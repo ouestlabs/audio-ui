@@ -1,7 +1,7 @@
 import type { ParameterValue } from "@audio-ui/core/device";
 import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
-import { type WarpMarker, warpedTime } from "@audio-ui/core/time";
+import { unwarpedTime, type WarpMarker, warpedTime } from "@audio-ui/core/time";
 import type { ClipValue } from "@audio-ui/react";
 
 /** What a clip's menu does to it. */
@@ -147,6 +147,48 @@ export function clipReach(clip: Arranged): number | undefined {
   return clip.warp
     ? warpedTime(clip.warp, clip.sourceLength)
     : clip.sourceLength;
+}
+
+/**
+ * What an audio clip shows of its recording across its length, `columns`
+ * amplitudes from 0 to 1, from the peaks of its source (`peaks`, spread evenly
+ * over `sourceLength`): the stretch it plays, folded round its loop, mirrored
+ * when reversed, stretched by its warp, as a player reads it. Each column is
+ * the loudest peak it covers.
+ */
+export function clipWaveform(
+  clip: Arranged,
+  peaks: readonly number[],
+  columns: number
+): number[] {
+  const { length, offset } = clip.value;
+  const count = Math.max(0, Math.floor(columns));
+  if (peaks.length === 0 || !(clip.sourceLength > 0) || length <= 0) {
+    return Array.from({ length: count }, () => 0);
+  }
+  const span = clip.warp
+    ? warpedTime(clip.warp, clip.sourceLength)
+    : clip.sourceLength;
+  /** The index of the peak at a time of the clip, from its start. */
+  const peakAt = (time: number) => {
+    let own = offset + time;
+    if (clip.loop && own >= clip.loop[1]) {
+      const [from, to] = clip.loop;
+      own = from + ((own - from) % Math.max(Number.EPSILON, to - from));
+    }
+    const read = clip.reversed ? span - own : own;
+    const source = clip.warp ? unwarpedTime(clip.warp, read) : read;
+    return Math.floor((source / clip.sourceLength) * peaks.length);
+  };
+  return Array.from({ length: count }, (_, column) => {
+    const a = peakAt((column / count) * length);
+    const b = peakAt(((column + 1) / count) * length);
+    let loudest = 0;
+    for (let index = Math.min(a, b); index <= Math.max(a, b); index += 1) {
+      loudest = Math.max(loudest, peaks[index] ?? 0);
+    }
+    return loudest;
+  });
 }
 
 /** A stretch of time on some tracks: what a drag across bare lanes selects. */

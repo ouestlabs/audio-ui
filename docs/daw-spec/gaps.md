@@ -48,7 +48,7 @@ Status: `Arranged.recording` names it, and every piece and copy keeps it; the bl
 
 ### G-011 The device catalog and the offline render are locked in a block
 The list that pairs each device with its engine and its panel, and `bounce()`, live inside `block-device-chain`: a project cannot install them to build a chain per track or render one.
-Status: `device-library` lists every device with its engine by its stable id, and `renderArrangement` renders a whole arrangement offline; the panels' catalog and the device chain block's own render are left (the block still keeps its list).
+Status: fixed. `device-library` lists every device with its engine and `device-panels` every panel, both by stable id; the device chain block builds its library from them (the 20 effects, where it listed 10), and `renderArrangement` renders a whole arrangement offline.
 
 ### G-012 Device latency is declared, never compensated
 Devices declare their latency (`latency` in `defineDevice`), and nothing lines the tracks up with it: a send in parallel with a compressor that looks ahead combs. Breaks MIX-012.
@@ -75,6 +75,14 @@ Status: fixed: `NoteTiming` (core), followed by the pocket synth and the wave sh
 The pocket synth is monophonic and its notes have no velocity: chords collapse to their last note and every note plays at the same level. Breaks MID-001 for anything but a single line.
 Fix (decided): velocity on the pocket synth's notes; chords by a host that stacks one voice per note.
 Status: fixed: notes have a velocity, and `arrangement-engine` gives each MIDI track a voice of its instrument per held note (eight by default); a chord sounds all its notes (checked in Chromium).
+
+### G-018 An audio clip on the timeline draws no waveform
+`ArrangedClip` draws a MIDI clip's notes, and nothing of an audio clip's recording: a track of recordings is a row of empty boxes.
+Fix: `clipWaveform` in `lib/arrangement` reads a clip's source peaks the way a player reads its recording (offset, loop, reverse, warp), and `ArrangedClip` draws them from a `peaks` prop.
+
+### G-019 The panels have no catalog
+A host that draws a chain per track has to import 22 panels by hand and pair them with the ids a project stores, as the device chain block did for its 10.
+Fix: `device-panels`, every panel by stable id with its width.
 
 ## Fixed
 

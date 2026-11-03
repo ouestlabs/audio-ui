@@ -329,7 +329,7 @@ The state is a plain value and a change is a command of `ArrangementCommand`, wh
 
 ### Arranged clips
 
-`ArrangedClip` (`npx shadcn@latest add @audio-ui/arranged-clip`) is a clip of the arrangement on its track's lane: drag its title bar to move it (with Alt, a copy), its edges to trim it into its source, its top corners to fade it, and pick a fade's curve from the menu of its handle. Held near an edge of the view, a moved or trimmed clip scrolls it, so it can go past what is on screen or to a track below; let go off the tracks (over the ruler, or the rows under the last track), a moved clip goes to the nearest track that takes it, a recording to an audio track and a MIDI clip to a MIDI one. Double-click its title to rename it in place; right-click it for its menu (edit, rename, duplicate, split at the cursor, switch off, delete), which selects it first. A MIDI clip draws its notes across its body, and a looped clip has no end while a warped one lasts as long as its warp stretches its source: `clipReach(clip)` in `lib/arrangement` gives how far a clip can be stretched, `undefined` when it loops.
+`ArrangedClip` (`npx shadcn@latest add @audio-ui/arranged-clip`) is a clip of the arrangement on its track's lane: drag its title bar to move it (with Alt, a copy), its edges to trim it into its source, its top corners to fade it, and pick a fade's curve from the menu of its handle. Held near an edge of the view, a moved or trimmed clip scrolls it, so it can go past what is on screen or to a track below; let go off the tracks (over the ruler, or the rows under the last track), a moved clip goes to the nearest track that takes it, a recording to an audio track and a MIDI clip to a MIDI one. Double-click its title to rename it in place; right-click it for its menu (edit, rename, duplicate, split at the cursor, switch off, delete), which selects it first. A MIDI clip draws its notes across its body and an audio clip its waveform, from the `peaks` of its source, and a looped clip has no end while a warped one lasts as long as its warp stretches its source: `clipReach(clip)` in `lib/arrangement` gives how far a clip can be stretched, `undefined` when it loops.
 
 ```tsx
 import { ArrangedClip, ArrangedClipGhost } from "@/components/audio-ui/arranged-clip";
@@ -802,6 +802,7 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"clip"} type={"Arranged"}>The clip: its place (`value`), its source and its notes.</TypeRow>
 <TypeRow name={"selected"} type={"boolean"}>Whether it is in the selection.</TypeRow>
 <TypeRow name={"swatch"} type={"number"}>Its color, an index into `TRACK_COLORS`: its track's.</TypeRow>
+<TypeRow name={"peaks"} type={"number[]"}>An audio clip's source as peaks from 0 to 1, spread evenly over its `sourceLength`: its waveform is drawn from them, the stretch it plays, round its loop, mirrored when reversed, stretched by its warp (`clipWaveform` in `lib/arrangement` reads it the same way).</TypeRow>
 <TypeRow name={"trackName"} type={"string"}>Its track's name, for its label.</TypeRow>
 <TypeRow name={"describe"} type={"(time) => string"}>A time in words, such as "Bar 3, beat 2".</TypeRow>
 <TypeRow name={"onChange, onCommit"} type={"(id, value, details) => void, (id, details) => void"}>The clip moved, trimmed or faded, and the gesture ended.</TypeRow>

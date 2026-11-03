@@ -3,7 +3,6 @@
 import type {
   Device,
   DeviceContext,
-  DeviceState,
   ParameterDescriptor,
   ParameterValue,
 } from "@audio-ui/core/device";
@@ -18,6 +17,7 @@ import {
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
+import { devicePanel } from "@/registry-audio/bases/base/audio/device-panels";
 import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";
 import {
   DeviceChain,
@@ -25,48 +25,19 @@ import {
   DeviceChainSlot,
   DeviceChainSlotControls,
 } from "@/registry-audio/bases/base/audio/elements/device-chain";
-import { ChorusPanel } from "@/registry-audio/bases/base/audio/panels/chorus-panel";
-import { CompressorPanel } from "@/registry-audio/bases/base/audio/panels/compressor-panel";
-import { DelayPanel } from "@/registry-audio/bases/base/audio/panels/delay-panel";
-import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equalizer-panel";
-import { FilterPanel } from "@/registry-audio/bases/base/audio/panels/filter-panel";
-import { LimiterPanel } from "@/registry-audio/bases/base/audio/panels/limiter-panel";
-import { ReduxPanel } from "@/registry-audio/bases/base/audio/panels/redux-panel";
-import { ReverbPanel } from "@/registry-audio/bases/base/audio/panels/reverb-panel";
-import { SaturatorPanel } from "@/registry-audio/bases/base/audio/panels/saturator-panel";
-import { UtilityPanel } from "@/registry-audio/bases/base/audio/panels/utility-panel";
 import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import {
   type DemoEngine,
   useDeviceLoop,
 } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { chorusDevice } from "@/registry-audio/bases/base/lib/chorus-device";
-import { createChorusEngine } from "@/registry-audio/bases/base/lib/chorus-engine";
-import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
-import { createCompressorEngine } from "@/registry-audio/bases/base/lib/compressor-engine";
-import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
-import { createDelayEngine } from "@/registry-audio/bases/base/lib/delay-engine";
 import {
   type DemoSourceName,
   demoKey,
   demoTempo,
   renderDemoSource,
 } from "@/registry-audio/bases/base/lib/demo-sound";
-import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
-import { createEqualizerEngine } from "@/registry-audio/bases/base/lib/equalizer-engine";
-import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
-import { createFilterEngine } from "@/registry-audio/bases/base/lib/filter-engine";
-import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
-import { createLimiterEngine } from "@/registry-audio/bases/base/lib/limiter-engine";
-import { reduxDevice } from "@/registry-audio/bases/base/lib/redux-device";
-import { createReduxEngine } from "@/registry-audio/bases/base/lib/redux-engine";
-import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
-import { createReverbEngine } from "@/registry-audio/bases/base/lib/reverb-engine";
-import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-device";
-import { createSaturatorEngine } from "@/registry-audio/bases/base/lib/saturator-engine";
-import { utilityDevice } from "@/registry-audio/bases/base/lib/utility-device";
-import { createUtilityEngine } from "@/registry-audio/bases/base/lib/utility-engine";
+import { DEVICE_SHELVES } from "@/registry-audio/bases/base/lib/device-library";
 import { downloadWavFile } from "@/registry-audio/bases/base/lib/wav-file";
 
 const MASTER_VOLUME = 0.7;
@@ -96,78 +67,26 @@ interface ChainDevice {
   width: string;
 }
 
-/** Pairs a device with its engine and its panel, checked against each other, for a list that holds them all. */
-function chainDevice<const Parameters extends readonly ParameterDescriptor[]>(
-  device: Device<Parameters>,
-  create: (
-    ctx: BaseAudioContext,
-    state: DeviceState<Parameters>,
-    context?: DeviceContext
-  ) => DemoEngine<DeviceState<Parameters>>,
-  Panel: ComponentType<ChainPanelProps<DeviceState<Parameters>>>,
-  width: string
-): ChainDevice {
-  return {
-    create: create as unknown as ChainDevice["create"],
-    device: device as unknown as ChainDevice["device"],
-    Panel: Panel as unknown as ChainDevice["Panel"],
-    width,
-  };
-}
-
-/** The devices of the library, by shelf. Any device goes in the same way: its description, its engine and its panel. */
-const SHELVES = [
-  {
-    devices: [
-      chainDevice(
-        compressorDevice,
-        createCompressorEngine,
-        CompressorPanel,
-        "w-96"
-      ),
-      chainDevice(limiterDevice, createLimiterEngine, LimiterPanel, "w-80"),
-    ],
-    label: "Dynamics",
-  },
-  {
-    devices: [
-      chainDevice(
-        equalizerDevice,
-        createEqualizerEngine,
-        EqualizerPanel,
-        "w-96"
-      ),
-      chainDevice(filterDevice, createFilterEngine, FilterPanel, "w-80"),
-    ],
-    label: "Tone",
-  },
-  {
-    devices: [
-      chainDevice(
-        saturatorDevice,
-        createSaturatorEngine,
-        SaturatorPanel,
-        "w-80"
-      ),
-      chainDevice(reduxDevice, createReduxEngine, ReduxPanel, "w-80"),
-    ],
-    label: "Distortion",
-  },
-  {
-    devices: [
-      chainDevice(delayDevice, createDelayEngine, DelayPanel, "w-80"),
-      chainDevice(reverbDevice, createReverbEngine, ReverbPanel, "w-80"),
-      chainDevice(chorusDevice, createChorusEngine, ChorusPanel, "w-80"),
-    ],
-    label: "Space",
-  },
-  {
-    devices: [
-      chainDevice(utilityDevice, createUtilityEngine, UtilityPanel, "w-80"),
-    ],
-    label: "Utility",
-  },
-];
+/**
+ * The effects of the library, by shelf, each with its engine and its own
+ * panel: the chain processes a sound, so it takes no instrument.
+ */
+const SHELVES = DEVICE_SHELVES.map((shelf) => ({
+  devices: shelf.devices.flatMap((entry): ChainDevice[] => {
+    const face = devicePanel(entry.device.id);
+    return entry.device.kind === "effect" && face
+      ? [
+          {
+            create: entry.create as unknown as ChainDevice["create"],
+            device: entry.device,
+            Panel: face.Panel as ChainDevice["Panel"],
+            width: face.width,
+          },
+        ]
+      : [];
+  }),
+  label: shelf.label,
+})).filter((shelf) => shelf.devices.length > 0);
 
 const LIBRARY = SHELVES.map((shelf) => ({
   items: shelf.devices.map((entry) => entry.device),
@@ -193,9 +112,11 @@ function slotOf(device: string, id: string): Slot | null {
   return entry ? { device, id, state: entry.device.defaults() } : null;
 }
 
-const START = [equalizerDevice.id, compressorDevice.id, delayDevice.id].flatMap(
-  (device, index) => slotOf(device, `start-${index}`) ?? []
-);
+const START = [
+  "audioui.equalizer",
+  "audioui.compressor",
+  "audioui.delay",
+].flatMap((device, index) => slotOf(device, `start-${index}`) ?? []);
 
 /** The chain's engines as one: and when those that load a worklet have it, for a render that must not start before. */
 type ChainEngine = DemoEngine<Slot[]> & {

@@ -327,6 +327,43 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Every device's panel by the device's stable id, with the width it is drawn at in a row: what draws a track's chain from the ids a project stores, with the face each device has on its own page.",
+    files: [
+      {
+        path: "audio/device-panels.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "device-panels",
+    registryDependencies: [
+      "@audio-ui/auto-pan-panel",
+      "@audio-ui/channel-eq-panel",
+      "@audio-ui/chorus-panel",
+      "@audio-ui/compressor-panel",
+      "@audio-ui/deesser-panel",
+      "@audio-ui/delay-panel",
+      "@audio-ui/distortion-panel",
+      "@audio-ui/equalizer-panel",
+      "@audio-ui/filter-panel",
+      "@audio-ui/gate-panel",
+      "@audio-ui/limiter-panel",
+      "@audio-ui/mid-side-panel",
+      "@audio-ui/multiband-panel",
+      "@audio-ui/overdrive-panel",
+      "@audio-ui/phaser-panel",
+      "@audio-ui/pocket-synth-panel",
+      "@audio-ui/redux-panel",
+      "@audio-ui/reverb-panel",
+      "@audio-ui/saturator-panel",
+      "@audio-ui/transient-panel",
+      "@audio-ui/utility-panel",
+      "@audio-ui/wave-shaper-panel",
+    ],
+    type: "registry:ui",
+  },
+  {
     categories: ["device", "plot"],
     dependencies: ["@audio-ui/react"],
     description:

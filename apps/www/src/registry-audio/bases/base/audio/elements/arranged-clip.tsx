@@ -33,6 +33,7 @@ import {
   type Arranged,
   type ClipAction,
   clipReach,
+  clipWaveform,
   playedNotes,
 } from "@/registry-audio/bases/base/lib/arrangement";
 
@@ -144,6 +145,45 @@ function ClipNotes({ clip }: { clip: Arranged }) {
   );
 }
 
+/** How many columns an audio clip's waveform is drawn in, whatever its width: the browser scales them. */
+const WAVEFORM_COLUMNS = 512;
+
+/** An audio clip's recording across its body: what it plays, as `clipWaveform` reads it. */
+function ClipWaveform({
+  clip,
+  peaks,
+}: {
+  clip: Arranged;
+  peaks: readonly number[];
+}) {
+  const path = useMemo(() => {
+    const columns = clipWaveform(clip, peaks, WAVEFORM_COLUMNS);
+    return columns
+      .map((level, column) => {
+        const half = Math.max(0.5, level * 50);
+        return `M${column + 0.5} ${50 - half}V${50 + half}`;
+      })
+      .join("");
+  }, [clip, peaks]);
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-x-0 top-5 bottom-1 h-[calc(100%-1.5rem)] w-full opacity-70"
+      data-slot="timeline-clip-waveform"
+      preserveAspectRatio="none"
+      viewBox={`0 0 ${WAVEFORM_COLUMNS} 100`}
+    >
+      <path
+        d={path}
+        fill="none"
+        stroke="currentColor"
+        strokeWidth={1}
+        vectorEffect="non-scaling-stroke"
+      />
+    </svg>
+  );
+}
+
 /** The original of a clip being copied, left in its place while the copy is dragged away. */
 function ArrangedClipGhost({ clip }: { clip: Arranged }) {
   const { length, start } = clip.value;
@@ -190,6 +230,8 @@ interface ArrangedClipProps {
   onRemove: (id: string) => void;
   onRename: (id: string, name: string) => void;
   onSelect: (id: string, additive: boolean) => void;
+  /** An audio clip's source as peaks from 0 to 1, spread evenly over its `sourceLength`: its waveform is drawn from them. */
+  peaks?: readonly number[];
   selected: boolean;
   /** The clip's color, an index into `TRACK_COLORS`: its track's. */
   swatch: number;
@@ -218,6 +260,7 @@ const ArrangedClip = memo(function ArrangedClipView({
   onRemove,
   onRename,
   onSelect,
+  peaks,
   selected,
   swatch,
   trackName,
@@ -350,6 +393,9 @@ const ArrangedClip = memo(function ArrangedClipView({
             )}
           </TimelineClipHeader>
           {clip.notes ? <ClipNotes clip={clip} /> : null}
+          {!clip.notes && peaks && peaks.length > 0 ? (
+            <ClipWaveform clip={clip} peaks={peaks} />
+          ) : null}
           <TimelineClipFade edge="in" />
           <TimelineClipFade edge="out" />
           <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />

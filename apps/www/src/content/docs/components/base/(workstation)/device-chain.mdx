@@ -169,6 +169,31 @@ import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 
 With `open` and `onOpenChange`, the library folds to a strip that opens it again. `searchRef` is its search field, for a `DeviceChainAdd` that opens the library and puts the focus in it.
 
+### Every device
+
+`device-panels` (`npx shadcn@latest add @audio-ui/device-panels`) is every device's panel by the device's stable id, with the width it is drawn at in a row, and `device-library` is every device with its engine, by shelf. Together they draw and play a chain from nothing but the ids and states a project stores:
+
+```tsx
+import { devicePanel } from "@/components/audio-ui/device-panels";
+import { DEVICE_SHELVES } from "@/lib/device-library";
+
+const shelves = DEVICE_SHELVES.map((shelf) => ({
+  items: shelf.devices.map((entry) => entry.device),
+  label: shelf.label,
+}));
+
+{track.devices.map((device) => {
+  const face = devicePanel(device.device);
+  return face ? (
+    <DeviceChainSlot className={face.width} key={device.id} title={device.device} value={device.id}>
+      <face.Panel onValueChange={(state) => setDevice(device.id, state)} value={device.state}>
+        <DeviceChainSlotControls />
+      </face.Panel>
+    </DeviceChainSlot>
+  ) : null;
+})}
+```
+
 ## Playing the chain
 
 The block runs one engine per slot, in series, the output of each into the input of the next: a slot added makes an engine, a slot removed lets its engine go, a new state goes to its engine only, and a move wires them again in the new order. A compressor's key input, its sidechain, is fed with the kick of the loop, so switching its Sidechain on ducks the loop with it. The engines are the devices' own (`<name>-engine`), the same ones their pages play.
