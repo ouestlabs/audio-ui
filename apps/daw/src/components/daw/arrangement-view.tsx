@@ -1,5 +1,5 @@
 import {
-  describeBarsBeats,
+  barsBeatsWith,
   secondsPerBar,
   secondsPerBeat,
 } from "@audio-ui/core/time";
@@ -40,6 +40,11 @@ import {
   TRACK_HEIGHT_STEP,
 } from "@/components/audio-ui/timeline";
 import {
+  TimelineBarMarks,
+  TimelineLocator,
+  TimelineSignature,
+} from "@/components/audio-ui/timeline-markers";
+import {
   TrackAutomation,
   TrackAutomationChooser,
 } from "@/components/audio-ui/track-automation";
@@ -65,6 +70,7 @@ import {
   GRID_DIVISION_OPTIONS,
   type useTimelineGrid,
 } from "@/hooks/use-timeline-grid";
+import type { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import type { useTrackAutomation } from "@/hooks/use-track-automation";
 import { useTrackReorder } from "@/hooks/use-track-reorder";
@@ -78,8 +84,6 @@ type Engine = ReturnType<typeof useArrangementEngine>;
 
 /** How wide the column of track headers is, in px. */
 const LEAD_PX = 220;
-/** The closest the ruler's labels come, in px. */
-const LABEL_PX = 56;
 
 function carriesFiles(event: DragEvent) {
   return Array.from(event.dataTransfer.types).includes("Files");
@@ -158,6 +162,8 @@ export interface ArrangementViewProps {
   /** Where playback starts: the start marker, in seconds. */
   cursor: number;
   engine: Engine;
+  /** The locators and the time signatures, with the commands behind them. */
+  markers: ReturnType<typeof useTimelineMarkers>;
   /** A double-click on a MIDI lane: an empty clip a bar long, from the bar under the pointer. */
   onAddMidiClip: (track: string, at: number) => void;
   /** A device of the library dropped on a track (its id), or on the add-track row (`NEW_TRACK`). */
@@ -192,6 +198,7 @@ export function ArrangementView({
   automation,
   cursor,
   engine,
+  markers,
   onAddMidiClip,
   onDevice,
   onFiles,
@@ -205,31 +212,31 @@ export function ArrangementView({
   viewportRef,
 }: ArrangementViewProps) {
   const { dispatch, doc, selectedIds, selectedTracks } = arrangement;
-  const { clips, duration, loop, returns, tempo, tracks } = doc;
+  const {
+    clips,
+    duration,
+    locators,
+    loop,
+    returns,
+    signatures,
+    tempo,
+    tracks,
+  } = doc;
   const { zoom } = view;
   const [dropOn, setDropOn] = useState<string | null>(null);
   const beat = secondsPerBeat(tempo);
   const bar = secondsPerBar(tempo);
   const describe = useCallback(
-    (seconds: number) => describeBarsBeats(seconds, tempo),
-    [tempo]
+    (seconds: number) => {
+      const { bar: number, beat: at } = barsBeatsWith(
+        seconds,
+        tempo,
+        signatures
+      );
+      return `Bar ${number}, beat ${at}`;
+    },
+    [signatures, tempo]
   );
-
-  // A label every so many bars, so they never crowd: a power of two.
-  const labels = useMemo(() => {
-    let every = 1;
-    while (every * bar * zoom < LABEL_PX && every < 1024) {
-      every *= 2;
-    }
-    const count = Math.floor(duration / bar);
-    return Array.from(
-      { length: Math.floor(count / every) + 1 },
-      (_, index) => ({
-        number: index * every + 1,
-        start: index * every * bar,
-      })
-    );
-  }, [bar, duration, zoom]);
 
   // Clips snap to the other clips' edges and to the locators, besides the grid.
   const snapPoints = useMemo(
@@ -368,6 +375,10 @@ export function ArrangementView({
       if (track && event.target === event.currentTarget && !event.shiftKey) {
         pressLane(track);
         pickTrack(track, false);
+        // The keys now go to the arrangement, not to the control that had them.
+        if (document.activeElement instanceof HTMLElement) {
+          document.activeElement.blur();
+        }
       }
     },
     [pickTrack, pressLane]
@@ -531,13 +542,70 @@ export function ArrangementView({
                 className="border-b-0"
                 getAriaValueText={describe}
               >
-                {labels.map((label) => (
-                  <TimelineMark key={label.start} value={label.start}>
-                    {label.number}
-                  </TimelineMark>
-                ))}
+                <TimelineBarMarks
+                  duration={duration}
+                  signatures={signatures}
+                  tempo={tempo}
+                  zoom={zoom}
+                />
                 <TimelinePlayhead />
               </TimelineRuler>
+            </Row>
+            <Row
+              className="shrink-0 border-foreground/20 border-b"
+              lead={
+                <span className="flex h-full w-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
+                  Locators
+                  <Button
+                    aria-label="Add a locator at the cursor (M)"
+                    className="size-5"
+                    onClick={markers.addLocator}
+                    size="icon"
+                    title="Add a locator at the cursor (M)"
+                    variant="ghost"
+                  >
+                    <PlusIcon aria-hidden="true" className="size-3" />
+                  </Button>
+                </span>
+              }
+            >
+              <TimelineLane className="h-6 border-b-0">
+                {locators.map((locator) => (
+                  <TimelineMark key={locator.at} value={locator.at}>
+                    <TimelineLocator locator={locator} {...markers.locator} />
+                  </TimelineMark>
+                ))}
+              </TimelineLane>
+            </Row>
+            <Row
+              className="shrink-0 border-foreground/20 border-b"
+              lead={
+                <span className="flex h-full w-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
+                  Signature
+                  <Button
+                    aria-label="Add a time signature at the cursor"
+                    className="size-5"
+                    onClick={markers.addSignature}
+                    size="icon"
+                    title="Add a time signature at the cursor"
+                    variant="ghost"
+                  >
+                    <PlusIcon aria-hidden="true" className="size-3" />
+                  </Button>
+                </span>
+              }
+            >
+              <TimelineLane className="h-6 border-b-0">
+                {signatures.map((change) => (
+                  <TimelineMark key={change.id} value={change.at}>
+                    <TimelineSignature
+                      change={change}
+                      editing={markers.editingSignature === change.id}
+                      {...markers.signature}
+                    />
+                  </TimelineMark>
+                ))}
+              </TimelineLane>
             </Row>
           </div>
           {[...tracks, ...returns].map((track) => {

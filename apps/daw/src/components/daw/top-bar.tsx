@@ -1,4 +1,4 @@
-import type { Tempo } from "@audio-ui/core/time";
+import type { SignatureChange, Tempo } from "@audio-ui/core/time";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
 import {
@@ -69,6 +69,8 @@ export interface TopBarProps {
   onTempoChange: (tempo: Tempo) => void;
   playing: boolean;
   position: Source<number>;
+  /** The time-signature changes: the position reads its bars through them. */
+  signatures: readonly SignatureChange[];
   tempo: Tempo;
 }
 
@@ -112,6 +114,7 @@ export function TopBar(props: TopBarProps) {
         onStop={props.onStop}
         onTempoChange={props.onTempoChange}
         playing={props.playing}
+        signatures={props.signatures}
         source={props.position}
         tempo={props.tempo}
       />

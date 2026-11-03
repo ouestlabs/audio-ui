@@ -33,7 +33,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useTimeSelection } from "@/hooks/use-time-selection";
+import { useTimelineCursor } from "@/hooks/use-timeline-cursor";
 import { useTimelineGrid } from "@/hooks/use-timeline-grid";
+import { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTrackAutomation } from "@/hooks/use-track-automation";
 import type { Arranged, ArrangementTrack } from "@/lib/arrangement";
@@ -77,6 +79,15 @@ function titleOf(
 const SAVE_MS = 500;
 
 const FIELDS = /^(INPUT|TEXTAREA|SELECT)$/;
+
+/** Whether a key press reached the arrangement itself, rather than a control with arrows of its own. */
+function onSurface(target: EventTarget | null) {
+  return (
+    target === document.body ||
+    (target instanceof HTMLElement &&
+      target.dataset.slot === "timeline-viewport")
+  );
+}
 
 /** Whether a key press goes to a field being typed in rather than to the app. */
 function typing(target: EventTarget | null) {
@@ -335,6 +346,34 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     tracks: doc.tracks,
   });
   const selectedTime = timeSelection.time;
+  // The locators and the time signatures, and what the keys do with the cursor.
+  const getPosition = useCallback(() => position.getSnapshot(), [position]);
+  const markers = useTimelineMarkers({
+    dispatch,
+    getPosition,
+    onJump: seek,
+    step: grid.snapStep,
+  });
+  const pickNextTrack = useCallback(
+    (id: string) => {
+      dispatch({ additive: false, id, type: "select-track" });
+      pickTrack(id);
+    },
+    [dispatch, pickTrack]
+  );
+  const cursorKeys = useTimelineCursor({
+    clips: doc.clips,
+    duration: doc.duration,
+    getPosition,
+    locators: doc.locators,
+    onAddLocator: markers.addLocator,
+    onPickTrack: pickNextTrack,
+    onSeek: seek,
+    selectedIds: arrangement.selectedIds,
+    selectedTracks: arrangement.selectedTracks,
+    step: grid.step,
+    tracks: doc.tracks,
+  });
   /** Where the selected clips start and end, or null with none. */
   const clipsRange = useCallback((): [number, number] | null => {
     const chosen = doc.clips.filter((clip) =>
@@ -511,8 +550,8 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     undo: () => dispatch({ type: "undo" }),
   };
   // One listener, before the focused control takes the key.
-  const keys = useRef({ commands, timeSelection });
-  keys.current = { commands, timeSelection };
+  const keys = useRef({ commands, cursorKeys, timeSelection });
+  keys.current = { commands, cursorKeys, timeSelection };
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (typing(event.target)) {
@@ -524,8 +563,13 @@ export function Daw({ initial, initialRecordings }: DawProps) {
         keys.current.timeSelection.clear();
         return;
       }
-      // What a key does to the time selected and the clipboard comes before what it does otherwise.
-      if (keys.current.timeSelection.handleKey(event)) {
+      // What a key does to the time selected, the clipboard and the cursor comes before what it does otherwise.
+      const { cursorKeys: moves, timeSelection: time } = keys.current;
+      if (
+        time.handleKey(event) ||
+        moves.handleKey(event) ||
+        (onSurface(event.target) && moves.handleArrowKey(event))
+      ) {
         return;
       }
       const command = matchShortcut(event);
@@ -623,6 +667,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
           onTempoChange={setTempo}
           playing={engine.playing}
           position={engine.position}
+          signatures={doc.signatures}
           tempo={doc.tempo}
         />
         <div className="flex min-h-0 flex-1">
@@ -649,6 +694,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
                   automation={automation}
                   cursor={cursor}
                   engine={engine}
+                  markers={markers}
                   onAddMidiClip={addMidiClip}
                   onDevice={dropDevice}
                   onFiles={addFiles}

@@ -643,6 +643,105 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       `it lasts ${seconds} s for ${expected} s selected`
     );
   },
+  "ARR-016: M puts a locator at the cursor, and Alt with the arrows jumps to it":
+    async (browser) => {
+      const page = await open(browser);
+      const at = () =>
+        page
+          .locator("[data-slot=timeline-playhead]")
+          .first()
+          .evaluate((element) =>
+            Number(
+              (element as HTMLElement).style.getPropertyValue(
+                "--timeline-offset"
+              )
+            )
+          );
+      const lane = await page.locator('[data-track="track-2"]').boundingBox();
+      assert(lane, "the lane is there");
+      await page.mouse.click(lane.x + 200, lane.y + lane.height / 2);
+      const placed = await at();
+      assert(placed > 0, "a click in the lane did not move the cursor");
+      await page.keyboard.press("KeyM");
+      await page
+        .getByRole("button", { name: "Locator 1" })
+        .waitFor({ timeout: 5000 });
+      await page.keyboard.press("Home");
+      await page.waitForFunction(
+        () =>
+          Number(
+            (
+              document.querySelector(
+                "[data-slot=timeline-playhead]"
+              ) as HTMLElement
+            ).style.getPropertyValue("--timeline-offset")
+          ) === 0
+      );
+      await page.keyboard.press("Alt+ArrowRight");
+      await page.waitForTimeout(100);
+      assert(
+        Math.abs((await at()) - placed) < 0.001,
+        `Alt+Right went to ${await at()}, not to the locator at ${placed}`
+      );
+    },
+  "ARR-017: a time signature goes at the cursor, opens to be typed, and the ruler counts through it":
+    async (browser) => {
+      const page = await open(browser);
+      const lane = await page.locator('[data-track="track-2"]').boundingBox();
+      assert(lane, "the lane is there");
+      await page.mouse.click(lane.x + 200, lane.y + lane.height / 2);
+      await page
+        .getByRole("button", { name: "Add a time signature at the cursor" })
+        .click();
+      await page.waitForFunction(
+        () => document.activeElement?.tagName === "INPUT"
+      );
+      await page.keyboard.press("ControlOrMeta+KeyA");
+      await page.keyboard.type("7/8");
+      await page.keyboard.press("Enter");
+      await page
+        .getByText("7/8", { exact: true })
+        .first()
+        .waitFor({ timeout: 5000 });
+    },
+  "ARR-018: the arrows move the cursor on the grid, End goes to the last clip, Up and Down pick a track":
+    async (browser) => {
+      const page = await open(browser);
+      const at = () =>
+        page
+          .locator("[data-slot=timeline-playhead]")
+          .first()
+          .evaluate((element) =>
+            Number(
+              (element as HTMLElement).style.getPropertyValue(
+                "--timeline-offset"
+              )
+            )
+          );
+      await dropChord(page, '[data-track="track-1"]', "Take", 8);
+      await page.waitForSelector("[data-clip-id]", { timeout: 10_000 });
+      await page.keyboard.press("Home");
+      await page.keyboard.press("ArrowRight");
+      await page.waitForTimeout(100);
+      assert((await at()) > 0, "Right did not move the cursor");
+      await page.keyboard.press("End");
+      await page.waitForTimeout(100);
+      assert((await at()) >= 8, `End went to ${await at()}`);
+      await page
+        .locator('[data-track="track-2"]')
+        .click({ position: { x: 300, y: 10 } });
+      await page
+        .locator("[data-slot=panel-bar]")
+        .getByText("2 Audio")
+        .waitFor();
+      await page.keyboard.press("ArrowDown");
+      await page.locator("[data-slot=panel-bar]").getByText("3 MIDI").waitFor();
+      await page.keyboard.press("ArrowUp");
+      await page
+        .locator("[data-slot=panel-bar]")
+        .getByText("2 Audio")
+        .waitFor();
+    },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

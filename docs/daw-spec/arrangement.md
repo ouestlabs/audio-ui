@@ -63,3 +63,15 @@ Test: apps/www/test/registry-audio/base/hooks/use-time-selection.test.tsx; apps/
 ### ARR-015 Selecting clips with a rectangle
 Shift and a drag across bare lane draws a rectangle: the clips it touches join the selection.
 Test: apps/daw/test/browser/run.ts "ARR-015"
+
+### ARR-016 Locators
+M, or the + of the locators' row, puts a locator at the cursor. A press on one puts the cursor there; a double-click or Enter renames it, Delete takes it away. Option with the left and right arrows jumps to the next locator or clip edge, of the selected tracks or of every track.
+Test: apps/www/test/registry-audio/base/hooks/use-timeline-cursor.test.tsx; apps/daw/test/browser/run.ts "ARR-016"
+
+### ARR-017 Time signatures
+The + of the signatures' row puts a change at the cursor, in the signature in force there, ready to be typed. From a change on, the ruler and the position count bars in its signature, and the bar a change cuts short is hatched. The arrows move a change by the grid, Delete takes it away. The grid's bar-long divisions and the tempo stay those of the arrangement's start.
+Test: apps/www/test/registry-audio/base/hooks/use-timeline-markers.test.tsx; apps/daw/test/browser/run.ts "ARR-017"
+
+### ARR-018 The cursor from the keyboard
+When a key reaches the arrangement, not a control with arrows of its own: Left and Right move the cursor by the grid, End goes to the end of the last clip, Up and Down pick the track above or below.
+Test: apps/www/test/registry-audio/base/hooks/use-timeline-cursor.test.tsx; apps/daw/test/browser/run.ts "ARR-018"

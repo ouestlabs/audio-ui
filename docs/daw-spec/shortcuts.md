@@ -38,5 +38,9 @@ Status: partial: which other keys Chrome and Safari keep is checked by hand (`ap
 | KEY-025 | Cmd+I | Insert silence at the selection |
 | KEY-026 | Cmd+Shift+Delete | Delete the selected time |
 | KEY-027 | A | Show or hide the automation |
+| KEY-028 | M | Add a locator at the cursor |
+| KEY-029 | Option+Left, Option+Right | Jump to the previous or next locator or clip edge |
+| KEY-030 | Left, Right, End, Up, Down | Move the cursor on the grid, to the last clip's end; pick the track above or below |
+| KEY-031 | Cmd+C, Cmd+X, Cmd+V, Cmd+J | Copy, cut, paste; one clip per track of the time selected |
 
 Test: apps/daw/test/shortcuts.test.ts, one case per rule id.
