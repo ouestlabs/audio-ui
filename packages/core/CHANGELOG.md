@@ -1,5 +1,13 @@
 # @audio-ui/core
 
+## 0.19.0
+
+### Minor Changes
+
+- c9c3c59: Time: `metronomeClicks(tempo, changes, until, rhythm)` gives the clicks of a metronome in seconds through the time-signature changes, the first of each bar accented, so a host can schedule them on the audio clock.
+- c9c3c59: Playback: `@audio-ui/core/playback` plays an arrangement's audio clips on the audio clock, to the frame. A `PlaybackState` counts both sides in whole frames, so a loop of any length never drifts; `TrackRenderer` is a track's player, which copies a recording bit for bit at speed 1, reads it through a cubic interpolator when warped, folds a looped clip, mirrors a reversed one, fades a stop or a jump over 2 ms, and keeps a track that heard of a play late in step; `CLIP_PLAYER_WORKLET` is that player as an AudioWorklet module, whatever the bundler, which answers a `sync` once it has every message before it, so an offline render can wait for its players before it starts. The mixer's arithmetic comes with it: `panGains` (constant power, 0 dB in the centre and +3 dB at either end, each channel on its own gain), `soloState` and `delayCompensation`.
+- c9c3c59: Device: an instrument's `noteOn(note, timing?)` and `noteOff(timing?)` take an optional `NoteTiming`, `{ at, id }`. `at` is a time of the audio clock, so a host that schedules notes ahead plays them on the frame they fall at instead of when its timer fires; `id` names the note, so a `noteOff` for a note that another one took over from lets nothing go. With no timing, both act now on the held note, as before.
+
 ## 0.18.0
 
 ### Minor Changes
