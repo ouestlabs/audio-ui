@@ -34,7 +34,7 @@ Test: packages/core/src/audio/playback/render.test.ts "CLP-003"
 | `DEV` | [Devices](devices.md) | 1 (racks: 2) |
 | `EXP` | [Export](export.md) | 1 |
 | `ENG` | [Engine](engine.md) | 1 |
-| `PRJ` | [Projects and files](project.md) | 1 (import: 2) |
+| `PRJ` | [Projects and files](project.md) | 1 (on disk, DAWproject: 2) |
 | `KEY` | [Shortcuts](shortcuts.md) | each phase |
 | `PRF` | [Performance targets](performance.md) | each phase |
 
