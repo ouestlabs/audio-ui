@@ -1143,6 +1143,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/use-marquee-selection",
       "@audio-ui/use-timeline-zoom",
       "@audio-ui/use-timeline-grid",
+      "@audio-ui/use-time-selection",
     ],
     type: "registry:ui",
   },

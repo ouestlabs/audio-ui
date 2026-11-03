@@ -60,6 +60,7 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/arranged-clip";
 import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import { TimelineTimeSelection } from "@/registry-audio/bases/base/audio/elements/time-selection";
 import {
   COMPACT_TRACK_HEIGHT,
   MAX_TRACK_HEIGHT,
@@ -109,6 +110,7 @@ import {
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
+import { useTimeSelection } from "@/registry-audio/bases/base/hooks/use-time-selection";
 import {
   GRID_DIVISION_OPTIONS,
   GRID_KEYS,
@@ -120,8 +122,6 @@ import { useTrackReorder } from "@/registry-audio/bases/base/hooks/use-track-reo
 import type {
   Arranged,
   ArrangementTrack,
-  Clipping,
-  TimeSelection,
   TrackKind,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
@@ -811,13 +811,6 @@ export default function BlockTimeline() {
     },
     [signatures, tempo]
   );
-  // A stretch of time on some tracks, drawn by dragging across bare lanes, and what was last copied.
-  const [timeSelection, setTimeSelection] = useState<TimeSelection | null>(
-    null
-  );
-  const clipboard = useRef<Clipping | null>(null);
-  // The track a press on bare lane began on: a time selection spans from it to the track under the pointer.
-  const pressTrackRef = useRef<string | null>(null);
   const [metronome, setMetronome] = useState(false);
   const [rhythm, setRhythm] = useState<MetronomeRhythm>("auto");
   // Automation mode, and the automated gains and pans moved by hand, which play their mix until enabled again.
@@ -834,6 +827,18 @@ export default function BlockTimeline() {
   const { playPause, seek } = useEngineTransport(engine);
   // The clips, as the commands that change them. A split cuts at the playhead, no closer to a clip's edge than a sixteenth of the bar.
   const getPosition = useCallback(() => clock.getSnapshot(), [clock]);
+  // A stretch of time on some tracks, drawn by dragging across bare lanes, and what the keys do with it.
+  const timeSelection = useTimeSelection({
+    bar,
+    clips,
+    copyOf,
+    dispatch,
+    getPosition,
+    selectedIds,
+    selectedTracks,
+    tracks,
+  });
+  const { clear: letGoOfTime, pressLane, time: selectedTime } = timeSelection;
   const splitStep = bar / 4;
   const addClip = useCallback(
     (clip: Arranged) => dispatch({ type: "add-clip", clip }),
@@ -933,41 +938,15 @@ export default function BlockTimeline() {
     },
     [dispatch]
   );
-  const clearTimeSelection = useCallback(
-    (time: TimeSelection) => dispatch({ type: "clear-time", time }),
-    [dispatch]
-  );
-  const consolidateTime = useCallback(
-    (time: TimeSelection) => dispatch({ type: "consolidate-time", time }),
-    [dispatch]
-  );
   const duplicateTrack = useCallback(
     (id: string) => dispatch({ type: "duplicate-track", id }),
-    [dispatch]
-  );
-  const fadeTimeSelection = useCallback(
-    (time: TimeSelection) => dispatch({ type: "fade-time", time }),
-    [dispatch]
-  );
-  const insertTimeSpan = useCallback(
-    (at: number, length: number) =>
-      dispatch({ type: "insert-time", at, length }),
     [dispatch]
   );
   const moveTrack = useCallback(
     (id: string, index: number) => dispatch({ type: "move-track", id, index }),
     [dispatch]
   );
-  const paste = useCallback(
-    (clipping: Clipping, at: number, track: string) =>
-      dispatch({ type: "paste", clipping, at, track }),
-    [dispatch]
-  );
   const redo = useCallback(() => dispatch({ type: "redo" }), [dispatch]);
-  const removeTimeSpan = useCallback(
-    (from: number, to: number) => dispatch({ type: "remove-time", from, to }),
-    [dispatch]
-  );
   const removeTrack = useCallback(
     (id: string) => dispatch({ type: "remove-track", id }),
     [dispatch]
@@ -1111,8 +1090,7 @@ export default function BlockTimeline() {
     (event: PointerEvent<HTMLDivElement>) => {
       if (event.target === event.currentTarget && !event.shiftKey && !multi) {
         const { track } = event.currentTarget.dataset;
-        pressTrackRef.current = track ?? null;
-        setTimeSelection(null);
+        pressLane(track ?? null);
         if (track) {
           selectTrack(track);
         } else {
@@ -1125,7 +1103,7 @@ export default function BlockTimeline() {
         } as FocusOptions);
       }
     },
-    [clearSelection, multi, selectTrack]
+    [clearSelection, multi, pressLane, selectTrack]
   );
   const addLocator = useCallback(
     () => dispatch({ type: "add-locator", at: clock.getSnapshot() }),
@@ -1263,29 +1241,6 @@ export default function BlockTimeline() {
     },
     [removeTrack, selectedIds.length, selectedTracks]
   );
-  /** A drag across bare lanes selects time: from the track it began on to the track under the pointer. */
-  const selectTime = useCallback(
-    (
-      range: readonly [number, number],
-      details: TimelinePrimitive.Lane.SelectionChangeEventDetails
-    ) => {
-      const order = tracks.map((track) => track.id);
-      const first = order.indexOf(pressTrackRef.current ?? "");
-      if (first === -1) {
-        return;
-      }
-      const under = document
-        .elementFromPoint(details.event.clientX, details.event.clientY)
-        ?.closest<HTMLElement>("[data-track]")?.dataset.track;
-      const last = under ? order.indexOf(under) : -1;
-      const [top, bottom] =
-        last === -1
-          ? [first, first]
-          : [Math.min(first, last), Math.max(first, last)];
-      setTimeSelection({ range, tracks: order.slice(top, bottom + 1) });
-    },
-    [tracks]
-  );
   /** Picking a clip lets go of the time selection. */
   // The clip panel shows the clip picked, as a DAW's detail view follows the selection, for as long as it is open. It starts closed, and picking a clip does not open it: a click of a clip's head does.
   const [clipViewOpen, setClipViewOpen] = useState(false);
@@ -1294,10 +1249,10 @@ export default function BlockTimeline() {
   const [clipBoxesFolded, setClipBoxesFolded] = useState<string[]>([]);
   const pickClip = useCallback(
     (id: string, additive: boolean) => {
-      setTimeSelection(null);
+      letGoOfTime();
       selectClip(id, additive);
     },
-    [selectClip]
+    [letGoOfTime, selectClip]
   );
   // What each audio clip draws of its recording, once the recording is there.
   const clipPeaks = useMemo(
@@ -1370,10 +1325,10 @@ export default function BlockTimeline() {
         track: trackId,
         value: { fadeIn: 0, fadeOut: 0, length: bar, offset: 0, start },
       });
-      setTimeSelection(null);
+      letGoOfTime();
       setClipViewOpen(true);
     },
-    [addClip, bar, duration]
+    [addClip, bar, duration, letGoOfTime]
   );
   const changeClipSettings = useCallback(
     (next: ClipSettings) => {
@@ -1464,146 +1419,31 @@ export default function BlockTimeline() {
     }
   }, [crop, editedClip]);
   const closeClipView = useCallback(() => setClipViewOpen(false), []);
-  /** Where a paste lands: the picked track, the top of the time selection, the track of a picked clip, or the first track. */
-  const pasteTrack = () =>
-    selectedTracks[0] ??
-    timeSelection?.tracks[0] ??
-    clips.find((clip) => selectedIds.includes(clip.id))?.track ??
-    tracks[0]?.id;
-  /** Cmd/Ctrl + D: the time selection again right after itself, which the selection moves onto; with Shift, time is opened for it first. */
-  const duplicateTime = (time: TimeSelection, opening: boolean) => {
-    const copied = copyOf(time);
-    const [from, to] = time.range;
-    if (opening) {
-      insertTimeSpan(to, to - from);
-    }
-    paste(copied, to, time.tracks[0] ?? "");
-    setTimeSelection({ ...time, range: [to, to + (to - from)] });
-  };
-  /** Cmd/Ctrl + V: the last copy at the cursor; with Shift, time is opened for it first. */
-  const pasteClipboard = (opening: boolean) => {
-    const copied = clipboard.current;
-    if (!copied) {
-      return;
-    }
-    const at = clock.getSnapshot();
-    if (opening) {
-      insertTimeSpan(at, copied.length);
-    }
-    paste(copied, at, pasteTrack() ?? "");
-  };
-  /** Cmd/Ctrl + X: copies, then empties the time selection (takes the time out, with Shift), or removes the selected clips. */
-  const cutSelection = (removing: boolean) => {
-    clipboard.current = copyOf(timeSelection);
-    if (timeSelection && removing) {
-      removeTimeSpan(...timeSelection.range);
-      setTimeSelection(null);
-    } else if (timeSelection) {
-      clearTimeSelection(timeSelection);
-    } else if (selectedIds[0]) {
-      removeClip(selectedIds[0]);
-    }
-  };
-  /** What Cmd/Ctrl + a letter does to the time selection, the clipboard or the cursor, or undefined when it does nothing here. */
-  const timeCommand = (key: string, shift: boolean) => {
-    const length = timeSelection
-      ? timeSelection.range[1] - timeSelection.range[0]
-      : bar;
-    const time = timeSelection;
-    const commands: Record<string, (() => void) | undefined> = {
-      c: () => {
-        clipboard.current = copyOf(time);
-      },
-      d: time ? () => duplicateTime(time, shift) : undefined,
-      i: () => insertTimeSpan(clock.getSnapshot(), length),
-      j: time ? () => consolidateTime(time) : undefined,
-      l: time
-        ? () => {
-            dispatch({
-              type: "set-loop",
-              loop: { on: true, range: [...time.range] },
-            });
-          }
-        : undefined,
-      v: clipboard.current ? () => pasteClipboard(shift) : undefined,
-      x: () => cutSelection(shift),
-    };
-    return commands[key];
-  };
-  /** What Delete does: empties the time selection, or with Cmd/Ctrl + Shift takes the time out of every track. */
-  const deleteCommand = (event: KeyboardEvent<HTMLDivElement>) => {
-    const time = timeSelection;
-    if (!time) {
-      return;
-    }
-    if (event.metaKey || event.ctrlKey) {
-      return event.shiftKey
-        ? () => {
-            removeTimeSpan(...time.range);
-            setTimeSelection(null);
-          }
-        : undefined;
-    }
-    return () => clearTimeSelection(time);
-  };
   /**
-   * Cmd/Ctrl + Alt + 3 shows or hides the clip panel, and Cmd/Ctrl + Alt + F
-   * makes fades from the time selection. Read from the key's place: Alt
-   * changes the letter on a Mac. Returns whether the key was one of these.
+   * Cmd/Ctrl + Alt + 3 shows or hides the clip panel, read from the key's place
+   * as Alt changes the letter on a Mac, and 0 switches the selected clips off
+   * or on. Returns whether the key was one of these.
    */
-  const handleAltCommand = (event: KeyboardEvent<HTMLDivElement>) => {
-    if (!((event.metaKey || event.ctrlKey) && event.altKey)) {
-      return false;
-    }
-    if (event.code === "Digit3") {
-      setClipViewOpen((open) => !open);
-    } else if (event.code === "KeyF" && timeSelection) {
-      fadeTimeSelection(timeSelection);
-    } else {
-      return false;
-    }
-    event.preventDefault();
-    return true;
-  };
-  /**
-   * Cmd/Ctrl + C and X copy and cut the time selection (the selected clips
-   * when there is none), V pastes at the cursor, I opens a stretch of silence
-   * there; with a time selection, D duplicates it after itself, J makes one
-   * clip per track of it and L loops it. With Shift too, X, V, D and Delete
-   * work on the time itself, on every track. Delete empties the time
-   * selection, and 0 switches the selected clips off or on. Cmd/Ctrl + Alt + F
-   * fades the clips whose edges the time selection covers, crossfading two that
-   * meet. Returns whether the key was one of these.
-   */
-  const handleTimeKey = (event: KeyboardEvent<HTMLDivElement>) => {
-    // In a field, copying and deleting are the field's own.
+  const handleClipKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if (typing(event.target)) {
       return false;
     }
-    if (handleAltCommand(event)) {
+    const mod = event.metaKey || event.ctrlKey;
+    if (mod && event.altKey && event.code === "Digit3") {
+      event.preventDefault();
+      setClipViewOpen((open) => !open);
       return true;
     }
-    if (event.altKey) {
-      return false;
-    }
-    const key = event.key.toLowerCase();
-    let command: (() => void) | undefined;
-    if (event.key === "Delete" || event.key === "Backspace") {
-      command = deleteCommand(event);
-    } else if (event.metaKey || event.ctrlKey) {
-      command = timeCommand(key, event.shiftKey);
-    } else if (
-      (key === "0" || event.code === "Digit0") &&
+    if (
+      !(mod || event.altKey) &&
+      (event.key === "0" || event.code === "Digit0") &&
       selectedIds.length > 0
     ) {
-      command = toggleSelected;
+      event.preventDefault();
+      toggleSelected();
+      return true;
     }
-    if (!command) {
-      return false;
-    }
-    event.preventDefault();
-    command();
-    return true;
+    return false;
   };
   /** In automation mode, what a track shows: the parameter chooser in its header, and the envelope over its lane. */
   const automationOf = (track: ArrangementTrack) => {
@@ -1655,12 +1495,13 @@ export default function BlockTimeline() {
   const handleKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
     if (event.key === "Escape") {
       clearSelection();
-      setTimeSelection(null);
+      letGoOfTime();
       return;
     }
     const key = event.key.toLowerCase();
     if (
-      handleTimeKey(event) ||
+      timeSelection.handleKey(event) ||
+      handleClipKey(event) ||
       handleTrackKey(event) ||
       handleLocatorKey(event) ||
       handleAutomationKey(event)
@@ -1869,6 +1710,10 @@ export default function BlockTimeline() {
     [clock, zoomAround]
   );
   const zoomToSelection = useCallback(() => {
+    if (selectedTime) {
+      zoomTo(...selectedTime.range);
+      return;
+    }
     const chosen = clips.filter(
       (clip) =>
         selectedIds.includes(clip.id) || selectedTracks.includes(clip.track)
@@ -1881,7 +1726,7 @@ export default function BlockTimeline() {
       Math.min(...chosen.map((clip) => clip.value.start)),
       Math.max(...chosen.map((clip) => clip.value.start + clip.value.length))
     );
-  }, [clips, loop, selectedIds, selectedTracks, zoomTo]);
+  }, [clips, loop, selectedIds, selectedTime, selectedTracks, zoomTo]);
 
   /** Up and Down pick the track above or below the one picked, or the first or last. */
   const pickNextTrack = useCallback(
@@ -2452,7 +2297,7 @@ export default function BlockTimeline() {
                         onDoubleClickCapture={showClipViewOfBody}
                         onPointerDown={focusPanel}
                         onPointerDownCapture={notePress}
-                        onSelectionChange={selectTime}
+                        onSelectionChange={timeSelection.onSelectionChange}
                         seekable
                       >
                         {copying
@@ -2496,16 +2341,8 @@ export default function BlockTimeline() {
                               trackName={track.name}
                             />
                           ))}
-                        {timeSelection?.tracks.includes(track.id) ? (
-                          <div
-                            aria-hidden="true"
-                            className="pointer-events-none absolute inset-y-0 z-10 bg-primary/15 ring-1 ring-primary/40 ring-inset"
-                            data-slot="timeline-time-selection"
-                            style={{
-                              left: `calc(var(--timeline-unit) * ${timeSelection.range[0]})`,
-                              width: `calc(var(--timeline-unit) * ${timeSelection.range[1] - timeSelection.range[0]})`,
-                            }}
-                          />
+                        {selectedTime?.tracks.includes(track.id) ? (
+                          <TimelineTimeSelection range={selectedTime.range} />
                         ) : null}
                         {automationOf(track).envelope}
                         <TimelinePlayhead />

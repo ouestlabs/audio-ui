@@ -119,6 +119,28 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["timeline"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A stretch of time on some tracks of an arrangement, drawn by dragging across bare lanes, with its overlay and what the keyboard does with it: copy, cut, paste, duplicate, consolidate, loop, fade, delete and open time, each one step of undo.",
+    files: [
+      {
+        path: "hooks/use-time-selection.ts",
+        type: "registry:hook",
+      },
+      {
+        path: "audio/elements/time-selection.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "use-time-selection",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
+    ],
+    type: "registry:hook",
+  },
+  {
+    categories: ["timeline"],
     dependencies: ["@audio-ui/core"],
     description:
       "The grid of an arrangement's timeline: adaptive to the zoom or a fixed division, straight or triplet, snapping or not, its name for a menu button, and the changes Cmd/Ctrl + 1 to 5 make.",
