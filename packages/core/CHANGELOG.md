@@ -1,5 +1,12 @@
 # @audio-ui/core
 
+## 0.18.0
+
+### Minor Changes
+
+- 9526c96: Analysis: `peakDb(samples)` gives the level in dBFS of the loudest sample, either way, beside `rmsDb`: the one says how near a signal comes to clipping, the other how loud it sounds. A meter draws the RMS as its bar and the held `peakDb` as its mark.
+- 9526c96: Timeline: a clip moved or trimmed with the pointer held near an edge of `Timeline.Viewport` scrolls it, and stays under the pointer while it does, so a clip can be taken past what is on screen; a move also scrolls down to the lanes below. Off the lanes, over a track header, the ruler or past the last lane, a moved clip goes to the nearest lane instead of staying where it was. `Timeline.Viewport` marks itself with `data-timeline-viewport`, which the clips find it by.
+
 ## 0.17.1
 
 ### Patch Changes
