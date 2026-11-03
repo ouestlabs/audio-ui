@@ -100,6 +100,16 @@ Docked under the tracks at a fixed height, the clip panel's boxes and waveform s
 Fix: the clip view's body fills its frame, the clip panel's waveform and the MIDI clip panel's roll take the room there is (the roll at 18rem when the panel has no height of its own, as before).
 Status: fixed (checked in Chromium in the DAW's detail view).
 
+### G-025 What the locators and time signatures still miss
+Double-clicking a locator starts playback there in a DAW, where ours renames it. A locator's menu has no way to loop to the next one, and there are no previous and next buttons (Alt with the arrows does that from the keyboard). Inserting or taking out time moves the clips and leaves the locators and the time signatures where they were.
+Fix: to decide, the first against renaming with a key; the rest are small.
+Status: open.
+
+### G-024 A timeline's marks could not be moved
+`Timeline.Mark` only placed something: a locator could not move at all, a time signature only with the arrows, in code of its own. Breaks ARR-016 and ARR-017.
+Fix: `Timeline.Mark` moves with `onValueChange` or `onValueCommitted`, by a drag on the grid and by Left and Right, a press staying a press. Locators got ids, so one keeps its focus as it moves, and `TimelineLocator` and `TimelineSignature` use it.
+Status: fixed (checked in Chromium in the DAW).
+
 ### G-023 A style's states never reached an install
 The registry build turns `cn-x` into what `.cn-x` applies, and only reads rules of that shape. A rule on a state or a descendant works on the site, which reads the sheet, and was dropped from what the CLI installs: the piano roll's keys were all white and showed no press, a sequencer's velocity fill lost its dim color and its transition, and an envelope never shook when refusing a point (its keyframes reached no project either). A pressed black key also kept its hover color on the site.
 Fix: those states are variants in the class's own `@apply`, the keyframes ship in the envelope items' `css`, the build carries `css`, and `apps/www/test/style-rules.test.ts` fails on a rule of any other shape.

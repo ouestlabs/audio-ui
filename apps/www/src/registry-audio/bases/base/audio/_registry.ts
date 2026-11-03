@@ -123,7 +123,7 @@ export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/core"],
     description:
-      "Locators and time-signature changes on a timeline's lane: press one to jump there, rename or retype it in place, move a signature with the arrows, delete either. With the bars of a ruler through those changes, and a hook for the commands behind them.",
+      "Locators and time-signature changes on a timeline's lane: press one to jump there, drag it or use the arrows to move it on the grid, rename or retype it in place, delete either. With the bars of a ruler through those changes, and a hook for the commands behind them.",
     files: [
       {
         path: "audio/elements/timeline-markers.tsx",

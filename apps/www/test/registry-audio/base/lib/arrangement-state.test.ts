@@ -354,7 +354,7 @@ describe("apply", () => {
       colors: 5,
       duration: 100,
       initialClips: clips,
-      initialLocators: [{ at: 20, name: "Verse" }],
+      initialLocators: [{ at: 20, id: "verse", name: "Verse" }],
       initialLoop: { on: true, range: [10, 30] },
       initialSignatures: [{ at: 40, beatUnit: 4, beatsPerBar: 3, id: "s" }],
       initialTracks: [
@@ -439,7 +439,7 @@ describe("apply", () => {
     ]);
     expect(doc.duration).toBe(200);
     expect(doc.loop).toEqual({ on: true, range: [20, 60] });
-    expect(doc.locators).toEqual([{ at: 40, name: "Verse" }]);
+    expect(doc.locators).toEqual([{ at: 40, id: "verse", name: "Verse" }]);
     expect(doc.signatures[0]?.at).toBe(80);
   });
 
@@ -470,21 +470,46 @@ describe("apply", () => {
   test("a locator is added where the cursor is, named by its number, and not twice", () => {
     let state = init([]);
     state = apply(state, { type: "add-locator", at: 50 });
-    expect(state.doc.locators.at(-1)).toEqual({ at: 50, name: "Locator 2" });
+    expect(state.doc.locators.at(-1)).toEqual({
+      at: 50,
+      id: "locator-1",
+      name: "Locator 2",
+    });
     expect(apply(state, { type: "add-locator", at: 50 })).toBe(state);
   });
 
   test("a locator is renamed, removed, and each is one step", () => {
     let state = init([]);
-    state = apply(state, { type: "rename-locator", at: 20, name: "Chorus" });
-    expect(state.doc.locators).toEqual([{ at: 20, name: "Chorus" }]);
+    state = apply(state, {
+      id: "verse",
+      name: "Chorus",
+      type: "rename-locator",
+    });
+    expect(state.doc.locators).toEqual([
+      { at: 20, id: "verse", name: "Chorus" },
+    ]);
     expect(
-      apply(state, { type: "rename-locator", at: 20, name: "Chorus" })
+      apply(state, { id: "verse", name: "Chorus", type: "rename-locator" })
     ).toBe(state);
-    state = apply(state, { type: "remove-locator", at: 20 });
+    state = apply(state, { id: "verse", type: "remove-locator" });
     expect(state.doc.locators).toEqual([]);
     expect(state.history.past).toHaveLength(2);
     expect(apply(state, { type: "undo" }).doc.locators[0]?.name).toBe("Chorus");
+  });
+
+  test("a locator moves within the song, keeps its id, and each move is one step", () => {
+    let state = init([]);
+    state = apply(state, { id: "verse", to: 30, type: "move-locator" });
+    expect(state.doc.locators).toEqual([
+      { at: 30, id: "verse", name: "Verse" },
+    ]);
+    expect(state.history.past).toHaveLength(1);
+    expect(apply(state, { type: "undo" }).doc.locators[0]?.at).toBe(20);
+    state = apply(state, { id: "verse", to: 1000, type: "move-locator" });
+    expect(state.doc.locators[0]?.at).toBe(state.doc.duration);
+    expect(apply(state, { id: "verse", to: 1000, type: "move-locator" })).toBe(
+      state
+    );
   });
 
   test("a signature takes the next free id and the signature in force where it is added", () => {

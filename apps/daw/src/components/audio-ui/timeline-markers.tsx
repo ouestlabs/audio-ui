@@ -28,6 +28,8 @@ import { TimelineMark } from "@/components/audio-ui/timeline";
 /** A named point of the arrangement, in its time. */
 export interface Locator {
   at: number;
+  /** Stays the same as it moves, so its button keeps the focus. */
+  id: string;
   name: string;
 }
 
@@ -51,22 +53,28 @@ function stopPress(event: PointerEvent<HTMLElement>) {
 const ON_ITS_TIME = "border-s-0 ps-0";
 
 /**
- * A locator, on its time on a lane: press it to put the cursor there,
- * double-click it or press Enter to rename it (Enter keeps the name, Escape
- * drops the change), Delete takes it away.
+ * A locator, on its time on a lane: press it to put the cursor there, drag it
+ * or press Left and Right to move it, on the grid, double-click it or press
+ * Enter to rename it (Enter keeps the name, Escape drops the change), Delete
+ * takes it away.
  */
 function TimelineLocator({
   locator,
   onJump,
+  onMove,
   onRemove,
   onRename,
+  step,
 }: {
   locator: Locator;
   onJump: (at: number) => void;
-  onRemove: (at: number) => void;
-  onRename: (at: number, name: string) => void;
+  onMove: (id: string, to: number) => void;
+  onRemove: (id: string) => void;
+  onRename: (id: string, name: string) => void;
+  /** How far the arrows move it, in the timeline's units. */
+  step: number;
 }) {
-  const { at, name } = locator;
+  const { at, id, name } = locator;
   const [editing, setEditing] = useState(false);
   const handleClick = useCallback(() => onJump(at), [at, onJump]);
   const startEditing = useCallback(() => setEditing(true), []);
@@ -75,14 +83,14 @@ function TimelineLocator({
       if (event.key === "Delete" || event.key === "Backspace") {
         event.preventDefault();
         event.stopPropagation();
-        onRemove(at);
+        onRemove(id);
       } else if (event.key === "Enter") {
         event.preventDefault();
         event.stopPropagation();
         setEditing(true);
       }
     },
-    [at, onRemove]
+    [id, onRemove]
   );
   const handleEditKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
@@ -90,17 +98,18 @@ function TimelineLocator({
       if (event.key === "Enter") {
         const next = event.currentTarget.value.trim();
         if (next) {
-          onRename(at, next);
+          onRename(id, next);
         }
         setEditing(false);
       } else if (event.key === "Escape") {
         setEditing(false);
       }
     },
-    [at, onRename]
+    [id, onRename]
   );
   const handleBlur = useCallback(() => setEditing(false), []);
-  const handleRemove = useCallback(() => onRemove(at), [at, onRemove]);
+  const handleRemove = useCallback(() => onRemove(id), [id, onRemove]);
+  const handleMoved = useCallback((to: number) => onMove(id, to), [id, onMove]);
   // The menu hands focus back as it closes, which would end the edit: open the field after it.
   const renameLater = useRef(false);
   const renameWhenClosed = useCallback(() => {
@@ -130,13 +139,18 @@ function TimelineLocator({
     );
   }
   return (
-    <TimelineMark className={ON_ITS_TIME} value={at}>
+    <TimelineMark
+      className={ON_ITS_TIME}
+      onValueCommitted={handleMoved}
+      step={step}
+      value={at}
+    >
       <ContextMenu onOpenChangeComplete={handleMenuClosed}>
         <ContextMenuTrigger
           render={
             <button
               aria-label={`Locator ${name}`}
-              className="pointer-events-auto flex h-full items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring"
+              className="pointer-events-auto flex h-full cursor-grab touch-none items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
               data-slot="timeline-locator"
               onClick={handleClick}
               onDoubleClick={startEditing}
@@ -161,10 +175,11 @@ function TimelineLocator({
 
 /**
  * A time-signature change, on its time on a lane: press it to put the
- * cursor there, double-click it or press Enter to type a new signature such
- * as 7/8 (Enter keeps it, Escape drops it), Left and Right move it by `step`,
- * Delete takes it away. Which change is being typed is held by the host
- * (`editing`), so a change just added can open ready to type.
+ * cursor there, drag it or press Left and Right to move it, on the grid,
+ * double-click it or press Enter to type a new signature such as 7/8 (Enter
+ * keeps it, Escape drops it), Delete takes it away. Which change is being
+ * typed is held by the host (`editing`), so a change just added can open ready
+ * to type.
  */
 function TimelineSignature({
   change,
@@ -194,20 +209,17 @@ function TimelineSignature({
   );
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
-      const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
       if (event.key === "Delete" || event.key === "Backspace") {
         onRemove(id);
       } else if (event.key === "Enter") {
         onEditingChange(id);
-      } else if (direction && step > 0) {
-        onMove(id, at + direction * step);
       } else {
         return;
       }
       event.preventDefault();
       event.stopPropagation();
     },
-    [at, id, onEditingChange, onMove, onRemove, step]
+    [id, onEditingChange, onRemove]
   );
   const handleEditKeyDown = useCallback(
     (event: KeyboardEvent<HTMLInputElement>) => {
@@ -229,6 +241,7 @@ function TimelineSignature({
     [onEditingChange]
   );
   const handleRemove = useCallback(() => onRemove(id), [id, onRemove]);
+  const handleMoved = useCallback((to: number) => onMove(id, to), [id, onMove]);
 
   if (editing) {
     return (
@@ -247,13 +260,18 @@ function TimelineSignature({
     );
   }
   return (
-    <TimelineMark className={ON_ITS_TIME} value={at}>
+    <TimelineMark
+      className={ON_ITS_TIME}
+      onValueCommitted={handleMoved}
+      step={step}
+      value={at}
+    >
       <ContextMenu>
         <ContextMenuTrigger
           render={
             <button
               aria-label={`Time signature ${label}`}
-              className="pointer-events-auto flex h-full items-center whitespace-nowrap border-foreground/60 border-s-2 ps-1 pe-2 text-xs tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
+              className="pointer-events-auto flex h-full cursor-grab touch-none items-center whitespace-nowrap border-foreground/60 border-s-2 ps-1 pe-2 text-xs tabular-nums outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
               data-slot="timeline-signature"
               onClick={handleClick}
               onDoubleClick={startEditing}

@@ -546,7 +546,7 @@ export function ArrangementView({
               <TimelineLane className="h-6 border-b-0">
                 {locators.map((locator) => (
                   <TimelineLocator
-                    key={locator.at}
+                    key={locator.id}
                     locator={locator}
                     {...markers.locator}
                   />

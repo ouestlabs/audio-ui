@@ -65,11 +65,11 @@ Shift and a drag across bare lane draws a rectangle: the clips it touches join t
 Test: apps/daw/test/browser/run.ts "ARR-015"
 
 ### ARR-016 Locators
-M, or the + of the locators' row, puts a locator at the cursor. A press on one puts the cursor there; a double-click or Enter renames it, Delete takes it away. Option with the left and right arrows jumps to the next locator or clip edge, of the selected tracks or of every track.
+M, or the + of the locators' row, puts a locator at the cursor. A press on one puts the cursor there; a double-click or Enter renames it, Delete takes it away. A drag moves it on the grid, or freely with Cmd held, and it lands on a clip's edge or another locator within a few pixels; focused, Left and Right move it by the grid. A move does not move the cursor, and is one step of undo. Option with the left and right arrows jumps to the next locator or clip edge, of the selected tracks or of every track.
 Test: apps/www/test/registry-audio/base/hooks/use-timeline-cursor.test.tsx; apps/daw/test/browser/run.ts "ARR-016"
 
 ### ARR-017 Time signatures
-The + of the signatures' row puts a change at the cursor, in the signature in force there, ready to be typed. From a change on, the ruler and the position count bars in its signature, and the bar a change cuts short is hatched. The arrows move a change by the grid, Delete takes it away. The grid's bar-long divisions and the tempo stay those of the arrangement's start.
+The + of the signatures' row puts a change at the cursor, in the signature in force there, ready to be typed. From a change on, the ruler and the position count bars in its signature, and the bar a change cuts short is hatched. A drag or the arrows move a change the same way as a locator, Delete takes it away. The ruler counts through a dragged change when it lands. The grid's bar-long divisions and the tempo stay those of the arrangement's start.
 Test: apps/www/test/registry-audio/base/hooks/use-timeline-markers.test.tsx; apps/daw/test/browser/run.ts "ARR-017"
 
 ### ARR-018 The cursor from the keyboard

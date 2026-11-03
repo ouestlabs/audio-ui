@@ -37,12 +37,18 @@ describe("useTimelineMarkers", () => {
       view.result.current.addLocator();
     });
     expect(doc().locators.map((locator) => locator.at)).toEqual([4]);
+    const id = doc().locators[0]?.id ?? "";
     act(() => {
-      view.result.current.locator.onRename(4, "Verse");
+      view.result.current.locator.onRename(id, "Verse");
     });
     expect(doc().locators[0]?.name).toBe("Verse");
     act(() => {
-      view.result.current.locator.onRemove(4);
+      view.result.current.locator.onMove(id, 8);
+    });
+    expect(doc().locators[0]?.at).toBe(8);
+    expect(view.result.current.locator.step).toBe(0.5);
+    act(() => {
+      view.result.current.locator.onRemove(id);
     });
     expect(doc().locators).toEqual([]);
   });

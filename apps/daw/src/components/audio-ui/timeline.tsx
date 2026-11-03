@@ -171,7 +171,7 @@ function TimelineMark({ className, ...props }: TimelinePrimitive.Mark.Props) {
   return (
     <TimelinePrimitive.Mark
       className={cn(
-        "border-s ps-1.5 tabular-nums pointer-events-none inset-y-0 flex items-center",
+        "border-s ps-1.5 tabular-nums pointer-events-none inset-y-0 flex items-center data-dragging:z-10",
         className
       )}
       data-slot="timeline-mark"

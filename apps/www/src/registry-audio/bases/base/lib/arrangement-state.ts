@@ -506,6 +506,8 @@ export type Span = readonly [number, number];
 /** A named point of the arrangement to jump to, in seconds. */
 export interface ArrangementLocator {
   at: number;
+  /** Stays the same as it moves, so its button keeps the focus. */
+  id: string;
   name: string;
 }
 
@@ -645,10 +647,11 @@ export type ArrangementCommand =
   | { type: "change-loop"; range: Span }
   /** A drag of a header's gain or pan: a burst, which `settle-clip-edit` closes into one step. */
   | { type: "change-mix"; id: string; patch: Partial<Omit<Mix, "color">> }
+  | { type: "move-locator"; id: string; to: number }
   | { type: "move-signature"; id: string; to: number }
-  | { type: "remove-locator"; at: number }
+  | { type: "remove-locator"; id: string }
   | { type: "remove-signature"; id: string }
-  | { type: "rename-locator"; at: number; name: string }
+  | { type: "rename-locator"; id: string; name: string }
   | { type: "set-loop"; loop: Partial<ArrangementLoop> }
   | { type: "set-mix"; id: string; patch: Partial<Omit<Mix, "color">> }
   | { type: "set-track-color"; id: string; color: number }
@@ -1497,18 +1500,18 @@ function changeSignature(
   }));
 }
 
-function renameLocator(
+function changeLocator<Key extends "at" | "name">(
   state: ArrangementState,
-  at: number,
-  name: string
+  id: string,
+  key: Key,
+  value: ArrangementLocator[Key]
 ): ArrangementState {
-  if (state.doc.locators.find((locator) => locator.at === at)?.name === name) {
-    return state;
-  }
   return edit(state, (doc) => ({
     ...doc,
     locators: doc.locators.map((locator) =>
-      locator.at === at ? { ...locator, name } : locator
+      locator.id === id && locator[key] !== value
+        ? { ...locator, [key]: value }
+        : locator
     ),
   }));
 }
@@ -1678,7 +1681,14 @@ const handlers: Handlers = {
             ...doc,
             locators: [
               ...doc.locators,
-              { at, name: `Locator ${doc.locators.length + 1}` },
+              {
+                at,
+                id: freshId(
+                  "locator",
+                  new Set(doc.locators.map((locator) => locator.id))
+                ),
+                name: `Locator ${doc.locators.length + 1}`,
+              },
             ],
           }
     ),
@@ -1757,22 +1767,30 @@ const handlers: Handlers = {
       ({ on, ...device }) => (on === false ? device : { ...device, on: false }),
       edit
     ),
+  "move-locator": (state, { id, to }) =>
+    changeLocator(
+      state,
+      id,
+      "at",
+      Math.min(state.doc.duration, Math.max(0, to))
+    ),
   "move-signature": (state, { id, to }) =>
     changeSignature(state, id, (change) => ({
       ...change,
       at: Math.min(state.doc.duration, Math.max(0, to)),
     })),
-  "remove-locator": (state, { at }) =>
+  "remove-locator": (state, { id }) =>
     edit(state, (doc) => ({
       ...doc,
-      locators: doc.locators.filter((locator) => locator.at !== at),
+      locators: doc.locators.filter((locator) => locator.id !== id),
     })),
   "remove-signature": (state, { id }) =>
     edit(state, (doc) => ({
       ...doc,
       signatures: doc.signatures.filter((change) => change.id !== id),
     })),
-  "rename-locator": (state, { at, name }) => renameLocator(state, at, name),
+  "rename-locator": (state, { id, name }) =>
+    changeLocator(state, id, "name", name),
   "set-loop": (state, { loop }) => setLoop(state, loop),
   "set-mix": (state, { id, patch }) => setMix(state, id, patch, edit),
   "set-track-color": (state, { id, color }) =>

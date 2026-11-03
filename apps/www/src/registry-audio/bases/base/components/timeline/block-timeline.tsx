@@ -176,8 +176,8 @@ const bars = (count: number) => count * BAR;
 
 /** The named points the timeline starts with. */
 const LOCATORS = [
-  { at: bars(4), name: "Verse" },
-  { at: bars(20), name: "Chorus" },
+  { at: bars(4), id: "verse", name: "Verse" },
+  { at: bars(20), id: "chorus", name: "Chorus" },
 ];
 
 /** The loop it starts with: bars 8 to 16, switched on. */
@@ -1941,7 +1941,7 @@ export default function BlockTimeline() {
                 <TimelineLane className="h-6 border-b-0">
                   {locators.map((locator) => (
                     <TimelineLocator
-                      key={locator.at}
+                      key={locator.id}
                       locator={locator}
                       {...markers.locator}
                     />

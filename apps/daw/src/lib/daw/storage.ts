@@ -53,6 +53,11 @@ export async function loadProject(): Promise<SavedProject | null> {
     const root = await navigator.storage.getDirectory();
     const file = await (await root.getFileHandle(PROJECT)).getFile();
     const project = JSON.parse(await file.text()) as SavedProject;
+    // A project saved before locators had ids gets them here.
+    project.doc.locators = project.doc.locators.map((locator, index) => ({
+      ...locator,
+      id: locator.id ?? `locator-${index + 1}`,
+    }));
     return project.version === 1 ? project : null;
   } catch {
     return null;

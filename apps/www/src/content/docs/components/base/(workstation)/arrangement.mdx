@@ -479,7 +479,7 @@ const selection = useTimeSelection({
 
 ### Locators and time signatures
 
-`TimelineLocator` and `TimelineSignature` (`npx shadcn@latest add @audio-ui/timeline-markers`) go on a lane of their own, and stand on their time with their line. A locator is a named point: press it to put the cursor there, double-click it or press Enter to rename it, Delete to take it away. The block's M adds one at the cursor, and Alt with the arrows jumps from one to the next.
+`TimelineLocator` and `TimelineSignature` (`npx shadcn@latest add @audio-ui/timeline-markers`) go on a lane of their own, and stand on their time with their line. A locator is a named point: press it to put the cursor there, drag it or press Left and Right to move it on the grid (Cmd/Ctrl lets go of the grid), double-click it or press Enter to rename it, Delete to take it away. A change of time signature moves the same way. The block's M adds one at the cursor, and Alt with the arrows jumps from one to the next.
 
 ```tsx
 import { TimelineLocator, TimelineSignature } from "@/components/audio-ui/timeline-markers";
@@ -487,11 +487,13 @@ import { TimelineLocator, TimelineSignature } from "@/components/audio-ui/timeli
 <TimelineLane>
   {locators.map((locator) => (
     <TimelineLocator
-      key={locator.at}
+      key={locator.id}
       locator={locator}
       onJump={seek}
+      onMove={moveLocator}
       onRemove={removeLocator}
       onRename={renameLocator}
+      step={grid}
     />
   ))}
 </TimelineLane>;
@@ -729,6 +731,21 @@ The lane that moves the position: a press jumps to the pointer and a drag scrubs
 <TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
 </TypeTable>
 
+### Mark
+
+Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid line. Its children are its label. With `onValueChange` or `onValueCommitted` it moves: a drag takes it along the lane, on the grid unless Cmd/Ctrl is held, landing on a `snapPoints` place within a few px, and Left and Right on something focused inside it move it by `step`. A press that stays one keeps its click; a drag does not click.
+
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Where the mark sits, in the timeline's units.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails) => void"}>Fires as the mark moves, on each step of a drag and each arrow key. With it or `onValueCommitted`, the mark can be moved.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails) => void"}>Fires once a drag or an arrow key has moved it, with where it landed.</TypeRow>
+<TypeRow name={"step"} type={"number"}>How far Left and Right move it. Defaults to the timeline's `step`.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-dragging"}>Whether a pointer is moving the mark.</TypeRow>
+</TypeTable>
+
 ### Range
 
 A stretch of the timeline, such as a loop, a selection or a clip, laid on the lane it sits in from `value[0]` to `value[1]`. Dragging its body moves it, on the grid unless Cmd/Ctrl is held; add a `Timeline.RangeHandle` per edge to resize it. With `drawable`, dragging across empty lane draws a new range. Its own native `<input type="range">` moves it from the keyboard and carries its accessible name (`aria-label` / `aria-labelledby`): Left and Right by a step, Up and Down by its own length, and with Cmd/Ctrl, Left and Right shorten or lengthen it by a step while Up and Down double or halve it. A drag lands an edge on a `snapPoints` place within a few px. Renders a `<div>` element.
@@ -879,7 +896,7 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"TimelineTrack"}>A row: a header beside a lane. `height`, `selected`, `onHeightChange`.</TypeRow>
 <TypeRow name={"TimelineTrackHeader"}>The strip that names a track, kept at the left edge.</TypeRow>
 <TypeRow name={"TimelineTrackResizeHandle"}>Sets the track's height, by dragging or with the keys.</TypeRow>
-<TypeRow name={"TimelineMark"}>Something placed at `value`: a bar number, a cue.</TypeRow>
+<TypeRow name={"TimelineMark"}>Something placed at `value`: a bar number, a cue. With `onValueChange` or `onValueCommitted` it moves: a drag takes it along the lane, on the grid unless Cmd/Ctrl is held, landing on a `snapPoints` place within a few px, and Left and Right on something focused inside it move it by `step`. A press that stays one keeps its click; a drag does not click.</TypeRow>
 <TypeRow name={"TimelinePlayhead"}>Follows the position on the lane it sits in.</TypeRow>
 <TypeRow name={"TimelineRange"}>A stretch of the timeline: `value`, `defaultValue`, `minLength`, `movable`, `drawable`, `onValueChange`, `onValueCommitted`.</TypeRow>
 <TypeRow name={"TimelineRangeHandle"}>Resizes one `edge` of the range.</TypeRow>
@@ -949,7 +966,7 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 
 <TypeTable>
 <TypeRow name={"dispatch, getPosition"} type={"(command) => state, () => number"}>The arrangement's commands, and where the cursor is.</TypeRow>
-<TypeRow name={"onJump, step"} type={"(at) => void, number"}>A marker pressed, and how far the arrows move a change.</TypeRow>
+<TypeRow name={"onJump, step"} type={"(at) => void, number"}>A marker pressed, and how far the arrows move one.</TypeRow>
 <TypeRow name={"locator, signature"} type={"props"}>To spread on `TimelineLocator` and `TimelineSignature`.</TypeRow>
 <TypeRow name={"addLocator, addSignature, editingSignature"} type={"() => void, () => void, string | null"}>New markers at the cursor, and the change being typed.</TypeRow>
 </TypeTable>

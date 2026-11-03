@@ -7,7 +7,12 @@
  * Each check opens a fresh profile, so the project starts new, except where
  * a check reloads to see what was kept.
  */
-import { type Browser, chromium, type Page } from "playwright-core";
+import {
+  type Browser,
+  chromium,
+  type Locator,
+  type Page,
+} from "playwright-core";
 
 const URL = process.env.DAW_URL ?? "http://localhost:3300/";
 const RATE = /kHz/;
@@ -148,6 +153,66 @@ function assert(condition: unknown, message: string): asserts condition {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+/** A drag and the arrows move a marker, each one step of undo, and neither moves the cursor; a press on it puts the cursor there. */
+async function movesLikeAMarker(page: Page, marker: Locator) {
+  const offset = (element: Locator) =>
+    element.evaluate((node) =>
+      Number(
+        (
+          node.closest(
+            "[data-slot=timeline-mark],[data-slot=timeline-playhead]"
+          ) as HTMLElement
+        ).style.getPropertyValue("--timeline-offset")
+      )
+    );
+  const cursor = page.locator("[data-slot=timeline-playhead]").first();
+  const start = await offset(marker);
+  const placed = await offset(cursor);
+  const box = await marker.boundingBox();
+  assert(box, "the marker is there");
+  await page.mouse.move(box.x + 8, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 208, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForTimeout(100);
+  const dragged = await offset(marker);
+  assert(
+    dragged > start,
+    `a drag left the marker at ${dragged}, from ${start}`
+  );
+  assert(
+    (await offset(cursor)) === placed,
+    "a drag of a marker moved the cursor"
+  );
+  await page.keyboard.press("ControlOrMeta+KeyZ");
+  await page.waitForTimeout(100);
+  assert(
+    (await offset(marker)) === start,
+    `undo left the marker at ${await offset(marker)}, not ${start}`
+  );
+  await marker.focus();
+  await page.keyboard.press("ArrowRight");
+  await page.waitForTimeout(100);
+  const stepped = await offset(marker);
+  assert(stepped > start, `Right left the marker at ${stepped}`);
+  assert(
+    await marker.evaluate((node) => node === document.activeElement),
+    "the marker lost the focus as it moved"
+  );
+  assert(
+    (await offset(cursor)) === placed,
+    "the arrows on a marker moved the cursor"
+  );
+  await page.keyboard.press("Home");
+  await page.waitForTimeout(100);
+  await marker.click();
+  await page.waitForTimeout(100);
+  assert(
+    Math.abs((await offset(cursor)) - stepped) < 0.001,
+    "a press on a marker did not put the cursor there"
+  );
 }
 
 /** The line of a marker just put at the cursor falls on the playhead, not beside it. */
@@ -757,6 +822,34 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         .first()
         .waitFor({ timeout: 5000 });
       await standsOnThePlayhead(page, "timeline-signature");
+    },
+  "ARR-016: a locator moves by a drag and the arrows, one step of undo each, and a press still jumps":
+    async (browser) => {
+      const page = await open(browser);
+      const lane = await page.locator('[data-track="track-2"]').boundingBox();
+      assert(lane, "the lane is there");
+      await page.mouse.click(lane.x + 200, lane.y + lane.height / 2);
+      await page.keyboard.press("KeyM");
+      const locator = page.getByRole("button", { name: "Locator 1" });
+      await locator.waitFor({ timeout: 5000 });
+      await movesLikeAMarker(page, locator);
+    },
+  "ARR-017: a time signature moves by a drag and the arrows, one step of undo each, and a press still jumps":
+    async (browser) => {
+      const page = await open(browser);
+      const lane = await page.locator('[data-track="track-2"]').boundingBox();
+      assert(lane, "the lane is there");
+      await page.mouse.click(lane.x + 200, lane.y + lane.height / 2);
+      await page
+        .getByRole("button", { name: "Add a time signature at the cursor" })
+        .click();
+      await page.waitForFunction(
+        () => document.activeElement?.tagName === "INPUT"
+      );
+      await page.keyboard.press("Enter");
+      const signature = page.locator("[data-slot=timeline-signature]").last();
+      await signature.waitFor({ timeout: 5000 });
+      await movesLikeAMarker(page, signature);
     },
   "ARR-018: the arrows move the cursor on the grid, End goes to the last clip, Up and Down pick a track":
     async (browser) => {
