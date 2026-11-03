@@ -479,7 +479,7 @@ const selection = useTimeSelection({
 
 ### Locators and time signatures
 
-`TimelineLocator` and `TimelineSignature` (`npx shadcn@latest add @audio-ui/timeline-markers`) go on a lane of their own, and stand on their time with their line. A locator is a named point: press it to put the cursor there, drag it or press Left and Right to move it on the grid (Cmd/Ctrl lets go of the grid), double-click it or press Enter to rename it, Delete to take it away. A change of time signature moves the same way. The block's M adds one at the cursor, and Alt with the arrows jumps from one to the next.
+`TimelineLocator` and `TimelineSignature` (`npx shadcn@latest add @audio-ui/timeline-markers`) go on a lane of their own, and stand on their time with their line. A locator is a named point: press it to put the cursor there, double-click it to play from there, drag it or press Left and Right to move it on the grid (Cmd/Ctrl lets go of the grid), press Enter or pick Rename in its menu to rename it, Delete to take it away. A change of time signature moves the same way. The block's M adds one at the cursor, and Alt with the arrows jumps from one to the next.
 
 ```tsx
 import { TimelineLocator, TimelineSignature } from "@/components/audio-ui/timeline-markers";
@@ -491,6 +491,7 @@ import { TimelineLocator, TimelineSignature } from "@/components/audio-ui/timeli
       locator={locator}
       onJump={seek}
       onMove={moveLocator}
+      onPlay={playFrom}
       onRemove={removeLocator}
       onRename={renameLocator}
       step={grid}
@@ -966,7 +967,7 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 
 <TypeTable>
 <TypeRow name={"dispatch, getPosition"} type={"(command) => state, () => number"}>The arrangement's commands, and where the cursor is.</TypeRow>
-<TypeRow name={"onJump, step"} type={"(at) => void, number"}>A marker pressed, and how far the arrows move one.</TypeRow>
+<TypeRow name={"onJump, onPlay, step"} type={"(at) => void, (at) => void, number"}>A marker pressed, a locator double-clicked to play from, and how far the arrows move one.</TypeRow>
 <TypeRow name={"locator, signature"} type={"props"}>To spread on `TimelineLocator` and `TimelineSignature`.</TypeRow>
 <TypeRow name={"addLocator, addSignature, editingSignature"} type={"() => void, () => void, string | null"}>New markers at the cursor, and the change being typed.</TypeRow>
 </TypeTable>

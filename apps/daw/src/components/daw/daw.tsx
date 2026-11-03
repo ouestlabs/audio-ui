@@ -318,6 +318,14 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     () => (engine.playing ? stop() : playFrom(cursor)),
     [cursor, engine.playing, playFrom, stop]
   );
+  // Stop then comes back here (ARR-016).
+  const playAt = useCallback(
+    (seconds: number) => {
+      setCursor(seconds);
+      playFrom(seconds);
+    },
+    [playFrom]
+  );
   const seek = useCallback(
     (seconds: number) => {
       if (engine.playing) {
@@ -376,6 +384,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     dispatch,
     getPosition,
     onJump: seek,
+    onPlay: playAt,
     step: grid.snapStep,
   });
   const pickNextTrack = useCallback(

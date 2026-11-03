@@ -19,15 +19,17 @@ function setup(position = 4) {
     return state;
   };
   const jumps: number[] = [];
+  const plays: number[] = [];
   const view = renderHook(() =>
     useTimelineMarkers({
       dispatch,
       getPosition: () => position,
       onJump: (at) => jumps.push(at),
+      onPlay: (at) => plays.push(at),
       step: 0.5,
     })
   );
-  return { doc: () => state.doc, jumps, view };
+  return { doc: () => state.doc, jumps, plays, view };
 }
 
 describe("useTimelineMarkers", () => {
@@ -71,10 +73,12 @@ describe("useTimelineMarkers", () => {
     expect(doc().signatures).toEqual([]);
   });
 
-  test("a press jumps, and the arrows move a change by the grid", () => {
-    const { jumps, view } = setup();
+  test("a press jumps, a double-click plays, and the arrows move a marker by the grid", () => {
+    const { jumps, plays, view } = setup();
     view.result.current.locator.onJump(8);
     expect(jumps).toEqual([8]);
+    view.result.current.locator.onPlay(8);
+    expect(plays).toEqual([8]);
     expect(view.result.current.signature.step).toBe(0.5);
   });
 });

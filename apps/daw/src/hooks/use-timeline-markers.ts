@@ -13,6 +13,8 @@ export interface UseTimelineMarkersOptions {
   getPosition: () => number;
   /** A locator or a time signature was pressed: put the cursor there. */
   onJump: (at: number) => void;
+  /** A locator was double-clicked: play from there. */
+  onPlay: (at: number) => void;
   /** How far the arrows move a locator or a time signature: the grid, in seconds. */
   step: number;
 }
@@ -28,6 +30,7 @@ export function useTimelineMarkers({
   dispatch,
   getPosition,
   onJump,
+  onPlay,
   step,
 }: UseTimelineMarkersOptions) {
   const [editingSignature, setEditingSignature] = useState<string | null>(null);
@@ -48,12 +51,13 @@ export function useTimelineMarkers({
       onJump,
       onMove: (id: string, to: number) =>
         dispatch({ id, to, type: "move-locator" }),
+      onPlay,
       onRemove: (id: string) => dispatch({ id, type: "remove-locator" }),
       onRename: (id: string, name: string) =>
         dispatch({ id, name, type: "rename-locator" }),
       step,
     }),
-    [dispatch, onJump, step]
+    [dispatch, onJump, onPlay, step]
   );
   const signature = useMemo(
     () => ({

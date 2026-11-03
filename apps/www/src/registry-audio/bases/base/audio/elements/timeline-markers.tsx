@@ -53,15 +53,16 @@ function stopPress(event: PointerEvent<HTMLElement>) {
 const ON_ITS_TIME = "border-s-0 ps-0";
 
 /**
- * A locator, on its time on a lane: press it to put the cursor there, drag it
- * or press Left and Right to move it, on the grid, double-click it or press
- * Enter to rename it (Enter keeps the name, Escape drops the change), Delete
- * takes it away.
+ * A locator, on its time on a lane: press it to put the cursor there,
+ * double-click it to play from there, drag it or press Left and Right to move
+ * it, on the grid, press Enter or pick Rename in its menu to rename it (Enter
+ * keeps the name, Escape drops the change), Delete takes it away.
  */
 function TimelineLocator({
   locator,
   onJump,
   onMove,
+  onPlay,
   onRemove,
   onRename,
   step,
@@ -69,6 +70,8 @@ function TimelineLocator({
   locator: Locator;
   onJump: (at: number) => void;
   onMove: (id: string, to: number) => void;
+  /** A double-click on it: play from its time. */
+  onPlay: (at: number) => void;
   onRemove: (id: string) => void;
   onRename: (id: string, name: string) => void;
   /** How far the arrows move it, in the timeline's units. */
@@ -77,7 +80,7 @@ function TimelineLocator({
   const { at, id, name } = locator;
   const [editing, setEditing] = useState(false);
   const handleClick = useCallback(() => onJump(at), [at, onJump]);
-  const startEditing = useCallback(() => setEditing(true), []);
+  const handleDoubleClick = useCallback(() => onPlay(at), [at, onPlay]);
   const handleKeyDown = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
       if (event.key === "Delete" || event.key === "Backspace") {
@@ -153,7 +156,7 @@ function TimelineLocator({
               className="pointer-events-auto flex h-full cursor-grab touch-none items-center whitespace-nowrap border-primary border-s-2 ps-1 pe-2 text-primary text-xs outline-none hover:bg-primary/10 focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
               data-slot="timeline-locator"
               onClick={handleClick}
-              onDoubleClick={startEditing}
+              onDoubleClick={handleDoubleClick}
               onKeyDown={handleKeyDown}
               type="button"
             />

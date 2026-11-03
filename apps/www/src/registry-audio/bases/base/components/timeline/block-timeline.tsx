@@ -1016,11 +1016,19 @@ export default function BlockTimeline() {
     [clearSelection, multi, pressLane, selectTrack]
   );
   const jumpToLocator = useCallback((at: number) => seek(at), [seek]);
+  const playFromLocator = useCallback(
+    (at: number) => {
+      engine.position.set(at);
+      engine.play(at);
+    },
+    [engine]
+  );
   // The locators and the time signatures, with the commands behind them.
   const markers = useTimelineMarkers({
     dispatch,
     getPosition,
     onJump: jumpToLocator,
+    onPlay: playFromLocator,
     step: snapStep,
   });
   // M, the arrows, Home and End: what the keys do with the cursor.

@@ -834,6 +834,47 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await locator.waitFor({ timeout: 5000 });
       await movesLikeAMarker(page, locator);
     },
+  "ARR-016: a double-click on a locator plays from it, and Stop comes back to it":
+    async (browser) => {
+      const page = await open(browser);
+      const offset = () =>
+        page
+          .locator("[data-slot=timeline-playhead]")
+          .first()
+          .evaluate((element) =>
+            Number(
+              (element as HTMLElement).style.getPropertyValue(
+                "--timeline-offset"
+              )
+            )
+          );
+      const lane = await page.locator('[data-track="track-2"]').boundingBox();
+      assert(lane, "the lane is there");
+      await page.mouse.click(lane.x + 200, lane.y + lane.height / 2);
+      const placed = await offset();
+      await page.keyboard.press("KeyM");
+      const locator = page.getByRole("button", { name: "Locator 1" });
+      await locator.waitFor({ timeout: 5000 });
+      await page.keyboard.press("Home");
+      await locator.dblclick();
+      await page.waitForTimeout(1200);
+      const played = await offset();
+      assert(
+        played > placed + 0.5,
+        `a second after the double-click the playhead is at ${played}, the locator at ${placed}`
+      );
+      assert(
+        (await page.locator("[data-slot=timeline-locator-input]").count()) ===
+          0,
+        "the double-click opened the name to edit"
+      );
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(200);
+      assert(
+        Math.abs((await offset()) - placed) < 0.001,
+        `Stop went to ${await offset()}, not back to the locator at ${placed}`
+      );
+    },
   "ARR-017: a time signature moves by a drag and the arrows, one step of undo each, and a press still jumps":
     async (browser) => {
       const page = await open(browser);
