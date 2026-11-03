@@ -100,6 +100,11 @@ Docked under the tracks at a fixed height, the clip panel's boxes and waveform s
 Fix: the clip view's body fills its frame, the clip panel's waveform and the MIDI clip panel's roll take the room there is (the roll at 18rem when the panel has no height of its own, as before).
 Status: fixed (checked in Chromium in the DAW's detail view).
 
+### G-023 A style's states never reached an install
+The registry build turns `cn-x` into what `.cn-x` applies, and only reads rules of that shape. A rule on a state or a descendant works on the site, which reads the sheet, and was dropped from what the CLI installs: the piano roll's keys were all white and showed no press, a sequencer's velocity fill lost its dim color and its transition, and an envelope never shook when refusing a point (its keyframes reached no project either). A pressed black key also kept its hover color on the site.
+Fix: those states are variants in the class's own `@apply`, the keyframes ship in the envelope items' `css`, the build carries `css`, and `apps/www/test/style-rules.test.ts` fails on a rule of any other shape.
+Status: fixed (checked in Chromium in the DAW). `apps/lab` keeps its old copies until it is reinstalled.
+
 ## Fixed
 
 None yet.

@@ -6,6 +6,10 @@ How the notes of MIDI clips reach the instruments. Editing notes is the piano ro
 Each MIDI track plays its notes through the instrument of its device chain. A MIDI track with no instrument plays nothing.
 Test: apps/daw/test/midi.test.ts "MID-001"
 
+### MID-007 The roll's keyboard
+The keys down the side of the piano roll are black and white, and a pressed key takes the accent color, the pointer still over it.
+Test: apps/www/test/style-rules.test.ts; apps/daw/test/browser/run.ts "MID-007"
+
 ### MID-002 On time
 A note starts at the frame of the audio clock where it lies on the arrangement, and ends at the frame of its end, scheduled ahead on the same transport as the audio clips (TRN-015), so a note and an audio clip that start together start on the same frame.
 Test: packages/core/src/audio/playback/transport.test.ts "MID-002"

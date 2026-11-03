@@ -45,6 +45,29 @@ const devices = DEVICES.map(
   })
 );
 
+/** How an envelope refuses a point: the styles' own keyframes, which an install has no other way to get. */
+const ENVELOPE_SHAKE = {
+  "@keyframes envelope-shake": {
+    "0%": {
+      "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
+      translate: "0 0",
+    },
+    "28.57%": {
+      "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
+      translate: "6px 0",
+    },
+    "57.14%": {
+      "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
+      translate: "-6px 0",
+    },
+    "78.57%": {
+      "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
+      translate: "4px 0",
+    },
+    "100%": { translate: "0 0" },
+  },
+};
+
 export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/react"],
@@ -56,6 +79,7 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
     ],
+    css: ENVELOPE_SHAKE,
     name: "envelope",
     type: "registry:ui",
   },
@@ -69,6 +93,7 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
     ],
+    css: ENVELOPE_SHAKE,
     name: "automation-envelope",
     type: "registry:ui",
   },

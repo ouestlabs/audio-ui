@@ -98,6 +98,7 @@ interface SourceFile {
 /** An item as `_registry.ts` declares it. */
 interface SourceItem {
   categories?: string[];
+  css?: Record<string, unknown>;
   cssVars?: Record<string, unknown>;
   dependencies?: string[];
   description?: string;
@@ -119,6 +120,7 @@ interface BuiltFile {
 /** An item as the registry serves it, keys in the order they are written. */
 interface BuiltItem {
   $schema: string;
+  css?: Record<string, unknown>;
   cssVars?: Record<string, unknown>;
   dependencies?: string[];
   description?: string;
@@ -377,6 +379,7 @@ async function buildItem(
 
   return {
     $schema: "https://ui.shadcn.com/schema/registry-item.json",
+    css: item.css,
     cssVars: item.cssVars,
     dependencies: item.dependencies,
     description: item.description,

@@ -107,6 +107,27 @@
   --radius-xl: calc(var(--radius) * 1.4);
   --color-success: var(--success);
   --color-warning: var(--warning);
+  @keyframes envelope-shake {
+  0% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: 0 0;
+    }
+  28.57% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: 6px 0;
+    }
+  57.14% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: -6px 0;
+    }
+  78.57% {
+    animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+    translate: 4px 0;
+    }
+  100% {
+    translate: 0 0;
+    }
+  }
 }
 
 @layer base {

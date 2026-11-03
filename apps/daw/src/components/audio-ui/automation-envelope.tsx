@@ -60,7 +60,7 @@ export function AutomationEnvelope({
           {(point, index, points) => (
             <EnvelopePrimitive.Point
               aria-label={`Point ${index + 1} of ${points.length}`}
-              className="rounded-full border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none group/point pointer-events-auto size-3 cursor-grab touch-none select-none outline-none after:absolute after:-inset-2 focus-visible:bg-primary active:cursor-grabbing data-dragging:bg-primary pointer-coarse:after:-inset-3"
+              className="rounded-full border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none data-blocked:animate-[envelope-shake_280ms_linear] motion-reduce:data-blocked:animate-none group/point pointer-events-auto size-3 cursor-grab touch-none select-none outline-none after:absolute after:-inset-2 focus-visible:bg-primary active:cursor-grabbing data-dragging:bg-primary pointer-coarse:after:-inset-3"
               getAriaValueText={formatValue}
               index={index}
               key={index}
