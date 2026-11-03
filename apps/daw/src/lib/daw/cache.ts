@@ -110,3 +110,18 @@ export async function cachedRecording(
     return null;
   }
 }
+
+/** Lets go of the caches of recordings the project no longer has: run before any is streamed, while nothing holds their files open. */
+export async function pruneCache(kept: ReadonlySet<string>): Promise<void> {
+  try {
+    const folder = await folderOf();
+    const names = await Array.fromAsync(folder.keys());
+    await Promise.all(
+      names
+        .filter((name) => !kept.has(name.slice(0, name.lastIndexOf("."))))
+        .map((name) => folder.removeEntry(name).catch(() => undefined))
+    );
+  } catch {
+    // Nothing cached yet.
+  }
+}

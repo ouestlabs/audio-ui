@@ -48,10 +48,23 @@ import { type ArrangementDoc, trackOf } from "@/lib/arrangement-state";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
 import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
+import {
+  canUseFolders,
+  mayWrite,
+  pickFolder,
+  rememberFolder,
+  saveToFolder,
+} from "@/lib/daw/folder";
+import { projectFromFolder } from "@/lib/daw/open-folder";
 import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import { freshMidiClipId, type Recording } from "@/lib/daw/recordings";
 import { matchShortcut, type ShortcutCommand } from "@/lib/daw/shortcuts";
-import { canStore, saveProject, saveRecording } from "@/lib/daw/storage";
+import {
+  canStore,
+  loadRecording,
+  saveProject,
+  saveRecording,
+} from "@/lib/daw/storage";
 import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
@@ -103,8 +116,12 @@ function typing(target: EventTarget | null) {
 }
 
 export interface DawProps {
+  /** The folder of the disk the project was opened from or saved to (PRJ-007), if any. */
+  folder: FileSystemDirectoryHandle | null;
   initial: ArrangementDoc;
   initialRecordings: ReadonlyMap<string, Recording>;
+  /** A project opened from a folder, to take this one's place. */
+  onOpen?: (project: DawProps) => void;
 }
 
 /**
@@ -114,7 +131,12 @@ export interface DawProps {
  * transport and the engine line around them. It holds the start marker and
  * the keyboard; everything else is the registry's.
  */
-export function Daw({ initial, initialRecordings }: DawProps) {
+export function Daw({
+  folder: initialFolder,
+  initial,
+  initialRecordings,
+  onOpen,
+}: DawProps) {
   const arrangement = useArrangement({
     colors: TRACK_COLOR_COUNT,
     duration: initial.duration,
@@ -482,6 +504,84 @@ export function Daw({ initial, initialRecordings }: DawProps) {
   );
 
   // Export (EXP-001, EXP-002): the main output, from the start to the end of the last clip.
+  // The project's folder on disk (PRJ-006, PRJ-007): Cmd+S saves to it, Cmd+Shift+S to another, Cmd+O opens one.
+  const [folder, setFolder] = useState(initialFolder);
+  const saveTo = useCallback(
+    async (target: FileSystemDirectoryHandle) => {
+      if (!(await mayWrite(target))) {
+        toast.error(`The browser was not let write to ${target.name}.`);
+        return;
+      }
+      const played = new Set(doc.clips.map((clip) => clip.recording));
+      const kept = [...recordings]
+        .filter(([id]) => played.has(id))
+        .map(([id, recording]) => ({ id, name: recording.name }));
+      const notice = toast.loading(`Saving to ${target.name}…`);
+      try {
+        const { missing } = await saveToFolder(
+          target,
+          doc,
+          kept,
+          loadRecording
+        );
+        setFolder(target);
+        await rememberFolder(target);
+        if (missing.length > 0) {
+          toast.warning(
+            `Saved to ${target.name}, without ${missing.join(", ")}`,
+            {
+              id: notice,
+            }
+          );
+        } else {
+          toast.success(`Saved to ${target.name}`, { id: notice });
+        }
+      } catch (error) {
+        toast.error(`Not saved: ${(error as Error).message}`, { id: notice });
+      }
+    },
+    [doc, recordings]
+  );
+  const saveAs = useCallback(async () => {
+    const picked = await pickFolder();
+    if (picked) {
+      await saveTo(picked);
+    }
+  }, [saveTo]);
+  const save = useCallback(
+    () => (folder ? saveTo(folder) : saveAs()),
+    [folder, saveAs, saveTo]
+  );
+  const openProjectFolder = useCallback(async () => {
+    const picked = await pickFolder();
+    const context = webAudio.getContext();
+    if (!(picked && context && onOpen)) {
+      return;
+    }
+    const notice = toast.loading(`Opening ${picked.name}…`);
+    try {
+      const opened = await projectFromFolder(context, picked);
+      await rememberFolder(picked);
+      if (opened.missing.length > 0) {
+        toast.warning(
+          `Opened ${picked.name}, without ${opened.missing.join(", ")}`,
+          {
+            id: notice,
+          }
+        );
+      } else {
+        toast.success(`Opened ${picked.name}`, { id: notice });
+      }
+      onOpen({
+        folder: picked,
+        initial: opened.doc,
+        initialRecordings: opened.recordings,
+      });
+    } catch (error) {
+      toast.error((error as Error).message, { id: notice });
+    }
+  }, [onOpen]);
+
   const exportWav = useCallback(async () => {
     // The time selected, or the whole arrangement to the end of its last clip (EXP-002).
     const [start, end] = selectedTime?.range ?? [
@@ -588,6 +688,9 @@ export function Daw({ initial, initialRecordings }: DawProps) {
       });
     },
     export: exportWav,
+    ...(canUseFolders()
+      ? { open: openProjectFolder, save, "save-as": saveAs }
+      : {}),
     "midi-track": () => dispatch({ kind: "midi", type: "add-track" }),
     "play-stop": playPause,
     redo: () => dispatch({ type: "redo" }),
@@ -718,6 +821,9 @@ export function Daw({ initial, initialRecordings }: DawProps) {
           metronome={metronome}
           onAutomatingChange={automation.setAutomating}
           onExport={exportWav}
+          {...(canUseFolders()
+            ? { onOpen: openProjectFolder, onSave: save, onSaveAs: saveAs }
+            : {})}
           onLoopingChange={setLooping}
           onMetronomeChange={setMetronome}
           onPlayPause={playPause}

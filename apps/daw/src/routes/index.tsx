@@ -1,10 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Daw, type DawProps } from "@/components/daw/daw";
-import { cachedRecording, canStream, streamRecording } from "@/lib/daw/cache";
+import {
+  cachedRecording,
+  canStream,
+  pruneCache,
+  streamRecording,
+} from "@/lib/daw/cache";
+import { recallFolder } from "@/lib/daw/folder";
 import { newProject } from "@/lib/daw/project";
 import { decodeRecording, type Recording } from "@/lib/daw/recordings";
-import { loadProject, loadRecording } from "@/lib/daw/storage";
+import { loadProject, loadRecording, pruneRecordings } from "@/lib/daw/storage";
 import { webAudio } from "@/lib/web-audio";
 
 export const Route = createFileRoute("/")({
@@ -34,8 +40,15 @@ async function openProject(): Promise<DawProps> {
   const saved = await loadProject();
   const context = webAudio.getContext();
   if (!(saved && context)) {
-    return { initial: newProject(), initialRecordings: new Map() };
+    return {
+      folder: null,
+      initial: newProject(),
+      initialRecordings: new Map(),
+    };
   }
+  // Before anything streams, while no file is held open: what the project no longer has goes.
+  const kept = new Set(saved.recordings.map((recording) => recording.id));
+  await Promise.all([pruneRecordings(kept), pruneCache(kept)]);
   const recordings = new Map<string, Recording>();
   await saved.recordings.reduce(async (done, { id, name }) => {
     await done;
@@ -44,14 +57,28 @@ async function openProject(): Promise<DawProps> {
       recordings.set(id, recording);
     }
   }, Promise.resolve());
-  return { initial: saved.doc, initialRecordings: recordings };
+  return { folder: null, initial: saved.doc, initialRecordings: recordings };
 }
 
 function Home() {
-  const [project, setProject] = useState<DawProps | null>(null);
+  // A project opened from a folder takes the place of this one: a new workstation, from its own state.
+  const [project, setProject] = useState<{
+    opened: number;
+    props: DawProps;
+  } | null>(null);
   useEffect(() => {
-    openProject().then(setProject);
+    Promise.all([openProject(), recallFolder()]).then(([props, folder]) =>
+      setProject({ opened: 0, props: { ...props, folder } })
+    );
   }, []);
+  const open = useCallback(
+    (props: DawProps) =>
+      setProject((current) => ({
+        opened: (current?.opened ?? 0) + 1,
+        props,
+      })),
+    []
+  );
   if (!project) {
     return (
       <main className="flex h-svh items-center justify-center text-muted-foreground text-sm">
@@ -59,5 +86,5 @@ function Home() {
       </main>
     );
   }
-  return <Daw {...project} />;
+  return <Daw {...project.props} key={project.opened} onOpen={open} />;
 }

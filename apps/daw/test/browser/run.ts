@@ -1121,7 +1121,11 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         const folder = await (
           await navigator.storage.getDirectory()
         ).getDirectoryHandle("cache");
-        return (await (await folder.getFileHandle("rec-1.f32")).getFile()).size;
+        const [samples] = (await Array.fromAsync(folder.keys())).filter(
+          (name) => name.endsWith(".f32")
+        );
+        return (await (await folder.getFileHandle(samples ?? "")).getFile())
+          .size;
       });
       // Two channels of 4 s at 48 kHz, as 32-bit floats.
       assert(cached === 2 * 4 * 48_000 * 4, `the cache holds ${cached} bytes`);
@@ -1146,6 +1150,75 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       );
       assert(decoded === 0, `the project decoded ${decoded} files again`);
       assert(again > -40, `the take reopened plays at ${again} dB`);
+    },
+  "PRJ-006 and PRJ-007: Cmd+S saves a folder with its document and samples, and Cmd+O opens it again":
+    async (browser) => {
+      const context = await browser.newContext({
+        viewport: { height: 1000, width: 1440 },
+      });
+      const shared = await context.newPage();
+      // The system's folder picker cannot be driven: it gives a folder of the private storage, which works the same.
+      await shared.addInitScript(() => {
+        (
+          window as unknown as {
+            showDirectoryPicker: () => Promise<FileSystemDirectoryHandle>;
+          }
+        ).showDirectoryPicker = async () =>
+          (
+            await (
+              await navigator.storage.getDirectory()
+            ).getDirectoryHandle("picked", { create: true })
+          ).getDirectoryHandle("Mirages", { create: true });
+      });
+      const page = await open(browser, shared);
+      await dropChord(page, "[data-add-track]", "Kick take", 2);
+      await page.waitForSelector('[aria-label="Kick take"][data-track-id]');
+      const folder = () =>
+        page.evaluate(async () => {
+          const root = await (
+            await (
+              await navigator.storage.getDirectory()
+            ).getDirectoryHandle("picked")
+          ).getDirectoryHandle("Mirages");
+          const document = JSON.parse(
+            await (
+              await (await root.getFileHandle("Mirages.audioui")).getFile()
+            ).text()
+          ) as { format: string; samples: { path: string }[]; version: number };
+          const samples = await root.getDirectoryHandle("Samples");
+          return {
+            document,
+            files: await Array.fromAsync(samples.keys()),
+          };
+        });
+      await page.keyboard.press("Meta+KeyS");
+      await page.getByText("Saved to Mirages").waitFor({ timeout: 10_000 });
+      const first = await folder();
+      assert(
+        first.document.format === "audio-ui-daw" &&
+          first.document.version === 1,
+        `the document reads ${first.document.format} ${first.document.version}`
+      );
+      assert(
+        first.files.join() === "Kick take.wav" &&
+          first.document.samples[0]?.path === "Samples/Kick take.wav",
+        `the folder holds ${first.files.join(", ")}`
+      );
+      await page.keyboard.press("Meta+KeyS");
+      await page.waitForTimeout(1000);
+      assert(
+        (await folder()).files.length === 1,
+        "a second save wrote the sample again"
+      );
+      await page.keyboard.press("Meta+KeyO");
+      await page.getByText("Opened Mirages").waitFor({ timeout: 15_000 });
+      await page.waitForSelector('[aria-label="Kick take"][data-track-id]');
+      await showMixer(page);
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the opened project plays at ${level} dB`);
     },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser

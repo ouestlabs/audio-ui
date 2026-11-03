@@ -23,12 +23,12 @@ Test: apps/daw/test/project.test.ts "PRJ-004"
 **Withdrawn**: a project is made in the app, from audio files dropped on it; another program's set files are not read.
 
 ### PRJ-006 The project folder
-A project on disk is a folder named after it: `<name>.audioui`, the document, and `Samples/`, the audio files it plays, as they were dropped in. The document is UTF-8 JSON with a `format` and a `version` at its top, and names each sample by its path in `Samples/`; a version it does not know is refused with a message, never half read. The decoded audio the engine streams from (G-013) is a cache in the browser's storage, made again from `Samples/` when it is missing.
-Status: planned (phase 2).
+A project on disk is a folder named after it: `<name>.audioui`, the document, and `Samples/`, the audio files it plays, as they were dropped in. The document is UTF-8 JSON with a `format` and a `version` at its top, and names each sample by its path in `Samples/`; a version it does not know is refused with a message, never half read. The decoded audio the engine streams from (G-013) is a cache in the browser's storage, made again from the recording's file when it is missing. A project opened gives its recordings new ids, so they never meet those the page already played; when the page opens again, the caches and files of recordings the project no longer has are let go.
+Test: apps/daw/test/project-file.test.ts "PRJ-006"; apps/daw/test/browser/run.ts "PRJ-006 and PRJ-007"
 
 ### PRJ-007 Open and save on disk
-Cmd+O opens a project folder, Cmd+S saves to the folder the project came from (asking for one the first time), Cmd+Shift+S saves a copy to another folder, which the project then belongs to. A save writes the document and only the samples the folder lacks. Saving to disk is for browsers that can write a folder the user picks (Chromium); elsewhere the project stays in the browser's storage and can be exported.
-Status: planned (phase 2).
+Cmd+O opens a project folder, Cmd+S saves to the folder the project came from (asking for one the first time), Cmd+Shift+S saves a copy to another folder, which the project then belongs to. A save writes the document and only the samples the folder lacks. Saving to disk is for browsers that can write a folder the user picks (Chromium); elsewhere the project stays in the browser's storage and can be exported, and these keys stay the browser's. The folder is remembered across reloads; the first save after one asks the browser's leave to write there again. Opening a folder replaces the project in the browser's storage: the one there before is not kept anywhere else unless it was saved.
+Test: apps/daw/test/project-file.test.ts "PRJ-007"; apps/daw/test/browser/run.ts "PRJ-006 and PRJ-007"
 
 ### PRJ-008 Projects of other DAWs, through DAWproject
 A project goes out as a `.dawproject` file (the open exchange format: a zip of `project.xml`, `metadata.xml` and the audio) and one comes in from it: tracks, clips with their fades and warp, notes, the tempo and time signatures, the mix, sends, and the automation of volume, pan and sends. Its equalizer, compressor, gate and limiter become ours with their settings; any other device is left out, and a report says what was, by track.
