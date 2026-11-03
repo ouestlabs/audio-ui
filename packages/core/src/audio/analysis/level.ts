@@ -31,3 +31,19 @@ export function rmsDb(samples: Float32Array | readonly number[]): number {
     ? gainToDb(Math.sqrt(sum / samples.length))
     : Number.NEGATIVE_INFINITY;
 }
+
+/**
+ * The level in dBFS of the loudest sample of `samples`, either way: how near
+ * the signal comes to clipping, where `rmsDb` says how loud it sounds. 0 dB
+ * for a sample at full scale, `-Infinity` for silence, an empty array, or one
+ * with a sample that is not a number.
+ */
+export function peakDb(samples: Float32Array | readonly number[]): number {
+  let loudest = 0;
+  for (const sample of samples) {
+    loudest = Math.max(loudest, Math.abs(sample));
+  }
+  return Number.isFinite(loudest)
+    ? gainToDb(loudest)
+    : Number.NEGATIVE_INFINITY;
+}

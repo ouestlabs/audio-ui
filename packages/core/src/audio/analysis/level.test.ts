@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { dbToGain, gainToDb, rmsDb } from "./index.ts";
+import { dbToGain, gainToDb, peakDb, rmsDb } from "./index.ts";
 
 describe("dbToGain and gainToDb", () => {
   test("follow the amplitude convention: 20 dB a decade, 6.02 dB a doubling", () => {
@@ -47,5 +47,26 @@ describe("rmsDb", () => {
     expect(rmsDb(new Float32Array(10))).toBe(Number.NEGATIVE_INFINITY);
     expect(rmsDb([])).toBe(Number.NEGATIVE_INFINITY);
     expect(rmsDb([0.5, Number.NaN])).toBe(Number.NEGATIVE_INFINITY);
+  });
+});
+
+describe("peakDb", () => {
+  test("is the loudest sample either way: 0 dB at full scale, 6 dB less at half", () => {
+    expect(peakDb([0.1, -1, 0.5])).toBeCloseTo(0, 9);
+    expect(peakDb([0.25, -0.5, 0.1])).toBeCloseTo(-6.0206, 3);
+  });
+
+  test("reads above the RMS of the same samples, which says how loud they sound", () => {
+    const sine = Array.from({ length: 4800 }, (_, index) =>
+      Math.sin((2 * Math.PI * 100 * index) / 48_000)
+    );
+    expect(peakDb(sine)).toBeCloseTo(0, 2);
+    expect(peakDb(sine) - rmsDb(sine)).toBeCloseTo(3.0103, 1);
+  });
+
+  test("is -Infinity for silence, nothing, or samples that are not numbers", () => {
+    expect(peakDb(new Float32Array(10))).toBe(Number.NEGATIVE_INFINITY);
+    expect(peakDb([])).toBe(Number.NEGATIVE_INFINITY);
+    expect(peakDb([0.5, Number.NaN])).toBe(Number.NEGATIVE_INFINITY);
   });
 });
