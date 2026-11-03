@@ -120,10 +120,7 @@ export function DeviceView({
   }
   return (
     <div className="flex h-full min-h-0 p-2">
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <span className="px-1 text-muted-foreground text-xs">
-          {current.name}
-        </span>
+      <div className="flex min-w-0 flex-1 flex-col">
         <DeviceChain
           className="min-h-0 flex-1 overflow-x-auto"
           onAdd={add}

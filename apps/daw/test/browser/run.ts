@@ -211,8 +211,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await showMixer(page);
       await page.keyboard.press("Home");
       await page.keyboard.press("Space");
-      // The clip loops a bar: its note comes round every two seconds.
-      const level = await loudest(page, 2500);
+      // The clip loops a bar: its note, a sixteenth, comes round every two seconds; listened to twice.
+      const level = await loudest(page, 4500);
       assert(
         level > -50,
         `the main track is near silent while the note plays (${level} dB)`
@@ -230,7 +230,11 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await library.getByRole("button", { name: "Space" }).click();
       await library.getByRole("option", { name: DELAY }).first().dblclick();
       const devices = page.getByRole("region", { name: "Devices" });
-      await devices.getByText("2 Audio").waitFor({ timeout: 5000 });
+      // The panel's bar names the track whose devices it shows.
+      await page
+        .locator("[data-slot=panel-bar]")
+        .getByText("2 Audio")
+        .waitFor({ timeout: 5000 });
       await devices
         .getByText("Delay", { exact: true })
         .waitFor({ timeout: 5000 });
@@ -271,7 +275,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         (await page.getByRole("region", { name: "Devices" }).count()) === 0,
         "the detail view stays open beside the mixer"
       );
-      await page.getByRole("button", { name: DEVICES }).click();
+      await page.getByRole("tab", { name: DEVICES }).click();
       await page.getByRole("region", { name: "Devices" }).waitFor();
       assert(
         (await page.locator('[aria-label="Main level"]').count()) === 0,
@@ -308,7 +312,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const given = await height("Devices");
       await showMixer(page);
       await page.keyboard.press("Meta+Alt+KeyM");
-      await page.getByRole("button", { name: DEVICES }).click();
+      await page.getByRole("tab", { name: DEVICES }).click();
       const back = await height("Devices");
       assert(
         Math.abs(back - given) < 4,
@@ -349,6 +353,32 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     await page.waitForTimeout(100);
     assert(Math.abs((await unit()) - wide) < 2, "X did not go back to the fit");
   },
+  "MIX-015: the panel folds to its strip, by its caret or by its line, and opens again":
+    async (browser) => {
+      const page = await open(browser);
+      const devices = page.getByRole("region", {
+        exact: true,
+        name: "Devices",
+      });
+      await page.getByRole("button", { name: "Fold the panel" }).click();
+      assert((await devices.count()) === 0, "folded, the devices still show");
+      await page.getByRole("button", { name: "Open the panel" }).click();
+      await devices.waitFor();
+      // Dragged under the view's least height, the line folds it to its strip.
+      const box = await page
+        .locator("[data-slot=resizable-handle]")
+        .boundingBox();
+      assert(box, "the line is there");
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width / 2, box.y + 600, { steps: 8 });
+      await page.mouse.up();
+      await page.getByRole("button", { name: "Open the panel" }).waitFor();
+      assert(
+        (await devices.count()) === 0,
+        "dragged down, the devices still show"
+      );
+    },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

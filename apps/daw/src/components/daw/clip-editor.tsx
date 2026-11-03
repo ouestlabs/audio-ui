@@ -1,6 +1,6 @@
 import type { Note } from "@audio-ui/core/piano-roll";
 import { secondsPerBar, secondsPerBeat } from "@audio-ui/core/time";
-import { useCallback } from "react";
+import { type ReactNode, useCallback } from "react";
 import { ClipPanel, type ClipSettings } from "@/components/audio-ui/clip-panel";
 import {
   MidiClipPanel,
@@ -61,6 +61,7 @@ function withSettings(
  * change is a command of the arrangement, a drag one step of undo.
  */
 export function ClipEditor({
+  actions,
   arrangement,
   clip,
   collapsed,
@@ -70,6 +71,8 @@ export function ClipEditor({
   onFoldedChange,
   recordings,
 }: {
+  /** What the clip view's strip carries at its end, such as the tabs of the panel it is in. */
+  actions?: ReactNode;
   arrangement: Arrangement;
   clip: Arranged;
   /** Whether the panel is rolled up to its strip: the host's, so it stays so from clip to clip. */
@@ -177,7 +180,9 @@ export function ClipEditor({
           offset: clip.value.offset,
           sourceLength: clip.sourceLength,
         }}
-      />
+      >
+        {actions}
+      </MidiClipPanel>
     );
   }
   const recording = clip.recording ? recordings.get(clip.recording) : undefined;
@@ -200,6 +205,8 @@ export function ClipEditor({
       onValueCommitted={settle}
       value={settingsOf(clip)}
       values={recording ? sourcePeaks(clip, recording) : []}
-    />
+    >
+      {actions}
+    </ClipPanel>
   );
 }

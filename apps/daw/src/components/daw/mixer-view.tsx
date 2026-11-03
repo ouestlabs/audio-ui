@@ -152,7 +152,7 @@ function Strip({
       )}
       onPointerDown={select}
     >
-      <span className="row-start-1 w-full truncate text-center font-medium text-xs">
+      <span className="row-start-1 min-h-4 w-full truncate text-center font-medium text-xs">
         {track.name}
       </span>
       {sends ? (
@@ -284,10 +284,11 @@ export function MixerView({
   );
   return (
     // One grid for every channel, each a subgrid of its six rows (name, sends, pan, fader, level, switches): what one
-    // channel lacks leaves its row empty, so every fader starts and ends level, and the faders take the height there is.
+    // channel lacks leaves its row empty, so every fader starts and ends level; the faders take the height there is,
+    // and never less than a fader's own least, 10rem.
     <div
       aria-label="Mixer"
-      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(7rem,1fr)_auto_auto] gap-x-2 gap-y-2 overflow-auto p-2"
+      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(10rem,1fr)_auto_auto] gap-x-2 gap-y-2 overflow-auto p-2"
       role="group"
     >
       {doc.tracks.map((track) => strip(track, false, true))}

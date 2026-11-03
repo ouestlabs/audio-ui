@@ -1,5 +1,6 @@
 import { secondsPerBar, type Tempo } from "@audio-ui/core/time";
 import {
+  type ReactNode,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -7,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { usePanelRef } from "react-resizable-panels";
 import { toast } from "sonner";
 import { ArrangementView } from "@/components/daw/arrangement-view";
 import { ClipEditor } from "@/components/daw/clip-editor";
@@ -14,6 +16,11 @@ import { DeviceView } from "@/components/daw/device-view";
 import { EngineLine } from "@/components/daw/engine-line";
 import { LibraryPanel } from "@/components/daw/library-panel";
 import { MixerView } from "@/components/daw/mixer-view";
+import {
+  PanelBar,
+  PanelTabs,
+  type PanelView,
+} from "@/components/daw/panel-strip";
 import { TopBar } from "@/components/daw/top-bar";
 import {
   ResizableHandle,
@@ -21,13 +28,15 @@ import {
   ResizablePanelGroup,
 } from "@/components/ui/resizable";
 import { Toaster } from "@/components/ui/sonner";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useTimelineGrid } from "@/hooks/use-timeline-grid";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import type { Arranged, ArrangementTrack } from "@/lib/arrangement";
 import { renderArrangement } from "@/lib/arrangement-engine";
-import type { ArrangementDoc } from "@/lib/arrangement-state";
+import { type ArrangementDoc, trackOf } from "@/lib/arrangement-state";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
 import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
 import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
@@ -37,6 +46,30 @@ import { canStore, saveProject, saveRecording } from "@/lib/daw/storage";
 import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
+
+/** Neither panel scrolls: the timeline and the views scroll inside themselves, and a size rounded under the bar's height shows no scrollbar. The library styles a panel's inner div to scroll, and its `style` comes after. */
+const UNSCROLLED = { overflow: "hidden" } as const;
+
+/** The panel under the arrangement folded: its strip alone. */
+const STRIP = "2.25rem";
+/** The least height of each view of that panel, its strip included: under it, what it shows is cut off. */
+const LEAST: Record<PanelView, string> = {
+  clip: "15rem",
+  devices: "25rem",
+  mixer: "26rem",
+};
+
+/** What the panel's bar names: the clip it holds, folded, or the track whose devices it shows; the mixer, nothing. */
+function titleOf(
+  view: PanelView,
+  clip: Arranged | undefined,
+  track: ArrangementTrack | undefined
+) {
+  if (view === "mixer") {
+    return;
+  }
+  return (view === "clip" ? clip?.name : undefined) ?? track?.name;
+}
 
 /** How long after a change the project is saved (PRJ-001: within a second). */
 const SAVE_MS = 500;
@@ -89,59 +122,80 @@ export function Daw({ initial, initialRecordings }: DawProps) {
   const [selectedTrack, setSelectedTrack] = useState<string | null>(
     initial.tracks[0]?.id ?? null
   );
-  // Under the arrangement, the detail view or the mixer, one at a time: both would leave the tracks no room.
-  const [panel, setPanel] = useState<"detail" | "mixer" | null>("detail");
-  const mixerOpen = panel === "mixer";
-  const detailOpen = panel === "detail";
-  // How tall each is, in px: a height dragged is kept for the next time it opens.
-  const panelHeights = useRef({ detail: 288, mixer: 416 });
-  const keepHeight = useCallback(
-    (size: { inPixels: number }) => {
-      if (panel) {
-        panelHeights.current[panel] = size.inPixels;
-      }
-    },
-    [panel]
-  );
-  // The clip panel rolled up and its boxes folded, held here so they stay from clip to clip.
-  const [clipRolled, setClipRolled] = useState(false);
-  const [clipFolded, setClipFolded] = useState<string[]>([]);
-  const setMixerOpen = useCallback(
-    (open: boolean) =>
-      setPanel((current) => {
-        if (open) {
-          return "mixer";
-        }
-        return current === "mixer" ? null : current;
-      }),
-    []
-  );
-  const setDetailOpen = useCallback(
-    (open: boolean) =>
-      setPanel((current) => {
-        if (open) {
-          return "detail";
-        }
-        return current === "detail" ? null : current;
-      }),
-    []
-  );
-  // What the detail view shows: the selected clip, or the selected track's devices (KEY-022).
-  const [detail, setDetail] = useState<"clip" | "devices">("devices");
+  // Under the arrangement, one panel (MIX-015): the selected clip, the selected track's devices, or the mixer. Like
+  // the library, it is always there, folded to its strip or open, its height shared with the tracks by the line above.
+  const [panelView, setPanelView] = useState<PanelView>("devices");
+  const [folded, setFolded] = useState(false);
+  const panelRef = usePanelRef();
   const [single] =
     arrangement.selectedIds.length === 1 ? arrangement.selectedIds : [];
   const selectedClip = single
     ? doc.clips.find((clip) => clip.id === single)
     : undefined;
-  // Picking a clip shows it; picking a track shows its devices.
+  // The clip view shows the selected clip: with none, the devices.
+  const shown = panelView === "clip" && !selectedClip ? "devices" : panelView;
+  // How tall each view is, in px: a height dragged is kept for the next time it shows.
+  const viewHeights = useRef<Record<PanelView, number>>({
+    clip: 288,
+    devices: 400,
+    mixer: 416,
+  });
+  // Folded by the line dragged under the view's least height, or opened by dragging it up.
+  const keepHeight = useCallback(
+    (size: { inPixels: number }) => {
+      const collapsed = panelRef.current?.isCollapsed() ?? false;
+      setFolded(collapsed);
+      if (!collapsed) {
+        viewHeights.current[shown] = size.inPixels;
+      }
+    },
+    [panelRef, shown]
+  );
+  const foldPanel = useCallback(
+    (fold: boolean) => {
+      setFolded(fold);
+      if (fold) {
+        panelRef.current?.collapse();
+      } else {
+        panelRef.current?.resize(viewHeights.current[shown]);
+      }
+    },
+    [panelRef, shown]
+  );
+  /** Shows a view, the panel open on it. */
+  const showView = useCallback(
+    (next: PanelView) => {
+      setPanelView(next);
+      foldPanel(false);
+    },
+    [foldPanel]
+  );
+  const pickView = useCallback(
+    (value: unknown) => showView(value as PanelView),
+    [showView]
+  );
+  /** A view's key: shows it, or folds the panel when it is what is open. */
+  const togglePanel = useCallback(
+    (next: PanelView) => {
+      if (shown === next && !folded) {
+        foldPanel(true);
+      } else {
+        showView(next);
+      }
+    },
+    [foldPanel, folded, showView, shown]
+  );
+  // The clip panel's boxes folded, held here so they stay from clip to clip.
+  const [clipFolded, setClipFolded] = useState<string[]>([]);
+  // Picking a clip shows it, picking a track its devices, the mixer left where it is.
   useEffect(() => {
     if (single) {
-      setDetail("clip");
+      setPanelView((current) => (current === "mixer" ? current : "clip"));
     }
   }, [single]);
   const pickTrack = useCallback((id: string) => {
     setSelectedTrack(id);
-    setDetail("devices");
+    setPanelView((current) => (current === "mixer" ? current : "devices"));
   }, []);
   // The library on the left (KEY-021), and its search, which the end of a chain focuses.
   const [libraryOpen, setLibraryOpen] = useState(true);
@@ -156,11 +210,11 @@ export function Daw({ initial, initialRecordings }: DawProps) {
       const made = addDeviceCommand(doc, device, onto);
       if (made) {
         dispatch(made.command);
-        pickTrack(made.track);
-        setDetailOpen(true);
+        setSelectedTrack(made.track);
+        showView("devices");
       }
     },
-    [dispatch, doc, pickTrack, setDetailOpen]
+    [dispatch, doc, showView]
   );
   const pickDevice = useCallback(
     (device: string) => placeDevice(device, selectedTrack),
@@ -193,9 +247,9 @@ export function Daw({ initial, initialRecordings }: DawProps) {
         },
         type: "add-clip",
       });
-      setDetailOpen(true);
+      showView("clip");
     },
-    [dispatch, doc.clips, doc.tempo, setDetailOpen]
+    [dispatch, doc.clips, doc.tempo, showView]
   );
   const [exporting, setExporting] = useState(false);
   const [saved, setSaved] = useState(
@@ -356,13 +410,16 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     }
   }, [doc, sources]);
 
-  // The view's keys: the grid, and the zoom around the playhead, onto the selection and back.
+  // The view's keys: the grid, the zoom around the playhead, onto the selection and back, and what the panels show.
   const viewKeys: Partial<Record<ShortcutCommand, () => void>> = {
+    detail: () => showView(shown === "clip" ? "devices" : "clip"),
     "grid-finer": () => grid.change("finer"),
     "grid-fixed": () => grid.change("fixed"),
     "grid-snap": () => grid.change("snap"),
     "grid-triplet": () => grid.change("triplet"),
     "grid-wider": () => grid.change("wider"),
+    library: () => setLibraryOpen((open) => !open),
+    mixer: () => togglePanel("mixer"),
     "zoom-back": view.zoomBack,
     "zoom-in": () => view.zoomAround(position.getSnapshot(), 2),
     "zoom-out": () => view.zoomAround(position.getSnapshot(), 0.5),
@@ -440,16 +497,6 @@ export function Daw({ initial, initialRecordings }: DawProps) {
         case "select-all":
           dispatch({ type: "select-all" });
           break;
-        case "mixer":
-          setPanel((current) => (current === "mixer" ? null : "mixer"));
-          break;
-        case "library":
-          setLibraryOpen((open) => !open);
-          break;
-        case "detail":
-          setDetail((shown) => (shown === "clip" ? "devices" : "clip"));
-          setDetailOpen(true);
-          break;
         case "export":
           exportWav();
           break;
@@ -468,7 +515,6 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     exportWav,
     playFrom,
     seek,
-    setDetailOpen,
   ]);
 
   // Saved as you go (PRJ-001): the document, and which recordings it keeps.
@@ -492,33 +538,58 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     return () => clearTimeout(timer);
   }, [doc, recordings]);
 
-  const clipEditor =
-    detailOpen && detail === "clip" && selectedClip ? (
-      <ClipEditor
-        arrangement={arrangement}
-        clip={selectedClip}
-        collapsed={clipRolled}
-        engine={engine}
-        folded={clipFolded}
-        onCollapsedChange={setClipRolled}
-        onFoldedChange={setClipFolded}
-        recordings={recordings}
-      />
-    ) : null;
-  const rolledUp = clipEditor !== null && clipRolled;
+  const panelTitle = titleOf(
+    shown,
+    selectedClip,
+    selectedTrack ? trackOf(doc, selectedTrack) : undefined
+  );
+  // What the panel holds, open: the clip view's own caret folds the panel to its bar.
+  let content: ReactNode;
+  if (shown === "mixer") {
+    content = (
+      <section aria-label="Mixer" className="h-full bg-muted/30">
+        <MixerView
+          arrangement={arrangement}
+          engine={engine}
+          onSelectTrack={pickTrack}
+          selectedTrack={selectedTrack}
+        />
+      </section>
+    );
+  } else {
+    content = (
+      <section aria-label="Devices" className="h-full">
+        {shown === "clip" && selectedClip ? (
+          <ClipEditor
+            actions={<PanelTabs clipAvailable />}
+            arrangement={arrangement}
+            clip={selectedClip}
+            collapsed={false}
+            engine={engine}
+            folded={clipFolded}
+            onCollapsedChange={foldPanel}
+            onFoldedChange={setClipFolded}
+            recordings={recordings}
+          />
+        ) : (
+          <DeviceView
+            arrangement={arrangement}
+            onOpenLibrary={openLibrary}
+            track={selectedTrack}
+          />
+        )}
+      </section>
+    );
+  }
 
   return (
     <TooltipProvider>
       <div className="flex h-svh flex-col">
         <TopBar
-          detailOpen={detailOpen}
           exporting={exporting}
           looping={doc.loop.on}
-          mixerOpen={mixerOpen}
-          onDetailOpenChange={setDetailOpen}
           onExport={exportWav}
           onLoopingChange={setLooping}
-          onMixerOpenChange={setMixerOpen}
           onPlayPause={playPause}
           onStop={stop}
           onTempoChange={setTempo}
@@ -543,6 +614,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
                 className="flex flex-col"
                 id="arrangement"
                 minSize="8rem"
+                style={UNSCROLLED}
               >
                 <ArrangementView
                   arrangement={arrangement}
@@ -560,51 +632,43 @@ export function Daw({ initial, initialRecordings }: DawProps) {
                   viewportRef={viewportRef}
                 />
               </ResizablePanel>
-              {panel && !rolledUp ? (
-                <>
-                  <ResizableHandle />
-                  <ResizablePanel
-                    defaultSize={`${panelHeights.current[panel]}px`}
-                    groupResizeBehavior="preserve-pixel-size"
-                    id={panel}
-                    key={panel}
-                    maxSize="85%"
-                    minSize="9rem"
-                    onResize={keepHeight}
-                  >
-                    {mixerOpen ? (
-                      <section
-                        aria-label="Mixer"
-                        className="h-full bg-muted/30"
-                      >
-                        <MixerView
-                          arrangement={arrangement}
-                          engine={engine}
-                          onSelectTrack={pickTrack}
-                          selectedTrack={selectedTrack}
-                        />
-                      </section>
-                    ) : (
-                      <section aria-label="Devices" className="h-full">
-                        {clipEditor ?? (
-                          <DeviceView
-                            arrangement={arrangement}
-                            onOpenLibrary={openLibrary}
-                            track={selectedTrack}
-                          />
-                        )}
-                      </section>
-                    )}
-                  </ResizablePanel>
-                </>
-              ) : null}
+              <ResizableHandle />
+              <ResizablePanel
+                className="flex flex-col"
+                collapsedSize={STRIP}
+                collapsible
+                defaultSize={folded ? STRIP : `${viewHeights.current[shown]}px`}
+                groupResizeBehavior="preserve-pixel-size"
+                id={shown}
+                key={shown}
+                maxSize="70%"
+                minSize={LEAST[shown]}
+                onResize={keepHeight}
+                panelRef={panelRef}
+                style={UNSCROLLED}
+              >
+                {/* One bar: the clip view's own strip carries the tabs while it shows a clip. */}
+                <Tabs
+                  className="h-full gap-0"
+                  onValueChange={pickView}
+                  value={shown}
+                >
+                  {folded || shown !== "clip" ? (
+                    <PanelBar
+                      clipAvailable={selectedClip !== undefined}
+                      folded={folded}
+                      onFoldedChange={foldPanel}
+                      title={panelTitle}
+                    />
+                  ) : null}
+                  {folded ? null : (
+                    <TabsContent className="min-h-0" value={shown}>
+                      {content}
+                    </TabsContent>
+                  )}
+                </Tabs>
+              </ResizablePanel>
             </ResizablePanelGroup>
-            {/* Rolled up, the clip panel is its strip alone: nothing to drag. */}
-            {rolledUp ? (
-              <section aria-label="Devices" className="shrink-0 border-t">
-                {clipEditor}
-              </section>
-            ) : null}
           </main>
         </div>
         <EngineLine saved={saved} status={engine.status} />

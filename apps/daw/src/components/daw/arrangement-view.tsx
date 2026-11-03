@@ -421,10 +421,7 @@ export function ArrangementView({
                   >
                     {grid.label}
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent
-                    align="start"
-                    className="w-auto min-w-48"
-                  >
+                  <DropdownMenuContent align="start">
                     <TimelineGridMenuItems
                       division={grid.division}
                       divisions={GRID_DIVISION_OPTIONS}
@@ -554,7 +551,7 @@ export function ArrangementView({
                     <PlusIcon aria-hidden="true" />
                     Add track
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-auto min-w-52">
+                  <DropdownMenuContent>
                     <DropdownMenuItem onClick={addAudio}>
                       Audio track
                       <DropdownMenuShortcut>Ctrl T</DropdownMenuShortcut>

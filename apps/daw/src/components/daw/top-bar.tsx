@@ -1,12 +1,8 @@
 import type { Tempo } from "@audio-ui/core/time";
 import type { Source } from "@audio-ui/react";
-import {
-  DownloadSimpleIcon,
-  FadersIcon,
-  SquaresFourIcon,
-} from "@phosphor-icons/react";
+import { DownloadSimpleIcon } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
-import { type ReactNode, useCallback } from "react";
+import type { ReactNode } from "react";
 import { Transport } from "@/components/audio-ui/transport";
 import { AudioUiIcon } from "@/components/site/audio-ui-icon";
 import { ModeSwitcher } from "@/components/site/mode-switcher";
@@ -55,14 +51,10 @@ function BarButton({
 }
 
 export interface TopBarProps {
-  detailOpen: boolean;
   exporting: boolean;
   looping: boolean;
-  mixerOpen: boolean;
-  onDetailOpenChange: (open: boolean) => void;
   onExport: () => void;
   onLoopingChange: (looping: boolean) => void;
-  onMixerOpenChange: (open: boolean) => void;
   onPlayPause: () => void;
   onStop: () => void;
   onTempoChange: (tempo: Tempo) => void;
@@ -71,18 +63,8 @@ export interface TopBarProps {
   tempo: Tempo;
 }
 
-/** The bar on top: the brand, as the lab has it, the transport, what is shown, and the export. */
+/** The bar on top: the brand, as the lab has it, the transport, and the export. */
 export function TopBar(props: TopBarProps) {
-  const { detailOpen, mixerOpen, onDetailOpenChange, onMixerOpenChange } =
-    props;
-  const toggleDetail = useCallback(
-    () => onDetailOpenChange(!detailOpen),
-    [detailOpen, onDetailOpenChange]
-  );
-  const toggleMixer = useCallback(
-    () => onMixerOpenChange(!mixerOpen),
-    [mixerOpen, onMixerOpenChange]
-  );
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b px-3">
       <Button
@@ -120,20 +102,6 @@ export function TopBar(props: TopBarProps) {
         tempo={props.tempo}
       />
       <div className="flex shrink-0 items-center gap-2">
-        <BarButton
-          label="Devices (Shift Tab)"
-          onClick={toggleDetail}
-          pressed={detailOpen}
-        >
-          <SquaresFourIcon aria-hidden="true" />
-        </BarButton>
-        <BarButton
-          label="Mixer (Cmd Option M)"
-          onClick={toggleMixer}
-          pressed={mixerOpen}
-        >
-          <FadersIcon aria-hidden="true" />
-        </BarButton>
         <BarButton
           disabled={props.exporting}
           label="Export WAV (Cmd Shift R)"
