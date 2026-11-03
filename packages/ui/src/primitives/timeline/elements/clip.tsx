@@ -33,7 +33,9 @@ const describeNumber: DescribePosition = (value) =>
 /**
  * A stretch of a source laid on a lane: a recording, a pattern. Dragging its
  * `Timeline.ClipHeader` moves it, on the grid unless Cmd/Ctrl is held, and
- * over other lanes too (the change says which one is under the pointer);
+ * over other lanes too (the change says which one is under the pointer, or
+ * the nearest when it is off them); held near an edge of the view, a move or
+ * a trim scrolls it, and a move scrolls down to the lanes below too;
  * pressing its body selects it and puts the cursor there. Add a
  * `Timeline.ClipHandle` per edge to trim it, which moves where in the source
  * it begins instead of stretching it, and a `Timeline.ClipFadeHandle` per

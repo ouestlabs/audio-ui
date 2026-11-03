@@ -23,8 +23,9 @@ function layoutScale(element: HTMLElement) {
  * The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a
  * trackpad) zooms around the pointer; a bare wheel scrolls as usual. Every
  * zoom change keeps its anchor point in place, or the middle of the view when
- * there is none. It reports its scroll offset and
- * width for `Timeline.Navigator`. Renders a `<div>` element.
+ * there is none. A clip moved or trimmed with the pointer held near its edges
+ * scrolls it. It reports its scroll offset and width for
+ * `Timeline.Navigator`. Renders a `<div>` element.
  */
 export function Viewport(componentProps: Viewport.Props) {
   const { className, ref, render, style, ...elementProps } = componentProps;
@@ -200,7 +201,12 @@ export function Viewport(componentProps: Viewport.Props) {
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
-      { onScroll: handleScroll, style: { overflowX: "auto" } },
+      // What a clip dragged near its edges scrolls, and finds its lanes in.
+      {
+        "data-timeline-viewport": "",
+        onScroll: handleScroll,
+        style: { overflowX: "auto" },
+      } as React.ComponentProps<"div">,
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
     ref: ref ? [ref, elementRef] : elementRef,

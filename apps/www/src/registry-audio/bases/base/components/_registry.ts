@@ -434,7 +434,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
-      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll. MIDI tracks hold MIDI clips that draw their notes, play through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. In automation mode each track draws an envelope of its volume or pan over its clips, which a MIDI track's own channel follows as it plays. Open it at full size and the tracks take the screen",
+      "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following its clock, and a navigator to zoom and scroll. MIDI tracks hold MIDI clips that draw their notes, play through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. Drop an audio file on an audio track for a clip of it, as long as the file, with its waveform in the clip panel; a clip dragged near an edge of the view scrolls it. In automation mode each track draws an envelope of its volume or pan over its clips, which a MIDI track's own channel follows as it plays. Open it at full size and the tracks take the screen",
     files: [
       {
         path: "components/timeline/block-timeline.tsx",
@@ -442,7 +442,7 @@ export const components: RegistryItem[] = [
       },
     ],
     meta: {
-      hint: "Click a track or clip to place the cursor, S to split, Cmd/Ctrl + D to duplicate. Drag a clip's title bar to move it (Alt to copy), its edges to trim, its corners to fade. Drag the loop strip to set a loop, M to add a locator, A for the automation, Cmd/Ctrl + scroll to zoom.",
+      hint: "Click a track or clip to place the cursor, S to split, Cmd/Ctrl + D to duplicate. Drag a clip's title bar to move it (Alt to copy), its edges to trim, its corners to fade. Drag the loop strip to set a loop, M to add a locator, A for the automation, Cmd/Ctrl + scroll to zoom. Drop an audio file on an audio track.",
     },
     name: "block-timeline",
     dependencies: ["@audio-ui/core", "@audio-ui/icons"],
@@ -463,6 +463,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/track-automation",
       "@audio-ui/use-track-reorder",
       "@audio-ui/use-midi-playback",
+      "@audio-ui/audio-decode",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/context-menu",

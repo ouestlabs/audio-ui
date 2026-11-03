@@ -1,3 +1,8 @@
+import {
+  createEdgeScroll,
+  screenScale,
+  scrollParent,
+} from "../../dom/edge-scroll.ts";
 import { followPointer } from "../../dom/gesture.ts";
 import {
   type ChangeEventDetails,
@@ -163,6 +168,67 @@ export function laneUnder(event: PointerEvent): Element | null {
     elements?.find((element) => element.hasAttribute("data-timeline-lane")) ??
     null
   );
+}
+
+/**
+ * The lane a moved clip is over: the one under the pointer or, off the lanes
+ * (over a track header, the ruler, or past the last lane, where a drag ends up
+ * after scrolling to the bottom), the nearest of the timeline's lanes above or
+ * below it.
+ */
+function laneAt(event: PointerEvent, scope: Element | null): Element | null {
+  const under = laneUnder(event);
+  if (under || !scope) {
+    return under;
+  }
+  let nearest: Element | null = null;
+  let best = Number.POSITIVE_INFINITY;
+  for (const lane of scope.querySelectorAll("[data-timeline-lane]")) {
+    const box = lane.getBoundingClientRect();
+    const distance = Math.max(
+      box.top - event.clientY,
+      event.clientY - box.bottom,
+      0
+    );
+    if (distance < best) {
+      best = distance;
+      nearest = lane;
+    }
+  }
+  return nearest;
+}
+
+/**
+ * The views a drag from `handle` scrolls near their edges: the timeline's own
+ * across, its edge zone starting after the track headers that stay at its
+ * start, and, for a move, the nearest view that scrolls down.
+ */
+function edgeViews(
+  view: HTMLElement | null,
+  handle: Element,
+  lane: Element | null,
+  vertical: boolean
+) {
+  const across =
+    view && view.scrollWidth > view.clientWidth
+      ? {
+          // Where the lanes begin in what scrolls, in client px: the headers cover what is before.
+          covered: lane
+            ? Math.max(
+                0,
+                lane.getBoundingClientRect().left -
+                  view.getBoundingClientRect().left +
+                  view.scrollLeft * screenScale(view)
+              )
+            : 0,
+          element: view,
+        }
+      : null;
+  const down = vertical ? scrollParent(handle, "y") : null;
+  return {
+    x: across,
+    y: down ? { element: down } : null,
+  };
 }
 
 /** The new clip a drag of `target` makes, when the pointer has moved by `delta` units. */
@@ -456,43 +522,61 @@ export function createClipController(initial: ClipOptions): ClipController {
     select(event);
     dragging = true;
     notify();
+    // The timeline's own view holds every lane of it: where a clip moved off them finds the nearest.
+    const view = handle.closest<HTMLElement>("[data-timeline-viewport]");
+    let last = event;
+    /** Puts the clip where the pointer is, the views' scroll since the press counted in: it stays under the pointer while they scroll. */
+    const place = (move: PointerEvent) => {
+      const units = unitsPerPixel(lane);
+      const shift = edges.shift();
+      const delta = (move.clientX - started.startX + shift.x) * units;
+      // The clip's own edges are not places for it to snap to.
+      const grid = bypassesGrid(move)
+        ? { offset: 0, step: 0 }
+        : withSnapRadius(
+            withoutSnapPoints(options.grid, [
+              started.origin.start,
+              clipEnd(started.origin),
+            ]),
+            units * SNAP_RADIUS_PX
+          );
+      const next = draggedClip(target, started.origin, delta, grid, limits());
+      if (target === "move") {
+        setDragOffset(move.clientY - started.startY + shift.y);
+      }
+      const details = Object.assign(createChangeEventDetails("drag", move), {
+        copy: started.copy,
+        delta:
+          target === "move" ? next.start - started.origin.start : undefined,
+        lane: target === "move" ? laneAt(move, view) : undefined,
+        target,
+      }) as ClipChangeEventDetails;
+      if (change(next, details)) {
+        started.changed = true;
+      }
+    };
+    // A move or a trim taken near an edge of the view scrolls it, and a move scrolls down to the lanes below too.
+    const edges = createEdgeScroll(
+      target === "move" || target === "trim-start" || target === "trim-end"
+        ? edgeViews(view, handle, lane, target === "move")
+        : {},
+      () => place(last)
+    );
     followPointer(
       handle,
       event.pointerId,
       (move) => {
-        const units = unitsPerPixel(lane);
-        const delta = (move.clientX - started.startX) * units;
-        // The clip's own edges are not places for it to snap to.
-        const grid = bypassesGrid(move)
-          ? { offset: 0, step: 0 }
-          : withSnapRadius(
-              withoutSnapPoints(options.grid, [
-                started.origin.start,
-                clipEnd(started.origin),
-              ]),
-              units * SNAP_RADIUS_PX
-            );
-        const next = draggedClip(target, started.origin, delta, grid, limits());
-        if (target === "move") {
-          setDragOffset(move.clientY - started.startY);
-        }
-        const details = Object.assign(createChangeEventDetails("drag", move), {
-          copy: started.copy,
-          delta:
-            target === "move" ? next.start - started.origin.start : undefined,
-          lane: target === "move" ? laneUnder(move) : undefined,
-          target,
-        }) as ClipChangeEventDetails;
-        if (change(next, details)) {
-          started.changed = true;
-        }
+        last = move;
+        edges.follow(move.clientX, move.clientY);
+        place(move);
       },
       (end) => {
+        edges.stop();
         const finished = gesture;
         gesture = null;
         // Read before settling: the clip falls back to the known value after.
         const committed = current();
-        const dropLane = target === "move" ? laneUnder(end) : undefined;
+        const dropLane = target === "move" ? laneAt(end, view) : undefined;
         setDragging(false);
         const didChange = finished?.changed ?? false;
         if (didChange || (dropLane && dropLane !== started.originLane)) {
