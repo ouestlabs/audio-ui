@@ -10,7 +10,6 @@ import {
   ArrowArcRightIcon,
   ArrowCounterClockwiseIcon,
   DotsThreeIcon,
-  DownloadSimpleIcon,
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
 } from "@phosphor-icons/react";
@@ -245,13 +244,6 @@ export function TopBar(props: TopBarProps) {
         >
           <EnvelopeIcon aria-hidden="true" />
         </BarButton>
-        <BarButton
-          disabled={props.exporting}
-          label="Export WAV (Cmd Shift R)"
-          onClick={props.onExport}
-        >
-          <DownloadSimpleIcon aria-hidden="true" />
-        </BarButton>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -287,6 +279,13 @@ export function TopBar(props: TopBarProps) {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={props.onExportDawproject}>
               Export DAWproject…
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={props.exporting}
+              onClick={props.onExport}
+            >
+              Export WAV
+              <DropdownMenuShortcut>⇧⌘R</DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuRadioGroup

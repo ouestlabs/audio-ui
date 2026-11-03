@@ -280,7 +280,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await dropChord(page, "[data-add-track]", "Chord take", 2);
       await page.waitForSelector('[aria-label="Chord take"][data-track-id]');
       const download = page.waitForEvent("download", { timeout: 30_000 });
-      await page.getByRole("button", { name: EXPORT }).click();
+      await page.getByRole("button", { name: "More controls" }).click();
+      await page.getByRole("menuitem", { name: EXPORT }).click();
       const file = await (await download).path();
       const bytes = new DataView(await Bun.file(file).arrayBuffer());
       const channels = bytes.getUint16(22, true);
@@ -749,7 +750,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       .evaluate((element) => (element as HTMLElement).style.width);
     const expected = Number(UNITS.exec(width)?.[1]);
     const download = page.waitForEvent("download", { timeout: 30_000 });
-    await page.getByRole("button", { name: EXPORT }).click();
+    await page.getByRole("button", { name: "More controls" }).click();
+    await page.getByRole("menuitem", { name: EXPORT }).click();
     const file = await (await download).path();
     const bytes = new DataView(await Bun.file(file).arrayBuffer());
     const seconds =

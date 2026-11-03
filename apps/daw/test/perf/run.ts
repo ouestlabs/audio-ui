@@ -601,7 +601,8 @@ const measures: Record<string, (browser: Browser) => Promise<string[]>> = {
     });
     const download = page.waitForEvent("download", { timeout: 600_000 });
     const started = performance.now();
-    await page.getByRole("button", { name: EXPORT }).click();
+    await page.getByRole("button", { name: "More controls" }).click();
+    await page.getByRole("menuitem", { name: EXPORT }).click();
     await download;
     const seconds = (performance.now() - started) / 1000;
     return [
