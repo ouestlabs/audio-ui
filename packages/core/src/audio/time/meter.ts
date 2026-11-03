@@ -5,6 +5,7 @@
  * as a DAW shows it. Positions are seconds, at one tempo.
  */
 
+import { type MetronomeRhythm, metronomeRhythmSeconds } from "./grid.ts";
 import { type BarsBeats, secondsPerQuarter, type Tempo } from "./tempo.ts";
 
 /** A new signature from `at` on, in seconds: `beatsPerBar` beats of a `beatUnit` note. */
@@ -105,6 +106,41 @@ export function barsOf(
     }
   });
   return bars;
+}
+
+/** A click of a metronome. */
+export interface MetronomeClick {
+  /** Whether it is the first of its bar. */
+  accent: boolean;
+  /** When it plays, in seconds. */
+  at: number;
+}
+
+/**
+ * The clicks of a metronome from 0 to `until` seconds, through the signature
+ * changes. `auto` clicks on each beat of the signature in force, `1-bar` once a
+ * bar, whatever its length, and any other rhythm at its own interval, which
+ * each bar starts again. The first click of a bar is accented.
+ */
+export function metronomeClicks(
+  tempo: Tempo,
+  changes: readonly SignatureChange[],
+  until: number,
+  rhythm: MetronomeRhythm = "auto"
+): MetronomeClick[] {
+  const interval =
+    rhythm === "1-bar" ? null : metronomeRhythmSeconds(rhythm, tempo);
+  const clicks: MetronomeClick[] = [];
+  for (const bar of barsOf(tempo, changes, until)) {
+    const whole = barSeconds(tempo, bar.beatsPerBar, bar.beatUnit);
+    const beats = rhythm === "1-bar" ? 1 : bar.beatsPerBar;
+    const step = interval ?? whole / beats;
+    const end = Math.min(bar.start + bar.length, until) - SLIVER;
+    for (let index = 0; bar.start + index * step < end; index += 1) {
+      clicks.push({ accent: index === 0, at: bar.start + index * step });
+    }
+  }
+  return clicks;
 }
 
 /** Where `seconds` falls in bars, beats and sixteenths through the signature changes, each counted from one. */

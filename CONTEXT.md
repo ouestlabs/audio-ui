@@ -40,6 +40,10 @@ _Avoid_: scheduler (bare: say the core or the clock), timer, metronome
 Everything laid out in time, as one document a host stores and saves: the tracks with their mixes and automation, the clips on them, the tempo, the time signatures, the locators, the loop and its own length. What is selected or copied is not part of it.
 _Avoid_: project (the host's whole saved file), song
 
+**Recording**:
+The audio a clip plays, decoded once and kept by id: an audio clip names its recording, and every piece cut from the clip plays the same one. Its own sample rate travels with it.
+_Avoid_: sample (the file, or one value of it), buffer, source (a live source is something else)
+
 **Reach**:
 How far a clip can be stretched on the timeline: without end when it loops, as far as its warp stretches its source when it is warped, otherwise the length of its source. It belongs to the clip, so laying another clip over it never changes it.
 _Avoid_: extent, span, source length (the recording alone)
