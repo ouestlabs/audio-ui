@@ -55,3 +55,11 @@ Test: apps/daw/test/browser/run.ts "ARR-012"
 ### ARR-013 Automation
 A shows or hides the automation: each track's lane draws the envelope of its volume or its pan, chosen in its header, over its clips. A double-click adds a point, a drag moves one, and what is drawn is what plays. A volume or a pan moved by hand stops following its envelope and plays the value it was moved to, drawn greyed, until "Re-enable automation", or until that envelope is drawn again.
 Test: apps/www/test/registry-audio/base/hooks/use-track-automation.test.tsx; apps/daw/test/browser/run.ts "ARR-013"
+
+### ARR-014 Selecting time
+A drag across bare lanes selects a stretch of time, from the track it began on to the track under the pointer, on the grid when it snaps. Cmd+C and Cmd+X copy and cut it (the selected clips with no time selected), Cmd+V pastes at the cursor, Cmd+D puts it again right after itself and moves the selection onto the copy, Cmd+J makes one clip per track of it, Delete empties it. With Shift too, Cmd+X, Cmd+V, Cmd+D and Delete work on the time itself, on every track. Each is one step of undo. Cmd+Option+F makes fades from it. A press on bare lane, picking a clip or Escape lets go of it.
+Test: apps/www/test/registry-audio/base/hooks/use-time-selection.test.tsx; apps/daw/test/browser/run.ts "ARR-014"
+
+### ARR-015 Selecting clips with a rectangle
+Shift and a drag across bare lane draws a rectangle: the clips it touches join the selection.
+Test: apps/daw/test/browser/run.ts "ARR-015"

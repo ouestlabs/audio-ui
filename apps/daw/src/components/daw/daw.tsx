@@ -32,6 +32,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
+import { useTimeSelection } from "@/hooks/use-time-selection";
 import { useTimelineGrid } from "@/hooks/use-timeline-grid";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTrackAutomation } from "@/hooks/use-track-automation";
@@ -321,20 +322,45 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     }
     rescale(ratio);
   }, [bar, position, rescale, running]);
-  /** Z: the selected clips fill the view, or the loop when none is. */
-  const zoomToSelection = useCallback(() => {
+  // A stretch of time on some tracks, dragged across bare lanes, and what the keys do with it.
+  const getCursor = useCallback(() => cursor, [cursor]);
+  const timeSelection = useTimeSelection({
+    bar,
+    clips: doc.clips,
+    copyOf: arrangement.copyOf,
+    dispatch,
+    getPosition: getCursor,
+    selectedIds: arrangement.selectedIds,
+    selectedTracks: arrangement.selectedTracks,
+    tracks: doc.tracks,
+  });
+  const selectedTime = timeSelection.time;
+  /** Where the selected clips start and end, or null with none. */
+  const clipsRange = useCallback((): [number, number] | null => {
     const chosen = doc.clips.filter((clip) =>
       arrangement.selectedIds.includes(clip.id)
     );
-    if (chosen.length === 0) {
-      view.zoomTo(...doc.loop.range);
-      return;
-    }
-    view.zoomTo(
-      Math.min(...chosen.map((clip) => clip.value.start)),
-      Math.max(...chosen.map((clip) => clip.value.start + clip.value.length))
-    );
-  }, [arrangement.selectedIds, doc.clips, doc.loop.range, view]);
+    return chosen.length > 0
+      ? [
+          Math.min(...chosen.map((clip) => clip.value.start)),
+          Math.max(
+            ...chosen.map((clip) => clip.value.start + clip.value.length)
+          ),
+        ]
+      : null;
+  }, [arrangement.selectedIds, doc.clips]);
+  /** Z: the time selected fills the view, or the selected clips, or the loop when there is neither. */
+  const zoomToSelection = useCallback(() => {
+    view.zoomTo(...(selectedTime?.range ?? clipsRange() ?? doc.loop.range));
+  }, [clipsRange, doc.loop.range, selectedTime, view]);
+  /** Cmd+L with no time selected (the selection's own keys take it then): the loop around the selected clips, or on or off with none (TRN-007). */
+  const loopKey = useCallback(() => {
+    const range = clipsRange();
+    dispatch({
+      loop: range ? { on: true, range } : { on: !doc.loop.on },
+      type: "set-loop",
+    });
+  }, [clipsRange, dispatch, doc.loop.on]);
   const setLooping = useCallback(
     (on: boolean) => dispatch({ loop: { on }, type: "set-loop" }),
     [dispatch]
@@ -383,10 +409,14 @@ export function Daw({ initial, initialRecordings }: DawProps) {
 
   // Export (EXP-001, EXP-002): the main output, from the start to the end of the last clip.
   const exportWav = useCallback(async () => {
-    const end = Math.max(
+    // The time selected, or the whole arrangement to the end of its last clip (EXP-002).
+    const [start, end] = selectedTime?.range ?? [
       0,
-      ...doc.clips.map((clip) => clip.value.start + clip.value.length)
-    );
+      Math.max(
+        0,
+        ...doc.clips.map((clip) => clip.value.start + clip.value.length)
+      ),
+    ];
     if (end <= 0) {
       toast.message("Nothing to export yet: drop an audio file on a track.");
       return;
@@ -404,6 +434,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
               id: notice,
             }
           ),
+        from: start,
         sampleRate: context?.sampleRate ?? 48_000,
         to: end,
       });
@@ -419,10 +450,10 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     } finally {
       setExporting(false);
     }
-  }, [doc, sources]);
+  }, [doc, selectedTime, sources]);
 
-  // The view's keys: the grid, the zoom around the playhead, onto the selection and back, and what the panels show.
-  const viewKeys: Partial<Record<ShortcutCommand, () => void>> = {
+  // What each key does (KEY-001 and on), read when it is pressed.
+  const commands: Partial<Record<ShortcutCommand, () => void>> = {
     automation: automation.toggle,
     detail: () => showView(shown === "clip" ? "devices" : "clip"),
     fold: () => {
@@ -437,6 +468,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     "grid-snap": () => grid.change("snap"),
     "grid-triplet": () => grid.change("triplet"),
     "grid-wider": () => grid.change("wider"),
+    loop: loopKey,
     library: () => setLibraryOpen((open) => !open),
     mixer: () => togglePanel("mixer"),
     "unfold-all": () => {
@@ -450,98 +482,62 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     "zoom-in": () => view.zoomAround(position.getSnapshot(), 2),
     "zoom-out": () => view.zoomAround(position.getSnapshot(), 0.5),
     "zoom-selection": zoomToSelection,
+    "audio-track": () => dispatch({ kind: "audio", type: "add-track" }),
+    continue: () => playFrom(stoppedAt.current),
+    deactivate: () => dispatch({ type: "toggle-selected" }),
+    delete: () => {
+      for (const id of arrangement.selectedIds) {
+        dispatch({ id, type: "remove-clip" });
+      }
+    },
+    duplicate: () => dispatch({ type: "duplicate-selection" }),
+    export: exportWav,
+    "midi-track": () => dispatch({ kind: "midi", type: "add-track" }),
+    "play-stop": playPause,
+    redo: () => dispatch({ type: "redo" }),
+    "return-track": () => dispatch({ kind: "return", type: "add-track" }),
+    "select-all": () => dispatch({ type: "select-all" }),
+    solo: () => {
+      if (selectedTrack) {
+        dispatch({
+          id: selectedTrack,
+          patch: { soloed: true },
+          type: "set-mix",
+        });
+      }
+    },
+    split: () => dispatch({ at: cursor, step: 0.01, type: "split-cursor" }),
+    "to-start": () => seek(0),
+    undo: () => dispatch({ type: "undo" }),
   };
-  // The keyboard (KEY-001 and on): one listener, before the focused control takes the key.
-  const keys = useRef({ cursor, playPause, selectedTrack, viewKeys });
-  keys.current = { cursor, playPause, selectedTrack, viewKeys };
+  // One listener, before the focused control takes the key.
+  const keys = useRef({ commands, timeSelection });
+  keys.current = { commands, timeSelection };
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (typing(event.target)) {
         return;
       }
-      const command = matchShortcut(event);
-      if (!command) {
+      // Escape lets go of what is selected, and stays the key of what it was pressed in.
+      if (event.key === "Escape") {
+        dispatch({ type: "clear-selection" });
+        keys.current.timeSelection.clear();
         return;
       }
-      event.preventDefault();
-      const {
-        cursor: at,
-        playPause: toggle,
-        selectedTrack: picked,
-        viewKeys: forView,
-      } = keys.current;
-      switch (command) {
-        case "play-stop":
-          toggle();
-          break;
-        case "continue":
-          playFrom(stoppedAt.current);
-          break;
-        case "to-start":
-          seek(0);
-          break;
-        case "loop":
-          dispatch({
-            loop: { on: !arrangement.doc.loop.on },
-            type: "set-loop",
-          });
-          break;
-        case "undo":
-          dispatch({ type: "undo" });
-          break;
-        case "redo":
-          dispatch({ type: "redo" });
-          break;
-        case "audio-track":
-          dispatch({ kind: "audio", type: "add-track" });
-          break;
-        case "midi-track":
-          dispatch({ kind: "midi", type: "add-track" });
-          break;
-        case "return-track":
-          dispatch({ kind: "return", type: "add-track" });
-          break;
-        case "delete":
-          for (const id of arrangement.selectedIds) {
-            dispatch({ id, type: "remove-clip" });
-          }
-          break;
-        case "split":
-          dispatch({ at, step: 0.01, type: "split-cursor" });
-          break;
-        case "duplicate":
-          dispatch({ type: "duplicate-selection" });
-          break;
-        case "deactivate":
-          dispatch({ type: "toggle-selected" });
-          break;
-        case "solo":
-          if (picked) {
-            dispatch({ id: picked, patch: { soloed: true }, type: "set-mix" });
-          }
-          break;
-        case "select-all":
-          dispatch({ type: "select-all" });
-          break;
-        case "export":
-          exportWav();
-          break;
-        default:
-          forView[command]?.();
-          break;
+      // What a key does to the time selected and the clipboard comes before what it does otherwise.
+      if (keys.current.timeSelection.handleKey(event)) {
+        return;
+      }
+      const command = matchShortcut(event);
+      if (command) {
+        event.preventDefault();
+        keys.current.commands[command]?.();
       }
     };
     window.addEventListener("keydown", onKey, { capture: true });
     return () =>
       window.removeEventListener("keydown", onKey, { capture: true });
-  }, [
-    arrangement.doc.loop.on,
-    arrangement.selectedIds,
-    dispatch,
-    exportWav,
-    playFrom,
-    seek,
-  ]);
+  }, [dispatch]);
 
   // Saved as you go (PRJ-001): the document, and which recordings it keeps.
   useEffect(() => {
@@ -662,6 +658,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
                   selectedTrack={selectedTrack}
                   timelineGrid={grid}
                   timelineZoom={view}
+                  timeSelection={timeSelection}
                   viewportRef={viewportRef}
                 />
               </ResizablePanel>

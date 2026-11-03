@@ -8,14 +8,17 @@ import { PlusIcon } from "@phosphor-icons/react";
 import {
   type DragEvent,
   type MouseEvent,
+  type PointerEvent,
   type ReactNode,
   type RefObject,
   useCallback,
   useMemo,
   useState,
 } from "react";
+import { createPortal } from "react-dom";
 import { ArrangedClip } from "@/components/audio-ui/arranged-clip";
 import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
+import { TimelineTimeSelection } from "@/components/audio-ui/time-selection";
 import {
   COMPACT_TRACK_HEIGHT,
   MAX_TRACK_HEIGHT,
@@ -56,6 +59,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
+import { useMarquee } from "@/hooks/use-marquee-selection";
+import type { useTimeSelection } from "@/hooks/use-time-selection";
 import {
   GRID_DIVISION_OPTIONS,
   type useTimelineGrid,
@@ -169,6 +174,8 @@ export interface ArrangementViewProps {
   timelineGrid: ReturnType<typeof useTimelineGrid>;
   /** The zoom, fitted to the view until it is zoomed. */
   timelineZoom: ReturnType<typeof useTimelineZoom>;
+  /** The stretch of time dragged across bare lanes. */
+  timeSelection: ReturnType<typeof useTimeSelection>;
   /** The viewport the zoom fits: the one the tracks scroll in. */
   viewportRef: RefObject<HTMLDivElement | null>;
 }
@@ -194,6 +201,7 @@ export function ArrangementView({
   selectedTrack,
   timelineGrid: grid,
   timelineZoom: view,
+  timeSelection,
   viewportRef,
 }: ArrangementViewProps) {
   const { dispatch, doc, selectedIds, selectedTracks } = arrangement;
@@ -294,11 +302,21 @@ export function ArrangementView({
       dispatch({ action, at: cursor, id, step: beat / 4, type: "clip-action" }),
     [beat, cursor, dispatch]
   );
+  // Picking a clip lets go of the time selected.
+  const { clear: letGoOfTime, pressLane, time: selectedTime } = timeSelection;
   const selectClip = useCallback(
-    (id: string, additive: boolean) =>
-      dispatch({ additive, id, type: "select-clip" }),
+    (id: string, additive: boolean) => {
+      letGoOfTime();
+      dispatch({ additive, id, type: "select-clip" });
+    },
+    [dispatch, letGoOfTime]
+  );
+  // Shift and a drag across bare lane draws a rectangle: the clips it touches join the selection.
+  const selectClips = useCallback(
+    (ids: string[]) => dispatch({ ids, type: "select-clips" }),
     [dispatch]
   );
+  const marquee = useMarquee(selectedIds as string[], selectClips, false);
   const removeClip = useCallback(
     (id: string) => dispatch({ id, type: "remove-clip" }),
     [dispatch]
@@ -342,6 +360,17 @@ export function ArrangementView({
       onSelectTrack(id);
     },
     [dispatch, onSelectTrack]
+  );
+  /** A press on a track's bare lane picks the track and lets go of what was selected; the lane puts the cursor there, and a drag from it selects time. */
+  const pressBareLane = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      const { track } = event.currentTarget.dataset;
+      if (track && event.target === event.currentTarget && !event.shiftKey) {
+        pressLane(track);
+        pickTrack(track, false);
+      }
+    },
+    [pickTrack, pressLane]
   );
   const renameTrack = useCallback(
     (id: string, name: string) => dispatch({ id, name, type: "rename-track" }),
@@ -440,7 +469,13 @@ export function ArrangementView({
         ref={viewportRef}
         scrollbar="hidden"
       >
-        <div className="flex min-h-full w-max min-w-full shrink-0 flex-col">
+        <div
+          className={cn(
+            "flex min-h-full w-max min-w-full shrink-0 flex-col",
+            marquee.rect && "select-none"
+          )}
+          {...marquee.handlers}
+        >
           <div className="sticky top-0 z-40 flex min-w-full shrink-0 flex-col bg-background">
             <Row
               className="shrink-0 border-foreground/20 border-b"
@@ -584,6 +619,8 @@ export function ArrangementView({
                     onDragLeave={fileLeave}
                     onDragOver={dragOver(track.id, takesFiles)}
                     onDrop={drop(track.id, takesFiles)}
+                    onPointerDown={pressBareLane}
+                    onSelectionChange={timeSelection.onSelectionChange}
                     seekable
                   >
                     {clips
@@ -606,6 +643,9 @@ export function ArrangementView({
                           trackName={track.name}
                         />
                       ))}
+                    {selectedTime?.tracks.includes(track.id) ? (
+                      <TimelineTimeSelection range={selectedTime.range} />
+                    ) : null}
                     {automation.automating ? (
                       <TrackAutomation
                         describe={describe}
@@ -678,6 +718,17 @@ export function ArrangementView({
           </Row>
         </div>
       </TimelineViewport>
+      {marquee.rect
+        ? createPortal(
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed z-50 border border-primary bg-primary/10"
+              data-slot="timeline-marquee"
+              style={marquee.rect}
+            />,
+            document.body
+          )
+        : null}
       <TrackReorderGhost
         className={
           dragged ? TRACK_COLORS[mixOf(dragged).color]?.edge : undefined

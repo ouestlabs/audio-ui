@@ -8,7 +8,7 @@ Test: apps/www/test/arrangement-bounce.test.ts "EXP-001"
 
 ### EXP-002 The range
 The whole arrangement, from its start to the end of its last clip; a time selection made before opening the dialog renders that stretch instead. Nothing past the range is rendered: an effect's tail is cut where the range ends.
-Test: apps/daw/test/export.test.ts "EXP-002"
+Test: apps/daw/test/browser/run.ts "EXP-002"
 
 ### EXP-003 The file
 WAV, at the project's sample rate, in 16 or 24-bit whole numbers or 32-bit floating point.

@@ -28,7 +28,7 @@ Test: packages/core/src/audio/playback/transport.test.ts "TRN-006"
 
 ### TRN-007 The loop from a selection
 Cmd+L puts the loop around the time selection, or around the selected clips, and turns it on; with nothing selected it turns the loop on or off.
-Test: apps/daw/test/transport.test.ts "TRN-007"
+Test: apps/daw/test/browser/run.ts "TRN-007"
 
 ### TRN-008 The end of the arrangement
 Playback stops at the end of the arrangement's length.

@@ -16,6 +16,7 @@ const EXPORT = /Export WAV/;
 const DELAY = /Delay/;
 const POCKET_SYNTH = /Pocket Synth/;
 const DEVICES = /^Devices/;
+const UNITS = /\* ([\d.]+)\)/;
 const MAIN_PEAK = /^Main peak/;
 
 /** A WAV file of `seconds` of a chord, made in the page and dropped on `selector`. */
@@ -79,6 +80,23 @@ async function dropChord(
     },
     { name, seconds, selector }
   );
+}
+
+/** Drags across bare lanes, from near the start of one track to `across` px on under the pointer of another. */
+async function selectTime(
+  page: Page,
+  fromTrack: string,
+  toTrack: string,
+  across = 60
+) {
+  const from = await page.locator(`[data-track="${fromTrack}"]`).boundingBox();
+  const to = await page.locator(`[data-track="${toTrack}"]`).boundingBox();
+  assert(from && to, "the lanes are there");
+  await page.mouse.move(from.x + 3, from.y + from.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(from.x + across, to.y + to.height / 2, { steps: 8 });
+  await page.mouse.up();
+  await page.waitForSelector("[data-slot=timeline-time-selection]");
 }
 
 async function open(browser: Browser, shared?: Page) {
@@ -523,6 +541,108 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         () => !document.querySelector("[data-slot=automation-envelope]")
       );
     },
+  "ARR-014: a drag across bare lanes selects time, and the keys work on it":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 8);
+      await page.waitForSelector("[data-clip-id]", { timeout: 10_000 });
+      const clips = () => page.locator("[data-clip-id]").count();
+      await selectTime(page, "track-2", "track-1");
+      assert(
+        (await page.locator("[data-slot=timeline-time-selection]").count()) ===
+          2,
+        "the time selected is not drawn on the two tracks it spans"
+      );
+      const before = await clips();
+      await page.keyboard.press("Meta+KeyD");
+      await page.waitForFunction(
+        (count) => document.querySelectorAll("[data-clip-id]").length > count,
+        before
+      );
+      await page.keyboard.press("Meta+KeyZ");
+      await page.waitForFunction(
+        (count) => document.querySelectorAll("[data-clip-id]").length === count,
+        before
+      );
+      await page.keyboard.press("Escape");
+      await page.waitForFunction(
+        () => !document.querySelector("[data-slot=timeline-time-selection]")
+      );
+    },
+  "ARR-015: Shift and a drag across bare lane selects the clips it touches":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 8);
+      const clip = await page.waitForSelector("[data-clip-id]", {
+        timeout: 10_000,
+      });
+      const box = await clip.boundingBox();
+      const lane = await page.locator('[data-track="track-2"]').boundingBox();
+      assert(box && lane, "the clip and the lane are there");
+      await page.keyboard.press("Escape");
+      await page.keyboard.down("Shift");
+      await page.mouse.move(lane.x + box.width + 6, lane.y + lane.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 2, box.y + box.height / 2, { steps: 6 });
+      await page.waitForSelector("[data-slot=timeline-marquee]");
+      await page.mouse.up();
+      await page.keyboard.up("Shift");
+      await page.waitForSelector("[data-clip-id][data-selected]", {
+        timeout: 5000,
+      });
+    },
+  "TRN-007: Cmd+L loops the time selected, and turns the loop on": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    const loop = page.locator("[data-slot=timeline-range]").first();
+    const wide = (await loop.boundingBox())?.width ?? 0;
+    await selectTime(page, "track-2", "track-2", 90);
+    const selected = await page
+      .locator("[data-slot=timeline-time-selection]")
+      .first()
+      .boundingBox();
+    assert(selected, "the time selected is drawn");
+    await page.keyboard.press("Meta+KeyL");
+    await page.waitForFunction(
+      ([from, width]) => {
+        const range = document.querySelector("[data-slot=timeline-range]");
+        return (
+          range !== null &&
+          Math.abs(range.getBoundingClientRect().width - (width as number)) <
+            2 &&
+          from !== width
+        );
+      },
+      [wide, selected.width]
+    );
+  },
+  "EXP-002: with time selected, the export renders that stretch": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await dropChord(page, '[data-track="track-1"]', "Take", 8);
+    await page.waitForSelector("[data-clip-id]", { timeout: 10_000 });
+    await selectTime(page, "track-2", "track-2", 90);
+    const width = await page
+      .locator("[data-slot=timeline-time-selection]")
+      .first()
+      .evaluate((element) => (element as HTMLElement).style.width);
+    const expected = Number(UNITS.exec(width)?.[1]);
+    const download = page.waitForEvent("download", { timeout: 30_000 });
+    await page.getByRole("button", { name: EXPORT }).click();
+    const file = await (await download).path();
+    const bytes = new DataView(await Bun.file(file).arrayBuffer());
+    const seconds =
+      bytes.getUint32(40, true) /
+      (bytes.getUint16(22, true) *
+        (bytes.getUint16(34, true) / 8) *
+        bytes.getUint32(24, true));
+    assert(
+      Math.abs(seconds - expected) < 0.01,
+      `it lasts ${seconds} s for ${expected} s selected`
+    );
+  },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {
