@@ -398,6 +398,131 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     await peak.click();
     assert((await peak.innerText()) === "-∞", "a click did not clear the peak");
   },
+  "ARR-010: a track moves by its grip, with Up and Down or dragged": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    const order = () =>
+      page
+        .locator("[data-track-id]")
+        .evaluateAll((rows) =>
+          rows.map((row) => row.getAttribute("aria-label"))
+        );
+    await page.getByRole("button", { name: "Move 1 Audio" }).focus();
+    await page.keyboard.press("ArrowDown");
+    await page.waitForFunction(
+      () =>
+        document
+          .querySelector("[data-track-id]")
+          ?.getAttribute("aria-label") === "2 Audio"
+    );
+    const grip = await page
+      .getByRole("button", { name: "Move 4 MIDI" })
+      .boundingBox();
+    // The first grip spans the first track's row.
+    const top = await page
+      .locator("[data-slot=track-grip]")
+      .first()
+      .boundingBox();
+    assert(grip && top, "the grips are there");
+    await page.mouse.move(grip.x + grip.width / 2, grip.y + grip.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(grip.x + grip.width / 2, top.y + 4, { steps: 10 });
+    await page.waitForSelector("[data-slot=track-reorder-ghost]");
+    await page.mouse.up();
+    await page.waitForFunction(
+      () =>
+        document
+          .querySelector("[data-track-id]")
+          ?.getAttribute("aria-label") === "4 MIDI"
+    );
+    const names = await order();
+    assert(
+      names.at(-1) === "B Delay",
+      `the returns stay last: ${names.join(", ")}`
+    );
+  },
+  "ARR-011: a track's height is set by its edge, and it keeps it": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    const row = page.locator(
+      '[data-track-id="track-2"] [data-slot=timeline-track]'
+    );
+    const before = await row.boundingBox();
+    const other = await page
+      .locator('[data-track-id="track-3"] [data-slot=timeline-track]')
+      .boundingBox();
+    assert(before && other, "the rows are there");
+    // The track shares the room until it is given a height of its own, by its edge.
+    await page.getByLabel("2 Audio height").focus();
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("ArrowDown");
+    await page.waitForTimeout(100);
+    const after = await row.boundingBox();
+    assert(after, "the row is there");
+    assert(
+      after.height !== before.height,
+      `the track stayed ${before.height} px tall`
+    );
+  },
+  "ARR-012: a track folds to a strip, by its caret and with U": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    const row = page.locator(
+      '[data-track-id="track-2"] [data-slot=timeline-track]'
+    );
+    const tall = (await row.boundingBox())?.height ?? 0;
+    await page.getByRole("button", { name: "Fold 2 Audio" }).click();
+    await page.getByRole("button", { name: "Unfold 2 Audio" }).waitFor();
+    const short = (await row.boundingBox())?.height ?? 0;
+    assert(short < tall / 2, `folded, the track is ${short} px, from ${tall}`);
+    await page.keyboard.press("Alt+KeyU");
+    await page.getByRole("button", { name: "Fold 2 Audio" }).waitFor();
+    await page.getByText("2 Audio", { exact: true }).first().click();
+    await page.keyboard.press("KeyU");
+    await page.getByRole("button", { name: "Unfold 2 Audio" }).waitFor();
+  },
+  "ARR-013: A shows the envelopes; a level moved by hand overrides one until it is enabled again":
+    async (browser) => {
+      const page = await open(browser);
+      await page.keyboard.press("KeyA");
+      await page.waitForSelector("[data-slot=automation-envelope]");
+      // The first track's volume drawn: a point of its faint line moved with the keys.
+      await page
+        .locator('[data-track="track-1"] [aria-label^="Point 1"]')
+        .first()
+        .focus();
+      await page.keyboard.press("ArrowDown");
+      await page.waitForFunction(
+        () =>
+          !document
+            .querySelector(
+              '[data-track="track-1"] [data-slot=automation-envelope]'
+            )
+            ?.className.includes("opacity-50")
+      );
+      assert(
+        (await page
+          .getByRole("button", { name: "Re-enable automation" })
+          .count()) === 0,
+        "nothing is overridden yet"
+      );
+      await page.getByRole("slider", { name: "1 Audio gain" }).focus();
+      await page.keyboard.press("ArrowLeft");
+      await page.getByRole("button", { name: "Re-enable automation" }).click();
+      assert(
+        (await page
+          .getByRole("button", { name: "Re-enable automation" })
+          .count()) === 0,
+        "the automation was not enabled again"
+      );
+      await page.keyboard.press("KeyA");
+      await page.waitForFunction(
+        () => !document.querySelector("[data-slot=automation-envelope]")
+      );
+    },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

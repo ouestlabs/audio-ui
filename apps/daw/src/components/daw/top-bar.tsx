@@ -1,8 +1,12 @@
 import type { Tempo } from "@audio-ui/core/time";
+import { EnvelopeIcon } from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
-import { DownloadSimpleIcon } from "@phosphor-icons/react";
+import {
+  ArrowCounterClockwiseIcon,
+  DownloadSimpleIcon,
+} from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
-import type { ReactNode } from "react";
+import { type ReactNode, useCallback } from "react";
 import { Transport } from "@/components/audio-ui/transport";
 import { AudioUiIcon } from "@/components/site/audio-ui-icon";
 import { ModeSwitcher } from "@/components/site/mode-switcher";
@@ -51,11 +55,16 @@ function BarButton({
 }
 
 export interface TopBarProps {
+  /** Whether each lane shows its envelope (KEY-027). */
+  automating: boolean;
   exporting: boolean;
   looping: boolean;
+  onAutomatingChange: (automating: boolean) => void;
   onExport: () => void;
   onLoopingChange: (looping: boolean) => void;
   onPlayPause: () => void;
+  /** Plays every envelope again: there only while a hand overrides one. */
+  onReenableAutomation?: () => void;
   onStop: () => void;
   onTempoChange: (tempo: Tempo) => void;
   playing: boolean;
@@ -63,8 +72,13 @@ export interface TopBarProps {
   tempo: Tempo;
 }
 
-/** The bar on top: the brand, as the lab has it, the transport, and the export. */
+/** The bar on top: the brand, as the lab has it, the transport, the automation, and the export. */
 export function TopBar(props: TopBarProps) {
+  const { automating, onAutomatingChange } = props;
+  const toggleAutomation = useCallback(
+    () => onAutomatingChange(!automating),
+    [automating, onAutomatingChange]
+  );
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b px-3">
       <Button
@@ -102,6 +116,24 @@ export function TopBar(props: TopBarProps) {
         tempo={props.tempo}
       />
       <div className="flex shrink-0 items-center gap-2">
+        {props.onReenableAutomation ? (
+          <BarButton
+            label="Re-enable automation"
+            onClick={props.onReenableAutomation}
+          >
+            <ArrowCounterClockwiseIcon
+              aria-hidden="true"
+              className="text-primary"
+            />
+          </BarButton>
+        ) : null}
+        <BarButton
+          label="Automation (A)"
+          onClick={toggleAutomation}
+          pressed={automating}
+        >
+          <EnvelopeIcon aria-hidden="true" />
+        </BarButton>
         <BarButton
           disabled={props.exporting}
           label="Export WAV (Cmd Shift R)"

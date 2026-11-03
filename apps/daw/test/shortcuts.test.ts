@@ -87,6 +87,22 @@ describe("the keyboard", () => {
     expect(matchShortcut(press("x", { code: "KeyX" }))).toBe("zoom-back");
   });
 
+  test("KEY-019: U folds the selected tracks, Option+U unfolds them all", () => {
+    on("MacIntel");
+    expect(matchShortcut(press("u", { code: "KeyU" }))).toBe("fold");
+    expect(matchShortcut(press("¨", { altKey: true, code: "KeyU" }))).toBe(
+      "unfold-all"
+    );
+  });
+
+  test("KEY-027: A shows or hides the automation, alone", () => {
+    on("MacIntel");
+    expect(matchShortcut(press("a", { code: "KeyA" }))).toBe("automation");
+    expect(matchShortcut(press("a", { code: "KeyA", metaKey: true }))).toBe(
+      "select-all"
+    );
+  });
+
   test("KEY-021: Cmd+Option+B shows or folds the library, Ctrl+Alt+B off a Mac", () => {
     on("MacIntel");
     expect(

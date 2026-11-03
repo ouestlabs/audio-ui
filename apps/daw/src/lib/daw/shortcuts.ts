@@ -6,12 +6,14 @@
  */
 export type ShortcutCommand =
   | "audio-track"
+  | "automation"
   | "continue"
   | "deactivate"
   | "delete"
   | "detail"
   | "duplicate"
   | "export"
+  | "fold"
   | "grid-finer"
   | "grid-fixed"
   | "grid-snap"
@@ -29,6 +31,7 @@ export type ShortcutCommand =
   | "split"
   | "to-start"
   | "undo"
+  | "unfold-all"
   | "zoom-back"
   | "zoom-in"
   | "zoom-out"
@@ -80,6 +83,9 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { command: "zoom-out", key: "-", mod: true },
   { command: "zoom-selection", key: "z" },
   { command: "zoom-back", key: "x" },
+  { command: "automation", key: "a" },
+  { command: "fold", key: "u" },
+  { alt: true, command: "unfold-all", key: "u" },
 ];
 
 const APPLE = /Mac|iPhone|iPad/;

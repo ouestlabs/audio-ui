@@ -17,6 +17,8 @@ import {
 import { ArrangedClip } from "@/components/audio-ui/arranged-clip";
 import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import {
+  COMPACT_TRACK_HEIGHT,
+  MAX_TRACK_HEIGHT,
   MIN_TRACK_HEIGHT,
   Timeline,
   TimelineGridMenuItems,
@@ -31,7 +33,18 @@ import {
   TimelineTrackControls,
   TimelineTrackHeader,
   TimelineViewport,
+  TRACK_COLORS,
+  TRACK_HEIGHT_STEP,
 } from "@/components/audio-ui/timeline";
+import {
+  TrackAutomation,
+  TrackAutomationChooser,
+} from "@/components/audio-ui/track-automation";
+import {
+  TrackGrip,
+  TrackReorderGhost,
+  trackReorderClass,
+} from "@/components/audio-ui/track-grip";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -48,12 +61,9 @@ import {
   type useTimelineGrid,
 } from "@/hooks/use-timeline-grid";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
-import {
-  type Arranged,
-  type ClipAction,
-  type Mix,
-  mixOf,
-} from "@/lib/arrangement";
+import type { useTrackAutomation } from "@/hooks/use-track-automation";
+import { useTrackReorder } from "@/hooks/use-track-reorder";
+import { type Arranged, type ClipAction, mixOf } from "@/lib/arrangement";
 import { NEW_TRACK } from "@/lib/daw/drop";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { cn } from "@/lib/utils";
@@ -70,6 +80,11 @@ function carriesFiles(event: DragEvent) {
   return Array.from(event.dataTransfer.types).includes("Files");
 }
 
+/** Whether a track set by hand is short enough for one row of controls. */
+function isShort(height: number | undefined) {
+  return height !== undefined && height < COMPACT_TRACK_HEIGHT;
+}
+
 /** Whether a drag carries a device from the library. */
 function carriesDevice(event: DragEvent) {
   return Array.from(event.dataTransfer.types).includes(DEVICE_DRAG_TYPE);
@@ -79,19 +94,38 @@ function carriesDevice(event: DragEvent) {
 function Row({
   children,
   className,
+  height,
   lead,
+  onResize,
   selected,
+  trackId,
 }: {
   children: ReactNode;
   className?: string;
+  /** A height set by hand: the row keeps it instead of sharing the room left. */
+  height?: number;
   lead: ReactNode;
+  onResize?: (trackId: string, height: number | undefined) => void;
   selected?: boolean;
+  trackId?: string;
 }) {
+  const resize = useCallback(
+    (next: number | undefined) => {
+      if (trackId !== undefined) {
+        onResize?.(trackId, next);
+      }
+    },
+    [onResize, trackId]
+  );
   return (
     <TimelineTrack
       className={className}
+      height={height}
+      maxHeight={MAX_TRACK_HEIGHT}
       minHeight={MIN_TRACK_HEIGHT}
+      onHeightChange={onResize ? resize : undefined}
       selected={selected}
+      step={TRACK_HEIGHT_STEP}
     >
       <TimelineTrackHeader
         className="relative flex items-stretch"
@@ -114,6 +148,8 @@ function Label({ children }: { children: ReactNode }) {
 
 export interface ArrangementViewProps {
   arrangement: Arrangement;
+  /** Automation mode, and the gains and pans moved by hand. */
+  automation: ReturnType<typeof useTrackAutomation>;
   /** Where playback starts: the start marker, in seconds. */
   cursor: number;
   engine: Engine;
@@ -146,6 +182,7 @@ export interface ArrangementViewProps {
  */
 export function ArrangementView({
   arrangement,
+  automation,
   cursor,
   engine,
   onAddMidiClip,
@@ -211,7 +248,12 @@ export function ArrangementView({
   const doubleClick = useCallback(
     (event: MouseEvent<HTMLElement>) => {
       const { track } = event.currentTarget.dataset;
-      if (!track || (event.target as HTMLElement).closest("[data-clip-id]")) {
+      if (
+        !track ||
+        (event.target as HTMLElement).closest(
+          "[data-clip-id], [data-slot=automation-envelope]"
+        )
+      ) {
         return;
       }
       const lane = event.currentTarget.getBoundingClientRect();
@@ -273,14 +315,22 @@ export function ArrangementView({
     ) => dispatch({ edge, id, shape, type: "set-fade-shape" }),
     [dispatch]
   );
-  const changeMix = useCallback(
-    (id: string, patch: Partial<Mix>) => {
-      const { color: _color, ...rest } = patch;
-      // A switch is one step; a drag of the gain or the pan is a burst, closed when it ends.
-      const burst = "gain" in rest || "pan" in rest;
-      dispatch({ id, patch: rest, type: burst ? "change-mix" : "set-mix" });
-    },
+  // A track moves by its grip, dragged or with Up and Down on it; a new one goes after the one it is asked from, of its kind.
+  const trackOrder = useMemo(() => tracks.map((track) => track.id), [tracks]);
+  const moveTrack = useCallback(
+    (id: string, index: number) => dispatch({ id, index, type: "move-track" }),
     [dispatch]
+  );
+  const reorder = useTrackReorder({ onMove: moveTrack, order: trackOrder });
+  const dragged = tracks.find((track) => track.id === reorder.ghost?.id);
+  const insertTrack = useCallback(
+    (id: string) =>
+      dispatch({
+        afterId: id,
+        kind: tracks.find((track) => track.id === id)?.kind,
+        type: "add-track",
+      }),
+    [dispatch, tracks]
   );
   const settle = useCallback(
     () => dispatch({ type: "settle-clip-edit" }),
@@ -304,6 +354,11 @@ export function ArrangementView({
   const duplicateTrack = useCallback(
     (id: string) => dispatch({ id, type: "duplicate-track" }),
     [dispatch]
+  );
+  // What a track's menu has and a return's has not.
+  const trackMenu = useMemo(
+    () => ({ onDuplicate: duplicateTrack, onInsert: insertTrack }),
+    [duplicateTrack, insertTrack]
   );
   const changeLoop = useCallback(
     (range: TimelinePrimitive.Range.Value) =>
@@ -454,6 +509,7 @@ export function ArrangementView({
             const mix = mixOf(track);
             const isReturn = returns.includes(track);
             const silent = mix.muted || (anySolo && !mix.soloed && !isReturn);
+            const height = arrangement.heights[track.id];
             // Files go on audio tracks; a device goes on any track that takes it.
             const takesFiles = !isReturn && track.kind !== "midi";
             return (
@@ -466,28 +522,53 @@ export function ArrangementView({
               >
                 <Row
                   className={cn(
-                    "flex-1 border-foreground/20 border-b",
-                    isReturn && "bg-muted/40"
+                    "border-foreground/20 border-b",
+                    height === undefined && "flex-1",
+                    isReturn && "bg-muted/40",
+                    trackReorderClass(reorder, track.id)
                   )}
+                  height={height}
                   lead={
-                    <TimelineTrackControls
-                      compact={false}
-                      mix={mix}
-                      name={track.name}
-                      onDuplicate={isReturn ? undefined : duplicateTrack}
-                      onMix={changeMix}
-                      onMixCommit={settle}
-                      onRemove={removeTrack}
-                      onRename={renameTrack}
-                      onSelect={pickTrack}
-                      selected={
-                        selectedTracks.includes(track.id) ||
-                        selectedTrack === track.id
-                      }
-                      trackId={track.id}
-                    />
+                    <div className="flex min-w-0 flex-1">
+                      {isReturn ? null : (
+                        <TrackGrip
+                          dragging={reorder.draggingId === track.id}
+                          trackName={track.name}
+                          {...reorder.gripProps(track.id)}
+                        />
+                      )}
+                      <TimelineTrackControls
+                        compact={isShort(height)}
+                        folded={arrangement.folded[track.id]}
+                        mix={mix}
+                        name={track.name}
+                        onMix={automation.changeMix}
+                        onMixCommit={settle}
+                        onRemove={removeTrack}
+                        onRename={renameTrack}
+                        onSelect={pickTrack}
+                        onToggleFold={arrangement.toggleFold}
+                        selected={
+                          selectedTracks.includes(track.id) ||
+                          selectedTrack === track.id
+                        }
+                        trackId={track.id}
+                        {...(isReturn ? undefined : trackMenu)}
+                      >
+                        {automation.automating ? (
+                          <TrackAutomationChooser
+                            onClear={automation.clear}
+                            onParameterChange={automation.show}
+                            parameter={automation.parameterOf(track.id)}
+                            track={track}
+                          />
+                        ) : null}
+                      </TimelineTrackControls>
+                    </div>
                   }
+                  onResize={arrangement.resizeTrack}
                   selected={selectedTracks.includes(track.id)}
+                  trackId={track.id}
                 >
                   <TimelineLane
                     className={cn(
@@ -525,6 +606,19 @@ export function ArrangementView({
                           trackName={track.name}
                         />
                       ))}
+                    {automation.automating ? (
+                      <TrackAutomation
+                        describe={describe}
+                        duration={duration}
+                        mix={mix}
+                        onChange={automation.edit}
+                        onCommit={settle}
+                        overridden={automation.overridden[track.id]}
+                        parameter={automation.parameterOf(track.id)}
+                        snapStep={grid.snapStep}
+                        track={track}
+                      />
+                    ) : null}
                     <TimelinePlayhead />
                   </TimelineLane>
                 </Row>
@@ -584,6 +678,14 @@ export function ArrangementView({
           </Row>
         </div>
       </TimelineViewport>
+      <TrackReorderGhost
+        className={
+          dragged ? TRACK_COLORS[mixOf(dragged).color]?.edge : undefined
+        }
+        ghost={reorder.ghost}
+        ghostRef={reorder.ghostRef}
+        trackName={dragged?.name}
+      />
     </Timeline>
   );
 }

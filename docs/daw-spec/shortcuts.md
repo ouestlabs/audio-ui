@@ -37,5 +37,6 @@ Status: partial: which other keys Chrome and Safari keep is checked by hand (`ap
 | KEY-024 | Cmd+Shift+R | Export audio |
 | KEY-025 | Cmd+I | Insert silence at the selection |
 | KEY-026 | Cmd+Shift+Delete | Delete the selected time |
+| KEY-027 | A | Show or hide the automation |
 
 Test: apps/daw/test/shortcuts.test.ts, one case per rule id.

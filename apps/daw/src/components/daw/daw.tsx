@@ -34,6 +34,7 @@ import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useTimelineGrid } from "@/hooks/use-timeline-grid";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+import { useTrackAutomation } from "@/hooks/use-track-automation";
 import type { Arranged, ArrangementTrack } from "@/lib/arrangement";
 import { renderArrangement } from "@/lib/arrangement-engine";
 import { type ArrangementDoc, trackOf } from "@/lib/arrangement-state";
@@ -116,7 +117,17 @@ export function Daw({ initial, initialRecordings }: DawProps) {
       new Map([...recordings].map(([id, recording]) => [id, recording.source])),
     [recordings]
   );
-  const engine = useArrangementEngine({ doc, recordings: sources });
+  // Automation mode, and the automated gains and pans moved by hand, which play their mix until enabled again.
+  const automatedTracks = useMemo(
+    () => [...doc.tracks, ...doc.returns],
+    [doc.returns, doc.tracks]
+  );
+  const automation = useTrackAutomation({ dispatch, tracks: automatedTracks });
+  const engine = useArrangementEngine({
+    doc,
+    overridden: automation.overridden,
+    recordings: sources,
+  });
   const [cursor, setCursor] = useState(0);
   const stoppedAt = useRef(0);
   const [selectedTrack, setSelectedTrack] = useState<string | null>(
@@ -412,7 +423,15 @@ export function Daw({ initial, initialRecordings }: DawProps) {
 
   // The view's keys: the grid, the zoom around the playhead, onto the selection and back, and what the panels show.
   const viewKeys: Partial<Record<ShortcutCommand, () => void>> = {
+    automation: automation.toggle,
     detail: () => showView(shown === "clip" ? "devices" : "clip"),
+    fold: () => {
+      const picked = arrangement.selectedTracks;
+      const chosen = picked.length > 0 ? picked : [selectedTrack ?? ""];
+      for (const id of chosen) {
+        arrangement.toggleFold(id);
+      }
+    },
     "grid-finer": () => grid.change("finer"),
     "grid-fixed": () => grid.change("fixed"),
     "grid-snap": () => grid.change("snap"),
@@ -420,6 +439,13 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     "grid-wider": () => grid.change("wider"),
     library: () => setLibraryOpen((open) => !open),
     mixer: () => togglePanel("mixer"),
+    "unfold-all": () => {
+      for (const [id, on] of Object.entries(arrangement.folded)) {
+        if (on) {
+          arrangement.toggleFold(id);
+        }
+      }
+    },
     "zoom-back": view.zoomBack,
     "zoom-in": () => view.zoomAround(position.getSnapshot(), 2),
     "zoom-out": () => view.zoomAround(position.getSnapshot(), 0.5),
@@ -551,6 +577,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
         <MixerView
           arrangement={arrangement}
           engine={engine}
+          onMix={automation.changeMix}
           onSelectTrack={pickTrack}
           selectedTrack={selectedTrack}
         />
@@ -586,11 +613,16 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     <TooltipProvider>
       <div className="flex h-svh flex-col">
         <TopBar
+          automating={automation.automating}
           exporting={exporting}
           looping={doc.loop.on}
+          onAutomatingChange={automation.setAutomating}
           onExport={exportWav}
           onLoopingChange={setLooping}
           onPlayPause={playPause}
+          onReenableAutomation={
+            automation.anyOverridden ? automation.reenable : undefined
+          }
           onStop={stop}
           onTempoChange={setTempo}
           playing={engine.playing}
@@ -618,6 +650,7 @@ export function Daw({ initial, initialRecordings }: DawProps) {
               >
                 <ArrangementView
                   arrangement={arrangement}
+                  automation={automation}
                   cursor={cursor}
                   engine={engine}
                   onAddMidiClip={addMidiClip}

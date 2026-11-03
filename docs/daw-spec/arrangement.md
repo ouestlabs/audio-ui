@@ -39,3 +39,19 @@ Test: apps/www/test/arrangement-state.test.ts "ARR-008"
 A new project holds two audio tracks, two MIDI tracks and two return tracks, the first with a reverb, the second with a delay, at 120 BPM in 4/4.
 Status: partial: OBS-013 checks the reference's default.
 Test: apps/daw/test/project.test.ts "ARR-009"
+
+### ARR-010 Moving a track
+A track moves up or down the arrangement by its grip, dragged or with Up and Down on it: a copy of its header follows the pointer, a line marks the gap it would land in, and the view scrolls at its edges. The return tracks stay under the tracks. One step of undo.
+Test: apps/daw/test/browser/run.ts "ARR-010"
+
+### ARR-011 A track's height
+A track shares the height of the view with the others until its edge is dragged, or moved with Up and Down, from its least height to its greatest: it keeps that height, and the others share what is left. When they no longer fit, the view scrolls.
+Test: apps/daw/test/browser/run.ts "ARR-011"
+
+### ARR-012 Folding a track
+A track folds to a strip by the caret in its header, or with U on the selected tracks; Option+U unfolds them all. What it holds still plays.
+Test: apps/daw/test/browser/run.ts "ARR-012"
+
+### ARR-013 Automation
+A shows or hides the automation: each track's lane draws the envelope of its volume or its pan, chosen in its header, over its clips. A double-click adds a point, a drag moves one, and what is drawn is what plays. A volume or a pan moved by hand stops following its envelope and plays the value it was moved to, drawn greyed, until "Re-enable automation", or until that envelope is drawn again.
+Test: apps/www/test/registry-audio/base/hooks/use-track-automation.test.tsx; apps/daw/test/browser/run.ts "ARR-013"

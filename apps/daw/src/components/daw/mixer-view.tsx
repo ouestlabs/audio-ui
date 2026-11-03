@@ -158,11 +158,7 @@ interface StripProps {
   analysers: readonly AnalyserNode[] | null;
   /** Main has no switch, no solo and no sends. */
   main?: boolean;
-  onMix: (
-    id: string,
-    patch: Partial<Omit<Mix, "color">>,
-    burst: boolean
-  ) => void;
+  onMix: (id: string, patch: Partial<Omit<Mix, "color">>) => void;
   onSelect: (id: string) => void;
   onSend: (id: string, to: string, level: number) => void;
   onSettle: () => void;
@@ -188,19 +184,19 @@ function Strip({
 }: StripProps) {
   const mix = mixOf(track);
   const setGain = useCallback(
-    (volume: number) => onMix(track.id, { gain: gainOf(volume) }, true),
+    (volume: number) => onMix(track.id, { gain: gainOf(volume) }),
     [onMix, track.id]
   );
   const setPan = useCallback(
-    (pan: number) => onMix(track.id, { pan }, true),
+    (pan: number) => onMix(track.id, { pan }),
     [onMix, track.id]
   );
   const setOn = useCallback(
-    (on: boolean) => onMix(track.id, { muted: !on }, false),
+    (on: boolean) => onMix(track.id, { muted: !on }),
     [onMix, track.id]
   );
   const setSolo = useCallback(
-    (soloed: boolean) => onMix(track.id, { soloed }, false),
+    (soloed: boolean) => onMix(track.id, { soloed }),
     [onMix, track.id]
   );
   const select = useCallback(() => onSelect(track.id), [onSelect, track.id]);
@@ -315,20 +311,18 @@ function Strip({
 export function MixerView({
   arrangement,
   engine,
+  onMix,
   onSelectTrack,
   selectedTrack,
 }: {
   arrangement: Arrangement;
   engine: Engine;
+  /** A channel's mix changed: a fader's drag is a burst, a switch a step of its own, and an automated gain or pan is overridden. */
+  onMix: (id: string, patch: Partial<Mix>) => void;
   onSelectTrack: (id: string) => void;
   selectedTrack: string | null;
 }) {
   const { dispatch, doc } = arrangement;
-  const onMix = useCallback(
-    (id: string, patch: Partial<Omit<Mix, "color">>, burst: boolean) =>
-      dispatch({ id, patch, type: burst ? "change-mix" : "set-mix" }),
-    [dispatch]
-  );
   const onSend = useCallback(
     (track: string, to: string, level: number) =>
       dispatch({ level, to, track, type: "change-send" }),
