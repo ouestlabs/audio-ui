@@ -1,0 +1,13 @@
+# The headers every page and file is served with (Cloudflare reads this file).
+# Cross-origin isolated: the audio engine shares recordings with its worklets
+# in shared memory, which only an isolated page may do.
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Embedder-Policy: require-corp
+
+# The build's files carry a hash in their name: they never change.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
