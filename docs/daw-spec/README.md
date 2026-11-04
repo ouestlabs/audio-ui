@@ -36,6 +36,7 @@ Test: packages/core/src/audio/playback/render.test.ts "CLP-003"
 | `ENG` | [Engine](engine.md) | 1 |
 | `PRJ` | [Projects and files](project.md) | 1 (on disk, DAWproject: 2) |
 | `AUT` | [Automation](automation.md) | 3 |
+| `REC` | [Recording](recording.md) | 6 |
 | `KEY` | [Shortcuts](shortcuts.md) | each phase |
 | `PRF` | [Performance targets](performance.md) | each phase |
 
