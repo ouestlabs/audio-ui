@@ -24,9 +24,8 @@ A fade-in and a fade-out never overlap: together they are as long as the clip at
 Test: packages/core/src/primitives/timeline/test/clip.test.ts (fitFades)
 
 ### CLP-006 Fades on clip edges
-A clip laid down gets a fade of 4 ms at each edge (or half its length when shorter), which can be edited, and a cut gives an audio clip one each side of it. It applies to clips made from now on: a project already saved keeps its fades.
-Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "CLP-006"
-Status: partial: a fade deleted does not go back to 4 ms.
+A clip laid down gets a fade of 4 ms at each edge (or half its length when shorter), which can be edited, and a cut gives an audio clip one each side of it. Delete or Backspace on a fade's handle sets it back to 4 ms; dragged to nothing, it stays at nothing. It applies to clips made from now on: a project already saved keeps its fades.
+Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "CLP-006"; apps/daw/test/browser/run.ts "CLP-006"
 
 ### CLP-007 Loop
 A looped clip plays from where it starts in its recording to the loop's end, then the loop again and again, for as long as the clip lasts. Each pass starts on the frame after the last one of the pass before.

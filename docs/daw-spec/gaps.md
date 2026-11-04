@@ -47,7 +47,7 @@ Status: fixed: the clip panel's Reverse mirrors the region and the loop with the
 
 ### G-010 A clip names its recording through its id
 `Arranged` has no field for the recording it plays: the block finds it by cutting the piece suffix off the clip's id (`file3-2` is `file3`). Consolidating a stretch copies its first clip and renders nothing. Breaks ARR-008.
-Status: `Arranged.recording` names it, and every piece and copy keeps it; the DAW consolidates by rendering (ARR-020). The Timeline block still finds recordings by their ids, and its Cmd+J still copies the first clip, since it gives no `onConsolidate`.
+Status: `Arranged.recording` names it, and every piece and copy keeps it; the DAW and the Timeline block consolidate by rendering (ARR-020). The block still finds its demo's recordings by their ids.
 
 ### G-011 The device catalog and the offline render are locked in a block
 The list that pairs each device with its engine and its panel, and `bounce()`, live inside `block-device-chain`: a project cannot install them to build a chain per track or render one.
@@ -136,6 +136,10 @@ Status: fixed (checked in Chromium in the DAW).
 The registry build turns `cn-x` into what `.cn-x` applies, and only reads rules of that shape. A rule on a state or a descendant works on the site, which reads the sheet, and was dropped from what the CLI installs: the piano roll's keys were all white and showed no press, a sequencer's velocity fill lost its dim color and its transition, and an envelope never shook when refusing a point (its keyframes reached no project either). A pressed black key also kept its hover color on the site.
 Fix: those states are variants in the class's own `@apply`, the keyframes ship in the envelope items' `css`, the build carries `css`, and `apps/www/test/style-rules.test.ts` fails on a rule of any other shape.
 Status: fixed (checked in Chromium in the DAW). `apps/lab` keeps its old copies until it is reinstalled.
+
+### G-030 Two silent plays that could not be made again
+Twice in the browser checks, a track that should sound read -100 dB on the main meter: `DEV-010` (a take through a rack) and `DEV-014` (a pad held in an instrument rack), each once, each passing on the next run. An export's silence (`EXP-009`) cannot explain them: it only touches offline renders.
+Status: not reproduced in 34 plays made for it, 14 at low load and 10 under eight busy processes for the rack, 10 for the pad. The first came right after files were reinstalled on the dev server, so a page reloading mid-check is possible, not shown. A pad's note does stop when its panel has left the screen. To reopen if a track is ever heard silent outside a check.
 
 ## Fixed
 

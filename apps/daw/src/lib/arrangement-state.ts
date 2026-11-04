@@ -392,6 +392,23 @@ export function openTime(
   return insertTime(all, at, length, { duration }, splitter(all));
 }
 
+/** The audio clips of a track a stretch of time takes in, in the order they start: what consolidating it renders. */
+export function audioClipsIn(
+  clips: readonly Arranged[],
+  track: string,
+  [from, to]: readonly [number, number]
+): Arranged[] {
+  return clips
+    .filter(
+      (clip) =>
+        clip.track === track &&
+        !clip.notes &&
+        clip.value.start < to &&
+        clip.value.start + clip.value.length > from
+    )
+    .sort((a, b) => a.value.start - b.value.start);
+}
+
 /** The notes MIDI clips play within `[from, to)`, as one clip's own notes: each kept as it sounds, its loop and transposition played out. */
 function mergedNotes(
   clips: readonly Arranged[],
@@ -622,6 +639,8 @@ export interface ClipChange {
   copy?: boolean;
   /** For a move: how far the clip moved from where the drag began, in the timeline's units. */
   delta?: number;
+  /** What set it off: Delete or Backspace taking a fade away brings it back to an edge's. */
+  event?: Event;
   target: ClipTarget;
 }
 
@@ -1075,14 +1094,49 @@ function toggleClips(
   }));
 }
 
+/**
+ * A clip's value with a fade Delete or Backspace took away on an audio clip
+ * back at an edge's, as far as its other fade leaves room: a fade dragged to
+ * nothing stays there, so a clip can still have none.
+ */
+function withDeletedFadeBack(
+  clip: Arranged | undefined,
+  value: ClipValue,
+  details: ClipChange
+): ClipValue {
+  const { event, target } = details;
+  const key = event && "key" in event ? (event as KeyboardEvent).key : null;
+  if (
+    !clip?.recording ||
+    (key !== "Delete" && key !== "Backspace") ||
+    (target !== "fade-in" && target !== "fade-out")
+  ) {
+    return value;
+  }
+  return target === "fade-in"
+    ? {
+        ...value,
+        fadeIn: Math.min(EDGE_FADE_SECONDS, value.length - value.fadeOut),
+      }
+    : {
+        ...value,
+        fadeOut: Math.min(EDGE_FADE_SECONDS, value.length - value.fadeIn),
+      };
+}
+
 function changeClip(
   state: ArrangementState,
   id: string,
-  value: ClipValue,
+  edited: ClipValue,
   details: ClipChange
 ): ArrangementState {
   const selected = state.selection?.clips ?? NONE;
   const current = state.doc.clips;
+  const value = withDeletedFadeBack(
+    current.find((clip) => clip.id === id),
+    edited,
+    details
+  );
   let { copying, group } = state.gesture;
   // A copy of a clip in a selection copies the whole selection.
   if (!(details.copy && copying)) {

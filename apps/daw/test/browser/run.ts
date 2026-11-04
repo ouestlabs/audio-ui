@@ -921,6 +921,49 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.keyboard.press("Space");
       assert(!(other > -40), `the silent track reads ${other} dB`);
     },
+  "CLP-006: a file dropped fades 4 ms at its edges, and Delete on a longer fade brings it back to 4 ms":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      await page.waitForSelector("[data-clip-id]", { timeout: 10_000 });
+      const fade = page.getByRole("slider", { name: "Take fade in" });
+      const value = () => fade.inputValue().then(Number);
+      assert(
+        Math.abs((await value()) - 0.004) < 1e-6,
+        `a file dropped fades in over ${await value()} s`
+      );
+      await fade.focus();
+      await page.keyboard.press("ArrowRight");
+      await page.waitForFunction(
+        () =>
+          Number(
+            (
+              document.querySelector(
+                '[aria-label="Take fade in"]'
+              ) as HTMLInputElement | null
+            )?.value
+          ) > 0.004
+      );
+      await page.keyboard.press("Delete");
+      await page.waitForFunction(
+        () =>
+          Math.abs(
+            Number(
+              (
+                document.querySelector(
+                  '[aria-label="Take fade in"]'
+                ) as HTMLInputElement | null
+              )?.value
+            ) - 0.004
+          ) < 1e-6,
+        undefined,
+        { timeout: 5000 }
+      );
+      assert(
+        (await page.locator("[data-clip-id]").count()) === 1,
+        "Delete on a fade took the clip away too"
+      );
+    },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {
       const page = await open(browser);
