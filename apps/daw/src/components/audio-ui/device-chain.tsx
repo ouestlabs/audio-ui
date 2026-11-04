@@ -585,7 +585,9 @@ function DeviceChainSlot({
       // The line a dragged device would land on, in the middle of the gap before this slot.
       "before:absolute before:inset-y-0 before:inset-s-[-5px] before:hidden before:w-0.5 before:rounded-full before:bg-primary data-drop:before:block",
       "data-dragging:z-10 data-dragging:shadow-lg",
-      className
+      className,
+      // Folded, it is as wide as its strip, whatever width the host gives the panel.
+      folded && "w-auto"
     ),
     "data-dragging": dragging === value ? "" : undefined,
     "data-drop": dropIndex === index ? "" : undefined,

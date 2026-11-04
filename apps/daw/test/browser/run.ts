@@ -378,6 +378,13 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await devices
         .getByText("Delay", { exact: true })
         .waitFor({ timeout: 5000 });
+      // Folded, the device is no wider than its strip, whatever its panel's width.
+      await devices.getByRole("button", { name: "Fold Delay" }).click();
+      const slot = devices.locator(
+        "[data-slot=device-chain-slot][data-folded]"
+      );
+      const width = (await slot.boundingBox())?.width ?? 0;
+      assert(width < 48, `the folded device is ${width} px wide`);
     },
   "DEV-003: a device dropped on the add-track row makes a track for it": async (
     browser
@@ -1335,9 +1342,11 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const drums = page.locator("[data-slot=drum-rack-panel]");
       await drums.waitFor({ timeout: 5000 });
       const pads = drums.getByRole("group", { name: "Pads" });
-      for (const name of ["Kick C2", "Snare D2", "Hat F#2"]) {
-        await pads.getByLabel(name, { exact: true }).waitFor();
-      }
+      await Promise.all(
+        ["Kick C2", "Snare D2", "Hat F#2"].map((name) =>
+          pads.getByLabel(name, { exact: true }).waitFor()
+        )
+      );
       // The kick rings four seconds: long enough to hear it on the main track's meter, in the mixer.
       await drums.getByRole("slider", { name: "Kick decay" }).focus();
       await page.keyboard.press("End");
