@@ -17,7 +17,7 @@ Status: partial: an instrument picked while an audio track is selected makes a M
 Test: apps/daw/test/devices.test.ts "DEV-003"; apps/daw/test/browser/run.ts "DEV-003"
 
 ### DEV-004 Moving and removing
-A device is moved by dragging its title bar: the others slide aside for it, a copy follows the pointer and settles into the gap, and Escape puts it back. Dragged anywhere over a rack it goes in, and out of one the same way, keeping its automation. A device from the library drops the same way. The chain that would take it lights up, with a line where it lands, its end included; a rack does not go inside itself, and only an instrument rack takes an instrument. It is removed with Backspace or Delete when selected. Each change is one step of undo.
+A device is moved by dragging its title bar: a label with its name follows the pointer, hiding nothing, the device shows dimmed where it would land, the others aside, and Escape puts it back. Dragged anywhere over a rack it goes in, and out of one the same way, keeping its automation. A device from the library drops the same way. The chain that would take it lights up, with a line where it lands, its end included; a rack does not go inside itself, and only an instrument rack takes an instrument. It is removed with Backspace or Delete when selected. Each change is one step of undo.
 Test: apps/www/test/arrangement-state.test.ts "DEV-004"; apps/www/test/registry-audio/base/lib/arrangement-racks.test.ts "DEV-004"; apps/daw/test/browser/run.ts "DEV-004"
 
 ### DEV-005 Bypass

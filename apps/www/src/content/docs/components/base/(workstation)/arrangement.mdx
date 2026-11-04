@@ -442,7 +442,7 @@ const reorder = useTrackReorder({
 />;
 ```
 
-The grip sits in its track's row, inside the `Timeline`. While a track is dragged, `draggingId` is the track, and the other rows slide aside for it. `ghost` is the box of its header, and `TrackReorderGhost` draws the copy under the pointer, fixed, which the drag moves without a render and settles into the gap. The view scrolls when the pointer nears its top or bottom edge, and `Escape` puts the track back. With `blockOf`, the tracks of a group move with it. The grip and the copy ship with the hook, in `components/audio-ui/track-grip`.
+The grip sits in its track's row, inside the `Timeline`. While a track is dragged, `draggingId` is the track, and it shows dimmed where it would land, the other rows aside. `ghost` is the box of its header, and `TrackReorderGhost` draws the copy under the pointer, fixed, which the drag moves without a render and settles into the gap. The view scrolls when the pointer nears its top or bottom edge, and `Escape` puts the track back. With `blockOf`, the tracks of a group move with it. The grip and the copy ship with the hook, in `components/audio-ui/track-grip`.
 
 ### Groups
 

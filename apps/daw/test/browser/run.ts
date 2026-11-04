@@ -2075,12 +2075,27 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.mouse.down();
       await page.mouse.move(limiter.x + limiter.width - 10, y, { steps: 8 });
       await page.waitForTimeout(250);
-      assert((await ghost.count()) === 1, "no copy follows the pointer");
+      assert((await ghost.count()) === 1, "no label follows the pointer");
       const slid = await slots.nth(1).boundingBox();
       assert(
         !!slid && Math.abs(limiter.x - slid.x - gate.width) < 2,
         `the Limiter went from ${limiter.x} to ${slid?.x}`
       );
+      // The label hides nothing; the device itself shows dimmed where it would land.
+      const label = await ghost.boundingBox();
+      assert(
+        !!label && label.width < 200 && label.height < 40,
+        `the label is ${label?.width} by ${label?.height}`
+      );
+      const dimmed = await slots.nth(0).boundingBox();
+      assert(
+        !!dimmed && Math.abs(dimmed.x - slid.x - slid.width) < 2,
+        `the Gate shows at ${dimmed?.x}, not after the Limiter at ${slid.x}`
+      );
+      const opacity = await slots
+        .nth(0)
+        .evaluate((slot) => getComputedStyle(slot).opacity);
+      assert(Number(opacity) < 0.5, `the Gate shows at ${opacity}`);
       // Escape puts it back.
       await page.keyboard.press("Escape");
       await page.waitForTimeout(350);

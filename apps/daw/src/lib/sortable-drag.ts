@@ -1,6 +1,8 @@
 const LIFT_PX = 4;
 const MOVE_MS = 160;
 const EASING = "cubic-bezier(0.2, 0, 0, 1)";
+/** How the items show where they would land. */
+const DIMMED = "0.3";
 
 /** How far to scroll so a pointer held near an edge of the view keeps it going; 0 away from the edges. */
 function edgeScrollStep(at: number, start: number, end: number): number {
@@ -35,9 +37,11 @@ export interface SortableDragOptions {
   count?: number;
   /** Whether the pointer is over another place that takes the item: the row then closes up behind it. */
   elsewhere?: (x: number, y: number) => boolean;
+  /** Whether what follows the pointer goes anywhere it goes and fades as it lands, a label smaller than the item, rather than along the row. */
+  free?: boolean;
   /** The index of the item pressed. */
   from: number;
-  /** The copy that follows the pointer, fixed where the item was, if it is there yet. */
+  /** What follows the pointer, fixed where it starts, if it is there yet. */
   ghost: () => HTMLElement | null;
   /** Every item of the row, in order. */
   items: readonly HTMLElement[];
@@ -57,6 +61,7 @@ export function startSortableDrag({
   axis,
   count = 1,
   elsewhere,
+  free = false,
   from,
   ghost,
   items,
@@ -92,7 +97,9 @@ export function startSortableDrag({
   const moving = items.slice(from, from + count);
   const startScroll = scrolled();
   const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const transition = reduced ? "" : `transform ${MOVE_MS}ms ${EASING}`;
+  const transition = reduced
+    ? ""
+    : `transform ${MOVE_MS}ms ${EASING}, opacity ${MOVE_MS}ms ${EASING}`;
   const translate = (by: number) =>
     across ? `translateX(${by}px)` : `translateY(${by}px)`;
 
@@ -103,26 +110,28 @@ export function startSortableDrag({
   let y = startY;
   let frame = 0;
 
-  /** The others, aside for a gap: those between it and where the items were. */
-  const slide = () => {
-    for (const [index, item] of items.entries()) {
-      let by = 0;
-      if (index >= from + count && index < gap) {
-        by = -size;
-      } else if (index >= gap && index < from) {
-        by = size;
-      }
-      if (index < from || index >= from + count) {
-        item.style.transform = by ? translate(by) : "";
-      }
-    }
-  };
   /** How far the items travel to reach the gap. */
   const landing = () => {
     if (gap > from) {
       return endOf(boxes[gap - 1] as DOMRect) - endOf(last);
     }
     return gap < from ? startOf(boxes[gap] as DOMRect) - startOf(first) : 0;
+  };
+  /** How far an item goes for the gap: the items to it, those between it and where they were aside. */
+  const offsetOf = (index: number) => {
+    if (index >= from && index < from + count) {
+      return landing();
+    }
+    if (index >= from + count && index < gap) {
+      return -size;
+    }
+    return index >= gap && index < from ? size : 0;
+  };
+  const slide = () => {
+    for (const [index, item] of items.entries()) {
+      const by = offsetOf(index);
+      item.style.transform = by ? translate(by) : "";
+    }
   };
 
   /** The gap a pointer at `at` points at; within the items' own place, where they are. */
@@ -147,7 +156,9 @@ export function startSortableDrag({
     );
     const copy = ghost();
     if (copy) {
-      copy.style.transform = translate(at - (across ? startX : startY));
+      copy.style.transform = free
+        ? `translate(${x - startX}px, ${y - startY}px)`
+        : translate(at - (across ? startX : startY));
     }
     away = elsewhere?.(x, y) ?? false;
     const wanted = away ? from : gapAt(at);
@@ -158,6 +169,22 @@ export function startSortableDrag({
     frame = requestAnimationFrame(tick);
   };
 
+  /** What follows the pointer, to where the items land: a label goes to their corner and fades into them. */
+  const settling = (copy: HTMLElement): Keyframe[] => {
+    const shift = landing() - (scrolled() - startScroll);
+    const { transform } = copy.style;
+    if (!free) {
+      return [{ transform }, { transform: translate(shift) }];
+    }
+    const box = copy.getBoundingClientRect();
+    const toX = first.left + (across ? shift : 0) - box.left + x - startX;
+    const toY = first.top + (across ? 0 : shift) - box.top + y - startY;
+    return [
+      { opacity: 1, transform },
+      { opacity: 0, transform: `translate(${toX}px, ${toY}px)` },
+    ];
+  };
+
   const follow = (event: PointerEvent) => {
     x = event.clientX;
     y = event.clientY;
@@ -165,11 +192,12 @@ export function startSortableDrag({
       lifted = true;
       onLift();
       document.documentElement.style.cursor = "grabbing";
-      for (const item of moving) {
-        item.style.visibility = "hidden";
-      }
       for (const item of items) {
         item.style.transition = transition;
+      }
+      for (const item of moving) {
+        item.style.opacity = DIMMED;
+        item.style.pointerEvents = "none";
       }
       frame = requestAnimationFrame(tick);
     }
@@ -194,7 +222,8 @@ export function startSortableDrag({
       for (const item of items) {
         item.style.transform = "";
         item.style.transition = "";
-        item.style.visibility = "";
+        item.style.opacity = "";
+        item.style.pointerEvents = "";
       }
       let index: number | null = null;
       if (released && !away && gap !== from) {
@@ -203,18 +232,20 @@ export function startSortableDrag({
       onEnd(index, released);
     };
     const copy = ghost();
-    if (copy && !reduced && !carried) {
-      const to = translate(landing() - (scrolled() - startScroll));
-      copy
-        .animate([{ transform: copy.style.transform }, { transform: to }], {
-          duration: MOVE_MS,
-          easing: EASING,
-          fill: "forwards",
-        })
-        .finished.then(clean, clean);
-    } else {
+    if (!copy || reduced || carried) {
       clean();
+      return;
     }
+    for (const item of moving) {
+      item.style.opacity = "";
+    }
+    copy
+      .animate(settling(copy), {
+        duration: MOVE_MS,
+        easing: EASING,
+        fill: "forwards",
+      })
+      .finished.then(clean, clean);
   };
   const release = () => finish(true);
   const cancel = () => finish(false);

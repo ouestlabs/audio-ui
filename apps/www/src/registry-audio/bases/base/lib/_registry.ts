@@ -1210,7 +1210,7 @@ export const lib: RegistryItem[] = [
   {
     categories: ["lib", "audio"],
     description:
-      "The gesture of reordering a row by dragging one of its items: the others slide aside, a copy follows the pointer and settles into the gap, the view scrolls at its edges. No render while it moves.",
+      "The gesture of reordering a row by dragging one of its items: the others slide aside, the item shows dimmed where it would land, what follows the pointer settles there, the view scrolls at its edges. No render while it moves.",
     files: [
       {
         path: "lib/sortable-drag.ts",

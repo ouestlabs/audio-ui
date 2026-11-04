@@ -15,7 +15,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -83,6 +83,8 @@ function useSlot() {
 }
 
 const CHAIN = '[data-slot="device-chain"]';
+/** How far the label of a dragged device starts up and left of the pointer, in px: small enough to stay out of what it is over. */
+const LABEL_LEAD = 14;
 
 /** A chain's own slots, in the order they are drawn: a rack's chain inside a slot has slots of its own. */
 function slotsOf(root: HTMLElement): HTMLElement[] {
@@ -149,33 +151,6 @@ function targetAt(
   return target?.scroller === scroller && target.accepts(id) ? target : null;
 }
 
-/** The copy of a slot that follows the pointer, fixed where the slot is, and drawn with what its canvases hold. */
-function liftedCopy(slot: HTMLElement, view: HTMLElement) {
-  const box = slot.getBoundingClientRect();
-  const copy = slot.cloneNode(true) as HTMLElement;
-  const canvases = slot.querySelectorAll("canvas");
-  for (const [index, canvas] of copy.querySelectorAll("canvas").entries()) {
-    const source = canvases[index];
-    if (source) {
-      canvas.getContext("2d")?.drawImage(source, 0, 0);
-    }
-  }
-  copy.dataset.slot = "device-chain-ghost";
-  copy.inert = true;
-  copy.setAttribute("aria-hidden", "true");
-  copy.classList.add("pointer-events-none", "z-50", "bg-card", "shadow-lg");
-  Object.assign(copy.style, {
-    height: `${box.height}px`,
-    left: `${box.left}px`,
-    margin: "0",
-    position: "fixed",
-    top: `${box.top}px`,
-    width: `${box.width}px`,
-  });
-  view.insertAdjacentElement("beforeend", copy);
-  return copy;
-}
-
 /** The gap a pointer at `x` points at: before the first slot whose middle is past it, or the end. */
 function gapAt(middles: number[], x: number): number {
   const index = middles.findIndex((middle) => x < middle);
@@ -237,6 +212,12 @@ function DeviceChain({
   const around = use(DeviceChainContext);
   const scroller = around?.scroller ?? root;
   const [dragging, setDragging] = useState<string | null>(null);
+  const [lifted, setLifted] = useState<{
+    left: number;
+    title: string;
+    top: number;
+  } | null>(null);
+  const ghostRef = useRef<HTMLDivElement>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [message, setMessage] = useState("");
   const live = useRef({
@@ -303,7 +284,7 @@ function DeviceChain({
         return;
       }
       event.preventDefault();
-      let ghost: HTMLElement | null = null;
+      const { clientX: pressX, clientY: pressY } = event;
       let target: ChainTarget | null = null;
       let targetGap = 0;
       startSortableDrag({
@@ -315,10 +296,6 @@ function DeviceChain({
             target?.mark(null);
           }
           target = next;
-          // See-through over a chain, so what lights up there and the line show under it.
-          if (ghost) {
-            ghost.style.opacity = next ? "0.5" : "";
-          }
           if (next) {
             targetGap = next.gapAt(x);
             next.mark(targetGap);
@@ -326,12 +303,13 @@ function DeviceChain({
           return next !== null;
         },
         from,
-        ghost: () => ghost,
+        free: true,
+        ghost: () => ghostRef.current,
         items: slotsOf(view),
         // In the frame the copy goes, the new order is there: one without either would jump.
         onEnd: (landed, released) =>
           flushSync(() => {
-            ghost?.remove();
+            setLifted(null);
             setDragging(null);
             target?.mark(null);
             if (released && target) {
@@ -341,7 +319,11 @@ function DeviceChain({
             }
           }),
         onLift: () => {
-          ghost = liftedCopy(slot, view);
+          setLifted({
+            left: pressX - LABEL_LEAD,
+            title: slot.getAttribute("aria-label") ?? "",
+            top: pressY - LABEL_LEAD,
+          });
           setDragging(id);
         },
         scroller: scrolling,
@@ -489,6 +471,20 @@ function DeviceChain({
           {message}
         </span>
       </div>
+      {lifted
+        ? createPortal(
+            <div
+              aria-hidden="true"
+              className="cn-audio-device pointer-events-none fixed z-50 flex h-7 max-w-48 items-center border bg-card px-2.5 font-medium text-xs shadow-lg"
+              data-slot="device-chain-ghost"
+              ref={ghostRef}
+              style={{ left: lifted.left, top: lifted.top }}
+            >
+              <span className="truncate">{lifted.title}</span>
+            </div>,
+            document.body
+          )
+        : null}
     </DeviceChainContext>
   );
 }
@@ -710,7 +706,8 @@ interface DeviceChainSlotProps extends Omit<ComponentProps<"div">, "title"> {
 /**
  * One device of the chain, drawn by its own panel: put `DeviceChainSlotControls`
  * at the end of the panel's header. Drag the device by its header or by the
- * grip: the others slide aside, or press Left or Right on the grip; Delete removes it, and a
+ * grip: a label follows the pointer, and the device shows dimmed where it would
+ * land, the others aside; or press Left or Right on the grip; Delete removes it, and a
  * right-click gives the same commands. Folded, the slot is a narrow strip with
  * its on and off square at the top, the device's name down it, and the same
  * controls at the bottom; a click anywhere else on the strip unfolds it.
