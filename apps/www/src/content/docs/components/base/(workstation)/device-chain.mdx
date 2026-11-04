@@ -250,6 +250,7 @@ Each slot is a group named after its device, and its grip is a button, "Move Com
 <TypeRow name={"onMove"} type={"(id: string, index: number) => void"}>A slot was moved to `index`, counted once it has left its place. Leave it out and the slots stay where they are.</TypeRow>
 <TypeRow name={"onRemove"} type={"(id: string) => void"}>A slot was removed. Leave it out and no slot can be.</TypeRow>
 <TypeRow name={"onAdd"} type={"(device: string, index: number) => void"}>A device was dropped on the chain from a library: its id, and the index it goes in. Leave it out and nothing can be dropped.</TypeRow>
+<TypeRow name={"flat"} type={"boolean"} default={"false"}>Lays the devices flat on the surface around them, a hairline between each and the next, instead of as cards: as a workstation's device view docks them.</TypeRow>
 </TypeTable>
 
 ### DeviceChainSlot

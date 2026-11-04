@@ -127,6 +127,7 @@ function Chain({
   return (
     <DeviceChain
       className={className}
+      flat
       onAdd={add}
       onMove={move}
       onRemove={remove}
@@ -446,13 +447,13 @@ export function DeviceView({
     );
   }
   return (
-    <div className="flex h-full min-h-0 p-2">
+    <div className="flex h-full min-h-0">
       <Chain
         className="no-scrollbar scroll-fade-x min-h-0 min-w-0 flex-1 overflow-x-auto"
         devices={current.devices ?? []}
         dispatch={dispatch}
         end={
-          <div className="flex shrink-0 flex-col gap-2">
+          <div className="flex shrink-0 flex-col gap-2 p-2">
             <DeviceChainAdd onClick={onOpenLibrary} />
             <Button onClick={addRack} size="sm" variant="outline">
               Add a rack
