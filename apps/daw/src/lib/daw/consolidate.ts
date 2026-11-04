@@ -6,28 +6,11 @@
  */
 import type { TimeSelection } from "@/lib/arrangement";
 import { renderTrackClips } from "@/lib/arrangement-engine";
-import type { ArrangementDoc } from "@/lib/arrangement-state";
+import { type ArrangementDoc, audioClipsIn } from "@/lib/arrangement-state";
 import type { RecordingSource } from "@/lib/clip-player";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { type Dropped, decodeFiles } from "@/lib/daw/drop";
 import { encodeWav } from "@/lib/wav-file";
-
-/** The audio clips of `track` a stretch takes in, in the order they start. */
-function audioClipsIn(
-  doc: ArrangementDoc,
-  track: string,
-  [from, to]: readonly [number, number]
-) {
-  return doc.clips
-    .filter(
-      (clip) =>
-        clip.track === track &&
-        !clip.notes &&
-        clip.value.start < to &&
-        clip.value.start + clip.value.length > from
-    )
-    .sort((a, b) => a.value.start - b.value.start);
-}
 
 /**
  * The recordings a stretch consolidates into, one after the other: `made` by
@@ -45,7 +28,7 @@ export async function renderConsolidated(
   const rendered: Record<string, string> = {};
   await time.tracks.reduce(async (done, track) => {
     await done;
-    const [first] = audioClipsIn(doc, track, time.range);
+    const [first] = audioClipsIn(doc.clips, track, time.range);
     if (!first) {
       return;
     }

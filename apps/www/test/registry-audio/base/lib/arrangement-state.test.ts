@@ -704,6 +704,38 @@ describe("apply", () => {
     expect(right?.value).toMatchObject({ fadeIn: 0.004, fadeOut: 0.2 });
   });
 
+  test("CLP-006: a fade deleted on an audio clip goes back to an edge's; dragged to nothing, or on a MIDI clip, it stays at nothing", () => {
+    const whole = at("a", 0, 20);
+    const fadeOf = (
+      item: Arranged,
+      event: { key?: string },
+      reason: string
+    ) => {
+      const state = apply(init([item]), {
+        details: { event, reason, target: "fade-in" } as never,
+        id: "a",
+        type: "change-clip",
+        value: { ...item.value, fadeIn: 0 },
+      });
+      return state.doc.clips[0]?.value.fadeIn;
+    };
+    const audio = {
+      ...whole,
+      recording: "take",
+      value: { ...whole.value, fadeIn: 1 },
+    };
+    expect(fadeOf(audio, { key: "Delete" }, "keyboard")).toBe(0.004);
+    expect(fadeOf(audio, { key: "Backspace" }, "keyboard")).toBe(0.004);
+    expect(fadeOf(audio, {}, "drag")).toBe(0);
+    expect(fadeOf(whole, { key: "Delete" }, "keyboard")).toBe(0);
+    // A clip too short for an edge's fade beside its other fade keeps them within its length.
+    const short = {
+      ...audio,
+      value: { ...audio.value, fadeOut: 0.999, length: 1 },
+    };
+    expect(fadeOf(short, { key: "Delete" }, "keyboard")).toBeCloseTo(0.001);
+  });
+
   test("CLP-006: a cut gives a MIDI clip no fades", () => {
     let state = init([at("a", 0, 20)]);
     state = apply(state, { type: "select-clip", id: "a", additive: false });

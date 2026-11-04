@@ -116,8 +116,11 @@ import { useTrackReorder } from "@/registry-audio/bases/base/hooks/use-track-reo
 import type {
   Arranged,
   ArrangementTrack,
+  TimeSelection,
   TrackKind,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import { renderTrackClips } from "@/registry-audio/bases/base/lib/arrangement-engine";
+import { audioClipsIn } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
 import {
@@ -784,12 +787,36 @@ export default function BlockTimeline() {
   // The clips, as the commands that change them. A split cuts at the playhead, no closer to a clip's edge than a sixteenth of the bar.
   const getPosition = useCallback(() => clock.getSnapshot(), [clock]);
   // A stretch of time on some tracks, drawn by dragging across bare lanes, and what the keys do with it.
+  // Cmd/Ctrl + J: each audio track's clips rendered into one recording, as they play, then one clip per track, one step of undo.
+  const consolidateTime = useCallback(
+    async (time: TimeSelection) => {
+      const sampleRate = webAudio.getContext()?.sampleRate;
+      const rendered: Record<string, string> = {};
+      await time.tracks.reduce(async (done, track) => {
+        await done;
+        if (audioClipsIn(doc.clips, track, time.range).length === 0) {
+          return;
+        }
+        const buffer = await renderTrackClips(doc, track, time.range, sources, {
+          sampleRate,
+        });
+        if (buffer) {
+          const id = `consolidated-${crypto.randomUUID()}`;
+          keepRecording(id, recordingOf(channelsOf(buffer), buffer.sampleRate));
+          rendered[track] = id;
+        }
+      }, Promise.resolve());
+      dispatch({ rendered, time, type: "consolidate-time" });
+    },
+    [dispatch, doc, keepRecording, sources]
+  );
   const timeSelection = useTimeSelection({
     bar,
     clips,
     copyOf,
     dispatch,
     getPosition,
+    onConsolidate: consolidateTime,
     selectedIds,
     selectedTracks,
     tracks,
