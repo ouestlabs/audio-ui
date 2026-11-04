@@ -895,6 +895,21 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core"],
     description:
+      "Racks: devices in parallel chains, each with its volume, pan, switch and solo, lined up on the slowest and summed, and eight macros that turn parameters of the devices inside over a stretch of their travel; the engine that plays one on a track's chain.",
+    files: [
+      {
+        path: "lib/rack.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "rack",
+    registryDependencies: ["@audio-ui/arrangement", "@audio-ui/device-library"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in.",
     files: [
       {
@@ -1044,6 +1059,7 @@ const items: RegistryItem[] = [
       "@audio-ui/clip-player",
       "@audio-ui/device-library",
       "@audio-ui/mixer-engine",
+      "@audio-ui/rack",
       "@audio-ui/web-audio",
     ],
     type: "registry:lib",

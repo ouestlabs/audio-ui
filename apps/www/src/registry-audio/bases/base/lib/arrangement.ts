@@ -89,7 +89,68 @@ export interface TrackDevice {
   instrument?: boolean;
   /** A device switched off passes the sound on unchanged. @default true */
   on?: boolean;
+  /** A rack's chains and macros: what a device of the kind `audioui.rack` holds instead of a state of its own. */
+  rack?: Rack;
   state: Readonly<Record<string, ParameterValue>>;
+}
+
+/** A chain of a rack: devices in series, and how loud and where it sits in what the rack sums. */
+export interface RackChain {
+  devices: readonly TrackDevice[];
+  id: string;
+  /** Its volume, pan and switches; a chain with none plays at unity. */
+  mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
+  name: string;
+}
+
+/** A parameter a macro turns: the device by its id, and the stretch of the parameter's travel the macro's turn covers, 0 to 1 of it. */
+export interface RackMapping {
+  device: string;
+  max: number;
+  min: number;
+  parameter: string;
+}
+
+/** A knob of a rack, 0 to 1, that turns the parameters mapped to it together. */
+export interface RackMacro {
+  mappings: readonly RackMapping[];
+  name?: string;
+  value: number;
+}
+
+/** Devices in parallel chains, summed, and eight macros over the devices inside. */
+export interface Rack {
+  chains: readonly RackChain[];
+  macros: readonly RackMacro[];
+}
+
+/** The id a rack's track device carries in place of a device of the library. */
+export const RACK_DEVICE = "audioui.rack";
+
+/** How many macros a rack has. */
+export const MACRO_COUNT = 8;
+
+/** A rack with one chain holding `devices`, and its eight macros at rest, turning nothing. */
+export function newRack(
+  chain: string,
+  devices: readonly TrackDevice[] = []
+): Rack {
+  return {
+    chains: [{ devices, id: chain, name: "Chain 1" }],
+    macros: Array.from({ length: MACRO_COUNT }, () => ({
+      mappings: [],
+      value: 0,
+    })),
+  };
+}
+
+/** Every device inside a rack, down the racks within it. */
+export function rackDevices(rack: Rack): TrackDevice[] {
+  return rack.chains.flatMap((chain) =>
+    chain.devices.flatMap((device) =>
+      device.rack ? [device, ...rackDevices(device.rack)] : [device]
+    )
+  );
 }
 
 /** A track of an arrangement. */

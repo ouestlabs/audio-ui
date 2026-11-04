@@ -614,3 +614,142 @@ check(
     );
   }
 );
+
+/** A rack of `chains` on a track, as a track device. */
+function rackDevice(
+  chains: {
+    devices?: ReturnType<typeof device>[];
+    id: string;
+    mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
+  }[],
+  macros: {
+    mappings: { device: string; max: number; min: number; parameter: string }[];
+    value: number;
+  }[] = []
+) {
+  return {
+    device: "audioui.rack",
+    id: "rack",
+    rack: {
+      chains: chains.map((chain) => ({
+        devices: chain.devices ?? [],
+        id: chain.id,
+        name: chain.id,
+        ...(chain.mix ? { mix: chain.mix } : {}),
+      })),
+      macros,
+    },
+    state: {},
+  };
+}
+
+/** The loudest a rack on one track makes an impulse of 0.5, and where. */
+async function throughRack(rack: ReturnType<typeof rackDevice>) {
+  const at = 9600;
+  const doc = arrangement({
+    clips: [clip("a", "fx", 0, 0.5, "click")],
+    tracks: [{ color: 0, devices: [rack], id: "fx", name: "Fx" }],
+  });
+  return loudestOf(
+    await render(doc, new Map([["click", impulse(0.5, at)]]), 0.5)
+  );
+}
+
+const chainMix = (gain: number, muted = false, soloed = false) => ({
+  gain,
+  muted,
+  pan: 0,
+  soloed,
+});
+
+check("DEV-010: a rack's chains play side by side and are summed", async () => {
+  const both = await throughRack(rackDevice([{ id: "a" }, { id: "b" }]));
+  assert(
+    Math.abs(both.level - 1) < 1e-4,
+    `two chains of an impulse of 0.5 sum to ${both.level}, not 1`
+  );
+});
+
+check("DEV-010: a chain's volume, switch and solo, as a track's", async () => {
+  const quieter = await throughRack(
+    rackDevice([{ id: "a" }, { id: "b", mix: chainMix(0.5) }])
+  );
+  assert(
+    Math.abs(quieter.level - 0.75) < 1e-4,
+    `at half, the sum is ${quieter.level}`
+  );
+  const off = await throughRack(
+    rackDevice([{ id: "a" }, { id: "b", mix: chainMix(1, true) }])
+  );
+  assert(
+    Math.abs(off.level - 0.5) < 1e-4,
+    `a chain switched off leaves ${off.level}`
+  );
+  const solo = await throughRack(
+    rackDevice([{ id: "a" }, { id: "b", mix: chainMix(0.5, false, true) }])
+  );
+  assert(
+    Math.abs(solo.level - 0.25) < 1e-4,
+    `the soloed chain alone gives ${solo.level}`
+  );
+});
+
+check(
+  "DEV-011: chains that delay differently meet on the same frame, and the track waits for the rack",
+  async () => {
+    // A compressor that looks ahead, at unity: an impulse under its threshold, no make-up.
+    const compressor = device("c", "audioui.compressor", {
+      autoMakeup: false,
+      makeupDb: 0,
+      thresholdDb: 0,
+    });
+    const rack = rackDevice([
+      { devices: [compressor], id: "slow" },
+      { id: "fast" },
+    ]);
+    const aligned = await throughRack(rack);
+    assert(
+      Math.abs(aligned.level - 1) < 1e-3,
+      `the two chains peak apart: the loudest sample is ${aligned.level}, not their sum`
+    );
+    assert(
+      aligned.at > 9600,
+      `the rack delays nothing (peak at ${aligned.at})`
+    );
+  }
+);
+
+check(
+  "DEV-012: a macro turns the parameter mapped to it, over the stretch of its travel",
+  async () => {
+    const utility = device("u", "audioui.utility");
+    const mapped = (value: number) =>
+      rackDevice(
+        [{ devices: [utility], id: "a" }],
+        [
+          {
+            // From 0 dB to +6 dB of a gain that runs from -35 to +35 dB.
+            mappings: [
+              {
+                device: "u",
+                max: 0.5 + (20 * Math.log10(2)) / 70,
+                min: 0.5,
+                parameter: "gainDb",
+              },
+            ],
+            value,
+          },
+        ]
+      );
+    const down = await throughRack(mapped(0));
+    const up = await throughRack(mapped(1));
+    assert(
+      Math.abs(down.level - 0.5) < 1e-3,
+      `the macro at rest gives ${down.level}`
+    );
+    assert(
+      Math.abs(up.level - 1) < 1e-2,
+      `the macro turned up gives ${up.level}, not 1`
+    );
+  }
+);
