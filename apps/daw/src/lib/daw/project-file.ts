@@ -4,6 +4,7 @@
  * document is UTF-8 JSON with its `format` and `version` at the top, and
  * names each sample by its path in the folder.
  */
+import { renamePadRecordings } from "@/lib/arrangement";
 import type { ArrangementDoc } from "@/lib/arrangement-state";
 
 export const PROJECT_FORMAT = "audio-ui-daw";
@@ -108,7 +109,7 @@ export function sampleFileName(
 
 /**
  * The project with every recording under a new id from `fresh`, in its
- * samples and in the clips that play them: what opening it gives, so its ids
+ * samples, in the clips and in the drum racks' pads that play them: what opening it gives, so its ids
  * never meet those a page has already played.
  */
 export function withFreshIds(
@@ -124,6 +125,10 @@ export function withFreshIds(
         clip.recording && ids.has(clip.recording)
           ? { ...clip, recording: ids.get(clip.recording) }
           : clip
+      ),
+      // The drum racks' pads play recordings too.
+      tracks: file.doc.tracks.map((track) =>
+        renamePadRecordings(track, (id) => ids.get(id) ?? id)
       ),
     },
     samples: file.samples.map((sample) => ({

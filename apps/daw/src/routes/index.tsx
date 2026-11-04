@@ -1,6 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Daw, type DawProps } from "@/components/daw/daw";
+import { padRecordings } from "@/lib/arrangement";
+import { allTracks } from "@/lib/arrangement-state";
 import {
   cachedRecording,
   canStream,
@@ -17,13 +19,18 @@ export const Route = createFileRoute("/")({
   component: Home,
 });
 
-/** A saved recording: streamed from its cache when there is one, decoded from its bytes otherwise (and cached, where it can stream). */
+/**
+ * A saved recording: streamed from its cache when there is one, decoded from
+ * its bytes otherwise (and cached, where it can stream). One a drum rack's pad
+ * plays (`whole`) stays decoded: a pad plays it at once.
+ */
 async function openRecording(
   context: BaseAudioContext,
   id: string,
-  name: string
+  name: string,
+  whole: boolean
 ): Promise<Recording | null> {
-  const streaming = canStream();
+  const streaming = canStream() && !whole;
   const cached = streaming
     ? await cachedRecording(id, name, context.sampleRate)
     : null;
@@ -49,10 +56,11 @@ async function openProject(): Promise<DawProps> {
   // Before anything streams, while no file is held open: what the project no longer has goes.
   const kept = new Set(saved.recordings.map((recording) => recording.id));
   await Promise.all([pruneRecordings(kept), pruneCache(kept)]);
+  const pads = padRecordings(allTracks(saved.doc));
   const recordings = new Map<string, Recording>();
   await saved.recordings.reduce(async (done, { id, name }) => {
     await done;
-    const recording = await openRecording(context, id, name);
+    const recording = await openRecording(context, id, name, pads.has(id));
     if (recording) {
       recordings.set(id, recording);
     }

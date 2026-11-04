@@ -198,6 +198,71 @@ export function newDrumRack(ids: readonly [string, string, string]): Rack {
   };
 }
 
+/** The recordings the pads of `tracks`' drum racks play: what a project keeps with its clips' recordings. */
+export function padRecordings(
+  tracks: readonly ArrangementTrack[]
+): Set<string> {
+  return new Set(
+    tracks.flatMap((track) =>
+      (track.devices ?? []).flatMap((device) =>
+        device.rack
+          ? [device, ...rackDevices(device.rack)].flatMap(
+              (item) =>
+                item.rack?.chains.flatMap((chain) =>
+                  chain.pad?.sound.kind === "sample"
+                    ? [chain.pad.sound.recording]
+                    : []
+                ) ?? []
+            )
+          : []
+      )
+    )
+  );
+}
+
+/** A rack whose pads play the recordings `rename` gives for theirs, down the racks within it. */
+function renamedRack(rack: Rack, rename: (id: string) => string): Rack {
+  return {
+    ...rack,
+    chains: rack.chains.map((chain) => ({
+      ...chain,
+      devices: chain.devices.map((device) =>
+        device.rack
+          ? { ...device, rack: renamedRack(device.rack, rename) }
+          : device
+      ),
+      ...(chain.pad?.sound.kind === "sample"
+        ? {
+            pad: {
+              ...chain.pad,
+              sound: {
+                ...chain.pad.sound,
+                recording: rename(chain.pad.sound.recording),
+              },
+            },
+          }
+        : {}),
+    })),
+  };
+}
+
+/** A track whose drum racks' pads play the recordings `rename` gives for theirs: what a project opened under new recording ids needs. */
+export function renamePadRecordings(
+  track: ArrangementTrack,
+  rename: (id: string) => string
+): ArrangementTrack {
+  return track.devices?.some((device) => device.rack)
+    ? {
+        ...track,
+        devices: track.devices.map((device) =>
+          device.rack
+            ? { ...device, rack: renamedRack(device.rack, rename) }
+            : device
+        ),
+      }
+    : track;
+}
+
 /** Every device inside a rack, down the racks within it. */
 export function rackDevices(rack: Rack): TrackDevice[] {
   return rack.chains.flatMap((chain) =>

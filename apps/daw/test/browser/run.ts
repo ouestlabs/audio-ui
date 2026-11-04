@@ -1362,6 +1362,39 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         .click();
       await pads.getByLabel("Snare C#2", { exact: true }).waitFor();
     },
+  "DEV-013: a recording dropped on a pad fills it, plays when the pad is struck, and comes back with the project":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a drum rack" }).click();
+      const drums = page.locator("[data-slot=drum-rack-panel]");
+      await drums.waitFor({ timeout: 5000 });
+      await dropChord(
+        page,
+        '[data-slot=drum-rack-panel] [data-note="39"]',
+        "Clap",
+        1
+      );
+      const pads = drums.getByRole("group", { name: "Pads" });
+      const clap = pads.getByLabel("Clap D#2", { exact: true });
+      await clap.waitFor({ timeout: 5000 });
+      await clap.click({ delay: 50 });
+      await showMixer(page);
+      const level = await loudest(page, 600);
+      assert(level > -40, `the recording on the pad plays at ${level} dB`);
+      await page.waitForSelector("text=Saved", { timeout: 5000 });
+      await open(browser, page);
+      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page
+        .locator("[data-slot=drum-rack-panel]")
+        .getByLabel("Clap D#2", { exact: true })
+        .click({ delay: 50 });
+      await showMixer(page);
+      const again = await loudest(page, 600);
+      assert(again > -40, `reloaded, the pad plays at ${again} dB`);
+    },
   "DEV-010 and DEV-012: a rack takes a device from the library, plays it, and a macro turns its parameter":
     async (browser) => {
       const page = await open(browser);
@@ -1395,6 +1428,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const through = await play();
       assert(through > -40, `the take through the rack plays at ${through} dB`);
       await page.getByRole("tab", { name: "Devices" }).click();
+      // The macros start hidden: the title bar's switch shows them.
+      await rack.getByRole("button", { name: "Macros", exact: true }).click();
       await rack.getByRole("button", { name: "Macro 1: 0 mapped" }).click();
       await page.getByRole("menuitem", { name: "Map a parameter" }).click();
       await page.getByRole("menuitem", { name: "Gain" }).click();

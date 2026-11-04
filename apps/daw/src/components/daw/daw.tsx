@@ -43,9 +43,17 @@ import { useTimelineGrid } from "@/hooks/use-timeline-grid";
 import { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTrackAutomation } from "@/hooks/use-track-automation";
-import type { Arranged, ArrangementTrack } from "@/lib/arrangement";
+import {
+  type Arranged,
+  type ArrangementTrack,
+  padRecordings,
+} from "@/lib/arrangement";
 import { renderArrangement } from "@/lib/arrangement-engine";
-import { type ArrangementDoc, trackOf } from "@/lib/arrangement-state";
+import {
+  type ArrangementDoc,
+  allTracks,
+  trackOf,
+} from "@/lib/arrangement-state";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
 import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
@@ -518,6 +526,49 @@ export function Daw({
     [dispatch, doc.duration, recordings]
   );
 
+  // A recording dropped on a drum rack's pad (DEV-013): kept decoded, as a pad plays it whole and at once.
+  const addPadSample = useCallback(
+    async (track: string, rack: string, note: number, files: File[]) => {
+      const context = webAudio.getContext();
+      if (!context || files.length === 0) {
+        return;
+      }
+      const { made, skipped } = await decodeFiles(
+        context,
+        files.slice(0, 1),
+        new Set(recordings.keys())
+      );
+      if (skipped.length > 0) {
+        toast.error(`Not a sound this browser can read: ${skipped.join(", ")}`);
+      }
+      const [first] = made;
+      if (!first) {
+        return;
+      }
+      const [id, { bytes, recording }] = first;
+      if (canStore()) {
+        saveRecording(id, bytes).catch(() =>
+          setSaved("Not saved: the browser refused to store the file")
+        );
+      }
+      setRecordings((current) => new Map([...current, [id, recording]]));
+      dispatch({
+        name: recording.name,
+        note,
+        rack,
+        sound: {
+          decay: Math.min(4, recording.length),
+          kind: "sample",
+          recording: id,
+          tune: 0,
+        },
+        track,
+        type: "set-pad",
+      });
+    },
+    [dispatch, recordings]
+  );
+
   // Export (EXP-001, EXP-002): the main output, from the start to the end of the last clip.
   // The project's folder on disk (PRJ-006, PRJ-007): Cmd+S saves to it, Cmd+Shift+S to another, Cmd+O opens one.
   const [folder, setFolder] = useState(initialFolder);
@@ -527,7 +578,11 @@ export function Daw({
         toast.error(`The browser was not let write to ${target.name}.`);
         return;
       }
-      const played = new Set(doc.clips.map((clip) => clip.recording));
+      // What the clips play, and the drum racks' pads.
+      const played = new Set([
+        ...doc.clips.map((clip) => clip.recording),
+        ...padRecordings(allTracks(doc)),
+      ]);
       const kept = [...recordings]
         .filter(([id]) => played.has(id))
         .map(([id, recording]) => ({ id, name: recording.name }));
@@ -902,6 +957,7 @@ export function Daw({
             onNoteOff={noteOff}
             onNoteOn={noteOn}
             onOpenLibrary={openLibrary}
+            onPadFiles={addPadSample}
             track={selectedTrack}
           />
         )}

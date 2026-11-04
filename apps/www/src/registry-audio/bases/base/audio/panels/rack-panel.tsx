@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -303,17 +303,24 @@ function RackChainRow({
   );
 }
 
-/** The frame of a rack's face: a device's title bar, with its square, its name and the host's controls, over what the rack shows. */
+/**
+ * The frame of a rack's face: a device's title bar, with its square, its name,
+ * a switch that shows the macros and the host's controls, over what the rack
+ * shows, its columns side by side. The macros start hidden.
+ */
 function RackFrame({
   children,
   className,
   controls,
   enabled = true,
+  macros,
   onEnabledChange,
   slot = "rack-panel",
   title = "Rack",
 }: {
   children: ReactNode;
+  /** The rack's macros, shown first when the title bar's switch is on. */
+  macros?: ReactNode;
   className?: string;
   /** What sits at the end of the title bar: a host's grip, fold and remove buttons. */
   controls?: ReactNode;
@@ -325,6 +332,7 @@ function RackFrame({
   /** Its name in the title bar. @default "Rack" */
   title?: string;
 }) {
+  const [showMacros, setShowMacros] = useState(false);
   return (
     <div
       className={cn(
@@ -355,11 +363,26 @@ function RackFrame({
         >
           {title}
         </span>
+        {macros ? (
+          <Toggle
+            className="ms-1 h-6 min-w-0 px-1.5 text-xs"
+            onPressedChange={setShowMacros}
+            pressed={showMacros}
+            size="sm"
+            variant="outline"
+          >
+            Macros
+          </Toggle>
+        ) : null}
         <div className="ms-auto flex items-center gap-2 [&_button]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]">
           {controls}
         </div>
       </div>
-      <div className="flex min-h-0 flex-1 gap-3 p-2">{children}</div>
+      {/* Its columns, a hairline between each and the next. */}
+      <div className="flex min-h-0 flex-1 gap-3 p-2 *:not-first:border-s *:not-first:ps-3">
+        {showMacros ? macros : null}
+        {children}
+      </div>
     </div>
   );
 }
@@ -405,8 +428,8 @@ function RackMacros({
 }
 
 /**
- * The face of a rack: its eight macros, each with a menu that maps a
- * parameter of a device inside to it or lets one go; its chains, each with
+ * The face of a rack: its eight macros, shown from the title bar, each with a
+ * menu that maps a parameter of a device inside to it or lets one go; its chains, each with
  * its volume, switch and solo, one of them picked; and the picked chain's
  * devices, which the host draws as `children`. Controlled: every change is a
  * callback, and the knobs report the end of a turn with the commit callbacks.
@@ -460,18 +483,20 @@ function RackPanel({
       className={className}
       controls={controls}
       enabled={enabled}
+      macros={
+        <RackMacros
+          macros={rack.macros}
+          onMacroChange={onMacroChange}
+          onMacroCommit={onMacroCommit}
+          onMapMacro={onMapMacro}
+          onUnmapMacro={onUnmapMacro}
+          parameters={parameters}
+        />
+      }
       onEnabledChange={onEnabledChange}
       title={title}
     >
-      <RackMacros
-        macros={rack.macros}
-        onMacroChange={onMacroChange}
-        onMacroCommit={onMacroCommit}
-        onMapMacro={onMapMacro}
-        onUnmapMacro={onUnmapMacro}
-        parameters={parameters}
-      />
-      <div className="flex w-72 shrink-0 flex-col gap-1 border-s ps-3">
+      <div className="flex w-60 shrink-0 flex-col gap-1">
         <ul aria-label="Chains" className="flex flex-col gap-0.5">
           {rack.chains.map((chain) => (
             <RackChainRow
@@ -504,7 +529,7 @@ function RackPanel({
           Add a chain
         </Button>
       </div>
-      <div className="flex min-w-0 flex-1 border-s ps-3">{children}</div>
+      <div className="flex min-w-0 flex-1">{children}</div>
     </RackFrame>
   );
 }

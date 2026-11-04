@@ -1,9 +1,11 @@
 /**
  * A project folder of the disk, opened into the workstation (PRJ-007): its
  * recordings under new ids, each kept in the browser's storage, decoded and
- * cached one after the other as a dropped file is.
+ * cached one after the other as a dropped file is; those a drum rack's pads
+ * play stay decoded.
  */
-import type { ArrangementDoc } from "@/lib/arrangement-state";
+import { padRecordings } from "@/lib/arrangement";
+import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { openFolder } from "@/lib/daw/folder";
 import { withFreshIds } from "@/lib/daw/project-file";
@@ -29,6 +31,7 @@ export async function projectFromFolder(
     taken.add(id);
     return id;
   });
+  const pads = padRecordings(allTracks(fresh.doc));
   const recordings = new Map<string, Recording>();
   await fresh.samples.reduce(async (done, sample, index) => {
     await done;
@@ -46,7 +49,9 @@ export async function projectFromFolder(
     }
     recordings.set(
       sample.id,
-      canStream() ? await streamRecording(sample.id, decoded) : decoded
+      canStream() && !pads.has(sample.id)
+        ? await streamRecording(sample.id, decoded)
+        : decoded
     );
   }, Promise.resolve());
   return { doc: fresh.doc, missing, recordings };

@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { DRUM_RACK_DEVICE, padRecordings } from "@/lib/arrangement";
 import { newProject } from "@/lib/daw/project";
 import {
   PROJECT_FORMAT,
@@ -81,5 +82,53 @@ describe("the project file", () => {
     expect(fresh.samples[0]?.id).toBe("rec-new");
     expect(fresh.doc.clips[0]?.recording).toBe("rec-new");
     expect(file.doc.clips[0]?.recording).toBe("rec-old");
+  });
+
+  test("PRJ-007 and DEV-013: the recordings a drum rack's pads play take their new ids too", () => {
+    const project = newProject();
+    const doc = {
+      ...project,
+      tracks: project.tracks.map((track, index) =>
+        index === 0
+          ? {
+              ...track,
+              devices: [
+                {
+                  device: DRUM_RACK_DEVICE,
+                  id: "drums",
+                  instrument: true,
+                  rack: {
+                    chains: [
+                      {
+                        devices: [],
+                        id: "pad",
+                        name: "Clap",
+                        pad: {
+                          note: 39,
+                          sound: {
+                            decay: 1,
+                            kind: "sample" as const,
+                            recording: "rec-old",
+                            tune: 0,
+                          },
+                        },
+                      },
+                    ],
+                    macros: [],
+                  },
+                  state: {},
+                },
+              ],
+            }
+          : track
+      ),
+    };
+    const file = readProjectFile(
+      writeProjectFile(doc, [
+        { id: "rec-old", name: "Clap", path: "Samples/Clap.wav" },
+      ])
+    );
+    const fresh = withFreshIds(file, () => "rec-new");
+    expect([...padRecordings(fresh.doc.tracks)]).toEqual(["rec-new"]);
   });
 });

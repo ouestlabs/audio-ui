@@ -1,7 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
+  type ArrangementTrack,
   DRUM_RACK_DEVICE,
   type DrumSound,
+  padRecordings,
+  renamePadRecordings,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   type ArrangementCommand,
@@ -150,5 +153,33 @@ describe("drum racks", () => {
       base
     );
     expect(padsOf(moved)[0]?.note).toBe(50);
+  });
+});
+
+describe("drum rack recordings", () => {
+  test("DEV-013: a project lists the recordings its pads play, and renames them", () => {
+    const base = run([addDrums()]);
+    const rack = drumsOf(base)?.id as string;
+    const state = run(
+      [
+        {
+          name: "Clap",
+          note: 39,
+          rack,
+          sound: clap,
+          track: "beat",
+          type: "set-pad",
+        },
+      ],
+      base
+    );
+    expect([...padRecordings(state.doc.tracks)]).toEqual(["clap"]);
+    const renamed = renamePadRecordings(
+      state.doc.tracks[0] as ArrangementTrack,
+      (id) => `${id}-2`
+    );
+    expect([...padRecordings([renamed])]).toEqual(["clap-2"]);
+    const untouched = state.doc.tracks[1] as ArrangementTrack;
+    expect(renamePadRecordings(untouched, (id) => `${id}-2`)).toBe(untouched);
   });
 });

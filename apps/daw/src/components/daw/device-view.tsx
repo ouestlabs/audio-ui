@@ -37,6 +37,8 @@ interface ChainProps {
   onNoteOff: (pitch: number) => void;
   /** Plays a note of the track now, as a key does, until `onNoteOff`. */
   onNoteOn: (pitch: number, velocity: number) => void;
+  /** Files dropped on the pad of `note` of the drum rack `rack`. */
+  onPadFiles: (rack: string, note: number, files: File[]) => void;
   tempo: Arrangement["doc"]["tempo"];
   track: string;
 }
@@ -242,7 +244,6 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       value={device.id}
     >
       <RackPanel
-        className="w-[48rem]"
         controls={<DeviceChainSlotControls />}
         enabled={device.on !== false}
         onAddChain={addChain}
@@ -261,7 +262,7 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       >
         {selected ? (
           <Chain
-            className="min-h-0 flex-1 overflow-x-auto"
+            className="min-h-0"
             devices={selected.devices}
             end={
               selected.devices.length === 0 ? (
@@ -288,7 +289,7 @@ const lowestPad = (rack: Rack) =>
 
 /** A drum rack, the track's instrument: its macros, its pads, and the picked pad's devices (DEV-013). */
 function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
-  const { dispatch, onNoteOff, onNoteOn, track } = chain;
+  const { dispatch, onNoteOff, onNoteOn, onPadFiles, track } = chain;
   const rack = device.rack ?? { chains: [], macros: [] };
   const rackId = device.id;
   const [note, setNote] = useState(() => lowestPad(rack));
@@ -312,6 +313,10 @@ function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       }),
     [dispatch, rackId, track]
   );
+  const drop = useCallback(
+    (at: number, files: File[]) => onPadFiles(rackId, at, files),
+    [onPadFiles, rackId]
+  );
   return (
     <DeviceChainSlot
       enabled={device.on !== false}
@@ -320,11 +325,11 @@ function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       value={device.id}
     >
       <DrumRackPanel
-        className="w-[56rem]"
         controls={<DeviceChainSlotControls />}
         enabled={device.on !== false}
         onChainMix={mix}
         onChainMixCommit={settle}
+        onDropFiles={drop}
         onEnabledChange={toggle}
         onMacroChange={turn}
         onMacroCommit={settle}
@@ -343,7 +348,7 @@ function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       >
         {pad ? (
           <Chain
-            className="min-h-0 flex-1 overflow-x-auto"
+            className="min-h-0"
             devices={pad.devices}
             end={
               pad.devices.length === 0 ? (
@@ -373,6 +378,7 @@ export function DeviceView({
   onNoteOff,
   onNoteOn,
   onOpenLibrary,
+  onPadFiles,
   track,
 }: {
   arrangement: Arrangement;
@@ -382,6 +388,13 @@ export function DeviceView({
   onNoteOn: (track: string, pitch: number, velocity: number) => void;
   /** Opens the library on the left, ready to search. */
   onOpenLibrary: () => void;
+  /** Files dropped on a pad of a drum rack on a track: a recording for it to play. */
+  onPadFiles: (
+    track: string,
+    rack: string,
+    note: number,
+    files: File[]
+  ) => void;
   track: string | null;
 }) {
   const { dispatch, doc } = arrangement;
@@ -419,6 +432,11 @@ export function DeviceView({
     (pitch: number) => onNoteOff(id, pitch),
     [id, onNoteOff]
   );
+  const padFiles = useCallback(
+    (rack: string, note: number, files: File[]) =>
+      onPadFiles(id, rack, note, files),
+    [id, onPadFiles]
+  );
 
   if (!current) {
     return (
@@ -430,7 +448,7 @@ export function DeviceView({
   return (
     <div className="flex h-full min-h-0 p-2">
       <Chain
-        className="min-h-0 min-w-0 flex-1 overflow-x-auto"
+        className="no-scrollbar scroll-fade-x min-h-0 min-w-0 flex-1 overflow-x-auto"
         devices={current.devices ?? []}
         dispatch={dispatch}
         end={
@@ -448,6 +466,7 @@ export function DeviceView({
         }
         onNoteOff={noteOff}
         onNoteOn={noteOn}
+        onPadFiles={padFiles}
         place={undefined}
         tempo={doc.tempo}
         track={current.id}

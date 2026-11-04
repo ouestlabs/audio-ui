@@ -220,7 +220,7 @@ function PadEditor({
 }
 
 /**
- * The face of a drum rack: its eight macros; its pads, sixteen at a time on
+ * The face of a drum rack: its eight macros, shown from the title bar; its pads, sixteen at a time on
  * a bank of the 128 notes, each named for the sound it plays, the lowest note
  * at the bottom left; the picked pad's voice, pitch, decay and mix; and the
  * picked pad's devices, which the host draws as `children`. Striking a pad
@@ -337,19 +337,21 @@ function DrumRackPanel({
       className={className}
       controls={controls}
       enabled={enabled}
+      macros={
+        <RackMacros
+          macros={rack.macros}
+          onMacroChange={onMacroChange}
+          onMacroCommit={onMacroCommit}
+          onMapMacro={onMapMacro}
+          onUnmapMacro={onUnmapMacro}
+          parameters={parameters}
+        />
+      }
       onEnabledChange={onEnabledChange}
       slot="drum-rack-panel"
       title={title}
     >
-      <RackMacros
-        macros={rack.macros}
-        onMacroChange={onMacroChange}
-        onMacroCommit={onMacroCommit}
-        onMapMacro={onMapMacro}
-        onUnmapMacro={onUnmapMacro}
-        parameters={parameters}
-      />
-      <div className="flex w-56 shrink-0 flex-col gap-1 border-s ps-3">
+      <div className="flex w-56 shrink-0 flex-col gap-1">
         <div className="flex items-center gap-1">
           <Button
             aria-label="Lower pads"
@@ -433,7 +435,7 @@ function DrumRackPanel({
           )}
         </Pad>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-2 border-s ps-3">
+      <div className="flex min-w-0 flex-1 flex-col gap-2">
         <PadEditor
           chain={padAt(rack, selectedNote)}
           note={selectedNote}
