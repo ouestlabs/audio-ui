@@ -38,8 +38,8 @@ Test: apps/daw/test/devices.test.ts "DEV-008"
 
 ### DEV-010 Racks
 A rack is a device that holds chains of devices side by side: the sound goes into every chain, through its devices in series, and the chains are summed. Each chain has its volume, pan, switch and solo, as a track does; a soloed chain silences the others. The effects picked on a chain are grouped into a rack, one chain of them, where the first was; a rack can also come from the library with one empty chain, and chains are added and removed. A device inside a rack is changed, switched off, moved and removed as on a track; a rack can hold racks. A drag of a chain's fader or of a macro is one step of undo.
-Test: apps/www/test/registry-audio/base/lib/arrangement-racks.test.ts "DEV-010"; apps/www/test/browser/arrangement-engine.check.ts "DEV-010"
-Status: partial: the device view shows no rack yet.
+Test: apps/www/test/registry-audio/base/lib/arrangement-racks.test.ts "DEV-010"; apps/www/test/browser/arrangement-engine.check.ts "DEV-010"; apps/daw/test/browser/run.ts "DEV-010 and DEV-012"
+In the DAW: Add a rack, at the end of the chain, puts one there; a device dragged from the library into a chain of it goes there; the macros map from their menu, to the whole travel of the parameter.
 
 ### DEV-011 A rack's delay
 Chains that delay the sound differently meet on the same frame: each waits for the slowest. The rack delays the track by its slowest chain, which the track's delay compensation counts.
@@ -47,5 +47,4 @@ Test: apps/www/test/browser/arrangement-engine.check.ts "DEV-011"
 
 ### DEV-012 Macros
 A rack has eight macros, each from 0 to 1. A parameter of any device inside the rack, a rack within it included, is mapped to a macro over a stretch of its travel: turning the macro from 0 to 1 moves the parameter across that stretch, along the parameter's own scale. Mapped again, the stretch changes; unmapped, the parameter plays as set.
-Test: apps/www/test/registry-audio/base/lib/arrangement-racks.test.ts "DEV-012"; apps/www/test/browser/arrangement-engine.check.ts "DEV-012"
-Status: partial: macros are mapped through commands only, the device view has no knob for them yet.
+Test: apps/www/test/registry-audio/base/lib/arrangement-racks.test.ts "DEV-012"; apps/www/test/browser/arrangement-engine.check.ts "DEV-012"; apps/daw/test/browser/run.ts "DEV-010 and DEV-012"

@@ -754,6 +754,8 @@ export type ArrangementCommand =
       id: string;
       index: number;
       to?: string;
+      /** A chain of a rack on the track the device moves along, instead of the track's own chain. */
+      chain?: { chain: string; rack: string };
     }
   | { type: "remove-device"; track: string; id: string }
   | {
@@ -1346,8 +1348,32 @@ function addDevice(
 
 function moveDevice(
   state: ArrangementState,
-  { id, index, to, track }: Extract<ArrangementCommand, { type: "move-device" }>
+  {
+    chain: along,
+    id,
+    index,
+    to,
+    track,
+  }: Extract<ArrangementCommand, { type: "move-device" }>
 ): ArrangementState {
+  if (along) {
+    return changeRack(
+      state,
+      track,
+      along.rack,
+      (rack) =>
+        withChain(rack, along.chain, (item) => {
+          const device = item.devices.find((each) => each.id === id);
+          const placed = device
+            ? placeDevice(item.devices, device, index)
+            : item.devices;
+          return sameItems(placed, item.devices)
+            ? item
+            : { ...item, devices: placed };
+        }),
+      edit
+    );
+  }
   const target = to ?? track;
   const device = trackOf(state.doc, track)?.devices?.find(
     (item) => item.id === id

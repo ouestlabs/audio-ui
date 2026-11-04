@@ -102,6 +102,11 @@ Docked under the tracks at a fixed height, the clip panel's boxes and waveform s
 Fix: the clip view's body fills its frame, the clip panel's waveform and the MIDI clip panel's roll take the room there is (the roll at 18rem when the panel has no height of its own, as before).
 Status: fixed (checked in Chromium in the DAW's detail view).
 
+### G-029 A chain inside a chain took the same drop twice
+`DeviceChain` counted every slot inside it, a rack's chain's included, and let a drop and a drag go on up: a device dropped on a rack's chain was added to it and to the track's chain around it, and a device dragged inside a rack dragged the rack too.
+Fix: a chain counts its own slots only, and a drop, the drag over it and a drag started inside stop at the innermost chain.
+Status: fixed (checked in Chromium in the DAW, DEV-010).
+
 ### G-028 Tracks had no color in a project whose theme has no chart colors
 The timeline's track colors read the theme's `--chart-1` to `--chart-5`, which an install does not bring and the DAW's theme did not have: every track, its clips and its strip in the mixer were the same, and a color picked in a header's menu changed nothing.
 Fix: each track color falls back to the design system's own, the shades the docs show, when the theme has none; a theme that has them keeps its own.

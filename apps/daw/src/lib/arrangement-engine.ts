@@ -26,6 +26,7 @@ import {
   mixAt,
   mixOf,
   playedNotes,
+  type Rack,
   type TrackDevice,
 } from "@/lib/arrangement";
 import {
@@ -55,6 +56,10 @@ import {
   type MixerState,
   type MixerStrip,
 } from "@/lib/mixer-engine";
+import {
+  createRackEngine,
+  type RackEngine,
+} from "@/lib/rack";
 
 /**
  * How far ahead a play is scheduled, so every part of the engine has heard of
@@ -94,9 +99,22 @@ interface Voice {
 interface PlacedDevice {
   /** Stands in for the device when it is switched off: it waits as long as the device would. */
   bypass: DelayNode | null;
-  engine: LibraryEngine;
-  entry: LibraryDevice;
+  /** The track device it plays, as it was last given. */
+  device: TrackDevice;
+  engine: LibraryEngine | RackEngine;
+  /** The device of the library it is; a rack is none. */
+  entry: LibraryDevice | null;
   state: TrackDevice["state"];
+}
+
+/** How long a placed device delays the sound, in seconds: a rack, as long as its slowest chain. */
+function placedLatency(placed: PlacedDevice, sampleRate: number): number {
+  return placed.entry
+    ? placed.entry.device.latency(
+        placed.entry.device.sanitize(placed.state),
+        sampleRate
+      )
+    : (placed.engine as RackEngine).latency();
 }
 
 interface TrackRuntime {
@@ -224,11 +242,8 @@ function chainLatency(
   sampleRate: number
 ): number {
   let frames = 0;
-  for (const { entry, state } of devices) {
-    frames += toFrames(
-      entry.device.latency(entry.device.sanitize(state), sampleRate),
-      sampleRate
-    );
+  for (const placed of devices) {
+    frames += toFrames(placedLatency(placed, sampleRate), sampleRate);
   }
   return frames;
 }
@@ -371,27 +386,48 @@ export async function createArrangementEngine(
     const values = entry.device.sanitize(device.state) as AnyDeviceState;
     const placed = runtime.devices.get(device.id);
     if (placed?.entry === entry) {
+      placed.device = device;
       if (placed.state !== device.state) {
         placed.state = device.state;
-        placed.engine.update(values, deviceContext());
+        (placed.engine as LibraryEngine).update(values, deviceContext());
       }
       return;
     }
     placed?.engine.dispose();
     runtime.devices.set(device.id, {
       bypass: null,
+      device,
       engine: entry.create(ctx, values, deviceContext()),
       entry,
       state: device.state,
     });
   };
 
+  /** A rack on a track's chain: made the first time, then brought in step whenever its description changes. */
+  const syncRack = (runtime: TrackRuntime, device: TrackDevice, rack: Rack) => {
+    const placed = runtime.devices.get(device.id);
+    if (placed && placed.entry === null) {
+      if (placed.device !== device) {
+        placed.device = device;
+        (placed.engine as RackEngine).update(rack, deviceContext());
+      }
+      return;
+    }
+    placed?.engine.dispose();
+    const engine = createRackEngine(ctx, library);
+    engine.update(rack, deviceContext());
+    runtime.devices.set(device.id, {
+      bypass: null,
+      device,
+      engine,
+      entry: null,
+      state: device.state,
+    });
+  };
+
   /** What stands in for a device switched off: the sound goes by unchanged, as late as the device would make it. */
   const bypassOf = (placed: PlacedDevice): ChainLink => {
-    const seconds = placed.entry.device.latency(
-      placed.entry.device.sanitize(placed.state),
-      rate
-    );
+    const seconds = placedLatency(placed, rate);
     placed.bypass ??= ctx.createDelay(Math.max(1, seconds * 2));
     placed.bypass.delayTime.value = toFrames(seconds, rate) / rate;
     return { input: placed.bypass, output: placed.bypass };
@@ -423,11 +459,15 @@ export async function createArrangementEngine(
   /** Brings a track's devices in step: engines made, updated or let go, its instrument's voices, then its chain. */
   const syncDevices = (track: ArrangementTrack, runtime: TrackRuntime) => {
     const strip = mixer.strip(track.id) ?? mixer.main;
-    const wanted = (track.devices ?? []).filter((device) =>
-      library(device.device)
+    const wanted = (track.devices ?? []).filter(
+      (device) => device.rack || library(device.device)
     );
     dropGone(runtime, wanted);
     for (const device of wanted) {
+      if (device.rack) {
+        syncRack(runtime, device, device.rack);
+        continue;
+      }
       const entry = library(device.device) as LibraryDevice;
       if (device.instrument) {
         syncInstrument(runtime, device, entry, strip.input);
@@ -945,7 +985,11 @@ export async function createArrangementEngine(
       await Promise.all([
         ...[...runtimes.values()].flatMap((runtime) => [
           runtime.player?.synced(),
-          ...[...runtime.devices.values()].map((placed) => placed.engine.ready),
+          ...[...runtime.devices.values()].map((placed) =>
+            placed.entry
+              ? (placed.engine as LibraryEngine).ready
+              : (placed.engine as RackEngine).ready()
+          ),
           ...(runtime.instrument?.voices ?? []).map(
             (voice) => voice.engine.ready
           ),

@@ -22,6 +22,7 @@ const LATENCY = /ms out/;
 const EXPORT = /Export WAV/;
 const DELAY = /Delay/;
 const POCKET_SYNTH = /Pocket Synth/;
+const UTILITY = /^Utility/;
 const DEVICES = /^Devices/;
 const UNITS = /\* ([\d.]+)\)/;
 const MAIN_PEAK = /^Main peak/;
@@ -1293,6 +1294,51 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         () =>
           document.querySelector('[aria-label="1 Audio"][data-track-id]') &&
           !document.querySelector('[aria-label="Group 1"][data-track-id]')
+      );
+    },
+  "DEV-010 and DEV-012: a rack takes a device from the library, plays it, and a macro turns its parameter":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Rack take", 3);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Utility");
+      await library
+        .getByRole("option", { name: UTILITY })
+        .first()
+        .dragTo(rack.locator("[data-slot=device-chain]"));
+      await rack
+        .getByText("Utility", { exact: true })
+        .waitFor({ timeout: 5000 });
+      await showMixer(page);
+      const play = async () => {
+        // The keys go to the page, not to the library's search field the drag left focused.
+        await page.evaluate(() =>
+          (document.activeElement as HTMLElement)?.blur()
+        );
+        await page.keyboard.press("Home");
+        await page.keyboard.press("Space");
+        const level = await loudest(page, 1500);
+        await page.keyboard.press("Space");
+        return level;
+      };
+      const through = await play();
+      assert(through > -40, `the take through the rack plays at ${through} dB`);
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await rack.getByRole("button", { name: "Macro 1: 0 mapped" }).click();
+      await page.getByRole("menuitem", { name: "Map a parameter" }).click();
+      await page.getByRole("menuitem", { name: "Gain" }).click();
+      await rack.getByRole("button", { name: "Macro 1: 1 mapped" }).waitFor();
+      // The macro at 0 puts the gain at the bottom of its travel.
+      await showMixer(page);
+      const down = await play();
+      assert(
+        down < through - 20,
+        `the macro mapped to the gain at 0 leaves the take at ${down} dB, from ${through} dB`
       );
     },
   "PRJ-001: the project comes back when the page is loaded again": async (

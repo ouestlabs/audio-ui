@@ -352,6 +352,26 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: [],
+    description:
+      "The face of a rack: eight macros, each with a menu that maps a parameter of a device inside or lets one go, its chains with their volume, switch and solo, and the picked chain's devices, which the host draws.",
+    files: [
+      {
+        path: "audio/panels/rack-panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "rack-panel",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/knob",
+      "@shadcn/button",
+      "@shadcn/dropdown-menu",
+      "@shadcn/toggle",
+    ],
+    type: "registry:ui",
+  },
+  {
     categories: ["device-chain"],
     description:
       "A library of devices by shelf, with a search: a device is added with Enter, a double-click or the Add button, or dragged to where it goes on a device chain.",

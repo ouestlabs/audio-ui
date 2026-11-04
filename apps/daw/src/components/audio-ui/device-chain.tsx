@@ -87,12 +87,15 @@ function edgeScrollStep(x: number, left: number, right: number): number {
 
 /** The middle of each slot across the view, in the order they are drawn. */
 function slotMiddles(root: HTMLElement): number[] {
+  // Its own slots only: a rack's chain inside a slot has slots of its own.
   return Array.from(
     root.querySelectorAll<HTMLElement>('[data-slot="device-chain-slot"]')
-  ).map((slot) => {
-    const box = slot.getBoundingClientRect();
-    return (box.left + box.right) / 2;
-  });
+  )
+    .filter((slot) => slot.closest('[data-slot="device-chain"]') === root)
+    .map((slot) => {
+      const box = slot.getBoundingClientRect();
+      return (box.left + box.right) / 2;
+    });
 }
 
 /** The gap a pointer at `x` points at: before the first slot whose middle is past it, or the end. */
@@ -259,7 +262,9 @@ function DeviceChain({
     if (!(live.current.onAdd && takesDevice(event))) {
       return;
     }
+    // The innermost chain takes it: one inside a slot has the drop, not the chain around it.
     event.preventDefault();
+    event.stopPropagation();
     event.dataTransfer.dropEffect = "copy";
     setDropIndex(gapAt(slotMiddles(event.currentTarget), event.clientX));
   }, []);
@@ -276,6 +281,7 @@ function DeviceChain({
       return;
     }
     event.preventDefault();
+    event.stopPropagation();
     setDropIndex(null);
     const device = event.dataTransfer.getData(DEVICE_DRAG_TYPE);
     if (device) {
@@ -529,6 +535,8 @@ function DeviceChainSlot({
     (event: PointerEvent<HTMLDivElement>) => {
       const target = event.target as Element;
       if (target.closest(HEADER) && !target.closest(CONTROL)) {
+        // A device inside a rack moves along its own chain, not the rack along the track's.
+        event.stopPropagation();
         startDrag(event, value);
       }
     },

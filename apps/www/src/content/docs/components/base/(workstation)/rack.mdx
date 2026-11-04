@@ -1,0 +1,44 @@
+---
+title: Rack
+description: "Devices in parallel chains, summed on the same frame, each chain with its volume, pan, switch and solo, and eight macros over the parameters inside. Controlled, with no audio in it."
+component: true
+base: base
+---
+
+A rack holds chains of devices side by side in one slot of a [device chain](/docs/components/base/device-chain). The face draws the rack you give it and calls back on every change; the engine that plays it follows the same rack.
+
+## Installation
+
+<Install name="rack-panel" packages="" />
+
+The engine that plays a rack is an item of its own, `npx shadcn@latest add @audio-ui/rack`.
+
+## Usage
+
+A rack is a device that holds chains of devices side by side: the sound goes into every chain, through its devices in series, and the chains are summed. Each chain has its volume, pan, switch and solo, and chains that delay the sound differently are lined up on the slowest. Eight macros turn parameters of the devices inside, each over a stretch of its travel.
+
+- **The rack itself:** a track device of the kind `audioui.rack` holds a `rack`, its chains and macros. `rack` (`npx shadcn@latest add @audio-ui/rack`) plays one: `createRackEngine(ctx, find)` gives a link of a chain with `input`, `output`, `update(rack)` and `latency()`.
+- **Its face:** `RackPanel` (`npx shadcn@latest add @audio-ui/rack-panel`) shows the macros, each with a menu to map a parameter of a device inside or let one go, the chains, and the picked chain's devices, which you draw as its `children` (a `DeviceChain` of their own).
+- **Commands:** `useArrangement` groups devices into a rack (`group-devices`), adds and removes chains, turns macros (`set-macro`) and maps them (`map-macro`, `unmap-macro`). A device inside a rack is changed, switched off, moved and removed as on a track.
+
+```tsx
+import { RackPanel } from "@/components/audio-ui/rack-panel";
+
+<RackPanel
+  onAddChain={addChain}
+  onChainMix={(chain, mix) => dispatch({ chain, mix, rack, track, type: "change-rack-chain" })}
+  onMacroChange={(index, value) => dispatch({ index, rack, track, type: "set-macro", value })}
+  onMapMacro={map}
+  onRemoveChain={removeChain}
+  onSelectChain={setPicked}
+  onUnmapMacro={unmap}
+  parameters={parameters}
+  rack={device.rack}
+  selectedChain={picked}
+>
+  {chainDevices /* a DeviceChain of the picked chain's devices */}
+</RackPanel>;
+```
+
+A chain inside a slot keeps its own drops and drags: a device dropped on it, or dragged along it, stays in it.
+

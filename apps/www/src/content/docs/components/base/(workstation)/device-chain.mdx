@@ -215,6 +215,10 @@ downloadWavFile(rendered, { bitDepth: 24, filename: "chain.wav" });
 
 `downloadWavFile` writes 16-bit PCM unless told 24, and `normalize: true` scales the sound so its loudest sample sits at full scale. `encodeWav(channels, sampleRate, options)` gives the bytes instead, to upload or to keep.
 
+## Racks
+
+A device can be a rack: chains of devices side by side, summed, with eight macros. Its face goes in a slot like any device, with a chain of its own inside it. See [Rack](/docs/components/base/rack).
+
 ## Interaction
 
 <KeyTable title="Chain">
