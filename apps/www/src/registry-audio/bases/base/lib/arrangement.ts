@@ -89,7 +89,7 @@ export interface TrackDevice {
   instrument?: boolean;
   /** A device switched off passes the sound on unchanged. @default true */
   on?: boolean;
-  /** A rack's chains and macros: what a device of the kind `audioui.rack` holds instead of a state of its own. */
+  /** A rack's chains and macros: what a device of the kind `audioui.rack` or `audioui.drum-rack` holds instead of a state of its own. */
   rack?: Rack;
   state: Readonly<Record<string, ParameterValue>>;
 }
@@ -101,6 +101,26 @@ export interface RackChain {
   /** Its volume, pan and switches; a chain with none plays at unity. */
   mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
   name: string;
+  /** In a drum rack: the note the chain answers, and the sound it plays into its devices. */
+  pad?: DrumPad;
+}
+
+/** The voices of the drum synthesis a pad can play. */
+export type DrumVoice = "hat" | "kick" | "snare";
+
+/**
+ * What a pad of a drum rack plays: a voice of the drum synthesis, or a
+ * recording, `tune` semitones from its own pitch, for `decay` seconds (a
+ * recording ends sooner when it is shorter).
+ */
+export type DrumSound =
+  | { decay: number; kind: "synth"; tune: number; voice: DrumVoice }
+  | { decay: number; kind: "sample"; recording: string; tune: number };
+
+/** The note a chain of a drum rack answers, 0 to 127, and the sound it plays. */
+export interface DrumPad {
+  note: number;
+  sound: DrumSound;
 }
 
 /** A parameter a macro turns: the device by its id, and the stretch of the parameter's travel the macro's turn covers, 0 to 1 of it. */
@@ -141,6 +161,40 @@ export function newRack(
       mappings: [],
       value: 0,
     })),
+  };
+}
+
+/** The id a drum rack's track device carries: an instrument whose chains are pads, each played by a note. */
+export const DRUM_RACK_DEVICE = "audioui.drum-rack";
+
+/** How long each voice of the drum synthesis rings by default, in seconds. */
+export const DRUM_DECAYS: Readonly<Record<DrumVoice, number>> = {
+  hat: 0.05,
+  kick: 0.2,
+  snare: 0.15,
+};
+
+/** How long a recording on a pad plays by default, in seconds, unless it ends sooner. */
+export const SAMPLE_DECAY = 2;
+
+/** The kit a drum rack starts with: a kick on C1, a snare on D1 and a closed hat on F#1, given the ids of their chains. */
+export function newDrumRack(ids: readonly [string, string, string]): Rack {
+  const pads: [DrumVoice, number, string][] = [
+    ["kick", 36, "Kick"],
+    ["snare", 38, "Snare"],
+    ["hat", 42, "Hat"],
+  ];
+  return {
+    chains: pads.map(([voice, note, name], index) => ({
+      devices: [],
+      id: ids[index] as string,
+      name,
+      pad: {
+        note,
+        sound: { decay: DRUM_DECAYS[voice], kind: "synth", tune: 0, voice },
+      },
+    })),
+    macros: newRack("").macros,
   };
 }
 

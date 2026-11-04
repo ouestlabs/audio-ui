@@ -48,6 +48,11 @@ import {
   type LibraryEngine,
   libraryDevice,
 } from "@/lib/device-library";
+import {
+  createDrumRackEngine,
+  type DrumRackEngine,
+  type PadRecording,
+} from "@/lib/drum-rack";
 import { triggerClick } from "@/lib/drum-synthesis";
 import {
   type ChainLink,
@@ -117,10 +122,28 @@ function placedLatency(placed: PlacedDevice, sampleRate: number): number {
     : (placed.engine as RackEngine).latency();
 }
 
+/** The recordings a drum rack's pads can play: the decoded ones, not those streamed from disk. */
+function padRecordings(
+  recordings: ReadonlyMap<string, RecordingSource>
+): ReadonlyMap<string, PadRecording> {
+  return new Map(
+    [...recordings].filter(
+      (entry): entry is [string, PadRecording] =>
+        "getChannelData" in entry[1] || "channels" in entry[1]
+    )
+  );
+}
+
 interface TrackRuntime {
   chainKey: string;
   clips: readonly Arranged[] | null;
   devices: Map<string, PlacedDevice>;
+  /** The drum rack a MIDI track plays through instead of an instrument: its track device as last given, and the recordings it had then. */
+  drums: {
+    device: TrackDevice;
+    engine: DrumRackEngine;
+    recordings: ReadonlyMap<string, RecordingSource>;
+  } | null;
   /** The instrument a MIDI track plays through: its device's id and state, and its voices. */
   instrument: {
     id: string;
@@ -293,6 +316,7 @@ export async function createArrangementEngine(
       chainKey: "",
       clips: null,
       devices: new Map(),
+      drums: null,
       instrument: null,
       notes: [],
       played: [],
@@ -303,6 +327,7 @@ export async function createArrangementEngine(
   };
 
   const releaseVoices = (runtime: TrackRuntime, at: number) => {
+    runtime.drums?.engine.cancel(at / rate);
     for (const voice of runtime.instrument?.voices ?? []) {
       if (voice.holding) {
         voice.engine.noteOff?.({ at: at / rate, id: voice.holding.id });
@@ -317,6 +342,7 @@ export async function createArrangementEngine(
       return;
     }
     runtime.player?.dispose();
+    runtime.drums?.engine.dispose();
     for (const voice of runtime.instrument?.voices ?? []) {
       voice.engine.dispose();
     }
@@ -336,12 +362,52 @@ export async function createArrangementEngine(
         runtime.devices.delete(id);
       }
     }
-    if (!wanted.some((device) => device.instrument) && runtime.instrument) {
+    dropInstruments(runtime, wanted);
+  };
+
+  /** Lets go of a track's instrument voices, or its drum rack, when the track no longer plays through them. */
+  const dropInstruments = (
+    runtime: TrackRuntime,
+    wanted: readonly TrackDevice[]
+  ) => {
+    const drums = wanted.find((device) => device.instrument && device.rack);
+    if (runtime.drums && runtime.drums.device.id !== drums?.id) {
+      runtime.drums.engine.dispose();
+      runtime.drums = null;
+    }
+    if (
+      !wanted.some((device) => device.instrument && !device.rack) &&
+      runtime.instrument
+    ) {
       for (const voice of runtime.instrument.voices) {
         voice.engine.dispose();
       }
       runtime.instrument = null;
     }
+  };
+
+  /** A MIDI track's drum rack: made the first time, then brought in step when it or the recordings change. */
+  const syncDrums = (
+    runtime: TrackRuntime,
+    device: TrackDevice,
+    rack: Rack,
+    input: AudioNode,
+    recordings: ReadonlyMap<string, RecordingSource>
+  ) => {
+    const current = runtime.drums;
+    if (current?.device === device && current.recordings === recordings) {
+      return;
+    }
+    const engine = current?.engine ?? createDrumRackEngine(ctx, library);
+    if (!current) {
+      engine.output.connect(input);
+    }
+    engine.update(
+      rack,
+      deviceContext(),
+      current?.recordings === recordings ? undefined : padRecordings(recordings)
+    );
+    runtime.drums = { device, engine, recordings };
   };
 
   /** A MIDI track's instrument: a voice for each note it can hold, made again when the device changes. */
@@ -456,14 +522,22 @@ export async function createArrangementEngine(
     );
   };
 
-  /** Brings a track's devices in step: engines made, updated or let go, its instrument's voices, then its chain. */
-  const syncDevices = (track: ArrangementTrack, runtime: TrackRuntime) => {
+  /** Brings a track's devices in step: engines made, updated or let go, its instrument's voices or drum rack, then its chain. */
+  const syncDevices = (
+    track: ArrangementTrack,
+    runtime: TrackRuntime,
+    recordings: ReadonlyMap<string, RecordingSource>
+  ) => {
     const strip = mixer.strip(track.id) ?? mixer.main;
     const wanted = (track.devices ?? []).filter(
       (device) => device.rack || library(device.device)
     );
     dropGone(runtime, wanted);
     for (const device of wanted) {
+      if (device.instrument && device.rack) {
+        syncDrums(runtime, device, device.rack, strip.input, recordings);
+        continue;
+      }
       if (device.rack) {
         syncRack(runtime, device, device.rack);
         continue;
@@ -493,7 +567,7 @@ export async function createArrangementEngine(
       return {
         gain,
         id: track.id,
-        latency: chainLatency(runtimeOf(track.id).devices.values(), rate),
+        latency: trackLatency(runtimeOf(track.id)),
         on: !mix.muted,
         pan,
         soloed: mix.soloed,
@@ -513,6 +587,11 @@ export async function createArrangementEngine(
       })),
     };
   };
+
+  /** The frames a track's chain delays its sound by: its drum rack, then its effects. */
+  const trackLatency = (runtime: TrackRuntime) =>
+    chainLatency(runtime.devices.values(), rate) +
+    (runtime.drums ? toFrames(runtime.drums.engine.latency(), rate) : 0);
 
   const position = () => {
     if (!state.playing) {
@@ -543,19 +622,34 @@ export async function createArrangementEngine(
       : note.end;
   };
 
+  /** Whether a track's notes have something to play: a drum rack, or an instrument's voices. */
+  const playsNotes = (
+    runtime: TrackRuntime | undefined,
+    entry: LibraryDevice | undefined
+  ): runtime is TrackRuntime =>
+    Boolean(runtime?.drums || (runtime?.instrument && entry));
+
   const noteOn = (
     runtime: TrackRuntime,
-    entry: LibraryDevice,
+    entry: LibraryDevice | undefined,
     note: FrameNote,
     at: number,
     passId: string
   ) => {
-    const { instrument } = runtime;
-    if (!instrument) {
-      return;
-    }
     const { chance, deviation, velocity } = note.note;
     if (Math.random() >= (chance ?? 1)) {
+      return;
+    }
+    const level = Math.min(
+      1,
+      Math.max(0, (velocity ?? 1) + Math.random() * (deviation ?? 0))
+    );
+    if (runtime.drums) {
+      runtime.drums.engine.hit(note.pitch, level, at / rate);
+      return;
+    }
+    const { instrument } = runtime;
+    if (!(instrument && entry)) {
       return;
     }
     const base = Object.fromEntries(
@@ -564,10 +658,7 @@ export async function createArrangementEngine(
     const played = {
       ...base,
       frequency: noteToFrequency(note.pitch),
-      velocity: Math.min(
-        1,
-        Math.max(0, (velocity ?? 1) + Math.random() * (deviation ?? 0))
-      ),
+      velocity: level,
     };
     const free =
       instrument.voices.find((voice) => !voice.holding) ??
@@ -613,7 +704,7 @@ export async function createArrangementEngine(
   ) => {
     const runtime = runtimes.get(track.id);
     const entry = instrumentOf(track);
-    if (!(runtime?.instrument && entry && runtime.notes.length > 0)) {
+    if (!playsNotes(runtime, entry) || runtime.notes.length === 0) {
       return;
     }
     const ends = startsInWindow(state, from, count, runtime.notes, endOf);
@@ -870,7 +961,7 @@ export async function createArrangementEngine(
     recordings: ReadonlyMap<string, RecordingSource>
   ) => {
     const runtime = runtimeOf(track.id);
-    syncDevices(track, runtime);
+    syncDevices(track, runtime, recordings);
     if (!next.tracks.includes(track)) {
       return;
     }
@@ -917,8 +1008,10 @@ export async function createArrangementEngine(
   /** A note started by hand: a voice of the track's instrument, now, as long as it is held. */
   const audition = (track: string, pitch: number, velocity: number) => {
     const runtime = runtimes.get(track);
-    const entry = doc && instrumentOf(trackOf(doc, track) ?? doc.main);
-    if (!(runtime?.instrument && entry)) {
+    const entry = doc
+      ? instrumentOf(trackOf(doc, track) ?? doc.main)
+      : undefined;
+    if (!playsNotes(runtime, entry)) {
       return;
     }
     const at = now();
@@ -985,6 +1078,7 @@ export async function createArrangementEngine(
       await Promise.all([
         ...[...runtimes.values()].flatMap((runtime) => [
           runtime.player?.synced(),
+          runtime.drums?.engine.ready(),
           ...[...runtime.devices.values()].map((placed) =>
             placed.entry
               ? (placed.engine as LibraryEngine).ready

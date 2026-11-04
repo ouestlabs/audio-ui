@@ -23,8 +23,11 @@ import {
   type AutomatedParameter,
   type ClipAction,
   type Clipping,
+  DRUM_RACK_DEVICE,
+  type DrumSound,
   type Mix,
   mixOf,
+  newDrumRack,
   newRack,
   RACK_DEVICE,
   type Rack,
@@ -724,6 +727,33 @@ export type ArrangementCommand =
       index: number;
       value: number;
     }
+  // Drum racks: a pad is a chain of the rack, found by its id or by the note it answers.
+  /** Puts `sound` on the pad of `note`: the chain already there takes it, or a new chain named `name` does. */
+  | {
+      type: "set-pad";
+      track: string;
+      rack: string;
+      note: number;
+      sound: DrumSound;
+      name?: string;
+    }
+  /** A pad's pitch or decay, as a turn of its knob sets it: a burst, which `settle-clip-edit` closes into one step. */
+  | {
+      type: "change-pad";
+      track: string;
+      rack: string;
+      chain: string;
+      tune?: number;
+      decay?: number;
+    }
+  /** Moves a pad to the note `note`; the pad there, if any, takes the note it had. */
+  | {
+      type: "move-pad";
+      track: string;
+      rack: string;
+      chain: string;
+      note: number;
+    }
   /** Maps a parameter of a device inside the rack to a macro, over a stretch of its travel; mapped again, its stretch changes. */
   | {
       type: "map-macro";
@@ -1302,6 +1332,70 @@ function holdsInstrument(doc: ArrangementDoc, id: string): boolean {
   return !isBus(doc, id) && trackOf(doc, id)?.kind === "midi";
 }
 
+/** What a new rack holds: one empty chain, or a drum rack's starting kit. */
+function rackFor(doc: ArrangementDoc, device: string): { rack?: Rack } {
+  const taken = chainIds(doc);
+  if (device === RACK_DEVICE) {
+    return { rack: newRack(freshId("chain", taken)) };
+  }
+  if (device === DRUM_RACK_DEVICE) {
+    return {
+      rack: newDrumRack([
+        freshId("chain", taken),
+        freshId("chain", taken),
+        freshId("chain", taken),
+      ]),
+    };
+  }
+  return {};
+}
+
+/** The sound of `note`'s pad put on: on the chain that answers it, or on a new one. */
+function setPad(
+  rack: Rack,
+  note: number,
+  sound: DrumSound,
+  id: string,
+  name = "Pad"
+): Rack {
+  const at = Math.round(Math.min(127, Math.max(0, note)));
+  const there = rack.chains.find((chain) => chain.pad?.note === at);
+  if (there) {
+    return withChain(rack, there.id, (chain) => ({
+      ...chain,
+      name: name.trim() || chain.name,
+      pad: { note: at, sound },
+    }));
+  }
+  return {
+    ...rack,
+    chains: [
+      ...rack.chains,
+      { devices: [], id, name: name.trim() || "Pad", pad: { note: at, sound } },
+    ],
+  };
+}
+
+/** A pad moved to `note`, and the pad there, if any, to the note the first had. */
+function movePad(rack: Rack, id: string, note: number): Rack {
+  const moved = rack.chains.find((chain) => chain.id === id)?.pad;
+  const to = Math.round(Math.min(127, Math.max(0, note)));
+  if (!moved || moved.note === to) {
+    return rack;
+  }
+  return {
+    ...rack,
+    chains: rack.chains.map((chain) => {
+      if (chain.id === id) {
+        return { ...chain, pad: { ...moved, note: to } };
+      }
+      return chain.pad?.note === to
+        ? { ...chain, pad: { ...chain.pad, note: moved.note } }
+        : chain;
+    }),
+  };
+}
+
 function addDevice(
   state: ArrangementState,
   command: Extract<ArrangementCommand, { type: "add-device" }>
@@ -1317,9 +1411,7 @@ function addDevice(
     device,
     id: freshId("device", deviceIds(state.doc)),
     ...(instrument ? { instrument: true } : {}),
-    ...(device === RACK_DEVICE
-      ? { rack: newRack(freshId("chain", chainIds(state.doc))) }
-      : {}),
+    ...rackFor(state.doc, device),
     state: values,
   };
   const { chain } = command;
@@ -2205,6 +2297,56 @@ const handlers: Handlers = {
           value: Math.min(1, Math.max(0, value)),
         })),
       burst
+    ),
+  "set-pad": (state, { name, note, rack, sound, track }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) =>
+        setPad(
+          current,
+          note,
+          sound,
+          freshId("chain", chainIds(state.doc)),
+          name
+        ),
+      edit
+    ),
+  "change-pad": (state, { chain, decay, rack, track, tune }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) =>
+        withChain(current, chain, (item) =>
+          item.pad
+            ? {
+                ...item,
+                pad: {
+                  ...item.pad,
+                  sound: {
+                    ...item.pad.sound,
+                    ...(tune === undefined
+                      ? {}
+                      : { tune: Math.min(48, Math.max(-48, tune)) }),
+                    ...(decay === undefined
+                      ? {}
+                      : { decay: Math.min(10, Math.max(0.01, decay)) }),
+                  },
+                },
+              }
+            : item
+        ),
+      burst
+    ),
+  "move-pad": (state, { chain, note, rack, track }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) => movePad(current, chain, note),
+      edit
     ),
   "map-macro": (state, { index, mapping, rack, track }) =>
     changeRack(

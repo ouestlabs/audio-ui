@@ -1,8 +1,10 @@
 import type { ParameterValue } from "@audio-ui/core/device";
-import type {
-  Arranged,
-  ArrangementTrack,
-  TrackDevice,
+import {
+  type Arranged,
+  type ArrangementTrack,
+  DRUM_RACK_DEVICE,
+  type DrumSound,
+  type TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   createArrangementEngine,
@@ -751,5 +753,128 @@ check(
       Math.abs(up.level - 1) < 1e-2,
       `the macro turned up gives ${up.level}, not 1`
     );
+  }
+);
+
+/** A drum rack of `pads` on a MIDI track playing `notes`, rendered for half a second with a recording `hit`, an impulse on its first frame. */
+async function throughDrums(
+  pads: {
+    devices?: ReturnType<typeof device>[];
+    mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
+    note: number;
+    sound: DrumSound;
+  }[],
+  notes: { pitch: number; velocity: number }[]
+) {
+  const doc = arrangement({
+    clips: [
+      {
+        ...clip("m", "beat", 0, 1),
+        notes: notes.map((note, index) => ({
+          id: `n${index}`,
+          length: 0.1,
+          start: 0.1,
+          ...note,
+        })),
+        recording: undefined,
+      },
+    ],
+    tracks: [
+      {
+        color: 0,
+        devices: [
+          {
+            device: DRUM_RACK_DEVICE,
+            id: "drums",
+            instrument: true,
+            rack: {
+              chains: pads.map((pad, index) => ({
+                devices: pad.devices ?? [],
+                id: `pad-${index}`,
+                name: `Pad ${index}`,
+                pad: { note: pad.note, sound: pad.sound },
+                ...(pad.mix ? { mix: pad.mix } : {}),
+              })),
+              macros: [],
+            },
+            state: {},
+          },
+        ],
+        id: "beat",
+        kind: "midi",
+        name: "Beat",
+      },
+    ],
+  });
+  return render(doc, new Map([["hit", impulse(0.5, 0)]]), 0.5);
+}
+
+const hit: DrumSound = { decay: 2, kind: "sample", recording: "hit", tune: 0 };
+
+check(
+  "DEV-013: a note plays the pads that answer it, on its frame, as loud as its velocity",
+  async () => {
+    const out = await throughDrums(
+      [
+        { note: 39, sound: hit },
+        { note: 36, sound: { ...hit, recording: "none" } },
+      ],
+      [{ pitch: 39, velocity: 0.5 }]
+    );
+    const { at, level } = loudestOf(out);
+    assert(at === 4800, `the pad sounds at frame ${at}, not 4800`);
+    assert(Math.abs(level - 0.25) < 1e-4, `at half velocity it gives ${level}`);
+    const none = await throughDrums(
+      [{ note: 39, sound: hit }],
+      [{ pitch: 60, velocity: 1 }]
+    );
+    assert(
+      none.getChannelData(0).every((sample) => sample === 0),
+      "a note no pad answers makes a sound"
+    );
+  }
+);
+
+check(
+  "DEV-013: a pad plays through its own devices and its chain's switch, and a synthesized voice sounds",
+  async () => {
+    const louder = await throughDrums(
+      [
+        {
+          devices: [device("u", "audioui.utility", { gainDb: 6 })],
+          note: 39,
+          sound: hit,
+        },
+      ],
+      [{ pitch: 39, velocity: 0.5 }]
+    );
+    const up = loudestOf(louder).level;
+    const expected = 0.25 * 10 ** (6 / 20);
+    assert(
+      Math.abs(up - expected) < 1e-4,
+      `+6 dB on the pad gives ${up}, not ${expected}`
+    );
+    const off = await throughDrums(
+      [{ mix: chainMix(1, true), note: 39, sound: hit }],
+      [{ pitch: 39, velocity: 1 }]
+    );
+    assert(
+      off.getChannelData(0).every((sample) => sample === 0),
+      "a pad switched off sounds"
+    );
+    const kick = await throughDrums(
+      [
+        {
+          note: 36,
+          sound: { decay: 0.2, kind: "synth", tune: 0, voice: "kick" },
+        },
+      ],
+      [{ pitch: 36, velocity: 1 }]
+    );
+    const data = kick.getChannelData(0);
+    const before = Math.max(...data.subarray(0, 4799).map(Math.abs));
+    const during = Math.max(...data.subarray(4800, 9600).map(Math.abs));
+    assert(before === 0, `the kick sounds before its note (${before})`);
+    assert(during > 0.3, `the kick is near silent (${during})`);
   }
 );

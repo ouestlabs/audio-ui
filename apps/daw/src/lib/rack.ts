@@ -105,6 +105,8 @@ export function rackLatency(
 
 /** A rack playing on a context: one link of a chain, its sound in at `input` and out at `output`. */
 export interface RackEngine {
+  /** Where the chain `id` takes its sound in: what a drum rack plays a pad into. */
+  chainInput: (id: string) => AudioNode | undefined;
   dispose: () => void;
   readonly input: AudioNode;
   /** How long it delays the sound now, in seconds. */
@@ -147,11 +149,14 @@ const nodesOf = (link: Placed["link"]) =>
  * it), then waits for the slowest chain so all of them meet on the same
  * frame, then its volume, pan and switch, summed at the output. A solo lets
  * only the soloed chains through. Devices are made with `find`; a rack
- * inside a rack plays the same way.
+ * inside a rack plays the same way. With `fed: false` the chains do not take
+ * the rack's input: each is played into at its own (`chainInput`), as a drum
+ * rack's pads are.
  */
 export function createRackEngine(
   ctx: BaseAudioContext,
-  find: FindDevice
+  find: FindDevice,
+  { fed = true }: { fed?: boolean } = {}
 ): RackEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
@@ -172,7 +177,9 @@ export function createRackEngine(
       volume: ctx.createGain(),
       wait: ctx.createDelay(MAX_WAIT_SECONDS),
     };
-    input.connect(made.input);
+    if (fed) {
+      input.connect(made.input);
+    }
     made.wait.connect(made.volume).connect(made.splitter);
     made.splitter.connect(made.left, 0).connect(made.merger, 0, 0);
     made.splitter.connect(made.right, 1).connect(made.merger, 0, 1);
@@ -350,6 +357,7 @@ export function createRackEngine(
   };
 
   return {
+    chainInput: (id) => chains.get(id)?.input,
     dispose: () => {
       for (const chain of chains.values()) {
         disposeChain(chain);
