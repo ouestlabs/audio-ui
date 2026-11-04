@@ -519,7 +519,7 @@ describe("warp modes", () => {
       "rec",
       RATE
     );
-    const whole = renderTrack([clip], one(rec), [playing(0)], 2 * RATE)[0];
+    const [whole] = renderTrack([clip], one(rec), [playing(0)], 2 * RATE);
     const at = 48_000;
     const jumped = new Float32Array(BLOCK);
     renderClips([jumped], 0, BLOCK, at, [clip], one(rec), RATE);

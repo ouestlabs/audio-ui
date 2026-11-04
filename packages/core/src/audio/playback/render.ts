@@ -286,7 +286,15 @@ function renderStretchedClip(
     (stretch.aligned
       ? alignedAt(clip, stretch, index, locate, left, step, rate)
       : 0);
-  const aheadAt = stretch.aligned ? lookAheadShare(clip) * hop : hop;
+  const aheadAt = stretch.aligned
+    ? lookAheadShare(clip) * hop
+    : Number.POSITIVE_INFINITY;
+  const add = (out: number, l: number, r: number, gain: number) => {
+    outLeft[out] = (outLeft[out] as number) + l * gain;
+    if (outRight) {
+      outRight[out] = (outRight[out] as number) + r * gain;
+    }
+  };
   let grain = -1;
   let start = 0;
   let next = 0;
@@ -302,7 +310,7 @@ function renderStretchedClip(
         next = startOf(index + 1);
       }
       const into = read - index * hop;
-      if (stretch.aligned && into >= aheadAt && ahead !== index) {
+      if (into >= aheadAt && ahead !== index) {
         ahead = index;
         startOf(index + 2);
       }
@@ -316,12 +324,7 @@ function renderStretchedClip(
         l = l * (1 - rise) + left(coming) * rise;
         r = r * (1 - rise) + right(coming) * rise;
       }
-      const out = at + frame - position;
-      const gain = gainAt(clip, frame);
-      outLeft[out] = (outLeft[out] as number) + l * gain;
-      if (outRight) {
-        outRight[out] = (outRight[out] as number) + r * gain;
-      }
+      add(at + frame - position, l, r, gainAt(clip, frame));
     }
   }
 }
