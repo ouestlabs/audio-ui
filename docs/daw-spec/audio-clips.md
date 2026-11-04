@@ -24,8 +24,9 @@ A fade-in and a fade-out never overlap: together they are as long as the clip at
 Test: packages/core/src/primitives/timeline/test/clip.test.ts (fitFades)
 
 ### CLP-006 Fades on clip edges
-A clip laid down gets a fade of 4 ms at each edge (or half its length when shorter), which can be edited; deleting such a fade sets it back to 4 ms.
-Status: planned (phase 3, with crossfades).
+A clip laid down gets a fade of 4 ms at each edge (or half its length when shorter), which can be edited, and a cut gives an audio clip one each side of it. It applies to clips made from now on: a project already saved keeps its fades.
+Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "CLP-006"
+Status: partial: a fade deleted does not go back to 4 ms.
 
 ### CLP-007 Loop
 A looped clip plays from where it starts in its recording to the loop's end, then the loop again and again, for as long as the clip lasts. Each pass starts on the frame after the last one of the pass before.
@@ -54,3 +55,7 @@ Test: packages/core/src/audio/playback/render.test.ts "CLP-012"
 ### CLP-013 Transpose
 Transposing an audio clip without changing its speed needs a warp mode that stretches time.
 Status: planned (phase 4). In repitch mode the transpose is disabled, as in the reference.
+
+### CLP-014 Crossfades
+Two clips that meet on a track with fades of one length play through each other: each goes on past the join by as much as both sources hold, up to that length, and both fade over the same stretch around it, along their shapes. With a shape whose two sides add up to one, such as linear, what they share stays level, and a clip cut in two plays on as if it were whole. Dragging a fade between two clips that meet gives both that length. With fades of different lengths, or nothing to play past the join, each keeps its own fade, down to silence at the join. In a `.dawproject` file they go out as the fades they are.
+Test: apps/www/test/browser/arrangement-engine.check.ts "CLP-014"

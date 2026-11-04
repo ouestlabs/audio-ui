@@ -4,6 +4,7 @@ import {
   type Arranged,
   type ArrangementTrack,
   mixOf,
+  withEdgeFades,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   allTracks,
@@ -610,6 +611,40 @@ describe("apply", () => {
     state = apply(state, { type: "duplicate-track", id: "drums" });
     const copy = state.doc.tracks.find((track) => track.id === "track-3");
     expect(copy?.mix).toMatchObject({ gain: 0.5, pan: -1 });
+  });
+
+  test("CLP-006: a cut gives an audio clip an edge's fade each side, and leaves its outer fades as they were", () => {
+    const whole = at("a", 0, 20);
+    let state = init([
+      {
+        ...whole,
+        recording: "take",
+        value: { ...whole.value, fadeIn: 0.1, fadeOut: 0.2 },
+      },
+    ]);
+    state = apply(state, { type: "select-clip", id: "a", additive: false });
+    state = apply(state, { type: "split-cursor", at: 10, step: 1 });
+    const [left, right] = state.doc.clips;
+    expect(left?.value).toMatchObject({ fadeIn: 0.1, fadeOut: 0.004 });
+    expect(right?.value).toMatchObject({ fadeIn: 0.004, fadeOut: 0.2 });
+  });
+
+  test("CLP-006: a cut gives a MIDI clip no fades", () => {
+    let state = init([at("a", 0, 20)]);
+    state = apply(state, { type: "select-clip", id: "a", additive: false });
+    state = apply(state, { type: "split-cursor", at: 10, step: 1 });
+    expect(state.doc.clips[0]?.value.fadeOut).toBe(0);
+    expect(state.doc.clips[1]?.value.fadeIn).toBe(0);
+  });
+
+  test("CLP-006: a clip laid down fades an edge's length at each end, half its length when it is shorter", () => {
+    expect(withEdgeFades({ length: 10, offset: 0, start: 0 })).toMatchObject({
+      fadeIn: 0.004,
+      fadeOut: 0.004,
+    });
+    expect(withEdgeFades({ length: 0.002, offset: 0, start: 0 })).toMatchObject(
+      { fadeIn: 0.001, fadeOut: 0.001 }
+    );
   });
 
   test("a split at the cursor cuts the selected clip, and its second piece takes a fresh id", () => {

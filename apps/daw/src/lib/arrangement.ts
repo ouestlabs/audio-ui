@@ -1,6 +1,7 @@
 import type { ParameterValue } from "@audio-ui/core/device";
 import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
+import type { PlayedClip } from "@audio-ui/core/playback";
 import { unwarpedTime, type WarpMarker, warpedTime } from "@audio-ui/core/time";
 import type { ClipValue } from "@audio-ui/react";
 
@@ -591,6 +592,57 @@ export function devicePositions(
     positions.set(named.device, parameters);
   }
   return positions;
+}
+
+/** The fade a clip laid down gets at each edge, in seconds: enough to take the click off a cut. */
+export const EDGE_FADE_SECONDS = 0.004;
+
+/** A clip's fades as it is laid down: `EDGE_FADE_SECONDS` at each edge, or half its length when it is shorter. */
+export function withEdgeFades<Value extends { length: number }>(
+  value: Value
+): Value & { fadeIn: number; fadeOut: number } {
+  const fade = Math.min(EDGE_FADE_SECONDS, value.length / 2);
+  return { ...value, fadeIn: fade, fadeOut: fade };
+}
+
+/**
+ * A track's played clips with their crossfades: two that meet with fades of
+ * one length play through each other. Each goes on past the join by as much as
+ * both sources hold, up to that length, and both fade over the same stretch
+ * around it, so what they share stays level, and a clip cut in two plays on as
+ * if it were whole. With nothing to play past the join, they keep their own
+ * fades. `played` is in the order the clips start.
+ */
+export function withCrossfades(played: readonly PlayedClip[]): PlayedClip[] {
+  const clips = [...played];
+  for (let index = 1; index < clips.length; index += 1) {
+    const left = clips[index - 1] as PlayedClip;
+    const right = clips[index] as PlayedClip;
+    if (
+      Math.abs(left.end - right.start) <= 1 &&
+      Math.abs(left.fadeOut - right.fadeIn) <= 1 &&
+      left.fadeOut > 0
+    ) {
+      const after = left.loop
+        ? left.fadeOut
+        : left.span - (left.end + left.shift);
+      const before = right.start + right.shift;
+      const half = Math.floor(Math.min(left.fadeOut, after, before));
+      if (half > 0) {
+        clips[index - 1] = {
+          ...left,
+          end: left.end + half,
+          fadeOut: half * 2,
+        };
+        clips[index] = {
+          ...right,
+          fadeIn: half * 2,
+          start: right.start - half,
+        };
+      }
+    }
+  }
+  return clips;
 }
 
 /** A rack with each macro an envelope moves where `turned` has it, by its parameter id. */

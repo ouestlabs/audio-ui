@@ -31,6 +31,7 @@ import {
   type Rack,
   rackWithMacros,
   type TrackDevice,
+  withCrossfades,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   type ArrangementDoc,
@@ -1018,7 +1019,9 @@ export async function createArrangementEngine(
       clips.every((clip, index) => clip === runtime.clips?.[index]);
     if (runtime.player && !same) {
       runtime.clips = clips;
-      runtime.played = playedClips(clips, (clip) => clip.recording, rate);
+      runtime.played = withCrossfades(
+        playedClips(clips, (clip) => clip.recording, rate)
+      );
       runtime.player.setClips(runtime.played, recordings);
     }
   };

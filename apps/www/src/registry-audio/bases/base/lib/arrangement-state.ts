@@ -27,6 +27,7 @@ import {
   DRUM_RACK_DEVICE,
   type DrumSound,
   deviceParameterKey,
+  EDGE_FADE_SECONDS,
   FULL_ZONE,
   INSTRUMENT_RACK_DEVICE,
   type Mix,
@@ -971,9 +972,21 @@ function splitWhere(
         if (!cut) {
           return [clip];
         }
+        // An edge's fade each side of an audio clip's cut: they cross, and it plays on as if whole.
+        const fade = clip.recording
+          ? Math.min(
+              EDGE_FADE_SECONDS,
+              cut[0].length - cut[0].fadeIn,
+              cut[1].length - cut[1].fadeOut
+            )
+          : 0;
         return [
-          { ...clip, value: cut[0] },
-          { ...clip, id: freshId(clip.id, taken), value: cut[1] },
+          { ...clip, value: { ...cut[0], fadeOut: fade } },
+          {
+            ...clip,
+            id: freshId(clip.id, taken),
+            value: { ...cut[1], fadeIn: fade },
+          },
         ];
       }),
     };

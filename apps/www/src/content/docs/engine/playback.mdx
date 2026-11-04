@@ -69,6 +69,8 @@ if (await loadClipPlayer(context)) {
 }
 ```
 
+The player plays every clip that sounds at a frame, so clips can overlap. `withCrossfades(played)`, from `@audio-ui/arrangement`, uses that: two clips that meet with fades of one length go on past the join, as far as both sources hold, and fade through each other, so what they share stays level. Give it what `playedClips` returns. `withEdgeFades(value)` gives a clip you lay down a fade of 4 ms at each edge.
+
 Without the library, `CLIP_PLAYER_WORKLET` is the processor as the source of a module, whatever your bundler:
 
 ```ts

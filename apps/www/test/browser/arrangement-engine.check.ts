@@ -1229,3 +1229,62 @@ check(
     );
   }
 );
+
+/** A recording that stands still at 0.5: what a crossfade of it keeps level, and a dip shows. */
+function steady(seconds: number) {
+  const data = new Float32Array(Math.round(seconds * RATE)).fill(0.5);
+  return { channels: [data, data], sampleRate: RATE };
+}
+
+/** The lowest the render stands around a join at 0.5 s of two clips of one recording, each with fades of these lengths. */
+async function lowestAtJoin(fadeOut: number, fadeIn: number, offset = 0.5) {
+  const doc = arrangement({
+    clips: [
+      {
+        ...clip("a", "vox", 0, 0.5),
+        sourceLength: 1,
+        value: { fadeIn: 0, fadeOut, length: 0.5, offset: 0, start: 0 },
+      },
+      {
+        ...clip("b", "vox", 0.5, 0.5),
+        sourceLength: 1,
+        value: { fadeIn, fadeOut: 0, length: 0.5, offset, start: 0.5 },
+      },
+    ],
+    tracks: [{ color: 0, id: "vox", name: "Vox" }],
+  });
+  const out = await render(doc, new Map([["take", steady(1)]]), 1);
+  return Math.min(
+    ...out
+      .getChannelData(0)
+      .subarray(0.3 * RATE, 0.7 * RATE)
+      .map(Math.abs)
+  );
+}
+
+check(
+  "CLP-014: two clips that meet with equal fades play through each other, with no dip",
+  async () => {
+    const low = await lowestAtJoin(0.1, 0.1);
+    assert(
+      Math.abs(low - 0.5) < 1e-3,
+      `across the crossfade the level falls to ${low}, from 0.5`
+    );
+  }
+);
+
+check(
+  "CLP-014: fades that differ stay fades of each clip, down to silence at the join",
+  async () => {
+    const low = await lowestAtJoin(0.1, 0.05);
+    assert(low < 0.01, `unequal fades stand at ${low} at the join`);
+  }
+);
+
+check(
+  "CLP-014: a clip with nothing before its start cannot cross earlier, and the other still fades",
+  async () => {
+    const low = await lowestAtJoin(0.1, 0.1, 0);
+    assert(low < 0.01, `with no material before it, the join stands at ${low}`);
+  }
+);
