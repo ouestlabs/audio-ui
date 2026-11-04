@@ -1903,6 +1903,9 @@ const failed = await names.reduce<Promise<number>>(async (count, name) => {
       `  FAIL ${name}\n       ${error instanceof Error ? error.message : String(error)}`
     );
     return total + 1;
+  } finally {
+    // A check leaves its pages open: closed here, so one app at a time plays, not every check's at once.
+    await Promise.all(chrome.contexts().map((context) => context.close()));
   }
 }, Promise.resolve(0));
 await chrome.close();
