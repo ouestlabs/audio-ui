@@ -14,7 +14,7 @@ A numeric field for an audio parameter: a tempo, a gain, a transpose, a cutoff, 
 - **Typing:** type a value and press Enter, or leave the field. What is typed stays in the field until it is committed, so a half-typed number never reaches `onValueChange`.
 - **Stepping:** the arrow keys step by `step`, with Shift by `largeStep` and with Alt by `smallStep`; the Page keys by `largeStep`; Home and End go to `min` and `max`. `steppers` adds a minus and a plus either side. The wheel never changes the value.
 - **Scrubbing:** drag the label or the unit sideways (`scrub="horizontal"`, right is more) or up and down (`"vertical"`, up is more), one step every `scrubSensitivity` pixels; hold Shift for large steps, Alt for small ones. The pointer is hidden while it drags, so it can go on past the screen's edge.
-- **Display:** `precision` digits after the point (as many as `step` has by default), and `format` for the rest, such as a sign (`signDisplay`) or a percent. Figures are not grouped (1200 Hz, not 1,200 Hz) unless `format` says so.
+- **Display:** `precision` digits after the point (as many as `step` has by default, or as `format` says when it is given), and `format` for the rest, such as a sign (`signDisplay`) or a percent. Figures are not grouped (1200 Hz, not 1,200 Hz) unless `format` says so.
 
 ## Installation
 
@@ -29,7 +29,7 @@ import { ParameterField } from "@/components/audio-ui/parameter-field";
 **Uncontrolled:** set only the initial value.
 
 ```tsx
-<ParameterField defaultValue={-6} label="Gain" max={24} min={-36} step={0.1} unit="dB" />
+<ParameterField defaultValue={-6} label="Gain" max={24} min={-36} precision={1} step={0.1} unit="dB" />
 ```
 
 **Controlled:** drive the value from state, and close an undo step when a gesture ends.
@@ -56,6 +56,21 @@ const [bpm, setBpm] = useState(120);
 <ParameterField hideLabel label="Transpose" scrub="vertical" size="sm" unit="st" />
 ```
 
+**Text of its own:** `formatValue` and `parseValue` write the value as text and read typed text back, such as a position in bars.beats.16ths, with the same look, keys and scrubbing. `shortLabel` shows a shorter word than the accessible name.
+
+```tsx
+<ParameterField
+  formatValue={(seconds) => formatBars(seconds, meter, "position")}
+  label="Clip start"
+  onValueChange={setStart}
+  parseValue={(text) => parseBars(text, meter, "position")}
+  shortLabel="Start"
+  size="sm"
+  step={sixteenth}
+  value={start}
+/>
+```
+
 ## API reference
 
 <TypeTable>
@@ -67,13 +82,15 @@ const [bpm, setBpm] = useState(120);
 <TypeRow name={"step"} type={"number"} default={"1"}>The step of the arrow keys, the steppers and a scrub.</TypeRow>
 <TypeRow name={"largeStep"} type={"number"} default={"step × 10"}>The step of Shift, the Page keys, and a scrub with Shift held.</TypeRow>
 <TypeRow name={"smallStep"} type={"number"} default={"step ÷ 10"}>The step of Alt, and of a scrub with Alt held.</TypeRow>
-<TypeRow name={"precision"} type={"number"} default={"as many as step has"}>Digits after the point.</TypeRow>
+<TypeRow name={"precision"} type={"number"} default={"as many as step has"}>Digits after the point. With `format`, as many as it says unless `precision` is given too.</TypeRow>
 <TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>How the value is shown and read back, past `precision`: a sign, a percent, grouping (off by default).</TypeRow>
 <TypeRow name={"unit"} type={"ReactNode"}>The unit after the value, such as "dB", "Hz" or "BPM": drag it to scrub.</TypeRow>
 <TypeRow name={"scrub"} type={"\"horizontal\" | \"vertical\" | false"} default={"\"horizontal\""}>Which way a drag on the label or the unit moves the value: sideways (right is more) or up and down (up is more). `false` for no scrubbing.</TypeRow>
 <TypeRow name={"scrubSensitivity"} type={"number"} default={"4"}>Pixels of drag per step when scrubbing.</TypeRow>
-<TypeRow name={"steppers"} type={"boolean"} default={"false"}>Adds a decrement and an increment button either side.</TypeRow>
+<TypeRow name={"steppers"} type={"boolean | { decrement, increment, icons? }"} default={"false"}>Adds a decrement and an increment button either side, named "Decrease" and "Increase" and the label, or by `decrement` and `increment`, with `icons` in place of the minus and the plus, as a zoom's magnifiers.</TypeRow>
 <TypeRow name={"size"} type={"\"default\" | \"sm\""} default={"\"default\""}>"sm" for a dense panel.</TypeRow>
+<TypeRow name={"shortLabel"} type={"string"} default={"label"}>What the field shows at its start, when the label is longer than the room: "Start" for "Clip start".</TypeRow>
+<TypeRow name={"formatValue, parseValue"} type={"(value) => string, (text) => number | null"}>Write the value as text of its own and read typed text back: the field keeps the same look, keys and scrubbing, and `format`, `precision` and `steppers` are left aside. `null` keeps the value as it was.</TypeRow>
 <TypeRow name={"hideLabel"} type={"boolean"} default={"false"}>Keeps the label out of sight: it still names the field.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"} default={"false"}>Takes no input, and does not scrub.</TypeRow>
 </TypeTable>

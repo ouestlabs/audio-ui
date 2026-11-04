@@ -51,8 +51,8 @@ import {
   ArrangedClip,
   ArrangedClipGhost,
 } from "@/registry-audio/bases/base/audio/elements/arranged-clip";
-import { NumberControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
 import { TimelineTimeSelection } from "@/registry-audio/bases/base/audio/elements/time-selection";
 import {
   COMPACT_TRACK_HEIGHT,
@@ -1742,8 +1742,10 @@ export default function BlockTimeline() {
             className="hidden items-center gap-2 @7xl/panel:flex"
             ref={zoomSlotRef}
           >
-            <NumberControl
+            <ParameterField
+              className="w-44"
               format={PERCENT}
+              hideLabel
               label="Zoom"
               largeStep={1}
               max={view.maxRatio}
@@ -1827,8 +1829,10 @@ export default function BlockTimeline() {
                     <DropdownMenuSubTrigger>Zoom</DropdownMenuSubTrigger>
                     <DropdownMenuSubContent className="w-auto">
                       <div className="p-2">
-                        <NumberControl
+                        <ParameterField
+                          className="w-44"
                           format={PERCENT}
+                          hideLabel
                           label="Zoom"
                           largeStep={1}
                           max={view.maxRatio}

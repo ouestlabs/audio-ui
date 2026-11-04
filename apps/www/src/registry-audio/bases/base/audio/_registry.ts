@@ -1060,13 +1060,17 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "clip-panel",
-    registryDependencies: ["@audio-ui/clip-view", "@audio-ui/timeline"],
+    registryDependencies: [
+      "@audio-ui/parameter-field",
+      "@audio-ui/clip-view",
+      "@audio-ui/timeline",
+    ],
     type: "registry:ui",
   },
   {
     categories: ["timeline"],
     description:
-      "The frame of a clip's detail view: a strip along its top (the caret that rolls the view up to it, the clip's switch, its name to rename, a status, actions), boxes of its properties beside its editor (ClipBox, foldable to a strip), rows, small toggles, text fields, and position fields in bars.beats.16ths.",
+      "The frame of a clip's detail view: a strip along its top (the caret that rolls the view up to it, the clip's switch, its name to rename, a status, actions), boxes of its properties beside its editor (ClipBox, foldable to a strip), rows, small toggles, and position fields in bars.beats.16ths (parameter fields).",
     files: [
       {
         path: "audio/elements/clip-view.tsx",
@@ -1074,7 +1078,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "clip-view",
-    registryDependencies: ["@shadcn/button"],
+    registryDependencies: ["@audio-ui/parameter-field", "@shadcn/button"],
     type: "registry:ui",
   },
   {
@@ -1130,7 +1134,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "bpm-control",
-    registryDependencies: ["@shadcn/input-group"],
+    registryDependencies: ["@audio-ui/parameter-field"],
     type: "registry:ui",
   },
   {

@@ -29,7 +29,6 @@ import { Button } from "@/registry/bases/base/ui/button";
 import {
   ClipBox,
   type ClipMeter,
-  ClipRow,
   ClipToggle,
   ClipView,
   formatBars,
@@ -266,29 +265,27 @@ function LoopBox({
       >
         Loop
       </ClipToggle>
-      <ClipRow label="Position">
-        <PositionField
-          disabled={!(enabled && loop)}
-          label="Loop position"
-          max={span}
-          meter={meter}
-          onChange={onPosition}
-          onCommit={onCommit}
-          value={loop?.[0] ?? offset}
-        />
-      </ClipRow>
-      <ClipRow label="Length">
-        <PositionField
-          disabled={!(enabled && loop)}
-          kind="length"
-          label="Loop length"
-          meter={meter}
-          min={step}
-          onChange={onLength}
-          onCommit={onCommit}
-          value={stretch}
-        />
-      </ClipRow>
+      <PositionField
+        disabled={!(enabled && loop)}
+        label="Loop position"
+        max={span}
+        meter={meter}
+        onChange={onPosition}
+        onCommit={onCommit}
+        shortLabel="Position"
+        value={loop?.[0] ?? offset}
+      />
+      <PositionField
+        disabled={!(enabled && loop)}
+        kind="length"
+        label="Loop length"
+        meter={meter}
+        min={step}
+        onChange={onLength}
+        onCommit={onCommit}
+        shortLabel="Length"
+        value={stretch}
+      />
       <div className="grid grid-cols-2 gap-1">
         <ClipToggle
           aria-label="Halve the loop"
@@ -622,27 +619,25 @@ function MidiClipPanel({
       boxes={
         <>
           <ClipBox title="Clip">
-            <ClipRow label="Start">
-              <PositionField
-                disabled={!onRegionChange}
-                label="Start"
-                max={span}
-                meter={meter}
-                onChange={setStart}
-                onCommit={onNotesCommitted}
-                value={offset}
-              />
-            </ClipRow>
-            <ClipRow label="End">
-              <PositionField
-                disabled={!onRegionChange}
-                label="End"
-                meter={meter}
-                onChange={setEnd}
-                onCommit={onNotesCommitted}
-                value={offset + length}
-              />
-            </ClipRow>
+            <PositionField
+              disabled={!onRegionChange}
+              label="Start"
+              max={span}
+              meter={meter}
+              onChange={setStart}
+              onCommit={onNotesCommitted}
+              shortLabel="Start"
+              value={offset}
+            />
+            <PositionField
+              disabled={!onRegionChange}
+              label="End"
+              meter={meter}
+              onChange={setEnd}
+              onCommit={onNotesCommitted}
+              shortLabel="End"
+              value={offset + length}
+            />
           </ClipBox>
           <LoopBox
             disabled={!onRegionChange}
