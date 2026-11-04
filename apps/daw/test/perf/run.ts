@@ -425,6 +425,35 @@ const underruns = (page: Page) =>
       ).playbackStats?.underrunEvents ?? 0
   );
 
+/** One set of `tracks` stretched tracks in `warpMode`, held 30 s: its load and underruns, as a line. */
+async function holdStretched(
+  browser: Browser,
+  tracks: number,
+  warpMode: WarpMode | undefined
+) {
+  const page = await openSet(browser, {
+    devices: CHAIN,
+    looping: true,
+    seconds: 60,
+    tracks,
+    warpMode,
+  });
+  const load = await loadMeter(page);
+  const before = await underruns(page);
+  await page.keyboard.press("Space");
+  await page.waitForTimeout(1000);
+  const loads = await inTurn(30, async () => {
+    await page.waitForTimeout(1000);
+    return load();
+  });
+  const fellBehind = (await underruns(page)) - before;
+  await page.keyboard.press("Space");
+  await page.context().close();
+  const peak = Math.max(...loads);
+  const mean = loads.reduce((sum, value) => sum + value, 0) / loads.length;
+  return `${warpMode}, ${tracks} tracks: load peak ${(peak * 100).toFixed(0)} %, mean ${(mean * 100).toFixed(0)} % over 30 s; ${fellBehind} underruns`;
+}
+
 /** Runs `step` `times` times, each once the last is done: a measure is presses in a row. */
 const inTurn = <T>(times: number, step: (index: number) => Promise<T>) =>
   Array.from({ length: times }, (_, index) => index).reduce<Promise<T[]>>(
@@ -609,27 +638,13 @@ const measures: Record<string, (browser: Browser) => Promise<string[]>> = {
     );
     const held = await inTurn(sets.length, async (index) => {
       const { tracks = 0, warpMode } = sets[index] ?? {};
-      const page = await openSet(browser, {
-        devices: CHAIN,
-        looping: true,
-        seconds: 60,
-        tracks,
-        warpMode,
-      });
-      const load = await loadMeter(page);
-      const before = await underruns(page);
-      await page.keyboard.press("Space");
-      await page.waitForTimeout(1000);
-      const loads = await inTurn(30, async () => {
-        await page.waitForTimeout(1000);
-        return load();
-      });
-      const fellBehind = (await underruns(page)) - before;
-      await page.keyboard.press("Space");
-      await page.context().close();
-      const peak = Math.max(...loads);
-      const mean = loads.reduce((sum, value) => sum + value, 0) / loads.length;
-      return `${warpMode}, ${tracks} tracks: load peak ${(peak * 100).toFixed(0)} %, mean ${(mean * 100).toFixed(0)} % over 30 s; ${fellBehind} underruns`;
+      // A set that fails says so on its own line, and the others still play.
+      try {
+        return await holdStretched(browser, tracks, warpMode);
+      } catch (error) {
+        await Promise.all(browser.contexts().map((context) => context.close()));
+        return `${warpMode}, ${tracks} tracks: did not play (${(error as Error).message.split("\n")[0]})`;
+      }
     });
     return held;
   },
