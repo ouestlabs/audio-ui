@@ -23,6 +23,7 @@ import {
   type ArrangementTrack,
   type AutomatedParameter,
   DRUM_RACK_DEVICE,
+  devicePositions,
   INSTRUMENT_RACK_DEVICE,
   mixAt,
   mixOf,
@@ -67,6 +68,8 @@ import {
 } from "@/registry-audio/bases/base/lib/mixer-engine";
 import {
   createRackEngine,
+  type MacroPositions,
+  playedState,
   type RackEngine,
 } from "@/registry-audio/bases/base/lib/rack";
 import {
@@ -89,6 +92,8 @@ const PAGES_FIRST_SECONDS = 0.5;
 /** The pages are asked for every fourth tick of the scheduler: ten times a second. */
 const PREFETCH_TICKS = 4;
 const POLL_MS = 25;
+/** How often a device's automated parameters are set to where their envelopes stand, in seconds, playing and in an export alike. */
+const AUTOMATION_SECONDS = 0.01;
 /** The id of the note a panel's pad holds. */
 const PAD_NOTE = "hand-pad";
 /** How many notes a MIDI track plays at once by default: one voice of its instrument each. */
@@ -151,7 +156,39 @@ type TrackInstrument = {
 const instrumentLatency = (instrument: TrackInstrument | null) =>
   instrument && instrument.kind !== "voices" ? instrument.player.latency() : 0;
 
+/** Whether a track automates a parameter of one of its devices. */
+const automatesDevices = (track: ArrangementTrack) =>
+  Object.keys(track.automation ?? {}).some((key) => key.startsWith("device:"));
+
+/** A rack with each macro its envelope moves where `turned` has it. */
+function automatedRack(
+  rack: Rack,
+  turned: ReadonlyMap<string, number> | undefined
+): Rack {
+  if (!turned) {
+    return rack;
+  }
+  return {
+    ...rack,
+    macros: rack.macros.map((macro, index) => {
+      const value = turned.get(`macro-${index + 1}`);
+      return value === undefined ? macro : { ...macro, value };
+    }),
+  };
+}
+
+/** What a track's devices were last set to by their envelopes, as a key: "" when none moves. */
+const positionsKey = (positions: MacroPositions) =>
+  [...positions]
+    .map(
+      ([device, parameters]) =>
+        `${device}:${[...parameters].map(([id, at]) => `${id}=${at.toFixed(4)}`).join(",")}`
+    )
+    .join(";");
+
 interface TrackRuntime {
+  /** Where its devices' envelopes last set them, as `positionsKey` writes it. */
+  automated: string;
   chainKey: string;
   clips: readonly Arranged[] | null;
   devices: Map<string, PlacedDevice>;
@@ -180,6 +217,8 @@ export interface ArrangementEngineOptions {
 }
 
 export interface ArrangementEngine {
+  /** Sets the devices' automated parameters to where their envelopes stand at the clock's frame `frame`: what an offline render calls every 10 ms. */
+  automate: (frame: number) => void;
   /**
    * Loads, while stopped, the pages of streamed recordings that a play from
    * `from` seconds would read first, so it starts with its sound there;
@@ -314,6 +353,7 @@ export async function createArrangementEngine(
   let state: PlaybackState = STOPPED;
   let scheduled = 0;
   let timer: ReturnType<typeof setInterval> | null = null;
+  let automationTimer: ReturnType<typeof setInterval> | null = null;
   let recordingsIn: ReadonlyMap<string, RecordingSource> = new Map();
   let metronome: MetronomeSettings = { on: false };
   let clicks: { accent: boolean; start: number }[] = [];
@@ -329,6 +369,7 @@ export async function createArrangementEngine(
       return existing;
     }
     const made: TrackRuntime = {
+      automated: "",
       chainKey: "",
       clips: null,
       devices: new Map(),
@@ -784,6 +825,10 @@ export async function createArrangementEngine(
       clearInterval(timer);
       timer = null;
     }
+    if (automationTimer !== null) {
+      clearInterval(automationTimer);
+      automationTimer = null;
+    }
     if (!state.playing) {
       return;
     }
@@ -794,6 +839,77 @@ export async function createArrangementEngine(
       releaseVoices(runtime, at);
     }
     broadcast({ at, loop: state.loop, playing: false, position: stoppedAt });
+  };
+
+  /** Sets a track's devices to where their envelopes stand at `x`, 0…1 of the arrangement: an automated parameter at its position, the others as set. */
+  const automateTrack = (
+    track: ArrangementTrack,
+    runtime: TrackRuntime,
+    x: number
+  ) => {
+    const positions = devicePositions(track, x, overrides[track.id]);
+    const key = positionsKey(positions);
+    if (key === runtime.automated) {
+      return;
+    }
+    runtime.automated = key;
+    const context = deviceContext();
+    for (const placed of runtime.devices.values()) {
+      const { device } = placed;
+      if (placed.entry) {
+        (placed.engine as LibraryEngine).update(
+          playedState(device, placed.entry, positions),
+          context
+        );
+      } else if (device.rack) {
+        (placed.engine as RackEngine).update(
+          automatedRack(device.rack, positions.get(device.id)),
+          context,
+          positions
+        );
+      }
+    }
+    automateInstrument(runtime.instrument, positions);
+  };
+
+  /** A track's instrument at the positions of its envelopes: a rack's macros and devices, or the instrument's own parameters. */
+  const automateInstrument = (
+    instrument: TrackInstrument | null,
+    positions: MacroPositions
+  ) => {
+    if (!instrument) {
+      return;
+    }
+    const { device } = instrument;
+    const context = deviceContext();
+    const rack = automatedRack(
+      device.rack ?? { chains: [], macros: [] },
+      positions.get(device.id)
+    );
+    if (instrument.kind === "voices") {
+      instrument.player.update(
+        playedState(device, instrument.player.entry, positions),
+        context
+      );
+    } else if (instrument.kind === "layers") {
+      instrument.player.update(rack, context, positions);
+    } else {
+      instrument.player.update(rack, context, undefined, positions);
+    }
+  };
+
+  /** The devices of every track set to where their envelopes stand at the clock's frame `frame`, while playing. */
+  const automate = (frame: number) => {
+    if (!(doc && state.playing) || frame < state.at || doc.duration <= 0) {
+      return;
+    }
+    const x = arrangementFrame(state, frame) / rate / doc.duration;
+    for (const track of allTracks(doc)) {
+      const runtime = runtimes.get(track.id);
+      if (runtime && (runtime.automated || automatesDevices(track))) {
+        automateTrack(track, runtime, x);
+      }
+    }
   };
 
   /** Chase: a note already sounding where playback starts plays from there; a drum hit already struck is not struck again. */
@@ -864,6 +980,14 @@ export async function createArrangementEngine(
     }
     timer = setInterval(tick, POLL_MS);
     tick();
+    if (automationTimer !== null) {
+      clearInterval(automationTimer);
+    }
+    automationTimer = setInterval(
+      () => automate(now()),
+      AUTOMATION_SECONDS * 1000
+    );
+    automate(now());
   };
 
   const play = (from: number, at = now() + toFrames(START_SECONDS, rate)) => {
@@ -923,6 +1047,10 @@ export async function createArrangementEngine(
   ) => {
     const runtime = runtimeOf(track.id);
     syncDevices(track, runtime, recordings);
+    // A device brought in step plays as set: its envelopes set it again at the next step.
+    if (runtime.automated) {
+      runtime.automated = "\u0000";
+    }
     if (!next.tracks.includes(track)) {
       return;
     }
@@ -1072,6 +1200,7 @@ export async function createArrangementEngine(
       ]);
     },
     schedule,
+    automate,
     setMetronome: (settings) => {
       metronome = settings;
       readClicks();
@@ -1146,6 +1275,20 @@ export async function renderArrangement(
   engine.play(from, 0);
   // A second at a time, on whole render quanta, which is where a render can stop.
   const step = 128 * Math.max(1, Math.round(sampleRate / 128));
+  // The devices' envelopes every 10 ms, as playing sets them.
+  const fine =
+    128 * Math.max(1, Math.round((AUTOMATION_SECONDS * sampleRate) / 128));
+  if (allTracks(doc).some(automatesDevices)) {
+    engine.automate(0);
+    for (let at = fine; at < frames; at += fine) {
+      if (at % step !== 0) {
+        ctx.suspend(at / sampleRate).then(() => {
+          engine.automate(at);
+          ctx.resume();
+        });
+      }
+    }
+  }
   const ahead = toFrames(LOOKAHEAD_SECONDS, sampleRate);
   // The pages of streamed recordings each second reads are in before it is rendered.
   await engine.load(0, Math.min(frames, step + ahead));
@@ -1153,6 +1296,7 @@ export async function renderArrangement(
   for (let at = step; at < frames; at += step) {
     ctx.suspend(at / sampleRate).then(async () => {
       const until = Math.min(frames, at + step + ahead);
+      engine.automate(at);
       await engine.load(at, until);
       engine.schedule(at + ahead, until);
       onProgress?.(at / frames);

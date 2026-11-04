@@ -26,12 +26,14 @@ import {
   type Clipping,
   DRUM_RACK_DEVICE,
   type DrumSound,
+  deviceParameterKey,
   FULL_ZONE,
   INSTRUMENT_RACK_DEVICE,
   type Mix,
   mixOf,
   newDrumRack,
   newRack,
+  parseDeviceParameter,
   RACK_DEVICE,
   type Rack,
   type RackChain,
@@ -39,8 +41,10 @@ import {
   type RackMapping,
   rackDevices,
   type TimeSelection,
+  type TrackAutomation,
   type TrackDevice,
   type TrackKind,
+  withoutDeviceAutomation,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   beginChange,
@@ -1611,6 +1615,28 @@ type Handlers = {
 };
 
 /** A track again right after it, with copies of its clips; a group, with every track in it. */
+/** A track's automation with its devices' envelopes under the new ids `renamed` gives them. */
+function renamedAutomation(
+  automation: TrackAutomation | undefined,
+  renamed: ReadonlyMap<string, string>
+): { automation?: TrackAutomation } {
+  if (!automation) {
+    return {};
+  }
+  return {
+    automation: Object.fromEntries(
+      Object.entries(automation).map(([key, points]) => {
+        const named = parseDeviceParameter(key);
+        const device = named && renamed.get(named.device);
+        return [
+          device && named ? deviceParameterKey(device, named.parameter) : key,
+          points,
+        ];
+      })
+    ) as TrackAutomation,
+  };
+}
+
 function duplicateTrack(state: ArrangementState, id: string): ArrangementState {
   const { tracks } = state.doc;
   if (!tracks.some((item) => item.id === id)) {
@@ -1628,12 +1654,19 @@ function duplicateTrack(state: ArrangementState, id: string): ArrangementState {
   );
   const copies = sources.map((item): ArrangementTrack => {
     const group = item.group === undefined ? undefined : ids.get(item.group);
+    const renamed = new Map(
+      (item.devices ?? []).map((device) => [
+        device.id,
+        freshId("device", devicesTaken),
+      ])
+    );
     return {
       ...item,
       devices: item.devices?.map((device) => ({
         ...device,
-        id: freshId("device", devicesTaken),
+        id: renamed.get(device.id) ?? device.id,
       })),
+      ...renamedAutomation(item.automation, renamed),
       ...(group === undefined ? {} : { group }),
       id: ids.get(item.id) ?? item.id,
       name: item.id === id ? `${item.name} copy` : item.name,
@@ -2278,7 +2311,38 @@ const handlers: Handlers = {
     edit(state, (doc) =>
       withTrack(doc, track, (item) => {
         const devices = dropDevice(item.devices ?? [], id);
-        return devices === (item.devices ?? []) ? item : { ...item, devices };
+        if (devices === (item.devices ?? [])) {
+          return item;
+        }
+        // The envelopes of what went go with it: the device and the devices of its racks.
+        const kept = new Set(
+          devices.flatMap((device) =>
+            device.rack
+              ? [
+                  device.id,
+                  ...rackDevices(device.rack).map((inside) => inside.id),
+                ]
+              : [device.id]
+          )
+        );
+        const gone = new Set(
+          (item.devices ?? [])
+            .flatMap((device) =>
+              device.rack
+                ? [
+                    device.id,
+                    ...rackDevices(device.rack).map((inside) => inside.id),
+                  ]
+                : [device.id]
+            )
+            .filter((each) => !kept.has(each))
+        );
+        const automation = withoutDeviceAutomation(item.automation, gone);
+        return {
+          ...item,
+          devices,
+          ...(automation === item.automation ? {} : { automation }),
+        };
       })
     ),
   "group-devices": (state, { ids, track }) => groupDevices(state, track, ids),

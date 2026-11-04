@@ -377,12 +377,23 @@ function writeMidiClip(clip: Arranged): string {
   );
 }
 
-/** A track's envelopes, at their times in the song. */
-function writeAutomation(track: ArrangementTrack, duration: number): string[] {
-  const parameters = Object.entries(track.automation ?? {}) as [
+/** A track's envelopes of volume and pan, at their times in the song; those of its devices are left out, said in `report`. */
+function writeAutomation(
+  track: ArrangementTrack,
+  duration: number,
+  report: string[]
+): string[] {
+  const entries = Object.entries(track.automation ?? {}) as [
     AutomatedParameter,
     readonly Breakpoint[],
   ][];
+  const parameters = entries.filter(
+    (entry): entry is ["pan" | "volume", readonly Breakpoint[]] =>
+      entry[0] === "volume" || entry[0] === "pan"
+  );
+  if (parameters.length < entries.length) {
+    report.push(`${track.name}: the automation of its devices left out`);
+  }
   return parameters.map(([parameter, points]) =>
     element(
       "Points",
@@ -455,7 +466,7 @@ export function writeDawproject(
       { id: `lanes-${track.id}`, track: `track-${track.id}` },
       [
         element("Clips", { id: `clips-${track.id}` }, clips),
-        ...writeAutomation(track, doc.duration),
+        ...writeAutomation(track, doc.duration, report),
       ]
     );
   });
