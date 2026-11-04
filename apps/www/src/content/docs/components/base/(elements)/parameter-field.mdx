@@ -56,6 +56,21 @@ const [bpm, setBpm] = useState(120);
 <ParameterField hideLabel label="Transpose" scrub="vertical" size="sm" unit="st" />
 ```
 
+**Text of its own:** `formatValue` and `parseValue` write the value as text and read typed text back, such as a position in bars.beats.16ths, with the same look, keys and scrubbing. `shortLabel` shows a shorter word than the accessible name.
+
+```tsx
+<ParameterField
+  formatValue={(seconds) => formatBars(seconds, meter, "position")}
+  label="Clip start"
+  onValueChange={setStart}
+  parseValue={(text) => parseBars(text, meter, "position")}
+  shortLabel="Start"
+  size="sm"
+  step={sixteenth}
+  value={start}
+/>
+```
+
 ## API reference
 
 <TypeTable>
@@ -74,6 +89,8 @@ const [bpm, setBpm] = useState(120);
 <TypeRow name={"scrubSensitivity"} type={"number"} default={"4"}>Pixels of drag per step when scrubbing.</TypeRow>
 <TypeRow name={"steppers"} type={"boolean | { decrement, increment, icons? }"} default={"false"}>Adds a decrement and an increment button either side, named "Decrease" and "Increase" and the label, or by `decrement` and `increment`, with `icons` in place of the minus and the plus, as a zoom's magnifiers.</TypeRow>
 <TypeRow name={"size"} type={"\"default\" | \"sm\""} default={"\"default\""}>"sm" for a dense panel.</TypeRow>
+<TypeRow name={"shortLabel"} type={"string"} default={"label"}>What the field shows at its start, when the label is longer than the room: "Start" for "Clip start".</TypeRow>
+<TypeRow name={"formatValue, parseValue"} type={"(value) => string, (text) => number | null"}>Write the value as text of its own and read typed text back: the field keeps the same look, keys and scrubbing, and `format`, `precision` and `steppers` are left aside. `null` keeps the value as it was.</TypeRow>
 <TypeRow name={"hideLabel"} type={"boolean"} default={"false"}>Keeps the label out of sight: it still names the field.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"} default={"false"}>Takes no input, and does not scrub.</TypeRow>
 </TypeTable>

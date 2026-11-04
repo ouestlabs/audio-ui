@@ -14,6 +14,7 @@ import {
 } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { ParameterField } from "@/components/audio-ui/parameter-field";
 
 /** Where bars and beats fall, in seconds: what position fields count in. */
 export interface ClipMeter {
@@ -299,9 +300,6 @@ function ClipBox({
   );
 }
 
-const FIELD =
-  "h-6 w-full min-w-0 rounded-md border bg-background px-1.5 text-xs tabular-nums outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:opacity-50";
-
 /** The clip's name, editable in place: Enter or leaving the field renames it, Escape gives it up. */
 function ClipNameField({
   name,
@@ -391,105 +389,34 @@ function ClipToggle({
 }
 
 /**
- * A text field for a value shown as `format` gives it and read back with
- * `parse`: Enter or leaving it sets what was typed, Escape gives it up, and
- * Up and Down step it by `step` (ten times with Shift). Each set commits.
+ * A time field in bars.beats.sixteenths, as a parameter field: a position
+ * from 1.1.1, or a length from 0.0.0. The arrows step a sixteenth, a beat
+ * with Shift; a drag on its label scrubs it.
  */
-function ClipField({
-  disabled,
-  format,
-  label,
-  onChange,
-  onCommit,
-  parse,
-  step,
-  value,
-}: {
-  disabled?: boolean;
-  format: (value: number) => string;
-  label: string;
-  onChange: (value: number) => void;
-  onCommit?: () => void;
-  parse: (text: string) => number | null;
-  step: number;
-  value: number;
-}) {
-  const [text, setText] = useState(() => format(value));
-  const [editing, setEditing] = useState(false);
-  useEffect(() => {
-    if (!editing) {
-      setText(format(value));
-    }
-  }, [editing, format, value]);
-  const apply = useCallback(
-    (next: number | null) => {
-      if (next !== null && Number.isFinite(next)) {
-        onChange(next);
-        onCommit?.();
-      }
-    },
-    [onChange, onCommit]
-  );
-  const handleChange = useCallback((event: ChangeEvent<HTMLInputElement>) => {
-    setEditing(true);
-    setText(event.target.value);
-  }, []);
-  const handleBlur = useCallback(() => {
-    if (editing) {
-      apply(parse(text));
-      setEditing(false);
-    }
-  }, [apply, editing, parse, text]);
-  const handleKeyDown = useCallback(
-    (event: KeyboardEvent<HTMLInputElement>) => {
-      const direction = { ArrowDown: -1, ArrowUp: 1 }[event.key];
-      if (direction) {
-        event.preventDefault();
-        apply(value + direction * step * (event.shiftKey ? 10 : 1));
-        setEditing(false);
-      } else if (event.key === "Enter") {
-        event.preventDefault();
-        apply(parse(text));
-        setEditing(false);
-      } else if (event.key === "Escape") {
-        setText(format(value));
-        setEditing(false);
-      }
-    },
-    [apply, format, parse, step, text, value]
-  );
-  return (
-    <input
-      aria-label={label}
-      className={cn(FIELD, "text-end")}
-      disabled={disabled}
-      onBlur={handleBlur}
-      onChange={handleChange}
-      onKeyDown={handleKeyDown}
-      spellCheck={false}
-      type="text"
-      value={text}
-    />
-  );
-}
-
-/** A time field in bars.beats.sixteenths: a position from 1.1.1, or a length from 0.0.0. Up and Down step a sixteenth, ten with Shift. */
 function PositionField({
+  disabled,
   kind = "position",
+  label,
   max = Number.POSITIVE_INFINITY,
   meter,
   min = 0,
   onChange,
-  ...props
-}: Omit<
-  ComponentProps<typeof ClipField>,
-  "format" | "parse" | "step" | "onChange"
-> & {
+  onCommit,
+  shortLabel,
+  value,
+}: {
+  disabled?: boolean;
   kind?: "length" | "position";
+  /** Names the field for assistive technology. */
+  label: string;
   max?: number;
   meter: ClipMeter;
   min?: number;
   onChange: (seconds: number) => void;
+  onCommit?: () => void;
+  /** What the field shows at its start; without it, the label is kept out of sight. */
+  shortLabel?: string;
+  value: number;
 }) {
   const format = useCallback(
     (seconds: number) => formatBars(seconds, meter, kind),
@@ -499,19 +426,25 @@ function PositionField({
     (text: string) => parseBars(text, meter, kind),
     [kind, meter]
   );
-  const change = useCallback(
-    (seconds: number) => onChange(Math.min(max, Math.max(min, seconds))),
-    [max, min, onChange]
-  );
+  const sixteenth = sixteenthOf(meter);
   return (
-    <ClipField
-      format={format}
-      onChange={change}
-      parse={parse}
-      step={sixteenthOf(meter)}
-      {...props}
+    <ParameterField
+      disabled={disabled}
+      formatValue={format}
+      hideLabel={shortLabel === undefined}
+      label={label}
+      largeStep={sixteenth * 4}
+      max={max}
+      min={min}
+      onValueChange={onChange}
+      onValueCommitted={onCommit}
+      parseValue={parse}
+      shortLabel={shortLabel}
+      size="sm"
+      step={sixteenth}
+      value={value}
     />
   );
 }
 
-export { ClipBox, ClipField, ClipRow, ClipToggle, ClipView, PositionField };
+export { ClipBox, ClipRow, ClipToggle, ClipView, PositionField };

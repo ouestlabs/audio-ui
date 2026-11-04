@@ -316,29 +316,27 @@ function LoopBox({
       <ClipToggle onClick={onToggle} pressed={Boolean(loop)}>
         Loop
       </ClipToggle>
-      <ClipRow label="Position">
-        <PositionField
-          disabled={!loop}
-          label="Loop position"
-          max={span}
-          meter={meter}
-          onChange={onPosition}
-          onCommit={onCommit}
-          value={loop?.[0] ?? offset}
-        />
-      </ClipRow>
-      <ClipRow label="Length">
-        <PositionField
-          disabled={!loop}
-          kind="length"
-          label="Loop length"
-          meter={meter}
-          min={meter.bar / meter.beatsPerBar / 4}
-          onChange={onLength}
-          onCommit={onCommit}
-          value={stretch}
-        />
-      </ClipRow>
+      <PositionField
+        disabled={!loop}
+        label="Loop position"
+        max={span}
+        meter={meter}
+        onChange={onPosition}
+        onCommit={onCommit}
+        shortLabel="Position"
+        value={loop?.[0] ?? offset}
+      />
+      <PositionField
+        disabled={!loop}
+        kind="length"
+        label="Loop length"
+        meter={meter}
+        min={meter.bar / meter.beatsPerBar / 4}
+        onChange={onLength}
+        onCommit={onCommit}
+        shortLabel="Length"
+        value={stretch}
+      />
       <div className="grid grid-cols-2 gap-1">
         <ClipToggle
           aria-label="Halve the loop"
@@ -455,54 +453,48 @@ function SampleBox({
           />
         ))}
       </div>
-      <ClipRow label="Gain">
-        <ParameterField
-          format={SIGNED}
-          hideLabel
-          label="Gain"
-          max={GAIN_RANGE[1]}
-          min={GAIN_RANGE[0]}
-          onValueChange={onGain}
-          onValueCommitted={onCommit}
-          precision={1}
-          size="sm"
-          step={0.5}
-          unit="dB"
-          value={gain}
-        />
-      </ClipRow>
-      <ClipRow label="Transp.">
-        <ParameterField
-          disabled={warpMode === "repitch"}
-          format={SIGNED}
-          hideLabel
-          label="Transpose"
-          max={TRANSPOSE_RANGE[1]}
-          min={TRANSPOSE_RANGE[0]}
-          onValueChange={onTranspose}
-          onValueCommitted={onCommit}
-          scrub="vertical"
-          size="sm"
-          unit="st"
-          value={transpose}
-        />
-      </ClipRow>
+      <ParameterField
+        format={SIGNED}
+        label="Gain"
+        max={GAIN_RANGE[1]}
+        min={GAIN_RANGE[0]}
+        onValueChange={onGain}
+        onValueCommitted={onCommit}
+        precision={1}
+        shortLabel="Gain"
+        size="sm"
+        step={0.5}
+        unit="dB"
+        value={gain}
+      />
+      <ParameterField
+        disabled={warpMode === "repitch"}
+        format={SIGNED}
+        label="Transpose"
+        max={TRANSPOSE_RANGE[1]}
+        min={TRANSPOSE_RANGE[0]}
+        onValueChange={onTranspose}
+        onValueCommitted={onCommit}
+        scrub="vertical"
+        shortLabel="Transp."
+        size="sm"
+        unit="st"
+        value={transpose}
+      />
       {rate === null ? null : (
         <>
           {/* The source's own tempo: in time at the arrangement's, it plays at their ratio. */}
-          <ClipRow label="BPM">
-            <ParameterField
-              hideLabel
-              label="Source tempo"
-              max={999}
-              min={1}
-              onValueChange={onTempo}
-              onValueCommitted={onCommit}
-              precision={2}
-              size="sm"
-              value={tempo / rate}
-            />
-          </ClipRow>
+          <ParameterField
+            label="Source tempo"
+            max={999}
+            min={1}
+            onValueChange={onTempo}
+            onValueCommitted={onCommit}
+            precision={2}
+            shortLabel="BPM"
+            size="sm"
+            value={tempo / rate}
+          />
           <div className="grid grid-cols-2 gap-1">
             <ClipToggle
               aria-label="Half the tempo: it plays twice as fast"
@@ -774,26 +766,24 @@ function ClipPanel({
       boxes={
         <>
           <ClipBox title="Clip">
-            <ClipRow label="Start">
-              <PositionField
-                label="Start"
-                max={span}
-                meter={meter}
-                onChange={setStart}
-                onCommit={onValueCommitted}
-                value={offset}
-              />
-            </ClipRow>
-            <ClipRow label="End">
-              <PositionField
-                label="End"
-                max={loop ? Number.POSITIVE_INFINITY : span}
-                meter={meter}
-                onChange={setEnd}
-                onCommit={onValueCommitted}
-                value={offset + length}
-              />
-            </ClipRow>
+            <PositionField
+              label="Start"
+              max={span}
+              meter={meter}
+              onChange={setStart}
+              onCommit={onValueCommitted}
+              shortLabel="Start"
+              value={offset}
+            />
+            <PositionField
+              label="End"
+              max={loop ? Number.POSITIVE_INFINITY : span}
+              meter={meter}
+              onChange={setEnd}
+              onCommit={onValueCommitted}
+              shortLabel="End"
+              value={offset + length}
+            />
           </ClipBox>
           <LoopBox
             loop={loop}
