@@ -10,6 +10,7 @@ import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
 import { type ArrangementTrack, type Mix, mixOf } from "@/lib/arrangement";
+import { trackOf } from "@/lib/arrangement-state";
 import { cn } from "@/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;
@@ -157,6 +158,8 @@ function SendKnob({
 
 interface StripProps {
   analysers: readonly AnalyserNode[] | null;
+  /** The group the track plays into, when it is in one (MIX-020). */
+  into?: string;
   /** Main has no switch, no solo and no sends. */
   main?: boolean;
   onMix: (id: string, patch: Partial<Omit<Mix, "color">>) => void;
@@ -173,6 +176,7 @@ interface StripProps {
 /** A channel of the mixer: its sends, its pan, its fader and meter, its switch and solo. */
 function Strip({
   analysers,
+  into,
   main,
   onMix,
   onSelect,
@@ -229,6 +233,11 @@ function Strip({
         <span className="min-h-4 w-full truncate text-center font-medium text-xs">
           {track.name}
         </span>
+        {into ? (
+          <span className="w-full truncate text-center text-muted-foreground text-xs">
+            To {into}
+          </span>
+        ) : null}
       </div>
       {sends ? (
         <div
@@ -348,6 +357,7 @@ export function MixerView({
   const strip = (track: ArrangementTrack, main = false, sends = false) => (
     <Strip
       analysers={engine.meter(track.id)}
+      into={track.group ? trackOf(doc, track.group)?.name : undefined}
       key={track.id}
       main={main}
       onMix={onMix}
@@ -369,7 +379,8 @@ export function MixerView({
       className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(10rem,1fr)_auto_auto] gap-y-2 overflow-auto pe-2"
       role="group"
     >
-      {doc.tracks.map((track) => strip(track, false, true))}
+      {/* A folded group hides its tracks here too. */}
+      {arrangement.unfoldedTracks.map((track) => strip(track, false, true))}
       {/* The returns and the main track stand apart from the tracks. */}
       <div
         aria-hidden="true"

@@ -1308,6 +1308,11 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       };
       await menu("1 Audio", "Group");
       await page.getByText("Group 1", { exact: true }).first().waitFor();
+      await showMixer(page);
+      await page
+        .getByRole("region", { name: "1 Audio" })
+        .getByText("To Group 1")
+        .waitFor();
       await menu("Group 1", "Duplicate");
       await page.getByText("Group 1 copy", { exact: true }).first().waitFor();
       const inside = await page
