@@ -428,7 +428,7 @@ function SampleBox({
   /** The speed the warp plays at, or null when the source plays as recorded. */
   rate: number | null;
   reversed: boolean;
-  /** The arrangement's tempo, in BPM: the source's is this times `rate`. */
+  /** The arrangement's tempo, in BPM: the source's is this over `rate`, since a source at half the tempo plays twice as fast to keep time. */
   tempo: number;
   transpose: number;
   warpMode: WarpMode;
@@ -497,19 +497,19 @@ function SampleBox({
               onCommit={onCommit}
               parse={parseNumber}
               step={1}
-              value={rate * tempo}
+              value={tempo / rate}
             />
           </ClipRow>
           <div className="grid grid-cols-2 gap-1">
             <ClipToggle
-              aria-label="Half the tempo: twice as long, half the speed"
-              onClick={onSlower}
+              aria-label="Half the tempo: it plays twice as fast"
+              onClick={onFaster}
             >
               ÷2
             </ClipToggle>
             <ClipToggle
-              aria-label="Twice the tempo: half as long, twice the speed"
-              onClick={onFaster}
+              aria-label="Twice the tempo: it plays half as fast"
+              onClick={onSlower}
             >
               ×2
             </ClipToggle>
@@ -707,8 +707,8 @@ function ClipPanel({
       if (!(warp && bpm > 0)) {
         return;
       }
-      const at = warpRate(warp, offset) * tempo;
-      set({ warp: scaleWarp(warp, at / bpm) });
+      // Played at tempo / bpm: the warp's stretches scale by the ratio of the speeds.
+      set({ warp: scaleWarp(warp, (warpRate(warp, offset) * bpm) / tempo) });
     },
     [offset, set, tempo, warp]
   );
