@@ -280,6 +280,39 @@ describe("DAWproject", () => {
     expect(report).toEqual(["Loop: Some Synth left out"]);
   });
 
+  test("PRJ-008: an alias clip plays the notes of the clip it names, as the format's own tests write one", () => {
+    const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Project version="1.0">
+  <Application name="Test" version="1.0"/>
+  <Transport><Tempo unit="bpm" value="120" id="t"/></Transport>
+  <Structure>
+    <Track contentType="notes" id="id1" name="Track 1" color="#000000">
+      <Channel role="regular" id="id2" destination="id0"/>
+    </Track>
+    <Track contentType="" id="m" name="Master"><Channel role="master" id="id0"/></Track>
+  </Structure>
+  <Arrangement id="a">
+    <Lanes timeUnit="beats" id="l0">
+      <Lanes track="id1" id="l1">
+        <Clips id="c">
+          <Clip time="0" duration="4" name="Clip 0">
+            <Notes id="id5"><Note time="0" duration="0.5" key="36" vel="0.8" rel="0.5"/></Notes>
+          </Clip>
+          <Clip time="32" duration="4" name="Alias Clip 0" reference="id5"/>
+        </Clips>
+      </Lanes>
+    </Lanes>
+  </Arrangement>
+</Project>`;
+    const { doc, report } = readDawproject(xml);
+    expect(report).toEqual([]);
+    const [clip, alias] = doc.clips;
+    expect(alias?.name).toBe("Alias Clip 0");
+    // 120 beats a minute: beat 32 is 16 seconds in.
+    expect(alias?.value.start).toBeCloseTo(16);
+    expect(alias?.notes).toEqual(clip?.notes);
+  });
+
   test("PRJ-008: what is not a DAWproject is refused, saying so", () => {
     expect(() => readDawproject("<Something/>")).toThrow("not a DAWproject");
   });

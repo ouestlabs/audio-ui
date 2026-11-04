@@ -772,13 +772,27 @@ const isGroup = (el: Element) =>
   kid(el, "Channel")?.getAttribute("role") === "submix";
 
 /** A clip's content, through one level of nested clips: its audio and warp map, or its notes. */
-function contentOf(clip: Element): {
+function contentOf(
+  clip: Element,
+  byId: ReadonlyMap<string, Element>
+): {
   audio?: Element;
   notes?: Element;
   playStart: number;
   warps?: Element;
 } | null {
   const playStart = numberAt(clip, "playStart");
+  // An alias clip plays the content of another, named by its id.
+  const shared = byId.get(clip.getAttribute("reference") ?? "");
+  if (shared?.tagName === "Notes") {
+    return { notes: shared, playStart };
+  }
+  if (shared?.tagName === "Audio") {
+    return { audio: shared, playStart };
+  }
+  if (shared?.tagName === "Warps") {
+    return { audio: kid(shared, "Audio"), playStart, warps: shared };
+  }
   const warps = kid(clip, "Warps");
   if (warps) {
     return { audio: kid(warps, "Audio"), playStart, warps };
@@ -796,7 +810,7 @@ function contentOf(clip: Element): {
     : [];
   const [only] = inner;
   if (inner.length === 1 && only && numberAt(only, "time") === 0) {
-    const nested = contentOf(only);
+    const nested = contentOf(only, byId);
     return nested
       ? { ...nested, playStart: playStart + nested.playStart }
       : null;
@@ -813,6 +827,8 @@ interface Reading {
     value: number;
   }[];
   bpm: number;
+  /** Every element of the project with an id, which another names it by. */
+  byId: ReadonlyMap<string, Element>;
   byTrack: Map<string, ArrangementTrack>;
   channels: Map<string, ReadChannel>;
   clips: Arranged[];
@@ -1017,7 +1033,7 @@ function readAudioClip(
 }
 
 function readClip(reading: Reading, el: Element, track: ArrangementTrack) {
-  const content = contentOf(el);
+  const content = contentOf(el, reading.byId);
   if (!content) {
     reading.report.push(
       `${el.getAttribute("name") ?? track.name}: a clip of a kind that cannot be read, left out`
@@ -1170,6 +1186,12 @@ export function readDawproject(
   const reading: Reading = {
     automation: [],
     bpm,
+    byId: new Map(
+      [...project.querySelectorAll("[id]")].map((item) => [
+        item.getAttribute("id") ?? "",
+        item,
+      ])
+    ),
     byTrack: new Map(),
     channels: new Map(),
     clips: [],
