@@ -2206,6 +2206,21 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.keyboard.press("Escape");
       await page.mouse.up();
     },
+  "ARR-021: a sideways swipe at the end of a scroll does not reach the browser's back":
+    async (browser) => {
+      const page = await open(browser);
+      const behavior = await page.evaluate(() =>
+        [document.documentElement, document.body]
+          .map((element) => getComputedStyle(element).overscrollBehaviorX)
+          .join()
+      );
+      assert(behavior === "none,none", `the page overscrolls as ${behavior}`);
+      const before = page.url();
+      await page.mouse.move(800, 700);
+      await page.mouse.wheel(-600, 0);
+      await page.waitForTimeout(200);
+      assert(page.url() === before, "the page went back");
+    },
   "ARR: a track dragged by its grip: the rows slide aside, and it lands in the gap":
     async (browser) => {
       const page = await open(browser);

@@ -83,3 +83,8 @@ Test: apps/www/test/registry-audio/base/hooks/use-arranged-clips.test.tsx; apps/
 ### ARR-020 Consolidate
 Cmd+J makes one clip per track of the time selected, one step of undo. A MIDI track's notes merge into it as they sound, their clip's loop and transposition played out. An audio track's clips render into one new recording as they play, with their fades, gains and crossfades, and without the track's devices, mix or automation, which go on acting after it: the track sounds the same. The recording is kept in floats, so what goes past full scale stays in it. It is named after the first clip it takes in. The recordings it replaces are kept, so undo can bring them back; saving to a folder leaves out those no clip plays.
 Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-020"; apps/www/test/registry-audio/base/lib/wav-file.test.ts "ARR-020"; apps/www/test/browser/arrangement-engine.check.ts "ARR-020"; apps/daw/test/browser/run.ts "ARR-020"
+
+### ARR-021 A swipe stays in the workstation
+A sideways swipe on a touchpad scrolls what is under it. At the end of a scroll, or over what does not scroll, nothing happens: the browser does not go back a page.
+Test: apps/daw/test/browser/run.ts "ARR-021"
+
