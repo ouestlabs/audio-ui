@@ -186,6 +186,7 @@ const formatRate = (rate: number) => {
   const semitones = 12 * Math.log2(rate);
   return `${rate.toFixed(2)}× · ${semitones > 0 ? "+" : ""}${semitones.toFixed(1)} st`;
 };
+const formatBpm = (bpm: number) => bpm.toFixed(2);
 const formatGain = (db: number) => `${db > 0 ? "+" : ""}${db.toFixed(1)} dB`;
 const formatTranspose = (semitones: number) =>
   `${semitones > 0 ? "+" : ""}${semitones} st`;
@@ -401,11 +402,13 @@ function SampleBox({
   onGain,
   onReversed,
   onSlower,
+  onTempo,
   onTranspose,
   onWarp,
   onWarpMode,
   rate,
   reversed,
+  tempo,
   transpose,
   warpMode,
 }: {
@@ -417,12 +420,16 @@ function SampleBox({
   onGain: (db: number) => void;
   onReversed: () => void;
   onSlower: () => void;
+  /** A tempo was typed for the source: the warp is scaled so it plays in time at the arrangement's. */
+  onTempo: (bpm: number) => void;
   onTranspose: (semitones: number) => void;
   onWarp: () => void;
   onWarpMode: (mode: WarpMode) => void;
   /** The speed the warp plays at, or null when the source plays as recorded. */
   rate: number | null;
   reversed: boolean;
+  /** The arrangement's tempo, in BPM: the source's is this times `rate`. */
+  tempo: number;
   transpose: number;
   warpMode: WarpMode;
 }) {
@@ -481,25 +488,37 @@ function SampleBox({
       </ClipRow>
       {rate === null ? null : (
         <>
+          {/* The source's own tempo: in time at the arrangement's, it plays at their ratio. */}
+          <ClipRow label="BPM">
+            <ClipField
+              format={formatBpm}
+              label="Source tempo"
+              onChange={onTempo}
+              onCommit={onCommit}
+              parse={parseNumber}
+              step={1}
+              value={rate * tempo}
+            />
+          </ClipRow>
+          <div className="grid grid-cols-2 gap-1">
+            <ClipToggle
+              aria-label="Half the tempo: twice as long, half the speed"
+              onClick={onSlower}
+            >
+              ÷2
+            </ClipToggle>
+            <ClipToggle
+              aria-label="Twice the tempo: half as long, twice the speed"
+              onClick={onFaster}
+            >
+              ×2
+            </ClipToggle>
+          </div>
           <ClipRow label="Speed">
             <output className="truncate text-end tabular-nums">
               {formatRate(rate)}
             </output>
           </ClipRow>
-          <div className="grid grid-cols-2 gap-1">
-            <ClipToggle
-              aria-label="Twice as long, half the speed"
-              onClick={onSlower}
-            >
-              ×2
-            </ClipToggle>
-            <ClipToggle
-              aria-label="Half as long, twice the speed"
-              onClick={onFaster}
-            >
-              ÷2
-            </ClipToggle>
-          </div>
         </>
       )}
     </ClipBox>
@@ -681,6 +700,18 @@ function ClipPanel({
     () => warp && setAndCommit({ warp: scaleWarp(warp, 0.5) }),
     [setAndCommit, warp]
   );
+  // The arrangement's tempo, from how long a bar lasts.
+  const tempo = (60 * beatsPerBar) / bar;
+  const setTempo = useCallback(
+    (bpm: number) => {
+      if (!(warp && bpm > 0)) {
+        return;
+      }
+      const at = warpRate(warp, offset) * tempo;
+      set({ warp: scaleWarp(warp, at / bpm) });
+    },
+    [offset, set, tempo, warp]
+  );
   const addMarker = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
       const box = event.currentTarget
@@ -783,11 +814,13 @@ function ClipPanel({
             onGain={setGain}
             onReversed={toggleReversed}
             onSlower={slower}
+            onTempo={setTempo}
             onTranspose={setTranspose}
             onWarp={toggleWarp}
             onWarpMode={setWarpMode}
             rate={warp ? warpRate(warp, offset) : null}
             reversed={reversed}
+            tempo={tempo}
             transpose={transpose}
             warpMode={warpMode}
           />
