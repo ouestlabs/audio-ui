@@ -25,6 +25,7 @@ import {
   type Clipping,
   DRUM_RACK_DEVICE,
   type DrumSound,
+  INSTRUMENT_RACK_DEVICE,
   type Mix,
   mixOf,
   newDrumRack,
@@ -1335,7 +1336,7 @@ function holdsInstrument(doc: ArrangementDoc, id: string): boolean {
 /** What a new rack holds: one empty chain, or a drum rack's starting kit. */
 function rackFor(doc: ArrangementDoc, device: string): { rack?: Rack } {
   const taken = chainIds(doc);
-  if (device === RACK_DEVICE) {
+  if (device === RACK_DEVICE || device === INSTRUMENT_RACK_DEVICE) {
     return { rack: newRack(freshId("chain", taken)) };
   }
   if (device === DRUM_RACK_DEVICE) {
@@ -1396,6 +1397,25 @@ function movePad(rack: Rack, id: string, note: number): Rack {
   };
 }
 
+/**
+ * Whether the rack `rack` on `track` takes the instrument `device` at the head
+ * of a chain: an instrument rack does, for an instrument of the library, not
+ * a rack.
+ */
+function takesInstrument(
+  doc: ArrangementDoc,
+  track: string,
+  rack: string,
+  device: TrackDevice
+): boolean {
+  const devices = trackOf(doc, track)?.devices ?? [];
+  const target = [
+    ...devices,
+    ...devices.flatMap((item) => (item.rack ? rackDevices(item.rack) : [])),
+  ].find((item) => item.id === rack);
+  return target?.device === INSTRUMENT_RACK_DEVICE && !device.rack;
+}
+
 function addDevice(
   state: ArrangementState,
   command: Extract<ArrangementCommand, { type: "add-device" }>
@@ -1416,7 +1436,7 @@ function addDevice(
   };
   const { chain } = command;
   if (chain) {
-    return instrument
+    return instrument && !takesInstrument(state.doc, track, chain.rack, added)
       ? state
       : changeRack(
           state,

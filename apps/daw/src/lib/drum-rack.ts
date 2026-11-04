@@ -13,6 +13,7 @@ import {
   createRackEngine,
   type FindDevice,
 } from "@/lib/rack";
+import type { NotePlayer } from "@/lib/voice-pool";
 
 /** A recording a pad plays: an `AudioBuffer`, or its channels decoded. */
 export type PadRecording =
@@ -29,18 +30,17 @@ export function padsOf(rack: Rack, note: number): RackChain[] {
   return rack.chains.filter((chain) => chain.pad?.note === note);
 }
 
-/** A drum rack playing on a context: an instrument, its sound out at `output`. */
-export interface DrumRackEngine {
-  /** Takes back the hits that start after `time` on the audio clock, as a stop does; those sounding ring out. */
-  cancel: (time: number) => void;
-  dispose: () => void;
-  /** Plays the pads of `note` at `time` on the audio clock, as loud as `velocity`, 0 to 1. */
-  hit: (note: number, velocity: number, time: number) => void;
+/**
+ * A drum rack playing on a context: a note player whose note on plays the
+ * pads of its pitch, as loud as its velocity, and rings for their decay; a
+ * note off lets nothing go, and `release` takes back the hits that start after
+ * its time, as a stop does, those sounding ringing out. Its sound comes out at
+ * `output`.
+ */
+export interface DrumRackEngine extends NotePlayer {
   /** How long it delays the sound, in seconds: its slowest chain. */
   latency: () => number;
   readonly output: AudioNode;
-  /** Resolves once every device inside is in the graph. */
-  ready: () => Promise<void>;
   /** Brings the pads, their chains and the macros in step with `rack`, the recordings the pads name in `recordings`. */
   update: (
     rack: Rack,
@@ -113,41 +113,47 @@ export function createDrumRackEngine(
     source.stop(end);
   };
 
-  return {
-    cancel: (time) => {
-      for (const hit of pending) {
-        if (hit.time > time) {
-          hit.gain.disconnect();
-        }
-      }
-      pending = [];
-    },
-    dispose: () => {
-      for (const hit of pending) {
+  const cancel = (time: number) => {
+    for (const hit of pending) {
+      if (hit.time > time) {
         hit.gain.disconnect();
+      }
+    }
+    pending = [];
+  };
+
+  const hit = (note: number, velocity: number, time: number) => {
+    if (velocity <= 0) {
+      return;
+    }
+    pending = pending.filter((item) => item.time > ctx.currentTime);
+    for (const chain of padsOf(current, note)) {
+      const input = rack.chainInput(chain.id);
+      if (input && chain.pad) {
+        const gain = ctx.createGain();
+        gain.gain.value = Math.min(1, velocity);
+        gain.connect(input);
+        play(chain.pad.sound, gain, time);
+        pending.push({ gain, time });
+      }
+    }
+  };
+
+  return {
+    dispose: () => {
+      for (const item of pending) {
+        item.gain.disconnect();
       }
       pending = [];
       rack.dispose();
     },
-    hit: (note, velocity, time) => {
-      if (velocity <= 0) {
-        return;
-      }
-      pending = pending.filter((hit) => hit.time > ctx.currentTime);
-      for (const chain of padsOf(current, note)) {
-        const input = rack.chainInput(chain.id);
-        if (input && chain.pad) {
-          const gain = ctx.createGain();
-          gain.gain.value = Math.min(1, velocity);
-          gain.connect(input);
-          play(chain.pad.sound, gain, time);
-          pending.push({ gain, time });
-        }
-      }
-    },
     latency: rack.latency,
+    // A drum rings for its decay, whatever the note's length.
+    noteOff: () => undefined,
+    noteOn: (note, time) => hit(note.pitch, note.velocity, time),
     output: rack.output,
     ready: rack.ready,
+    release: cancel,
     update: (next, context, sources) => {
       current = next;
       if (sources) {

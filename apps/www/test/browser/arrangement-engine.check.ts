@@ -4,6 +4,7 @@ import {
   type ArrangementTrack,
   DRUM_RACK_DEVICE,
   type DrumSound,
+  INSTRUMENT_RACK_DEVICE,
   type TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
@@ -900,6 +901,8 @@ check(
     try {
       engine.update(withDevices([off, kept]), recordings as never);
       engine.update(withDevices([kept]), recordings as never);
+      // Each update hands the clip player its clips again: the render waits until it has them.
+      await engine.ready();
     } catch (error) {
       throw new Error(`removing a device throws: ${(error as Error).message}`, {
         cause: error,
@@ -983,5 +986,76 @@ check(
     engine.dispose();
     const loudest = Math.max(...out.map(Math.abs));
     assert(loudest > 0.2, `the track through the rack plays at ${loudest}`);
+  }
+);
+
+/** The loudest a note makes through an instrument rack of `chains` on a MIDI track. */
+async function throughLayers(
+  chains: {
+    devices: ReturnType<typeof device>[];
+    mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
+  }[]
+) {
+  const doc = arrangement({
+    clips: [
+      {
+        ...clip("m", "keys", 0, 1),
+        notes: [{ id: "n", length: 0.3, pitch: 69, start: 0.05, velocity: 1 }],
+        recording: undefined,
+      },
+    ],
+    tracks: [
+      {
+        color: 0,
+        devices: [
+          {
+            device: INSTRUMENT_RACK_DEVICE,
+            id: "layers",
+            instrument: true,
+            rack: {
+              chains: chains.map((chain, index) => ({
+                devices: chain.devices,
+                id: `chain-${index}`,
+                name: `Chain ${index}`,
+                ...(chain.mix ? { mix: chain.mix } : {}),
+              })),
+              macros: [],
+            },
+            state: {},
+          },
+        ],
+        id: "keys",
+        kind: "midi",
+        name: "Keys",
+      },
+    ],
+  });
+  const out = (await render(doc, new Map(), 0.4)).getChannelData(0);
+  return Math.max(...out.subarray(4800, 16_000).map(Math.abs));
+}
+
+check(
+  "DEV-014: a note plays every chain's instrument of an instrument rack, in layers, and a chain switched off is silent",
+  async () => {
+    const synth = (id: string) =>
+      device(id, "audioui.pocket-synth", { wave: "sine" });
+    const one = await throughLayers([{ devices: [synth("a")] }]);
+    const two = await throughLayers([
+      { devices: [synth("a")] },
+      { devices: [synth("b")] },
+    ]);
+    const muted = await throughLayers([
+      { devices: [synth("a")] },
+      { devices: [synth("b")], mix: chainMix(1, true) },
+    ]);
+    assert(one > 0.05, `one layer is near silent (${one})`);
+    assert(
+      Math.abs(two / one - 2) < 0.05,
+      `two layers of the same synth give ${two}, not twice ${one}`
+    );
+    assert(
+      Math.abs(muted - one) < 1e-3,
+      `a layer switched off leaves ${muted}, not ${one}`
+    );
   }
 );

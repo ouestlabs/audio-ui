@@ -89,7 +89,7 @@ export interface TrackDevice {
   instrument?: boolean;
   /** A device switched off passes the sound on unchanged. @default true */
   on?: boolean;
-  /** A rack's chains and macros: what a device of the kind `audioui.rack` or `audioui.drum-rack` holds instead of a state of its own. */
+  /** A rack's chains and macros: what a device of the kind `audioui.rack`, `audioui.instrument-rack` or `audioui.drum-rack` holds instead of a state of its own. */
   rack?: Rack;
   state: Readonly<Record<string, ParameterValue>>;
 }
@@ -163,6 +163,9 @@ export function newRack(
     })),
   };
 }
+
+/** The id an instrument rack's track device carries: an instrument whose chains each start with an instrument, played together by every note. */
+export const INSTRUMENT_RACK_DEVICE = "audioui.instrument-rack";
 
 /** The id a drum rack's track device carries: an instrument whose chains are pads, each played by a note. */
 export const DRUM_RACK_DEVICE = "audioui.drum-rack";

@@ -3,6 +3,7 @@ import {
   type ArrangementTrack,
   DRUM_RACK_DEVICE,
   type DrumSound,
+  INSTRUMENT_RACK_DEVICE,
   padRecordings,
   renamePadRecordings,
 } from "@/registry-audio/bases/base/lib/arrangement";
@@ -181,5 +182,100 @@ describe("drum rack recordings", () => {
     expect([...padRecordings([renamed])]).toEqual(["clap-2"]);
     const untouched = state.doc.tracks[1] as ArrangementTrack;
     expect(renamePadRecordings(untouched, (id) => `${id}-2`)).toBe(untouched);
+  });
+});
+
+describe("instrument racks", () => {
+  const addLayers: ArrangementCommand = {
+    device: INSTRUMENT_RACK_DEVICE,
+    instrument: true,
+    state: {},
+    track: "beat",
+    type: "add-device",
+  };
+  const layersOf = (state: State) =>
+    state.doc.tracks[0]?.devices?.find(
+      (device) => device.device === INSTRUMENT_RACK_DEVICE
+    );
+
+  test("DEV-014: an instrument rack goes first on a MIDI track, with one empty chain, and a chain takes an instrument at its head", () => {
+    const base = run([addLayers]);
+    const rack = layersOf(base);
+    expect(rack?.instrument).toBe(true);
+    expect(rack?.rack?.chains).toHaveLength(1);
+    const chain = rack?.rack?.chains[0]?.id as string;
+    const place = { chain, rack: rack?.id as string };
+    const state = run(
+      [
+        {
+          chain: place,
+          device: "audioui.reverb",
+          state: {},
+          track: "beat",
+          type: "add-device",
+        },
+        {
+          chain: place,
+          device: "audioui.pocket-synth",
+          instrument: true,
+          state: {},
+          track: "beat",
+          type: "add-device",
+        },
+      ],
+      base
+    );
+    expect(
+      layersOf(state)?.rack?.chains[0]?.devices.map((device) => [
+        device.device,
+        Boolean(device.instrument),
+      ])
+    ).toEqual([
+      ["audioui.pocket-synth", true],
+      ["audioui.reverb", false],
+    ]);
+  });
+
+  test("DEV-014: an effect rack's chain and a drum rack's pad take no instrument, nor does a chain take a rack as its instrument", () => {
+    const fx = run([
+      { device: "audioui.rack", state: {}, track: "beat", type: "add-device" },
+    ]);
+    const effects = fx.doc.tracks[0]?.devices?.[0];
+    const intoEffects = run(
+      [
+        {
+          chain: {
+            chain: effects?.rack?.chains[0]?.id as string,
+            rack: effects?.id as string,
+          },
+          device: "audioui.pocket-synth",
+          instrument: true,
+          state: {},
+          track: "beat",
+          type: "add-device",
+        },
+      ],
+      fx
+    );
+    expect(intoEffects).toBe(fx);
+    const base = run([addLayers]);
+    const rack = layersOf(base);
+    const nested = run(
+      [
+        {
+          chain: {
+            chain: rack?.rack?.chains[0]?.id as string,
+            rack: rack?.id as string,
+          },
+          device: DRUM_RACK_DEVICE,
+          instrument: true,
+          state: {},
+          track: "beat",
+          type: "add-device",
+        },
+      ],
+      base
+    );
+    expect(nested).toBe(base);
   });
 });

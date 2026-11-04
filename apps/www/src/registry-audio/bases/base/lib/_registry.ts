@@ -922,6 +922,42 @@ const items: RegistryItem[] = [
       "@audio-ui/arrangement",
       "@audio-ui/drum-synthesis",
       "@audio-ui/rack",
+      "@audio-ui/voice-pool",
+    ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Note players: what a MIDI track plays through, all taking notes the same way, and the voice pool that plays an instrument of the library with a voice for each note it holds, the oldest given up first.",
+    files: [
+      {
+        path: "lib/voice-pool.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "voice-pool",
+    registryDependencies: ["@audio-ui/device-library"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Instrument racks: an instrument whose chains each start with an instrument of the library, then effects, all played by every note in layers and summed as a rack with its macros; the engine that plays one on a MIDI track.",
+    files: [
+      {
+        path: "lib/instrument-rack.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "instrument-rack",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/device-library",
+      "@audio-ui/rack",
+      "@audio-ui/voice-pool",
     ],
     type: "registry:lib",
   },
@@ -1080,6 +1116,8 @@ const items: RegistryItem[] = [
       "@audio-ui/mixer-engine",
       "@audio-ui/rack",
       "@audio-ui/drum-rack",
+      "@audio-ui/instrument-rack",
+      "@audio-ui/voice-pool",
       "@audio-ui/web-audio",
     ],
     type: "registry:lib",
