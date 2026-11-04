@@ -63,7 +63,7 @@ function DistortionPanel({
       >
         <Plot
           aria-label="Transfer curve"
-          className="h-28 min-h-24 grow"
+          className="h-28 min-h-16 grow"
           maxX={1}
           maxY={1}
           minX={-1}

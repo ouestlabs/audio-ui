@@ -4,6 +4,7 @@
  * so it plays again whatever became of the files. One project for now.
  */
 import type { ArrangementDoc } from "@/lib/arrangement-state";
+import { withUniqueTrackIds } from "./project";
 
 const PROJECT = "project.json";
 const RECORDINGS = "recordings";
@@ -58,6 +59,7 @@ export async function loadProject(): Promise<SavedProject | null> {
       ...locator,
       id: locator.id ?? `locator-${index + 1}`,
     }));
+    project.doc = withUniqueTrackIds(project.doc);
     return project.version === 1 ? project : null;
   } catch {
     return null;

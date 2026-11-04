@@ -436,7 +436,9 @@ function RackFrame({
   controls,
   enabled = true,
   macros,
+  macrosShown,
   onEnabledChange,
+  onMacrosShownChange,
   slot = "rack-panel",
   title = "Rack",
   tools,
@@ -444,6 +446,10 @@ function RackFrame({
   children: ReactNode;
   /** The rack's macros, shown first when the title bar's switch is on. */
   macros?: ReactNode;
+  /** Whether the macros show, controlled: to keep it past a reload, say. */
+  macrosShown?: boolean;
+  /** The title bar's switch of the macros was pressed. */
+  onMacrosShownChange?: (shown: boolean) => void;
   /** More switches after the macros' in the title bar, such as one that shows the zones. */
   tools?: ReactNode;
   className?: string;
@@ -457,13 +463,22 @@ function RackFrame({
   /** Its name in the title bar. @default "Rack" */
   title?: string;
 }) {
-  const [showMacros, setShowMacros] = useState(false);
+  const [ownMacros, setOwnMacros] = useState(false);
+  const showMacros = macrosShown ?? ownMacros;
+  const toggleMacros = useCallback(
+    (shown: boolean) => {
+      setOwnMacros(shown);
+      onMacrosShownChange?.(shown);
+    },
+    [onMacrosShownChange]
+  );
   return (
     <div
       className={cn(
         "cn-audio-device flex h-full min-w-0 flex-col overflow-hidden border bg-card",
         className
       )}
+      data-frame=""
       data-slot={slot}
     >
       {/* A device's title bar, as every face has: its square, its name, and the host's controls at the end. */}
@@ -489,7 +504,7 @@ function RackFrame({
           {title}
         </span>
         {macros ? (
-          <RackSwitch onPressedChange={setShowMacros} pressed={showMacros}>
+          <RackSwitch onPressedChange={toggleMacros} pressed={showMacros}>
             Macros
           </RackSwitch>
         ) : null}
@@ -559,8 +574,12 @@ function RackPanel({
   className,
   controls,
   enabled = true,
+  macrosShown,
   onEnabledChange,
+  onMacrosShownChange,
+  onZonesShownChange,
   title = "Rack",
+  zonesShown,
   onAddChain,
   onChainMix,
   onChainMixCommit,
@@ -584,6 +603,14 @@ function RackPanel({
   /** Whether the rack is on; with `onEnabledChange`, its square in the title bar. */
   enabled?: boolean;
   onEnabledChange?: (enabled: boolean) => void;
+  /** Whether the macros show, controlled: to keep it past a reload, say. */
+  macrosShown?: boolean;
+  /** The title bar's switch of the macros was pressed. */
+  onMacrosShownChange?: (shown: boolean) => void;
+  /** The title bar's switch of the zones was pressed. */
+  onZonesShownChange?: (shown: boolean) => void;
+  /** Whether the zones show, controlled, as `macrosShown`. */
+  zonesShown?: boolean;
   /** Its name in the title bar. @default "Rack" */
   title?: string;
   onAddChain: () => void;
@@ -604,7 +631,15 @@ function RackPanel({
   rack: Rack;
   selectedChain: string | null;
 }) {
-  const [showZones, setShowZones] = useState(false);
+  const [ownZones, setOwnZones] = useState(false);
+  const showZones = zonesShown ?? ownZones;
+  const toggleZones = useCallback(
+    (shown: boolean) => {
+      setOwnZones(shown);
+      onZonesShownChange?.(shown);
+    },
+    [onZonesShownChange]
+  );
   return (
     <RackFrame
       className={className}
@@ -620,11 +655,13 @@ function RackPanel({
           parameters={parameters}
         />
       }
+      macrosShown={macrosShown}
       onEnabledChange={onEnabledChange}
+      onMacrosShownChange={onMacrosShownChange}
       title={title}
       tools={
         onZoneChange ? (
-          <RackSwitch onPressedChange={setShowZones} pressed={showZones}>
+          <RackSwitch onPressedChange={toggleZones} pressed={showZones}>
             Zones
           </RackSwitch>
         ) : null

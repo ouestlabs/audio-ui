@@ -76,7 +76,7 @@ function AutoPanPanel({
       >
         <Plot
           aria-label="Movement over two seconds"
-          className="h-28 min-h-24 grow"
+          className="h-28 min-h-16 grow"
           maxX={WINDOW_SECONDS}
           maxY={100}
           minX={0}

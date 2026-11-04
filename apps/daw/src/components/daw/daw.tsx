@@ -1,8 +1,4 @@
-import {
-  type MetronomeRhythm,
-  secondsPerBar,
-  type Tempo,
-} from "@audio-ui/core/time";
+import { secondsPerBar, type Tempo } from "@audio-ui/core/time";
 import {
   type ChangeEvent,
   type ReactNode,
@@ -49,6 +45,7 @@ import {
   type ArrangementTrack,
   padRecordings,
   type TimeSelection,
+  type TrackDevice,
 } from "@/lib/arrangement";
 import { renderArrangement } from "@/lib/arrangement-engine";
 import {
@@ -87,6 +84,15 @@ import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
 import { RecordSettings } from "./record-settings";
+import {
+  clipsToReselect,
+  readView,
+  saveView,
+  useForgetRemoved,
+  useSavedArrangement,
+  useSavedScroll,
+  useSavedState,
+} from "./use-saved-view";
 import { useTake } from "./use-take";
 import { useTakeInputs } from "./use-take-inputs";
 
@@ -97,10 +103,29 @@ const UNSCROLLED = { overflow: "hidden" } as const;
 const STRIP = "2.25rem";
 /** The least height of each view of that panel, its strip included: under it, what it shows is cut off. */
 const LEAST: Record<PanelView, string> = {
-  clip: "15rem",
-  devices: "18rem",
+  // A warped clip's Sample box whole: its fields, ÷2 and ×2, and Speed.
+  clip: "17.5rem",
+  // The tallest device of the library, the compressor, whole, under the strip.
+  devices: "22.5rem",
   mixer: "21rem",
 };
+/** What a rack's title bar takes from the devices in it, in rem: each level of racks adds one. */
+const RACK_BAR = 2.5;
+
+/** How many racks deep a chain goes: 0 with none, 1 with a rack, 2 with a rack in a rack. */
+function rackDepth(devices: readonly TrackDevice[] | undefined): number {
+  let deepest = 0;
+  for (const device of devices ?? []) {
+    if (device.rack) {
+      const inner = Math.max(
+        0,
+        ...device.rack.chains.map((chain) => rackDepth(chain.devices))
+      );
+      deepest = Math.max(deepest, 1 + inner);
+    }
+  }
+  return deepest;
+}
 
 /** The most of the window the panel takes when it opens: what a height dragged by hand may go past. */
 const OPENING_SHARE = 0.45;
@@ -111,6 +136,16 @@ const OPENING: Record<PanelView, number> = {
   mixer: 400,
 };
 const REM = 16;
+
+/** The least height of a view: for the devices, each level of racks on the track takes a title bar from its devices' height. */
+function leastOf(
+  view: PanelView,
+  devices: readonly TrackDevice[] | undefined
+): string {
+  return view === "devices"
+    ? `${Number.parseFloat(LEAST.devices) + RACK_BAR * rackDepth(devices)}rem`
+    : LEAST[view];
+}
 
 /** How tall each view opens on a window `height` px tall: as tall as it likes, up to 45% of it, never under its least. */
 function openingHeights(height: number): Record<PanelView, number> {
@@ -191,6 +226,8 @@ export function Daw({
     colors: TRACK_COLOR_COUNT,
     duration: initial.duration,
     initialClips: initial.clips,
+    initialFolded: readView().trackFolded,
+    initialHeights: readView().trackHeights,
     initialLocators: initial.locators,
     initialLoop: initial.loop,
     initialMain: initial.main,
@@ -212,15 +249,25 @@ export function Daw({
     [doc.returns, doc.tracks]
   );
   const automation = useTrackAutomation({ dispatch, tracks: automatedTracks });
-  const [metronome, setMetronome] = useState(false);
-  const [rhythm, setRhythm] = useState<MetronomeRhythm>("auto");
+  const [metronome, setMetronome] = useSavedState("metronome", false);
+  const [rhythm, setRhythm] = useSavedState("rhythm", "auto");
   const engine = useArrangementEngine({
     doc,
     metronome: { on: metronome, rhythm },
     overridden: automation.overridden,
     recordings: sources,
   });
-  const [cursor, setCursor] = useState(0);
+  const [cursor, setCursor] = useSavedState(
+    "cursor",
+    0,
+    (seconds) => seconds <= initial.duration
+  );
+  // The playhead starts at the marker it was left on.
+  const [cursorAtOpen] = useState(cursor);
+  useEffect(
+    () => engine.position.set(cursorAtOpen),
+    [cursorAtOpen, engine.position]
+  );
   const stoppedAt = useRef(0);
   // Recording (REC): the armed tracks, Record, the count-in and Punch, and the take while it runs.
   const keepTake = useCallback(
@@ -242,13 +289,15 @@ export function Daw({
     setComputerKeys,
     transportPosition,
   } = useTakeInputs({ doc, engine, take });
-  const [selectedTrack, setSelectedTrack] = useState<string | null>(
-    initial.tracks[0]?.id ?? null
+  const [selectedTrack, setSelectedTrack] = useSavedState(
+    "selectedTrack",
+    initial.tracks[0]?.id ?? null,
+    (id) => id !== null && trackOf(initial, id) !== undefined
   );
   // Under the arrangement, one panel (MIX-015): the selected clip, the selected track's devices, or the mixer. Like
   // the library, it is always there, folded to its strip or open, its height shared with the tracks by the line above.
-  const [panelView, setPanelView] = useState<PanelView>("devices");
-  const [folded, setFolded] = useState(false);
+  const [panelView, setPanelView] = useSavedState("panelView", "devices");
+  const [folded, setFolded] = useSavedState("panelFolded", false);
   const panelRef = usePanelRef();
   const [single] =
     arrangement.selectedIds.length === 1 ? arrangement.selectedIds : [];
@@ -259,9 +308,10 @@ export function Daw({
   const shown = panelView === "clip" && !selectedClip ? "devices" : panelView;
   // How tall each view is, in px: a height dragged is kept for the next time it shows. It opens at no more than
   // 45% of the window, so a short screen keeps room for the tracks, and never under its least height.
-  const viewHeights = useRef<Record<PanelView, number>>(
-    openingHeights(globalThis.innerHeight ?? 900)
-  );
+  const viewHeights = useRef<Record<PanelView, number>>({
+    ...openingHeights(globalThis.innerHeight ?? 900),
+    ...readView().panelHeights,
+  });
   // Folded by the line dragged under the view's least height, or opened by dragging it up.
   const keepHeight = useCallback(
     (size: { inPixels: number }, id: string | number | undefined) => {
@@ -273,9 +323,10 @@ export function Daw({
       setFolded(collapsed);
       if (!collapsed) {
         viewHeights.current[shown] = size.inPixels;
+        saveView({ panelHeights: { ...viewHeights.current } });
       }
     },
-    [panelRef, shown]
+    [panelRef, shown, setFolded]
   );
   const foldPanel = useCallback(
     (fold: boolean) => {
@@ -286,7 +337,7 @@ export function Daw({
         panelRef.current?.resize(viewHeights.current[shown]);
       }
     },
-    [panelRef, shown]
+    [panelRef, shown, setFolded]
   );
   /** Shows a view, the panel open on it. */
   const showView = useCallback(
@@ -299,7 +350,7 @@ export function Daw({
         setFolded(false);
       }
     },
-    [foldPanel, shown]
+    [foldPanel, shown, setPanelView, setFolded]
   );
   const pickView = useCallback(
     (value: unknown) => showView(value as PanelView),
@@ -318,24 +369,36 @@ export function Daw({
     [foldPanel, folded, showView, shown]
   );
   // The clip panel's boxes folded, held here so they stay from clip to clip.
-  const [clipFolded, setClipFolded] = useState<string[]>([]);
+  const [clipFolded, setClipFolded] = useSavedState("clipFolded", []);
+  // The clip view comes back with the clips it showed, before anything is painted without them.
+  const [reselected] = useState(() =>
+    clipsToReselect(panelView, initial.clips)
+  );
+  useLayoutEffect(() => {
+    if (reselected.length > 0) {
+      dispatch({ ids: reselected, type: "select-clips" });
+    }
+  }, [dispatch, reselected]);
   // Picking a clip shows it, picking a track its devices, the mixer left where it is.
   useEffect(() => {
     if (single) {
       setPanelView((current) => (current === "mixer" ? current : "clip"));
     }
-  }, [single]);
-  const pickTrack = useCallback((id: string) => {
-    setSelectedTrack(id);
-    setPanelView((current) => (current === "mixer" ? current : "devices"));
-  }, []);
+  }, [single, setPanelView]);
+  const pickTrack = useCallback(
+    (id: string) => {
+      setSelectedTrack(id);
+      setPanelView((current) => (current === "mixer" ? current : "devices"));
+    },
+    [setPanelView, setSelectedTrack]
+  );
   // The library on the left (KEY-021), and its search, which the end of a chain focuses.
-  const [libraryOpen, setLibraryOpen] = useState(true);
+  const [libraryOpen, setLibraryOpen] = useSavedState("libraryOpen", true);
   const librarySearch = useRef<HTMLInputElement>(null);
   const openLibrary = useCallback(() => {
     setLibraryOpen(true);
     requestAnimationFrame(() => librarySearch.current?.focus());
-  }, []);
+  }, [setLibraryOpen]);
   /** Puts a device of the library on `onto`, or on a track of its own (DEV-003), and shows it in the device view. */
   const placeDevice = useCallback(
     (device: string, onto: string | null) => {
@@ -346,7 +409,7 @@ export function Daw({
         showView("devices");
       }
     },
-    [dispatch, doc, showView]
+    [dispatch, doc, showView, setSelectedTrack]
   );
   const pickDevice = useCallback(
     (device: string) => placeDevice(device, selectedTrack),
@@ -411,7 +474,12 @@ export function Daw({
       setCursor(0);
       engine.position.set(0);
     }
-  }, [cursor, engine, take]);
+  }, [
+    cursor,
+    engine,
+    take, // Stop pressed while stopped goes back to the start (TRN-003).
+    setCursor,
+  ]);
   const playPause = useCallback(
     () => (engine.playing || take.recording ? stop() : playFrom(cursor)),
     [cursor, engine.playing, playFrom, stop, take.recording]
@@ -422,7 +490,7 @@ export function Daw({
       setCursor(seconds);
       playFrom(seconds);
     },
-    [playFrom]
+    [playFrom, setCursor]
   );
   const seek = useCallback(
     (seconds: number) => {
@@ -433,12 +501,29 @@ export function Daw({
         engine.position.set(seconds);
       }
     },
-    [engine, playFrom]
+    [engine, playFrom, setCursor]
   );
   // The arrangement's zoom and grid, which the keys change too (KEY-016 to KEY-018).
   const viewportRef = useRef<HTMLDivElement>(null);
-  const view = useTimelineZoom({ duration: doc.duration, viewportRef });
-  const grid = useTimelineGrid({ tempo: doc.tempo, zoom: view.zoom });
+  const view = useTimelineZoom({
+    duration: doc.duration,
+    initialZoom: readView().zoom,
+    viewportRef,
+  });
+  const grid = useTimelineGrid({
+    initial: readView().grid,
+    tempo: doc.tempo,
+    zoom: view.zoom,
+  });
+  useSavedScroll(viewportRef);
+  useForgetRemoved(doc);
+  useSavedArrangement({
+    grid,
+    selectedClips: arrangement.selectedIds,
+    trackFolded: arrangement.folded,
+    trackHeights: arrangement.handHeights,
+    zoom: view.timeline.zoom,
+  });
   // A change of tempo, or the undo of one, changes the bar: the start marker and the zoom keep their places in it.
   const bar = secondsPerBar(doc.tempo);
   const lastBar = useRef(bar);
@@ -455,7 +540,7 @@ export function Daw({
       position.set(position.getSnapshot() * ratio);
     }
     rescale(ratio);
-  }, [bar, position, rescale, running]);
+  }, [bar, position, rescale, running, setCursor]);
   // A stretch of time on some tracks, dragged across bare lanes, and what the keys do with it.
   const getCursor = useCallback(() => cursor, [cursor]);
   // The tracks the keys work on: those picked by their headers, or the one last pressed.
@@ -1029,11 +1114,8 @@ export function Daw({
     return () => clearTimeout(timer);
   }, [doc, recordings]);
 
-  const panelTitle = titleOf(
-    shown,
-    selectedClip,
-    selectedTrack ? trackOf(doc, selectedTrack) : undefined
-  );
+  const shownTrack = selectedTrack ? trackOf(doc, selectedTrack) : undefined;
+  const panelTitle = titleOf(shown, selectedClip, shownTrack);
   // What the panel holds, open: the clip view's own caret folds the panel to its bar.
   let content: ReactNode;
   if (shown === "mixer") {
@@ -1201,7 +1283,7 @@ export function Daw({
                 id={shown}
                 key={shown}
                 maxSize="70%"
-                minSize={LEAST[shown]}
+                minSize={leastOf(shown, shownTrack?.devices)}
                 onResize={keepHeight}
                 panelRef={panelRef}
                 style={UNSCROLLED}

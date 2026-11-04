@@ -5,7 +5,7 @@ import type { Recording } from "@/lib/daw/recordings";
 const recording = (name: string, length: number): Recording => ({
   length,
   name,
-  peaks: [],
+  peaks: new Float32Array(0),
   source: { channels: [], sampleRate: 48_000 },
 });
 

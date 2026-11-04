@@ -79,3 +79,7 @@ Test: packages/core/src/audio/analysis/tempo.test.ts "CLP-018"
 A file dropped in is warped in Beats when its tempo can be told, so it plays in time at the arrangement's. A short file taken as a well-cut loop of 1, 2, 4, 8 or 16 bars (one of them gives a tempo within 4 % of the estimate, or of its double or half) takes the tempo its length gives, with a warp marker at its start and one at its end. Any other gets a marker on the first beat of each bar, each moved onto the transient within an eighth of a beat of it, and the clip starts on its first beat. A file with no tempo plays as recorded.
 Deviation: the reference also warps files it reads as one-shots, and lets a preference turn warping on import off; here a file with no tempo is not warped, and there is no preference yet.
 Test: packages/core/src/audio/analysis/tempo.test.ts "CLP-019"; apps/daw/test/drop.test.ts "CLP-019"
+
+### CLP-020 A waveform at any zoom
+An audio clip's waveform on its track has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one peak per pixel at the closest zoom. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length.
+Test: apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-020"; apps/daw/test/project-file.test.ts "CLP-020"; apps/daw/test/browser/run.ts "CLP-020"

@@ -78,7 +78,7 @@ function GatePanel({
           aria-label={
             value.external ? "Threshold of the sidechain" : "Transfer curve"
           }
-          className="h-28 min-h-24 grow"
+          className="h-28 min-h-16 grow"
           maxX={MAX_DB}
           maxY={MAX_DB}
           minX={MIN_DB}

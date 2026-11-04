@@ -3,9 +3,9 @@
 Keeping the work. The reference saves a set to a file and gathers its samples into a project folder. `apps/daw` keeps the project in the browser's private storage as you go, and from phase 2 saves it to a folder of the disk as well, in a format of its own: a project folder holding a `.audioui` document and its samples.
 
 ### PRJ-001 Saved as you go
-Every change is saved within a second, with the audio files it uses; reloading the page brings the project back as it was, its zoom and its scroll included.
+Every change is saved within a second, with the audio files it uses; reloading the page brings the project back as it was. So does how it was laid out, kept in this browser, apart from the document and from undo: the zoom and the scroll, the grid, the start marker, the track selected, tracks and devices folded and the heights set by hand, the library's shelf and whether it is open, the panel's view, height and fold, a rack's macros, zones and picked chain, a drum rack's picked pad, the clip panel's boxes and pen, and the metronome and the record settings. Monitoring stays off and the input goes back to the default, so a reload never starts a mic into the speakers, or fails on an input since unplugged. Opening another project forgets it.
 Deviation: the reference saves on command. Nothing here is lost on a reload.
-Test: apps/daw/test/project.test.ts "PRJ-001"
+Test: apps/daw/test/browser/run.ts "PRJ-001"
 
 ### PRJ-002 The project keeps its files
 An audio file dropped in is copied into the project's storage once: the project still plays after the original file is moved or deleted.

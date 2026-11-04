@@ -41,7 +41,7 @@ Status: partial: OBS-013 checks the reference's default.
 Test: apps/daw/test/project.test.ts "ARR-009"
 
 ### ARR-010 Moving a track
-A track moves up or down the arrangement by its grip, dragged or with Up and Down on it: a copy of its header follows the pointer, a line marks the gap it would land in, and the view scrolls at its edges. The return tracks stay under the tracks. One step of undo.
+A track moves up or down the arrangement by its grip, dragged or with Up and Down on it: a copy of its header follows the pointer, the track shows dimmed where it would land, the others aside, and the view scrolls at its edges. Escape puts it back. The return tracks stay under the tracks. One step of undo.
 Test: apps/daw/test/browser/run.ts "ARR-010"
 
 ### ARR-011 A track's height
@@ -83,3 +83,12 @@ Test: apps/www/test/registry-audio/base/hooks/use-arranged-clips.test.tsx; apps/
 ### ARR-020 Consolidate
 Cmd+J makes one clip per track of the time selected, one step of undo. A MIDI track's notes merge into it as they sound, their clip's loop and transposition played out. An audio track's clips render into one new recording as they play, with their fades, gains and crossfades, and without the track's devices, mix or automation, which go on acting after it: the track sounds the same. The recording is kept in floats, so what goes past full scale stays in it. It is named after the first clip it takes in. The recordings it replaces are kept, so undo can bring them back; saving to a folder leaves out those no clip plays.
 Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-020"; apps/www/test/registry-audio/base/lib/wav-file.test.ts "ARR-020"; apps/www/test/browser/arrangement-engine.check.ts "ARR-020"; apps/daw/test/browser/run.ts "ARR-020"
+
+### ARR-021 A swipe stays in the workstation
+A sideways swipe on a touchpad scrolls what is under it. At the end of a scroll, or over what does not scroll, nothing happens: the browser does not go back a page.
+Test: apps/daw/test/browser/run.ts "ARR-021"
+
+### ARR-022 One id per track
+A new or duplicated track never takes the id of a track there is, whatever was removed before the project was loaded. A project saved with two tracks under one id comes back with the second under a new one, empty: the clips stay on the first.
+Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-022"; apps/daw/test/project-file.test.ts "ARR-022"; apps/daw/test/browser/run.ts "ARR-022"
+

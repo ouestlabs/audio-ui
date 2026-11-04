@@ -1,6 +1,7 @@
 import type { Ref } from "react";
 import { DeviceBrowser } from "@/components/audio-ui/device-browser";
 import { DEVICE_SHELVES } from "@/lib/device-library";
+import { useSavedState } from "./use-saved-view";
 
 /** Every device of the library, by shelf, as the browser lists them. */
 const SHELVES = DEVICE_SHELVES.map((shelf) => ({
@@ -26,13 +27,16 @@ export function LibraryPanel({
   open: boolean;
   searchRef: Ref<HTMLInputElement>;
 }) {
+  const [shelf, setShelf] = useSavedState("libraryShelf", 0);
   return (
     <DeviceBrowser
       className="h-full"
       onOpenChange={onOpenChange}
       onPick={onPick}
+      onShelfChange={setShelf}
       open={open}
       searchRef={searchRef}
+      shelf={shelf}
       shelves={SHELVES}
     />
   );

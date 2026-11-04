@@ -41,6 +41,54 @@ const rackOf = (state: ReturnType<typeof setup>) =>
   chainOf(state).find((device) => device.rack);
 
 describe("racks", () => {
+  test("DEV-004: a device carried into a rack and out again, each one step of undo", () => {
+    const grouped = run([{ ids: ["verb"], track: "a", type: "group-devices" }]);
+    const rack = rackOf(grouped);
+    const rackId = rack?.id ?? "";
+    const chain = rack?.rack?.chains[0]?.id ?? "";
+    const into = apply(grouped, {
+      chain: { chain, rack: rackId },
+      id: "comp",
+      index: 0,
+      track: "a",
+      type: "carry-device",
+    });
+    expect(chainOf(into).map((device) => device.id)).toEqual(["eq", rackId]);
+    expect(
+      rackOf(into)?.rack?.chains[0]?.devices.map((device) => device.id)
+    ).toEqual(["comp", "verb"]);
+    expect(into.history.past).toHaveLength(grouped.history.past.length + 1);
+    const out = apply(into, {
+      id: "comp",
+      index: 0,
+      track: "a",
+      type: "carry-device",
+    });
+    expect(chainOf(out).map((device) => device.id)).toEqual([
+      "comp",
+      "eq",
+      rackId,
+    ]);
+    expect(
+      rackOf(out)?.rack?.chains[0]?.devices.map((device) => device.id)
+    ).toEqual(["verb"]);
+  });
+
+  test("DEV-004: a rack does not go inside itself", () => {
+    const grouped = run([{ ids: ["verb"], track: "a", type: "group-devices" }]);
+    const rack = rackOf(grouped);
+    const rackId = rack?.id ?? "";
+    expect(
+      apply(grouped, {
+        chain: { chain: rack?.rack?.chains[0]?.id ?? "", rack: rackId },
+        id: rackId,
+        index: 0,
+        track: "a",
+        type: "carry-device",
+      })
+    ).toBe(grouped);
+  });
+
   test("DEV-010: devices grouped go into a new rack, one chain of them, where the first was", () => {
     const state = run([
       { ids: ["comp", "verb"], track: "a", type: "group-devices" },

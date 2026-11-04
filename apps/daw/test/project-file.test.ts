@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { DRUM_RACK_DEVICE, padRecordings } from "@/lib/arrangement";
-import { newProject } from "@/lib/daw/project";
+import { newProject, withUniqueTrackIds } from "@/lib/daw/project";
 import {
   PROJECT_FORMAT,
   PROJECT_VERSION,
@@ -10,6 +10,7 @@ import {
   withFreshIds,
   writeProjectFile,
 } from "@/lib/daw/project-file";
+import { peakCountFor } from "@/lib/daw/recordings";
 
 const bytes = (text: string, extra: number[] = []) =>
   new Uint8Array([...text].map((char) => char.charCodeAt(0)).concat(extra))
@@ -130,5 +131,41 @@ describe("the project file", () => {
     );
     const fresh = withFreshIds(file, () => "rec-new");
     expect([...padRecordings(fresh.doc.tracks)]).toEqual(["rec-new"]);
+  });
+
+  test("ARR-022: a project saved with two tracks under one id comes back with one id per track", () => {
+    const doc = newProject();
+    const [first, second] = doc.tracks;
+    if (!(first && second)) {
+      throw new Error("a new project has tracks");
+    }
+    const twice = {
+      ...doc,
+      clips: [
+        {
+          id: "clip",
+          name: "Clip",
+          sourceLength: 1,
+          track: first.id,
+          value: { fadeIn: 0, fadeOut: 0, length: 1, offset: 0, start: 0 },
+        },
+      ],
+      tracks: [first, { ...second, id: first.id }],
+    };
+    const healed = withUniqueTrackIds(twice);
+    const ids = healed.tracks.map((track) => track.id);
+    expect(new Set(ids).size).toBe(2);
+    expect(ids[0]).toBe(first.id);
+    expect(healed.clips[0]?.track).toBe(first.id);
+    expect(withUniqueTrackIds(doc)).toBe(doc);
+  });
+});
+
+describe("peaks", () => {
+  test("CLP-020: a recording keeps enough peaks for the closest zoom, however long it is", () => {
+    // The closest zoom is 240 px a second.
+    expect(peakCountFor(240) / 240).toBeGreaterThanOrEqual(240);
+    expect(peakCountFor(1)).toBe(4096);
+    expect(peakCountFor(36_000)).toBe(2 ** 20);
   });
 });

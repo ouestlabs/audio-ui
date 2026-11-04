@@ -345,6 +345,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "device-chain",
     registryDependencies: [
+      "@audio-ui/sortable-drag",
       "@shadcn/button",
       "@shadcn/context-menu",
       "@shadcn/toggle",

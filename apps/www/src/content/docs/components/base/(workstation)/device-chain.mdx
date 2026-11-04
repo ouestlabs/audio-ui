@@ -217,16 +217,17 @@ downloadWavFile(rendered, { bitDepth: 24, filename: "chain.wav" });
 
 ## Racks
 
-A device can be a rack: chains of devices side by side, summed, with eight macros. Its face goes in a slot like any device, with a chain of its own inside it. See [Rack](/docs/components/base/rack).
+A device can be a rack: chains of devices side by side, summed, with eight macros. Its face goes in a slot like any device, with a chain of its own inside it. That chain has no scroll of its own: the rack is as wide as its devices, and the outermost chain scrolls them all. See [Rack](/docs/components/base/rack).
 
 ## Interaction
 
 <KeyTable title="Chain">
-<KeyRow gesture={"Drag a device by its header or its grip"}>Moves it. A line shows where it lands, and the row scrolls near its edges.</KeyRow>
+<KeyRow gesture={"Drag a device by its header or its grip"}>Moves it. A label with its name follows the pointer, the device shows dimmed where it would land, the others aside, and the row scrolls near its edges. `Escape` puts it back. With `onReceive`, a device goes in or out of a rack's chain the same way.</KeyRow>
+<KeyRow gesture={"Hold a device over a chain"}>The chain that would take it lights up, with a line where it lands, its end included. Anywhere over a rack is into the rack: its chain lights up, from its title bar and its list of chains too.</KeyRow>
 <KeyRow gesture={"`ArrowLeft` / `ArrowRight` on the grip"}>Move the device a place.</KeyRow>
 <KeyRow gesture={"`Delete` / `Backspace` on the grip"}>Remove the device.</KeyRow>
 <KeyRow gesture={"Right-click a device"}>Move it left or right, or remove it.</KeyRow>
-<KeyRow gesture={"Fold button"}>Folds the device to a strip with its name down it; the strip unfolds it.</KeyRow>
+<KeyRow gesture={"Fold button"}>Folds the device to a strip with its square, its name down it and its buttons at the bottom; a click anywhere on the strip, outside its buttons, unfolds it.</KeyRow>
 <KeyRow gesture={"Drop a device from the library"}>Adds it where it is dropped: between two devices, or at the end.</KeyRow>
 </KeyTable>
 
@@ -249,6 +250,8 @@ Each slot is a group named after its device, and its grip is a button, "Move Com
 <TypeRow name={"order"} type={"readonly string[]"}>The ids of the slots, in the order the sound goes through them.</TypeRow>
 <TypeRow name={"onMove"} type={"(id: string, index: number) => void"}>A slot was moved to `index`, counted once it has left its place. Leave it out and the slots stay where they are.</TypeRow>
 <TypeRow name={"onRemove"} type={"(id: string) => void"}>A slot was removed. Leave it out and no slot can be.</TypeRow>
+<TypeRow name={"onReceive"} type={"(id: string, index: number) => void"}>A device was dragged here from another chain around or inside this one, such as a rack's: its slot's id, and the index it goes in. Leave it out and none can come.</TypeRow>
+<TypeRow name={"canReceive"} type={"(id: string) => boolean"}>Whether a device of another chain can come here, by its slot's id. Every one by default.</TypeRow>
 <TypeRow name={"onAdd"} type={"(device: string, index: number) => void"}>A device was dropped on the chain from a library: its id, and the index it goes in. Leave it out and nothing can be dropped.</TypeRow>
 <TypeRow name={"flat"} type={"boolean"} default={"false"}>Lays the devices flat on the surface around them, a hairline between each and the next, instead of as cards: as a workstation's device view docks them. Each fills the chain's height; one taller than the chain keeps its own, and the chain scrolls to it.</TypeRow>
 </TypeTable>
@@ -260,6 +263,9 @@ Each slot is a group named after its device, and its grip is a button, "Move Com
 <TypeRow name={"title"} type={"string"}>The device's name, down the folded strip and in what the controls are called.</TypeRow>
 <TypeRow name={"enabled"} type={"boolean"}>Whether the device is on, for the square of the folded strip. Leave it out for a device that cannot be switched off.</TypeRow>
 <TypeRow name={"onEnabledChange"} type={"(enabled: boolean) => void"}>The square of the folded strip was pressed.</TypeRow>
+<TypeRow name={"folded"} type={"boolean"}>Whether the device is folded to its strip, controlled: to keep it past a reload, say.</TypeRow>
+<TypeRow name={"defaultFolded"} type={"boolean"} default={"false"}>Whether the device is folded to its strip when it first shows. Use `folded` to control it.</TypeRow>
+<TypeRow name={"onFoldedChange"} type={"(folded: boolean) => void"}>The device was folded or unfolded.</TypeRow>
 </TypeTable>
 
 ### Parts
@@ -275,6 +281,8 @@ Each slot is a group named after its device, and its grip is a button, "Move Com
 <TypeRow name={"shelves"} type={"{ label: string; items: { id, name, description? }[] }[]"}>The devices, by shelf, in the order they are shown.</TypeRow>
 <TypeRow name={"onPick"} type={"(id: string) => void"}>A device was picked: Enter, a double-click or the Add button.</TypeRow>
 <TypeRow name={"open"} type={"boolean"} default={"true"}>Whether the library is shown, or folded to a strip that opens it.</TypeRow>
+<TypeRow name={"shelf"} type={"number"}>The index of the shelf shown, controlled: to keep it past a reload, say.</TypeRow>
+<TypeRow name={"onShelfChange"} type={"(shelf: number) => void"}>Another shelf was opened.</TypeRow>
 <TypeRow name={"onOpenChange"} type={"(open: boolean) => void"}>Called to open or fold the library. Leave it out and it stays open, with no button to fold it.</TypeRow>
 <TypeRow name={"searchRef"} type={"Ref<HTMLInputElement>"}>The search field, to focus it from elsewhere.</TypeRow>
 </TypeTable>

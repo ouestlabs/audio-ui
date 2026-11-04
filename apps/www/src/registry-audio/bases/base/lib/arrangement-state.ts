@@ -71,6 +71,19 @@ const TRACK_NAMES: Record<TrackKind, string> = {
   midi: "MIDI",
 };
 
+const NUMBERED_TRACK = /^track-(\d+)$/;
+
+/**
+ * The number new tracks count on from: past every track there is, whatever
+ * was removed before these were loaded, so a new one never takes an id one has.
+ */
+function lastTrackNumber(tracks: readonly { id: string }[]): number {
+  return Math.max(
+    tracks.length,
+    ...tracks.map((track) => Number(NUMBERED_TRACK.exec(track.id)?.[1] ?? 0))
+  );
+}
+
 function freshId(id: string, taken: Set<string>): string {
   let n = 1;
   while (taken.has(`${id}-${n}`)) {
@@ -705,7 +718,7 @@ export function createArrangementState({
     gesture: { copying: null, group: null },
     history: emptyHistory(),
     selection: null,
-    trackCount: initialTracks.length,
+    trackCount: lastTrackNumber(initialTracks),
   };
 }
 
@@ -849,6 +862,14 @@ export type ArrangementCommand =
       index: number;
       to?: string;
       /** A chain of a rack on the track the device moves along, instead of the track's own chain. */
+      chain?: { chain: string; rack: string };
+    }
+  /** Carries a device of a track, wherever it is, to the track's own chain or a chain of a rack on it. */
+  | {
+      type: "carry-device";
+      track: string;
+      id: string;
+      index: number;
       chain?: { chain: string; rack: string };
     }
   | { type: "remove-device"; track: string; id: string }
@@ -1651,6 +1672,64 @@ function moveDevice(
   });
 }
 
+function carryDevice(
+  state: ArrangementState,
+  {
+    chain: along,
+    id,
+    index,
+    track,
+  }: Extract<ArrangementCommand, { type: "carry-device" }>
+): ArrangementState {
+  const { doc } = state;
+  const devices = trackOf(doc, track)?.devices ?? [];
+  const device = [
+    ...devices,
+    ...devices.flatMap((item) => (item.rack ? rackDevices(item.rack) : [])),
+  ].find((item) => item.id === id);
+  if (!device) {
+    return state;
+  }
+  // A rack does not go inside itself.
+  const inside = device.rack ? rackDevices(device.rack) : [];
+  if (
+    along &&
+    (along.rack === id || inside.some((item) => item.id === along.rack))
+  ) {
+    return state;
+  }
+  if (
+    device.instrument &&
+    !(along
+      ? takesInstrument(doc, track, along.rack, device)
+      : holdsInstrument(doc, track))
+  ) {
+    return state;
+  }
+  return edit(state, (current) =>
+    withTrack(current, track, (item) => {
+      const rest = dropDevice(item.devices ?? [], id);
+      if (!along) {
+        return { ...item, devices: placeDevice(rest, device, index) };
+      }
+      return {
+        ...item,
+        devices: mapDevice(rest, along.rack, (holder) =>
+          holder.rack
+            ? {
+                ...holder,
+                rack: withChain(holder.rack, along.chain, (chain) => ({
+                  ...chain,
+                  devices: placeDevice(chain.devices, device, index),
+                })),
+              }
+            : holder
+        ),
+      };
+    })
+  );
+}
+
 /** The track's device `id` changed by `change`, as one step (`edit`) or a burst. */
 function changeDevice(
   state: ArrangementState,
@@ -2420,6 +2499,7 @@ const handlers: Handlers = {
   "change-send": (state, { level, to, track }) =>
     setSend(state, track, to, level, burst),
   "move-device": (state, command) => moveDevice(state, command),
+  "carry-device": (state, command) => carryDevice(state, command),
   "remove-device": (state, { id, track }) =>
     edit(state, (doc) =>
       withTrack(doc, track, (item) => {

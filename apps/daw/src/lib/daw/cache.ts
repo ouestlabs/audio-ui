@@ -1,8 +1,9 @@
 /**
  * The decoded audio the engine streams (G-013, PRF-006), in the browser's
  * private storage: each recording's channels at the engine's rate, as 32-bit
- * floats one channel after the other, in `cache/<id>.f32`, and what it takes
- * to read it again without decoding, in `cache/<id>.json`. It is made from the
+ * floats one channel after the other, in `cache/<id>.f32`, its peaks the same
+ * way in `cache/<id>.peaks`, and what it takes to read it again without
+ * decoding, in `cache/<id>.json`. It is made from the
  * dropped file's bytes, and made again from them when it is missing.
  */
 import type { StreamedSource } from "@/lib/clip-player";
@@ -15,7 +16,6 @@ const CACHE = "cache";
 interface CacheEntry {
   channels: number;
   length: number;
-  peaks: number[];
   sampleRate: number;
 }
 
@@ -70,9 +70,13 @@ export async function streamRecording(
   const entry: CacheEntry = {
     channels: channels.length,
     length: channels[0]?.length ?? 0,
-    peaks: recording.peaks,
     sampleRate: source.sampleRate,
   };
+  const peaks = await (
+    await folder.getFileHandle(`${id}.peaks`, { create: true })
+  ).createWritable();
+  await peaks.write(recording.peaks as Float32Array<ArrayBuffer>);
+  await peaks.close();
   const meta = await (
     await folder.getFileHandle(`${id}.json`, { create: true })
   ).createWritable();
@@ -93,6 +97,8 @@ export async function cachedRecording(
       await (await (await folder.getFileHandle(`${id}.json`)).getFile()).text()
     ) as CacheEntry;
     const samples = await (await folder.getFileHandle(`${id}.f32`)).getFile();
+    // A cache made before peaks had a file of their own is missing it: made again, it draws finer.
+    const peaks = await (await folder.getFileHandle(`${id}.peaks`)).getFile();
     if (
       entry.sampleRate !== sampleRate ||
       samples.size !==
@@ -103,7 +109,7 @@ export async function cachedRecording(
     return {
       length: entry.length / entry.sampleRate,
       name,
-      peaks: entry.peaks,
+      peaks: new Float32Array(await peaks.arrayBuffer()),
       source: sourceOf(id, entry),
     };
   } catch {

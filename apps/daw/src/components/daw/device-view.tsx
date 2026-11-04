@@ -1,6 +1,6 @@
 import type { ParameterValue } from "@audio-ui/core/device";
 import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceChain,
   DeviceChainSlot,
@@ -41,6 +41,7 @@ import {
 } from "@/lib/arrangement";
 import { trackOf } from "@/lib/arrangement-state";
 import { libraryDevice } from "@/lib/device-library";
+import { useSavedEntry } from "./use-saved-view";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 
@@ -67,6 +68,12 @@ interface ChainProps {
   owner: ArrangementTrack;
   tempo: Arrangement["doc"]["tempo"];
   track: string;
+}
+
+/** Whether a slot is folded, kept with the view by the device's id. */
+interface SlotFold {
+  folded: boolean;
+  onFoldedChange: (folded: boolean) => void;
 }
 
 /** One device on a chain, drawn by its own panel (DEV-008); a rack, by the rack's. */
@@ -107,11 +114,13 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   );
   const { onHoldNote } = chain;
   const release = useCallback(() => onHoldNote(null), [onHoldNote]);
+  const [folded, setFolded] = useSavedEntry("deviceFolded", device.id, false);
+  const fold = { folded, onFoldedChange: setFolded };
   if (device.rack && device.device === DRUM_RACK_DEVICE) {
-    return <DrumSlot device={device} {...chain} />;
+    return <DrumSlot device={device} fold={fold} {...chain} />;
   }
   if (device.rack) {
-    return <RackSlot device={device} {...chain} />;
+    return <RackSlot device={device} fold={fold} {...chain} />;
   }
   if (!(face && entry)) {
     return null;
@@ -120,7 +129,9 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
     <DeviceChainSlot
       className={face.width}
       enabled={device.on !== false}
+      folded={folded}
       onEnabledChange={toggle}
+      onFoldedChange={setFolded}
       title={entry.device.name}
       value={device.id}
     >
@@ -135,6 +146,15 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       </face.Panel>
     </DeviceChainSlot>
   );
+}
+
+/** Whether the device `id` on the track, wherever it is, is an instrument. */
+function instrumentHeld(owner: ArrangementTrack, id: string) {
+  const devices = owner.devices ?? [];
+  return [
+    ...devices,
+    ...devices.flatMap((item) => (item.rack ? rackDevices(item.rack) : [])),
+  ].some((item) => item.id === id && item.instrument === true);
 }
 
 /** A chain of devices, the track's or a rack's: devices dropped from the library go where they land, and move along it. */
@@ -187,12 +207,26 @@ function Chain({
     (id: string) => dispatch({ id, track, type: "remove-device" }),
     [dispatch, track]
   );
+  // A device of the track, from another of its chains. An effect rack takes no instrument; the state refuses the rest.
+  const receive = useCallback(
+    (id: string, index: number) =>
+      dispatch({ chain: along, id, index, track, type: "carry-device" }),
+    [along, dispatch, track]
+  );
+  const { owner } = chain;
+  const noInstruments = place !== undefined && !place.instruments;
+  const canReceive = useCallback(
+    (id: string) => !(noInstruments && instrumentHeld(owner, id)),
+    [noInstruments, owner]
+  );
   return (
     <DeviceChain
+      canReceive={canReceive}
       className={className}
       flat
       onAdd={add}
       onMove={move}
+      onReceive={receive}
       onRemove={remove}
       order={order}
     >
@@ -289,13 +323,23 @@ function useRackCommands(
 }
 
 /** A rack on a chain: its macros and chains, and the picked chain's devices (DEV-010, DEV-012). */
-function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
+function RackSlot({
+  device,
+  fold,
+  ...chain
+}: ChainProps & { device: TrackDevice; fold: SlotFold }) {
   const { dispatch, track } = chain;
   const rack = device.rack ?? { chains: [], macros: [] };
   const rackId = device.id;
   // An instrument rack's chains each start with an instrument (DEV-014).
   const layered = device.device === INSTRUMENT_RACK_DEVICE;
-  const [picked, setPicked] = useState<string | null>(null);
+  const [picked, setPicked] = useSavedEntry("rackChain", rackId, "");
+  const [macrosShown, setMacrosShown] = useSavedEntry(
+    "rackMacros",
+    rackId,
+    false
+  );
+  const [zonesShown, setZonesShown] = useSavedEntry("rackZones", rackId, false);
   const selected =
     rack.chains.find((item) => item.id === picked) ?? rack.chains[0];
   const place = useMemo(
@@ -336,26 +380,31 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       onEnabledChange={toggle}
       title={layered ? "Instrument rack" : "Rack"}
       value={device.id}
+      {...fold}
     >
       <RackPanel
         controls={<DeviceChainSlotControls />}
         enabled={device.on !== false}
+        macrosShown={macrosShown}
         onAddChain={addChain}
         onChainMix={mix}
         onChainMixCommit={settle}
         onEnabledChange={toggle}
         onMacroChange={turn}
         onMacroCommit={settle}
+        onMacrosShownChange={setMacrosShown}
         onMapMacro={map}
         onRemoveChain={removeChain}
         onSelectChain={setPicked}
         onUnmapMacro={unmap}
         onZoneChange={layered ? zone : undefined}
         onZoneCommit={settle}
+        onZonesShownChange={setZonesShown}
         parameters={parameters}
         rack={shownRack}
         selectedChain={selected?.id ?? null}
         title={layered ? "Instrument rack" : "Rack"}
+        zonesShown={zonesShown}
       >
         {selected ? (
           <Chain
@@ -387,11 +436,20 @@ const lowestPad = (rack: Rack) =>
   );
 
 /** A drum rack, the track's instrument: its macros, its pads, and the picked pad's devices (DEV-013). */
-function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
+function DrumSlot({
+  device,
+  fold,
+  ...chain
+}: ChainProps & { device: TrackDevice; fold: SlotFold }) {
   const { dispatch, onNoteOff, onNoteOn, onPadFiles, track } = chain;
   const rack = device.rack ?? { chains: [], macros: [] };
   const rackId = device.id;
-  const [note, setNote] = useState(() => lowestPad(rack));
+  const [note, setNote] = useSavedEntry("drumNote", rackId, lowestPad(rack));
+  const [macrosShown, setMacrosShown] = useSavedEntry(
+    "rackMacros",
+    rackId,
+    false
+  );
   const pad = rack.chains.find((item) => item.pad?.note === note);
   const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
   const shownRack = useAutomatedRack(
@@ -428,16 +486,19 @@ function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       onEnabledChange={toggle}
       title="Drum rack"
       value={device.id}
+      {...fold}
     >
       <DrumRackPanel
         controls={<DeviceChainSlotControls />}
         enabled={device.on !== false}
+        macrosShown={macrosShown}
         onChainMix={mix}
         onChainMixCommit={settle}
         onDropFiles={drop}
         onEnabledChange={toggle}
         onMacroChange={turn}
         onMacroCommit={settle}
+        onMacrosShownChange={setMacrosShown}
         onMapMacro={map}
         onPadChange={change}
         onPadCommit={settle}
@@ -615,7 +676,8 @@ export function DeviceView({
       ) : null}
     </DropdownMenuContent>
   );
-  // An empty track's whole view takes a drop; once it has devices, a narrow strip ends the chain.
+  // An empty track's whole view takes a drop; once it has devices, a narrow strip stays at the view's right edge,
+  // however few or many there are, its line drawn over the last device's when they meet.
   const end =
     devices.length === 0 ? (
       <div className="flex flex-1 flex-col items-center justify-center gap-1 p-6 text-center">
@@ -639,7 +701,7 @@ export function DeviceView({
         </p>
       </div>
     ) : (
-      <div className="flex w-10 shrink-0 flex-col items-center gap-1 py-2">
+      <div className="sticky end-0 z-10 ms-auto flex w-10 shrink-0 flex-col items-center gap-1 bg-background py-2 shadow-[-1px_0_0_0_var(--border)]">
         <Button
           aria-label="Open the library"
           onClick={onOpenLibrary}
@@ -669,7 +731,7 @@ export function DeviceView({
   return (
     <div className="flex h-full min-h-0">
       <Chain
-        className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 overflow-auto"
+        className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 scroll-pe-10 overflow-auto"
         devices={devices}
         dispatch={dispatch}
         end={end}

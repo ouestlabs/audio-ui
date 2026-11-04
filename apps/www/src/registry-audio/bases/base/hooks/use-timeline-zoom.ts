@@ -23,6 +23,8 @@ function leadWidth(viewport: HTMLElement) {
 export interface UseTimelineZoomOptions {
   /** The arrangement's length, in seconds: fitted, the view shows all of it. */
   duration: number;
+  /** The zoom it starts at, in px per second: one kept from before, say. With none, it fits. */
+  initialZoom?: number;
   /** The closest the view zooms, in px per second. @default 240 */
   maxZoom?: number;
   /** The `TimelineViewport` the timeline scrolls in: the fit is the room beside its track headers. */
@@ -41,11 +43,12 @@ export interface UseTimelineZoomOptions {
  */
 export function useTimelineZoom({
   duration,
+  initialZoom,
   maxZoom = 240,
   viewportRef,
 }: UseTimelineZoomOptions) {
   const [fit, setFit] = useState(0);
-  const [zoomed, setZoomed] = useState<number | null>(null);
+  const [zoomed, setZoomed] = useState<number | null>(initialZoom ?? null);
   useLayoutEffect(() => {
     const element = viewportRef.current;
     if (!element) {

@@ -49,6 +49,13 @@ function stepped(division: GridDivision, density: number, finer: boolean) {
 }
 
 export interface UseTimelineGridOptions {
+  /** The grid it starts as: one kept from before, say. @default adaptive, snapping */
+  initial?: {
+    density: number;
+    division: GridDivision;
+    snap: boolean;
+    triplet: boolean;
+  };
   tempo: Tempo;
   /** The timeline's zoom, in px per second: an adaptive grid follows it. */
   zoom: number;
@@ -62,11 +69,17 @@ export interface UseTimelineGridOptions {
  * for the button that opens `TimelineGridMenuItems`. `change` is what
  * Cmd/Ctrl + 1 to 5 do (`GRID_KEYS`).
  */
-export function useTimelineGrid({ tempo, zoom }: UseTimelineGridOptions) {
-  const [division, setDivision] = useState<GridDivision>("adaptive");
-  const [density, setDensity] = useState<number>(24);
-  const [triplet, setTriplet] = useState(false);
-  const [snap, setSnap] = useState(true);
+export function useTimelineGrid({
+  initial,
+  tempo,
+  zoom,
+}: UseTimelineGridOptions) {
+  const [division, setDivision] = useState<GridDivision>(
+    initial?.division ?? "adaptive"
+  );
+  const [density, setDensity] = useState<number>(initial?.density ?? 24);
+  const [triplet, setTriplet] = useState(initial?.triplet ?? false);
+  const [snap, setSnap] = useState(initial?.snap ?? true);
   const step = gridInterval(division, zoom, tempo, {
     minSpacing: density,
     triplet,
@@ -100,6 +113,8 @@ export function useTimelineGrid({ tempo, zoom }: UseTimelineGridOptions) {
   return {
     change,
     chooseDivision,
+    /** How close an adaptive grid's lines may be, in px. */
+    density,
     division,
     /** The grid's name: its division, or "Snap off". */
     label: snap ? gridLabel(step, tempo) : "Snap off",

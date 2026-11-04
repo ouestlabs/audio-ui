@@ -14,6 +14,7 @@ import {
   type SyntheticEvent,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -150,42 +151,135 @@ function ClipNotes({ clip }: { clip: Arranged }) {
   );
 }
 
-/** How many columns an audio clip's waveform is drawn in, whatever its width: the browser scales them. */
-const WAVEFORM_COLUMNS = 512;
+/**
+ * How far past each side of what shows an audio clip's waveform is drawn, in
+ * px: a scroll finds it drawn, and draws it again only once past half of this.
+ */
+const WAVEFORM_OVERSCAN = 512;
+const THEME_ATTRIBUTES = ["class", "data-theme", "style"];
 
-/** An audio clip's recording across its body: what it plays, as `clipWaveform` reads it. */
+/**
+ * Paints a clip's waveform on its canvas, a column per pixel of the screen, for
+ * the stretch of the clip the view shows: however wide the zoom makes the clip,
+ * the canvas stays the size of the view, and a clip out of view paints nothing.
+ */
+function paintWaveform(
+  canvas: HTMLCanvasElement,
+  clip: Arranged,
+  peaks: ArrayLike<number>,
+  view: HTMLElement | null
+) {
+  const box = canvas.parentElement?.getBoundingClientRect();
+  const context = canvas.getContext("2d");
+  if (!(box && context)) {
+    return;
+  }
+  const sees =
+    view?.getBoundingClientRect() ??
+    new DOMRect(0, 0, window.innerWidth, window.innerHeight);
+  const from = Math.max(0, sees.left - box.left - WAVEFORM_OVERSCAN);
+  const to = Math.min(box.width, sees.right - box.left + WAVEFORM_OVERSCAN);
+  if (
+    to <= from ||
+    box.bottom < sees.top - WAVEFORM_OVERSCAN ||
+    box.top > sees.bottom + WAVEFORM_OVERSCAN
+  ) {
+    canvas.style.display = "none";
+    canvas.width = 0;
+    return;
+  }
+  canvas.style.display = "";
+  canvas.style.left = `${from}px`;
+  canvas.style.width = `${to - from}px`;
+  const scale = window.devicePixelRatio || 1;
+  const columns = Math.round((to - from) * scale);
+  const rows = Math.round(canvas.clientHeight * scale);
+  canvas.width = columns;
+  canvas.height = rows;
+  context.fillStyle = getComputedStyle(canvas).color;
+  const { length } = clip.value;
+  const middle = rows / 2;
+  const levels = clipWaveform(clip, peaks, columns, [
+    (from / box.width) * length,
+    (to / box.width) * length,
+  ]);
+  for (const [column, level] of levels.entries()) {
+    const half = Math.max(0.5, level * middle);
+    context.fillRect(column, middle - half, 1, half * 2);
+  }
+}
+
+/** An audio clip's recording across its body: what it plays, as `clipWaveform` reads it, as sharp at any zoom. */
 function ClipWaveform({
   clip,
   peaks,
 }: {
   clip: Arranged;
-  peaks: readonly number[];
+  peaks: ArrayLike<number>;
 }) {
-  const path = useMemo(() => {
-    const columns = clipWaveform(clip, peaks, WAVEFORM_COLUMNS);
-    return columns
-      .map((level, column) => {
-        const half = Math.max(0.5, level * 50);
-        return `M${column + 0.5} ${50 - half}V${50 + half}`;
-      })
-      .join("");
+  const ref = useRef<HTMLCanvasElement>(null);
+  useLayoutEffect(() => {
+    const canvas = ref.current;
+    const body = canvas?.parentElement;
+    if (!(canvas && body)) {
+      return;
+    }
+    const view = canvas.closest<HTMLElement>('[data-slot="timeline-viewport"]');
+    let drawnLeft = 0;
+    let drawnTop = 0;
+    let frame = 0;
+    const draw = () => {
+      frame = 0;
+      drawnLeft = view?.scrollLeft ?? 0;
+      drawnTop = view?.scrollTop ?? 0;
+      paintWaveform(canvas, clip, peaks, view);
+    };
+    const later = () => {
+      frame ||= requestAnimationFrame(draw);
+    };
+    const scrolled = () => {
+      if (
+        view &&
+        Math.max(
+          Math.abs(view.scrollLeft - drawnLeft),
+          Math.abs(view.scrollTop - drawnTop)
+        ) >
+          WAVEFORM_OVERSCAN / 2
+      ) {
+        later();
+      }
+    };
+    draw();
+    // Called between the layout and the paint: a zoom shows the clip and its waveform at the same width.
+    let first = true;
+    const resized = new ResizeObserver(() => {
+      if (!first) {
+        draw();
+      }
+      first = false;
+    });
+    resized.observe(body);
+    if (view) {
+      resized.observe(view);
+    }
+    view?.addEventListener("scroll", scrolled, { passive: true });
+    const themed = new MutationObserver(later);
+    themed.observe(document.documentElement, {
+      attributeFilter: THEME_ATTRIBUTES,
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      resized.disconnect();
+      themed.disconnect();
+      view?.removeEventListener("scroll", scrolled);
+    };
   }, [clip, peaks]);
   return (
-    <svg
-      aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-5 bottom-1 h-[calc(100%-1.5rem)] w-full opacity-70"
+    <canvas
+      className="pointer-events-none absolute top-5 bottom-1 h-[calc(100%-1.5rem)] opacity-70"
       data-slot="timeline-clip-waveform"
-      preserveAspectRatio="none"
-      viewBox={`0 0 ${WAVEFORM_COLUMNS} 100`}
-    >
-      <path
-        d={path}
-        fill="none"
-        stroke="currentColor"
-        strokeWidth={1}
-        vectorEffect="non-scaling-stroke"
-      />
-    </svg>
+      ref={ref}
+    />
   );
 }
 
@@ -354,7 +448,7 @@ interface ArrangedClipProps {
   onRename: (id: string, name: string) => void;
   onSelect: (id: string, additive: boolean) => void;
   /** An audio clip's source as peaks from 0 to 1, spread evenly over its `sourceLength`: its waveform is drawn from them. */
-  peaks?: readonly number[];
+  peaks?: ArrayLike<number>;
   selected: boolean;
   /** The clip's color, an index into `TRACK_COLORS`: its track's. */
   swatch: number;

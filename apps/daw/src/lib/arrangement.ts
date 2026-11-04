@@ -407,17 +407,64 @@ export function clipReach(clip: Arranged): number | undefined {
     : clip.sourceLength;
 }
 
+const PEAK_LEVELS = new WeakMap<object, ArrayLike<number>[]>();
+
+/** The peaks, then the loudest of every two, of every four and so on, kept with them: however many a column covers, it reads a few. */
+function peakLevels(peaks: ArrayLike<number>): ArrayLike<number>[] {
+  const kept = PEAK_LEVELS.get(peaks);
+  if (kept) {
+    return kept;
+  }
+  const levels = [peaks];
+  for (
+    let level = peaks;
+    level.length > 1;
+    level = levels.at(-1) as ArrayLike<number>
+  ) {
+    const coarser = new Float32Array(Math.ceil(level.length / 2));
+    for (let index = 0; index < coarser.length; index += 1) {
+      coarser[index] = Math.max(
+        level[index * 2] ?? 0,
+        level[index * 2 + 1] ?? 0
+      );
+    }
+    levels.push(coarser);
+  }
+  PEAK_LEVELS.set(peaks, levels);
+  return levels;
+}
+
+/** The loudest peak from `from` to `to`, both in, read at the level where that is a handful of entries: no peak is ever missed. */
+function loudestPeak(
+  levels: readonly ArrayLike<number>[],
+  from: number,
+  to: number
+): number {
+  const shift = Math.min(
+    levels.length - 1,
+    31 - Math.clz32(Math.max(1, (to - from) >> 2))
+  );
+  const level = levels[shift] as ArrayLike<number>;
+  let loudest = 0;
+  for (let index = from >> shift; index <= to >> shift; index += 1) {
+    loudest = Math.max(loudest, level[index] ?? 0);
+  }
+  return loudest;
+}
+
 /**
  * What an audio clip shows of its recording across its length, `columns`
  * amplitudes from 0 to 1, from the peaks of its source (`peaks`, spread evenly
  * over `sourceLength`): the stretch it plays, folded round its loop, mirrored
  * when reversed, stretched by its warp, as a player reads it. Each column is
- * the loudest peak it covers.
+ * the loudest peak it covers. `range` is the stretch of the clip to read, in
+ * seconds from its start, for a view that shows part of it: the whole by default.
  */
 export function clipWaveform(
   clip: Arranged,
-  peaks: readonly number[],
-  columns: number
+  peaks: ArrayLike<number>,
+  columns: number,
+  range: readonly [number, number] = [0, clip.value.length]
 ): number[] {
   const { length, offset } = clip.value;
   const count = Math.max(0, Math.floor(columns));
@@ -438,15 +485,17 @@ export function clipWaveform(
     const source = clip.warp ? unwarpedTime(clip.warp, read) : read;
     return Math.floor((source / clip.sourceLength) * peaks.length);
   };
-  return Array.from({ length: count }, (_, column) => {
-    const a = peakAt((column / count) * length);
-    const b = peakAt(((column + 1) / count) * length);
-    let loudest = 0;
-    for (let index = Math.min(a, b); index <= Math.max(a, b); index += 1) {
-      loudest = Math.max(loudest, peaks[index] ?? 0);
-    }
-    return loudest;
-  });
+  const levels = peakLevels(peaks);
+  const columnsRead: number[] = [];
+  const toTime = (column: number) =>
+    range[0] + (column / count) * (range[1] - range[0]);
+  let a = peakAt(toTime(0));
+  for (let column = 0; column < count; column += 1) {
+    const b = peakAt(toTime(column + 1));
+    columnsRead.push(loudestPeak(levels, Math.min(a, b), Math.max(a, b)));
+    a = b;
+  }
+  return columnsRead;
 }
 
 /** A stretch of time on some tracks: what a drag across bare lanes selects. */

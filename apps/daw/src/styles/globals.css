@@ -134,6 +134,11 @@
   * {
     @apply border-border outline-ring/50;
   }
+  /* A sideways swipe at the end of a scroll is not the browser's back. */
+  html,
+  body {
+    @apply overscroll-none;
+  }
   body {
     @apply bg-background font-sans text-foreground;
   }

@@ -233,6 +233,8 @@ function DrumRackPanel({
   className,
   controls,
   enabled = true,
+  macrosShown,
+  onMacrosShownChange,
   onChainMix,
   onChainMixCommit,
   onDropFiles,
@@ -260,6 +262,10 @@ function DrumRackPanel({
   controls?: ReactNode;
   /** Whether the rack is on; with `onEnabledChange`, its square in the title bar. */
   enabled?: boolean;
+  /** Whether the macros show, controlled: to keep it past a reload, say. */
+  macrosShown?: boolean;
+  /** The title bar's switch of the macros was pressed. */
+  onMacrosShownChange?: (shown: boolean) => void;
   onChainMix: (chain: string, mix: Partial<RackChainMix>) => void;
   onChainMixCommit?: () => void;
   /** Files dropped on the pad of `note`: a recording to play there. */
@@ -347,7 +353,9 @@ function DrumRackPanel({
           parameters={parameters}
         />
       }
+      macrosShown={macrosShown}
       onEnabledChange={onEnabledChange}
+      onMacrosShownChange={onMacrosShownChange}
       slot="drum-rack-panel"
       title={title}
     >

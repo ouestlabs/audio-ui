@@ -58,11 +58,7 @@ import {
   TrackAutomation,
   TrackAutomationChooser,
 } from "@/components/audio-ui/track-automation";
-import {
-  TrackGrip,
-  TrackReorderGhost,
-  trackReorderClass,
-} from "@/components/audio-ui/track-grip";
+import { TrackGrip, TrackReorderGhost } from "@/components/audio-ui/track-grip";
 import { TrackLevel } from "@/components/audio-ui/track-level";
 import { Button } from "@/components/ui/button";
 import {
@@ -462,7 +458,12 @@ export function ArrangementView({
     (id: string, index: number) => dispatch({ id, index, type: "move-track" }),
     [dispatch]
   );
-  const reorder = useTrackReorder({ onMove: moveTrack, order: trackOrder });
+  const blockOf = useCallback((id: string) => trackBlock(tracks, id), [tracks]);
+  const reorder = useTrackReorder({
+    blockOf,
+    onMove: moveTrack,
+    order: trackOrder,
+  });
   const dragged = tracks.find((track) => track.id === reorder.ghost?.id);
   const insertTrack = useCallback(
     (id: string) =>
@@ -761,8 +762,7 @@ export function ArrangementView({
                   className={cn(
                     "border-foreground/20 border-b",
                     height === undefined && "flex-1",
-                    isReturn && "bg-muted/40",
-                    trackReorderClass(reorder, track.id)
+                    isReturn && "bg-muted/40"
                   )}
                   height={height}
                   lead={
@@ -918,13 +918,14 @@ export function ArrangementView({
               dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
             )}
             lead={
-              <div className="m-1 flex min-w-0 flex-1">
+              <div className="m-0.5 flex min-w-0 flex-1">
                 {/* One button for every kind of track, each with its keys (KEY-006 to KEY-008). */}
                 <DropdownMenu>
                   <DropdownMenuTrigger
                     render={
                       <Button
                         className="min-w-0 flex-1 justify-start gap-1.5"
+                        size="sm"
                         variant="ghost"
                       />
                     }
@@ -952,15 +953,17 @@ export function ArrangementView({
             }
           >
             <TimelineLane
-              className="h-10 border-b-0 text-muted-foreground text-xs"
+              className="h-8 border-b-0 text-muted-foreground text-xs"
               data-add-track=""
               onDragLeave={fileLeave}
               onDragOver={dragOver(NEW_TRACK, true)}
               onDrop={drop(NEW_TRACK, true)}
             >
-              <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center">
-                Drop audio files or a device here: a track for each
-              </span>
+              {dropOn === NEW_TRACK ? (
+                <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center">
+                  A track for each
+                </span>
+              ) : null}
             </TimelineLane>
           </Row>
         </div>

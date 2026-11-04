@@ -102,7 +102,7 @@ function DelayPanel({
       >
         <Plot
           aria-label="Echoes"
-          className="h-28 min-h-24 grow"
+          className="h-28 min-h-16 grow"
           maxX={WINDOW_MS}
           maxY={100}
           minX={0}

@@ -81,7 +81,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.mid-side": entry(MidSidePanel),
   "audioui.multiband": entry(MultibandPanel, "w-96"),
   "audioui.overdrive": entry(OverdrivePanel),
-  "audioui.phaser": entry(PhaserPanel),
+  "audioui.phaser": entry(PhaserPanel, "w-[28rem]"),
   "audioui.pocket-synth": entry(PocketSynthPanel),
   "audioui.redux": entry(ReduxPanel),
   "audioui.reverb": entry(ReverbPanel),

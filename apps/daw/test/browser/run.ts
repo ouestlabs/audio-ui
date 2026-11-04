@@ -90,6 +90,10 @@ async function dropChord(
   );
 }
 
+const FOLD = /^Fold /;
+const REMOVE = /^Remove /;
+const UNFOLD = /^Unfold /;
+
 /** Drags across bare lanes, from near the start of one track to `across` px on under the pointer of another. */
 async function selectTime(
   page: Page,
@@ -147,8 +151,12 @@ async function expectChanged(
 
 /** Opens the mixer, where the main track's meter is. */
 async function showMixer(page: Page) {
-  await page.keyboard.press("Meta+Alt+KeyM");
-  await page.waitForSelector('[aria-label="Main level"]');
+  const level = page.locator('[aria-label="Main level"]');
+  // Its key folds it when it is open, and a page loaded again comes back on it.
+  if (await level.isHidden()) {
+    await page.keyboard.press("Meta+Alt+KeyM");
+  }
+  await level.waitFor();
 }
 
 /** The loudest the main track's meter reads, in dB, over `ms` of playback. */
@@ -2026,6 +2034,556 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       assert(
         down < through - 20,
         `the macro mapped to the gain at 0 leaves the take at ${down} dB, from ${through} dB`
+      );
+    },
+  "DEV-004: a device dragged: the others slide aside, it lands in the gap, Escape puts it back, and it goes into a rack":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const library = page.getByRole("region", { name: "Library" });
+      await ["Gate", "Limiter"].reduce(async (done, name) => {
+        await done;
+        await library.getByLabel("Search the devices").fill(name);
+        await library.getByRole("option").first().dblclick();
+      }, Promise.resolve());
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Effect rack" }).click();
+      const outer = page.locator("[data-slot=device-chain]").first();
+      const slots = outer.locator(":scope > [data-slot=device-chain-slot]");
+      const order = () =>
+        slots.evaluateAll((all) =>
+          all.map((slot) => slot.getAttribute("aria-label")).join()
+        );
+      await page.locator("[data-slot=rack-panel]").waitFor({ timeout: 5000 });
+      assert(
+        (await order()) === "Gate,Limiter,Rack",
+        `the chain reads ${await order()}`
+      );
+      const gate = await slots.nth(0).boundingBox();
+      const limiter = await slots.nth(1).boundingBox();
+      if (!(gate && limiter)) {
+        throw new Error("the slots are not on the page");
+      }
+      const y = gate.y + 12;
+      const pressAt = gate.x + 80;
+      const ghost = page.locator("[data-slot=device-chain-ghost]");
+      // A short press moves nothing.
+      await page.mouse.move(pressAt, y);
+      await page.mouse.down();
+      await page.mouse.move(pressAt + 2, y);
+      await page.mouse.up();
+      assert((await ghost.count()) === 0, "a press of 2 px lifted the device");
+      // Past the Limiter: it slides back by the Gate's width, and the copy follows.
+      await page.mouse.move(pressAt, y);
+      await page.mouse.down();
+      await page.mouse.move(limiter.x + limiter.width - 10, y, { steps: 8 });
+      await page.waitForTimeout(250);
+      assert((await ghost.count()) === 1, "no label follows the pointer");
+      const slid = await slots.nth(1).boundingBox();
+      assert(
+        !!slid && Math.abs(limiter.x - slid.x - gate.width) < 2,
+        `the Limiter went from ${limiter.x} to ${slid?.x}`
+      );
+      // The label hides nothing; the device itself shows dimmed where it would land.
+      const label = await ghost.boundingBox();
+      assert(
+        !!label && label.width < 200 && label.height < 40,
+        `the label is ${label?.width} by ${label?.height}`
+      );
+      const dimmed = await slots.nth(0).boundingBox();
+      assert(
+        !!dimmed && Math.abs(dimmed.x - slid.x - slid.width) < 2,
+        `the Gate shows at ${dimmed?.x}, not after the Limiter at ${slid.x}`
+      );
+      const opacity = await slots
+        .nth(0)
+        .evaluate((slot) => getComputedStyle(slot).opacity);
+      assert(Number(opacity) < 0.5, `the Gate shows at ${opacity}`);
+      // Escape puts it back.
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(350);
+      await page.mouse.up();
+      assert(
+        (await order()) === "Gate,Limiter,Rack",
+        `after Escape the chain reads ${await order()}`
+      );
+      assert((await ghost.count()) === 0, "the copy stayed after Escape");
+      // Dragged again and released, it lands in the gap: no frame shows the old order once the copy is gone.
+      await page.mouse.move(pressAt, y);
+      await page.mouse.down();
+      await page.mouse.move(limiter.x + limiter.width - 10, y, { steps: 8 });
+      await page.waitForTimeout(100);
+      await page.evaluate(() => {
+        const frames: string[] = [];
+        (window as unknown as { dropFrames: string[] }).dropFrames = frames;
+        const read = () => {
+          const chain = document.querySelector("[data-slot=device-chain]");
+          const names = [
+            ...(chain?.querySelectorAll(
+              ":scope > [data-slot=device-chain-slot]"
+            ) ?? []),
+          ].map((slot) => slot.getAttribute("aria-label"));
+          const lifted = document.querySelector(
+            "[data-slot=device-chain-ghost]"
+          );
+          frames.push(`${lifted ? "lifted" : "landed"}:${names.join()}`);
+          if (frames.length < 60) {
+            requestAnimationFrame(read);
+          }
+        };
+        requestAnimationFrame(read);
+      });
+      await page.mouse.up();
+      await page.waitForTimeout(1100);
+      const frames = await page.evaluate(
+        () => (window as unknown as { dropFrames: string[] }).dropFrames
+      );
+      assert(
+        !frames.includes("landed:Gate,Limiter,Rack"),
+        `a frame shows the old order after the landing: ${frames.join(" | ").slice(0, 300)}`
+      );
+      assert(
+        (await order()) === "Limiter,Gate,Rack",
+        `after the drop the chain reads ${await order()}`
+      );
+      assert((await ghost.count()) === 0, "the copy stayed after the drop");
+      // Into the rack's chain: it leaves the track's chain.
+      const first = await slots.nth(0).boundingBox();
+      const inner = await outer
+        .locator("[data-slot=rack-panel] [data-slot=device-chain]")
+        .boundingBox();
+      if (!(first && inner)) {
+        throw new Error("the rack's chain is not on the page");
+      }
+      await page.mouse.move(first.x + 80, first.y + 12);
+      await page.mouse.down();
+      // Anywhere over the rack is into it: from its list of chains, its chain lights up, with a line at its end.
+      const rackBox = await outer
+        .locator("[data-slot=rack-panel]")
+        .boundingBox();
+      if (!rackBox) {
+        throw new Error("the rack is not on the page");
+      }
+      await page.mouse.move(rackBox.x + 60, rackBox.y + 120, { steps: 10 });
+      await page.waitForTimeout(150);
+      const lit = await outer
+        .locator("[data-slot=rack-panel] [data-slot=device-chain]")
+        .getAttribute("data-over");
+      assert(lit === "", "over the rack, its chain does not light up");
+      assert(
+        (await outer.getAttribute("data-over")) === null,
+        "the track's chain lights up too"
+      );
+      await page.mouse.move(inner.x + 20, inner.y + 60, { steps: 4 });
+      await page.waitForTimeout(150);
+      await page.mouse.up();
+      await page.waitForTimeout(350);
+      assert(
+        (await order()) === "Gate,Rack",
+        `after the drop into the rack the chain reads ${await order()}`
+      );
+      assert(
+        (await page
+          .locator("[data-slot=rack-panel] [data-slot=device-chain-slot]")
+          .getAttribute("aria-label")) === "Limiter",
+        "the Limiter is not in the rack"
+      );
+      // A second one, held past the Limiter: the line is after the last device of the rack.
+      const gateNow = await slots.nth(0).boundingBox();
+      const held = await outer
+        .locator("[data-slot=rack-panel] [data-slot=device-chain-slot]")
+        .boundingBox();
+      if (!(gateNow && held)) {
+        throw new Error("the slots are not on the page");
+      }
+      await page.mouse.move(gateNow.x + 80, gateNow.y + 12);
+      await page.mouse.down();
+      await page.mouse.move(held.x + held.width - 4, held.y + 60, {
+        steps: 10,
+      });
+      await page.waitForTimeout(150);
+      const atEnd = await page
+        .locator("[data-slot=rack-panel] [data-drop-end]")
+        .count();
+      assert(atEnd === 1, "no line at the end of the rack's chain");
+      await page.keyboard.press("Escape");
+      await page.mouse.up();
+    },
+  "ARR-021: a sideways swipe at the end of a scroll does not reach the browser's back":
+    async (browser) => {
+      const page = await open(browser);
+      const behavior = await page.evaluate(() =>
+        [document.documentElement, document.body]
+          .map((element) => getComputedStyle(element).overscrollBehaviorX)
+          .join()
+      );
+      assert(behavior === "none,none", `the page overscrolls as ${behavior}`);
+      const before = page.url();
+      await page.mouse.move(800, 700);
+      await page.mouse.wheel(-600, 0);
+      await page.waitForTimeout(200);
+      assert(page.url() === before, "the page went back");
+    },
+  "CLP-020: zoomed in, a clip's waveform is solid and no wider than the view, a column per pixel":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, "[data-add-track]", "Long take", 20);
+      const canvas = page.locator("[data-slot=timeline-clip-waveform]").first();
+      await canvas.waitFor({ timeout: 30_000 });
+      await [1, 2, 3, 4, 5].reduce(async (done) => {
+        await done;
+        await page.keyboard.press("Meta+Equal");
+        await page.waitForTimeout(60);
+      }, Promise.resolve());
+      await page.waitForTimeout(400);
+      const read = await canvas.evaluate((element) => {
+        const drawn = element as HTMLCanvasElement;
+        const clip = drawn.parentElement?.getBoundingClientRect();
+        const view = drawn
+          .closest("[data-slot=timeline-viewport]")
+          ?.getBoundingClientRect();
+        const row = drawn
+          .getContext("2d")
+          ?.getImageData(0, drawn.height / 2, drawn.width, 1).data;
+        let empty = 0;
+        for (let column = 0; column < drawn.width; column += 1) {
+          if (!row?.[column * 4 + 3]) {
+            empty += 1;
+          }
+        }
+        return {
+          clip: clip?.width ?? 0,
+          columns: drawn.width,
+          empty,
+          scale: window.devicePixelRatio,
+          shown: drawn.getBoundingClientRect().width,
+          view: view?.width ?? 0,
+        };
+      });
+      assert(
+        read.clip > read.shown,
+        `a clip of ${read.clip} px draws ${read.shown} px`
+      );
+      assert(
+        read.shown <= read.view + 1024,
+        `${read.shown} px drawn in a view of ${read.view} px`
+      );
+      assert(
+        Math.abs(read.columns - read.shown * read.scale) < 2,
+        `${read.columns} columns over ${read.shown} px`
+      );
+      assert(
+        read.empty === 0,
+        `${read.empty} of ${read.columns} columns are gaps`
+      );
+    },
+  "ARR-022: a track removed, the page loaded again: a new track takes an id of its own, and shows and goes alone":
+    async (browser) => {
+      const page = await open(browser);
+      const rows = page.locator("[data-track-id]");
+      const ids = () =>
+        rows.evaluateAll((all) =>
+          all.map((row) => row.getAttribute("data-track-id") ?? "")
+        );
+      await page
+        .getByText("2 Audio", { exact: true })
+        .first()
+        .click({ button: "right" });
+      await page.getByRole("menuitem", { name: "Delete" }).click();
+      await page.waitForTimeout(800);
+      await page.reload();
+      await page.waitForSelector("[data-track-id]", { timeout: 30_000 });
+      const before = await rows.count();
+      await page.getByRole("button", { name: "Add track" }).click();
+      await page.getByRole("menuitem", { name: "Audio track" }).click();
+      await page.waitForFunction(
+        (count) => document.querySelectorAll("[data-track-id]").length > count,
+        before
+      );
+      const after = await ids();
+      assert(
+        new Set(after).size === after.length,
+        `two tracks share an id: ${after.join()}`
+      );
+    },
+  "PRJ-001: a device removed forgets it was folded, so a new one under its id opens":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Gate");
+      const gate = library.getByRole("option").first();
+      await gate.dblclick();
+      const slot = page.locator("[data-slot=device-chain-slot]").first();
+      await slot.getByRole("button", { name: FOLD }).click();
+      await slot.getByRole("button", { name: REMOVE }).click();
+      await page.waitForTimeout(100);
+      await gate.dblclick();
+      await page.locator("[data-slot=device-chain-slot]").first().waitFor();
+      assert(
+        (await page.locator("[data-slot=device-chain-strip]").count()) === 0,
+        "the new device opens folded"
+      );
+    },
+  "ARR: a track dragged by its grip: the rows slide aside, and it lands in the gap":
+    async (browser) => {
+      const page = await open(browser);
+      const rows = page.locator("[data-slot=track-grip]");
+      const names = () =>
+        rows.evaluateAll((all) =>
+          all.map((grip) => grip.getAttribute("aria-label")).join()
+        );
+      const before = await names();
+      const first = await rows.nth(0).boundingBox();
+      const second = await rows.nth(1).boundingBox();
+      if (!(first && second)) {
+        throw new Error("the grips are not on the page");
+      }
+      await page.mouse.move(first.x + 3, first.y + first.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(first.x + 3, second.y + second.height - 4, {
+        steps: 8,
+      });
+      await page.waitForTimeout(250);
+      const slid = await rows.nth(1).boundingBox();
+      assert(
+        !!slid && Math.abs(second.y - slid.y - first.height) < 2,
+        `the second track went from ${second.y} to ${slid?.y}`
+      );
+      assert(
+        (await page.locator("[data-slot=track-reorder-ghost]").count()) === 1,
+        "no copy of the header follows the pointer"
+      );
+      await page.mouse.up();
+      await page.waitForTimeout(350);
+      const [one, two, ...rest] = before.split(",");
+      assert(
+        (await names()) === [two, one, ...rest].join(),
+        `from ${before} the tracks read ${await names()}`
+      );
+    },
+  "DEV-006: a device's on square keeps its place and its shape when it folds":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Limiter");
+      await library.getByRole("option").first().dblclick();
+      const slot = page.locator("[data-slot=device-chain-slot]").first();
+      await slot.waitFor({ timeout: 5000 });
+      const square = slot.locator("button[aria-pressed]").first();
+      const read = async () => ({
+        box: await square.boundingBox(),
+        radius: await square.evaluate(
+          (el) => getComputedStyle(el).borderRadius
+        ),
+      });
+      const unfolded = await read();
+      await slot.getByRole("button", { name: FOLD }).click();
+      await slot.locator("[data-slot=device-chain-strip]").waitFor();
+      const folded = await read();
+      assert(
+        JSON.stringify(folded) === JSON.stringify(unfolded),
+        `the square goes from ${JSON.stringify(unfolded)} to ${JSON.stringify(folded)}`
+      );
+      // A press anywhere on the strip unfolds it, once it has not moved; its buttons keep their own job.
+      const strip = slot.locator("[data-slot=device-chain-strip]");
+      const box = await strip.boundingBox();
+      if (!box) {
+        throw new Error("the strip is not on the page");
+      }
+      const middle = {
+        x: box.x + box.width / 2,
+        y: box.y + box.height / 2,
+      };
+      await page.mouse.move(middle.x, middle.y);
+      await page.mouse.down();
+      await page.mouse.move(middle.x + 30, middle.y, { steps: 4 });
+      await page.waitForTimeout(100);
+      await page.mouse.up();
+      await page.waitForTimeout(100);
+      assert(
+        (await strip.count()) === 1,
+        "a drag of the strip unfolded the device"
+      );
+      await square.click();
+      await page.waitForTimeout(100);
+      assert(
+        (await strip.count()) === 1,
+        "the on square of the strip unfolded the device"
+      );
+      // The strip is what is pressed: its arrow says so without a button's surface of its own.
+      const arrow = slot.getByRole("button", { name: UNFOLD });
+      await arrow.hover();
+      await page.waitForTimeout(250);
+      const surface = await arrow.evaluate(
+        (el) => getComputedStyle(el).backgroundColor
+      );
+      assert(
+        surface === "rgba(0, 0, 0, 0)",
+        `the strip's arrow has a surface of its own (${surface})`
+      );
+      await arrow.focus();
+      await page.keyboard.press("Enter");
+      await slot
+        .locator("[data-slot=device-header]")
+        .waitFor({ timeout: 2000 });
+      await slot.getByRole("button", { name: FOLD }).click();
+      await strip.waitFor();
+      // Its tools are always there, at the bottom in the title bar's order, with the name over them.
+      await page.mouse.move(0, 0);
+      const name = await strip.locator("span[title]").boundingBox();
+      const tools = await Promise.all(
+        [
+          strip.locator("[data-device-grip]"),
+          slot.getByRole("button", { name: REMOVE }),
+          arrow,
+        ].map((tool) => tool.boundingBox())
+      );
+      const [grip, remove, last] = tools;
+      assert(
+        !!name &&
+          !!grip &&
+          !!remove &&
+          !!last &&
+          name.y + name.height <= grip.y &&
+          grip.y < remove.y &&
+          remove.y < last.y &&
+          box.y + box.height - (last.y + last.height) <= 6,
+        `the strip's bottom reads ${JSON.stringify({ name, tools })}`
+      );
+      const opacity = await arrow.evaluate(
+        (el) => getComputedStyle(el).opacity
+      );
+      assert(opacity === "1", `the arrow at rest is at ${opacity}`);
+      await page.mouse.click(middle.x, middle.y);
+      await slot
+        .locator("[data-slot=device-header]")
+        .waitFor({ timeout: 2000 });
+    },
+  "DEV-010: a rack's chain has no scroll of its own, and the strip that ends the track's chain stays at the right":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Effect rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      const inside = rack.locator("[data-slot=device-chain]");
+      const library = page.getByRole("region", { name: "Library" });
+      const names = ["Compressor", "Limiter", "Phaser", "Gate"];
+      await names.reduce(async (done, name, index) => {
+        await done;
+        await library.getByLabel("Search the devices").fill(name);
+        await library.getByRole("option").first().dragTo(inside);
+        await inside
+          .locator(":scope > [data-slot=device-chain-slot]")
+          .nth(index)
+          .waitFor({ timeout: 5000 });
+      }, Promise.resolve());
+      const overflow = await inside.evaluate(
+        (chain) => getComputedStyle(chain).overflowX
+      );
+      assert(
+        overflow === "visible",
+        `the rack's chain scrolls on its own (${overflow})`
+      );
+      const outer = page.locator("[data-slot=device-chain]").first();
+      const scrollLeft = () => outer.evaluate((chain) => chain.scrollLeft);
+      // Over a device of the rack, the wheel moves the track's chain.
+      await outer.evaluate((chain) => {
+        chain.scrollLeft = 400;
+      });
+      const view = await outer.boundingBox();
+      if (!view) {
+        throw new Error("the track's chain is not on the page");
+      }
+      await page.mouse.move(view.x + view.width / 2, view.y + 60);
+      await page.mouse.wheel(200, 0);
+      await page.waitForTimeout(300);
+      const moved = await scrollLeft();
+      assert(
+        moved > 400,
+        `the wheel over the rack leaves the track's chain at ${moved}`
+      );
+      // The strip stays at the view's right edge wherever the chain has scrolled.
+      const strip = page.getByRole("button", { name: "Open the library" });
+      const stripEnd = async () => {
+        const box = await strip.boundingBox();
+        return box ? box.x + box.width : 0;
+      };
+      const right = view.x + view.width;
+      const scrolled = await stripEnd();
+      assert(
+        scrolled <= right && scrolled > right - 40,
+        `the strip ends at ${scrolled}, the view at ${right}`
+      );
+      await outer.evaluate((chain) => {
+        chain.scrollLeft = 0;
+      });
+      await page.waitForTimeout(100);
+      const atStart = await stripEnd();
+      assert(
+        atStart <= right && atStart > right - 40,
+        `at the start of the chain the strip ends at ${atStart}, the view at ${right}`
+      );
+    },
+  "PRJ-001: how the workstation was laid out comes back when the page is loaded again":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByRole("button", { name: "Space" }).click();
+      await library.getByRole("option", { name: DELAY }).first().dblclick();
+      const slot = page.locator("[data-slot=device-chain-slot]").first();
+      await slot.getByRole("button", { name: FOLD }).click();
+      await slot.locator("[data-slot=device-chain-strip]").waitFor();
+      // A track folded, the mixer's view shown, zoomed in and scrolled, the metronome on.
+      await page
+        .locator('[aria-label="2 Audio"][data-track-id]')
+        .getByRole("button", { name: FOLD })
+        .click();
+      await page.getByRole("button", { name: "Zoom in" }).click();
+      await page.getByRole("button", { name: "Zoom in" }).click();
+      const viewport = page.locator("[data-slot=timeline-viewport]");
+      await viewport.evaluate((element) => {
+        element.scrollLeft = 300;
+      });
+      await page
+        .getByRole("button", { exact: true, name: "Metronome" })
+        .click();
+      await page.waitForTimeout(400);
+      const read = async () => ({
+        chosen: await library
+          .getByRole("button", { name: "Space" })
+          .getAttribute("aria-pressed"),
+        folded: await page.locator("[data-slot=device-chain-strip]").count(),
+        metronome: await page
+          .getByRole("button", { exact: true, name: "Metronome" })
+          .getAttribute("aria-pressed"),
+        scroll: await viewport.evaluate((element) => element.scrollLeft),
+        track: await page
+          .locator('[aria-label="2 Audio"][data-track-id]')
+          .getByRole("button", { name: UNFOLD })
+          .count(),
+      });
+      const before = await read();
+      assert(
+        before.scroll === 300,
+        `the arrangement did not scroll: ${before.scroll}`
+      );
+      await page.reload();
+      await page.waitForSelector("[data-track-id]", { timeout: 30_000 });
+      await page.waitForTimeout(500);
+      const after = await read();
+      assert(
+        JSON.stringify(after) === JSON.stringify(before),
+        `before ${JSON.stringify(before)}, after ${JSON.stringify(after)}`
       );
     },
   "PRJ-001: the project comes back when the page is loaded again": async (

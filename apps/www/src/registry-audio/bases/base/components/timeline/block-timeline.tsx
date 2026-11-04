@@ -85,7 +85,6 @@ import {
 import {
   TrackGrip,
   TrackReorderGhost,
-  trackReorderClass,
 } from "@/registry-audio/bases/base/audio/elements/track-grip";
 import { TrackLevel } from "@/registry-audio/bases/base/audio/elements/track-level";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
@@ -2031,8 +2030,7 @@ export default function BlockTimeline() {
                 <Row
                   className={cn(
                     "border-foreground/25 border-b",
-                    heights[track.id] === undefined && "flex-1",
-                    trackReorderClass(reorder, track.id)
+                    heights[track.id] === undefined && "flex-1"
                   )}
                   height={heights[track.id]}
                   lead={

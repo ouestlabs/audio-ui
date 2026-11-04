@@ -171,6 +171,23 @@ describe("clipWaveform", () => {
     },
   });
 
+  test("CLP-020: reads only the stretch of the clip it is asked for, a view's worth", () => {
+    // From 1 s of the source: the first second of the clip is peaks 2 to 3 and 4.
+    expect(clipWaveform(audio(), peaks, 1, [0, 1])).toEqual([4 / 7]);
+    expect(clipWaveform(audio(), peaks, 1, [1, 2])).toEqual([6 / 7]);
+  });
+
+  test("CLP-020: a column covering thousands of peaks finds the one loud one among them", () => {
+    const long = new Float32Array(100_000);
+    long[73_421] = 1;
+    const whole = audio({
+      value: { fadeIn: 0, fadeOut: 0, length: 4, offset: 0, start: 0 },
+    });
+    const columns = clipWaveform(whole, long, 100);
+    expect(columns.filter((level) => level === 1)).toHaveLength(1);
+    expect(columns[73]).toBe(1);
+  });
+
   test("shows the stretch of the source the clip plays", () => {
     // From 1 s to 3 s of the source: peaks 2 to 5, two columns each half.
     expect(clipWaveform(audio(), peaks, 2)).toEqual([4 / 7, 6 / 7]);
