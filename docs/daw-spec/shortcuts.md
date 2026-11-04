@@ -13,6 +13,7 @@ Status: partial: which other keys Chrome and Safari keep is checked by hand (`ap
 | --- | --- | --- |
 | KEY-001 | Space | Play from the start marker, or stop |
 | KEY-002 | Shift+Space | Continue from where playback stopped |
+| KEY-034 | F9 | Record on the armed tracks, or end the take (REC-004) |
 | KEY-003 | Home, Fn+Left | Start marker to the start |
 | KEY-004 | Cmd+L | Loop the selection, or turn the loop on or off |
 | KEY-005 | Cmd+Z, Cmd+Shift+Z | Undo, redo |

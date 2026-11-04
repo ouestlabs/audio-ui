@@ -37,6 +37,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
+import { useMidiInput } from "@/hooks/use-midi-input";
 import { useTimeSelection } from "@/hooks/use-time-selection";
 import { useTimelineCursor } from "@/hooks/use-timeline-cursor";
 import { useTimelineGrid } from "@/hooks/use-timeline-grid";
@@ -84,6 +85,7 @@ import {
 import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
+import { useTake } from "./use-take";
 
 /** Neither panel scrolls: the timeline and the views scroll inside themselves, and a size rounded under the bar's height shows no scrollbar. The library styles a panel's inner div to scroll, and its `style` comes after. */
 const UNSCROLLED = { overflow: "hidden" } as const;
@@ -217,6 +219,52 @@ export function Daw({
   });
   const [cursor, setCursor] = useState(0);
   const stoppedAt = useRef(0);
+  // Recording (REC): the armed tracks, Record, the count-in and Punch, and the take while it runs.
+  const keepTake = useCallback(
+    (made: ReadonlyMap<string, Recording>) =>
+      setRecordings((current) => new Map([...current, ...made])),
+    []
+  );
+  const take = useTake({
+    cursor,
+    dispatch,
+    doc,
+    engine,
+    onRecordings: keepTake,
+  });
+  // An armed MIDI track plays what comes in on its instrument (REC-003), and a take keeps it.
+  const armedMidi = useMemo(
+    () =>
+      doc.tracks
+        .filter((track) => track.kind === "midi" && take.armed.has(track.id))
+        .map((track) => track.id),
+    [doc.tracks, take.armed]
+  );
+  const midiInput = useMidiInput({
+    onNoteOff: (note) => {
+      for (const track of armedMidi) {
+        engine.engine?.noteOff(track, note);
+      }
+      take.noteOff(note);
+    },
+    onNoteOn: (note, velocity) => {
+      for (const track of armedMidi) {
+        engine.engine?.noteOn(track, note, velocity);
+      }
+      take.noteOn(note, velocity);
+    },
+  });
+  const armTrack = useCallback(
+    (track: string, exclusive: boolean) => {
+      take.arm(track, exclusive);
+      const kind = doc.tracks.find((item) => item.id === track)?.kind;
+      // The browser asks for MIDI in the gesture that arms a MIDI track.
+      if (kind === "midi" && midiInput.isSupported && !midiInput.isConnected) {
+        midiInput.requestAccess();
+      }
+    },
+    [doc.tracks, midiInput, take]
+  );
   const [selectedTrack, setSelectedTrack] = useState<string | null>(
     initial.tracks[0]?.id ?? null
   );
@@ -371,6 +419,12 @@ export function Daw({
     [doc.duration, engine]
   );
   const stop = useCallback(() => {
+    // Stop ends a take, as Record pressed again does (REC-004).
+    if (take.recording) {
+      take.finish();
+      engine.position.set(cursor);
+      return;
+    }
     if (engine.playing) {
       stoppedAt.current = engine.engine?.position() ?? cursor;
       engine.stop();
@@ -380,10 +434,10 @@ export function Daw({
       setCursor(0);
       engine.position.set(0);
     }
-  }, [cursor, engine]);
+  }, [cursor, engine, take]);
   const playPause = useCallback(
-    () => (engine.playing ? stop() : playFrom(cursor)),
-    [cursor, engine.playing, playFrom, stop]
+    () => (engine.playing || take.recording ? stop() : playFrom(cursor)),
+    [cursor, engine.playing, playFrom, stop, take.recording]
   );
   // Stop then comes back here (ARR-016).
   const playAt = useCallback(
@@ -913,6 +967,7 @@ export function Daw({
       : {}),
     "midi-track": () => dispatch({ kind: "midi", type: "add-track" }),
     "play-stop": playPause,
+    record: take.toggle,
     redo: () => dispatch({ type: "redo" }),
     "return-track": () => dispatch({ kind: "return", type: "add-track" }),
     "select-all": () => dispatch({ type: "select-all" }),
@@ -1063,9 +1118,13 @@ export function Daw({
           {...(canUseFolders()
             ? { onOpen: openProjectFolder, onSave: save, onSaveAs: saveAs }
             : {})}
+          countIn={take.countIn}
+          onCountInChange={take.setCountIn}
           onLoopingChange={setLooping}
           onMetronomeChange={setMetronome}
           onPlayPause={playPause}
+          onPunchChange={take.setPunch}
+          onRecordChange={take.toggle}
           onRedo={commands.redo}
           onReenableAutomation={
             automation.anyOverridden ? automation.reenable : undefined
@@ -1077,6 +1136,8 @@ export function Daw({
           onZoomRatioChange={view.setRatio}
           playing={engine.playing}
           position={engine.position}
+          punch={take.punch}
+          recording={take.recording}
           rhythm={rhythm}
           signatures={doc.signatures}
           tempo={doc.tempo}
@@ -1103,12 +1164,14 @@ export function Daw({
                 style={UNSCROLLED}
               >
                 <ArrangementView
+                  armed={take.armed}
                   arrangement={arrangement}
                   automation={automation}
                   cursor={cursor}
                   engine={engine}
                   markers={markers}
                   onAddMidiClip={addMidiClip}
+                  onArm={armTrack}
                   onDevice={dropDevice}
                   onEditClip={showClip}
                   onFiles={addFiles}

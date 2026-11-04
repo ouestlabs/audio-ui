@@ -1012,6 +1012,46 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.keyboard.press("Space");
       assert(level > -40, `the clip in Tones plays at ${level} dB`);
     },
+  "REC-004: an armed audio track records a take from the cursor, which plays back as a clip; one undo takes it away":
+    async (browser) => {
+      const page = await open(browser);
+      const clips = page.locator('[data-track="track-1"] [data-clip-id]');
+      const before = await clips.count();
+      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      assert(
+        (await page
+          .getByRole("button", { name: "Arm 1 Audio" })
+          .getAttribute("aria-pressed")) === "true",
+        "the track is armed"
+      );
+      await page.getByRole("button", { exact: true, name: "Record" }).click();
+      await page.waitForTimeout(2500);
+      await page.getByRole("button", { exact: true, name: "Record" }).click();
+      await page.waitForFunction(
+        (count) =>
+          document.querySelectorAll('[data-track="track-1"] [data-clip-id]')
+            .length > count,
+        before,
+        { timeout: 15_000 }
+      );
+      await showMixer(page);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the take plays back at ${level} dB`);
+      await page.keyboard.press("Meta+z");
+      await page.waitForFunction(
+        (count) =>
+          document.querySelectorAll('[data-track="track-1"] [data-clip-id]')
+            .length === count,
+        before,
+        { timeout: 5000 }
+      );
+    },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {
       const page = await open(browser);
@@ -1889,7 +1929,12 @@ const names = Object.keys(checks).filter(
   (name) => wanted.length === 0 || wanted.some((id) => name.startsWith(id))
 );
 const chrome = await chromium.launch({
-  args: ["--autoplay-policy=no-user-gesture-required"],
+  // A fake microphone, a tone, granted without asking: what a take records (REC).
+  args: [
+    "--autoplay-policy=no-user-gesture-required",
+    "--use-fake-device-for-media-stream",
+    "--use-fake-ui-for-media-stream",
+  ],
   executablePath: process.env.CHROME_PATH,
 });
 const failed = await names.reduce<Promise<number>>(async (count, name) => {

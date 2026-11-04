@@ -1,6 +1,6 @@
 "use client";
 
-import { CurveIcon } from "@audio-ui/icons/react";
+import { CurveIcon, RecordIcon } from "@audio-ui/icons/react";
 import {
   FADE_SHAPES,
   type FadeShape,
@@ -561,6 +561,7 @@ function TimelineTrackMenu({
  * is where the cursor goes), solo, mute and gain. The lower edge resizes it.
  */
 function TimelineTrackControls({
+  armed,
   children,
   compact,
   folded,
@@ -568,6 +569,7 @@ function TimelineTrackControls({
   name,
   onMix,
   onMixCommit,
+  onArm,
   onDuplicate,
   onGroup,
   onInsert,
@@ -580,6 +582,10 @@ function TimelineTrackControls({
   selected,
   trackId,
 }: {
+  /** Whether the track is armed to record. */
+  armed?: boolean;
+  /** Gives the header an Arm button. `exclusive` is false when Cmd or Ctrl is held: the other tracks stay armed (REC-001). */
+  onArm?: (trackId: string, exclusive: boolean) => void;
   /** More rows under the mix, such as the automation's parameter chooser. A short track leaves them out. */
   children?: ReactNode;
   /** A level meter drawn down the header's right edge, such as a vertical `Meter` sized to fill it. */
@@ -619,6 +625,11 @@ function TimelineTrackControls({
   const handleSolo = useCallback(
     () => onMix(trackId, { soloed: !mix.soloed }),
     [mix.soloed, onMix, trackId]
+  );
+  const handleArm = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) =>
+      onArm?.(trackId, !(event.metaKey || event.ctrlKey)),
+    [onArm, trackId]
   );
   const handleGain = useCallback(
     (value: number | readonly number[]) =>
@@ -771,6 +782,18 @@ function TimelineTrackControls({
           >
             M
           </Button>
+          {onArm ? (
+            <Button
+              aria-label={`Arm ${name}`}
+              aria-pressed={armed}
+              className={cn(armed && "text-destructive")}
+              onClick={handleArm}
+              size="icon-xs"
+              variant="ghost"
+            >
+              <RecordIcon weight={armed ? "fill" : "regular"} />
+            </Button>
+          ) : null}
         </div>
         {compact ? null : (
           <div className="flex h-7 items-center gap-6 pe-1">

@@ -248,6 +248,8 @@ function Label({ children }: { children: ReactNode }) {
 }
 
 export interface ArrangementViewProps {
+  /** The tracks armed to record (REC-001). */
+  armed: ReadonlySet<string>;
   arrangement: Arrangement;
   /** Automation mode, and the gains and pans moved by hand. */
   automation: ReturnType<typeof useTrackAutomation>;
@@ -258,6 +260,8 @@ export interface ArrangementViewProps {
   markers: ReturnType<typeof useTimelineMarkers>;
   /** A double-click on a MIDI lane: an empty clip a bar long, from the bar under the pointer. */
   onAddMidiClip: (track: string, at: number) => void;
+  /** An audio or MIDI track's Arm button: `exclusive` disarms the others. */
+  onArm: (track: string, exclusive: boolean) => void;
   /** A device of the library dropped on a track (its id), or on the add-track row (`NEW_TRACK`). */
   onDevice: (device: string, track: string) => void;
   /** "Edit" chosen from a clip's menu: the clip is selected, to show it. */
@@ -312,12 +316,14 @@ function rowOf(
 }
 
 export function ArrangementView({
+  armed,
   arrangement,
   automation,
   cursor,
   engine,
   markers,
   onAddMidiClip,
+  onArm,
   onDevice,
   onEditClip,
   onFiles,
@@ -744,6 +750,7 @@ export function ArrangementView({
                         />
                       )}
                       <FollowingControls
+                        armed={armed.has(track.id)}
                         compact={isShort(height)}
                         folded={arrangement.folded[track.id]}
                         following={{
@@ -758,6 +765,7 @@ export function ArrangementView({
                           />
                         }
                         name={track.name}
+                        onArm={isGroup || isReturn ? undefined : onArm}
                         onMix={automation.changeMix}
                         onMixCommit={settle}
                         onRemove={removeTrack}
