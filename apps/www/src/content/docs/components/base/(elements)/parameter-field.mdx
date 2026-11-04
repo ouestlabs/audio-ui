@@ -1,0 +1,79 @@
+---
+title: Parameter Field
+description: A parameter's value as a field you type, step, or scrub by dragging its label or its unit, with units and precision.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="parameter-field-demo" />
+
+A numeric field for an audio parameter: a tempo, a gain, a transpose, a cutoff, a pan, a velocity. It reads as a DAW's does, the name at its start, the value in monospace figures, the unit after it, and every way in a DAW to change it.
+
+## Overview
+
+- **Typing:** type a value and press Enter, or leave the field. What is typed stays in the field until it is committed, so a half-typed number never reaches `onValueChange`.
+- **Stepping:** the arrow keys step by `step`, with Shift by `largeStep` and with Alt by `smallStep`; the Page keys by `largeStep`; Home and End go to `min` and `max`. `steppers` adds a minus and a plus either side. The wheel never changes the value.
+- **Scrubbing:** drag the label or the unit sideways (`scrub="horizontal"`, right is more) or up and down (`"vertical"`, up is more), one step every `scrubSensitivity` pixels; hold Shift for large steps, Alt for small ones. The pointer is hidden while it drags, so it can go on past the screen's edge.
+- **Display:** `precision` digits after the point (as many as `step` has by default), and `format` for the rest, such as a sign (`signDisplay`) or a percent. Figures are not grouped (1200 Hz, not 1,200 Hz) unless `format` says so.
+
+## Installation
+
+<Install name="parameter-field" packages="@base-ui/react" />
+
+## Usage
+
+```tsx
+import { ParameterField } from "@/components/audio-ui/parameter-field";
+```
+
+**Uncontrolled:** set only the initial value.
+
+```tsx
+<ParameterField defaultValue={-6} label="Gain" max={24} min={-36} step={0.1} unit="dB" />
+```
+
+**Controlled:** drive the value from state, and close an undo step when a gesture ends.
+
+```tsx
+const [bpm, setBpm] = useState(120);
+
+<ParameterField
+  label="Tempo"
+  max={999}
+  min={20}
+  onValueChange={setBpm}
+  onValueCommitted={commitTempo}
+  precision={2}
+  steppers
+  unit="BPM"
+  value={bpm}
+/>
+```
+
+**Dense:** `size="sm"` for a panel of many, and `hideLabel` where the label sits elsewhere; the label still names the field.
+
+```tsx
+<ParameterField hideLabel label="Transpose" scrub="vertical" size="sm" unit="st" />
+```
+
+## API reference
+
+<TypeTable>
+<TypeRow name={"label"} type={"string"}>Names the field, shown at its start unless `hideLabel`: drag it to scrub.</TypeRow>
+<TypeRow name={"value, onValueChange"} type={"number, (value) => void"}>The value, when it is held outside, and every change, as a scrub or a step goes; a typed value once it is committed.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"} default={"min, or 0"}>The value it starts at, when it keeps its own value.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value) => void"}>A gesture that changed the value ended: a scrub let go, a step, a typed value committed.</TypeRow>
+<TypeRow name={"min, max"} type={"number"}>The range of the value.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"1"}>The step of the arrow keys, the steppers and a scrub.</TypeRow>
+<TypeRow name={"largeStep"} type={"number"} default={"step × 10"}>The step of Shift, the Page keys, and a scrub with Shift held.</TypeRow>
+<TypeRow name={"smallStep"} type={"number"} default={"step ÷ 10"}>The step of Alt, and of a scrub with Alt held.</TypeRow>
+<TypeRow name={"precision"} type={"number"} default={"as many as step has"}>Digits after the point.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>How the value is shown and read back, past `precision`: a sign, a percent, grouping (off by default).</TypeRow>
+<TypeRow name={"unit"} type={"ReactNode"}>The unit after the value, such as "dB", "Hz" or "BPM": drag it to scrub.</TypeRow>
+<TypeRow name={"scrub"} type={"\"horizontal\" | \"vertical\" | false"} default={"\"horizontal\""}>Which way a drag on the label or the unit moves the value: sideways (right is more) or up and down (up is more). `false` for no scrubbing.</TypeRow>
+<TypeRow name={"scrubSensitivity"} type={"number"} default={"4"}>Pixels of drag per step when scrubbing.</TypeRow>
+<TypeRow name={"steppers"} type={"boolean"} default={"false"}>Adds a decrement and an increment button either side.</TypeRow>
+<TypeRow name={"size"} type={"\"default\" | \"sm\""} default={"\"default\""}>"sm" for a dense panel.</TypeRow>
+<TypeRow name={"hideLabel"} type={"boolean"} default={"false"}>Keeps the label out of sight: it still names the field.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Takes no input, and does not scrub.</TypeRow>
+</TypeTable>

@@ -626,6 +626,107 @@
   .cn-audio-device {
     @apply rounded-none [--device-radius:0px];
   }
+
+  /* MARK: Parameter field (the input group's shape; the label and the unit muted, the value in monospace figures) */
+  .cn-parameter-field {
+    @apply w-auto min-w-0;
+  }
+
+  .cn-parameter-field-size-sm {
+    @apply h-8 text-xs [&_input]:text-xs;
+  }
+
+  .cn-parameter-field-label {
+    @apply text-muted-foreground text-xs uppercase tracking-wide;
+  }
+
+  .cn-parameter-field-label-sm {
+    @apply text-[0.625rem];
+  }
+
+  .cn-parameter-field-value {
+    @apply min-w-0 text-end font-mono tabular-nums;
+  }
+
+  .cn-parameter-field-unit {
+    @apply text-muted-foreground;
+  }
+
+  /* MARK: LED (lit, it glows in its tone; off, a dim dot) */
+  .cn-led {
+    @apply rounded-none bg-muted-foreground/25 shadow-inner transition-[background-color,box-shadow] duration-100 data-on:bg-current data-on:shadow-[0_0_0.375rem_currentColor] data-blink:data-on:animate-pulse motion-reduce:transition-none motion-reduce:data-blink:data-on:animate-none;
+  }
+
+  .cn-led-size-sm {
+    @apply size-1.5;
+  }
+
+  .cn-led-size-default {
+    @apply size-2;
+  }
+
+  .cn-led-size-lg {
+    @apply size-3;
+  }
+
+  .cn-led-tone-primary {
+    @apply text-primary;
+  }
+
+  .cn-led-tone-destructive {
+    @apply text-destructive;
+  }
+
+  /* MARK: LCD (the foreground as its glass, the background as lit figures, in light and dark alike) */
+  .cn-lcd {
+    @apply rounded-none bg-foreground font-mono text-background tabular-nums shadow-[inset_0_1px_3px_rgb(0_0_0/0.45)] ring-1 ring-foreground/20 ring-inset;
+  }
+
+  .cn-lcd-size-sm {
+    @apply gap-0 px-2 py-1 text-xs;
+  }
+
+  .cn-lcd-size-default {
+    @apply gap-0.5 px-3 py-2 text-sm;
+  }
+
+  .cn-lcd-label {
+    @apply text-[0.625rem] uppercase tracking-wider opacity-60;
+  }
+
+  /* MARK: Value display (monospace figures that do not jump as they change) */
+  .cn-value-display {
+    @apply font-mono tabular-nums tracking-tight;
+  }
+
+  .cn-value-display-size-sm {
+    @apply text-xs;
+  }
+
+  .cn-value-display-size-default {
+    @apply text-sm;
+  }
+
+  .cn-value-display-size-lg {
+    @apply font-medium text-2xl;
+  }
+
+  /* MARK: Rocker switch (the side pressed down sinks into the panel) */
+  .cn-rocker-switch {
+    @apply rounded-none bg-muted p-0.5 outline-none ring-1 ring-border transition-shadow focus-visible:ring-2 focus-visible:ring-ring data-disabled:cursor-not-allowed data-disabled:opacity-50;
+  }
+
+  .cn-rocker-switch-side {
+    @apply rounded-none font-mono font-semibold transition-[background-color,box-shadow,color] duration-100;
+  }
+
+  .cn-rocker-switch-on {
+    @apply bg-background text-foreground shadow-sm group-data-checked/rocker:bg-transparent group-data-checked/rocker:text-primary group-data-checked/rocker:shadow-inner;
+  }
+
+  .cn-rocker-switch-off {
+    @apply text-muted-foreground shadow-inner group-data-checked/rocker:bg-background group-data-checked/rocker:text-foreground group-data-checked/rocker:shadow-sm;
+  }
 }
 
 /* Envelope blocked-action shake, per-segment easing so each leg follows its own curve. Animates the standalone `translate` property (not `transform`) so it composites with Point's inline positioning transform instead of fighting it. */

@@ -19,6 +19,18 @@
       "name": "knob"
     },
     {
+      "count": 5,
+      "description": "Hardware-panel pieces: LEDs, small screens, values as they read, and rocker switches.",
+      "label": "Hardware",
+      "name": "hardware"
+    },
+    {
+      "count": 2,
+      "description": "Numeric fields for audio parameters: type a value, step it, or drag its label or unit to scrub it, with units and precision.",
+      "label": "Parameter field",
+      "name": "parameter-field"
+    },
+    {
       "count": 4,
       "description": "Decibel meter components for monitoring stereo and multi-channel audio levels.",
       "label": "Meter",
@@ -115,7 +127,7 @@
       "name": "piano-roll"
     },
     {
-      "count": 4,
+      "count": 5,
       "description": "Synth control patterns combining knobs, XY pads, and toggles.",
       "label": "Synth",
       "name": "synth"
@@ -157,5 +169,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 63
+  "totalComponents": 69
 }

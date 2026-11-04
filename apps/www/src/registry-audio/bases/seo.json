@@ -31,6 +31,16 @@
     "intro": "Browse {{count}} knob components for audio/ui, built on top of shadcn/ui.",
     "title": "Knob"
   },
+  "hardware": {
+    "description": "Hardware-panel pieces: LEDs, small screens, values as they read, and rocker switches. {{count}} components.",
+    "intro": "Browse {{count}} hardware components for audio/ui, built on top of shadcn/ui.",
+    "title": "Hardware"
+  },
+  "parameter-field": {
+    "description": "Numeric fields for audio parameters: type a value, step it, or drag its label or unit to scrub it, with units and precision. {{count}} components.",
+    "intro": "Browse {{count}} parameter field components for audio/ui, built on top of shadcn/ui.",
+    "title": "Parameter field"
+  },
   "meter": {
     "description": "Decibel meter components for monitoring stereo and multi-channel audio levels. {{count}} components.",
     "intro": "Browse {{count}} meter components for audio/ui, built on top of shadcn/ui.",

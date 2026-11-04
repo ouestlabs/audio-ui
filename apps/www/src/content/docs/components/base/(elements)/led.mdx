@@ -1,0 +1,34 @@
+---
+title: LED
+description: A status light that glows in its tone when lit, a dim dot when off, and blinks for an armed take.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="led-demo" />
+
+A status light, as on a panel: lit, it glows in its tone; off, it stays a dim dot, so its place still shows. It shows a state and sets none: put it beside the button or the switch that does.
+
+## Installation
+
+<Install name="led" packages="class-variance-authority" />
+
+## Usage
+
+```tsx
+import { Led } from "@/components/audio-ui/led";
+
+<Led blink label="Recording" on={recording} tone="destructive" />
+```
+
+Its label reads the state out to assistive technology ("Recording: on"). `blink` pulses it while lit, and holds it still for reduced motion. Its shape follows the style: round, or square in the square styles.
+
+## API reference
+
+<TypeTable>
+<TypeRow name={"on"} type={"boolean"}>Whether it is lit.</TypeRow>
+<TypeRow name={"label"} type={"string"}>Names what it shows, for assistive technology: "Recording", "Signal".</TypeRow>
+<TypeRow name={"tone"} type={"\"primary\" | \"destructive\""} default={"\"primary\""}>Its color when lit: the theme's primary, or destructive for recording and clipping.</TypeRow>
+<TypeRow name={"blink"} type={"boolean"} default={"false"}>Blinks while lit: a take arming, a clip about to start. Still for reduced motion.</TypeRow>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Its size.</TypeRow>
+</TypeTable>

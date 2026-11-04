@@ -1,0 +1,44 @@
+---
+title: Value Display
+description: An audio value as it reads, in steady monospace figures, for tempo, level, frequency, pan, percent, semitones and time.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="value-display-demo" />
+
+An audio value as a DAW shows it, in monospace figures that do not jump as they change: `120.00 BPM`, `-6.0 dB`, `1.2 kHz`, `L 30`, `50 %`, `+3 st`, `1:02.345`.
+
+## Installation
+
+<Install name="value-display" packages="@audio-ui/core class-variance-authority" />
+
+## Usage
+
+```tsx
+import { formatValue, ValueDisplay } from "@/components/audio-ui/value-display";
+
+<ValueDisplay kind="db" label="Gain" value={gain} />
+
+// The same text, for a title or an announcement.
+formatValue(gain, "db");
+```
+
+| `kind` | Value | Reads |
+| --- | --- | --- |
+| `bpm` | beats per minute | `120.00 BPM` |
+| `db` | decibels, `-Infinity` for silence | `-6.0 dB`, `-∞ dB` |
+| `hz` | hertz | `440 Hz`, `1.2 kHz` |
+| `pan` | -1 to 1 | `L 30`, `C`, `R 100` |
+| `percent` | 0 to 1 | `50 %` |
+| `semitones` | semitones | `+3 st` |
+| `time` | seconds | `1:02.345` |
+
+## API reference
+
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>The value.</TypeRow>
+<TypeRow name={"kind"} type={"ValueKind"}>How it reads: a tempo, a level, a frequency, a pan, a share, a pitch, a time.</TypeRow>
+<TypeRow name={"label"} type={"string"}>Names it for assistive technology, which reads it with its value: "Cutoff".</TypeRow>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>"lg" for the main value of a panel.</TypeRow>
+</TypeTable>

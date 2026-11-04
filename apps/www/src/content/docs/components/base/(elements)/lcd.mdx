@@ -1,0 +1,43 @@
+---
+title: LCD
+description: A small screen, as on a synth, that holds a reading under a caption, in light and dark alike.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="lcd-demo" />
+
+A small screen, as on a synth or a drum machine: the theme's foreground is its glass and its background the lit figures, so it reads as a screen in light and dark alike. It holds a reading, a `ValueDisplay` or a preset's name, under an optional caption. Its corners follow the style.
+
+## Installation
+
+<Install name="lcd" packages="class-variance-authority" />
+
+## Usage
+
+```tsx
+import { Lcd } from "@/components/audio-ui/lcd";
+
+<Lcd label="Preset" size="sm">
+  012 Warm Pad
+</Lcd>
+```
+
+For a value, put a [Value Display](/docs/components/base/value-display) in it, as the preview does: `<ValueDisplay kind="hz" size="lg" value={cutoff} />` under the caption "Filter cutoff".
+
+Give it `live` when its reading matters as it changes: a screen readers announce politely.
+
+## Together
+
+A synth's panel, with the screen showing the value last touched: Power plays an arpeggio at the tempo, through the waveform, the filter's cutoff and resonance, the gain and the transpose, into the master fader.
+
+<ComponentPreview styleName="base-nova" name="block-synth-panel" />
+
+## API reference
+
+<TypeTable>
+<TypeRow name={"children"} type={"ReactNode"}>The reading.</TypeRow>
+<TypeRow name={"label"} type={"ReactNode"}>A small caption over the reading: the parameter's or the preset's name.</TypeRow>
+<TypeRow name={"live"} type={"boolean"} default={"false"}>Announces changes politely, for a reading that matters as it changes.</TypeRow>
+<TypeRow name={"size"} type={"\"default\" | \"sm\""} default={"\"default\""}>"sm" for a single line in a dense panel.</TypeRow>
+</TypeTable>
