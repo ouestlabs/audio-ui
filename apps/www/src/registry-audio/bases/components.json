@@ -1,5 +1,11 @@
 [
   {
+    "categories": ["synth", "hardware", "parameter-field"],
+    "description": "A small synth's panel with every audio control together: Power plays an arpeggio at the tempo through the oscillator's waveform, a low-pass filter (cutoff and resonance knobs), the gain and the transpose fields, into the master fader; the screen shows the value last touched, the LED lights on each beat",
+    "name": "block-synth-panel",
+    "title": "Block synth panel"
+  },
+  {
     "categories": ["instrument", "synth", "xypad"],
     "description": "A synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the filter cutoff up",
     "name": "block-pocket-synth",

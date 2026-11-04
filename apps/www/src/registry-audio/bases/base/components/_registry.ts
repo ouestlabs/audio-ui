@@ -2,6 +2,31 @@ import type { RegistryItem } from "shadcn/schema";
 
 export const components: RegistryItem[] = [
   {
+    categories: ["synth", "hardware", "parameter-field"],
+    description:
+      "A small synth's panel with every audio control together: Power plays an arpeggio at the tempo through the oscillator's waveform, a low-pass filter (cutoff and resonance knobs), the gain and the transpose fields, into the master fader; the screen shows the value last touched, the LED lights on each beat",
+    files: [
+      {
+        path: "components/synth/block-synth-panel.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-synth-panel",
+    registryDependencies: [
+      "@audio-ui/fader",
+      "@audio-ui/knob",
+      "@audio-ui/lcd",
+      "@audio-ui/led",
+      "@audio-ui/parameter-field",
+      "@audio-ui/rocker-switch",
+      "@audio-ui/value-display",
+      "@audio-ui/waveform-select",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["instrument", "synth", "xypad"],
     dependencies: ["@audio-ui/react"],
     description:
