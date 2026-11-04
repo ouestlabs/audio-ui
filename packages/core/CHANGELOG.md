@@ -1,5 +1,14 @@
 # @audio-ui/core
 
+## 0.21.0
+
+### Minor Changes
+
+- 1404d89: Analysis: `detectTransients` finds where a recording's notes and beats begin, to the sample, and `estimateTempo` reads the tempo they keep (60 to 200 BPM, the octave nearest 120) and where its first beat falls, or `null` when there is no steady beat. `autoWarp` turns that into the warp markers that play a file in time at an arrangement's tempo: a short file that 1, 2, 4, 8 or 16 bars fit, as that loop; any other with a marker on the first beat of each bar, moved onto the nearest transient.
+- 1404d89: Playback: a clip can stretch time without changing its pitch. `warpMode` is `"repitch"`, the default and what a clip played until now, `"beats"`, slices that each play at their own speed so an attack keeps its shape (`warpGrain` sets their length), or `"tones"`, overlapping grains lined up on each other so a held note keeps its pitch and level. In those two, `transpose` plays the clip that many semitones from its pitch at the speed it has. A clip with no warp and no transpose is still copied as it is, in any mode.
+  
+  A streamed recording read between its frames finds its page once for the four points it interpolates, rather than four times: a stretched or repitched clip read from a stream costs less on the audio thread.
+
 ## 0.20.0
 
 ### Minor Changes
