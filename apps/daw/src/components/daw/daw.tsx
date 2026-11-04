@@ -84,7 +84,7 @@ const STRIP = "2.25rem";
 const LEAST: Record<PanelView, string> = {
   clip: "15rem",
   devices: "25rem",
-  mixer: "26rem",
+  mixer: "27rem",
 };
 
 /** What the panel's bar names: the clip it holds, folded, or the track whose devices it shows; the mixer, nothing. */

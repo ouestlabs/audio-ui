@@ -213,7 +213,7 @@ function Strip({
       aria-label={track.name}
       className={cn(
         // A column of the console, a hairline between it and the next.
-        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-2 transition-colors",
+        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-3 transition-colors",
         // The main track is wider: its meter has a scale.
         main && "w-36 border-e-0",
         track.kind === "group" && "bg-muted/40",
@@ -376,7 +376,7 @@ export function MixerView({
     // and never less than a fader's own least, 10rem.
     <div
       aria-label="Mixer"
-      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(10rem,1fr)_auto_auto] gap-y-2 overflow-auto pe-2"
+      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(10rem,1fr)_auto_auto] gap-y-2 no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden pe-2"
       role="group"
     >
       {/* A folded group hides its tracks here too. */}
