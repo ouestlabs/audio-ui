@@ -956,6 +956,7 @@ export function Daw({
           engine={engine}
           onMix={automation.changeMix}
           onSelectTrack={pickTrack}
+          overridden={automation.overridden}
           selectedTrack={selectedTrack}
         />
       </section>
@@ -984,6 +985,8 @@ export function Daw({
             onNoteOn={noteOn}
             onOpenLibrary={openLibrary}
             onPadFiles={addPadSample}
+            overridden={automation.overridden}
+            position={engine.position}
             track={selectedTrack}
           />
         )}

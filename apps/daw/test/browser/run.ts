@@ -121,6 +121,30 @@ async function open(browser: Browser, shared?: Page) {
   return page;
 }
 
+/** Waits until a slider's value is no longer `before`. */
+async function expectChanged(
+  slider: ReturnType<Page["getByRole"]>,
+  before: string
+) {
+  await slider.evaluate(
+    (element, from) =>
+      new Promise<void>((resolve, reject) => {
+        const end = performance.now() + 15_000;
+        const look = () => {
+          if ((element as HTMLInputElement).value !== from) {
+            resolve();
+          } else if (performance.now() > end) {
+            reject(new Error(`the slider stayed at ${from}`));
+          } else {
+            requestAnimationFrame(look);
+          }
+        };
+        look();
+      }),
+    before
+  );
+}
+
 /** Opens the mixer, where the main track's meter is. */
 async function showMixer(page: Page) {
   await page.keyboard.press("Meta+Alt+KeyM");
@@ -707,6 +731,75 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page
         .getByRole("button", { name: "Re-enable automation" })
         .waitFor({ timeout: 5000 });
+    },
+  "AUT-006: playing, a track's gain and a device's knob move with their envelopes, untouched":
+    async (browser) => {
+      const page = await open(browser);
+      await page
+        .locator('[aria-label="1 Audio"][data-track-id]')
+        .getByText("1 Audio")
+        .click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Utility");
+      await library.getByRole("option", { name: UTILITY }).first().dblclick();
+      const devices = page.getByRole("region", { name: "Devices" });
+      await devices.getByText("Utility", { exact: true }).waitFor();
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("KeyA");
+      // A point moved far from the other end: the envelope is a ramp, whichever it draws.
+      const ramp = async (name: string) => {
+        await page
+          .getByRole("group", { name })
+          .locator('[aria-label^="Point 1"]')
+          .first()
+          .focus();
+        await Array.from({ length: 30 }).reduce<Promise<void>>(
+          (done) => done.then(() => page.keyboard.press("ArrowDown")),
+          Promise.resolve()
+        );
+      };
+      await ramp("1 Audio volume automation");
+      const gain = page.getByRole("slider", { name: "1 Audio gain" });
+      const fromGain = await gain.inputValue();
+      await page.getByRole("combobox", { name: "1 Audio automation" }).click();
+      await page.getByRole("option", { exact: true, name: "Gain" }).click();
+      await ramp("1 Audio utility gain automation");
+      const knob = devices.getByRole("slider", { name: "Gain" }).first();
+      const fromKnob = await knob.inputValue();
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Space");
+      await page.waitForFunction(
+        ([before]) =>
+          (
+            document.querySelector(
+              '[aria-label="1 Audio gain"]'
+            ) as HTMLInputElement | null
+          )?.value !== before,
+        [fromGain],
+        { timeout: 15_000 }
+      );
+      await expectChanged(knob, fromKnob);
+      await page.keyboard.press("Space");
+      assert(
+        (await page
+          .getByRole("button", { name: "Re-enable automation" })
+          .count()) === 0,
+        "the envelopes moved the controls, and nothing counts as moved by hand"
+      );
+      // Another knob turned by hand leaves the automated ones following their envelopes.
+      await devices.getByRole("slider", { name: "Width" }).first().focus();
+      await page.keyboard.press("ArrowLeft");
+      await page.waitForTimeout(200);
+      assert(
+        (await page
+          .getByRole("button", { name: "Re-enable automation" })
+          .count()) === 0,
+        "a knob with no envelope, turned, stopped the ones that have one"
+      );
     },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {

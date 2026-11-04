@@ -909,6 +909,7 @@ check(
       });
     }
     engine.play(0, 0);
+    await engine.ready();
     const out = (await ctx.startRendering()).getChannelData(0);
     engine.dispose();
     const loudest = Math.max(...out.map(Math.abs));
@@ -982,6 +983,7 @@ check(
     );
     await engine.ready();
     engine.play(0, 0);
+    await engine.ready();
     const out = (await ctx.startRendering()).getChannelData(0);
     engine.dispose();
     const loudest = Math.max(...out.map(Math.abs));
@@ -1181,6 +1183,49 @@ check(
     assert(
       Math.abs(ratio - 10 ** (6 / 20)) < 0.1,
       `the macro's envelope raises the take by ${ratio}, not twice`
+    );
+  }
+);
+
+check(
+  "EXP-009: a render starts only once the clip players have heard of the play, or a short one could end silent",
+  async () => {
+    const posted: string[] = [];
+    let atStart: string[] = [];
+    const { postMessage } = MessagePort.prototype;
+    const { startRendering } = OfflineAudioContext.prototype;
+    MessagePort.prototype.postMessage = function (
+      this: MessagePort,
+      ...args: unknown[]
+    ) {
+      const { type } = (args[0] ?? {}) as { type?: string };
+      if (type) {
+        posted.push(type);
+      }
+      return (postMessage as (...all: unknown[]) => void).apply(this, args);
+    } as never;
+    OfflineAudioContext.prototype.startRendering = function (
+      this: OfflineAudioContext
+    ) {
+      atStart = [...posted];
+      return startRendering.call(this);
+    };
+    try {
+      const doc = arrangement({
+        clips: [clip("a", "vox", 0, 0.05)],
+        tracks: [{ color: 0, id: "vox", name: "Vox" }],
+      });
+      await render(doc, new Map([["take", recording(0.05)]]), 0.05);
+    } finally {
+      MessagePort.prototype.postMessage = postMessage;
+      OfflineAudioContext.prototype.startRendering = startRendering;
+    }
+    const heard = atStart.lastIndexOf("sync");
+    const played = atStart.lastIndexOf("state");
+    assert(played !== -1, "the clip player was told to play");
+    assert(
+      heard > played,
+      `the render started with the play unconfirmed: ${atStart.join(", ")}`
     );
   }
 );

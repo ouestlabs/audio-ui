@@ -593,6 +593,23 @@ export function devicePositions(
   return positions;
 }
 
+/** A rack with each macro an envelope moves where `turned` has it, by its parameter id. */
+export function rackWithMacros(
+  rack: Rack,
+  turned: ReadonlyMap<string, number> | undefined
+): Rack {
+  if (!turned) {
+    return rack;
+  }
+  return {
+    ...rack,
+    macros: rack.macros.map((macro, index) => {
+      const value = turned.get(`macro-${index + 1}`);
+      return value === undefined ? macro : { ...macro, value };
+    }),
+  };
+}
+
 /** A track's automation without the envelopes of the devices `gone`; the same one when it had none of theirs. */
 export function withoutDeviceAutomation(
   automation: TrackAutomation | undefined,

@@ -10,6 +10,7 @@ import {
   PlusIcon,
 } from "@phosphor-icons/react";
 import {
+  type ComponentProps,
   type DragEvent,
   type MouseEvent,
   type PointerEvent,
@@ -87,6 +88,10 @@ import {
 import type { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import type { useTrackAutomation } from "@/hooks/use-track-automation";
+import {
+  type AutomationFollowing,
+  useAutomatedMix,
+} from "@/hooks/use-track-automation";
 import { useTrackReorder } from "@/hooks/use-track-reorder";
 import {
   type Arranged,
@@ -115,6 +120,19 @@ function carriesFiles(event: DragEvent) {
 /** Whether a track set by hand is short enough for one row of controls. */
 function isShort(height: number | undefined) {
   return height !== undefined && height < COMPACT_TRACK_HEIGHT;
+}
+
+/** A track's header, its gain and pan showing where their envelopes stand as the arrangement plays (AUT-006). */
+function FollowingControls({
+  following,
+  track,
+  ...props
+}: Omit<ComponentProps<typeof TimelineTrackControls>, "mix"> & {
+  following: AutomationFollowing;
+  track: ArrangementTrack;
+}) {
+  const mix = useAutomatedMix(track, following);
+  return <TimelineTrackControls mix={mix} {...props} />;
 }
 
 /** What a rack is called in the automation chooser, by its kind. */
@@ -724,10 +742,14 @@ export function ArrangementView({
                           {...reorder.gripProps(track.id)}
                         />
                       )}
-                      <TimelineTrackControls
+                      <FollowingControls
                         compact={isShort(height)}
                         folded={arrangement.folded[track.id]}
-                        mix={mix}
+                        following={{
+                          duration,
+                          overridden: automation.overridden[track.id],
+                          position: engine.position,
+                        }}
                         name={track.name}
                         onMix={automation.changeMix}
                         onMixCommit={settle}
@@ -739,6 +761,7 @@ export function ArrangementView({
                           selectedTracks.includes(track.id) ||
                           selectedTrack === track.id
                         }
+                        track={track}
                         trackId={track.id}
                         {...menuOf(isReturn, isGroup)}
                       >
@@ -751,7 +774,7 @@ export function ArrangementView({
                             track={track}
                           />
                         ) : null}
-                      </TimelineTrackControls>
+                      </FollowingControls>
                     </div>
                   }
                   onResize={arrangement.resizeTrack}

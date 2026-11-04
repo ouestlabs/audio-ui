@@ -29,6 +29,7 @@ import {
   mixOf,
   playedNotes,
   type Rack,
+  rackWithMacros,
   type TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
@@ -159,23 +160,6 @@ const instrumentLatency = (instrument: TrackInstrument | null) =>
 /** Whether a track automates a parameter of one of its devices. */
 const automatesDevices = (track: ArrangementTrack) =>
   Object.keys(track.automation ?? {}).some((key) => key.startsWith("device:"));
-
-/** A rack with each macro its envelope moves where `turned` has it. */
-function automatedRack(
-  rack: Rack,
-  turned: ReadonlyMap<string, number> | undefined
-): Rack {
-  if (!turned) {
-    return rack;
-  }
-  return {
-    ...rack,
-    macros: rack.macros.map((macro, index) => {
-      const value = turned.get(`macro-${index + 1}`);
-      return value === undefined ? macro : { ...macro, value };
-    }),
-  };
-}
 
 /** What a track's devices were last set to by their envelopes, as a key: "" when none moves. */
 const positionsKey = (positions: MacroPositions) =>
@@ -863,7 +847,7 @@ export async function createArrangementEngine(
         );
       } else if (device.rack) {
         (placed.engine as RackEngine).update(
-          automatedRack(device.rack, positions.get(device.id)),
+          rackWithMacros(device.rack, positions.get(device.id)),
           context,
           positions
         );
@@ -882,7 +866,7 @@ export async function createArrangementEngine(
     }
     const { device } = instrument;
     const context = deviceContext();
-    const rack = automatedRack(
+    const rack = rackWithMacros(
       device.rack ?? { chains: [], macros: [] },
       positions.get(device.id)
     );
@@ -1303,6 +1287,8 @@ export async function renderArrangement(
       ctx.resume();
     });
   }
+  // Every clip player has heard of the play: a render started before could end before it did, silent.
+  await engine.ready();
   const rendered = await ctx.startRendering();
   onProgress?.(1);
   engine.dispose();

@@ -1,15 +1,127 @@
 "use client";
 
+import type { Source } from "@audio-ui/core";
+import type { ParameterValue } from "@audio-ui/core/device";
 import type { Breakpoint } from "@audio-ui/core/envelope";
-import { useCallback, useState } from "react";
+import { useCallback, useState, useSyncExternalStore } from "react";
 import { AUTOMATED_PARAMETERS } from "@/components/audio-ui/track-automation";
 import {
   type ArrangementTrack,
   type AutomatedParameter,
   deviceParameterKey,
+  devicePositions,
   type Mix,
+  mixAt,
+  mixOf,
+  parseDeviceParameter,
+  type Rack,
+  rackWithMacros,
+  type TrackDevice,
 } from "@/lib/arrangement";
 import type { ArrangementCommand } from "@/lib/arrangement-state";
+
+/** What a control needs to follow its envelope as the arrangement plays. */
+export interface AutomationFollowing {
+  /** The arrangement's length, in seconds. */
+  duration: number;
+  /** What was moved by hand on the track: it stays as set. */
+  overridden?: readonly AutomatedParameter[];
+  /** Where the arrangement plays, in seconds. */
+  position: Source<number>;
+}
+
+const NOT_FOLLOWING = () => () => undefined;
+
+/**
+ * Renders again when `keyAt` the arrangement's position changes, only while
+ * `active`: a control following an envelope renders for what it shows, not for
+ * every frame of the playhead, and one with no envelope never does.
+ */
+function useFollow(
+  { position }: AutomationFollowing,
+  active: boolean,
+  keyAt: (seconds: number) => string
+) {
+  useSyncExternalStore(
+    active ? position.subscribe : NOT_FOLLOWING,
+    () => (active ? keyAt(position.getSnapshot()) : ""),
+    () => ""
+  );
+}
+
+/** A track's mix as it plays: its volume and pan where their envelopes stand at the position, for a fader and a knob to show them moving. */
+export function useAutomatedMix(
+  track: ArrangementTrack,
+  following: AutomationFollowing
+): Mix {
+  const { duration, overridden, position } = following;
+  const mix = mixOf(track);
+  const levelsAt = (seconds: number) =>
+    mixAt(track, mix, seconds / duration, overridden);
+  const active =
+    duration > 0 && Boolean(track.automation?.volume || track.automation?.pan);
+  useFollow(following, active, (seconds) => {
+    const { gain, pan } = levelsAt(seconds);
+    return `${gain.toFixed(3)}:${pan.toFixed(3)}`;
+  });
+  return active ? { ...mix, ...levelsAt(position.getSnapshot()) } : mix;
+}
+
+/** Whether a track has an envelope of a parameter of the device `id`. */
+const automatesDevice = (track: ArrangementTrack, id: string) =>
+  Object.keys(track.automation ?? {}).some(
+    (key) => parseDeviceParameter(key)?.device === id
+  );
+
+/** Where a device's automated parameters stand at the position, as a key. */
+const standingKey = (positions: ReadonlyMap<string, number> | undefined) =>
+  [...(positions ?? [])].map(([id, at]) => `${id}=${at.toFixed(3)}`).join(",");
+
+/**
+ * A device's state as it plays: each automated parameter where its envelope
+ * stands at the position, for its panel to show its knobs moving. `denormalize`
+ * is the device's own, from its position along its travel to its value.
+ */
+export function useAutomatedDevice(
+  track: ArrangementTrack,
+  device: TrackDevice,
+  denormalize: ((id: string, position: number) => ParameterValue) | undefined,
+  following: AutomationFollowing
+): TrackDevice["state"] {
+  const { duration, overridden, position } = following;
+  const positionsAt = (seconds: number) =>
+    devicePositions(track, seconds / duration, overridden).get(device.id);
+  const active =
+    duration > 0 && Boolean(denormalize) && automatesDevice(track, device.id);
+  useFollow(following, active, (seconds) => standingKey(positionsAt(seconds)));
+  const positions = active ? positionsAt(position.getSnapshot()) : undefined;
+  if (!(positions && denormalize)) {
+    return device.state;
+  }
+  return {
+    ...device.state,
+    ...Object.fromEntries(
+      [...positions].map(([id, at]) => [id, denormalize(id, at)])
+    ),
+  };
+}
+
+/** A rack as it plays: each automated macro where its envelope stands at the position, for its knob to show it moving. */
+export function useAutomatedRack(
+  track: ArrangementTrack,
+  device: TrackDevice,
+  rack: Rack,
+  following: AutomationFollowing
+): Rack {
+  const { duration, overridden, position } = following;
+  const positionsAt = (seconds: number) =>
+    devicePositions(track, seconds / duration, overridden).get(device.id);
+  const active = duration > 0 && automatesDevice(track, device.id);
+  useFollow(following, active, (seconds) => standingKey(positionsAt(seconds)));
+  return active
+    ? rackWithMacros(rack, positionsAt(position.getSnapshot()))
+    : rack;
+}
 
 export interface UseTrackAutomationOptions {
   /** The arrangement's commands, as `useArrangement` returns them. */
