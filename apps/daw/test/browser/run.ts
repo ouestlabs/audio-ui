@@ -1338,7 +1338,9 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       await page.getByText("3 MIDI", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
-      await page.getByRole("button", { name: "Add a drum rack" }).click();
+      // The track has its synth: the strip that ends the chain adds racks.
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Drum rack" }).click();
       const drums = page.locator("[data-slot=drum-rack-panel]");
       await drums.waitFor({ timeout: 5000 });
       const pads = drums.getByRole("group", { name: "Pads" });
@@ -1367,7 +1369,9 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       await page.getByText("3 MIDI", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
-      await page.getByRole("button", { name: "Add a drum rack" }).click();
+      // The track has its synth: the strip that ends the chain adds racks.
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Drum rack" }).click();
       const drums = page.locator("[data-slot=drum-rack-panel]");
       await drums.waitFor({ timeout: 5000 });
       await dropChord(
@@ -1422,6 +1426,38 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.mouse.up();
       assert(level > -40, `the pad held plays the synth at ${level} dB`);
     },
+  "DEV-014: an instrument rack takes an instrument at the head of a chain, and it plays the track's notes":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("4 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Instrument rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Pocket Synth");
+      await library
+        .getByRole("option")
+        .first()
+        .dragTo(rack.locator("[data-slot=device-chain]"));
+      const pad = rack.locator("[data-slot=xypad]").first();
+      await pad.waitFor({ timeout: 5000 });
+      const box = await pad.boundingBox();
+      assert(box, "the synth in the rack shows its pad");
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.3, {
+        steps: 4,
+      });
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await showMixer(page);
+      const level = await loudest(page, 600);
+      await page.mouse.up();
+      assert(level > -40, `the synth in the rack plays at ${level} dB`);
+    },
   "DEV-010 and DEV-012: a rack takes a device from the library, plays it, and a macro turns its parameter":
     async (browser) => {
       const page = await open(browser);
@@ -1429,6 +1465,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.getByText("1 Audio", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Effect rack" }).click();
       const rack = page.locator("[data-slot=rack-panel]");
       await rack.waitFor({ timeout: 5000 });
       const library = page.getByRole("region", { name: "Library" });

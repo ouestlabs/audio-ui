@@ -1,7 +1,7 @@
+import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
   DeviceChain,
-  DeviceChainAdd,
   DeviceChainSlot,
   DeviceChainSlotControls,
 } from "@/components/audio-ui/device-chain";
@@ -13,10 +13,17 @@ import {
   type RackParameter,
 } from "@/components/audio-ui/rack-panel";
 import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import {
   DRUM_RACK_DEVICE,
   type DrumSound,
+  INSTRUMENT_RACK_DEVICE,
   RACK_DEVICE,
   type Rack,
   type RackMapping,
@@ -28,8 +35,10 @@ import { libraryDevice } from "@/lib/device-library";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 
-/** Where a chain of devices sits: the track's own, or a chain of a rack on it. */
-type ChainPlace = { chain: string; rack: string } | undefined;
+/** Where a chain of devices sits: the track's own, or a chain of a rack on it, which takes an instrument at its head in an instrument rack. */
+type ChainPlace =
+  | { chain: string; instruments?: boolean; rack: string }
+  | undefined;
 
 /** What every slot of a chain needs: the commands of the track, and where the chain is. */
 interface ChainProps {
@@ -107,14 +116,21 @@ function Chain({
 }) {
   const { dispatch, track } = chain;
   const order = useMemo(() => devices.map((device) => device.id), [devices]);
+  const along = useMemo(
+    () => (place ? { chain: place.chain, rack: place.rack } : undefined),
+    [place]
+  );
   const add = useCallback(
     (id: string, index?: number) => {
       const entry = libraryDevice(id);
-      if (!entry || (place && entry.device.kind === "instrument")) {
+      if (
+        !entry ||
+        (place && !place.instruments && entry.device.kind === "instrument")
+      ) {
         return;
       }
       dispatch({
-        chain: place,
+        chain: along,
         device: id,
         index,
         instrument: entry.device.kind === "instrument",
@@ -123,12 +139,12 @@ function Chain({
         type: "add-device",
       });
     },
-    [dispatch, place, track]
+    [along, dispatch, place, track]
   );
   const move = useCallback(
     (id: string, index: number) =>
-      dispatch({ chain: place, id, index, track, type: "move-device" }),
-    [dispatch, place, track]
+      dispatch({ chain: along, id, index, track, type: "move-device" }),
+    [along, dispatch, track]
   );
   const remove = useCallback(
     (id: string) => dispatch({ id, track, type: "remove-device" }),
@@ -237,9 +253,18 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   const { dispatch, track } = chain;
   const rack = device.rack ?? { chains: [], macros: [] };
   const rackId = device.id;
+  // An instrument rack's chains each start with an instrument (DEV-014).
+  const layered = device.device === INSTRUMENT_RACK_DEVICE;
   const [picked, setPicked] = useState<string | null>(null);
   const selected =
     rack.chains.find((item) => item.id === picked) ?? rack.chains[0];
+  const place = useMemo(
+    () =>
+      selected
+        ? { chain: selected.id, instruments: layered, rack: rackId }
+        : undefined,
+    [layered, rackId, selected]
+  );
   const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
   const { map, mix, removeChain, settle, toggle, turn, unmap } =
     useRackCommands(dispatch, track, rackId);
@@ -251,7 +276,7 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
     <DeviceChainSlot
       enabled={device.on !== false}
       onEnabledChange={toggle}
-      title="Rack"
+      title={layered ? "Instrument rack" : "Rack"}
       value={device.id}
     >
       <RackPanel
@@ -270,6 +295,7 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
         parameters={parameters}
         rack={rack}
         selectedChain={selected?.id ?? null}
+        title={layered ? "Instrument rack" : "Rack"}
       >
         {selected ? (
           <Chain
@@ -278,11 +304,13 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
             end={
               selected.devices.length === 0 ? (
                 <p className="self-center px-2 text-muted-foreground text-xs">
-                  Drag a device from the library into {selected.name}.
+                  {layered
+                    ? `Drag an instrument, then effects, from the library into ${selected.name}.`
+                    : `Drag a device from the library into ${selected.name}.`}
                 </p>
               ) : null
             }
-            place={{ chain: selected.id, rack: rackId }}
+            place={place}
             {...chain}
           />
         ) : null}
@@ -428,12 +456,24 @@ export function DeviceView({
       }),
     [current, dispatch]
   );
-  // A drum rack is an instrument: it goes first, in place of the one there was.
+  // A drum rack and an instrument rack are instruments: each goes first, in place of the one there was.
   const addDrumRack = useCallback(
     () =>
       current &&
       dispatch({
         device: DRUM_RACK_DEVICE,
+        instrument: true,
+        state: {},
+        track: current.id,
+        type: "add-device",
+      }),
+    [current, dispatch]
+  );
+  const addInstrumentRack = useCallback(
+    () =>
+      current &&
+      dispatch({
+        device: INSTRUMENT_RACK_DEVICE,
         instrument: true,
         state: {},
         track: current.id,
@@ -466,25 +506,80 @@ export function DeviceView({
       </p>
     );
   }
+  const midi = current.kind === "midi";
+  const devices = current.devices ?? [];
+  // The racks a track can take: a MIDI track's instrument racks too.
+  const rackMenu = (
+    <DropdownMenuContent align="start" className="w-auto">
+      <DropdownMenuItem onClick={addRack}>Effect rack</DropdownMenuItem>
+      {midi ? (
+        <>
+          <DropdownMenuItem onClick={addInstrumentRack}>
+            Instrument rack
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={addDrumRack}>Drum rack</DropdownMenuItem>
+        </>
+      ) : null}
+    </DropdownMenuContent>
+  );
+  // An empty track's whole view takes a drop; once it has devices, a narrow strip ends the chain.
+  const end =
+    devices.length === 0 ? (
+      <div className="flex flex-1 flex-col items-center justify-center gap-1 p-6 text-center">
+        <p className="text-muted-foreground text-sm">
+          {midi
+            ? "Drop an instrument or an effect here"
+            : "Drop an effect here"}
+        </p>
+        <p className="flex items-center text-muted-foreground text-xs">
+          <Button onClick={onOpenLibrary} size="sm" variant="link">
+            Browse the library
+          </Button>
+          ·
+          <DropdownMenu>
+            <DropdownMenuTrigger render={<Button size="sm" variant="link" />}>
+              Add a rack
+              <CaretDownIcon aria-hidden="true" />
+            </DropdownMenuTrigger>
+            {rackMenu}
+          </DropdownMenu>
+        </p>
+      </div>
+    ) : (
+      <div className="flex w-10 shrink-0 flex-col items-center gap-1 py-2">
+        <Button
+          aria-label="Open the library"
+          onClick={onOpenLibrary}
+          size="icon-sm"
+          title="Open the library"
+          variant="ghost"
+        >
+          <PlusIcon aria-hidden="true" />
+        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                aria-label="Add a rack"
+                size="icon-sm"
+                title="Add a rack"
+                variant="ghost"
+              />
+            }
+          >
+            <StackIcon aria-hidden="true" />
+          </DropdownMenuTrigger>
+          {rackMenu}
+        </DropdownMenu>
+      </div>
+    );
   return (
     <div className="flex h-full min-h-0">
       <Chain
         className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 overflow-auto"
-        devices={current.devices ?? []}
+        devices={devices}
         dispatch={dispatch}
-        end={
-          <div className="flex shrink-0 flex-col gap-2 p-2">
-            <DeviceChainAdd onClick={onOpenLibrary} />
-            <Button onClick={addRack} size="sm" variant="outline">
-              Add a rack
-            </Button>
-            {current.kind === "midi" ? (
-              <Button onClick={addDrumRack} size="sm" variant="outline">
-                Add a drum rack
-              </Button>
-            ) : null}
-          </div>
-        }
+        end={end}
         onHoldNote={holdNote}
         onNoteOff={noteOff}
         onNoteOn={noteOn}
