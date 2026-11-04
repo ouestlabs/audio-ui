@@ -260,6 +260,9 @@ Each slot is a group named after its device, and its grip is a button, "Move Com
 <TypeRow name={"title"} type={"string"}>The device's name, down the folded strip and in what the controls are called.</TypeRow>
 <TypeRow name={"enabled"} type={"boolean"}>Whether the device is on, for the square of the folded strip. Leave it out for a device that cannot be switched off.</TypeRow>
 <TypeRow name={"onEnabledChange"} type={"(enabled: boolean) => void"}>The square of the folded strip was pressed.</TypeRow>
+<TypeRow name={"folded"} type={"boolean"}>Whether the device is folded to its strip, controlled: to keep it past a reload, say.</TypeRow>
+<TypeRow name={"defaultFolded"} type={"boolean"} default={"false"}>Whether the device is folded to its strip when it first shows. Use `folded` to control it.</TypeRow>
+<TypeRow name={"onFoldedChange"} type={"(folded: boolean) => void"}>The device was folded or unfolded.</TypeRow>
 </TypeTable>
 
 ### Parts
@@ -275,6 +278,8 @@ Each slot is a group named after its device, and its grip is a button, "Move Com
 <TypeRow name={"shelves"} type={"{ label: string; items: { id, name, description? }[] }[]"}>The devices, by shelf, in the order they are shown.</TypeRow>
 <TypeRow name={"onPick"} type={"(id: string) => void"}>A device was picked: Enter, a double-click or the Add button.</TypeRow>
 <TypeRow name={"open"} type={"boolean"} default={"true"}>Whether the library is shown, or folded to a strip that opens it.</TypeRow>
+<TypeRow name={"shelf"} type={"number"}>The index of the shelf shown, controlled: to keep it past a reload, say.</TypeRow>
+<TypeRow name={"onShelfChange"} type={"(shelf: number) => void"}>Another shelf was opened.</TypeRow>
 <TypeRow name={"onOpenChange"} type={"(open: boolean) => void"}>Called to open or fold the library. Leave it out and it stays open, with no button to fold it.</TypeRow>
 <TypeRow name={"searchRef"} type={"Ref<HTMLInputElement>"}>The search field, to focus it from elsewhere.</TypeRow>
 </TypeTable>

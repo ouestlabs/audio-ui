@@ -537,10 +537,16 @@ function SlotMenu() {
 }
 
 interface DeviceChainSlotProps extends Omit<ComponentProps<"div">, "title"> {
+  /** Whether the device is folded to its strip when it first shows. Use `folded` to control it. @default false */
+  defaultFolded?: boolean;
   /** Whether the device is on, for the square of the folded strip. Leave it out for a device that cannot be switched off. */
   enabled?: boolean;
+  /** Whether the device is folded to its strip, controlled: to keep it past a reload, say. */
+  folded?: boolean;
   /** The square of the folded strip was pressed. */
   onEnabledChange?: (enabled: boolean) => void;
+  /** The device was folded or unfolded. */
+  onFoldedChange?: (folded: boolean) => void;
   /** The device's name, down the folded strip and in what the controls are called. */
   title: string;
   /** The slot's id, as it is in the chain's `order`. */
@@ -558,28 +564,33 @@ interface DeviceChainSlotProps extends Omit<ComponentProps<"div">, "title"> {
 function DeviceChainSlot({
   children,
   className,
+  defaultFolded = false,
   enabled,
+  folded: foldedProp,
   onEnabledChange,
+  onFoldedChange,
   title,
   value,
   ...props
 }: DeviceChainSlotProps) {
   const { dragging, dropIndex, flat, move, order, remove, startDrag } =
     useDeviceChain();
-  const [folded, setFolded] = useState(false);
+  const [ownFolded, setOwnFolded] = useState(defaultFolded);
+  const folded = foldedProp ?? ownFolded;
   const root = useRef<HTMLDivElement>(null);
   const pressedAt = useRef(0);
   const index = order.indexOf(value);
 
   const toggleFold = useCallback(() => {
-    setFolded((current) => !current);
+    setOwnFolded(!folded);
+    onFoldedChange?.(!folded);
     // The button that was pressed is gone with the face it was on: the focus goes to the one that takes its place.
     requestAnimationFrame(() =>
       root.current
         ?.querySelector<HTMLElement>('[data-slot="device-chain-slot-fold"]')
         ?.focus()
     );
-  }, []);
+  }, [folded, onFoldedChange]);
   const handlePointerDown = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
       pressedAt.current = event.clientX;

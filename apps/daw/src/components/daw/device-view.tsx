@@ -1,6 +1,6 @@
 import type { ParameterValue } from "@audio-ui/core/device";
 import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceChain,
   DeviceChainSlot,
@@ -41,6 +41,7 @@ import {
 } from "@/lib/arrangement";
 import { trackOf } from "@/lib/arrangement-state";
 import { libraryDevice } from "@/lib/device-library";
+import { useSavedEntry } from "./use-saved-view";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 
@@ -67,6 +68,12 @@ interface ChainProps {
   owner: ArrangementTrack;
   tempo: Arrangement["doc"]["tempo"];
   track: string;
+}
+
+/** Whether a slot is folded, kept with the view by the device's id. */
+interface SlotFold {
+  folded: boolean;
+  onFoldedChange: (folded: boolean) => void;
 }
 
 /** One device on a chain, drawn by its own panel (DEV-008); a rack, by the rack's. */
@@ -107,11 +114,13 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   );
   const { onHoldNote } = chain;
   const release = useCallback(() => onHoldNote(null), [onHoldNote]);
+  const [folded, setFolded] = useSavedEntry("deviceFolded", device.id, false);
+  const fold = { folded, onFoldedChange: setFolded };
   if (device.rack && device.device === DRUM_RACK_DEVICE) {
-    return <DrumSlot device={device} {...chain} />;
+    return <DrumSlot device={device} fold={fold} {...chain} />;
   }
   if (device.rack) {
-    return <RackSlot device={device} {...chain} />;
+    return <RackSlot device={device} fold={fold} {...chain} />;
   }
   if (!(face && entry)) {
     return null;
@@ -120,7 +129,9 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
     <DeviceChainSlot
       className={face.width}
       enabled={device.on !== false}
+      folded={folded}
       onEnabledChange={toggle}
+      onFoldedChange={setFolded}
       title={entry.device.name}
       value={device.id}
     >
@@ -289,13 +300,23 @@ function useRackCommands(
 }
 
 /** A rack on a chain: its macros and chains, and the picked chain's devices (DEV-010, DEV-012). */
-function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
+function RackSlot({
+  device,
+  fold,
+  ...chain
+}: ChainProps & { device: TrackDevice; fold: SlotFold }) {
   const { dispatch, track } = chain;
   const rack = device.rack ?? { chains: [], macros: [] };
   const rackId = device.id;
   // An instrument rack's chains each start with an instrument (DEV-014).
   const layered = device.device === INSTRUMENT_RACK_DEVICE;
-  const [picked, setPicked] = useState<string | null>(null);
+  const [picked, setPicked] = useSavedEntry("rackChain", rackId, "");
+  const [macrosShown, setMacrosShown] = useSavedEntry(
+    "rackMacros",
+    rackId,
+    false
+  );
+  const [zonesShown, setZonesShown] = useSavedEntry("rackZones", rackId, false);
   const selected =
     rack.chains.find((item) => item.id === picked) ?? rack.chains[0];
   const place = useMemo(
@@ -336,26 +357,31 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       onEnabledChange={toggle}
       title={layered ? "Instrument rack" : "Rack"}
       value={device.id}
+      {...fold}
     >
       <RackPanel
         controls={<DeviceChainSlotControls />}
         enabled={device.on !== false}
+        macrosShown={macrosShown}
         onAddChain={addChain}
         onChainMix={mix}
         onChainMixCommit={settle}
         onEnabledChange={toggle}
         onMacroChange={turn}
         onMacroCommit={settle}
+        onMacrosShownChange={setMacrosShown}
         onMapMacro={map}
         onRemoveChain={removeChain}
         onSelectChain={setPicked}
         onUnmapMacro={unmap}
         onZoneChange={layered ? zone : undefined}
         onZoneCommit={settle}
+        onZonesShownChange={setZonesShown}
         parameters={parameters}
         rack={shownRack}
         selectedChain={selected?.id ?? null}
         title={layered ? "Instrument rack" : "Rack"}
+        zonesShown={zonesShown}
       >
         {selected ? (
           <Chain
@@ -387,11 +413,20 @@ const lowestPad = (rack: Rack) =>
   );
 
 /** A drum rack, the track's instrument: its macros, its pads, and the picked pad's devices (DEV-013). */
-function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
+function DrumSlot({
+  device,
+  fold,
+  ...chain
+}: ChainProps & { device: TrackDevice; fold: SlotFold }) {
   const { dispatch, onNoteOff, onNoteOn, onPadFiles, track } = chain;
   const rack = device.rack ?? { chains: [], macros: [] };
   const rackId = device.id;
-  const [note, setNote] = useState(() => lowestPad(rack));
+  const [note, setNote] = useSavedEntry("drumNote", rackId, lowestPad(rack));
+  const [macrosShown, setMacrosShown] = useSavedEntry(
+    "rackMacros",
+    rackId,
+    false
+  );
   const pad = rack.chains.find((item) => item.pad?.note === note);
   const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
   const shownRack = useAutomatedRack(
@@ -428,16 +463,19 @@ function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       onEnabledChange={toggle}
       title="Drum rack"
       value={device.id}
+      {...fold}
     >
       <DrumRackPanel
         controls={<DeviceChainSlotControls />}
         enabled={device.on !== false}
+        macrosShown={macrosShown}
         onChainMix={mix}
         onChainMixCommit={settle}
         onDropFiles={drop}
         onEnabledChange={toggle}
         onMacroChange={turn}
         onMacroCommit={settle}
+        onMacrosShownChange={setMacrosShown}
         onMapMacro={map}
         onPadChange={change}
         onPadCommit={settle}

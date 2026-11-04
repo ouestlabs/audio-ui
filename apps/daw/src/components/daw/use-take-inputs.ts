@@ -1,11 +1,12 @@
 "use client";
 
 import type { Source } from "@audio-ui/react";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useComputerKeyboard } from "@/hooks/use-computer-keyboard";
 import { useMidiInput } from "@/hooks/use-midi-input";
 import type { ArrangementDoc } from "@/lib/arrangement-state";
+import { useSavedState } from "./use-saved-view";
 import type { useTake } from "./use-take";
 
 /**
@@ -52,7 +53,7 @@ export function useTakeInputs({
     onNoteOff: playNoteOff,
     onNoteOn: playNoteOn,
   });
-  const [computerKeys, setComputerKeys] = useState(false);
+  const [computerKeys, setComputerKeys] = useSavedState("computerKeys", false);
   const computerKeysOn = computerKeys && armedMidi.length > 0;
   useComputerKeyboard({
     enabled: computerKeysOn,

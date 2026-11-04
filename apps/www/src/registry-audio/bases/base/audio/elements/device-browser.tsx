@@ -51,10 +51,14 @@ interface DeviceBrowserProps
   onOpenChange?: (open: boolean) => void;
   /** A device was picked: its id. Enter, a double-click or the Add button. */
   onPick: (id: string) => void;
+  /** Another shelf was opened. */
+  onShelfChange?: (shelf: number) => void;
   /** Whether the library is shown, or folded to a strip that opens it. @default true */
   open?: boolean;
   /** The search field, to focus it from elsewhere: the end of a chain that opens the library. */
   searchRef?: Ref<HTMLInputElement>;
+  /** The index of the shelf shown, controlled: to keep it past a reload, say. */
+  shelf?: number;
   /** The devices, by shelf, in the order they are shown. */
   shelves: readonly DeviceBrowserShelf[];
 }
@@ -71,12 +75,15 @@ function DeviceBrowser({
   className,
   onOpenChange,
   onPick,
+  onShelfChange,
   open = true,
   searchRef,
+  shelf: shelfProp,
   shelves,
   ...props
 }: DeviceBrowserProps) {
-  const [shelf, setShelf] = useState(0);
+  const [ownShelf, setOwnShelf] = useState(0);
+  const shelf = shelfProp ?? ownShelf;
   const [query, setQuery] = useState("");
   const [cursor, setCursor] = useState(0);
   const listId = useId();
@@ -152,11 +159,16 @@ function DeviceBrowser({
     },
     [listed, markAt, onPick]
   );
-  const openShelf = useCallback((event: { currentTarget: HTMLElement }) => {
-    setShelf(Number(event.currentTarget.dataset.shelf));
-    setQuery("");
-    setCursor(0);
-  }, []);
+  const openShelf = useCallback(
+    (event: { currentTarget: HTMLElement }) => {
+      const next = Number(event.currentTarget.dataset.shelf);
+      setOwnShelf(next);
+      onShelfChange?.(next);
+      setQuery("");
+      setCursor(0);
+    },
+    [onShelfChange]
+  );
   const mark = useCallback((event: { currentTarget: HTMLElement }) => {
     setCursor(Number(event.currentTarget.dataset.index));
   }, []);

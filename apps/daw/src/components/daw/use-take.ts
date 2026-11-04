@@ -39,6 +39,7 @@ import {
 } from "@/lib/recording";
 import { encodeWav } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
+import { useSavedState } from "./use-saved-view";
 
 /** How long a stretch each level of a take drawn live covers, in seconds. */
 const LEVEL_SECONDS = 0.02;
@@ -293,11 +294,11 @@ export function useTake({
 }) {
   const [armed, setArmed] = useState<ReadonlySet<string>>(new Set());
   const [recording, setRecording] = useState(false);
-  const [countIn, setCountIn] = useState(0);
-  const [punch, setPunch] = useState(false);
-  const [overdub, setOverdub] = useState(false);
+  const [countIn, setCountIn] = useSavedState("countIn", 0);
+  const [punch, setPunch] = useSavedState("punch", false);
+  const [overdub, setOverdub] = useSavedState("overdub", false);
   /** Record quantization, as a share of a whole note: 0 for none. */
-  const [quantize, setQuantize] = useState(0);
+  const [quantize, setQuantize] = useSavedState("quantize", 0);
   /** Whether armed audio tracks play their input, for headphones (REC-003). */
   const [monitorInput, setMonitorInput] = useState(false);
   const [inputDevice, setInputDevice] = useState("");

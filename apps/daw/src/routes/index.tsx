@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Daw, type DawProps } from "@/components/daw/daw";
+import { clearView } from "@/components/daw/use-saved-view";
 import { padRecordings } from "@/lib/arrangement";
 import { allTracks } from "@/lib/arrangement-state";
 import {
@@ -47,6 +48,8 @@ async function openProject(): Promise<DawProps> {
   const saved = await loadProject();
   const context = webAudio.getContext();
   if (!(saved && context)) {
+    // A new project: nothing kept of the view is about it.
+    clearView();
     return {
       folder: null,
       initial: newProject(),
@@ -79,14 +82,13 @@ function Home() {
       setProject({ opened: 0, props: { ...props, folder } })
     );
   }, []);
-  const open = useCallback(
-    (props: DawProps) =>
-      setProject((current) => ({
-        opened: (current?.opened ?? 0) + 1,
-        props,
-      })),
-    []
-  );
+  const open = useCallback((props: DawProps) => {
+    clearView();
+    setProject((current) => ({
+      opened: (current?.opened ?? 0) + 1,
+      props,
+    }));
+  }, []);
   if (!project) {
     return (
       <main className="flex h-svh items-center justify-center text-muted-foreground text-sm">

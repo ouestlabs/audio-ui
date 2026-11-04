@@ -86,6 +86,23 @@ export interface MidiClipRegion {
   sourceLength: number;
 }
 
+/** What the panel shows of a clip, the same from clip to clip. */
+export interface MidiClipView {
+  /** Whether the pen draws; off, it selects. */
+  drawing: boolean;
+  /** Whether the roll folds to the pitches it uses. */
+  folded: boolean;
+  /** What the lane under the roll edits. */
+  level: NoteLevel;
+}
+
+/** How the panel opens. */
+export const MIDI_CLIP_VIEW: MidiClipView = {
+  drawing: true,
+  folded: false,
+  level: "velocity",
+};
+
 interface MidiClipPanelProps {
   /** Whether the clip is on: off, it stays on its track and is not heard. Leave it out, with `onActiveChange`, for a panel without the switch. */
   active?: boolean;
@@ -121,10 +138,14 @@ interface MidiClipPanelProps {
   onRegionChange?: (region: MidiClipRegion) => void;
   /** A name was typed in the strip. */
   onRename?: (name: string) => void;
+  /** The pen, the roll's fold or the lane was changed. */
+  onViewChange?: (view: MidiClipView) => void;
   /** Where the clip plays in its source, and its loop. */
   region: MidiClipRegion;
   /** The grid notes are drawn and moved on, in seconds. @default a quarter of `beat` */
   step?: number;
+  /** The pen, the roll's fold and the lane, controlled: to keep them from clip to clip, or past a reload. */
+  view?: MidiClipView;
 }
 
 /** What a Notes button does to the notes it acts on. */
@@ -398,6 +419,8 @@ function MidiClipPanel({
   className,
   collapsed,
   foldedBoxes,
+  onViewChange,
+  view,
   name,
   notes,
   onActiveChange,
@@ -417,15 +440,29 @@ function MidiClipPanel({
   const { length, loop, offset, sourceLength } = region;
   // The roll covers the source, and what the clip plays past it.
   const span = Math.max(sourceLength, loop?.[1] ?? 0, offset + length);
-  const [drawing, setDrawing] = useState(true);
-  const [folded, setFolded] = useState(false);
-  const [level, setLevel] = useState<NoteLevel>("velocity");
+  const [ownView, setOwnView] = useState<MidiClipView>(MIDI_CLIP_VIEW);
+  const current = view ?? ownView;
+  const { drawing, folded, level } = current;
+  const changeView = useCallback(
+    (patch: Partial<MidiClipView>) => {
+      const next = { ...current, ...patch };
+      setOwnView(next);
+      onViewChange?.(next);
+    },
+    [current, onViewChange]
+  );
   const [selection, setSelection] = useState<readonly NoteId[]>([]);
-  const toggleDrawing = useCallback(() => setDrawing((on) => !on), []);
-  const toggleFolded = useCallback(() => setFolded((on) => !on), []);
+  const toggleDrawing = useCallback(
+    () => changeView({ drawing: !drawing }),
+    [changeView, drawing]
+  );
+  const toggleFolded = useCallback(
+    () => changeView({ folded: !folded }),
+    [changeView, folded]
+  );
   const toggleLevel = useCallback(
-    () => setLevel((on) => (on === "velocity" ? "chance" : "velocity")),
-    []
+    () => changeView({ level: level === "velocity" ? "chance" : "velocity" }),
+    [changeView, level]
   );
   const value = useMemo(() => [...notes], [notes]);
   const bars = useMemo(

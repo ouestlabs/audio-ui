@@ -3,6 +3,7 @@ import { secondsPerBar, secondsPerBeat } from "@audio-ui/core/time";
 import { type ReactNode, useCallback } from "react";
 import { ClipPanel, type ClipSettings } from "@/components/audio-ui/clip-panel";
 import {
+  MIDI_CLIP_VIEW,
   MidiClipPanel,
   type MidiClipRegion,
 } from "@/components/audio-ui/midi-clip-panel";
@@ -11,6 +12,7 @@ import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import type { Arranged } from "@/lib/arrangement";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { cn } from "@/lib/utils";
+import { useSavedState } from "./use-saved-view";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
@@ -87,6 +89,7 @@ export function ClipEditor({
   recordings: ReadonlyMap<string, Recording>;
 }) {
   const { dispatch, doc } = arrangement;
+  const [midiView, setMidiView] = useSavedState("midiView", MIDI_CLIP_VIEW);
   const bar = secondsPerBar(doc.tempo);
   // Laid flat in the detail view, which draws the edge above it: no card of its own, and as tall as the view unless rolled up.
   const docked = cn("rounded-none border-0", !collapsed && "h-full");
@@ -176,12 +179,14 @@ export function ClipEditor({
         onNotesCommitted={settle}
         onRegionChange={changeRegion}
         onRename={rename}
+        onViewChange={setMidiView}
         region={{
           length: clip.value.length,
           loop: clip.loop ?? null,
           offset: clip.value.offset,
           sourceLength: clip.sourceLength,
         }}
+        view={midiView}
       >
         {actions}
       </MidiClipPanel>

@@ -2200,6 +2200,60 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `at the start of the chain the strip ends at ${atStart}, the view at ${right}`
       );
     },
+  "PRJ-001: how the workstation was laid out comes back when the page is loaded again":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByRole("button", { name: "Space" }).click();
+      await library.getByRole("option", { name: DELAY }).first().dblclick();
+      const slot = page.locator("[data-slot=device-chain-slot]").first();
+      await slot.getByRole("button", { name: FOLD }).click();
+      await slot.locator("[data-slot=device-chain-strip]").waitFor();
+      // A track folded, the mixer's view shown, zoomed in and scrolled, the metronome on.
+      await page
+        .locator('[aria-label="2 Audio"][data-track-id]')
+        .getByRole("button", { name: FOLD })
+        .click();
+      await page.getByRole("button", { name: "Zoom in" }).click();
+      await page.getByRole("button", { name: "Zoom in" }).click();
+      const viewport = page.locator("[data-slot=timeline-viewport]");
+      await viewport.evaluate((element) => {
+        element.scrollLeft = 300;
+      });
+      await page
+        .getByRole("button", { exact: true, name: "Metronome" })
+        .click();
+      await page.waitForTimeout(400);
+      const read = async () => ({
+        chosen: await library
+          .getByRole("button", { name: "Space" })
+          .getAttribute("aria-pressed"),
+        folded: await page.locator("[data-slot=device-chain-strip]").count(),
+        metronome: await page
+          .getByRole("button", { exact: true, name: "Metronome" })
+          .getAttribute("aria-pressed"),
+        scroll: await viewport.evaluate((element) => element.scrollLeft),
+        track: await page
+          .locator('[aria-label="2 Audio"][data-track-id]')
+          .getByRole("button", { name: UNFOLD })
+          .count(),
+      });
+      const before = await read();
+      assert(
+        before.scroll === 300,
+        `the arrangement did not scroll: ${before.scroll}`
+      );
+      await page.reload();
+      await page.waitForSelector("[data-track-id]", { timeout: 30_000 });
+      await page.waitForTimeout(500);
+      const after = await read();
+      assert(
+        JSON.stringify(after) === JSON.stringify(before),
+        `before ${JSON.stringify(before)}, after ${JSON.stringify(after)}`
+      );
+    },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

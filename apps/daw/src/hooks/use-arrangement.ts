@@ -28,6 +28,8 @@ export type { ArrangementSelection } from "@/lib/arrangement-state";
 
 const NO_IDS: string[] = [];
 const NO_COPIES: Arranged[] = [];
+const NO_FOLDS: Record<string, boolean> = {};
+const NO_HEIGHTS: Record<string, number> = {};
 
 export interface UseArrangementOptions {
   /** How many colors a track can take: new tracks cycle through them. @default 5 */
@@ -37,6 +39,10 @@ export interface UseArrangementOptions {
   /** The height of a folded track, in px. @default 28 */
   foldedHeight?: number;
   initialClips?: Arranged[];
+  /** The tracks folded when it starts, by id: as they were kept, say. */
+  initialFolded?: Record<string, boolean>;
+  /** The heights set by hand when it starts, by track id, in px. */
+  initialHeights?: Record<string, number>;
   initialLocators?: ArrangementLocator[];
   initialLoop?: ArrangementLoop;
   /** The main track: its devices and its mix. @default MAIN_TRACK */
@@ -63,6 +69,8 @@ export function useArrangement({
   duration,
   foldedHeight = 28,
   initialClips = [],
+  initialFolded = NO_FOLDS,
+  initialHeights = NO_HEIGHTS,
   initialLocators,
   initialLoop,
   initialMain,
@@ -101,9 +109,10 @@ export function useArrangement({
   const selectedTracks = selection?.tracks ?? NO_IDS;
 
   // The heights set by hand (a track with none shares the room left).
-  const [heights, setHeights] = useState<Record<string, number>>({});
+  const [heights, setHeights] =
+    useState<Record<string, number>>(initialHeights);
   // Folded tracks are strips: they keep the height set by hand for when they open again.
-  const [folded, setFolded] = useState<Record<string, boolean>>({});
+  const [folded, setFolded] = useState<Record<string, boolean>>(initialFolded);
   const toggleFold = useCallback(
     (trackId: string) =>
       setFolded((all) => ({ ...all, [trackId]: !all[trackId] })),
@@ -147,6 +156,8 @@ export function useArrangement({
     doc,
     duration: doc.duration,
     folded,
+    /** The heights set by hand, by track id, a folded track's kept for when it opens. */
+    handHeights: heights,
     heights: shownHeights,
     locators: doc.locators,
     loop: doc.loop,
