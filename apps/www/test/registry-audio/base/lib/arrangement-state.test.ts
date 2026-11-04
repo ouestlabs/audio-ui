@@ -1126,3 +1126,28 @@ describe("add-track with a name and an id", () => {
     ]);
   });
 });
+
+describe("track ids", () => {
+  test("ARR-022: a project loaded after a track was removed never gives two tracks one id", () => {
+    const loaded = (ids: string[]) =>
+      createArrangementState({
+        colors: 5,
+        duration: 10,
+        initialTracks: ids.map((id, color) => ({ color, id, name: id })),
+        tempo: DEFAULT_TEMPO,
+      });
+    const unique = (state: ReturnType<typeof loaded>) => {
+      const ids = state.doc.tracks.map((track) => track.id);
+      expect(new Set(ids).size).toBe(ids.length);
+    };
+    // Track 3 was removed: two tracks, the last numbered 4.
+    const gap = loaded(["track-1", "track-2", "track-4"]);
+    const added = apply(gap, { kind: "audio", type: "add-track" });
+    unique(added);
+    unique(apply(added, { kind: "audio", type: "add-track" }));
+    unique(apply(gap, { id: "track-1", type: "duplicate-track" }));
+    // A new track takes a number after every one there is, in its name too.
+    expect(added.doc.tracks.at(-1)?.id).toBe("track-5");
+    expect(added.doc.tracks.at(-1)?.name).toEndWith(" 5");
+  });
+});

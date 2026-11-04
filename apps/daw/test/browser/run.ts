@@ -2221,6 +2221,55 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.waitForTimeout(200);
       assert(page.url() === before, "the page went back");
     },
+  "ARR-022: a track removed, the page loaded again: a new track takes an id of its own, and shows and goes alone":
+    async (browser) => {
+      const page = await open(browser);
+      const rows = page.locator("[data-track-id]");
+      const ids = () =>
+        rows.evaluateAll((all) =>
+          all.map((row) => row.getAttribute("data-track-id") ?? "")
+        );
+      await page
+        .getByText("2 Audio", { exact: true })
+        .first()
+        .click({ button: "right" });
+      await page.getByRole("menuitem", { name: "Delete" }).click();
+      await page.waitForTimeout(800);
+      await page.reload();
+      await page.waitForSelector("[data-track-id]", { timeout: 30_000 });
+      const before = await rows.count();
+      await page.getByRole("button", { name: "Add track" }).click();
+      await page.getByRole("menuitem", { name: "Audio track" }).click();
+      await page.waitForFunction(
+        (count) => document.querySelectorAll("[data-track-id]").length > count,
+        before
+      );
+      const after = await ids();
+      assert(
+        new Set(after).size === after.length,
+        `two tracks share an id: ${after.join()}`
+      );
+    },
+  "PRJ-001: a device removed forgets it was folded, so a new one under its id opens":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Gate");
+      const gate = library.getByRole("option").first();
+      await gate.dblclick();
+      const slot = page.locator("[data-slot=device-chain-slot]").first();
+      await slot.getByRole("button", { name: FOLD }).click();
+      await slot.getByRole("button", { name: REMOVE }).click();
+      await page.waitForTimeout(100);
+      await gate.dblclick();
+      await page.locator("[data-slot=device-chain-slot]").first().waitFor();
+      assert(
+        (await page.locator("[data-slot=device-chain-strip]").count()) === 0,
+        "the new device opens folded"
+      );
+    },
   "ARR: a track dragged by its grip: the rows slide aside, and it lands in the gap":
     async (browser) => {
       const page = await open(browser);

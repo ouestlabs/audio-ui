@@ -7,6 +7,8 @@
 import { renamePadRecordings } from "@/lib/arrangement";
 import type { ArrangementDoc } from "@/lib/arrangement-state";
 
+import { withUniqueTrackIds } from "./project";
+
 export const PROJECT_FORMAT = "audio-ui-daw";
 export const PROJECT_VERSION = 1;
 export const PROJECT_EXTENSION = ".audioui";
@@ -63,7 +65,7 @@ export function readProjectFile(text: string): ProjectFile {
   if (!(file.doc && Array.isArray(file.samples))) {
     throw new Error("This project file is incomplete.");
   }
-  return file as ProjectFile;
+  return { ...file, doc: withUniqueTrackIds(file.doc) } as ProjectFile;
 }
 
 /** The extension of an audio file, from its first bytes: what a sample is named with in the folder. */

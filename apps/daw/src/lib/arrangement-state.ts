@@ -71,6 +71,19 @@ const TRACK_NAMES: Record<TrackKind, string> = {
   midi: "MIDI",
 };
 
+const NUMBERED_TRACK = /^track-(\d+)$/;
+
+/**
+ * The number new tracks count on from: past every track there is, whatever
+ * was removed before these were loaded, so a new one never takes an id one has.
+ */
+function lastTrackNumber(tracks: readonly { id: string }[]): number {
+  return Math.max(
+    tracks.length,
+    ...tracks.map((track) => Number(NUMBERED_TRACK.exec(track.id)?.[1] ?? 0))
+  );
+}
+
 function freshId(id: string, taken: Set<string>): string {
   let n = 1;
   while (taken.has(`${id}-${n}`)) {
@@ -705,7 +718,7 @@ export function createArrangementState({
     gesture: { copying: null, group: null },
     history: emptyHistory(),
     selection: null,
-    trackCount: initialTracks.length,
+    trackCount: lastTrackNumber(initialTracks),
   };
 }
 

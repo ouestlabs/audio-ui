@@ -88,6 +88,7 @@ import {
   clipsToReselect,
   readView,
   saveView,
+  useForgetRemoved,
   useSavedArrangement,
   useSavedScroll,
   useSavedState,
@@ -515,6 +516,7 @@ export function Daw({
     zoom: view.zoom,
   });
   useSavedScroll(viewportRef);
+  useForgetRemoved(doc);
   useSavedArrangement({
     grid,
     selectedClips: arrangement.selectedIds,

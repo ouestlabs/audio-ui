@@ -2,6 +2,9 @@ import type { NoteLevel } from "@audio-ui/core/piano-roll";
 import type { GridDivision, MetronomeRhythm } from "@audio-ui/core/time";
 import { type RefObject, useCallback, useEffect, useState } from "react";
 
+import { rackDevices } from "@/lib/arrangement";
+import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
+
 /**
  * How the workstation is laid out, kept in this browser beside the project
  * (PRJ-001): what is folded, open and picked, the heights, the zoom and the
@@ -225,4 +228,37 @@ export function clipsToReselect(
   return panelView === "clip"
     ? clips.filter((clip) => kept.has(clip.id)).map((clip) => clip.id)
     : [];
+}
+
+const ENTRIES = [
+  "deviceFolded",
+  "drumNote",
+  "rackChain",
+  "rackMacros",
+  "rackZones",
+] as const;
+
+/** Forgets what was kept of devices no longer there: a new one can take the id of one removed, and must not open folded. */
+export function useForgetRemoved(doc: ArrangementDoc) {
+  useEffect(() => {
+    const here = new Set(
+      allTracks(doc).flatMap((track) =>
+        (track.devices ?? []).flatMap((device) => [
+          device.id,
+          ...(device.rack ? rackDevices(device.rack) : []).map(({ id }) => id),
+        ])
+      )
+    );
+    const kept = readView();
+    for (const entry of ENTRIES) {
+      const ids = Object.keys(kept[entry] ?? {});
+      const left = ids.filter((id) => here.has(id));
+      if (left.length < ids.length) {
+        const values = kept[entry] as Record<string, unknown>;
+        saveView({
+          [entry]: Object.fromEntries(left.map((id) => [id, values[id]])),
+        });
+      }
+    }
+  }, [doc]);
 }

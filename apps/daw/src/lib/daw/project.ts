@@ -71,3 +71,30 @@ export function newProject(): ArrangementDoc {
     tempo: START_TEMPO,
   }).doc;
 }
+
+/**
+ * A document with one id per track (ARR-022): one saved when new tracks could
+ * take an id there was gets a new id for each track after the first under it.
+ * The clips stay on the first, where they showed; the others come back empty.
+ */
+export function withUniqueTrackIds(doc: ArrangementDoc): ArrangementDoc {
+  const taken = new Set(doc.tracks.map((track) => track.id));
+  if (taken.size === doc.tracks.length) {
+    return doc;
+  }
+  const seen = new Set<string>();
+  const tracks = doc.tracks.map((track) => {
+    if (!seen.has(track.id)) {
+      seen.add(track.id);
+      return track;
+    }
+    let n = doc.tracks.length + 1;
+    while (taken.has(`track-${n}`)) {
+      n += 1;
+    }
+    const id = `track-${n}`;
+    taken.add(id);
+    return { ...track, id };
+  });
+  return { ...doc, tracks };
+}

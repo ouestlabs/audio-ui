@@ -88,3 +88,7 @@ Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-020";
 A sideways swipe on a touchpad scrolls what is under it. At the end of a scroll, or over what does not scroll, nothing happens: the browser does not go back a page.
 Test: apps/daw/test/browser/run.ts "ARR-021"
 
+### ARR-022 One id per track
+A new or duplicated track never takes the id of a track there is, whatever was removed before the project was loaded. A project saved with two tracks under one id comes back with the second under a new one, empty: the clips stay on the first.
+Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-022"; apps/daw/test/project-file.test.ts "ARR-022"; apps/daw/test/browser/run.ts "ARR-022"
+
