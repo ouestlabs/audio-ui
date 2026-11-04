@@ -39,7 +39,7 @@ Test: apps/daw/test/devices.test.ts "DEV-008"
 ### DEV-010 Racks
 A rack is a device that holds chains of devices side by side: the sound goes into every chain, through its devices in series, and the chains are summed. Each chain has its volume, pan, switch and solo, as a track does; a soloed chain silences the others. The effects picked on a chain are grouped into a rack, one chain of them, where the first was; a rack can also come from the library with one empty chain, and chains are added and removed. A device inside a rack is changed, switched off, moved and removed as on a track; a rack can hold racks. A drag of a chain's fader or of a macro is one step of undo.
 Test: apps/www/test/registry-audio/base/lib/arrangement-racks.test.ts "DEV-010"; apps/www/test/browser/arrangement-engine.check.ts "DEV-010"; apps/daw/test/browser/run.ts "DEV-010 and DEV-012"
-In the DAW: Add a rack, at the end of the chain, puts one there; a device dragged from the library into a chain of it goes there; the macros map from their menu, to the whole travel of the parameter.
+In the DAW: Add a rack, at the end of the chain, puts one there; a device dragged from the library into a chain of it goes there; the macros show from the Macros switch of its title bar and map from their menu, to the whole travel of the parameter. The devices lie flat in the device view, a hairline between each, the inside of a rack too.
 
 ### DEV-011 A rack's delay
 Chains that delay the sound differently meet on the same frame: each waits for the slowest. The rack delays the track by its slowest chain, which the track's delay compensation counts.
@@ -48,3 +48,7 @@ Test: apps/www/test/browser/arrangement-engine.check.ts "DEV-011"
 ### DEV-012 Macros
 A rack has eight macros, each from 0 to 1. A parameter of any device inside the rack, a rack within it included, is mapped to a macro over a stretch of its travel: turning the macro from 0 to 1 moves the parameter across that stretch, along the parameter's own scale. Mapped again, the stretch changes; unmapped, the parameter plays as set.
 Test: apps/www/test/registry-audio/base/lib/arrangement-racks.test.ts "DEV-012"; apps/www/test/browser/arrangement-engine.check.ts "DEV-012"; apps/daw/test/browser/run.ts "DEV-010 and DEV-012"
+
+### DEV-013 Drum racks
+A drum rack is an instrument of a MIDI track whose chains are pads. A note plays the pads that answer it, each once, as loud as its velocity, its own sound into its own devices, ringing for its decay whatever the note's length; a note no pad answers is silent. A pad plays a synthesized voice (kick, snare, hat) or a recording, pitched in semitones and cut to a decay. A new drum rack has a kick on C2, a snare on D2 and a hat on F#2. The face shows sixteen pads on a bank of the 128 notes, the first bank starting on C2; striking a pad plays it and picks it, showing its voice, tune, decay, mix and devices. A voice picked on an empty pad makes one; a recording dropped on a pad fills it and is kept with the project. The macros are a rack's. A drum rack does not go out to DAWproject.
+Test: apps/www/test/registry-audio/base/lib/arrangement-drum-rack.test.ts "DEV-013"; apps/www/test/browser/arrangement-engine.check.ts "DEV-013"; apps/daw/test/project-file.test.ts "DEV-013"; apps/daw/test/browser/run.ts "DEV-013"

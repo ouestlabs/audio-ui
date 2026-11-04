@@ -18,7 +18,7 @@ The engine that plays a rack is an item of its own, `npx shadcn@latest add @audi
 A rack is a device that holds chains of devices side by side: the sound goes into every chain, through its devices in series, and the chains are summed. Each chain has its volume, pan, switch and solo, and chains that delay the sound differently are lined up on the slowest. Eight macros turn parameters of the devices inside, each over a stretch of its travel.
 
 - **The rack itself:** a track device of the kind `audioui.rack` holds a `rack`, its chains and macros. `rack` (`npx shadcn@latest add @audio-ui/rack`) plays one: `createRackEngine(ctx, find)` gives a link of a chain with `input`, `output`, `update(rack)` and `latency()`.
-- **Its face:** `RackPanel` (`npx shadcn@latest add @audio-ui/rack-panel`) shows the macros, each with a menu to map a parameter of a device inside or let one go, the chains, and the picked chain's devices, which you draw as its `children` (a `DeviceChain` of their own).
+- **Its face:** `RackPanel` (`npx shadcn@latest add @audio-ui/rack-panel`) shows the chains and the picked chain's devices, which you draw as its `children` (a `DeviceChain` of their own). The macros start hidden: the Macros switch of its title bar shows them, each with a menu to map a parameter of a device inside or let one go. `RackFrame`, `RackMacros` and `RackChainRow` are its parts, for a face of your own.
 - **Commands:** `useArrangement` groups devices into a rack (`group-devices`), adds and removes chains, turns macros (`set-macro`) and maps them (`map-macro`, `unmap-macro`). A device inside a rack is changed, switched off, moved and removed as on a track.
 
 ```tsx
@@ -42,3 +42,11 @@ import { RackPanel } from "@/components/audio-ui/rack-panel";
 
 A chain inside a slot keeps its own drops and drags: a device dropped on it, or dragged along it, stays in it.
 
+## Drum racks
+
+A drum rack is an instrument whose chains are pads: a note plays the pads that answer it, each its own sound into its own devices, and the rack sums them with its macros as any rack does. A pad plays a voice of the drum synthesis (kick, snare, hat) or a recording, `tune` semitones from its pitch and for `decay` seconds, as loud as the note's velocity, and rings for its decay whatever the note's length.
+
+- **The rack itself:** a track device of the kind `audioui.drum-rack` (`DRUM_RACK_DEVICE`), an instrument on a MIDI track. Its `rack` is the same as a rack's, each chain with a `pad`: the note it answers and the sound it plays. `newDrumRack` starts a kit with a kick on C2, a snare on D2 and a hat on F#2.
+- **Its engine:** `drum-rack` (`npx shadcn@latest add @audio-ui/drum-rack`) plays one: `createDrumRackEngine(ctx, find)` gives `output`, `hit(note, velocity, time)`, `cancel(time)` and `update(rack, context, recordings)`. The arrangement engine plays a MIDI track's notes through it, and a recording a pad names comes from the recordings it is given, decoded (a pad plays its recording whole, at once).
+- **Its face:** `DrumRackPanel` (`npx shadcn@latest add @audio-ui/drum-rack-panel`) shows sixteen pads at a time on a bank of the 128 notes, the lowest at the bottom left, the first bank shown starting on C2. Striking a pad picks it and calls `onPadOn(note, velocity)`; a file dropped on a pad goes to `onDropFiles(note, files)`. The picked pad shows its voice, tune, decay and mix, and its devices as `children`.
+- **Commands:** `set-pad` puts a sound on the pad of a note (a new pad when the note had none), `change-pad` turns its tune or decay as a burst, and `move-pad` moves a pad to another note, swapping with the pad there. A pad is removed, mixed and given devices as any chain. `padRecordings` lists the recordings the pads play, so a project keeps them, and `renamePadRecordings` follows a recording that takes a new id.
