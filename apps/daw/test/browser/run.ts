@@ -90,6 +90,10 @@ async function dropChord(
   );
 }
 
+const FOLD = /^Fold /;
+const REMOVE = /^Remove /;
+const UNFOLD = /^Unfold /;
+
 /** Drags across bare lanes, from near the start of one track to `across` px on under the pointer of another. */
 async function selectTime(
   page: Page,
@@ -2046,7 +2050,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         ),
       });
       const unfolded = await read();
-      await slot.getByRole("button", { name: /^Fold / }).click();
+      await slot.getByRole("button", { name: FOLD }).click();
       await slot.locator("[data-slot=device-chain-strip]").waitFor();
       const folded = await read();
       assert(
@@ -2080,7 +2084,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the on square of the strip unfolded the device"
       );
       // The strip is what is pressed: its arrow says so without a button's surface of its own.
-      const arrow = slot.getByRole("button", { name: /^Unfold / });
+      const arrow = slot.getByRole("button", { name: UNFOLD });
       await arrow.hover();
       await page.waitForTimeout(250);
       const surface = await arrow.evaluate(
@@ -2095,38 +2099,34 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await slot
         .locator("[data-slot=device-header]")
         .waitFor({ timeout: 2000 });
-      await slot.getByRole("button", { name: /^Fold / }).click();
+      await slot.getByRole("button", { name: FOLD }).click();
       await strip.waitFor();
-      // At rest the strip is its square and its name; the rest comes under the pointer or the keyboard.
-      const tools = strip.locator("button:not([aria-pressed])");
-      const shown = () =>
-        tools.evaluateAll((all) =>
-          all.map((el) => getComputedStyle(el).opacity).join()
-        );
-      // The Enter above left the keyboard on the arrow, where it rightly shows.
-      await page.evaluate(() =>
-        (document.activeElement as HTMLElement)?.blur()
-      );
+      // Its tools are always there, at the bottom in the title bar's order, with the name over them.
       await page.mouse.move(0, 0);
-      await page.waitForTimeout(300);
-      assert(
-        (await shown()) === "0,0,0",
-        `at rest the strip's tools are at ${await shown()}`
+      const name = await strip.locator("span[title]").boundingBox();
+      const tools = await Promise.all(
+        [
+          strip.locator("[data-device-grip]"),
+          slot.getByRole("button", { name: REMOVE }),
+          arrow,
+        ].map((tool) => tool.boundingBox())
       );
-      await page.mouse.move(middle.x, middle.y);
-      await page.waitForTimeout(300);
+      const [grip, remove, last] = tools;
       assert(
-        (await shown()) === "1,1,1",
-        `under the pointer the strip's tools are at ${await shown()}`
+        !!name &&
+          !!grip &&
+          !!remove &&
+          !!last &&
+          name.y + name.height <= grip.y &&
+          grip.y < remove.y &&
+          remove.y < last.y &&
+          box.y + box.height - (last.y + last.height) <= 6,
+        `the strip's bottom reads ${JSON.stringify({ name, tools })}`
       );
-      await page.mouse.move(0, 0);
-      await square.focus();
-      await page.keyboard.press("Tab");
-      await page.waitForTimeout(300);
-      assert(
-        (await shown()).startsWith("1,"),
-        `with the keyboard on the grip the strip's tools are at ${await shown()}`
+      const opacity = await arrow.evaluate(
+        (el) => getComputedStyle(el).opacity
       );
+      assert(opacity === "1", `the arrow at rest is at ${opacity}`);
       await page.mouse.click(middle.x, middle.y);
       await slot
         .locator("[data-slot=device-header]")
