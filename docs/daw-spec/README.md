@@ -36,11 +36,11 @@ Test: packages/core/src/audio/playback/render.test.ts "CLP-003"
 | `ENG` | [Engine](engine.md) | 1 |
 | `PRJ` | [Projects and files](project.md) | 1 (on disk, DAWproject: 2) |
 | `AUT` | [Automation](automation.md) | 3 |
-| `REC` | [Recording](recording.md) | 6 |
+| `REC` | [Recording](recording.md) | 5 |
 | `KEY` | [Shortcuts](shortcuts.md) | each phase |
 | `PRF` | [Performance targets](performance.md) | each phase |
 
-Later phases add their chapters here before they start: editing (3), warping (4), recording (6). There is no session view: the DAW is an arrangement only (decided 2026-11-04).
+Later phases add their chapters here before they start: editing (3), warping (4), recording (5). There is no session view: the DAW is an arrangement only (decided 2026-11-04).
 
 ## Fixtures
 
