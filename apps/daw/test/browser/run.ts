@@ -820,9 +820,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const lane = await page.locator('[data-track="track-2"]').boundingBox();
       assert(lane, "the lane is there");
       await page.mouse.click(lane.x + 200, lane.y + lane.height / 2);
-      await page
-        .getByRole("button", { name: "Add a time signature at the cursor" })
-        .click();
+      await page.getByRole("button", { name: "Add a marker" }).click();
+      await page.getByRole("menuitem", { name: "Time signature" }).click();
       await page.waitForFunction(
         () => document.activeElement?.tagName === "INPUT"
       );
@@ -893,9 +892,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const lane = await page.locator('[data-track="track-2"]').boundingBox();
       assert(lane, "the lane is there");
       await page.mouse.click(lane.x + 200, lane.y + lane.height / 2);
-      await page
-        .getByRole("button", { name: "Add a time signature at the cursor" })
-        .click();
+      await page.getByRole("button", { name: "Add a marker" }).click();
+      await page.getByRole("menuitem", { name: "Time signature" }).click();
       await page.waitForFunction(
         () => document.activeElement?.tagName === "INPUT"
       );

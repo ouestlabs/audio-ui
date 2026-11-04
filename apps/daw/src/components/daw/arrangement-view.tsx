@@ -113,6 +113,48 @@ function carriesDevice(event: DragEvent) {
   return Array.from(event.dataTransfer.types).includes(DEVICE_DRAG_TYPE);
 }
 
+/**
+ * The markers row's one button: a menu that adds a locator or a time
+ * signature at the cursor. It hands the focus back to nothing as it closes,
+ * so a new signature keeps it to be typed.
+ */
+function MarkerMenu({
+  onLocator,
+  onSignature,
+}: {
+  onLocator: () => void;
+  onSignature: () => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label="Add a marker"
+            className="size-5"
+            size="icon"
+            title="Add a marker"
+            variant="ghost"
+          />
+        }
+      >
+        <PlusIcon aria-hidden="true" className="size-3" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-auto" finalFocus={false}>
+        <DropdownMenuItem onClick={onLocator}>
+          <MapPinPlusIcon aria-hidden="true" />
+          Locator
+          <DropdownMenuShortcut>M</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onSignature}>
+          <MusicNotesPlusIcon aria-hidden="true" />
+          Time signature
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 /** A row of the arrangement: its header in the sticky column, its lane beside it. */
 function Row({
   children,
@@ -588,31 +630,10 @@ export function ArrangementView({
               lead={
                 <span className="flex h-full w-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
                   Markers
-                  <span className="flex">
-                    <Button
-                      aria-label="Add a locator at the cursor (M)"
-                      className="size-5"
-                      onClick={markers.addLocator}
-                      size="icon"
-                      title="Add a locator at the cursor (M)"
-                      variant="ghost"
-                    >
-                      <MapPinPlusIcon aria-hidden="true" className="size-3.5" />
-                    </Button>
-                    <Button
-                      aria-label="Add a time signature at the cursor"
-                      className="size-5"
-                      onClick={markers.addSignature}
-                      size="icon"
-                      title="Add a time signature at the cursor"
-                      variant="ghost"
-                    >
-                      <MusicNotesPlusIcon
-                        aria-hidden="true"
-                        className="size-3.5"
-                      />
-                    </Button>
-                  </span>
+                  <MarkerMenu
+                    onLocator={markers.addLocator}
+                    onSignature={markers.addSignature}
+                  />
                 </span>
               }
             >
