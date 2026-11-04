@@ -2028,6 +2028,30 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `the macro mapped to the gain at 0 leaves the take at ${down} dB, from ${through} dB`
       );
     },
+  "DEV-006: a device's on square keeps its place and its shape when it folds":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Limiter");
+      await library.getByRole("option").first().dblclick();
+      const slot = page.locator("[data-slot=device-chain-slot]").first();
+      await slot.waitFor({ timeout: 5000 });
+      const square = slot.locator("button[aria-pressed]").first();
+      const read = async () => ({
+        box: await square.boundingBox(),
+        radius: await square.evaluate((el) => getComputedStyle(el).borderRadius),
+      });
+      const unfolded = await read();
+      await slot.getByRole("button", { name: /^Fold / }).click();
+      await slot.locator("[data-slot=device-chain-strip]").waitFor();
+      const folded = await read();
+      assert(
+        JSON.stringify(folded) === JSON.stringify(unfolded),
+        `the square goes from ${JSON.stringify(unfolded)} to ${JSON.stringify(folded)}`
+      );
+    },
   "DEV-010: a rack's chain has no scroll of its own, and the strip that ends the track's chain stays at the right":
     async (browser) => {
       const page = await open(browser);

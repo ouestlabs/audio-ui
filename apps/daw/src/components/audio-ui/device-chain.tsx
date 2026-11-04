@@ -577,11 +577,11 @@ function DeviceChainSlot({
 
   const content = folded ? (
     <div
-      className="rounded-xl [--device-radius:calc(var(--radius)+4px)] flex h-full w-8 flex-col items-center gap-1 border bg-card p-1 [&_button]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]"
+      className="rounded-xl [--device-radius:calc(var(--radius)+4px)] flex h-full w-8 flex-col items-center gap-1 border bg-card p-1 [&_button:not([aria-pressed])]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]"
       data-frame=""
       data-slot="device-chain-strip"
     >
-      <SlotGrip />
+      {/* The on square is where the title bar has it, and as it has it: folding doesn't move it. */}
       {enabled === undefined ? null : (
         <span className="flex size-6 shrink-0 items-center justify-center">
           <Toggle
@@ -594,6 +594,7 @@ function DeviceChainSlot({
           />
         </span>
       )}
+      <SlotGrip />
       <SlotFold />
       <span
         className="min-h-0 flex-1 rotate-180 truncate py-1 font-medium text-xs [writing-mode:vertical-rl]"
