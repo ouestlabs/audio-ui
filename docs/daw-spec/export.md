@@ -34,3 +34,7 @@ Test: apps/www/test/arrangement-bounce.test.ts "EXP-007"
 ### EXP-008 Progress and cancel
 The render shows its progress and can be cancelled, which leaves no file.
 Test: apps/daw/test/export.test.ts "EXP-008"
+
+### EXP-009 A render never starts ahead of its players
+A render starts only once every clip player has confirmed it heard of the play. Started before, a short render could end before the message arrived and come out silent (18 of 2,281 renders under load, none of 2,052 with this).
+Test: apps/www/test/browser/arrangement-engine.check.ts "EXP-009"
