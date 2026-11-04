@@ -1159,6 +1159,8 @@ export async function renderArrangement(
       ctx.resume();
     });
   }
+  // Every clip player has heard of the play: a render started before could end before it did, silent.
+  await engine.ready();
   const rendered = await ctx.startRendering();
   onProgress?.(1);
   engine.dispose();
