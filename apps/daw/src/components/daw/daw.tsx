@@ -37,7 +37,7 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
-import { useMidiInput } from "@/hooks/use-midi-input";
+
 import { useTimeSelection } from "@/hooks/use-time-selection";
 import { useTimelineCursor } from "@/hooks/use-timeline-cursor";
 import { useTimelineGrid } from "@/hooks/use-timeline-grid";
@@ -56,6 +56,7 @@ import {
   allTracks,
   trackOf,
 } from "@/lib/arrangement-state";
+import { isComputerKeyboardKey } from "@/lib/computer-keyboard";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { renderConsolidated } from "@/lib/daw/consolidate";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
@@ -85,7 +86,9 @@ import {
 import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
+import { RecordSettings } from "./record-settings";
 import { useTake } from "./use-take";
+import { useTakeInputs } from "./use-take-inputs";
 
 /** Neither panel scrolls: the timeline and the views scroll inside themselves, and a size rounded under the bar's height shows no scrollbar. The library styles a panel's inner div to scroll, and its `style` comes after. */
 const UNSCROLLED = { overflow: "hidden" } as const;
@@ -232,39 +235,13 @@ export function Daw({
     engine,
     onRecordings: keepTake,
   });
-  // An armed MIDI track plays what comes in on its instrument (REC-003), and a take keeps it.
-  const armedMidi = useMemo(
-    () =>
-      doc.tracks
-        .filter((track) => track.kind === "midi" && take.armed.has(track.id))
-        .map((track) => track.id),
-    [doc.tracks, take.armed]
-  );
-  const midiInput = useMidiInput({
-    onNoteOff: (note) => {
-      for (const track of armedMidi) {
-        engine.engine?.noteOff(track, note);
-      }
-      take.noteOff(note);
-    },
-    onNoteOn: (note, velocity) => {
-      for (const track of armedMidi) {
-        engine.engine?.noteOn(track, note, velocity);
-      }
-      take.noteOn(note, velocity);
-    },
-  });
-  const armTrack = useCallback(
-    (track: string, exclusive: boolean) => {
-      take.arm(track, exclusive);
-      const kind = doc.tracks.find((item) => item.id === track)?.kind;
-      // The browser asks for MIDI in the gesture that arms a MIDI track.
-      if (kind === "midi" && midiInput.isSupported && !midiInput.isConnected) {
-        midiInput.requestAccess();
-      }
-    },
-    [doc.tracks, midiInput, take]
-  );
+  const {
+    armTrack,
+    computerKeys,
+    computerKeysOn,
+    setComputerKeys,
+    transportPosition,
+  } = useTakeInputs({ doc, engine, take });
   const [selectedTrack, setSelectedTrack] = useState<string | null>(
     initial.tracks[0]?.id ?? null
   );
@@ -985,11 +962,24 @@ export function Daw({
     undo: () => dispatch({ type: "undo" }),
   };
   // One listener, before the focused control takes the key.
-  const keys = useRef({ commands, cursorKeys, timeSelection });
-  keys.current = { commands, cursorKeys, timeSelection };
+  const keys = useRef({
+    commands,
+    computerKeysOn,
+    cursorKeys,
+    timeSelection,
+  });
+  keys.current = { commands, computerKeysOn, cursorKeys, timeSelection };
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (typing(event.target)) {
+        return;
+      }
+      // The computer's keyboard plays notes: its keys are not shortcuts while it is on.
+      if (
+        keys.current.computerKeysOn &&
+        !(event.metaKey || event.ctrlKey || event.altKey) &&
+        isComputerKeyboardKey(event.code)
+      ) {
         return;
       }
       // Escape lets go of what is selected, and stays the key of what it was pressed in.
@@ -1135,9 +1125,24 @@ export function Daw({
           onUndo={commands.undo}
           onZoomRatioChange={view.setRatio}
           playing={engine.playing}
-          position={engine.position}
+          position={transportPosition}
           punch={take.punch}
           recording={take.recording}
+          recordSettings={
+            <RecordSettings
+              computerKeys={computerKeys}
+              inputDevice={take.inputDevice}
+              inputs={take.inputs}
+              monitorInput={take.monitorInput}
+              onComputerKeysChange={setComputerKeys}
+              onInputDeviceChange={take.setInputDevice}
+              onMonitorInputChange={take.setMonitorInput}
+              onOverdubChange={take.setOverdub}
+              onQuantizeChange={take.setQuantize}
+              overdub={take.overdub}
+              quantize={take.quantize}
+            />
+          }
           rhythm={rhythm}
           signatures={doc.signatures}
           tempo={doc.tempo}

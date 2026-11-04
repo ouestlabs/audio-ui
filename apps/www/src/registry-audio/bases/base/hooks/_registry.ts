@@ -263,6 +263,24 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["audio", "piano", "synth"],
+    description:
+      "The computer's keyboard as a keyboard of notes, as in a DAW: the middle row from A plays the white keys and the row above the black ones, by where the keys sit; Z and X move an octave, C and V the velocity.",
+    files: [
+      {
+        path: "hooks/use-computer-keyboard.ts",
+        type: "registry:hook",
+      },
+      {
+        path: "lib/computer-keyboard.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "use-computer-keyboard",
+    registryDependencies: [],
+    type: "registry:hook",
+  },
+  {
     categories: ["audio", "waveform"],
     dependencies: ["@audio-ui/core"],
     description:

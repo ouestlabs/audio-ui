@@ -158,6 +158,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `envelope-ramp` | `scheduleEnvelopeRamp`, `sliceEnvelope` from `@/lib/envelope-ramp` | An envelope's points as a gain ramp on any `AudioParam` |
 | `drum-synthesis` | `triggerKick`, `triggerSnare`, `triggerHihat` from `@/lib/drum-synthesis` | Drum hits from oscillators and noise, no samples: `triggerKick(ctx, destination, time, { tune, decay })`, the same for `triggerSnare` and `triggerHihat`, with `time` on the audio clock |
 | `use-midi-input` | `useMidiInput` from `@/hooks/use-midi-input` | The page's MIDI keyboard: note on with velocity, note off, pitch bend, `activeNotes` for a piano. Connect from a click |
+| `use-computer-keyboard` | `useComputerKeyboard` from `@/hooks/use-computer-keyboard` | The computer's keys as a keyboard of notes while `enabled`: the middle row from A plays white keys from middle C, the row above black ones (by `code`, so any layout); Z/X octave, C/V velocity; fields and Cmd/Ctrl/Alt keys are left alone. |
 | `use-microphone` | `useMicrophone` from `@/hooks/use-microphone` | The microphone as an `AnalyserNode`, raw, never played out. Start it from a click |
 | `use-audio-levels` | `useAudioLevels` from `@/hooks/use-audio-levels` | Live levels and peaks from one analyser per channel, for a `Meter`'s `source`. Memoize the array |
 | `use-spectrum` | `useSpectrum`, `useSpectrumPeaks` from `@/hooks/use-spectrum` | A live spectrum on a log axis, for a `SpectrumAnalyzer` or a `PlotTrace` |
