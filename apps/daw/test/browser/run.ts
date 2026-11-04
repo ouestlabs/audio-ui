@@ -2221,6 +2221,59 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.waitForTimeout(200);
       assert(page.url() === before, "the page went back");
     },
+  "CLP-020: zoomed in, a clip's waveform is solid and no wider than the view, a column per pixel":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, "[data-add-track]", "Long take", 20);
+      const canvas = page.locator("[data-slot=timeline-clip-waveform]").first();
+      await canvas.waitFor({ timeout: 30_000 });
+      await [1, 2, 3, 4, 5].reduce(async (done) => {
+        await done;
+        await page.keyboard.press("Meta+Equal");
+        await page.waitForTimeout(60);
+      }, Promise.resolve());
+      await page.waitForTimeout(400);
+      const read = await canvas.evaluate((element) => {
+        const drawn = element as HTMLCanvasElement;
+        const clip = drawn.parentElement?.getBoundingClientRect();
+        const view = drawn
+          .closest("[data-slot=timeline-viewport]")
+          ?.getBoundingClientRect();
+        const row = drawn
+          .getContext("2d")
+          ?.getImageData(0, drawn.height / 2, drawn.width, 1).data;
+        let empty = 0;
+        for (let column = 0; column < drawn.width; column += 1) {
+          if (!row?.[column * 4 + 3]) {
+            empty += 1;
+          }
+        }
+        return {
+          clip: clip?.width ?? 0,
+          columns: drawn.width,
+          empty,
+          scale: window.devicePixelRatio,
+          shown: drawn.getBoundingClientRect().width,
+          view: view?.width ?? 0,
+        };
+      });
+      assert(
+        read.clip > read.shown,
+        `a clip of ${read.clip} px draws ${read.shown} px`
+      );
+      assert(
+        read.shown <= read.view + 1024,
+        `${read.shown} px drawn in a view of ${read.view} px`
+      );
+      assert(
+        Math.abs(read.columns - read.shown * read.scale) < 2,
+        `${read.columns} columns over ${read.shown} px`
+      );
+      assert(
+        read.empty === 0,
+        `${read.empty} of ${read.columns} columns are gaps`
+      );
+    },
   "ARR-022: a track removed, the page loaded again: a new track takes an id of its own, and shows and goes alone":
     async (browser) => {
       const page = await open(browser);

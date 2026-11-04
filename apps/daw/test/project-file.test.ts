@@ -10,6 +10,7 @@ import {
   withFreshIds,
   writeProjectFile,
 } from "@/lib/daw/project-file";
+import { peakCountFor } from "@/lib/daw/recordings";
 
 const bytes = (text: string, extra: number[] = []) =>
   new Uint8Array([...text].map((char) => char.charCodeAt(0)).concat(extra))
@@ -157,5 +158,14 @@ describe("the project file", () => {
     expect(ids[0]).toBe(first.id);
     expect(healed.clips[0]?.track).toBe(first.id);
     expect(withUniqueTrackIds(doc)).toBe(doc);
+  });
+});
+
+describe("peaks", () => {
+  test("CLP-020: a recording keeps enough peaks for the closest zoom, however long it is", () => {
+    // The closest zoom is 240 px a second.
+    expect(peakCountFor(240) / 240).toBeGreaterThanOrEqual(240);
+    expect(peakCountFor(1)).toBe(4096);
+    expect(peakCountFor(36_000)).toBe(2 ** 20);
   });
 });
