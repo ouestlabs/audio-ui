@@ -151,8 +151,12 @@ async function expectChanged(
 
 /** Opens the mixer, where the main track's meter is. */
 async function showMixer(page: Page) {
-  await page.keyboard.press("Meta+Alt+KeyM");
-  await page.waitForSelector('[aria-label="Main level"]');
+  const level = page.locator('[aria-label="Main level"]');
+  // Its key folds it when it is open, and a page loaded again comes back on it.
+  if (await level.isHidden()) {
+    await page.keyboard.press("Meta+Alt+KeyM");
+  }
+  await level.waitFor();
 }
 
 /** The loudest the main track's meter reads, in dB, over `ms` of playback. */
