@@ -148,6 +148,15 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   );
 }
 
+/** Whether the device `id` on the track, wherever it is, is an instrument. */
+function instrumentHeld(owner: ArrangementTrack, id: string) {
+  const devices = owner.devices ?? [];
+  return [
+    ...devices,
+    ...devices.flatMap((item) => (item.rack ? rackDevices(item.rack) : [])),
+  ].some((item) => item.id === id && item.instrument === true);
+}
+
 /** A chain of devices, the track's or a rack's: devices dropped from the library go where they land, and move along it. */
 function Chain({
   className,
@@ -198,12 +207,26 @@ function Chain({
     (id: string) => dispatch({ id, track, type: "remove-device" }),
     [dispatch, track]
   );
+  // A device of the track, from another of its chains. An effect rack takes no instrument; the state refuses the rest.
+  const receive = useCallback(
+    (id: string, index: number) =>
+      dispatch({ chain: along, id, index, track, type: "carry-device" }),
+    [along, dispatch, track]
+  );
+  const { owner } = chain;
+  const noInstruments = place !== undefined && !place.instruments;
+  const canReceive = useCallback(
+    (id: string) => !(noInstruments && instrumentHeld(owner, id)),
+    [noInstruments, owner]
+  );
   return (
     <DeviceChain
+      canReceive={canReceive}
       className={className}
       flat
       onAdd={add}
       onMove={move}
+      onReceive={receive}
       onRemove={remove}
       order={order}
     >
@@ -653,8 +676,8 @@ export function DeviceView({
       ) : null}
     </DropdownMenuContent>
   );
-  // An empty track's whole view takes a drop; once it has devices, a narrow strip ends the chain,
-  // and stays at the view's right edge when the devices go past it, its line on the last device's.
+  // An empty track's whole view takes a drop; once it has devices, a narrow strip stays at the view's right edge,
+  // however few or many there are, its line drawn over the last device's when they meet.
   const end =
     devices.length === 0 ? (
       <div className="flex flex-1 flex-col items-center justify-center gap-1 p-6 text-center">
@@ -678,7 +701,7 @@ export function DeviceView({
         </p>
       </div>
     ) : (
-      <div className="sticky end-0 z-10 -ms-px flex w-10 shrink-0 flex-col items-center gap-1 border-s bg-background py-2">
+      <div className="sticky end-0 z-10 ms-auto flex w-10 shrink-0 flex-col items-center gap-1 bg-background py-2 shadow-[-1px_0_0_0_var(--border)]">
         <Button
           aria-label="Open the library"
           onClick={onOpenLibrary}

@@ -3,10 +3,7 @@
 import type { ComponentProps, Ref } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
-import type {
-  TrackDrop,
-  TrackGhost,
-} from "@/hooks/use-track-reorder";
+import type { TrackGhost } from "@/hooks/use-track-reorder";
 
 /**
  * The grip a track is moved by, down the left edge of its header: give it
@@ -93,18 +90,4 @@ function TrackReorderGhost({
   );
 }
 
-/** The classes of a track's row while a track is dragged: the dragged one faded where it was, a line at the gap it would land in. */
-function trackReorderClass(
-  reorder: { draggingId: string | null; drop: TrackDrop | null },
-  id: string
-) {
-  return cn(
-    reorder.draggingId === id && "opacity-50",
-    reorder.drop?.id === id &&
-      (reorder.drop.edge === "top"
-        ? "shadow-[inset_0_2px_0_0_var(--primary)]"
-        : "shadow-[inset_0_-2px_0_0_var(--primary)]")
-  );
-}
-
-export { TrackGrip, TrackReorderGhost, trackReorderClass };
+export { TrackGrip, TrackReorderGhost };

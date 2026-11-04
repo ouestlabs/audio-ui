@@ -1,3 +1,4 @@
+import { ClipIcon, FadersIcon, KnobIcon } from "@audio-ui/icons/react";
 import { CaretDownIcon, CaretRightIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback } from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -14,12 +15,15 @@ export function PanelTabs({ clipAvailable }: { clipAvailable: boolean }) {
         disabled={!clipAvailable}
         value="clip"
       >
+        <ClipIcon aria-hidden="true" className="size-3.5" weight="fill" />
         Clip
       </TabsTrigger>
       <TabsTrigger className="px-2 text-xs" value="devices">
+        <KnobIcon aria-hidden="true" className="size-3.5" weight="fill" />
         Devices
       </TabsTrigger>
       <TabsTrigger className="px-2 text-xs" value="mixer">
+        <FadersIcon aria-hidden="true" className="size-3.5" weight="fill" />
         Mixer
       </TabsTrigger>
     </TabsList>

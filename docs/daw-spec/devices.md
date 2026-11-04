@@ -17,8 +17,8 @@ Status: partial: an instrument picked while an audio track is selected makes a M
 Test: apps/daw/test/devices.test.ts "DEV-003"; apps/daw/test/browser/run.ts "DEV-003"
 
 ### DEV-004 Moving and removing
-A device is moved by dragging its title bar and removed with Backspace or Delete when selected. Each change is one step of undo.
-Test: apps/www/test/arrangement-state.test.ts "DEV-004"
+A device is moved by dragging its title bar: the others slide aside for it, a copy follows the pointer and settles into the gap, and Escape puts it back. Dragged anywhere over a rack it goes in, and out of one the same way, keeping its automation. A device from the library drops the same way. The chain that would take it lights up, with a line where it lands, its end included; a rack does not go inside itself, and only an instrument rack takes an instrument. It is removed with Backspace or Delete when selected. Each change is one step of undo.
+Test: apps/www/test/arrangement-state.test.ts "DEV-004"; apps/www/test/registry-audio/base/lib/arrangement-racks.test.ts "DEV-004"; apps/daw/test/browser/run.ts "DEV-004"
 
 ### DEV-005 Bypass
 A device switched off passes its input unchanged to the frame, and keeps the latency its settings declare (MIX-012).
@@ -39,7 +39,7 @@ Test: apps/daw/test/devices.test.ts "DEV-008"
 ### DEV-010 Racks
 A rack is a device that holds chains of devices side by side: the sound goes into every chain, through its devices in series, and the chains are summed. Each chain has its volume, pan, switch and solo, as a track does; a soloed chain silences the others. The effects picked on a chain are grouped into a rack, one chain of them, where the first was; a rack can also come from the library with one empty chain, and chains are added and removed. A device inside a rack is changed, switched off, moved and removed as on a track; a rack can hold racks. A drag of a chain's fader or of a macro is one step of undo.
 Test: apps/www/test/registry-audio/base/lib/arrangement-racks.test.ts "DEV-010"; apps/www/test/browser/arrangement-engine.check.ts "DEV-010"; apps/daw/test/browser/run.ts "DEV-010 and DEV-012"; apps/daw/test/browser/run.ts "DEV-010: a rack's chain"
-In the DAW: Add a rack, at the end of the chain, puts one there; a device dragged from the library into a chain of it goes there; the macros show from the Macros switch of its title bar and map from their menu, to the whole travel of the parameter. The devices lie flat in the device view, a hairline between each, the inside of a rack too. A track with no devices shows its whole view as the place to drop one, with links to the library and the racks; once it has devices, a narrow strip at the end of the chain opens the library and adds a rack. That strip stays at the right edge of the view when the devices go past it. A rack's chain has no scroll of its own: the rack is as wide as its devices, and the wheel over it moves the track's chain.
+In the DAW: Add a rack, at the end of the chain, puts one there; a device dragged from the library into a chain of it goes there; the macros show from the Macros switch of its title bar and map from their menu, to the whole travel of the parameter. The devices lie flat in the device view, a hairline between each, the inside of a rack too. A track with no devices shows its whole view as the place to drop one, with links to the library and the racks; once it has devices, a narrow strip at the right edge of the view, however few or many there are, opens the library and adds a rack. A rack's chain has no scroll of its own: the rack is as wide as its devices, and the wheel over it moves the track's chain.
 
 ### DEV-011 A rack's delay
 Chains that delay the sound differently meet on the same frame: each waits for the slowest. The rack delays the track by its slowest chain, which the track's delay compensation counts.

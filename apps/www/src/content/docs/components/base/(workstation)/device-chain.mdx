@@ -222,7 +222,8 @@ A device can be a rack: chains of devices side by side, summed, with eight macro
 ## Interaction
 
 <KeyTable title="Chain">
-<KeyRow gesture={"Drag a device by its header or its grip"}>Moves it. A line shows where it lands, and the row scrolls near its edges.</KeyRow>
+<KeyRow gesture={"Drag a device by its header or its grip"}>Moves it. The others slide aside for it, it settles into the gap, and the row scrolls near its edges. `Escape` puts it back. With `onReceive`, a device goes in or out of a rack's chain the same way.</KeyRow>
+<KeyRow gesture={"Hold a device over a chain"}>The chain that would take it lights up, with a line where it lands, its end included. Anywhere over a rack is into the rack: its chain lights up, from its title bar and its list of chains too.</KeyRow>
 <KeyRow gesture={"`ArrowLeft` / `ArrowRight` on the grip"}>Move the device a place.</KeyRow>
 <KeyRow gesture={"`Delete` / `Backspace` on the grip"}>Remove the device.</KeyRow>
 <KeyRow gesture={"Right-click a device"}>Move it left or right, or remove it.</KeyRow>
@@ -249,6 +250,8 @@ Each slot is a group named after its device, and its grip is a button, "Move Com
 <TypeRow name={"order"} type={"readonly string[]"}>The ids of the slots, in the order the sound goes through them.</TypeRow>
 <TypeRow name={"onMove"} type={"(id: string, index: number) => void"}>A slot was moved to `index`, counted once it has left its place. Leave it out and the slots stay where they are.</TypeRow>
 <TypeRow name={"onRemove"} type={"(id: string) => void"}>A slot was removed. Leave it out and no slot can be.</TypeRow>
+<TypeRow name={"onReceive"} type={"(id: string, index: number) => void"}>A device was dragged here from another chain around or inside this one, such as a rack's: its slot's id, and the index it goes in. Leave it out and none can come.</TypeRow>
+<TypeRow name={"canReceive"} type={"(id: string) => boolean"}>Whether a device of another chain can come here, by its slot's id. Every one by default.</TypeRow>
 <TypeRow name={"onAdd"} type={"(device: string, index: number) => void"}>A device was dropped on the chain from a library: its id, and the index it goes in. Leave it out and nothing can be dropped.</TypeRow>
 <TypeRow name={"flat"} type={"boolean"} default={"false"}>Lays the devices flat on the surface around them, a hairline between each and the next, instead of as cards: as a workstation's device view docks them. Each fills the chain's height; one taller than the chain keeps its own, and the chain scrolls to it.</TypeRow>
 </TypeTable>

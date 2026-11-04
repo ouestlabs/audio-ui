@@ -416,7 +416,6 @@ A track's header is `TimelineTrackControls`, from the timeline: its name, gain, 
 import {
   TrackGrip,
   TrackReorderGhost,
-  trackReorderClass,
 } from "@/components/audio-ui/track-grip";
 import { useTrackReorder } from "@/hooks/use-track-reorder";
 
@@ -425,7 +424,7 @@ const reorder = useTrackReorder({
   order: tracks.map((track) => track.id),
 });
 
-<TimelineTrack className={trackReorderClass(reorder, track.id)}>
+<TimelineTrack>
   <TimelineTrackHeader>
     <TrackGrip
       dragging={reorder.draggingId === track.id}
@@ -443,7 +442,7 @@ const reorder = useTrackReorder({
 />;
 ```
 
-The grip sits in its track's row, inside the `Timeline`. While a track is dragged, `draggingId` is the track and `drop` (`{ id, edge }`) is the edge of the row it would land on: `trackReorderClass` fades the track where it was and draws a line at that edge. `ghost` is the box of its header, and `TrackReorderGhost` draws the copy under the pointer, fixed, which the drag moves without a render. The view scrolls when the pointer nears its top or bottom edge. The grip, the copy and the line ship with the hook, in `components/audio-ui/track-grip`.
+The grip sits in its track's row, inside the `Timeline`. While a track is dragged, `draggingId` is the track, and the other rows slide aside for it. `ghost` is the box of its header, and `TrackReorderGhost` draws the copy under the pointer, fixed, which the drag moves without a render and settles into the gap. The view scrolls when the pointer nears its top or bottom edge, and `Escape` puts the track back. With `blockOf`, the tracks of a group move with it. The grip and the copy ship with the hook, in `components/audio-ui/track-grip`.
 
 ### Groups
 
@@ -982,11 +981,10 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"order"} type={"string[]"}>The tracks' ids, top to bottom.</TypeRow>
 <TypeRow name={"onMove"} type={"(id, index) => void"}>A track was dropped at `index`.</TypeRow>
 <TypeRow name={"gripProps(id)"} type={"props"}>For a track's grip: its pointer and key handlers.</TypeRow>
-<TypeRow name={"draggingId, drop"} type={"string | null, { id, edge } | null"}>The track dragged, and where it would land.</TypeRow>
+<TypeRow name={"draggingId"} type={"string | null"}>The track dragged.</TypeRow>
 <TypeRow name={"ghost, ghostRef"} type={"{ id, top, left, width, height } | null, Ref"}>The copy to draw under the pointer, and the ref it takes.</TypeRow>
 <TypeRow name={"TrackGrip"} type={"dragging, trackName, ...gripProps(id)"}>The grip, down the left edge of a track's header.</TypeRow>
 <TypeRow name={"TrackReorderGhost"} type={"ghost, ghostRef, trackName"}>The copy of the dragged track's header under the pointer.</TypeRow>
-<TypeRow name={"trackReorderClass(reorder, id)"} type={"string"}>A row's classes while a track is dragged: faded where it was, a line where it would land.</TypeRow>
 </TypeTable>
 
 ### TimelineLocator and TimelineSignature

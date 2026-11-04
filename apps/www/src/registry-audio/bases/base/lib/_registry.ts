@@ -1207,6 +1207,19 @@ export const lib: RegistryItem[] = [
     registryDependencies: ["@audio-ui/audio-decode"],
     type: "registry:lib",
   },
+  {
+    categories: ["lib", "audio"],
+    description:
+      "The gesture of reordering a row by dragging one of its items: the others slide aside, a copy follows the pointer and settles into the gap, the view scrolls at its edges. No render while it moves.",
+    files: [
+      {
+        path: "lib/sortable-drag.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "sortable-drag",
+    type: "registry:lib",
+  },
   ...movedToCore.map(
     ([name, entry]): RegistryItem => ({
       dependencies: ["@audio-ui/core"],

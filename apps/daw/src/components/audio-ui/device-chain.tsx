@@ -10,10 +10,12 @@ import {
   type RefObject,
   use,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { flushSync } from "react-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +27,7 @@ import {
   ContextMenuTrigger,
 } from "@/components/ui/context-menu";
 import { Toggle } from "@/components/ui/toggle";
+import { startSortableDrag } from "@/lib/sortable-drag";
 import { XIcon, CaretLeftIcon } from "@phosphor-icons/react";
 
 /** The type a dragged device carries, with its id as the data: what a library sets and the chain takes. */
@@ -79,28 +82,98 @@ function useSlot() {
   return context;
 }
 
-/** How far to scroll so a pointer held near the start or end edge of a view keeps it going; 0 away from the edges. */
-function edgeScrollStep(x: number, left: number, right: number): number {
-  if (x < left + 48) {
-    return -Math.min(24, Math.ceil((left + 48 - x) / 3));
-  }
-  if (x > right - 48) {
-    return Math.min(24, Math.ceil((x - right + 48) / 3));
-  }
-  return 0;
+const CHAIN = '[data-slot="device-chain"]';
+
+/** A chain's own slots, in the order they are drawn: a rack's chain inside a slot has slots of its own. */
+function slotsOf(root: HTMLElement): HTMLElement[] {
+  return Array.from(
+    root.querySelectorAll<HTMLElement>('[data-slot="device-chain-slot"]')
+  ).filter((slot) => slot.closest(CHAIN) === root);
 }
 
 /** The middle of each slot across the view, in the order they are drawn. */
 function slotMiddles(root: HTMLElement): number[] {
-  // Its own slots only: a rack's chain inside a slot has slots of its own.
-  return Array.from(
-    root.querySelectorAll<HTMLElement>('[data-slot="device-chain-slot"]')
-  )
-    .filter((slot) => slot.closest('[data-slot="device-chain"]') === root)
-    .map((slot) => {
-      const box = slot.getBoundingClientRect();
-      return (box.left + box.right) / 2;
-    });
+  return slotsOf(root).map((slot) => {
+    const box = slot.getBoundingClientRect();
+    return (box.left + box.right) / 2;
+  });
+}
+
+/**
+ * The chain a device under `element` goes to: the one it is in, and anywhere
+ * on a slot that holds a chain of its own, such as a rack's title bar or its
+ * list of chains, that one: over a rack is into the rack.
+ */
+function chainUnder(element: Element | null) {
+  const over = element?.closest(CHAIN) ?? null;
+  const inside = element
+    ?.closest('[data-slot="device-chain-slot"]')
+    ?.querySelector(CHAIN);
+  return inside && over?.contains(inside) ? inside : over;
+}
+
+/** Whatever the chains around `element` mark goes: the innermost has the drop. */
+function clearAround(element: Element) {
+  for (
+    let around = element.parentElement?.closest(CHAIN);
+    around;
+    around = around.parentElement?.closest(CHAIN)
+  ) {
+    chainTargets.get(around)?.mark(null);
+  }
+}
+
+/** What a chain tells a drag from another chain beside or inside it. */
+interface ChainTarget {
+  accepts: (id: string) => boolean;
+  add: (device: string, index: number) => void;
+  adds: () => boolean;
+  gapAt: (x: number) => number;
+  mark: (index: number | null) => void;
+  receive: (id: string, index: number) => void;
+  scroller: HTMLElement | null;
+}
+
+const chainTargets = new WeakMap<Element, ChainTarget>();
+
+/** The chain under the pointer that a device of `view` can go to, if it is another. */
+function targetAt(
+  x: number,
+  y: number,
+  view: HTMLElement,
+  id: string,
+  scroller: HTMLElement
+) {
+  const over = chainUnder(document.elementFromPoint(x, y));
+  const target = over && over !== view ? chainTargets.get(over) : undefined;
+  return target?.scroller === scroller && target.accepts(id) ? target : null;
+}
+
+/** The copy of a slot that follows the pointer, fixed where the slot is, and drawn with what its canvases hold. */
+function liftedCopy(slot: HTMLElement, view: HTMLElement) {
+  const box = slot.getBoundingClientRect();
+  const copy = slot.cloneNode(true) as HTMLElement;
+  const canvases = slot.querySelectorAll("canvas");
+  for (const [index, canvas] of copy.querySelectorAll("canvas").entries()) {
+    const source = canvases[index];
+    if (source) {
+      canvas.getContext("2d")?.drawImage(source, 0, 0);
+    }
+  }
+  copy.dataset.slot = "device-chain-ghost";
+  copy.inert = true;
+  copy.setAttribute("aria-hidden", "true");
+  copy.classList.add("pointer-events-none", "z-50", "bg-card", "shadow-lg");
+  Object.assign(copy.style, {
+    height: `${box.height}px`,
+    left: `${box.left}px`,
+    margin: "0",
+    position: "fixed",
+    top: `${box.top}px`,
+    width: `${box.width}px`,
+  });
+  view.insertAdjacentElement("beforeend", copy);
+  return copy;
 }
 
 /** The gap a pointer at `x` points at: before the first slot whose middle is past it, or the end. */
@@ -123,12 +196,16 @@ function gripOf(root: HTMLElement | null, id: string | undefined) {
 }
 
 interface DeviceChainProps extends ComponentProps<"div"> {
+  /** Whether a device of another chain can come here, by its slot's id. @default every one */
+  canReceive?: (id: string) => boolean;
   /** Lays the devices flat on the surface around them, a hairline between each and the next, instead of as cards: as a workstation's device view docks them. Each fills the chain's height; one taller than the chain keeps its own, and the chain scrolls to it. */
   flat?: boolean;
   /** A device was dropped on the chain from a library: its id, and the index it goes in. Leave it out and nothing can be dropped. */
   onAdd?: (device: string, index: number) => void;
   /** A slot was moved to `index`, counted once it has left its place. Leave it out and the slots stay where they are. */
   onMove?: (id: string, index: number) => void;
+  /** A device was dragged here from another chain around or inside this one, such as a rack's: its slot's id, and the index it goes in. Leave it out and none can come. */
+  onReceive?: (id: string, index: number) => void;
   /** A slot was removed. Leave it out and no slot can be. */
   onRemove?: (id: string) => void;
   /** The ids of the slots, in the order the sound goes through them. */
@@ -145,11 +222,13 @@ interface DeviceChainProps extends ComponentProps<"div"> {
  * devices, and the outermost chain scrolls them all.
  */
 function DeviceChain({
+  canReceive,
   children,
   className,
   flat = false,
   onAdd,
   onMove,
+  onReceive,
   onRemove,
   order,
   ...props
@@ -160,8 +239,15 @@ function DeviceChain({
   const [dragging, setDragging] = useState<string | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [message, setMessage] = useState("");
-  const live = useRef({ onAdd, onMove, onRemove, order });
-  live.current = { onAdd, onMove, onRemove, order };
+  const live = useRef({
+    canReceive,
+    onAdd,
+    onMove,
+    onReceive,
+    onRemove,
+    order,
+  });
+  live.current = { canReceive, onAdd, onMove, onReceive, onRemove, order };
 
   const move = useCallback((id: string, index: number, title: string) => {
     const { onMove: apply, order: ids } = live.current;
@@ -217,90 +303,140 @@ function DeviceChain({
         return;
       }
       event.preventDefault();
-      const middles = slotMiddles(view);
-      const startX = event.clientX;
-      const startScroll = scrolling.scrollLeft;
-      let lastX = startX;
-      let gap = from;
-      let frame = 0;
-
-      // Once a frame while the slot is dragged, whether or not the pointer moved: near an edge of the row, it
-      // scrolls; the slot follows the pointer, and the slots are where they were at the press, moved by the scroll.
-      const tick = () => {
-        const box = scrolling.getBoundingClientRect();
-        scrolling.scrollLeft += edgeScrollStep(lastX, box.left, box.right);
-        const shift = scrolling.scrollLeft - startScroll;
-        slot.style.transform = `translateX(${lastX - startX + shift}px)`;
-        const next = gapAt(
-          middles.map((middle) => middle - shift),
-          lastX
-        );
-        if (next !== gap) {
-          gap = next;
-          // Its own place and the one after it leave the chain as it is: no line.
-          setDropIndex(next === from || next === from + 1 ? null : next);
-        }
-        frame = requestAnimationFrame(tick);
-      };
-      const follow = (moveEvent: globalThis.PointerEvent) => {
-        lastX = moveEvent.clientX;
-      };
-      const finish = (commit: boolean) => {
-        window.removeEventListener("pointermove", follow);
-        window.removeEventListener("pointerup", release);
-        window.removeEventListener("pointercancel", cancel);
-        cancelAnimationFrame(frame);
-        slot.style.transform = "";
-        // The gap the slot lands in; one less once the slot has left a place before it.
-        const landed = gap > from ? gap - 1 : gap;
-        if (commit && landed !== from) {
-          live.current.onMove?.(id, landed);
-        }
-        setDragging(null);
-        setDropIndex(null);
-      };
-      const release = () => finish(true);
-      const cancel = () => finish(false);
-
-      setDragging(id);
-      window.addEventListener("pointermove", follow);
-      window.addEventListener("pointerup", release);
-      window.addEventListener("pointercancel", cancel);
-      frame = requestAnimationFrame(tick);
+      let ghost: HTMLElement | null = null;
+      let target: ChainTarget | null = null;
+      let targetGap = 0;
+      startSortableDrag({
+        axis: "x",
+        // Over another chain, the gap there takes the device, and the row here closes up behind it.
+        elsewhere: (x, y) => {
+          const next = targetAt(x, y, view, id, scrolling);
+          if (target !== next) {
+            target?.mark(null);
+          }
+          target = next;
+          // See-through over a chain, so what lights up there and the line show under it.
+          if (ghost) {
+            ghost.style.opacity = next ? "0.5" : "";
+          }
+          if (next) {
+            targetGap = next.gapAt(x);
+            next.mark(targetGap);
+          }
+          return next !== null;
+        },
+        from,
+        ghost: () => ghost,
+        items: slotsOf(view),
+        // In the frame the copy goes, the new order is there: one without either would jump.
+        onEnd: (landed, released) =>
+          flushSync(() => {
+            ghost?.remove();
+            setDragging(null);
+            target?.mark(null);
+            if (released && target) {
+              target.receive(id, targetGap);
+            } else if (landed !== null) {
+              live.current.onMove?.(id, landed);
+            }
+          }),
+        onLift: () => {
+          ghost = liftedCopy(slot, view);
+          setDragging(id);
+        },
+        scroller: scrolling,
+        x: event.clientX,
+        y: event.clientY,
+      });
     },
     [scroller]
   );
 
-  const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
-    if (!(live.current.onAdd && takesDevice(event))) {
+  // Another chain's drag finds this one through its element.
+  useEffect(() => {
+    const element = root.current;
+    if (!element) {
       return;
     }
-    // The innermost chain takes it: one inside a slot has the drop, not the chain around it.
-    event.preventDefault();
-    event.stopPropagation();
-    event.dataTransfer.dropEffect = "copy";
-    setDropIndex(gapAt(slotMiddles(event.currentTarget), event.clientX));
-  }, []);
+    chainTargets.set(element, {
+      accepts: (id) =>
+        live.current.onReceive !== undefined &&
+        (live.current.canReceive?.(id) ?? true),
+      add: (device, index) => live.current.onAdd?.(device, index),
+      adds: () => live.current.onAdd !== undefined,
+      gapAt: (x) => gapAt(slotMiddles(element), x),
+      mark: setDropIndex,
+      receive: (id, index) => live.current.onReceive?.(id, index),
+      scroller: scroller.current,
+    });
+    return () => {
+      chainTargets.delete(element);
+    };
+  }, [scroller]);
 
-  const handleDragLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+  // Over a rack but outside its chain, the rack's chain has the drop: the chain it is marked on, for as long as it lasts.
+  const lent = useRef<ChainTarget | null>(null);
+  const lendTo = useCallback((next: ChainTarget | null) => {
+    if (lent.current !== next) {
+      lent.current?.mark(null);
+    }
+    lent.current = next;
+  }, []);
+  const handleDragOver = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (!(live.current.onAdd && takesDevice(event))) {
+        return;
+      }
+      // The innermost chain takes it: one inside a slot has the drop, not the chain around it.
+      event.preventDefault();
+      event.stopPropagation();
+      event.dataTransfer.dropEffect = "copy";
+      const own = event.currentTarget;
+      clearAround(own);
+      const under = chainUnder(event.target as Element);
+      const inner = under && under !== own ? chainTargets.get(under) : null;
+      if (inner?.adds()) {
+        setDropIndex(null);
+        lendTo(inner);
+        inner.mark(inner.gapAt(event.clientX));
+        return;
+      }
+      lendTo(null);
+      setDropIndex(gapAt(slotMiddles(own), event.clientX));
+    },
+    [lendTo]
+  );
+
+  const handleDragLeave = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
+        lendTo(null);
+        setDropIndex(null);
+      }
+    },
+    [lendTo]
+  );
+
+  const handleDrop = useCallback(
+    (event: DragEvent<HTMLDivElement>) => {
+      const add = live.current.onAdd;
+      if (!(add && takesDevice(event))) {
+        return;
+      }
+      event.preventDefault();
+      event.stopPropagation();
       setDropIndex(null);
-    }
-  }, []);
-
-  const handleDrop = useCallback((event: DragEvent<HTMLDivElement>) => {
-    const add = live.current.onAdd;
-    if (!(add && takesDevice(event))) {
-      return;
-    }
-    event.preventDefault();
-    event.stopPropagation();
-    setDropIndex(null);
-    const device = event.dataTransfer.getData(DEVICE_DRAG_TYPE);
-    if (device) {
-      add(device, gapAt(slotMiddles(event.currentTarget), event.clientX));
-    }
-  }, []);
+      const inner = lent.current;
+      lendTo(null);
+      const device = event.dataTransfer.getData(DEVICE_DRAG_TYPE);
+      if (device && inner) {
+        inner.add(device, inner.gapAt(event.clientX));
+      } else if (device) {
+        add(device, gapAt(slotMiddles(event.currentTarget), event.clientX));
+      }
+    },
+    [lendTo]
+  );
 
   const context = useMemo<DeviceChainContextValue>(
     () => ({
@@ -334,9 +470,12 @@ function DeviceChain({
           "flex min-h-0 min-w-0 items-stretch",
           !around && "overflow-x-auto overscroll-x-contain",
           flat ? "gap-0" : "gap-2 p-2",
+          // What a device let go now goes into.
+          "data-over:bg-primary/10 data-over:shadow-[inset_0_0_0_2px_var(--primary)]",
           className
         )}
         data-flat={flat ? "" : undefined}
+        data-over={dropIndex === null ? undefined : ""}
         data-slot="device-chain"
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -556,7 +695,7 @@ interface DeviceChainSlotProps extends Omit<ComponentProps<"div">, "title"> {
 /**
  * One device of the chain, drawn by its own panel: put `DeviceChainSlotControls`
  * at the end of the panel's header. Drag the device by its header or by the
- * grip, or press Left or Right on the grip; Delete removes it, and a
+ * grip: the others slide aside, or press Left or Right on the grip; Delete removes it, and a
  * right-click gives the same commands. Folded, the slot is a narrow strip with
  * its on and off square at the top, the device's name down it, and the same
  * controls at the bottom; a click anywhere else on the strip unfolds it.
@@ -655,21 +794,23 @@ function DeviceChainSlot({
     "aria-label": title,
     className: cn(
       "relative flex shrink-0 flex-col",
-      // The line a dragged device would land on, in the middle of the gap before this slot.
-      "before:absolute before:inset-y-0 before:hidden before:w-0.5 before:rounded-full before:bg-primary data-drop:before:block",
+      // The line a device would land on, in the middle of the gap before this slot; or after the last, for the end of the chain.
+      "before:absolute before:inset-y-0 before:z-10 before:hidden before:w-1 before:rounded-full before:bg-primary data-drop:before:block",
+      "after:absolute after:inset-y-0 after:z-10 after:hidden after:w-1 after:rounded-full after:bg-primary data-drop-end:after:block",
       // Flat, the device's card gives way to the surface, and a hairline ends it, however deep its frame sits (a panel
       // may wrap it, a rack holds more). It fills the chain's height, and a device taller than the chain keeps its height:
       // the chain scrolls to it.
       flat
-        ? "border-e before:inset-s-[-1px] *:h-auto *:min-h-full **:data-frame:rounded-none **:data-frame:border-0 **:data-frame:bg-transparent **:data-[slot=rack-chain]:rounded-none"
-        : "before:inset-s-[-5px]",
-      "data-dragging:z-10 data-dragging:shadow-lg",
+        ? "border-e before:inset-s-[-2px] after:inset-e-[-2px] *:h-auto *:min-h-full **:data-frame:rounded-none **:data-frame:border-0 **:data-frame:bg-transparent **:data-[slot=rack-chain]:rounded-none"
+        : "before:inset-s-[-6px] after:inset-e-[-6px]",
       className,
       // Folded, it is as wide as its strip, whatever width the host gives the panel.
       folded && "w-auto"
     ),
     "data-dragging": dragging === value ? "" : undefined,
     "data-drop": dropIndex === index ? "" : undefined,
+    "data-drop-end":
+      dropIndex === order.length && index === order.length - 1 ? "" : undefined,
     "data-folded": folded ? "" : undefined,
     "data-slot": "device-chain-slot",
     onClick: folded ? handleStripClick : undefined,

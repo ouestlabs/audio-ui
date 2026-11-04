@@ -41,7 +41,7 @@ Status: partial: OBS-013 checks the reference's default.
 Test: apps/daw/test/project.test.ts "ARR-009"
 
 ### ARR-010 Moving a track
-A track moves up or down the arrangement by its grip, dragged or with Up and Down on it: a copy of its header follows the pointer, a line marks the gap it would land in, and the view scrolls at its edges. The return tracks stay under the tracks. One step of undo.
+A track moves up or down the arrangement by its grip, dragged or with Up and Down on it: a copy of its header follows the pointer, the other tracks slide aside for it, it settles into the gap, and the view scrolls at its edges. Escape puts it back. The return tracks stay under the tracks. One step of undo.
 Test: apps/daw/test/browser/run.ts "ARR-010"
 
 ### ARR-011 A track's height

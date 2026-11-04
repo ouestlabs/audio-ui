@@ -102,6 +102,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-track-reorder",
+    registryDependencies: ["@audio-ui/sortable-drag"],
     type: "registry:hook",
   },
   {
