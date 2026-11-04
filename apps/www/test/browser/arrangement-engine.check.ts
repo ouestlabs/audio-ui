@@ -1337,3 +1337,52 @@ check(
     );
   }
 );
+
+/** How many times a stretch of a channel rises through zero per second: a sine's pitch. */
+function pitchIn(data: Float32Array, from: number, to: number) {
+  let rises = 0;
+  for (let index = from + 1; index < to; index += 1) {
+    if ((data[index - 1] as number) < 0 && (data[index] as number) >= 0) {
+      rises += 1;
+    }
+  }
+  return (rises * RATE) / (to - from);
+}
+
+check(
+  "CLP-015: through the whole engine, Beats and Tones keep a stretched clip's pitch, where Repitch moves it",
+  async () => {
+    const data = Float32Array.from(
+      { length: RATE },
+      (_, index) => 0.5 * Math.sin((2 * Math.PI * 440 * index) / RATE)
+    );
+    const pitch = async (warpMode: "beats" | "repitch" | "tones") => {
+      const doc = arrangement({
+        clips: [
+          {
+            ...clip("a", "vox", 0, 2),
+            sourceLength: 1,
+            warp: [
+              { source: 0, target: 0 },
+              { source: 1, target: 2 },
+            ],
+            warpMode,
+          },
+        ],
+        tracks: [{ color: 0, id: "vox", name: "Vox" }],
+      });
+      const out = await render(
+        doc,
+        new Map([["take", { channels: [data, data], sampleRate: RATE }]]),
+        2
+      );
+      return pitchIn(out.getChannelData(0), 4800, 86_400);
+    };
+    const repitch = await pitch("repitch");
+    const beats = await pitch("beats");
+    const tones = await pitch("tones");
+    assert(Math.abs(repitch - 220) < 5, `Repitch plays at ${repitch} Hz`);
+    assert(Math.abs(tones - 440) < 5, `Tones plays at ${tones} Hz`);
+    assert(beats > 400 && beats < 480, `Beats plays at ${beats} Hz`);
+  }
+);

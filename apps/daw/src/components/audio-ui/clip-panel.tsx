@@ -1,5 +1,6 @@
 "use client";
 
+import type { WarpMode } from "@audio-ui/core/playback";
 import {
   addWarpMarker,
   moveWarpMarker,
@@ -63,6 +64,8 @@ export interface ClipSettings {
    * them, speed and pitch together, and the other times are the clip's.
    */
   warp: readonly WarpMarker[] | null;
+  /** How it plays at another speed than its recording's: its pitch with its speed in Repitch, kept in Beats and Tones. @default "repitch" */
+  warpMode?: WarpMode;
 }
 
 /**
@@ -331,6 +334,31 @@ function LoopBox({
   );
 }
 
+const WARP_MODES: readonly { label: string; mode: WarpMode }[] = [
+  { label: "Repitch", mode: "repitch" },
+  { label: "Beats", mode: "beats" },
+  { label: "Tones", mode: "tones" },
+];
+
+function WarpModeToggle({
+  label,
+  mode,
+  onPick,
+  pressed,
+}: {
+  label: string;
+  mode: WarpMode;
+  onPick: (mode: WarpMode) => void;
+  pressed: boolean;
+}) {
+  const pick = useCallback(() => onPick(mode), [mode, onPick]);
+  return (
+    <ClipToggle className="px-0" onClick={pick} pressed={pressed}>
+      {label}
+    </ClipToggle>
+  );
+}
+
 /** The Sample box: Warp, Reverse, Crop, the gain and the transpose, and the speed with ×2 and ÷2 while warped. */
 function SampleBox({
   cropped,
@@ -343,9 +371,11 @@ function SampleBox({
   onSlower,
   onTranspose,
   onWarp,
+  onWarpMode,
   rate,
   reversed,
   transpose,
+  warpMode,
 }: {
   cropped: boolean;
   gain: number;
@@ -357,10 +387,12 @@ function SampleBox({
   onSlower: () => void;
   onTranspose: (semitones: number) => void;
   onWarp: () => void;
+  onWarpMode: (mode: WarpMode) => void;
   /** The speed the warp plays at, or null when the source plays as recorded. */
   rate: number | null;
   reversed: boolean;
   transpose: number;
+  warpMode: WarpMode;
 }) {
   return (
     <ClipBox foldable id="audio:sample" title="Sample">
@@ -377,6 +409,21 @@ function SampleBox({
           </ClipToggle>
         ) : null}
       </div>
+      <div
+        aria-label="Warp mode"
+        className="grid grid-cols-3 gap-1"
+        role="group"
+      >
+        {WARP_MODES.map((item) => (
+          <WarpModeToggle
+            key={item.mode}
+            label={item.label}
+            mode={item.mode}
+            onPick={onWarpMode}
+            pressed={warpMode === item.mode}
+          />
+        ))}
+      </div>
       <ClipRow label="Gain">
         <ClipField
           format={formatGain}
@@ -390,6 +437,7 @@ function SampleBox({
       </ClipRow>
       <ClipRow label="Transp.">
         <ClipField
+          disabled={warpMode === "repitch"}
           format={formatTranspose}
           label="Transpose"
           onChange={onTranspose}
@@ -464,6 +512,7 @@ function ClipPanel({
     sourceLength,
     transpose,
     warp,
+    warpMode = "repitch",
   } = value;
   const meter = useMemo(() => ({ bar, beatsPerBar }), [bar, beatsPerBar]);
   // How long the source lasts on the clip: as recorded, or as its warp stretches it.
@@ -557,9 +606,15 @@ function ClipPanel({
                 { source: 0, target: 0 },
                 { source: sourceLength, target: sourceLength },
               ],
+              // A clip warped for the first time keeps its pitch.
+              warpMode: value.warpMode ?? "beats",
             }
       ),
-    [length, offset, setAndCommit, sourceLength, warp]
+    [length, offset, setAndCommit, sourceLength, value.warpMode, warp]
+  );
+  const setWarpMode = useCallback(
+    (next: WarpMode) => setAndCommit({ warpMode: next }),
+    [setAndCommit]
   );
   const setWarp = useCallback(
     (next: readonly WarpMarker[]) => set({ warp: next }),
@@ -677,9 +732,11 @@ function ClipPanel({
             onSlower={slower}
             onTranspose={setTranspose}
             onWarp={toggleWarp}
+            onWarpMode={setWarpMode}
             rate={warp ? warpRate(warp, offset) : null}
             reversed={reversed}
             transpose={transpose}
+            warpMode={warpMode}
           />
         </>
       }

@@ -964,6 +964,54 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "Delete on a fade took the clip away too"
       );
     },
+  "CLP-015: Warp in the clip panel keeps the pitch, in Beats, and the panel picks another mode; the clip still plays":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const modes = page.getByRole("group", { name: "Warp mode" });
+      await modes.waitFor({ timeout: 5000 });
+      const pressed = (name: string) =>
+        modes
+          .getByRole("button", { exact: true, name })
+          .getAttribute("aria-pressed");
+      assert(
+        (await pressed("Repitch")) === "true",
+        "a new clip starts in Repitch"
+      );
+      await page.getByRole("button", { exact: true, name: "Warp" }).click();
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector('[aria-label="Warp mode"]')
+            ?.querySelectorAll('[aria-pressed="true"]')[0]?.textContent ===
+          "Beats",
+        undefined,
+        { timeout: 5000 }
+      );
+      await modes.getByRole("button", { exact: true, name: "Tones" }).click();
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector('[aria-label="Warp mode"]')
+            ?.querySelectorAll('[aria-pressed="true"]')[0]?.textContent ===
+          "Tones",
+        undefined,
+        { timeout: 5000 }
+      );
+      await showMixer(page);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the clip in Tones plays at ${level} dB`);
+    },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {
       const page = await open(browser);

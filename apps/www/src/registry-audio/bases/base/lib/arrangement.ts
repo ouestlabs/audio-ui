@@ -1,7 +1,7 @@
 import type { ParameterValue } from "@audio-ui/core/device";
 import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
-import type { PlayedClip } from "@audio-ui/core/playback";
+import type { PlayedClip, WarpMode } from "@audio-ui/core/playback";
 import { unwarpedTime, type WarpMarker, warpedTime } from "@audio-ui/core/time";
 import type { ClipValue } from "@audio-ui/react";
 
@@ -57,6 +57,8 @@ export interface Arranged {
    * its source, its loop) are on the clip.
    */
   warp?: readonly WarpMarker[];
+  /** How it plays at another speed than its recording's: its pitch with its speed, or kept, in slices or in grains. @default "repitch" */
+  warpMode?: WarpMode;
 }
 
 /** What a track holds: recordings, or notes for an instrument to play. */

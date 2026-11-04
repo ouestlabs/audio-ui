@@ -4,7 +4,7 @@ import {
   type PlayedClip,
   type PlayedStretch,
 } from "./clip.ts";
-import { type RecordingStream, streamedSample } from "./stream.ts";
+import { type RecordingStream, slotOffset, streamedSample } from "./stream.ts";
 import {
   continuesFrom,
   type PlaybackState,
@@ -61,12 +61,34 @@ function streamSamplers(
   stream: RecordingStream,
   exact: boolean
 ): readonly [Sampler, Sampler] {
+  const { pageFrames, samples } = stream.pool;
   const of = (channel: number): Sampler => {
     const read = (index: number) => streamedSample(stream, channel, index);
     return exact
       ? read
       : (at) => {
           const index = Math.floor(at);
+          const page = Math.floor((index - 1) / pageFrames);
+          const slot = stream.directory[page] ?? -1;
+          // The four points on one page, as they nearly always are: found once.
+          if (
+            slot >= 0 &&
+            index - 1 >= 0 &&
+            index + 2 < stream.length &&
+            Math.floor((index + 2) / pageFrames) === page
+          ) {
+            const base =
+              slotOffset(stream.pool, slot, channel) +
+              index -
+              page * pageFrames;
+            return cubic(
+              samples[base - 1] as number,
+              samples[base] as number,
+              samples[base + 1] as number,
+              samples[base + 2] as number,
+              at - index
+            );
+          }
           return cubic(
             read(index - 1),
             read(index),
@@ -188,7 +210,8 @@ function lookAheadShare(clip: PlayedClip): number {
 
 /**
  * How far the grain `index` of `clip` moves to line up on the one before it:
- * where what they share matches best, worked out once, from the grain before
+ * where what they share matches best, read on whole frames (close enough to
+ * line up on, and a quarter of the reads), worked out once, from the grain before
  * it. A jump starts the chain again there, unmoved.
  */
 function alignedAt(
@@ -196,7 +219,7 @@ function alignedAt(
   stretch: PlayedStretch,
   index: number,
   locate: (read: number) => number,
-  sample: Sampler,
+  nearest: Sampler,
   step: number,
   rate: number
 ): number {
@@ -225,14 +248,14 @@ function alignedAt(
   const spacing = hop / COMPARE_POINTS;
   // They share the stretch before this grain's start, where it crosses in.
   for (let point = 0; point < COMPARE_POINTS; point += 1) {
-    comparing[point] = sample(before + point * spacing * step);
+    comparing[point] = nearest(before + point * spacing * step);
   }
   const score = (shift: number) => {
     let sum = 0;
     for (let point = 0; point < COMPARE_POINTS; point += 1) {
       sum +=
         (comparing[point] as number) *
-        sample(here + shift + (point * spacing - hop) * step);
+        nearest(here + shift + (point * spacing - hop) * step);
     }
     return sum;
   };
@@ -269,6 +292,7 @@ function renderStretchedClip(
   stretch: PlayedStretch,
   left: Sampler,
   right: Sampler,
+  nearest: Sampler,
   rate: number,
   sampleRate: number
 ) {
@@ -284,7 +308,7 @@ function renderStretchedClip(
   const startOf = (index: number) =>
     locate(index * hop) +
     (stretch.aligned
-      ? alignedAt(clip, stretch, index, locate, left, step, rate)
+      ? alignedAt(clip, stretch, index, locate, nearest, step, rate)
       : 0);
   const aheadAt = stretch.aligned
     ? lookAheadShare(clip) * hop
@@ -373,6 +397,7 @@ function renderClip(
       clip.stretch,
       (source) => interpolate(left, source),
       (source) => interpolate(right, source),
+      (source) => left[Math.round(source)] ?? 0,
       recording.sampleRate,
       sampleRate
     );
@@ -430,6 +455,7 @@ function renderStreamedClip(
       clip.stretch,
       left,
       right,
+      (source) => streamedSample(recording.stream, 0, Math.round(source)),
       recording.sampleRate,
       sampleRate
     );

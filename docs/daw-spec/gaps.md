@@ -141,6 +141,10 @@ Status: fixed (checked in Chromium in the DAW). `apps/lab` keeps its old copies 
 Twice in the browser checks, a track that should sound read -100 dB on the main meter: `DEV-010` (a take through a rack) and `DEV-014` (a pad held in an instrument rack), each once, each passing on the next run. An export's silence (`EXP-009`) cannot explain them: it only touches offline renders.
 Status: not reproduced in 34 plays made for it, 14 at low load and 10 under eight busy processes for the rack, 10 for the pad. The first came right after files were reinstalled on the dev server, so a page reloading mid-check is possible, not shown. A pad's note does stop when its panel has left the screen. To reopen if a track is ever heard silent outside a check.
 
+### G-031 Stretched clips cost the app far more than the renderer
+With 16 tracks of clips played 1.12 times slower than recorded (PRF-008), the audio thread of the app falls behind in every warp mode, Repitch included, while the same tracks not stretched hold at 26 % and the renderer alone, in Chrome, spends 0.4 to 0.7 ms of a 2.67 ms quantum on them. Found while measuring Tones: a stream's page is now looked up once per interpolated read and Tones lines its grains up on whole frames, which brought 8 tracks of Tones from 98 % to 34 %; 16 still overload.
+Status: open. Next: profile the worklet in the app (what the engine sends a stretched clip's track, how often its clips are set, the pages streamed ahead for a clip that reads slower than it plays).
+
 ## Fixed
 
 None yet.

@@ -11,6 +11,7 @@
 import type { ParameterValue } from "@audio-ui/core/device";
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
+import type { WarpMode } from "@audio-ui/core/playback";
 import type { Tempo } from "@audio-ui/core/time";
 import {
   type Arranged,
@@ -326,6 +327,7 @@ function writeAudioClip(
           element(
             "Audio",
             {
+              ...(clip.warpMode ? { algorithm: clip.warpMode } : {}),
               channels: recording.channels,
               duration: recording.length,
               id: `audio-${clip.id}`,
@@ -1005,6 +1007,21 @@ function readMidiClip(reading: Reading, basics: ClipBasics, notesEl: Element) {
   reading.clips.push({ ...basics, notes, sourceLength: end });
 }
 
+/**
+ * The warp mode of an `algorithm`, whose names each DAW picks for itself: ours
+ * come back as they went, and any other keeps the pitch, as stretching does.
+ * With none, the clip plays as a warp does by default.
+ */
+function warpModeOf(algorithm: string | null): { warpMode?: WarpMode } {
+  if (!algorithm) {
+    return {};
+  }
+  const name = algorithm.toLowerCase();
+  return {
+    warpMode: name === "repitch" || name === "tones" ? name : "beats",
+  };
+}
+
 /** An audio clip: a warp map that only shifts the recording is a start in it, any other is a warp. */
 function readAudioClip(
   reading: Reading,
@@ -1050,6 +1067,7 @@ function readAudioClip(
       source: point.content,
       target: point.time,
     })),
+    ...warpModeOf(audio.getAttribute("algorithm")),
   });
 }
 

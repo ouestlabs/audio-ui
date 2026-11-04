@@ -584,6 +584,7 @@ function ClipDock({
         reversed: Boolean(clip.reversed),
         sourceLength: clip.sourceLength,
         transpose: clip.transpose ?? 0,
+        warpMode: clip.warpMode,
         warp: clip.warp ?? null,
       }}
       values={peaks}
@@ -1242,6 +1243,7 @@ export default function BlockTimeline() {
           loop: next.loop ?? undefined,
           reversed: next.reversed,
           transpose: next.transpose,
+          warpMode: next.warpMode,
           warp: next.warp ?? undefined,
           value: {
             ...clip.value,

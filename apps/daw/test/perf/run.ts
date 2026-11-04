@@ -592,6 +592,39 @@ const measures: Record<string, (browser: Browser) => Promise<string[]>> = {
     return lines;
   },
 
+  "PRF-008: tracks held with their clips stretched, in each warp mode": async (
+    browser
+  ) => {
+    const sets = (["repitch", "beats", "tones"] as const).flatMap((warpMode) =>
+      HELD_TRACKS.map((tracks) => ({ tracks, warpMode }))
+    );
+    const held = await inTurn(sets.length, async (index) => {
+      const { tracks = 0, warpMode } = sets[index] ?? {};
+      const page = await openSet(browser, {
+        devices: CHAIN,
+        looping: true,
+        seconds: 60,
+        tracks,
+        warpMode,
+      });
+      const load = await loadMeter(page);
+      const before = await underruns(page);
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(1000);
+      const loads = await inTurn(30, async () => {
+        await page.waitForTimeout(1000);
+        return load();
+      });
+      const fellBehind = (await underruns(page)) - before;
+      await page.keyboard.press("Space");
+      await page.context().close();
+      const peak = Math.max(...loads);
+      const mean = loads.reduce((sum, value) => sum + value, 0) / loads.length;
+      return `${warpMode}, ${tracks} tracks: load peak ${(peak * 100).toFixed(0)} %, mean ${(mean * 100).toFixed(0)} % over 30 s; ${fellBehind} underruns`;
+    });
+    return held;
+  },
+
   "PRF-005: export of the reference arrangement": async (browser) => {
     const page = await openSet(browser, {
       devices: CHAIN,
