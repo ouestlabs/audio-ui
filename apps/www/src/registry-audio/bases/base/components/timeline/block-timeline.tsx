@@ -496,6 +496,7 @@ function ClipDock({
   onValueChange,
   onValueCommitted,
   peaks,
+  position,
   foldedBoxes,
   onFoldedBoxesChange,
   onRename,
@@ -513,6 +514,8 @@ function ClipDock({
   >;
   onActiveChange: (active: boolean) => void;
   onClose: () => void;
+  /** The arrangement's position, live, which an audio clip's panel shows where it plays. */
+  position: ComponentProps<typeof ClipPanel>["position"];
   onCollapsedChange: (collapsed: boolean) => void;
   onCrop: () => void;
   onValueChange: (next: ClipSettings) => void;
@@ -576,6 +579,8 @@ function ClipDock({
       onRename={rename}
       onValueChange={onValueChange}
       onValueCommitted={onValueCommitted}
+      position={position}
+      start={clip.value.start}
       value={{
         gain: clip.gain ?? 0,
         length: clip.value.length,
@@ -2217,6 +2222,7 @@ export default function BlockTimeline() {
           onValueChange={changeClipSettings}
           onValueCommitted={settleClipEdit}
           peaks={editedPeaks}
+          position={clock}
         />
       ) : null}
       <TrackReorderGhost

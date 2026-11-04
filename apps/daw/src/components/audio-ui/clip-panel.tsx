@@ -11,7 +11,7 @@ import {
   warpedTime,
   warpRate,
 } from "@audio-ui/core/time";
-import { Waveform as WaveformPrimitive } from "@audio-ui/react";
+import { type Source, Waveform as WaveformPrimitive } from "@audio-ui/react";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -22,6 +22,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import {
   ClipBox,
@@ -38,6 +39,7 @@ import {
   TimelineLane,
   TimelineMark,
   TimelineNavigator,
+  TimelinePlayhead,
   TimelineRange,
   TimelineRangeHandle,
   TimelineViewport,
@@ -127,6 +129,10 @@ interface ClipPanelProps {
   onValueChange: (value: ClipSettings) => void;
   /** A gesture that changed the settings ended. */
   onValueCommitted?: () => void;
+  /** The arrangement's position, live: while it plays the clip, a playhead shows where in the source it reads. Leave it out for none. */
+  position?: Source<number>;
+  /** Where the clip starts on the arrangement, what `position` is read against. @default 0 */
+  start?: number;
   value: ClipSettings;
   /** The source's peaks, the shape the waveform draws. */
   values: WaveformPrimitive.Root.Peaks;
@@ -134,20 +140,46 @@ interface ClipPanelProps {
 
 const formatSeconds = (seconds: number) => `${seconds.toFixed(2)} s`;
 
-/** The peaks read again, the one at `pick(index, count)` for each index: a list of amplitudes, or a `{ min, max }` pair of them. */
+/**
+ * The peaks read again: each index takes in those from `pick(index, count)`
+ * up to the next index's, the loudest of them (the lowest, for a `min`), so a
+ * stretch drawn shorter keeps every peak it holds rather than every other one.
+ */
 function remap(
   values: WaveformPrimitive.Root.Peaks,
   pick: (index: number, count: number) => number
 ): WaveformPrimitive.Root.Peaks {
-  const read = (list: ArrayLike<number>) =>
-    Array.from(
-      { length: list.length },
-      (_, index) => list[pick(index, list.length)] ?? 0
-    );
+  const read = (list: ArrayLike<number>, lowest: boolean) => {
+    const count = list.length;
+    return Array.from({ length: count }, (_, index) => {
+      const from = pick(index, count);
+      const to = index + 1 < count ? pick(index + 1, count) : from + 1;
+      let peak = list[from] ?? 0;
+      for (let at = from + 1; at < to; at += 1) {
+        const value = list[at] ?? 0;
+        peak = lowest ? Math.min(peak, value) : Math.max(peak, value);
+      }
+      return peak;
+    });
+  };
+  return "length" in values
+    ? read(values, false)
+    : { max: read(values.max, false), min: read(values.min, true) };
+}
+
+/** The peaks backwards, as a reversed clip plays its source. */
+function reversedPeaks(
+  values: WaveformPrimitive.Root.Peaks
+): WaveformPrimitive.Root.Peaks {
+  const read = (list: ArrayLike<number>) => Array.from(list).reverse();
   return "length" in values
     ? read(values)
     : { max: read(values.max), min: read(values.min) };
 }
+
+/** What a playhead source reads while the clip does not play: nothing to show. */
+const NOT_PLAYING = -1;
+const noSubscription = () => () => undefined;
 
 /** A speed as the pitch it moves to, in semitones: twice as fast is an octave up. */
 const formatRate = (rate: number) => {
@@ -500,6 +532,8 @@ function ClipPanel({
   onRename,
   onValueChange,
   onValueCommitted,
+  position: arrangementPosition,
+  start: clipStart = 0,
   value,
   values,
 }: ClipPanelProps) {
@@ -528,10 +562,29 @@ function ClipPanel({
           )
         )
       : values;
-    return reversed
-      ? remap(placed, (index, count) => count - 1 - index)
-      : placed;
+    return reversed ? reversedPeaks(placed) : placed;
   }, [reversed, sourceLength, span, values, warp]);
+  // Where playback reads the source, in the clip's time: from where it starts in it, round its loop.
+  const playhead = useMemo<Source<number> | undefined>(() => {
+    if (!arrangementPosition) {
+      return;
+    }
+    const read = (at: number) => {
+      const into = at - clipStart;
+      if (into < 0 || into >= length) {
+        return NOT_PLAYING;
+      }
+      const time = offset + into;
+      if (!loop || time < loop[1] || loop[1] <= loop[0]) {
+        return time;
+      }
+      return loop[0] + ((time - loop[0]) % (loop[1] - loop[0]));
+    };
+    return {
+      getSnapshot: () => read(arrangementPosition.getSnapshot()),
+      subscribe: arrangementPosition.subscribe,
+    };
+  }, [arrangementPosition, clipStart, length, loop, offset]);
   const set = useCallback(
     (patch: Partial<ClipSettings>) => onValueChange({ ...value, ...patch }),
     [onValueChange, value]
@@ -764,6 +817,7 @@ function ClipPanel({
         onPlayedChange={setPlayed}
         onValueCommitted={onValueCommitted}
         onWarpChange={setWarp}
+        playhead={playhead}
         span={span}
         values={shown}
         warp={warp}
@@ -827,6 +881,7 @@ function ClipSource({
   onPlayedChange,
   onValueCommitted,
   onWarpChange,
+  playhead,
   span,
   values,
   warp,
@@ -843,6 +898,7 @@ function ClipSource({
   onPlayedChange: (next: readonly [number, number]) => void;
   onValueCommitted?: () => void;
   onWarpChange: (next: readonly WarpMarker[]) => void;
+  playhead?: Source<number>;
   span: number;
   values: WaveformPrimitive.Root.Peaks;
   warp: readonly WarpMarker[] | null;
@@ -871,6 +927,44 @@ function ClipSource({
     };
   }, [span]);
   const pxPerSecond = zoom ?? fit;
+  // The stretch in view: the waveform is drawn over it alone, as sharp at any zoom as the screen is.
+  const [view, setView] = useState<readonly [number, number]>([0, span]);
+  useLayoutEffect(() => {
+    const element = viewportRef.current;
+    if (!(element && pxPerSecond > 0)) {
+      return;
+    }
+    let frame = 0;
+    const follow = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const from = Math.max(0, element.scrollLeft / pxPerSecond);
+        const to = Math.min(
+          span,
+          (element.scrollLeft + element.clientWidth) / pxPerSecond
+        );
+        setView((was) =>
+          was[0] === from && was[1] === to ? was : [from, Math.max(from, to)]
+        );
+      });
+    };
+    follow();
+    element.addEventListener("scroll", follow, { passive: true });
+    const observer = new ResizeObserver(follow);
+    observer.observe(element);
+    return () => {
+      cancelAnimationFrame(frame);
+      element.removeEventListener("scroll", follow);
+      observer.disconnect();
+    };
+  }, [pxPerSecond, span]);
+  const [from, to] = view;
+  // Shown only while the clip plays: React hears when that changes, not each frame.
+  const playing = useSyncExternalStore(
+    playhead?.subscribe ?? noSubscription,
+    () => (playhead ? playhead.getSnapshot() !== NOT_PLAYING : false),
+    () => false
+  );
   const labels = rulerLabels(span, bar, beatsPerBar, pxPerSecond);
   // Zoomed in, a line per beat; out, a line per bar.
   const beat = bar / beatsPerBar;
@@ -884,6 +978,7 @@ function ClipSource({
       maxZoom={maxZoom || undefined}
       minZoom={fit || undefined}
       onZoomChange={setZoom}
+      source={playhead}
       zoom={zoom ?? undefined}
     >
       <TimelineNavigator className="mx-2 my-1.5" getAriaValueText={format} />
@@ -953,9 +1048,14 @@ function ClipSource({
               >
                 <WaveformPrimitive.Root
                   aria-label={`${name} source`}
-                  className="absolute inset-0"
+                  className="absolute inset-y-0"
                   duration={span}
                   peaks={values}
+                  range={[from, to]}
+                  style={{
+                    left: `calc(var(--timeline-unit) * ${from})`,
+                    width: `calc(var(--timeline-unit) * ${to - from})`,
+                  }}
                 >
                   <WaveformPrimitive.Canvas className="pointer-events-none [--waveform-bar-radius:max(0px,min(var(--radius-sm),3px))] [--waveform-color:color-mix(in_oklab,var(--muted-foreground)_50%,transparent)] [--waveform-progress-color:var(--primary)] block size-full" />
                 </WaveformPrimitive.Root>
@@ -969,6 +1069,7 @@ function ClipSource({
                   />
                 ) : null}
               </div>
+              {playing ? <TimelinePlayhead /> : null}
             </TimelineLane>
           </div>
         </div>

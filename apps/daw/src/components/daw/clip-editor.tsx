@@ -205,6 +205,8 @@ export function ClipEditor({
       onRename={rename}
       onValueChange={changeSettings}
       onValueCommitted={settle}
+      position={engine.position}
+      start={clip.value.start}
       value={settingsOf(clip)}
       values={recording ? sourcePeaks(clip, recording) : []}
     >
