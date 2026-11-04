@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { WaveformSelect } from "@/components/audio-ui/waveform-select";
 import { XYPad } from "@/components/audio-ui/xypad";
@@ -30,6 +30,8 @@ const formatPad = (position: { x: number; y: number }) => (
 );
 
 interface WaveShaperPanelProps {
+  /** Whatever the host puts at the end of the title bar: a device chain's grip, fold and remove buttons. */
+  children?: ReactNode;
   className?: string;
   /** The pad is let go. */
   onNoteOff?: () => void;
@@ -47,6 +49,7 @@ interface WaveShaperPanelProps {
  * none. It takes the height it is given: the pad grows to fill it.
  */
 function WaveShaperPanel({
+  children,
   className,
   onNoteOff,
   onNoteOn,
@@ -74,7 +77,9 @@ function WaveShaperPanel({
         device={waveShaperDevice}
         onValueChange={onValueChange}
         value={value}
-      />
+      >
+        {children}
+      </DeviceHeader>
       <div
         className="flex min-h-0 grow flex-col gap-2 p-2"
         data-slot="wave-shaper-panel"

@@ -81,6 +81,8 @@ const PAGES_FIRST_SECONDS = 0.5;
 /** The pages are asked for every fourth tick of the scheduler: ten times a second. */
 const PREFETCH_TICKS = 4;
 const POLL_MS = 25;
+/** The id of the note a panel's pad holds. */
+const PAD_NOTE = "hand-pad";
 /** How many notes a MIDI track plays at once by default: one voice of its instrument each. */
 const VOICES = 8;
 
@@ -180,6 +182,15 @@ export interface ArrangementEngine {
    */
   cue: (from: number) => Promise<void>;
   dispose: () => void;
+  /**
+   * Holds a note on a MIDI track's instrument now, by the instrument's own
+   * note parameters (a pad's pitch and cutoff), as its panel's pad plays it:
+   * called again while held, the same voice follows; `null` lets it go.
+   */
+  holdNote: (
+    track: string,
+    note: Readonly<Record<string, number>> | null
+  ) => void;
   /** The frames the engine delays its sound by: its delay compensation. */
   readonly latency: number;
   /**
@@ -634,7 +645,8 @@ export async function createArrangementEngine(
     entry: LibraryDevice | undefined,
     note: FrameNote,
     at: number,
-    passId: string
+    passId: string,
+    parameters: Readonly<Record<string, number>> = {}
   ) => {
     const { chance, deviation, velocity } = note.note;
     if (Math.random() >= (chance ?? 1)) {
@@ -659,19 +671,25 @@ export async function createArrangementEngine(
       ...base,
       frequency: noteToFrequency(note.pitch),
       velocity: level,
+      ...parameters,
     };
+    // The voice that holds this note already follows it; another takes the oldest one's place.
+    const held = instrument.voices.find(
+      (voice) => voice.holding?.id === passId
+    );
     const free =
+      held ??
       instrument.voices.find((voice) => !voice.holding) ??
       instrument.voices.reduce((oldest, voice) =>
         (voice.holding?.since ?? 0) < (oldest.holding?.since ?? 0)
           ? voice
           : oldest
       );
-    if (free.holding) {
+    if (free.holding && free !== held) {
       free.engine.noteOff?.({ at: at / rate, id: free.holding.id });
     }
     free.engine.noteOn?.(played, { at: at / rate, id: passId });
-    free.holding = { id: passId, since: at };
+    free.holding = held?.holding ?? { id: passId, since: at };
   };
 
   const noteOff = (runtime: TrackRuntime, at: number, passId: string) => {
@@ -1031,6 +1049,39 @@ export async function createArrangementEngine(
     );
   };
 
+  /** The note a panel's pad holds: one voice, which follows the pad as it moves. */
+  const holdNote: ArrangementEngine["holdNote"] = (track, parameters) => {
+    const runtime = runtimes.get(track);
+    if (!runtime) {
+      return;
+    }
+    const at = now();
+    if (!parameters) {
+      noteOff(runtime, at, PAD_NOTE);
+      return;
+    }
+    const entry = doc
+      ? instrumentOf(trackOf(doc, track) ?? doc.main)
+      : undefined;
+    if (!(runtime.instrument && entry)) {
+      return;
+    }
+    noteOn(
+      runtime,
+      entry,
+      {
+        end: at + 1,
+        id: PAD_NOTE,
+        note: { id: PAD_NOTE, length: 0, pitch: 69, start: 0, velocity: 1 },
+        pitch: 69,
+        start: 0,
+      },
+      at,
+      PAD_NOTE,
+      parameters
+    );
+  };
+
   return {
     dispose: () => {
       stop();
@@ -1069,6 +1120,7 @@ export async function createArrangementEngine(
       }
     },
     noteOn: (track, pitch, velocity = 1) => audition(track, pitch, velocity),
+    holdNote,
     play,
     get playing() {
       return state.playing;

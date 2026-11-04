@@ -912,3 +912,76 @@ check(
     assert(loudest > 0.5, `the device left plays the take at ${loudest}`);
   }
 );
+
+check(
+  "a note held by an instrument's pad sounds through the track, follows the pad, and lets go",
+  async () => {
+    const ctx = new OfflineAudioContext(2, RATE, RATE);
+    const engine = await createArrangementEngine(ctx);
+    assert(engine, "the engine loads");
+    engine.update(
+      arrangement({
+        tracks: [
+          {
+            color: 0,
+            devices: [device("s", "audioui.pocket-synth", { wave: "sine" })],
+            id: "keys",
+            kind: "midi",
+            name: "Keys",
+          },
+        ],
+      }),
+      new Map()
+    );
+    await engine.ready();
+    engine.holdNote("keys", { cutoff: 4000, frequency: 440 });
+    ctx.suspend(0.2).then(() => {
+      // The pad moved: the same voice glides, it does not start another.
+      engine.holdNote("keys", { cutoff: 4000, frequency: 660 });
+      ctx.resume();
+    });
+    ctx.suspend(0.4).then(() => {
+      engine.holdNote("keys", null);
+      ctx.resume();
+    });
+    const out = (await ctx.startRendering()).getChannelData(0);
+    engine.dispose();
+    const held = Math.max(...out.subarray(4800, 19_000).map(Math.abs));
+    const after = Math.max(...out.subarray(40_000).map(Math.abs));
+    assert(held > 0.05, `the pad's note is near silent (${held})`);
+    assert(after < 1e-4, `the pad's note rings after it is let go (${after})`);
+  }
+);
+
+check(
+  "DEV-010: a rack added empty, then given a device, plays the track through it",
+  async () => {
+    const ctx = new OfflineAudioContext(2, RATE / 2, RATE);
+    const engine = await createArrangementEngine(ctx);
+    assert(engine, "the engine loads");
+    const recordings = new Map([["take", recording(0.5)]]);
+    const withRack = (devices: TrackDevice[]) =>
+      arrangement({
+        clips: [clip("a", "vox", 0, 0.5)],
+        tracks: [
+          {
+            color: 0,
+            devices: [rackDevice([{ devices, id: "a" }])],
+            id: "vox",
+            name: "Vox",
+          },
+        ],
+      });
+    engine.update(withRack([]), recordings as never);
+    engine.update(
+      withRack([device("u", "audioui.utility")]),
+      recordings as never
+    );
+    await engine.ready();
+    engine.play(0, 0);
+    const out = (await ctx.startRendering()).getChannelData(0);
+    engine.dispose();
+    const loudest = Math.max(...out.map(Math.abs));
+    assert(loudest > 0.2, `the track through the rack plays at ${loudest}`);
+  }
+);

@@ -148,7 +148,7 @@ function PadEditor({
   return (
     <div
       aria-label={`Pad ${pitchName(note)}`}
-      className="flex flex-col gap-2"
+      className="flex flex-col gap-2 border-b p-2"
       data-slot="drum-pad-editor"
       role="group"
     >
@@ -351,7 +351,7 @@ function DrumRackPanel({
       slot="drum-rack-panel"
       title={title}
     >
-      <div className="flex w-56 shrink-0 flex-col gap-1">
+      <div className="flex w-60 shrink-0 flex-col gap-1 p-2">
         <div className="flex items-center gap-1">
           <Button
             aria-label="Lower pads"
@@ -435,7 +435,7 @@ function DrumRackPanel({
           )}
         </Pad>
       </div>
-      <div className="flex min-w-0 flex-1 flex-col gap-2">
+      <div className="flex min-w-0 flex-1 flex-col">
         <PadEditor
           chain={padAt(rack, selectedNote)}
           note={selectedNote}

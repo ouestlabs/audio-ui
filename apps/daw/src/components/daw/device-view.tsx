@@ -34,6 +34,8 @@ type ChainPlace = { chain: string; rack: string } | undefined;
 /** What every slot of a chain needs: the commands of the track, and where the chain is. */
 interface ChainProps {
   dispatch: Arrangement["dispatch"];
+  /** A note held by an instrument's panel, such as its pad, by its note parameters; `null` lets it go. */
+  onHoldNote: (note: Readonly<Record<string, number>> | null) => void;
   onNoteOff: (pitch: number) => void;
   /** Plays a note of the track now, as a key does, until `onNoteOff`. */
   onNoteOn: (pitch: number, velocity: number) => void;
@@ -57,6 +59,8 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
     () => dispatch({ id: device.id, track, type: "toggle-device" }),
     [device.id, dispatch, track]
   );
+  const { onHoldNote } = chain;
+  const release = useCallback(() => onHoldNote(null), [onHoldNote]);
   if (device.rack && device.device === DRUM_RACK_DEVICE) {
     return <DrumSlot device={device} {...chain} />;
   }
@@ -74,7 +78,13 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       title={entry.device.name}
       value={device.id}
     >
-      <face.Panel onValueChange={change} tempo={tempo} value={device.state}>
+      <face.Panel
+        onNoteOff={release}
+        onNoteOn={onHoldNote}
+        onValueChange={change}
+        tempo={tempo}
+        value={device.state}
+      >
         <DeviceChainSlotControls />
       </face.Panel>
     </DeviceChainSlot>
@@ -378,6 +388,7 @@ export function DeviceView({
   arrangement,
   onNoteOff,
   onNoteOn,
+  onHoldNote,
   onOpenLibrary,
   onPadFiles,
   track,
@@ -387,6 +398,11 @@ export function DeviceView({
   onNoteOff: (track: string, pitch: number) => void;
   /** Plays a note of a track now, through its instrument and chain, as a key does. */
   onNoteOn: (track: string, pitch: number, velocity: number) => void;
+  /** Holds a note of a track's instrument by its note parameters, as its pad plays it; `null` lets it go. */
+  onHoldNote: (
+    track: string,
+    note: Readonly<Record<string, number>> | null
+  ) => void;
   /** Opens the library on the left, ready to search. */
   onOpenLibrary: () => void;
   /** Files dropped on a pad of a drum rack on a track: a recording for it to play. */
@@ -433,6 +449,10 @@ export function DeviceView({
     (pitch: number) => onNoteOff(id, pitch),
     [id, onNoteOff]
   );
+  const holdNote = useCallback(
+    (note: Readonly<Record<string, number>> | null) => onHoldNote(id, note),
+    [id, onHoldNote]
+  );
   const padFiles = useCallback(
     (rack: string, note: number, files: File[]) =>
       onPadFiles(id, rack, note, files),
@@ -449,7 +469,7 @@ export function DeviceView({
   return (
     <div className="flex h-full min-h-0">
       <Chain
-        className="no-scrollbar scroll-fade-x min-h-0 min-w-0 flex-1 overflow-x-auto"
+        className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 overflow-auto"
         devices={current.devices ?? []}
         dispatch={dispatch}
         end={
@@ -465,6 +485,7 @@ export function DeviceView({
             ) : null}
           </div>
         }
+        onHoldNote={holdNote}
         onNoteOff={noteOff}
         onNoteOn={noteOn}
         onPadFiles={padFiles}

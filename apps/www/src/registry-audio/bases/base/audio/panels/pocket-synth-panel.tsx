@@ -44,6 +44,8 @@ const formatPad = (position: { x: number; y: number }): ReactNode => (
 );
 
 interface PocketSynthPanelProps {
+  /** Whatever the host puts at the end of the title bar: a device chain's grip, fold and remove buttons. */
+  children?: ReactNode;
   className?: string;
   /** The pad is let go. */
   onNoteOff?: () => void;
@@ -61,6 +63,7 @@ interface PocketSynthPanelProps {
  * gives it, or none. It takes the height it is given: the pad grows to fill it.
  */
 function PocketSynthPanel({
+  children,
   className,
   onNoteOff,
   onNoteOn,
@@ -103,7 +106,9 @@ function PocketSynthPanel({
         device={pocketSynthDevice}
         onValueChange={onValueChange}
         value={value}
-      />
+      >
+        {children}
+      </DeviceHeader>
       <div
         className="flex min-h-0 grow flex-col gap-2 p-2"
         data-slot="pocket-synth-panel"

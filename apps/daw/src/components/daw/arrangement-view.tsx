@@ -4,7 +4,11 @@ import {
   secondsPerBeat,
 } from "@audio-ui/core/time";
 import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
-import { PlusIcon } from "@phosphor-icons/react";
+import {
+  MapPinPlusIcon,
+  MusicNotesPlusIcon,
+  PlusIcon,
+} from "@phosphor-icons/react";
 import {
   type DragEvent,
   type MouseEvent,
@@ -578,49 +582,37 @@ export function ArrangementView({
                 <TimelinePlayhead />
               </TimelineRuler>
             </Row>
+            {/* The locators and the time signatures share one lane, so the tracks keep the room on a short screen. */}
             <Row
               className="shrink-0 border-foreground/20 border-b"
               lead={
                 <span className="flex h-full w-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
-                  Locators
-                  <Button
-                    aria-label="Add a locator at the cursor (M)"
-                    className="size-5"
-                    onClick={markers.addLocator}
-                    size="icon"
-                    title="Add a locator at the cursor (M)"
-                    variant="ghost"
-                  >
-                    <PlusIcon aria-hidden="true" className="size-3" />
-                  </Button>
-                </span>
-              }
-            >
-              <TimelineLane className="h-6 border-b-0">
-                {locators.map((locator) => (
-                  <TimelineLocator
-                    key={locator.id}
-                    locator={locator}
-                    {...markers.locator}
-                  />
-                ))}
-              </TimelineLane>
-            </Row>
-            <Row
-              className="shrink-0 border-foreground/20 border-b"
-              lead={
-                <span className="flex h-full w-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
-                  Signature
-                  <Button
-                    aria-label="Add a time signature at the cursor"
-                    className="size-5"
-                    onClick={markers.addSignature}
-                    size="icon"
-                    title="Add a time signature at the cursor"
-                    variant="ghost"
-                  >
-                    <PlusIcon aria-hidden="true" className="size-3" />
-                  </Button>
+                  Markers
+                  <span className="flex">
+                    <Button
+                      aria-label="Add a locator at the cursor (M)"
+                      className="size-5"
+                      onClick={markers.addLocator}
+                      size="icon"
+                      title="Add a locator at the cursor (M)"
+                      variant="ghost"
+                    >
+                      <MapPinPlusIcon aria-hidden="true" className="size-3.5" />
+                    </Button>
+                    <Button
+                      aria-label="Add a time signature at the cursor"
+                      className="size-5"
+                      onClick={markers.addSignature}
+                      size="icon"
+                      title="Add a time signature at the cursor"
+                      variant="ghost"
+                    >
+                      <MusicNotesPlusIcon
+                        aria-hidden="true"
+                        className="size-3.5"
+                      />
+                    </Button>
+                  </span>
                 </span>
               }
             >
@@ -631,6 +623,13 @@ export function ArrangementView({
                     editing={markers.editingSignature === change.id}
                     key={change.id}
                     {...markers.signature}
+                  />
+                ))}
+                {locators.map((locator) => (
+                  <TimelineLocator
+                    key={locator.id}
+                    locator={locator}
+                    {...markers.locator}
                   />
                 ))}
               </TimelineLane>

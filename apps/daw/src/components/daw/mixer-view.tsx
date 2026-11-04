@@ -373,10 +373,10 @@ export function MixerView({
   return (
     // One grid for every channel, each a subgrid of its six rows (name, sends, pan, fader, level, switches): what one
     // channel lacks leaves its row empty, so every fader starts and ends level; the faders take the height there is,
-    // and never less than a fader's own least, 10rem.
+    // and never less than 5rem, so the panel fits a short screen.
     <div
       aria-label="Mixer"
-      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(10rem,1fr)_auto_auto] gap-y-2 no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden pe-2"
+      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden pe-2"
       role="group"
     >
       {/* A folded group hides its tracks here too. */}

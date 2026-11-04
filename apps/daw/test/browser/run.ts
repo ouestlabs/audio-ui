@@ -1395,6 +1395,33 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const again = await loudest(page, 600);
       assert(again > -40, `reloaded, the pad plays at ${again} dB`);
     },
+  "DEV-008: an instrument's face has a chain's controls, and its pad plays the track's instrument":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const devices = page.getByRole("region", { name: "Devices" });
+      await devices
+        .getByRole("button", { name: "Fold Pocket Synth" })
+        .waitFor({ timeout: 5000 });
+      const pad = devices.locator("[data-slot=xypad]").first();
+      const box = await pad.boundingBox();
+      assert(box, "the Pocket Synth shows its pad");
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      // A move plays: the pad calls out as its value changes.
+      await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.3, {
+        steps: 4,
+      });
+      // The pad keeps the note while the pointer holds it; the keys go to the page, to open the mixer.
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await showMixer(page);
+      const level = await loudest(page, 600);
+      await page.mouse.up();
+      assert(level > -40, `the pad held plays the synth at ${level} dB`);
+    },
   "DEV-010 and DEV-012: a rack takes a device from the library, plays it, and a macro turns its parameter":
     async (browser) => {
       const page = await open(browser);

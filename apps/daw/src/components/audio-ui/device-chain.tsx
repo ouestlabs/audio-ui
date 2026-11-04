@@ -119,7 +119,7 @@ function gripOf(root: HTMLElement | null, id: string | undefined) {
 }
 
 interface DeviceChainProps extends ComponentProps<"div"> {
-  /** Lays the devices flat on the surface around them, a hairline between each and the next, instead of as cards: as a workstation's device view docks them. */
+  /** Lays the devices flat on the surface around them, a hairline between each and the next, instead of as cards: as a workstation's device view docks them. Each fills the chain's height; one taller than the chain keeps its own, and the chain scrolls to it. */
   flat?: boolean;
   /** A device was dropped on the chain from a library: its id, and the index it goes in. Leave it out and nothing can be dropped. */
   onAdd?: (device: string, index: number) => void;
@@ -601,9 +601,10 @@ function DeviceChainSlot({
       "relative flex shrink-0 flex-col",
       // The line a dragged device would land on, in the middle of the gap before this slot.
       "before:absolute before:inset-y-0 before:hidden before:w-0.5 before:rounded-full before:bg-primary data-drop:before:block",
-      // Flat, the device's card gives way to the surface, and a hairline ends it.
+      // Flat, the device's card gives way to the surface, and a hairline ends it. It fills the chain's height, and a
+      // device taller than the chain keeps its height: the chain scrolls to it.
       flat
-        ? "border-e before:inset-s-[-1px] *:rounded-none *:border-0 *:bg-transparent"
+        ? "border-e before:inset-s-[-1px] *:h-auto *:min-h-full *:rounded-none *:border-0 *:bg-transparent"
         : "before:inset-s-[-5px]",
       "data-dragging:z-10 data-dragging:shadow-lg",
       className,

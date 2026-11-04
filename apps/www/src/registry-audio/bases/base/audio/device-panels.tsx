@@ -29,6 +29,10 @@ export interface DevicePanelProps {
   /** What the host puts at the end of the title bar: a chain's controls, a play button. */
   children?: ReactNode;
   className?: string;
+  /** For an instrument's panel that plays it, such as a pad: its pad let go. */
+  onNoteOff?: () => void;
+  /** For an instrument's panel that plays it, such as a pad: a note, by the instrument's note parameters, called again as it moves. */
+  onNoteOn?: (note: Readonly<Record<string, number>>) => void;
   onValueChange: (state: Readonly<Record<string, ParameterValue>>) => void;
   /** For the panels that show a time in notes: the tempo it is read against. */
   tempo?: Tempo;
@@ -42,10 +46,12 @@ export interface DevicePanelEntry {
 }
 
 /** A panel as the catalog holds it: its own device's state, read as any device's. */
-function entry<State>(
+function entry<State, Note = never>(
   Panel: ComponentType<{
     children?: ReactNode;
     className?: string;
+    onNoteOff?: () => void;
+    onNoteOn?: (note: Note) => void;
     onValueChange: (state: State) => void;
     tempo?: Tempo;
     value: State;

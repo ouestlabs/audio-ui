@@ -370,8 +370,8 @@ function RackFrame({
           {controls}
         </div>
       </div>
-      {/* Its columns, a hairline between each and the next. */}
-      <div className="flex min-h-0 flex-1 gap-3 p-2 *:not-first:border-s *:not-first:ps-3">
+      {/* Its columns, a hairline between each and the next; each pads itself, so devices inside lie flush. */}
+      <div className="flex min-h-0 flex-1 *:not-first:border-s">
         {showMacros ? macros : null}
         {children}
       </div>
@@ -399,7 +399,7 @@ function RackMacros({
   return (
     <div
       aria-label="Macros"
-      className="grid shrink-0 grid-cols-4 content-start gap-x-2 gap-y-1"
+      className="grid shrink-0 grid-cols-4 content-start gap-x-2 gap-y-1 p-2"
       role="group"
     >
       {MACRO_SLOTS.map((slot, index) => (
@@ -488,7 +488,7 @@ function RackPanel({
       onEnabledChange={onEnabledChange}
       title={title}
     >
-      <div className="flex w-60 shrink-0 flex-col gap-1">
+      <div className="flex w-64 shrink-0 flex-col gap-1 p-2">
         <ul aria-label="Chains" className="flex flex-col gap-0.5">
           {rack.chains.map((chain) => (
             <RackChainRow

@@ -91,9 +91,29 @@ const STRIP = "2.25rem";
 /** The least height of each view of that panel, its strip included: under it, what it shows is cut off. */
 const LEAST: Record<PanelView, string> = {
   clip: "15rem",
-  devices: "25rem",
-  mixer: "27rem",
+  devices: "18rem",
+  mixer: "21rem",
 };
+
+/** The most of the window the panel takes when it opens: what a height dragged by hand may go past. */
+const OPENING_SHARE = 0.45;
+/** How tall each view opens on a tall window, in px. */
+const OPENING: Record<PanelView, number> = {
+  clip: 288,
+  devices: 360,
+  mixer: 400,
+};
+const REM = 16;
+
+/** How tall each view opens on a window `height` px tall: as tall as it likes, up to 45% of it, never under its least. */
+function openingHeights(height: number): Record<PanelView, number> {
+  const open = (view: PanelView) =>
+    Math.max(
+      Number.parseFloat(LEAST[view]) * REM,
+      Math.min(OPENING[view], Math.round(height * OPENING_SHARE))
+    );
+  return { clip: open("clip"), devices: open("devices"), mixer: open("mixer") };
+}
 
 /** What the panel's bar names: the clip it holds, folded, or the track whose devices it shows; the mixer, nothing. */
 function titleOf(
@@ -210,12 +230,11 @@ export function Daw({
     : undefined;
   // The clip view shows the selected clip: with none, the devices.
   const shown = panelView === "clip" && !selectedClip ? "devices" : panelView;
-  // How tall each view is, in px: a height dragged is kept for the next time it shows.
-  const viewHeights = useRef<Record<PanelView, number>>({
-    clip: 288,
-    devices: 400,
-    mixer: 416,
-  });
+  // How tall each view is, in px: a height dragged is kept for the next time it shows. It opens at no more than
+  // 45% of the window, so a short screen keeps room for the tracks, and never under its least height.
+  const viewHeights = useRef<Record<PanelView, number>>(
+    openingHeights(globalThis.innerHeight ?? 900)
+  );
   // Folded by the line dragged under the view's least height, or opened by dragging it up.
   const keepHeight = useCallback(
     (size: { inPixels: number }, id: string | number | undefined) => {
@@ -754,6 +773,11 @@ export function Daw({
     (track: string, pitch: number) => engine.engine?.noteOff(track, pitch),
     [engine.engine]
   );
+  const holdNote = useCallback(
+    (track: string, note: Readonly<Record<string, number>> | null) =>
+      engine.engine?.holdNote(track, note),
+    [engine.engine]
+  );
 
   // What each key does (KEY-001 and on), read when it is pressed.
   const commands: Partial<Record<ShortcutCommand, () => void>> = {
@@ -954,6 +978,7 @@ export function Daw({
         ) : (
           <DeviceView
             arrangement={arrangement}
+            onHoldNote={holdNote}
             onNoteOff={noteOff}
             onNoteOn={noteOn}
             onOpenLibrary={openLibrary}
