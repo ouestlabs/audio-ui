@@ -79,3 +79,7 @@ Test: apps/www/test/registry-audio/base/hooks/use-timeline-cursor.test.tsx; apps
 ### ARR-019 Moving and copying clips
 A clip dragged by its title moves along its track and to a track that takes what it holds: an audio clip an audio track, a MIDI clip a MIDI track, neither a return track. Let go off the tracks, it goes to the nearest that takes it. Option copies it, the original staying where it was, and the rest of a selection follows a clip dragged up or down.
 Test: apps/www/test/registry-audio/base/hooks/use-arranged-clips.test.tsx; apps/daw/test/browser/run.ts "ARR-019"
+
+### ARR-020 Consolidate
+Cmd+J makes one clip per track of the time selected, one step of undo. A MIDI track's notes merge into it as they sound, their clip's loop and transposition played out. An audio track's clips render into one new recording as they play, with their fades, gains and crossfades, and without the track's devices, mix or automation, which go on acting after it: the track sounds the same. The recording is kept in floats, so what goes past full scale stays in it. It is named after the first clip it takes in. The recordings it replaces are kept, so undo can bring them back; saving to a folder leaves out those no clip plays.
+Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-020"; apps/www/test/registry-audio/base/lib/wav-file.test.ts "ARR-020"; apps/www/test/browser/arrangement-engine.check.ts "ARR-020"; apps/daw/test/browser/run.ts "ARR-020"

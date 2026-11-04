@@ -11,6 +11,7 @@ import {
   createArrangementEngine,
   type MetronomeSettings,
   renderArrangement,
+  renderTrackClips,
 } from "@/registry-audio/bases/base/lib/arrangement-engine";
 import {
   type ArrangementDoc,
@@ -1104,6 +1105,89 @@ check(
   }
 );
 
+/** An envelope that holds `from` until a share `at` of the song, then `to` to its end. */
+const stepEnvelope = (from: number, to: number, at: number) => [
+  { x: 0, y: from },
+  { x: at, y: from },
+  { x: at + 1e-6, y: to },
+  { x: 1, y: to },
+];
+
+/** How loud a steady take plays through `devices` on a track whose `automation` moves them: before and after 0.25 s, of a 10 s song. */
+async function automatedLevels(
+  devices: TrackDevice[],
+  automation: Record<string, ReturnType<typeof stepEnvelope>>
+) {
+  const doc = arrangement({
+    clips: [clip("a", "vox", 0, 0.5)],
+    tracks: [
+      {
+        automation: automation as never,
+        color: 0,
+        devices,
+        id: "vox",
+        name: "Vox",
+      },
+    ],
+  });
+  const out = (
+    await render(doc, new Map([["take", recording(0.5)]]), 0.5)
+  ).getChannelData(0);
+  const peak = (from: number, to: number) =>
+    Math.max(...out.subarray(from * RATE, to * RATE).map(Math.abs));
+  return { after: peak(0.3, 0.45), before: peak(0.05, 0.2) };
+}
+
+/** How much louder the take plays after 0.25 s than before, its own swell taken out: an automated render against a still one. */
+async function automatedRise(
+  devices: TrackDevice[],
+  automation: Record<string, ReturnType<typeof stepEnvelope>>
+) {
+  const moved = await automatedLevels(devices, automation);
+  const still = await automatedLevels(devices, {});
+  return moved.after / moved.before / (still.after / still.before);
+}
+
+// The utility's gain runs from -35 to +35 dB: half its travel is 0 dB, and 6/70 more is +6 dB.
+const SIX_DB_UP = 0.5 + 6 / 70;
+
+check(
+  "AUT-001: a device's parameter follows its envelope, in an export as playing",
+  async () => {
+    const ratio = await automatedRise([device("u", "audioui.utility")], {
+      "device:u:gainDb": stepEnvelope(0.5, SIX_DB_UP, 0.025),
+    });
+    assert(
+      Math.abs(ratio - 10 ** (6 / 20)) < 0.1,
+      `the gain envelope raises the take by ${ratio}, not twice`
+    );
+  }
+);
+
+check(
+  "AUT-002: a rack's macro follows its envelope, and turns what is mapped to it",
+  async () => {
+    const rack = rackDevice(
+      [{ devices: [device("u", "audioui.utility")], id: "a" }],
+      [
+        {
+          mappings: [
+            { device: "u", max: SIX_DB_UP, min: 0.5, parameter: "gainDb" },
+          ],
+          value: 0,
+        },
+      ]
+    );
+    const ratio = await automatedRise([rack], {
+      "device:rack:macro-1": stepEnvelope(0, 1, 0.025),
+    });
+    assert(
+      Math.abs(ratio - 10 ** (6 / 20)) < 0.1,
+      `the macro's envelope raises the take by ${ratio}, not twice`
+    );
+  }
+);
+
 check(
   "EXP-009: a render starts only once the clip players have heard of the play, or a short one could end silent",
   async () => {
@@ -1143,6 +1227,113 @@ check(
     assert(
       heard > played,
       `the render started with the play unconfirmed: ${atStart.join(", ")}`
+    );
+  }
+);
+
+/** A recording that stands still at 0.5: what a crossfade of it keeps level, and a dip shows. */
+function steady(seconds: number) {
+  const data = new Float32Array(Math.round(seconds * RATE)).fill(0.5);
+  return { channels: [data, data], sampleRate: RATE };
+}
+
+/** The lowest the render stands around a join at 0.5 s of two clips of one recording, each with fades of these lengths. */
+async function lowestAtJoin(fadeOut: number, fadeIn: number, offset = 0.5) {
+  const doc = arrangement({
+    clips: [
+      {
+        ...clip("a", "vox", 0, 0.5),
+        sourceLength: 1,
+        value: { fadeIn: 0, fadeOut, length: 0.5, offset: 0, start: 0 },
+      },
+      {
+        ...clip("b", "vox", 0.5, 0.5),
+        sourceLength: 1,
+        value: { fadeIn, fadeOut: 0, length: 0.5, offset, start: 0.5 },
+      },
+    ],
+    tracks: [{ color: 0, id: "vox", name: "Vox" }],
+  });
+  const out = await render(doc, new Map([["take", steady(1)]]), 1);
+  return Math.min(
+    ...out
+      .getChannelData(0)
+      .subarray(0.3 * RATE, 0.7 * RATE)
+      .map(Math.abs)
+  );
+}
+
+check(
+  "CLP-014: two clips that meet with equal fades play through each other, with no dip",
+  async () => {
+    const low = await lowestAtJoin(0.1, 0.1);
+    assert(
+      Math.abs(low - 0.5) < 1e-3,
+      `across the crossfade the level falls to ${low}, from 0.5`
+    );
+  }
+);
+
+check(
+  "CLP-014: fades that differ stay fades of each clip, down to silence at the join",
+  async () => {
+    const low = await lowestAtJoin(0.1, 0.05);
+    assert(low < 0.01, `unequal fades stand at ${low} at the join`);
+  }
+);
+
+check(
+  "CLP-014: a clip with nothing before its start cannot cross earlier, and the other still fades",
+  async () => {
+    const low = await lowestAtJoin(0.1, 0.1, 0);
+    assert(low < 0.01, `with no material before it, the join stands at ${low}`);
+  }
+);
+
+check(
+  "ARR-020: a track's clips render as they play, without its devices, mix or automation, past full scale too",
+  async () => {
+    const take = recording(0.5);
+    const doc = arrangement({
+      clips: [{ ...clip("a", "vox", 0.1, 0.3), gain: 20 * Math.log10(4) }],
+      tracks: [
+        {
+          automation: {
+            volume: [
+              { x: 0, y: 0 },
+              { x: 1, y: 0 },
+            ],
+          },
+          color: 0,
+          devices: [device("u", "audioui.utility", { gainDb: -30 })],
+          id: "vox",
+          mix: unity(0.25),
+          name: "Vox",
+        },
+      ],
+    });
+    const out = await renderTrackClips(
+      doc,
+      "vox",
+      [0, 0.5],
+      new Map([["take", take]]) as never,
+      {
+        sampleRate: RATE,
+      }
+    );
+    assert(out, "the browser renders the clips offline");
+    const data = out.getChannelData(0);
+    const source = take.channels[0] as Float32Array;
+    const peak = Math.max(...source.subarray(0, 0.3 * RATE).map(Math.abs));
+    const loudest = Math.max(...data.map(Math.abs));
+    assert(
+      Math.abs(loudest - peak * 4) < 1e-3,
+      `the clip's +12 dB gives ${loudest}, not ${peak * 4}: its gain is in, its track's mix and devices out`
+    );
+    assert(loudest > 1, `the render stopped at full scale: ${loudest}`);
+    assert(
+      data.subarray(0, 0.1 * RATE - 1).every((sample) => sample === 0),
+      "the clip sounds before it starts"
     );
   }
 );

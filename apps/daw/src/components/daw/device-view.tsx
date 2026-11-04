@@ -1,3 +1,4 @@
+import type { ParameterValue } from "@audio-ui/core/device";
 import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
@@ -21,6 +22,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import {
+  type AutomationFollowing,
+  useAutomatedDevice,
+  useAutomatedRack,
+} from "@/hooks/use-track-automation";
+import {
+  type ArrangementTrack,
+  type AutomatedParameter,
   type ChainZone,
   DRUM_RACK_DEVICE,
   type DrumSound,
@@ -44,13 +52,19 @@ type ChainPlace =
 /** What every slot of a chain needs: the commands of the track, and where the chain is. */
 interface ChainProps {
   dispatch: Arrangement["dispatch"];
+  /** What the controls follow their envelopes by (AUT-006). */
+  following: AutomationFollowing;
   /** A note held by an instrument's panel, such as its pad, by its note parameters; `null` lets it go. */
   onHoldNote: (note: Readonly<Record<string, number>> | null) => void;
+  /** Parameters of a device moved by hand, by their ids: those automated stop following their envelopes (AUT-003). */
+  onMoved: (device: string, parameters: readonly string[]) => void;
   onNoteOff: (pitch: number) => void;
   /** Plays a note of the track now, as a key does, until `onNoteOff`. */
   onNoteOn: (pitch: number, velocity: number) => void;
   /** Files dropped on the pad of `note` of the drum rack `rack`. */
   onPadFiles: (rack: string, note: number, files: File[]) => void;
+  /** The track the chain is on, with its envelopes. */
+  owner: ArrangementTrack;
   tempo: Arrangement["doc"]["tempo"];
   track: string;
 }
@@ -60,10 +74,32 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   const { dispatch, tempo, track } = chain;
   const face = devicePanel(device.device);
   const entry = libraryDevice(device.device);
+  const { following, onMoved, owner } = chain;
+  // Its panel shows what plays: the parameters with an envelope where it stands.
+  const shown = useAutomatedDevice(
+    owner,
+    device,
+    entry?.device.denormalize as
+      | ((id: string, position: number) => ParameterValue)
+      | undefined,
+    following
+  );
+  // Only what the hand moved is kept: the others stay as set, not where their envelopes stood.
   const change = useCallback(
-    (state: TrackDevice["state"]) =>
-      dispatch({ id: device.id, state, track, type: "set-device" }),
-    [device.id, dispatch, track]
+    (state: TrackDevice["state"]) => {
+      const moved = Object.keys(state).filter((id) => state[id] !== shown[id]);
+      onMoved(device.id, moved);
+      dispatch({
+        id: device.id,
+        state: {
+          ...device.state,
+          ...Object.fromEntries(moved.map((id) => [id, state[id] as never])),
+        },
+        track,
+        type: "set-device",
+      });
+    },
+    [device.id, device.state, dispatch, onMoved, shown, track]
   );
   const toggle = useCallback(
     () => dispatch({ id: device.id, track, type: "toggle-device" }),
@@ -93,7 +129,7 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
         onNoteOn={onHoldNote}
         onValueChange={change}
         tempo={tempo}
-        value={device.state}
+        value={shown}
       >
         <DeviceChainSlotControls />
       </face.Panel>
@@ -187,7 +223,8 @@ function parametersOf(devices: readonly TrackDevice[]): RackParameter[] {
 function useRackCommands(
   dispatch: Arrangement["dispatch"],
   track: string,
-  rackId: string
+  rackId: string,
+  onMoved: ChainProps["onMoved"]
 ) {
   const settle = useCallback(
     () => dispatch({ type: "settle-clip-edit" }),
@@ -198,9 +235,11 @@ function useRackCommands(
     [dispatch, rackId, track]
   );
   const turn = useCallback(
-    (index: number, value: number) =>
-      dispatch({ index, rack: rackId, track, type: "set-macro", value }),
-    [dispatch, rackId, track]
+    (index: number, value: number) => {
+      onMoved(rackId, [`macro-${index + 1}`]);
+      dispatch({ index, rack: rackId, track, type: "set-macro", value });
+    },
+    [dispatch, onMoved, rackId, track]
   );
   const map = useCallback(
     (index: number, parameter: RackParameter) =>
@@ -267,8 +306,14 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
     [layered, rackId, selected]
   );
   const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
+  const shownRack = useAutomatedRack(
+    chain.owner,
+    device,
+    rack,
+    chain.following
+  );
   const { map, mix, removeChain, settle, toggle, turn, unmap } =
-    useRackCommands(dispatch, track, rackId);
+    useRackCommands(dispatch, track, rackId, chain.onMoved);
   const addChain = useCallback(
     () => dispatch({ rack: rackId, track, type: "add-rack-chain" }),
     [dispatch, rackId, track]
@@ -308,7 +353,7 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
         onZoneChange={layered ? zone : undefined}
         onZoneCommit={settle}
         parameters={parameters}
-        rack={rack}
+        rack={shownRack}
         selectedChain={selected?.id ?? null}
         title={layered ? "Instrument rack" : "Rack"}
       >
@@ -349,8 +394,14 @@ function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   const [note, setNote] = useState(() => lowestPad(rack));
   const pad = rack.chains.find((item) => item.pad?.note === note);
   const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
+  const shownRack = useAutomatedRack(
+    chain.owner,
+    device,
+    rack,
+    chain.following
+  );
   const { map, mix, removeChain, settle, toggle, turn, unmap } =
-    useRackCommands(dispatch, track, rackId);
+    useRackCommands(dispatch, track, rackId, chain.onMoved);
   const setSound = useCallback(
     (at: number, sound: DrumSound, name: string) =>
       dispatch({ name, note: at, rack: rackId, sound, track, type: "set-pad" }),
@@ -397,7 +448,7 @@ function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
         onSelectNote={setNote}
         onUnmapMacro={unmap}
         parameters={parameters}
-        rack={rack}
+        rack={shownRack}
         selectedNote={note}
       >
         {pad ? (
@@ -431,12 +482,19 @@ export function DeviceView({
   arrangement,
   onNoteOff,
   onNoteOn,
+  onDeviceMoved,
   onHoldNote,
   onOpenLibrary,
   onPadFiles,
+  overridden,
+  position,
   track,
 }: {
   arrangement: Arrangement;
+  /** What was moved by hand, by track: it stays as set. */
+  overridden: Readonly<Record<string, readonly AutomatedParameter[]>>;
+  /** Where the arrangement plays, in seconds. */
+  position: AutomationFollowing["position"];
   /** Lets go of a note `onNoteOn` started on a track. */
   onNoteOff: (track: string, pitch: number) => void;
   /** Plays a note of a track now, through its instrument and chain, as a key does. */
@@ -448,6 +506,12 @@ export function DeviceView({
   ) => void;
   /** Opens the library on the left, ready to search. */
   onOpenLibrary: () => void;
+  /** Parameters of a track's device moved by hand, by their ids: those automated stop following their envelopes. */
+  onDeviceMoved: (
+    track: string,
+    device: string,
+    parameters: readonly string[]
+  ) => void;
   /** Files dropped on a pad of a drum rack on a track: a recording for it to play. */
   onPadFiles: (
     track: string,
@@ -460,6 +524,15 @@ export function DeviceView({
   const { dispatch, doc } = arrangement;
   const current = track ? trackOf(doc, track) : undefined;
   const id = current?.id ?? "";
+  const trackOverridden = overridden[id];
+  const following = useMemo(
+    () => ({
+      duration: doc.duration,
+      overridden: trackOverridden,
+      position,
+    }),
+    [doc.duration, position, trackOverridden]
+  );
   const addRack = useCallback(
     () =>
       current &&
@@ -507,6 +580,11 @@ export function DeviceView({
   const holdNote = useCallback(
     (note: Readonly<Record<string, number>> | null) => onHoldNote(id, note),
     [id, onHoldNote]
+  );
+  const moved = useCallback(
+    (device: string, parameters: readonly string[]) =>
+      onDeviceMoved(id, device, parameters),
+    [id, onDeviceMoved]
   );
   const padFiles = useCallback(
     (rack: string, note: number, files: File[]) =>
@@ -595,10 +673,13 @@ export function DeviceView({
         devices={devices}
         dispatch={dispatch}
         end={end}
+        following={following}
         onHoldNote={holdNote}
+        onMoved={moved}
         onNoteOff={noteOff}
         onNoteOn={noteOn}
         onPadFiles={padFiles}
+        owner={current}
         place={undefined}
         tempo={doc.tempo}
         track={current.id}

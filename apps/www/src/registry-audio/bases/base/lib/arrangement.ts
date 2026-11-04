@@ -1,6 +1,7 @@
 import type { ParameterValue } from "@audio-ui/core/device";
 import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
+import type { PlayedClip } from "@audio-ui/core/playback";
 import { unwarpedTime, type WarpMarker, warpedTime } from "@audio-ui/core/time";
 import type { ClipValue } from "@audio-ui/react";
 
@@ -62,8 +63,45 @@ export interface Arranged {
 /** What a track holds: audio clips, MIDI clips, or other tracks (a group, which holds no clip and plays what its tracks play). */
 export type TrackKind = "audio" | "group" | "midi";
 
-/** What a track's automation can move: its volume, or where it sits in the stereo field. */
-export type AutomatedParameter = "pan" | "volume";
+/**
+ * A parameter of a device on a track, by the device's id and the parameter's,
+ * at any depth of its racks: `device:<device>:<parameter>`. A rack's macros
+ * are its parameters `macro-1` to `macro-8`.
+ */
+export type DeviceParameterKey = `device:${string}:${string}`;
+
+/** What a track's automation can move: its volume, where it sits in the stereo field, or a parameter of one of its devices. */
+export type AutomatedParameter = "pan" | "volume" | DeviceParameterKey;
+
+/** The key a device's parameter is automated under. */
+export const deviceParameterKey = (
+  device: string,
+  parameter: string
+): DeviceParameterKey => `device:${device}:${parameter}`;
+
+/** The device and the parameter a key names, or null for the track's own volume and pan. */
+export function parseDeviceParameter(
+  key: string
+): { device: string; parameter: string } | null {
+  if (!key.startsWith("device:")) {
+    return null;
+  }
+  const end = key.indexOf(":", "device:".length);
+  return end === -1
+    ? null
+    : {
+        device: key.slice("device:".length, end),
+        parameter: key.slice(end + 1),
+      };
+}
+
+/** The index of a rack's macro a parameter id names, `macro-1` to `macro-8`, or -1. */
+export function macroIndex(parameter: string): number {
+  const match = MACRO_PARAMETER.exec(parameter);
+  return match ? Number(match[1]) - 1 : -1;
+}
+
+const MACRO_PARAMETER = /^macro-([1-8])$/;
 
 /**
  * A track's automation: for each parameter it moves, the points of its
@@ -528,6 +566,117 @@ export function automationAt(points: readonly Breakpoint[], x: number): number {
     }
   }
   return (points.at(-1) as Breakpoint).y;
+}
+
+/**
+ * Where each automated device parameter of a track stands at `x`, 0…1 of the
+ * arrangement, as a position along its travel from 0 to 1, by device then
+ * parameter; one a change by hand has `overridden` plays as it is set.
+ */
+export function devicePositions(
+  track: ArrangementTrack,
+  x: number,
+  overridden: readonly AutomatedParameter[] = []
+): Map<string, Map<string, number>> {
+  const positions = new Map<string, Map<string, number>>();
+  for (const [key, points] of Object.entries(track.automation ?? {})) {
+    const named = parseDeviceParameter(key);
+    if (
+      !(named && points && points.length > 0) ||
+      overridden.includes(key as AutomatedParameter)
+    ) {
+      continue;
+    }
+    const parameters = positions.get(named.device) ?? new Map();
+    parameters.set(named.parameter, automationAt(points, x));
+    positions.set(named.device, parameters);
+  }
+  return positions;
+}
+
+/** The fade a clip laid down gets at each edge, in seconds: enough to take the click off a cut. */
+export const EDGE_FADE_SECONDS = 0.004;
+
+/** A clip's fades as it is laid down: `EDGE_FADE_SECONDS` at each edge, or half its length when it is shorter. */
+export function withEdgeFades<Value extends { length: number }>(
+  value: Value
+): Value & { fadeIn: number; fadeOut: number } {
+  const fade = Math.min(EDGE_FADE_SECONDS, value.length / 2);
+  return { ...value, fadeIn: fade, fadeOut: fade };
+}
+
+/**
+ * A track's played clips with their crossfades: two that meet with fades of
+ * one length play through each other. Each goes on past the join by as much as
+ * both sources hold, up to that length, and both fade over the same stretch
+ * around it, so what they share stays level, and a clip cut in two plays on as
+ * if it were whole. With nothing to play past the join, they keep their own
+ * fades. `played` is in the order the clips start.
+ */
+export function withCrossfades(played: readonly PlayedClip[]): PlayedClip[] {
+  const clips = [...played];
+  for (let index = 1; index < clips.length; index += 1) {
+    const left = clips[index - 1] as PlayedClip;
+    const right = clips[index] as PlayedClip;
+    if (
+      Math.abs(left.end - right.start) <= 1 &&
+      Math.abs(left.fadeOut - right.fadeIn) <= 1 &&
+      left.fadeOut > 0
+    ) {
+      const after = left.loop
+        ? left.fadeOut
+        : left.span - (left.end + left.shift);
+      const before = right.start + right.shift;
+      const half = Math.floor(Math.min(left.fadeOut, after, before));
+      if (half > 0) {
+        clips[index - 1] = {
+          ...left,
+          end: left.end + half,
+          fadeOut: half * 2,
+        };
+        clips[index] = {
+          ...right,
+          fadeIn: half * 2,
+          start: right.start - half,
+        };
+      }
+    }
+  }
+  return clips;
+}
+
+/** A rack with each macro an envelope moves where `turned` has it, by its parameter id. */
+export function rackWithMacros(
+  rack: Rack,
+  turned: ReadonlyMap<string, number> | undefined
+): Rack {
+  if (!turned) {
+    return rack;
+  }
+  return {
+    ...rack,
+    macros: rack.macros.map((macro, index) => {
+      const value = turned.get(`macro-${index + 1}`);
+      return value === undefined ? macro : { ...macro, value };
+    }),
+  };
+}
+
+/** A track's automation without the envelopes of the devices `gone`; the same one when it had none of theirs. */
+export function withoutDeviceAutomation(
+  automation: TrackAutomation | undefined,
+  gone: ReadonlySet<string>
+): TrackAutomation | undefined {
+  if (!automation) {
+    return automation;
+  }
+  const kept = Object.entries(automation).filter(([key]) => {
+    const named = parseDeviceParameter(key);
+    return !(named && gone.has(named.device));
+  });
+  return kept.length === Object.keys(automation).length
+    ? automation
+    : (Object.fromEntries(kept) as TrackAutomation);
 }
 
 /**

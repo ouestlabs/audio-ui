@@ -35,10 +35,11 @@ Test: packages/core/src/audio/playback/render.test.ts "CLP-003"
 | `EXP` | [Export](export.md) | 1 |
 | `ENG` | [Engine](engine.md) | 1 |
 | `PRJ` | [Projects and files](project.md) | 1 (on disk, DAWproject: 2) |
+| `AUT` | [Automation](automation.md) | 3 |
 | `KEY` | [Shortcuts](shortcuts.md) | each phase |
 | `PRF` | [Performance targets](performance.md) | each phase |
 
-Later phases add their chapters here before they start: editing and automation (3), warping (4), the session view (5), recording (6).
+Later phases add their chapters here before they start: editing (3), warping (4), the session view (5), recording (6).
 
 ## Fixtures
 

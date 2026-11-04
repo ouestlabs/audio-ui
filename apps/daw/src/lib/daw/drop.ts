@@ -1,4 +1,4 @@
-import type { Arranged } from "@/lib/arrangement";
+import { type Arranged, withEdgeFades } from "@/lib/arrangement";
 import type { ArrangementCommand } from "@/lib/arrangement-state";
 import {
   decodeRecording,
@@ -80,13 +80,11 @@ export function dropCommands(
       recording: id,
       sourceLength: recording.length,
       track: onto,
-      value: {
-        fadeIn: 0,
-        fadeOut: 0,
+      value: withEdgeFades({
         length: recording.length,
         offset: 0,
         start,
-      },
+      }),
     };
     end = Math.max(end, start + recording.length);
     commands.push({ clip, type: "add-clip" });

@@ -18,6 +18,7 @@ import {
 import {
   createRackEngine,
   type FindDevice,
+  type MacroPositions,
 } from "@/registry-audio/bases/base/lib/rack";
 import type { NotePlayer } from "@/registry-audio/bases/base/lib/voice-pool";
 
@@ -51,7 +52,8 @@ export interface DrumRackEngine extends NotePlayer {
   update: (
     rack: Rack,
     context?: DeviceContext,
-    recordings?: ReadonlyMap<string, PadRecording>
+    recordings?: ReadonlyMap<string, PadRecording>,
+    outer?: MacroPositions
   ) => void;
 }
 
@@ -160,12 +162,12 @@ export function createDrumRackEngine(
     output: rack.output,
     ready: rack.ready,
     release: cancel,
-    update: (next, context, sources) => {
+    update: (next, context, sources, outer) => {
       current = next;
       if (sources) {
         recordings = sources;
       }
-      rack.update(next, context);
+      rack.update(next, context, outer);
     },
   };
 }

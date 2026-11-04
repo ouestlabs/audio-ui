@@ -9,7 +9,15 @@ import { Toggle } from "@/components/ui/toggle";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
-import { type ArrangementTrack, type Mix, mixOf } from "@/lib/arrangement";
+import {
+  type AutomationFollowing,
+  useAutomatedMix,
+} from "@/hooks/use-track-automation";
+import type {
+  ArrangementTrack,
+  AutomatedParameter,
+  Mix,
+} from "@/lib/arrangement";
 import { trackOf } from "@/lib/arrangement-state";
 import { cn } from "@/lib/utils";
 
@@ -158,6 +166,8 @@ function SendKnob({
 
 interface StripProps {
   analysers: readonly AnalyserNode[] | null;
+  /** What the fader and the pan follow their envelopes by (AUT-006). */
+  following: AutomationFollowing;
   /** The group the track plays into, when it is in one (MIX-020). */
   into?: string;
   /** Main has no switch, no solo and no sends. */
@@ -176,6 +186,7 @@ interface StripProps {
 /** A channel of the mixer: its sends, its pan, its fader and meter, its switch and solo. */
 function Strip({
   analysers,
+  following,
   into,
   main,
   onMix,
@@ -187,7 +198,7 @@ function Strip({
   sends,
   track,
 }: StripProps) {
-  const mix = mixOf(track);
+  const mix = useAutomatedMix(track, following);
   const setGain = useCallback(
     (volume: number) => onMix(track.id, { gain: gainOf(volume) }),
     [onMix, track.id]
@@ -335,6 +346,7 @@ export function MixerView({
   engine,
   onMix,
   onSelectTrack,
+  overridden,
   selectedTrack,
 }: {
   arrangement: Arrangement;
@@ -342,6 +354,8 @@ export function MixerView({
   /** A channel's mix changed: a fader's drag is a burst, a switch a step of its own, and an automated gain or pan is overridden. */
   onMix: (id: string, patch: Partial<Mix>) => void;
   onSelectTrack: (id: string) => void;
+  /** What was moved by hand, by track: it stays as set. */
+  overridden: Readonly<Record<string, readonly AutomatedParameter[]>>;
   selectedTrack: string | null;
 }) {
   const { dispatch, doc } = arrangement;
@@ -357,6 +371,11 @@ export function MixerView({
   const strip = (track: ArrangementTrack, main = false, sends = false) => (
     <Strip
       analysers={engine.meter(track.id)}
+      following={{
+        duration: doc.duration,
+        overridden: overridden[track.id],
+        position: engine.position,
+      }}
       into={track.group ? trackOf(doc, track.group)?.name : undefined}
       key={track.id}
       main={main}

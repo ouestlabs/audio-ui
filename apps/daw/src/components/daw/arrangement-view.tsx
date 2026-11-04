@@ -10,6 +10,7 @@ import {
   PlusIcon,
 } from "@phosphor-icons/react";
 import {
+  type ComponentProps,
   type DragEvent,
   type MouseEvent,
   type PointerEvent,
@@ -52,6 +53,7 @@ import {
   TimelineSignature,
 } from "@/components/audio-ui/timeline-markers";
 import {
+  deviceTargets,
   TrackAutomation,
   TrackAutomationChooser,
 } from "@/components/audio-ui/track-automation";
@@ -60,6 +62,7 @@ import {
   TrackReorderGhost,
   trackReorderClass,
 } from "@/components/audio-ui/track-grip";
+import { TrackLevel } from "@/components/audio-ui/track-level";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -86,11 +89,23 @@ import {
 import type { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import type { useTrackAutomation } from "@/hooks/use-track-automation";
+import {
+  type AutomationFollowing,
+  useAutomatedMix,
+} from "@/hooks/use-track-automation";
 import { useTrackReorder } from "@/hooks/use-track-reorder";
-import { type Arranged, type ArrangementTrack, mixOf } from "@/lib/arrangement";
+import {
+  type Arranged,
+  type ArrangementTrack,
+  DRUM_RACK_DEVICE,
+  INSTRUMENT_RACK_DEVICE,
+  mixOf,
+  type TrackDevice,
+} from "@/lib/arrangement";
 import { trackBlock, trackDepth } from "@/lib/arrangement-state";
 import { NEW_TRACK } from "@/lib/daw/drop";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
+import { libraryDevice } from "@/lib/device-library";
 import { cn } from "@/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;
@@ -106,6 +121,27 @@ function carriesFiles(event: DragEvent) {
 /** Whether a track set by hand is short enough for one row of controls. */
 function isShort(height: number | undefined) {
   return height !== undefined && height < COMPACT_TRACK_HEIGHT;
+}
+
+/** A track's header, its gain and pan showing where their envelopes stand as the arrangement plays (AUT-006). */
+function FollowingControls({
+  following,
+  track,
+  ...props
+}: Omit<ComponentProps<typeof TimelineTrackControls>, "mix"> & {
+  following: AutomationFollowing;
+  track: ArrangementTrack;
+}) {
+  const mix = useAutomatedMix(track, following);
+  return <TimelineTrackControls mix={mix} {...props} />;
+}
+
+/** What a rack is called in the automation chooser, by its kind. */
+function rackName(device: TrackDevice) {
+  if (device.device === INSTRUMENT_RACK_DEVICE) {
+    return "Instrument rack";
+  }
+  return device.device === DRUM_RACK_DEVICE ? "Drum rack" : "Rack";
 }
 
 /** Whether a drag carries a device from the library. */
@@ -530,6 +566,17 @@ export function ArrangementView({
     [dispatch]
   );
   const anySolo = tracks.some((track) => mixOf(track).soloed);
+  // What each track's envelope can move besides its volume and pan: its devices' parameters (AUT-001).
+  const targets = useMemo(
+    () =>
+      new Map(
+        [...tracks, ...returns].map((track) => [
+          track.id,
+          deviceTargets(track.devices ?? [], libraryDevice, rackName),
+        ])
+      ),
+    [returns, tracks]
+  );
 
   return (
     <Timeline
@@ -696,10 +743,20 @@ export function ArrangementView({
                           {...reorder.gripProps(track.id)}
                         />
                       )}
-                      <TimelineTrackControls
+                      <FollowingControls
                         compact={isShort(height)}
                         folded={arrangement.folded[track.id]}
-                        mix={mix}
+                        following={{
+                          duration,
+                          overridden: automation.overridden[track.id],
+                          position: engine.position,
+                        }}
+                        meter={
+                          <TrackLevel
+                            analysers={engine.meter(track.id)}
+                            name={track.name}
+                          />
+                        }
                         name={track.name}
                         onMix={automation.changeMix}
                         onMixCommit={settle}
@@ -711,6 +768,7 @@ export function ArrangementView({
                           selectedTracks.includes(track.id) ||
                           selectedTrack === track.id
                         }
+                        track={track}
                         trackId={track.id}
                         {...menuOf(isReturn, isGroup)}
                       >
@@ -719,10 +777,11 @@ export function ArrangementView({
                             onClear={automation.clear}
                             onParameterChange={automation.show}
                             parameter={automation.parameterOf(track.id)}
+                            targets={targets.get(track.id)}
                             track={track}
                           />
                         ) : null}
-                      </TimelineTrackControls>
+                      </FollowingControls>
                     </div>
                   }
                   onResize={arrangement.resizeTrack}
@@ -788,6 +847,7 @@ export function ArrangementView({
                             overridden={automation.overridden[track.id]}
                             parameter={automation.parameterOf(track.id)}
                             snapStep={grid.snapStep}
+                            targets={targets.get(track.id)}
                             track={track}
                           />
                         ) : null}

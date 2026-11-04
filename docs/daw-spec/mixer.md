@@ -73,3 +73,7 @@ Test: apps/www/test/registry-audio/base/lib/arrangement-groups.test.ts "MIX-020"
 ### MIX-021 Delay compensation through groups
 Wherever paths meet, at a group, a return or the main track, they meet on the same frame: a track waits for the slowest of its group's tracks, a group for the slowest of the groups it meets, and each send waits on its own for the slowest send into the same return, whatever depth it leaves from.
 Test: packages/core/src/audio/playback/mixer.test.ts "MIX-021"; apps/www/test/browser/arrangement-engine.check.ts "MIX-021"
+
+### MIX-022 A meter in each track's header
+A track's header meters what its channel sends on, after its volume, pan and switch, down its right edge, as a thin pair: a track that plays reads a level, and a silent or muted one reads none.
+Test: apps/daw/test/browser/run.ts "MIX-022"

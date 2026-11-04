@@ -1,4 +1,5 @@
 import type { Breakpoint } from "@audio-ui/core/envelope";
+import type { Note } from "@audio-ui/core/piano-roll";
 import {
   type SignatureChange,
   secondsPerBar,
@@ -26,12 +27,16 @@ import {
   type Clipping,
   DRUM_RACK_DEVICE,
   type DrumSound,
+  deviceParameterKey,
+  EDGE_FADE_SECONDS,
   FULL_ZONE,
   INSTRUMENT_RACK_DEVICE,
   type Mix,
   mixOf,
   newDrumRack,
   newRack,
+  parseDeviceParameter,
+  playedNotes,
   RACK_DEVICE,
   type Rack,
   type RackChain,
@@ -39,8 +44,10 @@ import {
   type RackMapping,
   rackDevices,
   type TimeSelection,
+  type TrackAutomation,
   type TrackDevice,
   type TrackKind,
+  withoutDeviceAutomation,
 } from "@/lib/arrangement";
 import {
   beginChange,
@@ -385,21 +392,45 @@ export function openTime(
   return insertTime(all, at, length, { duration }, splitter(all));
 }
 
+/** The notes MIDI clips play within `[from, to)`, as one clip's own notes: each kept as it sounds, its loop and transposition played out. */
+function mergedNotes(
+  clips: readonly Arranged[],
+  from: number,
+  to: number
+): Note[] {
+  return clips
+    .filter((clip) => !clip.disabled)
+    .flatMap((clip) => playedNotes(clip))
+    .filter((note) => note.start >= from && note.start < to)
+    .sort((a, b) => a.start - b.start || a.pitch - b.pitch)
+    .map(({ sourceId: _sourceId, ...note }, index) => ({
+      ...note,
+      id: index + 1,
+      length: Math.min(note.length, to - note.start),
+      start: note.start - from,
+    }));
+}
+
 /**
  * Makes one clip per track of a stretch of time: on each track that has
  * anything in it, a clip spanning the stretch replaces what was there, named
- * after the first clip it takes in.
+ * after the first clip it takes in. MIDI clips merge into it, their notes as
+ * they sound. Audio clips become the recording `rendered` names for the track,
+ * which holds what they play: its fades, gain and all are in it, so the clip
+ * has none. An audio track with none rendered takes a copy of its first clip.
  */
 export function consolidate(
   all: Arranged[],
   selection: TimeSelection,
-  duration: number
+  duration: number,
+  rendered: Readonly<Record<string, string>> = {}
 ): { clips: Arranged[]; ids: string[] } {
   const [from, to] = selection.range;
   const length = to - from;
   const taken = new Set(all.map((clip) => clip.id));
-  const made = selection.tracks.flatMap((track) => {
-    const [first] = all
+  const value = { fadeIn: 0, fadeOut: 0, length, offset: 0, start: from };
+  const made = selection.tracks.flatMap((track): Arranged[] => {
+    const inside = all
       .filter(
         (clip) =>
           clip.track === track &&
@@ -407,17 +438,26 @@ export function consolidate(
           clip.value.start + clip.value.length > from
       )
       .sort((a, b) => a.value.start - b.value.start);
-    return first
-      ? [
-          {
-            ...first,
-            disabled: false,
-            id: freshId(first.id, taken),
-            sourceLength: length,
-            value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start: from },
-          },
-        ]
-      : [];
+    const [first] = inside;
+    if (!first) {
+      return [];
+    }
+    const whole = {
+      id: freshId(first.id, taken),
+      name: first.name,
+      sourceLength: length,
+      track,
+      value,
+    };
+    if (first.notes) {
+      return [{ ...whole, notes: mergedNotes(inside, from, to) }];
+    }
+    const recording = rendered[track];
+    return [
+      recording
+        ? { ...whole, recording }
+        : { ...first, disabled: false, ...whole },
+    ];
   });
   const cleared = clearTime(all, selection, duration);
   return { clips: [...cleared, ...made], ids: made.map((clip) => clip.id) };
@@ -829,7 +869,12 @@ export type ArrangementCommand =
       /** The track the clip was dropped on, if it left its own. */
       track: string | undefined;
     }
-  | { type: "consolidate-time"; time: TimeSelection }
+  /** One clip per track of a stretch of time; `rendered` names, by track, the recording that holds what its audio clips play. */
+  | {
+      type: "consolidate-time";
+      time: TimeSelection;
+      rendered?: Readonly<Record<string, string>>;
+    }
   | { type: "clear-selection" }
   | { type: "clear-time"; time: TimeSelection }
   | { type: "crop-clip"; id: string }
@@ -967,9 +1012,21 @@ function splitWhere(
         if (!cut) {
           return [clip];
         }
+        // An edge's fade each side of an audio clip's cut: they cross, and it plays on as if whole.
+        const fade = clip.recording
+          ? Math.min(
+              EDGE_FADE_SECONDS,
+              cut[0].length - cut[0].fadeIn,
+              cut[1].length - cut[1].fadeOut
+            )
+          : 0;
         return [
-          { ...clip, value: cut[0] },
-          { ...clip, id: freshId(clip.id, taken), value: cut[1] },
+          { ...clip, value: { ...cut[0], fadeOut: fade } },
+          {
+            ...clip,
+            id: freshId(clip.id, taken),
+            value: { ...cut[1], fadeIn: fade },
+          },
         ];
       }),
     };
@@ -1611,6 +1668,28 @@ type Handlers = {
 };
 
 /** A track again right after it, with copies of its clips; a group, with every track in it. */
+/** A track's automation with its devices' envelopes under the new ids `renamed` gives them. */
+function renamedAutomation(
+  automation: TrackAutomation | undefined,
+  renamed: ReadonlyMap<string, string>
+): { automation?: TrackAutomation } {
+  if (!automation) {
+    return {};
+  }
+  return {
+    automation: Object.fromEntries(
+      Object.entries(automation).map(([key, points]) => {
+        const named = parseDeviceParameter(key);
+        const device = named && renamed.get(named.device);
+        return [
+          device && named ? deviceParameterKey(device, named.parameter) : key,
+          points,
+        ];
+      })
+    ) as TrackAutomation,
+  };
+}
+
 function duplicateTrack(state: ArrangementState, id: string): ArrangementState {
   const { tracks } = state.doc;
   if (!tracks.some((item) => item.id === id)) {
@@ -1628,12 +1707,19 @@ function duplicateTrack(state: ArrangementState, id: string): ArrangementState {
   );
   const copies = sources.map((item): ArrangementTrack => {
     const group = item.group === undefined ? undefined : ids.get(item.group);
+    const renamed = new Map(
+      (item.devices ?? []).map((device) => [
+        device.id,
+        freshId("device", devicesTaken),
+      ])
+    );
     return {
       ...item,
       devices: item.devices?.map((device) => ({
         ...device,
-        id: freshId("device", devicesTaken),
+        id: renamed.get(device.id) ?? device.id,
       })),
+      ...renamedAutomation(item.automation, renamed),
       ...(group === undefined ? {} : { group }),
       id: ids.get(item.id) ?? item.id,
       name: item.id === id ? `${item.name} copy` : item.name,
@@ -2146,9 +2232,15 @@ function cropOne(state: ArrangementState, id: string): ArrangementState {
 
 function consolidateTime(
   state: ArrangementState,
-  time: TimeSelection
+  time: TimeSelection,
+  rendered?: Readonly<Record<string, string>>
 ): ArrangementState {
-  const { clips, ids } = consolidate(state.doc.clips, time, state.doc.duration);
+  const { clips, ids } = consolidate(
+    state.doc.clips,
+    time,
+    state.doc.duration,
+    rendered
+  );
   return withSelection(
     edit(state, (doc) => ({ ...doc, clips })),
     {
@@ -2278,7 +2370,38 @@ const handlers: Handlers = {
     edit(state, (doc) =>
       withTrack(doc, track, (item) => {
         const devices = dropDevice(item.devices ?? [], id);
-        return devices === (item.devices ?? []) ? item : { ...item, devices };
+        if (devices === (item.devices ?? [])) {
+          return item;
+        }
+        // The envelopes of what went go with it: the device and the devices of its racks.
+        const kept = new Set(
+          devices.flatMap((device) =>
+            device.rack
+              ? [
+                  device.id,
+                  ...rackDevices(device.rack).map((inside) => inside.id),
+                ]
+              : [device.id]
+          )
+        );
+        const gone = new Set(
+          (item.devices ?? [])
+            .flatMap((device) =>
+              device.rack
+                ? [
+                    device.id,
+                    ...rackDevices(device.rack).map((inside) => inside.id),
+                  ]
+                : [device.id]
+            )
+            .filter((each) => !kept.has(each))
+        );
+        const automation = withoutDeviceAutomation(item.automation, gone);
+        return {
+          ...item,
+          devices,
+          ...(automation === item.automation ? {} : { automation }),
+        };
       })
     ),
   "group-devices": (state, { ids, track }) => groupDevices(state, track, ids),
@@ -2494,7 +2617,8 @@ const handlers: Handlers = {
   "clip-action": (state, command) => clipAction(state, command),
   "commit-clip": (state, { id, copy, track }) =>
     commitClip(state, id, copy, track),
-  "consolidate-time": (state, { time }) => consolidateTime(state, time),
+  "consolidate-time": (state, { rendered, time }) =>
+    consolidateTime(state, time, rendered),
   "clear-selection": (state) => withSelection(state, null),
   "clear-time": (state, { time }) =>
     edit(state, (doc) => ({

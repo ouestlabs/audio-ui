@@ -47,6 +47,7 @@ import {
   type Arranged,
   type ArrangementTrack,
   padRecordings,
+  type TimeSelection,
 } from "@/lib/arrangement";
 import { renderArrangement } from "@/lib/arrangement-engine";
 import {
@@ -55,6 +56,7 @@ import {
   trackOf,
 } from "@/lib/arrangement-state";
 import { canStream, streamRecording } from "@/lib/daw/cache";
+import { renderConsolidated } from "@/lib/daw/consolidate";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
 import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
 import {
@@ -432,12 +434,53 @@ export function Daw({
     }
     return selectedTrack ? [selectedTrack] : [];
   }, [arrangement.selectedTracks, selectedTrack]);
+  // Cmd+J (ARR-020): each audio track's clips rendered into one recording, as they play, then one clip per track, one step of undo.
+  const consolidateTime = useCallback(
+    async (time: TimeSelection) => {
+      const context = webAudio.getContext();
+      if (!context) {
+        return;
+      }
+      const notice = toast.loading("Consolidating…");
+      try {
+        const { rendered, made } = await renderConsolidated(
+          context,
+          doc,
+          time,
+          sources,
+          new Set(recordings.keys())
+        );
+        if (canStore()) {
+          await Promise.all(
+            [...made].map(([id, { bytes }]) => saveRecording(id, bytes))
+          );
+        }
+        setRecordings(
+          (current) =>
+            new Map([
+              ...current,
+              ...[...made].map(
+                ([id, { recording }]) => [id, recording] as const
+              ),
+            ])
+        );
+        dispatch({ rendered, time, type: "consolidate-time" });
+        toast.dismiss(notice);
+      } catch (error) {
+        toast.error(`Not consolidated: ${(error as Error).message}`, {
+          id: notice,
+        });
+      }
+    },
+    [dispatch, doc, recordings, sources]
+  );
   const timeSelection = useTimeSelection({
     bar,
     clips: doc.clips,
     copyOf: arrangement.copyOf,
     dispatch,
     getPosition: getCursor,
+    onConsolidate: consolidateTime,
     selectedIds: arrangement.selectedIds,
     selectedTracks: pickedTracks,
     tracks: doc.tracks,
@@ -956,6 +999,7 @@ export function Daw({
           engine={engine}
           onMix={automation.changeMix}
           onSelectTrack={pickTrack}
+          overridden={automation.overridden}
           selectedTrack={selectedTrack}
         />
       </section>
@@ -978,11 +1022,14 @@ export function Daw({
         ) : (
           <DeviceView
             arrangement={arrangement}
+            onDeviceMoved={automation.deviceMoved}
             onHoldNote={holdNote}
             onNoteOff={noteOff}
             onNoteOn={noteOn}
             onOpenLibrary={openLibrary}
             onPadFiles={addPadSample}
+            overridden={automation.overridden}
+            position={engine.position}
             track={selectedTrack}
           />
         )}

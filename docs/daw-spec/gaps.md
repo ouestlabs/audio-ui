@@ -47,7 +47,7 @@ Status: fixed: the clip panel's Reverse mirrors the region and the loop with the
 
 ### G-010 A clip names its recording through its id
 `Arranged` has no field for the recording it plays: the block finds it by cutting the piece suffix off the clip's id (`file3-2` is `file3`). Consolidating a stretch copies its first clip and renders nothing. Breaks ARR-008.
-Status: `Arranged.recording` names it, and every piece and copy keeps it; the block still finds recordings by their ids, and consolidating still renders nothing (phase 3).
+Status: `Arranged.recording` names it, and every piece and copy keeps it; the DAW consolidates by rendering (ARR-020). The Timeline block still finds recordings by their ids, and its Cmd+J still copies the first clip, since it gives no `onConsolidate`.
 
 ### G-011 The device catalog and the offline render are locked in a block
 The list that pairs each device with its engine and its panel, and `bounce()`, live inside `block-device-chain`: a project cannot install them to build a chain per track or render one.
