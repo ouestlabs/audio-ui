@@ -42,7 +42,7 @@ Give `onRhythmChange` and a caret beside the metronome opens a menu of how often
 
 ### Recording
 
-Give `onRecordChange` with `recording` and a Record button follows Stop, its glyph red while it records. `onCountInChange` with `countIn` (0, 1, 2 or 4 bars) and `onPunchChange` with `punch` add a caret beside it, with the count-in and "Punch in the loop". The transport only shows the state: what a take records, and when, is yours; the `recording` lib (`npx shadcn@latest add @audio-ui/recording`) has an input recorder on an AudioWorklet and the clips a take becomes.
+Give `onRecordChange` with `recording` and a Record button follows Stop, its glyph red while it records. `onCountInChange` with `countIn` (0, 1, 2 or 4 bars) and `onPunchChange` with `punch` add a caret beside it, with the count-in and "Punch in the loop". `recordSettings` adds items of your own to that menu, such as an input, Overdub or Monitor. Before the start, as a count-in plays, the position counts back in negative bars (-2.1.1). The transport only shows the state: what a take records, and when, is yours; the `recording` lib (`npx shadcn@latest add @audio-ui/recording`) has an input recorder on an AudioWorklet and the clips a take becomes, the engine's `monitor(track, input)` plays an input through a track for headphones, and `use-computer-keyboard` (`npx shadcn@latest add @audio-ui/use-computer-keyboard`) makes the computer's keys a keyboard of notes.
 
 ## API reference
 
@@ -56,6 +56,7 @@ Give `onRecordChange` with `recording` and a Record button follows Stop, its gly
 <TypeRow name={"looping, onLoopingChange"} type={"boolean, (looping) => void"}>Whether the loop is on.</TypeRow>
 <TypeRow name={"recording, onRecordChange"} type={"boolean, (recording) => void"}>Whether it records. Giving the handler adds the Record button.</TypeRow>
 <TypeRow name={"countIn, onCountInChange"} type={"number, (bars) => void"} default={"0"}>How many bars the metronome counts in before a take, in Record's menu.</TypeRow>
+<TypeRow name={"recordSettings"} type={"ReactNode"}>More of Record's menu, after the count-in and Punch: menu items of your own.</TypeRow>
 <TypeRow name={"punch, onPunchChange"} type={"boolean, (punch) => void"} default={"false"}>Whether a take keeps only what falls inside the loop, in Record's menu.</TypeRow>
 <TypeRow name={"metronome, onMetronomeChange"} type={"boolean, (metronome) => void"}>Whether the metronome is on.</TypeRow>
 <TypeRow name={"rhythm, onRhythmChange"} type={"MetronomeRhythm, (rhythm) => void"} default={"\"auto\""}>How often the click sounds, and what the metronome's dots follow. Giving the handler adds the menu.</TypeRow>

@@ -1074,6 +1074,105 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         { timeout: 5000 }
       );
     },
+  "REC-005: a count-in counts the transport back in negative bars before the take starts":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await page.getByRole("button", { name: "Record settings" }).click();
+      await page.getByRole("menuitemradio", { name: "1 bar" }).click();
+      await page.keyboard.press("Escape");
+      const spoken = page.locator('[data-slot="transport-position"] .sr-only');
+      await page.getByRole("button", { exact: true, name: "Record" }).click();
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector('[data-slot="transport-position"] .sr-only')
+            ?.textContent?.startsWith("Bar -1"),
+        undefined,
+        { timeout: 3000 }
+      );
+      // A bar at 120 BPM is 2 s: then the take runs from 1.1.1.
+      await page.waitForFunction(
+        () =>
+          !document
+            .querySelector('[data-slot="transport-position"] .sr-only')
+            ?.textContent?.startsWith("Bar -"),
+        undefined,
+        { timeout: 5000 }
+      );
+      const after = await spoken.textContent();
+      await page.getByRole("button", { exact: true, name: "Record" }).click();
+      assert(after?.startsWith("Bar 1,"), `after the count-in: ${after}`);
+    },
+  "REC-002: the computer's keyboard plays notes on an armed MIDI track, and a take keeps them as a MIDI clip":
+    async (browser) => {
+      const page = await open(browser);
+      const clips = page.locator('[data-track="track-3"] [data-clip-id]');
+      const before = await clips.count();
+      await page.getByRole("button", { name: "Arm 3 MIDI" }).click();
+      await page.getByRole("button", { name: "Record settings" }).click();
+      await page
+        .getByRole("menuitemcheckbox", { name: "Computer keyboard" })
+        .click();
+      await page.keyboard.press("Escape");
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.getByRole("button", { exact: true, name: "Record" }).click();
+      await page.waitForTimeout(500);
+      // A, then D: C and E; S is solo otherwise, here a note too.
+      await ["a", "d", "s"].reduce(async (done, key) => {
+        await done;
+        await page.keyboard.down(key);
+        await page.waitForTimeout(250);
+        await page.keyboard.up(key);
+      }, Promise.resolve());
+      await page.waitForTimeout(300);
+      await page.getByRole("button", { exact: true, name: "Record" }).click();
+      await page.waitForFunction(
+        (count) =>
+          document.querySelectorAll('[data-track="track-3"] [data-clip-id]')
+            .length > count,
+        before,
+        { timeout: 5000 }
+      );
+      const soloed = await page
+        .getByRole("button", { name: "Solo 3 MIDI" })
+        .getAttribute("aria-pressed");
+      assert(soloed !== "true", "S played a note, it did not solo the track");
+      const notes = await clips
+        .last()
+        .locator('[data-slot="timeline-clip-notes"] > *')
+        .count();
+      assert(notes === 3, `the take keeps the 3 notes played (${notes})`);
+    },
+  "REC-003: with Monitor input on, an armed audio track plays its input through its strip, stopped; off, it is silent":
+    async (browser) => {
+      const page = await open(browser);
+      await showMixer(page);
+      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      const quiet = await loudest(page, 800);
+      await page.getByRole("button", { name: "Record settings" }).click();
+      await page
+        .getByRole("menuitemcheckbox", { name: "Monitor input (headphones)" })
+        .click();
+      await page.keyboard.press("Escape");
+      await page.waitForTimeout(800);
+      const heard = await loudest(page, 1000);
+      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      // The meter falls back at its own pace.
+      await page.waitForTimeout(2500);
+      const after = await loudest(page, 800);
+      assert(
+        quiet < -60,
+        `before Monitor, the input is not heard (${quiet} dB)`
+      );
+      assert(
+        heard > -40,
+        `with Monitor, the armed track plays its input (${heard} dB)`
+      );
+      assert(after < -60, `disarmed, it stops (${after} dB)`);
+    },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {
       const page = await open(browser);

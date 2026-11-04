@@ -107,6 +107,7 @@ export interface TopBarProps
     | "onRecordChange"
     | "punch"
     | "recording"
+    | "recordSettings"
   > {
   /** Whether each lane shows its envelope (KEY-027). */
   automating: boolean;
@@ -205,6 +206,7 @@ export function TopBar(props: TopBarProps) {
         playing={props.playing}
         punch={props.punch}
         recording={props.recording}
+        recordSettings={props.recordSettings}
         rhythm={props.rhythm}
         signatures={props.signatures}
         source={props.position}

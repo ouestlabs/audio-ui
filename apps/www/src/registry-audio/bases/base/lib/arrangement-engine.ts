@@ -229,6 +229,12 @@ export interface ArrangementEngine {
    */
   load: (from: number, to: number) => Promise<void>;
   readonly mixer: Mixer;
+  /**
+   * Plays `input` through a track's devices and strip, as an armed track
+   * monitors what comes in (REC-003); `null` takes it away. One input a
+   * track: a new one replaces the last.
+   */
+  monitor: (track: string, input: AudioNode | null) => void;
   /** Lets go of a note `noteOn` started on a MIDI track. */
   noteOff: (track: string, pitch: number) => void;
   /** Plays a note on a MIDI track's instrument now, through its chain, as a key of its editor does, until `noteOff`. */
@@ -1135,13 +1141,39 @@ export async function createArrangementEngine(
     );
   };
 
+  const monitored = new Map<string, { input: AudioNode; to: AudioNode }>();
+  const unmonitor = (track: string) => {
+    const was = monitored.get(track);
+    monitored.delete(track);
+    try {
+      was?.input.disconnect(was.to);
+    } catch {
+      // The strip it fed was taken apart with its track.
+    }
+  };
+
   return {
     dispose: () => {
       stop();
+      for (const track of [...monitored.keys()]) {
+        unmonitor(track);
+      }
       for (const id of [...runtimes.keys()]) {
         disposeRuntime(id);
       }
       mixer.dispose();
+    },
+    monitor: (track, input) => {
+      const strip = mixer.strip(track);
+      const was = monitored.get(track);
+      if (was?.input === input && was.to === strip?.input) {
+        return;
+      }
+      unmonitor(track);
+      if (input && strip) {
+        input.connect(strip.input);
+        monitored.set(track, { input, to: strip.input });
+      }
     },
     cue: (from) => {
       if (state.playing) {

@@ -7,7 +7,9 @@ import {
   type MetronomeRhythm,
   metronomeRhythmSeconds,
   type SignatureChange,
+  secondsPerBar,
   secondsPerBeat,
+  secondsPerQuarter,
   type Tempo,
 } from "@audio-ui/core/time";
 import {
@@ -19,7 +21,7 @@ import {
 } from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
-import { useCallback, useEffect, useRef } from "react";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -52,6 +54,22 @@ import {
 import { BpmControl } from "@/registry-audio/bases/base/audio/elements/bpm-control";
 
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;
+
+/**
+ * Where a time before the song's start falls, as a count-in reads it: bars
+ * counted back from the start, -2.1.1 then -1.4.4, at the first tempo.
+ */
+function countInBarsBeats(seconds: number, tempo: Tempo) {
+  const bar = Math.floor(seconds / secondsPerBar(tempo));
+  const into = seconds - bar * secondsPerBar(tempo);
+  const sixteenths = Math.floor(into / (secondsPerQuarter(tempo) / 4) + 1e-9);
+  const perBeat = 16 / tempo.beatUnit;
+  return {
+    bar,
+    beat: Math.floor(sixteenths / perBeat) + 1,
+    sixteenth: (sixteenths % perBeat) + 1,
+  };
+}
 
 /** One figure of the position, with its name under it. */
 function PositionField({
@@ -105,7 +123,12 @@ function TransportPosition({
       return;
     }
     const paint = () => {
-      const at = barsBeatsWith(source.getSnapshot(), tempo, signatures);
+      const seconds = source.getSnapshot();
+      // Before the start, as a count-in plays, the bars count back: -2.1.1.
+      const at =
+        seconds < 0
+          ? countInBarsBeats(seconds, tempo)
+          : barsBeatsWith(seconds, tempo, signatures);
       barNode.data = String(at.bar);
       beatNode.data = String(at.beat);
       sixteenthNode.data = String(at.sixteenth);
@@ -208,11 +231,13 @@ function RecordMenu({
   onCountInChange,
   onPunchChange,
   punch,
+  settings,
 }: {
   countIn: number;
   onCountInChange?: (bars: number) => void;
   onPunchChange?: (punch: boolean) => void;
   punch: boolean;
+  settings?: ReactNode;
 }) {
   const handleCountIn = useCallback(
     (value: string) => onCountInChange?.(Number(value)),
@@ -263,6 +288,12 @@ function RecordMenu({
             Punch in the loop
           </DropdownMenuCheckboxItem>
         ) : null}
+        {settings ? (
+          <>
+            <DropdownMenuSeparator />
+            {settings}
+          </>
+        ) : null}
       </DropdownMenuContent>
     </DropdownMenu>
   );
@@ -276,6 +307,7 @@ function RecordControls({
   onRecordChange,
   punch,
   recording,
+  settings,
 }: {
   countIn: number;
   onCountInChange?: (bars: number) => void;
@@ -283,6 +315,7 @@ function RecordControls({
   onRecordChange?: (recording: boolean) => void;
   punch: boolean;
   recording: boolean;
+  settings?: ReactNode;
 }) {
   const toggle = useCallback(
     () => onRecordChange?.(!recording),
@@ -308,12 +341,13 @@ function RecordControls({
       >
         <RecordIcon weight="fill" />
       </Toolbar.Button>
-      {onCountInChange || onPunchChange ? (
+      {onCountInChange || onPunchChange || settings ? (
         <RecordMenu
           countIn={countIn}
           onCountInChange={onCountInChange}
           onPunchChange={onPunchChange}
           punch={punch}
+          settings={settings}
         />
       ) : null}
     </>
@@ -607,6 +641,8 @@ interface TransportProps {
   punch?: boolean;
   /** Whether it is recording. */
   recording?: boolean;
+  /** More of Record's menu, after the count-in and Punch: menu items of your own, such as an input or overdub. */
+  recordSettings?: ReactNode;
   /** How often the click sounds, and what the metronome's dots follow. @default "auto" */
   rhythm?: MetronomeRhythm;
   /** The time-signature changes along the song, which the position's bars follow. @default [] */
@@ -647,6 +683,7 @@ function Transport({
   playing,
   punch = false,
   recording = false,
+  recordSettings,
   rhythm = "auto",
   signatures = NO_SIGNATURES,
   sound,
@@ -695,6 +732,7 @@ function Transport({
           onRecordChange={onRecordChange}
           punch={punch}
           recording={recording}
+          settings={recordSettings}
         />
         <ButtonGroupText>
           <TransportPosition

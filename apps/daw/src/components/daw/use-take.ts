@@ -1,8 +1,12 @@
 "use client";
 
-import { secondsPerBar, secondsPerBeat } from "@audio-ui/core/time";
+import {
+  secondsPerBar,
+  secondsPerBeat,
+  secondsPerQuarter,
+} from "@audio-ui/core/time";
 import { createSource, type Source } from "@audio-ui/react";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import type { Arranged } from "@/lib/arrangement";
@@ -27,6 +31,7 @@ import {
   audioTakeClip,
   blockPeak,
   midiTakeClip,
+  overdubbed,
   type PlayedNote,
   type RecordedBlock,
   sliceBlocks,
@@ -78,12 +83,8 @@ const LEAD_SECONDS = 0.05;
 
 /** What a take is while it runs: where playback started, what records it, the notes played. */
 interface Running {
-  /** The audio input, or null when no audio track is armed. */
-  input: {
-    recorder: InputRecorder;
-    source: MediaStreamAudioSourceNode;
-    stream: MediaStream;
-  } | null;
+  /** What records the audio input, or null when no audio track is armed. */
+  input: { recorder: InputRecorder; stream: MediaStream } | null;
   /** The input's latency plus the output's, in seconds (REC-008). */
   latency: number;
   notes: PlayedNote[];
@@ -104,39 +105,47 @@ function armedTracks(doc: ArrangementDoc, armed: ReadonlySet<string>) {
   return { audio, midi };
 }
 
+/** The browser's input as a node: the stream, and its source on the context. */
+interface OpenInput {
+  source: MediaStreamAudioSourceNode;
+  stream: MediaStream;
+}
+
 /** The browser's input, raw: echo cancellation, noise suppression and gain control are for calls, not for takes. */
-async function openInput(
+async function openStream(
   ctx: AudioContext,
-  onBlock: (block: RecordedBlock) => void
-) {
+  deviceId: string
+): Promise<OpenInput> {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       autoGainControl: false,
       echoCancellation: false,
       noiseSuppression: false,
+      ...(deviceId ? { deviceId: { exact: deviceId } } : {}),
     },
   });
-  const recorder = await createInputRecorder(ctx, onBlock);
-  if (!recorder) {
-    for (const track of stream.getTracks()) {
-      track.stop();
-    }
-    return null;
-  }
-  const source = ctx.createMediaStreamSource(stream);
-  source.connect(recorder.input);
-  return { recorder, source, stream };
+  return { source: ctx.createMediaStreamSource(stream), stream };
 }
 
-function closeInput(input: Running["input"]) {
-  if (!input) {
-    return;
-  }
-  input.source.disconnect();
-  input.recorder.dispose();
-  for (const track of input.stream.getTracks()) {
+function closeStream(input: OpenInput | null) {
+  input?.source.disconnect();
+  for (const track of input?.stream.getTracks() ?? []) {
     track.stop();
   }
+}
+
+/** The input's own latency, where the browser reports it, in seconds. */
+const inputLatency = (stream: MediaStream | undefined) =>
+  (
+    stream?.getAudioTracks()[0]?.getSettings() as
+      | { latency?: number }
+      | undefined
+  )?.latency ?? 0;
+
+/** The audio inputs the browser offers, by id and name; names show once it has given access to one. */
+export interface AudioInput {
+  id: string;
+  label: string;
 }
 
 /**
@@ -214,14 +223,39 @@ async function audioTakeCommands(
   }));
 }
 
-/** A MIDI take: a clip of the notes played on each armed MIDI track (REC-009). */
+/** What a MIDI take does: a clip of the notes played on each armed MIDI track, or with Overdub, the notes added to the clip under its start (REC-009). */
+interface MidiTakeOptions {
+  overdub: boolean;
+  /** Record quantization in seconds; 0 for none. */
+  quantize: number;
+}
+
+/** The MIDI clip on `track` that the take's start falls in, which Overdub adds to. */
+const clipUnder = (doc: ArrangementDoc, track: string, at: number) =>
+  doc.clips.find(
+    (clip) =>
+      clip.track === track &&
+      clip.notes &&
+      clip.value.start <= at &&
+      at < clip.value.start + clip.value.length
+  );
+
 function midiTakeCommands(
   take: Running,
   [from, to]: readonly [number, number],
-  doc: ArrangementDoc
+  doc: ArrangementDoc,
+  { overdub, quantize }: MidiTakeOptions
 ): ArrangementCommand[] {
   const taken = new Set(doc.clips.map((clip) => clip.id));
   return take.tracks.midi.map((track) => {
+    const under = overdub ? clipUnder(doc, track, from) : undefined;
+    if (under) {
+      // The same clip, laid again with the notes added: one undo step, nothing else moved.
+      return {
+        clip: overdubbed(under, take.notes, { from, quantize, to }),
+        type: "add-clip" as const,
+      };
+    }
     const id = freshMidiClipId(taken);
     taken.add(id);
     const clip: Arranged = midiTakeClip({
@@ -229,6 +263,7 @@ function midiTakeCommands(
       id,
       name: trackName(doc, track, "MIDI"),
       played: take.notes,
+      quantize,
       to,
       track,
     });
@@ -260,8 +295,18 @@ export function useTake({
   const [recording, setRecording] = useState(false);
   const [countIn, setCountIn] = useState(0);
   const [punch, setPunch] = useState(false);
+  const [overdub, setOverdub] = useState(false);
+  /** Record quantization, as a share of a whole note: 0 for none. */
+  const [quantize, setQuantize] = useState(0);
+  /** Whether armed audio tracks play their input, for headphones (REC-003). */
+  const [monitorInput, setMonitorInput] = useState(false);
+  const [inputDevice, setInputDevice] = useState("");
+  const [inputs, setInputs] = useState<readonly AudioInput[]>([]);
   const [live, setLive] = useState<LiveTake | null>(null);
+  // Where a count-in stands, in negative seconds before the take; null outside one (REC-005).
+  const [countdown] = useState(() => createSource<number | null>(null));
   const running = useRef<Running | null>(null);
+  const opened = useRef<{ device: string; input: OpenInput } | null>(null);
 
   // Arming one disarms the others, unless Cmd or Ctrl was held (REC-001).
   const arm = useCallback((track: string, exclusive: boolean) => {
@@ -276,6 +321,91 @@ export function useTake({
     });
   }, []);
 
+  /** The input, opened once and shared by monitoring and takes, on the device picked. */
+  const input = useCallback(
+    async (ctx: AudioContext) => {
+      if (opened.current?.device !== inputDevice) {
+        closeStream(opened.current?.input ?? null);
+        opened.current = null;
+      }
+      if (!opened.current) {
+        opened.current = {
+          device: inputDevice,
+          input: await openStream(ctx, inputDevice),
+        };
+      }
+      return opened.current.input;
+    },
+    [inputDevice]
+  );
+
+  /** The audio inputs the browser offers, read again as the menu opens. */
+  const refreshInputs = useCallback(async () => {
+    const devices = await navigator.mediaDevices
+      ?.enumerateDevices()
+      .catch(() => []);
+    setInputs(
+      (devices ?? [])
+        .filter((device) => device.kind === "audioinput")
+        .map((device, index) => ({
+          id: device.deviceId,
+          label: device.label || `Input ${index + 1}`,
+        }))
+    );
+  }, []);
+
+  // Armed audio tracks hear their input while Monitor is on; the input closes when nothing needs it.
+  const armedAudio = armedTracks(doc, armed).audio.join(" ");
+  useEffect(() => {
+    const engineNow = engine.engine;
+    const ctx = webAudio.getContext();
+    const tracks = armedAudio ? armedAudio.split(" ") : [];
+    if (!(engineNow && ctx instanceof AudioContext)) {
+      return;
+    }
+    let cancelled = false;
+    if (monitorInput && tracks.length > 0) {
+      input(ctx)
+        .then(({ source }) => {
+          if (!cancelled) {
+            for (const track of tracks) {
+              engineNow.monitor(track, source);
+            }
+          }
+        })
+        .catch(() =>
+          toast.error("The browser gave no access to an audio input")
+        );
+    }
+    return () => {
+      cancelled = true;
+      for (const track of tracks) {
+        engineNow.monitor(track, null);
+      }
+      if (!running.current) {
+        closeStream(opened.current?.input ?? null);
+        opened.current = null;
+      }
+    };
+  }, [armedAudio, engine.engine, input, monitorInput]);
+
+  // The count-in, counted back to the take's start on the transport.
+  const countDown = useCallback(
+    (ctx: AudioContext, startsAt: number) => {
+      const tick = () => {
+        const left = startsAt - ctx.currentTime;
+        if (left <= 0 || !running.current) {
+          countdown.set(null);
+          return;
+        }
+        countdown.set(-left);
+        requestAnimationFrame(tick);
+      };
+      tick();
+    },
+    [countdown]
+  );
+
   const start = useCallback(async () => {
     const ctx = webAudio.getContext();
     if (!(ctx instanceof AudioContext)) {
@@ -285,15 +415,20 @@ export function useTake({
       await ctx.resume();
     }
     const tracks = armedTracks(doc, armed);
-    const drawn = liveLevels(ctx.sampleRate);
-    const input =
-      tracks.audio.length > 0
-        ? await openInput(ctx, drawn.hear).catch(() => {
-            toast.error("The browser gave no access to an audio input");
-            return null;
-          })
-        : null;
     const rate = ctx.sampleRate;
+    const drawn = liveLevels(rate);
+    let recorder: Running["input"] = null;
+    if (tracks.audio.length > 0) {
+      const open = await input(ctx).catch(() => null);
+      const made = open ? await createInputRecorder(ctx, drawn.hear) : null;
+      if (open && made) {
+        open.source.connect(made.input);
+        recorder = { recorder: made, stream: open.stream };
+        refreshInputs();
+      } else {
+        toast.error("The browser gave no access to an audio input");
+      }
+    }
     const countInSeconds = countIn * secondsPerBar(doc.tempo);
     const lead = ctx.currentTime + LEAD_SECONDS;
     if (countIn > 0) {
@@ -304,13 +439,10 @@ export function useTake({
         beatsPerBar: doc.tempo.beatsPerBar,
       });
     }
-    const inputLatency = input?.stream.getAudioTracks()[0]?.getSettings();
     running.current = {
-      input,
+      input: recorder,
       latency:
-        ctx.baseLatency +
-        ctx.outputLatency +
-        ((inputLatency as { latency?: number } | undefined)?.latency ?? 0),
+        ctx.baseLatency + ctx.outputLatency + inputLatency(recorder?.stream),
       notes: [],
       playAt: Math.round((lead + countInSeconds) * rate),
       playFrom: cursor,
@@ -319,20 +451,24 @@ export function useTake({
     // Drawn from the take's first frame on: after the count-in, the latency taken off.
     drawn.gate.from =
       running.current.playAt + Math.round(running.current.latency * rate);
-    input?.recorder.start();
+    recorder?.recorder.start();
     engine.play(cursor, running.current.playAt);
+    if (countIn > 0) {
+      countDown(ctx, lead + countInSeconds);
+    }
     setRecording(true);
     setLive({
       from: cursor,
-      levels: input ? drawn.levels : undefined,
+      levels: recorder ? drawn.levels : undefined,
       tracks: new Set([...tracks.audio, ...tracks.midi]),
     });
-  }, [armed, countIn, cursor, doc, engine]);
+  }, [armed, countDown, countIn, cursor, doc, engine, input, refreshInputs]);
 
   const finish = useCallback(async () => {
     const take = running.current;
     const ctx = webAudio.getContext();
     running.current = null;
+    countdown.set(null);
     setRecording(false);
     setLive(null);
     if (!(take && ctx)) {
@@ -341,19 +477,36 @@ export function useTake({
     const stoppedAt = Math.ceil(ctx.currentTime * ctx.sampleRate);
     engine.stop();
     const blocks = take.input ? await take.input.recorder.stop() : [];
-    closeInput(take.input);
+    take.input?.recorder.dispose();
+    if (!monitorInput) {
+      closeStream(opened.current?.input ?? null);
+      opened.current = null;
+    }
     const range = takeRange(take, stoppedAt, ctx.sampleRate, doc, punch);
     if (!range) {
       return;
     }
     const commands = [
       ...(await audioTakeCommands(ctx, take, blocks, range, doc, onRecordings)),
-      ...midiTakeCommands(take, range, doc),
+      ...midiTakeCommands(take, range, doc, {
+        overdub,
+        quantize: quantize * 4 * secondsPerQuarter(doc.tempo),
+      }),
     ];
     if (commands.length > 0) {
       dispatch({ commands, type: "batch" });
     }
-  }, [dispatch, doc, engine, onRecordings, punch]);
+  }, [
+    countdown,
+    dispatch,
+    doc,
+    engine,
+    monitorInput,
+    onRecordings,
+    overdub,
+    punch,
+    quantize,
+  ]);
 
   const toggle = useCallback(() => {
     if (running.current) {
@@ -389,15 +542,26 @@ export function useTake({
   return {
     arm,
     armed,
+    countdown,
     countIn,
     finish,
+    inputDevice,
+    inputs,
     live,
+    monitorInput,
     noteOff,
     noteOn,
+    overdub,
     punch,
+    quantize,
     recording,
+    refreshInputs,
     setCountIn,
+    setInputDevice,
+    setMonitorInput,
+    setOverdub,
     setPunch,
+    setQuantize,
     toggle,
   };
 }
