@@ -3,6 +3,7 @@ import {
   type Arranged,
   automationAt,
   clipReach,
+  clipWaveform,
   flatAutomation,
   mixAt,
   panPosition,
@@ -148,5 +149,62 @@ describe("automation", () => {
       gain: 0.5,
       pan: 0.25,
     });
+  });
+});
+
+describe("clipWaveform", () => {
+  // A source of 4 seconds whose peaks rise: peak n is n / 7.
+  const peaks = Array.from({ length: 8 }, (_, index) => index / 7);
+  const audio = (patch: Partial<Arranged> = {}): Arranged => ({
+    id: "a",
+    name: "a",
+    sourceLength: 4,
+    track: "t",
+    ...patch,
+    value: {
+      fadeIn: 0,
+      fadeOut: 0,
+      length: 2,
+      offset: 1,
+      start: 0,
+      ...patch.value,
+    },
+  });
+
+  test("shows the stretch of the source the clip plays", () => {
+    // From 1 s to 3 s of the source: peaks 2 to 5, two columns each half.
+    expect(clipWaveform(audio(), peaks, 2)).toEqual([4 / 7, 6 / 7]);
+  });
+
+  test("a reversed clip shows its source mirrored", () => {
+    expect(clipWaveform(audio({ reversed: true }), peaks, 2)).toEqual([
+      6 / 7,
+      4 / 7,
+    ]);
+  });
+
+  test("a looped clip shows its loop again", () => {
+    const looped = audio({
+      loop: [1, 2],
+      value: { fadeIn: 0, fadeOut: 0, length: 3, offset: 1, start: 0 },
+    });
+    const columns = clipWaveform(looped, peaks, 3);
+    expect(columns[0]).toBe(columns[1]);
+    expect(columns[1]).toBe(columns[2]);
+  });
+
+  test("a warped clip shows its source stretched: twice as fast, twice as much of it", () => {
+    const fast = audio({
+      warp: [
+        { source: 0, target: 0 },
+        { source: 4, target: 2 },
+      ],
+      value: { fadeIn: 0, fadeOut: 0, length: 2, offset: 0, start: 0 },
+    });
+    expect(clipWaveform(fast, peaks, 2)).toEqual([4 / 7, 1]);
+  });
+
+  test("no peaks, no waveform", () => {
+    expect(clipWaveform(audio(), [], 3)).toEqual([0, 0, 0]);
   });
 });

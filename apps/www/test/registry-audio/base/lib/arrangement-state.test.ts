@@ -6,6 +6,7 @@ import {
   mixOf,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
+  allTracks,
   apply,
   clearTime,
   consolidate,
@@ -353,7 +354,7 @@ describe("apply", () => {
       colors: 5,
       duration: 100,
       initialClips: clips,
-      initialLocators: [{ at: 20, name: "Verse" }],
+      initialLocators: [{ at: 20, id: "verse", name: "Verse" }],
       initialLoop: { on: true, range: [10, 30] },
       initialSignatures: [{ at: 40, beatUnit: 4, beatsPerBar: 3, id: "s" }],
       initialTracks: [
@@ -428,7 +429,8 @@ describe("apply", () => {
   });
 
   test("a tempo change keeps the musical positions: every time in the document is scaled to the new bar", () => {
-    let state = init([at("a", 10, 20)]);
+    const midi = { ...at("a", 10, 20), notes: [] };
+    let state = init([midi]);
     state = apply(state, { type: "set-tempo", tempo: SLOWER });
     const { doc } = state;
     expect(doc.tempo).toBe(SLOWER);
@@ -437,7 +439,7 @@ describe("apply", () => {
     ]);
     expect(doc.duration).toBe(200);
     expect(doc.loop).toEqual({ on: true, range: [20, 60] });
-    expect(doc.locators).toEqual([{ at: 40, name: "Verse" }]);
+    expect(doc.locators).toEqual([{ at: 40, id: "verse", name: "Verse" }]);
     expect(doc.signatures[0]?.at).toBe(80);
   });
 
@@ -468,21 +470,46 @@ describe("apply", () => {
   test("a locator is added where the cursor is, named by its number, and not twice", () => {
     let state = init([]);
     state = apply(state, { type: "add-locator", at: 50 });
-    expect(state.doc.locators.at(-1)).toEqual({ at: 50, name: "Locator 2" });
+    expect(state.doc.locators.at(-1)).toEqual({
+      at: 50,
+      id: "locator-1",
+      name: "Locator 2",
+    });
     expect(apply(state, { type: "add-locator", at: 50 })).toBe(state);
   });
 
   test("a locator is renamed, removed, and each is one step", () => {
     let state = init([]);
-    state = apply(state, { type: "rename-locator", at: 20, name: "Chorus" });
-    expect(state.doc.locators).toEqual([{ at: 20, name: "Chorus" }]);
+    state = apply(state, {
+      id: "verse",
+      name: "Chorus",
+      type: "rename-locator",
+    });
+    expect(state.doc.locators).toEqual([
+      { at: 20, id: "verse", name: "Chorus" },
+    ]);
     expect(
-      apply(state, { type: "rename-locator", at: 20, name: "Chorus" })
+      apply(state, { id: "verse", name: "Chorus", type: "rename-locator" })
     ).toBe(state);
-    state = apply(state, { type: "remove-locator", at: 20 });
+    state = apply(state, { id: "verse", type: "remove-locator" });
     expect(state.doc.locators).toEqual([]);
     expect(state.history.past).toHaveLength(2);
     expect(apply(state, { type: "undo" }).doc.locators[0]?.name).toBe("Chorus");
+  });
+
+  test("a locator moves within the song, keeps its id, and each move is one step", () => {
+    let state = init([]);
+    state = apply(state, { id: "verse", to: 30, type: "move-locator" });
+    expect(state.doc.locators).toEqual([
+      { at: 30, id: "verse", name: "Verse" },
+    ]);
+    expect(state.history.past).toHaveLength(1);
+    expect(apply(state, { type: "undo" }).doc.locators[0]?.at).toBe(20);
+    state = apply(state, { id: "verse", to: 1000, type: "move-locator" });
+    expect(state.doc.locators[0]?.at).toBe(state.doc.duration);
+    expect(apply(state, { id: "verse", to: 1000, type: "move-locator" })).toBe(
+      state
+    );
   });
 
   test("a signature takes the next free id and the signature in force where it is added", () => {
@@ -606,5 +633,354 @@ describe("apply", () => {
     state = apply(state, { type: "rename-clip", id: "a", name: "Intro" });
     state = apply(state, { type: "select-clip", id: "a", additive: false });
     expect(apply(state, { type: "undo" }).selection).toBeNull();
+  });
+});
+
+describe("recordings and the tempo", () => {
+  const recording = (id: string, start: number, length: number) => ({
+    id,
+    name: id,
+    recording: "take",
+    sourceLength: 60,
+    track: "drums",
+    value: { fadeIn: 0, fadeOut: 0, length, offset: 4, start },
+  });
+  const init = (clips: Arranged[]) =>
+    createArrangementState({
+      colors: 5,
+      duration: 100,
+      initialClips: clips,
+      initialTracks: [{ color: 0, id: "drums", name: "Drums" }],
+      tempo: DEFAULT_TEMPO,
+    });
+
+  test("a recording that is not warped keeps its speed: its start follows the bar, its seconds stay", () => {
+    const scaled = scaleClip(recording("a", 10, 20), 2);
+    expect(scaled.value).toMatchObject({ length: 20, offset: 4, start: 20 });
+    expect(scaled.sourceLength).toBe(60);
+  });
+
+  test("a warped recording follows the tempo through its markers, the recording staying as it is", () => {
+    const warped = {
+      ...recording("a", 10, 20),
+      loop: [4, 12] as const,
+      warp: [
+        { source: 0, target: 0 },
+        { source: 60, target: 60 },
+      ],
+    };
+    const scaled = scaleClip(warped, 2);
+    expect(scaled.value).toMatchObject({ length: 40, offset: 8, start: 20 });
+    expect(scaled.loop).toEqual([8, 24]);
+    expect(scaled.warp).toEqual([
+      { source: 0, target: 0 },
+      { source: 60, target: 120 },
+    ]);
+    expect(scaled.sourceLength).toBe(60);
+  });
+
+  test("faster, a recording that keeps its speed ends where the next clip starts", () => {
+    let state = init([recording("a", 0, 20), recording("b", 20, 20)]);
+    state = apply(state, {
+      type: "set-tempo",
+      tempo: { ...DEFAULT_TEMPO, bpm: 240 },
+    });
+    const [a, b] = state.doc.clips;
+    expect(b?.value.start).toBe(10);
+    expect(a?.value.start).toBe(0);
+    expect(a?.value.length).toBe(10);
+  });
+
+  test("ARR-008: every piece and copy of a clip plays its recording", () => {
+    let state = init([recording("a", 0, 20)]);
+    state = apply(state, { type: "select-clip", id: "a", additive: false });
+    state = apply(state, { type: "split-cursor", at: 8, step: 1 });
+    state = apply(state, { type: "duplicate-selection" });
+    expect(state.doc.clips.length).toBeGreaterThan(2);
+    expect(state.doc.clips.every((piece) => piece.recording === "take")).toBe(
+      true
+    );
+  });
+});
+
+describe("devices, sends and return tracks", () => {
+  const init = () =>
+    createArrangementState({
+      colors: 5,
+      duration: 100,
+      initialReturns: [{ color: 0, id: "reverb", name: "A Reverb" }],
+      initialTracks: [
+        { color: 0, id: "vox", name: "Vox" },
+        { color: 1, id: "keys", kind: "midi", name: "Keys" },
+      ],
+      tempo: DEFAULT_TEMPO,
+    });
+  const compressor = { device: "audioui.compressor", state: { ratio: 4 } };
+  const synth = {
+    device: "audioui.pocket-synth",
+    instrument: true,
+    state: { volume: 0.8 },
+  };
+  const chain = (state: ReturnType<typeof init>, id: string) =>
+    allTracks(state.doc)
+      .find((track) => track.id === id)
+      ?.devices?.map((device) => device.device) ?? [];
+
+  test("DEV-001: devices go at the end of the chain, or where they are put", () => {
+    let state = init();
+    state = apply(state, { type: "add-device", track: "vox", ...compressor });
+    state = apply(state, {
+      type: "add-device",
+      track: "vox",
+      device: "audioui.equalizer",
+      state: {},
+      index: 0,
+    });
+    expect(chain(state, "vox")).toEqual([
+      "audioui.equalizer",
+      "audioui.compressor",
+    ]);
+    expect(state.doc.tracks[0]?.devices?.map((device) => device.id)).toEqual([
+      "device-2",
+      "device-1",
+    ]);
+  });
+
+  test("DEV-002: an instrument goes first on a MIDI track, in place of the one there was, and on no other track", () => {
+    let state = init();
+    state = apply(state, { type: "add-device", track: "keys", ...compressor });
+    state = apply(state, { type: "add-device", track: "keys", ...synth });
+    expect(chain(state, "keys")).toEqual([
+      "audioui.pocket-synth",
+      "audioui.compressor",
+    ]);
+    state = apply(state, {
+      type: "add-device",
+      track: "keys",
+      ...synth,
+      device: "audioui.other-synth",
+    });
+    expect(chain(state, "keys")).toEqual([
+      "audioui.other-synth",
+      "audioui.compressor",
+    ]);
+    for (const track of ["vox", "reverb", "main"]) {
+      expect(apply(state, { type: "add-device", track, ...synth })).toBe(state);
+    }
+    // No effect goes before it.
+    const effect = state.doc.tracks[1]?.devices?.[1];
+    state = apply(state, {
+      type: "move-device",
+      track: "keys",
+      id: effect?.id ?? "",
+      index: 0,
+    });
+    expect(chain(state, "keys")).toEqual([
+      "audioui.other-synth",
+      "audioui.compressor",
+    ]);
+  });
+
+  test("DEV-004: moving, switching off and removing a device are one step of undo each", () => {
+    let state = init();
+    state = apply(state, { type: "add-device", track: "vox", ...compressor });
+    state = apply(state, {
+      type: "add-device",
+      track: "vox",
+      device: "audioui.equalizer",
+      state: {},
+    });
+    const steps = state.history.past.length;
+    state = apply(state, {
+      type: "move-device",
+      track: "vox",
+      id: "device-2",
+      index: 0,
+    });
+    state = apply(state, {
+      type: "toggle-device",
+      track: "vox",
+      id: "device-2",
+    });
+    expect(state.doc.tracks[0]?.devices?.[0]).toMatchObject({
+      id: "device-2",
+      on: false,
+    });
+    state = apply(state, {
+      type: "move-device",
+      track: "vox",
+      id: "device-1",
+      index: 0,
+      to: "reverb",
+    });
+    expect(chain(state, "reverb")).toEqual(["audioui.compressor"]);
+    state = apply(state, {
+      type: "remove-device",
+      track: "reverb",
+      id: "device-1",
+    });
+    expect(state.history.past.length).toBe(steps + 4);
+    expect(chain(state, "reverb")).toEqual([]);
+    expect(
+      apply(state, { type: "undo" }).doc.returns[0]?.devices?.[0]?.id
+    ).toBe("device-1");
+  });
+
+  test("a turn of a knob is one step once settled", () => {
+    let state = init();
+    state = apply(state, { type: "add-device", track: "main", ...compressor });
+    const steps = state.history.past.length;
+    for (const ratio of [2, 3, 6]) {
+      state = apply(state, {
+        type: "change-device",
+        track: "main",
+        id: "device-1",
+        state: { ratio },
+      });
+    }
+    state = apply(state, { type: "settle-clip-edit" });
+    expect(state.doc.main.devices?.[0]?.state).toEqual({ ratio: 6 });
+    expect(state.history.past.length).toBe(steps + 1);
+  });
+
+  test("MIX-007: a send goes to a return, from silence to unity, and only there", () => {
+    let state = init();
+    state = apply(state, {
+      type: "set-send",
+      track: "vox",
+      to: "reverb",
+      level: 1.5,
+    });
+    expect(state.doc.tracks[0]?.sends).toEqual({ reverb: 1 });
+    expect(
+      apply(state, { type: "set-send", track: "vox", to: "keys", level: 0.5 })
+    ).toBe(state);
+    expect(
+      apply(state, {
+        type: "set-send",
+        track: "reverb",
+        to: "reverb",
+        level: 0.5,
+      })
+    ).toBe(state);
+    state = apply(state, { type: "set-send-mode", id: "reverb", pre: true });
+    expect(state.doc.returns[0]?.pre).toBe(true);
+  });
+
+  test("return tracks are named by their letter, stay among the returns, and take their sends with them", () => {
+    let state = init();
+    state = apply(state, { type: "add-track", kind: "return" });
+    expect(state.doc.returns.map((track) => [track.id, track.name])).toEqual([
+      ["reverb", "A Reverb"],
+      ["return-1", "B Return"],
+    ]);
+    state = apply(state, { type: "move-track", id: "return-1", index: 0 });
+    expect(state.doc.returns[0]?.id).toBe("return-1");
+    expect(state.doc.tracks.map((track) => track.id)).toEqual(["vox", "keys"]);
+    state = apply(state, {
+      type: "set-send",
+      track: "vox",
+      to: "reverb",
+      level: 0.5,
+    });
+    state = apply(state, { type: "remove-track", id: "reverb" });
+    expect(state.doc.tracks[0]?.sends).toEqual({});
+    expect(apply(state, { type: "remove-track", id: "main" })).toBe(state);
+  });
+
+  test("a duplicated track has devices of its own", () => {
+    let state = init();
+    state = apply(state, { type: "add-device", track: "vox", ...compressor });
+    state = apply(state, { type: "duplicate-track", id: "vox" });
+    const ids = state.doc.tracks.flatMap((track) =>
+      (track.devices ?? []).map((device) => device.id)
+    );
+    expect(ids).toEqual(["device-1", "device-2"]);
+  });
+
+  test("the main track and the returns take a mix, a name and a color like any track", () => {
+    let state = init();
+    state = apply(state, { type: "set-mix", id: "main", patch: { gain: 0.5 } });
+    state = apply(state, { type: "rename-track", id: "reverb", name: "Hall" });
+    expect(mixOf(state.doc.main).gain).toBe(0.5);
+    expect(state.doc.returns[0]?.name).toBe("Hall");
+  });
+});
+
+describe("batch", () => {
+  const init = () =>
+    createArrangementState({
+      colors: 5,
+      duration: 100,
+      initialTracks: [{ color: 0, id: "vox", name: "Vox" }],
+      tempo: DEFAULT_TEMPO,
+    });
+
+  test("ARR-006: several commands are one step of undo, each seeing what the one before did", () => {
+    let state = init();
+    state = apply(state, {
+      commands: [
+        { kind: "audio", type: "add-track" },
+        { id: "track-2", name: "Take", type: "rename-track" },
+        {
+          clip: {
+            id: "rec-1",
+            name: "Take",
+            recording: "rec-1",
+            sourceLength: 4,
+            track: "track-2",
+            value: { fadeIn: 0, fadeOut: 0, length: 4, offset: 0, start: 0 },
+          },
+          type: "add-clip",
+        },
+      ],
+      type: "batch",
+    });
+    expect(state.doc.tracks.map((track) => track.name)).toEqual([
+      "Vox",
+      "Take",
+    ]);
+    expect(state.doc.clips.map((placed) => placed.track)).toEqual(["track-2"]);
+    expect(state.history.past).toHaveLength(1);
+    const undone = apply(state, { type: "undo" });
+    expect(undone.doc.tracks).toHaveLength(1);
+    expect(undone.doc.clips).toHaveLength(0);
+  });
+
+  test("a batch that changes nothing adds no step", () => {
+    const state = init();
+    const next = apply(state, {
+      commands: [{ id: "nope", type: "remove-clip" }],
+      type: "batch",
+    });
+    expect(next.history.past).toHaveLength(0);
+  });
+});
+
+describe("add-track with a name and an id", () => {
+  test("ARR-006: a track takes the name and the id it is given, and the id only while it is free", () => {
+    let state = createArrangementState({
+      colors: 5,
+      duration: 100,
+      initialTracks: [{ color: 0, id: "vox", name: "Vox" }],
+      tempo: DEFAULT_TEMPO,
+    });
+    state = apply(state, {
+      id: "take",
+      kind: "audio",
+      name: "Take 1",
+      type: "add-track",
+    });
+    state = apply(state, {
+      id: "vox",
+      kind: "audio",
+      name: " ",
+      type: "add-track",
+    });
+    expect(state.doc.tracks.map((track) => [track.id, track.name])).toEqual([
+      ["vox", "Vox"],
+      ["take", "Take 1"],
+      ["track-3", "Track 3"],
+    ]);
   });
 });

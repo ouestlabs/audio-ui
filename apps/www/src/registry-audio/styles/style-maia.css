@@ -289,7 +289,7 @@
 
   /* MARK: Envelope (container ← cn-xypad, path/point ← cn-fader-range/thumb) */
   .cn-envelope {
-    @apply rounded-2xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-4 hover:ring-ring/50 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-ring/50 active:ring-4 active:ring-ring/50 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none;
+    @apply rounded-2xl border border-transparent bg-card ring-1 ring-foreground/10 transition-[color,border-color,box-shadow,opacity] duration-150 ease-out hover:ring-4 hover:ring-ring/50 has-[:focus-visible]:ring-4 has-[:focus-visible]:ring-ring/50 active:ring-4 active:ring-ring/50 has-[:focus-visible]:border-ring active:border-ring motion-reduce:transition-none data-blocked:animate-[envelope-shake_280ms_linear] motion-reduce:data-blocked:animate-none [&_svg[data-blocked]]:animate-[envelope-shake_280ms_linear] motion-reduce:[&_svg[data-blocked]]:animate-none;
   }
 
   .cn-envelope-size-sm {
@@ -313,7 +313,7 @@
   }
 
   .cn-envelope-point {
-    @apply rounded-full border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none;
+    @apply rounded-full border-2 border-primary bg-background shadow-xs data-active:bg-primary transition-[box-shadow] duration-150 ease-out hover:ring-4 hover:ring-ring/30 focus-within:ring-4 focus-within:ring-ring/30 data-dragging:ring-4 data-dragging:ring-ring/30 motion-reduce:transition-none data-blocked:animate-[envelope-shake_280ms_linear] motion-reduce:data-blocked:animate-none;
   }
 
   .cn-envelope-curve {
@@ -322,13 +322,6 @@
 
   .cn-envelope-point-value {
     @apply rounded-full bg-popover px-1.5 py-0.5 font-mono text-[10px] text-popover-foreground shadow-md ring-1 ring-foreground/10;
-  }
-
-  /* Blocked-action feedback: removing at minPoints or adding with allowAddPoints=false. */
-  .cn-envelope svg[data-blocked],
-  .cn-envelope[data-blocked],
-  .cn-envelope-point[data-blocked] {
-    @apply animate-[cn-envelope-shake_280ms_linear] motion-reduce:animate-none;
   }
 
   /* MARK: Scrubber */
@@ -362,11 +355,7 @@
   }
 
   .cn-sequencer-velocity-fill {
-    @apply bg-primary/30 transition-[background-color] duration-100 ease-out motion-reduce:transition-none;
-  }
-
-  .cn-sequencer-velocity[data-on] .cn-sequencer-velocity-fill {
-    @apply bg-primary;
+    @apply bg-primary/30 transition-[background-color] duration-100 ease-out motion-reduce:transition-none group-data-on/velocity:bg-primary;
   }
 
   /* MARK: Pad (pad ← cn-sequencer-cell, flash mixes primary by --pad-velocity) */
@@ -489,15 +478,7 @@
   }
 
   .cn-piano-roll-key {
-    @apply border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none;
-  }
-
-  .cn-piano-roll-key[data-color="black"] {
-    @apply bg-foreground/85 text-background hover:bg-foreground/70;
-  }
-
-  .cn-piano-roll-key[data-active] {
-    @apply bg-primary text-primary-foreground;
+    @apply border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none data-[color=black]:bg-foreground/85 data-[color=black]:text-background data-[color=black]:not-data-[active]:hover:bg-foreground/70 data-[active]:data-[color]:bg-primary data-[active]:data-[color]:text-primary-foreground;
   }
 
   /* MARK: Timeline */
@@ -648,7 +629,7 @@
 }
 
 /* Envelope blocked-action shake, per-segment easing so each leg follows its own curve. Animates the standalone `translate` property (not `transform`) so it composites with Point's inline positioning transform instead of fighting it. */
-@keyframes cn-envelope-shake {
+@keyframes envelope-shake {
   0% {
     animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
     translate: 0 0;

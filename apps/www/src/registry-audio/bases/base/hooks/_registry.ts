@@ -90,14 +90,82 @@ export const hooks: RegistryItem[] = [
   {
     categories: ["timeline", "mixer"],
     description:
-      "Reorders tracks: drag a track's grip to move it, with the view scrolling at its edges and a copy of its header under the pointer, or press Up and Down on the grip.",
+      "Reorders tracks: drag a track's grip to move it, with the view scrolling at its edges and a copy of its header under the pointer, or press Up and Down on the grip. With the grip, the copy and the line where the track would land.",
     files: [
       {
         path: "hooks/use-track-reorder.ts",
         type: "registry:hook",
       },
+      {
+        path: "audio/elements/track-grip.tsx",
+        type: "registry:ui",
+      },
     ],
     name: "use-track-reorder",
+    type: "registry:hook",
+  },
+  {
+    categories: ["timeline"],
+    description:
+      "The zoom of an arrangement's timeline: it fits the view beside the track headers until it is zoomed, zooms around a time that stays put on screen, fits a stretch of time, steps back through the zooms it left, and keeps its bars when the tempo changes.",
+    files: [
+      {
+        path: "hooks/use-timeline-zoom.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-timeline-zoom",
+    type: "registry:hook",
+  },
+  {
+    categories: ["timeline"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A stretch of time on some tracks of an arrangement, drawn by dragging across bare lanes, with its overlay and what the keyboard does with it: copy, cut, paste, duplicate, consolidate, loop, fade, delete and open time, each one step of undo.",
+    files: [
+      {
+        path: "hooks/use-time-selection.ts",
+        type: "registry:hook",
+      },
+      {
+        path: "audio/elements/time-selection.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "use-time-selection",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
+    ],
+    type: "registry:hook",
+  },
+  {
+    categories: ["timeline"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "What the keyboard does with an arrangement's cursor: the arrows on the grid, Home and End, Up and Down to pick a track, Alt and the arrows to jump between locators and clip edges, M to add a locator.",
+    files: [
+      {
+        path: "hooks/use-timeline-cursor.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-timeline-cursor",
+    registryDependencies: ["@audio-ui/arrangement"],
+    type: "registry:hook",
+  },
+  {
+    categories: ["timeline"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The grid of an arrangement's timeline: adaptive to the zoom or a fixed division, straight or triplet, snapping or not, its name for a menu button, and the changes Cmd/Ctrl + 1 to 5 make.",
+    files: [
+      {
+        path: "hooks/use-timeline-grid.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-timeline-grid",
     type: "registry:hook",
   },
   {
@@ -128,6 +196,7 @@ export const hooks: RegistryItem[] = [
     ],
     name: "use-piano-roll-playback",
     registryDependencies: [
+      "@audio-ui/drum-synthesis",
       "@audio-ui/use-transport-clock",
       "@audio-ui/use-synth-voices",
       "@audio-ui/envelope-ramp",

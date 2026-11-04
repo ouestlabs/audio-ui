@@ -35,8 +35,12 @@ The panel has a pad that plays the synth: the pitch goes across and the resonanc
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
 ```ts
-engine.noteOn(note); // starts a note, or glides the one being held
+engine.noteOn(note); // starts a note now, or glides the one being held
 engine.noteOff(); // lets it go
+
+// Scheduled ahead on the audio clock, by a host that plays notes from a song:
+engine.noteOn({ ...note, velocity: 0.8 }, { at: time, id: "c4" });
+engine.noteOff({ at: time + length, id: "c4" });
 ```
 
 One voice at a time, as the [pocket synth](/docs/components/base/pocket-synth). The distortion curve is a table of 44,100 points, rebuilt only when the drive changes. The shaper oversamples 4x, which delays its path by 4 ms, and the clean path waits as long so the mix does not comb.

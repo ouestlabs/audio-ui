@@ -40,6 +40,14 @@ export const waveShaperDevice = defineDevice({
       min: MIN_RESONANCE,
       step: 0.1,
     },
+    {
+      default: 1,
+      id: "velocity",
+      label: "Velocity",
+      max: 1,
+      min: 0,
+      step: 0.01,
+    },
   ],
   parameters: [
     {
@@ -107,6 +115,8 @@ export type WaveShaperState = DeviceState<typeof waveShaperDevice.parameters>;
 export interface WaveShaperNote {
   frequency: number;
   resonance: number;
+  /** How loud the note plays, from 0 to 1. @default 1 */
+  velocity?: number;
 }
 
 /** The pitch at a position from 0 to 1 along a log axis from 55 Hz to 880 Hz. */

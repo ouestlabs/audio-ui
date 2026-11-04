@@ -37,6 +37,10 @@ export interface UseArrangementOptions {
   initialClips?: Arranged[];
   initialLocators?: ArrangementLocator[];
   initialLoop?: ArrangementLoop;
+  /** The main track: its devices and its mix. @default MAIN_TRACK */
+  initialMain?: ArrangementTrack;
+  /** The return tracks the tracks send to. @default [] */
+  initialReturns?: ArrangementTrack[];
   initialSignatures?: ArrangementSignature[];
   initialTracks: ArrangementTrack[];
   /** The tempo and the time signature the timeline starts in. */
@@ -59,6 +63,8 @@ export function useArrangement({
   initialClips = [],
   initialLocators,
   initialLoop,
+  initialMain,
+  initialReturns,
   initialSignatures,
   initialTracks,
   tempo,
@@ -70,6 +76,8 @@ export function useArrangement({
       initialClips,
       initialLocators,
       initialLoop,
+      initialMain,
+      initialReturns,
       initialSignatures,
       initialTracks,
       tempo,
@@ -132,13 +140,19 @@ export function useArrangement({
     canUndo: canUndo(history),
     clips: doc.clips,
     copying: gesture.copying ?? NO_COPIES,
+    /** The whole document, what an engine plays and a project saves: the same object until a command changes it. */
+    doc,
     duration: doc.duration,
     folded,
     heights: shownHeights,
     locators: doc.locators,
     loop: doc.loop,
+    /** The main track: its devices and its mix. */
+    main: doc.main,
     mixOf,
     resizeTrack,
+    /** The return tracks. */
+    returns: doc.returns,
     selectedIds,
     selectedTracks,
     selection,

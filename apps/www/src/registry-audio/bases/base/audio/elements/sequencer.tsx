@@ -81,7 +81,7 @@ function Sequencer({
                     {(step) => (
                       <SequencerPrimitive.Velocity
                         aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1} velocity`}
-                        className="cn-sequencer-velocity relative h-8 min-w-0 cursor-ns-resize touch-none outline-none"
+                        className="cn-sequencer-velocity group/velocity relative h-8 min-w-0 cursor-ns-resize touch-none outline-none"
                         step={step}
                       >
                         <span className="cn-sequencer-velocity-fill absolute inset-x-0 bottom-0 h-[calc(var(--sequencer-velocity)*100%)]" />

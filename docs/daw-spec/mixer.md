@@ -1,0 +1,67 @@
+# Mixer
+
+What each track does to its sound on the way to the main output, the sends and the return tracks. Group tracks are phase 2.
+
+### MIX-001 Signal flow
+In a track, the clips (or the instrument) feed the device chain, left to right, then the volume, then the pan, then the track activator, then the track's output. A send set to post-fader taps the signal after the activator; one set to pre-fader taps it before the pan, the volume and the activator.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-001"
+
+### MIX-002 Volume
+The volume runs from silence to +6 dB, 0 dB by default; a double-click sets it back to 0 dB.
+Status: partial: OBS-004 checks the range against the reference.
+Test: apps/www/test/mixer.test.ts "MIX-002"
+
+### MIX-003 Pan
+The pan runs from 50 left to 50 right, centred by default, and follows a constant-power law with sine curves: 0 dB on both channels at the centre, +3 dB on the side it is turned to and silence on the other at either end. Each channel of a stereo signal is set by its own gain: nothing of the left channel moves into the right.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-003"
+
+### MIX-004 Track activator
+A track switched off sends nothing to its output and nothing through its post-fader sends; its pre-fader sends still feed their returns.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-004"
+
+### MIX-005 Solo
+Soloing a track silences every track that is not soloed and that does not feed a soloed one. One track is soloed at a time; Cmd adds a track to the solo. Soloed tracks keep their pan.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-005"
+
+### MIX-006 Return tracks and solo
+With solo in place on, soloing a track keeps the return tracks heard, so the track is heard with its reverb. Soloing a return track silences the main output of the other tracks but keeps what they send to that return.
+Status: partial: OBS-005 says whether solo in place is the reference's default.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-006"
+
+### MIX-007 Sends
+Each track has a send per return track, from silence to 0 dB, silent by default, and post-fader unless the return is set to pre.
+Status: partial: OBS-004 checks the range and default.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-007"
+
+### MIX-008 Return tracks
+A return track has a device chain, a volume, a pan, an activator and a solo, and plays no clips. Its own sends are off until turned on, so nothing feeds back by default.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-008"
+
+### MIX-009 The main track
+Every track and return goes to the main track, which has a device chain and a volume, no sends, and goes to the audio output. Nothing limits it: a mix that goes over full scale is shown by the meters, not hidden.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-009"
+
+### MIX-010 No clipping inside
+Between devices and tracks the signal is floating point: a level over 0 dBFS passes through and comes back down without distortion. Only the output and an export to whole-number samples can clip.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-010"
+
+### MIX-011 Meters
+Each track and the main track show their peak and their RMS level, the loudest peak held, and a mark when a frame went over 0 dBFS, until it is clicked.
+Status: partial: the main track has its loudest sample in dB under its fader, red over 0 dBFS until clicked, and a scale beside its meter; the tracks have their meters only.
+Test: apps/daw/test/mixer.test.ts "MIX-011"; apps/daw/test/browser/run.ts "MIX-011"
+
+### MIX-012 Delay compensation
+Whatever the latency its devices declare, every path (each track, each send, each return) reaches the main track lined up to the frame. A bypassed device keeps the latency its settings declare, so bypassing it moves nothing.
+Test: packages/core/src/audio/playback/mixer.test.ts "MIX-012"
+
+### MIX-013 Changes without zipper
+A volume, a pan or a send moved by hand glides to its new value within 10 ms instead of jumping.
+Test: apps/www/test/mixer.test.ts "MIX-013"
+
+### MIX-014 Several tracks at once
+With several tracks selected, moving the volume, the pan, the activator or the solo of one of them moves it on all of them.
+Test: apps/daw/test/mixer.test.ts "MIX-014"
+
+### MIX-015 The mixer and the detail view take turns
+Under the arrangement, one panel shows the clip, the devices or the mixer, one at a time, chosen by the tabs of its bar (the clip view's own strip carries them while it shows a clip), by the keys, or by a device or a clip that opens it. Both at once would leave the tracks no room. Like the library on the left, the panel is always there: folded, it is its bar alone, and the whole bar opens it. The line between the arrangement and the panel is dragged, or moved with the arrow keys, to share the height, from the least each view needs to show all of it to 70 %; dragged under that least, it folds the panel. Each view comes back at the height it was given. The mixer's channels fill that height, every fader as long as the others and never under a fader's own least. A choice of this workstation: the reference draws its mixer in another view.
+Test: apps/daw/test/browser/run.ts "MIX-015"

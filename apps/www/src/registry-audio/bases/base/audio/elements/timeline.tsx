@@ -171,7 +171,7 @@ function TimelineMark({ className, ...props }: TimelinePrimitive.Mark.Props) {
   return (
     <TimelinePrimitive.Mark
       className={cn(
-        "cn-timeline-mark pointer-events-none inset-y-0 flex items-center",
+        "cn-timeline-mark pointer-events-none inset-y-0 flex items-center data-dragging:z-10",
         className
       )}
       data-slot="timeline-mark"

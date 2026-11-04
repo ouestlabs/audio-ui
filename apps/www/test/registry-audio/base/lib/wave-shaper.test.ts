@@ -213,7 +213,11 @@ describe("an agent playing the wave shaper", () => {
       frequency: 110,
       resonance: 40,
     });
-    expect(result?.note).toEqual({ frequency: 110, resonance: 15.5 });
+    expect(result?.note).toEqual({
+      frequency: 110,
+      resonance: 15.5,
+      velocity: 1,
+    });
     expect(result?.summary).toContain("Resonance: 15.5 (brought into range)");
   });
 });

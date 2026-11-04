@@ -1,6 +1,7 @@
+import type { ParameterValue } from "@audio-ui/core/device";
 import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
-import { type WarpMarker, warpedTime } from "@audio-ui/core/time";
+import { unwarpedTime, type WarpMarker, warpedTime } from "@audio-ui/core/time";
 import type { ClipValue } from "@audio-ui/react";
 
 /** What a clip's menu does to it. */
@@ -32,6 +33,11 @@ export interface Arranged {
    * or moving the clip leaves each note where it was in the source.
    */
   notes?: readonly Note[];
+  /**
+   * The id of the recording an audio clip plays. Every piece cut from the clip,
+   * and every copy of it, plays the same one.
+   */
+  recording?: string;
   /** Whether its source plays backwards. */
   reversed?: boolean;
   /** Where its source begins in the recording it was cut from, once cropped. @default 0 */
@@ -69,18 +75,40 @@ export type TrackAutomation = Partial<
   Record<AutomatedParameter, readonly Breakpoint[]>
 >;
 
+/**
+ * A device on a track's chain: which one (its stable id, such as
+ * `audioui.compressor`), its state, and whether it is switched on. Its own id
+ * stays the same as it moves along the chain.
+ */
+export interface TrackDevice {
+  /** The id of the device it is, as its description gives it. */
+  device: string;
+  id: string;
+  /** An instrument comes first on a MIDI track, before every effect. */
+  instrument?: boolean;
+  /** A device switched off passes the sound on unchanged. @default true */
+  on?: boolean;
+  state: Readonly<Record<string, ParameterValue>>;
+}
+
 /** A track of an arrangement. */
 export interface ArrangementTrack {
   /** Its automation, by parameter. */
   automation?: TrackAutomation;
   /** An index into the colors a track can take. */
   color: number;
+  /** Its device chain, from first to last. */
+  devices?: readonly TrackDevice[];
   id: string;
   /** @default "audio" */
   kind?: TrackKind;
   /** What its header sets: a track that has none plays at unity. Undo takes it back, and a duplicate of the track keeps it. */
   mix?: Mix;
   name: string;
+  /** On a return track: whether what the others send it is taken before their volume, pan and switch, rather than after. @default false */
+  pre?: boolean;
+  /** How much it sends to each return track, by the return's id, as a gain from 0 (silence, the default) to 1 (0 dB). */
+  sends?: Readonly<Record<string, number>>;
 }
 
 /** What a track's header sets: how loud it is, where it sits in the stereo field, and whether it is silenced or soloed. */
@@ -119,6 +147,48 @@ export function clipReach(clip: Arranged): number | undefined {
   return clip.warp
     ? warpedTime(clip.warp, clip.sourceLength)
     : clip.sourceLength;
+}
+
+/**
+ * What an audio clip shows of its recording across its length, `columns`
+ * amplitudes from 0 to 1, from the peaks of its source (`peaks`, spread evenly
+ * over `sourceLength`): the stretch it plays, folded round its loop, mirrored
+ * when reversed, stretched by its warp, as a player reads it. Each column is
+ * the loudest peak it covers.
+ */
+export function clipWaveform(
+  clip: Arranged,
+  peaks: readonly number[],
+  columns: number
+): number[] {
+  const { length, offset } = clip.value;
+  const count = Math.max(0, Math.floor(columns));
+  if (peaks.length === 0 || !(clip.sourceLength > 0) || length <= 0) {
+    return Array.from({ length: count }, () => 0);
+  }
+  const span = clip.warp
+    ? warpedTime(clip.warp, clip.sourceLength)
+    : clip.sourceLength;
+  /** The index of the peak at a time of the clip, from its start. */
+  const peakAt = (time: number) => {
+    let own = offset + time;
+    if (clip.loop && own >= clip.loop[1]) {
+      const [from, to] = clip.loop;
+      own = from + ((own - from) % Math.max(Number.EPSILON, to - from));
+    }
+    const read = clip.reversed ? span - own : own;
+    const source = clip.warp ? unwarpedTime(clip.warp, read) : read;
+    return Math.floor((source / clip.sourceLength) * peaks.length);
+  };
+  return Array.from({ length: count }, (_, column) => {
+    const a = peakAt((column / count) * length);
+    const b = peakAt(((column + 1) / count) * length);
+    let loudest = 0;
+    for (let index = Math.min(a, b); index <= Math.max(a, b); index += 1) {
+      loudest = Math.max(loudest, peaks[index] ?? 0);
+    }
+    return loudest;
+  });
 }
 
 /** A stretch of time on some tracks: what a drag across bare lanes selects. */

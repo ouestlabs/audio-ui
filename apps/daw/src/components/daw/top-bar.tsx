@@ -1,0 +1,302 @@
+import type {
+  MetronomeRhythm,
+  SignatureChange,
+  Tempo,
+} from "@audio-ui/core/time";
+import { EnvelopeIcon } from "@audio-ui/icons/react";
+import type { Source } from "@audio-ui/react";
+import {
+  ArrowArcLeftIcon,
+  ArrowArcRightIcon,
+  ArrowCounterClockwiseIcon,
+  DotsThreeIcon,
+  DownloadSimpleIcon,
+  MagnifyingGlassMinusIcon,
+  MagnifyingGlassPlusIcon,
+} from "@phosphor-icons/react";
+import { Link } from "@tanstack/react-router";
+import { type ReactNode, useCallback } from "react";
+import { NumberControl } from "@/components/audio-ui/bpm-control";
+import { Transport } from "@/components/audio-ui/transport";
+import { AudioUiIcon } from "@/components/site/audio-ui-icon";
+import { ModeSwitcher } from "@/components/site/mode-switcher";
+import { Button } from "@/components/ui/button";
+import { ButtonGroup } from "@/components/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Kbd, KbdGroup } from "@/components/ui/kbd";
+import { Separator } from "@/components/ui/separator";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { SHORTCUT_HELP } from "@/lib/daw/shortcuts";
+
+/** The zoom presets, as shares of the fitted view: Fit shows everything. */
+const ZOOM_PRESETS = [1, 2, 4, 8];
+/** The zoom's steps are loupes, not a minus and a plus. */
+const ZOOM_STEPPERS = {
+  decrement: "Zoom out",
+  icons: {
+    decrement: <MagnifyingGlassMinusIcon aria-hidden="true" />,
+    increment: <MagnifyingGlassPlusIcon aria-hidden="true" />,
+  },
+  increment: "Zoom in",
+};
+/** How the zoom reads: as a share of the fitted view. */
+const PERCENT: Intl.NumberFormatOptions = {
+  maximumFractionDigits: 0,
+  style: "percent",
+};
+
+const noop = () => undefined;
+
+/** An icon button of the bar, as lab's has them: its name and its keys in the tooltip. */
+function BarButton({
+  children,
+  disabled,
+  label,
+  onClick,
+  pressed,
+}: {
+  children: ReactNode;
+  disabled?: boolean;
+  label: string;
+  onClick: () => void;
+  pressed?: boolean;
+}) {
+  return (
+    <Tooltip>
+      <TooltipTrigger
+        render={
+          <Button
+            aria-label={label}
+            aria-pressed={pressed}
+            className="text-muted-foreground aria-pressed:text-foreground"
+            disabled={disabled}
+            onClick={onClick}
+            size="icon"
+            variant="outline"
+          >
+            {children}
+          </Button>
+        }
+      />
+      <TooltipContent side="bottom">{label}</TooltipContent>
+    </Tooltip>
+  );
+}
+
+export interface TopBarProps {
+  /** Whether each lane shows its envelope (KEY-027). */
+  automating: boolean;
+  canRedo: boolean;
+  canUndo: boolean;
+  exporting: boolean;
+  looping: boolean;
+  metronome: boolean;
+  onAutomatingChange: (automating: boolean) => void;
+  onExport: () => void;
+  onLoopingChange: (looping: boolean) => void;
+  onMetronomeChange: (metronome: boolean) => void;
+  onPlayPause: () => void;
+  onRedo?: () => void;
+  /** Plays every envelope again: there only while a hand overrides one. */
+  onReenableAutomation?: () => void;
+  onRhythmChange: (rhythm: MetronomeRhythm) => void;
+  onStop: () => void;
+  onTempoChange: (tempo: Tempo) => void;
+  onUndo?: () => void;
+  onZoomRatioChange: (ratio: number) => void;
+  playing: boolean;
+  position: Source<number>;
+  rhythm: MetronomeRhythm;
+  /** The time-signature changes: the position reads its bars through them. */
+  signatures: readonly SignatureChange[];
+  tempo: Tempo;
+  /** The largest share of the fitted view the zoom reaches. */
+  zoomMaxRatio: number;
+  /** The zoom as a share of the fitted view: 1 shows everything. */
+  zoomRatio: number;
+}
+
+/** The bar on top: the brand, as the lab has it, the transport, the automation, and the export. */
+export function TopBar(props: TopBarProps) {
+  const { automating, onAutomatingChange } = props;
+  const toggleAutomation = useCallback(
+    () => onAutomatingChange(!automating),
+    [automating, onAutomatingChange]
+  );
+  const { onZoomRatioChange, zoomRatio } = props;
+  const pickZoom = useCallback(
+    (value: unknown) => onZoomRatioChange(Number(value)),
+    [onZoomRatioChange]
+  );
+  const preset = ZOOM_PRESETS.find(
+    (ratio) => Math.abs(ratio - zoomRatio) < 0.01
+  );
+  return (
+    <header className="flex h-12 shrink-0 items-center gap-3 border-b px-3">
+      <Button
+        className="w-fit shrink-0 pl-2"
+        nativeButton={false}
+        render={
+          <Link
+            aria-label="audio/ui daw, home"
+            className="flex items-center"
+            to="/"
+          >
+            <span aria-hidden className="flex select-none items-center gap-1">
+              <AudioUiIcon className="pointer-events-none size-5 text-foreground" />
+              <span className="mt-[-2.3px] font-medium font-serif text-xl leading-snug">
+                audio/ui
+              </span>
+              <span className="ml-1 rounded-md border px-1.5 py-0.5 text-muted-foreground text-xs">
+                daw
+              </span>
+            </span>
+          </Link>
+        }
+        variant="ghost"
+      />
+      <Separator orientation="vertical" />
+      <Transport
+        className="min-w-0 flex-1"
+        looping={props.looping}
+        metronome={props.metronome}
+        onLoopingChange={props.onLoopingChange}
+        onMetronomeChange={props.onMetronomeChange}
+        onPlayPause={props.onPlayPause}
+        onRhythmChange={props.onRhythmChange}
+        onStop={props.onStop}
+        onTempoChange={props.onTempoChange}
+        playing={props.playing}
+        rhythm={props.rhythm}
+        signatures={props.signatures}
+        source={props.position}
+        tempo={props.tempo}
+      />
+      <div className="flex shrink-0 items-center gap-2">
+        {props.onReenableAutomation ? (
+          <BarButton
+            label="Re-enable automation"
+            onClick={props.onReenableAutomation}
+          >
+            <ArrowCounterClockwiseIcon
+              aria-hidden="true"
+              className="text-primary"
+            />
+          </BarButton>
+        ) : null}
+        <ButtonGroup>
+          <BarButton
+            disabled={!props.canUndo}
+            label="Undo (Cmd Z)"
+            onClick={props.onUndo ?? noop}
+          >
+            <ArrowArcLeftIcon aria-hidden="true" />
+          </BarButton>
+          <BarButton
+            disabled={!props.canRedo}
+            label="Redo (Cmd Shift Z)"
+            onClick={props.onRedo ?? noop}
+          >
+            <ArrowArcRightIcon aria-hidden="true" />
+          </BarButton>
+        </ButtonGroup>
+        <div className="hidden items-center xl:flex">
+          <NumberControl
+            format={PERCENT}
+            label="Zoom"
+            largeStep={1}
+            max={props.zoomMaxRatio}
+            min={1}
+            onValueChange={onZoomRatioChange}
+            step={0.25}
+            steppers={ZOOM_STEPPERS}
+            unit="Zoom"
+            value={zoomRatio}
+          />
+        </div>
+        <BarButton
+          label="Automation (A)"
+          onClick={toggleAutomation}
+          pressed={automating}
+        >
+          <EnvelopeIcon aria-hidden="true" />
+        </BarButton>
+        <BarButton
+          disabled={props.exporting}
+          label="Export WAV (Cmd Shift R)"
+          onClick={props.onExport}
+        >
+          <DownloadSimpleIcon aria-hidden="true" />
+        </BarButton>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            render={
+              <Button
+                aria-label="More controls"
+                className="text-muted-foreground"
+                size="icon"
+                variant="outline"
+              />
+            }
+          >
+            <DotsThreeIcon aria-hidden="true" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-auto min-w-48">
+            <DropdownMenuRadioGroup
+              onValueChange={pickZoom}
+              value={preset === undefined ? "" : String(preset)}
+            >
+              {ZOOM_PRESETS.map((ratio) => (
+                <DropdownMenuRadioItem
+                  disabled={ratio > props.zoomMaxRatio}
+                  key={ratio}
+                  value={String(ratio)}
+                >
+                  {ratio === 1 ? "Fit" : `Zoom ${ratio * 100} %`}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+            <DropdownMenuSeparator />
+            <DropdownMenuSub>
+              <DropdownMenuSubTrigger>
+                Keyboard shortcuts
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="flex max-h-(--available-height) w-auto flex-col">
+                <div className="flex min-h-0 flex-col gap-2 overflow-y-auto p-2 text-sm whitespace-nowrap">
+                  {SHORTCUT_HELP.map((shortcut) => (
+                    <div
+                      className="flex items-center justify-between gap-3"
+                      key={shortcut.action}
+                    >
+                      <span>{shortcut.action}</span>
+                      <KbdGroup>
+                        {shortcut.keys.map((key) => (
+                          <Kbd key={key}>{key}</Kbd>
+                        ))}
+                      </KbdGroup>
+                    </div>
+                  ))}
+                </div>
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
+          </DropdownMenuContent>
+        </DropdownMenu>
+        <ModeSwitcher />
+      </div>
+    </header>
+  );
+}

@@ -15,6 +15,10 @@ const HIHAT_DECAY = 0.05;
 
 const SILENCE_FLOOR = 0.001;
 
+const CLICK_FREQ = 1000;
+const CLICK_ACCENT_FREQ = 1500;
+const CLICK_LEVEL = 0.4;
+
 /** Shapes one hit: `tune` in semitones from the voice's own pitch, `decay` in seconds. */
 export interface DrumOptions {
   decay?: number;
@@ -32,6 +36,32 @@ function createNoiseBuffer(
   const noise = Float32Array.from({ length }, () => Math.random() * 2 - 1);
   buffer.copyToChannel(noise, 0);
   return buffer;
+}
+
+/**
+ * A metronome's click at `time` on the audio clock, higher on the first beat
+ * of a bar. Returns its oscillator: disconnect it to take back a click that has
+ * not sounded yet.
+ */
+export function triggerClick(
+  destination: AudioNode,
+  time: number,
+  accent: boolean
+): OscillatorNode {
+  const { context } = destination;
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  oscillator.frequency.setValueAtTime(
+    accent ? CLICK_ACCENT_FREQ : CLICK_FREQ,
+    time
+  );
+  gain.gain.setValueAtTime(0.0001, time);
+  gain.gain.exponentialRampToValueAtTime(CLICK_LEVEL, time + 0.002);
+  gain.gain.exponentialRampToValueAtTime(0.0001, time + 0.05);
+  oscillator.connect(gain).connect(destination);
+  oscillator.start(time);
+  oscillator.stop(time + 0.06);
+  return oscillator;
 }
 
 /** Sine oscillator with a fast pitch sweep (150Hz→40Hz) and exponential amplitude decay, a classic 808-style kick. */

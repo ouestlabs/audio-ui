@@ -45,6 +45,29 @@ const devices = DEVICES.map(
   })
 );
 
+/** How an envelope refuses a point: the styles' own keyframes, which an install has no other way to get. */
+const ENVELOPE_SHAKE = {
+  "@keyframes envelope-shake": {
+    "0%": {
+      "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
+      translate: "0 0",
+    },
+    "28.57%": {
+      "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
+      translate: "6px 0",
+    },
+    "57.14%": {
+      "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
+      translate: "-6px 0",
+    },
+    "78.57%": {
+      "animation-timing-function": "cubic-bezier(0.22, 1, 0.36, 1)",
+      translate: "4px 0",
+    },
+    "100%": { translate: "0 0" },
+  },
+};
+
 export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/react"],
@@ -56,6 +79,7 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
     ],
+    css: ENVELOPE_SHAKE,
     name: "envelope",
     type: "registry:ui",
   },
@@ -69,6 +93,7 @@ export const audio: RegistryItem[] = [
         type: "registry:ui",
       },
     ],
+    css: ENVELOPE_SHAKE,
     name: "automation-envelope",
     type: "registry:ui",
   },
@@ -81,11 +106,16 @@ export const audio: RegistryItem[] = [
         path: "audio/elements/arranged-clip.tsx",
         type: "registry:ui",
       },
+      {
+        path: "hooks/use-arranged-clips.ts",
+        type: "registry:hook",
+      },
     ],
     name: "arranged-clip",
     registryDependencies: [
       "@audio-ui/timeline",
       "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
       "@shadcn/context-menu",
     ],
     type: "registry:ui",
@@ -93,31 +123,44 @@ export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/core"],
     description:
-      "Locators and time-signature changes on a timeline's lane: press one to jump there, rename or retype it in place, move a signature with the arrows, delete either.",
+      "Locators and time-signature changes on a timeline's lane: press one to jump there, drag it or use the arrows to move it on the grid, rename or retype it in place, delete either. With the bars of a ruler through those changes, and a hook for the commands behind them.",
     files: [
       {
         path: "audio/elements/timeline-markers.tsx",
         type: "registry:ui",
       },
+      {
+        path: "hooks/use-timeline-markers.ts",
+        type: "registry:hook",
+      },
     ],
     name: "timeline-markers",
-    registryDependencies: ["@shadcn/context-menu"],
+    registryDependencies: [
+      "@audio-ui/timeline",
+      "@audio-ui/use-arrangement",
+      "@shadcn/context-menu",
+    ],
     type: "registry:ui",
   },
   {
     dependencies: ["@audio-ui/core"],
     description:
-      "A track's automation: a chooser of the parameter its lane shows, Volume or Pan, for its header, and that parameter's envelope over its lane, standing faint at the mix's value until it is drawn.",
+      "A track's automation: a chooser of the parameter its lane shows, Volume or Pan, for its header, and that parameter's envelope over its lane, standing faint at the mix's value until it is drawn, with a hook for automation mode and the gains and pans moved by hand, which play their mix until enabled again.",
     files: [
       {
         path: "audio/elements/track-automation.tsx",
         type: "registry:ui",
+      },
+      {
+        path: "hooks/use-track-automation.ts",
+        type: "registry:hook",
       },
     ],
     name: "track-automation",
     registryDependencies: [
       "@audio-ui/automation-envelope",
       "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
       "@shadcn/button",
       "@shadcn/select",
     ],
@@ -323,6 +366,43 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-chain",
       "@shadcn/button",
       "@shadcn/input-group",
+    ],
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Every device's panel by the device's stable id, with the width it is drawn at in a row: what draws a track's chain from the ids a project stores, with the face each device has on its own page.",
+    files: [
+      {
+        path: "audio/device-panels.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "device-panels",
+    registryDependencies: [
+      "@audio-ui/auto-pan-panel",
+      "@audio-ui/channel-eq-panel",
+      "@audio-ui/chorus-panel",
+      "@audio-ui/compressor-panel",
+      "@audio-ui/deesser-panel",
+      "@audio-ui/delay-panel",
+      "@audio-ui/distortion-panel",
+      "@audio-ui/equalizer-panel",
+      "@audio-ui/filter-panel",
+      "@audio-ui/gate-panel",
+      "@audio-ui/limiter-panel",
+      "@audio-ui/mid-side-panel",
+      "@audio-ui/multiband-panel",
+      "@audio-ui/overdrive-panel",
+      "@audio-ui/phaser-panel",
+      "@audio-ui/pocket-synth-panel",
+      "@audio-ui/redux-panel",
+      "@audio-ui/reverb-panel",
+      "@audio-ui/saturator-panel",
+      "@audio-ui/transient-panel",
+      "@audio-ui/utility-panel",
+      "@audio-ui/wave-shaper-panel",
     ],
     type: "registry:ui",
   },
@@ -1086,7 +1166,7 @@ export const audio: RegistryItem[] = [
   ...devices,
   {
     description:
-      "The parts of an arrangement editor in one install: the timeline, the arrangement's state, its clips, markers and automation, track reordering and MIDI playback. block-timeline wires them into a screen.",
+      "The parts of an arrangement editor in one install: the timeline, its zoom and grid, the arrangement's state, its clips, markers and automation, track reordering and MIDI playback. block-timeline wires them into a screen.",
     files: [],
     name: "arrangement-editor",
     registryDependencies: [
@@ -1099,6 +1179,10 @@ export const audio: RegistryItem[] = [
       "@audio-ui/use-track-reorder",
       "@audio-ui/use-midi-playback",
       "@audio-ui/use-marquee-selection",
+      "@audio-ui/use-timeline-zoom",
+      "@audio-ui/use-timeline-grid",
+      "@audio-ui/use-time-selection",
+      "@audio-ui/use-timeline-cursor",
     ],
     type: "registry:ui",
   },
