@@ -6,6 +6,10 @@ import type { WarpMarker } from "../time/warp.ts";
 
 /** How often the level is read, in seconds: fine enough to tell sixteenths apart at 200 BPM. */
 const HOP_SECONDS = 0.005;
+/** How long a stretch each reading of the level spans, in seconds: longer than the beating of notes held together (a chord's beat near 55 Hz), which would read as a slow pulse, and short enough to tell sixteenths apart. */
+const WINDOW_SECONDS = 0.04;
+/** How much of the level before it a rise must add to count: a held note's wavering stays under it. */
+const RISE_SHARE = 0.25;
 /** The slowest and fastest beat a tempo is looked for at. */
 const MIN_BPM = 60;
 const MAX_BPM = 200;
@@ -27,15 +31,20 @@ export interface TempoEstimate {
   firstBeat: number;
 }
 
-/** How the level rises, read every `hop` frames: the rise of its RMS, never below 0, so a loud hit counts for more than a soft one. */
-function rises(channels: readonly Float32Array[], hop: number): Float32Array {
+/** How the level rises, read every `hop` frames over `window` frames: the rise of its RMS where it is a sound starting, so a loud hit counts for more than a soft one, and 0 elsewhere. */
+function rises(
+  channels: readonly Float32Array[],
+  hop: number,
+  window: number
+): Float32Array {
   const length = channels[0]?.length ?? 0;
   const count = Math.max(0, Math.floor(length / hop));
   const level = new Float32Array(count);
   for (let frame = 0; frame < count; frame += 1) {
     let sum = 0;
-    const from = frame * hop;
-    const to = Math.min(length, from + 2 * hop);
+    // The stretch just before the reading: a sound that starts rises the level where it starts, not a window early.
+    const to = Math.min(length, (frame + 1) * hop);
+    const from = Math.max(0, to - window);
     for (const channel of channels) {
       for (let index = from; index < to; index += 1) {
         sum += (channel[index] as number) ** 2;
@@ -45,10 +54,10 @@ function rises(channels: readonly Float32Array[], hop: number): Float32Array {
   }
   const strength = new Float32Array(count);
   for (let frame = 1; frame < count; frame += 1) {
-    strength[frame] = Math.max(
-      0,
-      (level[frame] as number) - (level[frame - 1] as number)
-    );
+    const before = level[frame - 1] as number;
+    const rise = (level[frame] as number) - before;
+    // A held sound wavers a little; only a rise of a share of the level before it is a sound starting.
+    strength[frame] = rise > RISE_SHARE * before ? rise : 0;
   }
   return strength;
 }
@@ -66,7 +75,11 @@ export function detectTransients(
   sampleRate: number
 ): number[] {
   const hop = hopOf(sampleRate);
-  const strength = rises(channels, hop);
+  const strength = rises(
+    channels,
+    hop,
+    Math.round(sampleRate * WINDOW_SECONDS)
+  );
   const count = strength.length;
   let highest = 0;
   for (const value of strength) {
@@ -165,7 +178,11 @@ export function estimateTempo(
 ): TempoEstimate | null {
   const hop = hopOf(sampleRate);
   const hopSeconds = hop / sampleRate;
-  const strength = rises(channels, hop);
+  const strength = rises(
+    channels,
+    hop,
+    Math.round(sampleRate * WINDOW_SECONDS)
+  );
   const count = strength.length;
   const shortest = Math.floor(60 / MAX_BPM / hopSeconds);
   const longest = Math.ceil(60 / MIN_BPM / hopSeconds);

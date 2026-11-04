@@ -77,6 +77,20 @@ describe("CLP-018: transients and tempo", () => {
     expect(Math.abs((estimate?.firstBeat ?? 0) - 0.6)).toBeLessThan(0.003);
   });
 
+  test("gives no tempo to a held chord, whose notes beat against each other", () => {
+    const chord = Float32Array.from({ length: RATE * 4 }, (_, index) => {
+      const time = index / RATE;
+      return (
+        (0.3 *
+          (Math.sin(2 * Math.PI * 220 * time) +
+            Math.sin(2 * Math.PI * 277.18 * time) +
+            Math.sin(2 * Math.PI * 329.63 * time))) /
+        3
+      );
+    });
+    expect(estimateTempo([chord, chord], RATE)).toBeNull();
+  });
+
   test("gives no tempo to noise, or to a single hit", () => {
     expect(estimateTempo(noise(6), RATE)).toBeNull();
     const single = new Float32Array(RATE * 4);
