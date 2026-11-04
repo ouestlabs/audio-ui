@@ -352,7 +352,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: [],
+    dependencies: ["@audio-ui/core"],
     description:
       "The face of a rack: eight macros, each with a menu that maps a parameter of a device inside or lets one go, its chains with their volume, switch and solo, and the picked chain's devices, which the host draws.",
     files: [
@@ -367,6 +367,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/knob",
       "@shadcn/button",
       "@shadcn/dropdown-menu",
+      "@shadcn/slider",
       "@shadcn/toggle",
     ],
     type: "registry:ui",

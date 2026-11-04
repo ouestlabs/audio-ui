@@ -1,7 +1,9 @@
 import type { DeviceContext } from "@audio-ui/core/device";
-import type {
-  Rack,
-  TrackDevice,
+import {
+  type ChainZone,
+  inZone,
+  type Rack,
+  type TrackDevice,
 } from "@/lib/arrangement";
 import type { LibraryDevice } from "@/lib/device-library";
 import {
@@ -41,6 +43,7 @@ export interface InstrumentRackEngine extends NotePlayer {
 interface Layer {
   device: TrackDevice;
   pool: VoicePool;
+  zone: ChainZone | undefined;
 }
 
 /**
@@ -76,9 +79,12 @@ export function createInstrumentRackEngine(
         layer.pool.noteOff(time, id);
       }
     },
+    // A note plays the chains whose zone holds it; a note off goes to them all, and lets go where the note is held.
     noteOn: (note, time, id) => {
       for (const layer of layers.values()) {
-        layer.pool.noteOn(note, time, id);
+        if (inZone(layer.zone, note.pitch, note.velocity)) {
+          layer.pool.noteOn(note, time, id);
+        }
       }
     },
     output: rack.output,
@@ -116,6 +122,7 @@ export function createInstrumentRackEngine(
         ) {
           layer.pool.update(values, context);
           layer.device = played.device;
+          layer.zone = chain.zone;
           continue;
         }
         const input = rack.chainInput(chain.id);
@@ -133,6 +140,7 @@ export function createInstrumentRackEngine(
             voices,
             input
           ),
+          zone: chain.zone,
         });
       }
     },

@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import {
+  type ChainZone,
   DRUM_RACK_DEVICE,
   type DrumSound,
   INSTRUMENT_RACK_DEVICE,
@@ -272,6 +273,18 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
     () => dispatch({ rack: rackId, track, type: "add-rack-chain" }),
     [dispatch, rackId, track]
   );
+  // An instrument rack's chains each play a zone of keys and velocities (DEV-015).
+  const zone = useCallback(
+    (id: string, patch: Partial<ChainZone>) =>
+      dispatch({
+        chain: id,
+        rack: rackId,
+        track,
+        type: "change-rack-chain",
+        zone: patch,
+      }),
+    [dispatch, rackId, track]
+  );
   return (
     <DeviceChainSlot
       enabled={device.on !== false}
@@ -292,6 +305,8 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
         onRemoveChain={removeChain}
         onSelectChain={setPicked}
         onUnmapMacro={unmap}
+        onZoneChange={layered ? zone : undefined}
+        onZoneCommit={settle}
         parameters={parameters}
         rack={rack}
         selectedChain={selected?.id ?? null}

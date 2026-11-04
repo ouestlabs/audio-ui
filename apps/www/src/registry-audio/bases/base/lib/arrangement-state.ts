@@ -21,10 +21,12 @@ import {
   type Arranged,
   type ArrangementTrack,
   type AutomatedParameter,
+  type ChainZone,
   type ClipAction,
   type Clipping,
   DRUM_RACK_DEVICE,
   type DrumSound,
+  FULL_ZONE,
   INSTRUMENT_RACK_DEVICE,
   type Mix,
   mixOf,
@@ -719,6 +721,8 @@ export type ArrangementCommand =
       chain: string;
       name?: string;
       mix?: Partial<NonNullable<RackChain["mix"]>>;
+      /** Its keys or its velocities, as a drag of a zone's slider sets them. */
+      zone?: Partial<ChainZone>;
     }
   /** A turn of a macro, 0 to 1: a burst, which `settle-clip-edit` closes into one step. */
   | {
@@ -1374,6 +1378,29 @@ function setPad(
       ...rack.chains,
       { devices: [], id, name: name.trim() || "Pad", pad: { note: at, sound } },
     ],
+  };
+}
+
+/** A range kept within `low` and `high`, its ends in order. */
+const within = (
+  [from, to]: readonly [number, number],
+  low: number,
+  high: number
+): [number, number] => {
+  const clamp = (value: number) => Math.min(high, Math.max(low, value));
+  return [clamp(Math.min(from, to)), clamp(Math.max(from, to))];
+};
+
+/** A chain's zone with `patch` over it: its keys whole notes from 0 to 127, its velocities from 0 to 1. */
+function zoned(
+  zone: ChainZone | undefined,
+  patch: Partial<ChainZone>
+): ChainZone {
+  const next = { ...FULL_ZONE, ...zone, ...patch };
+  const [low, high] = within(next.keys, 0, 127);
+  return {
+    keys: [Math.round(low), Math.round(high)],
+    velocity: within(next.velocity, 0, 1),
   };
 }
 
@@ -2282,7 +2309,7 @@ const handlers: Handlers = {
       }),
       edit
     ),
-  "change-rack-chain": (state, { chain, mix, name, rack, track }) =>
+  "change-rack-chain": (state, { chain, mix, name, rack, track, zone }) =>
     changeRack(
       state,
       track,
@@ -2291,6 +2318,7 @@ const handlers: Handlers = {
         withChain(current, chain, (item) => ({
           ...item,
           ...(name?.trim() ? { name: name.trim() } : {}),
+          ...(zone ? { zone: zoned(item.zone, zone) } : {}),
           ...(mix
             ? {
                 mix: {

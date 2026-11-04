@@ -1458,6 +1458,26 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.mouse.up();
       assert(level > -40, `the synth in the rack plays at ${level} dB`);
     },
+  "DEV-015: an instrument rack's Zones switch shows each chain's keys and velocities, and a key moved sets its zone":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("4 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Instrument rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      await rack.getByRole("button", { name: "Zones", exact: true }).click();
+      const zones = rack.getByRole("list", { name: "Zones" });
+      await zones.getByText("C-1 to G9").waitFor();
+      // The lowest key up an octave, a key at a time.
+      await zones.getByRole("slider").first().focus();
+      await Array.from({ length: 12 }).reduce<Promise<void>>(
+        (done) => done.then(() => page.keyboard.press("ArrowRight")),
+        Promise.resolve()
+      );
+      await zones.getByText("C0 to G9").waitFor({ timeout: 5000 });
+    },
   "DEV-010 and DEV-012: a rack takes a device from the library, plays it, and a macro turns its parameter":
     async (browser) => {
       const page = await open(browser);

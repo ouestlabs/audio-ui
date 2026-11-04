@@ -4,6 +4,7 @@ import {
   DRUM_RACK_DEVICE,
   type DrumSound,
   INSTRUMENT_RACK_DEVICE,
+  inZone,
   padRecordings,
   renamePadRecordings,
 } from "@/registry-audio/bases/base/lib/arrangement";
@@ -277,5 +278,54 @@ describe("instrument racks", () => {
       base
     );
     expect(nested).toBe(base);
+  });
+});
+
+describe("instrument rack zones", () => {
+  test("DEV-015: a chain's zone keeps whole keys from 0 to 127 and velocities from 0 to 1, its ends in order, as one step of a drag", () => {
+    const base = run([
+      {
+        device: INSTRUMENT_RACK_DEVICE,
+        instrument: true,
+        state: {},
+        track: "beat",
+        type: "add-device",
+      },
+    ]);
+    const rack = base.doc.tracks[0]?.devices?.[0];
+    const chain = rack?.rack?.chains[0]?.id as string;
+    const state = run(
+      [
+        {
+          chain,
+          rack: rack?.id as string,
+          track: "beat",
+          type: "change-rack-chain",
+          zone: { keys: [72.4, 36] },
+        },
+        {
+          chain,
+          rack: rack?.id as string,
+          track: "beat",
+          type: "change-rack-chain",
+          zone: { velocity: [-1, 0.5] },
+        },
+        { type: "settle-clip-edit" },
+      ],
+      base
+    );
+    expect(state.doc.tracks[0]?.devices?.[0]?.rack?.chains[0]?.zone).toEqual({
+      keys: [36, 72],
+      velocity: [0, 0.5],
+    });
+    expect(state.history.past).toHaveLength(2);
+  });
+
+  test("DEV-015: a note is in a zone when its pitch and its velocity both are, ends in; a chain with no zone plays them all", () => {
+    const zone = { keys: [36, 59] as const, velocity: [0, 0.5] as const };
+    expect(inZone(zone, 36, 0.5)).toBe(true);
+    expect(inZone(zone, 60, 0.5)).toBe(false);
+    expect(inZone(zone, 40, 0.6)).toBe(false);
+    expect(inZone(undefined, 127, 1)).toBe(true);
   });
 });

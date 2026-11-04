@@ -991,16 +991,21 @@ check(
 
 /** The loudest a note makes through an instrument rack of `chains` on a MIDI track. */
 async function throughLayers(
-  chains: {
-    devices: ReturnType<typeof device>[];
+  chains: readonly {
+    devices: readonly TrackDevice[];
     mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
-  }[]
+    zone?: {
+      keys: readonly [number, number];
+      velocity: readonly [number, number];
+    };
+  }[],
+  { pitch = 69, velocity = 1 }: { pitch?: number; velocity?: number } = {}
 ) {
   const doc = arrangement({
     clips: [
       {
         ...clip("m", "keys", 0, 1),
-        notes: [{ id: "n", length: 0.3, pitch: 69, start: 0.05, velocity: 1 }],
+        notes: [{ id: "n", length: 0.3, pitch, start: 0.05, velocity }],
         recording: undefined,
       },
     ],
@@ -1018,6 +1023,7 @@ async function throughLayers(
                 id: `chain-${index}`,
                 name: `Chain ${index}`,
                 ...(chain.mix ? { mix: chain.mix } : {}),
+                ...(chain.zone ? { zone: chain.zone } : {}),
               })),
               macros: [],
             },
@@ -1056,6 +1062,42 @@ check(
     assert(
       Math.abs(muted - one) < 1e-3,
       `a layer switched off leaves ${muted}, not ${one}`
+    );
+  }
+);
+
+check(
+  "DEV-015: a note plays only the chains whose keys and velocities hold it: a split, and soft and hard layers",
+  async () => {
+    const synth = (id: string) =>
+      device(id, "audioui.pocket-synth", { wave: "sine" });
+    const one = await throughLayers([{ devices: [synth("a")] }]);
+    const split = [
+      { devices: [synth("low")], zone: { keys: [0, 59], velocity: [0, 1] } },
+      { devices: [synth("high")], zone: { keys: [60, 127], velocity: [0, 1] } },
+    ] as const;
+    const high = await throughLayers(split, { pitch: 69 });
+    const low = await throughLayers(split, { pitch: 48 });
+    assert(
+      Math.abs(high - one) < 1e-3 && Math.abs(low - one) < 1e-3,
+      `a split plays one chain a note: ${low} and ${high}, not ${one}`
+    );
+    const layers = [
+      {
+        devices: [synth("soft")],
+        zone: { keys: [0, 127], velocity: [0, 0.5] },
+      },
+      {
+        devices: [synth("hard")],
+        zone: { keys: [0, 127], velocity: [0.5, 1] },
+      },
+    ] as const;
+    const soft = await throughLayers(layers, { velocity: 0.3 });
+    const both = await throughLayers(layers, { velocity: 0.5 });
+    assert(soft > 0.01, `the soft layer is silent (${soft})`);
+    assert(
+      Math.abs(both / soft - (2 * 0.5) / 0.3) < 0.1,
+      `on the edge both layers play: ${both} against ${soft}`
     );
   }
 );

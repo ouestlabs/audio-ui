@@ -1,5 +1,7 @@
 "use client";
 
+import { pitchName } from "@audio-ui/core/pitch";
+
 import { type ReactNode, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -15,12 +17,15 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
 import { Knob } from "@/components/audio-ui/knob";
-import type {
-  Rack,
-  RackChain,
-  RackMapping,
+import {
+  type ChainZone,
+  FULL_ZONE,
+  type Rack,
+  type RackChain,
+  type RackMapping,
 } from "@/lib/arrangement";
 import { XIcon, PlusIcon } from "@phosphor-icons/react";
 
@@ -295,6 +300,123 @@ function RackChainRow({
   );
 }
 
+/** A switch of a rack's title bar, which shows a part of the rack, such as its macros or its zones. */
+function RackSwitch({
+  children,
+  onPressedChange,
+  pressed,
+}: {
+  children: ReactNode;
+  onPressedChange: (pressed: boolean) => void;
+  pressed: boolean;
+}) {
+  return (
+    <Toggle
+      className="ms-1 h-6 min-w-0 px-1.5 text-xs"
+      onPressedChange={onPressedChange}
+      pressed={pressed}
+      size="sm"
+      variant="outline"
+    >
+      {children}
+    </Toggle>
+  );
+}
+
+/** How a velocity reads: as MIDI has it, 0 to 127. */
+const toMidi = (velocity: number) => Math.round(velocity * 127);
+
+/** One chain's zone: a range of keys, by their names, and a range of velocities. */
+function ZoneRow({
+  chain,
+  onCommit,
+  onZone,
+}: {
+  chain: RackChain;
+  onCommit?: () => void;
+  onZone: (chain: string, zone: Partial<ChainZone>) => void;
+}) {
+  const { id } = chain;
+  const zone = chain.zone ?? FULL_ZONE;
+  const keys = useCallback(
+    (value: number | readonly number[]) => {
+      if (Array.isArray(value)) {
+        onZone(id, { keys: [value[0] ?? 0, value[1] ?? 127] });
+      }
+    },
+    [id, onZone]
+  );
+  const velocity = useCallback(
+    (value: number | readonly number[]) => {
+      if (Array.isArray(value)) {
+        onZone(id, {
+          velocity: [(value[0] ?? 0) / 127, (value[1] ?? 127) / 127],
+        });
+      }
+    },
+    [id, onZone]
+  );
+  return (
+    <li className="flex flex-col gap-1" data-slot="rack-zone">
+      <span className="truncate font-medium text-xs">{chain.name}</span>
+      <div className="grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-2 text-muted-foreground text-xs">
+        <span>Keys</span>
+        <Slider
+          aria-label={`${chain.name} keys`}
+          max={127}
+          min={0}
+          onValueChange={keys}
+          onValueCommitted={onCommit}
+          step={1}
+          value={[...zone.keys]}
+        />
+        <span className="text-end tabular-nums">
+          {pitchName(zone.keys[0])} to {pitchName(zone.keys[1])}
+        </span>
+      </div>
+      <div className="grid grid-cols-[3.5rem_minmax(0,1fr)_5.5rem] items-center gap-2 text-muted-foreground text-xs">
+        <span>Velocity</span>
+        <Slider
+          aria-label={`${chain.name} velocities`}
+          max={127}
+          min={0}
+          onValueChange={velocity}
+          onValueCommitted={onCommit}
+          step={1}
+          value={zone.velocity.map(toMidi)}
+        />
+        <span className="text-end tabular-nums">
+          {toMidi(zone.velocity[0])} to {toMidi(zone.velocity[1])}
+        </span>
+      </div>
+    </li>
+  );
+}
+
+/** An instrument rack's zones: for each chain, the keys and the velocities of the notes it plays. */
+function RackZones({
+  chains,
+  onZoneChange,
+  onZoneCommit,
+}: {
+  chains: readonly RackChain[];
+  onZoneChange: (chain: string, zone: Partial<ChainZone>) => void;
+  onZoneCommit?: () => void;
+}) {
+  return (
+    <ul aria-label="Zones" className="flex w-80 shrink-0 flex-col gap-3 p-2">
+      {chains.map((chain) => (
+        <ZoneRow
+          chain={chain}
+          key={chain.id}
+          onCommit={onZoneCommit}
+          onZone={onZoneChange}
+        />
+      ))}
+    </ul>
+  );
+}
+
 /**
  * The frame of a rack's face: a device's title bar, with its square, its name,
  * a switch that shows the macros and the host's controls, over what the rack
@@ -309,10 +431,13 @@ function RackFrame({
   onEnabledChange,
   slot = "rack-panel",
   title = "Rack",
+  tools,
 }: {
   children: ReactNode;
   /** The rack's macros, shown first when the title bar's switch is on. */
   macros?: ReactNode;
+  /** More switches after the macros' in the title bar, such as one that shows the zones. */
+  tools?: ReactNode;
   className?: string;
   /** What sits at the end of the title bar: a host's grip, fold and remove buttons. */
   controls?: ReactNode;
@@ -356,16 +481,11 @@ function RackFrame({
           {title}
         </span>
         {macros ? (
-          <Toggle
-            className="ms-1 h-6 min-w-0 px-1.5 text-xs"
-            onPressedChange={setShowMacros}
-            pressed={showMacros}
-            size="sm"
-            variant="outline"
-          >
+          <RackSwitch onPressedChange={setShowMacros} pressed={showMacros}>
             Macros
-          </Toggle>
+          </RackSwitch>
         ) : null}
+        {tools}
         <div className="ms-auto flex items-center gap-2 [&_button]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]">
           {controls}
         </div>
@@ -442,6 +562,8 @@ function RackPanel({
   onRemoveChain,
   onSelectChain,
   onUnmapMacro,
+  onZoneChange,
+  onZoneCommit,
   parameters,
   rack,
   selectedChain,
@@ -465,11 +587,16 @@ function RackPanel({
   onRemoveChain: (chain: string) => void;
   onSelectChain: (chain: string) => void;
   onUnmapMacro: (index: number, mapping: RackMapping) => void;
+  /** Gives the title bar a Zones switch, which shows each chain's keys and velocities: an instrument rack's. A drag of one is a burst. */
+  onZoneChange?: (chain: string, zone: Partial<ChainZone>) => void;
+  /** Called when a drag of a zone's slider ends. */
+  onZoneCommit?: () => void;
   /** The parameters of the devices inside that a macro can turn. */
   parameters: readonly RackParameter[];
   rack: Rack;
   selectedChain: string | null;
 }) {
+  const [showZones, setShowZones] = useState(false);
   return (
     <RackFrame
       className={className}
@@ -487,6 +614,13 @@ function RackPanel({
       }
       onEnabledChange={onEnabledChange}
       title={title}
+      tools={
+        onZoneChange ? (
+          <RackSwitch onPressedChange={setShowZones} pressed={showZones}>
+            Zones
+          </RackSwitch>
+        ) : null
+      }
     >
       <div className="flex w-64 shrink-0 flex-col gap-1 p-2">
         <ul aria-label="Chains" className="flex flex-col gap-0.5">
@@ -513,6 +647,13 @@ function RackPanel({
           Add a chain
         </Button>
       </div>
+      {onZoneChange && showZones ? (
+        <RackZones
+          chains={rack.chains}
+          onZoneChange={onZoneChange}
+          onZoneCommit={onZoneCommit}
+        />
+      ) : null}
       <div className="flex min-w-0 flex-1">{children}</div>
     </RackFrame>
   );

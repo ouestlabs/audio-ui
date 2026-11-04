@@ -103,6 +103,32 @@ export interface RackChain {
   name: string;
   /** In a drum rack: the note the chain answers, and the sound it plays into its devices. */
   pad?: DrumPad;
+  /** In an instrument rack: the notes the chain plays. A chain with none plays them all. */
+  zone?: ChainZone;
+}
+
+/** The notes a chain of an instrument rack plays: its keys, lowest to highest pitch, and its velocities, 0 to 1, both ends in. */
+export interface ChainZone {
+  keys: readonly [number, number];
+  velocity: readonly [number, number];
+}
+
+/** The zone of a chain with none: every key, every velocity. */
+export const FULL_ZONE: ChainZone = { keys: [0, 127], velocity: [0, 1] };
+
+/** Whether a chain plays a note of `pitch` struck as hard as `velocity`: inside its keys and its velocities. */
+export function inZone(
+  zone: ChainZone | undefined,
+  pitch: number,
+  velocity: number
+): boolean {
+  const { keys, velocity: range } = zone ?? FULL_ZONE;
+  return (
+    pitch >= keys[0] &&
+    pitch <= keys[1] &&
+    velocity >= range[0] &&
+    velocity <= range[1]
+  );
 }
 
 /** The voices of the drum synthesis a pad can play. */
