@@ -4,14 +4,17 @@
  * `bunx vite preview --port 4173`, then `bun run test:perf`, or name the
  * measures: `bun test/perf/run.ts PRF-003`. `DAW_URL` points at another
  * server. `PERF_SECONDS` is how long the tracks held play (600, as PRF-004
- * asks), `PERF_TRACKS` how many (8,16,32).
+ * asks), `PERF_TRACKS` how many (8,16,32), `PERF_MODES` the warp modes of
+ * PRF-008 (repitch,beats,tones).
  *
  * Times are read off the audio clock: a sound scheduled at a context time is
  * heard at the page time `getOutputTimestamp` maps it to, which counts the
  * output's latency. Audio stays muted.
  */
+
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import type { WarpMode } from "@audio-ui/core/playback";
 import {
   type Browser,
   type BrowserContext,
@@ -28,6 +31,12 @@ import {
 
 const APP_URL = process.env.DAW_URL ?? "http://localhost:4173/";
 const HELD_SECONDS = Number(process.env.PERF_SECONDS ?? 600);
+/** The warp modes PRF-008 plays its sets in: `PERF_MODES` (repitch,beats,tones). */
+const WARP_MODES = (process.env.PERF_MODES ?? "repitch,beats,tones")
+  .split(",")
+  .filter((mode): mode is WarpMode =>
+    ["beats", "repitch", "tones"].includes(mode)
+  );
 const HELD_TRACKS = (process.env.PERF_TRACKS ?? "8,16,32")
   .split(",")
   .map(Number);
@@ -595,7 +604,7 @@ const measures: Record<string, (browser: Browser) => Promise<string[]>> = {
   "PRF-008: tracks held with their clips stretched, in each warp mode": async (
     browser
   ) => {
-    const sets = (["repitch", "beats", "tones"] as const).flatMap((warpMode) =>
+    const sets = WARP_MODES.flatMap((warpMode) =>
       HELD_TRACKS.map((tracks) => ({ tracks, warpMode }))
     );
     const held = await inTurn(sets.length, async (index) => {

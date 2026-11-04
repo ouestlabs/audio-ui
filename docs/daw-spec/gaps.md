@@ -141,9 +141,10 @@ Status: fixed (checked in Chromium in the DAW). `apps/lab` keeps its old copies 
 Twice in the browser checks, a track that should sound read -100 dB on the main meter: `DEV-010` (a take through a rack) and `DEV-014` (a pad held in an instrument rack), each once, each passing on the next run. An export's silence (`EXP-009`) cannot explain them: it only touches offline renders.
 Status: not reproduced in 34 plays made for it, 14 at low load and 10 under eight busy processes for the rack, 10 for the pad. The first came right after files were reinstalled on the dev server, so a page reloading mid-check is possible, not shown. A pad's note does stop when its panel has left the screen. To reopen if a track is ever heard silent outside a check.
 
-### G-031 Stretched clips cost the app far more than the renderer
-With 16 tracks of clips played 1.12 times slower than recorded (PRF-008), the audio thread of the app falls behind in every warp mode, Repitch included, while the same tracks not stretched hold at 26 % and the renderer alone, in Chrome, spends 0.4 to 0.7 ms of a 2.67 ms quantum on them. Found while measuring Tones: a stream's page is now looked up once per interpolated read and Tones lines its grains up on whole frames, which brought 8 tracks of Tones from 98 % to 34 %; 16 still overload.
-Status: open. Next: profile the worklet in the app (what the engine sends a stretched clip's track, how often its clips are set, the pages streamed ahead for a clip that reads slower than it plays).
+### G-031 Sixteen tracks through an equalizer and a compressor load the audio thread to three quarters
+Measured on 2026-11-04, 30 s each: 16 tracks not stretched, load mean 73 %, peak 89 %, one underrun; the same 16 stretched in Repitch, mean 73 %, peak 93 %, 38 underruns. Stretching costs next to nothing more: the load is the tracks'. PRF-004 read 26 % for the same set in phase 1, on a quieter machine; the graph of a track has barely changed since, so that gap is not shown to be the code's. A trace of the audio nodes over 8 s gave, per render quantum, 32 worklets where the clips need 16 (each compressor's key detector ran with its key off), about 330 gain nodes (some 20 a track: 9 in the channel strip, 9 in the compressor, 3 in the equalizer), 64 biquads and 16 compressor nodes.
+Fix: the compressor links a path to its output only while it is heard, and makes its key detector the first time the key is on, so at full mix with no key it renders its node alone (`apps/www/test/registry-audio/base/lib/compressor-engine.test.ts` "G-031").
+Status: partial: measured again at the end of phase 4. The channel strip's nine gains a track are next if the load stays high.
 
 ## Fixed
 

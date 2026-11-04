@@ -117,6 +117,33 @@ describe("createCompressorEngine", () => {
     expect(engine.reduction).toBe(-7.5);
   });
 
+  test("G-031: links to the output only the paths that are heard", () => {
+    const { created, ctx } = fakeContext();
+    const output = () => created.gains[1];
+    const engine = createCompressorEngine(ctx, defaults);
+    // input, output, dry, trim, wet, sidechain, keyed, keyedTrim, keyedWet
+    const [, , dry, , wet, , , , keyedWet] = created.gains;
+    const reaches = (node: FakeGain | undefined) =>
+      node?.connections.includes(output()) ?? false;
+    expect([reaches(dry), reaches(wet), reaches(keyedWet)]).toEqual([
+      false,
+      true,
+      false,
+    ]);
+    engine.update({ ...defaults, mix: 50 });
+    expect([reaches(dry), reaches(wet)]).toEqual([true, true]);
+  });
+
+  test("G-031: a path set to silence leaves the graph once it has faded", async () => {
+    const { created, ctx } = fakeContext();
+    const engine = createCompressorEngine(ctx, { ...defaults, mix: 50 });
+    const [, , dry] = created.gains;
+    engine.update(defaults);
+    expect(dry?.disconnected).toBe(0);
+    await Bun.sleep(150);
+    expect(dry?.disconnected).toBe(1);
+  });
+
   test("releases every node it made", () => {
     const { created, ctx } = fakeContext();
     const engine = createCompressorEngine(ctx, defaults);
