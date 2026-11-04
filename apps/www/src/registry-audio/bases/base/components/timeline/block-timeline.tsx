@@ -113,11 +113,13 @@ import { useTimelineMarkers } from "@/registry-audio/bases/base/hooks/use-timeli
 import { useTimelineZoom } from "@/registry-audio/bases/base/hooks/use-timeline-zoom";
 import { useTrackAutomation } from "@/registry-audio/bases/base/hooks/use-track-automation";
 import { useTrackReorder } from "@/registry-audio/bases/base/hooks/use-track-reorder";
-import type {
-  Arranged,
-  ArrangementTrack,
-  TimeSelection,
-  TrackKind,
+import {
+  type Arranged,
+  type ArrangementTrack,
+  analyzeBeat,
+  type TimeSelection,
+  type TrackKind,
+  warpOnImport,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { renderTrackClips } from "@/registry-audio/bases/base/lib/arrangement-engine";
 import { audioClipsIn } from "@/registry-audio/bases/base/lib/arrangement-state";
@@ -496,6 +498,7 @@ function ClipDock({
   onValueChange,
   onValueCommitted,
   peaks,
+  position,
   foldedBoxes,
   onFoldedBoxesChange,
   onRename,
@@ -513,6 +516,8 @@ function ClipDock({
   >;
   onActiveChange: (active: boolean) => void;
   onClose: () => void;
+  /** The arrangement's position, live, which an audio clip's panel shows where it plays. */
+  position: ComponentProps<typeof ClipPanel>["position"];
   onCollapsedChange: (collapsed: boolean) => void;
   onCrop: () => void;
   onValueChange: (next: ClipSettings) => void;
@@ -576,6 +581,8 @@ function ClipDock({
       onRename={rename}
       onValueChange={onValueChange}
       onValueCommitted={onValueCommitted}
+      position={position}
+      start={clip.value.start}
       value={{
         gain: clip.gain ?? 0,
         length: clip.value.length,
@@ -584,6 +591,7 @@ function ClipDock({
         reversed: Boolean(clip.reversed),
         sourceLength: clip.sourceLength,
         transpose: clip.transpose ?? 0,
+        warpMode: clip.warpMode,
         warp: clip.warp ?? null,
       }}
       values={peaks}
@@ -1242,6 +1250,7 @@ export default function BlockTimeline() {
           loop: next.loop ?? undefined,
           reversed: next.reversed,
           transpose: next.transpose,
+          warpMode: next.warpMode,
           warp: next.warp ?? undefined,
           value: {
             ...clip.value,
@@ -1425,6 +1434,7 @@ export default function BlockTimeline() {
   // The grid the lanes draw is the grid everything snaps to. Snap off draws no lines and snaps nothing: a step of 0 is no grid.
   // A file dragged over an audio track marks it; let go there, it becomes a clip at the grid line under the
   // pointer (anywhere with Cmd/Ctrl), named and as long as the file, and the files after it follow it on the track.
+  // A file with a beat is warped in time at the arrangement's tempo (CLP-019).
   const [fileTrack, setFileTrack] = useState<string | null>(null);
   const fileCount = useRef(0);
   const audioLaneUnder = useCallback(
@@ -1462,26 +1472,31 @@ export default function BlockTimeline() {
           fileCount.current += 1;
           const id = `file${fileCount.current}`;
           keepRecording(id, recordingOf(channels, context.sampleRate));
+          const clip = warpOnImport(
+            {
+              id,
+              name: file.name.replace(EXTENSION, ""),
+              recording: id,
+              sourceLength: length,
+              track: trackId,
+              value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start: at },
+            },
+            analyzeBeat(channels, context.sampleRate),
+            tempo
+          );
           addClip({
-            id,
-            name: file.name.replace(EXTENSION, ""),
-            recording: id,
-            sourceLength: length,
-            track: trackId,
+            ...clip,
             value: {
-              fadeIn: 0,
-              fadeOut: 0,
-              length: Math.min(length, duration - at),
-              offset: 0,
-              start: at,
+              ...clip.value,
+              length: Math.min(clip.value.length, duration - at),
             },
           });
           selectClip(id, false);
-          at += length;
+          at += clip.value.length;
         }
       }
     },
-    [addClip, duration, keepRecording, selectClip]
+    [addClip, duration, keepRecording, selectClip, tempo]
   );
   const handleFileOver = useCallback(
     (event: DragEvent<HTMLDivElement>) => {
@@ -2215,6 +2230,7 @@ export default function BlockTimeline() {
           onValueChange={changeClipSettings}
           onValueCommitted={settleClipEdit}
           peaks={editedPeaks}
+          position={clock}
         />
       ) : null}
       <TrackReorderGhost

@@ -129,7 +129,7 @@ Some engines add to this:
 | Member | On | What it is |
 | --- | --- | --- |
 | `sidechain` | Compressor, gate | The input of the signal that drives the device. |
-| `ready` | Every device that runs a worklet | A promise that resolves once the detector is in the graph. |
+| `ready` | Every device that runs a worklet | A promise that resolves once the detector can be in the graph. The compressor makes its detector the first time its key is on. |
 | `reduction` | Compressor, limiter, de-esser | The gain being taken off, in dB. Read it each frame. |
 | `noteOn`, `noteOff` | Instruments | Start and release a note. |
 

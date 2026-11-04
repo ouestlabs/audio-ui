@@ -1,4 +1,5 @@
 import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
+import { analyzeBeat, type BeatAnalysis } from "@/lib/arrangement";
 import { decodeAudioChannels } from "@/lib/audio-decode";
 import type { RecordingSource } from "@/lib/clip-player";
 
@@ -8,6 +9,8 @@ const EXTENSION = /\.[^.]+$/;
 
 /** A recording of the project: its sound, decoded at the engine's rate, and what its clips draw. */
 export interface Recording {
+  /** Its beat as it was read when it came in, which warps the clips laid down from it (CLP-019). */
+  beat?: BeatAnalysis;
   /** How long it lasts, in seconds. */
   length: number;
   /** The name of the file it came from, without its extension. */
@@ -37,7 +40,8 @@ export function freshRecordingId(taken: ReadonlySet<string>): string {
 /**
  * Decodes a file's bytes on `context`, at its sample rate (CLP-011: a file at
  * another rate is converted on the way), with the peaks of its loudest
- * channel. `null` when the bytes are not sound the browser can decode.
+ * channel and its beat. `null` when the bytes are not sound the browser can
+ * decode.
  */
 export async function decodeRecording(
   context: BaseAudioContext,
@@ -51,6 +55,7 @@ export async function decodeRecording(
   }
   const { max, min } = normalizePeaks(computePeaks(channels, PEAKS));
   return {
+    beat: analyzeBeat(channels, context.sampleRate),
     length: first.length / context.sampleRate,
     name,
     peaks: Array.from(max, (high, index) => Math.max(high, -(min[index] ?? 0))),

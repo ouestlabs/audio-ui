@@ -4,14 +4,17 @@
  * `bunx vite preview --port 4173`, then `bun run test:perf`, or name the
  * measures: `bun test/perf/run.ts PRF-003`. `DAW_URL` points at another
  * server. `PERF_SECONDS` is how long the tracks held play (600, as PRF-004
- * asks), `PERF_TRACKS` how many (8,16,32).
+ * asks), `PERF_TRACKS` how many (8,16,32), `PERF_MODES` the warp modes of
+ * PRF-008 (repitch,beats,tones).
  *
  * Times are read off the audio clock: a sound scheduled at a context time is
  * heard at the page time `getOutputTimestamp` maps it to, which counts the
  * output's latency. Audio stays muted.
  */
+
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import type { WarpMode } from "@audio-ui/core/playback";
 import {
   type Browser,
   type BrowserContext,
@@ -28,6 +31,12 @@ import {
 
 const APP_URL = process.env.DAW_URL ?? "http://localhost:4173/";
 const HELD_SECONDS = Number(process.env.PERF_SECONDS ?? 600);
+/** The warp modes PRF-008 plays its sets in: `PERF_MODES` (repitch,beats,tones). */
+const WARP_MODES = (process.env.PERF_MODES ?? "repitch,beats,tones")
+  .split(",")
+  .filter((mode): mode is WarpMode =>
+    ["beats", "repitch", "tones"].includes(mode)
+  );
 const HELD_TRACKS = (process.env.PERF_TRACKS ?? "8,16,32")
   .split(",")
   .map(Number);
@@ -416,6 +425,35 @@ const underruns = (page: Page) =>
       ).playbackStats?.underrunEvents ?? 0
   );
 
+/** One set of `tracks` stretched tracks in `warpMode`, held 30 s: its load and underruns, as a line. */
+async function holdStretched(
+  browser: Browser,
+  tracks: number,
+  warpMode: WarpMode | undefined
+) {
+  const page = await openSet(browser, {
+    devices: CHAIN,
+    looping: true,
+    seconds: 60,
+    tracks,
+    warpMode,
+  });
+  const load = await loadMeter(page);
+  const before = await underruns(page);
+  await page.keyboard.press("Space");
+  await page.waitForTimeout(1000);
+  const loads = await inTurn(30, async () => {
+    await page.waitForTimeout(1000);
+    return load();
+  });
+  const fellBehind = (await underruns(page)) - before;
+  await page.keyboard.press("Space");
+  await page.context().close();
+  const peak = Math.max(...loads);
+  const mean = loads.reduce((sum, value) => sum + value, 0) / loads.length;
+  return `${warpMode}, ${tracks} tracks: load peak ${(peak * 100).toFixed(0)} %, mean ${(mean * 100).toFixed(0)} % over 30 s; ${fellBehind} underruns`;
+}
+
 /** Runs `step` `times` times, each once the last is done: a measure is presses in a row. */
 const inTurn = <T>(times: number, step: (index: number) => Promise<T>) =>
   Array.from({ length: times }, (_, index) => index).reduce<Promise<T[]>>(
@@ -590,6 +628,25 @@ const measures: Record<string, (browser: Browser) => Promise<string[]>> = {
       `a set went over 80 % or fell behind: ${lines.join("; ")}`
     );
     return lines;
+  },
+
+  "PRF-008: tracks held with their clips stretched, in each warp mode": async (
+    browser
+  ) => {
+    const sets = WARP_MODES.flatMap((warpMode) =>
+      HELD_TRACKS.map((tracks) => ({ tracks, warpMode }))
+    );
+    const held = await inTurn(sets.length, async (index) => {
+      const { tracks = 0, warpMode } = sets[index] ?? {};
+      // A set that fails says so on its own line, and the others still play.
+      try {
+        return await holdStretched(browser, tracks, warpMode);
+      } catch (error) {
+        await Promise.all(browser.contexts().map((context) => context.close()));
+        return `${warpMode}, ${tracks} tracks: did not play (${(error as Error).message.split("\n")[0]})`;
+      }
+    });
+    return held;
   },
 
   "PRF-005: export of the reference arrangement": async (browser) => {

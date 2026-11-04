@@ -4,6 +4,7 @@
  * back, and the return tracks they send to. Nothing comes from another
  * program's sets.
  */
+import type { WarpMode } from "@audio-ui/core/playback";
 import type { Arranged, ArrangementTrack } from "@/lib/arrangement";
 import { createArrangementState } from "@/lib/arrangement-state";
 import { deviceAt, START_TEMPO, TRACK_COLOR_COUNT } from "@/lib/daw/project";
@@ -25,6 +26,8 @@ export interface LoadSetOptions {
   returns?: readonly string[];
   seconds: number;
   tracks: number;
+  /** Plays each clip 1.12 times slower than it was recorded, in this mode. */
+  warpMode?: WarpMode;
 }
 
 /** A project of `tracks` audio tracks, `seconds` long, as the app keeps one in the browser. */
@@ -34,6 +37,7 @@ export function loadSet({
   returns = [],
   seconds,
   tracks,
+  warpMode,
 }: LoadSetOptions): SavedProject {
   const returnTracks: ArrangementTrack[] = returns.map((device, index) => ({
     color: index % TRACK_COLOR_COUNT,
@@ -72,6 +76,15 @@ export function loadSet({
         offset: 0,
         start: index * TAKE_SECONDS,
       },
+      ...(warpMode
+        ? {
+            warp: [
+              { source: 0, target: 0 },
+              { source: TAKE_SECONDS / 1.12, target: TAKE_SECONDS },
+            ],
+            warpMode,
+          }
+        : {}),
     }))
   );
   const { doc } = createArrangementState({

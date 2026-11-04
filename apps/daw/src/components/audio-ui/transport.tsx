@@ -10,7 +10,13 @@ import {
   secondsPerBeat,
   type Tempo,
 } from "@audio-ui/core/time";
-import { LoopIcon, PauseIcon, PlayIcon, StopIcon } from "@audio-ui/icons/react";
+import {
+  LoopIcon,
+  PauseIcon,
+  PlayIcon,
+  RecordIcon,
+  StopIcon,
+} from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
 import { useCallback, useEffect, useRef } from "react";
@@ -186,6 +192,126 @@ function MetronomeBeat({
         ref={second}
       />
     </span>
+  );
+}
+
+/** The count-ins a take can have, in bars: 0 is none. */
+const COUNT_INS = [0, 1, 2, 4] as const;
+
+/**
+ * Recording's settings behind a caret beside Record: how many bars the
+ * metronome counts in before a take, and whether the take keeps only what
+ * falls inside the loop (Punch).
+ */
+function RecordMenu({
+  countIn,
+  onCountInChange,
+  onPunchChange,
+  punch,
+}: {
+  countIn: number;
+  onCountInChange?: (bars: number) => void;
+  onPunchChange?: (punch: boolean) => void;
+  punch: boolean;
+}) {
+  const handleCountIn = useCallback(
+    (value: string) => onCountInChange?.(Number(value)),
+    [onCountInChange]
+  );
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Toolbar.Button
+            aria-label="Record settings"
+            render={<Button size="icon" variant="outline" />}
+          />
+        }
+      >
+        <CaretDownIcon
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-auto min-w-40">
+        {onCountInChange ? (
+          <DropdownMenuGroup>
+            <DropdownMenuLabel>Count-in</DropdownMenuLabel>
+            <DropdownMenuRadioGroup
+              onValueChange={handleCountIn}
+              value={String(countIn)}
+            >
+              {COUNT_INS.map((bars) => (
+                <DropdownMenuRadioItem key={bars} value={String(bars)}>
+                  {bars === 0
+                    ? "None"
+                    : `${bars} ${bars === 1 ? "bar" : "bars"}`}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuGroup>
+        ) : null}
+        {onCountInChange && onPunchChange ? <DropdownMenuSeparator /> : null}
+        {onPunchChange ? (
+          <DropdownMenuCheckboxItem
+            checked={punch}
+            onCheckedChange={onPunchChange}
+          >
+            Punch in the loop
+          </DropdownMenuCheckboxItem>
+        ) : null}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** Record, and its settings' caret when there are any: nothing for a transport without `onRecordChange`. */
+function RecordControls({
+  countIn,
+  onCountInChange,
+  onPunchChange,
+  onRecordChange,
+  punch,
+  recording,
+}: {
+  countIn: number;
+  onCountInChange?: (bars: number) => void;
+  onPunchChange?: (punch: boolean) => void;
+  onRecordChange?: (recording: boolean) => void;
+  punch: boolean;
+  recording: boolean;
+}) {
+  const toggle = useCallback(
+    () => onRecordChange?.(!recording),
+    [onRecordChange, recording]
+  );
+  if (!onRecordChange) {
+    return null;
+  }
+  return (
+    <>
+      <Toolbar.Button
+        aria-label="Record"
+        aria-pressed={recording}
+        onClick={toggle}
+        render={
+          <Button
+            className={cn(recording && "text-destructive")}
+            size="icon"
+            variant="outline"
+          />
+        }
+        title="Record (F9)"
+      >
+        <RecordIcon weight="fill" />
+      </Toolbar.Button>
+      {onCountInChange || onPunchChange ? (
+        <RecordMenu
+          countIn={countIn}
+          onCountInChange={onCountInChange}
+          onPunchChange={onPunchChange}
+          punch={punch}
+        />
+      ) : null}
+    </>
   );
 }
 
@@ -441,14 +567,22 @@ const NO_SIGNATURES: readonly SignatureChange[] = [];
 
 interface TransportProps {
   className?: string;
+  /** How many bars the metronome counts in before a take: 0, 1, 2 or 4. @default 0 */
+  countIn?: number;
   /** Whether the loop is on. Leave it out, with `onLoopingChange`, for a transport without a loop. */
   looping?: boolean;
   /** Whether the metronome is on. Leave it out, with `onMetronomeChange`, for a transport without one. */
   metronome?: boolean;
+  /** A count-in was picked in Record's menu. */
+  onCountInChange?: (bars: number) => void;
   onLoopingChange?: (looping: boolean) => void;
   onMetronomeChange?: (metronome: boolean) => void;
   /** Play or pause was pressed. */
   onPlayPause: () => void;
+  /** Punch was turned on or off in Record's menu. */
+  onPunchChange?: (punch: boolean) => void;
+  /** Record was pressed. Leave it out, with `recording`, for a transport without one. */
+  onRecordChange?: (recording: boolean) => void;
   /** The click's rhythm was picked. Leave it out, with `onSoundChange`, for a metronome without settings. */
   onRhythmChange?: (rhythm: MetronomeRhythm) => void;
   /** The click's sound was picked, one of `sounds`. */
@@ -459,6 +593,10 @@ interface TransportProps {
   onTempoChange?: (tempo: Tempo) => void;
   /** Whether it is playing. */
   playing: boolean;
+  /** Whether a take keeps only what falls inside the loop. @default false */
+  punch?: boolean;
+  /** Whether it is recording. */
+  recording?: boolean;
   /** How often the click sounds, and what the metronome's dots follow. @default "auto" */
   rhythm?: MetronomeRhythm;
   /** The time-signature changes along the song, which the position's bars follow. @default [] */
@@ -483,16 +621,22 @@ interface TransportProps {
  */
 function Transport({
   className,
+  countIn = 0,
   looping,
   metronome,
+  onCountInChange,
   onLoopingChange,
   onMetronomeChange,
   onPlayPause,
+  onPunchChange,
+  onRecordChange,
   onRhythmChange,
   onSoundChange,
   onStop,
   onTempoChange,
   playing,
+  punch = false,
+  recording = false,
   rhythm = "auto",
   signatures = NO_SIGNATURES,
   sound,
@@ -534,6 +678,14 @@ function Transport({
         >
           <StopIcon weight="fill" />
         </Toolbar.Button>
+        <RecordControls
+          countIn={countIn}
+          onCountInChange={onCountInChange}
+          onPunchChange={onPunchChange}
+          onRecordChange={onRecordChange}
+          punch={punch}
+          recording={recording}
+        />
         <ButtonGroupText>
           <TransportPosition
             signatures={signatures}

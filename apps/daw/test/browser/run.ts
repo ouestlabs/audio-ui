@@ -964,6 +964,116 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "Delete on a fade took the clip away too"
       );
     },
+  "CLP-015: Warp in the clip panel keeps the pitch, in Beats, and the panel picks another mode; the clip still plays":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const modes = page.getByRole("group", { name: "Warp mode" });
+      await modes.waitFor({ timeout: 5000 });
+      const pressed = (name: string) =>
+        modes
+          .getByRole("button", { exact: true, name })
+          .getAttribute("aria-pressed");
+      assert(
+        (await pressed("Repitch")) === "true",
+        "a new clip starts in Repitch"
+      );
+      await page.getByRole("button", { exact: true, name: "Warp" }).click();
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector('[aria-label="Warp mode"]')
+            ?.querySelectorAll('[aria-pressed="true"]')[0]?.textContent ===
+          "Beats",
+        undefined,
+        { timeout: 5000 }
+      );
+      await modes.getByRole("button", { exact: true, name: "Tones" }).click();
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector('[aria-label="Warp mode"]')
+            ?.querySelectorAll('[aria-pressed="true"]')[0]?.textContent ===
+          "Tones",
+        undefined,
+        { timeout: 5000 }
+      );
+      await showMixer(page);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the clip in Tones plays at ${level} dB`);
+    },
+  "REC-004: an armed audio track records a take from the cursor, which plays back as a clip; one undo takes it away":
+    async (browser) => {
+      const page = await open(browser);
+      const clips = page.locator('[data-track="track-1"] [data-clip-id]');
+      const before = await clips.count();
+      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      assert(
+        (await page
+          .getByRole("button", { name: "Arm 1 Audio" })
+          .getAttribute("aria-pressed")) === "true",
+        "the track is armed"
+      );
+      await page.getByRole("button", { exact: true, name: "Record" }).click();
+      // The take shows on its track as it records, and grows (REC-011).
+      const live = page.locator(
+        '[data-track="track-1"] [data-slot="arranged-take"]'
+      );
+      await live.waitFor({ timeout: 5000 });
+      await page.waitForTimeout(1000);
+      const first = await live.evaluate((element) => ({
+        drawn: element.querySelector("path")?.getAttribute("d")?.length ?? 0,
+        width: element.getBoundingClientRect().width,
+      }));
+      await page.waitForTimeout(1500);
+      const later = await live.evaluate(
+        (element) => element.getBoundingClientRect().width
+      );
+      assert(
+        later > first.width && first.drawn > 0,
+        `the take grows (${first.width} then ${later} px) and draws what comes in (${first.drawn})`
+      );
+      await page.getByRole("button", { exact: true, name: "Record" }).click();
+      await page.waitForFunction(
+        () => !document.querySelector('[data-slot="arranged-take"]'),
+        undefined,
+        { timeout: 5000 }
+      );
+      await page.waitForFunction(
+        (count) =>
+          document.querySelectorAll('[data-track="track-1"] [data-clip-id]')
+            .length > count,
+        before,
+        { timeout: 15_000 }
+      );
+      await showMixer(page);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the take plays back at ${level} dB`);
+      await page.keyboard.press("Meta+z");
+      await page.waitForFunction(
+        (count) =>
+          document.querySelectorAll('[data-track="track-1"] [data-clip-id]')
+            .length === count,
+        before,
+        { timeout: 5000 }
+      );
+    },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {
       const page = await open(browser);
@@ -1841,7 +1951,12 @@ const names = Object.keys(checks).filter(
   (name) => wanted.length === 0 || wanted.some((id) => name.startsWith(id))
 );
 const chrome = await chromium.launch({
-  args: ["--autoplay-policy=no-user-gesture-required"],
+  // A fake microphone, a tone, granted without asking: what a take records (REC).
+  args: [
+    "--autoplay-policy=no-user-gesture-required",
+    "--use-fake-device-for-media-stream",
+    "--use-fake-ui-for-media-stream",
+  ],
   executablePath: process.env.CHROME_PATH,
 });
 const failed = await names.reduce<Promise<number>>(async (count, name) => {
@@ -1855,6 +1970,9 @@ const failed = await names.reduce<Promise<number>>(async (count, name) => {
       `  FAIL ${name}\n       ${error instanceof Error ? error.message : String(error)}`
     );
     return total + 1;
+  } finally {
+    // A check leaves its pages open: closed here, so one app at a time plays, not every check's at once.
+    await Promise.all(chrome.contexts().map((context) => context.close()));
   }
 }, Promise.resolve(0));
 await chrome.close();

@@ -1019,8 +1019,14 @@ export async function createArrangementEngine(
       clips.every((clip, index) => clip === runtime.clips?.[index]);
     if (runtime.player && !same) {
       runtime.clips = clips;
+      // A slice of Beats lasts a sixteenth note.
+      const warpGrain = 15 / next.tempo.bpm;
       runtime.played = withCrossfades(
-        playedClips(clips, (clip) => clip.recording, rate)
+        playedClips(
+          clips.map((clip) => ({ ...clip, warpGrain })),
+          (clip) => clip.recording,
+          rate
+        )
       );
       runtime.player.setClips(runtime.played, recordings);
     }

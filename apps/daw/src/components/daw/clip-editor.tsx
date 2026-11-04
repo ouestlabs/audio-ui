@@ -26,6 +26,7 @@ function settingsOf(clip: Arranged): ClipSettings {
     sourceLength: clip.sourceLength,
     transpose: clip.transpose ?? 0,
     warp: clip.warp ?? null,
+    warpMode: clip.warpMode,
   };
 }
 
@@ -51,6 +52,7 @@ function withSettings(
       offset: next.offset,
     },
     warp: next.warp ?? undefined,
+    warpMode: next.warpMode,
   };
 }
 
@@ -203,6 +205,8 @@ export function ClipEditor({
       onRename={rename}
       onValueChange={changeSettings}
       onValueCommitted={settle}
+      position={engine.position}
+      start={clip.value.start}
       value={settingsOf(clip)}
       values={recording ? sourcePeaks(clip, recording) : []}
     >

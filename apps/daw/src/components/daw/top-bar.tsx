@@ -14,7 +14,7 @@ import {
   MagnifyingGlassPlusIcon,
 } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
-import { type ReactNode, useCallback } from "react";
+import { type ComponentProps, type ReactNode, useCallback } from "react";
 import { NumberControl } from "@/components/audio-ui/bpm-control";
 import { Transport } from "@/components/audio-ui/transport";
 import { AudioUiIcon } from "@/components/site/audio-ui-icon";
@@ -98,7 +98,16 @@ function BarButton({
   );
 }
 
-export interface TopBarProps {
+export interface TopBarProps
+  extends Pick<
+    ComponentProps<typeof Transport>,
+    | "countIn"
+    | "onCountInChange"
+    | "onPunchChange"
+    | "onRecordChange"
+    | "punch"
+    | "recording"
+  > {
   /** Whether each lane shows its envelope (KEY-027). */
   automating: boolean;
   canRedo: boolean;
@@ -181,15 +190,21 @@ export function TopBar(props: TopBarProps) {
       <Separator orientation="vertical" />
       <Transport
         className="min-w-0 flex-1"
+        countIn={props.countIn}
         looping={props.looping}
         metronome={props.metronome}
+        onCountInChange={props.onCountInChange}
         onLoopingChange={props.onLoopingChange}
         onMetronomeChange={props.onMetronomeChange}
         onPlayPause={props.onPlayPause}
+        onPunchChange={props.onPunchChange}
+        onRecordChange={props.onRecordChange}
         onRhythmChange={props.onRhythmChange}
         onStop={props.onStop}
         onTempoChange={props.onTempoChange}
         playing={props.playing}
+        punch={props.punch}
+        recording={props.recording}
         rhythm={props.rhythm}
         signatures={props.signatures}
         source={props.position}

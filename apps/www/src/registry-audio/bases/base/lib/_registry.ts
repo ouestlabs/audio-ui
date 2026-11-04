@@ -1005,6 +1005,25 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "timeline"],
     dependencies: ["@audio-ui/core"],
     description:
+      "Recording into an arrangement: an input recorder on an AudioWorklet that keeps each block with its frame on the audio clock, the frames of a take with the latency taken off, and the audio or MIDI clip a take becomes, with record quantization and overdub",
+    files: [
+      {
+        path: "lib/recording.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "lib/input-recorder.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "recording",
+    registryDependencies: ["@audio-ui/arrangement"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "timeline"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "A track's player of audio clips on an AudioWorklet: its recordings to the frame on the audio clock, with gain, fades, loops, reverse and warp, in a running or an offline context",
     files: [
       {

@@ -154,7 +154,7 @@ export function useArrangementEngine({
   }, [engine, playing, position]);
 
   const play = useCallback(
-    (from: number) => {
+    (from: number, at?: number) => {
       const ctx = webAudio.getContext();
       if (!(engine && ctx)) {
         return;
@@ -163,7 +163,7 @@ export function useArrangementEngine({
       if (ctx.state !== "running") {
         ctx.resume();
       }
-      engine.play(from);
+      engine.play(from, at);
       position.set(from);
       setPlaying(true);
     },

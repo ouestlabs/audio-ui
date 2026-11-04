@@ -26,6 +26,7 @@ export type ShortcutCommand =
   | "mixer"
   | "open"
   | "play-stop"
+  | "record"
   | "redo"
   | "return-track"
   | "save"
@@ -57,6 +58,7 @@ interface Shortcut {
 export const SHORTCUTS: readonly Shortcut[] = [
   { command: "play-stop", key: " " },
   { command: "continue", key: " ", shift: true },
+  { command: "record", key: "f9" },
   { command: "to-start", key: "home" },
   { command: "loop", key: "l", mod: true },
   { command: "undo", key: "z", mod: true },

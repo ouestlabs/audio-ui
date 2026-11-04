@@ -27,6 +27,7 @@ Measured: at first, median 55.9 ms and worst 59.1 ms, over the target of 57.3 ms
 N stereo audio tracks playing at once, each through M devices, play 10 minutes with no dropout: the render load the browser reports (DevTools protocol, `WebAudio.getRealtimeData`) stays under 80 % at its peak, and no glitch is counted. N and M are set where the reference holds the same set without a dropout, on this machine (OBS-011).
 Measure: `apps/daw/test/perf/run.ts "PRF-004"`, on sets of 8, 16 and 32 tracks: the render load sampled each second, and the underruns `AudioContext.playbackStats` counts.
 Measured, 10 minutes each: 8 tracks peak 43 %, mean 17 %; 16 tracks peak 35 %, mean 26 %; 32 tracks peak 70 %, mean 45 %; no underrun. The peaks are brief spikes over a steady load. N and M are set against the reference once OBS-011 is in: until then, 32 tracks with two devices each hold. One underrun was counted once, on the first set a fresh browser played, in a pass of 20 seconds, and not again in five passes after.
+Measured again at the end of phase 4, 30 s each: 8 tracks peak 30 %, mean 14 %; 16 tracks peak 59 %, mean 40 %; no underrun, after the compressor stopped rendering the paths it is not heard through (G-031).
 
 ### PRF-005 Export speed
 A reference arrangement (16 stereo tracks, 3 minutes, an equalizer and a compressor on each, a reverb and a delay on two returns) renders in no more time than the reference takes to export the same set.
@@ -42,3 +43,8 @@ Measured: 329 to 346 MB opened, 473 to 515 MB playing, 495 to 525 MB after a pla
 During playback with N tracks, the page draws at the display's rate: no task longer than 50 ms, and meters and playhead move without React rendering on each frame.
 Measure: `apps/daw/test/perf/run.ts "PRF-007"`: over 30 s of 16 tracks playing, the long tasks, React's commits (through the hook its developer tools use) and the gaps between frames.
 Measured: no long task, no React commit, 60 frames a second, the longest gap 16.7 ms. Met.
+
+### PRF-008 Warp modes on the audio thread
+A render quantum has 2.67 ms at 48 kHz, and a clip that stretches time stays inside it. Beats costs what Repitch costs. Tones lines each grain up on the last, on whole frames; each clip does that work at a moment of its own, so clips that start together do not spend it in one block.
+Measure: `packages/core/src/audio/playback/render.bench.ts` (the renderer alone, under Bun, decoded or streamed), and `apps/daw/test/perf/run.ts "PRF-008"` (the app's load sets, each clip 1.12 times slower than recorded, through an equalizer and a compressor, 30 s per mode). Both are run when a phase is done, not on each change.
+Measured at the end of phase 4, 30 s each, load mean and peak: Repitch 8 tracks 15 % and 31 %, 16 tracks 36 % and 59 % (one underrun); Beats 8 tracks 12 % and 23 %, 16 tracks 33 % and 64 %; Tones 16 tracks 50 % and 93 % (one underrun). Tones on 8 tracks did not start in that run (its context did not reach running in 30 s, as the measures' first sets have done before). The renderer alone, 16 streamed tracks: median 0.33 ms in Repitch, 0.37 in Beats, 0.83 in Tones under Bun, 0.39, 0.24 and 0.68 ms in Chrome. Met for Repitch and Beats; Tones holds 16 tracks with a peak near the limit.

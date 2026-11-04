@@ -1,0 +1,147 @@
+import type { RecordedBlock } from "@/lib/recording";
+
+const PROCESSOR = "audioui-input-recorder";
+
+/**
+ * The recorder's processor: while it records, it copies each block of its
+ * input with the block's first frame on the audio clock and posts it out. It
+ * has no output, so what it records is never heard through it.
+ */
+const WORKLET = `class InputRecorder extends AudioWorkletProcessor {
+  constructor() {
+    super();
+    this.recording = false;
+    this.port.onmessage = (event) => {
+      this.recording = event.data === "start";
+      if (event.data === "stop") {
+        this.port.postMessage({ stopped: true });
+      }
+    };
+  }
+  process(inputs) {
+    const input = inputs[0];
+    if (this.recording && input && input.length > 0) {
+      const channels = input.map((channel) => channel.slice());
+      this.port.postMessage(
+        { channels, frame: currentFrame },
+        channels.map((channel) => channel.buffer)
+      );
+    }
+    return true;
+  }
+}
+registerProcessor("${PROCESSOR}", InputRecorder);`;
+
+const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
+
+function loadRecorder(ctx: BaseAudioContext): Promise<boolean> {
+  const cached = loaded.get(ctx);
+  if (cached) {
+    return cached;
+  }
+  const worklet = (ctx as { audioWorklet?: AudioWorklet }).audioWorklet;
+  if (!(worklet && typeof AudioWorkletNode !== "undefined")) {
+    return Promise.resolve(false);
+  }
+  const url = URL.createObjectURL(
+    new Blob([WORKLET], { type: "text/javascript" })
+  );
+  const done = worklet
+    .addModule(url)
+    .then(() => true)
+    .catch(() => false)
+    .finally(() => URL.revokeObjectURL(url));
+  loaded.set(ctx, done);
+  return done;
+}
+
+/** An input recorder on a context, as `createInputRecorder` makes it. */
+export interface InputRecorder {
+  dispose: () => void;
+  /** Connect what to record here, in stereo: a mono input is in both channels. It is only listened to, never heard. */
+  readonly input: AudioNode;
+  /** Keeps what comes in from the next block on. */
+  start: () => void;
+  /** Stops keeping, and gives every block kept since `start`, the last one in. */
+  stop: () => Promise<RecordedBlock[]>;
+}
+
+/**
+ * Records what is connected to it, block by block, each with its frame on the
+ * audio clock: what `takeFrames` and `sliceBlocks` cut a take from (REC-007,
+ * REC-008). `onBlock` hears each block as it comes, to draw the take live.
+ * `null` when the context cannot run worklets.
+ */
+export async function createInputRecorder(
+  ctx: BaseAudioContext,
+  onBlock?: (block: RecordedBlock) => void
+): Promise<InputRecorder | null> {
+  if (!(await loadRecorder(ctx))) {
+    return null;
+  }
+  const node = new AudioWorkletNode(ctx, PROCESSOR, {
+    channelCount: 2,
+    channelCountMode: "explicit",
+    numberOfInputs: 1,
+    numberOfOutputs: 0,
+  });
+  let blocks: RecordedBlock[] = [];
+  let stopped: (() => void) | null = null;
+  node.port.onmessage = (
+    event: MessageEvent<RecordedBlock | { stopped: true }>
+  ) => {
+    if ("stopped" in event.data) {
+      stopped?.();
+      stopped = null;
+      return;
+    }
+    blocks.push(event.data);
+    onBlock?.(event.data);
+  };
+  return {
+    dispose: () => {
+      node.port.close();
+      node.disconnect();
+    },
+    input: node,
+    start: () => {
+      blocks = [];
+      node.port.postMessage("start");
+    },
+    stop: () =>
+      new Promise((resolve) => {
+        stopped = () => resolve(blocks);
+        node.port.postMessage("stop");
+      }),
+  };
+}
+
+/** How long a count-in click rings, in seconds. */
+const CLICK_SECONDS = 0.03;
+
+/**
+ * Clicks a count-in on `ctx` from `at` seconds of its clock: `beats` beats
+ * `beatSeconds` apart, the first of every `beatsPerBar` higher, straight to
+ * the output (REC-005). The take starts on the beat after the last.
+ */
+export function playCountIn(
+  ctx: BaseAudioContext,
+  {
+    at,
+    beatSeconds,
+    beats,
+    beatsPerBar,
+  }: { at: number; beatSeconds: number; beats: number; beatsPerBar: number }
+): void {
+  for (let beat = 0; beat < beats; beat += 1) {
+    const time = at + beat * beatSeconds;
+    const tone = ctx.createOscillator();
+    const level = ctx.createGain();
+    tone.frequency.value = beat % beatsPerBar === 0 ? 1600 : 1000;
+    level.gain.setValueAtTime(0.3, time);
+    level.gain.exponentialRampToValueAtTime(0.001, time + CLICK_SECONDS);
+    tone.connect(level).connect(ctx.destination);
+    tone.start(time);
+    tone.stop(time + CLICK_SECONDS);
+  }
+}

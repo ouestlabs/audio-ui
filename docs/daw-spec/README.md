@@ -28,7 +28,7 @@ Test: packages/core/src/audio/playback/render.test.ts "CLP-003"
 | --- | --- | --- |
 | `TRN` | [Transport](transport.md) | 1 |
 | `ARR` | [Arrangement playback](arrangement.md) | 1 |
-| `CLP` | [Audio clips](audio-clips.md) | 1 (warp modes: 4) |
+| `CLP` | [Audio clips](audio-clips.md) | 1 (warp modes, tempo: 4) |
 | `MID` | [MIDI playback](midi.md) | 1 |
 | `MIX` | [Mixer](mixer.md) | 1 (groups: 2) |
 | `DEV` | [Devices](devices.md) | 1 (racks: 2) |
@@ -36,10 +36,11 @@ Test: packages/core/src/audio/playback/render.test.ts "CLP-003"
 | `ENG` | [Engine](engine.md) | 1 |
 | `PRJ` | [Projects and files](project.md) | 1 (on disk, DAWproject: 2) |
 | `AUT` | [Automation](automation.md) | 3 |
+| `REC` | [Recording](recording.md) | 5 |
 | `KEY` | [Shortcuts](shortcuts.md) | each phase |
 | `PRF` | [Performance targets](performance.md) | each phase |
 
-Later phases add their chapters here before they start: editing (3), warping (4), the session view (5), recording (6).
+Later phases add their chapters here before they start: editing (3), warping (4), recording (5). There is no session view: the DAW is an arrangement only (decided 2026-11-04).
 
 ## Fixtures
 

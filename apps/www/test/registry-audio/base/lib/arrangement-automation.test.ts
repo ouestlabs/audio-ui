@@ -79,7 +79,7 @@ describe("device automation", () => {
 
   test("AUT-004: a duplicated track's envelopes follow its devices under their new ids", () => {
     const state = run([{ id: "a", type: "duplicate-track" }]);
-    const copy = state.doc.tracks[1];
+    const [, copy] = state.doc.tracks;
     const [eq = "", comp = ""] =
       copy?.devices?.map((device) => device.id) ?? [];
     expect([eq, comp]).not.toContain("eq");

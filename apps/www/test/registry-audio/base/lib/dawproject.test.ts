@@ -337,6 +337,40 @@ describe("DAWproject", () => {
     expect(xml).not.toContain("lowGainDb");
   });
 
+  test("CLP-015: a clip's warp mode goes out and comes back; another DAW's name keeps the pitch, and none plays as a warp does by default", () => {
+    const warped = (
+      algorithm: string
+    ) => `<?xml version="1.0" encoding="UTF-8"?>
+<Project version="1.0">
+  <Transport><Tempo unit="bpm" value="120" id="t"/></Transport>
+  <Structure><Track contentType="audio" id="a" name="A"><Channel role="regular" id="c"/></Track></Structure>
+  <Arrangement id="r">
+    <Lanes timeUnit="seconds" id="l0"><Lanes track="a" id="l1"><Clips id="s">
+      <Clip time="0" duration="2"><Warps contentTimeUnit="seconds" timeUnit="seconds" id="w">
+        <Audio ${algorithm} channels="2" duration="1" sampleRate="48000" id="u"><File path="audio/a.wav"/></Audio>
+        <Warp time="0" contentTime="0"/><Warp time="2" contentTime="1"/>
+      </Warps></Clip>
+    </Clips></Lanes></Lanes>
+  </Arrangement>
+</Project>`;
+    const modeOf = (algorithm: string) =>
+      readDawproject(warped(algorithm)).doc.clips[0]?.warpMode;
+    expect(modeOf('algorithm="tones"')).toBe("tones");
+    expect(modeOf('algorithm="repitch"')).toBe("repitch");
+    expect(modeOf('algorithm="stretch"')).toBe("beats");
+    expect(modeOf("")).toBeUndefined();
+    const { doc } = createArrangementState({
+      colors: 5,
+      duration: 10,
+      initialClips: [{ ...audioClip, track: "a", warpMode: "tones" }],
+      initialTracks: [{ color: 0, id: "a", name: "A" }],
+      tempo: TEMPO,
+    });
+    expect(writeDawproject(doc, RECORDINGS).project).toContain(
+      'algorithm="tones"'
+    );
+  });
+
   test("PRJ-008: what is not a DAWproject is refused, saying so", () => {
     expect(() => readDawproject("<Something/>")).toThrow("not a DAWproject");
   });

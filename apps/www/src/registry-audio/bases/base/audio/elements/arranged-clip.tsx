@@ -1,6 +1,10 @@
 "use client";
 
-import type { FadeShape, Timeline as TimelinePrimitive } from "@audio-ui/react";
+import type {
+  FadeShape,
+  Source,
+  Timeline as TimelinePrimitive,
+} from "@audio-ui/react";
 import {
   type FocusEvent,
   Fragment,
@@ -9,6 +13,7 @@ import {
   memo,
   type SyntheticEvent,
   useCallback,
+  useEffect,
   useMemo,
   useRef,
   useState,
@@ -198,6 +203,97 @@ function ArrangedClipGhost({ clip }: { clip: Arranged }) {
       }}
     >
       {clip.name}
+    </div>
+  );
+}
+
+/** The path of a take's levels, a line per level from the middle, `count` wide and 100 tall. */
+function levelsPath(levels: readonly number[]) {
+  return levels
+    .map((level, index) => {
+      const half = Math.max(0.5, Math.min(1, level) * 50);
+      return `M${index + 0.5} ${50 - half}V${50 + half}`;
+    })
+    .join("");
+}
+
+/**
+ * A take as it records, on its track: from where it started to where
+ * playback is now, red, with what came in drawn as it comes. It follows
+ * `position` and `levels` in the DOM, without rendering React each frame.
+ */
+function ArrangedTake({
+  from,
+  levels,
+  name,
+  position,
+}: {
+  /** Where the take started, in the timeline's units. */
+  from: number;
+  /** The loudest of each equal stretch of the take so far, from its start, 0…1: a live list. Leave it out for a take of notes. */
+  levels?: Source<readonly number[]>;
+  name: string;
+  /** Where playback is, in the timeline's units: the take's end, live. */
+  position: Source<number>;
+}) {
+  const body = useRef<HTMLDivElement>(null);
+  const path = useRef<SVGPathElement>(null);
+  const svg = useRef<SVGSVGElement>(null);
+  useEffect(() => {
+    const follow = () => {
+      const length = Math.max(0, position.getSnapshot() - from);
+      body.current?.style.setProperty(
+        "width",
+        `calc(var(--timeline-unit) * ${length})`
+      );
+    };
+    follow();
+    return position.subscribe(follow);
+  }, [from, position]);
+  useEffect(() => {
+    if (!levels) {
+      return;
+    }
+    const draw = () => {
+      const list = levels.getSnapshot();
+      svg.current?.setAttribute(
+        "viewBox",
+        `0 0 ${Math.max(1, list.length)} 100`
+      );
+      path.current?.setAttribute("d", levelsPath(list));
+    };
+    draw();
+    return levels.subscribe(draw);
+  }, [levels]);
+  return (
+    <div
+      aria-label={`Recording on ${name}`}
+      className="pointer-events-none absolute inset-y-1.5 overflow-hidden rounded-[inherit] border border-destructive bg-destructive/15 text-destructive"
+      data-slot="arranged-take"
+      ref={body}
+      role="status"
+      style={{ left: `calc(var(--timeline-unit) * ${from})`, width: 0 }}
+    >
+      <span className="absolute inset-x-2 top-0.5 truncate text-xs">
+        {name}
+      </span>
+      {levels ? (
+        <svg
+          aria-hidden="true"
+          className="absolute inset-x-0 top-5 bottom-1 h-[calc(100%-1.5rem)] w-full"
+          preserveAspectRatio="none"
+          ref={svg}
+          viewBox="0 0 1 100"
+        >
+          <path
+            fill="none"
+            ref={path}
+            stroke="currentColor"
+            strokeWidth={1}
+            vectorEffect="non-scaling-stroke"
+          />
+        </svg>
+      ) : null}
     </div>
   );
 }
@@ -459,4 +555,4 @@ const ArrangedClip = memo(function ArrangedClipView({
   );
 });
 
-export { ArrangedClip, ArrangedClipGhost, ArrangedGroupPreview };
+export { ArrangedClip, ArrangedClipGhost, ArrangedGroupPreview, ArrangedTake };

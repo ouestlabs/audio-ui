@@ -40,6 +40,10 @@ The bar is a toolbar: it takes one tab stop, and the arrow keys move between its
 
 Give `onRhythmChange` and a caret beside the metronome opens a menu of how often it clicks: with the beat (`"auto"`), or a bar, a half, a quarter, an eighth, a sixteenth, each straight or as a triplet. Rhythms are named from the interval they work out to, through the same `gridLabel` the timeline's grid uses, so `1/8T` means one thing in both. The metronome's dots follow the rhythm, so they and the click are one pulse. Give `onSoundChange` with `sounds` (`{ value, label }[]`) and `sound` to list sounds in the same menu.
 
+### Recording
+
+Give `onRecordChange` with `recording` and a Record button follows Stop, its glyph red while it records. `onCountInChange` with `countIn` (0, 1, 2 or 4 bars) and `onPunchChange` with `punch` add a caret beside it, with the count-in and "Punch in the loop". The transport only shows the state: what a take records, and when, is yours; the `recording` lib (`npx shadcn@latest add @audio-ui/recording`) has an input recorder on an AudioWorklet and the clips a take becomes.
+
 ## API reference
 
 <TypeTable>
@@ -50,6 +54,9 @@ Give `onRhythmChange` and a caret beside the metronome opens a menu of how often
 <TypeRow name={"playing, onPlayPause"} type={"boolean, () => void"}>Whether it plays, and play or pause was pressed.</TypeRow>
 <TypeRow name={"onStop"} type={"() => void"}>Stop was pressed.</TypeRow>
 <TypeRow name={"looping, onLoopingChange"} type={"boolean, (looping) => void"}>Whether the loop is on.</TypeRow>
+<TypeRow name={"recording, onRecordChange"} type={"boolean, (recording) => void"}>Whether it records. Giving the handler adds the Record button.</TypeRow>
+<TypeRow name={"countIn, onCountInChange"} type={"number, (bars) => void"} default={"0"}>How many bars the metronome counts in before a take, in Record's menu.</TypeRow>
+<TypeRow name={"punch, onPunchChange"} type={"boolean, (punch) => void"} default={"false"}>Whether a take keeps only what falls inside the loop, in Record's menu.</TypeRow>
 <TypeRow name={"metronome, onMetronomeChange"} type={"boolean, (metronome) => void"}>Whether the metronome is on.</TypeRow>
 <TypeRow name={"rhythm, onRhythmChange"} type={"MetronomeRhythm, (rhythm) => void"} default={"\"auto\""}>How often the click sounds, and what the metronome's dots follow. Giving the handler adds the menu.</TypeRow>
 <TypeRow name={"sound, sounds, onSoundChange"} type={"string, { value, label }[], (sound) => void"}>The click's sounds, listed in the menu when `onSoundChange` is given.</TypeRow>
