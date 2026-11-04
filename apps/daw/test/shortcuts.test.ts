@@ -118,6 +118,15 @@ describe("the keyboard", () => {
     on("MacIntel");
     expect(matchShortcut(press("0"))).toBe("deactivate");
     expect(matchShortcut(press("s"))).toBe("solo");
-    expect(matchShortcut(press("s", { metaKey: true }))).toBeNull();
+    expect(matchShortcut(press("s", { ctrlKey: true }))).toBeNull();
+  });
+
+  test("KEY-032: Cmd+O opens, Cmd+S saves, Cmd+Shift+S saves to another folder", () => {
+    on("MacIntel");
+    expect(matchShortcut(press("o", { metaKey: true }))).toBe("open");
+    expect(matchShortcut(press("s", { metaKey: true }))).toBe("save");
+    expect(matchShortcut(press("s", { metaKey: true, shiftKey: true }))).toBe(
+      "save-as"
+    );
   });
 });

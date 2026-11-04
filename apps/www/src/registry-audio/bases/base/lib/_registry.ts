@@ -893,6 +893,102 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Racks: devices in parallel chains, each with its volume, pan, switch and solo, lined up on the slowest and summed, and eight macros that turn parameters of the devices inside over a stretch of their travel; the engine that plays one on a track's chain.",
+    files: [
+      {
+        path: "lib/rack.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "rack",
+    registryDependencies: ["@audio-ui/arrangement", "@audio-ui/device-library"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Drum racks: an instrument whose chains are pads, each answering a note with a voice of the drum synthesis or a recording, pitched and cut to a decay, into its own devices; the engine that plays one on a MIDI track.",
+    files: [
+      {
+        path: "lib/drum-rack.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-rack",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/drum-synthesis",
+      "@audio-ui/rack",
+      "@audio-ui/voice-pool",
+    ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Note players: what a MIDI track plays through, all taking notes the same way, and the voice pool that plays an instrument of the library with a voice for each note it holds, the oldest given up first.",
+    files: [
+      {
+        path: "lib/voice-pool.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "voice-pool",
+    registryDependencies: ["@audio-ui/device-library"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Instrument racks: an instrument whose chains each start with an instrument of the library, then effects, all played by every note in layers and summed as a rack with its macros; the engine that plays one on a MIDI track.",
+    files: [
+      {
+        path: "lib/instrument-rack.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "instrument-rack",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/device-library",
+      "@audio-ui/rack",
+      "@audio-ui/voice-pool",
+    ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in.",
+    files: [
+      {
+        path: "lib/dawproject.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "lib/zip.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "dawproject",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/compressor-device",
+      "@audio-ui/equalizer-device",
+      "@audio-ui/gate-device",
+      "@audio-ui/limiter-device",
+    ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
     description:
       "WAV files from rendered sound: 16 or 24-bit PCM, normalized or not, encoded to bytes or downloaded",
     files: [
@@ -1018,6 +1114,10 @@ const items: RegistryItem[] = [
       "@audio-ui/clip-player",
       "@audio-ui/device-library",
       "@audio-ui/mixer-engine",
+      "@audio-ui/rack",
+      "@audio-ui/drum-rack",
+      "@audio-ui/instrument-rack",
+      "@audio-ui/voice-pool",
       "@audio-ui/web-audio",
     ],
     type: "registry:lib",

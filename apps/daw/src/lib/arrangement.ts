@@ -59,7 +59,8 @@ export interface Arranged {
 }
 
 /** What a track holds: recordings, or notes for an instrument to play. */
-export type TrackKind = "audio" | "midi";
+/** What a track holds: audio clips, MIDI clips, or other tracks (a group, which holds no clip and plays what its tracks play). */
+export type TrackKind = "audio" | "group" | "midi";
 
 /** What a track's automation can move: its volume, or where it sits in the stereo field. */
 export type AutomatedParameter = "pan" | "volume";
@@ -88,7 +89,216 @@ export interface TrackDevice {
   instrument?: boolean;
   /** A device switched off passes the sound on unchanged. @default true */
   on?: boolean;
+  /** A rack's chains and macros: what a device of the kind `audioui.rack`, `audioui.instrument-rack` or `audioui.drum-rack` holds instead of a state of its own. */
+  rack?: Rack;
   state: Readonly<Record<string, ParameterValue>>;
+}
+
+/** A chain of a rack: devices in series, and how loud and where it sits in what the rack sums. */
+export interface RackChain {
+  devices: readonly TrackDevice[];
+  id: string;
+  /** Its volume, pan and switches; a chain with none plays at unity. */
+  mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
+  name: string;
+  /** In a drum rack: the note the chain answers, and the sound it plays into its devices. */
+  pad?: DrumPad;
+  /** In an instrument rack: the notes the chain plays. A chain with none plays them all. */
+  zone?: ChainZone;
+}
+
+/** The notes a chain of an instrument rack plays: its keys, lowest to highest pitch, and its velocities, 0 to 1, both ends in. */
+export interface ChainZone {
+  keys: readonly [number, number];
+  velocity: readonly [number, number];
+}
+
+/** The zone of a chain with none: every key, every velocity. */
+export const FULL_ZONE: ChainZone = { keys: [0, 127], velocity: [0, 1] };
+
+/** Whether a chain plays a note of `pitch` struck as hard as `velocity`: inside its keys and its velocities. */
+export function inZone(
+  zone: ChainZone | undefined,
+  pitch: number,
+  velocity: number
+): boolean {
+  const { keys, velocity: range } = zone ?? FULL_ZONE;
+  return (
+    pitch >= keys[0] &&
+    pitch <= keys[1] &&
+    velocity >= range[0] &&
+    velocity <= range[1]
+  );
+}
+
+/** The voices of the drum synthesis a pad can play. */
+export type DrumVoice = "hat" | "kick" | "snare";
+
+/**
+ * What a pad of a drum rack plays: a voice of the drum synthesis, or a
+ * recording, `tune` semitones from its own pitch, for `decay` seconds (a
+ * recording ends sooner when it is shorter).
+ */
+export type DrumSound =
+  | { decay: number; kind: "synth"; tune: number; voice: DrumVoice }
+  | { decay: number; kind: "sample"; recording: string; tune: number };
+
+/** The note a chain of a drum rack answers, 0 to 127, and the sound it plays. */
+export interface DrumPad {
+  note: number;
+  sound: DrumSound;
+}
+
+/** A parameter a macro turns: the device by its id, and the stretch of the parameter's travel the macro's turn covers, 0 to 1 of it. */
+export interface RackMapping {
+  device: string;
+  max: number;
+  min: number;
+  parameter: string;
+}
+
+/** A knob of a rack, 0 to 1, that turns the parameters mapped to it together. */
+export interface RackMacro {
+  mappings: readonly RackMapping[];
+  name?: string;
+  value: number;
+}
+
+/** Devices in parallel chains, summed, and eight macros over the devices inside. */
+export interface Rack {
+  chains: readonly RackChain[];
+  macros: readonly RackMacro[];
+}
+
+/** The id a rack's track device carries in place of a device of the library. */
+export const RACK_DEVICE = "audioui.rack";
+
+/** How many macros a rack has. */
+export const MACRO_COUNT = 8;
+
+/** A rack with one chain holding `devices`, and its eight macros at rest, turning nothing. */
+export function newRack(
+  chain: string,
+  devices: readonly TrackDevice[] = []
+): Rack {
+  return {
+    chains: [{ devices, id: chain, name: "Chain 1" }],
+    macros: Array.from({ length: MACRO_COUNT }, () => ({
+      mappings: [],
+      value: 0,
+    })),
+  };
+}
+
+/** The id an instrument rack's track device carries: an instrument whose chains each start with an instrument, played together by every note. */
+export const INSTRUMENT_RACK_DEVICE = "audioui.instrument-rack";
+
+/** The id a drum rack's track device carries: an instrument whose chains are pads, each played by a note. */
+export const DRUM_RACK_DEVICE = "audioui.drum-rack";
+
+/** How long each voice of the drum synthesis rings by default, in seconds. */
+export const DRUM_DECAYS: Readonly<Record<DrumVoice, number>> = {
+  hat: 0.05,
+  kick: 0.2,
+  snare: 0.15,
+};
+
+/** How long a recording on a pad plays by default, in seconds, unless it ends sooner. */
+export const SAMPLE_DECAY = 2;
+
+/** The kit a drum rack starts with: a kick on C2, a snare on D2 and a closed hat on F#2 (notes 36, 38 and 42), given the ids of their chains. */
+export function newDrumRack(ids: readonly [string, string, string]): Rack {
+  const pads: [DrumVoice, number, string][] = [
+    ["kick", 36, "Kick"],
+    ["snare", 38, "Snare"],
+    ["hat", 42, "Hat"],
+  ];
+  return {
+    chains: pads.map(([voice, note, name], index) => ({
+      devices: [],
+      id: ids[index] as string,
+      name,
+      pad: {
+        note,
+        sound: { decay: DRUM_DECAYS[voice], kind: "synth", tune: 0, voice },
+      },
+    })),
+    macros: newRack("").macros,
+  };
+}
+
+/** The recordings the pads of `tracks`' drum racks play: what a project keeps with its clips' recordings. */
+export function padRecordings(
+  tracks: readonly ArrangementTrack[]
+): Set<string> {
+  return new Set(
+    tracks.flatMap((track) =>
+      (track.devices ?? []).flatMap((device) =>
+        device.rack
+          ? [device, ...rackDevices(device.rack)].flatMap(
+              (item) =>
+                item.rack?.chains.flatMap((chain) =>
+                  chain.pad?.sound.kind === "sample"
+                    ? [chain.pad.sound.recording]
+                    : []
+                ) ?? []
+            )
+          : []
+      )
+    )
+  );
+}
+
+/** A rack whose pads play the recordings `rename` gives for theirs, down the racks within it. */
+function renamedRack(rack: Rack, rename: (id: string) => string): Rack {
+  return {
+    ...rack,
+    chains: rack.chains.map((chain) => ({
+      ...chain,
+      devices: chain.devices.map((device) =>
+        device.rack
+          ? { ...device, rack: renamedRack(device.rack, rename) }
+          : device
+      ),
+      ...(chain.pad?.sound.kind === "sample"
+        ? {
+            pad: {
+              ...chain.pad,
+              sound: {
+                ...chain.pad.sound,
+                recording: rename(chain.pad.sound.recording),
+              },
+            },
+          }
+        : {}),
+    })),
+  };
+}
+
+/** A track whose drum racks' pads play the recordings `rename` gives for theirs: what a project opened under new recording ids needs. */
+export function renamePadRecordings(
+  track: ArrangementTrack,
+  rename: (id: string) => string
+): ArrangementTrack {
+  return track.devices?.some((device) => device.rack)
+    ? {
+        ...track,
+        devices: track.devices.map((device) =>
+          device.rack
+            ? { ...device, rack: renamedRack(device.rack, rename) }
+            : device
+        ),
+      }
+    : track;
+}
+
+/** Every device inside a rack, down the racks within it. */
+export function rackDevices(rack: Rack): TrackDevice[] {
+  return rack.chains.flatMap((chain) =>
+    chain.devices.flatMap((device) =>
+      device.rack ? [device, ...rackDevices(device.rack)] : [device]
+    )
+  );
 }
 
 /** A track of an arrangement. */
@@ -99,6 +309,8 @@ export interface ArrangementTrack {
   color: number;
   /** Its device chain, from first to last. */
   devices?: readonly TrackDevice[];
+  /** The group track it is in, which its sound plays into; none, it plays into the main track. A group's tracks follow it in the list. */
+  group?: string;
   id: string;
   /** @default "audio" */
   kind?: TrackKind;

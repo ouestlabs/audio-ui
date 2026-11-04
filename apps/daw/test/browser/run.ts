@@ -7,12 +7,14 @@
  * Each check opens a fresh profile, so the project starts new, except where
  * a check reloads to see what was kept.
  */
+
 import {
   type Browser,
   chromium,
   type Locator,
   type Page,
 } from "playwright-core";
+import { readZip } from "@/lib/zip";
 
 const URL = process.env.DAW_URL ?? "http://localhost:3300/";
 const RATE = /kHz/;
@@ -20,6 +22,7 @@ const LATENCY = /ms out/;
 const EXPORT = /Export WAV/;
 const DELAY = /Delay/;
 const POCKET_SYNTH = /Pocket Synth/;
+const UTILITY = /^Utility/;
 const DEVICES = /^Devices/;
 const UNITS = /\* ([\d.]+)\)/;
 const MAIN_PEAK = /^Main peak/;
@@ -278,7 +281,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await dropChord(page, "[data-add-track]", "Chord take", 2);
       await page.waitForSelector('[aria-label="Chord take"][data-track-id]');
       const download = page.waitForEvent("download", { timeout: 30_000 });
-      await page.getByRole("button", { name: EXPORT }).click();
+      await page.getByRole("button", { name: "More controls" }).click();
+      await page.getByRole("menuitem", { name: EXPORT }).click();
       const file = await (await download).path();
       const bytes = new DataView(await Bun.file(file).arrayBuffer());
       const channels = bytes.getUint16(22, true);
@@ -374,6 +378,13 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await devices
         .getByText("Delay", { exact: true })
         .waitFor({ timeout: 5000 });
+      // Folded, the device is no wider than its strip, whatever its panel's width.
+      await devices.getByRole("button", { name: "Fold Delay" }).click();
+      const slot = devices.locator(
+        "[data-slot=device-chain-slot][data-folded]"
+      );
+      const width = (await slot.boundingBox())?.width ?? 0;
+      assert(width < 48, `the folded device is ${width} px wide`);
     },
   "DEV-003: a device dropped on the add-track row makes a track for it": async (
     browser
@@ -747,7 +758,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       .evaluate((element) => (element as HTMLElement).style.width);
     const expected = Number(UNITS.exec(width)?.[1]);
     const download = page.waitForEvent("download", { timeout: 30_000 });
-    await page.getByRole("button", { name: EXPORT }).click();
+    await page.getByRole("button", { name: "More controls" }).click();
+    await page.getByRole("menuitem", { name: EXPORT }).click();
     const file = await (await download).path();
     const bytes = new DataView(await Bun.file(file).arrayBuffer());
     const seconds =
@@ -808,9 +820,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const lane = await page.locator('[data-track="track-2"]').boundingBox();
       assert(lane, "the lane is there");
       await page.mouse.click(lane.x + 200, lane.y + lane.height / 2);
-      await page
-        .getByRole("button", { name: "Add a time signature at the cursor" })
-        .click();
+      await page.getByRole("button", { name: "Add a marker" }).click();
+      await page.getByRole("menuitem", { name: "Time signature" }).click();
       await page.waitForFunction(
         () => document.activeElement?.tagName === "INPUT"
       );
@@ -881,9 +892,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const lane = await page.locator('[data-track="track-2"]').boundingBox();
       assert(lane, "the lane is there");
       await page.mouse.click(lane.x + 200, lane.y + lane.height / 2);
-      await page
-        .getByRole("button", { name: "Add a time signature at the cursor" })
-        .click();
+      await page.getByRole("button", { name: "Add a marker" }).click();
+      await page.getByRole("menuitem", { name: "Time signature" }).click();
       await page.waitForFunction(
         () => document.activeElement?.tagName === "INPUT"
       );
@@ -1095,6 +1105,425 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       .filter({ hasText: "1/4" })
       .waitFor({ timeout: 5000 });
   },
+  "G-013: a dropped file plays streamed from its cache, and comes back from it without decoding":
+    async (browser) => {
+      const context = await browser.newContext({
+        viewport: { height: 1000, width: 1440 },
+      });
+      const shared = await context.newPage();
+      await shared.addInitScript(() => {
+        const decode = BaseAudioContext.prototype.decodeAudioData;
+        const scope = window as unknown as { decoded: number };
+        scope.decoded = 0;
+        BaseAudioContext.prototype.decodeAudioData = function (
+          this: BaseAudioContext,
+          ...args: Parameters<BaseAudioContext["decodeAudioData"]>
+        ) {
+          scope.decoded += 1;
+          return decode.apply(this, args);
+        };
+      });
+      const page = await open(browser, shared);
+      await dropChord(page, "[data-add-track]", "Streamed take", 4);
+      await page.waitForSelector('[aria-label="Streamed take"][data-track-id]');
+      await page.waitForSelector("text=Saved", { timeout: 5000 });
+      const cached = await page.evaluate(async () => {
+        const folder = await (
+          await navigator.storage.getDirectory()
+        ).getDirectoryHandle("cache");
+        const [samples] = (await Array.fromAsync(folder.keys())).filter(
+          (name) => name.endsWith(".f32")
+        );
+        return (await (await folder.getFileHandle(samples ?? "")).getFile())
+          .size;
+      });
+      // Two channels of 4 s at 48 kHz, as 32-bit floats.
+      assert(cached === 2 * 4 * 48_000 * 4, `the cache holds ${cached} bytes`);
+      const played = async () => {
+        await showMixer(page);
+        await page.keyboard.press("Home");
+        await page.keyboard.press("Space");
+        const level = await loudest(page, 1500);
+        await page.keyboard.press("Space");
+        return level;
+      };
+      const first = await played();
+      assert(first > -40, `the streamed take plays at ${first} dB`);
+      await open(browser, page);
+      await page.waitForSelector(
+        '[aria-label="Streamed take"][data-track-id]',
+        { timeout: 10_000 }
+      );
+      const again = await played();
+      const decoded = await page.evaluate(
+        () => (window as unknown as { decoded: number }).decoded
+      );
+      assert(decoded === 0, `the project decoded ${decoded} files again`);
+      assert(again > -40, `the take reopened plays at ${again} dB`);
+    },
+  "PRJ-006 and PRJ-007: Cmd+S saves a folder with its document and samples, and Cmd+O opens it again":
+    async (browser) => {
+      const context = await browser.newContext({
+        viewport: { height: 1000, width: 1440 },
+      });
+      const shared = await context.newPage();
+      // The system's folder picker cannot be driven: it gives a folder of the private storage, which works the same.
+      await shared.addInitScript(() => {
+        (
+          window as unknown as {
+            showDirectoryPicker: () => Promise<FileSystemDirectoryHandle>;
+          }
+        ).showDirectoryPicker = async () =>
+          (
+            await (
+              await navigator.storage.getDirectory()
+            ).getDirectoryHandle("picked", { create: true })
+          ).getDirectoryHandle("Mirages", { create: true });
+      });
+      const page = await open(browser, shared);
+      await dropChord(page, "[data-add-track]", "Kick take", 2);
+      await page.waitForSelector('[aria-label="Kick take"][data-track-id]');
+      const folder = () =>
+        page.evaluate(async () => {
+          const root = await (
+            await (
+              await navigator.storage.getDirectory()
+            ).getDirectoryHandle("picked")
+          ).getDirectoryHandle("Mirages");
+          const document = JSON.parse(
+            await (
+              await (await root.getFileHandle("Mirages.audioui")).getFile()
+            ).text()
+          ) as { format: string; samples: { path: string }[]; version: number };
+          const samples = await root.getDirectoryHandle("Samples");
+          return {
+            document,
+            files: await Array.fromAsync(samples.keys()),
+          };
+        });
+      await page.keyboard.press("Meta+KeyS");
+      await page.getByText("Saved to Mirages").waitFor({ timeout: 10_000 });
+      const first = await folder();
+      assert(
+        first.document.format === "audio-ui-daw" &&
+          first.document.version === 1,
+        `the document reads ${first.document.format} ${first.document.version}`
+      );
+      assert(
+        first.files.join() === "Kick take.wav" &&
+          first.document.samples[0]?.path === "Samples/Kick take.wav",
+        `the folder holds ${first.files.join(", ")}`
+      );
+      await page.keyboard.press("Meta+KeyS");
+      await page.waitForTimeout(1000);
+      assert(
+        (await folder()).files.length === 1,
+        "a second save wrote the sample again"
+      );
+      await page.keyboard.press("Meta+KeyO");
+      await page.getByText("Opened Mirages").waitFor({ timeout: 15_000 });
+      await page.waitForSelector('[aria-label="Kick take"][data-track-id]');
+      await showMixer(page);
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the opened project plays at ${level} dB`);
+    },
+  "PRJ-008: a project goes out as a .dawproject file with its audio, and comes back in from it":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, "[data-add-track]", "Exported take", 2);
+      await page.waitForSelector('[aria-label="Exported take"][data-track-id]');
+      const download = page.waitForEvent("download", { timeout: 30_000 });
+      await page.getByRole("button", { name: "More controls" }).click();
+      await page.getByRole("menuitem", { name: "Export DAWproject…" }).click();
+      const saved = await (await download).path();
+      const entries = await readZip(Bun.file(saved));
+      const project = new TextDecoder().decode(
+        await entries.get("project.xml")?.read()
+      );
+      assert(
+        project.includes('name="Exported take"') &&
+          entries.has("audio/Exported take.wav"),
+        `the archive holds ${[...entries.keys()].join(", ")}`
+      );
+      await page
+        .locator('input[type="file"][accept=".dawproject"]')
+        .setInputFiles({
+          buffer: Buffer.from(await Bun.file(saved).arrayBuffer()),
+          mimeType: "application/zip",
+          name: "arrangement.dawproject",
+        });
+      await page
+        .getByText("Opened arrangement.dawproject")
+        .waitFor({ timeout: 15_000 });
+      await page.waitForSelector('[aria-label="Exported take"][data-track-id]');
+      await showMixer(page);
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the imported project plays at ${level} dB`);
+    },
+  "MIX-020: Cmd+G groups the picked track, its sound plays through the group, and folding the group hides it":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Grouped take", 2);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.keyboard.press("Meta+KeyG");
+      await page.getByText("Group 1", { exact: true }).first().waitFor();
+      const depth = await page
+        .locator('[aria-label="1 Audio"][data-track-id] [data-depth]')
+        .first()
+        .getAttribute("data-depth");
+      assert(depth === "1", `the grouped track sits at depth ${depth}`);
+      assert(
+        (await page
+          .locator("[data-slot=arranged-group-preview] > div")
+          .count()) === 1,
+        "the group's lane does not show its track's clip"
+      );
+      await showMixer(page);
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the grouped track plays at ${level} dB`);
+      await page.getByRole("button", { name: "Fold Group 1" }).click();
+      await page.waitForFunction(
+        () => !document.querySelector('[aria-label="1 Audio"][data-track-id]')
+      );
+      await page.keyboard.press("Meta+Shift+KeyG");
+      await page.waitForFunction(
+        () =>
+          document.querySelector('[aria-label="1 Audio"][data-track-id]') &&
+          !document.querySelector('[aria-label="Group 1"][data-track-id]')
+      );
+    },
+  "MIX-020: a track's menu groups it, a group's menu duplicates it with its tracks and lets them go":
+    async (browser) => {
+      const page = await open(browser);
+      const menu = async (track: string, item: string) => {
+        await page
+          .getByText(track, { exact: true })
+          .first()
+          .click({ button: "right" });
+        await page.getByRole("menuitem", { name: item, exact: true }).click();
+      };
+      await menu("1 Audio", "Group");
+      await page.getByText("Group 1", { exact: true }).first().waitFor();
+      await showMixer(page);
+      await page
+        .getByRole("region", { name: "1 Audio" })
+        .getByText("To Group 1")
+        .waitFor();
+      await menu("Group 1", "Duplicate");
+      await page.getByText("Group 1 copy", { exact: true }).first().waitFor();
+      const inside = await page
+        .locator('[data-track-id] [data-depth="1"]')
+        .count();
+      assert(inside === 2, `${inside} tracks sit in the two groups`);
+      await menu("Group 1", "Ungroup");
+      await page.waitForFunction(
+        () =>
+          !document.querySelector('[aria-label="Group 1"][data-track-id]') &&
+          document.querySelector('[aria-label="Group 1 copy"][data-track-id]')
+      );
+    },
+  "DEV-013: a drum rack on a MIDI track plays a pad when it is struck, and a voice picked on an empty pad makes one":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      // The track has its synth: the strip that ends the chain adds racks.
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Drum rack" }).click();
+      const drums = page.locator("[data-slot=drum-rack-panel]");
+      await drums.waitFor({ timeout: 5000 });
+      const pads = drums.getByRole("group", { name: "Pads" });
+      await Promise.all(
+        ["Kick C2", "Snare D2", "Hat F#2"].map((name) =>
+          pads.getByLabel(name, { exact: true }).waitFor()
+        )
+      );
+      // The kick rings four seconds: long enough to hear it on the main track's meter, in the mixer.
+      await drums.getByRole("slider", { name: "Kick decay" }).focus();
+      await page.keyboard.press("End");
+      await pads.getByLabel("Kick C2", { exact: true }).click({ delay: 50 });
+      await showMixer(page);
+      const level = await loudest(page, 800);
+      assert(level > -40, `the kick pad struck plays at ${level} dB`);
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await pads.getByLabel("Empty C#2", { exact: true }).click();
+      await drums
+        .getByRole("group", { name: "Pad C#2" })
+        .getByRole("button", { name: "Snare" })
+        .click();
+      await pads.getByLabel("Snare C#2", { exact: true }).waitFor();
+    },
+  "DEV-013: a recording dropped on a pad fills it, plays when the pad is struck, and comes back with the project":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      // The track has its synth: the strip that ends the chain adds racks.
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Drum rack" }).click();
+      const drums = page.locator("[data-slot=drum-rack-panel]");
+      await drums.waitFor({ timeout: 5000 });
+      await dropChord(
+        page,
+        '[data-slot=drum-rack-panel] [data-note="39"]',
+        "Clap",
+        1
+      );
+      const pads = drums.getByRole("group", { name: "Pads" });
+      const clap = pads.getByLabel("Clap D#2", { exact: true });
+      await clap.waitFor({ timeout: 5000 });
+      await clap.click({ delay: 50 });
+      await showMixer(page);
+      const level = await loudest(page, 600);
+      assert(level > -40, `the recording on the pad plays at ${level} dB`);
+      await page.waitForSelector("text=Saved", { timeout: 5000 });
+      await open(browser, page);
+      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page
+        .locator("[data-slot=drum-rack-panel]")
+        .getByLabel("Clap D#2", { exact: true })
+        .click({ delay: 50 });
+      await showMixer(page);
+      const again = await loudest(page, 600);
+      assert(again > -40, `reloaded, the pad plays at ${again} dB`);
+    },
+  "DEV-008: an instrument's face has a chain's controls, and its pad plays the track's instrument":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const devices = page.getByRole("region", { name: "Devices" });
+      await devices
+        .getByRole("button", { name: "Fold Pocket Synth" })
+        .waitFor({ timeout: 5000 });
+      const pad = devices.locator("[data-slot=xypad]").first();
+      const box = await pad.boundingBox();
+      assert(box, "the Pocket Synth shows its pad");
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      // A move plays: the pad calls out as its value changes.
+      await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.3, {
+        steps: 4,
+      });
+      // The pad keeps the note while the pointer holds it; the keys go to the page, to open the mixer.
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await showMixer(page);
+      const level = await loudest(page, 600);
+      await page.mouse.up();
+      assert(level > -40, `the pad held plays the synth at ${level} dB`);
+    },
+  "DEV-014: an instrument rack takes an instrument at the head of a chain, and it plays the track's notes":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("4 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Instrument rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Pocket Synth");
+      await library
+        .getByRole("option")
+        .first()
+        .dragTo(rack.locator("[data-slot=device-chain]"));
+      const pad = rack.locator("[data-slot=xypad]").first();
+      await pad.waitFor({ timeout: 5000 });
+      const box = await pad.boundingBox();
+      assert(box, "the synth in the rack shows its pad");
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.3, {
+        steps: 4,
+      });
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await showMixer(page);
+      const level = await loudest(page, 600);
+      await page.mouse.up();
+      assert(level > -40, `the synth in the rack plays at ${level} dB`);
+    },
+  "DEV-015: an instrument rack's Zones switch shows each chain's keys and velocities, and a key moved sets its zone":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("4 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Instrument rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      await rack.getByRole("button", { name: "Zones", exact: true }).click();
+      const zones = rack.getByRole("list", { name: "Zones" });
+      await zones.getByText("C-1 to G9").waitFor();
+      // The lowest key up an octave, a key at a time.
+      await zones.getByRole("slider").first().focus();
+      await Array.from({ length: 12 }).reduce<Promise<void>>(
+        (done) => done.then(() => page.keyboard.press("ArrowRight")),
+        Promise.resolve()
+      );
+      await zones.getByText("C0 to G9").waitFor({ timeout: 5000 });
+    },
+  "DEV-010 and DEV-012: a rack takes a device from the library, plays it, and a macro turns its parameter":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Rack take", 3);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Effect rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Utility");
+      await library
+        .getByRole("option", { name: UTILITY })
+        .first()
+        .dragTo(rack.locator("[data-slot=device-chain]"));
+      await rack
+        .getByText("Utility", { exact: true })
+        .waitFor({ timeout: 5000 });
+      await showMixer(page);
+      const play = async () => {
+        // The keys go to the page, not to the library's search field the drag left focused.
+        await page.evaluate(() =>
+          (document.activeElement as HTMLElement)?.blur()
+        );
+        await page.keyboard.press("Home");
+        await page.keyboard.press("Space");
+        const level = await loudest(page, 1500);
+        await page.keyboard.press("Space");
+        return level;
+      };
+      const through = await play();
+      assert(through > -40, `the take through the rack plays at ${through} dB`);
+      await page.getByRole("tab", { name: "Devices" }).click();
+      // The macros start hidden: the title bar's switch shows them.
+      await rack.getByRole("button", { name: "Macros", exact: true }).click();
+      await rack.getByRole("button", { name: "Macro 1: 0 mapped" }).click();
+      await page.getByRole("menuitem", { name: "Map a parameter" }).click();
+      await page.getByRole("menuitem", { name: "Gain" }).click();
+      await rack.getByRole("button", { name: "Macro 1: 1 mapped" }).waitFor();
+      // The macro at 0 puts the gain at the bottom of its travel.
+      await showMixer(page);
+      const down = await play();
+      assert(
+        down < through - 20,
+        `the macro mapped to the gain at 0 leaves the take at ${down} dB, from ${through} dB`
+      );
+    },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

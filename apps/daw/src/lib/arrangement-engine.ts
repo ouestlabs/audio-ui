@@ -1,9 +1,12 @@
 import type { DeviceContext } from "@audio-ui/core/device";
-import { noteToFrequency } from "@audio-ui/core/pitch";
 import {
   arrangementFrame,
   heardFrame,
+  PAGE_FRAMES,
+  type PageRequest,
   type PlaybackState,
+  type PlayedClip,
+  pagesAhead,
   playedClips,
   rescaled,
   STOPPED,
@@ -19,21 +22,25 @@ import {
   type Arranged,
   type ArrangementTrack,
   type AutomatedParameter,
+  DRUM_RACK_DEVICE,
+  INSTRUMENT_RACK_DEVICE,
   mixAt,
   mixOf,
   playedNotes,
+  type Rack,
   type TrackDevice,
 } from "@/lib/arrangement";
 import {
   type ArrangementDoc,
   allTracks,
-  trackOf,
 } from "@/lib/arrangement-state";
 import {
   type ClipPlayer,
   createClipPlayer,
   loadClipPlayer,
   type RecordingSource,
+  streamedRecording,
+  wantPages,
 } from "@/lib/clip-player";
 import {
   type AnyDeviceState,
@@ -41,7 +48,16 @@ import {
   type LibraryEngine,
   libraryDevice,
 } from "@/lib/device-library";
+import {
+  createDrumRackEngine,
+  type DrumRackEngine,
+  type PadRecording,
+} from "@/lib/drum-rack";
 import { triggerClick } from "@/lib/drum-synthesis";
+import {
+  createInstrumentRackEngine,
+  type InstrumentRackEngine,
+} from "@/lib/instrument-rack";
 import {
   type ChainLink,
   createMixer,
@@ -49,6 +65,14 @@ import {
   type MixerState,
   type MixerStrip,
 } from "@/lib/mixer-engine";
+import {
+  createRackEngine,
+  type RackEngine,
+} from "@/lib/rack";
+import {
+  createVoicePool,
+  type VoicePool,
+} from "@/lib/voice-pool";
 
 /**
  * How far ahead a play is scheduled, so every part of the engine has heard of
@@ -59,7 +83,14 @@ import {
 export const START_SECONDS = 0.012;
 /** How far ahead of the clock notes and automation are scheduled, and how often the scheduler wakes. */
 const LOOKAHEAD_SECONDS = 0.1;
+/** How far ahead of playback the pages of streamed recordings are asked for, the first half second before the rest. */
+const PAGES_AHEAD_SECONDS = 4;
+const PAGES_FIRST_SECONDS = 0.5;
+/** The pages are asked for every fourth tick of the scheduler: ten times a second. */
+const PREFETCH_TICKS = 4;
 const POLL_MS = 25;
+/** The id of the note a panel's pad holds. */
+const PAD_NOTE = "hand-pad";
 /** How many notes a MIDI track plays at once by default: one voice of its instrument each. */
 const VOICES = 8;
 
@@ -73,32 +104,62 @@ interface FrameNote {
   start: number;
 }
 
-/** One instrument engine of a MIDI track, holding one note at a time. */
-interface Voice {
-  engine: LibraryEngine;
-  /** The note it holds, and since which frame of the clock. */
-  holding: { id: string; since: number } | null;
-}
-
 interface PlacedDevice {
   /** Stands in for the device when it is switched off: it waits as long as the device would. */
   bypass: DelayNode | null;
-  engine: LibraryEngine;
-  entry: LibraryDevice;
+  /** The track device it plays, as it was last given. */
+  device: TrackDevice;
+  engine: LibraryEngine | RackEngine;
+  /** The device of the library it is; a rack is none. */
+  entry: LibraryDevice | null;
   state: TrackDevice["state"];
 }
+
+/** How long a placed device delays the sound, in seconds: a rack, as long as its slowest chain. */
+function placedLatency(placed: PlacedDevice, sampleRate: number): number {
+  return placed.entry
+    ? placed.entry.device.latency(
+        placed.entry.device.sanitize(placed.state),
+        sampleRate
+      )
+    : (placed.engine as RackEngine).latency();
+}
+
+/** The recordings a drum rack's pads can play: the decoded ones, not those streamed from disk. */
+function padRecordings(
+  recordings: ReadonlyMap<string, RecordingSource>
+): ReadonlyMap<string, PadRecording> {
+  return new Map(
+    [...recordings].filter(
+      (entry): entry is [string, PadRecording] =>
+        "getChannelData" in entry[1] || "channels" in entry[1]
+    )
+  );
+}
+
+/** The instrument at the head of a MIDI track, by the kind of track device it plays, as it was last given, with the recordings it had then. */
+type TrackInstrument = {
+  device: TrackDevice;
+  recordings: ReadonlyMap<string, RecordingSource>;
+} & (
+  | { kind: "drums"; player: DrumRackEngine }
+  | { kind: "layers"; player: InstrumentRackEngine }
+  | { kind: "voices"; player: VoicePool }
+);
+
+/** How long a track's instrument delays the sound, in seconds: a rack, as long as its slowest chain. */
+const instrumentLatency = (instrument: TrackInstrument | null) =>
+  instrument && instrument.kind !== "voices" ? instrument.player.latency() : 0;
 
 interface TrackRuntime {
   chainKey: string;
   clips: readonly Arranged[] | null;
   devices: Map<string, PlacedDevice>;
-  /** The instrument a MIDI track plays through: its device's id and state, and its voices. */
-  instrument: {
-    id: string;
-    state: TrackDevice["state"];
-    voices: Voice[];
-  } | null;
+  /** What a MIDI track's notes play through: its instrument's voices, a drum rack or an instrument rack. */
+  instrument: TrackInstrument | null;
   notes: FrameNote[];
+  /** What its clip player plays, as it was last given: what the pages of streamed recordings are planned from. */
+  played: PlayedClip[];
   player: ClipPlayer | null;
 }
 
@@ -119,9 +180,30 @@ export interface ArrangementEngineOptions {
 }
 
 export interface ArrangementEngine {
+  /**
+   * Loads, while stopped, the pages of streamed recordings that a play from
+   * `from` seconds would read first, so it starts with its sound there;
+   * resolves once they are in. A host calls it when the cursor moves.
+   */
+  cue: (from: number) => Promise<void>;
   dispose: () => void;
+  /**
+   * Holds a note on a MIDI track's instrument now, by the instrument's own
+   * note parameters (a pad's pitch and cutoff), as its panel's pad plays it:
+   * called again while held, the same voice follows; `null` lets it go.
+   */
+  holdNote: (
+    track: string,
+    note: Readonly<Record<string, number>> | null
+  ) => void;
   /** The frames the engine delays its sound by: its delay compensation. */
   readonly latency: number;
+  /**
+   * Loads the pages of streamed recordings the clock's frames from `from` to
+   * `to` read; resolves once they are in. What an offline render waits for
+   * before it renders those frames.
+   */
+  load: (from: number, to: number) => Promise<void>;
   readonly mixer: Mixer;
   /** Lets go of a note `noteOn` started on a MIDI track. */
   noteOff: (track: string, pitch: number) => void;
@@ -199,11 +281,8 @@ function chainLatency(
   sampleRate: number
 ): number {
   let frames = 0;
-  for (const { entry, state } of devices) {
-    frames += toFrames(
-      entry.device.latency(entry.device.sanitize(state), sampleRate),
-      sampleRate
-    );
+  for (const placed of devices) {
+    frames += toFrames(placedLatency(placed, sampleRate), sampleRate);
   }
   return frames;
 }
@@ -255,6 +334,7 @@ export async function createArrangementEngine(
       devices: new Map(),
       instrument: null,
       notes: [],
+      played: [],
       player: null,
     };
     runtimes.set(id, made);
@@ -262,12 +342,7 @@ export async function createArrangementEngine(
   };
 
   const releaseVoices = (runtime: TrackRuntime, at: number) => {
-    for (const voice of runtime.instrument?.voices ?? []) {
-      if (voice.holding) {
-        voice.engine.noteOff?.({ at: at / rate, id: voice.holding.id });
-        voice.holding = null;
-      }
-    }
+    runtime.instrument?.player.release(at / rate);
   };
 
   const disposeRuntime = (id: string) => {
@@ -276,9 +351,7 @@ export async function createArrangementEngine(
       return;
     }
     runtime.player?.dispose();
-    for (const voice of runtime.instrument?.voices ?? []) {
-      voice.engine.dispose();
-    }
+    runtime.instrument?.player.dispose();
     for (const placed of runtime.devices.values()) {
       placed.engine.dispose();
       placed.bypass?.disconnect();
@@ -295,45 +368,91 @@ export async function createArrangementEngine(
         runtime.devices.delete(id);
       }
     }
-    if (!wanted.some((device) => device.instrument) && runtime.instrument) {
-      for (const voice of runtime.instrument.voices) {
-        voice.engine.dispose();
-      }
+    dropInstruments(runtime, wanted);
+  };
+
+  /** Lets go of a track's instrument when the track no longer plays through it. */
+  const dropInstruments = (
+    runtime: TrackRuntime,
+    wanted: readonly TrackDevice[]
+  ) => {
+    const head = wanted.find((device) => device.instrument);
+    if (runtime.instrument && runtime.instrument.device.id !== head?.id) {
+      runtime.instrument.player.dispose();
       runtime.instrument = null;
     }
   };
 
-  /** A MIDI track's instrument: a voice for each note it can hold, made again when the device changes. */
+  /** A track's instrument made for `device`, its sound into `input`: a rack's engine, or voices of the library's instrument. */
+  const makeInstrument = (
+    device: TrackDevice,
+    input: AudioNode,
+    recordings: ReadonlyMap<string, RecordingSource>
+  ): TrackInstrument | null => {
+    if (device.device === DRUM_RACK_DEVICE) {
+      const player = createDrumRackEngine(ctx, library);
+      player.output.connect(input);
+      return { device, kind: "drums", player, recordings };
+    }
+    if (device.device === INSTRUMENT_RACK_DEVICE) {
+      const player = createInstrumentRackEngine(ctx, library, voices);
+      player.output.connect(input);
+      return { device, kind: "layers", player, recordings };
+    }
+    const entry = library(device.device);
+    if (entry?.device.kind !== "instrument") {
+      return null;
+    }
+    const values = entry.device.sanitize(device.state) as AnyDeviceState;
+    const player = createVoicePool(
+      ctx,
+      entry,
+      values,
+      deviceContext(),
+      voices,
+      input
+    );
+    return { device, kind: "voices", player, recordings };
+  };
+
+  /** A MIDI track's instrument: made the first time, then brought in step when its device or the recordings change. */
   const syncInstrument = (
     runtime: TrackRuntime,
     device: TrackDevice,
-    entry: LibraryDevice,
-    input: AudioNode
+    input: AudioNode,
+    recordings: ReadonlyMap<string, RecordingSource>
   ) => {
-    const values = entry.device.sanitize(device.state) as AnyDeviceState;
-    const context = deviceContext();
-    const current = runtime.instrument;
-    if (current?.id === device.id) {
-      if (current.state !== device.state) {
-        current.state = device.state;
-        for (const voice of current.voices) {
-          voice.engine.update(values, context);
-        }
-      }
+    let current = runtime.instrument;
+    const fresh = !current;
+    if (!current) {
+      current = makeInstrument(device, input, recordings);
+      runtime.instrument = current;
+    }
+    if (
+      !current ||
+      (!fresh && current.device === device && current.recordings === recordings)
+    ) {
       return;
     }
-    for (const voice of current?.voices ?? []) {
-      voice.engine.dispose();
+    const context = deviceContext();
+    if (current.kind === "drums") {
+      current.player.update(
+        device.rack ?? { chains: [], macros: [] },
+        context,
+        fresh || current.recordings !== recordings
+          ? padRecordings(recordings)
+          : undefined
+      );
+    } else if (current.kind === "layers") {
+      current.player.update(device.rack ?? { chains: [], macros: [] }, context);
+    } else if (fresh || current.device.state !== device.state) {
+      current.player.update(
+        current.player.entry.device.sanitize(device.state) as AnyDeviceState,
+        context
+      );
     }
-    runtime.instrument = {
-      id: device.id,
-      state: device.state,
-      voices: Array.from({ length: voices }, () => {
-        const engine = entry.create(ctx, values, context);
-        engine.output.connect(input);
-        return { engine, holding: null };
-      }),
-    };
+    current.device = device;
+    current.recordings = recordings;
   };
 
   /** An effect's engine, made the first time, then told each new state. */
@@ -345,27 +464,48 @@ export async function createArrangementEngine(
     const values = entry.device.sanitize(device.state) as AnyDeviceState;
     const placed = runtime.devices.get(device.id);
     if (placed?.entry === entry) {
+      placed.device = device;
       if (placed.state !== device.state) {
         placed.state = device.state;
-        placed.engine.update(values, deviceContext());
+        (placed.engine as LibraryEngine).update(values, deviceContext());
       }
       return;
     }
     placed?.engine.dispose();
     runtime.devices.set(device.id, {
       bypass: null,
+      device,
       engine: entry.create(ctx, values, deviceContext()),
       entry,
       state: device.state,
     });
   };
 
+  /** A rack on a track's chain: made the first time, then brought in step whenever its description changes. */
+  const syncRack = (runtime: TrackRuntime, device: TrackDevice, rack: Rack) => {
+    const placed = runtime.devices.get(device.id);
+    if (placed && placed.entry === null) {
+      if (placed.device !== device) {
+        placed.device = device;
+        (placed.engine as RackEngine).update(rack, deviceContext());
+      }
+      return;
+    }
+    placed?.engine.dispose();
+    const engine = createRackEngine(ctx, library);
+    engine.update(rack, deviceContext());
+    runtime.devices.set(device.id, {
+      bypass: null,
+      device,
+      engine,
+      entry: null,
+      state: device.state,
+    });
+  };
+
   /** What stands in for a device switched off: the sound goes by unchanged, as late as the device would make it. */
   const bypassOf = (placed: PlacedDevice): ChainLink => {
-    const seconds = placed.entry.device.latency(
-      placed.entry.device.sanitize(placed.state),
-      rate
-    );
+    const seconds = placedLatency(placed, rate);
     placed.bypass ??= ctx.createDelay(Math.max(1, seconds * 2));
     placed.bypass.delayTime.value = toFrames(seconds, rate) / rate;
     return { input: placed.bypass, output: placed.bypass };
@@ -394,19 +534,24 @@ export async function createArrangementEngine(
     );
   };
 
-  /** Brings a track's devices in step: engines made, updated or let go, its instrument's voices, then its chain. */
-  const syncDevices = (track: ArrangementTrack, runtime: TrackRuntime) => {
+  /** Brings a track's devices in step: engines made, updated or let go, its instrument, then its chain. */
+  const syncDevices = (
+    track: ArrangementTrack,
+    runtime: TrackRuntime,
+    recordings: ReadonlyMap<string, RecordingSource>
+  ) => {
     const strip = mixer.strip(track.id) ?? mixer.main;
-    const wanted = (track.devices ?? []).filter((device) =>
-      library(device.device)
+    const wanted = (track.devices ?? []).filter(
+      (device) => device.rack || library(device.device)
     );
     dropGone(runtime, wanted);
     for (const device of wanted) {
-      const entry = library(device.device) as LibraryDevice;
       if (device.instrument) {
-        syncInstrument(runtime, device, entry, strip.input);
+        syncInstrument(runtime, device, strip.input, recordings);
+      } else if (device.rack) {
+        syncRack(runtime, device, device.rack);
       } else {
-        syncEffect(runtime, device, entry);
+        syncEffect(runtime, device, library(device.device) as LibraryDevice);
       }
     }
     rewire(
@@ -427,7 +572,7 @@ export async function createArrangementEngine(
       return {
         gain,
         id: track.id,
-        latency: chainLatency(runtimeOf(track.id).devices.values(), rate),
+        latency: trackLatency(runtimeOf(track.id)),
         on: !mix.muted,
         pan,
         soloed: mix.soloed,
@@ -442,10 +587,16 @@ export async function createArrangementEngine(
       })),
       tracks: current.tracks.map((track) => ({
         ...strip(track),
+        group: track.group ?? null,
         sends: track.sends ?? {},
       })),
     };
   };
+
+  /** The frames a track's chain delays its sound by: its instrument, then its effects. */
+  const trackLatency = (runtime: TrackRuntime) =>
+    chainLatency(runtime.devices.values(), rate) +
+    toFrames(instrumentLatency(runtime.instrument), rate);
 
   const position = () => {
     if (!state.playing) {
@@ -478,65 +629,34 @@ export async function createArrangementEngine(
 
   const noteOn = (
     runtime: TrackRuntime,
-    entry: LibraryDevice,
     note: FrameNote,
     at: number,
-    passId: string
+    passId: string,
+    parameters?: Readonly<Record<string, number>>
   ) => {
-    const { instrument } = runtime;
-    if (!instrument) {
-      return;
-    }
     const { chance, deviation, velocity } = note.note;
-    if (Math.random() >= (chance ?? 1)) {
+    if (!runtime.instrument || Math.random() >= (chance ?? 1)) {
       return;
     }
-    const base = Object.fromEntries(
-      entry.device.note.map((parameter) => [parameter.id, parameter.default])
+    const level = Math.min(
+      1,
+      Math.max(0, (velocity ?? 1) + Math.random() * (deviation ?? 0))
     );
-    const played = {
-      ...base,
-      frequency: noteToFrequency(note.pitch),
-      velocity: Math.min(
-        1,
-        Math.max(0, (velocity ?? 1) + Math.random() * (deviation ?? 0))
-      ),
-    };
-    const free =
-      instrument.voices.find((voice) => !voice.holding) ??
-      instrument.voices.reduce((oldest, voice) =>
-        (voice.holding?.since ?? 0) < (oldest.holding?.since ?? 0)
-          ? voice
-          : oldest
-      );
-    if (free.holding) {
-      free.engine.noteOff?.({ at: at / rate, id: free.holding.id });
-    }
-    free.engine.noteOn?.(played, { at: at / rate, id: passId });
-    free.holding = { id: passId, since: at };
+    runtime.instrument.player.noteOn(
+      { parameters, pitch: note.pitch, velocity: level },
+      at / rate,
+      passId
+    );
   };
 
-  const noteOff = (runtime: TrackRuntime, at: number, passId: string) => {
-    const voice = runtime.instrument?.voices.find(
-      (item) => item.holding?.id === passId
-    );
-    if (voice) {
-      voice.engine.noteOff?.({ at: at / rate, id: passId });
-      voice.holding = null;
-    }
-  };
+  const noteOff = (runtime: TrackRuntime, at: number, passId: string) =>
+    runtime.instrument?.player.noteOff(at / rate, passId);
 
   /** The id of a note on one pass: a looped arrangement plays the same note again on the next. */
   const passOf = (note: FrameNote, startAt: number) => `${note.id}#${startAt}`;
   /** The pass a note that ends at the clock's frame `at` started on. */
   const passEnding = (note: FrameNote, at: number) =>
     `${note.id}#${at - (endOf(note) - note.start)}`;
-
-  /** The library's entry for a track's instrument, when it has one. */
-  const instrumentOf = (track: ArrangementTrack) => {
-    const device = track.devices?.find((item) => item.instrument);
-    return device ? library(device.device) : undefined;
-  };
 
   /** The note ons and offs of a track that fall in a block of the clock: a note that ends where another starts lets go first. */
   const scheduleNotes = (
@@ -545,8 +665,7 @@ export async function createArrangementEngine(
     count: number
   ) => {
     const runtime = runtimes.get(track.id);
-    const entry = instrumentOf(track);
-    if (!(runtime?.instrument && entry && runtime.notes.length > 0)) {
+    if (!runtime?.instrument || runtime.notes.length === 0) {
       return;
     }
     const ends = startsInWindow(state, from, count, runtime.notes, endOf);
@@ -565,7 +684,7 @@ export async function createArrangementEngine(
       if (off) {
         noteOff(runtime, at, passEnding(item, at));
       } else {
-        noteOn(runtime, entry, item, at, passOf(item, at));
+        noteOn(runtime, item, at, passOf(item, at));
       }
     }
   };
@@ -677,16 +796,16 @@ export async function createArrangementEngine(
     broadcast({ at, loop: state.loop, playing: false, position: stoppedAt });
   };
 
-  /** Chase: a note already sounding where playback starts plays from there. */
+  /** Chase: a note already sounding where playback starts plays from there; a drum hit already struck is not struck again. */
   const chase = (at: number) => {
     for (const track of doc?.tracks ?? []) {
       const runtime = runtimes.get(track.id);
-      const entry = instrumentOf(track);
-      for (const note of runtime?.instrument && entry ? runtime.notes : []) {
+      const sustains =
+        runtime?.instrument && runtime.instrument.kind !== "drums";
+      for (const note of sustains ? runtime.notes : []) {
         if (note.start < state.position && endOf(note) > state.position) {
           noteOn(
             runtime as TrackRuntime,
-            entry as LibraryDevice,
             note,
             at,
             passOf(note, at - (state.position - note.start))
@@ -696,12 +815,46 @@ export async function createArrangementEngine(
     }
   };
 
+  /**
+   * The pages of streamed recordings the tracks read over `count` frames of
+   * the clock from `from` under `playback`: those of the next half second of
+   * every track first, then the rest, so no track waits behind another's.
+   */
+  const pagesOf = (playback: PlaybackState, from: number, count: number) => {
+    const near = Math.min(count, toFrames(PAGES_FIRST_SECONDS, rate));
+    const plan = (length: number) =>
+      [...runtimes.values()].flatMap((runtime) =>
+        runtime.played.length > 0
+          ? pagesAhead(
+              playback,
+              runtime.played,
+              from,
+              length,
+              streamedRecording,
+              rate,
+              PAGE_FRAMES
+            )
+          : []
+      );
+    const first: PageRequest[] = plan(near);
+    return near < count ? [...first, ...plan(count)] : first;
+  };
+
+  /** Asks for the pages of the next seconds of playback, or of a play from where it stopped. */
+  const prefetch = () =>
+    wantPages(pagesOf(state, now(), toFrames(PAGES_AHEAD_SECONDS, rate)));
+
   /** The scheduler of a running context: it wakes often and schedules what the next moments hold, and stops at the end. */
   const startClock = () => {
+    let ticks = 0;
     const tick = () => {
       const until = now() + toFrames(LOOKAHEAD_SECONDS, rate);
       schedule(scheduled, until);
       scheduled = Math.max(scheduled, until);
+      if (ticks % PREFETCH_TICKS === 0) {
+        prefetch();
+      }
+      ticks += 1;
       if (now() >= endFrame()) {
         stop();
       }
@@ -727,6 +880,7 @@ export async function createArrangementEngine(
       playing: true,
       position: Math.max(0, toFrames(from, rate)),
     });
+    prefetch();
     chase(at);
     scheduled = at;
     if (!(ctx instanceof OfflineAudioContext)) {
@@ -756,10 +910,8 @@ export async function createArrangementEngine(
       clips.every((clip, index) => clip === runtime.clips?.[index]);
     if (runtime.player && !same) {
       runtime.clips = clips;
-      runtime.player.setClips(
-        playedClips(clips, (clip) => clip.recording, rate),
-        recordings
-      );
+      runtime.played = playedClips(clips, (clip) => clip.recording, rate);
+      runtime.player.setClips(runtime.played, recordings);
     }
   };
 
@@ -770,7 +922,7 @@ export async function createArrangementEngine(
     recordings: ReadonlyMap<string, RecordingSource>
   ) => {
     const runtime = runtimeOf(track.id);
-    syncDevices(track, runtime);
+    syncDevices(track, runtime, recordings);
     if (!next.tracks.includes(track)) {
       return;
     }
@@ -817,15 +969,13 @@ export async function createArrangementEngine(
   /** A note started by hand: a voice of the track's instrument, now, as long as it is held. */
   const audition = (track: string, pitch: number, velocity: number) => {
     const runtime = runtimes.get(track);
-    const entry = doc && instrumentOf(trackOf(doc, track) ?? doc.main);
-    if (!(runtime?.instrument && entry)) {
+    if (!runtime?.instrument) {
       return;
     }
     const at = now();
     const id = `hand-${pitch}`;
     noteOn(
       runtime,
-      entry,
       {
         end: at + 1,
         id,
@@ -838,6 +988,32 @@ export async function createArrangementEngine(
     );
   };
 
+  /** The note a panel's pad holds: one voice, which follows the pad as it moves. */
+  const holdNote: ArrangementEngine["holdNote"] = (track, parameters) => {
+    const runtime = runtimes.get(track);
+    if (!runtime) {
+      return;
+    }
+    const at = now();
+    if (!parameters) {
+      noteOff(runtime, at, PAD_NOTE);
+      return;
+    }
+    noteOn(
+      runtime,
+      {
+        end: at + 1,
+        id: PAD_NOTE,
+        note: { id: PAD_NOTE, length: 0, pitch: 69, start: 0, velocity: 1 },
+        pitch: 69,
+        start: 0,
+      },
+      at,
+      PAD_NOTE,
+      parameters
+    );
+  };
+
   return {
     dispose: () => {
       stop();
@@ -846,9 +1022,28 @@ export async function createArrangementEngine(
       }
       mixer.dispose();
     },
+    cue: (from) => {
+      if (state.playing) {
+        return Promise.resolve();
+      }
+      const at = now();
+      return wantPages(
+        pagesOf(
+          {
+            at,
+            loop: state.loop,
+            playing: false,
+            position: toFrames(from, rate),
+          },
+          at,
+          toFrames(PAGES_AHEAD_SECONDS, rate)
+        )
+      );
+    },
     get latency() {
       return mixer.latency;
     },
+    load: (from, to) => wantPages(pagesOf(state, from, to - from)),
     mixer,
     noteOff: (track, pitch) => {
       const runtime = runtimes.get(track);
@@ -857,6 +1052,7 @@ export async function createArrangementEngine(
       }
     },
     noteOn: (track, pitch, velocity = 1) => audition(track, pitch, velocity),
+    holdNote,
     play,
     get playing() {
       return state.playing;
@@ -866,9 +1062,11 @@ export async function createArrangementEngine(
       await Promise.all([
         ...[...runtimes.values()].flatMap((runtime) => [
           runtime.player?.synced(),
-          ...[...runtime.devices.values()].map((placed) => placed.engine.ready),
-          ...(runtime.instrument?.voices ?? []).map(
-            (voice) => voice.engine.ready
+          runtime.instrument?.player.ready(),
+          ...[...runtime.devices.values()].map((placed) =>
+            placed.entry
+              ? (placed.engine as LibraryEngine).ready
+              : (placed.engine as RackEngine).ready()
           ),
         ]),
       ]);
@@ -949,10 +1147,14 @@ export async function renderArrangement(
   // A second at a time, on whole render quanta, which is where a render can stop.
   const step = 128 * Math.max(1, Math.round(sampleRate / 128));
   const ahead = toFrames(LOOKAHEAD_SECONDS, sampleRate);
+  // The pages of streamed recordings each second reads are in before it is rendered.
+  await engine.load(0, Math.min(frames, step + ahead));
   engine.schedule(0, Math.min(frames, step + ahead));
   for (let at = step; at < frames; at += step) {
-    ctx.suspend(at / sampleRate).then(() => {
-      engine.schedule(at + ahead, Math.min(frames, at + step + ahead));
+    ctx.suspend(at / sampleRate).then(async () => {
+      const until = Math.min(frames, at + step + ahead);
+      await engine.load(at, until);
+      engine.schedule(at + ahead, until);
       onProgress?.(at / frames);
       ctx.resume();
     });

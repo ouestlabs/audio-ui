@@ -1,8 +1,11 @@
 import type { ParameterValue } from "@audio-ui/core/device";
-import type {
-  Arranged,
-  ArrangementTrack,
-  TrackDevice,
+import {
+  type Arranged,
+  type ArrangementTrack,
+  DRUM_RACK_DEVICE,
+  type DrumSound,
+  INSTRUMENT_RACK_DEVICE,
+  type TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   createArrangementEngine,
@@ -505,6 +508,596 @@ check(
     assert(
       data.every((sample) => sample === 0),
       "the metronome clicks while it is off"
+    );
+  }
+);
+
+/** The frame of the loudest sample, and its level, of a render's left channel. */
+function loudestOf(buffer: AudioBuffer) {
+  const data = buffer.getChannelData(0);
+  let at = 0;
+  for (let index = 1; index < data.length; index += 1) {
+    if (Math.abs(data[index] as number) > Math.abs(data[at] as number)) {
+      at = index;
+    }
+  }
+  return { at, level: Math.abs(data[at] as number) };
+}
+
+const unity = (gain: number, soloed = false) => ({
+  color: 0,
+  gain,
+  muted: false,
+  pan: 0,
+  soloed,
+});
+
+check(
+  "MIX-020: a track in a group plays through the group's channel",
+  async () => {
+    // Past the few milliseconds a fader takes to settle where it is set.
+    const at = 9600;
+    const doc = arrangement({
+      clips: [clip("a", "kick", 0, 0.5, "click")],
+      tracks: [
+        {
+          color: 0,
+          id: "drums",
+          kind: "group",
+          mix: unity(0.5),
+          name: "Drums",
+        },
+        { color: 1, group: "drums", id: "kick", mix: unity(1), name: "Kick" },
+      ],
+    });
+    const recordings = new Map([["click", impulse(0.5, at)]]);
+    const half = loudestOf(await render(doc, recordings, 0.5));
+    assert(
+      Math.abs(half.level - 0.25) < 1e-4,
+      `the kick through a group at half comes out at ${half.level}, not 0.25`
+    );
+    const silent = loudestOf(
+      await render(
+        {
+          ...doc,
+          tracks: doc.tracks.map((track) =>
+            track.id === "drums" ? { ...track, mix: unity(0) } : track
+          ),
+        },
+        recordings,
+        0.5
+      )
+    );
+    assert(
+      silent.level < 1e-6,
+      `the group's fader down leaves ${silent.level}`
+    );
+  }
+);
+
+check(
+  "MIX-021: a track behind a group that delays and a track outside it reach the main track on the same frame",
+  async () => {
+    const at = 1000;
+    const doc = arrangement({
+      clips: [
+        clip("a", "kick", 0, 0.5, "click"),
+        clip("b", "bass", 0, 0.5, "click"),
+      ],
+      tracks: [
+        {
+          color: 0,
+          // A compressor that looks ahead, set so it leaves an impulse alone.
+          devices: [device("d1", "audioui.compressor", { threshold: 0 })],
+          id: "drums",
+          kind: "group",
+          name: "Drums",
+        },
+        { color: 1, group: "drums", id: "kick", name: "Kick" },
+        { color: 2, id: "bass", name: "Bass" },
+      ],
+    });
+    const recordings = new Map([["click", impulse(0.5, at)]]);
+    const soloed = (id: string) => ({
+      ...doc,
+      tracks: doc.tracks.map((track) => ({
+        ...track,
+        mix: unity(1, track.id === id),
+      })),
+    });
+    const grouped = loudestOf(await render(soloed("kick"), recordings, 0.5));
+    const alone = loudestOf(await render(soloed("bass"), recordings, 0.5));
+    assert(
+      grouped.at === alone.at,
+      `the grouped track peaks at frame ${grouped.at}, the other at ${alone.at}`
+    );
+    assert(
+      alone.at > at,
+      `the track outside waits for the group (peak at ${alone.at})`
+    );
+  }
+);
+
+/** A rack of `chains` on a track, as a track device. */
+function rackDevice(
+  chains: {
+    devices?: ReturnType<typeof device>[];
+    id: string;
+    mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
+  }[],
+  macros: {
+    mappings: { device: string; max: number; min: number; parameter: string }[];
+    value: number;
+  }[] = []
+) {
+  return {
+    device: "audioui.rack",
+    id: "rack",
+    rack: {
+      chains: chains.map((chain) => ({
+        devices: chain.devices ?? [],
+        id: chain.id,
+        name: chain.id,
+        ...(chain.mix ? { mix: chain.mix } : {}),
+      })),
+      macros,
+    },
+    state: {},
+  };
+}
+
+/** The loudest a rack on one track makes an impulse of 0.5, and where. */
+async function throughRack(rack: ReturnType<typeof rackDevice>) {
+  const at = 9600;
+  const doc = arrangement({
+    clips: [clip("a", "fx", 0, 0.5, "click")],
+    tracks: [{ color: 0, devices: [rack], id: "fx", name: "Fx" }],
+  });
+  return loudestOf(
+    await render(doc, new Map([["click", impulse(0.5, at)]]), 0.5)
+  );
+}
+
+const chainMix = (gain: number, muted = false, soloed = false) => ({
+  gain,
+  muted,
+  pan: 0,
+  soloed,
+});
+
+check("DEV-010: a rack's chains play side by side and are summed", async () => {
+  const both = await throughRack(rackDevice([{ id: "a" }, { id: "b" }]));
+  assert(
+    Math.abs(both.level - 1) < 1e-4,
+    `two chains of an impulse of 0.5 sum to ${both.level}, not 1`
+  );
+});
+
+check("DEV-010: a chain's volume, switch and solo, as a track's", async () => {
+  const quieter = await throughRack(
+    rackDevice([{ id: "a" }, { id: "b", mix: chainMix(0.5) }])
+  );
+  assert(
+    Math.abs(quieter.level - 0.75) < 1e-4,
+    `at half, the sum is ${quieter.level}`
+  );
+  const off = await throughRack(
+    rackDevice([{ id: "a" }, { id: "b", mix: chainMix(1, true) }])
+  );
+  assert(
+    Math.abs(off.level - 0.5) < 1e-4,
+    `a chain switched off leaves ${off.level}`
+  );
+  const solo = await throughRack(
+    rackDevice([{ id: "a" }, { id: "b", mix: chainMix(0.5, false, true) }])
+  );
+  assert(
+    Math.abs(solo.level - 0.25) < 1e-4,
+    `the soloed chain alone gives ${solo.level}`
+  );
+});
+
+check(
+  "DEV-011: chains that delay differently meet on the same frame, and the track waits for the rack",
+  async () => {
+    // A compressor that looks ahead, at unity: an impulse under its threshold, no make-up.
+    const compressor = device("c", "audioui.compressor", {
+      autoMakeup: false,
+      makeupDb: 0,
+      thresholdDb: 0,
+    });
+    const rack = rackDevice([
+      { devices: [compressor], id: "slow" },
+      { id: "fast" },
+    ]);
+    const aligned = await throughRack(rack);
+    assert(
+      Math.abs(aligned.level - 1) < 1e-3,
+      `the two chains peak apart: the loudest sample is ${aligned.level}, not their sum`
+    );
+    assert(
+      aligned.at > 9600,
+      `the rack delays nothing (peak at ${aligned.at})`
+    );
+  }
+);
+
+check(
+  "DEV-012: a macro turns the parameter mapped to it, over the stretch of its travel",
+  async () => {
+    const utility = device("u", "audioui.utility");
+    const mapped = (value: number) =>
+      rackDevice(
+        [{ devices: [utility], id: "a" }],
+        [
+          {
+            // From 0 dB to +6 dB of a gain that runs from -35 to +35 dB.
+            mappings: [
+              {
+                device: "u",
+                max: 0.5 + (20 * Math.log10(2)) / 70,
+                min: 0.5,
+                parameter: "gainDb",
+              },
+            ],
+            value,
+          },
+        ]
+      );
+    const down = await throughRack(mapped(0));
+    const up = await throughRack(mapped(1));
+    assert(
+      Math.abs(down.level - 0.5) < 1e-3,
+      `the macro at rest gives ${down.level}`
+    );
+    assert(
+      Math.abs(up.level - 1) < 1e-2,
+      `the macro turned up gives ${up.level}, not 1`
+    );
+  }
+);
+
+/** A drum rack of `pads` on a MIDI track playing `notes`, rendered for half a second with a recording `hit`, an impulse on its first frame. */
+function throughDrums(
+  pads: {
+    devices?: ReturnType<typeof device>[];
+    mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
+    note: number;
+    sound: DrumSound;
+  }[],
+  notes: { pitch: number; velocity: number }[]
+) {
+  const doc = arrangement({
+    clips: [
+      {
+        ...clip("m", "beat", 0, 1),
+        notes: notes.map((note, index) => ({
+          id: `n${index}`,
+          length: 0.1,
+          start: 0.1,
+          ...note,
+        })),
+        recording: undefined,
+      },
+    ],
+    tracks: [
+      {
+        color: 0,
+        devices: [
+          {
+            device: DRUM_RACK_DEVICE,
+            id: "drums",
+            instrument: true,
+            rack: {
+              chains: pads.map((pad, index) => ({
+                devices: pad.devices ?? [],
+                id: `pad-${index}`,
+                name: `Pad ${index}`,
+                pad: { note: pad.note, sound: pad.sound },
+                ...(pad.mix ? { mix: pad.mix } : {}),
+              })),
+              macros: [],
+            },
+            state: {},
+          },
+        ],
+        id: "beat",
+        kind: "midi",
+        name: "Beat",
+      },
+    ],
+  });
+  return render(doc, new Map([["hit", impulse(0.5, 0)]]), 0.5);
+}
+
+const hit: DrumSound = { decay: 2, kind: "sample", recording: "hit", tune: 0 };
+
+check(
+  "DEV-013: a note plays the pads that answer it, on its frame, as loud as its velocity",
+  async () => {
+    const out = await throughDrums(
+      [
+        { note: 39, sound: hit },
+        { note: 36, sound: { ...hit, recording: "none" } },
+      ],
+      [{ pitch: 39, velocity: 0.5 }]
+    );
+    const { at, level } = loudestOf(out);
+    assert(at === 4800, `the pad sounds at frame ${at}, not 4800`);
+    assert(Math.abs(level - 0.25) < 1e-4, `at half velocity it gives ${level}`);
+    const none = await throughDrums(
+      [{ note: 39, sound: hit }],
+      [{ pitch: 60, velocity: 1 }]
+    );
+    assert(
+      none.getChannelData(0).every((sample) => sample === 0),
+      "a note no pad answers makes a sound"
+    );
+  }
+);
+
+check(
+  "DEV-013: a pad plays through its own devices and its chain's switch, and a synthesized voice sounds",
+  async () => {
+    const louder = await throughDrums(
+      [
+        {
+          devices: [device("u", "audioui.utility", { gainDb: 6 })],
+          note: 39,
+          sound: hit,
+        },
+      ],
+      [{ pitch: 39, velocity: 0.5 }]
+    );
+    const up = loudestOf(louder).level;
+    const expected = 0.25 * 10 ** (6 / 20);
+    assert(
+      Math.abs(up - expected) < 1e-4,
+      `+6 dB on the pad gives ${up}, not ${expected}`
+    );
+    const off = await throughDrums(
+      [{ mix: chainMix(1, true), note: 39, sound: hit }],
+      [{ pitch: 39, velocity: 1 }]
+    );
+    assert(
+      off.getChannelData(0).every((sample) => sample === 0),
+      "a pad switched off sounds"
+    );
+    const kick = await throughDrums(
+      [
+        {
+          note: 36,
+          sound: { decay: 0.2, kind: "synth", tune: 0, voice: "kick" },
+        },
+      ],
+      [{ pitch: 36, velocity: 1 }]
+    );
+    const data = kick.getChannelData(0);
+    const before = Math.max(...data.subarray(0, 4799).map(Math.abs));
+    const during = Math.max(...data.subarray(4800, 9600).map(Math.abs));
+    assert(before === 0, `the kick sounds before its note (${before})`);
+    assert(during > 0.3, `the kick is near silent (${during})`);
+  }
+);
+
+check(
+  "DEV-007: a device removed from a track's chain, on or switched off, leaves the rest of the chain playing",
+  async () => {
+    const ctx = new OfflineAudioContext(2, RATE / 2, RATE);
+    const engine = await createArrangementEngine(ctx);
+    assert(engine, "the engine loads");
+    const take = recording(0.5);
+    const recordings = new Map([["take", take]]);
+    const withDevices = (devices: TrackDevice[]) =>
+      arrangement({
+        clips: [clip("a", "vox", 0, 0.5)],
+        tracks: [{ color: 0, devices, id: "vox", name: "Vox" }],
+      });
+    const on = device("on", "audioui.utility");
+    const off = { ...device("off", "audioui.utility"), on: false };
+    const kept = device("kept", "audioui.utility", { gainDb: 6 });
+    engine.update(withDevices([on, off, kept]), recordings as never);
+    await engine.ready();
+    try {
+      engine.update(withDevices([off, kept]), recordings as never);
+      engine.update(withDevices([kept]), recordings as never);
+      // Each update hands the clip player its clips again: the render waits until it has them.
+      await engine.ready();
+    } catch (error) {
+      throw new Error(`removing a device throws: ${(error as Error).message}`, {
+        cause: error,
+      });
+    }
+    engine.play(0, 0);
+    const out = (await ctx.startRendering()).getChannelData(0);
+    engine.dispose();
+    const loudest = Math.max(...out.map(Math.abs));
+    assert(loudest > 0.5, `the device left plays the take at ${loudest}`);
+  }
+);
+
+check(
+  "a note held by an instrument's pad sounds through the track, follows the pad, and lets go",
+  async () => {
+    const ctx = new OfflineAudioContext(2, RATE, RATE);
+    const engine = await createArrangementEngine(ctx);
+    assert(engine, "the engine loads");
+    engine.update(
+      arrangement({
+        tracks: [
+          {
+            color: 0,
+            devices: [device("s", "audioui.pocket-synth", { wave: "sine" })],
+            id: "keys",
+            kind: "midi",
+            name: "Keys",
+          },
+        ],
+      }),
+      new Map()
+    );
+    await engine.ready();
+    engine.holdNote("keys", { cutoff: 4000, frequency: 440 });
+    ctx.suspend(0.2).then(() => {
+      // The pad moved: the same voice glides, it does not start another.
+      engine.holdNote("keys", { cutoff: 4000, frequency: 660 });
+      ctx.resume();
+    });
+    ctx.suspend(0.4).then(() => {
+      engine.holdNote("keys", null);
+      ctx.resume();
+    });
+    const out = (await ctx.startRendering()).getChannelData(0);
+    engine.dispose();
+    const held = Math.max(...out.subarray(4800, 19_000).map(Math.abs));
+    const after = Math.max(...out.subarray(40_000).map(Math.abs));
+    assert(held > 0.05, `the pad's note is near silent (${held})`);
+    assert(after < 1e-4, `the pad's note rings after it is let go (${after})`);
+  }
+);
+
+check(
+  "DEV-010: a rack added empty, then given a device, plays the track through it",
+  async () => {
+    const ctx = new OfflineAudioContext(2, RATE / 2, RATE);
+    const engine = await createArrangementEngine(ctx);
+    assert(engine, "the engine loads");
+    const recordings = new Map([["take", recording(0.5)]]);
+    const withRack = (devices: TrackDevice[]) =>
+      arrangement({
+        clips: [clip("a", "vox", 0, 0.5)],
+        tracks: [
+          {
+            color: 0,
+            devices: [rackDevice([{ devices, id: "a" }])],
+            id: "vox",
+            name: "Vox",
+          },
+        ],
+      });
+    engine.update(withRack([]), recordings as never);
+    engine.update(
+      withRack([device("u", "audioui.utility")]),
+      recordings as never
+    );
+    await engine.ready();
+    engine.play(0, 0);
+    const out = (await ctx.startRendering()).getChannelData(0);
+    engine.dispose();
+    const loudest = Math.max(...out.map(Math.abs));
+    assert(loudest > 0.2, `the track through the rack plays at ${loudest}`);
+  }
+);
+
+/** The loudest a note makes through an instrument rack of `chains` on a MIDI track. */
+async function throughLayers(
+  chains: readonly {
+    devices: readonly TrackDevice[];
+    mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
+    zone?: {
+      keys: readonly [number, number];
+      velocity: readonly [number, number];
+    };
+  }[],
+  { pitch = 69, velocity = 1 }: { pitch?: number; velocity?: number } = {}
+) {
+  const doc = arrangement({
+    clips: [
+      {
+        ...clip("m", "keys", 0, 1),
+        notes: [{ id: "n", length: 0.3, pitch, start: 0.05, velocity }],
+        recording: undefined,
+      },
+    ],
+    tracks: [
+      {
+        color: 0,
+        devices: [
+          {
+            device: INSTRUMENT_RACK_DEVICE,
+            id: "layers",
+            instrument: true,
+            rack: {
+              chains: chains.map((chain, index) => ({
+                devices: chain.devices,
+                id: `chain-${index}`,
+                name: `Chain ${index}`,
+                ...(chain.mix ? { mix: chain.mix } : {}),
+                ...(chain.zone ? { zone: chain.zone } : {}),
+              })),
+              macros: [],
+            },
+            state: {},
+          },
+        ],
+        id: "keys",
+        kind: "midi",
+        name: "Keys",
+      },
+    ],
+  });
+  const out = (await render(doc, new Map(), 0.4)).getChannelData(0);
+  return Math.max(...out.subarray(4800, 16_000).map(Math.abs));
+}
+
+check(
+  "DEV-014: a note plays every chain's instrument of an instrument rack, in layers, and a chain switched off is silent",
+  async () => {
+    const synth = (id: string) =>
+      device(id, "audioui.pocket-synth", { wave: "sine" });
+    const one = await throughLayers([{ devices: [synth("a")] }]);
+    const two = await throughLayers([
+      { devices: [synth("a")] },
+      { devices: [synth("b")] },
+    ]);
+    const muted = await throughLayers([
+      { devices: [synth("a")] },
+      { devices: [synth("b")], mix: chainMix(1, true) },
+    ]);
+    assert(one > 0.05, `one layer is near silent (${one})`);
+    assert(
+      Math.abs(two / one - 2) < 0.05,
+      `two layers of the same synth give ${two}, not twice ${one}`
+    );
+    assert(
+      Math.abs(muted - one) < 1e-3,
+      `a layer switched off leaves ${muted}, not ${one}`
+    );
+  }
+);
+
+check(
+  "DEV-015: a note plays only the chains whose keys and velocities hold it: a split, and soft and hard layers",
+  async () => {
+    const synth = (id: string) =>
+      device(id, "audioui.pocket-synth", { wave: "sine" });
+    const one = await throughLayers([{ devices: [synth("a")] }]);
+    const split = [
+      { devices: [synth("low")], zone: { keys: [0, 59], velocity: [0, 1] } },
+      { devices: [synth("high")], zone: { keys: [60, 127], velocity: [0, 1] } },
+    ] as const;
+    const high = await throughLayers(split, { pitch: 69 });
+    const low = await throughLayers(split, { pitch: 48 });
+    assert(
+      Math.abs(high - one) < 1e-3 && Math.abs(low - one) < 1e-3,
+      `a split plays one chain a note: ${low} and ${high}, not ${one}`
+    );
+    const layers = [
+      {
+        devices: [synth("soft")],
+        zone: { keys: [0, 127], velocity: [0, 0.5] },
+      },
+      {
+        devices: [synth("hard")],
+        zone: { keys: [0, 127], velocity: [0.5, 1] },
+      },
+    ] as const;
+    const soft = await throughLayers(layers, { velocity: 0.3 });
+    const both = await throughLayers(layers, { velocity: 0.5 });
+    assert(soft > 0.01, `the soft layer is silent (${soft})`);
+    assert(
+      Math.abs(both / soft - (2 * 0.5) / 0.3) < 0.1,
+      `on the edge both layers play: ${both} against ${soft}`
     );
   }
 );

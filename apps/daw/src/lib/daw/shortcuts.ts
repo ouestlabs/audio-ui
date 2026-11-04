@@ -14,6 +14,7 @@ export type ShortcutCommand =
   | "duplicate"
   | "export"
   | "fold"
+  | "group"
   | "grid-finer"
   | "grid-fixed"
   | "grid-snap"
@@ -23,14 +24,18 @@ export type ShortcutCommand =
   | "loop"
   | "midi-track"
   | "mixer"
+  | "open"
   | "play-stop"
   | "redo"
   | "return-track"
+  | "save"
+  | "save-as"
   | "select-all"
   | "solo"
   | "split"
   | "to-start"
   | "undo"
+  | "ungroup"
   | "unfold-all"
   | "zoom-back"
   | "zoom-in"
@@ -73,6 +78,9 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { alt: true, command: "library", key: "b", mod: true },
   { command: "detail", key: "tab", shift: true },
   { command: "export", key: "r", mod: true, shift: true },
+  { command: "open", key: "o", mod: true },
+  { command: "save", key: "s", mod: true },
+  { command: "save-as", key: "s", mod: true, shift: true },
   { command: "grid-finer", key: "1", mod: true },
   { command: "grid-wider", key: "2", mod: true },
   { command: "grid-triplet", key: "3", mod: true },
@@ -85,6 +93,8 @@ export const SHORTCUTS: readonly Shortcut[] = [
   { command: "zoom-back", key: "x" },
   { command: "automation", key: "a" },
   { command: "fold", key: "u" },
+  { command: "group", key: "g", mod: true },
+  { command: "ungroup", key: "g", mod: true, shift: true },
   { alt: true, command: "unfold-all", key: "u" },
 ];
 
@@ -124,12 +134,17 @@ export const SHORTCUT_HELP: readonly { action: string; keys: string[] }[] = [
   { action: "Copy a clip while dragging it", keys: ["Option", "Drag"] },
   { action: "Select clips with a rectangle", keys: ["Shift", "Drag"] },
   { action: "Show or hide the automation", keys: ["A"] },
-  { action: "Fold the track", keys: ["U"] },
+  { action: "Fold the track, or a group's tracks", keys: ["U"] },
+  { action: "Group the selected tracks", keys: ["Cmd", "G"] },
+  { action: "Ungroup the selected group", keys: ["Cmd", "Shift", "G"] },
   { action: "Unfold every track", keys: ["Option", "U"] },
   { action: "Fold or show the library", keys: ["Cmd", "Option", "B"] },
   { action: "Show the mixer", keys: ["Cmd", "Option", "M"] },
   { action: "Switch between the clip and the devices", keys: ["Shift", "Tab"] },
   { action: "Export", keys: ["Cmd", "Shift", "R"] },
+  { action: "Open a project folder", keys: ["Cmd", "O"] },
+  { action: "Save to the project's folder", keys: ["Cmd", "S"] },
+  { action: "Save to another folder", keys: ["Cmd", "Shift", "S"] },
 ];
 
 const APPLE = /Mac|iPhone|iPad/;

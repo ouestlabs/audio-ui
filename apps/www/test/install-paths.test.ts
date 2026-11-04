@@ -224,6 +224,7 @@ test("named imports from @/components/audio-ui exist in the installed file", asy
 const PAGE_ITEM: Record<string, string> = {
   arrangement: "arrangement-editor",
   "device-chain": "block-device-chain",
+  rack: "rack-panel",
 };
 
 test("a component's docs page only imports what installing it brings", async () => {

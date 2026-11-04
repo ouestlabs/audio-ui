@@ -4,7 +4,11 @@ import {
   secondsPerBeat,
 } from "@audio-ui/core/time";
 import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
-import { PlusIcon } from "@phosphor-icons/react";
+import {
+  MapPinPlusIcon,
+  MusicNotesPlusIcon,
+  PlusIcon,
+} from "@phosphor-icons/react";
 import {
   type DragEvent,
   type MouseEvent,
@@ -19,6 +23,7 @@ import { createPortal } from "react-dom";
 import {
   ArrangedClip,
   ArrangedClipGhost,
+  ArrangedGroupPreview,
 } from "@/components/audio-ui/arranged-clip";
 import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import { TimelineTimeSelection } from "@/components/audio-ui/time-selection";
@@ -82,7 +87,8 @@ import type { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import type { useTrackAutomation } from "@/hooks/use-track-automation";
 import { useTrackReorder } from "@/hooks/use-track-reorder";
-import { type Arranged, mixOf } from "@/lib/arrangement";
+import { type Arranged, type ArrangementTrack, mixOf } from "@/lib/arrangement";
+import { trackBlock, trackDepth } from "@/lib/arrangement-state";
 import { NEW_TRACK } from "@/lib/daw/drop";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { cn } from "@/lib/utils";
@@ -105,6 +111,48 @@ function isShort(height: number | undefined) {
 /** Whether a drag carries a device from the library. */
 function carriesDevice(event: DragEvent) {
   return Array.from(event.dataTransfer.types).includes(DEVICE_DRAG_TYPE);
+}
+
+/**
+ * The markers row's one button: a menu that adds a locator or a time
+ * signature at the cursor. It hands the focus back to nothing as it closes,
+ * so a new signature keeps it to be typed.
+ */
+function MarkerMenu({
+  onLocator,
+  onSignature,
+}: {
+  onLocator: () => void;
+  onSignature: () => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label="Add a marker"
+            className="size-5"
+            size="icon"
+            title="Add a marker"
+            variant="ghost"
+          />
+        }
+      >
+        <PlusIcon aria-hidden="true" className="size-3" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-auto" finalFocus={false}>
+        <DropdownMenuItem onClick={onLocator}>
+          <MapPinPlusIcon aria-hidden="true" />
+          Locator
+          <DropdownMenuShortcut>M</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onSignature}>
+          <MusicNotesPlusIcon aria-hidden="true" />
+          Time signature
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 /** A row of the arrangement: its header in the sticky column, its lane beside it. */
@@ -203,6 +251,30 @@ export interface ArrangementViewProps {
  * track for it. Everything here is the registry's timeline, driven by the
  * arrangement's commands.
  */
+
+/** What a row needs of its track: what it is, whether it sounds, whether it takes files, how deep it sits and, a group, the tracks in it. */
+function rowOf(
+  track: ArrangementTrack,
+  tracks: readonly ArrangementTrack[],
+  returns: readonly ArrangementTrack[],
+  anySolo: boolean
+) {
+  const mix = mixOf(track);
+  const isReturn = returns.includes(track);
+  const isGroup = track.kind === "group";
+  return {
+    depth: trackDepth(tracks, track.id),
+    // A group's lane shows what the tracks in it play.
+    inside: isGroup ? trackBlock(tracks, track.id).slice(1) : [],
+    isGroup,
+    isReturn,
+    mix,
+    silent: mix.muted || (anySolo && !mix.soloed && !isReturn),
+    // Files go on audio tracks; a device goes on any track that takes it.
+    takesFiles: !isReturn && (track.kind ?? "audio") === "audio",
+  };
+}
+
 export function ArrangementView({
   arrangement,
   automation,
@@ -369,10 +441,37 @@ export function ArrangementView({
     (id: string) => dispatch({ id, type: "duplicate-track" }),
     [dispatch]
   );
-  // What a track's menu has and a return's has not.
+  // The track, with the tracks picked when it is one of them, into a new group (MIX-020).
+  const groupTrack = useCallback(
+    (id: string) =>
+      dispatch({
+        ids: selectedTracks.includes(id) ? selectedTracks : [id],
+        type: "group-tracks",
+      }),
+    [dispatch, selectedTracks]
+  );
+  const ungroupTrack = useCallback(
+    (id: string) => dispatch({ id, type: "ungroup" }),
+    [dispatch]
+  );
+  // What a track's menu has.
   const trackMenu = useMemo(
-    () => ({ onDuplicate: duplicateTrack, onInsert: insertTrack }),
-    [duplicateTrack, insertTrack]
+    () => ({
+      onDuplicate: duplicateTrack,
+      onGroup: groupTrack,
+      onInsert: insertTrack,
+    }),
+    [duplicateTrack, groupTrack, insertTrack]
+  );
+  // A group's menu lets its tracks go, too; a return's has none of these.
+  const menuOf = useCallback(
+    (isReturn: boolean, isGroup: boolean) => {
+      if (isReturn) {
+        return;
+      }
+      return isGroup ? { ...trackMenu, onUngroup: ungroupTrack } : trackMenu;
+    },
+    [trackMenu, ungroupTrack]
   );
   const changeLoop = useCallback(
     (range: TimelinePrimitive.Range.Value) =>
@@ -525,49 +624,16 @@ export function ArrangementView({
                 <TimelinePlayhead />
               </TimelineRuler>
             </Row>
+            {/* The locators and the time signatures share one lane, so the tracks keep the room on a short screen. */}
             <Row
               className="shrink-0 border-foreground/20 border-b"
               lead={
                 <span className="flex h-full w-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
-                  Locators
-                  <Button
-                    aria-label="Add a locator at the cursor (M)"
-                    className="size-5"
-                    onClick={markers.addLocator}
-                    size="icon"
-                    title="Add a locator at the cursor (M)"
-                    variant="ghost"
-                  >
-                    <PlusIcon aria-hidden="true" className="size-3" />
-                  </Button>
-                </span>
-              }
-            >
-              <TimelineLane className="h-6 border-b-0">
-                {locators.map((locator) => (
-                  <TimelineLocator
-                    key={locator.id}
-                    locator={locator}
-                    {...markers.locator}
+                  Markers
+                  <MarkerMenu
+                    onLocator={markers.addLocator}
+                    onSignature={markers.addSignature}
                   />
-                ))}
-              </TimelineLane>
-            </Row>
-            <Row
-              className="shrink-0 border-foreground/20 border-b"
-              lead={
-                <span className="flex h-full w-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
-                  Signature
-                  <Button
-                    aria-label="Add a time signature at the cursor"
-                    className="size-5"
-                    onClick={markers.addSignature}
-                    size="icon"
-                    title="Add a time signature at the cursor"
-                    variant="ghost"
-                  >
-                    <PlusIcon aria-hidden="true" className="size-3" />
-                  </Button>
                 </span>
               }
             >
@@ -580,16 +646,27 @@ export function ArrangementView({
                     {...markers.signature}
                   />
                 ))}
+                {locators.map((locator) => (
+                  <TimelineLocator
+                    key={locator.id}
+                    locator={locator}
+                    {...markers.locator}
+                  />
+                ))}
               </TimelineLane>
             </Row>
           </div>
-          {[...tracks, ...returns].map((track) => {
-            const mix = mixOf(track);
-            const isReturn = returns.includes(track);
-            const silent = mix.muted || (anySolo && !mix.soloed && !isReturn);
+          {[...arrangement.unfoldedTracks, ...returns].map((track) => {
+            const {
+              depth,
+              inside,
+              isGroup,
+              isReturn,
+              mix,
+              silent,
+              takesFiles,
+            } = rowOf(track, tracks, returns, anySolo);
             const height = arrangement.heights[track.id];
-            // Files go on audio tracks; a device goes on any track that takes it.
-            const takesFiles = !isReturn && track.kind !== "midi";
             return (
               <div
                 aria-label={track.name}
@@ -607,7 +684,11 @@ export function ArrangementView({
                   )}
                   height={height}
                   lead={
-                    <div className="flex min-w-0 flex-1">
+                    <div
+                      className="flex min-w-0 flex-1"
+                      data-depth={depth}
+                      style={{ paddingInlineStart: `${depth * 0.75}rem` }}
+                    >
                       {isReturn ? null : (
                         <TrackGrip
                           dragging={reorder.draggingId === track.id}
@@ -631,7 +712,7 @@ export function ArrangementView({
                           selectedTrack === track.id
                         }
                         trackId={track.id}
-                        {...(isReturn ? undefined : trackMenu)}
+                        {...menuOf(isReturn, isGroup)}
                       >
                         {automation.automating ? (
                           <TrackAutomationChooser
@@ -669,6 +750,13 @@ export function ArrangementView({
                         onSelectionChange={timeSelection.onSelectionChange}
                         seekable
                       >
+                        {isGroup ? (
+                          <ArrangedGroupPreview
+                            clips={clips.filter((clip) =>
+                              inside.includes(clip.track)
+                            )}
+                          />
+                        ) : null}
                         {arrangedClips.ghostsOn(track.id).map((original) => (
                           <ArrangedClipGhost
                             clip={original}

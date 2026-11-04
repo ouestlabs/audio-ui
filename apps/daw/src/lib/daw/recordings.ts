@@ -21,13 +21,17 @@ export interface Recording {
 export const nameOf = (file: { name: string }) =>
   file.name.replace(EXTENSION, "");
 
-/** The first id `rec-<n>` the project does not hold yet. */
+/**
+ * A new recording id: random, so an id is never given to other bytes, not
+ * even after another project was opened in the same page, whose players and
+ * cache still know the ids they played.
+ */
 export function freshRecordingId(taken: ReadonlySet<string>): string {
-  let n = 1;
-  while (taken.has(`rec-${n}`)) {
-    n += 1;
+  let id = `rec-${crypto.randomUUID().slice(0, 8)}`;
+  while (taken.has(id)) {
+    id = `rec-${crypto.randomUUID().slice(0, 8)}`;
   }
-  return `rec-${n}`;
+  return id;
 }
 
 /**

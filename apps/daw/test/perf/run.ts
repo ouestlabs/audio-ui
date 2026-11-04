@@ -10,9 +10,21 @@
  * heard at the page time `getOutputTimestamp` maps it to, which counts the
  * output's latency. Audio stays muted.
  */
-import { type Browser, chromium, type Page } from "playwright-core";
+import { mkdtemp, rm } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import {
+  type Browser,
+  type BrowserContext,
+  chromium,
+  type Page,
+} from "playwright-core";
 import { START_SECONDS } from "@/lib/arrangement-engine";
-import { type LoadSetOptions, loadSet, TAKE_SECONDS } from "./load-set.ts";
+import {
+  type LoadSetOptions,
+  loadSet,
+  stemSet,
+  TAKE_SECONDS,
+} from "./load-set.ts";
 
 const APP_URL = process.env.DAW_URL ?? "http://localhost:4173/";
 const HELD_SECONDS = Number(process.env.PERF_SECONDS ?? 600);
@@ -20,6 +32,7 @@ const HELD_TRACKS = (process.env.PERF_TRACKS ?? "8,16,32")
   .split(",")
   .map(Number);
 const EXPORT = /Export WAV/;
+const SPACES = /\s+/;
 
 /** What a track carries in the sets: an equalizer and a compressor. */
 const CHAIN = ["audioui.equalizer", "audioui.compressor"];
@@ -159,11 +172,15 @@ const median = (values: number[]) => {
 };
 const ms = (value: number) => `${value.toFixed(1)} ms`;
 
-async function open(browser: Browser) {
-  const context = await browser.newContext({
-    acceptDownloads: true,
-    viewport: { height: 1000, width: 1440 },
-  });
+async function open(browser: Browser | BrowserContext) {
+  // A browser opens a context of its own, which keeps its storage in memory; a context given is used as it is.
+  const context =
+    "newContext" in browser
+      ? await browser.newContext({
+          acceptDownloads: true,
+          viewport: { height: 1000, width: 1440 },
+        })
+      : browser;
   await context.addInitScript(instrument);
   const page = await context.newPage();
   await page.goto(APP_URL);
@@ -264,6 +281,106 @@ async function openSet(browser: Browser, options: LoadSetOptions) {
   });
   await wake(page);
   return page;
+}
+
+/**
+ * Opens the app on the user's longest set: `tracks` stems of `seconds`, their
+ * recordings written straight into the cache the engine streams from, as a
+ * project opened again finds them.
+ */
+async function openStems(
+  context: BrowserContext,
+  tracks: number,
+  seconds: number
+) {
+  const page = await open(context);
+  await page.waitForTimeout(1200);
+  await page.evaluate(
+    async ({ count, json, length }) => {
+      const rate = 48_000;
+      const frames = rate * length;
+      const root = await navigator.storage.getDirectory();
+      const cache = await root.getDirectoryHandle("cache", { create: true });
+      const write = async (
+        folder: FileSystemDirectoryHandle,
+        name: string,
+        chunks: (ArrayBuffer | string)[]
+      ) => {
+        const writable = await (
+          await folder.getFileHandle(name, { create: true })
+        ).createWritable();
+        await chunks.reduce(async (done, chunk) => {
+          await done;
+          await writable.write(chunk);
+        }, Promise.resolve());
+        await writable.close();
+      };
+      // Ten seconds of a chord, written again and again: what is read matters, not what it sounds like.
+      const piece = Float32Array.from(
+        { length: rate * 10 },
+        (_, index) => 0.2 * Math.sin((2 * Math.PI * 220 * index) / rate)
+      );
+      const channel = Array.from(
+        { length: Math.ceil(frames / piece.length) },
+        (_, index) =>
+          piece.slice(0, Math.min(piece.length, frames - index * piece.length))
+            .buffer as ArrayBuffer
+      );
+      await Array.from({ length: count }, (_, index) => index + 1).reduce(
+        async (done, stem) => {
+          await done;
+          await write(cache, `rec-${stem}.f32`, [...channel, ...channel]);
+          await write(cache, `rec-${stem}.json`, [
+            JSON.stringify({
+              channels: 2,
+              length: frames,
+              peaks: [],
+              sampleRate: rate,
+            }),
+          ]);
+        },
+        Promise.resolve()
+      );
+      await write(root, "project.json", [json]);
+    },
+    {
+      count: tracks,
+      json: JSON.stringify(stemSet({ seconds, tracks })),
+      length: seconds,
+    }
+  );
+  await page.reload();
+  await page.waitForSelector(`[data-track="track-${tracks}"]`, {
+    timeout: 120_000,
+  });
+  await wake(page);
+  return page;
+}
+
+/**
+ * What the tab holds in memory, in MB: the resident memory of the largest
+ * renderer process of the browser started on `profile`, as the system counts
+ * it, shared memory and the audio's pages included.
+ */
+async function tabMemory(profile: string): Promise<number> {
+  const rows = (await Bun.$`ps -axo pid=,ppid=,rss=,command=`.text())
+    .split("\n")
+    .map((line) => line.trim().split(SPACES))
+    .map(([pid, ppid, rss, ...command]) => ({
+      command: command.join(" "),
+      pid: Number(pid),
+      ppid: Number(ppid),
+      rss: Number(rss),
+    }));
+  const parent = rows.find(
+    (row) =>
+      row.command.includes(`--user-data-dir=${profile}`) &&
+      !row.command.includes("--type=")
+  );
+  const renderers = rows.filter(
+    (row) => row.ppid === parent?.pid && row.command.includes("--type=renderer")
+  );
+  return Math.max(0, ...renderers.map((row) => row.rss)) / 1024;
 }
 
 /** Reads the browser's render load of the page's audio, through the DevTools protocol. */
@@ -484,13 +601,48 @@ const measures: Record<string, (browser: Browser) => Promise<string[]>> = {
     });
     const download = page.waitForEvent("download", { timeout: 600_000 });
     const started = performance.now();
-    await page.getByRole("button", { name: EXPORT }).click();
+    await page.getByRole("button", { name: "More controls" }).click();
+    await page.getByRole("menuitem", { name: EXPORT }).click();
     await download;
     const seconds = (performance.now() - started) / 1000;
     return [
       `16 tracks of 3 minutes, two returns: ${seconds.toFixed(1)} s from Export to the file, ${(180 / seconds).toFixed(1)} times real time`,
     ];
   },
+
+  "PRF-006: the user's longest set, 17 stems of 11 min 48 s, streamed":
+    async () => {
+      const seconds = 708;
+      // A profile on disk, as a user's is: a context of the test keeps its storage in memory, too small for 4.6 GB.
+      const profile = await mkdtemp(`${tmpdir()}/audio-ui-perf-`);
+      const context = await chromium.launchPersistentContext(profile, {
+        viewport: { height: 1000, width: 1440 },
+      });
+      const page = await openStems(context, 17, seconds);
+      const before = await underruns(page);
+      const opened = await tabMemory(profile);
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(30_000);
+      const playing = await tabMemory(profile);
+      const fellBehind = (await underruns(page)) - before;
+      await page.keyboard.press("Space");
+      // A play from the middle, which no page was loaded for until the cursor got there.
+      const lane = await page.locator('[data-track="track-1"]').boundingBox();
+      assert(lane, "the first stem is there");
+      await page.mouse.click(lane.x + lane.width / 2, lane.y + lane.height / 2);
+      await page.waitForTimeout(500);
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(10_000);
+      const jumped = await tabMemory(profile);
+      const after = (await underruns(page)) - before;
+      await page.keyboard.press("Space");
+      await context.close();
+      await rm(profile, { force: true, recursive: true });
+      const most = Math.max(opened, playing, jumped);
+      const line = `17 stems of ${seconds} s (4.6 GB decoded): the page holds ${opened.toFixed(0)} MB opened, ${playing.toFixed(0)} MB after 30 s of playback, ${jumped.toFixed(0)} MB after a play from the middle; ${fellBehind} underruns playing, ${after} in all`;
+      assert(most < 1536 && after === 0, line);
+      return [line];
+    },
 
   "PRF-007: the interface while 16 tracks play": async (browser) => {
     const page = await openSet(browser, {

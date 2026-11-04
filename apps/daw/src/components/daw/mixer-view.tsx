@@ -4,11 +4,13 @@ import { useCallback, useEffect, useRef } from "react";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
 import { Meter } from "@/components/audio-ui/meter";
+import { TRACK_COLORS } from "@/components/audio-ui/timeline";
 import { Toggle } from "@/components/ui/toggle";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
 import { type ArrangementTrack, type Mix, mixOf } from "@/lib/arrangement";
+import { trackOf } from "@/lib/arrangement-state";
 import { cn } from "@/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;
@@ -156,6 +158,8 @@ function SendKnob({
 
 interface StripProps {
   analysers: readonly AnalyserNode[] | null;
+  /** The group the track plays into, when it is in one (MIX-020). */
+  into?: string;
   /** Main has no switch, no solo and no sends. */
   main?: boolean;
   onMix: (id: string, patch: Partial<Omit<Mix, "color">>) => void;
@@ -172,6 +176,7 @@ interface StripProps {
 /** A channel of the mixer: its sends, its pan, its fader and meter, its switch and solo. */
 function Strip({
   analysers,
+  into,
   main,
   onMix,
   onSelect,
@@ -207,16 +212,33 @@ function Strip({
     <section
       aria-label={track.name}
       className={cn(
-        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center rounded-lg border bg-background p-2",
+        // A column of the console, a hairline between it and the next.
+        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-3 transition-colors",
         // The main track is wider: its meter has a scale.
-        main && "w-36",
-        selected && "border-primary"
+        main && "w-36 border-e-0",
+        track.kind === "group" && "bg-muted/40",
+        selected && "bg-muted"
       )}
       onPointerDown={select}
     >
-      <span className="row-start-1 min-h-4 w-full truncate text-center font-medium text-xs">
-        {track.name}
-      </span>
+      <div className="row-start-1 flex w-full min-w-0 flex-col items-center gap-1.5">
+        {/* The track's color, as its clips have it. */}
+        <span
+          aria-hidden="true"
+          className={cn(
+            "h-1 w-full rounded-b-sm",
+            main ? "bg-foreground/25" : TRACK_COLORS[mix.color]?.dot
+          )}
+        />
+        <span className="min-h-4 w-full truncate text-center font-medium text-xs">
+          {track.name}
+        </span>
+        {into ? (
+          <span className="w-full truncate text-center text-muted-foreground text-xs">
+            To {into}
+          </span>
+        ) : null}
+      </div>
       {sends ? (
         <div
           aria-label={`${track.name} sends`}
@@ -335,6 +357,7 @@ export function MixerView({
   const strip = (track: ArrangementTrack, main = false, sends = false) => (
     <Strip
       analysers={engine.meter(track.id)}
+      into={track.group ? trackOf(doc, track.group)?.name : undefined}
       key={track.id}
       main={main}
       onMix={onMix}
@@ -350,16 +373,24 @@ export function MixerView({
   return (
     // One grid for every channel, each a subgrid of its six rows (name, sends, pan, fader, level, switches): what one
     // channel lacks leaves its row empty, so every fader starts and ends level; the faders take the height there is,
-    // and never less than a fader's own least, 10rem.
+    // and never less than 5rem, so the panel fits a short screen.
     <div
       aria-label="Mixer"
-      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(10rem,1fr)_auto_auto] gap-x-2 gap-y-2 overflow-auto p-2"
+      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden pe-2"
       role="group"
     >
-      {doc.tracks.map((track) => strip(track, false, true))}
-      <div aria-hidden="true" className="row-span-6 w-px bg-border" />
+      {/* A folded group hides its tracks here too. */}
+      {arrangement.unfoldedTracks.map((track) => strip(track, false, true))}
+      {/* The returns and the main track stand apart from the tracks. */}
+      <div
+        aria-hidden="true"
+        className="row-span-6 w-2 border-border border-e"
+      />
       {doc.returns.map((track) => strip(track))}
-      <div aria-hidden="true" className="row-span-6 w-px bg-border" />
+      <div
+        aria-hidden="true"
+        className="row-span-6 w-2 border-border border-e"
+      />
       {strip(doc.main, true)}
     </div>
   );

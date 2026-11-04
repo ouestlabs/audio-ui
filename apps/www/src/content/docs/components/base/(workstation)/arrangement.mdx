@@ -445,6 +445,16 @@ const reorder = useTrackReorder({
 
 The grip sits in its track's row, inside the `Timeline`. While a track is dragged, `draggingId` is the track and `drop` (`{ id, edge }`) is the edge of the row it would land on: `trackReorderClass` fades the track where it was and draws a line at that edge. `ghost` is the box of its header, and `TrackReorderGhost` draws the copy under the pointer, fixed, which the drag moves without a render. The view scrolls when the pointer nears its top or bottom edge. The grip, the copy and the line ship with the hook, in `components/audio-ui/track-grip`.
 
+### Groups
+
+A track can sit in a group track: it names it in `group`, and a group's tracks follow it in `tracks`. The group is a track of its own (`kind: "group"`), with its chain, its mix and its sends, and the tracks in it play into it instead of into the main track. A group can hold groups.
+
+- `{ type: "group-tracks", ids }` puts tracks into a new group where the first of them was. `{ type: "ungroup", id }` dissolves one, its tracks going up a level.
+- A group moves, is duplicated and is removed with its tracks; a track moved among a group's tracks joins it.
+- `TimelineTrackControls` puts "Group" and "Ungroup" in a track's menu when given `onGroup` and `onUngroup` (give `onUngroup` to a group track only).
+- `unfoldedTracks` (from `useArrangement`) leaves out the tracks of a folded group. `trackBlock` and `trackDepth` give a group's tracks and how deep a track sits, to indent its header.
+- `ArrangedGroupPreview`, from `arranged-clip`, draws on a group's lane what its tracks play.
+
 ### Time selections
 
 `useTimeSelection` (`npx shadcn@latest add @audio-ui/use-time-selection`) is a stretch of time on some tracks and what the keyboard does with it. Tell it where a press on bare lane began, give its `onSelectionChange` to the lanes, and draw the overlay on the tracks it spans:
@@ -572,6 +582,24 @@ A drag across the bare lanes selects a stretch of time on the tracks it sweeps, 
 <KeyRow gesture={"`Cmd` / `Ctrl` + `Alt` + `3`"}>Show or hide the clip panel.</KeyRow>
 <KeyRow gesture={"On the loop"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by its own length; with `Cmd` / `Ctrl`, `Left` / `Right` shorten or lengthen it and `Up` / `Down` double or halve it.</KeyRow>
 </KeyTable>
+
+### Other DAWs
+
+The `dawproject` lib (`npx shadcn@latest add @audio-ui/dawproject`) writes an arrangement to a `.dawproject` file and reads one back. DAWproject is the open exchange format several DAWs read and write: a zip of `project.xml`, `metadata.xml` and the audio.
+
+```ts
+import { exportDawproject, importDawproject } from "@/lib/dawproject";
+
+// Out: every recording a clip plays, by its id, with the file it goes in.
+const { file, report } = await exportDawproject(doc, recordings, readBytes);
+
+// In: the arrangement, and the bytes of each recording under the id its clips name.
+const { doc: opened, recordings: files, report: lost } = await importDawproject(blob);
+```
+
+- **What crosses over:** the tracks, the return tracks and the main track, with their volume, pan, mute, solo and sends. Audio clips with their fades, loop and warp, MIDI clips with their notes. The automation of volume and pan. The locators, the tempo and the time signatures. The equalizer, compressor, gate and limiter, whose settings the format describes.
+- **What is left out:** a reversed clip, a clip's gain, the loop and any other device. Each loss is a line of `report`.
+- **Times:** written in seconds, and read in seconds or beats.
 
 ### Undo and redo
 

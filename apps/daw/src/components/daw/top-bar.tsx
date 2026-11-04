@@ -10,7 +10,6 @@ import {
   ArrowArcRightIcon,
   ArrowCounterClockwiseIcon,
   DotsThreeIcon,
-  DownloadSimpleIcon,
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
 } from "@phosphor-icons/react";
@@ -25,9 +24,11 @@ import { ButtonGroup } from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
   DropdownMenuSub,
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
@@ -107,13 +108,21 @@ export interface TopBarProps {
   metronome: boolean;
   onAutomatingChange: (automating: boolean) => void;
   onExport: () => void;
+  /** Sends the project to other DAWs as a .dawproject file. */
+  onExportDawproject: () => void;
+  /** Opens a .dawproject file of another DAW in place of the project. */
+  onImportDawproject: () => void;
   onLoopingChange: (looping: boolean) => void;
   onMetronomeChange: (metronome: boolean) => void;
+  /** Opens a project folder, where the browser can: with it, the menu has Open, Save and Save As. */
+  onOpen?: () => void;
   onPlayPause: () => void;
   onRedo?: () => void;
   /** Plays every envelope again: there only while a hand overrides one. */
   onReenableAutomation?: () => void;
   onRhythmChange: (rhythm: MetronomeRhythm) => void;
+  onSave?: () => void;
+  onSaveAs?: () => void;
   onStop: () => void;
   onTempoChange: (tempo: Tempo) => void;
   onUndo?: () => void;
@@ -235,13 +244,6 @@ export function TopBar(props: TopBarProps) {
         >
           <EnvelopeIcon aria-hidden="true" />
         </BarButton>
-        <BarButton
-          disabled={props.exporting}
-          label="Export WAV (Cmd Shift R)"
-          onClick={props.onExport}
-        >
-          <DownloadSimpleIcon aria-hidden="true" />
-        </BarButton>
         <DropdownMenu>
           <DropdownMenuTrigger
             render={
@@ -256,6 +258,36 @@ export function TopBar(props: TopBarProps) {
             <DotsThreeIcon aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-auto min-w-48">
+            {props.onOpen ? (
+              <>
+                <DropdownMenuItem onClick={props.onOpen}>
+                  Open project…
+                  <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={props.onSave}>
+                  Save
+                  <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={props.onSaveAs}>
+                  Save as…
+                  <DropdownMenuShortcut>⇧⌘S</DropdownMenuShortcut>
+                </DropdownMenuItem>
+              </>
+            ) : null}
+            <DropdownMenuItem onClick={props.onImportDawproject}>
+              Import DAWproject…
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={props.onExportDawproject}>
+              Export DAWproject…
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              disabled={props.exporting}
+              onClick={props.onExport}
+            >
+              Export WAV
+              <DropdownMenuShortcut>⇧⌘R</DropdownMenuShortcut>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
             <DropdownMenuRadioGroup
               onValueChange={pickZoom}
               value={preset === undefined ? "" : String(preset)}

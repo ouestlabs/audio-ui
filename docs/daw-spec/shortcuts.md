@@ -42,6 +42,8 @@ Status: partial: which other keys Chrome and Safari keep is checked by hand (`ap
 | KEY-029 | Option+Left, Option+Right | Jump to the previous or next locator or clip edge |
 | KEY-030 | Left, Right, End, Up, Down | Move the cursor on the grid, to the last clip's end; pick the track above or below |
 | KEY-031 | Cmd+C, Cmd+X, Cmd+V, Cmd+J | Copy, cut, paste; one clip per track of the time selected |
+| KEY-033 | Cmd+G, Cmd+Shift+G | Group the picked tracks; ungroup the picked group, or the one a picked track is in (MIX-020) |
+| KEY-032 | Cmd+O, Cmd+S, Cmd+Shift+S | Open a project folder, save to the project's folder, save to another (PRJ-007); where the browser cannot write a folder, the browser keeps these keys |
 
 Delete takes the selected clips or, with none, a track its header picked: a press on a lane only puts the cursor there (KEY-012, apps/daw/test/browser/run.ts). The menu of the top bar lists every key.
 

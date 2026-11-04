@@ -15,6 +15,7 @@
     "scrubber",
     "---Mixing---",
     "mixer",
-    "device-chain"
+    "device-chain",
+    "rack"
   ]
 }

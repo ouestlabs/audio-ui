@@ -4,6 +4,7 @@ import {
   type Tempo,
 } from "@audio-ui/core/time";
 import {
+  type ChangeEvent,
   type ReactNode,
   useCallback,
   useEffect,
@@ -42,15 +43,42 @@ import { useTimelineGrid } from "@/hooks/use-timeline-grid";
 import { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
 import { useTrackAutomation } from "@/hooks/use-track-automation";
-import type { Arranged, ArrangementTrack } from "@/lib/arrangement";
+import {
+  type Arranged,
+  type ArrangementTrack,
+  padRecordings,
+} from "@/lib/arrangement";
 import { renderArrangement } from "@/lib/arrangement-engine";
-import { type ArrangementDoc, trackOf } from "@/lib/arrangement-state";
+import {
+  type ArrangementDoc,
+  allTracks,
+  trackOf,
+} from "@/lib/arrangement-state";
+import { canStream, streamRecording } from "@/lib/daw/cache";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
 import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
+import {
+  DAWPROJECT_ACCEPT,
+  exportProject,
+  importProject,
+} from "@/lib/daw/exchange";
+import {
+  canUseFolders,
+  mayWrite,
+  pickFolder,
+  rememberFolder,
+  saveToFolder,
+} from "@/lib/daw/folder";
+import { projectFromFolder } from "@/lib/daw/open-folder";
 import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import { freshMidiClipId, type Recording } from "@/lib/daw/recordings";
 import { matchShortcut, type ShortcutCommand } from "@/lib/daw/shortcuts";
-import { canStore, saveProject, saveRecording } from "@/lib/daw/storage";
+import {
+  canStore,
+  loadRecording,
+  saveProject,
+  saveRecording,
+} from "@/lib/daw/storage";
 import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
@@ -63,9 +91,29 @@ const STRIP = "2.25rem";
 /** The least height of each view of that panel, its strip included: under it, what it shows is cut off. */
 const LEAST: Record<PanelView, string> = {
   clip: "15rem",
-  devices: "25rem",
-  mixer: "26rem",
+  devices: "18rem",
+  mixer: "21rem",
 };
+
+/** The most of the window the panel takes when it opens: what a height dragged by hand may go past. */
+const OPENING_SHARE = 0.45;
+/** How tall each view opens on a tall window, in px. */
+const OPENING: Record<PanelView, number> = {
+  clip: 288,
+  devices: 360,
+  mixer: 400,
+};
+const REM = 16;
+
+/** How tall each view opens on a window `height` px tall: as tall as it likes, up to 45% of it, never under its least. */
+function openingHeights(height: number): Record<PanelView, number> {
+  const open = (view: PanelView) =>
+    Math.max(
+      Number.parseFloat(LEAST[view]) * REM,
+      Math.min(OPENING[view], Math.round(height * OPENING_SHARE))
+    );
+  return { clip: open("clip"), devices: open("devices"), mixer: open("mixer") };
+}
 
 /** What the panel's bar names: the clip it holds, folded, or the track whose devices it shows; the mixer, nothing. */
 function titleOf(
@@ -101,9 +149,22 @@ function typing(target: EventTarget | null) {
   );
 }
 
+/** What an exchange left out, a few lines of it for a notice. */
+function lostLines(report: readonly string[]): string | undefined {
+  if (report.length === 0) {
+    return;
+  }
+  const shown = report.slice(0, 4).join("; ");
+  return report.length > 4 ? `${shown}; and ${report.length - 4} more` : shown;
+}
+
 export interface DawProps {
+  /** The folder of the disk the project was opened from or saved to (PRJ-007), if any. */
+  folder: FileSystemDirectoryHandle | null;
   initial: ArrangementDoc;
   initialRecordings: ReadonlyMap<string, Recording>;
+  /** A project opened from a folder, to take this one's place. */
+  onOpen?: (project: DawProps) => void;
 }
 
 /**
@@ -113,7 +174,12 @@ export interface DawProps {
  * transport and the engine line around them. It holds the start marker and
  * the keyboard; everything else is the registry's.
  */
-export function Daw({ initial, initialRecordings }: DawProps) {
+export function Daw({
+  folder: initialFolder,
+  initial,
+  initialRecordings,
+  onOpen,
+}: DawProps) {
   const arrangement = useArrangement({
     colors: TRACK_COLOR_COUNT,
     duration: initial.duration,
@@ -164,12 +230,11 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     : undefined;
   // The clip view shows the selected clip: with none, the devices.
   const shown = panelView === "clip" && !selectedClip ? "devices" : panelView;
-  // How tall each view is, in px: a height dragged is kept for the next time it shows.
-  const viewHeights = useRef<Record<PanelView, number>>({
-    clip: 288,
-    devices: 400,
-    mixer: 416,
-  });
+  // How tall each view is, in px: a height dragged is kept for the next time it shows. It opens at no more than
+  // 45% of the window, so a short screen keeps room for the tracks, and never under its least height.
+  const viewHeights = useRef<Record<PanelView, number>>(
+    openingHeights(globalThis.innerHeight ?? 900)
+  );
   // Folded by the line dragged under the view's least height, or opened by dragging it up.
   const keepHeight = useCallback(
     (size: { inPixels: number }, id: string | number | undefined) => {
@@ -452,7 +517,8 @@ export function Daw({ initial, initialRecordings }: DawProps) {
       const { made, skipped } = await decodeFiles(
         context,
         files,
-        new Set(recordings.keys())
+        new Set(recordings.keys()),
+        canStream() ? streamRecording : undefined
       );
       if (skipped.length > 0) {
         toast.error(`Not a sound this browser can read: ${skipped.join(", ")}`);
@@ -479,7 +545,180 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     [dispatch, doc.duration, recordings]
   );
 
+  // A recording dropped on a drum rack's pad (DEV-013): kept decoded, as a pad plays it whole and at once.
+  const addPadSample = useCallback(
+    async (track: string, rack: string, note: number, files: File[]) => {
+      const context = webAudio.getContext();
+      if (!context || files.length === 0) {
+        return;
+      }
+      const { made, skipped } = await decodeFiles(
+        context,
+        files.slice(0, 1),
+        new Set(recordings.keys())
+      );
+      if (skipped.length > 0) {
+        toast.error(`Not a sound this browser can read: ${skipped.join(", ")}`);
+      }
+      const [first] = made;
+      if (!first) {
+        return;
+      }
+      const [id, { bytes, recording }] = first;
+      if (canStore()) {
+        saveRecording(id, bytes).catch(() =>
+          setSaved("Not saved: the browser refused to store the file")
+        );
+      }
+      setRecordings((current) => new Map([...current, [id, recording]]));
+      dispatch({
+        name: recording.name,
+        note,
+        rack,
+        sound: {
+          decay: Math.min(4, recording.length),
+          kind: "sample",
+          recording: id,
+          tune: 0,
+        },
+        track,
+        type: "set-pad",
+      });
+    },
+    [dispatch, recordings]
+  );
+
   // Export (EXP-001, EXP-002): the main output, from the start to the end of the last clip.
+  // The project's folder on disk (PRJ-006, PRJ-007): Cmd+S saves to it, Cmd+Shift+S to another, Cmd+O opens one.
+  const [folder, setFolder] = useState(initialFolder);
+  const saveTo = useCallback(
+    async (target: FileSystemDirectoryHandle) => {
+      if (!(await mayWrite(target))) {
+        toast.error(`The browser was not let write to ${target.name}.`);
+        return;
+      }
+      // What the clips play, and the drum racks' pads.
+      const played = new Set([
+        ...doc.clips.map((clip) => clip.recording),
+        ...padRecordings(allTracks(doc)),
+      ]);
+      const kept = [...recordings]
+        .filter(([id]) => played.has(id))
+        .map(([id, recording]) => ({ id, name: recording.name }));
+      const notice = toast.loading(`Saving to ${target.name}…`);
+      try {
+        const { missing } = await saveToFolder(
+          target,
+          doc,
+          kept,
+          loadRecording
+        );
+        setFolder(target);
+        await rememberFolder(target);
+        if (missing.length > 0) {
+          toast.warning(
+            `Saved to ${target.name}, without ${missing.join(", ")}`,
+            {
+              id: notice,
+            }
+          );
+        } else {
+          toast.success(`Saved to ${target.name}`, { id: notice });
+        }
+      } catch (error) {
+        toast.error(`Not saved: ${(error as Error).message}`, { id: notice });
+      }
+    },
+    [doc, recordings]
+  );
+  const saveAs = useCallback(async () => {
+    const picked = await pickFolder();
+    if (picked) {
+      await saveTo(picked);
+    }
+  }, [saveTo]);
+  const save = useCallback(
+    () => (folder ? saveTo(folder) : saveAs()),
+    [folder, saveAs, saveTo]
+  );
+  const openProjectFolder = useCallback(async () => {
+    const picked = await pickFolder();
+    const context = webAudio.getContext();
+    if (!(picked && context && onOpen)) {
+      return;
+    }
+    const notice = toast.loading(`Opening ${picked.name}…`);
+    try {
+      const opened = await projectFromFolder(context, picked);
+      await rememberFolder(picked);
+      if (opened.missing.length > 0) {
+        toast.warning(
+          `Opened ${picked.name}, without ${opened.missing.join(", ")}`,
+          {
+            id: notice,
+          }
+        );
+      } else {
+        toast.success(`Opened ${picked.name}`, { id: notice });
+      }
+      onOpen({
+        folder: picked,
+        initial: opened.doc,
+        initialRecordings: opened.recordings,
+      });
+    } catch (error) {
+      toast.error((error as Error).message, { id: notice });
+    }
+  }, [onOpen]);
+
+  // Projects of other DAWs, through DAWproject (PRJ-008).
+  const exportDawproject = useCallback(async () => {
+    const notice = toast.loading("Packing the project for other DAWs…");
+    try {
+      const { file, report } = await exportProject(doc, recordings);
+      const name = `${folder?.name ?? "arrangement"}.dawproject`;
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(file);
+      link.download = name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 0);
+      toast.success(`Exported to ${name}`, {
+        description: lostLines(report),
+        id: notice,
+      });
+    } catch (error) {
+      toast.error(`Not exported: ${(error as Error).message}`, { id: notice });
+    }
+  }, [doc, folder, recordings]);
+  const importInput = useRef<HTMLInputElement>(null);
+  const importDawproject = useCallback(() => importInput.current?.click(), []);
+  const openDawproject = useCallback(
+    async (event: ChangeEvent<HTMLInputElement>) => {
+      const [file] = event.target.files ?? [];
+      event.target.value = "";
+      const context = webAudio.getContext();
+      if (!(file && context && onOpen)) {
+        return;
+      }
+      const notice = toast.loading(`Opening ${file.name}…`);
+      try {
+        const opened = await importProject(context, file, TRACK_COLOR_COUNT);
+        toast.success(`Opened ${file.name}`, {
+          description: lostLines(opened.report),
+          id: notice,
+        });
+        onOpen({
+          folder: null,
+          initial: opened.doc,
+          initialRecordings: opened.recordings,
+        });
+      } catch (error) {
+        toast.error((error as Error).message, { id: notice });
+      }
+    },
+    [onOpen]
+  );
+
   const exportWav = useCallback(async () => {
     // The time selected, or the whole arrangement to the end of its last clip (EXP-002).
     const [start, end] = selectedTime?.range ?? [
@@ -524,6 +763,22 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     }
   }, [doc, selectedTime, sources]);
 
+  // A pad or a key played by hand, through the track's instrument (DEV-013).
+  const noteOn = useCallback(
+    (track: string, pitch: number, velocity: number) =>
+      engine.engine?.noteOn(track, pitch, velocity),
+    [engine.engine]
+  );
+  const noteOff = useCallback(
+    (track: string, pitch: number) => engine.engine?.noteOff(track, pitch),
+    [engine.engine]
+  );
+  const holdNote = useCallback(
+    (track: string, note: Readonly<Record<string, number>> | null) =>
+      engine.engine?.holdNote(track, note),
+    [engine.engine]
+  );
+
   // What each key does (KEY-001 and on), read when it is pressed.
   const commands: Partial<Record<ShortcutCommand, () => void>> = {
     automation: automation.toggle,
@@ -535,6 +790,12 @@ export function Daw({ initial, initialRecordings }: DawProps) {
         arrangement.toggleFold(id);
       }
     },
+    // The tracks picked go into a group (MIX-020), and a group picked lets its tracks go.
+    group: () => {
+      const picked = arrangement.selectedTracks;
+      const chosen = picked.length > 0 ? picked : [selectedTrack ?? ""];
+      dispatch({ ids: chosen, type: "group-tracks" });
+    },
     "grid-finer": () => grid.change("finer"),
     "grid-fixed": () => grid.change("fixed"),
     "grid-snap": () => grid.change("snap"),
@@ -543,6 +804,24 @@ export function Daw({ initial, initialRecordings }: DawProps) {
     loop: loopKey,
     library: () => setLibraryOpen((open) => !open),
     mixer: () => togglePanel("mixer"),
+    // A group picked, or the group a picked track is in.
+    ungroup: () => {
+      const picked = arrangement.selectedTracks;
+      const chosen = picked.length > 0 ? picked : [selectedTrack ?? ""];
+      const groups = new Set(
+        chosen.flatMap((id) => {
+          const track = trackOf(doc, id);
+          if (track?.kind === "group") {
+            return [id];
+          }
+          return track?.group ? [track.group] : [];
+        })
+      );
+      dispatch({
+        commands: [...groups].map((id) => ({ id, type: "ungroup" as const })),
+        type: "batch",
+      });
+    },
     "unfold-all": () => {
       for (const [id, on] of Object.entries(arrangement.folded)) {
         if (on) {
@@ -586,6 +865,9 @@ export function Daw({ initial, initialRecordings }: DawProps) {
       });
     },
     export: exportWav,
+    ...(canUseFolders()
+      ? { open: openProjectFolder, save, "save-as": saveAs }
+      : {}),
     "midi-track": () => dispatch({ kind: "midi", type: "add-track" }),
     "play-stop": playPause,
     redo: () => dispatch({ type: "redo" }),
@@ -696,7 +978,11 @@ export function Daw({ initial, initialRecordings }: DawProps) {
         ) : (
           <DeviceView
             arrangement={arrangement}
+            onHoldNote={holdNote}
+            onNoteOff={noteOff}
+            onNoteOn={noteOn}
             onOpenLibrary={openLibrary}
+            onPadFiles={addPadSample}
             track={selectedTrack}
           />
         )}
@@ -706,6 +992,15 @@ export function Daw({ initial, initialRecordings }: DawProps) {
 
   return (
     <TooltipProvider>
+      <input
+        accept={DAWPROJECT_ACCEPT}
+        aria-label="DAWproject file to open"
+        className="hidden"
+        onChange={openDawproject}
+        ref={importInput}
+        tabIndex={-1}
+        type="file"
+      />
       <div className="flex h-svh flex-col">
         <TopBar
           automating={automation.automating}
@@ -716,6 +1011,11 @@ export function Daw({ initial, initialRecordings }: DawProps) {
           metronome={metronome}
           onAutomatingChange={automation.setAutomating}
           onExport={exportWav}
+          onExportDawproject={exportDawproject}
+          onImportDawproject={importDawproject}
+          {...(canUseFolders()
+            ? { onOpen: openProjectFolder, onSave: save, onSaveAs: saveAs }
+            : {})}
           onLoopingChange={setLooping}
           onMetronomeChange={setMetronome}
           onPlayPause={playPause}

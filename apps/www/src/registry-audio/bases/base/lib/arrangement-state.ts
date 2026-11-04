@@ -21,10 +21,23 @@ import {
   type Arranged,
   type ArrangementTrack,
   type AutomatedParameter,
+  type ChainZone,
   type ClipAction,
   type Clipping,
+  DRUM_RACK_DEVICE,
+  type DrumSound,
+  FULL_ZONE,
+  INSTRUMENT_RACK_DEVICE,
   type Mix,
   mixOf,
+  newDrumRack,
+  newRack,
+  RACK_DEVICE,
+  type Rack,
+  type RackChain,
+  type RackMacro,
+  type RackMapping,
+  rackDevices,
   type TimeSelection,
   type TrackDevice,
   type TrackKind,
@@ -44,6 +57,13 @@ import {
  * A new id for a piece of the clip `id`: the first `-n` after it that no clip
  * in `taken` has. It is added to `taken`, so the next piece takes another.
  */
+/** What a new track is called, by what it holds, before its number. */
+const TRACK_NAMES: Record<TrackKind, string> = {
+  audio: "Track",
+  group: "Group",
+  midi: "MIDI",
+};
+
 function freshId(id: string, taken: Set<string>): string {
   let n = 1;
   while (taken.has(`${id}-${n}`)) {
@@ -684,6 +704,76 @@ export type ArrangementCommand =
       instrument?: boolean;
       state: TrackDevice["state"];
       index?: number;
+      /** A chain of a rack on the track to put it on, instead of the track's own chain. */
+      chain?: { chain: string; rack: string };
+    }
+  // Racks: by the rack's device id on a track's chain.
+  /** Puts the effects `ids` of a track's chain into a new rack, one chain of them, where the first was. */
+  | { type: "group-devices"; track: string; ids: readonly string[] }
+  /** Adds an empty chain to a rack. */
+  | { type: "add-rack-chain"; track: string; rack: string }
+  | { type: "remove-rack-chain"; track: string; rack: string; chain: string }
+  /** A chain's name or mix, as a drag of its fader sets it: a burst, which `settle-clip-edit` closes into one step. */
+  | {
+      type: "change-rack-chain";
+      track: string;
+      rack: string;
+      chain: string;
+      name?: string;
+      mix?: Partial<NonNullable<RackChain["mix"]>>;
+      /** Its keys or its velocities, as a drag of a zone's slider sets them. */
+      zone?: Partial<ChainZone>;
+    }
+  /** A turn of a macro, 0 to 1: a burst, which `settle-clip-edit` closes into one step. */
+  | {
+      type: "set-macro";
+      track: string;
+      rack: string;
+      index: number;
+      value: number;
+    }
+  // Drum racks: a pad is a chain of the rack, found by its id or by the note it answers.
+  /** Puts `sound` on the pad of `note`: the chain already there takes it, or a new chain named `name` does. */
+  | {
+      type: "set-pad";
+      track: string;
+      rack: string;
+      note: number;
+      sound: DrumSound;
+      name?: string;
+    }
+  /** A pad's pitch or decay, as a turn of its knob sets it: a burst, which `settle-clip-edit` closes into one step. */
+  | {
+      type: "change-pad";
+      track: string;
+      rack: string;
+      chain: string;
+      tune?: number;
+      decay?: number;
+    }
+  /** Moves a pad to the note `note`; the pad there, if any, takes the note it had. */
+  | {
+      type: "move-pad";
+      track: string;
+      rack: string;
+      chain: string;
+      note: number;
+    }
+  /** Maps a parameter of a device inside the rack to a macro, over a stretch of its travel; mapped again, its stretch changes. */
+  | {
+      type: "map-macro";
+      track: string;
+      rack: string;
+      index: number;
+      mapping: RackMapping;
+    }
+  | {
+      type: "unmap-macro";
+      track: string;
+      rack: string;
+      index: number;
+      device: string;
+      parameter: string;
     }
   /** A turn of a device's knob: a burst, which `settle-clip-edit` closes into one step. */
   | {
@@ -699,6 +789,8 @@ export type ArrangementCommand =
       id: string;
       index: number;
       to?: string;
+      /** A chain of a rack on the track the device moves along, instead of the track's own chain. */
+      chain?: { chain: string; rack: string };
     }
   | { type: "remove-device"; track: string; id: string }
   | {
@@ -746,7 +838,12 @@ export type ArrangementCommand =
   | { type: "edit-clip"; id: string; change: (clip: Arranged) => Arranged }
   | { type: "fade-time"; time: TimeSelection }
   | { type: "insert-time"; at: number; length: number }
+  /** Puts the tracks into a new group track, where the first of them was; it goes in the group they shared, if they shared one. */
+  | { type: "group-tracks"; ids: readonly string[]; name?: string }
+  /** Moves a track to `index` among the tracks, with the tracks of a group: it joins the group of the track it lands before. */
   | { type: "move-track"; id: string; index: number }
+  /** Dissolves a group: its tracks go into the group it was in, and its own devices and mix go with it. */
+  | { type: "ungroup"; id: string }
   | { type: "paste"; clipping: Clipping; at: number; track: string }
   | { type: "redo" }
   | { type: "release-clips" }
@@ -1071,8 +1168,147 @@ function selectTrack(
 function deviceIds(doc: ArrangementDoc): Set<string> {
   return new Set(
     allTracks(doc).flatMap((track) =>
-      (track.devices ?? []).map((device) => device.id)
+      (track.devices ?? []).flatMap((device) =>
+        device.rack
+          ? [device.id, ...rackDevices(device.rack).map((inside) => inside.id)]
+          : [device.id]
+      )
     )
+  );
+}
+
+/** Every chain id of every rack, so a new chain takes one no rack has. */
+function chainIds(doc: ArrangementDoc): Set<string> {
+  const racks = allTracks(doc).flatMap((track) =>
+    (track.devices ?? []).flatMap((device) =>
+      device.rack ? [device, ...rackDevices(device.rack)] : []
+    )
+  );
+  return new Set(
+    racks.flatMap(
+      (device) => device.rack?.chains.map((chain) => chain.id) ?? []
+    )
+  );
+}
+
+/** A chain of devices with the device `id` changed, wherever it is, down the racks within; the same chain when nothing changed. */
+function mapDevice(
+  devices: readonly TrackDevice[],
+  id: string,
+  change: (device: TrackDevice) => TrackDevice
+): readonly TrackDevice[] {
+  const next = devices.map((device) => {
+    if (device.id === id) {
+      return change(device);
+    }
+    if (!device.rack) {
+      return device;
+    }
+    const chains = device.rack.chains.map((chain) => {
+      const inside = mapDevice(chain.devices, id, change);
+      return inside === chain.devices ? chain : { ...chain, devices: inside };
+    });
+    return sameItems(chains, device.rack.chains)
+      ? device
+      : { ...device, rack: { ...device.rack, chains } };
+  });
+  return sameItems(next, devices) ? devices : next;
+}
+
+/** A chain of devices without the device `id`, wherever it is; the same chain when it was not there. */
+function dropDevice(
+  devices: readonly TrackDevice[],
+  id: string
+): readonly TrackDevice[] {
+  let changed = false;
+  const kept: TrackDevice[] = [];
+  for (const device of devices) {
+    if (device.id === id) {
+      changed = true;
+    } else if (device.rack) {
+      const chains = device.rack.chains.map((chain) => {
+        const inside = dropDevice(chain.devices, id);
+        return inside === chain.devices ? chain : { ...chain, devices: inside };
+      });
+      const same = sameItems(chains, device.rack.chains);
+      changed ||= !same;
+      kept.push(
+        same ? device : { ...device, rack: { ...device.rack, chains } }
+      );
+    } else {
+      kept.push(device);
+    }
+  }
+  return changed ? kept : devices;
+}
+
+/** A rack of a track changed, wherever it is on the track's chain, as one step or a burst. */
+function changeRack(
+  state: ArrangementState,
+  track: string,
+  rack: string,
+  change: (rack: Rack) => Rack,
+  write: typeof edit
+): ArrangementState {
+  return changeDevice(
+    state,
+    track,
+    rack,
+    (device) =>
+      device.rack ? { ...device, rack: change(device.rack) } : device,
+    write
+  );
+}
+
+/** A rack with the chain `id` changed. */
+const withChain = (
+  rack: Rack,
+  id: string,
+  change: (chain: RackChain) => RackChain
+): Rack => ({
+  ...rack,
+  chains: rack.chains.map((chain) => (chain.id === id ? change(chain) : chain)),
+});
+
+/** A rack with its macro `index` changed. */
+const withMacro = (
+  rack: Rack,
+  index: number,
+  change: (macro: RackMacro) => RackMacro
+): Rack => ({
+  ...rack,
+  macros: rack.macros.map((macro, at) =>
+    at === index ? change(macro) : macro
+  ),
+});
+
+/** The effects of a track's chain put into a new rack, one chain of them, where the first of them was. */
+function groupDevices(
+  state: ArrangementState,
+  track: string,
+  ids: readonly string[]
+): ArrangementState {
+  const chain = trackOf(state.doc, track)?.devices ?? [];
+  const grouped = chain.filter(
+    (device) => ids.includes(device.id) && !device.instrument
+  );
+  if (grouped.length === 0) {
+    return state;
+  }
+  const rack: TrackDevice = {
+    device: RACK_DEVICE,
+    id: freshId("rack", deviceIds(state.doc)),
+    rack: newRack(freshId("chain", chainIds(state.doc)), grouped),
+    state: {},
+  };
+  const first = chain.indexOf(grouped[0] as TrackDevice);
+  const rest = chain.filter((device) => !grouped.includes(device));
+  const at = rest.filter((device) => chain.indexOf(device) < first).length;
+  return edit(state, (doc) =>
+    withTrack(doc, track, (item) => ({
+      ...item,
+      devices: [...rest.slice(0, at), rack, ...rest.slice(at)],
+    }))
   );
 }
 
@@ -1101,6 +1337,112 @@ function holdsInstrument(doc: ArrangementDoc, id: string): boolean {
   return !isBus(doc, id) && trackOf(doc, id)?.kind === "midi";
 }
 
+/** What a new rack holds: one empty chain, or a drum rack's starting kit. */
+function rackFor(doc: ArrangementDoc, device: string): { rack?: Rack } {
+  const taken = chainIds(doc);
+  if (device === RACK_DEVICE || device === INSTRUMENT_RACK_DEVICE) {
+    return { rack: newRack(freshId("chain", taken)) };
+  }
+  if (device === DRUM_RACK_DEVICE) {
+    return {
+      rack: newDrumRack([
+        freshId("chain", taken),
+        freshId("chain", taken),
+        freshId("chain", taken),
+      ]),
+    };
+  }
+  return {};
+}
+
+/** The sound of `note`'s pad put on: on the chain that answers it, or on a new one. */
+function setPad(
+  rack: Rack,
+  note: number,
+  sound: DrumSound,
+  id: string,
+  name = "Pad"
+): Rack {
+  const at = Math.round(Math.min(127, Math.max(0, note)));
+  const there = rack.chains.find((chain) => chain.pad?.note === at);
+  if (there) {
+    return withChain(rack, there.id, (chain) => ({
+      ...chain,
+      name: name.trim() || chain.name,
+      pad: { note: at, sound },
+    }));
+  }
+  return {
+    ...rack,
+    chains: [
+      ...rack.chains,
+      { devices: [], id, name: name.trim() || "Pad", pad: { note: at, sound } },
+    ],
+  };
+}
+
+/** A range kept within `low` and `high`, its ends in order. */
+const within = (
+  [from, to]: readonly [number, number],
+  low: number,
+  high: number
+): [number, number] => {
+  const clamp = (value: number) => Math.min(high, Math.max(low, value));
+  return [clamp(Math.min(from, to)), clamp(Math.max(from, to))];
+};
+
+/** A chain's zone with `patch` over it: its keys whole notes from 0 to 127, its velocities from 0 to 1. */
+function zoned(
+  zone: ChainZone | undefined,
+  patch: Partial<ChainZone>
+): ChainZone {
+  const next = { ...FULL_ZONE, ...zone, ...patch };
+  const [low, high] = within(next.keys, 0, 127);
+  return {
+    keys: [Math.round(low), Math.round(high)],
+    velocity: within(next.velocity, 0, 1),
+  };
+}
+
+/** A pad moved to `note`, and the pad there, if any, to the note the first had. */
+function movePad(rack: Rack, id: string, note: number): Rack {
+  const moved = rack.chains.find((chain) => chain.id === id)?.pad;
+  const to = Math.round(Math.min(127, Math.max(0, note)));
+  if (!moved || moved.note === to) {
+    return rack;
+  }
+  return {
+    ...rack,
+    chains: rack.chains.map((chain) => {
+      if (chain.id === id) {
+        return { ...chain, pad: { ...moved, note: to } };
+      }
+      return chain.pad?.note === to
+        ? { ...chain, pad: { ...chain.pad, note: moved.note } }
+        : chain;
+    }),
+  };
+}
+
+/**
+ * Whether the rack `rack` on `track` takes the instrument `device` at the head
+ * of a chain: an instrument rack does, for an instrument of the library, not
+ * a rack.
+ */
+function takesInstrument(
+  doc: ArrangementDoc,
+  track: string,
+  rack: string,
+  device: TrackDevice
+): boolean {
+  const devices = trackOf(doc, track)?.devices ?? [];
+  const target = [
+    ...devices,
+    ...devices.flatMap((item) => (item.rack ? rackDevices(item.rack) : [])),
+  ].find((item) => item.id === rack);
+  return target?.device === INSTRUMENT_RACK_DEVICE && !device.rack;
+}
+
 function addDevice(
   state: ArrangementState,
   command: Extract<ArrangementCommand, { type: "add-device" }>
@@ -1116,8 +1458,25 @@ function addDevice(
     device,
     id: freshId("device", deviceIds(state.doc)),
     ...(instrument ? { instrument: true } : {}),
+    ...rackFor(state.doc, device),
     state: values,
   };
+  const { chain } = command;
+  if (chain) {
+    return instrument && !takesInstrument(state.doc, track, chain.rack, added)
+      ? state
+      : changeRack(
+          state,
+          track,
+          chain.rack,
+          (rack) =>
+            withChain(rack, chain.chain, (item) => ({
+              ...item,
+              devices: placeDevice(item.devices, added, index),
+            })),
+          edit
+        );
+  }
   return edit(state, (doc) =>
     withTrack(doc, track, (item) => ({
       ...item,
@@ -1128,8 +1487,32 @@ function addDevice(
 
 function moveDevice(
   state: ArrangementState,
-  { id, index, to, track }: Extract<ArrangementCommand, { type: "move-device" }>
+  {
+    chain: along,
+    id,
+    index,
+    to,
+    track,
+  }: Extract<ArrangementCommand, { type: "move-device" }>
 ): ArrangementState {
+  if (along) {
+    return changeRack(
+      state,
+      track,
+      along.rack,
+      (rack) =>
+        withChain(rack, along.chain, (item) => {
+          const device = item.devices.find((each) => each.id === id);
+          const placed = device
+            ? placeDevice(item.devices, device, index)
+            : item.devices;
+          return sameItems(placed, item.devices)
+            ? item
+            : { ...item, devices: placed };
+        }),
+      edit
+    );
+  }
   const target = to ?? track;
   const device = trackOf(state.doc, track)?.devices?.find(
     (item) => item.id === id
@@ -1167,12 +1550,8 @@ function changeDevice(
 ): ArrangementState {
   return write(state, (doc) =>
     withTrack(doc, track, (item) => {
-      const devices = (item.devices ?? []).map((device) =>
-        device.id === id ? change(device) : device
-      );
-      return sameItems(devices, item.devices ?? [])
-        ? item
-        : { ...item, devices };
+      const devices = mapDevice(item.devices ?? [], id, change);
+      return devices === (item.devices ?? []) ? item : { ...item, devices };
     })
   );
 }
@@ -1231,37 +1610,111 @@ type Handlers = {
   ) => ArrangementState;
 };
 
+/** A track again right after it, with copies of its clips; a group, with every track in it. */
 function duplicateTrack(state: ArrangementState, id: string): ArrangementState {
-  const source = state.doc.tracks.find((item) => item.id === id);
-  if (!source) {
+  const { tracks } = state.doc;
+  if (!tracks.some((item) => item.id === id)) {
     return state;
   }
-  const count = state.trackCount + 1;
+  const block = trackBlock(tracks, id);
+  const sources = tracks.filter((item) => block.includes(item.id));
   const devicesTaken = deviceIds(state.doc);
-  const copy: ArrangementTrack = {
-    ...source,
-    devices: source.devices?.map((device) => ({
-      ...device,
-      id: freshId("device", devicesTaken),
-    })),
-    id: `track-${count}`,
-    name: `${source.name} copy`,
-  };
+  // Each track of the block takes the next number, and the copies keep their groups among themselves.
+  const ids = new Map(
+    sources.map((item, index) => [
+      item.id,
+      `track-${state.trackCount + index + 1}`,
+    ])
+  );
+  const copies = sources.map((item): ArrangementTrack => {
+    const group = item.group === undefined ? undefined : ids.get(item.group);
+    return {
+      ...item,
+      devices: item.devices?.map((device) => ({
+        ...device,
+        id: freshId("device", devicesTaken),
+      })),
+      ...(group === undefined ? {} : { group }),
+      id: ids.get(item.id) ?? item.id,
+      name: item.id === id ? `${item.name} copy` : item.name,
+    };
+  });
   const next = edit(state, (doc) => {
-    const tracks = [...doc.tracks];
-    tracks.splice(tracks.findIndex((item) => item.id === id) + 1, 0, copy);
+    const last = Math.max(
+      ...block.map((each) => doc.tracks.findIndex((item) => item.id === each))
+    );
+    const list = [...doc.tracks];
+    list.splice(last + 1, 0, ...copies);
     const taken = new Set(doc.clips.map((clip) => clip.id));
-    const copies = doc.clips
-      .filter((clip) => clip.track === id)
+    const clips = doc.clips
+      .filter((clip) => ids.has(clip.track))
       .map((clip) => ({
         ...clip,
         id: freshId(clip.id, taken),
-        track: copy.id,
+        track: ids.get(clip.track) ?? clip.track,
       }));
-    return { ...doc, clips: [...doc.clips, ...copies], tracks };
+    return { ...doc, clips: [...doc.clips, ...clips], tracks: list };
   });
-  return { ...next, trackCount: count };
+  return { ...next, trackCount: state.trackCount + sources.length };
 }
+
+/** A track and every track in it, down the groups within: a group's block, which stays together in the list. */
+export function trackBlock(
+  tracks: readonly ArrangementTrack[],
+  id: string
+): string[] {
+  const block = [id];
+  for (const track of tracks) {
+    if (
+      track.group !== undefined &&
+      block.includes(track.group) &&
+      !block.includes(track.id)
+    ) {
+      block.push(track.id);
+    }
+  }
+  return block;
+}
+
+/** The tracks shown: those inside a folded group are hidden, its own row stays. */
+export function unfoldedTracks(
+  tracks: readonly ArrangementTrack[],
+  folded: Readonly<Record<string, boolean>>
+): ArrangementTrack[] {
+  const hidden = new Set(
+    tracks
+      .filter((track) => track.kind === "group" && folded[track.id])
+      .flatMap((track) => trackBlock(tracks, track.id).slice(1))
+  );
+  return tracks.filter((track) => !hidden.has(track.id));
+}
+
+/** How deep a track sits: 0 at the top, 1 in a group, 2 in a group within one. */
+export function trackDepth(
+  tracks: readonly ArrangementTrack[],
+  id: string
+): number {
+  const groupOf = new Map(tracks.map((track) => [track.id, track.group]));
+  let depth = 0;
+  let at = groupOf.get(id);
+  while (at !== undefined && depth < tracks.length) {
+    depth += 1;
+    at = groupOf.get(at);
+  }
+  return depth;
+}
+
+/** The track as it stands in `group`, or at the top with none. */
+const inGroup = (
+  track: ArrangementTrack,
+  group: string | undefined
+): ArrangementTrack => {
+  if (track.group === group) {
+    return track;
+  }
+  const { group: _left, ...rest } = track;
+  return group === undefined ? rest : { ...rest, group };
+};
 
 function moveTrack(
   state: ArrangementState,
@@ -1269,22 +1722,101 @@ function moveTrack(
   index: number
 ): ArrangementState {
   return edit(state, (doc) => {
-    const list = doc.returns.some((item) => item.id === id)
-      ? "returns"
-      : "tracks";
-    const from = doc[list].findIndex((item) => item.id === id);
-    if (from === -1 || from === index) {
+    if (doc.returns.some((item) => item.id === id)) {
+      const from = doc.returns.findIndex((item) => item.id === id);
+      if (from === index) {
+        return doc;
+      }
+      const moved = [...doc.returns];
+      const [track] = moved.splice(from, 1);
+      moved.splice(
+        Math.min(Math.max(index, 0), moved.length),
+        0,
+        track as ArrangementTrack
+      );
+      return { ...doc, returns: moved };
+    }
+    const from = doc.tracks.findIndex((item) => item.id === id);
+    if (from === -1) {
       return doc;
     }
-    const moved = [...doc[list]];
-    const [track] = moved.splice(from, 1);
-    moved.splice(
-      Math.min(Math.max(index, 0), moved.length),
-      0,
-      track as ArrangementTrack
-    );
-    return { ...doc, [list]: moved };
+    const block = trackBlock(doc.tracks, id);
+    const rest = doc.tracks.filter((track) => !block.includes(track.id));
+    const at = Math.min(Math.max(index, 0), rest.length);
+    // It joins the group of the track it lands before: between a group and its tracks, the group.
+    const next = rest[at];
+    const group = next?.group;
+    const moved = doc.tracks
+      .filter((track) => block.includes(track.id))
+      .map((track) => (track.id === id ? inGroup(track, group) : track));
+    const tracks = [...rest.slice(0, at), ...moved, ...rest.slice(at)];
+    const same = tracks.every((track, place) => track === doc.tracks[place]);
+    return same ? doc : { ...doc, tracks };
   });
+}
+
+/** The tracks picked, put into a new group where the first of them was. */
+function groupTracks(
+  state: ArrangementState,
+  ids: readonly string[],
+  name: string | undefined
+): ArrangementState {
+  const { tracks } = state.doc;
+  // A track in a group that is grouped too goes along with it.
+  const tops = tracks.filter(
+    (track) =>
+      ids.includes(track.id) &&
+      !ids.some(
+        (other) =>
+          other !== track.id && trackBlock(tracks, other).includes(track.id)
+      )
+  );
+  if (tops.length === 0) {
+    return state;
+  }
+  const parents = new Set(tops.map((track) => track.group));
+  const parent = parents.size === 1 ? tops[0]?.group : undefined;
+  const id = freshId("group", new Set(tracks.map((track) => track.id)));
+  const count = state.trackCount + 1;
+  const group: ArrangementTrack = {
+    color: (count - 1) % state.colors,
+    id,
+    kind: "group",
+    name:
+      name?.trim() ||
+      `Group ${tracks.filter((track) => track.kind === "group").length + 1}`,
+    ...(parent === undefined ? {} : { group: parent }),
+  };
+  const moving = new Set(tops.flatMap((track) => trackBlock(tracks, track.id)));
+  const first = tracks.findIndex((track) => moving.has(track.id));
+  const before = tracks
+    .slice(0, first)
+    .filter((track) => !moving.has(track.id));
+  const after = tracks.slice(first).filter((track) => !moving.has(track.id));
+  const inside = tracks
+    .filter((track) => moving.has(track.id))
+    .map((track) => (tops.includes(track) ? inGroup(track, id) : track));
+  const next = edit(state, (doc) => ({
+    ...doc,
+    tracks: [...before, group, ...inside, ...after],
+  }));
+  return { ...next, trackCount: count };
+}
+
+/** A group dissolved: its tracks go up into the group it was in. */
+function ungroup(state: ArrangementState, id: string): ArrangementState {
+  const group = state.doc.tracks.find((track) => track.id === id);
+  if (group?.kind !== "group") {
+    return state;
+  }
+  return edit(state, (doc) => ({
+    ...doc,
+    tracks: doc.tracks
+      .filter((track) => track.id !== id)
+      .map((track) =>
+        track.group === id ? inGroup(track, group.group) : track
+      ),
+  }));
 }
 
 function changeTrack(
@@ -1374,9 +1906,11 @@ function removeTrack(state: ArrangementState, id: string): ArrangementState {
       tracks: doc.tracks.map(unsend),
     }));
   }
-  // A track among the tracks picked takes the others with it.
+  // A track among the tracks picked takes the others with it, and a group the tracks in it.
   const picked = state.selection?.tracks ?? NONE;
-  const gone = picked.includes(id) ? picked : [id];
+  const gone = (picked.includes(id) ? picked : [id]).flatMap((each) =>
+    trackBlock(state.doc.tracks, each)
+  );
   return withSelection(
     edit(state, (doc) => ({
       ...doc,
@@ -1704,14 +2238,21 @@ const handlers: Handlers = {
       color: (count - 1) % state.colors,
       id: free ? id : `track-${count}`,
       kind,
-      name: name?.trim() || `${kind === "midi" ? "MIDI" : "Track"} ${count}`,
+      name: name?.trim() || `${TRACK_NAMES[kind]} ${count}`,
     };
     const next = edit(state, (doc) => {
-      const at = afterId
-        ? doc.tracks.findIndex((item) => item.id === afterId) + 1
+      // After a track and, a group, after the tracks in it, in the group it is in.
+      const after = afterId ? trackOf(doc, afterId) : undefined;
+      const block = afterId ? trackBlock(doc.tracks, afterId) : [];
+      const at = after
+        ? Math.max(
+            ...block.map((each) =>
+              doc.tracks.findIndex((item) => item.id === each)
+            )
+          ) + 1
         : doc.tracks.length;
       const tracks = [...doc.tracks];
-      tracks.splice(at || doc.tracks.length, 0, track);
+      tracks.splice(at || doc.tracks.length, 0, inGroup(track, after?.group));
       return { ...doc, tracks };
     });
     return { ...next, trackCount: count };
@@ -1735,14 +2276,160 @@ const handlers: Handlers = {
   "move-device": (state, command) => moveDevice(state, command),
   "remove-device": (state, { id, track }) =>
     edit(state, (doc) =>
-      withTrack(doc, track, (item) =>
-        item.devices?.some((device) => device.id === id)
-          ? {
-              ...item,
-              devices: item.devices.filter((device) => device.id !== id),
-            }
-          : item
-      )
+      withTrack(doc, track, (item) => {
+        const devices = dropDevice(item.devices ?? [], id);
+        return devices === (item.devices ?? []) ? item : { ...item, devices };
+      })
+    ),
+  "group-devices": (state, { ids, track }) => groupDevices(state, track, ids),
+  "add-rack-chain": (state, { rack, track }) => {
+    const id = freshId("chain", chainIds(state.doc));
+    return changeRack(
+      state,
+      track,
+      rack,
+      (current) => ({
+        ...current,
+        chains: [
+          ...current.chains,
+          { devices: [], id, name: `Chain ${current.chains.length + 1}` },
+        ],
+      }),
+      edit
+    );
+  },
+  "remove-rack-chain": (state, { chain, rack, track }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) => ({
+        ...current,
+        chains: current.chains.filter((item) => item.id !== chain),
+      }),
+      edit
+    ),
+  "change-rack-chain": (state, { chain, mix, name, rack, track, zone }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) =>
+        withChain(current, chain, (item) => ({
+          ...item,
+          ...(name?.trim() ? { name: name.trim() } : {}),
+          ...(zone ? { zone: zoned(item.zone, zone) } : {}),
+          ...(mix
+            ? {
+                mix: {
+                  gain: 1,
+                  muted: false,
+                  pan: 0,
+                  soloed: false,
+                  ...item.mix,
+                  ...mix,
+                },
+              }
+            : {}),
+        })),
+      burst
+    ),
+  "set-macro": (state, { index, rack, track, value }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) =>
+        withMacro(current, index, (macro) => ({
+          ...macro,
+          value: Math.min(1, Math.max(0, value)),
+        })),
+      burst
+    ),
+  "set-pad": (state, { name, note, rack, sound, track }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) =>
+        setPad(
+          current,
+          note,
+          sound,
+          freshId("chain", chainIds(state.doc)),
+          name
+        ),
+      edit
+    ),
+  "change-pad": (state, { chain, decay, rack, track, tune }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) =>
+        withChain(current, chain, (item) =>
+          item.pad
+            ? {
+                ...item,
+                pad: {
+                  ...item.pad,
+                  sound: {
+                    ...item.pad.sound,
+                    ...(tune === undefined
+                      ? {}
+                      : { tune: Math.min(48, Math.max(-48, tune)) }),
+                    ...(decay === undefined
+                      ? {}
+                      : { decay: Math.min(10, Math.max(0.01, decay)) }),
+                  },
+                },
+              }
+            : item
+        ),
+      burst
+    ),
+  "move-pad": (state, { chain, note, rack, track }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) => movePad(current, chain, note),
+      edit
+    ),
+  "map-macro": (state, { index, mapping, rack, track }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) =>
+        withMacro(current, index, (macro) => ({
+          ...macro,
+          mappings: [
+            ...macro.mappings.filter(
+              (item) =>
+                !(
+                  item.device === mapping.device &&
+                  item.parameter === mapping.parameter
+                )
+            ),
+            mapping,
+          ],
+        })),
+      edit
+    ),
+  "unmap-macro": (state, { device, index, parameter, rack, track }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) =>
+        withMacro(current, index, (macro) => ({
+          ...macro,
+          mappings: macro.mappings.filter(
+            (item) => !(item.device === device && item.parameter === parameter)
+          ),
+        })),
+      edit
     ),
   "set-device": (state, { id, state: values, track }) =>
     changeDevice(
@@ -1835,7 +2522,9 @@ const handlers: Handlers = {
       ...doc,
       clips: openTime(doc.clips, at, length, state.doc.duration),
     })),
+  "group-tracks": (state, { ids, name }) => groupTracks(state, ids, name),
   "move-track": (state, { id, index }) => moveTrack(state, id, index),
+  ungroup: (state, { id }) => ungroup(state, id),
   paste: (state, { clipping, at, track }) => paste(state, clipping, at, track),
   redo: (state) => restore(state, redo(state.history, state.doc)),
   "release-clips": (state) => releaseClips(state),

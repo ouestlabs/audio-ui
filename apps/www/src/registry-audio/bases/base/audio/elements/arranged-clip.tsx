@@ -202,6 +202,33 @@ function ArrangedClipGhost({ clip }: { clip: Arranged }) {
   );
 }
 
+/**
+ * What a group's tracks play, drawn on the group's lane as one thin bar per
+ * clip: it shows where they play even while the group is folded, and does
+ * nothing when pressed.
+ */
+function ArrangedGroupPreview({ clips }: { clips: readonly Arranged[] }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0"
+      data-slot="arranged-group-preview"
+    >
+      {clips.map((clip) => (
+        <div
+          className="absolute inset-y-2 rounded-sm bg-foreground/15 data-disabled:bg-foreground/5"
+          data-disabled={clip.disabled ? "" : undefined}
+          key={clip.id}
+          style={{
+            left: `calc(var(--timeline-unit) * ${clip.value.start})`,
+            width: `calc(var(--timeline-unit) * ${clip.value.length})`,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
 interface ArrangedClipProps {
   clip: Arranged;
   /** Whether this clip is being dragged with Alt held: it is the copy, and the original stays behind. */
@@ -432,4 +459,4 @@ const ArrangedClip = memo(function ArrangedClipView({
   );
 });
 
-export { ArrangedClip, ArrangedClipGhost };
+export { ArrangedClip, ArrangedClipGhost, ArrangedGroupPreview };

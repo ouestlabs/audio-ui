@@ -38,6 +38,7 @@ interface DeviceChainContextValue {
   dragging: string | null;
   /** The gap a dragged device would land in: before the slot at this index, or the end of the chain. */
   dropIndex: number | null;
+  flat: boolean;
   move: ((id: string, index: number, title: string) => void) | null;
   order: readonly string[];
   remove: ((id: string, title: string) => void) | null;
@@ -87,12 +88,15 @@ function edgeScrollStep(x: number, left: number, right: number): number {
 
 /** The middle of each slot across the view, in the order they are drawn. */
 function slotMiddles(root: HTMLElement): number[] {
+  // Its own slots only: a rack's chain inside a slot has slots of its own.
   return Array.from(
     root.querySelectorAll<HTMLElement>('[data-slot="device-chain-slot"]')
-  ).map((slot) => {
-    const box = slot.getBoundingClientRect();
-    return (box.left + box.right) / 2;
-  });
+  )
+    .filter((slot) => slot.closest('[data-slot="device-chain"]') === root)
+    .map((slot) => {
+      const box = slot.getBoundingClientRect();
+      return (box.left + box.right) / 2;
+    });
 }
 
 /** The gap a pointer at `x` points at: before the first slot whose middle is past it, or the end. */
@@ -115,6 +119,8 @@ function gripOf(root: HTMLElement | null, id: string | undefined) {
 }
 
 interface DeviceChainProps extends ComponentProps<"div"> {
+  /** Lays the devices flat on the surface around them, a hairline between each and the next, instead of as cards: as a workstation's device view docks them. Each fills the chain's height; one taller than the chain keeps its own, and the chain scrolls to it. */
+  flat?: boolean;
   /** A device was dropped on the chain from a library: its id, and the index it goes in. Leave it out and nothing can be dropped. */
   onAdd?: (device: string, index: number) => void;
   /** A slot was moved to `index`, counted once it has left its place. Leave it out and the slots stay where they are. */
@@ -135,6 +141,7 @@ interface DeviceChainProps extends ComponentProps<"div"> {
 function DeviceChain({
   children,
   className,
+  flat = false,
   onAdd,
   onMove,
   onRemove,
@@ -259,7 +266,9 @@ function DeviceChain({
     if (!(live.current.onAdd && takesDevice(event))) {
       return;
     }
+    // The innermost chain takes it: one inside a slot has the drop, not the chain around it.
     event.preventDefault();
+    event.stopPropagation();
     event.dataTransfer.dropEffect = "copy";
     setDropIndex(gapAt(slotMiddles(event.currentTarget), event.clientX));
   }, []);
@@ -276,6 +285,7 @@ function DeviceChain({
       return;
     }
     event.preventDefault();
+    event.stopPropagation();
     setDropIndex(null);
     const device = event.dataTransfer.getData(DEVICE_DRAG_TYPE);
     if (device) {
@@ -287,21 +297,34 @@ function DeviceChain({
     () => ({
       dragging,
       dropIndex,
+      flat,
       move: onMove ? move : null,
       order,
       remove: onRemove ? remove : null,
       startDrag,
     }),
-    [dragging, dropIndex, move, onMove, onRemove, order, remove, startDrag]
+    [
+      dragging,
+      dropIndex,
+      flat,
+      move,
+      onMove,
+      onRemove,
+      order,
+      remove,
+      startDrag,
+    ]
   );
 
   return (
     <DeviceChainContext value={context}>
       <div
         className={cn(
-          "flex min-h-0 min-w-0 items-stretch gap-2 overflow-x-auto overscroll-x-contain p-2",
+          "flex min-h-0 min-w-0 items-stretch overflow-x-auto overscroll-x-contain",
+          flat ? "gap-0" : "gap-2 p-2",
           className
         )}
+        data-flat={flat ? "" : undefined}
         data-slot="device-chain"
         onDragLeave={handleDragLeave}
         onDragOver={handleDragOver}
@@ -510,7 +533,7 @@ function DeviceChainSlot({
   value,
   ...props
 }: DeviceChainSlotProps) {
-  const { dragging, dropIndex, move, order, remove, startDrag } =
+  const { dragging, dropIndex, flat, move, order, remove, startDrag } =
     useDeviceChain();
   const [folded, setFolded] = useState(false);
   const root = useRef<HTMLDivElement>(null);
@@ -529,6 +552,8 @@ function DeviceChainSlot({
     (event: PointerEvent<HTMLDivElement>) => {
       const target = event.target as Element;
       if (target.closest(HEADER) && !target.closest(CONTROL)) {
+        // A device inside a rack moves along its own chain, not the rack along the track's.
+        event.stopPropagation();
         startDrag(event, value);
       }
     },
@@ -575,9 +600,16 @@ function DeviceChainSlot({
     className: cn(
       "relative flex shrink-0 flex-col",
       // The line a dragged device would land on, in the middle of the gap before this slot.
-      "before:absolute before:inset-y-0 before:inset-s-[-5px] before:hidden before:w-0.5 before:rounded-full before:bg-primary data-drop:before:block",
+      "before:absolute before:inset-y-0 before:hidden before:w-0.5 before:rounded-full before:bg-primary data-drop:before:block",
+      // Flat, the device's card gives way to the surface, and a hairline ends it. It fills the chain's height, and a
+      // device taller than the chain keeps its height: the chain scrolls to it.
+      flat
+        ? "border-e before:inset-s-[-1px] *:h-auto *:min-h-full *:rounded-none *:border-0 *:bg-transparent"
+        : "before:inset-s-[-5px]",
       "data-dragging:z-10 data-dragging:shadow-lg",
-      className
+      className,
+      // Folded, it is as wide as its strip, whatever width the host gives the panel.
+      folded && "w-auto"
     ),
     "data-dragging": dragging === value ? "" : undefined,
     "data-drop": dropIndex === index ? "" : undefined,

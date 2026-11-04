@@ -352,6 +352,48 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The face of a rack: eight macros, each with a menu that maps a parameter of a device inside or lets one go, its chains with their volume, switch and solo, and the picked chain's devices, which the host draws.",
+    files: [
+      {
+        path: "audio/panels/rack-panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "rack-panel",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/knob",
+      "@shadcn/button",
+      "@shadcn/dropdown-menu",
+      "@shadcn/slider",
+      "@shadcn/toggle",
+    ],
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "The face of a drum rack: eight macros, sixteen pads on a bank of the 128 notes, each named for its sound and played when struck, the picked pad's voice, tune, decay and mix, a recording dropped on a pad, and the picked pad's devices, which the host draws.",
+    files: [
+      {
+        path: "audio/panels/drum-rack-panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "drum-rack-panel",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/knob",
+      "@audio-ui/pad",
+      "@audio-ui/rack-panel",
+      "@shadcn/button",
+      "@shadcn/toggle",
+    ],
+    type: "registry:ui",
+  },
+  {
     categories: ["device-chain"],
     description:
       "A library of devices by shelf, with a search: a device is added with Enter, a double-click or the Add button, or dragged to where it goes on a device chain.",

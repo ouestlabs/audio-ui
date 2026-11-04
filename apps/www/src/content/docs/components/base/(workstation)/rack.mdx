@@ -1,0 +1,62 @@
+---
+title: Rack
+description: "Devices in parallel chains, summed on the same frame, each chain with its volume, pan, switch and solo, and eight macros over the parameters inside. Controlled, with no audio in it."
+component: true
+base: base
+---
+
+A rack holds chains of devices side by side in one slot of a [device chain](/docs/components/base/device-chain). The face draws the rack you give it and calls back on every change; the engine that plays it follows the same rack.
+
+## Installation
+
+<Install name="rack-panel" packages="" />
+
+The engine that plays a rack is an item of its own, `npx shadcn@latest add @audio-ui/rack`.
+
+## Usage
+
+A rack is a device that holds chains of devices side by side: the sound goes into every chain, through its devices in series, and the chains are summed. Each chain has its volume, pan, switch and solo, and chains that delay the sound differently are lined up on the slowest. Eight macros turn parameters of the devices inside, each over a stretch of its travel.
+
+- **The rack itself:** a track device of the kind `audioui.rack` holds a `rack`, its chains and macros. `rack` (`npx shadcn@latest add @audio-ui/rack`) plays one: `createRackEngine(ctx, find)` gives a link of a chain with `input`, `output`, `update(rack)` and `latency()`.
+- **Its face:** `RackPanel` (`npx shadcn@latest add @audio-ui/rack-panel`) shows the chains and the picked chain's devices, which you draw as its `children` (a `DeviceChain` of their own). The macros start hidden: the Macros switch of its title bar shows them, each with a menu to map a parameter of a device inside or let one go. `RackFrame`, `RackMacros` and `RackChainRow` are its parts, for a face of your own.
+- **Commands:** `useArrangement` groups devices into a rack (`group-devices`), adds and removes chains, turns macros (`set-macro`) and maps them (`map-macro`, `unmap-macro`). A device inside a rack is changed, switched off, moved and removed as on a track.
+
+```tsx
+import { RackPanel } from "@/components/audio-ui/rack-panel";
+
+<RackPanel
+  onAddChain={addChain}
+  onChainMix={(chain, mix) => dispatch({ chain, mix, rack, track, type: "change-rack-chain" })}
+  onMacroChange={(index, value) => dispatch({ index, rack, track, type: "set-macro", value })}
+  onMapMacro={map}
+  onRemoveChain={removeChain}
+  onSelectChain={setPicked}
+  onUnmapMacro={unmap}
+  parameters={parameters}
+  rack={device.rack}
+  selectedChain={picked}
+>
+  {chainDevices /* a DeviceChain of the picked chain's devices */}
+</RackPanel>;
+```
+
+A chain inside a slot keeps its own drops and drags: a device dropped on it, or dragged along it, stays in it.
+
+## Drum racks
+
+A drum rack is an instrument whose chains are pads: a note plays the pads that answer it, each its own sound into its own devices, and the rack sums them with its macros as any rack does. A pad plays a voice of the drum synthesis (kick, snare, hat) or a recording, `tune` semitones from its pitch and for `decay` seconds, as loud as the note's velocity, and rings for its decay whatever the note's length.
+
+- **The rack itself:** a track device of the kind `audioui.drum-rack` (`DRUM_RACK_DEVICE`), an instrument on a MIDI track. Its `rack` is the same as a rack's, each chain with a `pad`: the note it answers and the sound it plays. `newDrumRack` starts a kit with a kick on C2, a snare on D2 and a hat on F#2.
+- **Its engine:** `drum-rack` (`npx shadcn@latest add @audio-ui/drum-rack`) plays one: `createDrumRackEngine(ctx, find)` gives a note player (`noteOn(note, time, id)` plays the pads of the note's pitch, `release(time)` takes back the hits still ahead), with `output` and `update(rack, context, recordings)`. The arrangement engine plays a MIDI track's notes through it, and a recording a pad names comes from the recordings it is given, decoded (a pad plays its recording whole, at once).
+- **Its face:** `DrumRackPanel` (`npx shadcn@latest add @audio-ui/drum-rack-panel`) shows sixteen pads at a time on a bank of the 128 notes, the lowest at the bottom left, the first bank shown starting on C2. Striking a pad picks it and calls `onPadOn(note, velocity)`; a file dropped on a pad goes to `onDropFiles(note, files)`. The picked pad shows its voice, tune, decay and mix, and its devices as `children`.
+- **Commands:** `set-pad` puts a sound on the pad of a note (a new pad when the note had none), `change-pad` turns its tune or decay as a burst, and `move-pad` moves a pad to another note, swapping with the pad there. A pad is removed, mixed and given devices as any chain. `padRecordings` lists the recordings the pads play, so a project keeps them, and `renamePadRecordings` follows a recording that takes a new id.
+
+## Instrument racks
+
+An instrument rack is an instrument whose chains each start with an instrument of the library, then effects. A note plays every chain's instrument at once, in layers, each through its own effects, and the rack sums them with its macros as any rack does; a chain switched off or soloed away is silent.
+
+- **The rack itself:** a track device of the kind `audioui.instrument-rack` (`INSTRUMENT_RACK_DEVICE`), an instrument on a MIDI track, with one empty chain to start. `add-device` with an instrument and the `chain` of an instrument rack puts the instrument at the head of that chain, in place of the one there was; an effect rack's chain and a drum rack take none.
+- **Its engine:** `instrument-rack` (`npx shadcn@latest add @audio-ui/instrument-rack`) plays one: `createInstrumentRackEngine(ctx, find, voices)` gives a note player with `output`, `latency()` and `update(rack)`. Each chain's instrument plays with its own voices.
+- **Note players:** `voice-pool` (`npx shadcn@latest add @audio-ui/voice-pool`) is what a MIDI track plays through, all three taking notes the same way: `noteOn({ pitch, velocity, parameters }, time, id)`, `noteOff(time, id)` and `release(time)`. `createVoicePool` plays an instrument of the library with a voice per held note, giving up the oldest first.
+- **Zones:** a chain's `zone` holds the keys it plays, lowest to highest pitch, and its velocities, 0 to 1; a note plays the chains whose zone holds both its pitch and its velocity, ends in (`inZone`), and a chain with none plays them all. Split chains across the keyboard, or into soft and hard layers. `change-rack-chain` sets a chain's `zone` as a burst.
+- **Its face:** `RackPanel`, as an effect rack's, its chains' devices starting with their instrument. Given `onZoneChange`, its title bar has a Zones switch that shows each chain's keys, by their names, and velocities, 0 to 127, as two ranges.
