@@ -1169,6 +1169,7 @@ export function Daw({
                   automation={automation}
                   cursor={cursor}
                   engine={engine}
+                  liveTake={take.live}
                   markers={markers}
                   onAddMidiClip={addMidiClip}
                   onArm={armTrack}

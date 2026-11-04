@@ -1025,8 +1025,30 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the track is armed"
       );
       await page.getByRole("button", { exact: true, name: "Record" }).click();
-      await page.waitForTimeout(2500);
+      // The take shows on its track as it records, and grows (REC-011).
+      const live = page.locator(
+        '[data-track="track-1"] [data-slot="arranged-take"]'
+      );
+      await live.waitFor({ timeout: 5000 });
+      await page.waitForTimeout(1000);
+      const first = await live.evaluate((element) => ({
+        drawn: element.querySelector("path")?.getAttribute("d")?.length ?? 0,
+        width: element.getBoundingClientRect().width,
+      }));
+      await page.waitForTimeout(1500);
+      const later = await live.evaluate(
+        (element) => element.getBoundingClientRect().width
+      );
+      assert(
+        later > first.width && first.drawn > 0,
+        `the take grows (${first.width} then ${later} px) and draws what comes in (${first.drawn})`
+      );
       await page.getByRole("button", { exact: true, name: "Record" }).click();
+      await page.waitForFunction(
+        () => !document.querySelector('[data-slot="arranged-take"]'),
+        undefined,
+        { timeout: 5000 }
+      );
       await page.waitForFunction(
         (count) =>
           document.querySelectorAll('[data-track="track-1"] [data-clip-id]')

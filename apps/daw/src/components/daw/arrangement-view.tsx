@@ -25,6 +25,7 @@ import {
   ArrangedClip,
   ArrangedClipGhost,
   ArrangedGroupPreview,
+  ArrangedTake,
 } from "@/components/audio-ui/arranged-clip";
 import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import { TimelineTimeSelection } from "@/components/audio-ui/time-selection";
@@ -111,6 +112,8 @@ import { cn } from "@/lib/utils";
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
 
+import type { LiveTake } from "./use-take";
+
 /** How wide the column of track headers is, in px. */
 const LEAD_PX = 220;
 
@@ -134,6 +137,29 @@ function FollowingControls({
 }) {
   const mix = useAutomatedMix(track, following);
   return <TimelineTrackControls mix={mix} {...props} />;
+}
+
+/** The take recording on a track, if it records one: its sound drawn as it comes, a MIDI track's take bare (REC-011). */
+function TrackTake({
+  position,
+  take,
+  track,
+}: {
+  position: ComponentProps<typeof ArrangedTake>["position"];
+  take: LiveTake | null;
+  track: ArrangementTrack;
+}) {
+  if (!take?.tracks.has(track.id)) {
+    return null;
+  }
+  return (
+    <ArrangedTake
+      from={take.from}
+      levels={track.kind === "midi" ? undefined : take.levels}
+      name={track.name}
+      position={position}
+    />
+  );
 }
 
 /** What a rack is called in the automation chooser, by its kind. */
@@ -256,6 +282,8 @@ export interface ArrangementViewProps {
   /** Where playback starts: the start marker, in seconds. */
   cursor: number;
   engine: Engine;
+  /** The take recording now, drawn on its tracks as it grows (REC-011). */
+  liveTake: LiveTake | null;
   /** The locators and the time signatures, with the commands behind them. */
   markers: ReturnType<typeof useTimelineMarkers>;
   /** A double-click on a MIDI lane: an empty clip a bar long, from the bar under the pointer. */
@@ -321,6 +349,7 @@ export function ArrangementView({
   automation,
   cursor,
   engine,
+  liveTake,
   markers,
   onAddMidiClip,
   onArm,
@@ -842,6 +871,11 @@ export function ArrangementView({
                               {...arrangedClips.clipProps(clip)}
                             />
                           ))}
+                        <TrackTake
+                          position={engine.position}
+                          take={liveTake}
+                          track={track}
+                        />
                         {selectedTime?.tracks.includes(track.id) ? (
                           <TimelineTimeSelection range={selectedTime.range} />
                         ) : null}

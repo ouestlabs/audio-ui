@@ -406,7 +406,7 @@ While a clip is dragged with Alt, `arrangement.copying` lists the originals: dra
 
 With snapping on, a dragged clip or loop also lands on the edges of the other clips, the locators and the loop, through `snapPoints`. Where two clips meet, the fade-out of one and the fade-in of the next move together, as a crossfade, and a dashed line shows how far a fade being dragged can go.
 
-`useArrangedClips` ships with them and wires a clip to the arrangement's commands. Spread `clipProps(clip)` on `ArrangedClip`, with what draws it (`describe`, `peaks`, `swatch`, `trackName`), and draw `ghostsOn(trackId)` with `ArrangedClipGhost` for the originals of a copy dragged with Alt. A clip dropped on a track moves to it if the track takes what it holds, and let go off the tracks it goes to the nearest one; the rest of a selection follows a clip dragged up or down.
+`useArrangedClips` ships with them and wires a clip to the arrangement's commands. Spread `clipProps(clip)` on `ArrangedClip`, with what draws it (`describe`, `peaks`, `swatch`, `trackName`), and draw `ghostsOn(trackId)` with `ArrangedClipGhost` for the originals of a copy dragged with Alt. A clip dropped on a track moves to it if the track takes what it holds, and let go off the tracks it goes to the nearest one; the rest of a selection follows a clip dragged up or down. `ArrangedTake` draws a take while it records: from `from` to the live `position`, its `levels` (the loudest of each equal stretch so far, a live list) as they come in.
 
 ### Arranged tracks
 

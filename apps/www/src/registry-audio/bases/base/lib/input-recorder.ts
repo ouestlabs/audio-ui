@@ -69,10 +69,12 @@ export interface InputRecorder {
 /**
  * Records what is connected to it, block by block, each with its frame on the
  * audio clock: what `takeFrames` and `sliceBlocks` cut a take from (REC-007,
- * REC-008). `null` when the context cannot run worklets.
+ * REC-008). `onBlock` hears each block as it comes, to draw the take live.
+ * `null` when the context cannot run worklets.
  */
 export async function createInputRecorder(
-  ctx: BaseAudioContext
+  ctx: BaseAudioContext,
+  onBlock?: (block: RecordedBlock) => void
 ): Promise<InputRecorder | null> {
   if (!(await loadRecorder(ctx))) {
     return null;
@@ -94,6 +96,7 @@ export async function createInputRecorder(
       return;
     }
     blocks.push(event.data);
+    onBlock?.(event.data);
   };
   return {
     dispose: () => {

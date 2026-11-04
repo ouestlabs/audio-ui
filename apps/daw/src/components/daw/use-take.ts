@@ -1,6 +1,7 @@
 "use client";
 
 import { secondsPerBar, secondsPerBeat } from "@audio-ui/core/time";
+import { createSource, type Source } from "@audio-ui/react";
 import { useCallback, useRef, useState } from "react";
 import { toast } from "sonner";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
@@ -24,13 +25,53 @@ import {
 } from "@/lib/input-recorder";
 import {
   audioTakeClip,
+  blockPeak,
   midiTakeClip,
   type PlayedNote,
+  type RecordedBlock,
   sliceBlocks,
   takeFrames,
 } from "@/lib/recording";
 import { encodeWav } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
+
+/** How long a stretch each level of a take drawn live covers, in seconds. */
+const LEVEL_SECONDS = 0.02;
+
+/** A take as it records, for the arrangement to draw (REC-011): where it started, its tracks, and the levels of what came in. */
+export interface LiveTake {
+  from: number;
+  /** The loudest of every `LEVEL_SECONDS` of the take so far; none for a take of notes only. */
+  levels?: Source<readonly number[]>;
+  tracks: ReadonlySet<string>;
+}
+
+/**
+ * Levels of a take as its blocks come in: from the clock frame `gate.from`
+ * on, the loudest of each `LEVEL_SECONDS`, published as they fill.
+ */
+function liveLevels(rate: number) {
+  const list: number[] = [];
+  const levels = createSource<readonly number[]>(list);
+  const gate = { from: Number.POSITIVE_INFINITY };
+  const span = Math.round(LEVEL_SECONDS * rate);
+  let peak = 0;
+  let filled = 0;
+  const hear = (block: RecordedBlock) => {
+    if (block.frame < gate.from) {
+      return;
+    }
+    peak = Math.max(peak, blockPeak(block));
+    filled += block.channels[0]?.length ?? 0;
+    if (filled >= span) {
+      list.push(peak);
+      peak = 0;
+      filled = 0;
+      levels.set(list);
+    }
+  };
+  return { gate, hear, levels };
+}
 
 /** How far ahead of the press a take's playback starts, in seconds: room for the input to open. */
 const LEAD_SECONDS = 0.05;
@@ -64,7 +105,10 @@ function armedTracks(doc: ArrangementDoc, armed: ReadonlySet<string>) {
 }
 
 /** The browser's input, raw: echo cancellation, noise suppression and gain control are for calls, not for takes. */
-async function openInput(ctx: AudioContext) {
+async function openInput(
+  ctx: AudioContext,
+  onBlock: (block: RecordedBlock) => void
+) {
   const stream = await navigator.mediaDevices.getUserMedia({
     audio: {
       autoGainControl: false,
@@ -72,7 +116,7 @@ async function openInput(ctx: AudioContext) {
       noiseSuppression: false,
     },
   });
-  const recorder = await createInputRecorder(ctx);
+  const recorder = await createInputRecorder(ctx, onBlock);
   if (!recorder) {
     for (const track of stream.getTracks()) {
       track.stop();
@@ -216,6 +260,7 @@ export function useTake({
   const [recording, setRecording] = useState(false);
   const [countIn, setCountIn] = useState(0);
   const [punch, setPunch] = useState(false);
+  const [live, setLive] = useState<LiveTake | null>(null);
   const running = useRef<Running | null>(null);
 
   // Arming one disarms the others, unless Cmd or Ctrl was held (REC-001).
@@ -240,9 +285,10 @@ export function useTake({
       await ctx.resume();
     }
     const tracks = armedTracks(doc, armed);
+    const drawn = liveLevels(ctx.sampleRate);
     const input =
       tracks.audio.length > 0
-        ? await openInput(ctx).catch(() => {
+        ? await openInput(ctx, drawn.hear).catch(() => {
             toast.error("The browser gave no access to an audio input");
             return null;
           })
@@ -270,9 +316,17 @@ export function useTake({
       playFrom: cursor,
       tracks,
     };
+    // Drawn from the take's first frame on: after the count-in, the latency taken off.
+    drawn.gate.from =
+      running.current.playAt + Math.round(running.current.latency * rate);
     input?.recorder.start();
     engine.play(cursor, running.current.playAt);
     setRecording(true);
+    setLive({
+      from: cursor,
+      levels: input ? drawn.levels : undefined,
+      tracks: new Set([...tracks.audio, ...tracks.midi]),
+    });
   }, [armed, countIn, cursor, doc, engine]);
 
   const finish = useCallback(async () => {
@@ -280,6 +334,7 @@ export function useTake({
     const ctx = webAudio.getContext();
     running.current = null;
     setRecording(false);
+    setLive(null);
     if (!(take && ctx)) {
       return;
     }
@@ -336,6 +391,7 @@ export function useTake({
     armed,
     countIn,
     finish,
+    live,
     noteOff,
     noteOn,
     punch,

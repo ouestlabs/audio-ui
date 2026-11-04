@@ -74,6 +74,17 @@ export function sliceBlocks(
   return channels;
 }
 
+/** The loudest sample of a block, over its channels: what a take drawn live shows of it. */
+export function blockPeak(block: RecordedBlock): number {
+  let peak = 0;
+  for (const channel of block.channels) {
+    for (const sample of channel) {
+      peak = Math.max(peak, Math.abs(sample));
+    }
+  }
+  return peak;
+}
+
 /** The clip an audio take becomes: from where it started, as long as it lasted, over what lies under it. */
 export function audioTakeClip({
   id,

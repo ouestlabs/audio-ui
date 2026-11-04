@@ -44,4 +44,8 @@ Status: partial: Overdub and record quantization are in the lib, not yet in the 
 One undo takes a whole take away, with the clips it cut; one redo brings it back.
 Test: apps/daw/test/browser/run.ts "REC-004"
 
+### REC-011 A take drawn as it records
+While a take records, each of its tracks shows it as a red clip from where it started to the playhead, growing as playback moves, an audio take's sound drawn as it comes in.
+Test: apps/daw/test/browser/run.ts "REC-004"; apps/www/test/registry-audio/base/lib/recording.test.ts "REC-011"
+
 Deviation: no capture of what was played while not recording, no take lanes, and a take recorded with the loop on keeps its first pass.

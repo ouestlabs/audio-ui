@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   audioTakeClip,
+  blockPeak,
   midiTakeClip,
   overdubbed,
   sliceBlocks,
@@ -37,6 +38,15 @@ describe("recording", () => {
     expect([...(left ?? [])]).toEqual([1, 1, 2, 2, 2, 2, 0, 0, 0, 0, 3, 3]);
     // A mono input fills both channels.
     expect([...(right ?? [])]).toEqual([...(left ?? [])]);
+  });
+
+  test("REC-011: a block drawn live shows its loudest sample over its channels", () => {
+    expect(
+      blockPeak({
+        channels: [Float32Array.of(0.1, -0.2), Float32Array.of(0.05, -0.7)],
+        frame: 0,
+      })
+    ).toBeCloseTo(0.7, 6);
   });
 
   test("REC-007: an audio take is a clip from where it started, as long as it lasted, with edge fades", () => {
