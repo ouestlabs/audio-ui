@@ -677,7 +677,7 @@ function MidiClipPanel({
       status={status}
     >
       <Timeline
-        className="min-w-0 flex-1"
+        className="min-h-0 min-w-0 flex-1"
         duration={span}
         maxZoom={MAX_STEP_PX / step}
         snapStep={step}

@@ -289,6 +289,7 @@ function DeviceFrame({ children, className }: DeviceFrameProps) {
         "rounded-xl [--device-radius:calc(var(--radius)+4px)] flex w-full min-w-0 flex-col overflow-hidden border bg-card",
         className
       )}
+      data-frame=""
       data-slot="device-frame"
     >
       {children}

@@ -464,6 +464,7 @@ function RackFrame({
         "cn-audio-device flex h-full min-w-0 flex-col overflow-hidden border bg-card",
         className
       )}
+      data-frame=""
       data-slot={slot}
     >
       {/* A device's title bar, as every face has: its square, its name, and the host's controls at the end. */}

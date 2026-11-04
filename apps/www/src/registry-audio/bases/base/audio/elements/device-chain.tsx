@@ -582,6 +582,7 @@ function DeviceChainSlot({
   const content = folded ? (
     <div
       className="cn-audio-device flex h-full w-8 flex-col items-center gap-1 border bg-card p-1 [&_button]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]"
+      data-frame=""
       data-slot="device-chain-strip"
     >
       <SlotGrip />
@@ -616,10 +617,11 @@ function DeviceChainSlot({
       "relative flex shrink-0 flex-col",
       // The line a dragged device would land on, in the middle of the gap before this slot.
       "before:absolute before:inset-y-0 before:hidden before:w-0.5 before:rounded-full before:bg-primary data-drop:before:block",
-      // Flat, the device's card gives way to the surface, and a hairline ends it. It fills the chain's height, and a
-      // device taller than the chain keeps its height: the chain scrolls to it.
+      // Flat, the device's card gives way to the surface, and a hairline ends it, however deep its frame sits (a panel
+      // may wrap it, a rack holds more). It fills the chain's height, and a device taller than the chain keeps its height:
+      // the chain scrolls to it.
       flat
-        ? "border-e before:inset-s-[-1px] *:h-auto *:min-h-full *:rounded-none *:border-0 *:bg-transparent"
+        ? "border-e before:inset-s-[-1px] *:h-auto *:min-h-full **:data-frame:rounded-none **:data-frame:border-0 **:data-frame:bg-transparent **:data-[slot=rack-chain]:rounded-none"
         : "before:inset-s-[-5px]",
       "data-dragging:z-10 data-dragging:shadow-lg",
       className,

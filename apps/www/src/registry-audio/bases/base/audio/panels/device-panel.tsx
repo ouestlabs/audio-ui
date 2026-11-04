@@ -289,6 +289,7 @@ function DeviceFrame({ children, className }: DeviceFrameProps) {
         "cn-audio-device flex w-full min-w-0 flex-col overflow-hidden border bg-card",
         className
       )}
+      data-frame=""
       data-slot="device-frame"
     >
       {children}

@@ -49,6 +49,7 @@ import {
   type ArrangementTrack,
   padRecordings,
   type TimeSelection,
+  type TrackDevice,
 } from "@/lib/arrangement";
 import { renderArrangement } from "@/lib/arrangement-engine";
 import {
@@ -97,10 +98,29 @@ const UNSCROLLED = { overflow: "hidden" } as const;
 const STRIP = "2.25rem";
 /** The least height of each view of that panel, its strip included: under it, what it shows is cut off. */
 const LEAST: Record<PanelView, string> = {
-  clip: "15rem",
-  devices: "18rem",
+  // A warped clip's Sample box whole: its fields, ÷2 and ×2, and Speed.
+  clip: "17.5rem",
+  // The tallest device of the library, the compressor, whole, under the strip.
+  devices: "22.5rem",
   mixer: "21rem",
 };
+/** What a rack's title bar takes from the devices in it, in rem: each level of racks adds one. */
+const RACK_BAR = 2.5;
+
+/** How many racks deep a chain goes: 0 with none, 1 with a rack, 2 with a rack in a rack. */
+function rackDepth(devices: readonly TrackDevice[] | undefined): number {
+  let deepest = 0;
+  for (const device of devices ?? []) {
+    if (device.rack) {
+      const inner = Math.max(
+        0,
+        ...device.rack.chains.map((chain) => rackDepth(chain.devices))
+      );
+      deepest = Math.max(deepest, 1 + inner);
+    }
+  }
+  return deepest;
+}
 
 /** The most of the window the panel takes when it opens: what a height dragged by hand may go past. */
 const OPENING_SHARE = 0.45;
@@ -111,6 +131,16 @@ const OPENING: Record<PanelView, number> = {
   mixer: 400,
 };
 const REM = 16;
+
+/** The least height of a view: for the devices, each level of racks on the track takes a title bar from its devices' height. */
+function leastOf(
+  view: PanelView,
+  devices: readonly TrackDevice[] | undefined
+): string {
+  return view === "devices"
+    ? `${Number.parseFloat(LEAST.devices) + RACK_BAR * rackDepth(devices)}rem`
+    : LEAST[view];
+}
 
 /** How tall each view opens on a window `height` px tall: as tall as it likes, up to 45% of it, never under its least. */
 function openingHeights(height: number): Record<PanelView, number> {
@@ -1029,11 +1059,8 @@ export function Daw({
     return () => clearTimeout(timer);
   }, [doc, recordings]);
 
-  const panelTitle = titleOf(
-    shown,
-    selectedClip,
-    selectedTrack ? trackOf(doc, selectedTrack) : undefined
-  );
+  const shownTrack = selectedTrack ? trackOf(doc, selectedTrack) : undefined;
+  const panelTitle = titleOf(shown, selectedClip, shownTrack);
   // What the panel holds, open: the clip view's own caret folds the panel to its bar.
   let content: ReactNode;
   if (shown === "mixer") {
@@ -1201,7 +1228,7 @@ export function Daw({
                 id={shown}
                 key={shown}
                 maxSize="70%"
-                minSize={LEAST[shown]}
+                minSize={leastOf(shown, shownTrack?.devices)}
                 onResize={keepHeight}
                 panelRef={panelRef}
                 style={UNSCROLLED}
