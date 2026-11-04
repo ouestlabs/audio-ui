@@ -1060,7 +1060,11 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "clip-panel",
-    registryDependencies: ["@audio-ui/clip-view", "@audio-ui/timeline"],
+    registryDependencies: [
+      "@audio-ui/parameter-field",
+      "@audio-ui/clip-view",
+      "@audio-ui/timeline",
+    ],
     type: "registry:ui",
   },
   {
@@ -1130,7 +1134,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "bpm-control",
-    registryDependencies: ["@shadcn/input-group"],
+    registryDependencies: ["@audio-ui/parameter-field"],
     type: "registry:ui",
   },
   {

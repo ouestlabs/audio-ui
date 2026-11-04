@@ -25,6 +25,7 @@ export default function ParameterFieldDemo() {
         label="Gain"
         max={24}
         min={-36}
+        precision={1}
         step={0.1}
         unit="dB"
       />

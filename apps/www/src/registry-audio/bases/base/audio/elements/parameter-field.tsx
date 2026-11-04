@@ -44,6 +44,13 @@ function decimalsOf(step: number) {
   return point < 0 ? 0 : text.length - point - 1;
 }
 
+/** Steppers whose steps mean more than minus and plus, such as a zoom's: their names, and glyphs in place of − and +. */
+export interface ParameterFieldSteppers {
+  decrement: string;
+  icons?: { decrement: ReactNode; increment: ReactNode };
+  increment: string;
+}
+
 export interface ParameterFieldProps {
   className?: string;
   /** The value it starts at, when it keeps its own value. @default min, or 0 */
@@ -63,7 +70,7 @@ export interface ParameterFieldProps {
   onValueChange?: (value: number) => void;
   /** A gesture that changed the value ended: a scrub let go, a step, a typed value committed. */
   onValueCommitted?: (value: number) => void;
-  /** Digits after the point. @default as many as `step` has */
+  /** Digits after the point. @default as many as `step` has, or as `format` says when it is given */
   precision?: number;
   /**
    * Which way a drag on the label or the unit moves the value: sideways
@@ -79,8 +86,8 @@ export interface ParameterFieldProps {
   smallStep?: number;
   /** @default 1 */
   step?: number;
-  /** Adds a decrement and an increment button either side. @default false */
-  steppers?: boolean;
+  /** Adds a decrement and an increment button either side, named "Decrease" and "Increase" and the label, or as given. @default false */
+  steppers?: boolean | ParameterFieldSteppers;
   /** The unit after the value, such as "dB", "Hz" or "BPM": drag it to scrub. */
   unit?: ReactNode;
   /** The value, when it is held outside. */
@@ -136,15 +143,17 @@ export function ParameterField({
   const largeStep = largeStepProp ?? step * 10;
   const smallStep = smallStepProp ?? step / 10;
   const digits = precision ?? decimalsOf(step);
+  // A format given says how many digits itself, unless a precision is asked for too.
   const shown = useMemo<Intl.NumberFormatOptions>(
     () => ({
-      maximumFractionDigits: digits,
-      minimumFractionDigits: digits,
+      ...(format && precision === undefined
+        ? {}
+        : { maximumFractionDigits: digits, minimumFractionDigits: digits }),
       // 1200 Hz, as a DAW shows it, not 1,200.
       useGrouping: false,
       ...format,
     }),
-    [digits, format]
+    [digits, format, precision]
   );
   // The latest value, since a scrub sends several moves before the field re-renders.
   const latest = useRef(value);
@@ -248,6 +257,12 @@ export function ParameterField({
     );
 
   const small = size === "sm";
+  const stepperNames =
+    typeof steppers === "object"
+      ? steppers
+      : { decrement: `Decrease ${label}`, increment: `Increase ${label}` };
+  const stepperIcons =
+    typeof steppers === "object" ? steppers.icons : undefined;
   return (
     <NumberField.Root
       allowWheelScrub={false}
@@ -288,18 +303,20 @@ export function ParameterField({
           <NumberField.Decrement
             render={
               <InputGroupButton
-                aria-label={`Decrease ${label}`}
+                aria-label={stepperNames.decrement}
                 size="icon-xs"
               />
             }
           >
-            <IconPlaceholder
-              hugeicons="MinusSignIcon"
-              lucide="Minus"
-              phosphor="MinusIcon"
-              remixicon="RiSubtractLine"
-              tabler="IconMinus"
-            />
+            {stepperIcons?.decrement ?? (
+              <IconPlaceholder
+                hugeicons="MinusSignIcon"
+                lucide="Minus"
+                phosphor="MinusIcon"
+                remixicon="RiSubtractLine"
+                tabler="IconMinus"
+              />
+            )}
           </NumberField.Decrement>
         </InputGroupAddon>
       ) : null}
@@ -325,18 +342,20 @@ export function ParameterField({
             <NumberField.Increment
               render={
                 <InputGroupButton
-                  aria-label={`Increase ${label}`}
+                  aria-label={stepperNames.increment}
                   size="icon-xs"
                 />
               }
             >
-              <IconPlaceholder
-                hugeicons="PlusSignIcon"
-                lucide="Plus"
-                phosphor="PlusIcon"
-                remixicon="RiAddLine"
-                tabler="IconPlus"
-              />
+              {stepperIcons?.increment ?? (
+                <IconPlaceholder
+                  hugeicons="PlusSignIcon"
+                  lucide="Plus"
+                  phosphor="PlusIcon"
+                  remixicon="RiAddLine"
+                  tabler="IconPlus"
+                />
+              )}
             </NumberField.Increment>
           ) : null}
         </InputGroupAddon>

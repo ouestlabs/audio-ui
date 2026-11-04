@@ -204,6 +204,7 @@ export default function BlockSynthPanel() {
           max={6}
           min={-36}
           onValueChange={showGain}
+          precision={1}
           size="sm"
           step={0.1}
           unit="dB"

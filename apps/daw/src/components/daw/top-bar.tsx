@@ -15,7 +15,7 @@ import {
 } from "@phosphor-icons/react";
 import { Link } from "@tanstack/react-router";
 import { type ComponentProps, type ReactNode, useCallback } from "react";
-import { NumberControl } from "@/components/audio-ui/bpm-control";
+import { ParameterField } from "@/components/audio-ui/parameter-field";
 import { Transport } from "@/components/audio-ui/transport";
 import { AudioUiIcon } from "@/components/site/audio-ui-icon";
 import { ModeSwitcher } from "@/components/site/mode-switcher";
@@ -239,8 +239,10 @@ export function TopBar(props: TopBarProps) {
           </BarButton>
         </ButtonGroup>
         <div className="hidden items-center xl:flex">
-          <NumberControl
+          <ParameterField
+            className="w-44"
             format={PERCENT}
+            hideLabel
             label="Zoom"
             largeStep={1}
             max={props.zoomMaxRatio}

@@ -26,7 +26,6 @@ import {
 } from "react";
 import {
   ClipBox,
-  ClipField,
   type ClipMeter,
   ClipRow,
   ClipToggle,
@@ -34,6 +33,7 @@ import {
   formatBars,
   PositionField,
 } from "@/registry-audio/bases/base/audio/elements/clip-view";
+import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
 import {
   Timeline,
   TimelineLane,
@@ -186,15 +186,7 @@ const formatRate = (rate: number) => {
   const semitones = 12 * Math.log2(rate);
   return `${rate.toFixed(2)}× · ${semitones > 0 ? "+" : ""}${semitones.toFixed(1)} st`;
 };
-const formatBpm = (bpm: number) => bpm.toFixed(2);
-const formatGain = (db: number) => `${db > 0 ? "+" : ""}${db.toFixed(1)} dB`;
-const formatTranspose = (semitones: number) =>
-  `${semitones > 0 ? "+" : ""}${semitones} st`;
-/** A number typed in a field, its unit left out. */
-const parseNumber = (text: string) => {
-  const value = Number.parseFloat(text.replace(",", "."));
-  return Number.isFinite(value) ? value : null;
-};
+const SIGNED: Intl.NumberFormatOptions = { signDisplay: "exceptZero" };
 const GAIN_RANGE = [-36, 24] as const;
 const TRANSPOSE_RANGE = [-48, 48] as const;
 
@@ -464,25 +456,34 @@ function SampleBox({
         ))}
       </div>
       <ClipRow label="Gain">
-        <ClipField
-          format={formatGain}
+        <ParameterField
+          format={SIGNED}
+          hideLabel
           label="Gain"
-          onChange={onGain}
-          onCommit={onCommit}
-          parse={parseNumber}
+          max={GAIN_RANGE[1]}
+          min={GAIN_RANGE[0]}
+          onValueChange={onGain}
+          onValueCommitted={onCommit}
+          precision={1}
+          size="sm"
           step={0.5}
+          unit="dB"
           value={gain}
         />
       </ClipRow>
       <ClipRow label="Transp.">
-        <ClipField
+        <ParameterField
           disabled={warpMode === "repitch"}
-          format={formatTranspose}
+          format={SIGNED}
+          hideLabel
           label="Transpose"
-          onChange={onTranspose}
-          onCommit={onCommit}
-          parse={parseNumber}
-          step={1}
+          max={TRANSPOSE_RANGE[1]}
+          min={TRANSPOSE_RANGE[0]}
+          onValueChange={onTranspose}
+          onValueCommitted={onCommit}
+          scrub="vertical"
+          size="sm"
+          unit="st"
           value={transpose}
         />
       </ClipRow>
@@ -490,13 +491,15 @@ function SampleBox({
         <>
           {/* The source's own tempo: in time at the arrangement's, it plays at their ratio. */}
           <ClipRow label="BPM">
-            <ClipField
-              format={formatBpm}
+            <ParameterField
+              hideLabel
               label="Source tempo"
-              onChange={onTempo}
-              onCommit={onCommit}
-              parse={parseNumber}
-              step={1}
+              max={999}
+              min={1}
+              onValueChange={onTempo}
+              onValueCommitted={onCommit}
+              precision={2}
+              size="sm"
               value={tempo / rate}
             />
           </ClipRow>
