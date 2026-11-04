@@ -40,6 +40,12 @@ class ClipPlayerProcessor extends AudioWorkletProcessor {
           sampleRate: message.sampleRate,
         });
         break;
+      case "stream":
+        recordings.set(message.id, {
+          sampleRate: message.sampleRate,
+          stream: message.stream,
+        });
+        break;
       case "forget":
         recordings.delete(message.id);
         break;
