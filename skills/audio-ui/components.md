@@ -27,6 +27,7 @@ The pieces of any audio interface: controls, keyboards and displays. Each takes 
 | `fader` | `Fader` from `@/components/audio-ui/fader` | `@audio-ui/react/fader` | A linear slider for gain or any parameter, vertical or horizontal |
 | `xypad` | `XYPad` from `@/components/audio-ui/xypad` | `@audio-ui/react/xypad` | Two parameters on one surface (filter cutoff and resonance, pan and send) |
 | `envelope` | `Envelope` from `@/components/audio-ui/envelope` | `@audio-ui/react/envelope` | A ramp edited by breakpoints: ADSR and other shapes, drag points, bend segments |
+| `parameter-field` | `ParameterField` from `@/components/audio-ui/parameter-field` | registry only | A parameter's value as a field (tempo, gain, transpose, cutoff): typed, stepped with the arrows (Shift large, Alt small), or scrubbed by dragging its label or unit, with `unit`, `precision`, `format`, `steppers`, `size="sm"`. |
 
 ### Keyboards and pads
 

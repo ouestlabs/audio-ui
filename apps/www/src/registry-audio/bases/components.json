@@ -30,6 +30,12 @@
     "title": "Fader pan demo"
   },
   {
+    "categories": ["parameter-field"],
+    "description": "Parameter fields for tempo, gain, transpose and cutoff: typed, stepped, or scrubbed by their label or unit",
+    "name": "parameter-field-demo",
+    "title": "Parameter field demo"
+  },
+  {
     "categories": ["knob"],
     "description": "A knob turned by dragging up and down, like a fader: 150px of travel spans the whole range",
     "name": "knob-vertical-drag-demo",

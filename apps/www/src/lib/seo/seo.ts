@@ -32,6 +32,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "device-chain",
   "rack",
   "needle-meter",
+  "parameter-field",
   "pad",
   "piano",
   "piano-roll",

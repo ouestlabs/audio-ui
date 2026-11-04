@@ -1134,6 +1134,20 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: ["@base-ui/react"],
+    description:
+      "A parameter's value as a field: type it, step it with the arrows (Shift for large steps, Alt for small), or drag its label or unit to scrub it, sideways or up and down, with a unit, precision and steppers.",
+    files: [
+      {
+        path: "audio/elements/parameter-field.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "parameter-field",
+    registryDependencies: ["@shadcn/input-group"],
+    type: "registry:ui",
+  },
+  {
     description:
       "A button that connects the page's MIDI input, with the device's name beside it. Renders nothing when the browser has no Web MIDI.",
     files: [

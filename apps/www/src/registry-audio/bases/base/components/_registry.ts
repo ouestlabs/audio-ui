@@ -84,6 +84,20 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["parameter-field"],
+    description:
+      "Parameter fields for tempo, gain, transpose and cutoff: typed, stepped, or scrubbed by their label or unit",
+    files: [
+      {
+        path: "components/parameter-field/parameter-field-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "parameter-field-demo",
+    registryDependencies: ["@audio-ui/parameter-field"],
+    type: "registry:example",
+  },
+  {
     categories: ["knob"],
     description:
       "A knob turned by dragging up and down, like a fader: 150px of travel spans the whole range",

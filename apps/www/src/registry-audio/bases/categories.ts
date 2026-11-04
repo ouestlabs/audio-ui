@@ -78,6 +78,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Numeric fields for audio parameters: type a value, step it, or drag its label or unit to scrub it, with units and precision.",
+    label: "Parameter field",
+    name: "parameter-field",
+  },
+  {
+    description:
       "Decibel meter components for monitoring stereo and multi-channel audio levels.",
     label: "Meter",
     name: "meter",
@@ -236,6 +242,7 @@ export const categoryGroups: { label: string; names: string[] }[] = [
       "fader",
       "xypad",
       "envelope",
+      "parameter-field",
       "piano",
       "pad",
       "meter",
