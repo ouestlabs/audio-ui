@@ -400,3 +400,187 @@ describe("transport changes", () => {
     expect(lateLeft.slice(512)).toEqual(onTime[0].slice(512));
   });
 });
+
+/** A steady sine at `hertz`, in both channels. */
+function sine(seconds: number, hertz: number, level = 0.5): DecodedRecording {
+  const data = Float32Array.from(
+    { length: Math.round(seconds * RATE) },
+    (_, index) => level * Math.sin((2 * Math.PI * hertz * index) / RATE)
+  );
+  return { channels: [data, data], sampleRate: RATE };
+}
+
+/** How many times a stretch of samples rises through zero per second: its pitch, for a sine. */
+function pitchOf(data: Float32Array, from: number, to: number) {
+  let rises = 0;
+  for (let index = from + 1; index < to; index += 1) {
+    if ((data[index - 1] as number) < 0 && (data[index] as number) >= 0) {
+      rises += 1;
+    }
+  }
+  return (rises * RATE) / (to - from);
+}
+
+/** The lowest and the highest peak of a stretch, taken over windows of 10 ms. */
+function peaksOf(data: Float32Array, from: number, to: number) {
+  const size = 480;
+  let low = Number.POSITIVE_INFINITY;
+  let high = 0;
+  for (let start = from; start + size <= to; start += size) {
+    let peak = 0;
+    for (let index = start; index < start + size; index += 1) {
+      peak = Math.max(peak, Math.abs(data[index] as number));
+    }
+    low = Math.min(low, peak);
+    high = Math.max(high, peak);
+  }
+  return { high, low };
+}
+
+/** One second of recording stretched over two: half the speed. */
+const twiceAsLong = [
+  { source: 0, target: 0 },
+  { source: 1, target: 2 },
+];
+
+describe("warp modes", () => {
+  test("CLP-015: Repitch and no mode play the same, an octave down at half the speed; Beats and Tones keep the pitch", () => {
+    const rec = sine(1, 440);
+    const render = (warpMode?: ArrangedAudio["warpMode"]) =>
+      renderTrack(
+        [
+          playedClip(
+            audio(0, 2, { sourceLength: 1, warp: twiceAsLong, warpMode }),
+            "rec",
+            RATE
+          ),
+        ],
+        one(rec),
+        [playing(0)],
+        2 * RATE
+      )[0];
+    expect(pitchOf(render(), 4800, 91_200)).toBeCloseTo(220, -1);
+    expect(render("repitch")).toEqual(render());
+    expect(pitchOf(render("beats"), 4800, 91_200)).toBeGreaterThan(400);
+    expect(pitchOf(render("beats"), 4800, 91_200)).toBeLessThan(480);
+    expect(pitchOf(render("tones"), 4800, 91_200)).toBeCloseTo(440, -1);
+  });
+
+  test("CLP-015: a clip with no warp and no transpose is copied as it is in every mode", () => {
+    const rec = recording(0.5);
+    for (const warpMode of ["beats", "tones"] as const) {
+      const [left] = renderTrack(
+        [playedClip(audio(0, 0.5, { warpMode }), "rec", RATE)],
+        one(rec),
+        [playing(0)],
+        0.5 * RATE
+      );
+      expect(left).toEqual(rec.channels[0] as Float32Array);
+    }
+  });
+
+  test("CLP-016: a slice plays at its own speed from where the warp places it, so an attack keeps its shape", () => {
+    // A click every 0.25 s, stretched to twice as long: it comes every 0.5 s, a click and not a smear.
+    const data = new Float32Array(RATE);
+    for (const at of [0, 12_000, 24_000, 36_000]) {
+      data.set([1, -1, 0.5, -0.5], at + 10);
+    }
+    const [left] = renderTrack(
+      [
+        playedClip(
+          audio(0, 2, {
+            sourceLength: 1,
+            warp: twiceAsLong,
+            warpGrain: 0.125,
+            warpMode: "beats",
+          }),
+          "rec",
+          RATE
+        ),
+      ],
+      one({ channels: [data, data], sampleRate: RATE }),
+      [playing(0)],
+      2 * RATE
+    );
+    for (const at of [0, 24_000, 48_000, 72_000]) {
+      expect(left[at + 10]).toBeCloseTo(1, 3);
+      expect(left[at + 11]).toBeCloseTo(-1, 3);
+    }
+  });
+
+  test("CLP-016: a slice comes out the same from a jump as from playing through", () => {
+    const rec = recording(1);
+    const clip = playedClip(
+      audio(0, 2, {
+        sourceLength: 1,
+        warp: twiceAsLong,
+        warpMode: "beats",
+      }),
+      "rec",
+      RATE
+    );
+    const whole = renderTrack([clip], one(rec), [playing(0)], 2 * RATE)[0];
+    const at = 48_000;
+    const jumped = new Float32Array(BLOCK);
+    renderClips([jumped], 0, BLOCK, at, [clip], one(rec), RATE);
+    expect(jumped).toEqual(whole.slice(at, at + BLOCK));
+  });
+
+  test("CLP-017: a held note keeps its level across the grains", () => {
+    const rec = sine(1, 440);
+    const [left] = renderTrack(
+      [
+        playedClip(
+          audio(0, 2, {
+            sourceLength: 1,
+            warp: twiceAsLong,
+            warpMode: "tones",
+          }),
+          "rec",
+          RATE
+        ),
+      ],
+      one(rec),
+      [playing(0)],
+      2 * RATE
+    );
+    const { high, low } = peaksOf(left, 4800, 86_400);
+    expect(high).toBeLessThan(0.55);
+    expect(low).toBeGreaterThan(0.4);
+  });
+
+  test("CLP-017: an export from its start is the same every time", () => {
+    const rec = recording(1);
+    const render = () =>
+      renderTrack(
+        [
+          playedClip(
+            audio(0, 2, {
+              sourceLength: 1,
+              warp: twiceAsLong,
+              warpMode: "tones",
+            }),
+            "rec",
+            RATE
+          ),
+        ],
+        one(rec),
+        [playing(0)],
+        2 * RATE
+      )[0];
+    expect(render()).toEqual(render());
+  });
+
+  test("CLP-013: in Tones a clip plays its transpose at the speed it has; in Repitch the transpose does nothing", () => {
+    const rec = sine(1, 440);
+    const render = (warpMode: ArrangedAudio["warpMode"]) =>
+      renderTrack(
+        [playedClip(audio(0, 0.9, { transpose: 12, warpMode }), "rec", RATE)],
+        one(rec),
+        [playing(0)],
+        0.9 * RATE
+      )[0];
+    expect(pitchOf(render("tones"), 4800, 38_400)).toBeCloseTo(880, -1);
+    expect(pitchOf(render("repitch"), 4800, 38_400)).toBeCloseTo(440, -1);
+  });
+});

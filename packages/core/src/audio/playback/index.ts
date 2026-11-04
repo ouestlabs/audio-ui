@@ -2,8 +2,10 @@ export {
   type ArrangedAudio,
   createWarpReader,
   type PlayedClip,
+  type PlayedStretch,
   playedClip,
   playedClips,
+  type WarpMode,
 } from "./clip.ts";
 export { RECORDING_LOADER_WORKER } from "./loader-worker-source.ts";
 export {

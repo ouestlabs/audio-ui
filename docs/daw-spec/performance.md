@@ -42,3 +42,8 @@ Measured: 329 to 346 MB opened, 473 to 515 MB playing, 495 to 525 MB after a pla
 During playback with N tracks, the page draws at the display's rate: no task longer than 50 ms, and meters and playhead move without React rendering on each frame.
 Measure: `apps/daw/test/perf/run.ts "PRF-007"`: over 30 s of 16 tracks playing, the long tasks, React's commits (through the hook its developer tools use) and the gaps between frames.
 Measured: no long task, no React commit, 60 frames a second, the longest gap 16.7 ms. Met.
+
+### PRF-008 Warp modes on the audio thread
+A render quantum has 2.67 ms at 48 kHz, and a clip that stretches time stays inside it. Beats costs what Repitch costs. Tones lines each grain up on the last; each clip does that work at a moment of its own, so clips that start together do not spend it in one block.
+Measure, under Bun on the renderer alone, not yet in a worklet in the browser, as the time of a block over 11 s, 30 s of a 1.12x stretch of a recording: 32 clips in Beats, median 0.27 ms, worst 1.99 ms, none over. In Tones, 8 clips median 0.44 ms, worst 0.62 ms, none over; 16 clips median 0.67 ms, worst 1.52 ms, none over; 32 clips median 1.40 ms, 99.9th percentile 2.65 ms, 4 blocks of 4,124 over. One run of 4 clips had 10 blocks over, the worst 16 ms, which 8 and 16 clips did not: not explained.
+Status: partial: the same measure in the browser's worklet is still to make.

@@ -52,9 +52,21 @@ A mono recording plays at full level in both channels: a track's chain is always
 Test: packages/core/src/audio/playback/render.test.ts "CLP-012"
 
 ### CLP-013 Transpose
-Transposing an audio clip without changing its speed needs a warp mode that stretches time.
-Status: planned (phase 4). In repitch mode the transpose is disabled, as in the reference.
+In Beats or Tones, a clip plays `transpose` semitones from its pitch, at the speed its warp gives it. In Repitch the transpose does nothing: its speed is its pitch.
+Test: packages/core/src/audio/playback/render.test.ts "CLP-013"
 
 ### CLP-014 Crossfades
 Two clips that meet on a track with fades of one length play through each other: each goes on past the join by as much as both sources hold, up to that length, and both fade over the same stretch around it, along their shapes. With a shape whose two sides add up to one, such as linear, what they share stays level, and a clip cut in two plays on as if it were whole. Dragging a fade between two clips that meet gives both that length. With fades of different lengths, or nothing to play past the join, each keeps its own fade, down to silence at the join. In a `.dawproject` file they go out as the fades they are.
 Test: apps/www/test/browser/arrangement-engine.check.ts "CLP-014"
+
+### CLP-015 Warp modes
+A clip plays in one of three warp modes. Repitch keeps the speed and the pitch together (CLP-009), and is what a clip with no mode plays. Beats and Tones keep the pitch whatever the speed. A clip with no warp and no transpose is copied as it is in any mode (CLP-001).
+Test: packages/core/src/audio/playback/render.test.ts "CLP-015"
+
+### CLP-016 Beats
+Beats plays slices of the recording, a sixteenth note long by default, each at its own speed from where the warp places its start: what a slice holds, such as a drum's attack, sounds as it was recorded. Slowed down, a slice stops where the next begins; sped up, it is cut. The next slice crosses in just before its start, so an attack on its start is at full level. Where a slice falls is worked out from its frame alone, so a jump, a loop and an export all play the same.
+Test: packages/core/src/audio/playback/render.test.ts "CLP-016"
+
+### CLP-017 Tones
+Tones plays grains that overlap, each lined up on the sound of the one before it, so a held note keeps its pitch and its level. The lining up goes grain by grain from the clip's start or from where playback began: an export from its start is the same every time, and a play from the middle can differ from it in phase, not in pitch or time.
+Test: packages/core/src/audio/playback/render.test.ts "CLP-017"

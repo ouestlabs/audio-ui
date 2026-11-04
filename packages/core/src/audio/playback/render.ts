@@ -1,5 +1,9 @@
 import { fadeGain } from "../../primitives/timeline/clip.ts";
-import { createWarpReader, type PlayedClip } from "./clip.ts";
+import {
+  createWarpReader,
+  type PlayedClip,
+  type PlayedStretch,
+} from "./clip.ts";
 import { type RecordingStream, streamedSample } from "./stream.ts";
 import {
   continuesFrom,
@@ -123,7 +127,8 @@ function locator(
  * Where in its recording `clip` reads at the arrangement's frame `frame`, in
  * frames of the recording (fractional when warped or at another rate), or
  * NaN where it plays nothing: what both the player and the planner of a
- * stream's pages follow. `rate` is the recording's sample rate.
+ * stream's pages follow. `rate` is the recording's sample rate. A clip that
+ * stretches time reads its grain's own stretch.
  */
 export function sourceIndexer(
   clip: PlayedClip,
@@ -131,11 +136,194 @@ export function sourceIndexer(
   sampleRate: number
 ): (frame: number) => number {
   const locate = locator(clip, rate, sampleRate);
+  const { stretch } = clip;
+  const step = stretch ? (stretch.speed * rate) / sampleRate : 0;
   return (frame) => {
     const own = ownFrame(clip, frame);
     const read = clip.reversed ? clip.span - 1 - own : own;
-    return read >= 0 && read < clip.span ? locate(read) : Number.NaN;
+    if (!(read >= 0 && read < clip.span)) {
+      return Number.NaN;
+    }
+    if (!stretch) {
+      return locate(read);
+    }
+    const start = Math.floor(read / stretch.hop) * stretch.hop;
+    return locate(start) + (read - start) * step;
   };
+}
+
+/** How far each way a grain of Tones may move to line up on the last, in seconds: a period of a note down to about 83 Hz. */
+const ALIGN_SECONDS = 0.006;
+/** How finely it first looks, then looks again around the best, in frames of the recording. */
+const COARSE_STEP = 4;
+const FINE_REACH = 3;
+/** How many points of the sound it compares: what keeps it far inside a render quantum. */
+const COMPARE_POINTS = 60;
+/** What the grain before reads, kept here so it is read once and nothing is allocated. */
+const comparing = new Float32Array(COMPARE_POINTS);
+
+/** Where each of a clip's grains of Tones was moved to line up on the last, in frames of the recording. */
+interface Alignment {
+  /** The last grain worked out. */
+  last: number;
+  moved: Float32Array;
+}
+
+const alignments = new WeakMap<PlayedClip, Alignment>();
+
+/** Where in its grain each clip works the next one out, as a share of it: spread apart, so clips that start together do not all do it in one block. It changes when the work is done, never what comes out. */
+const lookAheadShares = new WeakMap<PlayedClip, number>();
+let clipsLookingAhead = 0;
+const GOLDEN_SHARE = 0.618_033_988_75;
+
+function lookAheadShare(clip: PlayedClip): number {
+  let share = lookAheadShares.get(clip);
+  if (share === undefined) {
+    clipsLookingAhead += 1;
+    share = (clipsLookingAhead * GOLDEN_SHARE) % 1;
+    lookAheadShares.set(clip, share);
+  }
+  return share;
+}
+
+/**
+ * How far the grain `index` of `clip` moves to line up on the one before it:
+ * where what they share matches best, worked out once, from the grain before
+ * it. A jump starts the chain again there, unmoved.
+ */
+function alignedAt(
+  clip: PlayedClip,
+  stretch: PlayedStretch,
+  index: number,
+  locate: (read: number) => number,
+  sample: Sampler,
+  step: number,
+  rate: number
+): number {
+  let alignment = alignments.get(clip);
+  if (!alignment) {
+    alignment = {
+      last: -1,
+      moved: new Float32Array(Math.ceil(clip.span / stretch.hop) + 2),
+    };
+    alignments.set(clip, alignment);
+  }
+  const { moved } = alignment;
+  if (index <= alignment.last) {
+    return moved[index] ?? 0;
+  }
+  if (index > alignment.last + 1) {
+    // Played from here: the chain starts again.
+    moved[index] = 0;
+    alignment.last = index;
+    return 0;
+  }
+  const reach = Math.round(ALIGN_SECONDS * rate);
+  const before = (moved[index - 1] ?? 0) + locate((index - 1) * stretch.hop);
+  const here = locate(index * stretch.hop);
+  const { hop } = stretch;
+  const spacing = hop / COMPARE_POINTS;
+  // They share the stretch before this grain's start, where it crosses in.
+  for (let point = 0; point < COMPARE_POINTS; point += 1) {
+    comparing[point] = sample(before + point * spacing * step);
+  }
+  const score = (shift: number) => {
+    let sum = 0;
+    for (let point = 0; point < COMPARE_POINTS; point += 1) {
+      sum +=
+        (comparing[point] as number) *
+        sample(here + shift + (point * spacing - hop) * step);
+    }
+    return sum;
+  };
+  let best = 0;
+  let bestScore = score(0);
+  const look = (from: number, to: number, by: number) => {
+    for (let shift = from; shift <= to; shift += by) {
+      const value = score(shift);
+      if (value > bestScore) {
+        bestScore = value;
+        best = shift;
+      }
+    }
+  };
+  look(-reach, reach, COARSE_STEP);
+  look(best - FINE_REACH, best + FINE_REACH, 1);
+  moved[index] = best;
+  alignment.last = index;
+  return best;
+}
+
+/**
+ * Adds what a clip that stretches time plays over `length` frames from
+ * `position`: its grains, each from where the warp places its start at its own
+ * speed. The next grain crosses in before its start, so it is at full level
+ * from there on: an attack on a slice's start keeps its shape.
+ */
+function renderStretchedClip(
+  output: readonly Float32Array[],
+  at: number,
+  length: number,
+  position: number,
+  clip: PlayedClip,
+  stretch: PlayedStretch,
+  left: Sampler,
+  right: Sampler,
+  rate: number,
+  sampleRate: number
+) {
+  const from = Math.max(position, clip.start);
+  const to = Math.min(position + length, clip.end);
+  const [outLeft, outRight] = output;
+  if (from >= to || !outLeft) {
+    return;
+  }
+  const locate = locator(clip, rate, sampleRate);
+  const { fade, hop } = stretch;
+  const step = (stretch.speed * rate) / sampleRate;
+  const startOf = (index: number) =>
+    locate(index * hop) +
+    (stretch.aligned
+      ? alignedAt(clip, stretch, index, locate, left, step, rate)
+      : 0);
+  const aheadAt = stretch.aligned ? lookAheadShare(clip) * hop : hop;
+  let grain = -1;
+  let start = 0;
+  let next = 0;
+  let ahead = -1;
+  for (let frame = from; frame < to; frame += 1) {
+    const own = ownFrame(clip, frame);
+    const read = clip.reversed ? clip.span - 1 - own : own;
+    if (read >= 0 && read < clip.span) {
+      const index = Math.floor(read / hop);
+      if (index !== grain) {
+        grain = index;
+        start = startOf(index);
+        next = startOf(index + 1);
+      }
+      const into = read - index * hop;
+      if (stretch.aligned && into >= aheadAt && ahead !== index) {
+        ahead = index;
+        startOf(index + 2);
+      }
+      const here = start + into * step;
+      let l = left(here);
+      let r = right(here);
+      const crossing = into - (hop - fade);
+      if (crossing >= 0) {
+        const rise = crossing / fade;
+        const coming = next + (into - hop) * step;
+        l = l * (1 - rise) + left(coming) * rise;
+        r = r * (1 - rise) + right(coming) * rise;
+      }
+      const out = at + frame - position;
+      const gain = gainAt(clip, frame);
+      outLeft[out] = (outLeft[out] as number) + l * gain;
+      if (outRight) {
+        outRight[out] = (outRight[out] as number) + r * gain;
+      }
+    }
+  }
 }
 
 /**
@@ -170,6 +358,21 @@ function renderClip(
   const [left, right = left] = recording.channels;
   const [outLeft, outRight] = output;
   if (from >= to || !left || !right || !outLeft) {
+    return;
+  }
+  if (clip.stretch) {
+    renderStretchedClip(
+      output,
+      at,
+      length,
+      position,
+      clip,
+      clip.stretch,
+      (source) => interpolate(left, source),
+      (source) => interpolate(right, source),
+      recording.sampleRate,
+      sampleRate
+    );
     return;
   }
   // The loop of every block, kept as plain array reads: the fast path.
@@ -209,8 +412,26 @@ function renderStreamedClip(
   if (from >= to || !outLeft) {
     return;
   }
-  const exact = clip.warp === null && recording.sampleRate === sampleRate;
+  const exact =
+    clip.warp === null &&
+    clip.stretch === null &&
+    recording.sampleRate === sampleRate;
   const [left, right] = streamSamplers(recording.stream, exact);
+  if (clip.stretch) {
+    renderStretchedClip(
+      output,
+      at,
+      length,
+      position,
+      clip,
+      clip.stretch,
+      left,
+      right,
+      recording.sampleRate,
+      sampleRate
+    );
+    return;
+  }
   const sourceAt = sourceIndexer(clip, recording.sampleRate, sampleRate);
   for (let frame = from; frame < to; frame += 1) {
     const source = sourceAt(frame);
