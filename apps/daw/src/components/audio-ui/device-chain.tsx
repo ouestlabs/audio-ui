@@ -5,6 +5,7 @@ import {
   createContext,
   type DragEvent,
   type KeyboardEvent,
+  type MouseEvent,
   type PointerEvent,
   type RefObject,
   use,
@@ -533,7 +534,8 @@ interface DeviceChainSlotProps extends Omit<ComponentProps<"div">, "title"> {
  * at the end of the panel's header. Drag the device by its header or by the
  * grip, or press Left or Right on the grip; Delete removes it, and a
  * right-click gives the same commands. Folded, the slot is a narrow strip with
- * the device's name down it, its on and off square, and the same controls.
+ * the device's name down it, its on and off square, and the same controls; a
+ * click anywhere else on the strip unfolds it.
  */
 function DeviceChainSlot({
   children,
@@ -548,6 +550,7 @@ function DeviceChainSlot({
     useDeviceChain();
   const [folded, setFolded] = useState(false);
   const root = useRef<HTMLDivElement>(null);
+  const pressedAt = useRef(0);
   const index = order.indexOf(value);
 
   const toggleFold = useCallback(() => {
@@ -561,6 +564,7 @@ function DeviceChainSlot({
   }, []);
   const handlePointerDown = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
+      pressedAt.current = event.clientX;
       const target = event.target as Element;
       if (target.closest(HEADER) && !target.closest(CONTROL)) {
         // A device inside a rack moves along its own chain, not the rack along the track's.
@@ -570,6 +574,16 @@ function DeviceChainSlot({
     },
     [startDrag, value]
   );
+  // Folded, a click on the strip unfolds it, outside its buttons: not the end of a drag of it.
+  const handleStripClick = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      const moved = Math.abs(event.clientX - pressedAt.current) > 3;
+      if (!(moved || (event.target as Element).closest(CONTROL))) {
+        toggleFold();
+      }
+    },
+    [toggleFold]
+  );
   const slot = useMemo<SlotContextValue>(
     () => ({ folded, index, title, toggleFold, value }),
     [folded, index, title, toggleFold, value]
@@ -577,7 +591,7 @@ function DeviceChainSlot({
 
   const content = folded ? (
     <div
-      className="rounded-xl [--device-radius:calc(var(--radius)+4px)] flex h-full w-8 flex-col items-center gap-1 border bg-card p-1 [&_button:not([aria-pressed])]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]"
+      className="rounded-xl [--device-radius:calc(var(--radius)+4px)] flex h-full w-8 cursor-pointer flex-col items-center gap-1 border bg-card p-1 [&_button:not([aria-pressed])]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]"
       data-frame=""
       data-slot="device-chain-strip"
     >
@@ -629,7 +643,8 @@ function DeviceChainSlot({
     "data-drop": dropIndex === index ? "" : undefined,
     "data-folded": folded ? "" : undefined,
     "data-slot": "device-chain-slot",
-    onPointerDown: move ? handlePointerDown : undefined,
+    onClick: folded ? handleStripClick : undefined,
+    onPointerDown: handlePointerDown,
     ref: root,
     role: "group",
     ...props,

@@ -25,8 +25,8 @@ A device switched off passes its input unchanged to the frame, and keeps the lat
 Test: apps/www/test/arrangement-engine.test.ts "DEV-005"
 
 ### DEV-006 Folding
-A double-click on a device's title bar folds it to a narrow strip, and unfolds it. The on square stays where it is, with the same shape.
-Test: apps/daw/test/devices.test.ts "DEV-006"; apps/daw/test/browser/run.ts "DEV-006"
+The fold button of a device's title bar folds it to a narrow strip. A click anywhere on the strip, outside its buttons, unfolds it; a drag of the strip moves the device and leaves it folded. The on square stays where it is, with the same shape.
+Test: apps/daw/test/browser/run.ts "DEV-006"
 
 ### DEV-007 No gap in the sound
 Adding, moving, bypassing or removing a device while playing does not stop the sound: the chain is rewired between two render quanta.

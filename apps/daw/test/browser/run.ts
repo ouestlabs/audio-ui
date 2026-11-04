@@ -2051,6 +2051,34 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         JSON.stringify(folded) === JSON.stringify(unfolded),
         `the square goes from ${JSON.stringify(unfolded)} to ${JSON.stringify(folded)}`
       );
+      // A press anywhere on the strip unfolds it, once it has not moved; its buttons keep their own job.
+      const strip = slot.locator("[data-slot=device-chain-strip]");
+      const box = await strip.boundingBox();
+      if (!box) {
+        throw new Error("the strip is not on the page");
+      }
+      const middle = {
+        x: box.x + box.width / 2,
+        y: box.y + box.height / 2,
+      };
+      await page.mouse.move(middle.x, middle.y);
+      await page.mouse.down();
+      await page.mouse.move(middle.x + 30, middle.y, { steps: 4 });
+      await page.waitForTimeout(100);
+      await page.mouse.up();
+      await page.waitForTimeout(100);
+      assert(
+        (await strip.count()) === 1,
+        "a drag of the strip unfolded the device"
+      );
+      await square.click();
+      await page.waitForTimeout(100);
+      assert(
+        (await strip.count()) === 1,
+        "the on square of the strip unfolded the device"
+      );
+      await page.mouse.click(middle.x, middle.y);
+      await slot.locator("[data-slot=device-header]").waitFor({ timeout: 2000 });
     },
   "DEV-010: a rack's chain has no scroll of its own, and the strip that ends the track's chain stays at the right":
     async (browser) => {
