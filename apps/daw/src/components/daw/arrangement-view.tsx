@@ -395,10 +395,37 @@ export function ArrangementView({
     (id: string) => dispatch({ id, type: "duplicate-track" }),
     [dispatch]
   );
-  // What a track's menu has and a return's has not.
+  // The track, with the tracks picked when it is one of them, into a new group (MIX-020).
+  const groupTrack = useCallback(
+    (id: string) =>
+      dispatch({
+        ids: selectedTracks.includes(id) ? selectedTracks : [id],
+        type: "group-tracks",
+      }),
+    [dispatch, selectedTracks]
+  );
+  const ungroupTrack = useCallback(
+    (id: string) => dispatch({ id, type: "ungroup" }),
+    [dispatch]
+  );
+  // What a track's menu has.
   const trackMenu = useMemo(
-    () => ({ onDuplicate: duplicateTrack, onInsert: insertTrack }),
-    [duplicateTrack, insertTrack]
+    () => ({
+      onDuplicate: duplicateTrack,
+      onGroup: groupTrack,
+      onInsert: insertTrack,
+    }),
+    [duplicateTrack, groupTrack, insertTrack]
+  );
+  // A group's menu lets its tracks go, too; a return's has none of these.
+  const menuOf = useCallback(
+    (isReturn: boolean, isGroup: boolean) => {
+      if (isReturn) {
+        return;
+      }
+      return isGroup ? { ...trackMenu, onUngroup: ungroupTrack } : trackMenu;
+    },
+    [trackMenu, ungroupTrack]
   );
   const changeLoop = useCallback(
     (range: TimelinePrimitive.Range.Value) =>
@@ -665,7 +692,7 @@ export function ArrangementView({
                           selectedTrack === track.id
                         }
                         trackId={track.id}
-                        {...(isReturn ? undefined : trackMenu)}
+                        {...menuOf(isReturn, isGroup)}
                       >
                         {automation.automating ? (
                           <TrackAutomationChooser

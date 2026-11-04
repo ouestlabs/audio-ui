@@ -467,51 +467,81 @@ const formatPan = (pan: number) => {
   return `${pan < 0 ? "L" : "R"}${amount}`;
 };
 
+type TrackAction = (trackId: string) => void;
+
+/** An entry of a track's menu, there only when it is given its action. */
+function TimelineTrackMenuItem({
+  action,
+  children,
+  trackId,
+  variant,
+}: {
+  action?: TrackAction;
+  children: ReactNode;
+  trackId: string;
+  variant?: "destructive";
+}) {
+  const handleClick = useCallback(() => action?.(trackId), [action, trackId]);
+  return action ? (
+    <ContextMenuItem onClick={handleClick} variant={variant}>
+      {children}
+    </ContextMenuItem>
+  ) : null;
+}
+
 /** A track's context menu: an entry for each action it is given, then the colors. */
 function TimelineTrackMenu({
   folded,
   onColor,
   onDuplicate,
   onFold,
+  onGroup,
   onInsert,
   onRemove,
   onRename,
+  onUngroup,
+  trackId,
 }: {
   folded?: boolean;
   onColor: (event: MouseEvent<HTMLElement>) => void;
-  onDuplicate?: () => void;
-  onFold?: () => void;
-  onInsert?: () => void;
-  onRemove?: () => void;
+  onDuplicate?: TrackAction;
+  onFold?: TrackAction;
+  onGroup?: TrackAction;
+  onInsert?: TrackAction;
+  onRemove?: TrackAction;
   onRename?: () => void;
+  onUngroup?: TrackAction;
+  trackId: string;
 }) {
   return (
     <ContextMenuContent className="w-auto min-w-36">
       {onRename ? (
         <ContextMenuItem onClick={onRename}>Rename</ContextMenuItem>
       ) : null}
-      {onDuplicate ? (
-        <ContextMenuItem onClick={onDuplicate}>Duplicate</ContextMenuItem>
-      ) : null}
-      {onFold ? (
-        <ContextMenuItem onClick={onFold}>
-          {folded ? "Unfold" : "Fold"}
-        </ContextMenuItem>
-      ) : null}
-      {onRemove ? (
-        <>
-          <ContextMenuSeparator />
-          <ContextMenuItem onClick={onRemove} variant="destructive">
-            Delete
-          </ContextMenuItem>
-        </>
-      ) : null}
-      {onInsert ? (
-        <>
-          <ContextMenuSeparator />
-          <ContextMenuItem onClick={onInsert}>Insert track</ContextMenuItem>
-        </>
-      ) : null}
+      <TimelineTrackMenuItem action={onDuplicate} trackId={trackId}>
+        Duplicate
+      </TimelineTrackMenuItem>
+      <TimelineTrackMenuItem action={onFold} trackId={trackId}>
+        {folded ? "Unfold" : "Fold"}
+      </TimelineTrackMenuItem>
+      <TimelineTrackMenuItem action={onGroup} trackId={trackId}>
+        Group
+      </TimelineTrackMenuItem>
+      <TimelineTrackMenuItem action={onUngroup} trackId={trackId}>
+        Ungroup
+      </TimelineTrackMenuItem>
+      {onRemove ? <ContextMenuSeparator /> : null}
+      <TimelineTrackMenuItem
+        action={onRemove}
+        trackId={trackId}
+        variant="destructive"
+      >
+        Delete
+      </TimelineTrackMenuItem>
+      {onInsert ? <ContextMenuSeparator /> : null}
+      <TimelineTrackMenuItem action={onInsert} trackId={trackId}>
+        Insert track
+      </TimelineTrackMenuItem>
       <ContextMenuSeparator />
       {TRACK_COLORS.map((swatch, index) => (
         <ContextMenuItem data-color={index} key={swatch.name} onClick={onColor}>
@@ -539,11 +569,13 @@ function TimelineTrackControls({
   onMix,
   onMixCommit,
   onDuplicate,
+  onGroup,
   onInsert,
   onRemove,
   onRename,
   onSelect,
   onToggleFold,
+  onUngroup,
   meter,
   selected,
   trackId,
@@ -565,8 +597,12 @@ function TimelineTrackControls({
   onMixCommit?: (trackId: string) => void;
   /** Gives the menu a "Duplicate" entry. */
   onDuplicate?: (trackId: string) => void;
+  /** Gives the menu a "Group" entry: the track, with the tracks picked, into a new group. */
+  onGroup?: (trackId: string) => void;
   /** Gives the menu an "Insert track" entry: a new track after this one. */
   onInsert?: (trackId: string) => void;
+  /** Gives the menu an "Ungroup" entry, for a group track: its tracks out of it, and the group removed. */
+  onUngroup?: (trackId: string) => void;
   /** Lets the name be edited in place: a double-click, or "Rename" in the menu. */
   onRename?: (trackId: string, name: string) => void;
   /** Gives the menu a "Delete track" entry. Leave it out for tracks that cannot be removed. */
@@ -603,10 +639,6 @@ function TimelineTrackControls({
       onMix(trackId, { color: Number(event.currentTarget.dataset.color) }),
     [onMix, trackId]
   );
-  const handleRemove = useCallback(
-    () => onRemove?.(trackId),
-    [onRemove, trackId]
-  );
   const [renaming, setRenaming] = useState(false);
   const startRenaming = useCallback(() => setRenaming(true), []);
   // The menu hands focus back as it closes, which would end the edit: open the field after it.
@@ -638,14 +670,6 @@ function TimelineTrackControls({
       setRenaming(false);
     },
     [onRename, trackId]
-  );
-  const handleDuplicate = useCallback(
-    () => onDuplicate?.(trackId),
-    [onDuplicate, trackId]
-  );
-  const handleInsert = useCallback(
-    () => onInsert?.(trackId),
-    [onInsert, trackId]
   );
   const handleFold = useCallback(
     () => onToggleFold?.(trackId),
@@ -785,11 +809,14 @@ function TimelineTrackControls({
       <TimelineTrackMenu
         folded={folded}
         onColor={handleColor}
-        onDuplicate={onDuplicate ? handleDuplicate : undefined}
-        onFold={onToggleFold ? handleFold : undefined}
-        onInsert={onInsert ? handleInsert : undefined}
-        onRemove={onRemove ? handleRemove : undefined}
+        onDuplicate={onDuplicate}
+        onFold={onToggleFold}
+        onGroup={onGroup}
+        onInsert={onInsert}
+        onRemove={onRemove}
         onRename={onRename ? handleRenameItem : undefined}
+        onUngroup={onUngroup}
+        trackId={trackId}
       />
     </ContextMenu>
   );

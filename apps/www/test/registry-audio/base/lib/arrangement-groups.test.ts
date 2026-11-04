@@ -149,4 +149,26 @@ describe("groups", () => {
     const inside = apply(grouped, { afterId: "kick", type: "add-track" });
     expect(layout(inside)[2]).toBe("track-7<group-1");
   });
+
+  test("MIX-020: a group duplicated comes again right after its tracks, with copies of them and their clips", () => {
+    const grouped = run([{ ids: ["kick", "snare"], type: "group-tracks" }]);
+    const copied = apply(grouped, { id: "group-1", type: "duplicate-track" });
+    expect(layout(copied)).toEqual([
+      "group-1",
+      "kick<group-1",
+      "snare<group-1",
+      "track-7",
+      "track-8<track-7",
+      "track-9<track-7",
+      "hats",
+      "bass",
+      "vocal",
+    ]);
+    expect(copied.doc.tracks[3]?.name).toBe("Group 1 copy");
+    expect(copied.doc.clips.map((clip) => clip.track)).toEqual([
+      "kick",
+      "track-8",
+    ]);
+    expect(copied.history.past).toHaveLength(2);
+  });
 });

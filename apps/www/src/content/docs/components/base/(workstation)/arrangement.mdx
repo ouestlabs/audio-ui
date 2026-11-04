@@ -450,7 +450,8 @@ The grip sits in its track's row, inside the `Timeline`. While a track is dragge
 A track can sit in a group track: it names it in `group`, and a group's tracks follow it in `tracks`. The group is a track of its own (`kind: "group"`), with its chain, its mix and its sends, and the tracks in it play into it instead of into the main track. A group can hold groups.
 
 - `{ type: "group-tracks", ids }` puts tracks into a new group where the first of them was. `{ type: "ungroup", id }` dissolves one, its tracks going up a level.
-- A group moves, and is removed, with its tracks; a track moved among a group's tracks joins it.
+- A group moves, is duplicated and is removed with its tracks; a track moved among a group's tracks joins it.
+- `TimelineTrackControls` puts "Group" and "Ungroup" in a track's menu when given `onGroup` and `onUngroup` (give `onUngroup` to a group track only).
 - `unfoldedTracks` (from `useArrangement`) leaves out the tracks of a folded group. `trackBlock` and `trackDepth` give a group's tracks and how deep a track sits, to indent its header.
 - `ArrangedGroupPreview`, from `arranged-clip`, draws on a group's lane what its tracks play.
 

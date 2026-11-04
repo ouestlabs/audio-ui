@@ -1296,6 +1296,31 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           !document.querySelector('[aria-label="Group 1"][data-track-id]')
       );
     },
+  "MIX-020: a track's menu groups it, a group's menu duplicates it with its tracks and lets them go":
+    async (browser) => {
+      const page = await open(browser);
+      const menu = async (track: string, item: string) => {
+        await page
+          .getByText(track, { exact: true })
+          .first()
+          .click({ button: "right" });
+        await page.getByRole("menuitem", { name: item, exact: true }).click();
+      };
+      await menu("1 Audio", "Group");
+      await page.getByText("Group 1", { exact: true }).first().waitFor();
+      await menu("Group 1", "Duplicate");
+      await page.getByText("Group 1 copy", { exact: true }).first().waitFor();
+      const inside = await page
+        .locator('[data-track-id] [data-depth="1"]')
+        .count();
+      assert(inside === 2, `${inside} tracks sit in the two groups`);
+      await menu("Group 1", "Ungroup");
+      await page.waitForFunction(
+        () =>
+          !document.querySelector('[aria-label="Group 1"][data-track-id]') &&
+          document.querySelector('[aria-label="Group 1 copy"][data-track-id]')
+      );
+    },
   "DEV-010 and DEV-012: a rack takes a device from the library, plays it, and a macro turns its parameter":
     async (browser) => {
       const page = await open(browser);

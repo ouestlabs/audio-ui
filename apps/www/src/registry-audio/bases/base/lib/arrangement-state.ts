@@ -1471,36 +1471,52 @@ type Handlers = {
   ) => ArrangementState;
 };
 
+/** A track again right after it, with copies of its clips; a group, with every track in it. */
 function duplicateTrack(state: ArrangementState, id: string): ArrangementState {
-  const source = state.doc.tracks.find((item) => item.id === id);
-  if (!source) {
+  const { tracks } = state.doc;
+  if (!tracks.some((item) => item.id === id)) {
     return state;
   }
-  const count = state.trackCount + 1;
+  const block = trackBlock(tracks, id);
+  const sources = tracks.filter((item) => block.includes(item.id));
   const devicesTaken = deviceIds(state.doc);
-  const copy: ArrangementTrack = {
-    ...source,
-    devices: source.devices?.map((device) => ({
-      ...device,
-      id: freshId("device", devicesTaken),
-    })),
-    id: `track-${count}`,
-    name: `${source.name} copy`,
-  };
+  // Each track of the block takes the next number, and the copies keep their groups among themselves.
+  const ids = new Map(
+    sources.map((item, index) => [
+      item.id,
+      `track-${state.trackCount + index + 1}`,
+    ])
+  );
+  const copies = sources.map((item): ArrangementTrack => {
+    const group = item.group === undefined ? undefined : ids.get(item.group);
+    return {
+      ...item,
+      devices: item.devices?.map((device) => ({
+        ...device,
+        id: freshId("device", devicesTaken),
+      })),
+      ...(group === undefined ? {} : { group }),
+      id: ids.get(item.id) ?? item.id,
+      name: item.id === id ? `${item.name} copy` : item.name,
+    };
+  });
   const next = edit(state, (doc) => {
-    const tracks = [...doc.tracks];
-    tracks.splice(tracks.findIndex((item) => item.id === id) + 1, 0, copy);
+    const last = Math.max(
+      ...block.map((each) => doc.tracks.findIndex((item) => item.id === each))
+    );
+    const list = [...doc.tracks];
+    list.splice(last + 1, 0, ...copies);
     const taken = new Set(doc.clips.map((clip) => clip.id));
-    const copies = doc.clips
-      .filter((clip) => clip.track === id)
+    const clips = doc.clips
+      .filter((clip) => ids.has(clip.track))
       .map((clip) => ({
         ...clip,
         id: freshId(clip.id, taken),
-        track: copy.id,
+        track: ids.get(clip.track) ?? clip.track,
       }));
-    return { ...doc, clips: [...doc.clips, ...copies], tracks };
+    return { ...doc, clips: [...doc.clips, ...clips], tracks: list };
   });
-  return { ...next, trackCount: count };
+  return { ...next, trackCount: state.trackCount + sources.length };
 }
 
 /** A track and every track in it, down the groups within: a group's block, which stays together in the list. */
