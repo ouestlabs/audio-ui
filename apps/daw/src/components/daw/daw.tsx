@@ -581,11 +581,11 @@ export function Daw({
       );
       setRecordings((current) => new Map([...current, ...decoded]));
       dispatch({
-        commands: dropCommands(decoded, track, at, doc.duration),
+        commands: dropCommands(decoded, track, at, doc.duration, doc.tempo),
         type: "batch",
       });
     },
-    [dispatch, doc.duration, recordings]
+    [dispatch, doc.duration, doc.tempo, recordings]
   );
 
   // A recording dropped on a drum rack's pad (DEV-013): kept decoded, as a pad plays it whole and at once.

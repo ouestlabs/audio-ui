@@ -1,3 +1,9 @@
+import {
+  autoWarp,
+  detectTransients,
+  estimateTempo,
+  type TempoEstimate,
+} from "@audio-ui/core/analysis";
 import type { ParameterValue } from "@audio-ui/core/device";
 import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
@@ -605,6 +611,54 @@ export function withEdgeFades<Value extends { length: number }>(
 ): Value & { fadeIn: number; fadeOut: number } {
   const fade = Math.min(EDGE_FADE_SECONDS, value.length / 2);
   return { ...value, fadeIn: fade, fadeOut: fade };
+}
+
+/** What a recording's beat is read as when it comes in: its tempo, if it has one, and its transients, in seconds. */
+export interface BeatAnalysis {
+  estimate: TempoEstimate | null;
+  transients: number[];
+}
+
+/** Reads a recording's beat, once, as it is decoded: what `warpOnImport` warps its clips by. */
+export function analyzeBeat(
+  channels: readonly Float32Array[],
+  sampleRate: number
+): BeatAnalysis {
+  const estimate = estimateTempo(channels, sampleRate);
+  return {
+    estimate,
+    transients: estimate ? detectTransients(channels, sampleRate) : [],
+  };
+}
+
+/**
+ * A clip of a recording just brought in, warped in Beats so it plays in time
+ * at `tempo` (CLP-019): a short loop as that loop, any other on the first
+ * beat of each bar, starting on its first beat and as long as the whole
+ * recording plays. A recording with no tempo leaves the clip as it is.
+ */
+export function warpOnImport<Clip extends Arranged>(
+  clip: Clip,
+  beat: BeatAnalysis,
+  tempo: { beatsPerBar: number; bpm: number }
+): Clip {
+  const warped = autoWarp({
+    beatsPerBar: tempo.beatsPerBar,
+    duration: clip.sourceLength,
+    estimate: beat.estimate,
+    tempo: tempo.bpm,
+    transients: beat.transients,
+  });
+  if (!warped) {
+    return clip;
+  }
+  const length = warpedTime(warped.warp, clip.sourceLength) - warped.offset;
+  return {
+    ...clip,
+    value: { ...clip.value, length, offset: warped.offset },
+    warp: warped.warp,
+    warpMode: "beats",
+  };
 }
 
 /**

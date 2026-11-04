@@ -1,4 +1,4 @@
-import { type Arranged, withEdgeFades } from "@/lib/arrangement";
+import { type Arranged, warpOnImport, withEdgeFades } from "@/lib/arrangement";
 import type { ArrangementCommand } from "@/lib/arrangement-state";
 import {
   decodeRecording,
@@ -52,14 +52,16 @@ export async function decodeFiles(
 /**
  * What lays dropped recordings out, as one batch: on a track, one clip after
  * the other from `at` (ARR-005); on the add-track row, a track each, named
- * after its file, its clip at `at` (ARR-006). The arrangement grows to hold
- * what goes past its end (TRN-008).
+ * after its file, its clip at `at` (ARR-006). A recording with a beat is
+ * warped in time at `tempo` (CLP-019). The arrangement grows to hold what
+ * goes past its end (TRN-008).
  */
 export function dropCommands(
   recordings: ReadonlyMap<string, Recording>,
   track: string,
   at: number,
-  duration: number
+  duration: number,
+  tempo: { beatsPerBar: number; bpm: number }
 ): ArrangementCommand[] {
   const commands: ArrangementCommand[] = [];
   let start = at;
@@ -74,7 +76,7 @@ export function dropCommands(
         type: "add-track",
       });
     }
-    const clip: Arranged = {
+    const laid: Arranged = {
       id,
       name: recording.name,
       recording: id,
@@ -86,10 +88,13 @@ export function dropCommands(
         start,
       }),
     };
-    end = Math.max(end, start + recording.length);
+    const clip = recording.beat
+      ? warpOnImport(laid, recording.beat, tempo)
+      : laid;
+    end = Math.max(end, start + clip.value.length);
     commands.push({ clip, type: "add-clip" });
     if (track !== NEW_TRACK) {
-      start += recording.length;
+      start += clip.value.length;
     }
   }
   return end > duration

@@ -520,6 +520,14 @@ The Signature strip holds time-signature changes: its + adds one at the cursor, 
 
 Drag an audio file from the desktop onto an audio track: the track is outlined while the file is over it, and let go, the file becomes a clip at the grid line under the pointer (anywhere with Cmd/Ctrl), named and as long as the file. Several files follow each other on the track, and a file let go anywhere else in the view does nothing. The block decodes a file at the engine's rate with `decodeAudioChannels` from `lib/audio-decode` (`npx shadcn@latest add @audio-ui/audio-decode`), keeps it as a recording the clip names (`recording`), and takes its peaks with `computePeaks` from `@audio-ui/core/analysis`: the clip draws its waveform, and it plays.
 
+A file with a beat comes in warped, in Beats, so it plays in time at the arrangement's tempo: `analyzeBeat` from the `arrangement` lib reads its tempo and transients once, as it is decoded (`estimateTempo` and `detectTransients` from `@audio-ui/core/analysis`), and `warpOnImport` warps the clip. A short file that 1, 2, 4, 8 or 16 bars fit at that tempo is taken as that loop, its tempo the one its length gives; a longer one gets a warp marker on the first beat of each bar, moved onto the nearest transient, and starts on its first beat. The clip panel's BPM shows the tempo it was read at: if a loop was read at twice or half its tempo, ÷2 or ×2 sets it right. A file with no steady beat, a single hit or a held sound, plays as recorded.
+
+```ts
+import { analyzeBeat, warpOnImport } from "@/lib/arrangement";
+
+const clip = warpOnImport(laidDown, analyzeBeat(channels, sampleRate), tempo);
+```
+
 ### Automation
 
 Press **A**, or the automation button, for automation mode: each track's header gets a chooser of what its lane shows, Volume or Pan, and its lane the envelope of that parameter over its clips (`automation-envelope`, `npx shadcn@latest add @audio-ui/automation-envelope`). Until the track has one, the line stands faint at the mix's value; double-click it to add a point, drag a point to move it on the grid (its level stays free), drag the small handle on a segment to bend it, and double-click a point to take it away. Beside the line, a press reaches the lane and the clips as before. Each track's channel follows its envelopes as it plays. Moving an automated gain or pan by hand overrides it: the envelope greys, the mix plays, and **Re-enable automation** in the toolbar (or drawing on the envelope) brings it back. In `lib/arrangement`, a track keeps its `automation` per parameter as points across the whole arrangement, `x` from 0 to 1, so a tempo change keeps them in place; `automationAt` reads one, `volumeGain` and `panPosition` turn its values into a gain and a pan, and `mixAt` gives what a track plays at a point of the song.
