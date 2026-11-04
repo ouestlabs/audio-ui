@@ -42,6 +42,8 @@ export interface UseTimeSelectionOptions {
   dispatch: (command: ArrangementCommand) => unknown;
   /** Where the cursor is, in seconds: where a paste lands and silence opens. */
   getPosition: () => number;
+  /** Consolidates a stretch of time, as Cmd/Ctrl + J asks: what a host that renders recordings does itself, ending with the `consolidate-time` command. @default that command, with nothing rendered */
+  onConsolidate?: (time: TimeSelection) => void;
   selectedIds: readonly string[];
   selectedTracks: readonly string[];
   tracks: readonly ArrangementTrack[];
@@ -65,6 +67,7 @@ export function useTimeSelection({
   copyOf,
   dispatch,
   getPosition,
+  onConsolidate,
   selectedIds,
   selectedTracks,
   tracks,
@@ -180,7 +183,12 @@ export function useTimeSelection({
           length: time ? time.range[1] - time.range[0] : bar,
           type: "insert-time",
         }),
-      j: time ? () => dispatch({ time, type: "consolidate-time" }) : undefined,
+      j: time
+        ? () =>
+            onConsolidate
+              ? onConsolidate(time)
+              : dispatch({ time, type: "consolidate-time" })
+        : undefined,
       l: time
         ? () =>
             dispatch({

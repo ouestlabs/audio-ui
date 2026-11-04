@@ -57,3 +57,17 @@ describe("encodeWav", () => {
     expect(view.getInt16(46, true)).toBe(-16_384);
   });
 });
+
+describe("a float WAV", () => {
+  test("ARR-020: 32 bits are floats, format 3, and keep what goes past full scale", () => {
+    const bytes = encodeWav([Float32Array.of(0.25, 1.5, -2)], 48_000, {
+      bitDepth: 32,
+    });
+    const view = new DataView(bytes.buffer);
+    expect(view.getUint16(20, true)).toBe(3);
+    expect(view.getUint16(34, true)).toBe(32);
+    expect(view.getFloat32(44, true)).toBe(0.25);
+    expect(view.getFloat32(48, true)).toBe(1.5);
+    expect(view.getFloat32(52, true)).toBe(-2);
+  });
+});

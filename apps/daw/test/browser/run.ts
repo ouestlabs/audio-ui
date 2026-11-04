@@ -846,6 +846,41 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await expectChanged(fader, await fader.inputValue());
       await page.keyboard.press("Space");
     },
+  "ARR-020: Cmd+J renders a track's clips into one new recording, which plays, and one undo brings them back":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 8);
+      const clip = page
+        .locator('[data-track="track-1"] [data-clip-id]')
+        .first();
+      await clip.waitFor({ timeout: 10_000 });
+      const before = await clip.getAttribute("data-clip-id");
+      await selectTime(page, "track-2", "track-1");
+      await page.keyboard.press("Meta+KeyJ");
+      // A new clip takes its place, whole, or the part of it the stretch covers.
+      await page.waitForFunction(
+        (id) =>
+          document.querySelector(`[data-clip-id="${id}"]`) === null ||
+          document.querySelectorAll('[data-track="track-1"] [data-clip-id]')
+            .length > 1,
+        before,
+        { timeout: 20_000 }
+      );
+      await page.waitForSelector("text=Saved", { timeout: 5000 });
+      await showMixer(page);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 1500);
+      await page.keyboard.press("Space");
+      assert(level > -40, `the consolidated track plays at ${level} dB`);
+      await page.keyboard.press("Meta+KeyZ");
+      await page.waitForSelector(`[data-clip-id="${before}"]`, {
+        timeout: 5000,
+      });
+    },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {
       const page = await open(browser);

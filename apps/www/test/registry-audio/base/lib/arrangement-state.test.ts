@@ -613,6 +613,81 @@ describe("apply", () => {
     expect(copy?.mix).toMatchObject({ gain: 0.5, pan: -1 });
   });
 
+  test("ARR-020: consolidating audio plays the recording rendered for its track, with nothing of the clips it replaces", () => {
+    const take = at("a", 2, 4);
+    const state = apply(
+      init([
+        {
+          ...take,
+          gain: 6,
+          recording: "take",
+          reversed: true,
+          value: { ...take.value, fadeIn: 0.5 },
+        },
+        at("b", 6, 4),
+      ]),
+      {
+        rendered: { [take.track]: "bounced" },
+        time: { range: [2, 10], tracks: [take.track] },
+        type: "consolidate-time",
+      }
+    );
+    expect(state.doc.clips).toEqual([
+      {
+        id: "a-1",
+        name: take.name,
+        recording: "bounced",
+        sourceLength: 8,
+        track: take.track,
+        value: { fadeIn: 0, fadeOut: 0, length: 8, offset: 0, start: 2 },
+      },
+    ]);
+    expect(state.history.past).toHaveLength(1);
+  });
+
+  test("ARR-020: consolidating MIDI merges the notes as they sound, into one clip of the stretch", () => {
+    const left = at("a", 0, 4);
+    const right = at("b", 4, 4);
+    const note = (id: number, start: number, pitch: number, length = 1) => ({
+      id,
+      length,
+      pitch,
+      start,
+      velocity: 0.5,
+    });
+    const state = apply(
+      init([
+        {
+          ...left,
+          notes: [note(1, 0.5, 60), note(2, 3, 62)],
+          transpose: 12,
+        },
+        {
+          ...right,
+          notes: [note(1, 1, 64), note(2, 2.5, 65, 2)],
+          value: { ...right.value, offset: 1 },
+        },
+      ]),
+      {
+        time: { range: [1, 6], tracks: [left.track] },
+        type: "consolidate-time",
+      }
+    );
+    const clips = state.doc.clips.filter((item) => item.notes?.length === 3);
+    expect(clips).toHaveLength(1);
+    const [merged] = clips;
+    expect(merged?.value).toMatchObject({ length: 5, offset: 0, start: 1 });
+    expect(merged?.transpose).toBeUndefined();
+    // The first note is before the stretch; the last runs past it, and stops with it.
+    expect(
+      merged?.notes?.map(({ length, pitch, start }) => [start, pitch, length])
+    ).toEqual([
+      [2, 74, 1],
+      [3, 64, 1],
+      [4.5, 65, 0.5],
+    ]);
+  });
+
   test("CLP-006: a cut gives an audio clip an edge's fade each side, and leaves its outer fades as they were", () => {
     const whole = at("a", 0, 20);
     let state = init([

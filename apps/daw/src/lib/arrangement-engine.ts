@@ -1297,3 +1297,31 @@ export async function renderArrangement(
   engine.dispose();
   return rendered;
 }
+
+/**
+ * What a track's clips play over `[from, to)` of the arrangement, and nothing
+ * else: their fades, gains and crossfades, without the track's devices, its
+ * mix, its automation or anything sent to it. It is what the clips would be as
+ * one recording, the track's chain still to come after it.
+ */
+export function renderTrackClips(
+  doc: ArrangementDoc,
+  track: string,
+  [from, to]: readonly [number, number],
+  recordings: ReadonlyMap<string, RecordingSource>,
+  options: Omit<RenderOptions, "from" | "to"> = {}
+): Promise<AudioBuffer | null> {
+  const bare = { color: 0, name: "" };
+  return renderArrangement(
+    {
+      ...doc,
+      clips: doc.clips.filter((clip) => clip.track === track),
+      loop: { ...doc.loop, on: false },
+      main: { ...bare, id: doc.main.id },
+      returns: [],
+      tracks: [{ ...bare, id: track, kind: "audio" }],
+    },
+    recordings,
+    { ...options, from, to }
+  );
+}

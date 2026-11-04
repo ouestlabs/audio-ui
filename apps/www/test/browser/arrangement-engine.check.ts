@@ -11,6 +11,7 @@ import {
   createArrangementEngine,
   type MetronomeSettings,
   renderArrangement,
+  renderTrackClips,
 } from "@/registry-audio/bases/base/lib/arrangement-engine";
 import {
   type ArrangementDoc,
@@ -1286,5 +1287,53 @@ check(
   async () => {
     const low = await lowestAtJoin(0.1, 0.1, 0);
     assert(low < 0.01, `with no material before it, the join stands at ${low}`);
+  }
+);
+
+check(
+  "ARR-020: a track's clips render as they play, without its devices, mix or automation, past full scale too",
+  async () => {
+    const take = recording(0.5);
+    const doc = arrangement({
+      clips: [{ ...clip("a", "vox", 0.1, 0.3), gain: 20 * Math.log10(4) }],
+      tracks: [
+        {
+          automation: {
+            volume: [
+              { x: 0, y: 0 },
+              { x: 1, y: 0 },
+            ],
+          },
+          color: 0,
+          devices: [device("u", "audioui.utility", { gainDb: -30 })],
+          id: "vox",
+          mix: unity(0.25),
+          name: "Vox",
+        },
+      ],
+    });
+    const out = await renderTrackClips(
+      doc,
+      "vox",
+      [0, 0.5],
+      new Map([["take", take]]) as never,
+      {
+        sampleRate: RATE,
+      }
+    );
+    assert(out, "the browser renders the clips offline");
+    const data = out.getChannelData(0);
+    const source = take.channels[0] as Float32Array;
+    const peak = Math.max(...source.subarray(0, 0.3 * RATE).map(Math.abs));
+    const loudest = Math.max(...data.map(Math.abs));
+    assert(
+      Math.abs(loudest - peak * 4) < 1e-3,
+      `the clip's +12 dB gives ${loudest}, not ${peak * 4}: its gain is in, its track's mix and devices out`
+    );
+    assert(loudest > 1, `the render stopped at full scale: ${loudest}`);
+    assert(
+      data.subarray(0, 0.1 * RATE - 1).every((sample) => sample === 0),
+      "the clip sounds before it starts"
+    );
   }
 );
