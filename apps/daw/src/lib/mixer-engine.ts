@@ -100,6 +100,19 @@ interface Channel extends MixerStrip {
 }
 
 /**
+ * Undoes the link from `from` to `to`, if it is still there: a device let go
+ * of before its chain is rewired has already undone its own links, and the
+ * Web Audio API throws on a link that is not there.
+ */
+function unlink(from: AudioNode, to: AudioNode) {
+  try {
+    from.disconnect(to);
+  } catch {
+    // Already undone.
+  }
+}
+
+/**
  * A mixer on the Web Audio API: a channel for each track and each return, and
  * the main track, which goes to `destination`.
  *
@@ -203,7 +216,7 @@ export function createMixer(
         const before = [input, ...links.map((link) => link.output)];
         const after = [...links.map((link) => link.input), chainOut];
         for (const [index, from] of before.entries()) {
-          from.disconnect(after[index] as AudioNode);
+          unlink(from, after[index] as AudioNode);
         }
         links = chain;
         const heads = [input, ...chain.map((link) => link.output)];

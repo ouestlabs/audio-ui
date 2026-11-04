@@ -757,7 +757,7 @@ check(
 );
 
 /** A drum rack of `pads` on a MIDI track playing `notes`, rendered for half a second with a recording `hit`, an impulse on its first frame. */
-async function throughDrums(
+function throughDrums(
   pads: {
     devices?: ReturnType<typeof device>[];
     mix?: { gain: number; muted: boolean; pan: number; soloed: boolean };
@@ -876,5 +876,39 @@ check(
     const during = Math.max(...data.subarray(4800, 9600).map(Math.abs));
     assert(before === 0, `the kick sounds before its note (${before})`);
     assert(during > 0.3, `the kick is near silent (${during})`);
+  }
+);
+
+check(
+  "DEV-007: a device removed from a track's chain, on or switched off, leaves the rest of the chain playing",
+  async () => {
+    const ctx = new OfflineAudioContext(2, RATE / 2, RATE);
+    const engine = await createArrangementEngine(ctx);
+    assert(engine, "the engine loads");
+    const take = recording(0.5);
+    const recordings = new Map([["take", take]]);
+    const withDevices = (devices: TrackDevice[]) =>
+      arrangement({
+        clips: [clip("a", "vox", 0, 0.5)],
+        tracks: [{ color: 0, devices, id: "vox", name: "Vox" }],
+      });
+    const on = device("on", "audioui.utility");
+    const off = { ...device("off", "audioui.utility"), on: false };
+    const kept = device("kept", "audioui.utility", { gainDb: 6 });
+    engine.update(withDevices([on, off, kept]), recordings as never);
+    await engine.ready();
+    try {
+      engine.update(withDevices([off, kept]), recordings as never);
+      engine.update(withDevices([kept]), recordings as never);
+    } catch (error) {
+      throw new Error(`removing a device throws: ${(error as Error).message}`, {
+        cause: error,
+      });
+    }
+    engine.play(0, 0);
+    const out = (await ctx.startRendering()).getChannelData(0);
+    engine.dispose();
+    const loudest = Math.max(...out.map(Math.abs));
+    assert(loudest > 0.5, `the device left plays the take at ${loudest}`);
   }
 );
