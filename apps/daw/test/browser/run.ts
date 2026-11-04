@@ -881,6 +881,46 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         timeout: 5000,
       });
     },
+  "MIX-022: a track's header meters it: the track that plays reads a level, a thin pair, and the others none":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 8);
+      await page.waitForSelector("[data-clip-id]", { timeout: 10_000 });
+      const level = page.getByRole("group", { name: "1 Audio level" });
+      const box = await level.boundingBox();
+      assert(
+        box && box.width < 12,
+        `the header's meter is ${box?.width} px wide, not a thin pair`
+      );
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const read = (name: string) =>
+        page.evaluate(
+          ([label]) =>
+            Number(
+              document
+                .querySelector(`[aria-label="${label}"] [aria-valuenow]`)
+                ?.getAttribute("aria-valuenow")
+            ),
+          [name]
+        );
+      await page.waitForFunction(
+        () =>
+          Number(
+            document
+              .querySelector('[aria-label="1 Audio level"] [aria-valuenow]')
+              ?.getAttribute("aria-valuenow")
+          ) > -40,
+        undefined,
+        { timeout: 10_000 }
+      );
+      const other = await read("2 Audio level");
+      await page.keyboard.press("Space");
+      assert(!(other > -40), `the silent track reads ${other} dB`);
+    },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {
       const page = await open(browser);

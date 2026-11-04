@@ -62,6 +62,7 @@ import {
   TrackReorderGhost,
   trackReorderClass,
 } from "@/components/audio-ui/track-grip";
+import { TrackLevel } from "@/components/audio-ui/track-level";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -750,6 +751,12 @@ export function ArrangementView({
                           overridden: automation.overridden[track.id],
                           position: engine.position,
                         }}
+                        meter={
+                          <TrackLevel
+                            analysers={engine.meter(track.id)}
+                            name={track.name}
+                          />
+                        }
                         name={track.name}
                         onMix={automation.changeMix}
                         onMixCommit={settle}

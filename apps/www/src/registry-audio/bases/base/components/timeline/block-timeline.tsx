@@ -87,6 +87,7 @@ import {
   TrackReorderGhost,
   trackReorderClass,
 } from "@/registry-audio/bases/base/audio/elements/track-grip";
+import { TrackLevel } from "@/registry-audio/bases/base/audio/elements/track-level";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import {
   ClipPanel,
@@ -586,28 +587,6 @@ function ClipDock({
     >
       <CloseClipView onClose={onClose} />
     </ClipPanel>
-  );
-}
-
-/** A track's level as the engine meters it: what its channel sends on, after its volume, pan and switch, so a silent track reads silence. */
-function TrackLevel({
-  analysers,
-  name,
-}: {
-  analysers: readonly AnalyserNode[] | null;
-  name: string;
-}) {
-  const levels = useAudioLevels(analysers ?? NO_ANALYSERS);
-  return (
-    <Meter
-      aria-label={`${name} level`}
-      className="gap-px data-[orientation=vertical]:h-full [--meter-thickness:--spacing(1)]"
-      orientation="vertical"
-      peakMarks="hidden"
-      size="sm"
-      source={analysers ? levels : SILENCE}
-      warnThreshold={-12}
-    />
   );
 }
 

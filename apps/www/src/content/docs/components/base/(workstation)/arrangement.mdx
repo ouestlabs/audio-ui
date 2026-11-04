@@ -410,7 +410,7 @@ With snapping on, a dragged clip or loop also lands on the edges of the other cl
 
 ### Arranged tracks
 
-A track's header is `TimelineTrackControls`, from the timeline: its name, gain, pan, mute, solo, color, fold and menu. `useTrackReorder` (`npx shadcn@latest add @audio-ui/use-track-reorder`) moves tracks: give each track a grip, and drag the grip, or press Up or Down on it.
+A track's header is `TimelineTrackControls`, from the timeline: its name, gain, pan, mute, solo, color, fold and menu. Its `meter` takes a level down its right edge: `TrackLevel` (`npx shadcn@latest add @audio-ui/track-level`), given `analysers={engine.meter(track.id)}`, is the one that goes there. `useTrackReorder` (`npx shadcn@latest add @audio-ui/use-track-reorder`) moves tracks: give each track a grip, and drag the grip, or press Up or Down on it.
 
 ```tsx
 import {

@@ -1009,6 +1009,20 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: [],
+    description:
+      "A track's level for its header: a thin vertical meter of what the engine meters on the track's channel, silent until an engine runs.",
+    files: [
+      {
+        path: "audio/elements/track-level.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "track-level",
+    registryDependencies: ["@audio-ui/meter", "@audio-ui/use-audio-levels"],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/core"],
     description:
       "A needle meter: a dial in dB that a live level moves, with the VU or the PPM ballistics of @audio-ui/core/meter. The needle turns outside React, so the dial does not re-render with the signal.",
