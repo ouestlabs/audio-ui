@@ -1,0 +1,34 @@
+---
+title: Rocker Switch
+description: A rocker switch, as on a mixer or a synth, the side pressed down sunk into the panel.
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="rocker-switch-demo" />
+
+A rocker, as on a mixer's or a synth's panel: two sides, the one pressed down sunk into the panel. Underneath it is a switch, with its role, Space to flip it, and its form value (`name`). Its shape follows the style, from a pill to a square.
+
+## Installation
+
+<Install name="rocker-switch" packages="@base-ui/react class-variance-authority" />
+
+## Usage
+
+```tsx
+import { RockerSwitch } from "@/components/audio-ui/rocker-switch";
+
+<RockerSwitch aria-label="Power" checked={power} onCheckedChange={setPower} />
+<RockerSwitch aria-label="Phase invert" offLabel="Ø" onLabel="Ø" orientation="horizontal" size="sm" />
+```
+
+## API reference
+
+<TypeTable>
+<TypeRow name={"checked, onCheckedChange"} type={"boolean, (checked) => void"}>Whether it is on, when it is held outside.</TypeRow>
+<TypeRow name={"defaultChecked"} type={"boolean"} default={"false"}>Whether it starts on, when it keeps its own state.</TypeRow>
+<TypeRow name={"onLabel, offLabel"} type={"ReactNode"} default={"\"I\", \"O\""}>What the on and the off side read.</TypeRow>
+<TypeRow name={"orientation"} type={"\"vertical\" | \"horizontal\""} default={"\"vertical\""}>Stood up, on at the top, or laid down, on at the right.</TypeRow>
+<TypeRow name={"size"} type={"\"default\" | \"sm\""} default={"\"default\""}>Its size.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Takes no input.</TypeRow>
+</TypeTable>

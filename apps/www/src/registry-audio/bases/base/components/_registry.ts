@@ -84,6 +84,65 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["hardware"],
+    description: "LEDs lit by Rec and Mute, one blinking red, in three sizes",
+    files: [
+      {
+        path: "components/hardware/led-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "led-demo",
+    registryDependencies: ["@audio-ui/led", "@shadcn/button"],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description:
+      "Screens with a caption: a filter cutoff in kHz driven by a parameter field, a preset's name and a tempo",
+    files: [
+      {
+        path: "components/hardware/lcd-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "lcd-demo",
+    registryDependencies: [
+      "@audio-ui/lcd",
+      "@audio-ui/value-display",
+      "@audio-ui/parameter-field",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description:
+      "A value of each kind: tempo, gain, cutoff, pan, mix, transpose and position",
+    files: [
+      {
+        path: "components/hardware/value-display-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "value-display-demo",
+    registryDependencies: ["@audio-ui/value-display"],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description:
+      "A power rocker that lights its LED, a small one laid down, and one disabled",
+    files: [
+      {
+        path: "components/hardware/rocker-switch-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "rocker-switch-demo",
+    registryDependencies: ["@audio-ui/rocker-switch", "@audio-ui/led"],
+    type: "registry:example",
+  },
+  {
     categories: ["parameter-field"],
     description:
       "Parameter fields for tempo, gain, transpose and cutoff: typed, stepped, or scrubbed by their label or unit",

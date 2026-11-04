@@ -19,6 +19,12 @@
       "name": "knob"
     },
     {
+      "count": 4,
+      "description": "Hardware-panel pieces: LEDs, small screens, values as they read, and rocker switches.",
+      "label": "Hardware",
+      "name": "hardware"
+    },
+    {
       "count": 1,
       "description": "Numeric fields for audio parameters: type a value, step it, or drag its label or unit to scrub it, with units and precision.",
       "label": "Parameter field",
@@ -163,5 +169,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 64
+  "totalComponents": 68
 }

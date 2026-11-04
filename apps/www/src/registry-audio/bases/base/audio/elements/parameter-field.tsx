@@ -1,6 +1,7 @@
 "use client";
 
 import { NumberField } from "@base-ui/react/number-field";
+import { cva } from "class-variance-authority";
 import {
   type KeyboardEvent,
   type ReactNode,
@@ -18,6 +19,16 @@ import {
   InputGroupInput,
   InputGroupText,
 } from "@/registry/bases/base/ui/input-group";
+
+const parameterFieldVariants = cva("cn-parameter-field", {
+  defaultVariants: { size: "default" },
+  variants: {
+    size: {
+      default: "",
+      sm: "cn-parameter-field-size-sm",
+    },
+  },
+});
 
 /** Enter commits what is typed: the field commits when it loses focus. */
 function commitOnEnter(event: KeyboardEvent<HTMLInputElement>) {
@@ -251,11 +262,7 @@ export function ParameterField({
       onValueCommitted={handleCommitted}
       render={
         <InputGroup
-          className={cn(
-            "w-auto min-w-0",
-            small && "h-7 text-xs [&_input]:text-xs",
-            className
-          )}
+          className={cn(parameterFieldVariants({ size }), className)}
         />
       }
       smallStep={smallStep}
@@ -267,8 +274,8 @@ export function ParameterField({
           {scrubbing(
             <InputGroupText
               className={cn(
-                "text-muted-foreground uppercase tracking-wide",
-                small ? "text-[0.625rem]" : "text-xs"
+                "cn-parameter-field-label",
+                small && "cn-parameter-field-label-sm"
               )}
             >
               {label}
@@ -300,7 +307,7 @@ export function ParameterField({
         render={
           <InputGroupInput
             aria-label={label}
-            className="min-w-0 text-end font-mono tabular-nums"
+            className="cn-parameter-field-value"
             onKeyDown={commitOnEnter}
           />
         }
@@ -310,7 +317,7 @@ export function ParameterField({
           {unit === undefined
             ? null
             : scrubbing(
-                <InputGroupText className="text-muted-foreground">
+                <InputGroupText className="cn-parameter-field-unit">
                   {unit}
                 </InputGroupText>
               )}

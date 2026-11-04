@@ -1134,7 +1134,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@base-ui/react"],
+    dependencies: ["@base-ui/react", "class-variance-authority"],
     description:
       "A parameter's value as a field: type it, step it with the arrows (Shift for large steps, Alt for small), or drag its label or unit to scrub it, sideways or up and down, with a unit, precision and steppers.",
     files: [
@@ -1145,6 +1145,58 @@ export const audio: RegistryItem[] = [
     ],
     name: "parameter-field",
     registryDependencies: ["@shadcn/input-group"],
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["class-variance-authority"],
+    description:
+      "A status light that glows in its tone when lit and stays a dim dot when off, blinking for an armed take: recording, signal, mute.",
+    files: [
+      {
+        path: "audio/elements/led.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "led",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["class-variance-authority"],
+    description:
+      "A small screen, as on a synth: the foreground as its glass and the background as lit figures, holding a reading under a caption, in light and dark alike.",
+    files: [
+      {
+        path: "audio/elements/lcd.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "lcd",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@audio-ui/core", "class-variance-authority"],
+    description:
+      "An audio value as it reads, in steady monospace figures: tempo, level in dB, frequency in Hz or kHz, pan, percent, semitones, time.",
+    files: [
+      {
+        path: "audio/elements/value-display.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "value-display",
+    type: "registry:ui",
+  },
+  {
+    dependencies: ["@base-ui/react", "class-variance-authority"],
+    description:
+      "A rocker switch, as on a mixer or a synth: two sides, the one pressed down sunk into the panel, upright or laid down, with a switch's role and keyboard.",
+    files: [
+      {
+        path: "audio/elements/rocker-switch.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "rocker-switch",
     type: "registry:ui",
   },
   {

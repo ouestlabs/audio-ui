@@ -28,6 +28,7 @@ The pieces of any audio interface: controls, keyboards and displays. Each takes 
 | `xypad` | `XYPad` from `@/components/audio-ui/xypad` | `@audio-ui/react/xypad` | Two parameters on one surface (filter cutoff and resonance, pan and send) |
 | `envelope` | `Envelope` from `@/components/audio-ui/envelope` | `@audio-ui/react/envelope` | A ramp edited by breakpoints: ADSR and other shapes, drag points, bend segments |
 | `parameter-field` | `ParameterField` from `@/components/audio-ui/parameter-field` | registry only | A parameter's value as a field (tempo, gain, transpose, cutoff): typed, stepped with the arrows (Shift large, Alt small), or scrubbed by dragging its label or unit, with `unit`, `precision`, `format`, `steppers`, `size="sm"`. |
+| `rocker-switch` | `RockerSwitch` from `@/components/audio-ui/rocker-switch` | registry only | An on/off rocker, as on a mixer or a synth panel: the side pressed down sunk in, `orientation`, `onLabel`/`offLabel`, a switch's role and keyboard. |
 
 ### Keyboards and pads
 
@@ -43,6 +44,9 @@ The pieces of any audio interface: controls, keyboards and displays. Each takes 
 | --- | --- | --- | --- |
 | `meter` | `Meter` from `@/components/audio-ui/meter` | `@audio-ui/react/meter` | Stereo or multi-channel dB level with peak hold, display only. Live levels come from a `source`, not from React state: `useAudioLevels(analysers)` from the `use-audio-levels` hook makes one |
 | `needle-meter` | `NeedleMeter` from `@/components/audio-ui/needle-meter` | registry only | A VU meter to the standard (ANSI C16.5, IEC 60268-17): the dial from -20 to +3 VU with its marks spread by voltage, and a needle with the 300 ms ballistics. It follows the first channel of a `source`, like `meter`; `reference` is the level in dB that reads 0 VU, -18 by default |
+| `led` | `Led` from `@/components/audio-ui/led` | registry only | A status light beside the control that sets it: `on`, `tone="destructive"` for recording or clipping, `blink`. |
+| `lcd` | `Lcd` from `@/components/audio-ui/lcd` | registry only | A small screen holding a reading under a `label`, in light and dark alike. |
+| `value-display` | `ValueDisplay`, `formatValue` from `@/components/audio-ui/value-display` | registry only | A value as it reads by `kind`: `bpm`, `db`, `hz`, `pan`, `percent`, `semitones`, `time`. |
 | `waveform` | `Waveform`, `WaveformRegion`, `WaveformMarker`, `LiveWaveform`, `BarVisualizer` from `@/components/audio-ui/waveform` | `@audio-ui/react/waveform` | A seekable waveform with regions and markers, a live scrolling one, or a bar visualizer (`waveform-peaks` lib turns a file into peaks) |
 | `spectrum-analyzer` | `SpectrumAnalyzer` from `@/components/audio-ui/spectrum-analyzer` | registry only, built on `Plot` | A live spectrum on a log frequency axis with held peaks. Feed it `useSpectrum(analyser)` from the `use-spectrum` hook, with the same `minHz`/`maxHz` |
 | `tuner` | `Tuner` from `@/components/audio-ui/tuner` | registry only | A chromatic tuner's display: the nearest note, a needle on a scale of cents and the frequency, in the primary color when in tune. It follows a `source`: `usePitch(analyser)` from `use-pitch`, fed by `useMicrophone()` (start it from a click) or any `AnalyserNode` |
