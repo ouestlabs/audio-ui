@@ -801,6 +801,51 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "a knob with no envelope, turned, stopped the ones that have one"
       );
     },
+  "AUT-006: playing, the mixer's fader and a rack's macro move with their envelopes":
+    async (browser) => {
+      const page = await open(browser);
+      await page
+        .locator('[aria-label="1 Audio"][data-track-id]')
+        .getByText("1 Audio")
+        .click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Effect rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.getByRole("button", { exact: true, name: "Macros" }).click();
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("KeyA");
+      // A point moved from the other end, by `key`: the envelope is a ramp.
+      const ramp = async (name: string, key: string) => {
+        await page
+          .getByRole("group", { name })
+          .locator('[aria-label^="Point 1"]')
+          .first()
+          .focus();
+        await Array.from({ length: 30 }).reduce<Promise<void>>(
+          (done) => done.then(() => page.keyboard.press(key)),
+          Promise.resolve()
+        );
+      };
+      await ramp("1 Audio volume automation", "ArrowDown");
+      await page.getByRole("combobox", { name: "1 Audio automation" }).click();
+      await page.getByRole("option", { exact: true, name: "Macro 1" }).click();
+      await ramp("1 Audio rack macro 1 automation", "ArrowUp");
+      const macro = rack.getByRole("slider", { name: "Macro 1" });
+      const fromMacro = await macro.inputValue();
+      assert(fromMacro !== "0", "the macro stands where its envelope starts");
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Space");
+      await expectChanged(macro, fromMacro);
+      await showMixer(page);
+      const fader = page.getByRole("slider", { name: "1 Audio volume" });
+      await expectChanged(fader, await fader.inputValue());
+      await page.keyboard.press("Space");
+    },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {
       const page = await open(browser);
