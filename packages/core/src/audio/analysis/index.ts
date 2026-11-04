@@ -1,4 +1,11 @@
 export {
+  type AutoWarp,
+  autoWarp,
+  detectTransients,
+  estimateTempo,
+  type TempoEstimate,
+} from "./beat.ts";
+export {
   type CompressorSettings,
   compressorOutput,
   webAudioCompressorOutput,

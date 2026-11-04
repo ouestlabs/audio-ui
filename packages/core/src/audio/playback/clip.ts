@@ -7,6 +7,24 @@ import { toFrames } from "./transport.ts";
  * An audio clip as an arrangement stores it, in seconds: the fields a player
  * needs, so any host's clip with these fields can be played.
  */
+/** How a clip plays at another speed than its recording's: with its pitch moving with it, in slices that keep their attacks, or in grains that keep a held note. */
+export type WarpMode = "beats" | "repitch" | "tones";
+
+/** How long the slices of Beats last by default, in seconds: a sixteenth note at 120 BPM. */
+const BEATS_GRAIN_SECONDS = 0.125;
+/** How far apart the grains of Tones start, in seconds. */
+const TONES_HOP_SECONDS = 0.03;
+/** The crossfade between two slices of Beats, in seconds. */
+const BEATS_FADE_SECONDS = 0.004;
+
+/** How a clip stretches time, in frames of the arrangement: how far apart its grains start and how long they cross, how fast each reads, and whether each is lined up on the last. */
+export interface PlayedStretch {
+  aligned: boolean;
+  fade: number;
+  hop: number;
+  speed: number;
+}
+
 export interface ArrangedAudio {
   /** A deactivated clip stays where it is and plays nothing. */
   disabled?: boolean;
@@ -20,6 +38,8 @@ export interface ArrangedAudio {
   sourceFrom?: number;
   /** How long its source is, in seconds of the recording. */
   sourceLength: number;
+  /** In Beats or Tones: how many semitones from its pitch it plays, at the speed it has. @default 0 */
+  transpose?: number;
   /** Where it lies, where it starts in what it plays, and its fades. */
   value: {
     fadeIn: number;
@@ -32,6 +52,10 @@ export interface ArrangedAudio {
   };
   /** Markers pinning times of its source (from `sourceFrom`) to times of its own: the source is stretched between them, its pitch with its speed. */
   warp?: readonly WarpMarker[];
+  /** In Beats: how long a slice lasts, in seconds. @default 0.125 */
+  warpGrain?: number;
+  /** How it plays at another speed than its recording's. @default "repitch" */
+  warpMode?: WarpMode;
 }
 
 /**
@@ -65,6 +89,8 @@ export interface PlayedClip {
   span: number;
   /** The arrangement's frame it starts at. */
   start: number;
+  /** How it stretches time; `null` when it plays through in one piece. */
+  stretch: PlayedStretch | null;
   /** Its warp markers, kept in order, in seconds; `null` when it plays its source as recorded. */
   warp: readonly WarpMarker[] | null;
 }
@@ -115,7 +141,35 @@ export function playedClip(
       sampleRate
     ),
     start,
+    stretch: stretchOf(clip, warp.length > 0, sampleRate),
     warp: warp.length > 0 ? warp : null,
+  };
+}
+
+/** How `clip` stretches time: not at all in Repitch, nor with nothing to stretch. */
+function stretchOf(
+  clip: ArrangedAudio,
+  warped: boolean,
+  sampleRate: number
+): PlayedStretch | null {
+  const { transpose = 0, warpGrain, warpMode = "repitch" } = clip;
+  if (warpMode === "repitch" || !(warped || transpose !== 0)) {
+    return null;
+  }
+  const speed = 2 ** (transpose / 12);
+  if (warpMode === "tones") {
+    const hop = Math.max(1, toFrames(TONES_HOP_SECONDS, sampleRate));
+    return { aligned: true, fade: hop, hop, speed };
+  }
+  const hop = Math.max(
+    1,
+    toFrames(warpGrain ?? BEATS_GRAIN_SECONDS, sampleRate)
+  );
+  return {
+    aligned: false,
+    fade: Math.min(hop, toFrames(BEATS_FADE_SECONDS, sampleRate)),
+    hop,
+    speed,
   };
 }
 
