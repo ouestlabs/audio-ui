@@ -70,3 +70,12 @@ Test: packages/core/src/audio/playback/render.test.ts "CLP-016"
 ### CLP-017 Tones
 Tones plays grains that overlap, each lined up on the sound of the one before it, so a held note keeps its pitch and its level. The lining up goes grain by grain from the clip's start or from where playback began: an export from its start is the same every time, and a play from the middle can differ from it in phase, not in pitch or time.
 Test: packages/core/src/audio/playback/render.test.ts "CLP-017"
+
+### CLP-018 Transients and tempo
+A recording's transients are where its notes and beats begin: frames where its level rises sharply, found to the sample. Its tempo is the beat period its transients repeat at most strongly, between 60 and 200 BPM, the octave nearest 120 BPM when two fit; the first beat is where that beat falls first. A recording with no steady beat (noise, a single hit) has no tempo.
+Test: packages/core/src/audio/analysis/tempo.test.ts "CLP-018"
+
+### CLP-019 Warp on import
+A file dropped in is warped in Beats when its tempo can be told, so it plays in time at the arrangement's. A short file taken as a well-cut loop of 1, 2, 4, 8 or 16 bars (one of them gives a tempo within 4 % of the estimate, or of its double or half) takes the tempo its length gives, with a warp marker at its start and one at its end. Any other gets a marker on the first beat of each bar, each moved onto the transient within an eighth of a beat of it, and the clip starts on its first beat. A file with no tempo plays as recorded.
+Deviation: the reference also warps files it reads as one-shots, and lets a preference turn warping on import off; here a file with no tempo is not warped, and there is no preference yet.
+Test: packages/core/src/audio/analysis/tempo.test.ts "CLP-019"; apps/daw/test/drop.test.ts "CLP-019"
