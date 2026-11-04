@@ -446,24 +446,42 @@ function SlotRemove() {
 
 function SlotFold() {
   const { folded, title, toggleFold } = useSlot();
+  const arrow = (
+    <IconPlaceholder
+      aria-hidden="true"
+      className={cn("transition-transform", folded && "size-3.5 rotate-180")}
+      hugeicons="ArrowLeft01Icon"
+      lucide="ChevronLeftIcon"
+      phosphor="CaretLeftIcon"
+      remixicon="RiArrowLeftSLine"
+      tabler="IconChevronLeft"
+    />
+  );
+  // Folded, the whole strip is what is pressed: this only says so, and is how the keyboard unfolds it.
+  if (folded) {
+    return (
+      <button
+        aria-expanded={false}
+        aria-label={`Unfold ${title}`}
+        className="flex size-6 shrink-0 cursor-pointer items-center justify-center text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        data-slot="device-chain-slot-fold"
+        onClick={toggleFold}
+        type="button"
+      >
+        {arrow}
+      </button>
+    );
+  }
   return (
     <Button
-      aria-expanded={!folded}
-      aria-label={`${folded ? "Unfold" : "Fold"} ${title}`}
+      aria-expanded
+      aria-label={`Fold ${title}`}
       data-slot="device-chain-slot-fold"
       onClick={toggleFold}
       size="icon-xs"
       variant="ghost"
     >
-      <IconPlaceholder
-        aria-hidden="true"
-        className={cn("transition-transform", folded && "rotate-180")}
-        hugeicons="ArrowLeft01Icon"
-        lucide="ChevronLeftIcon"
-        phosphor="CaretLeftIcon"
-        remixicon="RiArrowLeftSLine"
-        tabler="IconChevronLeft"
-      />
+      {arrow}
     </Button>
   );
 }
@@ -549,8 +567,9 @@ interface DeviceChainSlotProps extends Omit<ComponentProps<"div">, "title"> {
  * at the end of the panel's header. Drag the device by its header or by the
  * grip, or press Left or Right on the grip; Delete removes it, and a
  * right-click gives the same commands. Folded, the slot is a narrow strip with
- * the device's name down it, its on and off square, and the same controls; a
- * click anywhere else on the strip unfolds it.
+ * its on and off square and the device's name down it; the same controls show
+ * under the pointer or the keyboard, and a click anywhere else on the strip
+ * unfolds it.
  */
 function DeviceChainSlot({
   children,
@@ -606,7 +625,7 @@ function DeviceChainSlot({
 
   const content = folded ? (
     <div
-      className="cn-audio-device flex h-full w-8 cursor-pointer flex-col items-center gap-1 border bg-card p-1 [&_button:not([aria-pressed])]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]"
+      className="cn-audio-device flex h-full w-8 cursor-pointer flex-col items-center gap-1 border bg-card p-1 hover:[&_button:not([aria-pressed])]:opacity-100 [&_button:not([aria-pressed])]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))] [&_button:not([aria-pressed])]:opacity-0 [&_button:not([aria-pressed])]:transition-opacity [&_button:not([aria-pressed])]:focus-visible:opacity-100"
       data-frame=""
       data-slot="device-chain-strip"
     >
@@ -623,7 +642,9 @@ function DeviceChainSlot({
           />
         </span>
       )}
+      {/* Over the name, so what they leave at rest is no gap under it, and the name stays put when they show. */}
       <SlotGrip />
+      <SlotRemove />
       <SlotFold />
       <span
         className="min-h-0 flex-1 rotate-180 truncate py-1 font-medium text-xs [writing-mode:vertical-rl]"
@@ -631,7 +652,6 @@ function DeviceChainSlot({
       >
         {title}
       </span>
-      <SlotRemove />
     </div>
   ) : (
     children

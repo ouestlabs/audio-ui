@@ -2041,7 +2041,9 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const square = slot.locator("button[aria-pressed]").first();
       const read = async () => ({
         box: await square.boundingBox(),
-        radius: await square.evaluate((el) => getComputedStyle(el).borderRadius),
+        radius: await square.evaluate(
+          (el) => getComputedStyle(el).borderRadius
+        ),
       });
       const unfolded = await read();
       await slot.getByRole("button", { name: /^Fold / }).click();
@@ -2077,8 +2079,58 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         (await strip.count()) === 1,
         "the on square of the strip unfolded the device"
       );
+      // The strip is what is pressed: its arrow says so without a button's surface of its own.
+      const arrow = slot.getByRole("button", { name: /^Unfold / });
+      await arrow.hover();
+      await page.waitForTimeout(250);
+      const surface = await arrow.evaluate(
+        (el) => getComputedStyle(el).backgroundColor
+      );
+      assert(
+        surface === "rgba(0, 0, 0, 0)",
+        `the strip's arrow has a surface of its own (${surface})`
+      );
+      await arrow.focus();
+      await page.keyboard.press("Enter");
+      await slot
+        .locator("[data-slot=device-header]")
+        .waitFor({ timeout: 2000 });
+      await slot.getByRole("button", { name: /^Fold / }).click();
+      await strip.waitFor();
+      // At rest the strip is its square and its name; the rest comes under the pointer or the keyboard.
+      const tools = strip.locator("button:not([aria-pressed])");
+      const shown = () =>
+        tools.evaluateAll((all) =>
+          all.map((el) => getComputedStyle(el).opacity).join()
+        );
+      // The Enter above left the keyboard on the arrow, where it rightly shows.
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.mouse.move(0, 0);
+      await page.waitForTimeout(300);
+      assert(
+        (await shown()) === "0,0,0",
+        `at rest the strip's tools are at ${await shown()}`
+      );
+      await page.mouse.move(middle.x, middle.y);
+      await page.waitForTimeout(300);
+      assert(
+        (await shown()) === "1,1,1",
+        `under the pointer the strip's tools are at ${await shown()}`
+      );
+      await page.mouse.move(0, 0);
+      await square.focus();
+      await page.keyboard.press("Tab");
+      await page.waitForTimeout(300);
+      assert(
+        (await shown()).startsWith("1,"),
+        `with the keyboard on the grip the strip's tools are at ${await shown()}`
+      );
       await page.mouse.click(middle.x, middle.y);
-      await slot.locator("[data-slot=device-header]").waitFor({ timeout: 2000 });
+      await slot
+        .locator("[data-slot=device-header]")
+        .waitFor({ timeout: 2000 });
     },
   "DEV-010: a rack's chain has no scroll of its own, and the strip that ends the track's chain stays at the right":
     async (browser) => {
