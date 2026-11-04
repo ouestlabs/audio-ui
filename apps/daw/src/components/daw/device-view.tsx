@@ -615,7 +615,8 @@ export function DeviceView({
       ) : null}
     </DropdownMenuContent>
   );
-  // An empty track's whole view takes a drop; once it has devices, a narrow strip ends the chain.
+  // An empty track's whole view takes a drop; once it has devices, a narrow strip ends the chain,
+  // and stays at the view's right edge when the devices go past it, its line on the last device's.
   const end =
     devices.length === 0 ? (
       <div className="flex flex-1 flex-col items-center justify-center gap-1 p-6 text-center">
@@ -639,7 +640,7 @@ export function DeviceView({
         </p>
       </div>
     ) : (
-      <div className="flex w-10 shrink-0 flex-col items-center gap-1 py-2">
+      <div className="sticky end-0 z-10 -ms-px flex w-10 shrink-0 flex-col items-center gap-1 border-s bg-background py-2">
         <Button
           aria-label="Open the library"
           onClick={onOpenLibrary}
@@ -669,7 +670,7 @@ export function DeviceView({
   return (
     <div className="flex h-full min-h-0">
       <Chain
-        className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 overflow-auto"
+        className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 scroll-pe-10 overflow-auto"
         devices={devices}
         dispatch={dispatch}
         end={end}

@@ -2028,6 +2028,74 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `the macro mapped to the gain at 0 leaves the take at ${down} dB, from ${through} dB`
       );
     },
+  "DEV-010: a rack's chain has no scroll of its own, and the strip that ends the track's chain stays at the right":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Effect rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      const inside = rack.locator("[data-slot=device-chain]");
+      const library = page.getByRole("region", { name: "Library" });
+      const names = ["Compressor", "Limiter", "Phaser", "Gate"];
+      await names.reduce(async (done, name, index) => {
+        await done;
+        await library.getByLabel("Search the devices").fill(name);
+        await library.getByRole("option").first().dragTo(inside);
+        await inside
+          .locator(":scope > [data-slot=device-chain-slot]")
+          .nth(index)
+          .waitFor({ timeout: 5000 });
+      }, Promise.resolve());
+      const overflow = await inside.evaluate(
+        (chain) => getComputedStyle(chain).overflowX
+      );
+      assert(
+        overflow === "visible",
+        `the rack's chain scrolls on its own (${overflow})`
+      );
+      const outer = page.locator("[data-slot=device-chain]").first();
+      const scrollLeft = () => outer.evaluate((chain) => chain.scrollLeft);
+      // Over a device of the rack, the wheel moves the track's chain.
+      await outer.evaluate((chain) => {
+        chain.scrollLeft = 400;
+      });
+      const view = await outer.boundingBox();
+      if (!view) {
+        throw new Error("the track's chain is not on the page");
+      }
+      await page.mouse.move(view.x + view.width / 2, view.y + 60);
+      await page.mouse.wheel(200, 0);
+      await page.waitForTimeout(300);
+      const moved = await scrollLeft();
+      assert(
+        moved > 400,
+        `the wheel over the rack leaves the track's chain at ${moved}`
+      );
+      // The strip stays at the view's right edge wherever the chain has scrolled.
+      const strip = page.getByRole("button", { name: "Open the library" });
+      const stripEnd = async () => {
+        const box = await strip.boundingBox();
+        return box ? box.x + box.width : 0;
+      };
+      const right = view.x + view.width;
+      const scrolled = await stripEnd();
+      assert(
+        scrolled <= right && scrolled > right - 40,
+        `the strip ends at ${scrolled}, the view at ${right}`
+      );
+      await outer.evaluate((chain) => {
+        chain.scrollLeft = 0;
+      });
+      await page.waitForTimeout(100);
+      const atStart = await stripEnd();
+      assert(
+        atStart <= right && atStart > right - 40,
+        `at the start of the chain the strip ends at ${atStart}, the view at ${right}`
+      );
+    },
   "PRJ-001: the project comes back when the page is loaded again": async (
     browser
   ) => {

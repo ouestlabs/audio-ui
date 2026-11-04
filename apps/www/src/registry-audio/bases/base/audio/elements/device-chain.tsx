@@ -6,6 +6,7 @@ import {
   type DragEvent,
   type KeyboardEvent,
   type PointerEvent,
+  type RefObject,
   use,
   useCallback,
   useMemo,
@@ -42,6 +43,8 @@ interface DeviceChainContextValue {
   move: ((id: string, index: number, title: string) => void) | null;
   order: readonly string[];
   remove: ((id: string, title: string) => void) | null;
+  /** The chain that scrolls: the outermost, around any chain inside a rack. */
+  scroller: RefObject<HTMLDivElement | null>;
   startDrag: (event: PointerEvent<HTMLElement>, id: string) => void;
 }
 
@@ -136,7 +139,9 @@ interface DeviceChainProps extends ComponentProps<"div"> {
  * Controlled: it holds the ids of its slots, and a move, a removal or a device
  * dropped on it goes out through a callback for the host to apply. It makes no
  * sound and knows no engine. Each slot is a `DeviceChainSlot` with the
- * device's panel in it, and `DeviceChainAdd` ends the row.
+ * device's panel in it, and `DeviceChainAdd` ends the row. A chain inside a
+ * slot, as a rack holds, has no scroll of its own: the rack is as wide as its
+ * devices, and the outermost chain scrolls them all.
  */
 function DeviceChain({
   children,
@@ -149,6 +154,8 @@ function DeviceChain({
   ...props
 }: DeviceChainProps) {
   const root = useRef<HTMLDivElement>(null);
+  const around = use(DeviceChainContext);
+  const scroller = around?.scroller ?? root;
   const [dragging, setDragging] = useState<string | null>(null);
   const [dropIndex, setDropIndex] = useState<number | null>(null);
   const [message, setMessage] = useState("");
@@ -196,13 +203,14 @@ function DeviceChain({
   const startDrag = useCallback(
     (event: PointerEvent<HTMLElement>, id: string) => {
       const view = root.current;
+      const scrolling = scroller.current;
       const slot = event.currentTarget.closest<HTMLElement>(
         '[data-slot="device-chain-slot"]'
       );
       const from = live.current.order.indexOf(id);
       if (
         event.button !== 0 ||
-        !(view && slot && live.current.onMove) ||
+        !(view && scrolling && slot && live.current.onMove) ||
         from === -1
       ) {
         return;
@@ -210,7 +218,7 @@ function DeviceChain({
       event.preventDefault();
       const middles = slotMiddles(view);
       const startX = event.clientX;
-      const startScroll = view.scrollLeft;
+      const startScroll = scrolling.scrollLeft;
       let lastX = startX;
       let gap = from;
       let frame = 0;
@@ -218,9 +226,9 @@ function DeviceChain({
       // Once a frame while the slot is dragged, whether or not the pointer moved: near an edge of the row, it
       // scrolls; the slot follows the pointer, and the slots are where they were at the press, moved by the scroll.
       const tick = () => {
-        const box = view.getBoundingClientRect();
-        view.scrollLeft += edgeScrollStep(lastX, box.left, box.right);
-        const shift = view.scrollLeft - startScroll;
+        const box = scrolling.getBoundingClientRect();
+        scrolling.scrollLeft += edgeScrollStep(lastX, box.left, box.right);
+        const shift = scrolling.scrollLeft - startScroll;
         slot.style.transform = `translateX(${lastX - startX + shift}px)`;
         const next = gapAt(
           middles.map((middle) => middle - shift),
@@ -259,7 +267,7 @@ function DeviceChain({
       window.addEventListener("pointercancel", cancel);
       frame = requestAnimationFrame(tick);
     },
-    []
+    [scroller]
   );
 
   const handleDragOver = useCallback((event: DragEvent<HTMLDivElement>) => {
@@ -301,6 +309,7 @@ function DeviceChain({
       move: onMove ? move : null,
       order,
       remove: onRemove ? remove : null,
+      scroller,
       startDrag,
     }),
     [
@@ -312,6 +321,7 @@ function DeviceChain({
       onRemove,
       order,
       remove,
+      scroller,
       startDrag,
     ]
   );
@@ -320,7 +330,8 @@ function DeviceChain({
     <DeviceChainContext value={context}>
       <div
         className={cn(
-          "flex min-h-0 min-w-0 items-stretch overflow-x-auto overscroll-x-contain",
+          "flex min-h-0 min-w-0 items-stretch",
+          !around && "overflow-x-auto overscroll-x-contain",
           flat ? "gap-0" : "gap-2 p-2",
           className
         )}
