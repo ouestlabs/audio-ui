@@ -689,6 +689,17 @@ export function Daw({
     }
   }, [doc, selectedTime, sources]);
 
+  // A pad or a key played by hand, through the track's instrument (DEV-013).
+  const noteOn = useCallback(
+    (track: string, pitch: number, velocity: number) =>
+      engine.engine?.noteOn(track, pitch, velocity),
+    [engine.engine]
+  );
+  const noteOff = useCallback(
+    (track: string, pitch: number) => engine.engine?.noteOff(track, pitch),
+    [engine.engine]
+  );
+
   // What each key does (KEY-001 and on), read when it is pressed.
   const commands: Partial<Record<ShortcutCommand, () => void>> = {
     automation: automation.toggle,
@@ -888,6 +899,8 @@ export function Daw({
         ) : (
           <DeviceView
             arrangement={arrangement}
+            onNoteOff={noteOff}
+            onNoteOn={noteOn}
             onOpenLibrary={openLibrary}
             track={selectedTrack}
           />

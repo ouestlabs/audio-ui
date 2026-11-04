@@ -177,7 +177,7 @@ export const DRUM_DECAYS: Readonly<Record<DrumVoice, number>> = {
 /** How long a recording on a pad plays by default, in seconds, unless it ends sooner. */
 export const SAMPLE_DECAY = 2;
 
-/** The kit a drum rack starts with: a kick on C1, a snare on D1 and a closed hat on F#1, given the ids of their chains. */
+/** The kit a drum rack starts with: a kick on C2, a snare on D2 and a closed hat on F#2 (notes 36, 38 and 42), given the ids of their chains. */
 export function newDrumRack(ids: readonly [string, string, string]): Rack {
   const pads: [DrumVoice, number, string][] = [
     ["kick", 36, "Kick"],

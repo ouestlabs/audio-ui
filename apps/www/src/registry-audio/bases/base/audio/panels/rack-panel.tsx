@@ -194,7 +194,8 @@ function Macro({
   );
 }
 
-function ChainRow({
+/** A chain of a rack in a row: its name, which picks it, its volume, switch and solo, and a button that removes it. */
+function RackChainRow({
   chain,
   onMix,
   onMixCommit,
@@ -302,6 +303,107 @@ function ChainRow({
   );
 }
 
+/** The frame of a rack's face: a device's title bar, with its square, its name and the host's controls, over what the rack shows. */
+function RackFrame({
+  children,
+  className,
+  controls,
+  enabled = true,
+  onEnabledChange,
+  slot = "rack-panel",
+  title = "Rack",
+}: {
+  children: ReactNode;
+  className?: string;
+  /** What sits at the end of the title bar: a host's grip, fold and remove buttons. */
+  controls?: ReactNode;
+  /** Whether the rack is on; with `onEnabledChange`, its square in the title bar. */
+  enabled?: boolean;
+  onEnabledChange?: (enabled: boolean) => void;
+  /** Its `data-slot`. @default "rack-panel" */
+  slot?: string;
+  /** Its name in the title bar. @default "Rack" */
+  title?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "cn-audio-device flex h-full min-w-0 flex-col overflow-hidden border bg-card",
+        className
+      )}
+      data-slot={slot}
+    >
+      {/* A device's title bar, as every face has: its square, its name, and the host's controls at the end. */}
+      <div
+        className="flex items-center gap-1 border-b bg-muted/40 p-1"
+        data-slot="device-header"
+      >
+        {onEnabledChange ? (
+          <span className="flex size-6 shrink-0 items-center justify-center">
+            <Toggle
+              aria-label={`${title} on`}
+              className="size-4 min-h-0 min-w-0 rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.5625rem))] p-0 aria-pressed:border-primary aria-pressed:bg-primary"
+              onPressedChange={onEnabledChange}
+              pressed={enabled}
+              size="sm"
+              variant="outline"
+            />
+          </span>
+        ) : null}
+        <span
+          className={cn("font-medium text-xs", !onEnabledChange && "ps-1.5")}
+        >
+          {title}
+        </span>
+        <div className="ms-auto flex items-center gap-2 [&_button]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]">
+          {controls}
+        </div>
+      </div>
+      <div className="flex min-h-0 flex-1 gap-3 p-2">{children}</div>
+    </div>
+  );
+}
+
+/** A rack's eight macro knobs, each with a menu that maps a parameter of a device inside to it or lets one go. */
+function RackMacros({
+  macros,
+  onMacroChange,
+  onMacroCommit,
+  onMapMacro,
+  onUnmapMacro,
+  parameters,
+}: {
+  macros: Rack["macros"];
+  onMacroChange: (index: number, value: number) => void;
+  onMacroCommit?: () => void;
+  onMapMacro: (index: number, parameter: RackParameter) => void;
+  onUnmapMacro: (index: number, mapping: RackMapping) => void;
+  /** The parameters of the devices inside that a macro can turn. */
+  parameters: readonly RackParameter[];
+}) {
+  return (
+    <div
+      aria-label="Macros"
+      className="grid shrink-0 grid-cols-4 content-start gap-x-2 gap-y-1"
+      role="group"
+    >
+      {MACRO_SLOTS.map((slot, index) => (
+        <Macro
+          index={index}
+          key={slot}
+          mappings={macros[index]?.mappings ?? []}
+          onChange={onMacroChange}
+          onCommit={onMacroCommit}
+          onMap={onMapMacro}
+          onUnmap={onUnmapMacro}
+          parameters={parameters}
+          value={macros[index]?.value ?? 0}
+        />
+      ))}
+    </div>
+  );
+}
+
 /**
  * The face of a rack: its eight macros, each with a menu that maps a
  * parameter of a device inside to it or lets one go; its chains, each with
@@ -354,96 +456,57 @@ function RackPanel({
   selectedChain: string | null;
 }) {
   return (
-    <div
-      className={cn(
-        "cn-audio-device flex h-full min-w-0 flex-col overflow-hidden border bg-card",
-        className
-      )}
-      data-slot="rack-panel"
+    <RackFrame
+      className={className}
+      controls={controls}
+      enabled={enabled}
+      onEnabledChange={onEnabledChange}
+      title={title}
     >
-      {/* A device's title bar, as every face has: its square, its name, and the host's controls at the end. */}
-      <div
-        className="flex items-center gap-1 border-b bg-muted/40 p-1"
-        data-slot="device-header"
-      >
-        {onEnabledChange ? (
-          <span className="flex size-6 shrink-0 items-center justify-center">
-            <Toggle
-              aria-label={`${title} on`}
-              className="size-4 min-h-0 min-w-0 rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.5625rem))] p-0 aria-pressed:border-primary aria-pressed:bg-primary"
-              onPressedChange={onEnabledChange}
-              pressed={enabled}
-              size="sm"
-              variant="outline"
-            />
-          </span>
-        ) : null}
-        <span
-          className={cn("font-medium text-xs", !onEnabledChange && "ps-1.5")}
-        >
-          {title}
-        </span>
-        <div className="ms-auto flex items-center gap-2 [&_button]:rounded-[max(0px,calc(var(--device-radius,0.5rem)-0.375rem))]">
-          {controls}
-        </div>
-      </div>
-      <div className="flex min-h-0 flex-1 gap-3 p-2">
-        <div
-          aria-label="Macros"
-          className="grid shrink-0 grid-cols-4 content-start gap-x-2 gap-y-1"
-          role="group"
-        >
-          {MACRO_SLOTS.map((slot, index) => (
-            <Macro
-              index={index}
-              key={slot}
-              mappings={rack.macros[index]?.mappings ?? []}
-              onChange={onMacroChange}
-              onCommit={onMacroCommit}
-              onMap={onMapMacro}
-              onUnmap={onUnmapMacro}
-              parameters={parameters}
-              value={rack.macros[index]?.value ?? 0}
+      <RackMacros
+        macros={rack.macros}
+        onMacroChange={onMacroChange}
+        onMacroCommit={onMacroCommit}
+        onMapMacro={onMapMacro}
+        onUnmapMacro={onUnmapMacro}
+        parameters={parameters}
+      />
+      <div className="flex w-72 shrink-0 flex-col gap-1 border-s ps-3">
+        <ul aria-label="Chains" className="flex flex-col gap-0.5">
+          {rack.chains.map((chain) => (
+            <RackChainRow
+              chain={chain}
+              key={chain.id}
+              onMix={onChainMix}
+              onMixCommit={onChainMixCommit}
+              onRemove={onRemoveChain}
+              onSelect={onSelectChain}
+              removable={rack.chains.length > 1}
+              selected={chain.id === selectedChain}
             />
           ))}
-        </div>
-        <div className="flex w-72 shrink-0 flex-col gap-1 border-s ps-3">
-          <ul aria-label="Chains" className="flex flex-col gap-0.5">
-            {rack.chains.map((chain) => (
-              <ChainRow
-                chain={chain}
-                key={chain.id}
-                onMix={onChainMix}
-                onMixCommit={onChainMixCommit}
-                onRemove={onRemoveChain}
-                onSelect={onSelectChain}
-                removable={rack.chains.length > 1}
-                selected={chain.id === selectedChain}
-              />
-            ))}
-          </ul>
-          <Button
-            className="self-start"
-            onClick={onAddChain}
-            size="sm"
-            variant="ghost"
-          >
-            <IconPlaceholder
-              aria-hidden="true"
-              className="size-4"
-              hugeicons="PlusSignIcon"
-              lucide="PlusIcon"
-              phosphor="PlusIcon"
-              remixicon="RiAddLine"
-              tabler="IconPlus"
-            />
-            Add a chain
-          </Button>
-        </div>
-        <div className="flex min-w-0 flex-1 border-s ps-3">{children}</div>
+        </ul>
+        <Button
+          className="self-start"
+          onClick={onAddChain}
+          size="sm"
+          variant="ghost"
+        >
+          <IconPlaceholder
+            aria-hidden="true"
+            className="size-4"
+            hugeicons="PlusSignIcon"
+            lucide="PlusIcon"
+            phosphor="PlusIcon"
+            remixicon="RiAddLine"
+            tabler="IconPlus"
+          />
+          Add a chain
+        </Button>
       </div>
-    </div>
+      <div className="flex min-w-0 flex-1 border-s ps-3">{children}</div>
+    </RackFrame>
   );
 }
 
-export { RackPanel };
+export { RackChainRow, RackFrame, RackMacros, RackPanel };

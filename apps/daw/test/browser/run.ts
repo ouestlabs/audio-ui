@@ -1326,6 +1326,33 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           document.querySelector('[aria-label="Group 1 copy"][data-track-id]')
       );
     },
+  "DEV-013: a drum rack on a MIDI track plays a pad when it is struck, and a voice picked on an empty pad makes one":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a drum rack" }).click();
+      const drums = page.locator("[data-slot=drum-rack-panel]");
+      await drums.waitFor({ timeout: 5000 });
+      const pads = drums.getByRole("group", { name: "Pads" });
+      for (const name of ["Kick C2", "Snare D2", "Hat F#2"]) {
+        await pads.getByLabel(name, { exact: true }).waitFor();
+      }
+      // The kick rings four seconds: long enough to hear it on the main track's meter, in the mixer.
+      await drums.getByRole("slider", { name: "Kick decay" }).focus();
+      await page.keyboard.press("End");
+      await pads.getByLabel("Kick C2", { exact: true }).click({ delay: 50 });
+      await showMixer(page);
+      const level = await loudest(page, 800);
+      assert(level > -40, `the kick pad struck plays at ${level} dB`);
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await pads.getByLabel("Empty C#2", { exact: true }).click();
+      await drums
+        .getByRole("group", { name: "Pad C#2" })
+        .getByRole("button", { name: "Snare" })
+        .click();
+      await pads.getByLabel("Snare C#2", { exact: true }).waitFor();
+    },
   "DEV-010 and DEV-012: a rack takes a device from the library, plays it, and a macro turns its parameter":
     async (browser) => {
       const page = await open(browser);

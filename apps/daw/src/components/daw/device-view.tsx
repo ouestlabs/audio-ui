@@ -6,6 +6,7 @@ import {
   DeviceChainSlotControls,
 } from "@/components/audio-ui/device-chain";
 import { devicePanel } from "@/components/audio-ui/device-panels";
+import { DrumRackPanel } from "@/components/audio-ui/drum-rack-panel";
 import {
   type RackChainMix,
   RackPanel,
@@ -14,7 +15,10 @@ import {
 import { Button } from "@/components/ui/button";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import {
+  DRUM_RACK_DEVICE,
+  type DrumSound,
   RACK_DEVICE,
+  type Rack,
   type RackMapping,
   rackDevices,
   type TrackDevice,
@@ -30,6 +34,9 @@ type ChainPlace = { chain: string; rack: string } | undefined;
 /** What every slot of a chain needs: the commands of the track, and where the chain is. */
 interface ChainProps {
   dispatch: Arrangement["dispatch"];
+  onNoteOff: (pitch: number) => void;
+  /** Plays a note of the track now, as a key does, until `onNoteOff`. */
+  onNoteOn: (pitch: number, velocity: number) => void;
   tempo: Arrangement["doc"]["tempo"];
   track: string;
 }
@@ -48,6 +55,9 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
     () => dispatch({ id: device.id, track, type: "toggle-device" }),
     [device.id, dispatch, track]
   );
+  if (device.rack && device.device === DRUM_RACK_DEVICE) {
+    return <DrumSlot device={device} {...chain} />;
+  }
   if (device.rack) {
     return <RackSlot device={device} {...chain} />;
   }
@@ -143,15 +153,12 @@ function parametersOf(devices: readonly TrackDevice[]): RackParameter[] {
   });
 }
 
-/** A rack on a chain: its macros and chains, and the picked chain's devices (DEV-010, DEV-012). */
-function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
-  const { dispatch, track } = chain;
-  const rack = device.rack ?? { chains: [], macros: [] };
-  const rackId = device.id;
-  const [picked, setPicked] = useState<string | null>(null);
-  const selected =
-    rack.chains.find((item) => item.id === picked) ?? rack.chains[0];
-  const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
+/** The commands of a rack on a track, by its id: its switch, macros, chains' mixes, and the end of a drag. */
+function useRackCommands(
+  dispatch: Arrangement["dispatch"],
+  track: string,
+  rackId: string
+) {
   const settle = useCallback(
     () => dispatch({ type: "settle-clip-edit" }),
     [dispatch]
@@ -204,13 +211,27 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       }),
     [dispatch, rackId, track]
   );
-  const addChain = useCallback(
-    () => dispatch({ rack: rackId, track, type: "add-rack-chain" }),
-    [dispatch, rackId, track]
-  );
   const removeChain = useCallback(
     (id: string) =>
       dispatch({ chain: id, rack: rackId, track, type: "remove-rack-chain" }),
+    [dispatch, rackId, track]
+  );
+  return { map, mix, removeChain, settle, toggle, turn, unmap };
+}
+
+/** A rack on a chain: its macros and chains, and the picked chain's devices (DEV-010, DEV-012). */
+function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
+  const { dispatch, track } = chain;
+  const rack = device.rack ?? { chains: [], macros: [] };
+  const rackId = device.id;
+  const [picked, setPicked] = useState<string | null>(null);
+  const selected =
+    rack.chains.find((item) => item.id === picked) ?? rack.chains[0];
+  const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
+  const { map, mix, removeChain, settle, toggle, turn, unmap } =
+    useRackCommands(dispatch, track, rackId);
+  const addChain = useCallback(
+    () => dispatch({ rack: rackId, track, type: "add-rack-chain" }),
     [dispatch, rackId, track]
   );
   return (
@@ -258,6 +279,88 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   );
 }
 
+/** The note of a drum rack's lowest pad, or C2 when it has none. */
+const lowestPad = (rack: Rack) =>
+  Math.min(
+    ...rack.chains.flatMap((item) => (item.pad ? [item.pad.note] : [])),
+    rack.chains.some((item) => item.pad) ? 127 : 36
+  );
+
+/** A drum rack, the track's instrument: its macros, its pads, and the picked pad's devices (DEV-013). */
+function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
+  const { dispatch, onNoteOff, onNoteOn, track } = chain;
+  const rack = device.rack ?? { chains: [], macros: [] };
+  const rackId = device.id;
+  const [note, setNote] = useState(() => lowestPad(rack));
+  const pad = rack.chains.find((item) => item.pad?.note === note);
+  const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
+  const { map, mix, removeChain, settle, toggle, turn, unmap } =
+    useRackCommands(dispatch, track, rackId);
+  const setSound = useCallback(
+    (at: number, sound: DrumSound, name: string) =>
+      dispatch({ name, note: at, rack: rackId, sound, track, type: "set-pad" }),
+    [dispatch, rackId, track]
+  );
+  const change = useCallback(
+    (id: string, patch: { decay?: number; tune?: number }) =>
+      dispatch({
+        chain: id,
+        rack: rackId,
+        track,
+        type: "change-pad",
+        ...patch,
+      }),
+    [dispatch, rackId, track]
+  );
+  return (
+    <DeviceChainSlot
+      enabled={device.on !== false}
+      onEnabledChange={toggle}
+      title="Drum rack"
+      value={device.id}
+    >
+      <DrumRackPanel
+        className="w-[56rem]"
+        controls={<DeviceChainSlotControls />}
+        enabled={device.on !== false}
+        onChainMix={mix}
+        onChainMixCommit={settle}
+        onEnabledChange={toggle}
+        onMacroChange={turn}
+        onMacroCommit={settle}
+        onMapMacro={map}
+        onPadChange={change}
+        onPadCommit={settle}
+        onPadOff={onNoteOff}
+        onPadOn={onNoteOn}
+        onPadSound={setSound}
+        onRemovePad={removeChain}
+        onSelectNote={setNote}
+        onUnmapMacro={unmap}
+        parameters={parameters}
+        rack={rack}
+        selectedNote={note}
+      >
+        {pad ? (
+          <Chain
+            className="min-h-0 flex-1 overflow-x-auto"
+            devices={pad.devices}
+            end={
+              pad.devices.length === 0 ? (
+                <p className="self-center px-2 text-muted-foreground text-xs">
+                  Drag a device from the library onto {pad.name}.
+                </p>
+              ) : null
+            }
+            place={{ chain: pad.id, rack: rackId }}
+            {...chain}
+          />
+        ) : null}
+      </DrumRackPanel>
+    </DeviceChainSlot>
+  );
+}
+
 /**
  * The devices of the selected track in a row, in the order the sound goes
  * through them: a device dragged from the library goes where it is dropped
@@ -267,16 +370,23 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
  */
 export function DeviceView({
   arrangement,
+  onNoteOff,
+  onNoteOn,
   onOpenLibrary,
   track,
 }: {
   arrangement: Arrangement;
+  /** Lets go of a note `onNoteOn` started on a track. */
+  onNoteOff: (track: string, pitch: number) => void;
+  /** Plays a note of a track now, through its instrument and chain, as a key does. */
+  onNoteOn: (track: string, pitch: number, velocity: number) => void;
   /** Opens the library on the left, ready to search. */
   onOpenLibrary: () => void;
   track: string | null;
 }) {
   const { dispatch, doc } = arrangement;
   const current = track ? trackOf(doc, track) : undefined;
+  const id = current?.id ?? "";
   const addRack = useCallback(
     () =>
       current &&
@@ -287,6 +397,27 @@ export function DeviceView({
         type: "add-device",
       }),
     [current, dispatch]
+  );
+  // A drum rack is an instrument: it goes first, in place of the one there was.
+  const addDrumRack = useCallback(
+    () =>
+      current &&
+      dispatch({
+        device: DRUM_RACK_DEVICE,
+        instrument: true,
+        state: {},
+        track: current.id,
+        type: "add-device",
+      }),
+    [current, dispatch]
+  );
+  const noteOn = useCallback(
+    (pitch: number, velocity: number) => onNoteOn(id, pitch, velocity),
+    [id, onNoteOn]
+  );
+  const noteOff = useCallback(
+    (pitch: number) => onNoteOff(id, pitch),
+    [id, onNoteOff]
   );
 
   if (!current) {
@@ -308,8 +439,15 @@ export function DeviceView({
             <Button onClick={addRack} size="sm" variant="outline">
               Add a rack
             </Button>
+            {current.kind === "midi" ? (
+              <Button onClick={addDrumRack} size="sm" variant="outline">
+                Add a drum rack
+              </Button>
+            ) : null}
           </div>
         }
+        onNoteOff={noteOff}
+        onNoteOn={noteOn}
         place={undefined}
         tempo={doc.tempo}
         track={current.id}
