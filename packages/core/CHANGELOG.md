@@ -1,5 +1,12 @@
 # @audio-ui/core
 
+## 0.21.0
+
+### Minor Changes
+
+- 26b3742: Playback: tracks can play into group tracks. `routedCompensation(tracks, returns)` lines every path up wherever paths meet, through groups within groups and sends at any depth, with a wait for each track's way out and for each send. A `SoloTrack` can name its `group`: a soloed track keeps the groups it is in heard, and a soloed group lets the tracks in it be heard.
+- 26b3742: Playback: a recording can be streamed instead of decoded whole into memory, for sets longer than a tab can hold. `createPagePool` and `createRecordingStream` keep pages of audio in memory a worker and a worklet can share, `PageCache` loads the pages asked for and gives up those asked for longest ago, and `pagesAhead` says which pages a track's clips will read over the next frames, loops, reverse and warp included. `RECORDING_LOADER_WORKER` is a Worker that loads them from files of the origin private file system (`RecordingLoaderMessage`), and the clip player takes a `stream` message beside `recording`. The renderer plays a `StreamedRecording` beside a decoded one, and a decoded one as fast as before.
+
 ## 0.20.0
 
 ### Minor Changes
