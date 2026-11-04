@@ -313,6 +313,30 @@ describe("DAWproject", () => {
     expect(alias?.notes).toEqual(clip?.notes);
   });
 
+  test("AUT-005: a device's envelope stays out of the file and the report says so; the track's volume goes out", () => {
+    const ramp = [
+      { x: 0, y: 0 },
+      { x: 1, y: 1 },
+    ];
+    const { doc } = createArrangementState({
+      colors: 5,
+      duration: 10,
+      initialTracks: [
+        {
+          automation: { "device:eq:lowGainDb": ramp, volume: ramp },
+          color: 0,
+          id: "a",
+          name: "Vox",
+        },
+      ],
+      tempo: TEMPO,
+    });
+    const { project: xml, report } = writeDawproject(doc, new Map());
+    expect(report).toContain("Vox: the automation of its devices left out");
+    expect(xml).toContain('parameter="volume-a"');
+    expect(xml).not.toContain("lowGainDb");
+  });
+
   test("PRJ-008: what is not a DAWproject is refused, saying so", () => {
     expect(() => readDawproject("<Something/>")).toThrow("not a DAWproject");
   });

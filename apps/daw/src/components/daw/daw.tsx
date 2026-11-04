@@ -978,6 +978,7 @@ export function Daw({
         ) : (
           <DeviceView
             arrangement={arrangement}
+            onDeviceMoved={automation.deviceMoved}
             onHoldNote={holdNote}
             onNoteOff={noteOff}
             onNoteOn={noteOn}

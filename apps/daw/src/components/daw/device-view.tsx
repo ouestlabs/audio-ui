@@ -46,6 +46,8 @@ interface ChainProps {
   dispatch: Arrangement["dispatch"];
   /** A note held by an instrument's panel, such as its pad, by its note parameters; `null` lets it go. */
   onHoldNote: (note: Readonly<Record<string, number>> | null) => void;
+  /** Parameters of a device moved by hand, by their ids: those automated stop following their envelopes (AUT-003). */
+  onMoved: (device: string, parameters: readonly string[]) => void;
   onNoteOff: (pitch: number) => void;
   /** Plays a note of the track now, as a key does, until `onNoteOff`. */
   onNoteOn: (pitch: number, velocity: number) => void;
@@ -60,10 +62,16 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   const { dispatch, tempo, track } = chain;
   const face = devicePanel(device.device);
   const entry = libraryDevice(device.device);
+  const { onMoved } = chain;
   const change = useCallback(
-    (state: TrackDevice["state"]) =>
-      dispatch({ id: device.id, state, track, type: "set-device" }),
-    [device.id, dispatch, track]
+    (state: TrackDevice["state"]) => {
+      onMoved(
+        device.id,
+        Object.keys(state).filter((id) => state[id] !== device.state[id])
+      );
+      dispatch({ id: device.id, state, track, type: "set-device" });
+    },
+    [device.id, device.state, dispatch, onMoved, track]
   );
   const toggle = useCallback(
     () => dispatch({ id: device.id, track, type: "toggle-device" }),
@@ -187,7 +195,8 @@ function parametersOf(devices: readonly TrackDevice[]): RackParameter[] {
 function useRackCommands(
   dispatch: Arrangement["dispatch"],
   track: string,
-  rackId: string
+  rackId: string,
+  onMoved: ChainProps["onMoved"]
 ) {
   const settle = useCallback(
     () => dispatch({ type: "settle-clip-edit" }),
@@ -198,9 +207,11 @@ function useRackCommands(
     [dispatch, rackId, track]
   );
   const turn = useCallback(
-    (index: number, value: number) =>
-      dispatch({ index, rack: rackId, track, type: "set-macro", value }),
-    [dispatch, rackId, track]
+    (index: number, value: number) => {
+      onMoved(rackId, [`macro-${index + 1}`]);
+      dispatch({ index, rack: rackId, track, type: "set-macro", value });
+    },
+    [dispatch, onMoved, rackId, track]
   );
   const map = useCallback(
     (index: number, parameter: RackParameter) =>
@@ -268,7 +279,7 @@ function RackSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   );
   const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
   const { map, mix, removeChain, settle, toggle, turn, unmap } =
-    useRackCommands(dispatch, track, rackId);
+    useRackCommands(dispatch, track, rackId, chain.onMoved);
   const addChain = useCallback(
     () => dispatch({ rack: rackId, track, type: "add-rack-chain" }),
     [dispatch, rackId, track]
@@ -350,7 +361,7 @@ function DrumSlot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   const pad = rack.chains.find((item) => item.pad?.note === note);
   const parameters = useMemo(() => parametersOf(rackDevices(rack)), [rack]);
   const { map, mix, removeChain, settle, toggle, turn, unmap } =
-    useRackCommands(dispatch, track, rackId);
+    useRackCommands(dispatch, track, rackId, chain.onMoved);
   const setSound = useCallback(
     (at: number, sound: DrumSound, name: string) =>
       dispatch({ name, note: at, rack: rackId, sound, track, type: "set-pad" }),
@@ -431,6 +442,7 @@ export function DeviceView({
   arrangement,
   onNoteOff,
   onNoteOn,
+  onDeviceMoved,
   onHoldNote,
   onOpenLibrary,
   onPadFiles,
@@ -448,6 +460,12 @@ export function DeviceView({
   ) => void;
   /** Opens the library on the left, ready to search. */
   onOpenLibrary: () => void;
+  /** Parameters of a track's device moved by hand, by their ids: those automated stop following their envelopes. */
+  onDeviceMoved: (
+    track: string,
+    device: string,
+    parameters: readonly string[]
+  ) => void;
   /** Files dropped on a pad of a drum rack on a track: a recording for it to play. */
   onPadFiles: (
     track: string,
@@ -507,6 +525,11 @@ export function DeviceView({
   const holdNote = useCallback(
     (note: Readonly<Record<string, number>> | null) => onHoldNote(id, note),
     [id, onHoldNote]
+  );
+  const moved = useCallback(
+    (device: string, parameters: readonly string[]) =>
+      onDeviceMoved(id, device, parameters),
+    [id, onDeviceMoved]
   );
   const padFiles = useCallback(
     (rack: string, note: number, files: File[]) =>
@@ -596,6 +619,7 @@ export function DeviceView({
         dispatch={dispatch}
         end={end}
         onHoldNote={holdNote}
+        onMoved={moved}
         onNoteOff={noteOff}
         onNoteOn={noteOn}
         onPadFiles={padFiles}

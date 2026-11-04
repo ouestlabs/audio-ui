@@ -524,7 +524,7 @@ Drag an audio file from the desktop onto an audio track: the track is outlined w
 
 Press **A**, or the automation button, for automation mode: each track's header gets a chooser of what its lane shows, Volume or Pan, and its lane the envelope of that parameter over its clips (`automation-envelope`, `npx shadcn@latest add @audio-ui/automation-envelope`). Until the track has one, the line stands faint at the mix's value; double-click it to add a point, drag a point to move it on the grid (its level stays free), drag the small handle on a segment to bend it, and double-click a point to take it away. Beside the line, a press reaches the lane and the clips as before. Each track's channel follows its envelopes as it plays. Moving an automated gain or pan by hand overrides it: the envelope greys, the mix plays, and **Re-enable automation** in the toolbar (or drawing on the envelope) brings it back. In `lib/arrangement`, a track keeps its `automation` per parameter as points across the whole arrangement, `x` from 0 to 1, so a tempo change keeps them in place; `automationAt` reads one, `volumeGain` and `panPosition` turn its values into a gain and a pan, and `mixAt` gives what a track plays at a point of the song.
 
-`TrackAutomationChooser` and `TrackAutomation` (`npx shadcn@latest add @audio-ui/track-automation`) are those two parts: the chooser goes in the track's header (`TimelineTrackControls` takes it as children), the envelope in its lane. `AUTOMATED_PARAMETERS` lists what a track automates, Volume and Pan. `useTrackAutomation` ships with them and holds the mode:
+`TrackAutomationChooser` and `TrackAutomation` (`npx shadcn@latest add @audio-ui/track-automation`) are those two parts: the chooser goes in the track's header (`TimelineTrackControls` takes it as children), the envelope in its lane. `AUTOMATED_PARAMETERS` lists a track's own parameters, Volume and Pan. Its devices' parameters, and its racks' macros, can have an envelope too: `deviceTargets(track.devices, libraryDevice)` lists them, device by device, for the chooser's `targets` and the envelope's, and the engine sets each to where its envelope stands every 10 ms, playing and in an export. An envelope of a device is keyed `device:<device>:<parameter>` (`deviceParameterKey`); a device removed takes its envelopes along, and a duplicate's follow its new ids. `useTrackAutomation` ships with them and holds the mode; tell it a device's parameters moved by hand with `deviceMoved(trackId, device, parameters)`, and those automated play as set until `reenable`:
 
 ```tsx
 import { useTrackAutomation } from "@/hooks/use-track-automation";
@@ -538,6 +538,7 @@ const engine = useArrangementEngine({ doc, overridden: automation.overridden, re
       onClear={automation.clear}
       onParameterChange={automation.show}
       parameter={automation.parameterOf(track.id)}
+      targets={deviceTargets(track.devices ?? [], libraryDevice)}
       track={track}
     />
   ) : null}
@@ -1036,12 +1037,13 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 
 <TypeTable>
 <TypeRow name={"track"} type={"ArrangementTrack"}>The track, with its `automation`.</TypeRow>
-<TypeRow name={"parameter"} type={"\"volume\" | \"pan\""}>What the lane shows.</TypeRow>
+<TypeRow name={"parameter"} type={"AutomatedParameter"}>What the lane shows: `"volume"`, `"pan"`, or a device's parameter by its key.</TypeRow>
+<TypeRow name={"targets"} type={"AutomationTarget[]"}>The track's devices' parameters it can automate, as `deviceTargets` gives them: the chooser lists them by device, and the envelope reads and stands by them.</TypeRow>
 <TypeRow name={"onParameterChange, onClear"} type={"(trackId, parameter) => void"}>The chooser's: another parameter picked, and its envelope cleared.</TypeRow>
 <TypeRow name={"mix"} type={"Mix"}>The track's mix, where a line with no points stands.</TypeRow>
 <TypeRow name={"onChange, onCommit"} type={"(trackId, parameter, points) => void, () => void"}>The envelope was edited, and the gesture ended.</TypeRow>
 <TypeRow name={"duration, snapStep, describe"} type={"number, number, (time) => string"}>The arrangement's length, the grid a point snaps to in time, and a time in words.</TypeRow>
-<TypeRow name={"overridden"} type={"(\"volume\" | \"pan\")[]"}>The parameters moved by hand since, drawn greyed.</TypeRow>
+<TypeRow name={"overridden"} type={"AutomatedParameter[]"}>The parameters moved by hand since, drawn greyed.</TypeRow>
 </TypeTable>
 
 ### useMidiPlayback

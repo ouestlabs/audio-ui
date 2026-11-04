@@ -3,10 +3,11 @@
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import { useCallback, useState } from "react";
 import { AUTOMATED_PARAMETERS } from "@/components/audio-ui/track-automation";
-import type {
-  ArrangementTrack,
-  AutomatedParameter,
-  Mix,
+import {
+  type ArrangementTrack,
+  type AutomatedParameter,
+  deviceParameterKey,
+  type Mix,
 } from "@/lib/arrangement";
 import type { ArrangementCommand } from "@/lib/arrangement-state";
 
@@ -23,7 +24,8 @@ export interface UseTrackAutomationOptions {
  * of its parameter in its header (`TrackAutomation`, `TrackAutomationChooser`).
  * A gain or a pan moved by hand through `changeMix` overrides the envelope:
  * `overridden` lists, by track, what plays its mix instead (give it to the
- * engine), until `reenable`, or until `edit` draws that envelope again.
+ * engine), until `reenable`, or until `edit` draws that envelope again; so
+ * does a device's parameter moved by hand, told through `deviceMoved`.
  * `clear` takes an envelope away, as one step of undo.
  */
 export function useTrackAutomation({
@@ -103,6 +105,24 @@ export function useTrackAutomation({
     },
     [dispatch]
   );
+  /** Parameters of a track's device moved by hand, by their ids (a rack's macros `macro-1` to `macro-8`): those automated stop following their envelopes. */
+  const deviceMoved = useCallback(
+    (trackId: string, device: string, parameters: readonly string[]) => {
+      const automation = tracks.find(
+        (track) => track.id === trackId
+      )?.automation;
+      const moved = parameters
+        .map((parameter) => deviceParameterKey(device, parameter))
+        .filter((key) => automation?.[key]);
+      if (moved.length > 0) {
+        setOverridden((all) => ({
+          ...all,
+          [trackId]: [...new Set([...(all[trackId] ?? []), ...moved])],
+        }));
+      }
+    },
+    [tracks]
+  );
   const reenable = useCallback(() => setOverridden({}), []);
   return {
     /** Whether a change by hand overrides any envelope: what a "Re-enable automation" button waits for. */
@@ -112,6 +132,7 @@ export function useTrackAutomation({
     automating,
     changeMix,
     clear,
+    deviceMoved,
     edit,
     overridden,
     parameterOf,

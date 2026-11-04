@@ -669,6 +669,45 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         () => !document.querySelector("[data-slot=automation-envelope]")
       );
     },
+  "AUT-001 and AUT-003: a track's chooser lists its devices' parameters, one is drawn, and a knob turned by hand overrides it":
+    async (browser) => {
+      const page = await open(browser);
+      await page
+        .locator('[aria-label="1 Audio"][data-track-id]')
+        .getByText("1 Audio")
+        .click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Utility");
+      await library.getByRole("option", { name: UTILITY }).first().dblclick();
+      const devices = page.getByRole("region", { name: "Devices" });
+      await devices.getByText("Utility", { exact: true }).waitFor();
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("KeyA");
+      await page.getByRole("combobox", { name: "1 Audio automation" }).click();
+      await page.getByRole("option", { exact: true, name: "Gain" }).click();
+      const lane = page.getByRole("group", {
+        name: "1 Audio utility gain automation",
+      });
+      await lane.waitFor({ timeout: 5000 });
+      // Drawn: a point of its faint line moved with the keys.
+      await lane.locator('[aria-label^="Point 1"]').first().focus();
+      await page.keyboard.press("ArrowUp");
+      await page.waitForFunction(
+        () =>
+          !document
+            .querySelector(
+              '[data-track="track-1"] [data-slot=automation-envelope]'
+            )
+            ?.className.includes("opacity-50")
+      );
+      await devices.getByRole("slider", { name: "Gain" }).first().focus();
+      await page.keyboard.press("ArrowRight");
+      await page
+        .getByRole("button", { name: "Re-enable automation" })
+        .waitFor({ timeout: 5000 });
+    },
   "ARR-014: a drag across bare lanes selects time, and the keys work on it":
     async (browser) => {
       const page = await open(browser);
