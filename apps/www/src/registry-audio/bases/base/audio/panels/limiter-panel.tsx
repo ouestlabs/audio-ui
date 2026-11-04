@@ -75,7 +75,7 @@ function LimiterPanel({
       >
         <Plot
           aria-label="Transfer curve"
-          className="h-28 min-h-24 grow"
+          className="h-28 min-h-16 grow"
           maxX={MAX_DB}
           maxY={MAX_DB}
           minX={MIN_DB}
@@ -83,7 +83,8 @@ function LimiterPanel({
         >
           <PlotGrid
             x={{ ticks: DB_TICKS }}
-            y={{ ticks: DB_TICKS.slice(0, 2) }}
+            // Only -24 up the side: -48 would sit on the row of the figures along the bottom.
+            y={{ ticks: DB_TICKS.slice(1, 2) }}
           />
           <PlotGraph>
             <PlotCurve

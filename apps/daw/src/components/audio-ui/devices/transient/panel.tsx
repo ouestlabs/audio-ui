@@ -75,7 +75,7 @@ function TransientPanel({
       >
         <Plot
           aria-label="Attack and sustain"
-          className="h-28 min-h-24 grow"
+          className="h-28 min-h-16 grow"
           maxX={LIMIT_DB}
           maxY={LIMIT_DB}
           minX={-LIMIT_DB}

@@ -83,7 +83,7 @@ function ReverbPanel({
       >
         <Plot
           aria-label="Decay of the tail"
-          className="h-28 min-h-24 grow"
+          className="h-28 min-h-16 grow"
           maxX={WINDOW_SECONDS}
           maxY={0}
           minX={0}

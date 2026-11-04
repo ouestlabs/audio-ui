@@ -80,7 +80,7 @@ function PhaserPanel({
       >
         <Plot
           aria-label="Sweep over two seconds"
-          className="h-28 min-h-24 grow"
+          className="h-28 min-h-16 grow"
           maxX={WINDOW_SECONDS}
           maxY={100}
           minX={0}
@@ -95,7 +95,7 @@ function PhaserPanel({
           </PlotGraph>
         </Plot>
         <DevicePanel
-          className="grid-cols-3"
+          className="grid-cols-5"
           device={phaserDevice}
           disabled={unused}
           exclude={SWITCHES}

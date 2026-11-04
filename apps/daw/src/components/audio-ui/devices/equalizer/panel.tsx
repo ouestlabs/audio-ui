@@ -221,7 +221,7 @@ function EqualizerPanel({
       >
         <Plot
           aria-label="Frequency response"
-          className="h-28 min-h-24 grow"
+          className="h-28 min-h-16 grow"
           maxX={MAX_HZ}
           maxY={MAX_DB}
           minX={MIN_HZ}

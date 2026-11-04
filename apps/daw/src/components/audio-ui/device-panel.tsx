@@ -119,7 +119,8 @@ function ToggleControl({
   return (
     <Toggle
       aria-label={parameter.label}
-      className="aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
+      // Centred in its cell, level with the knobs beside it.
+      className="self-center justify-self-center aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
       onPressedChange={change}
       pressed={on}
       size="sm"
