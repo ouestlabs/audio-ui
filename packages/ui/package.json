@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/react",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "description": "Accessible, headless React primitives for audio interfaces: knobs, faders, XY pads, envelopes, meters, waveforms, timelines, step sequencers, drum pads, piano keyboards and piano rolls.",
   "keywords": [
     "audio-ui",
