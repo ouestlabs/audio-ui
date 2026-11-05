@@ -3096,6 +3096,51 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the loop is not on"
       );
     },
+  "ARR-016: the previous and next locator buttons put the cursor on the locators around it":
+    async (browser) => {
+      const page = await open(browser);
+      const offsetOf = (selector: string) =>
+        page.evaluate(
+          (target) =>
+            [...document.querySelectorAll(target)].map((node) =>
+              Number(
+                (
+                  node.closest(
+                    "[data-slot=timeline-mark],[data-slot=timeline-playhead]"
+                  ) as HTMLElement
+                ).style.getPropertyValue("--timeline-offset")
+              )
+            ),
+          selector
+        );
+      // Two locators, a bar apart, and the cursor back at the start.
+      await page.keyboard.press("KeyM");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("KeyM");
+      await page.keyboard.press("Home");
+      const marks = (await offsetOf("[data-slot=timeline-locator]")).sort(
+        (a, b) => a - b
+      );
+      assert(marks.length >= 2, "two locators were not added");
+      const cursor = async () =>
+        (await offsetOf("[data-slot=timeline-playhead]"))[0] ?? -1;
+      const next = page.getByRole("button", { name: "Next locator" });
+      const previous = page.getByRole("button", { name: "Previous locator" });
+      await next.click();
+      const ahead = marks.find((at) => at > 0) ?? -1;
+      assert(
+        Math.abs((await cursor()) - ahead) < 1e-6,
+        `Next put the cursor at ${await cursor()}, not ${ahead}`
+      );
+      const last = marks.at(-1) ?? -1;
+      await page.keyboard.press("End");
+      await previous.click();
+      assert(
+        (await cursor()) <= last + 1e-6,
+        `Previous left the cursor at ${await cursor()}`
+      );
+    },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
       const page = await open(browser);
