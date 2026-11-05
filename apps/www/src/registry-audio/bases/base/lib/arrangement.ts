@@ -116,7 +116,9 @@ const MACRO_PARAMETER = /^macro-([1-8])$/;
  * envelope across the whole arrangement, `x` from its start (0) to its end
  * (1) and `y` the parameter's value from 0 to 1, with the curve of the
  * segment leaving each point. Being shares of the song, the points keep
- * their musical place when the tempo changes.
+ * their musical place when the tempo changes; when the arrangement grows or
+ * shrinks, or time is inserted or taken out, they are retimed so each keeps
+ * its time.
  */
 export type TrackAutomation = Partial<
   Record<AutomatedParameter, readonly Breakpoint[]>

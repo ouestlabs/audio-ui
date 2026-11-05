@@ -22,6 +22,7 @@ import {
   type Arranged,
   type ArrangementTrack,
   type AutomatedParameter,
+  automationAt,
   type ChainZone,
   type ClipAction,
   type Clipping,
@@ -393,6 +394,125 @@ export function deleteTime(
   duration: number
 ): Arranged[] {
   return removeTime(all, from, to, { duration }, splitter(all));
+}
+
+/** A point of an envelope at its time, in seconds. */
+type TimedPoint = Breakpoint & { at: number };
+
+/**
+ * An envelope's points, kept in shares of the arrangement's length, moved in
+ * seconds by `move` and given back in shares of `after`, its new length: what
+ * goes past the new end is cut there, at the value it had.
+ */
+function retimeEnvelope(
+  points: readonly Breakpoint[],
+  before: number,
+  after: number,
+  move: (timed: TimedPoint[], valueAt: (at: number) => number) => TimedPoint[]
+): Breakpoint[] {
+  if (points.length === 0 || before <= 0 || after <= 0) {
+    return [...points];
+  }
+  const valueAt = (at: number) => automationAt(points, at / before);
+  const moved = move(
+    points.map((point) => ({ ...point, at: point.x * before })),
+    valueAt
+  );
+  const inside = moved.filter((point) => point.at <= after);
+  const cut =
+    inside.length < moved.length && inside.at(-1)?.at !== after
+      ? [...inside, { at: after, x: 0, y: valueAtMoved(moved, after) }]
+      : inside;
+  // An envelope drawn to the end still reaches it, holding its last value.
+  const last = cut.at(-1);
+  const held =
+    points.at(-1)?.x === 1 && last && last.at < after
+      ? [...cut, { at: after, x: 0, y: last.y }]
+      : cut;
+  return held.map(({ at, ...point }) => ({ ...point, x: at / after }));
+}
+
+/** The value of moved points at `at`, in seconds, along their segments. */
+function valueAtMoved(points: readonly TimedPoint[], at: number): number {
+  const end = points.at(-1)?.at ?? 1;
+  const span = end > 0 ? end : 1;
+  return automationAt(
+    points.map((point) => ({ ...point, x: point.at / span })),
+    at / span
+  );
+}
+
+/** Every track's automation, the returns' and the main track's, retimed by `retime`. */
+function retimeAutomation(
+  doc: ArrangementDoc,
+  retime: (points: readonly Breakpoint[]) => Breakpoint[]
+): Pick<ArrangementDoc, "main" | "returns" | "tracks"> {
+  const of = (track: ArrangementTrack): ArrangementTrack =>
+    track.automation
+      ? {
+          ...track,
+          automation: Object.fromEntries(
+            Object.entries(track.automation).map(([key, points]) => [
+              key,
+              points ? retime(points) : points,
+            ])
+          ) as TrackAutomation,
+        }
+      : track;
+  return {
+    main: of(doc.main),
+    returns: doc.returns.map(of),
+    tracks: doc.tracks.map(of),
+  };
+}
+
+/** The envelopes of the arrangement now `after` long: every point stays at its time, and one drawn to the end still reaches it. */
+export function automationForDuration(
+  doc: ArrangementDoc,
+  after: number
+): Pick<ArrangementDoc, "main" | "returns" | "tracks"> {
+  return retimeAutomation(doc, (points) =>
+    retimeEnvelope(points, doc.duration, after, (timed) => timed)
+  );
+}
+
+/** The envelopes with `length` seconds opened at `at`: the value there holds across it, what follows moves later. */
+export function automationAfterInsert(
+  doc: ArrangementDoc,
+  at: number,
+  length: number
+): Pick<ArrangementDoc, "main" | "returns" | "tracks"> {
+  return retimeAutomation(doc, (points) =>
+    retimeEnvelope(points, doc.duration, doc.duration, (timed, valueAt) => {
+      const held = valueAt(at);
+      return [
+        ...timed.filter((point) => point.at < at),
+        { at, x: 0, y: held },
+        { at: at + length, x: 0, y: held },
+        ...timed
+          .filter((point) => point.at > at)
+          .map((point) => ({ ...point, at: point.at + length })),
+      ];
+    })
+  );
+}
+
+/** The envelopes with the stretch from `from` to `to` taken out: they close up, what followed moves back. */
+export function automationAfterRemove(
+  doc: ArrangementDoc,
+  from: number,
+  to: number
+): Pick<ArrangementDoc, "main" | "returns" | "tracks"> {
+  return retimeAutomation(doc, (points) =>
+    retimeEnvelope(points, doc.duration, doc.duration, (timed, valueAt) => [
+      ...timed.filter((point) => point.at < from),
+      { at: from, x: 0, y: valueAt(from) },
+      { at: from, x: 0, y: valueAt(to) },
+      ...timed
+        .filter((point) => point.at > to)
+        .map((point) => ({ ...point, at: point.at - (to - from) })),
+    ])
+  );
 }
 
 /**
@@ -2841,6 +2961,7 @@ const handlers: Handlers = {
     edit(state, (doc) => ({
       ...doc,
       clips: openTime(doc.clips, at, length, state.doc.duration),
+      ...automationAfterInsert(doc, at, length),
       locators: marksAfterInsert(doc.locators, at, length),
       signatures: marksAfterInsert(doc.signatures, at, length),
     })),
@@ -2855,6 +2976,7 @@ const handlers: Handlers = {
     edit(state, (doc) => ({
       ...doc,
       clips: deleteTime(doc.clips, from, to, state.doc.duration),
+      ...automationAfterRemove(doc, from, to),
       locators: marksAfterRemove(doc.locators, from, to, false),
       signatures: marksAfterRemove(doc.signatures, from, to, true),
     })),
@@ -2869,7 +2991,14 @@ const handlers: Handlers = {
   "set-duration": (state, { duration }) =>
     state.doc.duration === duration
       ? state
-      : { ...state, doc: { ...state.doc, duration } },
+      : {
+          ...state,
+          doc: {
+            ...state.doc,
+            ...automationForDuration(state.doc, duration),
+            duration,
+          },
+        },
   "set-fade-shape": (state, { id, edge, shape }) =>
     fadeShape(state, id, edge, shape),
   "settle-clip-edit": (state) => ({

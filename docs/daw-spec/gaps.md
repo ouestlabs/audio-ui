@@ -32,6 +32,7 @@ Status: the document holds them (devices, sends, return tracks, the main track, 
 
 ### G-006 Automation is a share of the song
 A track's automation is only its volume and pan, and its points are fractions of the arrangement's length: `set-duration` stretches every envelope, and `insert-time` and `remove-time` move the clips but leave the envelopes where they were.
+Status: partial: the points stay fractions of the arrangement's length, so a tempo change keeps their musical place, but `set-duration`, `insert-time` and `remove-time` retime them so each keeps its time (`automationForDuration`, `automationAfterInsert`, `automationAfterRemove` in `lib/arrangement-state`): a longer arrangement holds the last value after the last point, a shorter one cuts the envelope at its new end, time inserted holds the value across it, time removed closes up with a step. Automation moves a track's devices' parameters now too (AUT-001). The loop still stays where it was when time is inserted or taken out.
 
 ### G-007 No mixer engine
 The Mixer block is a demo that makes its own sound, with no send and no return; nothing in the registry builds a track's chain, its sends and returns, or a main track.
@@ -125,7 +126,7 @@ Status: fixed (median 46.3 ms from the press to the output, was 55.9 ms).
 ### G-025 What the locators and time signatures still miss
 A locator's menu has no way to loop to the next one, there are no previous and next locator buttons, and inserting or taking out time leaves the locators and the time signatures where they were.
 Fix: small, each. (A double-click on a locator plays from it now, as in a DAW; it renamed it before.)
-Status: fixed, but for the loop and the automation (G-006), which still stay where they were when time is inserted or taken out. The previous and next buttons sit beside the Markers row's add button; a locator's menu loops from it to the next one, or to the end (`loop-to-next-locator`); inserting or taking out time moves the locators and the time signatures with the clips (`marksAfterInsert`, `marksAfterRemove` in `lib/arrangement-state`; a time signature in the time removed starts where it did, so what follows keeps its meter). The loop and the automation (G-006) stay where they were.
+Status: fixed, but for the loop, which still stays where it was when time is inserted or taken out; the automation follows (G-006). The previous and next buttons sit beside the Markers row's add button; a locator's menu loops from it to the next one, or to the end (`loop-to-next-locator`); inserting or taking out time moves the locators and the time signatures with the clips (`marksAfterInsert`, `marksAfterRemove` in `lib/arrangement-state`; a time signature in the time removed starts where it did, so what follows keeps its meter).
 
 ### G-024 A timeline's marks could not be moved
 `Timeline.Mark` only placed something: a locator could not move at all, a time signature only with the arrows, in code of its own. Breaks ARR-016 and ARR-017.

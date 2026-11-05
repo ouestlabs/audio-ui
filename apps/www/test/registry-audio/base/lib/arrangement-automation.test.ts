@@ -92,3 +92,83 @@ describe("device automation", () => {
     );
   });
 });
+
+describe("automation in time", () => {
+  // The volume ramps from 0 at 0 s to 1 at 10 s, the arrangement's end.
+  const volume = (commands: ArrangementCommand[]) =>
+    run(commands).doc.tracks[0]?.automation?.volume ?? [];
+  /** The envelope's points as seconds and values, rounded. */
+  const inSeconds = (
+    points: readonly { x: number; y: number }[],
+    duration: number
+  ) =>
+    points.map(({ x, y }) => [
+      Math.round(x * duration * 1000) / 1000,
+      Math.round(y * 1000) / 1000,
+    ]);
+
+  test("G-006: a longer arrangement keeps every point at its time, the last value held to the new end", () => {
+    const state = run([{ duration: 20, type: "set-duration" }]);
+    const points = state.doc.tracks[0]?.automation?.volume ?? [];
+    expect(inSeconds(points, 20)).toEqual([
+      [0, 0],
+      [10, 1],
+      [20, 1],
+    ]);
+  });
+
+  test("G-006: a shorter arrangement cuts the envelope at its new end, at the value it had there", () => {
+    const state = run([{ duration: 5, type: "set-duration" }]);
+    expect(inSeconds(state.doc.tracks[0]?.automation?.volume ?? [], 5)).toEqual(
+      [
+        [0, 0],
+        [5, 0.5],
+      ]
+    );
+  });
+
+  test("G-006: time inserted holds the value across it and moves what follows later", () => {
+    // 2 s at 4 s, in a 10 s arrangement: the ramp's end goes past it, so it ends at 10 s at its value there.
+    expect(
+      inSeconds(volume([{ at: 4, length: 2, type: "insert-time" }]), 10)
+    ).toEqual([
+      [0, 0],
+      [4, 0.4],
+      [6, 0.4],
+      [10, 0.8],
+    ]);
+  });
+
+  test("G-006: time taken out closes up the envelope, what followed moved back", () => {
+    expect(
+      inSeconds(volume([{ from: 2, to: 6, type: "remove-time" }]), 10)
+    ).toEqual([
+      [0, 0],
+      [2, 0.2],
+      [2, 0.6],
+      [6, 1],
+      [10, 1],
+    ]);
+  });
+
+  test("G-006: the envelopes of the returns and the main track follow time too", () => {
+    const state = createArrangementState({
+      colors: 5,
+      duration: 10,
+      initialMain: {
+        automation: { volume: ramp },
+        color: 0,
+        id: "main",
+        name: "Main",
+      },
+      initialTracks: [],
+      tempo: { beatUnit: 4, beatsPerBar: 4, bpm: 120 },
+    });
+    const longer = apply(state, { duration: 20, type: "set-duration" });
+    expect(inSeconds(longer.doc.main.automation?.volume ?? [], 20)).toEqual([
+      [0, 0],
+      [10, 1],
+      [20, 1],
+    ]);
+  });
+});

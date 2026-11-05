@@ -2344,6 +2344,11 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         .first()
         .getAttribute("data-depth");
       assert(depth === "1", `the grouped track sits at depth ${depth}`);
+      // Drawn in the render after the group's name: under load, read too soon it is not there yet.
+      await page
+        .locator("[data-slot=arranged-group-preview] > div")
+        .first()
+        .waitFor({ timeout: 5000 });
       assert(
         (await page
           .locator("[data-slot=arranged-group-preview] > div")
