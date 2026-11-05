@@ -93,5 +93,5 @@ A new or duplicated track never takes the id of a track there is, whatever was r
 Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-022"; apps/daw/test/project-file.test.ts "ARR-022"; apps/daw/test/browser/run.ts "ARR-022"
 
 ### ARR-023 The overview at any zoom
-The bar over the tracks shows the stretch the view shows as a window with a handle at each edge. Zoomed in until they no longer fit, it is one plain thumb that stays inside its bar: dragged, it scrolls, and a double-click on the bar shows everything. The handles come back as soon as there is room, and with the keyboard on one, it shows.
+The bar over the tracks shows the stretch the view shows as a window with a handle at each edge. At any zoom the window keeps both handles, apart and inside the bar, at the end of the timeline too: a handle dragged zooms, the window between them scrolls.
 Test: apps/daw/test/browser/run.ts "ARR-023"

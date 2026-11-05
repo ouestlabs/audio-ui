@@ -2289,56 +2289,85 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `${read.empty} of ${read.columns} columns are gaps`
       );
     },
-  "ARR-023: the overview's window, too narrow for its handles, is one plain thumb that scrolls":
+  "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
       const page = await open(browser);
       const bar = page.locator("[data-slot=timeline-navigator]");
-      const start = bar.getByLabel("Start of the visible range");
-      const handles = () =>
-        bar.locator(".cursor-ew-resize").evaluateAll((all) =>
-          all.map((handle) => {
-            const style = getComputedStyle(handle);
-            return `${style.opacity} ${style.pointerEvents}`;
-          })
+      const edges = async () => {
+        const read = async (label: string) => {
+          const box = await bar
+            .locator(`.cursor-ew-resize:has([aria-label="${label}"])`)
+            .boundingBox();
+          if (!box) {
+            throw new Error(`no handle: ${label}`);
+          }
+          return box;
+        };
+        return {
+          end: await read("End of the visible range"),
+          start: await read("Start of the visible range"),
+        };
+      };
+      const inBar = async () => {
+        const box = await bar.boundingBox();
+        const { end, start } = await edges();
+        assert(
+          !!box &&
+            start.x >= box.x &&
+            end.x + end.width <= box.x + box.width &&
+            end.x - (start.x + start.width) >= 12,
+          `the handles read ${JSON.stringify({ box, end, start })}`
         );
-      assert(await start.count(), "the overview has no handles");
-      assert(
-        (await handles()).every((handle) => handle.startsWith("1 ")),
-        `fitted, the handles read ${await handles()}`
-      );
+        return { end, start };
+      };
+      await inBar();
       await [1, 2, 3, 4, 5, 6, 7, 8].reduce(async (done) => {
         await done;
         await page.keyboard.press("Meta+Equal");
         await page.waitForTimeout(60);
       }, Promise.resolve());
       await page.waitForTimeout(300);
-      assert(
-        (await handles()).every((handle) => handle === "0 none"),
-        `zoomed in, the handles read ${await handles()}`
-      );
-      const thumb = bar.locator("[data-narrow]").first();
-      const box = await thumb.boundingBox();
-      if (!box) {
-        throw new Error("the overview's window is not on the page");
-      }
       const viewport = page.locator("[data-slot=timeline-viewport]");
-      const from = await viewport.evaluate((element) => element.scrollLeft);
-      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      const { end, start } = await inBar();
+      const opacity = await bar
+        .locator(".cursor-ew-resize")
+        .evaluateAll((all) =>
+          all.map((one) => getComputedStyle(one).opacity).join()
+        );
+      assert(opacity === "1,1", `the handles show at ${opacity}`);
+      // Between them, the window scrolls.
+      const y = start.y + start.height / 2;
+      const middle = (start.x + start.width + end.x) / 2;
+      const scrolled = () => viewport.evaluate((element) => element.scrollLeft);
+      const from = await scrolled();
+      await page.mouse.move(middle, y);
       await page.mouse.down();
-      await page.mouse.move(box.x + 300, box.y + box.height / 2, { steps: 6 });
+      await page.mouse.move(middle + 300, y, { steps: 6 });
       await page.mouse.up();
       await page.waitForTimeout(150);
-      const to = await viewport.evaluate((element) => element.scrollLeft);
-      assert(to > from, `dragging the thumb left the view at ${to}`);
-      // Scrolled to the end, it stays inside its bar.
+      assert(
+        (await scrolled()) > from,
+        "the window between them did not scroll"
+      );
+      // Scrolled to the end, both still show.
       await viewport.evaluate((element) => {
         element.scrollLeft = element.scrollWidth;
       });
-      await page.waitForTimeout(150);
-      const clipped = await bar.evaluate(
-        (element) => getComputedStyle(element).overflow
+      await page.waitForTimeout(200);
+      const atEnd = await inBar();
+      // The start handle dragged left zooms out, with no double-click.
+      const wide = () => viewport.evaluate((element) => element.scrollWidth);
+      const before = await wide();
+      await page.mouse.move(
+        atEnd.start.x + atEnd.start.width / 2,
+        atEnd.start.y + atEnd.start.height / 2
       );
-      assert(clipped === "hidden", `the bar lets its thumb out: ${clipped}`);
+      await page.mouse.down();
+      await page.mouse.move(atEnd.start.x - 200, y, { steps: 6 });
+      await page.mouse.up();
+      await page.waitForTimeout(200);
+      const after = await wide();
+      assert(after < before, `zoomed out from ${before} px to ${after} px`);
     },
   "ARR-022: a track removed, the page loaded again: a new track takes an id of its own, and shows and goes alone":
     async (browser) => {
