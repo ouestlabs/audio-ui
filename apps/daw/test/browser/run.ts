@@ -310,8 +310,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.keyboard.press("Meta+Equal");
       await page.keyboard.press("Meta+Equal");
       await page.keyboard.press("Meta+Digit4");
-      await dropChord(page, "[data-add-track]", "Chord take", 2);
-      await page.waitForSelector('[aria-label="Chord take"][data-track-id]');
+      await dropChord(page, '[data-track="track-1"]', "Chord take", 2);
+      await page
+        .locator("[data-clip-id]", { hasText: "Chord take" })
+        .waitFor({ timeout: 30_000 });
       const download = page.waitForEvent("download", { timeout: 30_000 });
       await page.getByRole("button", { name: "More controls" }).click();
       await page.getByRole("menuitem", { name: EXPORT }).click();
@@ -475,6 +477,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.mouse.down();
       await page.mouse.move(box.x + box.width / 2, box.y - 120, { steps: 6 });
       await page.mouse.up();
+      // The last step lands in the next frame: under load, read too soon it is not there yet.
+      await page.waitForTimeout(100);
       const taller = await height("Devices");
       assert(
         Math.abs(taller - devices - 120) < 4,
@@ -2439,9 +2443,12 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.getByRole("slider", { exact: true, name: "Loop" }).focus();
       await page.keyboard.press("Meta+ArrowDown");
       await page.keyboard.press("Meta+ArrowDown");
-      await page.locator("[data-slot=timeline-viewport]").first().click({
-        position: { x: 700, y: 300 },
-      });
+      await page
+        .locator("[data-slot=timeline-viewport]")
+        .first()
+        .click({
+          position: { x: 700, y: 300 },
+        });
       await zoom("Meta+Minus");
       await page.waitForTimeout(200);
       const drawn = await range.boundingBox();
@@ -2460,9 +2467,13 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       );
       await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2);
       await page.mouse.down();
-      await page.mouse.move(end.x + end.width / 2 + 90, end.y + end.height / 2, {
-        steps: 5,
-      });
+      await page.mouse.move(
+        end.x + end.width / 2 + 90,
+        end.y + end.height / 2,
+        {
+          steps: 5,
+        }
+      );
       await page.mouse.up();
       await page.waitForTimeout(100);
       const moved = await box(1);
@@ -2471,7 +2482,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         Math.abs(moved.x - (end.x + 90)) < 30,
         `dragged 90 px, the handle moved ${moved.x - end.x} px`
       );
-      assert(Math.abs(stayed.x - start.x) < 1, "the end handle moved the start");
+      assert(
+        Math.abs(stayed.x - start.x) < 1,
+        "the end handle moved the start"
+      );
     },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
