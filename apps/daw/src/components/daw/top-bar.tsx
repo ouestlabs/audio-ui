@@ -34,14 +34,14 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { SHORTCUT_HELP } from "@/lib/daw/shortcuts";
+import type { ShortcutCommand } from "@/lib/daw/shortcuts";
+import { CommandKeys, ShortcutList } from "./shortcut-list";
 
 /** The zoom presets, as shares of the fitted view: Fit shows everything. */
 const ZOOM_PRESETS = [1, 2, 4, 8];
@@ -65,12 +65,15 @@ const noop = () => undefined;
 /** An icon button of the bar, as lab's has them: its name and its keys in the tooltip. */
 function BarButton({
   children,
+  command,
   disabled,
   label,
   onClick,
   pressed,
 }: {
   children: ReactNode;
+  /** The command its keys run, shown with its name. */
+  command?: ShortcutCommand;
   disabled?: boolean;
   label: string;
   onClick: () => void;
@@ -93,7 +96,15 @@ function BarButton({
           </Button>
         }
       />
-      <TooltipContent side="bottom">{label}</TooltipContent>
+      <TooltipContent side="bottom">
+        {label}
+        {command ? (
+          <>
+            {" "}
+            <CommandKeys command={command} />
+          </>
+        ) : null}
+      </TooltipContent>
     </Tooltip>
   );
 }
@@ -226,15 +237,17 @@ export function TopBar(props: TopBarProps) {
         ) : null}
         <ButtonGroup>
           <BarButton
+            command="undo"
             disabled={!props.canUndo}
-            label="Undo (Cmd Z)"
+            label="Undo"
             onClick={props.onUndo ?? noop}
           >
             <ArrowArcLeftIcon aria-hidden="true" />
           </BarButton>
           <BarButton
+            command="redo"
             disabled={!props.canRedo}
-            label="Redo (Cmd Shift Z)"
+            label="Redo"
             onClick={props.onRedo ?? noop}
           >
             <ArrowArcRightIcon aria-hidden="true" />
@@ -257,7 +270,8 @@ export function TopBar(props: TopBarProps) {
           />
         </div>
         <BarButton
-          label="Automation (A)"
+          command="automation"
+          label="Automation"
           onClick={toggleAutomation}
           pressed={automating}
         >
@@ -281,15 +295,21 @@ export function TopBar(props: TopBarProps) {
               <>
                 <DropdownMenuItem onClick={props.onOpen}>
                   Open project…
-                  <DropdownMenuShortcut>⌘O</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>
+                    <CommandKeys command="open" />
+                  </DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={props.onSave}>
                   Save
-                  <DropdownMenuShortcut>⌘S</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>
+                    <CommandKeys command="save" />
+                  </DropdownMenuShortcut>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={props.onSaveAs}>
                   Save as…
-                  <DropdownMenuShortcut>⇧⌘S</DropdownMenuShortcut>
+                  <DropdownMenuShortcut>
+                    <CommandKeys command="save-as" />
+                  </DropdownMenuShortcut>
                 </DropdownMenuItem>
               </>
             ) : null}
@@ -304,7 +324,9 @@ export function TopBar(props: TopBarProps) {
               onClick={props.onExport}
             >
               Export WAV
-              <DropdownMenuShortcut>⇧⌘R</DropdownMenuShortcut>
+              <DropdownMenuShortcut>
+                <CommandKeys command="export" />
+              </DropdownMenuShortcut>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuRadioGroup
@@ -327,21 +349,7 @@ export function TopBar(props: TopBarProps) {
                 Keyboard shortcuts
               </DropdownMenuSubTrigger>
               <DropdownMenuSubContent className="flex max-h-(--available-height) w-auto flex-col">
-                <div className="flex min-h-0 flex-col gap-2 overflow-y-auto p-2 text-sm whitespace-nowrap">
-                  {SHORTCUT_HELP.map((shortcut) => (
-                    <div
-                      className="flex items-center justify-between gap-3"
-                      key={shortcut.action}
-                    >
-                      <span>{shortcut.action}</span>
-                      <KbdGroup>
-                        {shortcut.keys.map((key) => (
-                          <Kbd key={key}>{key}</Kbd>
-                        ))}
-                      </KbdGroup>
-                    </div>
-                  ))}
-                </div>
+                <ShortcutList />
               </DropdownMenuSubContent>
             </DropdownMenuSub>
           </DropdownMenuContent>

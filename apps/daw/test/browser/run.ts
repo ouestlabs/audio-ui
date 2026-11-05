@@ -462,6 +462,350 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the mixer stays open beside the detail view"
       );
     },
+  "MIX-016: the main track stays whole at the right of the mixer, and no channel passes under it":
+    async (browser) => {
+      const page = await open(browser);
+      await [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].reduce(async (done) => {
+        await done;
+        await page.locator("[data-add-track] button").click();
+        await page.getByRole("menuitem", { name: "Audio track" }).click();
+      }, Promise.resolve());
+      await showMixer(page);
+      const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      const channels = mixer.locator("[data-slot=mixer-channels]");
+      const main = mixer.getByRole("region", { exact: true, name: "Main" });
+      const read = async () => {
+        const [view, rows, strip] = [
+          await mixer.boundingBox(),
+          await channels.boundingBox(),
+          await main.boundingBox(),
+        ];
+        return {
+          channelsRight: (rows?.x ?? 0) + (rows?.width ?? 0),
+          left: strip?.x ?? 0,
+          right: (strip?.x ?? 0) + (strip?.width ?? 0),
+          viewRight: (view?.x ?? 0) + (view?.width ?? 0),
+        };
+      };
+      assert(
+        await channels.evaluate(
+          (element) => element.scrollWidth > element.clientWidth
+        ),
+        "the channels do not scroll"
+      );
+      await channels.evaluate((element) => {
+        element.scrollLeft = 0;
+      });
+      await page.waitForTimeout(100);
+      const start = await read();
+      assert(
+        start.right <= start.viewRight + 1 &&
+          start.right > start.viewRight - 24,
+        `scrolled to the start, the main track ends at ${start.right} in a mixer ending at ${start.viewRight}`
+      );
+      assert(
+        start.channelsRight <= start.left + 1,
+        `the channels run to ${start.channelsRight}, under a main track from ${start.left}`
+      );
+      await channels.evaluate((element) => {
+        element.scrollLeft = element.scrollWidth;
+      });
+      await page.waitForTimeout(100);
+      const end = await read();
+      assert(
+        Math.abs(end.left - start.left) < 2,
+        `the main track moved from ${start.left} to ${end.left}`
+      );
+      // One line between two channels, and before the main track: no gap, no double line.
+      const lines = await mixer.locator("section").evaluateAll((strips) =>
+        strips.map((strip) => {
+          const style = getComputedStyle(strip);
+          return [
+            Number.parseFloat(style.borderInlineStartWidth),
+            Number.parseFloat(style.borderInlineEndWidth),
+          ];
+        })
+      );
+      const doubled = lines.findIndex(
+        ([, after], index) => after > 0 && (lines[index + 1]?.[0] ?? 0) > 0
+      );
+      assert(doubled === -1, `a double line after channel ${doubled + 1}`);
+      assert(
+        (await channels.locator(":scope > :not(section)").count()) === 0,
+        "something other than a channel stands between them"
+      );
+      // Every fader starts level, the main track's too.
+      const tops = await mixer
+        .locator("[data-slot=fader-track]")
+        .evaluateAll((faders) =>
+          faders.map((fader) => Math.round(fader.getBoundingClientRect().top))
+        );
+      assert(
+        new Set(tops).size === 1,
+        `the faders start at ${[...new Set(tops)].join(", ")}`
+      );
+    },
+  "MIX-017: a track's channel moves by its name, dragged or with Left and Right, and its row moves with it":
+    async (browser) => {
+      const page = await open(browser);
+      await showMixer(page);
+      const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      const order = () =>
+        mixer
+          .locator("[data-mixer-track]")
+          .evaluateAll((strips) =>
+            strips.map((strip) => strip.getAttribute("aria-label"))
+          );
+      const rows = () =>
+        page
+          .locator("[data-track-id]")
+          .evaluateAll((items) =>
+            items.map((item) => item.getAttribute("aria-label"))
+          );
+      const before = await order();
+      const [first, second] = before;
+      assert(first && second, "there are two tracks");
+      const grip = mixer.getByRole("button", { name: `Move ${first}` });
+      const from = await grip.boundingBox();
+      const target = await mixer
+        .getByRole("button", { name: `Move ${second}` })
+        .boundingBox();
+      assert(from && target, "the names are there");
+      await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(
+        target.x + target.width,
+        target.y + target.height / 2,
+        { steps: 8 }
+      );
+      await page.waitForTimeout(100);
+      await page.mouse.up();
+      await page.waitForTimeout(300);
+      const dragged = await order();
+      assert(
+        dragged[0] === second && dragged[1] === first,
+        `dragged past the next, the order is ${dragged.join(", ")}`
+      );
+      assert(
+        (await rows()).slice(0, 2).join() === dragged.slice(0, 2).join(),
+        "the arrangement kept its old order"
+      );
+      await mixer.getByRole("button", { name: `Move ${first}` }).focus();
+      await page.keyboard.press("ArrowLeft");
+      await page.waitForTimeout(150);
+      assert(
+        (await order())[0] === first,
+        "Left did not move it back to the start"
+      );
+    },
+  "MIX-018: a click on a clip's title bar shows it in the clip view, even over the mixer; a drag of it does not":
+    async (browser) => {
+      const page = await open(browser);
+      // On a track of its own: no other clip lies under it.
+      // Long enough that its middle is its title bar, clear of its trim handles.
+      await dropChord(page, "[data-slot=arrangement-drop]", "Headed", 24);
+      const clip = page.locator("[data-clip-id]", { hasText: "Headed" });
+      await clip.waitFor({ timeout: 30_000 });
+      await showMixer(page);
+      const head = clip.locator("[data-slot=timeline-clip-header]");
+      const press = async (travel: number) => {
+        await head.scrollIntoViewIfNeeded();
+        const box = await head.boundingBox();
+        assert(box, "the title bar is there");
+        const y = (box?.y ?? 0) + (box?.height ?? 0) / 2;
+        const x = (box?.x ?? 0) + (box?.width ?? 0) / 2;
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        await page.mouse.move(x + travel, y, { steps: 5 });
+        await page.mouse.up();
+        await page.waitForTimeout(150);
+      };
+      const clipShown = async () =>
+        (await page
+          .getByRole("tab", { name: "Clip" })
+          .getAttribute("aria-selected")) === "true";
+      await press(60);
+      assert(!(await clipShown()), "a drag of the clip took the mixer away");
+      await press(0);
+      assert(await clipShown(), "a click on the title bar left the mixer");
+    },
+  "REC-001: a track's Arm button is a light, lit while it is armed, and says so as a pressed button":
+    async (browser) => {
+      const page = await open(browser);
+      const arm = page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" });
+      const light = arm.locator("[data-slot=led]");
+      assert((await light.count()) === 1, "the Arm button has no light");
+      assert(
+        (await arm.getAttribute("aria-pressed")) === "false" &&
+          (await light.getAttribute("data-on")) === null,
+        "the light is on before the track is armed"
+      );
+      await arm.click();
+      assert(
+        (await arm.getAttribute("aria-pressed")) === "true" &&
+          (await light.getAttribute("data-on")) === "",
+        "armed, the light stays off"
+      );
+      assert(
+        (await arm.getByRole("img").count()) === 0,
+        "the light says its state over the button's"
+      );
+    },
+  "ARR-027: a track's Solo, Mute and Arm are one group of switches: one stop of Tab, the arrows between them, a color each":
+    async (browser) => {
+      const page = await open(browser);
+      const group = page.getByRole("group", { name: "1 Audio switches" });
+      const solo = group.getByRole("button", { name: "Solo 1 Audio" });
+      await solo.focus();
+      await page.keyboard.press("ArrowRight");
+      assert(
+        await group
+          .getByRole("button", { name: "Mute 1 Audio" })
+          .evaluate((element) => element === document.activeElement),
+        "Right from Solo did not reach Mute"
+      );
+      await page.keyboard.press("Space");
+      assert(
+        (await group
+          .getByRole("button", { name: "Mute 1 Audio" })
+          .getAttribute("aria-pressed")) === "true",
+        "Space did not mute the track"
+      );
+      // Pressed, Solo and Mute each show a color of their own, not the gray of a pressed button.
+      await solo.click();
+      const [soloColor, muteColor, restColor] = await Promise.all(
+        ["Solo 1 Audio", "Mute 1 Audio", "Solo 2 Audio"].map((name) =>
+          page
+            .locator("[data-slot=timeline-track-header]")
+            .getByRole("button", { exact: true, name })
+            .evaluate((element) => getComputedStyle(element).backgroundColor)
+        )
+      );
+      assert(
+        new Set([soloColor, muteColor, restColor]).size === 3,
+        `Solo ${soloColor}, Mute ${muteColor}, at rest ${restColor}`
+      );
+      await solo.click();
+      await page.keyboard.press("Space");
+    },
+  "MIX-019: a channel's switches are its track header's: Solo, Mute and an Arm light, one group, each moved by the other":
+    async (browser) => {
+      const page = await open(browser);
+      await showMixer(page);
+      const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      const channel = mixer.getByRole("group", { name: "1 Audio switches" });
+      const header = page
+        .getByRole("group", { name: "1 Audio switches" })
+        .filter({ hasNot: mixer });
+      await channel.getByRole("button", { name: "Arm 1 Audio" }).click();
+      assert(
+        (await header
+          .first()
+          .getByRole("button", { name: "Arm 1 Audio" })
+          .getAttribute("aria-pressed")) === "true",
+        "armed in the mixer, the header's Arm stays off"
+      );
+      // Inside its channel, as far from either edge.
+      const [strip, switches] = [
+        await mixer
+          .getByRole("region", { exact: true, name: "1 Audio" })
+          .boundingBox(),
+        await channel.boundingBox(),
+      ];
+      const left = (switches?.x ?? 0) - (strip?.x ?? 0);
+      const right =
+        (strip?.x ?? 0) +
+        (strip?.width ?? 0) -
+        (switches?.x ?? 0) -
+        (switches?.width ?? 0);
+      const bottom =
+        (strip?.y ?? 0) +
+        (strip?.height ?? 0) -
+        (switches?.y ?? 0) -
+        (switches?.height ?? 0);
+      assert(
+        Math.abs(left - right) <= 1.5 && Math.abs(left - bottom) <= 1.5,
+        `the switches sit ${left} px from the left of their channel, ${right} px from the right and ${bottom} px from the bottom`
+      );
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Mute 1 Audio" })
+        .click();
+      assert(
+        (await channel
+          .getByRole("button", { name: "Mute 1 Audio" })
+          .getAttribute("aria-pressed")) === "true",
+        "muted in the header, the channel's Mute stays off"
+      );
+    },
+  "MIX-015: the library and the panel fold by a press anywhere on their bar, not only on its caret":
+    async (browser) => {
+      const page = await open(browser);
+      // Pressed on a bar's title, far from its caret.
+      const pressTitle = async (holder: Locator, text: string) => {
+        const title = await holder
+          .getByText(text, { exact: true })
+          .boundingBox();
+        assert(title, `the ${text} bar is there`);
+        await page.mouse.click(
+          (title?.x ?? 0) + 4,
+          (title?.y ?? 0) + (title?.height ?? 0) / 2
+        );
+      };
+      await pressTitle(
+        page.getByRole("region", { name: "Library" }),
+        "Library"
+      );
+      await page
+        .getByRole("button", { exact: true, name: "Open the library" })
+        .waitFor({ timeout: 3000 });
+      await page.getByRole("tab", { name: DEVICES }).click();
+      const bar = page.locator("[data-slot=panel-bar]");
+      const box = await bar.boundingBox();
+      assert(box, "the panel's bar is there");
+      await page.mouse.click(
+        (box?.x ?? 0) + (box?.width ?? 0) / 2,
+        (box?.y ?? 0) + (box?.height ?? 0) / 2
+      );
+      await page
+        .getByRole("button", { name: "Open the panel" })
+        .waitFor({ timeout: 3000 });
+      // A tab on the bar still does what a tab does: another view, the panel open on it.
+      await page.getByRole("tab", { name: "Mixer" }).click();
+      await page
+        .getByRole("button", { name: "Fold the panel" })
+        .waitFor({ timeout: 3000 });
+    },
+  "MIX-015: the panel open stays open from tab to tab, whatever height a view kept":
+    async (browser) => {
+      const page = await open(browser);
+      // A height kept from before, under what the clip view needs now.
+      await page.evaluate(() => {
+        const key = "audio-ui-daw:view";
+        const view = JSON.parse(localStorage.getItem(key) ?? "{}");
+        view.panelHeights = { ...view.panelHeights, clip: 40 };
+        view.panelFolded = false;
+        view.panelView = "devices";
+        localStorage.setItem(key, JSON.stringify(view));
+      });
+      await page.reload();
+      await page.waitForSelector("[data-track-id]", { timeout: 30_000 });
+      await dropChord(page, '[data-track="track-1"]', "Kept", 4);
+      const clip = page.locator("[data-clip-id]", { hasText: "Kept" });
+      await clip.waitFor({ timeout: 30_000 });
+      await page.getByRole("tab", { name: DEVICES }).click();
+      await page.getByRole("button", { name: "Fold the panel" }).waitFor();
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      await page.waitForTimeout(300);
+      assert(
+        (await page.getByRole("button", { name: "Open the panel" }).count()) ===
+          0,
+        "on the clip's tab, the panel folded"
+      );
+    },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);
@@ -1207,9 +1551,13 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       const clips = page.locator('[data-track="track-1"] [data-clip-id]');
       const before = await clips.count();
-      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" })
+        .click();
       assert(
         (await page
+          .locator("[data-slot=timeline-track-header]")
           .getByRole("button", { name: "Arm 1 Audio" })
           .getAttribute("aria-pressed")) === "true",
         "the track is armed"
@@ -1267,7 +1615,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "REC-005: a count-in counts the transport back in negative bars before the take starts":
     async (browser) => {
       const page = await open(browser);
-      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" })
+        .click();
       await page.getByRole("button", { name: "Record settings" }).click();
       await page.getByRole("menuitemradio", { name: "1 bar" }).click();
       await page.keyboard.press("Escape");
@@ -1299,7 +1650,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       const clips = page.locator('[data-track="track-3"] [data-clip-id]');
       const before = await clips.count();
-      await page.getByRole("button", { name: "Arm 3 MIDI" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 3 MIDI" })
+        .click();
       await page.getByRole("button", { name: "Record settings" }).click();
       await page
         .getByRole("menuitemcheckbox", { name: "Computer keyboard" })
@@ -1340,7 +1694,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await showMixer(page);
-      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" })
+        .click();
       const quiet = await loudest(page, 800);
       await page.getByRole("button", { name: "Record settings" }).click();
       await page
@@ -1349,7 +1706,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.keyboard.press("Escape");
       await page.waitForTimeout(800);
       const heard = await loudest(page, 1000);
-      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" })
+        .click();
       // The meter falls back at its own pace.
       await page.waitForTimeout(2500);
       const after = await loudest(page, 800);
@@ -1757,7 +2117,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           document.querySelectorAll("[data-track]").length === tracks - 1,
         before
       );
-      await page.getByRole("button", { name: "Undo (Cmd Z)" }).click();
+      await page.getByRole("button", { exact: true, name: "Undo" }).click();
       await page.waitForFunction(
         (tracks) => document.querySelectorAll("[data-track]").length === tracks,
         before
@@ -2664,6 +3024,40 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       assert(
         Math.abs(stayed.x - start.x) < 1,
         "the end handle moved the start"
+      );
+    },
+  "CLP-023: a clip's fade handles and its fades sit under its name, never over it":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Named take", 4);
+      const clip = page.locator("[data-clip-id]", { hasText: "Named take" });
+      await clip.waitFor({ timeout: 30_000 });
+      await clip.click();
+      const header = await clip
+        .locator("[data-slot=timeline-clip-header]")
+        .boundingBox();
+      const fade = await page
+        .getByRole("slider", { name: "Named take fade in" })
+        .locator("..")
+        .boundingBox();
+      assert(header && fade, "the header and the handle are there");
+      assert(
+        (fade?.y ?? 0) >= (header?.y ?? 0) + (header?.height ?? 0),
+        `the handle is at ${fade?.y}, the name runs to ${(header?.y ?? 0) + (header?.height ?? 0)}`
+      );
+      // The fade's line is drawn under the name too: give the fade some length first.
+      await page.getByRole("slider", { name: "Named take fade in" }).focus();
+      await [1, 2, 3, 4, 5, 6].reduce(async (done) => {
+        await done;
+        await page.keyboard.press("Shift+ArrowRight");
+      }, Promise.resolve());
+      const curve = await clip
+        .locator("[data-slot=timeline-clip-fade]")
+        .first()
+        .boundingBox();
+      assert(
+        (curve?.y ?? 0) >= (header?.y ?? 0) + (header?.height ?? 0) - 1,
+        `the fade is drawn from ${curve?.y}, over a name running to ${(header?.y ?? 0) + (header?.height ?? 0)}`
       );
     },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":

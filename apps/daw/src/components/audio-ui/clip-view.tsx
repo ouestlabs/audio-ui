@@ -171,10 +171,11 @@ function ClipView({
       data-slot="clip-view"
       {...props}
     >
-      {/* The view's own edge: it rolls up from here, and rolled up it is all that stays. */}
+      {/* The view's own edge: it rolls up from here, and rolled up it is all that stays. A press anywhere on it
+          outside its controls rolls the view up or opens it: the caret reaches across it, under the controls. */}
       <div
         className={cn(
-          "flex min-h-9 shrink-0 items-center gap-2 p-1 ps-2",
+          "relative flex min-h-10 shrink-0 items-center gap-2 p-1 ps-2",
           collapsed ? undefined : "border-b"
         )}
         data-slot="clip-view-strip"
@@ -184,7 +185,7 @@ function ClipView({
           aria-label={
             collapsed ? "Open the clip view" : "Roll the clip view up"
           }
-          className="flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring after:absolute after:inset-0 hover:after:bg-muted/40"
           onClick={toggleCollapsed}
           type="button"
         >
@@ -194,17 +195,19 @@ function ClipView({
           <button
             aria-label={active ? "Switch the clip off" : "Switch the clip on"}
             aria-pressed={active}
-            className="size-3 shrink-0 rounded-[2px] border border-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring aria-pressed:border-primary aria-pressed:bg-primary"
+            className="relative z-10 size-3 shrink-0 rounded-[2px] border border-muted-foreground outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring aria-pressed:border-primary aria-pressed:bg-primary"
             onClick={toggleActive}
             title="Take the clip out of the arrangement, or put it back"
             type="button"
           />
         ) : null}
         <ClipNameField name={name} onRename={onRename} />
-        <div className="flex min-w-0 flex-1 items-center gap-3 overflow-hidden text-muted-foreground tabular-nums">
+        <div className="pointer-events-none relative flex min-w-0 flex-1 items-center gap-3 overflow-hidden text-muted-foreground tabular-nums">
           {status}
         </div>
-        {actions}
+        <div className="relative z-10 flex shrink-0 items-center gap-2 empty:hidden">
+          {actions}
+        </div>
       </div>
       {/* Given a height, the boxes and the editor reach the bottom of it. */}
       {collapsed ? null : (
@@ -344,7 +347,7 @@ function ClipNameField({
   return (
     <input
       aria-label="Clip name"
-      className="h-6 w-40 min-w-0 rounded-md border border-transparent bg-transparent px-1.5 font-medium text-sm outline-none hover:border-border focus-visible:border-border focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-ring read-only:hover:border-transparent"
+      className="relative z-10 h-6 w-40 min-w-0 rounded-md border border-transparent bg-transparent px-1.5 font-medium text-sm outline-none hover:border-border focus-visible:border-border focus-visible:bg-background focus-visible:ring-2 focus-visible:ring-ring read-only:hover:border-transparent"
       onBlur={commit}
       onChange={handleChange}
       onKeyDown={handleKeyDown}

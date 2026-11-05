@@ -1,7 +1,7 @@
 "use client";
 
 import { dbToGain, gainToDb } from "@audio-ui/core/analysis";
-import { CurveIcon, RecordIcon } from "@audio-ui/icons/react";
+import { CurveIcon } from "@audio-ui/icons/react";
 import {
   FADE_SHAPES,
   type FadeShape,
@@ -36,8 +36,13 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/components/ui/toggle-group";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
+import { Led } from "@/components/audio-ui/led";
 import type { Mix } from "@/lib/arrangement";
 import { CaretRightIcon } from "@phosphor-icons/react";
 
@@ -241,6 +246,28 @@ function TimelineRangeHandle({
   );
 }
 
+/** A track header's switch: as small as its other buttons, a letter or a light in it. */
+const TRACK_SWITCH = "h-6 min-w-6 px-0";
+
+/**
+ * What a pressed Solo and Mute look like, wherever a track's switches are: a
+ * tint each, read at a glance across many tracks, the letter as it is. A theme
+ * sets `--solo` and `--mute`; without them, a blue and an amber.
+ */
+export const SWITCH_TONES = {
+  mute: "aria-pressed:border-[color-mix(in_oklab,var(--mute,oklch(0.8_0.16_75))_55%,transparent)] aria-pressed:bg-[color-mix(in_oklab,var(--mute,oklch(0.8_0.16_75))_22%,transparent)]",
+  solo: "aria-pressed:border-[color-mix(in_oklab,var(--solo,oklch(0.6_0.19_255))_55%,transparent)] aria-pressed:bg-[color-mix(in_oklab,var(--solo,oklch(0.6_0.19_255))_22%,transparent)]",
+} as const;
+
+/** Which of a track's switches are on, as its toggle group holds them. */
+function switchesOn(mix: Pick<Mix, "muted" | "soloed">, armed?: boolean) {
+  return [
+    ...(mix.soloed ? ["solo"] : []),
+    ...(mix.muted ? ["mute"] : []),
+    ...(armed ? ["arm"] : []),
+  ];
+}
+
 /** Where a fade being dragged stops: the other fade's start, as a dashed line. */
 const FADE_LIMIT =
   "pointer-events-none absolute inset-y-0 z-30 hidden border-foreground/60 border-l border-dashed";
@@ -362,7 +389,7 @@ function TimelineClipFadeHandle({
   const handle = (
     <TimelinePrimitive.ClipFadeHandle
       className={cn(
-        "rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none top-1 z-20 size-3 cursor-ew-resize data-[edge=in]:ms-1 data-[edge=out]:me-1 opacity-0 transition-opacity",
+        "rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none top-6 z-20 size-3 cursor-ew-resize data-[edge=in]:ms-1 data-[edge=out]:me-1 opacity-0 transition-opacity",
         "group-hover/clip:opacity-100 group-data-selected/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
         "after:absolute after:-inset-1 pointer-coarse:opacity-100 pointer-coarse:after:-inset-2",
         className
@@ -782,36 +809,44 @@ function TimelineTrackControls({
               {name}
             </button>
           )}
-          <Button
-            aria-label={`Solo ${name}`}
-            aria-pressed={mix.soloed}
-            onClick={handleSolo}
-            size="icon-xs"
-            variant={mix.soloed ? "default" : "ghost"}
+          {/* Its switches, one stop of Tab and the arrows between them: each holds its state, pressed or not. */}
+          <ToggleGroup
+            aria-label={`${name} switches`}
+            multiple
+            size="sm"
+            spacing={1}
+            value={switchesOn(mix, armed)}
           >
-            S
-          </Button>
-          <Button
-            aria-label={`Mute ${name}`}
-            aria-pressed={mix.muted}
-            onClick={handleMute}
-            size="icon-xs"
-            variant={mix.muted ? "default" : "ghost"}
-          >
-            M
-          </Button>
-          {onArm ? (
-            <Button
-              aria-label={`Arm ${name}`}
-              aria-pressed={armed}
-              className={cn(armed && "text-destructive")}
-              onClick={handleArm}
-              size="icon-xs"
-              variant="ghost"
+            <ToggleGroupItem
+              aria-label={`Solo ${name}`}
+              className={cn(TRACK_SWITCH, SWITCH_TONES.solo)}
+              onClick={handleSolo}
+              value="solo"
             >
-              <RecordIcon weight={armed ? "fill" : "regular"} />
-            </Button>
-          ) : null}
+              S
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              aria-label={`Mute ${name}`}
+              className={cn(TRACK_SWITCH, SWITCH_TONES.mute)}
+              onClick={handleMute}
+              value="mute"
+            >
+              M
+            </ToggleGroupItem>
+            {onArm ? (
+              <ToggleGroupItem
+                aria-label={`Arm ${name}`}
+                className={TRACK_SWITCH}
+                onClick={handleArm}
+                value="arm"
+              >
+                {/* A light, as on a console: lit red while the track is armed, a dim dot when not. */}
+                <span aria-hidden="true" className="contents">
+                  <Led label="Armed" on={Boolean(armed)} tone="destructive" />
+                </span>
+              </ToggleGroupItem>
+            ) : null}
+          </ToggleGroup>
         </div>
         {compact ? null : (
           <div className="flex h-7 items-center gap-6 pe-1">

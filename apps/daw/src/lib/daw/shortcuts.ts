@@ -1,185 +1,252 @@
-/**
- * The keyboard of the workstation (docs/daw-spec/shortcuts.md): the
- * reference's keys, with Cmd on a Mac and Ctrl elsewhere. Chrome keeps Cmd+T
- * and Cmd+Shift+T for its tabs before a page hears them, so Ctrl+T and
- * Ctrl+Shift+T do the same on a Mac.
- */
-export type ShortcutCommand =
-  | "audio-track"
-  | "automation"
-  | "continue"
-  | "deactivate"
-  | "delete"
-  | "detail"
-  | "duplicate"
-  | "export"
-  | "fold"
-  | "group"
-  | "grid-finer"
-  | "grid-fixed"
-  | "grid-snap"
-  | "grid-triplet"
-  | "grid-wider"
-  | "library"
-  | "loop"
-  | "midi-track"
-  | "mixer"
-  | "open"
-  | "play-stop"
-  | "record"
-  | "redo"
-  | "return-track"
-  | "save"
-  | "save-as"
-  | "select-all"
-  | "solo"
-  | "split"
-  | "to-start"
-  | "undo"
-  | "ungroup"
-  | "unfold-all"
-  | "zoom-back"
-  | "zoom-in"
-  | "zoom-out"
-  | "zoom-selection";
+import {
+  type CustomHotkeys,
+  defineAppHotkeys,
+  detectPlatform,
+  type Hotkey,
+  matchesKeyboardEvent,
+  parseHotkey,
+  type RegisterableHotkeyChord,
+} from "@tanstack/react-hotkeys";
 
-interface Shortcut {
-  alt?: boolean;
-  command: ShortcutCommand;
-  /** Ctrl itself, on a Mac: what stands in for a key the browser keeps. */
-  control?: boolean;
-  /** The key, as `KeyboardEvent.key` names it, lower case for a letter. */
-  key: string;
-  /** Cmd on a Mac, Ctrl elsewhere. */
-  mod?: boolean;
-  shift?: boolean;
+/**
+ * The keyboard of the workstation (docs/daw-spec/shortcuts.md), declared once
+ * as TanStack Hotkeys app hotkeys: each command has an id, a name and a group,
+ * which the shortcuts menu lists, and a default the user may rebind. `Mod` is
+ * Cmd on a Mac and Ctrl elsewhere. Chrome keeps Cmd+T and Cmd+Shift+T for its
+ * tabs before a page hears them, so a new track is Ctrl+T on every system.
+ *
+ * A letter is read by its name, and by where it sits when Option changes it on
+ * a Mac; a digit by where it sits (`[Digit1]`), as a layout such as AZERTY
+ * reaches the digits with Shift.
+ */
+export const APP_HOTKEYS = defineAppHotkeys({
+  continue: {
+    hotkey: "Shift+Space",
+    meta: { group: "Transport", name: "Continue from where it stopped" },
+  },
+  "play-stop": {
+    hotkey: "Space",
+    meta: { group: "Transport", name: "Play or stop" },
+  },
+  record: { hotkey: "F9", meta: { group: "Transport", name: "Record" } },
+  "to-start": {
+    hotkey: "Home",
+    meta: { group: "Transport", name: "Go to the start" },
+  },
+  loop: {
+    hotkey: "Mod+L",
+    meta: { group: "Transport", name: "Loop the selection" },
+  },
+  undo: { hotkey: "Mod+Z", meta: { group: "Edit", name: "Undo" } },
+  redo: { hotkey: "Mod+Shift+Z", meta: { group: "Edit", name: "Redo" } },
+  duplicate: { hotkey: "Mod+D", meta: { group: "Edit", name: "Duplicate" } },
+  split: {
+    hotkey: "Mod+E",
+    meta: { group: "Edit", name: "Split at the cursor" },
+  },
+  delete: {
+    hotkey: "Delete",
+    meta: { group: "Edit", name: "Delete what is selected" },
+  },
+  deactivate: {
+    hotkey: "0",
+    meta: { group: "Edit", name: "Switch the selected clips off or on" },
+  },
+  "select-all": {
+    hotkey: "Mod+A",
+    meta: { group: "Edit", name: "Select every clip" },
+  },
+  "audio-track": {
+    hotkey: "Control+T",
+    meta: { group: "Tracks", name: "New audio track" },
+  },
+  "midi-track": {
+    hotkey: "Control+Shift+T",
+    meta: { group: "Tracks", name: "New MIDI track" },
+  },
+  "return-track": {
+    hotkey: "Mod+Alt+T",
+    meta: { group: "Tracks", name: "New return track" },
+  },
+  solo: {
+    hotkey: "S",
+    meta: { group: "Tracks", name: "Solo the selected track" },
+  },
+  fold: {
+    hotkey: "U",
+    meta: { group: "Tracks", name: "Fold the track, or a group's tracks" },
+  },
+  "unfold-all": {
+    hotkey: "Alt+U",
+    meta: { group: "Tracks", name: "Unfold every track" },
+  },
+  group: {
+    hotkey: "Mod+G",
+    meta: { group: "Tracks", name: "Group the selected tracks" },
+  },
+  ungroup: {
+    hotkey: "Mod+Shift+G",
+    meta: { group: "Tracks", name: "Ungroup the selected group" },
+  },
+  automation: {
+    hotkey: "A",
+    meta: { group: "Tracks", name: "Show or hide the automation" },
+  },
+  "grid-finer": {
+    hotkey: "Mod+[Digit1]",
+    meta: { group: "Grid and zoom", name: "Finer grid" },
+  },
+  "grid-wider": {
+    hotkey: "Mod+[Digit2]",
+    meta: { group: "Grid and zoom", name: "Wider grid" },
+  },
+  "grid-triplet": {
+    hotkey: "Mod+[Digit3]",
+    meta: { group: "Grid and zoom", name: "Triplets" },
+  },
+  "grid-snap": {
+    hotkey: "Mod+[Digit4]",
+    meta: { group: "Grid and zoom", name: "Snap to the grid" },
+  },
+  "grid-fixed": {
+    hotkey: "Mod+[Digit5]",
+    meta: { group: "Grid and zoom", name: "A fixed grid" },
+  },
+  "zoom-in": {
+    hotkey: "Mod+=",
+    meta: { group: "Grid and zoom", name: "Zoom in" },
+  },
+  "zoom-out": {
+    hotkey: "Mod+-",
+    meta: { group: "Grid and zoom", name: "Zoom out" },
+  },
+  "zoom-selection": {
+    hotkey: "Z",
+    meta: { group: "Grid and zoom", name: "Zoom to the selection" },
+  },
+  "zoom-back": {
+    hotkey: "X",
+    meta: { group: "Grid and zoom", name: "Zoom back" },
+  },
+  library: {
+    hotkey: "Mod+Alt+B",
+    meta: { group: "View", name: "Fold or show the library" },
+  },
+  mixer: {
+    hotkey: "Mod+Alt+M",
+    meta: { group: "View", name: "Show the mixer" },
+  },
+  detail: {
+    hotkey: "Shift+Tab",
+    meta: { group: "View", name: "Switch between the clip and the devices" },
+  },
+  export: {
+    hotkey: "Mod+Shift+R",
+    meta: { group: "Project", name: "Export" },
+  },
+  open: {
+    hotkey: "Mod+O",
+    meta: { group: "Project", name: "Open a project folder" },
+  },
+  save: {
+    hotkey: "Mod+S",
+    meta: { group: "Project", name: "Save to the project's folder" },
+  },
+  "save-as": {
+    hotkey: "Mod+Shift+S",
+    meta: { group: "Project", name: "Save to another folder" },
+  },
+});
+
+declare module "@tanstack/react-hotkeys" {
+  interface Register {
+    appHotkeys: typeof APP_HOTKEYS;
+  }
 }
 
-export const SHORTCUTS: readonly Shortcut[] = [
-  { command: "play-stop", key: " " },
-  { command: "continue", key: " ", shift: true },
-  { command: "record", key: "f9" },
-  { command: "to-start", key: "home" },
-  { command: "loop", key: "l", mod: true },
-  { command: "undo", key: "z", mod: true },
-  { command: "redo", key: "z", mod: true, shift: true },
-  { command: "redo", key: "y", mod: true },
-  { command: "audio-track", key: "t", mod: true },
-  { command: "audio-track", control: true, key: "t" },
-  { command: "midi-track", key: "t", mod: true, shift: true },
-  { command: "midi-track", control: true, key: "t", shift: true },
-  { alt: true, command: "return-track", key: "t", mod: true },
-  { command: "delete", key: "delete" },
-  { command: "delete", key: "backspace" },
-  { command: "split", key: "e", mod: true },
-  { command: "duplicate", key: "d", mod: true },
-  { command: "deactivate", key: "0" },
-  { command: "solo", key: "s" },
-  { command: "select-all", key: "a", mod: true },
-  { alt: true, command: "mixer", key: "m", mod: true },
-  { alt: true, command: "library", key: "b", mod: true },
-  { command: "detail", key: "tab", shift: true },
-  { command: "export", key: "r", mod: true, shift: true },
-  { command: "open", key: "o", mod: true },
-  { command: "save", key: "s", mod: true },
-  { command: "save-as", key: "s", mod: true, shift: true },
-  { command: "grid-finer", key: "1", mod: true },
-  { command: "grid-wider", key: "2", mod: true },
-  { command: "grid-triplet", key: "3", mod: true },
-  { command: "grid-snap", key: "4", mod: true },
-  { command: "grid-fixed", key: "5", mod: true },
-  { command: "zoom-in", key: "=", mod: true },
-  { command: "zoom-in", key: "+", mod: true },
-  { command: "zoom-out", key: "-", mod: true },
-  { command: "zoom-selection", key: "z" },
-  { command: "zoom-back", key: "x" },
-  { command: "automation", key: "a" },
-  { command: "fold", key: "u" },
-  { command: "group", key: "g", mod: true },
-  { command: "ungroup", key: "g", mod: true, shift: true },
-  { alt: true, command: "unfold-all", key: "u" },
+/** What a key of the workstation runs: the id of one of its app hotkeys. */
+export type ShortcutCommand = keyof typeof APP_HOTKEYS;
+
+/** Second keys for a command, as a DAW has them: they run it too, and stay as they are when it is rebound. */
+export const ALSO_HOTKEYS: readonly {
+  command: ShortcutCommand;
+  hotkey: RegisterableHotkeyChord;
+}[] = [
+  { command: "redo", hotkey: "Mod+Y" },
+  { command: "delete", hotkey: "Backspace" },
+  // `0` by where it sits, for a layout that reaches it with Shift.
+  { command: "deactivate", hotkey: "[Digit0]" },
+  // `+` where a layout has it of its own, or on the numeric pad.
+  { command: "zoom-in", hotkey: { key: "+", mod: true } },
 ];
 
-/** The keyboard in words, for the shortcuts menu: what each does, then its keys. */
-export const SHORTCUT_HELP: readonly { action: string; keys: string[] }[] = [
-  { action: "Play or stop", keys: ["Space"] },
-  { action: "Continue from where it stopped", keys: ["Shift", "Space"] },
-  { action: "Move the cursor on the grid", keys: ["Left", "Right"] },
-  { action: "Go to the start, or the last clip's end", keys: ["Home", "End"] },
-  { action: "Pick the track above or below", keys: ["Up", "Down"] },
+/**
+ * Keys the arrangement's own parts take before the app hotkeys (the cursor,
+ * the time selected, the clipboard), and gestures: listed in the shortcuts
+ * menu beside them, they are not rebound here.
+ */
+export const OTHER_KEYS: readonly {
+  action: string;
+  /** Keys, drawn for the platform; or a gesture, in words. */
+  keys: readonly Hotkey[] | string;
+}[] = [
+  { action: "Move the cursor on the grid", keys: ["ArrowLeft", "ArrowRight"] },
+  { action: "Go to the last clip's end", keys: ["End"] },
+  { action: "Pick the track above or below", keys: ["ArrowUp", "ArrowDown"] },
   { action: "Add a locator at the cursor", keys: ["M"] },
   {
     action: "Jump to the next locator or clip edge",
-    keys: ["Option", "Arrows"],
+    keys: ["Alt+ArrowLeft", "Alt+ArrowRight"],
   },
-  { action: "Undo", keys: ["Cmd", "Z"] },
-  { action: "Redo", keys: ["Cmd", "Shift", "Z"] },
-  { action: "Loop the selection", keys: ["Cmd", "L"] },
-  { action: "New audio track", keys: ["Ctrl", "T"] },
-  { action: "New MIDI track", keys: ["Ctrl", "Shift", "T"] },
-  { action: "New return track", keys: ["Cmd", "Option", "T"] },
-  { action: "Copy, cut, paste", keys: ["Cmd", "C", "X", "V"] },
-  { action: "Duplicate", keys: ["Cmd", "D"] },
-  { action: "Split at the cursor", keys: ["Cmd", "E"] },
-  { action: "One clip per track of the time selected", keys: ["Cmd", "J"] },
-  { action: "Insert silence at the cursor", keys: ["Cmd", "I"] },
-  { action: "Fades from the time selected", keys: ["Cmd", "Option", "F"] },
-  { action: "Delete what is selected", keys: ["Delete"] },
-  { action: "Delete the selected time", keys: ["Cmd", "Shift", "Delete"] },
-  { action: "Switch the selected clips off or on", keys: ["0"] },
-  { action: "Solo the selected track", keys: ["S"] },
-  { action: "Select every clip", keys: ["Cmd", "A"] },
-  { action: "Finer or wider grid", keys: ["Cmd", "1", "2"] },
-  { action: "Triplets, snapping, a fixed grid", keys: ["Cmd", "3", "4", "5"] },
-  { action: "Zoom in or out", keys: ["Cmd", "=", "-"] },
-  { action: "Zoom to the selection, and back", keys: ["Z", "X"] },
-  { action: "Copy a clip while dragging it", keys: ["Option", "Drag"] },
-  { action: "Select clips with a rectangle", keys: ["Shift", "Drag"] },
-  { action: "Show or hide the automation", keys: ["A"] },
-  { action: "Fold the track, or a group's tracks", keys: ["U"] },
-  { action: "Group the selected tracks", keys: ["Cmd", "G"] },
-  { action: "Ungroup the selected group", keys: ["Cmd", "Shift", "G"] },
-  { action: "Unfold every track", keys: ["Option", "U"] },
-  { action: "Fold or show the library", keys: ["Cmd", "Option", "B"] },
-  { action: "Show the mixer", keys: ["Cmd", "Option", "M"] },
-  { action: "Switch between the clip and the devices", keys: ["Shift", "Tab"] },
-  { action: "Export", keys: ["Cmd", "Shift", "R"] },
-  { action: "Open a project folder", keys: ["Cmd", "O"] },
-  { action: "Save to the project's folder", keys: ["Cmd", "S"] },
-  { action: "Save to another folder", keys: ["Cmd", "Shift", "S"] },
+  { action: "Copy, cut, paste", keys: ["Mod+C", "Mod+X", "Mod+V"] },
+  { action: "One clip per track of the time selected", keys: ["Mod+J"] },
+  { action: "Insert silence at the cursor", keys: ["Mod+I"] },
+  { action: "Fades from the time selected", keys: ["Mod+Alt+F"] },
+  { action: "Delete the selected time", keys: ["Mod+Shift+Delete"] },
+  { action: "Copy a clip while dragging it", keys: "Option and drag" },
+  { action: "Select clips with a rectangle", keys: "Shift and drag" },
 ];
 
-const APPLE = /Mac|iPhone|iPad/;
-const LETTER_CODE = /^Key[A-Z]$/;
-const DIGIT_CODE = /^Digit\d$/;
+const KEPT = "audio-ui-daw:hotkeys";
 
-const isMac = () =>
-  typeof navigator !== "undefined" && APPLE.test(navigator.platform);
-
-/** The key a press names: its letter even with Option held, which changes `key` on a Mac, and a digit by its place, which a layout such as AZERTY reaches with Shift. */
-function keyOf(event: KeyboardEvent): string {
-  if (event.altKey && LETTER_CODE.test(event.code)) {
-    return event.code.slice(3).toLowerCase();
+/** The keys the user rebound, kept in this browser: only what differs from the defaults. */
+export function readCustomHotkeys(): CustomHotkeys {
+  try {
+    return JSON.parse(localStorage.getItem(KEPT) ?? "{}") as CustomHotkeys;
+  } catch {
+    return {};
   }
-  if (DIGIT_CODE.test(event.code)) {
-    return event.code.slice(5);
-  }
-  return event.key.toLowerCase();
 }
 
-/** The command a key press asks for, or none. */
+export function keepCustomHotkeys(custom: CustomHotkeys) {
+  try {
+    localStorage.setItem(KEPT, JSON.stringify(custom));
+  } catch {
+    // Refused: the rebound keys just won't come back.
+  }
+}
+
+/** The platform `mod` is read for: Cmd on a Mac, Ctrl elsewhere. */
+export const platformOf = () => detectPlatform();
+
+/** The command a key press asks for by the default keys, or none: what a test reads. */
 export function matchShortcut(event: KeyboardEvent): ShortcutCommand | null {
-  const mac = isMac();
-  const key = keyOf(event);
-  const mod = mac ? event.metaKey : event.ctrlKey;
-  const control = mac && event.ctrlKey;
-  const found = SHORTCUTS.find(
-    (shortcut) =>
-      shortcut.key === key &&
-      Boolean(shortcut.mod) === mod &&
-      Boolean(shortcut.control) === control &&
-      Boolean(shortcut.shift) === event.shiftKey &&
-      Boolean(shortcut.alt) === event.altKey
+  const platform = platformOf();
+  const chords: [ShortcutCommand, RegisterableHotkeyChord][] = [
+    ...Object.values(APP_HOTKEYS).map(
+      (hotkey) =>
+        [hotkey.id, hotkey.defaultHotkey] as [
+          ShortcutCommand,
+          RegisterableHotkeyChord,
+        ]
+    ),
+    ...ALSO_HOTKEYS.map(
+      ({ command, hotkey }) =>
+        [command, hotkey] as [ShortcutCommand, RegisterableHotkeyChord]
+    ),
+  ];
+  const found = chords.find(([, chord]) =>
+    matchesKeyboardEvent(event, parseHotkey(chord, platform), platform)
   );
-  return found?.command ?? null;
+  return found?.[0] ?? null;
 }

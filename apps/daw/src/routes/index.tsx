@@ -1,3 +1,4 @@
+import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Daw, type DawProps } from "@/components/daw/daw";
@@ -13,6 +14,11 @@ import {
 import { recallFolder } from "@/lib/daw/folder";
 import { newProject } from "@/lib/daw/project";
 import { decodeRecording, type Recording } from "@/lib/daw/recordings";
+import {
+  APP_HOTKEYS,
+  keepCustomHotkeys,
+  readCustomHotkeys,
+} from "@/lib/daw/shortcuts";
 import { loadProject, loadRecording, pruneRecordings } from "@/lib/daw/storage";
 import { webAudio } from "@/lib/web-audio";
 
@@ -72,6 +78,8 @@ async function openProject(): Promise<DawProps> {
 }
 
 function Home() {
+  // The keys the user rebound, read once: the provider owns them afterwards.
+  const [customHotkeys] = useState(readCustomHotkeys);
   // A project opened from a folder takes the place of this one: a new workstation, from its own state.
   const [project, setProject] = useState<{
     opened: number;
@@ -96,5 +104,14 @@ function Home() {
       </main>
     );
   }
-  return <Daw {...project.props} key={project.opened} onOpen={open} />;
+  return (
+    // The keyboard's app hotkeys, and the keys the user rebound, kept in this browser.
+    <HotkeysProvider
+      appHotkeys={APP_HOTKEYS}
+      customHotkeys={customHotkeys}
+      onCustomHotkeysChange={keepCustomHotkeys}
+    >
+      <Daw {...project.props} key={project.opened} onOpen={open} />
+    </HotkeysProvider>
+  );
 }

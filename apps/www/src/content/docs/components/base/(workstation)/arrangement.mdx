@@ -410,7 +410,7 @@ With snapping on, a dragged clip or loop also lands on the edges of the other cl
 
 ### Arranged tracks
 
-A track's header is `TimelineTrackControls`, from the timeline: its name, gain, pan, mute, solo, color, fold and menu. Its `meter` takes a level down its right edge: `TrackLevel` (`npx shadcn@latest add @audio-ui/track-level`), given `analysers={engine.meter(track.id)}`, is the one that goes there. `useTrackReorder` (`npx shadcn@latest add @audio-ui/use-track-reorder`) moves tracks: give each track a grip, and drag the grip, or press Up or Down on it.
+A track's header is `TimelineTrackControls`, from the timeline: its name, gain, pan, mute, solo, color, fold and menu. Its `meter` takes a level down its right edge: `TrackLevel` (`npx shadcn@latest add @audio-ui/track-level`), given `analysers={engine.meter(track.id)}`, is the one that goes there. `useTrackReorder` (`npx shadcn@latest add @audio-ui/use-track-reorder`) moves tracks: give each track a grip, and drag the grip, or press Up or Down on it. Its Solo, Mute and Arm are one toggle group: pressed, Solo is tinted with `--solo` and Mute with `--mute`, a blue and an amber when the theme sets neither, and Arm is a red `Led`. `SWITCH_TONES` gives those two looks to switches of your own, such as a mixer's.
 
 ```tsx
 import {

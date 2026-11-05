@@ -107,3 +107,7 @@ Test: apps/daw/test/browser/run.ts "ARR-025"
 ### ARR-026 A file being read
 From the moment a file is dropped until its clip is there, a pulsing outline says it is being read, named after it, or after how many files there are: at the time it lands on its track, its length not known yet, or in the room under the tracks and on the add-track button for a track of its own.
 Test: apps/daw/test/browser/run.ts "ARR-026"
+
+### ARR-027 A track's switches
+A track's Solo, Mute and Arm are switches that hold their state, one group in its header: Tab reaches it once, and the arrows move between them. Pressed, Solo is blue and Mute amber, the same in the mixer; Arm is a light, lit red while the track is armed.
+Test: apps/daw/test/browser/run.ts "ARR-027"; apps/daw/test/browser/run.ts "REC-001"

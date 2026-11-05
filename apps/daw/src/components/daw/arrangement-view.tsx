@@ -106,6 +106,7 @@ import { NEW_TRACK } from "@/lib/daw/drop";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { libraryDevice } from "@/lib/device-library";
 import { cn } from "@/lib/utils";
+import { CommandKeys } from "./shortcut-list";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
@@ -122,6 +123,46 @@ function carriesFiles(event: DragEvent) {
 /** Whether a track set by hand is short enough for one row of controls. */
 function isShort(height: number | undefined) {
   return height !== undefined && height < COMPACT_TRACK_HEIGHT;
+}
+
+const CLIP_HEAD = '[data-slot="timeline-clip-header"]';
+
+/**
+ * A click on a clip's title bar, not a drag of it, shows the clip in the clip
+ * view, whatever the panel shows: the mixer gives way to it. The press is read
+ * before the clip takes it, beside what `onPressCapture` does with it.
+ */
+function useClipHeadClick(
+  onShow: () => void,
+  onPressCapture: (event: PointerEvent<HTMLDivElement>) => void
+) {
+  const pressed = useRef<{ x: number; y: number } | null>(null);
+  const onPointerDownCapture = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      onPressCapture(event);
+      const onHead =
+        event.button === 0 &&
+        !(event.shiftKey || event.metaKey || event.ctrlKey || event.altKey) &&
+        (event.target as Element).closest(CLIP_HEAD);
+      pressed.current = onHead ? { x: event.clientX, y: event.clientY } : null;
+    },
+    [onPressCapture]
+  );
+  const onClickCapture = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      const at = pressed.current;
+      pressed.current = null;
+      if (
+        at &&
+        Math.hypot(event.clientX - at.x, event.clientY - at.y) < 4 &&
+        (event.target as Element).closest(CLIP_HEAD)
+      ) {
+        onShow();
+      }
+    },
+    [onShow]
+  );
+  return { onClickCapture, onPointerDownCapture };
 }
 
 /** The add-track button says what a drop on it does, and that it is at it. */
@@ -692,6 +733,10 @@ export function ArrangementView({
   );
   const anySolo = tracks.some((track) => mixOf(track).soloed);
   const readingOwn = reading.find(({ track }) => track === NEW_TRACK);
+  const headClick = useClipHeadClick(
+    onEditClip,
+    marquee.handlers.onPointerDownCapture
+  );
   const roomLeft = [...arrangement.unfoldedTracks, ...returns].every(
     (track) => arrangement.heights[track.id] !== undefined
   );
@@ -750,16 +795,22 @@ export function ArrangementView({
             <DropdownMenuContent>
               <DropdownMenuItem onClick={addAudio}>
                 Audio track
-                <DropdownMenuShortcut>Ctrl T</DropdownMenuShortcut>
+                <DropdownMenuShortcut>
+                  <CommandKeys command="audio-track" />
+                </DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={addMidi}>
                 MIDI track
-                <DropdownMenuShortcut>Ctrl Shift T</DropdownMenuShortcut>
+                <DropdownMenuShortcut>
+                  <CommandKeys command="midi-track" />
+                </DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={addReturn}>
                 Return track
-                <DropdownMenuShortcut>Cmd Option T</DropdownMenuShortcut>
+                <DropdownMenuShortcut>
+                  <CommandKeys command="return-track" />
+                </DropdownMenuShortcut>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -780,6 +831,7 @@ export function ArrangementView({
             marquee.rect && "select-none"
           )}
           {...marquee.handlers}
+          {...headClick}
         >
           <div className="sticky top-0 z-40 flex min-w-full shrink-0 flex-col bg-background">
             <Row

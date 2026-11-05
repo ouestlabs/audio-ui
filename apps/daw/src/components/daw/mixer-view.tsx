@@ -1,11 +1,21 @@
 import { dbToGain, gainToDb, peakDb } from "@audio-ui/core/analysis";
 import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
-import { useCallback, useEffect, useRef } from "react";
+import {
+  type KeyboardEvent,
+  type MouseEvent,
+  type PointerEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal, flushSync } from "react-dom";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
+import { Led } from "@/components/audio-ui/led";
 import { Meter } from "@/components/audio-ui/meter";
-import { TRACK_COLORS } from "@/components/audio-ui/timeline";
-import { Toggle } from "@/components/ui/toggle";
+import { SWITCH_TONES, TRACK_COLORS } from "@/components/audio-ui/timeline";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
@@ -18,7 +28,8 @@ import type {
   AutomatedParameter,
   Mix,
 } from "@/lib/arrangement";
-import { trackOf } from "@/lib/arrangement-state";
+import { trackBlock, trackOf } from "@/lib/arrangement-state";
+import { startSortableDrag } from "@/lib/sortable-drag";
 import { cn } from "@/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;
@@ -164,14 +175,26 @@ function SendKnob({
   );
 }
 
+/** How a track's channel is moved: its name, dragged, or with Left and Right on it. */
+interface StripGrip {
+  onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+  onPointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
+}
+
 interface StripProps {
   analysers: readonly AnalyserNode[] | null;
+  /** Whether the track is armed to record (REC-001). */
+  armed?: boolean;
   /** What the fader and the pan follow their envelopes by (AUT-006). */
   following: AutomationFollowing;
+  /** A track's channel moves by its name; a return and the main track stay where they are. */
+  grip?: StripGrip;
   /** The group the track plays into, when it is in one (MIX-020). */
   into?: string;
   /** Main has no switch, no solo and no sends. */
   main?: boolean;
+  /** Gives the channel an Arm switch, as its track's header has: `exclusive` is false when Cmd or Ctrl adds it to the armed ones. */
+  onArm?: (id: string, exclusive: boolean) => void;
   onMix: (id: string, patch: Partial<Omit<Mix, "color">>) => void;
   onSelect: (id: string) => void;
   onSend: (id: string, to: string, level: number) => void;
@@ -183,12 +206,82 @@ interface StripProps {
   track: ArrangementTrack;
 }
 
-/** A channel of the mixer: its sends, its pan, its fader and meter, its switch and solo. */
+/** A channel's switch: an equal share of its width, inside its edges. */
+const SWITCH = "min-w-0 flex-1 shrink basis-0 px-0";
+
+/** A channel's switches, the same as its track's header: one group, one stop of Tab, the arrows between them. */
+function StripSwitches({
+  armed,
+  muted,
+  name,
+  onArm,
+  onMute,
+  onSolo,
+  soloed,
+}: {
+  armed: boolean;
+  muted: boolean;
+  name: string;
+  onArm?: (event: MouseEvent<HTMLButtonElement>) => void;
+  onMute: () => void;
+  onSolo: () => void;
+  soloed: boolean;
+}) {
+  return (
+    <ToggleGroup
+      aria-label={`${name} switches`}
+      className="row-start-6 w-full min-w-0"
+      multiple
+      size="sm"
+      spacing={1}
+      value={[
+        ...(soloed ? ["solo"] : []),
+        ...(muted ? ["mute"] : []),
+        ...(armed ? ["arm"] : []),
+      ]}
+      variant="outline"
+    >
+      <ToggleGroupItem
+        aria-label={`Solo ${name}`}
+        className={cn(SWITCH, SWITCH_TONES.solo)}
+        onClick={onSolo}
+        value="solo"
+      >
+        S
+      </ToggleGroupItem>
+      <ToggleGroupItem
+        aria-label={`Mute ${name}`}
+        className={cn(SWITCH, SWITCH_TONES.mute)}
+        onClick={onMute}
+        value="mute"
+      >
+        M
+      </ToggleGroupItem>
+      {onArm ? (
+        <ToggleGroupItem
+          aria-label={`Arm ${name}`}
+          className={SWITCH}
+          onClick={onArm}
+          value="arm"
+        >
+          <span aria-hidden="true" className="contents">
+            <Led label="Armed" on={armed} tone="destructive" />
+          </span>
+        </ToggleGroupItem>
+      ) : null}
+    </ToggleGroup>
+  );
+}
+
+/** A channel of the mixer: its sends, its pan, its fader and meter, its switches. */
 function Strip({
   analysers,
+  armed = false,
   following,
+  grip,
   into,
   main,
+  onArm,
   onMix,
   onSelect,
   onSend,
@@ -207,13 +300,18 @@ function Strip({
     (pan: number) => onMix(track.id, { pan }),
     [onMix, track.id]
   );
-  const setOn = useCallback(
-    (on: boolean) => onMix(track.id, { muted: !on }),
-    [onMix, track.id]
+  const toggleMute = useCallback(
+    () => onMix(track.id, { muted: !mix.muted }),
+    [mix.muted, onMix, track.id]
   );
-  const setSolo = useCallback(
-    (soloed: boolean) => onMix(track.id, { soloed }),
-    [onMix, track.id]
+  const toggleSolo = useCallback(
+    () => onMix(track.id, { soloed: !mix.soloed }),
+    [mix.soloed, onMix, track.id]
+  );
+  const toggleArm = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) =>
+      onArm?.(track.id, !(event.metaKey || event.ctrlKey)),
+    [onArm, track.id]
   );
   const select = useCallback(() => onSelect(track.id), [onSelect, track.id]);
   const db = decibels(mix.gain);
@@ -224,12 +322,13 @@ function Strip({
       aria-label={track.name}
       className={cn(
         // A column of the console, a hairline between it and the next.
-        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-3 transition-colors",
+        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-2 transition-colors",
         // The main track is wider: its meter has a scale.
-        main && "w-36 border-e-0",
+        main && "w-36 border-s border-e-0",
         track.kind === "group" && "bg-muted/40",
         selected && "bg-muted"
       )}
+      data-mixer-track={grip ? track.id : undefined}
       onPointerDown={select}
     >
       <div className="row-start-1 flex w-full min-w-0 flex-col items-center gap-1.5">
@@ -241,9 +340,21 @@ function Strip({
             main ? "bg-foreground/25" : TRACK_COLORS[mix.color]?.dot
           )}
         />
-        <span className="min-h-4 w-full truncate text-center font-medium text-xs">
-          {track.name}
-        </span>
+        {grip ? (
+          <button
+            aria-label={`Move ${track.name}`}
+            className="min-h-4 w-full cursor-grab touch-none truncate rounded-sm text-center font-medium text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+            data-mixer-grip={track.id}
+            type="button"
+            {...grip}
+          >
+            {track.name}
+          </button>
+        ) : (
+          <span className="min-h-4 w-full truncate text-center font-medium text-xs">
+            {track.name}
+          </span>
+        )}
         {into ? (
           <span className="w-full truncate text-center text-muted-foreground text-xs">
             To {into}
@@ -309,28 +420,15 @@ function Strip({
       </span>
       {main ? <PeakReadout analysers={analysers ?? NO_ANALYSERS} /> : null}
       {main ? null : (
-        <div className="row-start-6 flex w-full gap-1">
-          <Toggle
-            aria-label={`${track.name} on`}
-            className="flex-1"
-            onPressedChange={setOn}
-            pressed={!mix.muted}
-            size="sm"
-            variant="outline"
-          >
-            On
-          </Toggle>
-          <Toggle
-            aria-label={`Solo ${track.name}`}
-            className="flex-1"
-            onPressedChange={setSolo}
-            pressed={mix.soloed}
-            size="sm"
-            variant="outline"
-          >
-            S
-          </Toggle>
-        </div>
+        <StripSwitches
+          armed={armed}
+          muted={mix.muted}
+          name={track.name}
+          onArm={onArm ? toggleArm : undefined}
+          onMute={toggleMute}
+          onSolo={toggleSolo}
+          soloed={mix.soloed}
+        />
       )}
     </section>
   );
@@ -342,15 +440,21 @@ function Strip({
  * and the engine follows it; the meters read the engine's channels.
  */
 export function MixerView({
+  armed,
   arrangement,
   engine,
+  onArm,
   onMix,
   onSelectTrack,
   overridden,
   selectedTrack,
 }: {
+  /** The tracks armed to record (REC-001). */
+  armed: ReadonlySet<string>;
   arrangement: Arrangement;
   engine: Engine;
+  /** Arms a track, or another one too with Cmd or Ctrl. */
+  onArm: (track: string, exclusive: boolean) => void;
   /** A channel's mix changed: a fader's drag is a burst, a switch a step of its own, and an automated gain or pan is overridden. */
   onMix: (id: string, patch: Partial<Mix>) => void;
   onSelectTrack: (id: string) => void;
@@ -368,17 +472,95 @@ export function MixerView({
     () => dispatch({ type: "settle-clip-edit" }),
     [dispatch]
   );
-  const strip = (track: ArrangementTrack, main = false, sends = false) => (
+  const channelsRef = useRef<HTMLDivElement>(null);
+  const ghostRef = useRef<HTMLDivElement>(null);
+  const [lifted, setLifted] = useState<{
+    left: number;
+    name: string;
+    top: number;
+  } | null>(null);
+  const live = useRef({ dispatch, tracks: arrangement.unfoldedTracks });
+  live.current = { dispatch, tracks: arrangement.unfoldedTracks };
+  // The tracks' channels reorder as their rows do in the arrangement: the same gesture, the same command.
+  const grip = useCallback(
+    (id: string, name: string): StripGrip => ({
+      onKeyDown: (event) => {
+        const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+        const from = live.current.tracks.findIndex((track) => track.id === id);
+        if (direction && from !== -1) {
+          event.preventDefault();
+          live.current.dispatch({
+            id,
+            index: from + direction,
+            type: "move-track",
+          });
+        }
+      },
+      onPointerDown: (event) => {
+        const channels = channelsRef.current;
+        if (event.button !== 0 || !channels) {
+          return;
+        }
+        const items = Array.from(
+          channels.querySelectorAll<HTMLElement>("[data-mixer-track]")
+        );
+        const from = items.findIndex((item) => item.dataset.mixerTrack === id);
+        if (from === -1) {
+          return;
+        }
+        event.preventDefault();
+        const block = new Set(trackBlock(live.current.tracks, id));
+        const box = event.currentTarget.getBoundingClientRect();
+        startSortableDrag({
+          axis: "x",
+          count: Math.max(
+            1,
+            items.filter((item) => block.has(item.dataset.mixerTrack ?? ""))
+              .length
+          ),
+          free: true,
+          from,
+          ghost: () => ghostRef.current,
+          items,
+          onEnd: (landed) =>
+            flushSync(() => {
+              setLifted(null);
+              if (landed !== null) {
+                live.current.dispatch({
+                  id,
+                  index: landed,
+                  type: "move-track",
+                });
+              }
+            }),
+          onLift: () => setLifted({ left: box.left, name, top: box.top }),
+          scroller: channels,
+          x: event.clientX,
+          y: event.clientY,
+        });
+      },
+    }),
+    []
+  );
+  const strip = (
+    track: ArrangementTrack,
+    main = false,
+    sends = false,
+    moves?: StripGrip
+  ) => (
     <Strip
       analysers={engine.meter(track.id)}
+      armed={armed.has(track.id)}
       following={{
         duration: doc.duration,
         overridden: overridden[track.id],
         position: engine.position,
       }}
+      grip={moves}
       into={track.group ? trackOf(doc, track.group)?.name : undefined}
       key={track.id}
       main={main}
+      onArm={moves && track.kind !== "group" ? onArm : undefined}
       onMix={onMix}
       onSelect={onSelectTrack}
       onSend={onSend}
@@ -392,25 +574,40 @@ export function MixerView({
   return (
     // One grid for every channel, each a subgrid of its six rows (name, sends, pan, fader, level, switches): what one
     // channel lacks leaves its row empty, so every fader starts and ends level; the faders take the height there is,
-    // and never less than 5rem, so the panel fits a short screen.
+    // and never less than 5rem, so the panel fits a short screen. The channels scroll in a subgrid of their own, and
+    // the main track stays beside them at the right, whole: nothing passes under it. One hairline between two
+    // channels, the main track's own before it.
     <div
       aria-label="Mixer"
-      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden pe-2"
+      className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 pe-2"
       role="group"
     >
-      {/* A folded group hides its tracks here too. */}
-      {arrangement.unfoldedTracks.map((track) => strip(track, false, true))}
-      {/* The returns and the main track stand apart from the tracks. */}
       <div
-        aria-hidden="true"
-        className="row-span-6 w-2 border-border border-e"
-      />
-      {doc.returns.map((track) => strip(track))}
-      <div
-        aria-hidden="true"
-        className="row-span-6 w-2 border-border border-e"
-      />
+        className="row-span-6 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden *:last:border-e-0"
+        data-slot="mixer-channels"
+        ref={channelsRef}
+      >
+        {/* A folded group hides its tracks here too. */}
+        {arrangement.unfoldedTracks.map((track) =>
+          strip(track, false, true, grip(track.id, track.name))
+        )}
+        {doc.returns.map((track) => strip(track))}
+      </div>
       {strip(doc.main, true)}
+      {lifted
+        ? createPortal(
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed z-50 flex h-7 max-w-40 items-center rounded-md border bg-card px-2.5 font-medium text-xs shadow-md"
+              data-slot="mixer-ghost"
+              ref={ghostRef}
+              style={{ left: lifted.left, top: lifted.top }}
+            >
+              <span className="truncate">{lifted.name}</span>
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }

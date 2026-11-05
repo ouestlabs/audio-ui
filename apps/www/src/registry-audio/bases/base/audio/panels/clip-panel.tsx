@@ -29,7 +29,6 @@ import {
   ClipRow,
   ClipToggle,
   ClipView,
-  formatBars,
   PositionField,
 } from "@/registry-audio/bases/base/audio/elements/clip-view";
 import { ClipWaveform } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
@@ -732,8 +731,6 @@ function ClipPanel({
       ? loop[0] === 0 && loop[1] === sourceLength
       : offset === 0 && length >= sourceLength);
 
-  const status = `Length ${formatBars(length, meter, "length")}`;
-
   return (
     <ClipView
       actions={children}
@@ -803,7 +800,6 @@ function ClipPanel({
       onCollapsedChange={onCollapsedChange}
       onFoldedBoxesChange={onFoldedBoxesChange}
       onRename={onRename}
-      status={status}
     >
       <ClipSource
         bar={bar}

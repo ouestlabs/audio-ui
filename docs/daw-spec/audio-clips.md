@@ -91,3 +91,7 @@ Test: apps/www/test/registry-audio/base/audio/clip-panel.test.ts "CLP-021"; apps
 ### CLP-022 Folding a clip box
 A press anywhere on the heading of a foldable box of the clip view folds it to a narrow strip, and a press anywhere on the strip unfolds it: the caret shows the way, it is not the only place to aim at.
 Test: apps/daw/test/browser/run.ts "CLP-022"
+
+### CLP-023 Fade handles
+A clip's fade handles sit at the top corners of its body, under its name, and its fades are drawn over its body alone: neither hides a letter of its name.
+Test: apps/daw/test/browser/run.ts "CLP-023"

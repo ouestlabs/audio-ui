@@ -1,4 +1,5 @@
 import { secondsPerBar, type Tempo } from "@audio-ui/core/time";
+import { useAppHotkeys, useHotkeys } from "@tanstack/react-hotkeys";
 import {
   type ChangeEvent,
   type ReactNode,
@@ -36,7 +37,6 @@ import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useArrangement } from "@/hooks/use-arrangement";
 import { useArrangementEngine } from "@/hooks/use-arrangement-engine";
-
 import { useTimeSelection } from "@/hooks/use-time-selection";
 import { useTimelineCursor } from "@/hooks/use-timeline-cursor";
 import { useTimelineGrid } from "@/hooks/use-timeline-grid";
@@ -76,7 +76,7 @@ import {
 import { projectFromFolder } from "@/lib/daw/open-folder";
 import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import { freshMidiClipId, nameOf, type Recording } from "@/lib/daw/recordings";
-import { matchShortcut, type ShortcutCommand } from "@/lib/daw/shortcuts";
+import { ALSO_HOTKEYS, type ShortcutCommand } from "@/lib/daw/shortcuts";
 import {
   canStore,
   loadRecording,
@@ -103,7 +103,7 @@ import { useTakeInputs } from "./use-take-inputs";
 const UNSCROLLED = { overflow: "hidden" } as const;
 
 /** The panel under the arrangement folded: its strip alone. */
-const STRIP = "2.25rem";
+const STRIP = "2.5rem";
 /** The least height of each view of that panel, its strip included: under it, what it shows is cut off. */
 const LEAST: Record<PanelView, string> = {
   // A warped clip's Sample box whole: its fields, ÷2 and ×2, and Speed.
@@ -148,6 +148,15 @@ function leastOf(
   return view === "devices"
     ? `${Number.parseFloat(LEAST.devices) + RACK_BAR * rackDepth(devices)}rem`
     : LEAST[view];
+}
+
+/** How tall a view opens, in px: as tall as it was given, and never under its least, which can have grown since. */
+function heightOf(
+  kept: number,
+  view: PanelView,
+  devices: readonly TrackDevice[] | undefined
+): number {
+  return Math.max(kept, Number.parseFloat(leastOf(view, devices)) * REM);
 }
 
 /** How tall each view opens on a window `height` px tall: as tall as it likes, up to 45% of it, never under its least. */
@@ -226,6 +235,9 @@ function refuseFile(event: DragEvent) {
     event.dataTransfer.dropEffect = "none";
   }
 }
+
+/** Key presses the workstation has taken, or run a shortcut for: none runs a second one. */
+const TAKEN = new WeakSet<KeyboardEvent>();
 
 export function Daw({
   folder: initialFolder,
@@ -1084,8 +1096,11 @@ export function Daw({
   });
   keys.current = { commands, computerKeysOn, cursorKeys, timeSelection };
   useEffect(() => {
+    // What the workstation takes before its shortcuts: typing, the computer's keyboard, Escape, the time
+    // selected and the cursor. A key taken here is not a shortcut too.
     const onKey = (event: KeyboardEvent) => {
       if (typing(event.target)) {
+        TAKEN.add(event);
         return;
       }
       // The computer's keyboard plays notes: its keys are not shortcuts while it is on.
@@ -1094,12 +1109,14 @@ export function Daw({
         !(event.metaKey || event.ctrlKey || event.altKey) &&
         isComputerKeyboardKey(event.code)
       ) {
+        TAKEN.add(event);
         return;
       }
       // Escape lets go of what is selected, and stays the key of what it was pressed in.
       if (event.key === "Escape") {
         dispatch({ type: "clear-selection" });
         keys.current.timeSelection.clear();
+        TAKEN.add(event);
         return;
       }
       // What a key does to the time selected, the clipboard and the cursor comes before what it does otherwise.
@@ -1109,18 +1126,44 @@ export function Daw({
         moves.handleKey(event) ||
         (onSurface(event.target) && moves.handleArrowKey(event))
       ) {
-        return;
-      }
-      const command = matchShortcut(event);
-      if (command) {
-        event.preventDefault();
-        keys.current.commands[command]?.();
+        TAKEN.add(event);
       }
     };
     window.addEventListener("keydown", onKey, { capture: true });
     return () =>
       window.removeEventListener("keydown", onKey, { capture: true });
   }, [dispatch]);
+  // The shortcuts (docs/daw-spec/shortcuts.md): the app hotkeys, as the user may have rebound them, and their
+  // second keys. Heard after what is taken above, once each: a key two chords match runs once.
+  const appHotkeys = useAppHotkeys();
+  const hotkeys = useMemo(() => {
+    const run = (command: ShortcutCommand) => (event: KeyboardEvent) => {
+      if (TAKEN.has(event)) {
+        return;
+      }
+      TAKEN.add(event);
+      event.preventDefault();
+      keys.current.commands[command]?.();
+    };
+    return [
+      ...Object.values(appHotkeys).map((hotkey) => ({
+        callback: run(hotkey.id),
+        hotkey,
+      })),
+      ...ALSO_HOTKEYS.map(({ command, hotkey }) => ({
+        callback: run(command),
+        hotkey,
+      })),
+    ];
+  }, [appHotkeys]);
+  useHotkeys(hotkeys, {
+    // Heard on the way down, as the keys of the workstation are: a focused control can't keep one from it.
+    capture: true,
+    conflictBehavior: "allow",
+    ignoreInputs: false,
+    preventDefault: false,
+    stopPropagation: false,
+  });
 
   // Saved as you go (PRJ-001): the document, and which recordings it keeps.
   useEffect(() => {
@@ -1151,8 +1194,10 @@ export function Daw({
     content = (
       <section aria-label="Mixer" className="h-full bg-muted/30">
         <MixerView
+          armed={take.armed}
           arrangement={arrangement}
           engine={engine}
+          onArm={armTrack}
           onMix={automation.changeMix}
           onSelectTrack={pickTrack}
           overridden={automation.overridden}
@@ -1308,7 +1353,11 @@ export function Daw({
                 className="flex flex-col"
                 collapsedSize={STRIP}
                 collapsible
-                defaultSize={folded ? STRIP : `${viewHeights.current[shown]}px`}
+                defaultSize={
+                  folded
+                    ? STRIP
+                    : `${heightOf(viewHeights.current[shown], shown, shownTrack?.devices)}px`
+                }
                 groupResizeBehavior="preserve-pixel-size"
                 id={shown}
                 key={shown}

@@ -9,21 +9,17 @@ export type PanelView = "clip" | "devices" | "mixer";
 /** The panel's views, as tabs: they go in the bar, or in the clip view's own strip when it shows a clip. */
 export function PanelTabs({ clipAvailable }: { clipAvailable: boolean }) {
   return (
-    <TabsList className="relative z-10 shrink-0 group-data-horizontal/tabs:h-7">
-      <TabsTrigger
-        className="px-2 text-xs"
-        disabled={!clipAvailable}
-        value="clip"
-      >
-        <ClipIcon aria-hidden="true" className="size-3.5" weight="fill" />
+    <TabsList className="relative z-10 shrink-0">
+      <TabsTrigger disabled={!clipAvailable} value="clip">
+        <ClipIcon aria-hidden="true" weight="fill" />
         Clip
       </TabsTrigger>
-      <TabsTrigger className="px-2 text-xs" value="devices">
-        <KnobIcon aria-hidden="true" className="size-3.5" weight="fill" />
+      <TabsTrigger value="devices">
+        <KnobIcon aria-hidden="true" weight="fill" />
         Devices
       </TabsTrigger>
-      <TabsTrigger className="px-2 text-xs" value="mixer">
-        <FadersIcon aria-hidden="true" className="size-3.5" weight="fill" />
+      <TabsTrigger value="mixer">
+        <FadersIcon aria-hidden="true" weight="fill" />
         Mixer
       </TabsTrigger>
     </TabsList>
@@ -32,9 +28,10 @@ export function PanelTabs({ clipAvailable }: { clipAvailable: boolean }) {
 
 /**
  * The one bar of the panel under the arrangement, laid out as a clip view's
- * strip: the caret that folds the panel, what it shows, and its tabs. Folded,
- * the panel is this bar alone, and the whole bar opens it, as the library's
- * strip does on the left; its tabs open it on their view.
+ * strip: the caret that folds the panel, what it shows, and its tabs. Open, a
+ * press anywhere on the bar outside its tabs folds it; folded, the panel is
+ * this bar alone, and the whole bar opens it, as the library's strip does on
+ * the left; its tabs open it on their view.
  */
 export function PanelBar({
   clipAvailable,
@@ -52,7 +49,7 @@ export function PanelBar({
   const fold = useCallback(() => onFoldedChange(true), [onFoldedChange]);
   return (
     <div
-      className="relative flex min-h-9 shrink-0 items-center gap-2 p-1 ps-2 text-xs data-open:border-b"
+      className="relative flex min-h-10 shrink-0 items-center gap-2 p-1 ps-2 text-xs data-open:border-b"
       data-folded={folded ? "" : undefined}
       data-open={folded ? undefined : ""}
       data-slot="panel-bar"
@@ -76,7 +73,7 @@ export function PanelBar({
         <button
           aria-expanded
           aria-label="Fold the panel"
-          className="flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex size-5 after:absolute after:inset-0 hover:after:bg-muted/40 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           onClick={fold}
           type="button"
         >
