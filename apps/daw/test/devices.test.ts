@@ -4,7 +4,7 @@ import {
   createArrangementState,
   trackOf,
 } from "@/lib/arrangement-state";
-import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
+import { addDeviceCommand, hasOutput, takesDevice } from "@/lib/daw/devices";
 import { NEW_TRACK } from "@/lib/daw/drop";
 import { newProject, TRACK_COLOR_COUNT } from "@/lib/daw/project";
 
@@ -120,5 +120,20 @@ describe("adding a device from the library", () => {
         ? command.commands.map((each) => each.type)
         : [];
     expect(types).toEqual(["add-track", "add-device"]);
+  });
+});
+
+describe("a track's output", () => {
+  test("MIX-024: a MIDI track has one with an instrument, and none without", () => {
+    const state = project();
+    const midi = trackOf(state.doc, "track-3");
+    const audio = trackOf(state.doc, "track-1");
+    if (!(midi && audio)) {
+      throw new Error("the new project lost a track");
+    }
+    expect(hasOutput(midi)).toBe(true);
+    expect(hasOutput(audio)).toBe(true);
+    expect(hasOutput({ ...midi, devices: [] })).toBe(false);
+    expect(hasOutput({ ...midi, devices: undefined })).toBe(false);
   });
 });

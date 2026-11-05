@@ -29,6 +29,7 @@ import type {
   Mix,
 } from "@/lib/arrangement";
 import { trackBlock, trackOf } from "@/lib/arrangement-state";
+import { hasOutput } from "@/lib/daw/devices";
 import { startSortableDrag } from "@/lib/sortable-drag";
 import { cn } from "@/lib/utils";
 
@@ -326,6 +327,8 @@ function Strip({
     [onArm, track.id]
   );
   const select = useCallback(() => onSelect(track.id), [onSelect, track.id]);
+  // A MIDI track with no instrument has no output: no sends, pan or fader (MIX-024).
+  const output = hasOutput(track);
   const db = decibels(mix.gain);
   const levels = useAudioLevels(analysers ?? NO_ANALYSERS);
   const source = analysers ? levels : SILENT_SOURCE;
@@ -373,7 +376,7 @@ function Strip({
           </span>
         ) : null}
       </div>
-      {sends ? (
+      {sends && output ? (
         <div
           aria-label={`${track.name} sends`}
           className="row-start-2 flex flex-wrap justify-center gap-1"
@@ -390,52 +393,56 @@ function Strip({
           ))}
         </div>
       ) : null}
-      <Knob
-        anchor={0}
-        aria-label={`${track.name} pan`}
-        className="row-start-4"
-        formatValue={formatPan}
-        max={1}
-        min={-1}
-        onValueChange={setPan}
-        onValueCommitted={onSettle}
-        size="sm"
-        step={0.02}
-        value={mix.pan}
-        valueLabel="hidden"
-      />
-      <div className="row-start-5 flex min-h-0 justify-center gap-1.5">
-        <Fader
-          aria-label={`${track.name} volume`}
-          formatValue={formatDb}
-          largeStep={6}
-          max={MAX_DB}
-          min={MIN_DB}
-          onValueChange={setGain}
-          onValueCommitted={onSettle}
-          size="sm"
-          step={0.5}
-          value={db}
-          valueLabel="hidden"
-        />
-        <StripMeter
-          label={track.name}
-          levels={source}
-          marks={main ? MAIN_MARKS : undefined}
-        />
-      </div>
-      {/* A pill over the pan, as the reference draws it: the loudest peak since it was cleared. */}
-      <PeakReadout
-        analysers={analysers ?? NO_ANALYSERS}
-        className="row-start-3 h-5 w-14"
-        name={main ? "Main" : track.name}
-      />
-      <span
-        aria-hidden="true"
-        className="row-start-6 text-muted-foreground text-xs tabular-nums"
-      >
-        {formatDb(db)}
-      </span>
+      {output ? (
+        <>
+          <Knob
+            anchor={0}
+            aria-label={`${track.name} pan`}
+            className="row-start-4"
+            formatValue={formatPan}
+            max={1}
+            min={-1}
+            onValueChange={setPan}
+            onValueCommitted={onSettle}
+            size="sm"
+            step={0.02}
+            value={mix.pan}
+            valueLabel="hidden"
+          />
+          <div className="row-start-5 flex min-h-0 justify-center gap-1.5">
+            <Fader
+              aria-label={`${track.name} volume`}
+              formatValue={formatDb}
+              largeStep={6}
+              max={MAX_DB}
+              min={MIN_DB}
+              onValueChange={setGain}
+              onValueCommitted={onSettle}
+              size="sm"
+              step={0.5}
+              value={db}
+              valueLabel="hidden"
+            />
+            <StripMeter
+              label={track.name}
+              levels={source}
+              marks={main ? MAIN_MARKS : undefined}
+            />
+          </div>
+          {/* A pill over the pan, as the reference draws it: the loudest peak since it was cleared. */}
+          <PeakReadout
+            analysers={analysers ?? NO_ANALYSERS}
+            className="row-start-3 h-5 w-14"
+            name={main ? "Main" : track.name}
+          />
+          <span
+            aria-hidden="true"
+            className="row-start-6 text-muted-foreground text-xs tabular-nums"
+          >
+            {formatDb(db)}
+          </span>
+        </>
+      ) : null}
       {main ? null : (
         <StripSwitches
           armed={armed}

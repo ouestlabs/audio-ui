@@ -104,6 +104,7 @@ import {
   type TrackDevice,
 } from "@/lib/arrangement";
 import { trackBlock, trackDepth } from "@/lib/arrangement-state";
+import { hasOutput } from "@/lib/daw/devices";
 import { NEW_TRACK } from "@/lib/daw/drop";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { libraryDevice } from "@/lib/device-library";
@@ -1054,6 +1055,7 @@ export function ArrangementView({
                         onRename={renameTrack}
                         onSelect={pickTrack}
                         onToggleFold={arrangement.toggleFold}
+                        output={hasOutput(track)}
                         selected={
                           selectedTracks.includes(track.id) ||
                           selectedTrack === track.id
