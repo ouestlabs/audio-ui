@@ -216,6 +216,14 @@ export interface DawProps {
  * transport and the engine line around them. It holds the start marker and
  * the keyboard; everything else is the registry's.
  */
+/** A file let go where nothing takes it would open in the browser, and leave the work behind. */
+function refuseFile(event: DragEvent) {
+  if (event.dataTransfer?.types.includes("Files") && !event.defaultPrevented) {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "none";
+  }
+}
+
 export function Daw({
   folder: initialFolder,
   initial,
@@ -297,6 +305,14 @@ export function Daw({
   // Under the arrangement, one panel (MIX-015): the selected clip, the selected track's devices, or the mixer. Like
   // the library, it is always there, folded to its strip or open, its height shared with the tracks by the line above.
   const [panelView, setPanelView] = useSavedState("panelView", "devices");
+  useEffect(() => {
+    window.addEventListener("dragover", refuseFile);
+    window.addEventListener("drop", refuseFile);
+    return () => {
+      window.removeEventListener("dragover", refuseFile);
+      window.removeEventListener("drop", refuseFile);
+    };
+  }, []);
   const [folded, setFolded] = useSavedState("panelFolded", false);
   const panelRef = usePanelRef();
   const [single] =

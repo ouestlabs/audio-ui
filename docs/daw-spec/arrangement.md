@@ -99,3 +99,7 @@ Test: apps/daw/test/browser/run.ts "ARR-023"
 ### ARR-024 A narrow range
 A range keeps room for both handles, apart and inside it, however narrow the zoom would draw it: from twice that room it is as wide as it is long, and under that it stays wider, with a line along its bottom showing its true length against the ruler. Dragged, its end handle stays under the pointer, and the range changes to match.
 Test: packages/core/src/primitives/timeline/range-controller.test.ts; apps/daw/test/browser/run.ts "ARR-024"
+
+### ARR-025 Room under the tracks
+Once no track shares the room left, because they are folded, set to a height or all removed, what remains under the last one takes audio files and devices, as the add-track button does: one new track for each, from the start of the arrangement. It says so. A file let go anywhere that takes nothing is refused, and never opens in the browser.
+Test: apps/daw/test/browser/run.ts "ARR-025"

@@ -607,6 +607,9 @@ export function ArrangementView({
     [dispatch]
   );
   const anySolo = tracks.some((track) => mixOf(track).soloed);
+  const roomLeft = [...arrangement.unfoldedTracks, ...returns].every(
+    (track) => arrangement.heights[track.id] !== undefined
+  );
   // What each track's envelope can move besides its volume and pan: its devices' parameters (AUT-001).
   const targets = useMemo(
     () =>
@@ -965,6 +968,23 @@ export function ArrangementView({
               </div>
             );
           })}
+          {/* Once no track shares the room left, what remains takes files and devices, a track for each. */}
+          {roomLeft ? (
+            <div
+              className={cn(
+                "flex min-h-14 flex-1 items-center text-muted-foreground text-xs",
+                dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
+              )}
+              data-slot="arrangement-drop"
+              onDragLeave={fileLeave}
+              onDragOver={dragOver(NEW_TRACK, true)}
+              onDrop={drop(NEW_TRACK, true)}
+            >
+              <span className="sticky left-3 px-3">
+                Drop audio files or a device here
+              </span>
+            </div>
+          ) : null}
         </div>
       </TimelineViewport>
       {marquee.rect

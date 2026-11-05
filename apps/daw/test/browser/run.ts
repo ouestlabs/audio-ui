@@ -698,6 +698,48 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `its name needs ${header?.height} px in a clip of ${clipBox?.height} px`
       );
     },
+  "ARR-025: with no track left, files dropped under the headers make tracks, and one dropped anywhere else never leaves the page":
+    async (browser) => {
+      const page = await open(browser);
+      const rows = page.locator("[data-track-id]");
+      // Its header's name picks a track, and Delete takes it.
+      while ((await rows.count()) > 0) {
+        const before = await rows.count();
+        await rows
+          .first()
+          .locator("[data-slot=timeline-track-header]")
+          .click({
+            position: { x: 60, y: 12 },
+          });
+        await page.keyboard.press("Delete");
+        await page.waitForTimeout(80);
+        assert((await rows.count()) < before, "Delete left the track");
+      }
+      const zone = page.locator("[data-slot=arrangement-drop]");
+      await zone.waitFor({ timeout: 3000 });
+      const room = await zone.boundingBox();
+      assert(
+        (room?.height ?? 0) > 100,
+        `the empty arrangement drops on ${room?.height} px`
+      );
+      // Over the line under the arrangement, which takes nothing: a file stays refused rather than opening in the browser.
+      const refused = await page.evaluate(() => {
+        const target = document.querySelector("[data-slot=resizable-handle]");
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(new File(["x"], "a.wav", { type: "audio/wav" }));
+        const init = { bubbles: true, cancelable: true, dataTransfer };
+        return !(
+          target?.dispatchEvent(new DragEvent("dragover", init)) ||
+          target?.dispatchEvent(new DragEvent("drop", init))
+        );
+      });
+      assert(refused, "a file dropped outside would open in the browser");
+      await dropChord(page, "[data-slot=arrangement-drop]", "Dropped take", 2);
+      await page
+        .locator("[data-clip-id]", { hasText: "Dropped take" })
+        .waitFor({ timeout: 30_000 });
+      assert((await rows.count()) === 1, "the file did not make its track");
+    },
   "ARR-013: A shows the envelopes; a level moved by hand overrides one until it is enabled again":
     async (browser) => {
       const page = await open(browser);
