@@ -3822,6 +3822,33 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       timeout: 10_000,
     });
   },
+  "PRJ-009: New project replaces the project, and a reload keeps the new one":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, "[data-add-track]", "Old take", 1);
+      await page.waitForSelector('[aria-label="Old take"][data-track-id]');
+      await page.waitForSelector("text=Saved", { timeout: 5000 });
+      await page.getByRole("button", { name: "More controls" }).click();
+      await page.getByRole("menuitem", { name: "New project" }).click();
+      await page.waitForSelector('[aria-label="1 MIDI"][data-track-id]');
+      assert(
+        (await page
+          .locator('[aria-label="Old take"][data-track-id]')
+          .count()) === 0,
+        "the old track is still there"
+      );
+      await page.waitForSelector("text=Saved", { timeout: 5000 });
+      await open(browser, page);
+      await page.waitForSelector('[aria-label="1 MIDI"][data-track-id]', {
+        timeout: 10_000,
+      });
+      assert(
+        (await page
+          .locator('[aria-label="Old take"][data-track-id]')
+          .count()) === 0,
+        "a reload brought the old project back"
+      );
+    },
 };
 
 const wanted = process.argv.slice(2);

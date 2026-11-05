@@ -74,7 +74,7 @@ import {
   saveToFolder,
 } from "@/lib/daw/folder";
 import { projectFromFolder } from "@/lib/daw/open-folder";
-import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
+import { newProject, TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import { freshMidiClipId, nameOf, type Recording } from "@/lib/daw/recordings";
 import { ALSO_HOTKEYS, type ShortcutCommand } from "@/lib/daw/shortcuts";
 import {
@@ -869,6 +869,15 @@ export function Daw({
     () => (folder ? saveTo(folder) : saveAs()),
     [folder, saveAs, saveTo]
   );
+  const newSet = useCallback(
+    () =>
+      onOpen?.({
+        folder: null,
+        initial: newProject(),
+        initialRecordings: new Map(),
+      }),
+    [onOpen]
+  );
   const openProjectFolder = useCallback(async () => {
     const picked = await pickFolder();
     const context = webAudio.getContext();
@@ -1297,6 +1306,7 @@ export function Daw({
           onCountInChange={take.setCountIn}
           onLoopingChange={setLooping}
           onMetronomeChange={setMetronome}
+          onNew={newSet}
           onPlayPause={playPause}
           onPunchChange={take.setPunch}
           onRecordChange={take.toggle}

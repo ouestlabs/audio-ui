@@ -135,6 +135,8 @@ export interface TopBarProps
   onImportDawproject: () => void;
   onLoopingChange: (looping: boolean) => void;
   onMetronomeChange: (metronome: boolean) => void;
+  /** Starts a new project, in place of this one. */
+  onNew: () => void;
   /** Opens a project folder, where the browser can: with it, the menu has Open, Save and Save As. */
   onOpen?: () => void;
   onPlayPause: () => void;
@@ -291,6 +293,9 @@ export function TopBar(props: TopBarProps) {
             <DotsThreeIcon aria-hidden="true" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-auto min-w-48">
+            <DropdownMenuItem onClick={props.onNew}>
+              New project
+            </DropdownMenuItem>
             {props.onOpen ? (
               <>
                 <DropdownMenuItem onClick={props.onOpen}>
