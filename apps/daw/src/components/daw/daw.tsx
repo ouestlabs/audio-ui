@@ -1,5 +1,5 @@
 import { secondsPerBar, type Tempo } from "@audio-ui/core/time";
-import { useHotkeys } from "@tanstack/react-hotkeys";
+import { useAppHotkeys, useHotkeys } from "@tanstack/react-hotkeys";
 import {
   type ChangeEvent,
   type ReactNode,
@@ -76,11 +76,7 @@ import {
 import { projectFromFolder } from "@/lib/daw/open-folder";
 import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import { freshMidiClipId, nameOf, type Recording } from "@/lib/daw/recordings";
-import {
-  platformOf,
-  platformShortcuts,
-  type ShortcutCommand,
-} from "@/lib/daw/shortcuts";
+import { ALSO_HOTKEYS, type ShortcutCommand } from "@/lib/daw/shortcuts";
 import {
   canStore,
   loadRecording,
@@ -1137,28 +1133,34 @@ export function Daw({
     return () =>
       window.removeEventListener("keydown", onKey, { capture: true });
   }, [dispatch]);
-  // The shortcuts (docs/daw-spec/shortcuts.md), heard after what is taken above, once each: a key two chords match runs once.
-  const hotkeys = useMemo(
-    () =>
-      platformShortcuts().map(({ chord, command }) => ({
-        callback: (event: KeyboardEvent) => {
-          if (TAKEN.has(event)) {
-            return;
-          }
-          TAKEN.add(event);
-          event.preventDefault();
-          keys.current.commands[command]?.();
-        },
-        hotkey: chord,
+  // The shortcuts (docs/daw-spec/shortcuts.md): the app hotkeys, as the user may have rebound them, and their
+  // second keys. Heard after what is taken above, once each: a key two chords match runs once.
+  const appHotkeys = useAppHotkeys();
+  const hotkeys = useMemo(() => {
+    const run = (command: ShortcutCommand) => (event: KeyboardEvent) => {
+      if (TAKEN.has(event)) {
+        return;
+      }
+      TAKEN.add(event);
+      event.preventDefault();
+      keys.current.commands[command]?.();
+    };
+    return [
+      ...Object.values(appHotkeys).map((hotkey) => ({
+        callback: run(hotkey.id),
+        hotkey,
       })),
-    []
-  );
+      ...ALSO_HOTKEYS.map(({ command, hotkey }) => ({
+        callback: run(command),
+        hotkey,
+      })),
+    ];
+  }, [appHotkeys]);
   useHotkeys(hotkeys, {
     // Heard on the way down, as the keys of the workstation are: a focused control can't keep one from it.
     capture: true,
     conflictBehavior: "allow",
     ignoreInputs: false,
-    platform: platformOf(),
     preventDefault: false,
     stopPropagation: false,
   });

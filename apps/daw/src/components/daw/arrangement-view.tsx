@@ -106,6 +106,7 @@ import { NEW_TRACK } from "@/lib/daw/drop";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { libraryDevice } from "@/lib/device-library";
 import { cn } from "@/lib/utils";
+import { CommandKeys } from "./shortcut-list";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
@@ -794,16 +795,22 @@ export function ArrangementView({
             <DropdownMenuContent>
               <DropdownMenuItem onClick={addAudio}>
                 Audio track
-                <DropdownMenuShortcut>Ctrl T</DropdownMenuShortcut>
+                <DropdownMenuShortcut>
+                  <CommandKeys command="audio-track" />
+                </DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={addMidi}>
                 MIDI track
-                <DropdownMenuShortcut>Ctrl Shift T</DropdownMenuShortcut>
+                <DropdownMenuShortcut>
+                  <CommandKeys command="midi-track" />
+                </DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={addReturn}>
                 Return track
-                <DropdownMenuShortcut>Cmd Option T</DropdownMenuShortcut>
+                <DropdownMenuShortcut>
+                  <CommandKeys command="return-track" />
+                </DropdownMenuShortcut>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

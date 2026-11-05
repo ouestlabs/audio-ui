@@ -2117,7 +2117,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           document.querySelectorAll("[data-track]").length === tracks - 1,
         before
       );
-      await page.getByRole("button", { name: "Undo (Cmd Z)" }).click();
+      await page.getByRole("button", { exact: true, name: "Undo" }).click();
       await page.waitForFunction(
         (tracks) => document.querySelectorAll("[data-track]").length === tracks,
         before
