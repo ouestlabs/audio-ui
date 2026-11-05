@@ -93,8 +93,8 @@ function Knob({
       <KnobPrimitive.Control
         className={cn(
           knobControlClassName,
-          // Dragged up and down, it is a fader: the cursor says so.
-          dragMode === "vertical" && "cursor-ns-resize active:cursor-ns-resize"
+          // Dragged up and down, it is a fader: the cursor says so, whichever way the mode was set.
+          "data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize"
         )}
         data-slot="knob-control"
       >

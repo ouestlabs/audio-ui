@@ -10,7 +10,11 @@ import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part.ts";
 import { useRender } from "../../internal/render.ts";
 import { useLocale } from "../../internal/use-locale.ts";
-import { KnobContext, type KnobContextValue } from "../context.ts";
+import {
+  KnobContext,
+  type KnobContextValue,
+  KnobDefaultsContext,
+} from "../context.ts";
 
 /**
  * Groups all parts of the knob and owns its value. Dragging the `Control`,
@@ -24,7 +28,7 @@ export function Root(componentProps: Root.Props) {
     className,
     defaultValue,
     disabled = false,
-    dragMode = "circular",
+    dragMode: dragModeProp,
     form,
     format,
     largeStep = 10,
@@ -43,6 +47,8 @@ export function Root(componentProps: Root.Props) {
     ...elementProps
   } = componentProps;
   const resolvedLocale = useLocale(locale);
+  const defaults = React.use(KnobDefaultsContext);
+  const dragMode = dragModeProp ?? defaults.dragMode ?? "circular";
 
   const [controller] = React.useState(() => createKnobController());
   // Set on every render, before the snapshot is read, so it always shows the latest props.
@@ -142,7 +148,7 @@ export namespace Root {
     /** Uncontrolled starting value, and the reset target of a double tap, an Alt + click and the Delete key. Defaults to the middle of the dial's travel. */
     defaultValue?: number;
     disabled?: boolean;
-    /** @default "circular" */
+    /** How a pointer drag turns into value. Defaults to the `dragMode` of the `Knob.Provider` around it, else `"circular"`. @default "circular" */
     dragMode?: DragMode;
     /** Identifies the form that owns the knob's input, when rendered outside it. */
     form?: string;

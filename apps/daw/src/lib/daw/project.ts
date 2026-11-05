@@ -26,25 +26,25 @@ export function deviceAt(id: string, device: string): TrackDevice {
   };
 }
 
-/** What a new project holds (ARR-009): two audio tracks, two MIDI tracks with a synth, a reverb return and a delay return. */
+/** What a new project holds (ARR-009): two MIDI tracks with a synth, then two audio tracks, a reverb return and a delay return. */
 export function newProject(): ArrangementDoc {
   const tracks: ArrangementTrack[] = [
-    { color: 0, id: "track-1", kind: "audio", name: "1 Audio" },
-    { color: 1, id: "track-2", kind: "audio", name: "2 Audio" },
     {
-      color: 2,
+      color: 0,
       devices: [deviceAt("device-1", "audioui.pocket-synth")],
       id: "track-3",
       kind: "midi",
-      name: "3 MIDI",
+      name: "1 MIDI",
     },
     {
-      color: 3,
+      color: 1,
       devices: [deviceAt("device-2", "audioui.pocket-synth")],
       id: "track-4",
       kind: "midi",
-      name: "4 MIDI",
+      name: "2 MIDI",
     },
+    { color: 2, id: "track-1", kind: "audio", name: "3 Audio" },
+    { color: 3, id: "track-2", kind: "audio", name: "4 Audio" },
   ];
   const returns: ArrangementTrack[] = [
     {

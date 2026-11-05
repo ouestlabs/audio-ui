@@ -34,3 +34,7 @@ Test: apps/daw/test/project-file.test.ts "PRJ-007"; apps/daw/test/browser/run.ts
 A project goes out as a `.dawproject` file (the open exchange format: a zip of `project.xml`, `metadata.xml` and the audio) and one comes in from it: tracks, clips with their fades and warp, alias clips that play another clip's content, notes, the tempo and time signatures, the mix, sends, and the automation of volume, pan and sends. Its equalizer, compressor, gate and limiter become ours with their settings; any other device is left out, and a report says what was, by track. A reversed clip, a clip's gain and the loop have no place in the format: an export says so. A MIDI track that comes in with no instrument gets the one a new MIDI track gets. Times go out in seconds and come in in seconds or beats.
 Test: apps/www/test/registry-audio/base/lib/dawproject.test.ts "PRJ-008"; apps/daw/test/browser/run.ts "PRJ-008"
 Status: checked against the format's schema and a project written as other DAWs write theirs, not yet against a file another DAW made.
+
+### PRJ-009 A new project
+The menu's New project replaces the project with a new one: the two MIDI tracks and the two audio tracks (ARR-009), the two returns, the default tempo, the view laid out afresh. The browser's storage takes the new one within a second, so a reload brings it back and not the one before. As with opening a folder, the project it replaces is not kept anywhere unless it was saved. The reference's Cmd+N is the browser's own (a new window), so there is no key.
+Test: apps/daw/test/browser/run.ts "PRJ-009"
