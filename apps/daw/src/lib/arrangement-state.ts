@@ -533,6 +533,26 @@ export function marksAfterInsert<Mark extends { at: number }>(
 }
 
 /**
+ * The loop after the stretch from `from` to `to` is taken out: a time inside it
+ * comes back to where it began, one after it moves back by its length. A loop
+ * with nothing left of it is not changed.
+ */
+export function loopAfterRemove(
+  range: readonly [number, number],
+  from: number,
+  to: number
+): readonly [number, number] {
+  const move = (at: number) => {
+    if (at <= from) {
+      return at;
+    }
+    return at < to ? from : at - (to - from);
+  };
+  const [start, end] = [move(range[0]), move(range[1])];
+  return end > start ? [start, end] : range;
+}
+
+/**
  * Marks after the stretch from `from` to `to` is taken out: those in it go
  * with it, those after it move back by its length. With `keepLast`, the last
  * mark in it stays, at `from`: a time signature the music after it still plays
@@ -544,7 +564,10 @@ export function marksAfterRemove<Mark extends { at: number }>(
   to: number,
   keepLast: boolean
 ): Mark[] {
-  const gone = marks.filter((mark) => mark.at > from && mark.at < to);
+  // One at the very start of the time taken out goes with it, as one inside it; keeping a meter keeps the last of them.
+  const gone = marks.filter(
+    (mark) => (keepLast ? mark.at > from : mark.at >= from) && mark.at < to
+  );
   const kept = keepLast ? gone.at(-1) : undefined;
   const after = marks.filter((mark) => !gone.includes(mark));
   // A mark already at `from` gives way to the one kept there.
@@ -2977,6 +3000,7 @@ const handlers: Handlers = {
       ...doc,
       clips: deleteTime(doc.clips, from, to, state.doc.duration),
       ...automationAfterRemove(doc, from, to),
+      loop: { ...doc.loop, range: loopAfterRemove(doc.loop.range, from, to) },
       locators: marksAfterRemove(doc.locators, from, to, false),
       signatures: marksAfterRemove(doc.signatures, from, to, true),
     })),

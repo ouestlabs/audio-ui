@@ -37,7 +37,7 @@ Test: apps/www/test/arrangement-state.test.ts "ARR-008"
 
 ### ARR-009 Tracks in a new project
 A new project holds two audio tracks, two MIDI tracks and two return tracks, the first with a reverb, the second with a delay, at 120 BPM in 4/4.
-Status: partial: OBS-013 checks the reference's default.
+Status: partial: the reference's new set (OBS-013, version 10.1) matches but for the order: it lists its two MIDI tracks before its two audio tracks, here the audio tracks come first. Its launch quantization starts at one bar.
 Test: apps/daw/test/project.test.ts "ARR-009"
 
 ### ARR-010 Moving a track
@@ -66,6 +66,7 @@ Test: apps/daw/test/browser/run.ts "ARR-015"
 
 ### ARR-016 Locators
 M, or the + of the locators' row, puts a locator at the cursor. A press on one puts the cursor there; a double-click plays from there, and Stop then comes back to it. Enter or Rename in its menu renames it, Delete takes it away. A drag moves it on the grid, or freely with Cmd held, and it lands on a clip's edge or another locator within a few pixels; focused, Left and Right move it by the grid. A move does not move the cursor, and is one step of undo. Option with the left and right arrows jumps to the next locator or clip edge, of the selected tracks or of every track.
+Time inserted or taken out moves the locators with the clips: those inside the time taken out go with it, one at its very start too, and those after it move by its length. The loop comes along when time is taken out, a time inside it coming back to where the time taken out began (OBS-018).
 Test: apps/www/test/registry-audio/base/hooks/use-timeline-cursor.test.tsx; apps/daw/test/browser/run.ts "ARR-016"
 
 ### ARR-017 Time signatures

@@ -806,6 +806,18 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "on the clip's tab, the panel folded"
       );
     },
+  "MIX-015: a press on the tab already shown opens the folded panel": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await page.getByRole("tab", { name: DEVICES }).click();
+    await page.getByRole("button", { name: "Fold the panel" }).click();
+    await page.getByRole("button", { name: "Open the panel" }).waitFor();
+    await page.getByRole("tab", { name: DEVICES }).click();
+    await page
+      .getByRole("button", { name: "Fold the panel" })
+      .waitFor({ timeout: 3000 });
+  },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);
@@ -820,8 +832,9 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await page.mouse.down();
       await page.mouse.move(box.x + box.width / 2, box.y - 120, { steps: 6 });
+      // The line follows the pointer a frame behind: released at once, the last step can be lost.
+      await page.waitForTimeout(150);
       await page.mouse.up();
-      // The last step lands in the next frame: under load, read too soon it is not there yet.
       await page.waitForTimeout(100);
       const taller = await height("Devices");
       assert(
