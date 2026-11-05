@@ -217,8 +217,10 @@ function TimelineRangeHandle({
   return (
     <TimelinePrimitive.RangeHandle
       className={cn(
-        "cn-timeline-range-handle absolute inset-y-1 w-2 cursor-ew-resize data-[edge=end]:right-1 data-[edge=start]:left-1",
-        "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
+        // On a range too narrow for both, the end handle stays clear of the start's, past the range's end.
+        "cn-timeline-range-handle absolute inset-y-1 w-2 cursor-ew-resize data-[edge=end]:left-[max(100%-0.75rem,0.875rem)] data-[edge=start]:left-1",
+        // The room to aim at grows away from the other handle, never over it.
+        "after:absolute after:inset-y-0 data-[edge=end]:after:-right-1.5 data-[edge=end]:after:left-0 data-[edge=start]:after:right-0 data-[edge=start]:after:-left-1.5 pointer-coarse:data-[edge=end]:after:-right-3 pointer-coarse:data-[edge=start]:after:-left-3",
         className
       )}
       data-slot="timeline-range-handle"

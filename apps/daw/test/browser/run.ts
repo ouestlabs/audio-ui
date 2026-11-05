@@ -2411,6 +2411,56 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       );
       await page.getByRole("button", { name: "Fold Loop" }).waitFor();
     },
+  "ARR-024: a range drawn narrow keeps both handles apart, and either still drags its own edge":
+    async (browser) => {
+      const page = await open(browser);
+      const range = page.locator("[data-slot=timeline-range]").first();
+      const handles = range.locator("[data-slot=timeline-range-handle]");
+      const box = async (at: number) => {
+        const found = await handles.nth(at).boundingBox();
+        assert(found, "the handle is there");
+        return found as NonNullable<typeof found>;
+      };
+      const zoom = async (key: string) => {
+        await [1, 2, 3, 4, 5].reduce(async (done) => {
+          await done;
+          await page.keyboard.press(key);
+          await page.waitForTimeout(60);
+        }, Promise.resolve());
+      };
+      // Zoomed in, the grid lets it down to a bar; zoomed back out, that is a sliver.
+      await zoom("Meta+Equal");
+      await page.getByRole("slider", { exact: true, name: "Loop" }).focus();
+      await page.keyboard.press("Meta+ArrowDown");
+      await page.keyboard.press("Meta+ArrowDown");
+      await page.locator("[data-slot=timeline-viewport]").first().click({
+        position: { x: 700, y: 300 },
+      });
+      await zoom("Meta+Minus");
+      await page.waitForTimeout(200);
+      const narrow = await range.boundingBox();
+      assert((narrow?.width ?? 99) < 20, `the range is ${narrow?.width} px wide`);
+      const [start, end] = [await box(0), await box(1)];
+      assert(
+        end.x - (start.x + start.width) >= 1,
+        `the handles are ${end.x - (start.x + start.width)} px apart`
+      );
+      await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(end.x + end.width / 2 + 60, end.y + end.height / 2, {
+        steps: 4,
+      });
+      await page.mouse.up();
+      const grown = await range.boundingBox();
+      assert(
+        (grown?.width ?? 0) > (narrow?.width ?? 0) + 30,
+        `dragged 60 px, the range went from ${narrow?.width} to ${grown?.width} px`
+      );
+      assert(
+        Math.abs((grown?.x ?? 0) - (narrow?.x ?? 0)) < 1,
+        "the end handle moved the start"
+      );
+    },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
       const page = await open(browser);

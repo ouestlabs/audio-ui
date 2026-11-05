@@ -770,7 +770,7 @@ function MidiClipPanel({
               sticky="top"
             >
               {/* The loop brace, or what the clip plays: drag it, or its ends. */}
-              <TimelineLane className="h-6.25 bg-background">
+              <TimelineLane className="h-5 bg-background">
                 <TimelineRange
                   aria-label={loop ? "Loop" : "Played"}
                   onValueChange={onRegionChange ? setBrace : undefined}

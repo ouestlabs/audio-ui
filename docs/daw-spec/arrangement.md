@@ -95,3 +95,7 @@ Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-022";
 ### ARR-023 The overview at any zoom
 The bar over the tracks shows the stretch the view shows as a window with a handle at each edge. At any zoom the window keeps both handles, apart and inside the bar, at the end of the timeline too. It follows the pointer exactly, and the view follows it: a handle dragged zooms with the other edge held still, down to the window's least width, where the zoom is at its closest and both stop. The window between the handles scrolls.
 Test: apps/daw/test/browser/run.ts "ARR-023"
+
+### ARR-024 A narrow range
+A range keeps both handles apart and in reach however narrow the zoom draws it: its fill stays true to the ruler, and past the width that holds them both, the end handle sits past the range's end. Dragged, each handle moves its own edge by what the pointer travels.
+Test: apps/daw/test/browser/run.ts "ARR-024"

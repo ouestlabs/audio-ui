@@ -827,7 +827,7 @@ export default function BlockPianoRoll() {
               }
               sticky="top"
             >
-              <TimelineLane className="h-6.25 cursor-cell bg-background">
+              <TimelineLane className="h-5 cursor-cell bg-background">
                 <TimelineRange
                   aria-label="Loop region"
                   className={cn(!looping && "opacity-40")}
