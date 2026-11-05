@@ -692,6 +692,23 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           .getAttribute("aria-pressed")) === "true",
         "armed in the mixer, the header's Arm stays off"
       );
+      // Inside its channel, as far from either edge.
+      const [strip, switches] = [
+        await mixer
+          .getByRole("region", { exact: true, name: "1 Audio" })
+          .boundingBox(),
+        await channel.boundingBox(),
+      ];
+      const left = (switches?.x ?? 0) - (strip?.x ?? 0);
+      const right =
+        (strip?.x ?? 0) +
+        (strip?.width ?? 0) -
+        (switches?.x ?? 0) -
+        (switches?.width ?? 0);
+      assert(
+        Math.abs(left - right) <= 1.5,
+        `the switches sit ${left} px from the left of their channel and ${right} px from the right`
+      );
       await page
         .locator("[data-slot=timeline-track-header]")
         .getByRole("button", { name: "Mute 1 Audio" })

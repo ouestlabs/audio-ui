@@ -206,6 +206,9 @@ interface StripProps {
   track: ArrangementTrack;
 }
 
+/** A channel's switch: an equal share of its width, inside its edges. */
+const SWITCH = "min-w-0 flex-1 shrink basis-0 px-0";
+
 /** A channel's switches, the same as its track's header: one group, one stop of Tab, the arrows between them. */
 function StripSwitches({
   armed,
@@ -227,7 +230,7 @@ function StripSwitches({
   return (
     <ToggleGroup
       aria-label={`${name} switches`}
-      className="row-start-6 w-full"
+      className="row-start-6 w-full min-w-0"
       multiple
       size="sm"
       spacing={1}
@@ -240,7 +243,7 @@ function StripSwitches({
     >
       <ToggleGroupItem
         aria-label={`Solo ${name}`}
-        className="flex-1"
+        className={SWITCH}
         onClick={onSolo}
         value="solo"
       >
@@ -248,7 +251,7 @@ function StripSwitches({
       </ToggleGroupItem>
       <ToggleGroupItem
         aria-label={`Mute ${name}`}
-        className="flex-1"
+        className={SWITCH}
         onClick={onMute}
         value="mute"
       >
@@ -257,7 +260,7 @@ function StripSwitches({
       {onArm ? (
         <ToggleGroupItem
           aria-label={`Arm ${name}`}
-          className="flex-1"
+          className={SWITCH}
           onClick={onArm}
           value="arm"
         >
