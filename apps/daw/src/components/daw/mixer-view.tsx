@@ -1,6 +1,14 @@
 import { dbToGain, gainToDb, peakDb } from "@audio-ui/core/analysis";
 import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
-import { useCallback, useEffect, useRef } from "react";
+import {
+  type KeyboardEvent,
+  type PointerEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { createPortal, flushSync } from "react-dom";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
 import { Meter } from "@/components/audio-ui/meter";
@@ -18,7 +26,8 @@ import type {
   AutomatedParameter,
   Mix,
 } from "@/lib/arrangement";
-import { trackOf } from "@/lib/arrangement-state";
+import { trackBlock, trackOf } from "@/lib/arrangement-state";
+import { startSortableDrag } from "@/lib/sortable-drag";
 import { cn } from "@/lib/utils";
 
 type Arrangement = ReturnType<typeof useArrangement>;
@@ -164,10 +173,18 @@ function SendKnob({
   );
 }
 
+/** How a track's channel is moved: its name, dragged, or with Left and Right on it. */
+interface StripGrip {
+  onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+  onPointerDown: (event: PointerEvent<HTMLButtonElement>) => void;
+}
+
 interface StripProps {
   analysers: readonly AnalyserNode[] | null;
   /** What the fader and the pan follow their envelopes by (AUT-006). */
   following: AutomationFollowing;
+  /** A track's channel moves by its name; a return and the main track stay where they are. */
+  grip?: StripGrip;
   /** The group the track plays into, when it is in one (MIX-020). */
   into?: string;
   /** Main has no switch, no solo and no sends. */
@@ -187,6 +204,7 @@ interface StripProps {
 function Strip({
   analysers,
   following,
+  grip,
   into,
   main,
   onMix,
@@ -230,6 +248,7 @@ function Strip({
         track.kind === "group" && "bg-muted/40",
         selected && "bg-muted"
       )}
+      data-mixer-track={grip ? track.id : undefined}
       onPointerDown={select}
     >
       <div className="row-start-1 flex w-full min-w-0 flex-col items-center gap-1.5">
@@ -241,9 +260,21 @@ function Strip({
             main ? "bg-foreground/25" : TRACK_COLORS[mix.color]?.dot
           )}
         />
-        <span className="min-h-4 w-full truncate text-center font-medium text-xs">
-          {track.name}
-        </span>
+        {grip ? (
+          <button
+            aria-label={`Move ${track.name}`}
+            className="min-h-4 w-full cursor-grab touch-none truncate rounded-sm text-center font-medium text-xs outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing"
+            data-mixer-grip={track.id}
+            type="button"
+            {...grip}
+          >
+            {track.name}
+          </button>
+        ) : (
+          <span className="min-h-4 w-full truncate text-center font-medium text-xs">
+            {track.name}
+          </span>
+        )}
         {into ? (
           <span className="w-full truncate text-center text-muted-foreground text-xs">
             To {into}
@@ -368,7 +399,82 @@ export function MixerView({
     () => dispatch({ type: "settle-clip-edit" }),
     [dispatch]
   );
-  const strip = (track: ArrangementTrack, main = false, sends = false) => (
+  const channelsRef = useRef<HTMLDivElement>(null);
+  const ghostRef = useRef<HTMLDivElement>(null);
+  const [lifted, setLifted] = useState<{
+    left: number;
+    name: string;
+    top: number;
+  } | null>(null);
+  const live = useRef({ dispatch, tracks: arrangement.unfoldedTracks });
+  live.current = { dispatch, tracks: arrangement.unfoldedTracks };
+  // The tracks' channels reorder as their rows do in the arrangement: the same gesture, the same command.
+  const grip = useCallback(
+    (id: string, name: string): StripGrip => ({
+      onKeyDown: (event) => {
+        const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+        const from = live.current.tracks.findIndex((track) => track.id === id);
+        if (direction && from !== -1) {
+          event.preventDefault();
+          live.current.dispatch({
+            id,
+            index: from + direction,
+            type: "move-track",
+          });
+        }
+      },
+      onPointerDown: (event) => {
+        const channels = channelsRef.current;
+        if (event.button !== 0 || !channels) {
+          return;
+        }
+        const items = Array.from(
+          channels.querySelectorAll<HTMLElement>("[data-mixer-track]")
+        );
+        const from = items.findIndex((item) => item.dataset.mixerTrack === id);
+        if (from === -1) {
+          return;
+        }
+        event.preventDefault();
+        const block = new Set(trackBlock(live.current.tracks, id));
+        const box = event.currentTarget.getBoundingClientRect();
+        startSortableDrag({
+          axis: "x",
+          count: Math.max(
+            1,
+            items.filter((item) => block.has(item.dataset.mixerTrack ?? ""))
+              .length
+          ),
+          free: true,
+          from,
+          ghost: () => ghostRef.current,
+          items,
+          onEnd: (landed) =>
+            flushSync(() => {
+              setLifted(null);
+              if (landed !== null) {
+                live.current.dispatch({
+                  id,
+                  index: landed,
+                  type: "move-track",
+                });
+              }
+            }),
+          onLift: () => setLifted({ left: box.left, name, top: box.top }),
+          scroller: channels,
+          x: event.clientX,
+          y: event.clientY,
+        });
+      },
+    }),
+    []
+  );
+  const strip = (
+    track: ArrangementTrack,
+    main = false,
+    sends = false,
+    moves?: StripGrip
+  ) => (
     <Strip
       analysers={engine.meter(track.id)}
       following={{
@@ -376,6 +482,7 @@ export function MixerView({
         overridden: overridden[track.id],
         position: engine.position,
       }}
+      grip={moves}
       into={track.group ? trackOf(doc, track.group)?.name : undefined}
       key={track.id}
       main={main}
@@ -403,12 +510,29 @@ export function MixerView({
       <div
         className="row-span-6 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden *:last:border-e-0"
         data-slot="mixer-channels"
+        ref={channelsRef}
       >
         {/* A folded group hides its tracks here too. */}
-        {arrangement.unfoldedTracks.map((track) => strip(track, false, true))}
+        {arrangement.unfoldedTracks.map((track) =>
+          strip(track, false, true, grip(track.id, track.name))
+        )}
         {doc.returns.map((track) => strip(track))}
       </div>
       {strip(doc.main, true)}
+      {lifted
+        ? createPortal(
+            <div
+              aria-hidden="true"
+              className="pointer-events-none fixed z-50 flex h-7 max-w-40 items-center rounded-md border bg-card px-2.5 font-medium text-xs shadow-md"
+              data-slot="mixer-ghost"
+              ref={ghostRef}
+              style={{ left: lifted.left, top: lifted.top }}
+            >
+              <span className="truncate">{lifted.name}</span>
+            </div>,
+            document.body
+          )
+        : null}
     </div>
   );
 }

@@ -545,6 +545,59 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `the faders start at ${[...new Set(tops)].join(", ")}`
       );
     },
+  "MIX-017: a track's channel moves by its name, dragged or with Left and Right, and its row moves with it":
+    async (browser) => {
+      const page = await open(browser);
+      await showMixer(page);
+      const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      const order = () =>
+        mixer
+          .locator("[data-mixer-track]")
+          .evaluateAll((strips) =>
+            strips.map((strip) => strip.getAttribute("aria-label"))
+          );
+      const rows = () =>
+        page
+          .locator("[data-track-id]")
+          .evaluateAll((items) =>
+            items.map((item) => item.getAttribute("aria-label"))
+          );
+      const before = await order();
+      const [first, second] = before;
+      assert(first && second, "there are two tracks");
+      const grip = mixer.getByRole("button", { name: `Move ${first}` });
+      const from = await grip.boundingBox();
+      const target = await mixer
+        .getByRole("button", { name: `Move ${second}` })
+        .boundingBox();
+      assert(from && target, "the names are there");
+      await page.mouse.move(from.x + from.width / 2, from.y + from.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(
+        target.x + target.width,
+        target.y + target.height / 2,
+        { steps: 8 }
+      );
+      await page.waitForTimeout(100);
+      await page.mouse.up();
+      await page.waitForTimeout(300);
+      const dragged = await order();
+      assert(
+        dragged[0] === second && dragged[1] === first,
+        `dragged past the next, the order is ${dragged.join(", ")}`
+      );
+      assert(
+        (await rows()).slice(0, 2).join() === dragged.slice(0, 2).join(),
+        "the arrangement kept its old order"
+      );
+      await mixer.getByRole("button", { name: `Move ${first}` }).focus();
+      await page.keyboard.press("ArrowLeft");
+      await page.waitForTimeout(150);
+      assert(
+        (await order())[0] === first,
+        "Left did not move it back to the start"
+      );
+    },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);

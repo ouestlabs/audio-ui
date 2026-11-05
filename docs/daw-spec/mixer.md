@@ -81,3 +81,7 @@ Test: apps/daw/test/browser/run.ts "MIX-022"
 ### MIX-016 The main track stays in sight
 In the mixer, the main track stays whole at the right edge, apart from the channels by a line. One line parts two channels, returns included: no gap and no double line. The channels scroll beside it, never under it, and its fader starts level with theirs.
 Test: apps/daw/test/browser/run.ts "MIX-016"
+
+### MIX-017 Moving a channel
+A track's channel moves by its name: dragged, the others slide aside and it lands in the gap, a group with its tracks; or with Left and Right on it. Its row in the arrangement moves with it: there is one order. Returns and the main track stay where they are.
+Test: apps/daw/test/browser/run.ts "MIX-017"
