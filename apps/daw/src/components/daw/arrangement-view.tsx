@@ -879,7 +879,10 @@ export function ArrangementView({
                     <ContextMenuTrigger render={<div className="contents" />}>
                       <TimelineLane
                         className={cn(
-                          "h-auto min-h-14 flex-1 border-b-0",
+                          "h-auto flex-1 border-b-0",
+                          height === undefined ? "min-h-14" : "min-h-0",
+                          // A short track keeps its clips thin, so they fit.
+                          isShort(height) && "**:data-clip-id:inset-y-0.5",
                           dropOn === track.id &&
                             "ring-2 ring-primary ring-inset",
                           silent && "**:data-clip-id:opacity-40"

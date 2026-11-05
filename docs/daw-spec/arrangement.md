@@ -49,7 +49,7 @@ A track shares the height of the view with the others until its edge is dragged,
 Test: apps/daw/test/browser/run.ts "ARR-011"
 
 ### ARR-012 Folding a track
-A track folds to a strip by the caret in its header, or with U on the selected tracks; Option+U unfolds them all. What it holds still plays.
+A track folds to a strip by the caret in its header, or with U on the selected tracks; Option+U unfolds them all. What it holds still plays. Its lane and its clips stay inside the strip, each clip thin enough to show its name, so nothing lies over the track below.
 Test: apps/daw/test/browser/run.ts "ARR-012"
 
 ### ARR-013 Automation
