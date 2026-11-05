@@ -17,6 +17,7 @@ const knobVariants = cva(
         lg: "cn-knob-size-lg",
         sm: "cn-knob-size-sm",
         xl: "cn-knob-size-xl",
+        xs: "cn-knob-size-xs",
       },
     },
   }
@@ -35,6 +36,7 @@ const knobBodyVariants = cva("cn-knob-body absolute z-0", {
       lg: "cn-knob-body-size-lg",
       sm: "cn-knob-body-size-sm",
       xl: "cn-knob-body-size-xl",
+      xs: "cn-knob-body-size-xs",
     },
   },
 });

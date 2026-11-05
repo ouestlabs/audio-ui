@@ -174,12 +174,13 @@ function SendKnob({
   return (
     <Knob
       aria-label={`${track.name} send to ${back.name}`}
+      dragMode="vertical"
       formatValue={formatSend}
       max={1}
       min={0}
       onValueChange={change}
       onValueCommitted={onSettle}
-      size="sm"
+      size="xs"
       step={0.01}
       value={track.sends?.[back.id] ?? 0}
       valueLabel="hidden"
@@ -394,6 +395,7 @@ function Strip({
         anchor={0}
         aria-label={`${track.name} pan`}
         className="row-start-4"
+        dragMode="vertical"
         formatValue={formatPan}
         max={1}
         min={-1}
