@@ -3849,6 +3849,46 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "a reload brought the old project back"
       );
     },
+  "PRJ-009: a new project belongs to no folder, so a save after a reload asks for one":
+    async (browser) => {
+      const context = await browser.newContext({
+        viewport: { height: 1000, width: 1440 },
+      });
+      const shared = await context.newPage();
+      // The picker gives a folder of the private storage, and counts the times it is asked.
+      await shared.addInitScript(() => {
+        const counted = window as unknown as {
+          picks: number;
+          showDirectoryPicker: () => Promise<FileSystemDirectoryHandle>;
+        };
+        counted.picks = 0;
+        counted.showDirectoryPicker = async () => {
+          counted.picks += 1;
+          return (
+            await (
+              await navigator.storage.getDirectory()
+            ).getDirectoryHandle("picked", { create: true })
+          ).getDirectoryHandle("Mirages", { create: true });
+        };
+      });
+      const page = await open(browser, shared);
+      await page.keyboard.press("Meta+KeyS");
+      await page.getByText("Saved to Mirages").waitFor({ timeout: 10_000 });
+      await page.getByRole("button", { name: "More controls" }).click();
+      await page.getByRole("menuitem", { name: "New project" }).click();
+      await page.waitForSelector("text=Saved", { timeout: 5000 });
+      await open(browser, page);
+      await page.waitForSelector('[aria-label="1 MIDI"][data-track-id]');
+      await page.keyboard.press("Meta+KeyS");
+      await page.getByText("Saved to Mirages").waitFor({ timeout: 10_000 });
+      const picks = await page.evaluate(
+        () => (window as unknown as { picks: number }).picks
+      );
+      assert(
+        picks === 1,
+        `the save asked for a folder ${picks} times, not once`
+      );
+    },
 };
 
 const wanted = process.argv.slice(2);
