@@ -395,6 +395,48 @@ export function deleteTime(
   return removeTime(all, from, to, { duration }, splitter(all));
 }
 
+/**
+ * Marks (locators, time signatures) after a stretch `length` long opens at
+ * `at`: one at or after it moves later with what it marks, but one at the
+ * very start stays there.
+ */
+export function marksAfterInsert<Mark extends { at: number }>(
+  marks: readonly Mark[],
+  at: number,
+  length: number
+): Mark[] {
+  return marks.map((mark) =>
+    mark.at > at || (mark.at === at && mark.at > 0)
+      ? { ...mark, at: mark.at + length }
+      : mark
+  );
+}
+
+/**
+ * Marks after the stretch from `from` to `to` is taken out: those in it go
+ * with it, those after it move back by its length. With `keepLast`, the last
+ * mark in it stays, at `from`: a time signature the music after it still plays
+ * in.
+ */
+export function marksAfterRemove<Mark extends { at: number }>(
+  marks: readonly Mark[],
+  from: number,
+  to: number,
+  keepLast: boolean
+): Mark[] {
+  const gone = marks.filter((mark) => mark.at > from && mark.at < to);
+  const kept = keepLast ? gone.at(-1) : undefined;
+  const after = marks.filter((mark) => !gone.includes(mark));
+  // A mark already at `from` gives way to the one kept there.
+  const placed = kept ? after.filter((mark) => mark.at !== from) : after;
+  return [
+    ...placed.map((mark) =>
+      mark.at >= to ? { ...mark, at: mark.at - (to - from) } : mark
+    ),
+    ...(kept ? [{ ...kept, at: from }] : []),
+  ].sort((a, b) => a.at - b.at);
+}
+
 /** Opens a stretch `length` long at `at` on every track: what came after it moves later. */
 export function openTime(
   all: Arranged[],
@@ -2779,6 +2821,8 @@ const handlers: Handlers = {
     edit(state, (doc) => ({
       ...doc,
       clips: openTime(doc.clips, at, length, state.doc.duration),
+      locators: marksAfterInsert(doc.locators, at, length),
+      signatures: marksAfterInsert(doc.signatures, at, length),
     })),
   "group-tracks": (state, { ids, name }) => groupTracks(state, ids, name),
   "move-track": (state, { id, index }) => moveTrack(state, id, index),
@@ -2791,6 +2835,8 @@ const handlers: Handlers = {
     edit(state, (doc) => ({
       ...doc,
       clips: deleteTime(doc.clips, from, to, state.doc.duration),
+      locators: marksAfterRemove(doc.locators, from, to, false),
+      signatures: marksAfterRemove(doc.signatures, from, to, true),
     })),
   "remove-track": (state, { id }) => removeTrack(state, id),
   "rename-clip": (state, { id, name }) => renameClip(state, id, name),

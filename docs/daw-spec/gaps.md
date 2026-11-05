@@ -123,9 +123,9 @@ Fix: measured with 32 tracks playing, a message reaches a worklet within one ren
 Status: fixed (median 46.3 ms from the press to the output, was 55.9 ms).
 
 ### G-025 What the locators and time signatures still miss
-A locator's menu has no way to loop to the next one, and there are no previous and next buttons (Alt with the arrows does that from the keyboard). Inserting or taking out time moves the clips and leaves the locators and the time signatures where they were.
+A locator's menu has no way to loop to the next one, and there are no previous and next buttons (Alt with the arrows does that from the keyboard).
 Fix: small, each. (A double-click on a locator plays from it now, as in a DAW; it renamed it before.)
-Status: open.
+Status: partial: inserting or taking out time moves the locators and the time signatures with the clips (`marksAfterInsert`, `marksAfterRemove` in `lib/arrangement-state`; a time signature in the time removed starts where it did, so what follows keeps its meter). The loop and the automation (G-006) stay where they were.
 
 ### G-024 A timeline's marks could not be moved
 `Timeline.Mark` only placed something: a locator could not move at all, a time signature only with the arrows, in code of its own. Breaks ARR-016 and ARR-017.

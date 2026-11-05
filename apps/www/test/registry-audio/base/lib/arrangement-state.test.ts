@@ -468,6 +468,47 @@ describe("apply", () => {
     ).toBe(state);
   });
 
+  test("G-025: time inserted moves the locators and the time signatures after it, with the clips", () => {
+    let state = init([at("a", 30, 10)]);
+    state = apply(state, { type: "insert-time", at: 10, length: 8 });
+    expect(state.doc.locators).toEqual([
+      { at: 28, id: "verse", name: "Verse" },
+    ]);
+    expect(state.doc.signatures.map((change) => change.at)).toEqual([48]);
+    expect(state.doc.clips[0]?.value.start).toBe(38);
+    // One step of the history, the marks with it.
+    state = apply(state, { type: "undo" });
+    expect(state.doc.locators[0]?.at).toBe(20);
+    expect(state.doc.signatures[0]?.at).toBe(40);
+  });
+
+  test("G-025: time inserted at a mark moves it with what it marks; one at 0 stays", () => {
+    let state = apply(init([]), { type: "insert-time", at: 20, length: 4 });
+    expect(state.doc.locators[0]?.at).toBe(24);
+    state = createArrangementState({
+      colors: 5,
+      duration: 100,
+      initialSignatures: [{ at: 0, beatUnit: 4, beatsPerBar: 3, id: "start" }],
+      initialTracks: [],
+      tempo: DEFAULT_TEMPO,
+    });
+    state = apply(state, { type: "insert-time", at: 0, length: 4 });
+    expect(state.doc.signatures[0]?.at).toBe(0);
+  });
+
+  test("G-025: time removed takes the locators in it, and moves those after it back", () => {
+    const state = apply(init([]), { type: "remove-time", from: 15, to: 25 });
+    expect(state.doc.locators).toEqual([]);
+    expect(state.doc.signatures.map((change) => change.at)).toEqual([30]);
+  });
+
+  test("G-025: a time signature in the time removed starts where the time removed did, so what follows keeps its meter", () => {
+    const state = apply(init([]), { type: "remove-time", from: 35, to: 45 });
+    expect(state.doc.signatures).toEqual([
+      { at: 35, beatUnit: 4, beatsPerBar: 3, id: "s" },
+    ]);
+  });
+
   test("a locator is added where the cursor is, named by its number, and not twice", () => {
     let state = init([]);
     state = apply(state, { type: "add-locator", at: 50 });
