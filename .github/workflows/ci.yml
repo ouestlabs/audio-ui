@@ -70,3 +70,16 @@ jobs:
       - name: Agent skill and docs match the code
         working-directory: apps/www
         run: bun test test/skills.test.ts test/install-paths.test.ts
+
+      # The DAW's own code: what it installs from the registry is checked where it comes from.
+      - name: Lint daw
+        working-directory: apps/daw
+        run: bunx biome ci src/components/daw src/routes src/lib/daw test
+
+      - name: Typecheck daw
+        working-directory: apps/daw
+        run: bun run typecheck
+
+      - name: Test daw
+        working-directory: apps/daw
+        run: bun test
