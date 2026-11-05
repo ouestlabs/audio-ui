@@ -13,7 +13,7 @@ const SHELVES = DEVICE_SHELVES.map((shelf) => ({
  * The library, down the left side of the workstation (KEY-021 shows or folds
  * it): every device by shelf, searched as you type. A device picked goes on
  * the selected track, or on a track of its own (DEV-003); dragged, it goes
- * where it is dropped, on a track, on the add-track row or into the chain of
+ * where it is dropped, on a track, on the add-track button or into the chain of
  * the device view.
  */
 export function LibraryPanel({

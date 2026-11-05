@@ -81,5 +81,5 @@ Deviation: the reference also warps files it reads as one-shots, and lets a pref
 Test: packages/core/src/audio/analysis/tempo.test.ts "CLP-019"; apps/daw/test/drop.test.ts "CLP-019"
 
 ### CLP-020 A waveform at any zoom
-An audio clip's waveform on its track has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one peak per pixel at the closest zoom. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length.
+An audio clip's waveform on its track has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one slice per pixel at the closest zoom, each column from its lowest sample to its highest, so a lopsided sound shows lopsided. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length.
 Test: apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-020"; apps/daw/test/project-file.test.ts "CLP-020"; apps/daw/test/browser/run.ts "CLP-020"

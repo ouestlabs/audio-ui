@@ -38,8 +38,10 @@ import {
 import {
   type Arranged,
   type ClipAction,
+  type ClipPeaks,
+  clipPeakCount,
   clipReach,
-  clipWaveform,
+  clipWaveformBands,
   playedNotes,
 } from "@/registry-audio/bases/base/lib/arrangement";
 
@@ -166,7 +168,7 @@ const THEME_ATTRIBUTES = ["class", "data-theme", "style"];
 function paintWaveform(
   canvas: HTMLCanvasElement,
   clip: Arranged,
-  peaks: ArrayLike<number>,
+  peaks: ClipPeaks,
   view: HTMLElement | null
 ) {
   const box = canvas.parentElement?.getBoundingClientRect();
@@ -199,24 +201,21 @@ function paintWaveform(
   context.fillStyle = getComputedStyle(canvas).color;
   const { length } = clip.value;
   const middle = rows / 2;
-  const levels = clipWaveform(clip, peaks, columns, [
+  const { max, min } = clipWaveformBands(clip, peaks, columns, [
     (from / box.width) * length,
     (to / box.width) * length,
   ]);
-  for (const [column, level] of levels.entries()) {
-    const half = Math.max(0.5, level * middle);
-    context.fillRect(column, middle - half, 1, half * 2);
+  for (let column = 0; column < columns; column += 1) {
+    const top = middle - (max[column] ?? 0) * middle;
+    const bottom = middle - (min[column] ?? 0) * middle;
+    // Silence is still a line.
+    const height = Math.max(1, bottom - top);
+    context.fillRect(column, Math.min(top, middle - height / 2), 1, height);
   }
 }
 
 /** An audio clip's recording across its body: what it plays, as `clipWaveform` reads it, as sharp at any zoom. */
-function ClipWaveform({
-  clip,
-  peaks,
-}: {
-  clip: Arranged;
-  peaks: ArrayLike<number>;
-}) {
+function ClipWaveform({ clip, peaks }: { clip: Arranged; peaks: ClipPeaks }) {
   const ref = useRef<HTMLCanvasElement>(null);
   useLayoutEffect(() => {
     const canvas = ref.current;
@@ -447,8 +446,8 @@ interface ArrangedClipProps {
   onRemove: (id: string) => void;
   onRename: (id: string, name: string) => void;
   onSelect: (id: string, additive: boolean) => void;
-  /** An audio clip's source as peaks from 0 to 1, spread evenly over its `sourceLength`: its waveform is drawn from them. */
-  peaks?: ArrayLike<number>;
+  /** An audio clip's source as peaks spread evenly over its `sourceLength`, amplitudes from 0 to 1 or the lowest and highest samples of each slice: its waveform is drawn from them. */
+  peaks?: ClipPeaks;
   selected: boolean;
   /** The clip's color, an index into `TRACK_COLORS`: its track's. */
   swatch: number;
@@ -610,7 +609,7 @@ const ArrangedClip = memo(function ArrangedClipView({
             )}
           </TimelineClipHeader>
           {clip.notes ? <ClipNotes clip={clip} /> : null}
-          {!clip.notes && peaks && peaks.length > 0 ? (
+          {!clip.notes && peaks && clipPeakCount(peaks) > 0 ? (
             <ClipWaveform clip={clip} peaks={peaks} />
           ) : null}
           <TimelineClipFade edge="in" />

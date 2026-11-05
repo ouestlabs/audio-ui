@@ -343,7 +343,7 @@ async function openStems(
             JSON.stringify({
               channels: 2,
               length: frames,
-              peaks: new Float32Array(0),
+              peaks: { max: new Float32Array(0), min: new Float32Array(0) },
               sampleRate: rate,
             }),
           ]);

@@ -12,7 +12,7 @@ Status: partial: OBS-006 says what the reference does with a second instrument.
 Test: apps/www/test/arrangement-state.test.ts "DEV-002"
 
 ### DEV-003 Adding a device
-A double-click on a device in the browser, or Enter on it, adds it at the end of the selected track's chain; dropped, it goes where it is dropped: on a track's chain, on a track's lane (at the end of its chain), or on the add-track row (a track of its own). With no track selected it makes one: an audio track for an effect, a MIDI track for an instrument. A track the device makes is named after it.
+A double-click on a device in the browser, or Enter on it, adds it at the end of the selected track's chain; dropped, it goes where it is dropped: on a track's chain, on a track's lane (at the end of its chain), or on the add-track button (a track of its own). With no track selected it makes one: an audio track for an effect, a MIDI track for an instrument. A track the device makes is named after it.
 Status: partial: an instrument picked while an audio track is selected makes a MIDI track after it, and one dropped on an audio track is refused; OBS-014 and OBS-015 check both against the reference, and the name it gives such a track.
 Test: apps/daw/test/devices.test.ts "DEV-003"; apps/daw/test/browser/run.ts "DEV-003"
 

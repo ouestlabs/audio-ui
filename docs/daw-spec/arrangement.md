@@ -23,8 +23,8 @@ Audio files dropped on an audio track become one clip each, laid one after the o
 Status: partial: OBS-001 settles whether the reference lays several files after each other or on tracks of their own, and what a modifier key changes.
 Test: apps/daw/test/arrangement.test.ts "ARR-005"
 
-### ARR-006 Files dropped on the add-track row
-Audio files dropped on the row that adds a track make one new audio track per file, named after it (without the extension), each holding its file as a clip from the time under the pointer.
+### ARR-006 Files dropped on the add-track button
+Audio files dropped on the button that adds a track, at the head of the track headers, make one new audio track per file, named after it (without the extension), each holding its file as a clip from the start of the arrangement. Dropped on a track, a file lands at the time under the pointer (ARR-005).
 Test: apps/daw/test/arrangement.test.ts "ARR-006"
 
 ### ARR-007 What cannot be read

@@ -278,7 +278,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       "the page is not cross-origin isolated"
     );
   },
-  "ARR-006: audio files dropped on the add-track row make a track each, named after them":
+  "ARR-006: audio files dropped on the add-track button make a track each, named after them":
     async (browser) => {
       const page = await open(browser);
       await dropChord(page, "[data-add-track]", "Chord take");
@@ -418,21 +418,20 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const width = (await slot.boundingBox())?.width ?? 0;
       assert(width < 48, `the folded device is ${width} px wide`);
     },
-  "DEV-003: a device dropped on the add-track row makes a track for it": async (
-    browser
-  ) => {
-    const page = await open(browser);
-    const before = await page.locator("[data-track-id]").count();
-    const library = page.getByRole("region", { name: "Library" });
-    await library
-      .getByRole("option", { name: POCKET_SYNTH })
-      .dragTo(page.locator("[data-add-track]"));
-    await page.waitForSelector('[aria-label="Pocket Synth"][data-track-id]', {
-      timeout: 5000,
-    });
-    const after = await page.locator("[data-track-id]").count();
-    assert(after === before + 1, `${before} tracks, then ${after}`);
-  },
+  "DEV-003: a device dropped on the add-track button makes a track for it":
+    async (browser) => {
+      const page = await open(browser);
+      const before = await page.locator("[data-track-id]").count();
+      const library = page.getByRole("region", { name: "Library" });
+      await library
+        .getByRole("option", { name: POCKET_SYNTH })
+        .dragTo(page.locator("[data-add-track]"));
+      await page.waitForSelector('[aria-label="Pocket Synth"][data-track-id]', {
+        timeout: 5000,
+      });
+      const after = await page.locator("[data-track-id]").count();
+      assert(after === before + 1, `${before} tracks, then ${after}`);
+    },
   "KEY-021: Cmd+Option+B folds the library and shows it again": async (
     browser
   ) => {
@@ -1671,6 +1670,18 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         () => (window as unknown as { decoded: number }).decoded
       );
       assert(decoded === 0, `the project decoded ${decoded} files again`);
+      // Its peaks came back from the cache too: the waveform reaches past the middle line.
+      const reach = await page
+        .locator("[data-slot=timeline-clip-waveform]")
+        .first()
+        .evaluate((element) => {
+          const drawn = element as HTMLCanvasElement;
+          const row = drawn
+            .getContext("2d")
+            ?.getImageData(0, 1, drawn.width, drawn.height / 2 - 2).data;
+          return row?.some((value, index) => index % 4 === 3 && value > 0);
+        });
+      assert(reach, "the waveform came back flat");
       assert(again > -40, `the take reopened plays at ${again} dB`);
     },
   "PRJ-006 and PRJ-007: Cmd+S saves a folder with its document and samples, and Cmd+O opens it again":
@@ -2363,6 +2374,42 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         (await names()) === [two, one, ...rest].join(),
         `from ${before} the tracks read ${await names()}`
       );
+    },
+  "DEV-004: a device held from the library over a rack lights its chain, not the track's":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Effect rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Gate");
+      await library.getByRole("option").first().hover();
+      await page.mouse.down();
+      const box = await rack.boundingBox();
+      if (!box) {
+        throw new Error("the rack is not on the page");
+      }
+      // A native drag takes a first move to start, and shows over what the next ones reach.
+      await page.mouse.move(box.x + 60, box.y + 120, { steps: 6 });
+      await page.mouse.move(box.x + 64, box.y + 124, { steps: 3 });
+      await page.waitForTimeout(150);
+      const lit = await page.evaluate(() =>
+        [...document.querySelectorAll("[data-slot=device-chain]")].map(
+          (chain) => chain.getAttribute("data-over") !== null
+        )
+      );
+      await page.mouse.up();
+      assert(
+        JSON.stringify(lit) === "[false,true]",
+        `the chains lit are ${JSON.stringify(lit)}`
+      );
+      await rack
+        .locator("[data-slot=device-chain-slot]")
+        .first()
+        .waitFor({ timeout: 5000 });
     },
   "DEV-006: a device's on square keeps its place and its shape when it folds":
     async (browser) => {

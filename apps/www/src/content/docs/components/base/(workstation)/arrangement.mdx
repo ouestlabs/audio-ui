@@ -953,7 +953,7 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"clip"} type={"Arranged"}>The clip: its place (`value`), its source and its notes.</TypeRow>
 <TypeRow name={"selected"} type={"boolean"}>Whether it is in the selection.</TypeRow>
 <TypeRow name={"swatch"} type={"number"}>Its color, an index into `TRACK_COLORS`: its track's.</TypeRow>
-<TypeRow name={"peaks"} type={"number[]"}>An audio clip's source as peaks from 0 to 1, spread evenly over its `sourceLength`: its waveform is drawn from them, the stretch it plays, round its loop, mirrored when reversed, stretched by its warp (`clipWaveform` in `lib/arrangement` reads it the same way).</TypeRow>
+<TypeRow name={"peaks"} type={"ArrayLike<number> | { max, min }"}>An audio clip's source as peaks spread evenly over its `sourceLength`, amplitudes from 0 to 1 or the lowest and highest samples of each slice: its waveform is drawn from them, the stretch it plays, round its loop, mirrored when reversed, stretched by its warp (`clipWaveform` in `lib/arrangement` reads it the same way).</TypeRow>
 <TypeRow name={"trackName"} type={"string"}>Its track's name, for its label.</TypeRow>
 <TypeRow name={"describe"} type={"(time) => string"}>A time in words, such as "Bar 3, beat 2".</TypeRow>
 <TypeRow name={"onChange, onCommit"} type={"(id, value, details) => void, (id, details) => void"}>The clip moved, trimmed or faded, and the gesture ended.</TypeRow>

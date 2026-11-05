@@ -2,7 +2,7 @@
  * The decoded audio the engine streams (G-013, PRF-006), in the browser's
  * private storage: each recording's channels at the engine's rate, as 32-bit
  * floats one channel after the other, in `cache/<id>.f32`, its peaks the same
- * way in `cache/<id>.peaks`, and what it takes to read it again without
+ * way, the highest then the lowest, in `cache/<id>.range`, and what it takes to read it again without
  * decoding, in `cache/<id>.json`. It is made from the
  * dropped file's bytes, and made again from them when it is missing.
  */
@@ -73,10 +73,13 @@ export async function streamRecording(
     sampleRate: source.sampleRate,
   };
   const peaks = await (
-    await folder.getFileHandle(`${id}.peaks`, { create: true })
+    await folder.getFileHandle(`${id}.range`, { create: true })
   ).createWritable();
-  await peaks.write(recording.peaks as Float32Array<ArrayBuffer>);
+  await peaks.write(recording.peaks.max as Float32Array<ArrayBuffer>);
+  await peaks.write(recording.peaks.min as Float32Array<ArrayBuffer>);
   await peaks.close();
+  // A level of amplitudes from before there were two, which nothing reads now.
+  await folder.removeEntry(`${id}.peaks`).catch(() => undefined);
   const meta = await (
     await folder.getFileHandle(`${id}.json`, { create: true })
   ).createWritable();
@@ -97,8 +100,12 @@ export async function cachedRecording(
       await (await (await folder.getFileHandle(`${id}.json`)).getFile()).text()
     ) as CacheEntry;
     const samples = await (await folder.getFileHandle(`${id}.f32`)).getFile();
-    // A cache made before peaks had a file of their own is missing it: made again, it draws finer.
-    const peaks = await (await folder.getFileHandle(`${id}.peaks`)).getFile();
+    // A cache made before peaks had this file is missing it: made again, it draws the sound as it is.
+    const range = new Float32Array(
+      await (
+        await (await folder.getFileHandle(`${id}.range`)).getFile()
+      ).arrayBuffer()
+    );
     if (
       entry.sampleRate !== sampleRate ||
       samples.size !==
@@ -109,7 +116,10 @@ export async function cachedRecording(
     return {
       length: entry.length / entry.sampleRate,
       name,
-      peaks: new Float32Array(await peaks.arrayBuffer()),
+      peaks: {
+        max: range.subarray(0, range.length / 2),
+        min: range.subarray(range.length / 2),
+      },
       source: sourceOf(id, entry),
     };
   } catch {

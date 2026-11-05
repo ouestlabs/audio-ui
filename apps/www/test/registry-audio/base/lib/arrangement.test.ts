@@ -4,6 +4,7 @@ import {
   automationAt,
   clipReach,
   clipWaveform,
+  clipWaveformBands,
   flatAutomation,
   mixAt,
   panPosition,
@@ -186,6 +187,25 @@ describe("clipWaveform", () => {
     const columns = clipWaveform(whole, long, 100);
     expect(columns.filter((level) => level === 1)).toHaveLength(1);
     expect(columns[73]).toBe(1);
+  });
+
+  test("CLP-020: the highest and the lowest of each column, as lopsided as the sound", () => {
+    const max = new Float32Array(100_000);
+    const min = new Float32Array(100_000);
+    max[10_000] = 0.25;
+    min[10_000] = -1;
+    max[90_000] = 1;
+    min[90_000] = -0.5;
+    const whole = audio({
+      value: { fadeIn: 0, fadeOut: 0, length: 4, offset: 0, start: 0 },
+    });
+    const bands = clipWaveformBands(whole, { max, min }, 100);
+    expect([bands.max[10], bands.min[10]]).toEqual([0.25, -1]);
+    expect([bands.max[90], bands.min[90]]).toEqual([1, -0.5]);
+    expect([bands.max[50], bands.min[50]]).toEqual([0, 0]);
+    // Amplitudes reach as far down as up.
+    const level = clipWaveformBands(whole, max, 100);
+    expect([level.max[90], level.min[90]]).toEqual([1, -1]);
   });
 
   test("shows the stretch of the source the clip plays", () => {

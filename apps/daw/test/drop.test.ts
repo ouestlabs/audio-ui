@@ -5,7 +5,7 @@ import type { Recording } from "@/lib/daw/recordings";
 const recording = (name: string, length: number): Recording => ({
   length,
   name,
-  peaks: new Float32Array(0),
+  peaks: { max: new Float32Array(0), min: new Float32Array(0) },
   source: { channels: [], sampleRate: 48_000 },
 });
 
@@ -39,7 +39,7 @@ describe("dropping files", () => {
     ]);
   });
 
-  test("ARR-006: on the add-track row, a track each, named after its file, every clip where they were dropped", () => {
+  test("ARR-006: on the add-track button, a track each, named after its file, every clip where they were dropped", () => {
     const commands = dropCommands(two, NEW_TRACK, 4, 100, TEMPO);
     expect(commands.map((command) => command.type)).toEqual([
       "add-track",
