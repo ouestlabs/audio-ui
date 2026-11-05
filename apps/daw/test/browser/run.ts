@@ -2666,6 +2666,27 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the end handle moved the start"
       );
     },
+  "CLP-023: a clip's fade handles sit under its name, never over it": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await dropChord(page, '[data-track="track-1"]', "Named take", 4);
+    const clip = page.locator("[data-clip-id]", { hasText: "Named take" });
+    await clip.waitFor({ timeout: 30_000 });
+    await clip.click();
+    const header = await clip
+      .locator("[data-slot=timeline-clip-header]")
+      .boundingBox();
+    const fade = await page
+      .getByRole("slider", { name: "Named take fade in" })
+      .locator("..")
+      .boundingBox();
+    assert(header && fade, "the header and the handle are there");
+    assert(
+      (fade?.y ?? 0) >= (header?.y ?? 0) + (header?.height ?? 0),
+      `the handle is at ${fade?.y}, the name runs to ${(header?.y ?? 0) + (header?.height ?? 0)}`
+    );
+  },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
       const page = await open(browser);

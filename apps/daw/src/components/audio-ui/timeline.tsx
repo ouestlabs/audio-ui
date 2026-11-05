@@ -362,7 +362,7 @@ function TimelineClipFadeHandle({
   const handle = (
     <TimelinePrimitive.ClipFadeHandle
       className={cn(
-        "rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none top-1 z-20 size-3 cursor-ew-resize data-[edge=in]:ms-1 data-[edge=out]:me-1 opacity-0 transition-opacity",
+        "rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none top-6 z-20 size-3 cursor-ew-resize data-[edge=in]:ms-1 data-[edge=out]:me-1 opacity-0 transition-opacity",
         "group-hover/clip:opacity-100 group-data-selected/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
         "after:absolute after:-inset-1 pointer-coarse:opacity-100 pointer-coarse:after:-inset-2",
         className
