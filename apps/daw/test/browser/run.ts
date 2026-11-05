@@ -665,6 +665,39 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     await page.keyboard.press("KeyU");
     await page.getByRole("button", { name: "Unfold 2 Audio" }).waitFor();
   },
+  "ARR-012: a folded track holds its lane and its clips, with their names, inside its strip":
+    async (browser) => {
+      const page = await open(browser);
+      const row = page.locator(
+        '[data-track-id="track-2"] [data-slot=timeline-track]'
+      );
+      const lane = page.locator('[data-track="track-2"]');
+      await dropChord(page, '[data-track="track-2"]', "Take", 4);
+      const clip = lane.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await page.getByRole("button", { name: "Fold 2 Audio" }).click();
+      await page.getByRole("button", { name: "Unfold 2 Audio" }).waitFor();
+      await page.waitForTimeout(100);
+      const strip = await row.boundingBox();
+      const bottom = (strip?.y ?? 0) + (strip?.height ?? 0);
+      const laneBox = await lane.boundingBox();
+      const clipBox = await clip.boundingBox();
+      assert(
+        (laneBox?.y ?? 0) + (laneBox?.height ?? 0) <= bottom + 1,
+        `the lane is ${laneBox?.height} px in a strip of ${strip?.height} px`
+      );
+      assert(
+        (clipBox?.y ?? 0) + (clipBox?.height ?? 0) <= bottom + 1,
+        `the clip is ${clipBox?.height} px in a strip of ${strip?.height} px`
+      );
+      const header = await clip
+        .locator("[data-slot=timeline-clip-header]")
+        .boundingBox();
+      assert(
+        (header?.height ?? 99) <= (clipBox?.height ?? 0),
+        `its name needs ${header?.height} px in a clip of ${clipBox?.height} px`
+      );
+    },
   "ARR-013: A shows the envelopes; a level moved by hand overrides one until it is enabled again":
     async (browser) => {
       const page = await open(browser);
