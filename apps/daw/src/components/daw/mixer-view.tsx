@@ -88,12 +88,21 @@ function StripMeter({
 }
 
 /**
- * The loudest sample the main track has played since it was last cleared, in
- * dB (MIX-011), red once one went over 0 dBFS; a click clears it. Read from
- * the channel's analysers each frame, and written straight into the page when
- * it rises, so it costs no render.
+ * The loudest sample a channel has played since it was last cleared, in dB
+ * (MIX-011), red once one went over 0 dBFS; a click clears it. Read from the
+ * channel's analysers each frame, and written straight into the page when it
+ * rises, so it costs no render. The main track's is a wide box of its own, a
+ * track's a small one beside its fader's value.
  */
-function PeakReadout({ analysers }: { analysers: readonly AnalyserNode[] }) {
+function PeakReadout({
+  analysers,
+  className,
+  name,
+}: {
+  analysers: readonly AnalyserNode[];
+  className: string;
+  name: string;
+}) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const held = useRef(Number.NEGATIVE_INFINITY);
   const paint = useCallback(() => {
@@ -103,9 +112,9 @@ function PeakReadout({ analysers }: { analysers: readonly AnalyserNode[] }) {
     }
     const text = formatDb(held.current);
     button.textContent = text;
-    button.ariaLabel = `Main peak ${text} dB, click to clear`;
+    button.ariaLabel = `${name} peak ${text} dB, click to clear`;
     button.toggleAttribute("data-over", held.current >= 0);
-  }, []);
+  }, [name]);
   useEffect(() => {
     const read = analysers.map((analyser) => ({
       analyser,
@@ -132,8 +141,11 @@ function PeakReadout({ analysers }: { analysers: readonly AnalyserNode[] }) {
   }, [paint]);
   return (
     <button
-      aria-label="Main peak -∞ dB, click to clear"
-      className="row-start-6 h-7 w-full rounded-md border text-muted-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-over:border-destructive data-over:bg-destructive/10 data-over:text-destructive"
+      aria-label={`${name} peak -∞ dB, click to clear`}
+      className={cn(
+        "rounded-md border text-muted-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-over:border-destructive data-over:bg-destructive/10 data-over:text-destructive",
+        className
+      )}
       onClick={clear}
       ref={buttonRef}
       type="button"
@@ -412,13 +424,28 @@ function Strip({
           marks={main ? MAIN_MARKS : undefined}
         />
       </div>
-      <span
-        aria-hidden="true"
-        className="row-start-5 text-muted-foreground text-xs tabular-nums"
-      >
-        {formatDb(db)}
-      </span>
-      {main ? <PeakReadout analysers={analysers ?? NO_ANALYSERS} /> : null}
+      <div className="row-start-5 flex w-full items-center justify-between gap-1">
+        <span
+          aria-hidden="true"
+          className="text-muted-foreground text-xs tabular-nums"
+        >
+          {formatDb(db)}
+        </span>
+        {main ? null : (
+          <PeakReadout
+            analysers={analysers ?? NO_ANALYSERS}
+            className="h-5 w-12 shrink-0"
+            name={track.name}
+          />
+        )}
+      </div>
+      {main ? (
+        <PeakReadout
+          analysers={analysers ?? NO_ANALYSERS}
+          className="row-start-6 h-7 w-full"
+          name="Main"
+        />
+      ) : null}
       {main ? null : (
         <StripSwitches
           armed={armed}

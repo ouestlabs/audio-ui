@@ -936,6 +936,30 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     await peak.click();
     assert((await peak.innerText()) === "-∞", "a click did not clear the peak");
   },
+  "MIX-011: every channel holds its loudest peak, a track's as well as the main track's, until it is clicked":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Loud take", 3);
+      await page.locator("[data-clip-id]", { hasText: "Loud take" }).waitFor({
+        timeout: 30_000,
+      });
+      await showMixer(page);
+      const own = page.getByRole("button", { name: "1 Audio peak" });
+      const silent = page.getByRole("button", { name: "2 Audio peak" });
+      assert((await own.innerText()) === "-∞", "a track's peak starts at -∞");
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(1200);
+      await page.keyboard.press("Space");
+      const held = await own.innerText();
+      assert(held !== "-∞" && Number(held) > -40, `the track held ${held}`);
+      assert(
+        (await silent.innerText()) === "-∞",
+        "a track that played nothing held a peak"
+      );
+      await own.click();
+      assert((await own.innerText()) === "-∞", "a click did not clear it");
+    },
   "ARR-010: a track moves by its grip, with Up and Down or dragged": async (
     browser
   ) => {

@@ -17,6 +17,7 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-003"
 
 ### MIX-004 Track activator
 A track switched off sends nothing to its output and nothing through its post-fader sends; its pre-fader sends still feed their returns.
+Deviation: the reference's activator is a numbered button, lit while the track is on, and it has no mute. Here the switch is a Mute (M), lit while the track is muted: the same effect in the opposite sense, kept because the header's and the mixer's Solo, Mute and Arm are one group of switches.
 Test: packages/core/src/audio/playback/mixer.test.ts "MIX-004"
 
 ### MIX-005 Solo
@@ -47,7 +48,7 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-010"
 
 ### MIX-011 Meters
 Each track and the main track show their peak and their RMS level, the loudest peak held, and a mark when a frame went over 0 dBFS, until it is clicked.
-Status: partial: the main track has its loudest sample in dB under its fader, red over 0 dBFS until clicked, and a scale beside its meter; the tracks have their meters only.
+Each channel has its loudest sample in dB beside its fader's value, red over 0 dBFS until clicked, as the reference's does on every track (OBS-013, version 10.1); the main track's is a wide box under its fader, with a scale beside its meter.
 Test: apps/daw/test/mixer.test.ts "MIX-011"; apps/daw/test/browser/run.ts "MIX-011"
 
 ### MIX-012 Delay compensation
