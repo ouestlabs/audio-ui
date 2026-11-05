@@ -100,6 +100,7 @@ export function Range(componentProps: Range.Props) {
     disabled: disabledProp = false,
     drawable = false,
     getAriaValueText = describeNumber,
+    minDrawnWidth = 0,
     minLength: minLengthProp,
     movable = true,
     onValueChange,
@@ -126,6 +127,7 @@ export function Range(componentProps: Range.Props) {
     duration,
     grid,
     largeStep,
+    minDrawnWidth,
     minLength,
     movable,
     onValueChange,
@@ -192,6 +194,7 @@ export function Range(componentProps: Range.Props) {
   const drag = useRangeDrag(context, "both", movable && !disabled);
   const [start, end] = snapshot.value;
   const length = end - start;
+  const placed = placedOver(start, length);
 
   const handleKeyDown = React.useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -239,7 +242,15 @@ export function Range(componentProps: Range.Props) {
             ) : null}
           </>
         ),
-        style: { ...placedOver(start, length), touchAction: "none" },
+        style: {
+          ...placed,
+          ...(minDrawnWidth > 0
+            ? {
+                width: `max(${placed.width}, calc(${minDrawnWidth}px + ${placed.width} / 2))`,
+              }
+            : null),
+          touchAction: "none",
+        },
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
     ),
@@ -283,6 +294,8 @@ export namespace Range {
     drawable?: boolean;
     /** Returns how a position is announced, for the range and its handles. Defaults to the number. */
     getAriaValueText?: DescribePosition;
+    /** The least room it is drawn with, in px, so its handles keep apart at any zoom. From twice that it is as wide as it is long; under that it stays wider, and a drag of its end follows what is drawn. Leave it out and it is always as wide as it is long. */
+    minDrawnWidth?: number;
     /** The shortest the range can be, in the timeline's units. Defaults to the grid step. */
     minLength?: number;
     /** Whether dragging the body, or its keys, moves the range. @default true */

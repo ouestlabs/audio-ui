@@ -97,5 +97,5 @@ The bar over the tracks shows the stretch the view shows as a window with a hand
 Test: apps/daw/test/browser/run.ts "ARR-023"
 
 ### ARR-024 A narrow range
-A range keeps both handles apart and in reach however narrow the zoom draws it: its fill stays true to the ruler, and past the width that holds them both, the end handle sits past the range's end. Dragged, each handle moves its own edge by what the pointer travels.
-Test: apps/daw/test/browser/run.ts "ARR-024"
+A range keeps room for both handles, apart and inside it, however narrow the zoom would draw it: from twice that room it is as wide as it is long, and under that it stays wider, with a line along its bottom showing its true length against the ruler. Dragged, its end handle stays under the pointer, and the range changes to match.
+Test: packages/core/src/primitives/timeline/range-controller.test.ts; apps/daw/test/browser/run.ts "ARR-024"

@@ -518,6 +518,10 @@
     @apply bg-primary/25 ring-inset hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50;
   }
 
+  .cn-timeline-range-extent {
+    @apply bg-primary;
+  }
+
   .cn-timeline-range-handle {
     @apply rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/30 has-focus-visible:ring-2 has-focus-visible:ring-ring/30 active:ring-2 active:ring-ring/30 motion-reduce:transition-none;
   }

@@ -58,11 +58,13 @@ export {
 } from "./position.ts";
 export {
   createRangeController,
+  drawnRangeWidth,
   type RangeChangeEventDetails,
   type RangeCommitEventDetails,
   type RangeController,
   type RangeOptions,
   type RangeSnapshot,
+  rangeWidthOfDrawn,
 } from "./range-controller.ts";
 export {
   anchoredScroll,

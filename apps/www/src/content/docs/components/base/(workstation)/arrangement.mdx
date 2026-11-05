@@ -795,6 +795,7 @@ A stretch of the timeline, such as a loop, a selection or a clip, laid on the la
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 <TypeRow name={"drawable"} type={"boolean"} default={"false"}>Whether dragging across empty lane draws a new range.</TypeRow>
 <TypeRow name={"getAriaValueText"} type={"DescribePosition"}>Returns how a position is announced, for the range and its handles. Defaults to the number.</TypeRow>
+<TypeRow name={"minDrawnWidth"} type={"number"}>The least room it is drawn with, in px, so its handles keep apart at any zoom. From twice that it is as wide as it is long; under that it stays wider, and a drag of its end follows what is drawn. Leave it out and it is always as wide as it is long.</TypeRow>
 <TypeRow name={"minLength"} type={"number"}>The shortest the range can be, in the timeline's units. Defaults to the grid step.</TypeRow>
 <TypeRow name={"movable"} type={"boolean"} default={"true"}>Whether dragging the body, or its keys, moves the range.</TypeRow>
 <TypeRow name={"onValueChange"} type={"(value: Value, eventDetails: ChangeEventDetails) => void"}>Fires while the range is moved, resized or drawn.</TypeRow>
@@ -938,7 +939,7 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"TimelineTrackResizeHandle"}>Sets the track's height, by dragging or with the keys.</TypeRow>
 <TypeRow name={"TimelineMark"}>Something placed at `value`: a bar number, a cue. With `onValueChange` or `onValueCommitted` it moves: a drag takes it along the lane, on the grid unless Cmd/Ctrl is held, landing on a `snapPoints` place within a few px, and Left and Right on something focused inside it move it by `step`. A press that stays one keeps its click; a drag does not click.</TypeRow>
 <TypeRow name={"TimelinePlayhead"}>Follows the position on the lane it sits in.</TypeRow>
-<TypeRow name={"TimelineRange"}>A stretch of the timeline: `value`, `defaultValue`, `minLength`, `movable`, `drawable`, `onValueChange`, `onValueCommitted`.</TypeRow>
+<TypeRow name={"TimelineRange"}>A stretch of the timeline: `value`, `defaultValue`, `minLength`, `movable`, `drawable`, `onValueChange`, `onValueCommitted`. It sets `minDrawnWidth` to 32, and while it is drawn wider than it is long, a line along its bottom shows its true length against the ruler.</TypeRow>
 <TypeRow name={"TimelineRangeHandle"}>Resizes one `edge` of the range.</TypeRow>
 <TypeRow name={"TimelineClip"}>A stretch of a source: `value`, `sourceLength`, `selected`, `onValueChange`, `onValueCommitted`, `onRemove`. Dragged over other lanes too.</TypeRow>
 <TypeRow name={"TimelineClipHeader"}>The clip's title bar: drag it to move the clip.</TypeRow>

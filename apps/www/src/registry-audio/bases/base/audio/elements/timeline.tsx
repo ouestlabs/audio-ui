@@ -197,16 +197,29 @@ function TimelinePlayhead({
   );
 }
 
-function TimelineRange({ className, ...props }: TimelinePrimitive.Range.Props) {
+function TimelineRange({
+  children,
+  className,
+  ...props
+}: TimelinePrimitive.Range.Props) {
   return (
     <TimelinePrimitive.Range
       className={cn(
-        "cn-timeline-range inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+        "cn-timeline-range @container/range inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
         className
       )}
       data-slot="timeline-range"
+      minDrawnWidth={32}
       {...props}
-    />
+    >
+      {/* Its true length against the ruler, while it is drawn wider to keep its handles apart. */}
+      <span
+        aria-hidden="true"
+        className="cn-timeline-range-extent pointer-events-none absolute start-0 bottom-0 h-0.5 w-[calc(var(--timeline-unit)*var(--timeline-length))] @min-[4rem]/range:hidden"
+        data-slot="timeline-range-extent"
+      />
+      {children}
+    </TimelinePrimitive.Range>
   );
 }
 
@@ -217,8 +230,7 @@ function TimelineRangeHandle({
   return (
     <TimelinePrimitive.RangeHandle
       className={cn(
-        // On a range too narrow for both, the end handle stays clear of the start's, past the range's end.
-        "cn-timeline-range-handle absolute inset-y-1 w-2 cursor-ew-resize data-[edge=end]:left-[max(100%-0.75rem,0.875rem)] data-[edge=start]:left-1",
+        "cn-timeline-range-handle absolute inset-y-1 w-2 cursor-ew-resize data-[edge=end]:right-1 data-[edge=start]:left-1",
         // The room to aim at grows away from the other handle, never over it.
         "after:absolute after:inset-y-0 data-[edge=end]:after:-right-1.5 data-[edge=end]:after:left-0 data-[edge=start]:after:right-0 data-[edge=start]:after:-left-1.5 pointer-coarse:data-[edge=end]:after:-right-3 pointer-coarse:data-[edge=start]:after:-left-3",
         className
