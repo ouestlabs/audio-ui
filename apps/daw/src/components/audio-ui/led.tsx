@@ -21,8 +21,6 @@ const ledVariants = cva("rounded-full bg-muted-foreground/25 shadow-inner transi
 });
 
 export interface LedProps extends VariantProps<typeof ledVariants> {
-  /** Hides it from assistive technology, where what holds it already says its state: a button's pressed state. */
-  "aria-hidden"?: boolean;
   /** Blinks while lit: a take arming, a clip about to start. Still for reduced motion. @default false */
   blink?: boolean;
   className?: string;
@@ -38,7 +36,6 @@ export interface LedProps extends VariantProps<typeof ledVariants> {
  * state out ("Recording: on").
  */
 export function Led({
-  "aria-hidden": hidden,
   blink = false,
   className,
   label,
@@ -48,14 +45,13 @@ export function Led({
 }: LedProps) {
   return (
     <span
-      aria-hidden={hidden || undefined}
-      aria-label={hidden ? undefined : `${label}: ${on ? "on" : "off"}`}
+      aria-label={`${label}: ${on ? "on" : "off"}`}
       className={cn(ledVariants({ size, tone }), className)}
       data-blink={blink ? "" : undefined}
       data-on={on ? "" : undefined}
       data-size={size ?? "default"}
       data-slot="led"
-      role={hidden ? undefined : "img"}
+      role="img"
     />
   );
 }

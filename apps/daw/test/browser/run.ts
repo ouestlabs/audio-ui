@@ -651,6 +651,28 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the light says its state over the button's"
       );
     },
+  "ARR-027: a track's Solo, Mute and Arm are one group of switches: one stop of Tab, the arrows between them":
+    async (browser) => {
+      const page = await open(browser);
+      const group = page.getByRole("group", { name: "1 Audio switches" });
+      const solo = group.getByRole("button", { name: "Solo 1 Audio" });
+      await solo.focus();
+      await page.keyboard.press("ArrowRight");
+      assert(
+        await group
+          .getByRole("button", { name: "Mute 1 Audio" })
+          .evaluate((element) => element === document.activeElement),
+        "Right from Solo did not reach Mute"
+      );
+      await page.keyboard.press("Space");
+      assert(
+        (await group
+          .getByRole("button", { name: "Mute 1 Audio" })
+          .getAttribute("aria-pressed")) === "true",
+        "Space did not mute the track"
+      );
+      await page.keyboard.press("Space");
+    },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);

@@ -37,6 +37,10 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
 } from "@/registry/bases/base/ui/dropdown-menu";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/registry/bases/base/ui/toggle-group";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { Led } from "@/registry-audio/bases/base/audio/elements/led";
@@ -240,6 +244,18 @@ function TimelineRangeHandle({
       {...props}
     />
   );
+}
+
+/** A track header's switch: as small as its other buttons, a letter or a light in it. */
+const TRACK_SWITCH = "h-6 min-w-6 px-0";
+
+/** Which of a track's switches are on, as its toggle group holds them. */
+function switchesOn(mix: Pick<Mix, "muted" | "soloed">, armed?: boolean) {
+  return [
+    ...(mix.soloed ? ["solo"] : []),
+    ...(mix.muted ? ["mute"] : []),
+    ...(armed ? ["arm"] : []),
+  ];
 }
 
 /** Where a fade being dragged stops: the other fade's start, as a dashed line. */
@@ -790,38 +806,44 @@ function TimelineTrackControls({
               {name}
             </button>
           )}
-          <Button
-            aria-label={`Solo ${name}`}
-            aria-pressed={mix.soloed}
-            onClick={handleSolo}
-            size="icon-xs"
-            variant={mix.soloed ? "default" : "ghost"}
+          {/* Its switches, one stop of Tab and the arrows between them: each holds its state, pressed or not. */}
+          <ToggleGroup
+            aria-label={`${name} switches`}
+            multiple
+            size="sm"
+            spacing={1}
+            value={switchesOn(mix, armed)}
           >
-            S
-          </Button>
-          <Button
-            aria-label={`Mute ${name}`}
-            aria-pressed={mix.muted}
-            onClick={handleMute}
-            size="icon-xs"
-            variant={mix.muted ? "default" : "ghost"}
-          >
-            M
-          </Button>
-          {onArm ? (
-            <Button
-              aria-label={`Arm ${name}`}
-              aria-pressed={armed}
-              onClick={handleArm}
-              size="icon-xs"
-              variant="ghost"
+            <ToggleGroupItem
+              aria-label={`Solo ${name}`}
+              className={TRACK_SWITCH}
+              onClick={handleSolo}
+              value="solo"
             >
-              {/* A light, as on a console: lit red while the track is armed, a dim dot when not. */}
-              <span aria-hidden="true" className="contents">
-                <Led label="Armed" on={Boolean(armed)} tone="destructive" />
-              </span>
-            </Button>
-          ) : null}
+              S
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              aria-label={`Mute ${name}`}
+              className={TRACK_SWITCH}
+              onClick={handleMute}
+              value="mute"
+            >
+              M
+            </ToggleGroupItem>
+            {onArm ? (
+              <ToggleGroupItem
+                aria-label={`Arm ${name}`}
+                className={TRACK_SWITCH}
+                onClick={handleArm}
+                value="arm"
+              >
+                {/* A light, as on a console: lit red while the track is armed, a dim dot when not. */}
+                <span aria-hidden="true" className="contents">
+                  <Led label="Armed" on={Boolean(armed)} tone="destructive" />
+                </span>
+              </ToggleGroupItem>
+            ) : null}
+          </ToggleGroup>
         </div>
         {compact ? null : (
           <div className="flex h-7 items-center gap-6 pe-1">

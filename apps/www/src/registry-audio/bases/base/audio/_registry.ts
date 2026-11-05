@@ -1137,6 +1137,7 @@ export const audio: RegistryItem[] = [
       "@shadcn/button-group",
       "@shadcn/context-menu",
       "@shadcn/dropdown-menu",
+      "@shadcn/toggle-group",
     ],
     type: "registry:ui",
   },
