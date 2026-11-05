@@ -81,5 +81,13 @@ Deviation: the reference also warps files it reads as one-shots, and lets a pref
 Test: packages/core/src/audio/analysis/tempo.test.ts "CLP-019"; apps/daw/test/drop.test.ts "CLP-019"
 
 ### CLP-020 A waveform at any zoom
-An audio clip's waveform on its track has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one slice per pixel at the closest zoom, each column from its lowest sample to its highest, so a lopsided sound shows lopsided. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length. The clip view draws its source the same way: a column per pixel, from the lowest sample to the highest.
+An audio clip's waveform on its track has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one slice per pixel at the closest zoom, each column from its lowest sample to its highest, so a lopsided sound shows lopsided. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length. The clip view draws its source the same way, and both follow a zoom in the frame it happens, not once it stops.
 Test: apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-020"; apps/daw/test/project-file.test.ts "CLP-020"; apps/daw/test/browser/run.ts "CLP-020"
+
+### CLP-021 The source in the clip view
+Under the clip view's ruler, a range holds what the clip plays of its source, or its loop: two handles to drag, and the range itself to move it. It has no fill of its own: the waveform dims outside it, so what plays shows on the sound itself. Warp markers lying closer than a handle's room, on average, show as ticks along the top of the waveform, and zooming in brings their handles and lines back.
+Test: apps/www/test/registry-audio/base/audio/clip-panel.test.ts "CLP-021"; apps/daw/test/browser/run.ts "CLP-021"
+
+### CLP-022 Folding a clip box
+A press anywhere on the heading of a foldable box of the clip view folds it to a narrow strip, and a press anywhere on the strip unfolds it: the caret shows the way, it is not the only place to aim at.
+Test: apps/daw/test/browser/run.ts "CLP-022"

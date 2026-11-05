@@ -231,9 +231,9 @@ function ClipView({
 
 /**
  * One box of a clip's properties, a column of a fixed width so the boxes
- * beside it never move under the pointer. With `foldable`, a caret in its
+ * beside it never move under the pointer. With `foldable`, a press on its
  * heading folds it to a narrow strip that keeps its name and the caret, and
- * gives its width to the editor.
+ * gives its width to the editor; a press anywhere on the strip unfolds it.
  */
 function ClipBox({
   children,
@@ -258,7 +258,7 @@ function ClipBox({
     <button
       aria-expanded={!folded}
       aria-label={folded ? `Unfold ${title}` : `Fold ${title}`}
-      className="flex size-4 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+      className="flex size-4 shrink-0 cursor-pointer items-center justify-center rounded-sm text-muted-foreground outline-none after:absolute after:inset-0 hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
       onClick={toggle}
       type="button"
     >
@@ -269,7 +269,7 @@ function ClipBox({
     return (
       <section
         aria-label={title}
-        className="flex w-6 shrink-0 flex-col items-center gap-2 border-s py-2 first:border-s-0"
+        className="relative flex w-6 shrink-0 flex-col items-center gap-2 border-s py-2 first:border-s-0 hover:bg-muted/50"
         data-folded=""
         data-slot="clip-box"
       >
@@ -289,7 +289,9 @@ function ClipBox({
       )}
       data-slot="clip-box"
     >
-      <div className="flex h-5 items-center gap-1.5">
+      <div
+        className={cn("flex h-5 items-center gap-1.5", foldable && "relative")}
+      >
         <h4 className="truncate font-semibold text-muted-foreground uppercase tracking-wide">
           {title}
         </h4>

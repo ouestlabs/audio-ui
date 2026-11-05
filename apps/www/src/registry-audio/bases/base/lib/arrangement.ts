@@ -462,6 +462,12 @@ export type ClipPeaks =
   | ArrayLike<number>
   | { max: ArrayLike<number>; min: ArrayLike<number> };
 
+/** What reading a clip's recording takes: how it plays, not where it lies. */
+export type ClipReading = Pick<
+  Arranged,
+  "loop" | "reversed" | "sourceLength" | "warp"
+> & { value: Pick<ClipValue, "length" | "offset"> };
+
 /** How many slices `peaks` holds. */
 export const clipPeakCount = (peaks: ClipPeaks) =>
   "length" in peaks
@@ -470,7 +476,7 @@ export const clipPeakCount = (peaks: ClipPeaks) =>
 
 /** Which peaks each of `columns` covers, across a stretch of a clip as a player reads it. */
 function columnSpans(
-  clip: Arranged,
+  clip: ClipReading,
   peakCount: number,
   columns: number,
   range: readonly [number, number] = [0, clip.value.length]
@@ -515,7 +521,7 @@ function columnSpans(
  * seconds from its start, for a view that shows part of it: the whole by default.
  */
 export function clipWaveform(
-  clip: Arranged,
+  clip: ClipReading,
   peaks: ArrayLike<number>,
   columns: number,
   range?: readonly [number, number]
@@ -532,7 +538,7 @@ export function clipWaveform(
  * have no lowest of their own, so they reach as far down as up.
  */
 export function clipWaveformBands(
-  clip: Arranged,
+  clip: ClipReading,
   peaks: ClipPeaks,
   columns: number,
   range?: readonly [number, number]

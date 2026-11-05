@@ -173,6 +173,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `play-toggle` | `PlayToggle` from `@/components/audio-ui/play-toggle` | A play and pause button for a demo signal: feed it `usePlaySwitch()` inside an `AudioSessionProvider` to start a device's loop |
 | `automation-envelope` | `AutomationEnvelope` from `@/components/audio-ui/automation-envelope` | A track's automation over its lane in a timeline, under the same zoom and scroll as the clips |
 | `clip-view`, `clip-panel`, `midi-clip-panel` | from `@/components/audio-ui/<name>` | The detail view of an arrangement's audio or MIDI clip: its strip, start and end, loop, and the waveform or notes |
+| `clip-waveform` | `ClipWaveform` from `@/components/audio-ui/clip-waveform` | A clip's recording on a canvas, as the clip plays it, a column per pixel, drawn in the frame of a zoom. Used by `arranged-clip` and `clip-panel` |
 | `use-marquee-selection` | `useMarquee` from `@/hooks/use-marquee-selection` | A selection rectangle for the clips of a timeline |
 | `use-audio-signal` | `useAudioSignal` from `@/hooks/use-audio-signal` | An `AnalyserNode` as live signals for a waveform: loudest sample, frequency bands, raw samples |
 | `use-simulated-clock`, `use-simulated-levels`, `use-play-switch` | from `@/hooks/<name>` | A clock, levels and a play switch for a demo that makes no sound |

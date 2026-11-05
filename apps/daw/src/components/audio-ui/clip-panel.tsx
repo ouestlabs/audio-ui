@@ -6,12 +6,11 @@ import {
   moveWarpMarker,
   removeWarpMarker,
   scaleWarp,
-  unwarpedTime,
   type WarpMarker,
   warpedTime,
   warpRate,
 } from "@audio-ui/core/time";
-import { type Source, Waveform as WaveformPrimitive } from "@audio-ui/react";
+import type { Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -33,6 +32,7 @@ import {
   formatBars,
   PositionField,
 } from "@/components/audio-ui/clip-view";
+import { ClipWaveform } from "@/components/audio-ui/clip-waveform";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
 import {
   Timeline,
@@ -44,6 +44,10 @@ import {
   TimelineRangeHandle,
   TimelineViewport,
 } from "@/components/audio-ui/timeline";
+import {
+  type ClipPeaks,
+  clipPeakCount,
+} from "@/lib/arrangement";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {
@@ -135,47 +139,10 @@ interface ClipPanelProps {
   start?: number;
   value: ClipSettings;
   /** The source's peaks, the shape the waveform draws. */
-  values: WaveformPrimitive.Root.Peaks;
+  values: ClipPeaks;
 }
 
 const formatSeconds = (seconds: number) => `${seconds.toFixed(2)} s`;
-
-/**
- * The peaks read again: each index takes in those from `pick(index, count)`
- * up to the next index's, the loudest of them (the lowest, for a `min`), so a
- * stretch drawn shorter keeps every peak it holds rather than every other one.
- */
-function remap(
-  values: WaveformPrimitive.Root.Peaks,
-  pick: (index: number, count: number) => number
-): WaveformPrimitive.Root.Peaks {
-  const read = (list: ArrayLike<number>, lowest: boolean) => {
-    const count = list.length;
-    return Array.from({ length: count }, (_, index) => {
-      const from = pick(index, count);
-      const to = index + 1 < count ? pick(index + 1, count) : from + 1;
-      let peak = list[from] ?? 0;
-      for (let at = from + 1; at < to; at += 1) {
-        const value = list[at] ?? 0;
-        peak = lowest ? Math.min(peak, value) : Math.max(peak, value);
-      }
-      return peak;
-    });
-  };
-  return "length" in values
-    ? read(values, false)
-    : { max: read(values.max, false), min: read(values.min, true) };
-}
-
-/** The peaks backwards, as a reversed clip plays its source. */
-function reversedPeaks(
-  values: WaveformPrimitive.Root.Peaks
-): WaveformPrimitive.Root.Peaks {
-  const read = (list: ArrayLike<number>) => Array.from(list).reverse();
-  return "length" in values
-    ? read(values)
-    : { max: read(values.max), min: read(values.min) };
-}
 
 /** What a playhead source reads while the clip does not play: nothing to show. */
 const NOT_PLAYING = -1;
@@ -197,9 +164,22 @@ const markerIndex = (element: HTMLElement) => Number(element.dataset.index);
 const stopPropagation = (event: MouseEvent<HTMLElement>) =>
   event.stopPropagation();
 
+/** How far apart warp markers have to be on average, in px, for their handles to fit and be told apart. */
+const WARP_MARKER_ROOM = 16;
+
+/** Whether the warp markers lie too close at this zoom to be held: they then show as ticks, and zooming in brings their handles. */
+export function warpMarkersTight(
+  count: number,
+  span: number,
+  pxPerSecond: number
+): boolean {
+  return (span * pxPerSecond) / Math.max(1, count - 1) < WARP_MARKER_ROOM;
+}
+
 /**
  * The warp markers over the waveform: drag one, or press its arrows, to
  * stretch the source on either side of it; Delete takes it away (two stay).
+ * `tight`, they are ticks along its top that keep the waveform in sight.
  */
 function WarpMarkers({
   format,
@@ -207,12 +187,14 @@ function WarpMarkers({
   onChange,
   onCommit,
   span,
+  tight,
 }: {
   format: (seconds: number) => string;
   markers: readonly WarpMarker[];
   onChange: (next: readonly WarpMarker[]) => void;
   onCommit?: () => void;
   span: number;
+  tight: boolean;
 }) {
   const startDrag = useCallback((event: PointerEvent<HTMLSpanElement>) => {
     event.stopPropagation();
@@ -260,27 +242,33 @@ function WarpMarkers({
   );
   return markers.map((marker, index) => (
     <div
-      className="pointer-events-none absolute inset-y-0 z-10 w-px bg-foreground/70"
+      className={
+        tight
+          ? "pointer-events-none absolute top-0 z-10 h-1.5 w-px bg-foreground/50"
+          : "pointer-events-none absolute inset-y-0 z-10 w-px bg-foreground/70"
+      }
       data-slot="clip-panel-warp-marker"
       key={`${marker.source}`}
       style={{ left: `${(marker.target / span) * 100}%` }}
     >
-      <span
-        aria-label={`Warp marker ${index + 1}`}
-        aria-valuemax={span}
-        aria-valuemin={0}
-        aria-valuenow={marker.target}
-        aria-valuetext={format(marker.target)}
-        className="pointer-events-auto absolute top-0 left-1/2 size-3 -translate-x-1/2 cursor-ew-resize touch-none rounded-sm border border-foreground bg-card outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        data-index={index}
-        onDoubleClick={stopPropagation}
-        onKeyDown={keyDown}
-        onLostPointerCapture={onCommit}
-        onPointerDown={startDrag}
-        onPointerMove={drag}
-        role="slider"
-        tabIndex={0}
-      />
+      {tight ? null : (
+        <span
+          aria-label={`Warp marker ${index + 1}`}
+          aria-valuemax={span}
+          aria-valuemin={0}
+          aria-valuenow={marker.target}
+          aria-valuetext={format(marker.target)}
+          className="pointer-events-auto absolute top-0 left-1/2 size-3 -translate-x-1/2 cursor-ew-resize touch-none rounded-sm border border-foreground bg-card outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          data-index={index}
+          onDoubleClick={stopPropagation}
+          onKeyDown={keyDown}
+          onLostPointerCapture={onCommit}
+          onPointerDown={startDrag}
+          onPointerMove={drag}
+          role="slider"
+          tabIndex={0}
+        />
+      )}
     </div>
   ));
 }
@@ -565,19 +553,6 @@ function ClipPanel({
   const meter = useMemo(() => ({ bar, beatsPerBar }), [bar, beatsPerBar]);
   // How long the source lasts on the clip: as recorded, or as its warp stretches it.
   const span = warp ? warpedTime(warp, sourceLength) : sourceLength;
-  // Warped, the source is drawn in the clip's time; reversed, backwards, as it plays.
-  const shown = useMemo(() => {
-    const placed = warp
-      ? remap(values, (index, count) =>
-          Math.round(
-            (unwarpedTime(warp, (index / Math.max(1, count - 1)) * span) /
-              sourceLength) *
-              (count - 1)
-          )
-        )
-      : values;
-    return reversed ? reversedPeaks(placed) : placed;
-  }, [reversed, sourceLength, span, values, warp]);
   // Where playback reads the source, in the clip's time: from where it starts in it, round its loop.
   const playhead = useMemo<Source<number> | undefined>(() => {
     if (!arrangementPosition) {
@@ -844,8 +819,10 @@ function ClipPanel({
         onValueCommitted={onValueCommitted}
         onWarpChange={setWarp}
         playhead={playhead}
+        reversed={reversed}
+        sourceLength={sourceLength}
         span={span}
-        values={shown}
+        values={values}
         warp={warp}
       />
     </ClipView>
@@ -856,12 +833,30 @@ function ClipPanel({
 const LABEL_SPACING = 40;
 /** The widest a peak of the waveform is drawn, in px: zooming in stops there, before the drawing turns to blocks. */
 const PEAK_PX = 3;
-/** A length the waveform snaps up to one pixel of the screen, at any density: a column per pixel, and silence still a line. */
-const SCREEN_PIXEL = 0.01;
+/** The range over the waveform: its handles, with what it leaves out dimmed below. */
+const PLAYED_RANGE = "bg-transparent hover:bg-primary/10";
 
-/** How many peaks the waveform has across the source. */
-const peakCount = (values: WaveformPrimitive.Root.Peaks) =>
-  "length" in values ? values.length : values.max.length;
+/** A stretch of the source the clip doesn't play, dimmed over the waveform. */
+function Unplayed({
+  from,
+  span,
+  to,
+}: {
+  from: number;
+  span: number;
+  to: number;
+}) {
+  return (
+    <div
+      className="pointer-events-none absolute inset-y-0 bg-background/60"
+      data-slot="clip-panel-unplayed"
+      style={{
+        left: `${(from / span) * 100}%`,
+        width: `${((to - from) / span) * 100}%`,
+      }}
+    />
+  );
+}
 
 /** The ruler's labels at `pxPerSecond`: each beat (`bar.beat`) once they are far enough apart, else every bar, every second, fourth… */
 function rulerLabels(
@@ -910,6 +905,8 @@ function ClipSource({
   onValueCommitted,
   onWarpChange,
   playhead,
+  reversed,
+  sourceLength,
   span,
   values,
   warp,
@@ -927,8 +924,10 @@ function ClipSource({
   onValueCommitted?: () => void;
   onWarpChange: (next: readonly WarpMarker[]) => void;
   playhead?: Source<number>;
+  reversed: boolean;
+  sourceLength: number;
   span: number;
-  values: WaveformPrimitive.Root.Peaks;
+  values: ClipPeaks;
   warp: readonly WarpMarker[] | null;
 }) {
   // Fitted to its width until zoomed, as the arrangement is.
@@ -955,38 +954,19 @@ function ClipSource({
     };
   }, [span]);
   const pxPerSecond = zoom ?? fit;
-  // The stretch in view: the waveform is drawn over it alone, as sharp at any zoom as the screen is.
-  const [view, setView] = useState<readonly [number, number]>([0, span]);
-  useLayoutEffect(() => {
-    const element = viewportRef.current;
-    if (!(element && pxPerSecond > 0)) {
-      return;
-    }
-    let frame = 0;
-    const follow = () => {
-      cancelAnimationFrame(frame);
-      frame = requestAnimationFrame(() => {
-        const from = Math.max(0, element.scrollLeft / pxPerSecond);
-        const to = Math.min(
-          span,
-          (element.scrollLeft + element.clientWidth) / pxPerSecond
-        );
-        setView((was) =>
-          was[0] === from && was[1] === to ? was : [from, Math.max(from, to)]
-        );
-      });
-    };
-    follow();
-    element.addEventListener("scroll", follow, { passive: true });
-    const observer = new ResizeObserver(follow);
-    observer.observe(element);
-    return () => {
-      cancelAnimationFrame(frame);
-      element.removeEventListener("scroll", follow);
-      observer.disconnect();
-    };
-  }, [pxPerSecond, span]);
-  const [from, to] = view;
+  // The whole source in the clip's time, read as the clip plays it.
+  const reading = useMemo(
+    () => ({
+      reversed,
+      sourceLength,
+      value: { length: span, offset: 0 },
+      warp: warp ?? undefined,
+    }),
+    [reversed, sourceLength, span, warp]
+  );
+  const [playedFrom, playedTo] = loop
+    ? [Math.min(offset, loop[0]), loop[1]]
+    : [offset, Math.min(span, offset + length)];
   // Shown only while the clip plays: React hears when that changes, not each frame.
   const playing = useSyncExternalStore(
     playhead?.subscribe ?? noSubscription,
@@ -998,7 +978,7 @@ function ClipSource({
   const beat = bar / beatsPerBar;
   const gridStep = beat * pxPerSecond >= LABEL_SPACING / 2 ? beat : bar;
   // As far in as the waveform has detail for.
-  const maxZoom = Math.max(fit, (peakCount(values) * PEAK_PX) / span);
+  const maxZoom = Math.max(fit, (clipPeakCount(values) * PEAK_PX) / span);
   return (
     <Timeline
       className="min-w-0 flex-1"
@@ -1031,6 +1011,7 @@ function ClipSource({
               <>
                 <TimelineRange
                   aria-label="Loop"
+                  className={PLAYED_RANGE}
                   getAriaValueText={format}
                   onValueChange={onLoopChange}
                   onValueCommitted={onValueCommitted}
@@ -1048,6 +1029,7 @@ function ClipSource({
             ) : (
               <TimelineRange
                 aria-label="Played"
+                className={PLAYED_RANGE}
                 getAriaValueText={format}
                 onValueChange={onPlayedChange}
                 onValueCommitted={onValueCommitted}
@@ -1074,25 +1056,17 @@ function ClipSource({
                 data-slot="clip-panel-source"
                 style={{ width: `calc(var(--timeline-unit) * ${span})` }}
               >
-                <WaveformPrimitive.Root
-                  aria-label={`${name} source`}
-                  className="absolute inset-y-0"
-                  duration={span}
-                  peaks={values}
-                  range={[from, to]}
-                  style={{
-                    left: `calc(var(--timeline-unit) * ${from})`,
-                    width: `calc(var(--timeline-unit) * ${to - from})`,
-                  }}
-                >
-                  <WaveformPrimitive.Canvas
-                    barGap={0}
-                    barRadius={0}
-                    barWidth={SCREEN_PIXEL}
-                    className="pointer-events-none [--waveform-bar-radius:max(0px,min(var(--radius-sm),3px))] [--waveform-color:color-mix(in_oklab,var(--muted-foreground)_50%,transparent)] [--waveform-progress-color:var(--primary)] block size-full"
-                    minBarHeight={SCREEN_PIXEL}
+                {clipPeakCount(values) > 0 ? (
+                  <ClipWaveform
+                    aria-label={`${name} source`}
+                    className="inset-y-0 h-full text-muted-foreground"
+                    clip={reading}
+                    peaks={values}
+                    role="img"
                   />
-                </WaveformPrimitive.Root>
+                ) : null}
+                <Unplayed from={0} span={span} to={playedFrom} />
+                <Unplayed from={playedTo} span={span} to={span} />
                 {warp ? (
                   <WarpMarkers
                     format={format}
@@ -1100,6 +1074,7 @@ function ClipSource({
                     onChange={onWarpChange}
                     onCommit={onValueCommitted}
                     span={span}
+                    tight={warpMarkersTight(warp.length, span, pxPerSecond)}
                   />
                 ) : null}
               </div>

@@ -98,6 +98,19 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    description:
+      "A clip's recording drawn on a canvas, a column per pixel of the screen, as its clip plays it: looped, reversed, warped. It draws only what the view shows, and a zoom in the frame it happens.",
+    files: [
+      {
+        path: "audio/elements/clip-waveform.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "clip-waveform",
+    registryDependencies: ["@audio-ui/arrangement"],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
       "A clip of an arrangement on its track's lane: move it, trim and fade it, pick a fade's curve, rename it in place and act on it from its menu. A MIDI clip draws its notes across its body.",
@@ -113,6 +126,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "arranged-clip",
     registryDependencies: [
+      "@audio-ui/clip-waveform",
       "@audio-ui/timeline",
       "@audio-ui/arrangement",
       "@audio-ui/use-arrangement",
@@ -1062,6 +1076,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "clip-panel",
     registryDependencies: [
+      "@audio-ui/clip-waveform",
       "@audio-ui/parameter-field",
       "@audio-ui/clip-view",
       "@audio-ui/timeline",

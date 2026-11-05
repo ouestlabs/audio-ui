@@ -2320,6 +2320,97 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       `${read.empty} of ${read.columns} columns are gaps`
     );
   },
+  "CLP-020: the clip view's waveform follows a zoom as it goes, not once it stops":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 20);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const source = page.locator("[data-slot=clip-panel-source]");
+      await source.locator("canvas").waitFor({ timeout: 5000 });
+      await page.waitForTimeout(400);
+      const box = await source.boundingBox();
+      await page.mouse.move(
+        (box?.x ?? 0) + (box?.width ?? 0) / 2,
+        (box?.y ?? 0) + (box?.height ?? 0) / 2
+      );
+      const drawn = () =>
+        source.locator("canvas").evaluate((element) => {
+          const canvas = element as HTMLCanvasElement;
+          return canvas.width > 0
+            ? canvas.toDataURL()
+            : `${canvas.width}x${canvas.height}`;
+        });
+      const before = await drawn();
+      await page.keyboard.down("Control");
+      await [1, 2, 3, 4, 5, 6, 7, 8].reduce(async (done) => {
+        await done;
+        await page.mouse.wheel(0, -120);
+      }, Promise.resolve());
+      // In the frame after the last step, with no time for anything to catch up.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => resolve());
+          })
+      );
+      const zoomed = await drawn();
+      await page.keyboard.up("Control");
+      await page.waitForTimeout(500);
+      const settled = await drawn();
+      assert(zoomed !== before, "the zoom drew nothing");
+      assert(zoomed === settled, "the waveform caught up only after the zoom");
+    },
+  "CLP-021: the clip view dims what the clip leaves out of its source": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await dropChord(page, '[data-track="track-1"]', "Take", 20);
+    const clip = page.locator("[data-clip-id]").first();
+    await clip.waitFor({ timeout: 10_000 });
+    await clip.click();
+    await page.getByRole("tab", { name: "Clip" }).click();
+    const left = page.locator("[data-slot=clip-panel-unplayed]").first();
+    await left.waitFor({ state: "attached", timeout: 5000 });
+    const width = async () => (await left.boundingBox())?.width ?? 0;
+    assert((await width()) === 0, "a clip playing it all still dims some");
+    const handle = page.getByRole("slider", { name: "Clip start" });
+    await handle.focus();
+    await [1, 2, 3, 4, 5, 6].reduce(async (done) => {
+      await done;
+      await page.keyboard.press("Shift+ArrowRight");
+    }, Promise.resolve());
+    await page.waitForTimeout(100);
+    assert((await width()) > 0, "the stretch before the start is not dimmed");
+  },
+  "CLP-022: a clip box folds from anywhere on its heading, and unfolds from anywhere on its strip":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const box = page.locator("[data-slot=clip-box]", { hasText: "Loop" });
+      // Its title, not its caret: the press lands on the button stretched over the heading.
+      const title = await box
+        .getByRole("heading", { name: "Loop" })
+        .boundingBox();
+      await page.mouse.click(
+        (title?.x ?? 0) + 4,
+        (title?.y ?? 0) + (title?.height ?? 0) / 2
+      );
+      await page.getByRole("button", { name: "Unfold Loop" }).waitFor();
+      const strip = await box.boundingBox();
+      assert(strip && strip.width < 48, "the box did not fold to a strip");
+      await page.mouse.click(
+        (strip?.x ?? 0) + (strip?.width ?? 0) / 2,
+        (strip?.y ?? 0) + (strip?.height ?? 0) - 8
+      );
+      await page.getByRole("button", { name: "Fold Loop" }).waitFor();
+    },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
       const page = await open(browser);
