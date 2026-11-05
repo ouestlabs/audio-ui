@@ -778,6 +778,34 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         .getByRole("button", { name: "Fold the panel" })
         .waitFor({ timeout: 3000 });
     },
+  "MIX-015: the panel open stays open from tab to tab, whatever height a view kept":
+    async (browser) => {
+      const page = await open(browser);
+      // A height kept from before, under what the clip view needs now.
+      await page.evaluate(() => {
+        const key = "audio-ui-daw:view";
+        const view = JSON.parse(localStorage.getItem(key) ?? "{}");
+        view.panelHeights = { ...view.panelHeights, clip: 40 };
+        view.panelFolded = false;
+        view.panelView = "devices";
+        localStorage.setItem(key, JSON.stringify(view));
+      });
+      await page.reload();
+      await page.waitForSelector("[data-track-id]", { timeout: 30_000 });
+      await dropChord(page, '[data-track="track-1"]', "Kept", 4);
+      const clip = page.locator("[data-clip-id]", { hasText: "Kept" });
+      await clip.waitFor({ timeout: 30_000 });
+      await page.getByRole("tab", { name: DEVICES }).click();
+      await page.getByRole("button", { name: "Fold the panel" }).waitFor();
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      await page.waitForTimeout(300);
+      assert(
+        (await page.getByRole("button", { name: "Open the panel" }).count()) ===
+          0,
+        "on the clip's tab, the panel folded"
+      );
+    },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);

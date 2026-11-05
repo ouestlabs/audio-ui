@@ -43,61 +43,84 @@ export type ShortcutCommand =
   | "zoom-out"
   | "zoom-selection";
 
-interface Shortcut {
-  alt?: boolean;
+import {
+  matchesKeyboardEvent,
+  parseHotkey,
+  type RawHotkeyChord,
+} from "@tanstack/react-hotkeys";
+
+/** A key of the workstation: the command it runs, and the chord it is pressed with. */
+export interface Shortcut {
+  /**
+   * The chord, as the hotkeys library reads it: `mod` is Cmd on a Mac and Ctrl
+   * elsewhere. A letter is read by its name, and by where it sits when Option
+   * changes it on a Mac; a digit by where it sits (its `code`), as a layout
+   * such as AZERTY reaches the digits with Shift.
+   */
+  chord: RawHotkeyChord;
   command: ShortcutCommand;
-  /** Ctrl itself, on a Mac: what stands in for a key the browser keeps. */
-  control?: boolean;
-  /** The key, as `KeyboardEvent.key` names it, lower case for a letter. */
-  key: string;
-  /** Cmd on a Mac, Ctrl elsewhere. */
-  mod?: boolean;
-  shift?: boolean;
+  /** Only on a Mac: Ctrl itself, standing in for a key the browser keeps there. */
+  mac?: boolean;
 }
 
 export const SHORTCUTS: readonly Shortcut[] = [
-  { command: "play-stop", key: " " },
-  { command: "continue", key: " ", shift: true },
-  { command: "record", key: "f9" },
-  { command: "to-start", key: "home" },
-  { command: "loop", key: "l", mod: true },
-  { command: "undo", key: "z", mod: true },
-  { command: "redo", key: "z", mod: true, shift: true },
-  { command: "redo", key: "y", mod: true },
-  { command: "audio-track", key: "t", mod: true },
-  { command: "audio-track", control: true, key: "t" },
-  { command: "midi-track", key: "t", mod: true, shift: true },
-  { command: "midi-track", control: true, key: "t", shift: true },
-  { alt: true, command: "return-track", key: "t", mod: true },
-  { command: "delete", key: "delete" },
-  { command: "delete", key: "backspace" },
-  { command: "split", key: "e", mod: true },
-  { command: "duplicate", key: "d", mod: true },
-  { command: "deactivate", key: "0" },
-  { command: "solo", key: "s" },
-  { command: "select-all", key: "a", mod: true },
-  { alt: true, command: "mixer", key: "m", mod: true },
-  { alt: true, command: "library", key: "b", mod: true },
-  { command: "detail", key: "tab", shift: true },
-  { command: "export", key: "r", mod: true, shift: true },
-  { command: "open", key: "o", mod: true },
-  { command: "save", key: "s", mod: true },
-  { command: "save-as", key: "s", mod: true, shift: true },
-  { command: "grid-finer", key: "1", mod: true },
-  { command: "grid-wider", key: "2", mod: true },
-  { command: "grid-triplet", key: "3", mod: true },
-  { command: "grid-snap", key: "4", mod: true },
-  { command: "grid-fixed", key: "5", mod: true },
-  { command: "zoom-in", key: "=", mod: true },
-  { command: "zoom-in", key: "+", mod: true },
-  { command: "zoom-out", key: "-", mod: true },
-  { command: "zoom-selection", key: "z" },
-  { command: "zoom-back", key: "x" },
-  { command: "automation", key: "a" },
-  { command: "fold", key: "u" },
-  { command: "group", key: "g", mod: true },
-  { command: "ungroup", key: "g", mod: true, shift: true },
-  { alt: true, command: "unfold-all", key: "u" },
+  { chord: { key: " " }, command: "play-stop" },
+  { chord: { key: " ", shift: true }, command: "continue" },
+  { chord: { key: "F9" }, command: "record" },
+  { chord: { key: "Home" }, command: "to-start" },
+  { chord: { key: "L", mod: true }, command: "loop" },
+  { chord: { key: "Z", mod: true }, command: "undo" },
+  { chord: { key: "Z", mod: true, shift: true }, command: "redo" },
+  { chord: { key: "Y", mod: true }, command: "redo" },
+  { chord: { key: "T", mod: true }, command: "audio-track" },
+  {
+    chord: { key: "T", ctrl: true },
+    command: "audio-track",
+    mac: true,
+  },
+  {
+    chord: { key: "T", mod: true, shift: true },
+    command: "midi-track",
+  },
+  {
+    chord: { key: "T", ctrl: true, shift: true },
+    command: "midi-track",
+    mac: true,
+  },
+  {
+    chord: { alt: true, key: "T", mod: true },
+    command: "return-track",
+  },
+  { chord: { key: "Delete" }, command: "delete" },
+  { chord: { key: "Backspace" }, command: "delete" },
+  { chord: { key: "E", mod: true }, command: "split" },
+  { chord: { key: "D", mod: true }, command: "duplicate" },
+  { chord: { key: "0" }, command: "deactivate" },
+  { chord: { code: "Digit0" }, command: "deactivate" },
+  { chord: { key: "S" }, command: "solo" },
+  { chord: { key: "A", mod: true }, command: "select-all" },
+  { chord: { alt: true, key: "M", mod: true }, command: "mixer" },
+  { chord: { alt: true, key: "B", mod: true }, command: "library" },
+  { chord: { key: "Tab", shift: true }, command: "detail" },
+  { chord: { key: "R", mod: true, shift: true }, command: "export" },
+  { chord: { key: "O", mod: true }, command: "open" },
+  { chord: { key: "S", mod: true }, command: "save" },
+  { chord: { key: "S", mod: true, shift: true }, command: "save-as" },
+  { chord: { code: "Digit1", mod: true }, command: "grid-finer" },
+  { chord: { code: "Digit2", mod: true }, command: "grid-wider" },
+  { chord: { code: "Digit3", mod: true }, command: "grid-triplet" },
+  { chord: { code: "Digit4", mod: true }, command: "grid-snap" },
+  { chord: { code: "Digit5", mod: true }, command: "grid-fixed" },
+  { chord: { key: "=", mod: true }, command: "zoom-in" },
+  { chord: { key: "+", mod: true }, command: "zoom-in" },
+  { chord: { key: "-", mod: true }, command: "zoom-out" },
+  { chord: { key: "Z" }, command: "zoom-selection" },
+  { chord: { key: "X" }, command: "zoom-back" },
+  { chord: { key: "A" }, command: "automation" },
+  { chord: { key: "U" }, command: "fold" },
+  { chord: { key: "G", mod: true }, command: "group" },
+  { chord: { key: "G", mod: true, shift: true }, command: "ungroup" },
+  { chord: { alt: true, key: "U" }, command: "unfold-all" },
 ];
 
 /** The keyboard in words, for the shortcuts menu: what each does, then its keys. */
@@ -150,36 +173,24 @@ export const SHORTCUT_HELP: readonly { action: string; keys: string[] }[] = [
 ];
 
 const APPLE = /Mac|iPhone|iPad/;
-const LETTER_CODE = /^Key[A-Z]$/;
-const DIGIT_CODE = /^Digit\d$/;
 
-const isMac = () =>
-  typeof navigator !== "undefined" && APPLE.test(navigator.platform);
+/** The platform `mod` is read for: Cmd on a Mac, Ctrl elsewhere. */
+export const platformOf = (): "mac" | "windows" =>
+  typeof navigator !== "undefined" && APPLE.test(navigator.platform)
+    ? "mac"
+    : "windows";
 
-/** The key a press names: its letter even with Option held, which changes `key` on a Mac, and a digit by its place, which a layout such as AZERTY reaches with Shift. */
-function keyOf(event: KeyboardEvent): string {
-  if (event.altKey && LETTER_CODE.test(event.code)) {
-    return event.code.slice(3).toLowerCase();
-  }
-  if (DIGIT_CODE.test(event.code)) {
-    return event.code.slice(5);
-  }
-  return event.key.toLowerCase();
+/** The keys of this platform: a Mac adds what stands in for the keys its browser keeps. */
+export function platformShortcuts(): readonly Shortcut[] {
+  const mac = platformOf() === "mac";
+  return SHORTCUTS.filter((shortcut) => mac || !shortcut.mac);
 }
 
 /** The command a key press asks for, or none. */
 export function matchShortcut(event: KeyboardEvent): ShortcutCommand | null {
-  const mac = isMac();
-  const key = keyOf(event);
-  const mod = mac ? event.metaKey : event.ctrlKey;
-  const control = mac && event.ctrlKey;
-  const found = SHORTCUTS.find(
-    (shortcut) =>
-      shortcut.key === key &&
-      Boolean(shortcut.mod) === mod &&
-      Boolean(shortcut.control) === control &&
-      Boolean(shortcut.shift) === event.shiftKey &&
-      Boolean(shortcut.alt) === event.altKey
+  const platform = platformOf();
+  const found = platformShortcuts().find((shortcut) =>
+    matchesKeyboardEvent(event, parseHotkey(shortcut.chord, platform), platform)
   );
   return found?.command ?? null;
 }
