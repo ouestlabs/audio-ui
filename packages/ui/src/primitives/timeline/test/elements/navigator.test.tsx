@@ -8,7 +8,10 @@ import { Timeline } from "../../../../entries/timeline.ts";
  * 100px in, past a column of headers: 200px of lane shows 20 units. The
  * navigator's track is 500px wide, 5px per unit.
  */
-function renderNavigator(rootProps: Timeline.Root.Props = {}) {
+function renderNavigator(
+  rootProps: Timeline.Root.Props = {},
+  navigatorProps: Timeline.Navigator.Props = {}
+) {
   const onZoomChange = mock(
     (_zoom: number, _details: Timeline.Root.ZoomChangeEventDetails) => undefined
   );
@@ -22,7 +25,7 @@ function renderNavigator(rootProps: Timeline.Root.Props = {}) {
       <Timeline.Viewport data-testid="viewport">
         <Timeline.Lane data-testid="lane" />
       </Timeline.Viewport>
-      <Timeline.Navigator data-testid="navigator">
+      <Timeline.Navigator data-testid="navigator" {...navigatorProps}>
         <Timeline.NavigatorWindow
           aria-label="Visible range"
           data-testid="window"
@@ -129,6 +132,36 @@ describe("Timeline.Navigator", () => {
     const [zoom, details] = onZoomChange.mock.calls.at(-1) ?? [];
     expect(zoom).toBe(2);
     expect(details?.reason).toBe("double-click");
+  });
+
+  test("with a least width, a tiny stretch is drawn that wide, inside the bar", () => {
+    const original = globalThis.ResizeObserver;
+    const callbacks: ResizeObserverCallback[] = [];
+    globalThis.ResizeObserver = class {
+      constructor(callback: ResizeObserverCallback) {
+        callbacks.push(callback);
+      }
+      disconnect = () => undefined;
+      observe = () => undefined;
+      unobserve = () => undefined;
+    } as unknown as typeof ResizeObserver;
+    try {
+      const { shown } = renderNavigator(
+        { defaultZoom: 1000 },
+        { minWindowWidth: 50 }
+      );
+      // The bar is measured again when it resizes: 500 px, so 50 px is a tenth of it.
+      act(() => {
+        for (const callback of callbacks) {
+          callback([], {} as ResizeObserver);
+        }
+      });
+      const [left, width] = shown().map((value) => Number.parseFloat(value));
+      expect(width).toBeCloseTo(10, 1);
+      expect((left ?? 0) + (width ?? 0)).toBeLessThanOrEqual(100);
+    } finally {
+      globalThis.ResizeObserver = original;
+    }
   });
 
   test("the window's input scrolls from the keyboard", () => {

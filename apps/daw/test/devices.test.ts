@@ -83,7 +83,7 @@ describe("adding a device from the library", () => {
     expect(devicesOf(after.doc, made.track)).toEqual([DELAY]);
   });
 
-  test("DEV-003: on the add-track row, a track of its own", () => {
+  test("DEV-003: on the add-track button, a track of its own", () => {
     const { after, made } = added(DELAY, NEW_TRACK);
     expect(made.track).not.toBe(NEW_TRACK);
     expect(after.doc.tracks).toHaveLength(project().doc.tracks.length + 1);

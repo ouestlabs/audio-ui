@@ -36,7 +36,7 @@ export function takesDevice(
  * What adding the library's device `device` asks of the arrangement
  * (DEV-003), as one command, so one step of undo. It goes on the chain of
  * `onto`, at its end or at `index`, when that track takes it; otherwise, and
- * on the add-track row (`NEW_TRACK`) or with no track, on a new track named
+ * on the add-track button (`NEW_TRACK`) or with no track, on a new track named
  * after it, a MIDI track for an instrument and an audio track for an effect,
  * after `onto` when that is a track. `track` is where it goes; null for a
  * device the library does not have.

@@ -23,8 +23,8 @@ Audio files dropped on an audio track become one clip each, laid one after the o
 Status: partial: OBS-001 settles whether the reference lays several files after each other or on tracks of their own, and what a modifier key changes.
 Test: apps/daw/test/arrangement.test.ts "ARR-005"
 
-### ARR-006 Files dropped on the add-track row
-Audio files dropped on the row that adds a track make one new audio track per file, named after it (without the extension), each holding its file as a clip from the time under the pointer.
+### ARR-006 Files dropped on the add-track button
+Audio files dropped on the button that adds a track, at the head of the track headers, make one new audio track per file, named after it (without the extension), each holding its file as a clip from the start of the arrangement. Dropped on a track, a file lands at the time under the pointer (ARR-005).
 Test: apps/daw/test/arrangement.test.ts "ARR-006"
 
 ### ARR-007 What cannot be read
@@ -92,3 +92,10 @@ Test: apps/daw/test/browser/run.ts "ARR-021"
 A new or duplicated track never takes the id of a track there is, whatever was removed before the project was loaded. A project saved with two tracks under one id comes back with the second under a new one, empty: the clips stay on the first.
 Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-022"; apps/daw/test/project-file.test.ts "ARR-022"; apps/daw/test/browser/run.ts "ARR-022"
 
+### ARR-023 The overview at any zoom
+The bar over the tracks shows the stretch the view shows as a window with a handle at each edge. At any zoom the window keeps both handles, apart and inside the bar, at the end of the timeline too. It follows the pointer exactly, and the view follows it: a handle dragged zooms with the other edge held still, down to the window's least width, where the zoom is at its closest and both stop. The window between the handles scrolls.
+Test: apps/daw/test/browser/run.ts "ARR-023"
+
+### ARR-024 A narrow range
+A range keeps room for both handles, apart and inside it, however narrow the zoom would draw it: from twice that room it is as wide as it is long, and under that it stays wider, with a line along its bottom showing its true length against the ruler. Dragged, its end handle stays under the pointer, and the range changes to match.
+Test: packages/core/src/primitives/timeline/range-controller.test.ts; apps/daw/test/browser/run.ts "ARR-024"

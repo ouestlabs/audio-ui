@@ -666,7 +666,7 @@ export function Daw({
     [dispatch]
   );
 
-  // Files dropped on a track lay one after the other (ARR-005); on the add-track row, a track each (ARR-006).
+  // Files dropped on a track lay one after the other (ARR-005); on the add-track button, a track each (ARR-006).
   const addFiles = useCallback(
     async (files: File[], track: string, at: number) => {
       const context = webAudio.getContext();

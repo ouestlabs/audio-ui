@@ -289,6 +289,17 @@ describe("Timeline.RangeHandle", () => {
     expect(lastCall(onValueCommitted)[0]).toEqual([10, 75]);
   });
 
+  test("with minDrawnWidth, a drag of its end follows what is drawn", () => {
+    const { end, span } = renderRange({
+      defaultValue: [20, 24],
+      minDrawnWidth: 32,
+      minLength: 1,
+    });
+    // 8px long, drawn 36px: 10px further it is drawn 46px, so 28px long, 14 units.
+    drag(end, 100, 110);
+    expect(span()).toEqual(["20", "14"]);
+  });
+
   test("an edge stops a minimum length short of the other", () => {
     const { span, start } = renderRange({ minLength: 10 });
     drag(start, 40, 900);

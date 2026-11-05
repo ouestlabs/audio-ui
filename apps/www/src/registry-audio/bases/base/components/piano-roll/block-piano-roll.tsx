@@ -827,13 +827,10 @@ export default function BlockPianoRoll() {
               }
               sticky="top"
             >
-              <TimelineLane className="h-5.5 cursor-cell bg-muted/40">
+              <TimelineLane className="h-5 cursor-cell bg-background">
                 <TimelineRange
                   aria-label="Loop region"
-                  className={cn(
-                    "rounded-none bg-primary/70 ring-0",
-                    !looping && "opacity-40"
-                  )}
+                  className={cn(!looping && "opacity-40")}
                   drawable
                   getAriaValueText={describeStep}
                   onDoubleClick={clearLoopRegion}
@@ -841,16 +838,8 @@ export default function BlockPianoRoll() {
                   onValueCommitted={commitLoopRegion}
                   value={loopRange}
                 >
-                  <TimelineRangeHandle
-                    aria-label="Loop start"
-                    className="rounded-none bg-foreground/20 hover:bg-foreground/40"
-                    edge="start"
-                  />
-                  <TimelineRangeHandle
-                    aria-label="Loop end"
-                    className="rounded-none bg-foreground/20 hover:bg-foreground/40"
-                    edge="end"
-                  />
+                  <TimelineRangeHandle aria-label="Loop start" edge="start" />
+                  <TimelineRangeHandle aria-label="Loop end" edge="end" />
                 </TimelineRange>
               </TimelineLane>
               <TimelineRuler

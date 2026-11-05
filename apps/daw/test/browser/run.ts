@@ -278,7 +278,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       "the page is not cross-origin isolated"
     );
   },
-  "ARR-006: audio files dropped on the add-track row make a track each, named after them":
+  "ARR-006: audio files dropped on the add-track button make a track each, named after them":
     async (browser) => {
       const page = await open(browser);
       await dropChord(page, "[data-add-track]", "Chord take");
@@ -310,8 +310,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.keyboard.press("Meta+Equal");
       await page.keyboard.press("Meta+Equal");
       await page.keyboard.press("Meta+Digit4");
-      await dropChord(page, "[data-add-track]", "Chord take", 2);
-      await page.waitForSelector('[aria-label="Chord take"][data-track-id]');
+      await dropChord(page, '[data-track="track-1"]', "Chord take", 2);
+      await page
+        .locator("[data-clip-id]", { hasText: "Chord take" })
+        .waitFor({ timeout: 30_000 });
       const download = page.waitForEvent("download", { timeout: 30_000 });
       await page.getByRole("button", { name: "More controls" }).click();
       await page.getByRole("menuitem", { name: EXPORT }).click();
@@ -418,21 +420,20 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const width = (await slot.boundingBox())?.width ?? 0;
       assert(width < 48, `the folded device is ${width} px wide`);
     },
-  "DEV-003: a device dropped on the add-track row makes a track for it": async (
-    browser
-  ) => {
-    const page = await open(browser);
-    const before = await page.locator("[data-track-id]").count();
-    const library = page.getByRole("region", { name: "Library" });
-    await library
-      .getByRole("option", { name: POCKET_SYNTH })
-      .dragTo(page.locator("[data-add-track]"));
-    await page.waitForSelector('[aria-label="Pocket Synth"][data-track-id]', {
-      timeout: 5000,
-    });
-    const after = await page.locator("[data-track-id]").count();
-    assert(after === before + 1, `${before} tracks, then ${after}`);
-  },
+  "DEV-003: a device dropped on the add-track button makes a track for it":
+    async (browser) => {
+      const page = await open(browser);
+      const before = await page.locator("[data-track-id]").count();
+      const library = page.getByRole("region", { name: "Library" });
+      await library
+        .getByRole("option", { name: POCKET_SYNTH })
+        .dragTo(page.locator("[data-add-track]"));
+      await page.waitForSelector('[aria-label="Pocket Synth"][data-track-id]', {
+        timeout: 5000,
+      });
+      const after = await page.locator("[data-track-id]").count();
+      assert(after === before + 1, `${before} tracks, then ${after}`);
+    },
   "KEY-021: Cmd+Option+B folds the library and shows it again": async (
     browser
   ) => {
@@ -476,6 +477,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.mouse.down();
       await page.mouse.move(box.x + box.width / 2, box.y - 120, { steps: 6 });
       await page.mouse.up();
+      // The last step lands in the next frame: under load, read too soon it is not there yet.
+      await page.waitForTimeout(100);
       const taller = await height("Devices");
       assert(
         Math.abs(taller - devices - 120) < 4,
@@ -1671,6 +1674,18 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         () => (window as unknown as { decoded: number }).decoded
       );
       assert(decoded === 0, `the project decoded ${decoded} files again`);
+      // Its peaks came back from the cache too: the waveform reaches past the middle line.
+      const reach = await page
+        .locator("[data-slot=timeline-clip-waveform]")
+        .first()
+        .evaluate((element) => {
+          const drawn = element as HTMLCanvasElement;
+          const row = drawn
+            .getContext("2d")
+            ?.getImageData(0, 1, drawn.width, drawn.height / 2 - 2).data;
+          return row?.some((value, index) => index % 4 === 3 && value > 0);
+        });
+      assert(reach, "the waveform came back flat");
       assert(again > -40, `the take reopened plays at ${again} dB`);
     },
   "PRJ-006 and PRJ-007: Cmd+S saves a folder with its document and samples, and Cmd+O opens it again":
@@ -2278,6 +2293,367 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `${read.empty} of ${read.columns} columns are gaps`
       );
     },
+  "CLP-020: the clip view's waveform is solid too, a column per pixel": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await dropChord(page, '[data-track="track-1"]', "Take", 4);
+    const clip = page.locator("[data-clip-id]").first();
+    await clip.waitFor({ timeout: 10_000 });
+    await clip.click();
+    await page.getByRole("tab", { name: "Clip" }).click();
+    const canvas = page.locator("[data-slot=clip-panel-source] canvas");
+    await canvas.waitFor({ timeout: 5000 });
+    await page.waitForTimeout(400);
+    const read = await canvas.evaluate((element) => {
+      const drawn = element as HTMLCanvasElement;
+      const row = drawn
+        .getContext("2d")
+        ?.getImageData(0, Math.floor(drawn.height / 2), drawn.width, 1).data;
+      let empty = 0;
+      for (let column = 0; column < drawn.width; column += 1) {
+        if (!row?.[column * 4 + 3]) {
+          empty += 1;
+        }
+      }
+      return { columns: drawn.width, empty };
+    });
+    assert(read.columns > 0, "the waveform has no columns");
+    assert(
+      read.empty === 0,
+      `${read.empty} of ${read.columns} columns are gaps`
+    );
+  },
+  "CLP-020: the clip view's waveform follows a zoom as it goes, not once it stops":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 20);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const source = page.locator("[data-slot=clip-panel-source]");
+      await source.locator("canvas").waitFor({ timeout: 5000 });
+      await page.waitForTimeout(400);
+      const box = await source.boundingBox();
+      await page.mouse.move(
+        (box?.x ?? 0) + (box?.width ?? 0) / 2,
+        (box?.y ?? 0) + (box?.height ?? 0) / 2
+      );
+      const drawn = () =>
+        source.locator("canvas").evaluate((element) => {
+          const canvas = element as HTMLCanvasElement;
+          return canvas.width > 0
+            ? canvas.toDataURL()
+            : `${canvas.width}x${canvas.height}`;
+        });
+      const before = await drawn();
+      await page.keyboard.down("Control");
+      await [1, 2, 3, 4, 5, 6, 7, 8].reduce(async (done) => {
+        await done;
+        await page.mouse.wheel(0, -120);
+      }, Promise.resolve());
+      // In the frame after the last step, with no time for anything to catch up.
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) => {
+            requestAnimationFrame(() => resolve());
+          })
+      );
+      const zoomed = await drawn();
+      await page.keyboard.up("Control");
+      await page.waitForTimeout(500);
+      const settled = await drawn();
+      assert(zoomed !== before, "the zoom drew nothing");
+      assert(zoomed === settled, "the waveform caught up only after the zoom");
+    },
+  "CLP-021: the clip view dims what the clip leaves out of its source": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await dropChord(page, '[data-track="track-1"]', "Take", 20);
+    const clip = page.locator("[data-clip-id]").first();
+    await clip.waitFor({ timeout: 10_000 });
+    await clip.click();
+    await page.getByRole("tab", { name: "Clip" }).click();
+    const left = page.locator("[data-slot=clip-panel-unplayed]").first();
+    await left.waitFor({ state: "attached", timeout: 5000 });
+    const width = async () => (await left.boundingBox())?.width ?? 0;
+    assert((await width()) === 0, "a clip playing it all still dims some");
+    const handle = page.getByRole("slider", { name: "Clip start" });
+    await handle.focus();
+    await [1, 2, 3, 4, 5, 6].reduce(async (done) => {
+      await done;
+      await page.keyboard.press("Shift+ArrowRight");
+    }, Promise.resolve());
+    await page.waitForTimeout(100);
+    assert((await width()) > 0, "the stretch before the start is not dimmed");
+  },
+  "CLP-022: a clip box folds from anywhere on its heading, and unfolds from anywhere on its strip":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const box = page.locator("[data-slot=clip-box]", { hasText: "Loop" });
+      // Its title, not its caret: the press lands on the button stretched over the heading.
+      const title = await box
+        .getByRole("heading", { name: "Loop" })
+        .boundingBox();
+      await page.mouse.click(
+        (title?.x ?? 0) + 4,
+        (title?.y ?? 0) + (title?.height ?? 0) / 2
+      );
+      await page.getByRole("button", { name: "Unfold Loop" }).waitFor();
+      const strip = await box.boundingBox();
+      assert(strip && strip.width < 48, "the box did not fold to a strip");
+      await page.mouse.click(
+        (strip?.x ?? 0) + (strip?.width ?? 0) / 2,
+        (strip?.y ?? 0) + (strip?.height ?? 0) - 8
+      );
+      await page.getByRole("button", { name: "Fold Loop" }).waitFor();
+    },
+  "ARR-024: a range too narrow for its handles keeps them apart inside it, shows its true length, and follows the pointer":
+    async (browser) => {
+      const page = await open(browser);
+      const range = page.locator("[data-slot=timeline-range]").first();
+      const handles = range.locator("[data-slot=timeline-range-handle]");
+      const extent = range.locator("[data-slot=timeline-range-extent]");
+      const box = async (at: number) => {
+        const found = await handles.nth(at).boundingBox();
+        assert(found, "the handle is there");
+        return found as NonNullable<typeof found>;
+      };
+      const zoom = async (key: string) => {
+        await [1, 2, 3, 4, 5].reduce(async (done) => {
+          await done;
+          await page.keyboard.press(key);
+          await page.waitForTimeout(60);
+        }, Promise.resolve());
+      };
+      await zoom("Meta+Equal");
+      await page.waitForTimeout(200);
+      assert(
+        !(await extent.isVisible()),
+        "a range as wide as it is long still shows its length apart"
+      );
+      // Zoomed in, the grid lets it down to a bar; zoomed back out, that is a sliver.
+      await page.getByRole("slider", { exact: true, name: "Loop" }).focus();
+      await page.keyboard.press("Meta+ArrowDown");
+      await page.keyboard.press("Meta+ArrowDown");
+      await page
+        .locator("[data-slot=timeline-viewport]")
+        .first()
+        .click({
+          position: { x: 700, y: 300 },
+        });
+      await zoom("Meta+Minus");
+      await page.waitForTimeout(200);
+      const drawn = await range.boundingBox();
+      const line = await extent.boundingBox();
+      assert((line?.width ?? 99) < 20, `its length shows ${line?.width} px`);
+      assert((drawn?.width ?? 0) >= 32, `it is drawn ${drawn?.width} px wide`);
+      const [start, end] = [await box(0), await box(1)];
+      assert(
+        end.x - (start.x + start.width) >= 4,
+        `the handles are ${end.x - (start.x + start.width)} px apart`
+      );
+      assert(
+        start.x >= (drawn?.x ?? 0) &&
+          end.x + end.width <= (drawn?.x ?? 0) + (drawn?.width ?? 0),
+        "a handle is outside the range"
+      );
+      await page.mouse.move(end.x + end.width / 2, end.y + end.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(
+        end.x + end.width / 2 + 90,
+        end.y + end.height / 2,
+        {
+          steps: 5,
+        }
+      );
+      await page.mouse.up();
+      await page.waitForTimeout(100);
+      const moved = await box(1);
+      const stayed = await box(0);
+      assert(
+        Math.abs(moved.x - (end.x + 90)) < 30,
+        `dragged 90 px, the handle moved ${moved.x - end.x} px`
+      );
+      assert(
+        Math.abs(stayed.x - start.x) < 1,
+        "the end handle moved the start"
+      );
+    },
+  "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
+    async (browser) => {
+      const page = await open(browser);
+      const bar = page.locator("[data-slot=timeline-navigator]");
+      const edges = async () => {
+        const read = async (label: string) => {
+          const box = await bar
+            .locator(`.cursor-ew-resize:has([aria-label="${label}"])`)
+            .boundingBox();
+          if (!box) {
+            throw new Error(`no handle: ${label}`);
+          }
+          return box;
+        };
+        return {
+          end: await read("End of the visible range"),
+          start: await read("Start of the visible range"),
+        };
+      };
+      const inBar = async () => {
+        const box = await bar.boundingBox();
+        const { end, start } = await edges();
+        assert(
+          !!box &&
+            start.x >= box.x &&
+            end.x + end.width <= box.x + box.width &&
+            end.x - (start.x + start.width) >= 12,
+          `the handles read ${JSON.stringify({ box, end, start })}`
+        );
+        return { end, start };
+      };
+      await inBar();
+      await [1, 2, 3, 4, 5, 6, 7, 8].reduce(async (done) => {
+        await done;
+        await page.keyboard.press("Meta+Equal");
+        await page.waitForTimeout(60);
+      }, Promise.resolve());
+      await page.waitForTimeout(300);
+      const viewport = page.locator("[data-slot=timeline-viewport]");
+      const { end, start } = await inBar();
+      const opacity = await bar
+        .locator(".cursor-ew-resize")
+        .evaluateAll((all) =>
+          all.map((one) => getComputedStyle(one).opacity).join()
+        );
+      assert(opacity === "1,1", `the handles show at ${opacity}`);
+      // Between them, the window scrolls.
+      const y = start.y + start.height / 2;
+      const middle = (start.x + start.width + end.x) / 2;
+      const scrolled = () => viewport.evaluate((element) => element.scrollLeft);
+      const from = await scrolled();
+      await page.mouse.move(middle, y);
+      await page.mouse.down();
+      await page.mouse.move(middle + 300, y, { steps: 6 });
+      await page.mouse.up();
+      await page.waitForTimeout(150);
+      assert(
+        (await scrolled()) > from,
+        "the window between them did not scroll"
+      );
+      // Scrolled to the end, both still show.
+      await viewport.evaluate((element) => {
+        element.scrollLeft = element.scrollWidth;
+      });
+      await page.waitForTimeout(200);
+      await inBar();
+      // An edge dragged in, far past its least width: the other edge stays, the window at its least, and the view stops with it.
+      await viewport.evaluate((element) => {
+        element.scrollLeft = 0;
+      });
+      await page.keyboard.press("Meta+Minus");
+      await page.keyboard.press("Meta+Minus");
+      await page.keyboard.press("Meta+Minus");
+      await page.waitForTimeout(250);
+      const drawnEdges = await inBar();
+      await page.mouse.move(
+        drawnEdges.end.x + drawnEdges.end.width / 2,
+        drawnEdges.end.y + drawnEdges.end.height / 2
+      );
+      await page.mouse.down();
+      await page.mouse.move(drawnEdges.end.x - 400, y, { steps: 8 });
+      await page.waitForTimeout(100);
+      const closest = await viewport.evaluate((element) => element.scrollWidth);
+      await page.mouse.move(drawnEdges.end.x - 600, y, { steps: 4 });
+      await page.waitForTimeout(100);
+      await page.mouse.up();
+      const stopped = await inBar();
+      assert(
+        Math.abs(stopped.start.x - drawnEdges.start.x) <= 1,
+        `the end handle moved the start from ${drawnEdges.start.x} to ${stopped.start.x}`
+      );
+      assert(
+        (await viewport.evaluate((element) => element.scrollWidth)) === closest,
+        "the view went on zooming past the window's least width"
+      );
+      // The start handle dragged in: the end stays where it is, and nothing slides.
+      await page.mouse.move(
+        stopped.start.x + stopped.start.width / 2,
+        stopped.start.y + stopped.start.height / 2
+      );
+      await page.mouse.down();
+      await page.mouse.move(stopped.start.x + 300, y, { steps: 6 });
+      await page.mouse.up();
+      await page.waitForTimeout(150);
+      const held = await inBar();
+      assert(
+        Math.abs(held.end.x - stopped.end.x) <= 1,
+        `the start handle moved the end from ${stopped.end.x} to ${held.end.x}`
+      );
+      // A handle dragged out zooms out, with no double-click: here the end's, the window against the start of the bar.
+      const wide = () => viewport.evaluate((element) => element.scrollWidth);
+      const before = await wide();
+      await page.mouse.move(
+        held.end.x + held.end.width / 2,
+        held.end.y + held.end.height / 2
+      );
+      await page.mouse.down();
+      await page.mouse.move(held.end.x + held.end.width / 2 + 200, y, {
+        steps: 6,
+      });
+      await page.mouse.up();
+      await page.waitForTimeout(200);
+      const after = await wide();
+      assert(after < before, `zoomed out from ${before} px to ${after} px`);
+      const out = await inBar();
+      assert(
+        Math.abs(out.end.x - (held.end.x + 200)) <= 2,
+        `the end handle is at ${out.end.x}, the pointer at ${held.end.x + 200}`
+      );
+    },
+  "MIX-002: a track's fader and its mixer channel are one fader: the same range and the same place, each moved by the other":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByRole("tab", { name: "Mixer" }).click();
+      const track = page.getByRole("slider", { name: "2 Audio gain" });
+      const channel = page.getByRole("slider", { name: "2 Audio volume" });
+      await channel.waitFor({ timeout: 5000 });
+      const read = async () =>
+        Promise.all(
+          [track, channel].map((slider) =>
+            slider.evaluate((input) => {
+              const { max, min, value } = input as HTMLInputElement;
+              return { max, min, value };
+            })
+          )
+        );
+      const same = async (when: string) => {
+        const [a, b] = await read();
+        assert(
+          JSON.stringify(a) === JSON.stringify(b),
+          `${when}: ${JSON.stringify(a)} and ${JSON.stringify(b)}`
+        );
+        return a?.value;
+      };
+      assert((await same("at first")) === "0", "they do not start at 0 dB");
+      await track.focus();
+      await page.keyboard.press("ArrowLeft");
+      await page.keyboard.press("ArrowLeft");
+      const down = await same("moved on the track");
+      assert(Number(down) < 0, `the track's fader reads ${down}`);
+      await channel.focus();
+      await page.keyboard.press("End");
+      assert(
+        (await same("moved on the channel")) === "6",
+        "the channel's top is not the track's"
+      );
+    },
   "ARR-022: a track removed, the page loaded again: a new track takes an id of its own, and shows and goes alone":
     async (browser) => {
       const page = await open(browser);
@@ -2363,6 +2739,42 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         (await names()) === [two, one, ...rest].join(),
         `from ${before} the tracks read ${await names()}`
       );
+    },
+  "DEV-004: a device held from the library over a rack lights its chain, not the track's":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: "Add a rack" }).click();
+      await page.getByRole("menuitem", { name: "Effect rack" }).click();
+      const rack = page.locator("[data-slot=rack-panel]");
+      await rack.waitFor({ timeout: 5000 });
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Gate");
+      await library.getByRole("option").first().hover();
+      await page.mouse.down();
+      const box = await rack.boundingBox();
+      if (!box) {
+        throw new Error("the rack is not on the page");
+      }
+      // A native drag takes a first move to start, and shows over what the next ones reach.
+      await page.mouse.move(box.x + 60, box.y + 120, { steps: 6 });
+      await page.mouse.move(box.x + 64, box.y + 124, { steps: 3 });
+      await page.waitForTimeout(150);
+      const lit = await page.evaluate(() =>
+        [...document.querySelectorAll("[data-slot=device-chain]")].map(
+          (chain) => chain.getAttribute("data-over") !== null
+        )
+      );
+      await page.mouse.up();
+      assert(
+        JSON.stringify(lit) === "[false,true]",
+        `the chains lit are ${JSON.stringify(lit)}`
+      );
+      await rack
+        .locator("[data-slot=device-chain-slot]")
+        .first()
+        .waitFor({ timeout: 5000 });
     },
   "DEV-006: a device's on square keeps its place and its shape when it folds":
     async (browser) => {

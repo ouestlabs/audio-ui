@@ -2,6 +2,7 @@ import {
   createNavigatorController,
   type NavigatorController,
   type NavigatorPart,
+  thumbOf,
   visibleRange,
 } from "@audio-ui/core/timeline";
 import * as React from "react";
@@ -24,6 +25,8 @@ interface NavigatorContextValue {
   duration: number;
   /** The visible stretch, in units. */
   range: readonly [number, number];
+  /** The window as drawn: where its edges sit and how wide it is, as shares of the bar. */
+  thumb: { end: number; start: number; width: number };
   /** The navigator's bar: what a drag's px are measured along. */
   trackRef: React.RefObject<HTMLDivElement | null>;
 }
@@ -51,6 +54,7 @@ export function Navigator(componentProps: Navigator.Props) {
   const {
     className,
     getAriaValueText = describeNumber,
+    minWindowWidth = 0,
     ref,
     render,
     style,
@@ -58,7 +62,7 @@ export function Navigator(componentProps: Navigator.Props) {
   } = componentProps;
   const timeline = useTimelineContext("Navigator");
   const { actions, meta, state } = timeline;
-  const { duration, viewport } = meta;
+  const { duration, maxZoom, viewport } = meta;
   const metrics = React.useSyncExternalStore(
     viewport.subscribe,
     viewport.get,
@@ -66,17 +70,45 @@ export function Navigator(componentProps: Navigator.Props) {
   );
   const range = visibleRange(metrics, duration);
   const trackRef = React.useRef<HTMLDivElement>(null);
+  const [bar, setBar] = React.useState(0);
+  React.useEffect(() => {
+    const track = trackRef.current;
+    if (!(track && minWindowWidth > 0)) {
+      return;
+    }
+    const measure = () => setBar(track.getBoundingClientRect().width);
+    measure();
+    const observer = new ResizeObserver(measure);
+    observer.observe(track);
+    return () => observer.disconnect();
+  }, [minWindowWidth]);
+  const drawn =
+    minWindowWidth > 0 && bar > 0 && duration > 0
+      ? thumbOf(range, duration, bar, minWindowWidth)
+      : null;
+  const span = drawn ? bar : Math.max(duration, Number.MIN_VALUE);
+  const [from, to] = drawn ?? range;
 
   const controller = React.useMemo(
     () =>
       createNavigatorController({
         disabled: state.disabled,
         duration,
+        maxZoom,
         metrics: () => viewport.get(),
+        minWindowWidth,
         scrollTo: actions.scrollTo,
         zoomTo: actions.zoomTo,
       }),
-    [actions.scrollTo, actions.zoomTo, duration, state.disabled, viewport]
+    [
+      actions.scrollTo,
+      actions.zoomTo,
+      duration,
+      maxZoom,
+      minWindowWidth,
+      state.disabled,
+      viewport,
+    ]
   );
 
   const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -89,9 +121,10 @@ export function Navigator(componentProps: Navigator.Props) {
       describe: getAriaValueText,
       duration,
       range,
+      thumb: { end: to / span, start: from / span, width: (to - from) / span },
       trackRef,
     }),
-    [controller, duration, getAriaValueText, range]
+    [controller, duration, from, getAriaValueText, range, span, to]
   );
 
   const element = useRender({
@@ -161,6 +194,8 @@ export namespace Navigator {
   export interface Props extends PartProps<"div", State> {
     /** Returns how a position is announced by the window and its handles. Defaults to the number. */
     getAriaValueText?: DescribePosition;
+    /** The least width the window is drawn at, in px, so its handles keep room at any zoom. Dragged, the window follows the pointer, and the view follows the window. Leave it out and the window is as wide as the stretch it shows. */
+    minWindowWidth?: number;
   }
 }
 
@@ -186,10 +221,8 @@ export function NavigatorWindow(componentProps: NavigatorWindow.Props) {
     "window",
     state.disabled
   );
-  const { describe, duration, range } = navigator;
+  const { describe, duration, range, thumb } = navigator;
   const [start, end] = range;
-  const share = (value: number) =>
-    `${(duration > 0 ? value / duration : 0) * 100}%`;
 
   return useRender({
     defaultTagName: "div",
@@ -217,9 +250,9 @@ export function NavigatorWindow(componentProps: NavigatorWindow.Props) {
           </>
         ),
         style: {
-          left: share(start),
+          left: `${thumb.start * 100}%`,
           position: "absolute",
-          width: share(end - start),
+          width: `${thumb.width * 100}%`,
         },
       },
       { ...elementProps, ...resolveStyling(className, style, state) }
@@ -258,7 +291,7 @@ export function NavigatorHandle(componentProps: NavigatorHandle.Props) {
     edge,
     timelineState.disabled
   );
-  const { describe, duration, range } = navigator;
+  const { describe, duration, range, thumb } = navigator;
   const current = edge === "start" ? range[0] : range[1];
   const state = React.useMemo<NavigatorHandle.State>(
     () => ({ ...timelineState, edge }),
@@ -291,7 +324,7 @@ export function NavigatorHandle(componentProps: NavigatorHandle.Props) {
           </>
         ),
         style: {
-          left: `${(duration > 0 ? current / duration : 0) * 100}%`,
+          left: `${(edge === "start" ? thumb.start : thumb.end) * 100}%`,
           position: "absolute",
           touchAction: "none",
         },

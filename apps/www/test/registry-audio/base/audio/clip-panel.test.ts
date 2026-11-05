@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   type ClipSettings,
   reversedSettings,
+  warpMarkersTight,
 } from "@/registry-audio/bases/base/audio/panels/clip-panel";
 
 const settings = (patch: Partial<ClipSettings> = {}): ClipSettings => ({
@@ -50,5 +51,16 @@ describe("reversedSettings", () => {
       ],
     });
     expect(reversedSettings(warped).offset).toBe(7);
+  });
+});
+
+describe("warpMarkersTight", () => {
+  test("CLP-021: markers closer than a handle on average are ticks", () => {
+    expect(warpMarkersTight(142, 240, 2.8)).toBe(true);
+    expect(warpMarkersTight(142, 240, 100)).toBe(false);
+  });
+
+  test("CLP-021: a couple of markers across a wide view keep their handles", () => {
+    expect(warpMarkersTight(2, 4, 160)).toBe(false);
   });
 });

@@ -7,7 +7,7 @@ import {
   type Recording,
 } from "@/lib/daw/recordings";
 
-/** Where a file dropped on the add-track row goes: a track of its own. */
+/** Where a file dropped on the add-track button goes: a track of its own. */
 export const NEW_TRACK = "new";
 
 /** A dropped file, decoded: its recording and the bytes it came from, to keep. */
@@ -51,7 +51,7 @@ export async function decodeFiles(
 
 /**
  * What lays dropped recordings out, as one batch: on a track, one clip after
- * the other from `at` (ARR-005); on the add-track row, a track each, named
+ * the other from `at` (ARR-005); on the add-track button, a track each, named
  * after its file, its clip at `at` (ARR-006). A recording with a beat is
  * warped in time at `tempo` (CLP-019). The arrangement grows to hold what
  * goes past its end (TRN-008).

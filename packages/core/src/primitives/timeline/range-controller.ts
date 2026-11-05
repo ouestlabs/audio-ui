@@ -45,6 +45,8 @@ export interface RangeOptions {
   duration: number;
   grid: Grid;
   largeStep: number;
+  /** The least room it is drawn with, in px, as `drawnRangeWidth` draws it: a drag of its end follows what is drawn. @default 0 */
+  minDrawnWidth?: number;
   /** The shortest the range can be, in the timeline's units. */
   minLength: number;
   /** Whether dragging the body, or its keys, moves the range. */
@@ -105,6 +107,20 @@ export interface RangeController {
   pressDraw: (event: PointerEvent, lane: Element) => void;
   setOptions: (options: RangeOptions) => void;
   subscribe: (listener: () => void) => () => void;
+}
+
+/**
+ * How wide a range `width` px long is drawn, so that it keeps `least` px of
+ * room for its handles: from `2 * least` px up, as long as it is, and under
+ * that it still grows with its length, at half the rate.
+ */
+export function drawnRangeWidth(width: number, least: number): number {
+  return Math.max(width, least + width / 2);
+}
+
+/** How long a range is, in px, when it is drawn `drawn` px wide. */
+export function rangeWidthOfDrawn(drawn: number, least: number): number {
+  return drawn >= 2 * least ? drawn : Math.max(0, 2 * (drawn - least));
 }
 
 /** One drag, from press to release. */
@@ -362,7 +378,19 @@ export function createRangeController(initial: RangeOptions): RangeController {
       (move) => {
         // Pixels become units along the lane, the same way a drag reads them.
         const units = perPixel(lane);
-        const delta = (move.clientX - gesture.startX) * units;
+        const moved = move.clientX - gesture.startX;
+        // Its end follows the pointer as drawn: a range drawn wider than it is changes faster than its handle moves.
+        const least = options.minDrawnWidth ?? 0;
+        const length = (gesture.origin[1] - gesture.origin[0]) / units;
+        const delta =
+          edge === "end" && least > 0 && units > 0
+            ? (rangeWidthOfDrawn(
+                drawnRangeWidth(length, least) + moved,
+                least
+              ) -
+                length) *
+              units
+            : moved * units;
         // Its own edges are not places for the range to snap to.
         const grid: Grid = bypassesGrid(move)
           ? { offset: 0, step: 0 }

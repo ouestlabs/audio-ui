@@ -10,6 +10,12 @@ const LEAST_PEAKS = 4096;
 const MOST_PEAKS = 2 ** 20;
 const EXTENSION = /\.[^.]+$/;
 
+/** A recording's shape, a slice at a time. */
+export interface RecordingPeaks {
+  max: Float32Array;
+  min: Float32Array;
+}
+
 /** A recording of the project: its sound, decoded at the engine's rate, and what its clips draw. */
 export interface Recording {
   /** Its beat as it was read when it came in, which warps the clips laid down from it (CLP-019). */
@@ -18,8 +24,8 @@ export interface Recording {
   length: number;
   /** The name of the file it came from, without its extension. */
   name: string;
-  /** One amplitude per slice, from 0 to 1. */
-  peaks: Float32Array;
+  /** The lowest and highest sample of each slice, from -1 to 1. */
+  peaks: RecordingPeaks;
   source: RecordingSource;
 }
 
@@ -63,38 +69,43 @@ export async function decodeRecording(
   if (!(channels && first && first.length > 0)) {
     return null;
   }
-  const { max, min } = normalizePeaks(
+  const peaks = normalizePeaks(
     computePeaks(channels, peakCountFor(first.length / context.sampleRate))
   );
   return {
     beat: analyzeBeat(channels, context.sampleRate),
     length: first.length / context.sampleRate,
     name,
-    peaks: Float32Array.from(max, (high, index) =>
-      Math.max(high, -(min[index] ?? 0))
-    ),
+    peaks: {
+      max: Float32Array.from(peaks.max),
+      min: Float32Array.from(peaks.min),
+    },
     source: { channels, sampleRate: context.sampleRate },
   };
 }
 
-const stretches = new WeakMap<Float32Array, Map<number, Float32Array>>();
+const stretches = new WeakMap<RecordingPeaks, Map<number, RecordingPeaks>>();
 
 /** The peaks of the stretch of its recording a clip's source holds: what its waveform is drawn from. */
 export function sourcePeaks(
   clip: { sourceFrom?: number; sourceLength: number },
   recording: Recording
-): Float32Array {
+): RecordingPeaks {
   const { length, peaks } = recording;
-  const from = Math.floor(((clip.sourceFrom ?? 0) / length) * peaks.length);
-  const to = Math.ceil(
-    (((clip.sourceFrom ?? 0) + clip.sourceLength) / length) * peaks.length
+  const count = peaks.max.length;
+  const from = Math.floor(((clip.sourceFrom ?? 0) / length) * count);
+  const to = Math.max(
+    from + 1,
+    Math.ceil((((clip.sourceFrom ?? 0) + clip.sourceLength) / length) * count)
   );
   // The same view of them each time, copying nothing: a clip draws again only when it changes.
-  const views = stretches.get(peaks) ?? new Map<number, Float32Array>();
+  const views = stretches.get(peaks) ?? new Map<number, RecordingPeaks>();
   stretches.set(peaks, views);
-  const key = from * (peaks.length + 1) + to;
-  const stretch =
-    views.get(key) ?? peaks.subarray(from, Math.max(from + 1, to));
+  const key = from * (count + 1) + to;
+  const stretch = views.get(key) ?? {
+    max: peaks.max.subarray(from, to),
+    min: peaks.min.subarray(from, to),
+  };
   views.set(key, stretch);
   return stretch;
 }

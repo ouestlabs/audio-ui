@@ -1,7 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
   createRangeController,
+  drawnRangeWidth,
   type RangeOptions,
+  rangeWidthOfDrawn,
 } from "./range-controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
@@ -139,5 +141,25 @@ describe("Range controller subscriptions", () => {
     listener.mockClear();
     range.keyDown(key("ArrowRight"));
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("A range drawn with room for its handles", () => {
+  test("is as long as it is from twice the room up", () => {
+    expect(drawnRangeWidth(64, 32)).toBe(64);
+    expect(drawnRangeWidth(300, 32)).toBe(300);
+  });
+
+  test("under that keeps the room, and still grows with its length", () => {
+    expect(drawnRangeWidth(0, 32)).toBe(32);
+    expect(drawnRangeWidth(6, 32)).toBe(35);
+    expect(drawnRangeWidth(40, 32)).toBe(52);
+  });
+
+  test("reads back its length from what is drawn", () => {
+    for (const width of [0, 6, 40, 64, 300]) {
+      expect(rangeWidthOfDrawn(drawnRangeWidth(width, 32), 32)).toBe(width);
+    }
+    expect(rangeWidthOfDrawn(10, 32)).toBe(0);
   });
 });

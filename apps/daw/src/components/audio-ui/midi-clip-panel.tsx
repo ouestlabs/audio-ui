@@ -750,7 +750,7 @@ function MidiClipPanel({
               </Button>
             }
           >
-            <TimelineNavigator className="mx-2 my-1.5" />
+            <TimelineNavigator className="rounded-none" />
           </PianoRollStrip>
           <PianoRollViewport ref={viewportRef}>
             <PianoRollStrip
@@ -770,22 +770,19 @@ function MidiClipPanel({
               sticky="top"
             >
               {/* The loop brace, or what the clip plays: drag it, or its ends. */}
-              <TimelineLane className="h-4 bg-muted/40">
+              <TimelineLane className="h-5 bg-background">
                 <TimelineRange
                   aria-label={loop ? "Loop" : "Played"}
-                  className="rounded-none bg-primary/70 ring-0"
                   onValueChange={onRegionChange ? setBrace : undefined}
                   onValueCommitted={onNotesCommitted}
                   value={loop ?? [offset, offset + length]}
                 >
                   <TimelineRangeHandle
                     aria-label={loop ? "Loop start" : "Clip start"}
-                    className="rounded-none bg-foreground/20 hover:bg-foreground/40"
                     edge="start"
                   />
                   <TimelineRangeHandle
                     aria-label={loop ? "Loop end" : "Clip end"}
-                    className="rounded-none bg-foreground/20 hover:bg-foreground/40"
                     edge="end"
                   />
                 </TimelineRange>

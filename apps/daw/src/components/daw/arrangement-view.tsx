@@ -286,11 +286,11 @@ export interface ArrangementViewProps {
   onAddMidiClip: (track: string, at: number) => void;
   /** An audio or MIDI track's Arm button: `exclusive` disarms the others. */
   onArm: (track: string, exclusive: boolean) => void;
-  /** A device of the library dropped on a track (its id), or on the add-track row (`NEW_TRACK`). */
+  /** A device of the library dropped on a track (its id), or on the add-track button (`NEW_TRACK`). */
   onDevice: (device: string, track: string) => void;
   /** "Edit" chosen from a clip's menu: the clip is selected, to show it. */
   onEditClip: () => void;
-  /** Files dropped on a track (its id), or on the add-track row (`NEW_TRACK`), at a time of the arrangement. */
+  /** Files dropped on a track (its id), or on the add-track button (`NEW_TRACK`), at a time of the arrangement. */
   onFiles: (files: File[], track: string, at: number) => void;
   /** A click in the ruler or a lane: where to start, and whether to play from there. */
   onSeek: (seconds: number) => void;
@@ -562,7 +562,7 @@ export function ArrangementView({
     },
     [grid.snapStep, zoom]
   );
-  // A lane takes a device of the library, and files when `files` (an audio track, or the add-track row).
+  // A lane takes a device of the library, and files when `files` (an audio track, or the add-track button).
   const dragOver = useCallback(
     (track: string, files: boolean) => (event: DragEvent<HTMLElement>) => {
       if (carriesDevice(event) || (files && carriesFiles(event))) {
@@ -583,7 +583,12 @@ export function ArrangementView({
       } else if (files && carriesFiles(event)) {
         event.preventDefault();
         setDropOn(null);
-        onFiles(Array.from(event.dataTransfer.files), track, timeAt(event));
+        // A track of their own starts at the start: that cell has no time under the pointer.
+        onFiles(
+          Array.from(event.dataTransfer.files),
+          track,
+          track === NEW_TRACK ? 0 : timeAt(event)
+        );
       }
     },
     [onDevice, onFiles, timeAt]
@@ -625,11 +630,56 @@ export function ArrangementView({
       {...view.timeline}
     >
       {/* The overview of the whole arrangement, on top as a DAW has it, over the lanes alone. */}
-      <div
-        className="shrink-0 border-b px-1 py-1"
-        style={{ paddingInlineStart: LEAD_PX }}
-      >
-        <TimelineNavigator getAriaValueText={describe} />
+      <div className="flex shrink-0 border-b">
+        {/* Takes a device or files dropped on it, a track for each. */}
+        <div
+          aria-label="New tracks"
+          className={cn(
+            "flex shrink-0 items-center border-e",
+            dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
+          )}
+          data-add-track=""
+          onDragLeave={fileLeave}
+          onDragOver={dragOver(NEW_TRACK, true)}
+          onDrop={drop(NEW_TRACK, true)}
+          role="group"
+          style={{ width: LEAD_PX }}
+        >
+          {/* One button for every kind of track, each with its keys (KEY-006 to KEY-008). */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  className="min-w-0 flex-1 justify-start gap-1.5 rounded-none px-3 font-normal"
+                  size="xs"
+                  variant="ghost"
+                />
+              }
+            >
+              <PlusIcon aria-hidden="true" />
+              {dropOn === NEW_TRACK ? "A track for each" : "Add track"}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={addAudio}>
+                Audio track
+                <DropdownMenuShortcut>Ctrl T</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={addMidi}>
+                MIDI track
+                <DropdownMenuShortcut>Ctrl Shift T</DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={addReturn}>
+                Return track
+                <DropdownMenuShortcut>Cmd Option T</DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <TimelineNavigator
+          className="h-auto min-w-0 flex-1 rounded-none"
+          getAriaValueText={describe}
+        />
       </div>
       <TimelineViewport
         className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/30"
@@ -912,60 +962,6 @@ export function ArrangementView({
               </div>
             );
           })}
-          <Row
-            className={cn(
-              "sticky bottom-0 z-30 bg-background",
-              dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
-            )}
-            lead={
-              <div className="m-0.5 flex min-w-0 flex-1">
-                {/* One button for every kind of track, each with its keys (KEY-006 to KEY-008). */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger
-                    render={
-                      <Button
-                        className="min-w-0 flex-1 justify-start gap-1.5"
-                        size="sm"
-                        variant="ghost"
-                      />
-                    }
-                  >
-                    <PlusIcon aria-hidden="true" />
-                    Add track
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent>
-                    <DropdownMenuItem onClick={addAudio}>
-                      Audio track
-                      <DropdownMenuShortcut>Ctrl T</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={addMidi}>
-                      MIDI track
-                      <DropdownMenuShortcut>Ctrl Shift T</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={addReturn}>
-                      Return track
-                      <DropdownMenuShortcut>Cmd Option T</DropdownMenuShortcut>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </div>
-            }
-          >
-            <TimelineLane
-              className="h-8 border-b-0 text-muted-foreground text-xs"
-              data-add-track=""
-              onDragLeave={fileLeave}
-              onDragOver={dragOver(NEW_TRACK, true)}
-              onDrop={drop(NEW_TRACK, true)}
-            >
-              {dropOn === NEW_TRACK ? (
-                <span className="pointer-events-none absolute inset-y-0 start-3 flex items-center">
-                  A track for each
-                </span>
-              ) : null}
-            </TimelineLane>
-          </Row>
         </div>
       </TimelineViewport>
       {marquee.rect

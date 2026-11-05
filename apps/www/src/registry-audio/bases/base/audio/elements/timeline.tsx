@@ -1,5 +1,6 @@
 "use client";
 
+import { dbToGain, gainToDb } from "@audio-ui/core/analysis";
 import { CurveIcon, RecordIcon } from "@audio-ui/icons/react";
 import {
   FADE_SHAPES,
@@ -68,7 +69,7 @@ function TimelineViewport({
       className={cn(
         "cn-timeline-viewport relative min-h-0 min-w-0 overscroll-x-contain",
         scrollbar === "hidden" &&
-          "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "scrollbar-none [&::-webkit-scrollbar]:hidden",
         className
       )}
       data-slot="timeline-viewport"
@@ -196,16 +197,29 @@ function TimelinePlayhead({
   );
 }
 
-function TimelineRange({ className, ...props }: TimelinePrimitive.Range.Props) {
+function TimelineRange({
+  children,
+  className,
+  ...props
+}: TimelinePrimitive.Range.Props) {
   return (
     <TimelinePrimitive.Range
       className={cn(
-        "cn-timeline-range inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+        "cn-timeline-range @container/range inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
         className
       )}
       data-slot="timeline-range"
+      minDrawnWidth={32}
       {...props}
-    />
+    >
+      {/* Its true length against the ruler, while it is drawn wider to keep its handles apart. */}
+      <span
+        aria-hidden="true"
+        className="cn-timeline-range-extent pointer-events-none absolute start-0 bottom-0 h-0.5 w-[calc(var(--timeline-unit)*var(--timeline-length))] @min-[4rem]/range:hidden"
+        data-slot="timeline-range-extent"
+      />
+      {children}
+    </TimelinePrimitive.Range>
   );
 }
 
@@ -217,7 +231,8 @@ function TimelineRangeHandle({
     <TimelinePrimitive.RangeHandle
       className={cn(
         "cn-timeline-range-handle absolute inset-y-1 w-2 cursor-ew-resize data-[edge=end]:right-1 data-[edge=start]:left-1",
-        "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
+        // The room to aim at grows away from the other handle, never over it.
+        "after:absolute after:inset-y-0 data-[edge=end]:after:-right-1.5 data-[edge=end]:after:left-0 data-[edge=start]:after:right-0 data-[edge=start]:after:-left-1.5 pointer-coarse:data-[edge=end]:after:-right-3 pointer-coarse:data-[edge=start]:after:-left-3",
         className
       )}
       data-slot="timeline-range-handle"
@@ -348,7 +363,7 @@ function TimelineClipFadeHandle({
     <TimelinePrimitive.ClipFadeHandle
       className={cn(
         "cn-timeline-clip-fade-handle top-1 z-20 size-3 cursor-ew-resize data-[edge=in]:ms-1 data-[edge=out]:me-1 opacity-0 transition-opacity",
-        "group-hover/clip:opacity-100 group-data-[selected]/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
+        "group-hover/clip:opacity-100 group-data-selected/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
         "after:absolute after:-inset-1 pointer-coarse:opacity-100 pointer-coarse:after:-inset-2",
         className
       )}
@@ -392,11 +407,12 @@ function TimelineNavigator({
     <TimelinePrimitive.Navigator
       className={cn("cn-timeline-navigator shrink-0 select-none", className)}
       data-slot="timeline-navigator"
+      minWindowWidth={48}
       {...props}
     >
       <TimelinePrimitive.NavigatorWindow
         aria-label="Visible range"
-        className="cn-timeline-navigator-window inset-y-0 min-w-6 cursor-grab rounded-[inherit] active:cursor-grabbing"
+        className="cn-timeline-navigator-window inset-y-0 cursor-grab rounded-[inherit] active:cursor-grabbing"
       />
       <TimelinePrimitive.NavigatorHandle
         aria-label="Start of the visible range"
@@ -413,6 +429,13 @@ function TimelineNavigator({
 }
 
 const selectText = (element: HTMLInputElement | null) => element?.select();
+
+/** A track's volume, in dB as a mixer's channel has it: at the bottom, silence. */
+const TRACK_MIN_DB = -60;
+const TRACK_MAX_DB = 6;
+const gainOfDb = (db: number) => (db <= TRACK_MIN_DB ? 0 : dbToGain(db));
+const formatGainDb = (db: number) =>
+  db <= TRACK_MIN_DB ? "-inf dB" : `${db.toFixed(1)} dB`;
 
 /** A track is never shorter than its full header needs: to go smaller, fold it. */
 export const MIN_TRACK_HEIGHT = 79;
@@ -633,7 +656,9 @@ function TimelineTrackControls({
   );
   const handleGain = useCallback(
     (value: number | readonly number[]) =>
-      onMix(trackId, { gain: Array.isArray(value) ? value[0] : Number(value) }),
+      onMix(trackId, {
+        gain: gainOfDb(Array.isArray(value) ? value[0] : value),
+      }),
     [onMix, trackId]
   );
   const handlePan = useCallback(
@@ -801,15 +826,16 @@ function TimelineTrackControls({
               aria-label={`${name} gain`}
               className="ms-2.5 min-w-0 flex-1 **:data-[orientation=horizontal]:min-w-0 **:data-[slot=fader-value]:top-full **:data-[slot=fader-value]:bottom-auto **:data-[slot=fader-value]:mt-1 **:data-[slot=fader-value]:mb-0"
               editableValue
-              max={1}
-              min={0}
+              formatValue={formatGainDb}
+              max={TRACK_MAX_DB}
+              min={TRACK_MIN_DB}
               onValueChange={handleGain}
               onValueCommitted={handleMixCommit}
               orientation="horizontal"
               size="sm"
-              step={0.01}
+              step={0.5}
               thumbMarks={false}
-              value={mix.gain}
+              value={Math.max(TRACK_MIN_DB, gainToDb(mix.gain))}
               valueLabel="auto"
             />
             <Knob

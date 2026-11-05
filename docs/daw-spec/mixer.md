@@ -7,7 +7,7 @@ In a track, the clips (or the instrument) feed the device chain, left to right, 
 Test: packages/core/src/audio/playback/mixer.test.ts "MIX-001"
 
 ### MIX-002 Volume
-The volume runs from silence to +6 dB, 0 dB by default; a double-click sets it back to 0 dB.
+The volume runs from silence to +6 dB, 0 dB by default; a double-click sets it back to 0 dB. A track's fader in the arrangement and its channel in the mixer are one and the same: the same range and the same place, each moved by the other.
 Status: partial: OBS-004 checks the range against the reference.
 Test: apps/www/test/mixer.test.ts "MIX-002"
 
