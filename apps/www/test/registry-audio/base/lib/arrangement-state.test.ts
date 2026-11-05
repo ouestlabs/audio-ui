@@ -509,6 +509,18 @@ describe("apply", () => {
     ]);
   });
 
+  test("G-025: a locator loops to the next one, or to the end, and turns the loop on, one step of undo", () => {
+    let state = apply(init([]), { at: 60, type: "add-locator" });
+    state = apply(state, { loop: { on: false }, type: "set-loop" });
+    state = apply(state, { id: "verse", type: "loop-to-next-locator" });
+    expect(state.doc.loop).toEqual({ on: true, range: [20, 60] });
+    const last = state.doc.locators.find((locator) => locator.at === 60);
+    state = apply(state, { id: last?.id ?? "", type: "loop-to-next-locator" });
+    expect(state.doc.loop).toEqual({ on: true, range: [60, 100] });
+    state = apply(state, { type: "undo" });
+    expect(state.doc.loop).toEqual({ on: true, range: [20, 60] });
+  });
+
   test("a locator is added where the cursor is, named by its number, and not twice", () => {
     let state = init([]);
     state = apply(state, { type: "add-locator", at: 50 });

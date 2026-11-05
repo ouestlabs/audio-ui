@@ -49,6 +49,8 @@ export function useTimelineMarkers({
   const locator = useMemo(
     () => ({
       onJump,
+      onLoopToNext: (id: string) =>
+        dispatch({ id, type: "loop-to-next-locator" }),
       onMove: (id: string, to: number) =>
         dispatch({ id, to, type: "move-locator" }),
       onPlay,

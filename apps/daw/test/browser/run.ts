@@ -3060,6 +3060,42 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `the fade is drawn from ${curve?.y}, over a name running to ${(header?.y ?? 0) + (header?.height ?? 0)}`
       );
     },
+  "ARR-016: a locator's menu loops from it to the next one, and turns the loop on":
+    async (browser) => {
+      const page = await open(browser);
+      await page.keyboard.press("KeyM");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("KeyM");
+      const first = page.locator("[data-slot=timeline-locator]").first();
+      await first.waitFor({ timeout: 5000 });
+      assert(
+        (await page.locator("[data-slot=timeline-locator]").count()) >= 2,
+        "two locators were not added"
+      );
+      const loop = page.getByRole("slider", { exact: true, name: "Loop" });
+      const looping = page
+        .getByRole("button", { exact: true, name: "Loop" })
+        .first();
+      // The loop off first, so the menu is what turns it on.
+      if ((await looping.getAttribute("aria-pressed")) === "true") {
+        await looping.click();
+      }
+      const before = await loop.getAttribute("aria-valuetext");
+      await first.click({ button: "right" });
+      await page
+        .getByRole("menuitem", { name: "Loop to the next locator" })
+        .click();
+      await page.waitForTimeout(150);
+      const after = await loop.getAttribute("aria-valuetext");
+      assert(after !== before, `the loop stayed ${before}`);
+      assert(
+        (await looping.getAttribute("aria-pressed")) === "true",
+        "the loop is not on"
+      );
+    },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
       const page = await open(browser);

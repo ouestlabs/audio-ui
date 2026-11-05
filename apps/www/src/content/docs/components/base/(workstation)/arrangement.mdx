@@ -488,7 +488,7 @@ const selection = useTimeSelection({
 
 ### Locators and time signatures
 
-`TimelineLocator` and `TimelineSignature` (`npx shadcn@latest add @audio-ui/timeline-markers`) go on a lane of their own, and stand on their time with their line. A locator is a named point: press it to put the cursor there, double-click it to play from there, drag it or press Left and Right to move it on the grid (Cmd/Ctrl lets go of the grid), press Enter or pick Rename in its menu to rename it, Delete to take it away. A change of time signature moves the same way. The block's M adds one at the cursor, and Alt with the arrows jumps from one to the next.
+`TimelineLocator` and `TimelineSignature` (`npx shadcn@latest add @audio-ui/timeline-markers`) go on a lane of their own, and stand on their time with their line. A locator is a named point: press it to put the cursor there, double-click it to play from there, drag it or press Left and Right to move it on the grid (Cmd/Ctrl lets go of the grid), press Enter or pick Rename in its menu to rename it, Delete to take it away. A change of time signature moves the same way. The block's M adds one at the cursor, and Alt with the arrows jumps from one to the next. A locator given `onLoopToNext` has "Loop to the next locator" in its menu: the loop from it to the next one, or to the end, turned on.
 
 ```tsx
 import { TimelineLocator, TimelineSignature } from "@/components/audio-ui/timeline-markers";
@@ -996,6 +996,7 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeTable>
 <TypeRow name={"locator"} type={"{ at, name }"}>A locator.</TypeRow>
 <TypeRow name={"onJump, onRemove, onRename"} type={"(at) => void, (at) => void, (at, name) => void"}>Pressed, deleted and renamed.</TypeRow>
+<TypeRow name={"onLoopToNext"} type={"(id) => void"}>Its menu's "Loop to the next locator": the loop from it to the next one, or to the end. Without it, the menu has no such entry.</TypeRow>
 <TypeRow name={"change"} type={"{ id, at, beatsPerBar, beatUnit }"}>A time-signature change.</TypeRow>
 <TypeRow name={"editing, onEditingChange"} type={"boolean, (id | null) => void"}>Whether it is being typed.</TypeRow>
 <TypeRow name={"onMove, onSet, onRemove"} type={"(id, to) => void, (id, beats, unit) => void, (id) => void"}>Moved by `step` with the arrows, typed, deleted.</TypeRow>

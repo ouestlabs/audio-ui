@@ -782,6 +782,8 @@ export type ArrangementCommand =
   /** A drag of a header's gain or pan: a burst, which `settle-clip-edit` closes into one step. */
   | { type: "change-mix"; id: string; patch: Partial<Omit<Mix, "color">> }
   | { type: "move-locator"; id: string; to: number }
+  /** Loops from a locator to the next one, or to the end, and turns the loop on. */
+  | { type: "loop-to-next-locator"; id: string }
   | { type: "move-signature"; id: string; to: number }
   | { type: "remove-locator"; id: string }
   | { type: "remove-signature"; id: string }
@@ -2311,6 +2313,23 @@ function changeLocator<Key extends "at" | "name">(
   }));
 }
 
+/** The loop from a locator to the next one, or to the arrangement's end: on, one step of undo. */
+function loopToNextLocator(
+  state: ArrangementState,
+  id: string
+): ArrangementState {
+  const { duration, locators } = state.doc;
+  const from = locators.find((locator) => locator.id === id)?.at;
+  if (from === undefined) {
+    return state;
+  }
+  const to = Math.min(
+    duration,
+    ...locators.filter((locator) => locator.at > from).map(({ at }) => at)
+  );
+  return to > from ? setLoop(state, { on: true, range: [from, to] }) : state;
+}
+
 function setLoop(
   state: ArrangementState,
   change: Partial<ArrangementLoop>
@@ -2753,6 +2772,7 @@ const handlers: Handlers = {
       ({ on, ...device }) => (on === false ? device : { ...device, on: false }),
       edit
     ),
+  "loop-to-next-locator": (state, { id }) => loopToNextLocator(state, id),
   "move-locator": (state, { id, to }) =>
     changeLocator(
       state,

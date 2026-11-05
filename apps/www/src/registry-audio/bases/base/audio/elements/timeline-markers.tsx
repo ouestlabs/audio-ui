@@ -56,11 +56,13 @@ const ON_ITS_TIME = "border-s-0 ps-0";
  * A locator, on its time on a lane: press it to put the cursor there,
  * double-click it to play from there, drag it or press Left and Right to move
  * it, on the grid, press Enter or pick Rename in its menu to rename it (Enter
- * keeps the name, Escape drops the change), Delete takes it away.
+ * keeps the name, Escape drops the change), Delete takes it away. With
+ * `onLoopToNext`, its menu loops from it to the next locator.
  */
 function TimelineLocator({
   locator,
   onJump,
+  onLoopToNext,
   onMove,
   onPlay,
   onRemove,
@@ -69,6 +71,8 @@ function TimelineLocator({
 }: {
   locator: Locator;
   onJump: (at: number) => void;
+  /** Its menu's "Loop to the next locator": the loop from it to the next one, or to the end. */
+  onLoopToNext?: (id: string) => void;
   onMove: (id: string, to: number) => void;
   /** A double-click on it: play from its time. */
   onPlay: (at: number) => void;
@@ -112,6 +116,7 @@ function TimelineLocator({
   );
   const handleBlur = useCallback(() => setEditing(false), []);
   const handleRemove = useCallback(() => onRemove(id), [id, onRemove]);
+  const handleLoop = useCallback(() => onLoopToNext?.(id), [id, onLoopToNext]);
   const handleMoved = useCallback((to: number) => onMove(id, to), [id, onMove]);
   // The menu hands focus back as it closes, which would end the edit: open the field after it.
   const renameLater = useRef(false);
@@ -165,6 +170,11 @@ function TimelineLocator({
           {name}
         </ContextMenuTrigger>
         <ContextMenuContent className="w-auto min-w-32">
+          {onLoopToNext ? (
+            <ContextMenuItem onClick={handleLoop}>
+              Loop to the next locator
+            </ContextMenuItem>
+          ) : null}
           <ContextMenuItem onClick={renameWhenClosed}>Rename</ContextMenuItem>
           <ContextMenuSeparator />
           <ContextMenuItem onClick={handleRemove} variant="destructive">
