@@ -856,6 +856,8 @@ function ClipPanel({
 const LABEL_SPACING = 40;
 /** The widest a peak of the waveform is drawn, in px: zooming in stops there, before the drawing turns to blocks. */
 const PEAK_PX = 3;
+/** A length the waveform snaps up to one pixel of the screen, at any density: a column per pixel, and silence still a line. */
+const SCREEN_PIXEL = 0.01;
 
 /** How many peaks the waveform has across the source. */
 const peakCount = (values: WaveformPrimitive.Root.Peaks) =>
@@ -1083,7 +1085,13 @@ function ClipSource({
                     width: `calc(var(--timeline-unit) * ${to - from})`,
                   }}
                 >
-                  <WaveformPrimitive.Canvas className="cn-waveform-canvas block size-full" />
+                  <WaveformPrimitive.Canvas
+                    barGap={0}
+                    barRadius={0}
+                    barWidth={SCREEN_PIXEL}
+                    className="cn-waveform-canvas block size-full"
+                    minBarHeight={SCREEN_PIXEL}
+                  />
                 </WaveformPrimitive.Root>
                 {warp ? (
                   <WarpMarkers

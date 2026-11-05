@@ -2289,6 +2289,37 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `${read.empty} of ${read.columns} columns are gaps`
       );
     },
+  "CLP-020: the clip view's waveform is solid too, a column per pixel": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await dropChord(page, '[data-track="track-1"]', "Take", 4);
+    const clip = page.locator("[data-clip-id]").first();
+    await clip.waitFor({ timeout: 10_000 });
+    await clip.click();
+    await page.getByRole("tab", { name: "Clip" }).click();
+    const canvas = page.locator("[data-slot=clip-panel-source] canvas");
+    await canvas.waitFor({ timeout: 5000 });
+    await page.waitForTimeout(400);
+    const read = await canvas.evaluate((element) => {
+      const drawn = element as HTMLCanvasElement;
+      const row = drawn
+        .getContext("2d")
+        ?.getImageData(0, Math.floor(drawn.height / 2), drawn.width, 1).data;
+      let empty = 0;
+      for (let column = 0; column < drawn.width; column += 1) {
+        if (!row?.[column * 4 + 3]) {
+          empty += 1;
+        }
+      }
+      return { columns: drawn.width, empty };
+    });
+    assert(read.columns > 0, "the waveform has no columns");
+    assert(
+      read.empty === 0,
+      `${read.empty} of ${read.columns} columns are gaps`
+    );
+  },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
       const page = await open(browser);
