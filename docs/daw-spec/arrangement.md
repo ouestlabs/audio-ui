@@ -19,7 +19,7 @@ Adding, moving, trimming or removing a clip while playing changes what plays wit
 Test: apps/daw/test/arrangement.test.ts "ARR-004"
 
 ### ARR-005 Files dropped on a track
-Audio files dropped on an audio track become one clip each, laid one after the other from the time under the pointer (snapped to the grid when snapping is on). A clip takes its file's name, without the extension.
+Audio files dropped on an audio track become one clip each, laid one after the other from the time under the pointer (snapped to the grid when snapping is on). While a file is carried over the track, a line with that time shows where it would land. A clip takes its file's name, without the extension.
 Status: partial: OBS-001 settles whether the reference lays several files after each other or on tracks of their own, and what a modifier key changes.
 Test: apps/daw/test/arrangement.test.ts "ARR-005"
 
@@ -99,3 +99,7 @@ Test: apps/daw/test/browser/run.ts "ARR-023"
 ### ARR-024 A narrow range
 A range keeps room for both handles, apart and inside it, however narrow the zoom would draw it: from twice that room it is as wide as it is long, and under that it stays wider, with a line along its bottom showing its true length against the ruler. Dragged, its end handle stays under the pointer, and the range changes to match.
 Test: packages/core/src/primitives/timeline/range-controller.test.ts; apps/daw/test/browser/run.ts "ARR-024"
+
+### ARR-025 Room under the tracks
+Under the last track there is always room for more, at least a track's least lane high and all that the tracks leave: it takes audio files and devices, as the add-track button does, one new track for each, from the start of the arrangement. It says so. A file let go anywhere that takes nothing is refused, and never opens in the browser.
+Test: apps/daw/test/browser/run.ts "ARR-025"

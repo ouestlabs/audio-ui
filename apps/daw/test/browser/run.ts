@@ -698,6 +698,110 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `its name needs ${header?.height} px in a clip of ${clipBox?.height} px`
       );
     },
+  "ARR-005: a file carried over a track shows where it would land; under the tracks it makes one":
+    async (browser) => {
+      const page = await open(browser);
+      await page.keyboard.press("Meta+Equal");
+      await page.keyboard.press("Meta+Equal");
+      await page.waitForTimeout(150);
+      const lane = page.locator('[data-track="track-1"]');
+      const box = await lane.boundingBox();
+      assert(box, "the lane is there");
+      const over = (kind: string, x: number) =>
+        lane.evaluate(
+          (element, { eventKind, offset }) => {
+            const dataTransfer = new DataTransfer();
+            dataTransfer.items.add(
+              new File(["x"], "a.wav", { type: "audio/wav" })
+            );
+            const rect = element.getBoundingClientRect();
+            element.dispatchEvent(
+              new DragEvent(eventKind, {
+                bubbles: true,
+                cancelable: true,
+                clientX: rect.left + offset,
+                clientY: rect.top + 10,
+                dataTransfer,
+              })
+            );
+          },
+          { eventKind: kind, offset: x }
+        );
+      await over("dragover", 300);
+      await page.waitForTimeout(60);
+      await over("dragover", 300);
+      const line = lane.locator("[data-slot=arrangement-drop-line]");
+      await line.waitFor({ timeout: 2000 });
+      const shown = await line.boundingBox();
+      assert(
+        Math.abs((shown?.x ?? 0) - (box.x + 300)) < 60,
+        `carried 300 px in, the line is ${(shown?.x ?? 0) - box.x} px in`
+      );
+      assert(
+        ((await line.textContent()) ?? "").length > 0,
+        "the line does not say where"
+      );
+      await over("dragleave", 300);
+      await page.waitForTimeout(60);
+      assert(!(await line.isVisible()), "the line stayed after the file left");
+      const room = await page
+        .locator("[data-slot=arrangement-drop]")
+        .boundingBox();
+      assert((room?.height ?? 0) >= 56, `the room is ${room?.height} px high`);
+      const tracks = await page.locator("[data-track-id]").count();
+      await dropChord(page, "[data-slot=arrangement-drop]", "Below", 2);
+      await page
+        .locator("[data-clip-id]", { hasText: "Below" })
+        .waitFor({ timeout: 30_000 });
+      assert(
+        (await page.locator("[data-track-id]").count()) === tracks + 1,
+        "under the tracks, the file did not make its own"
+      );
+    },
+  "ARR-025: with no track left, files dropped under the headers make tracks, and one dropped anywhere else never leaves the page":
+    async (browser) => {
+      const page = await open(browser);
+      const rows = page.locator("[data-track-id]");
+      // Its header's name picks a track, and Delete takes it.
+      const total = await rows.count();
+      await Array.from({ length: total }).reduce<Promise<void>>(
+        async (done) => {
+          await done;
+          await rows
+            .first()
+            .locator("[data-slot=timeline-track-header]")
+            .click({ position: { x: 60, y: 12 } });
+          await page.keyboard.press("Delete");
+          await page.waitForTimeout(80);
+        },
+        Promise.resolve()
+      );
+      assert((await rows.count()) === 0, "Delete left a track");
+      const zone = page.locator("[data-slot=arrangement-drop]");
+      await zone.waitFor({ timeout: 3000 });
+      const room = await zone.boundingBox();
+      assert(
+        (room?.height ?? 0) > 100,
+        `the empty arrangement drops on ${room?.height} px`
+      );
+      // Over the line under the arrangement, which takes nothing: a file stays refused rather than opening in the browser.
+      const refused = await page.evaluate(() => {
+        const target = document.querySelector("[data-slot=resizable-handle]");
+        const dataTransfer = new DataTransfer();
+        dataTransfer.items.add(new File(["x"], "a.wav", { type: "audio/wav" }));
+        const init = { bubbles: true, cancelable: true, dataTransfer };
+        return !(
+          target?.dispatchEvent(new DragEvent("dragover", init)) ||
+          target?.dispatchEvent(new DragEvent("drop", init))
+        );
+      });
+      assert(refused, "a file dropped outside would open in the browser");
+      await dropChord(page, "[data-slot=arrangement-drop]", "Dropped take", 2);
+      await page
+        .locator("[data-clip-id]", { hasText: "Dropped take" })
+        .waitFor({ timeout: 30_000 });
+      assert((await rows.count()) === 1, "the file did not make its track");
+    },
   "ARR-013: A shows the envelopes; a level moved by hand overrides one until it is enabled again":
     async (browser) => {
       const page = await open(browser);
