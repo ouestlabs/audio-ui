@@ -2354,20 +2354,70 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         element.scrollLeft = element.scrollWidth;
       });
       await page.waitForTimeout(200);
-      const atEnd = await inBar();
-      // The start handle dragged left zooms out, with no double-click.
+      await inBar();
+      // An edge dragged in, far past its least width: the other edge stays, the window at its least, and the view stops with it.
+      await viewport.evaluate((element) => {
+        element.scrollLeft = 0;
+      });
+      await page.keyboard.press("Meta+Minus");
+      await page.keyboard.press("Meta+Minus");
+      await page.keyboard.press("Meta+Minus");
+      await page.waitForTimeout(250);
+      const drawnEdges = await inBar();
+      await page.mouse.move(
+        drawnEdges.end.x + drawnEdges.end.width / 2,
+        drawnEdges.end.y + drawnEdges.end.height / 2
+      );
+      await page.mouse.down();
+      await page.mouse.move(drawnEdges.end.x - 400, y, { steps: 8 });
+      await page.waitForTimeout(100);
+      const closest = await viewport.evaluate((element) => element.scrollWidth);
+      await page.mouse.move(drawnEdges.end.x - 600, y, { steps: 4 });
+      await page.waitForTimeout(100);
+      await page.mouse.up();
+      const stopped = await inBar();
+      assert(
+        Math.abs(stopped.start.x - drawnEdges.start.x) <= 1,
+        `the end handle moved the start from ${drawnEdges.start.x} to ${stopped.start.x}`
+      );
+      assert(
+        (await viewport.evaluate((element) => element.scrollWidth)) === closest,
+        "the view went on zooming past the window's least width"
+      );
+      // The start handle dragged in: the end stays where it is, and nothing slides.
+      await page.mouse.move(
+        stopped.start.x + stopped.start.width / 2,
+        stopped.start.y + stopped.start.height / 2
+      );
+      await page.mouse.down();
+      await page.mouse.move(stopped.start.x + 300, y, { steps: 6 });
+      await page.mouse.up();
+      await page.waitForTimeout(150);
+      const held = await inBar();
+      assert(
+        Math.abs(held.end.x - stopped.end.x) <= 1,
+        `the start handle moved the end from ${stopped.end.x} to ${held.end.x}`
+      );
+      // A handle dragged out zooms out, with no double-click: here the end's, the window against the start of the bar.
       const wide = () => viewport.evaluate((element) => element.scrollWidth);
       const before = await wide();
       await page.mouse.move(
-        atEnd.start.x + atEnd.start.width / 2,
-        atEnd.start.y + atEnd.start.height / 2
+        held.end.x + held.end.width / 2,
+        held.end.y + held.end.height / 2
       );
       await page.mouse.down();
-      await page.mouse.move(atEnd.start.x - 200, y, { steps: 6 });
+      await page.mouse.move(held.end.x + held.end.width / 2 + 200, y, {
+        steps: 6,
+      });
       await page.mouse.up();
       await page.waitForTimeout(200);
       const after = await wide();
       assert(after < before, `zoomed out from ${before} px to ${after} px`);
+      const out = await inBar();
+      assert(
+        Math.abs(out.end.x - (held.end.x + 200)) <= 2,
+        `the end handle is at ${out.end.x}, the pointer at ${held.end.x + 200}`
+      );
     },
   "ARR-022: a track removed, the page loaded again: a new track takes an id of its own, and shows and goes alone":
     async (browser) => {

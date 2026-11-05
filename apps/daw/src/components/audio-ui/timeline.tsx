@@ -13,7 +13,6 @@ import {
   type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
-  type Ref,
   useCallback,
   useRef,
   useState,
@@ -385,21 +384,6 @@ function TimelineClipFadeHandle({
 }
 
 /** The whole timeline as one bar: drag the window to scroll, an edge to zoom, double-click to show everything. */
-/** The handles sit on the window's edges, whatever its width: its least width keeps them apart. */
-const NAVIGATOR_START = { left: "0.25rem" };
-const NAVIGATOR_END = { left: "auto", right: "0.25rem" };
-
-/** The window at its least width stays inside the bar, at the end of the timeline too, so both handles do. */
-const renderNavigatorWindow: NonNullable<
-  TimelinePrimitive.NavigatorWindow.Props["render"]
-> = ({ ref, style, ...props }) => (
-  <div
-    {...props}
-    ref={ref as Ref<HTMLDivElement>}
-    style={{ ...style, left: `min(${style?.left}, calc(100% - 3rem))` }}
-  />
-);
-
 function TimelineNavigator({
   className,
   ...props
@@ -408,26 +392,23 @@ function TimelineNavigator({
     <TimelinePrimitive.Navigator
       className={cn("h-6 rounded-[min(var(--radius-sm),6px)] bg-muted shrink-0 select-none", className)}
       data-slot="timeline-navigator"
+      minWindowWidth={48}
       {...props}
     >
       <TimelinePrimitive.NavigatorWindow
         aria-label="Visible range"
-        className="bg-primary/25 hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 inset-y-0 min-w-12 cursor-grab rounded-[inherit] active:cursor-grabbing"
-        render={renderNavigatorWindow}
-      >
-        <TimelinePrimitive.NavigatorHandle
-          aria-label="Start of the visible range"
-          className="rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none inset-y-1 w-2 cursor-ew-resize after:absolute after:-inset-x-1 after:inset-y-0"
-          edge="start"
-          style={NAVIGATOR_START}
-        />
-        <TimelinePrimitive.NavigatorHandle
-          aria-label="End of the visible range"
-          className="rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none inset-y-1 w-2 cursor-ew-resize after:absolute after:-inset-x-1 after:inset-y-0"
-          edge="end"
-          style={NAVIGATOR_END}
-        />
-      </TimelinePrimitive.NavigatorWindow>
+        className="bg-primary/25 hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 inset-y-0 cursor-grab rounded-[inherit] active:cursor-grabbing"
+      />
+      <TimelinePrimitive.NavigatorHandle
+        aria-label="Start of the visible range"
+        className="rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none inset-y-1 ms-1 w-2 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
+        edge="start"
+      />
+      <TimelinePrimitive.NavigatorHandle
+        aria-label="End of the visible range"
+        className="rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none inset-y-1 w-2 cursor-ew-resize data-[edge=end]:-translate-x-[calc(100%+0.25rem)] after:absolute after:-inset-x-1.5 after:inset-y-0"
+        edge="end"
+      />
     </TimelinePrimitive.Navigator>
   );
 }

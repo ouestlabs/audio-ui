@@ -13,7 +13,6 @@ import {
   type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
-  type Ref,
   useCallback,
   useRef,
   useState,
@@ -69,7 +68,7 @@ function TimelineViewport({
       className={cn(
         "cn-timeline-viewport relative min-h-0 min-w-0 overscroll-x-contain",
         scrollbar === "hidden" &&
-          "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "scrollbar-none [&::-webkit-scrollbar]:hidden",
         className
       )}
       data-slot="timeline-viewport"
@@ -349,7 +348,7 @@ function TimelineClipFadeHandle({
     <TimelinePrimitive.ClipFadeHandle
       className={cn(
         "cn-timeline-clip-fade-handle top-1 z-20 size-3 cursor-ew-resize data-[edge=in]:ms-1 data-[edge=out]:me-1 opacity-0 transition-opacity",
-        "group-hover/clip:opacity-100 group-data-[selected]/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
+        "group-hover/clip:opacity-100 group-data-selected/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
         "after:absolute after:-inset-1 pointer-coarse:opacity-100 pointer-coarse:after:-inset-2",
         className
       )}
@@ -385,21 +384,6 @@ function TimelineClipFadeHandle({
 }
 
 /** The whole timeline as one bar: drag the window to scroll, an edge to zoom, double-click to show everything. */
-/** The handles sit on the window's edges, whatever its width: its least width keeps them apart. */
-const NAVIGATOR_START = { left: "0.25rem" };
-const NAVIGATOR_END = { left: "auto", right: "0.25rem" };
-
-/** The window at its least width stays inside the bar, at the end of the timeline too, so both handles do. */
-const renderNavigatorWindow: NonNullable<
-  TimelinePrimitive.NavigatorWindow.Props["render"]
-> = ({ ref, style, ...props }) => (
-  <div
-    {...props}
-    ref={ref as Ref<HTMLDivElement>}
-    style={{ ...style, left: `min(${style?.left}, calc(100% - 3rem))` }}
-  />
-);
-
 function TimelineNavigator({
   className,
   ...props
@@ -408,26 +392,23 @@ function TimelineNavigator({
     <TimelinePrimitive.Navigator
       className={cn("cn-timeline-navigator shrink-0 select-none", className)}
       data-slot="timeline-navigator"
+      minWindowWidth={48}
       {...props}
     >
       <TimelinePrimitive.NavigatorWindow
         aria-label="Visible range"
-        className="cn-timeline-navigator-window inset-y-0 min-w-12 cursor-grab rounded-[inherit] active:cursor-grabbing"
-        render={renderNavigatorWindow}
-      >
-        <TimelinePrimitive.NavigatorHandle
-          aria-label="Start of the visible range"
-          className="cn-timeline-navigator-handle inset-y-1 w-2 cursor-ew-resize after:absolute after:-inset-x-1 after:inset-y-0"
-          edge="start"
-          style={NAVIGATOR_START}
-        />
-        <TimelinePrimitive.NavigatorHandle
-          aria-label="End of the visible range"
-          className="cn-timeline-navigator-handle inset-y-1 w-2 cursor-ew-resize after:absolute after:-inset-x-1 after:inset-y-0"
-          edge="end"
-          style={NAVIGATOR_END}
-        />
-      </TimelinePrimitive.NavigatorWindow>
+        className="cn-timeline-navigator-window inset-y-0 cursor-grab rounded-[inherit] active:cursor-grabbing"
+      />
+      <TimelinePrimitive.NavigatorHandle
+        aria-label="Start of the visible range"
+        className="cn-timeline-navigator-handle inset-y-1 ms-1 w-2 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
+        edge="start"
+      />
+      <TimelinePrimitive.NavigatorHandle
+        aria-label="End of the visible range"
+        className="cn-timeline-navigator-handle inset-y-1 w-2 cursor-ew-resize data-[edge=end]:-translate-x-[calc(100%+0.25rem)] after:absolute after:-inset-x-1.5 after:inset-y-0"
+        edge="end"
+      />
     </TimelinePrimitive.Navigator>
   );
 }

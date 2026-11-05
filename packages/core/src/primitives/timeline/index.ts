@@ -41,6 +41,8 @@ export {
   type NavigatorMetrics,
   type NavigatorOptions,
   type NavigatorPart,
+  rangeOfThumb,
+  thumbOf,
   visibleRange,
 } from "./navigator.ts";
 export {
