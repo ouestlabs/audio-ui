@@ -249,6 +249,16 @@ function TimelineRangeHandle({
 /** A track header's switch: as small as its other buttons, a letter or a light in it. */
 const TRACK_SWITCH = "h-6 min-w-6 px-0";
 
+/**
+ * What a pressed Solo and Mute look like, wherever a track's switches are: a
+ * tint each, read at a glance across many tracks, the letter as it is. A theme
+ * sets `--solo` and `--mute`; without them, a blue and an amber.
+ */
+export const SWITCH_TONES = {
+  mute: "aria-pressed:border-[color-mix(in_oklab,var(--mute,oklch(0.8_0.16_75))_55%,transparent)] aria-pressed:bg-[color-mix(in_oklab,var(--mute,oklch(0.8_0.16_75))_22%,transparent)]",
+  solo: "aria-pressed:border-[color-mix(in_oklab,var(--solo,oklch(0.6_0.19_255))_55%,transparent)] aria-pressed:bg-[color-mix(in_oklab,var(--solo,oklch(0.6_0.19_255))_22%,transparent)]",
+} as const;
+
 /** Which of a track's switches are on, as its toggle group holds them. */
 function switchesOn(mix: Pick<Mix, "muted" | "soloed">, armed?: boolean) {
   return [
@@ -809,7 +819,7 @@ function TimelineTrackControls({
           >
             <ToggleGroupItem
               aria-label={`Solo ${name}`}
-              className={TRACK_SWITCH}
+              className={cn(TRACK_SWITCH, SWITCH_TONES.solo)}
               onClick={handleSolo}
               value="solo"
             >
@@ -817,7 +827,7 @@ function TimelineTrackControls({
             </ToggleGroupItem>
             <ToggleGroupItem
               aria-label={`Mute ${name}`}
-              className={TRACK_SWITCH}
+              className={cn(TRACK_SWITCH, SWITCH_TONES.mute)}
               onClick={handleMute}
               value="mute"
             >

@@ -653,7 +653,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the light says its state over the button's"
       );
     },
-  "ARR-027: a track's Solo, Mute and Arm are one group of switches: one stop of Tab, the arrows between them":
+  "ARR-027: a track's Solo, Mute and Arm are one group of switches: one stop of Tab, the arrows between them, a color each":
     async (browser) => {
       const page = await open(browser);
       const group = page.getByRole("group", { name: "1 Audio switches" });
@@ -673,6 +673,21 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           .getAttribute("aria-pressed")) === "true",
         "Space did not mute the track"
       );
+      // Pressed, Solo and Mute each show a color of their own, not the gray of a pressed button.
+      await solo.click();
+      const [soloColor, muteColor, restColor] = await Promise.all(
+        ["Solo 1 Audio", "Mute 1 Audio", "Solo 2 Audio"].map((name) =>
+          page
+            .locator("[data-slot=timeline-track-header]")
+            .getByRole("button", { exact: true, name })
+            .evaluate((element) => getComputedStyle(element).backgroundColor)
+        )
+      );
+      assert(
+        new Set([soloColor, muteColor, restColor]).size === 3,
+        `Solo ${soloColor}, Mute ${muteColor}, at rest ${restColor}`
+      );
+      await solo.click();
       await page.keyboard.press("Space");
     },
   "MIX-019: a channel's switches are its track header's: Solo, Mute and an Arm light, one group, each moved by the other":

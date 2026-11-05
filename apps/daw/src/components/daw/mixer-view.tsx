@@ -14,7 +14,7 @@ import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
 import { Led } from "@/components/audio-ui/led";
 import { Meter } from "@/components/audio-ui/meter";
-import { TRACK_COLORS } from "@/components/audio-ui/timeline";
+import { SWITCH_TONES, TRACK_COLORS } from "@/components/audio-ui/timeline";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
@@ -243,7 +243,7 @@ function StripSwitches({
     >
       <ToggleGroupItem
         aria-label={`Solo ${name}`}
-        className={SWITCH}
+        className={cn(SWITCH, SWITCH_TONES.solo)}
         onClick={onSolo}
         value="solo"
       >
@@ -251,7 +251,7 @@ function StripSwitches({
       </ToggleGroupItem>
       <ToggleGroupItem
         aria-label={`Mute ${name}`}
-        className={SWITCH}
+        className={cn(SWITCH, SWITCH_TONES.mute)}
         onClick={onMute}
         value="mute"
       >
