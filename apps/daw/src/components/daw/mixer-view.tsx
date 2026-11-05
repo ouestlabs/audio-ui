@@ -88,12 +88,21 @@ function StripMeter({
 }
 
 /**
- * The loudest sample the main track has played since it was last cleared, in
- * dB (MIX-011), red once one went over 0 dBFS; a click clears it. Read from
- * the channel's analysers each frame, and written straight into the page when
- * it rises, so it costs no render.
+ * The loudest sample a channel has played since it was last cleared, in dB
+ * (MIX-011), red once one went over 0 dBFS; a click clears it. Read from the
+ * channel's analysers each frame, and written straight into the page when it
+ * rises, so it costs no render. Every channel's, the main track's too, is a
+ * pill over its pan.
  */
-function PeakReadout({ analysers }: { analysers: readonly AnalyserNode[] }) {
+function PeakReadout({
+  analysers,
+  className,
+  name,
+}: {
+  analysers: readonly AnalyserNode[];
+  className: string;
+  name: string;
+}) {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const held = useRef(Number.NEGATIVE_INFINITY);
   const paint = useCallback(() => {
@@ -103,9 +112,9 @@ function PeakReadout({ analysers }: { analysers: readonly AnalyserNode[] }) {
     }
     const text = formatDb(held.current);
     button.textContent = text;
-    button.ariaLabel = `Main peak ${text} dB, click to clear`;
+    button.ariaLabel = `${name} peak ${text} dB, click to clear`;
     button.toggleAttribute("data-over", held.current >= 0);
-  }, []);
+  }, [name]);
   useEffect(() => {
     const read = analysers.map((analyser) => ({
       analyser,
@@ -132,8 +141,11 @@ function PeakReadout({ analysers }: { analysers: readonly AnalyserNode[] }) {
   }, [paint]);
   return (
     <button
-      aria-label="Main peak -∞ dB, click to clear"
-      className="row-start-6 h-7 w-full rounded-md border text-muted-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-over:border-destructive data-over:bg-destructive/10 data-over:text-destructive"
+      aria-label={`${name} peak -∞ dB, click to clear`}
+      className={cn(
+        "rounded-full border bg-muted/60 text-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring data-over:border-destructive data-over:bg-destructive/10 data-over:text-destructive",
+        className
+      )}
       onClick={clear}
       ref={buttonRef}
       type="button"
@@ -162,12 +174,13 @@ function SendKnob({
   return (
     <Knob
       aria-label={`${track.name} send to ${back.name}`}
+      dragMode="vertical"
       formatValue={formatSend}
       max={1}
       min={0}
       onValueChange={change}
       onValueCommitted={onSettle}
-      size="sm"
+      size="xs"
       step={0.01}
       value={track.sends?.[back.id] ?? 0}
       valueLabel="hidden"
@@ -230,7 +243,7 @@ function StripSwitches({
   return (
     <ToggleGroup
       aria-label={`${name} switches`}
-      className="row-start-6 w-full min-w-0"
+      className="row-start-7 w-full min-w-0"
       multiple
       size="sm"
       spacing={1}
@@ -322,7 +335,7 @@ function Strip({
       aria-label={track.name}
       className={cn(
         // A column of the console, a hairline between it and the next.
-        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-2 transition-colors",
+        "row-span-7 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-2 transition-colors",
         // The main track is wider: its meter has a scale.
         main && "w-36 border-s border-e-0",
         track.kind === "group" && "bg-muted/40",
@@ -381,7 +394,8 @@ function Strip({
       <Knob
         anchor={0}
         aria-label={`${track.name} pan`}
-        className="row-start-3"
+        className="row-start-4"
+        dragMode="vertical"
         formatValue={formatPan}
         max={1}
         min={-1}
@@ -392,7 +406,7 @@ function Strip({
         value={mix.pan}
         valueLabel="hidden"
       />
-      <div className="row-start-4 flex min-h-0 justify-center gap-1.5">
+      <div className="row-start-5 flex min-h-0 justify-center gap-1.5">
         <Fader
           aria-label={`${track.name} volume`}
           formatValue={formatDb}
@@ -412,13 +426,18 @@ function Strip({
           marks={main ? MAIN_MARKS : undefined}
         />
       </div>
+      {/* A pill over the pan, as the reference draws it: the loudest peak since it was cleared. */}
+      <PeakReadout
+        analysers={analysers ?? NO_ANALYSERS}
+        className="row-start-3 h-5 w-14"
+        name={main ? "Main" : track.name}
+      />
       <span
         aria-hidden="true"
-        className="row-start-5 text-muted-foreground text-xs tabular-nums"
+        className="row-start-6 text-muted-foreground text-xs tabular-nums"
       >
         {formatDb(db)}
       </span>
-      {main ? <PeakReadout analysers={analysers ?? NO_ANALYSERS} /> : null}
       {main ? null : (
         <StripSwitches
           armed={armed}
@@ -579,11 +598,11 @@ export function MixerView({
     // channels, the main track's own before it.
     <div
       aria-label="Mixer"
-      className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 pe-2"
+      className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 pe-2"
       role="group"
     >
       <div
-        className="row-span-6 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden *:last:border-e-0"
+        className="row-span-7 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden *:last:border-e-0"
         data-slot="mixer-channels"
         ref={channelsRef}
       >

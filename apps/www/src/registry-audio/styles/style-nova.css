@@ -10,6 +10,10 @@
     @apply rounded-full border border-transparent ring-1 ring-foreground/10 transition-[border-color,box-shadow] duration-150 ease-out focus-within:border-ring focus-within:ring-3 focus-within:ring-ring/50 hover:ring-2 hover:ring-ring/40 has-[[data-slot=knob-control]:active]:border-ring has-[[data-slot=knob-control]:active]:ring-3 has-[[data-slot=knob-control]:active]:ring-ring motion-reduce:transition-none;
   }
 
+  .cn-knob-size-xs {
+    @apply size-8;
+  }
+
   .cn-knob-size-sm {
     @apply size-11;
   }
@@ -32,6 +36,10 @@
 
   .cn-knob-body {
     @apply rounded-full bg-card text-card-foreground ring-1 ring-foreground/10 transition-transform duration-100 ease-out motion-reduce:transition-none;
+  }
+
+  .cn-knob-body-size-xs {
+    @apply inset-1;
   }
 
   .cn-knob-body-size-sm {

@@ -150,6 +150,43 @@ async function expectChanged(
 }
 
 /** Opens the mixer, where the main track's meter is. */
+const PAN_KNOB = / pan$/;
+const SEND_KNOB = / send to /;
+
+/** A knob of the mixer's first channel turns by a drag up and not by one across (MIX-023). */
+async function dragKnobVertically(page: Page, name: RegExp) {
+  const knob = page
+    .getByRole("group", { exact: true, name: "Mixer" })
+    .getByRole("slider", { name })
+    .first();
+  const read = () =>
+    knob.evaluate((input) => (input as HTMLInputElement).value);
+  const box = await knob.evaluate((input) => {
+    let node: HTMLElement | null = input as HTMLElement;
+    while (node && node.getBoundingClientRect().width < 20) {
+      node = node.parentElement;
+    }
+    const rect = node?.getBoundingClientRect();
+    return rect && { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 };
+  });
+  assert(box, `${name} is there`);
+  const before = await read();
+  await page.mouse.move(box.x, box.y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + 30, box.y, { steps: 5 });
+  await page.mouse.up();
+  assert((await read()) === before, `${name} moved by a drag across`);
+  await page.mouse.move(box.x, box.y);
+  await page.mouse.down();
+  await page.mouse.move(box.x, box.y - 30, { steps: 5 });
+  await page.mouse.up();
+  const after = await read();
+  assert(
+    Number(after) > Number(before),
+    `${name} did not rise by a drag up, from ${before} to ${after}`
+  );
+}
+
 async function showMixer(page: Page) {
   const level = page.locator('[aria-label="Main level"]');
   // Its key folds it when it is open, and a page loaded again comes back on it.
@@ -892,6 +929,69 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     await page.waitForTimeout(100);
     assert(Math.abs((await unit()) - wide) < 2, "X did not go back to the fit");
   },
+  "MIX-015: on a short window the mixer opens with every channel whole, its switches included":
+    async (browser) => {
+      // Short from the start: a panel opens by the window's height.
+      const page = await open(
+        browser,
+        await (
+          await browser.newContext({ viewport: { height: 749, width: 1440 } })
+        ).newPage()
+      );
+      await showMixer(page);
+      const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      const [view, switches] = [
+        await mixer.boundingBox(),
+        await mixer
+          .locator("[data-slot=mixer-channels] section")
+          .first()
+          .locator("[data-slot=toggle-group]")
+          .boundingBox(),
+      ];
+      assert(view && switches, "the mixer and its first channel are there");
+      assert(
+        switches.y + switches.height <= view.y + view.height + 0.5,
+        `the switches end at ${switches.y + switches.height}, under the mixer's ${view.y + view.height}`
+      );
+    },
+  "MIX-015: each row of sends a return adds makes the mixer taller, so every channel stays whole":
+    async (browser) => {
+      const page = await open(
+        browser,
+        await (
+          await browser.newContext({ viewport: { height: 749, width: 1440 } })
+        ).newPage()
+      );
+      await showMixer(page);
+      // The set has two returns: four more make six, three rows of two sends.
+      await [1, 2, 3, 4].reduce(async (done) => {
+        await done;
+        await page.locator("[data-add-track] button").click();
+        await page.getByRole("menuitem", { name: "Return track" }).click();
+      }, Promise.resolve());
+      await page.waitForTimeout(400);
+      const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      const [view, switches] = [
+        await mixer.boundingBox(),
+        await mixer
+          .locator("[data-slot=mixer-channels] section")
+          .first()
+          .locator("[data-slot=toggle-group]")
+          .boundingBox(),
+      ];
+      assert(view && switches, "the mixer and its first channel are there");
+      assert(
+        switches.y + switches.height <= view.y + view.height + 0.5,
+        `six sends: the switches end at ${switches.y + switches.height}, under the mixer's ${view.y + view.height}`
+      );
+    },
+  "MIX-023: a channel's pan and sends turn by a drag up and down, and a drag across moves nothing":
+    async (browser) => {
+      const page = await open(browser);
+      await showMixer(page);
+      await dragKnobVertically(page, PAN_KNOB);
+      await dragKnobVertically(page, SEND_KNOB);
+    },
   "MIX-015: the panel folds to its strip, by its caret or by its line, and opens again":
     async (browser) => {
       const page = await open(browser);
@@ -936,6 +1036,30 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     await peak.click();
     assert((await peak.innerText()) === "-∞", "a click did not clear the peak");
   },
+  "MIX-011: every channel holds its loudest peak, a track's as well as the main track's, until it is clicked":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Loud take", 3);
+      await page.locator("[data-clip-id]", { hasText: "Loud take" }).waitFor({
+        timeout: 30_000,
+      });
+      await showMixer(page);
+      const own = page.getByRole("button", { name: "1 Audio peak" });
+      const silent = page.getByRole("button", { name: "2 Audio peak" });
+      assert((await own.innerText()) === "-∞", "a track's peak starts at -∞");
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(1200);
+      await page.keyboard.press("Space");
+      const held = await own.innerText();
+      assert(held !== "-∞" && Number(held) > -40, `the track held ${held}`);
+      assert(
+        (await silent.innerText()) === "-∞",
+        "a track that played nothing held a peak"
+      );
+      await own.click();
+      assert((await own.innerText()) === "-∞", "a click did not clear it");
+    },
   "ARR-010: a track moves by its grip, with Up and Down or dragged": async (
     browser
   ) => {

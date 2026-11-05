@@ -110,10 +110,15 @@ const LEAST: Record<PanelView, string> = {
   clip: "17.5rem",
   // The tallest device of the library, the compressor, whole, under the strip.
   devices: "22.5rem",
-  mixer: "21rem",
+  // A channel whole with a send: name, send, peak, pan, a fader of 5rem, its value and its switches, under the strip.
+  mixer: "22.25rem",
 };
 /** What a rack's title bar takes from the devices in it, in rem: each level of racks adds one. */
 const RACK_BAR = 2.5;
+/** What a row of sends takes in the mixer, in rem: a knob and its gap. Two sends make a row, and the mixer's least holds one. */
+const SEND_ROW = 2.25;
+/** The sends a row of a channel holds. */
+const SENDS_PER_ROW = 2;
 
 /** How many racks deep a chain goes: 0 with none, 1 with a rack, 2 with a rack in a rack. */
 function rackDepth(devices: readonly TrackDevice[] | undefined): number {
@@ -140,23 +145,36 @@ const OPENING: Record<PanelView, number> = {
 };
 const REM = 16;
 
-/** The least height of a view: for the devices, each level of racks on the track takes a title bar from its devices' height. */
+/** The least height of a view: for the devices, each level of racks on the track takes a title bar from its devices' height; for the mixer, each row of sends past the first takes a knob's. */
 function leastOf(
   view: PanelView,
-  devices: readonly TrackDevice[] | undefined
+  devices: readonly TrackDevice[] | undefined,
+  sendRows: number
 ): string {
-  return view === "devices"
-    ? `${Number.parseFloat(LEAST.devices) + RACK_BAR * rackDepth(devices)}rem`
+  if (view === "devices") {
+    return `${Number.parseFloat(LEAST.devices) + RACK_BAR * rackDepth(devices)}rem`;
+  }
+  return view === "mixer"
+    ? `${Number.parseFloat(LEAST.mixer) + SEND_ROW * Math.max(0, sendRows - 1)}rem`
     : LEAST[view];
+}
+
+/** What tells the panel's view from another: the mixer, once its least grows, is a new one, so it opens at that height. */
+function panelKey(view: PanelView, sendRows: number): string {
+  return view === "mixer" ? `${view}-${sendRows}` : view;
 }
 
 /** How tall a view opens, in px: as tall as it was given, and never under its least, which can have grown since. */
 function heightOf(
   kept: number,
   view: PanelView,
-  devices: readonly TrackDevice[] | undefined
+  devices: readonly TrackDevice[] | undefined,
+  sendRows: number
 ): number {
-  return Math.max(kept, Number.parseFloat(leastOf(view, devices)) * REM);
+  return Math.max(
+    kept,
+    Number.parseFloat(leastOf(view, devices, sendRows)) * REM
+  );
 }
 
 /** How tall each view opens on a window `height` px tall: as tall as it likes, up to 45% of it, never under its least. */
@@ -1197,6 +1215,7 @@ export function Daw({
   }, [doc, recordings]);
 
   const shownTrack = selectedTrack ? trackOf(doc, selectedTrack) : undefined;
+  const sendRows = Math.ceil(doc.returns.length / SENDS_PER_ROW);
   const panelTitle = titleOf(shown, selectedClip, shownTrack);
   // What the panel holds, open: the clip view's own caret folds the panel to its bar.
   let content: ReactNode;
@@ -1366,13 +1385,13 @@ export function Daw({
                 defaultSize={
                   folded
                     ? STRIP
-                    : `${heightOf(viewHeights.current[shown], shown, shownTrack?.devices)}px`
+                    : `${heightOf(viewHeights.current[shown], shown, shownTrack?.devices, sendRows)}px`
                 }
                 groupResizeBehavior="preserve-pixel-size"
                 id={shown}
-                key={shown}
+                key={panelKey(shown, sendRows)}
                 maxSize="70%"
-                minSize={leastOf(shown, shownTrack?.devices)}
+                minSize={leastOf(shown, shownTrack?.devices, sendRows)}
                 onResize={keepHeight}
                 panelRef={panelRef}
                 style={UNSCROLLED}

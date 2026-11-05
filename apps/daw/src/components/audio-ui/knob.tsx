@@ -17,6 +17,7 @@ const knobVariants = cva(
         lg: "size-16",
         sm: "size-11",
         xl: "size-24",
+        xs: "size-8",
       },
     },
   }
@@ -35,6 +36,7 @@ const knobBodyVariants = cva("rounded-full bg-card text-card-foreground ring-1 r
       lg: "inset-2",
       sm: "inset-1",
       xl: "inset-2.5",
+      xs: "inset-1",
     },
   },
 });

@@ -17,6 +17,7 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-003"
 
 ### MIX-004 Track activator
 A track switched off sends nothing to its output and nothing through its post-fader sends; its pre-fader sends still feed their returns.
+Deviation: the reference's activator is a numbered button, lit while the track is on, and it has no mute. Here the switch is a Mute (M), lit while the track is muted: the same effect in the opposite sense, kept because the header's and the mixer's Solo, Mute and Arm are one group of switches.
 Test: packages/core/src/audio/playback/mixer.test.ts "MIX-004"
 
 ### MIX-005 Solo
@@ -47,7 +48,7 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-010"
 
 ### MIX-011 Meters
 Each track and the main track show their peak and their RMS level, the loudest peak held, and a mark when a frame went over 0 dBFS, until it is clicked.
-Status: partial: the main track has its loudest sample in dB under its fader, red over 0 dBFS until clicked, and a scale beside its meter; the tracks have their meters only.
+Each channel, the main track's too, has its loudest sample in dB in a pill over its pan, red over 0 dBFS until clicked, as the reference draws it on every track (OBS-013, version 10.1); the main track has a scale beside its meter.
 Test: apps/daw/test/mixer.test.ts "MIX-011"; apps/daw/test/browser/run.ts "MIX-011"
 
 ### MIX-012 Delay compensation
@@ -63,7 +64,7 @@ With several tracks selected, moving the volume, the pan, the activator or the s
 Test: apps/daw/test/mixer.test.ts "MIX-014"
 
 ### MIX-015 The mixer and the detail view take turns
-Under the arrangement, one panel shows the clip, the devices or the mixer, one at a time, chosen by the tabs of its bar (the clip view's own strip carries them while it shows a clip), by the keys, or by a device or a clip that opens it. Both at once would leave the tracks no room. Like the library on the left, the panel is always there: folded, it is its bar alone, and the whole bar opens it; open, a press anywhere on its bar outside its tabs folds it, and so does one on the library's bar, or on the clip view's strip outside its controls. The line between the arrangement and the panel is dragged, or moved with the arrow keys, to share the height, from the least each view needs to show all of it to 70 %; dragged under that least, it folds the panel. Each view comes back at the height it was given. The mixer's channels fill that height, every fader as long as the others and never under a fader's own least. A choice of this workstation: the reference draws its mixer in another view.
+Under the arrangement, one panel shows the clip, the devices or the mixer, one at a time, chosen by the tabs of its bar (the clip view's own strip carries them while it shows a clip), by the keys, or by a device or a clip that opens it. Both at once would leave the tracks no room. Like the library on the left, the panel is always there: folded, it is its bar alone, and the whole bar opens it; open, a press anywhere on its bar outside its tabs folds it, and so does one on the library's bar, or on the clip view's strip outside its controls. The line between the arrangement and the panel is dragged, or moved with the arrow keys, to share the height, from the least each view needs to show all of it to 70 %; dragged under that least, it folds the panel. Each view comes back at the height it was given. The mixer's channels fill that height, every fader as long as the others and never under a fader's own least. The mixer's own least holds a whole channel, its sends included: each row of two sends past the first adds a row's height to it, and the panel opens at that height when a return is added, as the reference's mixer grows with its sends, so no switch is cut off on a short window. A choice of this workstation: the reference draws its mixer in another view.
 Test: apps/daw/test/browser/run.ts "MIX-015"
 
 ### MIX-020 Group tracks
@@ -93,3 +94,7 @@ Test: apps/daw/test/browser/run.ts "MIX-018"
 ### MIX-019 A channel's switches
 A channel holds the same switches as its track's header, in one group: Solo, Mute and, for a track that records, an Arm light. Each is the same state as the header's: one moved, the other shows it.
 Test: apps/daw/test/browser/run.ts "MIX-019"
+
+### MIX-023 A channel's knobs turn by a vertical drag
+A channel's pan and its sends are dragged up and down, as the reference's knobs are, and a drag across moves nothing; the wheel and the keys work as on every knob. The sends are small knobs, two to a row, all of them shown.
+Test: apps/daw/test/browser/run.ts "MIX-023"
