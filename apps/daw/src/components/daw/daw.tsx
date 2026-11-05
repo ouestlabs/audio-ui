@@ -103,7 +103,7 @@ import { useTakeInputs } from "./use-take-inputs";
 const UNSCROLLED = { overflow: "hidden" } as const;
 
 /** The panel under the arrangement folded: its strip alone. */
-const STRIP = "2.25rem";
+const STRIP = "2.5rem";
 /** The least height of each view of that panel, its strip included: under it, what it shows is cut off. */
 const LEAST: Record<PanelView, string> = {
   // A warped clip's Sample box whole: its fields, ÷2 and ×2, and Speed.

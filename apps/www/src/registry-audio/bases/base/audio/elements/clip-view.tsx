@@ -175,7 +175,7 @@ function ClipView({
           outside its controls rolls the view up or opens it: the caret reaches across it, under the controls. */}
       <div
         className={cn(
-          "relative flex min-h-9 shrink-0 items-center gap-2 p-1 ps-2",
+          "relative flex min-h-10 shrink-0 items-center gap-2 p-1 ps-2",
           collapsed ? undefined : "border-b"
         )}
         data-slot="clip-view-strip"

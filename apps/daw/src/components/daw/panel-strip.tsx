@@ -49,7 +49,7 @@ export function PanelBar({
   const fold = useCallback(() => onFoldedChange(true), [onFoldedChange]);
   return (
     <div
-      className="relative flex min-h-9 shrink-0 items-center gap-2 p-1 ps-2 text-xs data-open:border-b"
+      className="relative flex min-h-10 shrink-0 items-center gap-2 p-1 ps-2 text-xs data-open:border-b"
       data-folded={folded ? "" : undefined}
       data-open={folded ? undefined : ""}
       data-slot="panel-bar"
