@@ -832,8 +832,9 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await page.mouse.down();
       await page.mouse.move(box.x + box.width / 2, box.y - 120, { steps: 6 });
+      // The line follows the pointer a frame behind: released at once, the last step can be lost.
+      await page.waitForTimeout(150);
       await page.mouse.up();
-      // The last step lands in the next frame: under load, read too soon it is not there yet.
       await page.waitForTimeout(100);
       const taller = await height("Devices");
       assert(
