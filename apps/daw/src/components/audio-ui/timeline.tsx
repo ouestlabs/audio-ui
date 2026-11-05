@@ -1,7 +1,7 @@
 "use client";
 
 import { dbToGain, gainToDb } from "@audio-ui/core/analysis";
-import { CurveIcon, RecordIcon } from "@audio-ui/icons/react";
+import { CurveIcon } from "@audio-ui/icons/react";
 import {
   FADE_SHAPES,
   type FadeShape,
@@ -38,6 +38,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
+import { Led } from "@/components/audio-ui/led";
 import type { Mix } from "@/lib/arrangement";
 import { CaretRightIcon } from "@phosphor-icons/react";
 
@@ -804,12 +805,17 @@ function TimelineTrackControls({
             <Button
               aria-label={`Arm ${name}`}
               aria-pressed={armed}
-              className={cn(armed && "text-destructive")}
               onClick={handleArm}
               size="icon-xs"
               variant="ghost"
             >
-              <RecordIcon weight={armed ? "fill" : "regular"} />
+              {/* A light, as on a console: lit red while the track is armed, a dim dot when not. */}
+              <Led
+                aria-hidden
+                label="Armed"
+                on={Boolean(armed)}
+                tone="destructive"
+              />
             </Button>
           ) : null}
         </div>

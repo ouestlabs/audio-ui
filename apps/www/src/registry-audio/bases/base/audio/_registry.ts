@@ -1132,6 +1132,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/arrangement",
       "@audio-ui/fader",
       "@audio-ui/knob",
+      "@audio-ui/led",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/context-menu",

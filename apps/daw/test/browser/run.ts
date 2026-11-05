@@ -629,6 +629,28 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await press(0);
       assert(await clipShown(), "a click on the title bar left the mixer");
     },
+  "REC-001: a track's Arm button is a light, lit while it is armed, and says so as a pressed button":
+    async (browser) => {
+      const page = await open(browser);
+      const arm = page.getByRole("button", { name: "Arm 1 Audio" });
+      const light = arm.locator("[data-slot=led]");
+      assert((await light.count()) === 1, "the Arm button has no light");
+      assert(
+        (await arm.getAttribute("aria-pressed")) === "false" &&
+          (await light.getAttribute("data-on")) === null,
+        "the light is on before the track is armed"
+      );
+      await arm.click();
+      assert(
+        (await arm.getAttribute("aria-pressed")) === "true" &&
+          (await light.getAttribute("data-on")) === "",
+        "armed, the light stays off"
+      );
+      assert(
+        (await arm.getByRole("img").count()) === 0,
+        "the light says its state over the button's"
+      );
+    },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);
