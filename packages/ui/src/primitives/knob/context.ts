@@ -1,4 +1,8 @@
-import type { KnobController, KnobSnapshot } from "@audio-ui/core/knob";
+import type {
+  KnobController,
+  KnobDragMode,
+  KnobSnapshot,
+} from "@audio-ui/core/knob";
 import * as React from "react";
 import type { Root } from "./elements/root.tsx";
 
@@ -15,6 +19,13 @@ export interface KnobContextValue {
   snapshot: KnobSnapshot;
   state: Root.State;
 }
+
+/** What a `Knob.Provider` sets for the knobs below it. */
+export interface KnobDefaultsValue {
+  dragMode?: KnobDragMode;
+}
+
+export const KnobDefaultsContext = React.createContext<KnobDefaultsValue>({});
 
 export const KnobContext = React.createContext<KnobContextValue | null>(null);
 

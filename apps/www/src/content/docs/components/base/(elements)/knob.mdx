@@ -227,6 +227,14 @@ Accessible label, associated with the thumb's input. Renders a `<div>` element.
 <TypeRow name={"data-dragging"}>Whether a pointer is dragging the knob.</TypeRow>
 </TypeTable>
 
+### Provider
+
+Sets how every `Knob.Root` below it turns by a drag, unless the knob has a `dragMode` of its own: wrap an app once to have all its knobs dragged up and down. Renders no element.
+
+<TypeTable>
+<TypeRow name={"dragMode"} type={"\"circular\" | \"vertical\" | \"revolution\""}>How a pointer drag turns into value, for the knobs that do not set their own.</TypeRow>
+</TypeTable>
+
 ### Registry component
 
 `Knob` accepts `size` and `className` plus primitive props from `KnobPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the knob's input.
@@ -257,7 +265,7 @@ Accessible label, associated with the thumb's input. Renders a `<div>` element.
 
 
 
-`@audio-ui/react/knob` exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
+`@audio-ui/react/knob` exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Provider` (the default `dragMode` of the knobs below it), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
 
 ## Examples
 
@@ -278,3 +286,13 @@ Use `anchor` to show a reference point on the rail (for example the center of a 
 `dragMode="vertical"` turns the knob like a fader: drag up to increase, down to decrease, with 150px of travel for the whole range. It suits a small knob, or one next to others, where going around it would be fiddly.
 
 <ComponentPreview styleName="base-nova" name="knob-vertical-drag-demo" />
+
+To turn every knob of an app that way, wrap it once in `Knob.Provider`: each `Knob.Root` below it takes that mode, unless it sets its own `dragMode`.
+
+```tsx
+import { Knob } from "@audio-ui/react"
+
+<Knob.Provider dragMode="vertical">
+  <Mixer />
+</Knob.Provider>
+```

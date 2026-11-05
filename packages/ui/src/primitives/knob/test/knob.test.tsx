@@ -316,6 +316,29 @@ describe("Knob drag modes", () => {
     expect(control.getAttribute("data-drag-mode")).toBe("vertical");
   });
 
+  test("a Knob.Provider sets the drag mode of the knobs below it, and a knob's own wins", () => {
+    const view = render(
+      <Knob.Provider dragMode="vertical">
+        <Knob.Root>
+          <Knob.Control data-testid="inherits">
+            <Knob.Thumb aria-label="Inherits" />
+          </Knob.Control>
+        </Knob.Root>
+        <Knob.Root dragMode="revolution">
+          <Knob.Control data-testid="own">
+            <Knob.Thumb aria-label="Own" />
+          </Knob.Control>
+        </Knob.Root>
+      </Knob.Provider>
+    );
+    expect(view.getByTestId("inherits").getAttribute("data-drag-mode")).toBe(
+      "vertical"
+    );
+    expect(view.getByTestId("own").getAttribute("data-drag-mode")).toBe(
+      "revolution"
+    );
+  });
+
   test("a controlled value that lags behind doesn't pull the knob back mid-drag", () => {
     const { control, input } = renderKnob({ dragMode: "vertical", value: 10 });
     fireEvent.pointerDown(control, { clientX: 50, clientY: 90, pointerId: 1 });

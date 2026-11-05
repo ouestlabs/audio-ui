@@ -1,3 +1,4 @@
+import { Knob } from "@audio-ui/react";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
@@ -111,7 +112,10 @@ function Home() {
       customHotkeys={customHotkeys}
       onCustomHotkeysChange={keepCustomHotkeys}
     >
-      <Daw {...project.props} key={project.opened} onOpen={open} />
+      {/* Every knob of the workstation turns by a drag up and down, as the reference's do. */}
+      <Knob.Provider dragMode="vertical">
+        <Daw {...project.props} key={project.opened} onOpen={open} />
+      </Knob.Provider>
     </HotkeysProvider>
   );
 }

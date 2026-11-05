@@ -153,12 +153,9 @@ async function expectChanged(
 const PAN_KNOB = / pan$/;
 const SEND_KNOB = / send to /;
 
-/** A knob of the mixer's first channel turns by a drag up and not by one across (MIX-023). */
-async function dragKnobVertically(page: Page, name: RegExp) {
-  const knob = page
-    .getByRole("group", { exact: true, name: "Mixer" })
-    .getByRole("slider", { name })
-    .first();
+/** A knob turns by a drag up and not by one across (MIX-023). */
+async function dragKnobVertically(page: Page, knob: Locator, name: string) {
+  await knob.scrollIntoViewIfNeeded();
   const read = () =>
     knob.evaluate((input) => (input as HTMLInputElement).value);
   const box = await knob.evaluate((input) => {
@@ -434,8 +431,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await page
-        .locator('[aria-label="2 Audio"][data-track-id]')
-        .getByText("2 Audio")
+        .locator('[aria-label="4 Audio"][data-track-id]')
+        .getByText("4 Audio")
         .click();
       const library = page.getByRole("region", { name: "Library" });
       await library.getByRole("button", { name: "Space" }).click();
@@ -444,7 +441,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       // The panel's bar names the track whose devices it shows.
       await page
         .locator("[data-slot=panel-bar]")
-        .getByText("2 Audio")
+        .getByText("4 Audio")
         .waitFor({ timeout: 5000 });
       await devices
         .getByText("Delay", { exact: true })
@@ -477,9 +474,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     const page = await open(browser);
     await page.getByRole("region", { name: "Library" }).waitFor();
     await page.keyboard.press("Meta+Alt+KeyB");
-    await page
-      .getByRole("button", { exact: true, name: "Open the library" })
-      .waitFor();
+    await page.locator("button[data-slot=device-browser]").waitFor();
     await page.keyboard.press("Meta+Alt+KeyB");
     await page.getByRole("region", { name: "Library" }).waitFor();
   },
@@ -671,7 +666,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       const arm = page
         .locator("[data-slot=timeline-track-header]")
-        .getByRole("button", { name: "Arm 1 Audio" });
+        .getByRole("button", { name: "Arm 3 Audio" });
       const light = arm.locator("[data-slot=led]");
       assert((await light.count()) === 1, "the Arm button has no light");
       assert(
@@ -693,27 +688,27 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "ARR-027: a track's Solo, Mute and Arm are one group of switches: one stop of Tab, the arrows between them, a color each":
     async (browser) => {
       const page = await open(browser);
-      const group = page.getByRole("group", { name: "1 Audio switches" });
-      const solo = group.getByRole("button", { name: "Solo 1 Audio" });
+      const group = page.getByRole("group", { name: "3 Audio switches" });
+      const solo = group.getByRole("button", { name: "Solo 3 Audio" });
       await solo.focus();
       await page.keyboard.press("ArrowRight");
       assert(
         await group
-          .getByRole("button", { name: "Mute 1 Audio" })
+          .getByRole("button", { name: "Mute 3 Audio" })
           .evaluate((element) => element === document.activeElement),
         "Right from Solo did not reach Mute"
       );
       await page.keyboard.press("Space");
       assert(
         (await group
-          .getByRole("button", { name: "Mute 1 Audio" })
+          .getByRole("button", { name: "Mute 3 Audio" })
           .getAttribute("aria-pressed")) === "true",
         "Space did not mute the track"
       );
       // Pressed, Solo and Mute each show a color of their own, not the gray of a pressed button.
       await solo.click();
       const [soloColor, muteColor, restColor] = await Promise.all(
-        ["Solo 1 Audio", "Mute 1 Audio", "Solo 2 Audio"].map((name) =>
+        ["Solo 3 Audio", "Mute 3 Audio", "Solo 4 Audio"].map((name) =>
           page
             .locator("[data-slot=timeline-track-header]")
             .getByRole("button", { exact: true, name })
@@ -732,22 +727,22 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       await showMixer(page);
       const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
-      const channel = mixer.getByRole("group", { name: "1 Audio switches" });
+      const channel = mixer.getByRole("group", { name: "3 Audio switches" });
       const header = page
-        .getByRole("group", { name: "1 Audio switches" })
+        .getByRole("group", { name: "3 Audio switches" })
         .filter({ hasNot: mixer });
-      await channel.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await channel.getByRole("button", { name: "Arm 3 Audio" }).click();
       assert(
         (await header
           .first()
-          .getByRole("button", { name: "Arm 1 Audio" })
+          .getByRole("button", { name: "Arm 3 Audio" })
           .getAttribute("aria-pressed")) === "true",
         "armed in the mixer, the header's Arm stays off"
       );
       // Inside its channel, as far from either edge.
       const [strip, switches] = [
         await mixer
-          .getByRole("region", { exact: true, name: "1 Audio" })
+          .getByRole("region", { exact: true, name: "3 Audio" })
           .boundingBox(),
         await channel.boundingBox(),
       ];
@@ -768,11 +763,11 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       );
       await page
         .locator("[data-slot=timeline-track-header]")
-        .getByRole("button", { name: "Mute 1 Audio" })
+        .getByRole("button", { name: "Mute 3 Audio" })
         .click();
       assert(
         (await channel
-          .getByRole("button", { name: "Mute 1 Audio" })
+          .getByRole("button", { name: "Mute 3 Audio" })
           .getAttribute("aria-pressed")) === "true",
         "muted in the header, the channel's Mute stays off"
       );
@@ -796,7 +791,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "Library"
       );
       await page
-        .getByRole("button", { exact: true, name: "Open the library" })
+        .locator("button[data-slot=device-browser]")
         .waitFor({ timeout: 3000 });
       await page.getByRole("tab", { name: DEVICES }).click();
       const bar = page.locator("[data-slot=panel-bar]");
@@ -989,8 +984,27 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await showMixer(page);
-      await dragKnobVertically(page, PAN_KNOB);
-      await dragKnobVertically(page, SEND_KNOB);
+      const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      await dragKnobVertically(
+        page,
+        mixer.getByRole("slider", { name: PAN_KNOB }).first(),
+        "the channel's pan"
+      );
+      await dragKnobVertically(
+        page,
+        mixer.getByRole("slider", { name: SEND_KNOB }).first(),
+        "the channel's send"
+      );
+      // A knob of the registry's own timeline, not written by the workstation.
+      await dragKnobVertically(
+        page,
+        page
+          .locator("[data-track-id]")
+          .first()
+          .getByRole("slider", { name: PAN_KNOB })
+          .first(),
+        "the track header's pan"
+      );
     },
   "MIX-015: the panel folds to its strip, by its caret or by its line, and opens again":
     async (browser) => {
@@ -1044,8 +1058,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         timeout: 30_000,
       });
       await showMixer(page);
-      const own = page.getByRole("button", { name: "1 Audio peak" });
-      const silent = page.getByRole("button", { name: "2 Audio peak" });
+      const own = page.getByRole("button", { name: "3 Audio peak" });
+      const silent = page.getByRole("button", { name: "4 Audio peak" });
       assert((await own.innerText()) === "-∞", "a track's peak starts at -∞");
       await page.keyboard.press("Home");
       await page.keyboard.press("Space");
@@ -1070,16 +1084,16 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         .evaluateAll((rows) =>
           rows.map((row) => row.getAttribute("aria-label"))
         );
-    await page.getByRole("button", { name: "Move 1 Audio" }).focus();
+    await page.getByRole("button", { name: "Move 1 MIDI" }).focus();
     await page.keyboard.press("ArrowDown");
     await page.waitForFunction(
       () =>
         document
           .querySelector("[data-track-id]")
-          ?.getAttribute("aria-label") === "2 Audio"
+          ?.getAttribute("aria-label") === "2 MIDI"
     );
     const grip = await page
-      .getByRole("button", { name: "Move 4 MIDI" })
+      .getByRole("button", { name: "Move 4 Audio" })
       .boundingBox();
     // The first grip spans the first track's row.
     const top = await page
@@ -1096,7 +1110,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       () =>
         document
           .querySelector("[data-track-id]")
-          ?.getAttribute("aria-label") === "4 MIDI"
+          ?.getAttribute("aria-label") === "4 Audio"
     );
     const names = await order();
     assert(
@@ -1117,7 +1131,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       .boundingBox();
     assert(before && other, "the rows are there");
     // The track shares the room until it is given a height of its own, by its edge.
-    await page.getByLabel("2 Audio height").focus();
+    await page.getByLabel("4 Audio height").focus();
     await page.keyboard.press("ArrowDown");
     await page.keyboard.press("ArrowDown");
     await page.waitForTimeout(100);
@@ -1136,15 +1150,15 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       '[data-track-id="track-2"] [data-slot=timeline-track]'
     );
     const tall = (await row.boundingBox())?.height ?? 0;
-    await page.getByRole("button", { name: "Fold 2 Audio" }).click();
-    await page.getByRole("button", { name: "Unfold 2 Audio" }).waitFor();
+    await page.getByRole("button", { name: "Fold 4 Audio" }).click();
+    await page.getByRole("button", { name: "Unfold 4 Audio" }).waitFor();
     const short = (await row.boundingBox())?.height ?? 0;
     assert(short < tall / 2, `folded, the track is ${short} px, from ${tall}`);
     await page.keyboard.press("Alt+KeyU");
-    await page.getByRole("button", { name: "Fold 2 Audio" }).waitFor();
-    await page.getByText("2 Audio", { exact: true }).first().click();
+    await page.getByRole("button", { name: "Fold 4 Audio" }).waitFor();
+    await page.getByText("4 Audio", { exact: true }).first().click();
     await page.keyboard.press("KeyU");
-    await page.getByRole("button", { name: "Unfold 2 Audio" }).waitFor();
+    await page.getByRole("button", { name: "Unfold 4 Audio" }).waitFor();
   },
   "ARR-012: a folded track holds its lane and its clips, with their names, inside its strip":
     async (browser) => {
@@ -1156,8 +1170,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await dropChord(page, '[data-track="track-2"]', "Take", 4);
       const clip = lane.locator("[data-clip-id]").first();
       await clip.waitFor({ timeout: 10_000 });
-      await page.getByRole("button", { name: "Fold 2 Audio" }).click();
-      await page.getByRole("button", { name: "Unfold 2 Audio" }).waitFor();
+      await page.getByRole("button", { name: "Fold 4 Audio" }).click();
+      await page.getByRole("button", { name: "Unfold 4 Audio" }).waitFor();
       await page.waitForTimeout(100);
       const strip = await row.boundingBox();
       const bottom = (strip?.y ?? 0) + (strip?.height ?? 0);
@@ -1350,7 +1364,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           .count()) === 0,
         "nothing is overridden yet"
       );
-      await page.getByRole("slider", { name: "1 Audio gain" }).focus();
+      await page.getByRole("slider", { name: "3 Audio gain" }).focus();
       await page.keyboard.press("ArrowLeft");
       await page.getByRole("button", { name: "Re-enable automation" }).click();
       assert(
@@ -1368,8 +1382,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await page
-        .locator('[aria-label="1 Audio"][data-track-id]')
-        .getByText("1 Audio")
+        .locator('[aria-label="3 Audio"][data-track-id]')
+        .getByText("3 Audio")
         .click();
       const library = page.getByRole("region", { name: "Library" });
       await library.getByLabel("Search the devices").fill("Utility");
@@ -1380,10 +1394,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         (document.activeElement as HTMLElement)?.blur()
       );
       await page.keyboard.press("KeyA");
-      await page.getByRole("combobox", { name: "1 Audio automation" }).click();
+      await page.getByRole("combobox", { name: "3 Audio automation" }).click();
       await page.getByRole("option", { exact: true, name: "Gain" }).click();
       const lane = page.getByRole("group", {
-        name: "1 Audio utility gain automation",
+        name: "3 Audio utility gain automation",
       });
       await lane.waitFor({ timeout: 5000 });
       // Drawn: a point of its faint line moved with the keys.
@@ -1407,8 +1421,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await page
-        .locator('[aria-label="1 Audio"][data-track-id]')
-        .getByText("1 Audio")
+        .locator('[aria-label="3 Audio"][data-track-id]')
+        .getByText("3 Audio")
         .click();
       const library = page.getByRole("region", { name: "Library" });
       await library.getByLabel("Search the devices").fill("Utility");
@@ -1431,12 +1445,12 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           Promise.resolve()
         );
       };
-      await ramp("1 Audio volume automation");
-      const gain = page.getByRole("slider", { name: "1 Audio gain" });
+      await ramp("3 Audio volume automation");
+      const gain = page.getByRole("slider", { name: "3 Audio gain" });
       const fromGain = await gain.inputValue();
-      await page.getByRole("combobox", { name: "1 Audio automation" }).click();
+      await page.getByRole("combobox", { name: "3 Audio automation" }).click();
       await page.getByRole("option", { exact: true, name: "Gain" }).click();
-      await ramp("1 Audio utility gain automation");
+      await ramp("3 Audio utility gain automation");
       const knob = devices.getByRole("slider", { name: "Gain" }).first();
       const fromKnob = await knob.inputValue();
       await page.evaluate(() =>
@@ -1447,7 +1461,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         ([before]) =>
           (
             document.querySelector(
-              '[aria-label="1 Audio gain"]'
+              '[aria-label="3 Audio gain"]'
             ) as HTMLInputElement | null
           )?.value !== before,
         [fromGain],
@@ -1476,8 +1490,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await page
-        .locator('[aria-label="1 Audio"][data-track-id]')
-        .getByText("1 Audio")
+        .locator('[aria-label="3 Audio"][data-track-id]')
+        .getByText("3 Audio")
         .click();
       await page.getByRole("tab", { name: "Devices" }).click();
       await page.getByRole("button", { name: "Add a rack" }).click();
@@ -1500,10 +1514,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           Promise.resolve()
         );
       };
-      await ramp("1 Audio volume automation", "ArrowDown");
-      await page.getByRole("combobox", { name: "1 Audio automation" }).click();
+      await ramp("3 Audio volume automation", "ArrowDown");
+      await page.getByRole("combobox", { name: "3 Audio automation" }).click();
       await page.getByRole("option", { exact: true, name: "Macro 1" }).click();
-      await ramp("1 Audio rack macro 1 automation", "ArrowUp");
+      await ramp("3 Audio rack macro 1 automation", "ArrowUp");
       const macro = rack.getByRole("slider", { name: "Macro 1" });
       const fromMacro = await macro.inputValue();
       assert(fromMacro !== "0", "the macro stands where its envelope starts");
@@ -1513,7 +1527,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.keyboard.press("Space");
       await expectChanged(macro, fromMacro);
       await showMixer(page);
-      const fader = page.getByRole("slider", { name: "1 Audio volume" });
+      const fader = page.getByRole("slider", { name: "3 Audio volume" });
       await expectChanged(fader, await fader.inputValue());
       await page.keyboard.press("Space");
     },
@@ -1557,7 +1571,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       await dropChord(page, '[data-track="track-1"]', "Take", 8);
       await page.waitForSelector("[data-clip-id]", { timeout: 10_000 });
-      const level = page.getByRole("group", { name: "1 Audio level" });
+      const level = page.getByRole("group", { name: "3 Audio level" });
       const box = await level.boundingBox();
       assert(
         box && box.width < 12,
@@ -1582,13 +1596,13 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         () =>
           Number(
             document
-              .querySelector('[aria-label="1 Audio level"] [aria-valuenow]')
+              .querySelector('[aria-label="3 Audio level"] [aria-valuenow]')
               ?.getAttribute("aria-valuenow")
           ) > -40,
         undefined,
         { timeout: 10_000 }
       );
-      const other = await read("2 Audio level");
+      const other = await read("4 Audio level");
       await page.keyboard.press("Space");
       assert(!(other > -40), `the silent track reads ${other} dB`);
     },
@@ -1690,12 +1704,12 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const before = await clips.count();
       await page
         .locator("[data-slot=timeline-track-header]")
-        .getByRole("button", { name: "Arm 1 Audio" })
+        .getByRole("button", { name: "Arm 3 Audio" })
         .click();
       assert(
         (await page
           .locator("[data-slot=timeline-track-header]")
-          .getByRole("button", { name: "Arm 1 Audio" })
+          .getByRole("button", { name: "Arm 3 Audio" })
           .getAttribute("aria-pressed")) === "true",
         "the track is armed"
       );
@@ -1754,7 +1768,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       await page
         .locator("[data-slot=timeline-track-header]")
-        .getByRole("button", { name: "Arm 1 Audio" })
+        .getByRole("button", { name: "Arm 3 Audio" })
         .click();
       await page.getByRole("button", { name: "Record settings" }).click();
       await page.getByRole("menuitemradio", { name: "1 bar" }).click();
@@ -1789,7 +1803,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const before = await clips.count();
       await page
         .locator("[data-slot=timeline-track-header]")
-        .getByRole("button", { name: "Arm 3 MIDI" })
+        .getByRole("button", { name: "Arm 1 MIDI" })
         .click();
       await page.getByRole("button", { name: "Record settings" }).click();
       await page
@@ -1818,7 +1832,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         { timeout: 5000 }
       );
       const soloed = await page
-        .getByRole("button", { name: "Solo 3 MIDI" })
+        .getByRole("button", { name: "Solo 1 MIDI" })
         .getAttribute("aria-pressed");
       assert(soloed !== "true", "S played a note, it did not solo the track");
       const notes = await clips
@@ -1833,7 +1847,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await showMixer(page);
       await page
         .locator("[data-slot=timeline-track-header]")
-        .getByRole("button", { name: "Arm 1 Audio" })
+        .getByRole("button", { name: "Arm 3 Audio" })
         .click();
       const quiet = await loudest(page, 800);
       await page.getByRole("button", { name: "Record settings" }).click();
@@ -1845,7 +1859,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const heard = await loudest(page, 1000);
       await page
         .locator("[data-slot=timeline-track-header]")
-        .getByRole("button", { name: "Arm 1 Audio" })
+        .getByRole("button", { name: "Arm 3 Audio" })
         .click();
       // The meter falls back at its own pace.
       await page.waitForTimeout(2500);
@@ -2159,19 +2173,16 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.waitForTimeout(100);
       assert((await at()) >= 8, `End went to ${await at()}`);
       await page
-        .locator('[data-track="track-2"]')
+        .locator('[data-track="track-4"]')
         .click({ position: { x: 300, y: 10 } });
-      await page
-        .locator("[data-slot=panel-bar]")
-        .getByText("2 Audio")
-        .waitFor();
+      await page.locator("[data-slot=panel-bar]").getByText("2 MIDI").waitFor();
       await page.keyboard.press("ArrowDown");
-      await page.locator("[data-slot=panel-bar]").getByText("3 MIDI").waitFor();
-      await page.keyboard.press("ArrowUp");
       await page
         .locator("[data-slot=panel-bar]")
-        .getByText("2 Audio")
+        .getByText("3 Audio")
         .waitFor();
+      await page.keyboard.press("ArrowUp");
+      await page.locator("[data-slot=panel-bar]").getByText("2 MIDI").waitFor();
     },
   "ARR-019: a clip moves to a track that takes it, and Option copies it":
     async (browser) => {
@@ -2247,7 +2258,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         (await count()) === before,
         "a press on a lane let Delete take its track"
       );
-      await page.getByText("2 Audio", { exact: true }).first().click();
+      await page.getByText("4 Audio", { exact: true }).first().click();
       await page.keyboard.press("Delete");
       await page.waitForFunction(
         (tracks) =>
@@ -2473,11 +2484,11 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await dropChord(page, '[data-track="track-1"]', "Grouped take", 2);
-      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByText("3 Audio", { exact: true }).first().click();
       await page.keyboard.press("Meta+KeyG");
       await page.getByText("Group 1", { exact: true }).first().waitFor();
       const depth = await page
-        .locator('[aria-label="1 Audio"][data-track-id] [data-depth]')
+        .locator('[aria-label="3 Audio"][data-track-id] [data-depth]')
         .first()
         .getAttribute("data-depth");
       assert(depth === "1", `the grouped track sits at depth ${depth}`);
@@ -2500,12 +2511,12 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       assert(level > -40, `the grouped track plays at ${level} dB`);
       await page.getByRole("button", { name: "Fold Group 1" }).click();
       await page.waitForFunction(
-        () => !document.querySelector('[aria-label="1 Audio"][data-track-id]')
+        () => !document.querySelector('[aria-label="3 Audio"][data-track-id]')
       );
       await page.keyboard.press("Meta+Shift+KeyG");
       await page.waitForFunction(
         () =>
-          document.querySelector('[aria-label="1 Audio"][data-track-id]') &&
+          document.querySelector('[aria-label="3 Audio"][data-track-id]') &&
           !document.querySelector('[aria-label="Group 1"][data-track-id]')
       );
     },
@@ -2519,11 +2530,11 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           .click({ button: "right" });
         await page.getByRole("menuitem", { name: item, exact: true }).click();
       };
-      await menu("1 Audio", "Group");
+      await menu("3 Audio", "Group");
       await page.getByText("Group 1", { exact: true }).first().waitFor();
       await showMixer(page);
       await page
-        .getByRole("region", { name: "1 Audio" })
+        .getByRole("region", { name: "3 Audio" })
         .getByText("To Group 1")
         .waitFor();
       await menu("Group 1", "Duplicate");
@@ -2542,7 +2553,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "DEV-013: a drum rack on a MIDI track plays a pad when it is struck, and a voice picked on an empty pad makes one":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByText("1 MIDI", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       // The track has its synth: the strip that ends the chain adds racks.
       await page.getByRole("button", { name: "Add a rack" }).click();
@@ -2573,7 +2584,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "DEV-013: a recording dropped on a pad fills it, plays when the pad is struck, and comes back with the project":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByText("1 MIDI", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       // The track has its synth: the strip that ends the chain adds racks.
       await page.getByRole("button", { name: "Add a rack" }).click();
@@ -2595,7 +2606,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       assert(level > -40, `the recording on the pad plays at ${level} dB`);
       await page.waitForSelector("text=Saved", { timeout: 5000 });
       await open(browser, page);
-      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByText("1 MIDI", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       await page
         .locator("[data-slot=drum-rack-panel]")
@@ -2608,7 +2619,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "DEV-008: an instrument's face has a chain's controls, and its pad plays the track's instrument":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("3 MIDI", { exact: true }).first().click();
+      await page.getByText("1 MIDI", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       const devices = page.getByRole("region", { name: "Devices" });
       await devices
@@ -2635,7 +2646,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "DEV-014: an instrument rack takes an instrument at the head of a chain, and it plays the track's notes":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("4 MIDI", { exact: true }).first().click();
+      await page.getByText("2 MIDI", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       await page.getByRole("button", { name: "Add a rack" }).click();
       await page.getByRole("menuitem", { name: "Instrument rack" }).click();
@@ -2667,7 +2678,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "DEV-015: an instrument rack's Zones switch shows each chain's keys and velocities, and a key moved sets its zone":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("4 MIDI", { exact: true }).first().click();
+      await page.getByText("2 MIDI", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       await page.getByRole("button", { name: "Add a rack" }).click();
       await page.getByRole("menuitem", { name: "Instrument rack" }).click();
@@ -2688,7 +2699,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await dropChord(page, '[data-track="track-1"]', "Rack take", 3);
-      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByText("3 Audio", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       await page.getByRole("button", { name: "Add a rack" }).click();
       await page.getByRole("menuitem", { name: "Effect rack" }).click();
@@ -2735,7 +2746,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "DEV-004: a device dragged: the others slide aside, it lands in the gap, Escape puts it back, and it goes into a rack":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByText("3 Audio", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       const library = page.getByRole("region", { name: "Library" });
       await ["Gate", "Limiter"].reduce(async (done, name) => {
@@ -3417,8 +3428,8 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await page.getByRole("tab", { name: "Mixer" }).click();
-      const track = page.getByRole("slider", { name: "2 Audio gain" });
-      const channel = page.getByRole("slider", { name: "2 Audio volume" });
+      const track = page.getByRole("slider", { name: "4 Audio gain" });
+      const channel = page.getByRole("slider", { name: "4 Audio volume" });
       await channel.waitFor({ timeout: 5000 });
       const read = async () =>
         Promise.all(
@@ -3459,7 +3470,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           all.map((row) => row.getAttribute("data-track-id") ?? "")
         );
       await page
-        .getByText("2 Audio", { exact: true })
+        .getByText("4 Audio", { exact: true })
         .first()
         .click({ button: "right" });
       await page.getByRole("menuitem", { name: "Delete" }).click();
@@ -3482,7 +3493,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "PRJ-001: a device removed forgets it was folded, so a new one under its id opens":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByText("3 Audio", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       const library = page.getByRole("region", { name: "Library" });
       await library.getByLabel("Search the devices").fill("Gate");
@@ -3539,7 +3550,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "DEV-004: a device held from the library over a rack lights its chain, not the track's":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByText("3 Audio", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       await page.getByRole("button", { name: "Add a rack" }).click();
       await page.getByRole("menuitem", { name: "Effect rack" }).click();
@@ -3575,7 +3586,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "DEV-006: a device's on square keeps its place and its shape when it folds":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByText("3 Audio", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       const library = page.getByRole("region", { name: "Library" });
       await library.getByLabel("Search the devices").fill("Limiter");
@@ -3675,7 +3686,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "DEV-010: a rack's chain has no scroll of its own, and the strip that ends the track's chain stays at the right":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByText("3 Audio", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       await page.getByRole("button", { name: "Add a rack" }).click();
       await page.getByRole("menuitem", { name: "Effect rack" }).click();
@@ -3719,7 +3730,9 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `the wheel over the rack leaves the track's chain at ${moved}`
       );
       // The strip stays at the view's right edge wherever the chain has scrolled.
-      const strip = page.getByRole("button", { name: "Open the library" });
+      const strip = page
+        .getByTestId("devices")
+        .getByRole("button", { name: "Open the library" });
       const stripEnd = async () => {
         const box = await strip.boundingBox();
         return box ? box.x + box.width : 0;
@@ -3743,7 +3756,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "PRJ-001: how the workstation was laid out comes back when the page is loaded again":
     async (browser) => {
       const page = await open(browser);
-      await page.getByText("1 Audio", { exact: true }).first().click();
+      await page.getByText("3 Audio", { exact: true }).first().click();
       await page.getByRole("tab", { name: "Devices" }).click();
       const library = page.getByRole("region", { name: "Library" });
       await library.getByRole("button", { name: "Space" }).click();
@@ -3753,7 +3766,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await slot.locator("[data-slot=device-chain-strip]").waitFor();
       // A track folded, the mixer's view shown, zoomed in and scrolled, the metronome on.
       await page
-        .locator('[aria-label="2 Audio"][data-track-id]')
+        .locator('[aria-label="4 Audio"][data-track-id]')
         .getByRole("button", { name: FOLD })
         .click();
       await page.getByRole("button", { name: "Zoom in" }).click();
@@ -3776,7 +3789,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           .getAttribute("aria-pressed"),
         scroll: await viewport.evaluate((element) => element.scrollLeft),
         track: await page
-          .locator('[aria-label="2 Audio"][data-track-id]')
+          .locator('[aria-label="4 Audio"][data-track-id]')
           .getByRole("button", { name: UNFOLD })
           .count(),
       });
