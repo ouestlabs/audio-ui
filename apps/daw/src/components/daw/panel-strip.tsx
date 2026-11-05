@@ -32,9 +32,10 @@ export function PanelTabs({ clipAvailable }: { clipAvailable: boolean }) {
 
 /**
  * The one bar of the panel under the arrangement, laid out as a clip view's
- * strip: the caret that folds the panel, what it shows, and its tabs. Folded,
- * the panel is this bar alone, and the whole bar opens it, as the library's
- * strip does on the left; its tabs open it on their view.
+ * strip: the caret that folds the panel, what it shows, and its tabs. Open, a
+ * press anywhere on the bar outside its tabs folds it; folded, the panel is
+ * this bar alone, and the whole bar opens it, as the library's strip does on
+ * the left; its tabs open it on their view.
  */
 export function PanelBar({
   clipAvailable,
@@ -76,7 +77,7 @@ export function PanelBar({
         <button
           aria-expanded
           aria-label="Fold the panel"
-          className="flex size-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
+          className="flex size-5 after:absolute after:inset-0 hover:after:bg-muted/40 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring"
           onClick={fold}
           type="button"
         >

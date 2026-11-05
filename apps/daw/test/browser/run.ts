@@ -740,6 +740,44 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "muted in the header, the channel's Mute stays off"
       );
     },
+  "MIX-015: the library and the panel fold by a press anywhere on their bar, not only on its caret":
+    async (browser) => {
+      const page = await open(browser);
+      // Pressed on a bar's title, far from its caret.
+      const pressTitle = async (holder: Locator, text: string) => {
+        const title = await holder
+          .getByText(text, { exact: true })
+          .boundingBox();
+        assert(title, `the ${text} bar is there`);
+        await page.mouse.click(
+          (title?.x ?? 0) + 4,
+          (title?.y ?? 0) + (title?.height ?? 0) / 2
+        );
+      };
+      await pressTitle(
+        page.getByRole("region", { name: "Library" }),
+        "Library"
+      );
+      await page
+        .getByRole("button", { exact: true, name: "Open the library" })
+        .waitFor({ timeout: 3000 });
+      await page.getByRole("tab", { name: DEVICES }).click();
+      const bar = page.locator("[data-slot=panel-bar]");
+      const box = await bar.boundingBox();
+      assert(box, "the panel's bar is there");
+      await page.mouse.click(
+        (box?.x ?? 0) + (box?.width ?? 0) / 2,
+        (box?.y ?? 0) + (box?.height ?? 0) / 2
+      );
+      await page
+        .getByRole("button", { name: "Open the panel" })
+        .waitFor({ timeout: 3000 });
+      // A tab on the bar still does what a tab does: another view, the panel open on it.
+      await page.getByRole("tab", { name: "Mixer" }).click();
+      await page
+        .getByRole("button", { name: "Fold the panel" })
+        .waitFor({ timeout: 3000 });
+    },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);

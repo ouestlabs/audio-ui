@@ -223,18 +223,21 @@ function DeviceBrowser({
       data-slot="device-browser"
       {...props}
     >
-      <div className="flex shrink-0 items-center gap-1 border-b bg-muted/40 p-1 ps-2.5">
-        <span className="flex-1 font-medium text-xs">Library</span>
+      {/* A press anywhere on this bar folds the library: its button reaches across it. */}
+      <div className="relative flex shrink-0 items-center gap-1 border-b bg-muted/40 p-1 ps-2.5">
+        <span className="pointer-events-none relative flex-1 font-medium text-xs">
+          Library
+        </span>
         {onOpenChange ? (
-          <Button
+          <button
             aria-expanded
             aria-label="Fold the library"
+            className="flex size-6 shrink-0 items-center justify-center rounded-sm text-muted-foreground outline-none after:absolute after:inset-0 hover:text-foreground hover:after:bg-muted/40 focus-visible:ring-2 focus-visible:ring-ring [&_svg]:size-3.5"
             onClick={fold}
-            size="icon-xs"
-            variant="ghost"
+            type="button"
           >
             <CaretLeftIcon aria-hidden="true" />
-          </Button>
+          </button>
         ) : null}
       </div>
       <div className="shrink-0 border-b p-1.5">
