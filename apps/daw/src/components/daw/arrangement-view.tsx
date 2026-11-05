@@ -635,7 +635,7 @@ export function ArrangementView({
         <div
           aria-label="New tracks"
           className={cn(
-            "flex shrink-0 items-center border-e p-0.5",
+            "flex shrink-0 items-center border-e",
             dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
           )}
           data-add-track=""
@@ -650,8 +650,8 @@ export function ArrangementView({
             <DropdownMenuTrigger
               render={
                 <Button
-                  className="min-w-0 flex-1 justify-start gap-1.5"
-                  size="sm"
+                  className="min-w-0 flex-1 justify-start gap-1.5 rounded-none px-3 font-normal"
+                  size="xs"
                   variant="ghost"
                 />
               }

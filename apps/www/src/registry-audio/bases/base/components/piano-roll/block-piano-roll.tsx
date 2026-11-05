@@ -831,7 +831,7 @@ export default function BlockPianoRoll() {
                 <TimelineRange
                   aria-label="Loop region"
                   className={cn(
-                    "rounded-none bg-primary/70 ring-0",
+                    "bg-primary/70 hover:bg-primary/70",
                     !looping && "opacity-40"
                   )}
                   drawable

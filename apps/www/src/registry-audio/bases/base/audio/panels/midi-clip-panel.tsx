@@ -773,7 +773,7 @@ function MidiClipPanel({
               <TimelineLane className="h-4 bg-muted/40">
                 <TimelineRange
                   aria-label={loop ? "Loop" : "Played"}
-                  className="rounded-none bg-primary/70 ring-0"
+                  className="bg-primary/70 hover:bg-primary/70"
                   onValueChange={onRegionChange ? setBrace : undefined}
                   onValueCommitted={onNotesCommitted}
                   value={loop ?? [offset, offset + length]}

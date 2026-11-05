@@ -201,7 +201,7 @@ function TimelineRange({ className, ...props }: TimelinePrimitive.Range.Props) {
   return (
     <TimelinePrimitive.Range
       className={cn(
-        "rounded-[min(var(--radius-sm),6px)] bg-primary/20 ring-1 ring-primary/50 ring-inset has-focus-visible:ring-2 has-focus-visible:ring-ring inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+        "bg-primary/25 ring-inset hover:bg-primary/35 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
         className
       )}
       data-slot="timeline-range"
