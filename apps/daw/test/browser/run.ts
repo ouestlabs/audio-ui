@@ -598,6 +598,37 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "Left did not move it back to the start"
       );
     },
+  "MIX-018: a click on a clip's title bar shows it in the clip view, even over the mixer; a drag of it does not":
+    async (browser) => {
+      const page = await open(browser);
+      // On a track of its own: no other clip lies under it.
+      // Long enough that its middle is its title bar, clear of its trim handles.
+      await dropChord(page, "[data-slot=arrangement-drop]", "Headed", 24);
+      const clip = page.locator("[data-clip-id]", { hasText: "Headed" });
+      await clip.waitFor({ timeout: 30_000 });
+      await showMixer(page);
+      const head = clip.locator("[data-slot=timeline-clip-header]");
+      const press = async (travel: number) => {
+        await head.scrollIntoViewIfNeeded();
+        const box = await head.boundingBox();
+        assert(box, "the title bar is there");
+        const y = (box?.y ?? 0) + (box?.height ?? 0) / 2;
+        const x = (box?.x ?? 0) + (box?.width ?? 0) / 2;
+        await page.mouse.move(x, y);
+        await page.mouse.down();
+        await page.mouse.move(x + travel, y, { steps: 5 });
+        await page.mouse.up();
+        await page.waitForTimeout(150);
+      };
+      const clipShown = async () =>
+        (await page
+          .getByRole("tab", { name: "Clip" })
+          .getAttribute("aria-selected")) === "true";
+      await press(60);
+      assert(!(await clipShown()), "a drag of the clip took the mixer away");
+      await press(0);
+      assert(await clipShown(), "a click on the title bar left the mixer");
+    },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);
@@ -2802,27 +2833,40 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the end handle moved the start"
       );
     },
-  "CLP-023: a clip's fade handles sit under its name, never over it": async (
-    browser
-  ) => {
-    const page = await open(browser);
-    await dropChord(page, '[data-track="track-1"]', "Named take", 4);
-    const clip = page.locator("[data-clip-id]", { hasText: "Named take" });
-    await clip.waitFor({ timeout: 30_000 });
-    await clip.click();
-    const header = await clip
-      .locator("[data-slot=timeline-clip-header]")
-      .boundingBox();
-    const fade = await page
-      .getByRole("slider", { name: "Named take fade in" })
-      .locator("..")
-      .boundingBox();
-    assert(header && fade, "the header and the handle are there");
-    assert(
-      (fade?.y ?? 0) >= (header?.y ?? 0) + (header?.height ?? 0),
-      `the handle is at ${fade?.y}, the name runs to ${(header?.y ?? 0) + (header?.height ?? 0)}`
-    );
-  },
+  "CLP-023: a clip's fade handles and its fades sit under its name, never over it":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Named take", 4);
+      const clip = page.locator("[data-clip-id]", { hasText: "Named take" });
+      await clip.waitFor({ timeout: 30_000 });
+      await clip.click();
+      const header = await clip
+        .locator("[data-slot=timeline-clip-header]")
+        .boundingBox();
+      const fade = await page
+        .getByRole("slider", { name: "Named take fade in" })
+        .locator("..")
+        .boundingBox();
+      assert(header && fade, "the header and the handle are there");
+      assert(
+        (fade?.y ?? 0) >= (header?.y ?? 0) + (header?.height ?? 0),
+        `the handle is at ${fade?.y}, the name runs to ${(header?.y ?? 0) + (header?.height ?? 0)}`
+      );
+      // The fade's line is drawn under the name too: give the fade some length first.
+      await page.getByRole("slider", { name: "Named take fade in" }).focus();
+      await [1, 2, 3, 4, 5, 6].reduce(async (done) => {
+        await done;
+        await page.keyboard.press("Shift+ArrowRight");
+      }, Promise.resolve());
+      const curve = await clip
+        .locator("[data-slot=timeline-clip-fade]")
+        .first()
+        .boundingBox();
+      assert(
+        (curve?.y ?? 0) >= (header?.y ?? 0) + (header?.height ?? 0) - 1,
+        `the fade is drawn from ${curve?.y}, over a name running to ${(header?.y ?? 0) + (header?.height ?? 0)}`
+      );
+    },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
       const page = await open(browser);

@@ -44,6 +44,9 @@ import {
   playedNotes,
 } from "@/lib/arrangement";
 
+/** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
+const UNDER_HEAD = { height: "calc(100% - 1.25rem)", top: "1.25rem" };
+
 /** A clip's menu: what is done to it, then what is done away with. */
 function menuEntries(disabled: boolean): {
   action: ClipAction;
@@ -486,8 +489,8 @@ const ArrangedClip = memo(function ArrangedClipView({
               peaks={peaks}
             />
           ) : null}
-          <TimelineClipFade edge="in" />
-          <TimelineClipFade edge="out" />
+          <TimelineClipFade edge="in" style={UNDER_HEAD} />
+          <TimelineClipFade edge="out" style={UNDER_HEAD} />
           <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />
           <TimelineClipHandle aria-label={`${clip.name} end`} edge="end" />
           <TimelineClipFadeHandle

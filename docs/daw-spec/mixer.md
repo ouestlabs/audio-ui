@@ -85,3 +85,7 @@ Test: apps/daw/test/browser/run.ts "MIX-016"
 ### MIX-017 Moving a channel
 A track's channel moves by its name: dragged, the others slide aside and it lands in the gap, a group with its tracks; or with Left and Right on it. Its row in the arrangement moves with it: there is one order. Returns and the main track stay where they are.
 Test: apps/daw/test/browser/run.ts "MIX-017"
+
+### MIX-018 A clip's title bar shows it
+A click on a clip's title bar, not a drag of it, shows the clip in the clip view, whatever the panel showed: the mixer gives way to it. Picking a clip any other way, or moving it, leaves the mixer where it is.
+Test: apps/daw/test/browser/run.ts "MIX-018"

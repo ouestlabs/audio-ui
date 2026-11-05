@@ -93,5 +93,5 @@ A press anywhere on the heading of a foldable box of the clip view folds it to a
 Test: apps/daw/test/browser/run.ts "CLP-022"
 
 ### CLP-023 Fade handles
-A clip's fade handles sit at the top corners of its body, under its name, so they never hide a letter of it.
+A clip's fade handles sit at the top corners of its body, under its name, and its fades are drawn over its body alone: neither hides a letter of its name.
 Test: apps/daw/test/browser/run.ts "CLP-023"
