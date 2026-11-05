@@ -124,6 +124,14 @@ function isShort(height: number | undefined) {
   return height !== undefined && height < COMPACT_TRACK_HEIGHT;
 }
 
+/** The add-track button says what a drop on it does, and that it is at it. */
+function addTrackLabel(dropping: boolean, reading: ReadingFiles | undefined) {
+  if (dropping) {
+    return "A track for each";
+  }
+  return reading ? "Reading…" : "Add track";
+}
+
 /** Where a file carried over a lane would land, with the time it would land at. */
 function DropLine({
   active,
@@ -301,6 +309,38 @@ function Label({ children }: { children: ReactNode }) {
   );
 }
 
+/** Files dropped and still being read: where they go, and what to call them. */
+export interface ReadingFiles {
+  at: number;
+  key: number;
+  name: string;
+  /** The track they land on, or `NEW_TRACK`. */
+  track: string;
+}
+
+/** What is being read for a track, where it will land: its length is not known yet. */
+function ReadingClips({
+  reading,
+  track,
+}: {
+  reading: readonly ReadingFiles[];
+  track: string;
+}) {
+  return reading
+    .filter((files) => files.track === track)
+    .map(({ at, key, name }) => (
+      <div
+        className="pointer-events-none absolute inset-y-1.5 w-40 truncate rounded-sm border border-primary border-dashed bg-primary/10 px-2 text-primary text-xs motion-safe:animate-pulse"
+        data-slot="arrangement-reading"
+        key={key}
+        role="status"
+        style={{ left: `calc(var(--timeline-unit) * ${at})` }}
+      >
+        Reading {name}…
+      </div>
+    ));
+}
+
 export interface ArrangementViewProps {
   /** The tracks armed to record (REC-001). */
   armed: ReadonlySet<string>;
@@ -327,6 +367,8 @@ export interface ArrangementViewProps {
   /** A click in the ruler or a lane: where to start, and whether to play from there. */
   onSeek: (seconds: number) => void;
   onSelectTrack: (id: string) => void;
+  /** Files dropped and still being read. */
+  reading: readonly ReadingFiles[];
   recordings: ReadonlyMap<string, Recording>;
   /** The track whose devices the detail view shows. */
   selectedTrack: string | null;
@@ -384,6 +426,7 @@ export function ArrangementView({
   onDevice,
   onEditClip,
   onFiles,
+  reading,
   onSeek,
   onSelectTrack,
   recordings,
@@ -648,6 +691,7 @@ export function ArrangementView({
     [dispatch]
   );
   const anySolo = tracks.some((track) => mixOf(track).soloed);
+  const readingOwn = reading.find(({ track }) => track === NEW_TRACK);
   const roomLeft = [...arrangement.unfoldedTracks, ...returns].every(
     (track) => arrangement.heights[track.id] !== undefined
   );
@@ -701,7 +745,7 @@ export function ArrangementView({
               }
             >
               <PlusIcon aria-hidden="true" />
-              {dropOn === NEW_TRACK ? "A track for each" : "Add track"}
+              {addTrackLabel(dropOn === NEW_TRACK, readingOwn)}
             </DropdownMenuTrigger>
             <DropdownMenuContent>
               <DropdownMenuItem onClick={addAudio}>
@@ -941,6 +985,7 @@ export function ArrangementView({
                         seekable
                       >
                         <DropLine active={dropOn === track.id} ref={dropLine} />
+                        <ReadingClips reading={reading} track={track.id} />
                         {isGroup ? (
                           <ArrangedGroupPreview
                             clips={clips.filter((clip) =>
@@ -1021,9 +1066,19 @@ export function ArrangementView({
             onDrop={drop(NEW_TRACK, true)}
             role="group"
           >
-            <span className="sticky left-3 px-3">
-              Drop audio files or a device here
-            </span>
+            {readingOwn ? (
+              <span
+                className="sticky left-3 px-3 text-primary motion-safe:animate-pulse"
+                data-slot="arrangement-reading"
+                role="status"
+              >
+                Reading {readingOwn.name}…
+              </span>
+            ) : (
+              <span className="sticky left-3 px-3">
+                Drop audio files or a device here
+              </span>
+            )}
           </div>
         </div>
       </TimelineViewport>

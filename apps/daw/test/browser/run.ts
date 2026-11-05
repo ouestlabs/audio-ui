@@ -758,6 +758,48 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "under the tracks, the file did not make its own"
       );
     },
+  "ARR-026: a file shows where it goes while it is read, on its track and for a new one, and gives way to its clip":
+    async (browser) => {
+      const page = await open(browser);
+      // Gone in a moment: seen as it appears, not looked for after.
+      await page.evaluate(() => {
+        const seen: string[] = [];
+        (window as unknown as { reading: string[] }).reading = seen;
+        new MutationObserver(() => {
+          for (const element of document.querySelectorAll(
+            "[data-slot=arrangement-reading]"
+          )) {
+            seen.push(element.textContent ?? "");
+          }
+        }).observe(document.body, { childList: true, subtree: true });
+      });
+      const seen = () =>
+        page.evaluate(() =>
+          (window as unknown as { reading: string[] }).reading.splice(0)
+        );
+      await dropChord(page, '[data-track="track-1"]', "On a track", 8);
+      await page
+        .locator("[data-clip-id]", { hasText: "On a track" })
+        .waitFor({ timeout: 30_000 });
+      const onTrack = await seen();
+      assert(
+        onTrack.some((text) => text.includes("On a track")),
+        `nothing said the file was being read: ${onTrack.join(", ")}`
+      );
+      await dropChord(page, "[data-slot=arrangement-drop]", "Of its own", 8);
+      await page
+        .locator("[data-clip-id]", { hasText: "Of its own" })
+        .waitFor({ timeout: 30_000 });
+      const ofItsOwn = await seen();
+      assert(
+        ofItsOwn.some((text) => text.includes("Of its own")),
+        `nothing said the file was being read: ${ofItsOwn.join(", ")}`
+      );
+      assert(
+        (await page.locator("[data-slot=arrangement-reading]").count()) === 0,
+        "it still says it is reading, with the clip there"
+      );
+    },
   "ARR-025: with no track left, files dropped under the headers make tracks, and one dropped anywhere else never leaves the page":
     async (browser) => {
       const page = await open(browser);

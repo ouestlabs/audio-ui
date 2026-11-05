@@ -11,7 +11,10 @@ import {
 } from "react";
 import { usePanelRef } from "react-resizable-panels";
 import { toast } from "sonner";
-import { ArrangementView } from "@/components/daw/arrangement-view";
+import {
+  ArrangementView,
+  type ReadingFiles,
+} from "@/components/daw/arrangement-view";
 import { ClipEditor } from "@/components/daw/clip-editor";
 import { DeviceView } from "@/components/daw/device-view";
 import { EngineLine } from "@/components/daw/engine-line";
@@ -72,7 +75,7 @@ import {
 } from "@/lib/daw/folder";
 import { projectFromFolder } from "@/lib/daw/open-folder";
 import { TRACK_COLOR_COUNT } from "@/lib/daw/project";
-import { freshMidiClipId, type Recording } from "@/lib/daw/recordings";
+import { freshMidiClipId, nameOf, type Recording } from "@/lib/daw/recordings";
 import { matchShortcut, type ShortcutCommand } from "@/lib/daw/shortcuts";
 import {
   canStore,
@@ -683,17 +686,27 @@ export function Daw({
   );
 
   // Files dropped on a track lay one after the other (ARR-005); on the add-track button, a track each (ARR-006).
+  const [reading, setReading] = useState<readonly ReadingFiles[]>([]);
+  const readingKey = useRef(0);
   const addFiles = useCallback(
     async (files: File[], track: string, at: number) => {
       const context = webAudio.getContext();
       if (!context) {
         return;
       }
+      readingKey.current += 1;
+      const key = readingKey.current;
+      const [first] = files;
+      const name =
+        files.length === 1 && first ? nameOf(first) : `${files.length} files`;
+      setReading((current) => [...current, { at, key, name, track }]);
       const { made, skipped } = await decodeFiles(
         context,
         files,
         new Set(recordings.keys()),
         canStream() ? streamRecording : undefined
+      ).finally(() =>
+        setReading((current) => current.filter((one) => one.key !== key))
       );
       if (skipped.length > 0) {
         toast.error(`Not a sound this browser can read: ${skipped.join(", ")}`);
@@ -1281,6 +1294,7 @@ export function Daw({
                   onFiles={addFiles}
                   onSeek={seek}
                   onSelectTrack={pickTrack}
+                  reading={reading}
                   recordings={recordings}
                   selectedTrack={selectedTrack}
                   timelineGrid={grid}
