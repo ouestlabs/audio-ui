@@ -705,9 +705,14 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         (strip?.width ?? 0) -
         (switches?.x ?? 0) -
         (switches?.width ?? 0);
+      const bottom =
+        (strip?.y ?? 0) +
+        (strip?.height ?? 0) -
+        (switches?.y ?? 0) -
+        (switches?.height ?? 0);
       assert(
-        Math.abs(left - right) <= 1.5,
-        `the switches sit ${left} px from the left of their channel and ${right} px from the right`
+        Math.abs(left - right) <= 1.5 && Math.abs(left - bottom) <= 1.5,
+        `the switches sit ${left} px from the left of their channel, ${right} px from the right and ${bottom} px from the bottom`
       );
       await page
         .locator("[data-slot=timeline-track-header]")

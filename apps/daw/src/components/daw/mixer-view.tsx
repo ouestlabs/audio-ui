@@ -322,7 +322,7 @@ function Strip({
       aria-label={track.name}
       className={cn(
         // A column of the console, a hairline between it and the next.
-        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-3 transition-colors",
+        "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-2 transition-colors",
         // The main track is wider: its meter has a scale.
         main && "w-36 border-s border-e-0",
         track.kind === "group" && "bg-muted/40",
