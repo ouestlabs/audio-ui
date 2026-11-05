@@ -395,6 +395,48 @@ export function deleteTime(
   return removeTime(all, from, to, { duration }, splitter(all));
 }
 
+/**
+ * Marks (locators, time signatures) after a stretch `length` long opens at
+ * `at`: one at or after it moves later with what it marks, but one at the
+ * very start stays there.
+ */
+export function marksAfterInsert<Mark extends { at: number }>(
+  marks: readonly Mark[],
+  at: number,
+  length: number
+): Mark[] {
+  return marks.map((mark) =>
+    mark.at > at || (mark.at === at && mark.at > 0)
+      ? { ...mark, at: mark.at + length }
+      : mark
+  );
+}
+
+/**
+ * Marks after the stretch from `from` to `to` is taken out: those in it go
+ * with it, those after it move back by its length. With `keepLast`, the last
+ * mark in it stays, at `from`: a time signature the music after it still plays
+ * in.
+ */
+export function marksAfterRemove<Mark extends { at: number }>(
+  marks: readonly Mark[],
+  from: number,
+  to: number,
+  keepLast: boolean
+): Mark[] {
+  const gone = marks.filter((mark) => mark.at > from && mark.at < to);
+  const kept = keepLast ? gone.at(-1) : undefined;
+  const after = marks.filter((mark) => !gone.includes(mark));
+  // A mark already at `from` gives way to the one kept there.
+  const placed = kept ? after.filter((mark) => mark.at !== from) : after;
+  return [
+    ...placed.map((mark) =>
+      mark.at >= to ? { ...mark, at: mark.at - (to - from) } : mark
+    ),
+    ...(kept ? [{ ...kept, at: from }] : []),
+  ].sort((a, b) => a.at - b.at);
+}
+
 /** Opens a stretch `length` long at `at` on every track: what came after it moves later. */
 export function openTime(
   all: Arranged[],
@@ -740,6 +782,8 @@ export type ArrangementCommand =
   /** A drag of a header's gain or pan: a burst, which `settle-clip-edit` closes into one step. */
   | { type: "change-mix"; id: string; patch: Partial<Omit<Mix, "color">> }
   | { type: "move-locator"; id: string; to: number }
+  /** Loops from a locator to the next one, or to the end, and turns the loop on. */
+  | { type: "loop-to-next-locator"; id: string }
   | { type: "move-signature"; id: string; to: number }
   | { type: "remove-locator"; id: string }
   | { type: "remove-signature"; id: string }
@@ -2269,6 +2313,23 @@ function changeLocator<Key extends "at" | "name">(
   }));
 }
 
+/** The loop from a locator to the next one, or to the arrangement's end: on, one step of undo. */
+function loopToNextLocator(
+  state: ArrangementState,
+  id: string
+): ArrangementState {
+  const { duration, locators } = state.doc;
+  const from = locators.find((locator) => locator.id === id)?.at;
+  if (from === undefined) {
+    return state;
+  }
+  const to = Math.min(
+    duration,
+    ...locators.filter((locator) => locator.at > from).map(({ at }) => at)
+  );
+  return to > from ? setLoop(state, { on: true, range: [from, to] }) : state;
+}
+
 function setLoop(
   state: ArrangementState,
   change: Partial<ArrangementLoop>
@@ -2711,6 +2772,7 @@ const handlers: Handlers = {
       ({ on, ...device }) => (on === false ? device : { ...device, on: false }),
       edit
     ),
+  "loop-to-next-locator": (state, { id }) => loopToNextLocator(state, id),
   "move-locator": (state, { id, to }) =>
     changeLocator(
       state,
@@ -2779,6 +2841,8 @@ const handlers: Handlers = {
     edit(state, (doc) => ({
       ...doc,
       clips: openTime(doc.clips, at, length, state.doc.duration),
+      locators: marksAfterInsert(doc.locators, at, length),
+      signatures: marksAfterInsert(doc.signatures, at, length),
     })),
   "group-tracks": (state, { ids, name }) => groupTracks(state, ids, name),
   "move-track": (state, { id, index }) => moveTrack(state, id, index),
@@ -2791,6 +2855,8 @@ const handlers: Handlers = {
     edit(state, (doc) => ({
       ...doc,
       clips: deleteTime(doc.clips, from, to, state.doc.duration),
+      locators: marksAfterRemove(doc.locators, from, to, false),
+      signatures: marksAfterRemove(doc.signatures, from, to, true),
     })),
   "remove-track": (state, { id }) => removeTrack(state, id),
   "rename-clip": (state, { id, name }) => renameClip(state, id, name),

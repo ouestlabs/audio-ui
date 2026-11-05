@@ -343,6 +343,8 @@ export function Daw({
     ...openingHeights(globalThis.innerHeight ?? 900),
     ...readView().panelHeights,
   });
+  // The view that has shown at its height since it opened: until then, a report of it folded is not the user's.
+  const settled = useRef<PanelView | null>(null);
   // Folded by the line dragged under the view's least height, or opened by dragging it up.
   const keepHeight = useCallback(
     (size: { inPixels: number }, id: string | number | undefined) => {
@@ -351,13 +353,21 @@ export function Daw({
         return;
       }
       const collapsed = panelRef.current?.isCollapsed() ?? false;
+      // A view opened on the panel open, that reports itself folded before it has shown: it stays open.
+      if (collapsed && !folded && settled.current !== shown) {
+        panelRef.current?.resize(viewHeights.current[shown]);
+        return;
+      }
+      if (!collapsed) {
+        settled.current = shown;
+      }
       setFolded(collapsed);
       if (!collapsed) {
         viewHeights.current[shown] = size.inPixels;
         saveView({ panelHeights: { ...viewHeights.current } });
       }
     },
-    [panelRef, shown, setFolded]
+    [folded, panelRef, shown, setFolded]
   );
   const foldPanel = useCallback(
     (fold: boolean) => {

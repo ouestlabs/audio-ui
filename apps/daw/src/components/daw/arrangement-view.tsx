@@ -5,6 +5,8 @@ import {
 } from "@audio-ui/core/time";
 import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
 import {
+  CaretLeftIcon,
+  CaretRightIcon,
   MapPinPlusIcon,
   MusicNotesPlusIcon,
   PlusIcon,
@@ -257,6 +259,62 @@ function carriesDevice(event: DragEvent) {
  * signature at the cursor. It hands the focus back to nothing as it closes,
  * so a new signature keeps it to be typed.
  */
+/**
+ * The previous and the next locator, from where the cursor is: the cursor
+ * goes there, as a press on the locator puts it. Alt with the arrows does the
+ * same from the keyboard, with the clips' edges too.
+ */
+function LocatorSteps({
+  locators,
+  onJump,
+  position,
+}: {
+  locators: readonly { at: number }[];
+  onJump: (at: number) => void;
+  position: () => number;
+}) {
+  const step = useCallback(
+    (direction: -1 | 1) => {
+      const now = position();
+      const ahead = locators
+        .map(({ at }) => at)
+        .filter((at) => (direction > 0 ? at > now + 1e-6 : at < now - 1e-6));
+      if (ahead.length > 0) {
+        onJump(direction > 0 ? Math.min(...ahead) : Math.max(...ahead));
+      }
+    },
+    [locators, onJump, position]
+  );
+  const previous = useCallback(() => step(-1), [step]);
+  const next = useCallback(() => step(1), [step]);
+  return (
+    <>
+      <Button
+        aria-label="Previous locator"
+        className="size-5"
+        disabled={locators.length === 0}
+        onClick={previous}
+        size="icon"
+        title="Previous locator"
+        variant="ghost"
+      >
+        <CaretLeftIcon aria-hidden="true" className="size-3" weight="fill" />
+      </Button>
+      <Button
+        aria-label="Next locator"
+        className="size-5"
+        disabled={locators.length === 0}
+        onClick={next}
+        size="icon"
+        title="Next locator"
+        variant="ghost"
+      >
+        <CaretRightIcon aria-hidden="true" className="size-3" weight="fill" />
+      </Button>
+    </>
+  );
+}
+
 function MarkerMenu({
   onLocator,
   onSignature,
@@ -901,8 +959,13 @@ export function ArrangementView({
             <Row
               className="shrink-0 border-foreground/20 border-b"
               lead={
-                <span className="flex h-full w-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
-                  Markers
+                <span className="flex h-full w-full items-center gap-0.5 ps-3 pe-1 text-muted-foreground text-xs">
+                  <span className="me-auto">Markers</span>
+                  <LocatorSteps
+                    locators={locators}
+                    onJump={markers.locator.onJump}
+                    position={engine.position.getSnapshot}
+                  />
                   <MarkerMenu
                     onLocator={markers.addLocator}
                     onSignature={markers.addSignature}

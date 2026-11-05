@@ -3060,6 +3060,87 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `the fade is drawn from ${curve?.y}, over a name running to ${(header?.y ?? 0) + (header?.height ?? 0)}`
       );
     },
+  "ARR-016: a locator's menu loops from it to the next one, and turns the loop on":
+    async (browser) => {
+      const page = await open(browser);
+      await page.keyboard.press("KeyM");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("KeyM");
+      const first = page.locator("[data-slot=timeline-locator]").first();
+      await first.waitFor({ timeout: 5000 });
+      assert(
+        (await page.locator("[data-slot=timeline-locator]").count()) >= 2,
+        "two locators were not added"
+      );
+      const loop = page.getByRole("slider", { exact: true, name: "Loop" });
+      const looping = page
+        .getByRole("button", { exact: true, name: "Loop" })
+        .first();
+      // The loop off first, so the menu is what turns it on.
+      if ((await looping.getAttribute("aria-pressed")) === "true") {
+        await looping.click();
+      }
+      const before = await loop.getAttribute("aria-valuetext");
+      await first.click({ button: "right" });
+      await page
+        .getByRole("menuitem", { name: "Loop to the next locator" })
+        .click();
+      await page.waitForTimeout(150);
+      const after = await loop.getAttribute("aria-valuetext");
+      assert(after !== before, `the loop stayed ${before}`);
+      assert(
+        (await looping.getAttribute("aria-pressed")) === "true",
+        "the loop is not on"
+      );
+    },
+  "ARR-016: the previous and next locator buttons put the cursor on the locators around it":
+    async (browser) => {
+      const page = await open(browser);
+      const offsetOf = (selector: string) =>
+        page.evaluate(
+          (target) =>
+            [...document.querySelectorAll(target)].map((node) =>
+              Number(
+                (
+                  node.closest(
+                    "[data-slot=timeline-mark],[data-slot=timeline-playhead]"
+                  ) as HTMLElement
+                ).style.getPropertyValue("--timeline-offset")
+              )
+            ),
+          selector
+        );
+      // Two locators, a bar apart, and the cursor back at the start.
+      await page.keyboard.press("KeyM");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("ArrowRight");
+      await page.keyboard.press("KeyM");
+      await page.keyboard.press("Home");
+      const marks = (await offsetOf("[data-slot=timeline-locator]")).sort(
+        (a, b) => a - b
+      );
+      assert(marks.length >= 2, "two locators were not added");
+      const cursor = async () =>
+        (await offsetOf("[data-slot=timeline-playhead]"))[0] ?? -1;
+      const next = page.getByRole("button", { name: "Next locator" });
+      const previous = page.getByRole("button", { name: "Previous locator" });
+      await next.click();
+      const ahead = marks.find((at) => at > 0) ?? -1;
+      assert(
+        Math.abs((await cursor()) - ahead) < 1e-6,
+        `Next put the cursor at ${await cursor()}, not ${ahead}`
+      );
+      const last = marks.at(-1) ?? -1;
+      await page.keyboard.press("End");
+      await previous.click();
+      assert(
+        (await cursor()) <= last + 1e-6,
+        `Previous left the cursor at ${await cursor()}`
+      );
+    },
   "ARR-023: zoomed all the way in, the overview's window keeps both handles, apart, inside the bar, and one dragged zooms out":
     async (browser) => {
       const page = await open(browser);
