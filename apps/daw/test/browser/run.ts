@@ -632,7 +632,9 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "REC-001: a track's Arm button is a light, lit while it is armed, and says so as a pressed button":
     async (browser) => {
       const page = await open(browser);
-      const arm = page.getByRole("button", { name: "Arm 1 Audio" });
+      const arm = page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" });
       const light = arm.locator("[data-slot=led]");
       assert((await light.count()) === 1, "the Arm button has no light");
       assert(
@@ -672,6 +674,34 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "Space did not mute the track"
       );
       await page.keyboard.press("Space");
+    },
+  "MIX-019: a channel's switches are its track header's: Solo, Mute and an Arm light, one group, each moved by the other":
+    async (browser) => {
+      const page = await open(browser);
+      await showMixer(page);
+      const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      const channel = mixer.getByRole("group", { name: "1 Audio switches" });
+      const header = page
+        .getByRole("group", { name: "1 Audio switches" })
+        .filter({ hasNot: mixer });
+      await channel.getByRole("button", { name: "Arm 1 Audio" }).click();
+      assert(
+        (await header
+          .first()
+          .getByRole("button", { name: "Arm 1 Audio" })
+          .getAttribute("aria-pressed")) === "true",
+        "armed in the mixer, the header's Arm stays off"
+      );
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Mute 1 Audio" })
+        .click();
+      assert(
+        (await channel
+          .getByRole("button", { name: "Mute 1 Audio" })
+          .getAttribute("aria-pressed")) === "true",
+        "muted in the header, the channel's Mute stays off"
+      );
     },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
@@ -1418,9 +1448,13 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       const clips = page.locator('[data-track="track-1"] [data-clip-id]');
       const before = await clips.count();
-      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" })
+        .click();
       assert(
         (await page
+          .locator("[data-slot=timeline-track-header]")
           .getByRole("button", { name: "Arm 1 Audio" })
           .getAttribute("aria-pressed")) === "true",
         "the track is armed"
@@ -1478,7 +1512,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
   "REC-005: a count-in counts the transport back in negative bars before the take starts":
     async (browser) => {
       const page = await open(browser);
-      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" })
+        .click();
       await page.getByRole("button", { name: "Record settings" }).click();
       await page.getByRole("menuitemradio", { name: "1 bar" }).click();
       await page.keyboard.press("Escape");
@@ -1510,7 +1547,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       const clips = page.locator('[data-track="track-3"] [data-clip-id]');
       const before = await clips.count();
-      await page.getByRole("button", { name: "Arm 3 MIDI" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 3 MIDI" })
+        .click();
       await page.getByRole("button", { name: "Record settings" }).click();
       await page
         .getByRole("menuitemcheckbox", { name: "Computer keyboard" })
@@ -1551,7 +1591,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
     async (browser) => {
       const page = await open(browser);
       await showMixer(page);
-      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" })
+        .click();
       const quiet = await loudest(page, 800);
       await page.getByRole("button", { name: "Record settings" }).click();
       await page
@@ -1560,7 +1603,10 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       await page.keyboard.press("Escape");
       await page.waitForTimeout(800);
       const heard = await loudest(page, 1000);
-      await page.getByRole("button", { name: "Arm 1 Audio" }).click();
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 Audio" })
+        .click();
       // The meter falls back at its own pace.
       await page.waitForTimeout(2500);
       const after = await loudest(page, 800);

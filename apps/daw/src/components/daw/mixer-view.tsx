@@ -2,6 +2,7 @@ import { dbToGain, gainToDb, peakDb } from "@audio-ui/core/analysis";
 import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,
+  type MouseEvent,
   type PointerEvent,
   useCallback,
   useEffect,
@@ -11,9 +12,10 @@ import {
 import { createPortal, flushSync } from "react-dom";
 import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
+import { Led } from "@/components/audio-ui/led";
 import { Meter } from "@/components/audio-ui/meter";
 import { TRACK_COLORS } from "@/components/audio-ui/timeline";
-import { Toggle } from "@/components/ui/toggle";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
@@ -181,6 +183,8 @@ interface StripGrip {
 
 interface StripProps {
   analysers: readonly AnalyserNode[] | null;
+  /** Whether the track is armed to record (REC-001). */
+  armed?: boolean;
   /** What the fader and the pan follow their envelopes by (AUT-006). */
   following: AutomationFollowing;
   /** A track's channel moves by its name; a return and the main track stay where they are. */
@@ -189,6 +193,8 @@ interface StripProps {
   into?: string;
   /** Main has no switch, no solo and no sends. */
   main?: boolean;
+  /** Gives the channel an Arm switch, as its track's header has: `exclusive` is false when Cmd or Ctrl adds it to the armed ones. */
+  onArm?: (id: string, exclusive: boolean) => void;
   onMix: (id: string, patch: Partial<Omit<Mix, "color">>) => void;
   onSelect: (id: string) => void;
   onSend: (id: string, to: string, level: number) => void;
@@ -200,13 +206,79 @@ interface StripProps {
   track: ArrangementTrack;
 }
 
-/** A channel of the mixer: its sends, its pan, its fader and meter, its switch and solo. */
+/** A channel's switches, the same as its track's header: one group, one stop of Tab, the arrows between them. */
+function StripSwitches({
+  armed,
+  muted,
+  name,
+  onArm,
+  onMute,
+  onSolo,
+  soloed,
+}: {
+  armed: boolean;
+  muted: boolean;
+  name: string;
+  onArm?: (event: MouseEvent<HTMLButtonElement>) => void;
+  onMute: () => void;
+  onSolo: () => void;
+  soloed: boolean;
+}) {
+  return (
+    <ToggleGroup
+      aria-label={`${name} switches`}
+      className="row-start-6 w-full"
+      multiple
+      size="sm"
+      spacing={1}
+      value={[
+        ...(soloed ? ["solo"] : []),
+        ...(muted ? ["mute"] : []),
+        ...(armed ? ["arm"] : []),
+      ]}
+      variant="outline"
+    >
+      <ToggleGroupItem
+        aria-label={`Solo ${name}`}
+        className="flex-1"
+        onClick={onSolo}
+        value="solo"
+      >
+        S
+      </ToggleGroupItem>
+      <ToggleGroupItem
+        aria-label={`Mute ${name}`}
+        className="flex-1"
+        onClick={onMute}
+        value="mute"
+      >
+        M
+      </ToggleGroupItem>
+      {onArm ? (
+        <ToggleGroupItem
+          aria-label={`Arm ${name}`}
+          className="flex-1"
+          onClick={onArm}
+          value="arm"
+        >
+          <span aria-hidden="true" className="contents">
+            <Led label="Armed" on={armed} tone="destructive" />
+          </span>
+        </ToggleGroupItem>
+      ) : null}
+    </ToggleGroup>
+  );
+}
+
+/** A channel of the mixer: its sends, its pan, its fader and meter, its switches. */
 function Strip({
   analysers,
+  armed = false,
   following,
   grip,
   into,
   main,
+  onArm,
   onMix,
   onSelect,
   onSend,
@@ -225,13 +297,18 @@ function Strip({
     (pan: number) => onMix(track.id, { pan }),
     [onMix, track.id]
   );
-  const setOn = useCallback(
-    (on: boolean) => onMix(track.id, { muted: !on }),
-    [onMix, track.id]
+  const toggleMute = useCallback(
+    () => onMix(track.id, { muted: !mix.muted }),
+    [mix.muted, onMix, track.id]
   );
-  const setSolo = useCallback(
-    (soloed: boolean) => onMix(track.id, { soloed }),
-    [onMix, track.id]
+  const toggleSolo = useCallback(
+    () => onMix(track.id, { soloed: !mix.soloed }),
+    [mix.soloed, onMix, track.id]
+  );
+  const toggleArm = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) =>
+      onArm?.(track.id, !(event.metaKey || event.ctrlKey)),
+    [onArm, track.id]
   );
   const select = useCallback(() => onSelect(track.id), [onSelect, track.id]);
   const db = decibels(mix.gain);
@@ -340,28 +417,15 @@ function Strip({
       </span>
       {main ? <PeakReadout analysers={analysers ?? NO_ANALYSERS} /> : null}
       {main ? null : (
-        <div className="row-start-6 flex w-full gap-1">
-          <Toggle
-            aria-label={`${track.name} on`}
-            className="flex-1"
-            onPressedChange={setOn}
-            pressed={!mix.muted}
-            size="sm"
-            variant="outline"
-          >
-            On
-          </Toggle>
-          <Toggle
-            aria-label={`Solo ${track.name}`}
-            className="flex-1"
-            onPressedChange={setSolo}
-            pressed={mix.soloed}
-            size="sm"
-            variant="outline"
-          >
-            S
-          </Toggle>
-        </div>
+        <StripSwitches
+          armed={armed}
+          muted={mix.muted}
+          name={track.name}
+          onArm={onArm ? toggleArm : undefined}
+          onMute={toggleMute}
+          onSolo={toggleSolo}
+          soloed={mix.soloed}
+        />
       )}
     </section>
   );
@@ -373,15 +437,21 @@ function Strip({
  * and the engine follows it; the meters read the engine's channels.
  */
 export function MixerView({
+  armed,
   arrangement,
   engine,
+  onArm,
   onMix,
   onSelectTrack,
   overridden,
   selectedTrack,
 }: {
+  /** The tracks armed to record (REC-001). */
+  armed: ReadonlySet<string>;
   arrangement: Arrangement;
   engine: Engine;
+  /** Arms a track, or another one too with Cmd or Ctrl. */
+  onArm: (track: string, exclusive: boolean) => void;
   /** A channel's mix changed: a fader's drag is a burst, a switch a step of its own, and an automated gain or pan is overridden. */
   onMix: (id: string, patch: Partial<Mix>) => void;
   onSelectTrack: (id: string) => void;
@@ -477,6 +547,7 @@ export function MixerView({
   ) => (
     <Strip
       analysers={engine.meter(track.id)}
+      armed={armed.has(track.id)}
       following={{
         duration: doc.duration,
         overridden: overridden[track.id],
@@ -486,6 +557,7 @@ export function MixerView({
       into={track.group ? trackOf(doc, track.group)?.name : undefined}
       key={track.id}
       main={main}
+      onArm={moves && track.kind !== "group" ? onArm : undefined}
       onMix={onMix}
       onSelect={onSelectTrack}
       onSend={onSend}

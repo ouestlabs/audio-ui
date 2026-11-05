@@ -89,3 +89,7 @@ Test: apps/daw/test/browser/run.ts "MIX-017"
 ### MIX-018 A clip's title bar shows it
 A click on a clip's title bar, not a drag of it, shows the clip in the clip view, whatever the panel showed: the mixer gives way to it. Picking a clip any other way, or moving it, leaves the mixer where it is.
 Test: apps/daw/test/browser/run.ts "MIX-018"
+
+### MIX-019 A channel's switches
+A channel holds the same switches as its track's header, in one group: Solo, Mute and, for a track that records, an Arm light. Each is the same state as the header's: one moved, the other shows it.
+Test: apps/daw/test/browser/run.ts "MIX-019"

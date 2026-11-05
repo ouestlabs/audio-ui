@@ -1151,8 +1151,10 @@ export function Daw({
     content = (
       <section aria-label="Mixer" className="h-full bg-muted/30">
         <MixerView
+          armed={take.armed}
           arrangement={arrangement}
           engine={engine}
+          onArm={armTrack}
           onMix={automation.changeMix}
           onSelectTrack={pickTrack}
           overridden={automation.overridden}
