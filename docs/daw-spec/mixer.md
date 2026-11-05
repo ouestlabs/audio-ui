@@ -48,7 +48,7 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-010"
 
 ### MIX-011 Meters
 Each track and the main track show their peak and their RMS level, the loudest peak held, and a mark when a frame went over 0 dBFS, until it is clicked.
-Each channel has its loudest sample in dB beside its fader's value, red over 0 dBFS until clicked, as the reference's does on every track (OBS-013, version 10.1); the main track's is a wide box under its fader, with a scale beside its meter.
+Each channel, the main track's too, has its loudest sample in dB in a pill over its pan, red over 0 dBFS until clicked, as the reference draws it on every track (OBS-013, version 10.1); the main track has a scale beside its meter.
 Test: apps/daw/test/mixer.test.ts "MIX-011"; apps/daw/test/browser/run.ts "MIX-011"
 
 ### MIX-012 Delay compensation
