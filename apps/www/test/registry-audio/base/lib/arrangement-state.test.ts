@@ -502,6 +502,25 @@ describe("apply", () => {
     expect(state.doc.signatures.map((change) => change.at)).toEqual([30]);
   });
 
+  test("G-025: a locator exactly where the time removed begins goes with it", () => {
+    let state = apply(init([]), { at: 50, type: "add-locator" });
+    state = apply(state, { from: 50, to: 60, type: "remove-time" });
+    expect(state.doc.locators.map((locator) => locator.at)).toEqual([20]);
+  });
+
+  test("G-025: the loop follows time taken out: an end inside it comes back to where it began, a loop after it moves back", () => {
+    // The loop runs 10 to 30; the time from 25 to 45 is taken out.
+    let state = apply(init([]), { from: 25, to: 45, type: "remove-time" });
+    expect(state.doc.loop).toEqual({ on: true, range: [10, 25] });
+    // A loop after the time taken out moves back with what it marks.
+    state = apply(init([]), { loop: { range: [60, 80] }, type: "set-loop" });
+    state = apply(state, { from: 25, to: 45, type: "remove-time" });
+    expect(state.doc.loop.range).toEqual([40, 60]);
+    // Both ends inside it: nothing left to loop, so the loop stays as it was.
+    state = apply(init([]), { from: 5, to: 40, type: "remove-time" });
+    expect(state.doc.loop.range).toEqual([10, 30]);
+  });
+
   test("G-025: a time signature in the time removed starts where the time removed did, so what follows keeps its meter", () => {
     const state = apply(init([]), { type: "remove-time", from: 35, to: 45 });
     expect(state.doc.signatures).toEqual([
