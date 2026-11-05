@@ -103,3 +103,7 @@ Test: packages/core/src/primitives/timeline/range-controller.test.ts; apps/daw/t
 ### ARR-025 Room under the tracks
 Under the last track there is always room for more, at least a track's least lane high and all that the tracks leave: it takes audio files and devices, as the add-track button does, one new track for each, from the start of the arrangement. It says so. A file let go anywhere that takes nothing is refused, and never opens in the browser.
 Test: apps/daw/test/browser/run.ts "ARR-025"
+
+### ARR-026 A file being read
+From the moment a file is dropped until its clip is there, a pulsing outline says it is being read, named after it, or after how many files there are: at the time it lands on its track, its length not known yet, or in the room under the tracks and on the add-track button for a track of its own.
+Test: apps/daw/test/browser/run.ts "ARR-026"
