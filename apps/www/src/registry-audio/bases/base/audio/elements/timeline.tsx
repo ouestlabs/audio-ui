@@ -14,6 +14,7 @@ import {
   type MouseEvent,
   type ReactNode,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -384,28 +385,57 @@ function TimelineClipFadeHandle({
 }
 
 /** The whole timeline as one bar: drag the window to scroll, an edge to zoom, double-click to show everything. */
+/**
+ * The whole timeline as one bar, with the stretch the view shows as a window
+ * and a handle at each edge. Once the window is at its least width, too narrow
+ * for them, it is one plain thumb: the handles go, unless the keyboard is on one.
+ */
 function TimelineNavigator({
   className,
   ...props
 }: TimelinePrimitive.Navigator.Props) {
+  const windowRef = useRef<HTMLDivElement>(null);
+  const [narrow, setNarrow] = useState(false);
+  useEffect(() => {
+    const element = windowRef.current;
+    if (!element) {
+      return;
+    }
+    const measure = () =>
+      setNarrow(
+        element.offsetWidth <=
+          Number.parseFloat(getComputedStyle(element).minWidth)
+      );
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, []);
+  const state = narrow ? "" : undefined;
   return (
     <TimelinePrimitive.Navigator
-      className={cn("cn-timeline-navigator shrink-0 select-none", className)}
+      className={cn(
+        "cn-timeline-navigator shrink-0 select-none overflow-hidden",
+        className
+      )}
       data-slot="timeline-navigator"
       {...props}
     >
       <TimelinePrimitive.NavigatorWindow
         aria-label="Visible range"
-        className="cn-timeline-navigator-window inset-y-0 min-w-6 cursor-grab rounded-[inherit] active:cursor-grabbing"
+        className="cn-timeline-navigator-window inset-y-0 min-w-8 cursor-grab rounded-[inherit] active:cursor-grabbing"
+        data-narrow={state}
+        ref={windowRef}
       />
       <TimelinePrimitive.NavigatorHandle
         aria-label="Start of the visible range"
-        className="cn-timeline-navigator-handle inset-y-1 ms-1 w-2 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0"
+        className="cn-timeline-navigator-handle inset-y-1 ms-1 w-2 cursor-ew-resize after:absolute after:-inset-x-1.5 after:inset-y-0 data-narrow:pointer-events-none data-narrow:opacity-0 data-narrow:has-focus-visible:opacity-100"
+        data-narrow={state}
         edge="start"
       />
       <TimelinePrimitive.NavigatorHandle
         aria-label="End of the visible range"
-        className="cn-timeline-navigator-handle inset-y-1 w-2 cursor-ew-resize data-[edge=end]:-translate-x-[calc(100%+0.25rem)] after:absolute after:-inset-x-1.5 after:inset-y-0"
+        className="cn-timeline-navigator-handle inset-y-1 w-2 cursor-ew-resize data-[edge=end]:-translate-x-[calc(100%+0.25rem)] after:absolute after:-inset-x-1.5 after:inset-y-0 data-narrow:pointer-events-none data-narrow:opacity-0 data-narrow:has-focus-visible:opacity-100"
+        data-narrow={state}
         edge="end"
       />
     </TimelinePrimitive.Navigator>

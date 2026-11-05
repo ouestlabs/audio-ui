@@ -2289,6 +2289,57 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `${read.empty} of ${read.columns} columns are gaps`
       );
     },
+  "ARR-023: the overview's window, too narrow for its handles, is one plain thumb that scrolls":
+    async (browser) => {
+      const page = await open(browser);
+      const bar = page.locator("[data-slot=timeline-navigator]");
+      const start = bar.getByLabel("Start of the visible range");
+      const handles = () =>
+        bar.locator(".cursor-ew-resize").evaluateAll((all) =>
+          all.map((handle) => {
+            const style = getComputedStyle(handle);
+            return `${style.opacity} ${style.pointerEvents}`;
+          })
+        );
+      assert(await start.count(), "the overview has no handles");
+      assert(
+        (await handles()).every((handle) => handle.startsWith("1 ")),
+        `fitted, the handles read ${await handles()}`
+      );
+      await [1, 2, 3, 4, 5, 6, 7, 8].reduce(async (done) => {
+        await done;
+        await page.keyboard.press("Meta+Equal");
+        await page.waitForTimeout(60);
+      }, Promise.resolve());
+      await page.waitForTimeout(300);
+      assert(
+        (await handles()).every((handle) => handle === "0 none"),
+        `zoomed in, the handles read ${await handles()}`
+      );
+      const thumb = bar.locator("[data-narrow]").first();
+      const box = await thumb.boundingBox();
+      if (!box) {
+        throw new Error("the overview's window is not on the page");
+      }
+      const viewport = page.locator("[data-slot=timeline-viewport]");
+      const from = await viewport.evaluate((element) => element.scrollLeft);
+      await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(box.x + 300, box.y + box.height / 2, { steps: 6 });
+      await page.mouse.up();
+      await page.waitForTimeout(150);
+      const to = await viewport.evaluate((element) => element.scrollLeft);
+      assert(to > from, `dragging the thumb left the view at ${to}`);
+      // Scrolled to the end, it stays inside its bar.
+      await viewport.evaluate((element) => {
+        element.scrollLeft = element.scrollWidth;
+      });
+      await page.waitForTimeout(150);
+      const clipped = await bar.evaluate(
+        (element) => getComputedStyle(element).overflow
+      );
+      assert(clipped === "hidden", `the bar lets its thumb out: ${clipped}`);
+    },
   "ARR-022: a track removed, the page loaded again: a new track takes an id of its own, and shows and goes alone":
     async (browser) => {
       const page = await open(browser);

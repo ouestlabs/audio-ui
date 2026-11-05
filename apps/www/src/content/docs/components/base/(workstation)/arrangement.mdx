@@ -676,6 +676,8 @@ The whole timeline as one bar, with the stretch the viewport shows drawn inside 
 <TypeRow name={"data-scrubbing"}>Whether a pointer is moving the position.</TypeRow>
 </TypeTable>
 
+The styled `TimelineNavigator` draws the window as one plain thumb once it is at its least width, too narrow for its handles: dragged, it scrolls, and a double-click on the bar shows everything. The handles come back with the room, and with the keyboard on one.
+
 ### NavigatorWindow
 
 The stretch of the timeline the viewport shows. Dragging it scrolls; its native `<input type="range">` scrolls from the keyboard and carries its accessible name. Renders a `<div>` element.

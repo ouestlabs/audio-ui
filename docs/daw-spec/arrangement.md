@@ -92,3 +92,6 @@ Test: apps/daw/test/browser/run.ts "ARR-021"
 A new or duplicated track never takes the id of a track there is, whatever was removed before the project was loaded. A project saved with two tracks under one id comes back with the second under a new one, empty: the clips stay on the first.
 Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "ARR-022"; apps/daw/test/project-file.test.ts "ARR-022"; apps/daw/test/browser/run.ts "ARR-022"
 
+### ARR-023 The overview at any zoom
+The bar over the tracks shows the stretch the view shows as a window with a handle at each edge. Zoomed in until they no longer fit, it is one plain thumb that stays inside its bar: dragged, it scrolls, and a double-click on the bar shows everything. The handles come back as soon as there is room, and with the keyboard on one, it shows.
+Test: apps/daw/test/browser/run.ts "ARR-023"
