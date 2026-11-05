@@ -37,7 +37,7 @@ Test: apps/www/test/arrangement-state.test.ts "ARR-008"
 
 ### ARR-009 Tracks in a new project
 A new project holds two audio tracks, two MIDI tracks and two return tracks, the first with a reverb, the second with a delay, at 120 BPM in 4/4.
-Status: partial: OBS-013 checks the reference's default.
+Status: partial: the reference's new set (OBS-013, version 10.1) matches but for the order: it lists its two MIDI tracks before its two audio tracks, here the audio tracks come first. Its launch quantization starts at one bar.
 Test: apps/daw/test/project.test.ts "ARR-009"
 
 ### ARR-010 Moving a track

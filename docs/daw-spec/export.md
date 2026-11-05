@@ -12,7 +12,7 @@ Test: apps/daw/test/browser/run.ts "EXP-002"
 
 ### EXP-003 The file
 WAV, at the project's sample rate, in 16 or 24-bit whole numbers or 32-bit floating point.
-Status: partial: OBS-009 gives the reference's defaults. AIFF and FLAC are planned (phase 2).
+Status: partial: the reference's dialog (OBS-009, version 10.1) shows the track to render, its start and length, loop, mono and normalize switches, the sample rate, and PCM with a file type, a bit depth and a dither (AIFF, 16 bits and triangular as it was left on that machine; the lists were not opened). AIFF and FLAC are planned (phase 2).
 Test: apps/www/test/wav-file.test.ts "EXP-003"
 
 ### EXP-004 Dither

@@ -8,7 +8,7 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-001"
 
 ### MIX-002 Volume
 The volume runs from silence to +6 dB, 0 dB by default; a double-click sets it back to 0 dB. A track's fader in the arrangement and its channel in the mixer are one and the same: the same range and the same place, each moved by the other.
-Status: partial: OBS-004 checks the range against the reference.
+Checked against the reference: +6.0 dB at the top (OBS-004).
 Test: apps/www/test/mixer.test.ts "MIX-002"
 
 ### MIX-003 Pan
@@ -25,12 +25,12 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-005"
 
 ### MIX-006 Return tracks and solo
 With solo in place on, soloing a track keeps the return tracks heard, so the track is heard with its reverb. Soloing a return track silences the main output of the other tracks but keeps what they send to that return.
-Status: partial: OBS-005 says whether solo in place is the reference's default.
+Checked against the reference: solo in place is on by default (OBS-005).
 Test: packages/core/src/audio/playback/mixer.test.ts "MIX-006"
 
 ### MIX-007 Sends
 Each track has a send per return track, from silence to 0 dB, silent by default, and post-fader unless the return is set to pre.
-Status: partial: OBS-004 checks the range and default.
+Checked against the reference: a send reaches 0.0 dB at the top and starts at -inf (OBS-004).
 Test: packages/core/src/audio/playback/mixer.test.ts "MIX-007"
 
 ### MIX-008 Return tracks
