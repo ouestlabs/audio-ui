@@ -703,18 +703,20 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const page = await open(browser);
       const rows = page.locator("[data-track-id]");
       // Its header's name picks a track, and Delete takes it.
-      while ((await rows.count()) > 0) {
-        const before = await rows.count();
-        await rows
-          .first()
-          .locator("[data-slot=timeline-track-header]")
-          .click({
-            position: { x: 60, y: 12 },
-          });
-        await page.keyboard.press("Delete");
-        await page.waitForTimeout(80);
-        assert((await rows.count()) < before, "Delete left the track");
-      }
+      const total = await rows.count();
+      await Array.from({ length: total }).reduce<Promise<void>>(
+        async (done) => {
+          await done;
+          await rows
+            .first()
+            .locator("[data-slot=timeline-track-header]")
+            .click({ position: { x: 60, y: 12 } });
+          await page.keyboard.press("Delete");
+          await page.waitForTimeout(80);
+        },
+        Promise.resolve()
+      );
+      assert((await rows.count()) === 0, "Delete left a track");
       const zone = page.locator("[data-slot=arrangement-drop]");
       await zone.waitFor({ timeout: 3000 });
       const room = await zone.boundingBox();

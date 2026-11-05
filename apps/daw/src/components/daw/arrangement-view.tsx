@@ -122,6 +122,15 @@ function isShort(height: number | undefined) {
   return height !== undefined && height < COMPACT_TRACK_HEIGHT;
 }
 
+/** A lane fills its row: with a height of its own, however short, and a short track keeps its clips thin, so they fit. */
+function laneFit(height: number | undefined) {
+  return cn(
+    "h-auto flex-1 border-b-0",
+    height === undefined ? "min-h-14" : "min-h-0",
+    isShort(height) && "**:data-clip-id:inset-y-0.5"
+  );
+}
+
 /** A track's header, its gain and pan showing where their envelopes stand as the arrangement plays (AUT-006). */
 function FollowingControls({
   following,
@@ -882,10 +891,7 @@ export function ArrangementView({
                     <ContextMenuTrigger render={<div className="contents" />}>
                       <TimelineLane
                         className={cn(
-                          "h-auto flex-1 border-b-0",
-                          height === undefined ? "min-h-14" : "min-h-0",
-                          // A short track keeps its clips thin, so they fit.
-                          isShort(height) && "**:data-clip-id:inset-y-0.5",
+                          laneFit(height),
                           dropOn === track.id &&
                             "ring-2 ring-primary ring-inset",
                           silent && "**:data-clip-id:opacity-40"
@@ -971,6 +977,7 @@ export function ArrangementView({
           {/* Once no track shares the room left, what remains takes files and devices, a track for each. */}
           {roomLeft ? (
             <div
+              aria-label="Room for new tracks"
               className={cn(
                 "flex min-h-14 flex-1 items-center text-muted-foreground text-xs",
                 dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
@@ -979,6 +986,7 @@ export function ArrangementView({
               onDragLeave={fileLeave}
               onDragOver={dragOver(NEW_TRACK, true)}
               onDrop={drop(NEW_TRACK, true)}
+              role="group"
             >
               <span className="sticky left-3 px-3">
                 Drop audio files or a device here
