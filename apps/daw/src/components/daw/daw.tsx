@@ -869,15 +869,15 @@ export function Daw({
     () => (folder ? saveTo(folder) : saveAs()),
     [folder, saveAs, saveTo]
   );
-  const newSet = useCallback(
-    () =>
-      onOpen?.({
-        folder: null,
-        initial: newProject(),
-        initialRecordings: new Map(),
-      }),
-    [onOpen]
-  );
+  const newSet = useCallback(async () => {
+    // The new project belongs to no folder: a reload must not hand it the old one.
+    await rememberFolder(null);
+    onOpen?.({
+      folder: null,
+      initial: newProject(),
+      initialRecordings: new Map(),
+    });
+  }, [onOpen]);
   const openProjectFolder = useCallback(async () => {
     const picked = await pickFolder();
     const context = webAudio.getContext();
@@ -940,6 +940,7 @@ export function Daw({
       const notice = toast.loading(`Opening ${file.name}…`);
       try {
         const opened = await importProject(context, file, TRACK_COLOR_COUNT);
+        await rememberFolder(null);
         toast.success(`Opened ${file.name}`, {
           description: lostLines(opened.report),
           id: notice,

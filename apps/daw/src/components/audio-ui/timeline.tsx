@@ -616,6 +616,7 @@ function TimelineTrackControls({
   compact,
   folded,
   mix,
+  output = true,
   name,
   onMix,
   onMixCommit,
@@ -642,6 +643,8 @@ function TimelineTrackControls({
   meter?: ReactNode;
   /** Whether the track is short: one row, with no gain. */
   compact: boolean;
+  /** Whether the track has an output. One without, such as a MIDI track with no instrument, has no gain or pan to set. Defaults to `true`. */
+  output?: boolean;
   /** Whether the track is folded to a strip: the caret opens it. */
   folded?: boolean;
   /** Gives the header a caret that folds the track. */
@@ -848,7 +851,7 @@ function TimelineTrackControls({
             ) : null}
           </ToggleGroup>
         </div>
-        {compact ? null : (
+        {compact || !output ? null : (
           <div className="flex h-7 items-center gap-6 pe-1">
             <Fader
               aria-label={`${name} gain`}

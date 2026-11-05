@@ -1,3 +1,4 @@
+import type { ArrangementTrack } from "@/lib/arrangement";
 import {
   type ArrangementCommand,
   type ArrangementDoc,
@@ -29,6 +30,14 @@ export function takesDevice(
   return (
     !instrument ||
     doc.tracks.some((track) => track.id === id && track.kind === "midi")
+  );
+}
+
+/** Whether a track has an output: a MIDI track with no instrument has none, so no volume, pan or sends (MIX-024). */
+export function hasOutput(track: ArrangementTrack): boolean {
+  return (
+    track.kind !== "midi" ||
+    (track.devices ?? []).some((device) => device.instrument)
   );
 }
 

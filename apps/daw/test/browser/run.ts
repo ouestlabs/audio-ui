@@ -980,6 +980,59 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `six sends: the switches end at ${switches.y + switches.height}, under the mixer's ${view.y + view.height}`
       );
     },
+  "MIX-024: a MIDI track with no instrument has no volume, pan or sends, in the mixer and in its header, and an instrument brings them back":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("1 MIDI", { exact: true }).first().click();
+      const controls = (name: string) =>
+        page.getByRole("slider", { name: `1 MIDI ${name}` });
+      await showMixer(page);
+      assert(
+        (await controls("pan").count()) === 2,
+        "the new MIDI track has no pan in its header and its channel"
+      );
+      await page.getByRole("tab", { name: "Devices" }).click();
+      await page.getByRole("button", { name: REMOVE }).first().click();
+      await page.getByRole("tab", { name: "Mixer" }).click();
+      await page.waitForFunction(
+        () =>
+          !document.querySelector(
+            '[aria-label="1 MIDI pan"], [aria-label="1 MIDI volume"]'
+          ),
+        undefined,
+        { timeout: 5000 }
+      );
+      assert(
+        (await page.getByRole("group", { name: "1 MIDI sends" }).count()) === 0,
+        "the channel still has sends"
+      );
+      assert(
+        (await page.getByLabel("1 MIDI gain").count()) === 0,
+        "the header still has a gain"
+      );
+      assert(
+        (await page.getByRole("button", { name: "Mute 1 MIDI" }).count()) > 0,
+        "the switches went with the volume"
+      );
+      assert(
+        (await controls("pan").count()) === 0 &&
+          (await page.getByRole("slider", { name: "2 MIDI pan" }).count()) > 0,
+        "another MIDI track lost its pan"
+      );
+      // An instrument given again brings them back.
+      await page
+        .getByRole("region", { name: "Library" })
+        .getByLabel("Search the devices")
+        .fill("Pocket Synth");
+      await page
+        .getByRole("region", { name: "Library" })
+        .getByRole("option", { name: "Pocket Synth" })
+        .first()
+        .dblclick();
+      // The header's pan and the channel's, both.
+      await page.getByRole("tab", { name: "Mixer" }).click();
+      await controls("pan").nth(1).waitFor({ timeout: 5000 });
+    },
   "MIX-023: a channel's pan and sends turn by a drag up and down, and a drag across moves nothing":
     async (browser) => {
       const page = await open(browser);
@@ -3847,6 +3900,46 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           .locator('[aria-label="Old take"][data-track-id]')
           .count()) === 0,
         "a reload brought the old project back"
+      );
+    },
+  "PRJ-009: a new project belongs to no folder, so a save after a reload asks for one":
+    async (browser) => {
+      const context = await browser.newContext({
+        viewport: { height: 1000, width: 1440 },
+      });
+      const shared = await context.newPage();
+      // The picker gives a folder of the private storage, and counts the times it is asked.
+      await shared.addInitScript(() => {
+        const counted = window as unknown as {
+          picks: number;
+          showDirectoryPicker: () => Promise<FileSystemDirectoryHandle>;
+        };
+        counted.picks = 0;
+        counted.showDirectoryPicker = async () => {
+          counted.picks += 1;
+          return (
+            await (
+              await navigator.storage.getDirectory()
+            ).getDirectoryHandle("picked", { create: true })
+          ).getDirectoryHandle("Mirages", { create: true });
+        };
+      });
+      const page = await open(browser, shared);
+      await page.keyboard.press("Meta+KeyS");
+      await page.getByText("Saved to Mirages").waitFor({ timeout: 10_000 });
+      await page.getByRole("button", { name: "More controls" }).click();
+      await page.getByRole("menuitem", { name: "New project" }).click();
+      await page.waitForSelector("text=Saved", { timeout: 5000 });
+      await open(browser, page);
+      await page.waitForSelector('[aria-label="1 MIDI"][data-track-id]');
+      await page.keyboard.press("Meta+KeyS");
+      await page.getByText("Saved to Mirages").waitFor({ timeout: 10_000 });
+      const picks = await page.evaluate(
+        () => (window as unknown as { picks: number }).picks
+      );
+      assert(
+        picks === 1,
+        `the save asked for a folder ${picks} times, not once`
       );
     },
 };
