@@ -462,6 +462,54 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the mixer stays open beside the detail view"
       );
     },
+  "MIX-016: the main track stays at the right of the mixer while the channels scroll under it":
+    async (browser) => {
+      const page = await open(browser);
+      await [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].reduce(async (done) => {
+        await done;
+        await page.locator("[data-add-track] button").click();
+        await page.getByRole("menuitem", { name: "Audio track" }).click();
+      }, Promise.resolve());
+      await showMixer(page);
+      const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      const main = mixer.getByRole("region", { exact: true, name: "Main" });
+      const edges = async () => {
+        const [view, strip] = [
+          await mixer.boundingBox(),
+          await main.boundingBox(),
+        ];
+        return {
+          left: strip?.x ?? 0,
+          right: (strip?.x ?? 0) + (strip?.width ?? 0),
+          viewRight: (view?.x ?? 0) + (view?.width ?? 0),
+        };
+      };
+      await mixer.evaluate((element) => {
+        element.scrollLeft = 0;
+      });
+      await page.waitForTimeout(100);
+      const start = await edges();
+      assert(
+        await mixer.evaluate(
+          (element) => element.scrollWidth > element.clientWidth
+        ),
+        "the mixer does not scroll"
+      );
+      assert(
+        start.right <= start.viewRight + 1 &&
+          start.right > start.viewRight - 24,
+        `scrolled to the start, the main track ends at ${start.right} in a mixer ending at ${start.viewRight}`
+      );
+      await mixer.evaluate((element) => {
+        element.scrollLeft = element.scrollWidth;
+      });
+      await page.waitForTimeout(100);
+      const end = await edges();
+      assert(
+        Math.abs(end.left - start.left) < 2,
+        `the main track moved from ${start.left} to ${end.left}`
+      );
+    },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);

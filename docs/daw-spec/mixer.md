@@ -77,3 +77,7 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-021"; apps/www/test/br
 ### MIX-022 A meter in each track's header
 A track's header meters what its channel sends on, after its volume, pan and switch, down its right edge, as a thin pair: a track that plays reads a level, and a silent or muted one reads none.
 Test: apps/daw/test/browser/run.ts "MIX-022"
+
+### MIX-016 The main track stays in sight
+In the mixer, the main track stays at the right edge, apart from the channels by a line, while they scroll under it.
+Test: apps/daw/test/browser/run.ts "MIX-016"

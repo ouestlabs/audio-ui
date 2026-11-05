@@ -225,8 +225,8 @@ function Strip({
       className={cn(
         // A column of the console, a hairline between it and the next.
         "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-3 transition-colors",
-        // The main track is wider: its meter has a scale.
-        main && "w-36 border-e-0",
+        // The main track is wider, its meter has a scale; it stays at the right edge while the channels scroll under it.
+        main && "sticky end-0 z-10 ms-2 w-36 border-s border-e-0 bg-background",
         track.kind === "group" && "bg-muted/40",
         selected && "bg-muted"
       )}
@@ -395,7 +395,7 @@ export function MixerView({
     // and never less than 5rem, so the panel fits a short screen.
     <div
       aria-label="Mixer"
-      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden pe-2"
+      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 no-scrollbar scroll-fade-s overflow-x-auto overflow-y-hidden pe-2"
       role="group"
     >
       {/* A folded group hides its tracks here too. */}
@@ -406,10 +406,6 @@ export function MixerView({
         className="row-span-6 w-2 border-border border-e"
       />
       {doc.returns.map((track) => strip(track))}
-      <div
-        aria-hidden="true"
-        className="row-span-6 w-2 border-border border-e"
-      />
       {strip(doc.main, true)}
     </div>
   );
