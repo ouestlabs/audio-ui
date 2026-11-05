@@ -15,9 +15,11 @@ import {
   type MouseEvent,
   type PointerEvent,
   type ReactNode,
+  type Ref,
   type RefObject,
   useCallback,
   useMemo,
+  useRef,
   useState,
 } from "react";
 import { createPortal } from "react-dom";
@@ -120,6 +122,27 @@ function carriesFiles(event: DragEvent) {
 /** Whether a track set by hand is short enough for one row of controls. */
 function isShort(height: number | undefined) {
   return height !== undefined && height < COMPACT_TRACK_HEIGHT;
+}
+
+/** Where a file carried over a lane would land, with the time it would land at. */
+function DropLine({
+  active,
+  ref,
+}: {
+  active: boolean;
+  ref: Ref<HTMLDivElement>;
+}) {
+  if (!active) {
+    return null;
+  }
+  return (
+    <div
+      className="pointer-events-none absolute inset-y-0 start-[calc(var(--timeline-unit)*var(--drop-at,0))] z-30 border-primary border-s-2 ps-1 text-primary text-xs tabular-nums"
+      data-slot="arrangement-drop-line"
+      hidden
+      ref={ref}
+    />
+  );
 }
 
 /** A lane fills its row: with a height of its own, however short, and a short track keeps its clips thin, so they fit. */
@@ -383,6 +406,7 @@ export function ArrangementView({
   } = doc;
   const { zoom } = view;
   const [dropOn, setDropOn] = useState<string | null>(null);
+  const dropLine = useRef<HTMLDivElement>(null);
   const beat = secondsPerBeat(tempo);
   const bar = secondsPerBar(tempo);
   const describe = useCallback(
@@ -578,9 +602,17 @@ export function ArrangementView({
         event.preventDefault();
         event.dataTransfer.dropEffect = "copy";
         setDropOn(track);
+        // Straight on the line: it moves with the pointer, and nothing else has to draw again.
+        const line = dropLine.current;
+        if (line && track !== NEW_TRACK && carriesFiles(event)) {
+          const time = timeAt(event);
+          line.hidden = false;
+          line.style.setProperty("--drop-at", String(time));
+          line.textContent = describe(time);
+        }
       }
     },
-    []
+    [describe, timeAt]
   );
   const drop = useCallback(
     (track: string, files: boolean) => (event: DragEvent<HTMLElement>) => {
@@ -908,6 +940,7 @@ export function ArrangementView({
                         onSelectionChange={timeSelection.onSelectionChange}
                         seekable
                       >
+                        <DropLine active={dropOn === track.id} ref={dropLine} />
                         {isGroup ? (
                           <ArrangedGroupPreview
                             clips={clips.filter((clip) =>
@@ -974,25 +1007,24 @@ export function ArrangementView({
               </div>
             );
           })}
-          {/* Once no track shares the room left, what remains takes files and devices, a track for each. */}
-          {roomLeft ? (
-            <div
-              aria-label="Room for new tracks"
-              className={cn(
-                "flex min-h-14 flex-1 items-center text-muted-foreground text-xs",
-                dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
-              )}
-              data-slot="arrangement-drop"
-              onDragLeave={fileLeave}
-              onDragOver={dragOver(NEW_TRACK, true)}
-              onDrop={drop(NEW_TRACK, true)}
-              role="group"
-            >
-              <span className="sticky left-3 px-3">
-                Drop audio files or a device here
-              </span>
-            </div>
-          ) : null}
+          {/* Under the last track, always: it takes files and devices, a track for each. */}
+          <div
+            aria-label="Room for new tracks"
+            className={cn(
+              "flex min-h-14 items-center text-muted-foreground text-xs",
+              roomLeft ? "flex-1" : "shrink-0",
+              dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
+            )}
+            data-slot="arrangement-drop"
+            onDragLeave={fileLeave}
+            onDragOver={dragOver(NEW_TRACK, true)}
+            onDrop={drop(NEW_TRACK, true)}
+            role="group"
+          >
+            <span className="sticky left-3 px-3">
+              Drop audio files or a device here
+            </span>
+          </div>
         </div>
       </TimelineViewport>
       {marquee.rect
