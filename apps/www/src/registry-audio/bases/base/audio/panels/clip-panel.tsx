@@ -1007,7 +1007,7 @@ function ClipSource({
       source={playhead}
       zoom={zoom ?? undefined}
     >
-      <TimelineNavigator className="mx-2 my-1.5" getAriaValueText={format} />
+      <TimelineNavigator className="rounded-none" getAriaValueText={format} />
       {/* Flush in the clip view, which is the frame: no border or corners of its own. */}
       <TimelineViewport
         className="flex min-w-0 flex-1 flex-col border-t bg-muted/40"

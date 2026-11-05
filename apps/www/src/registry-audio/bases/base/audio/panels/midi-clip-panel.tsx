@@ -750,7 +750,7 @@ function MidiClipPanel({
               </Button>
             }
           >
-            <TimelineNavigator className="mx-2 my-1.5" />
+            <TimelineNavigator className="rounded-none" />
           </PianoRollStrip>
           <PianoRollViewport ref={viewportRef}>
             <PianoRollStrip

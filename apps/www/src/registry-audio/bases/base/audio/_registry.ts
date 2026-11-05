@@ -1103,7 +1103,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio-ui/icons"],
     description:
       "A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.",
     files: [

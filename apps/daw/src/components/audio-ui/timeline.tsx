@@ -1,5 +1,6 @@
 "use client";
 
+import { dbToGain, gainToDb } from "@audio-ui/core/analysis";
 import { CurveIcon, RecordIcon } from "@audio-ui/icons/react";
 import {
   FADE_SHAPES,
@@ -68,7 +69,7 @@ function TimelineViewport({
       className={cn(
         "bg-background relative min-h-0 min-w-0 overscroll-x-contain",
         scrollbar === "hidden" &&
-          "[scrollbar-width:none] [&::-webkit-scrollbar]:hidden",
+          "scrollbar-none [&::-webkit-scrollbar]:hidden",
         className
       )}
       data-slot="timeline-viewport"
@@ -348,7 +349,7 @@ function TimelineClipFadeHandle({
     <TimelinePrimitive.ClipFadeHandle
       className={cn(
         "rounded-[min(var(--radius-sm),6px)] border-ring border bg-card transition-[color,box-shadow] hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:ring-3 active:ring-ring/50 motion-reduce:transition-none top-1 z-20 size-3 cursor-ew-resize data-[edge=in]:ms-1 data-[edge=out]:me-1 opacity-0 transition-opacity",
-        "group-hover/clip:opacity-100 group-data-[selected]/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
+        "group-hover/clip:opacity-100 group-data-selected/clip:opacity-100 data-dragging:opacity-100 has-focus-visible:opacity-100",
         "after:absolute after:-inset-1 pointer-coarse:opacity-100 pointer-coarse:after:-inset-2",
         className
       )}
@@ -414,6 +415,13 @@ function TimelineNavigator({
 }
 
 const selectText = (element: HTMLInputElement | null) => element?.select();
+
+/** A track's volume, in dB as a mixer's channel has it: at the bottom, silence. */
+const TRACK_MIN_DB = -60;
+const TRACK_MAX_DB = 6;
+const gainOfDb = (db: number) => (db <= TRACK_MIN_DB ? 0 : dbToGain(db));
+const formatGainDb = (db: number) =>
+  db <= TRACK_MIN_DB ? "-inf dB" : `${db.toFixed(1)} dB`;
 
 /** A track is never shorter than its full header needs: to go smaller, fold it. */
 export const MIN_TRACK_HEIGHT = 79;
@@ -634,7 +642,9 @@ function TimelineTrackControls({
   );
   const handleGain = useCallback(
     (value: number | readonly number[]) =>
-      onMix(trackId, { gain: Array.isArray(value) ? value[0] : Number(value) }),
+      onMix(trackId, {
+        gain: gainOfDb(Array.isArray(value) ? value[0] : value),
+      }),
     [onMix, trackId]
   );
   const handlePan = useCallback(
@@ -795,15 +805,16 @@ function TimelineTrackControls({
               aria-label={`${name} gain`}
               className="ms-2.5 min-w-0 flex-1 **:data-[orientation=horizontal]:min-w-0 **:data-[slot=fader-value]:top-full **:data-[slot=fader-value]:bottom-auto **:data-[slot=fader-value]:mt-1 **:data-[slot=fader-value]:mb-0"
               editableValue
-              max={1}
-              min={0}
+              formatValue={formatGainDb}
+              max={TRACK_MAX_DB}
+              min={TRACK_MIN_DB}
               onValueChange={handleGain}
               onValueCommitted={handleMixCommit}
               orientation="horizontal"
               size="sm"
-              step={0.01}
+              step={0.5}
               thumbMarks={false}
-              value={mix.gain}
+              value={Math.max(TRACK_MIN_DB, gainToDb(mix.gain))}
               valueLabel="auto"
             />
             <Knob

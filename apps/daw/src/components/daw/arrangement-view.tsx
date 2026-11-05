@@ -676,9 +676,10 @@ export function ArrangementView({
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-        <div className="min-w-0 flex-1 p-1">
-          <TimelineNavigator getAriaValueText={describe} />
-        </div>
+        <TimelineNavigator
+          className="h-auto min-w-0 flex-1 rounded-none"
+          getAriaValueText={describe}
+        />
       </div>
       <TimelineViewport
         className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/30"

@@ -1,5 +1,6 @@
 "use client";
 
+import { dbToGain, gainToDb } from "@audio-ui/core/analysis";
 import { CurveIcon, RecordIcon } from "@audio-ui/icons/react";
 import {
   FADE_SHAPES,
@@ -415,6 +416,13 @@ function TimelineNavigator({
 
 const selectText = (element: HTMLInputElement | null) => element?.select();
 
+/** A track's volume, in dB as a mixer's channel has it: at the bottom, silence. */
+const TRACK_MIN_DB = -60;
+const TRACK_MAX_DB = 6;
+const gainOfDb = (db: number) => (db <= TRACK_MIN_DB ? 0 : dbToGain(db));
+const formatGainDb = (db: number) =>
+  db <= TRACK_MIN_DB ? "-inf dB" : `${db.toFixed(1)} dB`;
+
 /** A track is never shorter than its full header needs: to go smaller, fold it. */
 export const MIN_TRACK_HEIGHT = 79;
 /** Below this a track is a strip: the full header (name, solo, mute, gain, pan) needs this much room, so a shorter track keeps the name, solo and mute and drops the rest. */
@@ -634,7 +642,9 @@ function TimelineTrackControls({
   );
   const handleGain = useCallback(
     (value: number | readonly number[]) =>
-      onMix(trackId, { gain: Array.isArray(value) ? value[0] : Number(value) }),
+      onMix(trackId, {
+        gain: gainOfDb(Array.isArray(value) ? value[0] : value),
+      }),
     [onMix, trackId]
   );
   const handlePan = useCallback(
@@ -802,15 +812,16 @@ function TimelineTrackControls({
               aria-label={`${name} gain`}
               className="ms-2.5 min-w-0 flex-1 **:data-[orientation=horizontal]:min-w-0 **:data-[slot=fader-value]:top-full **:data-[slot=fader-value]:bottom-auto **:data-[slot=fader-value]:mt-1 **:data-[slot=fader-value]:mb-0"
               editableValue
-              max={1}
-              min={0}
+              formatValue={formatGainDb}
+              max={TRACK_MAX_DB}
+              min={TRACK_MIN_DB}
               onValueChange={handleGain}
               onValueCommitted={handleMixCommit}
               orientation="horizontal"
               size="sm"
-              step={0.01}
+              step={0.5}
               thumbMarks={false}
-              value={mix.gain}
+              value={Math.max(TRACK_MIN_DB, gainToDb(mix.gain))}
               valueLabel="auto"
             />
             <Knob

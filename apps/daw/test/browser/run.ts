@@ -2419,6 +2419,43 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         `the end handle is at ${out.end.x}, the pointer at ${held.end.x + 200}`
       );
     },
+  "MIX-002: a track's fader and its mixer channel are one fader: the same range and the same place, each moved by the other":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByRole("tab", { name: "Mixer" }).click();
+      const track = page.getByRole("slider", { name: "2 Audio gain" });
+      const channel = page.getByRole("slider", { name: "2 Audio volume" });
+      await channel.waitFor({ timeout: 5000 });
+      const read = async () =>
+        Promise.all(
+          [track, channel].map((slider) =>
+            slider.evaluate((input) => {
+              const { max, min, value } = input as HTMLInputElement;
+              return { max, min, value };
+            })
+          )
+        );
+      const same = async (when: string) => {
+        const [a, b] = await read();
+        assert(
+          JSON.stringify(a) === JSON.stringify(b),
+          `${when}: ${JSON.stringify(a)} and ${JSON.stringify(b)}`
+        );
+        return a?.value;
+      };
+      assert((await same("at first")) === "0", "they do not start at 0 dB");
+      await track.focus();
+      await page.keyboard.press("ArrowLeft");
+      await page.keyboard.press("ArrowLeft");
+      const down = await same("moved on the track");
+      assert(Number(down) < 0, `the track's fader reads ${down}`);
+      await channel.focus();
+      await page.keyboard.press("End");
+      assert(
+        (await same("moved on the channel")) === "6",
+        "the channel's top is not the track's"
+      );
+    },
   "ARR-022: a track removed, the page loaded again: a new track takes an id of its own, and shows and goes alone":
     async (browser) => {
       const page = await open(browser);
