@@ -9,21 +9,17 @@ export type PanelView = "clip" | "devices" | "mixer";
 /** The panel's views, as tabs: they go in the bar, or in the clip view's own strip when it shows a clip. */
 export function PanelTabs({ clipAvailable }: { clipAvailable: boolean }) {
   return (
-    <TabsList className="relative z-10 shrink-0 group-data-horizontal/tabs:h-7">
-      <TabsTrigger
-        className="px-2 text-xs"
-        disabled={!clipAvailable}
-        value="clip"
-      >
-        <ClipIcon aria-hidden="true" className="size-3.5" weight="fill" />
+    <TabsList className="relative z-10 shrink-0">
+      <TabsTrigger disabled={!clipAvailable} value="clip">
+        <ClipIcon aria-hidden="true" weight="fill" />
         Clip
       </TabsTrigger>
-      <TabsTrigger className="px-2 text-xs" value="devices">
-        <KnobIcon aria-hidden="true" className="size-3.5" weight="fill" />
+      <TabsTrigger value="devices">
+        <KnobIcon aria-hidden="true" weight="fill" />
         Devices
       </TabsTrigger>
-      <TabsTrigger className="px-2 text-xs" value="mixer">
-        <FadersIcon aria-hidden="true" className="size-3.5" weight="fill" />
+      <TabsTrigger value="mixer">
+        <FadersIcon aria-hidden="true" weight="fill" />
         Mixer
       </TabsTrigger>
     </TabsList>
