@@ -1,5 +1,12 @@
 # @audio-ui/core
 
+## 0.22.0
+
+### Minor Changes
+
+- ba6bb13: Timeline: `Navigator` takes `minWindowWidth`, the least width its window is drawn at, so its handles stay apart and inside the bar at any zoom. A drag follows the window as drawn, and an edge stops with the zoom at `maxZoom` instead of sliding the window on.
+- ba6bb13: Timeline: `Range` takes `minDrawnWidth`, the least room it is drawn with, so its handles stay apart and in reach however far out the view is zoomed. From twice that width it is as wide as it is long. A drag of its end follows what is drawn.
+
 ## 0.21.0
 
 ### Minor Changes
