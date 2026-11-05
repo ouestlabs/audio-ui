@@ -806,6 +806,18 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "on the clip's tab, the panel folded"
       );
     },
+  "MIX-015: a press on the tab already shown opens the folded panel": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    await page.getByRole("tab", { name: DEVICES }).click();
+    await page.getByRole("button", { name: "Fold the panel" }).click();
+    await page.getByRole("button", { name: "Open the panel" }).waitFor();
+    await page.getByRole("tab", { name: DEVICES }).click();
+    await page
+      .getByRole("button", { name: "Fold the panel" })
+      .waitFor({ timeout: 3000 });
+  },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
     async (browser) => {
       const page = await open(browser);

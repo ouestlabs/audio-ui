@@ -7,9 +7,16 @@ import { TabsList, TabsTrigger } from "@/components/ui/tabs";
 export type PanelView = "clip" | "devices" | "mixer";
 
 /** The panel's views, as tabs: they go in the bar, or in the clip view's own strip when it shows a clip. */
-export function PanelTabs({ clipAvailable }: { clipAvailable: boolean }) {
+export function PanelTabs({
+  clipAvailable,
+  onPress,
+}: {
+  clipAvailable: boolean;
+  /** A press on a tab, even the one already shown, which a change of tab does not report: the folded panel opens on it. */
+  onPress?: () => void;
+}) {
   return (
-    <TabsList className="relative z-10 shrink-0">
+    <TabsList className="relative z-10 shrink-0" onClick={onPress}>
       <TabsTrigger disabled={!clipAvailable} value="clip">
         <ClipIcon aria-hidden="true" weight="fill" />
         Clip
@@ -83,7 +90,10 @@ export function PanelBar({
       <span className="pointer-events-none relative min-w-0 flex-1 truncate font-medium">
         {title}
       </span>
-      <PanelTabs clipAvailable={clipAvailable} />
+      <PanelTabs
+        clipAvailable={clipAvailable}
+        onPress={folded ? open : undefined}
+      />
     </div>
   );
 }
