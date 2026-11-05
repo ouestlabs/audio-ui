@@ -79,5 +79,5 @@ A track's header meters what its channel sends on, after its volume, pan and swi
 Test: apps/daw/test/browser/run.ts "MIX-022"
 
 ### MIX-016 The main track stays in sight
-In the mixer, the main track stays at the right edge, apart from the channels by a line, while they scroll under it.
+In the mixer, the main track stays whole at the right edge, apart from the channels by a line. The channels scroll beside it, never under it, and its fader starts level with theirs.
 Test: apps/daw/test/browser/run.ts "MIX-016"

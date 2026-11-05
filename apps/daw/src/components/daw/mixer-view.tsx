@@ -225,8 +225,8 @@ function Strip({
       className={cn(
         // A column of the console, a hairline between it and the next.
         "row-span-6 grid w-28 grid-rows-subgrid justify-items-center border-border/60 border-e px-2 pb-3 transition-colors",
-        // The main track is wider, its meter has a scale; it stays at the right edge while the channels scroll under it.
-        main && "sticky end-0 z-10 ms-2 w-36 border-s border-e-0 bg-background",
+        // The main track is wider: its meter has a scale.
+        main && "w-36 border-s border-e-0",
         track.kind === "group" && "bg-muted/40",
         selected && "bg-muted"
       )}
@@ -392,20 +392,26 @@ export function MixerView({
   return (
     // One grid for every channel, each a subgrid of its six rows (name, sends, pan, fader, level, switches): what one
     // channel lacks leaves its row empty, so every fader starts and ends level; the faders take the height there is,
-    // and never less than 5rem, so the panel fits a short screen.
+    // and never less than 5rem, so the panel fits a short screen. The channels scroll in a subgrid of their own, and
+    // the main track stays beside them at the right, whole: nothing passes under it.
     <div
       aria-label="Mixer"
-      className="grid h-full min-h-0 auto-cols-max grid-flow-col grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 no-scrollbar scroll-fade-s overflow-x-auto overflow-y-hidden pe-2"
+      className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 pe-2"
       role="group"
     >
-      {/* A folded group hides its tracks here too. */}
-      {arrangement.unfoldedTracks.map((track) => strip(track, false, true))}
-      {/* The returns and the main track stand apart from the tracks. */}
       <div
-        aria-hidden="true"
-        className="row-span-6 w-2 border-border border-e"
-      />
-      {doc.returns.map((track) => strip(track))}
+        className="row-span-6 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden"
+        data-slot="mixer-channels"
+      >
+        {/* A folded group hides its tracks here too. */}
+        {arrangement.unfoldedTracks.map((track) => strip(track, false, true))}
+        {/* The returns stand apart from the tracks. */}
+        <div
+          aria-hidden="true"
+          className="row-span-6 w-2 border-border border-e"
+        />
+        {doc.returns.map((track) => strip(track))}
+      </div>
       {strip(doc.main, true)}
     </div>
   );

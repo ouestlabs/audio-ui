@@ -462,7 +462,7 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "the mixer stays open beside the detail view"
       );
     },
-  "MIX-016: the main track stays at the right of the mixer while the channels scroll under it":
+  "MIX-016: the main track stays whole at the right of the mixer, and no channel passes under it":
     async (browser) => {
       const page = await open(browser);
       await [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].reduce(async (done) => {
@@ -472,42 +472,59 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       }, Promise.resolve());
       await showMixer(page);
       const mixer = page.getByRole("group", { exact: true, name: "Mixer" });
+      const channels = mixer.locator("[data-slot=mixer-channels]");
       const main = mixer.getByRole("region", { exact: true, name: "Main" });
-      const edges = async () => {
-        const [view, strip] = [
+      const read = async () => {
+        const [view, rows, strip] = [
           await mixer.boundingBox(),
+          await channels.boundingBox(),
           await main.boundingBox(),
         ];
         return {
+          channelsRight: (rows?.x ?? 0) + (rows?.width ?? 0),
           left: strip?.x ?? 0,
           right: (strip?.x ?? 0) + (strip?.width ?? 0),
           viewRight: (view?.x ?? 0) + (view?.width ?? 0),
         };
       };
-      await mixer.evaluate((element) => {
+      assert(
+        await channels.evaluate(
+          (element) => element.scrollWidth > element.clientWidth
+        ),
+        "the channels do not scroll"
+      );
+      await channels.evaluate((element) => {
         element.scrollLeft = 0;
       });
       await page.waitForTimeout(100);
-      const start = await edges();
-      assert(
-        await mixer.evaluate(
-          (element) => element.scrollWidth > element.clientWidth
-        ),
-        "the mixer does not scroll"
-      );
+      const start = await read();
       assert(
         start.right <= start.viewRight + 1 &&
           start.right > start.viewRight - 24,
         `scrolled to the start, the main track ends at ${start.right} in a mixer ending at ${start.viewRight}`
       );
-      await mixer.evaluate((element) => {
+      assert(
+        start.channelsRight <= start.left + 1,
+        `the channels run to ${start.channelsRight}, under a main track from ${start.left}`
+      );
+      await channels.evaluate((element) => {
         element.scrollLeft = element.scrollWidth;
       });
       await page.waitForTimeout(100);
-      const end = await edges();
+      const end = await read();
       assert(
         Math.abs(end.left - start.left) < 2,
         `the main track moved from ${start.left} to ${end.left}`
+      );
+      // Every fader starts level, the main track's too.
+      const tops = await mixer
+        .locator("[data-slot=fader-track]")
+        .evaluateAll((faders) =>
+          faders.map((fader) => Math.round(fader.getBoundingClientRect().top))
+        );
+      assert(
+        new Set(tops).size === 1,
+        `the faders start at ${[...new Set(tops)].join(", ")}`
       );
     },
   "MIX-015: the line over the mixer or the detail view shares the height, and each keeps its own":
