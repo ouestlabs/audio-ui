@@ -393,23 +393,19 @@ export function MixerView({
     // One grid for every channel, each a subgrid of its six rows (name, sends, pan, fader, level, switches): what one
     // channel lacks leaves its row empty, so every fader starts and ends level; the faders take the height there is,
     // and never less than 5rem, so the panel fits a short screen. The channels scroll in a subgrid of their own, and
-    // the main track stays beside them at the right, whole: nothing passes under it.
+    // the main track stays beside them at the right, whole: nothing passes under it. One hairline between two
+    // channels, the main track's own before it.
     <div
       aria-label="Mixer"
       className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 pe-2"
       role="group"
     >
       <div
-        className="row-span-6 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden"
+        className="row-span-6 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden *:last:border-e-0"
         data-slot="mixer-channels"
       >
         {/* A folded group hides its tracks here too. */}
         {arrangement.unfoldedTracks.map((track) => strip(track, false, true))}
-        {/* The returns stand apart from the tracks. */}
-        <div
-          aria-hidden="true"
-          className="row-span-6 w-2 border-border border-e"
-        />
         {doc.returns.map((track) => strip(track))}
       </div>
       {strip(doc.main, true)}

@@ -516,6 +516,24 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         Math.abs(end.left - start.left) < 2,
         `the main track moved from ${start.left} to ${end.left}`
       );
+      // One line between two channels, and before the main track: no gap, no double line.
+      const lines = await mixer.locator("section").evaluateAll((strips) =>
+        strips.map((strip) => {
+          const style = getComputedStyle(strip);
+          return [
+            Number.parseFloat(style.borderInlineStartWidth),
+            Number.parseFloat(style.borderInlineEndWidth),
+          ];
+        })
+      );
+      const doubled = lines.findIndex(
+        ([, after], index) => after > 0 && (lines[index + 1]?.[0] ?? 0) > 0
+      );
+      assert(doubled === -1, `a double line after channel ${doubled + 1}`);
+      assert(
+        (await channels.locator(":scope > :not(section)").count()) === 0,
+        "something other than a channel stands between them"
+      );
       // Every fader starts level, the main track's too.
       const tops = await mixer
         .locator("[data-slot=fader-track]")
