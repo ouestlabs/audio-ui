@@ -79,8 +79,8 @@ Test: packages/core/src/audio/playback/mixer.test.ts "MIX-021"; apps/www/test/br
 A track's header meters what its channel sends on, after its volume, pan and switch, down its right edge, as a thin pair: a track that plays reads a level, and a silent or muted one reads none.
 Test: apps/daw/test/browser/run.ts "MIX-022"
 
-### MIX-016 The main track stays in sight
-In the mixer, the main track stays whole at the right edge, apart from the channels by a line. One line parts two channels, returns included: no gap and no double line. The channels scroll beside it, never under it, and its fader starts level with theirs.
+### MIX-016 The return tracks and the main track stay in sight
+In the mixer, the return tracks and the main track stay whole at the right edge, apart from the channels by a line. One line parts two channels, returns included: no gap and no double line. Only the tracks' channels scroll, beside them and never under them, and their faders start level with theirs.
 Test: apps/daw/test/browser/run.ts "MIX-016"
 
 ### MIX-017 Moving a channel
