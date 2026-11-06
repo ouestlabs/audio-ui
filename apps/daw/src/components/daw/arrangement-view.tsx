@@ -128,6 +128,11 @@ function isShort(height: number | undefined) {
   return height !== undefined && height < COMPACT_TRACK_HEIGHT;
 }
 
+/** The room a header with the automation chooser needs: one row more than a squeezed track has. */
+function chooserRoom(shown: unknown, height: number | undefined) {
+  return shown && !isShort(height) ? "min-h-30" : undefined;
+}
+
 const CLIP_HEAD = '[data-slot="timeline-clip-header"]';
 
 /**
@@ -1035,6 +1040,7 @@ export function ArrangementView({
                   className={cn(
                     "border-foreground/20 border-b",
                     height === undefined && "flex-1",
+                    chooserRoom(shownParameter, height),
                     isReturn && "bg-muted/40"
                   )}
                   height={height}
