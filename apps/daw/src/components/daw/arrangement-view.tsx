@@ -104,7 +104,7 @@ import {
   type TrackDevice,
 } from "@/lib/arrangement";
 import { trackBlock, trackDepth } from "@/lib/arrangement-state";
-import { hasOutput } from "@/lib/daw/devices";
+import { automatedParameter, hasOutput } from "@/lib/daw/devices";
 import { NEW_TRACK } from "@/lib/daw/drop";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { libraryDevice } from "@/lib/device-library";
@@ -126,6 +126,11 @@ function carriesFiles(event: DragEvent) {
 /** Whether a track set by hand is short enough for one row of controls. */
 function isShort(height: number | undefined) {
   return height !== undefined && height < COMPACT_TRACK_HEIGHT;
+}
+
+/** The room a header with the automation chooser needs: one row more than a squeezed track has. */
+function chooserRoom(shown: unknown, height: number | undefined) {
+  return shown && !isShort(height) ? "min-h-30" : undefined;
 }
 
 const CLIP_HEAD = '[data-slot="timeline-clip-header"]';
@@ -811,6 +816,24 @@ export function ArrangementView({
     [returns, tracks]
   );
 
+  // In automation mode, what each lane shows: nothing for a track with no output and no device parameter (MIX-024).
+  const shownParameters = useMemo(
+    () =>
+      new Map(
+        automation.automating
+          ? [...tracks, ...returns].map((track) => [
+              track.id,
+              automatedParameter(
+                track,
+                automation.parameterOf(track.id),
+                targets.get(track.id)
+              ),
+            ])
+          : []
+      ),
+    [automation.automating, automation.parameterOf, returns, targets, tracks]
+  );
+
   return (
     <Timeline
       className="min-h-0 flex-1"
@@ -1004,6 +1027,7 @@ export function ArrangementView({
               takesFiles,
             } = rowOf(track, tracks, returns, anySolo);
             const height = arrangement.heights[track.id];
+            const shownParameter = shownParameters.get(track.id);
             return (
               <div
                 aria-label={track.name}
@@ -1016,6 +1040,7 @@ export function ArrangementView({
                   className={cn(
                     "border-foreground/20 border-b",
                     height === undefined && "flex-1",
+                    chooserRoom(shownParameter, height),
                     isReturn && "bg-muted/40"
                   )}
                   height={height}
@@ -1064,11 +1089,12 @@ export function ArrangementView({
                         trackId={track.id}
                         {...menuOf(isReturn, isGroup)}
                       >
-                        {automation.automating ? (
+                        {shownParameter ? (
                           <TrackAutomationChooser
                             onClear={automation.clear}
                             onParameterChange={automation.show}
-                            parameter={automation.parameterOf(track.id)}
+                            output={hasOutput(track)}
+                            parameter={shownParameter}
                             targets={targets.get(track.id)}
                             track={track}
                           />
@@ -1136,7 +1162,7 @@ export function ArrangementView({
                         {selectedTime?.tracks.includes(track.id) ? (
                           <TimelineTimeSelection range={selectedTime.range} />
                         ) : null}
-                        {automation.automating ? (
+                        {shownParameter ? (
                           <TrackAutomation
                             describe={describe}
                             duration={duration}
@@ -1144,7 +1170,7 @@ export function ArrangementView({
                             onChange={automation.edit}
                             onCommit={settle}
                             overridden={automation.overridden[track.id]}
-                            parameter={automation.parameterOf(track.id)}
+                            parameter={shownParameter}
                             snapStep={grid.snapStep}
                             targets={targets.get(track.id)}
                             track={track}

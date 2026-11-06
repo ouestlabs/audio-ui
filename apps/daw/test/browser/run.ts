@@ -1019,6 +1019,18 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           (await page.getByRole("slider", { name: "2 MIDI pan" }).count()) > 0,
         "another MIDI track lost its pan"
       );
+      // Its lane has no volume or pan envelope to draw either.
+      await page.keyboard.press("KeyA");
+      await page
+        .getByRole("combobox", { name: "2 MIDI automation" })
+        .waitFor({ timeout: 5000 });
+      assert(
+        (await page
+          .getByRole("combobox", { name: "1 MIDI automation" })
+          .count()) === 0 &&
+          (await page.getByLabel("1 MIDI volume automation").count()) === 0,
+        "the track with no output still offers a volume to automate"
+      );
       // An instrument given again brings them back.
       await page
         .getByRole("region", { name: "Library" })
@@ -1032,6 +1044,9 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       // The header's pan and the channel's, both.
       await page.getByRole("tab", { name: "Mixer" }).click();
       await controls("pan").nth(1).waitFor({ timeout: 5000 });
+      await page
+        .getByRole("combobox", { name: "1 MIDI automation" })
+        .waitFor({ timeout: 5000 });
     },
   "MIX-023: a channel's pan and sends turn by a drag up and down, and a drag across moves nothing":
     async (browser) => {

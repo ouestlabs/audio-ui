@@ -4,7 +4,12 @@ import {
   createArrangementState,
   trackOf,
 } from "@/lib/arrangement-state";
-import { addDeviceCommand, hasOutput, takesDevice } from "@/lib/daw/devices";
+import {
+  addDeviceCommand,
+  automatedParameter,
+  hasOutput,
+  takesDevice,
+} from "@/lib/daw/devices";
 import { NEW_TRACK } from "@/lib/daw/drop";
 import { newProject, TRACK_COLOR_COUNT } from "@/lib/daw/project";
 
@@ -135,5 +140,19 @@ describe("a track's output", () => {
     expect(hasOutput(audio)).toBe(true);
     expect(hasOutput({ ...midi, devices: [] })).toBe(false);
     expect(hasOutput({ ...midi, devices: undefined })).toBe(false);
+  });
+
+  test("MIX-024: its lane shows a device parameter, or nothing, never a volume it lacks", () => {
+    const midi = trackOf(project().doc, "track-3");
+    if (!midi) {
+      throw new Error("the new project lost a track");
+    }
+    const bare = { ...midi, devices: [] };
+    const key = "device:d:cutoff" as const;
+    expect(automatedParameter(midi, "volume")).toBe("volume");
+    expect(automatedParameter(bare, "volume", [{ key }])).toBe(key);
+    expect(automatedParameter(bare, "pan", [{ key }])).toBe(key);
+    expect(automatedParameter(bare, key, [{ key }])).toBe(key);
+    expect(automatedParameter(bare, "volume")).toBeNull();
   });
 });

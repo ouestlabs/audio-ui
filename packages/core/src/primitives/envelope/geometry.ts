@@ -190,8 +190,10 @@ export function polylinePoints(value: Breakpoint[]): string {
   if (!(first && last)) {
     return "";
   }
+  // The graph is stretched across the whole arrangement, many thousands of
+  // pixels wide: x keeps four decimals, so a bend is not drawn in steps.
   const coordinate = (x: number, y: number) =>
-    `${roundCoord(x * 100)},${roundCoord((1 - y) * 100)}`;
+    `${Math.round(x * 1e6) / 1e4},${roundCoord((1 - y) * 100)}`;
   const coordinates = [coordinate(0, first.y)];
   value.forEach((point, index) => {
     coordinates.push(coordinate(point.x, point.y));

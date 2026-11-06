@@ -1,4 +1,4 @@
-import type { ArrangementTrack } from "@/lib/arrangement";
+import type { ArrangementTrack, AutomatedParameter } from "@/lib/arrangement";
 import {
   type ArrangementCommand,
   type ArrangementDoc,
@@ -39,6 +39,22 @@ export function hasOutput(track: ArrangementTrack): boolean {
     track.kind !== "midi" ||
     (track.devices ?? []).some((device) => device.instrument)
   );
+}
+
+/**
+ * The parameter a track's lane shows in automation mode: the one `shown`, or
+ * for a track with no output, whose volume and pan are gone (MIX-024), its
+ * first device parameter. Null when there is none to show.
+ */
+export function automatedParameter(
+  track: ArrangementTrack,
+  shown: AutomatedParameter,
+  targets: readonly { key: AutomatedParameter }[] = []
+): AutomatedParameter | null {
+  if (hasOutput(track) || (shown !== "volume" && shown !== "pan")) {
+    return shown;
+  }
+  return targets[0]?.key ?? null;
 }
 
 /**
