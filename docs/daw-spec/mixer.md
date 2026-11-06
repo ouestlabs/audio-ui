@@ -100,5 +100,5 @@ A channel's pan and its sends are dragged up and down, as the reference's knobs 
 Test: apps/daw/test/browser/run.ts "MIX-023"
 
 ### MIX-024 A track with no output has no volume
-A MIDI track with no instrument has no output, as in the reference: its channel has no sends, pan, fader or peak, and its header has no gain or pan. Its switches stay, and its values are kept: a track given an instrument again has them as they were. A new MIDI track holds an instrument, so this shows when the instrument is removed.
+A MIDI track with no instrument has no output, as in the reference: its channel has no sends, pan, fader or peak, and its header has no gain or pan. In automation mode its chooser lists only its devices' parameters, and a track with none has no chooser or envelope. Its switches stay, and its values are kept: a track given an instrument again has them as they were. A new MIDI track holds an instrument, so this shows when the instrument is removed.
 Test: apps/daw/test/browser/run.ts "MIX-024"; apps/daw/test/devices.test.ts "MIX-024"

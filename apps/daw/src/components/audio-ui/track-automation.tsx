@@ -160,7 +160,7 @@ function labelOf(
 }
 
 /** The chooser's entries: the track's own volume and pan, then its devices' parameters, device by device. */
-function chooserGroups(targets: readonly AutomationTarget[]) {
+function chooserGroups(targets: readonly AutomationTarget[], output: boolean) {
   const groups = new Map<string, { label: string; value: string }[]>();
   for (const target of targets) {
     const items = groups.get(target.group) ?? [];
@@ -168,13 +168,17 @@ function chooserGroups(targets: readonly AutomationTarget[]) {
     groups.set(target.group, items);
   }
   return [
-    {
-      items: AUTOMATED_PARAMETERS.map((value) => ({
-        label: PARAMETERS[value].label,
-        value: value as string,
-      })),
-      label: "",
-    },
+    ...(output
+      ? [
+          {
+            items: AUTOMATED_PARAMETERS.map((value) => ({
+              label: PARAMETERS[value].label,
+              value: value as string,
+            })),
+            label: "",
+          },
+        ]
+      : []),
     ...[...groups].map(([label, items]) => ({ items, label })),
   ];
 }
@@ -183,19 +187,22 @@ function chooserGroups(targets: readonly AutomationTarget[]) {
 function TrackAutomationChooser({
   onClear,
   onParameterChange,
+  output = true,
   parameter,
   targets = [],
   track,
 }: {
   onClear: (trackId: string, parameter: AutomatedParameter) => void;
   onParameterChange: (trackId: string, parameter: AutomatedParameter) => void;
+  /** Whether the track has an output. One without, such as a MIDI track with no instrument, has no volume or pan to automate, and the chooser lists only its devices' parameters. Defaults to `true`. */
+  output?: boolean;
   parameter: AutomatedParameter;
   /** The parameters of the track's devices it can automate besides its volume and pan, as `deviceTargets` gives them. */
   targets?: readonly AutomationTarget[];
   track: ArrangementTrack;
 }) {
   const { automation, id: trackId, name } = track;
-  const groups = useMemo(() => chooserGroups(targets), [targets]);
+  const groups = useMemo(() => chooserGroups(targets, output), [targets, output]);
   const items = useMemo(() => groups.flatMap((group) => group.items), [groups]);
   const change = useCallback(
     (next: string | null) =>

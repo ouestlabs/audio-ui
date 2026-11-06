@@ -1052,6 +1052,7 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"parameter"} type={"AutomatedParameter"}>What the lane shows: `"volume"`, `"pan"`, or a device's parameter by its key.</TypeRow>
 <TypeRow name={"targets"} type={"AutomationTarget[]"}>The track's devices' parameters it can automate, as `deviceTargets` gives them: the chooser lists them by device, and the envelope reads and stands by them.</TypeRow>
 <TypeRow name={"onParameterChange, onClear"} type={"(trackId, parameter) => void"}>The chooser's: another parameter picked, and its envelope cleared.</TypeRow>
+<TypeRow name={"output"} type={"boolean"} default={"true"}>Whether the track has an output. One without, such as a MIDI track with no instrument, has no volume or pan: the chooser lists only its devices' parameters.</TypeRow>
 <TypeRow name={"mix"} type={"Mix"}>The track's mix, where a line with no points stands.</TypeRow>
 <TypeRow name={"onChange, onCommit"} type={"(trackId, parameter, points) => void, () => void"}>The envelope was edited, and the gesture ended.</TypeRow>
 <TypeRow name={"duration, snapStep, describe"} type={"number, number, (time) => string"}>The arrangement's length, the grid a point snaps to in time, and a time in words.</TypeRow>
