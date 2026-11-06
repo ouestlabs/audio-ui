@@ -201,12 +201,12 @@ async function open(browser: Browser | BrowserContext) {
 /** Wakes the audio with a press on the engine line, where a press does nothing else. */
 async function wake(page: Page) {
   await page.getByText("kHz").click();
-  // About one context in six stays asleep after the press, in Chromium too: a play wakes it, so the wait gives up after a few seconds.
+  // A context sometimes still sleeps a few seconds after the press (seen against the built app, not on the dev server): a play wakes it, so the wait gives up.
   await page
     .waitForFunction(
       () =>
-        (window as unknown as { probe: Probe }).probe.contexts.at(-1)
-          ?.state === "running",
+        (window as unknown as { probe: Probe }).probe.contexts.at(-1)?.state ===
+        "running",
       undefined,
       { timeout: 4000 }
     )
