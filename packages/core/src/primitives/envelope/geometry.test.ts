@@ -56,3 +56,19 @@ describe("polylinePoints of a tightly bent segment", () => {
     expect(polylinePoints(value).split(" ")).toHaveLength(4);
   });
 });
+
+describe("polylinePoints across a very wide graph", () => {
+  test("keeps x precise enough that a short bend is not drawn in steps", () => {
+    const value = [
+      { curve: 0.6, x: 0.1, y: 0 },
+      { x: 0.1004, y: 1 },
+    ];
+    const xs = polylinePoints(value)
+      .split(" ")
+      .map((pair) => Number(pair.split(",")[0]));
+    // A tenth of a percent of a graph 40000 px wide is 40 px.
+    expect(new Set(xs.map((x) => Math.round(x * 10))).size).toBeLessThan(
+      new Set(xs).size
+    );
+  });
+});
