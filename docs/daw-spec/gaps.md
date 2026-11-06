@@ -14,7 +14,7 @@ Status: partial: the points stay fractions of the arrangement's length, so a tem
 ### G-027 A lone underrun, now and then
 In about one short pass of PRF-004 in six, the browser counts one underrun, on a set of 8 or 16 tracks whose load peaked under 30 %: never in the three passes of 10 minutes, never in 8 plays and stops of 16 tracks counted apart. Each time it came on a set just opened, after the previous one closed in the same browser. It came again once in three passes of PRF-006, while 17 streamed stems played, in a browser of its own. Breaks PRF-004 when it happens.
 Fix: to find. The cause is not established: the browser's own audio stream opening, or the closed page's, are suspects, not the load. To take again on the USB output with Chrome itself.
-Status: open.
+Status: open. Taken again on 2026-11-06 on a USB output, in the machine's Chrome with its sound on (`PERF_CHROME=1 PERF_SECONDS=30 PERF_TRACKS=8,16 bun test/perf/run.ts PRF-004`, 20 passes against the built app): 7 passes counted underruns, one to three on most (twelve once), with the load peaking between 11 % and 37 %. The set of 8 was hit 3 times and the set of 16, which runs second in the same browser, 6 times. So it is far more frequent than one pass in six, and the load is not the cause. Not yet told apart: the USB output, Chrome, or the workstation (the same passes on the laptop's speakers, and on the muted Chromium, are next).
 
 
 ### G-030 Two silent plays that could not be made again
