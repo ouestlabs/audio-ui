@@ -9,7 +9,8 @@
  *
  * Times are read off the audio clock: a sound scheduled at a context time is
  * heard at the page time `getOutputTimestamp` maps it to, which counts the
- * output's latency. Audio stays muted.
+ * output's latency. Audio stays muted, unless `PERF_CHROME=1` runs the
+ * machine's Chrome with its sound on, through the system's output.
  */
 
 import { mkdtemp, rm } from "node:fs/promises";
@@ -200,11 +201,16 @@ async function open(browser: Browser | BrowserContext) {
 /** Wakes the audio with a press on the engine line, where a press does nothing else. */
 async function wake(page: Page) {
   await page.getByText("kHz").click();
-  await page.waitForFunction(
-    () =>
-      (window as unknown as { probe: Probe }).probe.contexts.at(-1)?.state ===
-      "running"
-  );
+  // About one context in six stays asleep after the press, in Chromium too: a play wakes it, so the wait gives up after a few seconds.
+  await page
+    .waitForFunction(
+      () =>
+        (window as unknown as { probe: Probe }).probe.contexts.at(-1)
+          ?.state === "running",
+      undefined,
+      { timeout: 4000 }
+    )
+    .catch(() => undefined);
   await page.waitForTimeout(300);
 }
 
@@ -749,7 +755,12 @@ const wanted = process.argv.slice(2);
 const chosen = Object.entries(measures).filter(
   ([name]) => wanted.length === 0 || wanted.some((word) => name.includes(word))
 );
-const launched = await chromium.launch();
+// `PERF_CHROME=1`: the Chrome of the machine with its sound on, so the context plays through the system's output (G-027), not a muted Chromium.
+const launched = await chromium.launch(
+  process.env.PERF_CHROME
+    ? { channel: "chrome", ignoreDefaultArgs: ["--mute-audio"] }
+    : {}
+);
 const passed = await inTurn(chosen.length, async (index) => {
   const [name, measure] = chosen[index] ?? ["", async () => []];
   try {
