@@ -417,7 +417,13 @@ export function Daw({
     (value: unknown) => showView(value as PanelView),
     [showView]
   );
-  const showClip = useCallback(() => showView("clip"), [showView]);
+  const showClip = useCallback(() => {
+    // The clip's track comes with it: the Devices tab then shows that track's devices, not those of a track or a return picked before.
+    if (selectedClip) {
+      setSelectedTrack(selectedClip.track);
+    }
+    showView("clip");
+  }, [selectedClip, setSelectedTrack, showView]);
   /** A view's key: shows it, or folds the panel when it is what is open. */
   const togglePanel = useCallback(
     (next: PanelView) => {
@@ -446,6 +452,13 @@ export function Daw({
       setPanelView((current) => (current === "mixer" ? current : "clip"));
     }
   }, [single, setPanelView]);
+  // The devices are those of the track of the clip picked, not of a track picked before it.
+  const clipTrack = selectedClip?.track;
+  useEffect(() => {
+    if (single && clipTrack) {
+      setSelectedTrack(clipTrack);
+    }
+  }, [single, clipTrack, setSelectedTrack]);
   const pickTrack = useCallback(
     (id: string) => {
       setSelectedTrack(id);

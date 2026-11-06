@@ -1864,6 +1864,40 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         "Space again plays, and records nothing"
       );
     },
+  "MIX-015: the Devices tab shows the devices of the track of the clip picked, not of a track or a return picked before it":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Chord take", 30);
+      const clip = page.locator("[data-clip-id]", { hasText: "Chord take" });
+      await clip.waitFor({ timeout: 30_000 });
+      const title = page.locator('[data-slot="panel-bar"]');
+      // A return picked first: its devices are the ones the tab shows.
+      await showMixer(page);
+      await page
+        .getByRole("region", { exact: true, name: "A Reverb" })
+        .click({ position: { x: 20, y: 6 } });
+      await page.getByRole("tab", { name: "Devices" }).click();
+      assert(
+        ((await title.textContent()) ?? "").includes("A Reverb"),
+        "the Devices tab shows the return that was picked"
+      );
+      const bar = clip.locator("[data-slot=timeline-clip-header]");
+      await bar.scrollIntoViewIfNeeded();
+      const head = (await bar.boundingBox()) ?? {
+        height: 0,
+        width: 0,
+        x: 0,
+        y: 0,
+      };
+      await page.mouse.click(head.x + head.width / 2, head.y + head.height / 2);
+      await page.waitForTimeout(300);
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const shown = (await title.textContent()) ?? "";
+      assert(
+        shown.includes("3 Audio") && !shown.includes("A Reverb"),
+        `the Devices tab shows the clip's track, not the return (${shown})`
+      );
+    },
   "REC-005: a count-in counts the transport back in negative bars before the take starts":
     async (browser) => {
       const page = await open(browser);
