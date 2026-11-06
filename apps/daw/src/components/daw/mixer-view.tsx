@@ -14,7 +14,7 @@ import { Fader } from "@/components/audio-ui/fader";
 import { Knob } from "@/components/audio-ui/knob";
 import { Led } from "@/components/audio-ui/led";
 import { Meter } from "@/components/audio-ui/meter";
-import { SWITCH_TONES, TRACK_COLORS } from "@/components/audio-ui/timeline";
+import { SWITCH_TONES, trackSwatch } from "@/components/audio-ui/timeline";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
@@ -305,6 +305,7 @@ function Strip({
   track,
 }: StripProps) {
   const mix = useAutomatedMix(track, following);
+  const swatch = trackSwatch(mix.color);
   const setGain = useCallback(
     (volume: number) => onMix(track.id, { gain: gainOf(volume) }),
     [onMix, track.id]
@@ -352,8 +353,9 @@ function Strip({
           aria-hidden="true"
           className={cn(
             "h-1 w-full rounded-b-sm",
-            main ? "bg-foreground/25" : TRACK_COLORS[mix.color]?.dot
+            main ? "bg-foreground/25" : swatch.dot
           )}
+          style={swatch.style}
         />
         {grip ? (
           <button

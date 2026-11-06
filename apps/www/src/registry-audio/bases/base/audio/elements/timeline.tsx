@@ -15,6 +15,7 @@ import {
   type MouseEvent,
   type ReactNode,
   useCallback,
+  useEffect,
   useRef,
   useState,
 } from "react";
@@ -44,7 +45,10 @@ import {
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { Led } from "@/registry-audio/bases/base/audio/elements/led";
-import type { Mix } from "@/registry-audio/bases/base/lib/arrangement";
+import type {
+  Mix,
+  TrackColor,
+} from "@/registry-audio/bases/base/lib/arrangement";
 
 function Timeline({ className, ...props }: TimelinePrimitive.Root.Props) {
   return (
@@ -509,6 +513,31 @@ export const TRACK_COLORS = [
   },
 ] as const;
 
+/** The pieces that paint one color of a track: classes for its header edge, its clips and its dots, and the style that carries a color of the user's own. */
+interface TrackSwatch {
+  clip?: string;
+  dot?: string;
+  edge?: string;
+  style?: CSSProperties;
+}
+
+/**
+ * How a track's color paints. An index takes the palette's classes; a CSS
+ * color of the user's own paints through `--track-color`, which `style`
+ * sets, so a header, its clips and its dots all follow it.
+ */
+export function trackSwatch(color: TrackColor): TrackSwatch {
+  if (typeof color === "string") {
+    return {
+      clip: "[--primary:var(--track-color)]",
+      dot: "bg-(--track-color)",
+      edge: "border-s-(--track-color)",
+      style: { "--track-color": color } as CSSProperties,
+    };
+  }
+  return TRACK_COLORS[color] ?? {};
+}
+
 const formatPan = (pan: number) => {
   const amount = Math.round(Math.abs(pan) * 100);
   if (amount === 0) {
@@ -543,6 +572,7 @@ function TimelineTrackMenuItem({
 function TimelineTrackMenu({
   folded,
   onColor,
+  onCustomColor,
   onDuplicate,
   onFold,
   onGroup,
@@ -554,6 +584,7 @@ function TimelineTrackMenu({
 }: {
   folded?: boolean;
   onColor: (event: MouseEvent<HTMLElement>) => void;
+  onCustomColor: () => void;
   onDuplicate?: TrackAction;
   onFold?: TrackAction;
   onGroup?: TrackAction;
@@ -602,6 +633,10 @@ function TimelineTrackMenu({
           {swatch.name}
         </ContextMenuItem>
       ))}
+      <ContextMenuItem onClick={onCustomColor}>
+        <span aria-hidden="true" className="size-2.5 rounded-full border" />
+        Custom...
+      </ContextMenuItem>
     </ContextMenuContent>
   );
 }
@@ -705,6 +740,22 @@ function TimelineTrackControls({
       onMix(trackId, { color: Number(event.currentTarget.dataset.color) }),
     [onMix, trackId]
   );
+  const picker = useRef<HTMLInputElement>(null);
+  const customColor = typeof mix.color === "string" ? mix.color : "#3e63dd";
+  const openPicker = useCallback(() => {
+    if (picker.current) {
+      picker.current.value = customColor;
+      picker.current.showPicker();
+    }
+  }, [customColor]);
+  // The picker's change fires once it is closed with a color, not along its drag: one edit, one undo.
+  useEffect(() => {
+    const input = picker.current;
+    const pick = () => input && onMix(trackId, { color: input.value });
+    input?.addEventListener("change", pick);
+    return () => input?.removeEventListener("change", pick);
+  }, [onMix, trackId]);
+  const swatch = trackSwatch(mix.color);
   const [renaming, setRenaming] = useState(false);
   const startRenaming = useCallback(() => setRenaming(true), []);
   // The menu hands focus back as it closes, which would end the edit: open the field after it.
@@ -770,12 +821,21 @@ function TimelineTrackControls({
               "@container/header relative flex w-full cursor-default flex-col justify-center border-s-4",
               // A strip is as tall as its buttons plus an equal margin all round, so they sit concentric with its corners.
               compact ? "ps-4 pe-4 py-0" : "gap-1.5 ps-4 pe-5 py-2.5",
-              TRACK_COLORS[mix.color]?.edge
+              swatch.edge
             )}
             onClick={handleHeaderClick}
+            style={swatch.style}
           />
         }
       >
+        <input
+          aria-label={`${name} custom color`}
+          className="sr-only"
+          defaultValue={customColor}
+          ref={picker}
+          tabIndex={-1}
+          type="color"
+        />
         <div className="flex items-center gap-1">
           {onToggleFold ? (
             <Button
@@ -903,6 +963,7 @@ function TimelineTrackControls({
       <TimelineTrackMenu
         folded={folded}
         onColor={handleColor}
+        onCustomColor={openPicker}
         onDuplicate={onDuplicate}
         onFold={onToggleFold}
         onGroup={onGroup}

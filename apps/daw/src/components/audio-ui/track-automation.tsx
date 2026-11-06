@@ -202,7 +202,10 @@ function TrackAutomationChooser({
   track: ArrangementTrack;
 }) {
   const { automation, id: trackId, name } = track;
-  const groups = useMemo(() => chooserGroups(targets, output), [targets, output]);
+  const groups = useMemo(
+    () => chooserGroups(targets, output),
+    [targets, output]
+  );
   const items = useMemo(() => groups.flatMap((group) => group.items), [groups]);
   const change = useCallback(
     (next: string | null) =>

@@ -1,6 +1,6 @@
 "use client";
 
-import type { ComponentProps, Ref } from "react";
+import type { ComponentProps, CSSProperties, Ref } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/lib/utils";
 import type { TrackGhost } from "@/hooks/use-track-reorder";
@@ -58,11 +58,14 @@ function TrackReorderGhost({
   className,
   ghost,
   ghostRef,
+  style,
   trackName,
 }: {
   className?: string;
   ghost: TrackGhost | null;
   ghostRef: Ref<HTMLDivElement>;
+  /** What carries the color of a track that has one of its own, as `trackSwatch` gives it. */
+  style?: CSSProperties;
   trackName?: string;
 }) {
   if (!(ghost && trackName)) {
@@ -78,6 +81,7 @@ function TrackReorderGhost({
       data-slot="track-reorder-ghost"
       ref={ghostRef}
       style={{
+        ...style,
         height: ghost.height,
         left: ghost.left,
         top: ghost.top,

@@ -349,12 +349,15 @@ export function rackDevices(rack: Rack): TrackDevice[] {
   );
 }
 
+/** A track's color: an index into the colors the timeline offers, or a color of the user's own as a CSS hex such as `#3e63dd`. */
+export type TrackColor = number | string;
+
 /** A track of an arrangement. */
 export interface ArrangementTrack {
   /** Its automation, by parameter. */
   automation?: TrackAutomation;
-  /** An index into the colors a track can take. */
-  color: number;
+  /** An index into the colors a track can take, or a color of the user's own as a CSS hex. */
+  color: TrackColor;
   /** Its device chain, from first to last. */
   devices?: readonly TrackDevice[];
   /** The group track it is in, which its sound plays into; none, it plays into the main track. A group's tracks follow it in the list. */
@@ -373,8 +376,8 @@ export interface ArrangementTrack {
 
 /** What a track's header sets: how loud it is, where it sits in the stereo field, and whether it is silenced or soloed. */
 export interface Mix {
-  /** An index into the colors a track can take. */
-  color: number;
+  /** An index into the colors a track can take, or a color of the user's own as a CSS hex. */
+  color: TrackColor;
   gain: number;
   muted: boolean;
   /** From -1 (left) to 1 (right). */

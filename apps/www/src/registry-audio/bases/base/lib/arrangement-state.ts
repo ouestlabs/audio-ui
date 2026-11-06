@@ -46,6 +46,7 @@ import {
   rackDevices,
   type TimeSelection,
   type TrackAutomation,
+  type TrackColor,
   type TrackDevice,
   type TrackKind,
   withoutDeviceAutomation,
@@ -933,7 +934,7 @@ export type ArrangementCommand =
   | { type: "rename-locator"; id: string; name: string }
   | { type: "set-loop"; loop: Partial<ArrangementLoop> }
   | { type: "set-mix"; id: string; patch: Partial<Omit<Mix, "color">> }
-  | { type: "set-track-color"; id: string; color: number }
+  | { type: "set-track-color"; id: string; color: TrackColor }
   | {
       type: "set-signature";
       id: string;

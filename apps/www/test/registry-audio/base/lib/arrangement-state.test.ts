@@ -673,6 +673,22 @@ describe("apply", () => {
     ).toBe(state);
   });
 
+  test("a track can take a color of the user's own", () => {
+    let state = init([]);
+    state = apply(state, {
+      type: "set-track-color",
+      id: "drums",
+      color: "#3e63dd",
+    });
+    expect(state.doc.tracks[0]?.color).toBe("#3e63dd");
+    expect(mixOf(state.doc.tracks[0] as ArrangementTrack).color).toBe(
+      "#3e63dd"
+    );
+    expect(
+      apply(state, { type: "set-track-color", id: "drums", color: "#3e63dd" })
+    ).toBe(state);
+  });
+
   test("a duplicated track keeps its mix", () => {
     let state = init([]);
     state = apply(state, {

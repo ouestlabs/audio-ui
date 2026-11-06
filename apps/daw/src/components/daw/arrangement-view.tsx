@@ -49,8 +49,8 @@ import {
   TimelineTrackControls,
   TimelineTrackHeader,
   TimelineViewport,
-  TRACK_COLORS,
   TRACK_HEIGHT_STEP,
+  trackSwatch,
 } from "@/components/audio-ui/timeline";
 import {
   TimelineBarMarks,
@@ -1237,11 +1237,10 @@ export function ArrangementView({
           )
         : null}
       <TrackReorderGhost
-        className={
-          dragged ? TRACK_COLORS[mixOf(dragged).color]?.edge : undefined
-        }
+        className={dragged ? trackSwatch(mixOf(dragged).color).edge : undefined}
         ghost={reorder.ghost}
         ghostRef={reorder.ghostRef}
+        style={dragged ? trackSwatch(mixOf(dragged).color).style : undefined}
         trackName={dragged?.name}
       />
     </Timeline>

@@ -72,6 +72,7 @@ import {
   TimelineViewport,
   TRACK_COLORS,
   TRACK_HEIGHT_STEP,
+  trackSwatch,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import {
   TimelineBarMarks,
@@ -2237,10 +2238,13 @@ export default function BlockTimeline() {
       ) : null}
       <TrackReorderGhost
         className={
-          ghostTrack ? TRACK_COLORS[mixOf(ghostTrack).color]?.edge : undefined
+          ghostTrack ? trackSwatch(mixOf(ghostTrack).color).edge : undefined
         }
         ghost={reorder.ghost}
         ghostRef={reorder.ghostRef}
+        style={
+          ghostTrack ? trackSwatch(mixOf(ghostTrack).color).style : undefined
+        }
         trackName={ghostTrack?.name}
       />
     </div>
