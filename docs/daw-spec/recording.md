@@ -17,7 +17,7 @@ Deviation: the reference monitors an armed audio track by default; through a lap
 Test: apps/daw/test/browser/run.ts "REC-003"
 
 ### REC-004 Record
-The Record button (F9) starts playback, from the cursor, and records on every armed track; pressed again, or Stop, ends the take. With no track armed it records nothing and plays.
+The Record button (F9) starts playback, from the cursor, and records on every armed track; pressed again, or Stop, ends the take. With no track armed it records nothing and plays. Space ends a take too, whatever has the focus, the Record button just pressed included; the next Space plays what was recorded and records nothing.
 Test: apps/daw/test/browser/run.ts "REC-004"
 
 ### REC-005 Count-in

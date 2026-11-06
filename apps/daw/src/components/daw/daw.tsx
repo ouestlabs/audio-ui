@@ -256,6 +256,8 @@ function refuseFile(event: DragEvent) {
 
 /** Key presses the workstation has taken, or run a shortcut for: none runs a second one. */
 const TAKEN = new WeakSet<KeyboardEvent>();
+/** Whether Space is down and a shortcut ran on it: a focused button would click on that same press. */
+let spaceShortcut = false;
 
 export function Daw({
   folder: initialFolder,
@@ -1167,9 +1169,29 @@ export function Daw({
         TAKEN.add(event);
       }
     };
+    // A button clicks on Space as the key comes up, after the shortcut ran: the shortcut wins, so that click, which
+    // no pointer made, goes nowhere. Record pressed, then Space, would otherwise stop the take and start another.
+    const onClick = (event: MouseEvent) => {
+      if (spaceShortcut && event.detail === 0) {
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+    };
+    const onKeyUp = (event: KeyboardEvent) => {
+      if (event.code === "Space") {
+        setTimeout(() => {
+          spaceShortcut = false;
+        }, 0);
+      }
+    };
     window.addEventListener("keydown", onKey, { capture: true });
-    return () =>
+    window.addEventListener("keyup", onKeyUp, { capture: true });
+    window.addEventListener("click", onClick, { capture: true });
+    return () => {
       window.removeEventListener("keydown", onKey, { capture: true });
+      window.removeEventListener("keyup", onKeyUp, { capture: true });
+      window.removeEventListener("click", onClick, { capture: true });
+    };
   }, [dispatch]);
   // The shortcuts (docs/daw-spec/shortcuts.md): the app hotkeys, as the user may have rebound them, and their
   // second keys. Heard after what is taken above, once each: a key two chords match runs once.
@@ -1181,6 +1203,9 @@ export function Daw({
       }
       TAKEN.add(event);
       event.preventDefault();
+      if (event.code === "Space") {
+        spaceShortcut = true;
+      }
       keys.current.commands[command]?.();
     };
     return [

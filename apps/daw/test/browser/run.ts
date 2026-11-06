@@ -1831,6 +1831,39 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         { timeout: 5000 }
       );
     },
+  "REC-004: Space ends a take Record just started, even with the button focused, and Space again plays without recording":
+    async (browser) => {
+      const page = await open(browser);
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 MIDI" })
+        .click();
+      const record = page.getByRole("button", { exact: true, name: "Record" });
+      const takes = page.locator('[data-slot="arranged-take"]');
+      // The press leaves Record focused: Space must not click it again as the key comes up.
+      await record.click();
+      await takes.waitFor({ timeout: 5000 });
+      await page.keyboard.press("Space");
+      await page.waitForFunction(
+        () => !document.querySelector('[data-slot="arranged-take"]'),
+        undefined,
+        { timeout: 5000 }
+      );
+      assert(
+        (await record.getAttribute("aria-pressed")) === "false",
+        "Space ended the take and Record is off"
+      );
+      await page.keyboard.press("Space");
+      await page
+        .getByRole("button", { exact: true, name: "Pause" })
+        .waitFor({ timeout: 5000 });
+      await page.waitForTimeout(800);
+      assert(
+        (await takes.count()) === 0 &&
+          (await record.getAttribute("aria-pressed")) === "false",
+        "Space again plays, and records nothing"
+      );
+    },
   "REC-005: a count-in counts the transport back in negative bars before the take starts":
     async (browser) => {
       const page = await open(browser);
