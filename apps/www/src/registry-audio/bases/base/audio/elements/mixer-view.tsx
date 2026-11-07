@@ -1,3 +1,5 @@
+"use client";
+
 import { dbToGain, gainToDb, peakDb } from "@audio-ui/core/analysis";
 import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
 import {
@@ -10,28 +12,37 @@ import {
   useState,
 } from "react";
 import { createPortal, flushSync } from "react-dom";
-import { Fader } from "@/components/audio-ui/fader";
-import { Knob } from "@/components/audio-ui/knob";
-import { Led } from "@/components/audio-ui/led";
-import { Meter } from "@/components/audio-ui/meter";
-import { SWITCH_TONES, trackSwatch } from "@/components/audio-ui/timeline";
-import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import type { useArrangement } from "@/hooks/use-arrangement";
-import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
-import { useAudioLevels } from "@/hooks/use-audio-levels";
+import { cn } from "@/registry/bases/base/lib/utils";
+import {
+  ToggleGroup,
+  ToggleGroupItem,
+} from "@/registry/bases/base/ui/toggle-group";
+import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
+import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
+import { Led } from "@/registry-audio/bases/base/audio/elements/led";
+import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import {
+  SWITCH_TONES,
+  trackSwatch,
+} from "@/registry-audio/bases/base/audio/elements/timeline";
+import type { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
+import type { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
+import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import {
   type AutomationFollowing,
   useAutomatedMix,
-} from "@/hooks/use-track-automation";
+} from "@/registry-audio/bases/base/hooks/use-track-automation";
 import {
   type ArrangementTrack,
   type AutomatedParameter,
   hasOutput,
   type Mix,
-} from "@/lib/arrangement";
-import { trackBlock, trackOf } from "@/lib/arrangement-state";
-import { startSortableDrag } from "@/lib/sortable-drag";
-import { cn } from "@/lib/utils";
+} from "@/registry-audio/bases/base/lib/arrangement";
+import {
+  trackBlock,
+  trackOf,
+} from "@/registry-audio/bases/base/lib/arrangement-state";
+import { startSortableDrag } from "@/registry-audio/bases/base/lib/sortable-drag";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
@@ -475,12 +486,12 @@ export function MixerView({
   overridden,
   selectedTrack,
 }: {
-  /** The tracks armed to record (REC-001). */
-  armed: ReadonlySet<string>;
+  /** The tracks armed to record (REC-001). With `onArm`, their channels show an Arm light. */
+  armed?: ReadonlySet<string>;
   arrangement: Arrangement;
   engine: Engine;
-  /** Arms a track, or another one too with Cmd or Ctrl. */
-  onArm: (track: string, exclusive: boolean) => void;
+  /** Arms a track, or another one too with Cmd or Ctrl. Leave it out and no channel has an Arm switch. */
+  onArm?: (track: string, exclusive: boolean) => void;
   /** A channel's mix changed: a fader's drag is a burst, a switch a step of its own, and an automated gain or pan is overridden. */
   onMix: (id: string, patch: Partial<Mix>) => void;
   onSelectTrack: (id: string) => void;
@@ -576,7 +587,7 @@ export function MixerView({
   ) => (
     <Strip
       analysers={engine.meter(track.id)}
-      armed={armed.has(track.id)}
+      armed={armed?.has(track.id)}
       following={{
         duration: doc.duration,
         overridden: overridden[track.id],
@@ -600,24 +611,16 @@ export function MixerView({
   return (
     // One grid for every channel, each a subgrid of its six rows (name, sends, pan, fader, level, switches): what one
     // channel lacks leaves its row empty, so every fader starts and ends level; the faders take the height there is,
-    // and never less than 5rem, so the panel fits a short screen. The channels scroll in a subgrid of their own, and
-    // the returns and the main track stay beside them at the right, whole: nothing passes under them. One hairline
-    // between two channels, the main track's own before it.
+    // and never less than 5rem, so the panel fits a short screen. The channels scroll in a subgrid of their own, the
+    // returns after the tracks', and the main track stays beside them at the right, whole: nothing passes under it.
+    // One hairline between two channels, the main track's own before it.
     <div
       aria-label="Mixer"
-      className={cn(
-        "grid h-full min-h-0 grid-rows-[auto_auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 pe-2",
-        doc.returns.length > 0
-          ? "grid-cols-[minmax(0,1fr)_auto_auto]"
-          : "grid-cols-[minmax(0,1fr)_auto]"
-      )}
+      className="grid h-full min-h-0 grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_auto_auto_auto_minmax(5rem,1fr)_auto_auto] [--fader-min-height:5rem] gap-y-2 pe-2"
       role="group"
     >
       <div
-        className={cn(
-          "row-span-7 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden",
-          doc.returns.length === 0 && "*:last:border-e-0"
-        )}
+        className="row-span-7 grid min-w-0 auto-cols-max grid-flow-col grid-rows-subgrid no-scrollbar scroll-fade-x overflow-x-auto overflow-y-hidden *:last:border-e-0"
         data-slot="mixer-channels"
         ref={channelsRef}
       >
@@ -625,15 +628,8 @@ export function MixerView({
         {arrangement.unfoldedTracks.map((track) =>
           strip(track, false, true, grip(track.id, track.name))
         )}
+        {doc.returns.map((track) => strip(track))}
       </div>
-      {doc.returns.length > 0 ? (
-        <div
-          className="row-span-7 grid auto-cols-max grid-flow-col grid-rows-subgrid *:last:border-e-0"
-          data-slot="mixer-returns"
-        >
-          {doc.returns.map((track) => strip(track))}
-        </div>
-      ) : null}
       {strip(doc.main, true)}
       {lifted
         ? createPortal(

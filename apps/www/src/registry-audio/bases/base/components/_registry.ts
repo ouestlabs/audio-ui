@@ -1139,7 +1139,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
-      "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",
+      "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",
     files: [
       {
         path: "components/mixer/block-mixer.tsx",
@@ -1147,18 +1147,18 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-mixer",
-    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/core"],
     registryDependencies: [
-      "@audio-ui/fader",
-      "@audio-ui/knob",
-      "@audio-ui/meter",
-      "@audio-ui/use-audio-levels",
-      "@audio-ui/use-master-bus",
-      "@audio-ui/use-transport-clock",
+      "@audio-ui/mixer-view",
+      "@audio-ui/arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/track-automation",
+      "@audio-ui/use-play-switch",
+      "@audio-ui/clip-player",
+      "@audio-ui/demo-sound",
+      "@audio-ui/device-library",
       "@audio-ui/web-audio",
-      "@audio-ui/drum-synthesis",
-      "@shadcn/button",
-      "@shadcn/toggle",
     ],
     type: "registry:block",
   },

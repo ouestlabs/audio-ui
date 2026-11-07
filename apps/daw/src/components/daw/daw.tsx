@@ -17,10 +17,10 @@ import {
   type ReadingFiles,
 } from "@/components/audio-ui/arrangement-view";
 import { DeviceView } from "@/components/audio-ui/device-view";
+import { MixerView } from "@/components/audio-ui/mixer-view";
 import { ClipEditor } from "@/components/daw/clip-editor";
 import { EngineLine } from "@/components/daw/engine-line";
 import { LibraryPanel } from "@/components/daw/library-panel";
-import { MixerView } from "@/components/daw/mixer-view";
 import {
   PanelBar,
   PanelTabs,

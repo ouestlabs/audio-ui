@@ -1,13 +1,13 @@
 ---
 title: Mixer
-description: "A mixing console: tracks with pan, fader, meter, mute and solo into a master with a stereo meter, every meter reading the real signal of its channel."
+description: "The mixer of an arrangement, controlled: a channel for each track and return with pan, sends, fader, meter, peak, solo and mute, then the main track, every meter reading the real signal of its channel."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-mixer" />
 
-A channel strip per track and a master, built from the [Knob](/docs/components/base/knob), [Fader](/docs/components/base/fader) and [Meter](/docs/components/base/meter), and run on the Web Audio API alone: each strip is a few nodes, and each meter reads an `AnalyserNode`, not a number made up for the picture.
+A channel for each track and each return track, then the main track. Each channel has its pan, its sends, its fader, its meter and its loudest peak, and Solo, Mute and, for a track that records, an Arm light. It is built from the [Knob](/docs/components/base/knob), [Fader](/docs/components/base/fader) and [Meter](/docs/components/base/meter), and it is the mixer a workstation shows under its tracks: the state is an [arrangement](/docs/components/base/arrangement), and every change is one of its commands.
 
 ## Installation
 
@@ -40,7 +40,7 @@ npm install @audio-ui/react @audio-ui/core
 <Step>Add the components and hooks it is made of:</Step>
 
 ```bash
-npx shadcn@latest add @audio-ui/fader @audio-ui/knob @audio-ui/meter @audio-ui/use-audio-levels @audio-ui/use-master-bus @audio-ui/use-transport-clock @audio-ui/web-audio @audio-ui/drum-synthesis @shadcn/button @shadcn/toggle
+npx shadcn@latest add @audio-ui/mixer-view @audio-ui/arrangement @audio-ui/use-arrangement @audio-ui/arrangement-engine @audio-ui/track-automation @audio-ui/use-play-switch @audio-ui/demo-sound @audio-ui/device-library @audio-ui/web-audio @audio-ui/clip-player
 ```
 
 <Step>Copy and paste the following code into your project.</Step>
@@ -65,25 +65,38 @@ npx shadcn@latest add @audio-ui/fader @audio-ui/knob @audio-ui/meter @audio-ui/u
 
 </CodeTabs>
 
-## Signal path
+## Usage
 
-Each channel is a chain of four nodes into the master bus:
+`mixer-view` (`npx shadcn@latest add @audio-ui/mixer-view`) is the view on its own. It is controlled: the arrangement comes in through `useArrangement`, and every change goes out as a command or through `onMix`.
 
+```tsx
+import { MixerView } from "@/components/audio-ui/mixer-view";
+
+<MixerView
+  arrangement={arrangement} // useArrangement
+  engine={engine} // useArrangementEngine: the position and each channel's meter
+  onMix={automation.changeMix} // a fader, a pan or a switch of a channel
+  onSelectTrack={setSelected}
+  overridden={automation.overridden} // what was moved by hand, by track
+  selectedTrack={selected}
+/>;
 ```
-input → fader (GainNode) → mute (GainNode) → panner (StereoPannerNode) → master
-                                  └→ AnalyserNode → its meter
-```
 
-- **The fader is in dB**, from silent at the bottom to +6 dB, and sets the node's gain as `10 ** (db / 20)`. It moves the gain with `setTargetAtTime`, so dragging it does not click.
-- **Mute and solo go through their own gain**, not through the fader, so un-muting returns to where the fader was. A track is audible when it is not muted and either it is soloed or nothing is: a muted track stays silent even if soloed.
-- **The meter taps the channel after its fader and its mute**, before the pan: it shows what reaches the mix.
-- **The master's meter reads its two sides** through a `ChannelSplitterNode`, ahead of the bus's safety limiter. The bus is the one every block shares (`use-master-bus`).
+`armed` and `onArm` add an Arm light to the channels of tracks that record. Leave them out and no channel has one.
 
-The analysers are never connected to `ctx.destination`, so reading a level plays nothing.
+## A channel
+
+- **Pan and sends** are knobs, dragged up and down; a send is a small knob for each return track. A channel with no output, such as a MIDI track with no instrument, has none of them, nor a fader or a peak.
+- **The fader** runs from silence to +6 dB, 0 dB by default, and a double-click sets it back to 0. It is the same fader as the track's in the arrangement: one moves the other.
+- **The meter** shows the channel's peak and its level, after its fader and its switches; the main track has a scale beside its own.
+- **The peak** is the loudest sample the channel has played, in dB, in a pill over its pan. It turns red past 0 dBFS, and a click clears it.
+- **Solo, Mute and Arm** are the same state as the track's header in the arrangement, in one group.
+
+The main track stays in sight at the right, apart from the channels by a line, while the channels scroll; the return tracks follow the tracks' channels and scroll with them. A channel moves by its name, dragged or with Left and Right on it, and the arrangement's rows move with it. A track in a group names the group it plays into.
 
 ## Meters
 
-A meter takes a live `source`, so a channel costs no React render per frame. `useAudioLevels` makes one from the analysers of a channel:
+The meters read the engine's channels: `engine.meter(id)` gives the `AnalyserNode`s of a track, and a meter takes a live `source`, so a channel costs no React render per frame. `useAudioLevels` makes one from the analysers:
 
 ```tsx
 import { Meter } from "@/components/audio-ui/meter";
@@ -94,12 +107,12 @@ const levels = useAudioLevels(analysers); // memoize the array: a new one restar
 <Meter aria-label="Drums level" peakMarks="hidden" source={levels} />;
 ```
 
-The level is the RMS of the time-domain samples in dB. It rises at once and falls back at 30 dB a second, so a drum hit reads as a hit and does not flicker. Nothing is published while the signal is silent. The hooks a mixer plays through are in the Audio engine: [Output](/docs/engine/output) for the master bus, [Clock and time](/docs/engine/clock-and-time) for the transport clock and [Analysis](/docs/engine/analysis) for the levels.
+The level is the RMS of the time-domain samples in dB. It rises at once and falls back at 30 dB a second, so a drum hit reads as a hit and does not flicker. Nothing is published while the signal is silent. The analysers are never connected to `ctx.destination`, so reading a level plays nothing.
 
-## Playing your own sources
+## Over an engine of your own
 
-The block plays a small loop of its own, so it sounds on first load. To mix your own tracks, connect each source to the `input` node of a channel instead of to the destination, and drop the loop. A channel's nodes are created once, with the shared context, and its fader, mute and pan are driven from state with `setTargetAtTime`.
+The view asks two things of the engine: `position`, a live source of seconds, and `meter(id)`, the analysers of a track by its id, or `null` when there are none yet. Any engine that gives those, an AudioWorklet or WASM one, drives the view; the commands of the arrangement tell it what to play.
 
 ## Accessibility
 
-Every control is a native input behind its own role: the pan is a slider named "Drums pan" and the volume "Drums volume", and mute and solo are toggle buttons, "Mute Drums" and "Solo Drums". A strip is a group with the track's name, so a screen reader reads "Drums, group" then each control, and tabbing goes pan, volume, mute, solo, then the next track. The faders and knobs take the arrow keys, Home and End.
+Every control is a native input behind its own role: the pan is a slider named "Drums pan" and the volume "Drums volume", and mute and solo are toggle buttons, "Mute Drums" and "Solo Drums". A channel is a group with the track's name, so a screen reader reads "Drums, group" then each control, and tabbing goes through its pan, sends, volume, then its switches, then the next track. The faders and knobs take the arrow keys, Home and End.

@@ -1341,6 +1341,34 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["mixer"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "The mixer of an arrangement, controlled: a channel for each track and return, then the main track. Each has its pan, its sends, its fader, its meter and its peak, and Solo, Mute and an Arm light; the main track stays in sight at the right while the channels scroll, and a channel moves by its name. Every change is a command of the arrangement.",
+    files: [
+      {
+        path: "audio/elements/mixer-view.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "mixer-view",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/fader",
+      "@audio-ui/knob",
+      "@audio-ui/led",
+      "@audio-ui/meter",
+      "@audio-ui/sortable-drag",
+      "@audio-ui/timeline",
+      "@audio-ui/track-automation",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/use-audio-levels",
+      "@shadcn/toggle-group",
+    ],
+    type: "registry:ui",
+  },
+  {
     categories: ["device-chain"],
     dependencies: ["@audio-ui/core"],
     description:
