@@ -38,6 +38,8 @@ import { phaserDevice } from "@/registry-audio/bases/base/lib/phaser-device";
 import { createPhaserEngine } from "@/registry-audio/bases/base/lib/phaser-engine";
 import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-device";
 import { createPocketSynthEngine } from "@/registry-audio/bases/base/lib/pocket-synth-engine";
+import { polySynthDevice } from "@/registry-audio/bases/base/lib/poly-synth-device";
+import { createPolySynthEngine } from "@/registry-audio/bases/base/lib/poly-synth-engine";
 import { reduxDevice } from "@/registry-audio/bases/base/lib/redux-device";
 import { createReduxEngine } from "@/registry-audio/bases/base/lib/redux-engine";
 import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
@@ -109,6 +111,7 @@ function entry<const Parameters extends readonly ParameterDescriptor[]>(
  */
 export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Instruments
+  entry(polySynthDevice, createPolySynthEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),
   entry(waveShaperDevice, createWaveShaperEngine, "Instruments"),
   // Dynamics

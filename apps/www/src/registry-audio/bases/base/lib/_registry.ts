@@ -84,6 +84,38 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
+      "The Poly Synth as an instrument device: a saw, a pulse, a sub oscillator and noise, a resonant low-pass filter that follows the keyboard, an envelope for the filter and the level, a vibrato and a chorus, with eight presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/poly-synth-device.ts",
+        target: "components/audio-ui/devices/poly-synth/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "poly-synth-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the Poly Synth on the Web Audio API: noteOn starts a note or glides the held one, noteOff releases it from where its envelope got to, and every control follows the state without a click. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/poly-synth-engine.ts",
+        target: "components/audio-ui/devices/poly-synth/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "poly-synth-engine",
+    registryDependencies: ["@audio-ui/poly-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "The Pocket Synth as an instrument device: its waveform, filter and volume, and the pitch and filter cutoff a position on a pad plays, with no panel and no audio in it.",
     files: [
       {
@@ -1080,6 +1112,8 @@ const items: RegistryItem[] = [
       "@audio-ui/phaser-engine",
       "@audio-ui/pocket-synth-device",
       "@audio-ui/pocket-synth-engine",
+      "@audio-ui/poly-synth-device",
+      "@audio-ui/poly-synth-engine",
       "@audio-ui/redux-device",
       "@audio-ui/redux-engine",
       "@audio-ui/reverb-device",

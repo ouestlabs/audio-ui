@@ -1,0 +1,59 @@
+---
+title: Poly synth
+description: "An eighties polyphonic synth device: a saw, a pulse, a sub oscillator and noise into a resonant filter, an envelope, a vibrato and a chorus, with eight presets, a panel with a keyboard, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-poly-synth" />
+
+An eighties polyphonic synth. Four sources (a saw, a pulse of any width, a sub oscillator an octave down and noise) are mixed into a resonant low-pass filter, which an envelope opens along with the level, and a vibrato and a stereo chorus finish the sound. Start from one of its eight presets (Brass, Strings, Soft Pad, Pluck, Fat Bass, Organ, Sweep, Glass Lead), then shape it. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="poly-synth" kind="device" />
+
+## Controls
+
+Every control reads 0 to 10, as a panel's sliders do, and shows the value it sets in the unit the sound takes.
+
+<DeviceControls device="poly-synth">
+<Control id="saw">The level of the saw.</Control>
+<Control id="pulse">The level of the pulse.</Control>
+<Control id="width">The pulse's width: a square at 0, thin at 10.</Control>
+<Control id="sub">The level of the square an octave down.</Control>
+<Control id="noise">The level of the white noise.</Control>
+<Control id="cutoff">Where the low-pass filter closes, from 40 Hz to 12 kHz.</Control>
+<Control id="resonance">How much the filter rings at its cutoff.</Control>
+<Control id="contour">How far the envelope opens the filter, up to four octaves.</Control>
+<Control id="keys">How much the cutoff follows the pitch: at 10, an octave up opens it an octave.</Control>
+<Control id="attack">How long a note takes to rise.</Control>
+<Control id="decay">How long it takes to fall to the sustain.</Control>
+<Control id="sustain">The level a held note stays at.</Control>
+<Control id="release">How long a note takes to fade once let go.</Control>
+<Control id="rate">The vibrato's speed.</Control>
+<Control id="vibrato">How far the vibrato moves the pitch.</Control>
+<Control id="chorus">The stereo chorus: off, I or the wider II.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel loads a preset from the menu in its title bar, beside the chorus switch, lays the other controls out by what they do (oscillators, filter, envelope, vibrato, output) and has a keyboard of two octaves that plays the synth. `polySynthPreset(name)` gives a preset's whole state, and `POLY_SYNTH_PRESETS` lists them. The panel sends notes out and does not make the sound, so it plays through any engine.
+
+<DeviceUsage name="poly-synth" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.noteOn({ frequency: 261.63, velocity: 0.8 }); // a note now, or the held one glides to it
+engine.noteOff(); // lets it go, over the release
+
+// Scheduled ahead on the audio clock, by a host that plays notes from a song:
+engine.noteOn({ frequency: 440 }, { at: time, id: "a4" });
+engine.noteOff({ at: time + length, id: "a4" });
+```
+
+An engine plays one voice. For chords, make as many as the notes you hold and give each note its own: the [arrangement](/docs/components/base/arrangement)'s engine does it for a MIDI track, and the block above keeps eight. A note rises over its attack, then settles at its sustain; the filter opens by the envelope amount on the same curves. Let go, both fall back over the release from where they had got to, so a short note never clicks. A `noteOff` whose `id` is not the held note's lets nothing go. Every control moves with a ramp, and a held note follows the ones that shape it. An agent plays the synth with the `play` tool.

@@ -24,9 +24,11 @@
     "chorus",
     "phaser",
     "auto-pan",
-    "---Utility and instruments---",
+    "---Utility---",
     "utility",
     "mid-side",
+    "---Instruments---",
+    "poly-synth",
     "pocket-synth",
     "wave-shaper"
   ]

@@ -14,6 +14,7 @@ import { multibandDevice } from "@/registry-audio/bases/base/lib/multiband-devic
 import { overdriveDevice } from "@/registry-audio/bases/base/lib/overdrive-device";
 import { phaserDevice } from "@/registry-audio/bases/base/lib/phaser-device";
 import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-device";
+import { polySynthDevice } from "@/registry-audio/bases/base/lib/poly-synth-device";
 import { reduxDevice } from "@/registry-audio/bases/base/lib/redux-device";
 import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
 import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-device";
@@ -39,6 +40,7 @@ export const DEVICE_DOCS = {
   overdrive: overdriveDevice,
   phaser: phaserDevice,
   "pocket-synth": pocketSynthDevice,
+  "poly-synth": polySynthDevice,
   redux: reduxDevice,
   reverb: reverbDevice,
   saturator: saturatorDevice,

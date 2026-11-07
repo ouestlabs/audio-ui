@@ -12,6 +12,12 @@
     "title": "Block pocket synth"
   },
   {
+    "categories": ["instrument", "synth", "piano"],
+    "description": "An eighties polyphonic synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    "name": "block-poly-synth",
+    "title": "Block poly synth"
+  },
+  {
     "categories": ["instrument", "synth", "xypad"],
     "description": "A wave shaper synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the resonance up",
     "name": "block-wave-shaper",
@@ -28,6 +34,30 @@
     "description": "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     "name": "fader-pan-demo",
     "title": "Fader pan demo"
+  },
+  {
+    "categories": ["hardware"],
+    "description": "LEDs lit by Rec and Mute, one blinking red, in three sizes",
+    "name": "led-demo",
+    "title": "Led demo"
+  },
+  {
+    "categories": ["hardware"],
+    "description": "Screens with a caption: a filter cutoff in kHz driven by a parameter field, a preset's name and a tempo",
+    "name": "lcd-demo",
+    "title": "Lcd demo"
+  },
+  {
+    "categories": ["hardware"],
+    "description": "A value of each kind: tempo, gain, cutoff, pan, mix, transpose and position",
+    "name": "value-display-demo",
+    "title": "Value display demo"
+  },
+  {
+    "categories": ["hardware"],
+    "description": "A power rocker that lights its LED, a small one laid down, and one disabled",
+    "name": "rocker-switch-demo",
+    "title": "Rocker switch demo"
   },
   {
     "categories": ["parameter-field"],
@@ -148,6 +178,12 @@
     "description": "Waveform with a resizable loop region, markers and a hover time",
     "name": "waveform-region-demo",
     "title": "Waveform region demo"
+  },
+  {
+    "categories": ["plot"],
+    "description": "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
+    "name": "plot-demo",
+    "title": "Plot demo"
   },
   {
     "categories": ["dynamics", "plot", "knob"],

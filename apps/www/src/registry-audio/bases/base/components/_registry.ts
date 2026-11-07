@@ -48,6 +48,28 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "An eighties polyphonic synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    files: [
+      {
+        path: "components/device/block-poly-synth.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-poly-synth",
+    registryDependencies: [
+      "@audio-ui/poly-synth-panel",
+      "@audio-ui/poly-synth-device",
+      "@audio-ui/poly-synth-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["instrument", "synth", "xypad"],
     dependencies: ["@audio-ui/react"],
     description:

@@ -22,6 +22,7 @@ const DEVICES = [
   "overdrive",
   "phaser",
   "pocket-synth",
+  "poly-synth",
   "redux",
   "reverb",
   "saturator",
@@ -454,6 +455,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/overdrive-panel",
       "@audio-ui/phaser-panel",
       "@audio-ui/pocket-synth-panel",
+      "@audio-ui/poly-synth-panel",
       "@audio-ui/redux-panel",
       "@audio-ui/reverb-panel",
       "@audio-ui/saturator-panel",
@@ -480,6 +482,27 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/compressor-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "piano"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "The face of the Poly Synth device: its eight presets, its controls by what they do (oscillators, filter, envelope, vibrato and chorus) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/panels/poly-synth-panel.tsx",
+        target: "components/audio-ui/devices/poly-synth/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "poly-synth-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/piano",
+      "@audio-ui/poly-synth-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },

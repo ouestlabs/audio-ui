@@ -10,6 +10,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "distortion",
   "chorus",
   "pocket-synth",
+  "poly-synth",
   "wave-shaper",
   "utility",
   "limiter",

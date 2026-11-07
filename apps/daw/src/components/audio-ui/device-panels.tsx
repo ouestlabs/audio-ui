@@ -17,6 +17,7 @@ import { MultibandPanel } from "@/components/audio-ui/devices/multiband/panel";
 import { OverdrivePanel } from "@/components/audio-ui/devices/overdrive/panel";
 import { PhaserPanel } from "@/components/audio-ui/devices/phaser/panel";
 import { PocketSynthPanel } from "@/components/audio-ui/devices/pocket-synth/panel";
+import { PolySynthPanel } from "@/components/audio-ui/devices/poly-synth/panel";
 import { ReduxPanel } from "@/components/audio-ui/devices/redux/panel";
 import { ReverbPanel } from "@/components/audio-ui/devices/reverb/panel";
 import { SaturatorPanel } from "@/components/audio-ui/devices/saturator/panel";
@@ -83,6 +84,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.overdrive": entry(OverdrivePanel),
   "audioui.phaser": entry(PhaserPanel, "w-[28rem]"),
   "audioui.pocket-synth": entry(PocketSynthPanel),
+  "audioui.poly-synth": entry(PolySynthPanel, "w-[40rem]"),
   "audioui.redux": entry(ReduxPanel),
   "audioui.reverb": entry(ReverbPanel),
   "audioui.saturator": entry(SaturatorPanel),

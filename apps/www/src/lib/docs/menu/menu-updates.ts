@@ -51,6 +51,7 @@ export const DOCS_MENU_UPDATES: Record<string, MenuUpdate> = {
   "piano-roll": { mark: "New", on: "2026-10-11" },
   plot: { mark: "New", on: "2026-10-11" },
   "pocket-synth": { mark: "New", on: "2026-10-16" },
+  "poly-synth": { mark: "New", on: "2026-11-07" },
   redux: { mark: "New", on: "2026-10-16" },
   reverb: { mark: "New", on: "2026-10-16" },
   saturator: { mark: "New", on: "2026-10-16" },
