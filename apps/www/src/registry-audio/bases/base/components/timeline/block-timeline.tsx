@@ -93,6 +93,7 @@ import {
   stringMachineDevice,
   stringMachinePreset,
 } from "@/registry-audio/bases/base/lib/string-machine-device";
+import { tapeKeysDevice } from "@/registry-audio/bases/base/lib/tape-keys-device";
 import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
@@ -187,7 +188,8 @@ const REVERB = "return-1";
  * The song as a project: its drums and its strummed guitar as audio tracks,
  * its bass, its organ, its lead and its pad as MIDI tracks played by the
  * registry's instruments (a mono synth's sub bass, a tonewheel organ on three
- * drawbars, a mono synth's lead and a string machine's swell), a vibe on the
+ * drawbars, a tape keyboard's flutes on the lead and a string machine's
+ * swell), a vibe on the
  * guitar's chain, and a reverb on a return track the organ, the guitar, the
  * lead and the pad send to.
  */
@@ -250,9 +252,9 @@ const TRACKS: ArrangementTrack[] = [
     color: 4,
     devices: [
       device(
-        "lead-synth",
-        monoSynthDevice,
-        { ...monoSynthPreset("Lead"), glide: 0, volume: 8 },
+        "lead-flutes",
+        tapeKeysDevice,
+        { station: "flutes", volume: 8.4 },
         true
       ),
     ],

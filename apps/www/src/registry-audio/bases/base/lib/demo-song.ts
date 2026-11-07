@@ -88,7 +88,7 @@ const held = (
  * in the chorus jumps an octave and walks back to the top; the lead is the
  * chorus's hook over four bars, a call and its answer, each note a tone of
  * the chord under it, starting with it, and let go just before the next so
- * every note is struck anew.
+ * every note is struck anew, in the octave of a tape keyboard's flutes.
  */
 export const SONG_SCORE = {
   "bass-chorus": notes(
@@ -118,21 +118,21 @@ export const SONG_SCORE = {
   ),
   lead: notes(
     [
-      [0, 1.4, 76],
-      [1.5, 0.4, 74],
-      [2, 0.9, 71],
-      [3, 0.9, 74],
-      [4, 1.4, 71],
-      [5.5, 0.4, 74],
-      [6, 0.9, 73],
-      [7, 0.9, 76],
-      [8, 1.4, 79],
-      [9.5, 0.4, 78],
-      [10, 0.9, 76],
-      [11, 0.9, 74],
-      [12, 0.9, 74],
-      [13, 0.9, 71],
-      [14, 1.9, 73],
+      [0, 1.4, 64],
+      [1.5, 0.4, 62],
+      [2, 0.9, 59],
+      [3, 0.9, 62],
+      [4, 1.4, 59],
+      [5.5, 0.4, 62],
+      [6, 0.9, 61],
+      [7, 0.9, 64],
+      [8, 1.4, 67],
+      [9.5, 0.4, 66],
+      [10, 0.9, 64],
+      [11, 0.9, 62],
+      [12, 0.9, 62],
+      [13, 0.9, 59],
+      [14, 1.9, 61],
     ],
     0.8
   ),
