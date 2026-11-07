@@ -723,21 +723,26 @@
     @apply font-medium text-2xl;
   }
 
-  /* MARK: Rocker switch (the side pressed down sinks into the panel) */
+  /* MARK: Rocker switch (one cap that tips on its middle: the side pressed down slopes into the bezel, the other stands out) */
   .cn-rocker-switch {
-    @apply rounded-lg bg-muted p-0.5 outline-none ring-1 ring-border transition-shadow focus-visible:ring-2 focus-visible:ring-ring data-disabled:cursor-not-allowed data-disabled:opacity-50;
+    @apply rounded-lg bg-muted p-[3px] shadow-inner outline-none ring-1 ring-border transition-shadow focus-visible:ring-2 focus-visible:ring-ring data-disabled:cursor-not-allowed data-disabled:opacity-50;
   }
 
+  .cn-rocker-switch-cap {
+    @apply rounded-md overflow-hidden bg-border shadow-sm;
+  }
+
+  /* A side standing out is lit at its edge; pressed down, it is shaded toward its edge and sunk under the bezel's lip. */
   .cn-rocker-switch-side {
-    @apply rounded-md font-mono font-semibold transition-[background-color,box-shadow,color] duration-100;
+    @apply font-mono font-semibold text-muted-foreground transition-[color,box-shadow] duration-100;
   }
 
   .cn-rocker-switch-on {
-    @apply bg-background text-foreground shadow-sm group-data-checked/rocker:bg-transparent group-data-checked/rocker:text-primary group-data-checked/rocker:shadow-inner;
+    @apply bg-[linear-gradient(var(--rocker-edge),color-mix(in_oklab,white_6%,var(--muted)),color-mix(in_oklab,white_16%,var(--muted)))] group-data-checked/rocker:bg-[linear-gradient(var(--rocker-edge),color-mix(in_oklab,black_4%,var(--muted)),color-mix(in_oklab,black_14%,var(--muted)))] group-data-checked/rocker:text-primary group-data-checked/rocker:shadow-[inset_0_0_3px_rgb(0_0_0/0.18)];
   }
 
   .cn-rocker-switch-off {
-    @apply text-muted-foreground shadow-inner group-data-checked/rocker:bg-background group-data-checked/rocker:text-foreground group-data-checked/rocker:shadow-sm;
+    @apply bg-[linear-gradient(var(--rocker-edge),color-mix(in_oklab,black_4%,var(--muted)),color-mix(in_oklab,black_14%,var(--muted)))] shadow-[inset_0_0_3px_rgb(0_0_0/0.18)] group-data-checked/rocker:bg-[linear-gradient(var(--rocker-edge),color-mix(in_oklab,white_6%,var(--muted)),color-mix(in_oklab,white_16%,var(--muted)))] group-data-checked/rocker:shadow-none;
   }
 }
 

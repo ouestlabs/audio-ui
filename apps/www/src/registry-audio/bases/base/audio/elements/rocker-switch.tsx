@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 
 const rockerSwitchVariants = cva(
-  "cn-rocker-switch group/rocker inline-flex shrink-0 gap-0.5",
+  "cn-rocker-switch group/rocker inline-flex shrink-0",
   {
     compoundVariants: [
       {
@@ -34,8 +34,8 @@ const rockerSwitchVariants = cva(
     variants: {
       /** Stood up, on at the top, or laid down, on at the right. */
       orientation: {
-        horizontal: "flex-row-reverse",
-        vertical: "flex-col",
+        horizontal: "",
+        vertical: "",
       },
       size: {
         default: "",
@@ -56,9 +56,10 @@ export interface RockerSwitchProps
 }
 
 /**
- * A rocker, as on a mixer's or a synth's panel: two sides, the one pressed
- * down sunk into the panel. A switch underneath, with its role, its keyboard
- * (Space) and its form value; name it with `aria-label`.
+ * A rocker, as on a mixer's or a synth's panel: one cap in a bezel that tips
+ * on its middle, the side pressed down sloping into the panel and the other
+ * standing out, the on side lit while it is on. A switch underneath, with its
+ * role, its keyboard (Space) and its form value; name it with `aria-label`.
  */
 export function RockerSwitch({
   className,
@@ -78,17 +79,22 @@ export function RockerSwitch({
     >
       <span
         aria-hidden="true"
-        className="cn-rocker-switch-side cn-rocker-switch-on flex flex-1 items-center justify-center"
-        data-slot="rocker-switch-on"
+        className="cn-rocker-switch-cap flex flex-1 gap-px group-data-[orientation=horizontal]/rocker:flex-row-reverse group-data-[orientation=vertical]/rocker:flex-col"
+        data-slot="rocker-switch-cap"
       >
-        {onLabel}
-      </span>
-      <span
-        aria-hidden="true"
-        className="cn-rocker-switch-side cn-rocker-switch-off flex flex-1 items-center justify-center"
-        data-slot="rocker-switch-off"
-      >
-        {offLabel}
+        {/* Each side slopes toward its own edge: `--rocker-edge` is where that edge is. */}
+        <span
+          className="cn-rocker-switch-side cn-rocker-switch-on flex flex-1 items-center justify-center group-data-[orientation=horizontal]/rocker:[--rocker-edge:to_right] group-data-[orientation=vertical]/rocker:[--rocker-edge:to_top]"
+          data-slot="rocker-switch-on"
+        >
+          {onLabel}
+        </span>
+        <span
+          className="cn-rocker-switch-side cn-rocker-switch-off flex flex-1 items-center justify-center group-data-[orientation=horizontal]/rocker:[--rocker-edge:to_left] group-data-[orientation=vertical]/rocker:[--rocker-edge:to_bottom]"
+          data-slot="rocker-switch-off"
+        >
+          {offLabel}
+        </span>
       </span>
     </SwitchPrimitive.Root>
   );

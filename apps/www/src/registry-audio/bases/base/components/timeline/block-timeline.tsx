@@ -233,8 +233,7 @@ const TRACKS: ArrangementTrack[] = [
     ],
     id: "pluck",
     kind: "midi",
-    // A marimba strikes and dies away: its fader lifts it to sit with the sustained parts.
-    mix: { ...UNITY_MIX, color: 3, gain: 10 ** (6 / 20) },
+    mix: { ...UNITY_MIX, color: 3, gain: 10 ** (-6 / 20) },
     name: "Pluck",
     sends: { [REVERB]: 0.4 },
   },
