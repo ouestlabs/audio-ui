@@ -76,11 +76,12 @@ import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decod
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
 import {
   renderSongPart,
-  SONG_BARS,
+  SONG_RECORDINGS,
   SONG_SCORE,
   SONG_TEMPO,
   type SongNote,
   type SongPart,
+  type SongScorePart,
 } from "@/registry-audio/bases/base/lib/demo-song";
 import {
   monoSynthDevice,
@@ -91,7 +92,7 @@ import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
 import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
-const BARS = 32;
+const BARS = 24;
 
 /** No device library here: the arrangement takes no device. */
 const noDevice = () => undefined;
@@ -149,17 +150,19 @@ const PERCENT: Intl.NumberFormatOptions = {
 
 const bars = (count: number) => count * BAR;
 
-/** The named points the timeline starts with: the parts of the song. */
-const LOCATORS = [
-  { at: bars(0), id: "intro", name: "Intro" },
-  { at: bars(4), id: "verse", name: "Verse" },
-  { at: bars(12), id: "chorus", name: "Chorus" },
-  { at: bars(20), id: "verse-2", name: "Verse 2" },
-  { at: bars(28), id: "outro", name: "Outro" },
-];
+/** The song's parts, in order, and the bar each starts on. */
+const PARTS = [
+  { at: 0, id: "intro", name: "Intro" },
+  { at: 4, id: "verse", name: "Verse" },
+  { at: 12, id: "chorus", name: "Chorus" },
+  { at: 20, id: "outro", name: "Outro" },
+] as const;
 
-/** The loop it starts with: the chorus, switched on. */
-const LOOP = { on: true, range: [bars(12), bars(20)] } as const;
+/** The named points the timeline starts with: the parts of the song. */
+const LOCATORS = PARTS.map(({ at, id, name }) => ({ at: bars(at), id, name }));
+
+/** The loop it starts with, switched on: the whole song, whose outro leads back into its intro. */
+const LOOP = { on: true, range: [0, bars(BARS)] } as const;
 
 /** A device on a chain, at its own defaults with `patch` over them. */
 const device = <State extends object>(
@@ -178,10 +181,10 @@ const REVERB = "return-1";
 
 /**
  * The song as a project: its drums and its strummed guitar as audio tracks,
- * its bass and its organ as MIDI tracks played by the registry's instruments
- * (a mono synth's sub bass and a tonewheel organ on three drawbars), a vibe
- * on the guitar's chain, and a reverb on a return track the organ and the
- * guitar send to.
+ * its bass, its organ and its lead as MIDI tracks played by the registry's
+ * instruments (a mono synth's sub bass, a tonewheel organ on three drawbars
+ * and a mono synth's lead), a vibe on the guitar's chain, and a reverb on a
+ * return track the organ, the guitar and the lead send to.
  */
 const TRACKS: ArrangementTrack[] = [
   {
@@ -234,15 +237,30 @@ const TRACKS: ArrangementTrack[] = [
     color: 3,
     devices: [device("guitar-vibe", vibeDevice)],
     id: "guitar",
-    mix: { ...UNITY_MIX, color: 3, gain: 10 ** (-1 / 20) },
+    mix: { ...UNITY_MIX, color: 3, gain: 10 ** (-2 / 20) },
     name: "Guitar",
     sends: { [REVERB]: 0.35 },
+  },
+  {
+    color: 4,
+    devices: [
+      device(
+        "lead-synth",
+        monoSynthDevice,
+        { ...monoSynthPreset("Lead"), volume: 8 },
+        true
+      ),
+    ],
+    id: "lead",
+    kind: "midi",
+    name: "Lead",
+    sends: { [REVERB]: 0.3 },
   },
 ];
 
 const RETURNS: ArrangementTrack[] = [
   {
-    color: 4,
+    color: 0,
     devices: [device("reverb", reverbDevice, { mix: 100 })],
     id: REVERB,
     name: "A Reverb",
@@ -258,12 +276,6 @@ const SILENCE = {
   subscribe: () => () => undefined,
 };
 
-/** The song's parts that come as recordings. */
-const SONG_PARTS: readonly SongPart[] = ["drums", "guitar"];
-
-/** How long the song's recordings last: two bars, its loop. */
-const LOOP_BARS = SONG_BARS;
-
 const BEAT = BAR / 4;
 
 /** The edges of a clip from bar `from` to bar `to`. */
@@ -273,23 +285,6 @@ const placedAt = (from: number, to: number) => ({
   length: bars(to - from),
   offset: 0,
   start: bars(from),
-});
-
-/** An audio clip of `track` from bar `from` to bar `to`, looping its recording of the song. */
-const audioClip = (
-  id: string,
-  name: string,
-  track: SongPart,
-  from: number,
-  to: number
-): Arranged => ({
-  id,
-  loop: [0, bars(LOOP_BARS)],
-  name,
-  recording: track,
-  sourceLength: bars(LOOP_BARS),
-  track,
-  value: placedAt(from, to),
 });
 
 /** The song's notes as a MIDI clip holds them: in seconds, at the song's tempo. */
@@ -302,50 +297,75 @@ const notesOf = (notes: readonly SongNote[]): Arranged["notes"] =>
     velocity,
   }));
 
-const SCORE = {
-  bass: notesOf(SONG_SCORE.bass),
-  organ: notesOf(SONG_SCORE.organ),
-};
+/** A take of the song: a recording an audio clip loops, or notes a MIDI clip loops. Its track is the word before its dash. */
+type Take = SongPart | SongScorePart;
 
-/** A MIDI clip of `track` from bar `from` to bar `to`, looping its part of the song. */
-const midiClip = (
+const isRecording = (take: Take): take is SongPart => take in SONG_RECORDINGS;
+
+/** How many bars a take lasts before it loops: a score's, up to the bar its last note ends in. */
+const barsOf = (take: Take) =>
+  isRecording(take)
+    ? SONG_RECORDINGS[take]
+    : Math.ceil(
+        Math.max(...SONG_SCORE[take].map((note) => note.start + note.length)) /
+          4
+      );
+
+/** A clip of `take` from bar `from` to bar `to`, on its track, looping it. */
+function clipOf(
   id: string,
   name: string,
-  track: keyof typeof SCORE,
+  take: Take,
   from: number,
   to: number
-): Arranged => ({
-  id,
-  loop: [0, bars(LOOP_BARS)],
-  name,
-  notes: SCORE[track],
-  sourceLength: bars(LOOP_BARS),
-  track,
-  value: placedAt(from, to),
-});
+) {
+  const loop = bars(barsOf(take));
+  const clip: Arranged = {
+    id,
+    loop: [0, loop],
+    name,
+    sourceLength: loop,
+    track: take.split("-")[0] ?? take,
+    value: placedAt(from, to),
+  };
+  return isRecording(take)
+    ? { ...clip, recording: take }
+    : { ...clip, notes: notesOf(SONG_SCORE[take]) };
+}
 
 /**
- * A song in five parts, each clip named after the one it plays in: the guitar
- * and the organ open it, the verse brings in the drums and the bass under the
- * guitar, the chorus is the whole band, the verse comes back, and the guitar
- * and the organ close it.
+ * What each part of the song plays, all of it on the same loop. The organ and
+ * the guitar open it, the verse brings in the drums and the bass, the chorus
+ * is the whole band, harder, under the lead's hook, and the organ and the
+ * guitar close it, back where the song started.
  */
-const CLIPS: Arranged[] = [
-  audioClip("g1", "Intro", "guitar", 0, 4),
-  audioClip("g2", "Verse", "guitar", 4, 12),
-  audioClip("g3", "Chorus", "guitar", 12, 20),
-  audioClip("g4", "Verse 2", "guitar", 20, 28),
-  audioClip("g5", "Outro", "guitar", 28, 32),
-  midiClip("o1", "Intro", "organ", 0, 4),
-  midiClip("o2", "Chorus", "organ", 12, 20),
-  midiClip("o3", "Outro", "organ", 28, 32),
-  audioClip("d1", "Verse", "drums", 4, 12),
-  audioClip("d2", "Chorus", "drums", 12, 20),
-  audioClip("d3", "Verse 2", "drums", 20, 28),
-  midiClip("b1", "Verse", "bass", 4, 12),
-  midiClip("b2", "Chorus", "bass", 12, 20),
-  midiClip("b3", "Verse 2", "bass", 20, 28),
-];
+const PLAYS: Record<(typeof PARTS)[number]["id"], readonly Take[]> = {
+  chorus: ["drums-chorus", "bass-chorus", "organ", "guitar-chorus", "lead"],
+  intro: ["organ", "guitar-verse"],
+  outro: ["organ", "guitar-verse"],
+  verse: ["drums-verse", "bass-verse", "guitar-verse"],
+};
+
+/**
+ * The song's clips, each named after the part it plays in. The bar before
+ * each chorus ends on a snare roll, in place of the part's own drums.
+ */
+const CLIPS: Arranged[] = PARTS.flatMap((part, index) => {
+  const end = PARTS[index + 1]?.at ?? BARS;
+  const fill = PARTS[index + 1]?.id === "chorus";
+  const clips = PLAYS[part.id].map((take) =>
+    clipOf(
+      `${part.id}-${take}`,
+      part.name,
+      take,
+      part.at,
+      fill && take.startsWith("drums-") ? end - 1 : end
+    )
+  );
+  return fill
+    ? [...clips, clipOf(`${part.id}-fill`, "Fill", "drums-fill", end - 1, end)]
+    : clips;
+});
 
 const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Split at the cursor", keys: ["S"] },
@@ -607,7 +627,7 @@ function useRecordings() {
       return;
     }
     let cancelled = false;
-    for (const part of SONG_PARTS) {
+    for (const part of Object.keys(SONG_RECORDINGS) as SongPart[]) {
       renderSongPart(part, context.sampleRate).then((buffer) => {
         if (!cancelled) {
           setRecordings((current) =>

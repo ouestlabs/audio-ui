@@ -1,35 +1,35 @@
 /**
- * A chill two-bar song at 80 BPM, on E minor seven, G and A: a strummed
- * guitar and drums drawn here as recordings, as files would arrive, and an
- * organ and a bass as notes for MIDI tracks to play. The guitar is a
- * plucked-string model (a burst of noise round a delay line that loses its
- * highs on each pass), strummed down and up; the drums are oscillators and
- * noise. What an arrangement's demo plays.
+ * A chill song at 80 BPM on one two-bar loop, E minor seven, G and A, that
+ * every part plays: the verse and the chorus differ by who plays, not by
+ * their chords, so the song comes round as a loop does. Its strummed guitar
+ * and its drums are drawn here as recordings, as files would arrive, one per
+ * part; its organ, its bass and its lead are notes for MIDI tracks to play.
+ * The guitar is a plucked-string model (a burst of noise round a delay line
+ * that loses its highs on each pass), strummed down and up; the drums are
+ * oscillators and noise. What an arrangement's demo plays.
  */
 
 import type { Tempo } from "@audio-ui/core/time";
 
 const BPM = 80;
 export const SONG_TEMPO: Tempo = { beatsPerBar: 4, beatUnit: 4, bpm: BPM };
-/** How long the song's loop lasts, in bars. */
-export const SONG_BARS = 2;
 
 const BEAT = 60 / BPM;
-const BEATS = SONG_BARS * 4;
-/** The average level every recording is brought to, -22 dBFS, and the peak none passes. */
+/** The average level the verse's recordings are brought to, -22 dBFS, and the peak no recording passes. */
 const TARGET_RMS = 10 ** (-22 / 20);
 const CEILING = 0.9;
 const hertz = (note: number) => 440 * 2 ** ((note - 69) / 12);
 
-const CHORDS = {
+/** The guitar's shapes, low string first. */
+const SHAPES = {
   A: [45, 52, 57, 61, 64],
   Em7: [40, 47, 50, 55, 59, 64],
   G: [43, 47, 50, 55, 59, 67],
 } as const;
-type Chord = keyof typeof CHORDS;
+type Shape = keyof typeof SHAPES;
 
-/** The chord under each beat of the two bars. */
-const HARMONY: readonly Chord[] = [
+/** The loop, a chord per beat over its two bars. */
+const HARMONY: readonly Shape[] = [
   "Em7",
   "Em7",
   "Em7",
@@ -39,6 +39,7 @@ const HARMONY: readonly Chord[] = [
   "A",
   "A",
 ];
+
 /** One bar of strums: when, which way, and how long the strings ring before the hand mutes them, in beats. */
 const STRUMS = [
   { at: 0, down: true, ring: 1.5 },
@@ -49,8 +50,9 @@ const STRUMS = [
 ] as const;
 /** How far apart the strings of one strum are struck, in seconds. */
 const SPREAD = 0.011;
-/** Where the kick falls, in beats over the two bars: the bass follows it. */
-const KICKS = [0, 1.75, 2.5, 4, 5.75, 6.5] as const;
+
+/** Where the kick falls in a bar, in beats: the bass follows it. */
+const KICK = [0, 1.75, 2.5] as const;
 
 /** A note of the song, as a MIDI clip holds it: its pitch, and its start and length in beats. */
 export interface SongNote {
@@ -60,40 +62,92 @@ export interface SongNote {
   velocity: number;
 }
 
-/** The organ's chords: E minor seven for a bar, G and A for two beats each, held a little short of the next. */
-const ORGAN: readonly { at: number; beats: number; notes: number[] }[] = [
-  { at: 0, beats: 4, notes: [52, 55, 59, 62] },
-  { at: 4, beats: 2, notes: [55, 59, 62, 67] },
-  { at: 6, beats: 2, notes: [57, 61, 64, 69] },
-];
-/** The bass: the root of each chord, on the kick, an octave under the guitar's low string. */
-const BASS: readonly [start: number, length: number, pitch: number][] = [
-  [0, 1.5, 40],
-  [1.75, 0.5, 40],
-  [2.5, 1.25, 40],
-  [4, 1.5, 43],
-  [5.75, 0.25, 43],
-  [6, 0.4, 45],
-  [6.5, 1.25, 45],
-];
+type Phrase = readonly [start: number, length: number, pitch: number][];
 
-/** The organ and the bass as notes, for MIDI tracks to play, over the two bars. */
-export const SONG_SCORE: Record<"bass" | "organ", SongNote[]> = {
-  bass: BASS.map(([start, length, pitch]) => ({
-    length,
-    pitch,
-    start,
-    velocity: 0.8,
-  })),
-  organ: ORGAN.flatMap((chord) =>
+const notes = (phrase: Phrase, velocity: number): SongNote[] =>
+  phrase.map(([start, length, pitch]) => ({ length, pitch, start, velocity }));
+
+/** Chords held for `beats`, from `at`, a little short of the next. */
+const held = (
+  chords: readonly { at: number; beats: number; notes: number[] }[],
+  velocity: number
+): SongNote[] =>
+  chords.flatMap((chord) =>
     chord.notes.map((pitch) => ({
       length: chord.beats - 0.1,
       pitch,
       start: chord.at,
-      velocity: 0.7,
+      velocity,
     }))
+  );
+
+/**
+ * The song's notes by part, for MIDI tracks to play, each as long as its
+ * loop. The organ holds the chords; the bass plays the roots on the kick, and
+ * in the chorus jumps an octave and walks back to the top; the lead is the
+ * chorus's hook over four bars, a call and its answer, ending on E so it
+ * starts again.
+ */
+export const SONG_SCORE = {
+  "bass-chorus": notes(
+    [
+      [0, 1.5, 40],
+      [1.75, 0.5, 52],
+      [2.5, 1.25, 40],
+      [4, 1.5, 43],
+      [5.75, 0.25, 55],
+      [6, 0.4, 45],
+      [6.5, 1, 45],
+      [7.5, 0.4, 47],
+    ],
+    0.85
   ),
-};
+  "bass-verse": notes(
+    [
+      [0, 1.5, 40],
+      [1.75, 0.5, 40],
+      [2.5, 1.25, 40],
+      [4, 1.5, 43],
+      [5.75, 0.25, 43],
+      [6, 0.4, 45],
+      [6.5, 1.25, 45],
+    ],
+    0.8
+  ),
+  lead: notes(
+    [
+      [0, 0.5, 71],
+      [0.5, 0.5, 74],
+      [1, 1.5, 76],
+      [2.5, 0.5, 74],
+      [3, 1, 71],
+      [4, 1.5, 74],
+      [5.5, 0.5, 71],
+      [6, 0.5, 73],
+      [6.5, 1.5, 69],
+      [8, 0.5, 71],
+      [8.5, 0.5, 74],
+      [9, 1, 76],
+      [10, 0.5, 78],
+      [10.5, 0.5, 76],
+      [11, 1, 74],
+      [12, 1.5, 79],
+      [13.5, 0.5, 78],
+      [14, 2, 76],
+    ],
+    0.8
+  ),
+  organ: held(
+    [
+      { at: 0, beats: 4, notes: [52, 55, 59, 62] },
+      { at: 4, beats: 2, notes: [55, 59, 62, 67] },
+      { at: 6, beats: 2, notes: [57, 61, 64, 69] },
+    ],
+    0.7
+  ),
+} satisfies Record<string, SongNote[]>;
+
+export type SongScorePart = keyof typeof SONG_SCORE;
 
 /** One plucked string, added into `out` from `start` for `seconds`, muted at the end. */
 function pluck(
@@ -127,13 +181,14 @@ function pluck(
   }
 }
 
-function strum(rate: number, length: number) {
+/** The guitar strumming the loop, struck harder for the chorus. */
+function strum(force: number, rate: number, length: number) {
   const out = new Float32Array(length);
-  for (let bar = 0; bar < SONG_BARS; bar += 1) {
+  for (let bar = 0; bar < HARMONY.length / 4; bar += 1) {
     for (const stroke of STRUMS) {
       const beat = bar * 4 + stroke.at;
-      const notes = CHORDS[HARMONY[Math.floor(beat)] ?? "Em7"];
-      const order = stroke.down ? notes : [...notes].reverse();
+      const shape = SHAPES[HARMONY[Math.floor(beat)] ?? "Em7"];
+      const order = stroke.down ? shape : [...shape].reverse();
       for (const [string, note] of order.entries()) {
         pluck(
           out,
@@ -141,7 +196,7 @@ function strum(rate: number, length: number) {
           beat * BEAT + string * SPREAD,
           stroke.ring * BEAT,
           note,
-          stroke.down ? 0.3 : 0.2
+          (stroke.down ? 0.3 : 0.2) * force
         );
       }
     }
@@ -149,23 +204,19 @@ function strum(rate: number, length: number) {
   return out;
 }
 
+interface Hit {
+  at: number;
+  decay: number;
+  frequency: number;
+  level: number;
+  noise?: BiquadFilterType;
+}
+
 /** A drum hit into `out`: a sine whose pitch falls as it sounds, or noise through a filter. */
 function hit(
   ctx: OfflineAudioContext,
   out: AudioNode,
-  {
-    at,
-    decay,
-    frequency,
-    level,
-    noise,
-  }: {
-    at: number;
-    decay: number;
-    frequency: number;
-    level: number;
-    noise?: BiquadFilterType;
-  }
+  { at, decay, frequency, level, noise }: Hit
 ) {
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(level, at);
@@ -198,86 +249,151 @@ function hit(
   oscillator.stop(at + decay + 0.02);
 }
 
-/** A kick on the song's beats, a snare on two and four, and hats on every eighth, the off-beats softer. */
-function drums(ctx: OfflineAudioContext, out: AudioNode) {
-  for (const beat of KICKS) {
-    hit(ctx, out, { at: beat * BEAT, decay: 0.35, frequency: 50, level: 0.9 });
-  }
-  for (const beat of [1, 3, 5, 7]) {
-    hit(ctx, out, {
+const kick = (beat: number): Hit => ({
+  at: beat * BEAT,
+  decay: 0.35,
+  frequency: 50,
+  level: 0.9,
+});
+const snare = (beat: number, level = 1): Hit[] => [
+  {
+    at: beat * BEAT,
+    decay: 0.18,
+    frequency: 1500,
+    level: 0.5 * level,
+    noise: "bandpass",
+  },
+  { at: beat * BEAT, decay: 0.08, frequency: 180, level: 0.3 * level },
+];
+const clap = (beat: number): Hit => ({
+  at: beat * BEAT + 0.008,
+  decay: 0.12,
+  frequency: 1100,
+  level: 0.35,
+  noise: "bandpass",
+});
+/** Hats on every eighth of `bars`, the off-beats softer, and an open one where `open` says. */
+const hats = (bars: number, open: readonly number[] = []): Hit[] =>
+  Array.from({ length: bars * 8 }, (_, eighth) => {
+    const beat = eighth / 2;
+    const off = eighth % 2 === 1;
+    const closed = { decay: off ? 0.03 : 0.06, level: off ? 0.12 : 0.2 };
+    return {
       at: beat * BEAT,
-      decay: 0.18,
-      frequency: 1500,
-      level: 0.5,
-      noise: "bandpass",
-    });
-    hit(ctx, out, { at: beat * BEAT, decay: 0.08, frequency: 180, level: 0.3 });
-  }
-  for (let eighth = 0; eighth < BEATS * 2; eighth += 1) {
-    hit(ctx, out, {
-      at: (eighth / 2) * BEAT,
-      decay: eighth % 2 ? 0.03 : 0.06,
       frequency: 7000,
-      level: eighth % 2 ? 0.12 : 0.2,
       noise: "highpass",
-    });
+      ...(open.includes(beat % 4) ? { decay: 0.22, level: 0.14 } : closed),
+    };
+  });
+const everyBar = <T>(bars: number, of: (bar: number) => T[]) =>
+  Array.from({ length: bars }, (_, bar) => of(bar * 4)).flat();
+
+/**
+ * The drums of each part, as hits: the verse's beat, the fill that ends it
+ * (a snare roll that grows), and the chorus's, with a clap on the snare, an
+ * open hat at the end of each bar and a crash on its first beat.
+ */
+const DRUMS = {
+  "drums-chorus": [
+    { at: 0, decay: 1.6, frequency: 4500, level: 0.16, noise: "highpass" },
+    ...everyBar(4, (at) => KICK.map((beat) => kick(at + beat))),
+    ...everyBar(4, (at) => [
+      ...snare(at + 1),
+      ...snare(at + 3),
+      clap(at + 1),
+      clap(at + 3),
+    ]),
+    ...hats(4, [3.5]),
+  ],
+  "drums-fill": [
+    kick(0),
+    ...snare(1),
+    ...hats(1).slice(0, 4),
+    ...Array.from({ length: 8 }, (_, step) =>
+      snare(2 + step / 4, 0.35 + step * 0.09)
+    ).flat(),
+  ],
+  "drums-verse": [
+    ...everyBar(2, (at) => KICK.map((beat) => kick(at + beat))),
+    ...everyBar(2, (at) => [...snare(at + 1), ...snare(at + 3)]),
+    ...hats(2),
+  ],
+} satisfies Record<string, Hit[]>;
+
+/** Every recording of the song, by id, and how many bars it lasts. */
+export const SONG_RECORDINGS = {
+  "drums-chorus": 4,
+  "drums-fill": 1,
+  "drums-verse": 2,
+  "guitar-chorus": 2,
+  "guitar-verse": 2,
+} as const;
+
+export type SongPart = keyof typeof SONG_RECORDINGS;
+
+/** A part's samples, before any level is set. */
+function draw(part: SongPart, rate: number): Promise<Float32Array> {
+  const length = Math.ceil(rate * BEAT * 4 * SONG_RECORDINGS[part]);
+  if (part.startsWith("guitar-")) {
+    return Promise.resolve(
+      strum(part === "guitar-chorus" ? 1.2 : 1, rate, length)
+    );
   }
+  const ctx = new OfflineAudioContext(1, length, rate);
+  const out = ctx.createGain();
+  out.connect(ctx.destination);
+  for (const one of DRUMS[part as keyof typeof DRUMS]) {
+    hit(ctx, out, one);
+  }
+  return ctx.startRendering().then((done) => done.getChannelData(0));
 }
 
-/** Brings samples to the recordings' shared average level, with no peak past the ceiling. */
-function normalize(data: Float32Array) {
+function measure(data: Float32Array) {
   let squares = 0;
   let peak = 0;
   for (const sample of data) {
     squares += sample * sample;
     peak = Math.max(peak, Math.abs(sample));
   }
-  const rms = Math.sqrt(squares / data.length);
-  if (rms === 0) {
-    return;
-  }
-  const gain = Math.min(TARGET_RMS / rms, CEILING / peak);
-  for (let index = 0; index < data.length; index += 1) {
-    data[index] = (data[index] ?? 0) * gain;
-  }
+  return { peak, rms: Math.sqrt(squares / data.length) };
 }
 
-export type SongPart = "drums" | "guitar";
-
-const rendered = new Map<string, Promise<AudioBuffer>>();
+const drawn = new Map<string, Promise<Float32Array>>();
+const once = (part: SongPart, rate: number) => {
+  const id = `${part}:${rate}`;
+  const kept = drawn.get(id) ?? draw(part, rate);
+  drawn.set(id, kept);
+  return kept;
+};
 
 /**
- * One recorded part of the song, two bars at its tempo, brought to the level
- * every part has: what an audio track of an arrangement plays. Drawn once per
- * sample rate.
+ * One recorded part of the song at its tempo: what an audio track of an
+ * arrangement plays. Every part of an instrument takes the gain that brings
+ * its verse to the song's level, so the quiet parts stay quiet and the chorus
+ * stays the loudest, and none peaks past the ceiling. Drawn once per sample
+ * rate.
  */
-export function renderSongPart(
+export async function renderSongPart(
   part: SongPart,
   sampleRate: number
 ): Promise<AudioBuffer> {
-  const id = `${part}:${sampleRate}`;
-  const kept = rendered.get(id);
-  if (kept) {
-    return kept;
+  const verse = measure(
+    await once(
+      part.startsWith("guitar-") ? "guitar-verse" : "drums-verse",
+      sampleRate
+    )
+  );
+  const data = Float32Array.from(await once(part, sampleRate));
+  const { peak } = measure(data);
+  const gain = Math.min(
+    TARGET_RMS / verse.rms,
+    CEILING / verse.peak,
+    CEILING / peak
+  );
+  for (let index = 0; index < data.length; index += 1) {
+    data[index] = (data[index] ?? 0) * gain;
   }
-  const length = Math.ceil(sampleRate * BEAT * BEATS);
-  let buffer: Promise<AudioBuffer>;
-  if (part === "guitar") {
-    const data = strum(sampleRate, length);
-    normalize(data);
-    const made = new AudioBuffer({ length, sampleRate });
-    made.copyToChannel(data, 0);
-    buffer = Promise.resolve(made);
-  } else {
-    const ctx = new OfflineAudioContext(1, length, sampleRate);
-    const out = ctx.createGain();
-    out.connect(ctx.destination);
-    drums(ctx, out);
-    buffer = ctx.startRendering().then((done) => {
-      normalize(done.getChannelData(0));
-      return done;
-    });
-  }
-  rendered.set(id, buffer);
+  const buffer = new AudioBuffer({ length: data.length, sampleRate });
+  buffer.copyToChannel(data, 0);
   return buffer;
 }
