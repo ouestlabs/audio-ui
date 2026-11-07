@@ -64,6 +64,8 @@ import { transientDevice } from "@/components/audio-ui/devices/transient/device"
 import { createTransientEngine } from "@/components/audio-ui/devices/transient/engine";
 import { utilityDevice } from "@/components/audio-ui/devices/utility/device";
 import { createUtilityEngine } from "@/components/audio-ui/devices/utility/engine";
+import { vibeDevice } from "@/components/audio-ui/devices/vibe/device";
+import { createVibeEngine } from "@/components/audio-ui/devices/vibe/engine";
 import { waveShaperDevice } from "@/components/audio-ui/devices/wave-shaper/device";
 import { createWaveShaperEngine } from "@/components/audio-ui/devices/wave-shaper/engine";
 
@@ -162,6 +164,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Motion
   entry(phaserDevice, createPhaserEngine, "Motion"),
   entry(autoPanDevice, createAutoPanEngine, "Motion"),
+  entry(vibeDevice, createVibeEngine, "Motion"),
   // Utility
   entry(utilityDevice, createUtilityEngine, "Utility"),
   entry(midSideDevice, createMidSideEngine, "Utility"),
