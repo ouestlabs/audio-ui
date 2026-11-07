@@ -11,6 +11,7 @@ import { DistortionPanel } from "@/registry-audio/bases/base/audio/panels/distor
 import { ElectricPianoPanel } from "@/registry-audio/bases/base/audio/panels/electric-piano-panel";
 import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equalizer-panel";
 import { FilterPanel } from "@/registry-audio/bases/base/audio/panels/filter-panel";
+import { FmSynthPanel } from "@/registry-audio/bases/base/audio/panels/fm-synth-panel";
 import { GatePanel } from "@/registry-audio/bases/base/audio/panels/gate-panel";
 import { LimiterPanel } from "@/registry-audio/bases/base/audio/panels/limiter-panel";
 import { MidSidePanel } from "@/registry-audio/bases/base/audio/panels/mid-side-panel";
@@ -80,6 +81,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.electric-piano": entry(ElectricPianoPanel, "w-[32rem]"),
   "audioui.equalizer": entry(EqualizerPanel, "w-96"),
   "audioui.filter": entry(FilterPanel),
+  "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
   "audioui.limiter": entry(LimiterPanel),
   "audioui.mid-side": entry(MidSidePanel),

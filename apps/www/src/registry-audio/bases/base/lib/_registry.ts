@@ -97,6 +97,22 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The FM Synth as an instrument device: four operators, each a ratio, a level, a decay and a sustain, eight algorithms that wire them, feedback, an attack, a release and a vibrato, with eight presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/fm-synth-device.ts",
+        target: "components/audio-ui/devices/fm-synth/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "fm-synth-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "device", "pad"],
     dependencies: ["@audio-ui/core"],
     description:
@@ -142,6 +158,22 @@ const items: RegistryItem[] = [
     ],
     name: "poly-synth-engine",
     registryDependencies: ["@audio-ui/poly-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the FM Synth on the Web Audio API: four operators wired by the algorithm, each with its envelope; noteOn strikes a note, or cuts the held one and strikes anew, noteOff releases every operator from where it got to, and the levels, ratios, feedback and vibrato move a held note. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/fm-synth-engine.ts",
+        target: "components/audio-ui/devices/fm-synth/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "fm-synth-engine",
+    registryDependencies: ["@audio-ui/fm-synth-device"],
     type: "registry:lib",
   },
   {
@@ -1178,6 +1210,8 @@ const items: RegistryItem[] = [
       "@audio-ui/pocket-synth-engine",
       "@audio-ui/poly-synth-device",
       "@audio-ui/poly-synth-engine",
+      "@audio-ui/fm-synth-device",
+      "@audio-ui/fm-synth-engine",
       "@audio-ui/sampler-device",
       "@audio-ui/sampler-engine",
       "@audio-ui/electric-piano-device",

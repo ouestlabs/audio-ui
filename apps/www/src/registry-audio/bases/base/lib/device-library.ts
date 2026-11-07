@@ -26,6 +26,8 @@ import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-devic
 import { createEqualizerEngine } from "@/registry-audio/bases/base/lib/equalizer-engine";
 import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
 import { createFilterEngine } from "@/registry-audio/bases/base/lib/filter-engine";
+import { fmSynthDevice } from "@/registry-audio/bases/base/lib/fm-synth-device";
+import { createFmSynthEngine } from "@/registry-audio/bases/base/lib/fm-synth-engine";
 import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
 import { createGateEngine } from "@/registry-audio/bases/base/lib/gate-engine";
 import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
@@ -117,6 +119,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Instruments
   entry(polySynthDevice, createPolySynthEngine, "Instruments"),
   entry(electricPianoDevice, createElectricPianoEngine, "Instruments"),
+  entry(fmSynthDevice, createFmSynthEngine, "Instruments"),
   entry(samplerDevice, createSamplerEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),
   entry(waveShaperDevice, createWaveShaperEngine, "Instruments"),

@@ -8,6 +8,7 @@ import { distortionDevice } from "@/registry-audio/bases/base/lib/distortion-dev
 import { electricPianoDevice } from "@/registry-audio/bases/base/lib/electric-piano-device";
 import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
 import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
+import { fmSynthDevice } from "@/registry-audio/bases/base/lib/fm-synth-device";
 import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
 import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import { midSideDevice } from "@/registry-audio/bases/base/lib/mid-side-device";
@@ -44,6 +45,7 @@ export const DEVICE_DOCS = {
   "pocket-synth": pocketSynthDevice,
   "poly-synth": polySynthDevice,
   "electric-piano": electricPianoDevice,
+  "fm-synth": fmSynthDevice,
   sampler: samplerDevice,
   redux: reduxDevice,
   reverb: reverbDevice,

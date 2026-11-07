@@ -70,6 +70,28 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    files: [
+      {
+        path: "components/device/block-fm-synth.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-fm-synth",
+    registryDependencies: [
+      "@audio-ui/fm-synth-panel",
+      "@audio-ui/fm-synth-device",
+      "@audio-ui/fm-synth-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["instrument", "pad"],
     dependencies: ["@audio-ui/core"],
     description:

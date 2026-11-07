@@ -43,6 +43,7 @@ describe("takesPlay", () => {
           "block-mixer",
           "block-pocket-synth",
           "block-electric-piano",
+          "block-fm-synth",
           "block-poly-synth",
           "block-sampler",
           "block-synth-panel",

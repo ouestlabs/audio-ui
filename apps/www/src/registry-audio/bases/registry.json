@@ -97,7 +97,7 @@
       "name": "utility"
     },
     {
-      "count": 5,
+      "count": 6,
       "description": "Instrument devices: synths played from a pad, by pointer or by an agent.",
       "label": "Instruments",
       "name": "instrument"
@@ -121,7 +121,7 @@
       "name": "pad"
     },
     {
-      "count": 4,
+      "count": 5,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
       "name": "piano"
@@ -133,7 +133,7 @@
       "name": "piano-roll"
     },
     {
-      "count": 6,
+      "count": 7,
       "description": "Synth control patterns combining knobs, XY pads, and toggles.",
       "label": "Synth",
       "name": "synth"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 63
+  "totalComponents": 64
 }

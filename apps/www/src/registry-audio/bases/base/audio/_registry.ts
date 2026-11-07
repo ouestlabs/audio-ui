@@ -16,6 +16,7 @@ const DEVICES = [
   "electric-piano",
   "equalizer",
   "filter",
+  "fm-synth",
   "gate",
   "limiter",
   "mid-side",
@@ -458,6 +459,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/phaser-panel",
       "@audio-ui/pocket-synth-panel",
       "@audio-ui/poly-synth-panel",
+      "@audio-ui/fm-synth-panel",
       "@audio-ui/sampler-panel",
       "@audio-ui/electric-piano-panel",
       "@audio-ui/redux-panel",
@@ -506,6 +508,27 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/piano",
       "@audio-ui/poly-synth-device",
+      "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "piano"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "The face of the FM Synth device: its eight presets, what every operator shares, each operator's four controls and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/panels/fm-synth-panel.tsx",
+        target: "components/audio-ui/devices/fm-synth/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "fm-synth-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/piano",
+      "@audio-ui/fm-synth-device",
       "@shadcn/select",
     ],
     type: "registry:ui",
