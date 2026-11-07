@@ -31,11 +31,6 @@
     "intro": "Browse {{count}} knob components for audio/ui, built on top of shadcn/ui.",
     "title": "Knob"
   },
-  "hardware": {
-    "description": "Hardware-panel pieces: LEDs, small screens, values as they read, and rocker switches. {{count}} components.",
-    "intro": "Browse {{count}} hardware components for audio/ui, built on top of shadcn/ui.",
-    "title": "Hardware"
-  },
   "parameter-field": {
     "description": "Numeric fields for audio parameters: type a value, step it, or drag its label or unit to scrub it, with units and precision. {{count}} components.",
     "intro": "Browse {{count}} parameter field components for audio/ui, built on top of shadcn/ui.",
@@ -52,9 +47,14 @@
     "title": "Mixer"
   },
   "device-chain": {
-    "description": "Device chains: a track's effects in a row, reordered, folded, switched off and removed, with a library to add one from. {{count}} components.",
+    "description": "Device chains: a track's effects in a row, reordered, folded, switched off and removed. {{count}} components.",
     "intro": "Browse {{count}} device chain components for audio/ui, built on top of shadcn/ui.",
     "title": "Device chain"
+  },
+  "device-browser": {
+    "description": "Device browsers: a library of devices by shelf, with a search, to add one from or drag it onto a chain. {{count}} components.",
+    "intro": "Browse {{count}} device browser components for audio/ui, built on top of shadcn/ui.",
+    "title": "Device browser"
   },
   "spectrum": {
     "description": "Spectrum analyzers: the level of a sound across frequencies, live, with held peaks. {{count}} components.",
@@ -100,11 +100,6 @@
     "description": "Tuners: the note and the pitch of a sound, live from the microphone. {{count}} components.",
     "intro": "Browse {{count}} tuner components for audio/ui, built on top of shadcn/ui.",
     "title": "Tuner"
-  },
-  "plot": {
-    "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors. {{count}} components.",
-    "intro": "Browse {{count}} plot components for audio/ui, built on top of shadcn/ui.",
-    "title": "Plot"
   },
   "pad": {
     "description": "Drum pad grids: strike them by pointer or keyboard, with velocity and choke groups. {{count}} components.",

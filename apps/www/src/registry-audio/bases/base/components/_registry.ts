@@ -83,19 +83,6 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["fader"],
-    description: "Fader component example with horizontal orientation",
-    files: [
-      {
-        path: "components/fader/fader-horizontal-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "fader-horizontal-demo",
-    registryDependencies: ["@audio-ui/fader"],
-    type: "registry:example",
-  },
-  {
-    categories: ["fader"],
     description:
       "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     files: [
@@ -106,65 +93,6 @@ export const components: RegistryItem[] = [
     ],
     name: "fader-pan-demo",
     registryDependencies: ["@audio-ui/fader"],
-    type: "registry:example",
-  },
-  {
-    categories: ["hardware"],
-    description: "LEDs lit by Rec and Mute, one blinking red, in three sizes",
-    files: [
-      {
-        path: "components/hardware/led-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "led-demo",
-    registryDependencies: ["@audio-ui/led", "@shadcn/button"],
-    type: "registry:example",
-  },
-  {
-    categories: ["hardware"],
-    description:
-      "Screens with a caption: a filter cutoff in kHz driven by a parameter field, a preset's name and a tempo",
-    files: [
-      {
-        path: "components/hardware/lcd-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "lcd-demo",
-    registryDependencies: [
-      "@audio-ui/lcd",
-      "@audio-ui/value-display",
-      "@audio-ui/parameter-field",
-    ],
-    type: "registry:example",
-  },
-  {
-    categories: ["hardware"],
-    description:
-      "A value of each kind: tempo, gain, cutoff, pan, mix, transpose and position",
-    files: [
-      {
-        path: "components/hardware/value-display-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "value-display-demo",
-    registryDependencies: ["@audio-ui/value-display"],
-    type: "registry:example",
-  },
-  {
-    categories: ["hardware"],
-    description:
-      "A power rocker that lights its LED, a small one laid down, and one disabled",
-    files: [
-      {
-        path: "components/hardware/rocker-switch-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "rocker-switch-demo",
-    registryDependencies: ["@audio-ui/rocker-switch", "@audio-ui/led"],
     type: "registry:example",
   },
   {
@@ -179,20 +107,6 @@ export const components: RegistryItem[] = [
     ],
     name: "parameter-field-demo",
     registryDependencies: ["@audio-ui/parameter-field"],
-    type: "registry:example",
-  },
-  {
-    categories: ["knob"],
-    description:
-      "A knob turned by dragging up and down, like a fader: 150px of travel spans the whole range",
-    files: [
-      {
-        path: "components/knob/knob-vertical-drag-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "knob-vertical-drag-demo",
-    registryDependencies: ["@audio-ui/knob"],
     type: "registry:example",
   },
   {
@@ -219,19 +133,6 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "knob-filter-control-demo",
-    registryDependencies: ["@audio-ui/knob"],
-    type: "registry:example",
-  },
-  {
-    categories: ["knob"],
-    description: "Knob value arc (rail + highlight) and optional anchor range",
-    files: [
-      {
-        path: "components/knob/knob-arc-and-anchor-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "knob-arc-and-anchor-demo",
     registryDependencies: ["@audio-ui/knob"],
     type: "registry:example",
   },
@@ -452,19 +353,6 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["meter"],
-    description: "Horizontal meter example",
-    files: [
-      {
-        path: "components/meter/meter-horizontal-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "meter-horizontal-demo",
-    registryDependencies: ["@audio-ui/meter", "@audio-ui/use-simulated-levels"],
-    type: "registry:example",
-  },
-  {
     categories: ["xypad"],
     description: "XYPad with live x/y readout",
     files: [
@@ -515,23 +403,6 @@ export const components: RegistryItem[] = [
   {
     categories: ["timeline"],
     description:
-      "A timeline with a loop range, a ruler and two tracks, each with a clip you move, trim and fade, and a playhead on a clock: the timeline alone, with no arrangement around it",
-    files: [
-      {
-        path: "components/timeline/timeline-clips-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "timeline-clips-demo",
-    registryDependencies: [
-      "@audio-ui/timeline",
-      "@audio-ui/use-simulated-clock",
-    ],
-    type: "registry:example",
-  },
-  {
-    categories: ["timeline"],
-    description:
       "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following the sound, and a navigator to zoom and scroll. It plays on the audio clock through the arrangement engine: audio clips loop a drum beat and a pad and draw their waveform, MIDI clips draw their notes, play a bass and chords through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. Drop an audio file on an audio track for a clip of it that plays, as long as the file; a clip dragged near an edge of the view scrolls it. Each track's meter reads its channel. In automation mode each track draws an envelope of its volume or pan over its clips, which its channel follows as it plays. Open it at full size and the tracks take the screen",
     files: [
       {
@@ -570,6 +441,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/track-automation",
       "@audio-ui/use-track-reorder",
       "@audio-ui/audio-decode",
+      "@audio-ui/arrangement-view",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/context-menu",
@@ -583,19 +455,6 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["waveform"],
-    description: "Waveform default example",
-    files: [
-      {
-        path: "components/waveform/waveform-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "waveform-demo",
-    registryDependencies: ["@audio-ui/waveform"],
-    type: "registry:example",
-  },
-  {
-    categories: ["waveform"],
     description:
       "Waveform with a resizable loop region, markers and a hover time",
     files: [
@@ -606,82 +465,6 @@ export const components: RegistryItem[] = [
     ],
     name: "waveform-region-demo",
     registryDependencies: ["@audio-ui/waveform"],
-    type: "registry:example",
-  },
-  {
-    categories: ["waveform"],
-    description:
-      "Live waveform scrolling with the microphone, or with a speech-like signal while it is off",
-    files: [
-      {
-        path: "components/waveform/waveform-live-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "waveform-live-demo",
-    registryDependencies: [
-      "@audio-ui/use-audio-signal",
-      "@audio-ui/use-microphone",
-      "@audio-ui/waveform",
-    ],
-    type: "registry:example",
-  },
-  {
-    categories: ["plot"],
-    description:
-      "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
-    files: [
-      {
-        path: "components/plot/plot-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    meta: {
-      hint: "Click a band to set its type and width. Double-click empty space to add one, Delete to remove it.",
-    },
-    name: "plot-demo",
-    dependencies: ["@audio-ui/core"],
-    registryDependencies: [
-      "@audio-ui/plot",
-      "@audio-ui/knob",
-      "@audio-ui/use-noise-through-eq",
-      "@audio-ui/use-spectrum",
-      "@shadcn/popover",
-      "@shadcn/select",
-    ],
-    type: "registry:example",
-  },
-  {
-    categories: ["plot"],
-    description:
-      "A low-pass filter: one handle on the resonance peak sets the cutoff and how much it rings",
-    files: [
-      {
-        path: "components/plot/plot-filter-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "plot-filter-demo",
-    dependencies: ["@audio-ui/core"],
-    registryDependencies: ["@audio-ui/plot"],
-    type: "registry:example",
-  },
-  {
-    categories: ["plot"],
-    description:
-      "A compressor transfer curve: one handle sets the threshold, the other the ratio",
-    files: [
-      {
-        path: "components/plot/plot-compressor-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "plot-compressor-demo",
-    dependencies: ["@audio-ui/core"],
-    registryDependencies: [
-      "@audio-ui/plot",
-      "@audio-ui/use-pulses-through-compressor",
-    ],
     type: "registry:example",
   },
   {
@@ -732,21 +515,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/web-audio",
     ],
     type: "registry:block",
-  },
-  {
-    categories: ["utility", "knob"],
-    dependencies: ["@audio-ui/core"],
-    description:
-      "A device of your own, defined by its parameters alone: the panel, the state and the tool an agent calls come from that one description. Turn a knob, or send the call a model could send",
-    files: [
-      {
-        path: "components/device/device-contract-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "device-contract-demo",
-    registryDependencies: ["@audio-ui/device-panel"],
-    type: "registry:example",
   },
   {
     categories: ["delay-reverb", "plot", "knob"],
@@ -1138,7 +906,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
-      "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",
+      "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",
     files: [
       {
         path: "components/mixer/block-mixer.tsx",
@@ -1146,18 +914,39 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-mixer",
-    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/core"],
     registryDependencies: [
-      "@audio-ui/fader",
-      "@audio-ui/knob",
-      "@audio-ui/meter",
-      "@audio-ui/use-audio-levels",
-      "@audio-ui/use-master-bus",
-      "@audio-ui/use-transport-clock",
+      "@audio-ui/mixer-view",
+      "@audio-ui/arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/track-automation",
+      "@audio-ui/use-play-switch",
+      "@audio-ui/clip-player",
+      "@audio-ui/demo-sound",
+      "@audio-ui/device-library",
       "@audio-ui/web-audio",
-      "@audio-ui/drum-synthesis",
-      "@shadcn/button",
-      "@shadcn/toggle",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["device-browser"],
+    description:
+      "A library of devices by shelf, with a search: pick one with Enter, a double-click or the Add button, or drag it onto a chain, and see what comes back",
+    files: [
+      {
+        path: "components/device-browser/block-device-browser.tsx",
+        type: "registry:block",
+      },
+    ],
+    meta: {
+      hint: "Type to search every shelf, Enter to add the first device found, ArrowDown to go into the list. Double-click a device, or drag it onto the drop area.",
+    },
+    name: "block-device-browser",
+    registryDependencies: [
+      "@audio-ui/device-browser",
+      "@audio-ui/device-chain",
+      "@audio-ui/device-library",
     ],
     type: "registry:block",
   },
@@ -1165,7 +954,7 @@ export const components: RegistryItem[] = [
     categories: ["device-chain", "knob"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine, with a kick on the sidechain, or render it to a WAV file",
+      "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine. It is the view a workstation shows under its tracks, over an arrangement of one track",
     files: [
       {
         path: "components/device-chain/block-device-chain.tsx",
@@ -1174,16 +963,17 @@ export const components: RegistryItem[] = [
     ],
     name: "block-device-chain",
     registryDependencies: [
-      "@audio-ui/device-chain",
+      "@audio-ui/device-view",
       "@audio-ui/device-browser",
       "@audio-ui/device-library",
-      "@audio-ui/device-panels",
+      "@audio-ui/arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/clip-player",
       "@audio-ui/demo-sound",
       "@audio-ui/use-demo-source",
-      "@audio-ui/use-device-loop",
-      "@audio-ui/use-master-bus",
-      "@audio-ui/wav-file",
-      "@shadcn/button",
+      "@audio-ui/use-play-switch",
+      "@audio-ui/web-audio",
     ],
     type: "registry:block",
   },

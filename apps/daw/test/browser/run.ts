@@ -1831,6 +1831,73 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         { timeout: 5000 }
       );
     },
+  "REC-004: Space ends a take Record just started, even with the button focused, and Space again plays without recording":
+    async (browser) => {
+      const page = await open(browser);
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: "Arm 1 MIDI" })
+        .click();
+      const record = page.getByRole("button", { exact: true, name: "Record" });
+      const takes = page.locator('[data-slot="arranged-take"]');
+      // The press leaves Record focused: Space must not click it again as the key comes up.
+      await record.click();
+      await takes.waitFor({ timeout: 5000 });
+      await page.keyboard.press("Space");
+      await page.waitForFunction(
+        () => !document.querySelector('[data-slot="arranged-take"]'),
+        undefined,
+        { timeout: 5000 }
+      );
+      assert(
+        (await record.getAttribute("aria-pressed")) === "false",
+        "Space ended the take and Record is off"
+      );
+      await page.keyboard.press("Space");
+      await page
+        .getByRole("button", { exact: true, name: "Pause" })
+        .waitFor({ timeout: 5000 });
+      await page.waitForTimeout(800);
+      assert(
+        (await takes.count()) === 0 &&
+          (await record.getAttribute("aria-pressed")) === "false",
+        "Space again plays, and records nothing"
+      );
+    },
+  "MIX-015: the Devices tab shows the devices of the track of the clip picked, not of a track or a return picked before it":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Chord take", 30);
+      const clip = page.locator("[data-clip-id]", { hasText: "Chord take" });
+      await clip.waitFor({ timeout: 30_000 });
+      const title = page.locator('[data-slot="panel-bar"]');
+      // A return picked first: its devices are the ones the tab shows.
+      await showMixer(page);
+      await page
+        .getByRole("region", { exact: true, name: "A Reverb" })
+        .click({ position: { x: 20, y: 6 } });
+      await page.getByRole("tab", { name: "Devices" }).click();
+      assert(
+        ((await title.textContent()) ?? "").includes("A Reverb"),
+        "the Devices tab shows the return that was picked"
+      );
+      const bar = clip.locator("[data-slot=timeline-clip-header]");
+      await bar.scrollIntoViewIfNeeded();
+      const head = (await bar.boundingBox()) ?? {
+        height: 0,
+        width: 0,
+        x: 0,
+        y: 0,
+      };
+      await page.mouse.click(head.x + head.width / 2, head.y + head.height / 2);
+      await page.waitForTimeout(300);
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const shown = (await title.textContent()) ?? "";
+      assert(
+        shown.includes("3 Audio") && !shown.includes("A Reverb"),
+        `the Devices tab shows the clip's track, not the return (${shown})`
+      );
+    },
   "REC-005: a count-in counts the transport back in negative bars before the take starts":
     async (browser) => {
       const page = await open(browser);
@@ -2843,12 +2910,18 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       const y = gate.y + 12;
       const pressAt = gate.x + 80;
       const ghost = page.locator("[data-slot=device-chain-ghost]");
-      // A short press moves nothing.
+      // A short press lifts nothing: it is a click on the title bar, which folds the device, and a click on its strip opens it again.
       await page.mouse.move(pressAt, y);
       await page.mouse.down();
       await page.mouse.move(pressAt + 2, y);
       await page.mouse.up();
       assert((await ghost.count()) === 0, "a press of 2 px lifted the device");
+      await slots.nth(0).locator("[data-slot=device-chain-strip]").waitFor();
+      await slots
+        .nth(0)
+        .locator("[data-slot=device-chain-strip]")
+        .click({ position: { x: 14, y: 80 } });
+      await slots.nth(0).locator("[data-slot=device-header]").waitFor();
       // Past the Limiter: it slides back by the Gate's width, and the copy follows.
       await page.mouse.move(pressAt, y);
       await page.mouse.down();
@@ -3751,6 +3824,43 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         .locator("[data-slot=device-header]")
         .waitFor({ timeout: 2000 });
     },
+  "DEV-006: a press on a device's title bar folds it, a press on its buttons does not, and a drag of it moves it without folding":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("3 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Limiter");
+      await library.getByRole("option").first().dblclick();
+      const slot = page.locator("[data-slot=device-chain-slot]").first();
+      await slot.waitFor({ timeout: 5000 });
+      const strip = slot.locator("[data-slot=device-chain-strip]");
+      const header = slot.locator("[data-slot=device-header]").first();
+      const title = header.getByText("Limiter", { exact: true });
+      // The on square is a button: a press on it switches the device and leaves it open.
+      await slot.locator("button[aria-pressed]").first().click();
+      await page.waitForTimeout(100);
+      assert((await strip.count()) === 0, "the on square folded the device");
+      // A drag of the title bar is a move, not a press.
+      const bar = await header.boundingBox();
+      if (!bar) {
+        throw new Error("the title bar is not on the page");
+      }
+      await page.mouse.move(bar.x + bar.width / 2, bar.y + bar.height / 2);
+      await page.mouse.down();
+      await page.mouse.move(bar.x + bar.width / 2 + 40, bar.y + 6, {
+        steps: 4,
+      });
+      await page.mouse.up();
+      await page.waitForTimeout(150);
+      assert((await strip.count()) === 0, "a drag of the title bar folded it");
+      // A press on the name folds it, and one on the strip opens it again.
+      await title.click();
+      await strip.waitFor({ timeout: 2000 });
+      await strip.click({ position: { x: 14, y: 80 } });
+      await header.waitFor({ timeout: 2000 });
+    },
+
   "DEV-010: a rack's chain has no scroll of its own, and the strip that ends the track's chain stays at the right":
     async (browser) => {
       const page = await open(browser);

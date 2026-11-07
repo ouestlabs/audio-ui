@@ -695,7 +695,7 @@ interface DeviceChainSlotProps extends Omit<ComponentProps<"div">, "title"> {
  * land, the others aside; or press Left or Right on the grip; Delete removes it, and a
  * right-click gives the same commands. Folded, the slot is a narrow strip with
  * its on and off square at the top, the device's name down it, and the same
- * controls at the bottom; a click anywhere else on the strip unfolds it.
+ * controls at the bottom; a click anywhere else on the strip unfolds it. Open, a click on its title bar, outside its buttons, folds it; a drag of the title bar moves it.
  */
 function DeviceChainSlot({
   children,
@@ -714,7 +714,8 @@ function DeviceChainSlot({
   const [ownFolded, setOwnFolded] = useState(defaultFolded);
   const folded = foldedProp ?? ownFolded;
   const root = useRef<HTMLDivElement>(null);
-  const pressedAt = useRef(0);
+  // Whether the pointer went anywhere since it was pressed: a drag, or a press that came back to where it began, is not a click.
+  const travelled = useRef<boolean>(false);
   const index = order.indexOf(value);
 
   const toggleFold = useCallback(() => {
@@ -729,7 +730,21 @@ function DeviceChainSlot({
   }, [folded, onFoldedChange]);
   const handlePointerDown = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
-      pressedAt.current = event.clientX;
+      const { clientX, clientY } = event;
+      travelled.current = false;
+      const watch = (pointer: globalThis.PointerEvent) => {
+        if (
+          Math.hypot(pointer.clientX - clientX, pointer.clientY - clientY) > 3
+        ) {
+          travelled.current = true;
+        }
+      };
+      window.addEventListener("pointermove", watch, { capture: true });
+      window.addEventListener(
+        "pointerup",
+        () => window.removeEventListener("pointermove", watch, true),
+        { capture: true, once: true }
+      );
       const target = event.target as Element;
       if (target.closest(HEADER) && !target.closest(CONTROL)) {
         // A device inside a rack moves along its own chain, not the rack along the track's.
@@ -739,15 +754,21 @@ function DeviceChainSlot({
     },
     [startDrag, value]
   );
-  // Folded, a click on the strip unfolds it, outside its buttons: not the end of a drag of it.
-  const handleStripClick = useCallback(
+  // A click folds or unfolds, outside the buttons and not at the end of a drag: folded, anywhere on the strip; open, on the title bar of this device, not on that of one inside it.
+  const handleClick = useCallback(
     (event: MouseEvent<HTMLDivElement>) => {
-      const moved = Math.abs(event.clientX - pressedAt.current) > 3;
-      if (!(moved || (event.target as Element).closest(CONTROL))) {
+      const target = event.target as Element;
+      if (travelled.current || target.closest(CONTROL)) {
+        return;
+      }
+      const onOwnHeader =
+        target.closest('[data-slot="device-header"]') !== null &&
+        target.closest('[data-slot="device-chain-slot"]') === root.current;
+      if (folded || onOwnHeader) {
         toggleFold();
       }
     },
-    [toggleFold]
+    [folded, toggleFold]
   );
   const slot = useMemo<SlotContextValue>(
     () => ({ folded, index, title, toggleFold, value }),
@@ -810,7 +831,7 @@ function DeviceChainSlot({
       dropIndex === order.length && index === order.length - 1 ? "" : undefined,
     "data-folded": folded ? "" : undefined,
     "data-slot": "device-chain-slot",
-    onClick: folded ? handleStripClick : undefined,
+    onClick: handleClick,
     onPointerDown: handlePointerDown,
     ref: root,
     role: "group",

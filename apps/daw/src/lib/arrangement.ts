@@ -349,12 +349,15 @@ export function rackDevices(rack: Rack): TrackDevice[] {
   );
 }
 
+/** A track's color: an index into the colors the timeline offers, or a color of the user's own as a CSS hex such as `#3e63dd`. */
+export type TrackColor = number | string;
+
 /** A track of an arrangement. */
 export interface ArrangementTrack {
   /** Its automation, by parameter. */
   automation?: TrackAutomation;
-  /** An index into the colors a track can take. */
-  color: number;
+  /** An index into the colors a track can take, or a color of the user's own as a CSS hex. */
+  color: TrackColor;
   /** Its device chain, from first to last. */
   devices?: readonly TrackDevice[];
   /** The group track it is in, which its sound plays into; none, it plays into the main track. A group's tracks follow it in the list. */
@@ -373,8 +376,8 @@ export interface ArrangementTrack {
 
 /** What a track's header sets: how loud it is, where it sits in the stereo field, and whether it is silenced or soloed. */
 export interface Mix {
-  /** An index into the colors a track can take. */
-  color: number;
+  /** An index into the colors a track can take, or a color of the user's own as a CSS hex. */
+  color: TrackColor;
   gain: number;
   muted: boolean;
   /** From -1 (left) to 1 (right). */
@@ -393,6 +396,33 @@ export const UNITY_MIX: Mix = {
 /** What a track's header shows: its mix, over unity, with the track's own color. */
 export function mixOf(track: ArrangementTrack): Mix {
   return { ...UNITY_MIX, ...track.mix, color: track.color };
+}
+
+/** Where files or a device dropped on the add-track button go: a track of their own. */
+export const NEW_TRACK = "new";
+
+/** Whether a track has an output: a MIDI track with no instrument has none, so no volume, pan or sends (MIX-024). */
+export function hasOutput(track: ArrangementTrack): boolean {
+  return (
+    track.kind !== "midi" ||
+    (track.devices ?? []).some((device) => device.instrument)
+  );
+}
+
+/**
+ * The parameter a track's lane shows in automation mode: the one `shown`, or
+ * for a track with no output, whose volume and pan are gone (MIX-024), its
+ * first device parameter. Null when there is none to show.
+ */
+export function automatedParameter(
+  track: ArrangementTrack,
+  shown: AutomatedParameter,
+  targets: readonly { key: AutomatedParameter }[] = []
+): AutomatedParameter | null {
+  if (hasOutput(track) || (shown !== "volume" && shown !== "pan")) {
+    return shown;
+  }
+  return targets[0]?.key ?? null;
 }
 
 /**

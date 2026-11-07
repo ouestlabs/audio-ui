@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import type { Arranged } from "@/registry-audio/bases/base/lib/arrangement";
-import { createArrangementState } from "@/registry-audio/bases/base/lib/arrangement-state";
+import {
+  apply,
+  createArrangementState,
+} from "@/registry-audio/bases/base/lib/arrangement-state";
 import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
 import {
   exportDawproject,
@@ -278,6 +281,29 @@ describe("DAWproject", () => {
       0,
     ]);
     expect(report).toEqual(["Loop: Some Synth left out"]);
+  });
+
+  test("PRJ-008: a track's color goes out and comes back, a palette color as its index and one of the user's own as it is", () => {
+    const state = createArrangementState({
+      colors: 5,
+      duration: 32,
+      initialTracks: [
+        { color: 0, id: "drums", name: "Drums" },
+        { color: 1, id: "keys", kind: "midi", name: "Keys" },
+      ],
+      tempo: TEMPO,
+    });
+    const { doc } = apply(state, {
+      type: "set-track-color",
+      id: "keys",
+      color: "#12ABCD",
+    });
+    const { project: xml } = writeDawproject(doc, RECORDINGS);
+    expect(xml).toContain('color="#12ABCD"');
+    const [drums, keys] = readDawproject(xml).doc.tracks;
+    expect(drums?.color).toBe(0);
+    expect(keys?.color).toBe("#12abcd");
+    expect(keys?.mix?.color).toBe("#12abcd");
   });
 
   test("PRJ-008: an alias clip plays the notes of the clip it names, as the format's own tests write one", () => {

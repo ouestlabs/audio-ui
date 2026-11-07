@@ -1,11 +1,10 @@
-import type { ArrangementTrack, AutomatedParameter } from "@/lib/arrangement";
+import { NEW_TRACK } from "@/lib/arrangement";
 import {
   type ArrangementCommand,
   type ArrangementDoc,
   allTracks,
   trackOf,
 } from "@/lib/arrangement-state";
-import { NEW_TRACK } from "@/lib/daw/drop";
 import { libraryDevice } from "@/lib/device-library";
 
 /** The first id `track-<n>` no track of the document has. */
@@ -31,30 +30,6 @@ export function takesDevice(
     !instrument ||
     doc.tracks.some((track) => track.id === id && track.kind === "midi")
   );
-}
-
-/** Whether a track has an output: a MIDI track with no instrument has none, so no volume, pan or sends (MIX-024). */
-export function hasOutput(track: ArrangementTrack): boolean {
-  return (
-    track.kind !== "midi" ||
-    (track.devices ?? []).some((device) => device.instrument)
-  );
-}
-
-/**
- * The parameter a track's lane shows in automation mode: the one `shown`, or
- * for a track with no output, whose volume and pan are gone (MIX-024), its
- * first device parameter. Null when there is none to show.
- */
-export function automatedParameter(
-  track: ArrangementTrack,
-  shown: AutomatedParameter,
-  targets: readonly { key: AutomatedParameter }[] = []
-): AutomatedParameter | null {
-  if (hasOutput(track) || (shown !== "volume" && shown !== "pan")) {
-    return shown;
-  }
-  return targets[0]?.key ?? null;
 }
 
 /**

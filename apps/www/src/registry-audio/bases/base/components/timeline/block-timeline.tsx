@@ -7,15 +7,10 @@ import {
   secondsPerBar,
   type Tempo,
 } from "@audio-ui/core/time";
-import { bypassesGrid } from "@audio-ui/core/timeline";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import {
   type ComponentProps,
-  type DragEvent,
   type KeyboardEvent,
-  type MouseEvent,
-  type PointerEvent,
-  type ReactNode,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -23,16 +18,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { createPortal } from "react-dom";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import { ButtonGroup } from "@/registry/bases/base/ui/button-group";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/registry/bases/base/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -47,46 +35,10 @@ import {
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
-import {
-  ArrangedClip,
-  ArrangedClipGhost,
-} from "@/registry-audio/bases/base/audio/elements/arranged-clip";
+import { ArrangementView } from "@/registry-audio/bases/base/audio/elements/arrangement-view";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
-import { TimelineTimeSelection } from "@/registry-audio/bases/base/audio/elements/time-selection";
-import {
-  COMPACT_TRACK_HEIGHT,
-  MAX_TRACK_HEIGHT,
-  MIN_TRACK_HEIGHT,
-  Timeline,
-  TimelineGridMenuItems,
-  TimelineLane,
-  TimelineNavigator,
-  TimelinePlayhead,
-  TimelineRange,
-  TimelineRangeHandle,
-  TimelineRuler,
-  TimelineTrack,
-  TimelineTrackControls,
-  TimelineTrackHeader,
-  TimelineViewport,
-  TRACK_COLORS,
-  TRACK_HEIGHT_STEP,
-} from "@/registry-audio/bases/base/audio/elements/timeline";
-import {
-  TimelineBarMarks,
-  TimelineLocator,
-  TimelineSignature,
-} from "@/registry-audio/bases/base/audio/elements/timeline-markers";
-import {
-  TrackAutomation,
-  TrackAutomationChooser,
-} from "@/registry-audio/bases/base/audio/elements/track-automation";
-import {
-  TrackGrip,
-  TrackReorderGhost,
-} from "@/registry-audio/bases/base/audio/elements/track-grip";
-import { TrackLevel } from "@/registry-audio/bases/base/audio/elements/track-level";
+import { TRACK_COLORS } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import {
   ClipPanel,
@@ -96,26 +48,23 @@ import {
   MidiClipPanel,
   type MidiClipRegion,
 } from "@/registry-audio/bases/base/audio/panels/midi-clip-panel";
-import { useArrangedClips } from "@/registry-audio/bases/base/hooks/use-arranged-clips";
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
-import { useMarquee } from "@/registry-audio/bases/base/hooks/use-marquee-selection";
 import { useTimeSelection } from "@/registry-audio/bases/base/hooks/use-time-selection";
 import { useTimelineCursor } from "@/registry-audio/bases/base/hooks/use-timeline-cursor";
 import {
-  GRID_DIVISION_OPTIONS,
   GRID_KEYS,
   useTimelineGrid,
 } from "@/registry-audio/bases/base/hooks/use-timeline-grid";
 import { useTimelineMarkers } from "@/registry-audio/bases/base/hooks/use-timeline-markers";
 import { useTimelineZoom } from "@/registry-audio/bases/base/hooks/use-timeline-zoom";
 import { useTrackAutomation } from "@/registry-audio/bases/base/hooks/use-track-automation";
-import { useTrackReorder } from "@/registry-audio/bases/base/hooks/use-track-reorder";
 import {
   type Arranged,
   type ArrangementTrack,
   analyzeBeat,
+  NEW_TRACK,
   type TimeSelection,
   type TrackKind,
   warpOnImport,
@@ -133,6 +82,17 @@ import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const BARS = 32;
+
+/** No device library here: the arrangement takes no device. */
+const noDevice = () => undefined;
+
+const NO_READING: readonly {
+  at: number;
+  key: number;
+  name: string;
+  track: string;
+}[] = [];
+
 /** The arrangement is laid out at the first tempo, the demo sounds': a tempo change keeps its musical positions. */
 const BAR = secondsPerBar(DEMO_TEMPO);
 /** Whether a key went to a field you type in, where it is the field's own. */
@@ -333,51 +293,6 @@ const CLIPS: Arranged[] = [
   arranged("p2", "Pad", "pad", 16, 24, "pad"),
 ];
 
-function Row({
-  children,
-  className,
-  height,
-  lead,
-  onResize,
-  selected,
-  trackId,
-}: {
-  children: ReactNode;
-  className?: string;
-  /** A height set by hand: the row keeps it instead of sharing what is left. */
-  height?: number;
-  lead?: ReactNode;
-  onResize?: (trackId: string, height: number | undefined) => void;
-  selected?: boolean;
-  trackId?: string;
-}) {
-  const handleHeight = useCallback(
-    (next: number | undefined) => {
-      if (trackId !== undefined) {
-        onResize?.(trackId, next);
-      }
-    },
-    [onResize, trackId]
-  );
-  return (
-    <TimelineTrack
-      className={className}
-      height={height}
-      maxHeight={MAX_TRACK_HEIGHT}
-      minHeight={MIN_TRACK_HEIGHT}
-      onHeightChange={handleHeight}
-      selected={selected}
-      step={TRACK_HEIGHT_STEP}
-    >
-      <TimelineTrackHeader className="relative flex items-stretch">
-        {lead}
-      </TimelineTrackHeader>
-      <div className="flex flex-1 flex-col">{children}</div>
-    </TimelineTrack>
-  );
-}
-
-/** What the keyboard does, for the shortcuts popover: the keys, then what they do. */
 const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Split at the cursor", keys: ["S"] },
   { action: "Split at the cursor", keys: ["Cmd/Ctrl", "E"] },
@@ -412,7 +327,6 @@ const RECORDING_PEAKS = 16_384;
 /** The end of a file's name that says its format. */
 const EXTENSION = /\.[^.]+$/;
 /** The files the browser can try to decode as sound when it does not give their type. */
-const AUDIO_FILE = /\.(aac|aif|aiff|flac|m4a|mp3|oga|ogg|opus|wav|weba|webm)$/i;
 
 /** A recording the clips play: the demo's, or a file dropped on a track. Its sound, its peaks and how long it lasts, in seconds. */
 interface Recording {
@@ -434,9 +348,6 @@ function recordingOf(
 }
 
 /** Whether a drag carries files from the desktop, rather than something of the page. */
-function carriesFiles(event: DragEvent) {
-  return Array.from(event.dataTransfer.types).includes("Files");
-}
 
 /** One amplitude per slice, from 0 to 1, as the clip panel draws them. */
 function amplitudes(channels: readonly Float32Array[]): number[] {
@@ -710,6 +621,15 @@ function useEngineTransport({
  * tracks take the screen.
  */
 export default function BlockTimeline() {
+  const arrangement = useArrangement({
+    colors: TRACK_COLORS.length,
+    duration: BARS * BAR,
+    initialClips: CLIPS,
+    initialLocators: LOCATORS,
+    initialLoop: LOOP,
+    initialTracks: TRACKS,
+    tempo: DEMO_TEMPO,
+  });
   const {
     dispatch,
     doc,
@@ -721,26 +641,12 @@ export default function BlockTimeline() {
     canRedo,
     canUndo,
     clips,
-    copying,
     copyOf,
-    folded,
-    heights,
-    toggleFold,
-    mixOf,
-    resizeTrack,
     selectedIds,
     selectedTracks,
     selection,
     tracks,
-  } = useArrangement({
-    colors: TRACK_COLORS.length,
-    duration: BARS * BAR,
-    initialClips: CLIPS,
-    initialLocators: LOCATORS,
-    initialLoop: LOOP,
-    initialTracks: TRACKS,
-    tempo: DEMO_TEMPO,
-  });
+  } = arrangement;
   // What the lanes, the headers and the keys report, as the commands that change the selection.
   const clearSelection = useCallback(
     () => dispatch({ type: "clear-selection" }),
@@ -755,7 +661,7 @@ export default function BlockTimeline() {
       dispatch({ type: "select-clip", id, additive }),
     [dispatch]
   );
-  const selectClips = useCallback(
+  const _selectClips = useCallback(
     (ids: string[]) => dispatch({ type: "select-clips", ids }),
     [dispatch]
   );
@@ -828,7 +734,7 @@ export default function BlockTimeline() {
     selectedTracks,
     tracks,
   });
-  const { clear: letGoOfTime, pressLane, time: selectedTime } = timeSelection;
+  const { clear: letGoOfTime, time: selectedTime } = timeSelection;
   const splitStep = bar / 4;
   const addClip = useCallback(
     (clip: Arranged) => dispatch({ type: "add-clip", clip }),
@@ -874,7 +780,7 @@ export default function BlockTimeline() {
     (id: string) => dispatch({ type: "duplicate-track", id }),
     [dispatch]
   );
-  const moveTrack = useCallback(
+  const _moveTrack = useCallback(
     (id: string, index: number) => dispatch({ type: "move-track", id, index }),
     [dispatch]
   );
@@ -883,7 +789,7 @@ export default function BlockTimeline() {
     (id: string) => dispatch({ type: "remove-track", id }),
     [dispatch]
   );
-  const renameTrack = useCallback(
+  const _renameTrack = useCallback(
     (id: string, name: string) => dispatch({ type: "rename-track", id, name }),
     [dispatch]
   );
@@ -893,7 +799,7 @@ export default function BlockTimeline() {
   const view = useTimelineZoom({ duration, viewportRef });
   const { zoom } = view;
   const grid = useTimelineGrid({ tempo, zoom });
-  const { snap, snapStep, step: gridSeconds } = grid;
+  const { snapStep, step: gridSeconds } = grid;
   // Whether the bar has room for the zoom control; the menu lists the zoom steps only when it does not.
   const zoomSlotRef = useRef<HTMLDivElement>(null);
   const [zoomInBar, setZoomInBar] = useState(true);
@@ -940,22 +846,18 @@ export default function BlockTimeline() {
     clock.set(clock.getSnapshot() * ratio);
     rescale(ratio);
   }, [bar, clock, rescale]);
-  const handleAddTrack = useCallback(() => addTrack(), [addTrack]);
-  const handleAddMidiTrack = useCallback(
+  const _handleAddTrack = useCallback(() => addTrack(), [addTrack]);
+  const _handleAddMidiTrack = useCallback(
     () => addTrack(undefined, "midi"),
     [addTrack]
   );
   // Multi-select: a press on a clip adds it to the selection, and a drag on bare lane draws a rectangle. For touch, which has no Shift.
   const [multi, setMulti] = useState(false);
   // A touch screen has no Shift: in multi-select mode every press on a header adds to the tracks picked.
-  const pickTrack = useCallback(
+  const _pickTrack = useCallback(
     (id: string, additive: boolean) => selectTrack(id, additive || multi),
     [multi, selectTrack]
   );
-  const marquee = useMarquee(selectedIds, selectClips, multi);
-  // A muted track is silent, and while any track is soloed so is every other: their clips are drawn drained.
-  const anySolo = tracks.some((track) => mixOf(track).soloed);
-
   // Stop goes back to the top, as a DAW's does.
   const { stop: stopEngine } = engine;
   const stop = useCallback(() => {
@@ -967,66 +869,20 @@ export default function BlockTimeline() {
     (ratio) => Math.abs(ratio - view.ratio) < 0.01
   );
   const { setRatio: changeZoom } = view;
-  // A track moves by dragging its grip, or with Up and Down on it.
-  const trackOrder = useMemo(() => tracks.map((track) => track.id), [tracks]);
-  const reorder = useTrackReorder({ onMove: moveTrack, order: trackOrder });
-  const ghostTrack = tracks.find((track) => track.id === reorder.ghost?.id);
   const changeZoomPreset = useCallback(
     (value: string) => changeZoom(Number(value)),
     [changeZoom]
   );
-  // A press on a track's empty lane puts the cursor there (the lane does it) and picks the track, letting go of the clips; on the surface under the last track it lets go of everything, as nothing is there.
-  // The closed clip panel comes back on a click of a clip's head, or a double-click on its body: not on a press, which may begin a move, a trim or a fade, and the panel takes room from the tracks under the pointer.
-  const pressRef = useRef<{ x: number; y: number } | null>(null);
-  const notePress = useCallback((event: PointerEvent<HTMLDivElement>) => {
-    pressRef.current = { x: event.clientX, y: event.clientY };
-  }, []);
-  const showClipView = useCallback((event: MouseEvent<HTMLDivElement>) => {
-    const press = pressRef.current;
-    // A click is a press that let go where it began, give or take a hand's shake.
-    const dragged =
-      press !== null &&
-      Math.hypot(event.clientX - press.x, event.clientY - press.y) > 4;
-    if (
-      !dragged &&
-      (event.target as HTMLElement).closest(
-        '[data-slot="timeline-clip-header"]'
-      )
-    ) {
-      setClipViewOpen(true);
-    }
-  }, []);
-  const showClipViewOfBody = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      const target = event.target as HTMLElement;
-      // On the head a double-click renames the clip.
-      if (
-        target.closest("[data-clip-id]") &&
-        !target.closest('[data-slot="timeline-clip-header"]')
-      ) {
-        setClipViewOpen(true);
-      }
+  // A press on a track puts the keys back on the panel, which catches them: the lane takes no focus.
+  const focusTrack = useCallback(
+    (id: string) => {
+      selectTrack(id);
+      panelRef.current?.focus({
+        focusVisible: false,
+        preventScroll: true,
+      } as FocusOptions);
     },
-    []
-  );
-  const focusPanel = useCallback(
-    (event: PointerEvent<HTMLDivElement>) => {
-      if (event.target === event.currentTarget && !event.shiftKey && !multi) {
-        const { track } = event.currentTarget.dataset;
-        pressLane(track ?? null);
-        if (track) {
-          selectTrack(track);
-        } else {
-          clearSelection();
-        }
-        // `focusVisible` is missing from older DOM typings.
-        panelRef.current?.focus({
-          focusVisible: false,
-          preventScroll: true,
-        } as FocusOptions);
-      }
-    },
-    [clearSelection, multi, pressLane, selectTrack]
+    [selectTrack]
   );
   const jumpToLocator = useCallback((at: number) => seek(at), [seek]);
   const playFromLocator = useCallback(
@@ -1157,38 +1013,21 @@ export default function BlockTimeline() {
   const [clipBoxesFolded, setClipBoxesFolded] = useState<string[]>([]);
   // The clips, as the commands that change them. The menu's Edit opens the clip panel, and picking a clip lets go of the time selected.
   const openClipView = useCallback(() => setClipViewOpen(true), []);
-  const arrangedClips = useArrangedClips({
-    clips,
-    copying,
-    dispatch,
-    getPosition,
-    onEdit: openClipView,
-    onPress: letGoOfTime,
-    selectedIds,
-    splitStep,
-    tracks,
-    viewportRef,
-  });
   // What each audio clip draws of its recording, once the recording is there.
-  const clipPeaks = useMemo(
-    () =>
-      new Map(
-        clips.flatMap((clip) => {
-          const recording = clip.recording
-            ? recordings.get(clip.recording)
-            : undefined;
-          return recording
-            ? [[clip.id, recordedPeaks(recording, clip)] as const]
-            : [];
-        })
-      ),
-    [clips, recordings]
+  const peaksOf = useCallback(
+    (clip: Arranged) => {
+      const recording = clip.recording
+        ? recordings.get(clip.recording)
+        : undefined;
+      return recording ? recordedPeaks(recording, clip) : undefined;
+    },
+    [recordings]
   );
   // The clip panel, under the tracks: it edits the first selected clip.
   const editedClip = clips.find((clip) => clip.id === selectedIds[0]);
   const editedPeaks = useMemo(
-    () => (editedClip && clipPeaks.get(editedClip.id)) ?? NO_PEAKS,
-    [clipPeaks, editedClip]
+    () => (editedClip && peaksOf(editedClip)) ?? NO_PEAKS,
+    [editedClip, peaksOf]
   );
   // A MIDI clip's notes, from the clip panel's piano roll: a drag is one undo step.
   const changeNotes = useCallback(
@@ -1202,23 +1041,7 @@ export default function BlockTimeline() {
   // A double-click on bare MIDI lane makes an empty clip a bar long there, looping, and opens it.
   const midiClipCount = useRef(0);
   const addMidiClipAt = useCallback(
-    (event: MouseEvent<HTMLDivElement>) => {
-      const lane = event.currentTarget;
-      const trackId = lane.dataset.track;
-      if (
-        !trackId ||
-        (event.target as HTMLElement).closest(
-          "[data-clip-id], [data-slot=automation-envelope]"
-        )
-      ) {
-        return;
-      }
-      const rect = lane.getBoundingClientRect();
-      const time = ((event.clientX - rect.left) / rect.width) * duration;
-      const start = Math.max(
-        0,
-        Math.min(Math.floor(time / bar) * bar, duration - bar)
-      );
+    (trackId: string, start: number) => {
       midiClipCount.current += 1;
       addClip({
         id: `midi-${midiClipCount.current}`,
@@ -1232,7 +1055,11 @@ export default function BlockTimeline() {
       letGoOfTime();
       setClipViewOpen(true);
     },
-    [addClip, bar, duration, letGoOfTime]
+    [addClip, bar, letGoOfTime]
+  );
+  const renameClip = useCallback(
+    (id: string, name: string) => dispatch({ type: "rename-clip", id, name }),
+    [dispatch]
   );
   const changeClipSettings = useCallback(
     (next: ClipSettings) => {
@@ -1350,36 +1177,6 @@ export default function BlockTimeline() {
     }
     return false;
   };
-  /** In automation mode, what a track shows: the parameter chooser in its header, and the envelope over its lane. */
-  const automationOf = (track: ArrangementTrack) => {
-    if (!automation.automating) {
-      return { chooser: null, envelope: null };
-    }
-    const parameter = automation.parameterOf(track.id);
-    return {
-      chooser: (
-        <TrackAutomationChooser
-          onClear={automation.clear}
-          onParameterChange={automation.show}
-          parameter={parameter}
-          track={track}
-        />
-      ),
-      envelope: (
-        <TrackAutomation
-          describe={describe}
-          duration={duration}
-          mix={mixOf(track)}
-          onChange={automation.edit}
-          onCommit={settleClipEdit}
-          overridden={automation.overridden[track.id]}
-          parameter={parameter}
-          snapStep={snapStep}
-          track={track}
-        />
-      ),
-    };
-  };
   /** A shows or hides the automation; returns whether the key was it. */
   const handleAutomationKey = (event: KeyboardEvent<HTMLDivElement>) => {
     if (
@@ -1434,20 +1231,7 @@ export default function BlockTimeline() {
   // A file dragged over an audio track marks it; let go there, it becomes a clip at the grid line under the
   // pointer (anywhere with Cmd/Ctrl), named and as long as the file, and the files after it follow it on the track.
   // A file with a beat is warped in time at the arrangement's tempo (CLP-019).
-  const [fileTrack, setFileTrack] = useState<string | null>(null);
   const fileCount = useRef(0);
-  const audioLaneUnder = useCallback(
-    (event: DragEvent) => {
-      const lane = (event.target as Element).closest<HTMLElement>(
-        "[data-track]"
-      );
-      const track = tracks.find(
-        (candidate) => candidate.id === lane?.dataset.track
-      );
-      return track && (track.kind ?? "audio") === "audio" ? lane : null;
-    },
-    [tracks]
-  );
   const addFiles = useCallback(
     async (files: File[], trackId: string, start: number) => {
       // Decoded at the engine's rate, so they play as they are. A file that is not sound is left out.
@@ -1463,85 +1247,44 @@ export default function BlockTimeline() {
             .catch(() => null)
         )
       );
+      // Under the headers, each file makes a track of its own, from the start; on a track, they follow one another.
+      const own = trackId === NEW_TRACK;
       let at = start;
       for (const [index, file] of files.entries()) {
         const channels = decoded[index];
         const length = (channels?.[0]?.length ?? 0) / context.sampleRate;
-        if (channels && length > 0 && at < duration) {
-          fileCount.current += 1;
-          const id = `file${fileCount.current}`;
-          keepRecording(id, recordingOf(channels, context.sampleRate));
-          const clip = warpOnImport(
-            {
-              id,
-              name: file.name.replace(EXTENSION, ""),
-              recording: id,
-              sourceLength: length,
-              track: trackId,
-              value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start: at },
-            },
-            analyzeBeat(channels, context.sampleRate),
-            tempo
-          );
-          addClip({
-            ...clip,
-            value: {
-              ...clip.value,
-              length: Math.min(clip.value.length, duration - at),
-            },
-          });
-          selectClip(id, false);
-          at += clip.value.length;
+        const onto = own ? addTrack(undefined, "audio")?.id : trackId;
+        if (!(channels && onto && length > 0 && at < duration)) {
+          continue;
         }
+        fileCount.current += 1;
+        const id = `file${fileCount.current}`;
+        keepRecording(id, recordingOf(channels, context.sampleRate));
+        const clip = warpOnImport(
+          {
+            id,
+            name: file.name.replace(EXTENSION, ""),
+            recording: id,
+            sourceLength: length,
+            track: onto,
+            value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start: at },
+          },
+          analyzeBeat(channels, context.sampleRate),
+          tempo
+        );
+        addClip({
+          ...clip,
+          value: {
+            ...clip.value,
+            length: Math.min(clip.value.length, duration - at),
+          },
+        });
+        selectClip(id, false);
+        at += own ? 0 : clip.value.length;
       }
     },
-    [addClip, duration, keepRecording, selectClip, tempo]
+    [addClip, addTrack, duration, keepRecording, selectClip, tempo]
   );
-  const handleFileOver = useCallback(
-    (event: DragEvent<HTMLDivElement>) => {
-      if (!carriesFiles(event)) {
-        return;
-      }
-      // The whole view takes the drag, so a file let go anywhere but an audio track does nothing, rather than open in the tab.
-      event.preventDefault();
-      const lane = audioLaneUnder(event);
-      event.dataTransfer.dropEffect = lane ? "copy" : "none";
-      setFileTrack(lane?.dataset.track ?? null);
-    },
-    [audioLaneUnder]
-  );
-  const handleFileLeave = useCallback((event: DragEvent<HTMLDivElement>) => {
-    if (!event.currentTarget.contains(event.relatedTarget as Node | null)) {
-      setFileTrack(null);
-    }
-  }, []);
-  const handleFileDrop = useCallback(
-    (event: DragEvent<HTMLDivElement>) => {
-      if (!carriesFiles(event)) {
-        return;
-      }
-      event.preventDefault();
-      setFileTrack(null);
-      // The files are only there while the drop is handled: read them, and where they go, before decoding.
-      const lane = audioLaneUnder(event);
-      const trackId = lane?.dataset.track;
-      const files = Array.from(event.dataTransfer.files).filter(
-        (file) => file.type.startsWith("audio/") || AUDIO_FILE.test(file.name)
-      );
-      if (!(lane && trackId) || files.length === 0) {
-        return;
-      }
-      const box = lane.getBoundingClientRect();
-      const time = ((event.clientX - box.left) / box.width) * duration;
-      const start =
-        bypassesGrid(event) || snapStep <= 0
-          ? time
-          : Math.round(time / snapStep) * snapStep;
-      addFiles(files, trackId, Math.max(0, start));
-    },
-    [addFiles, audioLaneUnder, duration, snapStep]
-  );
-
   // What the time strips report, as the commands that change the arrangement.
   const changeTempo = useCallback(
     (next: Tempo) => dispatch({ type: "set-tempo", tempo: next }),
@@ -1551,27 +1294,11 @@ export default function BlockTimeline() {
     (on: boolean) => dispatch({ type: "set-loop", loop: { on } }),
     [dispatch]
   );
-  const changeLoop = useCallback(
+  const _changeLoop = useCallback(
     (range: readonly [number, number]) =>
       dispatch({ type: "change-loop", range }),
     [dispatch]
   );
-  // A dragged clip or loop is pulled onto the edges of the other clips, the locators and the loop.
-  const snapPoints = useMemo(() => {
-    if (!snap) {
-      return;
-    }
-    const points = new Set<number>(loop);
-    for (const clip of clips) {
-      points.add(clip.value.start);
-      points.add(clip.value.start + clip.value.length);
-    }
-    for (const locator of locators) {
-      points.add(locator.at);
-    }
-    return [...points];
-  }, [clips, locators, loop, snap]);
-
   // Z zooms onto the selection, + and - zoom around the cursor, X steps back through the zooms they left behind.
   const { zoomAround, zoomBack, zoomTo } = view;
   const zoomAroundCursor = useCallback(
@@ -1868,352 +1595,28 @@ export default function BlockTimeline() {
           </DropdownMenu>
         </div>
       </div>
-      <Timeline
-        className="min-h-0 flex-1 gap-2"
-        duration={duration}
-        onPositionChange={seek}
-        snapPoints={snapPoints}
-        snapStep={snapStep}
-        source={clock}
-        {...view.timeline}
-      >
-        <TimelineNavigator getAriaValueText={describe} />
-        <TimelineViewport
-          className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/40"
-          onDragLeave={handleFileLeave}
-          onDragOver={handleFileOver}
-          onDrop={handleFileDrop}
-          ref={viewportRef}
-          scrollbar="hidden"
-        >
-          {/* As wide as the lanes, so the stuck headers stay put however far it scrolls. */}
-          <div
-            className={cn(
-              "flex min-h-full w-max min-w-full shrink-0 flex-col",
-              marquee.rect && "select-none"
-            )}
-            {...marquee.handlers}
-          >
-            {/* One sticky block, so what is stuck stays stacked whatever each row measures. */}
-            <div className="sticky top-0 z-40 flex min-w-full shrink-0 flex-col bg-background">
-              <Row
-                className="shrink-0 border-foreground/25 border-b"
-                lead={
-                  <span className="flex h-full items-center px-3 text-xs text-muted-foreground">
-                    Loop
-                  </span>
-                }
-              >
-                <TimelineLane className="h-6 cursor-cell border-b-0">
-                  <TimelineRange
-                    aria-label="Loop"
-                    drawable
-                    getAriaValueText={describe}
-                    onValueChange={changeLoop}
-                    onValueCommitted={settleClipEdit}
-                    value={loop}
-                  >
-                    <TimelineRangeHandle aria-label="Loop start" edge="start" />
-                    <TimelineRangeHandle aria-label="Loop end" edge="end" />
-                  </TimelineRange>
-                  <TimelinePlayhead />
-                </TimelineLane>
-              </Row>
-              <Row
-                className="shrink-0 border-foreground/25 border-b bg-background"
-                lead={
-                  <DropdownMenu>
-                    <DropdownMenuTrigger
-                      render={
-                        <Button
-                          aria-label="Grid"
-                          className="h-full w-full justify-start rounded-none border-0 tabular-nums"
-                          variant="ghost"
-                        />
-                      }
-                    >
-                      {grid.label}
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start">
-                      <TimelineGridMenuItems
-                        division={grid.division}
-                        divisions={GRID_DIVISION_OPTIONS}
-                        onDivisionChange={grid.chooseDivision}
-                        onSnapChange={grid.setSnap}
-                        onTripletChange={grid.setTriplet}
-                        snap={snap}
-                        triplet={grid.triplet}
-                        variant="dropdown"
-                      />
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                }
-              >
-                <TimelineRuler
-                  aria-label="Playhead"
-                  className="border-b-0"
-                  getAriaValueText={describe}
-                >
-                  <TimelineBarMarks
-                    duration={duration}
-                    signatures={signatures}
-                    tempo={tempo}
-                    zoom={zoom}
-                  />
-                  <TimelinePlayhead />
-                </TimelineRuler>
-              </Row>
-              <Row
-                className="shrink-0 border-foreground/25 border-b bg-background"
-                lead={
-                  <span className="flex h-full items-center px-3 text-xs text-muted-foreground">
-                    Markers
-                  </span>
-                }
-              >
-                <TimelineLane className="h-6 border-b-0">
-                  {locators.map((locator) => (
-                    <TimelineLocator
-                      key={locator.id}
-                      locator={locator}
-                      {...markers.locator}
-                    />
-                  ))}
-                </TimelineLane>
-              </Row>
-              <Row
-                className="shrink-0 border-foreground/25 border-b bg-background"
-                lead={
-                  <div className="flex h-full items-center justify-between ps-3 pe-1 text-muted-foreground text-xs">
-                    Signature
-                    <Button
-                      aria-label="Add a time signature at the cursor"
-                      className="size-5"
-                      onClick={markers.addSignature}
-                      size="icon"
-                      title="Add a time signature at the cursor"
-                      variant="ghost"
-                    >
-                      <IconPlaceholder
-                        aria-hidden="true"
-                        className="size-3"
-                        hugeicons="PlusSignIcon"
-                        lucide="PlusIcon"
-                        phosphor="PlusIcon"
-                        remixicon="RiAddLine"
-                        tabler="IconPlus"
-                      />
-                    </Button>
-                  </div>
-                }
-              >
-                <TimelineLane className="h-6 border-b-0">
-                  {signatures.map((change) => (
-                    <TimelineSignature
-                      change={change}
-                      editing={markers.editingSignature === change.id}
-                      key={change.id}
-                      {...markers.signature}
-                    />
-                  ))}
-                </TimelineLane>
-              </Row>
-            </div>
-            {tracks.map((track) => (
-              <div
-                aria-label={track.name}
-                className="contents"
-                data-track-id={track.id}
-                key={track.id}
-                role="group"
-              >
-                <Row
-                  className={cn(
-                    "border-foreground/25 border-b",
-                    heights[track.id] === undefined && "flex-1"
-                  )}
-                  height={heights[track.id]}
-                  lead={
-                    <div className="flex min-w-0 flex-1">
-                      <TrackGrip
-                        dragging={reorder.draggingId === track.id}
-                        trackName={track.name}
-                        {...reorder.gripProps(track.id)}
-                      />
-                      <TimelineTrackControls
-                        compact={
-                          heights[track.id] !== undefined &&
-                          heights[track.id] < COMPACT_TRACK_HEIGHT
-                        }
-                        folded={folded[track.id]}
-                        meter={
-                          <TrackLevel
-                            analysers={engine.meter(track.id)}
-                            name={track.name}
-                          />
-                        }
-                        mix={mixOf(track)}
-                        name={track.name}
-                        onDuplicate={duplicateTrack}
-                        onInsert={addTrack}
-                        onMix={automation.changeMix}
-                        onMixCommit={settleClipEdit}
-                        onRemove={removeTrack}
-                        onRename={renameTrack}
-                        onSelect={pickTrack}
-                        onToggleFold={toggleFold}
-                        selected={selectedTracks.includes(track.id)}
-                        trackId={track.id}
-                      >
-                        {automationOf(track).chooser}
-                      </TimelineTrackControls>
-                    </div>
-                  }
-                  onResize={resizeTrack}
-                  selected={selectedTracks.includes(track.id)}
-                  trackId={track.id}
-                >
-                  <ContextMenu>
-                    <ContextMenuTrigger render={<div className="contents" />}>
-                      <TimelineLane
-                        className={cn(
-                          "h-auto flex-1 border-b-0",
-                          heights[track.id] === undefined
-                            ? "min-h-14"
-                            : "min-h-0",
-                          // A short track keeps its clips thin, so they fit.
-                          heights[track.id] !== undefined &&
-                            heights[track.id] < COMPACT_TRACK_HEIGHT &&
-                            "**:data-clip-id:inset-y-0.5",
-                          selectedTracks.includes(track.id) && "bg-muted/40",
-                          // An audio file dragged over the track.
-                          fileTrack === track.id &&
-                            "ring-2 ring-primary ring-inset",
-                          // A silent track keeps its clips on the page, drained.
-                          (mixOf(track).muted ||
-                            (anySolo && !mixOf(track).soloed)) &&
-                            "**:data-clip-id:opacity-40"
-                        )}
-                        data-track={track.id}
-                        gridStep={snapStep}
-                        onClick={showClipView}
-                        onDoubleClick={
-                          track.kind === "midi" ? addMidiClipAt : undefined
-                        }
-                        onDoubleClickCapture={showClipViewOfBody}
-                        onPointerDown={focusPanel}
-                        onPointerDownCapture={notePress}
-                        onSelectionChange={timeSelection.onSelectionChange}
-                        seekable
-                      >
-                        {arrangedClips.ghostsOn(track.id).map((original) => (
-                          <ArrangedClipGhost
-                            clip={original}
-                            key={original.id}
-                          />
-                        ))}
-                        {clips
-                          .filter((clip) => clip.track === track.id)
-                          .map((clip) => (
-                            <ArrangedClip
-                              describe={describe}
-                              key={clip.id}
-                              multi={multi}
-                              peaks={clipPeaks.get(clip.id)}
-                              swatch={mixOf(track).color}
-                              trackName={track.name}
-                              {...arrangedClips.clipProps(clip)}
-                            />
-                          ))}
-                        {selectedTime?.tracks.includes(track.id) ? (
-                          <TimelineTimeSelection range={selectedTime.range} />
-                        ) : null}
-                        {automationOf(track).envelope}
-                        <TimelinePlayhead />
-                      </TimelineLane>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent className="w-auto min-w-48">
-                      <TimelineGridMenuItems
-                        division={grid.division}
-                        divisions={GRID_DIVISION_OPTIONS}
-                        onDivisionChange={grid.chooseDivision}
-                        onSnapChange={grid.setSnap}
-                        onTripletChange={grid.setTriplet}
-                        snap={snap}
-                        triplet={grid.triplet}
-                      />
-                    </ContextMenuContent>
-                  </ContextMenu>
-                </Row>
-              </div>
-            ))}
-            <Row
-              className="sticky bottom-0 z-30 border-foreground/25 border-b bg-background"
-              lead={
-                <div className="m-1 flex min-w-0 flex-1 gap-1">
-                  <Button
-                    className="min-w-0 flex-1 justify-start gap-1.5"
-                    onClick={handleAddTrack}
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <IconPlaceholder
-                      hugeicons="PlusSignIcon"
-                      lucide="PlusIcon"
-                      phosphor="PlusIcon"
-                      remixicon="RiAddLine"
-                      tabler="IconPlus"
-                    />
-                    Audio
-                  </Button>
-                  <Button
-                    className="min-w-0 flex-1 justify-start gap-1.5"
-                    onClick={handleAddMidiTrack}
-                    size="sm"
-                    variant="ghost"
-                  >
-                    <IconPlaceholder
-                      hugeicons="PlusSignIcon"
-                      lucide="PlusIcon"
-                      phosphor="PlusIcon"
-                      remixicon="RiAddLine"
-                      tabler="IconPlus"
-                    />
-                    MIDI
-                  </Button>
-                </div>
-              }
-            >
-              <TimelineLane
-                className="h-10 border-b-0 bg-background"
-                gridStep={snapStep}
-              />
-            </Row>
-            {/* The surface carries on to the bottom of the view, so the arrangement does not stop at the last track. */}
-            <Row className="flex-1" lead={<div className="h-full" />}>
-              <TimelineLane
-                className="h-auto flex-1 border-b-0 bg-background"
-                gridStep={snapStep}
-                onPointerDown={focusPanel}
-                seekable
-              >
-                <TimelinePlayhead />
-              </TimelineLane>
-            </Row>
-          </div>
-        </TimelineViewport>
-        {marquee.rect
-          ? // In the page's body: a dialog is transformed, which would make a fixed rectangle its own.
-            createPortal(
-              <div
-                aria-hidden="true"
-                className="pointer-events-none fixed z-50 border border-primary bg-primary/10"
-                style={marquee.rect}
-              />,
-              document.body
-            )
-          : null}
-      </Timeline>
+      <ArrangementView
+        arrangement={arrangement}
+        automation={automation}
+        engine={engine}
+        findDevice={noDevice}
+        getCursor={getPosition}
+        liveTake={null}
+        markers={markers}
+        multiSelect={multi}
+        onAddMidiClip={addMidiClipAt}
+        onEditClip={openClipView}
+        onFiles={addFiles}
+        onSeek={seek}
+        onSelectTrack={focusTrack}
+        peaksOf={peaksOf}
+        reading={NO_READING}
+        selectedTrack={selectedTracks[0] ?? null}
+        timelineGrid={grid}
+        timelineZoom={view}
+        timeSelection={timeSelection}
+        viewportRef={viewportRef}
+      />
       {clipViewOpen ? (
         <ClipDock
           bar={bar}
@@ -2228,21 +1631,13 @@ export default function BlockTimeline() {
           onCollapsedChange={setClipViewCollapsed}
           onCrop={cropEdited}
           onFoldedBoxesChange={setClipBoxesFolded}
-          onRename={arrangedClips.onRename}
+          onRename={renameClip}
           onValueChange={changeClipSettings}
           onValueCommitted={settleClipEdit}
           peaks={editedPeaks}
           position={clock}
         />
       ) : null}
-      <TrackReorderGhost
-        className={
-          ghostTrack ? TRACK_COLORS[mixOf(ghostTrack).color]?.edge : undefined
-        }
-        ghost={reorder.ghost}
-        ghostRef={reorder.ghostRef}
-        trackName={ghostTrack?.name}
-      />
     </div>
   );
 }

@@ -78,13 +78,6 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
-      "Hardware-panel pieces: LEDs, small screens, values as they read, and rocker switches.",
-    docs: "lcd",
-    label: "Hardware",
-    name: "hardware",
-  },
-  {
-    description:
       "Numeric fields for audio parameters: type a value, step it, or drag its label or unit to scrub it, with units and precision.",
     label: "Parameter field",
     name: "parameter-field",
@@ -103,9 +96,15 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
-      "Device chains: a track's effects in a row, reordered, folded, switched off and removed, with a library to add one from.",
+      "Device chains: a track's effects in a row, reordered, folded, switched off and removed.",
     label: "Device chain",
     name: "device-chain",
+  },
+  {
+    description:
+      "Device browsers: a library of devices by shelf, with a search, to add one from or drag it onto a chain.",
+    label: "Device browser",
+    name: "device-browser",
   },
   {
     description:
@@ -167,12 +166,6 @@ export const categories: CategoryDef[] = [
       "Tuners: the note and the pitch of a sound, live from the microphone.",
     label: "Tuner",
     name: "tuner",
-  },
-  {
-    description:
-      "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
-    label: "Plot",
-    name: "plot",
   },
   {
     description:
@@ -250,12 +243,10 @@ export const categoryGroups: { label: string; names: string[] }[] = [
       "xypad",
       "envelope",
       "parameter-field",
-      "hardware",
       "piano",
       "pad",
       "meter",
       "waveform",
-      "plot",
       "spectrum",
       "tuner",
     ],
@@ -270,6 +261,7 @@ export const categoryGroups: { label: string; names: string[] }[] = [
       "scrubber",
       "mixer",
       "device-chain",
+      "device-browser",
     ],
   },
   {

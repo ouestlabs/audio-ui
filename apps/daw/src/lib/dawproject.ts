@@ -8,6 +8,7 @@ import {
   type ArrangementTrack,
   type AutomatedParameter,
   mixOf,
+  type TrackColor,
   type TrackDevice,
   volumeGain,
   volumeValue,
@@ -81,6 +82,25 @@ const bool = (name: string, id: string, value: boolean) =>
 
 /** The colors tracks are written with, by the index a track keeps. */
 const COLORS = ["#e5484d", "#f5a524", "#30a46c", "#3e63dd", "#8e4ec6"];
+
+const HEX_COLOR = /^#[0-9a-f]{6}$/;
+
+/** A color a track is written with: a palette index as its hex, a color of the user's own as it is. */
+function writtenColor(color: TrackColor): string {
+  return typeof color === "string"
+    ? color
+    : (COLORS[color % COLORS.length] as string);
+}
+
+/** The color a track is read back with: a palette color as its index, another hex as it is, and none by the track's place in the order. */
+function readColor(written: string | null, index: number): TrackColor {
+  const hex = written?.trim().toLowerCase() ?? "";
+  const palette = COLORS.indexOf(hex);
+  if (palette >= 0) {
+    return palette;
+  }
+  return HEX_COLOR.test(hex) ? hex : index;
+}
 
 const TYPE_TO_DAWPROJECT: Record<string, string> = {
   highcut: "lowPass",
@@ -253,7 +273,7 @@ function writeTrack(
   return element(
     "Track",
     {
-      color: COLORS[track.color % COLORS.length],
+      color: writtenColor(track.color),
       contentType,
       id: role === "master" ? "track-main" : `track-${track.id}`,
       loaded: true,
@@ -745,13 +765,14 @@ function readTrack(
   const panValue = pan?.hasAttribute("value")
     ? Number(pan.getAttribute("value"))
     : 0.5;
+  const color = readColor(el.getAttribute("color"), index);
   const track: ArrangementTrack = {
-    color: index,
+    color,
     ...(devices.length > 0 ? { devices } : {}),
     id,
     kind: kindOf(el, content),
     mix: {
-      color: index,
+      color,
       gain: volume ?? 1,
       muted: channel
         ? kid(channel, "Mute")?.getAttribute("value") === "true"

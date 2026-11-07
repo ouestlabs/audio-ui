@@ -409,7 +409,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    categories: ["device-chain"],
+    categories: ["device-browser"],
     description:
       "A library of devices by shelf, with a search: a device is added with Enter, a double-click or the Add button, or dragged to where it goes on a device chain.",
     files: [
@@ -1309,6 +1309,92 @@ export const audio: RegistryItem[] = [
   },
   ...devices,
   {
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "The arrangement of a workstation, controlled: the loop, the ruler, the locators and time signatures, a row per track with its header, meter, automation and clips, the return and group tracks, and the row that takes files and devices dropped on it. State comes in through the arrangement's hooks and every change goes out as a command or a callback, so it runs over an engine of your own.",
+    files: [
+      {
+        path: "audio/elements/arrangement-view.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "arrangement-view",
+    registryDependencies: [
+      "@audio-ui/arranged-clip",
+      "@audio-ui/arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/device-chain",
+      "@audio-ui/timeline",
+      "@audio-ui/timeline-markers",
+      "@audio-ui/track-automation",
+      "@audio-ui/track-level",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/use-marquee-selection",
+      "@audio-ui/use-time-selection",
+      "@audio-ui/use-timeline-grid",
+      "@audio-ui/use-timeline-zoom",
+      "@audio-ui/use-track-reorder",
+      "@shadcn/button",
+      "@shadcn/context-menu",
+      "@shadcn/dropdown-menu",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["mixer"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "The mixer of an arrangement, controlled: a channel for each track and return, then the main track. Each has its pan, its sends, its fader, its meter and its peak, and Solo, Mute and an Arm light; the main track stays in sight at the right while the channels scroll, and a channel moves by its name. Every change is a command of the arrangement.",
+    files: [
+      {
+        path: "audio/elements/mixer-view.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "mixer-view",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/fader",
+      "@audio-ui/knob",
+      "@audio-ui/led",
+      "@audio-ui/meter",
+      "@audio-ui/sortable-drag",
+      "@audio-ui/timeline",
+      "@audio-ui/track-automation",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/use-audio-levels",
+      "@shadcn/toggle-group",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device-chain"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The devices of one track of an arrangement, controlled: its chain in a row, each device drawn by its own panel, racks with their macros, chains and zones, drum racks with their pads, devices dropped from a library where they go, and the end of the chain that opens the library or adds a rack. Every change is a command of the arrangement, and what a view remembers, such as a slot folded, goes through a hook you can give.",
+    files: [
+      {
+        path: "audio/elements/device-view.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "device-view",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/device-chain",
+      "@audio-ui/device-library",
+      "@audio-ui/device-panels",
+      "@audio-ui/drum-rack-panel",
+      "@audio-ui/rack-panel",
+      "@audio-ui/track-automation",
+      "@audio-ui/use-arrangement",
+      "@shadcn/button",
+      "@shadcn/dropdown-menu",
+    ],
+    type: "registry:ui",
+  },
+  {
     description:
       "The parts of an arrangement editor in one install: the timeline, its zoom and grid, the arrangement's state, its clips, markers and automation, track reordering and MIDI playback. block-timeline wires them into a screen.",
     files: [],
@@ -1318,6 +1404,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/arrangement",
       "@audio-ui/use-arrangement",
       "@audio-ui/arranged-clip",
+      "@audio-ui/arrangement-view",
       "@audio-ui/timeline-markers",
       "@audio-ui/track-automation",
       "@audio-ui/use-track-reorder",

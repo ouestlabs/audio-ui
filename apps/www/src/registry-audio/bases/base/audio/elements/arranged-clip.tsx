@@ -33,7 +33,7 @@ import {
   TimelineClipFadeHandle,
   TimelineClipHandle,
   TimelineClipHeader,
-  TRACK_COLORS,
+  trackSwatch,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import {
   type Arranged,
@@ -42,6 +42,7 @@ import {
   clipPeakCount,
   clipReach,
   playedNotes,
+  type TrackColor,
 } from "@/registry-audio/bases/base/lib/arrangement";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
@@ -322,8 +323,8 @@ interface ArrangedClipProps {
   /** An audio clip's source as peaks spread evenly over its `sourceLength`, amplitudes from 0 to 1 or the lowest and highest samples of each slice: its waveform is drawn from them. */
   peaks?: ClipPeaks;
   selected: boolean;
-  /** The clip's color, an index into `TRACK_COLORS`: its track's. */
-  swatch: number;
+  /** The clip's color: its track's, an index into `TRACK_COLORS` or a color of the user's own. */
+  swatch: TrackColor;
   trackName: string;
 }
 
@@ -354,6 +355,7 @@ const ArrangedClip = memo(function ArrangedClipView({
   swatch,
   trackName,
 }: ArrangedClipProps) {
+  const paint = trackSwatch(swatch);
   const handleRemove = useCallback(
     () => onRemove(clip.id),
     [clip.id, onRemove]
@@ -446,7 +448,7 @@ const ArrangedClip = memo(function ArrangedClipView({
           aria-label={`${trackName}, ${clip.name}`}
           className={cn(
             "inset-y-1.5",
-            TRACK_COLORS[swatch]?.clip,
+            paint.clip,
             copying && "opacity-90 shadow-lg ring-2 ring-primary",
             clip.disabled && "opacity-40"
           )}
@@ -462,8 +464,12 @@ const ArrangedClip = memo(function ArrangedClipView({
           sourceLength={clipReach(clip)}
           style={
             lift
-              ? { transform: `translateY(${lift}px)`, zIndex: 10 }
-              : undefined
+              ? {
+                  ...paint.style,
+                  transform: `translateY(${lift}px)`,
+                  zIndex: 10,
+                }
+              : paint.style
           }
           value={clip.value}
         >

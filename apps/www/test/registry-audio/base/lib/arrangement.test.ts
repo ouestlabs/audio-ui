@@ -1,11 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import {
   type Arranged,
+  type ArrangementTrack,
+  automatedParameter,
   automationAt,
   clipReach,
   clipWaveform,
   clipWaveformBands,
   flatAutomation,
+  hasOutput,
   mixAt,
   panPosition,
   playedNotes,
@@ -243,5 +246,33 @@ describe("clipWaveform", () => {
 
   test("no peaks, no waveform", () => {
     expect(clipWaveform(audio(), [], 3)).toEqual([0, 0, 0]);
+  });
+});
+
+describe("a track's output", () => {
+  const midi: ArrangementTrack = {
+    color: 0,
+    devices: [{ device: "synth", id: "d", instrument: true, state: {} }],
+    id: "t",
+    kind: "midi",
+    name: "Keys",
+  };
+  const audio: ArrangementTrack = { color: 0, id: "a", name: "Audio" };
+
+  test("MIX-024: a MIDI track has one with an instrument, and none without", () => {
+    expect(hasOutput(midi)).toBe(true);
+    expect(hasOutput(audio)).toBe(true);
+    expect(hasOutput({ ...midi, devices: [] })).toBe(false);
+    expect(hasOutput({ ...midi, devices: undefined })).toBe(false);
+  });
+
+  test("MIX-024: its lane shows a device parameter, or nothing, never a volume it lacks", () => {
+    const bare = { ...midi, devices: [] };
+    const key = "device:d:cutoff" as const;
+    expect(automatedParameter(midi, "volume")).toBe("volume");
+    expect(automatedParameter(bare, "volume", [{ key }])).toBe(key);
+    expect(automatedParameter(bare, "pan", [{ key }])).toBe(key);
+    expect(automatedParameter(bare, key, [{ key }])).toBe(key);
+    expect(automatedParameter(bare, "volume")).toBeNull();
   });
 });

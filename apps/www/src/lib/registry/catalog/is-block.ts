@@ -8,16 +8,12 @@ export const isBlock = (name: string) => name.startsWith("block-");
 
 /**
  * The previews that can be opened at full size: the editors made to take a
- * whole screen, and the plots, which are all the better for the room. A block
- * that fits a card does not need it.
+ * whole screen. A block that fits a card does not need it.
  */
 const EXPANDABLE = new Set([
   "block-device-chain",
   "block-piano-roll",
   "block-timeline",
-  "plot-compressor-demo",
-  "plot-demo",
-  "plot-filter-demo",
 ]);
 
 export const isExpandable = (name: string) => EXPANDABLE.has(name);
@@ -69,10 +65,6 @@ function reaches(
 export const takesPlay = (name: string) => reaches(name, PLAY_SWITCH);
 
 /** The previews that can show your own sound: their bar gets a button that turns the microphone on. */
-const MICROPHONE = new Set([
-  "needle-meter-demo",
-  "tuner-demo",
-  "waveform-live-demo",
-]);
+const MICROPHONE = new Set(["needle-meter-demo", "tuner-demo"]);
 
 export const takesMicrophone = (name: string) => MICROPHONE.has(name);

@@ -25,51 +25,15 @@
   },
   {
     "categories": ["fader"],
-    "description": "Fader component example with horizontal orientation",
-    "name": "fader-horizontal-demo",
-    "title": "Fader horizontal demo"
-  },
-  {
-    "categories": ["fader"],
     "description": "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     "name": "fader-pan-demo",
     "title": "Fader pan demo"
-  },
-  {
-    "categories": ["hardware"],
-    "description": "LEDs lit by Rec and Mute, one blinking red, in three sizes",
-    "name": "led-demo",
-    "title": "Led demo"
-  },
-  {
-    "categories": ["hardware"],
-    "description": "Screens with a caption: a filter cutoff in kHz driven by a parameter field, a preset's name and a tempo",
-    "name": "lcd-demo",
-    "title": "Lcd demo"
-  },
-  {
-    "categories": ["hardware"],
-    "description": "A value of each kind: tempo, gain, cutoff, pan, mix, transpose and position",
-    "name": "value-display-demo",
-    "title": "Value display demo"
-  },
-  {
-    "categories": ["hardware"],
-    "description": "A power rocker that lights its LED, a small one laid down, and one disabled",
-    "name": "rocker-switch-demo",
-    "title": "Rocker switch demo"
   },
   {
     "categories": ["parameter-field"],
     "description": "Parameter fields for tempo, gain, transpose and cutoff: typed, stepped, or scrubbed by their label or unit",
     "name": "parameter-field-demo",
     "title": "Parameter field demo"
-  },
-  {
-    "categories": ["knob"],
-    "description": "A knob turned by dragging up and down, like a fader: 150px of travel spans the whole range",
-    "name": "knob-vertical-drag-demo",
-    "title": "Knob vertical drag demo"
   },
   {
     "categories": ["knob"],
@@ -82,12 +46,6 @@
     "description": "Filter cutoff knob on a logarithmic scale, 20 Hz to 20 kHz, every decade the same share of the dial",
     "name": "knob-filter-control-demo",
     "title": "Knob filter control demo"
-  },
-  {
-    "categories": ["knob"],
-    "description": "Knob value arc (rail + highlight) and optional anchor range",
-    "name": "knob-arc-and-anchor-demo",
-    "title": "Knob arc and anchor demo"
   },
   {
     "categories": ["envelope"],
@@ -162,12 +120,6 @@
     "title": "Needle meter demo"
   },
   {
-    "categories": ["meter"],
-    "description": "Horizontal meter example",
-    "name": "meter-horizontal-demo",
-    "title": "Meter horizontal demo"
-  },
-  {
     "categories": ["xypad"],
     "description": "XYPad with live x/y readout",
     "name": "xypad-live-value-demo",
@@ -187,51 +139,15 @@
   },
   {
     "categories": ["timeline"],
-    "description": "A timeline with a loop range, a ruler and two tracks, each with a clip you move, trim and fade, and a playhead on a clock: the timeline alone, with no arrangement around it",
-    "name": "timeline-clips-demo",
-    "title": "Timeline clips demo"
-  },
-  {
-    "categories": ["timeline"],
     "description": "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following the sound, and a navigator to zoom and scroll. It plays on the audio clock through the arrangement engine: audio clips loop a drum beat and a pad and draw their waveform, MIDI clips draw their notes, play a bass and chords through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. Drop an audio file on an audio track for a clip of it that plays, as long as the file; a clip dragged near an edge of the view scrolls it. Each track's meter reads its channel. In automation mode each track draws an envelope of its volume or pan over its clips, which its channel follows as it plays. Open it at full size and the tracks take the screen",
     "name": "block-timeline",
     "title": "Block timeline"
   },
   {
     "categories": ["waveform"],
-    "description": "Waveform default example",
-    "name": "waveform-demo",
-    "title": "Waveform demo"
-  },
-  {
-    "categories": ["waveform"],
     "description": "Waveform with a resizable loop region, markers and a hover time",
     "name": "waveform-region-demo",
     "title": "Waveform region demo"
-  },
-  {
-    "categories": ["waveform"],
-    "description": "Live waveform scrolling with the microphone, or with a speech-like signal while it is off",
-    "name": "waveform-live-demo",
-    "title": "Waveform live demo"
-  },
-  {
-    "categories": ["plot"],
-    "description": "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
-    "name": "plot-demo",
-    "title": "Plot demo"
-  },
-  {
-    "categories": ["plot"],
-    "description": "A low-pass filter: one handle on the resonance peak sets the cutoff and how much it rings",
-    "name": "plot-filter-demo",
-    "title": "Plot filter demo"
-  },
-  {
-    "categories": ["plot"],
-    "description": "A compressor transfer curve: one handle sets the threshold, the other the ratio",
-    "name": "plot-compressor-demo",
-    "title": "Plot compressor demo"
   },
   {
     "categories": ["dynamics", "plot", "knob"],
@@ -244,12 +160,6 @@
     "description": "An equalizer you can plug in: its state, a panel that draws it with a handle on each band and an engine that plays it, side by side. Play pink noise and the spectrum behind the curve is what comes out",
     "name": "block-equalizer",
     "title": "Block equalizer"
-  },
-  {
-    "categories": ["utility", "knob"],
-    "description": "A device of your own, defined by its parameters alone: the panel, the state and the tool an agent calls come from that one description. Turn a knob, or send the call a model could send",
-    "name": "device-contract-demo",
-    "title": "Device contract demo"
   },
   {
     "categories": ["delay-reverb", "plot", "knob"],
@@ -361,13 +271,19 @@
   },
   {
     "categories": ["mixer", "fader", "meter", "knob"],
-    "description": "Mixing console: four tracks of a loop with pan, fader, meter, mute and solo, into a master with a stereo meter, every meter reading its real signal",
+    "description": "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",
     "name": "block-mixer",
     "title": "Block mixer"
   },
   {
+    "categories": ["device-browser"],
+    "description": "A library of devices by shelf, with a search: pick one with Enter, a double-click or the Add button, or drag it onto a chain, and see what comes back",
+    "name": "block-device-browser",
+    "title": "Block device browser"
+  },
+  {
     "categories": ["device-chain", "knob"],
-    "description": "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine, with a kick on the sidechain, or render it to a WAV file",
+    "description": "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine. It is the view a workstation shows under its tracks, over an arrangement of one track",
     "name": "block-device-chain",
     "title": "Block device chain"
   },

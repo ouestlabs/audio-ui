@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
-import { dropCommands, NEW_TRACK } from "@/lib/daw/drop";
+import { NEW_TRACK } from "@/lib/arrangement";
+import { dropCommands } from "@/lib/daw/drop";
 import type { Recording } from "@/lib/daw/recordings";
 
 const recording = (name: string, length: number): Recording => ({

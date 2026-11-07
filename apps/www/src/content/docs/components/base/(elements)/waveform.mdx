@@ -5,7 +5,7 @@ component: true
 base: base
 ---
 
-<ComponentPreview styleName="base-nova" name="waveform-demo" />
+<ComponentPreview styleName="base-nova" name="waveform-region-demo" />
 
 Components for drawing audio. `Waveform` shows a whole file and lets you scrub through it. `LiveWaveform` follows a signal as it plays. `BarVisualizer` turns that signal into a few bars you style in CSS. All three wrap the `Waveform` primitive from `@audio-ui/react`, which works with any audio: decoded PCM samples, a microphone or a stream from your server.
 
@@ -37,7 +37,7 @@ Components for drawing audio. `Waveform` shows a whole file and lets you scrub t
 npx shadcn@latest add @audio-ui/waveform
 ```
 
-It installs the element alone. For the player above, ready to run: `npx shadcn@latest add @audio-ui/waveform-demo`.
+It installs the element alone. For the waveform above, ready to run: `npx shadcn@latest add @audio-ui/waveform-region-demo`.
 
 </TabsContent>
 
@@ -519,19 +519,9 @@ Every part accepts a `render` prop and `className` / `style` as functions of sta
 
 ## Examples
 
-### Default
-
-<ComponentPreview styleName="base-nova" name="waveform-demo" />
-
 ### Region, markers and hover time
 
 <ComponentPreview styleName="base-nova" name="waveform-region-demo" />
-
-### Live
-
-The signal is recorded as it comes in, the newest level entering from the right.
-
-<ComponentPreview styleName="base-nova" name="waveform-live-demo" />
 
 ### Player, wired to a real uploaded file
 
