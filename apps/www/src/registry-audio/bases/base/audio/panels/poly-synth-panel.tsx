@@ -176,7 +176,7 @@ function PolySynthPanel({
         />
         <Piano
           aria-label="Play the synth"
-          className="mt-auto h-14 shrink-0"
+          className="mt-auto min-h-14 flex-1"
           maxPitch={HIGHEST}
           minPitch={LOWEST}
           onNoteOff={release}
