@@ -56,6 +56,10 @@ import { samplerDevice } from "@/registry-audio/bases/base/lib/sampler-device";
 import { createSamplerEngine } from "@/registry-audio/bases/base/lib/sampler-engine";
 import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-device";
 import { createSaturatorEngine } from "@/registry-audio/bases/base/lib/saturator-engine";
+import { stringMachineDevice } from "@/registry-audio/bases/base/lib/string-machine-device";
+import { createStringMachineEngine } from "@/registry-audio/bases/base/lib/string-machine-engine";
+import { tapeKeysDevice } from "@/registry-audio/bases/base/lib/tape-keys-device";
+import { createTapeKeysEngine } from "@/registry-audio/bases/base/lib/tape-keys-engine";
 import { transientDevice } from "@/registry-audio/bases/base/lib/transient-device";
 import { createTransientEngine } from "@/registry-audio/bases/base/lib/transient-engine";
 import { utilityDevice } from "@/registry-audio/bases/base/lib/utility-device";
@@ -129,6 +133,8 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(monoSynthDevice, createMonoSynthEngine, "Instruments", { mono: true }),
   entry(electricPianoDevice, createElectricPianoEngine, "Instruments"),
   entry(organDevice, createOrganEngine, "Instruments"),
+  entry(stringMachineDevice, createStringMachineEngine, "Instruments"),
+  entry(tapeKeysDevice, createTapeKeysEngine, "Instruments"),
   entry(fmSynthDevice, createFmSynthEngine, "Instruments"),
   entry(samplerDevice, createSamplerEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),

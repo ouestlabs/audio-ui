@@ -117,6 +117,50 @@ export const components: RegistryItem[] = [
     categories: ["instrument", "synth", "piano"],
     dependencies: ["@audio-ui/core"],
     description:
+      "A string machine you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    files: [
+      {
+        path: "components/device/block-string-machine.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-string-machine",
+    registryDependencies: [
+      "@audio-ui/string-machine-panel",
+      "@audio-ui/string-machine-device",
+      "@audio-ui/string-machine-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A tape-replay keyboard you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight keys for chords. Play its 35 keys, or a MIDI keyboard from G2 to F5",
+    files: [
+      {
+        path: "components/device/block-tape-keys.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-tape-keys",
+    registryDependencies: [
+      "@audio-ui/tape-keys-panel",
+      "@audio-ui/tape-keys-device",
+      "@audio-ui/tape-keys-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
       {

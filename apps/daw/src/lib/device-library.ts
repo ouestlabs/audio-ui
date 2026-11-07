@@ -56,6 +56,10 @@ import { samplerDevice } from "@/components/audio-ui/devices/sampler/device";
 import { createSamplerEngine } from "@/components/audio-ui/devices/sampler/engine";
 import { saturatorDevice } from "@/components/audio-ui/devices/saturator/device";
 import { createSaturatorEngine } from "@/components/audio-ui/devices/saturator/engine";
+import { stringMachineDevice } from "@/components/audio-ui/devices/string-machine/device";
+import { createStringMachineEngine } from "@/components/audio-ui/devices/string-machine/engine";
+import { tapeKeysDevice } from "@/components/audio-ui/devices/tape-keys/device";
+import { createTapeKeysEngine } from "@/components/audio-ui/devices/tape-keys/engine";
 import { transientDevice } from "@/components/audio-ui/devices/transient/device";
 import { createTransientEngine } from "@/components/audio-ui/devices/transient/engine";
 import { utilityDevice } from "@/components/audio-ui/devices/utility/device";
@@ -129,6 +133,8 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(monoSynthDevice, createMonoSynthEngine, "Instruments", { mono: true }),
   entry(electricPianoDevice, createElectricPianoEngine, "Instruments"),
   entry(organDevice, createOrganEngine, "Instruments"),
+  entry(stringMachineDevice, createStringMachineEngine, "Instruments"),
+  entry(tapeKeysDevice, createTapeKeysEngine, "Instruments"),
   entry(fmSynthDevice, createFmSynthEngine, "Instruments"),
   entry(samplerDevice, createSamplerEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),

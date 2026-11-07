@@ -132,6 +132,38 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
+      "The String Machine as an instrument device: a violin, a viola, a cello and a bass register, a brightness filter, an attack, a release and an ensemble, with eight presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/string-machine-device.ts",
+        target: "components/audio-ui/devices/string-machine/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "string-machine-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Tape Keys as an instrument device: 35 keys, each a strip of tape with one note on it, on three tracks (flutes, strings and a choir), the tape's speed, wow and flutter, and a tone, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/tape-keys-device.ts",
+        target: "components/audio-ui/devices/tape-keys/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "tape-keys-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "The FM Synth as an instrument device: four operators, each a ratio, a level, a decay and a sustain, eight algorithms that wire them, feedback, an attack, a release and a vibrato, with eight presets, and no panel and no audio in it.",
     files: [
       {
@@ -222,6 +254,38 @@ const items: RegistryItem[] = [
     ],
     name: "organ-engine",
     registryDependencies: ["@audio-ui/organ-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the String Machine on the Web Audio API: four registers into a brightness filter, bowed in and out from where it got to, through an ensemble; noteOn bows a note, or cuts the held one and bows anew, noteOff lets it go over the release, and the registers and the brightness move a held note. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/string-machine-engine.ts",
+        target: "components/audio-ui/devices/string-machine/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "string-machine-engine",
+    registryDependencies: ["@audio-ui/string-machine-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One key of Tape Keys on the Web Audio API: its tape runs on the track chosen for eight seconds at most, a little off in pitch and level, with hiss, wow and flutter, through saturation and a tone; noteOn runs a key, or cuts the held one and runs anew, noteOff lets the tape go at once, and the speed, wow and tone move a held key. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/tape-keys-engine.ts",
+        target: "components/audio-ui/devices/tape-keys/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "tape-keys-engine",
+    registryDependencies: ["@audio-ui/tape-keys-device"],
     type: "registry:lib",
   },
   {
@@ -1280,6 +1344,10 @@ const items: RegistryItem[] = [
       "@audio-ui/mono-synth-engine",
       "@audio-ui/organ-device",
       "@audio-ui/organ-engine",
+      "@audio-ui/string-machine-device",
+      "@audio-ui/string-machine-engine",
+      "@audio-ui/tape-keys-device",
+      "@audio-ui/tape-keys-engine",
       "@audio-ui/sampler-device",
       "@audio-ui/sampler-engine",
       "@audio-ui/electric-piano-device",

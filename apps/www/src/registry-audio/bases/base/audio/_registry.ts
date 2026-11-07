@@ -22,6 +22,8 @@ const DEVICES = [
   "mid-side",
   "mono-synth",
   "organ",
+  "string-machine",
+  "tape-keys",
   "multiband",
   "overdrive",
   "phaser",
@@ -464,6 +466,8 @@ export const audio: RegistryItem[] = [
       "@audio-ui/fm-synth-panel",
       "@audio-ui/mono-synth-panel",
       "@audio-ui/organ-panel",
+      "@audio-ui/string-machine-panel",
+      "@audio-ui/tape-keys-panel",
       "@audio-ui/sampler-panel",
       "@audio-ui/electric-piano-panel",
       "@audio-ui/redux-panel",
@@ -557,6 +561,48 @@ export const audio: RegistryItem[] = [
       "@audio-ui/piano",
       "@audio-ui/organ-device",
       "@shadcn/select",
+      "@shadcn/toggle-group",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "piano"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "The face of the String Machine device: its eight presets, its controls by what they do (registers, tone, bow and output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/panels/string-machine-panel.tsx",
+        target: "components/audio-ui/devices/string-machine/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "string-machine-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/piano",
+      "@audio-ui/string-machine-device",
+      "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "piano"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "The face of the Tape Keys device: the track its heads read in its title bar, the tape's speed, wow and tone, the volume, and its 35 keys. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/panels/tape-keys-panel.tsx",
+        target: "components/audio-ui/devices/tape-keys/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "tape-keys-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/piano",
+      "@audio-ui/tape-keys-device",
       "@shadcn/toggle-group",
     ],
     type: "registry:ui",

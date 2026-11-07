@@ -15,6 +15,8 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "fm-synth",
   "mono-synth",
   "organ",
+  "string-machine",
+  "tape-keys",
   "sampler",
   "wave-shaper",
   "utility",

@@ -26,6 +26,8 @@ import { ReduxPanel } from "@/registry-audio/bases/base/audio/panels/redux-panel
 import { ReverbPanel } from "@/registry-audio/bases/base/audio/panels/reverb-panel";
 import { SamplerPanel } from "@/registry-audio/bases/base/audio/panels/sampler-panel";
 import { SaturatorPanel } from "@/registry-audio/bases/base/audio/panels/saturator-panel";
+import { StringMachinePanel } from "@/registry-audio/bases/base/audio/panels/string-machine-panel";
+import { TapeKeysPanel } from "@/registry-audio/bases/base/audio/panels/tape-keys-panel";
 import { TransientPanel } from "@/registry-audio/bases/base/audio/panels/transient-panel";
 import { UtilityPanel } from "@/registry-audio/bases/base/audio/panels/utility-panel";
 import { WaveShaperPanel } from "@/registry-audio/bases/base/audio/panels/wave-shaper-panel";
@@ -92,6 +94,8 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.mid-side": entry(MidSidePanel),
   "audioui.mono-synth": entry(MonoSynthPanel, "w-[40rem]"),
   "audioui.organ": entry(OrganPanel, "w-[44rem]"),
+  "audioui.string-machine": entry(StringMachinePanel, "w-[36rem]"),
+  "audioui.tape-keys": entry(TapeKeysPanel, "w-[32rem]"),
   "audioui.multiband": entry(MultibandPanel, "w-96"),
   "audioui.overdrive": entry(OverdrivePanel),
   "audioui.phaser": entry(PhaserPanel, "w-[28rem]"),

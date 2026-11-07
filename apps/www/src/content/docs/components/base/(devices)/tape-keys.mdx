@@ -1,0 +1,47 @@
+---
+title: Tape keys
+description: "A tape-replay keyboard device: 35 keys, each a strip of tape with one note on it, on three tracks (flutes, strings and a choir), with the tape's speed, wow and flutter and a tone, a panel with its keys, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-tape-keys" />
+
+A tape-replay keyboard. Under each of its 35 keys, G2 to F5, lies a strip of tape with one note recorded on it, on three tracks: flutes, strings and a choir; the track switch chooses the one the heads read. Press a key and its tape runs past the head; hold it for eight seconds and the tape runs out, and the note stops however long the key stays down. Each key's strip is a little off in pitch and level from its neighbours, the tape hisses while it runs, the capstan's wow and flutter bend the pitch, and a tone control darkens the lot. The keys are not touch-sensitive: the tape plays at the level it was recorded. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="tape-keys" kind="device" />
+
+## Controls
+
+Every number reads 0 to 10, as a panel's sliders do, and shows the value it sets in the unit the sound takes.
+
+<DeviceControls device="tape-keys">
+<Control id="station">The track the heads read: flutes, strings or a choir. It takes the next key.</Control>
+<Control id="speed">How fast the tape runs, up to a whole tone slower or faster.</Control>
+<Control id="wow">How far the capstan's slow wow and quick flutter bend the pitch.</Control>
+<Control id="tone">Where the tone control darkens the sound, from 1.2 kHz to 14 kHz.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel switches the track in its title bar, lays out the tape's speed, wow and tone and the volume, and has the 35 keys that play the tapes. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up their keys. The panel sends notes out and does not make the sound, so it plays through any engine.
+
+<DeviceUsage name="tape-keys" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.noteOn({ frequency: 261.63 }); // C4's tape runs
+engine.noteOff(); // the pads let go of it
+
+// Scheduled ahead on the audio clock, by a host that plays notes from a song:
+engine.noteOn({ frequency: 440 }, { at: time, id: "a4" });
+engine.noteOff({ at: time + length, id: "a4" });
+```
+
+An engine plays one key's tape, through its own tape path. For chords, make as many as the notes you hold and give each note its own: the [arrangement](/docs/components/base/arrangement)'s engine does it for a MIDI track, and the block above keeps eight. A note plays the key nearest its pitch, and a pitch outside the 35 keys plays nothing. A key's tape runs for eight seconds at most; let go before, and the pads let go of the tape at once. A note while one is held cuts it and runs anew, and a `noteOff` whose `id` is not the held note's lets nothing go. The speed, the wow and the tone move a held key; the track takes the next. An agent plays the keyboard with the `play` tool.

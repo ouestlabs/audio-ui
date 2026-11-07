@@ -23,6 +23,8 @@ import { reduxDevice } from "@/registry-audio/bases/base/lib/redux-device";
 import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
 import { samplerDevice } from "@/registry-audio/bases/base/lib/sampler-device";
 import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-device";
+import { stringMachineDevice } from "@/registry-audio/bases/base/lib/string-machine-device";
+import { tapeKeysDevice } from "@/registry-audio/bases/base/lib/tape-keys-device";
 import { transientDevice } from "@/registry-audio/bases/base/lib/transient-device";
 import { utilityDevice } from "@/registry-audio/bases/base/lib/utility-device";
 import { waveShaperDevice } from "@/registry-audio/bases/base/lib/wave-shaper-device";
@@ -50,6 +52,8 @@ export const DEVICE_DOCS = {
   "fm-synth": fmSynthDevice,
   "mono-synth": monoSynthDevice,
   organ: organDevice,
+  "string-machine": stringMachineDevice,
+  "tape-keys": tapeKeysDevice,
   sampler: samplerDevice,
   redux: reduxDevice,
   reverb: reverbDevice,
