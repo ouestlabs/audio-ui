@@ -18,6 +18,12 @@
     "title": "Block poly synth"
   },
   {
+    "categories": ["instrument", "piano"],
+    "description": "A tine electric piano you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, ten voices for chords. Play the keyboard, or a MIDI keyboard: a hard key barks and pings",
+    "name": "block-electric-piano",
+    "title": "Block electric piano"
+  },
+  {
     "categories": ["instrument", "synth", "xypad"],
     "description": "A wave shaper synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the resonance up",
     "name": "block-wave-shaper",

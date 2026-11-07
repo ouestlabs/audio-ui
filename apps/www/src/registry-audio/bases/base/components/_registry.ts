@@ -70,6 +70,28 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["instrument", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A tine electric piano you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, ten voices for chords. Play the keyboard, or a MIDI keyboard: a hard key barks and pings",
+    files: [
+      {
+        path: "components/device/block-electric-piano.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-electric-piano",
+    registryDependencies: [
+      "@audio-ui/electric-piano-panel",
+      "@audio-ui/electric-piano-device",
+      "@audio-ui/electric-piano-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["instrument", "synth", "xypad"],
     dependencies: ["@audio-ui/react"],
     description:

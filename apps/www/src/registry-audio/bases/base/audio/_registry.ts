@@ -13,6 +13,7 @@ const DEVICES = [
   "deesser",
   "delay",
   "distortion",
+  "electric-piano",
   "equalizer",
   "filter",
   "gate",
@@ -456,6 +457,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/phaser-panel",
       "@audio-ui/pocket-synth-panel",
       "@audio-ui/poly-synth-panel",
+      "@audio-ui/electric-piano-panel",
       "@audio-ui/redux-panel",
       "@audio-ui/reverb-panel",
       "@audio-ui/saturator-panel",
@@ -502,6 +504,27 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/piano",
       "@audio-ui/poly-synth-device",
+      "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "piano"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "The face of the Electric Piano device: its four presets, its controls by what they do (tone, pickup, tremolo, output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/panels/electric-piano-panel.tsx",
+        target: "components/audio-ui/devices/electric-piano/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "electric-piano-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/piano",
+      "@audio-ui/electric-piano-device",
       "@shadcn/select",
     ],
     type: "registry:ui",

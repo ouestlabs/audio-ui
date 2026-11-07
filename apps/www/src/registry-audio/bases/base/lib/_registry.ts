@@ -100,6 +100,22 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
+      "The Electric Piano as an instrument device: a tine's body that barks and a bell that pings, rung down by itself, a pickup's drive and a tremolo, with four presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/electric-piano-device.ts",
+        target: "components/audio-ui/devices/electric-piano/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "electric-piano-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "One voice of the Poly Synth on the Web Audio API: noteOn starts a note or glides the held one, noteOff releases it from where its envelope got to, and every control follows the state without a click. A host plays chords with several.",
     files: [
       {
@@ -110,6 +126,22 @@ const items: RegistryItem[] = [
     ],
     name: "poly-synth-engine",
     registryDependencies: ["@audio-ui/poly-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the Electric Piano on the Web Audio API: noteOn strikes a note, which rings down by itself, or cuts the ringing one and strikes anew; noteOff lets it fall silent from where it got to; the drive, the tremolo and the volume follow the state without a click. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/electric-piano-engine.ts",
+        target: "components/audio-ui/devices/electric-piano/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "electric-piano-engine",
+    registryDependencies: ["@audio-ui/electric-piano-device"],
     type: "registry:lib",
   },
   {
@@ -1114,6 +1146,8 @@ const items: RegistryItem[] = [
       "@audio-ui/pocket-synth-engine",
       "@audio-ui/poly-synth-device",
       "@audio-ui/poly-synth-engine",
+      "@audio-ui/electric-piano-device",
+      "@audio-ui/electric-piano-engine",
       "@audio-ui/redux-device",
       "@audio-ui/redux-engine",
       "@audio-ui/reverb-device",

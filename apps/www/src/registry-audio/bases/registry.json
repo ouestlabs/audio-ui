@@ -97,7 +97,7 @@
       "name": "utility"
     },
     {
-      "count": 3,
+      "count": 4,
       "description": "Instrument devices: synths played from a pad, by pointer or by an agent.",
       "label": "Instruments",
       "name": "instrument"
@@ -121,7 +121,7 @@
       "name": "pad"
     },
     {
-      "count": 3,
+      "count": 4,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
       "name": "piano"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 61
+  "totalComponents": 62
 }

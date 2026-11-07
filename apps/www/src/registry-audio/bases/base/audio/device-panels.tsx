@@ -8,6 +8,7 @@ import { CompressorPanel } from "@/registry-audio/bases/base/audio/panels/compre
 import { DeesserPanel } from "@/registry-audio/bases/base/audio/panels/deesser-panel";
 import { DelayPanel } from "@/registry-audio/bases/base/audio/panels/delay-panel";
 import { DistortionPanel } from "@/registry-audio/bases/base/audio/panels/distortion-panel";
+import { ElectricPianoPanel } from "@/registry-audio/bases/base/audio/panels/electric-piano-panel";
 import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equalizer-panel";
 import { FilterPanel } from "@/registry-audio/bases/base/audio/panels/filter-panel";
 import { GatePanel } from "@/registry-audio/bases/base/audio/panels/gate-panel";
@@ -75,6 +76,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.deesser": entry(DeesserPanel),
   "audioui.delay": entry(DelayPanel),
   "audioui.distortion": entry(DistortionPanel),
+  "audioui.electric-piano": entry(ElectricPianoPanel, "w-[32rem]"),
   "audioui.equalizer": entry(EqualizerPanel, "w-96"),
   "audioui.filter": entry(FilterPanel),
   "audioui.gate": entry(GatePanel),

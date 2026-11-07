@@ -5,6 +5,7 @@ import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-dev
 import { deesserDevice } from "@/registry-audio/bases/base/lib/deesser-device";
 import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
 import { distortionDevice } from "@/registry-audio/bases/base/lib/distortion-device";
+import { electricPianoDevice } from "@/registry-audio/bases/base/lib/electric-piano-device";
 import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
 import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
 import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
@@ -41,6 +42,7 @@ export const DEVICE_DOCS = {
   phaser: phaserDevice,
   "pocket-synth": pocketSynthDevice,
   "poly-synth": polySynthDevice,
+  "electric-piano": electricPianoDevice,
   redux: reduxDevice,
   reverb: reverbDevice,
   saturator: saturatorDevice,

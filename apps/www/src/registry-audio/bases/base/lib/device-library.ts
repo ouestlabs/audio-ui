@@ -20,6 +20,8 @@ import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
 import { createDelayEngine } from "@/registry-audio/bases/base/lib/delay-engine";
 import { distortionDevice } from "@/registry-audio/bases/base/lib/distortion-device";
 import { createDistortionEngine } from "@/registry-audio/bases/base/lib/distortion-engine";
+import { electricPianoDevice } from "@/registry-audio/bases/base/lib/electric-piano-device";
+import { createElectricPianoEngine } from "@/registry-audio/bases/base/lib/electric-piano-engine";
 import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
 import { createEqualizerEngine } from "@/registry-audio/bases/base/lib/equalizer-engine";
 import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
@@ -112,6 +114,7 @@ function entry<const Parameters extends readonly ParameterDescriptor[]>(
 export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Instruments
   entry(polySynthDevice, createPolySynthEngine, "Instruments"),
+  entry(electricPianoDevice, createElectricPianoEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),
   entry(waveShaperDevice, createWaveShaperEngine, "Instruments"),
   // Dynamics

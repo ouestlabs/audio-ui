@@ -11,6 +11,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "chorus",
   "pocket-synth",
   "poly-synth",
+  "electric-piano",
   "wave-shaper",
   "utility",
   "limiter",
