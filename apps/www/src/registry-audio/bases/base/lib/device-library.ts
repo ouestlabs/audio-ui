@@ -34,6 +34,8 @@ import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import { createLimiterEngine } from "@/registry-audio/bases/base/lib/limiter-engine";
 import { midSideDevice } from "@/registry-audio/bases/base/lib/mid-side-device";
 import { createMidSideEngine } from "@/registry-audio/bases/base/lib/mid-side-engine";
+import { monoSynthDevice } from "@/registry-audio/bases/base/lib/mono-synth-device";
+import { createMonoSynthEngine } from "@/registry-audio/bases/base/lib/mono-synth-engine";
 import { multibandDevice } from "@/registry-audio/bases/base/lib/multiband-device";
 import { createMultibandEngine } from "@/registry-audio/bases/base/lib/multiband-engine";
 import { overdriveDevice } from "@/registry-audio/bases/base/lib/overdrive-device";
@@ -87,6 +89,8 @@ export interface LibraryDevice {
     context?: DeviceContext
   ) => LibraryEngine;
   device: Device<readonly ParameterDescriptor[]>;
+  /** An instrument whose engine is the whole of it, one note at a time: a host makes one and gives it every note, as it glides from one to the next. */
+  mono?: boolean;
   shelf: string;
 }
 
@@ -101,12 +105,14 @@ function entry<const Parameters extends readonly ParameterDescriptor[]>(
     noteOn?: (note: never, timing?: NoteTiming) => void;
     update: (state: DeviceState<Parameters>, context?: DeviceContext) => void;
   },
-  shelf: string
+  shelf: string,
+  options: { mono?: boolean } = {}
 ): LibraryDevice {
   return {
     create: create as unknown as LibraryDevice["create"],
     device: device as unknown as LibraryDevice["device"],
     shelf,
+    ...options,
   };
 }
 
@@ -118,6 +124,7 @@ function entry<const Parameters extends readonly ParameterDescriptor[]>(
 export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Instruments
   entry(polySynthDevice, createPolySynthEngine, "Instruments"),
+  entry(monoSynthDevice, createMonoSynthEngine, "Instruments", { mono: true }),
   entry(electricPianoDevice, createElectricPianoEngine, "Instruments"),
   entry(fmSynthDevice, createFmSynthEngine, "Instruments"),
   entry(samplerDevice, createSamplerEngine, "Instruments"),

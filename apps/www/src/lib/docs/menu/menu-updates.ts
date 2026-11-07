@@ -54,6 +54,7 @@ export const DOCS_MENU_UPDATES: Record<string, MenuUpdate> = {
   "poly-synth": { mark: "New", on: "2026-11-07" },
   "electric-piano": { mark: "New", on: "2026-11-07" },
   "fm-synth": { mark: "New", on: "2026-11-07" },
+  "mono-synth": { mark: "New", on: "2026-11-07" },
   sampler: { mark: "New", on: "2026-11-07" },
   redux: { mark: "New", on: "2026-10-16" },
   reverb: { mark: "New", on: "2026-10-16" },

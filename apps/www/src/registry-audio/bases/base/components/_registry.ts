@@ -73,6 +73,28 @@ export const components: RegistryItem[] = [
     categories: ["instrument", "synth", "piano"],
     dependencies: ["@audio-ui/core"],
     description:
+      "A monophonic analog synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, one note at a time that glides to the next. Play the keyboard, or a MIDI keyboard",
+    files: [
+      {
+        path: "components/device/block-mono-synth.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-mono-synth",
+    registryDependencies: [
+      "@audio-ui/mono-synth-panel",
+      "@audio-ui/mono-synth-device",
+      "@audio-ui/mono-synth-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
       {

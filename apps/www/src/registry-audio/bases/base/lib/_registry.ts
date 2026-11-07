@@ -100,6 +100,22 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
+      "The Mono Synth as an instrument device: a saw, square or triangle oscillator, a sub oscillator and noise, a resonant low-pass filter an envelope opens, a range, a glide and a vibrato, with eight presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/mono-synth-device.ts",
+        target: "components/audio-ui/devices/mono-synth/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "mono-synth-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "The FM Synth as an instrument device: four operators, each a ratio, a level, a decay and a sustain, eight algorithms that wire them, feedback, an attack, a release and a vibrato, with eight presets, and no panel and no audio in it.",
     files: [
       {
@@ -158,6 +174,22 @@ const items: RegistryItem[] = [
     ],
     name: "poly-synth-engine",
     registryDependencies: ["@audio-ui/poly-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Mono Synth on the Web Audio API, the whole synth in one engine: it takes every note by its id, the first opens the envelope, a note while one is held glides to it, and letting go of it glides back to the one still held. Every control moves a held note.",
+    files: [
+      {
+        path: "lib/mono-synth-engine.ts",
+        target: "components/audio-ui/devices/mono-synth/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "mono-synth-engine",
+    registryDependencies: ["@audio-ui/mono-synth-device"],
     type: "registry:lib",
   },
   {
@@ -1212,6 +1244,8 @@ const items: RegistryItem[] = [
       "@audio-ui/poly-synth-engine",
       "@audio-ui/fm-synth-device",
       "@audio-ui/fm-synth-engine",
+      "@audio-ui/mono-synth-device",
+      "@audio-ui/mono-synth-engine",
       "@audio-ui/sampler-device",
       "@audio-ui/sampler-engine",
       "@audio-ui/electric-piano-device",

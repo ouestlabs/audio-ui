@@ -12,6 +12,7 @@ import { fmSynthDevice } from "@/registry-audio/bases/base/lib/fm-synth-device";
 import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
 import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import { midSideDevice } from "@/registry-audio/bases/base/lib/mid-side-device";
+import { monoSynthDevice } from "@/registry-audio/bases/base/lib/mono-synth-device";
 import { multibandDevice } from "@/registry-audio/bases/base/lib/multiband-device";
 import { overdriveDevice } from "@/registry-audio/bases/base/lib/overdrive-device";
 import { phaserDevice } from "@/registry-audio/bases/base/lib/phaser-device";
@@ -46,6 +47,7 @@ export const DEVICE_DOCS = {
   "poly-synth": polySynthDevice,
   "electric-piano": electricPianoDevice,
   "fm-synth": fmSynthDevice,
+  "mono-synth": monoSynthDevice,
   sampler: samplerDevice,
   redux: reduxDevice,
   reverb: reverbDevice,

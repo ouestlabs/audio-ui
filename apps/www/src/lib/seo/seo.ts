@@ -13,6 +13,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "poly-synth",
   "electric-piano",
   "fm-synth",
+  "mono-synth",
   "sampler",
   "wave-shaper",
   "utility",

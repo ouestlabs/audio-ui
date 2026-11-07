@@ -15,6 +15,7 @@ import { FmSynthPanel } from "@/registry-audio/bases/base/audio/panels/fm-synth-
 import { GatePanel } from "@/registry-audio/bases/base/audio/panels/gate-panel";
 import { LimiterPanel } from "@/registry-audio/bases/base/audio/panels/limiter-panel";
 import { MidSidePanel } from "@/registry-audio/bases/base/audio/panels/mid-side-panel";
+import { MonoSynthPanel } from "@/registry-audio/bases/base/audio/panels/mono-synth-panel";
 import { MultibandPanel } from "@/registry-audio/bases/base/audio/panels/multiband-panel";
 import { OverdrivePanel } from "@/registry-audio/bases/base/audio/panels/overdrive-panel";
 import { PhaserPanel } from "@/registry-audio/bases/base/audio/panels/phaser-panel";
@@ -88,6 +89,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.gate": entry(GatePanel),
   "audioui.limiter": entry(LimiterPanel),
   "audioui.mid-side": entry(MidSidePanel),
+  "audioui.mono-synth": entry(MonoSynthPanel, "w-[40rem]"),
   "audioui.multiband": entry(MultibandPanel, "w-96"),
   "audioui.overdrive": entry(OverdrivePanel),
   "audioui.phaser": entry(PhaserPanel, "w-[28rem]"),

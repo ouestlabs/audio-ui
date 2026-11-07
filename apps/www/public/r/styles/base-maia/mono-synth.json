@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The mono synth device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/mono-synth/.","files":[],"name":"mono-synth","registryDependencies":["@audio-ui/mono-synth-device","@audio-ui/mono-synth-engine","@audio-ui/mono-synth-panel"],"type":"registry:ui"}

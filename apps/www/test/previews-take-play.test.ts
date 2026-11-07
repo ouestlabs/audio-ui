@@ -44,6 +44,7 @@ describe("takesPlay", () => {
           "block-pocket-synth",
           "block-electric-piano",
           "block-fm-synth",
+          "block-mono-synth",
           "block-poly-synth",
           "block-sampler",
           "block-synth-panel",

@@ -19,6 +19,12 @@
   },
   {
     "categories": ["instrument", "synth", "piano"],
+    "description": "A monophonic analog synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, one note at a time that glides to the next. Play the keyboard, or a MIDI keyboard",
+    "name": "block-mono-synth",
+    "title": "Block mono synth"
+  },
+  {
+    "categories": ["instrument", "synth", "piano"],
     "description": "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     "name": "block-fm-synth",
     "title": "Block fm synth"
