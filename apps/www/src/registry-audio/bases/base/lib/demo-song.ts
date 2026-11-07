@@ -5,7 +5,7 @@
  * and its drums are drawn here as recordings, as files would arrive, one per
  * part; its organ, its pad, its bass and its lead are notes for MIDI tracks to play.
  * The guitar is a plucked-string model (a burst of noise round a delay line
- * that loses its highs on each pass), strummed down and up; the drums are
+ * that loses its highs on each pass), strummed in funk sixteenths; the drums are
  * oscillators and noise. What an arrangement's demo plays.
  */
 
@@ -40,19 +40,41 @@ const HARMONY: readonly Shape[] = [
   "A",
 ];
 
-/** One bar of strums: when, which way, and how long the strings ring before the hand mutes them, in beats. */
-const STRUMS = [
-  { at: 0, down: true, ring: 1.5 },
-  { at: 1.5, down: false, ring: 0.5 },
-  { at: 2, down: true, ring: 1 },
-  { at: 3, down: true, ring: 0.5 },
-  { at: 3.5, down: false, ring: 0.5 },
-] as const;
-/** How far apart the strings of one strum are struck, in seconds. */
-const SPREAD = 0.011;
+/**
+ * One bar of funk strumming, on the sixteenths, the hand going down on the
+ * even ones and up on the odd: stabs of the chord where the kick and the bass
+ * land, cut short by the fretting hand, and muted scratches between them that
+ * keep the hand moving. `ring` is how long a stab sounds, in beats.
+ */
+const STRUMS: readonly { at: number; ring?: number }[] = [
+  { at: 0, ring: 0.4 },
+  { at: 0.25 },
+  { at: 0.5 },
+  { at: 0.75, ring: 0.2 },
+  { at: 1, ring: 0.2 },
+  { at: 1.25 },
+  { at: 1.5, ring: 0.2 },
+  { at: 1.75, ring: 0.2 },
+  { at: 2 },
+  { at: 2.25 },
+  { at: 2.5, ring: 0.4 },
+  { at: 2.75 },
+  { at: 3, ring: 0.2 },
+  { at: 3.25 },
+  { at: 3.5, ring: 0.4 },
+  { at: 3.75 },
+];
+/** How long a muted scratch sounds, in beats: a click of strings, no pitch to speak of. */
+const SCRATCH = 0.05;
+/** How many of a shape's highest strings a stab strikes: funk plays the top of the chord. */
+const TOP_STRINGS = 4;
+/** How far apart the strings of one strum are struck, in seconds: tight, for sixteenths. */
+const SPREAD = 0.005;
 
-/** Where the kick falls in a bar, in beats: the bass follows it. */
-const KICK = [0, 1.75, 2.5] as const;
+/** Where the kick falls over the loop's two bars, in beats, on the sixteenths: the bass lands with it. */
+const KICK = [0, 0.75, 1.75, 2.5, 4, 4.75, 6, 6.5] as const;
+/** The snare's ghost notes, soft, between the backbeats of each bar. */
+const GHOSTS = [0.75, 1.75, 2.25, 3.25, 3.75] as const;
 
 /** A note of the song, as a MIDI clip holds it: its pitch, and its start and length in beats. */
 export interface SongNote {
@@ -62,10 +84,21 @@ export interface SongNote {
   velocity: number;
 }
 
-type Phrase = readonly [start: number, length: number, pitch: number][];
+type Phrase = readonly (readonly [
+  start: number,
+  length: number,
+  pitch: number,
+  velocity?: number,
+])[];
 
+/** A phrase's notes, at `velocity` unless a note says its own: a ghost note is played soft. */
 const notes = (phrase: Phrase, velocity: number): SongNote[] =>
-  phrase.map(([start, length, pitch]) => ({ length, pitch, start, velocity }));
+  phrase.map(([start, length, pitch, own]) => ({
+    length,
+    pitch,
+    start,
+    velocity: own ?? velocity,
+  }));
 
 /** Chords held for `beats`, from `at`, a little short of the next. */
 const held = (
@@ -84,8 +117,9 @@ const held = (
 /**
  * The song's notes by part, for MIDI tracks to play, each as long as its
  * loop. The organ holds the chords and the pad the same an octave up, each
- * voice moving as little as it can; the bass plays the roots on the kick, and
- * in the chorus jumps an octave and walks back to the top; the lead is the
+ * voice moving as little as it can; the bass is funk, short notes on the
+ * sixteenths, landing with the kick, popping the octave, soft ghost notes
+ * between, and a walk into the next chord, busier in the chorus; the lead is the
  * chorus's hook over four bars, a call and its answer, each note a tone of
  * the chord under it, starting with it, and let go just before the next so
  * every note is struck anew, in the octave of a tape keyboard's flutes.
@@ -93,28 +127,57 @@ const held = (
 export const SONG_SCORE = {
   "bass-chorus": notes(
     [
-      [0, 1.5, 40],
-      [1.75, 0.5, 52],
-      [2.5, 1.25, 40],
-      [4, 1.5, 43],
-      [5.75, 0.25, 55],
+      [0, 0.4, 40],
+      [0.5, 0.2, 52],
+      [0.75, 0.2, 40, 0.45],
+      [1, 0.2, 52],
+      [1.25, 0.2, 50, 0.45],
+      [1.75, 0.4, 40],
+      [2.5, 0.2, 40],
+      [2.75, 0.2, 52],
+      [3, 0.2, 50],
+      [3.5, 0.2, 47],
+      [3.75, 0.2, 45, 0.45],
+      [4, 0.4, 43],
+      [4.5, 0.2, 55],
+      [4.75, 0.2, 43, 0.45],
+      [5, 0.2, 55],
+      [5.5, 0.2, 50],
+      [5.75, 0.2, 47, 0.45],
       [6, 0.4, 45],
-      [6.5, 1, 45],
-      [7.5, 0.4, 47],
+      [6.5, 0.2, 45],
+      [6.75, 0.2, 57],
+      [7, 0.2, 55],
+      [7.25, 0.2, 52, 0.45],
+      [7.5, 0.2, 49],
+      [7.75, 0.2, 50],
     ],
-    0.85
+    0.9
   ),
   "bass-verse": notes(
     [
-      [0, 1.5, 40],
-      [1.75, 0.5, 40],
-      [2.5, 1.25, 40],
-      [4, 1.5, 43],
-      [5.75, 0.25, 43],
+      [0, 0.4, 40],
+      [0.75, 0.2, 40, 0.45],
+      [1, 0.2, 52],
+      [1.5, 0.2, 50],
+      [1.75, 0.4, 40],
+      [2.5, 0.4, 40],
+      [3, 0.2, 43],
+      [3.25, 0.2, 45, 0.45],
+      [3.5, 0.2, 47],
+      [4, 0.4, 43],
+      [4.75, 0.2, 43, 0.45],
+      [5, 0.2, 55],
+      [5.5, 0.2, 50],
+      [5.75, 0.2, 43, 0.45],
       [6, 0.4, 45],
-      [6.5, 1.25, 45],
+      [6.5, 0.4, 45],
+      [7, 0.2, 57],
+      [7.25, 0.2, 55, 0.45],
+      [7.5, 0.2, 52],
+      [7.75, 0.2, 50, 0.45],
     ],
-    0.8
+    0.85
   ),
   lead: notes(
     [
@@ -156,7 +219,13 @@ export const SONG_SCORE = {
 
 export type SongScorePart = keyof typeof SONG_SCORE;
 
-/** One plucked string, added into `out` from `start` for `seconds`, muted at the end. */
+/**
+ * One plucked string, added into `out` from `start` for `seconds`, muted at
+ * the end. The string is a delay line whose every pass averages two
+ * neighbours and loses a little, so the highs die first; that average delays
+ * by half a sample, and the line reads between samples, so the string is in
+ * tune with the other instruments to the cent.
+ */
 function pluck(
   out: Float32Array,
   rate: number,
@@ -165,24 +234,29 @@ function pluck(
   note: number,
   level: number
 ) {
-  const period = Math.max(2, Math.round(rate / hertz(note)));
-  const line = new Float32Array(period);
+  const delay = Math.max(2, rate / hertz(note) - 0.5);
+  const whole = Math.floor(delay);
+  const part = delay - whole;
+  const first = Math.round(start * rate);
+  const length = Math.max(
+    0,
+    Math.min(out.length - first, Math.round(seconds * rate))
+  );
+  const seed = whole + 2;
+  const line = new Float32Array(seed + length);
   // The pick: noise, softened, so the attack is bright but not a click.
   let soft = 0;
-  for (let index = 0; index < period; index += 1) {
+  for (let index = 0; index < seed; index += 1) {
     soft += (Math.random() * 2 - 1 - soft) * 0.6;
     line[index] = soft;
   }
-  const first = Math.round(start * rate);
-  const length = Math.min(out.length - first, Math.round(seconds * rate));
+  const at = (index: number) =>
+    (1 - part) * (line[index] ?? 0) + part * (line[index - 1] ?? 0);
   const mute = Math.round(0.012 * rate);
-  let index = 0;
   for (let sample = 0; sample < length; sample += 1) {
-    const next = (index + 1) % period;
-    const value = line[index] ?? 0;
-    // Each pass averages two neighbours and loses a little: the highs die first, as on a string.
-    line[index] = 0.996 * 0.5 * (value + (line[next] ?? 0));
-    index = next;
+    const index = seed + sample;
+    const value = 0.996 * 0.5 * (at(index - whole) + at(index - whole - 1));
+    line[index] = value;
     const fade = Math.min(1, (length - sample) / mute);
     out[first + sample] = (out[first + sample] ?? 0) + value * level * fade;
   }
@@ -192,18 +266,21 @@ function pluck(
 function strum(force: number, rate: number, length: number) {
   const out = new Float32Array(length);
   for (let bar = 0; bar < HARMONY.length / 4; bar += 1) {
-    for (const stroke of STRUMS) {
+    for (const [sixteenth, stroke] of STRUMS.entries()) {
       const beat = bar * 4 + stroke.at;
-      const shape = SHAPES[HARMONY[Math.floor(beat)] ?? "Em7"];
-      const order = stroke.down ? shape : [...shape].reverse();
+      const top = SHAPES[HARMONY[Math.floor(beat)] ?? "Em7"].slice(
+        -TOP_STRINGS
+      );
+      const down = sixteenth % 2 === 0;
+      const order = down ? top : [...top].reverse();
       for (const [string, note] of order.entries()) {
         pluck(
           out,
           rate,
           beat * BEAT + string * SPREAD,
-          stroke.ring * BEAT,
+          (stroke.ring ?? SCRATCH) * BEAT,
           note,
-          (stroke.down ? 0.3 : 0.2) * force
+          (stroke.ring ? 0.3 : 0.1) * (down ? 1 : 0.8) * force
         );
       }
     }
@@ -279,52 +356,54 @@ const clap = (beat: number): Hit => ({
   level: 0.35,
   noise: "bandpass",
 });
-/** Hats on every eighth of `bars`, the off-beats softer, and an open one where `open` says. */
+/** Hats on every sixteenth of `bars`: the beats loudest, the off-beats a little less, the sixteenths between soft, and an open one where `open` says. */
 const hats = (bars: number, open: readonly number[] = []): Hit[] =>
-  Array.from({ length: bars * 8 }, (_, eighth) => {
-    const beat = eighth / 2;
-    const off = eighth % 2 === 1;
-    const closed = { decay: off ? 0.03 : 0.06, level: off ? 0.12 : 0.2 };
+  Array.from({ length: bars * 16 }, (_, sixteenth) => {
+    const beat = sixteenth / 4;
+    const accent = [0.2, 0.06, 0.14, 0.07][sixteenth % 4] ?? 0.06;
     return {
       at: beat * BEAT,
       frequency: 7000,
       noise: "highpass",
-      ...(open.includes(beat % 4) ? { decay: 0.22, level: 0.14 } : closed),
+      ...(open.includes(beat % 4)
+        ? { decay: 0.22, level: 0.14 }
+        : { decay: sixteenth % 2 ? 0.025 : 0.05, level: accent }),
     };
   });
 const everyBar = <T>(bars: number, of: (bar: number) => T[]) =>
   Array.from({ length: bars }, (_, bar) => of(bar * 4)).flat();
+/** The funk groove over `bars`: the kick with the bass, the snare on two and four with its ghost notes. */
+const groove = (bars: number): Hit[] => [
+  ...everyBar(bars / 2, (at) => KICK.map((beat) => kick(at * 2 + beat))),
+  ...everyBar(bars, (at) => [
+    ...snare(at + 1),
+    ...snare(at + 3),
+    ...GHOSTS.flatMap((beat) => snare(at + beat, 0.22)),
+  ]),
+];
 
 /**
- * The drums of each part, as hits: the verse's beat, the fill that ends it
- * (a snare roll that grows), and the chorus's, with a clap on the snare, an
- * open hat at the end of each bar and a crash on its first beat.
+ * The drums of each part, as hits: the verse's funk groove, the fill that
+ * ends it (a snare roll that grows), and the chorus's, the same groove with a
+ * clap on the snare, an open hat at the end of each bar and a crash on its
+ * first beat.
  */
 const DRUMS = {
   "drums-chorus": [
     { at: 0, decay: 1.6, frequency: 4500, level: 0.16, noise: "highpass" },
-    ...everyBar(4, (at) => KICK.map((beat) => kick(at + beat))),
-    ...everyBar(4, (at) => [
-      ...snare(at + 1),
-      ...snare(at + 3),
-      clap(at + 1),
-      clap(at + 3),
-    ]),
+    ...groove(4),
+    ...everyBar(4, (at) => [clap(at + 1), clap(at + 3)]),
     ...hats(4, [3.5]),
   ],
   "drums-fill": [
     kick(0),
     ...snare(1),
-    ...hats(1).slice(0, 4),
+    ...hats(1).slice(0, 8),
     ...Array.from({ length: 8 }, (_, step) =>
       snare(2 + step / 4, 0.35 + step * 0.09)
     ).flat(),
   ],
-  "drums-verse": [
-    ...everyBar(2, (at) => KICK.map((beat) => kick(at + beat))),
-    ...everyBar(2, (at) => [...snare(at + 1), ...snare(at + 3)]),
-    ...hats(2),
-  ],
+  "drums-verse": [...groove(2), ...hats(2)],
 } satisfies Record<string, Hit[]>;
 
 /** Every recording of the song, by id, and how many bars it lasts. */

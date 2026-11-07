@@ -207,7 +207,15 @@ const TRACKS: ArrangementTrack[] = [
       device(
         "bass-synth",
         monoSynthDevice,
-        { ...monoSynthPreset("Sub Bass"), volume: 7 },
+        // The sub bass with its filter opened and a short envelope: each note slaps, as funk wants.
+        {
+          ...monoSynthPreset("Sub Bass"),
+          contour: 5,
+          cutoff: 4,
+          decay: 3,
+          sustain: 4,
+          volume: 8.5,
+        },
         true
       ),
     ],
@@ -254,7 +262,8 @@ const TRACKS: ArrangementTrack[] = [
       device(
         "lead-flutes",
         tapeKeysDevice,
-        { station: "flutes", volume: 8.4 },
+        // No wow: a lead that wavers sounds out of tune against the organ.
+        { station: "flutes", volume: 8.4, wow: 0 },
         true
       ),
     ],
