@@ -189,9 +189,8 @@ const REVERB = "return-1";
  * its bass, its organ, its lead and its pad as MIDI tracks played by the
  * registry's instruments (a mono synth's sub bass, a tonewheel organ on three
  * drawbars, a tape keyboard's flutes on the lead and a string machine's
- * swell), a vibe on the
- * guitar's chain, and a reverb on a return track the organ, the guitar, the
- * lead and the pad send to.
+ * swell), a vibe in vibrato on the guitar's chain, and a reverb on a return
+ * track the organ, the guitar, the lead and the pad send to.
  */
 const TRACKS: ArrangementTrack[] = [
   {
@@ -207,15 +206,7 @@ const TRACKS: ArrangementTrack[] = [
       device(
         "bass-synth",
         monoSynthDevice,
-        // The sub bass with its filter opened and a short envelope: each note slaps, as funk wants.
-        {
-          ...monoSynthPreset("Sub Bass"),
-          contour: 5,
-          cutoff: 4,
-          decay: 3,
-          sustain: 4,
-          volume: 8.5,
-        },
+        { ...monoSynthPreset("Sub Bass"), volume: 7 },
         true
       ),
     ],
@@ -250,7 +241,7 @@ const TRACKS: ArrangementTrack[] = [
   },
   {
     color: 3,
-    devices: [device("guitar-vibe", vibeDevice)],
+    devices: [device("guitar-vibe", vibeDevice, { mode: "vibrato" })],
     id: "guitar",
     mix: { ...UNITY_MIX, gain: 10 ** (-5 / 20) },
     name: "Guitar",

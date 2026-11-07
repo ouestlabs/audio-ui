@@ -117,9 +117,9 @@ const held = (
 /**
  * The song's notes by part, for MIDI tracks to play, each as long as its
  * loop. The organ holds the chords and the pad the same an octave up, each
- * voice moving as little as it can; the bass is funk, short notes on the
- * sixteenths, landing with the kick, popping the octave, soft ghost notes
- * between, and a walk into the next chord, busier in the chorus; the lead is the
+ * voice moving as little as it can; the bass sits in the pocket, a few round
+ * notes held on the roots where the kick lands and silences between, the
+ * chorus walking back to the top on its last off-beat; the lead is the
  * chorus's hook over four bars, a call and its answer, each note a tone of
  * the chord under it, starting with it, and let go just before the next so
  * every note is struck anew, in the octave of a tape keyboard's flutes.
@@ -127,55 +127,24 @@ const held = (
 export const SONG_SCORE = {
   "bass-chorus": notes(
     [
-      [0, 0.4, 40],
-      [0.5, 0.2, 52],
-      [0.75, 0.2, 40, 0.45],
-      [1, 0.2, 52],
-      [1.25, 0.2, 50, 0.45],
-      [1.75, 0.4, 40],
-      [2.5, 0.2, 40],
-      [2.75, 0.2, 52],
-      [3, 0.2, 50],
-      [3.5, 0.2, 47],
-      [3.75, 0.2, 45, 0.45],
-      [4, 0.4, 43],
-      [4.5, 0.2, 55],
-      [4.75, 0.2, 43, 0.45],
-      [5, 0.2, 55],
-      [5.5, 0.2, 50],
-      [5.75, 0.2, 47, 0.45],
+      [0, 1.4, 40],
+      [1.75, 0.6, 40],
+      [2.5, 0.9, 50],
+      [4, 1.4, 43],
       [6, 0.4, 45],
-      [6.5, 0.2, 45],
-      [6.75, 0.2, 57],
-      [7, 0.2, 55],
-      [7.25, 0.2, 52, 0.45],
-      [7.5, 0.2, 49],
-      [7.75, 0.2, 50],
+      [6.5, 0.9, 45],
+      [7.5, 0.4, 47],
     ],
-    0.9
+    0.85
   ),
   "bass-verse": notes(
     [
-      [0, 0.4, 40],
-      [0.75, 0.2, 40, 0.45],
-      [1, 0.2, 52],
-      [1.5, 0.2, 50],
-      [1.75, 0.4, 40],
-      [2.5, 0.4, 40],
-      [3, 0.2, 43],
-      [3.25, 0.2, 45, 0.45],
-      [3.5, 0.2, 47],
-      [4, 0.4, 43],
-      [4.75, 0.2, 43, 0.45],
-      [5, 0.2, 55],
-      [5.5, 0.2, 50],
-      [5.75, 0.2, 43, 0.45],
+      [0, 1.4, 40],
+      [1.75, 0.6, 40],
+      [2.5, 0.9, 47],
+      [4, 1.4, 43],
       [6, 0.4, 45],
-      [6.5, 0.4, 45],
-      [7, 0.2, 57],
-      [7.25, 0.2, 55, 0.45],
-      [7.5, 0.2, 52],
-      [7.75, 0.2, 50, 0.45],
+      [6.5, 1.1, 45],
     ],
     0.85
   ),
