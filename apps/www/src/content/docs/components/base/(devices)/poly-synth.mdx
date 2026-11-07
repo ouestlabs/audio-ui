@@ -39,7 +39,7 @@ Every control reads 0 to 10, as a panel's sliders do, and shows the value it set
 
 ## Panel
 
-The panel loads a preset from the menu in its title bar, beside the chorus switch, lays the other controls out by what they do (oscillators, filter, envelope, vibrato, output) and has a keyboard of two octaves that plays the synth. `polySynthPreset(name)` gives a preset's whole state, and `POLY_SYNTH_PRESETS` lists them. The panel sends notes out and does not make the sound, so it plays through any engine.
+The panel loads a preset from the menu in its title bar, beside the chorus switch, lays the other controls out by what they do (oscillators, filter, envelope, vibrato, output) and has a keyboard of two octaves that plays the synth. `polySynthPreset(name)` gives a preset's whole state, and `POLY_SYNTH_PRESETS` lists them. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up their keys. The panel sends notes out and does not make the sound, so it plays through any engine.
 
 <DeviceUsage name="poly-synth" />
 

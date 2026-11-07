@@ -123,6 +123,17 @@ export interface WaveShaperNote {
 export const waveShaperPitch = (position: number) =>
   MIN_FREQUENCY * (MAX_FREQUENCY / MIN_FREQUENCY) ** position;
 
+/** Where a pitch sits along the pad's log axis, from 0 to 1: the inverse of `waveShaperPitch`, held inside the axis. */
+export const waveShaperPosition = (frequency: number) =>
+  Math.min(
+    1,
+    Math.max(
+      0,
+      Math.log(frequency / MIN_FREQUENCY) /
+        Math.log(MAX_FREQUENCY / MIN_FREQUENCY)
+    )
+  );
+
 /** The resonance at a position from 0 to 1, from 0.5 to 15.5. */
 export const waveShaperResonance = (position: number) =>
   MIN_RESONANCE + position * RESONANCE_RANGE;

@@ -44,7 +44,7 @@ The controls read 0 to 10, the ratios in steps of a list and the algorithm by it
 
 ## Panel
 
-The panel loads a preset from the menu in its title bar, lays out what every operator shares, then each operator's ratio, level, decay and sustain, and has a keyboard of two octaves that plays the synth. `fmSynthPreset(name)` gives a preset's whole state, `FM_SYNTH_PRESETS` lists them, and `FM_ALGORITHMS` holds each algorithm's carriers and links, to draw its wiring. The panel sends notes out and does not make the sound, so it plays through any engine.
+The panel loads a preset from the menu in its title bar, lays out what every operator shares, then each operator's ratio, level, decay and sustain, and has a keyboard of two octaves that plays the synth. `fmSynthPreset(name)` gives a preset's whole state, `FM_SYNTH_PRESETS` lists them, and `FM_ALGORITHMS` holds each algorithm's carriers and links, to draw its wiring. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up their keys. The panel sends notes out and does not make the sound, so it plays through any engine.
 
 <DeviceUsage name="fm-synth" />
 

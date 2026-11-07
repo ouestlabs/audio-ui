@@ -1,6 +1,7 @@
 "use client";
 
-import { type ReactNode, useCallback, useId, useState } from "react";
+import { noteToFrequency } from "@audio-ui/core/pitch";
+import { type ReactNode, useCallback, useId, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   ToggleGroup,
@@ -19,6 +20,7 @@ import {
   pocketSynthCutoff,
   pocketSynthDevice,
   pocketSynthPitch,
+  pocketSynthPosition,
 } from "@/registry-audio/bases/base/lib/pocket-synth-device";
 
 /** Graduations along the fader: ticks only, the readout beside it says the value. */
@@ -44,6 +46,8 @@ const formatPad = (position: { x: number; y: number }): ReactNode => (
 );
 
 interface PocketSynthPanelProps {
+  /** The notes held now, such as on a MIDI keyboard: the pad's point goes to the pitch of the last one. */
+  activeNotes?: readonly number[];
   /** Whatever the host puts at the end of the title bar: a device chain's grip, fold and remove buttons. */
   children?: ReactNode;
   className?: string;
@@ -63,6 +67,7 @@ interface PocketSynthPanelProps {
  * gives it, or none. It takes the height it is given: the pad grows to fill it.
  */
 function PocketSynthPanel({
+  activeNotes,
   children,
   className,
   onNoteOff,
@@ -75,6 +80,18 @@ function PocketSynthPanel({
   const faderValueId = useId();
   const [position, setPosition] = useState({ x: 50, y: 50 });
 
+  // A note held, such as on a MIDI keyboard, takes the point to its pitch across; up stays where the hand left it.
+  const held = activeNotes?.at(-1);
+  const shown = useMemo(
+    () =>
+      held === undefined
+        ? position
+        : {
+            x: pocketSynthPosition(noteToFrequency(held)) * PAD_MAX,
+            y: position.y,
+          },
+    [held, position]
+  );
   const move = useCallback(
     (next: { x: number; y: number }) => {
       setPosition(next);
@@ -123,7 +140,7 @@ function PocketSynthPanel({
           minY={0}
           onValueChange={move}
           onValueCommitted={onNoteOff}
-          value={position}
+          value={shown}
         />
         <WaveformSelect
           aria-label={WAVE.label}

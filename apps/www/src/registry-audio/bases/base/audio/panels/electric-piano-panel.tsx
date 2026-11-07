@@ -43,6 +43,8 @@ const LOWEST = 48;
 const HIGHEST = 72;
 
 interface ElectricPianoPanelProps {
+  /** The notes held now, such as on a MIDI keyboard: their keys light up as they are played. */
+  activeNotes?: readonly number[];
   /** Whatever the host puts at the end of the title bar: a device chain's grip, fold and remove buttons. */
   children?: ReactNode;
   className?: string;
@@ -62,6 +64,7 @@ interface ElectricPianoPanelProps {
  * so it plays through whatever engine a host gives it.
  */
 function ElectricPianoPanel({
+  activeNotes,
   children,
   className,
   onNoteOff,
@@ -132,6 +135,7 @@ function ElectricPianoPanel({
           value={value}
         />
         <Piano
+          activeNotes={activeNotes}
           aria-label="Play the piano"
           className="mt-auto min-h-14 flex-1"
           maxPitch={HIGHEST}

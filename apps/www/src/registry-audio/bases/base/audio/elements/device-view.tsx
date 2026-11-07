@@ -81,6 +81,8 @@ type ChainPlace =
 
 /** What every slot of a chain needs: the commands of the track, and where the chain is. */
 interface ChainProps {
+  /** The notes held now, such as on a MIDI keyboard: an instrument's keys or pads light them up. */
+  activeNotes?: readonly number[];
   dispatch: Arrangement["dispatch"];
   /** What the controls follow their envelopes by (AUT-006). */
   following: AutomationFollowing;
@@ -143,7 +145,7 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
     () => dispatch({ id: device.id, track, type: "toggle-device" }),
     [device.id, dispatch, track]
   );
-  const { onHoldNote } = chain;
+  const { activeNotes, onHoldNote } = chain;
   const release = useCallback(() => onHoldNote(null), [onHoldNote]);
   const [folded, setFolded] = chain.useEntry("deviceFolded", device.id, false);
   const fold = { folded, onFoldedChange: setFolded };
@@ -167,6 +169,7 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       value={device.id}
     >
       <face.Panel
+        activeNotes={activeNotes}
         onNoteOff={release}
         onNoteOn={onHoldNote}
         onValueChange={change}
@@ -575,6 +578,7 @@ function DrumSlot({
  * undo and the engine follows it.
  */
 export function DeviceView({
+  activeNotes,
   arrangement,
   onNoteOff,
   onNoteOn,
@@ -587,6 +591,8 @@ export function DeviceView({
   track,
   useEntry = useLocalEntry,
 }: {
+  /** The notes held now on the track, such as on a MIDI keyboard: its instrument's keys or pads light them up. */
+  activeNotes?: readonly number[];
   arrangement: Arrangement;
   /** What was moved by hand, by track: it stays as set. */
   overridden: Readonly<Record<string, readonly AutomatedParameter[]>>;
@@ -796,6 +802,7 @@ export function DeviceView({
   return (
     <div className="flex h-full min-h-0">
       <Chain
+        activeNotes={activeNotes}
         className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 scroll-pe-10 overflow-auto"
         devices={devices}
         dispatch={dispatch}

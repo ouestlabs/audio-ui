@@ -30,6 +30,8 @@ import { WaveShaperPanel } from "@/components/audio-ui/devices/wave-shaper/panel
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
 export interface DevicePanelProps {
+  /** For an instrument's panel with keys or pads: the notes held now, such as on a MIDI keyboard, which light up. */
+  activeNotes?: readonly number[];
   /** What the host puts at the end of the title bar: a chain's controls, a play button. */
   children?: ReactNode;
   className?: string;
@@ -52,6 +54,7 @@ export interface DevicePanelEntry {
 /** A panel as the catalog holds it: its own device's state, read as any device's. */
 function entry<State, Note = never>(
   Panel: ComponentType<{
+    activeNotes?: readonly number[];
     children?: ReactNode;
     className?: string;
     onNoteOff?: () => void;

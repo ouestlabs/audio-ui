@@ -1,6 +1,7 @@
 "use client";
 
-import { type ReactNode, useCallback, useState } from "react";
+import { noteToFrequency } from "@audio-ui/core/pitch";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { WaveformSelect } from "@/components/audio-ui/waveform-select";
 import { XYPad } from "@/components/audio-ui/xypad";
@@ -14,6 +15,7 @@ import {
   type WaveShaperState,
   waveShaperDevice,
   waveShaperPitch,
+  waveShaperPosition,
   waveShaperResonance,
 } from "@/components/audio-ui/devices/wave-shaper/device";
 
@@ -30,6 +32,8 @@ const formatPad = (position: { x: number; y: number }) => (
 );
 
 interface WaveShaperPanelProps {
+  /** The notes held now, such as on a MIDI keyboard: the pad's point goes to the pitch of the last one. */
+  activeNotes?: readonly number[];
   /** Whatever the host puts at the end of the title bar: a device chain's grip, fold and remove buttons. */
   children?: ReactNode;
   className?: string;
@@ -49,6 +53,7 @@ interface WaveShaperPanelProps {
  * none. It takes the height it is given: the pad grows to fill it.
  */
 function WaveShaperPanel({
+  activeNotes,
   children,
   className,
   onNoteOff,
@@ -57,6 +62,18 @@ function WaveShaperPanel({
   value,
 }: WaveShaperPanelProps) {
   const [position, setPosition] = useState({ x: 50, y: 50 });
+  // A note held, such as on a MIDI keyboard, takes the point to its pitch across; up stays where the hand left it.
+  const held = activeNotes?.at(-1);
+  const shown = useMemo(
+    () =>
+      held === undefined
+        ? position
+        : {
+            x: waveShaperPosition(noteToFrequency(held)) * PAD_MAX,
+            y: position.y,
+          },
+    [held, position]
+  );
   const move = useCallback(
     (next: { x: number; y: number }) => {
       setPosition(next);
@@ -94,7 +111,7 @@ function WaveShaperPanel({
           minY={0}
           onValueChange={move}
           onValueCommitted={onNoteOff}
-          value={position}
+          value={shown}
         />
         <WaveformSelect
           aria-label={WAVE.label}

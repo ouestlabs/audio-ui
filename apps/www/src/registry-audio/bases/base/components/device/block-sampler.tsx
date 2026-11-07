@@ -109,7 +109,7 @@ export default function BlockSampler() {
     [noteOn]
   );
   const releaseKey = useCallback(() => noteOff(PANEL_NOTE), [noteOff]);
-  useMidiInput({
+  const midi = useMidiInput({
     onNoteOff: (pitch: number) => noteOff(`midi-${pitch}`),
     onNoteOn: (pitch: number, velocity: number) =>
       noteOn({ frequency: noteToFrequency(pitch), velocity }, `midi-${pitch}`),
@@ -157,6 +157,7 @@ export default function BlockSampler() {
       role="group"
     >
       <SamplerPanel
+        activeNotes={midi.activeNotes}
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}

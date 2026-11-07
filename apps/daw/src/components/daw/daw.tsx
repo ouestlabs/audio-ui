@@ -117,6 +117,18 @@ const ADD_TRACK_KEYS = {
   "return-track": <CommandKeys command="return-track" />,
 };
 
+/** No notes held: what an instrument on a track that is not armed lights up. */
+const NO_NOTES: readonly number[] = [];
+
+/** The notes a track's instrument lights up: those held now, when the track is armed and so plays them. */
+function heldOn(
+  track: string | null,
+  armed: ReadonlySet<string>,
+  held: readonly number[]
+) {
+  return track && armed.has(track) ? held : NO_NOTES;
+}
+
 /** The panel under the arrangement folded: its strip alone. */
 const STRIP = "2.5rem";
 /** The least height of each view of that panel, its strip included: under it, what it shows is cut off. */
@@ -344,6 +356,7 @@ export function Daw({
     armTrack,
     computerKeys,
     computerKeysOn,
+    heldNotes,
     setComputerKeys,
     transportPosition,
   } = useTakeInputs({ doc, engine, take });
@@ -1330,6 +1343,7 @@ export function Daw({
           />
         ) : (
           <DeviceView
+            activeNotes={heldOn(selectedTrack, take.armed, heldNotes)}
             arrangement={arrangement}
             onDeviceMoved={automation.deviceMoved}
             onHoldNote={holdNote}

@@ -29,7 +29,7 @@ Every control reads 0 to 10, as a panel's knobs do, and shows the value it sets 
 
 ## Panel
 
-The panel loads a preset from the menu in its title bar, lays the controls out by what they do (tone, pickup, tremolo, output) and has a keyboard of two octaves that plays the piano. `electricPianoPreset(name)` gives a preset's whole state, and `ELECTRIC_PIANO_PRESETS` lists them. The panel sends notes out and does not make the sound, so it plays through any engine.
+The panel loads a preset from the menu in its title bar, lays the controls out by what they do (tone, pickup, tremolo, output) and has a keyboard of two octaves that plays the piano. `electricPianoPreset(name)` gives a preset's whole state, and `ELECTRIC_PIANO_PRESETS` lists them. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up their keys. The panel sends notes out and does not make the sound, so it plays through any engine.
 
 <DeviceUsage name="electric-piano" />
 

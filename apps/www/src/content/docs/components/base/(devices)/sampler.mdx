@@ -26,7 +26,7 @@ A slice sampler. A sample is cut into sixteen equal slices, and each pad, or eac
 
 ## Panel
 
-The panel has the sample in its title bar, its controls, and sixteen pads in two rows, one a slice, that play it: a pad struck sends the note of its slice, as hard as it was struck. `sliceOf(pitch)` is the slice a pitch plays, and `SAMPLER_FIRST_NOTE` the note of the first. The panel sends notes out and does not make the sound, so it plays through any engine.
+The panel has the sample in its title bar, its controls, and sixteen pads in two rows, one a slice, that play it: a pad struck sends the note of its slice, as hard as it was struck. `sliceOf(pitch)` is the slice a pitch plays, and `SAMPLER_FIRST_NOTE` the note of the first. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up the pads of their slices. The panel sends notes out and does not make the sound, so it plays through any engine.
 
 <DeviceUsage name="sampler" />
 

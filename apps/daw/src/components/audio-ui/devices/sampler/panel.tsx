@@ -2,7 +2,7 @@
 
 import { noteToFrequency } from "@audio-ui/core/pitch";
 import type { Pad as PadPrimitive } from "@audio-ui/react";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -24,6 +24,7 @@ import {
   type SamplerNote,
   type SamplerState,
   samplerDevice,
+  sliceOf,
 } from "@/components/audio-ui/devices/sampler/device";
 
 /** What the title bar holds: the sample, a list. */
@@ -38,6 +39,8 @@ const PADS = Array.from({ length: SAMPLER_SLICES }, (_, slice) => ({
 }));
 
 interface SamplerPanelProps {
+  /** The notes held now, such as on a MIDI keyboard: the pads of their slices light up as they are played. */
+  activeNotes?: readonly number[];
   /** Whatever the host puts at the end of the title bar: a device chain's grip, fold and remove buttons. */
   children?: ReactNode;
   className?: string;
@@ -57,6 +60,7 @@ interface SamplerPanelProps {
  * engine a host gives it.
  */
 function SamplerPanel({
+  activeNotes,
   children,
   className,
   onNoteOff,
@@ -81,6 +85,10 @@ function SamplerPanel({
     [onNoteOn]
   );
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
+  const lit = useMemo(
+    () => (activeNotes ?? []).map((pitch) => String(sliceOf(pitch))),
+    [activeNotes]
+  );
 
   return (
     <DeviceFrame className={cn("h-full", className)}>
@@ -124,6 +132,7 @@ function SamplerPanel({
           value={value}
         />
         <Pad
+          activePads={lit}
           aria-label="Slices"
           className="mt-auto min-h-24 flex-1 grid-rows-2"
           columns={8}
