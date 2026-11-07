@@ -16,6 +16,7 @@
     "---Mixing---",
     "mixer",
     "device-chain",
+    "device-browser",
     "rack"
   ]
 }

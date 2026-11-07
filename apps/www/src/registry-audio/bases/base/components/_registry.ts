@@ -1163,10 +1163,31 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["device-browser"],
+    description:
+      "A library of devices by shelf, with a search: pick one with Enter, a double-click or the Add button, or drag it onto a chain, and see what comes back",
+    files: [
+      {
+        path: "components/device-browser/block-device-browser.tsx",
+        type: "registry:block",
+      },
+    ],
+    meta: {
+      hint: "Type to search every shelf, Enter to add the first device found, ArrowDown to go into the list. Double-click a device, or drag it onto the drop area.",
+    },
+    name: "block-device-browser",
+    registryDependencies: [
+      "@audio-ui/device-browser",
+      "@audio-ui/device-chain",
+      "@audio-ui/device-library",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["device-chain", "knob"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine, with a kick on the sidechain, or render it to a WAV file",
+      "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine, or render it to a WAV file. It is the view a workstation shows under its tracks, over an arrangement of one track",
     files: [
       {
         path: "components/device-chain/block-device-chain.tsx",
@@ -1175,15 +1196,18 @@ export const components: RegistryItem[] = [
     ],
     name: "block-device-chain",
     registryDependencies: [
-      "@audio-ui/device-chain",
+      "@audio-ui/device-view",
       "@audio-ui/device-browser",
       "@audio-ui/device-library",
-      "@audio-ui/device-panels",
+      "@audio-ui/arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/clip-player",
       "@audio-ui/demo-sound",
       "@audio-ui/use-demo-source",
-      "@audio-ui/use-device-loop",
-      "@audio-ui/use-master-bus",
+      "@audio-ui/use-play-switch",
       "@audio-ui/wav-file",
+      "@audio-ui/web-audio",
       "@shadcn/button",
     ],
     type: "registry:block",

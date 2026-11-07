@@ -1,20 +1,7 @@
 "use client";
 
 import type { ParameterValue } from "@audio-ui/core/device";
-import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
-import {
-  DeviceChain,
-  DeviceChainSlot,
-  DeviceChainSlotControls,
-} from "@/components/audio-ui/device-chain";
-import { devicePanel } from "@/components/audio-ui/device-panels";
-import { DrumRackPanel } from "@/components/audio-ui/drum-rack-panel";
-import {
-  type RackChainMix,
-  RackPanel,
-  type RackParameter,
-} from "@/components/audio-ui/rack-panel";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -22,6 +9,18 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { devicePanel } from "@/components/audio-ui/device-panels";
+import {
+  DeviceChain,
+  DeviceChainSlot,
+  DeviceChainSlotControls,
+} from "@/components/audio-ui/device-chain";
+import { DrumRackPanel } from "@/components/audio-ui/drum-rack-panel";
+import {
+  type RackChainMix,
+  RackPanel,
+  type RackParameter,
+} from "@/components/audio-ui/rack-panel";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import {
   type AutomationFollowing,
@@ -43,6 +42,7 @@ import {
 } from "@/lib/arrangement";
 import { trackOf } from "@/lib/arrangement-state";
 import { libraryDevice } from "@/lib/device-library";
+import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 
@@ -601,8 +601,8 @@ export function DeviceView({
     track: string,
     note: Readonly<Record<string, number>> | null
   ) => void;
-  /** Opens the library on the left, ready to search. */
-  onOpenLibrary: () => void;
+  /** Opens the library, ready to search. Leave it out when there is none to open, and the view has no button for it. */
+  onOpenLibrary?: () => void;
   /** Parameters of a track's device moved by hand, by their ids: those automated stop following their envelopes. */
   onDeviceMoved: (
     track: string,
@@ -725,10 +725,14 @@ export function DeviceView({
             : "Drop an effect here"}
         </p>
         <p className="flex items-center text-muted-foreground text-xs">
-          <Button onClick={onOpenLibrary} size="sm" variant="link">
-            Browse the library
-          </Button>
-          ·
+          {onOpenLibrary ? (
+            <>
+              <Button onClick={onOpenLibrary} size="sm" variant="link">
+                Browse the library
+              </Button>
+              ·
+            </>
+          ) : null}
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button size="sm" variant="link" />}>
               Add a rack
@@ -740,15 +744,17 @@ export function DeviceView({
       </div>
     ) : (
       <div className="sticky end-0 z-10 ms-auto flex w-10 shrink-0 flex-col items-center gap-1 bg-background py-2 shadow-[-1px_0_0_0_var(--border)]">
-        <Button
-          aria-label="Open the library"
-          onClick={onOpenLibrary}
-          size="icon-sm"
-          title="Open the library"
-          variant="ghost"
-        >
-          <PlusIcon aria-hidden="true" />
-        </Button>
+        {onOpenLibrary ? (
+          <Button
+            aria-label="Open the library"
+            onClick={onOpenLibrary}
+            size="icon-sm"
+            title="Open the library"
+            variant="ghost"
+          >
+            <PlusIcon aria-hidden="true" />
+          </Button>
+        ) : null}
         <DropdownMenu>
           <DropdownMenuTrigger
             render={

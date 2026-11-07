@@ -366,8 +366,14 @@
     "title": "Block mixer"
   },
   {
+    "categories": ["device-browser"],
+    "description": "A library of devices by shelf, with a search: pick one with Enter, a double-click or the Add button, or drag it onto a chain, and see what comes back",
+    "name": "block-device-browser",
+    "title": "Block device browser"
+  },
+  {
     "categories": ["device-chain", "knob"],
-    "description": "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine, with a kick on the sidechain, or render it to a WAV file",
+    "description": "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine, or render it to a WAV file. It is the view a workstation shows under its tracks, over an arrangement of one track",
     "name": "block-device-chain",
     "title": "Block device chain"
   },

@@ -409,7 +409,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    categories: ["device-chain"],
+    categories: ["device-browser"],
     description:
       "A library of devices by shelf, with a search: a device is added with Enter, a double-click or the Add button, or dragged to where it goes on a device chain.",
     files: [

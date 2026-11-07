@@ -103,9 +103,15 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
-      "Device chains: a track's effects in a row, reordered, folded, switched off and removed, with a library to add one from.",
+      "Device chains: a track's effects in a row, reordered, folded, switched off and removed.",
     label: "Device chain",
     name: "device-chain",
+  },
+  {
+    description:
+      "Device browsers: a library of devices by shelf, with a search, to add one from or drag it onto a chain.",
+    label: "Device browser",
+    name: "device-browser",
   },
   {
     description:
@@ -270,6 +276,7 @@ export const categoryGroups: { label: string; names: string[] }[] = [
       "scrubber",
       "mixer",
       "device-chain",
+      "device-browser",
     ],
   },
   {

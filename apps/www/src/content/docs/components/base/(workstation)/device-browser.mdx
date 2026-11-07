@@ -1,0 +1,78 @@
+---
+title: Device browser
+description: "A library of devices by shelf, with a search: pick one with Enter, a double-click or the Add button, or drag it onto a device chain. It keeps what is searched and marked, and nothing else."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-device-browser" />
+
+A library of devices, with the shelves down the side, the devices of the open shelf beside them and a search over every shelf. It adds nothing itself: a device picked, or dragged out, comes back as an id, and what to do with it is yours. In a workstation the id goes onto a track's [device chain](/docs/components/base/device-chain).
+
+## Installation
+
+<Install name="device-browser" packages="" />
+
+The block above is `@audio-ui/block-device-browser`. It installs the [device chain](/docs/components/base/device-chain) with it, for the drag type the two share.
+
+## Anatomy
+
+```tsx
+<DeviceBrowser />
+```
+
+## Usage
+
+`DeviceBrowser` lists devices by shelf, with a search over all of them. A device definition is an item as it is: it has an `id`, a `name` and a `description`.
+
+```tsx
+import { DeviceBrowser } from "@/components/audio-ui/device-browser";
+
+<DeviceBrowser
+  onPick={(id) => add(id)}
+  shelves={[
+    { items: [compressorDevice, limiterDevice], label: "Dynamics" },
+    { items: [delayDevice, reverbDevice], label: "Space" },
+  ]}
+/>;
+```
+
+`onPick` gets the id of the device to add, at the end of the chain. A device dragged from the library onto the chain comes to its `onAdd(id, index)` instead, with the place it was dropped in. The drag carries the id under `DEVICE_DRAG_TYPE`, exported by `device-chain`, so anything of yours can be dragged onto a chain the same way:
+
+```tsx
+import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
+
+<div
+  draggable
+  onDragStart={(event) => event.dataTransfer.setData(DEVICE_DRAG_TYPE, "audioui.reverb")}
+/>;
+```
+
+With `open` and `onOpenChange`, the library folds to a strip that opens it again. `searchRef` is its search field, for a `DeviceChainAdd` that opens the library and puts the focus in it.
+
+## Interaction
+
+<KeyTable title="Library">
+<KeyRow gesture={"Type in the search"}>Finds devices by name first, then by what they do, across every shelf.</KeyRow>
+<KeyRow gesture={"`Enter` in the search"}>Adds the first device found.</KeyRow>
+<KeyRow gesture={"`ArrowDown` in the search"}>Goes into the list.</KeyRow>
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`, `Home` / `End` in the list"}>Mark a device.</KeyRow>
+<KeyRow gesture={"`Enter` / `Space` in the list, double-click, the Add button"}>Add the marked device.</KeyRow>
+<KeyRow gesture={"`Escape` in the search"}>Clears it.</KeyRow>
+</KeyTable>
+
+The library's list is a list box, and its shelves are toggle buttons.
+
+## API reference
+
+### DeviceBrowser
+
+<TypeTable>
+<TypeRow name={"shelves"} type={"{ label: string; items: { id, name, description? }[] }[]"}>The devices, by shelf, in the order they are shown.</TypeRow>
+<TypeRow name={"onPick"} type={"(id: string) => void"}>A device was picked: Enter, a double-click or the Add button.</TypeRow>
+<TypeRow name={"open"} type={"boolean"} default={"true"}>Whether the library is shown, or folded to a strip that opens it.</TypeRow>
+<TypeRow name={"shelf"} type={"number"}>The index of the shelf shown, controlled: to keep it past a reload, say.</TypeRow>
+<TypeRow name={"onShelfChange"} type={"(shelf: number) => void"}>Another shelf was opened.</TypeRow>
+<TypeRow name={"onOpenChange"} type={"(open: boolean) => void"}>Called to open or fold the library. Leave it out and it stays open, with no button to fold it.</TypeRow>
+<TypeRow name={"searchRef"} type={"Ref<HTMLInputElement>"}>The search field, to focus it from elsewhere.</TypeRow>
+</TypeTable>

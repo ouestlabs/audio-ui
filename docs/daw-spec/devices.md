@@ -25,7 +25,7 @@ A device switched off passes its input unchanged to the frame, and keeps the lat
 Test: apps/www/test/arrangement-engine.test.ts "DEV-005"
 
 ### DEV-006 Folding
-The fold button of a device's title bar folds it to a narrow strip. A click anywhere on the strip, outside its buttons, unfolds it; a drag of the strip moves the device and leaves it folded. The on square stays where it is, with the same shape. The strip has that square at the top, the device's name down it, and at the bottom its grip, its remove button and its arrow, in the order the title bar has them.
+The fold button of a device's title bar folds it to a narrow strip, and so does a press on the title bar outside its buttons: a drag of it moves the device instead. A click anywhere on the strip, outside its buttons, unfolds it; a drag of the strip moves the device and leaves it folded. The on square stays where it is, with the same shape. The strip has that square at the top, the device's name down it, and at the bottom its grip, its remove button and its arrow, in the order the title bar has them.
 Test: apps/daw/test/browser/run.ts "DEV-006"
 
 ### DEV-007 No gap in the sound

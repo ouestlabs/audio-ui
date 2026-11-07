@@ -39,6 +39,7 @@ describe("takesPlay", () => {
     const effects = DEVICES.filter(
       (name) =>
         ![
+          "block-device-browser",
           "block-drum-rack",
           "block-mixer",
           "block-pocket-synth",

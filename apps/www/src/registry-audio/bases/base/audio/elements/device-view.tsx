@@ -601,8 +601,8 @@ export function DeviceView({
     track: string,
     note: Readonly<Record<string, number>> | null
   ) => void;
-  /** Opens the library on the left, ready to search. */
-  onOpenLibrary: () => void;
+  /** Opens the library, ready to search. Leave it out when there is none to open, and the view has no button for it. */
+  onOpenLibrary?: () => void;
   /** Parameters of a track's device moved by hand, by their ids: those automated stop following their envelopes. */
   onDeviceMoved: (
     track: string,
@@ -725,10 +725,14 @@ export function DeviceView({
             : "Drop an effect here"}
         </p>
         <p className="flex items-center text-muted-foreground text-xs">
-          <Button onClick={onOpenLibrary} size="sm" variant="link">
-            Browse the library
-          </Button>
-          ·
+          {onOpenLibrary ? (
+            <>
+              <Button onClick={onOpenLibrary} size="sm" variant="link">
+                Browse the library
+              </Button>
+              ·
+            </>
+          ) : null}
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button size="sm" variant="link" />}>
               Add a rack
@@ -747,22 +751,24 @@ export function DeviceView({
       </div>
     ) : (
       <div className="sticky end-0 z-10 ms-auto flex w-10 shrink-0 flex-col items-center gap-1 bg-background py-2 shadow-[-1px_0_0_0_var(--border)]">
-        <Button
-          aria-label="Open the library"
-          onClick={onOpenLibrary}
-          size="icon-sm"
-          title="Open the library"
-          variant="ghost"
-        >
-          <IconPlaceholder
-            aria-hidden="true"
-            hugeicons="PlusSignIcon"
-            lucide="PlusIcon"
-            phosphor="PlusIcon"
-            remixicon="RiAddLine"
-            tabler="IconPlus"
-          />
-        </Button>
+        {onOpenLibrary ? (
+          <Button
+            aria-label="Open the library"
+            onClick={onOpenLibrary}
+            size="icon-sm"
+            title="Open the library"
+            variant="ghost"
+          >
+            <IconPlaceholder
+              aria-hidden="true"
+              hugeicons="PlusSignIcon"
+              lucide="PlusIcon"
+              phosphor="PlusIcon"
+              remixicon="RiAddLine"
+              tabler="IconPlus"
+            />
+          </Button>
+        ) : null}
         <DropdownMenu>
           <DropdownMenuTrigger
             render={

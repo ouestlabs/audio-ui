@@ -52,9 +52,14 @@
     "title": "Mixer"
   },
   "device-chain": {
-    "description": "Device chains: a track's effects in a row, reordered, folded, switched off and removed, with a library to add one from. {{count}} components.",
+    "description": "Device chains: a track's effects in a row, reordered, folded, switched off and removed. {{count}} components.",
     "intro": "Browse {{count}} device chain components for audio/ui, built on top of shadcn/ui.",
     "title": "Device chain"
+  },
+  "device-browser": {
+    "description": "Device browsers: a library of devices by shelf, with a search, to add one from or drag it onto a chain. {{count}} components.",
+    "intro": "Browse {{count}} device browser components for audio/ui, built on top of shadcn/ui.",
+    "title": "Device browser"
   },
   "spectrum": {
     "description": "Spectrum analyzers: the level of a sound across frequencies, live, with held peaks. {{count}} components.",
