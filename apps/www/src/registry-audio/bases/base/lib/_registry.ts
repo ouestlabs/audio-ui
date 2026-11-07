@@ -97,6 +97,22 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device", "pad"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Sampler as an instrument device: one of two samples cut into sixteen slices, a key or a pad each from note 36, a low-pass filter, a pitch, a release and a gate, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/sampler-device.ts",
+        target: "components/audio-ui/devices/sampler/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "sampler-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "device", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
@@ -126,6 +142,22 @@ const items: RegistryItem[] = [
     ],
     name: "poly-synth-engine",
     registryDependencies: ["@audio-ui/poly-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "pad"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the Sampler on the Web Audio API, with the two samples it comes with rendered once and shared: noteOn plays the slice its pitch picks, to its end, or cuts the playing one and plays anew; with the gate on, noteOff closes it over the release; load plays a file of your own. A host plays several slices at once with several.",
+    files: [
+      {
+        path: "lib/sampler-engine.ts",
+        target: "components/audio-ui/devices/sampler/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "sampler-engine",
+    registryDependencies: ["@audio-ui/sampler-device"],
     type: "registry:lib",
   },
   {
@@ -1146,6 +1178,8 @@ const items: RegistryItem[] = [
       "@audio-ui/pocket-synth-engine",
       "@audio-ui/poly-synth-device",
       "@audio-ui/poly-synth-engine",
+      "@audio-ui/sampler-device",
+      "@audio-ui/sampler-engine",
       "@audio-ui/electric-piano-device",
       "@audio-ui/electric-piano-engine",
       "@audio-ui/redux-device",

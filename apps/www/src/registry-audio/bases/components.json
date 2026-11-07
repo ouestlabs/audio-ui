@@ -18,6 +18,12 @@
     "title": "Block poly synth"
   },
   {
+    "categories": ["instrument", "pad"],
+    "description": "A slice sampler you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Strike its sixteen pads, play a MIDI keyboard from C2, or drop an audio file on it",
+    "name": "block-sampler",
+    "title": "Block sampler"
+  },
+  {
     "categories": ["instrument", "piano"],
     "description": "A tine electric piano you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, ten voices for chords. Play the keyboard, or a MIDI keyboard: a hard key barks and pings",
     "name": "block-electric-piano",

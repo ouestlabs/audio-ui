@@ -18,6 +18,7 @@ import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-
 import { polySynthDevice } from "@/registry-audio/bases/base/lib/poly-synth-device";
 import { reduxDevice } from "@/registry-audio/bases/base/lib/redux-device";
 import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
+import { samplerDevice } from "@/registry-audio/bases/base/lib/sampler-device";
 import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-device";
 import { transientDevice } from "@/registry-audio/bases/base/lib/transient-device";
 import { utilityDevice } from "@/registry-audio/bases/base/lib/utility-device";
@@ -43,6 +44,7 @@ export const DEVICE_DOCS = {
   "pocket-synth": pocketSynthDevice,
   "poly-synth": polySynthDevice,
   "electric-piano": electricPianoDevice,
+  sampler: samplerDevice,
   redux: reduxDevice,
   reverb: reverbDevice,
   saturator: saturatorDevice,

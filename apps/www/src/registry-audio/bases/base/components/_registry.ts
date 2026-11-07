@@ -70,6 +70,28 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["instrument", "pad"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A slice sampler you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Strike its sixteen pads, play a MIDI keyboard from C2, or drop an audio file on it",
+    files: [
+      {
+        path: "components/device/block-sampler.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-sampler",
+    registryDependencies: [
+      "@audio-ui/sampler-panel",
+      "@audio-ui/sampler-device",
+      "@audio-ui/sampler-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["instrument", "piano"],
     dependencies: ["@audio-ui/core"],
     description:

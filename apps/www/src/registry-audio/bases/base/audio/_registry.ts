@@ -26,6 +26,7 @@ const DEVICES = [
   "poly-synth",
   "redux",
   "reverb",
+  "sampler",
   "saturator",
   "transient",
   "utility",
@@ -457,6 +458,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/phaser-panel",
       "@audio-ui/pocket-synth-panel",
       "@audio-ui/poly-synth-panel",
+      "@audio-ui/sampler-panel",
       "@audio-ui/electric-piano-panel",
       "@audio-ui/redux-panel",
       "@audio-ui/reverb-panel",
@@ -504,6 +506,27 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/piano",
       "@audio-ui/poly-synth-device",
+      "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "pad", "piano"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "The face of the Sampler device: its sample in its title bar, its controls and sixteen pads, one a slice, that play it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
+    files: [
+      {
+        path: "audio/panels/sampler-panel.tsx",
+        target: "components/audio-ui/devices/sampler/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "sampler-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/pad",
+      "@audio-ui/sampler-device",
       "@shadcn/select",
     ],
     type: "registry:ui",

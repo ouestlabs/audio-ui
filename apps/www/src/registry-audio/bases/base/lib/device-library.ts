@@ -46,6 +46,8 @@ import { reduxDevice } from "@/registry-audio/bases/base/lib/redux-device";
 import { createReduxEngine } from "@/registry-audio/bases/base/lib/redux-engine";
 import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
 import { createReverbEngine } from "@/registry-audio/bases/base/lib/reverb-engine";
+import { samplerDevice } from "@/registry-audio/bases/base/lib/sampler-device";
+import { createSamplerEngine } from "@/registry-audio/bases/base/lib/sampler-engine";
 import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-device";
 import { createSaturatorEngine } from "@/registry-audio/bases/base/lib/saturator-engine";
 import { transientDevice } from "@/registry-audio/bases/base/lib/transient-device";
@@ -115,6 +117,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Instruments
   entry(polySynthDevice, createPolySynthEngine, "Instruments"),
   entry(electricPianoDevice, createElectricPianoEngine, "Instruments"),
+  entry(samplerDevice, createSamplerEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),
   entry(waveShaperDevice, createWaveShaperEngine, "Instruments"),
   // Dynamics

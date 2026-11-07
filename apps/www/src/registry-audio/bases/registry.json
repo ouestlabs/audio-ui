@@ -97,7 +97,7 @@
       "name": "utility"
     },
     {
-      "count": 4,
+      "count": 5,
       "description": "Instrument devices: synths played from a pad, by pointer or by an agent.",
       "label": "Instruments",
       "name": "instrument"
@@ -115,7 +115,7 @@
       "name": "plot"
     },
     {
-      "count": 2,
+      "count": 3,
       "description": "Drum pad grids: strike them by pointer or keyboard, with velocity and choke groups.",
       "label": "Pad",
       "name": "pad"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 62
+  "totalComponents": 63
 }

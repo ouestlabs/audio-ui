@@ -21,6 +21,7 @@ import { PocketSynthPanel } from "@/registry-audio/bases/base/audio/panels/pocke
 import { PolySynthPanel } from "@/registry-audio/bases/base/audio/panels/poly-synth-panel";
 import { ReduxPanel } from "@/registry-audio/bases/base/audio/panels/redux-panel";
 import { ReverbPanel } from "@/registry-audio/bases/base/audio/panels/reverb-panel";
+import { SamplerPanel } from "@/registry-audio/bases/base/audio/panels/sampler-panel";
 import { SaturatorPanel } from "@/registry-audio/bases/base/audio/panels/saturator-panel";
 import { TransientPanel } from "@/registry-audio/bases/base/audio/panels/transient-panel";
 import { UtilityPanel } from "@/registry-audio/bases/base/audio/panels/utility-panel";
@@ -89,6 +90,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.poly-synth": entry(PolySynthPanel, "w-[40rem]"),
   "audioui.redux": entry(ReduxPanel),
   "audioui.reverb": entry(ReverbPanel),
+  "audioui.sampler": entry(SamplerPanel, "w-[32rem]"),
   "audioui.saturator": entry(SaturatorPanel),
   "audioui.transient": entry(TransientPanel),
   "audioui.utility": entry(UtilityPanel),
