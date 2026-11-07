@@ -14,6 +14,7 @@ const EXPANDABLE = new Set([
   "block-device-chain",
   "block-piano-roll",
   "block-timeline",
+  "plot-demo",
 ]);
 
 export const isExpandable = (name: string) => EXPANDABLE.has(name);

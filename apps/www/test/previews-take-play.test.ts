@@ -9,6 +9,7 @@ const DEVICES = components
 describe("takesPlay", () => {
   test("is true for the previews that follow their session's play switch", () => {
     for (const name of [
+      "plot-demo",
       "spectrum-analyzer-demo",
       "piano-roll-playback-demo",
       "block-delay",

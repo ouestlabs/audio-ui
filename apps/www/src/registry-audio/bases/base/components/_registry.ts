@@ -96,6 +96,65 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["hardware"],
+    description: "LEDs lit by Rec and Mute, one blinking red, in three sizes",
+    files: [
+      {
+        path: "components/hardware/led-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "led-demo",
+    registryDependencies: ["@audio-ui/led", "@shadcn/button"],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description:
+      "Screens with a caption: a filter cutoff in kHz driven by a parameter field, a preset's name and a tempo",
+    files: [
+      {
+        path: "components/hardware/lcd-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "lcd-demo",
+    registryDependencies: [
+      "@audio-ui/lcd",
+      "@audio-ui/value-display",
+      "@audio-ui/parameter-field",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description:
+      "A value of each kind: tempo, gain, cutoff, pan, mix, transpose and position",
+    files: [
+      {
+        path: "components/hardware/value-display-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "value-display-demo",
+    registryDependencies: ["@audio-ui/value-display"],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description:
+      "A power rocker that lights its LED, a small one laid down, and one disabled",
+    files: [
+      {
+        path: "components/hardware/rocker-switch-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "rocker-switch-demo",
+    registryDependencies: ["@audio-ui/rocker-switch", "@audio-ui/led"],
+    type: "registry:example",
+  },
+  {
     categories: ["parameter-field"],
     description:
       "Parameter fields for tempo, gain, transpose and cutoff: typed, stepped, or scrubbed by their label or unit",
@@ -465,6 +524,31 @@ export const components: RegistryItem[] = [
     ],
     name: "waveform-region-demo",
     registryDependencies: ["@audio-ui/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description:
+      "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
+    files: [
+      {
+        path: "components/plot/plot-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    meta: {
+      hint: "Click a band to set its type and width. Double-click empty space to add one, Delete to remove it.",
+    },
+    name: "plot-demo",
+    dependencies: ["@audio-ui/core"],
+    registryDependencies: [
+      "@audio-ui/plot",
+      "@audio-ui/knob",
+      "@audio-ui/use-noise-through-eq",
+      "@audio-ui/use-spectrum",
+      "@shadcn/popover",
+      "@shadcn/select",
+    ],
     type: "registry:example",
   },
   {
