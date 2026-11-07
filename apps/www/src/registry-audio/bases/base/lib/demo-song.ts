@@ -117,9 +117,11 @@ const held = (
 /**
  * The song's notes by part, for MIDI tracks to play, each as long as its
  * loop. The organ holds the chords and the pad the same an octave up, each
- * voice moving as little as it can; the bass is locked to the kick, a note
- * on each of its hits, the organ's root held until the next one, the chorus
- * walking back to the top on its last off-beat; the lead is the
+ * voice moving as little as it can; the bass leaves room: the organ's root
+ * on the first two hits of the kick under each chord, the second softer, a
+ * note on the third beat, the A pushed a sixteenth ahead of its chord, and
+ * silence between, the chorus walking back to the top on its last off-beat;
+ * the lead is the
  * chorus's hook over four bars, a call and its answer, each note a tone of
  * the chord under it, starting with it, and let go just before the next so
  * every note is struck anew, in the octave of a tape keyboard's flutes.
@@ -127,30 +129,26 @@ const held = (
 export const SONG_SCORE = {
   "bass-chorus": notes(
     [
-      [0, 0.6, 40],
-      [0.75, 0.9, 40],
-      [1.75, 0.6, 40],
-      [2.5, 1.3, 40],
-      [4, 0.6, 43],
-      [4.75, 1.1, 43],
-      [6, 0.4, 45],
-      [6.5, 0.9, 45],
-      [7.5, 0.4, 47],
+      [0, 0.5, 40],
+      [0.75, 0.4, 40, 0.7],
+      [2.5, 0.5, 40],
+      [4, 0.5, 43],
+      [4.75, 0.4, 43, 0.7],
+      [5.75, 0.9, 45],
+      [7.5, 0.3, 47, 0.7],
     ],
-    0.85
+    0.9
   ),
   "bass-verse": notes(
     [
-      [0, 0.6, 40],
-      [0.75, 0.9, 40],
-      [1.75, 0.6, 40],
-      [2.5, 1.3, 40],
-      [4, 0.6, 43],
-      [4.75, 1.1, 43],
-      [6, 0.4, 45],
-      [6.5, 1.3, 45],
+      [0, 0.5, 40],
+      [0.75, 0.4, 40, 0.7],
+      [2.5, 0.5, 40],
+      [4, 0.5, 43],
+      [4.75, 0.4, 43, 0.7],
+      [5.75, 0.9, 45],
     ],
-    0.85
+    0.9
   ),
   lead: notes(
     [
