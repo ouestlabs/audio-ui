@@ -85,8 +85,9 @@ const held = (
  * The song's notes by part, for MIDI tracks to play, each as long as its
  * loop. The organ holds the chords; the bass plays the roots on the kick, and
  * in the chorus jumps an octave and walks back to the top; the lead is the
- * chorus's hook over four bars, a call and its answer, ending on E so it
- * starts again.
+ * chorus's hook over four bars, a call and its answer, each note a tone of
+ * the chord under it, starting with it, and let go just before the next so
+ * every note is struck anew.
  */
 export const SONG_SCORE = {
   "bass-chorus": notes(
@@ -116,24 +117,21 @@ export const SONG_SCORE = {
   ),
   lead: notes(
     [
-      [0, 0.5, 71],
-      [0.5, 0.5, 74],
-      [1, 1.5, 76],
-      [2.5, 0.5, 74],
-      [3, 1, 71],
-      [4, 1.5, 74],
-      [5.5, 0.5, 71],
-      [6, 0.5, 73],
-      [6.5, 1.5, 69],
-      [8, 0.5, 71],
-      [8.5, 0.5, 74],
-      [9, 1, 76],
-      [10, 0.5, 78],
-      [10.5, 0.5, 76],
-      [11, 1, 74],
-      [12, 1.5, 79],
-      [13.5, 0.5, 78],
-      [14, 2, 76],
+      [0, 1.4, 76],
+      [1.5, 0.4, 74],
+      [2, 0.9, 71],
+      [3, 0.9, 74],
+      [4, 1.4, 71],
+      [5.5, 0.4, 74],
+      [6, 0.9, 73],
+      [7, 0.9, 76],
+      [8, 1.4, 79],
+      [9.5, 0.4, 78],
+      [10, 0.9, 76],
+      [11, 0.9, 74],
+      [12, 0.9, 74],
+      [13, 0.9, 71],
+      [14, 1.9, 73],
     ],
     0.8
   ),

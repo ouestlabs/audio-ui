@@ -247,7 +247,7 @@ const TRACKS: ArrangementTrack[] = [
       device(
         "lead-synth",
         monoSynthDevice,
-        { ...monoSynthPreset("Lead"), volume: 8 },
+        { ...monoSynthPreset("Lead"), glide: 0, volume: 8 },
         true
       ),
     ],
