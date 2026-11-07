@@ -491,26 +491,28 @@ function ReadingClips({
 }
 
 export interface ArrangementViewProps {
-  /** The tracks armed to record (REC-001). */
-  armed: ReadonlySet<string>;
+  /** The tracks armed to record (REC-001). With `onArm`, they show an Arm button. */
+  armed?: ReadonlySet<string>;
   arrangement: Arrangement;
   /** Automation mode, and the gains and pans moved by hand. */
   automation: ReturnType<typeof useTrackAutomation>;
-  /** Where playback starts: the start marker, in seconds. */
-  cursor: number;
   engine: Engine;
   /** What a track's envelope can move besides its volume and pan: the description of a device of this id, if it has one. */
   findDevice: Parameters<typeof deviceTargets>[1];
+  /** Where the cursor is, in seconds: playback starts there and a split cuts there. Read when it is needed, so it never draws the view again. */
+  getCursor: () => number;
   /** The take recording now, drawn on its tracks as it grows (REC-011). */
   liveTake: ArrangementTake | null;
   /** The locators and the time signatures, with the commands behind them. */
   markers: ReturnType<typeof useTimelineMarkers>;
+  /** A press on a clip or a header adds to the selection, and a drag across bare lane draws a rectangle: for a touch screen, which has no Shift. */
+  multiSelect?: boolean;
   /** A double-click on a MIDI lane: an empty clip a bar long, from the bar under the pointer. */
   onAddMidiClip: (track: string, at: number) => void;
   /** An audio or MIDI track's Arm button: `exclusive` disarms the others. */
-  onArm: (track: string, exclusive: boolean) => void;
+  onArm?: (track: string, exclusive: boolean) => void;
   /** A device of the library dropped on a track (its id), or on the add-track button (`NEW_TRACK`). */
-  onDevice: (device: string, track: string) => void;
+  onDevice?: (device: string, track: string) => void;
   /** "Edit" chosen from a clip's menu: the clip is selected, to show it. */
   onEditClip: () => void;
   /** Files dropped on a track (its id), or on the add-track button (`NEW_TRACK`), at a time of the arrangement. */
@@ -573,11 +575,12 @@ export function ArrangementView({
   armed,
   arrangement,
   automation,
-  cursor,
   engine,
   findDevice,
+  getCursor,
   liveTake,
   markers,
+  multiSelect = false,
   onAddMidiClip,
   onArm,
   onDevice,
@@ -658,7 +661,6 @@ export function ArrangementView({
 
   // Picking a clip lets go of the time selected, and its menu's Edit shows it in the panel.
   const { clear: letGoOfTime, pressLane, time: selectedTime } = timeSelection;
-  const getCursor = useCallback(() => cursor, [cursor]);
   const arrangedClips = useArrangedClips({
     clips,
     copying: arrangement.copying,
@@ -676,7 +678,7 @@ export function ArrangementView({
     (ids: string[]) => dispatch({ ids, type: "select-clips" }),
     [dispatch]
   );
-  const marquee = useMarquee(selectedIds as string[], selectClips, false);
+  const marquee = useMarquee(selectedIds as string[], selectClips, multiSelect);
   // A track moves by its grip, dragged or with Up and Down on it; a new one goes after the one it is asked from, of its kind.
   const trackOrder = useMemo(() => tracks.map((track) => track.id), [tracks]);
   const moveTrack = useCallback(
@@ -705,26 +707,34 @@ export function ArrangementView({
   );
   const pickTrack = useCallback(
     (id: string, additive: boolean) => {
-      dispatch({ additive, id, type: "select-track" });
+      dispatch({ additive: additive || multiSelect, id, type: "select-track" });
       onSelectTrack(id);
     },
-    [dispatch, onSelectTrack]
+    [dispatch, multiSelect, onSelectTrack]
   );
   /** A press on a track's bare lane picks the track and lets go of what was selected; the lane puts the cursor there, and a drag from it selects time. */
   const pressBareLane = useCallback(
     (event: PointerEvent<HTMLElement>) => {
       const { track } = event.currentTarget.dataset;
-      if (track && event.target === event.currentTarget && !event.shiftKey) {
+      if (
+        track &&
+        event.target === event.currentTarget &&
+        !(event.shiftKey || multiSelect)
+      ) {
         pressLane(track);
         dispatch({ type: "clear-selection" });
         onSelectTrack(track);
-        // The keys now go to the arrangement, not to the control that had them.
-        if (document.activeElement instanceof HTMLElement) {
-          document.activeElement.blur();
+        // The keys now go to the arrangement, not to the control that had them: unless that control holds the lane, which is where they go already.
+        const { activeElement } = document;
+        if (
+          activeElement instanceof HTMLElement &&
+          !activeElement.contains(event.currentTarget)
+        ) {
+          activeElement.blur();
         }
       }
     },
-    [dispatch, onSelectTrack, pressLane]
+    [dispatch, multiSelect, onSelectTrack, pressLane]
   );
   const renameTrack = useCallback(
     (id: string, name: string) => dispatch({ id, name, type: "rename-track" }),
@@ -812,7 +822,7 @@ export function ArrangementView({
       if (device) {
         event.preventDefault();
         setDropOn(null);
-        onDevice(device, track);
+        onDevice?.(device, track);
       } else if (files && carriesFiles(event)) {
         event.preventDefault();
         setDropOn(null);
@@ -1109,7 +1119,7 @@ export function ArrangementView({
                         />
                       )}
                       <FollowingControls
-                        armed={armed.has(track.id)}
+                        armed={armed?.has(track.id)}
                         compact={isShort(height)}
                         folded={arrangement.folded[track.id]}
                         following={{
@@ -1270,7 +1280,9 @@ export function ArrangementView({
               </span>
             ) : (
               <span className="sticky left-3 px-3">
-                Drop audio files or a device here
+                {onDevice
+                  ? "Drop audio files or a device here"
+                  : "Drop audio files here"}
               </span>
             )}
           </div>

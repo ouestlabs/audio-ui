@@ -570,6 +570,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/track-automation",
       "@audio-ui/use-track-reorder",
       "@audio-ui/audio-decode",
+      "@audio-ui/arrangement-view",
       "@shadcn/button",
       "@shadcn/button-group",
       "@shadcn/context-menu",

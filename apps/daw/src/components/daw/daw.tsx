@@ -1436,9 +1436,9 @@ export function Daw({
                   armed={take.armed}
                   arrangement={arrangement}
                   automation={automation}
-                  cursor={cursor}
                   engine={engine}
                   findDevice={libraryDevice}
+                  getCursor={getCursor}
                   liveTake={take.live}
                   markers={markers}
                   onAddMidiClip={addMidiClip}

@@ -11,7 +11,7 @@ An arrangement is tracks of clips along a song. It comes in two layers that inst
 
 ## Installation
 
-The whole arrangement installs with `npx shadcn@latest add @audio-ui/arrangement-editor`: every part below, with the timeline. A part installs alone by its name (`@audio-ui/arranged-clip`, `@audio-ui/use-track-reorder`…). The preview above is `@audio-ui/block-timeline`, which wires them into a screen. The tabs below are the timeline on its own.
+The whole arrangement installs with `npx shadcn@latest add @audio-ui/arrangement-editor`: every part below, with the timeline. A part installs alone by its name (`@audio-ui/arranged-clip`, `@audio-ui/use-track-reorder`…). The preview above is `@audio-ui/block-timeline`, which wires them into a screen around `@audio-ui/arrangement-view`. The tabs below are the timeline on its own.
 
 
 <CodeTabs>
@@ -348,6 +348,36 @@ The state is a plain value and a change is a command of `ArrangementCommand`, wh
 - **Time**: `clear-time`, `paste`, `remove-time`, `insert-time`, `consolidate-time` and `fade-time` act on a time selection (`{ range, tracks }`), and `copyOf(time)` copies one; `insert-time` and `remove-time` move the locators, the time signatures and the automation after the stretch with the clips (`marksAfterInsert`, `marksAfterRemove`, `automationAfterInsert`, `automationAfterRemove`); a locator in a stretch removed goes with it, one at its start too, a time signature in it starts where it did, and `remove-time` brings the loop along (`loopAfterRemove`: a time inside it comes back to where the stretch began); an envelope holds its value across time inserted; `set-duration` keeps every automation point at its time (`automationForDuration`); `lib/arrangement-state` holds them as pure functions: `copyTime`, `clearTime`, `pasteTime`, `deleteTime`, `openTime`, `consolidate`, with `crossfade` for a fade where two clips meet, given to both. `consolidate-time` merges a MIDI track's notes; for an audio track, render its clips with `renderTrackClips(doc, track, range, recordings)` from `arrangement-engine` (they play without the track's chain), keep the result as a recording, and name it in the command's `rendered`, by track. `audioClipsIn(clips, track, range)` says which clips a track would render. `useTimeSelection` calls `onConsolidate(time)` on Cmd/Ctrl + J for that. Without one, an audio track takes a copy of its first clip.
 - **Tempo, signatures, locators and the loop**: `set-tempo` keeps the musical positions, so every time in the document is scaled to the new bar and a MIDI clip three bars long stays three bars long, as one undo step, since each step of the history carries its own tempo. A recording follows the tempo only when it is warped, through its markers, the recording itself staying as it is; one that is not warped keeps its speed, so its start follows the bar and it lasts as many seconds as before, and where that runs it into the next clip it ends there (`settleOverlaps`). Then `add-signature`, `set-signature`, `move-signature` and `remove-signature`, `add-locator`, `rename-locator` and `remove-locator`, `set-loop` (`{ on, range }`, either one) and `change-loop`, a drag of the range that is one step once `settle-clip-edit` closes it, and `set-duration`, which changes the song's length without a step. The hook returns `tempo`, `signatures`, `locators`, `loop` and `duration`.
 - **History**: `undo` and `redo`, and `canUndo` and `canRedo`. `batch` (`{ commands }`) applies several commands in order as one step, each seeing what the one before it did: what one gesture that makes several changes sends, such as files dropped to make a track each.
+
+### The arrangement view
+
+`arrangement-view` (`npx shadcn@latest add @audio-ui/arrangement-view`) is the whole arrangement as one controlled element: the loop, the ruler, the locators and time signatures, a row per track with its header, meter, automation and clips, the return and group tracks, and the row under the last track that takes dropped files. It is the view the preview above and the workstation draw their tracks with. State comes in through the hooks of the parts below, and every change goes out as a command or a callback, so it runs over an engine of your own.
+
+```tsx
+<ArrangementView
+  arrangement={arrangement} // useArrangement
+  automation={automation} // useTrackAutomation
+  engine={engine} // useArrangementEngine: the position and the meters
+  findDevice={(id) => library.find(id)} // a device's description, for the automation chooser
+  getCursor={getPosition} // where the cursor is, read when it is needed
+  liveTake={null} // a take recording now, drawn as it grows
+  markers={markers} // useTimelineMarkers
+  onAddMidiClip={(track, at) => {}} // a double-click on a MIDI lane
+  onEditClip={() => {}} // a clip's title bar pressed, or its menu's Edit
+  onFiles={(files, track, at) => {}} // track is NEW_TRACK under the headers
+  onSeek={seek}
+  onSelectTrack={selectTrack}
+  peaksOf={(clip) => peaks.get(clip.id)} // what a clip draws of its sound
+  reading={[]} // files dropped and still being read
+  selectedTrack={selectedTrack}
+  timelineGrid={grid} // useTimelineGrid
+  timelineZoom={zoom} // useTimelineZoom
+  timeSelection={timeSelection} // useTimeSelection
+  viewportRef={viewportRef}
+/>
+```
+
+What an app owns stays out of the view. `peaksOf` gives the peaks of the sound a clip plays, `findDevice` the description of a device by its id, and `shortcuts` the keys to show beside each kind of track in the add-track menu. `onArm` and `armed` add an Arm button to the tracks that record, `onDevice` makes the view take a device dragged from `device-browser`, and `multiSelect` makes a press add to the selection, for a touch screen. Leave a prop out and what it drives is not drawn.
 
 ### Arranged clips
 
