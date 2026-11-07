@@ -83,19 +83,6 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["fader"],
-    description: "Fader component example with horizontal orientation",
-    files: [
-      {
-        path: "components/fader/fader-horizontal-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "fader-horizontal-demo",
-    registryDependencies: ["@audio-ui/fader"],
-    type: "registry:example",
-  },
-  {
-    categories: ["fader"],
     description:
       "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     files: [
@@ -106,65 +93,6 @@ export const components: RegistryItem[] = [
     ],
     name: "fader-pan-demo",
     registryDependencies: ["@audio-ui/fader"],
-    type: "registry:example",
-  },
-  {
-    categories: ["hardware"],
-    description: "LEDs lit by Rec and Mute, one blinking red, in three sizes",
-    files: [
-      {
-        path: "components/hardware/led-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "led-demo",
-    registryDependencies: ["@audio-ui/led", "@shadcn/button"],
-    type: "registry:example",
-  },
-  {
-    categories: ["hardware"],
-    description:
-      "Screens with a caption: a filter cutoff in kHz driven by a parameter field, a preset's name and a tempo",
-    files: [
-      {
-        path: "components/hardware/lcd-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "lcd-demo",
-    registryDependencies: [
-      "@audio-ui/lcd",
-      "@audio-ui/value-display",
-      "@audio-ui/parameter-field",
-    ],
-    type: "registry:example",
-  },
-  {
-    categories: ["hardware"],
-    description:
-      "A value of each kind: tempo, gain, cutoff, pan, mix, transpose and position",
-    files: [
-      {
-        path: "components/hardware/value-display-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "value-display-demo",
-    registryDependencies: ["@audio-ui/value-display"],
-    type: "registry:example",
-  },
-  {
-    categories: ["hardware"],
-    description:
-      "A power rocker that lights its LED, a small one laid down, and one disabled",
-    files: [
-      {
-        path: "components/hardware/rocker-switch-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "rocker-switch-demo",
-    registryDependencies: ["@audio-ui/rocker-switch", "@audio-ui/led"],
     type: "registry:example",
   },
   {
@@ -179,20 +107,6 @@ export const components: RegistryItem[] = [
     ],
     name: "parameter-field-demo",
     registryDependencies: ["@audio-ui/parameter-field"],
-    type: "registry:example",
-  },
-  {
-    categories: ["knob"],
-    description:
-      "A knob turned by dragging up and down, like a fader: 150px of travel spans the whole range",
-    files: [
-      {
-        path: "components/knob/knob-vertical-drag-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "knob-vertical-drag-demo",
-    registryDependencies: ["@audio-ui/knob"],
     type: "registry:example",
   },
   {
@@ -219,19 +133,6 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "knob-filter-control-demo",
-    registryDependencies: ["@audio-ui/knob"],
-    type: "registry:example",
-  },
-  {
-    categories: ["knob"],
-    description: "Knob value arc (rail + highlight) and optional anchor range",
-    files: [
-      {
-        path: "components/knob/knob-arc-and-anchor-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "knob-arc-and-anchor-demo",
     registryDependencies: ["@audio-ui/knob"],
     type: "registry:example",
   },
@@ -452,19 +353,6 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
-    categories: ["meter"],
-    description: "Horizontal meter example",
-    files: [
-      {
-        path: "components/meter/meter-horizontal-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "meter-horizontal-demo",
-    registryDependencies: ["@audio-ui/meter", "@audio-ui/use-simulated-levels"],
-    type: "registry:example",
-  },
-  {
     categories: ["xypad"],
     description: "XYPad with live x/y readout",
     files: [
@@ -511,23 +399,6 @@ export const components: RegistryItem[] = [
       "@shadcn/toggle",
     ],
     type: "registry:block",
-  },
-  {
-    categories: ["timeline"],
-    description:
-      "A timeline with a loop range, a ruler and two tracks, each with a clip you move, trim and fade, and a playhead on a clock: the timeline alone, with no arrangement around it",
-    files: [
-      {
-        path: "components/timeline/timeline-clips-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "timeline-clips-demo",
-    registryDependencies: [
-      "@audio-ui/timeline",
-      "@audio-ui/use-simulated-clock",
-    ],
-    type: "registry:example",
   },
   {
     categories: ["timeline"],
@@ -584,19 +455,6 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["waveform"],
-    description: "Waveform default example",
-    files: [
-      {
-        path: "components/waveform/waveform-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "waveform-demo",
-    registryDependencies: ["@audio-ui/waveform"],
-    type: "registry:example",
-  },
-  {
-    categories: ["waveform"],
     description:
       "Waveform with a resizable loop region, markers and a hover time",
     files: [
@@ -607,82 +465,6 @@ export const components: RegistryItem[] = [
     ],
     name: "waveform-region-demo",
     registryDependencies: ["@audio-ui/waveform"],
-    type: "registry:example",
-  },
-  {
-    categories: ["waveform"],
-    description:
-      "Live waveform scrolling with the microphone, or with a speech-like signal while it is off",
-    files: [
-      {
-        path: "components/waveform/waveform-live-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "waveform-live-demo",
-    registryDependencies: [
-      "@audio-ui/use-audio-signal",
-      "@audio-ui/use-microphone",
-      "@audio-ui/waveform",
-    ],
-    type: "registry:example",
-  },
-  {
-    categories: ["plot"],
-    description:
-      "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
-    files: [
-      {
-        path: "components/plot/plot-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    meta: {
-      hint: "Click a band to set its type and width. Double-click empty space to add one, Delete to remove it.",
-    },
-    name: "plot-demo",
-    dependencies: ["@audio-ui/core"],
-    registryDependencies: [
-      "@audio-ui/plot",
-      "@audio-ui/knob",
-      "@audio-ui/use-noise-through-eq",
-      "@audio-ui/use-spectrum",
-      "@shadcn/popover",
-      "@shadcn/select",
-    ],
-    type: "registry:example",
-  },
-  {
-    categories: ["plot"],
-    description:
-      "A low-pass filter: one handle on the resonance peak sets the cutoff and how much it rings",
-    files: [
-      {
-        path: "components/plot/plot-filter-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "plot-filter-demo",
-    dependencies: ["@audio-ui/core"],
-    registryDependencies: ["@audio-ui/plot"],
-    type: "registry:example",
-  },
-  {
-    categories: ["plot"],
-    description:
-      "A compressor transfer curve: one handle sets the threshold, the other the ratio",
-    files: [
-      {
-        path: "components/plot/plot-compressor-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "plot-compressor-demo",
-    dependencies: ["@audio-ui/core"],
-    registryDependencies: [
-      "@audio-ui/plot",
-      "@audio-ui/use-pulses-through-compressor",
-    ],
     type: "registry:example",
   },
   {
@@ -733,21 +515,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/web-audio",
     ],
     type: "registry:block",
-  },
-  {
-    categories: ["utility", "knob"],
-    dependencies: ["@audio-ui/core"],
-    description:
-      "A device of your own, defined by its parameters alone: the panel, the state and the tool an agent calls come from that one description. Turn a knob, or send the call a model could send",
-    files: [
-      {
-        path: "components/device/device-contract-demo.tsx",
-        type: "registry:example",
-      },
-    ],
-    name: "device-contract-demo",
-    registryDependencies: ["@audio-ui/device-panel"],
-    type: "registry:example",
   },
   {
     categories: ["delay-reverb", "plot", "knob"],

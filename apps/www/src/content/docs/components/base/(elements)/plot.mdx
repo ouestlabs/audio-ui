@@ -5,7 +5,7 @@ component: true
 base: base
 ---
 
-<ComponentPreview styleName="base-nova" name="plot-demo" />
+Curves and draggable points, for equalizers, filters and compressors: `Plot` draws a graph, and the devices' own panels are built on it.
 
 ## Installation
 
@@ -23,7 +23,7 @@ base: base
 npx shadcn@latest add @audio-ui/plot
 ```
 
-It installs the element alone. For the equalizer above, with its pink noise and spectrum, ready to run: `npx shadcn@latest add @audio-ui/plot-demo`.
+It installs the element alone.
 
 </TabsContent>
 
@@ -130,20 +130,6 @@ const spectrum = useSpectrum(analyser, { minHz: 20, maxHz: 20000 });
 ```
 
 The hook's options are in [Analysis](/docs/engine/analysis#spectrum).
-
-## Examples
-
-### Filter
-
-One handle on the resonance peak sets the cutoff and how much it rings.
-
-<ComponentPreview styleName="base-nova" name="plot-filter-demo" />
-
-### Compressor
-
-One handle sets the threshold, the other the ratio.
-
-<ComponentPreview styleName="base-nova" name="plot-compressor-demo" />
 
 ## API reference
 

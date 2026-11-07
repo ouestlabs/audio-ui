@@ -7,22 +7,16 @@
       "name": "envelope"
     },
     {
-      "count": 4,
+      "count": 3,
       "description": "Fader components for level, gain, and mix controls.",
       "label": "Fader",
       "name": "fader"
     },
     {
-      "count": 28,
+      "count": 25,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
-    },
-    {
-      "count": 5,
-      "description": "Hardware-panel pieces: LEDs, small screens, values as they read, and rocker switches.",
-      "label": "Hardware",
-      "name": "hardware"
     },
     {
       "count": 2,
@@ -31,7 +25,7 @@
       "name": "parameter-field"
     },
     {
-      "count": 4,
+      "count": 3,
       "description": "Decibel meter components for monitoring stereo and multi-channel audio levels.",
       "label": "Meter",
       "name": "meter"
@@ -91,7 +85,7 @@
       "name": "modulation"
     },
     {
-      "count": 3,
+      "count": 2,
       "description": "Utility devices: gain, pan, width, mono and phase invert.",
       "label": "Utility",
       "name": "utility"
@@ -107,12 +101,6 @@
       "description": "Tuners: the note and the pitch of a sound, live from the microphone.",
       "label": "Tuner",
       "name": "tuner"
-    },
-    {
-      "count": 22,
-      "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
-      "label": "Plot",
-      "name": "plot"
     },
     {
       "count": 2,
@@ -157,13 +145,13 @@
       "name": "transport"
     },
     {
-      "count": 2,
+      "count": 1,
       "description": "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
       "label": "Timeline",
       "name": "timeline"
     },
     {
-      "count": 4,
+      "count": 2,
       "description": "Seekable waveform components for scrubbing and visualizing audio playback.",
       "label": "Waveform",
       "name": "waveform"
@@ -175,5 +163,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 70
+  "totalComponents": 55
 }
