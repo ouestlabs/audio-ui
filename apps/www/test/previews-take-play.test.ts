@@ -45,6 +45,7 @@ describe("takesPlay", () => {
           "block-electric-piano",
           "block-fm-synth",
           "block-mono-synth",
+          "block-organ",
           "block-poly-synth",
           "block-sampler",
           "block-synth-panel",

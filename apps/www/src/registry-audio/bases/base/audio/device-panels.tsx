@@ -17,6 +17,7 @@ import { LimiterPanel } from "@/registry-audio/bases/base/audio/panels/limiter-p
 import { MidSidePanel } from "@/registry-audio/bases/base/audio/panels/mid-side-panel";
 import { MonoSynthPanel } from "@/registry-audio/bases/base/audio/panels/mono-synth-panel";
 import { MultibandPanel } from "@/registry-audio/bases/base/audio/panels/multiband-panel";
+import { OrganPanel } from "@/registry-audio/bases/base/audio/panels/organ-panel";
 import { OverdrivePanel } from "@/registry-audio/bases/base/audio/panels/overdrive-panel";
 import { PhaserPanel } from "@/registry-audio/bases/base/audio/panels/phaser-panel";
 import { PocketSynthPanel } from "@/registry-audio/bases/base/audio/panels/pocket-synth-panel";
@@ -90,6 +91,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.limiter": entry(LimiterPanel),
   "audioui.mid-side": entry(MidSidePanel),
   "audioui.mono-synth": entry(MonoSynthPanel, "w-[40rem]"),
+  "audioui.organ": entry(OrganPanel, "w-[44rem]"),
   "audioui.multiband": entry(MultibandPanel, "w-96"),
   "audioui.overdrive": entry(OverdrivePanel),
   "audioui.phaser": entry(PhaserPanel, "w-[28rem]"),

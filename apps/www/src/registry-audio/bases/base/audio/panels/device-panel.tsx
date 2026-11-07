@@ -138,6 +138,7 @@ const MAX_BUTTONS = 6;
 function ChoiceControl({
   device,
   disabled,
+  group,
   onValueChange,
   parameter,
   value,
@@ -239,7 +240,7 @@ function ChoiceControl({
     // As wide as its column at most: in a narrow panel a list shrinks to fit instead of running over the edge.
     <div className="flex min-w-0 max-w-full flex-col items-center gap-1.5">
       <span aria-hidden="true" className="text-muted-foreground text-xs">
-        {parameter.label}
+        {withoutGroup(parameter.label, group)}
       </span>
       {control}
     </div>
@@ -468,6 +469,7 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
         <ChoiceControl
           {...props}
           disabled={disabled.includes(parameter.id as never)}
+          group={group}
           key={parameter.id}
           parameter={parameter}
         />

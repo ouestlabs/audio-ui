@@ -14,6 +14,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "electric-piano",
   "fm-synth",
   "mono-synth",
+  "organ",
   "sampler",
   "wave-shaper",
   "utility",

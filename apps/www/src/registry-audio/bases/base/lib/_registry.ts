@@ -116,6 +116,22 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
+      "The Organ as an instrument device: nine drawbars of sines at the organ's harmonics, a percussion on the second or third harmonic, a key click, a drive and a rotary speaker, with six registrations, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/organ-device.ts",
+        target: "components/audio-ui/devices/organ/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "organ-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "The FM Synth as an instrument device: four operators, each a ratio, a level, a decay and a sustain, eight algorithms that wire them, feedback, an attack, a release and a vibrato, with eight presets, and no panel and no audio in it.",
     files: [
       {
@@ -190,6 +206,22 @@ const items: RegistryItem[] = [
     ],
     name: "mono-synth-engine",
     registryDependencies: ["@audio-ui/mono-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One key of the Organ on the Web Audio API: nine sines at the drawbars' levels, with the percussion and the click, through a drive and a rotary speaker; noteOn sounds a key at once, or cuts the held one and sounds anew, noteOff stops it at once, and the drawbars move a held key. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/organ-engine.ts",
+        target: "components/audio-ui/devices/organ/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "organ-engine",
+    registryDependencies: ["@audio-ui/organ-device"],
     type: "registry:lib",
   },
   {
@@ -1246,6 +1278,8 @@ const items: RegistryItem[] = [
       "@audio-ui/fm-synth-engine",
       "@audio-ui/mono-synth-device",
       "@audio-ui/mono-synth-engine",
+      "@audio-ui/organ-device",
+      "@audio-ui/organ-engine",
       "@audio-ui/sampler-device",
       "@audio-ui/sampler-engine",
       "@audio-ui/electric-piano-device",

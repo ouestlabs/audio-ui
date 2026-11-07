@@ -25,6 +25,7 @@ const MIDI = new Set([
   "block-electric-piano",
   "block-fm-synth",
   "block-mono-synth",
+  "block-organ",
   "block-poly-synth",
   "block-sampler",
   "piano-size-default-demo",

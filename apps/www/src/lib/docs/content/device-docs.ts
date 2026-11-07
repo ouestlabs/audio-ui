@@ -14,6 +14,7 @@ import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import { midSideDevice } from "@/registry-audio/bases/base/lib/mid-side-device";
 import { monoSynthDevice } from "@/registry-audio/bases/base/lib/mono-synth-device";
 import { multibandDevice } from "@/registry-audio/bases/base/lib/multiband-device";
+import { organDevice } from "@/registry-audio/bases/base/lib/organ-device";
 import { overdriveDevice } from "@/registry-audio/bases/base/lib/overdrive-device";
 import { phaserDevice } from "@/registry-audio/bases/base/lib/phaser-device";
 import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-device";
@@ -48,6 +49,7 @@ export const DEVICE_DOCS = {
   "electric-piano": electricPianoDevice,
   "fm-synth": fmSynthDevice,
   "mono-synth": monoSynthDevice,
+  organ: organDevice,
   sampler: samplerDevice,
   redux: reduxDevice,
   reverb: reverbDevice,

@@ -38,6 +38,8 @@ import { monoSynthDevice } from "@/registry-audio/bases/base/lib/mono-synth-devi
 import { createMonoSynthEngine } from "@/registry-audio/bases/base/lib/mono-synth-engine";
 import { multibandDevice } from "@/registry-audio/bases/base/lib/multiband-device";
 import { createMultibandEngine } from "@/registry-audio/bases/base/lib/multiband-engine";
+import { organDevice } from "@/registry-audio/bases/base/lib/organ-device";
+import { createOrganEngine } from "@/registry-audio/bases/base/lib/organ-engine";
 import { overdriveDevice } from "@/registry-audio/bases/base/lib/overdrive-device";
 import { createOverdriveEngine } from "@/registry-audio/bases/base/lib/overdrive-engine";
 import { phaserDevice } from "@/registry-audio/bases/base/lib/phaser-device";
@@ -126,6 +128,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(polySynthDevice, createPolySynthEngine, "Instruments"),
   entry(monoSynthDevice, createMonoSynthEngine, "Instruments", { mono: true }),
   entry(electricPianoDevice, createElectricPianoEngine, "Instruments"),
+  entry(organDevice, createOrganEngine, "Instruments"),
   entry(fmSynthDevice, createFmSynthEngine, "Instruments"),
   entry(samplerDevice, createSamplerEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),
