@@ -3,7 +3,7 @@
  * every part plays: the verse and the chorus differ by who plays, not by
  * their chords, so the song comes round as a loop does. Its strummed guitar
  * and its drums are drawn here as recordings, as files would arrive, one per
- * part; its organ, its bass and its lead are notes for MIDI tracks to play.
+ * part; its organ, its pad, its bass and its lead are notes for MIDI tracks to play.
  * The guitar is a plucked-string model (a burst of noise round a delay line
  * that loses its highs on each pass), strummed down and up; the drums are
  * oscillators and noise. What an arrangement's demo plays.
@@ -83,7 +83,8 @@ const held = (
 
 /**
  * The song's notes by part, for MIDI tracks to play, each as long as its
- * loop. The organ holds the chords; the bass plays the roots on the kick, and
+ * loop. The organ holds the chords and the pad the same an octave up, each
+ * voice moving as little as it can; the bass plays the roots on the kick, and
  * in the chorus jumps an octave and walks back to the top; the lead is the
  * chorus's hook over four bars, a call and its answer, each note a tone of
  * the chord under it, starting with it, and let go just before the next so
@@ -134,6 +135,14 @@ export const SONG_SCORE = {
       [14, 1.9, 73],
     ],
     0.8
+  ),
+  pad: held(
+    [
+      { at: 0, beats: 4, notes: [64, 67, 71, 74] },
+      { at: 4, beats: 2, notes: [62, 67, 71, 74] },
+      { at: 6, beats: 2, notes: [61, 64, 69, 73] },
+    ],
+    0.6
   ),
   organ: held(
     [

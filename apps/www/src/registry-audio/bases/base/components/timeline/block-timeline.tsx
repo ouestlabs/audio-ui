@@ -89,6 +89,10 @@ import {
 } from "@/registry-audio/bases/base/lib/mono-synth-device";
 import { organDevice } from "@/registry-audio/bases/base/lib/organ-device";
 import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
+import {
+  stringMachineDevice,
+  stringMachinePreset,
+} from "@/registry-audio/bases/base/lib/string-machine-device";
 import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
@@ -181,10 +185,11 @@ const REVERB = "return-1";
 
 /**
  * The song as a project: its drums and its strummed guitar as audio tracks,
- * its bass, its organ and its lead as MIDI tracks played by the registry's
- * instruments (a mono synth's sub bass, a tonewheel organ on three drawbars
- * and a mono synth's lead), a vibe on the guitar's chain, and a reverb on a
- * return track the organ, the guitar and the lead send to.
+ * its bass, its organ, its lead and its pad as MIDI tracks played by the
+ * registry's instruments (a mono synth's sub bass, a tonewheel organ on three
+ * drawbars, a mono synth's lead and a string machine's swell), a vibe on the
+ * guitar's chain, and a reverb on a return track the organ, the guitar, the
+ * lead and the pad send to.
  */
 const TRACKS: ArrangementTrack[] = [
   {
@@ -237,7 +242,7 @@ const TRACKS: ArrangementTrack[] = [
     color: 3,
     devices: [device("guitar-vibe", vibeDevice)],
     id: "guitar",
-    mix: { ...UNITY_MIX, color: 3, gain: 10 ** (-2 / 20) },
+    mix: { ...UNITY_MIX, gain: 10 ** (-5 / 20) },
     name: "Guitar",
     sends: { [REVERB]: 0.35 },
   },
@@ -255,6 +260,23 @@ const TRACKS: ArrangementTrack[] = [
     kind: "midi",
     name: "Lead",
     sends: { [REVERB]: 0.3 },
+  },
+  {
+    color: 1,
+    devices: [
+      device(
+        "pad-strings",
+        stringMachineDevice,
+        stringMachinePreset("Swell"),
+        true
+      ),
+    ],
+    id: "pad",
+    kind: "midi",
+    // A bed under the band, felt more than heard.
+    mix: { ...UNITY_MIX, gain: 10 ** (-6 / 20) },
+    name: "Pad",
+    sends: { [REVERB]: 0.4 },
   },
 ];
 
@@ -350,22 +372,29 @@ const PLAYS: Record<(typeof PARTS)[number]["id"], readonly Take[]> = {
  * The song's clips, each named after the part it plays in. The bar before
  * each chorus ends on a snare roll, in place of the part's own drums.
  */
-const CLIPS: Arranged[] = PARTS.flatMap((part, index) => {
-  const end = PARTS[index + 1]?.at ?? BARS;
-  const fill = PARTS[index + 1]?.id === "chorus";
-  const clips = PLAYS[part.id].map((take) =>
-    clipOf(
-      `${part.id}-${take}`,
-      part.name,
-      take,
-      part.at,
-      fill && take.startsWith("drums-") ? end - 1 : end
-    )
-  );
-  return fill
-    ? [...clips, clipOf(`${part.id}-fill`, "Fill", "drums-fill", end - 1, end)]
-    : clips;
-});
+const CLIPS: Arranged[] = [
+  ...PARTS.flatMap((part, index) => {
+    const end = PARTS[index + 1]?.at ?? BARS;
+    const fill = PARTS[index + 1]?.id === "chorus";
+    const clips = PLAYS[part.id].map((take) =>
+      clipOf(
+        `${part.id}-${take}`,
+        part.name,
+        take,
+        part.at,
+        fill && take.startsWith("drums-") ? end - 1 : end
+      )
+    );
+    return fill
+      ? [
+          ...clips,
+          clipOf(`${part.id}-fill`, "Fill", "drums-fill", end - 1, end),
+        ]
+      : clips;
+  }),
+  // The pad swells in on the third bar and holds to the end: each time round, the song opens without it.
+  clipOf("pad", "Pad", "pad", 2, BARS),
+];
 
 const SHORTCUTS: { action: string; keys: string[] }[] = [
   { action: "Split at the cursor", keys: ["S"] },

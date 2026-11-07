@@ -203,7 +203,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `sortable-drag` | `startSortableDrag` from `@/lib/sortable-drag` | The gesture of reordering a row by dragging: the others slide aside, the item shows dimmed where it would land, the view scrolls at its edges, with no render while it moves. `device-chain` and `use-track-reorder` use it |
 | `wav-file` | `encodeWav`, `downloadWavFile` from `@/lib/wav-file` | Save rendered sound as a WAV file, 16 or 24-bit, normalized or not: what an `OfflineAudioContext` renders |
 | `key-detector`, `oversampling`, `synced-rate`, `demo-sound`, `device-measure` | from `@/lib/<name>` | The engine pieces of the devices: a key detector worklet, oversampled waveshaping, a tempo-synced rate, the demo sounds by name (a boom bap loop and a drone), measuring an engine against its panel |
-| `demo-song` | from `@/lib/demo-song` | The arrangement demo's song: a chill song at 80 BPM on one two-bar loop (intro, verse, chorus, outro), a strummed guitar and drums as recordings per part (`renderSongPart`, `SONG_RECORDINGS`), an organ, a bass and a lead as notes (`SONG_SCORE`) |
+| `demo-song` | from `@/lib/demo-song` | The arrangement demo's song: a chill song at 80 BPM on one two-bar loop (intro, verse, chorus, outro), a strummed guitar and drums as recordings per part (`renderSongPart`, `SONG_RECORDINGS`), an organ, a pad, a bass and a lead as notes (`SONG_SCORE`) |
 | `piano-roll-tools` | `createPianoRollTools` from `@/lib/piano-roll-tools` | Typed tools an AI model uses to edit a piano roll |
 
 ## Ready blocks
