@@ -120,7 +120,7 @@ const held = (
  * voice moving as little as it can; the bass leaves room: the organ's root
  * on the first two hits of the kick under each chord, the second softer, a
  * note on the third beat, the A pushed a sixteenth ahead of its chord, and
- * silence between, the chorus walking back to the top on its last off-beat;
+ * silence between, the chorus dropping to a low B on its last off-beat;
  * the lead is the
  * chorus's hook over four bars, a call and its answer, each note a tone of
  * the chord under it, starting with it, and let go just before the next so
@@ -135,7 +135,7 @@ export const SONG_SCORE = {
       [4, 0.5, 43],
       [4.75, 0.4, 43, 0.7],
       [5.75, 0.9, 45],
-      [7.5, 0.3, 47, 0.7],
+      [7.5, 0.3, 35, 0.7],
     ],
     0.9
   ),
