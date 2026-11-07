@@ -1187,7 +1187,7 @@ export const components: RegistryItem[] = [
     categories: ["device-chain", "knob"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine, or render it to a WAV file. It is the view a workstation shows under its tracks, over an arrangement of one track",
+      "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine. It is the view a workstation shows under its tracks, over an arrangement of one track",
     files: [
       {
         path: "components/device-chain/block-device-chain.tsx",
@@ -1206,9 +1206,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/demo-sound",
       "@audio-ui/use-demo-source",
       "@audio-ui/use-play-switch",
-      "@audio-ui/wav-file",
       "@audio-ui/web-audio",
-      "@shadcn/button",
     ],
     type: "registry:block",
   },

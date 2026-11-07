@@ -373,7 +373,7 @@
   },
   {
     "categories": ["device-chain", "knob"],
-    "description": "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine, or render it to a WAV file. It is the view a workstation shows under its tracks, over an arrangement of one track",
+    "description": "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine. It is the view a workstation shows under its tracks, over an arrangement of one track",
     "name": "block-device-chain",
     "title": "Block device chain"
   },

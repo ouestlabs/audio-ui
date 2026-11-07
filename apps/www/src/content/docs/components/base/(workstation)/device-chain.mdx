@@ -13,7 +13,7 @@ The devices of a track, in the order the sound goes through them, with a way to 
 
 <Install name="device-chain" packages="" />
 
-The library is an item of its own: see [Device browser](/docs/components/base/device-browser). The block above, which plays a loop through the chain with the library beside it, is `@audio-ui/block-device-chain`.
+The library is an item of its own: see [Device browser](/docs/components/base/device-browser). The block above, which plays a loop through the chain, is `@audio-ui/block-device-chain`.
 
 ## Anatomy
 
@@ -165,45 +165,9 @@ const shelves = DEVICE_SHELVES.map((shelf) => ({
 
 ## Playing the chain
 
-The block runs one engine per slot, in series, the output of each into the input of the next: a slot added makes an engine, a slot removed lets its engine go, a new state goes to its engine only, and a move wires them again in the new order. A compressor's key input, its sidechain, is fed with the kick of the loop, so switching its Sidechain on ducks the loop with it. The engines are the devices' own (`<name>-engine`), the same ones their pages play.
+The block holds an arrangement of one track, whose chain is the devices on screen, and the arrangement's engine plays a loop through it: a device added, moved, removed or turned reaches the engine as a command of the arrangement, and the sound follows it. The engines are the devices' own (`<name>-engine`), the same ones their pages play.
 
 Over an engine of your own, keep the same list and send it the order and the states: the chain and the panels never touch the audio.
-
-### Exporting
-
-**Export WAV** renders the loop through the chain into a file, faster than real time: the same engines made on an `OfflineAudioContext`, once those that load a worklet have it, and the file runs on for three seconds after the loop, for echoes and the tail of a reverb to die away. A render says nothing while it runs, so the block stops it a few times on the way (`suspend`) to show how far it has got. `wav-file` (`npx shadcn@latest add @audio-ui/wav-file`) turns what renders into a WAV file:
-
-```ts
-import { downloadWavFile } from "@/lib/wav-file";
-
-const offline = new OfflineAudioContext(2, seconds * 48_000, 48_000);
-// The same engines, made on `offline`, with the source connected and started.
-const rendered = await offline.startRendering();
-downloadWavFile(rendered, { bitDepth: 24, filename: "chain.wav" });
-```
-
-`downloadWavFile` writes 16-bit PCM unless told 24, and `normalize: true` scales the sound so its loudest sample sits at full scale. `encodeWav(channels, sampleRate, options)` gives the bytes instead, to upload or to keep.
-
-## A track's devices
-
-`device-view` (`npx shadcn@latest add @audio-ui/device-view`) is the chain of one track of an [arrangement](/docs/components/base/arrangement), controlled: each device on its own panel, racks with their macros, chains and zones, a drum rack with its pads, a device dropped from the library where it lands, and, at the end of the chain, a way to open the library or add a rack. It is the view the workstation shows under its tracks. Every change is a command of the arrangement, so it is one step of undo and an engine that follows the arrangement follows it.
-
-```tsx
-<DeviceView
-  arrangement={arrangement} // useArrangement
-  onDeviceMoved={(track, device, parameters) => {}} // a knob turned by hand stops following its envelope
-  onHoldNote={(track, note) => {}} // an instrument's pad holds a note; null lets it go
-  onNoteOff={(track, pitch) => {}}
-  onNoteOn={(track, pitch, velocity) => {}}
-  onOpenLibrary={() => {}} // the library, ready to search
-  onPadFiles={(track, rack, note, files) => {}} // files dropped on a pad of a drum rack
-  overridden={automation.overridden}
-  position={engine.position}
-  track={selectedTrack}
-/>
-```
-
-What a view remembers per device, such as a slot folded, the chain picked in a rack or whether its macros show, lasts as long as the view. Give `useEntry` a hook with the shape of `useState` by an entry name and a device id to keep them, in storage for example, so they come back.
 
 ## Racks
 
