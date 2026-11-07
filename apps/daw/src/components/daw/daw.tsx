@@ -16,8 +16,8 @@ import {
   ArrangementView,
   type ReadingFiles,
 } from "@/components/audio-ui/arrangement-view";
+import { DeviceView } from "@/components/audio-ui/device-view";
 import { ClipEditor } from "@/components/daw/clip-editor";
-import { DeviceView } from "@/components/daw/device-view";
 import { EngineLine } from "@/components/daw/engine-line";
 import { LibraryPanel } from "@/components/daw/library-panel";
 import { MixerView } from "@/components/daw/mixer-view";
@@ -100,6 +100,7 @@ import {
   saveView,
   useForgetRemoved,
   useSavedArrangement,
+  useSavedEntry,
   useSavedScroll,
   useSavedState,
 } from "./use-saved-view";
@@ -1339,6 +1340,7 @@ export function Daw({
             overridden={automation.overridden}
             position={engine.position}
             track={selectedTrack}
+            useEntry={useSavedEntry}
           />
         )}
       </section>

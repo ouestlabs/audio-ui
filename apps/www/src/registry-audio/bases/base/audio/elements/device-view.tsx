@@ -1,31 +1,33 @@
+"use client";
+
 import type { ParameterValue } from "@audio-ui/core/device";
-import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
-import { type ReactNode, useCallback, useMemo } from "react";
-import {
-  DeviceChain,
-  DeviceChainSlot,
-  DeviceChainSlotControls,
-} from "@/components/audio-ui/device-chain";
-import { devicePanel } from "@/components/audio-ui/device-panels";
-import { DrumRackPanel } from "@/components/audio-ui/drum-rack-panel";
-import {
-  type RackChainMix,
-  RackPanel,
-  type RackParameter,
-} from "@/components/audio-ui/rack-panel";
-import { Button } from "@/components/ui/button";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { IconPlaceholder } from "@/components/icon-placeholder";
+import { Button } from "@/registry/bases/base/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { useArrangement } from "@/hooks/use-arrangement";
+} from "@/registry/bases/base/ui/dropdown-menu";
+import { devicePanel } from "@/registry-audio/bases/base/audio/device-panels";
+import {
+  DeviceChain,
+  DeviceChainSlot,
+  DeviceChainSlotControls,
+} from "@/registry-audio/bases/base/audio/elements/device-chain";
+import { DrumRackPanel } from "@/registry-audio/bases/base/audio/panels/drum-rack-panel";
+import {
+  type RackChainMix,
+  RackPanel,
+  type RackParameter,
+} from "@/registry-audio/bases/base/audio/panels/rack-panel";
+import type { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import {
   type AutomationFollowing,
   useAutomatedDevice,
   useAutomatedRack,
-} from "@/hooks/use-track-automation";
+} from "@/registry-audio/bases/base/hooks/use-track-automation";
 import {
   type ArrangementTrack,
   type AutomatedParameter,
@@ -38,12 +40,39 @@ import {
   type RackMapping,
   rackDevices,
   type TrackDevice,
-} from "@/lib/arrangement";
-import { trackOf } from "@/lib/arrangement-state";
-import { libraryDevice } from "@/lib/device-library";
-import { useSavedEntry } from "./use-saved-view";
+} from "@/registry-audio/bases/base/lib/arrangement";
+import { trackOf } from "@/registry-audio/bases/base/lib/arrangement-state";
+import { libraryDevice } from "@/registry-audio/bases/base/lib/device-library";
 
 type Arrangement = ReturnType<typeof useArrangement>;
+
+/** What a device view remembers per device or rack, by its id: whether a slot is folded, the chain or pad picked, what a rack shows. */
+export interface DeviceViewEntries {
+  deviceFolded: boolean;
+  drumNote: number;
+  rackChain: string;
+  rackMacros: boolean;
+  rackZones: boolean;
+}
+
+/** `useState` for one of those entries, by the id of the device it is for. Give one that keeps them, such as in storage, so they come back; without one they last as long as the view. */
+export type DeviceViewMemory = <Entry extends keyof DeviceViewEntries>(
+  entry: Entry,
+  id: string,
+  fallback: DeviceViewEntries[Entry]
+) => readonly [
+  DeviceViewEntries[Entry],
+  (value: DeviceViewEntries[Entry]) => void,
+];
+
+/** The memory a view has by default: `useState`, so an entry lasts as long as the view. */
+function useLocalEntry<Entry extends keyof DeviceViewEntries>(
+  _entry: Entry,
+  _id: string,
+  fallback: DeviceViewEntries[Entry]
+) {
+  return useState(fallback);
+}
 
 /** Where a chain of devices sits: the track's own, or a chain of a rack on it, which takes an instrument at its head in an instrument rack. */
 type ChainPlace =
@@ -68,6 +97,8 @@ interface ChainProps {
   owner: ArrangementTrack;
   tempo: Arrangement["doc"]["tempo"];
   track: string;
+  /** Where the view keeps what it remembers per device. */
+  useEntry: DeviceViewMemory;
 }
 
 /** Whether a slot is folded, kept with the view by the device's id. */
@@ -114,7 +145,7 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   );
   const { onHoldNote } = chain;
   const release = useCallback(() => onHoldNote(null), [onHoldNote]);
-  const [folded, setFolded] = useSavedEntry("deviceFolded", device.id, false);
+  const [folded, setFolded] = chain.useEntry("deviceFolded", device.id, false);
   const fold = { folded, onFoldedChange: setFolded };
   if (device.rack && device.device === DRUM_RACK_DEVICE) {
     return <DrumSlot device={device} fold={fold} {...chain} />;
@@ -333,13 +364,17 @@ function RackSlot({
   const rackId = device.id;
   // An instrument rack's chains each start with an instrument (DEV-014).
   const layered = device.device === INSTRUMENT_RACK_DEVICE;
-  const [picked, setPicked] = useSavedEntry("rackChain", rackId, "");
-  const [macrosShown, setMacrosShown] = useSavedEntry(
+  const [picked, setPicked] = chain.useEntry("rackChain", rackId, "");
+  const [macrosShown, setMacrosShown] = chain.useEntry(
     "rackMacros",
     rackId,
     false
   );
-  const [zonesShown, setZonesShown] = useSavedEntry("rackZones", rackId, false);
+  const [zonesShown, setZonesShown] = chain.useEntry(
+    "rackZones",
+    rackId,
+    false
+  );
   const selected =
     rack.chains.find((item) => item.id === picked) ?? rack.chains[0];
   const place = useMemo(
@@ -444,8 +479,8 @@ function DrumSlot({
   const { dispatch, onNoteOff, onNoteOn, onPadFiles, track } = chain;
   const rack = device.rack ?? { chains: [], macros: [] };
   const rackId = device.id;
-  const [note, setNote] = useSavedEntry("drumNote", rackId, lowestPad(rack));
-  const [macrosShown, setMacrosShown] = useSavedEntry(
+  const [note, setNote] = chain.useEntry("drumNote", rackId, lowestPad(rack));
+  const [macrosShown, setMacrosShown] = chain.useEntry(
     "rackMacros",
     rackId,
     false
@@ -550,6 +585,7 @@ export function DeviceView({
   overridden,
   position,
   track,
+  useEntry = useLocalEntry,
 }: {
   arrangement: Arrangement;
   /** What was moved by hand, by track: it stays as set. */
@@ -581,6 +617,8 @@ export function DeviceView({
     files: File[]
   ) => void;
   track: string | null;
+  /** Where the view keeps what it remembers per device, such as a slot folded; each lasts as long as the view when none is given. */
+  useEntry?: DeviceViewMemory;
 }) {
   const { dispatch, doc } = arrangement;
   const current = track ? trackOf(doc, track) : undefined;
@@ -694,7 +732,14 @@ export function DeviceView({
           <DropdownMenu>
             <DropdownMenuTrigger render={<Button size="sm" variant="link" />}>
               Add a rack
-              <CaretDownIcon aria-hidden="true" />
+              <IconPlaceholder
+                aria-hidden="true"
+                hugeicons="ArrowDown01Icon"
+                lucide="ChevronDownIcon"
+                phosphor="CaretDownIcon"
+                remixicon="RiArrowDownSLine"
+                tabler="IconChevronDown"
+              />
             </DropdownMenuTrigger>
             {rackMenu}
           </DropdownMenu>
@@ -709,7 +754,14 @@ export function DeviceView({
           title="Open the library"
           variant="ghost"
         >
-          <PlusIcon aria-hidden="true" />
+          <IconPlaceholder
+            aria-hidden="true"
+            hugeicons="PlusSignIcon"
+            lucide="PlusIcon"
+            phosphor="PlusIcon"
+            remixicon="RiAddLine"
+            tabler="IconPlus"
+          />
         </Button>
         <DropdownMenu>
           <DropdownMenuTrigger
@@ -722,7 +774,14 @@ export function DeviceView({
               />
             }
           >
-            <StackIcon aria-hidden="true" />
+            <IconPlaceholder
+              aria-hidden="true"
+              hugeicons="Layers01Icon"
+              lucide="LayersIcon"
+              phosphor="StackIcon"
+              remixicon="RiStackLine"
+              tabler="IconStack2"
+            />
           </DropdownMenuTrigger>
           {rackMenu}
         </DropdownMenu>
@@ -745,6 +804,7 @@ export function DeviceView({
         place={undefined}
         tempo={doc.tempo}
         track={current.id}
+        useEntry={useEntry}
       />
     </div>
   );
