@@ -1309,6 +1309,38 @@ export const audio: RegistryItem[] = [
   },
   ...devices,
   {
+    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    description:
+      "The arrangement of a workstation, controlled: the loop, the ruler, the locators and time signatures, a row per track with its header, meter, automation and clips, the return and group tracks, and the row that takes files and devices dropped on it. State comes in through the arrangement's hooks and every change goes out as a command or a callback, so it runs over an engine of your own.",
+    files: [
+      {
+        path: "audio/elements/arrangement-view.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "arrangement-view",
+    registryDependencies: [
+      "@audio-ui/arranged-clip",
+      "@audio-ui/arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/device-chain",
+      "@audio-ui/timeline",
+      "@audio-ui/timeline-markers",
+      "@audio-ui/track-automation",
+      "@audio-ui/track-level",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/use-marquee-selection",
+      "@audio-ui/use-time-selection",
+      "@audio-ui/use-timeline-grid",
+      "@audio-ui/use-timeline-zoom",
+      "@audio-ui/use-track-reorder",
+      "@shadcn/button",
+      "@shadcn/context-menu",
+      "@shadcn/dropdown-menu",
+    ],
+    type: "registry:ui",
+  },
+  {
     description:
       "The parts of an arrangement editor in one install: the timeline, its zoom and grid, the arrangement's state, its clips, markers and automation, track reordering and MIDI playback. block-timeline wires them into a screen.",
     files: [],
@@ -1318,6 +1350,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/arrangement",
       "@audio-ui/use-arrangement",
       "@audio-ui/arranged-clip",
+      "@audio-ui/arrangement-view",
       "@audio-ui/timeline-markers",
       "@audio-ui/track-automation",
       "@audio-ui/use-track-reorder",

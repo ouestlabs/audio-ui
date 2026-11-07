@@ -1,3 +1,5 @@
+"use client";
+
 import {
   barsBeatsWith,
   secondsPerBar,
@@ -89,32 +91,36 @@ import {
 } from "@/hooks/use-timeline-grid";
 import type { useTimelineMarkers } from "@/hooks/use-timeline-markers";
 import type { useTimelineZoom } from "@/hooks/use-timeline-zoom";
-import type { useTrackAutomation } from "@/hooks/use-track-automation";
 import {
   type AutomationFollowing,
   useAutomatedMix,
+  type useTrackAutomation,
 } from "@/hooks/use-track-automation";
 import { useTrackReorder } from "@/hooks/use-track-reorder";
 import {
   type Arranged,
   type ArrangementTrack,
+  automatedParameter,
   DRUM_RACK_DEVICE,
+  hasOutput,
   INSTRUMENT_RACK_DEVICE,
   mixOf,
+  NEW_TRACK,
   type TrackDevice,
 } from "@/lib/arrangement";
 import { trackBlock, trackDepth } from "@/lib/arrangement-state";
-import { automatedParameter, hasOutput } from "@/lib/daw/devices";
-import { NEW_TRACK } from "@/lib/daw/drop";
-import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
-import { libraryDevice } from "@/lib/device-library";
 import { cn } from "@/lib/utils";
-import { CommandKeys } from "./shortcut-list";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
 
-import type { LiveTake } from "./use-take";
+/** A take as it records, for the arrangement to draw (REC-011): where it started, its tracks, and the levels of what came in. */
+export interface ArrangementTake {
+  from: number;
+  /** The loudest of every stretch of the take so far; none for a take of notes only. */
+  levels?: ComponentProps<typeof ArrangedTake>["levels"];
+  tracks: ReadonlySet<string>;
+}
 
 /** How wide the column of track headers is, in px. */
 const LEAD_PX = 220;
@@ -231,7 +237,7 @@ function TrackTake({
   track,
 }: {
   position: ComponentProps<typeof ArrangedTake>["position"];
-  take: LiveTake | null;
+  take: ArrangementTake | null;
   track: ArrangementTrack;
 }) {
   if (!take?.tracks.has(track.id)) {
@@ -260,11 +266,6 @@ function carriesDevice(event: DragEvent) {
   return Array.from(event.dataTransfer.types).includes(DEVICE_DRAG_TYPE);
 }
 
-/**
- * The markers row's one button: a menu that adds a locator or a time
- * signature at the cursor. It hands the focus back to nothing as it closes,
- * so a new signature keeps it to be typed.
- */
 /**
  * The previous and the next locator, from where the cursor is: the cursor
  * goes there, as a press on the locator puts it. Alt with the arrows does the
@@ -304,7 +305,7 @@ function LocatorSteps({
         title="Previous locator"
         variant="ghost"
       >
-        <CaretLeftIcon aria-hidden="true" className="size-3" weight="fill" />
+        <CaretLeftIcon aria-hidden="true" className="size-3" />
       </Button>
       <Button
         aria-label="Next locator"
@@ -315,12 +316,17 @@ function LocatorSteps({
         title="Next locator"
         variant="ghost"
       >
-        <CaretRightIcon aria-hidden="true" className="size-3" weight="fill" />
+        <CaretRightIcon aria-hidden="true" className="size-3" />
       </Button>
     </>
   );
 }
 
+/**
+ * The markers row's one button: a menu that adds a locator or a time
+ * signature at the cursor. It hands the focus back to nothing as it closes,
+ * so a new signature keeps it to be typed.
+ */
 function MarkerMenu({
   onLocator,
   onSignature,
@@ -455,8 +461,10 @@ export interface ArrangementViewProps {
   /** Where playback starts: the start marker, in seconds. */
   cursor: number;
   engine: Engine;
+  /** What a track's envelope can move besides its volume and pan: the description of a device of this id, if it has one. */
+  findDevice: Parameters<typeof deviceTargets>[1];
   /** The take recording now, drawn on its tracks as it grows (REC-011). */
-  liveTake: LiveTake | null;
+  liveTake: ArrangementTake | null;
   /** The locators and the time signatures, with the commands behind them. */
   markers: ReturnType<typeof useTimelineMarkers>;
   /** A double-click on a MIDI lane: an empty clip a bar long, from the bar under the pointer. */
@@ -472,11 +480,16 @@ export interface ArrangementViewProps {
   /** A click in the ruler or a lane: where to start, and whether to play from there. */
   onSeek: (seconds: number) => void;
   onSelectTrack: (id: string) => void;
+  /** The peaks of the sound a clip plays, to draw its waveform: none for a clip with no sound of its own. */
+  peaksOf: (clip: Arranged) => ComponentProps<typeof ArrangedClip>["peaks"];
   /** Files dropped and still being read. */
   reading: readonly ReadingFiles[];
-  recordings: ReadonlyMap<string, Recording>;
   /** The track whose devices the detail view shows. */
   selectedTrack: string | null;
+  /** The keys shown beside each kind of track in the add-track menu, if you bind any. */
+  shortcuts?: Partial<
+    Record<"audio-track" | "midi-track" | "return-track", ReactNode>
+  >;
   /** The grid the lanes draw and the clips snap to. */
   timelineGrid: ReturnType<typeof useTimelineGrid>;
   /** The zoom, fitted to the view until it is zoomed. */
@@ -486,14 +499,6 @@ export interface ArrangementViewProps {
   /** The viewport the zoom fits: the one the tracks scroll in. */
   viewportRef: RefObject<HTMLDivElement | null>;
 }
-
-/**
- * The arrangement: the loop and the ruler on top, a row per track with its
- * header and its clips, the return tracks, and the row that adds a track,
- * where dropped files each make a track of their own and a dropped device a
- * track for it. Everything here is the registry's timeline, driven by the
- * arrangement's commands.
- */
 
 /** What a row needs of its track: what it is, whether it sounds, whether it takes files, how deep it sits and, a group, the tracks in it. */
 function rowOf(
@@ -518,12 +523,21 @@ function rowOf(
   };
 }
 
+/**
+ * The arrangement: the loop and the ruler on top, a row per track with its
+ * header and its clips, the return tracks, and the row that adds a track,
+ * where dropped files each make a track of their own and a dropped device a
+ * track for it. It is controlled: the arrangement's state comes in through the
+ * hooks, and every change goes out as a command or a callback, so it runs over
+ * an engine of your own.
+ */
 export function ArrangementView({
   armed,
   arrangement,
   automation,
   cursor,
   engine,
+  findDevice,
   liveTake,
   markers,
   onAddMidiClip,
@@ -534,8 +548,9 @@ export function ArrangementView({
   reading,
   onSeek,
   onSelectTrack,
-  recordings,
+  peaksOf,
   selectedTrack,
+  shortcuts,
   timelineGrid: grid,
   timelineZoom: view,
   timeSelection,
@@ -581,15 +596,6 @@ export function ArrangementView({
     [clips, doc.locators]
   );
 
-  const peaksOf = useCallback(
-    (clip: Arranged) => {
-      const recording = clip.recording
-        ? recordings.get(clip.recording)
-        : undefined;
-      return recording ? sourcePeaks(clip, recording) : undefined;
-    },
-    [recordings]
-  );
   /** A double-click on bare MIDI lane: an empty clip a bar long there. */
   const doubleClick = useCallback(
     (event: MouseEvent<HTMLElement>) => {
@@ -810,10 +816,10 @@ export function ArrangementView({
       new Map(
         [...tracks, ...returns].map((track) => [
           track.id,
-          deviceTargets(track.devices ?? [], libraryDevice, rackName),
+          deviceTargets(track.devices ?? [], findDevice, rackName),
         ])
       ),
-    [returns, tracks]
+    [findDevice, returns, tracks]
   );
 
   // In automation mode, what each lane shows: nothing for a track with no output and no device parameter (MIX-024).
@@ -878,20 +884,20 @@ export function ArrangementView({
               <DropdownMenuItem onClick={addAudio}>
                 Audio track
                 <DropdownMenuShortcut>
-                  <CommandKeys command="audio-track" />
+                  {shortcuts?.["audio-track"]}
                 </DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuItem onClick={addMidi}>
                 MIDI track
                 <DropdownMenuShortcut>
-                  <CommandKeys command="midi-track" />
+                  {shortcuts?.["midi-track"]}
                 </DropdownMenuShortcut>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={addReturn}>
                 Return track
                 <DropdownMenuShortcut>
-                  <CommandKeys command="return-track" />
+                  {shortcuts?.["return-track"]}
                 </DropdownMenuShortcut>
               </DropdownMenuItem>
             </DropdownMenuContent>

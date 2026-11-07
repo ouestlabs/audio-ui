@@ -23,13 +23,13 @@ import {
   type AutomationFollowing,
   useAutomatedMix,
 } from "@/hooks/use-track-automation";
-import type {
-  ArrangementTrack,
-  AutomatedParameter,
-  Mix,
+import {
+  type ArrangementTrack,
+  type AutomatedParameter,
+  hasOutput,
+  type Mix,
 } from "@/lib/arrangement";
 import { trackBlock, trackOf } from "@/lib/arrangement-state";
-import { hasOutput } from "@/lib/daw/devices";
 import { startSortableDrag } from "@/lib/sortable-drag";
 import { cn } from "@/lib/utils";
 

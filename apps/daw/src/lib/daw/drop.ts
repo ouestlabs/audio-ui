@@ -1,4 +1,9 @@
-import { type Arranged, warpOnImport, withEdgeFades } from "@/lib/arrangement";
+import {
+  type Arranged,
+  NEW_TRACK,
+  warpOnImport,
+  withEdgeFades,
+} from "@/lib/arrangement";
 import type { ArrangementCommand } from "@/lib/arrangement-state";
 import {
   decodeRecording,
@@ -6,9 +11,6 @@ import {
   nameOf,
   type Recording,
 } from "@/lib/daw/recordings";
-
-/** Where a file dropped on the add-track button goes: a track of its own. */
-export const NEW_TRACK = "new";
 
 /** A dropped file, decoded: its recording and the bytes it came from, to keep. */
 export interface Dropped {

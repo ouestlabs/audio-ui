@@ -15,7 +15,7 @@ import { toast } from "sonner";
 import {
   ArrangementView,
   type ReadingFiles,
-} from "@/components/daw/arrangement-view";
+} from "@/components/audio-ui/arrangement-view";
 import { ClipEditor } from "@/components/daw/clip-editor";
 import { DeviceView } from "@/components/daw/device-view";
 import { EngineLine } from "@/components/daw/engine-line";
@@ -46,6 +46,7 @@ import { useTrackAutomation } from "@/hooks/use-track-automation";
 import {
   type Arranged,
   type ArrangementTrack,
+  NEW_TRACK,
   padRecordings,
   type TimeSelection,
   type TrackDevice,
@@ -60,7 +61,7 @@ import { isComputerKeyboardKey } from "@/lib/computer-keyboard";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { renderConsolidated } from "@/lib/daw/consolidate";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
-import { decodeFiles, dropCommands, NEW_TRACK } from "@/lib/daw/drop";
+import { decodeFiles, dropCommands } from "@/lib/daw/drop";
 import {
   DAWPROJECT_ACCEPT,
   exportProject,
@@ -75,7 +76,12 @@ import {
 } from "@/lib/daw/folder";
 import { projectFromFolder } from "@/lib/daw/open-folder";
 import { newProject, TRACK_COLOR_COUNT } from "@/lib/daw/project";
-import { freshMidiClipId, nameOf, type Recording } from "@/lib/daw/recordings";
+import {
+  freshMidiClipId,
+  nameOf,
+  type Recording,
+  sourcePeaks,
+} from "@/lib/daw/recordings";
 import { ALSO_HOTKEYS, type ShortcutCommand } from "@/lib/daw/shortcuts";
 import {
   canStore,
@@ -87,6 +93,7 @@ import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
 import { RecordSettings } from "./record-settings";
+import { CommandKeys } from "./shortcut-list";
 import {
   clipsToReselect,
   readView,
@@ -101,6 +108,13 @@ import { useTakeInputs } from "./use-take-inputs";
 
 /** Neither panel scrolls: the timeline and the views scroll inside themselves, and a size rounded under the bar's height shows no scrollbar. The library styles a panel's inner div to scroll, and its `style` comes after. */
 const UNSCROLLED = { overflow: "hidden" } as const;
+
+/** The keys shown in the arrangement's add-track menu. */
+const ADD_TRACK_KEYS = {
+  "audio-track": <CommandKeys command="audio-track" />,
+  "midi-track": <CommandKeys command="midi-track" />,
+  "return-track": <CommandKeys command="return-track" />,
+};
 
 /** The panel under the arrangement folded: its strip alone. */
 const STRIP = "2.5rem";
@@ -740,6 +754,17 @@ export function Daw({
     [dispatch]
   );
 
+  // The peaks of the sound a clip plays, drawn as its waveform.
+  const peaksOf = useCallback(
+    (clip: Arranged) => {
+      const recording = clip.recording
+        ? recordings.get(clip.recording)
+        : undefined;
+      return recording ? sourcePeaks(clip, recording) : undefined;
+    },
+    [recordings]
+  );
+
   // Files dropped on a track lay one after the other (ARR-005); on the add-track button, a track each (ARR-006).
   const [reading, setReading] = useState<readonly ReadingFiles[]>([]);
   const readingKey = useRef(0);
@@ -1182,10 +1207,15 @@ export function Daw({
         TAKEN.add(event);
       }
     };
-    // A button clicks on Space as the key comes up, after the shortcut ran: the shortcut wins, so that click, which
-    // no pointer made, goes nowhere. Record pressed, then Space, would otherwise stop the take and start another.
+    // A button clicks on Space as the key comes up, after the shortcut ran: on the transport, whose buttons the
+    // shortcut drives too, the shortcut wins, so that click, which no pointer made, goes nowhere. Record pressed,
+    // then Space, would otherwise stop the take and start another. Any other button keeps its Space.
     const onClick = (event: MouseEvent) => {
-      if (spaceShortcut && event.detail === 0) {
+      if (
+        spaceShortcut &&
+        event.detail === 0 &&
+        (event.target as Element).closest('[data-slot="transport"]')
+      ) {
         event.preventDefault();
         event.stopImmediatePropagation();
       }
@@ -1408,6 +1438,7 @@ export function Daw({
                   automation={automation}
                   cursor={cursor}
                   engine={engine}
+                  findDevice={libraryDevice}
                   liveTake={take.live}
                   markers={markers}
                   onAddMidiClip={addMidiClip}
@@ -1417,9 +1448,10 @@ export function Daw({
                   onFiles={addFiles}
                   onSeek={seek}
                   onSelectTrack={pickTrack}
+                  peaksOf={peaksOf}
                   reading={reading}
-                  recordings={recordings}
                   selectedTrack={selectedTrack}
+                  shortcuts={ADD_TRACK_KEYS}
                   timelineGrid={grid}
                   timelineZoom={view}
                   timeSelection={timeSelection}

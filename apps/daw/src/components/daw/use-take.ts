@@ -5,9 +5,10 @@ import {
   secondsPerBeat,
   secondsPerQuarter,
 } from "@audio-ui/core/time";
-import { createSource, type Source } from "@audio-ui/react";
+import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
+import type { ArrangementTake } from "@/components/audio-ui/arrangement-view";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import type { Arranged } from "@/lib/arrangement";
 import type {
@@ -43,14 +44,6 @@ import { useSavedState } from "./use-saved-view";
 
 /** How long a stretch each level of a take drawn live covers, in seconds. */
 const LEVEL_SECONDS = 0.02;
-
-/** A take as it records, for the arrangement to draw (REC-011): where it started, its tracks, and the levels of what came in. */
-export interface LiveTake {
-  from: number;
-  /** The loudest of every `LEVEL_SECONDS` of the take so far; none for a take of notes only. */
-  levels?: Source<readonly number[]>;
-  tracks: ReadonlySet<string>;
-}
 
 /**
  * Levels of a take as its blocks come in: from the clock frame `gate.from`
@@ -303,7 +296,7 @@ export function useTake({
   const [monitorInput, setMonitorInput] = useState(false);
   const [inputDevice, setInputDevice] = useState("");
   const [inputs, setInputs] = useState<readonly AudioInput[]>([]);
-  const [live, setLive] = useState<LiveTake | null>(null);
+  const [live, setLive] = useState<ArrangementTake | null>(null);
   // Where a count-in stands, in negative seconds before the take; null outside one (REC-005).
   const [countdown] = useState(() => createSource<number | null>(null));
   const running = useRef<Running | null>(null);
