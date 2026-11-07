@@ -1,0 +1,37 @@
+---
+title: Vibe
+description: "A photocell vibe device: a lamp that pulses on four phase-shift stages, in chorus or vibrato, with its speed, intensity and level, a panel that draws the lamp, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-vibe" />
+
+A photocell vibe. A lamp pulses inside a box, and four light cells around it set four phase-shift stages: the brighter the lamp, the higher each stage turns the phase around. The stages sit far apart, so the sound sweeps in a lopsided, throbbing way rather than as an even phaser does, and the lamp lights at once and fades slowly, so the sweep rises quickly and falls back slowly. In Chorus mode the shifted sound is mixed with the dry one, for moving notches; in Vibrato mode it plays alone, and its moving phase is heard as pitch. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="vibe" kind="device" />
+
+## Controls
+
+The knobs read 0 to 10, and show the value they set in the unit the sound takes.
+
+<DeviceControls device="vibe">
+<Control id="mode">Chorus mixes the shifted sound with the dry one; Vibrato plays it alone, heard as pitch.</Control>
+<Control id="speed">How fast the lamp pulses, from 0.6 Hz to 12 Hz.</Control>
+<Control id="intensity">How far the lamp moves the four stages, up to two octaves and a half.</Control>
+<Control id="volume">The level of the output, unity a little past the middle.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the lamp's light over two seconds, over the mode and the knobs, all drawn off while the device is off. `vibeLight(state)` is what it draws, and `lampCycle()` gives one cycle of the light.
+
+<DeviceUsage name="vibe" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The sound goes through a warm preamp, then four all-pass stages spread from 90 Hz to 5.2 kHz, each moved in cents by one oscillator whose wave is the lamp's light. Chorus is half dry and half shifted, Vibrato is shifted alone, and off, the sound passes untouched. Every control moves with a ramp, so a turn makes no click.

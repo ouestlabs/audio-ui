@@ -714,6 +714,22 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device", "modulation"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The vibe as a device: a lamp that pulses on four phase-shift stages spread wide apart, in chorus or vibrato, with its speed, intensity and level, the lamp's cycle and what it shows, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/vibe-device.ts",
+        target: "components/audio-ui/devices/vibe/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "vibe-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
@@ -727,6 +743,22 @@ const items: RegistryItem[] = [
     ],
     name: "phaser-engine",
     registryDependencies: ["@audio-ui/phaser-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "modulation"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The vibe on the Web Audio API: a warm preamp, four all-pass stages swept by an oscillator of the lamp's own wave, mixed half dry in chorus or alone in vibrato, and a bypass when it is off.",
+    files: [
+      {
+        path: "lib/vibe-engine.ts",
+        target: "components/audio-ui/devices/vibe/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "vibe-engine",
+    registryDependencies: ["@audio-ui/vibe-device"],
     type: "registry:lib",
   },
   {
@@ -1071,6 +1103,21 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A chill two-bar song at 80 BPM on E minor seven, G and A: a strummed guitar (a plucked-string model) and drums drawn as recordings, and an organ and a bass as notes for MIDI tracks. What the arrangement's demo plays.",
+    files: [
+      {
+        path: "lib/demo-song.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "demo-song",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "device", "plot"],
     dependencies: ["@audio-ui/core"],
     description:
@@ -1334,6 +1381,8 @@ const items: RegistryItem[] = [
       "@audio-ui/overdrive-engine",
       "@audio-ui/phaser-device",
       "@audio-ui/phaser-engine",
+      "@audio-ui/vibe-device",
+      "@audio-ui/vibe-engine",
       "@audio-ui/pocket-synth-device",
       "@audio-ui/pocket-synth-engine",
       "@audio-ui/poly-synth-device",

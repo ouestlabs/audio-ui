@@ -27,6 +27,7 @@ import { stringMachineDevice } from "@/registry-audio/bases/base/lib/string-mach
 import { tapeKeysDevice } from "@/registry-audio/bases/base/lib/tape-keys-device";
 import { transientDevice } from "@/registry-audio/bases/base/lib/transient-device";
 import { utilityDevice } from "@/registry-audio/bases/base/lib/utility-device";
+import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
 import { waveShaperDevice } from "@/registry-audio/bases/base/lib/wave-shaper-device";
 
 /** The devices the docs describe, by the slug of their page. */
@@ -60,6 +61,7 @@ export const DEVICE_DOCS = {
   saturator: saturatorDevice,
   transient: transientDevice,
   utility: utilityDevice,
+  vibe: vibeDevice,
   "wave-shaper": waveShaperDevice,
 } as const;
 

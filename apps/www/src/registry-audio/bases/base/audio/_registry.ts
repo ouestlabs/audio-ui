@@ -35,6 +35,7 @@ const DEVICES = [
   "saturator",
   "transient",
   "utility",
+  "vibe",
   "wave-shaper",
 ];
 
@@ -461,6 +462,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/multiband-panel",
       "@audio-ui/overdrive-panel",
       "@audio-ui/phaser-panel",
+      "@audio-ui/vibe-panel",
       "@audio-ui/pocket-synth-panel",
       "@audio-ui/poly-synth-panel",
       "@audio-ui/fm-synth-panel",
@@ -971,6 +973,26 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/phaser-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the vibe device: the lamp's light over two seconds, rising fast and fading slowly, over its mode and its knobs.",
+    files: [
+      {
+        path: "audio/panels/vibe-panel.tsx",
+        target: "components/audio-ui/devices/vibe/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "vibe-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/vibe-device",
     ],
     type: "registry:ui",
   },

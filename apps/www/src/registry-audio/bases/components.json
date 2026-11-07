@@ -301,6 +301,12 @@
   },
   {
     "categories": ["modulation", "plot", "knob"],
+    "description": "A photocell vibe you can plug in: its state, a panel that draws the lamp and an engine that plays it, each its own file. Play the loop and turn the speed and the intensity",
+    "name": "block-vibe",
+    "title": "Block vibe"
+  },
+  {
+    "categories": ["modulation", "plot", "knob"],
     "description": "An auto pan you can plug in: its state, a panel that draws the movement and an engine that plays it. Play a loop through it, pick a waveform and switch to tremolo",
     "name": "block-auto-pan",
     "title": "Block auto pan"

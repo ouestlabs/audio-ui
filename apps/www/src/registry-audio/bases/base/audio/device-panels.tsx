@@ -30,6 +30,7 @@ import { StringMachinePanel } from "@/registry-audio/bases/base/audio/panels/str
 import { TapeKeysPanel } from "@/registry-audio/bases/base/audio/panels/tape-keys-panel";
 import { TransientPanel } from "@/registry-audio/bases/base/audio/panels/transient-panel";
 import { UtilityPanel } from "@/registry-audio/bases/base/audio/panels/utility-panel";
+import { VibePanel } from "@/registry-audio/bases/base/audio/panels/vibe-panel";
 import { WaveShaperPanel } from "@/registry-audio/bases/base/audio/panels/wave-shaper-panel";
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
@@ -107,6 +108,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.saturator": entry(SaturatorPanel),
   "audioui.transient": entry(TransientPanel),
   "audioui.utility": entry(UtilityPanel),
+  "audioui.vibe": entry(VibePanel),
   "audioui.wave-shaper": entry(WaveShaperPanel),
 };
 

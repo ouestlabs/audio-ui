@@ -68,6 +68,7 @@ export const DOCS_MENU_UPDATES: Record<string, MenuUpdate> = {
   transient: { mark: "New", on: "2026-10-16" },
   tuner: { mark: "New", on: "2026-10-15" },
   utility: { mark: "New", on: "2026-10-16" },
+  vibe: { mark: "New", on: "2026-11-07" },
   "wave-shaper": { mark: "New", on: "2026-10-16" },
   waveform: { mark: "Updated", on: "2026-10-11" },
 };

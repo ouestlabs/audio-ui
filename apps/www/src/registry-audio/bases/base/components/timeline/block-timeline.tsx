@@ -74,23 +74,21 @@ import { renderTrackClips } from "@/registry-audio/bases/base/lib/arrangement-en
 import { audioClipsIn } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
-import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
 import {
-  DEMO_TEMPO,
-  GROOVE_SCORE,
-  type GrooveNote,
-  renderGroovePart,
-} from "@/registry-audio/bases/base/lib/demo-sound";
-import { electricPianoDevice } from "@/registry-audio/bases/base/lib/electric-piano-device";
-import {
-  fmSynthDevice,
-  fmSynthPreset,
-} from "@/registry-audio/bases/base/lib/fm-synth-device";
+  renderSongPart,
+  SONG_BARS,
+  SONG_SCORE,
+  SONG_TEMPO,
+  type SongNote,
+  type SongPart,
+} from "@/registry-audio/bases/base/lib/demo-song";
 import {
   monoSynthDevice,
   monoSynthPreset,
 } from "@/registry-audio/bases/base/lib/mono-synth-device";
+import { organDevice } from "@/registry-audio/bases/base/lib/organ-device";
 import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
+import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const BARS = 32;
@@ -105,8 +103,8 @@ const NO_READING: readonly {
   track: string;
 }[] = [];
 
-/** The arrangement is laid out at the groove's tempo: a tempo change keeps its musical positions. */
-const BAR = secondsPerBar(DEMO_TEMPO);
+/** The arrangement is laid out at the song's tempo: a tempo change keeps its musical positions. */
+const BAR = secondsPerBar(SONG_TEMPO);
 /** Whether a key went to a field you type in, where it is the field's own. */
 function typing(target: EventTarget) {
   return (
@@ -179,18 +177,18 @@ const device = <State extends object>(
 const REVERB = "return-1";
 
 /**
- * The groove as a project: its drums as an audio track, its bass, keys and
- * plucked line as MIDI tracks played by the registry's instruments (a mono
- * synth's sub bass, an electric piano and an FM marimba), a delay on
- * the pluck's chain, and a reverb on a return track the keys and the pluck
- * send to.
+ * The song as a project: its drums and its strummed guitar as audio tracks,
+ * its bass and its organ as MIDI tracks played by the registry's instruments
+ * (a mono synth's sub bass and a tonewheel organ on three drawbars), a vibe
+ * on the guitar's chain, and a reverb on a return track the organ and the
+ * guitar send to.
  */
 const TRACKS: ArrangementTrack[] = [
   {
     color: 0,
     id: "drums",
-    // Its snare is the loudest hit of the groove: a little under unity, the main keeps its headroom.
-    mix: { ...UNITY_MIX, gain: 10 ** (-2 / 20) },
+    // Its kick is the loudest hit of the song: under unity, the drums sit back and the main keeps its headroom.
+    mix: { ...UNITY_MIX, gain: 10 ** (-4 / 20) },
     name: "Drums",
   },
   {
@@ -199,7 +197,7 @@ const TRACKS: ArrangementTrack[] = [
       device(
         "bass-synth",
         monoSynthDevice,
-        { ...monoSynthPreset("Sub Bass"), volume: 8 },
+        { ...monoSynthPreset("Sub Bass"), volume: 7 },
         true
       ),
     ],
@@ -209,33 +207,36 @@ const TRACKS: ArrangementTrack[] = [
   },
   {
     color: 2,
-    devices: [device("keys-piano", electricPianoDevice, { volume: 5.3 }, true)],
-    id: "keys",
+    devices: [
+      device(
+        "organ",
+        organDevice,
+        {
+          click: 1,
+          drawbar1: 0,
+          drawbar2: 0,
+          drawbar3: 8,
+          drawbar4: 6,
+          drawbar5: 5,
+          drive: 1,
+          rotary: "slow",
+          volume: 6,
+        },
+        true
+      ),
+    ],
+    id: "organ",
     kind: "midi",
-    name: "Keys",
-    sends: { [REVERB]: 0.3 },
+    name: "Organ",
+    sends: { [REVERB]: 0.25 },
   },
   {
     color: 3,
-    devices: [
-      device(
-        "pluck-synth",
-        fmSynthDevice,
-        { ...fmSynthPreset("Marimba"), volume: 10 },
-        true
-      ),
-      device("pluck-delay", delayDevice, {
-        division: "1/8",
-        feedback: 35,
-        mix: 25,
-        sync: true,
-      }),
-    ],
-    id: "pluck",
-    kind: "midi",
-    mix: { ...UNITY_MIX, color: 3, gain: 10 ** (-6 / 20) },
-    name: "Pluck",
-    sends: { [REVERB]: 0.4 },
+    devices: [device("guitar-vibe", vibeDevice)],
+    id: "guitar",
+    mix: { ...UNITY_MIX, color: 3, gain: 10 ** (-1 / 20) },
+    name: "Guitar",
+    sends: { [REVERB]: 0.35 },
   },
 ];
 
@@ -257,8 +258,11 @@ const SILENCE = {
   subscribe: () => () => undefined,
 };
 
-/** How long the groove's recordings last: two bars, its loop. */
-const GROOVE_BARS = 2;
+/** The song's parts that come as recordings. */
+const SONG_PARTS: readonly SongPart[] = ["drums", "guitar"];
+
+/** How long the song's recordings last: two bars, its loop. */
+const LOOP_BARS = SONG_BARS;
 
 const BEAT = BAR / 4;
 
@@ -271,24 +275,25 @@ const placedAt = (from: number, to: number) => ({
   start: bars(from),
 });
 
-/** An audio clip of the drums from bar `from` to bar `to`, looping the groove's drums. */
-const drums = (
+/** An audio clip of `track` from bar `from` to bar `to`, looping its recording of the song. */
+const audioClip = (
   id: string,
   name: string,
+  track: SongPart,
   from: number,
   to: number
 ): Arranged => ({
   id,
-  loop: [0, bars(GROOVE_BARS)],
+  loop: [0, bars(LOOP_BARS)],
   name,
-  recording: "drums",
-  sourceLength: bars(GROOVE_BARS),
-  track: "drums",
+  recording: track,
+  sourceLength: bars(LOOP_BARS),
+  track,
   value: placedAt(from, to),
 });
 
-/** The groove's notes as a MIDI clip holds them: in seconds, at the groove's tempo. */
-const notesOf = (notes: readonly GrooveNote[]): Arranged["notes"] =>
+/** The song's notes as a MIDI clip holds them: in seconds, at the song's tempo. */
+const notesOf = (notes: readonly SongNote[]): Arranged["notes"] =>
   notes.map(({ length, pitch, start, velocity }, index) => ({
     id: `n${index}`,
     length: length * BEAT,
@@ -298,12 +303,11 @@ const notesOf = (notes: readonly GrooveNote[]): Arranged["notes"] =>
   }));
 
 const SCORE = {
-  bass: notesOf(GROOVE_SCORE.bass),
-  keys: notesOf(GROOVE_SCORE.keys),
-  pluck: notesOf(GROOVE_SCORE.pluck),
+  bass: notesOf(SONG_SCORE.bass),
+  organ: notesOf(SONG_SCORE.organ),
 };
 
-/** A MIDI clip of `track` from bar `from` to bar `to`, looping its part of the groove. */
+/** A MIDI clip of `track` from bar `from` to bar `to`, looping its part of the song. */
 const midiClip = (
   id: string,
   name: string,
@@ -312,31 +316,32 @@ const midiClip = (
   to: number
 ): Arranged => ({
   id,
-  loop: [0, bars(GROOVE_BARS)],
+  loop: [0, bars(LOOP_BARS)],
   name,
   notes: SCORE[track],
-  sourceLength: bars(GROOVE_BARS),
+  sourceLength: bars(LOOP_BARS),
   track,
   value: placedAt(from, to),
 });
 
 /**
- * A song in five parts, each clip named after the one it plays in: the keys
- * and the pluck open it, the verse brings in the drums and the bass, the chorus
- * is the whole groove, the verse comes back, and the keys and the pluck close it.
+ * A song in five parts, each clip named after the one it plays in: the guitar
+ * and the organ open it, the verse brings in the drums and the bass under the
+ * guitar, the chorus is the whole band, the verse comes back, and the guitar
+ * and the organ close it.
  */
 const CLIPS: Arranged[] = [
-  midiClip("k1", "Intro", "keys", 0, 4),
-  midiClip("k2", "Verse", "keys", 4, 12),
-  midiClip("k3", "Chorus", "keys", 12, 20),
-  midiClip("k4", "Verse 2", "keys", 20, 28),
-  midiClip("k5", "Outro", "keys", 28, 32),
-  midiClip("p1", "Intro", "pluck", 0, 4),
-  midiClip("p2", "Chorus", "pluck", 12, 20),
-  midiClip("p3", "Outro", "pluck", 28, 32),
-  drums("d1", "Verse", 4, 12),
-  drums("d2", "Chorus", 12, 20),
-  drums("d3", "Verse 2", 20, 28),
+  audioClip("g1", "Intro", "guitar", 0, 4),
+  audioClip("g2", "Verse", "guitar", 4, 12),
+  audioClip("g3", "Chorus", "guitar", 12, 20),
+  audioClip("g4", "Verse 2", "guitar", 20, 28),
+  audioClip("g5", "Outro", "guitar", 28, 32),
+  midiClip("o1", "Intro", "organ", 0, 4),
+  midiClip("o2", "Chorus", "organ", 12, 20),
+  midiClip("o3", "Outro", "organ", 28, 32),
+  audioClip("d1", "Verse", "drums", 4, 12),
+  audioClip("d2", "Chorus", "drums", 12, 20),
+  audioClip("d3", "Verse 2", "drums", 20, 28),
   midiClip("b1", "Verse", "bass", 4, 12),
   midiClip("b2", "Chorus", "bass", 12, 20),
   midiClip("b3", "Verse 2", "bass", 20, 28),
@@ -588,8 +593,8 @@ function channelsOf(buffer: AudioBuffer) {
 }
 
 /**
- * The recordings the audio clips play, by id: the groove's drums, drawn
- * once at the engine's rate, and the files dropped on the tracks, which
+ * The recordings the audio clips play, by id: the song's drums and guitar,
+ * drawn once at the engine's rate, and the files dropped on the tracks, which
  * `keepRecording` adds.
  */
 function useRecordings() {
@@ -602,16 +607,18 @@ function useRecordings() {
       return;
     }
     let cancelled = false;
-    renderGroovePart("drums", context.sampleRate).then((beat) => {
-      if (!cancelled) {
-        setRecordings((current) =>
-          new Map(current).set(
-            "drums",
-            recordingOf(channelsOf(beat), context.sampleRate)
-          )
-        );
-      }
-    });
+    for (const part of SONG_PARTS) {
+      renderSongPart(part, context.sampleRate).then((buffer) => {
+        if (!cancelled) {
+          setRecordings((current) =>
+            new Map(current).set(
+              part,
+              recordingOf(channelsOf(buffer), context.sampleRate)
+            )
+          );
+        }
+      });
+    }
     return () => {
       cancelled = true;
     };
@@ -676,7 +683,7 @@ export default function BlockTimeline() {
     initialLoop: LOOP,
     initialReturns: RETURNS,
     initialTracks: TRACKS,
-    tempo: DEMO_TEMPO,
+    tempo: SONG_TEMPO,
   });
   const {
     dispatch,

@@ -24,6 +24,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "gate",
   "saturator",
   "phaser",
+  "vibe",
   "auto-pan",
   "channel-eq",
   "overdrive",
