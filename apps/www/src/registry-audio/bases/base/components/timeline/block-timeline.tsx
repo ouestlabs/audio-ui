@@ -67,6 +67,7 @@ import {
   NEW_TRACK,
   type TimeSelection,
   type TrackKind,
+  UNITY_MIX,
   warpOnImport,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { renderTrackClips } from "@/registry-audio/bases/base/lib/arrangement-engine";
@@ -80,7 +81,15 @@ import {
   type GrooveNote,
   renderGroovePart,
 } from "@/registry-audio/bases/base/lib/demo-sound";
-import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-device";
+import { electricPianoDevice } from "@/registry-audio/bases/base/lib/electric-piano-device";
+import {
+  fmSynthDevice,
+  fmSynthPreset,
+} from "@/registry-audio/bases/base/lib/fm-synth-device";
+import {
+  monoSynthDevice,
+  monoSynthPreset,
+} from "@/registry-audio/bases/base/lib/mono-synth-device";
 import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
@@ -171,18 +180,26 @@ const REVERB = "return-1";
 
 /**
  * The groove as a project: its drums as an audio track, its bass, keys and
- * plucked line as MIDI tracks each played by a synth, a delay on the pluck's
- * chain, and a reverb on a return track the keys and the pluck send to.
+ * plucked line as MIDI tracks played by the registry's instruments (a mono
+ * synth's sub bass, an electric piano and an FM marimba), a delay on
+ * the pluck's chain, and a reverb on a return track the keys and the pluck
+ * send to.
  */
 const TRACKS: ArrangementTrack[] = [
-  { color: 0, id: "drums", name: "Drums" },
+  {
+    color: 0,
+    id: "drums",
+    // Its snare is the loudest hit of the groove: a little under unity, the main keeps its headroom.
+    mix: { ...UNITY_MIX, gain: 10 ** (-2 / 20) },
+    name: "Drums",
+  },
   {
     color: 1,
     devices: [
       device(
         "bass-synth",
-        pocketSynthDevice,
-        { filter: "lowpass", volume: 0.7, wave: "sawtooth" },
+        monoSynthDevice,
+        { ...monoSynthPreset("Sub Bass"), volume: 8 },
         true
       ),
     ],
@@ -192,14 +209,7 @@ const TRACKS: ArrangementTrack[] = [
   },
   {
     color: 2,
-    devices: [
-      device(
-        "keys-synth",
-        pocketSynthDevice,
-        { filter: "lowpass", volume: 0.22, wave: "triangle" },
-        true
-      ),
-    ],
+    devices: [device("keys-piano", electricPianoDevice, { volume: 5.3 }, true)],
     id: "keys",
     kind: "midi",
     name: "Keys",
@@ -210,8 +220,8 @@ const TRACKS: ArrangementTrack[] = [
     devices: [
       device(
         "pluck-synth",
-        pocketSynthDevice,
-        { filter: "allpass", volume: 0.88, wave: "triangle" },
+        fmSynthDevice,
+        { ...fmSynthPreset("Marimba"), volume: 10 },
         true
       ),
       device("pluck-delay", delayDevice, {
@@ -223,6 +233,8 @@ const TRACKS: ArrangementTrack[] = [
     ],
     id: "pluck",
     kind: "midi",
+    // A marimba strikes and dies away: its fader lifts it to sit with the sustained parts.
+    mix: { ...UNITY_MIX, color: 3, gain: 10 ** (6 / 20) },
     name: "Pluck",
     sends: { [REVERB]: 0.4 },
   },
