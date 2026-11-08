@@ -63,6 +63,20 @@ describe("drumKit", () => {
   });
 });
 
+test("the kit sits as it is heard from in front: kick, snare and clap in the middle, hats left, crash right", () => {
+  const kit = drumKit();
+  const pan = (note: number) =>
+    kit.chains.find((chain) => chain.pad?.note === note)?.mix?.pan ?? 0;
+  expect([
+    pan(DRUM_NOTES.kick),
+    pan(DRUM_NOTES.snare),
+    pan(DRUM_NOTES.clap),
+  ]).toEqual([0, 0, 0]);
+  expect(pan(DRUM_NOTES.hat)).toBeLessThan(0);
+  expect(pan(DRUM_NOTES.openHat)).toBe(pan(DRUM_NOTES.hat));
+  expect(pan(DRUM_NOTES.crash)).toBeGreaterThan(0);
+});
+
 describe("a drum rack started from a kit", () => {
   test("takes the kit, its chains and devices under ids no other has", () => {
     const once = run([addKit]);

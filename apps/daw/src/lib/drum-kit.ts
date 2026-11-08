@@ -18,20 +18,22 @@ export const DRUM_KIT_PADS: readonly {
   choke?: number;
   name: string;
   note: number;
+  /** Where it sits, from -1 (left) to 1 (right), as a kit is heard from in front of it. @default 0 */
+  pan?: number;
   /** Whether it plays in the small room. */
   room?: boolean;
   sound?: Partial<DrumSynthState>;
   voice: DrumSynthVoice;
 }[] = [
   { name: "Kick", note: 36, voice: "kick" },
-  { name: "Rim", note: 37, voice: "rim" },
+  { name: "Rim", note: 37, pan: 0.15, voice: "rim" },
   { name: "Snare", note: 38, room: true, voice: "snare" },
   { name: "Clap", note: 39, room: true, voice: "clap" },
-  { choke: 1, name: "Closed Hat", note: 42, voice: "hat" },
-  { name: "Low Tom", note: 43, sound: { tune: -5 }, voice: "tom" },
-  { choke: 1, name: "Open Hat", note: 46, voice: "open-hat" },
-  { name: "Mid Tom", note: 47, voice: "tom" },
-  { name: "Crash", note: 49, voice: "cymbal" },
+  { choke: 1, name: "Closed Hat", note: 42, pan: -0.3, voice: "hat" },
+  { name: "Low Tom", note: 43, pan: 0.25, sound: { tune: -5 }, voice: "tom" },
+  { choke: 1, name: "Open Hat", note: 46, pan: -0.3, voice: "open-hat" },
+  { name: "Mid Tom", note: 47, pan: -0.15, voice: "tom" },
+  { name: "Crash", note: 49, pan: 0.35, voice: "cymbal" },
 ];
 
 /** The kit's notes, by the pad's voice: what a part is written with. */
@@ -61,28 +63,38 @@ const slug = (name: string) => name.toLowerCase().replace(/\s+/g, "-");
  */
 export function drumKit(prefix = "kit"): Rack {
   return {
-    chains: DRUM_KIT_PADS.map(({ choke, name, note, room, sound, voice }) => {
-      const id = `${prefix}-${slug(name)}`;
-      const devices: TrackDevice[] = [
-        {
-          device: drumSynthDevice.id,
-          id: `${id}-synth`,
-          instrument: true,
-          state: drumSynthPreset(voice, sound),
-        },
-        ...(room
-          ? [
-              {
-                device: reverbDevice.id,
-                id: `${id}-room`,
-                state: { ...reverbDevice.defaults(), ...ROOM },
-              },
-            ]
-          : []),
-      ];
-      const pad: DrumPad = choke === undefined ? { note } : { choke, note };
-      return { devices, id, name, pad };
-    }),
+    chains: DRUM_KIT_PADS.map(
+      ({ choke, name, note, pan, room, sound, voice }) => {
+        const id = `${prefix}-${slug(name)}`;
+        const devices: TrackDevice[] = [
+          {
+            device: drumSynthDevice.id,
+            id: `${id}-synth`,
+            instrument: true,
+            state: drumSynthPreset(voice, sound),
+          },
+          ...(room
+            ? [
+                {
+                  device: reverbDevice.id,
+                  id: `${id}-room`,
+                  state: { ...reverbDevice.defaults(), ...ROOM },
+                },
+              ]
+            : []),
+        ];
+        const pad: DrumPad = choke === undefined ? { note } : { choke, note };
+        return {
+          devices,
+          id,
+          ...(pan
+            ? { mix: { gain: 1, muted: false, pan, soloed: false } }
+            : {}),
+          name,
+          pad,
+        };
+      }
+    ),
     macros: newRack("").macros,
   };
 }
