@@ -1138,6 +1138,21 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core"],
     description:
+      "A drum clip's notes as steps: a row per pad, a step per stretch of the grid, with each step's velocity, chance and shift, and the edits a step sequencer makes on the notes (switch a step, set its level, fill a row every n steps).",
+    files: [
+      {
+        path: "lib/drum-steps.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-steps",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "A chill song at 80 BPM on one two-bar loop, E minor seven, G and A: drums drawn as recordings, one per part with a fill, and an organ, a pad, a bass and a lead hook as notes for MIDI tracks. What the arrangement's demo plays.",
     files: [
       {

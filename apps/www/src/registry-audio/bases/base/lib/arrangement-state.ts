@@ -666,7 +666,14 @@ export function consolidate(
       value,
     };
     if (first.notes) {
-      return [{ ...whole, notes: mergedNotes(inside, from, to) }];
+      // The notes as they are written, so the first clip's swing still plays them.
+      return [
+        {
+          ...whole,
+          notes: mergedNotes(inside, from, to),
+          ...(first.swing ? { swing: first.swing } : {}),
+        },
+      ];
     }
     const recording = rendered[track];
     return [

@@ -51,6 +51,8 @@ export interface Arranged {
   sourceFrom?: number;
   /** How long the recording behind the clip is: trimming stops where it runs out. */
   sourceLength: number;
+  /** A MIDI clip's swing: its notes stay on the grid, and play late on the off-beats. */
+  swing?: ClipSwing;
   /** The id of the track it lies on. */
   track: string;
   /** How far it is transposed, in semitones. @default 0 */
@@ -601,6 +603,29 @@ export interface Clipping {
   parts: (Arranged & { row: number })[];
 }
 
+/**
+ * How a MIDI clip swings: `amount` from 0, straight, to 1, where an off-beat
+ * plays a third of a step late, as in a triplet; `division` is the step that
+ * swings, an eighth or a sixteenth.
+ */
+export interface ClipSwing {
+  amount: number;
+  division: 8 | 16;
+}
+
+/**
+ * Where `time` plays once swung on steps `step` long: the even steps stay,
+ * the odd ones are pushed late by `amount` of a third of a step, and the time
+ * between moves in a straight line, so no two notes ever change places.
+ */
+export function swungTime(time: number, step: number, amount: number): number {
+  if (amount <= 0 || step <= 0) {
+    return time;
+  }
+  const phase = (time / step) % 2;
+  return time + ((amount * step) / 3) * (phase <= 1 ? phase : 2 - phase);
+}
+
 /** Where a note of a MIDI clip plays in the arrangement, transposed with the clip. */
 export interface PlayedNote extends Note {
   /** The id of the note in the clip's source, which a looped clip plays more than once. */
@@ -612,24 +637,32 @@ export interface PlayedNote extends Note {
  * starting inside it, from where it starts in its source, and round its loop
  * again and again when it has one. A note runs to the clip's end at most,
  * and is transposed as the clip is. Each gets an id of its own, since a loop
- * plays a note more than once.
+ * plays a note more than once. Given `beat`, how long a beat lasts, a swung
+ * clip's notes play swung; without it, they are where they are written.
  */
-export function playedNotes(clip: Arranged): PlayedNote[] {
+export function playedNotes(clip: Arranged, beat?: number): PlayedNote[] {
   const notes = clip.notes ?? [];
   const { length, offset, start } = clip.value;
   const end = start + length;
   const transpose = clip.transpose ?? 0;
+  const { swing } = clip;
+  const swung =
+    swing && beat
+      ? (time: number) =>
+          swungTime(time, (beat * 4) / swing.division, swing.amount)
+      : (time: number) => time;
   const played: PlayedNote[] = [];
   const place = (from: number, to: number, shift: number) => {
     for (const note of notes) {
-      const at = note.start + shift;
+      const heard = swung(note.start);
+      const at = heard + shift;
       if (note.start < from || note.start >= to || at >= end) {
         continue;
       }
       played.push({
         ...note,
         id: `${note.id}@${at}`,
-        length: Math.min(note.length, end - at),
+        length: Math.min(swung(note.start + note.length) - heard, end - at),
         pitch: note.pitch + transpose,
         sourceId: note.id,
         start: at,

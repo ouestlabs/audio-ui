@@ -17,6 +17,7 @@ import {
   type MetronomeRhythm,
   metronomeClicks,
   secondsPerBar,
+  secondsPerBeat,
 } from "@audio-ui/core/time";
 import {
   type Arranged,
@@ -265,14 +266,18 @@ export interface ArrangementEngine {
   ) => void;
 }
 
-/** The notes a MIDI track plays, in frames of the arrangement, in the order they start. */
-function framesOf(clips: readonly Arranged[], sampleRate: number): FrameNote[] {
+/** The notes a MIDI track plays, in frames of the arrangement, in the order they start, swung where a clip swings on beats `beat` long. */
+function framesOf(
+  clips: readonly Arranged[],
+  sampleRate: number,
+  beat: number
+): FrameNote[] {
   const notes: FrameNote[] = [];
   for (const clip of clips) {
     if (clip.disabled || !clip.notes) {
       continue;
     }
-    for (const note of playedNotes(clip)) {
+    for (const note of playedNotes(clip, beat)) {
       if (!note.muted) {
         const start = toFrames(note.start, sampleRate);
         notes.push({
@@ -1066,7 +1071,8 @@ export async function createArrangementEngine(
     } else if (track.kind === "midi") {
       runtime.notes = framesOf(
         next.clips.filter((clip) => clip.track === track.id),
-        rate
+        rate,
+        secondsPerBeat(next.tempo)
       );
     }
   };
