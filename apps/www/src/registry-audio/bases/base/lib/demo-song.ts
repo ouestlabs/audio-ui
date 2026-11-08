@@ -1,12 +1,13 @@
 /**
  * A chill song at 80 BPM on one two-bar loop, E minor seven, G and A, that
  * every part plays: the verse and the chorus differ by who plays, not by
- * their chords, so the song comes round as a loop does. Its strummed guitar
- * and its drums are drawn here as recordings, as files would arrive, one per
- * part; its organ, its pad, its bass and its lead are notes for MIDI tracks to play.
- * The guitar is a plucked-string model (a burst of noise round a delay line
- * that loses its highs on each pass), strummed in funk sixteenths; the drums are
- * oscillators and noise. What an arrangement's demo plays.
+ * their chords, so the song comes round as a loop does. Its picked guitar and
+ * its drums are drawn here as recordings, as files would arrive, one per
+ * part; its organ, its pad, its bass and its lead are notes for MIDI tracks
+ * to play. The guitar is a plucked-string model (a burst of noise round a
+ * delay line that loses its highs on each pass), picking the chords in
+ * eighths; the drums are oscillators and noise. What an arrangement's demo
+ * plays.
  */
 
 import type { Tempo } from "@audio-ui/core/time";
@@ -40,36 +41,10 @@ const HARMONY: readonly Shape[] = [
   "A",
 ];
 
-/**
- * One bar of funk strumming, on the sixteenths, the hand going down on the
- * even ones and up on the odd: stabs of the chord where the kick and the bass
- * land, cut short by the fretting hand, and muted scratches between them that
- * keep the hand moving. `ring` is how long a stab sounds, in beats.
- */
-const STRUMS: readonly { at: number; ring?: number }[] = [
-  { at: 0, ring: 0.4 },
-  { at: 0.25 },
-  { at: 0.5 },
-  { at: 0.75, ring: 0.2 },
-  { at: 1, ring: 0.2 },
-  { at: 1.25 },
-  { at: 1.5, ring: 0.2 },
-  { at: 1.75, ring: 0.2 },
-  { at: 2 },
-  { at: 2.25 },
-  { at: 2.5, ring: 0.4 },
-  { at: 2.75 },
-  { at: 3, ring: 0.2 },
-  { at: 3.25 },
-  { at: 3.5, ring: 0.4 },
-  { at: 3.75 },
-];
-/** How long a muted scratch sounds, in beats: a click of strings, no pitch to speak of. */
-const SCRATCH = 0.05;
-/** How many of a shape's highest strings a stab strikes: funk plays the top of the chord. */
-const TOP_STRINGS = 4;
-/** How far apart the strings of one strum are struck, in seconds: tight, for sixteenths. */
-const SPREAD = 0.005;
+/** Which strings an arpeggio picks, an eighth at a time, over a chord of four beats: up from the root and back down. */
+const ARPEGGIO_BAR = [0, 1, 2, 3, 4, 3, 2, 1] as const;
+/** Over a chord of two beats: up from the root. */
+const ARPEGGIO_HALF = [0, 1, 2, 3] as const;
 
 /** Where the kick falls over the loop's two bars, in beats, on the sixteenths: the bass lands with it. */
 const KICK = [0, 0.75, 1.75, 2.5, 4, 4.75, 6, 6.5] as const;
@@ -233,28 +208,35 @@ function pluck(
   }
 }
 
-/** The guitar strumming the loop, struck harder for the chorus. */
-function strum(force: number, rate: number, length: number) {
+/**
+ * The guitar picking the loop's chords one string at a time, on the eighths,
+ * each string left to ring until its chord changes, so the arpeggio sounds as
+ * the chord; picked harder for the chorus.
+ */
+function arpeggiate(force: number, rate: number, length: number) {
   const out = new Float32Array(length);
-  for (let bar = 0; bar < HARMONY.length / 4; bar += 1) {
-    for (const [sixteenth, stroke] of STRUMS.entries()) {
-      const beat = bar * 4 + stroke.at;
-      const top = SHAPES[HARMONY[Math.floor(beat)] ?? "Em7"].slice(
-        -TOP_STRINGS
-      );
-      const down = sixteenth % 2 === 0;
-      const order = down ? top : [...top].reverse();
-      for (const [string, note] of order.entries()) {
-        pluck(
-          out,
-          rate,
-          beat * BEAT + string * SPREAD,
-          (stroke.ring ?? SCRATCH) * BEAT,
-          note,
-          (stroke.ring ? 0.3 : 0.1) * (down ? 1 : 0.8) * force
-        );
-      }
+  for (let eighth = 0; eighth < HARMONY.length * 2; eighth += 1) {
+    const beat = eighth / 2;
+    const chord = HARMONY[Math.floor(beat)] ?? "Em7";
+    let first = Math.floor(beat);
+    while (first > 0 && HARMONY[first - 1] === chord) {
+      first -= 1;
     }
+    let end = Math.floor(beat) + 1;
+    while (HARMONY[end] === chord) {
+      end += 1;
+    }
+    const pattern = end - first === 4 ? ARPEGGIO_BAR : ARPEGGIO_HALF;
+    const string = pattern[(eighth - first * 2) % pattern.length] ?? 0;
+    const shape = SHAPES[chord];
+    pluck(
+      out,
+      rate,
+      beat * BEAT,
+      (end - beat) * BEAT + 0.05,
+      shape[string % shape.length] ?? shape[0],
+      0.28 * force
+    );
   }
   return out;
 }
@@ -393,7 +375,7 @@ function draw(part: SongPart, rate: number): Promise<Float32Array> {
   const length = Math.ceil(rate * BEAT * 4 * SONG_RECORDINGS[part]);
   if (part.startsWith("guitar-")) {
     return Promise.resolve(
-      strum(part === "guitar-chorus" ? 1.2 : 1, rate, length)
+      arpeggiate(part === "guitar-chorus" ? 1.2 : 1, rate, length)
     );
   }
   const ctx = new OfflineAudioContext(1, length, rate);
