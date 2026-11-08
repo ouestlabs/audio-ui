@@ -229,12 +229,14 @@ export function ClipEditor({
         onSwingChange={changeSwing}
         onViewChange={setMidiView}
         pads={pads}
+        position={engine.position}
         region={{
           length: clip.value.length,
           loop: clip.loop ?? null,
           offset: clip.value.offset,
           sourceLength: clip.sourceLength,
         }}
+        start={clip.value.start}
         swing={clip.swing}
         view={midiView}
       >

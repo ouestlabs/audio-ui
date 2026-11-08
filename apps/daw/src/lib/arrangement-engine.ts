@@ -7,6 +7,7 @@ import {
   type PlaybackState,
   type PlayedClip,
   pagesAhead,
+  playbackRuns,
   playedClips,
   rescaled,
   STOPPED,
@@ -725,24 +726,47 @@ export async function createArrangementEngine(
     }
   };
 
-  /** A track's volume and pan glide to where its automation has them at the clock's frame `to`. */
-  const scheduleAutomation = (track: ArrangementTrack, to: number) => {
+  /**
+   * A track's volume and pan glide along its automation over the clock's
+   * frames `from` to `to`: to where it has them at the end of each run of the
+   * arrangement the window plays, and where the loop comes round, at once to
+   * where it has them at the loop's start, not gliding there over the end.
+   */
+  const scheduleAutomation = (
+    track: ArrangementTrack,
+    from: number,
+    to: number
+  ) => {
+    const current = doc;
     if (
-      !(doc && track.automation && Object.keys(track.automation).length > 0)
+      !(current && track.automation && Object.keys(track.automation).length > 0)
     ) {
       return;
     }
-    const at = arrangementFrame(state, to) / rate;
-    const mix = mixAt(
-      track,
-      mixOf(track),
-      at / doc.duration,
-      overrides[track.id]
-    );
-    if (track === doc.main) {
-      mixer.glideMain(mix, to / rate);
-    } else {
-      mixer.glide(track.id, mix, to / rate);
+    const levelAt = (frame: number) =>
+      mixAt(
+        track,
+        mixOf(track),
+        frame / rate / current.duration,
+        overrides[track.id]
+      );
+    const glide = (frame: number, clock: number) => {
+      if (track === current.main) {
+        mixer.glideMain(levelAt(frame), clock / rate);
+      } else {
+        mixer.glide(track.id, levelAt(frame), clock / rate);
+      }
+    };
+    const runs = playbackRuns(state, from, to - from);
+    if (runs.length === 0) {
+      glide(arrangementFrame(state, to), to);
+      return;
+    }
+    for (const [index, run] of runs.entries()) {
+      if (index > 0) {
+        glide(run.position, from + run.offset);
+      }
+      glide(run.position + run.length, from + run.offset + run.length);
     }
   };
 
@@ -800,7 +824,7 @@ export async function createArrangementEngine(
     }
     // The returns' volume and pan and the main track's follow their envelopes too.
     for (const track of allTracks(doc)) {
-      scheduleAutomation(track, to);
+      scheduleAutomation(track, from, to);
     }
   };
 
@@ -1008,6 +1032,10 @@ export async function createArrangementEngine(
       playing: true,
       position: Math.max(0, toFrames(from, rate)),
     });
+    // Each envelope starts where it stands where playback starts, not where the mix was: in the middle of a fade, as low as it is there.
+    for (const track of allTracks(doc)) {
+      scheduleAutomation(track, at, at);
+    }
     prefetch();
     chase(at);
     scheduled = at;

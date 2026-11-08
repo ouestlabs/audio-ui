@@ -199,6 +199,15 @@ function Macro({
   );
 }
 
+/** A pan as it reads: C in the middle, else how far left or right, out of 100. */
+function formatPan(pan: number) {
+  const amount = Math.round(Math.abs(pan) * 100);
+  if (amount === 0) {
+    return "C";
+  }
+  return `${pan < 0 ? "L" : "R"}${amount}`;
+}
+
 /** A chain of a rack in a row: its name, which picks it, its volume, switch and solo, and a button that removes it. */
 function RackChainRow({
   chain,
@@ -225,6 +234,7 @@ function RackChainRow({
     (gain: number) => onMix(id, { gain }),
     [id, onMix]
   );
+  const setPan = useCallback((pan: number) => onMix(id, { pan }), [id, onMix]);
   // A switch is a step of its own.
   const setOn = useCallback(
     (on: boolean) => {
@@ -265,7 +275,22 @@ function RackChainRow({
         onValueCommitted={onMixCommit}
         size="sm"
         step={0.01}
+        title="Volume"
         value={mix.gain}
+        valueLabel="hidden"
+      />
+      <Knob
+        anchor={0}
+        aria-label={`${chain.name} pan`}
+        formatValue={formatPan}
+        max={1}
+        min={-1}
+        onValueChange={setPan}
+        onValueCommitted={onMixCommit}
+        size="sm"
+        step={0.01}
+        title="Pan"
+        value={mix.pan}
         valueLabel="hidden"
       />
       <Toggle

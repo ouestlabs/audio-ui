@@ -21,7 +21,6 @@ import {
   useMemo,
   useRef,
   useState,
-  useSyncExternalStore,
 } from "react";
 import {
   ClipBox,
@@ -30,6 +29,7 @@ import {
   ClipToggle,
   ClipView,
   PositionField,
+  useClipPlayhead,
 } from "@/registry-audio/bases/base/audio/elements/clip-view";
 import { ClipWaveform } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
@@ -142,10 +142,6 @@ interface ClipPanelProps {
 }
 
 const formatSeconds = (seconds: number) => `${seconds.toFixed(2)} s`;
-
-/** What a playhead source reads while the clip does not play: nothing to show. */
-const NOT_PLAYING = -1;
-const noSubscription = () => () => undefined;
 
 /** A speed as the pitch it moves to, in semitones: twice as fast is an octave up. */
 const formatRate = (rate: number) => {
@@ -553,26 +549,12 @@ function ClipPanel({
   // How long the source lasts on the clip: as recorded, or as its warp stretches it.
   const span = warp ? warpedTime(warp, sourceLength) : sourceLength;
   // Where playback reads the source, in the clip's time: from where it starts in it, round its loop.
-  const playhead = useMemo<Source<number> | undefined>(() => {
-    if (!arrangementPosition) {
-      return;
-    }
-    const read = (at: number) => {
-      const into = at - clipStart;
-      if (into < 0 || into >= length) {
-        return NOT_PLAYING;
-      }
-      const time = offset + into;
-      if (!loop || time < loop[1] || loop[1] <= loop[0]) {
-        return time;
-      }
-      return loop[0] + ((time - loop[0]) % (loop[1] - loop[0]));
-    };
-    return {
-      getSnapshot: () => read(arrangementPosition.getSnapshot()),
-      subscribe: arrangementPosition.subscribe,
-    };
-  }, [arrangementPosition, clipStart, length, loop, offset]);
+  const { playhead, playing } = useClipPlayhead(arrangementPosition, {
+    length,
+    loop,
+    offset,
+    start: clipStart,
+  });
   const set = useCallback(
     (patch: Partial<ClipSettings>) => onValueChange({ ...value, ...patch }),
     [onValueChange, value]
@@ -815,6 +797,7 @@ function ClipPanel({
         onValueCommitted={onValueCommitted}
         onWarpChange={setWarp}
         playhead={playhead}
+        playing={playing}
         reversed={reversed}
         sourceLength={sourceLength}
         span={span}
@@ -901,6 +884,7 @@ function ClipSource({
   onValueCommitted,
   onWarpChange,
   playhead,
+  playing,
   reversed,
   sourceLength,
   span,
@@ -920,6 +904,8 @@ function ClipSource({
   onValueCommitted?: () => void;
   onWarpChange: (next: readonly WarpMarker[]) => void;
   playhead?: Source<number>;
+  /** Whether the clip plays now: its playhead shows. */
+  playing: boolean;
   reversed: boolean;
   sourceLength: number;
   span: number;
@@ -963,12 +949,6 @@ function ClipSource({
   const [playedFrom, playedTo] = loop
     ? [Math.min(offset, loop[0]), loop[1]]
     : [offset, Math.min(span, offset + length)];
-  // Shown only while the clip plays: React hears when that changes, not each frame.
-  const playing = useSyncExternalStore(
-    playhead?.subscribe ?? noSubscription,
-    () => (playhead ? playhead.getSnapshot() !== NOT_PLAYING : false),
-    () => false
-  );
   const labels = rulerLabels(span, bar, beatsPerBar, pxPerSecond);
   // Zoomed in, a line per beat; out, a line per bar.
   const beat = bar / beatsPerBar;

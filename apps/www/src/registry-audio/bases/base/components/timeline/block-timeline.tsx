@@ -638,12 +638,14 @@ function ClipDock({
         onFoldedBoxesChange={onFoldedBoxesChange}
         onNotesCommitted={onValueCommitted}
         onRename={rename}
+        position={position}
         region={{
           length: clip.value.length,
           loop: clip.loop ?? null,
           offset: clip.value.offset,
           sourceLength: clip.sourceLength,
         }}
+        start={clip.value.start}
         swing={clip.swing}
         {...midi}
       >

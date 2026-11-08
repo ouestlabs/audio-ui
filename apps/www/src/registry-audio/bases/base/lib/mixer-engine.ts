@@ -161,6 +161,9 @@ export function createMixer(
     const chainOut = gain();
     const pre = gain();
     const volume = gain();
+    // Stereo before the pan, whatever the chain left: a mono sound goes to both sides.
+    volume.channelCount = 2;
+    volume.channelCountMode = "explicit";
     const splitter = ctx.createChannelSplitter(2);
     const left = gain();
     const right = gain();

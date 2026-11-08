@@ -21,6 +21,8 @@ export interface Steps {
   chances: number[][];
   /** Whether a note starts in the step. */
   pattern: boolean[][];
+  /** How many times the step plays: its notes, more than one for a roll, none when it is off. */
+  repeats: number[][];
   /** How late the step's first note starts in it, as a share of a step: 0 on the grid. */
   shifts: number[][];
   /** How hard the step plays, 0 to 1: its loudest note's. */
@@ -72,6 +74,7 @@ export function stepsOf(notes: readonly Note[], grid: StepGrid): Steps {
   const velocities = filled(grid, STEP_VELOCITY);
   const chances = filled(grid, 1);
   const shifts = filled(grid, 0);
+  const repeats = filled(grid, 0);
   for (const note of [...notes].sort((a, b) => a.start - b.start)) {
     const cell = cellOf(note, grid);
     if (!cell) {
@@ -79,6 +82,7 @@ export function stepsOf(notes: readonly Note[], grid: StepGrid): Steps {
     }
     const { row, step } = cell;
     const first = !pattern[row]?.[step];
+    (repeats[row] as number[])[step] = (repeats[row]?.[step] ?? 0) + 1;
     const velocity = note.velocity ?? 1;
     (pattern[row] as boolean[])[step] = true;
     (velocities[row] as number[])[step] = first
@@ -92,7 +96,7 @@ export function stepsOf(notes: readonly Note[], grid: StepGrid): Steps {
       );
     }
   }
-  return { chances, pattern, shifts, velocities };
+  return { chances, pattern, repeats, shifts, velocities };
 }
 
 /** An id no note in `notes` has. */
@@ -178,6 +182,41 @@ export function filledEvery(
   );
   for (let step = 0; step < grid.steps; step += Math.max(1, every)) {
     next = [...next, stepNote(next, grid, { row, step }, velocity)];
+  }
+  return next;
+}
+
+/** The most a step can repeat in a roll. */
+export const MAX_REPEATS = 4;
+
+/**
+ * The notes with the step `cell` played `count` times, a roll: as many hits
+ * as even across the step, each as loud as its first note was, or one hit
+ * again with `count` 1. A step that plays nothing stays so.
+ */
+export function withStepRepeats(
+  notes: readonly Note[],
+  grid: StepGrid,
+  cell: StepCell,
+  count: number
+): readonly Note[] {
+  const inside = notes.filter((note) => inCell(note, grid, cell));
+  const [first] = [...inside].sort((a, b) => a.start - b.start);
+  if (!first) {
+    return notes;
+  }
+  const times = Math.min(MAX_REPEATS, Math.max(1, Math.round(count)));
+  let next = notes.filter((note) => !inCell(note, grid, cell));
+  for (let hit = 0; hit < times; hit += 1) {
+    next = [
+      ...next,
+      {
+        ...first,
+        id: hit === 0 ? first.id : freshId(next),
+        length: grid.step / times,
+        start: timeOf(cell.step + hit / times, grid),
+      },
+    ];
   }
   return next;
 }

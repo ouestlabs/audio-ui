@@ -519,6 +519,17 @@ function DrumSlot({
     (at: number, files: File[]) => onPadFiles(rackId, at, files),
     [onPadFiles, rackId]
   );
+  // A strike on a pad's instrument panel plays the pad's note, as hard as it was struck; let go, the note ends.
+  const holdPad = useCallback(
+    (held: Readonly<Record<string, number>> | null) => {
+      if (held) {
+        onNoteOn(note, held.velocity);
+      } else {
+        onNoteOff(note);
+      }
+    },
+    [note, onNoteOff, onNoteOn]
+  );
   const setChoke = useCallback(
     (id: string, choke: number | null) =>
       dispatch({
@@ -574,8 +585,10 @@ function DrumSlot({
                 </p>
               ) : null
             }
-            place={{ chain: pad.id, rack: rackId }}
+            place={{ chain: pad.id, instruments: true, rack: rackId }}
             {...chain}
+            // The pad's instrument, struck from its own panel, plays the pad.
+            onHoldNote={holdPad}
           />
         ) : null}
       </DrumRackPanel>
