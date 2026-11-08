@@ -138,8 +138,8 @@ function DrumStepEditor({
         return null;
       }
       return (
-        // Its background reaches over the gaps around it too, so no step shows between the names as the steps scroll under them.
-        <div className="sticky start-0 z-10 flex w-28 min-w-0 items-center gap-0.5 self-stretch bg-card before:pointer-events-none before:absolute before:-inset-y-1 before:-start-1 before:-end-2 before:-z-10 before:bg-card">
+        // Its background reaches over the gaps around it too, so no step shows between the names as the steps scroll under them, and fades out across the gap before the steps, which leaves the ring of the step being played whole.
+        <div className="sticky start-1 z-10 flex w-28 min-w-0 items-center gap-0.5 self-stretch bg-card before:pointer-events-none before:absolute before:-inset-y-1 before:-start-1 before:-end-2 before:-z-10 before:bg-[linear-gradient(to_right,var(--color-card)_calc(100%-0.5rem),transparent)]">
           <Button
             className="h-6 min-w-0 flex-1 justify-start truncate px-1.5 text-xs"
             data-note={pad.note}
