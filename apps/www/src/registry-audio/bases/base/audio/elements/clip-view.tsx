@@ -1,5 +1,6 @@
 "use client";
 
+import type { Source } from "@audio-ui/react";
 import {
   type ChangeEvent,
   type ComponentProps,
@@ -11,6 +12,7 @@ import {
   useEffect,
   useMemo,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -452,4 +454,65 @@ function PositionField({
   );
 }
 
-export { ClipBox, ClipRow, ClipToggle, ClipView, PositionField };
+/** What a clip's playhead reads while the clip does not play: nothing to show. */
+const NOT_PLAYING = -1;
+const noSubscription = () => () => undefined;
+
+/**
+ * Where playback reads a clip's source, live, from the arrangement's
+ * `position`: in the source's time, from where the clip starts in it and
+ * round its loop, or `NOT_PLAYING` outside the clip. `playing` says whether
+ * the clip plays now, and changes only when that does, not each frame.
+ */
+function useClipPlayhead(
+  position: Source<number> | undefined,
+  {
+    length,
+    loop,
+    offset,
+    start,
+  }: {
+    length: number;
+    loop: readonly [number, number] | null | undefined;
+    offset: number;
+    /** Where the clip starts on the arrangement. */
+    start: number;
+  }
+) {
+  const playhead = useMemo<Source<number> | undefined>(() => {
+    if (!position) {
+      return;
+    }
+    const read = (at: number) => {
+      const into = at - start;
+      if (into < 0 || into >= length) {
+        return NOT_PLAYING;
+      }
+      const time = offset + into;
+      if (!loop || time < loop[1] || loop[1] <= loop[0]) {
+        return time;
+      }
+      return loop[0] + ((time - loop[0]) % (loop[1] - loop[0]));
+    };
+    return {
+      getSnapshot: () => read(position.getSnapshot()),
+      subscribe: position.subscribe,
+    };
+  }, [length, loop, offset, position, start]);
+  const playing = useSyncExternalStore(
+    playhead?.subscribe ?? noSubscription,
+    () => (playhead ? playhead.getSnapshot() !== NOT_PLAYING : false),
+    () => false
+  );
+  return { playhead, playing };
+}
+
+export {
+  ClipBox,
+  ClipRow,
+  ClipToggle,
+  ClipView,
+  NOT_PLAYING,
+  PositionField,
+  useClipPlayhead,
+};

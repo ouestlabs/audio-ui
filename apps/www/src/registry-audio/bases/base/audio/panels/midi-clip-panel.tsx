@@ -15,7 +15,7 @@ import {
   stretchNotes,
 } from "@audio-ui/core/piano-roll";
 import { pitchName } from "@audio-ui/core/pitch";
-import type { PianoRoll as PianoRollPrimitive } from "@audio-ui/react";
+import type { PianoRoll as PianoRollPrimitive, Source } from "@audio-ui/react";
 import {
   type MouseEvent,
   type ReactNode,
@@ -33,6 +33,7 @@ import {
   ClipView,
   formatBars,
   PositionField,
+  useClipPlayhead,
 } from "@/registry-audio/bases/base/audio/elements/clip-view";
 import {
   DrumStepEditor,
@@ -55,6 +56,7 @@ import {
   TimelineLane,
   TimelineMark,
   TimelineNavigator,
+  TimelinePlayhead,
   TimelineRange,
   TimelineRangeHandle,
   TimelineRuler,
@@ -158,8 +160,12 @@ interface MidiClipPanelProps {
    * them.
    */
   pads?: readonly DrumStepPad[];
+  /** The arrangement's position, live: while it plays the clip, a playhead shows where in its notes, and the steps light the one playing. Leave it out for none. */
+  position?: Source<number>;
   /** Where the clip plays in its source, and its loop. */
   region: MidiClipRegion;
+  /** Where the clip starts on the arrangement, what `position` is read against. @default 0 */
+  start?: number;
   /** The grid notes are drawn and moved on, in seconds. @default a quarter of `beat` */
   step?: number;
   /** The clip's swing: its off-beats played late. */
@@ -525,6 +531,8 @@ function ClipRoll({
   onNotesCommitted,
   onRegionChange,
   padNames,
+  playhead,
+  playing,
   selection,
   setBrace,
   setSelection,
@@ -550,6 +558,8 @@ function ClipRoll({
   onNotesCommitted?: () => void;
   onRegionChange?: (region: MidiClipRegion) => void;
   padNames: Readonly<Record<number, string>> | undefined;
+  playhead: Source<number> | undefined;
+  playing: boolean;
   selection: readonly NoteId[];
   setBrace: (range: readonly [number, number]) => void;
   setSelection: (selection: readonly NoteId[]) => void;
@@ -588,6 +598,7 @@ function ClipRoll({
       duration={span}
       maxZoom={MAX_STEP_PX / step}
       snapStep={step}
+      source={playhead}
     >
       <PianoRoll
         drawStyle="paint"
@@ -670,6 +681,7 @@ function ClipRoll({
                 <PianoRollStretchHandle edge="start" />
                 <PianoRollStretchHandle edge="end" />
               </PianoRollSelectionSpan>
+              {playing ? <TimelinePlayhead /> : null}
             </TimelineRuler>
           </PianoRollStrip>
           <PianoRollStrip
@@ -680,7 +692,9 @@ function ClipRoll({
               accentStep={beat}
               aria-label={`${name} notes`}
               gridStep={step}
-            />
+            >
+              {playing ? <TimelinePlayhead /> : null}
+            </PianoRollGrid>
           </PianoRollStrip>
           <PianoRollStrip
             className="border-t"
@@ -748,7 +762,9 @@ function MidiClipPanel({
   onRename,
   onSwingChange,
   pads,
+  position,
   region,
+  start: clipStart = 0,
   step = beat / 4,
   swing,
 }: MidiClipPanelProps) {
@@ -787,6 +803,25 @@ function MidiClipPanel({
   const setShowSteps = useCallback(
     (steps: boolean) => changeView({ steps }),
     [changeView]
+  );
+  // Where playback reads the notes, and the step it plays, from the arrangement's position.
+  const { playhead, playing } = useClipPlayhead(position, {
+    length,
+    loop,
+    offset,
+    start: clipStart,
+  });
+  const stepFrom = loop?.[0] ?? offset;
+  const playedStep = useMemo<Source<number> | undefined>(
+    () =>
+      playhead && {
+        getSnapshot: () => {
+          const time = playhead.getSnapshot();
+          return time < 0 ? -1 : Math.floor((time - stepFrom) / step + 1e-6);
+        },
+        subscribe: playhead.subscribe,
+      },
+    [playhead, step, stepFrom]
   );
   const padNames = useMemo(
     () =>
@@ -871,8 +906,7 @@ function MidiClipPanel({
     [offset, setRegion, step]
   );
   const setLoopPosition = useCallback(
-    (position: number) =>
-      loop && setRegion({ loop: [position, position + loop[1] - loop[0]] }),
+    (at: number) => loop && setRegion({ loop: [at, at + loop[1] - loop[0]] }),
     [loop, setRegion]
   );
   const setLoopLength = useCallback(
@@ -1039,7 +1073,8 @@ function MidiClipPanel({
           onNotesChange={onNotesChange}
           onNotesCommitted={onNotesCommitted}
           pads={drums}
-          start={loop?.[0] ?? offset}
+          source={playedStep}
+          start={stepFrom}
           step={step}
           steps={Math.max(1, Math.round(loopSpan / step))}
         />
@@ -1060,6 +1095,8 @@ function MidiClipPanel({
           onNotesCommitted={onNotesCommitted}
           onRegionChange={onRegionChange}
           padNames={padNames}
+          playhead={playhead}
+          playing={playing}
           selection={selection}
           setBrace={setBrace}
           setSelection={setSelection}

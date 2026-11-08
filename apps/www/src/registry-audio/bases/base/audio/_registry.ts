@@ -1339,8 +1339,9 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline"],
+    dependencies: ["@audio-ui/react"],
     description:
-      "The frame of a clip's detail view: a strip along its top (the caret that rolls the view up to it, the clip's switch, its name to rename, a status, actions), boxes of its properties beside its editor (ClipBox, foldable to a strip), rows, small toggles, and position fields in bars.beats.16ths (parameter fields).",
+      "The frame of a clip's detail view: a strip along its top (the caret that rolls the view up to it, the clip's switch, its name to rename, a status, actions), boxes of its properties beside its editor (ClipBox, foldable to a strip), rows, small toggles, position fields in bars.beats.16ths (parameter fields), and useClipPlayhead, where playback reads the clip's source from the arrangement's position.",
     files: [
       {
         path: "audio/elements/clip-view.tsx",

@@ -1,6 +1,7 @@
 "use client";
 
 import type { Note } from "@audio-ui/core/piano-roll";
+import type { Source } from "@audio-ui/react";
 import { type MouseEvent, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -46,6 +47,8 @@ interface DrumStepEditorProps {
   onNotesCommitted?: () => void;
   /** The pads, top to bottom: a row each. */
   pads: readonly DrumStepPad[];
+  /** The step being played, a live value: its column lights up. */
+  source?: Source<number>;
   /** Where the first step starts, in the clip's source: its loop's start. @default 0 */
   start?: number;
   /** How long a step lasts, in seconds. */
@@ -70,6 +73,7 @@ function DrumStepEditor({
   onNotesChange,
   onNotesCommitted,
   pads,
+  source,
   start = 0,
   step,
   steps,
@@ -202,6 +206,7 @@ function DrumStepEditor({
             renderRowLabel={renderRowLabel}
             rowLabels={pads.map((pad) => pad.name)}
             size="sm"
+            source={source}
             style={{ minWidth: `${steps * STEP_REM + 8}rem` }}
             value={view.pattern}
             velocities={view.velocities}
