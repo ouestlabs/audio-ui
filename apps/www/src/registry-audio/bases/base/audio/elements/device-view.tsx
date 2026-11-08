@@ -1,7 +1,15 @@
 "use client";
 
+import type { Source } from "@audio-ui/core";
 import type { ParameterValue } from "@audio-ui/core/device";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { secondsPerBeat, type Tempo } from "@audio-ui/core/time";
+import {
+  type ReactNode,
+  useCallback,
+  useMemo,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
@@ -29,23 +37,136 @@ import {
   useAutomatedRack,
 } from "@/registry-audio/bases/base/hooks/use-track-automation";
 import {
+  type Arranged,
   type ArrangementTrack,
   type AutomatedParameter,
   type ChainZone,
   DRUM_RACK_DEVICE,
   type DrumSound,
   INSTRUMENT_RACK_DEVICE,
+  playedNotes,
   RACK_DEVICE,
   type Rack,
+  type RackChain,
   type RackMapping,
   rackDevices,
   type TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { trackOf } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { libraryDevice } from "@/registry-audio/bases/base/lib/device-library";
-import { drumKit } from "@/registry-audio/bases/base/lib/drum-kit";
+import {
+  DRUM_KIT_PADS,
+  drumKit,
+} from "@/registry-audio/bases/base/lib/drum-kit";
 
 type Arrangement = ReturnType<typeof useArrangement>;
+
+const NO_NOTES: readonly number[] = [];
+const noSubscription = () => () => undefined;
+const noNotes = () => NO_NOTES;
+/** How long after the position last moved its notes still sound: once playback stops, the pads go dark. */
+const STILL_MS = 120;
+
+/**
+ * The pitches the clips of `track` sound at the arrangement's position, live,
+ * a new list only when they change: none once the position stands still, so
+ * nothing stays lit where playback stopped.
+ */
+function useSoundingNotes(
+  clips: readonly Arranged[],
+  track: string,
+  tempo: Tempo,
+  position: Source<number>
+): Source<readonly number[]> {
+  return useMemo(() => {
+    const beat = secondsPerBeat(tempo);
+    const spans = clips
+      .filter((clip) => clip.track === track && !clip.disabled && clip.notes)
+      .flatMap((clip) => playedNotes(clip, beat))
+      .filter((note) => !note.muted)
+      .map((note) => ({
+        end: note.start + note.length,
+        pitch: note.pitch,
+        start: note.start,
+      }));
+    let moved = Number.NEGATIVE_INFINITY;
+    let last = NO_NOTES;
+    const getSnapshot = () => {
+      if (performance.now() - moved > STILL_MS) {
+        last = NO_NOTES;
+        return last;
+      }
+      const at = position.getSnapshot();
+      const now = [
+        ...new Set(
+          spans
+            .filter((span) => span.start <= at && at < span.end)
+            .map((span) => span.pitch)
+        ),
+      ].sort((a, b) => a - b);
+      if (
+        now.length !== last.length ||
+        now.some((pitch, index) => pitch !== last[index])
+      ) {
+        last = now.length > 0 ? now : NO_NOTES;
+      }
+      return last;
+    };
+    const subscribe = (notify: () => void) => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const stop = position.subscribe(() => {
+        moved = performance.now();
+        notify();
+        clearTimeout(timer);
+        timer = setTimeout(notify, STILL_MS + 10);
+      });
+      return () => {
+        stop();
+        clearTimeout(timer);
+      };
+    };
+    return { getSnapshot, subscribe };
+  }, [clips, position, tempo, track]);
+}
+
+/** The names a pad bears that came with it, not from the user: the kit's. */
+const GIVEN_NAMES = new Set(DRUM_KIT_PADS.map((pad) => pad.name.toLowerCase()));
+
+/**
+ * The name a pad takes when a choice of the instrument at its head changes to
+ * `state`, such as a Drum Synth's voice: the new choice's label, while the pad
+ * bears the old choice's name or the kit's. A name of the user's own stays.
+ */
+function followedName(
+  pad: RackChain,
+  state: TrackDevice["state"]
+): string | undefined {
+  const [head] = pad.devices;
+  const entry = head?.instrument ? libraryDevice(head.device) : undefined;
+  if (!(head && entry)) {
+    return;
+  }
+  const name = pad.name.trim().toLowerCase();
+  for (const parameter of entry.device.parameters) {
+    if (parameter.kind !== "choice") {
+      continue;
+    }
+    const was = parameter.options.find(
+      (option) =>
+        option.value === (head.state[parameter.id] ?? parameter.default)
+    );
+    const now = parameter.options.find(
+      (option) => option.value === state[parameter.id]
+    );
+    if (
+      now &&
+      now !== was &&
+      (name === was?.label.toLowerCase() || GIVEN_NAMES.has(name))
+    ) {
+      return now.label;
+    }
+  }
+}
 
 /** What a device view remembers per device or rack, by its id: whether a slot is folded, the chain or pad picked, what a rack shows. */
 export interface DeviceViewEntries {
@@ -98,6 +219,8 @@ interface ChainProps {
   onPadFiles: (rack: string, note: number, files: File[]) => void;
   /** The track the chain is on, with its envelopes. */
   owner: ArrangementTrack;
+  /** The notes the track's clips sound as the arrangement plays: a drum rack's pads light them up. */
+  sounding?: Source<readonly number[]>;
   tempo: Arrangement["doc"]["tempo"];
   track: string;
   /** Where the view keeps what it remembers per device. */
@@ -480,7 +603,8 @@ function DrumSlot({
   fold,
   ...chain
 }: ChainProps & { device: TrackDevice; fold: SlotFold }) {
-  const { dispatch, onNoteOff, onNoteOn, onPadFiles, track } = chain;
+  const { activeNotes, dispatch, onNoteOff, onNoteOn, onPadFiles, track } =
+    chain;
   const rack = device.rack ?? { chains: [], macros: [] };
   const rackId = device.id;
   const [note, setNote] = chain.useEntry("drumNote", rackId, lowestPad(rack));
@@ -541,6 +665,53 @@ function DrumSlot({
       }),
     [dispatch, rackId, track]
   );
+  const rename = useCallback(
+    (id: string, name: string) => {
+      dispatch({
+        chain: id,
+        name,
+        rack: rackId,
+        track,
+        type: "change-rack-chain",
+      });
+      settle();
+    },
+    [dispatch, rackId, settle, track]
+  );
+  // A choice of the pad's instrument, such as the Drum Synth's voice, renames a pad still named after it, in the same step of undo: the name goes first, as a burst the change closes.
+  const padDispatch = useCallback<Arrangement["dispatch"]>(
+    (command) => {
+      const name =
+        pad &&
+        command.type === "set-device" &&
+        command.id === pad.devices[0]?.id
+          ? followedName(pad, command.state)
+          : undefined;
+      if (pad && name) {
+        dispatch({
+          chain: pad.id,
+          name,
+          rack: rackId,
+          track,
+          type: "change-rack-chain",
+        });
+      }
+      return dispatch(command);
+    },
+    [dispatch, pad, rackId, track]
+  );
+  // The pads light what the clips play and what is held, as the instrument's keys do.
+  const { sounding } = chain;
+  const played = useSyncExternalStore(
+    sounding?.subscribe ?? noSubscription,
+    sounding?.getSnapshot ?? noNotes,
+    noNotes
+  );
+  const lit = useMemo(
+    () =>
+      activeNotes?.length ? [...new Set([...played, ...activeNotes])] : played,
+    [activeNotes, played]
+  );
   return (
     <DeviceChainSlot
       enabled={device.on !== false}
@@ -550,6 +721,7 @@ function DrumSlot({
       {...fold}
     >
       <DrumRackPanel
+        activeNotes={lit}
         controls={<DeviceChainSlotControls />}
         enabled={device.on !== false}
         macrosShown={macrosShown}
@@ -568,6 +740,7 @@ function DrumSlot({
         onPadOn={onNoteOn}
         onPadSound={setSound}
         onRemovePad={removeChain}
+        onRenamePad={rename}
         onSelectNote={setNote}
         onUnmapMacro={unmap}
         parameters={parameters}
@@ -576,7 +749,8 @@ function DrumSlot({
       >
         {pad ? (
           <Chain
-            className="min-h-0"
+            // The pads strike the drum: a Drum Synth's own pad would only repeat the picked one.
+            className="min-h-0 [&_[data-slot=drum-synth-panel]>[data-slot=pad]]:hidden"
             devices={pad.devices}
             end={
               pad.devices.length === 0 ? (
@@ -587,6 +761,7 @@ function DrumSlot({
             }
             place={{ chain: pad.id, instruments: true, rack: rackId }}
             {...chain}
+            dispatch={padDispatch}
             // The pad's instrument, struck from its own panel, plays the pad.
             onHoldNote={holdPad}
           />
@@ -724,6 +899,7 @@ export function DeviceView({
       onPadFiles(id, rack, note, files),
     [id, onPadFiles]
   );
+  const sounding = useSoundingNotes(doc.clips, id, doc.tempo, position);
 
   if (!current) {
     return (
@@ -843,6 +1019,7 @@ export function DeviceView({
         onPadFiles={padFiles}
         owner={current}
         place={undefined}
+        sounding={sounding}
         tempo={doc.tempo}
         track={current.id}
         useEntry={useEntry}

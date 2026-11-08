@@ -1,9 +1,9 @@
 "use client";
 
 import { pitchName } from "@audio-ui/core/pitch";
-
+import { PlusIcon, XIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback, useState } from "react";
-import { cn } from "@/lib/utils";
+import { Knob } from "@/components/audio-ui/knob";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,7 +19,6 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Slider } from "@/components/ui/slider";
 import { Toggle } from "@/components/ui/toggle";
-import { Knob } from "@/components/audio-ui/knob";
 import {
   type ChainZone,
   FULL_ZONE,
@@ -27,7 +26,7 @@ import {
   type RackChain,
   type RackMapping,
 } from "@/lib/arrangement";
-import { XIcon, PlusIcon } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 /** A parameter of a device inside the rack that a macro can turn. */
 export interface RackParameter {
@@ -50,6 +49,7 @@ const MACRO_SLOTS = Array.from(
 const UNITY: RackChainMix = { gain: 1, muted: false, pan: 0, soloed: false };
 
 const percent = (value: number) => `${Math.round(value * 100)} %`;
+/** A gain as it reads, in decibels. */
 const decibels = (gain: number) =>
   gain <= 0 ? "-inf dB" : `${(20 * Math.log10(gain)).toFixed(1)} dB`;
 
@@ -721,4 +721,4 @@ function RackPanel({
   );
 }
 
-export { RackChainRow, RackFrame, RackMacros, RackPanel };
+export { decibels, formatPan, RackChainRow, RackFrame, RackMacros, RackPanel };

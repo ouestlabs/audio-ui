@@ -50,6 +50,7 @@ const MACRO_SLOTS = Array.from(
 const UNITY: RackChainMix = { gain: 1, muted: false, pan: 0, soloed: false };
 
 const percent = (value: number) => `${Math.round(value * 100)} %`;
+/** A gain as it reads, in decibels. */
 const decibels = (gain: number) =>
   gain <= 0 ? "-inf dB" : `${(20 * Math.log10(gain)).toFixed(1)} dB`;
 
@@ -737,4 +738,4 @@ function RackPanel({
   );
 }
 
-export { RackChainRow, RackFrame, RackMacros, RackPanel };
+export { decibels, formatPan, RackChainRow, RackFrame, RackMacros, RackPanel };
