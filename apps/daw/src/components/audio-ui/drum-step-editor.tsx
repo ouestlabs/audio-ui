@@ -134,7 +134,7 @@ function DrumStepEditor({
         return null;
       }
       return (
-        <div className="flex w-28 min-w-0 items-center gap-0.5">
+        <div className="sticky start-0 z-10 flex w-28 min-w-0 items-center gap-0.5 self-stretch bg-card">
           <Button
             className="h-6 min-w-0 flex-1 justify-start truncate px-1.5 text-xs"
             data-note={pad.note}
@@ -190,20 +190,23 @@ function DrumStepEditor({
       className={cn("flex min-h-0 min-w-0 flex-col gap-2 p-2", className)}
       data-slot="drum-step-editor"
     >
-      <div className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 overflow-auto">
-        <Sequencer
-          beatEvery={beatEvery}
-          // Every pad on screen at once: short steps.
-          className="gap-y-1"
-          onValueChange={changePattern}
-          onValueCommitted={commit}
-          renderRowLabel={renderRowLabel}
-          rowLabels={pads.map((pad) => pad.name)}
-          size="sm"
-          style={{ minWidth: `${steps * STEP_REM + 8}rem` }}
-          value={view.pattern}
-          velocities={view.velocities}
-        />
+      {/* Each axis scrolls in a box of its own, so each fades at its own edges: the pads down, the steps across, under the pads' names, which stay. */}
+      <div className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <div className="no-scrollbar scroll-fade-e overflow-x-auto overflow-y-hidden">
+          <Sequencer
+            beatEvery={beatEvery}
+            // Every pad on screen at once: short steps.
+            className="gap-y-1"
+            onValueChange={changePattern}
+            onValueCommitted={commit}
+            renderRowLabel={renderRowLabel}
+            rowLabels={pads.map((pad) => pad.name)}
+            size="sm"
+            style={{ minWidth: `${steps * STEP_REM + 8}rem` }}
+            value={view.pattern}
+            velocities={view.velocities}
+          />
+        </div>
       </div>
     </div>
   );
