@@ -1168,6 +1168,25 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio"],
+    dependencies: [],
+    description:
+      "A drum kit to start a drum rack from: a pad per drum on the General MIDI notes, each a Drum Synth at the head of its chain, the snare and the clap in a small room, the hats in one choke group.",
+    files: [
+      {
+        path: "lib/drum-kit.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-kit",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/drum-synth-device",
+      "@audio-ui/reverb-device",
+    ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core"],
     description:
       "A drum clip's notes as steps: a row per pad, a step per stretch of the grid, with each step's velocity, chance and shift, and the edits a step sequencer makes on the notes (switch a step, set its level, fill a row every n steps).",
@@ -1292,7 +1311,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core"],
     description:
-      "Drum racks: an instrument whose chains are pads, each answering a note with a voice of the drum synthesis or a recording, pitched and cut to a decay, into its own devices; the engine that plays one on a MIDI track.",
+      "Drum racks: an instrument whose chains are pads, each answering a note with the instrument at its head, such as a Drum Synth, or else a voice of the drum synthesis or a recording, into its own devices, a pad of a choke group cutting the others short; the engine that plays one on a MIDI track.",
     files: [
       {
         path: "lib/drum-rack.ts",
@@ -1303,6 +1322,7 @@ const items: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/arrangement",
       "@audio-ui/drum-synthesis",
+      "@audio-ui/instrument-rack",
       "@audio-ui/rack",
       "@audio-ui/voice-pool",
     ],

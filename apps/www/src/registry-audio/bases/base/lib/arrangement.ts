@@ -193,10 +193,16 @@ export type DrumSound =
   | { decay: number; kind: "synth"; tune: number; voice: DrumVoice }
   | { decay: number; kind: "sample"; recording: string; tune: number };
 
-/** The note a chain of a drum rack answers, 0 to 127, and the sound it plays. */
+/**
+ * The note a chain of a drum rack answers, 0 to 127, and what it plays: the
+ * instrument at the head of its chain, such as a Drum Synth, or else `sound`.
+ */
 export interface DrumPad {
+  /** Its choke group: a hit on another pad of the group cuts it short, as a closed hat cuts the open one. */
+  choke?: number;
   note: number;
-  sound: DrumSound;
+  /** A voice of the drum synthesis or a recording, for a pad with no instrument at the head of its chain. */
+  sound?: DrumSound;
 }
 
 /** A parameter a macro turns: the device by its id, and the stretch of the parameter's travel the macro's turn covers, 0 to 1 of it. */
@@ -288,7 +294,7 @@ export function padRecordings(
           ? [device, ...rackDevices(device.rack)].flatMap(
               (item) =>
                 item.rack?.chains.flatMap((chain) =>
-                  chain.pad?.sound.kind === "sample"
+                  chain.pad?.sound?.kind === "sample"
                     ? [chain.pad.sound.recording]
                     : []
                 ) ?? []
@@ -310,7 +316,7 @@ function renamedRack(rack: Rack, rename: (id: string) => string): Rack {
           ? { ...device, rack: renamedRack(device.rack, rename) }
           : device
       ),
-      ...(chain.pad?.sound.kind === "sample"
+      ...(chain.pad?.sound?.kind === "sample"
         ? {
             pad: {
               ...chain.pad,
