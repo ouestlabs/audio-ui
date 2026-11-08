@@ -30,6 +30,8 @@ import { fmSynthDevice } from "@/components/audio-ui/devices/fm-synth/device";
 import { createFmSynthEngine } from "@/components/audio-ui/devices/fm-synth/engine";
 import { gateDevice } from "@/components/audio-ui/devices/gate/device";
 import { createGateEngine } from "@/components/audio-ui/devices/gate/engine";
+import { guitarDevice } from "@/components/audio-ui/devices/guitar/device";
+import { createGuitarEngine } from "@/components/audio-ui/devices/guitar/engine";
 import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
 import { createLimiterEngine } from "@/components/audio-ui/devices/limiter/engine";
 import { midSideDevice } from "@/components/audio-ui/devices/mid-side/device";
@@ -137,6 +139,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(organDevice, createOrganEngine, "Instruments"),
   entry(stringMachineDevice, createStringMachineEngine, "Instruments"),
   entry(tapeKeysDevice, createTapeKeysEngine, "Instruments"),
+  entry(guitarDevice, createGuitarEngine, "Instruments"),
   entry(fmSynthDevice, createFmSynthEngine, "Instruments"),
   entry(samplerDevice, createSamplerEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),

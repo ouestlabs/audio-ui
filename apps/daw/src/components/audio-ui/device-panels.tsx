@@ -13,6 +13,7 @@ import { EqualizerPanel } from "@/components/audio-ui/devices/equalizer/panel";
 import { FilterPanel } from "@/components/audio-ui/devices/filter/panel";
 import { FmSynthPanel } from "@/components/audio-ui/devices/fm-synth/panel";
 import { GatePanel } from "@/components/audio-ui/devices/gate/panel";
+import { GuitarPanel } from "@/components/audio-ui/devices/guitar/panel";
 import { LimiterPanel } from "@/components/audio-ui/devices/limiter/panel";
 import { MidSidePanel } from "@/components/audio-ui/devices/mid-side/panel";
 import { MonoSynthPanel } from "@/components/audio-ui/devices/mono-synth/panel";
@@ -97,6 +98,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.organ": entry(OrganPanel, "w-[44rem]"),
   "audioui.string-machine": entry(StringMachinePanel, "w-[36rem]"),
   "audioui.tape-keys": entry(TapeKeysPanel, "w-[32rem]"),
+  "audioui.guitar": entry(GuitarPanel, "w-[30rem]"),
   "audioui.multiband": entry(MultibandPanel, "w-96"),
   "audioui.overdrive": entry(OverdrivePanel),
   "audioui.phaser": entry(PhaserPanel, "w-[28rem]"),
