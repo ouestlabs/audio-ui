@@ -187,9 +187,7 @@ interface Hit {
   frequency: number;
   level: number;
   noise?: BiquadFilterType;
-  /** How far above its pitch a drum starts, and how long it takes to fall to it, in seconds: a kick drops fast, a tom sags. */
-  pitchDrop?: { ratio: number; seconds: number };
-  /** Whether it goes through the room, a reverb. */
+  /** Whether it goes through the snare's room, a reverb. */
   room?: boolean;
 }
 
@@ -197,14 +195,7 @@ interface Hit {
 function hit(
   ctx: OfflineAudioContext,
   out: AudioNode,
-  {
-    at,
-    decay,
-    frequency,
-    level,
-    noise,
-    pitchDrop = { ratio: 2.5, seconds: 0.06 },
-  }: Hit
+  { at, decay, frequency, level, noise }: Hit
 ) {
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(level, at);
@@ -230,11 +221,8 @@ function hit(
     return;
   }
   const oscillator = ctx.createOscillator();
-  oscillator.frequency.setValueAtTime(frequency * pitchDrop.ratio, at);
-  oscillator.frequency.exponentialRampToValueAtTime(
-    frequency,
-    at + pitchDrop.seconds
-  );
+  oscillator.frequency.setValueAtTime(frequency * 2.5, at);
+  oscillator.frequency.exponentialRampToValueAtTime(frequency, at + 0.06);
   oscillator.connect(gain);
   oscillator.start(at);
   oscillator.stop(at + decay + 0.02);
@@ -246,20 +234,22 @@ const kick = (beat: number): Hit => ({
   frequency: 50,
   level: 0.9,
 });
-/** A snare hit, dry: what the ghost notes play. */
-const snare = (beat: number, level = 1): Hit[] => [
+/** A snare hit; `room` sends it through the room, as the backbeats and the fill are. */
+const snare = (beat: number, level = 1, room = false): Hit[] => [
   {
     at: beat * BEAT,
     decay: 0.18,
     frequency: 1500,
     level: 0.5 * level,
     noise: "bandpass",
+    room,
   },
   {
     at: beat * BEAT,
     decay: 0.08,
     frequency: 180,
     level: 0.3 * level,
+    room,
   },
 ];
 const clap = (beat: number, room = false): Hit => ({
@@ -270,27 +260,6 @@ const clap = (beat: number, room = false): Hit => ({
   noise: "bandpass",
   room,
 });
-/** Where the toms sit, in hertz: a high one that calls and a low one that answers. */
-const TOMS = { high: 150, low: 98 } as const;
-/** A tom in the room: a skin that sags in pitch as it rings, and the stick's click on it, `level` from 0 to 1. */
-const tom = (beat: number, frequency: number, level = 1): Hit[] => [
-  {
-    at: beat * BEAT,
-    decay: 0.55,
-    frequency,
-    level: 0.75 * level,
-    pitchDrop: { ratio: 1.5, seconds: 0.14 },
-    room: true,
-  },
-  {
-    at: beat * BEAT,
-    decay: 0.03,
-    frequency: 2500,
-    level: 0.2 * level,
-    noise: "bandpass",
-    room: true,
-  },
-];
 /** Hats on every sixteenth of `bars`: the beats loudest, the off-beats a little less, the sixteenths between soft, and an open one where `open` says. */
 const hats = (bars: number, open: readonly number[] = []): Hit[] =>
   Array.from({ length: bars * 16 }, (_, sixteenth) => {
@@ -307,21 +276,20 @@ const hats = (bars: number, open: readonly number[] = []): Hit[] =>
   });
 const everyBar = <T>(bars: number, of: (bar: number) => T[]) =>
   Array.from({ length: bars }, (_, bar) => of(bar * 4)).flat();
-/** The groove over `bars`: the kick with the bass, a high tom on two and a low one on four that answers, and the snare's ghost notes between. */
+/** The funk groove over `bars`: the kick with the bass, the snare on two and four with its ghost notes. */
 const groove = (bars: number): Hit[] => [
   ...everyBar(bars / 2, (at) => KICK.map((beat) => kick(at * 2 + beat))),
   ...everyBar(bars, (at) => [
-    ...tom(at + 1, TOMS.high),
-    ...tom(at + 3, TOMS.low),
+    ...snare(at + 1, 1, true),
+    ...snare(at + 3, 1, true),
     ...GHOSTS.flatMap((beat) => snare(at + beat, 0.22)),
   ]),
 ];
 
 /**
- * The drums of each part, as hits: the verse's groove, with its toms on the
- * backbeat; the fill that ends it, a roll down from the high tom to the low
- * one that grows, as a talking drum's; and the chorus's, the same groove with
- * a clap on the toms, an open hat at the end of each bar and a crash on its
+ * The drums of each part, as hits: the verse's funk groove, the fill that
+ * ends it (a snare roll that grows), and the chorus's, the same groove with a
+ * clap on the snare, an open hat at the end of each bar and a crash on its
  * first beat.
  */
 const DRUMS = {
@@ -333,15 +301,10 @@ const DRUMS = {
   ],
   "drums-fill": [
     kick(0),
-    ...tom(1, TOMS.high),
+    ...snare(1, 1, true),
     ...hats(1).slice(0, 8),
-    // Down from the high tom to the low one, louder as it goes, as a talking drum calls into the chorus.
     ...Array.from({ length: 8 }, (_, step) =>
-      tom(
-        2 + step / 4,
-        TOMS.high * (TOMS.low / TOMS.high) ** (step / 7),
-        0.3 + step * 0.06
-      )
+      snare(2 + step / 4, 0.35 + step * 0.09, true)
     ).flat(),
   ],
   "drums-verse": [...groove(2), ...hats(2)],
@@ -357,7 +320,7 @@ export const SONG_RECORDINGS = {
 export type SongPart = keyof typeof SONG_RECORDINGS;
 
 /** A part's samples, before any level is set. */
-/** The toms' room: how long its tail lasts, in seconds, how long before it answers, and how much of it is heard. */
+/** The snare's room: how long its tail lasts, in seconds, how long before it answers, and how much of it is heard. */
 const ROOM = { delay: 0.018, seconds: 1.6, wet: 0.45 } as const;
 
 /** A room's answer to a hit: noise that fades and darkens as it fades, as a plate's tail does. */
@@ -377,9 +340,10 @@ function roomImpulse(ctx: BaseAudioContext) {
 }
 
 /**
- * A part's samples, before any level is set. The toms and the claps go
- * through a room as well, while the ghost notes stay dry; the room's tail,
- * past the end, comes round to the start, as the part loops.
+ * A part's samples, before any level is set. The backbeats on two and four,
+ * the snare and its clap, and the fill's roll go through a room as well,
+ * while the ghost notes stay dry; the room's tail, past the end, comes round
+ * to the start, as the part loops.
  */
 function draw(part: SongPart, rate: number): Promise<Float32Array> {
   const length = Math.ceil(rate * BEAT * 4 * SONG_RECORDINGS[part]);
