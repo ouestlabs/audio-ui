@@ -138,7 +138,8 @@ function DrumStepEditor({
         return null;
       }
       return (
-        <div className="sticky start-0 z-10 flex w-28 min-w-0 items-center gap-0.5 self-stretch bg-card">
+        // Its background reaches over the gaps around it too, so no step shows between the names as the steps scroll under them.
+        <div className="sticky start-0 z-10 flex w-28 min-w-0 items-center gap-0.5 self-stretch bg-card before:pointer-events-none before:absolute before:-inset-y-1 before:-start-1 before:-end-2 before:-z-10 before:bg-card">
           <Button
             className="h-6 min-w-0 flex-1 justify-start truncate px-1.5 text-xs"
             data-note={pad.note}
