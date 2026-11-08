@@ -1,21 +1,18 @@
 /**
  * A chill song at 80 BPM on one two-bar loop, E minor seven, G and A, that
  * every part plays: the verse and the chorus differ by who plays, not by
- * their chords, so the song comes round as a loop does. Its drums are drawn
- * here as recordings, as files would arrive, one per part, from oscillators
- * and noise; its organ, its pad, its bass and its lead are notes for MIDI
- * tracks to play. What an arrangement's demo plays.
+ * their chords, so the song comes round as a loop does. Everything in it is
+ * notes for MIDI tracks to play: its drums on a drum kit's pads, one part
+ * each, and its organ, its pad, its bass and its lead. What an arrangement's
+ * demo plays.
  */
 
 import type { Tempo } from "@audio-ui/core/time";
+import { DRUM_NOTES } from "@/registry-audio/bases/base/lib/drum-kit";
 
 const BPM = 80;
 export const SONG_TEMPO: Tempo = { beatsPerBar: 4, beatUnit: 4, bpm: BPM };
 
-const BEAT = 60 / BPM;
-/** The average level the verse's recordings are brought to, -22 dBFS, and the peak no recording passes. */
-const TARGET_RMS = 10 ** (-22 / 20);
-const CEILING = 0.9;
 /** Where the kick falls over the loop's two bars, in beats, on the sixteenths: the bass lands with it. */
 const KICK = [0, 0.75, 1.75, 2.5, 4, 4.75, 6, 6.5] as const;
 /** The snare's ghost notes, soft, between the backbeats of each bar. */
@@ -59,6 +56,63 @@ const held = (
     }))
   );
 
+/** A drum hit as a note of the kit: its pad, its beat, and how hard. */
+const drum = (pad: number, start: number, velocity = 1): SongNote => ({
+  length: 0.25,
+  pitch: pad,
+  start,
+  velocity,
+});
+const everyBar = <T>(bars: number, of: (bar: number) => T[]) =>
+  Array.from({ length: bars }, (_, bar) => of(bar * 4)).flat();
+/** Hats on every sixteenth of `bars`: the beats loudest, the off-beats a little less, the sixteenths between soft, and an open one where `open` says. */
+const hats = (bars: number, open: readonly number[] = []): SongNote[] =>
+  Array.from({ length: bars * 16 }, (_, sixteenth) => {
+    const beat = sixteenth / 4;
+    return open.includes(beat % 4)
+      ? drum(DRUM_NOTES.openHat, beat)
+      : drum(DRUM_NOTES.hat, beat, [1, 0.3, 0.7, 0.35][sixteenth % 4]);
+  });
+/** The funk groove over `bars`: the kick with the bass, the snare on two and four with its ghost notes. */
+const groove = (bars: number): SongNote[] => [
+  ...everyBar(bars / 2, (at) =>
+    KICK.map((beat) => drum(DRUM_NOTES.kick, at * 2 + beat))
+  ),
+  ...everyBar(bars, (at) => [
+    drum(DRUM_NOTES.snare, at + 1),
+    drum(DRUM_NOTES.snare, at + 3),
+    ...GHOSTS.map((beat) => drum(DRUM_NOTES.snare, at + beat, 0.22)),
+  ]),
+];
+
+/**
+ * The drums of each part, as notes of a drum kit (`drumKit`): the verse's
+ * funk groove, the fill that ends it (a snare roll that grows), and the
+ * chorus's, the same groove with a clap on the snare, an open hat at the end
+ * of each bar and a crash on its first beat. The snare and the clap ring in
+ * the kit's room.
+ */
+const DRUMS = {
+  "drums-chorus": [
+    drum(DRUM_NOTES.crash, 0),
+    ...groove(4),
+    ...everyBar(4, (at) => [
+      drum(DRUM_NOTES.clap, at + 1),
+      drum(DRUM_NOTES.clap, at + 3),
+    ]),
+    ...hats(4, [3.5]),
+  ],
+  "drums-fill": [
+    drum(DRUM_NOTES.kick, 0),
+    drum(DRUM_NOTES.snare, 1),
+    ...hats(1).slice(0, 8),
+    ...Array.from({ length: 8 }, (_, step) =>
+      drum(DRUM_NOTES.snare, 2 + step / 4, 0.35 + step * 0.09)
+    ),
+  ],
+  "drums-verse": [...groove(2), ...hats(2)],
+} satisfies Record<string, SongNote[]>;
+
 /**
  * The song's notes by part, for MIDI tracks to play, each as long as its
  * loop. The organ holds the chords and the pad the same an octave up, each
@@ -72,6 +126,7 @@ const held = (
  * and the strength it was played with.
  */
 export const SONG_SCORE = {
+  ...DRUMS,
   "bass-chorus": notes(
     [
       [0, 0.5, 40],
@@ -133,239 +188,3 @@ export const SONG_SCORE = {
 } satisfies Record<string, SongNote[]>;
 
 export type SongScorePart = keyof typeof SONG_SCORE;
-
-interface Hit {
-  at: number;
-  decay: number;
-  frequency: number;
-  level: number;
-  noise?: BiquadFilterType;
-  /** Whether it goes through the snare's room, a reverb. */
-  room?: boolean;
-}
-
-/** A drum hit into `out`: a sine whose pitch falls as it sounds, or noise through a filter. */
-function hit(
-  ctx: OfflineAudioContext,
-  out: AudioNode,
-  { at, decay, frequency, level, noise }: Hit
-) {
-  const gain = ctx.createGain();
-  gain.gain.setValueAtTime(level, at);
-  gain.gain.exponentialRampToValueAtTime(0.0001, at + decay);
-  gain.connect(out);
-  if (noise) {
-    const buffer = ctx.createBuffer(
-      1,
-      Math.ceil(ctx.sampleRate * (decay + 0.02)),
-      ctx.sampleRate
-    );
-    const data = buffer.getChannelData(0);
-    for (let index = 0; index < data.length; index += 1) {
-      data[index] = Math.random() * 2 - 1;
-    }
-    const source = ctx.createBufferSource();
-    source.buffer = buffer;
-    const filter = ctx.createBiquadFilter();
-    filter.type = noise;
-    filter.frequency.value = frequency;
-    source.connect(filter).connect(gain);
-    source.start(at);
-    return;
-  }
-  const oscillator = ctx.createOscillator();
-  oscillator.frequency.setValueAtTime(frequency * 2.5, at);
-  oscillator.frequency.exponentialRampToValueAtTime(frequency, at + 0.06);
-  oscillator.connect(gain);
-  oscillator.start(at);
-  oscillator.stop(at + decay + 0.02);
-}
-
-const kick = (beat: number): Hit => ({
-  at: beat * BEAT,
-  decay: 0.35,
-  frequency: 50,
-  level: 0.9,
-});
-/** A snare hit; `room` sends it through the room, as the backbeats and the fill are. */
-const snare = (beat: number, level = 1, room = false): Hit[] => [
-  {
-    at: beat * BEAT,
-    decay: 0.18,
-    frequency: 1500,
-    level: 0.5 * level,
-    noise: "bandpass",
-    room,
-  },
-  {
-    at: beat * BEAT,
-    decay: 0.08,
-    frequency: 180,
-    level: 0.3 * level,
-    room,
-  },
-];
-const clap = (beat: number, room = false): Hit => ({
-  at: beat * BEAT + 0.008,
-  decay: 0.12,
-  frequency: 1100,
-  level: 0.35,
-  noise: "bandpass",
-  room,
-});
-/** Hats on every sixteenth of `bars`: the beats loudest, the off-beats a little less, the sixteenths between soft, and an open one where `open` says. */
-const hats = (bars: number, open: readonly number[] = []): Hit[] =>
-  Array.from({ length: bars * 16 }, (_, sixteenth) => {
-    const beat = sixteenth / 4;
-    const accent = [0.2, 0.06, 0.14, 0.07][sixteenth % 4] ?? 0.06;
-    return {
-      at: beat * BEAT,
-      frequency: 7000,
-      noise: "highpass",
-      ...(open.includes(beat % 4)
-        ? { decay: 0.22, level: 0.14 }
-        : { decay: sixteenth % 2 ? 0.025 : 0.05, level: accent }),
-    };
-  });
-const everyBar = <T>(bars: number, of: (bar: number) => T[]) =>
-  Array.from({ length: bars }, (_, bar) => of(bar * 4)).flat();
-/** The funk groove over `bars`: the kick with the bass, the snare on two and four with its ghost notes. */
-const groove = (bars: number): Hit[] => [
-  ...everyBar(bars / 2, (at) => KICK.map((beat) => kick(at * 2 + beat))),
-  ...everyBar(bars, (at) => [
-    ...snare(at + 1, 1, true),
-    ...snare(at + 3, 1, true),
-    ...GHOSTS.flatMap((beat) => snare(at + beat, 0.22)),
-  ]),
-];
-
-/**
- * The drums of each part, as hits: the verse's funk groove, the fill that
- * ends it (a snare roll that grows), and the chorus's, the same groove with a
- * clap on the snare, an open hat at the end of each bar and a crash on its
- * first beat.
- */
-const DRUMS = {
-  "drums-chorus": [
-    { at: 0, decay: 1.6, frequency: 4500, level: 0.16, noise: "highpass" },
-    ...groove(4),
-    ...everyBar(4, (at) => [clap(at + 1, true), clap(at + 3, true)]),
-    ...hats(4, [3.5]),
-  ],
-  "drums-fill": [
-    kick(0),
-    ...snare(1, 1, true),
-    ...hats(1).slice(0, 8),
-    ...Array.from({ length: 8 }, (_, step) =>
-      snare(2 + step / 4, 0.35 + step * 0.09, true)
-    ).flat(),
-  ],
-  "drums-verse": [...groove(2), ...hats(2)],
-} satisfies Record<string, Hit[]>;
-
-/** Every recording of the song, by id, and how many bars it lasts. */
-export const SONG_RECORDINGS = {
-  "drums-chorus": 4,
-  "drums-fill": 1,
-  "drums-verse": 2,
-} as const;
-
-export type SongPart = keyof typeof SONG_RECORDINGS;
-
-/** A part's samples, before any level is set. */
-/** The snare's room: how long its tail lasts, in seconds, how long before it answers, and how much of it is heard. */
-const ROOM = { delay: 0.018, seconds: 1.6, wet: 0.45 } as const;
-
-/** A room's answer to a hit: noise that fades and darkens as it fades, as a plate's tail does. */
-function roomImpulse(ctx: BaseAudioContext) {
-  const length = Math.ceil(ctx.sampleRate * ROOM.seconds);
-  const start = Math.round(ctx.sampleRate * ROOM.delay);
-  const buffer = ctx.createBuffer(1, length + start, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  let dark = 0;
-  for (let index = 0; index < length; index += 1) {
-    const fade = (1 - index / length) ** 3;
-    // The tail loses its highs as it fades: the noise is smoothed more and more.
-    dark += (Math.random() * 2 - 1 - dark) * (0.7 - 0.6 * (index / length));
-    data[start + index] = dark * fade * 0.25;
-  }
-  return buffer;
-}
-
-/**
- * A part's samples, before any level is set. The backbeats on two and four,
- * the snare and its clap, and the fill's roll go through a room as well,
- * while the ghost notes stay dry; the room's tail, past the end, comes round
- * to the start, as the part loops.
- */
-function draw(part: SongPart, rate: number): Promise<Float32Array> {
-  const length = Math.ceil(rate * BEAT * 4 * SONG_RECORDINGS[part]);
-  const tail = Math.ceil(rate * (ROOM.seconds + ROOM.delay));
-  const ctx = new OfflineAudioContext(1, length + tail, rate);
-  const out = ctx.createGain();
-  out.connect(ctx.destination);
-  const room = ctx.createGain();
-  const reverb = ctx.createConvolver();
-  reverb.normalize = false;
-  reverb.buffer = roomImpulse(ctx);
-  const wet = ctx.createGain();
-  wet.gain.value = ROOM.wet;
-  room.connect(out);
-  room.connect(reverb).connect(wet).connect(out);
-  for (const one of DRUMS[part]) {
-    hit(ctx, one.room ? room : out, one);
-  }
-  return ctx.startRendering().then((done) => {
-    const data = done.getChannelData(0);
-    const looped = data.slice(0, length);
-    for (let index = length; index < data.length; index += 1) {
-      const at = (index - length) % length;
-      looped[at] = (looped[at] ?? 0) + (data[index] ?? 0);
-    }
-    return looped;
-  });
-}
-
-function measure(data: Float32Array) {
-  let squares = 0;
-  let peak = 0;
-  for (const sample of data) {
-    squares += sample * sample;
-    peak = Math.max(peak, Math.abs(sample));
-  }
-  return { peak, rms: Math.sqrt(squares / data.length) };
-}
-
-const drawn = new Map<string, Promise<Float32Array>>();
-const once = (part: SongPart, rate: number) => {
-  const id = `${part}:${rate}`;
-  const kept = drawn.get(id) ?? draw(part, rate);
-  drawn.set(id, kept);
-  return kept;
-};
-
-/**
- * One recorded part of the song at its tempo: what an audio track of an
- * arrangement plays. Every part takes the gain that brings the verse's drums
- * to the song's level, so the fill and the chorus keep their own, and none
- * peaks past the ceiling. Drawn once per sample rate.
- */
-export async function renderSongPart(
-  part: SongPart,
-  sampleRate: number
-): Promise<AudioBuffer> {
-  const verse = measure(await once("drums-verse", sampleRate));
-  const data = Float32Array.from(await once(part, sampleRate));
-  const { peak } = measure(data);
-  const gain = Math.min(
-    TARGET_RMS / verse.rms,
-    CEILING / verse.peak,
-    CEILING / peak
-  );
-  for (let index = 0; index < data.length; index += 1) {
-    data[index] = (data[index] ?? 0) * gain;
-  }
-  const buffer = new AudioBuffer({ length: data.length, sampleRate });
-  buffer.copyToChannel(data, 0);
-  return buffer;
-}

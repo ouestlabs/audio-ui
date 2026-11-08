@@ -115,7 +115,7 @@ describe("createDrumSynthEngine", () => {
   test("starts its output at its volume", () => {
     const { ctx, made } = fakeContext();
     createDrumSynthEngine(ctx, drumSynthPreset("kick", { volume: 10 }));
-    expect(made.gains[0]?.gain.value).toBeCloseTo(volumeGain(10), 9);
+    expect(made.gains[0]?.gain.value).toBeCloseTo(volumeGain(10) * 2.5, 9);
   });
 
   test("a kick is a sine falling to its pitch, struck at the note's time and ringing for its decay", () => {

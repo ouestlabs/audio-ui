@@ -1204,7 +1204,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A chill song at 80 BPM on one two-bar loop, E minor seven, G and A: drums drawn as recordings, one per part with a fill, and an organ, a pad, a bass and a lead hook as notes for MIDI tracks. What the arrangement's demo plays.",
+      "A chill song at 80 BPM on one two-bar loop, E minor seven, G and A, all of it notes for MIDI tracks: its drums on a drum kit's pads, one part each with a fill, and an organ, a pad, a bass and a lead hook. What the arrangement's demo plays.",
     files: [
       {
         path: "lib/demo-song.ts",
@@ -1212,7 +1212,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "demo-song",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/drum-kit"],
     type: "registry:lib",
   },
   {

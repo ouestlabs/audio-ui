@@ -208,7 +208,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `drum-step-editor` | `DrumStepEditor` from `@/components/audio-ui/drum-step-editor` | registry only | A drum clip's notes as steps, a row per pad (`pads`): paint steps, sound a pad (`onAudition`), fill a row every 2, 4 or 8 steps; the roll edits their velocity and chance. `midi-clip-panel` shows it for a clip given `pads` |
 | `drum-kit` | from `@/lib/drum-kit` | A drum kit to start a drum rack from: `drumKit()` gives a pad per drum on the General MIDI notes (`DRUM_NOTES`), each a Drum Synth at the head of its chain, the snare and the clap in a small room, the hats in one choke group; pass it as `rack` with `add-device` |
 | `drum-steps` | from `@/lib/drum-steps` | A drum clip's notes as steps, a row per pad: `stepsOf` reads each step's velocity, chance and shift, and `withStep`, `withStepLevel` and `filledEvery` edit the notes as a step sequencer does |
-| `demo-song` | from `@/lib/demo-song` | The arrangement demo's song: a chill song at 80 BPM on one two-bar loop (intro, verse, chorus, outro), its drums as recordings per part (`renderSongPart`, `SONG_RECORDINGS`), an organ, a pad, a bass and a lead as notes (`SONG_SCORE`) |
+| `demo-song` | from `@/lib/demo-song` | The arrangement demo's song: a chill song at 80 BPM on one two-bar loop (intro, verse, chorus, outro), every part notes (`SONG_SCORE`): its drums on a drum kit's pads (`drum-kit`), one part each with a fill, an organ, a pad, a bass and a lead |
 | `piano-roll-tools` | `createPianoRollTools` from `@/lib/piano-roll-tools` | Typed tools an AI model uses to edit a piano roll |
 
 ## Ready blocks

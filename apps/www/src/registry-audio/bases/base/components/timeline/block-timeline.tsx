@@ -12,7 +12,6 @@ import {
   type ComponentProps,
   type KeyboardEvent,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -64,6 +63,8 @@ import {
   type Arranged,
   type ArrangementTrack,
   analyzeBeat,
+  type ClipSwing,
+  DRUM_RACK_DEVICE,
   NEW_TRACK,
   type TimeSelection,
   type TrackKind,
@@ -80,14 +81,12 @@ import { channelEqDevice } from "@/registry-audio/bases/base/lib/channel-eq-devi
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
 import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
 import {
-  renderSongPart,
-  SONG_RECORDINGS,
   SONG_SCORE,
   SONG_TEMPO,
   type SongNote,
-  type SongPart,
   type SongScorePart,
 } from "@/registry-audio/bases/base/lib/demo-song";
+import { drumKit } from "@/registry-audio/bases/base/lib/drum-kit";
 import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import {
   monoSynthDevice,
@@ -204,9 +203,9 @@ const ORGAN_FADE = [
 ];
 
 /**
- * The song as a project: its drums as an audio track, and its bass, its
- * organ, its lead and its pad as MIDI tracks played by the registry's
- * instruments (a mono synth's sub bass, a tonewheel organ on three drawbars
+ * The song as a project: every track MIDI, played by the registry's
+ * instruments (a drum rack with a Drum Synth on every pad for the drums, its
+ * snare and clap in a small room, a mono synth's sub bass, a tonewheel organ on three drawbars
  * for the chords, another on its first four, driven and spun fast through a
  * vibe in vibrato, for the lead, and a string machine on the pad), and a
  * reverb on a return track the organ, the lead and the pad send to. The drums
@@ -217,7 +216,17 @@ const ORGAN_FADE = [
 const TRACKS: ArrangementTrack[] = [
   {
     color: 0,
+    devices: [
+      {
+        device: DRUM_RACK_DEVICE,
+        id: "drum-kit",
+        instrument: true,
+        rack: drumKit(),
+        state: {},
+      },
+    ],
     id: "drums",
+    kind: "midi",
     mix: { ...UNITY_MIX, gain: 10 ** (-3 / 20) },
     name: "Drums",
   },
@@ -381,19 +390,14 @@ const notesOf = (notes: readonly SongNote[]): Arranged["notes"] =>
     velocity,
   }));
 
-/** A take of the song: a recording an audio clip loops, or notes a MIDI clip loops. Its track is the word before its dash. */
-type Take = SongPart | SongScorePart;
+/** A take of the song: notes a MIDI clip loops. Its track is the word before its dash. */
+type Take = SongScorePart;
 
-const isRecording = (take: Take): take is SongPart => take in SONG_RECORDINGS;
-
-/** How many bars a take lasts before it loops: a score's, up to the bar its last note ends in. */
+/** How many bars a take lasts before it loops: up to the bar its last note ends in. */
 const barsOf = (take: Take) =>
-  isRecording(take)
-    ? SONG_RECORDINGS[take]
-    : Math.ceil(
-        Math.max(...SONG_SCORE[take].map((note) => note.start + note.length)) /
-          4
-      );
+  Math.ceil(
+    Math.max(...SONG_SCORE[take].map((note) => note.start + note.length)) / 4
+  );
 
 /** A clip of `take` from bar `from` to bar `to`, on its track, looping it. */
 function clipOf(
@@ -402,19 +406,17 @@ function clipOf(
   take: Take,
   from: number,
   to: number
-) {
+): Arranged {
   const loop = bars(barsOf(take));
-  const clip: Arranged = {
+  return {
     id,
     loop: [0, loop],
     name,
+    notes: notesOf(SONG_SCORE[take]),
     sourceLength: loop,
     track: take.split("-")[0] ?? take,
     value: placedAt(from, to),
   };
-  return isRecording(take)
-    ? { ...clip, recording: take }
-    : { ...clip, notes: notesOf(SONG_SCORE[take]) };
 }
 
 /**
@@ -587,7 +589,13 @@ function ClipDock({
   /** What a MIDI clip's panel edits and sounds. */
   midi: Pick<
     ComponentProps<typeof MidiClipPanel>,
-    "onNoteOff" | "onNoteOn" | "onNotesChange" | "onRegionChange"
+    | "onNoteOff"
+    | "onNoteOn"
+    | "onNotesChange"
+    | "onPadOn"
+    | "onRegionChange"
+    | "onSwingChange"
+    | "pads"
   >;
   onActiveChange: (active: boolean) => void;
   onClose: () => void;
@@ -633,6 +641,7 @@ function ClipDock({
           offset: clip.value.offset,
           sourceLength: clip.sourceLength,
         }}
+        swing={clip.swing}
         {...midi}
       >
         <CloseClipView onClose={onClose} />
@@ -703,37 +712,11 @@ function channelsOf(buffer: AudioBuffer) {
   );
 }
 
-/**
- * The recordings the audio clips play, by id: the song's drums,
- * drawn once at the engine's rate, and the files dropped on the tracks, which
- * `keepRecording` adds.
- */
+/** The recordings the audio clips play, by id: the files dropped on the tracks, which `keepRecording` adds. */
 function useRecordings() {
   const [recordings, setRecordings] = useState<ReadonlyMap<string, Recording>>(
     () => new Map()
   );
-  useEffect(() => {
-    const context = webAudio.getContext();
-    if (!context) {
-      return;
-    }
-    let cancelled = false;
-    for (const part of Object.keys(SONG_RECORDINGS) as SongPart[]) {
-      renderSongPart(part, context.sampleRate).then((buffer) => {
-        if (!cancelled) {
-          setRecordings((current) =>
-            new Map(current).set(
-              part,
-              recordingOf(channelsOf(buffer), context.sampleRate)
-            )
-          );
-        }
-      });
-    }
-    return () => {
-      cancelled = true;
-    };
-  }, []);
   const keepRecording = useCallback(
     (id: string, recording: Recording) =>
       setRecordings((current) => new Map(current).set(id, recording)),
@@ -1293,14 +1276,58 @@ export default function BlockTimeline() {
     },
     [editedTrack, engine.engine]
   );
+  // A drum clip's pads: those of the drum rack its track plays, lowest note on top.
+  const editedRack = tracks
+    .find((item) => item.id === editedTrack)
+    ?.devices?.find((item) => item.device === DRUM_RACK_DEVICE)?.rack;
+  const editedPads = useMemo(
+    () =>
+      editedRack?.chains
+        .flatMap((chain) =>
+          chain.pad ? [{ name: chain.name, note: chain.pad.note }] : []
+        )
+        .sort((a, b) => a.note - b.note),
+    [editedRack]
+  );
+  // A pad's name pressed in the steps: the track plays it, let go at once, as a drum rings on.
+  const auditionPad = useCallback(
+    (note: number) => {
+      if (editedTrack) {
+        engine.engine?.noteOn(editedTrack, note, 0.8);
+        engine.engine?.noteOff(editedTrack, note);
+      }
+    },
+    [editedTrack, engine.engine]
+  );
+  const changeSwing = useCallback(
+    (swing: ClipSwing | null) => {
+      if (editedClip) {
+        editClip(editedClip.id, ({ swing: _was, ...clip }) =>
+          swing ? { ...clip, swing } : clip
+        );
+      }
+    },
+    [editClip, editedClip]
+  );
   const midiEditing = useMemo(
     () => ({
       onNoteOff: auditionOff,
       onNoteOn: auditionOn,
       onNotesChange: changeNotes,
+      onPadOn: auditionPad,
       onRegionChange: changeMidiRegion,
+      onSwingChange: changeSwing,
+      pads: editedPads,
     }),
-    [auditionOff, auditionOn, changeMidiRegion, changeNotes]
+    [
+      auditionOff,
+      auditionOn,
+      auditionPad,
+      changeMidiRegion,
+      changeNotes,
+      changeSwing,
+      editedPads,
+    ]
   );
   // The clip panel's switch: off, the clip stays on its track and is not heard.
   const setEditedActive = useCallback(
