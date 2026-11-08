@@ -82,11 +82,17 @@ function DrumSynthPanel({
         <Pad
           activePads={activeNotes?.length ? ACTIVE : undefined}
           aria-label="Strike the drum"
-          className="mt-auto min-h-14 flex-1"
+          // One pad across the panel, in the room left under the controls, not square.
+          className="mt-auto min-h-14 flex-1 grid-rows-[minmax(0,1fr)]"
           columns={1}
           onPadOn={strike}
         >
-          <PadItem value="hit">{voice?.label}</PadItem>
+          <PadItem
+            className="aspect-auto h-full items-center justify-center"
+            value="hit"
+          >
+            {voice?.label}
+          </PadItem>
         </Pad>
       </div>
     </DeviceFrame>
