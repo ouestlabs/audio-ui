@@ -3,8 +3,8 @@
  * every part plays: the verse and the chorus differ by who plays, not by
  * their chords, so the song comes round as a loop does. Its drums are drawn
  * here as recordings, as files would arrive, one per part, from oscillators
- * and noise; its guitar, its organ, its pad, its bass and its lead are notes
- * for MIDI tracks to play. What an arrangement's demo plays.
+ * and noise; its organ, its pad, its bass and its lead are notes for MIDI
+ * tracks to play. What an arrangement's demo plays.
  */
 
 import type { Tempo } from "@audio-ui/core/time";
@@ -66,14 +66,10 @@ const held = (
  * on the first two hits of the kick under each chord, the second softer, a
  * note on the third beat, the A pushed a sixteenth ahead of its chord, and
  * silence between, the chorus dropping to a low B on its last off-beat. The
- * guitar picks the chords one string at a time, on the eighths: up from the
- * root and back down over E minor seven, up over G and over A, each string
- * left to ring until its chord changes or it is picked again, so the
- * arpeggio sounds as the chord;
- * picked harder in the chorus. The lead is the chorus's hook over four bars, a call
- * and its answer, each note a tone of the chord under it, starting with it,
- * and let go just before the next so every note is struck anew, in the octave
- * of a tape keyboard's flutes.
+ * lead is the chorus's hook, played on a keyboard and kept as it was played:
+ * D, B and A twice over, the A held, then three Bs and three C sharps picked
+ * on the sixteenths before B and A lead back round, each note at the length
+ * and the strength it was played with.
  */
 export const SONG_SCORE = {
   "bass-chorus": notes(
@@ -99,67 +95,24 @@ export const SONG_SCORE = {
     ],
     0.9
   ),
-  "guitar-chorus": notes(
-    [
-      [0, 3.95, 40],
-      [0.5, 2.95, 47],
-      [1, 1.95, 50],
-      [1.5, 0.95, 55],
-      [2, 1.95, 59],
-      [2.5, 1.45, 55],
-      [3, 0.95, 50],
-      [3.5, 0.45, 47],
-      [4, 1.95, 43],
-      [4.5, 1.45, 47],
-      [5, 0.95, 50],
-      [5.5, 0.45, 55],
-      [6, 1.95, 45],
-      [6.5, 1.45, 52],
-      [7, 0.95, 57],
-      [7.5, 0.45, 61],
-    ],
-    0.95
-  ),
-  "guitar-verse": notes(
-    [
-      [0, 3.95, 40],
-      [0.5, 2.95, 47],
-      [1, 1.95, 50],
-      [1.5, 0.95, 55],
-      [2, 1.95, 59],
-      [2.5, 1.45, 55],
-      [3, 0.95, 50],
-      [3.5, 0.45, 47],
-      [4, 1.95, 43],
-      [4.5, 1.45, 47],
-      [5, 0.95, 50],
-      [5.5, 0.45, 55],
-      [6, 1.95, 45],
-      [6.5, 1.45, 52],
-      [7, 0.95, 57],
-      [7.5, 0.45, 61],
-    ],
-    0.8
-  ),
   lead: notes(
     [
-      [0, 1.4, 64],
-      [1.5, 0.4, 62],
-      [2, 0.9, 59],
-      [3, 0.9, 62],
-      [4, 1.4, 59],
-      [5.5, 0.4, 62],
-      [6, 0.9, 61],
-      [7, 0.9, 64],
-      [8, 1.4, 67],
-      [9.5, 0.4, 66],
-      [10, 0.9, 64],
-      [11, 0.9, 62],
-      [12, 0.9, 62],
-      [13, 0.9, 59],
-      [14, 1.9, 61],
+      [0, 1, 74, 0.83],
+      [1, 0.55, 71, 0.95],
+      [1.5, 0.6, 69, 0.8],
+      [2, 1.05, 74, 0.77],
+      [3, 0.5, 71, 0.98],
+      [3.5, 1.55, 69, 0.84],
+      [5, 0.15, 71, 0.95],
+      [5.25, 0.15, 71, 0.85],
+      [5.5, 0.6, 71, 0.8],
+      [6, 0.15, 73],
+      [6.25, 0.1, 73, 0.96],
+      [6.5, 0.5, 73],
+      [7, 0.6, 71, 0.96],
+      [7.5, 0.45, 69, 0.85],
     ],
-    0.8
+    1
   ),
   pad: held(
     [

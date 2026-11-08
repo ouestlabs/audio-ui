@@ -71,9 +71,14 @@ import {
   warpOnImport,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { renderTrackClips } from "@/registry-audio/bases/base/lib/arrangement-engine";
-import { audioClipsIn } from "@/registry-audio/bases/base/lib/arrangement-state";
+import {
+  audioClipsIn,
+  MAIN_TRACK,
+} from "@/registry-audio/bases/base/lib/arrangement-state";
 import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
+import { channelEqDevice } from "@/registry-audio/bases/base/lib/channel-eq-device";
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
+import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
 import {
   renderSongPart,
   SONG_RECORDINGS,
@@ -83,7 +88,7 @@ import {
   type SongPart,
   type SongScorePart,
 } from "@/registry-audio/bases/base/lib/demo-song";
-import { guitarDevice } from "@/registry-audio/bases/base/lib/guitar-device";
+import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import {
   monoSynthDevice,
   monoSynthPreset,
@@ -185,13 +190,29 @@ const device = <State extends object>(
 const REVERB = "return-1";
 
 /**
+ * The organ's volume across the song, as shares of it: at its level, faded
+ * over the intro's last bar, silent through the verse, back for the chorus.
+ */
+const ORGAN_FADE = [
+  { x: 0, y: 0.773 },
+  { curve: 0.366, x: 0.125, y: 0.773 },
+  { curve: -0.355, x: 0.1667, y: 0.303 },
+  { x: 0.1736, y: 0 },
+  { curve: 0.216, x: 0.4861, y: 0 },
+  { x: 0.5, y: 0.773 },
+  { x: 1, y: 0.773 },
+];
+
+/**
  * The song as a project: its drums as an audio track, and its bass, its
- * organ, its guitar, its lead and its pad as MIDI tracks played by the
- * registry's instruments (a mono synth's sub bass, a tonewheel organ on three
- * drawbars, a plucked guitar through a vibe in vibrato, and a string machine
- * on the lead, silent for now, and on the pad), and a reverb on a return
- * track the organ, the guitar, the lead and the pad send to. The drums and
- * the bass lead the mix; the organ and the pad lie under them.
+ * organ, its lead and its pad as MIDI tracks played by the registry's
+ * instruments (a mono synth's sub bass, a tonewheel organ on three drawbars
+ * for the chords, another on its first four, driven and spun fast through a
+ * vibe in vibrato, for the lead, and a string machine on the pad), and a
+ * reverb on a return track the organ, the lead and the pad send to. The drums
+ * and the bass lead the mix, the organ and the lead stand a little apart, and
+ * the pad lies under them. The organ fades out over the intro's last bar and
+ * comes back for the chorus.
  */
 const TRACKS: ArrangementTrack[] = [
   {
@@ -216,6 +237,7 @@ const TRACKS: ArrangementTrack[] = [
     name: "Bass",
   },
   {
+    automation: { volume: ORGAN_FADE },
     color: 2,
     devices: [
       device(
@@ -237,7 +259,7 @@ const TRACKS: ArrangementTrack[] = [
     ],
     id: "organ",
     kind: "midi",
-    mix: { ...UNITY_MIX, gain: 10 ** (-6 / 20) },
+    mix: { ...UNITY_MIX, gain: 10 ** (-9 / 20), pan: -0.15 },
     name: "Organ",
     sends: { [REVERB]: 0.25 },
   },
@@ -245,27 +267,32 @@ const TRACKS: ArrangementTrack[] = [
     color: 3,
     devices: [
       device(
-        "guitar",
-        guitarDevice,
-        { body: 4, decay: 6, tone: 6, volume: 9 },
+        "lead-organ",
+        organDevice,
+        {
+          click: 3,
+          drawbar1: 8,
+          drawbar2: 8,
+          drawbar3: 8,
+          drawbar4: 8,
+          drive: 6,
+          rotary: "fast",
+          volume: 7,
+        },
         true
       ),
-      device("guitar-vibe", vibeDevice, { mode: "vibrato" }),
+      device("lead-vibe", vibeDevice, {
+        intensity: 6,
+        mode: "vibrato",
+        speed: 4,
+        volume: 7,
+      }),
     ],
-    id: "guitar",
-    kind: "midi",
-    name: "Guitar",
-    sends: { [REVERB]: 0.35 },
-  },
-  {
-    color: 4,
-    devices: [device("lead-strings", stringMachineDevice, {}, true)],
     id: "lead",
     kind: "midi",
-    // Waiting for a hook that fits the guitar: kept, silent.
-    mix: { ...UNITY_MIX, gain: 10 ** (-15 / 20), muted: true },
+    mix: { ...UNITY_MIX, gain: 10 ** (-12 / 20), pan: 0.15 },
     name: "Lead",
-    sends: { [REVERB]: 0.3 },
+    sends: { [REVERB]: 0.35 },
   },
   {
     color: 1,
@@ -285,6 +312,35 @@ const TRACKS: ArrangementTrack[] = [
     sends: { [REVERB]: 0.4 },
   },
 ];
+
+/**
+ * The master on the main track: a touch of air and presence on a dark mix
+ * and a little less of the lowest lows, a gentle compression that holds the
+ * band together, and a limiter that brings it up under a ceiling of -1 dB.
+ */
+const MAIN: ArrangementTrack = {
+  ...MAIN_TRACK,
+  devices: [
+    device("master-eq", channelEqDevice, {
+      highDb: 3,
+      lowDb: -1.5,
+      midDb: 1.5,
+      midHz: 3000,
+    }),
+    device("master-glue", compressorDevice, {
+      attackMs: 30,
+      autoMakeup: false,
+      ratio: 2,
+      releaseMs: 200,
+      thresholdDb: -20,
+    }),
+    device("master-limiter", limiterDevice, {
+      ceilingDb: -1,
+      gainDb: 8,
+      releaseMs: 120,
+    }),
+  ],
+};
 
 const RETURNS: ArrangementTrack[] = [
   {
@@ -362,16 +418,16 @@ function clipOf(
 }
 
 /**
- * What each part of the song plays, all of it on the same loop. The drums,
- * the organ and the guitar open it, the verse brings in the bass, the chorus
- * is the whole band, harder, under the lead's hook, and the organ and the
- * guitar close it, back where the song started.
+ * What each part of the song plays, all of it on the same loop. The drums
+ * and the organ open it, the verse is the drums and the bass alone, the
+ * chorus is the whole band, harder, under the lead's hook, and the organ
+ * closes it alone, back where the song started.
  */
 const PLAYS: Record<(typeof PARTS)[number]["id"], readonly Take[]> = {
-  chorus: ["drums-chorus", "bass-chorus", "organ", "guitar-chorus", "lead"],
-  intro: ["drums-verse", "organ", "guitar-verse"],
-  outro: ["organ", "guitar-verse"],
-  verse: ["drums-verse", "bass-verse", "guitar-verse"],
+  chorus: ["drums-chorus", "bass-chorus", "organ", "lead"],
+  intro: ["drums-verse", "organ"],
+  outro: ["organ"],
+  verse: ["drums-verse", "bass-verse"],
 };
 
 /**
@@ -648,7 +704,7 @@ function channelsOf(buffer: AudioBuffer) {
 }
 
 /**
- * The recordings the audio clips play, by id: the song's drums and guitar,
+ * The recordings the audio clips play, by id: the song's drums,
  * drawn once at the engine's rate, and the files dropped on the tracks, which
  * `keepRecording` adds.
  */
@@ -736,6 +792,7 @@ export default function BlockTimeline() {
     initialClips: CLIPS,
     initialLocators: LOCATORS,
     initialLoop: LOOP,
+    initialMain: MAIN,
     initialReturns: RETURNS,
     initialTracks: TRACKS,
     tempo: SONG_TEMPO,
