@@ -1,11 +1,12 @@
 import type { Note } from "@audio-ui/core/piano-roll";
 import { secondsPerBar, secondsPerBeat } from "@audio-ui/core/time";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { ClipPanel, type ClipSettings } from "@/components/audio-ui/clip-panel";
 import {
   MIDI_CLIP_VIEW,
   MidiClipPanel,
   type MidiClipRegion,
+  type MidiClipView,
 } from "@/components/audio-ui/midi-clip-panel";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
@@ -89,7 +90,20 @@ export function ClipEditor({
   recordings: ReadonlyMap<string, Recording>;
 }) {
   const { dispatch, doc } = arrangement;
-  const [midiView, setMidiView] = useSavedState("midiView", MIDI_CLIP_VIEW);
+  const [savedView, setSavedView] = useSavedState("midiView", MIDI_CLIP_VIEW);
+  // Each clip opens with the pen off, whatever the last one had: Draw is turned on for the clip it is wanted on.
+  const [pen, setPen] = useState({ clip: clip.id, drawing: false });
+  const midiView = {
+    ...savedView,
+    drawing: pen.clip === clip.id && pen.drawing,
+  };
+  const setMidiView = useCallback(
+    ({ drawing, ...kept }: MidiClipView) => {
+      setPen({ clip: clip.id, drawing });
+      setSavedView({ ...kept, drawing: false });
+    },
+    [clip.id, setSavedView]
+  );
   const bar = secondsPerBar(doc.tempo);
   // Laid flat in the detail view, which draws the edge above it: no card of its own, and as tall as the view unless rolled up.
   const docked = cn("rounded-none border-0", !collapsed && "h-full");

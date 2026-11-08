@@ -98,7 +98,7 @@ export interface MidiClipView {
 
 /** How the panel opens. */
 export const MIDI_CLIP_VIEW: MidiClipView = {
-  drawing: true,
+  drawing: false,
   folded: false,
   level: "velocity",
 };
