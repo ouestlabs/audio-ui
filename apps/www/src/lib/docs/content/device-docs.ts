@@ -5,20 +5,31 @@ import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-dev
 import { deesserDevice } from "@/registry-audio/bases/base/lib/deesser-device";
 import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
 import { distortionDevice } from "@/registry-audio/bases/base/lib/distortion-device";
+import { drumSynthDevice } from "@/registry-audio/bases/base/lib/drum-synth-device";
+import { electricPianoDevice } from "@/registry-audio/bases/base/lib/electric-piano-device";
 import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
 import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
+import { fmSynthDevice } from "@/registry-audio/bases/base/lib/fm-synth-device";
 import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
+import { guitarDevice } from "@/registry-audio/bases/base/lib/guitar-device";
 import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import { midSideDevice } from "@/registry-audio/bases/base/lib/mid-side-device";
+import { monoSynthDevice } from "@/registry-audio/bases/base/lib/mono-synth-device";
 import { multibandDevice } from "@/registry-audio/bases/base/lib/multiband-device";
+import { organDevice } from "@/registry-audio/bases/base/lib/organ-device";
 import { overdriveDevice } from "@/registry-audio/bases/base/lib/overdrive-device";
 import { phaserDevice } from "@/registry-audio/bases/base/lib/phaser-device";
 import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-device";
+import { polySynthDevice } from "@/registry-audio/bases/base/lib/poly-synth-device";
 import { reduxDevice } from "@/registry-audio/bases/base/lib/redux-device";
 import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
+import { samplerDevice } from "@/registry-audio/bases/base/lib/sampler-device";
 import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-device";
+import { stringMachineDevice } from "@/registry-audio/bases/base/lib/string-machine-device";
+import { tapeKeysDevice } from "@/registry-audio/bases/base/lib/tape-keys-device";
 import { transientDevice } from "@/registry-audio/bases/base/lib/transient-device";
 import { utilityDevice } from "@/registry-audio/bases/base/lib/utility-device";
+import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
 import { waveShaperDevice } from "@/registry-audio/bases/base/lib/wave-shaper-device";
 
 /** The devices the docs describe, by the slug of their page. */
@@ -39,11 +50,22 @@ export const DEVICE_DOCS = {
   overdrive: overdriveDevice,
   phaser: phaserDevice,
   "pocket-synth": pocketSynthDevice,
+  "poly-synth": polySynthDevice,
+  "electric-piano": electricPianoDevice,
+  "fm-synth": fmSynthDevice,
+  "mono-synth": monoSynthDevice,
+  organ: organDevice,
+  "string-machine": stringMachineDevice,
+  "tape-keys": tapeKeysDevice,
+  guitar: guitarDevice,
+  "drum-synth": drumSynthDevice,
+  sampler: samplerDevice,
   redux: reduxDevice,
   reverb: reverbDevice,
   saturator: saturatorDevice,
   transient: transientDevice,
   utility: utilityDevice,
+  vibe: vibeDevice,
   "wave-shaper": waveShaperDevice,
 } as const;
 

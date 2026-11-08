@@ -1,7 +1,7 @@
 "use client";
 
 import type { Source } from "@audio-ui/react";
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useComputerKeyboard } from "@/hooks/use-computer-keyboard";
 import { useMidiInput } from "@/hooks/use-midi-input";
@@ -31,12 +31,15 @@ export function useTakeInputs({
         .map((track) => track.id),
     [doc.tracks, take.armed]
   );
+  // The notes held now, from the MIDI input or the computer's keys: what the armed tracks' instruments light up.
+  const [heldNotes, setHeldNotes] = useState<readonly number[]>([]);
   const playNoteOff = useCallback(
     (note: number) => {
       for (const track of armedMidi) {
         engine.engine?.noteOff(track, note);
       }
       take.noteOff(note);
+      setHeldNotes((held) => held.filter((pitch) => pitch !== note));
     },
     [armedMidi, engine.engine, take]
   );
@@ -46,6 +49,7 @@ export function useTakeInputs({
         engine.engine?.noteOn(track, note, velocity);
       }
       take.noteOn(note, velocity);
+      setHeldNotes((held) => (held.includes(note) ? held : [...held, note]));
     },
     [armedMidi, engine.engine, take]
   );
@@ -94,6 +98,7 @@ export function useTakeInputs({
     computerKeys,
     /** Whether the keys play notes now: on, and a MIDI track armed. */
     computerKeysOn,
+    heldNotes,
     setComputerKeys,
     transportPosition,
   };

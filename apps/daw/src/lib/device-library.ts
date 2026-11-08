@@ -20,34 +20,56 @@ import { delayDevice } from "@/components/audio-ui/devices/delay/device";
 import { createDelayEngine } from "@/components/audio-ui/devices/delay/engine";
 import { distortionDevice } from "@/components/audio-ui/devices/distortion/device";
 import { createDistortionEngine } from "@/components/audio-ui/devices/distortion/engine";
+import { drumSynthDevice } from "@/components/audio-ui/devices/drum-synth/device";
+import { createDrumSynthEngine } from "@/components/audio-ui/devices/drum-synth/engine";
+import { electricPianoDevice } from "@/components/audio-ui/devices/electric-piano/device";
+import { createElectricPianoEngine } from "@/components/audio-ui/devices/electric-piano/engine";
 import { equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
 import { createEqualizerEngine } from "@/components/audio-ui/devices/equalizer/engine";
 import { filterDevice } from "@/components/audio-ui/devices/filter/device";
 import { createFilterEngine } from "@/components/audio-ui/devices/filter/engine";
+import { fmSynthDevice } from "@/components/audio-ui/devices/fm-synth/device";
+import { createFmSynthEngine } from "@/components/audio-ui/devices/fm-synth/engine";
 import { gateDevice } from "@/components/audio-ui/devices/gate/device";
 import { createGateEngine } from "@/components/audio-ui/devices/gate/engine";
+import { guitarDevice } from "@/components/audio-ui/devices/guitar/device";
+import { createGuitarEngine } from "@/components/audio-ui/devices/guitar/engine";
 import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
 import { createLimiterEngine } from "@/components/audio-ui/devices/limiter/engine";
 import { midSideDevice } from "@/components/audio-ui/devices/mid-side/device";
 import { createMidSideEngine } from "@/components/audio-ui/devices/mid-side/engine";
+import { monoSynthDevice } from "@/components/audio-ui/devices/mono-synth/device";
+import { createMonoSynthEngine } from "@/components/audio-ui/devices/mono-synth/engine";
 import { multibandDevice } from "@/components/audio-ui/devices/multiband/device";
 import { createMultibandEngine } from "@/components/audio-ui/devices/multiband/engine";
+import { organDevice } from "@/components/audio-ui/devices/organ/device";
+import { createOrganEngine } from "@/components/audio-ui/devices/organ/engine";
 import { overdriveDevice } from "@/components/audio-ui/devices/overdrive/device";
 import { createOverdriveEngine } from "@/components/audio-ui/devices/overdrive/engine";
 import { phaserDevice } from "@/components/audio-ui/devices/phaser/device";
 import { createPhaserEngine } from "@/components/audio-ui/devices/phaser/engine";
 import { pocketSynthDevice } from "@/components/audio-ui/devices/pocket-synth/device";
 import { createPocketSynthEngine } from "@/components/audio-ui/devices/pocket-synth/engine";
+import { polySynthDevice } from "@/components/audio-ui/devices/poly-synth/device";
+import { createPolySynthEngine } from "@/components/audio-ui/devices/poly-synth/engine";
 import { reduxDevice } from "@/components/audio-ui/devices/redux/device";
 import { createReduxEngine } from "@/components/audio-ui/devices/redux/engine";
 import { reverbDevice } from "@/components/audio-ui/devices/reverb/device";
 import { createReverbEngine } from "@/components/audio-ui/devices/reverb/engine";
+import { samplerDevice } from "@/components/audio-ui/devices/sampler/device";
+import { createSamplerEngine } from "@/components/audio-ui/devices/sampler/engine";
 import { saturatorDevice } from "@/components/audio-ui/devices/saturator/device";
 import { createSaturatorEngine } from "@/components/audio-ui/devices/saturator/engine";
+import { stringMachineDevice } from "@/components/audio-ui/devices/string-machine/device";
+import { createStringMachineEngine } from "@/components/audio-ui/devices/string-machine/engine";
+import { tapeKeysDevice } from "@/components/audio-ui/devices/tape-keys/device";
+import { createTapeKeysEngine } from "@/components/audio-ui/devices/tape-keys/engine";
 import { transientDevice } from "@/components/audio-ui/devices/transient/device";
 import { createTransientEngine } from "@/components/audio-ui/devices/transient/engine";
 import { utilityDevice } from "@/components/audio-ui/devices/utility/device";
 import { createUtilityEngine } from "@/components/audio-ui/devices/utility/engine";
+import { vibeDevice } from "@/components/audio-ui/devices/vibe/device";
+import { createVibeEngine } from "@/components/audio-ui/devices/vibe/engine";
 import { waveShaperDevice } from "@/components/audio-ui/devices/wave-shaper/device";
 import { createWaveShaperEngine } from "@/components/audio-ui/devices/wave-shaper/engine";
 
@@ -79,6 +101,8 @@ export interface LibraryDevice {
     context?: DeviceContext
   ) => LibraryEngine;
   device: Device<readonly ParameterDescriptor[]>;
+  /** An instrument whose engine is the whole of it, one note at a time: a host makes one and gives it every note, as it glides from one to the next. */
+  mono?: boolean;
   shelf: string;
 }
 
@@ -93,12 +117,14 @@ function entry<const Parameters extends readonly ParameterDescriptor[]>(
     noteOn?: (note: never, timing?: NoteTiming) => void;
     update: (state: DeviceState<Parameters>, context?: DeviceContext) => void;
   },
-  shelf: string
+  shelf: string,
+  options: { mono?: boolean } = {}
 ): LibraryDevice {
   return {
     create: create as unknown as LibraryDevice["create"],
     device: device as unknown as LibraryDevice["device"],
     shelf,
+    ...options,
   };
 }
 
@@ -109,6 +135,18 @@ function entry<const Parameters extends readonly ParameterDescriptor[]>(
  */
 export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Instruments
+  entry(polySynthDevice, createPolySynthEngine, "Instruments"),
+  entry(monoSynthDevice, createMonoSynthEngine, "Instruments", { mono: true }),
+  entry(electricPianoDevice, createElectricPianoEngine, "Instruments"),
+  entry(organDevice, createOrganEngine, "Instruments"),
+  entry(stringMachineDevice, createStringMachineEngine, "Instruments"),
+  entry(tapeKeysDevice, createTapeKeysEngine, "Instruments"),
+  entry(guitarDevice, createGuitarEngine, "Instruments"),
+  entry(drumSynthDevice, createDrumSynthEngine, "Instruments", {
+    mono: true,
+  }),
+  entry(fmSynthDevice, createFmSynthEngine, "Instruments"),
+  entry(samplerDevice, createSamplerEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),
   entry(waveShaperDevice, createWaveShaperEngine, "Instruments"),
   // Dynamics
@@ -134,6 +172,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Motion
   entry(phaserDevice, createPhaserEngine, "Motion"),
   entry(autoPanDevice, createAutoPanEngine, "Motion"),
+  entry(vibeDevice, createVibeEngine, "Motion"),
   // Utility
   entry(utilityDevice, createUtilityEngine, "Utility"),
   entry(midSideDevice, createMidSideEngine, "Utility"),

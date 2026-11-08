@@ -26,7 +26,7 @@ Two detuned oscillators, a distortion mixed in with the clean sound, and a low-p
 
 ## Panel
 
-The panel has a pad that plays the synth: the pitch goes across and the resonance goes up. `waveShaperPitch(position)` and `waveShaperResonance(position)` turn a position from 0 to 1 into a note.
+The panel has a pad that plays the synth: the pitch goes across and the resonance goes up. `waveShaperPitch(position)` and `waveShaperResonance(position)` turn a position from 0 to 1 into a note. With `activeNotes`, the notes held now, such as on a MIDI keyboard, take the pad's point to the pitch of the last one, and `waveShaperPosition(frequency)` is where a pitch sits.
 
 <DeviceUsage name="wave-shaper" />
 

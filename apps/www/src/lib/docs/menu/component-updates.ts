@@ -1,4 +1,7 @@
-import { PATTERNS_MENU_UPDATES } from "@/lib/docs/menu/menu-updates";
+import {
+  PATTERNS_MENU_UPDATES,
+  shownMarks,
+} from "@/lib/docs/menu/menu-updates";
 import { normalizeSlug } from "@/lib/utils";
 
 const PATTERN_REGEX = /[?#]/;
@@ -16,7 +19,7 @@ function getComponentCategoryKey(value: string) {
 }
 
 const componentMenuUpdates = new Map(
-  Object.entries(PATTERNS_MENU_UPDATES).map(([componentName, hint]) => [
+  shownMarks(PATTERNS_MENU_UPDATES).map(([componentName, hint]) => [
     getComponentCategoryKey(componentName),
     hint,
   ])

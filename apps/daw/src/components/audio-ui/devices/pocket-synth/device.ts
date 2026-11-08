@@ -98,6 +98,17 @@ export interface PocketSynthNote {
 export const pocketSynthPitch = (position: number) =>
   MIN_FREQUENCY * (MAX_FREQUENCY / MIN_FREQUENCY) ** position;
 
+/** Where a pitch sits along the pad's log axis, from 0 to 1: the inverse of `pocketSynthPitch`, held inside the axis. */
+export const pocketSynthPosition = (frequency: number) =>
+  Math.min(
+    1,
+    Math.max(
+      0,
+      Math.log(frequency / MIN_FREQUENCY) /
+        Math.log(MAX_FREQUENCY / MIN_FREQUENCY)
+    )
+  );
+
 /** The filter cutoff at a position from 0 to 1 along a log axis from 200 Hz to 8 kHz. */
 export const pocketSynthCutoff = (position: number) =>
   MIN_CUTOFF * (MAX_CUTOFF / MIN_CUTOFF) ** position;

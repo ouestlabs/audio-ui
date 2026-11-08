@@ -334,7 +334,8 @@ const NO_LIFT = () => undefined;
  * A clip of an arrangement, on its track's lane: move it, trim either edge
  * into its source, fade it in and out, and pick a fade's curve; double-click
  * its title to rename it, and right-click it for its menu. A MIDI clip draws
- * its notes across its body.
+ * its notes across its body and has no fades: they shape a recording's sound,
+ * and its notes play whole.
  */
 const ArrangedClip = memo(function ArrangedClipView({
   clip,
@@ -495,22 +496,30 @@ const ArrangedClip = memo(function ArrangedClipView({
               peaks={peaks}
             />
           ) : null}
-          <TimelineClipFade edge="in" style={UNDER_HEAD} />
-          <TimelineClipFade edge="out" style={UNDER_HEAD} />
+          {clip.notes ? null : (
+            <>
+              <TimelineClipFade edge="in" style={UNDER_HEAD} />
+              <TimelineClipFade edge="out" style={UNDER_HEAD} />
+            </>
+          )}
           <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />
           <TimelineClipHandle aria-label={`${clip.name} end`} edge="end" />
-          <TimelineClipFadeHandle
-            aria-label={`${clip.name} fade in`}
-            edge="in"
-            onShapeChange={handleFadeInShape}
-            shape={clip.value.fadeInShape}
-          />
-          <TimelineClipFadeHandle
-            aria-label={`${clip.name} fade out`}
-            edge="out"
-            onShapeChange={handleFadeOutShape}
-            shape={clip.value.fadeOutShape}
-          />
+          {clip.notes ? null : (
+            <>
+              <TimelineClipFadeHandle
+                aria-label={`${clip.name} fade in`}
+                edge="in"
+                onShapeChange={handleFadeInShape}
+                shape={clip.value.fadeInShape}
+              />
+              <TimelineClipFadeHandle
+                aria-label={`${clip.name} fade out`}
+                edge="out"
+                onShapeChange={handleFadeOutShape}
+                shape={clip.value.fadeOutShape}
+              />
+            </>
+          )}
         </TimelineClip>
       </ContextMenuTrigger>
       <ContextMenuContent className="w-auto min-w-44">

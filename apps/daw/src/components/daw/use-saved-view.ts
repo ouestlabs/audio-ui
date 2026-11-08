@@ -39,7 +39,12 @@ export interface SavedView {
   libraryOpen: boolean;
   libraryShelf: number;
   metronome: boolean;
-  midiView: { drawing: boolean; folded: boolean; level: NoteLevel };
+  midiView: {
+    drawing: boolean;
+    folded: boolean;
+    level: NoteLevel;
+    steps?: boolean;
+  };
   overdub: boolean;
   panelFolded: boolean;
   panelHeights: Record<string, number>;

@@ -666,7 +666,14 @@ export function consolidate(
       value,
     };
     if (first.notes) {
-      return [{ ...whole, notes: mergedNotes(inside, from, to) }];
+      // The notes as they are written, so the first clip's swing still plays them.
+      return [
+        {
+          ...whole,
+          notes: mergedNotes(inside, from, to),
+          ...(first.swing ? { swing: first.swing } : {}),
+        },
+      ];
     }
     const recording = rendered[track];
     return [
@@ -966,6 +973,8 @@ export type ArrangementCommand =
       index?: number;
       /** A chain of a rack on the track to put it on, instead of the track's own chain. */
       chain?: { chain: string; rack: string };
+      /** For a rack: what it starts with, such as a drum kit, instead of an empty chain. Its chains and devices take ids no other has. */
+      rack?: Rack;
     }
   // Racks: by the rack's device id on a track's chain.
   /** Puts the effects `ids` of a track's chain into a new rack, one chain of them, where the first was. */
@@ -1001,6 +1010,14 @@ export type ArrangementCommand =
       note: number;
       sound: DrumSound;
       name?: string;
+    }
+  /** Puts the pad `chain` in the choke group `choke`, or takes it out with `null`: a hit on a pad of the group cuts the others short. */
+  | {
+      type: "set-pad-choke";
+      track: string;
+      rack: string;
+      chain: string;
+      choke: number | null;
     }
   /** A pad's pitch or decay, as a turn of its knob sets it: a burst, which `settle-clip-edit` closes into one step. */
   | {
@@ -1657,6 +1674,42 @@ function holdsInstrument(doc: ArrangementDoc, id: string): boolean {
   return !isBus(doc, id) && trackOf(doc, id)?.kind === "midi";
 }
 
+/**
+ * `rack` with ids no chain or device of the document has, down the racks
+ * within it: its macros follow the devices they turn under their new ids.
+ */
+function withFreshRackIds(doc: ArrangementDoc, rack: Rack): Rack {
+  const chains = chainIds(doc);
+  const devices = deviceIds(doc);
+  const renamed = new Map<string, string>();
+  const fresh = (inside: Rack): Rack => {
+    const made = inside.chains.map((chain) => ({
+      ...chain,
+      devices: chain.devices.map((device) => {
+        const id = freshId(device.id, devices);
+        renamed.set(device.id, id);
+        return {
+          ...device,
+          id,
+          ...(device.rack ? { rack: fresh(device.rack) } : {}),
+        };
+      }),
+      id: freshId(chain.id, chains),
+    }));
+    return {
+      chains: made,
+      macros: inside.macros.map((macro) => ({
+        ...macro,
+        mappings: macro.mappings.map((mapping) => ({
+          ...mapping,
+          device: renamed.get(mapping.device) ?? mapping.device,
+        })),
+      })),
+    };
+  };
+  return fresh(rack);
+}
+
 /** What a new rack holds: one empty chain, or a drum rack's starting kit. */
 function rackFor(doc: ArrangementDoc, device: string): { rack?: Rack } {
   const taken = chainIds(doc);
@@ -1689,7 +1742,7 @@ function setPad(
     return withChain(rack, there.id, (chain) => ({
       ...chain,
       name: name.trim() || chain.name,
-      pad: { note: at, sound },
+      pad: { ...chain.pad, note: at, sound },
     }));
   }
   return {
@@ -1760,7 +1813,12 @@ function takesInstrument(
     ...devices,
     ...devices.flatMap((item) => (item.rack ? rackDevices(item.rack) : [])),
   ].find((item) => item.id === rack);
-  return target?.device === INSTRUMENT_RACK_DEVICE && !device.rack;
+  // An instrument rack's chain plays its instrument in layers; a drum rack's pad plays it as its sound.
+  return (
+    (target?.device === INSTRUMENT_RACK_DEVICE ||
+      target?.device === DRUM_RACK_DEVICE) &&
+    !device.rack
+  );
 }
 
 function addDevice(
@@ -1778,7 +1836,9 @@ function addDevice(
     device,
     id: freshId("device", deviceIds(state.doc)),
     ...(instrument ? { instrument: true } : {}),
-    ...rackFor(state.doc, device),
+    ...(command.rack
+      ? { rack: withFreshRackIds(state.doc, command.rack) }
+      : rackFor(state.doc, device)),
     state: values,
   };
   const { chain } = command;
@@ -2346,19 +2406,16 @@ function changeAutomation(
   parameter: AutomatedParameter,
   points: readonly Breakpoint[] | null
 ): ArrangementState {
-  return burst(state, (doc) => ({
-    ...doc,
-    tracks: doc.tracks.map((track) => {
-      if (track.id !== trackId) {
-        return track;
-      }
+  // A return's envelope and the main track's too, not only a track's.
+  return burst(state, (doc) =>
+    withTrack(doc, trackId, (track) => {
       const { [parameter]: _cleared, ...kept } = track.automation ?? {};
       return {
         ...track,
         automation: points ? { ...kept, [parameter]: points } : kept,
       };
-    }),
-  }));
+    })
+  );
 }
 
 const sameTempo = (a: Tempo, b: Tempo) =>
@@ -2830,7 +2887,7 @@ const handlers: Handlers = {
       rack,
       (current) =>
         withChain(current, chain, (item) =>
-          item.pad
+          item.pad?.sound
             ? {
                 ...item,
                 pad: {
@@ -2849,6 +2906,21 @@ const handlers: Handlers = {
             : item
         ),
       burst
+    ),
+  "set-pad-choke": (state, { chain, choke, rack, track }) =>
+    changeRack(
+      state,
+      track,
+      rack,
+      (current) =>
+        withChain(current, chain, (item) => {
+          if (!item.pad) {
+            return item;
+          }
+          const { choke: _was, ...pad } = item.pad;
+          return { ...item, pad: choke === null ? pad : { ...pad, choke } };
+        }),
+      edit
     ),
   "move-pad": (state, { chain, note, rack, track }) =>
     changeRack(

@@ -1,15 +1,20 @@
 import type { Note } from "@audio-ui/core/piano-roll";
 import { secondsPerBar, secondsPerBeat } from "@audio-ui/core/time";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { ClipPanel, type ClipSettings } from "@/components/audio-ui/clip-panel";
 import {
   MIDI_CLIP_VIEW,
   MidiClipPanel,
   type MidiClipRegion,
+  type MidiClipView,
 } from "@/components/audio-ui/midi-clip-panel";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
-import type { Arranged } from "@/lib/arrangement";
+import {
+  type Arranged,
+  type ClipSwing,
+  DRUM_RACK_DEVICE,
+} from "@/lib/arrangement";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import { cn } from "@/lib/utils";
 import { useSavedState } from "./use-saved-view";
@@ -89,7 +94,20 @@ export function ClipEditor({
   recordings: ReadonlyMap<string, Recording>;
 }) {
   const { dispatch, doc } = arrangement;
-  const [midiView, setMidiView] = useSavedState("midiView", MIDI_CLIP_VIEW);
+  const [savedView, setSavedView] = useSavedState("midiView", MIDI_CLIP_VIEW);
+  // Each clip opens with the pen off, whatever the last one had: Draw is turned on for the clip it is wanted on.
+  const [pen, setPen] = useState({ clip: clip.id, drawing: false });
+  const midiView = {
+    ...savedView,
+    drawing: pen.clip === clip.id && pen.drawing,
+  };
+  const setMidiView = useCallback(
+    ({ drawing, ...kept }: MidiClipView) => {
+      setPen({ clip: clip.id, drawing });
+      setSavedView({ ...kept, drawing: false });
+    },
+    [clip.id, setSavedView]
+  );
   const bar = secondsPerBar(doc.tempo);
   // Laid flat in the detail view, which draws the edge above it: no card of its own, and as tall as the view unless rolled up.
   const docked = cn("rounded-none border-0", !collapsed && "h-full");
@@ -147,6 +165,34 @@ export function ClipEditor({
     () => dispatch({ id: clip.id, type: "crop-clip" }),
     [clip.id, dispatch]
   );
+  // A drum clip's pads: those of the drum rack its track plays, lowest note on top, as a drum part is read.
+  const drumRack = doc.tracks
+    .find((track) => track.id === clip.track)
+    ?.devices?.find((device) => device.device === DRUM_RACK_DEVICE)?.rack;
+  const pads = useMemo(
+    () =>
+      drumRack?.chains
+        .flatMap((chain) =>
+          chain.pad ? [{ name: chain.name, note: chain.pad.note }] : []
+        )
+        .sort((a, b) => a.note - b.note),
+    [drumRack]
+  );
+  const changeSwing = useCallback(
+    (swing: ClipSwing | null) =>
+      edit(({ swing: _was, ...current }) =>
+        swing ? { ...current, swing } : current
+      ),
+    [edit]
+  );
+  // A pad's name pressed in the steps: the track plays it, let go at once, as a drum rings on.
+  const auditionPad = useCallback(
+    (note: number) => {
+      engine.engine?.noteOn(clip.track, note, 0.8);
+      engine.engine?.noteOff(clip.track, note);
+    },
+    [clip.track, engine.engine]
+  );
   // A key pressed in the piano roll plays the track's instrument.
   const noteOn = useCallback(
     (pitch: number, details: { velocity: number }) =>
@@ -177,15 +223,19 @@ export function ClipEditor({
         onNoteOn={noteOn}
         onNotesChange={changeNotes}
         onNotesCommitted={settle}
+        onPadOn={auditionPad}
         onRegionChange={changeRegion}
         onRename={rename}
+        onSwingChange={changeSwing}
         onViewChange={setMidiView}
+        pads={pads}
         region={{
           length: clip.value.length,
           loop: clip.loop ?? null,
           offset: clip.value.offset,
           sourceLength: clip.sourceLength,
         }}
+        swing={clip.swing}
         view={midiView}
       >
         {actions}

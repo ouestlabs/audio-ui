@@ -43,6 +43,7 @@ import {
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { trackOf } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { libraryDevice } from "@/registry-audio/bases/base/lib/device-library";
+import { drumKit } from "@/registry-audio/bases/base/lib/drum-kit";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 
@@ -81,6 +82,8 @@ type ChainPlace =
 
 /** What every slot of a chain needs: the commands of the track, and where the chain is. */
 interface ChainProps {
+  /** The notes held now, such as on a MIDI keyboard: an instrument's keys or pads light them up. */
+  activeNotes?: readonly number[];
   dispatch: Arrangement["dispatch"];
   /** What the controls follow their envelopes by (AUT-006). */
   following: AutomationFollowing;
@@ -143,7 +146,7 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
     () => dispatch({ id: device.id, track, type: "toggle-device" }),
     [device.id, dispatch, track]
   );
-  const { onHoldNote } = chain;
+  const { activeNotes, onHoldNote } = chain;
   const release = useCallback(() => onHoldNote(null), [onHoldNote]);
   const [folded, setFolded] = chain.useEntry("deviceFolded", device.id, false);
   const fold = { folded, onFoldedChange: setFolded };
@@ -167,6 +170,7 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       value={device.id}
     >
       <face.Panel
+        activeNotes={activeNotes}
         onNoteOff={release}
         onNoteOn={onHoldNote}
         onValueChange={change}
@@ -515,6 +519,17 @@ function DrumSlot({
     (at: number, files: File[]) => onPadFiles(rackId, at, files),
     [onPadFiles, rackId]
   );
+  const setChoke = useCallback(
+    (id: string, choke: number | null) =>
+      dispatch({
+        chain: id,
+        choke,
+        rack: rackId,
+        track,
+        type: "set-pad-choke",
+      }),
+    [dispatch, rackId, track]
+  );
   return (
     <DeviceChainSlot
       enabled={device.on !== false}
@@ -536,6 +551,7 @@ function DrumSlot({
         onMacrosShownChange={setMacrosShown}
         onMapMacro={map}
         onPadChange={change}
+        onPadChoke={setChoke}
         onPadCommit={settle}
         onPadOff={onNoteOff}
         onPadOn={onNoteOn}
@@ -575,6 +591,7 @@ function DrumSlot({
  * undo and the engine follows it.
  */
 export function DeviceView({
+  activeNotes,
   arrangement,
   onNoteOff,
   onNoteOn,
@@ -587,6 +604,8 @@ export function DeviceView({
   track,
   useEntry = useLocalEntry,
 }: {
+  /** The notes held now on the track, such as on a MIDI keyboard: its instrument's keys or pads light them up. */
+  activeNotes?: readonly number[];
   arrangement: Arrangement;
   /** What was moved by hand, by track: it stays as set. */
   overridden: Readonly<Record<string, readonly AutomatedParameter[]>>;
@@ -650,6 +669,8 @@ export function DeviceView({
       dispatch({
         device: DRUM_RACK_DEVICE,
         instrument: true,
+        // A kit to start from: a Drum Synth on every pad.
+        rack: drumKit(),
         state: {},
         track: current.id,
         type: "add-device",
@@ -796,6 +817,7 @@ export function DeviceView({
   return (
     <div className="flex h-full min-h-0">
       <Chain
+        activeNotes={activeNotes}
         className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 scroll-pe-10 overflow-auto"
         devices={devices}
         dispatch={dispatch}

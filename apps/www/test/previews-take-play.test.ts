@@ -9,6 +9,7 @@ const DEVICES = components
 describe("takesPlay", () => {
   test("is true for the previews that follow their session's play switch", () => {
     for (const name of [
+      "plot-demo",
       "spectrum-analyzer-demo",
       "piano-roll-playback-demo",
       "block-delay",
@@ -41,6 +42,16 @@ describe("takesPlay", () => {
           "block-drum-rack",
           "block-mixer",
           "block-pocket-synth",
+          "block-electric-piano",
+          "block-fm-synth",
+          "block-mono-synth",
+          "block-organ",
+          "block-string-machine",
+          "block-tape-keys",
+          "block-guitar",
+          "block-drum-synth",
+          "block-poly-synth",
+          "block-sampler",
           "block-synth-panel",
           "block-wave-shaper",
           "block-piano-roll",

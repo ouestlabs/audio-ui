@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The poly synth device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/poly-synth/.","files":[],"name":"poly-synth","registryDependencies":["@audio-ui/poly-synth-device","@audio-ui/poly-synth-engine","@audio-ui/poly-synth-panel"],"type":"registry:ui"}

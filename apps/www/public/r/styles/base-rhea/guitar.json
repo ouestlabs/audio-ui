@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The guitar device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/guitar/.","files":[],"name":"guitar","registryDependencies":["@audio-ui/guitar-device","@audio-ui/guitar-engine","@audio-ui/guitar-panel"],"type":"registry:ui"}

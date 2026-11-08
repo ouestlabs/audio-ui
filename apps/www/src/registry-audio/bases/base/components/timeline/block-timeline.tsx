@@ -12,7 +12,6 @@ import {
   type ComponentProps,
   type KeyboardEvent,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -64,24 +63,45 @@ import {
   type Arranged,
   type ArrangementTrack,
   analyzeBeat,
+  type ClipSwing,
+  DRUM_RACK_DEVICE,
   NEW_TRACK,
   type TimeSelection,
   type TrackKind,
+  UNITY_MIX,
   warpOnImport,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { renderTrackClips } from "@/registry-audio/bases/base/lib/arrangement-engine";
-import { audioClipsIn } from "@/registry-audio/bases/base/lib/arrangement-state";
-import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
-import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
 import {
-  DEMO_TEMPO,
-  renderBeatLoop,
-  renderHeldChord,
-} from "@/registry-audio/bases/base/lib/demo-sound";
-import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-device";
+  audioClipsIn,
+  MAIN_TRACK,
+} from "@/registry-audio/bases/base/lib/arrangement-state";
+import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
+import { channelEqDevice } from "@/registry-audio/bases/base/lib/channel-eq-device";
+import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
+import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
+import {
+  SONG_SCORE,
+  SONG_TEMPO,
+  type SongNote,
+  type SongScorePart,
+} from "@/registry-audio/bases/base/lib/demo-song";
+import { drumKit } from "@/registry-audio/bases/base/lib/drum-kit";
+import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
+import {
+  monoSynthDevice,
+  monoSynthPreset,
+} from "@/registry-audio/bases/base/lib/mono-synth-device";
+import { organDevice } from "@/registry-audio/bases/base/lib/organ-device";
+import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
+import {
+  stringMachineDevice,
+  stringMachinePreset,
+} from "@/registry-audio/bases/base/lib/string-machine-device";
+import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
-const BARS = 32;
+const BARS = 24;
 
 /** No device library here: the arrangement takes no device. */
 const noDevice = () => undefined;
@@ -93,8 +113,8 @@ const NO_READING: readonly {
   track: string;
 }[] = [];
 
-/** The arrangement is laid out at the first tempo, the demo sounds': a tempo change keeps its musical positions. */
-const BAR = secondsPerBar(DEMO_TEMPO);
+/** The arrangement is laid out at the song's tempo: a tempo change keeps its musical positions. */
+const BAR = secondsPerBar(SONG_TEMPO);
 /** Whether a key went to a field you type in, where it is the field's own. */
 function typing(target: EventTarget) {
   return (
@@ -139,48 +159,209 @@ const PERCENT: Intl.NumberFormatOptions = {
 
 const bars = (count: number) => count * BAR;
 
-/** The named points the timeline starts with. */
-const LOCATORS = [
-  { at: bars(4), id: "verse", name: "Verse" },
-  { at: bars(20), id: "chorus", name: "Chorus" },
-];
+/** The song's parts, in order, and the bar each starts on. */
+const PARTS = [
+  { at: 0, id: "intro", name: "Intro" },
+  { at: 4, id: "verse", name: "Verse" },
+  { at: 12, id: "chorus", name: "Chorus" },
+  { at: 20, id: "outro", name: "Outro" },
+] as const;
 
-/** The loop it starts with: bars 8 to 16, switched on. */
-const LOOP = { on: true, range: [bars(8), bars(16)] } as const;
+/** The named points the timeline starts with: the parts of the song. */
+const LOCATORS = PARTS.map(({ at, id, name }) => ({ at: bars(at), id, name }));
 
-/** A pocket synth on a MIDI track, set for the part it plays. */
-const synth = (
+/** The loop it starts with, switched on: the whole song, whose outro leads back into its intro. */
+const LOOP = { on: true, range: [0, bars(BARS)] } as const;
+
+/** A device on a chain, at its own defaults with `patch` over them. */
+const device = <State extends object>(
   id: string,
-  patch: Partial<ReturnType<typeof pocketSynthDevice.defaults>>
+  described: { defaults: () => State; id: string },
+  patch: Partial<State> = {},
+  instrument = false
 ) => ({
-  device: pocketSynthDevice.id,
+  device: described.id,
   id,
-  instrument: true,
-  state: { ...pocketSynthDevice.defaults(), ...patch },
+  ...(instrument ? { instrument: true } : {}),
+  state: { ...described.defaults(), ...patch },
 });
 
+const REVERB = "return-1";
+
+/**
+ * The organ's volume across the song, as shares of it: at its level, faded
+ * over the intro's last bar, silent through the verse, back for the chorus.
+ */
+const ORGAN_FADE = [
+  { x: 0, y: 0.773 },
+  { curve: 0.366, x: 0.125, y: 0.773 },
+  { curve: -0.355, x: 0.1667, y: 0.303 },
+  { x: 0.1736, y: 0 },
+  { curve: 0.216, x: 0.4861, y: 0 },
+  { x: 0.5, y: 0.773 },
+  { x: 1, y: 0.773 },
+];
+
+/**
+ * The song as a project: every track MIDI, played by the registry's
+ * instruments (a drum rack with a Drum Synth on every pad for the drums, its
+ * snare and clap in a small room, a mono synth's sub bass, a tonewheel organ
+ * on three drawbars for the chords, another on its 8', 4' and 2' with the
+ * rotary stopped, through a vibe in vibrato, for the lead, and a string
+ * machine on the pad), and a
+ * reverb on a return track the organ, the lead and the pad send to. The drums
+ * and the bass lead the mix, the organ and the lead stand a little apart, and
+ * the pad lies under them. The organ fades out over the intro's last bar and
+ * comes back for the chorus.
+ */
 const TRACKS: ArrangementTrack[] = [
-  { color: 0, id: "drums", name: "Drums" },
+  {
+    color: 0,
+    devices: [
+      {
+        device: DRUM_RACK_DEVICE,
+        id: "drum-kit",
+        instrument: true,
+        rack: drumKit(),
+        state: {},
+      },
+    ],
+    id: "drums",
+    kind: "midi",
+    mix: { ...UNITY_MIX, gain: 10 ** (-3 / 20) },
+    name: "Drums",
+  },
   {
     color: 1,
     devices: [
-      synth("device-1", { filter: "lowpass", volume: 0.7, wave: "sawtooth" }),
+      device(
+        "bass-synth",
+        monoSynthDevice,
+        { ...monoSynthPreset("Sub Bass"), volume: 7 },
+        true
+      ),
     ],
     id: "bass",
     kind: "midi",
+    mix: { ...UNITY_MIX, gain: 10 ** (2 / 20) },
     name: "Bass",
   },
   {
+    automation: { volume: ORGAN_FADE },
     color: 2,
     devices: [
-      synth("device-2", { filter: "lowpass", volume: 0.35, wave: "triangle" }),
+      device(
+        "organ",
+        organDevice,
+        {
+          click: 1,
+          drawbar1: 0,
+          drawbar2: 0,
+          drawbar3: 8,
+          drawbar4: 6,
+          drawbar5: 5,
+          drive: 1,
+          rotary: "slow",
+          volume: 6,
+        },
+        true
+      ),
     ],
-    id: "keys",
+    id: "organ",
     kind: "midi",
-    name: "Keys",
+    mix: { ...UNITY_MIX, gain: 10 ** (-12 / 20), pan: -0.15 },
+    name: "Organ",
+    sends: { [REVERB]: 0.25 },
   },
-  { color: 3, id: "pad", name: "Pad" },
-] as const;
+  {
+    color: 3,
+    devices: [
+      device(
+        "lead-organ",
+        organDevice,
+        {
+          click: 3,
+          drawbar1: 0,
+          drawbar2: 0,
+          drawbar3: 6,
+          drawbar4: 0,
+          drawbar5: 8,
+          drawbar7: 4,
+          drive: 0,
+          rotary: "stop",
+          volume: 7,
+        },
+        true
+      ),
+      device("lead-vibe", vibeDevice, {
+        intensity: 6,
+        mode: "vibrato",
+        speed: 4,
+        volume: 7,
+      }),
+    ],
+    id: "lead",
+    kind: "midi",
+    mix: { ...UNITY_MIX, gain: 10 ** (-16 / 20), pan: 0.15 },
+    name: "Lead",
+    sends: { [REVERB]: 0.35 },
+  },
+  {
+    color: 1,
+    devices: [
+      device(
+        "pad-strings",
+        stringMachineDevice,
+        stringMachinePreset("Swell"),
+        true
+      ),
+    ],
+    id: "pad",
+    kind: "midi",
+    // A bed under the band, felt more than heard.
+    mix: { ...UNITY_MIX, gain: 10 ** (-15 / 20) },
+    name: "Pad",
+    sends: { [REVERB]: 0.4 },
+  },
+];
+
+/**
+ * The master on the main track: a touch of air and presence on a dark mix
+ * and a little less of the lowest lows, a gentle compression that holds the
+ * band together, and a limiter that brings it up under a ceiling of -1 dB.
+ */
+const MAIN: ArrangementTrack = {
+  ...MAIN_TRACK,
+  devices: [
+    device("master-eq", channelEqDevice, {
+      highDb: 3,
+      lowDb: -1.5,
+      midDb: 1.5,
+      midHz: 3000,
+    }),
+    device("master-glue", compressorDevice, {
+      attackMs: 30,
+      autoMakeup: false,
+      ratio: 2,
+      releaseMs: 200,
+      thresholdDb: -20,
+    }),
+    device("master-limiter", limiterDevice, {
+      ceilingDb: -1,
+      gainDb: 8,
+      releaseMs: 120,
+    }),
+  ],
+};
+
+const RETURNS: ArrangementTrack[] = [
+  {
+    color: 0,
+    devices: [device("reverb", reverbDevice, { mix: 100 })],
+    id: REVERB,
+    name: "A Reverb",
+  },
+];
 
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
 const NO_PEAKS: number[] = [];
@@ -191,106 +372,95 @@ const SILENCE = {
   subscribe: () => () => undefined,
 };
 
-/** How long the demo's recordings last: two bars at their tempo. */
-const RECORDING_BARS = 2;
-
-/** An audio clip from bar `from` to bar `to`, looping a recording of the demo. */
-const arranged = (
-  id: string,
-  name: string,
-  track: string,
-  from: number,
-  to: number,
-  recording: string
-): Arranged => ({
-  id,
-  loop: [0, bars(RECORDING_BARS)],
-  name,
-  recording,
-  sourceLength: bars(RECORDING_BARS),
-  track,
-  value: {
-    fadeIn: 0,
-    fadeOut: 0,
-    length: bars(to - from),
-    offset: 0,
-    start: bars(from),
-  },
-});
-
 const BEAT = BAR / 4;
 
-/** Notes from `[pitch, beat, beats]`: where each starts and how long it lasts, in beats of the first tempo. */
-const notesOf = (pattern: readonly (readonly [number, number, number])[]) =>
-  pattern.map(([pitch, at, beats], index) => ({
-    id: `n${index}`,
-    length: beats * BEAT,
-    pitch,
-    start: at * BEAT,
-    velocity: 0.8,
-  }));
-
-/** Two bars of bass: A, then F, on the beat and the off-beats around it. */
-const BASSLINE = notesOf([
-  [33, 0, 0.75],
-  [33, 1.5, 0.5],
-  [45, 2, 0.5],
-  [33, 3, 0.75],
-  [29, 4, 0.75],
-  [29, 5.5, 0.5],
-  [41, 6, 0.5],
-  [31, 7, 0.75],
-]);
-
-/** Four bars of chords, one a bar: A minor, F, C, G. */
-const CHORDS = notesOf(
-  [
-    [57, 60, 64],
-    [53, 57, 60],
-    [55, 60, 64],
-    [55, 59, 62],
-  ].flatMap((chord, bar) =>
-    chord.map((pitch) => [pitch, bar * 4, 3.75] as const)
-  )
-);
-
-/** A MIDI clip that loops `notes` over `loopBars`, from bar `from` to bar `to`. */
-const midiArranged = (
-  id: string,
-  name: string,
-  track: string,
-  from: number,
-  to: number,
-  loopBars: number,
-  notes: Arranged["notes"]
-): Arranged => ({
-  id,
-  loop: [0, bars(loopBars)],
-  name,
-  notes,
-  sourceLength: bars(loopBars),
-  track,
-  value: {
-    fadeIn: 0,
-    fadeOut: 0,
-    length: bars(to - from),
-    offset: 0,
-    start: bars(from),
-  },
+/** The edges of a clip from bar `from` to bar `to`. */
+const placedAt = (from: number, to: number) => ({
+  fadeIn: 0,
+  fadeOut: 0,
+  length: bars(to - from),
+  offset: 0,
+  start: bars(from),
 });
 
+/** The song's notes as a MIDI clip holds them: in seconds, at the song's tempo. */
+const notesOf = (notes: readonly SongNote[]): Arranged["notes"] =>
+  notes.map(({ length, pitch, start, velocity }, index) => ({
+    id: `n${index}`,
+    length: length * BEAT,
+    pitch,
+    start: start * BEAT,
+    velocity,
+  }));
+
+/** A take of the song: notes a MIDI clip loops. Its track is the word before its dash. */
+type Take = SongScorePart;
+
+/** How many bars a take lasts before it loops: up to the bar its last note ends in. */
+const barsOf = (take: Take) =>
+  Math.ceil(
+    Math.max(...SONG_SCORE[take].map((note) => note.start + note.length)) / 4
+  );
+
+/** A clip of `take` from bar `from` to bar `to`, on its track, looping it. */
+function clipOf(
+  id: string,
+  name: string,
+  take: Take,
+  from: number,
+  to: number
+): Arranged {
+  const loop = bars(barsOf(take));
+  return {
+    id,
+    loop: [0, loop],
+    name,
+    notes: notesOf(SONG_SCORE[take]),
+    sourceLength: loop,
+    track: take.split("-")[0] ?? take,
+    value: placedAt(from, to),
+  };
+}
+
+/**
+ * What each part of the song plays, all of it on the same loop. The drums
+ * and the organ open it, the verse is the drums and the bass alone, the
+ * chorus is the whole band, harder, under the lead's hook, and the organ
+ * and the hook close it, back where the song started.
+ */
+const PLAYS: Record<(typeof PARTS)[number]["id"], readonly Take[]> = {
+  chorus: ["drums-chorus", "bass-chorus", "organ", "lead"],
+  intro: ["drums-verse", "organ"],
+  outro: ["organ", "lead"],
+  verse: ["drums-verse", "bass-verse"],
+};
+
+/**
+ * The song's clips, each named after the part it plays in. The bar before
+ * each chorus ends on a snare roll, in place of the part's own drums.
+ */
 const CLIPS: Arranged[] = [
-  arranged("d1", "Intro", "drums", 0, 4, "beat"),
-  arranged("d2", "Groove", "drums", 4, 16, "beat"),
-  arranged("d3", "Groove", "drums", 16, 28, "beat"),
-  arranged("d4", "Fill", "drums", 28, 32, "beat"),
-  midiArranged("b1", "Sub", "bass", 4, 12, 2, BASSLINE),
-  midiArranged("b2", "Sub", "bass", 16, 28, 2, BASSLINE),
-  midiArranged("k1", "Pad", "keys", 0, 8, 4, CHORDS),
-  midiArranged("k2", "Chords", "keys", 8, 16, 4, CHORDS),
-  midiArranged("k3", "Pad", "keys", 20, 32, 4, CHORDS),
-  arranged("p1", "Pad", "pad", 8, 16, "pad"),
-  arranged("p2", "Pad", "pad", 16, 24, "pad"),
+  ...PARTS.flatMap((part, index) => {
+    const end = PARTS[index + 1]?.at ?? BARS;
+    const fill = PARTS[index + 1]?.id === "chorus";
+    const clips = PLAYS[part.id].map((take) =>
+      clipOf(
+        `${part.id}-${take}`,
+        part.name,
+        take,
+        part.at,
+        fill && take.startsWith("drums-") ? end - 1 : end
+      )
+    );
+    return fill
+      ? [
+          ...clips,
+          clipOf(`${part.id}-fill`, "Fill", "drums-fill", end - 1, end),
+        ]
+      : clips;
+  }),
+  // The pad swells in on the third bar and holds to the end: each time round, the song opens without it.
+  clipOf("pad", "Pad", "pad", 2, BARS),
 ];
 
 const SHORTCUTS: { action: string; keys: string[] }[] = [
@@ -422,7 +592,13 @@ function ClipDock({
   /** What a MIDI clip's panel edits and sounds. */
   midi: Pick<
     ComponentProps<typeof MidiClipPanel>,
-    "onNoteOff" | "onNoteOn" | "onNotesChange" | "onRegionChange"
+    | "onNoteOff"
+    | "onNoteOn"
+    | "onNotesChange"
+    | "onPadOn"
+    | "onRegionChange"
+    | "onSwingChange"
+    | "pads"
   >;
   onActiveChange: (active: boolean) => void;
   onClose: () => void;
@@ -468,6 +644,7 @@ function ClipDock({
           offset: clip.value.offset,
           sourceLength: clip.sourceLength,
         }}
+        swing={clip.swing}
         {...midi}
       >
         <CloseClipView onClose={onClose} />
@@ -538,37 +715,11 @@ function channelsOf(buffer: AudioBuffer) {
   );
 }
 
-/**
- * The recordings the audio clips play, by id: the demo's beat and pad, drawn
- * once at the engine's rate, and the files dropped on the tracks, which
- * `keepRecording` adds.
- */
+/** The recordings the audio clips play, by id: the files dropped on the tracks, which `keepRecording` adds. */
 function useRecordings() {
   const [recordings, setRecordings] = useState<ReadonlyMap<string, Recording>>(
     () => new Map()
   );
-  useEffect(() => {
-    const context = webAudio.getContext();
-    if (!context) {
-      return;
-    }
-    let cancelled = false;
-    Promise.all([
-      renderBeatLoop(context.sampleRate),
-      renderHeldChord(context.sampleRate),
-    ]).then(([beat, pad]) => {
-      if (!cancelled) {
-        setRecordings((current) =>
-          new Map(current)
-            .set("beat", recordingOf(channelsOf(beat), context.sampleRate))
-            .set("pad", recordingOf(channelsOf(pad), context.sampleRate))
-        );
-      }
-    });
-    return () => {
-      cancelled = true;
-    };
-  }, []);
   const keepRecording = useCallback(
     (id: string, recording: Recording) =>
       setRecordings((current) => new Map(current).set(id, recording)),
@@ -627,8 +778,10 @@ export default function BlockTimeline() {
     initialClips: CLIPS,
     initialLocators: LOCATORS,
     initialLoop: LOOP,
+    initialMain: MAIN,
+    initialReturns: RETURNS,
     initialTracks: TRACKS,
-    tempo: DEMO_TEMPO,
+    tempo: SONG_TEMPO,
   });
   const {
     dispatch,
@@ -1126,14 +1279,58 @@ export default function BlockTimeline() {
     },
     [editedTrack, engine.engine]
   );
+  // A drum clip's pads: those of the drum rack its track plays, lowest note on top.
+  const editedRack = tracks
+    .find((item) => item.id === editedTrack)
+    ?.devices?.find((item) => item.device === DRUM_RACK_DEVICE)?.rack;
+  const editedPads = useMemo(
+    () =>
+      editedRack?.chains
+        .flatMap((chain) =>
+          chain.pad ? [{ name: chain.name, note: chain.pad.note }] : []
+        )
+        .sort((a, b) => a.note - b.note),
+    [editedRack]
+  );
+  // A pad's name pressed in the steps: the track plays it, let go at once, as a drum rings on.
+  const auditionPad = useCallback(
+    (note: number) => {
+      if (editedTrack) {
+        engine.engine?.noteOn(editedTrack, note, 0.8);
+        engine.engine?.noteOff(editedTrack, note);
+      }
+    },
+    [editedTrack, engine.engine]
+  );
+  const changeSwing = useCallback(
+    (swing: ClipSwing | null) => {
+      if (editedClip) {
+        editClip(editedClip.id, ({ swing: _was, ...clip }) =>
+          swing ? { ...clip, swing } : clip
+        );
+      }
+    },
+    [editClip, editedClip]
+  );
   const midiEditing = useMemo(
     () => ({
       onNoteOff: auditionOff,
       onNoteOn: auditionOn,
       onNotesChange: changeNotes,
+      onPadOn: auditionPad,
       onRegionChange: changeMidiRegion,
+      onSwingChange: changeSwing,
+      pads: editedPads,
     }),
-    [auditionOff, auditionOn, changeMidiRegion, changeNotes]
+    [
+      auditionOff,
+      auditionOn,
+      auditionPad,
+      changeMidiRegion,
+      changeNotes,
+      changeSwing,
+      editedPads,
+    ]
   );
   // The clip panel's switch: off, the clip stays on its track and is not heard.
   const setEditedActive = useCallback(

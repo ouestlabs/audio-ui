@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The fm synth device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/fm-synth/.","files":[],"name":"fm-synth","registryDependencies":["@audio-ui/fm-synth-device","@audio-ui/fm-synth-engine","@audio-ui/fm-synth-panel"],"type":"registry:ui"}

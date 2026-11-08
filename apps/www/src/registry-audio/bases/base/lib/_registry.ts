@@ -84,6 +84,326 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
+      "The Poly Synth as an instrument device: a saw, a pulse, a sub oscillator and noise, a resonant low-pass filter that follows the keyboard, an envelope for the filter and the level, a vibrato and a chorus, with eight presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/poly-synth-device.ts",
+        target: "components/audio-ui/devices/poly-synth/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "poly-synth-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Mono Synth as an instrument device: a saw, square or triangle oscillator, a sub oscillator and noise, a resonant low-pass filter an envelope opens, a range, a glide and a vibrato, with eight presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/mono-synth-device.ts",
+        target: "components/audio-ui/devices/mono-synth/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "mono-synth-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Organ as an instrument device: nine drawbars of sines at the organ's harmonics, a percussion on the second or third harmonic, a key click, a drive and a rotary speaker, with six registrations, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/organ-device.ts",
+        target: "components/audio-ui/devices/organ/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "organ-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The String Machine as an instrument device: a violin, a viola, a cello and a bass register, a brightness filter, an attack, a release and an ensemble, with eight presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/string-machine-device.ts",
+        target: "components/audio-ui/devices/string-machine/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "string-machine-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Tape Keys as an instrument device: 35 keys, each a strip of tape with one note on it, on three tracks (flutes, strings and a choir), the tape's speed, wow and flutter, and a tone, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/tape-keys-device.ts",
+        target: "components/audio-ui/devices/tape-keys/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "tape-keys-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The guitar as a device: a plucked string that rings and fades, its highs first, through the body's warmth and a tone control, with its decay and palm mute, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/guitar-device.ts",
+        target: "components/audio-ui/devices/guitar/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "guitar-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A synthesized drum as a device: a kick, a snare, a clap, a closed or an open hat, a tom, a rim or a cymbal, with its tuning, decay, tone and snap, played by velocity. Its state, its description and the tools an agent plays it with.",
+    files: [
+      {
+        path: "lib/drum-synth-device.ts",
+        target: "components/audio-ui/devices/drum-synth/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-synth-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The FM Synth as an instrument device: four operators, each a ratio, a level, a decay and a sustain, eight algorithms that wire them, feedback, an attack, a release and a vibrato, with eight presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/fm-synth-device.ts",
+        target: "components/audio-ui/devices/fm-synth/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "fm-synth-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "pad"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Sampler as an instrument device: one of two samples cut into sixteen slices, a key or a pad each from note 36, a low-pass filter, a pitch, a release and a gate, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/sampler-device.ts",
+        target: "components/audio-ui/devices/sampler/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "sampler-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Electric Piano as an instrument device: a tine's body that barks and a bell that pings, rung down by itself, a pickup's drive and a tremolo, with four presets, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/electric-piano-device.ts",
+        target: "components/audio-ui/devices/electric-piano/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "electric-piano-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the Poly Synth on the Web Audio API: noteOn starts a note or glides the held one, noteOff releases it from where its envelope got to, and every control follows the state without a click. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/poly-synth-engine.ts",
+        target: "components/audio-ui/devices/poly-synth/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "poly-synth-engine",
+    registryDependencies: ["@audio-ui/poly-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Mono Synth on the Web Audio API, the whole synth in one engine: it takes every note by its id, the first opens the envelope, a note while one is held glides to it, and letting go of it glides back to the one still held. Every control moves a held note.",
+    files: [
+      {
+        path: "lib/mono-synth-engine.ts",
+        target: "components/audio-ui/devices/mono-synth/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "mono-synth-engine",
+    registryDependencies: ["@audio-ui/mono-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One key of the Organ on the Web Audio API: nine sines at the drawbars' levels, with the percussion and the click, through a drive and a rotary speaker; noteOn sounds a key at once, or cuts the held one and sounds anew, noteOff stops it at once, and the drawbars move a held key. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/organ-engine.ts",
+        target: "components/audio-ui/devices/organ/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "organ-engine",
+    registryDependencies: ["@audio-ui/organ-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the String Machine on the Web Audio API: four registers into a brightness filter, bowed in and out from where it got to, through an ensemble; noteOn bows a note, or cuts the held one and bows anew, noteOff lets it go over the release, and the registers and the brightness move a held note. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/string-machine-engine.ts",
+        target: "components/audio-ui/devices/string-machine/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "string-machine-engine",
+    registryDependencies: ["@audio-ui/string-machine-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One key of Tape Keys on the Web Audio API: its tape runs on the track chosen for eight seconds at most, a little off in pitch and level, with hiss, wow and flutter, through saturation and a tone; noteOn runs a key, or cuts the held one and runs anew, noteOff lets the tape go at once, and the speed, wow and tone move a held key. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/tape-keys-engine.ts",
+        target: "components/audio-ui/devices/tape-keys/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "tape-keys-engine",
+    registryDependencies: ["@audio-ui/tape-keys-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The guitar's Web Audio engine: one plucked string, drawn when its note comes and in tune to the cent, through the body and the tone; a host plays chords with several.",
+    files: [
+      {
+        path: "lib/guitar-engine.ts",
+        target: "components/audio-ui/devices/guitar/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "guitar-engine",
+    registryDependencies: ["@audio-ui/guitar-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Drum Synth on the Web Audio API: one engine plays every hit, each made of a falling sine and filtered noise when it comes, from a noise made once per context, ringing for its decay whatever the note's length.",
+    files: [
+      {
+        path: "lib/drum-synth-engine.ts",
+        target: "components/audio-ui/devices/drum-synth/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-synth-engine",
+    registryDependencies: ["@audio-ui/drum-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the FM Synth on the Web Audio API: four operators wired by the algorithm, each with its envelope; noteOn strikes a note, or cuts the held one and strikes anew, noteOff releases every operator from where it got to, and the levels, ratios, feedback and vibrato move a held note. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/fm-synth-engine.ts",
+        target: "components/audio-ui/devices/fm-synth/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "fm-synth-engine",
+    registryDependencies: ["@audio-ui/fm-synth-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "pad"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the Sampler on the Web Audio API, with the two samples it comes with rendered once and shared: noteOn plays the slice its pitch picks, to its end, or cuts the playing one and plays anew; with the gate on, noteOff closes it over the release; load plays a file of your own. A host plays several slices at once with several.",
+    files: [
+      {
+        path: "lib/sampler-engine.ts",
+        target: "components/audio-ui/devices/sampler/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "sampler-engine",
+    registryDependencies: ["@audio-ui/sampler-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "One voice of the Electric Piano on the Web Audio API: noteOn strikes a note, which rings down by itself, or cuts the ringing one and strikes anew; noteOff lets it fall silent from where it got to; the drive, the tremolo and the volume follow the state without a click. A host plays chords with several.",
+    files: [
+      {
+        path: "lib/electric-piano-engine.ts",
+        target: "components/audio-ui/devices/electric-piano/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "electric-piano-engine",
+    registryDependencies: ["@audio-ui/electric-piano-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "The Pocket Synth as an instrument device: its waveform, filter and volume, and the pitch and filter cutoff a position on a pad plays, with no panel and no audio in it.",
     files: [
       {
@@ -458,6 +778,22 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "device", "modulation"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The vibe as a device: a lamp that pulses on four phase-shift stages spread wide apart, in chorus or vibrato, with its speed, intensity and level, the lamp's cycle and what it shows, and no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/vibe-device.ts",
+        target: "components/audio-ui/devices/vibe/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "vibe-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
@@ -471,6 +807,22 @@ const items: RegistryItem[] = [
     ],
     name: "phaser-engine",
     registryDependencies: ["@audio-ui/phaser-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "modulation"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The vibe on the Web Audio API: a warm preamp, four all-pass stages swept by an oscillator of the lamp's own wave, mixed half dry in chorus or alone in vibrato, and a bypass when it is off.",
+    files: [
+      {
+        path: "lib/vibe-engine.ts",
+        target: "components/audio-ui/devices/vibe/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "vibe-engine",
+    registryDependencies: ["@audio-ui/vibe-device"],
     type: "registry:lib",
   },
   {
@@ -815,6 +1167,55 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio"],
+    dependencies: [],
+    description:
+      "A drum kit to start a drum rack from: a pad per drum on the General MIDI notes, each a Drum Synth at the head of its chain, the snare and the clap in a small room, the hats in one choke group.",
+    files: [
+      {
+        path: "lib/drum-kit.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-kit",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/drum-synth-device",
+      "@audio-ui/reverb-device",
+    ],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A drum clip's notes as steps: a row per pad, a step per stretch of the grid, with each step's velocity, chance and shift, and the edits a step sequencer makes on the notes (switch a step, set its level, fill a row every n steps).",
+    files: [
+      {
+        path: "lib/drum-steps.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-steps",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A chill song at 80 BPM on one two-bar loop, E minor seven, G and A, all of it notes for MIDI tracks: its drums on a drum kit's pads, one part each with a fill, and an organ, a pad, a bass and a lead hook. What the arrangement's demo plays.",
+    files: [
+      {
+        path: "lib/demo-song.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "demo-song",
+    registryDependencies: ["@audio-ui/drum-kit"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "device", "plot"],
     dependencies: ["@audio-ui/core"],
     description:
@@ -910,7 +1311,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core"],
     description:
-      "Drum racks: an instrument whose chains are pads, each answering a note with a voice of the drum synthesis or a recording, pitched and cut to a decay, into its own devices; the engine that plays one on a MIDI track.",
+      "Drum racks: an instrument whose chains are pads, each answering a note with the instrument at its head, such as a Drum Synth, or else a voice of the drum synthesis or a recording, into its own devices, a pad of a choke group cutting the others short; the engine that plays one on a MIDI track.",
     files: [
       {
         path: "lib/drum-rack.ts",
@@ -921,6 +1322,7 @@ const items: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/arrangement",
       "@audio-ui/drum-synthesis",
+      "@audio-ui/instrument-rack",
       "@audio-ui/rack",
       "@audio-ui/voice-pool",
     ],
@@ -1078,8 +1480,30 @@ const items: RegistryItem[] = [
       "@audio-ui/overdrive-engine",
       "@audio-ui/phaser-device",
       "@audio-ui/phaser-engine",
+      "@audio-ui/vibe-device",
+      "@audio-ui/vibe-engine",
       "@audio-ui/pocket-synth-device",
       "@audio-ui/pocket-synth-engine",
+      "@audio-ui/poly-synth-device",
+      "@audio-ui/poly-synth-engine",
+      "@audio-ui/fm-synth-device",
+      "@audio-ui/fm-synth-engine",
+      "@audio-ui/mono-synth-device",
+      "@audio-ui/mono-synth-engine",
+      "@audio-ui/organ-device",
+      "@audio-ui/organ-engine",
+      "@audio-ui/string-machine-device",
+      "@audio-ui/string-machine-engine",
+      "@audio-ui/tape-keys-device",
+      "@audio-ui/tape-keys-engine",
+      "@audio-ui/guitar-device",
+      "@audio-ui/guitar-engine",
+      "@audio-ui/drum-synth-device",
+      "@audio-ui/drum-synth-engine",
+      "@audio-ui/sampler-device",
+      "@audio-ui/sampler-engine",
+      "@audio-ui/electric-piano-device",
+      "@audio-ui/electric-piano-engine",
       "@audio-ui/redux-device",
       "@audio-ui/redux-engine",
       "@audio-ui/reverb-device",

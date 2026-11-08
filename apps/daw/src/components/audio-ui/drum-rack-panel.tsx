@@ -5,6 +5,14 @@ import type { Pad as PadPrimitive } from "@audio-ui/react";
 import { type DragEvent, type ReactNode, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
 import { Knob } from "@/components/audio-ui/knob";
 import { Pad, PadItem } from "@/components/audio-ui/pad";
@@ -98,13 +106,62 @@ function VoiceToggle({
   );
 }
 
-/** The picked pad's sound: which voice it plays, its pitch and decay, and its chain's mix. */
+/** The choke groups a pad can be in, or none. */
+const CHOKE_GROUPS = [
+  { label: "No choke", value: "none" },
+  ...[1, 2, 3, 4].map((group) => ({
+    label: `Choke ${group}`,
+    value: String(group),
+  })),
+];
+
+/** The pad's choke group: a hit on another pad of it cuts this one short. */
+function ChokeSelect({
+  chain,
+  onPadChoke,
+}: {
+  chain: RackChain;
+  onPadChoke: (chain: string, choke: number | null) => void;
+}) {
+  const pick = useCallback(
+    (value: string | null) =>
+      onPadChoke(chain.id, !value || value === "none" ? null : Number(value)),
+    [chain.id, onPadChoke]
+  );
+  return (
+    <Select
+      items={CHOKE_GROUPS}
+      onValueChange={pick}
+      value={chain.pad?.choke === undefined ? "none" : String(chain.pad.choke)}
+    >
+      <SelectTrigger
+        aria-label={`${chain.name} choke group`}
+        className="h-6 w-28 shrink-0"
+        size="sm"
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {CHOKE_GROUPS.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
+  );
+}
+
+/** The picked pad: which voice it plays, its pitch and decay, or else the instrument at its head; its chain's mix and its choke group. */
 function PadEditor({
   chain,
   note,
   onChainMix,
   onChainMixCommit,
   onPadChange,
+  onPadChoke,
   onPadCommit,
   onPadSound,
   onRemovePad,
@@ -117,11 +174,14 @@ function PadEditor({
     chain: string,
     change: { decay?: number; tune?: number }
   ) => void;
+  onPadChoke?: (chain: string, choke: number | null) => void;
   onPadCommit?: () => void;
   onPadSound: (note: number, sound: DrumSound, name: string) => void;
   onRemovePad: (chain: string) => void;
 }) {
-  const sound = chain?.pad?.sound;
+  // An instrument at the head of the chain is the pad's sound: its own panel, among the pad's devices, shapes it.
+  const played = Boolean(chain?.devices[0]?.instrument);
+  const sound = played ? undefined : chain?.pad?.sound;
   const id = chain?.id ?? "";
   const pick = useCallback(
     (voice: DrumVoice, label: string) =>
@@ -156,48 +216,61 @@ function PadEditor({
         <span className="me-1 w-8 shrink-0 text-muted-foreground text-xs tabular-nums">
           {pitchName(note)}
         </span>
-        {VOICES.map((item) => (
-          <VoiceToggle
-            key={item.voice}
-            label={item.label}
-            onPick={pick}
-            pressed={sound?.kind === "synth" && sound.voice === item.voice}
-            voice={item.voice}
-          />
-        ))}
+        {played ? (
+          <span className="truncate text-xs">{chain?.name}</span>
+        ) : (
+          VOICES.map((item) => (
+            <VoiceToggle
+              key={item.voice}
+              label={item.label}
+              onPick={pick}
+              pressed={sound?.kind === "synth" && sound.voice === item.voice}
+              voice={item.voice}
+            />
+          ))
+        )}
+        {chain && onPadChoke ? (
+          <span className="ms-auto">
+            <ChokeSelect chain={chain} onPadChoke={onPadChoke} />
+          </span>
+        ) : null}
       </div>
-      {chain && sound ? (
+      {chain && (played || sound) ? (
         <div className="flex items-center gap-3">
-          <Caption label="Tune">
-            <Knob
-              anchor={0}
-              aria-label={`${chain.name} tune`}
-              formatValue={semitones}
-              max={24}
-              min={-24}
-              onValueChange={tune}
-              onValueCommitted={onPadCommit}
-              size="sm"
-              step={1}
-              value={sound.tune}
-              valueLabel="hidden"
-            />
-          </Caption>
-          <Caption label="Decay">
-            <Knob
-              aria-label={`${chain.name} decay`}
-              formatValue={seconds}
-              max={4}
-              min={0.02}
-              onValueChange={decay}
-              onValueCommitted={onPadCommit}
-              scale="log"
-              size="sm"
-              step={0.001}
-              value={sound.decay}
-              valueLabel="hidden"
-            />
-          </Caption>
+          {sound ? (
+            <>
+              <Caption label="Tune">
+                <Knob
+                  anchor={0}
+                  aria-label={`${chain.name} tune`}
+                  formatValue={semitones}
+                  max={24}
+                  min={-24}
+                  onValueChange={tune}
+                  onValueCommitted={onPadCommit}
+                  size="sm"
+                  step={1}
+                  value={sound.tune}
+                  valueLabel="hidden"
+                />
+              </Caption>
+              <Caption label="Decay">
+                <Knob
+                  aria-label={`${chain.name} decay`}
+                  formatValue={seconds}
+                  max={4}
+                  min={0.02}
+                  onValueChange={decay}
+                  onValueCommitted={onPadCommit}
+                  scale="log"
+                  size="sm"
+                  step={0.001}
+                  value={sound.decay}
+                  valueLabel="hidden"
+                />
+              </Caption>
+            </>
+          ) : null}
           <ul aria-label="Pad mix" className="min-w-0 flex-1">
             <RackChainRow
               chain={chain}
@@ -212,7 +285,8 @@ function PadEditor({
         </div>
       ) : (
         <span className="text-muted-foreground text-xs">
-          Empty: pick a voice, or drop a recording on the pad.
+          Empty: pick a voice, drop a recording on the pad, or drag a Drum Synth
+          onto it.
         </span>
       )}
     </div>
@@ -243,6 +317,7 @@ function DrumRackPanel({
   onMacroCommit,
   onMapMacro,
   onPadChange,
+  onPadChoke,
   onPadCommit,
   onPadOff,
   onPadOn,
@@ -279,6 +354,8 @@ function DrumRackPanel({
     chain: string,
     change: { decay?: number; tune?: number }
   ) => void;
+  /** The picked pad put in a choke group, or taken out of one with `null`; leave it out for no choke control. */
+  onPadChoke?: (chain: string, choke: number | null) => void;
   onPadCommit?: () => void;
   /** A pad let go of. */
   onPadOff?: (note: number) => void;
@@ -434,6 +511,7 @@ function DrumRackPanel({
           onChainMix={onChainMix}
           onChainMixCommit={onChainMixCommit}
           onPadChange={onPadChange}
+          onPadChoke={onPadChoke}
           onPadCommit={onPadCommit}
           onPadSound={onPadSound}
           onRemovePad={onRemovePad}

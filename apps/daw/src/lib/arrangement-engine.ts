@@ -17,6 +17,7 @@ import {
   type MetronomeRhythm,
   metronomeClicks,
   secondsPerBar,
+  secondsPerBeat,
 } from "@audio-ui/core/time";
 import {
   type Arranged,
@@ -265,14 +266,18 @@ export interface ArrangementEngine {
   ) => void;
 }
 
-/** The notes a MIDI track plays, in frames of the arrangement, in the order they start. */
-function framesOf(clips: readonly Arranged[], sampleRate: number): FrameNote[] {
+/** The notes a MIDI track plays, in frames of the arrangement, in the order they start, swung where a clip swings on beats `beat` long. */
+function framesOf(
+  clips: readonly Arranged[],
+  sampleRate: number,
+  beat: number
+): FrameNote[] {
   const notes: FrameNote[] = [];
   for (const clip of clips) {
     if (clip.disabled || !clip.notes) {
       continue;
     }
-    for (const note of playedNotes(clip)) {
+    for (const note of playedNotes(clip, beat)) {
       if (!note.muted) {
         const start = toFrames(note.start, sampleRate);
         notes.push({
@@ -610,9 +615,8 @@ export async function createArrangementEngine(
         soloed: mix.soloed,
       };
     };
-    const main = mixOf(current.main);
     return {
-      main: { gain: main.gain, pan: main.pan },
+      main: levels(current.main),
       returns: current.returns.map((track) => ({
         ...strip(track),
         pre: Boolean(track.pre),
@@ -729,11 +733,17 @@ export async function createArrangementEngine(
       return;
     }
     const at = arrangementFrame(state, to) / rate;
-    mixer.glide(
-      track.id,
-      mixAt(track, mixOf(track), at / doc.duration, overrides[track.id]),
-      to / rate
+    const mix = mixAt(
+      track,
+      mixOf(track),
+      at / doc.duration,
+      overrides[track.id]
     );
+    if (track === doc.main) {
+      mixer.glideMain(mix, to / rate);
+    } else {
+      mixer.glide(track.id, mix, to / rate);
+    }
   };
 
   /** The metronome's clicks in frames of the arrangement, on the bars of the signatures in force. */
@@ -787,6 +797,9 @@ export async function createArrangementEngine(
     scheduleClicks(from, to);
     for (const track of doc.tracks) {
       scheduleNotes(track, from, to - from);
+    }
+    // The returns' volume and pan and the main track's follow their envelopes too.
+    for (const track of allTracks(doc)) {
       scheduleAutomation(track, to);
     }
   };
@@ -1058,7 +1071,8 @@ export async function createArrangementEngine(
     } else if (track.kind === "midi") {
       runtime.notes = framesOf(
         next.clips.filter((clip) => clip.track === track.id),
-        rate
+        rate,
+        secondsPerBeat(next.tempo)
       );
     }
   };

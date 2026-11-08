@@ -172,10 +172,19 @@ function PianoRollStrip({
 }
 
 type PianoRollKeysProps = Omit<PianoRollPrimitive.Keys.Props, "className"> &
-  VariantProps<typeof pianoRollVariants> & { className?: string };
+  VariantProps<typeof pianoRollVariants> & {
+    className?: string;
+    /** A name for some keys, by pitch, written on them in place of the note's: a drum rack's pads, say. */
+    names?: Readonly<Record<number, string>>;
+  };
 
 /** The keyboard down the side, one key per row: press one to hear it, Shift selects its row. */
-function PianoRollKeys({ className, size, ...props }: PianoRollKeysProps) {
+function PianoRollKeys({
+  className,
+  names,
+  size,
+  ...props
+}: PianoRollKeysProps) {
   return (
     <PianoRollPrimitive.Keys
       aria-label="Keys"
@@ -194,12 +203,17 @@ function PianoRollKeys({ className, size, ...props }: PianoRollKeysProps) {
             key={pitch}
             pitch={pitch}
           >
-            {/* Only C, where octaves are counted from; folded, rows are not neighbours and each names itself. */}
-            <PianoRollPrimitive.KeyLabel
-              className={cn(
-                pitch % 12 !== 0 && "hidden group-data-folded/piano-roll:inline"
-              )}
-            />
+            {/* A key with a name of its own, such as a drum rack's pad, says it; else only C, where octaves are counted from, and folded, every row names itself. */}
+            {names?.[pitch] === undefined ? (
+              <PianoRollPrimitive.KeyLabel
+                className={cn(
+                  pitch % 12 !== 0 &&
+                    "hidden group-data-folded/piano-roll:inline"
+                )}
+              />
+            ) : (
+              <span className="truncate">{names[pitch]}</span>
+            )}
           </PianoRollPrimitive.Key>
         )}
       </PianoRollPrimitive.Rows>

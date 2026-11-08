@@ -1,0 +1,49 @@
+---
+title: Electric piano
+description: "A tine electric piano device: a body that barks, a bell that pings, a pickup that can be driven and a tremolo, with four presets, a panel with a keyboard, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-electric-piano" />
+
+A tine electric piano. A key strikes a tine and a pickup hears it ring: a body on the same pitch, which barks when the key is struck hard, and a bell fourteen times up, which pings and is gone in a tenth of a second. The note rings down by itself, longer in the bass, through a pickup that can be driven and a tremolo. Start from one of its four presets (Warm, Bell, Bark, Mellow), then shape it. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="electric-piano" kind="device" />
+
+## Controls
+
+Every control reads 0 to 10, as a panel's knobs do, and shows the value it sets in the unit the sound takes.
+
+<DeviceControls device="electric-piano">
+<Control id="bark">How much the body growls when a key is struck hard.</Control>
+<Control id="bell">How loud the hammer's ping on the tine.</Control>
+<Control id="decay">How long a note rings at middle C: the bass rings longer, the treble shorter.</Control>
+<Control id="drive">How hard the pickup and the preamp are driven.</Control>
+<Control id="rate">The tremolo's speed.</Control>
+<Control id="depth">How far the tremolo swings the level.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel loads a preset from the menu in its title bar, lays the controls out by what they do (tone, pickup, tremolo, output) and has a keyboard of two octaves that plays the piano. `electricPianoPreset(name)` gives a preset's whole state, and `ELECTRIC_PIANO_PRESETS` lists them. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up their keys. The panel sends notes out and does not make the sound, so it plays through any engine.
+
+<DeviceUsage name="electric-piano" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.noteOn({ frequency: 261.63, velocity: 0.9 }); // strikes a key
+engine.noteOff(); // lets it go: it falls silent in a fifth of a second
+
+// Scheduled ahead on the audio clock, by a host that plays notes from a song:
+engine.noteOn({ frequency: 440 }, { at: time, id: "a4" });
+engine.noteOff({ at: time + length, id: "a4" });
+```
+
+An engine plays one voice. For chords, make as many as the notes you hold and give each note its own: the [arrangement](/docs/components/base/arrangement)'s engine does it for a MIDI track, and the block above keeps ten. A note rises in three milliseconds and rings down by itself, even held; its bark and its bell are as bright as the key is hard. Let go, it falls silent from where it got to. A key struck again while its note rings cuts it and strikes anew. A note already ringing keeps the timbre it was struck with, while the drive, the tremolo and the volume move under it. An agent plays the piano with the `play` tool.

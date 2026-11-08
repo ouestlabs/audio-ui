@@ -1,0 +1,45 @@
+---
+title: Sampler
+description: "A slice sampler device: a sample cut into sixteen slices, a pad or a key each, through a filter, transposed, struck or gated, with a panel of pads, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-sampler" />
+
+A slice sampler. A sample is cut into sixteen equal slices, and each pad, or each key from C2 (note 36), plays one: struck, it plays to its end; with the gate on, it plays while the key is held. A low-pass filter, a pitch and a release shape it. It comes with two samples of its own, a dusty keys loop and a sub bass line, so it sounds on first load and travels with a project; drop an audio file on the block above to play that instead. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="sampler" kind="device" />
+
+## Controls
+
+<DeviceControls device="sampler">
+<Control id="sample">The sample the slices are cut from.</Control>
+<Control id="pitch">How far the slices are transposed, in semitones: up plays them faster and shorter.</Control>
+<Control id="cutoff">Where the low-pass filter closes, from 200 Hz to 18 kHz.</Control>
+<Control id="release">How long a gated slice takes to close once let go, and how long every slice fades at its end.</Control>
+<Control id="gate">Off, a slice plays to its end however short the press; on, it plays while the key is held.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel has the sample in its title bar, its controls, and sixteen pads in two rows, one a slice, that play it: a pad struck sends the note of its slice, as hard as it was struck. `sliceOf(pitch)` is the slice a pitch plays, and `SAMPLER_FIRST_NOTE` the note of the first. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up the pads of their slices. The panel sends notes out and does not make the sound, so it plays through any engine.
+
+<DeviceUsage name="sampler" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.noteOn({ frequency: 65.41, velocity: 1 }); // C2: the first slice
+engine.noteOff(); // with the gate on, it closes over the release
+
+// A file of your own in place of the sample the state names:
+engine.load(await context.decodeAudioData(await file.arrayBuffer()));
+```
+
+An engine plays one slice at a time; a host plays several at once with several engines, one note each, as the [arrangement](/docs/components/base/arrangement)'s engine does for a MIDI track. The samples it comes with are rendered once and shared by every engine, and `ready` resolves once the state's sample is there: a note before plays nothing. A slice rises in three milliseconds and fades at its end, so it never clicks. A note while one plays cuts it and plays anew. `load(buffer)` plays a file in place of the state's sample until the state names another; `load(null)` goes back to it. An agent plays the sampler with the `play` tool.

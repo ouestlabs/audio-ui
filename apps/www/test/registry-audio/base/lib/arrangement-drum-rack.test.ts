@@ -237,7 +237,7 @@ describe("instrument racks", () => {
     ]);
   });
 
-  test("DEV-014: an effect rack's chain and a drum rack's pad take no instrument, nor does a chain take a rack as its instrument", () => {
+  test("DEV-014: an effect rack's chain takes no instrument, nor does a chain take a rack as its instrument", () => {
     const fx = run([
       { device: "audioui.rack", state: {}, track: "beat", type: "add-device" },
     ]);

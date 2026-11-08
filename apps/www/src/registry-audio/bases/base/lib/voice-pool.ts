@@ -59,9 +59,46 @@ interface Voice {
   holding: { id: string; since: number } | null;
 }
 
+/** A mono instrument: its one engine takes every note, and lets each go by its id. */
+function createMonoPlayer(
+  ctx: BaseAudioContext,
+  entry: LibraryDevice,
+  values: AnyDeviceState,
+  context: DeviceContext | undefined,
+  output: AudioNode
+): VoicePool {
+  const engine = entry.create(ctx, values, context);
+  engine.output.connect(output);
+  const held = new Set<string>();
+  return {
+    dispose: () => engine.dispose(),
+    entry,
+    noteOff: (time, id) => {
+      if (held.delete(id)) {
+        engine.noteOff?.({ at: time, id });
+      }
+    },
+    noteOn: (note, time, id) => {
+      held.add(id);
+      engine.noteOn?.(noteParameters(entry, note), { at: time, id });
+    },
+    ready: async () => {
+      await engine.ready;
+    },
+    release: (time) => {
+      for (const id of held) {
+        engine.noteOff?.({ at: time, id });
+      }
+      held.clear();
+    },
+    update: (next, nextContext) => engine.update(next, nextContext),
+  };
+}
+
 /**
  * An instrument of the library played with `count` voices into `output`, one
- * note each: a new note takes a free voice, or the one held longest.
+ * note each: a new note takes a free voice, or the one held longest. A mono
+ * instrument gets one engine, which takes every note.
  */
 export function createVoicePool(
   ctx: BaseAudioContext,
@@ -71,6 +108,9 @@ export function createVoicePool(
   count: number,
   output: AudioNode
 ): VoicePool {
+  if (entry.mono) {
+    return createMonoPlayer(ctx, entry, values, context, output);
+  }
   const voices: Voice[] = Array.from({ length: count }, () => {
     const engine = entry.create(ctx, values, context);
     engine.output.connect(output);

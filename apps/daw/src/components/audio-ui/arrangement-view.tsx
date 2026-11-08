@@ -106,9 +106,11 @@ import {
   type TrackDevice,
 } from "@/lib/arrangement";
 import {
+  type ArrangementDoc,
   trackBlock,
   trackDepth,
 } from "@/lib/arrangement-state";
+import { drumKit } from "@/lib/drum-kit";
 import { CaretLeftIcon, CaretRightIcon, PlusIcon, MapPinPlusIcon, MusicNotesPlusIcon } from "@phosphor-icons/react";
 
 type Arrangement = ReturnType<typeof useArrangement>;
@@ -505,23 +507,29 @@ export interface ArrangementViewProps {
 /** What a row needs of its track: what it is, whether it sounds, whether it takes files, how deep it sits and, a group, the tracks in it. */
 function rowOf(
   track: ArrangementTrack,
-  tracks: readonly ArrangementTrack[],
-  returns: readonly ArrangementTrack[],
+  {
+    main,
+    returns,
+    tracks,
+  }: Pick<ArrangementDoc, "main" | "returns" | "tracks">,
   anySolo: boolean
 ) {
   const mix = mixOf(track);
-  const isReturn = returns.includes(track);
+  const isMain = track === main;
+  // A return or the main track: it plays no clips, only what comes to it.
+  const isBus = isMain || returns.includes(track);
   const isGroup = track.kind === "group";
   return {
     depth: trackDepth(tracks, track.id),
     // A group's lane shows what the tracks in it play.
     inside: isGroup ? trackBlock(tracks, track.id).slice(1) : [],
+    isBus,
     isGroup,
-    isReturn,
+    isMain,
     mix,
-    silent: mix.muted || (anySolo && !mix.soloed && !isReturn),
+    silent: mix.muted || (anySolo && !mix.soloed && !isBus),
     // Files go on audio tracks; a device goes on any track that takes it.
-    takesFiles: !isReturn && (track.kind ?? "audio") === "audio",
+    takesFiles: !isBus && (track.kind ?? "audio") === "audio",
   };
 }
 
@@ -565,6 +573,7 @@ export function ArrangementView({
     duration,
     locators,
     loop,
+    main,
     returns,
     signatures,
     tempo,
@@ -732,15 +741,21 @@ export function ArrangementView({
     }),
     [duplicateTrack, groupTrack, insertTrack]
   );
-  // A group's menu lets its tracks go, too; a return's has none of these.
-  const menuOf = useCallback(
-    (isReturn: boolean, isGroup: boolean) => {
-      if (isReturn) {
-        return;
+  // What a header can do by what its track is: a group's menu lets its tracks go, a return's has none of the menu, and the main track stays, as it is named, with no solo or mute.
+  const actionsOf = useCallback(
+    ({ isBus, isGroup, isMain }: ReturnType<typeof rowOf>) => {
+      if (isMain) {
+        return { switches: false };
       }
-      return isGroup ? { ...trackMenu, onUngroup: ungroupTrack } : trackMenu;
+      const kept = { onRemove: removeTrack, onRename: renameTrack };
+      if (isBus) {
+        return kept;
+      }
+      return isGroup
+        ? { ...kept, ...trackMenu, onUngroup: ungroupTrack }
+        : { ...kept, ...trackMenu, onArm };
     },
-    [trackMenu, ungroupTrack]
+    [onArm, removeTrack, renameTrack, trackMenu, ungroupTrack]
   );
   const changeLoop = useCallback(
     (range: TimelinePrimitive.Range.Value) =>
@@ -811,25 +826,53 @@ export function ArrangementView({
     () => dispatch({ kind: "return", type: "add-track" }),
     [dispatch]
   );
+  // A drum track: a MIDI track with a drum rack of a Drum Synth on every pad, as one step of undo.
+  const addDrums = useCallback(() => {
+    const taken = new Set(tracks.map((track) => track.id));
+    let count = 1;
+    while (taken.has(`drums-${count}`)) {
+      count += 1;
+    }
+    const id = `drums-${count}`;
+    dispatch({
+      commands: [
+        { id, kind: "midi", name: "Drums", type: "add-track" },
+        {
+          device: DRUM_RACK_DEVICE,
+          instrument: true,
+          rack: drumKit(),
+          state: {},
+          track: id,
+          type: "add-device",
+        },
+      ],
+      type: "batch",
+    });
+  }, [dispatch, tracks]);
   const anySolo = tracks.some((track) => mixOf(track).soloed);
   const readingOwn = reading.find(({ track }) => track === NEW_TRACK);
   const headClick = useClipHeadClick(
     onEditClip,
     marquee.handlers.onPointerDownCapture
   );
-  const roomLeft = [...arrangement.unfoldedTracks, ...returns].every(
+  // The tracks, the returns, then the main track: what everything plays through, with its devices and envelopes.
+  const rows = useMemo(
+    () => [...arrangement.unfoldedTracks, ...returns, main],
+    [arrangement.unfoldedTracks, main, returns]
+  );
+  const roomLeft = rows.every(
     (track) => arrangement.heights[track.id] !== undefined
   );
   // What each track's envelope can move besides its volume and pan: its devices' parameters (AUT-001).
   const targets = useMemo(
     () =>
       new Map(
-        [...tracks, ...returns].map((track) => [
+        [...tracks, ...returns, main].map((track) => [
           track.id,
           deviceTargets(track.devices ?? [], findDevice, rackName),
         ])
       ),
-    [findDevice, returns, tracks]
+    [findDevice, main, returns, tracks]
   );
 
   // In automation mode, what each lane shows: nothing for a track with no output and no device parameter (MIX-024).
@@ -837,7 +880,7 @@ export function ArrangementView({
     () =>
       new Map(
         automation.automating
-          ? [...tracks, ...returns].map((track) => [
+          ? [...tracks, ...returns, main].map((track) => [
               track.id,
               automatedParameter(
                 track,
@@ -847,7 +890,14 @@ export function ArrangementView({
             ])
           : []
       ),
-    [automation.automating, automation.parameterOf, returns, targets, tracks]
+    [
+      automation.automating,
+      automation.parameterOf,
+      main,
+      returns,
+      targets,
+      tracks,
+    ]
   );
 
   return (
@@ -903,6 +953,7 @@ export function ArrangementView({
                   {shortcuts?.["midi-track"]}
                 </DropdownMenuShortcut>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={addDrums}>Drum track</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={addReturn}>
                 Return track
@@ -1032,16 +1083,10 @@ export function ArrangementView({
               </TimelineLane>
             </Row>
           </div>
-          {[...arrangement.unfoldedTracks, ...returns].map((track) => {
-            const {
-              depth,
-              inside,
-              isGroup,
-              isReturn,
-              mix,
-              silent,
-              takesFiles,
-            } = rowOf(track, tracks, returns, anySolo);
+          {rows.map((track) => {
+            const row = rowOf(track, doc, anySolo);
+            const { depth, inside, isBus, isGroup, mix, silent, takesFiles } =
+              row;
             const height = arrangement.heights[track.id];
             const shownParameter = shownParameters.get(track.id);
             return (
@@ -1057,7 +1102,7 @@ export function ArrangementView({
                     "border-foreground/20 border-b",
                     height === undefined && "flex-1",
                     chooserRoom(shownParameter, height),
-                    isReturn && "bg-muted/40"
+                    isBus && "bg-muted/40"
                   )}
                   height={height}
                   lead={
@@ -1066,7 +1111,7 @@ export function ArrangementView({
                       data-depth={depth}
                       style={{ paddingInlineStart: `${depth * 0.75}rem` }}
                     >
-                      {isReturn ? null : (
+                      {isBus ? null : (
                         <TrackGrip
                           dragging={reorder.draggingId === track.id}
                           trackName={track.name}
@@ -1089,11 +1134,8 @@ export function ArrangementView({
                           />
                         }
                         name={track.name}
-                        onArm={isGroup || isReturn ? undefined : onArm}
                         onMix={automation.changeMix}
                         onMixCommit={settle}
-                        onRemove={removeTrack}
-                        onRename={renameTrack}
                         onSelect={pickTrack}
                         onToggleFold={arrangement.toggleFold}
                         output={hasOutput(track)}
@@ -1103,7 +1145,7 @@ export function ArrangementView({
                         }
                         track={track}
                         trackId={track.id}
-                        {...menuOf(isReturn, isGroup)}
+                        {...actionsOf(row)}
                       >
                         {shownParameter ? (
                           <TrackAutomationChooser

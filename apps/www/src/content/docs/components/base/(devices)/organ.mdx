@@ -1,0 +1,58 @@
+---
+title: Organ
+description: "A tonewheel organ device: nine drawbars, a percussion, a key click, a drive and a rotary speaker, with six registrations, a panel with drawbars and a keyboard, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-organ" />
+
+A tonewheel organ. Every key sounds nine sines at the organ's harmonics, from the 16' an octave under the key to the 1' three octaves over it, each at the level its drawbar is pulled to. A percussion on the second or third harmonic and a tick of key click open each note, and the sound goes through a drive and a rotary speaker, whose horns take a moment to reach a new speed. Start from one of its six registrations (Jazz, Gospel, Rock, Church, Flute, Full), then pull the drawbars. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="organ" kind="device" />
+
+## Controls
+
+A drawbar pulls from 0 to 8, each step 3 dB louder; the knobs read 0 to 10.
+
+<DeviceControls device="organ">
+<Control id="drawbar1">The 16', an octave under the key.</Control>
+<Control id="drawbar2">The 5⅓', a fifth over the key.</Control>
+<Control id="drawbar3">The 8', the key itself.</Control>
+<Control id="drawbar4">The 4', an octave over it.</Control>
+<Control id="drawbar5">The 2⅔', an octave and a fifth over it.</Control>
+<Control id="drawbar6">The 2', two octaves over it.</Control>
+<Control id="drawbar7">The 1⅗', two octaves and a third over it.</Control>
+<Control id="drawbar8">The 1⅓', two octaves and a fifth over it.</Control>
+<Control id="drawbar9">The 1', three octaves over it.</Control>
+<Control id="percussion">A short note on each key's attack.</Control>
+<Control id="harmonic">The percussion's pitch: the second or the third harmonic.</Control>
+<Control id="decay">How fast the percussion dies away.</Control>
+<Control id="click">The tick of noise as a key's contacts close.</Control>
+<Control id="drive">How hard the sound is driven into the overdrive.</Control>
+<Control id="rotary">The rotary speaker: stopped, slow or fast.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel loads a registration from the menu in its title bar, beside the rotary speaker's switch, draws the nine drawbars as faders, the percussion, the key click, the drive and the volume beside them, and has a keyboard of two octaves that plays the organ. `organPreset(name)` gives a registration's whole state, and `ORGAN_PRESETS` lists them. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up their keys. The panel sends notes out and does not make the sound, so it plays through any engine.
+
+<DeviceUsage name="organ" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.noteOn({ frequency: 261.63 }); // a key now
+engine.noteOff(); // stops it
+
+// Scheduled ahead on the audio clock, by a host that plays notes from a song:
+engine.noteOn({ frequency: 440 }, { at: time, id: "a4" });
+engine.noteOff({ at: time + length, id: "a4" });
+```
+
+An engine plays one key, through its own drive and rotary speaker. For chords, make as many as the notes you hold and give each note its own: the [arrangement](/docs/components/base/arrangement)'s engine does it for a MIDI track, and the block above keeps eight. A key sounds at once and stops at once, as an organ's does, with no click. A note while one is held cuts it and sounds anew, and a `noteOff` whose `id` is not the held note's lets nothing go. A drawbar moved sounds on a held key, and a registration with few drawbars out is lifted part of the way so it is not far quieter than a full one. An agent plays the organ with the `play` tool.

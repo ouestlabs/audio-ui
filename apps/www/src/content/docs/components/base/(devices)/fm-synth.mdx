@@ -1,0 +1,64 @@
+---
+title: FM synth
+description: "A four-operator FM synth device: four sines at ratios of the pitch, each with its level and envelope, wired by eight algorithms, with feedback, eight presets, a panel with a keyboard, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-fm-synth" />
+
+A four-operator FM synth. Each operator is a sine at a ratio of the pitch, with its own level and its own envelope. The algorithm wires them: a carrier is heard, and a modulator bends the pitch of the operator under it many times a second, which grows the harmonics. The deeper a modulator goes, the brighter the sound, so a sound can start bright and mellow as it rings, as an electric piano or a bell does. Operator 4 can feed back on itself, from a sine towards a saw. Start from one of its eight presets (E.Piano, Tubular, Bass, Brass, Marimba, Clav, Organ, Glass Pad), then shape it. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="fm-synth" kind="device" />
+
+## Controls
+
+The controls read 0 to 10, the ratios in steps of a list and the algorithm by its number, and show the value they set in the unit the sound takes.
+
+<DeviceControls device="fm-synth">
+<Control id="algorithm">How the four operators are wired, from 1 (all in a stack) to 8 (all heard).</Control>
+<Control id="feedback">How far operator 4 feeds back on itself, from a sine towards a saw.</Control>
+<Control id="attack">How long every operator takes to rise.</Control>
+<Control id="release">How long every operator takes to fade once let go.</Control>
+<Control id="vibrato">How far the vibrato moves the pitch.</Control>
+<Control id="ratio1">Operator 1's ratio of the pitch, from half to fourteen times.</Control>
+<Control id="level1">Operator 1's level: a carrier's loudness, a modulator's depth.</Control>
+<Control id="decay1">How long operator 1 takes to fall to its sustain.</Control>
+<Control id="sustain1">The level operator 1 holds at.</Control>
+<Control id="ratio2">Operator 2's ratio of the pitch, from half to fourteen times.</Control>
+<Control id="level2">Operator 2's level: a carrier's loudness, a modulator's depth.</Control>
+<Control id="decay2">How long operator 2 takes to fall to its sustain.</Control>
+<Control id="sustain2">The level operator 2 holds at.</Control>
+<Control id="ratio3">Operator 3's ratio of the pitch, from half to fourteen times.</Control>
+<Control id="level3">Operator 3's level: a carrier's loudness, a modulator's depth.</Control>
+<Control id="decay3">How long operator 3 takes to fall to its sustain.</Control>
+<Control id="sustain3">The level operator 3 holds at.</Control>
+<Control id="ratio4">Operator 4's ratio of the pitch, from half to fourteen times.</Control>
+<Control id="level4">Operator 4's level: a carrier's loudness, a modulator's depth.</Control>
+<Control id="decay4">How long operator 4 takes to fall to its sustain.</Control>
+<Control id="sustain4">The level operator 4 holds at.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel loads a preset from the menu in its title bar, lays out what every operator shares, then each operator's ratio, level, decay and sustain, and has a keyboard of two octaves that plays the synth. `fmSynthPreset(name)` gives a preset's whole state, `FM_SYNTH_PRESETS` lists them, and `FM_ALGORITHMS` holds each algorithm's carriers and links, to draw its wiring. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up their keys. The panel sends notes out and does not make the sound, so it plays through any engine.
+
+<DeviceUsage name="fm-synth" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.noteOn({ frequency: 261.63, velocity: 0.9 }); // a harder key is louder and brighter
+engine.noteOff(); // every operator fades over the release
+
+// Scheduled ahead on the audio clock, by a host that plays notes from a song:
+engine.noteOn({ frequency: 440 }, { at: time, id: "a4" });
+engine.noteOff({ at: time + length, id: "a4" });
+```
+
+An engine plays one voice. For chords, make as many as the notes you hold and give each note its own: the [arrangement](/docs/components/base/arrangement)'s engine does it for a MIDI track, and the block above keeps eight. A harder key is louder and modulates deeper, and the treble is modulated less, so its harmonics never fold back into noise. Let go, every operator falls back over the release from where it had got to. A note while one is held cuts it and strikes anew. A level, a ratio, the feedback and the vibrato move a held note; the algorithm and the envelopes take the next one. An agent plays the synth with the `play` tool.

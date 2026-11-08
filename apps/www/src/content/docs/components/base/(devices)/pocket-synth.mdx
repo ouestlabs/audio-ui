@@ -23,7 +23,7 @@ One oscillator through a resonant filter. Press the pad: the pitch goes across a
 
 ## Panel
 
-The panel has a pad that plays the synth: its position gives the note, so the pitch goes across and the cutoff goes up. `pocketSynthPitch(position)` and `pocketSynthCutoff(position)` turn a position from 0 to 1 into hertz. The panel sends notes out and does not make the sound, so it plays through any engine.
+The panel has a pad that plays the synth: its position gives the note, so the pitch goes across and the cutoff goes up. `pocketSynthPitch(position)` and `pocketSynthCutoff(position)` turn a position from 0 to 1 into hertz. With `activeNotes`, the notes held now, such as on a MIDI keyboard, take the pad's point to the pitch of the last one, and `pocketSynthPosition(frequency)` is where a pitch sits. The panel sends notes out and does not make the sound, so it plays through any engine.
 
 <DeviceUsage name="pocket-synth" />
 

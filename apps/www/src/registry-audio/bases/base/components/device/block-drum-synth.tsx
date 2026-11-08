@@ -1,0 +1,76 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { DrumSynthPanel } from "@/registry-audio/bases/base/audio/panels/drum-synth-panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
+import {
+  type DrumSynthNote,
+  type DrumSynthState,
+  drumSynthDevice,
+} from "@/registry-audio/bases/base/lib/drum-synth-device";
+import {
+  createDrumSynthEngine,
+  type DrumSynthEngine,
+} from "@/registry-audio/bases/base/lib/drum-synth-engine";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
+
+/**
+ * A synthesized drum you can plug in: its state, a panel that draws and
+ * strikes it, and a Web Audio engine that makes the sound, each its own file.
+ * One engine plays every hit, each ringing for its decay. Strike the pad, or
+ * play it from a MIDI keyboard or pad controller, as hard as you like.
+ */
+export default function BlockDrumSynth() {
+  const [state, setState] = useState<DrumSynthState>(() =>
+    drumSynthDevice.defaults()
+  );
+  const master = useMasterBus(1);
+  const [engine, setEngine] = useState<DrumSynthEngine | null>(null);
+  const stateRef = useRef(state);
+  stateRef.current = state;
+
+  useEffect(() => {
+    const ctx = webAudio.getContext();
+    if (!(ctx && master)) {
+      return;
+    }
+    const made = createDrumSynthEngine(ctx, stateRef.current);
+    made.output.connect(master);
+    setEngine(made);
+    return () => {
+      made.dispose();
+      setEngine(null);
+    };
+  }, [master]);
+
+  // The engine follows the state, whoever changed it: a control or a call.
+  useEffect(() => {
+    engine?.update(state);
+  }, [engine, state]);
+
+  const strike = useCallback(
+    (note: DrumSynthNote) => {
+      const ctx = webAudio.getContext();
+      if (ctx?.state === "suspended") {
+        ctx.resume();
+      }
+      engine?.noteOn(note);
+    },
+    [engine]
+  );
+  const midi = useMidiInput({
+    onNoteOn: (_pitch: number, velocity: number) => strike({ velocity }),
+  });
+
+  return (
+    <div className="cn-audio-panel h-full w-full min-w-0">
+      <DrumSynthPanel
+        activeNotes={midi.activeNotes}
+        onNoteOn={strike}
+        onValueChange={setState}
+        value={state}
+      />
+    </div>
+  );
+}

@@ -1,6 +1,6 @@
-import { DOCS_MENU_UPDATES } from "@/lib/docs/menu/menu-updates";
+import { DOCS_MENU_UPDATES, shownMarks } from "@/lib/docs/menu/menu-updates";
 
-export const PAGES_NEW = Object.keys(DOCS_MENU_UPDATES);
+export const PAGES_NEW = shownMarks(DOCS_MENU_UPDATES).map(([page]) => page);
 const PATTERN_REGEX = /[?#]/;
 function getDocsComponentKey(value: string) {
   const [path = ""] = value.split(PATTERN_REGEX);
@@ -24,7 +24,7 @@ function getDocsComponentKey(value: string) {
 }
 
 const docsMenuUpdates = new Map(
-  Object.entries(DOCS_MENU_UPDATES).map(([componentName, hint]) => [
+  shownMarks(DOCS_MENU_UPDATES).map(([componentName, hint]) => [
     getDocsComponentKey(componentName),
     hint,
   ])

@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The sampler device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/sampler/.","files":[],"name":"sampler","registryDependencies":["@audio-ui/sampler-device","@audio-ui/sampler-engine","@audio-ui/sampler-panel"],"type":"registry:ui"}

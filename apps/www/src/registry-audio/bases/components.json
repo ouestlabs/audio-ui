@@ -12,6 +12,66 @@
     "title": "Block pocket synth"
   },
   {
+    "categories": ["instrument", "synth", "piano"],
+    "description": "An eighties polyphonic synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    "name": "block-poly-synth",
+    "title": "Block poly synth"
+  },
+  {
+    "categories": ["instrument", "synth", "piano"],
+    "description": "A monophonic analog synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, one note at a time that glides to the next. Play the keyboard, or a MIDI keyboard",
+    "name": "block-mono-synth",
+    "title": "Block mono synth"
+  },
+  {
+    "categories": ["instrument", "synth", "piano"],
+    "description": "A tonewheel organ you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    "name": "block-organ",
+    "title": "Block organ"
+  },
+  {
+    "categories": ["instrument", "synth", "piano"],
+    "description": "A string machine you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    "name": "block-string-machine",
+    "title": "Block string machine"
+  },
+  {
+    "categories": ["instrument", "synth", "piano"],
+    "description": "A tape-replay keyboard you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight keys for chords. Play its 35 keys, or a MIDI keyboard from G2 to F5",
+    "name": "block-tape-keys",
+    "title": "Block tape keys"
+  },
+  {
+    "categories": ["instrument", "synth", "piano"],
+    "description": "A plucked guitar: its panel and its engine, eight strings for chords, played from the keyboard or a MIDI keyboard.",
+    "name": "block-guitar",
+    "title": "Block guitar"
+  },
+  {
+    "categories": ["instrument", "synth", "pad"],
+    "description": "A synthesized drum: its panel and its engine, struck from its pad, a MIDI keyboard or a pad controller, as hard as you like.",
+    "name": "block-drum-synth",
+    "title": "Block drum synth"
+  },
+  {
+    "categories": ["instrument", "synth", "piano"],
+    "description": "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    "name": "block-fm-synth",
+    "title": "Block fm synth"
+  },
+  {
+    "categories": ["instrument", "pad"],
+    "description": "A slice sampler you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Strike its sixteen pads, play a MIDI keyboard from C2, or drop an audio file on it",
+    "name": "block-sampler",
+    "title": "Block sampler"
+  },
+  {
+    "categories": ["instrument", "piano"],
+    "description": "A tine electric piano you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, ten voices for chords. Play the keyboard, or a MIDI keyboard: a hard key barks and pings",
+    "name": "block-electric-piano",
+    "title": "Block electric piano"
+  },
+  {
     "categories": ["instrument", "synth", "xypad"],
     "description": "A wave shaper synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the resonance up",
     "name": "block-wave-shaper",
@@ -28,6 +88,30 @@
     "description": "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     "name": "fader-pan-demo",
     "title": "Fader pan demo"
+  },
+  {
+    "categories": ["hardware"],
+    "description": "LEDs lit by Rec and Mute, one blinking red, in three sizes",
+    "name": "led-demo",
+    "title": "Led demo"
+  },
+  {
+    "categories": ["hardware"],
+    "description": "Screens with a caption: a filter cutoff in kHz driven by a parameter field, a preset's name and a tempo",
+    "name": "lcd-demo",
+    "title": "Lcd demo"
+  },
+  {
+    "categories": ["hardware"],
+    "description": "A value of each kind: tempo, gain, cutoff, pan, mix, transpose and position",
+    "name": "value-display-demo",
+    "title": "Value display demo"
+  },
+  {
+    "categories": ["hardware"],
+    "description": "A power rocker that lights its LED, a small one laid down, and one disabled",
+    "name": "rocker-switch-demo",
+    "title": "Rocker switch demo"
   },
   {
     "categories": ["parameter-field"],
@@ -150,6 +234,12 @@
     "title": "Waveform region demo"
   },
   {
+    "categories": ["plot"],
+    "description": "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
+    "name": "plot-demo",
+    "title": "Plot demo"
+  },
+  {
     "categories": ["dynamics", "plot", "knob"],
     "description": "A compressor you can plug in: its state, a panel that draws it and a Web Audio engine that plays it, side by side. Play a pulsing signal and turn the knobs",
     "name": "block-compressor",
@@ -220,6 +310,12 @@
     "description": "A phaser and flanger you can plug in: its state, a panel that draws the sweep and an engine that plays it. Play a loop through it, switch the mode and turn the rate and the feedback",
     "name": "block-phaser",
     "title": "Block phaser"
+  },
+  {
+    "categories": ["modulation", "plot", "knob"],
+    "description": "A photocell vibe you can plug in: its state, a panel that draws the lamp and an engine that plays it, each its own file. Play the loop and turn the speed and the intensity",
+    "name": "block-vibe",
+    "title": "Block vibe"
   },
   {
     "categories": ["modulation", "plot", "knob"],

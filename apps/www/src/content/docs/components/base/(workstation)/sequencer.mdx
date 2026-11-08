@@ -150,4 +150,6 @@ How loud one step plays, as a bar from the bottom of its box: the height is the 
 <TypeRow name={"rowLabels"} type={"string[]"}>Names written beside each row, and its accessible name.</TypeRow>
 <TypeRow name={"beatEvery"} type={"number"} default={"4"}>Highlights every nth step.</TypeRow>
 <TypeRow name={"showVelocity"} type={"boolean"} default={"false"}>Draws a bar under each row to set how loud every step plays.</TypeRow>
+<TypeRow name={"size"} type={'"default" | "sm"'} default={'"default"'}>`sm` draws short steps and a thin bar under them, so many rows fit.</TypeRow>
+<TypeRow name={"renderRowLabel"} type={"(row: number) => ReactNode"}>What sits beside a row in place of its written name, such as a button that sounds it; the row keeps its name for assistive technology.</TypeRow>
 </TypeTable>

@@ -169,6 +169,28 @@ The block holds an arrangement of one track, whose chain is the devices on scree
 
 Over an engine of your own, keep the same list and send it the order and the states: the chain and the panels never touch the audio.
 
+## A track's devices
+
+`device-view` (`npx shadcn@latest add @audio-ui/device-view`) is the chain of one track of an [arrangement](/docs/components/base/arrangement), controlled: each device on its own panel, racks with their macros, chains and zones, a drum rack with its pads, a device dropped from the library where it lands, and, at the end of the chain, a way to open the library or add a rack. It is the view the workstation shows under its tracks. Every change is a command of the arrangement, so it is one step of undo and an engine that follows the arrangement follows it. With `activeNotes`, the notes held now on the track, such as on a MIDI keyboard, light up its instrument's keys or pads.
+
+```tsx
+<DeviceView
+  arrangement={arrangement} // useArrangement
+  onDeviceMoved={(track, device, parameters) => {}} // a knob turned by hand stops following its envelope
+  onHoldNote={(track, note) => {}} // an instrument's pad holds a note; null lets it go
+  onNoteOff={(track, pitch) => {}}
+  onNoteOn={(track, pitch, velocity) => {}}
+  onOpenLibrary={() => {}} // the library, ready to search
+  onPadFiles={(track, rack, note, files) => {}} // files dropped on a pad of a drum rack
+  overridden={automation.overridden}
+  position={engine.position}
+  track={selectedTrack}
+  activeNotes={heldNotes} // the notes held now on the track: its instrument's keys or pads light up
+/>
+```
+
+What a view remembers per device, such as a slot folded, the chain picked in a rack or whether its macros show, lasts as long as the view. Give `useEntry` a hook with the shape of `useState` by an entry name and a device id to keep them, in storage for example, so they come back.
+
 ## Racks
 
 A device can be a rack: chains of devices side by side, summed, with eight macros. Its face goes in a slot like any device, with a chain of its own inside it. That chain has no scroll of its own: the rack is as wide as its devices, and the outermost chain scrolls them all. See [Rack](/docs/components/base/rack).

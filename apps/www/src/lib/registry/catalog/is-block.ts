@@ -14,6 +14,7 @@ const EXPANDABLE = new Set([
   "block-device-chain",
   "block-piano-roll",
   "block-timeline",
+  "plot-demo",
 ]);
 
 export const isExpandable = (name: string) => EXPANDABLE.has(name);
@@ -21,6 +22,16 @@ export const isExpandable = (name: string) => EXPANDABLE.has(name);
 /** The previews that play from a keyboard: their bar gets a button to connect a MIDI one. */
 const MIDI = new Set([
   "block-piano-roll",
+  "block-electric-piano",
+  "block-fm-synth",
+  "block-mono-synth",
+  "block-organ",
+  "block-string-machine",
+  "block-tape-keys",
+  "block-guitar",
+  "block-drum-synth",
+  "block-poly-synth",
+  "block-sampler",
   "piano-size-default-demo",
   "spectrum-analyzer-demo",
 ]);

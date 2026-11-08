@@ -48,6 +48,226 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "An eighties polyphonic synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    files: [
+      {
+        path: "components/device/block-poly-synth.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-poly-synth",
+    registryDependencies: [
+      "@audio-ui/poly-synth-panel",
+      "@audio-ui/poly-synth-device",
+      "@audio-ui/poly-synth-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A monophonic analog synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, one note at a time that glides to the next. Play the keyboard, or a MIDI keyboard",
+    files: [
+      {
+        path: "components/device/block-mono-synth.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-mono-synth",
+    registryDependencies: [
+      "@audio-ui/mono-synth-panel",
+      "@audio-ui/mono-synth-device",
+      "@audio-ui/mono-synth-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A tonewheel organ you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    files: [
+      {
+        path: "components/device/block-organ.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-organ",
+    registryDependencies: [
+      "@audio-ui/organ-panel",
+      "@audio-ui/organ-device",
+      "@audio-ui/organ-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A string machine you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    files: [
+      {
+        path: "components/device/block-string-machine.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-string-machine",
+    registryDependencies: [
+      "@audio-ui/string-machine-panel",
+      "@audio-ui/string-machine-device",
+      "@audio-ui/string-machine-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A tape-replay keyboard you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight keys for chords. Play its 35 keys, or a MIDI keyboard from G2 to F5",
+    files: [
+      {
+        path: "components/device/block-tape-keys.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-tape-keys",
+    registryDependencies: [
+      "@audio-ui/tape-keys-panel",
+      "@audio-ui/tape-keys-device",
+      "@audio-ui/tape-keys-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A plucked guitar: its panel and its engine, eight strings for chords, played from the keyboard or a MIDI keyboard.",
+    files: [
+      {
+        path: "components/device/block-guitar.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-guitar",
+    registryDependencies: [
+      "@audio-ui/guitar-panel",
+      "@audio-ui/guitar-device",
+      "@audio-ui/guitar-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "pad"],
+    dependencies: [],
+    description:
+      "A synthesized drum: its panel and its engine, struck from its pad, a MIDI keyboard or a pad controller, as hard as you like.",
+    files: [
+      {
+        path: "components/device/block-drum-synth.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-drum-synth",
+    registryDependencies: [
+      "@audio-ui/drum-synth-panel",
+      "@audio-ui/drum-synth-device",
+      "@audio-ui/drum-synth-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
+    files: [
+      {
+        path: "components/device/block-fm-synth.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-fm-synth",
+    registryDependencies: [
+      "@audio-ui/fm-synth-panel",
+      "@audio-ui/fm-synth-device",
+      "@audio-ui/fm-synth-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "pad"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A slice sampler you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Strike its sixteen pads, play a MIDI keyboard from C2, or drop an audio file on it",
+    files: [
+      {
+        path: "components/device/block-sampler.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-sampler",
+    registryDependencies: [
+      "@audio-ui/sampler-panel",
+      "@audio-ui/sampler-device",
+      "@audio-ui/sampler-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A tine electric piano you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, ten voices for chords. Play the keyboard, or a MIDI keyboard: a hard key barks and pings",
+    files: [
+      {
+        path: "components/device/block-electric-piano.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-electric-piano",
+    registryDependencies: [
+      "@audio-ui/electric-piano-panel",
+      "@audio-ui/electric-piano-device",
+      "@audio-ui/electric-piano-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["instrument", "synth", "xypad"],
     dependencies: ["@audio-ui/react"],
     description:
@@ -93,6 +313,65 @@ export const components: RegistryItem[] = [
     ],
     name: "fader-pan-demo",
     registryDependencies: ["@audio-ui/fader"],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description: "LEDs lit by Rec and Mute, one blinking red, in three sizes",
+    files: [
+      {
+        path: "components/hardware/led-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "led-demo",
+    registryDependencies: ["@audio-ui/led", "@shadcn/button"],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description:
+      "Screens with a caption: a filter cutoff in kHz driven by a parameter field, a preset's name and a tempo",
+    files: [
+      {
+        path: "components/hardware/lcd-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "lcd-demo",
+    registryDependencies: [
+      "@audio-ui/lcd",
+      "@audio-ui/value-display",
+      "@audio-ui/parameter-field",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description:
+      "A value of each kind: tempo, gain, cutoff, pan, mix, transpose and position",
+    files: [
+      {
+        path: "components/hardware/value-display-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "value-display-demo",
+    registryDependencies: ["@audio-ui/value-display"],
+    type: "registry:example",
+  },
+  {
+    categories: ["hardware"],
+    description:
+      "A power rocker that lights its LED, a small one laid down, and one disabled",
+    files: [
+      {
+        path: "components/hardware/rocker-switch-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "rocker-switch-demo",
+    registryDependencies: ["@audio-ui/rocker-switch", "@audio-ui/led"],
     type: "registry:example",
   },
   {
@@ -426,8 +705,16 @@ export const components: RegistryItem[] = [
       "@audio-ui/use-arrangement",
       "@audio-ui/arrangement-engine",
       "@audio-ui/clip-player",
-      "@audio-ui/demo-sound",
-      "@audio-ui/pocket-synth-device",
+      "@audio-ui/demo-song",
+      "@audio-ui/drum-kit",
+      "@audio-ui/reverb-device",
+      "@audio-ui/mono-synth-device",
+      "@audio-ui/organ-device",
+      "@audio-ui/string-machine-device",
+      "@audio-ui/channel-eq-device",
+      "@audio-ui/compressor-device",
+      "@audio-ui/limiter-device",
+      "@audio-ui/vibe-device",
       "@audio-ui/web-audio",
       "@audio-ui/use-marquee-selection",
       "@audio-ui/use-time-selection",
@@ -465,6 +752,31 @@ export const components: RegistryItem[] = [
     ],
     name: "waveform-region-demo",
     registryDependencies: ["@audio-ui/waveform"],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description:
+      "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
+    files: [
+      {
+        path: "components/plot/plot-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    meta: {
+      hint: "Click a band to set its type and width. Double-click empty space to add one, Delete to remove it.",
+    },
+    name: "plot-demo",
+    dependencies: ["@audio-ui/core"],
+    registryDependencies: [
+      "@audio-ui/plot",
+      "@audio-ui/knob",
+      "@audio-ui/use-noise-through-eq",
+      "@audio-ui/use-spectrum",
+      "@shadcn/popover",
+      "@shadcn/select",
+    ],
     type: "registry:example",
   },
   {
@@ -724,6 +1036,28 @@ export const components: RegistryItem[] = [
       "@audio-ui/phaser-panel",
       "@audio-ui/phaser-device",
       "@audio-ui/phaser-engine",
+      "@audio-ui/demo-sound",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["modulation", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A photocell vibe you can plug in: its state, a panel that draws the lamp and an engine that plays it, each its own file. Play the loop and turn the speed and the intensity",
+    files: [
+      {
+        path: "components/device/block-vibe.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-vibe",
+    registryDependencies: [
+      "@audio-ui/vibe-panel",
+      "@audio-ui/vibe-device",
+      "@audio-ui/vibe-engine",
       "@audio-ui/demo-sound",
       "@audio-ui/use-device-loop",
       "@audio-ui/use-master-bus",

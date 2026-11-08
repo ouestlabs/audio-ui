@@ -78,6 +78,13 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Hardware-panel pieces: LEDs, small screens, values as they read, and rocker switches.",
+    docs: "lcd",
+    label: "Hardware",
+    name: "hardware",
+  },
+  {
+    description:
       "Numeric fields for audio parameters: type a value, step it, or drag its label or unit to scrub it, with units and precision.",
     label: "Parameter field",
     name: "parameter-field",
@@ -169,6 +176,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
+    label: "Plot",
+    name: "plot",
+  },
+  {
+    description:
       "Drum pad grids: strike them by pointer or keyboard, with velocity and choke groups.",
     label: "Pad",
     name: "pad",
@@ -243,10 +256,12 @@ export const categoryGroups: { label: string; names: string[] }[] = [
       "xypad",
       "envelope",
       "parameter-field",
+      "hardware",
       "piano",
       "pad",
       "meter",
       "waveform",
+      "plot",
       "spectrum",
       "tuner",
     ],
