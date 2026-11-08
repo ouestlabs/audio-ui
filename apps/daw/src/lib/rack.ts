@@ -180,6 +180,9 @@ export function createRackEngine(
     if (fed) {
       input.connect(made.input);
     }
+    // Stereo before the pan: a mono sound, such as a Drum Synth's, goes to both sides, not to the left alone.
+    made.volume.channelCount = 2;
+    made.volume.channelCountMode = "explicit";
     made.wait.connect(made.volume).connect(made.splitter);
     made.splitter.connect(made.left, 0).connect(made.merger, 0, 0);
     made.splitter.connect(made.right, 1).connect(made.merger, 0, 1);
