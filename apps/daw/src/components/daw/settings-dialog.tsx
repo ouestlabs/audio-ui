@@ -17,6 +17,7 @@ import {
 } from "@tanstack/react-hotkeys";
 import { useTheme } from "next-themes";
 import { type ReactNode, useCallback, useEffect, useId, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -59,10 +60,12 @@ const THEMES = [
   { label: "System", value: "system" },
 ];
 
-const COUNT_INS = [0, 1, 2, 4].map((bars) => ({
-  label: bars === 0 ? "None" : `${bars} ${bars === 1 ? "bar" : "bars"}`,
-  value: String(bars),
-}));
+const COUNT_INS = [
+  { label: "None", value: "0" },
+  { label: "1 bar", value: "1" },
+  { label: "2 bars", value: "2" },
+  { label: "4 bars", value: "4" },
+];
 
 const QUANTIZE_LABELS: Record<number, string> = {
   0: "None",
@@ -78,6 +81,9 @@ const QUANTIZES = RECORD_QUANTIZE.map((share) => ({
 
 const SYSTEM_OUTPUT = "system";
 
+/** The id of a row's description, which its control is described by. */
+const hintOf = (id: string) => `${id}-hint`;
+
 /** A setting: its name and what it does on the left, its control on the right. */
 function Row({
   children,
@@ -87,33 +93,44 @@ function Row({
 }: {
   children: ReactNode;
   description?: ReactNode;
-  /** The control's id, so the name labels it. */
+  /** The control's id, so the name labels it; its description is `hintOf(id)`, for the control's `aria-describedby`. */
   id?: string;
   label: string;
 }) {
   return (
-    <div className="flex items-center justify-between gap-6 py-2">
-      <div className="flex min-w-0 flex-col gap-0.5">
+    // Wraps where it is narrow: the control goes under its name rather than over it.
+    <div className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-2">
+      <div className="flex min-w-0 flex-1 basis-48 flex-col gap-0.5">
         <label className="font-medium text-sm" htmlFor={id}>
           {label}
         </label>
         {description ? (
-          <p className="text-muted-foreground text-xs">{description}</p>
+          <p
+            className="text-muted-foreground text-xs"
+            id={id ? hintOf(id) : undefined}
+          >
+            {description}
+          </p>
         ) : null}
       </div>
-      <div className="flex shrink-0 items-center gap-2">{children}</div>
+      <div className="flex min-w-0 max-w-full items-center gap-2">
+        {children}
+      </div>
     </div>
   );
 }
 
 /** A pick from a short list, as a select: its items by value and label. */
 function Pick({
+  described,
   disabled,
   id,
   items,
   onValueChange,
   value,
 }: {
+  /** Whether its row has a description, which then describes it. */
+  described?: boolean;
   disabled?: boolean;
   id: string;
   items: readonly { label: string; value: string }[];
@@ -135,7 +152,11 @@ function Pick({
       onValueChange={pick}
       value={value}
     >
-      <SelectTrigger className="w-48" id={id}>
+      <SelectTrigger
+        aria-describedby={described ? hintOf(id) : undefined}
+        className="w-48 max-w-full"
+        id={id}
+      >
         <SelectValue />
       </SelectTrigger>
       <SelectContent>
@@ -167,6 +188,7 @@ function GeneralSection() {
     <Row id={id} label="Theme">
       <ToggleGroup
         aria-label="Theme"
+        className="flex-wrap"
         id={id}
         onValueChange={pick}
         size="sm"
@@ -269,6 +291,7 @@ function AudioSection({
         label="Output"
       >
         <Pick
+          described={!routable}
           disabled={!routable}
           id={`${id}-output`}
           items={[
@@ -279,8 +302,17 @@ function AudioSection({
           value={output || SYSTEM_OUTPUT}
         />
       </Row>
-      <Row id={`${id}-input`} label="Input">
+      <Row
+        description={
+          inputs.length === 0
+            ? "Listed once the browser lets the workstation use a microphone. Record on an audio track to allow it."
+            : undefined
+        }
+        id={`${id}-input`}
+        label="Input"
+      >
         <Pick
+          described={inputs.length === 0}
           disabled={inputs.length === 0}
           id={`${id}-input`}
           items={[
@@ -297,6 +329,7 @@ function AudioSection({
         label="Monitor the input"
       >
         <Switch
+          aria-describedby={hintOf(`${id}-monitor`)}
           checked={monitorInput}
           id={`${id}-monitor`}
           onCheckedChange={onMonitorInputChange}
@@ -323,6 +356,7 @@ function AudioSection({
         label="Latency"
       >
         <Pick
+          described
           id={`${id}-latency`}
           items={LATENCIES}
           onValueChange={pickLatency}
@@ -407,9 +441,16 @@ function MidiSection({
         description={
           midi.error ?? "The browser asks before it lets the page hear them."
         }
+        id={`${id}-connect`}
         label="MIDI devices"
       >
-        <Button onClick={midi.requestAccess} size="sm" variant="outline">
+        <Button
+          aria-describedby={hintOf(`${id}-connect`)}
+          id={`${id}-connect`}
+          onClick={midi.requestAccess}
+          size="sm"
+          variant="outline"
+        >
           Connect
         </Button>
       </Row>
@@ -430,6 +471,7 @@ function MidiSection({
         label="Play with the keyboard"
       >
         <Switch
+          aria-describedby={hintOf(id)}
           checked={computerKeys}
           id={id}
           onCheckedChange={onComputerKeysChange}
@@ -494,6 +536,7 @@ function RecordSection({
         label="Count-in"
       >
         <Pick
+          described
           id={`${id}-count`}
           items={COUNT_INS}
           onValueChange={pickCountIn}
@@ -513,6 +556,7 @@ function RecordSection({
         label="Metronome rhythm"
       >
         <Pick
+          described
           id={`${id}-rhythm`}
           items={rhythms}
           onValueChange={pickRhythm}
@@ -525,6 +569,7 @@ function RecordSection({
         label="MIDI overdub"
       >
         <Switch
+          aria-describedby={hintOf(`${id}-overdub`)}
           checked={overdub}
           id={`${id}-overdub`}
           onCheckedChange={onOverdubChange}
@@ -536,6 +581,7 @@ function RecordSection({
         label="Record quantize"
       >
         <Pick
+          described
           id={`${id}-quantize`}
           items={QUANTIZES}
           onValueChange={pickQuantize}
@@ -592,7 +638,7 @@ function ShortcutRow({
           matchesKeyboardEvent(context.event, item.hotkey)
       );
       return taken
-        ? `Already ${appHotkeys[taken.command]?.meta?.name ?? taken.command}`
+        ? `${appHotkeys[taken.command]?.meta?.name ?? taken.command} already uses these keys. Press others, or Escape.`
         : true;
     },
   });
@@ -605,6 +651,9 @@ function ShortcutRow({
     setProblem(null);
     resetCustomHotkey(id);
   }, [id, resetCustomHotkey]);
+  const nameId = useId();
+  const keysId = useId();
+  const problemId = useId();
   let keys: ReactNode = <span className="text-muted-foreground">None</span>;
   if (isRecording) {
     keys = <span className="text-muted-foreground">Press keys…</span>;
@@ -612,16 +661,21 @@ function ShortcutRow({
     keys = <HotkeyKeys hotkey={hotkey} />;
   }
   return (
-    <div className="flex items-center justify-between gap-4 py-1">
-      <span className="min-w-0 truncate text-sm">{name}</span>
-      <span className="flex shrink-0 items-center gap-1">
-        {problem ? (
-          <span className="text-destructive text-xs">{problem}</span>
-        ) : null}
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 py-1">
+      <span className="min-w-0 flex-1 basis-40 text-sm" id={nameId}>
+        {name}
+      </span>
+      <span className="flex min-w-0 flex-wrap items-center justify-end gap-1">
+        {/* Always there, so a refusal is read as it comes: what the keys belong to, and what to do. */}
+        <span className="text-destructive text-xs" id={problemId} role="status">
+          {problem}
+        </span>
         <Button
-          aria-label={`Keys for ${name}`}
+          aria-describedby={problemId}
+          aria-labelledby={`${nameId} ${keysId}`}
           aria-pressed={isRecording}
           className="min-w-28 justify-center"
+          id={keysId}
           onClick={startRecording}
           size="sm"
           variant="outline"
@@ -629,6 +683,7 @@ function ShortcutRow({
           {keys}
         </Button>
         <Button
+          aria-label={`Reset ${name}`}
           className="text-muted-foreground"
           disabled={!custom}
           onClick={reset}
@@ -648,7 +703,26 @@ function ShortcutsSection({
   onRecordingChange: (recording: boolean) => void;
 }) {
   const items = useAppHotkeyList();
-  const { customHotkeys, resetCustomHotkeys } = useCustomHotkeys();
+  const { customHotkeys, resetCustomHotkeys, setCustomHotkey } =
+    useCustomHotkeys();
+  // Every key of the user's own goes back to its default, and Undo in the toast brings them all back.
+  const resetAll = useCallback(() => {
+    const kept = Object.entries(customHotkeys) as [
+      ShortcutCommand,
+      Hotkey | null,
+    ][];
+    resetCustomHotkeys();
+    toast("Shortcuts reset", {
+      action: {
+        label: "Undo",
+        onClick: () => {
+          for (const [command, hotkey] of kept) {
+            setCustomHotkey(command, hotkey);
+          }
+        },
+      },
+    });
+  }, [customHotkeys, resetCustomHotkeys, setCustomHotkey]);
   const groups = [...new Set(items.map((item) => item.appHotkey.meta?.group))];
   return (
     <>
@@ -659,7 +733,7 @@ function ShortcutsSection({
         </p>
         <Button
           disabled={Object.keys(customHotkeys).length === 0}
-          onClick={resetCustomHotkeys}
+          onClick={resetAll}
           size="sm"
           variant="outline"
         >
@@ -686,6 +760,27 @@ function ShortcutsSection({
         </section>
       ))}
     </>
+  );
+}
+
+/**
+ * A section's panel: it scrolls, and fades where more follows. The fade is a
+ * scroll-driven animation, which never ends, so it sits on a box inside: on
+ * the panel, the tabs would wait for it before letting the panel go.
+ */
+function SettingsPanel({
+  children,
+  value,
+}: {
+  children: ReactNode;
+  value: string;
+}) {
+  return (
+    <TabsContent className="flex min-h-0 min-w-0" value={value}>
+      <div className="scroll-fade min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 py-3">
+        {children}
+      </div>
+    </TabsContent>
   );
 }
 
@@ -753,7 +848,7 @@ export function SettingsDialog({
           value={section}
         >
           <TabsList
-            className="w-40 shrink-0 items-stretch justify-start gap-1 rounded-none border-e py-2 ps-2 pe-1 group-data-vertical/tabs:h-full"
+            className="w-28 shrink-0 items-stretch justify-start gap-1 rounded-none border-e py-2 ps-2 pe-1 group-data-vertical/tabs:h-full sm:w-40"
             variant="line"
           >
             {SECTIONS.map((item) => (
@@ -762,36 +857,21 @@ export function SettingsDialog({
               </TabsTrigger>
             ))}
           </TabsList>
-          <TabsContent
-            className="min-h-0 overflow-y-auto px-5 py-3"
-            value="General"
-          >
+          <SettingsPanel value="General">
             <GeneralSection />
-          </TabsContent>
-          <TabsContent
-            className="min-h-0 overflow-y-auto px-5 py-3"
-            value="Audio"
-          >
+          </SettingsPanel>
+          <SettingsPanel value="Audio">
             <AudioSection {...audio} open={open} />
-          </TabsContent>
-          <TabsContent
-            className="min-h-0 overflow-y-auto px-5 py-3"
-            value="MIDI"
-          >
+          </SettingsPanel>
+          <SettingsPanel value="MIDI">
             <MidiSection {...midi} />
-          </TabsContent>
-          <TabsContent
-            className="min-h-0 overflow-y-auto px-5 py-3"
-            value="Record"
-          >
+          </SettingsPanel>
+          <SettingsPanel value="Record">
             <RecordSection {...record} />
-          </TabsContent>
-          <TabsContent
-            className="min-h-0 overflow-y-auto px-5 py-3"
-            value="Shortcuts"
-          >
+          </SettingsPanel>
+          <SettingsPanel value="Shortcuts">
             <ShortcutsSection onRecordingChange={setRecording} />
-          </TabsContent>
+          </SettingsPanel>
         </Tabs>
       </DialogContent>
     </Dialog>
