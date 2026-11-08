@@ -12,6 +12,7 @@ import {
   readProjectFile,
   SAMPLES,
   sampleFileName,
+  savedAs,
   sniffExtension,
   writeProjectFile,
 } from "@/lib/daw/project-file";
@@ -80,6 +81,40 @@ async function writeFile(
   await writable.close();
 }
 
+/** Whether two files hold the same bytes. */
+function sameBytes(a: ArrayBuffer, b: ArrayBuffer): boolean {
+  if (a.byteLength !== b.byteLength) {
+    return false;
+  }
+  const left = new Uint8Array(a);
+  const right = new Uint8Array(b);
+  return left.every((byte, index) => byte === right[index]);
+}
+
+/** A file of `samples` already holding `bytes`, among those the recording `name` may be saved as. */
+async function fileHolding(
+  samples: FileSystemDirectoryHandle,
+  taken: ReadonlySet<string>,
+  name: string,
+  extension: string,
+  bytes: ArrayBuffer
+): Promise<string | undefined> {
+  // One after the other, and only until one holds them.
+  return await savedAs(name, extension, [...taken]).reduce<
+    Promise<string | undefined>
+  >(async (earlier, file) => {
+    const before = await earlier;
+    if (before) {
+      return before;
+    }
+    const found = await (await samples.getFileHandle(file)).getFile();
+    return found.size === bytes.byteLength &&
+      sameBytes(await found.arrayBuffer(), bytes)
+      ? file
+      : undefined;
+  }, Promise.resolve(undefined));
+}
+
 /** The samples the folder's document already names, by recording id. */
 async function savedSamples(
   folder: FileSystemDirectoryHandle,
@@ -95,8 +130,10 @@ async function savedSamples(
 
 /**
  * Saves the project to its folder: `<folder>.audioui`, and in `Samples/` the
- * files of the recordings the folder lacks, read with `bytesOf`. Returns the
- * names of the recordings whose files could not be read.
+ * files of the recordings the folder lacks, read with `bytesOf`. A recording
+ * whose bytes a file of its name already holds keeps that file, so saving
+ * again writes no copy. Returns the names of the recordings whose files could
+ * not be read.
  */
 export async function saveToFolder(
   folder: FileSystemDirectoryHandle,
@@ -122,7 +159,14 @@ export async function saveToFolder(
       missing.push(name);
       return;
     }
-    const file = sampleFileName(name, sniffExtension(bytes), taken);
+    // Opened again, a recording has a new id: the file it was saved to is found by its bytes, not written twice.
+    const extension = sniffExtension(bytes);
+    const same = await fileHolding(samples, taken, name, extension, bytes);
+    if (same) {
+      written.push({ id, name, path: `${SAMPLES}/${same}` });
+      return;
+    }
+    const file = sampleFileName(name, extension, taken);
     await writeFile(samples, file, bytes);
     taken.add(file);
     written.push({ id, name, path: `${SAMPLES}/${file}` });
