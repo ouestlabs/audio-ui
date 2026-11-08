@@ -190,7 +190,7 @@ function DrumStepEditor({
       className={cn("flex min-h-0 min-w-0 flex-col gap-2 p-2", className)}
       data-slot="drum-step-editor"
     >
-      <div className="min-h-0 min-w-0 flex-1 overflow-auto">
+      <div className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 overflow-auto">
         <Sequencer
           beatEvery={beatEvery}
           // Every pad on screen at once: short steps.
