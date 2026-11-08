@@ -117,12 +117,7 @@ function VoiceToggle({
 }) {
   const pick = useCallback(() => onPick(voice, label), [label, onPick, voice]);
   return (
-    <Toggle
-      onPressedChange={pick}
-      pressed={pressed}
-      size="sm"
-      variant="outline"
-    >
+    <Toggle onPressedChange={pick} pressed={pressed} variant="outline">
       {label}
     </Toggle>
   );
@@ -198,8 +193,7 @@ function ChokeSelect({
     >
       <SelectTrigger
         aria-label={`${chain.name} choke group`}
-        className="h-6 w-28 shrink-0"
-        size="sm"
+        className="w-28 shrink-0"
       >
         <SelectValue />
       </SelectTrigger>
@@ -351,7 +345,6 @@ function PadMix({
         aria-label={`${name} on`}
         onPressedChange={setOn}
         pressed={!mix.muted}
-        size="sm"
         variant="outline"
       >
         On
@@ -360,7 +353,6 @@ function PadMix({
         aria-label={`Solo ${name}`}
         onPressedChange={setSolo}
         pressed={mix.soloed}
-        size="sm"
         variant="outline"
       >
         S
@@ -369,7 +361,7 @@ function PadMix({
         aria-label={`Remove ${name}`}
         className="text-muted-foreground"
         onClick={remove}
-        size="icon-sm"
+        size="icon"
         variant="ghost"
       >
         <XIcon aria-hidden="true" className="size-4" />
