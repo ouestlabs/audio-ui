@@ -207,8 +207,8 @@ function DrumStepEditor({
         <div className="no-scrollbar scroll-fade-e overflow-x-auto overflow-y-hidden">
           <Sequencer
             beatEvery={beatEvery}
-            // Every pad on screen at once: short steps.
-            className="gap-y-1"
+            // Every pad on screen at once: short steps, with room around them for the ring of the step being played.
+            className="gap-y-1 p-1"
             onValueChange={changePattern}
             onValueCommitted={commit}
             renderRowLabel={renderRowLabel}
