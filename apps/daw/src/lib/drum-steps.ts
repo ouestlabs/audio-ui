@@ -6,9 +6,11 @@ export interface StepCell {
   step: number;
 }
 
-/** The steps a clip is seen on: a row per pad, by its note, top to bottom, `steps` steps `step` long. */
+/** The steps a clip is seen on: a row per pad, by its note, top to bottom, `steps` steps `step` long from `start`, such as its loop's start. */
 export interface StepGrid {
   notes: readonly number[];
+  /** Where the first step starts, in the clip's source. @default 0 */
+  start?: number;
   step: number;
   steps: number;
 }
@@ -38,13 +40,17 @@ export const STEP_VELOCITY = 0.8;
 const EDGE = 1e-6;
 
 /** The step a time starts in. */
-const stepAt = (time: number, step: number) =>
-  Math.floor((time + step * EDGE) / step);
+const stepAt = (time: number, grid: StepGrid) =>
+  Math.floor((time - (grid.start ?? 0) + grid.step * EDGE) / grid.step);
+
+/** Where the step `step` starts. */
+const timeOf = (step: number, grid: StepGrid) =>
+  (grid.start ?? 0) + step * grid.step;
 
 /** Where a note sits on the grid: its row and its step, or nothing when no pad answers it or it starts past the last step. */
 function cellOf(note: Note, grid: StepGrid): StepCell | undefined {
   const row = grid.notes.indexOf(note.pitch);
-  const step = stepAt(note.start, grid.step);
+  const step = stepAt(note.start, grid);
   return row === -1 || step < 0 || step >= grid.steps
     ? undefined
     : { row, step };
@@ -82,7 +88,7 @@ export function stepsOf(notes: readonly Note[], grid: StepGrid): Steps {
       (chances[row] as number[])[step] = note.chance ?? 1;
       (shifts[row] as number[])[step] = Math.max(
         0,
-        note.start / grid.step - step
+        (note.start - timeOf(step, grid)) / grid.step
       );
     }
   }
@@ -109,7 +115,7 @@ const stepNote = (
   id: freshId(notes),
   length: grid.step,
   pitch: grid.notes[row] ?? 0,
-  start: step * grid.step,
+  start: timeOf(step, grid),
   velocity,
 });
 
@@ -152,7 +158,7 @@ export function withStepLevel(
     }
     if (level === "shift") {
       const shift = Math.min(MAX_SHIFT, Math.max(0, value));
-      return { ...note, start: (cell.step + shift) * grid.step };
+      return { ...note, start: timeOf(cell.step + shift, grid) };
     }
     return { ...note, [level]: Math.min(1, Math.max(0, value)) };
   });

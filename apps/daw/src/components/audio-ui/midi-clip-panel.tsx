@@ -35,6 +35,11 @@ import {
   PositionField,
 } from "@/components/audio-ui/clip-view";
 import {
+  DrumStepEditor,
+  type DrumStepPad,
+} from "@/components/audio-ui/drum-step-editor";
+import { Knob } from "@/components/audio-ui/knob";
+import {
   PianoRoll,
   PianoRollGrid,
   PianoRollKeys,
@@ -54,6 +59,7 @@ import {
   TimelineRangeHandle,
   TimelineRuler,
 } from "@/components/audio-ui/timeline";
+import type { ClipSwing } from "@/lib/arrangement";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;
@@ -94,6 +100,8 @@ export interface MidiClipView {
   folded: boolean;
   /** What the lane under the roll edits. */
   level: NoteLevel;
+  /** Whether a drum clip shows its steps, a row per pad, rather than its roll. @default true */
+  steps?: boolean;
 }
 
 /** How the panel opens. */
@@ -134,16 +142,28 @@ interface MidiClipPanelProps {
   onNotesChange: (notes: Note[]) => void;
   /** Fires once a change ends: the place to take an undo step. */
   onNotesCommitted?: () => void;
+  /** A pad's name was pressed in the steps: sound it. */
+  onPadOn?: (note: number) => void;
   /** Fires on every change of where the clip plays. Leave it out for a panel that only edits notes. */
   onRegionChange?: (region: MidiClipRegion) => void;
   /** A name was typed in the strip. */
   onRename?: (name: string) => void;
+  /** The swing was turned, or its step changed; `null` plays the clip straight. Leave it out for a panel without the Groove box. */
+  onSwingChange?: (swing: ClipSwing | null) => void;
   /** The pen, the roll's fold or the lane was changed. */
   onViewChange?: (view: MidiClipView) => void;
+  /**
+   * The pads of the drum rack that plays the clip, top to bottom: given, the
+   * clip opens on its steps, a row per pad, and the roll names its keys after
+   * them.
+   */
+  pads?: readonly DrumStepPad[];
   /** Where the clip plays in its source, and its loop. */
   region: MidiClipRegion;
   /** The grid notes are drawn and moved on, in seconds. @default a quarter of `beat` */
   step?: number;
+  /** The clip's swing: its off-beats played late. */
+  swing?: ClipSwing;
   /** The pen, the roll's fold and the lane, controlled: to keep them from clip to clip, or past a reload. */
   view?: MidiClipView;
 }
@@ -334,6 +354,94 @@ function LoopBox({
   );
 }
 
+const percent = (value: number) => `${Math.round(value * 100)}%`;
+
+/** The Groove box: for a drum clip, its steps or its roll; the swing, and the step it swings, an eighth or a sixteenth. */
+function GrooveBox({
+  onCommit,
+  onShowSteps,
+  onSwingChange,
+  steps,
+  swing,
+}: {
+  onCommit?: () => void;
+  /** Given for a drum clip: shows its steps, or with `false` its roll. */
+  onShowSteps?: (steps: boolean) => void;
+  onSwingChange?: (swing: ClipSwing | null) => void;
+  steps: boolean;
+  swing: ClipSwing | undefined;
+}) {
+  const division = swing?.division ?? 16;
+  const turn = useCallback(
+    (value: number | readonly number[]) => {
+      const amount = Array.isArray(value) ? (value[0] ?? 0) : Number(value);
+      onSwingChange?.(amount > 0 ? { amount, division } : null);
+    },
+    [division, onSwingChange]
+  );
+  const pickDivision = useCallback(
+    (event: MouseEvent<HTMLButtonElement>) => {
+      const next = Number(event.currentTarget.dataset.division) as 8 | 16;
+      if (swing) {
+        onSwingChange?.({ ...swing, division: next });
+        onCommit?.();
+      }
+    },
+    [onCommit, onSwingChange, swing]
+  );
+  const showSteps = useCallback(() => onShowSteps?.(true), [onShowSteps]);
+  const showRoll = useCallback(() => onShowSteps?.(false), [onShowSteps]);
+  return (
+    <ClipBox foldable id="midi:groove" title="Groove">
+      {onShowSteps ? (
+        <div className="grid grid-cols-2 gap-1">
+          <ClipToggle onClick={showSteps} pressed={steps}>
+            Steps
+          </ClipToggle>
+          <ClipToggle onClick={showRoll} pressed={!steps}>
+            Roll
+          </ClipToggle>
+        </div>
+      ) : null}
+      <div className="flex items-center gap-2">
+        <Knob
+          aria-label="Swing"
+          disabled={!onSwingChange}
+          formatValue={percent}
+          max={1}
+          min={0}
+          onValueChange={turn}
+          onValueCommitted={onCommit}
+          size="sm"
+          step={0.01}
+          value={swing?.amount ?? 0}
+          valueLabel="hidden"
+        />
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <span className="text-[10px] text-muted-foreground leading-tight">
+            Swing {percent(swing?.amount ?? 0)}
+          </span>
+          <div className="grid grid-cols-2 gap-1">
+            {[8, 16].map((each) => (
+              <ClipToggle
+                aria-label={`Swing the ${each === 8 ? "eighths" : "sixteenths"}`}
+                className="px-0"
+                data-division={each}
+                disabled={!(onSwingChange && swing)}
+                key={each}
+                onClick={pickDivision}
+                pressed={division === each}
+              >
+                {each === 8 ? "8th" : "16th"}
+              </ClipToggle>
+            ))}
+          </div>
+        </div>
+      </div>
+    </ClipBox>
+  );
+}
+
 /** The Notes box: transposing, the note operations and the velocity ramps, on the selected notes or every note. */
 function NotesBox({
   noteCount,
@@ -400,6 +508,211 @@ function NotesBox({
   );
 }
 
+/** The clip's piano roll: Draw at the top left, Fold above the keys, the loop brace on the ruler, and a velocity or chance lane under the notes. */
+function ClipRoll({
+  bars,
+  beat,
+  drawing,
+  folded,
+  length,
+  level,
+  loop,
+  name,
+  offset,
+  onNoteOff,
+  onNoteOn,
+  onNotesChange,
+  onNotesCommitted,
+  onRegionChange,
+  padNames,
+  selection,
+  setBrace,
+  setSelection,
+  span,
+  step,
+  toggleDrawing,
+  toggleFolded,
+  toggleLevel,
+  value,
+}: {
+  bars: readonly number[];
+  beat: number;
+  drawing: boolean;
+  folded: boolean;
+  length: number;
+  level: NoteLevel;
+  loop: readonly [number, number] | null;
+  name: string;
+  offset: number;
+  onNoteOff?: PianoRollPrimitive.Root.Props["onNoteOff"];
+  onNoteOn?: PianoRollPrimitive.Root.Props["onNoteOn"];
+  onNotesChange: (notes: Note[]) => void;
+  onNotesCommitted?: () => void;
+  onRegionChange?: (region: MidiClipRegion) => void;
+  padNames: Readonly<Record<number, string>> | undefined;
+  selection: readonly NoteId[];
+  setBrace: (range: readonly [number, number]) => void;
+  setSelection: (selection: readonly NoteId[]) => void;
+  span: number;
+  step: number;
+  toggleDrawing: () => void;
+  toggleFolded: () => void;
+  toggleLevel: () => void;
+  value: Note[];
+}) {
+  // Opens on the notes, or on middle C with none: once, each time it shows (key the panel by clip).
+  const viewportRef = useRef<HTMLDivElement>(null);
+  const centerRef = useRef(60);
+  centerRef.current =
+    value.length > 0
+      ? Math.round(
+          value.reduce((sum, note) => sum + note.pitch, 0) / value.length
+        )
+      : 60;
+  useEffect(() => {
+    // A frame later, once the roll has its rows laid out.
+    const frame = requestAnimationFrame(() => {
+      const viewport = viewportRef.current;
+      if (!viewport) {
+        return;
+      }
+      const row = (MAX_PITCH - centerRef.current) / (MAX_PITCH - MIN_PITCH + 1);
+      viewport.scrollTop =
+        row * viewport.scrollHeight - viewport.clientHeight / 2;
+    });
+    return () => cancelAnimationFrame(frame);
+  }, []);
+  return (
+    <Timeline
+      className="min-h-0 min-w-0 flex-1"
+      duration={span}
+      maxZoom={MAX_STEP_PX / step}
+      snapStep={step}
+    >
+      <PianoRoll
+        drawStyle="paint"
+        folded={folded}
+        maxPitch={MAX_PITCH}
+        minPitch={MIN_PITCH}
+        mode={drawing ? "draw" : "select"}
+        onNoteOff={onNoteOff}
+        onNoteOn={onNoteOn}
+        onSelectionChange={setSelection}
+        onValueChange={onNotesChange}
+        onValueCommitted={onNotesCommitted}
+        selection={selection}
+        // Its own height, inline: a page that stretches the rolls it shows to fill it leaves this one be.
+        style={ROLL_SIZE}
+        value={value}
+      >
+        <PianoRollStrip
+          className="border-b"
+          lead={
+            <Button
+              aria-pressed={drawing}
+              className="h-full w-full rounded-none text-[10px] uppercase tracking-wide"
+              onClick={toggleDrawing}
+              size="sm"
+              type="button"
+              variant={drawing ? "default" : "ghost"}
+            >
+              Draw
+            </Button>
+          }
+        >
+          <TimelineNavigator className="rounded-none" />
+        </PianoRollStrip>
+        <PianoRollViewport ref={viewportRef}>
+          <PianoRollStrip
+            className="border-b"
+            lead={
+              <Button
+                aria-pressed={folded}
+                className="h-full w-full rounded-none text-[10px] uppercase tracking-wide"
+                onClick={toggleFolded}
+                size="sm"
+                type="button"
+                variant={folded ? "default" : "ghost"}
+              >
+                Fold
+              </Button>
+            }
+            sticky="top"
+          >
+            {/* The loop brace, or what the clip plays: drag it, or its ends. */}
+            <TimelineLane className="h-5 bg-background">
+              <TimelineRange
+                aria-label={loop ? "Loop" : "Played"}
+                onValueChange={onRegionChange ? setBrace : undefined}
+                onValueCommitted={onNotesCommitted}
+                value={loop ?? [offset, offset + length]}
+              >
+                <TimelineRangeHandle
+                  aria-label={loop ? "Loop start" : "Clip start"}
+                  edge="start"
+                />
+                <TimelineRangeHandle
+                  aria-label={loop ? "Loop end" : "Clip end"}
+                  edge="end"
+                />
+              </TimelineRange>
+            </TimelineLane>
+            <TimelineRuler
+              aria-label="Position in the clip"
+              className="h-4.5 border-b-0 text-[10px]"
+            >
+              {bars.map((at, index) => (
+                <TimelineMark className="ps-1" key={at} value={at}>
+                  {index + 1}
+                </TimelineMark>
+              ))}
+              <PianoRollSelectionSpan className="bg-primary/25">
+                <PianoRollStretchHandle edge="start" />
+                <PianoRollStretchHandle edge="end" />
+              </PianoRollSelectionSpan>
+            </TimelineRuler>
+          </PianoRollStrip>
+          <PianoRollStrip
+            className="flex-1"
+            lead={<PianoRollKeys names={padNames} />}
+          >
+            <PianoRollGrid
+              accentStep={beat}
+              aria-label={`${name} notes`}
+              gridStep={step}
+            />
+          </PianoRollStrip>
+          <PianoRollStrip
+            className="border-t"
+            lead={
+              <>
+                <Button
+                  aria-label={`Lane: ${level}, show ${level === "velocity" ? "chance" : "velocity"}`}
+                  className="h-5 w-full shrink-0 rounded-none text-[9px] uppercase tracking-wide"
+                  onClick={toggleLevel}
+                  size="sm"
+                  type="button"
+                  variant="ghost"
+                >
+                  {level === "velocity" ? "Vel" : "Chance"}
+                </Button>
+                <PianoRollVelocityScale level={level} />
+              </>
+            }
+            sticky="bottom"
+          >
+            <PianoRollVelocity
+              accentStep={beat}
+              gridStep={step}
+              level={level}
+            />
+          </PianoRollStrip>
+        </PianoRollViewport>
+      </PianoRoll>
+    </Timeline>
+  );
+}
+
 /**
  * The clip view of an arrangement's MIDI clip, as a DAW's: a Clip box (its
  * switch and name, where it starts and ends in its source or with Loop on
@@ -430,10 +743,14 @@ function MidiClipPanel({
   onNoteOn,
   onNotesChange,
   onNotesCommitted,
+  onPadOn,
   onRegionChange,
   onRename,
+  onSwingChange,
+  pads,
   region,
   step = beat / 4,
+  swing,
 }: MidiClipPanelProps) {
   const beatsPerBar = Math.round(bar / beat);
   const meter = useMemo(() => ({ bar, beatsPerBar }), [bar, beatsPerBar]);
@@ -463,6 +780,20 @@ function MidiClipPanel({
   const toggleLevel = useCallback(
     () => changeView({ level: level === "velocity" ? "chance" : "velocity" }),
     [changeView, level]
+  );
+  // A drum clip opens on its steps, a row per pad, unless its roll was asked for.
+  const drums = pads && pads.length > 0 ? pads : undefined;
+  const showSteps = Boolean(drums) && current.steps !== false;
+  const setShowSteps = useCallback(
+    (steps: boolean) => changeView({ steps }),
+    [changeView]
+  );
+  const padNames = useMemo(
+    () =>
+      drums
+        ? Object.fromEntries(drums.map((pad) => [pad.note, pad.name]))
+        : undefined,
+    [drums]
   );
   const value = useMemo(() => [...notes], [notes]);
   const bars = useMemo(
@@ -606,29 +937,6 @@ function MidiClipPanel({
     onNotesCommitted?.();
   }, [loop, notes, onNotesChange, onNotesCommitted, setRegion, sourceLength]);
 
-  // Opens on the notes, or on middle C with none: once, when it mounts (key it by clip).
-  const viewportRef = useRef<HTMLDivElement>(null);
-  const centerRef = useRef(60);
-  centerRef.current =
-    notes.length > 0
-      ? Math.round(
-          notes.reduce((sum, note) => sum + note.pitch, 0) / notes.length
-        )
-      : 60;
-  useEffect(() => {
-    // A frame later, once the roll has its rows laid out.
-    const frame = requestAnimationFrame(() => {
-      const viewport = viewportRef.current;
-      if (!viewport) {
-        return;
-      }
-      const row = (MAX_PITCH - centerRef.current) / (MAX_PITCH - MIN_PITCH + 1);
-      viewport.scrollTop =
-        row * viewport.scrollHeight - viewport.clientHeight / 2;
-    });
-    return () => cancelAnimationFrame(frame);
-  }, []);
-
   const loopSpan = loop ? loop[1] - loop[0] : length;
   const held = useMemo(() => {
     const ids = new Set<NoteId>(selection);
@@ -693,6 +1001,15 @@ function MidiClipPanel({
             step={step}
             stretch={loopSpan}
           />
+          {onSwingChange || drums ? (
+            <GrooveBox
+              onCommit={onNotesCommitted}
+              onShowSteps={drums ? setShowSteps : undefined}
+              onSwingChange={onSwingChange}
+              steps={showSteps}
+              swing={swing}
+            />
+          ) : null}
           <NotesBox
             noteCount={notes.length}
             onEdit={handleNoteEdit}
@@ -713,130 +1030,47 @@ function MidiClipPanel({
       onRename={onRename}
       status={status}
     >
-      <Timeline
-        className="min-h-0 min-w-0 flex-1"
-        duration={span}
-        maxZoom={MAX_STEP_PX / step}
-        snapStep={step}
-      >
-        <PianoRoll
-          drawStyle="paint"
+      {drums && showSteps ? (
+        <DrumStepEditor
+          beatEvery={Math.max(1, Math.round(beat / step))}
+          className="flex-1"
+          notes={notes}
+          onAudition={onPadOn}
+          onNotesChange={onNotesChange}
+          onNotesCommitted={onNotesCommitted}
+          pads={drums}
+          start={loop?.[0] ?? offset}
+          step={step}
+          steps={Math.max(1, Math.round(loopSpan / step))}
+        />
+      ) : (
+        <ClipRoll
+          bars={bars}
+          beat={beat}
+          drawing={drawing}
           folded={folded}
-          maxPitch={MAX_PITCH}
-          minPitch={MIN_PITCH}
-          mode={drawing ? "draw" : "select"}
+          length={length}
+          level={level}
+          loop={loop}
+          name={name}
+          offset={offset}
           onNoteOff={onNoteOff}
           onNoteOn={onNoteOn}
-          onSelectionChange={setSelection}
-          onValueChange={onNotesChange}
-          onValueCommitted={onNotesCommitted}
+          onNotesChange={onNotesChange}
+          onNotesCommitted={onNotesCommitted}
+          onRegionChange={onRegionChange}
+          padNames={padNames}
           selection={selection}
-          // Its own height, inline: a page that stretches the rolls it shows to fill it leaves this one be.
-          style={ROLL_SIZE}
+          setBrace={setBrace}
+          setSelection={setSelection}
+          span={span}
+          step={step}
+          toggleDrawing={toggleDrawing}
+          toggleFolded={toggleFolded}
+          toggleLevel={toggleLevel}
           value={value}
-        >
-          <PianoRollStrip
-            className="border-b"
-            lead={
-              <Button
-                aria-pressed={drawing}
-                className="h-full w-full rounded-none text-[10px] uppercase tracking-wide"
-                onClick={toggleDrawing}
-                size="sm"
-                type="button"
-                variant={drawing ? "default" : "ghost"}
-              >
-                Draw
-              </Button>
-            }
-          >
-            <TimelineNavigator className="rounded-none" />
-          </PianoRollStrip>
-          <PianoRollViewport ref={viewportRef}>
-            <PianoRollStrip
-              className="border-b"
-              lead={
-                <Button
-                  aria-pressed={folded}
-                  className="h-full w-full rounded-none text-[10px] uppercase tracking-wide"
-                  onClick={toggleFolded}
-                  size="sm"
-                  type="button"
-                  variant={folded ? "default" : "ghost"}
-                >
-                  Fold
-                </Button>
-              }
-              sticky="top"
-            >
-              {/* The loop brace, or what the clip plays: drag it, or its ends. */}
-              <TimelineLane className="h-5 bg-background">
-                <TimelineRange
-                  aria-label={loop ? "Loop" : "Played"}
-                  onValueChange={onRegionChange ? setBrace : undefined}
-                  onValueCommitted={onNotesCommitted}
-                  value={loop ?? [offset, offset + length]}
-                >
-                  <TimelineRangeHandle
-                    aria-label={loop ? "Loop start" : "Clip start"}
-                    edge="start"
-                  />
-                  <TimelineRangeHandle
-                    aria-label={loop ? "Loop end" : "Clip end"}
-                    edge="end"
-                  />
-                </TimelineRange>
-              </TimelineLane>
-              <TimelineRuler
-                aria-label="Position in the clip"
-                className="h-4.5 border-b-0 text-[10px]"
-              >
-                {bars.map((at, index) => (
-                  <TimelineMark className="ps-1" key={at} value={at}>
-                    {index + 1}
-                  </TimelineMark>
-                ))}
-                <PianoRollSelectionSpan className="bg-primary/25">
-                  <PianoRollStretchHandle edge="start" />
-                  <PianoRollStretchHandle edge="end" />
-                </PianoRollSelectionSpan>
-              </TimelineRuler>
-            </PianoRollStrip>
-            <PianoRollStrip className="flex-1" lead={<PianoRollKeys />}>
-              <PianoRollGrid
-                accentStep={beat}
-                aria-label={`${name} notes`}
-                gridStep={step}
-              />
-            </PianoRollStrip>
-            <PianoRollStrip
-              className="border-t"
-              lead={
-                <>
-                  <Button
-                    aria-label={`Lane: ${level}, show ${level === "velocity" ? "chance" : "velocity"}`}
-                    className="h-5 w-full shrink-0 rounded-none text-[9px] uppercase tracking-wide"
-                    onClick={toggleLevel}
-                    size="sm"
-                    type="button"
-                    variant="ghost"
-                  >
-                    {level === "velocity" ? "Vel" : "Chance"}
-                  </Button>
-                  <PianoRollVelocityScale level={level} />
-                </>
-              }
-              sticky="bottom"
-            >
-              <PianoRollVelocity
-                accentStep={beat}
-                gridStep={step}
-                level={level}
-              />
-            </PianoRollStrip>
-          </PianoRollViewport>
-        </PianoRoll>
-      </Timeline>
+        />
+      )}
     </ClipView>
   );
 }

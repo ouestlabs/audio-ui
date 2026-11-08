@@ -93,3 +93,12 @@ describe("filledEvery", () => {
     );
   });
 });
+
+describe("a grid from the loop's start", () => {
+  test("counts its steps from there, and puts a new note there", () => {
+    const late: StepGrid = { ...grid, start: 1 };
+    expect(stepsOf([note(1, 36, 1.125)], late).pattern[0]?.[1]).toBe(true);
+    const notes = withStep([], late, { row: 1, step: 2 }, true);
+    expect(notes[0]?.start).toBe(1.25);
+  });
+});

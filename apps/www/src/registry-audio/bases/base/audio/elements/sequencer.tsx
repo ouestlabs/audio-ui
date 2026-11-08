@@ -1,16 +1,21 @@
 "use client";
 
 import { Sequencer as SequencerPrimitive } from "@audio-ui/react";
+import type { ReactNode } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 
 type SequencerProps = Omit<SequencerPrimitive.Root.Props, "className"> & {
   className?: string;
   /** Names each row, such as "Kick": it labels the row for assistive technology and is written beside it. */
   rowLabels?: readonly string[];
+  /** What sits beside a row in place of its written name, such as a button that sounds it: the row keeps its name for assistive technology. */
+  renderRowLabel?: (row: number) => ReactNode;
   /** Highlights every `beatEvery` steps, such as 4 for a beat in sixteenths. */
   beatEvery?: number;
   /** Draws a bar under each row to set how loud every step plays: press or drag across it; Alt + click returns a step to full. */
   showVelocity?: boolean;
+  /** `sm` draws short steps and a thin bar under them, so many rows fit. @default "default" */
+  size?: "default" | "sm";
 };
 
 /**
@@ -24,8 +29,10 @@ type SequencerProps = Omit<SequencerPrimitive.Root.Props, "className"> & {
 function Sequencer({
   beatEvery = 4,
   className,
+  renderRowLabel,
   rowLabels,
   showVelocity = false,
+  size = "default",
   ...props
 }: SequencerProps) {
   return (
@@ -52,14 +59,15 @@ function Sequencer({
             }
             index={row}
           >
-            {rowLabels ? (
-              <span
-                aria-hidden="true"
-                className="max-w-24 truncate text-muted-foreground text-xs"
-              >
-                {rowLabels[row]}
-              </span>
-            ) : null}
+            {renderRowLabel?.(row) ??
+              (rowLabels ? (
+                <span
+                  aria-hidden="true"
+                  className="max-w-24 truncate text-muted-foreground text-xs"
+                >
+                  {rowLabels[row]}
+                </span>
+              ) : null)}
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <div className="grid grid-flow-col auto-cols-fr gap-1">
                 <SequencerPrimitive.Cells>
@@ -67,7 +75,8 @@ function Sequencer({
                     <SequencerPrimitive.Cell
                       aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1}`}
                       className={cn(
-                        "cn-sequencer-cell h-9 min-w-0 cursor-pointer touch-none outline-none",
+                        "cn-sequencer-cell min-w-0 cursor-pointer touch-none outline-none",
+                        size === "sm" ? "h-6" : "h-9",
                         step % beatEvery === 0 && "cn-sequencer-cell-beat"
                       )}
                       step={step}
@@ -81,7 +90,10 @@ function Sequencer({
                     {(step) => (
                       <SequencerPrimitive.Velocity
                         aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1} velocity`}
-                        className="cn-sequencer-velocity group/velocity relative h-8 min-w-0 cursor-ns-resize touch-none outline-none"
+                        className={cn(
+                          "cn-sequencer-velocity group/velocity relative min-w-0 cursor-ns-resize touch-none outline-none",
+                          size === "sm" ? "h-3" : "h-8"
+                        )}
                         step={step}
                       >
                         <span className="cn-sequencer-velocity-fill absolute inset-x-0 bottom-0 h-[calc(var(--sequencer-velocity)*100%)]" />

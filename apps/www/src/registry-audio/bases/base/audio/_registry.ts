@@ -1352,10 +1352,30 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["sequencer", "pad"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A drum clip's notes as steps, a row per pad of the drum rack that plays them: press or paint steps, sound a pad from its name, and fill a row every 2, 4 or 8 steps. The notes stay what the clip keeps, so the piano roll shows the same ones, with their velocity and chance.",
+    files: [
+      {
+        path: "audio/elements/drum-step-editor.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "drum-step-editor",
+    registryDependencies: [
+      "@audio-ui/drum-steps",
+      "@audio-ui/sequencer",
+      "@shadcn/button",
+      "@shadcn/dropdown-menu",
+    ],
+    type: "registry:ui",
+  },
+  {
     categories: ["timeline", "piano"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's MIDI clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2, Dupl. Loop) and Notes (transpose, invert, reverse, legato, ×2, ÷2, humanize, velocity ramps) boxes, the last two foldable, beside its piano roll (Draw, Fold, the loop brace on the ruler, keys, grid, a velocity or chance lane). Notes are drawn a grid step at a time.",
+      "The clip view of an arrangement's MIDI clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2, Dupl. Loop), Groove (the swing, on the eighths or the sixteenths, and for a drum clip its steps or its roll) and Notes (transpose, invert, reverse, legato, ×2, ÷2, humanize, velocity ramps) boxes, beside its piano roll (Draw, Fold, the loop brace on the ruler, keys, grid, a velocity or chance lane), or for a drum clip its steps, a row per pad. Notes are drawn a grid step at a time.",
     files: [
       {
         path: "audio/panels/midi-clip-panel.tsx",
@@ -1364,7 +1384,10 @@ export const audio: RegistryItem[] = [
     ],
     name: "midi-clip-panel",
     registryDependencies: [
+      "@audio-ui/arrangement",
       "@audio-ui/clip-view",
+      "@audio-ui/drum-step-editor",
+      "@audio-ui/knob",
       "@audio-ui/piano-roll",
       "@audio-ui/timeline",
       "@shadcn/button",
@@ -1574,6 +1597,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "arrangement-view",
     registryDependencies: [
+      "@audio-ui/drum-kit",
       "@audio-ui/arranged-clip",
       "@audio-ui/arrangement",
       "@audio-ui/arrangement-engine",

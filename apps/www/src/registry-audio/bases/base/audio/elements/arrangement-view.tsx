@@ -111,6 +111,7 @@ import {
   trackBlock,
   trackDepth,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
+import { drumKit } from "@/registry-audio/bases/base/lib/drum-kit";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 type Engine = ReturnType<typeof useArrangementEngine>;
@@ -863,6 +864,29 @@ export function ArrangementView({
     () => dispatch({ kind: "return", type: "add-track" }),
     [dispatch]
   );
+  // A drum track: a MIDI track with a drum rack of a Drum Synth on every pad, as one step of undo.
+  const addDrums = useCallback(() => {
+    const taken = new Set(tracks.map((track) => track.id));
+    let count = 1;
+    while (taken.has(`drums-${count}`)) {
+      count += 1;
+    }
+    const id = `drums-${count}`;
+    dispatch({
+      commands: [
+        { id, kind: "midi", name: "Drums", type: "add-track" },
+        {
+          device: DRUM_RACK_DEVICE,
+          instrument: true,
+          rack: drumKit(),
+          state: {},
+          track: id,
+          type: "add-device",
+        },
+      ],
+      type: "batch",
+    });
+  }, [dispatch, tracks]);
   const anySolo = tracks.some((track) => mixOf(track).soloed);
   const readingOwn = reading.find(({ track }) => track === NEW_TRACK);
   const headClick = useClipHeadClick(
@@ -974,6 +998,7 @@ export function ArrangementView({
                   {shortcuts?.["midi-track"]}
                 </DropdownMenuShortcut>
               </DropdownMenuItem>
+              <DropdownMenuItem onClick={addDrums}>Drum track</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={addReturn}>
                 Return track
