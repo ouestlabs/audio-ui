@@ -71,6 +71,8 @@ export interface Mixer {
    * clock, in a straight line from where they were: what automation plays.
    */
   glide: (id: string, mix: { gain: number; pan: number }, at: number) => void;
+  /** Moves the main track's volume and pan as `glide` moves a channel's. */
+  glideMain: (mix: { gain: number; pan: number }, at: number) => void;
   /** How many frames late the whole mix comes out: what its delay compensation adds. */
   readonly latency: number;
   readonly main: MixerStrip;
@@ -233,6 +235,23 @@ export function createMixer(
 
   const main = channel(destination);
 
+  /** A channel's volume and pan to where they are at `at`, in a straight line from where they were. */
+  const glide = (
+    target: Channel,
+    { gain, pan }: { gain: number; pan: number },
+    at: number
+  ) => {
+    const [left, right] = panGains(pan);
+    for (const [param, value] of [
+      [target.volume.gain, Math.max(0, gain)],
+      [target.left.gain, left],
+      [target.right.gain, right],
+    ] as const) {
+      target.last.set(param, value);
+      param.linearRampToValueAtTime(value, at);
+    }
+  };
+
   const remove = (id: string) => {
     const gone = channels.get(id);
     if (!gone) {
@@ -368,21 +387,13 @@ export function createMixer(
         node.disconnect();
       }
     },
-    glide: (id, { gain, pan }, at) => {
+    glide: (id, levels, at) => {
       const target = channels.get(id);
-      if (!target) {
-        return;
-      }
-      const [left, right] = panGains(pan);
-      for (const [param, value] of [
-        [target.volume.gain, Math.max(0, gain)],
-        [target.left.gain, left],
-        [target.right.gain, right],
-      ] as const) {
-        target.last.set(param, value);
-        param.linearRampToValueAtTime(value, at);
+      if (target) {
+        glide(target, levels, at);
       }
     },
+    glideMain: (levels, at) => glide(main, levels, at),
     get latency() {
       return latency;
     },

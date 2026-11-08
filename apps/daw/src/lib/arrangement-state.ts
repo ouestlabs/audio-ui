@@ -2346,19 +2346,16 @@ function changeAutomation(
   parameter: AutomatedParameter,
   points: readonly Breakpoint[] | null
 ): ArrangementState {
-  return burst(state, (doc) => ({
-    ...doc,
-    tracks: doc.tracks.map((track) => {
-      if (track.id !== trackId) {
-        return track;
-      }
+  // A return's envelope and the main track's too, not only a track's.
+  return burst(state, (doc) =>
+    withTrack(doc, trackId, (track) => {
       const { [parameter]: _cleared, ...kept } = track.automation ?? {};
       return {
         ...track,
         automation: points ? { ...kept, [parameter]: points } : kept,
       };
-    }),
-  }));
+    })
+  );
 }
 
 const sameTempo = (a: Tempo, b: Tempo) =>

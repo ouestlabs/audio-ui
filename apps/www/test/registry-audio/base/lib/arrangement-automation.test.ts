@@ -172,3 +172,25 @@ describe("automation in time", () => {
     ]);
   });
 });
+
+describe("envelopes drawn", () => {
+  test("a return's envelope and the main track's are written, not only a track's", () => {
+    let state = createArrangementState({
+      colors: 5,
+      duration: 10,
+      initialReturns: [{ color: 0, id: "r", name: "A Reverb" }],
+      initialTracks: [],
+      tempo: { beatUnit: 4, beatsPerBar: 4, bpm: 120 },
+    });
+    for (const trackId of ["r", state.doc.main.id]) {
+      state = apply(state, {
+        parameter: "volume",
+        points: ramp,
+        trackId,
+        type: "change-automation",
+      });
+    }
+    expect(state.doc.returns[0]?.automation?.volume).toEqual(ramp);
+    expect(state.doc.main.automation?.volume).toEqual(ramp);
+  });
+});

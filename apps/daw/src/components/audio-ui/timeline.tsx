@@ -666,6 +666,7 @@ function TimelineTrackControls({
   onUngroup,
   meter,
   selected,
+  switches = true,
   trackId,
 }: {
   /** Whether the track is armed to record. */
@@ -704,6 +705,8 @@ function TimelineTrackControls({
   /** `additive` when Shift, Cmd or Ctrl is held: add the track to the tracks picked. */
   onSelect: (trackId: string, additive: boolean) => void;
   selected: boolean;
+  /** Whether the header has its solo and mute. The main track has neither: everything plays through it. Defaults to `true`. */
+  switches?: boolean;
   trackId: string;
 }) {
   const handleMute = useCallback(
@@ -873,43 +876,45 @@ function TimelineTrackControls({
             </button>
           )}
           {/* Its switches, one stop of Tab and the arrows between them: each holds its state, pressed or not. */}
-          <ToggleGroup
-            aria-label={`${name} switches`}
-            multiple
-            size="sm"
-            spacing={1}
-            value={switchesOn(mix, armed)}
-          >
-            <ToggleGroupItem
-              aria-label={`Solo ${name}`}
-              className={cn(TRACK_SWITCH, SWITCH_TONES.solo)}
-              onClick={handleSolo}
-              value="solo"
+          {switches ? (
+            <ToggleGroup
+              aria-label={`${name} switches`}
+              multiple
+              size="sm"
+              spacing={1}
+              value={switchesOn(mix, armed)}
             >
-              S
-            </ToggleGroupItem>
-            <ToggleGroupItem
-              aria-label={`Mute ${name}`}
-              className={cn(TRACK_SWITCH, SWITCH_TONES.mute)}
-              onClick={handleMute}
-              value="mute"
-            >
-              M
-            </ToggleGroupItem>
-            {onArm ? (
               <ToggleGroupItem
-                aria-label={`Arm ${name}`}
-                className={TRACK_SWITCH}
-                onClick={handleArm}
-                value="arm"
+                aria-label={`Solo ${name}`}
+                className={cn(TRACK_SWITCH, SWITCH_TONES.solo)}
+                onClick={handleSolo}
+                value="solo"
               >
-                {/* A light, as on a console: lit red while the track is armed, a dim dot when not. */}
-                <span aria-hidden="true" className="contents">
-                  <Led label="Armed" on={Boolean(armed)} tone="destructive" />
-                </span>
+                S
               </ToggleGroupItem>
-            ) : null}
-          </ToggleGroup>
+              <ToggleGroupItem
+                aria-label={`Mute ${name}`}
+                className={cn(TRACK_SWITCH, SWITCH_TONES.mute)}
+                onClick={handleMute}
+                value="mute"
+              >
+                M
+              </ToggleGroupItem>
+              {onArm ? (
+                <ToggleGroupItem
+                  aria-label={`Arm ${name}`}
+                  className={TRACK_SWITCH}
+                  onClick={handleArm}
+                  value="arm"
+                >
+                  {/* A light, as on a console: lit red while the track is armed, a dim dot when not. */}
+                  <span aria-hidden="true" className="contents">
+                    <Led label="Armed" on={Boolean(armed)} tone="destructive" />
+                  </span>
+                </ToggleGroupItem>
+              ) : null}
+            </ToggleGroup>
+          ) : null}
         </div>
         {compact || !output ? null : (
           <div className="flex h-7 items-center gap-6 pe-1">

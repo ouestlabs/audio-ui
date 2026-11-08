@@ -610,9 +610,8 @@ export async function createArrangementEngine(
         soloed: mix.soloed,
       };
     };
-    const main = mixOf(current.main);
     return {
-      main: { gain: main.gain, pan: main.pan },
+      main: levels(current.main),
       returns: current.returns.map((track) => ({
         ...strip(track),
         pre: Boolean(track.pre),
@@ -729,11 +728,17 @@ export async function createArrangementEngine(
       return;
     }
     const at = arrangementFrame(state, to) / rate;
-    mixer.glide(
-      track.id,
-      mixAt(track, mixOf(track), at / doc.duration, overrides[track.id]),
-      to / rate
+    const mix = mixAt(
+      track,
+      mixOf(track),
+      at / doc.duration,
+      overrides[track.id]
     );
+    if (track === doc.main) {
+      mixer.glideMain(mix, to / rate);
+    } else {
+      mixer.glide(track.id, mix, to / rate);
+    }
   };
 
   /** The metronome's clicks in frames of the arrangement, on the bars of the signatures in force. */
@@ -787,6 +792,9 @@ export async function createArrangementEngine(
     scheduleClicks(from, to);
     for (const track of doc.tracks) {
       scheduleNotes(track, from, to - from);
+    }
+    // The returns' volume and pan and the main track's follow their envelopes too.
+    for (const track of allTracks(doc)) {
       scheduleAutomation(track, to);
     }
   };

@@ -349,7 +349,7 @@ The state is a plain value and a change is a command of `ArrangementCommand`, wh
 
 ### The arrangement view
 
-`arrangement-view` (`npx shadcn@latest add @audio-ui/arrangement-view`) is the whole arrangement as one controlled element: the loop, the ruler, the locators and time signatures, a row per track with its header, meter, automation and clips, the return and group tracks, and the row under the last track that takes dropped files. It is the view the preview above and the workstation draw their tracks with. State comes in through the hooks of the parts below, and every change goes out as a command or a callback, so it runs over an engine of your own.
+`arrangement-view` (`npx shadcn@latest add @audio-ui/arrangement-view`) is the whole arrangement as one controlled element: the loop, the ruler, the locators and time signatures, a row per track with its header, meter, automation and clips, the return and group tracks, the main track last, and the row under the last track that takes dropped files. Everything plays through the main track: its row picks it, so its devices show, and it takes a device dropped on it, its volume, its pan and its envelopes, with no solo, mute, rename or delete. It is the view the preview above and the workstation draw their tracks with. State comes in through the hooks of the parts below, and every change goes out as a command or a callback, so it runs over an engine of your own.
 
 ```tsx
 <ArrangementView
@@ -480,6 +480,7 @@ A track can sit in a group track: it names it in `group`, and a group's tracks f
 - A group moves, is duplicated and is removed with its tracks; a track moved among a group's tracks joins it.
 - `TimelineTrackControls` puts "Group" and "Ungroup" in a track's menu when given `onGroup` and `onUngroup` (give `onUngroup` to a group track only).
 - `TimelineTrackControls` leaves out its gain and pan when given `output={false}`: for a track with no output, such as a MIDI track with no instrument.
+- `TimelineTrackControls` leaves out its solo and mute when given `switches={false}`: for the main track, which everything plays through.
 - `unfoldedTracks` (from `useArrangement`) leaves out the tracks of a folded group. `trackBlock` and `trackDepth` give a group's tracks and how deep a track sits, to indent its header.
 - `ArrangedGroupPreview`, from `arranged-clip`, draws on a group's lane what its tracks play.
 

@@ -315,8 +315,8 @@ export function Daw({
   );
   // Automation mode, and the automated gains and pans moved by hand, which play their mix until enabled again.
   const automatedTracks = useMemo(
-    () => [...doc.tracks, ...doc.returns],
-    [doc.returns, doc.tracks]
+    () => [...doc.tracks, ...doc.returns, doc.main],
+    [doc.main, doc.returns, doc.tracks]
   );
   const automation = useTrackAutomation({ dispatch, tracks: automatedTracks });
   const [metronome, setMetronome] = useSavedState("metronome", false);
