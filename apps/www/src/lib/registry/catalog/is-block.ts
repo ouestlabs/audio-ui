@@ -28,6 +28,7 @@ const MIDI = new Set([
   "block-organ",
   "block-string-machine",
   "block-tape-keys",
+  "block-guitar",
   "block-poly-synth",
   "block-sampler",
   "piano-size-default-demo",

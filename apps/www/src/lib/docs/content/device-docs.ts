@@ -10,6 +10,7 @@ import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-devic
 import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
 import { fmSynthDevice } from "@/registry-audio/bases/base/lib/fm-synth-device";
 import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
+import { guitarDevice } from "@/registry-audio/bases/base/lib/guitar-device";
 import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import { midSideDevice } from "@/registry-audio/bases/base/lib/mid-side-device";
 import { monoSynthDevice } from "@/registry-audio/bases/base/lib/mono-synth-device";
@@ -55,6 +56,7 @@ export const DEVICE_DOCS = {
   organ: organDevice,
   "string-machine": stringMachineDevice,
   "tape-keys": tapeKeysDevice,
+  guitar: guitarDevice,
   sampler: samplerDevice,
   redux: reduxDevice,
   reverb: reverbDevice,

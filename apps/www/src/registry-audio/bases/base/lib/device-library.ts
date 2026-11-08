@@ -30,6 +30,8 @@ import { fmSynthDevice } from "@/registry-audio/bases/base/lib/fm-synth-device";
 import { createFmSynthEngine } from "@/registry-audio/bases/base/lib/fm-synth-engine";
 import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
 import { createGateEngine } from "@/registry-audio/bases/base/lib/gate-engine";
+import { guitarDevice } from "@/registry-audio/bases/base/lib/guitar-device";
+import { createGuitarEngine } from "@/registry-audio/bases/base/lib/guitar-engine";
 import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import { createLimiterEngine } from "@/registry-audio/bases/base/lib/limiter-engine";
 import { midSideDevice } from "@/registry-audio/bases/base/lib/mid-side-device";
@@ -137,6 +139,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(organDevice, createOrganEngine, "Instruments"),
   entry(stringMachineDevice, createStringMachineEngine, "Instruments"),
   entry(tapeKeysDevice, createTapeKeysEngine, "Instruments"),
+  entry(guitarDevice, createGuitarEngine, "Instruments"),
   entry(fmSynthDevice, createFmSynthEngine, "Instruments"),
   entry(samplerDevice, createSamplerEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),

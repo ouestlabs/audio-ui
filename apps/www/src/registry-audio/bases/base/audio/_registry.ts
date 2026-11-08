@@ -24,6 +24,7 @@ const DEVICES = [
   "organ",
   "string-machine",
   "tape-keys",
+  "guitar",
   "multiband",
   "overdrive",
   "phaser",
@@ -470,6 +471,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/organ-panel",
       "@audio-ui/string-machine-panel",
       "@audio-ui/tape-keys-panel",
+      "@audio-ui/guitar-panel",
       "@audio-ui/sampler-panel",
       "@audio-ui/electric-piano-panel",
       "@audio-ui/redux-panel",
@@ -606,6 +608,26 @@ export const audio: RegistryItem[] = [
       "@audio-ui/piano",
       "@audio-ui/tape-keys-device",
       "@shadcn/toggle-group",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "piano"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "The guitar's face: the string's tone, decay and palm mute, the body and the volume, and a keyboard from the open low E up three octaves, controlled, with no audio in it.",
+    files: [
+      {
+        path: "audio/panels/guitar-panel.tsx",
+        target: "components/audio-ui/devices/guitar/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "guitar-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/piano",
+      "@audio-ui/guitar-device",
     ],
     type: "registry:ui",
   },

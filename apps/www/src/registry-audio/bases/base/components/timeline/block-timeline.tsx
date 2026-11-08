@@ -83,6 +83,7 @@ import {
   type SongPart,
   type SongScorePart,
 } from "@/registry-audio/bases/base/lib/demo-song";
+import { guitarDevice } from "@/registry-audio/bases/base/lib/guitar-device";
 import {
   monoSynthDevice,
   monoSynthPreset,
@@ -93,7 +94,6 @@ import {
   stringMachineDevice,
   stringMachinePreset,
 } from "@/registry-audio/bases/base/lib/string-machine-device";
-import { tapeKeysDevice } from "@/registry-audio/bases/base/lib/tape-keys-device";
 import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
@@ -185,19 +185,19 @@ const device = <State extends object>(
 const REVERB = "return-1";
 
 /**
- * The song as a project: its drums and its strummed guitar as audio tracks,
- * its bass, its organ, its lead and its pad as MIDI tracks played by the
+ * The song as a project: its drums as an audio track, and its bass, its
+ * organ, its guitar, its lead and its pad as MIDI tracks played by the
  * registry's instruments (a mono synth's sub bass, a tonewheel organ on three
- * drawbars, a tape keyboard's flutes on the lead and a string machine's
- * swell), a vibe in vibrato on the guitar's chain, and a reverb on a return
- * track the organ, the guitar, the lead and the pad send to.
+ * drawbars, a plucked guitar through a vibe in vibrato, and a string machine
+ * on the lead, silent for now, and on the pad), and a reverb on a return
+ * track the organ, the guitar, the lead and the pad send to. The drums and
+ * the bass lead the mix; the organ and the pad lie under them.
  */
 const TRACKS: ArrangementTrack[] = [
   {
     color: 0,
     id: "drums",
-    // Its kick is the loudest hit of the song: under unity, the drums sit back and the main keeps its headroom.
-    mix: { ...UNITY_MIX, gain: 10 ** (-4 / 20) },
+    mix: { ...UNITY_MIX, gain: 10 ** (-3 / 20) },
     name: "Drums",
   },
   {
@@ -212,6 +212,7 @@ const TRACKS: ArrangementTrack[] = [
     ],
     id: "bass",
     kind: "midi",
+    mix: { ...UNITY_MIX, gain: 10 ** (2 / 20) },
     name: "Bass",
   },
   {
@@ -236,30 +237,33 @@ const TRACKS: ArrangementTrack[] = [
     ],
     id: "organ",
     kind: "midi",
+    mix: { ...UNITY_MIX, gain: 10 ** (-6 / 20) },
     name: "Organ",
     sends: { [REVERB]: 0.25 },
   },
   {
     color: 3,
-    devices: [device("guitar-vibe", vibeDevice, { mode: "vibrato" })],
+    devices: [
+      device(
+        "guitar",
+        guitarDevice,
+        { body: 4, decay: 6, tone: 6, volume: 9 },
+        true
+      ),
+      device("guitar-vibe", vibeDevice, { mode: "vibrato" }),
+    ],
     id: "guitar",
-    mix: { ...UNITY_MIX, gain: 10 ** (-5 / 20) },
+    kind: "midi",
     name: "Guitar",
     sends: { [REVERB]: 0.35 },
   },
   {
     color: 4,
-    devices: [
-      device(
-        "lead-flutes",
-        tapeKeysDevice,
-        // No wow: a lead that wavers sounds out of tune against the organ.
-        { station: "flutes", volume: 8.4, wow: 0 },
-        true
-      ),
-    ],
+    devices: [device("lead-strings", stringMachineDevice, {}, true)],
     id: "lead",
     kind: "midi",
+    // Waiting for a hook that fits the guitar: kept, silent.
+    mix: { ...UNITY_MIX, gain: 10 ** (-15 / 20), muted: true },
     name: "Lead",
     sends: { [REVERB]: 0.3 },
   },
@@ -276,7 +280,7 @@ const TRACKS: ArrangementTrack[] = [
     id: "pad",
     kind: "midi",
     // A bed under the band, felt more than heard.
-    mix: { ...UNITY_MIX, gain: 10 ** (-6 / 20) },
+    mix: { ...UNITY_MIX, gain: 10 ** (-10 / 20) },
     name: "Pad",
     sends: { [REVERB]: 0.4 },
   },

@@ -161,6 +161,28 @@ export const components: RegistryItem[] = [
     categories: ["instrument", "synth", "piano"],
     dependencies: ["@audio-ui/core"],
     description:
+      "A plucked guitar: its panel and its engine, eight strings for chords, played from the keyboard or a MIDI keyboard.",
+    files: [
+      {
+        path: "components/device/block-guitar.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-guitar",
+    registryDependencies: [
+      "@audio-ui/guitar-panel",
+      "@audio-ui/guitar-device",
+      "@audio-ui/guitar-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["instrument", "synth", "piano"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
       {
@@ -665,8 +687,8 @@ export const components: RegistryItem[] = [
       "@audio-ui/reverb-device",
       "@audio-ui/mono-synth-device",
       "@audio-ui/organ-device",
+      "@audio-ui/guitar-device",
       "@audio-ui/string-machine-device",
-      "@audio-ui/tape-keys-device",
       "@audio-ui/vibe-device",
       "@audio-ui/web-audio",
       "@audio-ui/use-marquee-selection",

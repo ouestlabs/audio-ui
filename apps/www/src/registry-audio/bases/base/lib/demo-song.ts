@@ -1,13 +1,10 @@
 /**
  * A chill song at 80 BPM on one two-bar loop, E minor seven, G and A, that
  * every part plays: the verse and the chorus differ by who plays, not by
- * their chords, so the song comes round as a loop does. Its picked guitar and
- * its drums are drawn here as recordings, as files would arrive, one per
- * part; its organ, its pad, its bass and its lead are notes for MIDI tracks
- * to play. The guitar is a plucked-string model (a burst of noise round a
- * delay line that loses its highs on each pass), picking the chords in
- * eighths; the drums are oscillators and noise. What an arrangement's demo
- * plays.
+ * their chords, so the song comes round as a loop does. Its drums are drawn
+ * here as recordings, as files would arrive, one per part, from oscillators
+ * and noise; its guitar, its organ, its pad, its bass and its lead are notes
+ * for MIDI tracks to play. What an arrangement's demo plays.
  */
 
 import type { Tempo } from "@audio-ui/core/time";
@@ -19,33 +16,6 @@ const BEAT = 60 / BPM;
 /** The average level the verse's recordings are brought to, -22 dBFS, and the peak no recording passes. */
 const TARGET_RMS = 10 ** (-22 / 20);
 const CEILING = 0.9;
-const hertz = (note: number) => 440 * 2 ** ((note - 69) / 12);
-
-/** The guitar's shapes, low string first. */
-const SHAPES = {
-  A: [45, 52, 57, 61, 64],
-  Em7: [40, 47, 50, 55, 59, 64],
-  G: [43, 47, 50, 55, 59, 67],
-} as const;
-type Shape = keyof typeof SHAPES;
-
-/** The loop, a chord per beat over its two bars. */
-const HARMONY: readonly Shape[] = [
-  "Em7",
-  "Em7",
-  "Em7",
-  "Em7",
-  "G",
-  "G",
-  "A",
-  "A",
-];
-
-/** Which strings an arpeggio picks, an eighth at a time, over a chord of four beats: up from the root and back down. */
-const ARPEGGIO_BAR = [0, 1, 2, 3, 4, 3, 2, 1] as const;
-/** Over a chord of two beats: up from the root. */
-const ARPEGGIO_HALF = [0, 1, 2, 3] as const;
-
 /** Where the kick falls over the loop's two bars, in beats, on the sixteenths: the bass lands with it. */
 const KICK = [0, 0.75, 1.75, 2.5, 4, 4.75, 6, 6.5] as const;
 /** The snare's ghost notes, soft, between the backbeats of each bar. */
@@ -95,11 +65,15 @@ const held = (
  * voice moving as little as it can; the bass leaves room: the organ's root
  * on the first two hits of the kick under each chord, the second softer, a
  * note on the third beat, the A pushed a sixteenth ahead of its chord, and
- * silence between, the chorus dropping to a low B on its last off-beat;
- * the lead is the
- * chorus's hook over four bars, a call and its answer, each note a tone of
- * the chord under it, starting with it, and let go just before the next so
- * every note is struck anew, in the octave of a tape keyboard's flutes.
+ * silence between, the chorus dropping to a low B on its last off-beat. The
+ * guitar picks the chords one string at a time, on the eighths: up from the
+ * root and back down over E minor seven, up over G and over A, each string
+ * left to ring until its chord changes or it is picked again, so the
+ * arpeggio sounds as the chord;
+ * picked harder in the chorus. The lead is the chorus's hook over four bars, a call
+ * and its answer, each note a tone of the chord under it, starting with it,
+ * and let go just before the next so every note is struck anew, in the octave
+ * of a tape keyboard's flutes.
  */
 export const SONG_SCORE = {
   "bass-chorus": notes(
@@ -124,6 +98,48 @@ export const SONG_SCORE = {
       [5.75, 0.9, 45],
     ],
     0.9
+  ),
+  "guitar-chorus": notes(
+    [
+      [0, 3.95, 40],
+      [0.5, 2.95, 47],
+      [1, 1.95, 50],
+      [1.5, 0.95, 55],
+      [2, 1.95, 59],
+      [2.5, 1.45, 55],
+      [3, 0.95, 50],
+      [3.5, 0.45, 47],
+      [4, 1.95, 43],
+      [4.5, 1.45, 47],
+      [5, 0.95, 50],
+      [5.5, 0.45, 55],
+      [6, 1.95, 45],
+      [6.5, 1.45, 52],
+      [7, 0.95, 57],
+      [7.5, 0.45, 61],
+    ],
+    0.95
+  ),
+  "guitar-verse": notes(
+    [
+      [0, 3.95, 40],
+      [0.5, 2.95, 47],
+      [1, 1.95, 50],
+      [1.5, 0.95, 55],
+      [2, 1.95, 59],
+      [2.5, 1.45, 55],
+      [3, 0.95, 50],
+      [3.5, 0.45, 47],
+      [4, 1.95, 43],
+      [4.5, 1.45, 47],
+      [5, 0.95, 50],
+      [5.5, 0.45, 55],
+      [6, 1.95, 45],
+      [6.5, 1.45, 52],
+      [7, 0.95, 57],
+      [7.5, 0.45, 61],
+    ],
+    0.8
   ),
   lead: notes(
     [
@@ -165,88 +181,14 @@ export const SONG_SCORE = {
 
 export type SongScorePart = keyof typeof SONG_SCORE;
 
-/**
- * One plucked string, added into `out` from `start` for `seconds`, muted at
- * the end. The string is a delay line whose every pass averages two
- * neighbours and loses a little, so the highs die first; that average delays
- * by half a sample, and the line reads between samples, so the string is in
- * tune with the other instruments to the cent.
- */
-function pluck(
-  out: Float32Array,
-  rate: number,
-  start: number,
-  seconds: number,
-  note: number,
-  level: number
-) {
-  const delay = Math.max(2, rate / hertz(note) - 0.5);
-  const whole = Math.floor(delay);
-  const part = delay - whole;
-  const first = Math.round(start * rate);
-  const length = Math.max(
-    0,
-    Math.min(out.length - first, Math.round(seconds * rate))
-  );
-  const seed = whole + 2;
-  const line = new Float32Array(seed + length);
-  // The pick: noise, softened, so the attack is bright but not a click.
-  let soft = 0;
-  for (let index = 0; index < seed; index += 1) {
-    soft += (Math.random() * 2 - 1 - soft) * 0.6;
-    line[index] = soft;
-  }
-  const at = (index: number) =>
-    (1 - part) * (line[index] ?? 0) + part * (line[index - 1] ?? 0);
-  const mute = Math.round(0.012 * rate);
-  for (let sample = 0; sample < length; sample += 1) {
-    const index = seed + sample;
-    const value = 0.996 * 0.5 * (at(index - whole) + at(index - whole - 1));
-    line[index] = value;
-    const fade = Math.min(1, (length - sample) / mute);
-    out[first + sample] = (out[first + sample] ?? 0) + value * level * fade;
-  }
-}
-
-/**
- * The guitar picking the loop's chords one string at a time, on the eighths,
- * each string left to ring until its chord changes, so the arpeggio sounds as
- * the chord; picked harder for the chorus.
- */
-function arpeggiate(force: number, rate: number, length: number) {
-  const out = new Float32Array(length);
-  for (let eighth = 0; eighth < HARMONY.length * 2; eighth += 1) {
-    const beat = eighth / 2;
-    const chord = HARMONY[Math.floor(beat)] ?? "Em7";
-    let first = Math.floor(beat);
-    while (first > 0 && HARMONY[first - 1] === chord) {
-      first -= 1;
-    }
-    let end = Math.floor(beat) + 1;
-    while (HARMONY[end] === chord) {
-      end += 1;
-    }
-    const pattern = end - first === 4 ? ARPEGGIO_BAR : ARPEGGIO_HALF;
-    const string = pattern[(eighth - first * 2) % pattern.length] ?? 0;
-    const shape = SHAPES[chord];
-    pluck(
-      out,
-      rate,
-      beat * BEAT,
-      (end - beat) * BEAT + 0.05,
-      shape[string % shape.length] ?? shape[0],
-      0.28 * force
-    );
-  }
-  return out;
-}
-
 interface Hit {
   at: number;
   decay: number;
   frequency: number;
   level: number;
   noise?: BiquadFilterType;
+  /** Whether it goes through the snare's room, a reverb. */
+  room?: boolean;
 }
 
 /** A drum hit into `out`: a sine whose pitch falls as it sounds, or noise through a filter. */
@@ -292,22 +234,31 @@ const kick = (beat: number): Hit => ({
   frequency: 50,
   level: 0.9,
 });
-const snare = (beat: number, level = 1): Hit[] => [
+/** A snare hit; `room` sends it through the room, as the backbeats on two and four are. */
+const snare = (beat: number, level = 1, room = false): Hit[] => [
   {
     at: beat * BEAT,
     decay: 0.18,
     frequency: 1500,
     level: 0.5 * level,
     noise: "bandpass",
+    room,
   },
-  { at: beat * BEAT, decay: 0.08, frequency: 180, level: 0.3 * level },
+  {
+    at: beat * BEAT,
+    decay: 0.08,
+    frequency: 180,
+    level: 0.3 * level,
+    room,
+  },
 ];
-const clap = (beat: number): Hit => ({
+const clap = (beat: number, room = false): Hit => ({
   at: beat * BEAT + 0.008,
   decay: 0.12,
   frequency: 1100,
   level: 0.35,
   noise: "bandpass",
+  room,
 });
 /** Hats on every sixteenth of `bars`: the beats loudest, the off-beats a little less, the sixteenths between soft, and an open one where `open` says. */
 const hats = (bars: number, open: readonly number[] = []): Hit[] =>
@@ -329,8 +280,8 @@ const everyBar = <T>(bars: number, of: (bar: number) => T[]) =>
 const groove = (bars: number): Hit[] => [
   ...everyBar(bars / 2, (at) => KICK.map((beat) => kick(at * 2 + beat))),
   ...everyBar(bars, (at) => [
-    ...snare(at + 1),
-    ...snare(at + 3),
+    ...snare(at + 1, 1, true),
+    ...snare(at + 3, 1, true),
     ...GHOSTS.flatMap((beat) => snare(at + beat, 0.22)),
   ]),
 ];
@@ -345,7 +296,7 @@ const DRUMS = {
   "drums-chorus": [
     { at: 0, decay: 1.6, frequency: 4500, level: 0.16, noise: "highpass" },
     ...groove(4),
-    ...everyBar(4, (at) => [clap(at + 1), clap(at + 3)]),
+    ...everyBar(4, (at) => [clap(at + 1, true), clap(at + 3, true)]),
     ...hats(4, [3.5]),
   ],
   "drums-fill": [
@@ -364,27 +315,62 @@ export const SONG_RECORDINGS = {
   "drums-chorus": 4,
   "drums-fill": 1,
   "drums-verse": 2,
-  "guitar-chorus": 2,
-  "guitar-verse": 2,
 } as const;
 
 export type SongPart = keyof typeof SONG_RECORDINGS;
 
 /** A part's samples, before any level is set. */
+/** The snare's room: how long its tail lasts, in seconds, how long before it answers, and how much of it is heard. */
+const ROOM = { delay: 0.018, seconds: 1.6, wet: 0.45 } as const;
+
+/** A room's answer to a hit: noise that fades and darkens as it fades, as a plate's tail does. */
+function roomImpulse(ctx: BaseAudioContext) {
+  const length = Math.ceil(ctx.sampleRate * ROOM.seconds);
+  const start = Math.round(ctx.sampleRate * ROOM.delay);
+  const buffer = ctx.createBuffer(1, length + start, ctx.sampleRate);
+  const data = buffer.getChannelData(0);
+  let dark = 0;
+  for (let index = 0; index < length; index += 1) {
+    const fade = (1 - index / length) ** 3;
+    // The tail loses its highs as it fades: the noise is smoothed more and more.
+    dark += (Math.random() * 2 - 1 - dark) * (0.7 - 0.6 * (index / length));
+    data[start + index] = dark * fade * 0.25;
+  }
+  return buffer;
+}
+
+/**
+ * A part's samples, before any level is set. The backbeats on two and four,
+ * the snare and its clap, go through a room as well, while the ghost notes
+ * and the fill stay dry; the room's tail, past the end, comes round to the
+ * start, as the part loops.
+ */
 function draw(part: SongPart, rate: number): Promise<Float32Array> {
   const length = Math.ceil(rate * BEAT * 4 * SONG_RECORDINGS[part]);
-  if (part.startsWith("guitar-")) {
-    return Promise.resolve(
-      arpeggiate(part === "guitar-chorus" ? 1.2 : 1, rate, length)
-    );
-  }
-  const ctx = new OfflineAudioContext(1, length, rate);
+  const tail = Math.ceil(rate * (ROOM.seconds + ROOM.delay));
+  const ctx = new OfflineAudioContext(1, length + tail, rate);
   const out = ctx.createGain();
   out.connect(ctx.destination);
-  for (const one of DRUMS[part as keyof typeof DRUMS]) {
-    hit(ctx, out, one);
+  const room = ctx.createGain();
+  const reverb = ctx.createConvolver();
+  reverb.normalize = false;
+  reverb.buffer = roomImpulse(ctx);
+  const wet = ctx.createGain();
+  wet.gain.value = ROOM.wet;
+  room.connect(out);
+  room.connect(reverb).connect(wet).connect(out);
+  for (const one of DRUMS[part]) {
+    hit(ctx, one.room ? room : out, one);
   }
-  return ctx.startRendering().then((done) => done.getChannelData(0));
+  return ctx.startRendering().then((done) => {
+    const data = done.getChannelData(0);
+    const looped = data.slice(0, length);
+    for (let index = length; index < data.length; index += 1) {
+      const at = (index - length) % length;
+      looped[at] = (looped[at] ?? 0) + (data[index] ?? 0);
+    }
+    return looped;
+  });
 }
 
 function measure(data: Float32Array) {
@@ -407,21 +393,15 @@ const once = (part: SongPart, rate: number) => {
 
 /**
  * One recorded part of the song at its tempo: what an audio track of an
- * arrangement plays. Every part of an instrument takes the gain that brings
- * its verse to the song's level, so the quiet parts stay quiet and the chorus
- * stays the loudest, and none peaks past the ceiling. Drawn once per sample
- * rate.
+ * arrangement plays. Every part takes the gain that brings the verse's drums
+ * to the song's level, so the fill and the chorus keep their own, and none
+ * peaks past the ceiling. Drawn once per sample rate.
  */
 export async function renderSongPart(
   part: SongPart,
   sampleRate: number
 ): Promise<AudioBuffer> {
-  const verse = measure(
-    await once(
-      part.startsWith("guitar-") ? "guitar-verse" : "drums-verse",
-      sampleRate
-    )
-  );
+  const verse = measure(await once("drums-verse", sampleRate));
   const data = Float32Array.from(await once(part, sampleRate));
   const { peak } = measure(data);
   const gain = Math.min(

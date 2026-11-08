@@ -1,0 +1,47 @@
+---
+title: Guitar
+description: "A plucked guitar device: a string a pick strikes, that rings and fades with its highs first, through the body and a tone control, with its decay and palm mute, a panel with a keyboard, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-guitar" />
+
+A plucked guitar string. A pick strikes it, a burst brighter the harder it is picked, and the string rings and fades, its highs dying first, as a real string's do. It is in tune to the cent at every pitch, so it plays along with the other instruments. The body warms its low end, a tone control darkens the lot, and the palm can mute the strings for short, dry notes. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="guitar" kind="device" />
+
+## Controls
+
+Every number reads 0 to 10, as a panel's sliders do, and shows the value it sets in the unit the sound takes.
+
+<DeviceControls device="guitar">
+<Control id="tone">Where the tone control darkens the sound, from 1.5 kHz to 12 kHz.</Control>
+<Control id="decay">How long an open string rings before it falls silent, from under half a second to six seconds.</Control>
+<Control id="mute">How much the palm mutes the strings: at the top, a note rings a tenth as long.</Control>
+<Control id="body">How much the guitar's body warms the low end, at its resonance.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel lays out the string's tone, decay and palm mute, the body and the volume, and has a keyboard from the open low E up three octaves, E2 to E5, that picks the strings. With `activeNotes`, the notes held now, such as on a MIDI keyboard, light up their keys. The panel sends notes out and does not make the sound, so it plays through any engine.
+
+<DeviceUsage name="guitar" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.noteOn({ frequency: 196, velocity: 0.8 }); // G3, picked
+engine.noteOff(); // the fretting hand lifts off
+
+// Scheduled ahead on the audio clock, by a host that plays notes from a song:
+engine.noteOn({ frequency: 329.63 }, { at: time, id: "e4" });
+engine.noteOff({ at: time + length, id: "e4" });
+```
+
+An engine plays one string. For chords, make as many as the notes you hold and give each note its own: the [arrangement](/docs/components/base/arrangement)'s engine does it for a MIDI track, and the block above keeps eight. A note picks the string at its pitch, louder and brighter the higher its velocity, and it rings for the decay, shortened by the palm mute, however long the note is held; let go before, and the string falls silent at once. A note while one sounds cuts it and picks anew, and a `noteOff` whose `id` is not the sounding note's lets nothing go. The tone, the body and the volume move a ringing string; the decay and the mute take the next. The string is drawn when its note comes, as samples, by `stringSamples`, which the engine exports. An agent plays the guitar with the `play` tool.

@@ -48,6 +48,7 @@ describe("takesPlay", () => {
           "block-organ",
           "block-string-machine",
           "block-tape-keys",
+          "block-guitar",
           "block-poly-synth",
           "block-sampler",
           "block-synth-panel",

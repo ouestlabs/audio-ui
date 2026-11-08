@@ -43,6 +43,12 @@
   },
   {
     "categories": ["instrument", "synth", "piano"],
+    "description": "A plucked guitar: its panel and its engine, eight strings for chords, played from the keyboard or a MIDI keyboard.",
+    "name": "block-guitar",
+    "title": "Block guitar"
+  },
+  {
+    "categories": ["instrument", "synth", "piano"],
     "description": "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     "name": "block-fm-synth",
     "title": "Block fm synth"

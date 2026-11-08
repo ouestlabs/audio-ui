@@ -164,6 +164,22 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
+      "The guitar as a device: a plucked string that rings and fades, its highs first, through the body's warmth and a tone control, with its decay and palm mute, with no panel and no audio in it.",
+    files: [
+      {
+        path: "lib/guitar-device.ts",
+        target: "components/audio-ui/devices/guitar/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "guitar-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "The FM Synth as an instrument device: four operators, each a ratio, a level, a decay and a sustain, eight algorithms that wire them, feedback, an attack, a release and a vibrato, with eight presets, and no panel and no audio in it.",
     files: [
       {
@@ -286,6 +302,22 @@ const items: RegistryItem[] = [
     ],
     name: "tape-keys-engine",
     registryDependencies: ["@audio-ui/tape-keys-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The guitar's Web Audio engine: one plucked string, drawn when its note comes and in tune to the cent, through the body and the tone; a host plays chords with several.",
+    files: [
+      {
+        path: "lib/guitar-engine.ts",
+        target: "components/audio-ui/devices/guitar/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "guitar-engine",
+    registryDependencies: ["@audio-ui/guitar-device"],
     type: "registry:lib",
   },
   {
@@ -1106,7 +1138,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A chill song at 80 BPM on one two-bar loop, E minor seven, G and A: a strummed guitar (a plucked-string model) and drums drawn as recordings, one per part with a fill, and an organ, a pad, a bass and a lead hook as notes for MIDI tracks. What the arrangement's demo plays.",
+      "A chill song at 80 BPM on one two-bar loop, E minor seven, G and A: drums drawn as recordings, one per part with a fill, and a guitar, an organ, a pad, a bass and a lead hook as notes for MIDI tracks. What the arrangement's demo plays.",
     files: [
       {
         path: "lib/demo-song.ts",
@@ -1397,6 +1429,8 @@ const items: RegistryItem[] = [
       "@audio-ui/string-machine-engine",
       "@audio-ui/tape-keys-device",
       "@audio-ui/tape-keys-engine",
+      "@audio-ui/guitar-device",
+      "@audio-ui/guitar-engine",
       "@audio-ui/sampler-device",
       "@audio-ui/sampler-engine",
       "@audio-ui/electric-piano-device",
