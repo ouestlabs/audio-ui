@@ -38,3 +38,7 @@ Status: checked against the format's schema and a project written as other DAWs 
 ### PRJ-009 A new project
 The menu's New project replaces the project with a new one: the two MIDI tracks and the two audio tracks (ARR-009), the two returns, the default tempo, the view laid out afresh. The browser's storage takes the new one within a second, so a reload brings it back and not the one before. As with opening a folder, the project it replaces is not kept anywhere unless it was saved. The reference's Cmd+N is the browser's own (a new window), so there is no key. A new project, like one imported from a `.dawproject` file, belongs to no folder: the folder remembered is forgotten, and the first save after a reload asks for one, so it never writes over the folder of the project before.
 Test: apps/daw/test/browser/run.ts "PRJ-009"
+
+### PRJ-010 The first visit plays a song
+A browser that keeps no project opens the song the site's hero plays (`public/demo/hero.audioui`): drums, bass, organ, lead and pad, every part MIDI, so Play sounds at once with nothing to load. It is the project from then on, saved as any other; New project still starts from the empty tracks. When the song cannot be read, the first visit opens a new project.
+Test: checked by hand in the production build, on a browser with nothing kept.

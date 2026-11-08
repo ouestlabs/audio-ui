@@ -31,6 +31,7 @@ src/
 - `audio-ui/`, `ui/`, `hooks/` and the registry's files in `lib/` stay as the CLI writes them. A change they need goes to the registry, then is installed again.
 - The page is cross-origin isolated (`public/_headers`, and `src/start.ts` in development), so the engine shares recordings with its worklets in shared memory.
 - The project is kept in the browser's private storage (OPFS): the document, and the bytes of every file it plays.
+- A first visit opens `public/demo/hero.audioui`, the song of the site's hero, saved from the DAW: replace that file to change it. A phone or a narrow window first sees a notice that the workstation is made for a computer.
 
 ## Installing a registry change before it is deployed
 
