@@ -18,6 +18,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "string-machine",
   "tape-keys",
   "guitar",
+  "drum-synth",
   "sampler",
   "wave-shaper",
   "utility",

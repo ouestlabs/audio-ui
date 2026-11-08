@@ -48,6 +48,12 @@
     "title": "Block guitar"
   },
   {
+    "categories": ["instrument", "synth", "pad"],
+    "description": "A synthesized drum: its panel and its engine, struck from its pad, a MIDI keyboard or a pad controller, as hard as you like.",
+    "name": "block-drum-synth",
+    "title": "Block drum synth"
+  },
+  {
     "categories": ["instrument", "synth", "piano"],
     "description": "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     "name": "block-fm-synth",

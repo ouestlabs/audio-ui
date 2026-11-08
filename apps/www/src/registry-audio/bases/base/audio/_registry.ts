@@ -25,6 +25,7 @@ const DEVICES = [
   "string-machine",
   "tape-keys",
   "guitar",
+  "drum-synth",
   "multiband",
   "overdrive",
   "phaser",
@@ -472,6 +473,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/string-machine-panel",
       "@audio-ui/tape-keys-panel",
       "@audio-ui/guitar-panel",
+      "@audio-ui/drum-synth-panel",
       "@audio-ui/sampler-panel",
       "@audio-ui/electric-piano-panel",
       "@audio-ui/redux-panel",
@@ -628,6 +630,26 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/piano",
       "@audio-ui/guitar-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "synth", "pad"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    description:
+      "The face of the Drum Synth device: its voice and tuning, decay, tone and snap, its volume, and a pad that strikes it, harder near its top.",
+    files: [
+      {
+        path: "audio/panels/drum-synth-panel.tsx",
+        target: "components/audio-ui/devices/drum-synth/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "drum-synth-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/pad",
+      "@audio-ui/drum-synth-device",
     ],
     type: "registry:ui",
   },

@@ -20,6 +20,8 @@ import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
 import { createDelayEngine } from "@/registry-audio/bases/base/lib/delay-engine";
 import { distortionDevice } from "@/registry-audio/bases/base/lib/distortion-device";
 import { createDistortionEngine } from "@/registry-audio/bases/base/lib/distortion-engine";
+import { drumSynthDevice } from "@/registry-audio/bases/base/lib/drum-synth-device";
+import { createDrumSynthEngine } from "@/registry-audio/bases/base/lib/drum-synth-engine";
 import { electricPianoDevice } from "@/registry-audio/bases/base/lib/electric-piano-device";
 import { createElectricPianoEngine } from "@/registry-audio/bases/base/lib/electric-piano-engine";
 import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
@@ -140,6 +142,9 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(stringMachineDevice, createStringMachineEngine, "Instruments"),
   entry(tapeKeysDevice, createTapeKeysEngine, "Instruments"),
   entry(guitarDevice, createGuitarEngine, "Instruments"),
+  entry(drumSynthDevice, createDrumSynthEngine, "Instruments", {
+    mono: true,
+  }),
   entry(fmSynthDevice, createFmSynthEngine, "Instruments"),
   entry(samplerDevice, createSamplerEngine, "Instruments"),
   entry(pocketSynthDevice, createPocketSynthEngine, "Instruments"),

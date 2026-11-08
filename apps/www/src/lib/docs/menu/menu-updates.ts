@@ -59,6 +59,7 @@ export const DOCS_MENU_UPDATES: Record<string, MenuUpdate> = {
   "string-machine": { mark: "New", on: "2026-11-07" },
   "tape-keys": { mark: "New", on: "2026-11-07" },
   guitar: { mark: "New", on: "2026-11-08" },
+  "drum-synth": { mark: "New", on: "2026-11-08" },
   sampler: { mark: "New", on: "2026-11-07" },
   redux: { mark: "New", on: "2026-10-16" },
   reverb: { mark: "New", on: "2026-10-16" },

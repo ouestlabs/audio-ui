@@ -1,0 +1,46 @@
+---
+title: Drum Synth
+description: "A synthesized drum device: a kick, a snare, a clap, a closed or an open hat, a tom, a rim or a cymbal from oscillators and noise, tuned, with its decay, tone and snap, a panel with a pad, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-drum-synth" />
+
+A drum made of sound, not of a sample. Pick its voice, a kick, a snare, a clap, a closed or an open hat, a tom, a rim or a cymbal, and shape it: its tuning, how long it rings, how bright it is and how sharp its attack. Each voice is a sine whose pitch falls, filtered noise, or both, and a harder hit is louder and brighter, so a pattern's accents sound as accents. It is what a [drum rack](/docs/components/base/rack#drum-racks)'s pad plays: one Drum Synth per pad, each with its own chain of effects. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="drum-synth" kind="device" />
+
+## Controls
+
+Every number but the tuning reads 0 to 10, as a panel's sliders do, and the middle is the voice as it comes.
+
+<DeviceControls device="drum-synth">
+<Control id="voice">Which drum it is.</Control>
+<Control id="tune">How far its pitch moves, or its noise's filter, from an octave down to an octave up.</Control>
+<Control id="decay">How long it rings: from an eighth of the voice's own ring to eight times it.</Control>
+<Control id="tone">How bright it is: its noise's filter from half as high to twice. On the kick, past the middle, the beater's click.</Control>
+<Control id="snap">How sharp its attack: the kick's and the tom's pitch drop, the snare's wires against its body, the clap's extra hands, the rim's crack.</Control>
+<Control id="volume">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel lays out the voice and its tuning, the decay, the tone and the snap, the volume, and a pad that strikes it, harder near its top. With `activeNotes`, the notes held now, such as on a MIDI keyboard or from a sequencer, the pad lights up. The panel sends its strikes out and does not make the sound, so it plays through any engine.
+
+<DeviceUsage name="drum-synth" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.noteOn({ velocity: 0.9 }); // a hit, hard
+
+// Scheduled ahead on the audio clock, by a host that plays a pattern:
+engine.noteOn({ velocity: 0.4 }, { at: time });
+```
+
+One engine plays every hit: each is made when it comes, from the state at that moment, and rings for its decay whatever the note's length, so `noteOff` lets nothing go. To cut a hat short, as an open hat is when the closed one is struck, a drum rack puts its pads in a choke group. The noise every hit reads from is made once per audio context, each hit starting somewhere else in it, so no two sound alike. The volume moves what rings; the other controls take the next hit. An agent strikes it with the `play` tool.

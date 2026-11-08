@@ -5,6 +5,7 @@ import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-dev
 import { deesserDevice } from "@/registry-audio/bases/base/lib/deesser-device";
 import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
 import { distortionDevice } from "@/registry-audio/bases/base/lib/distortion-device";
+import { drumSynthDevice } from "@/registry-audio/bases/base/lib/drum-synth-device";
 import { electricPianoDevice } from "@/registry-audio/bases/base/lib/electric-piano-device";
 import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
 import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
@@ -57,6 +58,7 @@ export const DEVICE_DOCS = {
   "string-machine": stringMachineDevice,
   "tape-keys": tapeKeysDevice,
   guitar: guitarDevice,
+  "drum-synth": drumSynthDevice,
   sampler: samplerDevice,
   redux: reduxDevice,
   reverb: reverbDevice,

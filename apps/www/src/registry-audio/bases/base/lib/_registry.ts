@@ -180,6 +180,22 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
+      "A synthesized drum as a device: a kick, a snare, a clap, a closed or an open hat, a tom, a rim or a cymbal, with its tuning, decay, tone and snap, played by velocity. Its state, its description and the tools an agent plays it with.",
+    files: [
+      {
+        path: "lib/drum-synth-device.ts",
+        target: "components/audio-ui/devices/drum-synth/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-synth-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
       "The FM Synth as an instrument device: four operators, each a ratio, a level, a decay and a sustain, eight algorithms that wire them, feedback, an attack, a release and a vibrato, with eight presets, and no panel and no audio in it.",
     files: [
       {
@@ -318,6 +334,22 @@ const items: RegistryItem[] = [
     ],
     name: "guitar-engine",
     registryDependencies: ["@audio-ui/guitar-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The Drum Synth on the Web Audio API: one engine plays every hit, each made of a falling sine and filtered noise when it comes, from a noise made once per context, ringing for its decay whatever the note's length.",
+    files: [
+      {
+        path: "lib/drum-synth-engine.ts",
+        target: "components/audio-ui/devices/drum-synth/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "drum-synth-engine",
+    registryDependencies: ["@audio-ui/drum-synth-device"],
     type: "registry:lib",
   },
   {
@@ -1446,6 +1478,8 @@ const items: RegistryItem[] = [
       "@audio-ui/tape-keys-engine",
       "@audio-ui/guitar-device",
       "@audio-ui/guitar-engine",
+      "@audio-ui/drum-synth-device",
+      "@audio-ui/drum-synth-engine",
       "@audio-ui/sampler-device",
       "@audio-ui/sampler-engine",
       "@audio-ui/electric-piano-device",

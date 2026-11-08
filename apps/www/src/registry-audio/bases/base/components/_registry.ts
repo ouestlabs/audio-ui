@@ -180,6 +180,28 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["instrument", "synth", "pad"],
+    dependencies: [],
+    description:
+      "A synthesized drum: its panel and its engine, struck from its pad, a MIDI keyboard or a pad controller, as hard as you like.",
+    files: [
+      {
+        path: "components/device/block-drum-synth.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-drum-synth",
+    registryDependencies: [
+      "@audio-ui/drum-synth-panel",
+      "@audio-ui/drum-synth-device",
+      "@audio-ui/drum-synth-engine",
+      "@audio-ui/use-master-bus",
+      "@audio-ui/use-midi-input",
+      "@audio-ui/web-audio",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["instrument", "synth", "piano"],
     dependencies: ["@audio-ui/core"],
     description:
