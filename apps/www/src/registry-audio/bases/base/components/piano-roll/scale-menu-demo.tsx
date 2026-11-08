@@ -47,6 +47,8 @@ export default function ScaleMenuDemo() {
       <Piano
         activeNotes={marked}
         aria-label="Piano"
+        // The keys stay white and black in every theme, the primary color does not: the scale takes its hue at a lightness of its own, light on a white key, mid on a black one, so a key in it reads whatever the theme.
+        className="[&_[data-active][data-color=black]]:bg-[oklch(from_var(--primary)_0.55_c_h)] [&_[data-active][data-color=white]]:bg-[oklch(from_var(--primary)_0.85_c_h)]"
         maxPitch={MAX_PITCH}
         minPitch={MIN_PITCH}
       />
