@@ -38,6 +38,8 @@ const midi = useMidiInput({
 <TypeRow name={"activeNotes"} type={"number[]"}>The pitches held on the device.</TypeRow>
 <TypeRow name={"isSupported, isConnected"} type={"boolean"}>Whether the browser has Web MIDI, and whether the page listens.</TypeRow>
 <TypeRow name={"inputNames"} type={"string[]"}>The names of the connected devices.</TypeRow>
+<TypeRow name={"mutedInputs"} type={"string[]"}>The names of the devices switched off with `setInputEnabled`: their keys are not heard.</TypeRow>
+<TypeRow name={"setInputEnabled"} type={"(name: string, enabled: boolean) => void"}>Switches a device off by its name, for the whole page, or on again. It holds before the device connects.</TypeRow>
 <TypeRow name={"error"} type={"string | null"}>Why connecting failed, such as a refused permission.</TypeRow>
 </TypeTable>
 

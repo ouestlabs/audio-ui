@@ -73,6 +73,7 @@ describe("createMidiInput", () => {
       connected: true,
       error: null,
       inputs: ["Keystation", "MIDI device"],
+      muted: [],
       supported: true,
     });
 
@@ -118,6 +119,27 @@ describe("createMidiInput", () => {
     fake.access.inputs.set("late", late);
     fake.access.onstatechange?.();
     expect(input.getSnapshot().inputs).toEqual(["A", "B"]);
+  });
+
+  test("a device switched off is not heard, the others are, until it is on again", async () => {
+    const fake = fakeAccess(["Keys", "Pads"]);
+    setNavigator({ requestMIDIAccess: () => Promise.resolve(fake.access) });
+    const input = createMidiInput();
+    const heard: MidiMessage[] = [];
+    input.listen((message) => heard.push(message));
+    // Switched off before it connects, as a saved choice is.
+    input.setInputEnabled("Pads", false);
+    await input.connect();
+    expect(input.getSnapshot().muted).toEqual(["Pads"]);
+    fake.send(1, 0x90, 36, 100);
+    fake.send(0, 0x90, 60, 100);
+    expect(
+      heard.map((message) => message.type === "noteon" && message.note)
+    ).toEqual([60]);
+    input.setInputEnabled("Pads", true);
+    fake.send(1, 0x90, 36, 100);
+    expect(heard).toHaveLength(2);
+    expect(input.getSnapshot().muted).toEqual([]);
   });
 
   test("stops listening to every device on disconnect", async () => {

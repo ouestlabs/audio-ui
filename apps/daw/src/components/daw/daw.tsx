@@ -93,6 +93,7 @@ import { libraryDevice } from "@/lib/device-library";
 import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
 import { RecordSettings } from "./record-settings";
+import { SettingsDialog } from "./settings-dialog";
 import { CommandKeys } from "./shortcut-list";
 import {
   clipsToReselect,
@@ -496,6 +497,8 @@ export function Daw({
   );
   // The library on the left (KEY-021), and its search, which the end of a chain focuses.
   const [libraryOpen, setLibraryOpen] = useSavedState("libraryOpen", true);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const openSettings = useCallback(() => setSettingsOpen(true), []);
   const librarySearch = useRef<HTMLInputElement>(null);
   const openLibrary = useCallback(() => {
     setLibraryOpen(true);
@@ -1175,6 +1178,7 @@ export function Daw({
         });
       }
     },
+    settings: openSettings,
     split: () => dispatch({ at: cursor, step: 0.01, type: "split-cursor" }),
     "to-start": () => seek(0),
     undo: () => dispatch({ type: "undo" }),
@@ -1184,13 +1188,25 @@ export function Daw({
     commands,
     computerKeysOn,
     cursorKeys,
+    settingsOpen,
     timeSelection,
   });
-  keys.current = { commands, computerKeysOn, cursorKeys, timeSelection };
+  keys.current = {
+    commands,
+    computerKeysOn,
+    cursorKeys,
+    settingsOpen,
+    timeSelection,
+  };
   useEffect(() => {
     // What the workstation takes before its shortcuts: typing, the computer's keyboard, Escape, the time
     // selected and the cursor. A key taken here is not a shortcut too.
     const onKey = (event: KeyboardEvent) => {
+      // The settings take the keys while they are open, a shortcut being recorded among them.
+      if (keys.current.settingsOpen) {
+        TAKEN.add(event);
+        return;
+      }
       if (typing(event.target)) {
         TAKEN.add(event);
         return;
@@ -1400,6 +1416,7 @@ export function Daw({
             automation.anyOverridden ? automation.reenable : undefined
           }
           onRhythmChange={setRhythm}
+          onSettings={openSettings}
           onStop={stop}
           onTempoChange={setTempo}
           onUndo={commands.undo}
@@ -1519,6 +1536,33 @@ export function Daw({
         </div>
         <EngineLine saved={saved} status={engine.status} />
       </div>
+      <SettingsDialog
+        audio={{
+          inputDevice: take.inputDevice,
+          inputs: take.inputs,
+          monitorInput: take.monitorInput,
+          onInputDeviceChange: take.setInputDevice,
+          onMonitorInputChange: take.setMonitorInput,
+          onReadInputs: take.refreshInputs,
+          status: engine.status,
+        }}
+        midi={{ computerKeys, onComputerKeysChange: setComputerKeys }}
+        onOpenChange={setSettingsOpen}
+        open={settingsOpen}
+        record={{
+          countIn: take.countIn,
+          metronome,
+          onCountInChange: take.setCountIn,
+          onMetronomeChange: setMetronome,
+          onOverdubChange: take.setOverdub,
+          onQuantizeChange: take.setQuantize,
+          onRhythmChange: setRhythm,
+          overdub: take.overdub,
+          quantize: take.quantize,
+          rhythm,
+          tempo: doc.tempo,
+        }}
+      />
       <Toaster />
     </TooltipProvider>
   );

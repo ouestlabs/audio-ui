@@ -156,6 +156,11 @@ export const APP_HOTKEYS = defineAppHotkeys({
     hotkey: "Mod+Shift+S",
     meta: { group: "Project", name: "Save to another folder" },
   },
+  // With Shift: the browser keeps Mod+Comma for its own settings.
+  settings: {
+    hotkey: "Mod+Shift+[Comma]",
+    meta: { group: "View", name: "Settings" },
+  },
 });
 
 declare module "@tanstack/react-hotkeys" {

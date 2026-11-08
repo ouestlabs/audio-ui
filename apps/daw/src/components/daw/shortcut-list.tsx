@@ -35,7 +35,7 @@ export function CommandKeys({ command }: { command: ShortcutCommand }) {
 }
 
 /** One hotkey as keys, as the platform names them: ⌘ and S on a Mac, Ctrl and S elsewhere. */
-function HotkeyKeys({ hotkey }: { hotkey: Hotkey }) {
+export function HotkeyKeys({ hotkey }: { hotkey: Hotkey }) {
   const platform = usePlatform();
   const steps = Array.isArray(hotkey) ? hotkey : [hotkey];
   return (

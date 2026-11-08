@@ -4,7 +4,7 @@ The reference's keyboard, Mac keys. Each command also lives in the command menu,
 
 ## How the keys are held
 
-Every command's keys are declared once, as TanStack Hotkeys app hotkeys (`apps/daw/src/lib/daw/shortcuts.ts`): an id, a name, a group and a default, with second keys beside some (Cmd+Y for redo, Backspace for delete). The shortcuts menu, the menus and the tooltips show them from there, named for the platform (⌘ on a Mac, Ctrl elsewhere), so a key rebound by the user shows as it is. What the user rebinds is kept in this browser, only what differs from the defaults. A key the workstation takes first (typing, the computer's keyboard, Escape, the time selected, the cursor) is not a shortcut too, and a key two chords match runs once.
+Every command's keys are declared once, as TanStack Hotkeys app hotkeys (`apps/daw/src/lib/daw/shortcuts.ts`): an id, a name, a group and a default, with second keys beside some (Cmd+Y for redo, Backspace for delete). The shortcuts menu, the menus and the tooltips show them from there, named for the platform (⌘ on a Mac, Ctrl elsewhere), so a key rebound by the user shows as it is. The settings' Shortcuts section rebinds a command by recording the keys pressed, and refuses keys another command answers. What the user rebinds is kept in this browser, only what differs from the defaults. A key the workstation takes first (typing, the computer's keyboard, Escape, the time selected, the cursor) is not a shortcut too, and a key two chords match runs once.
 
 ## Kept by the browser
 
@@ -49,6 +49,7 @@ Status: partial: which other keys Chrome and Safari keep is checked by hand (`ap
 | KEY-031 | Cmd+C, Cmd+X, Cmd+V, Cmd+J | Copy, cut, paste; one clip per track of the time selected, rendered (ARR-020) |
 | KEY-033 | Cmd+G, Cmd+Shift+G | Group the picked tracks; ungroup the picked group, or the one a picked track is in (MIX-020) |
 | KEY-032 | Cmd+O, Cmd+S, Cmd+Shift+S | Open a project folder, save to the project's folder, save to another (PRJ-007); where the browser cannot write a folder, the browser keeps these keys |
+| KEY-035 | Cmd+Shift+Comma | Open the settings: the theme, the audio output, input and latency, the MIDI devices, recording, and the shortcuts, each rebound by pressing its new keys. Cmd+Comma stays the browser's |
 
 Delete takes the selected clips or, with none, a track its header picked: a press on a lane only puts the cursor there (KEY-012, apps/daw/test/browser/run.ts). The menu of the top bar lists every key.
 

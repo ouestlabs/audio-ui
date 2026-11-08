@@ -146,6 +146,8 @@ export interface TopBarProps
   onRhythmChange: (rhythm: MetronomeRhythm) => void;
   onSave?: () => void;
   onSaveAs?: () => void;
+  /** Opens the workstation's settings. */
+  onSettings: () => void;
   onStop: () => void;
   onTempoChange: (tempo: Tempo) => void;
   onUndo?: () => void;
@@ -349,6 +351,12 @@ export function TopBar(props: TopBarProps) {
               ))}
             </DropdownMenuRadioGroup>
             <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={props.onSettings}>
+              Settings…
+              <DropdownMenuShortcut>
+                <CommandKeys command="settings" />
+              </DropdownMenuShortcut>
+            </DropdownMenuItem>
             <DropdownMenuSub>
               <DropdownMenuSubTrigger>
                 Keyboard shortcuts

@@ -15,6 +15,7 @@ import {
 import { recallFolder } from "@/lib/daw/folder";
 import { newProject } from "@/lib/daw/project";
 import { decodeRecording, type Recording } from "@/lib/daw/recordings";
+import { configureAudio } from "@/lib/daw/settings";
 import {
   APP_HOTKEYS,
   keepCustomHotkeys,
@@ -53,6 +54,8 @@ async function openRecording(
 /** The project kept in the browser, its recordings opened one after the other, or a new one. */
 async function openProject(): Promise<DawProps> {
   const saved = await loadProject();
+  // The context is made here first: with the latency the settings keep.
+  configureAudio();
   const context = webAudio.getContext();
   if (!(saved && context)) {
     // A new project: nothing kept of the view is about it.

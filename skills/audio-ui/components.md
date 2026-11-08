@@ -161,7 +161,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 
 | Name | Import | Use it for |
 | --- | --- | --- |
-| `web-audio` | `webAudio` from `@/lib/web-audio` | The page's one `AudioContext`: `webAudio.getContext()`, `null` on the server. Resume it from the click that starts the sound |
+| `web-audio` | `webAudio` from `@/lib/web-audio` | The page's one `AudioContext`: `webAudio.getContext()`, `null` on the server; `webAudio.configure(options)` before the first call sets its latency or output. Resume it from the click that starts the sound |
 | `use-master-bus` | `useMasterBus` from `@/hooks/use-master-bus` | One gain and a safety limiter that every sound of a screen connects into, set by one volume |
 | `use-transport-clock` | `useTransportClock` from `@/hooks/use-transport-clock` | Schedule notes ahead on the audio clock: `onStep(step, time)` on each step, a loop region, seek with `reanchor`, `getPosition` for a playhead |
 | `clip-player` | `loadClipPlayer`, `createClipPlayer` from `@/lib/clip-player` | A track's audio clips played to the frame on the audio clock, in an AudioWorklet: `setClips(playedClips(...), recordings)`, `schedule(state)` with a `PlaybackState` from `@audio-ui/core/playback`, `synced()` before an offline render |

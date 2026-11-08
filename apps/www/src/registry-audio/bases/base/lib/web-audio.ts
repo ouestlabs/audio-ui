@@ -6,6 +6,12 @@ declare global {
 /** The page's one AudioContext, made the first time something asks for it. */
 export class WebAudio {
   #audioContext: AudioContext | null = null;
+  #options: AudioContextOptions = {};
+
+  /** The options the context is made with, such as its `latencyHint`: call it before anything asks for the context, as they do not change one already made. */
+  configure(options: AudioContextOptions) {
+    this.#options = options;
+  }
 
   getContext(): AudioContext | null {
     if (!this.isClient()) {
@@ -18,7 +24,7 @@ export class WebAudio {
       if (!AudioContextClass) {
         return null;
       }
-      this.#audioContext = new AudioContextClass();
+      this.#audioContext = new AudioContextClass(this.#options);
     }
 
     const ctx = this.#audioContext;
