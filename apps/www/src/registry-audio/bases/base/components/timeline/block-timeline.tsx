@@ -205,9 +205,10 @@ const ORGAN_FADE = [
 /**
  * The song as a project: every track MIDI, played by the registry's
  * instruments (a drum rack with a Drum Synth on every pad for the drums, its
- * snare and clap in a small room, a mono synth's sub bass, a tonewheel organ on three drawbars
- * for the chords, another on its first four, driven and spun fast through a
- * vibe in vibrato, for the lead, and a string machine on the pad), and a
+ * snare and clap in a small room, a mono synth's sub bass, a tonewheel organ
+ * on three drawbars for the chords, another on its 8', 4' and 2' with the
+ * rotary stopped, through a vibe in vibrato, for the lead, and a string
+ * machine on the pad), and a
  * reverb on a return track the organ, the lead and the pad send to. The drums
  * and the bass lead the mix, the organ and the lead stand a little apart, and
  * the pad lies under them. The organ fades out over the intro's last bar and
@@ -268,7 +269,7 @@ const TRACKS: ArrangementTrack[] = [
     ],
     id: "organ",
     kind: "midi",
-    mix: { ...UNITY_MIX, gain: 10 ** (-9 / 20), pan: -0.15 },
+    mix: { ...UNITY_MIX, gain: 10 ** (-12 / 20), pan: -0.15 },
     name: "Organ",
     sends: { [REVERB]: 0.25 },
   },
@@ -280,12 +281,14 @@ const TRACKS: ArrangementTrack[] = [
         organDevice,
         {
           click: 3,
-          drawbar1: 8,
-          drawbar2: 8,
-          drawbar3: 8,
-          drawbar4: 8,
-          drive: 6,
-          rotary: "fast",
+          drawbar1: 0,
+          drawbar2: 0,
+          drawbar3: 6,
+          drawbar4: 0,
+          drawbar5: 8,
+          drawbar7: 4,
+          drive: 0,
+          rotary: "stop",
           volume: 7,
         },
         true
@@ -299,7 +302,7 @@ const TRACKS: ArrangementTrack[] = [
     ],
     id: "lead",
     kind: "midi",
-    mix: { ...UNITY_MIX, gain: 10 ** (-12 / 20), pan: 0.15 },
+    mix: { ...UNITY_MIX, gain: 10 ** (-16 / 20), pan: 0.15 },
     name: "Lead",
     sends: { [REVERB]: 0.35 },
   },
@@ -316,7 +319,7 @@ const TRACKS: ArrangementTrack[] = [
     id: "pad",
     kind: "midi",
     // A bed under the band, felt more than heard.
-    mix: { ...UNITY_MIX, gain: 10 ** (-10 / 20) },
+    mix: { ...UNITY_MIX, gain: 10 ** (-15 / 20) },
     name: "Pad",
     sends: { [REVERB]: 0.4 },
   },
@@ -423,12 +426,12 @@ function clipOf(
  * What each part of the song plays, all of it on the same loop. The drums
  * and the organ open it, the verse is the drums and the bass alone, the
  * chorus is the whole band, harder, under the lead's hook, and the organ
- * closes it alone, back where the song started.
+ * and the hook close it, back where the song started.
  */
 const PLAYS: Record<(typeof PARTS)[number]["id"], readonly Take[]> = {
   chorus: ["drums-chorus", "bass-chorus", "organ", "lead"],
   intro: ["drums-verse", "organ"],
-  outro: ["organ"],
+  outro: ["organ", "lead"],
   verse: ["drums-verse", "bass-verse"],
 };
 
