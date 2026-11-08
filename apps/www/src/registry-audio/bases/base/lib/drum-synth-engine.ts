@@ -14,8 +14,6 @@ const NOISE_SECONDS = 2;
 /** Where a hit's envelope ends, near silence, so the ramp down is exponential all the way. */
 const FLOOR = 0.0001;
 const SMOOTHING = 0.03;
-/** What every hit is lifted by on its way out, +8 dB: a kit stands with the registry's other instruments at the same volume. */
-const VOICE_GAIN = 2.5;
 
 export interface DrumSynthEngine
   extends InstrumentBinding<DrumSynthState, DrumSynthNote> {
@@ -257,7 +255,7 @@ export function createDrumSynthEngine(
 ): DrumSynthEngine {
   let state = initial;
   const output = ctx.createGain();
-  output.gain.value = volumeGain(initial.volume) * VOICE_GAIN;
+  output.gain.value = volumeGain(initial.volume);
 
   return {
     dispose: () => output.disconnect(),
@@ -280,7 +278,7 @@ export function createDrumSynthEngine(
     update: (next) => {
       state = next;
       output.gain.setTargetAtTime(
-        volumeGain(next.volume) * VOICE_GAIN,
+        volumeGain(next.volume),
         ctx.currentTime,
         SMOOTHING
       );

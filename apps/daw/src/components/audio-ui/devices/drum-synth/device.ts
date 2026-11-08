@@ -36,10 +36,11 @@ export const toneRatio = (value: number) => 2 ** ((value - 5) / 5);
 /** A pitch's ratio for `semitones`. */
 export const tuneRatio = (semitones: number) => 2 ** (semitones / 12);
 
-const MIN_VOLUME_DB = -40;
-const MAX_VOLUME_DB = 0;
+/** The volume's travel, in decibels: unity at its default of 8, so a kit stands with the registry's other instruments. */
+const MIN_VOLUME_DB = -32;
+const MAX_VOLUME_DB = 8;
 
-/** The volume's level, as a gain, up to unity: silence at 0. */
+/** The volume's level, as a gain, from -32 dB to +8 dB: silence at 0. */
 export function volumeGain(value: number) {
   if (value <= 0) {
     return 0;
