@@ -1,7 +1,7 @@
 "use client";
 
 import { Sequencer as SequencerPrimitive } from "@audio-ui/react";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 type SequencerProps = Omit<SequencerPrimitive.Root.Props, "className"> & {
@@ -16,6 +16,10 @@ type SequencerProps = Omit<SequencerPrimitive.Root.Props, "className"> & {
   showVelocity?: boolean;
   /** `sm` draws short steps and a thin bar under them, so many rows fit. @default "default" */
   size?: "default" | "sm";
+  /** Draws a step that plays fainter the softer it plays, by `velocities`: a ghost note shows as one. @default false */
+  shadeByVelocity?: boolean;
+  /** What a step shows inside it, such as how many times it repeats. */
+  renderCell?: (row: number, step: number) => ReactNode;
 };
 
 /**
@@ -29,12 +33,15 @@ type SequencerProps = Omit<SequencerPrimitive.Root.Props, "className"> & {
 function Sequencer({
   beatEvery = 4,
   className,
+  renderCell,
   renderRowLabel,
   rowLabels,
+  shadeByVelocity = false,
   showVelocity = false,
   size = "default",
   ...props
 }: SequencerProps) {
+  const { velocities } = props;
   return (
     <SequencerPrimitive.Root
       className={cn(
@@ -75,12 +82,25 @@ function Sequencer({
                     <SequencerPrimitive.Cell
                       aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1}`}
                       className={cn(
-                        "rounded-[min(var(--radius-sm),6px)] border bg-muted/60 transition-[background-color,box-shadow,transform] duration-100 ease-out hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-95 aria-pressed:border-primary aria-pressed:bg-primary data-current:ring-2 data-current:ring-foreground/40 data-disabled:pointer-events-none motion-reduce:transition-none motion-reduce:active:scale-100 min-w-0 cursor-pointer touch-none outline-none",
+                        "rounded-[min(var(--radius-sm),6px)] border bg-muted/60 transition-[background-color,box-shadow,transform] duration-100 ease-out hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring/50 active:scale-95 aria-pressed:border-primary aria-pressed:bg-primary data-current:ring-2 data-current:ring-foreground/40 data-disabled:pointer-events-none motion-reduce:transition-none motion-reduce:active:scale-100 flex min-w-0 cursor-pointer touch-none items-center justify-center font-medium text-[9px] tabular-nums outline-none aria-pressed:text-primary-foreground",
                         size === "sm" ? "h-6" : "h-9",
-                        step % beatEvery === 0 && "bg-muted"
+                        step % beatEvery === 0 && "bg-muted",
+                        shadeByVelocity &&
+                          "aria-pressed:opacity-(--sequencer-cell-level)"
                       )}
+                      data-step={step}
                       step={step}
-                    />
+                      style={
+                        shadeByVelocity
+                          ? ({
+                              "--sequencer-cell-level":
+                                0.35 + 0.65 * (velocities?.[row]?.[step] ?? 1),
+                            } as CSSProperties)
+                          : undefined
+                      }
+                    >
+                      {renderCell?.(row, step)}
+                    </SequencerPrimitive.Cell>
                   )}
                 </SequencerPrimitive.Cells>
               </div>

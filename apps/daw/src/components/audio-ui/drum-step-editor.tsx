@@ -2,7 +2,14 @@
 
 import type { Note } from "@audio-ui/core/piano-roll";
 import type { Source } from "@audio-ui/react";
-import { type MouseEvent, useCallback, useMemo } from "react";
+import {
+  type MouseEvent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
@@ -15,9 +22,11 @@ import {
 import { Sequencer } from "@/components/audio-ui/sequencer";
 import {
   filledEvery,
+  MAX_REPEATS,
   type StepGrid,
   stepsOf,
   withStep,
+  withStepRepeats,
 } from "@/lib/drum-steps";
 import { DotsThreeIcon } from "@phosphor-icons/react";
 
@@ -32,6 +41,8 @@ const FILLS = [2, 4, 8] as const;
 
 /** The narrowest a step is drawn, so a long clip scrolls rather than squeezing its steps. */
 const STEP_REM = 1.5;
+/** How much of the view's end the fade takes: a step in it is not yet in view. */
+const FADE_PX = 40;
 
 interface DrumStepEditorProps {
   /** How many steps make a beat: a firmer step marks each. @default 4 */
@@ -59,11 +70,14 @@ interface DrumStepEditorProps {
 
 /**
  * A drum clip's notes as steps, a row per pad of the drum rack that plays
- * them: press a step to switch it, and drag across to paint. The notes stay
- * what the clip keeps, so a note off the grid still lights its step, and the
- * piano roll shows the same notes, with their velocity and chance. A pad's
- * name sounds it, and its menu fills the row every 2, 4 or 8 steps, or clears
- * it.
+ * them: press a step to switch it, and drag across to paint. With Repeat on,
+ * a press on a step that plays makes it a roll, two, three or four hits, and
+ * back to one. A step is drawn fainter the softer it plays, so a ghost note
+ * shows as one, and while the clip plays, the view keeps the step being played
+ * in sight. The notes stay what the clip keeps, so a note off the grid still
+ * lights its step, and the piano roll shows the same notes, with their
+ * velocity and chance. A pad's name sounds it, and its menu fills the row
+ * every 2, 4 or 8 steps, or clears it.
  */
 function DrumStepEditor({
   beatEvery = 4,
@@ -83,15 +97,29 @@ function DrumStepEditor({
     [pads, start, step, steps]
   );
   const view = useMemo(() => stepsOf(notes, grid), [grid, notes]);
+  const [repeating, setRepeating] = useState(false);
+  const toggleRepeating = useCallback(() => setRepeating((on) => !on), []);
 
-  // A step that changed is a note added or taken away: the rest stay as they are.
+  // A step that changed is a note added or taken away, the rest left as they are; with Repeat on, a step that plays turns into its next roll instead of off.
   const changePattern = useCallback(
     (next: boolean[][]) => {
       let changed: readonly Note[] = notes;
       next.forEach((row, at) => {
         row.forEach((on, index) => {
-          if (on !== Boolean(view.pattern[at]?.[index])) {
-            changed = withStep(changed, grid, { row: at, step: index }, on);
+          if (on === Boolean(view.pattern[at]?.[index])) {
+            return;
+          }
+          const cell = { row: at, step: index };
+          if (repeating && !on) {
+            const times = view.repeats[at]?.[index] ?? 1;
+            changed = withStepRepeats(
+              changed,
+              grid,
+              cell,
+              times >= MAX_REPEATS ? 1 : times + 1
+            );
+          } else {
+            changed = withStep(changed, grid, cell, on);
           }
         });
       });
@@ -99,8 +127,46 @@ function DrumStepEditor({
         onNotesChange([...changed]);
       }
     },
-    [grid, notes, onNotesChange, view.pattern]
+    [grid, notes, onNotesChange, repeating, view.pattern, view.repeats]
   );
+  const renderCell = useCallback(
+    (row: number, index: number) => {
+      const times = view.repeats[row]?.[index] ?? 0;
+      return times > 1 ? `×${times}` : null;
+    },
+    [view.repeats]
+  );
+
+  // While the clip plays, the step being played stays in sight: past the view, it turns the page.
+  const scrollerRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (!source) {
+      return;
+    }
+    let last = -1;
+    const follow = () => {
+      const now = Math.floor(source.getSnapshot());
+      if (now === last) {
+        return;
+      }
+      last = now;
+      const scroller = scrollerRef.current;
+      const cell = scroller?.querySelector<HTMLElement>(`[data-step="${now}"]`);
+      if (!(scroller && cell)) {
+        return;
+      }
+      const label = scroller.querySelector<HTMLElement>(
+        '[data-slot="drum-step-label"]'
+      );
+      const box = scroller.getBoundingClientRect();
+      const at = cell.getBoundingClientRect();
+      const from = box.left + (label?.offsetWidth ?? 0) + 8;
+      if (at.left < from || at.right > box.right - FADE_PX) {
+        scroller.scrollBy({ behavior: "smooth", left: at.left - from });
+      }
+    };
+    return source.subscribe(follow);
+  }, [source]);
   const commit = useCallback(() => onNotesCommitted?.(), [onNotesCommitted]);
   const audition = useCallback(
     (event: MouseEvent<HTMLButtonElement>) =>
@@ -139,7 +205,10 @@ function DrumStepEditor({
       }
       return (
         // Its background reaches over the gaps around it too, so no step shows between the names as the steps scroll under them, and fades out across the gap before the steps, which leaves the ring of the step being played whole.
-        <div className="sticky start-1 z-10 flex w-28 min-w-0 items-center gap-0.5 self-stretch bg-card before:pointer-events-none before:absolute before:-inset-y-1 before:-start-1 before:-end-2 before:-z-10 before:bg-[linear-gradient(to_right,var(--color-card)_calc(100%-0.5rem),transparent)]">
+        <div
+          className="sticky start-1 z-10 flex w-28 min-w-0 items-center gap-0.5 self-stretch bg-card before:pointer-events-none before:absolute before:-inset-y-1 before:-start-1 before:-end-2 before:-z-10 before:bg-[linear-gradient(to_right,var(--color-card)_calc(100%-0.5rem),transparent)]"
+          data-slot="drum-step-label"
+        >
           <Button
             className="h-6 min-w-0 flex-1 justify-start truncate px-1.5 text-xs"
             data-note={pad.note}
@@ -195,17 +264,39 @@ function DrumStepEditor({
       className={cn("flex min-h-0 min-w-0 flex-col gap-2 p-2", className)}
       data-slot="drum-step-editor"
     >
+      <div className="flex items-center gap-2">
+        <Button
+          aria-pressed={repeating}
+          className="h-6 px-2 text-xs"
+          onClick={toggleRepeating}
+          size="xs"
+          variant={repeating ? "default" : "outline"}
+        >
+          Repeat
+        </Button>
+        {repeating ? (
+          <span className="truncate text-[10px] text-muted-foreground">
+            Press a step that plays to roll it: twice, three times, four, then
+            once again.
+          </span>
+        ) : null}
+      </div>
       {/* Each axis scrolls in a box of its own, so each fades at its own edges: the pads down, the steps across, under the pads' names, which stay. */}
       <div className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-        <div className="no-scrollbar scroll-fade-e overflow-x-auto overflow-y-hidden">
+        <div
+          className="no-scrollbar scroll-fade-e overflow-x-auto overflow-y-hidden"
+          ref={scrollerRef}
+        >
           <Sequencer
             beatEvery={beatEvery}
             // Every pad on screen at once: short steps, with room around them for the ring of the step being played.
             className="gap-y-1 p-1"
             onValueChange={changePattern}
             onValueCommitted={commit}
+            renderCell={renderCell}
             renderRowLabel={renderRowLabel}
             rowLabels={pads.map((pad) => pad.name)}
+            shadeByVelocity
             size="sm"
             source={source}
             style={{ minWidth: `${steps * STEP_REM + 8}rem` }}

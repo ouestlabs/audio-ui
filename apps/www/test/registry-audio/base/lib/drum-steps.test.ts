@@ -6,6 +6,7 @@ import {
   stepsOf,
   withStep,
   withStepLevel,
+  withStepRepeats,
 } from "@/registry-audio/bases/base/lib/drum-steps";
 
 /** A kick on 36 and a snare on 38, sixteen sixteenths of a beat of 0.5 s. */
@@ -100,5 +101,46 @@ describe("a grid from the loop's start", () => {
     expect(stepsOf([note(1, 36, 1.125)], late).pattern[0]?.[1]).toBe(true);
     const notes = withStep([], late, { row: 1, step: 2 }, true);
     expect(notes[0]?.start).toBe(1.25);
+  });
+});
+
+describe("rolls", () => {
+  test("a step counts its notes as how many times it repeats", () => {
+    const steps = stepsOf(
+      [note(1, 42, 0), note(2, 42, 0.0625), note(3, 36, 0)],
+      { ...grid, notes: [36, 42] }
+    );
+    expect(steps.repeats[1]?.[0]).toBe(2);
+    expect(steps.repeats[0]?.[0]).toBe(1);
+    expect(steps.repeats[0]?.[1]).toBe(0);
+  });
+
+  test("a roll splits the step into even hits as loud as its first", () => {
+    const notes = withStepRepeats(
+      [note(1, 38, 0.5, 0.6)],
+      grid,
+      { row: 1, step: 4 },
+      3
+    );
+    expect(notes.map((item) => item.start)).toEqual([
+      0.5,
+      0.5 + 0.125 / 3,
+      0.5 + (0.125 * 2) / 3,
+    ]);
+    expect(notes.every((item) => item.velocity === 0.6)).toBe(true);
+    expect(stepsOf(notes, grid).repeats[1]?.[4]).toBe(3);
+  });
+
+  test("back to one, the step is one hit again; on a step that plays nothing, nothing changes", () => {
+    const rolled = withStepRepeats(
+      [note(1, 38, 0.5)],
+      grid,
+      { row: 1, step: 4 },
+      4
+    );
+    const single = withStepRepeats(rolled, grid, { row: 1, step: 4 }, 1);
+    expect(single).toHaveLength(1);
+    const empty = [note(1, 36, 0)];
+    expect(withStepRepeats(empty, grid, { row: 1, step: 4 }, 2)).toBe(empty);
   });
 });
