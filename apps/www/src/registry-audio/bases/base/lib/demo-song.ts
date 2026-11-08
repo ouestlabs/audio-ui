@@ -234,7 +234,7 @@ const kick = (beat: number): Hit => ({
   frequency: 50,
   level: 0.9,
 });
-/** A snare hit; `room` sends it through the room, as the backbeats on two and four are. */
+/** A snare hit; `room` sends it through the room, as the backbeats and the fill are. */
 const snare = (beat: number, level = 1, room = false): Hit[] => [
   {
     at: beat * BEAT,
@@ -301,10 +301,10 @@ const DRUMS = {
   ],
   "drums-fill": [
     kick(0),
-    ...snare(1),
+    ...snare(1, 1, true),
     ...hats(1).slice(0, 8),
     ...Array.from({ length: 8 }, (_, step) =>
-      snare(2 + step / 4, 0.35 + step * 0.09)
+      snare(2 + step / 4, 0.35 + step * 0.09, true)
     ).flat(),
   ],
   "drums-verse": [...groove(2), ...hats(2)],
@@ -341,9 +341,9 @@ function roomImpulse(ctx: BaseAudioContext) {
 
 /**
  * A part's samples, before any level is set. The backbeats on two and four,
- * the snare and its clap, go through a room as well, while the ghost notes
- * and the fill stay dry; the room's tail, past the end, comes round to the
- * start, as the part loops.
+ * the snare and its clap, and the fill's roll go through a room as well,
+ * while the ghost notes stay dry; the room's tail, past the end, comes round
+ * to the start, as the part loops.
  */
 function draw(part: SongPart, rate: number): Promise<Float32Array> {
   const length = Math.ceil(rate * BEAT * 4 * SONG_RECORDINGS[part]);
