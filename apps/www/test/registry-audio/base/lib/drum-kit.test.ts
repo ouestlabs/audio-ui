@@ -159,4 +159,29 @@ describe("a drum rack started from a kit", () => {
     );
     expect(kitOf(next)?.chains[0]?.devices[0]?.device).toBe(drumSynthDevice.id);
   });
+
+  test("a sound put on a pad takes the place of the instrument at its head, and the pad keeps its effects", () => {
+    const state = run([addKit]);
+    const rack = state.doc.tracks[0]?.devices?.[0];
+    const snare = () =>
+      kitOf(next)?.chains.find((chain) => chain.pad?.note === DRUM_NOTES.snare);
+    const next = run(
+      [
+        {
+          name: "My snare",
+          note: DRUM_NOTES.snare,
+          rack: rack?.id as string,
+          sound: { decay: 0.4, kind: "sample", recording: "rec-1", tune: 0 },
+          track: "beat",
+          type: "set-pad",
+        },
+      ],
+      state
+    );
+    expect(snare()?.name).toBe("My snare");
+    expect(snare()?.pad?.sound).toMatchObject({ recording: "rec-1" });
+    expect(snare()?.devices.map((device) => device.device)).toEqual([
+      "audioui.reverb",
+    ]);
+  });
 });

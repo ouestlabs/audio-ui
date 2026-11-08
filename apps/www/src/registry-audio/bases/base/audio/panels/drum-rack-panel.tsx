@@ -2,7 +2,14 @@
 
 import { pitchName } from "@audio-ui/core/pitch";
 import type { Pad as PadPrimitive } from "@audio-ui/react";
-import { type DragEvent, type ReactNode, useCallback, useState } from "react";
+import {
+  type ChangeEvent,
+  type DragEvent,
+  type ReactNode,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
@@ -106,6 +113,54 @@ function VoiceToggle({
   );
 }
 
+/** Picks a recording from the computer for the pad of `note`, as a drop on the pad does. */
+function SampleButton({
+  note,
+  onFiles,
+}: {
+  note: number;
+  onFiles: (note: number, files: File[]) => void;
+}) {
+  const input = useRef<HTMLInputElement>(null);
+  const open = useCallback(() => input.current?.click(), []);
+  const change = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const files = [...(event.currentTarget.files ?? [])];
+      // Cleared, so the same file picked again still loads.
+      event.currentTarget.value = "";
+      if (files.length > 0) {
+        onFiles(note, files);
+      }
+    },
+    [note, onFiles]
+  );
+  return (
+    <>
+      <Button onClick={open} size="sm" variant="outline">
+        <IconPlaceholder
+          aria-hidden="true"
+          className="size-4"
+          hugeicons="Upload01Icon"
+          lucide="UploadIcon"
+          phosphor="UploadIcon"
+          remixicon="RiUploadLine"
+          tabler="IconUpload"
+        />
+        Sample
+      </Button>
+      <input
+        accept="audio/*"
+        aria-hidden="true"
+        className="hidden"
+        onChange={change}
+        ref={input}
+        tabIndex={-1}
+        type="file"
+      />
+    </>
+  );
+}
+
 /** The choke groups a pad can be in, or none. */
 const CHOKE_GROUPS = [
   { label: "No choke", value: "none" },
@@ -154,12 +209,13 @@ function ChokeSelect({
   );
 }
 
-/** The picked pad: which voice it plays, its pitch and decay, or else the instrument at its head; its chain's mix and its choke group. */
+/** The picked pad: which voice or recording it plays, its pitch and decay, or else the instrument at its head; its chain's mix and its choke group. */
 function PadEditor({
   chain,
   note,
   onChainMix,
   onChainMixCommit,
+  onLoadFiles,
   onPadChange,
   onPadChoke,
   onPadCommit,
@@ -170,6 +226,7 @@ function PadEditor({
   note: number;
   onChainMix: (chain: string, mix: Partial<RackChainMix>) => void;
   onChainMixCommit?: () => void;
+  onLoadFiles?: (note: number, files: File[]) => void;
   onPadChange: (
     chain: string,
     change: { decay?: number; tune?: number }
@@ -229,6 +286,9 @@ function PadEditor({
             />
           ))
         )}
+        {onLoadFiles ? (
+          <SampleButton note={note} onFiles={onLoadFiles} />
+        ) : null}
         {chain && onPadChoke ? (
           <span className="ms-auto">
             <ChokeSelect chain={chain} onPadChoke={onPadChoke} />
@@ -285,8 +345,8 @@ function PadEditor({
         </div>
       ) : (
         <span className="text-muted-foreground text-xs">
-          Empty: pick a voice, drop a recording on the pad, or drag a Drum Synth
-          onto it.
+          Empty: pick a voice or a sample, drop a recording on the pad, or drag
+          a Drum Synth onto it.
         </span>
       )}
     </div>
@@ -298,8 +358,8 @@ function PadEditor({
  * a bank of the 128 notes, each named for the sound it plays, the lowest note
  * at the bottom left; the picked pad's voice, pitch, decay and mix; and the
  * picked pad's devices, which the host draws as `children`. Striking a pad
- * picks it and plays it through `onPadOn`; a recording dropped on a pad goes
- * to `onDropFiles`. Controlled: every change is a callback, and the knobs
+ * picks it and plays it through `onPadOn`; a recording dropped on a pad, or
+ * picked with the Sample button, goes to `onDropFiles`. Controlled: every change is a callback, and the knobs
  * report the end of a turn with the commit callbacks.
  */
 function DrumRackPanel({
@@ -343,7 +403,7 @@ function DrumRackPanel({
   onMacrosShownChange?: (shown: boolean) => void;
   onChainMix: (chain: string, mix: Partial<RackChainMix>) => void;
   onChainMixCommit?: () => void;
-  /** Files dropped on the pad of `note`: a recording to play there. */
+  /** Files dropped on the pad of `note`, or picked with the Sample button, which shows only with this: a recording to play there. */
   onDropFiles?: (note: number, files: File[]) => void;
   onEnabledChange?: (enabled: boolean) => void;
   onMacroChange: (index: number, value: number) => void;
@@ -526,6 +586,7 @@ function DrumRackPanel({
           note={selectedNote}
           onChainMix={onChainMix}
           onChainMixCommit={onChainMixCommit}
+          onLoadFiles={onDropFiles}
           onPadChange={onPadChange}
           onPadChoke={onPadChoke}
           onPadCommit={onPadCommit}
