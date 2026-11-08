@@ -362,14 +362,14 @@ function clipOf(
 }
 
 /**
- * What each part of the song plays, all of it on the same loop. The organ and
- * the guitar open it, the verse brings in the drums and the bass, the chorus
+ * What each part of the song plays, all of it on the same loop. The drums,
+ * the organ and the guitar open it, the verse brings in the bass, the chorus
  * is the whole band, harder, under the lead's hook, and the organ and the
  * guitar close it, back where the song started.
  */
 const PLAYS: Record<(typeof PARTS)[number]["id"], readonly Take[]> = {
   chorus: ["drums-chorus", "bass-chorus", "organ", "guitar-chorus", "lead"],
-  intro: ["organ", "guitar-verse"],
+  intro: ["drums-verse", "organ", "guitar-verse"],
   outro: ["organ", "guitar-verse"],
   verse: ["drums-verse", "bass-verse", "guitar-verse"],
 };
