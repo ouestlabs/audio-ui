@@ -42,6 +42,7 @@ import {
 } from "@/lib/arrangement";
 import { trackOf } from "@/lib/arrangement-state";
 import { libraryDevice } from "@/lib/device-library";
+import { drumKit } from "@/lib/drum-kit";
 import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 
 type Arrangement = ReturnType<typeof useArrangement>;
@@ -518,6 +519,17 @@ function DrumSlot({
     (at: number, files: File[]) => onPadFiles(rackId, at, files),
     [onPadFiles, rackId]
   );
+  const setChoke = useCallback(
+    (id: string, choke: number | null) =>
+      dispatch({
+        chain: id,
+        choke,
+        rack: rackId,
+        track,
+        type: "set-pad-choke",
+      }),
+    [dispatch, rackId, track]
+  );
   return (
     <DeviceChainSlot
       enabled={device.on !== false}
@@ -539,6 +551,7 @@ function DrumSlot({
         onMacrosShownChange={setMacrosShown}
         onMapMacro={map}
         onPadChange={change}
+        onPadChoke={setChoke}
         onPadCommit={settle}
         onPadOff={onNoteOff}
         onPadOn={onNoteOn}
@@ -656,6 +669,8 @@ export function DeviceView({
       dispatch({
         device: DRUM_RACK_DEVICE,
         instrument: true,
+        // A kit to start from: a Drum Synth on every pad.
+        rack: drumKit(),
         state: {},
         track: current.id,
         type: "add-device",
