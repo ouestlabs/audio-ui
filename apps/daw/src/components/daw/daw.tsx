@@ -64,6 +64,7 @@ import {
   type ExportSettings,
 } from "@/lib/audio-export";
 import { isComputerKeyboardKey } from "@/lib/computer-keyboard";
+import { exportSound } from "@/lib/daw/audio-files";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { renderConsolidated } from "@/lib/daw/consolidate";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
@@ -73,7 +74,6 @@ import {
   exportProject,
   importProject,
 } from "@/lib/daw/exchange";
-import { exportSound } from "@/lib/daw/export-audio";
 import {
   canUseFolders,
   mayWrite,

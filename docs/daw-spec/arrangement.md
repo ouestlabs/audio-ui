@@ -28,8 +28,8 @@ Audio files dropped on the button that adds a track, at the head of the track he
 Test: apps/daw/test/arrangement.test.ts "ARR-006"
 
 ### ARR-007 What cannot be read
-A dropped file that is not sound, or that the browser cannot decode, is left out, and the app says which.
-Test: apps/daw/test/arrangement.test.ts "ARR-007"
+An AIFF, CAF or Apple Lossless file the browser cannot decode, as Chrome cannot, is read by a decoder of its format, at the project's sample rate. A file that is still not sound is left out, and the app says which.
+Test: apps/www/test/registry-audio/base/lib/audio-decode.test.ts, apps/daw/test/browser/run.ts "ARR-007"
 
 ### ARR-008 Clips keep their recording
 A clip names the recording it plays; splitting, duplicating or copying it keeps that name, so every piece plays the same recording.

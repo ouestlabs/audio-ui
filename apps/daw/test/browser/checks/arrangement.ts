@@ -1,8 +1,10 @@
 /** The checks of docs/daw-spec/arrangement.md. */
+import encode from "@audio/encode";
 import {
   assert,
   type Checks,
   dropChord,
+  dropFiles,
   loudest,
   movesLikeAMarker,
   open,
@@ -20,6 +22,50 @@ export const checks: Checks = {
         timeout: 10_000,
       });
       await page.waitForSelector("[data-slot=timeline-clip-waveform]");
+    },
+  "ARR-007: AIFF, CAF and Apple Lossless files, which Chrome does not decode, make tracks too":
+    async (browser) => {
+      const page = await open(browser);
+      const rate = 48_000;
+      const tone = Float32Array.from(
+        { length: rate * 2 },
+        (_, frame) => 0.3 * Math.sin((2 * Math.PI * 220 * frame) / rate)
+      );
+      const channels = [tone, tone];
+      await dropFiles(page, "[data-add-track]", [
+        {
+          bytes: await encode.aiff(channels, {
+            bitDepth: 16,
+            sampleRate: rate,
+          }),
+          name: "AIFF take.aiff",
+          type: "audio/aiff",
+        },
+        {
+          bytes: await encode.caf(channels, { bitDepth: 16, sampleRate: rate }),
+          name: "CAF take.caf",
+          type: "audio/x-caf",
+        },
+        {
+          bytes: await encode.m4a(channels, {
+            codec: "alac",
+            sampleRate: rate,
+          }),
+          name: "ALAC take.m4a",
+          type: "audio/mp4",
+        },
+      ]);
+      await Promise.all(
+        ["AIFF take", "CAF take", "ALAC take"].map((name) =>
+          page.waitForSelector(`[aria-label="${name}"][data-track-id]`, {
+            timeout: 20_000,
+          })
+        )
+      );
+      const waveforms = await page
+        .locator("[data-slot=timeline-clip-waveform]")
+        .count();
+      assert(waveforms >= 3, `${waveforms} waveforms for 3 files`);
     },
   "ARR-027: a track's Solo, Mute and Arm are one group of switches: one stop of Tab, the arrows between them, a color each":
     async (browser) => {

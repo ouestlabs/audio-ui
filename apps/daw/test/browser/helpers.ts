@@ -85,6 +85,45 @@ export async function dropChord(
   );
 }
 
+/** Drops files of the given bytes on `selector` at once, as a drag from the desktop would. */
+export async function dropFiles(
+  page: Page,
+  selector: string,
+  files: { bytes: Uint8Array; name: string; type: string }[]
+) {
+  await page.evaluate(
+    ({ files: dropped, selector: target }) => {
+      const transfer = new DataTransfer();
+      for (const file of dropped) {
+        const bytes = Uint8Array.from(atob(file.base64), (char) =>
+          char.charCodeAt(0)
+        );
+        transfer.items.add(new File([bytes], file.name, { type: file.type }));
+      }
+      const element = document.querySelector(target) as HTMLElement;
+      const box = element.getBoundingClientRect();
+      const init = {
+        bubbles: true,
+        cancelable: true,
+        clientX: box.left + 10,
+        clientY: box.top + 10,
+        dataTransfer: transfer,
+      };
+      element.dispatchEvent(new DragEvent("dragenter", init));
+      element.dispatchEvent(new DragEvent("dragover", init));
+      element.dispatchEvent(new DragEvent("drop", init));
+    },
+    {
+      files: files.map((file) => ({
+        base64: Buffer.from(file.bytes).toString("base64"),
+        name: file.name,
+        type: file.type,
+      })),
+      selector,
+    }
+  );
+}
+
 export const FOLD = /^Fold /;
 export const REMOVE = /^Remove /;
 export const UNFOLD = /^Unfold /;

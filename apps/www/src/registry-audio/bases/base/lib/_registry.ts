@@ -32,9 +32,14 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "waveform"],
-    dependencies: [],
+    dependencies: [
+      "@audio/decode-aiff",
+      "@audio/decode-caf",
+      "@audio/decode-mp4",
+      "@audio/resample-sinc",
+    ],
     description:
-      "Decoding an audio file into samples with the Web Audio API (decodeAudioData), the step before the waveform maths of @audio-ui/core/analysis",
+      "Decoding an audio file into samples at a context's rate, the step before the waveform maths of @audio-ui/core/analysis: the browser's decoder first, and for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed",
     files: [
       {
         path: "lib/audio-decode.ts",

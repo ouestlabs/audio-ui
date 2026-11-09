@@ -184,3 +184,9 @@ Status: fixed: at the end of phase 4, 16 tracks load the audio thread at 40 % on
 An export to FLAC or MP3, and the encoders for them, were not in the registry: its `wav-file` wrote 16 or 24-bit PCM and 32-bit floats, and nothing else.
 Fix: `audio-encode` replaces it: `encodeAudio` writes WAV, FLAC or MP3 through `@audio/encode`, in chunks with a paint between two, each format's encoder loaded the first time it is used (`apps/www/test/registry-audio/base/lib/audio-encode.test.ts`). The DAW installs it and keeps it out of its server's build.
 Status: fixed (EXP-003).
+
+
+### G-033 Chrome left out AIFF, CAF and Apple Lossless files
+The registry's `audio-decode` read a file with the browser's decoder only, and Chrome's reads no AIFF (the usual export of a Mac DAW), no CAF and no Apple Lossless: a dropped one was left out as not sound. Measured on 2026-11-09 with a second of each format: Chrome refuses AIFF, CAF, Apple Lossless, WavPack and QOA; the Safari engine refuses WavPack and QOA.
+Fix: an AIFF, CAF or Apple Lossless file the browser refuses goes through a decoder of its format (`@audio/decode-aiff`, `-caf`, `-mp4`), then `@audio/resample-sinc` to the context's rate, each loaded the first time a file needs it. `@audio/decode` itself was left out: its 4.2.0 imports two decoders it does not depend on, which fails a bundler's build. WavPack and QOA, which no browser decodes, stay out until a file of one turns up (`apps/www/test/registry-audio/base/lib/audio-decode.test.ts`).
+Status: fixed (ARR-007).
