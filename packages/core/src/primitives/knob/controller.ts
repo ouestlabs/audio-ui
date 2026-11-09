@@ -353,7 +353,7 @@ export function createKnobController(
   };
 
   const press: KnobController["press"] = (event, control) => {
-    if (options.disabled || pointers.busy(event)) {
+    if (options.disabled || !pointers.claim(event)) {
       return;
     }
     // Alt + click returns to the default, as in a DAW.
@@ -398,9 +398,10 @@ export function createKnobController(
         current.changed = true;
       }
     };
-    // A cancelled press is no tap: the browser took the pointer away.
+    // Only a release is a tap: not a cancel, when the browser took the pointer
+    // away, nor the next press, when the release was missed.
     pointers.follow(control, event.pointerId, move, (end) =>
-      finish(end, end.type !== "pointercancel")
+      finish(end, end.type === "pointerup" || end.type === "pointermove")
     );
   };
 

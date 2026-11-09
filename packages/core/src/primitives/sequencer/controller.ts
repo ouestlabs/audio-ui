@@ -334,7 +334,7 @@ export function createSequencerController(
     root,
     nodes
   ) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     const on = !isOn(currentPattern(), cell);
@@ -387,7 +387,7 @@ export function createSequencerController(
     root,
     nodes
   ) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     const gesture: VelocityGesture = { changed: false, nodes, row: cell.row };

@@ -294,7 +294,7 @@ export function createWaveformController(
   };
 
   const pressSeek: WaveformSeekController["pressSeek"] = (event, element) => {
-    if (inert() || event.button !== 0 || pointers.busy(event)) {
+    if (inert() || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     element.setPointerCapture?.(event.pointerId);

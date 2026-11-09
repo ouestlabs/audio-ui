@@ -3,6 +3,7 @@ import {
   boxElement,
   dragWithSecondFinger,
   ONE_FINGER,
+  touch,
 } from "../../../test/helpers.ts";
 import { createKnobController } from "./controller.ts";
 
@@ -175,5 +176,30 @@ describe("Knob controller pointers", () => {
       ],
     });
     expect(result).toEqual(ONE_FINGER);
+  });
+});
+
+describe("Knob controller missed release", () => {
+  test("pressed again after a release it missed, the last drag commits and the new one turns at its own speed", () => {
+    const onValueCommitted = mock((_value: number) => undefined);
+    const knob = createKnobController({
+      dragMode: "vertical",
+      onValueCommitted,
+    });
+    const control = boxElement();
+    const start = knob.getSnapshot().value;
+    knob.press(touch("pointerdown", 80, 40, 1), control);
+    // Past a tap's reach: a drag.
+    document.dispatchEvent(touch("pointermove", 80, 20, 1));
+    const turned = knob.getSnapshot().value;
+    // The release is lost: the same pointer presses again.
+    knob.press(touch("pointerdown", 80, 20, 1), control);
+    expect(onValueCommitted.mock.calls.map(([value]) => value)).toEqual([
+      turned,
+    ]);
+    document.dispatchEvent(touch("pointermove", 80, 0, 1));
+    expect(knob.getSnapshot().value - turned).toBe(turned - start);
+    document.dispatchEvent(touch("pointerup", 80, 0, 1));
+    expect(onValueCommitted).toHaveBeenCalledTimes(2);
   });
 });

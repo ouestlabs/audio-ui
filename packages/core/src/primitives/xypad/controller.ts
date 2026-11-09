@@ -312,7 +312,7 @@ export function createXYPadController(
   };
 
   const press: XYPadController["press"] = (event, control) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     // Alt + press returns to the default, as in a DAW.

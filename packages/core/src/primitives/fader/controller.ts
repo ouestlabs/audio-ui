@@ -266,7 +266,7 @@ export function createFaderController(
   };
 
   const press: FaderController["press"] = (event, control, thumb) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     const vertical = (options.orientation ?? "vertical") === "vertical";

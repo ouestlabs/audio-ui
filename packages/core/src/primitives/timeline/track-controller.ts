@@ -137,7 +137,7 @@ export function createTrackController(initial: TrackOptions): TrackController {
   };
 
   const press: TrackController["press"] = (event, handle) => {
-    if (event.button !== 0 || pointers.busy(event)) {
+    if (event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);

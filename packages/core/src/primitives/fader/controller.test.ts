@@ -3,6 +3,7 @@ import {
   boxElement,
   dragWithSecondFinger,
   ONE_FINGER,
+  touch,
 } from "../../../test/helpers.ts";
 import { createFaderController } from "./controller.ts";
 
@@ -184,5 +185,21 @@ describe("Fader controller pointers", () => {
       ],
     });
     expect(result).toEqual(ONE_FINGER);
+  });
+});
+
+describe("Fader controller missed release", () => {
+  test("pressed again after a release it missed, the last drag commits there and the new one once", () => {
+    const onValueCommitted = mock(() => undefined);
+    const fader = createFaderController({ onValueCommitted });
+    const control = boxElement(20, 200);
+    fader.press(touch("pointerdown", 10, 100, 1), control, null);
+    document.dispatchEvent(touch("pointermove", 10, 80, 1));
+    // The release is lost: the same pointer presses again.
+    fader.press(touch("pointerdown", 10, 80, 1), control, null);
+    expect(onValueCommitted).toHaveBeenCalledTimes(1);
+    document.dispatchEvent(touch("pointermove", 10, 60, 1));
+    document.dispatchEvent(touch("pointerup", 10, 60, 1));
+    expect(onValueCommitted).toHaveBeenCalledTimes(2);
   });
 });

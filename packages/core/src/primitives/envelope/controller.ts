@@ -472,7 +472,7 @@ export function createEnvelopeController(
     handle,
     graph
   ) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     // Alt + press removes the point, as in a DAW's automation lane.
@@ -552,7 +552,7 @@ export function createEnvelopeController(
       options.disabled ||
       flat ||
       event.button !== 0 ||
-      pointers.busy(event)
+      !pointers.claim(event)
     ) {
       return;
     }
@@ -608,7 +608,7 @@ export function createEnvelopeController(
       options.disabled ||
       event.button !== 0 ||
       !event.altKey ||
-      pointers.busy(event)
+      !pointers.claim(event)
     ) {
       return;
     }

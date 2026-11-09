@@ -205,7 +205,7 @@ export function createNavigatorController(
   const range = () => visibleRange(options.metrics(), options.duration);
 
   const press: NavigatorController["press"] = (part, event, handle, track) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);

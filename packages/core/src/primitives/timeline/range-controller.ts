@@ -359,7 +359,7 @@ export function createRangeController(initial: RangeOptions): RangeController {
   };
 
   const press: RangeController["press"] = (edge, event, handle, lane) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     if (edge === "both" && !options.movable) {
@@ -429,7 +429,7 @@ export function createRangeController(initial: RangeOptions): RangeController {
       options.disabled ||
       !options.drawable ||
       event.button !== 0 ||
-      pointers.busy(event) ||
+      !pointers.claim(event) ||
       event.target !== lane
     ) {
       return;
