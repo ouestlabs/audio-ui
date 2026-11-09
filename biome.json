@@ -16,6 +16,7 @@
       "!**/.zed",
       "!**/.vscode",
       "!**/routeTree.gen.ts",
+      "!apps/www/src/registry/icons/__*__.ts",
       "!**/.source",
       "!apps/www/public/r"
     ]
