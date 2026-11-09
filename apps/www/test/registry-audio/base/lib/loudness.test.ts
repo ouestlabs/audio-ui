@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
+import kWeighting from "@audio/weighting-k";
 import {
+  createLoudnessReader,
+  type LiveLoudness,
   LOUDNESS_TARGETS,
+  LOUDNESS_WORKLET,
   loudnessGain,
   measureLoudness,
 } from "@/registry-audio/bases/base/lib/loudness";
@@ -100,5 +104,190 @@ describe("loudnessGain", () => {
         -14
       )
     ).toBe(0);
+  });
+});
+
+interface Processor {
+  process: (inputs: Float32Array[][]) => boolean;
+}
+
+/**
+ * The meter's processor, run as the audio thread runs it, 128 frames at a
+ * time: what it posts, a block's power each 100 ms.
+ */
+function blocksOf(channels: Float32Array[], rate = RATE) {
+  const posted: number[] = [];
+  class AudioWorkletProcessor {
+    readonly port = { postMessage: (power: number) => posted.push(power) };
+  }
+  let Made: (new (options: unknown) => Processor) | undefined;
+  const register = (
+    _name: string,
+    made: new (options: unknown) => Processor
+  ) => {
+    Made = made;
+  };
+  new Function("AudioWorkletProcessor", "registerProcessor", LOUDNESS_WORKLET)(
+    AudioWorkletProcessor,
+    register
+  );
+  if (!Made) {
+    throw new Error("The worklet registered no processor");
+  }
+  const processor = new Made({
+    processorOptions: {
+      coefs: kWeighting.coefs(rate),
+      frames: Math.round(rate / 10),
+    },
+  });
+  const frames = channels[0]?.length ?? 0;
+  for (let frame = 0; frame < frames; frame += 128) {
+    processor.process([
+      channels.map((channel) => channel.subarray(frame, frame + 128)),
+    ]);
+  }
+  return posted;
+}
+
+/** Each reading of a sound, block by block, as a live meter shows it. */
+function readings(channels: Float32Array[]) {
+  const reader = createLoudnessReader();
+  return blocksOf(channels).map((power) => reader.add(power));
+}
+
+const last = (all: LiveLoudness[]) => all.at(-1) as LiveLoudness;
+
+describe("createLoudnessReader, over the meter's blocks", () => {
+  test("a steady stereo sine of 1 kHz reads as loud as its peak, momentary, short-term and integrated (EBU Tech 3341, cases 1 and 2)", () => {
+    for (const dbfs of [-23, -33]) {
+      const reading = last(readings(sine(1000, [[dbfs, 20]])));
+      expect(reading.momentary).toBeCloseTo(dbfs, 1);
+      expect(reading.shortTerm).toBeCloseTo(dbfs, 1);
+      expect(reading.integrated).toBeCloseTo(dbfs, 1);
+    }
+  });
+
+  test("the gates leave the quiet passages out of the integrated loudness (EBU Tech 3341, cases 3 to 5)", () => {
+    const cases: [dbfs: number, seconds: number][][] = [
+      [
+        [-36, 10],
+        [-23, 60],
+        [-36, 10],
+      ],
+      [
+        [-72, 10],
+        [-36, 10],
+        [-23, 60],
+        [-36, 10],
+        [-72, 10],
+      ],
+      [
+        [-26, 20.1],
+        [-20, 20.1],
+        [-26, 20.1],
+      ],
+    ];
+    for (const passages of cases) {
+      expect(last(readings(sine(1000, passages))).integrated).toBeCloseTo(
+        -23,
+        1
+      );
+    }
+  });
+
+  test("the short-term loudness holds over a sound that repeats every 3 s (EBU Tech 3341, case 9)", () => {
+    const period: [dbfs: number, seconds: number][] = [
+      [-20, 1.34],
+      [-30, 1.66],
+    ];
+    const all = readings(
+      sine(1000, Array.from({ length: 5 }, () => period).flat())
+    );
+    // From its first 3 s on.
+    for (const reading of all.slice(29)) {
+      expect(Math.abs(reading.shortTerm + 23)).toBeLessThan(0.1);
+    }
+  });
+
+  test("reads the integrated loudness of a whole sound as the offline measurement does", () => {
+    // Noise in passages from loud to near silence, so both gates have something to leave out.
+    let seed = 1;
+    const noise = () => {
+      seed = (seed * 16_807) % 2_147_483_647;
+      return seed / 2_147_483_647 - 0.5;
+    };
+    const levels = [0.5, 0.02, 0.3, 0.0001, 0.8, 0.05];
+    const channels = [0, 1].map(() =>
+      Float32Array.from(
+        { length: levels.length * 3 * RATE },
+        (_, frame) => (levels[Math.floor(frame / (3 * RATE))] ?? 0) * noise()
+      )
+    );
+    expect(last(readings(channels)).integrated).toBeCloseTo(
+      measureLoudness(channels, RATE).lufs,
+      2
+    );
+  });
+
+  test("has no momentary loudness before 400 ms, no short-term before 3 s, and silence has none at all", () => {
+    const all = readings(sine(1000, [[-23, 3]]));
+    expect(all.at(2)?.momentary).toBe(Number.NEGATIVE_INFINITY);
+    expect(all.at(3)?.momentary).toBeCloseTo(-23, 1);
+    expect(all.at(28)?.shortTerm).toBe(Number.NEGATIVE_INFINITY);
+    expect(all.at(29)?.shortTerm).toBeCloseTo(-23, 1);
+    expect(last(readings([new Float32Array(5 * RATE)]))).toEqual({
+      integrated: Number.NEGATIVE_INFINITY,
+      momentary: Number.NEGATIVE_INFINITY,
+      shortTerm: Number.NEGATIVE_INFINITY,
+    });
+  });
+
+  test("clear starts the integrated loudness over and keeps the others", () => {
+    const reader = createLoudnessReader();
+    const loud = blocksOf(sine(1000, [[-14, 5]]));
+    const quiet = blocksOf(sine(1000, [[-30, 5]]));
+    for (const power of loud) {
+      reader.add(power);
+    }
+    reader.clear();
+    const after = reader.add(quiet[0] as number);
+    expect(after.integrated).toBe(Number.NEGATIVE_INFINITY);
+    expect(after.shortTerm).toBeGreaterThan(-15);
+    let reading = after;
+    for (const power of quiet.slice(1)) {
+      reading = reader.add(power);
+    }
+    expect(reading.integrated).toBeCloseTo(-30, 1);
+  });
+});
+
+describe("the meter's processor", () => {
+  test("posts a block each 100 ms, at any rate, the frames of a block across the render quanta", () => {
+    expect(blocksOf(sine(1000, [[-23, 2]]))).toHaveLength(20);
+    expect(blocksOf([new Float32Array(44_100)], 44_100)).toHaveLength(10);
+  });
+
+  test("counts a quantum with no input as silence", () => {
+    const posted: number[] = [];
+    class AudioWorkletProcessor {
+      readonly port = { postMessage: (power: number) => posted.push(power) };
+    }
+    let processor: Processor | undefined;
+    new Function(
+      "AudioWorkletProcessor",
+      "registerProcessor",
+      LOUDNESS_WORKLET
+    )(
+      AudioWorkletProcessor,
+      (_name: string, Made: new (options: unknown) => Processor) => {
+        processor = new Made({
+          processorOptions: { coefs: kWeighting.coefs(RATE), frames: 4800 },
+        });
+      }
+    );
+    for (let quantum = 0; quantum < 75; quantum += 1) {
+      processor?.process([[]]);
+    }
+    expect(posted).toEqual([0, 0]);
   });
 });

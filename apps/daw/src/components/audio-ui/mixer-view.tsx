@@ -28,6 +28,7 @@ import {
 import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
+import { useLoudness } from "@/hooks/use-loudness";
 import {
   type AutomationFollowing,
   useAutomatedMix,
@@ -73,6 +74,9 @@ const formatPan = (pan: number) => {
 };
 const formatSend = (level: number) =>
   level <= 0 ? "-∞ dB" : `${gainToDb(level).toFixed(1)} dB`;
+
+const formatLufs = (lufs: number, digits: number) =>
+  Number.isFinite(lufs) ? lufs.toFixed(digits) : "-∞";
 
 /** The main track's meter is read to the dB: a scale beside it. */
 const MAIN_MARKS = [0, -6, -12, -24, -48];
@@ -167,6 +171,59 @@ function PeakReadout({
   );
 }
 
+/**
+ * How loud the mix is (MIX-025), in LUFS, integrated since it was last
+ * cleared: what streaming services and broadcasters hold a file to, and what
+ * an export normalizes to. A click clears it. Its text is written straight
+ * into the page as the reading moves, so it costs no render.
+ */
+function LoudnessReadout({
+  className,
+  tap,
+}: {
+  className: string;
+  tap: AudioNode | null;
+}) {
+  const { clear, source } = useLoudness(tap);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  useEffect(() => {
+    const paint = () => {
+      const button = buttonRef.current;
+      const label = button?.firstChild;
+      if (!(button && label instanceof Text)) {
+        return;
+      }
+      const { integrated } = source.getSnapshot();
+      const text = `${formatLufs(integrated, 1)} LUFS`;
+      // Its name moves by whole LU, so a screen reader is not read each tenth.
+      const name = `Main loudness ${formatLufs(integrated, 0)} LUFS, click to clear`;
+      // One text node's data, not its children: a change of children restyles the whole page.
+      if (label.data !== text) {
+        label.data = text;
+      }
+      if (button.ariaLabel !== name) {
+        button.ariaLabel = name;
+      }
+    };
+    paint();
+    return source.subscribe(paint);
+  }, [source]);
+  return (
+    <button
+      aria-label="Main loudness -∞ LUFS, click to clear"
+      className={cn(
+        "rounded-full border bg-muted/60 text-foreground text-xs tabular-nums outline-none transition-colors hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring",
+        className
+      )}
+      onClick={clear}
+      ref={buttonRef}
+      type="button"
+    >
+      -∞ LUFS
+    </button>
+  );
+}
+
 /** A send of a channel to a return, from silence to 0 dB (MIX-007). */
 function SendKnob({
   back,
@@ -227,6 +284,8 @@ interface StripProps {
   selected: boolean;
   /** A return's own sends are off (MIX-008): it shows none. */
   sends?: boolean;
+  /** What the main track sends on, which its loudness is read from; `null` until an engine runs. */
+  tap?: AudioNode | null;
   track: ArrangementTrack;
 }
 
@@ -297,7 +356,7 @@ function StripSwitches({
   );
 }
 
-/** A channel of the mixer: its sends, its pan, its fader and meter, its switches. */
+/** A channel of the mixer: its sends, its pan, its fader and meter, its switches; the main track's loudness in their place. */
 function Strip({
   analysers,
   armed = false,
@@ -313,6 +372,7 @@ function Strip({
   returns,
   selected,
   sends,
+  tap = null,
   track,
 }: StripProps) {
   const mix = useAutomatedMix(track, following);
@@ -456,7 +516,12 @@ function Strip({
           </span>
         </>
       ) : null}
-      {main ? null : (
+      {main ? (
+        <LoudnessReadout
+          className="row-start-7 h-5 w-24 self-center"
+          tap={tap}
+        />
+      ) : (
         <StripSwitches
           armed={armed}
           muted={mix.muted}
@@ -605,6 +670,7 @@ export function MixerView({
       returns={doc.returns}
       selected={selectedTrack === track.id}
       sends={sends}
+      tap={main ? engine.tap(track.id) : null}
       track={track}
     />
   );

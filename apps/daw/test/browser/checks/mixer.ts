@@ -7,6 +7,7 @@ import {
   dragKnobVertically,
   dropChord,
   loudest,
+  MAIN_LOUDNESS,
   MAIN_PEAK,
   open,
   PAN_KNOB,
@@ -596,6 +597,34 @@ export const checks: Checks = {
       );
       await own.click();
       assert((await own.innerText()) === "-∞", "a click did not clear it");
+    },
+  "MIX-025: the main track reads the mix's loudness in LUFS until it is clicked":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, "[data-add-track]", "Chord take");
+      await page.waitForSelector('[aria-label="Chord take"][data-track-id]');
+      await showMixer(page);
+      const loudness = page.getByRole("button", { name: MAIN_LOUDNESS });
+      assert(
+        (await loudness.innerText()) === "-∞ LUFS",
+        "the loudness starts at -∞"
+      );
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      await page.waitForTimeout(1500);
+      await page.keyboard.press("Space");
+      const read = Number.parseFloat(await loudness.innerText());
+      assert(read > -40 && read < 0, `the mix read ${read} LUFS`);
+      assert(
+        (await loudness.getAttribute("aria-label")) ===
+          `Main loudness ${Math.round(read)} LUFS, click to clear`,
+        "its name does not say the loudness to the LU"
+      );
+      await loudness.click();
+      assert(
+        (await loudness.innerText()) === "-∞ LUFS",
+        "a click did not clear it"
+      );
     },
   "MIX-022: a track's header meters it: the track that plays reads a level, a thin pair, and the others none":
     async (browser) => {

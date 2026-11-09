@@ -45,7 +45,7 @@ export interface UseArrangementEngineOptions {
  * the audio clock. The document comes in as a value and the engine follows
  * it while it plays. Returns the transport (`play`, `stop`, `playing`), the
  * playhead as a live source of seconds (what the speakers play, not what is
- * being computed), each channel's meter, and the engine's status.
+ * being computed), each channel's meter and tap, and the engine's status.
  */
 export function useArrangementEngine({
   doc,
@@ -178,15 +178,21 @@ export function useArrangementEngine({
     setPlaying(false);
   }, [engine, position]);
 
-  /** A channel's meter, one analyser per channel, by its track's id; the main track's with `main`. */
-  const meter = useCallback(
+  const channel = useCallback(
     (id: string) =>
       engine
-        ? ((id === doc.main.id ? engine.mixer.main : engine.mixer.strip(id))
-            ?.meter ?? null)
+        ? ((id === doc.main.id ? engine.mixer.main : engine.mixer.strip(id)) ??
+          null)
         : null,
     [doc.main.id, engine]
   );
+  /** A channel's meter, one analyser per channel, by its track's id; the main track's with `main`. */
+  const meter = useCallback(
+    (id: string) => channel(id)?.meter ?? null,
+    [channel]
+  );
+  /** What a channel sends on, by its track's id, for a measurement of your own such as `useLoudness`; the main track's with `main`. */
+  const tap = useCallback((id: string) => channel(id)?.tap ?? null, [channel]);
 
-  return { engine, meter, play, playing, position, status, stop };
+  return { engine, meter, play, playing, position, status, stop, tap };
 }

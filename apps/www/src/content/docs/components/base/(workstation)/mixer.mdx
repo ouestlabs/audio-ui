@@ -90,6 +90,7 @@ import { MixerView } from "@/components/audio-ui/mixer-view";
 - **The fader** runs from silence to +6 dB, 0 dB by default, and a double-click sets it back to 0. It is the same fader as the track's in the arrangement: one moves the other.
 - **The meter** shows the channel's peak and its level, after its fader and its switches; the main track has a scale beside its own.
 - **The peak** is the loudest sample the channel has played, in dB, in a pill over its pan. It turns red past 0 dBFS, and a click clears it.
+- **The loudness** of the mix, in the main track's channel under its fader: its integrated loudness in LUFS since it was last cleared, what streaming services and broadcasters hold a file to (-14 LUFS for streaming). A click clears it.
 - **Solo, Mute and Arm** are the same state as the track's header in the arrangement, in one group.
 
 The main track stays in sight at the right, apart from the channels by a line, while the channels scroll; the return tracks follow the tracks' channels and scroll with them. A channel moves by its name, dragged or with Left and Right on it, and the arrangement's rows move with it. A track in a group names the group it plays into.
@@ -111,7 +112,7 @@ The level is the RMS of the time-domain samples in dB. It rises at once and fall
 
 ## Over an engine of your own
 
-The view asks two things of the engine: `position`, a live source of seconds, and `meter(id)`, the analysers of a track by its id, or `null` when there are none yet. Any engine that gives those, an AudioWorklet or WASM one, drives the view; the commands of the arrangement tell it what to play.
+The view asks three things of the engine: `position`, a live source of seconds, `meter(id)`, the analysers of a track by its id, or `null` when there are none yet, and `tap(id)`, the node the main track's sound passes through after its volume, which its loudness is read from (`useLoudness`), or `null`. Any engine that gives those, an AudioWorklet or WASM one, drives the view; the commands of the arrangement tell it what to play.
 
 ## Accessibility
 
