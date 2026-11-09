@@ -1,5 +1,11 @@
 # @audio-ui/core
 
+## 0.23.2
+
+### Patch Changes
+
+- b65607f: Knob, Fader, XYPad, Envelope, Sequencer, PianoRoll, Waveform, Plot and Timeline: pressed again after a release the page missed (the button let go outside the window or over a menu), a control ends the drag it was in, committing it, before it starts the new one. It used to follow that pointer twice: a knob turned at twice the speed, and a fader committed its drag twice.
+
 ## 0.23.1
 
 ### Patch Changes
