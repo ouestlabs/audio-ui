@@ -151,7 +151,7 @@
       "name": "scrubber"
     },
     {
-      "count": 1,
+      "count": 2,
       "description": "Transport controls: return to start, play, stop, record and loop, with the position in bars and beats and the tempo.",
       "label": "Transport",
       "name": "transport"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 71
+  "totalComponents": 72
 }

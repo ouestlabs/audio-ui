@@ -424,5 +424,11 @@
     "description": "The transport of a DAW as joined clusters: play or pause, stop and the position in bars, beats and sixteenths; loop and metronome toggles; the tempo and the time signature. A clock stands in for the engine",
     "name": "transport-demo",
     "title": "Transport demo"
+  },
+  {
+    "categories": ["transport"],
+    "description": "The export dialog over two seconds of a chord: pick a format and a level, and Export saves the file and says how loud it came out, in LUFS and dBTP",
+    "name": "export-dialog-demo",
+    "title": "Export dialog demo"
   }
 ]

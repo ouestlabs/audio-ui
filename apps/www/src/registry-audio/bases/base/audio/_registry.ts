@@ -305,6 +305,25 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["transport"],
+    description:
+      "The settings of an export in a dialog: the file's format, its bit depth or bitrate, and its level, left as it is, brought to its peak, or to a loudness target for streaming, podcasts or broadcast. Controlled: Export sends the settings",
+    files: [
+      {
+        path: "audio/elements/export-dialog.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "export-dialog",
+    registryDependencies: [
+      "@audio-ui/audio-export",
+      "@shadcn/button",
+      "@shadcn/dialog",
+      "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
     categories: ["piano"],
     dependencies: ["@audio-ui/core"],
     description:

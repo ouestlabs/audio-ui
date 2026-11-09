@@ -17,6 +17,8 @@
     "mixer",
     "device-chain",
     "device-browser",
-    "rack"
+    "rack",
+    "---Export---",
+    "export-dialog"
   ]
 }

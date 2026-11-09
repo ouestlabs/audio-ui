@@ -63,6 +63,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "scale-menu",
   "note-find",
   "note-edit-menu",
+  "export-dialog",
 ] as const;
 
 export type CanonicalComponentDocSlug =

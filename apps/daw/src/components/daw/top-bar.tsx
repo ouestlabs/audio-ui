@@ -40,7 +40,6 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { AudioFileFormat } from "@/lib/audio-encode";
 import type { ShortcutCommand } from "@/lib/daw/shortcuts";
 import { CommandKeys, ShortcutList } from "./shortcut-list";
 
@@ -129,8 +128,8 @@ export interface TopBarProps
   looping: boolean;
   metronome: boolean;
   onAutomatingChange: (automating: boolean) => void;
-  /** Renders the arrangement to a file of a format (EXP-003). */
-  onExport: (format: AudioFileFormat) => void;
+  /** Opens the export dialog (EXP-003). */
+  onExport: () => void;
   /** Sends the project to other DAWs as a .dawproject file. */
   onExportDawproject: () => void;
   /** Opens a .dawproject file of another DAW in place of the project. */
@@ -178,10 +177,6 @@ export function TopBar(props: TopBarProps) {
     (value: unknown) => onZoomRatioChange(Number(value)),
     [onZoomRatioChange]
   );
-  const { onExport } = props;
-  const exportWav = useCallback(() => onExport("wav"), [onExport]);
-  const exportFlac = useCallback(() => onExport("flac"), [onExport]);
-  const exportMp3 = useCallback(() => onExport("mp3"), [onExport]);
   const preset = ZOOM_PRESETS.find(
     (ratio) => Math.abs(ratio - zoomRatio) < 0.01
   );
@@ -332,17 +327,14 @@ export function TopBar(props: TopBarProps) {
             <DropdownMenuItem onClick={props.onExportDawproject}>
               Export DAWproject…
             </DropdownMenuItem>
-            <DropdownMenuItem disabled={props.exporting} onClick={exportWav}>
-              Export WAV
+            <DropdownMenuItem
+              disabled={props.exporting}
+              onClick={props.onExport}
+            >
+              Export…
               <DropdownMenuShortcut>
                 <CommandKeys command="export" />
               </DropdownMenuShortcut>
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled={props.exporting} onClick={exportFlac}>
-              Export FLAC
-            </DropdownMenuItem>
-            <DropdownMenuItem disabled={props.exporting} onClick={exportMp3}>
-              Export MP3
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuRadioGroup

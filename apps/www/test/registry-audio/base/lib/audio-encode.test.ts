@@ -3,7 +3,6 @@ import decodeFlac from "@audio/decode-flac";
 import decodeMp3 from "@audio/decode-mp3";
 import decodeWav from "@audio/decode-wav";
 import { rmsDb } from "@audio-ui/core/analysis";
-import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { encodeAudio } from "@/registry-audio/bases/base/lib/audio-encode";
 
 /** Five seconds of two tones, one per side: more than two chunks, the last one short. */
@@ -18,12 +17,15 @@ function tones(sampleRate: number): [Float32Array, Float32Array] {
   return [left, right];
 }
 
-// The MP3 encoder loads its WebAssembly through the runtime's own `fetch`, which the page the other tests run in stands in for.
-beforeAll(async () => {
-  await GlobalRegistrator.unregister();
+// The MP3 encoder loads its WebAssembly with `instantiateStreaming(fetch(...))`, and the runtime refuses the
+// page's own `Response` the other tests run with: read the module's bytes from it instead, for these tests only.
+const { instantiateStreaming } = WebAssembly;
+beforeAll(() => {
+  WebAssembly.instantiateStreaming = async (source, imports) =>
+    WebAssembly.instantiate(await (await source).arrayBuffer(), imports);
 });
 afterAll(() => {
-  GlobalRegistrator.register();
+  WebAssembly.instantiateStreaming = instantiateStreaming;
 });
 
 const bytesOf = async (file: Blob) => new Uint8Array(await file.arrayBuffer());

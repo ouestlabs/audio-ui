@@ -111,6 +111,7 @@ The CRITICAL rules (sound without clicks, live data without re-renders) are in t
 | Play a piano roll's notes, with undo and redo | `use-piano-roll-playback`, `use-undo-history` |
 | Play, stop, record, loop, bars and tempo | `transport` |
 | Play and pause with a seek bar | `scrubber` |
+| Export to WAV, FLAC or MP3, normalized to a peak or a loudness | `export-dialog`, which installs `exportSound` |
 
 Installed components import from `@/components/audio-ui/<name>`. Every import, install name and ready block: [components.md](./components.md).
 

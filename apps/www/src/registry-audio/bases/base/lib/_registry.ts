@@ -80,6 +80,21 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Exporting rendered sound to a file: the settings an export picks (format, bit depth or bitrate, a level left as it is, brought to its peak or to a loudness target) and exportSound, which measures, normalizes and encodes, saying how far it is",
+    files: [
+      {
+        path: "lib/audio-export.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "audio-export",
+    registryDependencies: ["@audio-ui/audio-encode", "@audio-ui/loudness"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
