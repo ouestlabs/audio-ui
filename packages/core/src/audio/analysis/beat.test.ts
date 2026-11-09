@@ -64,6 +64,34 @@ describe("CLP-018: transients and tempo", () => {
     }
   });
 
+  test("the silence after a loud passage holds no transient", () => {
+    // A long loud groove, then silence: the level read over it must fall to nothing, not carry what came before.
+    const loud = groove(120, 60)[0] as Float32Array;
+    const data = new Float32Array(loud.length + RATE * 5);
+    data.set(loud);
+    const transients = detectTransients([data, data], RATE);
+    expect(transients.length).toBeGreaterThan(0);
+    expect(transients.every((at) => at < 60)).toBe(true);
+  });
+
+  test("at 44.1 kHz too, where a window is not a whole number of hops", () => {
+    const rate = 44_100;
+    const data = new Float32Array(rate * 2);
+    for (const at of [0.25, 1.1]) {
+      const from = Math.round(at * rate);
+      for (let index = 0; index < 0.1 * rate; index += 1) {
+        data[from + index] =
+          0.8 *
+          Math.exp((-index / rate) * 40) *
+          Math.sin((2 * Math.PI * 60 * index) / rate);
+      }
+    }
+    const found = detectTransients([data], rate);
+    expect(found).toHaveLength(2);
+    expect(found[0]).toBeCloseTo(0.25, 2);
+    expect(found[1]).toBeCloseTo(1.1, 2);
+  });
+
   test("reads a groove's tempo, and the octave nearest 120 BPM", () => {
     for (const bpm of [84, 100, 128, 150]) {
       const estimate = estimateTempo(groove(bpm, 12), RATE);
