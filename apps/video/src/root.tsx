@@ -8,6 +8,7 @@ import {
   SPOTLIGHT_SECONDS,
   Spotlight,
 } from "./compositions/spotlight.tsx";
+import { STARS_SECONDS, Stars } from "./compositions/stars.tsx";
 import { TEASER_SECONDS, Teaser } from "./compositions/teaser.tsx";
 
 const FPS = 60;
@@ -37,6 +38,14 @@ export function Root() {
         durationInFrames={Math.round(REGISTRY_SECONDS * FPS)}
         fps={FPS}
         id="Registry"
+        {...LANDSCAPE}
+      />
+      <Composition
+        component={Stars}
+        defaultProps={{ stars: 200, theme: "light" as const }}
+        durationInFrames={Math.round(STARS_SECONDS * FPS)}
+        fps={FPS}
+        id="Stars"
         {...LANDSCAPE}
       />
       <Composition
