@@ -1,4 +1,4 @@
-import { isReleased } from "../../dom/pointer.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import { clamp, clampFinite, roundToStep } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
@@ -111,7 +111,6 @@ interface XYPadGesture {
   changed: boolean;
   /** Whether the pointer moved after the press: the commit reason is "drag", else "press". */
   moved: boolean;
-  pointerId: number;
   rect: DOMRect;
 }
 
@@ -123,6 +122,7 @@ export function createXYPadController(
   initial: XYPadOptions = {}
 ): XYPadController {
   let options = initial;
+  const pointers = createPointerLock();
   const bounds = () => ({
     maxX: options.maxX ?? 100,
     maxY: options.maxY ?? 100,
@@ -312,7 +312,7 @@ export function createXYPadController(
   };
 
   const press: XYPadController["press"] = (event, control) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     // Alt + press returns to the default, as in a DAW.
@@ -324,7 +324,6 @@ export function createXYPadController(
     const started: XYPadGesture = {
       changed: false,
       moved: false,
-      pointerId: event.pointerId,
       rect: control.getBoundingClientRect(),
     };
     gesture = started;
@@ -335,18 +334,11 @@ export function createXYPadController(
       createChangeEventDetails("press", event) as XYPadChangeEventDetails
     );
 
-    const drag = new AbortController();
-    const doc = control.ownerDocument;
-    const { signal } = drag;
-    doc.addEventListener(
-      "pointermove",
-      (moveEvent: PointerEvent) => {
-        if (!gesture || moveEvent.pointerId !== started.pointerId) {
-          return;
-        }
-        if (isReleased(moveEvent)) {
-          drag.abort();
-          finish(moveEvent);
+    pointers.follow(
+      control,
+      event.pointerId,
+      (moveEvent) => {
+        if (!gesture) {
           return;
         }
         started.moved = true;
@@ -362,17 +354,8 @@ export function createXYPadController(
           started.changed = true;
         }
       },
-      { signal }
+      finish
     );
-    const release = (endEvent: PointerEvent) => {
-      if (!gesture || endEvent.pointerId !== started.pointerId) {
-        return;
-      }
-      drag.abort();
-      finish(endEvent);
-    };
-    doc.addEventListener("pointerup", release, { signal });
-    doc.addEventListener("pointercancel", release, { signal });
   };
 
   const keyDown: XYPadController["keyDown"] = (event) => {

@@ -1,4 +1,9 @@
 import { afterEach, describe, expect, mock, test } from "bun:test";
+import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
 import { createEnvelopeController } from "./controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
@@ -151,5 +156,41 @@ describe("Envelope controller subscriptions", () => {
     listener.mockClear();
     envelope.keyPoint(0, key("ArrowUp"));
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("Envelope controller pointers", () => {
+  test("a second finger on another point is ignored, and the first goes on moving its point", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const envelope = create({
+      defaultValue: [
+        { x: 0, y: 0.2 },
+        { x: 0.5, y: 0.5 },
+        { x: 1, y: 0.8 },
+      ],
+      onValueChange,
+      onValueCommitted,
+    });
+    const graph = boxElement(100, 100);
+    let index = 1;
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [50, 50],
+        [50, 30],
+        [50, 10],
+      ],
+      press: (event) => {
+        envelope.pressPoint(index, event, graph, graph);
+        index = 0;
+      },
+      second: [
+        [0, 80],
+        [0, 60],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

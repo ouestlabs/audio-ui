@@ -1,4 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
 import { createSequencerController } from "./controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
@@ -132,5 +137,48 @@ describe("Sequencer controller subscriptions", () => {
     listener.mockClear();
     sequencer.toggleCell({ row: 0, step: 0 }, key(" "));
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("Sequencer controller pointers", () => {
+  test("a second finger painting is ignored, and the first goes on painting", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const sequencer = createSequencerController({
+      defaultValue: PATTERN,
+      onValueChange,
+      onValueCommitted,
+    });
+    const root = boxElement(30, 20);
+    // The cells, 10px squares: row 0 on top, step 0 on the left.
+    const nodes = new Map(
+      [0, 1].flatMap((row) =>
+        [0, 1, 2].map((step) => {
+          const cell = boxElement(10, 10);
+          cell.getBoundingClientRect = () =>
+            new DOMRect(step * 10, row * 10, 10, 10);
+          return [`${row}:${step}`, cell] as const;
+        })
+      )
+    );
+    let cell = { row: 0, step: 0 };
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [5, 5],
+        [25, 5],
+        [15, 15],
+      ],
+      press: (event) => {
+        sequencer.pressCell(cell, event, root, nodes);
+        cell = { row: 1, step: 0 };
+      },
+      second: [
+        [5, 15],
+        [25, 15],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

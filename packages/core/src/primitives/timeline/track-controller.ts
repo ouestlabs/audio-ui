@@ -1,4 +1,4 @@
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import { clamp } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
@@ -64,6 +64,7 @@ export interface TrackController {
  */
 export function createTrackController(initial: TrackOptions): TrackController {
   let options = initial;
+  const pointers = createPointerLock();
   let resizing = false;
   const listeners = new Set<() => void>();
   const notify = () => {
@@ -136,7 +137,7 @@ export function createTrackController(initial: TrackOptions): TrackController {
   };
 
   const press: TrackController["press"] = (event, handle) => {
-    if (event.button !== 0) {
+    if (event.button !== 0 || pointers.busy(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);
@@ -154,7 +155,7 @@ export function createTrackController(initial: TrackOptions): TrackController {
     };
     resizing = true;
     notify();
-    followPointer(
+    pointers.follow(
       handle,
       event.pointerId,
       (move) => {

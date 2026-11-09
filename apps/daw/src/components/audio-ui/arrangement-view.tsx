@@ -860,9 +860,14 @@ export function ArrangementView({
     () => [...arrangement.unfoldedTracks, ...returns, main],
     [arrangement.unfoldedTracks, main, returns]
   );
-  const roomLeft = rows.every(
-    (track) => arrangement.heights[track.id] !== undefined
-  );
+  /**
+   * A row's height: the one set by hand, or none, to share the room the
+   * others leave. The main track keeps a track's least height instead: it
+   * never takes the room under the tracks, where files land (ARR-025).
+   */
+  const heightOf = (id: string) =>
+    arrangement.heights[id] ?? (id === main.id ? MIN_TRACK_HEIGHT : undefined);
+  const roomLeft = rows.every((track) => heightOf(track.id) !== undefined);
   // What each track's envelope can move besides its volume and pan: its devices' parameters (AUT-001).
   const targets = useMemo(
     () =>
@@ -1087,7 +1092,7 @@ export function ArrangementView({
             const row = rowOf(track, doc, anySolo);
             const { depth, inside, isBus, isGroup, mix, silent, takesFiles } =
               row;
-            const height = arrangement.heights[track.id];
+            const height = heightOf(track.id);
             const shownParameter = shownParameters.get(track.id);
             return (
               <div

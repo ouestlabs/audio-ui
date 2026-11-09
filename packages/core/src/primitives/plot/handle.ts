@@ -1,4 +1,4 @@
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
@@ -116,6 +116,7 @@ export function createPlotHandleController(
   initial: PlotHandleOptions
 ): PlotHandleController {
   let options = initial;
+  const pointers = createPointerLock();
   const moves = (along: "x" | "y") =>
     options.axis === undefined ||
     options.axis === "both" ||
@@ -236,7 +237,7 @@ export function createPlotHandleController(
   };
 
   const press: PlotHandleController["press"] = (event, element) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     // An Alt + press returns to the default, as in a DAW.
@@ -256,7 +257,7 @@ export function createPlotHandleController(
     gesture = started;
     dragging = true;
     notify();
-    followPointer(
+    pointers.follow(
       element,
       event.pointerId,
       (move) => {

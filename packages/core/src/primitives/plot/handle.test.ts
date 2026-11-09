@@ -1,4 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
 import { LINEAR_SCALE } from "../../value/scale.ts";
 import {
   createPlotHandleController,
@@ -111,5 +116,33 @@ describe("Plot handle controller subscriptions", () => {
     listener.mockClear();
     handle.keyDown(key("ArrowUp"));
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("Plot handle controller pointers", () => {
+  test("a second finger on the handle is ignored, and the first goes on dragging it", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const handle = create({
+      measure: () => new DOMRect(0, 0, 100, 100),
+      onValueChange,
+      onValueCommitted,
+    });
+    const element = boxElement(10, 10);
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [50, 50],
+        [60, 50],
+        [70, 50],
+      ],
+      press: (event) => handle.press(event, element),
+      second: [
+        [20, 20],
+        [10, 10],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

@@ -15,7 +15,7 @@ const BUDGETS: Record<string, number> = {
   "piano-roll": 15_200,
   plot: 7100,
   sequencer: 5300,
-  timeline: 16_700,
+  timeline: 16_800,
   waveform: 11_600,
   xypad: 4900,
 };

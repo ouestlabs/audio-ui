@@ -3,7 +3,7 @@ import {
   screenScale,
   scrollParent,
 } from "../../dom/edge-scroll.ts";
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
@@ -388,6 +388,7 @@ export interface ClipController {
  */
 export function createClipController(initial: ClipOptions): ClipController {
   let options = initial;
+  const pointers = createPointerLock();
   const limits = (): ClipLimits => ({
     duration: options.duration,
     minLength: options.minLength,
@@ -502,7 +503,7 @@ export function createClipController(initial: ClipOptions): ClipController {
   };
 
   const press: ClipController["press"] = (target, event, handle, lane) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     if (target === "move" && !options.movable) {
@@ -562,7 +563,7 @@ export function createClipController(initial: ClipOptions): ClipController {
         : {},
       () => place(last)
     );
-    followPointer(
+    pointers.follow(
       handle,
       event.pointerId,
       (move) => {

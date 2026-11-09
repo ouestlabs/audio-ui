@@ -1,0 +1,118 @@
+{
+  "doc": {
+    "clips": [],
+    "duration": 128,
+    "locators": [],
+    "loop": {
+      "on": false,
+      "range": [
+        0,
+        8
+      ]
+    },
+    "main": {
+      "color": 0,
+      "id": "main",
+      "name": "Main"
+    },
+    "returns": [
+      {
+        "color": 0,
+        "devices": [
+          {
+            "device": "audioui.reverb",
+            "id": "device-3",
+            "state": {
+              "enabled": true,
+              "decay": 2.2,
+              "preDelayMs": 20,
+              "dampingHz": 7000,
+              "mix": 25
+            }
+          }
+        ],
+        "id": "return-1",
+        "name": "A Reverb"
+      },
+      {
+        "color": 1,
+        "devices": [
+          {
+            "device": "audioui.delay",
+            "id": "device-4",
+            "state": {
+              "enabled": true,
+              "timeMs": 350,
+              "sync": false,
+              "division": "1/8",
+              "feedback": 40,
+              "toneHz": 6000,
+              "mix": 30
+            }
+          }
+        ],
+        "id": "return-2",
+        "name": "B Delay"
+      }
+    ],
+    "signatures": [],
+    "tempo": {
+      "beatUnit": 4,
+      "beatsPerBar": 4,
+      "bpm": 120
+    },
+    "tracks": [
+      {
+        "color": 0,
+        "devices": [
+          {
+            "device": "audioui.pocket-synth",
+            "id": "device-1",
+            "instrument": true,
+            "state": {
+              "wave": "square",
+              "filter": "allpass",
+              "volume": 0.5
+            }
+          }
+        ],
+        "id": "track-3",
+        "kind": "midi",
+        "name": "1 MIDI"
+      },
+      {
+        "color": 1,
+        "devices": [
+          {
+            "device": "audioui.pocket-synth",
+            "id": "device-2",
+            "instrument": true,
+            "state": {
+              "wave": "square",
+              "filter": "allpass",
+              "volume": 0.5
+            }
+          }
+        ],
+        "id": "track-4",
+        "kind": "midi",
+        "name": "2 MIDI"
+      },
+      {
+        "color": 2,
+        "id": "track-1",
+        "kind": "audio",
+        "name": "3 Audio"
+      },
+      {
+        "color": 3,
+        "id": "track-2",
+        "kind": "audio",
+        "name": "4 Audio"
+      }
+    ]
+  },
+  "format": "audio-ui-daw",
+  "samples": [],
+  "version": 1
+}

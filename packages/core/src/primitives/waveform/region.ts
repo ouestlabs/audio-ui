@@ -1,4 +1,4 @@
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
@@ -102,6 +102,7 @@ export function createWaveformRegionController(
   initial: WaveformRegionOptions
 ): WaveformRegionController {
   let options = initial;
+  const pointers = createPointerLock();
   const limits = () => ({
     duration: options.duration,
     minLength: options.minLength,
@@ -217,7 +218,7 @@ export function createWaveformRegionController(
     track,
     shownRange
   ) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);
@@ -233,7 +234,7 @@ export function createWaveformRegionController(
       const width = track?.getBoundingClientRect().width ?? 0;
       return (shownRange[1] - shownRange[0]) / Math.max(width, 1);
     };
-    followPointer(
+    pointers.follow(
       handle,
       event.pointerId,
       (move) => {

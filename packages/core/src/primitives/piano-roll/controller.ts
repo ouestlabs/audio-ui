@@ -1,5 +1,5 @@
 import type { Scale } from "../../audio/pitch/scale.ts";
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import { clamp } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
@@ -394,6 +394,7 @@ export function createPianoRollController(
   initial: PianoRollOptions
 ): PianoRollController {
   let options = initial;
+  const pointers = createPointerLock();
   const bounds = (): RollBounds => {
     const { duration, grid, step } = options.timeline;
     return {
@@ -1055,11 +1056,11 @@ export function createPianoRollController(
     };
     gridGesture = current;
     soundPainted(current, note.pitch, event);
-    followPointer(grid, event.pointerId, moveGrid, endGrid);
+    pointers.follow(grid, event.pointerId, moveGrid, endGrid);
   };
 
   const pressGrid: PianoRollController["pressGrid"] = (event, grid) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     if ((options.mode ?? "select") === "select") {
@@ -1075,7 +1076,7 @@ export function createPianoRollController(
         x: event.clientX - rect.left,
         y: event.clientY - rect.top,
       };
-      followPointer(grid, event.pointerId, moveGrid, endGrid);
+      pointers.follow(grid, event.pointerId, moveGrid, endGrid);
       return;
     }
     editing = true;
@@ -1113,7 +1114,7 @@ export function createPianoRollController(
       startX: event.clientX,
       startY: event.clientY,
     };
-    followPointer(grid, event.pointerId, moveGrid, endGrid);
+    pointers.follow(grid, event.pointerId, moveGrid, endGrid);
   };
 
   const doubleClickGrid: PianoRollController["doubleClickGrid"] = (
@@ -1252,7 +1253,7 @@ export function createPianoRollController(
     element,
     grid
   ) => {
-    if (options.disabled) {
+    if (options.disabled || pointers.busy(event)) {
       return;
     }
     const selection = selectedIds();
@@ -1291,7 +1292,7 @@ export function createPianoRollController(
       startY: event.clientY,
     };
     audition(noteGesture, anchor.pitch, event, anchor.velocity ?? 1);
-    followPointer(element, event.pointerId, moveNote, endNote);
+    pointers.follow(element, event.pointerId, moveNote, endNote);
   };
 
   const doubleClickNote: PianoRollController["doubleClickNote"] = (
@@ -1402,7 +1403,7 @@ export function createPianoRollController(
     lane,
     level = "velocity"
   ) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     const selection = selectedIds();
@@ -1437,7 +1438,7 @@ export function createPianoRollController(
       origin: [...displayed()],
       startY: event.clientY,
     };
-    followPointer(element, event.pointerId, moveVelocity, endVelocity);
+    pointers.follow(element, event.pointerId, moveVelocity, endVelocity);
   };
 
   const keyVelocity: PianoRollController["keyVelocity"] = (
@@ -1530,6 +1531,7 @@ export function createPianoRollController(
     if (
       options.disabled ||
       event.button !== 0 ||
+      pointers.busy(event) ||
       (options.mode ?? "select") !== "draw"
     ) {
       return;
@@ -1540,7 +1542,7 @@ export function createPianoRollController(
     notify();
     paintLevelGesture = { changed: false, lane, level };
     movePaintLevel(event);
-    followPointer(lane, event.pointerId, movePaintLevel, endPaintLevel);
+    pointers.follow(lane, event.pointerId, movePaintLevel, endPaintLevel);
   };
 
   // ---- stretch
@@ -1592,7 +1594,7 @@ export function createPianoRollController(
     element,
     grid
   ) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     const ids = selectedIds();
@@ -1613,7 +1615,7 @@ export function createPianoRollController(
       moving: edge === "end" ? span.end : span.start,
       origin: [...displayed()],
     };
-    followPointer(element, event.pointerId, moveStretch, endStretch);
+    pointers.follow(element, event.pointerId, moveStretch, endStretch);
   };
 
   // ---- keys and commands

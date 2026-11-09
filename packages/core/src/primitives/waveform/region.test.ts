@@ -1,5 +1,10 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
+import {
   createWaveformRegionController,
   type WaveformRegionOptions,
 } from "./region.ts";
@@ -88,5 +93,34 @@ describe("Waveform region controller subscriptions", () => {
     listener.mockClear();
     region.keyDown("end", key("ArrowUp"));
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("Waveform region controller pointers", () => {
+  test("a second finger on the other edge is ignored, and the first goes on moving its edge", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const region = create({ onValueChange, onValueCommitted });
+    // 100px for the 10 units shown: 0.1 a pixel.
+    const track = boxElement(100, 20);
+    let edge: "end" | "start" = "start";
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [0, 10],
+        [20, 10],
+        [40, 10],
+      ],
+      press: (event) => {
+        region.press(edge, event, track, track, [0, 10]);
+        edge = "end";
+      },
+      second: [
+        [100, 10],
+        [80, 10],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

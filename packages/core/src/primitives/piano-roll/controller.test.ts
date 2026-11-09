@@ -1,4 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
+import { dragWithSecondFinger, ONE_FINGER } from "../../../test/helpers.ts";
 import {
   createPianoRollController,
   type PianoRollOptions,
@@ -264,5 +265,39 @@ describe("Piano roll controller velocity brush", () => {
     roll.paintLevels(pointer("pointerdown", 5, 10), lane, "chance");
     document.dispatchEvent(pointer("pointerup", 5, 10));
     expect(roll.getSnapshot().notes[0]?.chance).toBeUndefined();
+  });
+});
+
+describe("Piano roll controller pointers", () => {
+  test("a second finger on another note is ignored, and the first goes on moving its note", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const roll = create({
+      maxPitch: 64,
+      minPitch: 60,
+      onValueChange,
+      onValueCommitted,
+    });
+    const grid = gridElement();
+    let note = "a";
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      // Note a, at pitch 60 on the bottom row, then note b, at 64 on the top row.
+      first: [
+        [5, 45],
+        [25, 45],
+        [45, 45],
+      ],
+      press: (event) => {
+        roll.pressNote(note, "move", event, grid, grid);
+        note = "b";
+      },
+      second: [
+        [25, 5],
+        [65, 5],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

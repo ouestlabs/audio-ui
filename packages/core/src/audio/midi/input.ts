@@ -53,6 +53,7 @@ export function createMidiInput(): MidiInput {
   const listeners = new Set<() => void>();
   const muted = new Set<string>();
   let access: MIDIAccess | null = null;
+  let request = 0;
   let state: MidiInputState | null = null;
 
   const getSnapshot = () => {
@@ -110,16 +111,26 @@ export function createMidiInput(): MidiInput {
         update({ error: "This browser has no Web MIDI." });
         return;
       }
+      // A later connect or a disconnect makes this request's answer stale.
+      request += 1;
+      const asked = request;
       try {
         detach();
-        access = await navigator.requestMIDIAccess({ sysex: false });
+        const granted = await navigator.requestMIDIAccess({ sysex: false });
+        if (asked !== request) {
+          return;
+        }
+        access = granted;
         access.onstatechange = attach;
         attach();
       } catch {
-        update({ error: "MIDI access was denied." });
+        if (asked === request) {
+          update({ error: "MIDI access was denied." });
+        }
       }
     },
     disconnect: () => {
+      request += 1;
       detach();
       update({ connected: false, error: null, inputs: [] });
     },

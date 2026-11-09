@@ -34,8 +34,11 @@ export function useMicrophone(): UseMicrophoneReturn {
   const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const [error, setError] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  // A later start, a stop or an unmount makes a request's answer stale.
+  const requestRef = useRef(0);
 
   const stop = useCallback(() => {
+    requestRef.current += 1;
     for (const track of streamRef.current?.getTracks() ?? []) {
       track.stop();
     }
@@ -49,6 +52,8 @@ export function useMicrophone(): UseMicrophoneReturn {
       setError("This browser has no microphone access.");
       return;
     }
+    requestRef.current += 1;
+    const asked = requestRef.current;
     try {
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: {
@@ -60,6 +65,13 @@ export function useMicrophone(): UseMicrophoneReturn {
       if (ctx.state === "suspended") {
         await ctx.resume();
       }
+      if (asked !== requestRef.current) {
+        // Not wanted any more: released at once, or the browser keeps recording.
+        for (const track of stream.getTracks()) {
+          track.stop();
+        }
+        return;
+      }
       for (const track of streamRef.current?.getTracks() ?? []) {
         track.stop();
       }
@@ -70,7 +82,9 @@ export function useMicrophone(): UseMicrophoneReturn {
       setError(null);
       setAnalyser(node);
     } catch {
-      setError("Microphone access was denied.");
+      if (asked === requestRef.current) {
+        setError("Microphone access was denied.");
+      }
     }
   }, []);
 

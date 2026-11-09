@@ -1,4 +1,4 @@
-import { isReleased } from "../../dom/pointer.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import { clamp, clampFinite, roundToStep } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
@@ -125,6 +125,7 @@ export function createFaderController(
   initial: FaderOptions = {}
 ): FaderController {
   let options = initial;
+  const pointers = createPointerLock();
   const bounds = () => ({
     max: options.max ?? DEFAULT_MAX,
     min: options.min ?? DEFAULT_MIN,
@@ -265,7 +266,7 @@ export function createFaderController(
   };
 
   const press: FaderController["press"] = (event, control, thumb) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     const vertical = (options.orientation ?? "vertical") === "vertical";
@@ -281,7 +282,6 @@ export function createFaderController(
     let value = displayed();
     // Whether the gesture set a value, even one it later came back from.
     let changed = false;
-    const { pointerId } = event;
     if (!onThumb) {
       const next = valueAt(control, event.clientX, event.clientY);
       if (next !== value && change(next, changeDetails("track-press", event))) {
@@ -292,11 +292,8 @@ export function createFaderController(
     dragging = true;
     notify();
 
-    const doc = control.ownerDocument;
-    const gesture = new AbortController();
     let moved = false;
     const finish = (end: PointerEvent) => {
-      gesture.abort();
       dragging = false;
       notify();
       if (changed) {
@@ -310,13 +307,6 @@ export function createFaderController(
       }
     };
     const move = (moveEvent: PointerEvent) => {
-      if (moveEvent.pointerId !== pointerId) {
-        return;
-      }
-      if (isReleased(moveEvent)) {
-        finish(moveEvent);
-        return;
-      }
       moved = true;
       const next = valueAt(
         control,
@@ -328,10 +318,7 @@ export function createFaderController(
         changed = true;
       }
     };
-    const { signal } = gesture;
-    doc.addEventListener("pointermove", move, { signal });
-    doc.addEventListener("pointerup", finish, { signal });
-    doc.addEventListener("pointercancel", finish, { signal });
+    pointers.follow(control, event.pointerId, move, finish);
   };
 
   const keyDown: FaderController["keyDown"] = (event, element) => {

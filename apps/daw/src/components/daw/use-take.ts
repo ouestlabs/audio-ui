@@ -87,6 +87,9 @@ interface Running {
   tracks: { audio: string[]; midi: string[] };
 }
 
+/** Where a take stands, from Record pressed to its clips made. */
+type TakePhase = "cancelled" | "finishing" | "idle" | "recording" | "starting";
+
 /** The tracks a take records on: the armed ones, audio or MIDI. */
 function armedTracks(doc: ArrangementDoc, armed: ReadonlySet<string>) {
   const audio: string[] = [];
@@ -300,7 +303,17 @@ export function useTake({
   // Where a count-in stands, in negative seconds before the take; null outside one (REC-005).
   const [countdown] = useState(() => createSource<number | null>(null));
   const running = useRef<Running | null>(null);
-  const opened = useRef<{ device: string; input: OpenInput } | null>(null);
+  /**
+   * Where a take stands. Starting, it waits on the context, the input and its
+   * recorder, and a Stop cancels it once they answer; finishing, its recorder
+   * hands over the last blocks before the input can close.
+   */
+  const phase = useRef<TakePhase>("idle");
+  /** The input, open or still asked for: one answer every caller shares. */
+  const opened = useRef<{
+    device: string;
+    input: Promise<OpenInput>;
+  } | null>(null);
 
   // Arming one disarms the others, unless Cmd or Ctrl was held (REC-001).
   const arm = useCallback((track: string, exclusive: boolean) => {
@@ -315,22 +328,31 @@ export function useTake({
     });
   }, []);
 
+  /** Lets the input go: closed now, or as soon as the browser grants it if it still asks. */
+  const closeInput = useCallback(() => {
+    opened.current?.input.then(closeStream, () => undefined);
+    opened.current = null;
+  }, []);
+
   /** The input, opened once and shared by monitoring and takes, on the device picked. */
   const input = useCallback(
-    async (ctx: AudioContext) => {
-      if (opened.current?.device !== inputDevice) {
-        closeStream(opened.current?.input ?? null);
-        opened.current = null;
+    (ctx: AudioContext) => {
+      if (opened.current && opened.current.device !== inputDevice) {
+        closeInput();
       }
       if (!opened.current) {
-        opened.current = {
-          device: inputDevice,
-          input: await openStream(ctx, inputDevice),
-        };
+        const asked = openStream(ctx, inputDevice);
+        opened.current = { device: inputDevice, input: asked };
+        // Refused, it is asked for again the next time.
+        asked.catch(() => {
+          if (opened.current?.input === asked) {
+            opened.current = null;
+          }
+        });
       }
       return opened.current.input;
     },
-    [inputDevice]
+    [closeInput, inputDevice]
   );
 
   /** The audio inputs the browser offers, read again as the menu opens. */
@@ -376,12 +398,12 @@ export function useTake({
       for (const track of tracks) {
         engineNow.monitor(track, null);
       }
-      if (!running.current) {
-        closeStream(opened.current?.input ?? null);
-        opened.current = null;
+      // A take starting or running holds the input.
+      if (phase.current === "idle") {
+        closeInput();
       }
     };
-  }, [armedAudio, engine.engine, input, monitorInput]);
+  }, [armedAudio, closeInput, engine.engine, input, monitorInput]);
 
   // The count-in, counted back to the take's start on the transport.
   const countDown = useCallback(
@@ -400,11 +422,21 @@ export function useTake({
     [countdown]
   );
 
+  /** Closes the input once a take is done with it, unless Monitor still holds it. */
+  const releaseInput = useCallback(() => {
+    if (!monitorInput) {
+      closeInput();
+    }
+  }, [closeInput, monitorInput]);
+
   const start = useCallback(async () => {
     const ctx = webAudio.getContext();
-    if (!(ctx instanceof AudioContext)) {
+    if (!(ctx instanceof AudioContext) || phase.current !== "idle") {
       return;
     }
+    phase.current = "starting";
+    // Lit at once: the input can take a while to come, behind a prompt.
+    setRecording(true);
     if (ctx.state !== "running") {
       await ctx.resume();
     }
@@ -423,6 +455,15 @@ export function useTake({
         toast.error("The browser gave no access to an audio input");
       }
     }
+    // Read afresh: `finish` may have cancelled it while the input and the recorder came.
+    if ((phase.current as TakePhase) === "cancelled") {
+      // Stopped while it started: nothing plays.
+      recorder?.recorder.dispose();
+      releaseInput();
+      phase.current = "idle";
+      return;
+    }
+    phase.current = "recording";
     const countInSeconds = countIn * secondsPerBar(doc.tempo);
     const lead = ctx.currentTime + LEAD_SECONDS;
     if (countIn > 0) {
@@ -450,15 +491,34 @@ export function useTake({
     if (countIn > 0) {
       countDown(ctx, lead + countInSeconds);
     }
-    setRecording(true);
     setLive({
       from: cursor,
       levels: recorder ? drawn.levels : undefined,
       tracks: new Set([...tracks.audio, ...tracks.midi]),
     });
-  }, [armed, countDown, countIn, cursor, doc, engine, input, refreshInputs]);
+  }, [
+    armed,
+    countDown,
+    countIn,
+    cursor,
+    doc,
+    engine,
+    input,
+    refreshInputs,
+    releaseInput,
+  ]);
 
   const finish = useCallback(async () => {
+    if (phase.current === "starting") {
+      // `start` sees it once the input and the recorder have answered.
+      phase.current = "cancelled";
+      setRecording(false);
+      return;
+    }
+    if (phase.current !== "recording") {
+      return;
+    }
+    phase.current = "finishing";
     const take = running.current;
     const ctx = webAudio.getContext();
     running.current = null;
@@ -466,16 +526,16 @@ export function useTake({
     setRecording(false);
     setLive(null);
     if (!(take && ctx)) {
+      phase.current = "idle";
       return;
     }
     const stoppedAt = Math.ceil(ctx.currentTime * ctx.sampleRate);
     engine.stop();
     const blocks = take.input ? await take.input.recorder.stop() : [];
     take.input?.recorder.dispose();
-    if (!monitorInput) {
-      closeStream(opened.current?.input ?? null);
-      opened.current = null;
-    }
+    releaseInput();
+    // The input is free: a new take can start while this one becomes clips.
+    phase.current = "idle";
     const range = takeRange(take, stoppedAt, ctx.sampleRate, doc, punch);
     if (!range) {
       return;
@@ -495,18 +555,18 @@ export function useTake({
     dispatch,
     doc,
     engine,
-    monitorInput,
     onRecordings,
     overdub,
     punch,
     quantize,
+    releaseInput,
   ]);
 
   const toggle = useCallback(() => {
-    if (running.current) {
-      finish();
-    } else {
+    if (phase.current === "idle") {
       start();
+    } else {
+      finish();
     }
   }, [finish, start]);
 

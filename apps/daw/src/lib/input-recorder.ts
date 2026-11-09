@@ -86,13 +86,14 @@ export async function createInputRecorder(
     numberOfOutputs: 0,
   });
   let blocks: RecordedBlock[] = [];
-  let stopped: (() => void) | null = null;
+  // While it stops: the one answer every `stop` gets, and what gives it.
+  let stopping: Promise<RecordedBlock[]> | null = null;
+  let settle: (() => void) | null = null;
   node.port.onmessage = (
     event: MessageEvent<RecordedBlock | { stopped: true }>
   ) => {
     if ("stopped" in event.data) {
-      stopped?.();
-      stopped = null;
+      settle?.();
       return;
     }
     blocks.push(event.data);
@@ -100,19 +101,26 @@ export async function createInputRecorder(
   };
   return {
     dispose: () => {
+      settle?.();
       node.port.close();
       node.disconnect();
     },
     input: node,
     start: () => {
       blocks = [];
+      stopping = null;
       node.port.postMessage("start");
     },
-    stop: () =>
-      new Promise((resolve) => {
-        stopped = () => resolve(blocks);
+    stop: () => {
+      stopping ??= new Promise((resolve) => {
+        settle = () => {
+          settle = null;
+          resolve(blocks);
+        };
         node.port.postMessage("stop");
-      }),
+      });
+      return stopping;
+    },
   };
 }
 
