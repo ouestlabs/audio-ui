@@ -183,7 +183,34 @@ const engine = useArrangementEngine({
 - `status` is the context's sample rate, its latency in seconds (the output's and the delay compensation's), and its state: what an engine line shows.
 - A device switched off passes the sound on unchanged, as late as it would make it, so switching it moves nothing in time.
 
-`renderArrangement(doc, recordings, { from, to, sampleRate })` renders the main output to a buffer through the same engine on an offline context, faster than real time, scheduling the notes a second at a time with `onProgress` as it goes: the same frames come out as play, and a neutral clip comes out bit for bit. `encodeWav` from `wav-file` turns it into a file.
+`renderArrangement(doc, recordings, { from, to, sampleRate })` renders the main output to a buffer through the same engine on an offline context, faster than real time, scheduling the notes a second at a time with `onProgress` as it goes: the same frames come out as play, and a neutral clip comes out bit for bit.
+
+### To a file
+
+`audio-encode` writes rendered sound to a WAV, FLAC or MP3 file. It encodes in chunks with a paint between two, so a long file never freezes the page, and loads each format's encoder (WebAssembly for FLAC and MP3) the first time it is used.
+
+```bash
+npx shadcn@latest add @audio-ui/audio-encode
+```
+
+```ts
+import { renderArrangement } from "@/lib/arrangement-engine";
+import { downloadFile, encodeAudio } from "@/lib/audio-encode";
+
+const rendered = await renderArrangement(doc, recordings, { from: 0, sampleRate: 48_000, to: 30 });
+if (rendered) {
+  const file = await encodeAudio([rendered.getChannelData(0), rendered.getChannelData(1)], {
+    bitrate: 320,
+    format: "mp3",
+    onProgress: (done) => console.log(`${Math.round(done * 100)}%`),
+    sampleRate: rendered.sampleRate,
+  });
+  downloadFile(file, "arrangement.mp3");
+}
+```
+
+- `format` is `"wav"`, `"flac"` or `"mp3"`. `bitDepth` is 16 (the default) or 24 for WAV and FLAC, or 32 for a WAV of floats, which keeps what goes past full scale; anywhere else a sample past full scale is clipped. `bitrate` is an MP3's, in kbps, 128 by default.
+- An MP3 comes out at the nearest rate MP3 has: 48 kHz for a render at 96 kHz.
 
 ## The mixer
 

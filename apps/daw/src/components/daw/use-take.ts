@@ -16,6 +16,7 @@ import type {
   ArrangementDoc,
 } from "@/lib/arrangement-state";
 import { canStream, streamRecording } from "@/lib/daw/cache";
+import { encodeAudio } from "@/lib/daw/export-audio";
 import {
   decodeRecording,
   freshMidiClipId,
@@ -38,7 +39,6 @@ import {
   sliceBlocks,
   takeFrames,
 } from "@/lib/recording";
-import { encodeWav } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
 import { useSavedState } from "./use-saved-view";
 
@@ -197,7 +197,9 @@ async function audioTakeCommands(
     2
   );
   const id = freshRecordingId(new Set());
-  const bytes = encodeWav(channels, rate).buffer as ArrayBuffer;
+  const bytes = await (
+    await encodeAudio(channels, { format: "wav", sampleRate: rate })
+  ).arrayBuffer();
   const decoded = await decodeRecording(ctx, bytes, "Audio take");
   if (!decoded) {
     return [];

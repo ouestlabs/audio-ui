@@ -1435,4 +1435,23 @@ export const components: RegistryItem[] = [
     registryDependencies: ["@audio-ui/transport"],
     type: "registry:example",
   },
+  {
+    categories: ["transport"],
+    description:
+      "The export dialog over two seconds of a chord: pick a format and a level, and Export saves the file and says how loud it came out, in LUFS and dBTP",
+    files: [
+      {
+        path: "components/transport/export-dialog-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "export-dialog-demo",
+    registryDependencies: [
+      "@audio-ui/audio-encode",
+      "@audio-ui/audio-export",
+      "@audio-ui/export-dialog",
+      "@shadcn/button",
+    ],
+    type: "registry:example",
+  },
 ];

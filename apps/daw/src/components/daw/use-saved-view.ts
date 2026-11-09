@@ -4,6 +4,7 @@ import { type RefObject, useCallback, useEffect, useState } from "react";
 
 import { rackDevices } from "@/lib/arrangement";
 import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
+import type { ExportSettings } from "@/lib/audio-export";
 
 /**
  * How the workstation is laid out, kept in this browser beside the project
@@ -30,6 +31,7 @@ export interface SavedView {
   computerKeys: boolean;
   countIn: number;
   cursor: number;
+  exportSettings: ExportSettings;
   grid: {
     density: number;
     division: GridDivision;

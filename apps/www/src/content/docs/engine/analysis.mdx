@@ -49,6 +49,25 @@ const peaks = useSpectrumPeaks(spectrum, { hold: 1, fall: 24 });
 
 `useSpectrum` gives dB per point along a logarithmic frequency axis, 160 points from 20 Hz to 20 kHz unless told otherwise. Draw it with the [Spectrum analyzer](/docs/components/base/spectrum-analyzer), or as a trace on a [Plot](/docs/components/base/plot) behind an equalizer's curve. `useSpectrumPeaks` keeps each point's loudest level for `hold` seconds, then lets it fall at `fall` dB per second.
 
+## Loudness
+
+`loudness` measures a whole sound the way streaming services and broadcasters do (ITU-R BS.1770): its integrated loudness in LUFS, its loudest sample, and its true peak, the loudest point of the waveform between the samples. `loudnessGain` is the gain that brings it to a target as far as its true peak stays under a ceiling, -1 dBTP unless told otherwise: a sound that would pass it lands under the target instead, and nothing is limited.
+
+```bash
+npx shadcn@latest add @audio-ui/loudness
+```
+
+```ts
+import { dbToGain } from "@audio-ui/core/analysis";
+import { LOUDNESS_TARGETS, loudnessGain, measureLoudness } from "@/lib/loudness";
+
+const loudness = measureLoudness(channels, sampleRate); // { lufs: -19.2, peak: -3.1, truePeak: -2.8 }
+const gain = dbToGain(loudnessGain(loudness, LOUDNESS_TARGETS.streaming));
+const normalized = channels.map((channel) => channel.map((sample) => sample * gain));
+```
+
+It reads every sample, the true peak at four points a sample: about half a second a minute of loud stereo on a laptop, so measure where the page can wait, as an export does. `LOUDNESS_TARGETS` holds -14 LUFS for streaming, -16 for podcasts and -23 for broadcast (EBU R 128).
+
 ## The functions behind them
 
 `@audio-ui/core/analysis` holds the math as plain functions, for an engine of your own or a worker:

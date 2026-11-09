@@ -46,6 +46,55 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio/encode"],
+    description:
+      "Writing sound to a WAV, FLAC or MP3 file, the step after an offline render or a recording: encoded in chunks with its progress, each format's encoder loaded the first time it is used, and saved through the browser's downloads",
+    files: [
+      {
+        path: "lib/audio-encode.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "audio-encode",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/loudness-lufs",
+      "@audio/loudness-truepeak",
+    ],
+    description:
+      "How loud a sound is, the way streaming services and broadcasters measure it (ITU-R BS.1770): integrated loudness in LUFS, sample and true peak, and the gain that brings it to a target such as -14 LUFS without passing a true-peak ceiling",
+    files: [
+      {
+        path: "lib/loudness.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "loudness",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Exporting rendered sound to a file: the settings an export picks (format, bit depth or bitrate, a level left as it is, brought to its peak or to a loudness target) and exportSound, which measures, normalizes and encodes, saying how far it is",
+    files: [
+      {
+        path: "lib/audio-export.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "audio-export",
+    registryDependencies: ["@audio-ui/audio-encode", "@audio-ui/loudness"],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
@@ -1387,20 +1436,6 @@ const items: RegistryItem[] = [
       "@audio-ui/gate-device",
       "@audio-ui/limiter-device",
     ],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio"],
-    description:
-      "WAV files from rendered sound: 16 or 24-bit PCM, normalized or not, encoded to bytes or downloaded",
-    files: [
-      {
-        path: "lib/wav-file.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "wav-file",
-    registryDependencies: [],
     type: "registry:lib",
   },
   {

@@ -128,6 +128,7 @@ export interface TopBarProps
   looping: boolean;
   metronome: boolean;
   onAutomatingChange: (automating: boolean) => void;
+  /** Opens the export dialog (EXP-003). */
   onExport: () => void;
   /** Sends the project to other DAWs as a .dawproject file. */
   onExportDawproject: () => void;
@@ -330,7 +331,7 @@ export function TopBar(props: TopBarProps) {
               disabled={props.exporting}
               onClick={props.onExport}
             >
-              Export WAV
+              Export…
               <DropdownMenuShortcut>
                 <CommandKeys command="export" />
               </DropdownMenuShortcut>
