@@ -190,3 +190,10 @@ Status: fixed (EXP-003).
 The registry's `audio-decode` read a file with the browser's decoder only, and Chrome's reads no AIFF (the usual export of a Mac DAW), no CAF and no Apple Lossless: a dropped one was left out as not sound. Measured on 2026-11-09 with a second of each format: Chrome refuses AIFF, CAF, Apple Lossless, WavPack and QOA; the Safari engine refuses WavPack and QOA.
 Fix: an AIFF, CAF or Apple Lossless file the browser refuses goes through a decoder of its format (`@audio/decode-aiff`, `-caf`, `-mp4`), then `@audio/resample-sinc` to the context's rate, each loaded the first time a file needs it. `@audio/decode` itself was left out: its 4.2.0 imports two decoders it does not depend on, which fails a bundler's build. WavPack and QOA, which no browser decodes, stay out until a file of one turns up (`apps/www/test/registry-audio/base/lib/audio-decode.test.ts`).
 Status: fixed (ARR-007).
+
+
+### G-034 A dropped file is decoded whole
+A dropped file is read whole, decoded whole by the browser, then analyzed and written to the cache, so the page holds all of its samples at once before letting them go. Measured on 2026-11-09 in Chrome with a 15-minute stereo WAV at 48 kHz (173 MB): the page takes about 1.05 GB more at the peak and keeps 0.45 GB more after (the file's bytes, kept to save it). Growing with the length, an hour of stereo would take some 4 GB, near what a tab may hold. The import also held the page for 3.3 s at once; the core's beat analysis now reads each sample twice instead of eight times, and it holds the page for 0.7 s (2.5 s to the clip, from 6.5 s).
+Fix: to come. A file decoded in parts in a worker, each part resampled, measured and written to the cache as it comes, would hold a part at a time; the browser's decoder has no such form, so it takes a decoder of each format in the worker.
+Status: open: files up to half an hour or so import as they are.
+
