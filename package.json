@@ -9,6 +9,8 @@
     ],
     "catalog": {
       "@audio/encode": "1.11.0",
+      "@audio/loudness-lufs": "1.2.0",
+      "@audio/loudness-truepeak": "1.1.7",
       "@base-ui/react": "^1.9.0",
       "@cloudflare/vite-plugin": "1.64.0",
       "@phosphor-icons/react": "^2.1.10",

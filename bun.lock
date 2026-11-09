@@ -132,6 +132,8 @@
         "@audio-ui/icons": "*",
         "@audio-ui/react": "*",
         "@audio/encode": "catalog:",
+        "@audio/loudness-lufs": "catalog:",
+        "@audio/loudness-truepeak": "catalog:",
         "@base-ui/react": "catalog:",
         "@fontsource-variable/geist": "^5.3.0",
         "@fontsource-variable/inter": "^5.3.0",
@@ -264,6 +266,8 @@
   },
   "catalog": {
     "@audio/encode": "1.11.0",
+    "@audio/loudness-lufs": "1.2.0",
+    "@audio/loudness-truepeak": "1.1.7",
     "@base-ui/react": "^1.9.0",
     "@cloudflare/vite-plugin": "1.64.0",
     "@phosphor-icons/react": "^2.1.10",
@@ -307,6 +311,8 @@
 
     "@audio-ui/react": ["@audio-ui/react@workspace:packages/ui"],
 
+    "@audio/biquad": ["@audio/biquad@1.2.2", "", {}, "sha512-RLq9G8tOjqT7R+W0mgiJZmzIBK52XqE8toQPH/s2ocMo84FvWWcXJkYy/Yfttib9wCeSc4V/zWuIHloCpNBcEA=="],
+
     "@audio/decode-flac": ["@audio/decode-flac@2.0.0", "", { "dependencies": { "@wasm-audio-decoders/flac": "~0.2.10", "codec-parser": "~2.5.0" } }, "sha512-Wv7XXs81Zp8vKb6LtDuKL//Z+kAT5OxeelTmvRguqYt5Cp0Q9R1qFXdBToAg6052BHGipA11kIJQRrveNWFXRA=="],
 
     "@audio/decode-mp3": ["@audio/decode-mp3@1.3.1", "", { "dependencies": { "mpg123-decoder": "^1.0.3" } }, "sha512-GhGm6C2hwngU+t5uEpUc94jZGCrCIXrgfneDURfK9/2tgFAWHVeckFNsSRmL4+Vd7u32uv8wQamjTnBSlrkVGA=="],
@@ -343,7 +349,13 @@
 
     "@audio/encode-webm": ["@audio/encode-webm@1.3.1", "", { "dependencies": { "@audio/encode-opus": "^1.3.2" } }, "sha512-04iHcWQikUC7Tdi4w+FVYfxUvllsdQryxdDszx46Fc3Bd5rPn6mPKrSs04snYhZmQdcGGo/WM2sOzKoe0a314Q=="],
 
+    "@audio/loudness-lufs": ["@audio/loudness-lufs@1.2.0", "", { "dependencies": { "@audio/biquad": "^1.2.0", "@audio/weighting-k": "^1.0.0" } }, "sha512-SX7p4IEPxj6/3yoh9fepUMlvshv6SNGoGVfqqZutCjMczEinnfmEb38eMrj1n0eRblnha3WeZ/PFXXDcVMVsqA=="],
+
+    "@audio/loudness-truepeak": ["@audio/loudness-truepeak@1.1.7", "", {}, "sha512-4kVZOM5vTSV+gDyM9aru6+K+1i6knOtw1L2xzokkTlRk03FihC4RNnmPkpCJr0a0+ZSPCljqLgXaZdcSkUzPTw=="],
+
     "@audio/resample-polyphase": ["@audio/resample-polyphase@1.1.0", "", {}, "sha512-mSPyTABEzAcF+/kI2gys0+tI9GCJsYQ81tVpzY81rvLCHbop2HVFsbJLVRHHXD8mTGX9c27ggkthF+QnnHLqSA=="],
+
+    "@audio/weighting-k": ["@audio/weighting-k@1.2.1", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-tiSLbRzFTQVvS8aUMKBBE+ZDtBNzgYmBWlg8/F00YbaDpR1kepsOSPCE3KqA51ekI4RAT/YPIZi+8yirq76GUQ=="],
 
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 

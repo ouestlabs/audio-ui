@@ -61,6 +61,25 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/loudness-lufs",
+      "@audio/loudness-truepeak",
+    ],
+    description:
+      "How loud a sound is, the way streaming services and broadcasters measure it (ITU-R BS.1770): integrated loudness in LUFS, sample and true peak, and the gain that brings it to a target such as -14 LUFS without passing a true-peak ceiling",
+    files: [
+      {
+        path: "lib/loudness.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "loudness",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
