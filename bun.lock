@@ -19,9 +19,13 @@
         "@audio-ui/core": "*",
         "@audio-ui/icons": "*",
         "@audio-ui/react": "*",
+        "@audio/decode-aiff": "catalog:",
+        "@audio/decode-caf": "catalog:",
+        "@audio/decode-mp4": "catalog:",
         "@audio/encode": "catalog:",
         "@audio/loudness-lufs": "catalog:",
         "@audio/loudness-truepeak": "catalog:",
+        "@audio/resample-sinc": "catalog:",
         "@base-ui/react": "catalog:",
         "@fontsource/bricolage-grotesque": "^5.3.0",
         "@fontsource/instrument-serif": "^5.3.0",
@@ -133,9 +137,13 @@
         "@audio-ui/core": "*",
         "@audio-ui/icons": "*",
         "@audio-ui/react": "*",
+        "@audio/decode-aiff": "catalog:",
+        "@audio/decode-caf": "catalog:",
+        "@audio/decode-mp4": "catalog:",
         "@audio/encode": "catalog:",
         "@audio/loudness-lufs": "catalog:",
         "@audio/loudness-truepeak": "catalog:",
+        "@audio/resample-sinc": "catalog:",
         "@base-ui/react": "catalog:",
         "@fontsource-variable/geist": "^5.3.0",
         "@fontsource-variable/inter": "^5.3.0",
@@ -267,9 +275,13 @@
     },
   },
   "catalog": {
+    "@audio/decode-aiff": "1.3.0",
+    "@audio/decode-caf": "1.4.1",
+    "@audio/decode-mp4": "1.3.1",
     "@audio/encode": "1.11.0",
     "@audio/loudness-lufs": "1.2.0",
     "@audio/loudness-truepeak": "1.1.7",
+    "@audio/resample-sinc": "1.3.0",
     "@base-ui/react": "^1.9.0",
     "@cloudflare/vite-plugin": "1.64.0",
     "@phosphor-icons/react": "^2.1.10",
@@ -315,9 +327,27 @@
 
     "@audio/biquad": ["@audio/biquad@1.2.2", "", {}, "sha512-RLq9G8tOjqT7R+W0mgiJZmzIBK52XqE8toQPH/s2ocMo84FvWWcXJkYy/Yfttib9wCeSc4V/zWuIHloCpNBcEA=="],
 
+    "@audio/decode-aac": ["@audio/decode-aac@1.6.0", "", {}, "sha512-4EdPNlHkFstqlfZhMC1pER+SKKldh1ZubD2VaxLAxSPH8fLA6upwVCVyMnqZ41PD6XTBrvf87aRZ0aPQTb4eiw=="],
+
+    "@audio/decode-ac3": ["@audio/decode-ac3@1.0.0", "", {}, "sha512-GR2PLqxxrybNRwdA3/ZazB4ZWz7yQNihYtjuigGfEpSqKt95FnUgjIVfE7aJmznvxa6voq8Mou6NvSoTqH104g=="],
+
+    "@audio/decode-aiff": ["@audio/decode-aiff@1.3.0", "", {}, "sha512-GgCNYZMmma5Xol8lxqDZQ7qFYsIpfWn8LXKPZ8ZR6IaVOs1O+nCge/Bli1tNZSEucgG6mWh4Jvw+/XL6eXbwWw=="],
+
+    "@audio/decode-amr": ["@audio/decode-amr@1.3.1", "", {}, "sha512-rYwY8HpmAwptaQDeNAoccbzbcYteHmL4s+KWVW8Y+NgJugQFhApsFeqs0ljVmuI2TvOmZRivMJwvg6++MdsUaA=="],
+
+    "@audio/decode-caf": ["@audio/decode-caf@1.4.1", "", {}, "sha512-iA0jNpUbGkFi45TjAbePrh/1K+SkVaQnp4r4br0kvd0IaD/cSzqOewi197Rba/VBlgoVFAro9ypuyh/VtTNNBw=="],
+
+    "@audio/decode-dts": ["@audio/decode-dts@1.0.0", "", {}, "sha512-WApeOndo8C+3IzncPFg7vwRm9/ZbWjCzB93mx86en/+4/IWpUVz0W/wRINzg5gKGQa23xz5ZwGMGNC0X7i8nJw=="],
+
+    "@audio/decode-eac3": ["@audio/decode-eac3@1.0.0", "", {}, "sha512-2UFpJUhI6MBouhP7Dztby5xfTem38Ql1QYxDnqqJAINI65O6xjqGqlxQgpWIwH/oZ2imaRislsTu0X0IrPe3+A=="],
+
     "@audio/decode-flac": ["@audio/decode-flac@2.0.0", "", { "dependencies": { "@wasm-audio-decoders/flac": "~0.2.10", "codec-parser": "~2.5.0" } }, "sha512-Wv7XXs81Zp8vKb6LtDuKL//Z+kAT5OxeelTmvRguqYt5Cp0Q9R1qFXdBToAg6052BHGipA11kIJQRrveNWFXRA=="],
 
     "@audio/decode-mp3": ["@audio/decode-mp3@1.3.1", "", { "dependencies": { "mpg123-decoder": "^1.0.3" } }, "sha512-GhGm6C2hwngU+t5uEpUc94jZGCrCIXrgfneDURfK9/2tgFAWHVeckFNsSRmL4+Vd7u32uv8wQamjTnBSlrkVGA=="],
+
+    "@audio/decode-mp4": ["@audio/decode-mp4@1.3.1", "", { "dependencies": { "@audio/decode-aac": "^1.6.0", "@audio/decode-ac3": "^1.0.0", "@audio/decode-amr": "^1.3.0", "@audio/decode-dts": "^1.0.0", "@audio/decode-eac3": "^1.0.0", "@audio/decode-flac": "^1.3.0", "@audio/decode-mp3": "^1.3.0", "@audio/decode-opus": "^1.3.3" } }, "sha512-t0EhxlrR7WFzk40SGjgXpi+Y8xUzkGKouw4wwsfii0S2iKvMbZwA5NAx2ZcZbWRzl4zWwzitll6XTek54RHT5A=="],
+
+    "@audio/decode-opus": ["@audio/decode-opus@1.3.3", "", { "dependencies": { "codec-parser": "~2.5.0" } }, "sha512-/iykUcA9cgdqqj9pLwPjBkJ4z+WlpLIyWA4xGzvTBkHb1uWpMxYX5yoG+slw8HhmBmrBP2LxKqw6i779g4acVA=="],
 
     "@audio/decode-wav": ["@audio/decode-wav@2.0.0", "", {}, "sha512-fs5MxpGxGwhftXGmIgKT1zzEshQ0vlNkNN/HdHXTZevPenHOxEDblVHKZbhC0ip7jlIi4aV4If6aC+VKrWb6Hw=="],
 
@@ -356,6 +386,8 @@
     "@audio/loudness-truepeak": ["@audio/loudness-truepeak@1.1.7", "", {}, "sha512-4kVZOM5vTSV+gDyM9aru6+K+1i6knOtw1L2xzokkTlRk03FihC4RNnmPkpCJr0a0+ZSPCljqLgXaZdcSkUzPTw=="],
 
     "@audio/resample-polyphase": ["@audio/resample-polyphase@1.1.0", "", {}, "sha512-mSPyTABEzAcF+/kI2gys0+tI9GCJsYQ81tVpzY81rvLCHbop2HVFsbJLVRHHXD8mTGX9c27ggkthF+QnnHLqSA=="],
+
+    "@audio/resample-sinc": ["@audio/resample-sinc@1.3.0", "", {}, "sha512-Qz8D8N15gpb5JgmDC6mD3ebcmIFi+G24L8N+YlGHTER6e+C/DNQGjXfregoARU49TyJIPqekAZkVroNdY499lA=="],
 
     "@audio/weighting-k": ["@audio/weighting-k@1.2.1", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-tiSLbRzFTQVvS8aUMKBBE+ZDtBNzgYmBWlg8/F00YbaDpR1kepsOSPCE3KqA51ekI4RAT/YPIZi+8yirq76GUQ=="],
 
@@ -2888,6 +2920,8 @@
     "zwitch": ["zwitch@2.0.4", "", {}, "sha512-bXE4cR/kVZhKZX/RjPEflHaKVhUVl85noU3v6b8apfQEc1x4A+zBxjZ4lN8LqGd6WZ3dl98pY4o717VFmoPp+A=="],
 
     "@antfu/install-pkg/tinyexec": ["tinyexec@1.2.4", "", {}, "sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg=="],
+
+    "@audio/decode-mp4/@audio/decode-flac": ["@audio/decode-flac@1.3.5", "", { "dependencies": { "@wasm-audio-decoders/flac": "~0.2.10", "codec-parser": "~2.5.0" } }, "sha512-ZaPeaprVjBpFfTFRjrfzWpxj5MBVJZR0j90g7aCfDTb82KFEdsVaf5cMrrVCKKrnSu0b2VBqXnEm6JZY1poTpA=="],
 
     "@babel/core/@babel/parser": ["@babel/parser@7.29.7", "", { "dependencies": { "@babel/types": "^7.29.7" }, "bin": "./bin/babel-parser.js" }, "sha512-hnORnjP/1P/zFEndoeX+n+t1RwWRJiJpM/jO7FW32Kn9r5+sJB2JWOdYo4L6k78j15eCwY3Gm/7364B1EMwtNg=="],
 

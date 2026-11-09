@@ -39,16 +39,29 @@ function rises(
 ): Float32Array {
   const length = channels[0]?.length ?? 0;
   const count = Math.max(0, Math.floor(length / hop));
-  const level = new Float32Array(count);
-  for (let frame = 0; frame < count; frame += 1) {
+  const squares = (from: number, to: number) => {
     let sum = 0;
-    // The stretch just before the reading: a sound that starts rises the level where it starts, not a window early.
-    const to = Math.min(length, (frame + 1) * hop);
-    const from = Math.max(0, to - window);
     for (const channel of channels) {
       for (let index = from; index < to; index += 1) {
         sum += (channel[index] as number) ** 2;
       }
+    }
+    return sum;
+  };
+  // Each hop's squares, summed once: a window is the hops it covers, and the part of one where it starts. Read
+  // afresh each time, a window's sum never carries the rounding of the windows before it, as a running one would.
+  const hops = Float64Array.from({ length: count }, (_, index) =>
+    squares(index * hop, (index + 1) * hop)
+  );
+  const level = new Float32Array(count);
+  for (let frame = 0; frame < count; frame += 1) {
+    // The stretch just before the reading: a sound that starts rises the level where it starts, not a window early.
+    const to = (frame + 1) * hop;
+    const from = Math.max(0, to - window);
+    const whole = Math.ceil(from / hop);
+    let sum = squares(from, whole * hop);
+    for (let index = whole; index <= frame; index += 1) {
+      sum += hops[index] as number;
     }
     level[frame] = Math.sqrt(sum / ((to - from) * channels.length || 1));
   }

@@ -15,8 +15,8 @@ import type {
   ArrangementCommand,
   ArrangementDoc,
 } from "@/lib/arrangement-state";
+import { encodeAudio } from "@/lib/daw/audio-files";
 import { canStream, streamRecording } from "@/lib/daw/cache";
-import { encodeAudio } from "@/lib/daw/export-audio";
 import {
   decodeRecording,
   freshMidiClipId,

@@ -1,7 +1,7 @@
 import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
 import { analyzeBeat, type BeatAnalysis } from "@/lib/arrangement";
-import { decodeAudioChannels } from "@/lib/audio-decode";
 import type { RecordingSource } from "@/lib/clip-player";
+import { decodeAudioChannels } from "@/lib/daw/audio-files";
 
 /** How many peaks a recording keeps per second: one per pixel at the closest zoom. */
 const PEAKS_PER_SECOND = 256;

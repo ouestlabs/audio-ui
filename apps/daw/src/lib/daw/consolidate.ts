@@ -8,9 +8,9 @@ import type { TimeSelection } from "@/lib/arrangement";
 import { renderTrackClips } from "@/lib/arrangement-engine";
 import { type ArrangementDoc, audioClipsIn } from "@/lib/arrangement-state";
 import type { RecordingSource } from "@/lib/clip-player";
+import { encodeAudio } from "@/lib/daw/audio-files";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { type Dropped, decodeFiles } from "@/lib/daw/drop";
-import { encodeAudio } from "@/lib/daw/export-audio";
 
 /**
  * The recordings a stretch consolidates into, one after the other: `made` by
