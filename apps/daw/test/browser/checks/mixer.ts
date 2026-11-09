@@ -341,10 +341,21 @@ export const checks: Checks = {
       const line = page.locator("[data-slot=resizable-handle]");
       const box = await line.boundingBox();
       assert(box, "the line is there");
+      // The frames the page paints from here: a failure says whether it was busy or lost the pointer.
+      await page.evaluate(() => {
+        const painted = globalThis as unknown as { painted: number };
+        painted.painted = 0;
+        const tick = () => {
+          painted.painted += 1;
+          requestAnimationFrame(tick);
+        };
+        requestAnimationFrame(tick);
+      });
       await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
       await page.mouse.down();
       await page.mouse.move(box.x + box.width / 2, box.y - 120, { steps: 6 });
       // The line follows the pointer a frame behind: released before it catches up, the last step is lost.
+      // Late in a long run the page can paint nothing for seconds, so it is given ten.
       const view = await page
         .getByRole("region", { exact: true, name: "Devices" })
         .elementHandle();
@@ -353,15 +364,18 @@ export const checks: Checks = {
           ([element, least]) =>
             (element?.getBoundingClientRect().height ?? 0) >= least,
           [view, devices + 116] as const,
-          { timeout: 2000 }
+          { timeout: 10_000 }
         )
         .catch(() => undefined);
       await page.mouse.up();
       await page.waitForTimeout(100);
       const taller = await height("Devices");
+      const painted = await page.evaluate(
+        () => (globalThis as unknown as { painted: number }).painted
+      );
       assert(
         Math.abs(taller - devices - 120) < 4,
-        `dragged up 120 px, the detail view went from ${devices} to ${taller}`
+        `dragged up 120 px, the detail view went from ${devices} to ${taller}, the page painting ${painted} frames meanwhile`
       );
       await line.focus();
       await page.keyboard.press("ArrowDown");
