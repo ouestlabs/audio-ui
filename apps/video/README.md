@@ -51,6 +51,14 @@ bun run registry
 
 The shadcn CLI in a terminal, `npx shadcn@latest add @audio-ui/knob` and what it prints, then the window opens a pane where the installed knob turns, in 10.6 seconds.
 
+### The stars
+
+```sh
+bun run stars
+```
+
+A thank you for the GitHub stars, in 7.5 seconds: a star and a number counting up to the last hundred reached, "stars on GitHub" and "Thank you", three lines set to one width. Then the card leaves for the logo and the repository's address, as the other videos end. The script reads the count with `gh` first.
+
 ### Options
 
 - `--theme dark`: render on the dark theme (light by default).

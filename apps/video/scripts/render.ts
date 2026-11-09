@@ -7,6 +7,7 @@
  *   bun run all                               every component: "New" where the docs' menu marks it, no status otherwise
  *   bun run teaser                            the whole library
  *   bun run registry                          the shadcn CLI installing a knob, then the knob turning
+ *   bun run stars                             a thank you for the GitHub stars, at the last hundred reached
  *
  * Options: --theme light|dark.
  * The videos land in apps/video/out/.
@@ -14,6 +15,7 @@
 import { parseArgs } from "node:util";
 import { bundle } from "@remotion/bundler";
 import { renderMedia, selectComposition } from "@remotion/renderer";
+import { $ } from "bun";
 import { SHOWCASES } from "../src/showcases/index.ts";
 import { webpackOverride } from "../webpack-override.ts";
 
@@ -154,6 +156,15 @@ async function everyComponent(): Promise<Job[]> {
   );
 }
 
+/** The repository's stars as GitHub counts them today, down to the last hundred reached: the milestone the video thanks people for. */
+async function starMilestone() {
+  const count = Number(
+    await $`gh api repos/ouestlabs/audio-ui --jq .stargazers_count`.text()
+  );
+  console.log(`${count} stars`);
+  return Math.floor(count / 100) * 100;
+}
+
 let jobs: Job[];
 if (command === "teaser") {
   jobs = [{ file: "teaser.mp4", id: "Teaser", props: {} }];
@@ -165,6 +176,17 @@ if (command === "teaser") {
       props: { theme: values.theme === "dark" ? "dark" : "light" },
     },
   ];
+} else if (command === "stars") {
+  jobs = [
+    {
+      file: "stars.mp4",
+      id: "Stars",
+      props: {
+        stars: await starMilestone(),
+        theme: values.theme === "dark" ? "dark" : "light",
+      },
+    },
+  ];
 } else if (command === "all") {
   jobs = await everyComponent();
 } else if (
@@ -174,7 +196,7 @@ if (command === "teaser") {
   jobs = [await spotlight(command, name)];
 } else {
   fail(
-    "Usage: bun run new|update|showcase <name> [--note …] | bun run all | bun run teaser | bun run registry"
+    "Usage: bun run new|update|showcase <name> [--note …] | bun run all | bun run teaser | bun run registry | bun run stars"
   );
 }
 

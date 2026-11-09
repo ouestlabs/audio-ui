@@ -13,6 +13,7 @@ bun run update <name> --note "…" --note "…"       # up to 3 notes; without -
 bun run showcase <name>                           # no status
 bun run all                                       # every component
 bun run teaser                                    # the 28 s library teaser
+bun run stars                                     # a thank you for the GitHub stars (reads the count with gh)
 bun run studio                                    # preview, under Showcases
 ```
 

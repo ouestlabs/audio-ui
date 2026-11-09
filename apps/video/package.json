@@ -11,6 +11,7 @@
     "registry": "bun scripts/render.ts registry",
     "render": "bun scripts/render.ts",
     "showcase": "bun scripts/render.ts showcase",
+    "stars": "bun scripts/render.ts stars",
     "studio": "remotion studio src/index.ts",
     "teaser": "bun scripts/render.ts teaser",
     "update": "bun scripts/render.ts update"
