@@ -145,7 +145,16 @@ export async function selectTime(
   await page.waitForSelector("[data-slot=timeline-time-selection]");
 }
 
-export async function open(browser: Browser, shared?: Page) {
+/**
+ * Opens the workstation on the test project, its settings set to `settings`
+ * first: dropped files play as recorded unless a check asks otherwise, so a
+ * held chord laid down keeps its length (CLP-019).
+ */
+export async function open(
+  browser: Browser,
+  shared?: Page,
+  settings: Record<string, unknown> = { warpOnImport: false }
+) {
   const page =
     shared ??
     (await (
@@ -154,6 +163,16 @@ export async function open(browser: Browser, shared?: Page) {
         viewport: { height: 1000, width: 1440 },
       })
     ).newPage());
+  await page.addInitScript((kept) => {
+    const key = "audio-ui-daw:settings";
+    localStorage.setItem(
+      key,
+      JSON.stringify({
+        ...JSON.parse(localStorage.getItem(key) ?? "{}"),
+        ...kept,
+      })
+    );
+  }, settings);
   // The test project in place of the song a first visit opens.
   await page.route("**/demo/hero.audioui", (route) =>
     route.fulfill({ body: FIXTURE, contentType: "application/json" })

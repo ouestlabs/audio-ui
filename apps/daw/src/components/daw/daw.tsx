@@ -89,6 +89,7 @@ import {
   type Recording,
   sourcePeaks,
 } from "@/lib/daw/recordings";
+import { readSettings } from "@/lib/daw/settings";
 import { ALSO_HOTKEYS, type ShortcutCommand } from "@/lib/daw/shortcuts";
 import {
   canStore,
@@ -838,7 +839,14 @@ export function Daw({
       );
       setRecordings((current) => new Map([...current, ...decoded]));
       dispatch({
-        commands: dropCommands(decoded, track, at, doc.duration, doc.tempo),
+        commands: dropCommands(
+          decoded,
+          track,
+          at,
+          doc.duration,
+          doc.tempo,
+          readSettings().warpOnImport
+        ),
         type: "batch",
       });
     },

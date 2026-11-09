@@ -1,14 +1,60 @@
 /** The checks of docs/daw-spec/audio-clips.md. */
+import encode from "@audio/encode";
 import {
   assert,
   type Checks,
   dropChord,
+  dropFiles,
   loudest,
   open,
   showMixer,
 } from "../helpers";
 
 export const checks: Checks = {
+  "CLP-019: with Warp files on import on, a dropped groove comes in warped in Beats at its tempo":
+    async (browser) => {
+      const page = await open(browser, undefined, { warpOnImport: true });
+      // Sixteen seconds of a kick and a snare at 100 BPM, from a quarter of a second in.
+      const rate = 48_000;
+      const groove = new Float32Array(16 * rate);
+      let seed = 3;
+      for (let beat = 0; 0.25 + beat * 0.6 < 16; beat += 1) {
+        const from = Math.round((0.25 + beat * 0.6) * rate);
+        for (
+          let frame = 0;
+          frame < 0.2 * rate && from + frame < groove.length;
+          frame += 1
+        ) {
+          seed = (seed * 1_103_515_245 + 12_345) & 0x7f_ff_ff_ff;
+          const sound =
+            beat % 2 === 0
+              ? 0.9 * Math.sin((2 * Math.PI * 55 * frame) / rate)
+              : 0.5 * ((seed / 0x7f_ff_ff_ff) * 2 - 1);
+          groove[from + frame] = sound * Math.exp((-frame / rate) * 20);
+        }
+      }
+      await dropFiles(page, '[data-track="track-1"]', [
+        {
+          bytes: await encode.wav([groove, groove], { sampleRate: rate }),
+          name: "Groove.wav",
+          type: "audio/wav",
+        },
+      ]);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 20_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const modes = page.getByRole("group", { name: "Warp mode" });
+      await modes.waitFor({ timeout: 5000 });
+      assert(
+        (await modes
+          .getByRole("button", { exact: true, name: "Beats" })
+          .getAttribute("aria-pressed")) === "true",
+        "the groove did not come in in Beats"
+      );
+      const tempo = Number(await page.getByLabel("Source tempo").inputValue());
+      assert(Math.abs(tempo - 100) < 0.1, `read at ${tempo} BPM, not 100`);
+    },
   "CLP-006: a file dropped fades 4 ms at its edges, and Delete on a longer fade brings it back to 4 ms":
     async (browser) => {
       const page = await open(browser);

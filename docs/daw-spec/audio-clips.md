@@ -72,13 +72,13 @@ Tones plays grains that overlap, each lined up on the sound of the one before it
 Test: packages/core/src/audio/playback/render.test.ts "CLP-017"
 
 ### CLP-018 Transients and tempo
-A recording's transients are where its notes and beats begin: frames where its level rises sharply, found to the sample. Its tempo is the beat period its transients repeat at most strongly, between 60 and 200 BPM, the octave nearest 120 BPM when two fit; the first beat is where that beat falls first. A recording with no steady beat (noise, a single hit) has no tempo.
-Test: packages/core/src/audio/analysis/tempo.test.ts "CLP-018"
+A recording's transients are where its notes and beats begin: frames where its level rises sharply, found to the sample. Its tempo is read from how its onsets repeat (spectral flux, a comb of tempos from 60 to 200 BPM), then the beat grid is fitted on its transients, to a hundredth of a BPM, with the first beat where it falls. A recording with no attack (silence, noise, a single hit) has no tempo. Measured on 2026-11-09 on 27 drum grooves of human drummers played to a click (Groove MIDI Dataset) and 3 loops: 24 read at their tempo, 6 at its double or half, none wrong; the transients alone found no tempo in 19 of them.
+Test: packages/core/src/audio/analysis/beat.test.ts (transients), apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-018"
 
 ### CLP-019 Warp on import
-A file dropped in is warped in Beats when its tempo can be told, so it plays in time at the arrangement's. A short file taken as a well-cut loop of 1, 2, 4, 8 or 16 bars (one of them gives a tempo within 4 % of the estimate, or of its double or half) takes the tempo its length gives, with a warp marker at its start and one at its end. Any other gets a marker on the first beat of each bar, each moved onto the transient within an eighth of a beat of it, and the clip starts on its first beat. A file with no tempo plays as recorded.
-Deviation: the reference also warps files it reads as one-shots, and lets a preference turn warping on import off; here a file with no tempo is not warped, and there is no preference yet.
-Test: packages/core/src/audio/analysis/tempo.test.ts "CLP-019"; apps/daw/test/drop.test.ts "CLP-019"
+A file dropped in is warped in Beats when its tempo can be told, so it plays in time at the arrangement's. A short file taken as a well-cut loop of 1, 2, 4, 8 or 16 bars (one of them gives a tempo within 4 % of the estimate, or of its double or half) takes the tempo its length gives, with a warp marker at its start and one at its end. Any other gets a marker on the first beat of each bar, each moved onto the transient within an eighth of a beat of it, and the clip starts on its first beat. A file with no tempo plays as recorded. Warp files on import, in the Record settings and on by default, turns this off: every dropped file then plays as recorded, as a voice or an ambience would want.
+Deviation: the reference also warps files it reads as one-shots; here a single hit has no tempo and plays as recorded.
+Test: packages/core/src/audio/analysis/beat.test.ts (autoWarp); apps/daw/test/drop.test.ts "CLP-019"; apps/daw/test/browser/run.ts "CLP-019"
 
 ### CLP-020 A waveform at any zoom
 An audio clip's waveform on its track has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one slice per pixel at the closest zoom, each column from its lowest sample to its highest, so a lopsided sound shows lopsided. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length. The clip view draws its source the same way, and both follow a zoom in the frame it happens, not once it stops.
