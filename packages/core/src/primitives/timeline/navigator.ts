@@ -1,4 +1,4 @@
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import { createChangeEventDetails } from "../../value/events.ts";
 import type { TimelineZoomChangeEventDetails } from "./position.ts";
 import type { ZoomAnchor } from "./scale.ts";
@@ -175,6 +175,7 @@ export function createNavigatorController(
   initial: NavigatorOptions
 ): NavigatorController {
   let options = initial;
+  const pointers = createPointerLock();
 
   /** Scrolls or zooms the viewport so it shows `next`. */
   const showRange = (
@@ -204,13 +205,13 @@ export function createNavigatorController(
   const range = () => visibleRange(options.metrics(), options.duration);
 
   const press: NavigatorController["press"] = (part, event, handle, track) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);
     const from = range();
     const startX = event.clientX;
-    followPointer(
+    pointers.follow(
       handle,
       event.pointerId,
       (move) => {

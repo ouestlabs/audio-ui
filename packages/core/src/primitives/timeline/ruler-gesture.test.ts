@@ -1,4 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
 import { createTimelineController, type TimelineOptions } from "./position.ts";
 
 const create = (options: Partial<TimelineOptions> = {}) =>
@@ -150,5 +155,30 @@ describe("Timeline lane press with a selection", () => {
     document.dispatchEvent(pointer("pointerup", { clientX: 50, buttons: 0 }));
     expect(onSelectionCommitted).not.toHaveBeenCalled();
     expect(timeline.getSnapshot().position).toBe(5);
+  });
+});
+
+describe("Timeline pointers", () => {
+  test("a second finger on the ruler is ignored, and the first goes on seeking", () => {
+    const onPositionChange = mock(() => undefined);
+    const onPositionCommitted = mock(() => undefined);
+    // 10px a unit.
+    const timeline = create({ onPositionChange, onPositionCommitted });
+    const ruler = boxElement(1000, 20);
+    const result = dragWithSecondFinger({
+      changes: () => onPositionChange.mock.calls.length,
+      commits: () => onPositionCommitted.mock.calls.length,
+      first: [
+        [50, 10],
+        [100, 10],
+        [150, 10],
+      ],
+      press: (event) => timeline.pressRuler(event, ruler, ruler),
+      second: [
+        [500, 10],
+        [600, 10],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

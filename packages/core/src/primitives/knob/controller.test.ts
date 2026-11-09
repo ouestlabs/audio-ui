@@ -1,4 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
 import { createKnobController } from "./controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
@@ -142,5 +147,33 @@ describe("Knob controller subscriptions", () => {
     listener.mockClear();
     knob.keyDown(key("ArrowUp"));
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("Knob controller pointers", () => {
+  test("a second finger on the knob is ignored, and the first goes on turning it", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const knob = createKnobController({
+      dragMode: "vertical",
+      onValueChange,
+      onValueCommitted,
+    });
+    const control = boxElement();
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [80, 25],
+        [80, 15],
+        [80, 5],
+      ],
+      press: (event) => knob.press(event, control),
+      second: [
+        [80, 40],
+        [80, 50],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

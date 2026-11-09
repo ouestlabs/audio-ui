@@ -1,5 +1,10 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
+import {
   createTrackController,
   type TrackOptions,
 } from "./track-controller.ts";
@@ -91,5 +96,29 @@ describe("Track height", () => {
     track.typeAt(150, new Event("input"));
     expect(onHeightCommitted.mock.calls[0]?.[0]).toBe(150);
     expect(track.keyDown(key("a"))).toBe(false);
+  });
+});
+
+describe("Track pointers", () => {
+  test("a second finger on the handle is ignored, and the first goes on resizing", () => {
+    const onHeightChange = mock(() => undefined);
+    const onHeightCommitted = mock(() => undefined);
+    const track = create({ height: 100, onHeightChange, onHeightCommitted });
+    const handle = boxElement(100, 4);
+    const result = dragWithSecondFinger({
+      changes: () => onHeightChange.mock.calls.length,
+      commits: () => onHeightCommitted.mock.calls.length,
+      first: [
+        [50, 0],
+        [50, 10],
+        [50, 20],
+      ],
+      press: (event) => track.press(event, handle),
+      second: [
+        [50, 50],
+        [50, 80],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

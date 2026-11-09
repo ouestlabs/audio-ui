@@ -38,3 +38,31 @@ export function followPointer(
   doc.addEventListener("pointerup", release, { signal });
   doc.addEventListener("pointercancel", release, { signal });
 }
+
+/** One pointer at a time on a control, as `createPointerLock` makes it. */
+export interface PointerLock {
+  /** Whether a press is to be ignored: another pointer drags the control. */
+  busy: (event: PointerEvent) => boolean;
+  /** Follows one pointer as `followPointer` does, and holds the control until it ends. */
+  follow: typeof followPointer;
+}
+
+/**
+ * One pointer at a time on a control: while one drags it, a press from
+ * another is ignored, so a second finger can't take the gesture over. The
+ * same pointer pressing again means its release was missed: that press
+ * starts afresh, so a lost release never leaves the control dead.
+ */
+export function createPointerLock(): PointerLock {
+  let held: number | null = null;
+  return {
+    busy: (event) => held !== null && held !== event.pointerId,
+    follow: (target, pointerId, move, end) => {
+      held = pointerId;
+      followPointer(target, pointerId, move, (event) => {
+        held = null;
+        end(event);
+      });
+    },
+  };
+}

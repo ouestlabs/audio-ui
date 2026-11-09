@@ -1,4 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
 import { createWaveformController, type WaveformSeekOptions } from "./seek.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
@@ -105,5 +110,29 @@ describe("Waveform seek controller hover and subscriptions", () => {
     listener.mockClear();
     seek.keyDown(key("ArrowRight"));
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("Waveform seek controller pointers", () => {
+  test("a second finger is ignored, and the first goes on seeking", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const seek = create({ onValueChange, onValueCommitted });
+    const element = boxElement(100, 20);
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [50, 10],
+        [30, 10],
+        [10, 10],
+      ],
+      press: (event) => seek.pressSeek(event, element),
+      second: [
+        [90, 10],
+        [80, 10],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

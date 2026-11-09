@@ -1,4 +1,4 @@
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import { clampFinite } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
@@ -159,6 +159,7 @@ export function createTimelineController(
   initial: TimelineOptions
 ): TimelineController {
   let options = initial;
+  const pointers = createPointerLock();
 
   // Held by the timeline, unless `position` or a live `source` is given.
   let uncontrolledPosition = options.defaultPosition ?? 0;
@@ -265,7 +266,7 @@ export function createTimelineController(
     lane,
     selecting
   ) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);
@@ -304,7 +305,7 @@ export function createTimelineController(
         gesture.range = range;
       }
     };
-    followPointer(
+    pointers.follow(
       handle,
       event.pointerId,
       (move) => {
@@ -373,7 +374,7 @@ export function createTimelineController(
     handle,
     lane
   ) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);
@@ -393,7 +394,7 @@ export function createTimelineController(
         range: null,
       };
       setScrubbing(true);
-      followPointer(
+      pointers.follow(
         handle,
         event.pointerId,
         (move) => {
@@ -434,7 +435,7 @@ export function createTimelineController(
       anchor.value,
       createChangeEventDetails("press", event)
     );
-    followPointer(
+    pointers.follow(
       handle,
       event.pointerId,
       (move) => {

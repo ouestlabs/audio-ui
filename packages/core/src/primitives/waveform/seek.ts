@@ -1,4 +1,4 @@
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import { clampFinite, clampUnit } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
@@ -130,6 +130,7 @@ export function createWaveformController(
   initial: WaveformSeekOptions
 ): WaveformSeekController {
   let options = initial;
+  const pointers = createPointerLock();
   let selection: WaveformSelectionHandlers = {};
   const hover = createStore<number | null>(null);
 
@@ -258,7 +259,7 @@ export function createWaveformController(
     selected = null;
     dragging = true;
     notify();
-    followPointer(
+    pointers.follow(
       element,
       event.pointerId,
       (move) => {
@@ -293,7 +294,7 @@ export function createWaveformController(
   };
 
   const pressSeek: WaveformSeekController["pressSeek"] = (event, element) => {
-    if (inert() || event.button !== 0) {
+    if (inert() || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     element.setPointerCapture?.(event.pointerId);
@@ -310,7 +311,7 @@ export function createWaveformController(
       valueAt(element, event.clientX),
       createChangeEventDetails("press", event)
     );
-    followPointer(
+    pointers.follow(
       element,
       event.pointerId,
       (move) => {

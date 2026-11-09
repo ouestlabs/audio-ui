@@ -1,4 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
 import { createFaderController } from "./controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
@@ -155,5 +160,29 @@ describe("Fader controller subscriptions", () => {
     listener.mockClear();
     fader.keyDown(key("ArrowUp"), document.body);
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("Fader controller pointers", () => {
+  test("a second finger on the fader is ignored, and the first goes on moving it", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const fader = createFaderController({ onValueChange, onValueCommitted });
+    const control = boxElement(20, 200);
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [10, 100],
+        [10, 80],
+        [10, 60],
+      ],
+      press: (event) => fader.press(event, control, null),
+      second: [
+        [10, 180],
+        [10, 190],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

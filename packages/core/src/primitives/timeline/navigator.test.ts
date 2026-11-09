@@ -1,5 +1,10 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
+import {
   createNavigatorController,
   movedRange,
   type NavigatorMetrics,
@@ -241,5 +246,36 @@ describe("Navigator window with a least width", () => {
     drag("start", -10);
     expect(thumb()[0]).toBeCloseTo(from - 10, 2);
     expect(thumb()[1]).toBeCloseTo(to, 2);
+  });
+});
+
+describe("Navigator pointers", () => {
+  test("a second finger on the bar is ignored, and the first goes on moving the window", () => {
+    // A fifth of the timeline shown, on a 100px bar.
+    const { controller, scrollTo, zoomTo } = create(
+      {},
+      { origin: 0, scrollStart: 0, width: 200, zoom: 10 }
+    );
+    const bar = boxElement(100, 10);
+    let part: NavigatorPart = "window";
+    const result = dragWithSecondFinger({
+      changes: () => scrollTo.mock.calls.length + zoomTo.mock.calls.length,
+      commits: () => 0,
+      first: [
+        [10, 5],
+        [20, 5],
+        [30, 5],
+      ],
+      press: (event) => {
+        controller.press(part, event, bar, bar);
+        part = "start";
+      },
+      second: [
+        [0, 5],
+        [50, 5],
+      ],
+    });
+    // The bar moves the view as it goes: there is nothing to commit.
+    expect(result).toEqual({ ...ONE_FINGER, commits: 0 });
   });
 });

@@ -1,4 +1,4 @@
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
@@ -145,6 +145,7 @@ export function createSequencerController(
   initial: SequencerOptions = {}
 ): SequencerController {
   let options = initial;
+  const pointers = createPointerLock();
 
   // The pattern and velocities as the gesture under way left them: a
   // controlled value that lags behind must not pull them back mid-gesture.
@@ -333,7 +334,7 @@ export function createSequencerController(
     root,
     nodes
   ) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     const on = !isOn(currentPattern(), cell);
@@ -346,7 +347,7 @@ export function createSequencerController(
     ) {
       gesture.changed = true;
     }
-    followPointer(
+    pointers.follow(
       root,
       event.pointerId,
       (move) => {
@@ -386,13 +387,13 @@ export function createSequencerController(
     root,
     nodes
   ) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     const gesture: VelocityGesture = { changed: false, nodes, row: cell.row };
     drawing = gesture;
     drawVelocityAt(event, cell.row, nodes);
-    followPointer(
+    pointers.follow(
       root,
       event.pointerId,
       (move) => {

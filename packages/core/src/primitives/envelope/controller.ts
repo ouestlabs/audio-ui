@@ -1,4 +1,4 @@
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import { clamp } from "../../shared/math.ts";
 import {
   type ChangeEventDetails,
@@ -193,6 +193,7 @@ export function createEnvelopeController(
   initial: EnvelopeOptions = {}
 ): EnvelopeController {
   let options = initial;
+  const pointers = createPointerLock();
   const bounds = () => ({
     maxPoints: options.maxPoints ?? Number.POSITIVE_INFINITY,
     minPoints: options.minPoints ?? DEFAULT_MIN_POINTS,
@@ -471,7 +472,7 @@ export function createEnvelopeController(
     handle,
     graph
   ) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     // Alt + press removes the point, as in a DAW's automation lane.
@@ -493,7 +494,7 @@ export function createEnvelopeController(
     gesture = started;
     draggingIndex = index;
     notify();
-    followPointer(
+    pointers.follow(
       handle,
       event.pointerId,
       (move) => {
@@ -547,7 +548,12 @@ export function createEnvelopeController(
     const from = displayed()[index];
     const to = displayed()[index + 1];
     const flat = from && to ? Math.abs(to.y - from.y) < 1e-6 : true;
-    if (options.disabled || flat || event.button !== 0) {
+    if (
+      options.disabled ||
+      flat ||
+      event.button !== 0 ||
+      pointers.busy(event)
+    ) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);
@@ -560,7 +566,7 @@ export function createEnvelopeController(
     gesture = started;
     draggingSegmentIndex = index;
     notify();
-    followPointer(
+    pointers.follow(
       handle,
       event.pointerId,
       (move) => {
@@ -598,7 +604,12 @@ export function createEnvelopeController(
   };
 
   const pressBend: EnvelopeController["pressBend"] = (event, graph) => {
-    if (options.disabled || event.button !== 0 || !event.altKey) {
+    if (
+      options.disabled ||
+      event.button !== 0 ||
+      !event.altKey ||
+      pointers.busy(event)
+    ) {
       return;
     }
     const at = pointerAt(graph, event);
@@ -620,7 +631,7 @@ export function createEnvelopeController(
     gesture = started;
     draggingSegmentIndex = index;
     notify();
-    followPointer(
+    pointers.follow(
       graph,
       event.pointerId,
       (move) => {

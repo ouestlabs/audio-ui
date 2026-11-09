@@ -1,4 +1,9 @@
 import { describe, expect, mock, test } from "bun:test";
+import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
 import { createXYPadController } from "./controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
@@ -140,5 +145,29 @@ describe("XY pad controller subscriptions", () => {
     listener.mockClear();
     pad.keyDown(key("ArrowUp"));
     expect(listener).not.toHaveBeenCalled();
+  });
+});
+
+describe("XY pad controller pointers", () => {
+  test("a second finger on the pad is ignored, and the first goes on moving the point", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const pad = createXYPadController({ onValueChange, onValueCommitted });
+    const control = boxElement(100, 100);
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [50, 50],
+        [60, 40],
+        [70, 30],
+      ],
+      press: (event) => pad.press(event, control),
+      second: [
+        [10, 90],
+        [5, 95],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

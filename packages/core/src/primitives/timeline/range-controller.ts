@@ -1,4 +1,4 @@
-import { followPointer } from "../../dom/gesture.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import {
   type ChangeEventDetails,
   type CommitEventDetails,
@@ -138,6 +138,7 @@ interface RangeGesture {
  */
 export function createRangeController(initial: RangeOptions): RangeController {
   let options = initial;
+  const pointers = createPointerLock();
   const limits = () => ({
     duration: options.duration,
     minLength: options.minLength,
@@ -358,7 +359,7 @@ export function createRangeController(initial: RangeOptions): RangeController {
   };
 
   const press: RangeController["press"] = (edge, event, handle, lane) => {
-    if (options.disabled || event.button !== 0) {
+    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
       return;
     }
     if (edge === "both" && !options.movable) {
@@ -372,7 +373,7 @@ export function createRangeController(initial: RangeOptions): RangeController {
     };
     dragging = true;
     notify();
-    followPointer(
+    pointers.follow(
       handle,
       event.pointerId,
       (move) => {
@@ -428,6 +429,7 @@ export function createRangeController(initial: RangeOptions): RangeController {
       options.disabled ||
       !options.drawable ||
       event.button !== 0 ||
+      pointers.busy(event) ||
       event.target !== lane
     ) {
       return;
@@ -451,7 +453,7 @@ export function createRangeController(initial: RangeOptions): RangeController {
     dragging = true;
     notify();
     const gesture = { changed: drawTo(event, anchor) };
-    followPointer(
+    pointers.follow(
       lane,
       event.pointerId,
       (move) => {

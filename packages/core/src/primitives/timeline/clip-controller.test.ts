@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, mock, test } from "bun:test";
-import { installFrames } from "../../../test/helpers.ts";
+import {
+  boxElement,
+  dragWithSecondFinger,
+  installFrames,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
 import { type ClipOptions, createClipController } from "./clip-controller.ts";
 
 const key = (name: string, extra: Partial<KeyboardEventInit> = {}) =>
@@ -335,5 +340,34 @@ describe("Clip controller near the edges of its view", () => {
     document.dispatchEvent(pointer("pointermove", 100, 140));
     document.dispatchEvent(pointer("pointerup", 100, 140));
     expect(committed.mock.calls[0]?.[1].lane).toBe(lanes[1]);
+  });
+});
+
+describe("Clip controller pointers", () => {
+  test("a second finger on the clip is ignored, and the first goes on moving it", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    // 10px a unit.
+    const clip = create({ onValueChange, onValueCommitted, zoom: 10 });
+    const lane = boxElement(1000, 40);
+    let target: "move" | "trim-end" = "move";
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [150, 20],
+        [200, 20],
+        [250, 20],
+      ],
+      press: (event) => {
+        clip.press(target, event, lane, lane);
+        target = "trim-end";
+      },
+      second: [
+        [300, 20],
+        [400, 20],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

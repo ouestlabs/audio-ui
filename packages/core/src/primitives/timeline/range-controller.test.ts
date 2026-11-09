@@ -1,5 +1,10 @@
 import { describe, expect, mock, test } from "bun:test";
 import {
+  boxElement,
+  dragWithSecondFinger,
+  ONE_FINGER,
+} from "../../../test/helpers.ts";
+import {
   createRangeController,
   drawnRangeWidth,
   type RangeOptions,
@@ -161,5 +166,34 @@ describe("A range drawn with room for its handles", () => {
       expect(rangeWidthOfDrawn(drawnRangeWidth(width, 32), 32)).toBe(width);
     }
     expect(rangeWidthOfDrawn(10, 32)).toBe(0);
+  });
+});
+
+describe("Range controller pointers", () => {
+  test("a second finger on the other edge is ignored, and the first goes on moving its edge", () => {
+    const onValueChange = mock(() => undefined);
+    const onValueCommitted = mock(() => undefined);
+    const range = create({ onValueChange, onValueCommitted });
+    // 100px for the 100 units: one a pixel.
+    const lane = boxElement(100, 20);
+    let edge: "end" | "start" = "start";
+    const result = dragWithSecondFinger({
+      changes: () => onValueChange.mock.calls.length,
+      commits: () => onValueCommitted.mock.calls.length,
+      first: [
+        [20, 10],
+        [25, 10],
+        [30, 10],
+      ],
+      press: (event) => {
+        range.press(edge, event, lane, lane);
+        edge = "end";
+      },
+      second: [
+        [40, 10],
+        [60, 10],
+      ],
+    });
+    expect(result).toEqual(ONE_FINGER);
   });
 });

@@ -1,4 +1,4 @@
-import { isReleased } from "../../dom/pointer.ts";
+import { createPointerLock } from "../../dom/gesture.ts";
 import {
   clamp,
   clampFinite,
@@ -133,7 +133,6 @@ interface KnobGesture {
   lastY: number;
   /** Farthest distance from the press point, in px. */
   maxDistance: number;
-  pointerId: number;
   /**
    * Where the drag has taken the dial along its travel, 0…1 and beyond:
    * accumulated move by move, so Shift can make any stretch of it finer,
@@ -153,6 +152,7 @@ export function createKnobController(
   initial: KnobOptions = {}
 ): KnobController {
   let options = initial;
+  const pointers = createPointerLock();
   let scale: ParameterScale = resolveScale(initial.scale ?? "linear");
   const bounds = () => ({
     max: options.max ?? 100,
@@ -353,7 +353,7 @@ export function createKnobController(
   };
 
   const press: KnobController["press"] = (event, control) => {
-    if (options.disabled) {
+    if (options.disabled || pointers.busy(event)) {
       return;
     }
     // Alt + click returns to the default, as in a DAW.
@@ -364,14 +364,11 @@ export function createKnobController(
     control.setPointerCapture?.(event.pointerId);
     const rect = control.getBoundingClientRect();
     const { min, max } = bounds();
-    const doc = control.ownerDocument;
-    const drag = new AbortController();
     gesture = {
       changed: false,
       lastAngle: pointerAngle(event.clientX, event.clientY, rect),
       lastY: event.clientY,
       maxDistance: 0,
-      pointerId: event.pointerId,
       position: scale.toPosition(displayed(), min, max),
       rect,
       startX: event.clientX,
@@ -382,12 +379,7 @@ export function createKnobController(
 
     const move = (moveEvent: PointerEvent) => {
       const current = gesture;
-      if (!current || moveEvent.pointerId !== current.pointerId) {
-        return;
-      }
-      if (isReleased(moveEvent)) {
-        drag.abort();
-        finish(moveEvent, true);
+      if (!current) {
         return;
       }
       current.maxDistance = Math.max(
@@ -406,19 +398,10 @@ export function createKnobController(
         current.changed = true;
       }
     };
-    const end = (endEvent: PointerEvent, allowTap: boolean) => {
-      if (!gesture || endEvent.pointerId !== gesture.pointerId) {
-        return;
-      }
-      drag.abort();
-      finish(endEvent, allowTap);
-    };
-    const { signal } = drag;
-    doc.addEventListener("pointermove", move, { signal });
-    doc.addEventListener("pointerup", (up) => end(up, true), { signal });
-    doc.addEventListener("pointercancel", (cancel) => end(cancel, false), {
-      signal,
-    });
+    // A cancelled press is no tap: the browser took the pointer away.
+    pointers.follow(control, event.pointerId, move, (end) =>
+      finish(end, end.type !== "pointercancel")
+    );
   };
 
   const keyDown: KnobController["keyDown"] = (event) => {
