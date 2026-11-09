@@ -1,5 +1,12 @@
 # @audio-ui/core
 
+## 0.23.1
+
+### Patch Changes
+
+- fc36425: MIDI input: a `disconnect()` made while the browser still asks for access now holds once access is granted, and of two `connect()` calls made at once, only the last one is listened to. The answer to the earlier request used to connect the devices again.
+- fc36425: Knob, Fader, XYPad, Envelope, Sequencer, PianoRoll, Waveform, Plot and Timeline: while one finger drags a control, a second finger pressed on it is ignored, so it can't take the drag over. A second finger used to freeze a knob under the first, or drop the note a piano roll was moving. The same pointer pressing again still starts afresh, so a release the page missed never leaves a control dead. Fader: a finger lifted somewhere else no longer ends its drag.
+
 ## 0.23.0
 
 ### Minor Changes
