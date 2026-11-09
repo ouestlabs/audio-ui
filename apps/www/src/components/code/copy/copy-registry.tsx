@@ -9,6 +9,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useConfig } from "@/hooks/use-config";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { trackEvent } from "@/lib/events";
 import { cn } from "@/lib/utils";
 
@@ -18,14 +19,7 @@ interface CopyRegistryProps extends React.ComponentProps<typeof Button> {
 
 export function CopyRegistry({ value, ...props }: CopyRegistryProps) {
   const [config] = useConfig();
-  const [hasCopied, setHasCopied] = React.useState(false);
-
-  React.useEffect(() => {
-    if (hasCopied) {
-      const timer = setTimeout(() => setHasCopied(false), 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [hasCopied]);
+  const { copyToClipboard: copy, isCopied: hasCopied } = useCopyToClipboard();
 
   const copyToClipboard = React.useCallback(async () => {
     try {
@@ -47,8 +41,9 @@ export function CopyRegistry({ value, ...props }: CopyRegistryProps) {
           break;
       }
 
-      await navigator.clipboard.writeText(command);
-      setHasCopied(true);
+      if (!(await copy(command))) {
+        return;
+      }
 
       trackEvent({
         name: "copy_component_cli",
@@ -64,6 +59,7 @@ export function CopyRegistry({ value, ...props }: CopyRegistryProps) {
       console.error("Failed to copy:", err);
     }
   }, [
+    copy,
     value,
     config?.packageManager,
     config?.base,

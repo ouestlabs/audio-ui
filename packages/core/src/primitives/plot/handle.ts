@@ -237,7 +237,7 @@ export function createPlotHandleController(
   };
 
   const press: PlotHandleController["press"] = (event, element) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     // An Alt + press returns to the default, as in a DAW.

@@ -266,7 +266,7 @@ export function createTimelineController(
     lane,
     selecting
   ) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);
@@ -374,7 +374,7 @@ export function createTimelineController(
     handle,
     lane
   ) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);

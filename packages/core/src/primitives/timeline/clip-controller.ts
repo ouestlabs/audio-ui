@@ -503,7 +503,7 @@ export function createClipController(initial: ClipOptions): ClipController {
   };
 
   const press: ClipController["press"] = (target, event, handle, lane) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     if (target === "move" && !options.movable) {

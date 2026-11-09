@@ -1060,7 +1060,7 @@ export function createPianoRollController(
   };
 
   const pressGrid: PianoRollController["pressGrid"] = (event, grid) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     if ((options.mode ?? "select") === "select") {
@@ -1253,7 +1253,7 @@ export function createPianoRollController(
     element,
     grid
   ) => {
-    if (options.disabled || pointers.busy(event)) {
+    if (options.disabled || !pointers.claim(event)) {
       return;
     }
     const selection = selectedIds();
@@ -1403,7 +1403,7 @@ export function createPianoRollController(
     lane,
     level = "velocity"
   ) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     const selection = selectedIds();
@@ -1531,7 +1531,7 @@ export function createPianoRollController(
     if (
       options.disabled ||
       event.button !== 0 ||
-      pointers.busy(event) ||
+      !pointers.claim(event) ||
       (options.mode ?? "select") !== "draw"
     ) {
       return;
@@ -1594,7 +1594,7 @@ export function createPianoRollController(
     element,
     grid
   ) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     const ids = selectedIds();

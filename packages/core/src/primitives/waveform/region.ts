@@ -218,7 +218,7 @@ export function createWaveformRegionController(
     track,
     shownRange
   ) => {
-    if (options.disabled || event.button !== 0 || pointers.busy(event)) {
+    if (options.disabled || event.button !== 0 || !pointers.claim(event)) {
       return;
     }
     handle.setPointerCapture?.(event.pointerId);
