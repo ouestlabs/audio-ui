@@ -3,9 +3,10 @@ import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
 import { Daw, type DawProps } from "@/components/daw/daw";
+import { SmallScreenNotice } from "@/components/daw/small-screen-notice";
 import { clearView } from "@/components/daw/use-saved-view";
 import { padRecordings } from "@/lib/arrangement";
-import { allTracks } from "@/lib/arrangement-state";
+import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
 import {
   cachedRecording,
   canStream,
@@ -14,7 +15,9 @@ import {
 } from "@/lib/daw/cache";
 import { recallFolder } from "@/lib/daw/folder";
 import { newProject } from "@/lib/daw/project";
+import { readProjectFile } from "@/lib/daw/project-file";
 import { decodeRecording, type Recording } from "@/lib/daw/recordings";
+import { configureAudio } from "@/lib/daw/settings";
 import {
   APP_HOTKEYS,
   keepCustomHotkeys,
@@ -50,16 +53,28 @@ async function openRecording(
   return decoded && streaming ? streamRecording(id, decoded) : decoded;
 }
 
-/** The project kept in the browser, its recordings opened one after the other, or a new one. */
+/** What a first visit opens: the song the site's hero plays, every part of it MIDI, so Play sounds at once. A new project when it can't be read. */
+async function firstProject(): Promise<ArrangementDoc> {
+  try {
+    const response = await fetch("/demo/hero.audioui");
+    return readProjectFile(await response.text()).doc;
+  } catch {
+    return newProject();
+  }
+}
+
+/** The project kept in the browser, its recordings opened one after the other, or the first visit's. */
 async function openProject(): Promise<DawProps> {
   const saved = await loadProject();
+  // The context is made here first: with the latency the settings keep.
+  configureAudio();
   const context = webAudio.getContext();
   if (!(saved && context)) {
-    // A new project: nothing kept of the view is about it.
+    // Nothing kept: nothing kept of the view is about it either.
     clearView();
     return {
       folder: null,
-      initial: newProject(),
+      initial: await firstProject(),
       initialRecordings: new Map(),
     };
   }
@@ -115,6 +130,7 @@ function Home() {
       {/* Every knob of the workstation turns by a drag up and down, as the reference's do. */}
       <Knob.Provider dragMode="vertical">
         <Daw {...project.props} key={project.opened} onOpen={open} />
+        <SmallScreenNotice />
       </Knob.Provider>
     </HotkeysProvider>
   );

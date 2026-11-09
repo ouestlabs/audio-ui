@@ -17,6 +17,12 @@ import { webAudio } from "@/lib/web-audio";
 const ctx = webAudio.getContext(); // null on the server
 ```
 
+To make it with options of its own, such as how much latency it trades for steadiness, configure it before anything asks for it. They do not change a context already made, so a change takes the next page load:
+
+```tsx
+webAudio.configure({ latencyHint: "playback" });
+```
+
 Browsers start a context suspended until the user does something on the page. Resume it from the gesture that starts the sound, such as a play button:
 
 ```tsx

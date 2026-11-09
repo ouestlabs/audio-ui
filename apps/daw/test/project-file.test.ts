@@ -6,6 +6,7 @@ import {
   PROJECT_VERSION,
   readProjectFile,
   sampleFileName,
+  savedAs,
   sniffExtension,
   withFreshIds,
   writeProjectFile,
@@ -167,5 +168,24 @@ describe("peaks", () => {
     expect(peakCountFor(240) / 240).toBeGreaterThanOrEqual(240);
     expect(peakCountFor(1)).toBe(4096);
     expect(peakCountFor(36_000)).toBe(2 ** 20);
+  });
+});
+
+describe("a recording saved again", () => {
+  test("PRJ-007: is looked for under its own name, numbered or not, and nowhere else", () => {
+    const files = [
+      "Drums Verse.wav",
+      "Drums Verse 2.wav",
+      "Drums Verse Fill.wav",
+      "Drums Chorus.wav",
+      "Drums Verse 3.mp3",
+    ];
+    expect(savedAs("Drums Verse", "wav", files)).toEqual([
+      "Drums Verse.wav",
+      "Drums Verse 2.wav",
+    ]);
+    expect(savedAs("Bass (DI)", "wav", ["Bass (DI) 2.wav"])).toEqual([
+      "Bass (DI) 2.wav",
+    ]);
   });
 });

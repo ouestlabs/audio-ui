@@ -7,6 +7,8 @@ export interface MidiInputState {
   error: string | null;
   /** The names of the connected devices. */
   inputs: string[];
+  /** The names of the devices switched off with `setInputEnabled`: their messages are not heard. */
+  muted: string[];
   /** Whether this browser has the Web MIDI API, which needs a secure context. */
   supported: boolean;
 }
@@ -21,6 +23,8 @@ export interface MidiInput {
   getSnapshot: () => MidiInputState;
   /** Calls `handler` with each channel voice message of every connected input. Returns its unsubscribe. */
   listen: (handler: (message: MidiMessage) => void) => () => void;
+  /** Switches the device named `name` off, so its messages are not heard, or on again. It holds before the device connects and while it is unplugged. */
+  setInputEnabled: (name: string, enabled: boolean) => void;
   /** Calls `listener` when the state changes. Returns its unsubscribe. */
   subscribe: (listener: () => void) => () => void;
 }
@@ -29,6 +33,7 @@ const UNSUPPORTED: MidiInputState = {
   connected: false,
   error: null,
   inputs: [],
+  muted: [],
   supported: false,
 };
 
@@ -39,12 +44,14 @@ const isSupported = () =>
 /**
  * The MIDI inputs of the page through the Web MIDI API, as one source: every
  * listener hears the messages of every connected device, and devices plugged
- * or unplugged later are picked up. System exclusive access is not asked for.
+ * or unplugged later are picked up, and a device switched off with
+ * `setInputEnabled` is not heard. System exclusive access is not asked for.
  * Make one and share it, so the browser is asked once.
  */
 export function createMidiInput(): MidiInput {
   const handlers = new Set<(message: MidiMessage) => void>();
   const listeners = new Set<() => void>();
+  const muted = new Set<string>();
   let access: MIDIAccess | null = null;
   let state: MidiInputState | null = null;
 
@@ -65,7 +72,11 @@ export function createMidiInput(): MidiInput {
     }
     const names: string[] = [];
     for (const input of access.inputs.values()) {
+      const name = input.name ?? "MIDI device";
       input.onmidimessage = (event) => {
+        if (muted.has(name)) {
+          return;
+        }
         const message = parseMidiMessage(event.data);
         if (message) {
           for (const handler of handlers) {
@@ -73,7 +84,7 @@ export function createMidiInput(): MidiInput {
           }
         }
       };
-      names.push(input.name ?? "MIDI device");
+      names.push(name);
     }
     update({
       connected: names.length > 0,
@@ -114,6 +125,17 @@ export function createMidiInput(): MidiInput {
     },
     getServerSnapshot: () => UNSUPPORTED,
     getSnapshot,
+    setInputEnabled: (name, enabled) => {
+      if (enabled === !muted.has(name)) {
+        return;
+      }
+      if (enabled) {
+        muted.delete(name);
+      } else {
+        muted.add(name);
+      }
+      update({ muted: [...muted] });
+    },
     listen: (handler) => {
       handlers.add(handler);
       return () => {

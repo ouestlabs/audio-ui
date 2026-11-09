@@ -1002,7 +1002,7 @@ export type ArrangementCommand =
       value: number;
     }
   // Drum racks: a pad is a chain of the rack, found by its id or by the note it answers.
-  /** Puts `sound` on the pad of `note`: the chain already there takes it, or a new chain named `name` does. */
+  /** Puts `sound` on the pad of `note`: the chain already there takes it, in place of the instrument at its head, or a new chain named `name` does. */
   | {
       type: "set-pad";
       track: string;
@@ -1739,8 +1739,12 @@ function setPad(
   const at = Math.round(Math.min(127, Math.max(0, note)));
   const there = rack.chains.find((chain) => chain.pad?.note === at);
   if (there) {
+    // An instrument at the head of the chain would go on playing over the sound: the sound takes its place, the effects after it stay.
     return withChain(rack, there.id, (chain) => ({
       ...chain,
+      devices: chain.devices[0]?.instrument
+        ? chain.devices.slice(1)
+        : chain.devices,
       name: name.trim() || chain.name,
       pad: { ...chain.pad, note: at, sound },
     }));

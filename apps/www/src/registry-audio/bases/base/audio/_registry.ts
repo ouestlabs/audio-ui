@@ -415,6 +415,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/pad",
       "@audio-ui/rack-panel",
       "@shadcn/button",
+      "@shadcn/input-group",
       "@shadcn/select",
       "@shadcn/toggle",
     ],

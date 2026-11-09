@@ -109,6 +109,36 @@ export function sampleFileName(
   return file;
 }
 
+/** A number of a file saved under a name already taken, as `sampleFileName` adds it. */
+const WHOLE_NUMBER = /^\d+$/;
+
+/**
+ * The files of `files` a recording named `name` may already be saved as: its
+ * own name, and the numbered ones `sampleFileName` gives when that is taken.
+ * Saving again looks there first for a file of the same bytes, so a project
+ * saved twice keeps one file per recording.
+ */
+export function savedAs(
+  name: string,
+  extension: string,
+  files: readonly string[]
+): string[] {
+  const plain = `${name}.${extension}`;
+  return files.filter((file) => {
+    if (file === plain) {
+      return true;
+    }
+    const prefix = `${name} `;
+    const suffix = `.${extension}`;
+    if (!(file.startsWith(prefix) && file.endsWith(suffix))) {
+      return false;
+    }
+    return WHOLE_NUMBER.test(
+      file.slice(prefix.length, file.length - suffix.length)
+    );
+  });
+}
+
 /**
  * The project with every recording under a new id from `fresh`, in its
  * samples, in the clips and in the drum racks' pads that play them: what opening it gives, so its ids

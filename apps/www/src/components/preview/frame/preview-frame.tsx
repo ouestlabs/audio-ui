@@ -42,7 +42,8 @@ export const blockPanelClassName =
   "min-h-60 flex-nowrap items-stretch justify-start sm:**:data-[slot=preview]:max-w-none [&_.cn-audio-panel]:w-full [&_.cn-audio-panel]:flex-1 [&_.cn-audio-panel]:rounded-none [&_.cn-audio-panel]:border-0 [&_.cn-audio-panel]:bg-transparent [&_.cn-audio-panel]:p-0 [&_[data-slot=piano-roll]]:max-h-56";
 
 /** What a preview's panel looks like, on a page and in a card alike. */
-const panelClassName = `flex min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto font-sans **:data-[slot=preview]:w-full sm:**:data-[slot=preview]:max-w-[80%] ${PANEL_INSET}`;
+// Isolated: what a preview stacks inside it, such as a timeline's sticky ruler, stays under what the page lays over it, as the outline of the page.
+const panelClassName = `isolate flex min-w-0 flex-1 flex-col flex-wrap items-center justify-center overflow-x-auto font-sans **:data-[slot=preview]:w-full sm:**:data-[slot=preview]:max-w-[80%] ${PANEL_INSET}`;
 
 /**
  * What a panel shows while its preview is on its way: a spinner in the middle

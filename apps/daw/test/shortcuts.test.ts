@@ -129,4 +129,17 @@ describe("the keyboard", () => {
       "save-as"
     );
   });
+
+  test("KEY-035: Cmd+Shift+Comma opens the settings, Cmd+Comma stays the browser's", () => {
+    on("MacIntel");
+    // Shift turns the comma into "<" on most layouts: the key is matched by its place.
+    expect(
+      matchShortcut(
+        press("<", { code: "Comma", metaKey: true, shiftKey: true })
+      )
+    ).toBe("settings");
+    expect(
+      matchShortcut(press(",", { code: "Comma", metaKey: true }))
+    ).toBeNull();
+  });
 });

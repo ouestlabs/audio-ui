@@ -102,6 +102,12 @@ describe("drumSynthDevice", () => {
     expect(drumSynthPreset("snare").voice).toBe("snare");
   });
 
+  test("the volume's default plays at unity, its top 8 dB above", () => {
+    expect(volumeGain(drumSynthDevice.defaults().volume)).toBeCloseTo(1, 9);
+    expect(20 * Math.log10(volumeGain(10))).toBeCloseTo(8, 9);
+    expect(volumeGain(0)).toBe(0);
+  });
+
   test("the decay's middle is the voice's own ring, its ends an eighth and eight times", () => {
     for (const { value } of DRUM_SYNTH_VOICES) {
       expect(decaySeconds(value, 5)).toBeCloseTo(VOICE_DECAYS[value], 9);
@@ -115,7 +121,7 @@ describe("createDrumSynthEngine", () => {
   test("starts its output at its volume", () => {
     const { ctx, made } = fakeContext();
     createDrumSynthEngine(ctx, drumSynthPreset("kick", { volume: 10 }));
-    expect(made.gains[0]?.gain.value).toBeCloseTo(volumeGain(10) * 2.5, 9);
+    expect(made.gains[0]?.gain.value).toBeCloseTo(volumeGain(10), 9);
   });
 
   test("a kick is a sine falling to its pitch, struck at the note's time and ringing for its decay", () => {
