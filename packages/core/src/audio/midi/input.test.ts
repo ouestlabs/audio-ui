@@ -156,6 +156,49 @@ describe("createMidiInput", () => {
     expect(input.getSnapshot()).toMatchObject({ connected: false, inputs: [] });
   });
 
+  test("a disconnect while access is asked for wins over the answer", async () => {
+    const fake = fakeAccess(["A"]);
+    let grant: (access: unknown) => void = () => undefined;
+    setNavigator({
+      requestMIDIAccess: () =>
+        new Promise((resolve) => {
+          grant = resolve;
+        }),
+    });
+    const input = createMidiInput();
+    const heard: MidiMessage[] = [];
+    input.listen((message) => heard.push(message));
+    const connecting = input.connect();
+    input.disconnect();
+    grant(fake.access);
+    await connecting;
+    fake.send(0, 0x90, 60, 100);
+    expect(heard).toEqual([]);
+    expect(fake.ports[0]?.onmidimessage).toBeNull();
+    expect(fake.access.onstatechange).toBeNull();
+    expect(input.getSnapshot()).toMatchObject({ connected: false, inputs: [] });
+  });
+
+  test("of two connects at once, only the last one is listened to", async () => {
+    const first = fakeAccess(["Old"]);
+    const second = fakeAccess(["New"]);
+    const grants: ((access: unknown) => void)[] = [];
+    setNavigator({
+      requestMIDIAccess: () =>
+        new Promise((resolve) => {
+          grants.push(resolve);
+        }),
+    });
+    const input = createMidiInput();
+    const connecting = [input.connect(), input.connect()];
+    grants[1]?.(second.access);
+    grants[0]?.(first.access);
+    await Promise.all(connecting);
+    expect(first.access.onstatechange).toBeNull();
+    expect(first.ports[0]?.onmidimessage).toBeNull();
+    expect(input.getSnapshot().inputs).toEqual(["New"]);
+  });
+
   test("says so when permission is denied or there is no device", async () => {
     setNavigator({ requestMIDIAccess: () => Promise.reject(new Error("no")) });
     const denied = createMidiInput();
