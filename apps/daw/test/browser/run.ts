@@ -1922,6 +1922,69 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
       );
       assert(live === 0, `${live} input tracks are still open`);
     },
+  "REC-003: a take started while Monitor still waits for the input shares it, and Monitor off closes it":
+    async (browser) => {
+      const context = await browser.newContext({
+        viewport: { height: 1000, width: 1440 },
+      });
+      const shared = await context.newPage();
+      // The input is granted late, as after a prompt, and every stream the page asks for is kept to look at.
+      await shared.addInitScript(() => {
+        const devices = navigator.mediaDevices;
+        const ask = devices.getUserMedia.bind(devices);
+        const scope = window as unknown as { streams: MediaStream[] };
+        scope.streams = [];
+        devices.getUserMedia = async (constraints) => {
+          const stream = await ask(constraints);
+          scope.streams.push(stream);
+          await new Promise((resolve) => setTimeout(resolve, 800));
+          return stream;
+        };
+      });
+      const page = await open(browser, shared);
+      const monitor = async () => {
+        await page.getByRole("button", { name: "Record settings" }).click();
+        await page
+          .getByRole("menuitemcheckbox", { name: "Monitor input (headphones)" })
+          .click();
+        await page.keyboard.press("Escape");
+      };
+      await page.keyboard.press("Control+KeyT");
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: ARM })
+        .last()
+        .click();
+      // Monitor asks for the input; Record comes while it waits.
+      await monitor();
+      const record = page.getByRole("button", { exact: true, name: "Record" });
+      await record.click();
+      await page.locator('[data-slot="arranged-take"]').waitFor({
+        timeout: 5000,
+      });
+      await record.click();
+      await page.waitForTimeout(500);
+      const streams = () =>
+        page.evaluate(() =>
+          (window as unknown as { streams: MediaStream[] }).streams.map(
+            (stream) =>
+              stream.getTracks().filter((track) => track.readyState === "live")
+                .length
+          )
+        );
+      const asked = await streams();
+      assert(
+        asked.length === 1 && asked[0] === 1,
+        `the page asked for ${asked.length} inputs, and holds ${asked.join(", ")} live tracks, not one shared input`
+      );
+      await monitor();
+      await page.waitForTimeout(500);
+      const left = (await streams()).reduce((sum, live) => sum + live, 0);
+      assert(
+        left === 0,
+        `${left} input tracks are still open with Monitor off`
+      );
+    },
   "MIX-015: the Devices tab shows the devices of the track of the clip picked, not of a track or a return picked before it":
     async (browser) => {
       const page = await open(browser);

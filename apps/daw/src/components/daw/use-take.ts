@@ -309,7 +309,11 @@ export function useTake({
    * hands over the last blocks before the input can close.
    */
   const phase = useRef<TakePhase>("idle");
-  const opened = useRef<{ device: string; input: OpenInput } | null>(null);
+  /** The input, open or still asked for: one answer every caller shares. */
+  const opened = useRef<{
+    device: string;
+    input: Promise<OpenInput>;
+  } | null>(null);
 
   // Arming one disarms the others, unless Cmd or Ctrl was held (REC-001).
   const arm = useCallback((track: string, exclusive: boolean) => {
@@ -324,22 +328,31 @@ export function useTake({
     });
   }, []);
 
+  /** Lets the input go: closed now, or as soon as the browser grants it if it still asks. */
+  const closeInput = useCallback(() => {
+    opened.current?.input.then(closeStream, () => undefined);
+    opened.current = null;
+  }, []);
+
   /** The input, opened once and shared by monitoring and takes, on the device picked. */
   const input = useCallback(
-    async (ctx: AudioContext) => {
-      if (opened.current?.device !== inputDevice) {
-        closeStream(opened.current?.input ?? null);
-        opened.current = null;
+    (ctx: AudioContext) => {
+      if (opened.current && opened.current.device !== inputDevice) {
+        closeInput();
       }
       if (!opened.current) {
-        opened.current = {
-          device: inputDevice,
-          input: await openStream(ctx, inputDevice),
-        };
+        const asked = openStream(ctx, inputDevice);
+        opened.current = { device: inputDevice, input: asked };
+        // Refused, it is asked for again the next time.
+        asked.catch(() => {
+          if (opened.current?.input === asked) {
+            opened.current = null;
+          }
+        });
       }
       return opened.current.input;
     },
-    [inputDevice]
+    [closeInput, inputDevice]
   );
 
   /** The audio inputs the browser offers, read again as the menu opens. */
@@ -387,11 +400,10 @@ export function useTake({
       }
       // A take starting or running holds the input.
       if (phase.current === "idle") {
-        closeStream(opened.current?.input ?? null);
-        opened.current = null;
+        closeInput();
       }
     };
-  }, [armedAudio, engine.engine, input, monitorInput]);
+  }, [armedAudio, closeInput, engine.engine, input, monitorInput]);
 
   // The count-in, counted back to the take's start on the transport.
   const countDown = useCallback(
@@ -413,10 +425,9 @@ export function useTake({
   /** Closes the input once a take is done with it, unless Monitor still holds it. */
   const releaseInput = useCallback(() => {
     if (!monitorInput) {
-      closeStream(opened.current?.input ?? null);
-      opened.current = null;
+      closeInput();
     }
-  }, [monitorInput]);
+  }, [closeInput, monitorInput]);
 
   const start = useCallback(async () => {
     const ctx = webAudio.getContext();
