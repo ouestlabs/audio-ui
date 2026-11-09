@@ -62,6 +62,8 @@ export interface MixerStrip {
   readonly meter: readonly AnalyserNode[];
   /** Puts these in series between its input and its volume, in order; with none, the sound goes straight on. */
   setChain: (chain: readonly ChainLink[]) => void;
+  /** What it sends on, in stereo, after its volume, pan and switch: where a measurement of your own listens, such as a loudness meter. Connected anywhere else, it plays twice. */
+  readonly tap: AudioNode;
 }
 
 export interface Mixer {
@@ -232,6 +234,7 @@ export function createMixer(
       },
       solo,
       switch: toggle,
+      tap: post,
       volume,
     };
   };

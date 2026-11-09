@@ -102,3 +102,8 @@ Test: apps/daw/test/browser/run.ts "MIX-023"
 ### MIX-024 A track with no output has no volume
 A MIDI track with no instrument has no output, as in the reference: its channel has no sends, pan, fader or peak, and its header has no gain or pan. In automation mode its chooser lists only its devices' parameters, and a track with none has no chooser or envelope. Its switches stay, and its values are kept: a track given an instrument again has them as they were. A new MIDI track holds an instrument, so this shows when the instrument is removed.
 Test: apps/daw/test/browser/run.ts "MIX-024"; apps/daw/test/devices.test.ts "MIX-024"
+
+### MIX-025 The loudness of the mix
+The main track's channel reads the mix's integrated loudness in LUFS (ITU-R BS.1770), under its fader, since it was last clicked: every 400 ms of the main track's sound after its volume, the quiet passages gated out (-70 LUFS, then 10 LU under the rest), so it agrees with the loudness an export of the same passage measures (EXP-010). It goes on while the transport is stopped, where silence counts for nothing.
+Deviation: not in the reference manual's mixer. It reads the mix in the unit the export normalizes to (EXP-005).
+Test: apps/www/test/registry-audio/base/lib/loudness.test.ts "createLoudnessReader"; apps/daw/test/browser/checks/mixer.ts "MIX-025"

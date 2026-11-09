@@ -1643,7 +1643,7 @@ export const audio: RegistryItem[] = [
     categories: ["mixer"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
-      "The mixer of an arrangement, controlled: a channel for each track and return, then the main track. Each has its pan, its sends, its fader, its meter and its peak, and Solo, Mute and an Arm light; the main track stays in sight at the right while the channels scroll, and a channel moves by its name. Every change is a command of the arrangement.",
+      "The mixer of an arrangement, controlled: a channel for each track and return, then the main track. Each has its pan, its sends, its fader, its meter and its peak, and Solo, Mute and an Arm light; the main track reads its loudness in LUFS and stays in sight at the right while the channels scroll, and a channel moves by its name. Every change is a command of the arrangement.",
     files: [
       {
         path: "audio/elements/mixer-view.tsx",
@@ -1663,6 +1663,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/track-automation",
       "@audio-ui/use-arrangement",
       "@audio-ui/use-audio-levels",
+      "@audio-ui/use-loudness",
       "@shadcn/toggle-group",
     ],
     type: "registry:ui",

@@ -25,6 +25,7 @@
     "@audio/loudness-lufs": "catalog:",
     "@audio/loudness-truepeak": "catalog:",
     "@audio/resample-sinc": "catalog:",
+    "@audio/weighting-k": "catalog:",
     "@base-ui/react": "catalog:",
     "@fontsource/bricolage-grotesque": "^5.3.0",
     "@fontsource/instrument-serif": "^5.3.0",

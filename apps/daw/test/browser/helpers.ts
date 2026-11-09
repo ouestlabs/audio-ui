@@ -21,6 +21,7 @@ export const UTILITY = /^Utility/;
 export const DEVICES = /^Devices/;
 export const UNITS = /\* ([\d.]+)\)/;
 export const MAIN_PEAK = /^Main peak/;
+export const MAIN_LOUDNESS = /^Main loudness/;
 
 /** A WAV file of `seconds` of a chord, made in the page and dropped on `selector`. */
 export async function dropChord(

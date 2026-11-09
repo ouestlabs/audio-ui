@@ -42,7 +42,7 @@ Sound and live data for audio/ui controls. Getting sound out takes an AudioConte
 ### 2. Live Data (CRITICAL)
 
 - `live-source-not-state` - Meters, traces, waveforms and playheads take a `source` (`createSource`), never per-frame state
-- `live-meter-levels` - `use-audio-levels` for RMS in dB from time-domain samples, with peak hold
+- `live-meter-levels` - `use-audio-levels` for RMS in dB from time-domain samples, with peak hold, and `use-loudness` for LUFS
 - `live-mic-input` - Raw microphone signal up-mixed to stereo, analysers never connected to the speakers
 - `live-midi-input` - `use-midi-input` for the page's one MIDI input, connected from a click
 - `live-pitch-detection` - A YIN period search (`use-pitch`) for a tuner, never the loudest FFT bin

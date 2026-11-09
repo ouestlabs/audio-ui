@@ -389,6 +389,21 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "meter"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "How loud a signal is while it plays, in LUFS, as streaming services and broadcasters measure it (ITU-R BS.1770): its momentary, short-term and integrated loudness, measured on the audio thread, as a live source refreshed every 100 ms without re-rendering",
+    files: [
+      {
+        path: "hooks/use-loudness.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-loudness",
+    registryDependencies: ["@audio-ui/loudness"],
+    type: "registry:hook",
+  },
+  {
+    categories: ["hooks", "audio", "meter"],
     dependencies: [],
     description:
       "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from: a demo meter that is never at rest",

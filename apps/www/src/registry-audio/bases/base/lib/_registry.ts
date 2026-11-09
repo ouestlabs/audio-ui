@@ -71,9 +71,10 @@ const items: RegistryItem[] = [
       "@audio-ui/core",
       "@audio/loudness-lufs",
       "@audio/loudness-truepeak",
+      "@audio/weighting-k",
     ],
     description:
-      "How loud a sound is, the way streaming services and broadcasters measure it (ITU-R BS.1770): integrated loudness in LUFS, sample and true peak, and the gain that brings it to a target such as -14 LUFS without passing a true-peak ceiling",
+      "How loud a sound is, the way streaming services and broadcasters measure it (ITU-R BS.1770): integrated loudness in LUFS, sample and true peak, and the gain that brings it to a target such as -14 LUFS without passing a true-peak ceiling; and while it plays, its momentary, short-term and integrated loudness, measured on the audio thread",
     files: [
       {
         path: "lib/loudness.ts",
