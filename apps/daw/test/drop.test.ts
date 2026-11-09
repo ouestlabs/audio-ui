@@ -93,4 +93,24 @@ describe("dropping files", () => {
     expect(after?.value.start).toBeCloseTo(4, 9);
     expect(after?.warp).toBeUndefined();
   });
+
+  test("CLP-019: with Warp files on import off, a recording with a beat plays as recorded", () => {
+    const loop: Recording = {
+      ...recording("Loop", 4.8),
+      beat: {
+        estimate: { bpm: 100, confidence: 0.8, firstBeat: 0 },
+        transients: [0],
+      },
+    };
+    const [clip] = dropCommands(
+      new Map([["rec-3", loop]]),
+      "track-1",
+      0,
+      100,
+      TEMPO,
+      false
+    ).flatMap((command) => (command.type === "add-clip" ? [command.clip] : []));
+    expect(clip?.warp).toBeUndefined();
+    expect(clip?.value.length).toBeCloseTo(4.8, 9);
+  });
 });

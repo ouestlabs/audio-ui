@@ -32,12 +32,15 @@ export interface Settings {
   mutedMidi: readonly string[];
   /** The audio output, by device id: empty for the system's. */
   output: string;
+  /** Whether a dropped file is warped to the tempo read in it (CLP-019). */
+  warpOnImport: boolean;
 }
 
 const DEFAULTS: Settings = {
   latency: "interactive",
   mutedMidi: [],
   output: "",
+  warpOnImport: true,
 };
 const KEPT = "audio-ui-daw:settings";
 

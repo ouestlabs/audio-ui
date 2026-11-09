@@ -54,16 +54,17 @@ export async function decodeFiles(
 /**
  * What lays dropped recordings out, as one batch: on a track, one clip after
  * the other from `at` (ARR-005); on the add-track button, a track each, named
- * after its file, its clip at `at` (ARR-006). A recording with a beat is
- * warped in time at `tempo` (CLP-019). The arrangement grows to hold what
- * goes past its end (TRN-008).
+ * after its file, its clip at `at` (ARR-006). With `warp`, a recording with a
+ * beat is warped in time at `tempo` (CLP-019). The arrangement grows to hold
+ * what goes past its end (TRN-008).
  */
 export function dropCommands(
   recordings: ReadonlyMap<string, Recording>,
   track: string,
   at: number,
   duration: number,
-  tempo: { beatsPerBar: number; bpm: number }
+  tempo: { beatsPerBar: number; bpm: number },
+  warp = true
 ): ArrangementCommand[] {
   const commands: ArrangementCommand[] = [];
   let start = at;
@@ -90,9 +91,8 @@ export function dropCommands(
         start,
       }),
     };
-    const clip = recording.beat
-      ? warpOnImport(laid, recording.beat, tempo)
-      : laid;
+    const clip =
+      warp && recording.beat ? warpOnImport(laid, recording.beat, tempo) : laid;
     end = Math.max(end, start + clip.value.length);
     commands.push({ clip, type: "add-clip" });
     if (track !== NEW_TRACK) {

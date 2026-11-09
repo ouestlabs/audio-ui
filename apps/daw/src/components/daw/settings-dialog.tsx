@@ -509,6 +509,14 @@ function RecordSection({
   tempo,
 }: RecordSettingsSectionProps) {
   const id = useId();
+  // A preference of the workstation, kept with its settings: every project's drops follow it.
+  const [warpOnImport, setWarpOnImport] = useState(
+    () => readSettings().warpOnImport
+  );
+  const pickWarp = useCallback((on: boolean) => {
+    setWarpOnImport(on);
+    keepSettings({ warpOnImport: on });
+  }, []);
   const pickCountIn = useCallback(
     (value: string) => onCountInChange(Number(value)),
     [onCountInChange]
@@ -586,6 +594,18 @@ function RecordSection({
           items={QUANTIZES}
           onValueChange={pickQuantize}
           value={String(quantize)}
+        />
+      </Row>
+      <Row
+        description="A dropped file plays in time at the project's tempo, from the tempo read in it."
+        id={`${id}-warp`}
+        label="Warp files on import"
+      >
+        <Switch
+          aria-describedby={hintOf(`${id}-warp`)}
+          checked={warpOnImport}
+          id={`${id}-warp`}
+          onCheckedChange={pickWarp}
         />
       </Row>
     </>

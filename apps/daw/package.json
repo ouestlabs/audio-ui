@@ -17,6 +17,7 @@
     "@audio-ui/core": "*",
     "@audio-ui/icons": "*",
     "@audio-ui/react": "*",
+    "@audio/beat-detect": "catalog:",
     "@audio/decode-aiff": "catalog:",
     "@audio/decode-caf": "catalog:",
     "@audio/decode-mp4": "catalog:",
