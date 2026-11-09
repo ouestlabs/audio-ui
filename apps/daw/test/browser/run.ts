@@ -26,6 +26,8 @@ const UTILITY = /^Utility/;
 const DEVICES = /^Devices/;
 const UNITS = /\* ([\d.]+)\)/;
 const MAIN_PEAK = /^Main peak/;
+const ARM = /^Arm /;
+const RENDERING = /^Rendering the arrangement/;
 
 /** A WAV file of `seconds` of a chord, made in the page and dropped on `selector`. */
 async function dropChord(
@@ -366,6 +368,18 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
         seconds > 2 && seconds < 3,
         `it lasts ${seconds} s for a clip of 2 s dropped half a second in`
       );
+    },
+  "EXP-001: the export shortcut pressed again while it renders starts no second render":
+    async (browser) => {
+      // The project it opens on has clips: the first press starts a render, which says so in a notice.
+      const page = await open(browser);
+      await page.keyboard.press("Meta+Shift+KeyR");
+      await page.keyboard.press("Meta+Shift+KeyR");
+      await page.waitForTimeout(1000);
+      const renders = await page
+        .locator("[data-sonner-toast]", { hasText: RENDERING })
+        .count();
+      assert(renders === 1, `the export started ${renders} renders, not one`);
     },
   "MID-001: a note drawn in a MIDI clip plays through the track's instrument":
     async (browser) => {
@@ -1863,6 +1877,50 @@ const checks: Record<string, (browser: Browser) => Promise<void>> = {
           (await record.getAttribute("aria-pressed")) === "false",
         "Space again plays, and records nothing"
       );
+    },
+  "REC-004: Record pressed again before the take has started stops it, and leaves no input open":
+    async (browser) => {
+      const context = await browser.newContext({
+        viewport: { height: 1000, width: 1440 },
+      });
+      const shared = await context.newPage();
+      // The input is granted late, as after a prompt, and every stream the page gets is kept to look at.
+      await shared.addInitScript(() => {
+        const devices = navigator.mediaDevices;
+        const ask = devices.getUserMedia.bind(devices);
+        const scope = window as unknown as { streams: MediaStream[] };
+        scope.streams = [];
+        devices.getUserMedia = async (constraints) => {
+          const stream = await ask(constraints);
+          scope.streams.push(stream);
+          await new Promise((resolve) => setTimeout(resolve, 500));
+          return stream;
+        };
+      });
+      const page = await open(browser, shared);
+      // A new audio track, the last one, armed: the take asks for the input.
+      await page.keyboard.press("Control+KeyT");
+      await page
+        .locator("[data-slot=timeline-track-header]")
+        .getByRole("button", { name: ARM })
+        .last()
+        .click();
+      const record = page.getByRole("button", { exact: true, name: "Record" });
+      await record.click();
+      await record.click();
+      await page.waitForTimeout(1500);
+      assert(
+        (await record.getAttribute("aria-pressed")) === "false" &&
+          (await page.locator('[data-slot="arranged-take"]').count()) === 0,
+        "the second press stopped the take before it started"
+      );
+      const live = await page.evaluate(
+        () =>
+          (window as unknown as { streams: MediaStream[] }).streams
+            .flatMap((stream) => stream.getTracks())
+            .filter((track) => track.readyState === "live").length
+      );
+      assert(live === 0, `${live} input tracks are still open`);
     },
   "MIX-015: the Devices tab shows the devices of the track of the clip picked, not of a track or a return picked before it":
     async (browser) => {

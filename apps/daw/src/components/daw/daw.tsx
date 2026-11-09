@@ -552,6 +552,7 @@ export function Daw({
     [dispatch, doc.clips, doc.tempo, showView]
   );
   const [exporting, setExporting] = useState(false);
+  const rendering = useRef<boolean>(false);
   const [saved, setSaved] = useState(
     canStore()
       ? "Saved"
@@ -1015,6 +1016,10 @@ export function Daw({
   );
 
   const exportWav = useCallback(async () => {
+    // One render at a time: the shortcut runs again before `exporting` disables the button.
+    if (rendering.current) {
+      return;
+    }
     // The time selected, or the whole arrangement to the end of its last clip (EXP-002).
     const [start, end] = selectedTime?.range ?? [
       0,
@@ -1027,6 +1032,7 @@ export function Daw({
       toast.message("Nothing to export yet: drop an audio file on a track.");
       return;
     }
+    rendering.current = true;
     setExporting(true);
     // The progress of the render, in a notice that says it is done once it is (EXP-008).
     const notice = toast.loading("Rendering the arrangement…");
@@ -1054,6 +1060,7 @@ export function Daw({
         toast.error("This browser cannot render offline.", { id: notice });
       }
     } finally {
+      rendering.current = false;
       setExporting(false);
     }
   }, [doc, selectedTime, sources]);
