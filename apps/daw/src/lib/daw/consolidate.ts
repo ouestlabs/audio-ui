@@ -10,7 +10,7 @@ import { type ArrangementDoc, audioClipsIn } from "@/lib/arrangement-state";
 import type { RecordingSource } from "@/lib/clip-player";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { type Dropped, decodeFiles } from "@/lib/daw/drop";
-import { encodeWav } from "@/lib/wav-file";
+import { encodeAudio } from "@/lib/daw/export-audio";
 
 /**
  * The recordings a stretch consolidates into, one after the other: `made` by
@@ -38,12 +38,12 @@ export async function renderConsolidated(
     if (!buffer) {
       throw new Error("this browser cannot render offline");
     }
-    const bytes = encodeWav(
+    const bytes = await encodeAudio(
       [buffer.getChannelData(0), buffer.getChannelData(1)],
-      buffer.sampleRate,
-      { bitDepth: 32 }
+      "wav",
+      { bitDepth: 32, sampleRate: buffer.sampleRate }
     );
-    const file = new File([bytes as BlobPart], `${first.name}.wav`, {
+    const file = new File([bytes], `${first.name}.wav`, {
       type: "audio/wav",
     });
     const { made: decoded } = await decodeFiles(

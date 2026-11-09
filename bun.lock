@@ -19,6 +19,7 @@
         "@audio-ui/core": "*",
         "@audio-ui/icons": "*",
         "@audio-ui/react": "*",
+        "@audio/encode": "1.11.0",
         "@base-ui/react": "catalog:",
         "@fontsource/bricolage-grotesque": "^5.3.0",
         "@fontsource/instrument-serif": "^5.3.0",
@@ -38,6 +39,8 @@
         "tw-animate-css": "catalog:",
       },
       "devDependencies": {
+        "@audio/decode-flac": "2.0.0",
+        "@audio/decode-mp3": "1.3.1",
         "@cloudflare/vite-plugin": "catalog:",
         "@types/bun": "catalog:",
         "@types/node": "catalog:",
@@ -204,7 +207,7 @@
     },
     "packages/core": {
       "name": "@audio-ui/core",
-      "version": "0.19.0",
+      "version": "0.23.2",
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
         "@types/bun": "1.4.2",
@@ -233,9 +236,9 @@
     },
     "packages/ui": {
       "name": "@audio-ui/react",
-      "version": "0.11.0",
+      "version": "0.13.1",
       "dependencies": {
-        "@audio-ui/core": "^0.19.0",
+        "@audio-ui/core": "^0.23.0",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
@@ -300,6 +303,42 @@
     "@audio-ui/icons": ["@audio-ui/icons@workspace:packages/icons"],
 
     "@audio-ui/react": ["@audio-ui/react@workspace:packages/ui"],
+
+    "@audio/decode-flac": ["@audio/decode-flac@2.0.0", "", { "dependencies": { "@wasm-audio-decoders/flac": "~0.2.10", "codec-parser": "~2.5.0" } }, "sha512-Wv7XXs81Zp8vKb6LtDuKL//Z+kAT5OxeelTmvRguqYt5Cp0Q9R1qFXdBToAg6052BHGipA11kIJQRrveNWFXRA=="],
+
+    "@audio/decode-mp3": ["@audio/decode-mp3@1.3.1", "", { "dependencies": { "mpg123-decoder": "^1.0.3" } }, "sha512-GhGm6C2hwngU+t5uEpUc94jZGCrCIXrgfneDURfK9/2tgFAWHVeckFNsSRmL4+Vd7u32uv8wQamjTnBSlrkVGA=="],
+
+    "@audio/encode": ["@audio/encode@1.11.0", "", { "dependencies": { "@audio/encode-aac": "^1.2.1", "@audio/encode-aiff": "^1.4.2", "@audio/encode-alac": "^1.0.2", "@audio/encode-caf": "^1.3.2", "@audio/encode-flac": "^1.4.3", "@audio/encode-gsm": "^0.1.0", "@audio/encode-mp3": "^2.0.1", "@audio/encode-mp4": "^1.2.1", "@audio/encode-ogg": "^1.3.1", "@audio/encode-opus": "^1.3.2", "@audio/encode-qoa": "^1.3.1", "@audio/encode-wav": "^1.5.2", "@audio/encode-wavpack": "^1.0.2", "@audio/encode-webm": "^1.3.1" } }, "sha512-e++lSZ+pOfuWGgk0NhqI8gBq7uzKxJH7bzqJsVMuIC8q5HQVtCFZz7+lRsfLJK9YT3yH04EacgvXr28NSdDcsg=="],
+
+    "@audio/encode-aac": ["@audio/encode-aac@1.2.1", "", {}, "sha512-VUAyqoPpiYkk8CZ7sCxwO4jIqgWEGrm67ue9UcXOI8XaIR3n1edFk8gJTeJoT/JwPUxtJ8mShIVZWy2VW+UZeA=="],
+
+    "@audio/encode-aiff": ["@audio/encode-aiff@1.4.2", "", {}, "sha512-bE26C0RNgLNZCkK4ItJaBIutkk+X5G8IGPiDC4Lzl9HNww6dYNoWD3bnACeGeu3MtdFXNkgPPMWA9pVGOKcx9A=="],
+
+    "@audio/encode-alac": ["@audio/encode-alac@1.0.2", "", { "dependencies": { "@audio/encode-mp4": "^1.1.0" } }, "sha512-9fCYe2b7Q5m/7wnh16s8uD80jDg01p1Sf6lI4D4RRMDeXVOsRRx9ZlLplBEevCZnKvtKDFrgEjx3sKizYdRFZg=="],
+
+    "@audio/encode-caf": ["@audio/encode-caf@1.3.2", "", {}, "sha512-rSCjZfvrcX1JXviibCkq1PsC21DZuMFFIs0K8NOudMkka84xnKbYC3IJfvgCms9m5FJias5eO7CTYfZJPIYgww=="],
+
+    "@audio/encode-flac": ["@audio/encode-flac@1.4.3", "", {}, "sha512-tU90aXOj/xTsWxcEKM0i0IpELJuohTWMv1kD2q75nT3iKf9d+5NlE1ra2vcF6l7+o5xlrkiiu5fekI332SYVXw=="],
+
+    "@audio/encode-gsm": ["@audio/encode-gsm@0.1.0", "", {}, "sha512-KvgEMps5rtUFFiJietMaMrhAiiJ3ypqme6lM0JQYU1lH1Vz0aDnyJ+lR14MeEBezLt1NTo4uN0ACtFcDF7loZQ=="],
+
+    "@audio/encode-mp3": ["@audio/encode-mp3@2.0.1", "", {}, "sha512-hCOPSgzr5aw268HpHxALGP1bctI16wBODQ0+h/d35B8TjiSCDNoUKyIbhXI+xEHoGX4te+PlwEuaXytGJWZOiQ=="],
+
+    "@audio/encode-mp4": ["@audio/encode-mp4@1.2.1", "", { "dependencies": { "@audio/encode-aac": "^1.2.0", "@audio/encode-flac": "^1.4.2", "@audio/encode-mp3": "^2.0.0", "@audio/encode-opus": "^1.3.2" } }, "sha512-DigG+8MZm+VOSuBl0NUdxmiFFhG4GjfSmDiqGE4uKy4rGVfKnuBvOVJM3z9d4NhPWQsgL8S+XBZPiUpTasUN1g=="],
+
+    "@audio/encode-ogg": ["@audio/encode-ogg@1.3.1", "", {}, "sha512-EMnAZbJsVs5TQfXzLG09UJQc1wfWR5JkAkQ4hJ5U9cSqIAAackpszPFnh+uFfbd/9IWF9/SdwkuzGqp//K74Yg=="],
+
+    "@audio/encode-opus": ["@audio/encode-opus@1.3.2", "", { "dependencies": { "@audio/resample-polyphase": "^1.1.0" } }, "sha512-9RGcWtjuIZ+nWhTMRlrNTGz+AgINf0lI+BPTAXAqk6W5KL/MiRn8JJ90O5vAf8wb+rt5KPIcI4DrtXy0ZJZj4g=="],
+
+    "@audio/encode-qoa": ["@audio/encode-qoa@1.3.1", "", { "dependencies": { "qoa-format": "^1.0.1" } }, "sha512-iauA2aHfyaOTU0gUgy+G9+lMh3WW/yfssUX3i7o7hVqkNzPAf7tKkYjN5NHKzuWeNDRVzXgOGXdOMarZa8/V8w=="],
+
+    "@audio/encode-wav": ["@audio/encode-wav@1.5.2", "", {}, "sha512-fK/jvM0J8zPZS+HngnmtkYCrrVqWZPx3mglhSgEDcXMD1coSt358QPP1SkOyfGUi5HHF7Ehx54xUxLJ+ndhEcA=="],
+
+    "@audio/encode-wavpack": ["@audio/encode-wavpack@1.0.2", "", {}, "sha512-bmz7iOB/IQQ7TW746t5a9H5jeHe9xMfWK+mZSVtJY2KCXuG+5OvQuUu6clNk2IYhSIiEr54Nyc0fmTLJBaxDMw=="],
+
+    "@audio/encode-webm": ["@audio/encode-webm@1.3.1", "", { "dependencies": { "@audio/encode-opus": "^1.3.2" } }, "sha512-04iHcWQikUC7Tdi4w+FVYfxUvllsdQryxdDszx46Fc3Bd5rPn6mPKrSs04snYhZmQdcGGo/WM2sOzKoe0a314Q=="],
+
+    "@audio/resample-polyphase": ["@audio/resample-polyphase@1.1.0", "", {}, "sha512-mSPyTABEzAcF+/kI2gys0+tI9GCJsYQ81tVpzY81rvLCHbop2HVFsbJLVRHHXD8mTGX9c27ggkthF+QnnHLqSA=="],
 
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 
@@ -508,6 +547,8 @@
     "@esbuild/win32-ia32": ["@esbuild/win32-ia32@0.27.7", "", { "os": "win32", "cpu": "ia32" }, "sha512-SmwKXe6VHIyZYbBLJrhOoCJRB/Z1tckzmgTLfFYOfpMAx63BJEaL9ExI8x7v0oAO3Zh6D/Oi1gVxEYr5oUCFhw=="],
 
     "@esbuild/win32-x64": ["@esbuild/win32-x64@0.27.7", "", { "os": "win32", "cpu": "x64" }, "sha512-56hiAJPhwQ1R4i+21FVF7V8kSD5zZTdHcVuRFMW0hn753vVfQN8xlx4uOPT4xoGH0Z/oVATuR82AiqSTDIpaHg=="],
+
+    "@eshaz/web-worker": ["@eshaz/web-worker@1.2.2", "", {}, "sha512-WxXiHFmD9u/owrzempiDlBB1ZYqiLnm9s6aPc8AlFQalq2tKmqdmMr9GXOupDgzXtqnBipj8Un0gkIm7Sjf8mw=="],
 
     "@floating-ui/core": ["@floating-ui/core@1.8.0", "", { "dependencies": { "@floating-ui/utils": "^0.2.12" } }, "sha512-0CIZ5itps/8x7BG8dEIhs53BvCUH2PCoogtakwRTut+Arm58sJooJ0AuZhLw2HJYIR5cMLNPBSS728sPho2khQ=="],
 
@@ -1183,6 +1224,10 @@
 
     "@testing-library/react": ["@testing-library/react@16.3.2", "", { "dependencies": { "@babel/runtime": "^7.12.5" }, "peerDependencies": { "@testing-library/dom": "^10.0.0", "@types/react": "^18.0.0 || ^19.0.0", "@types/react-dom": "^18.0.0 || ^19.0.0", "react": "^18.0.0 || ^19.0.0", "react-dom": "^18.0.0 || ^19.0.0" }, "optionalPeers": ["@types/react", "@types/react-dom"] }, "sha512-XU5/SytQM+ykqMnAnvB2umaJNIOsLF3PVv//1Ew4CTcpz0/BRyy/af40qqrt7SjKpDdT1saBMc42CUok5gaw+g=="],
 
+    "@thi.ng/bitstream": ["@thi.ng/bitstream@2.4.55", "", { "dependencies": { "@thi.ng/errors": "^2.6.17" } }, "sha512-9Oj7k8SrPZ/T+ke7nivbNnoTm+fnICzz8jbgN/+JdpeohfplVW64rSiTqgbhzq8BakFa3yxeFjxeFlFZ+2gFYg=="],
+
+    "@thi.ng/errors": ["@thi.ng/errors@2.6.17", "", {}, "sha512-momw7wo3EXes1wa6Smckr+l4BaJi/h+E67R3furYOBjQpciie1OgoTa43PXPb1POsuWxynkEF8OCnQgreE8twg=="],
+
     "@ts-morph/common": ["@ts-morph/common@0.29.0", "", { "dependencies": { "minimatch": "^10.0.1", "path-browserify": "^1.0.1", "tinyglobby": "^0.2.14" } }, "sha512-35oUmphHbJvQ/+UTwFNme/t2p3FoKiGJ5auTjjpNTop2dyREspirjMy82PLSC1pnDJ8ah1GU98hwpVt64YXQsg=="],
 
     "@turbo/darwin-64": ["@turbo/darwin-64@2.11.7", "", { "os": "darwin", "cpu": "x64" }, "sha512-Z2LFOxwbiJueD1miByXJS/BrW21vv6YaQXZustty5jEX4vQYw6zyh101Sz1QO7WG0mqBzKagZ/DoAeeujI0/Sw=="],
@@ -1354,6 +1399,10 @@
     "@upsetjs/venn.js": ["@upsetjs/venn.js@2.0.0", "", { "optionalDependencies": { "d3-selection": "^3.0.0", "d3-transition": "^3.0.1" } }, "sha512-WbBhLrooyePuQ1VZxrJjtLvTc4NVfpOyKx0sKqioq9bX1C1m7Jgykkn8gLrtwumBioXIqam8DLxp88Adbue6Hw=="],
 
     "@vitejs/plugin-react": ["@vitejs/plugin-react@6.1.2", "", { "dependencies": { "@rolldown/pluginutils": "^1.0.1" }, "peerDependencies": { "@rolldown/plugin-babel": "^0.1.7 || ^0.2.0", "babel-plugin-react-compiler": "^1.0.0", "oxc-transform-react": "^0.152.0", "vite": "^8.0.0" }, "optionalPeers": ["@rolldown/plugin-babel", "babel-plugin-react-compiler", "oxc-transform-react"] }, "sha512-fhJNGUdscQa4HkI0xFxwonWyhnVReCPDbXI7FH7jmzpnVCrFQI7PRrhWecO263610vOrs9tr2Y4xcf8uAdFxbw=="],
+
+    "@wasm-audio-decoders/common": ["@wasm-audio-decoders/common@9.0.7", "", { "dependencies": { "@eshaz/web-worker": "1.2.2", "simple-yenc": "^1.0.4" } }, "sha512-WRaUuWSKV7pkttBygml/a6dIEpatq2nnZGFIoPTc5yPLkxL6Wk4YaslPM98OPQvWacvNZ+Py9xROGDtrFBDzag=="],
+
+    "@wasm-audio-decoders/flac": ["@wasm-audio-decoders/flac@0.2.11", "", { "dependencies": { "@wasm-audio-decoders/common": "9.0.7", "codec-parser": "2.5.0" } }, "sha512-bbSGuDDxY89CrS7FYc2cBBfvtgk3EY9As8dVe8PFIgX7ECd/wefdi8UbGlvcdQZczRwE500KBt4cqf/+mMVsfw=="],
 
     "@webassemblyjs/ast": ["@webassemblyjs/ast@1.14.1", "", { "dependencies": { "@webassemblyjs/helper-numbers": "1.13.2", "@webassemblyjs/helper-wasm-bytecode": "1.13.2" } }, "sha512-nuBEDgQfm1ccRp/8bCQrx1frohyufl4JlbMMZ4P1wpeOfDhF6FQkxZJ1b/e+PLwr6X1Nhw6OLme5usuBWYBvuQ=="],
 
@@ -1534,6 +1583,8 @@
     "cn": ["cn@0.5.0", "", { "bin": { "cn": "bin/cn.mjs" } }, "sha512-JGEixZEpfFXm1P5uXwvEobOFLlHwIWi5v4tjd1ZwfiYmcEilkuD2l+054rvJcYCR1B+uVThHeUbgmNz1FwuxuA=="],
 
     "code-block-writer": ["code-block-writer@13.0.3", "", {}, "sha512-Oofo0pq3IKnsFtuHqSF7TqBfr71aeyZDVJ0HpmqB7FBM2qEigL0iPONSCZSO9pE9dZTAxANe5XHG9Uy0YMv8cg=="],
+
+    "codec-parser": ["codec-parser@2.5.0", "", {}, "sha512-Ru9t80fV8B0ZiixQl8xhMTLru+dzuis/KQld32/x5T/+3LwZb0/YvQdSKytX9JqCnRdiupvAvyYJINKrXieziQ=="],
 
     "collapse-white-space": ["collapse-white-space@2.1.0", "", {}, "sha512-loKTxY1zCOuG4j9f6EPnuyyYkf58RnhhWTvRoZEokgB+WbdXehfjFviyOVYkqzEWz1Q5kRiZdBYS5SwxbQYwzw=="],
 
@@ -2261,6 +2312,8 @@
 
     "motion-utils": ["motion-utils@14.1.0", "", {}, "sha512-xd4FeWOnnXsJHmAaRCLNbOS7mEaNOangjMt3Pl241H07f1kxW48fADQ/8O5hLLNhf1qdlozgY3PPAHBdOoU7AA=="],
 
+    "mpg123-decoder": ["mpg123-decoder@1.0.3", "", { "dependencies": { "@wasm-audio-decoders/common": "9.0.7" } }, "sha512-+fjxnWigodWJm3+4pndi+KUg9TBojgn31DPk85zEsim7C6s0X5Ztc/hQYdytXkwuGXH+aB0/aEkG40Emukv6oQ=="],
+
     "ms": ["ms@2.1.3", "", {}, "sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA=="],
 
     "mz": ["mz@2.7.0", "", { "dependencies": { "any-promise": "^1.0.0", "object-assign": "^4.0.1", "thenify-all": "^1.0.0" } }, "sha512-z81GNO7nnYMEhrGh9LeymoE4+Yr0Wn5McHIZMK5cfQCl+NDX08sCZgUc9/6MHni9IWuFLm1Z3HTCXu2z9fN62Q=="],
@@ -2408,6 +2461,8 @@
     "proto-list": ["proto-list@1.2.4", "", {}, "sha512-vtK/94akxsTMhe0/cbfpR+syPuszcuwhqVjJq26CuNDgFGj682oRBXOP5MJpv2r7JtE8MsiepGIqvvOTBwn2vA=="],
 
     "proxy-addr": ["proxy-addr@2.0.8", "", { "dependencies": { "forwarded": "0.2.0", "ipaddr.js": "1.9.1" } }, "sha512-5nnx0yGyVUcY6t9RnWcARWtwT9F1D8O9rt08htPvnd49W1IgZtmLkhu9WfMzQj1cFxjHIO6connUNVW5k7AVyQ=="],
+
+    "qoa-format": ["qoa-format@1.0.1", "", { "dependencies": { "@thi.ng/bitstream": "^2.2.12" } }, "sha512-dMB0Z6XQjdpz/Cw4Rf6RiBpQvUSPCfYlQMWvmuWlWkAT7nDQD29cVZ1SwDUB6DYJSitHENwbt90lqfI+7bvMcw=="],
 
     "qs": ["qs@6.16.1", "", { "dependencies": { "es-define-property": "^1.0.1", "side-channel": "^1.1.1" } }, "sha512-5Px6J7rfHBAGUhNQ3es4YzcOdBBw0SDcVtThJml4RdnKw4tKs2epA0kPZ+K8X+WiHktT93RHVcQ/3ym5aTCgtg=="],
 
@@ -2560,6 +2615,8 @@
     "side-channel-weakmap": ["side-channel-weakmap@1.0.2", "", { "dependencies": { "call-bound": "^1.0.2", "es-errors": "^1.3.0", "get-intrinsic": "^1.2.5", "object-inspect": "^1.13.3", "side-channel-map": "^1.0.1" } }, "sha512-WPS/HvHQTYnHisLo9McqBHOJk2FkHO/tlpvldyrnem4aeQp4hai3gythswg6p01oSoTl58rcpiFAjF2br2Ak2A=="],
 
     "signal-exit": ["signal-exit@4.1.0", "", {}, "sha512-bzyZ1e88w9O1iNJbKnOlvYTrWPDl46O1bG0D3XInv+9tkPrxrN8jUUTiFlDkkmKWgn1M6CfIA13SuGqOa9Korw=="],
+
+    "simple-yenc": ["simple-yenc@1.0.4", "", {}, "sha512-5gvxpSd79e9a3V4QDYUqnqxeD4HGlhCakVpb6gMnDD7lexJggSBJRBO5h52y/iJrdXRilX9UCuDaIJhSWm5OWw=="],
 
     "sisteransi": ["sisteransi@1.0.5", "", {}, "sha512-bLGGlR1QxBcynn2d5YmDX4MGjlZvy2MRBDRNHLJ8VI6l6+9FUiyTFNJ0IveOSP0bcXgVDPRcfGqA0pjaqUpfVg=="],
 

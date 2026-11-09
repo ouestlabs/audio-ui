@@ -68,6 +68,12 @@ import {
   importProject,
 } from "@/lib/daw/exchange";
 import {
+  downloadFile,
+  EXPORT_OPTIONS,
+  type ExportFormat,
+  encodeAudio,
+} from "@/lib/daw/export-audio";
+import {
   canUseFolders,
   mayWrite,
   pickFolder,
@@ -90,7 +96,6 @@ import {
   saveRecording,
 } from "@/lib/daw/storage";
 import { libraryDevice } from "@/lib/device-library";
-import { downloadWavFile } from "@/lib/wav-file";
 import { webAudio } from "@/lib/web-audio";
 import { RecordSettings } from "./record-settings";
 import { SettingsDialog } from "./settings-dialog";
@@ -972,11 +977,7 @@ export function Daw({
     try {
       const { file, report } = await exportProject(doc, recordings);
       const name = `${folder?.name ?? "arrangement"}.dawproject`;
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(file);
-      link.download = name;
-      link.click();
-      setTimeout(() => URL.revokeObjectURL(link.href), 0);
+      downloadFile(file, name);
       toast.success(`Exported to ${name}`, {
         description: lostLines(report),
         id: notice,
@@ -1015,55 +1016,73 @@ export function Daw({
     [onOpen]
   );
 
-  const exportWav = useCallback(async () => {
-    // One render at a time: the shortcut runs again before `exporting` disables the button.
-    if (rendering.current) {
-      return;
-    }
-    // The time selected, or the whole arrangement to the end of its last clip (EXP-002).
-    const [start, end] = selectedTime?.range ?? [
-      0,
-      Math.max(
-        0,
-        ...doc.clips.map((clip) => clip.value.start + clip.value.length)
-      ),
-    ];
-    if (end <= 0) {
-      toast.message("Nothing to export yet: drop an audio file on a track.");
-      return;
-    }
-    rendering.current = true;
-    setExporting(true);
-    // The progress of the render, in a notice that says it is done once it is (EXP-008).
-    const notice = toast.loading("Rendering the arrangement…");
-    try {
-      const context = webAudio.getContext();
-      const rendered = await renderArrangement(doc, sources, {
-        onProgress: (done) =>
-          toast.loading(
-            `Rendering the arrangement… ${Math.round(done * 100)}%`,
-            {
-              id: notice,
-            }
-          ),
-        from: start,
-        sampleRate: context?.sampleRate ?? 48_000,
-        to: end,
-      });
-      if (rendered) {
-        downloadWavFile(rendered, {
-          bitDepth: 24,
-          filename: "arrangement.wav",
-        });
-        toast.success("Exported to arrangement.wav", { id: notice });
-      } else {
-        toast.error("This browser cannot render offline.", { id: notice });
+  const exportAudio = useCallback(
+    async (format: ExportFormat) => {
+      // One render at a time: the shortcut runs again before `exporting` disables the button.
+      if (rendering.current) {
+        return;
       }
-    } finally {
-      rendering.current = false;
-      setExporting(false);
-    }
-  }, [doc, selectedTime, sources]);
+      // The time selected, or the whole arrangement to the end of its last clip (EXP-002).
+      const [start, end] = selectedTime?.range ?? [
+        0,
+        Math.max(
+          0,
+          ...doc.clips.map((clip) => clip.value.start + clip.value.length)
+        ),
+      ];
+      if (end <= 0) {
+        toast.message("Nothing to export yet: drop an audio file on a track.");
+        return;
+      }
+      rendering.current = true;
+      setExporting(true);
+      // The progress of the render, in a notice that says it is done once it is (EXP-008).
+      const notice = toast.loading("Rendering the arrangement…");
+      try {
+        const context = webAudio.getContext();
+        const rendered = await renderArrangement(doc, sources, {
+          onProgress: (done) =>
+            toast.loading(
+              `Rendering the arrangement… ${Math.round(done * 100)}%`,
+              {
+                id: notice,
+              }
+            ),
+          from: start,
+          sampleRate: context?.sampleRate ?? 48_000,
+          to: end,
+        });
+        if (rendered) {
+          const name = `arrangement.${format}`;
+          const channels = Array.from(
+            { length: rendered.numberOfChannels },
+            (_, index) => rendered.getChannelData(index)
+          );
+          const file = await encodeAudio(
+            channels,
+            format,
+            { ...EXPORT_OPTIONS[format], sampleRate: rendered.sampleRate },
+            (done) =>
+              toast.loading(`Encoding ${name}… ${Math.round(done * 100)}%`, {
+                id: notice,
+              })
+          );
+          downloadFile(file, name);
+          toast.success(`Exported to ${name}`, { id: notice });
+        } else {
+          toast.error("This browser cannot render offline.", { id: notice });
+        }
+      } catch (error) {
+        toast.error(`Not exported: ${(error as Error).message}`, {
+          id: notice,
+        });
+      } finally {
+        rendering.current = false;
+        setExporting(false);
+      }
+    },
+    [doc, selectedTime, sources]
+  );
 
   // A pad or a key played by hand, through the track's instrument (DEV-013).
   const noteOn = useCallback(
@@ -1166,7 +1185,7 @@ export function Daw({
         type: "batch",
       });
     },
-    export: exportWav,
+    export: () => exportAudio("wav"),
     ...(canUseFolders()
       ? { open: openProjectFolder, save, "save-as": saveAs }
       : {}),
@@ -1404,7 +1423,7 @@ export function Daw({
           looping={doc.loop.on}
           metronome={metronome}
           onAutomatingChange={automation.setAutomating}
-          onExport={exportWav}
+          onExport={exportAudio}
           onExportDawproject={exportDawproject}
           onImportDawproject={importDawproject}
           {...(canUseFolders()

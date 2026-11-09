@@ -11,17 +11,17 @@ The whole arrangement, from its start to the end of its last clip; a time select
 Test: apps/daw/test/browser/run.ts "EXP-002"
 
 ### EXP-003 The file
-WAV, at the project's sample rate, in 16 or 24-bit whole numbers or 32-bit floating point.
-Status: partial: the reference's dialog (OBS-009, version 10.1) shows the track to render, its start and length, loop, mono and normalize switches, the sample rate, and PCM with a file type, a bit depth and a dither (AIFF, 16 bits and triangular as it was left on that machine; the lists were not opened). AIFF and FLAC are planned (phase 2).
-Test: apps/www/test/wav-file.test.ts "EXP-003"
+WAV or FLAC at 24 bits, or MP3 at 320 kbps, at the project's sample rate. An MP3 of a project at a rate MP3 does not have comes out at the nearest one it has (48 kHz for 96 kHz). A format's encoder is loaded the first time it is asked for, and the file is encoded in chunks with a paint between two, so the page keeps answering.
+Status: partial: the reference's dialog (OBS-009, version 10.1) shows the track to render, its start and length, loop, mono and normalize switches, the sample rate, and PCM with a file type, a bit depth and a dither (AIFF, 16 bits and triangular as it was left on that machine; the lists were not opened). AIFF, and a choice of 16 bits or 32-bit floats, wait for that dialog.
+Test: apps/daw/test/export-audio.test.ts "EXP-003", apps/daw/test/browser/run.ts "EXP-003"
 
 ### EXP-004 Dither
 Rendered below 32 bits, the samples are dithered with triangular noise by default; dither can be turned off. It is applied once, at the very end.
-Test: apps/www/test/wav-file.test.ts "EXP-004"
+Status: open: the export rounds each sample to the nearest step and dithers nothing yet.
 
 ### EXP-005 Normalize
 When asked, the render's loudest peak is brought to 0 dBFS.
-Test: apps/www/test/wav-file.test.ts "EXP-005"
+Status: open: the export has no switch for it yet.
 
 ### EXP-006 The render is what plays
 An offline render and playback of the same arrangement give the same frames: the same engine runs on an offline context.
