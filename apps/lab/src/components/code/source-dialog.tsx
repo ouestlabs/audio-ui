@@ -79,7 +79,9 @@ export function SourceDialog() {
   const files = device ? sourceFiles(device.slug) : [];
   const [name, setName] = useState("index.tsx");
   const [code, setCode] = useState("");
-  const [copied, setCopied] = useState(false);
+  // When the code was last copied: each copy says so for 1.5 s from then on.
+  const [copiedAt, setCopiedAt] = useState<number | null>(null);
+  const copied = copiedAt !== null;
   const file = files.find((item) => item.name === name) ?? files[0];
 
   useEffect(() => {
@@ -98,15 +100,15 @@ export function SourceDialog() {
   }, [file, state.sourceOpen]);
 
   useEffect(() => {
-    if (!copied) {
+    if (copiedAt === null) {
       return;
     }
-    const id = setTimeout(() => setCopied(false), 1500);
+    const id = setTimeout(() => setCopiedAt(null), 1500);
     return () => clearTimeout(id);
-  }, [copied]);
+  }, [copiedAt]);
   const copy = useCallback(async () => {
     await navigator.clipboard.writeText(code);
-    setCopied(true);
+    setCopiedAt(performance.now());
   }, [code]);
 
   if (!device) {

@@ -8,6 +8,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { type Event, trackEvent } from "@/lib/events";
 import { cn } from "@/lib/utils";
 
@@ -31,32 +32,14 @@ export function CopyButton({
   event?: Event["name"];
   properties?: Record<string, any>;
 }) {
-  const [hasCopied, setHasCopied] = React.useState(false);
-
-  React.useEffect(() => {
-    if (hasCopied) {
-      const timer = setTimeout(() => {
-        setHasCopied(false);
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [hasCopied]);
+  const { copyToClipboard, isCopied: hasCopied } = useCopyToClipboard();
 
   const handleCopy = React.useCallback(() => {
-    copyToClipboardWithMeta(
-      value,
-      event
-        ? {
-            name: event,
-            properties: {
-              code: value,
-              ...properties,
-            },
-          }
-        : undefined
-    );
-    setHasCopied(true);
-  }, [event, properties, value]);
+    copyToClipboard(value);
+    if (event) {
+      trackEvent({ name: event, properties: { code: value, ...properties } });
+    }
+  }, [copyToClipboard, event, properties, value]);
 
   return (
     <Tooltip>
