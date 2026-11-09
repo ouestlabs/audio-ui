@@ -198,7 +198,7 @@ async function audioTakeCommands(
   );
   const id = freshRecordingId(new Set());
   const bytes = await (
-    await encodeAudio(channels, "wav", { sampleRate: rate })
+    await encodeAudio(channels, { format: "wav", sampleRate: rate })
   ).arrayBuffer();
   const decoded = await decodeRecording(ctx, bytes, "Audio take");
   if (!decoded) {

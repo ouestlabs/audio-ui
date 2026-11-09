@@ -40,7 +40,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { ExportFormat } from "@/lib/daw/export-audio";
+import type { AudioFileFormat } from "@/lib/audio-encode";
 import type { ShortcutCommand } from "@/lib/daw/shortcuts";
 import { CommandKeys, ShortcutList } from "./shortcut-list";
 
@@ -130,7 +130,7 @@ export interface TopBarProps
   metronome: boolean;
   onAutomatingChange: (automating: boolean) => void;
   /** Renders the arrangement to a file of a format (EXP-003). */
-  onExport: (format: ExportFormat) => void;
+  onExport: (format: AudioFileFormat) => void;
   /** Sends the project to other DAWs as a .dawproject file. */
   onExportDawproject: () => void;
   /** Opens a .dawproject file of another DAW in place of the project. */

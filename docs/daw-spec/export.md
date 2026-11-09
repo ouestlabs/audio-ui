@@ -13,7 +13,7 @@ Test: apps/daw/test/browser/run.ts "EXP-002"
 ### EXP-003 The file
 WAV or FLAC at 24 bits, or MP3 at 320 kbps, at the project's sample rate. An MP3 of a project at a rate MP3 does not have comes out at the nearest one it has (48 kHz for 96 kHz). A format's encoder is loaded the first time it is asked for, and the file is encoded in chunks with a paint between two, so the page keeps answering.
 Status: partial: the reference's dialog (OBS-009, version 10.1) shows the track to render, its start and length, loop, mono and normalize switches, the sample rate, and PCM with a file type, a bit depth and a dither (AIFF, 16 bits and triangular as it was left on that machine; the lists were not opened). AIFF, and a choice of 16 bits or 32-bit floats, wait for that dialog.
-Test: apps/daw/test/export-audio.test.ts "EXP-003", apps/daw/test/browser/run.ts "EXP-003"
+Test: apps/www/test/registry-audio/base/lib/audio-encode.test.ts "EXP-003", apps/daw/test/browser/run.ts "EXP-003"
 
 ### EXP-004 Dither
 Rendered below 32 bits, the samples are dithered with triangular noise by default; dither can be turned off. It is applied once, at the very end.

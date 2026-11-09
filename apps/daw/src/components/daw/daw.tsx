@@ -57,6 +57,7 @@ import {
   allTracks,
   trackOf,
 } from "@/lib/arrangement-state";
+import { type AudioFileFormat, downloadFile } from "@/lib/audio-encode";
 import { isComputerKeyboardKey } from "@/lib/computer-keyboard";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { renderConsolidated } from "@/lib/daw/consolidate";
@@ -67,12 +68,7 @@ import {
   exportProject,
   importProject,
 } from "@/lib/daw/exchange";
-import {
-  downloadFile,
-  EXPORT_OPTIONS,
-  type ExportFormat,
-  encodeAudio,
-} from "@/lib/daw/export-audio";
+import { EXPORT_OPTIONS, encodeAudio } from "@/lib/daw/export-audio";
 import {
   canUseFolders,
   mayWrite,
@@ -1017,7 +1013,7 @@ export function Daw({
   );
 
   const exportAudio = useCallback(
-    async (format: ExportFormat) => {
+    async (format: AudioFileFormat) => {
       // One render at a time: the shortcut runs again before `exporting` disables the button.
       if (rendering.current) {
         return;
@@ -1058,15 +1054,15 @@ export function Daw({
             { length: rendered.numberOfChannels },
             (_, index) => rendered.getChannelData(index)
           );
-          const file = await encodeAudio(
-            channels,
+          const file = await encodeAudio(channels, {
+            ...EXPORT_OPTIONS[format],
             format,
-            { ...EXPORT_OPTIONS[format], sampleRate: rendered.sampleRate },
-            (done) =>
+            onProgress: (done) =>
               toast.loading(`Encoding ${name}… ${Math.round(done * 100)}%`, {
                 id: notice,
-              })
-          );
+              }),
+            sampleRate: rendered.sampleRate,
+          });
           downloadFile(file, name);
           toast.success(`Exported to ${name}`, { id: notice });
         } else {

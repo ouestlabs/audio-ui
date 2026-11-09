@@ -40,8 +40,7 @@ export async function renderConsolidated(
     }
     const bytes = await encodeAudio(
       [buffer.getChannelData(0), buffer.getChannelData(1)],
-      "wav",
-      { bitDepth: 32, sampleRate: buffer.sampleRate }
+      { bitDepth: 32, format: "wav", sampleRate: buffer.sampleRate }
     );
     const file = new File([bytes], `${first.name}.wav`, {
       type: "audio/wav",

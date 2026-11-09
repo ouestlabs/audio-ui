@@ -178,3 +178,9 @@ Status: fixed (checked in Chromium in the DAW, DEV-010).
 Measured on 2026-11-04, 30 s each: 16 tracks not stretched, load mean 73 %, peak 89 %, one underrun; the same 16 stretched in Repitch, mean 73 %, peak 93 %, 38 underruns. Stretching costs next to nothing more: the load is the tracks'. PRF-004 read 26 % for the same set in phase 1, on a quieter machine; the graph of a track has barely changed since, so that gap is not shown to be the code's. A trace of the audio nodes over 8 s gave, per render quantum, 32 worklets where the clips need 16 (each compressor's key detector ran with its key off), about 330 gain nodes (some 20 a track: 9 in the channel strip, 9 in the compressor, 3 in the equalizer), 64 biquads and 16 compressor nodes.
 Fix: the compressor links a path to its output only while it is heard, and makes its key detector the first time the key is on, so at full mix with no key it renders its node alone (`apps/www/test/registry-audio/base/lib/compressor-engine.test.ts` "G-031").
 Status: fixed: at the end of phase 4, 16 tracks load the audio thread at 40 % on average, peak 59 %, with no underrun (PRF-004). The channel strip's nine gains a track are where to look next if a set needs more.
+
+
+### G-032 The registry wrote WAV files only
+An export to FLAC or MP3, and the encoders for them, were not in the registry: its `wav-file` wrote 16 or 24-bit PCM and 32-bit floats, and nothing else.
+Fix: `audio-encode` replaces it: `encodeAudio` writes WAV, FLAC or MP3 through `@audio/encode`, in chunks with a paint between two, each format's encoder loaded the first time it is used (`apps/www/test/registry-audio/base/lib/audio-encode.test.ts`). The DAW installs it and keeps it out of its server's build.
+Status: fixed (EXP-003).
