@@ -1,5 +1,11 @@
 # @audio-ui/core
 
+## 0.23.0
+
+### Minor Changes
+
+- 06f110a: MIDI input: `setInputEnabled(name, enabled)` switches one device off, so its messages are not heard, or on again, and the state lists the devices switched off in `muted`. The choice holds before the device connects and while it is unplugged.
+
 ## 0.22.1
 
 ### Patch Changes
