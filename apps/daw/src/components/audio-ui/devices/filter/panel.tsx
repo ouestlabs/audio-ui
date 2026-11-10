@@ -5,6 +5,14 @@ import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Plot,
   PlotArea,
   PlotCursor,
@@ -21,7 +29,10 @@ import {
   DevicePanel,
 } from "@/components/audio-ui/device-panel";
 import {
+  CIRCUIT_TYPES,
+  type FilterCircuit,
   type FilterState,
+  filterCircuit,
   filterCurve,
   filterDevice,
   resonanceDb,
@@ -36,10 +47,15 @@ const DB_TICKS = [-24, 0, 24];
 /** The scale a spectrum is drawn on, in dB of level: its own, behind the gain axis. */
 const SPECTRUM_MIN_DB = -100;
 const SPECTRUM_MAX_DB = -10;
-const SWITCHES = ["enabled"] as const;
+const IN_THE_TITLE_BAR = ["enabled", "circuit"] as const;
 const OFF = filterDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled");
+/** The clean filter has no drive to bend it. */
+const CLEAN_OFF = ["driveDb"] as const;
+const CIRCUITS =
+  filterDevice.parameters.find((parameter) => parameter.id === "circuit")
+    ?.options ?? [];
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describePointer = (point: { x: number; y: number }) =>
@@ -61,9 +77,11 @@ interface FilterPanelProps {
 
 /**
  * The face of the filter device: the curve it plays, with a handle on the
- * cutoff: drag it across for the frequency and up for the resonance. The type
- * is a list of buttons, and the knobs under it are the same parameters, for a
- * precise value. Controlled like `DevicePanel`, which it uses for them. Its
+ * cutoff: drag it across for the frequency and up for the resonance. The
+ * circuit is picked in the title bar, those without the type greyed out, and
+ * the curve is the one that circuit plays. The type is a list of buttons, and
+ * the knobs under it are the same parameters, for a precise value, the drive
+ * for a ladder. Controlled like `DevicePanel`, which it uses for them. Its
  * children sit at the end of the title bar.
  */
 function FilterPanel({
@@ -84,6 +102,21 @@ function FilterPanel({
       ),
     [onValueChange, value]
   );
+  const pickCircuit = useCallback(
+    (circuit: string | null) => {
+      if (circuit) {
+        onValueChange(filterDevice.set(value, "circuit", circuit));
+      }
+    },
+    [onValueChange, value]
+  );
+  const played = filterCircuit(value);
+  let disabled: readonly (typeof OFF)[number][] | undefined;
+  if (!value.enabled) {
+    disabled = OFF;
+  } else if (played === "clean") {
+    disabled = CLEAN_OFF;
+  }
   return (
     <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
@@ -92,6 +125,33 @@ function FilterPanel({
         onValueChange={onValueChange}
         value={value}
       >
+        <Select
+          disabled={!value.enabled}
+          items={CIRCUITS}
+          onValueChange={pickCircuit}
+          value={played}
+        >
+          <SelectTrigger aria-label="Circuit" className="h-6 w-28" size="sm">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {CIRCUITS.map((circuit) => (
+                <SelectItem
+                  disabled={
+                    !CIRCUIT_TYPES[circuit.value as FilterCircuit].includes(
+                      value.type
+                    )
+                  }
+                  key={circuit.value}
+                  value={circuit.value}
+                >
+                  {circuit.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         {children}
       </DeviceHeader>
       <div
@@ -136,10 +196,10 @@ function FilterPanel({
           ) : null}
         </Plot>
         <DevicePanel
-          className="grid-cols-3"
+          className="grid-cols-4"
           device={filterDevice}
-          disabled={value.enabled ? undefined : OFF}
-          exclude={SWITCHES}
+          disabled={disabled}
+          exclude={IN_THE_TITLE_BAR}
           onValueChange={onValueChange}
           value={value}
         />

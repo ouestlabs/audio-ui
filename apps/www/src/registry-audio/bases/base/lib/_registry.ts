@@ -595,13 +595,23 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/filter-diode-ladder",
+      "@audio/filter-korg35",
+      "@audio/filter-moog-ladder",
+    ],
     description:
-      "The filter as a device: a type, a cutoff and a resonance, the numbers that go on the node for a state and the curve a state plays, with no panel and no audio in it.",
+      "The filter as a device: a type, a circuit (clean, two Moog ladders, a diode ladder or a Korg35), a cutoff, a resonance and a drive, the numbers that go on the node and the ladder worklet for a state, the worklet's source, and the curve a state plays, a ladder's measured on it, with no panel and no audio in it.",
     files: [
       {
         path: "lib/filter-device.ts",
         target: "components/audio-ui/devices/filter/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "lib/filter-ladders.ts",
+        target: "components/audio-ui/devices/filter/ladders.ts",
         type: "registry:lib",
       },
     ],
@@ -613,7 +623,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A filter on the Web Audio API for a filter state: the node the curve draws, with the resonance in the unit it wants, and the signal going round it when it is off, moving without a click.",
+      "A filter on the Web Audio API for a filter state: the clean circuit a biquad node, a ladder an AudioWorklet loaded from a blob and fed only while it plays, the two cross-faded on a change of circuit, and the signal going round them when it is off, moving without a click.",
     files: [
       {
         path: "lib/filter-engine.ts",

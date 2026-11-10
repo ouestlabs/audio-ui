@@ -886,7 +886,7 @@ export const audio: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the filter device: the curve it plays with a handle on the cutoff to drag its frequency and resonance, an optional live spectrum behind it, over the device knobs.",
+      "The face of the filter device: the curve its circuit plays with a handle on the cutoff to drag its frequency and resonance, an optional live spectrum behind it, the circuit picked in the title bar, over the device knobs.",
     files: [
       {
         path: "audio/panels/filter-panel.tsx",
@@ -899,6 +899,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/filter-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },
