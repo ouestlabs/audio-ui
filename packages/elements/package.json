@@ -56,6 +56,10 @@
       "types": "./dist/piano/index.d.ts",
       "import": "./dist/piano.js"
     },
+    "./sequencer": {
+      "types": "./dist/sequencer/index.d.ts",
+      "import": "./dist/sequencer.js"
+    },
     "./xypad": {
       "types": "./dist/xypad/index.d.ts",
       "import": "./dist/xypad.js"

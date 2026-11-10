@@ -327,6 +327,38 @@ A key that starts sounding fires `noteon`, with `event.detail` `{ pitch, velocit
 | `<audio-ui-meter-label>` | Names its channel |
 | `<audio-ui-meter-mark>` | A graduation at its `value`, such as -18, beside the channels |
 
+### Sequencer
+
+`<audio-ui-sequencer>` is a grid of steps to switch on and off, a row per sound, a group: pressing a cell flips it, and dragging on carries the new state across every cell the pointer crosses. The cells are one tab stop, walked with the arrow keys. The rows and the steps are made from templates:
+
+```html
+<audio-ui-sequencer aria-label="Pattern" default-value="x...x... ..x...x.">
+  <audio-ui-sequencer-rows labels="Kick, Snare">
+    <template>
+      <audio-ui-sequencer-steps>
+        <template><audio-ui-sequencer-cell></audio-ui-sequencer-cell></template>
+      </audio-ui-sequencer-steps>
+    </template>
+  </audio-ui-sequencer-rows>
+</audio-ui-sequencer>
+```
+
+<TypeTable>
+<TypeRow name={"value"} type={"string"}>The pattern as text: a word per row, a character per step, `x` for a step on and `.` for one off. The `value` property takes and gives it as `boolean[][]`.</TypeRow>
+<TypeRow name={"default-value"} type={"string"}>The starting pattern, written the same way.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+Flipping cells fires `input`, with `{ value, reason }`, which `preventDefault()` refuses, then `change`. The `velocities` property (`number[][]`, 0 to 1) holds how loud each step plays; drawing them fires `velocityinput` and `velocitychange`, with `{ velocities, reason }`. The `source` property, `{ getSnapshot, subscribe }` giving the step being played, marks that step's cells with `data-current` as the clock ticks.
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-sequencer-rows>` | Makes an `<audio-ui-sequencer-row>` per row of the pattern from its `<template>`; `labels` names them, separated by commas |
+| `<audio-ui-sequencer-row>` | One sound's row, a group, for its `index` |
+| `<audio-ui-sequencer-steps>` | Makes an `<audio-ui-sequencer-step>` per step of its row from its `<template>`. Neither takes room, so the cells are the grid's own items |
+| `<audio-ui-sequencer-cell>` | One step, a toggle button pressed when it is on (`data-on`), named after its row and step ("Kick, step 5") |
+| `<audio-ui-sequencer-velocity>` | How loud a step plays, as a bar whose height is the `--sequencer-velocity` CSS variable; a press or a drag sets it, Alt + click or Delete bring it back to full, and a native range input takes the keys |
+
 ### Data attributes
 
 Every part carries the state of its control:
@@ -337,4 +369,7 @@ Every part carries the state of its control:
 <TypeRow name={"data-drag-mode"}>On a knob's parts, its `drag-mode`. Style the cursor from it.</TypeRow>
 <TypeRow name={"data-orientation"}>On a fader's parts, `horizontal` or `vertical`.</TypeRow>
 <TypeRow name={"data-active"}>On a pad or a piano key, while it sounds.</TypeRow>
+<TypeRow name={"data-on"}>On a sequencer's cell or velocity bar, while its step is on.</TypeRow>
+<TypeRow name={"data-current"}>On the cells of the step being played.</TypeRow>
+<TypeRow name={"data-painting"}>On a sequencer and its parts while a pointer paints cells.</TypeRow>
 </TypeTable>
