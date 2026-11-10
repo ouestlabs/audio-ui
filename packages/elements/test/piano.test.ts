@@ -17,10 +17,17 @@ function renderPiano(attributes = "") {
     </audio-ui-piano>`;
   const root = document.querySelector("audio-ui-piano") as PianoElement;
   mockRect(root, { bottom: 100, height: 100, right: 800, width: 800 });
-  const on: PianoNoteOnDetail[] = [];
-  const off: PianoNoteOffDetail[] = [];
-  root.addEventListener("noteon", (event) => on.push(event.detail));
-  root.addEventListener("noteoff", (event) => off.push(event.detail));
+  const on: Omit<PianoNoteOnDetail, "event">[] = [];
+  const off: Omit<PianoNoteOffDetail, "event">[] = [];
+  // The fields the tests read, not the event: a report of a failed match would walk its whole document.
+  root.addEventListener("noteon", (event) => {
+    const { pitch, reason, velocity } = event.detail;
+    on.push({ pitch, reason, velocity });
+  });
+  root.addEventListener("noteoff", (event) => {
+    const { pitch, reason } = event.detail;
+    off.push({ pitch, reason });
+  });
   return {
     key: (pitch: number) =>
       root.querySelector(`audio-ui-piano-key[pitch="${pitch}"]`) as HTMLElement,

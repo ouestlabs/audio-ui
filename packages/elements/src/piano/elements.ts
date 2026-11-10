@@ -25,6 +25,8 @@ export const PIANO_TAGS = Object.freeze({
 
 /** What a `noteon` event carries: the pitch played, how hard, and how. */
 export interface PianoNoteOnDetail {
+  /** The pointer or key event that played it. */
+  event: Event;
   /** MIDI pitch: 60 is middle C. */
   pitch: number;
   /** `press` for a pointer, `glide` when it slid onto the key, `keyboard` for Enter or Space. */
@@ -35,6 +37,8 @@ export interface PianoNoteOnDetail {
 
 /** What a `noteoff` event carries: the pitch released, and why. */
 export interface PianoNoteOffDetail {
+  /** The pointer, key or focus event that released it. */
+  event: Event;
   pitch: number;
   /** `press` (released), `glide` (slid off it), or `keyboard` (a key released, or the focus lost while held). */
   reason: PianoNoteOffEventDetails["reason"];
@@ -218,7 +222,7 @@ export class PianoElement extends ControlRoot<PianoSnapshot> {
           new CustomEvent("noteoff", {
             bubbles: true,
             composed: true,
-            detail: { pitch, reason: details.reason },
+            detail: { event: details.event, pitch, reason: details.reason },
           })
         ),
       onNoteOn: (pitch, details) => {
@@ -228,6 +232,7 @@ export class PianoElement extends ControlRoot<PianoSnapshot> {
             cancelable: true,
             composed: true,
             detail: {
+              event: details.event,
               pitch,
               reason: details.reason,
               velocity: details.velocity,

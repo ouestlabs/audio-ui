@@ -262,7 +262,7 @@ A strike fires `padon`, with `event.detail` `{ value, velocity, reason }`: `prev
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-A key that starts sounding fires `noteon`, with `event.detail` `{ pitch, velocity, reason }`: `preventDefault()` keeps it silent. One that stops fires `noteoff`, with `{ pitch, reason }`.
+A key that starts sounding fires `noteon`, with `event.detail` `{ pitch, velocity, reason, event }`, `event` being the pointer or key event that played it: `preventDefault()` keeps it silent. One that stops fires `noteoff`, with `{ pitch, reason, event }`.
 
 | Part | What it is |
 | --- | --- |

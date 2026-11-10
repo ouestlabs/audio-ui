@@ -6,11 +6,11 @@
  * when the template arrives or changes: a page being read connects the host
  * before its template.
  */
-export class Stamp {
+export class Stamp<Key extends number | string = number> {
   readonly #host: Element;
   readonly #tag: string;
   readonly #attribute: string;
-  readonly #prepare: ((item: Element, key: number) => void) | undefined;
+  readonly #prepare: ((item: Element, key: Key) => void) | undefined;
   #template: HTMLTemplateElement | undefined;
   #watch: MutationObserver | undefined;
 
@@ -18,7 +18,7 @@ export class Stamp {
     host: Element,
     tag: string,
     attribute: string,
-    prepare?: (item: Element, key: number) => void
+    prepare?: (item: Element, key: Key) => void
   ) {
     this.#host = host;
     this.#tag = tag;
@@ -45,14 +45,14 @@ export class Stamp {
   }
 
   /** Makes an item per key, in that order, keeping the ones whose key stays. */
-  update(keys: readonly number[]) {
-    const made = new Map<number, Element>();
+  update(keys: readonly Key[]) {
+    const made = new Map<string, Element>();
     for (const item of this.items()) {
-      made.set(Number(item.getAttribute(this.#attribute)), item);
+      made.set(item.getAttribute(this.#attribute) ?? "", item);
     }
     const items = keys.map((key) => {
-      const existing = made.get(key);
-      made.delete(key);
+      const existing = made.get(String(key));
+      made.delete(String(key));
       if (existing) {
         return existing;
       }
