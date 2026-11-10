@@ -221,27 +221,28 @@ describe("the gate device", () => {
     expect(gateCurve({ ...defaults, enabled: false })(-80)).toBe(-80);
   });
 
-  test("the times go to the detector in seconds, and the floor is a gain", () => {
-    const settings = gateSettings({
-      ...defaults,
-      attackMs: 2,
-      floorDb: -40,
-      holdMs: 50,
-      lookaheadMs: 5,
-      releaseMs: 200,
+  test("the worklet gets the times in milliseconds and the floor as the range", () => {
+    expect(
+      gateSettings({
+        ...defaults,
+        attackMs: 2,
+        floorDb: -40,
+        holdMs: 50,
+        lookaheadMs: 5,
+        releaseMs: 200,
+      }).modelParams
+    ).toMatchObject({
+      attack: 2,
+      hold: 50,
+      lookahead: 5,
+      range: -40,
+      release: 200,
     });
-    expect(settings).toMatchObject({
-      attack: 0.002,
-      hold: 0.05,
-      lookahead: 0.005,
-      release: 0.2,
-    });
-    expect(settings.floor).toBeCloseTo(0.01, 9);
   });
 
   test("off, the gate is open and has no look-ahead", () => {
     const off = gateSettings({ ...defaults, enabled: false, lookaheadMs: 5 });
-    expect(off).toMatchObject({ floor: 1, lookahead: 0 });
+    expect(off.modelParams).toMatchObject({ lookahead: 0, range: 0 });
     expect(gateDevice.latency({ ...defaults, lookaheadMs: 5 }, 48_000)).toBe(
       0.005
     );
@@ -253,55 +254,15 @@ describe("the gate device", () => {
     ).toBe(0);
   });
 
-  test("the detector source is a processor with the five parameters the engine sets", () => {
+  test("the worklet source is the processor the engine makes", () => {
     expect(GATE_WORKLET).toContain('registerProcessor("audioui-gate"');
-    for (const name of ["threshold", "floor", "attack", "hold", "release"]) {
-      expect(GATE_WORKLET).toContain(`name: "${name}"`);
-    }
   });
 
-  test("the engine delays the signal by the look-ahead, stays open without worklets and follows updates", async () => {
-    const { ctx, made } = fakeContext();
+  test("the engine stays open without worklets and follows updates", async () => {
+    const { ctx } = fakeContext();
     const engine = createGateEngine(ctx, { ...defaults, lookaheadMs: 4 });
-    expect(made.delay.delayTime.value).toBeCloseTo(0.004, 9);
     expect(await engine.ready).toBe(false);
     engine.update({ ...defaults, lookaheadMs: 8 });
-    expect(made.delay.delayTime.targets.at(-1)).toBeCloseTo(0.008, 9);
-  });
-});
-
-describe("the gate's key", () => {
-  const defaults = gateDevice.defaults();
-
-  test("it says it takes a key, and the key is a switch, not a signal in the state", () => {
-    expect(gateDevice.sidechain).toBe(true);
-    expect(gateDevice.describe().sidechain).toBe(true);
-    expect(defaults.external).toBe(false);
-    expect(gateSettings({ ...defaults, external: true })).toMatchObject({
-      outerKey: 1,
-      ownKey: 0,
-    });
-    expect(gateSettings(defaults)).toMatchObject({ outerKey: 0, ownKey: 1 });
-  });
-
-  test("the engine has a sidechain input that only the key switch opens", () => {
-    const { ctx, made } = fakeContext();
-    const engine = createGateEngine(ctx, { ...defaults, external: true });
-    expect(engine.sidechain).toBeDefined();
-    expect(engine.sidechain).not.toBe(engine.input);
-    const keys = made.gains.filter(
-      (gain) => gain.gain.value === 0 || gain.gain.value === 1
-    );
-    expect(keys.length).toBeGreaterThanOrEqual(2);
-    engine.update({ ...defaults, external: false });
-    const targets = made.gains.flatMap((gain) => gain.gain.targets);
-    expect(targets).toContain(1);
-    expect(targets).toContain(0);
-  });
-
-  test("an agent can switch the key on", () => {
-    expect(gateDevice.apply(defaults, { external: true }).state.external).toBe(
-      true
-    );
+    engine.dispose();
   });
 });

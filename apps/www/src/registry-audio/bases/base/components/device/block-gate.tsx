@@ -11,9 +11,8 @@ import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
-/** A held chord, opened by the kick of the loop: the key is heard by the gate only. */
+/** A loop whose tails fall under the threshold, so the gate closes between the hits. */
 const START = {
-  external: true,
   floorDb: -70,
   attackMs: 1,
   holdMs: 20,
@@ -24,9 +23,8 @@ const START = {
 /**
  * A gate you can plug in: its state, a panel that draws its transfer curve
  * with a handle on the threshold and an engine that plays it, each its own
- * file. It starts keyed: a held chord that the kick of the loop opens and
- * closes. Raise the threshold and the kick opens it for less time; switch the
- * key off and the gate follows the chord itself.
+ * file. It plays a groove: raise the threshold and the tails of the hits are
+ * cut shorter.
  */
 export default function BlockGate() {
   const [state, setState] = useState<GateState>(
@@ -36,8 +34,6 @@ export default function BlockGate() {
   useDeviceLoop({
     create: createGateEngine,
     destination: master,
-    key: true,
-    source: "chord",
     state,
   });
   return (

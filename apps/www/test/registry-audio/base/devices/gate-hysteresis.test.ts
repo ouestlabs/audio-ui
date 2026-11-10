@@ -1,17 +1,16 @@
 import { describe, expect, test } from "bun:test";
 import { gate } from "@audio/dynamics-gate/audio";
 import {
-  GATE_HYSTERESIS_WORKLET,
+  GATE_WORKLET,
   gateDevice,
   gateSettings,
-  gateUnused,
 } from "@/registry-audio/bases/base/devices/gate/device";
 import { madeProcessor } from "./manifest-processor";
 
 const RATE = 48_000;
 const BLOCK = 128;
 const defaults = gateDevice.defaults();
-const hysteresis = { ...defaults, model: "hysteresis" as const };
+const hysteresis = defaults;
 
 /** Bursts of a sine over the threshold, a quiet tail between: what a gate opens and closes on. */
 const bursts = (start: number) =>
@@ -36,11 +35,7 @@ describe("the gate's hysteresis model", () => {
   test("plays the processor of @audio/dynamics-gate as published, sample for sample", () => {
     for (const lookaheadMs of [0, 5]) {
       const state = { ...hysteresis, lookaheadMs };
-      const { processor } = madeProcessor(
-        GATE_HYSTERESIS_WORKLET,
-        "hysteresis",
-        RATE
-      );
+      const { processor } = madeProcessor(GATE_WORKLET, "noise", RATE);
       const params = parametersOf(state);
       const run = gate({
         currentTime: 0,
@@ -71,10 +66,9 @@ describe("the gate's hysteresis model", () => {
     }
   });
 
-  test("closes the hysteresis under the threshold, its floor the range, and takes no key", () => {
+  test("closes the hysteresis under the threshold, its floor the range", () => {
     const settings = gateSettings({
       ...hysteresis,
-      external: true,
       floorDb: -50,
       hysteresisDb: 10,
       thresholdDb: -30,
@@ -84,18 +78,19 @@ describe("the gate's hysteresis model", () => {
       range: -50,
       threshold: -30,
     });
-    expect(settings).toMatchObject({ modelWet: 1, outerKey: 0, ownKey: 1 });
-    expect(gateSettings({ ...hysteresis, enabled: false }).modelWet).toBe(0);
+    expect(
+      gateSettings({ ...hysteresis, enabled: false }).modelParams
+    ).toMatchObject({
+      lookahead: 0,
+      range: 0,
+    });
   });
 
-  test("each model draws off what it does not use, and the latency is the look-ahead for both", () => {
-    expect(gateUnused("clean")).toEqual(["hysteresisDb"]);
-    expect(gateUnused("hysteresis")).toEqual(["external"]);
+  test("the latency is the look-ahead", () => {
     const state = { ...hysteresis, lookaheadMs: 4 };
     expect(gateDevice.latency(state, RATE)).toBe(
       gate.latency({ params: { lookahead: [4] }, sampleRate: RATE } as never) /
         RATE
     );
-    expect(gateDevice.latency({ ...state, model: "clean" }, RATE)).toBe(0.004);
   });
 });
