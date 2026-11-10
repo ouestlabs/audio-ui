@@ -22,6 +22,7 @@
     "@audio/decode-caf": "catalog:",
     "@audio/decode-mp4": "catalog:",
     "@audio/effect-bitcrusher": "catalog:",
+    "@audio/effect-distortion": "catalog:",
     "@audio/effect-graindelay": "catalog:",
     "@audio/effect-lofi": "catalog:",
     "@audio/effect-multitap": "catalog:",

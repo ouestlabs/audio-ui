@@ -405,9 +405,9 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/effect-distortion"],
     description:
-      "The distortion as a device: a drive, a tone, a mix and an output level, the numbers that go on the nodes for a state, the soft clip and the transfer curve a state plays, with no panel and no audio in it.",
+      "The distortion as a device: a curve (tanh, cubic, hard or fold, the curves of @audio/effect-distortion), a drive, a tone, a mix and an output level, the numbers that go on the nodes for a state, the table of each curve and the transfer curve a state plays, with no panel and no audio in it.",
     files: [
       {
         path: "devices/distortion/device.ts",
@@ -423,7 +423,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A distortion on the Web Audio API for a distortion state: a drive gain into a fixed soft-clip table at 4x oversampling, a tone filter, mixed with the clean sound at an output level, moving without a click.",
+      "A distortion on the Web Audio API for a distortion state: a drive gain into the table of its curve at 4x oversampling, a tone filter, mixed with the clean sound at an output level, moving without a click.",
     files: [
       {
         path: "devices/distortion/engine.ts",
@@ -442,7 +442,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the distortion device: its transfer curve against the straight line of a clean sound, over the device knobs.",
+      "The face of the distortion device: its transfer curve against the straight line of a clean sound, over the choice of the curve, each button drawn from its curve, and the device knobs.",
     files: [
       {
         path: "devices/distortion/panel.tsx",
@@ -453,6 +453,7 @@ export const devices: RegistryItem[] = [
     name: "distortion-panel",
     registryDependencies: [
       "@audio-ui/device-panel",
+      "@audio-ui/curve-select",
       "@audio-ui/plot",
       "@audio-ui/distortion-device",
     ],

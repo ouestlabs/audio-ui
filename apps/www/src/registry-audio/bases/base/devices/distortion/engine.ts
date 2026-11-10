@@ -25,8 +25,9 @@ export interface DistortionEngine {
  *       → dry (waits as long as the shaper) ──────────────────────────────────────────┴→ level → output
  * ```
  *
- * The drive is a gain before a fixed soft-clip table, so turning it never
- * rebuilds the table. The shaper oversamples 4x to keep the clip from aliasing.
+ * The drive is a gain before the table of the curve, so turning it never
+ * changes the table; only picking another curve does. The shaper oversamples
+ * 4x to keep the curve from aliasing.
  */
 export function createDistortionEngine(
   ctx: BaseAudioContext,
@@ -41,7 +42,8 @@ export function createDistortionEngine(
   const dry = ctx.createGain();
   const dryDelay = createOversamplingDelay(ctx, "4x");
   const level = ctx.createGain();
-  shaper.curve = distortionTable();
+  shaper.curve = distortionTable(initial.curve);
+  let { curve } = initial;
   shaper.oversample = "4x";
   tone.type = "lowpass";
   input
@@ -82,6 +84,10 @@ export function createDistortionEngine(
     output,
     update: (state) => {
       const settings = distortionSettings(state);
+      if (state.curve !== curve) {
+        ({ curve } = state);
+        shaper.curve = distortionTable(curve);
+      }
       follow(drive.gain, settings.drive / TABLE_DOMAIN);
       follow(tone.frequency, settings.tone);
       follow(wet.gain, settings.wet);

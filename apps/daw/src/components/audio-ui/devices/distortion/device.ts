@@ -1,25 +1,42 @@
+import distortion from "@audio/effect-distortion";
 import { formatHz } from "@audio-ui/core/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
 import { oversamplingSeconds } from "@/lib/oversampling";
 
-const CURVE_SAMPLES = 4096;
-
-/** The table covers the signal after the drive from -8 to 8, so a driven peak is still on the curve instead of held at its edge. */
-export const TABLE_DOMAIN = 8;
+const TABLE_SAMPLES = 16_384;
 
 /**
- * A distortion as a device: a drive that pushes the signal into a soft clip, a
- * tone, a mix and an output level, with no panel and no audio in it.
+ * The table covers the signal after the drive from -100 to 100, the gain of
+ * the drive at its top (40 dB): a full-scale input at full drive is still on
+ * the curve, where a fold keeps folding instead of holding at the table's edge.
+ */
+export const TABLE_DOMAIN = 100;
+
+/**
+ * A distortion as a device: a drive that pushes the signal into one of four
+ * curves, a tone, a mix and an output level, with no panel and no audio in it.
  */
 export const distortionDevice = defineDevice({
   description:
-    "Bends the sound: the drive pushes the signal into a soft clip that rounds its peaks, the tone closes the highs after it, mixed with the clean sound at an output level.",
+    "Bends the sound: the drive pushes the signal into a curve (a tanh or a cubic soft clip, a hard clip or a wavefold), the tone closes the highs after it, mixed with the clean sound at an output level.",
   id: "audioui.distortion",
   // The shaper oversamples 4x and the dry path waits as long: the delay is the same on or off.
   latency: (_state, sampleRate) => oversamplingSeconds("4x", sampleRate),
   name: "Distortion",
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },
+    {
+      default: "tanh",
+      id: "curve",
+      kind: "choice",
+      label: "Curve",
+      options: [
+        { label: "Tanh", value: "tanh" },
+        { label: "Cubic", value: "soft" },
+        { label: "Hard", value: "hard" },
+        { label: "Fold", value: "foldback" },
+      ],
+    },
     {
       default: 12,
       id: "driveDb",
@@ -77,30 +94,60 @@ export function distortionSettings(state: DistortionState) {
   };
 }
 
-/** The soft clip: the output for an input from -1 to 1 at a drive gain, normalised so full scale in is full scale out. */
-export function softClip(input: number, drive: number) {
-  return Math.tanh(drive * input) / Math.tanh(drive);
-}
+const tables = new Map<DistortionState["curve"], Float32Array<ArrayBuffer>>();
 
-/** The clip as a table for a `WaveShaperNode`: tanh over the drive's range. The drive is a gain before it (divided by `TABLE_DOMAIN`), so the table is one fixed shape. */
-export function distortionTable(): Float32Array<ArrayBuffer> {
-  const table = new Float32Array(new ArrayBuffer(CURVE_SAMPLES * 4));
-  for (let index = 0; index < CURVE_SAMPLES; index += 1) {
-    table[index] = Math.tanh(
-      TABLE_DOMAIN * ((index * 2) / (CURVE_SAMPLES - 1) - 1)
-    );
+/**
+ * A curve as a table for a `WaveShaperNode`, written by the curve of
+ * `@audio/effect-distortion` itself. The drive is a gain before it (divided by
+ * `TABLE_DOMAIN`), so the table depends on the curve alone. Each curve's table
+ * is made once and shared: a node copies the table it is given.
+ */
+export function distortionTable(
+  curve: DistortionState["curve"]
+): Float32Array<ArrayBuffer> {
+  const made = tables.get(curve);
+  if (made) {
+    return made;
   }
+  const table = new Float32Array(new ArrayBuffer(TABLE_SAMPLES * 4));
+  for (let index = 0; index < TABLE_SAMPLES; index += 1) {
+    table[index] = TABLE_DOMAIN * ((index * 2) / (TABLE_SAMPLES - 1) - 1);
+  }
+  // A drive of 0 is a gain of 1 and a mix of 1 is no dry: the curve alone.
+  distortion(table, { drive: 0, mix: 1, type: curve });
+  tables.set(curve, table);
   return table;
 }
 
 /**
+ * A curve at an input after the drive, read from its table as a
+ * `WaveShaperNode` reads it, between two entries: what the node plays.
+ */
+export function distortionShape(
+  curve: DistortionState["curve"],
+  input: number
+) {
+  const table = distortionTable(curve);
+  const position = Math.max(
+    0,
+    Math.min(
+      TABLE_SAMPLES - 1,
+      ((input / TABLE_DOMAIN + 1) * (TABLE_SAMPLES - 1)) / 2
+    )
+  );
+  const index = Math.min(Math.floor(position), TABLE_SAMPLES - 2);
+  const fraction = position - index;
+  return (
+    (table[index] ?? 0) * (1 - fraction) + (table[index + 1] ?? 0) * fraction
+  );
+}
+
+/**
  * The transfer curve a state plays: the output for an input from -1 to 1, the
- * drive through the clip, then the mix with the clean sound and the output.
+ * drive through the curve, then the mix with the clean sound and the output.
  */
 export function distortionCurve(state: DistortionState) {
   const { dry, drive, output, wet } = distortionSettings(state);
-  return (input: number) => {
-    const shaped = Math.tanh(drive * input);
-    return output * (dry * input + wet * shaped);
-  };
+  return (input: number) =>
+    output * (dry * input + wet * distortionShape(state.curve, drive * input));
 }
