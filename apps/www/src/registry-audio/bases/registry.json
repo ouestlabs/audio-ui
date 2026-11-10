@@ -13,7 +13,7 @@
       "name": "fader"
     },
     {
-      "count": 26,
+      "count": 27,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -73,7 +73,7 @@
       "name": "eq"
     },
     {
-      "count": 4,
+      "count": 5,
       "description": "Distortion devices: an overdrive, a saturator, a distortion and a bit crusher.",
       "label": "Distortion",
       "name": "distortion"
@@ -109,7 +109,7 @@
       "name": "tuner"
     },
     {
-      "count": 21,
+      "count": 22,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
       "name": "plot"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 72
+  "totalComponents": 73
 }

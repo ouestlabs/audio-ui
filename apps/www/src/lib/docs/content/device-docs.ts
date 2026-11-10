@@ -13,6 +13,7 @@ import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/devi
 import { gateDevice } from "@/registry-audio/bases/base/devices/gate/device";
 import { guitarDevice } from "@/registry-audio/bases/base/devices/guitar/device";
 import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
+import { lofiDevice } from "@/registry-audio/bases/base/devices/lofi/device";
 import { midSideDevice } from "@/registry-audio/bases/base/devices/mid-side/device";
 import { monoSynthDevice } from "@/registry-audio/bases/base/devices/mono-synth/device";
 import { multibandDevice } from "@/registry-audio/bases/base/devices/multiband/device";
@@ -61,6 +62,7 @@ export const DEVICE_DOCS = {
   "drum-synth": drumSynthDevice,
   sampler: samplerDevice,
   redux: reduxDevice,
+  lofi: lofiDevice,
   reverb: reverbDevice,
   saturator: saturatorDevice,
   transient: transientDevice,

@@ -36,6 +36,8 @@ import { guitarDevice } from "@/registry-audio/bases/base/devices/guitar/device"
 import { createGuitarEngine } from "@/registry-audio/bases/base/devices/guitar/engine";
 import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
 import { createLimiterEngine } from "@/registry-audio/bases/base/devices/limiter/engine";
+import { lofiDevice } from "@/registry-audio/bases/base/devices/lofi/device";
+import { createLofiEngine } from "@/registry-audio/bases/base/devices/lofi/engine";
 import { midSideDevice } from "@/registry-audio/bases/base/devices/mid-side/device";
 import { createMidSideEngine } from "@/registry-audio/bases/base/devices/mid-side/engine";
 import { monoSynthDevice } from "@/registry-audio/bases/base/devices/mono-synth/device";
@@ -165,6 +167,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(overdriveDevice, createOverdriveEngine, "Distortion"),
   entry(distortionDevice, createDistortionEngine, "Distortion"),
   entry(reduxDevice, createReduxEngine, "Distortion"),
+  entry(lofiDevice, createLofiEngine, "Distortion"),
   // Space
   entry(delayDevice, createDelayEngine, "Space"),
   entry(reverbDevice, createReverbEngine, "Space"),

@@ -1238,6 +1238,27 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["distortion", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A lo-fi you can plug in: its state, a panel that draws the band it leaves and an engine that plays it. Play a loop through it and turn up the wow and the crackle",
+    files: [
+      {
+        path: "components/device/block-lofi.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-lofi",
+    registryDependencies: [
+      "@audio-ui/lofi-panel",
+      "@audio-ui/lofi-device",
+      "@audio-ui/lofi-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",

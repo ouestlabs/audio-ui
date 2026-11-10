@@ -35,6 +35,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "transient",
   "mid-side",
   "redux",
+  "lofi",
   "envelope",
   "fader",
   "knob",

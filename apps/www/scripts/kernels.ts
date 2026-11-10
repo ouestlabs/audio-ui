@@ -34,6 +34,11 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "LOFI_KERNELS",
+    file: "devices/lofi/kernels.ts",
+    kernels: [{ file: "lofi.js", name: "@audio/effect-lofi", use: "lofi" }],
+  },
+  {
     constant: "REDUX_KERNELS",
     file: "devices/redux/kernels.ts",
     kernels: [

@@ -1,9 +1,9 @@
-import { createOversamplingDelay } from "@/lib/oversampling";
 import {
   type SaturatorState,
   saturatorSettings,
   saturatorTable,
 } from "@/components/audio-ui/devices/saturator/device";
+import { createOversamplingDelay } from "@/lib/oversampling";
 
 const RAMP_SECONDS = 0.015;
 

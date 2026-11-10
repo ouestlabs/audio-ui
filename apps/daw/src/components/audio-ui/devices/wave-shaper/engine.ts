@@ -1,11 +1,11 @@
 import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
-import { createOversamplingDelay } from "@/lib/oversampling";
 import {
   type WaveShaperNote,
   type WaveShaperState,
   waveShaperCurve,
   waveShaperCutoff,
 } from "@/components/audio-ui/devices/wave-shaper/device";
+import { createOversamplingDelay } from "@/lib/oversampling";
 
 /** How fast a parameter follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.01;

@@ -23,6 +23,7 @@
     "@audio/decode-mp4": "catalog:",
     "@audio/effect-bitcrusher": "catalog:",
     "@audio/effect-graindelay": "catalog:",
+    "@audio/effect-lofi": "catalog:",
     "@audio/effect-multitap": "catalog:",
     "@audio/effect-noiseshaper": "catalog:",
     "@audio/effect-pingpong": "catalog:",

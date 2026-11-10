@@ -1,0 +1,40 @@
+---
+title: Lo-fi
+description: "A lo-fi device: wow, flutter, hiss, crackle, a high-pass and a low-pass and a tape drive, a panel that draws the band it leaves, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-lofi" />
+
+Ages the sound like a worn tape or a record. Its pitch drifts and wobbles, a hiss and the crackle of dust ride under it, its band narrows and a tape drive saturates it. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="lofi" kind="device" />
+
+## Controls
+
+<DeviceControls device="lofi">
+<Control id="wow">A slow drift of the pitch, about 0.7 times a second, as a tape stretching on its reels.</Control>
+<Control id="flutter">A fast wobble of the pitch, about 7 times a second, as a capstan that does not turn true.</Control>
+<Control id="noise">A hiss under the sound, as a tape's or a record's surface.</Control>
+<Control id="crackle">How often dust crackles, and how loud.</Control>
+<Control id="lowpassHz">Where the highs fall away, 18 dB an octave, as a worn tape loses its top.</Control>
+<Control id="highpassHz">Where the lows fall away, as a small speaker or a record's rumble filter.</Control>
+<Control id="drive">How hard the sound goes into the tape's saturation, its level kept.</Control>
+</DeviceControls>
+
+Each control at 0 takes its part out. There is no mix: the drift and the wobble delay the sound by a couple of milliseconds, and mixing it with the clean sound would comb it.
+
+## Panel
+
+The panel draws the band the high-pass and the low-pass leave. `lofiCurve(state)` is the curve it draws: the kernel's three one-pole low-passes in a row and its one-pole high-pass.
+
+<DeviceUsage name="lofi" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The lo-fi is the kernel of `@audio/effect-lofi` in an `AudioWorklet` loaded from a blob (`LOFI_WORKLET` is its source), 128 frames at a time, each channel with a noise of its own. A worklet cannot import, so the device carries the kernel as published (`LOFI_KERNELS`, in its `kernels.ts`). Until it is ready, and when it is off, the sound passes clean, and `engine.ready` resolves to `false` in a context that cannot run worklets. Its hiss and crackle play on through silence, as a record's do.

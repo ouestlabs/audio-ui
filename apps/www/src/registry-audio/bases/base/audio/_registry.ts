@@ -442,6 +442,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/sampler-panel",
       "@audio-ui/electric-piano-panel",
       "@audio-ui/redux-panel",
+      "@audio-ui/lofi-panel",
       "@audio-ui/reverb-panel",
       "@audio-ui/saturator-panel",
       "@audio-ui/transient-panel",

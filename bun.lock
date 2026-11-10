@@ -25,6 +25,7 @@
         "@audio/decode-mp4": "catalog:",
         "@audio/effect-bitcrusher": "catalog:",
         "@audio/effect-graindelay": "catalog:",
+        "@audio/effect-lofi": "catalog:",
         "@audio/effect-multitap": "catalog:",
         "@audio/effect-noiseshaper": "catalog:",
         "@audio/effect-pingpong": "catalog:",
@@ -160,6 +161,7 @@
         "@audio/decode-mp4": "catalog:",
         "@audio/effect-bitcrusher": "catalog:",
         "@audio/effect-graindelay": "catalog:",
+        "@audio/effect-lofi": "catalog:",
         "@audio/effect-multitap": "catalog:",
         "@audio/effect-noiseshaper": "catalog:",
         "@audio/effect-pingpong": "catalog:",
@@ -327,6 +329,7 @@
     "@audio/decode-mp4": "1.3.1",
     "@audio/effect-bitcrusher": "1.1.5",
     "@audio/effect-graindelay": "1.1.6",
+    "@audio/effect-lofi": "1.1.6",
     "@audio/effect-multitap": "1.1.6",
     "@audio/effect-noiseshaper": "1.1.5",
     "@audio/effect-pingpong": "1.1.5",
@@ -422,6 +425,8 @@
     "@audio/effect-bitcrusher": ["@audio/effect-bitcrusher@1.1.5", "", {}, "sha512-4oJNcHvyKHJGh3QYLSqhBLY27zuNoTusE6dcBTa4uS6IRRTvkw2H8oIGizoxi5AefKBSrOt28RJhKqG6bL5DVA=="],
 
     "@audio/effect-graindelay": ["@audio/effect-graindelay@1.1.6", "", {}, "sha512-OWN3QPQ67WxmeE487UBCE/GRmkAMKvaPJv0ffck9RsRLHLmIlOmbGbBMxPK/OvB4SxOXVFxci7bpswTiAroENQ=="],
+
+    "@audio/effect-lofi": ["@audio/effect-lofi@1.1.6", "", {}, "sha512-sGeWGoOx5dXO9n9y7m8Nx8lsI6zduEl7VcLQuzL/LxQsgRImXrMKURLX8JqnTFMxAYjvWkg3I1L2P1CNKJG2Mw=="],
 
     "@audio/effect-multitap": ["@audio/effect-multitap@1.1.6", "", {}, "sha512-MlqkQYyn9OngS+fcY7Zg7BWcrdRVIQBkiJ18evgdArq1U6DO7X7wUg1RfABQRyLMhzuTVE5GPwugZB8/iJyfZg=="],
 

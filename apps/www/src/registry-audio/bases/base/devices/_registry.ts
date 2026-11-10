@@ -19,6 +19,7 @@ const DEVICES = [
   "fm-synth",
   "gate",
   "limiter",
+  "lofi",
   "mid-side",
   "mono-synth",
   "organ",
@@ -1317,6 +1318,63 @@ export const devices: RegistryItem[] = [
       "@audio-ui/piano",
       "@audio-ui/poly-synth-device",
       "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/effect-lofi"],
+    description:
+      "The lo-fi as a device: its wow, flutter, hiss, crackle, the band a high-pass and a low-pass leave and a tape drive, the numbers that go on the worklet for a state, the band a state leaves and the worklet's source, with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/lofi/device.ts",
+        target: "components/audio-ui/devices/lofi/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/lofi/kernels.ts",
+        target: "components/audio-ui/devices/lofi/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "lofi-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A lo-fi on the Web Audio API for a lo-fi state: the kernel of @audio/effect-lofi in an AudioWorklet loaded from a blob, the sound passing clean until it is ready and when it is off.",
+    files: [
+      {
+        path: "devices/lofi/engine.ts",
+        target: "components/audio-ui/devices/lofi/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "lofi-engine",
+    registryDependencies: ["@audio-ui/lofi-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the lo-fi device: the band it leaves between its high-pass and its low-pass, over the device knobs.",
+    files: [
+      {
+        path: "devices/lofi/panel.tsx",
+        target: "components/audio-ui/devices/lofi/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "lofi-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/lofi-device",
     ],
     type: "registry:ui",
   },

@@ -16,6 +16,7 @@ import { FmSynthPanel } from "@/registry-audio/bases/base/devices/fm-synth/panel
 import { GatePanel } from "@/registry-audio/bases/base/devices/gate/panel";
 import { GuitarPanel } from "@/registry-audio/bases/base/devices/guitar/panel";
 import { LimiterPanel } from "@/registry-audio/bases/base/devices/limiter/panel";
+import { LofiPanel } from "@/registry-audio/bases/base/devices/lofi/panel";
 import { MidSidePanel } from "@/registry-audio/bases/base/devices/mid-side/panel";
 import { MonoSynthPanel } from "@/registry-audio/bases/base/devices/mono-synth/panel";
 import { MultibandPanel } from "@/registry-audio/bases/base/devices/multiband/panel";
@@ -107,6 +108,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.pocket-synth": entry(PocketSynthPanel),
   "audioui.poly-synth": entry(PolySynthPanel, "w-[40rem]"),
   "audioui.redux": entry(ReduxPanel),
+  "audioui.lofi": entry(LofiPanel),
   "audioui.reverb": entry(ReverbPanel),
   "audioui.sampler": entry(SamplerPanel, "w-[32rem]"),
   "audioui.saturator": entry(SaturatorPanel),
