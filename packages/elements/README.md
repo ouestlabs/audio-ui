@@ -53,6 +53,7 @@ Every change fires `input`, with `event.detail.value` and `event.detail.reason` 
 | `<audio-ui-meter>` | Level meters, from values or a live source, with peak hold, warning and clip |
 | `<audio-ui-pad>` | Drum pads to strike, by pointer or key, with velocity and choke groups |
 | `<audio-ui-piano>` | A keyboard to play, with glides, chords, and a piano or even layout |
+| `<audio-ui-piano-roll>` | Notes on a timeline to draw, move, resize and select, with a keyboard down the side and a velocity lane |
 | `<audio-ui-plot>` | Axes to draw curves, lines, bands, live traces and a grid on, with handles to drag |
 | `<audio-ui-sequencer>` | A step sequencer: cells painted on and off, velocities, the step being played |
 | `<audio-ui-timeline>` | An arrangement: a ruler and a playhead, tracks of clips to move, trim and fade, loop ranges, zoom and a navigator |

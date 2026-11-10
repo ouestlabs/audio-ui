@@ -9,6 +9,7 @@ const elements = [
   "meter",
   "pad",
   "piano",
+  "piano-roll",
   "plot",
   "sequencer",
   "timeline",

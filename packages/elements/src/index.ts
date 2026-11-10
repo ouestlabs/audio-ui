@@ -9,6 +9,7 @@ export * from "./knob/index.ts";
 export * from "./meter/index.ts";
 export * from "./pad/index.ts";
 export * from "./piano/index.ts";
+export * from "./piano-roll/index.ts";
 export * from "./plot/index.ts";
 export * from "./sequencer/index.ts";
 export * from "./timeline/index.ts";

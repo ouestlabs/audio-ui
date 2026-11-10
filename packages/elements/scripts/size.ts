@@ -8,11 +8,12 @@
 const BUDGETS: Record<string, number> = {
   envelope: 9000,
   fader: 5300,
-  index: 59_000,
+  index: 71_000,
   knob: 6000,
   meter: 4200,
   pad: 3500,
   piano: 4700,
+  "piano-roll": 33_500,
   plot: 8500,
   sequencer: 6000,
   timeline: 19_000,
