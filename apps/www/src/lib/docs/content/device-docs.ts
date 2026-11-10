@@ -8,6 +8,7 @@ import { deesserDevice } from "@/registry-audio/bases/base/devices/deesser/devic
 import { delayDevice } from "@/registry-audio/bases/base/devices/delay/device";
 import { distortionDevice } from "@/registry-audio/bases/base/devices/distortion/device";
 import { drumSynthDevice } from "@/registry-audio/bases/base/devices/drum-synth/device";
+import { duckerDevice } from "@/registry-audio/bases/base/devices/ducker/device";
 import { electricPianoDevice } from "@/registry-audio/bases/base/devices/electric-piano/device";
 import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
 import { exciterDevice } from "@/registry-audio/bases/base/devices/exciter/device";
@@ -47,6 +48,7 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  ducker: duckerDevice,
   expander: expanderDevice,
   "binaural-panner": binauralPannerDevice,
   stutter: stutterDevice,

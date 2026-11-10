@@ -1022,6 +1022,27 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["dynamics", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A ducker you can plug in: its state, a panel that draws the gain for the key's level and an engine that plays it. A held chord, ducked by the kick of the loop",
+    files: [
+      {
+        path: "components/device/block-ducker.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-ducker",
+    registryDependencies: [
+      "@audio-ui/ducker-panel",
+      "@audio-ui/ducker-device",
+      "@audio-ui/ducker-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:

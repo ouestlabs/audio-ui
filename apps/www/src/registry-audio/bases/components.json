@@ -306,6 +306,12 @@
     "title": "Block expander"
   },
   {
+    "categories": ["dynamics", "plot", "knob"],
+    "description": "A ducker you can plug in: its state, a panel that draws the gain for the key's level and an engine that plays it. A held chord, ducked by the kick of the loop",
+    "name": "block-ducker",
+    "title": "Block ducker"
+  },
+  {
     "categories": ["distortion", "plot", "knob"],
     "description": "A saturator you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it, pick a curve and turn the drive",
     "name": "block-saturator",

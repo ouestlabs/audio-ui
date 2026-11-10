@@ -302,6 +302,47 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "DUCKER_KERNELS",
+    file: "devices/ducker/kernels.ts",
+    kernels: [
+      {
+        file: "util.js",
+        from: "@audio/dynamics-ducker",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "timeCoef",
+      },
+      {
+        file: "envelope.js",
+        from: "@audio/dynamics-ducker",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "envelope",
+      },
+      {
+        file: "util.js",
+        from: "@audio/dynamics-ducker",
+        internal: true,
+        name: "@audio/dynamics-compressor",
+        use: ["writer", "concat", "db2lin", "lin2db"],
+      },
+      {
+        file: "compressor.js",
+        from: "@audio/dynamics-ducker",
+        internal: true,
+        name: "@audio/dynamics-compressor",
+        use: "compressorGain",
+      },
+      {
+        file: "util.js",
+        internal: true,
+        name: "@audio/dynamics-ducker",
+        use: ["db2lin", "lin2db"],
+      },
+      { file: "audio.js", name: "@audio/dynamics-ducker", use: "ducker" },
+    ],
+  },
+  {
     constant: "EXPANDER_KERNELS",
     file: "devices/expander/kernels.ts",
     kernels: [

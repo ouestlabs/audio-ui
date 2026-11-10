@@ -15,6 +15,7 @@ const DEVICES = [
   "deesser",
   "delay",
   "distortion",
+  "ducker",
   "electric-piano",
   "equalizer",
   "exciter",
@@ -882,6 +883,67 @@ export const devices: RegistryItem[] = [
       "@audio-ui/plot",
       "@audio-ui/expander-device",
       "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/dynamics-ducker",
+      "@audio/dynamics-compressor",
+    ],
+    description:
+      "The ducker as a device: a threshold, a ratio, a knee, a range, an attack and a release, the numbers that go on the worklet for a state, the gain it puts on the sound for a level of the key and the worklet's source (the ducker of @audio/dynamics-ducker), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/ducker/device.ts",
+        target: "components/audio-ui/devices/ducker/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/ducker/kernels.ts",
+        target: "components/audio-ui/devices/ducker/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "ducker-device",
+    registryDependencies: ["@audio-ui/manifest-worklet"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A ducker on the Web Audio API for a ducker state: the ducker of @audio/dynamics-ducker in an AudioWorklet loaded from a blob, the sound on its first input and the key from the sidechain on its second, fed only while it plays, the sound passing unchanged until it is ready.",
+    files: [
+      {
+        path: "devices/ducker/engine.ts",
+        target: "components/audio-ui/devices/ducker/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "ducker-engine",
+    registryDependencies: ["@audio-ui/ducker-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the ducker device: the gain it puts on the sound for each level of the key, with a handle on the threshold and the range it never goes under, over the device knobs.",
+    files: [
+      {
+        path: "devices/ducker/panel.tsx",
+        target: "components/audio-ui/devices/ducker/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "ducker-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/ducker-device",
     ],
     type: "registry:ui",
   },

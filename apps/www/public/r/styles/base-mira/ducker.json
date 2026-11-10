@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The ducker device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/ducker/.","files":[],"name":"ducker","registryDependencies":["@audio-ui/ducker-device","@audio-ui/ducker-engine","@audio-ui/ducker-panel"],"type":"registry:ui"}

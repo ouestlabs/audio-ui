@@ -26,6 +26,8 @@ import { distortionDevice } from "@/registry-audio/bases/base/devices/distortion
 import { createDistortionEngine } from "@/registry-audio/bases/base/devices/distortion/engine";
 import { drumSynthDevice } from "@/registry-audio/bases/base/devices/drum-synth/device";
 import { createDrumSynthEngine } from "@/registry-audio/bases/base/devices/drum-synth/engine";
+import { duckerDevice } from "@/registry-audio/bases/base/devices/ducker/device";
+import { createDuckerEngine } from "@/registry-audio/bases/base/devices/ducker/engine";
 import { electricPianoDevice } from "@/registry-audio/bases/base/devices/electric-piano/device";
 import { createElectricPianoEngine } from "@/registry-audio/bases/base/devices/electric-piano/engine";
 import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
@@ -176,6 +178,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(limiterDevice, createLimiterEngine, "Dynamics"),
   entry(gateDevice, createGateEngine, "Dynamics"),
   entry(expanderDevice, createExpanderEngine, "Dynamics"),
+  entry(duckerDevice, createDuckerEngine, "Dynamics"),
   entry(multibandDevice, createMultibandEngine, "Dynamics"),
   entry(transientDevice, createTransientEngine, "Dynamics"),
   entry(deesserDevice, createDeesserEngine, "Dynamics"),

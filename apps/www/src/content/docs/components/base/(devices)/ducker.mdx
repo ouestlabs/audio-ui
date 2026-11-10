@@ -1,0 +1,43 @@
+---
+title: Ducker
+description: "A ducker device: threshold, ratio, knee, range, attack and release, a panel that draws the gain for the key's level, a Web Audio engine with a sidechain, and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-ducker" />
+
+Turns a sound down while another one plays: a voice over music, a kick under a pad. The other sound is the key, connected to the sidechain: it is only listened to, never heard. It plays the ducker of [audio.js](https://audio.js.org). It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="ducker" kind="device" />
+
+## Controls
+
+<DeviceControls device="ducker">
+<Control id="thresholdDb">The level of the key above which the sound is turned down. Drag the handle on the plot across to set it.</Control>
+<Control id="ratio">How much the key's level over the threshold turns the sound down: at 4:1, 4 dB of key over the threshold take 3 dB off the sound.</Control>
+<Control id="kneeDb">How gradually it starts to duck around the threshold. 0 is a hard knee.</Control>
+<Control id="rangeDb">The most it turns the sound down. The plot draws it as a dotted line.</Control>
+<Control id="attackMs">How fast it ducks when the key comes in.</Control>
+<Control id="releaseMs">How fast the sound comes back when the key stops.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the gain it puts on the sound for each level of the key, once it has settled, through the package's own compression curve: the threshold, a handle on it, and the range it never goes under.
+
+<DeviceUsage name="ducker" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine). Connect the key to `engine.sidechain`; see [Sidechain](/docs/devices#sidechain).
+
+```ts
+engine.reduction; // dB being taken off, read per frame
+```
+
+The browser has no ducker node. The engine plays the processor of `@audio/dynamics-ducker`'s manifest as published, in an `AudioWorklet` with two inputs, the sound and the key, fed only while it plays: off, or until the worklet is ready, the sound goes round it. With nothing on the sidechain, it follows the sound itself, as a compressor would. The threshold, the ratio, the knee and the range change as it plays. A new attack or release builds it again: at most every 50 ms, the new one first playing the last 100 ms of the sound and of the key, then taking over in a 30 ms fade.
+
+Measured with a tone under an 80 Hz key, the sound is turned down to within 0.7 dB of the curve, at every level of the key: 7.5 dB drawn for a key at -20 dB, 6.8 dB heard.

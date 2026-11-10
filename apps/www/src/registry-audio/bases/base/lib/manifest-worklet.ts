@@ -11,7 +11,9 @@
  * 1, a choice as the index of its value, and takes the values as they come,
  * past the ranges a manifest suggests.
  * It plays the model sent by message (`{ model }`), the first one from
- * `processorOptions.model`, per channel, two channels out.
+ * `processorOptions.model`, per channel, two channels out. Its first input is
+ * the sound; any other, such as a key, goes to the model as its next input,
+ * none when nothing is connected to it.
  *
  * - A parameter the manifest reads as it plays changes at once. A new model,
  *   or a change to a parameter flagged `restart`, makes a new one, at most
@@ -74,6 +76,8 @@ class ManifestProcessor extends AudioWorkletProcessor {
     };
     const length = Math.ceil(PREROLL_SECONDS * sampleRate);
     this.history = [new Float32Array(length), new Float32Array(length)];
+    /** Each other input, as the model hears it this block, and what it held: its next inputs heard first too. */
+    this.others = [];
     this.filled = 0;
     this.values = {};
     this.playing = null;
@@ -118,7 +122,8 @@ class ManifestProcessor extends AudioWorkletProcessor {
     const out = [this.scratch[2], this.scratch[3]];
     for (let at = left.length - this.filled; at < left.length; at += BLOCK) {
       const end = Math.min(at + BLOCK, left.length);
-      run([[left.subarray(at, end), right.subarray(at, end)]], [out], values);
+      const others = this.others.map((other) => other.present ? [other.held[0].subarray(at, end), other.held[1].subarray(at, end)] : []);
+      run([[left.subarray(at, end), right.subarray(at, end)], ...others], [out], values);
     }
     this.since = 0;
     return { key, late: Math.min(late, left.length), run, values };
@@ -145,6 +150,17 @@ class ManifestProcessor extends AudioWorkletProcessor {
     const right = coming ? (input[1] ?? input[0]) : silence;
     const out = output.length > 1 ? output : [output[0], this.scratch[0].subarray(0, frames)];
     const values = this.valuesOf(name, parameters);
+    const others = [];
+    for (let index = 1; index < inputs.length; index += 1) {
+      const other = inputs[index];
+      const present = Boolean(other && other.length > 0);
+      if (!this.others[index - 1]) {
+        const length = this.history[0].length;
+        this.others[index - 1] = { held: [new Float32Array(length), new Float32Array(length)], present };
+      }
+      this.others[index - 1].present = present;
+      others.push(present ? [other[0], other[1] ?? other[0]] : []);
+    }
     let key = name;
     for (const restart of RESTARTS[name]) {
       key += ":" + (typeof values[restart] === "object" ? values[restart][0] : values[restart]);
@@ -157,10 +173,10 @@ class ManifestProcessor extends AudioWorkletProcessor {
       this.leaving = { left: fade, model: this.playing, total: fade };
       this.playing = this.start(name, values, key);
     }
-    this.playing.run([[left, right]], [out], values);
+    this.playing.run([[left, right], ...others], [out], values);
     if (this.leaving) {
       const old = [this.scratch[1].subarray(0, frames), this.scratch[2].subarray(0, frames)];
-      this.leaving.model.run([[left, right]], [old], this.leaving.model.values);
+      this.leaving.model.run([[left, right], ...others], [old], this.leaving.model.values);
       for (let frame = 0; frame < frames; frame += 1) {
         // A fade in a line: the two hold the same sound at about the same gain, so their amplitudes add.
         const going = Math.max(0, this.leaving.left - frame) / this.leaving.total;
@@ -182,11 +198,12 @@ class ManifestProcessor extends AudioWorkletProcessor {
       this.taken += Math.abs(inLeft) + Math.abs(inRight);
       this.given += Math.abs(out[0][frame]) + Math.abs(out[1][frame]);
     }
-    const sources = [left, right];
-    for (let channel = 0; channel < 2; channel += 1) {
-      const line = this.history[channel];
-      line.copyWithin(0, frames);
-      line.set(sources[channel], line.length - frames);
+    const lines = [[this.history, [left, right]], ...this.others.map((other, index) => [other.held, others[index].length > 0 ? others[index] : [silence, silence]])];
+    for (const [held, sources] of lines) {
+      for (let channel = 0; channel < 2; channel += 1) {
+        held[channel].copyWithin(0, frames);
+        held[channel].set(sources[channel], held[channel].length - frames);
+      }
     }
     this.filled = Math.min(held, this.filled + frames);
     this.sent += frames;

@@ -11,6 +11,7 @@ import { DeesserPanel } from "@/registry-audio/bases/base/devices/deesser/panel"
 import { DelayPanel } from "@/registry-audio/bases/base/devices/delay/panel";
 import { DistortionPanel } from "@/registry-audio/bases/base/devices/distortion/panel";
 import { DrumSynthPanel } from "@/registry-audio/bases/base/devices/drum-synth/panel";
+import { DuckerPanel } from "@/registry-audio/bases/base/devices/ducker/panel";
 import { ElectricPianoPanel } from "@/registry-audio/bases/base/devices/electric-piano/panel";
 import { EqualizerPanel } from "@/registry-audio/bases/base/devices/equalizer/panel";
 import { ExciterPanel } from "@/registry-audio/bases/base/devices/exciter/panel";
@@ -104,6 +105,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.ducker": entry(DuckerPanel),
   "audioui.expander": entry(ExpanderPanel),
   "audioui.binaural-panner": entry(BinauralPannerPanel),
   "audioui.stutter": entry(StutterPanel),
