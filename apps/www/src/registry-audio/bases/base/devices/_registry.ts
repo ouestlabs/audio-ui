@@ -180,13 +180,18 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/effect-chorus"],
     description:
-      "The chorus as a device: a rate, a depth, a delay and a mix, the numbers that go on the nodes for a state and the sweep of the delay time, with no panel and no audio in it.",
+      "The chorus as a device: a rate, a depth, a delay, one to eight voices and a mix, the numbers that go on the nodes for a state, the sweep of each voice's delay time and the source of the voices' worklet (the chorus of @audio/effect-chorus), with no panel and no audio in it.",
     files: [
       {
         path: "devices/chorus/device.ts",
         target: "components/audio-ui/devices/chorus/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/chorus/kernels.ts",
+        target: "components/audio-ui/devices/chorus/kernels.ts",
         type: "registry:lib",
       },
     ],
@@ -198,7 +203,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A chorus on the Web Audio API for a chorus state: a short delay whose time an oscillator sweeps, mixed with the dry sound, moving without a click.",
+      "A chorus on the Web Audio API for a chorus state: a short delay whose time an oscillator sweeps, or two to eight voices in an AudioWorklet loaded from a blob, mixed with the dry sound, moving without a click.",
     files: [
       {
         path: "devices/chorus/engine.ts",
@@ -214,7 +219,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the chorus device: the delay time as the oscillator sweeps it over two seconds, over the device knobs.",
+      "The face of the chorus device: the delay time of each voice as its oscillator sweeps it over two seconds, over the device knobs.",
     files: [
       {
         path: "devices/chorus/panel.tsx",
@@ -1164,13 +1169,18 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/effect-phaser"],
     description:
-      "The phaser-flanger as a device: a mode, a rate, a depth, a centre frequency, a delay, a feedback and a mix, the numbers that go on the nodes for a state and the sweep, with no panel and no audio in it.",
+      "The phaser-flanger as a device: a mode (phaser, classic or flanger), a rate, a depth, a centre frequency, a delay, the classic phaser's stages, a feedback and a mix, the numbers that go on the nodes for a state, the sweep and the source of the classic phaser's worklet (the phaser of @audio/effect-phaser), with no panel and no audio in it.",
     files: [
       {
         path: "devices/phaser/device.ts",
         target: "components/audio-ui/devices/phaser/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/phaser/kernels.ts",
+        target: "components/audio-ui/devices/phaser/kernels.ts",
         type: "registry:lib",
       },
     ],
@@ -1182,7 +1192,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A phaser and flanger on the Web Audio API for a phaser state: four all-pass filters and a short delay swept by one oscillator, crossfaded by the mode, with feedback and a mix.",
+      "A phaser and flanger on the Web Audio API for a phaser state: four all-pass filters and a short delay swept by one oscillator, and the classic phaser's first-order stages in an AudioWorklet loaded from a blob, crossfaded by the mode, with feedback and a mix.",
     files: [
       {
         path: "devices/phaser/engine.ts",
@@ -1198,7 +1208,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the phaser-flanger device: the sweep of its oscillator over two seconds, over the device knobs, with the ones the mode does not use drawn off.",
+      "The face of the phaser-flanger device: the sweep of its oscillator over two seconds, over the device knobs, with the ones the mode does not use drawn off, and the mode picked in its title bar.",
     files: [
       {
         path: "devices/phaser/panel.tsx",
@@ -1211,6 +1221,7 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/phaser-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },

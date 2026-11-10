@@ -55,6 +55,20 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "PHASER_KERNELS",
+    file: "devices/phaser/kernels.ts",
+    kernels: [
+      { file: "phaser.js", name: "@audio/effect-phaser", use: "phaser" },
+    ],
+  },
+  {
+    constant: "CHORUS_KERNELS",
+    file: "devices/chorus/kernels.ts",
+    kernels: [
+      { file: "chorus.js", name: "@audio/effect-chorus", use: "chorus" },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [

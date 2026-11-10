@@ -1,13 +1,13 @@
 ---
 title: Chorus
-description: "A chorus device: a rate or a note value, a depth, a delay and a mix, a panel that draws the sweep of the delay, a Web Audio engine and tools for agents."
+description: "A chorus device: a rate or a note value, a depth, a delay, one to eight voices and a mix, a panel that draws the sweep of each voice, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-chorus" />
 
-Thickens the sound with a short delay that a slow oscillator sweeps up and down. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Thickens the sound with a short delay that a slow oscillator sweeps up and down, or up to eight of them, swept in turn. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -21,12 +21,13 @@ Thickens the sound with a short delay that a slow oscillator sweeps up and down.
 <Control id="division">The note value of one cycle of the oscillator.</Control>
 <Control id="depth">How far the oscillator moves the delay.</Control>
 <Control id="delayMs">The delay the sweep is centred on.</Control>
+<Control id="voices">How many delays are read, 1 to 8, their oscillators spread evenly around the cycle. However many there are, they play as loud as one. A new count or a new delay with more than one voice waits for the knob to rest, then fades in.</Control>
 <Control id="mix">The balance of the delayed signal and the dry one.</Control>
 </DeviceControls>
 
 ## Panel
 
-The panel draws the delay time over two seconds as the oscillator moves it. `chorusSweep(state)` is what it draws. With Sync on, it draws the oscillator at the rate it really has.
+The panel draws the delay time of each voice over two seconds as its oscillator moves it. `chorusSweep(state, tempo, voice)` is what it draws for a voice. With Sync on, it draws the oscillator at the rate it really has.
 
 <DeviceUsage name="chorus" />
 
@@ -34,4 +35,6 @@ The panel draws the delay time over two seconds as the oscillator moves it. `cho
 
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-The output of the oscillator, scaled by the depth, is added to the delay time. The sweep is kept inside the delay, so the time never goes negative.
+One voice is a delay node: the output of the oscillator, scaled by the depth, is added to its time. The sweep is kept inside the delay, so the time never goes negative.
+
+Two to eight voices run on the audio thread: the kernel of `@audio/effect-chorus` in an `AudioWorklet` loaded from a blob (`CHORUS_WORKLET` is its source), 128 frames at a time, its depth the same sweep as a share of the delay. The kernel averages its voices, and on a full sound they hardly correlate, so the worklet raises them by the square root of their count. A worklet cannot import, so the device carries the kernel as published (`CHORUS_KERNELS`, in its `kernels.ts`). The worklet is fed only while more than one voice plays. Until it has loaded, and in a context with no worklets, the chorus plays one voice: `ready` resolves once it is in the graph.

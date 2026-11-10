@@ -46,9 +46,10 @@ interface ChorusPanelProps {
 }
 
 /**
- * The face of the chorus device: the delay time as the oscillator sweeps it
- * over two seconds, over its knobs. Controlled like `DevicePanel`, which it
- * uses for them. Its children sit at the end of the title bar.
+ * The face of the chorus device: the delay time of each voice as its
+ * oscillator sweeps it over two seconds, over its knobs. Controlled like
+ * `DevicePanel`, which it uses for them. Its children sit at the end of the
+ * title bar.
  */
 function ChorusPanel({
   children,
@@ -57,7 +58,14 @@ function ChorusPanel({
   tempo = DEFAULT_TEMPO,
   value,
 }: ChorusPanelProps) {
-  const sweep = useMemo(() => chorusSweep(value, tempo), [tempo, value]);
+  const sweeps = useMemo(
+    () =>
+      Array.from({ length: value.voices }, (_, voice) => ({
+        sweep: chorusSweep(value, tempo, voice),
+        voice,
+      })),
+    [tempo, value]
+  );
   let unused: readonly (typeof OFF)[number][] = OFF;
   if (value.enabled) {
     unused = value.sync ? SYNCED_OFF : FREE_OFF;
@@ -89,11 +97,13 @@ function ChorusPanel({
             y={{ format: formatMs, ticks: MS_TICKS }}
           />
           <PlotGraph>
-            <PlotCurve fn={sweep} />
+            {sweeps.map(({ sweep, voice }) => (
+              <PlotCurve fn={sweep} key={voice} />
+            ))}
           </PlotGraph>
         </Plot>
         <DevicePanel
-          className="grid-cols-3"
+          className="grid-cols-4"
           device={chorusDevice}
           disabled={unused}
           exclude={SWITCHES}
