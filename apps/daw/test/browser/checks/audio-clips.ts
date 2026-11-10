@@ -355,4 +355,46 @@ export const checks: Checks = {
         `the fade is drawn from ${curve?.y}, over a name running to ${(header?.y ?? 0) + (header?.height ?? 0)}`
       );
     },
+  "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const source = page.locator("[data-slot=clip-panel-source]");
+      const canvas = source.locator("canvas");
+      await canvas.waitFor({ timeout: 5000 });
+      await page.waitForTimeout(400);
+      const box = await page
+        .locator("[data-slot=clip-panel] [data-slot=timeline-viewport]")
+        .boundingBox();
+      await page.mouse.move(
+        (box?.x ?? 0) + (box?.width ?? 0) / 2,
+        (box?.y ?? 0) + (box?.height ?? 0) / 2
+      );
+      const detail = () => canvas.getAttribute("data-detail");
+      const seen = new Set<string | null>([await detail()]);
+      // Zoomed in step by step, each step drawn before the next.
+      await page.keyboard.down("Control");
+      const zoomIn = async (step: number): Promise<void> => {
+        if (step >= 160 || seen.has("line")) {
+          return;
+        }
+        await page.mouse.wheel(0, -240);
+        await page.waitForTimeout(40);
+        seen.add(await detail());
+        await zoomIn(step + 1);
+      };
+      await zoomIn(0);
+      await page.keyboard.up("Control");
+      await page.waitForTimeout(400);
+      assert(seen.has("peaks"), `it never drew the peaks: ${[...seen]}`);
+      assert(seen.has("samples"), `it never drew the samples: ${[...seen]}`);
+      assert(
+        (await detail()) === "line",
+        `the closest zoom draws ${await detail()}`
+      );
+    },
 };

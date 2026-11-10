@@ -81,7 +81,7 @@ Deviation: the reference also warps files it reads as one-shots; here a single h
 Test: packages/core/src/audio/analysis/beat.test.ts (autoWarp); apps/daw/test/drop.test.ts "CLP-019"; apps/daw/test/browser/run.ts "CLP-019"
 
 ### CLP-020 A waveform at any zoom
-An audio clip's waveform on its track has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one slice per pixel at the closest zoom, each column from its lowest sample to its highest, so a lopsided sound shows lopsided. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length. The clip view draws its source the same way, and both follow a zoom in the frame it happens, not once it stops.
+An audio clip's waveform on its track has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one slice per pixel at the closest zoom, each column from its lowest sample to its highest, so a lopsided sound shows lopsided. Each column is joined to the next, and a column narrower than a peak takes the level between the two peaks around it, so a close zoom draws slopes, never steps. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length. The clip view draws its source the same way, and both follow a zoom in the frame it happens, not once it stops.
 Test: apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-020"; apps/daw/test/project-file.test.ts "CLP-020"; apps/daw/test/browser/run.ts "CLP-020"
 
 ### CLP-021 The source in the clip view
@@ -95,3 +95,8 @@ Test: apps/daw/test/browser/run.ts "CLP-022"
 ### CLP-023 Fade handles
 A clip's fade handles sit at the top corners of its body, under its name, and its fades are drawn over its body alone: neither hides a letter of its name.
 Test: apps/daw/test/browser/run.ts "CLP-023"
+
+### CLP-024 Samples up close
+The clip view zooms in past the detail of a recording's peaks, down to 40 px between two samples: closer than the peaks, each column of the waveform spans its lowest and highest sample, and past one sample per pixel the waveform is a line through the samples, with a dot on each one that grows in from 6 px apart to 12. It reads the samples around what the view shows, from memory or from the recording's cache file, keeps them, and reads them ahead as the zoom nears them, so a zoom or a scroll draws in the frame it happens, never the peaks first and the samples after. The source's lane is never laid out wider than 16 million px, so a long recording stops short of the closest zoom.
+Deviation: the reference draws each channel of a stereo recording; here the waveform is the middle of the two, (L + R) / 2.
+Test: apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-024"; apps/daw/test/samples.test.ts "CLP-024"; apps/daw/test/browser/run.ts "CLP-024"

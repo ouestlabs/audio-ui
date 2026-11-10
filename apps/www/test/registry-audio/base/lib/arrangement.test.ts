@@ -5,14 +5,18 @@ import {
   analyzeBeat,
   automatedParameter,
   automationAt,
+  clipFramePositions,
   clipReach,
   clipWaveform,
   clipWaveformBands,
   flatAutomation,
+  framesToRead,
   hasOutput,
   mixAt,
   panPosition,
   playedNotes,
+  sampleBands,
+  sampleLine,
   volumeGain,
   volumeValue,
 } from "@/registry-audio/bases/base/lib/arrangement";
@@ -212,6 +216,16 @@ describe("clipWaveform", () => {
     expect([level.max[90], level.min[90]]).toEqual([1, -1]);
   });
 
+  test("CLP-020: closer than its peaks, a column takes the level between the two around it: slopes, not steps", () => {
+    // Half a peak per column, from peak 2: each column's middle lies a quarter of a peak further.
+    const columns = clipWaveform(audio(), peaks, 8);
+    for (const [column, level] of columns.entries()) {
+      expect(level).toBeCloseTo((1.75 + 0.5 * column) / 7, 10);
+    }
+    const bands = clipWaveformBands(audio(), { max: peaks, min: peaks }, 8);
+    expect(bands.max[3]).toBeCloseTo(3.25 / 7, 10);
+  });
+
   test("shows the stretch of the source the clip plays", () => {
     // From 1 s to 3 s of the source: peaks 2 to 5, two columns each half.
     expect(clipWaveform(audio(), peaks, 2)).toEqual([4 / 7, 6 / 7]);
@@ -345,5 +359,66 @@ describe("CLP-018: the beat a recording comes in with", () => {
         RATE
       ).estimate
     ).toBeNull();
+  });
+});
+
+describe("CLP-024: a clip waveform from its samples", () => {
+  /** A 1 s source of 100 frames, read whole by a 1 s clip. */
+  const reading = {
+    sourceLength: 1,
+    value: { length: 1, offset: 0 },
+  };
+
+  test("each column edge reads its frame of the source, as a player does", () => {
+    expect(clipFramePositions(reading, 100, 4)).toEqual([0, 25, 50, 75, 100]);
+    // A stretch of the clip: its second half.
+    expect(clipFramePositions(reading, 100, 2, [0.5, 1])).toEqual([
+      50, 75, 100,
+    ]);
+    // Reversed, the clip reads the source from its end.
+    expect(clipFramePositions({ ...reading, reversed: true }, 100, 2)).toEqual([
+      100, 50, 0,
+    ]);
+    expect(clipFramePositions(reading, 0, 4)).toEqual([]);
+  });
+
+  test("reads the frames the columns touch, within the source", () => {
+    expect(framesToRead([10.5, 12.25, 14], 100)).toEqual([10, 15]);
+    expect(framesToRead([98.5, 99.9], 100)).toEqual([98, 100]);
+    expect(framesToRead([100, 50, 0], 100)).toEqual([0, 100]);
+  });
+
+  test("a column wider than a frame spans its lowest and highest sample", () => {
+    const values = [0, 0.5, -0.25, 1, -1, 0.25];
+    // Two columns of three frames each, read from frame 0.
+    expect(sampleBands([0, 3, 6], values, 0)).toEqual({
+      max: [1, 1],
+      min: [-0.25, -1],
+    });
+  });
+
+  test("a column narrower than a frame takes the sound where it lies", () => {
+    // Frames 10 and 11 hold 0 and 1: a quarter of the way, the sound is at 0.25.
+    const { max, min } = sampleBands([10.25, 10.5], [0, 1], 10);
+    expect(max[0]).toBeCloseTo(0.5, 5);
+    expect(min[0]).toBeCloseTo(0.25, 5);
+  });
+
+  test("past a frame per column, a line through the samples with each sample at its column", () => {
+    // Four columns over two frames: a sample every two columns.
+    const { levels, samples } = sampleLine([0, 0.5, 1, 1.5, 2], [0, 1, 0], 0);
+    expect(levels).toEqual([0, 0.5, 1, 0.5, 0]);
+    expect(samples).toEqual([
+      [0, 0],
+      [2, 1],
+    ]);
+  });
+
+  test("a line read backwards, for a reversed clip, still places each sample", () => {
+    const { samples } = sampleLine([2, 1.5, 1, 0.5, 0], [0, 1, 0], 0);
+    expect(samples).toEqual([
+      [0, 0],
+      [2, 1],
+    ]);
   });
 });
