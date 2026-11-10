@@ -168,6 +168,13 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "BINAURAL_PANNER_KERNELS",
+    file: "devices/binaural-panner/kernels.ts",
+    kernels: [
+      { file: "binaural.js", name: "@audio/spatial-binaural", use: "binaural" },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [

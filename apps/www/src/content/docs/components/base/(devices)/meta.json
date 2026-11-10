@@ -37,6 +37,7 @@
     "---Utility---",
     "utility",
     "mid-side",
+    "binaural-panner",
     "---Instruments---",
     "poly-synth",
     "mono-synth",

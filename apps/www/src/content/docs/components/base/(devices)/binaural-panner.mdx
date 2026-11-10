@@ -1,0 +1,37 @@
+---
+title: Binaural Panner
+description: "A binaural panner device: a direction, a distance, a head's size and a mix, a panel with the head seen from above, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-binaural-panner" />
+
+Places a sound all around the head, for headphones. A pan only sets a level between two speakers; this one makes the cues the ear uses: the far ear hears the sound a fraction of a millisecond later, and darker, in the head's shadow. Drag the sound around the head, behind it, beside it, farther out. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="binaural-panner" kind="device" />
+
+## Controls
+
+<DeviceControls device="binaural-panner">
+<Control id="azimuthDeg">Where the sound comes from, in degrees: 0 in front, 90 to the right, -90 to the left, 180 behind. Drag the handle around the head to set it.</Control>
+<Control id="distanceM">How far the sound is: twice as far is half as loud. Drag the handle out or in to set it.</Control>
+<Control id="headCm">The radius of the head the cues are made for: a bigger head delays and shades the far ear more.</Control>
+<Control id="mix">The balance of the placed sound and the sound as it was.</Control>
+</DeviceControls>
+
+The cues are of direction around the head, not of height, and a sound behind sounds much like one in front: the model has no ears' folds to tell them apart.
+
+## Panel
+
+The panel shows the head seen from above, in front up, and a handle for the sound: its angle is the direction and how far out it is the distance. `binauralPoint(state)` is where the handle sits, and `binauralPlace(point)` the direction and distance of a point.
+
+<DeviceUsage name="binaural-panner" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The panner runs on the audio thread: the binaural panner of `@audio/spatial-binaural`, the structural model of Brown and Duda, in an `AudioWorklet` loaded from a blob (`BINAURAL_PANNER_WORKLET` is its source), 128 frames at a time. It folds the sound to mono, delays the far ear as a round head would, and shades it with a one-pole filter, smoothing a change of direction so it does not click. Its delay line is made for the largest head, so the head can change while it plays, and a direction is sent as the angle nearest the last, so a turn across the back goes the short way round. A worklet cannot import, so the device carries the kernel as published (`BINAURAL_PANNER_KERNELS`, in its `kernels.ts`). Until it is ready, and in a context with no worklets, the sound passes clean: `ready` resolves once it is in the graph.

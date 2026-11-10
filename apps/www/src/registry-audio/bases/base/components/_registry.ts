@@ -1427,6 +1427,27 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["utility", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A binaural panner you can plug in: its state, a panel with the head seen from above and an engine that plays it. Put headphones on, play a loop and drag the sound around the head",
+    files: [
+      {
+        path: "components/device/block-binaural-panner.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-binaural-panner",
+    registryDependencies: [
+      "@audio-ui/binaural-panner-panel",
+      "@audio-ui/binaural-panner-device",
+      "@audio-ui/binaural-panner-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",

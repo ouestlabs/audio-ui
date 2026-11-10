@@ -55,6 +55,7 @@
         "@audio/reverb-freeverb": "catalog:",
         "@audio/reverb-schroeder": "catalog:",
         "@audio/reverb-spring": "catalog:",
+        "@audio/spatial-binaural": "catalog:",
         "@audio/spatial-microshift": "catalog:",
         "@audio/weighting-k": "catalog:",
         "@base-ui/react": "catalog:",
@@ -206,6 +207,7 @@
         "@audio/reverb-freeverb": "catalog:",
         "@audio/reverb-schroeder": "catalog:",
         "@audio/reverb-spring": "catalog:",
+        "@audio/spatial-binaural": "catalog:",
         "@audio/spatial-microshift": "catalog:",
         "@audio/weighting-k": "catalog:",
         "@base-ui/react": "catalog:",
@@ -390,6 +392,7 @@
     "@audio/reverb-freeverb": "1.0.5",
     "@audio/reverb-schroeder": "1.1.3",
     "@audio/reverb-spring": "1.1.3",
+    "@audio/spatial-binaural": "0.1.1",
     "@audio/spatial-microshift": "1.1.3",
     "@audio/weighting-k": "1.2.1",
     "@base-ui/react": "^1.9.0",
@@ -564,6 +567,8 @@
     "@audio/reverb-schroeder": ["@audio/reverb-schroeder@1.1.3", "", {}, "sha512-JEQKFcaqFEExAeAbC+c0y7+AvexaKmkSkBTdkU3DYIzptEisPz+DxgE75NhNRmVcWV99nvyAJjIlQvJncDekZg=="],
 
     "@audio/reverb-spring": ["@audio/reverb-spring@1.1.3", "", {}, "sha512-TFpzEhyrdpSKdFzpNTr2sGkFrfiqdRNzpMjZAC11zxi/zaGNnDLaIN/flvESUSquKSHb8BnfJnIrRtUCqYUwkg=="],
+
+    "@audio/spatial-binaural": ["@audio/spatial-binaural@0.1.1", "", {}, "sha512-N1Upm2h9uqA6yOZZhWf5DgaLe9+bOD9ASe12fadfMfmM3I/nSV5//Nqg51e5pnlNh1ttP6loD/qUO+UsHOT3jg=="],
 
     "@audio/spatial-microshift": ["@audio/spatial-microshift@1.1.3", "", {}, "sha512-xdGFD4IxEqnPjDLb0Pp8zPalqbdlV9ZR3hPWgC2j8VPUpmOELR2siFJLAqcbnrmcupt6y2e7GGhJo71F1lusXQ=="],
 

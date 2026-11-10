@@ -7,6 +7,7 @@ import type { RegistryItem } from "shadcn/schema";
  */
 const DEVICES = [
   "auto-pan",
+  "binaural-panner",
   "bass-enhancer",
   "channel-eq",
   "chorus",
@@ -1864,6 +1865,63 @@ export const devices: RegistryItem[] = [
       "@audio-ui/plot",
       "@audio-ui/stutter-device",
       "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/spatial-binaural"],
+    description:
+      "The binaural panner as a device: a direction, a distance, a head's size and a mix, the numbers that go on the worklet for a state, where it sits on the panel's top view and the worklet's source (the binaural panner of @audio/spatial-binaural), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/binaural-panner/device.ts",
+        target: "components/audio-ui/devices/binaural-panner/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/binaural-panner/kernels.ts",
+        target: "components/audio-ui/devices/binaural-panner/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "binaural-panner-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A binaural panner on the Web Audio API for a binaural panner state: the binaural panner of @audio/spatial-binaural in an AudioWorklet loaded from a blob, a turn across the back the short way round, the sound passing clean until it is ready.",
+    files: [
+      {
+        path: "devices/binaural-panner/engine.ts",
+        target: "components/audio-ui/devices/binaural-panner/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "binaural-panner-engine",
+    registryDependencies: ["@audio-ui/binaural-panner-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the binaural panner device: the head seen from above and a handle for the sound around it, its direction and its distance, over the device knobs.",
+    files: [
+      {
+        path: "devices/binaural-panner/panel.tsx",
+        target: "components/audio-ui/devices/binaural-panner/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "binaural-panner-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/binaural-panner-device",
     ],
     type: "registry:ui",
   },

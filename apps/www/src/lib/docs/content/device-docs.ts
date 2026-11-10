@@ -1,5 +1,6 @@
 import { autoPanDevice } from "@/registry-audio/bases/base/devices/auto-pan/device";
 import { bassEnhancerDevice } from "@/registry-audio/bases/base/devices/bass-enhancer/device";
+import { binauralPannerDevice } from "@/registry-audio/bases/base/devices/binaural-panner/device";
 import { channelEqDevice } from "@/registry-audio/bases/base/devices/channel-eq/device";
 import { chorusDevice } from "@/registry-audio/bases/base/devices/chorus/device";
 import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
@@ -45,6 +46,7 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  "binaural-panner": binauralPannerDevice,
   stutter: stutterDevice,
   rotary: rotaryDevice,
   "bass-enhancer": bassEnhancerDevice,

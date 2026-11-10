@@ -3,6 +3,7 @@ import type { Tempo } from "@audio-ui/core/time";
 import type { ComponentType, ReactNode } from "react";
 import { AutoPanPanel } from "@/registry-audio/bases/base/devices/auto-pan/panel";
 import { BassEnhancerPanel } from "@/registry-audio/bases/base/devices/bass-enhancer/panel";
+import { BinauralPannerPanel } from "@/registry-audio/bases/base/devices/binaural-panner/panel";
 import { ChannelEqPanel } from "@/registry-audio/bases/base/devices/channel-eq/panel";
 import { ChorusPanel } from "@/registry-audio/bases/base/devices/chorus/panel";
 import { CompressorPanel } from "@/registry-audio/bases/base/devices/compressor/panel";
@@ -102,6 +103,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.binaural-panner": entry(BinauralPannerPanel),
   "audioui.stutter": entry(StutterPanel),
   "audioui.rotary": entry(RotaryPanel, "w-96"),
   "audioui.bass-enhancer": entry(BassEnhancerPanel),

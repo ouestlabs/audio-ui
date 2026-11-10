@@ -10,6 +10,8 @@ import { autoPanDevice } from "@/registry-audio/bases/base/devices/auto-pan/devi
 import { createAutoPanEngine } from "@/registry-audio/bases/base/devices/auto-pan/engine";
 import { bassEnhancerDevice } from "@/registry-audio/bases/base/devices/bass-enhancer/device";
 import { createBassEnhancerEngine } from "@/registry-audio/bases/base/devices/bass-enhancer/engine";
+import { binauralPannerDevice } from "@/registry-audio/bases/base/devices/binaural-panner/device";
+import { createBinauralPannerEngine } from "@/registry-audio/bases/base/devices/binaural-panner/engine";
 import { channelEqDevice } from "@/registry-audio/bases/base/devices/channel-eq/device";
 import { createChannelEqEngine } from "@/registry-audio/bases/base/devices/channel-eq/engine";
 import { chorusDevice } from "@/registry-audio/bases/base/devices/chorus/device";
@@ -203,6 +205,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Utility
   entry(utilityDevice, createUtilityEngine, "Utility"),
   entry(midSideDevice, createMidSideEngine, "Utility"),
+  entry(binauralPannerDevice, createBinauralPannerEngine, "Utility"),
 ];
 
 const byId = new Map(DEVICE_LIBRARY.map((item) => [item.device.id, item]));

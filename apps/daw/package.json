@@ -53,6 +53,7 @@
     "@audio/reverb-freeverb": "catalog:",
     "@audio/reverb-schroeder": "catalog:",
     "@audio/reverb-spring": "catalog:",
+    "@audio/spatial-binaural": "catalog:",
     "@audio/spatial-microshift": "catalog:",
     "@audio/weighting-k": "catalog:",
     "@base-ui/react": "catalog:",

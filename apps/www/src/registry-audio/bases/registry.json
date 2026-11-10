@@ -13,7 +13,7 @@
       "name": "fader"
     },
     {
-      "count": 35,
+      "count": 36,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -91,7 +91,7 @@
       "name": "modulation"
     },
     {
-      "count": 2,
+      "count": 3,
       "description": "Utility devices: gain, pan, width, mono and phase invert.",
       "label": "Utility",
       "name": "utility"
@@ -109,7 +109,7 @@
       "name": "tuner"
     },
     {
-      "count": 30,
+      "count": 31,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
       "name": "plot"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 81
+  "totalComponents": 82
 }

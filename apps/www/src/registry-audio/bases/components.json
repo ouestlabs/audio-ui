@@ -420,6 +420,12 @@
     "title": "Block stutter"
   },
   {
+    "categories": ["utility", "plot", "knob"],
+    "description": "A binaural panner you can plug in: its state, a panel with the head seen from above and an engine that plays it. Put headphones on, play a loop and drag the sound around the head",
+    "name": "block-binaural-panner",
+    "title": "Block binaural panner"
+  },
+  {
     "categories": ["mixer", "fader", "meter", "knob"],
     "description": "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",
     "name": "block-mixer",
