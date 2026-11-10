@@ -1,0 +1,73 @@
+{
+  "name": "@audio-ui/elements",
+  "version": "0.0.0",
+  "description": "Accessible, headless custom elements for audio interfaces.",
+  "keywords": [
+    "audio-ui",
+    "custom-elements",
+    "web-components",
+    "audio",
+    "headless",
+    "accessible",
+    "knob",
+    "fader",
+    "slider",
+    "web-audio",
+    "daw",
+    "synth",
+    "music"
+  ],
+  "homepage": "https://www.audio-ui.dev/docs/custom-elements",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/elements"
+  },
+  "license": "MIT",
+  "sideEffects": [
+    "./dist/index.js",
+    "./dist/knob.js",
+    "./dist/fader.js"
+  ],
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./fader": {
+      "types": "./dist/fader/index.d.ts",
+      "import": "./dist/fader.js"
+    },
+    "./knob": {
+      "types": "./dist/knob/index.d.ts",
+      "import": "./dist/knob.js"
+    }
+  },
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist node_modules .turbo",
+    "dev": "bunx --bun tsup --watch",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "size": "bun scripts/size.ts",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@audio-ui/core": "^0.23.3"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^21.0.4",
+    "@types/bun": "1.4.2",
+    "tsup": "^8.5.0",
+    "typescript": "^7.0.2"
+  }
+}
