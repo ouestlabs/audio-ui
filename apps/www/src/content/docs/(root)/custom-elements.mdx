@@ -270,6 +270,34 @@ A key that starts sounding fires `noteon`, with `event.detail` `{ pitch, velocit
 | `<audio-ui-piano-key>` | One key, a button placed for its `pitch` and named after it ("C4"). `data-color` is `black` or `white` |
 | `<audio-ui-piano-key-label>` | The name of the key it sits in, hidden from assistive technology |
 
+### XY pad
+
+`<audio-ui-xypad>` owns a point `{ x, y }`: a press jumps it to the pointer and a drag follows, the wheel and the trackpad move it, the arrows move both axes, and a double click or Delete return it to its default. Its place is the `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top) CSS variables, as percentages, for crosshairs and guides.
+
+<TypeTable>
+<TypeRow name={"min-x"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"max-x"} type={"number"} default={"100"}></TypeRow>
+<TypeRow name={"min-y"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"max-y"} type={"number"} default={"100"}></TypeRow>
+<TypeRow name={"step-x"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"step-y"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"value"} type={"string"}>The point, as `"x y"`. The `value` property reads and moves it as `{ x, y }`.</TypeRow>
+<TypeRow name={"default-value"} type={"string"}>The starting point, and what a reset returns to. Defaults to the center.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for each axis.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
+<TypeRow name={"name"} type={"string"}>Its two inputs submit as `name.x` and `name.y`.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+`input` and `change` carry `{ value: { x, y }, reason }`.
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-xypad-control>` | The pad's surface: the press, the drag, the wheel, a double click to reset |
+| `<audio-ui-xypad-thumb>` | Marks the point, and holds a native range input per axis. Its `aria-label` names the axes after it ("Filter X"); `label-x` and `label-y` name each one |
+| `<audio-ui-xypad-value>` | Both axes, formatted, as `"x, y"` |
+| `<audio-ui-xypad-label>` | Names both inputs when the thumb has no name of its own |
+
 ### Data attributes
 
 Every part carries the state of its control:

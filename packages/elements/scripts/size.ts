@@ -7,10 +7,11 @@
 /** Gzipped bytes. About 15% above what each weighs today. */
 const BUDGETS: Record<string, number> = {
   fader: 5300,
-  index: 13_000,
+  index: 15_500,
   knob: 6000,
   pad: 3500,
   piano: 4700,
+  xypad: 5300,
 };
 
 const dist = `${import.meta.dir}/../dist`;

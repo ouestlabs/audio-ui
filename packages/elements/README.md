@@ -51,6 +51,7 @@ Every change fires `input`, with `event.detail.value` and `event.detail.reason` 
 | `<audio-ui-fader>` | A linear parameter, vertical by default, from -60 to +6 |
 | `<audio-ui-pad>` | Drum pads to strike, by pointer or key, with velocity and choke groups |
 | `<audio-ui-piano>` | A keyboard to play, with glides, chords, and a piano or even layout |
+| `<audio-ui-xypad>` | A two-dimensional parameter, a point on a pad |
 
 ## Documentation
 

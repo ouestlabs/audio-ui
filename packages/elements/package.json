@@ -51,6 +51,10 @@
     "./piano": {
       "types": "./dist/piano/index.d.ts",
       "import": "./dist/piano.js"
+    },
+    "./xypad": {
+      "types": "./dist/xypad/index.d.ts",
+      "import": "./dist/xypad.js"
     }
   },
   "module": "dist/index.js",
