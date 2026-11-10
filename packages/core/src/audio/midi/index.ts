@@ -1,14 +1,4 @@
 export {
-  type EncodeMidiFileOptions,
-  encodeMidiFile,
-  MidiFileError,
-  type MidiFileNote,
-  type MidiFileTempo,
-  type MidiFileTimeSignature,
-  type ParsedMidiFile,
-  parseMidiFile,
-} from "./file.ts";
-export {
   createMidiInput,
   type MidiInput,
   type MidiInputState,
