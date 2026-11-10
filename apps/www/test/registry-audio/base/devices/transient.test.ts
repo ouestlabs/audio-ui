@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import {
-  LOOKAHEAD_SECONDS,
   TRANSIENT_WORKLET,
   transientDevice,
   transientSettings,
@@ -27,14 +26,9 @@ class FakeNode {
 class FakeGain extends FakeNode {
   readonly gain = new FakeParam();
 }
-class FakeDelay extends FakeNode {
-  readonly delayTime = new FakeParam();
-}
-
 function fakeContext() {
-  const made = { delay: new FakeDelay(), gains: [] as FakeGain[] };
+  const made = { gains: [] as FakeGain[] };
   const ctx = {
-    createDelay: () => made.delay,
     createGain: () => {
       const gain = new FakeGain();
       made.gains.push(gain);
@@ -53,18 +47,17 @@ describe("the transient shaper device", () => {
     expect(transientDevice.kind).toBe("effect");
     expect(
       transientDevice.describe().parameters.map((parameter) => parameter.id)
-    ).toEqual(["enabled", "model", "attackDb", "sustainDb", "outputDb"]);
+    ).toEqual(["enabled", "attackDb", "sustainDb", "outputDb"]);
   });
 
-  test("the numbers are the amounts in dB and the output as a gain", () => {
-    expect(
-      transientSettings({
-        ...defaults,
-        attackDb: 8,
-        outputDb: 6,
-        sustainDb: -4,
-      })
-    ).toMatchObject({ attack: 8, sustain: -4 });
+  test("the numbers are the gains the shaper adds, and the output as a gain", () => {
+    const { modelParams } = transientSettings({
+      ...defaults,
+      attackDb: 8,
+      sustainDb: -4,
+    });
+    expect(modelParams.attackGain).toBeCloseTo(10 ** (8 / 20) - 1, 6);
+    expect(modelParams.sustainGain).toBeCloseTo(10 ** (-4 / 20) - 1, 6);
     expect(transientSettings({ ...defaults, outputDb: 6 }).output).toBeCloseTo(
       1.995,
       3
@@ -79,31 +72,20 @@ describe("the transient shaper device", () => {
         enabled: false,
         outputDb: 6,
       })
-    ).toMatchObject({ attack: 0, modelWet: 0, output: 1, sustain: 0 });
+    ).toEqual({ modelParams: { attackGain: 0, sustainGain: 0 }, output: 1 });
   });
 
-  test("the audio waits a millisecond for the detector, on or off", () => {
-    expect(transientDevice.latency(defaults, 48_000)).toBe(LOOKAHEAD_SECONDS);
-    expect(
-      transientDevice.latency({ ...defaults, enabled: false }, 48_000)
-    ).toBe(LOOKAHEAD_SECONDS);
-    expect(LOOKAHEAD_SECONDS).toBe(0.001);
-  });
-
-  test("the detector source is a processor with the two amounts the engine sets", () => {
+  test("the worklet source is the processor the engine makes", () => {
     expect(TRANSIENT_WORKLET).toContain(
       'registerProcessor("audioui-transient"'
     );
-    expect(TRANSIENT_WORKLET).toContain('name: "attack"');
-    expect(TRANSIENT_WORKLET).toContain('name: "sustain"');
   });
 });
 
 describe("the transient shaper engine", () => {
-  test("delays the audio by the look-ahead and passes it until the detector is ready", async () => {
+  test("passes the audio until the shaper is ready", async () => {
     const { ctx, made } = fakeContext();
     const engine = createTransientEngine(ctx, defaults);
-    expect(made.delay.delayTime.value).toBe(LOOKAHEAD_SECONDS);
     expect(await engine.ready).toBe(false);
     expect(made.gains.some((gain) => gain.gain.value === 1)).toBe(true);
   });
@@ -116,6 +98,6 @@ describe("the transient shaper engine", () => {
       10 ** (6 / 20)
     );
     engine.dispose();
-    expect(made.delay.disconnected).toBeGreaterThan(0);
+    expect(made.gains.every((gain) => gain.disconnected > 0)).toBe(true);
   });
 });

@@ -2541,7 +2541,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core", "@audio/dynamics-transient-shaper"],
     description:
-      "The transient shaper as a device: an attack and a sustain, each up or down by 12 dB, and an output gain, its models (clean, or the follower of @audio/dynamics-transient-shaper), the numbers that go on the nodes for a state and the sources of the detector's and the follower's worklets, with no panel and no audio in it.",
+      "The transient shaper as a device: an attack and a sustain, each up or down by 12 dB, and an output gain, the numbers that go on the nodes for a state and the source of the worklet of @audio/dynamics-transient-shaper, with no panel and no audio in it.",
     files: [
       {
         path: "devices/transient/device.ts",
@@ -2562,7 +2562,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A transient shaper on the Web Audio API for a transient state: a worklet detector reads the shape of the envelope and writes the gain, and the audio waits a millisecond for it so the attack is shaped from its first sample, or the follower model in a worklet fed only while it plays.",
+      "A transient shaper on the Web Audio API for a transient state: the audio.js shaper in a worklet, the signal passing unchanged until it is ready.",
     files: [
       {
         path: "devices/transient/engine.ts",
@@ -2578,7 +2578,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the transient shaper device: the model picked in its title bar, a square with the sustain across and the attack up, and a handle to drag to both at once, over the output knob.",
+      "The face of the transient shaper device: a square with the sustain across and the attack up, and a handle to drag to both at once, over the output knob.",
     files: [
       {
         path: "devices/transient/panel.tsx",
