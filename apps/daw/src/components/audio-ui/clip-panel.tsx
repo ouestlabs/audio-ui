@@ -31,7 +31,10 @@ import {
   PositionField,
   useClipPlayhead,
 } from "@/components/audio-ui/clip-view";
-import { ClipWaveform } from "@/components/audio-ui/clip-waveform";
+import {
+  type ClipSamples,
+  ClipWaveform,
+} from "@/components/audio-ui/clip-waveform";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
 import {
   Timeline,
@@ -134,6 +137,8 @@ interface ClipPanelProps {
   onValueCommitted?: () => void;
   /** The arrangement's position, live: while it plays the clip, a playhead shows where in the source it reads. Leave it out for none. */
   position?: Source<number>;
+  /** The source's samples, read as the view needs them: with them, the waveform zooms in to the samples themselves, as a line through them past a frame per pixel. Leave it out to stop at the peaks' detail. */
+  samples?: ClipSamples;
   /** Where the clip starts on the arrangement, what `position` is read against. @default 0 */
   start?: number;
   value: ClipSettings;
@@ -530,6 +535,7 @@ function ClipPanel({
   onValueChange,
   onValueCommitted,
   position: arrangementPosition,
+  samples,
   start: clipStart = 0,
   value,
   values,
@@ -799,6 +805,7 @@ function ClipPanel({
         playhead={playhead}
         playing={playing}
         reversed={reversed}
+        samples={samples}
         sourceLength={sourceLength}
         span={span}
         values={values}
@@ -812,6 +819,10 @@ function ClipPanel({
 const LABEL_SPACING = 40;
 /** The widest a peak of the waveform is drawn, in px: zooming in stops there, before the drawing turns to blocks. */
 const PEAK_PX = 3;
+/** How far apart two samples are drawn at the closest zoom, in px, with samples to draw. */
+const FRAME_PX = 40;
+/** The widest the source's lane is laid out, in px: past about 17 million, a browser stops laying an element out. */
+const MOST_LANE_PX = 16_000_000;
 /** The range over the waveform: its handles, with what it leaves out dimmed below. */
 const PLAYED_RANGE = "bg-transparent hover:bg-primary/10";
 
@@ -886,6 +897,7 @@ function ClipSource({
   playhead,
   playing,
   reversed,
+  samples,
   sourceLength,
   span,
   values,
@@ -907,6 +919,7 @@ function ClipSource({
   /** Whether the clip plays now: its playhead shows. */
   playing: boolean;
   reversed: boolean;
+  samples?: ClipSamples;
   sourceLength: number;
   span: number;
   values: ClipPeaks;
@@ -953,8 +966,13 @@ function ClipSource({
   // Zoomed in, a line per beat; out, a line per bar.
   const beat = bar / beatsPerBar;
   const gridStep = beat * pxPerSecond >= LABEL_SPACING / 2 ? beat : bar;
-  // As far in as the waveform has detail for.
-  const maxZoom = Math.max(fit, (clipPeakCount(values) * PEAK_PX) / span);
+  // As far in as the waveform has detail for: the peaks', or with the samples, a few px per frame, as wide as a lane can be laid out.
+  const maxZoom = Math.max(
+    fit,
+    samples
+      ? Math.min(samples.frames * FRAME_PX, MOST_LANE_PX) / span
+      : (clipPeakCount(values) * PEAK_PX) / span
+  );
   return (
     <Timeline
       className="min-w-0 flex-1"
@@ -1039,6 +1057,7 @@ function ClipSource({
                     clip={reading}
                     peaks={values}
                     role="img"
+                    samples={samples}
                   />
                 ) : null}
                 <Unplayed from={0} span={span} to={playedFrom} />

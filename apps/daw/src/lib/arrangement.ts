@@ -514,23 +514,17 @@ export const clipPeakCount = (peaks: ClipPeaks) =>
     ? peaks.length
     : Math.min(peaks.max.length, peaks.min.length);
 
-/** Which peaks each of `columns` covers, across a stretch of a clip as a player reads it. */
-function columnSpans(
-  clip: ClipReading,
-  peakCount: number,
-  columns: number,
-  range: readonly [number, number] = [0, clip.value.length]
-): [number, number][] {
-  const { length, offset } = clip.value;
-  const count = Math.max(0, Math.floor(columns));
-  if (peakCount === 0 || !(clip.sourceLength > 0) || length <= 0) {
-    return Array.from({ length: count }, (): [number, number] => [0, 0]);
-  }
+/**
+ * Where a clip reads its recording at a time of the clip, from its start, as
+ * a share of the source from 0 to 1: folded round its loop, mirrored when
+ * reversed, stretched by its warp, as a player reads it.
+ */
+function sourceShareAt(clip: ClipReading): (time: number) => number {
+  const { offset } = clip.value;
   const span = clip.warp
     ? warpedTime(clip.warp, clip.sourceLength)
     : clip.sourceLength;
-  /** The index of the peak at a time of the clip, from its start. */
-  const peakAt = (time: number) => {
+  return (time) => {
     let own = offset + time;
     if (clip.loop && own >= clip.loop[1]) {
       const [from, to] = clip.loop;
@@ -538,18 +532,177 @@ function columnSpans(
     }
     const read = clip.reversed ? span - own : own;
     const source = clip.warp ? unwarpedTime(clip.warp, read) : read;
-    return Math.floor((source / clip.sourceLength) * peakCount);
+    return source / clip.sourceLength;
   };
-  const toTime = (column: number) =>
-    range[0] + (column / count) * (range[1] - range[0]);
-  const spans: [number, number][] = [];
-  let a = peakAt(toTime(0));
-  for (let column = 0; column < count; column += 1) {
-    const b = peakAt(toTime(column + 1));
-    spans.push([Math.min(a, b), Math.max(a, b)]);
-    a = b;
+}
+
+/**
+ * Each of `columns` levels from `peaks`, read at `positions` (the column
+ * edges, in peaks): the farthest peak a column covers, or, for a column
+ * narrower than a peak, the level where its middle lies, between the two
+ * peaks around it, so a close zoom draws slopes, not steps.
+ */
+function columnLevels(
+  positions: readonly number[],
+  columns: number,
+  peaks: ArrayLike<number>,
+  pick: (a: number, b: number) => number
+): number[] {
+  if (positions.length === 0) {
+    return Array.from({ length: Math.max(0, Math.floor(columns)) }, () => 0);
   }
-  return spans;
+  const levels = peakLevels(peaks, pick);
+  const last = peaks.length - 1;
+  const read: number[] = [];
+  for (let column = 0; column + 1 < positions.length; column += 1) {
+    const a = positions[column] ?? 0;
+    const b = positions[column + 1] ?? a;
+    if (Math.abs(b - a) >= 1) {
+      read.push(
+        farthestPeak(
+          levels,
+          pick,
+          Math.floor(Math.min(a, b)),
+          Math.floor(Math.max(a, b))
+        )
+      );
+      continue;
+    }
+    // Each peak stands at the middle of its slice.
+    const middle = Math.max(0, Math.min(last, (a + b) / 2 - 0.5));
+    const below = Math.floor(middle);
+    const low = peaks[below] ?? 0;
+    const high = peaks[Math.min(last, below + 1)] ?? low;
+    read.push(low + (high - low) * (middle - below));
+  }
+  return read;
+}
+
+/**
+ * Where each column edge of a stretch of a clip reads its recording, in
+ * frames of the source: `columns + 1` positions, fractional, from the first
+ * column's left edge to the last one's right edge, as a player reads it.
+ * `frames` is how many the source holds over its `sourceLength`. Empty when
+ * there is nothing to read.
+ */
+export function clipFramePositions(
+  clip: ClipReading,
+  frames: number,
+  columns: number,
+  range: readonly [number, number] = [0, clip.value.length]
+): number[] {
+  const count = Math.max(0, Math.floor(columns));
+  if (frames <= 0 || !(clip.sourceLength > 0) || clip.value.length <= 0) {
+    return [];
+  }
+  const shareAt = sourceShareAt(clip);
+  return Array.from(
+    { length: count + 1 },
+    (_, column) =>
+      shareAt(
+        range[0] + (column / Math.max(1, count)) * (range[1] - range[0])
+      ) * frames
+  );
+}
+
+/**
+ * The frames to read for `positions`: from the first one any column touches
+ * to one past the last, within the source's `frames`.
+ */
+export function framesToRead(
+  positions: readonly number[],
+  frames: number
+): readonly [number, number] {
+  let low = Number.POSITIVE_INFINITY;
+  let high = Number.NEGATIVE_INFINITY;
+  for (const position of positions) {
+    low = Math.min(low, position);
+    high = Math.max(high, position);
+  }
+  if (!Number.isFinite(low)) {
+    return [0, 0];
+  }
+  return [Math.max(0, Math.floor(low)), Math.min(frames, Math.ceil(high) + 1)];
+}
+
+/** The sample at a fractional frame, between its two neighbors, from samples read from frame `first`. */
+function sampleAt(values: ArrayLike<number>, first: number, frame: number) {
+  const index = frame - first;
+  const below = Math.floor(index);
+  const a = values[Math.max(0, Math.min(values.length - 1, below))] ?? 0;
+  const b = values[Math.max(0, Math.min(values.length - 1, below + 1))] ?? a;
+  return a + (b - a) * (index - below);
+}
+
+/**
+ * The lowest and highest sample each column covers, from -1 to 1, from the
+ * samples `values` read from frame `first`: the same bands as
+ * `clipWaveformBands`, sharper than the peaks allow. A column narrower than a
+ * frame takes the sound where it lies.
+ */
+export function sampleBands(
+  positions: readonly number[],
+  values: ArrayLike<number>,
+  first: number
+): { max: number[]; min: number[] } {
+  const max: number[] = [];
+  const min: number[] = [];
+  for (let column = 0; column + 1 < positions.length; column += 1) {
+    const a = positions[column] ?? 0;
+    const b = positions[column + 1] ?? a;
+    const from = Math.ceil(Math.min(a, b)) - first;
+    const to = Math.floor(Math.max(a, b)) - first;
+    let high = Math.max(sampleAt(values, first, a), sampleAt(values, first, b));
+    let low = Math.min(sampleAt(values, first, a), sampleAt(values, first, b));
+    for (
+      let index = Math.max(0, from);
+      index <= to && index < values.length;
+      index += 1
+    ) {
+      const value = values[index] ?? 0;
+      high = Math.max(high, value);
+      low = Math.min(low, value);
+    }
+    max.push(high);
+    min.push(low);
+  }
+  return { max, min };
+}
+
+/**
+ * The sound as a line through its samples, for a zoom past one frame per
+ * column: the level at each column edge, interpolated between the samples
+ * `values` read from frame `first`, and each sample's place, as a fractional
+ * column, with its level.
+ */
+export function sampleLine(
+  positions: readonly number[],
+  values: ArrayLike<number>,
+  first: number
+): { levels: number[]; samples: [column: number, level: number][] } {
+  const levels = positions.map((frame) => sampleAt(values, first, frame));
+  const samples: [number, number][] = [];
+  for (let column = 1; column < positions.length; column += 1) {
+    const a = positions[column - 1] ?? 0;
+    const b = positions[column] ?? a;
+    // A loop's turn is a jump, not samples to cross.
+    if (a === b || Math.abs(b - a) > 2) {
+      continue;
+    }
+    const step = b > a ? 1 : -1;
+    // Every frame crossed between the two edges, the left edge's own included.
+    for (
+      let frame = step > 0 ? Math.ceil(a) : Math.floor(a);
+      step > 0 ? frame < b : frame > b;
+      frame += step
+    ) {
+      const value = values[frame - first];
+      if (value !== undefined) {
+        samples.push([column - 1 + (frame - a) / (b - a), value]);
+      }
+    }
+  }
+  return { levels, samples };
 }
 
 /**
@@ -557,7 +710,8 @@ function columnSpans(
  * amplitudes from 0 to 1, from the peaks of its source (`peaks`, spread evenly
  * over `sourceLength`): the stretch it plays, folded round its loop, mirrored
  * when reversed, stretched by its warp, as a player reads it. Each column is
- * the loudest peak it covers. `range` is the stretch of the clip to read, in
+ * the loudest peak it covers, and a column narrower than a peak the level
+ * between the two around it. `range` is the stretch of the clip to read, in
  * seconds from its start, for a view that shows part of it: the whole by default.
  */
 export function clipWaveform(
@@ -566,10 +720,8 @@ export function clipWaveform(
   columns: number,
   range?: readonly [number, number]
 ): number[] {
-  const levels = peakLevels(peaks, Math.max);
-  return columnSpans(clip, peaks.length, columns, range).map(([from, to]) =>
-    farthestPeak(levels, Math.max, from, to)
-  );
+  const positions = clipFramePositions(clip, peaks.length, columns, range);
+  return columnLevels(positions, columns, peaks, Math.max);
 }
 
 /**
@@ -587,12 +739,15 @@ export function clipWaveformBands(
     const max = clipWaveform(clip, peaks, columns, range);
     return { max, min: max.map((level) => -level) };
   }
-  const spans = columnSpans(clip, clipPeakCount(peaks), columns, range);
-  const highs = peakLevels(peaks.max, Math.max);
-  const lows = peakLevels(peaks.min, Math.min);
+  const positions = clipFramePositions(
+    clip,
+    clipPeakCount(peaks),
+    columns,
+    range
+  );
   return {
-    max: spans.map(([from, to]) => farthestPeak(highs, Math.max, from, to)),
-    min: spans.map(([from, to]) => farthestPeak(lows, Math.min, from, to)),
+    max: columnLevels(positions, columns, peaks.max, Math.max),
+    min: columnLevels(positions, columns, peaks.min, Math.min),
   };
 }
 

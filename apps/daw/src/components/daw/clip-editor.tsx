@@ -16,6 +16,7 @@ import {
   DRUM_RACK_DEVICE,
 } from "@/lib/arrangement";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
+import { recordingSamples } from "@/lib/daw/samples";
 import { cn } from "@/lib/utils";
 import { useSavedState } from "./use-saved-view";
 
@@ -263,6 +264,7 @@ export function ClipEditor({
       onValueChange={changeSettings}
       onValueCommitted={settle}
       position={engine.position}
+      samples={recording ? recordingSamples(recording.source) : undefined}
       start={clip.value.start}
       value={settingsOf(clip)}
       values={recording ? sourcePeaks(clip, recording) : []}
