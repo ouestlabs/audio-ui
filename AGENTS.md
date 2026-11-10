@@ -25,7 +25,7 @@ audio-ui/
 ├── packages/
 │   ├── core/       # @audio-ui/core, published (framework-agnostic logic)
 │   ├── ui/         # @audio-ui/react, published (headless primitives)
-│   ├── elements/   # @audio-ui/elements, published: the knob and the fader as custom elements, over core
+│   ├── elements/   # @audio-ui/elements, published: the primitives as custom elements, over core
 │   └── icons/      # @audio-ui/icons, published: audio glyphs (one thin stroke on a 24 grid, in four weights)
 └── skills/         # The agent skills we ship to library users: audio-ui, web-audio, design, core (npx skills add ouestlabs/audio-ui)
 ```

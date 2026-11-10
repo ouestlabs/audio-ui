@@ -6,9 +6,9 @@
 npm install @audio-ui/core   # no dependencies
 ```
 
-## The knob and the fader as custom elements
+## The primitives as custom elements
 
-For a knob or a fader, take `@audio-ui/elements` before writing a binding: they are the same parts as the React primitives, as custom elements, built on these controllers, with the same keys, drag, wheel, native range input and data attributes.
+Before writing a binding, use `@audio-ui/elements`: every primitive as unstyled, accessible Web Components built on these controllers, at API parity with `@audio-ui/react` (parts, keyboard interactions, ARIA semantics, native range inputs, `data-*` attributes).
 
 ```bash
 npm install @audio-ui/elements
@@ -32,11 +32,11 @@ npm install @audio-ui/elements
 </script>
 ```
 
-- `input` fires on every change, `event.detail` is `{ value, reason }`, and `preventDefault()` refuses it; `change` fires once a gesture ends. The `value` property reads the value and moves the control.
+- `input` fires on every change with `event.detail` `{ value, reason }`; `preventDefault()` rejects the change. `change` fires once when an interaction ends. The `value` property reads and sets the value.
 - Vue: `compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")` in the Vue plugin's `template` options, then `:value` and `@input="x = $event.detail.value"`. Svelte 5: `value={x}` and `oninput={(event) => (x = event.detail.value)}`.
-- The elements set only display, position, `touch-action` and the thumb's place; style the rest from the tags and the data attributes (`data-dragging`, `data-disabled`, `data-drag-mode`, `data-orientation`). Docs: https://www.audio-ui.dev/docs/custom-elements
+- The elements apply only display, positioning and `touch-action`, in zero-specificity rules. Style parts by tag and by `data-*` state attributes (`data-dragging`, `data-disabled`, `data-orientation`). API reference: https://www.audio-ui.dev/docs/custom-elements
 
-The other primitives have no custom element yet: build them on the controllers below.
+Each primitive registers from its own entry point, `@audio-ui/elements/<primitive>`. Parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`, distinct from the root's `input` and `change`. Use the controllers below directly only for interfaces the elements do not cover.
 
 ## What it exports
 

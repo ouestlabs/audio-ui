@@ -2,4 +2,4 @@
 "@audio-ui/elements": minor
 ---
 
-A new package: the knob and the fader as custom elements, `<audio-ui-knob>` and `<audio-ui-fader>`, for a page in plain HTML, Vue, Svelte or any framework that renders HTML. They are the same parts as the React primitives, built on `@audio-ui/core`, with the same keys, drag and wheel, a native range input in each thumb, and the same data attributes to style from. Every change fires an `input` event, which `preventDefault()` refuses, and a gesture that ends fires a `change`; the `value` property reads and moves the control. Importing `@audio-ui/elements/knob` or `@audio-ui/elements/fader` registers its elements.
+New package: every primitive as framework-agnostic Web Components, built on `@audio-ui/core` and at API parity with `@audio-ui/react`, with the same parts, keyboard interactions, ARIA semantics and `data-*` state attributes. Controls fire `input` on every change, cancelable with `preventDefault()`, and `change` when an interaction ends; parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`. Each primitive registers from its own entry point, `@audio-ui/elements/<primitive>`.

@@ -1,6 +1,6 @@
 # audio/ui core
 
-**Version 1.3.0**  
+**Version 1.4.0**  
 audio/ui  
 November 2026
 

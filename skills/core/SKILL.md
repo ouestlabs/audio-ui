@@ -1,10 +1,10 @@
 ---
 name: core
-description: "Load this before writing any audio control, knob, fader, meter, XY pad or slider for Vue, Svelte, Solid, Angular, Lit, web components or plain JavaScript and the DOM, or in any project without React. It holds the framework-free @audio-ui/core controllers behind every audio/ui primitive (value math, log scales, pointer, wheel and keyboard handling, native range input for accessibility, live sources), the knob and the fader as custom elements in @audio-ui/elements, the plain DOM knob and fader, and the Vue and Svelte bindings, so the control is not rewritten from scratch. Use it whenever the user names a non-React framework or says no React, even if they only ask for a rotary knob, a fader or a synth UI."
+description: "Load this before writing any audio control, knob, fader, meter, XY pad or slider for Vue, Svelte, Solid, Angular, Lit, web components or plain JavaScript and the DOM, or in any project without React. It holds the framework-free @audio-ui/core controllers behind every audio/ui primitive (value math, log scales, pointer, wheel and keyboard handling, native range input for accessibility, live sources), every primitive as custom elements in @audio-ui/elements, the plain DOM knob and fader, and the Vue and Svelte bindings, so the control is not rewritten from scratch. Use it whenever the user names a non-React framework or says no React, even if they only ask for a rotary knob, a fader or a synth UI."
 license: MIT
 metadata:
   author: audio/ui
-  version: "1.3.0"
+  version: "1.4.0"
 ---
 
 # Audio controls without React

@@ -1,9 +1,9 @@
 ---
 title: Custom elements
-description: The knob and the fader as custom elements, with the parts, state attributes and events of the React primitives.
+description: Every primitive as framework-agnostic Web Components, with the parts, state attributes and events of the React primitives.
 ---
 
-`@audio-ui/elements` holds the knob and the fader of audio/ui as custom elements, for a page in Vue, in Svelte, or with no framework at all. They are the same parts as the [primitives](/docs/primitives) of `@audio-ui/react`, built on the same `@audio-ui/core`: the same keys, drag and wheel, the same native `<input type="range">` in each thumb, the same `data-*` attributes to style from. The two below take the classes of the registry's own Knob and Fader.
+`@audio-ui/elements` provides every primitive as a set of unstyled, accessible custom elements. Each one is built on `@audio-ui/core` and keeps API parity with [`@audio-ui/react`](/docs/primitives): the same parts, keyboard interactions, ARIA semantics and `data-*` state attributes. The elements work in plain HTML and in any framework that renders HTML, such as Vue, Svelte, Angular or Lit. The preview below uses the classes of the registry's Knob and Fader.
 
 <ElementsPreview />
 
@@ -13,14 +13,13 @@ description: The knob and the fader as custom elements, with the parts, state at
 npm install @audio-ui/elements
 ```
 
-Importing a subpath registers its elements. Import it once, where the page starts:
+Each primitive is a separate entry point, `@audio-ui/elements/<primitive>`, which registers its elements when imported. The package root registers every primitive. Import an entry once, before the elements are used:
 
 ```js
 import "@audio-ui/elements/knob";
-import "@audio-ui/elements/fader";
 ```
 
-`@audio-ui/elements` alone registers both. On a server, the import does nothing, and the elements come to life in the browser.
+Registration is a no-op on the server: server-rendered markup upgrades once the module loads in the browser.
 
 ## Usage
 
@@ -58,7 +57,7 @@ import "@audio-ui/elements/fader";
 
 <TabsContent value="vue">
 
-Tell Vue's compiler the tags are custom elements, in `vite.config.js`:
+Declare the tags as custom elements to Vue's compiler, in `vite.config.js`:
 
 ```js
 vue({
@@ -127,7 +126,7 @@ const cutoff = ref(1000);
 
 <TabsContent value="react">
 
-In React, take `@audio-ui/react`: the same knob, as components, with typed props, a `render` prop, and the value as React state. React renders the custom elements too, as the preview above shows, but the components fit it better.
+In React, use `@audio-ui/react`: the same parts as components, with typed props, a `render` prop and controlled state. React 19 renders the custom elements as well, as the preview above does, but the components integrate with it natively.
 
 ```tsx
 import { Knob } from "@audio-ui/react";
@@ -149,18 +148,22 @@ const [cutoff, setCutoff] = useState(1000);
 
 </Tabs>
 
-The fader takes the same shape: `<audio-ui-fader>`, with `-label`, `-control`, `-track`, `-indicator`, `-thumb` and `-value` parts.
-
 ## Value and events
 
-- **`input`** fires on every change: a drag, a key, the wheel, a reset. `event.detail.value` is the new value and `event.detail.reason` what changed it (`"drag"`, `"keyboard"`, `"wheel"`, `"reset"`, `"input-change"`, and `"track-press"` on a fader). `preventDefault()` refuses it, and the control stays where it was.
-- **`change`** fires once, when a gesture that changed the value ends: the time to start a note, push to an undo stack or save.
-- **`value`**, the property, reads the value and moves the control when you set it. A framework that binds it (`:value` in Vue, `value={}` in Svelte) sets it. While a pointer drags, the control follows the pointer even if the value you set lags behind.
-- **`name`** makes the thumb's input a field of the form around it, submitted with the value.
+Every control follows the same contract:
+
+| Member | Kind | Description |
+| --- | --- | --- |
+| `input` | Event | Fires on every change. `event.detail` holds the new `value` and the `reason` for the change, such as `"drag"`, `"keyboard"`, `"wheel"`, `"reset"` or `"input-change"`. Calling `preventDefault()` rejects the change. |
+| `change` | Event | Fires once when an interaction that changed the value ends. Use it to commit: start a note, record an undo step, save. |
+| `value` | Property | Reads the current value, and sets it. Framework bindings (`:value` in Vue, `value={}` in Svelte) write this property. During a drag, the control follows the pointer even when the bound value lags behind. |
+| `name` | Attribute | Submits the value with the enclosing form, through the control's native range input. |
+
+A part that holds a value of its own fires events prefixed with its name, for example `clipinput` and `clipchange` on a timeline clip. These never collide with the control's own `input` and `change`, and they bubble, so a single listener on the root can handle every part.
 
 ## Styling
 
-The elements set only what they need to work: `display: block` on the parts that are boxes, `position: relative` and `touch-action: none` on the control, the thumb's rotation or place, in rules with no specificity, so any rule of yours wins. No color, size or spacing comes from them. Style them from the same attributes as the React parts:
+The elements apply only the styles their behavior depends on: the display of each box, the positioning of placed parts, `touch-action` on interactive surfaces. These rules are wrapped in `:where()`, so they carry no specificity and any rule of yours takes precedence. No color, size or spacing is set. Style the parts by tag and by the same state attributes as the React parts:
 
 ```css
 audio-ui-knob-control { width: 4rem; height: 4rem; cursor: grab; }
@@ -171,108 +174,114 @@ audio-ui-knob-indicator { color: var(--primary); }
 audio-ui-knob-thumb:has(input:focus-visible) { outline: 2px solid var(--ring); }
 ```
 
-The track and the indicator draw their arc with `currentColor`. A class works too: the preview above uses the classes of the registry's Knob and Fader, as Tailwind writes them.
+Parts drawn as SVG use `currentColor`. Classes work as well: the preview above applies the registry's Tailwind classes.
 
 ## API reference
 
 ### Knob
 
-`<audio-ui-knob>` groups all parts of the knob and owns its value.
+`<audio-ui-knob>` is the root of a rotary control. It owns the value and renders its parts from it.
 
 <TypeTable>
 <TypeRow name={"min"} type={"number"} default={"0"}></TypeRow>
 <TypeRow name={"max"} type={"number"} default={"100"}></TypeRow>
 <TypeRow name={"step"} type={"number"} default={"1"}></TypeRow>
-<TypeRow name={"large-step"} type={"number"} default={"10"}>Step for Page Up/Page Down and Shift + Arrow keys.</TypeRow>
-<TypeRow name={"value"} type={"number"}>The value. The `value` property reads it and moves the knob.</TypeRow>
-<TypeRow name={"default-value"} type={"number"}>The starting value, and what a double tap, an Alt + click and the Delete key return to. Defaults to the middle of the dial's travel.</TypeRow>
-<TypeRow name={"anchor"} type={"number"}>Value the indicator arc grows from (e.g. `0` on a -1…1 pan knob). Defaults to `min`.</TypeRow>
-<TypeRow name={"drag-mode"} type={"\"circular\" | \"revolution\" | \"vertical\""} default={"\"circular\""}>How a pointer drag turns into value.</TypeRow>
-<TypeRow name={"scale"} type={"\"linear\" | \"log\""} default={"\"linear\""}>How the value maps onto the dial's travel. The `scale` property also takes your own `{ toPosition, toValue }`.</TypeRow>
-<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for the value part and the input's `aria-valuetext`. The `format` property takes the options as an object.</TypeRow>
-<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
-<TypeRow name={"name"} type={"string"}>Identifies the field when a form is submitted.</TypeRow>
+<TypeRow name={"large-step"} type={"number"} default={"10"}>Step for Page Up, Page Down and Shift + Arrow keys.</TypeRow>
+<TypeRow name={"value"} type={"number"}>The current value. Mirrored by the `value` property.</TypeRow>
+<TypeRow name={"default-value"} type={"number"}>The initial value, restored by a double tap, Alt + click or Delete. Defaults to the middle of the travel.</TypeRow>
+<TypeRow name={"anchor"} type={"number"}>The value the indicator arc starts from, such as `0` on a -1 to 1 pan. Defaults to `min`.</TypeRow>
+<TypeRow name={"drag-mode"} type={"\"circular\" | \"revolution\" | \"vertical\""} default={"\"circular\""}>How pointer movement maps to the value.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"log\""} default={"\"linear\""}>How the value maps onto the travel. The `scale` property also accepts a custom `{ toPosition, toValue }`.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for the value part and `aria-valuetext`. The `format` property accepts the options object.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser locale.</TypeRow>
+<TypeRow name={"name"} type={"string"}>The form field name.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-| Part | What it is |
+| Part | Description |
 | --- | --- |
-| `<audio-ui-knob-control>` | The interactive surface: pointer drags, the mouse wheel, a double tap or an Alt + click to reset |
-| `<audio-ui-knob-track>` | The full sweep of the dial, as an SVG arc. `stroke-width` in its 48×48 box, 3 by default |
-| `<audio-ui-knob-indicator>` | The arc from `anchor` to the value, drawn over the track |
-| `<audio-ui-knob-thumb>` | Rotates with the value, and holds the native range input. Its `aria-label`, `aria-labelledby` and `aria-describedby` go to that input |
-| `<audio-ui-knob-value>` | The formatted value, as its text |
-| `<audio-ui-knob-label>` | Names the input when the thumb has no name of its own |
+| `<audio-ui-knob-control>` | The interactive surface: pointer drag, wheel, double tap or Alt + click to reset |
+| `<audio-ui-knob-track>` | The full sweep, drawn as an SVG arc. `stroke-width` sets its width in the 48×48 viewBox (3 by default) |
+| `<audio-ui-knob-indicator>` | The arc from `anchor` to the value |
+| `<audio-ui-knob-thumb>` | Rotates with the value and contains the native range input, to which its `aria-label`, `aria-labelledby` and `aria-describedby` are moved |
+| `<audio-ui-knob-value>` | The formatted value |
+| `<audio-ui-knob-label>` | Labels the input when the thumb has no accessible name |
 
 ### Fader
 
-`<audio-ui-fader>` groups all parts of the fader and owns its value, with audio defaults: vertical, from -60 to +6. It is a group, named by its label.
+`<audio-ui-fader>` is the root of a linear control, with audio defaults: vertical, from -60 to +6. It has `role="group"`, labelled by its label part.
 
 <TypeTable>
 <TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
 <TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
 <TypeRow name={"step"} type={"number"} default={"1"}></TypeRow>
-<TypeRow name={"large-step"} type={"number"} default={"10"}>Step for Page Up/Page Down and Shift + Arrow keys.</TypeRow>
-<TypeRow name={"value"} type={"number"}>The value. The `value` property reads it and moves the fader.</TypeRow>
-<TypeRow name={"default-value"} type={"number"}>The starting value, and what a double click, an Alt + click and the Delete key return to. Defaults to the midpoint.</TypeRow>
-<TypeRow name={"anchor"} type={"number"}>Value the indicator fills from, such as `0` on a -1…1 pan. Defaults to `min`.</TypeRow>
+<TypeRow name={"large-step"} type={"number"} default={"10"}>Step for Page Up, Page Down and Shift + Arrow keys.</TypeRow>
+<TypeRow name={"value"} type={"number"}>The current value. Mirrored by the `value` property.</TypeRow>
+<TypeRow name={"default-value"} type={"number"}>The initial value, restored by a double click, Alt + click or Delete. Defaults to the midpoint.</TypeRow>
+<TypeRow name={"anchor"} type={"number"}>The value the indicator fills from, such as `0` on a -1 to 1 pan. Defaults to `min`.</TypeRow>
 <TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}></TypeRow>
-<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for the value part and the input's `aria-valuetext`.</TypeRow>
-<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
-<TypeRow name={"name"} type={"string"}>Identifies the field when a form is submitted.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for the value part and `aria-valuetext`.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser locale.</TypeRow>
+<TypeRow name={"name"} type={"string"}>The form field name.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-| Part | What it is |
+| Part | Description |
 | --- | --- |
-| `<audio-ui-fader-control>` | The interactive area: a press on the track jumps to the value under it, a press on the thumb drags it from where it was taken, and the wheel steps |
+| `<audio-ui-fader-control>` | The interactive area. A press on the track jumps to the pointer; a press on the thumb drags from where it was grabbed; the wheel steps |
 | `<audio-ui-fader-track>` | The full range of travel |
-| `<audio-ui-fader-indicator>` | The filled part of the track, from `min` or the `anchor` to the value |
-| `<audio-ui-fader-thumb>` | The draggable thumb, placed at the value, holding the native range input |
-| `<audio-ui-fader-value>` | The formatted value, as its text |
-| `<audio-ui-fader-label>` | Names the group, and the input when the thumb has no name of its own |
+| `<audio-ui-fader-indicator>` | The filled range, from `min` or `anchor` to the value |
+| `<audio-ui-fader-thumb>` | The draggable thumb, positioned at the value, containing the native range input |
+| `<audio-ui-fader-value>` | The formatted value |
+| `<audio-ui-fader-label>` | Labels the group, and the input when the thumb has no accessible name |
 
 ### Pad
 
-`<audio-ui-pad>` is a grid of pads to strike, a group: each pad sounds while held, by pointer or with Enter or Space, and each pointer holds its own pad. A strike is harder where a pen or screen presses harder, or else toward the top of the pad. The pads are one tab stop: the arrows walk them, up and down by a row.
+`<audio-ui-pad>` is a grid of velocity-sensitive pads with `role="group"`. A pad sounds while held, by pointer or with Enter and Space, and each pointer holds its own pad. Velocity comes from pen or touch pressure, or from the vertical press position. The pads share one tab stop and are navigated with the arrow keys.
 
 <TypeTable>
-<TypeRow name={"columns"} type={"number"} default={"4"}>How many pads a row holds: what the up and down arrows move by. Lay the grid out to match.</TypeRow>
-<TypeRow name={"active-pads"} type={"string"}>Pads lit from elsewhere, such as a sequencer or a MIDI input, separated by spaces. The `activePads` property takes an array.</TypeRow>
+<TypeRow name={"columns"} type={"number"} default={"4"}>Pads per row, used by Up and Down. Match it in the layout.</TypeRow>
+<TypeRow name={"active-pads"} type={"string"}>Pads lit externally, such as by a sequencer or MIDI input, separated by spaces. The `activePads` property accepts an array.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-A strike fires `padon`, with `event.detail` `{ value, velocity, reason }`: `preventDefault()` keeps it silent. A release fires `padoff`, with `{ value, reason }`, and `reason` is `"choke"` when another pad of its group stopped it.
+| Event | Detail | Description |
+| --- | --- | --- |
+| `padon` | `{ value, velocity, reason }` | A pad is struck. `preventDefault()` keeps it silent |
+| `padoff` | `{ value, reason }` | A pad is released; `reason` is `"choke"` when another pad of its group stopped it |
 
-| Part | What it is |
+| Part | Description |
 | --- | --- |
-| `<audio-ui-pad-item>` | One pad, a button named by its content. `value` names it in the events; pads sharing a `choke-group` stop each other; `disabled` silences one. How hard it was last struck is its `--pad-velocity` CSS variable, from 0 to 1 |
+| `<audio-ui-pad-item>` | A pad, a button labelled by its content. `value` identifies it in events, `choke-group` makes pads stop each other, and `disabled` silences it. Sets `--pad-velocity` (0 to 1) to the last strike's velocity |
 
 ### Piano
 
-`<audio-ui-piano>` is a keyboard to play, a group: every key sounds while pressed, by pointer or with Enter or Space. Dragging across the keys glides from one to the next, and each pointer holds its own key, so chords can be played on a touch screen. The keys are one tab stop: the arrows walk them, Shift by an octave.
+`<audio-ui-piano>` is a playable keyboard with `role="group"`. A key sounds while pressed, by pointer or with Enter and Space. Dragging glides across keys, and each pointer holds its own key, so chords can be played on touch screens. The keys share one tab stop and are navigated with the arrow keys, by octave with Shift.
 
 <TypeTable>
-<TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive: 60 is middle C.</TypeRow>
+<TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive. 60 is middle C.</TypeRow>
 <TypeRow name={"max-pitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
-<TypeRow name={"pitches"} type={"string"}>Only these pitches get keys, separated by spaces. The `pitches` property takes an array.</TypeRow>
-<TypeRow name={"active-notes"} type={"string"}>Pitches lit from elsewhere, such as a MIDI input or a sequencer. The `activeNotes` property takes an array.</TypeRow>
-<TypeRow name={"layout"} type={"\"keyboard\" | \"even\""} default={"\"keyboard\""}>How the keys share the length: like a piano, or one equal share each, as a piano roll's rows.</TypeRow>
-<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}>Vertical puts the low end at the bottom.</TypeRow>
+<TypeRow name={"pitches"} type={"string"}>Restricts the keys to these pitches, separated by spaces. The `pitches` property accepts an array.</TypeRow>
+<TypeRow name={"active-notes"} type={"string"}>Pitches lit externally, such as by MIDI input. The `activeNotes` property accepts an array.</TypeRow>
+<TypeRow name={"layout"} type={"\"keyboard\" | \"even\""} default={"\"keyboard\""}>Key sizes: piano proportions, or equal shares as on a piano roll.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}>Vertical places the low end at the bottom.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-A key that starts sounding fires `noteon`, with `event.detail` `{ pitch, velocity, reason, event }`, `event` being the pointer or key event that played it: `preventDefault()` keeps it silent. One that stops fires `noteoff`, with `{ pitch, reason, event }`.
+| Event | Detail | Description |
+| --- | --- | --- |
+| `noteon` | `{ pitch, velocity, reason, event }` | A key starts sounding. `event` is the originating pointer or keyboard event. `preventDefault()` keeps it silent |
+| `noteoff` | `{ pitch, reason, event }` | A key stops sounding |
 
-| Part | What it is |
+| Part | Description |
 | --- | --- |
-| `<audio-ui-piano-keys>` | Makes an `<audio-ui-piano-key>` for each pitch, lowest first, each holding what its `<template>` holds. It takes no room of its own |
-| `<audio-ui-piano-key>` | One key, a button placed for its `pitch` and named after it ("C4"). `data-color` is `black` or `white` |
-| `<audio-ui-piano-key-label>` | The name of the key it sits in, hidden from assistive technology |
+| `<audio-ui-piano-keys>` | Generates an `<audio-ui-piano-key>` per pitch, lowest first, from its `<template>`. Renders with `display: contents` |
+| `<audio-ui-piano-key>` | A key, a button positioned for its `pitch` and labelled with its name ("C4"). `data-color` is `black` or `white` |
+| `<audio-ui-piano-key-label>` | The name of its key, hidden from assistive technology |
 
 ### XY pad
 
-`<audio-ui-xypad>` owns a point `{ x, y }`: a press jumps it to the pointer and a drag follows, the wheel and the trackpad move it, the arrows move both axes, and a double click or Delete return it to its default. Its place is the `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top) CSS variables, as percentages, for crosshairs and guides.
+`<audio-ui-xypad>` controls a two-dimensional value `{ x, y }`. A press moves the point to the pointer and a drag follows it; the wheel, the trackpad and the arrow keys move it; a double click or Delete resets it. The position is exposed as `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top), as percentages.
 
 <TypeTable>
 <TypeRow name={"min-x"} type={"number"} default={"0"}></TypeRow>
@@ -281,55 +290,55 @@ A key that starts sounding fires `noteon`, with `event.detail` `{ pitch, velocit
 <TypeRow name={"max-y"} type={"number"} default={"100"}></TypeRow>
 <TypeRow name={"step-x"} type={"number"} default={"1"}></TypeRow>
 <TypeRow name={"step-y"} type={"number"} default={"1"}></TypeRow>
-<TypeRow name={"value"} type={"string"}>The point, as `"x y"`. The `value` property reads and moves it as `{ x, y }`.</TypeRow>
-<TypeRow name={"default-value"} type={"string"}>The starting point, and what a reset returns to. Defaults to the center.</TypeRow>
-<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for each axis.</TypeRow>
-<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
-<TypeRow name={"name"} type={"string"}>Its two inputs submit as `name.x` and `name.y`.</TypeRow>
+<TypeRow name={"value"} type={"string"}>The point, as `"x y"`. The `value` property reads and sets it as `{ x, y }`.</TypeRow>
+<TypeRow name={"default-value"} type={"string"}>The initial point, restored on reset. Defaults to the center.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, applied to each axis.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser locale.</TypeRow>
+<TypeRow name={"name"} type={"string"}>The inputs submit as `name.x` and `name.y`.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
 `input` and `change` carry `{ value: { x, y }, reason }`.
 
-| Part | What it is |
+| Part | Description |
 | --- | --- |
-| `<audio-ui-xypad-control>` | The pad's surface: the press, the drag, the wheel, a double click to reset |
-| `<audio-ui-xypad-thumb>` | Marks the point, and holds a native range input per axis. Its `aria-label` names the axes after it ("Filter X"); `label-x` and `label-y` name each one |
-| `<audio-ui-xypad-value>` | Both axes, formatted, as `"x, y"` |
-| `<audio-ui-xypad-label>` | Names both inputs when the thumb has no name of its own |
+| `<audio-ui-xypad-control>` | The interactive surface: press, drag, wheel, double click to reset |
+| `<audio-ui-xypad-thumb>` | Marks the point and contains one native range input per axis. Its `aria-label` labels both axes ("Filter X", "Filter Y"); `label-x` and `label-y` label each one |
+| `<audio-ui-xypad-value>` | Both axes, formatted as `"x, y"` |
+| `<audio-ui-xypad-label>` | Labels both inputs when the thumb has no accessible name |
 
 ### Meter
 
-`<audio-ui-meter>` groups the channels of a level meter. Levels come from `value` (and `peak`), a level per channel separated by spaces, or the `value` and `peak` properties as arrays; or from a live `source` property, `{ getSnapshot, subscribe }`, whose frames are written straight to the parts. A click on it clears the clips a live source latched.
+`<audio-ui-meter>` displays one or more level channels. Levels come from the `value` and `peak` attributes or properties, one per channel, or from a live `source` property, `{ getSnapshot, subscribe }`, whose frames are written directly to the parts. A click clears clip indicators latched by a live source.
 
 <TypeTable>
-<TypeRow name={"value"} type={"string"}>A level per channel, such as `"-12 -6"`: the count is the channel count.</TypeRow>
-<TypeRow name={"peak"} type={"string"}>A peak-hold level per channel. Timing and decay live outside the meter.</TypeRow>
+<TypeRow name={"value"} type={"string"}>One level per channel, such as `"-12 -6"`. The count sets the number of channels.</TypeRow>
+<TypeRow name={"peak"} type={"string"}>One peak-hold level per channel. Hold time and decay are managed outside the meter.</TypeRow>
 <TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
 <TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
-<TypeRow name={"scale"} type={"\"linear\" | \"iec\""} default={"\"linear\""}>How levels spread along the length; the `scale` property also takes your own increasing curve.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"iec\""} default={"\"linear\""}>How levels map onto the length. The `scale` property also accepts a custom increasing curve.</TypeRow>
 <TypeRow name={"clip-threshold"} type={"number"} default={"0"}>Level at or above which a channel is clipping.</TypeRow>
-<TypeRow name={"warn-threshold"} type={"number"}>Level at or above which a channel is in its warning zone, below the clip threshold. Unset, there is none.</TypeRow>
+<TypeRow name={"warn-threshold"} type={"number"}>Level at or above which a channel enters its warning zone. None by default.</TypeRow>
 <TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}></TypeRow>
-<TypeRow name={"unit"} type={"string"}>What each channel says after its level, such as `dB`: "-6 dB". The `getAriaValueText` property says it your way.</TypeRow>
+<TypeRow name={"unit"} type={"string"}>Appended to each channel's `aria-valuetext`, such as `dB`. The `getAriaValueText` property overrides the text.</TypeRow>
 <TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON. One decimal by default.</TypeRow>
-<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser locale.</TypeRow>
 </TypeTable>
 
-| Part | What it is |
+| Part | Description |
 | --- | --- |
-| `<audio-ui-meter-channels>` | Makes an `<audio-ui-meter-channel>` per level, each holding what its `<template>` holds. `label` names each one, `{n}` its number ("Output {n}"). It takes no room of its own |
-| `<audio-ui-meter-channel>` | One channel, a `role="meter"`, for its `index`. `data-warning`, `data-clipping`, and `data-clipped` until a click clears it |
+| `<audio-ui-meter-channels>` | Generates an `<audio-ui-meter-channel>` per level from its `<template>`. `label` names each channel, `{n}` being its number ("Output {n}"). Renders with `display: contents` |
+| `<audio-ui-meter-channel>` | A channel with `role="meter"`, for its `index`. Carries `data-warning`, `data-clipping`, and `data-clipped` until cleared |
 | `<audio-ui-meter-track>` | The full range of a channel |
-| `<audio-ui-meter-indicator>` | The lit part, scaled to the level |
-| `<audio-ui-meter-peak>` | The peak-hold mark, hidden while the channel has none |
+| `<audio-ui-meter-indicator>` | The lit range, scaled to the level |
+| `<audio-ui-meter-peak>` | The peak-hold marker, hidden when the channel has none |
 | `<audio-ui-meter-value>` | The formatted level |
-| `<audio-ui-meter-label>` | Names its channel |
-| `<audio-ui-meter-mark>` | A graduation at its `value`, such as -18, beside the channels |
+| `<audio-ui-meter-label>` | Labels its channel |
+| `<audio-ui-meter-mark>` | A scale graduation at its `value`, such as -18 |
 
 ### Sequencer
 
-`<audio-ui-sequencer>` is a grid of steps to switch on and off, a row per sound, a group: pressing a cell flips it, and dragging on carries the new state across every cell the pointer crosses. The cells are one tab stop, walked with the arrow keys. The rows and the steps are made from templates:
+`<audio-ui-sequencer>` is a step grid with one row per sound and `role="group"`. Pressing a cell toggles it, and dragging applies the new state to every cell crossed. The cells share one tab stop and are navigated with the arrow keys. Rows and steps are generated from templates:
 
 ```html
 <audio-ui-sequencer aria-label="Pattern" default-value="x...x... ..x...x.">
@@ -344,24 +353,29 @@ A key that starts sounding fires `noteon`, with `event.detail` `{ pitch, velocit
 ```
 
 <TypeTable>
-<TypeRow name={"value"} type={"string"}>The pattern as text: a word per row, a character per step, `x` for a step on and `.` for one off. The `value` property takes and gives it as `boolean[][]`.</TypeRow>
-<TypeRow name={"default-value"} type={"string"}>The starting pattern, written the same way.</TypeRow>
+<TypeRow name={"value"} type={"string"}>The pattern as text: one word per row, one character per step, `x` for on and `.` for off. The `value` property reads and sets it as `boolean[][]`.</TypeRow>
+<TypeRow name={"default-value"} type={"string"}>The initial pattern, in the same notation.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-Flipping cells fires `input`, with `{ value, reason }`, which `preventDefault()` refuses, then `change`. The `velocities` property (`number[][]`, 0 to 1) holds how loud each step plays; drawing them fires `velocityinput` and `velocitychange`, with `{ velocities, reason }`. The `source` property, `{ getSnapshot, subscribe }` giving the step being played, marks that step's cells with `data-current` as the clock ticks.
+| Event | Detail | Description |
+| --- | --- | --- |
+| `input`, `change` | `{ value, reason }` | The pattern changes, then the gesture ends |
+| `velocityinput`, `velocitychange` | `{ velocities, reason }` | Step velocities change, then the gesture ends |
 
-| Part | What it is |
+The `velocities` property holds each step's velocity as `number[][]` (0 to 1). The `source` property, `{ getSnapshot, subscribe }` returning the current step, marks that step's cells with `data-current`.
+
+| Part | Description |
 | --- | --- |
-| `<audio-ui-sequencer-rows>` | Makes an `<audio-ui-sequencer-row>` per row of the pattern from its `<template>`; `labels` names them, separated by commas |
-| `<audio-ui-sequencer-row>` | One sound's row, a group, for its `index` |
-| `<audio-ui-sequencer-steps>` | Makes an `<audio-ui-sequencer-step>` per step of its row from its `<template>`. Neither takes room, so the cells are the grid's own items |
-| `<audio-ui-sequencer-cell>` | One step, a toggle button pressed when it is on (`data-on`), named after its row and step ("Kick, step 5") |
-| `<audio-ui-sequencer-velocity>` | How loud a step plays, as a bar whose height is the `--sequencer-velocity` CSS variable; a press or a drag sets it, Alt + click or Delete bring it back to full, and a native range input takes the keys |
+| `<audio-ui-sequencer-rows>` | Generates an `<audio-ui-sequencer-row>` per row from its `<template>`. `labels` names them, separated by commas |
+| `<audio-ui-sequencer-row>` | A row with `role="group"`, for its `index` |
+| `<audio-ui-sequencer-steps>` | Generates an `<audio-ui-sequencer-step>` per step from its `<template>`. Both render with `display: contents`, so the cells are the grid items |
+| `<audio-ui-sequencer-cell>` | A step, a toggle button pressed when on (`data-on`), labelled with its row and step ("Kick, step 5") |
+| `<audio-ui-sequencer-velocity>` | A step's velocity as a bar sized by `--sequencer-velocity`. Press or drag to set it; Alt + click or Delete resets it to full; its native range input takes the keyboard |
 
 ### Envelope
 
-`<audio-ui-envelope>` is a breakpoint envelope, a group: drag a point to move it, double click the graph to add one, and double click, Alt + click or Delete to remove one. The points are one tab stop: Page Up and Page Down (or Home and End) move between them, and the arrow keys move the focused one. Each segment has a handle on its midpoint that bends it, and Alt + drag on the graph bends the segment under the pointer. The points and segments elements make a handle each, from a `<template>` if they have one:
+`<audio-ui-envelope>` is a breakpoint envelope editor with `role="group"`. Points are dragged to move, added with a double click on the graph, and removed with a double click, Alt + click or Delete. Each segment has a curve handle at its midpoint, and Alt + drag on the graph bends the segment under the pointer. The points share one tab stop: Page Up and Page Down (or Home and End) move between them, and the arrow keys move the focused point. Points and segment handles are generated, from a `<template>` when one is provided:
 
 ```html
 <audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.2 1, 0.6 0.5, 1 0">
@@ -375,32 +389,32 @@ Flipping cells fires `input`, with `{ value, reason }`, which `preventDefault()`
 ```
 
 <TypeTable>
-<TypeRow name={"value"} type={"string"}>The points, separated by commas, each `x y` or `x y curve` in 0 to 1, the curve from -1 to 1. The `value` property takes and gives them as `{ x, y, curve? }[]`.</TypeRow>
-<TypeRow name={"default-value"} type={"string"}>The starting points, written the same way. Defaults to an ADSR shape.</TypeRow>
-<TypeRow name={"min-points"} type={"number"} default={"2"}>Removing a point is refused at this count.</TypeRow>
-<TypeRow name={"max-points"} type={"number"}>Adding a point is refused at this count.</TypeRow>
-<TypeRow name={"snap"} type={"string"} default={"0"}>The grid the pointer puts points on: one step, such as `0.25`, or `"x y"` for each axis (`"0.125 0"` snaps across and leaves the level free). Cmd or Ctrl leaves it.</TypeRow>
-<TypeRow name={"step"} type={"number"} default={"0.01"}>The keyboard step on both axes.</TypeRow>
-<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for each point's coordinates.</TypeRow>
-<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
+<TypeRow name={"value"} type={"string"}>The points, separated by commas, each `x y` or `x y curve`: coordinates from 0 to 1, curve from -1 to 1. The `value` property reads and sets them as `{ x, y, curve? }[]`.</TypeRow>
+<TypeRow name={"default-value"} type={"string"}>The initial points, in the same notation. Defaults to an ADSR shape.</TypeRow>
+<TypeRow name={"min-points"} type={"number"} default={"2"}>Removal is refused at this count.</TypeRow>
+<TypeRow name={"max-points"} type={"number"}>Adding is refused at this count.</TypeRow>
+<TypeRow name={"snap"} type={"string"} default={"0"}>Pointer grid: one step, such as `0.25`, or `"x y"` per axis (`"0.125 0"` snaps time only). Cmd or Ctrl bypasses it.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for point coordinates.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser locale.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-`input` and `change` carry `{ value, reason, index }`, the reason `drag`, `keyboard`, `add`, `remove` or `curve`. The `getPointValueText(point, index)` and `getCurveValueText(curve, index)` properties write what a screen reader hears, in real units.
+`input` and `change` carry `{ value, reason, index }`, with `reason` one of `drag`, `keyboard`, `add`, `remove` or `curve`. The `getPointValueText(point, index)` and `getCurveValueText(curve, index)` properties customize `aria-valuetext`.
 
-| Part | What it is |
+| Part | Description |
 | --- | --- |
-| `<audio-ui-envelope-graph>` | The drawing surface, filling the envelope: a double click adds a point, and it carries `data-blocked` briefly when adding is refused |
-| `<audio-ui-envelope-line>` | The curve through the points, in `currentColor`; `stroke-width` sets its width, which the stretch leaves alone |
+| `<audio-ui-envelope-graph>` | The drawing surface, filling the envelope. A double click adds a point; carries `data-blocked` briefly when adding is refused |
+| `<audio-ui-envelope-line>` | The curve through the points, in `currentColor`, with a constant stroke width set by `stroke-width` |
 | `<audio-ui-envelope-fill>` | The area under the curve, in `currentColor` |
-| `<audio-ui-envelope-points>` | Makes an `<audio-ui-envelope-point>` per point; `label` names them, `{n}` the number and `{count}` how many ("Point {n} of {count}" by default) |
-| `<audio-ui-envelope-point>` | A slider on the point's level, placed with `left` and `bottom`. It carries `data-dragging` while dragged, `data-removable` while it can be removed, and `data-blocked` briefly when removal is refused |
-| `<audio-ui-envelope-segments>` | Makes an `<audio-ui-envelope-segment>` per segment; `label` names them ("Curve {n}" by default) |
-| `<audio-ui-envelope-segment>` | A slider on the curve, from -1 to 1, on the segment's midpoint: drag it or press Up and Down to bend, double click or Delete to straighten. `data-flat` marks a segment with nothing to bend |
+| `<audio-ui-envelope-points>` | Generates an `<audio-ui-envelope-point>` per point. `label` names them, with `{n}` and `{count}` placeholders ("Point {n} of {count}" by default) |
+| `<audio-ui-envelope-point>` | A slider on the point's level, positioned with `left` and `bottom`. Carries `data-dragging`, `data-removable`, and `data-blocked` briefly when removal is refused |
+| `<audio-ui-envelope-segments>` | Generates an `<audio-ui-envelope-segment>` per segment. `label` names them ("Curve {n}" by default) |
+| `<audio-ui-envelope-segment>` | A slider on the segment's curve, from -1 to 1, at its midpoint. Drag or Up and Down to bend; double click or Delete to straighten. Carries `data-flat` when the segment cannot bend |
 
 ### Plot
 
-`<audio-ui-plot>` holds two axes and everything drawn on them, in the axes' units: an equalizer's response, a filter's cutoff, a compressor's curve. Each drawing covers the plot with an SVG of its own, in `currentColor`, its strokes the same width however the plot stretches. A curve takes its function, and a trace its live source, as properties:
+`<audio-ui-plot>` defines two axes and lays out everything drawn on them in axis units, for response curves, filter displays and transfer functions. Each drawing part renders its own SVG covering the plot, in `currentColor`, with a constant stroke width. Curves take their function and traces their live source as properties:
 
 ```html
 <audio-ui-plot min-x="20" max-x="20000" scale-x="log" min-y="-24" max-y="24">
@@ -419,30 +433,30 @@ Flipping cells fires `input`, with `{ value, reason }`, which `preventDefault()`
 <TypeRow name={"max-x"} type={"number"} default={"1"}></TypeRow>
 <TypeRow name={"min-y"} type={"number"} default={"0"}></TypeRow>
 <TypeRow name={"max-y"} type={"number"} default={"1"}></TypeRow>
-<TypeRow name={"scale-x"} type={"string"} default={"linear"}>`linear` or `log`, for frequency. The `scaleX` property also takes your own `{ toPosition, toValue }`.</TypeRow>
-<TypeRow name={"scale-y"} type={"string"} default={"linear"}></TypeRow>
-<TypeRow name={"locale"} type={"string"}>For its handles' values. Defaults to the browser's language.</TypeRow>
+<TypeRow name={"scale-x"} type={"\"linear\" | \"log\""} default={"\"linear\""}>The `scaleX` property also accepts a custom `{ toPosition, toValue }`.</TypeRow>
+<TypeRow name={"scale-y"} type={"\"linear\" | \"log\""} default={"\"linear\""}></TypeRow>
+<TypeRow name={"locale"} type={"string"}>Locale of the handles' values. Defaults to the browser locale.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-Its `valueAt(clientX, clientY)` method turns a pointer position into a value in the axes' units, for adding a point where someone double-clicks.
+The `valueAt(clientX, clientY)` method converts a pointer position into axis units.
 
-| Part | What it is |
+| Part | Description |
 | --- | --- |
-| `<audio-ui-plot-curve>` | `y = fn(x)` across the plot, from its `fn` property. With `fill-to`, it closes down to that y value as an area; `samples` sets how many points it starts from (256) |
-| `<audio-ui-plot-line>` | A straight line at a `value`: vertical on the x `axis` (the default), horizontal on the y axis |
-| `<audio-ui-plot-band>` | The stretch of one `axis` between `from` and `to`, across all of the other |
-| `<audio-ui-plot-trace>` | The live y values of its `source` property, `{ getSnapshot, subscribe }`, spread across the plot and drawn again on each change. `fill-to` as for a curve; `min` and `max` put the values on a scale of their own |
-| `<audio-ui-plot-grid>` | Lines and labels at round values: `axis` (`x`, `y` or `both`), `x-ticks` and `y-ticks` where they go, `x-count` and `y-count` about how many, `labels` which axes are labelled (or `none`), and a `format(value, axis)` property. Lines carry `data-part="line"`, labels `data-part="label"`, both `data-axis`, and the line at zero `data-zero` |
-| `<audio-ui-plot-mark>` | A label at a `value` on one `axis`, such as "1k", hidden from assistive technology |
-| `<audio-ui-plot-dot>` | A point nothing drags: a still `value` (`"x y"`), or the live point of its `source` property |
-| `<audio-ui-plot-handle>` | A point to drag, with a `value` and `default-value` as `"x y"`, held to one `axis` if asked. It moves from where it is (four times finer with Shift), resets on a double click, an Alt + click or Delete, and holds a native range input per axis named after its `aria-label` ("Low X"), or `label-x` and `label-y`. It fires `input` and `change` itself, with `{ value, reason }` |
-| `<audio-ui-plot-cursor>` | Follows a mouse or a pen over the plot: sets `--plot-cursor-x` and `--plot-cursor-y` and `data-active`, for crosshair lines |
-| `<audio-ui-plot-cursor-readout>` | Inside the cursor, the value under the pointer as text, through its `format` property |
+| `<audio-ui-plot-curve>` | `y = fn(x)` across the plot, from the `fn` property. `fill-to` closes it to a y value as an area; `samples` sets the initial sampling (256), refined adaptively at sharp bends |
+| `<audio-ui-plot-line>` | A line at `value`: vertical on the x `axis` (default), horizontal on the y axis |
+| `<audio-ui-plot-band>` | The range of one `axis` between `from` and `to`, spanning the other axis |
+| `<audio-ui-plot-trace>` | A live line from the `source` property, `{ getSnapshot, subscribe }`, redrawn on each change. Supports `fill-to`; `min` and `max` set an independent value scale |
+| `<audio-ui-plot-grid>` | Grid lines and labels at round values. `axis` (`x`, `y` or `both`), `x-ticks` and `y-ticks`, `x-count` and `y-count`, `labels` (`none` or an axis), and a `format(value, axis)` property. Lines carry `data-part="line"`, labels `data-part="label"`, both `data-axis`, and the zero line `data-zero` |
+| `<audio-ui-plot-mark>` | A label at `value` on one `axis`, hidden from assistive technology |
+| `<audio-ui-plot-dot>` | A non-interactive point: a static `value` (`"x y"`) or the live point of its `source` property |
+| `<audio-ui-plot-handle>` | A draggable point, with `value` and `default-value` as `"x y"`, optionally constrained to one `axis`. Relative drag (Shift for fine), reset on double click, Alt + click or Delete. Contains a native range input per axis, labelled from its `aria-label` ("Low X") or `label-x` and `label-y`. Fires `input` and `change` with `{ value, reason }` |
+| `<audio-ui-plot-cursor>` | Tracks a mouse or pen over the plot, setting `--plot-cursor-x`, `--plot-cursor-y` and `data-active` |
+| `<audio-ui-plot-cursor-readout>` | Inside the cursor, the value under the pointer as text, formatted by its `format` property |
 
 ### Waveform
 
-`<audio-ui-waveform>` shows a sound and, with a control, seeks through it: a press jumps to the pointer, a drag scrubs, and the keys step through. Its shape is its `peaks` property, known upfront, or a live `levels` signal; its position is its `value`, or a live `source`, and it is the `--waveform-position` CSS variable the playhead and thumb follow:
+`<audio-ui-waveform>` displays audio and, with a control part, seeks through it: a press seeks to the pointer, a drag scrubs, and the keyboard steps. The shape comes from the `peaks` property or a live `levels` source; the position from `value` or a live `source`, exposed as `--waveform-position`:
 
 ```html
 <audio-ui-waveform duration="102">
@@ -457,33 +471,33 @@ Its `valueAt(clientX, clientY)` method turns a pointer position into a value in 
 ```
 
 <TypeTable>
-<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit the position is in, typically seconds.</TypeRow>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit of the position, typically seconds.</TypeRow>
 <TypeRow name={"value"} type={"number"}>The playback position, from 0 to `duration`.</TypeRow>
 <TypeRow name={"default-value"} type={"number"} default={"0"}></TypeRow>
-<TypeRow name={"step"} type={"number"}>Step for the arrow keys. Defaults to a hundredth of `duration`.</TypeRow>
-<TypeRow name={"large-step"} type={"number"}>Step for Page Up, Page Down and Shift + arrows. Defaults to a tenth of `duration`.</TypeRow>
-<TypeRow name={"range"} type={"string"}>The stretch shown, `"start end"`: a clip's window onto its source, a zoomed view. Defaults to the whole audio; while the position is outside it, the waveform carries `data-outside`.</TypeRow>
-<TypeRow name={"loading"} type={"boolean"}>The audio is still on its way: seeking waits, and the bars sweep.</TypeRow>
+<TypeRow name={"step"} type={"number"}>Arrow key step. Defaults to `duration / 100`.</TypeRow>
+<TypeRow name={"large-step"} type={"number"}>Page Up, Page Down and Shift + Arrow step. Defaults to `duration / 10`.</TypeRow>
+<TypeRow name={"range"} type={"string"}>The visible window, `"start end"`, for clips and zoomed views. Defaults to the whole audio. Sets `data-outside` while the position is outside it.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"}>Seeking is disabled and the bars animate until the audio is available.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-Seeking fires `input` and `change` with `{ value, reason }`. While a live signal is audible the waveform carries `data-active`.
+`input` and `change` carry `{ value, reason }`. The root carries `data-active` while a live signal is audible.
 
-| Part | What it is |
+| Part | Description |
 | --- | --- |
-| `<audio-ui-waveform-control>` | The seekable surface, holding the native range input that takes focus and the keys. Its `getAriaValueText(value, duration)` property says how the position is announced. With `selectable`, a Shift + drag selects a stretch, firing `selectioninput` and `selectioncommit` with `[start, end]` |
-| `<audio-ui-waveform-canvas>` | Draws the waveform on a canvas, sharp at any pixel density: `variant` (`mirror`, `bars`, `line`, or `scope` for raw samples), `bar-width`, `bar-gap`, `bar-radius`, `min-bar-height`, `gain`, `mirrored`, `idle`, `mode` (`static` or `scrolling`), `scroll-speed` and `line-width`. The played part is `--waveform-progress-color`, the rest `--waveform-color` |
-| `<audio-ui-waveform-bars>` | Makes `count` `<audio-ui-waveform-bar>`s (24), each at its level in the `--waveform-level` CSS variable, for a visualizer styled in CSS; bars the position has passed carry `data-played`. Also `gain`, `idle`, `min-level` and `mirrored` |
-| `<audio-ui-waveform-playhead>` | A mark at the position |
+| `<audio-ui-waveform-control>` | The seekable surface, containing the native range input. `getAriaValueText(value, duration)` customizes its announcement. With `selectable`, Shift + drag selects a range and fires `selectioninput` and `selectioncommit` with `[start, end]` |
+| `<audio-ui-waveform-canvas>` | Renders on a canvas aligned to device pixels. `variant` (`mirror`, `bars`, `line`, or `scope` for raw samples), `bar-width`, `bar-gap`, `bar-radius`, `min-bar-height`, `gain`, `mirrored`, `idle`, `mode` (`static` or `scrolling`), `scroll-speed`, `line-width`. Colors from `--waveform-color` and `--waveform-progress-color` |
+| `<audio-ui-waveform-bars>` | Generates `count` `<audio-ui-waveform-bar>` elements (24), each sized by `--waveform-level`, for CSS-styled visualizers. Played bars carry `data-played`. Also `gain`, `idle`, `min-level`, `mirrored` |
+| `<audio-ui-waveform-playhead>` | A marker at the position |
 | `<audio-ui-waveform-thumb>` | A handle centered on the position |
-| `<audio-ui-waveform-hover>` | Shown at the hovered point; its `format(value, duration)` property writes it as text |
-| `<audio-ui-waveform-marker>` | A cue at its `value`, labelled by its content |
-| `<audio-ui-waveform-region>` | A loop or a selection, from its `value` (`"start end"`): dragging its body moves it, unless `movable="false"`. It fires `regioninput` and `regionchange` with `{ value, edge, reason }`, so a seek listener never takes them |
-| `<audio-ui-waveform-region-handle>` | Resizes the `edge` (`start` or `end`) of its region, by dragging or through the range input it holds |
+| `<audio-ui-waveform-hover>` | Shown at the hovered position; its `format(value, duration)` property renders it as text |
+| `<audio-ui-waveform-marker>` | A cue at `value`, labelled by its content |
+| `<audio-ui-waveform-region>` | A loop or selection from `value` (`"start end"`). Draggable unless `movable="false"`. Fires `regioninput` and `regionchange` with `{ value, edge, reason }` |
+| `<audio-ui-waveform-region-handle>` | Resizes the region's `edge` (`start` or `end`) by drag or through its native range input |
 
 ### Timeline
 
-`<audio-ui-timeline>` is an arrangement: a ruler that moves the position, lanes of clips to move, trim and fade, loop ranges, and a viewport that scrolls and zooms them. Units are yours: seconds, beats, steps. Each part that holds a value of its own fires events named after it, so a listener on the timeline for the position never takes them, and one listener there can serve every clip:
+`<audio-ui-timeline>` is the root of an arrangement: a ruler that sets the position, lanes of clips that move, trim and fade, loop ranges, and a viewport that scrolls and zooms. Units are arbitrary: seconds, beats or steps.
 
 ```html
 <audio-ui-timeline duration="32" snap-step="1">
@@ -503,42 +517,47 @@ Seeking fires `input` and `change` with `{ value, reason }`. While a live signal
 ```
 
 <TypeTable>
-<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the timeline, in your units.</TypeRow>
-<TypeRow name={"position"} type={"number"}>The playback position. The `source` property follows a live one instead.</TypeRow>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the timeline, in its units.</TypeRow>
+<TypeRow name={"position"} type={"number"}>The playback position. The `source` property follows a live position instead.</TypeRow>
 <TypeRow name={"default-position"} type={"number"} default={"0"}></TypeRow>
-<TypeRow name={"zoom"} type={"number"}>px per unit. Leave it out and the timeline fits the width it is given.</TypeRow>
+<TypeRow name={"zoom"} type={"number"}>Pixels per unit. When unset, the timeline fits its width.</TypeRow>
 <TypeRow name={"default-zoom"} type={"number"}></TypeRow>
 <TypeRow name={"min-zoom"} type={"number"} default={"0"}></TypeRow>
 <TypeRow name={"max-zoom"} type={"number"}></TypeRow>
-<TypeRow name={"snap-step"} type={"number"} default={"0"}>Distance between grid lines: every gesture lands on the grid unless Cmd/Ctrl is held. 0 is no grid.</TypeRow>
-<TypeRow name={"snap-offset"} type={"number"} default={"0"}>Where the grid's lines start.</TypeRow>
-<TypeRow name={"snap-points"} type={"string"}>Places that pull a dragged clip or range onto them from a few px away, separated by spaces: the edges of other clips, the locators.</TypeRow>
-<TypeRow name={"step"} type={"number"}>Step for the arrow keys. Defaults to `snap-step`, or a hundredth of `duration`.</TypeRow>
-<TypeRow name={"large-step"} type={"number"}>Step for Page Up and Page Down. Defaults to ten steps.</TypeRow>
+<TypeRow name={"snap-step"} type={"number"} default={"0"}>Grid spacing. Gestures snap to it unless Cmd or Ctrl is held; 0 disables the grid.</TypeRow>
+<TypeRow name={"snap-offset"} type={"number"} default={"0"}>Where the grid starts.</TypeRow>
+<TypeRow name={"snap-points"} type={"string"}>Magnetic positions for dragged clips and ranges, separated by spaces, such as clip edges and locators.</TypeRow>
+<TypeRow name={"step"} type={"number"}>Arrow key step. Defaults to `snap-step`, or `duration / 100`.</TypeRow>
+<TypeRow name={"large-step"} type={"number"}>Page Up and Page Down step. Defaults to ten steps.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-Moving the position fires `input` and `change` with `{ value, reason }`; a new zoom fires `zoomchange`, which `preventDefault()` refuses. Every lane sets `--timeline-unit`, the width of one unit, and what is placed on it sets `--timeline-offset` and `--timeline-length`.
+| Event | Detail | Description |
+| --- | --- | --- |
+| `input`, `change` | `{ value, reason }` | The position changes, then the gesture ends |
+| `zoomchange` | `{ value, reason }` | The zoom changes, already clamped. `preventDefault()` rejects it |
 
-| Part | What it is |
+Every lane sets `--timeline-unit`, the width of one unit; placed parts set `--timeline-offset` and `--timeline-length`.
+
+| Part | Description |
 | --- | --- |
-| `<audio-ui-timeline-viewport>` | The scrolling window: Cmd/Ctrl + wheel and a pinch zoom around the pointer |
-| `<audio-ui-timeline-ruler>` | The lane that moves the position, holding the native range input for the keys. With `selectable`, a Shift + drag selects a stretch, firing `selectioninput` and `selectioncommit` |
-| `<audio-ui-timeline-lane>` | A strip parts are placed on. With `seekable`, a press on its bare area moves the position; with `selectable` too, a drag selects a stretch |
-| `<audio-ui-timeline-playhead>` | A mark at the position, on the lane it sits in |
-| `<audio-ui-timeline-mark>` | Something at a `value`, such as a bar number. With `movable`, a drag moves it, firing `markinput` and `markchange` |
-| `<audio-ui-timeline-range>` | A loop or a selection, its `value` as `"start end"`: drag it, resize it with an `<audio-ui-timeline-range-handle>` per `edge`, or with `drawable`, draw one across the empty lane. It fires `rangeinput` and `rangechange` with `{ value, edge, reason }` |
-| `<audio-ui-timeline-navigator>` | The whole timeline as a bar: drag its `<audio-ui-timeline-navigator-window>` to scroll, one of its `<audio-ui-timeline-navigator-handle>`s to zoom, double-click to show everything |
-| `<audio-ui-timeline-track>` | A row of a header beside a lane, its `height` in px: an `<audio-ui-timeline-track-resize-handle>` changes it, firing `heightinput` and `heightchange`. `<audio-ui-timeline-track-header>` stays at the left edge as the lane scrolls |
-| `<audio-ui-timeline-clip>` | A stretch of a source: `start`, `length`, `offset`, `fade-in` and `fade-out` (with `fade-in-shape` and `fade-out-shape`), `source-length`. A press on its body selects it (`clipselect`, then `selected`) and puts the cursor there; Delete fires `clipremove`. It fires `clipinput` and `clipchange` with `{ value, reason, target, lane, delta, copy }` |
-| `<audio-ui-timeline-clip-header>` | Dragging it moves the clip, over other lanes too |
-| `<audio-ui-timeline-clip-handle>` | Trims the clip's `edge`, moving where in the source it begins rather than stretching it |
-| `<audio-ui-timeline-clip-fade-handle>` | Sets the fade at its `edge` (`in` or `out`); a double click or Enter steps its shape |
-| `<audio-ui-timeline-clip-fade>` | Draws the fade at its `edge` over the clip, shaded by `--clip-fade-shade` |
+| `<audio-ui-timeline-viewport>` | The scrolling container. Cmd/Ctrl + wheel and pinch zoom around the pointer |
+| `<audio-ui-timeline-ruler>` | The lane that sets the position, containing the native range input. With `selectable`, Shift + drag selects a range and fires `selectioninput` and `selectioncommit` |
+| `<audio-ui-timeline-lane>` | A lane for placed parts. `seekable` sets the position from a press on empty space; with `selectable`, a drag selects a range |
+| `<audio-ui-timeline-playhead>` | A marker at the position |
+| `<audio-ui-timeline-mark>` | A part placed at `value`, such as a bar number. With `movable`, it can be dragged and fires `markinput` and `markchange` |
+| `<audio-ui-timeline-range>` | A loop or selection, `value` as `"start end"`. Draggable, resizable with an `<audio-ui-timeline-range-handle>` per `edge`, and with `drawable`, drawn on empty lane. Fires `rangeinput` and `rangechange` with `{ value, edge, reason }` |
+| `<audio-ui-timeline-navigator>` | An overview bar. Its `<audio-ui-timeline-navigator-window>` scrolls, its `<audio-ui-timeline-navigator-handle>`s zoom, and a double click fits the whole timeline |
+| `<audio-ui-timeline-track>` | A row with a header and a lane, sized by `height` in pixels. An `<audio-ui-timeline-track-resize-handle>` changes it and fires `heightinput` and `heightchange`. `<audio-ui-timeline-track-header>` stays pinned while the lane scrolls |
+| `<audio-ui-timeline-clip>` | A region of a source: `start`, `length`, `offset`, `fade-in`, `fade-out`, `fade-in-shape`, `fade-out-shape`, `source-length`. A press selects it (`clipselect`, then the `selected` attribute) and sets the position; Delete fires `clipremove`. Fires `clipinput` and `clipchange` with `{ value, reason, target, lane, delta, copy }`. Sets `--clip-unit` for its own parts |
+| `<audio-ui-timeline-clip-header>` | Moves the clip by drag, across lanes |
+| `<audio-ui-timeline-clip-handle>` | Trims the clip's `edge`, shifting the source offset rather than stretching |
+| `<audio-ui-timeline-clip-fade-handle>` | Sets the fade at its `edge` (`in` or `out`). Double click or Enter cycles its shape |
+| `<audio-ui-timeline-clip-fade>` | Renders the fade at its `edge`, shaded with `--clip-fade-shade` |
 
 ### Piano roll
 
-`<audio-ui-piano-roll>` edits notes on a timeline: it sits inside an `<audio-ui-timeline>`, which gives it its length, zoom, grid and position, and importing it registers the timeline and the piano too. Its notes are its `value` property, `{ id, pitch, start, length, velocity?, chance?, muted? }[]`, and its selection its `selection` property. The rows, the notes and the velocity bars are made from them:
+`<audio-ui-piano-roll>` is a note editor placed inside an `<audio-ui-timeline>`, which provides its length, zoom, grid and position. Its entry point also registers the timeline and piano elements. Notes are set through the `value` property as `{ id, pitch, start, length, velocity?, chance?, muted? }[]`, and the selection through the `selection` property. Rows, notes and velocity bars are generated from them:
 
 ```html
 <audio-ui-timeline duration="16" snap-step="0.25">
@@ -558,42 +577,48 @@ Moving the position fires `input` and `change` with `{ value, reason }`; a new z
 ```
 
 <TypeTable>
-<TypeRow name={"min-pitch"} type={"number"} default={"48"}>The lowest row, a MIDI pitch: 60 is middle C.</TypeRow>
-<TypeRow name={"max-pitch"} type={"number"} default={"72"}>The highest row.</TypeRow>
-<TypeRow name={"folded"} type={"string"}>Present, only the pitches carrying notes get a row; `"scale"`, those in the scale as well.</TypeRow>
-<TypeRow name={"scale"} type={"string"}>The scale whose rows are marked `data-in-scale`: `major`, `minor`, `dorian`… with `scale-root`, 0 for C.</TypeRow>
-<TypeRow name={"mode"} type={"string"} default={"select"}>What a press on empty grid does: start a selection rectangle, or `draw` a note.</TypeRow>
-<TypeRow name={"draw-style"} type={"string"} default={"stretch"}>In draw mode, `paint` draws a note in each grid cell a drag crosses.</TypeRow>
-<TypeRow name={"min-length"} type={"number"}>The shortest a note can be. Defaults to the timeline's grid step.</TypeRow>
-<TypeRow name={"active-pitches"} type={"string"}>Pitches lit from elsewhere, separated by spaces: a MIDI input, the notes playing.</TypeRow>
+<TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest row, a MIDI pitch. 60 is middle C.</TypeRow>
+<TypeRow name={"max-pitch"} type={"number"} default={"72"}>Highest row.</TypeRow>
+<TypeRow name={"folded"} type={"string"}>When present, only pitches with notes get a row; `"scale"` also keeps the scale's pitches.</TypeRow>
+<TypeRow name={"scale"} type={"string"}>Scale name, such as `major`, `minor` or `dorian`, with `scale-root` (0 for C). Its rows carry `data-in-scale`.</TypeRow>
+<TypeRow name={"mode"} type={"\"select\" | \"draw\""} default={"\"select\""}>Behavior of a press on empty grid: marquee selection or note drawing.</TypeRow>
+<TypeRow name={"draw-style"} type={"\"stretch\" | \"paint\""} default={"\"stretch\""}>In draw mode, `paint` draws a note in each grid cell crossed.</TypeRow>
+<TypeRow name={"min-length"} type={"number"}>Minimum note length. Defaults to the timeline's grid step.</TypeRow>
+<TypeRow name={"active-pitches"} type={"string"}>Pitches lit externally, separated by spaces, such as MIDI input or playing notes.</TypeRow>
 <TypeRow name={"disabled"} type={"boolean"}></TypeRow>
 </TypeTable>
 
-Editing the notes fires `input` and `change` with `{ value, reason }`; a new selection fires `noteselect` with `{ selection, reason }`; a pitch that should sound fires `noteon`, which `preventDefault()` keeps silent, and `noteoff`. The `getNoteLabel(note)` property names each note, "C4, 4 to 6" by default.
+| Event | Detail | Description |
+| --- | --- | --- |
+| `input`, `change` | `{ value, reason }` | The notes change, then the gesture ends |
+| `noteselect` | `{ selection, reason }` | The selection changes. `preventDefault()` rejects it |
+| `noteon`, `noteoff` | `{ pitch, reason, event }` | A pitch starts or stops sounding. `preventDefault()` on `noteon` keeps it silent |
 
-| Part | What it is |
+The `getNoteLabel(note)` property sets each note's accessible name, "C4, 4 to 6" by default.
+
+| Part | Description |
 | --- | --- |
-| `<audio-ui-piano-roll-grid>` | The surface notes are drawn on, a timeline lane that takes focus: Enter adds a note at the position, Escape clears the selection, Cmd/Ctrl+A selects every note, and Cmd/Ctrl+D, C, X, V and Q repeat, copy, cut, paste and quantize |
-| `<audio-ui-piano-roll-rows>` | Makes an `<audio-ui-piano-roll-row>` per pitch, highest first: a band across the grid with `data-color`, `data-in-scale`, `data-octave` and `data-active` |
-| `<audio-ui-piano-roll-notes>` | Makes an `<audio-ui-piano-roll-note>` per note, in reading order, from its `<template>`: a toggle button placed at its start and pitch, which moves by dragging and from the keys, with `--piano-roll-velocity` and `--piano-roll-chance` |
-| `<audio-ui-piano-roll-note-handle>` | Inside a note, drags its `edge` to change its length |
-| `<audio-ui-piano-roll-marquee>` | The selection rectangle being dragged |
-| `<audio-ui-piano-roll-selection-span>` | The time the selection covers; an `<audio-ui-piano-roll-stretch-handle>` per `edge` stretches it |
-| `<audio-ui-piano-roll-velocity-lane>` | A lane of bars, one per note through `<audio-ui-piano-roll-velocities>`, for its velocity or with `level="chance"` its chance to play. Each `<audio-ui-piano-roll-velocity>` is as tall as `--piano-roll-level` and holds a native range input |
-| `<audio-ui-piano-roll-keys>` | Lays the `<audio-ui-piano>` it holds on the roll's rows: a key sounds through the roll, and with Shift selects the notes on its row |
+| `<audio-ui-piano-roll-grid>` | The focusable note surface, a timeline lane. Enter adds a note at the position, Escape clears the selection, Cmd/Ctrl+A selects all, and Cmd/Ctrl+D, C, X, V and Q duplicate, copy, cut, paste and quantize |
+| `<audio-ui-piano-roll-rows>` | Generates an `<audio-ui-piano-roll-row>` per pitch, highest first. Rows carry `data-color`, `data-in-scale`, `data-octave` and `data-active` |
+| `<audio-ui-piano-roll-notes>` | Generates an `<audio-ui-piano-roll-note>` per note in reading order, from its `<template>`. Each note is a toggle button positioned at its start and pitch, movable by pointer and keyboard, exposing `--piano-roll-velocity` and `--piano-roll-chance` |
+| `<audio-ui-piano-roll-note-handle>` | Inside a note, resizes it from its `edge` |
+| `<audio-ui-piano-roll-marquee>` | The selection rectangle during a marquee drag |
+| `<audio-ui-piano-roll-selection-span>` | The time range of the selection; an `<audio-ui-piano-roll-stretch-handle>` per `edge` stretches it |
+| `<audio-ui-piano-roll-velocity-lane>` | A lane of per-note bars, through `<audio-ui-piano-roll-velocities>`, for velocity or, with `level="chance"`, probability. Each `<audio-ui-piano-roll-velocity>` is sized by `--piano-roll-level` and contains a native range input |
+| `<audio-ui-piano-roll-keys>` | Lays out the `<audio-ui-piano>` it contains on the roll's rows. Keys sound through the roll; Shift + press selects the notes of that row |
 
 ### Data attributes
 
-Every part carries the state of its control:
+Parts reflect the state of their control:
 
 <TypeTable title="Data attributes">
 <TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
 <TypeRow name={"data-dragging"}>Present while a pointer drags the control.</TypeRow>
-<TypeRow name={"data-drag-mode"}>On a knob's parts, its `drag-mode`. Style the cursor from it.</TypeRow>
-<TypeRow name={"data-orientation"}>On a fader's parts, `horizontal` or `vertical`.</TypeRow>
-<TypeRow name={"data-active"}>On a pad or a piano key, while it sounds.</TypeRow>
-<TypeRow name={"data-on"}>On a sequencer's cell or velocity bar, while its step is on.</TypeRow>
-<TypeRow name={"data-current"}>On the cells of the step being played.</TypeRow>
-<TypeRow name={"data-painting"}>On a sequencer and its parts while a pointer paints cells.</TypeRow>
-<TypeRow name={"data-blocked"}>On an envelope's graph or point, briefly, when adding or removing a point is refused.</TypeRow>
+<TypeRow name={"data-drag-mode"}>On knob parts, the `drag-mode`, for cursor styling.</TypeRow>
+<TypeRow name={"data-orientation"}>On fader parts, `horizontal` or `vertical`.</TypeRow>
+<TypeRow name={"data-active"}>On a pad or a piano key while it sounds.</TypeRow>
+<TypeRow name={"data-on"}>On a sequencer cell or velocity bar whose step is on.</TypeRow>
+<TypeRow name={"data-current"}>On the cells of the current step.</TypeRow>
+<TypeRow name={"data-painting"}>On the sequencer and its parts during a paint gesture.</TypeRow>
+<TypeRow name={"data-blocked"}>On an envelope graph or point, briefly, when an add or remove is refused.</TypeRow>
 </TypeTable>
