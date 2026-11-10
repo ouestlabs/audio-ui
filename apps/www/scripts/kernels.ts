@@ -95,6 +95,14 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "WAH_KERNELS",
+    file: "devices/wah/kernels.ts",
+    kernels: [
+      { file: "auto-wah.js", name: "@audio/effect-autowah", use: "autoWah" },
+      { file: "wah.js", name: "@audio/effect-wah", use: "wah" },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [

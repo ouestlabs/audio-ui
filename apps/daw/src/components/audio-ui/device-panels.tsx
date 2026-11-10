@@ -36,6 +36,7 @@ import { TiltEqPanel } from "@/components/audio-ui/devices/tilt-eq/panel";
 import { TransientPanel } from "@/components/audio-ui/devices/transient/panel";
 import { UtilityPanel } from "@/components/audio-ui/devices/utility/panel";
 import { VibePanel } from "@/components/audio-ui/devices/vibe/panel";
+import { WahPanel } from "@/components/audio-ui/devices/wah/panel";
 import { WaveShaperPanel } from "@/components/audio-ui/devices/wave-shaper/panel";
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
@@ -96,6 +97,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.wah": entry(WahPanel, "w-[32rem]"),
   "audioui.graphic-eq": entry(GraphicEqPanel, "w-[28rem]"),
   "audioui.tilt-eq": entry(TiltEqPanel),
   "audioui.limiter": entry(LimiterPanel),

@@ -76,6 +76,8 @@ import { utilityDevice } from "@/registry-audio/bases/base/devices/utility/devic
 import { createUtilityEngine } from "@/registry-audio/bases/base/devices/utility/engine";
 import { vibeDevice } from "@/registry-audio/bases/base/devices/vibe/device";
 import { createVibeEngine } from "@/registry-audio/bases/base/devices/vibe/engine";
+import { wahDevice } from "@/registry-audio/bases/base/devices/wah/device";
+import { createWahEngine } from "@/registry-audio/bases/base/devices/wah/engine";
 import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shaper/device";
 import { createWaveShaperEngine } from "@/registry-audio/bases/base/devices/wave-shaper/engine";
 
@@ -182,6 +184,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(phaserDevice, createPhaserEngine, "Motion"),
   entry(autoPanDevice, createAutoPanEngine, "Motion"),
   entry(vibeDevice, createVibeEngine, "Motion"),
+  entry(wahDevice, createWahEngine, "Motion"),
   // Utility
   entry(utilityDevice, createUtilityEngine, "Utility"),
   entry(midSideDevice, createMidSideEngine, "Utility"),

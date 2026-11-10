@@ -33,12 +33,14 @@ import { tiltEqDevice } from "@/registry-audio/bases/base/devices/tilt-eq/device
 import { transientDevice } from "@/registry-audio/bases/base/devices/transient/device";
 import { utilityDevice } from "@/registry-audio/bases/base/devices/utility/device";
 import { vibeDevice } from "@/registry-audio/bases/base/devices/vibe/device";
+import { wahDevice } from "@/registry-audio/bases/base/devices/wah/device";
 import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shaper/device";
 
 /** The devices the docs describe, by the slug of their page. */
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  wah: wahDevice,
   "graphic-eq": graphicEqDevice,
   "tilt-eq": tiltEqDevice,
   chorus: chorusDevice,

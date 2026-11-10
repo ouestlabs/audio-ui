@@ -1301,6 +1301,27 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["modulation", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A wah you can plug in: its state, a panel that draws the band and its travel and an engine that plays it. Play a loop through it: the louder the hit, the higher the band",
+    files: [
+      {
+        path: "components/device/block-wah.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-wah",
+    registryDependencies: [
+      "@audio-ui/wah-panel",
+      "@audio-ui/wah-device",
+      "@audio-ui/wah-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",

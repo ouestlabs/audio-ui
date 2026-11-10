@@ -41,6 +41,7 @@ const DEVICES = [
   "transient",
   "utility",
   "vibe",
+  "wah",
   "wave-shaper",
 ];
 
@@ -1505,6 +1506,68 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/tilt-eq-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/effect-autowah",
+      "@audio/effect-wah",
+    ],
+    description:
+      "The wah as a device: a mode (envelope, sweep or pedal), the band's frequency and resonance, an envelope's range, sensitivity, attack and release, an oscillator's rate or note value and depth, a mix and an output, the numbers that go on the worklet for a state, the band's travel and curve and the worklet's source (the auto-wah of @audio/effect-autowah and the wah of @audio/effect-wah), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/wah/device.ts",
+        target: "components/audio-ui/devices/wah/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/wah/kernels.ts",
+        target: "components/audio-ui/devices/wah/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "wah-device",
+    registryDependencies: ["@audio-ui/synced-rate"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A wah on the Web Audio API for a wah state: an AudioWorklet loaded from a blob that plays every mode, one output each, faded by the mode, mixed with the clean sound at an output level, the sound passing clean until it is ready.",
+    files: [
+      {
+        path: "devices/wah/engine.ts",
+        target: "components/audio-ui/devices/wah/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "wah-engine",
+    registryDependencies: ["@audio-ui/wah-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the wah device: the band where it rests, and dashed where its travel ends, over the device knobs, the mode picked in its title bar.",
+    files: [
+      {
+        path: "devices/wah/panel.tsx",
+        target: "components/audio-ui/devices/wah/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "wah-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/wah-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },

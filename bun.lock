@@ -24,6 +24,7 @@
         "@audio/decode-aiff": "catalog:",
         "@audio/decode-caf": "catalog:",
         "@audio/decode-mp4": "catalog:",
+        "@audio/effect-autowah": "catalog:",
         "@audio/effect-bitcrusher": "catalog:",
         "@audio/effect-chorus": "catalog:",
         "@audio/effect-distortion": "catalog:",
@@ -33,6 +34,7 @@
         "@audio/effect-noiseshaper": "catalog:",
         "@audio/effect-phaser": "catalog:",
         "@audio/effect-pingpong": "catalog:",
+        "@audio/effect-wah": "catalog:",
         "@audio/encode": "catalog:",
         "@audio/eq-tilt": "catalog:",
         "@audio/filter-diode-ladder": "catalog:",
@@ -166,6 +168,7 @@
         "@audio/decode-aiff": "catalog:",
         "@audio/decode-caf": "catalog:",
         "@audio/decode-mp4": "catalog:",
+        "@audio/effect-autowah": "catalog:",
         "@audio/effect-bitcrusher": "catalog:",
         "@audio/effect-chorus": "catalog:",
         "@audio/effect-distortion": "catalog:",
@@ -175,6 +178,7 @@
         "@audio/effect-noiseshaper": "catalog:",
         "@audio/effect-phaser": "catalog:",
         "@audio/effect-pingpong": "catalog:",
+        "@audio/effect-wah": "catalog:",
         "@audio/encode": "catalog:",
         "@audio/eq-tilt": "catalog:",
         "@audio/filter-diode-ladder": "catalog:",
@@ -341,6 +345,7 @@
     "@audio/decode-aiff": "1.3.1",
     "@audio/decode-caf": "1.4.2",
     "@audio/decode-mp4": "1.3.1",
+    "@audio/effect-autowah": "1.1.5",
     "@audio/effect-bitcrusher": "1.1.5",
     "@audio/effect-chorus": "2.0.2",
     "@audio/effect-distortion": "1.1.5",
@@ -350,6 +355,7 @@
     "@audio/effect-noiseshaper": "1.1.5",
     "@audio/effect-phaser": "1.1.6",
     "@audio/effect-pingpong": "1.1.5",
+    "@audio/effect-wah": "1.1.5",
     "@audio/encode": "1.11.0",
     "@audio/eq-tilt": "1.2.3",
     "@audio/filter-diode-ladder": "1.2.2",
@@ -441,6 +447,8 @@
 
     "@audio/decode-wav": ["@audio/decode-wav@2.0.0", "", {}, "sha512-fs5MxpGxGwhftXGmIgKT1zzEshQ0vlNkNN/HdHXTZevPenHOxEDblVHKZbhC0ip7jlIi4aV4If6aC+VKrWb6Hw=="],
 
+    "@audio/effect-autowah": ["@audio/effect-autowah@1.1.5", "", {}, "sha512-H7wWbgOmFyCk8TJE/Mv+bAj43xUnP5vXxN/xf7Z6RrHvGBnY9pzDYhDJMF1O1Sromh7bX1hPmJ6GDqmaInq4hQ=="],
+
     "@audio/effect-bitcrusher": ["@audio/effect-bitcrusher@1.1.5", "", {}, "sha512-4oJNcHvyKHJGh3QYLSqhBLY27zuNoTusE6dcBTa4uS6IRRTvkw2H8oIGizoxi5AefKBSrOt28RJhKqG6bL5DVA=="],
 
     "@audio/effect-chorus": ["@audio/effect-chorus@2.0.2", "", {}, "sha512-YgpoY1iQCRKHxEWJH2oOYBMHQv+lo0Dy21ap9lok3QXaWBomrMOeNRXOqlRysMdQwLvksc5QvnIWWETlc4+s6Q=="],
@@ -458,6 +466,8 @@
     "@audio/effect-phaser": ["@audio/effect-phaser@1.1.6", "", {}, "sha512-AgxlNNp/E3rF/rPOK1kbtddfLNsyjftNv90booaSB2DZJHag4ne4A9ck4OwoxRxzBbDOcIkcMGKYA8vzEXjYzw=="],
 
     "@audio/effect-pingpong": ["@audio/effect-pingpong@1.1.5", "", {}, "sha512-Z56kBSJlMatLdutgwLpiGEPmOMiTPoYEGq+rT59QZQwSjd1af/OFpO2U1/yeTHvCrOSqYUvd7y7VI+jN6kDjFQ=="],
+
+    "@audio/effect-wah": ["@audio/effect-wah@1.1.5", "", {}, "sha512-QHO0gUUcSi5ZEHghXo9Gu2FL8jecLvB/7ccYFCoVwo5YUTdC0sY0unYNdourcqqcaKTF98pcFwWyvB006Ct2Fg=="],
 
     "@audio/encode": ["@audio/encode@1.11.0", "", { "dependencies": { "@audio/encode-aac": "^1.2.1", "@audio/encode-aiff": "^1.4.2", "@audio/encode-alac": "^1.0.2", "@audio/encode-caf": "^1.3.2", "@audio/encode-flac": "^1.4.3", "@audio/encode-gsm": "^0.1.0", "@audio/encode-mp3": "^2.0.1", "@audio/encode-mp4": "^1.2.1", "@audio/encode-ogg": "^1.3.1", "@audio/encode-opus": "^1.3.2", "@audio/encode-qoa": "^1.3.1", "@audio/encode-wav": "^1.5.2", "@audio/encode-wavpack": "^1.0.2", "@audio/encode-webm": "^1.3.1" } }, "sha512-e++lSZ+pOfuWGgk0NhqI8gBq7uzKxJH7bzqJsVMuIC8q5HQVtCFZz7+lRsfLJK9YT3yH04EacgvXr28NSdDcsg=="],
 

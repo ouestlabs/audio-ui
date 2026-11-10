@@ -1,0 +1,44 @@
+---
+title: Wah
+description: "A wah device: an envelope, sweep or pedal mode, the band's frequency and resonance, an envelope's range and timing, an oscillator's rate and depth, a mix and an output, a panel that draws the band, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-wah" />
+
+Sweeps a resonant band through the sound. In Envelope mode the sound's own loudness moves it, the classic auto-wah: the harder a note is played, the higher the band. In Sweep mode a slow oscillator moves it. In Pedal mode it stays where it is set, a wah pedal held at one place, for a host to move by automation. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="wah" kind="device" />
+
+## Controls
+
+<DeviceControls device="wah">
+<Control id="mode">What moves the band, picked in the title bar: the envelope of the sound, an oscillator, or nothing. The controls the mode does not use are drawn off.</Control>
+<Control id="frequencyHz">Where the band is: the bottom of its travel in Envelope mode, the middle of the sweep in Sweep mode, the pedal's place in Pedal mode.</Control>
+<Control id="rangeHz">How far above the frequency the loudest sound lifts the band, in Envelope mode.</Control>
+<Control id="sensitivity">How much of the sound's level drives the envelope: higher, quieter playing reaches the top too.</Control>
+<Control id="attackMs">How fast the band rises when the sound gets louder.</Control>
+<Control id="releaseMs">How fast it falls back when the sound fades.</Control>
+<Control id="rateHz">How fast the oscillator sweeps, in Sweep mode.</Control>
+<Control id="sync">Takes the rate from a note value and the tempo of the host. See [Tempo sync](/docs/devices#tempo-sync).</Control>
+<Control id="division">The note value of one cycle of the oscillator.</Control>
+<Control id="depth">How far the oscillator sweeps either side of the frequency, in octaves.</Control>
+<Control id="resonance">How narrow and how loud the band is, its Q: at 5 it stands 14 dB above the rest.</Control>
+<Control id="mix">The balance of the band and the clean sound: a wah is the band alone, at 100 %.</Control>
+<Control id="outputDb">The level of the output, to bring a narrow band back to the level of the sound.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the band where it rests, and dashed where its travel ends: the top of the envelope's lift, or both ends of the sweep. The mode is picked in its title bar. `wahCurve(state, bandHz)` is a curve it draws, the band at a frequency mixed with the clean sound, and `wahReach(state)` where the band rests and how far it goes.
+
+<DeviceUsage name="wah" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The wah runs on the audio thread: the auto-wah of `@audio/effect-autowah` and the wah of `@audio/effect-wah` in an `AudioWorklet` loaded from a blob (`WAH_WORKLET` is its source), 128 frames at a time. Both are the same band-pass, a trapezoidal state-variable filter stable at any resonance, so every mode plays at the same level. The worklet plays all three modes, one output each, and the mode fades one in and the others out, so changing it does not click. A worklet cannot import, so the device carries both kernels as published (`WAH_KERNELS`, in its `kernels.ts`). Until it is ready, and in a context with no worklets, the sound passes clean: `ready` resolves once it is in the graph.

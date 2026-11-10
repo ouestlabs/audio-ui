@@ -104,6 +104,7 @@ function NumberControl({
 /** A switch is one button that carries its own label, filled when it is on. */
 function ToggleControl({
   device,
+  disabled,
   onValueChange,
   parameter,
   value,
@@ -121,6 +122,7 @@ function ToggleControl({
       aria-label={parameter.label}
       // Centred in its cell, level with the knobs beside it.
       className="self-center justify-self-center aria-pressed:border-primary aria-pressed:bg-primary aria-pressed:text-primary-foreground"
+      disabled={disabled}
       onPressedChange={change}
       pressed={on}
       size="sm"
@@ -461,7 +463,12 @@ function DevicePanel<const Parameters extends readonly ParameterDescriptor[]>({
   const control = (parameter: ParameterDescriptor, group?: string) => {
     if (parameter.kind === "toggle") {
       return (
-        <ToggleControl {...props} key={parameter.id} parameter={parameter} />
+        <ToggleControl
+          {...props}
+          disabled={disabled.includes(parameter.id as never)}
+          key={parameter.id}
+          parameter={parameter}
+        />
       );
     }
     if (parameter.kind === "choice") {

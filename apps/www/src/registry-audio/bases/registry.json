@@ -13,7 +13,7 @@
       "name": "fader"
     },
     {
-      "count": 29,
+      "count": 30,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -85,7 +85,7 @@
       "name": "delay-reverb"
     },
     {
-      "count": 4,
+      "count": 5,
       "description": "Modulation devices: a chorus, a phaser and flanger, and an auto pan.",
       "label": "Modulation",
       "name": "modulation"
@@ -109,7 +109,7 @@
       "name": "tuner"
     },
     {
-      "count": 24,
+      "count": 25,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
       "name": "plot"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 75
+  "totalComponents": 76
 }
