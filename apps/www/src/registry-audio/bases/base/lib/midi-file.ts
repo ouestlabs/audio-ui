@@ -1,3 +1,4 @@
+import parseMidi from "@audio/midi-parse";
 import {
   encodeMidiFile,
   type MidiFileNote,
@@ -75,6 +76,120 @@ export async function readMidiFile(
     });
   }
   return { bpm, notes };
+}
+
+/** A note of a score in beats: where it starts and how long it lasts, in quarter notes. */
+export interface ScoreNote {
+  length: number;
+  pitch: number;
+  start: number;
+  /** 0 to 1. */
+  velocity: number;
+}
+
+/** One part of a score: its name, whether it is drums, and its notes in beats. */
+export interface ScorePart {
+  /** On MIDI channel 10, the drums of General MIDI. */
+  drums: boolean;
+  name: string;
+  notes: ScoreNote[];
+  /** The General MIDI program it asks for, 0 to 127, when it names one: 0 is a piano, 32 a bass. */
+  program?: number;
+}
+
+/** MIDI's channel 10, counted from 0: the drums. */
+const DRUM_CHANNEL = 9;
+const MICROSECONDS_PER_SECOND = 1_000_000;
+const META_TRACK_NAME = 3;
+
+/**
+ * Reads a MIDI file as parts, for a host that lays each on a track of its
+ * own: a part per track and channel, named after its track (and its channel,
+ * when a track holds several), its notes in beats as they were written, not
+ * quantized and not cut, at least a tick long, and the first program its
+ * channel plays. Also the file's first tempo, unrounded. The file is parsed
+ * by `@audio/midi-parse`.
+ */
+export async function readMidiFileParts(
+  file: Blob
+): Promise<{ bpm: number; parts: ScorePart[] }> {
+  const parsed = parseMidi(new Uint8Array(await file.arrayBuffer()));
+  // The parser times notes in seconds: its tempo map turns them back into beats.
+  const beatOf = (seconds: number) => {
+    let [mark] = parsed.tempos;
+    for (const tempo of parsed.tempos) {
+      if (tempo.time > seconds) {
+        break;
+      }
+      mark = tempo;
+    }
+    if (!mark) {
+      return 0;
+    }
+    return (
+      mark.tick / parsed.division +
+      ((seconds - mark.time) * MICROSECONDS_PER_SECOND) / mark.usPerBeat
+    );
+  };
+  const byPart = new Map<number, ScoreNote[]>();
+  for (const midiNote of parsed.notes) {
+    const key = midiNote.track * 16 + midiNote.channel;
+    const notes = byPart.get(key) ?? [];
+    const start = beatOf(midiNote.time);
+    notes.push({
+      length: Math.max(
+        1 / parsed.division,
+        beatOf(midiNote.time + midiNote.duration) - start
+      ),
+      pitch: midiNote.midi,
+      start,
+      velocity: midiNote.velocity,
+    });
+    byPart.set(key, notes);
+  }
+  const keys = [...byPart.keys()].sort((a, b) => a - b);
+  const channelsOf = (track: number) =>
+    keys.filter((key) => Math.floor(key / 16) === track).length;
+  const events = parsed.tracks.map((track, index) => ({ index, track }));
+  const programOf = (track: number, channel: number) => {
+    // On its own track first; a format 0 file, or a tempo track, may set it elsewhere.
+    for (const onItsOwn of [true, false]) {
+      for (const { index, track: list } of events) {
+        if (onItsOwn && index !== track) {
+          continue;
+        }
+        const event = list.find(
+          (each) => each.type === "program" && each.channel === channel
+        );
+        if (typeof event?.program === "number") {
+          return event.program;
+        }
+      }
+    }
+  };
+  const nameOf = (track: number) => {
+    const event = parsed.tracks[track]?.find(
+      (each) => each.type === "meta" && each.meta === META_TRACK_NAME
+    );
+    return typeof event?.text === "string" ? event.text.trim() : "";
+  };
+  const [first] = parsed.tempos;
+  return {
+    bpm: first ? MICROSECONDS_PER_MINUTE / first.usPerBeat : 120,
+    parts: keys.map((key) => {
+      const track = Math.floor(key / 16);
+      const channel = key % 16;
+      const named = nameOf(track) || `Track ${track + 1}`;
+      const program = programOf(track, channel);
+      return {
+        drums: channel === DRUM_CHANNEL,
+        name:
+          channelsOf(track) > 1 ? `${named}, channel ${channel + 1}` : named,
+        notes: byPart.get(key) ?? [],
+        ...(program === undefined ? {} : { program }),
+      };
+    }),
+  };
 }
 
 /** The notes as a Standard MIDI File, the inverse of `readMidiFile`. Deactivated notes are left out. */

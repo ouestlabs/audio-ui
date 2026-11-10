@@ -1,14 +1,14 @@
 import writeMusicXml, { parse, type TempoPoint } from "@audio/musicxml";
 import type { Note } from "@audio-ui/core/piano-roll";
+import { strFromU8, unzipSync } from "fflate";
+import type {
+  ScoreNote,
+  ScorePart,
+} from "@/registry-audio/bases/base/lib/midi-file";
 
 const SECONDS_PER_MINUTE = 60;
 /** The tempo a part with no tempo marks is read at, as the parser reads it. */
 const DEFAULT_BPM = 120;
-const ZIP_LOCAL_HEADER = 0x04_03_4b_50;
-const ZIP_DIRECTORY_END = 0x06_05_4b_50;
-const ZIP_DIRECTORY_ENTRY = 0x02_01_4b_50;
-const STORED = 0;
-const DEFLATED = 8;
 /** A compressed score names its score in this file. */
 const CONTAINER = "META-INF/container.xml";
 const ROOT_FILE = /<rootfile[^>]*full-path="([^"]+)"/;
@@ -56,84 +56,20 @@ function beatOf(seconds: number, tempos: readonly TempoPoint[]) {
   return beat;
 }
 
-const view = (bytes: Uint8Array) =>
-  new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-
-/** Where a file's bytes are in a zip archive, by its name, and how they are stored. */
-function zipEntry(archive: Uint8Array, name: string) {
-  const data = view(archive);
-  // The directory ends in the last 22 bytes, or before a comment of up to 64 KB.
-  let end = archive.length - 22;
-  while (end >= 0 && data.getUint32(end, true) !== ZIP_DIRECTORY_END) {
-    end -= 1;
-  }
-  if (end < 0) {
-    throw new Error("A compressed MusicXML file needs its zip directory");
-  }
-  const count = data.getUint16(end + 10, true);
-  let entry = data.getUint32(end + 16, true);
-  const decoder = new TextDecoder();
-  for (let index = 0; index < count; index += 1) {
-    if (data.getUint32(entry, true) !== ZIP_DIRECTORY_ENTRY) {
-      break;
-    }
-    const nameLength = data.getUint16(entry + 28, true);
-    const offset = data.getUint32(entry + 42, true);
-    const entryName = decoder.decode(
-      archive.subarray(entry + 46, entry + 46 + nameLength)
-    );
-    if (
-      entryName === name &&
-      data.getUint32(offset, true) === ZIP_LOCAL_HEADER
-    ) {
-      const start =
-        offset +
-        30 +
-        data.getUint16(offset + 26, true) +
-        data.getUint16(offset + 28, true);
-      return {
-        method: data.getUint16(entry + 10, true),
-        packed: archive.slice(start, start + data.getUint32(entry + 20, true)),
-      };
-    }
-    entry +=
-      46 +
-      nameLength +
-      data.getUint16(entry + 30, true) +
-      data.getUint16(entry + 32, true);
-  }
-  throw new Error(`A compressed MusicXML file has no ${name}`);
-}
-
-/** A file's bytes out of a zip archive, by its name, inflated when it is deflated. */
-async function unzipped(archive: Uint8Array, name: string) {
-  const { method, packed } = zipEntry(archive, name);
-  if (method === STORED) {
-    return packed;
-  }
-  if (method !== DEFLATED) {
-    throw new Error(
-      `A compressed MusicXML file stores ${name} in a way it cannot open`
-    );
-  }
-  const stream = new Blob([packed])
-    .stream()
-    .pipeThrough(new DecompressionStream("deflate-raw"));
-  return new Uint8Array(await new Response(stream).arrayBuffer());
-}
-
 /** A score's text: as it is, or out of the `.mxl` archive that holds it, in UTF-8 or UTF-16 by its byte-order mark. */
 async function scoreText(file: Blob) {
-  let bytes = new Uint8Array(await file.arrayBuffer());
-  if (bytes.length > 4 && view(bytes).getUint32(0, true) === ZIP_LOCAL_HEADER) {
-    const container = new TextDecoder().decode(
-      await unzipped(bytes, CONTAINER)
-    );
-    const root = ROOT_FILE.exec(container)?.[1];
-    if (!root) {
-      throw new Error("A compressed MusicXML file names no score");
+  let bytes: Uint8Array = new Uint8Array(await file.arrayBuffer());
+  // A zip begins "PK": a compressed score, its container naming the score inside.
+  if (bytes[0] === 0x50 && bytes[1] === 0x4b) {
+    // An archive may hold any files, or none of these: a path can be missing.
+    const files: Partial<Record<string, Uint8Array>> = unzipSync(bytes);
+    const container = files[CONTAINER];
+    const root = container ? ROOT_FILE.exec(strFromU8(container))?.[1] : null;
+    const score = root ? files[root] : undefined;
+    if (!score) {
+      throw new Error("A compressed MusicXML file names no score it holds");
     }
-    bytes = await unzipped(bytes, root);
+    bytes = score;
   }
   if (bytes[0] === 0xff && bytes[1] === 0xfe) {
     return new TextDecoder("utf-16le").decode(bytes);
@@ -142,6 +78,40 @@ async function scoreText(file: Blob) {
     return new TextDecoder("utf-16be").decode(bytes);
   }
   return new TextDecoder().decode(bytes);
+}
+
+/**
+ * Reads a MusicXML score as parts, for a host that lays each on a track of
+ * its own: a part each, by its name, its notes in beats as they were
+ * written, through changes of tempo, not quantized and not cut. A score, or
+ * one compressed as `.mxl`. Grace notes, which take no time, are dropped, and
+ * repeats play once, as written. Also its first tempo and its title.
+ */
+export async function readMusicXmlFileParts(
+  file: Blob
+): Promise<{ bpm: number; parts: ScorePart[]; title?: string }> {
+  const score = parse(await scoreText(file));
+  const parts = score.parts.map((part, index) => {
+    const notes: ScoreNote[] = [];
+    for (const scoreNote of part.notes) {
+      if (scoreNote.duration > 0) {
+        const start = beatOf(scoreNote.time, part.tempos);
+        notes.push({
+          length:
+            beatOf(scoreNote.time + scoreNote.duration, part.tempos) - start,
+          pitch: scoreNote.midi,
+          start,
+          velocity: scoreNote.velocity,
+        });
+      }
+    }
+    return { drums: false, name: part.name || `Part ${index + 1}`, notes };
+  });
+  return {
+    bpm: score.parts[0]?.tempos[0]?.bpm ?? DEFAULT_BPM,
+    parts,
+    title: score.title,
+  };
 }
 
 /**
@@ -163,39 +133,33 @@ export async function readMusicXmlFile(
     minPitch = 0,
     stepsPerQuarter = 4,
   } = grid;
-  const score = parse(await scoreText(file));
-  const [first] = score.parts;
-  const bpm = clamp(
-    Math.round(first?.tempos[0]?.bpm ?? DEFAULT_BPM),
-    minBpm,
-    maxBpm
-  );
+  const score = await readMusicXmlFileParts(file);
   const notes: Note[] = [];
   for (const part of score.parts) {
     for (const scoreNote of part.notes) {
-      if (scoreNote.duration <= 0) {
-        continue;
-      }
-      const onset = beatOf(scoreNote.time, part.tempos);
-      const end = beatOf(scoreNote.time + scoreNote.duration, part.tempos);
-      const start = Math.round(onset * stepsPerQuarter);
+      const start = Math.round(scoreNote.start * stepsPerQuarter);
       if (start < 0 || start >= duration) {
         continue;
       }
       notes.push({
         id: `musicxml-import-${notes.length}`,
         length: clamp(
-          Math.round(end * stepsPerQuarter) - start,
+          Math.round((scoreNote.start + scoreNote.length) * stepsPerQuarter) -
+            start,
           1,
           duration - start
         ),
-        pitch: clamp(scoreNote.midi, minPitch, maxPitch),
+        pitch: clamp(scoreNote.pitch, minPitch, maxPitch),
         start,
         velocity: clamp(scoreNote.velocity, 0, 1),
       });
     }
   }
-  return { bpm, notes, title: score.title };
+  return {
+    bpm: clamp(Math.round(score.bpm), minBpm, maxBpm),
+    notes,
+    title: score.title,
+  };
 }
 
 /**

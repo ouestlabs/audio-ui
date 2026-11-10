@@ -134,6 +134,8 @@ export interface TopBarProps
   onExportDawproject: () => void;
   /** Opens a .dawproject file of another DAW in place of the project. */
   onImportDawproject: () => void;
+  /** Imports MIDI files or MusicXML scores, a MIDI track for each of their parts. */
+  onImportScore: () => void;
   onLoopingChange: (looping: boolean) => void;
   onMetronomeChange: (metronome: boolean) => void;
   /** Starts a new project, in place of this one. */
@@ -323,6 +325,9 @@ export function TopBar(props: TopBarProps) {
             ) : null}
             <DropdownMenuItem onClick={props.onImportDawproject}>
               Import DAWproject…
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={props.onImportScore}>
+              Import MIDI or MusicXML…
             </DropdownMenuItem>
             <DropdownMenuItem onClick={props.onExportDawproject}>
               Export DAWproject…

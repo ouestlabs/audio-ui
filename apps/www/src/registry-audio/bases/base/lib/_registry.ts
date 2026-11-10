@@ -241,9 +241,9 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "piano"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/midi-parse"],
     description:
-      "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one",
+      "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one; or read one as parts in beats, a part per track and channel with its name and program, for a host that lays each on a track (parsed by @audio/midi-parse)",
     files: [
       {
         path: "lib/midi-file.ts",
@@ -256,7 +256,7 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/musicxml"],
+    dependencies: ["@audio-ui/core", "@audio/musicxml", "fflate"],
     description:
       "MusicXML scores to and from notes on a grid of steps: read one, plain or compressed as .mxl, with its first tempo, every part into one clip, write one for a notation app, or download one",
     files: [
@@ -266,7 +266,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "musicxml-file",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/midi-file"],
     type: "registry:lib",
   },
   {

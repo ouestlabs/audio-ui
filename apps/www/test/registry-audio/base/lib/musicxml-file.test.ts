@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { strToU8, zipSync } from "fflate";
 import {
   readMusicXmlFile,
   writeMusicXmlFile,
@@ -55,57 +56,6 @@ const EXPECTED = [
   { length: 12, pitch: 66, start: 20 },
 ];
 
-/** A zip archive of `files`, each stored or deflated, as a `.mxl` is. */
-async function zipOf(
-  files: { data: Uint8Array<ArrayBuffer>; deflate: boolean; name: string }[]
-) {
-  const encoder = new TextEncoder();
-  const parts: Uint8Array<ArrayBuffer>[] = [];
-  const directory: Uint8Array<ArrayBuffer>[] = [];
-  const packings = await Promise.all(
-    files.map(async (file) =>
-      file.deflate
-        ? new Uint8Array(
-            await new Response(
-              new Blob([file.data])
-                .stream()
-                .pipeThrough(new CompressionStream("deflate-raw"))
-            ).arrayBuffer()
-          )
-        : file.data
-    )
-  );
-  let offset = 0;
-  for (const [index, file] of files.entries()) {
-    const name = encoder.encode(file.name);
-    const packed = packings[index] ?? file.data;
-    const local = new DataView(new ArrayBuffer(30));
-    local.setUint32(0, 0x04_03_4b_50, true);
-    local.setUint16(8, file.deflate ? 8 : 0, true);
-    local.setUint32(18, packed.length, true);
-    local.setUint32(22, file.data.length, true);
-    local.setUint16(26, name.length, true);
-    const entry = new DataView(new ArrayBuffer(46));
-    entry.setUint32(0, 0x02_01_4b_50, true);
-    entry.setUint16(10, file.deflate ? 8 : 0, true);
-    entry.setUint32(20, packed.length, true);
-    entry.setUint32(24, file.data.length, true);
-    entry.setUint16(28, name.length, true);
-    entry.setUint32(42, offset, true);
-    parts.push(new Uint8Array(local.buffer), name, packed);
-    directory.push(new Uint8Array(entry.buffer), name);
-    offset += 30 + name.length + packed.length;
-  }
-  const size = directory.reduce((sum, part) => sum + part.length, 0);
-  const end = new DataView(new ArrayBuffer(22));
-  end.setUint32(0, 0x06_05_4b_50, true);
-  end.setUint16(8, files.length, true);
-  end.setUint16(10, files.length, true);
-  end.setUint32(12, size, true);
-  end.setUint32(16, offset, true);
-  return new Blob([...parts, ...directory, new Uint8Array(end.buffer)]);
-}
-
 describe("readMusicXmlFile", () => {
   test("reads a score onto the steps, in the beats it was written in, its first tempo and title", async () => {
     const read = await readMusicXmlFile(new Blob([SCORE]), GRID);
@@ -115,29 +65,19 @@ describe("readMusicXmlFile", () => {
   });
 
   test("opens a score compressed as .mxl, its container naming it", async () => {
-    const encoder = new TextEncoder();
-    const archive = await zipOf([
-      {
-        data: encoder.encode("application/vnd.recordare.musicxml"),
-        deflate: false,
-        name: "mimetype",
-      },
-      {
-        data: encoder.encode(
+    const archive = zipSync({
+      "META-INF/container.xml": [
+        strToU8(
           '<?xml version="1.0"?><container><rootfiles><rootfile full-path="score/piece.musicxml" media-type="application/vnd.recordare.musicxml+xml"/></rootfiles></container>'
         ),
-        deflate: false,
-        name: "META-INF/container.xml",
-      },
-      {
-        data: encoder.encode(SCORE),
-        deflate: true,
-        name: "score/piece.musicxml",
-      },
-    ]);
-    expect(shapes((await readMusicXmlFile(archive, GRID)).notes)).toEqual(
-      EXPECTED
-    );
+        { level: 0 },
+      ],
+      mimetype: [strToU8("application/vnd.recordare.musicxml"), { level: 0 }],
+      "score/piece.musicxml": strToU8(SCORE),
+    });
+    expect(
+      shapes((await readMusicXmlFile(new Blob([archive]), GRID)).notes)
+    ).toEqual(EXPECTED);
   });
 
   test("reads a score in UTF-16, by its byte-order mark", async () => {
