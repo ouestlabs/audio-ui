@@ -90,6 +90,8 @@ import { tiltEqDevice } from "@/components/audio-ui/devices/tilt-eq/device";
 import { createTiltEqEngine } from "@/components/audio-ui/devices/tilt-eq/engine";
 import { transientDevice } from "@/components/audio-ui/devices/transient/device";
 import { createTransientEngine } from "@/components/audio-ui/devices/transient/engine";
+import { unlimiterDevice } from "@/components/audio-ui/devices/unlimiter/device";
+import { createUnlimiterEngine } from "@/components/audio-ui/devices/unlimiter/engine";
 import { utilityDevice } from "@/components/audio-ui/devices/utility/device";
 import { createUtilityEngine } from "@/components/audio-ui/devices/utility/engine";
 import { vibeDevice } from "@/components/audio-ui/devices/vibe/device";
@@ -182,6 +184,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(expanderDevice, createExpanderEngine, "Dynamics"),
   entry(duckerDevice, createDuckerEngine, "Dynamics"),
   entry(companderDevice, createCompanderEngine, "Dynamics"),
+  entry(unlimiterDevice, createUnlimiterEngine, "Dynamics"),
   entry(multibandDevice, createMultibandEngine, "Dynamics"),
   entry(transientDevice, createTransientEngine, "Dynamics"),
   entry(deesserDevice, createDeesserEngine, "Dynamics"),

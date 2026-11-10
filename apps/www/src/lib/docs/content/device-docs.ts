@@ -40,6 +40,7 @@ import { stutterDevice } from "@/registry-audio/bases/base/devices/stutter/devic
 import { tapeKeysDevice } from "@/registry-audio/bases/base/devices/tape-keys/device";
 import { tiltEqDevice } from "@/registry-audio/bases/base/devices/tilt-eq/device";
 import { transientDevice } from "@/registry-audio/bases/base/devices/transient/device";
+import { unlimiterDevice } from "@/registry-audio/bases/base/devices/unlimiter/device";
 import { utilityDevice } from "@/registry-audio/bases/base/devices/utility/device";
 import { vibeDevice } from "@/registry-audio/bases/base/devices/vibe/device";
 import { wahDevice } from "@/registry-audio/bases/base/devices/wah/device";
@@ -49,6 +50,7 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  unlimiter: unlimiterDevice,
   compander: companderDevice,
   ducker: duckerDevice,
   expander: expanderDevice,

@@ -318,6 +318,12 @@
     "title": "Block compander"
   },
   {
+    "categories": ["dynamics", "plot", "knob"],
+    "description": "An unlimiter you can plug in: its state, a panel that draws the lift for an attack's size and an engine that plays it. Play a loop through it: its flattened attacks are lifted back",
+    "name": "block-unlimiter",
+    "title": "Block unlimiter"
+  },
+  {
     "categories": ["distortion", "plot", "knob"],
     "description": "A saturator you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it, pick a curve and turn the drive",
     "name": "block-saturator",

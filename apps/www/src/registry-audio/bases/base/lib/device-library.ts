@@ -90,6 +90,8 @@ import { tiltEqDevice } from "@/registry-audio/bases/base/devices/tilt-eq/device
 import { createTiltEqEngine } from "@/registry-audio/bases/base/devices/tilt-eq/engine";
 import { transientDevice } from "@/registry-audio/bases/base/devices/transient/device";
 import { createTransientEngine } from "@/registry-audio/bases/base/devices/transient/engine";
+import { unlimiterDevice } from "@/registry-audio/bases/base/devices/unlimiter/device";
+import { createUnlimiterEngine } from "@/registry-audio/bases/base/devices/unlimiter/engine";
 import { utilityDevice } from "@/registry-audio/bases/base/devices/utility/device";
 import { createUtilityEngine } from "@/registry-audio/bases/base/devices/utility/engine";
 import { vibeDevice } from "@/registry-audio/bases/base/devices/vibe/device";
@@ -182,6 +184,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(expanderDevice, createExpanderEngine, "Dynamics"),
   entry(duckerDevice, createDuckerEngine, "Dynamics"),
   entry(companderDevice, createCompanderEngine, "Dynamics"),
+  entry(unlimiterDevice, createUnlimiterEngine, "Dynamics"),
   entry(multibandDevice, createMultibandEngine, "Dynamics"),
   entry(transientDevice, createTransientEngine, "Dynamics"),
   entry(deesserDevice, createDeesserEngine, "Dynamics"),

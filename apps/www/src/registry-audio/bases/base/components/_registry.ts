@@ -1064,6 +1064,27 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["dynamics", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An unlimiter you can plug in: its state, a panel that draws the lift for an attack's size and an engine that plays it. Play a loop through it: its flattened attacks are lifted back",
+    files: [
+      {
+        path: "components/device/block-unlimiter.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-unlimiter",
+    registryDependencies: [
+      "@audio-ui/unlimiter-panel",
+      "@audio-ui/unlimiter-device",
+      "@audio-ui/unlimiter-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:

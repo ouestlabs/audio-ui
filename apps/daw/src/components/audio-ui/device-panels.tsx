@@ -43,6 +43,7 @@ import { StutterPanel } from "@/components/audio-ui/devices/stutter/panel";
 import { TapeKeysPanel } from "@/components/audio-ui/devices/tape-keys/panel";
 import { TiltEqPanel } from "@/components/audio-ui/devices/tilt-eq/panel";
 import { TransientPanel } from "@/components/audio-ui/devices/transient/panel";
+import { UnlimiterPanel } from "@/components/audio-ui/devices/unlimiter/panel";
 import { UtilityPanel } from "@/components/audio-ui/devices/utility/panel";
 import { VibePanel } from "@/components/audio-ui/devices/vibe/panel";
 import { WahPanel } from "@/components/audio-ui/devices/wah/panel";
@@ -106,6 +107,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.unlimiter": entry(UnlimiterPanel),
   "audioui.compander": entry(CompanderPanel),
   "audioui.ducker": entry(DuckerPanel),
   "audioui.expander": entry(ExpanderPanel),

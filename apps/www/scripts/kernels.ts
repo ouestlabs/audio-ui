@@ -459,6 +459,53 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "UNLIMITER_KERNELS",
+    file: "devices/unlimiter/kernels.ts",
+    kernels: [
+      {
+        file: "util.js",
+        from: "@audio/dynamics-unlimit",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "timeCoef",
+      },
+      {
+        file: "envelope.js",
+        from: "@audio/dynamics-unlimit",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "envelope",
+      },
+      {
+        file: "util.js",
+        from: "@audio/dynamics-unlimit",
+        internal: true,
+        name: "@audio/dynamics-expander",
+        use: ["writer", "concat", "db2lin", "lin2db"],
+      },
+      {
+        file: "expander.js",
+        from: "@audio/dynamics-unlimit",
+        internal: true,
+        name: "@audio/dynamics-expander",
+        use: "upwardExpanderGain",
+      },
+      {
+        file: "util.js",
+        internal: true,
+        name: "@audio/dynamics-unlimit",
+        use: ["writer", "concat", "db2lin", "lin2db"],
+      },
+      {
+        file: "unlimit.js",
+        internal: true,
+        name: "@audio/dynamics-unlimit",
+        use: ["unlimitGain", "unlimitDeficitGain"],
+      },
+      { file: "audio.js", name: "@audio/dynamics-unlimit", use: "unlimit" },
+    ],
+  },
+  {
     constant: "LIMITER_KERNELS",
     file: "devices/limiter/kernels.ts",
     kernels: [

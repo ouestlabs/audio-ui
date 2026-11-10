@@ -48,6 +48,7 @@ const DEVICES = [
   "stutter",
   "saturator",
   "transient",
+  "unlimiter",
   "utility",
   "vibe",
   "wah",
@@ -1002,6 +1003,63 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/compander-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/dynamics-unlimit"],
+    description:
+      "The unlimiter as a device: an amount, a drive, a crest, adaptive and a guarded ceiling, the numbers that go on the worklet for a state, the lift it gives an attack by its size and the worklet's source (the de-limiter of @audio/dynamics-unlimit), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/unlimiter/device.ts",
+        target: "components/audio-ui/devices/unlimiter/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/unlimiter/kernels.ts",
+        target: "components/audio-ui/devices/unlimiter/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "unlimiter-device",
+    registryDependencies: ["@audio-ui/manifest-worklet"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "An unlimiter on the Web Audio API for an unlimiter state: the de-limiter of @audio/dynamics-unlimit in an AudioWorklet loaded from a blob, fed only while it plays, the sound passing unchanged until it is ready.",
+    files: [
+      {
+        path: "devices/unlimiter/engine.ts",
+        target: "components/audio-ui/devices/unlimiter/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "unlimiter-engine",
+    registryDependencies: ["@audio-ui/unlimiter-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the unlimiter device: the lift it gives an attack for its size, with the crest an attack is lifted to, over the device knobs and switches.",
+    files: [
+      {
+        path: "devices/unlimiter/panel.tsx",
+        target: "components/audio-ui/devices/unlimiter/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "unlimiter-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/unlimiter-device",
     ],
     type: "registry:ui",
   },

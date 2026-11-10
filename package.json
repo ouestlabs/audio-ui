@@ -23,6 +23,7 @@
       "@audio/dynamics-limiter": "0.2.1",
       "@audio/dynamics-opto": "0.2.5",
       "@audio/dynamics-transient-shaper": "0.1.6",
+      "@audio/dynamics-unlimit": "0.1.2",
       "@audio/dynamics-varimu": "0.2.4",
       "@audio/dynamics-vca": "0.2.5",
       "@audio/effect-autowah": "1.1.5",

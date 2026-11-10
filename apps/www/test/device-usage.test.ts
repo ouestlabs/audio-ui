@@ -60,6 +60,6 @@ test("every device page shows its own panel and says what every device page says
       }
     }
   }
-  expect(pages).toBe(46);
+  expect(pages).toBe(47);
   expect(wrong).toEqual([]);
 });
