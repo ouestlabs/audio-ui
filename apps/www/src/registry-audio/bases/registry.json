@@ -13,7 +13,7 @@
       "name": "fader"
     },
     {
-      "count": 38,
+      "count": 39,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -61,7 +61,7 @@
       "name": "spectrum"
     },
     {
-      "count": 8,
+      "count": 9,
       "description": "Dynamics devices: compressors, a limiter, a gate, a de-esser and a transient shaper, each a state, a panel, an engine and the tools an agent drives it with.",
       "label": "Dynamics",
       "name": "dynamics"
@@ -109,7 +109,7 @@
       "name": "tuner"
     },
     {
-      "count": 33,
+      "count": 34,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
       "name": "plot"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 84
+  "totalComponents": 85
 }

@@ -32,6 +32,7 @@
     "@audio/decode-aiff": "catalog:",
     "@audio/decode-caf": "catalog:",
     "@audio/decode-mp4": "catalog:",
+    "@audio/dynamics-compand": "catalog:",
     "@audio/dynamics-compressor": "catalog:",
     "@audio/dynamics-deesser": "catalog:",
     "@audio/dynamics-ducker": "catalog:",

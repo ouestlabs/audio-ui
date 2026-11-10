@@ -24,6 +24,7 @@
         "@audio/decode-aiff": "catalog:",
         "@audio/decode-caf": "catalog:",
         "@audio/decode-mp4": "catalog:",
+        "@audio/dynamics-compand": "catalog:",
         "@audio/dynamics-compressor": "catalog:",
         "@audio/dynamics-deesser": "catalog:",
         "@audio/dynamics-ducker": "catalog:",
@@ -189,6 +190,7 @@
         "@audio/decode-aiff": "catalog:",
         "@audio/decode-caf": "catalog:",
         "@audio/decode-mp4": "catalog:",
+        "@audio/dynamics-compand": "catalog:",
         "@audio/dynamics-compressor": "catalog:",
         "@audio/dynamics-deesser": "catalog:",
         "@audio/dynamics-ducker": "catalog:",
@@ -388,6 +390,7 @@
     "@audio/decode-aiff": "1.3.1",
     "@audio/decode-caf": "1.4.2",
     "@audio/decode-mp4": "1.3.1",
+    "@audio/dynamics-compand": "0.1.7",
     "@audio/dynamics-compressor": "0.3.1",
     "@audio/dynamics-deesser": "0.4.1",
     "@audio/dynamics-ducker": "0.1.9",
@@ -511,6 +514,8 @@
     "@audio/decode-opus": ["@audio/decode-opus@1.3.3", "", { "dependencies": { "codec-parser": "~2.5.0" } }, "sha512-/iykUcA9cgdqqj9pLwPjBkJ4z+WlpLIyWA4xGzvTBkHb1uWpMxYX5yoG+slw8HhmBmrBP2LxKqw6i779g4acVA=="],
 
     "@audio/decode-wav": ["@audio/decode-wav@2.0.0", "", {}, "sha512-fs5MxpGxGwhftXGmIgKT1zzEshQ0vlNkNN/HdHXTZevPenHOxEDblVHKZbhC0ip7jlIi4aV4If6aC+VKrWb6Hw=="],
+
+    "@audio/dynamics-compand": ["@audio/dynamics-compand@0.1.7", "", { "dependencies": { "@audio/dynamics-envelope": "^0.1.0" } }, "sha512-TnhUDM+G+wY9z0F1LvVnIGxnbyohHJ8bRKEIv/GzkwnnLh/mgoAEzBymEgDrauTI0jD/LV7Kr9X9UFoobVuJFQ=="],
 
     "@audio/dynamics-compressor": ["@audio/dynamics-compressor@0.3.1", "", {}, "sha512-xN18QJ8fGULtGYyZ6+ybhDcQpJo4sLWeKaWSNq1RlPdjVHcBy7kRKetsJnyVooAb3B1HW9GNPLlt5EuKMRlLEA=="],
 

@@ -6,6 +6,7 @@ import { BassEnhancerPanel } from "@/registry-audio/bases/base/devices/bass-enha
 import { BinauralPannerPanel } from "@/registry-audio/bases/base/devices/binaural-panner/panel";
 import { ChannelEqPanel } from "@/registry-audio/bases/base/devices/channel-eq/panel";
 import { ChorusPanel } from "@/registry-audio/bases/base/devices/chorus/panel";
+import { CompanderPanel } from "@/registry-audio/bases/base/devices/compander/panel";
 import { CompressorPanel } from "@/registry-audio/bases/base/devices/compressor/panel";
 import { DeesserPanel } from "@/registry-audio/bases/base/devices/deesser/panel";
 import { DelayPanel } from "@/registry-audio/bases/base/devices/delay/panel";
@@ -105,6 +106,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.compander": entry(CompanderPanel),
   "audioui.ducker": entry(DuckerPanel),
   "audioui.expander": entry(ExpanderPanel),
   "audioui.binaural-panner": entry(BinauralPannerPanel),

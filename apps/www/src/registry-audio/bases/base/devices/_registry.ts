@@ -11,6 +11,7 @@ const DEVICES = [
   "bass-enhancer",
   "channel-eq",
   "chorus",
+  "compander",
   "compressor",
   "deesser",
   "delay",
@@ -944,6 +945,63 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/ducker-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/dynamics-compand"],
+    description:
+      "The compander as a device: the level out at -90, -60, -20 and 0 dB in, an attack and a release, the numbers that go on the worklet for a state, the curve a state plays, measured from the package's own stream, and the worklet's source (the compander of @audio/dynamics-compand), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/compander/device.ts",
+        target: "components/audio-ui/devices/compander/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/compander/kernels.ts",
+        target: "components/audio-ui/devices/compander/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "compander-device",
+    registryDependencies: ["@audio-ui/manifest-worklet"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A compander on the Web Audio API for a compander state: the compander of @audio/dynamics-compand in an AudioWorklet loaded from a blob, fed only while it plays, the sound passing unchanged until it is ready.",
+    files: [
+      {
+        path: "devices/compander/engine.ts",
+        target: "components/audio-ui/devices/compander/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "compander-engine",
+    registryDependencies: ["@audio-ui/compander-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the compander device: its transfer curve against the straight line of a clean sound, with a handle on each of its four points, over the device knobs.",
+    files: [
+      {
+        path: "devices/compander/panel.tsx",
+        target: "components/audio-ui/devices/compander/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "compander-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/compander-device",
     ],
     type: "registry:ui",
   },

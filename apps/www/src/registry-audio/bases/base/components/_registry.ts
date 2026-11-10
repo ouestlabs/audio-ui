@@ -1043,6 +1043,27 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["dynamics", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A compander you can plug in: its state, a panel that draws its curve with a handle on each point and an engine that plays it. Play a loop through it and drag the points: under the straight line it turns the sound down, over it up",
+    files: [
+      {
+        path: "components/device/block-compander.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-compander",
+    registryDependencies: [
+      "@audio-ui/compander-panel",
+      "@audio-ui/compander-device",
+      "@audio-ui/compander-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:

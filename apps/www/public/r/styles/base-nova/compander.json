@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The compander device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/compander/.","files":[],"name":"compander","registryDependencies":["@audio-ui/compander-device","@audio-ui/compander-engine","@audio-ui/compander-panel"],"type":"registry:ui"}

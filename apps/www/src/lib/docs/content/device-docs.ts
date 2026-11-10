@@ -3,6 +3,7 @@ import { bassEnhancerDevice } from "@/registry-audio/bases/base/devices/bass-enh
 import { binauralPannerDevice } from "@/registry-audio/bases/base/devices/binaural-panner/device";
 import { channelEqDevice } from "@/registry-audio/bases/base/devices/channel-eq/device";
 import { chorusDevice } from "@/registry-audio/bases/base/devices/chorus/device";
+import { companderDevice } from "@/registry-audio/bases/base/devices/compander/device";
 import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
 import { deesserDevice } from "@/registry-audio/bases/base/devices/deesser/device";
 import { delayDevice } from "@/registry-audio/bases/base/devices/delay/device";
@@ -48,6 +49,7 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  compander: companderDevice,
   ducker: duckerDevice,
   expander: expanderDevice,
   "binaural-panner": binauralPannerDevice,

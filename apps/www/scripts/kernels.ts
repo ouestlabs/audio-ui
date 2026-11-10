@@ -248,6 +248,39 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "COMPANDER_KERNELS",
+    file: "devices/compander/kernels.ts",
+    kernels: [
+      {
+        file: "util.js",
+        from: "@audio/dynamics-compand",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "timeCoef",
+      },
+      {
+        file: "envelope.js",
+        from: "@audio/dynamics-compand",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "envelope",
+      },
+      {
+        file: "util.js",
+        internal: true,
+        name: "@audio/dynamics-compand",
+        use: ["writer", "concat", "db2lin", "lin2db"],
+      },
+      {
+        file: "compand.js",
+        internal: true,
+        name: "@audio/dynamics-compand",
+        use: "compandStream",
+      },
+      { file: "audio.js", name: "@audio/dynamics-compand", use: "compand" },
+    ],
+  },
+  {
     constant: "DEESSER_KERNELS",
     file: "devices/deesser/kernels.ts",
     kernels: [

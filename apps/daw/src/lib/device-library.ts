@@ -16,6 +16,8 @@ import { channelEqDevice } from "@/components/audio-ui/devices/channel-eq/device
 import { createChannelEqEngine } from "@/components/audio-ui/devices/channel-eq/engine";
 import { chorusDevice } from "@/components/audio-ui/devices/chorus/device";
 import { createChorusEngine } from "@/components/audio-ui/devices/chorus/engine";
+import { companderDevice } from "@/components/audio-ui/devices/compander/device";
+import { createCompanderEngine } from "@/components/audio-ui/devices/compander/engine";
 import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
 import { createCompressorEngine } from "@/components/audio-ui/devices/compressor/engine";
 import { deesserDevice } from "@/components/audio-ui/devices/deesser/device";
@@ -179,6 +181,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(gateDevice, createGateEngine, "Dynamics"),
   entry(expanderDevice, createExpanderEngine, "Dynamics"),
   entry(duckerDevice, createDuckerEngine, "Dynamics"),
+  entry(companderDevice, createCompanderEngine, "Dynamics"),
   entry(multibandDevice, createMultibandEngine, "Dynamics"),
   entry(transientDevice, createTransientEngine, "Dynamics"),
   entry(deesserDevice, createDeesserEngine, "Dynamics"),
