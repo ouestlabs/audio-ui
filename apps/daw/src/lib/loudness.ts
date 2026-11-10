@@ -195,14 +195,14 @@ function loadMeter(ctx: BaseAudioContext): Promise<boolean> {
   if (cached) {
     return cached;
   }
-  const worklet = (ctx as { audioWorklet?: AudioWorklet }).audioWorklet;
-  if (!(worklet && typeof AudioWorkletNode !== "undefined")) {
+  // A page without a secure origin has no worklets.
+  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
     return Promise.resolve(false);
   }
   const url = URL.createObjectURL(
     new Blob([LOUDNESS_WORKLET], { type: "text/javascript" })
   );
-  const done = worklet
+  const done = ctx.audioWorklet
     .addModule(url)
     .then(() => true)
     .catch(() => false)

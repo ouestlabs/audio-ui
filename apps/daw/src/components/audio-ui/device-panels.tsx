@@ -86,7 +86,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.chorus": entry(ChorusPanel),
   "audioui.compressor": entry(CompressorPanel, "w-96"),
   "audioui.deesser": entry(DeesserPanel),
-  "audioui.delay": entry(DelayPanel),
+  "audioui.delay": entry(DelayPanel, "w-[28rem]"),
   "audioui.distortion": entry(DistortionPanel),
   "audioui.electric-piano": entry(ElectricPianoPanel, "w-[32rem]"),
   "audioui.equalizer": entry(EqualizerPanel, "w-96"),

@@ -21,6 +21,19 @@ interface KernelSet {
 
 export const KERNEL_SETS: readonly KernelSet[] = [
   {
+    constant: "DELAY_KERNELS",
+    file: "devices/delay/kernels.ts",
+    kernels: [
+      { file: "ping-pong.js", name: "@audio/effect-pingpong", use: "pingPong" },
+      { file: "multitap.js", name: "@audio/effect-multitap", use: "multitap" },
+      {
+        file: "graindelay.js",
+        name: "@audio/effect-graindelay",
+        use: "graindelay",
+      },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [

@@ -315,6 +315,9 @@ function circuitResponse(settings: CircuitSettings) {
  * peak, and by `circuitMakeup`, so it plays at the clean filter's level.
  */
 export const CIRCUIT_WORKLET = `${FILTER_KERNELS}
+/** With nothing coming in, a circuit rings out, until it has been this long quiet; one that sings on its own never is. */
+const QUIET_SECONDS = 0.5;
+const SILENT = 1e-6;
 const CIRCUITS = {
   diode: (data, params) => diodeLadder(data, params),
   korg35: (data, params) => korg35(data, params),
@@ -336,6 +339,7 @@ class AudioUiFilterCircuit extends AudioWorkletProcessor {
     this.circuit = circuit;
     this.type = type;
     this.channels = [];
+    this.quiet = 0;
     this.port.onmessage = ({ data }) => {
       // Another circuit starts from rest: its state means something else.
       if (data.circuit !== this.circuit) {
@@ -348,7 +352,11 @@ class AudioUiFilterCircuit extends AudioWorkletProcessor {
   process(inputs, outputs, parameters) {
     const input = inputs[0];
     const output = outputs[0];
-    if (!(input && input.length > 0 && output)) {
+    if (!(output && output.length > 0)) {
+      return true;
+    }
+    const coming = input && input.length > 0;
+    if (!coming && this.quiet >= QUIET_SECONDS * sampleRate) {
       return true;
     }
     const run = CIRCUITS[this.circuit];
@@ -371,9 +379,15 @@ class AudioUiFilterCircuit extends AudioWorkletProcessor {
       level = 1 + 4 * resonance;
     }
     const makeup = (level * Math.tanh(1)) / Math.tanh(drive);
+    let loudest = 0;
     for (let channel = 0; channel < output.length; channel += 1) {
       const data = output[channel];
-      data.set(input[channel % input.length]);
+      // Nothing coming in: the circuit rings out on silence.
+      if (coming) {
+        data.set(input[channel % input.length]);
+      } else {
+        data.fill(0);
+      }
       this.channels[channel] ??= { fs: sampleRate };
       const params = this.channels[channel];
       params.fc = cutoff;
@@ -383,8 +397,10 @@ class AudioUiFilterCircuit extends AudioWorkletProcessor {
       run(data, params);
       for (let frame = 0; frame < data.length; frame += 1) {
         data[frame] *= makeup;
+        loudest = Math.max(loudest, Math.abs(data[frame]));
       }
     }
+    this.quiet = coming || loudest > SILENT ? 0 : this.quiet + output[0].length;
     return true;
   }
 }

@@ -341,13 +341,23 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/effect-graindelay",
+      "@audio/effect-multitap",
+      "@audio/effect-pingpong",
+    ],
     description:
-      "The delay as a device: its time, feedback, tone and mix, the numbers that go on the nodes for a state and the echoes a state makes, with no panel and no audio in it.",
+      "The delay as a device: its mode (an echo, a ping-pong, a multitap or a grain delay), time, feedback, tone and mix, and the grain delay's pitch, spray, jitter and grain size, the numbers that go on the nodes for a state, the echoes a state makes and the worklet's source, with no panel and no audio in it.",
     files: [
       {
         path: "devices/delay/device.ts",
         target: "components/audio-ui/devices/delay/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/delay/kernels.ts",
+        target: "components/audio-ui/devices/delay/kernels.ts",
         type: "registry:lib",
       },
     ],
@@ -359,7 +369,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A delay on the Web Audio API for a delay state: an echo that goes round a tone filter so each repeat is darker, mixed with the dry sound, with a time that bends like a tape instead of clicking.",
+      "A delay on the Web Audio API for a delay state: an echo that goes round a tone filter so each repeat is darker, mixed with the dry sound, with a time that bends like a tape instead of clicking, and the ping-pong, multitap and grain modes on an AudioWorklet loaded from a blob, fed only while one plays.",
     files: [
       {
         path: "devices/delay/engine.ts",
@@ -388,6 +398,7 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/delay-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },

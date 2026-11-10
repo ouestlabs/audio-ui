@@ -417,6 +417,16 @@ describe("the ladders' worklet", () => {
     });
   }
 
+  test("with nothing coming in, a resonance rings out", () => {
+    const processor = made();
+    const click = new Float32Array(128);
+    click[0] = 1;
+    processor.process([[click]], [[new Float32Array(128)]], parameters(1));
+    const output = new Float32Array(128);
+    processor.process([[]], [[output]], parameters(1));
+    expect(Math.max(...output.map(Math.abs))).toBeGreaterThan(1e-4);
+  });
+
   test("with nothing coming in, it waits", () => {
     expect(made().process([[]], [[new Float32Array(128)]], parameters(1))).toBe(
       true

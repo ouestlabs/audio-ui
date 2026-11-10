@@ -23,6 +23,9 @@
         "@audio/decode-aiff": "catalog:",
         "@audio/decode-caf": "catalog:",
         "@audio/decode-mp4": "catalog:",
+        "@audio/effect-graindelay": "catalog:",
+        "@audio/effect-multitap": "catalog:",
+        "@audio/effect-pingpong": "catalog:",
         "@audio/encode": "catalog:",
         "@audio/filter-diode-ladder": "catalog:",
         "@audio/filter-korg35": "catalog:",
@@ -153,6 +156,9 @@
         "@audio/decode-aiff": "catalog:",
         "@audio/decode-caf": "catalog:",
         "@audio/decode-mp4": "catalog:",
+        "@audio/effect-graindelay": "catalog:",
+        "@audio/effect-multitap": "catalog:",
+        "@audio/effect-pingpong": "catalog:",
         "@audio/encode": "catalog:",
         "@audio/filter-diode-ladder": "catalog:",
         "@audio/filter-korg35": "catalog:",
@@ -315,6 +321,9 @@
     "@audio/decode-aiff": "1.3.1",
     "@audio/decode-caf": "1.4.2",
     "@audio/decode-mp4": "1.3.1",
+    "@audio/effect-graindelay": "1.1.6",
+    "@audio/effect-multitap": "1.1.6",
+    "@audio/effect-pingpong": "1.1.5",
     "@audio/encode": "1.11.0",
     "@audio/filter-diode-ladder": "1.2.2",
     "@audio/filter-korg35": "1.2.1",
@@ -403,6 +412,12 @@
     "@audio/decode-opus": ["@audio/decode-opus@1.3.3", "", { "dependencies": { "codec-parser": "~2.5.0" } }, "sha512-/iykUcA9cgdqqj9pLwPjBkJ4z+WlpLIyWA4xGzvTBkHb1uWpMxYX5yoG+slw8HhmBmrBP2LxKqw6i779g4acVA=="],
 
     "@audio/decode-wav": ["@audio/decode-wav@2.0.0", "", {}, "sha512-fs5MxpGxGwhftXGmIgKT1zzEshQ0vlNkNN/HdHXTZevPenHOxEDblVHKZbhC0ip7jlIi4aV4If6aC+VKrWb6Hw=="],
+
+    "@audio/effect-graindelay": ["@audio/effect-graindelay@1.1.6", "", {}, "sha512-OWN3QPQ67WxmeE487UBCE/GRmkAMKvaPJv0ffck9RsRLHLmIlOmbGbBMxPK/OvB4SxOXVFxci7bpswTiAroENQ=="],
+
+    "@audio/effect-multitap": ["@audio/effect-multitap@1.1.6", "", {}, "sha512-MlqkQYyn9OngS+fcY7Zg7BWcrdRVIQBkiJ18evgdArq1U6DO7X7wUg1RfABQRyLMhzuTVE5GPwugZB8/iJyfZg=="],
+
+    "@audio/effect-pingpong": ["@audio/effect-pingpong@1.1.5", "", {}, "sha512-Z56kBSJlMatLdutgwLpiGEPmOMiTPoYEGq+rT59QZQwSjd1af/OFpO2U1/yeTHvCrOSqYUvd7y7VI+jN6kDjFQ=="],
 
     "@audio/encode": ["@audio/encode@1.11.0", "", { "dependencies": { "@audio/encode-aac": "^1.2.1", "@audio/encode-aiff": "^1.4.2", "@audio/encode-alac": "^1.0.2", "@audio/encode-caf": "^1.3.2", "@audio/encode-flac": "^1.4.3", "@audio/encode-gsm": "^0.1.0", "@audio/encode-mp3": "^2.0.1", "@audio/encode-mp4": "^1.2.1", "@audio/encode-ogg": "^1.3.1", "@audio/encode-opus": "^1.3.2", "@audio/encode-qoa": "^1.3.1", "@audio/encode-wav": "^1.5.2", "@audio/encode-wavpack": "^1.0.2", "@audio/encode-webm": "^1.3.1" } }, "sha512-e++lSZ+pOfuWGgk0NhqI8gBq7uzKxJH7bzqJsVMuIC8q5HQVtCFZz7+lRsfLJK9YT3yH04EacgvXr28NSdDcsg=="],
 
