@@ -1,5 +1,11 @@
 # @audio-ui/core
 
+## 0.24.0
+
+### Minor Changes
+
+- 718e188: Waveform: `attachWaveformCanvas` and `attachWaveformBars` draw a waveform on a canvas, or as a row of bars styled in CSS, from peaks or a live signal, outside any framework. The React `Waveform.Canvas` and `Waveform.Bars` now draw through them.
+
 ## 0.23.3
 
 ### Patch Changes

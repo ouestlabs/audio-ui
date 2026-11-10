@@ -1,5 +1,13 @@
 # @audio-ui/react
 
+## 0.13.2
+
+### Patch Changes
+
+- 718e188: Timeline: `ClipFade` and `ClipFadeHandle` are positioned correctly when the timeline fits its width. They were sized from `--timeline-unit`, which is a percentage of the lane when no zoom is set and resolved against the clip inside it; the clip now sets `--clip-unit`, the width of one unit for its own parts.
+- Updated dependencies [718e188]
+  - @audio-ui/core@0.24.0
+
 ## 0.13.1
 
 ### Patch Changes
