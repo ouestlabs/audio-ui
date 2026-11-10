@@ -556,9 +556,16 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/reverb-dattorro",
+      "@audio/reverb-fdn",
+      "@audio/reverb-freeverb",
+      "@audio/reverb-schroeder",
+      "@audio/reverb-spring",
+    ],
     description:
-      "The reverb as a device: its decay, pre-delay, damping and mix, the numbers that go on the nodes for a state, the decay a state draws and the impulse response of its room, with no panel and no audio in it.",
+      "The reverb as a device: its type (a room, a plate, a hall, a spring, a Freeverb or a Schroeder), decay, pre-delay, damping and mix, the numbers that go on the nodes for a state, the decay a state draws and the impulse response of its room, with no panel and no audio in it.",
     files: [
       {
         path: "lib/reverb-device.ts",
@@ -574,7 +581,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A reverb on the Web Audio API for a reverb state: a convolver fed a room made from the decay and the damping, two of them cross-faded so a new room never clicks, after a pre-delay and mixed with the dry sound.",
+      "A reverb on the Web Audio API for a reverb state: a convolver fed a room made from the type, the decay and the damping, two of them cross-faded so a new room never clicks, after a pre-delay and mixed with the dry sound.",
     files: [
       {
         path: "lib/reverb-engine.ts",

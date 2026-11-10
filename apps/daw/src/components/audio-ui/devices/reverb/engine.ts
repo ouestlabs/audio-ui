@@ -8,7 +8,7 @@ import {
 const RAMP_SECONDS = 0.02;
 /** How long a new room takes to take over from the old one, in seconds. */
 const CROSSFADE_SECONDS = 0.08;
-/** A room is made at most this often while a knob is dragged, in milliseconds: the impulse is a table of a few hundred thousand points. */
+/** How long a knob rests before its room is made, in milliseconds: the impulse is a table of a few hundred thousand points, and a type other than the room takes tens of milliseconds to ring. */
 const REBUILD_MS = 120;
 
 export interface ReverbEngine {
@@ -28,10 +28,11 @@ export interface ReverbEngine {
  *       → pre-delay → room A or room B → wet ──────────┴→ output
  * ```
  *
- * The room is a convolver fed an impulse response made from the decay and the
- * damping (`reverbImpulse`). A convolver cannot change its impulse without a
- * click, so there are two: a new room is loaded in the idle one and the two
- * cross-fade. The room is rebuilt at most every 120 ms while a knob moves.
+ * The room is a convolver fed an impulse response made from the type, the
+ * decay and the damping (`reverbImpulse`). A convolver cannot change its
+ * impulse without a click, so there are two: a new room is loaded in the idle
+ * one and the two cross-fade. The room is rebuilt once a knob has rested for
+ * 120 ms.
  */
 export function createReverbEngine(
   ctx: BaseAudioContext,
@@ -53,7 +54,7 @@ export function createReverbEngine(
   wet.connect(output);
 
   let active = 0;
-  let built: { dampingHz: number; decay: number } | null = null;
+  let built: Pick<ReverbState, "dampingHz" | "decay" | "type"> | null = null;
   let timer: ReturnType<typeof setTimeout> | undefined;
   let latest = initial;
 
@@ -86,11 +87,16 @@ export function createReverbEngine(
     if (
       built &&
       built.decay === state.decay &&
-      built.dampingHz === state.dampingHz
+      built.dampingHz === state.dampingHz &&
+      built.type === state.type
     ) {
       return;
     }
-    built = { dampingHz: state.dampingHz, decay: state.decay };
+    built = {
+      dampingHz: state.dampingHz,
+      decay: state.decay,
+      type: state.type,
+    };
     load(state, false);
   };
 
@@ -100,7 +106,11 @@ export function createReverbEngine(
   wet.gain.value = first.wet;
   preDelay.delayTime.value = first.preDelay;
   rooms[1]?.fade.gain.setValueAtTime(0, 0);
-  built = { dampingHz: initial.dampingHz, decay: initial.decay };
+  built = {
+    dampingHz: initial.dampingHz,
+    decay: initial.decay,
+    type: initial.type,
+  };
   load(initial, true);
 
   return {

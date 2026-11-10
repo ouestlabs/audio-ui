@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
   DECAY_DB,
+  type ReverbType,
   reverbDecay,
   reverbDevice,
   reverbImpulse,
@@ -123,16 +124,96 @@ describe("the reverb device", () => {
   });
 
   test("a closed damping takes the highs out of the tail", () => {
-    const energyAbove = (dampingHz: number) => {
-      const [data] = reverbImpulse(8000, { dampingHz, decay: 0.5 }, seeded());
-      // The first difference is a crude high-pass: how much the signal jumps.
-      let sum = 0;
-      for (let i = 1; i < data.length; i += 1) {
-        sum += ((data[i] ?? 0) - (data[i - 1] ?? 0)) ** 2;
-      }
-      return sum;
-    };
-    expect(energyAbove(1000)).toBeLessThan(energyAbove(20_000) / 2);
+    expect(highs("room", 1000)).toBeLessThan(highs("room", 20_000) / 2);
+  });
+
+  test("the room is the type a reverb starts with", () => {
+    expect(defaults.type).toBe("room");
+    expect(reverbDevice.sanitize({ decay: 3 }).type).toBe("room");
+  });
+});
+
+/** How much of the impulse is in its highs, by its first difference: a crude high-pass. */
+function highs(type: ReverbType, dampingHz: number) {
+  const [data] = reverbImpulse(
+    16_000,
+    { dampingHz, decay: 0.8, type },
+    seeded()
+  );
+  let jumps = 0;
+  let energy = 0;
+  for (let i = 1; i < data.length; i += 1) {
+    jumps += ((data[i] ?? 0) - (data[i - 1] ?? 0)) ** 2;
+    energy += (data[i] ?? 0) ** 2;
+  }
+  return jumps / energy;
+}
+
+/** The decay time an impulse has, by its energy decay from -5 to -35 dB, doubled. */
+function decayTime(channels: Float32Array[], sampleRate: number) {
+  const length = channels[0]?.length ?? 0;
+  const left = new Float64Array(length);
+  let sum = 0;
+  for (let i = length - 1; i >= 0; i -= 1) {
+    for (const channel of channels) {
+      sum += (channel[i] ?? 0) ** 2;
+    }
+    left[i] = sum;
+  }
+  const db = (i: number) => 10 * Math.log10((left[i] ?? 0) / (left[0] ?? 1));
+  const at5 = left.findIndex((_, i) => db(i) <= -5);
+  const at35 = left.findIndex((_, i) => db(i) <= -35);
+  return (2 * (at35 - at5)) / sampleRate;
+}
+
+const TYPES =
+  reverbDevice.parameters
+    .find((parameter) => parameter.id === "type")
+    ?.options?.map((option) => option.value as ReverbType) ?? [];
+
+describe("the reverb's types", () => {
+  test("there is a room, a plate, a hall, a spring, a Freeverb and a Schroeder", () => {
+    expect(TYPES).toEqual([
+      "room",
+      "plate",
+      "hall",
+      "spring",
+      "freeverb",
+      "schroeder",
+    ]);
+  });
+
+  for (const type of TYPES) {
+    test(`${type}: falls by 60 dB over the decay time`, () => {
+      const room = reverbImpulse(
+        16_000,
+        { dampingHz: 7000, decay: 1.5, type },
+        seeded()
+      );
+      expect(room[0].length).toBe(24_000);
+      expect(decayTime(room, 16_000)).toBeGreaterThan(1.5 * 0.85);
+      expect(decayTime(room, 16_000)).toBeLessThan(1.5 * 1.15);
+    });
+
+    test(`${type}: shorter than it rings by itself, it is brought down to the decay time`, () => {
+      const room = reverbImpulse(
+        16_000,
+        { dampingHz: 7000, decay: 0.3, type },
+        seeded()
+      );
+      expect(decayTime(room, 16_000)).toBeLessThan(0.3 * 1.25);
+    });
+
+    test(`${type}: a closed damping takes the highs out of it`, () => {
+      expect(highs(type, 1000)).toBeLessThan(highs(type, 20_000) / 2);
+    });
+  }
+
+  test("a type made by its own algorithm is the same room every time", () => {
+    const state = { dampingHz: 5000, decay: 1, type: "plate" as const };
+    expect(reverbImpulse(16_000, state)[0]).toEqual(
+      reverbImpulse(16_000, state)[0]
+    );
   });
 });
 
@@ -154,6 +235,15 @@ describe("createReverbEngine", () => {
     await new Promise((resolve) => setTimeout(resolve, 200));
     expect(made.buffers).toHaveLength(loaded + 1);
     expect(made.convolvers[1]?.buffer?.length).toBe(16_000);
+  });
+
+  test("a new type builds a new room", async () => {
+    const { ctx, made } = fakeContext();
+    const engine = createReverbEngine(ctx, defaults);
+    const loaded = made.buffers.length;
+    engine.update({ ...defaults, type: "plate" });
+    await new Promise((resolve) => setTimeout(resolve, 200));
+    expect(made.buffers).toHaveLength(loaded + 1);
   });
 
   test("a knob that does not change the room does not rebuild it", async () => {

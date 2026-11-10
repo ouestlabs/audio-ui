@@ -878,6 +878,7 @@ export const audio: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/reverb-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },

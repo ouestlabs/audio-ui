@@ -1,6 +1,6 @@
 ---
 title: Reverb
-description: "A reverb device: a decay, a pre-delay, a damping and a mix, a panel that draws the tail with a handle, a Web Audio engine and tools for agents."
+description: "A reverb device: six types of room, a decay, a pre-delay, a damping and a mix, a panel that draws the tail with a handle, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
@@ -16,15 +16,16 @@ Puts the sound in a room. It is a [device](/docs/devices): a state, a panel, an 
 ## Controls
 
 <DeviceControls device="reverb">
+<Control id="type">The algorithm the room is made with, picked in the title bar. Room, noise dying away, smooth and even, is the default. Plate is a Dattorro plate, dense and bright. Hall is a feedback delay network, wide and even. Spring is the dispersive loop of a spring tank, with its chirp, in mono. Freeverb is eight damped combs and four allpasses per side. Schroeder is four combs and two allpasses, the first digital reverb, in mono.</Control>
 <Control id="decay">How long the tail takes to fall by 60 dB. Drag the handle at the end of the tail to set it.</Control>
 <Control id="preDelayMs">The time between the sound and the start of the tail.</Control>
-<Control id="dampingHz">Closes the highs of the tail, as soft walls do.</Control>
+<Control id="dampingHz">Closes the highs of the tail, as soft walls do: a one-pole low-pass on what goes into the room, the same for every type.</Control>
 <Control id="mix">The balance of the room and the dry signal.</Control>
 </DeviceControls>
 
 ## Panel
 
-The panel draws the level of the tail falling in dB, from the end of the pre-delay to -60 dB. `reverbDecay(state)` is the curve it draws, and `reverbImpulse(sampleRate, state)` makes the impulse response of the room.
+The panel draws the level of the tail falling in dB, from the end of the pre-delay to -60 dB, and picks the type in its title bar. `reverbDecay(state)` is the curve it draws, and `reverbImpulse(sampleRate, state)` makes the impulse response of the room.
 
 <DeviceUsage name="reverb" />
 
@@ -32,4 +33,6 @@ The panel draws the level of the tail falling in dB, from the end of the pre-del
 
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-The room is a convolver fed an impulse response made from the decay and the damping. A convolver cannot change its impulse without a click, so the engine has two and cross-fades: a new room is built in the idle one, at most every 120 ms while a control moves.
+The room is a convolver fed an impulse response made from the type, the decay and the damping. Room is noise shaped to the decay. Every other type is its own algorithm rung by a click, from `@audio/reverb-dattorro`, `@audio/reverb-fdn`, `@audio/reverb-spring`, `@audio/reverb-freeverb` and `@audio/reverb-schroeder`, its feedback set so the tail falls by 60 dB over the decay time. These algorithms hold no modulation, so the impulse response is the algorithm itself, and every type plays at the cost of one convolver. A plate, a spring and a Freeverb ring for half a second at the least: a shorter decay brings their tail down along the same exponential. A spring longer than about 9 s stops at that.
+
+A convolver cannot change its impulse without a click, so the engine has two and cross-fades: a new room is built in the idle one once a control has rested for 120 ms. Building a type other than Room takes a few tens of milliseconds for a long decay.
