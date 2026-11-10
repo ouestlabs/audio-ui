@@ -28,7 +28,8 @@
   },
   "license": "MIT",
   "sideEffects": [
-    "./dist/*.js"
+    "./dist/*.js",
+    "./src/*/index.ts"
   ],
   "type": "module",
   "exports": {

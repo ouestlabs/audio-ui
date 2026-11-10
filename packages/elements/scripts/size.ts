@@ -4,6 +4,8 @@
  * so an element cannot get heavier without somebody deciding it should.
  * Run `bun run build:pkg` first.
  */
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
+
 /** Gzipped bytes. About 15% above what each weighs today. */
 const BUDGETS: Record<string, number> = {
   envelope: 9000,
@@ -24,14 +26,28 @@ const BUDGETS: Record<string, number> = {
 const dist = `${import.meta.dir}/../dist`;
 let failed = false;
 
+const primitives = Object.keys(BUDGETS).filter((entry) => entry !== "index");
+
+/** The elements an entry registers when imported for its side effect: its root, every root for the package root, and for the piano roll the timeline and piano it is composed of. */
+const REGISTERS: Record<string, readonly string[]> = {
+  index: primitives.map((entry) => `audio-ui-${entry}`),
+  "piano-roll": [
+    "audio-ui-piano-roll",
+    "audio-ui-timeline-viewport",
+    "audio-ui-piano-key",
+  ],
+};
+
 /**
- * Whether a page that imports `entry` only for its side effect, as
- * `import "@audio-ui/elements/knob"` does, still registers the elements once
- * a bundler has dropped the code it thinks is unused: what `sideEffects` in
- * package.json decides.
+ * The elements a page that imports `entry` only for its side effect, as
+ * `import "@audio-ui/elements/knob"` does, fails to register once a bundler
+ * has dropped the code it thinks is unused: what `sideEffects` in
+ * package.json decides. The bundle runs in a window of its own, so an entry
+ * checked before cannot register them in its place.
  */
-async function registers(entry: string, tag: string) {
+async function unregistered(entry: string): Promise<string[]> {
   const page = `${dist}/.registers-${entry}.js`;
+  const bundled = `${dist}/.registered-${entry}.js`;
   await Bun.write(page, `import "./${entry}.js";\n`);
   const result = await Bun.build({
     entrypoints: [page],
@@ -40,9 +56,20 @@ async function registers(entry: string, tag: string) {
   });
   await Bun.file(page).delete();
   const [output] = result.outputs;
-  return Boolean(
-    result.success && output && (await output.text()).includes(tag)
-  );
+  const tags = REGISTERS[entry] ?? [`audio-ui-${entry}`];
+  if (!(result.success && output)) {
+    return [...tags];
+  }
+  await Bun.write(bundled, output);
+  GlobalRegistrator.register();
+  try {
+    // A query of its own, so each window runs the bundle afresh.
+    await import(`${Bun.pathToFileURL(bundled).href}?${entry}`);
+    return tags.filter((tag) => !customElements.get(tag));
+  } finally {
+    await GlobalRegistrator.unregister();
+    await Bun.file(bundled).delete();
+  }
 }
 
 for (const [entry, budget] of Object.entries(BUDGETS)) {
@@ -59,10 +86,10 @@ for (const [entry, budget] of Object.entries(BUDGETS)) {
     failed = true;
     continue;
   }
-  const tag = entry === "index" ? "audio-ui-knob" : `audio-ui-${entry}`;
-  if (!(await registers(entry, tag))) {
+  const missing = await unregistered(entry);
+  if (missing.length > 0) {
     console.error(
-      `FAIL ${entry}: imported for its side effect, it registers no <${tag}>`
+      `FAIL ${entry}: imported for its side effect, it does not register ${missing.map((tag) => `<${tag}>`).join(", ")}`
     );
     failed = true;
   }
