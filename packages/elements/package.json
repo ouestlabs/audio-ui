@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/elements",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Accessible, headless custom elements for audio interfaces.",
   "keywords": [
     "audio-ui",
@@ -101,7 +101,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@audio-ui/core": "^0.23.3"
+    "@audio-ui/core": "^0.24.0"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^21.0.4",

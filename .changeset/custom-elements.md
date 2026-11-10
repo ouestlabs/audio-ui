@@ -1,5 +1,0 @@
----
-"@audio-ui/elements": minor
----
-
-New package: every primitive as framework-agnostic Web Components, built on `@audio-ui/core` and at API parity with `@audio-ui/react`, with the same parts, keyboard interactions, ARIA semantics and `data-*` state attributes. Controls fire `input` on every change, cancelable with `preventDefault()`, and `change` when an interaction ends; parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`. Each primitive registers from its own entry point, `@audio-ui/elements/<primitive>`.
