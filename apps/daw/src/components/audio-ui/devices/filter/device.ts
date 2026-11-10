@@ -1,6 +1,7 @@
 import diodeLadder from "@audio/filter-diode-ladder";
 import korg35 from "@audio/filter-korg35";
 import moogLadder from "@audio/filter-moog-ladder";
+import oberheim from "@audio/filter-oberheim";
 import {
   type BiquadType,
   biquadResponse,
@@ -11,7 +12,7 @@ import {
   WEB_AUDIO_FILTER_TYPES,
 } from "@audio-ui/core/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
-import { LADDER_KERNELS } from "@/components/audio-ui/devices/filter/ladders";
+import { FILTER_KERNELS } from "@/components/audio-ui/devices/filter/kernels";
 
 /** The width a filter has when the resonance is at its lowest: flat, a Butterworth. */
 export const FLAT_Q = Math.SQRT1_2;
@@ -25,7 +26,7 @@ const MAX_Q = 18;
  */
 export const filterDevice = defineDevice({
   description:
-    "Takes part of the spectrum out: a low-pass, high-pass, band-pass or notch filter at a cutoff frequency, with a resonance that makes it ring or narrow it, through a circuit, clean or a ladder that a drive bends.",
+    "Takes part of the spectrum out: a low-pass, high-pass, band-pass or notch filter at a cutoff frequency, with a resonance that makes it ring or narrow it, through a circuit, clean or modeled on an analog one that a drive bends.",
   id: "audioui.filter",
   name: "Filter",
   parameters: [
@@ -53,6 +54,7 @@ export const filterDevice = defineDevice({
         { label: "Ladder 12", value: "ladder12" },
         { label: "Diode", value: "diode" },
         { label: "Korg35", value: "korg35" },
+        { label: "SEM", value: "sem" },
       ],
     },
     {
@@ -90,15 +92,16 @@ export const filterDevice = defineDevice({
 export type FilterState = DeviceState<typeof filterDevice.parameters>;
 export type FilterCircuit = FilterState["circuit"];
 type FilterType = FilterState["type"];
-type LadderCircuit = Exclude<FilterCircuit, "clean">;
+type AnalogCircuit = Exclude<FilterCircuit, "clean">;
 
-/** The types each circuit has: the clean filter all four, a ladder the taps of its own. */
+/** The types each circuit has: the clean filter and the SEM all four, a ladder the taps of its own. */
 export const CIRCUIT_TYPES: Record<FilterCircuit, readonly FilterType[]> = {
   clean: ["lowpass", "highpass", "bandpass", "notch"],
   diode: ["lowpass"],
   korg35: ["lowpass", "highpass"],
   ladder12: ["lowpass", "highpass", "bandpass"],
   ladder24: ["lowpass", "highpass", "bandpass"],
+  sem: ["lowpass", "highpass", "bandpass", "notch"],
 };
 
 /** The circuit a state plays: its own where it has the type, the clean filter where it does not. */
@@ -118,7 +121,7 @@ const peakDb = (q: number) =>
 const PEAK_STEP_DB = 2;
 /** The resonance each ladder needs for its peak to rise 0, 2, 4… 26 dB over its passband: measured on each, the same at any cutoff. */
 const LADDER_PEAKS: Record<
-  Exclude<LadderCircuit, "korg35">,
+  Exclude<AnalogCircuit, "korg35" | "sem">,
   readonly number[]
 > = {
   diode: [
@@ -136,11 +139,16 @@ const LADDER_PEAKS: Record<
 };
 
 /**
- * A ladder's resonance for a resonance of the clean filter: its peak as high
- * over its passband. The Korg35 has no peak to match: its resonance follows the
- * knob, from none at flat to all of it at the top.
+ * An analog circuit's resonance for a resonance of the clean filter: a
+ * ladder's peak as high over its passband, from its table. The SEM is a
+ * state-variable filter whose damping is `1 - resonance`, the same 2-pole
+ * filter as the clean one at `1 - 1 / (2Q)`. The Korg35 has no peak to match:
+ * its resonance follows the knob, from none at flat to all of it at the top.
  */
-export function ladderResonance(circuit: LadderCircuit, q: number): number {
+export function circuitResonance(circuit: AnalogCircuit, q: number): number {
+  if (circuit === "sem") {
+    return 1 - 1 / (2 * q);
+  }
   if (circuit === "korg35") {
     return Math.min(
       1,
@@ -155,12 +163,20 @@ export function ladderResonance(circuit: LadderCircuit, q: number): number {
   return low + (high - low) * (at - below);
 }
 
+/** The circuits a drive bends: the SEM's saturation is its own, fixed. */
+export const DRIVEN_CIRCUITS: readonly FilterCircuit[] = [
+  "ladder24",
+  "ladder12",
+  "diode",
+  "korg35",
+];
+
 /**
- * The numbers that go on the ladder worklet for a state: the circuit it plays,
- * its tap, the cutoff, the resonance and the drive as a gain. `null` when the
- * state plays the clean filter.
+ * The numbers that go on the circuit worklet for a state: the circuit it
+ * plays, its type, the cutoff, the resonance and the drive as a gain, 1 for a
+ * circuit with none. `null` when the state plays the clean filter.
  */
-export function ladderSettings(state: FilterState) {
+export function circuitSettings(state: FilterState) {
   const circuit = filterCircuit(state);
   if (circuit === "clean") {
     return null;
@@ -168,30 +184,35 @@ export function ladderSettings(state: FilterState) {
   return {
     circuit,
     cutoff: state.cutoffHz,
-    drive: 10 ** (state.driveDb / 20),
-    resonance: ladderResonance(circuit, state.resonance),
-    type:
-      state.type === "highpass" || state.type === "bandpass"
-        ? state.type
-        : "lowpass",
+    drive: DRIVEN_CIRCUITS.includes(circuit) ? 10 ** (state.driveDb / 20) : 1,
+    resonance: circuitResonance(circuit, state.resonance),
+    type: state.type,
   } as const;
 }
 
-type LadderSettings = NonNullable<ReturnType<typeof ladderSettings>>;
+type CircuitSettings = NonNullable<ReturnType<typeof circuitSettings>>;
 
 /**
- * How much a ladder's low-pass is brought back up so its passband stays at
- * 0 dB as the resonance rises, where the circuit loses its lows: by its loss
- * at DC, `1 + 4·resonance` for the Moog and diode ladders, `1 + k(1 + G + G²)`
- * for the Korg35, its feedback `k = 2·resonance` and `G` its stages' gain at
- * the cutoff. Its peak then rises over 0 dB as the clean filter's does. A
- * high-pass loses nothing in its passband and a band-pass has none: 1.
+ * How much an analog circuit's output is brought back so it plays at the
+ * clean filter's level: a low-pass at 0 dB in its passband, where a ladder
+ * loses its lows as the resonance rises (by its loss at DC, `1 + 4·resonance`
+ * for the Moog and diode ladders, `1 + k(1 + G + G²)` for the Korg35, its
+ * feedback `k = 2·resonance` and `G` its stages' gain at the cutoff), and a
+ * band-pass at 0 dB at its cutoff (`4 - k` for the 4-pole Moog, `(4 - k) / 2`
+ * for the 2-pole one, `k = 4·resonance`, and `2(1 - resonance)` for the SEM).
+ * A high-pass and a notch lose nothing: 1.
  */
-export function passbandMakeup(
-  { circuit, cutoff, resonance, type }: LadderSettings,
+export function circuitMakeup(
+  { circuit, cutoff, resonance, type }: CircuitSettings,
   sampleRate: number
 ): number {
-  if (type !== "lowpass") {
+  if (type === "bandpass") {
+    if (circuit === "sem") {
+      return 2 * (1 - resonance);
+    }
+    return circuit === "ladder12" ? (4 - 4 * resonance) / 2 : 4 - 4 * resonance;
+  }
+  if (type !== "lowpass" || circuit === "sem") {
     return 1;
   }
   if (circuit !== "korg35") {
@@ -203,31 +224,39 @@ export function passbandMakeup(
   const stage = g / (1 + g);
   return 1 + 2 * resonance * (1 + stage + stage * stage);
 }
+
 type Kernel = (
   data: Float32Array,
   params: {
     fc: number;
     fs: number;
     resonance: number;
-    type: LadderSettings["type"];
+    type: CircuitSettings["type"];
   }
 ) => unknown;
 
-/** Each ladder as its package runs it, on the main thread, for its curve. */
-const KERNELS: Record<LadderCircuit, Kernel> = {
+/** The type a ladder's taps have, for a type it has. */
+const tap = (type: CircuitSettings["type"]) =>
+  type === "highpass" || type === "bandpass" ? type : "lowpass";
+
+/** Each analog circuit as its package runs it, on the main thread, for its curve. */
+const KERNELS: Record<AnalogCircuit, Kernel> = {
   diode: (data, params) => diodeLadder(data, params),
   korg35: (data, params) =>
     korg35(data, {
       ...params,
       type: params.type === "highpass" ? "highpass" : "lowpass",
     }),
-  ladder12: (data, params) => moogLadder(data, { ...params, poles: 2 }),
-  ladder24: (data, params) => moogLadder(data, { ...params, poles: 4 }),
+  ladder12: (data, params) =>
+    moogLadder(data, { ...params, poles: 2, type: tap(params.type) }),
+  ladder24: (data, params) =>
+    moogLadder(data, { ...params, poles: 4, type: tap(params.type) }),
+  sem: (data, params) => oberheim(data, params),
 };
 
-/** How many frames of a ladder's response its curve reads at most: enough for a low cutoff ringing at the top resonance to die away. */
+/** How many frames of a circuit's response its curve reads at most: enough for a low cutoff ringing at the top resonance to die away. */
 const RESPONSE_FRAMES = 2 ** 15;
-/** A click too quiet to saturate a ladder: its curve is the circuit itself, whatever the drive. */
+/** A click too quiet to saturate a circuit: its curve is the circuit itself, whatever the drive. */
 const CLICK = 1e-5;
 /** Under this, a response has died away: what follows adds nothing to its transform. */
 const SILENT = CLICK * 1e-7;
@@ -252,13 +281,13 @@ function gainAt(response: Float32Array, length: number, hz: number) {
   return Math.hypot(re, im);
 }
 
-/** A ladder's curve: its response to a quiet click, its passband brought back, read at each frequency asked, in dB. */
-function ladderResponse(settings: LadderSettings) {
+/** An analog circuit's curve: its response to a quiet click, brought back to the clean filter's level, read at each frequency asked, in dB. */
+function circuitResponse(settings: CircuitSettings) {
   const { circuit, cutoff, resonance, type } = settings;
   const response = new Float32Array(RESPONSE_FRAMES);
   response[0] = CLICK;
   KERNELS[circuit](response, { fc: cutoff, fs: SAMPLE_RATE, resonance, type });
-  const makeup = 20 * Math.log10(passbandMakeup(settings, SAMPLE_RATE));
+  const makeup = 20 * Math.log10(circuitMakeup(settings, SAMPLE_RATE));
   let { length } = response;
   while (length > 1 && Math.abs(response[length - 1] ?? 0) < SILENT) {
     length -= 1;
@@ -278,25 +307,26 @@ function ladderResponse(settings: LadderSettings) {
 }
 
 /**
- * The ladder filters' processor for an `AudioWorklet`: the circuit and the
+ * The analog circuits' processor for an `AudioWorklet`: the circuit and the
  * tap a message picks, at the cutoff, the resonance and the drive of its
  * parameters, 128 frames at a time, its state kept per channel. Its output
  * is brought back by `tanh(1) / tanh(drive)`, so at the default drive it is
  * the kernel's own and more drive bends a full-scale sound without raising its
- * peak, and a low-pass by `passbandMakeup`, so its passband stays at 0 dB.
+ * peak, and by `circuitMakeup`, so it plays at the clean filter's level.
  */
-export const LADDER_WORKLET = `${LADDER_KERNELS}
+export const CIRCUIT_WORKLET = `${FILTER_KERNELS}
 const CIRCUITS = {
   diode: (data, params) => diodeLadder(data, params),
   korg35: (data, params) => korg35(data, params),
   ladder12: (data, params) => moogLadder(data, Object.assign(params, { poles: 2 })),
   ladder24: (data, params) => moogLadder(data, Object.assign(params, { poles: 4 })),
+  sem: (data, params) => oberheim(data, params),
 };
-class AudioUiLadder extends AudioWorkletProcessor {
+class AudioUiFilterCircuit extends AudioWorkletProcessor {
   static get parameterDescriptors() {
     return [
       { name: "cutoff", defaultValue: 1000, minValue: 20, maxValue: 20000, automationRate: "k-rate" },
-      { name: "resonance", defaultValue: 0, minValue: 0, maxValue: 1.2, automationRate: "k-rate" },
+      { name: "resonance", defaultValue: 0, minValue: -1, maxValue: 1.2, automationRate: "k-rate" },
       { name: "drive", defaultValue: 1, minValue: 0.1, maxValue: 10, automationRate: "k-rate" },
     ];
   }
@@ -325,16 +355,22 @@ class AudioUiLadder extends AudioWorkletProcessor {
     const drive = parameters.drive[0];
     const cutoff = parameters.cutoff[0];
     const resonance = parameters.resonance[0];
-    // As passbandMakeup on the main thread: a low-pass's loss at DC made up.
-    let passband = 1;
-    if (this.type === "lowpass" && this.circuit === "korg35") {
+    // As circuitMakeup on the main thread: the clean filter's level.
+    let level = 1;
+    if (this.type === "bandpass") {
+      if (this.circuit === "sem") {
+        level = 2 * (1 - resonance);
+      } else {
+        level = this.circuit === "ladder12" ? (4 - 4 * resonance) / 2 : 4 - 4 * resonance;
+      }
+    } else if (this.type === "lowpass" && this.circuit === "korg35") {
       const g = Math.tan((Math.PI * Math.min(cutoff, sampleRate * 0.49)) / sampleRate);
       const stage = g / (1 + g);
-      passband = 1 + 2 * resonance * (1 + stage + stage * stage);
-    } else if (this.type === "lowpass") {
-      passband = 1 + 4 * resonance;
+      level = 1 + 2 * resonance * (1 + stage + stage * stage);
+    } else if (this.type === "lowpass" && this.circuit !== "sem") {
+      level = 1 + 4 * resonance;
     }
-    const makeup = (passband * Math.tanh(1)) / Math.tanh(drive);
+    const makeup = (level * Math.tanh(1)) / Math.tanh(drive);
     for (let channel = 0; channel < output.length; channel += 1) {
       const data = output[channel];
       data.set(input[channel % input.length]);
@@ -352,7 +388,7 @@ class AudioUiLadder extends AudioWorkletProcessor {
     return true;
   }
 }
-registerProcessor("audioui-ladder", AudioUiLadder);
+registerProcessor("audioui-filter-circuit", AudioUiFilterCircuit);
 `;
 
 /** The band type of the shared curve code that each filter type is. A low-pass cuts the highs, so it is a high cut. */
@@ -379,14 +415,14 @@ export function filterSettings(state: FilterState) {
   };
 }
 
-/** The curve a state plays: the gain in dB at each frequency, a ladder's measured on it. Flat when it is off. */
+/** The curve a state plays: the gain in dB at each frequency, an analog circuit's measured on it. Flat when it is off. */
 export function filterCurve(state: FilterState) {
   if (!state.enabled) {
     return () => 0;
   }
-  const ladder = ladderSettings(state);
-  if (ladder) {
-    return ladderResponse(ladder);
+  const circuit = circuitSettings(state);
+  if (circuit) {
+    return circuitResponse(circuit);
   }
   return biquadResponse({
     frequency: state.cutoffHz,

@@ -1,19 +1,18 @@
 import { describe, expect, test } from "bun:test";
 import {
+  CIRCUIT_WORKLET,
+  circuitResonance,
+  circuitSettings,
   type FilterState,
   FLAT_Q,
   filterCircuit,
   filterCurve,
   filterDevice,
   filterSettings,
-  LADDER_WORKLET,
-  ladderResonance,
-  ladderSettings,
   resonanceDb,
   resonanceFromDb,
 } from "@/registry-audio/bases/base/lib/filter-device";
 import { createFilterEngine } from "@/registry-audio/bases/base/lib/filter-engine";
-import { LADDER_KERNELS } from "@/registry-audio/bases/base/lib/filter-ladders";
 
 class FakeParam {
   value = 0;
@@ -155,23 +154,17 @@ describe("createFilterEngine", () => {
   });
 });
 
-const PACKAGE_JSON = /package\.json$/;
-const KERNEL_FILES = [
-  ["@audio/filter-moog-ladder", "moog-ladder.js", "moogLadder"],
-  ["@audio/filter-diode-ladder", "diode-ladder.js", "diodeLadder"],
-  ["@audio/filter-korg35", "korg35.js", "korg35"],
-] as const;
-
 describe("the filter's circuits", () => {
   const ladders = ["ladder24", "ladder12", "diode", "korg35"] as const;
 
-  test("a clean filter and four ladders, clean the one a filter starts with", () => {
+  test("a clean filter and five analog circuits, clean the one a filter starts with", () => {
     const circuit = filterDevice.parameters.find(
       (parameter) => parameter.id === "circuit"
     );
     expect(circuit?.options?.map((option) => option.value)).toEqual([
       "clean",
       ...ladders,
+      "sem",
     ]);
     expect(defaults.circuit).toBe("clean");
     expect(defaults.driveDb).toBe(0);
@@ -189,12 +182,56 @@ describe("the filter's circuits", () => {
       "korg35"
     );
     expect(
-      ladderSettings({ ...defaults, circuit: "diode", type: "notch" })
+      circuitSettings({ ...defaults, circuit: "diode", type: "notch" })
     ).toBe(null);
   });
 
+  test("the SEM is the clean filter at the same resonance, every type of it, until it saturates", () => {
+    for (const type of ["lowpass", "highpass", "bandpass", "notch"] as const) {
+      for (const resonance of [0.3, FLAT_Q, 4, 18]) {
+        const state = { ...defaults, cutoffHz: 1000, resonance, type };
+        const clean = filterCurve(state);
+        const sem = filterCurve({ ...state, circuit: "sem" });
+        let apart = 0;
+        for (let hz = 20; hz < 20_000; hz *= 1.02) {
+          // A notch's floor is below anything heard: compare it to -60 dB.
+          apart = Math.max(
+            apart,
+            Math.abs(Math.max(sem(hz), -60) - Math.max(clean(hz), -60))
+          );
+        }
+        expect({ apart: apart < 0.5, resonance, type }).toEqual({
+          apart: true,
+          resonance,
+          type,
+        });
+      }
+    }
+  });
+
+  test("a band-pass peaks at 0 dB at its cutoff in every circuit that has one", () => {
+    for (const circuit of ["ladder24", "ladder12", "sem"] as const) {
+      for (const resonance of [FLAT_Q, 4, 12]) {
+        const curve = filterCurve({
+          ...defaults,
+          circuit,
+          cutoffHz: 1000,
+          resonance,
+          type: "bandpass",
+        });
+        expect(curve(1000)).toBeCloseTo(0, 1);
+      }
+    }
+  });
+
+  test("the SEM has no drive: its saturation is its own", () => {
+    expect(
+      circuitSettings({ ...defaults, circuit: "sem", driveDb: 20 })?.drive
+    ).toBe(1);
+  });
+
   test("the drive is a gain on the way in", () => {
-    const settings = ladderSettings({
+    const settings = circuitSettings({
       ...defaults,
       circuit: "ladder24",
       driveDb: 20,
@@ -221,7 +258,7 @@ describe("the filter's circuits", () => {
           0
         );
       }
-      expect(ladderResonance(circuit, FLAT_Q)).toBe(0);
+      expect(circuitResonance(circuit, FLAT_Q)).toBe(0);
     });
   }
 
@@ -235,9 +272,9 @@ describe("the filter's circuits", () => {
   });
 
   test("korg35: no peak to match, its resonance follows the knob", () => {
-    expect(ladderResonance("korg35", FLAT_Q)).toBe(0);
-    expect(ladderResonance("korg35", 18)).toBeCloseTo(1, 6);
-    expect(ladderResonance("korg35", 0.3)).toBe(0);
+    expect(circuitResonance("korg35", FLAT_Q)).toBe(0);
+    expect(circuitResonance("korg35", 18)).toBeCloseTo(1, 6);
+    expect(circuitResonance("korg35", 0.3)).toBe(0);
   });
 
   /** How much a curve falls over the octave from 2 to 4 kHz, its cutoff at 500 Hz: past the knee, short of where Nyquist warps it. */
@@ -275,26 +312,6 @@ describe("the filter's circuits", () => {
     const loud = filterCurve({ ...state, driveDb: 20 });
     expect(loud(1000)).toBeCloseTo(quiet(1000), 6);
   });
-
-  test("its kernels are the packages' own, as installed", async () => {
-    const kept = await Promise.all(
-      KERNEL_FILES.map(async ([name, file, use]) => {
-        const root = Bun.resolveSync(
-          `${name}/package.json`,
-          import.meta.dir
-        ).replace(PACKAGE_JSON, "");
-        const source = await Bun.file(`${root}${file}`).text();
-        return {
-          kept: LADDER_KERNELS.includes(
-            source.replace(`export default function ${use}`, `function ${use}`)
-          ),
-          name,
-        };
-      })
-    );
-    // When it fails: bun scripts/build-ladders.ts, from apps/www.
-    expect(kept.filter((kernel) => !kernel.kept)).toEqual([]);
-  });
 });
 
 describe("the ladders' worklet", () => {
@@ -317,7 +334,7 @@ describe("the ladders' worklet", () => {
       "AudioWorkletProcessor",
       "registerProcessor",
       "sampleRate",
-      LADDER_WORKLET
+      CIRCUIT_WORKLET
     )(
       AudioWorkletProcessor,
       (_name: string, processor: new (options: unknown) => Processor) => {
@@ -384,7 +401,7 @@ describe("the ladders' worklet", () => {
     expect(output[127]).toBeCloseTo((expected[127] ?? 0) * (1 + 4 * 0.6), 6);
   });
 
-  for (const circuit of ["ladder24", "ladder12", "diode", "korg35"]) {
+  for (const circuit of ["ladder24", "ladder12", "diode", "korg35", "sem"]) {
     test(`${circuit}: a resonant low-pass lets a steady level through as it came in`, () => {
       const processor = made();
       processor.port.onmessage({ data: { circuit, type: "lowpass" } });

@@ -30,6 +30,7 @@ import {
 } from "@/components/audio-ui/device-panel";
 import {
   CIRCUIT_TYPES,
+  DRIVEN_CIRCUITS,
   type FilterCircuit,
   type FilterState,
   filterCircuit,
@@ -51,8 +52,8 @@ const IN_THE_TITLE_BAR = ["enabled", "circuit"] as const;
 const OFF = filterDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled");
-/** The clean filter has no drive to bend it. */
-const CLEAN_OFF = ["driveDb"] as const;
+/** The clean filter and the SEM have no drive to bend them. */
+const UNDRIVEN_OFF = ["driveDb"] as const;
 const CIRCUITS =
   filterDevice.parameters.find((parameter) => parameter.id === "circuit")
     ?.options ?? [];
@@ -81,7 +82,7 @@ interface FilterPanelProps {
  * circuit is picked in the title bar, those without the type greyed out, and
  * the curve is the one that circuit plays. The type is a list of buttons, and
  * the knobs under it are the same parameters, for a precise value, the drive
- * for a ladder. Controlled like `DevicePanel`, which it uses for them. Its
+ * for a circuit it bends. Controlled like `DevicePanel`, which it uses for them. Its
  * children sit at the end of the title bar.
  */
 function FilterPanel({
@@ -114,8 +115,8 @@ function FilterPanel({
   let disabled: readonly (typeof OFF)[number][] | undefined;
   if (!value.enabled) {
     disabled = OFF;
-  } else if (played === "clean") {
-    disabled = CLEAN_OFF;
+  } else if (!DRIVEN_CIRCUITS.includes(played)) {
+    disabled = UNDRIVEN_OFF;
   }
   return (
     <DeviceFrame className={cn("h-full", className)}>

@@ -25,6 +25,7 @@
     "@audio/filter-diode-ladder": "catalog:",
     "@audio/filter-korg35": "catalog:",
     "@audio/filter-moog-ladder": "catalog:",
+    "@audio/filter-oberheim": "catalog:",
     "@audio/loudness-lufs": "catalog:",
     "@audio/loudness-truepeak": "catalog:",
     "@audio/resample-sinc": "catalog:",
