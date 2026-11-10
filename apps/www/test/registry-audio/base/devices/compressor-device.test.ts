@@ -18,6 +18,7 @@ describe("compressorDevice", () => {
       compressorDevice.describe().parameters.map((parameter) => parameter.id)
     ).toEqual([
       "enabled",
+      "model",
       "thresholdDb",
       "ratio",
       "attackMs",

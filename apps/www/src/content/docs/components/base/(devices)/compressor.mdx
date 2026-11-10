@@ -1,13 +1,13 @@
 ---
 title: Compressor
-description: "A compressor device: threshold, ratio, attack, release, knee, make-up and mix, a panel that draws its transfer curve, a Web Audio engine with a sidechain, and tools for agents."
+description: "A compressor device: six models, threshold, ratio, attack, release, knee, make-up and mix, a panel that draws its transfer curve, a Web Audio engine with a sidechain, and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-compressor" />
 
-Brings loud parts down. Above the threshold, the level rises by one decibel for every `ratio` decibels in. With the sidechain on, it follows the level of another signal, so a kick can duck a pad. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Brings loud parts down. Above the threshold, the level rises by one decibel for every `ratio` decibels in. Its model is the browser's clean compressor or one of five from [audio.js](https://audio.js.org), each with its own detector and timing. With the sidechain on, the clean model follows the level of another signal, so a kick can duck a pad. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -16,20 +16,34 @@ Brings loud parts down. Above the threshold, the level rises by one decibel for 
 ## Controls
 
 <DeviceControls device="compressor">
+<Control id="model">How the compressor follows the level and moves the gain. See [Models](#models). It is picked in the title bar, and the controls the model does not use are drawn off.</Control>
 <Control id="thresholdDb">The level above which the compressor works.</Control>
 <Control id="ratio">How much the level is brought down above the threshold. At 4:1, 4 dB in give 1 dB out.</Control>
 <Control id="attackMs">How fast the compressor takes the gain down once the level is over the threshold.</Control>
 <Control id="releaseMs">How fast the gain comes back once the level is under it.</Control>
 <Control id="kneeDb">How gradually the compressor starts to work around the threshold. 0 is a hard knee.</Control>
-<Control id="autoMakeup">Keeps the make-up gain the browser's node adds on its own, which grows with the threshold and the ratio.</Control>
-<Control id="makeupDb">Makes up for the gain taken off. It does nothing while Auto make-up is on.</Control>
+<Control id="autoMakeup">Keeps the make-up gain the browser's node adds on its own, which grows with the threshold and the ratio. Clean model only.</Control>
+<Control id="makeupDb">Makes up for the gain taken off. On the clean model it does nothing while Auto make-up is on.</Control>
 <Control id="mix">The balance of the compressed signal and the dry one, for parallel compression.</Control>
-<Control id="external">Makes the compressor follow the signal connected to `engine.sidechain`. See [Sidechain](/docs/devices#sidechain).</Control>
+<Control id="external">Makes the compressor follow the signal connected to `engine.sidechain`. See [Sidechain](/docs/devices#sidechain). Clean model only.</Control>
 </DeviceControls>
+
+## Models
+
+| Model | Package | Detector | Character |
+| --- | --- | --- | --- |
+| Clean | the browser's `DynamicsCompressorNode` | peak, with a 6 ms lookahead | The default. The only model with Auto make-up and the sidechain. |
+| Smooth | `@audio/dynamics-compressor` | peak | The gain reduction is smoothed in decibels, so the attack and the release hold at any depth of compression. Threshold, ratio and knee move as it plays. |
+| VCA | `@audio/dynamics-vca` | peak | Clean and precise, with a near-hard knee. |
+| FET | `@audio/dynamics-fet` | peak | Very fast, made for short attacks and high ratios. |
+| Opto | `@audio/dynamics-opto` | RMS | A wide soft knee, and a release that slows the longer it has been reducing. It has no Release of its own. |
+| Vari-Mu | `@audio/dynamics-varimu` | RMS, of its own output | A very soft knee, and a ratio that rises as it is pushed. It has no Ratio of its own. |
+
+Every model takes the knobs as they are set. A model other than the clean one runs in an `AudioWorklet`, the processor of its package's manifest as published, and Make-up goes on after it. A change to a value the model is built with (all of them on VCA, FET, Opto and Vari-Mu, the attack and the release on Smooth) builds it again, at most every 50 ms: the new one first plays the last 100 ms of sound, so it starts where the old one was, then takes over in a 30 ms fade.
 
 ## Panel
 
-The panel draws the transfer curve the state plays: the threshold, the dashed unity line, and a dot that rides the curve at the level going in. Pass `level`, a live source in dB, to show the dot. Below the threshold the curve sits above unity by the make-up gain.
+The panel draws the transfer curve the state plays: the threshold, the dashed unity line, and a dot that rides the curve at the level going in. Pass `level`, a live source in dB, to show the dot. Below the threshold the curve sits above unity by the make-up gain. The model is picked in its title bar.
 
 <DeviceUsage name="compressor" />
 
@@ -44,10 +58,22 @@ engine.reduction; // dB being taken off, read per frame
 What goes on each node comes from `compressorSettings(state)`. Two things the browser's compressor node does that the engine accounts for:
 
 - **It adds a make-up gain of its own that cannot be turned off.** It grows with the threshold and the ratio (+10.8 dB at -24 dB and 4:1). With Auto make-up off, the engine takes it back out and applies Make-up. With it on, the node's is kept.
-- **It looks ahead by 6 ms.** The dry path waits as long, so a parallel mix does not comb. This is the [latency](/docs/devices#latency) of the device.
+- **It looks ahead by 6 ms.** The dry path waits as long, so a parallel mix does not comb. The other models are fed from the same delay, so the [latency](/docs/devices#latency) of the device is 6 ms whatever the model.
+
+The other models are fed only while one plays. Until their worklet is ready, the node plays for them. `engine.reduction` reads the gain a model takes off, measured from its output against its input about every 10 ms.
 
 With the sidechain on, the browser's node has no input for it, so the signal goes through a gain that a worklet drives. The worklet follows the peak of the sidechain, instant up and 10 ms down, and applies the same curve as the node, with a soft knee, a slope of 1/ratio over the threshold, and the attack and release on the reduction. The make-up of the node is added by hand. Measured in Chrome with a sine at -6 dB over a threshold of -18 dB at 4:1, it takes off 8.9 dB at 1 kHz and 8.5 dB at 60 Hz, where the curve says 9. With the sidechain on, `engine.reduction` reads the detector.
 
 ## How close the curve is
 
-The curve is the static curve of the node: the level once the gain has settled. A real detector follows a signal with an attack and a release, so what you hear sits a little above it. Measured in Chrome with a 440 Hz sine, it is about 0.5 dB at the defaults and up to 1.3 dB with a slow attack and a short release. Below the threshold it is exact.
+The curve is the static curve: the level once the gain has settled on a steady level. For the clean model it is the node's. For the others it is measured from the model itself, its processor run on a steady level until it settles (`modelCurve`), so the vari-mu, which follows its own output, draws what it plays. Below the threshold it is exact.
+
+A real detector follows a signal with an attack and a release, so what you hear sits above the curve, by how much depending on the detector. Measured on a sine with its peak 12 dB over the threshold, at the defaults:
+
+| Model | Above the curve | Why |
+| --- | --- | --- |
+| Clean | about 0.5 dB at 440 Hz, up to 1.3 dB with a slow attack and a short release (in Chrome) | The node's detector |
+| Smooth | under 0.1 dB | Its gain reduction is smoothed in decibels, after the curve |
+| Opto | about 2.3 dB | It follows the RMS level, 3 dB under a sine's peak |
+| Vari-Mu | about 1.5 dB | It follows the RMS level of its own output |
+| VCA, FET | 4.4 dB at 100 Hz to 5.6 dB at 1 kHz | Their detectors follow the waveform itself, so the gain comes back between its peaks |

@@ -246,13 +246,25 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/dynamics-compressor",
+      "@audio/dynamics-fet",
+      "@audio/dynamics-opto",
+      "@audio/dynamics-varimu",
+      "@audio/dynamics-vca",
+    ],
     description:
-      "The compressor as a device: its parameters and what they mean, the numbers that go on the nodes for a state, and the curve a state plays, with no panel and no audio in it.",
+      "The compressor as a device: its parameters and what they mean, its models (the browser's clean compressor, and the smooth, VCA, FET, opto and vari-mu compressors of @audio/dynamics-*), the numbers that go on the nodes for a state, the curve a state plays and the source of the models' worklet, with no panel and no audio in it.",
     files: [
       {
         path: "devices/compressor/device.ts",
         target: "components/audio-ui/devices/compressor/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/compressor/kernels.ts",
+        target: "components/audio-ui/devices/compressor/kernels.ts",
         type: "registry:lib",
       },
     ],
@@ -264,7 +276,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A compressor on the Web Audio API for a compressor state: the node, its make-up taken back out or kept, a dry and compressed mix aligned to the node's lookahead, parameters that move without a click, and a key: a worklet detector that ducks the signal from another one.",
+      "A compressor on the Web Audio API for a compressor state: the node, its make-up taken back out or kept, a dry and compressed mix aligned to the node's lookahead, parameters that move without a click, a key (a worklet detector that ducks the signal from another one) and the other models in a worklet of their own, fed only while one plays.",
     files: [
       {
         path: "devices/compressor/engine.ts",
@@ -283,7 +295,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the compressor device: the transfer curve it plays, with the threshold and the level going in on it, over the device's knobs.",
+      "The face of the compressor device: the model picked in its title bar, the transfer curve it plays, with the threshold and the level going in on it, over the device's knobs, those a model does not use drawn off.",
     files: [
       {
         path: "devices/compressor/panel.tsx",
@@ -296,6 +308,7 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/compressor-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },

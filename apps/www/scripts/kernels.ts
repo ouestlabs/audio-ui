@@ -11,10 +11,17 @@ interface Kernel {
    * not install itself but one of its kernels depends on.
    */
   from?: string;
+  /**
+   * A module only the modules after it call, such as a package's own helpers:
+   * its names stay in a constant of its own, which they take theirs from, so
+   * a name two of them export does not clash.
+   */
+  internal?: boolean;
   name: string;
   /**
    * What the worklet calls, by the names the module exports it under, by
-   * default or by name: one function, or several.
+   * default or by name: one function, or several. For an internal module, what
+   * the modules after it import.
    */
   use: string | readonly string[];
 }
@@ -175,6 +182,72 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "COMPRESSOR_KERNELS",
+    file: "devices/compressor/kernels.ts",
+    kernels: [
+      {
+        file: "util.js",
+        from: "@audio/dynamics-vca",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "timeCoef",
+      },
+      {
+        file: "envelope.js",
+        from: "@audio/dynamics-vca",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "envelope",
+      },
+      {
+        file: "util.js",
+        from: "@audio/dynamics-vca",
+        internal: true,
+        name: "@audio/dynamics-compressor",
+        use: ["writer", "concat", "db2lin", "lin2db"],
+      },
+      {
+        file: "compressor.js",
+        from: "@audio/dynamics-vca",
+        internal: true,
+        name: "@audio/dynamics-compressor",
+        use: "compressorGain",
+      },
+      ...(["vca", "fet", "opto", "varimu"] as const).flatMap((model) => [
+        {
+          file: "util.js",
+          internal: true,
+          name: `@audio/dynamics-${model}`,
+          use: ["writer", "concat", "db2lin", "lin2db", "timeCoef"],
+        },
+        {
+          file: `${model}.js`,
+          internal: true,
+          name: `@audio/dynamics-${model}`,
+          use: `${model}Stream`,
+        },
+        { file: "audio.js", name: `@audio/dynamics-${model}`, use: model },
+      ]),
+      {
+        file: "util.js",
+        internal: true,
+        name: "@audio/dynamics-compressor",
+        use: ["writer", "concat", "db2lin", "lin2db", "timeCoef"],
+      },
+      {
+        file: "compressor.js",
+        internal: true,
+        name: "@audio/dynamics-compressor",
+        use: ["compress", "compressorState"],
+      },
+      {
+        file: "audio.js",
+        name: "@audio/dynamics-compressor",
+        use: "compressor",
+      },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [
@@ -217,89 +290,105 @@ const escaped = (text: string) =>
 
 const namesOf = (use: Kernel["use"]) => (typeof use === "string" ? [use] : use);
 
-/** A module's path in its package, with `.` and `..` worked out. */
-function normalized(path: string) {
-  const parts: string[] = [];
-  for (const part of path.split("/")) {
-    if (part === "..") {
-      parts.pop();
-    } else if (part !== "." && part !== "") {
-      parts.push(part);
-    }
-  }
-  return parts.join("/");
-}
-
-/** What a vendored module gives the modules after it: its names, and which one it exports by default. */
+/** What a vendored module gives the modules after it: its names, which one it exports by default, and for an internal one, the constant that holds them. */
 interface Held {
   byDefault?: string;
-  name: string;
   names: readonly string[];
+  scope?: string;
 }
 
-/** The module an import names: one of the package's own by its path, or another package, by a path in it or by its name. */
-function heldFor(
-  specifier: string,
-  { file, name }: Pick<Kernel, "file" | "name">,
-  held: ReadonlyMap<string, Held>
-) {
-  if (specifier.startsWith(".")) {
-    const folder = file.split("/").slice(0, -1).join("/");
-    return held.get(`${name}/${normalized(`${folder}/${specifier}`)}`);
+/** The file an import loads, from the module at `path`, as the runtime resolves it: a package by the copy that module sees. Nothing, for one not installed where it looks. */
+function resolved(specifier: string, path: string) {
+  try {
+    return Bun.resolveSync(specifier, path.slice(0, path.lastIndexOf("/")));
+  } catch {
+    return "";
   }
-  return (
-    held.get(specifier) ??
-    [...held.values()].find((module) => module.name === specifier)
+}
+
+/** The names an import takes from a module, by the name each is exported under and the name it is given: each one the module gives. */
+function namedOf(
+  clause: string,
+  module: Held,
+  where: string,
+  specifier: string
+) {
+  const named = NAMED_IMPORT.exec(clause);
+  if (!named) {
+    throw new Error(
+      `${where} imports ${clause} from ${specifier}, a form the set cannot hold`
+    );
+  }
+  const names = (named[1] ?? "")
+    .split(",")
+    .map((part) => part.trim())
+    .filter(Boolean)
+    .map((part) => {
+      const [imported = "", local = imported] = part
+        .split(" as ")
+        .map((each) => each.trim());
+      return { imported, local };
+    });
+  const missing = names.find(
+    ({ imported }) => !module.names.includes(imported)
+  );
+  if (missing) {
+    throw new Error(
+      `${where} imports ${missing.imported} from ${specifier}, which the set does not take`
+    );
+  }
+  return names;
+}
+
+/** What a module's scope declares for the names it imports: those of an internal module from the constant that holds them, an alias for one taken under another name. */
+function aliasesOf(
+  names: readonly { imported: string; local: string }[],
+  module: Held
+) {
+  if (module.scope) {
+    const parts = names.map(({ imported, local }) =>
+      imported === local ? imported : `${imported}: ${local}`
+    );
+    return [`const { ${parts.join(", ")} } = ${module.scope};`];
+  }
+  return names.flatMap(({ imported, local }) =>
+    local === imported ? [] : [`const ${local} = ${imported};`]
   );
 }
 
 /**
  * A module's source without the imports the set already holds: modules
- * vendored before it, whose names its scope sees, a default import under
- * another name kept as an alias. Any other import is refused, since a worklet
- * cannot load it.
+ * vendored before it, by the file each import loads. The names of one in the
+ * top scope it sees as they are, a default import under another name kept as
+ * an alias; those of an internal one it takes from the constant that holds
+ * them. Any other import is refused, since a worklet cannot load it.
  */
 function withoutImports(
   source: string,
-  kernel: Pick<Kernel, "file" | "name">,
+  where: string,
+  path: string,
   held: ReadonlyMap<string, Held>
 ) {
-  const where = `${kernel.name}/${kernel.file}`;
   const aliases: string[] = [];
   const body = source.replace(
     IMPORT_STATEMENT,
     (_line, clause: string, specifier: string) => {
-      const module = heldFor(specifier, kernel, held);
+      const module = held.get(resolved(specifier, path));
       if (!module) {
         throw new Error(
           `${where} imports ${specifier}, which the set does not hold before it: a worklet cannot load it`
         );
       }
-      const named = NAMED_IMPORT.exec(clause.trim());
-      if (DEFAULT_IMPORT.test(clause.trim()) && module.byDefault) {
-        if (clause.trim() !== module.byDefault) {
-          aliases.push(`const ${clause.trim()} = ${module.byDefault};`);
+      const taken = clause.trim();
+      if (DEFAULT_IMPORT.test(taken) && module.byDefault && !module.scope) {
+        if (taken !== module.byDefault) {
+          aliases.push(`const ${taken} = ${module.byDefault};`);
         }
         return "";
       }
-      for (const part of named?.[1]?.split(",") ?? []) {
-        const [imported = "", local = imported] = part
-          .split(" as ")
-          .map((each) => each.trim());
-        if (!module.names.includes(imported)) {
-          throw new Error(
-            `${where} imports ${imported} from ${specifier}, which the set does not take`
-          );
-        }
-        if (local !== imported) {
-          aliases.push(`const ${local} = ${imported};`);
-        }
-      }
-      if (!named) {
-        throw new Error(
-          `${where} imports ${clause} from ${specifier}, a form the set cannot hold`
-        );
-      }
+      aliases.push(
+        ...aliasesOf(namedOf(taken, module, where, specifier), module)
+      );
       return "";
     }
   );
@@ -333,31 +422,36 @@ export async function kernelFile({ constant, kernels }: KernelSet) {
         : import.meta.dir;
       const root = rootOf(kernel.name, kernel.file, base);
       const manifest = await Bun.file(`${root}package.json`).json();
-      const source = await Bun.file(`${root}${kernel.file}`).text();
-      return { kernel, manifest, source };
+      const path = `${root}${kernel.file}`;
+      const source = await Bun.file(path).text();
+      return { kernel, manifest, path, source };
     })
   );
   const held = new Map<string, Held>();
-  const modules = read.map(({ kernel, manifest, source }) => {
-    const { file, name, use } = kernel;
-    const body = withoutImports(source, kernel, held)
+  const modules = read.map(({ kernel, manifest, path, source }, index) => {
+    const { file, internal, name, use } = kernel;
+    const body = withoutImports(source, `${name}/${file}`, path, held)
       .replace(EXPORT_LIST, "")
       .replace(EXPORT, "");
-    held.set(`${name}/${file}`, {
+    const names = namesOf(use);
+    const scope = internal ? `module${index}` : undefined;
+    held.set(path, {
       byDefault: DEFAULT_EXPORT.exec(source)?.[1],
-      name,
-      names: namesOf(use),
+      names,
+      scope,
     });
     const { author, license, version } = manifest;
     const by = (typeof author === "string" ? author : author?.name)?.replace(
       CONTACT,
       ""
     );
-    const names = namesOf(use);
     const given = typeof use === "string" ? use : `{ ${names.join(", ")} }`;
+    const code = scope
+      ? `const ${scope} = (() => {\n${body}\nreturn { ${names.join(", ")} };\n})();\n`
+      : `const ${given} = (() => {\n${body}\nreturn ${given};\n})();\n`;
     return {
-      code: `const ${given} = (() => {\n${body}\nreturn ${given};\n})();\n`,
-      label: ` * - \`${name}\` ${version} (${license}, ${by}): ${names.map((each) => `\`${each}\``).join(", ")}`,
+      code,
+      label: ` * - \`${name}\` ${version} (${license}, ${by}): ${names.map((each) => `\`${each}\``).join(", ")}${scope ? `, as \`${scope}\`` : ""}`,
     };
   });
   return `/**

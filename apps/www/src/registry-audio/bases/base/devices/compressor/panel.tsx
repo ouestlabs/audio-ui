@@ -1,8 +1,16 @@
 "use client";
 
 import type { Source } from "@audio-ui/react";
-import { type ReactNode, useEffect, useMemo, useRef } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/base/ui/select";
 import {
   Plot,
   PlotCurve,
@@ -20,6 +28,7 @@ import {
   type CompressorState,
   compressorCurve,
   compressorDevice,
+  compressorUnused,
 } from "@/registry-audio/bases/base/devices/compressor/device";
 
 const MIN_DB = -60;
@@ -35,7 +44,10 @@ const GROUPS = [
     parameters: ["makeupDb", "mix", "autoMakeup", "external"],
   },
 ] as const;
-const SWITCHES = ["enabled"] as const;
+const IN_THE_TITLE_BAR = ["enabled", "model"] as const;
+const MODELS =
+  compressorDevice.parameters.find((parameter) => parameter.id === "model")
+    ?.options ?? [];
 /** With auto make-up on, the node's own make-up plays and this knob does nothing. */
 const MAKEUP_OFF = ["makeupDb"] as const;
 
@@ -50,11 +62,11 @@ interface CompressorPanelProps {
 }
 
 /**
- * The face of the compressor device: a title bar with the on square, the
- * transfer curve it plays with the threshold and the level going in on it, and
- * its knobs and switches gathered by what they do. It is
- * controlled like `DevicePanel`, which it uses for the knobs: drawing the
- * curve is all it adds. Its children sit at the end of the title bar.
+ * The face of the compressor device: a title bar with the on square and the
+ * model, the transfer curve it plays with the threshold and the level going
+ * in on it, and its knobs and switches gathered by what they do, those a
+ * model does not use drawn off. It is controlled like `DevicePanel`, which it
+ * uses for the knobs. Its children sit at the end of the title bar.
  */
 function CompressorPanel({
   children,
@@ -64,6 +76,21 @@ function CompressorPanel({
   value,
 }: CompressorPanelProps) {
   const output = useMemo(() => compressorCurve(value), [value]);
+  const pickModel = useCallback(
+    (model: string | null) => {
+      if (model) {
+        onValueChange(compressorDevice.set(value, "model", model));
+      }
+    },
+    [onValueChange, value]
+  );
+  const keyed = value.model === "clean" && value.external;
+  let unused: readonly (keyof CompressorState)[] | undefined = value.autoMakeup
+    ? MAKEUP_OFF
+    : undefined;
+  if (value.model !== "clean") {
+    unused = compressorUnused(value.model);
+  }
   const dot = useMemo(
     () =>
       level && {
@@ -101,13 +128,30 @@ function CompressorPanel({
           onValueChange={onValueChange}
           value={value}
         >
+          <Select
+            disabled={!value.enabled}
+            items={MODELS}
+            onValueChange={pickModel}
+            value={value.model}
+          >
+            <SelectTrigger aria-label="Model" className="h-6 w-24" size="sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {MODELS.map((model) => (
+                  <SelectItem key={model.value} value={model.value}>
+                    {model.label}
+                  </SelectItem>
+                ))}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
           {children}
         </DeviceHeader>
         <div className="flex min-h-0 grow flex-col gap-2 p-2">
           <Plot
-            aria-label={
-              value.external ? "Threshold of the sidechain" : "Transfer curve"
-            }
+            aria-label={keyed ? "Threshold of the sidechain" : "Transfer curve"}
             className="h-28 min-h-16 grow"
             maxX={MAX_DB}
             maxY={MAX_DB}
@@ -129,9 +173,9 @@ function CompressorPanel({
                 className="stroke-foreground/40"
                 value={value.thresholdDb}
               />
-              {value.external ? null : <PlotCurve fn={output} />}
+              {keyed ? null : <PlotCurve fn={output} />}
             </PlotGraph>
-            {dot && !value.external ? (
+            {dot && !keyed ? (
               <PlotDot
                 className="group-data-idle/compressor:hidden"
                 source={dot}
@@ -140,8 +184,8 @@ function CompressorPanel({
           </Plot>
           <DevicePanel
             device={compressorDevice}
-            disabled={value.autoMakeup ? MAKEUP_OFF : undefined}
-            exclude={SWITCHES}
+            disabled={unused}
+            exclude={IN_THE_TITLE_BAR}
             groups={GROUPS}
             onValueChange={onValueChange}
             value={value}
