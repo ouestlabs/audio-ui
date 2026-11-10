@@ -9,6 +9,7 @@ const BUDGETS: Record<string, number> = {
   fader: 5300,
   index: 15_500,
   knob: 6000,
+  meter: 4200,
   pad: 3500,
   piano: 4700,
   xypad: 5300,

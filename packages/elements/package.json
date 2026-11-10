@@ -44,6 +44,10 @@
       "types": "./dist/knob/index.d.ts",
       "import": "./dist/knob.js"
     },
+    "./meter": {
+      "types": "./dist/meter/index.d.ts",
+      "import": "./dist/meter.js"
+    },
     "./pad": {
       "types": "./dist/pad/index.d.ts",
       "import": "./dist/pad.js"

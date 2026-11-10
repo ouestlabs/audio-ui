@@ -298,6 +298,35 @@ A key that starts sounding fires `noteon`, with `event.detail` `{ pitch, velocit
 | `<audio-ui-xypad-value>` | Both axes, formatted, as `"x, y"` |
 | `<audio-ui-xypad-label>` | Names both inputs when the thumb has no name of its own |
 
+### Meter
+
+`<audio-ui-meter>` groups the channels of a level meter. Levels come from `value` (and `peak`), a level per channel separated by spaces, or the `value` and `peak` properties as arrays; or from a live `source` property, `{ getSnapshot, subscribe }`, whose frames are written straight to the parts. A click on it clears the clips a live source latched.
+
+<TypeTable>
+<TypeRow name={"value"} type={"string"}>A level per channel, such as `"-12 -6"`: the count is the channel count.</TypeRow>
+<TypeRow name={"peak"} type={"string"}>A peak-hold level per channel. Timing and decay live outside the meter.</TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"iec\""} default={"\"linear\""}>How levels spread along the length; the `scale` property also takes your own increasing curve.</TypeRow>
+<TypeRow name={"clip-threshold"} type={"number"} default={"0"}>Level at or above which a channel is clipping.</TypeRow>
+<TypeRow name={"warn-threshold"} type={"number"}>Level at or above which a channel is in its warning zone, below the clip threshold. Unset, there is none.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}></TypeRow>
+<TypeRow name={"unit"} type={"string"}>What each channel says after its level, such as `dB`: "-6 dB". The `getAriaValueText` property says it your way.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON. One decimal by default.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
+</TypeTable>
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-meter-channels>` | Makes an `<audio-ui-meter-channel>` per level, each holding what its `<template>` holds. `label` names each one, `{n}` its number ("Output {n}"). It takes no room of its own |
+| `<audio-ui-meter-channel>` | One channel, a `role="meter"`, for its `index`. `data-warning`, `data-clipping`, and `data-clipped` until a click clears it |
+| `<audio-ui-meter-track>` | The full range of a channel |
+| `<audio-ui-meter-indicator>` | The lit part, scaled to the level |
+| `<audio-ui-meter-peak>` | The peak-hold mark, hidden while the channel has none |
+| `<audio-ui-meter-value>` | The formatted level |
+| `<audio-ui-meter-label>` | Names its channel |
+| `<audio-ui-meter-mark>` | A graduation at its `value`, such as -18, beside the channels |
+
 ### Data attributes
 
 Every part carries the state of its control:

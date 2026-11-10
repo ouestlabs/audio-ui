@@ -5,6 +5,7 @@
  */
 export * from "./fader/index.ts";
 export * from "./knob/index.ts";
+export * from "./meter/index.ts";
 export * from "./pad/index.ts";
 export * from "./piano/index.ts";
 export * from "./xypad/index.ts";
