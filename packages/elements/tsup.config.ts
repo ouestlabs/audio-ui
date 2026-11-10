@@ -9,6 +9,7 @@ const elements = [
   "meter",
   "pad",
   "piano",
+  "plot",
   "sequencer",
   "xypad",
 ];

@@ -398,6 +398,48 @@ Flipping cells fires `input`, with `{ value, reason }`, which `preventDefault()`
 | `<audio-ui-envelope-segments>` | Makes an `<audio-ui-envelope-segment>` per segment; `label` names them ("Curve {n}" by default) |
 | `<audio-ui-envelope-segment>` | A slider on the curve, from -1 to 1, on the segment's midpoint: drag it or press Up and Down to bend, double click or Delete to straighten. `data-flat` marks a segment with nothing to bend |
 
+### Plot
+
+`<audio-ui-plot>` holds two axes and everything drawn on them, in the axes' units: an equalizer's response, a filter's cutoff, a compressor's curve. Each drawing covers the plot with an SVG of its own, in `currentColor`, its strokes the same width however the plot stretches. A curve takes its function, and a trace its live source, as properties:
+
+```html
+<audio-ui-plot min-x="20" max-x="20000" scale-x="log" min-y="-24" max-y="24">
+  <audio-ui-plot-grid></audio-ui-plot-grid>
+  <audio-ui-plot-line axis="y" value="0"></audio-ui-plot-line>
+  <audio-ui-plot-curve></audio-ui-plot-curve>
+  <audio-ui-plot-handle aria-label="Low" value="200 6"></audio-ui-plot-handle>
+</audio-ui-plot>
+<script type="module">
+  document.querySelector("audio-ui-plot-curve").fn = (hz) => response(hz);
+</script>
+```
+
+<TypeTable>
+<TypeRow name={"min-x"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"max-x"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"min-y"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"max-y"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"scale-x"} type={"string"} default={"linear"}>`linear` or `log`, for frequency. The `scaleX` property also takes your own `{ toPosition, toValue }`.</TypeRow>
+<TypeRow name={"scale-y"} type={"string"} default={"linear"}></TypeRow>
+<TypeRow name={"locale"} type={"string"}>For its handles' values. Defaults to the browser's language.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+Its `valueAt(clientX, clientY)` method turns a pointer position into a value in the axes' units, for adding a point where someone double-clicks.
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-plot-curve>` | `y = fn(x)` across the plot, from its `fn` property. With `fill-to`, it closes down to that y value as an area; `samples` sets how many points it starts from (256) |
+| `<audio-ui-plot-line>` | A straight line at a `value`: vertical on the x `axis` (the default), horizontal on the y axis |
+| `<audio-ui-plot-band>` | The stretch of one `axis` between `from` and `to`, across all of the other |
+| `<audio-ui-plot-trace>` | The live y values of its `source` property, `{ getSnapshot, subscribe }`, spread across the plot and drawn again on each change. `fill-to` as for a curve; `min` and `max` put the values on a scale of their own |
+| `<audio-ui-plot-grid>` | Lines and labels at round values: `axis` (`x`, `y` or `both`), `x-ticks` and `y-ticks` where they go, `x-count` and `y-count` about how many, `labels` which axes are labelled (or `none`), and a `format(value, axis)` property. Lines carry `data-part="line"`, labels `data-part="label"`, both `data-axis`, and the line at zero `data-zero` |
+| `<audio-ui-plot-mark>` | A label at a `value` on one `axis`, such as "1k", hidden from assistive technology |
+| `<audio-ui-plot-dot>` | A point nothing drags: a still `value` (`"x y"`), or the live point of its `source` property |
+| `<audio-ui-plot-handle>` | A point to drag, with a `value` and `default-value` as `"x y"`, held to one `axis` if asked. It moves from where it is (four times finer with Shift), resets on a double click, an Alt + click or Delete, and holds a native range input per axis named after its `aria-label` ("Low X"), or `label-x` and `label-y`. It fires `input` and `change` itself, with `{ value, reason }` |
+| `<audio-ui-plot-cursor>` | Follows a mouse or a pen over the plot: sets `--plot-cursor-x` and `--plot-cursor-y` and `data-active`, for crosshair lines |
+| `<audio-ui-plot-cursor-readout>` | Inside the cursor, the value under the pointer as text, through its `format` property |
+
 ### Data attributes
 
 Every part carries the state of its control:

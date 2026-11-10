@@ -60,6 +60,10 @@
       "types": "./dist/piano/index.d.ts",
       "import": "./dist/piano.js"
     },
+    "./plot": {
+      "types": "./dist/plot/index.d.ts",
+      "import": "./dist/plot.js"
+    },
     "./sequencer": {
       "types": "./dist/sequencer/index.d.ts",
       "import": "./dist/sequencer.js"
