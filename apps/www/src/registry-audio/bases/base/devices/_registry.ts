@@ -314,25 +314,30 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/dynamics-deesser"],
     description:
-      "The de-esser as a device: a frequency, a threshold, a ratio and a range, the numbers that go on the nodes for a state, the table that keeps the highs above their floor and the response a state draws, with no panel and no audio in it.",
+      "The de-esser as a device: a frequency, a threshold, a ratio and a range, its models (the clean split, or the split, band and wide band de-essers of @audio/dynamics-deesser, which tell an s by the highs over the voice's body), the numbers that go on the nodes for a state, the table that keeps the highs above their floor, the response a state draws and the source of the other models' worklet, with no panel and no audio in it.",
     files: [
       {
         path: "devices/deesser/device.ts",
         target: "components/audio-ui/devices/deesser/device.ts",
         type: "registry:lib",
       },
+      {
+        path: "devices/deesser/kernels.ts",
+        target: "components/audio-ui/devices/deesser/kernels.ts",
+        type: "registry:lib",
+      },
     ],
     name: "deesser-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/manifest-worklet"],
     type: "registry:lib",
   },
   {
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A de-esser on the Web Audio API for a de-esser state: a Linkwitz-Riley split at the frequency, the highs read by the compressor's detector and taken down over the threshold, never under the range, and added back to the lows.",
+      "A de-esser on the Web Audio API for a de-esser state: a Linkwitz-Riley split at the frequency, the highs read by the compressor's detector and taken down over the threshold, never under the range, and added back to the lows, or the other models in a worklet fed only while one plays.",
     files: [
       {
         path: "devices/deesser/engine.ts",
@@ -351,7 +356,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the de-esser device: what it does at each frequency with a handle at the frequency to drag across and up or down for the range, over the device knobs.",
+      "The face of the de-esser device: the model picked in its title bar, what it does at each frequency with a handle at the frequency to drag across and up or down for the range, over the device knobs, those the model does not use drawn off.",
     files: [
       {
         path: "devices/deesser/panel.tsx",
@@ -364,6 +369,7 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/deesser-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },

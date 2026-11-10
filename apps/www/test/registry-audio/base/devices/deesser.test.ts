@@ -69,8 +69,11 @@ describe("the de-esser device", () => {
       deesserDevice.describe().parameters.map((parameter) => parameter.id)
     ).toEqual([
       "enabled",
+      "model",
       "frequencyHz",
+      "q",
       "thresholdDb",
+      "overBodyDb",
       "ratio",
       "rangeDb",
       "listen",

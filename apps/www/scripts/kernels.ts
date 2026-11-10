@@ -248,6 +248,60 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "DEESSER_KERNELS",
+    file: "devices/deesser/kernels.ts",
+    kernels: [
+      {
+        file: "util.js",
+        from: "@audio/dynamics-vca",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "timeCoef",
+      },
+      {
+        file: "envelope.js",
+        from: "@audio/dynamics-vca",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "envelope",
+      },
+      {
+        file: "util.js",
+        from: "@audio/dynamics-deesser",
+        internal: true,
+        name: "@audio/dynamics-compressor",
+        use: ["writer", "concat", "db2lin", "lin2db"],
+      },
+      {
+        file: "compressor.js",
+        from: "@audio/dynamics-deesser",
+        internal: true,
+        name: "@audio/dynamics-compressor",
+        use: "compressorGain",
+      },
+      {
+        file: "biquad.js",
+        from: "@audio/dynamics-deesser",
+        internal: true,
+        name: "@audio/biquad",
+        use: ["lowpass", "highpass", "step", "state"],
+      },
+      {
+        file: "util.js",
+        internal: true,
+        name: "@audio/dynamics-deesser",
+        use: ["writer", "db2lin", "timeCoef", "smoother"],
+      },
+      {
+        file: "deesser.js",
+        internal: true,
+        name: "@audio/dynamics-deesser",
+        use: ["deesserStream", "latency"],
+      },
+      { file: "audio.js", name: "@audio/dynamics-deesser", use: "deesser" },
+    ],
+  },
+  {
     constant: "GATE_KERNELS",
     file: "devices/gate/kernels.ts",
     kernels: [

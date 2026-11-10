@@ -8,7 +8,8 @@
  * `models` names each one by the value that picks it (`{ smooth: "compressor" }`).
  * The processor, registered as `processor`, has a k-rate parameter for each
  * parameter of any of its manifests, by the manifest's name, a toggle as 0 or
- * 1, and takes the values as they come, past the ranges a manifest suggests.
+ * 1, a choice as the index of its value, and takes the values as they come,
+ * past the ranges a manifest suggests.
  * It plays the model sent by message (`{ model }`), the first one from
  * `processorOptions.model`, per channel, two channels out.
  *
@@ -45,14 +46,16 @@ const POST_SECONDS = 0.01;
 const BLOCK = 128;
 /** The parameters that make each model again when they change. */
 const RESTARTS = {};
-/** A parameter for each one of any model, at the default of the first that has it. */
+/** A parameter for each one of any model, at the default of the first that has it: a choice by its index. */
 const DESCRIPTORS = [];
 for (const name in MODELS) {
   const params = MODELS[name].params;
   RESTARTS[name] = Object.keys(params).filter((key) => (params[key].flags || []).includes("restart"));
   for (const key in params) {
     if (!DESCRIPTORS.some((descriptor) => descriptor.name === key)) {
-      DESCRIPTORS.push({ name: key, defaultValue: Number(params[key].default), automationRate: "k-rate" });
+      const param = params[key];
+      const defaultValue = param.type === "enum" ? param.values.indexOf(param.default) : Number(param.default);
+      DESCRIPTORS.push({ name: key, defaultValue, automationRate: "k-rate" });
     }
   }
 }
@@ -82,20 +85,24 @@ class ManifestProcessor extends AudioWorkletProcessor {
     this.given = 0;
     this.scratch = [];
   }
-  /** A model's values for this block, from the parameters, a toggle as a boolean. One object per model, changed in place. */
+  /** A model's values for this block, from the parameters, a toggle as a boolean, a choice as its value. One object per model, changed in place. */
   valuesOf(name, parameters) {
     const params = MODELS[name].params;
     if (!this.values[name]) {
       this.values[name] = {};
       for (const key in params) {
-        this.values[name][key] = params[key].type === "bool" ? false : new Float32Array(1);
+        const type = params[key].type;
+        this.values[name][key] = type === "bool" || type === "enum" ? params[key].default : new Float32Array(1);
       }
     }
     const values = this.values[name];
     for (const key in params) {
       const value = parameters[key][0];
-      if (params[key].type === "bool") {
+      const param = params[key];
+      if (param.type === "bool") {
         values[key] = value >= 0.5;
+      } else if (param.type === "enum") {
+        values[key] = param.values[Math.round(value)] ?? param.default;
       } else {
         values[key][0] = value;
       }
@@ -140,7 +147,7 @@ class ManifestProcessor extends AudioWorkletProcessor {
     const values = this.valuesOf(name, parameters);
     let key = name;
     for (const restart of RESTARTS[name]) {
-      key += ":" + (typeof values[restart] === "boolean" ? values[restart] : values[restart][0]);
+      key += ":" + (typeof values[restart] === "object" ? values[restart][0] : values[restart]);
     }
     this.since += frames;
     if (!this.playing) {
