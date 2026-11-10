@@ -558,8 +558,8 @@ const DEFAULT_EXPORT = /export default function ([A-Za-z_$][\w$]*)/;
 const EXPORT_LIST = /^export\s*\{[^}]*\};?[ \t]*\n?/gm;
 /** The keyword that exports a declaration, by default or by name: a scope of its own keeps it. */
 const EXPORT = /^export (default )?/gm;
-/** An npm author's email and web page, left out: the name says who wrote it. */
-const CONTACT = /\s*[<(][^>)]*[>)]/g;
+/** Where an npm author's email or web page starts: the name before it says who wrote it. */
+const CONTACT = /[<(]/;
 
 /** What a template literal needs escaped to hold the text as it is. */
 const escaped = (text: string) =>
@@ -717,10 +717,9 @@ export async function kernelFile({ constant, kernels }: KernelSet) {
     const byDefault = DEFAULT_EXPORT.exec(source)?.[1];
     held.set(path, { byDefault, names, scope });
     const { author, license, version } = manifest;
-    const by = (typeof author === "string" ? author : author?.name)?.replace(
-      CONTACT,
-      ""
-    );
+    const by = (typeof author === "string" ? author : author?.name)
+      ?.split(CONTACT)[0]
+      ?.trim();
     const given = typeof use === "string" ? use : `{ ${names.join(", ")} }`;
     // An internal module gives its default export too, to a default import.
     const returned = byDefault ? [...names, `default: ${byDefault}`] : names;
