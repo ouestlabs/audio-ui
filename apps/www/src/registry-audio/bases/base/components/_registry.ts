@@ -1343,6 +1343,48 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["eq", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An exciter you can plug in: its state, a panel that draws the band it excites and an engine that plays it. Play a loop through it and raise the amount: it comes forward",
+    files: [
+      {
+        path: "components/device/block-exciter.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-exciter",
+    registryDependencies: [
+      "@audio-ui/exciter-panel",
+      "@audio-ui/exciter-device",
+      "@audio-ui/exciter-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["eq", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A bass enhancer you can plug in: its state, a panel that draws the sub it takes and where its harmonics go, and an engine that plays it. Play a loop through it on small speakers and raise the amount",
+    files: [
+      {
+        path: "components/device/block-bass-enhancer.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-bass-enhancer",
+    registryDependencies: [
+      "@audio-ui/bass-enhancer-panel",
+      "@audio-ui/bass-enhancer-device",
+      "@audio-ui/bass-enhancer-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",

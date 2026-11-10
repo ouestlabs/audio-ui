@@ -8,6 +8,8 @@ import type {
 } from "@audio-ui/core/device";
 import { autoPanDevice } from "@/registry-audio/bases/base/devices/auto-pan/device";
 import { createAutoPanEngine } from "@/registry-audio/bases/base/devices/auto-pan/engine";
+import { bassEnhancerDevice } from "@/registry-audio/bases/base/devices/bass-enhancer/device";
+import { createBassEnhancerEngine } from "@/registry-audio/bases/base/devices/bass-enhancer/engine";
 import { channelEqDevice } from "@/registry-audio/bases/base/devices/channel-eq/device";
 import { createChannelEqEngine } from "@/registry-audio/bases/base/devices/channel-eq/engine";
 import { chorusDevice } from "@/registry-audio/bases/base/devices/chorus/device";
@@ -26,6 +28,8 @@ import { electricPianoDevice } from "@/registry-audio/bases/base/devices/electri
 import { createElectricPianoEngine } from "@/registry-audio/bases/base/devices/electric-piano/engine";
 import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
 import { createEqualizerEngine } from "@/registry-audio/bases/base/devices/equalizer/engine";
+import { exciterDevice } from "@/registry-audio/bases/base/devices/exciter/device";
+import { createExciterEngine } from "@/registry-audio/bases/base/devices/exciter/engine";
 import { filterDevice } from "@/registry-audio/bases/base/devices/filter/device";
 import { createFilterEngine } from "@/registry-audio/bases/base/devices/filter/engine";
 import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/device";
@@ -171,6 +175,8 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(channelEqDevice, createChannelEqEngine, "Tone"),
   entry(graphicEqDevice, createGraphicEqEngine, "Tone"),
   entry(tiltEqDevice, createTiltEqEngine, "Tone"),
+  entry(exciterDevice, createExciterEngine, "Tone"),
+  entry(bassEnhancerDevice, createBassEnhancerEngine, "Tone"),
   entry(filterDevice, createFilterEngine, "Tone"),
   // Distortion
   entry(saturatorDevice, createSaturatorEngine, "Distortion"),

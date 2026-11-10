@@ -1,4 +1,5 @@
 import { autoPanDevice } from "@/registry-audio/bases/base/devices/auto-pan/device";
+import { bassEnhancerDevice } from "@/registry-audio/bases/base/devices/bass-enhancer/device";
 import { channelEqDevice } from "@/registry-audio/bases/base/devices/channel-eq/device";
 import { chorusDevice } from "@/registry-audio/bases/base/devices/chorus/device";
 import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
@@ -8,6 +9,7 @@ import { distortionDevice } from "@/registry-audio/bases/base/devices/distortion
 import { drumSynthDevice } from "@/registry-audio/bases/base/devices/drum-synth/device";
 import { electricPianoDevice } from "@/registry-audio/bases/base/devices/electric-piano/device";
 import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
+import { exciterDevice } from "@/registry-audio/bases/base/devices/exciter/device";
 import { filterDevice } from "@/registry-audio/bases/base/devices/filter/device";
 import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/device";
 import { frequencyShifterDevice } from "@/registry-audio/bases/base/devices/frequency-shifter/device";
@@ -41,6 +43,8 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  "bass-enhancer": bassEnhancerDevice,
+  exciter: exciterDevice,
   "frequency-shifter": frequencyShifterDevice,
   wah: wahDevice,
   "graphic-eq": graphicEqDevice,

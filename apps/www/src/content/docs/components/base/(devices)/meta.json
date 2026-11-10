@@ -14,6 +14,8 @@
     "channel-eq",
     "graphic-eq",
     "tilt-eq",
+    "exciter",
+    "bass-enhancer",
     "filter",
     "---Distortion---",
     "overdrive",

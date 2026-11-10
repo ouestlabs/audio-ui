@@ -63,6 +63,8 @@ export const DOCS_MENU_UPDATES: Record<string, MenuUpdate> = {
   sampler: { mark: "New", on: "2026-11-07" },
   redux: { mark: "New", on: "2026-10-16" },
   lofi: { mark: "New", on: "2026-11-10" },
+  "bass-enhancer": { mark: "New", on: "2026-11-10" },
+  exciter: { mark: "New", on: "2026-11-10" },
   "frequency-shifter": { mark: "New", on: "2026-11-10" },
   wah: { mark: "New", on: "2026-11-10" },
   "graphic-eq": { mark: "New", on: "2026-11-10" },

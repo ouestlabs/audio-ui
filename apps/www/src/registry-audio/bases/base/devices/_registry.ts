@@ -7,6 +7,7 @@ import type { RegistryItem } from "shadcn/schema";
  */
 const DEVICES = [
   "auto-pan",
+  "bass-enhancer",
   "channel-eq",
   "chorus",
   "compressor",
@@ -15,6 +16,7 @@ const DEVICES = [
   "distortion",
   "electric-piano",
   "equalizer",
+  "exciter",
   "filter",
   "frequency-shifter",
   "fm-synth",
@@ -1631,6 +1633,120 @@ export const devices: RegistryItem[] = [
       "@audio-ui/plot",
       "@audio-ui/frequency-shifter-device",
       "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/effect-exciter"],
+    description:
+      "The exciter as a device: a frequency, a drive and an amount, the numbers that go on the worklet for a state, the band it excites and the worklet's source (the exciter of @audio/effect-exciter), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/exciter/device.ts",
+        target: "components/audio-ui/devices/exciter/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/exciter/kernels.ts",
+        target: "components/audio-ui/devices/exciter/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "exciter-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "An exciter on the Web Audio API for an exciter state: the exciter of @audio/effect-exciter in an AudioWorklet loaded from a blob, the sound passing clean until it is ready.",
+    files: [
+      {
+        path: "devices/exciter/engine.ts",
+        target: "components/audio-ui/devices/exciter/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "exciter-engine",
+    registryDependencies: ["@audio-ui/exciter-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the exciter device: the band of highs it makes its harmonics from, over the device knobs.",
+    files: [
+      {
+        path: "devices/exciter/panel.tsx",
+        target: "components/audio-ui/devices/exciter/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "exciter-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/exciter-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/effect-subbass"],
+    description:
+      "The bass enhancer as a device: a frequency, a drive, an amount and the share of the sub kept, the numbers that go on the worklet for a state, its two bands and the worklet's source (the bass enhancer of @audio/effect-subbass), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/bass-enhancer/device.ts",
+        target: "components/audio-ui/devices/bass-enhancer/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/bass-enhancer/kernels.ts",
+        target: "components/audio-ui/devices/bass-enhancer/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "bass-enhancer-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A bass enhancer on the Web Audio API for a bass enhancer state: the bass enhancer of @audio/effect-subbass in an AudioWorklet loaded from a blob, the sound passing clean until it is ready.",
+    files: [
+      {
+        path: "devices/bass-enhancer/engine.ts",
+        target: "components/audio-ui/devices/bass-enhancer/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "bass-enhancer-engine",
+    registryDependencies: ["@audio-ui/bass-enhancer-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the bass enhancer device: the sub it takes, dashed, and the band its harmonics go to, over the device knobs.",
+    files: [
+      {
+        path: "devices/bass-enhancer/panel.tsx",
+        target: "components/audio-ui/devices/bass-enhancer/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "bass-enhancer-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/bass-enhancer-device",
     ],
     type: "registry:ui",
   },

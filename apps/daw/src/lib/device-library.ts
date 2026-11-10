@@ -8,6 +8,8 @@ import type {
 } from "@audio-ui/core/device";
 import { autoPanDevice } from "@/components/audio-ui/devices/auto-pan/device";
 import { createAutoPanEngine } from "@/components/audio-ui/devices/auto-pan/engine";
+import { bassEnhancerDevice } from "@/components/audio-ui/devices/bass-enhancer/device";
+import { createBassEnhancerEngine } from "@/components/audio-ui/devices/bass-enhancer/engine";
 import { channelEqDevice } from "@/components/audio-ui/devices/channel-eq/device";
 import { createChannelEqEngine } from "@/components/audio-ui/devices/channel-eq/engine";
 import { chorusDevice } from "@/components/audio-ui/devices/chorus/device";
@@ -26,6 +28,8 @@ import { electricPianoDevice } from "@/components/audio-ui/devices/electric-pian
 import { createElectricPianoEngine } from "@/components/audio-ui/devices/electric-piano/engine";
 import { equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
 import { createEqualizerEngine } from "@/components/audio-ui/devices/equalizer/engine";
+import { exciterDevice } from "@/components/audio-ui/devices/exciter/device";
+import { createExciterEngine } from "@/components/audio-ui/devices/exciter/engine";
 import { filterDevice } from "@/components/audio-ui/devices/filter/device";
 import { createFilterEngine } from "@/components/audio-ui/devices/filter/engine";
 import { fmSynthDevice } from "@/components/audio-ui/devices/fm-synth/device";
@@ -171,6 +175,8 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(channelEqDevice, createChannelEqEngine, "Tone"),
   entry(graphicEqDevice, createGraphicEqEngine, "Tone"),
   entry(tiltEqDevice, createTiltEqEngine, "Tone"),
+  entry(exciterDevice, createExciterEngine, "Tone"),
+  entry(bassEnhancerDevice, createBassEnhancerEngine, "Tone"),
   entry(filterDevice, createFilterEngine, "Tone"),
   // Distortion
   entry(saturatorDevice, createSaturatorEngine, "Distortion"),

@@ -2,6 +2,7 @@ import type { ParameterValue } from "@audio-ui/core/device";
 import type { Tempo } from "@audio-ui/core/time";
 import type { ComponentType, ReactNode } from "react";
 import { AutoPanPanel } from "@/components/audio-ui/devices/auto-pan/panel";
+import { BassEnhancerPanel } from "@/components/audio-ui/devices/bass-enhancer/panel";
 import { ChannelEqPanel } from "@/components/audio-ui/devices/channel-eq/panel";
 import { ChorusPanel } from "@/components/audio-ui/devices/chorus/panel";
 import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
@@ -11,6 +12,7 @@ import { DistortionPanel } from "@/components/audio-ui/devices/distortion/panel"
 import { DrumSynthPanel } from "@/components/audio-ui/devices/drum-synth/panel";
 import { ElectricPianoPanel } from "@/components/audio-ui/devices/electric-piano/panel";
 import { EqualizerPanel } from "@/components/audio-ui/devices/equalizer/panel";
+import { ExciterPanel } from "@/components/audio-ui/devices/exciter/panel";
 import { FilterPanel } from "@/components/audio-ui/devices/filter/panel";
 import { FmSynthPanel } from "@/components/audio-ui/devices/fm-synth/panel";
 import { FrequencyShifterPanel } from "@/components/audio-ui/devices/frequency-shifter/panel";
@@ -98,6 +100,8 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.bass-enhancer": entry(BassEnhancerPanel),
+  "audioui.exciter": entry(ExciterPanel),
   "audioui.frequency-shifter": entry(FrequencyShifterPanel, "w-96"),
   "audioui.wah": entry(WahPanel, "w-[32rem]"),
   "audioui.graphic-eq": entry(GraphicEqPanel, "w-[28rem]"),

@@ -1,0 +1,35 @@
+---
+title: Bass Enhancer
+description: "A bass enhancer device: a frequency, a drive, an amount and the sub it keeps, a panel that draws its two bands, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-bass-enhancer" />
+
+Lets a bass be heard on small speakers. A phone or a laptop cannot play the lowest notes, but the ear hears a note from its harmonics alone. The device takes the lows under a frequency, shapes them into their harmonics, which those speakers can play, and adds them to the sound. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="bass-enhancer" kind="device" />
+
+## Controls
+
+<DeviceControls device="bass-enhancer">
+<Control id="frequencyHz">The top of the lows it takes: the bass under it is what it makes harmonics from.</Control>
+<Control id="drive">How hard the lows are shaped: more makes more harmonics.</Control>
+<Control id="amount">How much of the harmonics is added. At 0 the sound is as it was.</Control>
+<Control id="keep">How much of the sub itself stays. Lower thins the lows under the frequency, for speakers that would only waste power on them, but never takes them out whole: at 0, with the frequency at 80 Hz, a note at 30 Hz is 6 dB down and one at the frequency 2 dB up, since the low-pass the kernel takes away is shifted in phase.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the sub it takes, dashed, and the band its harmonics go to, two and a half times higher. `bassEnhancerBands(state)` is what it draws.
+
+<DeviceUsage name="bass-enhancer" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The bass enhancer runs on the audio thread: the bass enhancer of `@audio/effect-subbass` in an `AudioWorklet` loaded from a blob (`BASS_ENHANCER_WORKLET` is its source), 128 frames at a time: a low-pass takes the sub, a waveshaper makes its even and odd harmonics, and a band-pass keeps them between two and five times the frequency, where small speakers play. A worklet cannot import, so the device carries the kernel as published (`BASS_ENHANCER_KERNELS`, in its `kernels.ts`). Until it is ready, and in a context with no worklets, the sound passes clean: `ready` resolves once it is in the graph.

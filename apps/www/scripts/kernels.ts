@@ -115,6 +115,20 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "EXCITER_KERNELS",
+    file: "devices/exciter/kernels.ts",
+    kernels: [
+      { file: "exciter.js", name: "@audio/effect-exciter", use: "exciter" },
+    ],
+  },
+  {
+    constant: "BASS_ENHANCER_KERNELS",
+    file: "devices/bass-enhancer/kernels.ts",
+    kernels: [
+      { file: "subbass.js", name: "@audio/effect-subbass", use: "subbass" },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [
