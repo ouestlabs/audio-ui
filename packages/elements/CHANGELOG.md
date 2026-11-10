@@ -1,5 +1,12 @@
 # @audio-ui/elements
 
+## 0.1.1
+
+### Patch Changes
+
+- Updated dependencies [205d843]
+  - @audio-ui/core@0.25.0
+
 ## 0.1.0
 
 ### Minor Changes

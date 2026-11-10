@@ -1,5 +1,11 @@
 # @audio-ui/core
 
+## 0.25.0
+
+### Minor Changes
+
+- 205d843: Pitch: `SCALES` has the whole-tone scale, `"whole-tone"`, six notes a whole step apart.
+
 ## 0.24.0
 
 ### Minor Changes
