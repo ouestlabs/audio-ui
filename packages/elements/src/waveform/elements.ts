@@ -660,7 +660,12 @@ export class WaveformRegionElement extends WaveformPartElement {
     return this.controller.getSnapshot().value;
   }
 
-  set value(value: WaveformRegionValue) {
+  set value(value: WaveformRegionValue | string) {
+    // A framework may set the attribute's text form as the property.
+    if (typeof value === "string") {
+      this.setAttribute("value", value);
+      return;
+    }
     this.#value = [Number(value[0]), Number(value[1])];
     this.repaint();
   }

@@ -162,7 +162,12 @@ export class PianoElement extends ControlRoot<PianoSnapshot> {
       : undefined;
   }
 
-  set pitches(pitches: readonly number[] | undefined) {
+  set pitches(pitches: readonly number[] | undefined | string) {
+    // A framework may set the attribute's text form as the property.
+    if (typeof pitches === "string") {
+      this.setAttribute("pitches", pitches);
+      return;
+    }
     this.#pitches = pitches;
     this.configure();
     this.paint();

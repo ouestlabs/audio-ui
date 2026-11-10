@@ -209,7 +209,12 @@ export class EnvelopeElement extends ControlRoot<EnvelopeSnapshot> {
     return this.controller.getSnapshot().value;
   }
 
-  set value(value: Breakpoint[]) {
+  set value(value: Breakpoint[] | string) {
+    // A framework may set the attribute's text form as the property.
+    if (typeof value === "string") {
+      this.setAttribute("value", value);
+      return;
+    }
     this.#value = value;
     this.configure();
     this.paint();
@@ -543,6 +548,10 @@ abstract class EnvelopeHandleElement extends EnvelopePartElement {
   /** Which point it is, or which point its segment leaves from, in `x` order. */
   get index(): number {
     return numberAttribute(this, "index") ?? 0;
+  }
+
+  set index(index: number) {
+    this.setAttribute("index", String(index));
   }
 
   protected abstract nodes(envelope: EnvelopeElement): Map<number, HTMLElement>;

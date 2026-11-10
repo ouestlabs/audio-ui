@@ -121,7 +121,12 @@ export class TimelineRangeElement extends TimelinePartElement {
     return this.controller?.getSnapshot().value ?? this.#value ?? [0, 0];
   }
 
-  set value(value: RangeValue) {
+  set value(value: RangeValue | string) {
+    // A framework may set the attribute's text form as the property.
+    if (typeof value === "string") {
+      this.setAttribute("value", value);
+      return;
+    }
     this.#value = [Number(value[0]), Number(value[1])];
     this.repaint();
   }

@@ -847,7 +847,12 @@ export class PlotHandleElement extends PlotPartElement {
     return this.controller.getSnapshot().value;
   }
 
-  set value(value: PlotPoint) {
+  set value(value: PlotPoint | string) {
+    // A framework may set the attribute's text form as the property.
+    if (typeof value === "string") {
+      this.setAttribute("value", value);
+      return;
+    }
     this.#value = { x: Number(value.x), y: Number(value.y) };
     this.repaint();
   }

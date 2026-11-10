@@ -124,7 +124,12 @@ export class MeterElement extends ControlRoot<MeterSnapshot> {
     return this.#value ?? numberList(this, "value");
   }
 
-  set value(levels: readonly number[] | undefined) {
+  set value(levels: readonly number[] | undefined | string) {
+    // A framework may set the attribute's text form as the property.
+    if (typeof levels === "string") {
+      this.setAttribute("value", levels);
+      return;
+    }
     this.#value = levels;
     this.configure();
     this.paint();
@@ -138,7 +143,12 @@ export class MeterElement extends ControlRoot<MeterSnapshot> {
     );
   }
 
-  set peak(levels: readonly number[] | undefined) {
+  set peak(levels: readonly number[] | undefined | string) {
+    // A framework may set the attribute's text form as the property.
+    if (typeof levels === "string") {
+      this.setAttribute("peak", levels);
+      return;
+    }
     this.#peak = levels;
     this.configure();
     this.paint();
@@ -303,6 +313,8 @@ export class MeterChannelsElement extends MeterPartElement {
  * `aria-valuetext`.
  */
 export class MeterChannelElement extends MeterPartElement {
+  static readonly observedAttributes = ["index"];
+
   /** Returns the channel's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted level. */
   getAriaValueText:
     | ((formatted: string, value: number, index: number) => string)
@@ -311,6 +323,10 @@ export class MeterChannelElement extends MeterPartElement {
   labelId: string | undefined;
 
   readonly #presence = document.createElement("span");
+
+  attributeChangedCallback() {
+    this.root?.paint();
+  }
 
   constructor() {
     super();
@@ -323,6 +339,10 @@ export class MeterChannelElement extends MeterPartElement {
   /** Its place in the levels, from its `index` attribute. */
   get index(): number {
     return numberAttribute(this, "index") ?? 0;
+  }
+
+  set index(index: number) {
+    this.setAttribute("index", String(index));
   }
 
   override paint(snapshot: MeterSnapshot) {

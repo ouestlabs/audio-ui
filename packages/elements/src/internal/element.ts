@@ -28,11 +28,16 @@ export function define(elements: Record<string, CustomElementConstructor>) {
 
 const added = new Set<string>();
 
+/** The cascade layer the structural rules are declared in. */
+const LAYER = "audio-ui-elements";
+
 /**
- * Adds rules an element needs to work, such as `display: block` on a part
- * that rotates, to one `<style>` in the page's head. They sit in `:where()`,
- * with no specificity, so any rule of the page wins over them. No color,
- * size or spacing: the look is the page's.
+ * Adds the structural rules an element depends on, such as `display: block`
+ * on a part that rotates, to one `<style>` at the start of the page's head.
+ * The rules use `:where()`, so they carry no specificity, and are declared
+ * in the `audio-ui-elements` cascade layer, first in the document: any rule
+ * of the page takes precedence, including utilities declared in later
+ * layers. No color, size or spacing is set.
  */
 export function structure(rules: string) {
   if (typeof document === "undefined" || added.has(rules)) {
@@ -47,7 +52,7 @@ export function structure(rules: string) {
     style.dataset.audioUiElements = "";
     document.head.insertBefore(style, document.head.firstChild);
   }
-  style.appendChild(document.createTextNode(rules));
+  style.appendChild(document.createTextNode(`@layer ${LAYER} {\n${rules}\n}`));
 }
 
 /** Sets each attribute to its value, and removes the ones whose value is `null`, touching only what changed. */

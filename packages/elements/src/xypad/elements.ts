@@ -145,7 +145,12 @@ export class XYPadElement extends ControlRoot<XYPadSnapshot> {
     return this.controller.getSnapshot().value;
   }
 
-  set value(value: XYPadPoint) {
+  set value(value: XYPadPoint | string) {
+    // A framework may set the attribute's text form as the property.
+    if (typeof value === "string") {
+      this.setAttribute("value", value);
+      return;
+    }
     this.#value = { x: Number(value.x), y: Number(value.y) };
     this.configure();
     this.paint();

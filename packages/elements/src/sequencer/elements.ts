@@ -179,7 +179,12 @@ export class SequencerElement extends ControlRoot<SequencerSnapshot> {
     return this.controller.getSnapshot().value;
   }
 
-  set value(value: Pattern) {
+  set value(value: Pattern | string) {
+    // A framework may set the attribute's text form as the property.
+    if (typeof value === "string") {
+      this.setAttribute("value", value);
+      return;
+    }
     this.#value = value;
     this.configure();
     this.paint();
@@ -408,6 +413,10 @@ export class SequencerRowElement extends SequencerPartElement {
   /** Which row it is, from the top. */
   get index(): number {
     return numberAttribute(this, "index") ?? 0;
+  }
+
+  set index(index: number) {
+    this.setAttribute("index", String(index));
   }
 
   override paint(snapshot: SequencerSnapshot) {
