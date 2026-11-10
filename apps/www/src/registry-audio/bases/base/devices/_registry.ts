@@ -1322,13 +1322,22 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/effect-bitcrusher",
+      "@audio/effect-noiseshaper",
+    ],
     description:
-      "The redux as a device: a number of bits, a downsample factor and a mix, the numbers that go on the nodes for a state, the stairs of the quantizer and the source of the sample-hold worklet, with no panel and no audio in it.",
+      "The redux as a device: a number of bits rounded to the nearest level or shaped, a downsample factor and a mix, the numbers that go on the nodes for a state, the stairs of the quantizer and the source of the worklet that holds and shapes, with no panel and no audio in it.",
     files: [
       {
         path: "devices/redux/device.ts",
         target: "components/audio-ui/devices/redux/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/redux/kernels.ts",
+        target: "components/audio-ui/devices/redux/kernels.ts",
         type: "registry:lib",
       },
     ],
@@ -1340,7 +1349,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A redux on the Web Audio API for a redux state: a sample hold in an AudioWorklet loaded from a blob and a quantizer table for the bits, mixed with the clean sound; the bits are crushed at once and the hold joins when the worklet is ready.",
+      "A redux on the Web Audio API for a redux state: a sample hold in an AudioWorklet loaded from a blob, which also shapes the bits, and a quantizer table that rounds them to the nearest level, mixed with the clean sound; the bits are crushed at once and the hold joins when the worklet is ready.",
     files: [
       {
         path: "devices/redux/engine.ts",

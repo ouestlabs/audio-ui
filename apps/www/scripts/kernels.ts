@@ -34,6 +34,22 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "REDUX_KERNELS",
+    file: "devices/redux/kernels.ts",
+    kernels: [
+      {
+        file: "bitcrusher.js",
+        name: "@audio/effect-bitcrusher",
+        use: "bitcrusher",
+      },
+      {
+        file: "noise-shaping.js",
+        name: "@audio/effect-noiseshaper",
+        use: "noiseShaping",
+      },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [

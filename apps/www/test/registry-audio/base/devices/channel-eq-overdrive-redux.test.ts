@@ -223,3 +223,101 @@ describe("the redux device", () => {
     });
   });
 });
+
+describe("the redux's quantizer and its worklet", () => {
+  const defaults = reduxDevice.defaults();
+  interface Processor {
+    port: { onmessage: (event: { data: unknown }) => void };
+    process: (
+      inputs: Float32Array[][],
+      outputs: Float32Array[][],
+      parameters: Record<string, Float32Array>
+    ) => boolean;
+  }
+  const made = (shaped: boolean) => {
+    class AudioWorkletProcessor {
+      readonly port: { onmessage: (event: { data: unknown }) => void } = {
+        onmessage: () => undefined,
+      };
+    }
+    let Made: (new (options: unknown) => Processor) | undefined;
+    new Function(
+      "AudioWorkletProcessor",
+      "registerProcessor",
+      "sampleRate",
+      REDUX_WORKLET
+    )(
+      AudioWorkletProcessor,
+      (_name: string, processor: new (options: unknown) => Processor) => {
+        Made = processor;
+      },
+      48_000
+    );
+    if (!Made) {
+      throw new Error("The worklet registered no processor");
+    }
+    return new Made({ processorOptions: { shaped } });
+  };
+  const ramp = () => new Float32Array(128).map((_, frame) => frame / 200 - 0.3);
+  const parameters = (hold: number, bits: number) => ({
+    bits: new Float32Array([bits]),
+    hold: new Float32Array([hold]),
+  });
+
+  test("its bits are rounded to the nearest level or shaped, the nearest the one it starts with", () => {
+    const quantizer = reduxDevice.parameters.find(
+      (parameter) => parameter.id === "quantize"
+    );
+    expect(quantizer?.options?.map((option) => option.value)).toEqual([
+      "nearest",
+      "shaped",
+    ]);
+    expect(defaults.quantize).toBe("nearest");
+    // A redux saved before the choice plays as it did.
+    expect(reduxDevice.sanitize({ bits: 4 }).quantize).toBe("nearest");
+    expect(reduxSettings({ ...defaults, quantize: "shaped" }).shaped).toBe(
+      true
+    );
+  });
+
+  test("it holds each sample as the bitcrusher does, at 24 bits", async () => {
+    const { default: bitcrusher } = await import("@audio/effect-bitcrusher");
+    const input = ramp();
+    const output = new Float32Array(128);
+    made(false).process([[input]], [[output]], parameters(4, 8));
+    const expected = bitcrusher(input.slice(), {
+      bits: 24,
+      fs: 48_000,
+      rate: 1 / 4,
+    });
+    expect([...output]).toEqual([...expected]);
+    // Each held value stands for four samples.
+    expect(new Set(output).size).toBeLessThanOrEqual(33);
+  });
+
+  test("shaped, it rounds with the noise shaper's error feedback after the hold", async () => {
+    const { default: bitcrusher } = await import("@audio/effect-bitcrusher");
+    const { default: noiseShaping } = await import("@audio/effect-noiseshaper");
+    const input = ramp();
+    const output = new Float32Array(128);
+    made(true).process([[input]], [[output]], parameters(2, 3));
+    const held = bitcrusher(input.slice(), { bits: 24, fs: 48_000, rate: 0.5 });
+    expect([...output]).toEqual([...noiseShaping(held, { bits: 3 })]);
+  });
+
+  test("a message switches the shaping", () => {
+    const processor = made(false);
+    processor.port.onmessage({ data: { shaped: true } });
+    const output = new Float32Array(128);
+    processor.process([[ramp()]], [[output]], parameters(1, 2));
+    // Two bits: every sample on one of the levels -1, -0.5, 0, 0.5, 1.
+    expect(output.every((sample) => (sample * 2) % 1 === 0)).toBe(true);
+  });
+
+  test("with no worklet, a shaped quantizer still rounds through the table", async () => {
+    const { ctx, made: nodes } = fakeContext();
+    const engine = createReduxEngine(ctx, { ...defaults, quantize: "shaped" });
+    expect(await engine.ready).toBe(false);
+    expect(nodes.shaper.curve).not.toBeNull();
+  });
+});

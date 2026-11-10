@@ -1,4 +1,5 @@
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { REDUX_KERNELS } from "@/registry-audio/bases/base/devices/redux/kernels";
 
 /** The table of the quantizer has this many steps: finer than 16 bits can tell apart on a plot. */
 const TABLE_STEPS = 2 ** 16;
@@ -10,7 +11,7 @@ const TABLE_STEPS = 2 ** 16;
  */
 export const reduxDevice = defineDevice({
   description:
-    "Roughens the sound like an early sampler: it keeps only a number of bits of each sample and holds each sample for a number of samples, mixed with the clean sound.",
+    "Roughens the sound like an early sampler: it keeps only a number of bits of each sample, rounded to the nearest level or shaped so the noise goes to the highs, and holds each sample for a number of samples, mixed with the clean sound.",
   id: "audioui.redux",
   name: "Redux",
   parameters: [
@@ -22,6 +23,16 @@ export const reduxDevice = defineDevice({
       max: 16,
       min: 1,
       step: 1,
+    },
+    {
+      default: "nearest",
+      id: "quantize",
+      kind: "choice",
+      label: "Quantize",
+      options: [
+        { label: "Nearest", value: "nearest" },
+        { label: "Shaped", value: "shaped" },
+      ],
     },
     {
       default: 4,
@@ -50,7 +61,13 @@ export type ReduxState = DeviceState<typeof reduxDevice.parameters>;
 /** The numbers that go on the nodes for a state. Off, the clean sound passes. */
 export function reduxSettings(state: ReduxState) {
   const mix = state.enabled ? state.mix / 100 : 0;
-  return { bits: state.bits, dry: 1 - mix, hold: state.hold, wet: mix };
+  return {
+    bits: state.bits,
+    dry: 1 - mix,
+    hold: state.hold,
+    shaped: state.quantize === "shaped",
+    wet: mix,
+  };
 }
 
 /** One input from -1 to 1 kept to `bits` bits: the nearest of 2^bits levels. */
@@ -75,34 +92,54 @@ export function reduxCurve(state: ReduxState) {
 }
 
 /**
- * The processor of the sample hold, as the source of an `AudioWorklet` module:
- * it keeps each sample for `hold` samples. The engine loads it from a blob, so
- * there is no file to serve.
+ * The processor of the redux, as the source of an `AudioWorklet` module: it
+ * holds each sample for `hold` samples with the bitcrusher of
+ * `@audio/effect-bitcrusher` at 24 bits, finer than any rounding to come, and
+ * when the quantizer is shaped, rounds to `bits` with the error feedback of
+ * `@audio/effect-noiseshaper`, so the rounding noise goes to the highs. A
+ * message `{ shaped }` switches it. The engine loads it from a blob, so there
+ * is no file to serve.
  */
-export const REDUX_WORKLET = `
+export const REDUX_WORKLET = `${REDUX_KERNELS}
 class AudioUiRedux extends AudioWorkletProcessor {
   static get parameterDescriptors() {
-    return [{ name: "hold", defaultValue: 1, minValue: 1, maxValue: 64, automationRate: "k-rate" }];
+    return [
+      { name: "hold", defaultValue: 1, minValue: 1, maxValue: 64, automationRate: "k-rate" },
+      { name: "bits", defaultValue: 16, minValue: 1, maxValue: 24, automationRate: "k-rate" },
+    ];
   }
-  constructor() {
+  constructor(options) {
     super();
-    this.count = 0;
-    this.held = [];
+    this.shaped = Boolean(options?.processorOptions?.shaped);
+    this.channels = [];
+    this.port.onmessage = ({ data }) => {
+      this.shaped = Boolean(data.shaped);
+    };
   }
   process(inputs, outputs, parameters) {
     const input = inputs[0];
     const output = outputs[0];
-    const hold = Math.max(1, Math.round(parameters.hold[0]));
-    const length = output[0] ? output[0].length : 0;
-    for (let n = 0; n < length; n += 1) {
-      if (this.count % hold === 0) {
-        for (let c = 0; c < output.length; c += 1) {
-          this.held[c] = input[c] ? input[c][n] : 0;
-        }
+    if (!(output && output.length > 0)) {
+      return true;
+    }
+    const hold = Math.max(1, parameters.hold[0]);
+    const bits = parameters.bits[0];
+    for (let channel = 0; channel < output.length; channel += 1) {
+      const data = output[channel];
+      const from = input && input.length > 0 ? input[channel % input.length] : null;
+      if (from) {
+        data.set(from);
+      } else {
+        data.fill(0);
       }
-      this.count += 1;
-      for (let c = 0; c < output.length; c += 1) {
-        output[c][n] = this.held[c] || 0;
+      this.channels[channel] ??= { crush: { fs: sampleRate }, shape: { fs: sampleRate } };
+      const state = this.channels[channel];
+      state.crush.bits = 24;
+      state.crush.rate = 1 / hold;
+      bitcrusher(data, state.crush);
+      if (this.shaped) {
+        state.shape.bits = bits;
+        noiseShaping(data, state.shape);
       }
     }
     return true;
