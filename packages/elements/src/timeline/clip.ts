@@ -681,7 +681,8 @@ export class TimelineClipFadeElement extends TimelineClipPartElement {
       "stroke-width": "1.5",
       "vector-effect": "non-scaling-stroke",
     });
-    this.#svg.append(this.#shade, this.#line);
+    this.#svg.appendChild(this.#shade);
+    this.#svg.appendChild(this.#line);
   }
 
   attributeChangedCallback() {
