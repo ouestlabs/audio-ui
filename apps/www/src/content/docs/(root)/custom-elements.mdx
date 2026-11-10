@@ -232,6 +232,22 @@ The track and the indicator draw their arc with `currentColor`. A class works to
 | `<audio-ui-fader-value>` | The formatted value, as its text |
 | `<audio-ui-fader-label>` | Names the group, and the input when the thumb has no name of its own |
 
+### Pad
+
+`<audio-ui-pad>` is a grid of pads to strike, a group: each pad sounds while held, by pointer or with Enter or Space, and each pointer holds its own pad. A strike is harder where a pen or screen presses harder, or else toward the top of the pad. The pads are one tab stop: the arrows walk them, up and down by a row.
+
+<TypeTable>
+<TypeRow name={"columns"} type={"number"} default={"4"}>How many pads a row holds: what the up and down arrows move by. Lay the grid out to match.</TypeRow>
+<TypeRow name={"active-pads"} type={"string"}>Pads lit from elsewhere, such as a sequencer or a MIDI input, separated by spaces. The `activePads` property takes an array.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+A strike fires `padon`, with `event.detail` `{ value, velocity, reason }`: `preventDefault()` keeps it silent. A release fires `padoff`, with `{ value, reason }`, and `reason` is `"choke"` when another pad of its group stopped it.
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-pad-item>` | One pad, a button named by its content. `value` names it in the events; pads sharing a `choke-group` stop each other; `disabled` silences one. How hard it was last struck is its `--pad-velocity` CSS variable, from 0 to 1 |
+
 ### Data attributes
 
 Every part carries the state of its control:
@@ -241,4 +257,5 @@ Every part carries the state of its control:
 <TypeRow name={"data-dragging"}>Present while a pointer drags the control.</TypeRow>
 <TypeRow name={"data-drag-mode"}>On a knob's parts, its `drag-mode`. Style the cursor from it.</TypeRow>
 <TypeRow name={"data-orientation"}>On a fader's parts, `horizontal` or `vertical`.</TypeRow>
+<TypeRow name={"data-active"}>On a pad, while it sounds.</TypeRow>
 </TypeTable>

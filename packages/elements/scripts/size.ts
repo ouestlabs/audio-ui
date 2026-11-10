@@ -7,8 +7,9 @@
 /** Gzipped bytes. About 15% above what each weighs today. */
 const BUDGETS: Record<string, number> = {
   fader: 5300,
-  index: 8200,
+  index: 10_300,
   knob: 6000,
+  pad: 3500,
 };
 
 const dist = `${import.meta.dir}/../dist`;
@@ -49,7 +50,7 @@ for (const [entry, budget] of Object.entries(BUDGETS)) {
     failed = true;
     continue;
   }
-  const tag = entry === "fader" ? "audio-ui-fader" : "audio-ui-knob";
+  const tag = entry === "index" ? "audio-ui-knob" : `audio-ui-${entry}`;
   if (!(await registers(entry, tag))) {
     console.error(
       `FAIL ${entry}: imported for its side effect, it registers no <${tag}>`

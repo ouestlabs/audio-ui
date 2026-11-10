@@ -43,6 +43,10 @@
     "./knob": {
       "types": "./dist/knob/index.d.ts",
       "import": "./dist/knob.js"
+    },
+    "./pad": {
+      "types": "./dist/pad/index.d.ts",
+      "import": "./dist/pad.js"
     }
   },
   "module": "dist/index.js",

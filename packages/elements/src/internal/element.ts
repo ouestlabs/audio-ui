@@ -108,6 +108,15 @@ export function jsonAttribute<T>(
   }
 }
 
+const LIST_SEPARATOR = /[\s,]+/;
+
+/** A list attribute: values separated by spaces or commas, none when it is missing. */
+export function listAttribute(element: Element, name: string): string[] {
+  return (element.getAttribute(name) ?? "")
+    .split(LIST_SEPARATOR)
+    .filter(Boolean);
+}
+
 /** A number attribute, or `undefined` when it is missing or not a number. */
 export function numberAttribute(
   element: Element,
