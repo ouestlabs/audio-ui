@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type MonoSynthNote,
@@ -66,7 +66,7 @@ export default function BlockMonoSynth() {
     onNoteOff: (pitch: number) => engine?.noteOff({ id: `midi-${pitch}` }),
     onNoteOn: (pitch: number, velocity: number) =>
       engine?.noteOn(
-        { frequency: noteToFrequency(pitch), velocity },
+        { frequency: midiToHz(pitch), velocity },
         { id: `midi-${pitch}` }
       ),
   });

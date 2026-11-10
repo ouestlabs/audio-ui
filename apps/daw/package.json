@@ -62,6 +62,7 @@
     "@audio/loudness-truepeak": "catalog:",
     "@audio/midi-parse": "catalog:",
     "@audio/midi-write": "catalog:",
+    "@audio/note": "catalog:",
     "@audio/musicxml": "catalog:",
     "@audio/resample-sinc": "catalog:",
     "@audio/reverb-dattorro": "catalog:",

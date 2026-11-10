@@ -37,13 +37,13 @@ export const SCALE_LABELS: Record<ScaleName, string> = {
   locrian: "Locrian",
   lydian: "Lydian",
   major: "Major",
-  "major-pentatonic": "Major pentatonic",
+  "pentatonic-major": "Major pentatonic",
   "melodic-minor": "Melodic minor",
   minor: "Minor",
-  "minor-pentatonic": "Minor pentatonic",
+  "pentatonic-minor": "Minor pentatonic",
   mixolydian: "Mixolydian",
   phrygian: "Phrygian",
-  "whole-tone": "Whole tone",
+  whole: "Whole tone",
 };
 const SCALE_NAMES = Object.keys(SCALES) as ScaleName[];
 const ROOTS = Array.from({ length: 12 }, (_, root) => root);

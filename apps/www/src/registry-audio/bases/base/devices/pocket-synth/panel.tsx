@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback, useId, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -87,7 +87,7 @@ function PocketSynthPanel({
       held === undefined
         ? position
         : {
-            x: pocketSynthPosition(noteToFrequency(held)) * PAD_MAX,
+            x: pocketSynthPosition(midiToHz(held)) * PAD_MAX,
             y: position.y,
           },
     [held, position]

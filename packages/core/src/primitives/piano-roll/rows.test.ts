@@ -62,7 +62,7 @@ describe("rollRows", () => {
   });
 
   test("keeps every row with a scale unfolded, or folded on the notes alone", () => {
-    const scale = { name: "minor-pentatonic", root: 9 } as const;
+    const scale = { name: "pentatonic-minor", root: 9 } as const;
     expect(rollRows([], 60, 63, false, scale).pitches).toHaveLength(4);
     expect(rollRows([{ pitch: 61 }], 60, 63, true, scale).pitches).toEqual([
       61,

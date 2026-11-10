@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import { useCallback, useEffect, useRef } from "react";
 import {
   type EnvelopePoint,
@@ -98,7 +98,7 @@ export function useSynthVoices({
       const oscillator = ctx.createOscillator();
       const gain = ctx.createGain();
       oscillator.type = oscillatorType;
-      oscillator.frequency.setValueAtTime(noteToFrequency(note), startTime);
+      oscillator.frequency.setValueAtTime(midiToHz(note), startTime);
       gain.gain.value = 0;
 
       oscillator.connect(gain);
@@ -186,7 +186,7 @@ export function useSynthVoices({
     const ratio = 2 ** (semitones / SEMITONES_PER_OCTAVE);
     for (const [note, voice] of voicesRef.current.entries()) {
       voice.oscillator.frequency.setTargetAtTime(
-        noteToFrequency(note) * ratio,
+        midiToHz(note) * ratio,
         ctx.currentTime,
         PITCH_BEND_SMOOTHING_SECONDS
       );

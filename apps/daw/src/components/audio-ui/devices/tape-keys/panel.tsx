@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import {
@@ -73,7 +73,7 @@ function TapeKeysPanel({
     [onValueChange, value]
   );
   const play = useCallback(
-    (pitch: number) => onNoteOn?.({ frequency: noteToFrequency(pitch) }),
+    (pitch: number) => onNoteOn?.({ frequency: midiToHz(pitch) }),
     [onNoteOn]
   );
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);

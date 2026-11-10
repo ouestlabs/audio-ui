@@ -127,6 +127,9 @@
     "test": "bun test",
     "worklet:build": "bun scripts/worklet.ts"
   },
+  "dependencies": {
+    "@audio/note": "1.0.3"
+  },
   "devDependencies": {
     "@happy-dom/global-registrator": "^21.0.4",
     "@types/bun": "1.4.2",

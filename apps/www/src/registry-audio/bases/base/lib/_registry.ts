@@ -322,7 +322,7 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/note"],
     description:
       "Note players: what a MIDI track plays through, all taking notes the same way, and the voice pool that plays an instrument of the library with a voice for each note it holds, the oldest given up first.",
     files: [

@@ -582,7 +582,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Electric Piano device: its four presets, its controls by what they do (tone, pickup, tremolo, output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -753,7 +753,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the FM Synth device: its eight presets, what every operator shares, each operator's four controls and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -1097,7 +1097,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The guitar's face: the string's tone, decay and palm mute, the body and the volume, and a keyboard from the open low E up three octaves, controlled, with no audio in it.",
     files: [
@@ -1268,7 +1268,12 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio-ui/icons"],
+    dependencies: [
+      "@audio-ui/react",
+      "@audio-ui/core",
+      "@audio-ui/icons",
+      "@audio/note",
+    ],
     description:
       "The face of the Mono Synth device: its eight presets, the oscillator's wave and the range in its title bar, its controls by what they do (oscillators, filter, envelope, glide and vibrato) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -1377,7 +1382,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Organ device: its six registrations and the rotary speaker in its title bar, nine drawbars as faders, its percussion, key click, drive and volume, and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -1545,7 +1550,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "xypad"],
-    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons", "@audio/note"],
     description:
       "The face of the Pocket Synth device: a pad that plays it, its waveform and filter, and its volume. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -1600,7 +1605,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Poly Synth device: its eight presets, its controls by what they do (oscillators, filter, envelope, vibrato and chorus) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -2351,7 +2356,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "pad", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Sampler device: its sample in its title bar, its controls and sixteen pads, one a slice, that play it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -2460,7 +2465,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the String Machine device: its eight presets, its controls by what they do (registers, tone, bow and output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -2513,7 +2518,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Tape Keys device: the track its heads read in its title bar, the tape's speed, wow and tone, the volume, and its 35 keys. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -2730,7 +2735,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "xypad"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio/note"],
     description:
       "The face of the Wave Shaper device: a pad that plays it, its waveform and its knobs. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
