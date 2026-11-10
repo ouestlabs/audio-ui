@@ -114,13 +114,18 @@ export abstract class ControlPart<Root extends ControlRoot<Snapshot>, Snapshot>
 }
 
 /**
- * Fires `input` on `element` for a change, as a cancelable event that
- * bubbles out of a shadow root too. Returns whether the change stands:
+ * Fires `input` on `element` for a change, or the event named `type` for a
+ * change of something besides its value, as a cancelable event that bubbles
+ * out of a shadow root too. Returns whether the change stands:
  * `preventDefault()` refuses it.
  */
-export function reportChange<Detail>(element: Element, detail: Detail) {
+export function reportChange<Detail>(
+  element: Element,
+  detail: Detail,
+  type = "input"
+) {
   return element.dispatchEvent(
-    new CustomEvent("input", {
+    new CustomEvent(type, {
       bubbles: true,
       cancelable: true,
       composed: true,
@@ -129,9 +134,13 @@ export function reportChange<Detail>(element: Element, detail: Detail) {
   );
 }
 
-/** Fires `change` on `element` once a gesture that changed the value ends. */
-export function reportCommit<Detail>(element: Element, detail: Detail) {
+/** Fires `change` on `element` once a gesture that changed the value ends, or the event named `type`. */
+export function reportCommit<Detail>(
+  element: Element,
+  detail: Detail,
+  type = "change"
+) {
   element.dispatchEvent(
-    new CustomEvent("change", { bubbles: true, composed: true, detail })
+    new CustomEvent(type, { bubbles: true, composed: true, detail })
   );
 }

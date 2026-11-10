@@ -11,6 +11,7 @@ const elements = [
   "piano",
   "plot",
   "sequencer",
+  "waveform",
   "xypad",
 ];
 

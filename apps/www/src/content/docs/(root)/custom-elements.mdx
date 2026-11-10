@@ -440,6 +440,47 @@ Its `valueAt(clientX, clientY)` method turns a pointer position into a value in 
 | `<audio-ui-plot-cursor>` | Follows a mouse or a pen over the plot: sets `--plot-cursor-x` and `--plot-cursor-y` and `data-active`, for crosshair lines |
 | `<audio-ui-plot-cursor-readout>` | Inside the cursor, the value under the pointer as text, through its `format` property |
 
+### Waveform
+
+`<audio-ui-waveform>` shows a sound and, with a control, seeks through it: a press jumps to the pointer, a drag scrubs, and the keys step through. Its shape is its `peaks` property, known upfront, or a live `levels` signal; its position is its `value`, or a live `source`, and it is the `--waveform-position` CSS variable the playhead and thumb follow:
+
+```html
+<audio-ui-waveform duration="102">
+  <audio-ui-waveform-control aria-label="Seek">
+    <audio-ui-waveform-canvas></audio-ui-waveform-canvas>
+    <audio-ui-waveform-playhead></audio-ui-waveform-playhead>
+  </audio-ui-waveform-control>
+</audio-ui-waveform>
+<script type="module">
+  document.querySelector("audio-ui-waveform").peaks = peaks;
+</script>
+```
+
+<TypeTable>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit the position is in, typically seconds.</TypeRow>
+<TypeRow name={"value"} type={"number"}>The playback position, from 0 to `duration`.</TypeRow>
+<TypeRow name={"default-value"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"step"} type={"number"}>Step for the arrow keys. Defaults to a hundredth of `duration`.</TypeRow>
+<TypeRow name={"large-step"} type={"number"}>Step for Page Up, Page Down and Shift + arrows. Defaults to a tenth of `duration`.</TypeRow>
+<TypeRow name={"range"} type={"string"}>The stretch shown, `"start end"`: a clip's window onto its source, a zoomed view. Defaults to the whole audio; while the position is outside it, the waveform carries `data-outside`.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"}>The audio is still on its way: seeking waits, and the bars sweep.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+Seeking fires `input` and `change` with `{ value, reason }`. While a live signal is audible the waveform carries `data-active`.
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-waveform-control>` | The seekable surface, holding the native range input that takes focus and the keys. Its `getAriaValueText(value, duration)` property says how the position is announced. With `selectable`, a Shift + drag selects a stretch, firing `selectioninput` and `selectioncommit` with `[start, end]` |
+| `<audio-ui-waveform-canvas>` | Draws the waveform on a canvas, sharp at any pixel density: `variant` (`mirror`, `bars`, `line`, or `scope` for raw samples), `bar-width`, `bar-gap`, `bar-radius`, `min-bar-height`, `gain`, `mirrored`, `idle`, `mode` (`static` or `scrolling`), `scroll-speed` and `line-width`. The played part is `--waveform-progress-color`, the rest `--waveform-color` |
+| `<audio-ui-waveform-bars>` | Makes `count` `<audio-ui-waveform-bar>`s (24), each at its level in the `--waveform-level` CSS variable, for a visualizer styled in CSS; bars the position has passed carry `data-played`. Also `gain`, `idle`, `min-level` and `mirrored` |
+| `<audio-ui-waveform-playhead>` | A mark at the position |
+| `<audio-ui-waveform-thumb>` | A handle centered on the position |
+| `<audio-ui-waveform-hover>` | Shown at the hovered point; its `format(value, duration)` property writes it as text |
+| `<audio-ui-waveform-marker>` | A cue at its `value`, labelled by its content |
+| `<audio-ui-waveform-region>` | A loop or a selection, from its `value` (`"start end"`): dragging its body moves it, unless `movable="false"`. It fires `regioninput` and `regionchange` with `{ value, edge, reason }`, so a seek listener never takes them |
+| `<audio-ui-waveform-region-handle>` | Resizes the `edge` (`start` or `end`) of its region, by dragging or through the range input it holds |
+
 ### Data attributes
 
 Every part carries the state of its control:

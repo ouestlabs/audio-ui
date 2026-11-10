@@ -268,13 +268,10 @@ export class SequencerElement extends ControlRoot<SequencerSnapshot> {
       onValueCommitted: (value, details) =>
         reportCommit(this, { reason: details.reason, value }),
       onVelocityChange: (velocities, details) => {
-        const stands = this.dispatchEvent(
-          new CustomEvent("velocityinput", {
-            bubbles: true,
-            cancelable: true,
-            composed: true,
-            detail: { reason: details.reason, velocities },
-          })
+        const stands = reportChange(
+          this,
+          { reason: details.reason, velocities },
+          "velocityinput"
         );
         if (!stands) {
           details.cancel();
@@ -286,12 +283,10 @@ export class SequencerElement extends ControlRoot<SequencerSnapshot> {
         }
       },
       onVelocityCommitted: (velocities, details) =>
-        this.dispatchEvent(
-          new CustomEvent("velocitychange", {
-            bubbles: true,
-            composed: true,
-            detail: { reason: details.reason, velocities },
-          })
+        reportCommit(
+          this,
+          { reason: details.reason, velocities },
+          "velocitychange"
         ),
       value: this.#value,
       velocities: this.#velocities,
