@@ -74,6 +74,8 @@ import { saturatorDevice } from "@/components/audio-ui/devices/saturator/device"
 import { createSaturatorEngine } from "@/components/audio-ui/devices/saturator/engine";
 import { stringMachineDevice } from "@/components/audio-ui/devices/string-machine/device";
 import { createStringMachineEngine } from "@/components/audio-ui/devices/string-machine/engine";
+import { stutterDevice } from "@/components/audio-ui/devices/stutter/device";
+import { createStutterEngine } from "@/components/audio-ui/devices/stutter/engine";
 import { tapeKeysDevice } from "@/components/audio-ui/devices/tape-keys/device";
 import { createTapeKeysEngine } from "@/components/audio-ui/devices/tape-keys/engine";
 import { tiltEqDevice } from "@/components/audio-ui/devices/tilt-eq/device";
@@ -197,6 +199,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(wahDevice, createWahEngine, "Motion"),
   entry(frequencyShifterDevice, createFrequencyShifterEngine, "Motion"),
   entry(rotaryDevice, createRotaryEngine, "Motion"),
+  entry(stutterDevice, createStutterEngine, "Motion"),
   // Utility
   entry(utilityDevice, createUtilityEngine, "Utility"),
   entry(midSideDevice, createMidSideEngine, "Utility"),

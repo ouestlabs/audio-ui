@@ -38,6 +38,7 @@
         "@audio/effect-pingpong": "catalog:",
         "@audio/effect-ringmod": "catalog:",
         "@audio/effect-rotary": "catalog:",
+        "@audio/effect-stutter": "catalog:",
         "@audio/effect-subbass": "catalog:",
         "@audio/effect-wah": "catalog:",
         "@audio/encode": "catalog:",
@@ -187,6 +188,7 @@
         "@audio/effect-pingpong": "catalog:",
         "@audio/effect-ringmod": "catalog:",
         "@audio/effect-rotary": "catalog:",
+        "@audio/effect-stutter": "catalog:",
         "@audio/effect-subbass": "catalog:",
         "@audio/effect-wah": "catalog:",
         "@audio/encode": "catalog:",
@@ -370,6 +372,7 @@
     "@audio/effect-pingpong": "1.1.5",
     "@audio/effect-ringmod": "1.1.5",
     "@audio/effect-rotary": "0.1.2",
+    "@audio/effect-stutter": "1.1.6",
     "@audio/effect-subbass": "1.2.0",
     "@audio/effect-wah": "1.1.5",
     "@audio/encode": "1.11.0",
@@ -491,6 +494,8 @@
     "@audio/effect-ringmod": ["@audio/effect-ringmod@1.1.5", "", {}, "sha512-631I1cp5HCPwP+hkufumfuH4sq6cQ5j5Ggx6RjC8MFJUJ1bdwt36nXwiseknpJrWlgMSup9wJ+ashDGCvKGp9Q=="],
 
     "@audio/effect-rotary": ["@audio/effect-rotary@0.1.2", "", { "dependencies": { "@audio/biquad": "^1.1.0", "@audio/eq-crossover": "^1.0.0" } }, "sha512-YDVAKx2/rSjGsNAEgmw4DRT2hhRfHwoirLV9ambGrRPl2Dgc/2XMcYJUZquzJXBeCoGYQBOtuTsfuoBIgzg3VQ=="],
+
+    "@audio/effect-stutter": ["@audio/effect-stutter@1.1.6", "", {}, "sha512-R9mGZ+TrccNatcwkaX9H3L6H5I6AMt/dclU20mswo0g5prp+A0ZiDYy+Y9Vwr9MGcD3VOdQp+QvXnf92bSlEhg=="],
 
     "@audio/effect-subbass": ["@audio/effect-subbass@1.2.0", "", {}, "sha512-tnmct2BusM7W5Yir7fxpnB30QceBqe8lGR6Zk8+XLZgKoxV8PYGZJGR5iuC0lVOYAU6V+Xkfgbdt112yPEYJQw=="],
 

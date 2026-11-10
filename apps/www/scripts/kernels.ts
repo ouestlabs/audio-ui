@@ -161,6 +161,13 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "STUTTER_KERNELS",
+    file: "devices/stutter/kernels.ts",
+    kernels: [
+      { file: "stutter.js", name: "@audio/effect-stutter", use: "stutter" },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [

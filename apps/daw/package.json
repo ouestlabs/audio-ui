@@ -36,6 +36,7 @@
     "@audio/effect-pingpong": "catalog:",
     "@audio/effect-ringmod": "catalog:",
     "@audio/effect-rotary": "catalog:",
+    "@audio/effect-stutter": "catalog:",
     "@audio/effect-subbass": "catalog:",
     "@audio/effect-wah": "catalog:",
     "@audio/encode": "catalog:",

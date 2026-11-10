@@ -27,6 +27,7 @@
       "@audio/effect-pingpong": "1.1.5",
       "@audio/effect-ringmod": "1.1.5",
       "@audio/effect-rotary": "0.1.2",
+      "@audio/effect-stutter": "1.1.6",
       "@audio/effect-subbass": "1.2.0",
       "@audio/effect-wah": "1.1.5",
       "@audio/encode": "1.11.0",

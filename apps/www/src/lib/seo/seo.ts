@@ -29,6 +29,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "vibe",
   "auto-pan",
   "channel-eq",
+  "stutter",
   "rotary",
   "bass-enhancer",
   "exciter",

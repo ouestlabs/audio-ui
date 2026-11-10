@@ -41,6 +41,7 @@ const DEVICES = [
   "reverb",
   "rotary",
   "sampler",
+  "stutter",
   "saturator",
   "transient",
   "utility",
@@ -1805,6 +1806,64 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/rotary-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/effect-stutter"],
+    description:
+      "The stutter as a device: an interval and a slice in note values, a decay and a mix, the numbers that go on the worklet for a state at a tempo, one interval as the panel draws it and the worklet's source (the stutter of @audio/effect-stutter), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/stutter/device.ts",
+        target: "components/audio-ui/devices/stutter/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/stutter/kernels.ts",
+        target: "components/audio-ui/devices/stutter/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "stutter-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A stutter on the Web Audio API for a stutter state: the stutter of @audio/effect-stutter in an AudioWorklet loaded from a blob, its lengths read against the host's tempo, a fresh cycle when it is turned on, the sound passing clean until it is ready.",
+    files: [
+      {
+        path: "devices/stutter/engine.ts",
+        target: "components/audio-ui/devices/stutter/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "stutter-engine",
+    registryDependencies: ["@audio-ui/stutter-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the stutter device: one interval in beats, the slice it catches and its repeats at the level the decay leaves, over the device knobs.",
+    files: [
+      {
+        path: "devices/stutter/panel.tsx",
+        target: "components/audio-ui/devices/stutter/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "stutter-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/stutter-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },

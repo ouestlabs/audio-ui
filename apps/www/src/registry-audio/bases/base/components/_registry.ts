@@ -1406,6 +1406,27 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["modulation", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A stutter you can plug in: its state, a panel that draws one interval and an engine that plays it. Play a loop through it and switch it on: it catches a slice and repeats it",
+    files: [
+      {
+        path: "components/device/block-stutter.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-stutter",
+    registryDependencies: [
+      "@audio-ui/stutter-panel",
+      "@audio-ui/stutter-device",
+      "@audio-ui/stutter-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",

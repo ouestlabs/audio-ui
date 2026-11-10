@@ -35,6 +35,7 @@ import { RotaryPanel } from "@/registry-audio/bases/base/devices/rotary/panel";
 import { SamplerPanel } from "@/registry-audio/bases/base/devices/sampler/panel";
 import { SaturatorPanel } from "@/registry-audio/bases/base/devices/saturator/panel";
 import { StringMachinePanel } from "@/registry-audio/bases/base/devices/string-machine/panel";
+import { StutterPanel } from "@/registry-audio/bases/base/devices/stutter/panel";
 import { TapeKeysPanel } from "@/registry-audio/bases/base/devices/tape-keys/panel";
 import { TiltEqPanel } from "@/registry-audio/bases/base/devices/tilt-eq/panel";
 import { TransientPanel } from "@/registry-audio/bases/base/devices/transient/panel";
@@ -101,6 +102,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.stutter": entry(StutterPanel),
   "audioui.rotary": entry(RotaryPanel, "w-96"),
   "audioui.bass-enhancer": entry(BassEnhancerPanel),
   "audioui.exciter": entry(ExciterPanel),

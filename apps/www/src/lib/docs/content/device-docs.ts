@@ -32,6 +32,7 @@ import { rotaryDevice } from "@/registry-audio/bases/base/devices/rotary/device"
 import { samplerDevice } from "@/registry-audio/bases/base/devices/sampler/device";
 import { saturatorDevice } from "@/registry-audio/bases/base/devices/saturator/device";
 import { stringMachineDevice } from "@/registry-audio/bases/base/devices/string-machine/device";
+import { stutterDevice } from "@/registry-audio/bases/base/devices/stutter/device";
 import { tapeKeysDevice } from "@/registry-audio/bases/base/devices/tape-keys/device";
 import { tiltEqDevice } from "@/registry-audio/bases/base/devices/tilt-eq/device";
 import { transientDevice } from "@/registry-audio/bases/base/devices/transient/device";
@@ -44,6 +45,7 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  stutter: stutterDevice,
   rotary: rotaryDevice,
   "bass-enhancer": bassEnhancerDevice,
   exciter: exciterDevice,

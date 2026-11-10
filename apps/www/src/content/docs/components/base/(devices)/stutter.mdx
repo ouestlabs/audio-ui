@@ -1,0 +1,35 @@
+---
+title: Stutter
+description: "A stutter device: an interval and a slice in note values, a decay and a mix, a panel that draws one interval, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-stutter" />
+
+Repeats the sound. At the start of every interval it catches a slice, then plays it again and again until the interval ends, each repeat quieter by the decay. The lengths are note values of the host's tempo, so the repeats fall in time. Turning it on catches a slice at once, a stutter to play live. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="stutter" kind="device" />
+
+## Controls
+
+<DeviceControls device="stutter">
+<Control id="interval">How long a cycle lasts: the slice is caught at its start, and repeated to its end.</Control>
+<Control id="slice">How long the slice is, never longer than the interval: shorter repeats it faster.</Control>
+<Control id="decay">How much quieter each repeat is than the one before. At 0 they all play at full level.</Control>
+<Control id="mix">The balance of the repeats and the sound as it plays.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws one interval, in beats: the slice it catches, the sound as it plays, then each repeat at the level the decay leaves it. `stutterCycle(state)` is what it draws, and `stutterSettings(state, tempo)` the lengths in seconds.
+
+<DeviceUsage name="stutter" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The stutter runs on the audio thread: the stutter of `@audio/effect-stutter` in an `AudioWorklet` loaded from a blob (`STUTTER_WORKLET` is its source), 128 frames at a time, with short fades at the edges of each repeat so it does not click. Its cycle runs from when it starts, not from the bar: the device knows the tempo, not where the transport is. Turning it on starts a fresh cycle, catching a slice at once, and new lengths, from a control or a change of tempo, wait for them to rest, then fade in on a fresh cycle. A worklet cannot import, so the device carries the kernel as published (`STUTTER_KERNELS`, in its `kernels.ts`). Until it is ready, and in a context with no worklets, the sound passes clean: `ready` resolves once it is in the graph.
