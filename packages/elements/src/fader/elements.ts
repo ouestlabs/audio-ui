@@ -8,8 +8,6 @@ import {
   type FaderSnapshot,
 } from "@audio-ui/core/fader";
 import {
-  connectPart,
-  ElementBase,
   ensureId,
   jsonAttribute,
   localeOf,
@@ -17,6 +15,12 @@ import {
   reflect,
 } from "../internal/element.ts";
 import { INPUT_NAMES, ThumbInput, ValueText } from "../internal/input.ts";
+import {
+  ControlPart,
+  ControlRoot,
+  reportChange,
+  reportCommit,
+} from "../internal/parts.ts";
 
 /** The names the fader's elements are registered under, frozen: a page cannot rename them by accident. */
 export const FADER_TAGS = Object.freeze({
@@ -59,10 +63,6 @@ const stateAttributes = (snapshot: FaderSnapshot) => ({
   "data-orientation": snapshot.orientation,
 });
 
-interface FaderPart extends HTMLElement {
-  paint: (snapshot: FaderSnapshot) => void;
-}
-
 /**
  * Groups all parts of the fader, with audio defaults (vertical, -60 to +6)
  * and mouse-wheel stepping, and owns its value. Every change fires an `input`
@@ -74,7 +74,7 @@ interface FaderPart extends HTMLElement {
  * `disabled`, `orientation`, `format` (`Intl.NumberFormat` options as JSON),
  * `locale` and `name`. It is a group, named by its label.
  */
-export class FaderElement extends ElementBase {
+export class FaderElement extends ControlRoot<FaderSnapshot> {
   static readonly observedAttributes = [
     "anchor",
     "default-value",
@@ -99,27 +99,14 @@ export class FaderElement extends ElementBase {
   /** The label's id, which names the group and the input when the thumb has no name of its own. */
   labelId: string | undefined;
 
-  readonly #parts = new Set<FaderPart>();
   #value: number | undefined;
   #format: Intl.NumberFormatOptions | undefined;
-  #stop: (() => void) | undefined;
-
-  connectedCallback() {
-    this.#configure();
-    this.#stop ??= this.controller.subscribe(() => this.paint());
-    this.paint();
-  }
-
-  disconnectedCallback() {
-    this.#stop?.();
-    this.#stop = undefined;
-  }
 
   attributeChangedCallback(name: string) {
     if (name === "value") {
       this.#value = numberAttribute(this, "value");
     }
-    this.#configure();
+    this.configure();
     this.paint();
   }
 
@@ -148,7 +135,7 @@ export class FaderElement extends ElementBase {
 
   set value(value: number) {
     this.#value = Number(value);
-    this.#configure();
+    this.configure();
     this.paint();
   }
 
@@ -159,34 +146,27 @@ export class FaderElement extends ElementBase {
 
   set format(format: Intl.NumberFormatOptions | undefined) {
     this.#format = format;
-    this.#configure();
+    this.configure();
     this.paint();
   }
 
-  /** Paints the fader and every part from the controller's snapshot. */
-  paint() {
-    const snapshot = this.controller.getSnapshot();
-    reflect(this, {
+  protected snapshot() {
+    return this.controller.getSnapshot();
+  }
+
+  protected subscribe(listener: () => void) {
+    return this.controller.subscribe(listener);
+  }
+
+  protected rootAttributes(snapshot: FaderSnapshot) {
+    return {
       ...stateAttributes(snapshot),
       "aria-labelledby": this.labelId ?? null,
       role: "group",
-    });
-    for (const part of this.#parts) {
-      part.paint(snapshot);
-    }
+    };
   }
 
-  /** Called by a part when it connects: it is painted at once, then on every change. */
-  attach(part: FaderPart) {
-    this.#parts.add(part);
-    part.paint(this.controller.getSnapshot());
-  }
-
-  detach(part: FaderPart) {
-    this.#parts.delete(part);
-  }
-
-  #configure() {
+  protected configure() {
     const orientation = this.getAttribute(
       "orientation"
     ) as FaderOrientation | null;
@@ -200,13 +180,7 @@ export class FaderElement extends ElementBase {
       max: numberAttribute(this, "max"),
       min: numberAttribute(this, "min"),
       onValueChange: (value, details) => {
-        const event: FaderInputEvent = new CustomEvent("input", {
-          bubbles: true,
-          cancelable: true,
-          composed: true,
-          detail: { reason: details.reason, value },
-        });
-        if (!this.dispatchEvent(event)) {
+        if (!reportChange(this, { reason: details.reason, value })) {
           details.cancel();
           return;
         }
@@ -216,14 +190,8 @@ export class FaderElement extends ElementBase {
           this.controller.setOptions({ ...options, value });
         }
       },
-      onValueCommitted: (value, details) => {
-        const event: FaderChangeEvent = new CustomEvent("change", {
-          bubbles: true,
-          composed: true,
-          detail: { reason: details.reason, value },
-        });
-        this.dispatchEvent(event);
-      },
+      onValueCommitted: (value, details) =>
+        reportCommit(this, { reason: details.reason, value }),
       orientation: orientation === "horizontal" ? "horizontal" : "vertical",
       step: numberAttribute(this, "step"),
       value: this.#value,
@@ -232,40 +200,19 @@ export class FaderElement extends ElementBase {
   }
 }
 
-const isFader = (element: Element | null): element is FaderElement =>
-  element instanceof FaderElement;
-
 /** What every part of the fader does: find its fader, and carry its state. */
-abstract class FaderPartElement extends ElementBase implements FaderPart {
-  protected fader: FaderElement | null = null;
+abstract class FaderPartElement extends ControlPart<
+  FaderElement,
+  FaderSnapshot
+> {
+  protected readonly rootTag = FADER_TAGS.root;
 
-  connectedCallback() {
-    connectPart(this, FADER_TAGS.root, isFader, (fader) => {
-      this.fader = fader;
-      this.attached(fader);
-      fader.attach(this);
-    });
+  protected isRoot(element: Element | null) {
+    return element instanceof FaderElement;
   }
 
-  disconnectedCallback() {
-    const { fader } = this;
-    if (fader) {
-      fader.detach(this);
-      this.detached(fader);
-      this.fader = null;
-    }
-  }
-
-  paint(snapshot: FaderSnapshot) {
-    reflect(this, stateAttributes(snapshot));
-  }
-
-  protected attached(_fader: FaderElement): void {
-    // A part with nothing of its own to set up.
-  }
-
-  protected detached(_fader: FaderElement): void {
-    // A part with nothing of its own to let go of.
+  protected state(snapshot: FaderSnapshot) {
+    return stateAttributes(snapshot);
   }
 }
 
@@ -378,14 +325,14 @@ export class FaderThumbElement extends FaderPartElement {
     super();
     const input = this.#input.element;
     input.addEventListener("keydown", (event) => {
-      if (this.fader?.controller.keyDown(event, input)) {
+      if (this.root?.controller.keyDown(event, input)) {
         event.preventDefault();
       }
     });
     // Assistive technology may set the input's value directly; the fader reports it as its own change.
     input.addEventListener("input", (event) => {
       event.stopPropagation();
-      this.fader?.controller.type(Number(input.value), event);
+      this.root?.controller.type(Number(input.value), event);
     });
     input.addEventListener("change", (event) => event.stopPropagation());
   }
@@ -401,7 +348,7 @@ export class FaderThumbElement extends FaderPartElement {
     next: string | null
   ) {
     if (this.#input.take(this, name, next)) {
-      this.fader?.paint();
+      this.root?.paint();
     }
   }
 
@@ -444,8 +391,8 @@ export class FaderThumbElement extends FaderPartElement {
     reflect(this.input, { "aria-orientation": snapshot.orientation });
     this.#input.write({
       ...snapshot,
-      labelId: this.fader?.labelId,
-      name: this.fader?.getAttribute("name") ?? null,
+      labelId: this.root?.labelId,
+      name: this.root?.getAttribute("name") ?? null,
     });
   }
 }

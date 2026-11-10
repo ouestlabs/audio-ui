@@ -12,15 +12,18 @@ import {
   type KnobSnapshot,
 } from "@audio-ui/core/knob";
 import {
-  connectPart,
-  ElementBase,
   ensureId,
   jsonAttribute,
   localeOf,
   numberAttribute,
-  reflect,
 } from "../internal/element.ts";
 import { INPUT_NAMES, ThumbInput, ValueText } from "../internal/input.ts";
+import {
+  ControlPart,
+  ControlRoot,
+  reportChange,
+  reportCommit,
+} from "../internal/parts.ts";
 
 /** The names the knob's elements are registered under, frozen: a page cannot rename them by accident. */
 export const KNOB_TAGS = Object.freeze({
@@ -70,10 +73,6 @@ const stateAttributes = (snapshot: KnobSnapshot) => ({
   "data-dragging": snapshot.dragging ? "" : null,
 });
 
-interface KnobPart extends HTMLElement {
-  paint: (snapshot: KnobSnapshot) => void;
-}
-
 /**
  * Groups all parts of the knob and owns its value. Dragging the
  * `<audio-ui-knob-control>`, turning the mouse wheel over it, the keyboard on
@@ -84,7 +83,7 @@ interface KnobPart extends HTMLElement {
  * `anchor`, `disabled`, `drag-mode`, `scale` (`linear` or `log`), `format`
  * (`Intl.NumberFormat` options as JSON), `locale` and `name`.
  */
-export class KnobElement extends ElementBase {
+export class KnobElement extends ControlRoot<KnobSnapshot> {
   static readonly observedAttributes = [
     "anchor",
     "default-value",
@@ -108,28 +107,15 @@ export class KnobElement extends ElementBase {
   /** The label's id, which names the input when the thumb has no name of its own. */
   labelId: string | undefined;
 
-  readonly #parts = new Set<KnobPart>();
   #value: number | undefined;
   #format: Intl.NumberFormatOptions | undefined;
   #scale: ParameterScaleProp | undefined;
-  #stop: (() => void) | undefined;
-
-  connectedCallback() {
-    this.#configure();
-    this.#stop ??= this.controller.subscribe(() => this.paint());
-    this.paint();
-  }
-
-  disconnectedCallback() {
-    this.#stop?.();
-    this.#stop = undefined;
-  }
 
   attributeChangedCallback(name: string) {
     if (name === "value") {
       this.#value = numberAttribute(this, "value");
     }
-    this.#configure();
+    this.configure();
     this.paint();
   }
 
@@ -158,7 +144,7 @@ export class KnobElement extends ElementBase {
 
   set value(value: number) {
     this.#value = Number(value);
-    this.#configure();
+    this.configure();
     this.paint();
   }
 
@@ -169,7 +155,7 @@ export class KnobElement extends ElementBase {
 
   set format(format: Intl.NumberFormatOptions | undefined) {
     this.#format = format;
-    this.#configure();
+    this.configure();
     this.paint();
   }
 
@@ -180,27 +166,20 @@ export class KnobElement extends ElementBase {
 
   set scale(scale: ParameterScaleProp | undefined) {
     this.#scale = scale;
-    this.#configure();
+    this.configure();
     this.paint();
   }
 
-  /** Paints the knob and every part from the controller's snapshot. */
-  paint() {
-    const snapshot = this.controller.getSnapshot();
-    reflect(this, stateAttributes(snapshot));
-    for (const part of this.#parts) {
-      part.paint(snapshot);
-    }
+  protected snapshot() {
+    return this.controller.getSnapshot();
   }
 
-  /** Called by a part when it connects: it is painted at once, then on every change. */
-  attach(part: KnobPart) {
-    this.#parts.add(part);
-    part.paint(this.controller.getSnapshot());
+  protected subscribe(listener: () => void) {
+    return this.controller.subscribe(listener);
   }
 
-  detach(part: KnobPart) {
-    this.#parts.delete(part);
+  protected rootAttributes(snapshot: KnobSnapshot) {
+    return stateAttributes(snapshot);
   }
 
   #scaleAttribute(): ParameterScaleProp | undefined {
@@ -208,7 +187,7 @@ export class KnobElement extends ElementBase {
     return scale === "linear" || scale === "log" ? scale : undefined;
   }
 
-  #configure() {
+  protected configure() {
     const dragMode = this.getAttribute("drag-mode") as KnobDragMode | null;
     const options: KnobOptions = {
       anchor: numberAttribute(this, "anchor"),
@@ -221,13 +200,7 @@ export class KnobElement extends ElementBase {
       max: numberAttribute(this, "max"),
       min: numberAttribute(this, "min"),
       onValueChange: (value, details) => {
-        const event: KnobInputEvent = new CustomEvent("input", {
-          bubbles: true,
-          cancelable: true,
-          composed: true,
-          detail: { reason: details.reason, value },
-        });
-        if (!this.dispatchEvent(event)) {
+        if (!reportChange(this, { reason: details.reason, value })) {
           details.cancel();
           return;
         }
@@ -237,14 +210,8 @@ export class KnobElement extends ElementBase {
           this.controller.setOptions({ ...options, value });
         }
       },
-      onValueCommitted: (value, details) => {
-        const event: KnobChangeEvent = new CustomEvent("change", {
-          bubbles: true,
-          composed: true,
-          detail: { reason: details.reason, value },
-        });
-        this.dispatchEvent(event);
-      },
+      onValueCommitted: (value, details) =>
+        reportCommit(this, { reason: details.reason, value }),
       scale: this.scale,
       step: numberAttribute(this, "step"),
       value: this.#value,
@@ -253,40 +220,16 @@ export class KnobElement extends ElementBase {
   }
 }
 
-const isKnob = (element: Element | null): element is KnobElement =>
-  element instanceof KnobElement;
-
 /** What every part of the knob does: find its knob, and carry its state. */
-abstract class KnobPartElement extends ElementBase implements KnobPart {
-  protected knob: KnobElement | null = null;
+abstract class KnobPartElement extends ControlPart<KnobElement, KnobSnapshot> {
+  protected readonly rootTag = KNOB_TAGS.root;
 
-  connectedCallback() {
-    connectPart(this, KNOB_TAGS.root, isKnob, (knob) => {
-      this.knob = knob;
-      this.attached(knob);
-      knob.attach(this);
-    });
+  protected isRoot(element: Element | null) {
+    return element instanceof KnobElement;
   }
 
-  disconnectedCallback() {
-    const { knob } = this;
-    if (knob) {
-      knob.detach(this);
-      this.detached(knob);
-      this.knob = null;
-    }
-  }
-
-  paint(snapshot: KnobSnapshot) {
-    reflect(this, stateAttributes(snapshot));
-  }
-
-  protected attached(_knob: KnobElement): void {
-    // A part with nothing of its own to set up.
-  }
-
-  protected detached(_knob: KnobElement): void {
-    // A part with nothing of its own to let go of.
+  protected state(snapshot: KnobSnapshot) {
+    return stateAttributes(snapshot);
   }
 }
 
@@ -344,8 +287,8 @@ abstract class KnobArcElement extends KnobPartElement {
   }
 
   attributeChangedCallback() {
-    if (this.knob) {
-      this.paint(this.knob.controller.getSnapshot());
+    if (this.root) {
+      this.paint(this.root.controller.getSnapshot());
     }
   }
 
@@ -411,14 +354,14 @@ export class KnobThumbElement extends KnobPartElement {
     super();
     const input = this.#input.element;
     input.addEventListener("keydown", (event) => {
-      if (this.knob?.controller.keyDown(event)) {
+      if (this.root?.controller.keyDown(event)) {
         event.preventDefault();
       }
     });
     // Assistive technology may set the input's value directly; the knob reports it as its own change.
     input.addEventListener("input", (event) => {
       event.stopPropagation();
-      this.knob?.controller.type(Number(input.value), event);
+      this.root?.controller.type(Number(input.value), event);
     });
     input.addEventListener("change", (event) => event.stopPropagation());
   }
@@ -434,7 +377,7 @@ export class KnobThumbElement extends KnobPartElement {
     next: string | null
   ) {
     if (this.#input.take(this, name, next)) {
-      this.knob?.paint();
+      this.root?.paint();
     }
   }
 
@@ -456,8 +399,8 @@ export class KnobThumbElement extends KnobPartElement {
     this.style.rotate = `${snapshot.angle}deg`;
     this.#input.write({
       ...snapshot,
-      labelId: this.knob?.labelId,
-      name: this.knob?.getAttribute("name") ?? null,
+      labelId: this.root?.labelId,
+      name: this.root?.getAttribute("name") ?? null,
     });
   }
 }
