@@ -14,6 +14,27 @@ const BUDGETS: Record<string, number> = {
 const dist = `${import.meta.dir}/../dist`;
 let failed = false;
 
+/**
+ * Whether a page that imports `entry` only for its side effect, as
+ * `import "@audio-ui/elements/knob"` does, still registers the elements once
+ * a bundler has dropped the code it thinks is unused: what `sideEffects` in
+ * package.json decides.
+ */
+async function registers(entry: string, tag: string) {
+  const page = `${dist}/.registers-${entry}.js`;
+  await Bun.write(page, `import "./${entry}.js";\n`);
+  const result = await Bun.build({
+    entrypoints: [page],
+    minify: true,
+    target: "browser",
+  });
+  await Bun.file(page).delete();
+  const [output] = result.outputs;
+  return Boolean(
+    result.success && output && (await output.text()).includes(tag)
+  );
+}
+
 for (const [entry, budget] of Object.entries(BUDGETS)) {
   // One at a time: bundling in parallel makes the sizes no different, only the log harder to read.
   // biome-ignore lint/performance/noAwaitInLoops: sequential on purpose
@@ -27,6 +48,13 @@ for (const [entry, budget] of Object.entries(BUDGETS)) {
     console.error(`${entry}: could not be bundled`);
     failed = true;
     continue;
+  }
+  const tag = entry === "fader" ? "audio-ui-fader" : "audio-ui-knob";
+  if (!(await registers(entry, tag))) {
+    console.error(
+      `FAIL ${entry}: imported for its side effect, it registers no <${tag}>`
+    );
+    failed = true;
   }
   const size = Bun.gzipSync(new Uint8Array(await output.arrayBuffer())).length;
   const over = size > budget;

@@ -28,9 +28,7 @@
   },
   "license": "MIT",
   "sideEffects": [
-    "./dist/index.js",
-    "./dist/knob.js",
-    "./dist/fader.js"
+    "./dist/*.js"
   ],
   "type": "module",
   "exports": {
