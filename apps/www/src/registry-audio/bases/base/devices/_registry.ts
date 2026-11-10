@@ -764,25 +764,30 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/dynamics-gate"],
     description:
-      "The gate as a device: a threshold, a floor, an attack, a hold, a release and a look-ahead, the numbers that go on the nodes for a state, the detector worklet and the curve a state plays, with no panel and no audio in it.",
+      "The gate as a device: a threshold, a floor, an attack, a hold, a release and a look-ahead, its models (clean, with a sidechain, or the hysteresis gate of @audio/dynamics-gate), the numbers that go on the nodes for a state, the detector worklet, the source of the hysteresis model's worklet and the curve a state plays, with no panel and no audio in it.",
     files: [
       {
         path: "devices/gate/device.ts",
         target: "components/audio-ui/devices/gate/device.ts",
         type: "registry:lib",
       },
+      {
+        path: "devices/gate/kernels.ts",
+        target: "components/audio-ui/devices/gate/kernels.ts",
+        type: "registry:lib",
+      },
     ],
     name: "gate-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/manifest-worklet"],
     type: "registry:lib",
   },
   {
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A gate on the Web Audio API for a gate state: a worklet detector reads the key and writes the gain (threshold, attack, hold, release), and a delay in front of the gain gives the look-ahead.",
+      "A gate on the Web Audio API for a gate state: a worklet detector reads the key and writes the gain (threshold, attack, hold, release), and a delay in front of the gain gives the look-ahead, or the hysteresis model in a worklet fed only while it plays.",
     files: [
       {
         path: "devices/gate/engine.ts",
@@ -798,7 +803,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the gate device: its transfer curve against the straight line of a clean sound with a handle on the threshold, over the device knobs.",
+      "The face of the gate device: the model picked in its title bar, its transfer curve against the straight line of a clean sound with a handle on the threshold and a line where the hysteresis model closes, over the device knobs, those the model does not use drawn off.",
     files: [
       {
         path: "devices/gate/panel.tsx",
@@ -811,6 +816,7 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/gate-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },

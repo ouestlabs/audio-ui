@@ -1,13 +1,13 @@
 ---
 title: Gate
-description: "A gate device: threshold, floor, attack, hold, release and look-ahead, a panel that draws its transfer curve, a Web Audio engine with a sidechain, and tools for agents."
+description: "A gate device: a clean or a hysteresis model, threshold, floor, attack, hold, release and look-ahead, a panel that draws its transfer curve, a Web Audio engine with a sidechain, and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-gate" />
 
-Cuts the sound between hits. Above the threshold the signal passes, and below it the signal is turned down to the floor. With the sidechain on, a kick can open a held chord. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Cuts the sound between hits. Above the threshold the signal passes, and below it the signal is turned down to the floor. With the sidechain on, the clean model lets a kick open a held chord. The hysteresis model, from [audio.js](https://audio.js.org), closes only under a lower threshold than the one it opens at. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -16,13 +16,15 @@ Cuts the sound between hits. Above the threshold the signal passes, and below it
 ## Controls
 
 <DeviceControls device="gate">
+<Control id="model">Clean is the gate's own detector, the only model with the sidechain. Hysteresis is `@audio/dynamics-gate`: once open, it closes only when the level falls the hysteresis under the threshold, so a level around the threshold does not make it chatter. It is picked in the title bar, and the controls the model does not use are drawn off.</Control>
 <Control id="thresholdDb">The level above which the gate opens. Drag the handle on the plot across to set it.</Control>
+<Control id="hysteresisDb">How far under the threshold the level must fall for the hysteresis model to close. The plot draws that level as a dotted line.</Control>
 <Control id="floorDb">How far the signal is turned down while the gate is closed.</Control>
 <Control id="attackMs">How fast the gate opens.</Control>
 <Control id="holdMs">How long the gate stays open after the level drops under the threshold.</Control>
 <Control id="releaseMs">How fast the gate closes after the hold.</Control>
 <Control id="lookaheadMs">Delays the signal so the gate is open before a transient arrives. It adds the same [latency](/docs/devices#latency).</Control>
-<Control id="external">Makes the gate follow the signal connected to `engine.sidechain`. See [Sidechain](/docs/devices#sidechain).</Control>
+<Control id="external">Makes the gate follow the signal connected to `engine.sidechain`. See [Sidechain](/docs/devices#sidechain). Clean model only.</Control>
 </DeviceControls>
 
 ## Panel
@@ -35,8 +37,10 @@ The panel draws the transfer curve against the straight line of a clean sound, w
 
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-The browser has no gate node, so the engine measures the level with an `AudioWorklet` that writes the gain to apply. The level is a peak follower. The gate is open while the level is over the threshold and for the hold after it, and the gain moves toward 1 or the floor with the attack or the release as a time constant.
+The browser has no gate node. For the clean model, the engine measures the level with an `AudioWorklet` that writes the gain to apply. The level is a peak follower. The gate is open while the level is over the threshold and for the hold after it, and the gain moves toward 1 or the floor with the attack or the release as a time constant.
 
 A delay in front of the gain is the look-ahead. The detector reads the signal before it, so the gate is open when a transient arrives. `gateSettings(state)` gives the numbers the engine puts on its nodes.
 
 Measured in Chrome, a hold of 100 ms keeps a quiet tone open for the 100 ms after a burst and then closes it to the floor, and 5 ms of look-ahead lets the first millisecond of a burst through at 0.50 instead of 0.26.
+
+The hysteresis model is the processor of `@audio/dynamics-gate`'s manifest as published, in an `AudioWorklet` fed only while it plays, with its own look-ahead: the latency is the same for both models. Until the worklet is ready, the clean model plays for it. Every one of its values builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade.

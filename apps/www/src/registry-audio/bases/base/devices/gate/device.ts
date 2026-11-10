@@ -1,20 +1,24 @@
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { GATE_KERNELS } from "@/registry-audio/bases/base/devices/gate/kernels";
+import { manifestWorklet } from "@/registry-audio/bases/base/lib/manifest-worklet";
 
 /**
  * A gate as a device: it lets a signal through above a threshold and turns it
  * down to a floor below it, with an attack and a release for how fast it opens
  * and closes, a hold for how long it stays open once the level has dropped, and
  * a look-ahead that delays the signal so the gate is open before a transient
- * arrives, and no panel and no audio in it. It takes a sidechain: with `external` on, its
- * level is the one of the signal connected to the engine's `sidechain` input,
- * so a kick can open a held chord.
+ * arrives, and no panel and no audio in it. Its clean model takes a sidechain:
+ * with `external` on, its level is the one of the signal connected to the
+ * engine's `sidechain` input, so a kick can open a held chord. Its hysteresis
+ * model is the gate of `@audio/dynamics-gate`, which closes only under a
+ * lower threshold than the one it opens at.
  */
 /** The longest look-ahead, in milliseconds: the delay the engine makes room for. */
 export const MAX_LOOKAHEAD_MS = 10;
 
 export const gateDevice = defineDevice({
   description:
-    "Cleans up between sounds: above the threshold the signal passes, below it the signal is turned down to the floor. The attack and the release say how fast it opens and closes, the hold how long it stays open after the level drops, and the look-ahead delays the signal so the gate is open before a transient arrives. With the sidechain on, the level it follows is the one of another signal.",
+    "Cleans up between sounds: above the threshold the signal passes, below it the signal is turned down to the floor. The attack and the release say how fast it opens and closes, the hold how long it stays open after the level drops, and the look-ahead delays the signal so the gate is open before a transient arrives. Its model is clean, the only one with the sidechain (with it on, the level it follows is the one of another signal), or hysteresis, which once open closes only when the level falls the hysteresis under the threshold, so a level around the threshold does not make it chatter.",
   id: "audioui.gate",
   // The look-ahead delays the signal, and so the device; off, the signal goes straight through.
   latency: (state) => (state.enabled ? state.lookaheadMs / 1000 : 0),
@@ -23,11 +27,30 @@ export const gateDevice = defineDevice({
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },
     {
+      default: "clean",
+      id: "model",
+      kind: "choice",
+      label: "Model",
+      options: [
+        { label: "Clean", value: "clean" },
+        { label: "Hysteresis", value: "hysteresis" },
+      ],
+    },
+    {
       default: -36,
       id: "thresholdDb",
       label: "Threshold",
       max: 0,
       min: -70,
+      step: 0.5,
+      unit: "dB",
+    },
+    {
+      default: 6,
+      id: "hysteresisDb",
+      label: "Hysteresis",
+      max: 24,
+      min: 0,
       step: 0.5,
       unit: "dB",
     },
@@ -86,16 +109,38 @@ export type GateState = DeviceState<typeof gateDevice.parameters>;
 
 const toGain = (db: number) => 10 ** (db / 20);
 
+/** The controls a model does not use: the hysteresis for the clean one, the sidechain for the other. */
+export function gateUnused(model: GateState["model"]) {
+  return model === "clean"
+    ? (["hysteresisDb"] as const)
+    : (["external"] as const);
+}
+
 /** The numbers that go on the nodes for a state. Off, the gate is fully open. */
 export function gateSettings(state: GateState) {
+  const clean = state.model === "clean";
+  // Only the clean model listens to a key.
+  const external = clean && state.external;
   return {
     attack: state.attackMs / 1000,
     floor: state.enabled ? toGain(state.floorDb) : 1,
     hold: state.holdMs / 1000,
     lookahead: state.enabled ? state.lookaheadMs / 1000 : 0,
+    model: state.model,
+    /** What the hysteresis model is made with, in its manifest's units: it closes the hysteresis under the threshold. */
+    modelParams: {
+      attack: state.attackMs,
+      closeThreshold: state.thresholdDb - state.hysteresisDb,
+      hold: state.holdMs,
+      lookahead: state.lookaheadMs,
+      range: state.floorDb,
+      release: state.releaseMs,
+      threshold: state.thresholdDb,
+    },
+    modelWet: state.enabled && !clean ? 1 : 0,
     // Which signal the level is measured on: the key when it is on, the signal itself otherwise.
-    outerKey: state.external ? 1 : 0,
-    ownKey: state.external ? 0 : 1,
+    outerKey: external ? 1 : 0,
+    ownKey: external ? 0 : 1,
     release: state.releaseMs / 1000,
     threshold: toGain(state.thresholdDb),
   };
@@ -165,3 +210,14 @@ export function gateCurve(state: GateState) {
   return (inputDb: number) =>
     inputDb >= state.thresholdDb ? inputDb : inputDb + state.floorDb;
 }
+
+/**
+ * The source of the hysteresis model's `AudioWorklet`, processor
+ * `audioui-gate-hysteresis`: the manifest of `@audio/dynamics-gate`, played
+ * by `manifestWorklet`. Every parameter makes it again.
+ */
+export const GATE_HYSTERESIS_WORKLET = manifestWorklet({
+  kernels: GATE_KERNELS,
+  models: { hysteresis: "gate" },
+  processor: "audioui-gate-hysteresis",
+});

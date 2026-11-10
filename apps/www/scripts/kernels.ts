@@ -248,6 +248,39 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "GATE_KERNELS",
+    file: "devices/gate/kernels.ts",
+    kernels: [
+      {
+        file: "util.js",
+        from: "@audio/dynamics-gate",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "timeCoef",
+      },
+      {
+        file: "envelope.js",
+        from: "@audio/dynamics-gate",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "envelope",
+      },
+      {
+        file: "util.js",
+        internal: true,
+        name: "@audio/dynamics-gate",
+        use: ["writer", "concat", "db2lin", "timeCoef"],
+      },
+      {
+        file: "gate.js",
+        internal: true,
+        name: "@audio/dynamics-gate",
+        use: "gateStream",
+      },
+      { file: "audio.js", name: "@audio/dynamics-gate", use: "gate" },
+    ],
+  },
+  {
     constant: "LIMITER_KERNELS",
     file: "devices/limiter/kernels.ts",
     kernels: [
