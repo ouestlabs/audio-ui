@@ -53,6 +53,7 @@
       "@audio/loudness-lufs": "1.2.0",
       "@audio/loudness-truepeak": "1.1.7",
       "@audio/midi-parse": "1.0.3",
+      "@audio/midi-write": "1.0.3",
       "@audio/musicxml": "0.1.0",
       "@audio/resample-sinc": "1.3.0",
       "@audio/reverb-dattorro": "1.1.3",

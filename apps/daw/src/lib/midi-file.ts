@@ -1,13 +1,8 @@
 import parseMidi from "@audio/midi-parse";
-import {
-  encodeMidiFile,
-  type MidiFileNote,
-  parseMidiFile,
-} from "@audio-ui/core/midi";
+import writeMidi from "@audio/midi-write";
 import type { Note } from "@audio-ui/core/piano-roll";
 
-/** Standard MIDI File resolution, ticks per quarter note, a common round value shared by most DAWs' own exports. */
-const TICKS_PER_QUARTER_NOTE = 480;
+const SECONDS_PER_MINUTE = 60;
 const MICROSECONDS_PER_MINUTE = 60_000_000;
 
 /** What a file input or a drop zone accepts as a MIDI file. */
@@ -49,28 +44,22 @@ export async function readMidiFile(
     minPitch = 0,
     stepsPerQuarter = 4,
   } = grid;
-  const parsed = parseMidiFile(await file.arrayBuffer());
-  const bpm = clamp(
-    Math.round(MICROSECONDS_PER_MINUTE / parsed.microsecondsPerQuarterNote),
-    minBpm,
-    maxBpm
-  );
-  const ticksPerStep = parsed.ticksPerQuarterNote / stepsPerQuarter;
-
+  const { bpm: fileBpm, parts } = await readMidiFileParts(file);
+  const bpm = clamp(Math.round(fileBpm), minBpm, maxBpm);
   const notes: Note[] = [];
-  for (const midiNote of parsed.notes) {
-    const start = Math.round(midiNote.startTick / ticksPerStep);
+  for (const midiNote of parts.flatMap((part) => part.notes)) {
+    const start = Math.round(midiNote.start * stepsPerQuarter);
     if (start < 0 || start >= duration) {
       continue;
     }
     notes.push({
       id: `midi-import-${notes.length}`,
       length: clamp(
-        Math.round(midiNote.durationTicks / ticksPerStep),
+        Math.round(midiNote.length * stepsPerQuarter),
         1,
         duration - start
       ),
-      pitch: clamp(midiNote.note, minPitch, maxPitch),
+      pitch: clamp(midiNote.pitch, minPitch, maxPitch),
       start,
       velocity: clamp(midiNote.velocity, 0, 1),
     });
@@ -197,21 +186,20 @@ export function writeMidiFile(
   notes: readonly Note[],
   { bpm, stepsPerQuarter = 4 }: { bpm: number; stepsPerQuarter?: number }
 ): Uint8Array {
-  const ticksPerStep = TICKS_PER_QUARTER_NOTE / stepsPerQuarter;
-  const midiNotes: Omit<MidiFileNote, "track">[] = notes
-    .filter((note) => !note.muted)
-    .map((note) => ({
-      channel: 0,
-      durationTicks: Math.round(note.length * ticksPerStep),
-      note: note.pitch,
-      startTick: Math.round(note.start * ticksPerStep),
-      velocity: note.velocity ?? 1,
-    }));
-  return encodeMidiFile({
-    bpm,
-    notes: midiNotes,
-    ticksPerQuarterNote: TICKS_PER_QUARTER_NOTE,
-  });
+  // The writer takes seconds: a step lasts a quarter note over `stepsPerQuarter`.
+  const secondsPerStep = SECONDS_PER_MINUTE / bpm / stepsPerQuarter;
+  return writeMidi(
+    notes
+      .filter((note) => !note.muted)
+      .map((note) => ({
+        channel: 0,
+        duration: note.length * secondsPerStep,
+        midi: note.pitch,
+        time: note.start * secondsPerStep,
+        velocity: note.velocity ?? 1,
+      })),
+    { bpm }
+  );
 }
 
 /** Saves the notes as a `.mid` file, named `filename`. */
@@ -222,7 +210,7 @@ export function downloadMidiFile(
   const bytes = writeMidiFile(notes, options);
   // `Uint8Array`'s `.buffer` types as `ArrayBufferLike` (which also covers
   // `SharedArrayBuffer`) while `BlobPart` wants a concrete `ArrayBuffer`,
-  // safe here since `encodeMidiFile` always builds a fresh, non-shared one.
+  // safe here since the writer always builds a fresh, non-shared one.
   const blob = new Blob([bytes.buffer as ArrayBuffer], { type: "audio/midi" });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");

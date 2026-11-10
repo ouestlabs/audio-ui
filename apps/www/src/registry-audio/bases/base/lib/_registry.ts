@@ -256,9 +256,9 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/midi-parse"],
+    dependencies: ["@audio-ui/core", "@audio/midi-parse", "@audio/midi-write"],
     description:
-      "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one; or read one as parts in beats, a part per track and channel with its name and program, for a host that lays each on a track (parsed by @audio/midi-parse)",
+      "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one; or read one as parts in beats, a part per track and channel with its name and program, for a host that lays each on a track (parsed by @audio/midi-parse, written by @audio/midi-write)",
     files: [
       {
         path: "lib/midi-file.ts",

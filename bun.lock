@@ -63,6 +63,7 @@
         "@audio/loudness-lufs": "catalog:",
         "@audio/loudness-truepeak": "catalog:",
         "@audio/midi-parse": "catalog:",
+        "@audio/midi-write": "catalog:",
         "@audio/musicxml": "catalog:",
         "@audio/resample-sinc": "catalog:",
         "@audio/reverb-dattorro": "catalog:",
@@ -231,6 +232,7 @@
         "@audio/loudness-lufs": "catalog:",
         "@audio/loudness-truepeak": "catalog:",
         "@audio/midi-parse": "catalog:",
+        "@audio/midi-write": "catalog:",
         "@audio/musicxml": "catalog:",
         "@audio/resample-sinc": "catalog:",
         "@audio/reverb-dattorro": "catalog:",
@@ -320,7 +322,7 @@
     },
     "packages/core": {
       "name": "@audio-ui/core",
-      "version": "0.24.0",
+      "version": "0.25.0",
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
         "@types/bun": "1.4.2",
@@ -330,9 +332,9 @@
     },
     "packages/elements": {
       "name": "@audio-ui/elements",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
-        "@audio-ui/core": "^0.24.0",
+        "@audio-ui/core": "^0.25.0",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
@@ -362,9 +364,9 @@
     },
     "packages/ui": {
       "name": "@audio-ui/react",
-      "version": "0.13.2",
+      "version": "0.13.3",
       "dependencies": {
-        "@audio-ui/core": "^0.24.0",
+        "@audio-ui/core": "^0.25.0",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
@@ -432,6 +434,7 @@
     "@audio/loudness-lufs": "1.2.0",
     "@audio/loudness-truepeak": "1.1.7",
     "@audio/midi-parse": "1.0.3",
+    "@audio/midi-write": "1.0.3",
     "@audio/musicxml": "0.1.0",
     "@audio/resample-sinc": "1.3.0",
     "@audio/reverb-dattorro": "1.1.3",
@@ -629,6 +632,8 @@
     "@audio/loudness-truepeak": ["@audio/loudness-truepeak@1.1.7", "", {}, "sha512-4kVZOM5vTSV+gDyM9aru6+K+1i6knOtw1L2xzokkTlRk03FihC4RNnmPkpCJr0a0+ZSPCljqLgXaZdcSkUzPTw=="],
 
     "@audio/midi-parse": ["@audio/midi-parse@1.0.3", "", {}, "sha512-l454ohl5+X5XeozLAd4hZeS+QUmNLDepL50/6+rxGTf8rnq/QdE/aiqn0xG6QNxkY7ezRujUUh1V1JQ4FPZRYg=="],
+
+    "@audio/midi-write": ["@audio/midi-write@1.0.3", "", {}, "sha512-WJI3FBTT7+LBwkp2CH5/6KDEcD0kjINztn7SzcDhYQeJJrlifkiq92yDKfdew+E9o4oDqY3oI3VWMiunt0JquQ=="],
 
     "@audio/musicxml": ["@audio/musicxml@0.1.0", "", {}, "sha512-naW+wO4PPrGNUS/xcPrna/QGX51p5H7/kJS95FOxtWkFStqs35eW8LQeDIojAVnbOggTuxZ3y5FDlT7yS2z5xw=="],
 
