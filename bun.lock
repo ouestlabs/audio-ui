@@ -26,6 +26,7 @@
         "@audio/decode-mp4": "catalog:",
         "@audio/dynamics-compressor": "catalog:",
         "@audio/dynamics-fet": "catalog:",
+        "@audio/dynamics-limiter": "catalog:",
         "@audio/dynamics-opto": "catalog:",
         "@audio/dynamics-varimu": "catalog:",
         "@audio/dynamics-vca": "catalog:",
@@ -185,6 +186,7 @@
         "@audio/decode-mp4": "catalog:",
         "@audio/dynamics-compressor": "catalog:",
         "@audio/dynamics-fet": "catalog:",
+        "@audio/dynamics-limiter": "catalog:",
         "@audio/dynamics-opto": "catalog:",
         "@audio/dynamics-varimu": "catalog:",
         "@audio/dynamics-vca": "catalog:",
@@ -378,6 +380,7 @@
     "@audio/decode-mp4": "1.3.1",
     "@audio/dynamics-compressor": "0.3.1",
     "@audio/dynamics-fet": "0.2.5",
+    "@audio/dynamics-limiter": "0.2.1",
     "@audio/dynamics-opto": "0.2.5",
     "@audio/dynamics-varimu": "0.2.4",
     "@audio/dynamics-vca": "0.2.5",
@@ -499,6 +502,8 @@
     "@audio/dynamics-envelope": ["@audio/dynamics-envelope@0.1.4", "", {}, "sha512-1nA2UG7BPnWGA5DM94npwZHiNqTAhOu786XeFqbnwX3bFyAgDRJ9VxENDoGPyPjSkvuDvJ4f//yehr8EmWrJaw=="],
 
     "@audio/dynamics-fet": ["@audio/dynamics-fet@0.2.5", "", { "dependencies": { "@audio/dynamics-compressor": "^0.2.0", "@audio/dynamics-envelope": "^0.1.0" } }, "sha512-dWg6gRNPc+u3oDOHLr7gVQiKKKXPE9BLjQJdCoDcEp4rJT53isHxg0YAVVCZlCAVuJjRW39LiSYp55iaO9Ad1w=="],
+
+    "@audio/dynamics-limiter": ["@audio/dynamics-limiter@0.2.1", "", {}, "sha512-vJuH2bypt9UbcVdl9uJE5hnNTea0F4VtI0kGGUeMTu+3Mzdxu04hJ1ekm+sMOc47PKto/G24FDnOfWHdDt5lzg=="],
 
     "@audio/dynamics-opto": ["@audio/dynamics-opto@0.2.5", "", { "dependencies": { "@audio/dynamics-compressor": "^0.2.0", "@audio/dynamics-envelope": "^0.1.0" } }, "sha512-oezbg3VK15/cYB3I8JBYtYwiGKm3bRy4bBXmiX6MRi91AEB20qMHGD0Q/vlA62xR929BUysD8Qhn975DH6rIEA=="],
 

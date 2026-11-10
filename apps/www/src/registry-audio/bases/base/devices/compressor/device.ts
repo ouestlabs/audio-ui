@@ -6,6 +6,7 @@ import { vca } from "@audio/dynamics-vca/audio";
 import { webAudioCompressorOutput } from "@audio-ui/core/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
 import { COMPRESSOR_KERNELS } from "@/registry-audio/bases/base/devices/compressor/kernels";
+import { manifestWorklet } from "@/registry-audio/bases/base/lib/manifest-worklet";
 
 /**
  * A compressor as a device: its parameters and what they mean, with no panel
@@ -389,162 +390,18 @@ registerProcessor("audioui-compressor-key", AudioUiCompressorKey);
 
 /**
  * The source of the models' `AudioWorklet`, processor
- * `audioui-compressor-models`: the processor of each model's audio.js
- * manifest, per channel, the model it plays sent by message. A parameter the
- * manifest reads as it plays changes at once; a new model, or a parameter
- * that makes it again (flagged `restart`), makes a new one, at most every
- * 50 ms so a knob turned all along is heard as it goes. The new one hears the
- * last 100 ms first, so it starts where the old one was, and takes over in a
- * 30 ms fade. A model has no make-up of its own: the engine adds the knob's
- * after it. With nothing coming in it plays on silence as long as its state
- * lasts, a second at least, then rests. It posts the gain it takes off, in
- * dB, about every 10 ms, for a meter.
+ * `audioui-compressor-models`: each model's audio.js manifest, played by
+ * `manifestWorklet`, the model sent by message. A model has no make-up of its
+ * own: the engine adds the knob's after it.
  */
-export const COMPRESSOR_MODELS_WORKLET = `${COMPRESSOR_KERNELS}
-const MODELS = { fet, opto, smooth: compressor, varimu, vca };
-const RESTART_SECONDS = 0.05;
-const FADE_SECONDS = 0.03;
-const PREROLL_SECONDS = 0.1;
-const QUIET_SECONDS = 1;
-const POST_SECONDS = 0.01;
-const BLOCK = 128;
-/** The parameters that make each model again when they change. */
-const RESTARTS = {};
-for (const name in MODELS) {
-  const params = MODELS[name].params;
-  RESTARTS[name] = Object.keys(params).filter((key) => (params[key].flags || []).includes("restart"));
-}
-
-class AudioUiCompressorModels extends AudioWorkletProcessor {
-  static get parameterDescriptors() {
-    return [
-      { name: "threshold", defaultValue: -18, minValue: -100, maxValue: 0, automationRate: "k-rate" },
-      { name: "ratio", defaultValue: 4, minValue: 1, maxValue: 100, automationRate: "k-rate" },
-      { name: "knee", defaultValue: 6, minValue: 0, maxValue: 60, automationRate: "k-rate" },
-      { name: "attack", defaultValue: 5, minValue: 0.01, maxValue: 1000, automationRate: "k-rate" },
-      { name: "release", defaultValue: 80, minValue: 1, maxValue: 10000, automationRate: "k-rate" },
-    ];
-  }
-  constructor(options) {
-    super();
-    this.model = options.processorOptions.model;
-    this.port.onmessage = (event) => {
-      if (MODELS[event.data.model]) {
-        this.model = event.data.model;
-      }
-    };
-    const length = Math.ceil(PREROLL_SECONDS * sampleRate);
-    this.history = [new Float32Array(length), new Float32Array(length)];
-    this.filled = 0;
-    this.values = {};
-    this.playing = null;
-    this.leaving = null;
-    this.since = 0;
-    this.quiet = 0;
-    this.sent = 0;
-    this.taken = 0;
-    this.given = 0;
-    this.scratch = [];
-  }
-  /** A model's values for this block: the knobs for the parameters it has, its manifest's defaults for the rest, no make-up. One object per model, its numbers changed in place. */
-  valuesOf(name, parameters) {
-    const params = MODELS[name].params;
-    if (!this.values[name]) {
-      this.values[name] = {};
-      for (const key in params) {
-        this.values[name][key] = Float32Array.of(key === "makeup" ? 0 : params[key].default);
-      }
-    }
-    const values = this.values[name];
-    for (const key in parameters) {
-      if (values[key]) {
-        values[key][0] = parameters[key][0];
-      }
-    }
-    return values;
-  }
-  /** A new model, played first on the sound just gone. */
-  start(name, values, key) {
-    const run = MODELS[name]({ currentTime, maxBlockSize: BLOCK, maxChannels: 2, params: values, sampleRate });
-    const [left, right] = this.history;
-    const out = [this.scratch[2], this.scratch[3]];
-    for (let at = left.length - this.filled; at < left.length; at += BLOCK) {
-      const end = Math.min(at + BLOCK, left.length);
-      run([[left.subarray(at, end), right.subarray(at, end)]], [out], values);
-    }
-    this.since = 0;
-    return { key, run, values };
-  }
-  process(inputs, outputs, parameters) {
-    const input = inputs[0];
-    const output = outputs[0];
-    const name = this.model;
-    if (!(output && output.length > 0 && MODELS[name])) {
-      return true;
-    }
-    const frames = output[0].length;
-    const coming = input && input.length > 0;
-    if (!coming && this.quiet >= Math.max(MODELS[name].tail, QUIET_SECONDS) * sampleRate) {
-      return true;
-    }
-    if (!this.scratch[0] || this.scratch[0].length < Math.max(frames, BLOCK)) {
-      const size = Math.max(frames, BLOCK);
-      this.scratch = [0, 1, 2, 3, 4].map(() => new Float32Array(size));
-    }
-    // Nothing coming in: the model still plays on, fed silence, so its state comes back to rest.
-    const silence = this.scratch[4].subarray(0, frames);
-    const left = coming ? input[0] : silence;
-    const right = coming ? (input[1] ?? input[0]) : silence;
-    const out = output.length > 1 ? output : [output[0], this.scratch[0].subarray(0, frames)];
-    const values = this.valuesOf(name, parameters);
-    let key = name;
-    for (const restart of RESTARTS[name]) {
-      key += ":" + values[restart][0];
-    }
-    this.since += frames;
-    if (!this.playing) {
-      this.playing = this.start(name, values, key);
-    } else if (key !== this.playing.key && !this.leaving && this.since >= RESTART_SECONDS * sampleRate) {
-      const fade = Math.round(FADE_SECONDS * sampleRate);
-      this.leaving = { left: fade, model: this.playing, total: fade };
-      this.playing = this.start(name, values, key);
-    }
-    this.playing.run([[left, right]], [out], values);
-    if (this.leaving) {
-      const old = [this.scratch[1].subarray(0, frames), this.scratch[2].subarray(0, frames)];
-      this.leaving.model.run([[left, right]], [old], this.leaving.model.values);
-      for (let frame = 0; frame < frames; frame += 1) {
-        // A fade in a line: the two hold the same sound at about the same gain, so their amplitudes add.
-        const going = Math.max(0, this.leaving.left - frame) / this.leaving.total;
-        out[0][frame] = out[0][frame] * (1 - going) + old[0][frame] * going;
-        out[1][frame] = out[1][frame] * (1 - going) + old[1][frame] * going;
-      }
-      this.leaving.left -= frames;
-      if (this.leaving.left <= 0) {
-        this.leaving = null;
-      }
-    }
-    const sources = [left, right];
-    for (let channel = 0; channel < 2; channel += 1) {
-      const held = this.history[channel];
-      held.copyWithin(0, frames);
-      held.set(sources[channel], held.length - frames);
-    }
-    this.filled = Math.min(this.history[0].length, this.filled + frames);
-    for (let frame = 0; frame < frames; frame += 1) {
-      this.taken += Math.abs(left[frame]) + Math.abs(right[frame]);
-      this.given += Math.abs(out[0][frame]) + Math.abs(out[1][frame]);
-    }
-    this.sent += frames;
-    if (this.sent >= POST_SECONDS * sampleRate) {
-      this.port.postMessage(this.taken > 1e-9 ? Math.min(0, 20 * Math.log10(this.given / this.taken + 1e-12)) : 0);
-      this.sent = 0;
-      this.taken = 0;
-      this.given = 0;
-    }
-    this.quiet = coming ? 0 : this.quiet + frames;
-    return true;
-  }
-}
-registerProcessor("audioui-compressor-models", AudioUiCompressorModels);
-`;
+export const COMPRESSOR_MODELS_WORKLET = manifestWorklet({
+  kernels: COMPRESSOR_KERNELS,
+  models: {
+    fet: "fet",
+    opto: "opto",
+    smooth: "compressor",
+    varimu: "varimu",
+    vca: "vca",
+  },
+  processor: "audioui-compressor-models",
+});

@@ -104,7 +104,7 @@ function SamplerPanel({
         >
           <SelectTrigger
             aria-label={SAMPLE.label}
-            className="h-6 w-32"
+            className="w-32 data-[size=sm]:h-6"
             size="sm"
           >
             <SelectValue />

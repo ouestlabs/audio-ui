@@ -134,7 +134,11 @@ function CompressorPanel({
             onValueChange={pickModel}
             value={value.model}
           >
-            <SelectTrigger aria-label="Model" className="h-6 w-24" size="sm">
+            <SelectTrigger
+              aria-label="Model"
+              className="w-24 data-[size=sm]:h-6"
+              size="sm"
+            >
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

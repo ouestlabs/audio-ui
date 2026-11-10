@@ -10,6 +10,7 @@ import {
   modelCurve,
 } from "@/registry-audio/bases/base/devices/compressor/device";
 import { createCompressorEngine } from "@/registry-audio/bases/base/devices/compressor/engine";
+import { madeProcessor, type Processor } from "./manifest-processor";
 
 const RATE = 48_000;
 const BLOCK = 128;
@@ -20,44 +21,8 @@ const MODELS = Object.keys(
   COMPRESSOR_MODELS
 ) as (keyof typeof COMPRESSOR_MODELS)[];
 
-interface Processor {
-  port: { onmessage: ((event: { data: unknown }) => void) | null };
-  process: (
-    inputs: Float32Array[][],
-    outputs: Float32Array[][],
-    parameters: Record<string, Float32Array>
-  ) => boolean;
-}
-
-/** The worklet's processor, its posts kept. */
-function made(model: string) {
-  const posted: number[] = [];
-  class AudioWorkletProcessor {
-    readonly port = {
-      onmessage: null,
-      postMessage: (value: number) => posted.push(value),
-    };
-  }
-  let Made: (new (options: unknown) => Processor) | undefined;
-  new Function(
-    "AudioWorkletProcessor",
-    "registerProcessor",
-    "sampleRate",
-    "currentTime",
-    COMPRESSOR_MODELS_WORKLET
-  )(
-    AudioWorkletProcessor,
-    (_name: string, processor: new (options: unknown) => Processor) => {
-      Made = processor;
-    },
-    RATE,
-    0
-  );
-  if (!Made) {
-    throw new Error("The worklet registered no processor");
-  }
-  return { posted, processor: new Made({ processorOptions: { model } }) };
-}
+const made = (model: string) =>
+  madeProcessor(COMPRESSOR_MODELS_WORKLET, model, RATE);
 
 /** A block of two channels. */
 type Stereo = [Float32Array, Float32Array];

@@ -132,7 +132,11 @@ function FilterPanel({
           onValueChange={pickCircuit}
           value={played}
         >
-          <SelectTrigger aria-label="Circuit" className="h-6 w-28" size="sm">
+          <SelectTrigger
+            aria-label="Circuit"
+            className="w-28 data-[size=sm]:h-6"
+            size="sm"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

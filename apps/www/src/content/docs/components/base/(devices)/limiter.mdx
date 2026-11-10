@@ -1,13 +1,13 @@
 ---
 title: Limiter
-description: "A limiter device: input gain, ceiling and release, a panel that draws its transfer curve with a handle on the ceiling, a Web Audio engine and tools for agents."
+description: "A limiter device: a clean or a look-ahead model, input gain, ceiling, release and true peak, a panel that draws its transfer curve with a handle on the ceiling, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-limiter" />
 
-Keeps the sound under a ceiling. The input gain pushes the level against it, and what goes over is held down. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Keeps the sound under a ceiling. The input gain pushes the level against it, and what goes over is held down. Its model is the browser's compressor with a clip, or the lookahead brickwall limiter of [audio.js](https://audio.js.org), which can hold true peaks. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -16,9 +16,12 @@ Keeps the sound under a ceiling. The input gain pushes the level against it, and
 ## Controls
 
 <DeviceControls device="limiter">
+<Control id="model">Clean is the browser's compressor and a clip. Look-ahead is `@audio/dynamics-limiter`: it sees each peak coming and ramps the gain down into it, with no clip. It is picked in the title bar, and the controls the model does not use are drawn off.</Control>
 <Control id="gainDb">Pushes the level of the input against the ceiling.</Control>
 <Control id="ceilingDb">The level the output should not go over.</Control>
 <Control id="releaseMs">How fast the gain comes back after a peak.</Control>
+<Control id="lookaheadMs">How far ahead the look-ahead model sees a peak coming: how long it takes to bring the gain down into it, and how late the sound comes out.</Control>
+<Control id="truePeak">Keeps the waveform rebuilt between the samples under the ceiling too, not only the samples. It adds 96 samples of latency.</Control>
 </DeviceControls>
 
 ## Panel
@@ -35,8 +38,21 @@ Create it, connect it and update it as for any device: see [The engine](/docs/de
 engine.reduction; // dB being taken off, read per frame
 ```
 
-The engine is the browser's compressor node at a ratio of 20 with no knee, then a hard clip. The node adds a make-up gain of its own that cannot be turned off, so the engine takes it back out, and a signal under the ceiling is only as loud as the gain makes it.
+### Clean
+
+The clean model is the browser's compressor node at a ratio of 20 with no knee, then a hard clip. The node adds a make-up gain of its own that cannot be turned off, so the engine takes it back out, and a signal under the ceiling is only as loud as the gain makes it.
 
 A ratio of 20 is not a wall. Measured in Chrome, with a ceiling of -1 dB and +24 dB in, the node alone reaches +0.6 dBFS. The final clip, oversampled 4x, keeps the samples at the ceiling: in the conformance page the peak is never more than 0.05 dB over it, for ceilings of -1, -6 and -12 dB and up to +36 dB in. The filter of the oversampling rings a little, so it is not exactly zero.
 
-That is a sample peak, not an inter-sample (true) peak. It is not a substitute for a true-peak limiter on a master that is checked against a loudness standard.
+That is a sample peak, not an inter-sample (true) peak. It is not a substitute for a true-peak limiter on a master that is checked against a loudness standard: use the look-ahead model with True peak on.
+
+### Look-ahead
+
+The look-ahead model is the processor of `@audio/dynamics-limiter`'s manifest as published, in an `AudioWorklet` fed only while it plays. Until the worklet is ready, the clean model plays for it. Every one of its values builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. `engine.reduction` reads the gain it takes off, measured from its output against its input as late.
+
+Its latency is the look-ahead, plus 96 samples with True peak on, and the device declares it, so a host that compensates latency keeps it in time. Measured on noise pushed 20 dB over the ceiling:
+
+| True peak | Samples | Between the samples |
+| --- | --- | --- |
+| Off | at the ceiling | up to 1.5 dB over it |
+| On | at the ceiling | at it, read at 8 points a sample; 0.02 dB over, read at the 4 of BS.1770 |

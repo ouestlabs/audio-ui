@@ -248,6 +248,25 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "LIMITER_KERNELS",
+    file: "devices/limiter/kernels.ts",
+    kernels: [
+      {
+        file: "util.js",
+        internal: true,
+        name: "@audio/dynamics-limiter",
+        use: ["writer", "concat", "db2lin", "timeCoef"],
+      },
+      {
+        file: "limiter.js",
+        internal: true,
+        name: "@audio/dynamics-limiter",
+        use: ["limiterStream", "latency"],
+      },
+      { file: "audio.js", name: "@audio/dynamics-limiter", use: "limiter" },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [

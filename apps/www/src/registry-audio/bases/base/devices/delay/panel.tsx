@@ -125,7 +125,11 @@ function DelayPanel({
           onValueChange={pickMode}
           value={value.mode}
         >
-          <SelectTrigger aria-label="Mode" className="h-6 w-28" size="sm">
+          <SelectTrigger
+            aria-label="Mode"
+            className="w-28 data-[size=sm]:h-6"
+            size="sm"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

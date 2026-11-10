@@ -101,7 +101,11 @@ function ReverbPanel({
           onValueChange={pickType}
           value={value.type}
         >
-          <SelectTrigger aria-label="Type" className="h-6 w-28" size="sm">
+          <SelectTrigger
+            aria-label="Type"
+            className="w-28 data-[size=sm]:h-6"
+            size="sm"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>

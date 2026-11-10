@@ -108,7 +108,11 @@ function StringMachinePanel({
         value={value}
       >
         <Select items={PRESET_NAMES} onValueChange={pickPreset} value={preset}>
-          <SelectTrigger aria-label="Preset" className="h-6 w-28" size="sm">
+          <SelectTrigger
+            aria-label="Preset"
+            className="w-28 data-[size=sm]:h-6"
+            size="sm"
+          >
             <SelectValue placeholder="Preset" />
           </SelectTrigger>
           <SelectContent>

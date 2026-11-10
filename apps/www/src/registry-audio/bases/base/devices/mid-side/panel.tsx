@@ -97,7 +97,11 @@ function MidSidePanel({
           onValueChange={pickWidening}
           value={value.widen}
         >
-          <SelectTrigger aria-label="Widen" className="h-6 w-24" size="sm">
+          <SelectTrigger
+            aria-label="Widen"
+            className="w-24 data-[size=sm]:h-6"
+            size="sm"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
