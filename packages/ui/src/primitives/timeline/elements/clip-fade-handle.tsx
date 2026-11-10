@@ -2,7 +2,6 @@ import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part.ts";
 import { mergeProps, useRender } from "../../internal/render.ts";
 import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
-import { UNIT_PROPERTY } from "../context.ts";
 import {
   type ClipState,
   type ClipTarget,
@@ -100,10 +99,10 @@ export function ClipFadeHandle(componentProps: ClipFadeHandle.Props) {
   const place: React.CSSProperties =
     edge === "in"
       ? {
-          insetInlineStart: `calc(var(${UNIT_PROPERTY}) * var(--clip-fade-in))`,
+          insetInlineStart: "calc(var(--clip-unit) * var(--clip-fade-in))",
         }
       : {
-          insetInlineEnd: `calc(var(${UNIT_PROPERTY}) * var(--clip-fade-out))`,
+          insetInlineEnd: "calc(var(--clip-unit) * var(--clip-fade-out))",
         };
 
   return useRender({

@@ -304,6 +304,23 @@ describe("Timeline.Clip", () => {
     );
   });
 
+  test("its fades are placed in a unit of the clip's own: a share of the clip when fitted, px when zoomed", () => {
+    const fitted = renderClip({ defaultValue: { ...start, fadeIn: 10 } });
+    // Fitted, the timeline's unit is a share of the lane, which inside the clip would be a share of the clip.
+    expect(fitted.clip.style.getPropertyValue("--clip-unit")).toBe(
+      "calc(100% / 40)"
+    );
+    expect(fitted.fadeInHandle.style.insetInlineStart).toBe(
+      "calc(var(--clip-unit) * var(--clip-fade-in))"
+    );
+    expect(fitted.view.getByTestId("fade-in").style.width).toBe(
+      "calc(var(--clip-unit) * var(--clip-fade-in))"
+    );
+    fitted.view.unmount();
+    const zoomed = renderClip({}, { zoom: 4 });
+    expect(zoomed.clip.style.getPropertyValue("--clip-unit")).toBe("4px");
+  });
+
   test("while a fade is dragged the clip says which, and how far each fade can grow", () => {
     const { clip, fadeInHandle } = renderClip({
       defaultValue: { ...start, fadeOut: 15 },
