@@ -280,8 +280,8 @@
   },
   "catalog": {
     "@audio/beat-detect": "1.1.0",
-    "@audio/decode-aiff": "1.3.0",
-    "@audio/decode-caf": "1.4.1",
+    "@audio/decode-aiff": "1.3.1",
+    "@audio/decode-caf": "1.4.2",
     "@audio/decode-mp4": "1.3.1",
     "@audio/encode": "1.11.0",
     "@audio/loudness-lufs": "1.2.0",
@@ -341,11 +341,11 @@
 
     "@audio/decode-ac3": ["@audio/decode-ac3@1.0.0", "", {}, "sha512-GR2PLqxxrybNRwdA3/ZazB4ZWz7yQNihYtjuigGfEpSqKt95FnUgjIVfE7aJmznvxa6voq8Mou6NvSoTqH104g=="],
 
-    "@audio/decode-aiff": ["@audio/decode-aiff@1.3.0", "", {}, "sha512-GgCNYZMmma5Xol8lxqDZQ7qFYsIpfWn8LXKPZ8ZR6IaVOs1O+nCge/Bli1tNZSEucgG6mWh4Jvw+/XL6eXbwWw=="],
+    "@audio/decode-aiff": ["@audio/decode-aiff@1.3.1", "", {}, "sha512-XZi6H/OA2haery/YPnMzjEG9YvJ1oG0Ls8/Vj9RyQzEzfi3faHK7buou4JreFglR4sLUvdGAjxhD7L3APfmT6Q=="],
 
     "@audio/decode-amr": ["@audio/decode-amr@1.3.1", "", {}, "sha512-rYwY8HpmAwptaQDeNAoccbzbcYteHmL4s+KWVW8Y+NgJugQFhApsFeqs0ljVmuI2TvOmZRivMJwvg6++MdsUaA=="],
 
-    "@audio/decode-caf": ["@audio/decode-caf@1.4.1", "", {}, "sha512-iA0jNpUbGkFi45TjAbePrh/1K+SkVaQnp4r4br0kvd0IaD/cSzqOewi197Rba/VBlgoVFAro9ypuyh/VtTNNBw=="],
+    "@audio/decode-caf": ["@audio/decode-caf@1.4.2", "", {}, "sha512-y0EE54inb503DelpguEr7Lb54qqrfzZHI0TuTfaDZqQT7KeiX8oL/Hp9QHpvGtlggxq7CvnmFy0KFESB8BMF9w=="],
 
     "@audio/decode-dts": ["@audio/decode-dts@1.0.0", "", {}, "sha512-WApeOndo8C+3IzncPFg7vwRm9/ZbWjCzB93mx86en/+4/IWpUVz0W/wRINzg5gKGQa23xz5ZwGMGNC0X7i8nJw=="],
 
