@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ChorusPanel } from "@/registry-audio/bases/base/audio/panels/chorus-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type ChorusState,
   chorusDevice,
-} from "@/registry-audio/bases/base/lib/chorus-device";
-import { createChorusEngine } from "@/registry-audio/bases/base/lib/chorus-engine";
+} from "@/registry-audio/bases/base/devices/chorus/device";
+import { createChorusEngine } from "@/registry-audio/bases/base/devices/chorus/engine";
+import { ChorusPanel } from "@/registry-audio/bases/base/devices/chorus/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

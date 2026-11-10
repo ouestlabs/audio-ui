@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { PhaserPanel } from "@/registry-audio/bases/base/audio/panels/phaser-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type PhaserState,
   phaserDevice,
-} from "@/registry-audio/bases/base/lib/phaser-device";
-import { createPhaserEngine } from "@/registry-audio/bases/base/lib/phaser-engine";
+} from "@/registry-audio/bases/base/devices/phaser/device";
+import { createPhaserEngine } from "@/registry-audio/bases/base/devices/phaser/engine";
+import { PhaserPanel } from "@/registry-audio/bases/base/devices/phaser/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

@@ -8,18 +8,18 @@ import {
   useRef,
   useState,
 } from "react";
-import { SamplerPanel } from "@/registry-audio/bases/base/audio/panels/sampler-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type SamplerNote,
   type SamplerState,
   samplerDevice,
-} from "@/registry-audio/bases/base/lib/sampler-device";
+} from "@/registry-audio/bases/base/devices/sampler/device";
 import {
   createSamplerEngine,
   type SamplerEngine,
-} from "@/registry-audio/bases/base/lib/sampler-engine";
+} from "@/registry-audio/bases/base/devices/sampler/engine";
+import { SamplerPanel } from "@/registry-audio/bases/base/devices/sampler/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** How many slices play at once: a ninth takes the voice held longest. */

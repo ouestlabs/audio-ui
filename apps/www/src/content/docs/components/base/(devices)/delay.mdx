@@ -1,6 +1,6 @@
 ---
 title: Delay
-description: "A delay device: a time or a note value, a feedback, a tone and a mix, a panel that draws the echoes with a handle, a Web Audio engine and tools for agents."
+description: "A delay device: four modes, a time or a note value, a feedback, a tone and a mix, a panel that draws the echoes with a handle, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
@@ -16,17 +16,22 @@ Repeats the sound. The echoes fade by the feedback, each darker than the one bef
 ## Controls
 
 <DeviceControls device="delay">
+<Control id="mode">How it repeats, picked in the title bar. Echo, the default, repeats the sound after the time. Ping-pong takes the middle of the sound in on the left and bounces its echoes from side to side. Multitap echoes at half the time and at the time, at half and at three tenths of the level. Grain repeats it as short grains, transposed and scattered.</Control>
 <Control id="timeMs">The time between the echoes. Drag the handle on the first echo across to set it.</Control>
 <Control id="sync">Takes the time from a note value and the tempo of the host instead of milliseconds. See [Tempo sync](/docs/devices#tempo-sync).</Control>
 <Control id="division">The note value of the time, from 1/32 to a whole note, with triplets and dotted notes.</Control>
 <Control id="feedback">How much of the output goes back in. Drag the handle on the first echo up to raise it.</Control>
 <Control id="toneHz">Closes the highs of each repeat.</Control>
 <Control id="mix">The balance of the echoes and the dry signal.</Control>
+<Control id="pitch">The grain delay's transposition of each grain, in semitones.</Control>
+<Control id="sprayMs">How much later than the time a grain may read, at random: the grains scatter.</Control>
+<Control id="jitter">How far a grain's transposition may stray from the pitch, at random, in semitones.</Control>
+<Control id="grainMs">How long each grain lasts.</Control>
 </DeviceControls>
 
 ## Panel
 
-The panel draws the echoes the state makes, one line each, fainter as they fade. `delayTaps(state, windowMs)` returns them. With Sync on, the handle lands on the nearest note value and the Time control is drawn off. With Sync off, the note list is.
+The panel draws the echoes the state makes, one line each, fainter as they fade: a multitap's every half time. `delayTaps(state, windowMs)` returns them. With Sync on, the handle lands on the nearest note value and the Time control is drawn off. With Sync off, the note list is. The mode is picked in the title bar, and the grain delay's pitch, spray, jitter and grain size show with it alone.
 
 <DeviceUsage name="delay" />
 
@@ -35,3 +40,5 @@ The panel draws the echoes the state makes, one line each, fainter as they fade.
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
 The repeats go round a low-pass filter, so each is darker than the one before. A change of time glides slowly, so the echo bends like a tape instead of clicking, and the feedback stops short of 95 % so it cannot run away. A note longer than the delay can hold (two seconds) is held to that. The `1/8d` the block starts on is a dotted eighth at the loop's 100 BPM, 450 ms.
+
+The ping-pong, multitap and grain modes run on the audio thread: the kernels of `@audio/effect-pingpong`, `@audio/effect-multitap` and `@audio/effect-graindelay` in an `AudioWorklet` loaded from a blob, 128 frames at a time, their wet sound through a tone filter of its own. A worklet cannot import, so the device carries their code as published (`DELAY_KERNELS`, in its `kernels.ts`). A multitap's and a grain delay's lines are made as long as the longest settings need, so a multitap's time glides and a grain delay's grains follow every knob at once. A ping-pong's line is as long as its time: a new time waits for the knob to rest, then fades in on a fresh line as the old one fades out, as does a change of mode. The worklet is fed only while one of its modes plays, and until it has loaded, and in a context with no worklets, they play the echo: `ready` resolves once it is in the graph.

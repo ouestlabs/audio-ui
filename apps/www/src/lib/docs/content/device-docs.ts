@@ -1,41 +1,68 @@
-import { autoPanDevice } from "@/registry-audio/bases/base/lib/auto-pan-device";
-import { channelEqDevice } from "@/registry-audio/bases/base/lib/channel-eq-device";
-import { chorusDevice } from "@/registry-audio/bases/base/lib/chorus-device";
-import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
-import { deesserDevice } from "@/registry-audio/bases/base/lib/deesser-device";
-import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
-import { distortionDevice } from "@/registry-audio/bases/base/lib/distortion-device";
-import { drumSynthDevice } from "@/registry-audio/bases/base/lib/drum-synth-device";
-import { electricPianoDevice } from "@/registry-audio/bases/base/lib/electric-piano-device";
-import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
-import { filterDevice } from "@/registry-audio/bases/base/lib/filter-device";
-import { fmSynthDevice } from "@/registry-audio/bases/base/lib/fm-synth-device";
-import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
-import { guitarDevice } from "@/registry-audio/bases/base/lib/guitar-device";
-import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
-import { midSideDevice } from "@/registry-audio/bases/base/lib/mid-side-device";
-import { monoSynthDevice } from "@/registry-audio/bases/base/lib/mono-synth-device";
-import { multibandDevice } from "@/registry-audio/bases/base/lib/multiband-device";
-import { organDevice } from "@/registry-audio/bases/base/lib/organ-device";
-import { overdriveDevice } from "@/registry-audio/bases/base/lib/overdrive-device";
-import { phaserDevice } from "@/registry-audio/bases/base/lib/phaser-device";
-import { pocketSynthDevice } from "@/registry-audio/bases/base/lib/pocket-synth-device";
-import { polySynthDevice } from "@/registry-audio/bases/base/lib/poly-synth-device";
-import { reduxDevice } from "@/registry-audio/bases/base/lib/redux-device";
-import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
-import { samplerDevice } from "@/registry-audio/bases/base/lib/sampler-device";
-import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-device";
-import { stringMachineDevice } from "@/registry-audio/bases/base/lib/string-machine-device";
-import { tapeKeysDevice } from "@/registry-audio/bases/base/lib/tape-keys-device";
-import { transientDevice } from "@/registry-audio/bases/base/lib/transient-device";
-import { utilityDevice } from "@/registry-audio/bases/base/lib/utility-device";
-import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
-import { waveShaperDevice } from "@/registry-audio/bases/base/lib/wave-shaper-device";
+import { autoPanDevice } from "@/registry-audio/bases/base/devices/auto-pan/device";
+import { bassEnhancerDevice } from "@/registry-audio/bases/base/devices/bass-enhancer/device";
+import { binauralPannerDevice } from "@/registry-audio/bases/base/devices/binaural-panner/device";
+import { channelEqDevice } from "@/registry-audio/bases/base/devices/channel-eq/device";
+import { chorusDevice } from "@/registry-audio/bases/base/devices/chorus/device";
+import { companderDevice } from "@/registry-audio/bases/base/devices/compander/device";
+import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
+import { deesserDevice } from "@/registry-audio/bases/base/devices/deesser/device";
+import { delayDevice } from "@/registry-audio/bases/base/devices/delay/device";
+import { distortionDevice } from "@/registry-audio/bases/base/devices/distortion/device";
+import { drumSynthDevice } from "@/registry-audio/bases/base/devices/drum-synth/device";
+import { duckerDevice } from "@/registry-audio/bases/base/devices/ducker/device";
+import { electricPianoDevice } from "@/registry-audio/bases/base/devices/electric-piano/device";
+import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
+import { exciterDevice } from "@/registry-audio/bases/base/devices/exciter/device";
+import { expanderDevice } from "@/registry-audio/bases/base/devices/expander/device";
+import { filterDevice } from "@/registry-audio/bases/base/devices/filter/device";
+import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/device";
+import { frequencyShifterDevice } from "@/registry-audio/bases/base/devices/frequency-shifter/device";
+import { gateDevice } from "@/registry-audio/bases/base/devices/gate/device";
+import { graphicEqDevice } from "@/registry-audio/bases/base/devices/graphic-eq/device";
+import { guitarDevice } from "@/registry-audio/bases/base/devices/guitar/device";
+import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
+import { lofiDevice } from "@/registry-audio/bases/base/devices/lofi/device";
+import { midSideDevice } from "@/registry-audio/bases/base/devices/mid-side/device";
+import { monoSynthDevice } from "@/registry-audio/bases/base/devices/mono-synth/device";
+import { multibandDevice } from "@/registry-audio/bases/base/devices/multiband/device";
+import { organDevice } from "@/registry-audio/bases/base/devices/organ/device";
+import { overdriveDevice } from "@/registry-audio/bases/base/devices/overdrive/device";
+import { phaserDevice } from "@/registry-audio/bases/base/devices/phaser/device";
+import { pocketSynthDevice } from "@/registry-audio/bases/base/devices/pocket-synth/device";
+import { polySynthDevice } from "@/registry-audio/bases/base/devices/poly-synth/device";
+import { reduxDevice } from "@/registry-audio/bases/base/devices/redux/device";
+import { reverbDevice } from "@/registry-audio/bases/base/devices/reverb/device";
+import { rotaryDevice } from "@/registry-audio/bases/base/devices/rotary/device";
+import { samplerDevice } from "@/registry-audio/bases/base/devices/sampler/device";
+import { saturatorDevice } from "@/registry-audio/bases/base/devices/saturator/device";
+import { stringMachineDevice } from "@/registry-audio/bases/base/devices/string-machine/device";
+import { stutterDevice } from "@/registry-audio/bases/base/devices/stutter/device";
+import { tapeKeysDevice } from "@/registry-audio/bases/base/devices/tape-keys/device";
+import { tiltEqDevice } from "@/registry-audio/bases/base/devices/tilt-eq/device";
+import { transientDevice } from "@/registry-audio/bases/base/devices/transient/device";
+import { unlimiterDevice } from "@/registry-audio/bases/base/devices/unlimiter/device";
+import { utilityDevice } from "@/registry-audio/bases/base/devices/utility/device";
+import { vibeDevice } from "@/registry-audio/bases/base/devices/vibe/device";
+import { wahDevice } from "@/registry-audio/bases/base/devices/wah/device";
+import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shaper/device";
 
 /** The devices the docs describe, by the slug of their page. */
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  unlimiter: unlimiterDevice,
+  compander: companderDevice,
+  ducker: duckerDevice,
+  expander: expanderDevice,
+  "binaural-panner": binauralPannerDevice,
+  stutter: stutterDevice,
+  rotary: rotaryDevice,
+  "bass-enhancer": bassEnhancerDevice,
+  exciter: exciterDevice,
+  "frequency-shifter": frequencyShifterDevice,
+  wah: wahDevice,
+  "graphic-eq": graphicEqDevice,
+  "tilt-eq": tiltEqDevice,
   chorus: chorusDevice,
   compressor: compressorDevice,
   deesser: deesserDevice,
@@ -61,6 +88,7 @@ export const DEVICE_DOCS = {
   "drum-synth": drumSynthDevice,
   sampler: samplerDevice,
   redux: reduxDevice,
+  lofi: lofiDevice,
   reverb: reverbDevice,
   saturator: saturatorDevice,
   transient: transientDevice,

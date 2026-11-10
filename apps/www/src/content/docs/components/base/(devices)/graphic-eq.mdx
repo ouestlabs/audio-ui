@@ -1,0 +1,44 @@
+---
+title: Graphic EQ
+description: "A graphic EQ device: ten bands an octave apart on faders and an output level, a panel that draws the curve, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-graphic-eq" />
+
+Shapes the tone with ten bands an octave apart, from 31 Hz to 16 kHz, each on a fader of its own, as a graphic equalizer has them. For bands you place and widen yourself, use the [equalizer](/docs/components/base/equalizer). It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="graphic-eq" kind="device" />
+
+## Controls
+
+<DeviceControls device="graphic-eq">
+<Control id="band31">The lowest octave: the weight under a kick and a bass.</Control>
+<Control id="band63">The body of a kick and a bass.</Control>
+<Control id="band125">The warmth of most instruments, or their mud.</Control>
+<Control id="band250">The fullness of voices and guitars.</Control>
+<Control id="band500">The body of the middle, or its boxiness.</Control>
+<Control id="band1k">Where most sounds speak: a voice's nose, a snare's crack.</Control>
+<Control id="band2k">Presence: how near a voice or a guitar sounds.</Control>
+<Control id="band4k">Edge and attack, or harshness.</Control>
+<Control id="band8k">Brilliance and the sibilance of voices.</Control>
+<Control id="band16k">Air, at the top of hearing.</Control>
+<Control id="outputDb">The level of the output, to make up for what the bands add or take.</Control>
+</DeviceControls>
+
+Each band boosts or cuts 15 dB. A band at 0 dB leaves its octave as it is.
+
+## Panel
+
+The panel draws the curve the bands play together over a fader for each, as on a graphic equalizer, with the output knob beside them. `graphicEqCurve(state)` is the curve it draws, and `graphicEqBands(state)` the filters a state is.
+
+<DeviceUsage name="graphic-eq" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The bands are those of `@audio/eq-graphic`: a bell at each octave centre of ISO 266, all as wide (a Q of 1.4), so they meet without a gap or a hump. Its bells are the Audio EQ Cookbook's, which a `BiquadFilterNode` of type `peaking` computes, so the engine is ten of those in series, then an output level. Off, every band goes flat and the level to 0 dB.

@@ -1,13 +1,13 @@
 ---
 title: Filter
-description: "A filter device: a type, a cutoff and a resonance, a panel with a handle on the curve and a live spectrum, a Web Audio engine and tools for agents."
+description: "A filter device: a type, six circuits, a cutoff, a resonance and a drive, a panel with a handle on the curve and a live spectrum, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-filter" />
 
-Takes part of the spectrum out: a low-pass, a high-pass, a band-pass or a notch. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Takes part of the spectrum out: a low-pass, a high-pass, a band-pass or a notch, clean or through a circuit modeled on an analog one. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -17,13 +17,15 @@ Takes part of the spectrum out: a low-pass, a high-pass, a band-pass or a notch.
 
 <DeviceControls device="filter">
 <Control id="type">The shape of the filter.</Control>
+<Control id="circuit">What the filter is made of, picked in the title bar. Clean is a biquad, the default, with every type. Ladder 24 is a Moog transistor ladder, four poles, 24 dB an octave, and Ladder 12 the same ladder at two poles, both with a low-pass, a high-pass and a band-pass. Diode is a diode ladder, the four poles of a TB-303, low-pass only. Korg35 is two poles with the saturation of the MS-20's feedback, low-pass and high-pass, with no resonant peak. SEM is the Oberheim SEM's state-variable filter, two poles, every type, its saturation in its feedback. A circuit without the type plays clean, and comes back when the type does.</Control>
 <Control id="cutoffHz">The frequency where the filter starts to work. Drag the handle across to set it.</Control>
-<Control id="resonance">How much the filter rings around the cutoff. Drag the handle up to raise it.</Control>
+<Control id="resonance">How much the filter rings around the cutoff. Drag the handle up to raise it. A ladder rings as high over its passband as the clean filter at the same resonance, and the Moog and diode ladders start to sing on their own at the top. The SEM is the clean filter at the same resonance until it saturates. Every circuit plays at the clean filter's level: a low-pass keeps its passband at 0 dB, where a ladder alone would lose its lows as the resonance rises, and a band-pass peaks at 0 dB at its cutoff. The Korg35 has no peak: its resonance saturates and darkens instead.</Control>
+<Control id="driveDb">How hard the sound goes into a ladder's saturation, and the Korg35's. At 0 dB it plays as its circuit does; more drive bends and thickens a loud sound without raising its peak, and brings a quiet one up into the saturation. The clean filter has none, and the SEM's saturation is its own.</Control>
 </DeviceControls>
 
 ## Panel
 
-The panel draws the curve of the filter, with a handle on it. Pass a spectrum to the panel to see what comes out behind the curve. `filterCurve(state)` is the curve it draws.
+The panel draws the curve of the filter, with a handle on it, and picks the circuit in its title bar, those without the type greyed out. Pass a spectrum to the panel to see what comes out behind the curve. `filterCurve(state)` is the curve it draws: an analog circuit's is measured on it, its response to a click too quiet to saturate, read at each frequency the plot draws.
 
 <DeviceUsage name="filter" />
 
@@ -31,4 +33,6 @@ The panel draws the curve of the filter, with a handle on it. Pass a spectrum to
 
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-The node is the filter the curve draws. A low-pass and a high-pass read their resonance in decibels, so the device gives it to the node in that unit, and the curve and the sound agree. `filterSettings(state)` is what goes on the node.
+The clean circuit is a biquad node, the filter the curve draws. A low-pass and a high-pass read their resonance in decibels, so the device gives it to the node in that unit, and the curve and the sound agree. `filterSettings(state)` is what goes on the node.
+
+An analog circuit runs on the audio thread: the kernels of `@audio/filter-moog-ladder`, `@audio/filter-diode-ladder`, `@audio/filter-korg35` and `@audio/filter-oberheim` in an `AudioWorklet` loaded from a blob, 128 frames at a time, about a percent of a core at most. A worklet cannot import, so the device carries their code as published (`FILTER_KERNELS`, in its `kernels.ts`), at the versions the registry was built with; the curve reads the packages as installed. The worklet is fed only while an analog circuit plays, and a change of circuit fades one out as the other comes in. Until it has loaded, and in a context with no worklets, an analog circuit plays the clean filter: `ready` resolves once it is in the graph. `circuitSettings(state)` is what goes on it, and `circuitMakeup` how its level is brought back.

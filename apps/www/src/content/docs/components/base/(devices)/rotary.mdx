@@ -1,0 +1,38 @@
+---
+title: Rotary
+description: "A rotary speaker device: a slow, fast or stop speed, a crossover, a depth, the horn's and the drum's ramps, a width and a mix, a panel that draws its two bands, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-rotary" />
+
+Spins the sound in a rotary speaker, the cabinet of an organ: the highs come from a horn and the lows from a drum, both turning, so the sound sweeps its pitch and its level past the microphones. Switch from Slow to Fast and the rotors wind up, the light horn first, the heavy drum after it. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="rotary" kind="device" />
+
+## Controls
+
+<DeviceControls device="rotary">
+<Control id="speed">How fast the rotors turn: Slow, the horn at 0.8 turns a second and the drum at 0.7; Fast, the horn at 6.7 and the drum at 5.9; or Stop. They wind to the new speed, they never jump.</Control>
+<Control id="crossoverHz">Where the sound splits between the drum, under it, and the horn, over it.</Control>
+<Control id="depth">How far the rotors sweep the pitch and the level. At 0 the sound only splits.</Control>
+<Control id="hornRampS">How long the horn takes to reach a new speed.</Control>
+<Control id="drumRampS">How long the drum takes, heavier and slower than the horn.</Control>
+<Control id="widthDeg">The angle between the two microphones around the cabinet: 0 is mono, 180 the widest.</Control>
+<Control id="mix">The balance of the cabinet and the clean sound, in mono.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the drum's band, dashed, and the horn's, split at the crossover, over its speed and its knobs. `rotaryBands(state)` is what it draws.
+
+<DeviceUsage name="rotary" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The cabinet runs on the audio thread: the rotary of `@audio/effect-rotary` in an `AudioWorklet` loaded from a blob (`ROTARY_WORKLET` is its source), 128 frames at a time. It splits the sound with a fourth-order Linkwitz-Riley crossover, which sums back to flat, then each rotor turns its band through a delay that sweeps its pitch and a gain that sweeps its level, heard by two microphones. The cabinet is mono: it takes both channels together and gives the two microphones. A worklet cannot import, so the device carries the rotary and the modules it is built from as published, the crossover of `@audio/eq-crossover`, the Butterworth design of `digital-filter` and the sections of `@audio/biquad` (`ROTARY_KERNELS`, in its `kernels.ts`). Until it is ready, and in a context with no worklets, the sound passes clean: `ready` resolves once it is in the graph.

@@ -1,13 +1,13 @@
 ---
 title: Mid/side
-description: "A mid/side device: a level for the centre, a level for the sides and a bass mono frequency, a panel with one handle for the two levels, a Web Audio engine and tools for agents."
+description: "A mid/side device: a widening, a level for the centre, a level for the sides and a bass mono frequency, a panel with one handle for the two levels, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-mid-side" />
 
-Sets the centre and the sides of a stereo signal apart. The mid is what both channels share, such as a kick or a voice, and the side is what sets them apart, such as a wide pad. Each has its own level, and Bass mono takes the lows out of the side so everything under a frequency sits in the middle. For a gain, a pan or a single width control, use the [utility](/docs/components/base/utility). It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Sets the centre and the sides of a stereo signal apart. The mid is what both channels share, such as a kick or a voice, and the side is what sets them apart, such as a wide pad. Each has its own level, and Bass mono takes the lows out of the side so everything under a frequency sits in the middle. Widen makes sides first, even from a mono sound, for the side level to set. For a gain, a pan or a single width control, use the [utility](/docs/components/base/utility). It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -17,14 +17,18 @@ Sets the centre and the sides of a stereo signal apart. The mid is what both cha
 ## Controls
 
 <DeviceControls device="mid-side">
+<Control id="widen">How sides are made before the split, picked in the title bar. Off leaves the sound as it is. Haas delays the right channel a few milliseconds: the ear hears the sound from the left, wide. Detune shifts the left channel up and the right one down a few cents, each blended with its own sound. The knobs a widening does not use are drawn off.</Control>
 <Control id="midDb">The level of the centre. Drag the handle on the plot up or down to set it.</Control>
 <Control id="sideDb">The level of the sides. Drag the handle on the plot across to set it.</Control>
-<Control id="bassMonoHz">The frequency under which the sides are taken out, so the bass sits in the centre. Off at 0.</Control>
+<Control id="bassMonoHz">The frequency under which the sides are taken out, so the bass sits in the centre. Off at 0. It comes after the widening, so a widened bass stays in the centre too.</Control>
+<Control id="haasMs">How long Haas delays the right channel, 1 to 35 ms.</Control>
+<Control id="detuneCents">How far Detune shifts each channel, 1 to 50 cents, the left up and the right down. A new detune waits for the knob to rest, then fades in.</Control>
+<Control id="detuneMix">The share of each channel Detune shifts; the rest stays as it is.</Control>
 </DeviceControls>
 
 ## Panel
 
-The panel is a square with the side level across and the mid level up, and one handle to drag to both at once. The crossing of the two lines is a signal left as it is.
+The panel is a square with the side level across and the mid level up, and one handle to drag to both at once. The crossing of the two lines is a signal left as it is. The widening is picked in its title bar.
 
 <DeviceUsage name="mid-side" />
 
@@ -33,6 +37,8 @@ The panel is a square with the side level across and the mid level up, and one h
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
 The signal is split into mid, `(L + R) / 2`, and side, `(L - R) / 2`. Each has its own gain, and the output is `L = mid + side` and `R = mid - side`. A mono input is spread to both sides first, so it is all mid. Off, both levels are unity and the sides keep their lows.
+
+Haas is a delay node on the right channel. Detune runs on the audio thread: the shifters of `@audio/spatial-microshift`, two read heads that glide through a 50 ms ring and cross-fade, in an `AudioWorklet` loaded from a blob (`DETUNE_WORKLET` is its source), 128 frames at a time. A worklet cannot import, so the device carries the module as published (`MID_SIDE_KERNELS`, in its `kernels.ts`). A new detune fades in on a fresh pair of shifters, run through the last 50 ms of sound first so it sounds at once. The worklet is fed only while Detune plays. Until it has loaded, and in a context with no worklets, Detune passes the sound as it is: `ready` resolves once it is in the graph.
 
 Bass mono is a high-pass on the side only. It is a second-order Butterworth filter, so the sides are 3 dB down at the frequency, and a signal in the centre is untouched.
 

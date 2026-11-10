@@ -7,13 +7,13 @@
       "name": "envelope"
     },
     {
-      "count": 3,
+      "count": 4,
       "description": "Fader components for level, gain, and mix controls.",
       "label": "Fader",
       "name": "fader"
     },
     {
-      "count": 26,
+      "count": 40,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -61,19 +61,19 @@
       "name": "spectrum"
     },
     {
-      "count": 6,
+      "count": 10,
       "description": "Dynamics devices: compressors, a limiter, a gate, a de-esser and a transient shaper, each a state, a panel, an engine and the tools an agent drives it with.",
       "label": "Dynamics",
       "name": "dynamics"
     },
     {
-      "count": 3,
+      "count": 7,
       "description": "EQ and filter devices: an equalizer, a channel EQ and a filter, with a curve you drag.",
       "label": "EQ and filters",
       "name": "eq"
     },
     {
-      "count": 4,
+      "count": 5,
       "description": "Distortion devices: an overdrive, a saturator, a distortion and a bit crusher.",
       "label": "Distortion",
       "name": "distortion"
@@ -85,13 +85,13 @@
       "name": "delay-reverb"
     },
     {
-      "count": 4,
+      "count": 8,
       "description": "Modulation devices: a chorus, a phaser and flanger, and an auto pan.",
       "label": "Modulation",
       "name": "modulation"
     },
     {
-      "count": 2,
+      "count": 3,
       "description": "Utility devices: gain, pan, width, mono and phase invert.",
       "label": "Utility",
       "name": "utility"
@@ -109,7 +109,7 @@
       "name": "tuner"
     },
     {
-      "count": 21,
+      "count": 35,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
       "name": "plot"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 72
+  "totalComponents": 86
 }

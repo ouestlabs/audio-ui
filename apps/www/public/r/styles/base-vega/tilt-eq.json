@@ -1,0 +1,1 @@
+{"$schema":"https://ui.shadcn.com/schema/registry-item.json","description":"The tilt eq device in one install: its state, its Web Audio engine and its panel, to components/audio-ui/devices/tilt-eq/.","files":[],"name":"tilt-eq","registryDependencies":["@audio-ui/tilt-eq-device","@audio-ui/tilt-eq-engine","@audio-ui/tilt-eq-panel"],"type":"registry:ui"}

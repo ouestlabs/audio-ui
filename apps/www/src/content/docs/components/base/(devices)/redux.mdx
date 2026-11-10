@@ -17,6 +17,7 @@ Roughens the sound like an early sampler. It keeps only some bits of each sample
 
 <DeviceControls device="redux">
 <Control id="bits">How many bits each sample keeps. At 8 the stairs are too fine to see: take it down to 3 or 4.</Control>
+<Control id="quantize">How each sample is rounded to its bits. Nearest, the default, takes the closest level. Shaped carries each sample's error to the next, so the rounding noise moves to the highs, where it is heard less: fewer bits sound cleaner.</Control>
 <Control id="hold">How many samples each one is held for.</Control>
 <Control id="mix">The balance of the roughened signal and the clean one.</Control>
 </DeviceControls>
@@ -31,4 +32,4 @@ The panel draws the stairs the bits make against the straight line of a clean so
 
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-The bits are a quantizer table in a `WaveShaperNode`, rebuilt only when they change. The sample hold is an `AudioWorklet` (`REDUX_WORKLET` is its source). Until it is ready the bits are already crushed and the rate is not yet reduced, and `engine.ready` resolves to `false` in a context that cannot run worklets. The hold takes whole samples, not a filtered resampling, so it aliases, which is the sound.
+Rounded to the nearest level, the bits are a quantizer table in a `WaveShaperNode`, rebuilt only when they change. The sample hold is an `AudioWorklet` (`REDUX_WORKLET` is its source): the bitcrusher of `@audio/effect-bitcrusher` at 24 bits, and for a shaped quantizer the error feedback of `@audio/effect-noiseshaper`, the table then out of the way. A worklet cannot import, so the device carries their code as published (`REDUX_KERNELS`, in its `kernels.ts`). Until it is ready the bits are already rounded to the nearest level, shaped or not, and the rate is not yet reduced, and `engine.ready` resolves to `false` in a context that cannot run worklets. The hold takes whole samples, not a filtered resampling, so it aliases, which is the sound.

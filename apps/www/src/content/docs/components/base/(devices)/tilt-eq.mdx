@@ -1,0 +1,34 @@
+---
+title: Tilt EQ
+description: "A tilt EQ device: one knob that tilts the tone around a pivot and an output level, a panel that draws the curve, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-tilt-eq" />
+
+Makes the whole sound brighter or darker with one knob. It tilts the tone around a pivot: turned up, the highs rise and the lows fall by as much, turned down the other way round. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="tilt-eq" kind="device" />
+
+## Controls
+
+<DeviceControls device="tilt-eq">
+<Control id="tiltDb">How far the tone tilts, 12 dB either way: up raises the highs and lowers the lows, down does the opposite. At 0 the sound is as it was.</Control>
+<Control id="pivotHz">The frequency the tone tilts around, which stays where it was.</Control>
+<Control id="outputDb">The level of the output.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the curve the tilt plays, with a line at the pivot. `tiltEqCurve(state)` is the curve it draws, from the shelves of `@audio/biquad` as the kernel makes them.
+
+<DeviceUsage name="tilt-eq" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The tilt is the kernel of `@audio/eq-tilt` in an `AudioWorklet` loaded from a blob (`TILT_EQ_WORKLET` is its source), 128 frames at a time: a low shelf and a high shelf of `@audio/biquad` at the pivot, with opposite gains and a Q of 0.5, gentler than the fixed slope of a `BiquadFilterNode` shelf, which is why it runs in a worklet. A worklet cannot import, so the device carries both modules as published (`TILT_EQ_KERNELS`, in its `kernels.ts`). A turn of a knob makes new coefficients and keeps the filters' state, so it does not click. Until the worklet is ready the sound passes clean, and `engine.ready` resolves to `false` in a context that cannot run worklets. `tiltEqSettings(state)` is what goes on it: the kernel's own gain raises the lows, so it takes the tilt the other way round.

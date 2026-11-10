@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { TransientPanel } from "@/registry-audio/bases/base/audio/panels/transient-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type TransientState,
   transientDevice,
-} from "@/registry-audio/bases/base/lib/transient-device";
-import { createTransientEngine } from "@/registry-audio/bases/base/lib/transient-engine";
+} from "@/registry-audio/bases/base/devices/transient/device";
+import { createTransientEngine } from "@/registry-audio/bases/base/devices/transient/engine";
+import { TransientPanel } from "@/registry-audio/bases/base/devices/transient/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

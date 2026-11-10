@@ -4,6 +4,14 @@ import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Plot,
   PlotCursor,
   PlotGraph,
@@ -21,6 +29,7 @@ import {
   delayDevice,
   delaySeconds,
   delayTaps,
+  GRAIN_PARAMETERS,
   nearestDivision,
 } from "@/components/audio-ui/devices/delay/device";
 
@@ -28,7 +37,12 @@ import {
 const WINDOW_MS = 3000;
 const TIME_TICKS = [500, 1000, 2000];
 const PERCENT_TICKS = [25, 50, 75];
-const SWITCHES = ["enabled"] as const;
+/** In the title bar: the switch and the mode. The grain delay's own knobs show with it alone. */
+const IN_THE_TITLE_BAR = ["enabled", "mode"] as const;
+const NOT_GRAIN = [...IN_THE_TITLE_BAR, ...GRAIN_PARAMETERS] as const;
+const MODES =
+  delayDevice.parameters.find((parameter) => parameter.id === "mode")
+    ?.options ?? [];
 const SYNCED_OFF = ["timeMs"] as const;
 const FREE_OFF = ["division"] as const;
 
@@ -55,8 +69,10 @@ interface DelayPanelProps {
  * they fade, with a handle on the first: drag it across for the time and up for
  * the feedback. Synced to a tempo, the handle lands on the nearest note value
  * and the time knob is drawn off, as the note one is when it is not. The knobs
- * under it are the same parameters, for a precise value. Controlled like `DevicePanel`, which it uses for the knobs. Its children sit
- * at the end of the title bar.
+ * under it are the same parameters, for a precise value, and the grain
+ * delay's pitch, spray, jitter and grain size when it is the mode, picked in
+ * the title bar. Controlled like `DevicePanel`, which it uses for the knobs.
+ * Its children sit at the end of the title bar.
  */
 function DelayPanel({
   children,
@@ -86,6 +102,15 @@ function DelayPanel({
       ),
     [onValueChange, tempo, value]
   );
+  const pickMode = useCallback(
+    (mode: string | null) => {
+      if (mode) {
+        onValueChange(delayDevice.set(value, "mode", mode));
+      }
+    },
+    [onValueChange, value]
+  );
+  const grain = value.mode === "grain";
   return (
     <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
@@ -94,6 +119,29 @@ function DelayPanel({
         onValueChange={onValueChange}
         value={value}
       >
+        <Select
+          disabled={!value.enabled}
+          items={MODES}
+          onValueChange={pickMode}
+          value={value.mode}
+        >
+          <SelectTrigger
+            aria-label="Mode"
+            className="w-28 data-[size=sm]:h-6"
+            size="sm"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {MODES.map((mode) => (
+                <SelectItem key={mode.value} value={mode.value}>
+                  {mode.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         {children}
       </DeviceHeader>
       <div
@@ -134,10 +182,10 @@ function DelayPanel({
           ) : null}
         </Plot>
         <DevicePanel
-          className="grid-cols-3"
+          className="grid-cols-5"
           device={delayDevice}
           disabled={unused as never}
-          exclude={SWITCHES}
+          exclude={grain ? IN_THE_TITLE_BAR : NOT_GRAIN}
           onValueChange={onValueChange}
           value={value}
         />

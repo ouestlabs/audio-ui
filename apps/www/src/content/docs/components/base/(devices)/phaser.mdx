@@ -1,13 +1,13 @@
 ---
 title: Phaser
-description: "A phaser device: a phaser or flanger mode, a rate or a note value, a depth, a centre frequency, a delay, a feedback and a mix, a panel that draws the sweep, a Web Audio engine and tools for agents."
+description: "A phaser device: a phaser, classic or flanger mode, a rate or a note value, a depth, a centre frequency, a delay, the classic phaser's stages, a feedback and a mix, a panel that draws the sweep, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-phaser" />
 
-Sweeps notches through the sound with a slow oscillator. In Phaser mode it is a chain of four all-pass filters around a centre frequency. In Flanger mode it is a very short delay. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Sweeps notches through the sound with a slow oscillator. In Phaser mode it is a chain of four all-pass filters around a centre frequency. In Classic mode it is 2 to 12 first-order all-pass stages, as analog phasers have. In Flanger mode it is a very short delay. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -16,20 +16,21 @@ Sweeps notches through the sound with a slow oscillator. In Phaser mode it is a 
 ## Controls
 
 <DeviceControls device="phaser">
-<Control id="mode">Phaser sweeps the filters, Flanger sweeps the delay. The controls the mode does not use are drawn off.</Control>
+<Control id="mode">Phaser sweeps four second-order all-pass filters, an octave range either side of the centre. Classic sweeps first-order stages in a straight line around the centre, from the centre less the depth's share of it to the centre plus as much, so its notches spend longer in the highs. Flanger sweeps the delay. It is picked in the title bar, and the controls the mode does not use are drawn off.</Control>
 <Control id="rateHz">How fast the oscillator sweeps.</Control>
 <Control id="sync">Takes the rate from a note value and the tempo of the host. See [Tempo sync](/docs/devices#tempo-sync).</Control>
 <Control id="division">The note value of one cycle of the oscillator.</Control>
-<Control id="depth">How far the oscillator moves the filters or the delay.</Control>
+<Control id="depth">How far the oscillator moves the filters or the delay. For Classic, the share of the centre the sweep goes either side of it.</Control>
 <Control id="centerHz">The frequency the phaser sweeps around.</Control>
 <Control id="delayMs">The delay the flanger sweeps around.</Control>
+<Control id="stages">How many first-order stages the classic phaser has, 2 to 12: half as many notches. A new count waits for the knob to rest, then fades in.</Control>
 <Control id="feedback">How much of the output goes back in, which deepens the notches.</Control>
 <Control id="mix">The balance of the processed signal and the dry one.</Control>
 </DeviceControls>
 
 ## Panel
 
-The panel draws what the oscillator does over two seconds. `phaserSweep(state)` is what it draws, and `phaserSettings(state)` gives the numbers that go on the nodes.
+The panel draws what the oscillator does over two seconds, and picks the mode in its title bar. `phaserSweep(state)` is what it draws, and `phaserSettings(state)` gives the numbers that go on the nodes.
 
 <DeviceUsage name="phaser" />
 
@@ -37,4 +38,6 @@ The panel draws what the oscillator does over two seconds. `phaserSweep(state)` 
 
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-Both paths are always built and the mode crossfades them, so switching does not click. One oscillator moves the filters, in cents, and the delay, in seconds. The flanger's sweep is kept inside its delay so the time never goes negative.
+The phaser and flanger paths are always built and the mode crossfades them, so switching does not click. One oscillator moves the filters, in cents, and the delay, in seconds. The flanger's sweep is kept inside its delay so the time never goes negative.
+
+The classic phaser runs on the audio thread: the kernel of `@audio/effect-phaser` in an `AudioWorklet` loaded from a blob (`PHASER_WORKLET` is its source), 128 frames at a time, with its own oscillator. A worklet cannot import, so the device carries the kernel as published (`PHASER_KERNELS`, in its `kernels.ts`). The worklet is fed only while Classic plays. Until it has loaded, and in a context with no worklets, Classic plays the phaser: `ready` resolves once it is in the graph.

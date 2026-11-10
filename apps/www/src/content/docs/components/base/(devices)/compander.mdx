@@ -1,0 +1,43 @@
+---
+title: Compander
+description: "A compander device: a transfer curve drawn with four points, attack and release, a panel with a handle on each point, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-compander" />
+
+Draws its own transfer curve. Four points set the level out at -90, -60, -20 and 0 dB in, and the curve runs between them in straight lines. A point under the straight line of a clean sound turns the sound down at that level, one over it turns it up: one curve brings the loud parts down, lifts the quiet ones or closes on the noise. It plays the compander of [audio.js](https://audio.js.org). It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="compander" kind="device" />
+
+## Controls
+
+<DeviceControls device="compander">
+<Control id="out0Db">The level out for a sound at -90 dB in, and with it the slope from silence. Drag the first handle up or down.</Control>
+<Control id="out1Db">The level out for a sound at -60 dB in.</Control>
+<Control id="out2Db">The level out for a sound at -20 dB in.</Control>
+<Control id="out3Db">The level out for a sound at 0 dB in. Under 0, the loudest parts are brought down.</Control>
+<Control id="attackMs">How fast it follows the level as it rises.</Control>
+<Control id="releaseMs">How fast it follows the level as it falls.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the transfer curve against the straight line of a clean sound, with a handle on each point that moves up and down. The curve is measured from the package's own stream, run on a steady level until it settles.
+
+<DeviceUsage name="compander" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.reduction; // dB being taken off, read per frame
+```
+
+The browser has no compander node. The engine plays the processor of `@audio/dynamics-compand`'s manifest as published, in an `AudioWorklet` fed only while it plays: off, or until the worklet is ready, the sound goes round it. Every one of its values builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade.
+
+Measured on a steady tone from -70 to -3 dB, the output sits within 0.2 dB of the curve.

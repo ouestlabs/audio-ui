@@ -2,18 +2,18 @@
 
 import { createSource } from "@audio-ui/react";
 import { useEffect, useRef, useState } from "react";
-import { CompressorPanel } from "@/registry-audio/bases/base/audio/panels/compressor-panel";
-import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import {
   type CompressorState,
   compressorDevice,
-} from "@/registry-audio/bases/base/lib/compressor-device";
+} from "@/registry-audio/bases/base/devices/compressor/device";
 import {
   type CompressorEngine,
   createCompressorEngine,
-} from "@/registry-audio/bases/base/lib/compressor-engine";
+} from "@/registry-audio/bases/base/devices/compressor/engine";
+import { CompressorPanel } from "@/registry-audio/bases/base/devices/compressor/panel";
+import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import {
   demoKey,
   renderDemoSource,

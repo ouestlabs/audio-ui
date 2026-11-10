@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { OverdrivePanel } from "@/registry-audio/bases/base/audio/panels/overdrive-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import {
   type OverdriveState,
   overdriveDevice,
-} from "@/registry-audio/bases/base/lib/overdrive-device";
-import { createOverdriveEngine } from "@/registry-audio/bases/base/lib/overdrive-engine";
+} from "@/registry-audio/bases/base/devices/overdrive/device";
+import { createOverdriveEngine } from "@/registry-audio/bases/base/devices/overdrive/engine";
+import { OverdrivePanel } from "@/registry-audio/bases/base/devices/overdrive/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 
 const MASTER_VOLUME = 0.7;
 const MIN_HZ = 20;

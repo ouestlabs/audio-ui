@@ -75,13 +75,14 @@ Published to npm: **don't break its public API without a changeset**.
 ```
 registry-audio/bases/base/
 ├── audio/elements/  # Styled elements over each primitive (knob.tsx, fader.tsx, timeline.tsx…)
-├── audio/panels/    # The face of a device: controlled, no audio (compressor-panel.tsx…)
+├── audio/panels/    # Panels that are no device's own: clip, rack, drum rack, the generic device-panel
+├── devices/<name>/  # A device, named as it installs: device.ts, engine.ts, panel.tsx (and kernels.ts for a worklet's)
 ├── components/      # Catalog by category folder: block-{component}-{variant}.tsx + {component}-*-demo.tsx
 ├── hooks/           # use-web-audio, use-transport-clock, use-spectrum…
 └── lib/             # web-audio, musical-time, waveform-dsp, lookahead-scheduler…
 ```
 
-Each of `audio/`, `components/`, `hooks/`, `lib/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/base/`.
+Each of `audio/`, `devices/`, `components/`, `hooks/`, `lib/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/base/`. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js kernels a device runs in an `AudioWorklet` are listed in `apps/www/scripts/kernels.ts` and written by `bun run kernels:build`; `test/kernels.test.ts` fails when a copy no longer matches its package.
 
 `registry-audio/bases/{components,registry,seo}.json` are **generated** by `registry:build` from the `_registry.ts` files and `registry-audio/bases/categories.ts`: never edit them by hand. A new category goes in `categories.ts`; a category with zero items fails the build. Item tags not listed there (`ui`, `grid`) are free-form search tags.
 

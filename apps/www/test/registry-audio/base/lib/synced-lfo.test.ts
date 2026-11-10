@@ -3,19 +3,19 @@ import {
   autoPanDevice,
   autoPanSettings,
   autoPanSweep,
-} from "@/registry-audio/bases/base/lib/auto-pan-device";
-import { createAutoPanEngine } from "@/registry-audio/bases/base/lib/auto-pan-engine";
+} from "@/registry-audio/bases/base/devices/auto-pan/device";
+import { createAutoPanEngine } from "@/registry-audio/bases/base/devices/auto-pan/engine";
 import {
   chorusDevice,
   chorusSettings,
   chorusSweep,
-} from "@/registry-audio/bases/base/lib/chorus-device";
-import { createChorusEngine } from "@/registry-audio/bases/base/lib/chorus-engine";
+} from "@/registry-audio/bases/base/devices/chorus/device";
+import { createChorusEngine } from "@/registry-audio/bases/base/devices/chorus/engine";
 import {
   phaserDevice,
   phaserSettings,
-} from "@/registry-audio/bases/base/lib/phaser-device";
-import { createPhaserEngine } from "@/registry-audio/bases/base/lib/phaser-engine";
+} from "@/registry-audio/bases/base/devices/phaser/device";
+import { createPhaserEngine } from "@/registry-audio/bases/base/devices/phaser/engine";
 import { lfoRate } from "@/registry-audio/bases/base/lib/synced-rate";
 
 class FakeParam {

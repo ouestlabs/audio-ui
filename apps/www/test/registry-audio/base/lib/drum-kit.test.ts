@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { drumSynthDevice } from "@/registry-audio/bases/base/devices/drum-synth/device";
 import { DRUM_RACK_DEVICE } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   type ArrangementCommand,
@@ -10,7 +11,6 @@ import {
   DRUM_NOTES,
   drumKit,
 } from "@/registry-audio/bases/base/lib/drum-kit";
-import { drumSynthDevice } from "@/registry-audio/bases/base/lib/drum-synth-device";
 
 function setup() {
   return createArrangementState({

@@ -240,7 +240,7 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
   const entry = libraryDevice(device.device);
   const { following, onMoved, owner } = chain;
   // Its panel shows what plays: the parameters with an envelope where it stands.
-  const shown = useAutomatedDevice(
+  const automated = useAutomatedDevice(
     owner,
     device,
     entry?.device.denormalize as
@@ -248,6 +248,10 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
       | undefined,
     following
   );
+  // As the engine plays it: a parameter the state was saved without, at its default.
+  const shown = entry
+    ? (entry.device.sanitize(automated as never) as TrackDevice["state"])
+    : automated;
   // Only what the hand moved is kept: the others stay as set, not where their envelopes stood.
   const change = useCallback(
     (state: TrackDevice["state"]) => {

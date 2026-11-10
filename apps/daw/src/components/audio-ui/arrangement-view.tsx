@@ -528,8 +528,8 @@ function rowOf(
     isMain,
     mix,
     silent: mix.muted || (anySolo && !mix.soloed && !isBus),
-    // Files go on audio tracks; a device goes on any track that takes it.
-    takesFiles: !isBus && (track.kind ?? "audio") === "audio",
+    // Files go on audio and MIDI tracks, the host sorting sounds from scores; a device goes on any track that takes it.
+    takesFiles: !isBus && (track.kind ?? "audio") !== "group",
   };
 }
 
@@ -774,7 +774,7 @@ export function ArrangementView({
     },
     [grid.snapStep, zoom]
   );
-  // A lane takes a device of the library, and files when `files` (an audio track, or the add-track button).
+  // A lane takes a device of the library, and files when `files` (an audio or a MIDI track, or the add-track button).
   const dragOver = useCallback(
     (track: string, files: boolean) => (event: DragEvent<HTMLElement>) => {
       if (carriesDevice(event) || (files && carriesFiles(event))) {

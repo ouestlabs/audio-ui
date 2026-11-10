@@ -89,6 +89,13 @@ import {
   type Recording,
   sourcePeaks,
 } from "@/lib/daw/recordings";
+import {
+  isScoreFile,
+  readScore,
+  SCORE_ACCEPT,
+  type Score,
+  scoreCommands,
+} from "@/lib/daw/scores";
 import { readSettings } from "@/lib/daw/settings";
 import { ALSO_HOTKEYS, type ShortcutCommand } from "@/lib/daw/shortcuts";
 import {
@@ -798,13 +805,47 @@ export function Daw({
     [recordings]
   );
 
+  // MIDI files and MusicXML scores (MID-008): a MIDI track a part on the add-track button, a clip on a MIDI track.
+  const addScores = useCallback(
+    async (files: readonly File[], track: string, at: number) => {
+      if (track !== NEW_TRACK && !takesDevice(doc, track, true)) {
+        toast.error("A MIDI file or a score goes on a MIDI track.");
+        return;
+      }
+      const read = await Promise.all(files.map(readScore));
+      const skipped = files.filter((_file, index) => !read[index]);
+      if (skipped.length > 0) {
+        toast.error(
+          `Not a MIDI file or a score with notes: ${skipped.map((file) => file.name).join(", ")}`
+        );
+      }
+      const scores = read.filter((score): score is Score => score !== null);
+      if (scores.length > 0) {
+        dispatch({
+          commands: scoreCommands(scores, track, at, doc),
+          type: "batch",
+        });
+      }
+    },
+    [dispatch, doc]
+  );
+
   // Files dropped on a track lay one after the other (ARR-005); on the add-track button, a track each (ARR-006).
   const [reading, setReading] = useState<readonly ReadingFiles[]>([]);
   const readingKey = useRef(0);
   const addFiles = useCallback(
-    async (files: File[], track: string, at: number) => {
+    async (dropped: File[], track: string, at: number) => {
+      const scores = dropped.filter(isScoreFile);
+      if (scores.length > 0) {
+        addScores(scores, track, at);
+      }
+      const files = dropped.filter((file) => !isScoreFile(file));
       const context = webAudio.getContext();
-      if (!context) {
+      if (!context || files.length === 0) {
+        return;
+      }
+      if (track !== NEW_TRACK && takesDevice(doc, track, true)) {
+        toast.error("A sound goes on an audio track.");
         return;
       }
       readingKey.current += 1;
@@ -850,7 +891,7 @@ export function Daw({
         type: "batch",
       });
     },
-    [dispatch, doc.duration, doc.tempo, recordings]
+    [addScores, dispatch, doc, recordings]
   );
 
   // A recording dropped on a drum rack's pad (DEV-013): kept decoded, as a pad plays it whole and at once.
@@ -1005,6 +1046,19 @@ export function Daw({
   }, [doc, folder, recordings]);
   const importInput = useRef<HTMLInputElement>(null);
   const importDawproject = useCallback(() => importInput.current?.click(), []);
+  // Imported, a score's parts go on new MIDI tracks from the cursor (MID-009).
+  const scoreInput = useRef<HTMLInputElement>(null);
+  const importScore = useCallback(() => scoreInput.current?.click(), []);
+  const openScores = useCallback(
+    (event: ChangeEvent<HTMLInputElement>) => {
+      const files = [...(event.target.files ?? [])];
+      event.target.value = "";
+      if (files.length > 0) {
+        addScores(files, NEW_TRACK, cursor);
+      }
+    },
+    [addScores, cursor]
+  );
   const openDawproject = useCallback(
     async (event: ChangeEvent<HTMLInputElement>) => {
       const [file] = event.target.files ?? [];
@@ -1454,6 +1508,16 @@ export function Daw({
         tabIndex={-1}
         type="file"
       />
+      <input
+        accept={SCORE_ACCEPT}
+        aria-label="MIDI files or scores to import"
+        className="hidden"
+        multiple
+        onChange={openScores}
+        ref={scoreInput}
+        tabIndex={-1}
+        type="file"
+      />
       <div className="flex h-svh flex-col">
         <TopBar
           automating={automation.automating}
@@ -1466,6 +1530,7 @@ export function Daw({
           onExport={openExport}
           onExportDawproject={exportDawproject}
           onImportDawproject={importDawproject}
+          onImportScore={importScore}
           {...(canUseFolders()
             ? { onOpen: openProjectFolder, onSave: save, onSaveAs: saveAs }
             : {})}

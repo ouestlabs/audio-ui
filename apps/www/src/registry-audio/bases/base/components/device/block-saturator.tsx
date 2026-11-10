@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { SaturatorPanel } from "@/registry-audio/bases/base/audio/panels/saturator-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type SaturatorState,
   saturatorDevice,
-} from "@/registry-audio/bases/base/lib/saturator-device";
-import { createSaturatorEngine } from "@/registry-audio/bases/base/lib/saturator-engine";
+} from "@/registry-audio/bases/base/devices/saturator/device";
+import { createSaturatorEngine } from "@/registry-audio/bases/base/devices/saturator/engine";
+import { SaturatorPanel } from "@/registry-audio/bases/base/devices/saturator/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

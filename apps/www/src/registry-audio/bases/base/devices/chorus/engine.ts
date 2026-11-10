@@ -1,0 +1,178 @@
+import type { DeviceContext } from "@audio-ui/core/device";
+import { DEFAULT_TEMPO } from "@audio-ui/core/time";
+import {
+  CHORUS_WORKLET,
+  type ChorusState,
+  chorusSettings,
+} from "@/registry-audio/bases/base/devices/chorus/device";
+
+const RAMP_SECONDS = 0.03;
+/** How long after the voices fade out their input is taken away, in ms: the fade is over by then. */
+const UNFEED_MS = 120;
+
+export interface ChorusEngine {
+  dispose: () => void;
+  /** Connect the signal to process here. */
+  readonly input: AudioNode;
+  /** Connect this to the destination, or to the next device. */
+  readonly output: AudioNode;
+  /** Resolves once the voices are in the graph. Until then the chorus plays one. A context with no worklets never resolves it to `true`. */
+  readonly ready: Promise<boolean>;
+  update: (state: ChorusState, context?: DeviceContext) => void;
+}
+
+const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
+
+/** Loads the voices into a context once. `false` when the context cannot run worklets. */
+function loadVoices(ctx: BaseAudioContext): Promise<boolean> {
+  const cached = loaded.get(ctx);
+  if (cached) {
+    return cached;
+  }
+  // A page without a secure origin has no worklets.
+  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
+    return Promise.resolve(false);
+  }
+  const url = URL.createObjectURL(
+    new Blob([CHORUS_WORKLET], { type: "text/javascript" })
+  );
+  const done = ctx.audioWorklet
+    .addModule(url)
+    .then(() => true)
+    .catch(() => false)
+    .finally(() => URL.revokeObjectURL(url));
+  loaded.set(ctx, done);
+  return done;
+}
+
+/**
+ * A chorus on the Web Audio API for a `ChorusState`:
+ *
+ * ```
+ * input → dry ──────────────────────────────┐
+ *       → delay → wet ──────────────────────┤
+ *           ↑ sweep ← oscillator (the rate) │
+ *       → voices (worklet) → voices wet ────┴→ output
+ * ```
+ *
+ * One voice is the delay, the oscillator's output, scaled by the sweep, added
+ * to its time. Two to eight are an `AudioWorklet` loaded from a blob, fed only
+ * while they play: until it is ready, the chorus plays one voice.
+ */
+export function createChorusEngine(
+  ctx: BaseAudioContext,
+  initial: ChorusState,
+  context?: DeviceContext
+): ChorusEngine {
+  let tempo = context?.tempo ?? DEFAULT_TEMPO;
+  const input = ctx.createGain();
+  const output = ctx.createGain();
+  const dry = ctx.createGain();
+  const wet = ctx.createGain();
+  const delay = ctx.createDelay(0.1);
+  const oscillator = ctx.createOscillator();
+  const sweep = ctx.createGain();
+  const voicesWet = ctx.createGain();
+  oscillator.type = "sine";
+  input.connect(dry).connect(output);
+  input.connect(delay).connect(wet).connect(output);
+  oscillator.connect(sweep).connect(delay.delayTime);
+  voicesWet.connect(output);
+
+  let voices: AudioWorkletNode | null = null;
+  let latest = initial;
+  let disposed = false;
+  let fed = false;
+  let unfeed: ReturnType<typeof setTimeout> | undefined;
+
+  const set = (
+    state: ChorusState,
+    write: (param: AudioParam, value: number) => void
+  ) => {
+    const settings = chorusSettings(state, tempo);
+    // Until the worklet is ready, the chorus plays one voice.
+    const playing = settings.voices > 1 && voices !== null;
+    write(delay.delayTime, settings.delay);
+    write(oscillator.frequency, settings.rate);
+    write(sweep.gain, settings.sweep);
+    write(dry.gain, settings.dry);
+    write(wet.gain, playing ? 0 : settings.wet);
+    write(voicesWet.gain, playing ? settings.wet : 0);
+    if (voices) {
+      const param = (name: string) =>
+        voices?.parameters.get(name) as AudioParam;
+      write(param("rate"), settings.rate);
+      write(param("depth"), settings.share);
+      // A new line, not a glide: they change at once, and the worklet fades them in.
+      param("delay").value = settings.delay;
+      param("voices").value = settings.voices;
+    }
+    clearTimeout(unfeed);
+    if (playing && !fed && voices) {
+      input.connect(voices);
+      fed = true;
+    } else if (!playing && fed) {
+      // Once the fade is over: a worklet fed nothing costs nothing.
+      unfeed = setTimeout(() => {
+        if (fed && voices) {
+          input.disconnect(voices);
+          fed = false;
+        }
+      }, UNFEED_MS);
+    }
+  };
+  const follow = (param: AudioParam, value: number) =>
+    param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
+  set(initial, (param, value) => {
+    param.value = value;
+  });
+  oscillator.start();
+
+  const ready = loadVoices(ctx).then((ok) => {
+    if (!ok || disposed) {
+      return false;
+    }
+    const settings = chorusSettings(latest, tempo);
+    voices = new AudioWorkletNode(ctx, "audioui-chorus", {
+      outputChannelCount: [2],
+      parameterData: {
+        delay: settings.delay,
+        depth: settings.share,
+        rate: settings.rate,
+        voices: settings.voices,
+      },
+    });
+    voices.connect(voicesWet);
+    set(latest, follow);
+    return true;
+  });
+
+  return {
+    dispose: () => {
+      disposed = true;
+      clearTimeout(unfeed);
+      oscillator.stop();
+      for (const node of [
+        input,
+        dry,
+        delay,
+        wet,
+        sweep,
+        oscillator,
+        voicesWet,
+        output,
+      ]) {
+        node.disconnect();
+      }
+      voices?.disconnect();
+    },
+    input,
+    output,
+    ready,
+    update: (state, next) => {
+      tempo = next?.tempo ?? tempo;
+      latest = state;
+      set(state, follow);
+    },
+  };
+}

@@ -1,7 +1,144 @@
 /** The checks of docs/daw-spec/midi.md. */
-import { assert, type Checks, loudest, open, showMixer } from "../helpers";
+import {
+  assert,
+  type Checks,
+  dropFiles,
+  loudest,
+  open,
+  showMixer,
+} from "../helpers";
+
+const ascii = (value: string) => [...value].map((char) => char.charCodeAt(0));
+const u32 = (value: number) => [
+  (value >>> 24) & 0xff,
+  (value >>> 16) & 0xff,
+  (value >>> 8) & 0xff,
+  value & 0xff,
+];
+const chunk = (id: string, bytes: number[]) => [
+  ...ascii(id),
+  ...u32(bytes.length),
+  ...bytes,
+];
+const END = [0, 0xff, 0x2f, 0];
+
+/**
+ * A MIDI file of two tracks at 96 ticks a quarter: "Bass", a fingered bass
+ * (program 33) playing a C for a bar, and "Drums" on channel 10, a kick on
+ * each beat.
+ */
+const SONG = new Uint8Array([
+  ...chunk("MThd", [0, 1, 0, 2, 0, 96]),
+  ...chunk("MTrk", [
+    0,
+    0xff,
+    0x03,
+    4,
+    ...ascii("Bass"),
+    0,
+    0xc0,
+    33,
+    0,
+    0x90,
+    36,
+    110,
+    // A bar of 384 ticks, as a variable-length quantity.
+    0x83,
+    0x00,
+    0x80,
+    36,
+    0,
+    ...END,
+  ]),
+  ...chunk("MTrk", [
+    0,
+    0xff,
+    0x03,
+    5,
+    ...ascii("Drums"),
+    ...[0, 96, 192, 288].flatMap((_tick, index) => [
+      index === 0 ? 0 : 48,
+      0x99,
+      36,
+      120,
+      48,
+      0x89,
+      36,
+      0,
+    ]),
+    ...END,
+  ]),
+]);
+
+/** A MusicXML score of one part: a bar of four quarter notes. */
+const SCORE = new TextEncoder().encode(`<?xml version="1.0"?>
+<score-partwise version="4.0">
+  <part-list><score-part id="P1"><part-name>Flute</part-name></score-part></part-list>
+  <part id="P1"><measure number="1"><attributes><divisions>1</divisions></attributes>
+    ${["C", "D", "E", "F"].map((step) => `<note><pitch><step>${step}</step><octave>5</octave></pitch><duration>1</duration></note>`).join("")}
+  </measure></part>
+</score-partwise>`);
 
 export const checks: Checks = {
+  "MID-008: a MIDI file on the add-track button makes a MIDI track a part, with its instrument; a score on a MIDI track, a clip; on an audio track, a notice":
+    async (browser) => {
+      const page = await open(browser);
+      await dropFiles(page, "[data-add-track]", [
+        { bytes: SONG, name: "Song.mid", type: "audio/midi" },
+      ]);
+      await page.waitForSelector('[aria-label="Bass"][data-track-id]', {
+        timeout: 10_000,
+      });
+      await page.waitForSelector('[aria-label="Drums"][data-track-id]');
+      await showMixer(page);
+      await page.keyboard.press("Home");
+      await page.keyboard.press("Space");
+      const level = await loudest(page, 2000);
+      await page.keyboard.press("Space");
+      assert(
+        level > -50,
+        `the imported parts are near silent through their instruments (${level} dB)`
+      );
+      const onTheLane = page.locator('[data-track="track-3"] [data-clip-id]');
+      const before = await onTheLane.count();
+      await dropFiles(page, '[data-track="track-3"]', [
+        {
+          bytes: SCORE,
+          name: "Tune.musicxml",
+          type: "application/vnd.recordare.musicxml+xml",
+        },
+      ]);
+      await page.waitForFunction(
+        (count) =>
+          document.querySelectorAll('[data-track="track-3"] [data-clip-id]')
+            .length > count,
+        before,
+        { timeout: 5000 }
+      );
+      await dropFiles(page, '[data-track="track-1"]', [
+        { bytes: SONG, name: "Song.mid", type: "audio/midi" },
+      ]);
+      await page
+        .locator("[data-sonner-toast]", { hasText: "goes on a MIDI track" })
+        .waitFor({ timeout: 5000 });
+    },
+  "MID-009: Import MIDI or MusicXML lays a file's parts on new MIDI tracks":
+    async (browser) => {
+      const page = await open(browser);
+      const chooser = page.waitForEvent("filechooser");
+      await page.getByRole("button", { name: "More controls" }).click();
+      await page
+        .getByRole("menuitem", { name: "Import MIDI or MusicXML…" })
+        .click();
+      await (await chooser).setFiles({
+        buffer: Buffer.from(SCORE),
+        mimeType: "application/vnd.recordare.musicxml+xml",
+        name: "Tune.musicxml",
+      });
+      await page.waitForSelector('[aria-label="Tune"][data-track-id]', {
+        timeout: 10_000,
+      });
+    },
   "MID-001: a note drawn in a MIDI clip plays through the track's instrument":
     async (browser) => {
       const page = await open(browser);

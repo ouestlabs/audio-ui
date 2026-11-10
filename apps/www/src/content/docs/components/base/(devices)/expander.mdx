@@ -1,0 +1,48 @@
+---
+title: Expander
+description: "An expander device: downward or upward, threshold, ratio, knee, range, attack and release, a panel that draws its transfer curve, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-expander" />
+
+Widens the dynamics. Downward, it turns down what falls under the threshold, softer than a gate: the room between the words, the bleed between the hits. Upward, it lifts what rises over it, giving back the peaks a limiter flattened. It plays the expander of [audio.js](https://audio.js.org). It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="expander" kind="device" />
+
+## Controls
+
+<DeviceControls device="expander">
+<Control id="mode">Downward turns down what falls under the threshold. Upward lifts what rises over it. It is picked in the title bar.</Control>
+<Control id="thresholdDb">The level the expander turns on. Drag the handle on the plot across to set it.</Control>
+<Control id="ratio">How many dB the level moves for each dB past the threshold: at 1:2, 10 dB under the threshold come out 20 dB under it.</Control>
+<Control id="kneeDb">How gradually it starts to work around the threshold. 0 is a hard knee.</Control>
+<Control id="rangeDb">The most it turns the sound down, or lifts it.</Control>
+<Control id="attackMs">How fast it follows the level as it rises.</Control>
+<Control id="releaseMs">How fast it follows the level as it falls.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the transfer curve against the straight line of a clean sound, with a handle on the threshold, through the package's own gain curves.
+
+<DeviceUsage name="expander" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+```ts
+engine.reduction; // dB being taken off, read per frame
+```
+
+The browser has no expander node. The engine plays the processor of `@audio/dynamics-expander`'s manifest as published, in an `AudioWorklet` fed only while it plays: off, or until the worklet is ready, the sound goes round it. The mode, the threshold, the ratio, the knee and the range change as it plays. A new attack or release builds it again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. `engine.reduction` reads what it takes off, so it reads 0 upward.
+
+## How close the curve is
+
+The curve is the static curve, the level once it has settled. Measured on a steady tone at 100 Hz and at 1 kHz, the output's peaks sit up to 1.2 dB under it near and past the threshold, and on it elsewhere.
+
+Upward has no ceiling but the range: at the defaults, a tone at -6 dB comes out at +17 dB. Follow it with a [limiter](/docs/components/base/limiter), or keep the range low.

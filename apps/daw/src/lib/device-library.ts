@@ -8,10 +8,16 @@ import type {
 } from "@audio-ui/core/device";
 import { autoPanDevice } from "@/components/audio-ui/devices/auto-pan/device";
 import { createAutoPanEngine } from "@/components/audio-ui/devices/auto-pan/engine";
+import { bassEnhancerDevice } from "@/components/audio-ui/devices/bass-enhancer/device";
+import { createBassEnhancerEngine } from "@/components/audio-ui/devices/bass-enhancer/engine";
+import { binauralPannerDevice } from "@/components/audio-ui/devices/binaural-panner/device";
+import { createBinauralPannerEngine } from "@/components/audio-ui/devices/binaural-panner/engine";
 import { channelEqDevice } from "@/components/audio-ui/devices/channel-eq/device";
 import { createChannelEqEngine } from "@/components/audio-ui/devices/channel-eq/engine";
 import { chorusDevice } from "@/components/audio-ui/devices/chorus/device";
 import { createChorusEngine } from "@/components/audio-ui/devices/chorus/engine";
+import { companderDevice } from "@/components/audio-ui/devices/compander/device";
+import { createCompanderEngine } from "@/components/audio-ui/devices/compander/engine";
 import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
 import { createCompressorEngine } from "@/components/audio-ui/devices/compressor/engine";
 import { deesserDevice } from "@/components/audio-ui/devices/deesser/device";
@@ -22,20 +28,32 @@ import { distortionDevice } from "@/components/audio-ui/devices/distortion/devic
 import { createDistortionEngine } from "@/components/audio-ui/devices/distortion/engine";
 import { drumSynthDevice } from "@/components/audio-ui/devices/drum-synth/device";
 import { createDrumSynthEngine } from "@/components/audio-ui/devices/drum-synth/engine";
+import { duckerDevice } from "@/components/audio-ui/devices/ducker/device";
+import { createDuckerEngine } from "@/components/audio-ui/devices/ducker/engine";
 import { electricPianoDevice } from "@/components/audio-ui/devices/electric-piano/device";
 import { createElectricPianoEngine } from "@/components/audio-ui/devices/electric-piano/engine";
 import { equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
 import { createEqualizerEngine } from "@/components/audio-ui/devices/equalizer/engine";
+import { exciterDevice } from "@/components/audio-ui/devices/exciter/device";
+import { createExciterEngine } from "@/components/audio-ui/devices/exciter/engine";
+import { expanderDevice } from "@/components/audio-ui/devices/expander/device";
+import { createExpanderEngine } from "@/components/audio-ui/devices/expander/engine";
 import { filterDevice } from "@/components/audio-ui/devices/filter/device";
 import { createFilterEngine } from "@/components/audio-ui/devices/filter/engine";
 import { fmSynthDevice } from "@/components/audio-ui/devices/fm-synth/device";
 import { createFmSynthEngine } from "@/components/audio-ui/devices/fm-synth/engine";
+import { frequencyShifterDevice } from "@/components/audio-ui/devices/frequency-shifter/device";
+import { createFrequencyShifterEngine } from "@/components/audio-ui/devices/frequency-shifter/engine";
 import { gateDevice } from "@/components/audio-ui/devices/gate/device";
 import { createGateEngine } from "@/components/audio-ui/devices/gate/engine";
+import { graphicEqDevice } from "@/components/audio-ui/devices/graphic-eq/device";
+import { createGraphicEqEngine } from "@/components/audio-ui/devices/graphic-eq/engine";
 import { guitarDevice } from "@/components/audio-ui/devices/guitar/device";
 import { createGuitarEngine } from "@/components/audio-ui/devices/guitar/engine";
 import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
 import { createLimiterEngine } from "@/components/audio-ui/devices/limiter/engine";
+import { lofiDevice } from "@/components/audio-ui/devices/lofi/device";
+import { createLofiEngine } from "@/components/audio-ui/devices/lofi/engine";
 import { midSideDevice } from "@/components/audio-ui/devices/mid-side/device";
 import { createMidSideEngine } from "@/components/audio-ui/devices/mid-side/engine";
 import { monoSynthDevice } from "@/components/audio-ui/devices/mono-synth/device";
@@ -56,20 +74,30 @@ import { reduxDevice } from "@/components/audio-ui/devices/redux/device";
 import { createReduxEngine } from "@/components/audio-ui/devices/redux/engine";
 import { reverbDevice } from "@/components/audio-ui/devices/reverb/device";
 import { createReverbEngine } from "@/components/audio-ui/devices/reverb/engine";
+import { rotaryDevice } from "@/components/audio-ui/devices/rotary/device";
+import { createRotaryEngine } from "@/components/audio-ui/devices/rotary/engine";
 import { samplerDevice } from "@/components/audio-ui/devices/sampler/device";
 import { createSamplerEngine } from "@/components/audio-ui/devices/sampler/engine";
 import { saturatorDevice } from "@/components/audio-ui/devices/saturator/device";
 import { createSaturatorEngine } from "@/components/audio-ui/devices/saturator/engine";
 import { stringMachineDevice } from "@/components/audio-ui/devices/string-machine/device";
 import { createStringMachineEngine } from "@/components/audio-ui/devices/string-machine/engine";
+import { stutterDevice } from "@/components/audio-ui/devices/stutter/device";
+import { createStutterEngine } from "@/components/audio-ui/devices/stutter/engine";
 import { tapeKeysDevice } from "@/components/audio-ui/devices/tape-keys/device";
 import { createTapeKeysEngine } from "@/components/audio-ui/devices/tape-keys/engine";
+import { tiltEqDevice } from "@/components/audio-ui/devices/tilt-eq/device";
+import { createTiltEqEngine } from "@/components/audio-ui/devices/tilt-eq/engine";
 import { transientDevice } from "@/components/audio-ui/devices/transient/device";
 import { createTransientEngine } from "@/components/audio-ui/devices/transient/engine";
+import { unlimiterDevice } from "@/components/audio-ui/devices/unlimiter/device";
+import { createUnlimiterEngine } from "@/components/audio-ui/devices/unlimiter/engine";
 import { utilityDevice } from "@/components/audio-ui/devices/utility/device";
 import { createUtilityEngine } from "@/components/audio-ui/devices/utility/engine";
 import { vibeDevice } from "@/components/audio-ui/devices/vibe/device";
 import { createVibeEngine } from "@/components/audio-ui/devices/vibe/engine";
+import { wahDevice } from "@/components/audio-ui/devices/wah/device";
+import { createWahEngine } from "@/components/audio-ui/devices/wah/engine";
 import { waveShaperDevice } from "@/components/audio-ui/devices/wave-shaper/device";
 import { createWaveShaperEngine } from "@/components/audio-ui/devices/wave-shaper/engine";
 
@@ -153,18 +181,27 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(compressorDevice, createCompressorEngine, "Dynamics"),
   entry(limiterDevice, createLimiterEngine, "Dynamics"),
   entry(gateDevice, createGateEngine, "Dynamics"),
+  entry(expanderDevice, createExpanderEngine, "Dynamics"),
+  entry(duckerDevice, createDuckerEngine, "Dynamics"),
+  entry(companderDevice, createCompanderEngine, "Dynamics"),
+  entry(unlimiterDevice, createUnlimiterEngine, "Dynamics"),
   entry(multibandDevice, createMultibandEngine, "Dynamics"),
   entry(transientDevice, createTransientEngine, "Dynamics"),
   entry(deesserDevice, createDeesserEngine, "Dynamics"),
   // Tone
   entry(equalizerDevice, createEqualizerEngine, "Tone"),
   entry(channelEqDevice, createChannelEqEngine, "Tone"),
+  entry(graphicEqDevice, createGraphicEqEngine, "Tone"),
+  entry(tiltEqDevice, createTiltEqEngine, "Tone"),
+  entry(exciterDevice, createExciterEngine, "Tone"),
+  entry(bassEnhancerDevice, createBassEnhancerEngine, "Tone"),
   entry(filterDevice, createFilterEngine, "Tone"),
   // Distortion
   entry(saturatorDevice, createSaturatorEngine, "Distortion"),
   entry(overdriveDevice, createOverdriveEngine, "Distortion"),
   entry(distortionDevice, createDistortionEngine, "Distortion"),
   entry(reduxDevice, createReduxEngine, "Distortion"),
+  entry(lofiDevice, createLofiEngine, "Distortion"),
   // Space
   entry(delayDevice, createDelayEngine, "Space"),
   entry(reverbDevice, createReverbEngine, "Space"),
@@ -173,9 +210,14 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(phaserDevice, createPhaserEngine, "Motion"),
   entry(autoPanDevice, createAutoPanEngine, "Motion"),
   entry(vibeDevice, createVibeEngine, "Motion"),
+  entry(wahDevice, createWahEngine, "Motion"),
+  entry(frequencyShifterDevice, createFrequencyShifterEngine, "Motion"),
+  entry(rotaryDevice, createRotaryEngine, "Motion"),
+  entry(stutterDevice, createStutterEngine, "Motion"),
   // Utility
   entry(utilityDevice, createUtilityEngine, "Utility"),
   entry(midSideDevice, createMidSideEngine, "Utility"),
+  entry(binauralPannerDevice, createBinauralPannerEngine, "Utility"),
 ];
 
 const byId = new Map(DEVICE_LIBRARY.map((item) => [item.device.id, item]));

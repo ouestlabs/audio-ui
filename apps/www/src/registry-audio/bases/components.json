@@ -300,6 +300,30 @@
     "title": "Block gate"
   },
   {
+    "categories": ["dynamics", "plot", "knob"],
+    "description": "An expander you can plug in: its state, a panel that draws its curve and an engine that plays it. Play a loop through it: downward, what falls under the threshold is turned down; upward, the peaks are lifted",
+    "name": "block-expander",
+    "title": "Block expander"
+  },
+  {
+    "categories": ["dynamics", "plot", "knob"],
+    "description": "A ducker you can plug in: its state, a panel that draws the gain for the key's level and an engine that plays it. A held chord, ducked by the kick of the loop",
+    "name": "block-ducker",
+    "title": "Block ducker"
+  },
+  {
+    "categories": ["dynamics", "plot", "knob"],
+    "description": "A compander you can plug in: its state, a panel that draws its curve with a handle on each point and an engine that plays it. Play a loop through it and drag the points: under the straight line it turns the sound down, over it up",
+    "name": "block-compander",
+    "title": "Block compander"
+  },
+  {
+    "categories": ["dynamics", "plot", "knob"],
+    "description": "An unlimiter you can plug in: its state, a panel that draws the lift for an attack's size and an engine that plays it. Play a loop through it: its flattened attacks are lifted back",
+    "name": "block-unlimiter",
+    "title": "Block unlimiter"
+  },
+  {
     "categories": ["distortion", "plot", "knob"],
     "description": "A saturator you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it, pick a curve and turn the drive",
     "name": "block-saturator",
@@ -364,6 +388,66 @@
     "description": "A redux you can plug in: its state, a panel that draws the stairs the bits make and an engine that plays it. Play a loop through it and take the bits down",
     "name": "block-redux",
     "title": "Block redux"
+  },
+  {
+    "categories": ["distortion", "plot", "knob"],
+    "description": "A lo-fi you can plug in: its state, a panel that draws the band it leaves and an engine that plays it. Play a loop through it and turn up the wow and the crackle",
+    "name": "block-lofi",
+    "title": "Block lofi"
+  },
+  {
+    "categories": ["eq", "plot", "fader", "knob"],
+    "description": "A graphic EQ you can plug in: its state, a panel that draws the curve over a fader per band and an engine that plays it. Play a loop through it and pull the faders, the spectrum behind is what comes out",
+    "name": "block-graphic-eq",
+    "title": "Block graphic eq"
+  },
+  {
+    "categories": ["eq", "plot", "knob"],
+    "description": "A tilt EQ you can plug in: its state, a panel that draws the curve it tilts and an engine that plays it. Play a loop through it and turn the tilt: brighter one way, darker the other",
+    "name": "block-tilt-eq",
+    "title": "Block tilt eq"
+  },
+  {
+    "categories": ["modulation", "plot", "knob"],
+    "description": "A wah you can plug in: its state, a panel that draws the band and its travel and an engine that plays it. Play a loop through it: the louder the hit, the higher the band",
+    "name": "block-wah",
+    "title": "Block wah"
+  },
+  {
+    "categories": ["modulation", "plot", "knob"],
+    "description": "A frequency shifter you can plug in: its state, a panel that draws what it does to a note and an engine that plays it. Play a loop through it and turn the shift: its harmonics stop lining up",
+    "name": "block-frequency-shifter",
+    "title": "Block frequency shifter"
+  },
+  {
+    "categories": ["eq", "plot", "knob"],
+    "description": "An exciter you can plug in: its state, a panel that draws the band it excites and an engine that plays it. Play a loop through it and raise the amount: it comes forward",
+    "name": "block-exciter",
+    "title": "Block exciter"
+  },
+  {
+    "categories": ["eq", "plot", "knob"],
+    "description": "A bass enhancer you can plug in: its state, a panel that draws the sub it takes and where its harmonics go, and an engine that plays it. Play a loop through it on small speakers and raise the amount",
+    "name": "block-bass-enhancer",
+    "title": "Block bass enhancer"
+  },
+  {
+    "categories": ["modulation", "plot", "knob"],
+    "description": "A rotary speaker you can plug in: its state, a panel that draws its two bands and an engine that plays it. Play a loop through it and switch to Fast: the rotors wind up",
+    "name": "block-rotary",
+    "title": "Block rotary"
+  },
+  {
+    "categories": ["modulation", "plot", "knob"],
+    "description": "A stutter you can plug in: its state, a panel that draws one interval and an engine that plays it. Play a loop through it and switch it on: it catches a slice and repeats it",
+    "name": "block-stutter",
+    "title": "Block stutter"
+  },
+  {
+    "categories": ["utility", "plot", "knob"],
+    "description": "A binaural panner you can plug in: its state, a panel with the head seen from above and an engine that plays it. Put headphones on, play a loop and drag the sound around the head",
+    "name": "block-binaural-panner",
+    "title": "Block binaural panner"
   },
   {
     "categories": ["mixer", "fader", "meter", "knob"],

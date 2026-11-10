@@ -488,6 +488,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/note-find",
       "@audio-ui/note-edit-menu",
       "@audio-ui/midi-file",
+      "@audio-ui/musicxml-file",
       "@audio-ui/use-master-bus",
       "@audio-ui/use-midi-input",
       "@audio-ui/use-synth-voices",
@@ -1000,6 +1001,90 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["dynamics", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An expander you can plug in: its state, a panel that draws its curve and an engine that plays it. Play a loop through it: downward, what falls under the threshold is turned down; upward, the peaks are lifted",
+    files: [
+      {
+        path: "components/device/block-expander.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-expander",
+    registryDependencies: [
+      "@audio-ui/expander-panel",
+      "@audio-ui/expander-device",
+      "@audio-ui/expander-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["dynamics", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A ducker you can plug in: its state, a panel that draws the gain for the key's level and an engine that plays it. A held chord, ducked by the kick of the loop",
+    files: [
+      {
+        path: "components/device/block-ducker.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-ducker",
+    registryDependencies: [
+      "@audio-ui/ducker-panel",
+      "@audio-ui/ducker-device",
+      "@audio-ui/ducker-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["dynamics", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A compander you can plug in: its state, a panel that draws its curve with a handle on each point and an engine that plays it. Play a loop through it and drag the points: under the straight line it turns the sound down, over it up",
+    files: [
+      {
+        path: "components/device/block-compander.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-compander",
+    registryDependencies: [
+      "@audio-ui/compander-panel",
+      "@audio-ui/compander-device",
+      "@audio-ui/compander-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["dynamics", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An unlimiter you can plug in: its state, a panel that draws the lift for an attack's size and an engine that plays it. Play a loop through it: its flattened attacks are lifted back",
+    files: [
+      {
+        path: "components/device/block-unlimiter.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-unlimiter",
+    registryDependencies: [
+      "@audio-ui/unlimiter-panel",
+      "@audio-ui/unlimiter-device",
+      "@audio-ui/unlimiter-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
@@ -1232,6 +1317,216 @@ export const components: RegistryItem[] = [
       "@audio-ui/redux-panel",
       "@audio-ui/redux-device",
       "@audio-ui/redux-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["distortion", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A lo-fi you can plug in: its state, a panel that draws the band it leaves and an engine that plays it. Play a loop through it and turn up the wow and the crackle",
+    files: [
+      {
+        path: "components/device/block-lofi.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-lofi",
+    registryDependencies: [
+      "@audio-ui/lofi-panel",
+      "@audio-ui/lofi-device",
+      "@audio-ui/lofi-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["eq", "plot", "fader", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A graphic EQ you can plug in: its state, a panel that draws the curve over a fader per band and an engine that plays it. Play a loop through it and pull the faders, the spectrum behind is what comes out",
+    files: [
+      {
+        path: "components/device/block-graphic-eq.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-graphic-eq",
+    registryDependencies: [
+      "@audio-ui/graphic-eq-panel",
+      "@audio-ui/graphic-eq-device",
+      "@audio-ui/graphic-eq-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["eq", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A tilt EQ you can plug in: its state, a panel that draws the curve it tilts and an engine that plays it. Play a loop through it and turn the tilt: brighter one way, darker the other",
+    files: [
+      {
+        path: "components/device/block-tilt-eq.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-tilt-eq",
+    registryDependencies: [
+      "@audio-ui/tilt-eq-panel",
+      "@audio-ui/tilt-eq-device",
+      "@audio-ui/tilt-eq-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["modulation", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A wah you can plug in: its state, a panel that draws the band and its travel and an engine that plays it. Play a loop through it: the louder the hit, the higher the band",
+    files: [
+      {
+        path: "components/device/block-wah.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-wah",
+    registryDependencies: [
+      "@audio-ui/wah-panel",
+      "@audio-ui/wah-device",
+      "@audio-ui/wah-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["modulation", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A frequency shifter you can plug in: its state, a panel that draws what it does to a note and an engine that plays it. Play a loop through it and turn the shift: its harmonics stop lining up",
+    files: [
+      {
+        path: "components/device/block-frequency-shifter.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-frequency-shifter",
+    registryDependencies: [
+      "@audio-ui/frequency-shifter-panel",
+      "@audio-ui/frequency-shifter-device",
+      "@audio-ui/frequency-shifter-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["eq", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An exciter you can plug in: its state, a panel that draws the band it excites and an engine that plays it. Play a loop through it and raise the amount: it comes forward",
+    files: [
+      {
+        path: "components/device/block-exciter.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-exciter",
+    registryDependencies: [
+      "@audio-ui/exciter-panel",
+      "@audio-ui/exciter-device",
+      "@audio-ui/exciter-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["eq", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A bass enhancer you can plug in: its state, a panel that draws the sub it takes and where its harmonics go, and an engine that plays it. Play a loop through it on small speakers and raise the amount",
+    files: [
+      {
+        path: "components/device/block-bass-enhancer.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-bass-enhancer",
+    registryDependencies: [
+      "@audio-ui/bass-enhancer-panel",
+      "@audio-ui/bass-enhancer-device",
+      "@audio-ui/bass-enhancer-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["modulation", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A rotary speaker you can plug in: its state, a panel that draws its two bands and an engine that plays it. Play a loop through it and switch to Fast: the rotors wind up",
+    files: [
+      {
+        path: "components/device/block-rotary.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-rotary",
+    registryDependencies: [
+      "@audio-ui/rotary-panel",
+      "@audio-ui/rotary-device",
+      "@audio-ui/rotary-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["modulation", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A stutter you can plug in: its state, a panel that draws one interval and an engine that plays it. Play a loop through it and switch it on: it catches a slice and repeats it",
+    files: [
+      {
+        path: "components/device/block-stutter.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-stutter",
+    registryDependencies: [
+      "@audio-ui/stutter-panel",
+      "@audio-ui/stutter-device",
+      "@audio-ui/stutter-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["utility", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A binaural panner you can plug in: its state, a panel with the head seen from above and an engine that plays it. Put headphones on, play a loop and drag the sound around the head",
+    files: [
+      {
+        path: "components/device/block-binaural-panner.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-binaural-panner",
+    registryDependencies: [
+      "@audio-ui/binaural-panner-panel",
+      "@audio-ui/binaural-panner-device",
+      "@audio-ui/binaural-panner-engine",
       "@audio-ui/use-device-loop",
       "@audio-ui/use-master-bus",
     ],

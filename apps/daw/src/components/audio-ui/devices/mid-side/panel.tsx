@@ -4,6 +4,14 @@ import { formatDb } from "@audio-ui/core/analysis";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Plot,
   PlotGraph,
   PlotGrid,
@@ -23,10 +31,19 @@ import {
 const MIN_DB = -24;
 const MAX_DB = 12;
 const TICKS = [-12, 0, 12];
-const SWITCHES = ["enabled"] as const;
+const IN_THE_TITLE_BAR = ["enabled", "widen"] as const;
 const OFF = midSideDevice.parameters
   .map((parameter) => parameter.id)
-  .filter((id) => id !== "enabled");
+  .filter((id) => id !== "enabled" && id !== "widen");
+const WIDENINGS =
+  midSideDevice.parameters.find((parameter) => parameter.id === "widen")
+    ?.options ?? [];
+/** The controls a widening does not use. */
+const UNUSED = {
+  detune: ["haasMs"],
+  haas: ["detuneCents", "detuneMix"],
+  off: ["haasMs", "detuneCents", "detuneMix"],
+} as const;
 
 const formatMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describeValue = (value: number) => formatDb(value);
@@ -43,9 +60,9 @@ interface MidSidePanelProps {
 /**
  * The face of the mid/side device: a square with the side level across and the
  * mid level up, and a handle to drag to both at once. The crossing of the two
- * lines is a signal left as it is. Bass mono is the knob under it. Controlled
- * like `DevicePanel`, which it uses for the knobs. Its children sit at the end
- * of the title bar.
+ * lines is a signal left as it is. Bass mono and the widening's knobs are under
+ * it, the widening picked in the title bar. Controlled like `DevicePanel`,
+ * which it uses for the knobs. Its children sit at the end of the title bar.
  */
 function MidSidePanel({
   children,
@@ -58,6 +75,14 @@ function MidSidePanel({
       onValueChange(midSideDevice.apply(value, { midDb: y, sideDb: x }).state),
     [onValueChange, value]
   );
+  const pickWidening = useCallback(
+    (widen: string | null) => {
+      if (widen) {
+        onValueChange(midSideDevice.set(value, "widen", widen));
+      }
+    },
+    [onValueChange, value]
+  );
   return (
     <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
@@ -66,6 +91,29 @@ function MidSidePanel({
         onValueChange={onValueChange}
         value={value}
       >
+        <Select
+          disabled={!value.enabled}
+          items={WIDENINGS}
+          onValueChange={pickWidening}
+          value={value.widen}
+        >
+          <SelectTrigger
+            aria-label="Widen"
+            className="w-24 data-[size=sm]:h-6"
+            size="sm"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {WIDENINGS.map((widening) => (
+                <SelectItem key={widening.value} value={widening.value}>
+                  {widening.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         {children}
       </DeviceHeader>
       <div
@@ -99,9 +147,10 @@ function MidSidePanel({
           ) : null}
         </Plot>
         <DevicePanel
+          className="grid-cols-3"
           device={midSideDevice}
-          disabled={value.enabled ? undefined : OFF}
-          exclude={SWITCHES}
+          disabled={value.enabled ? UNUSED[value.widen] : OFF}
+          exclude={IN_THE_TITLE_BAR}
           onValueChange={onValueChange}
           value={value}
         />

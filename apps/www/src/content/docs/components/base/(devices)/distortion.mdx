@@ -1,13 +1,13 @@
 ---
 title: Distortion
-description: "A distortion device: a drive, a tone, a mix and an output, a panel that draws the transfer curve, a Web Audio engine and tools for agents."
+description: "A distortion device: four curves, a drive, a tone, a mix and an output, a panel that draws the transfer curve, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-distortion" />
 
-Bends the sound. The more the drive, the more the peaks round off. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Bends the sound into one of four curves. The more the drive, the more the peaks round off, or fold back. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -16,15 +16,16 @@ Bends the sound. The more the drive, the more the peaks round off. It is a [devi
 ## Controls
 
 <DeviceControls device="distortion">
-<Control id="driveDb">How hard the signal is pushed into the clip.</Control>
-<Control id="toneHz">Closes the highs after the clip.</Control>
+<Control id="curve">The shape the drive pushes the signal into, picked with a row of buttons, each drawn from its curve. Tanh, the default, rounds the peaks off gently. Cubic rounds them off sooner and holds them flat at full scale; a quiet input comes out half as loud again. Hard holds the peaks flat at full scale, with a corner. Fold reflects whatever passes full scale back inside it, again and again as the drive grows.</Control>
+<Control id="driveDb">How hard the signal is pushed into the curve.</Control>
+<Control id="toneHz">Closes the highs after the curve.</Control>
 <Control id="mix">The balance of the distorted signal and the clean one.</Control>
 <Control id="outputDb">The level of the output.</Control>
 </DeviceControls>
 
 ## Panel
 
-The panel draws the transfer curve, the output for each input, against the straight line of a clean sound. `softClip(input, drive)` is the clip and `distortionCurve(state)` is the whole curve with the mix and the output.
+The panel draws the transfer curve, the output for each input, against the straight line of a clean sound, and picks the curve with buttons drawn from each. `distortionShape(curve, input)` is a curve at an input after the drive, and `distortionCurve(state)` is the whole curve with the mix and the output.
 
 <DeviceUsage name="distortion" />
 
@@ -32,4 +33,4 @@ The panel draws the transfer curve, the output for each input, against the strai
 
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-The drive is a gain before one fixed soft-clip table, so turning it never rebuilds the table. The shaper oversamples 4x to keep the clip from aliasing, which is the [latency](/docs/devices#latency) of the device.
+The drive is a gain before the table of the curve, so turning it never changes the table; only picking another curve does. The tables are written by the curves of `@audio/effect-distortion` (`distortionTable(curve)`) over the whole range of the drive, so a fold keeps folding at full drive. The shaper oversamples 4x to keep the curve from aliasing, which is the [latency](/docs/devices#latency) of the device.

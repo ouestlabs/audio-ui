@@ -1,20 +1,20 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equalizer-panel";
+import {
+  type EqualizerState,
+  equalizerDevice,
+} from "@/registry-audio/bases/base/devices/equalizer/device";
+import {
+  createEqualizerEngine,
+  type EqualizerEngine,
+} from "@/registry-audio/bases/base/devices/equalizer/engine";
+import { EqualizerPanel } from "@/registry-audio/bases/base/devices/equalizer/panel";
 import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
-import {
-  type EqualizerState,
-  equalizerDevice,
-} from "@/registry-audio/bases/base/lib/equalizer-device";
-import {
-  createEqualizerEngine,
-  type EqualizerEngine,
-} from "@/registry-audio/bases/base/lib/equalizer-engine";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const FFT_SIZE = 4096;

@@ -1,4 +1,6 @@
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { TRANSIENT_KERNELS } from "@/components/audio-ui/devices/transient/kernels";
+import { manifestWorklet } from "@/lib/manifest-worklet";
 
 /** How far ahead of the signal the detector reads, in seconds: the audio waits this long so the gain is already up when a hit arrives. It is the latency of the device. */
 export const LOOKAHEAD_SECONDS = 0.001;
@@ -7,17 +9,29 @@ export const LOOKAHEAD_SECONDS = 0.001;
  * A transient shaper as a device: it turns the attack of a sound up or down
  * and the sustain after it up or down, whatever the level of the sound, with
  * no panel and no audio in it. A drum loses its click or gains it, a pluck
- * rings longer or shorter, and none of it needs a threshold.
+ * rings longer or shorter, and none of it needs a threshold. Its clean model
+ * reads the attack ahead of the sound; its follower model is the transient
+ * shaper of `@audio/dynamics-transient-shaper`.
  */
 export const transientDevice = defineDevice({
   description:
-    "Shapes the attack and the sustain of a sound: the attack is the moment a hit starts, the sustain is what rings after it, and each is turned up or down by up to 12 dB, at any level of the signal, with an output gain.",
+    "Shapes the attack and the sustain of a sound: the attack is the moment a hit starts, the sustain is what rings after it, and each is turned up or down by up to 12 dB, at any level of the signal, with an output gain. Its model is clean, which tells the attack by how far the peak rises over itself smoothed over 25 ms and moves the gain in decibels, or follower, which tells it by how far the level rises over a copy of it 50 times slower and moves the gain in a line between the attack's and the sustain's.",
   id: "audioui.transient",
   // The audio waits for the detector, on or off, so the delay is the same either way.
   latency: () => LOOKAHEAD_SECONDS,
   name: "Transient shaper",
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },
+    {
+      default: "clean",
+      id: "model",
+      kind: "choice",
+      label: "Model",
+      options: [
+        { label: "Clean", value: "clean" },
+        { label: "Follower", value: "follower" },
+      ],
+    },
     {
       default: 6,
       id: "attackDb",
@@ -55,6 +69,13 @@ export function transientSettings(state: TransientState) {
   const on = state.enabled;
   return {
     attack: on ? state.attackDb : 0,
+    model: state.model,
+    /** What the follower model plays, in its manifest's units: the gain added on an attack and on the sustain, as a share, so an attack all attack gets the decibels asked. */
+    modelParams: {
+      attackGain: 10 ** (state.attackDb / 20) - 1,
+      sustainGain: 10 ** (state.sustainDb / 20) - 1,
+    },
+    modelWet: on && state.model !== "clean" ? 1 : 0,
     output: on ? 10 ** (state.outputDb / 20) : 1,
     sustain: on ? state.sustainDb : 0,
   };
@@ -118,3 +139,15 @@ class AudioUiTransient extends AudioWorkletProcessor {
 }
 registerProcessor("audioui-transient", AudioUiTransient);
 `;
+
+/**
+ * The source of the follower model's `AudioWorklet`, processor
+ * `audioui-transient-follower`: the manifest of
+ * `@audio/dynamics-transient-shaper`, played by `manifestWorklet`. Its
+ * attack and sustain change as it plays.
+ */
+export const TRANSIENT_FOLLOWER_WORKLET = manifestWorklet({
+  kernels: TRANSIENT_KERNELS,
+  models: { follower: "transientShaper" },
+  processor: "audioui-transient-follower",
+});

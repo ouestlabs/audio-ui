@@ -2,18 +2,18 @@
 
 import { noteToFrequency } from "@audio-ui/core/pitch";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { TapeKeysPanel } from "@/registry-audio/bases/base/audio/panels/tape-keys-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type TapeKeysNote,
   type TapeKeysState,
   tapeKeysDevice,
-} from "@/registry-audio/bases/base/lib/tape-keys-device";
+} from "@/registry-audio/bases/base/devices/tape-keys/device";
 import {
   createTapeKeysEngine,
   type TapeKeysEngine,
-} from "@/registry-audio/bases/base/lib/tape-keys-engine";
+} from "@/registry-audio/bases/base/devices/tape-keys/engine";
+import { TapeKeysPanel } from "@/registry-audio/bases/base/devices/tape-keys/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** How many keys sound at once: a ninth takes the voice held longest. */

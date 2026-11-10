@@ -1,0 +1,38 @@
+---
+title: Frequency Shifter
+description: "A frequency shifter device: a shift or ring mode, the shift in hertz, the ring's frequency, a precision and a mix, a panel that draws what it does to a note, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-frequency-shifter" />
+
+Moves every frequency of the sound by the same number of hertz. A pitch shift multiplies frequencies and keeps a note's harmonics in line; a frequency shift adds to them, so they stop lining up: a few hertz make a slow phasing, more make the sound metallic and strange. In Ring mode it multiplies the sound by a sine instead, leaving the sum and the difference of each frequency and the sine's, the bell of a ring modulator. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="frequency-shifter" kind="device" />
+
+## Controls
+
+<DeviceControls device="frequency-shifter">
+<Control id="mode">Shift moves every frequency, Ring multiplies the sound by a sine. It is picked in the title bar, and the controls the mode does not use are drawn off.</Control>
+<Control id="shiftHz">How far every frequency moves, up or down. One pushed below 0 comes back up as its mirror.</Control>
+<Control id="frequencyHz">The frequency of the ring's sine. Under about 20 Hz it is a tremolo; above, a ring.</Control>
+<Control id="precision">How long the shifter's filter is: High keeps low notes clean, and delays the sound by 2.6 ms; Low delays it by 0.2 ms, and blurs the lows. A new precision fades in.</Control>
+<Control id="mix">The balance of the shifted sound and the clean one.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws what the device does to a 220 Hz note and its harmonics: the frequencies that go in, faint, and the ones that come out. `frequencyShifterPartials(state)` is what it draws.
+
+<DeviceUsage name="frequency-shifter" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The shifter runs on the audio thread: the frequency shifter of `@audio/effect-freqshift`, a Hilbert filter that turns the sound into its analytic signal and turns it like a wheel, and the ring modulator of `@audio/effect-ringmod`, in an `AudioWorklet` loaded from a blob (`FREQUENCY_SHIFTER_WORKLET` is its source), 128 frames at a time. Each mixes the clean sound in itself, the shifter's delayed as long as its filter, so the mix never combs. The worklet plays both modes, one output each, and the mode fades one in and the other out. A worklet cannot import, so the device carries both kernels as published (`FREQUENCY_SHIFTER_KERNELS`, in its `kernels.ts`). Until it is ready, and in a context with no worklets, the sound passes clean: `ready` resolves once it is in the graph.
+
+The shift delays the sound by half its filter's length, which is the [latency](/docs/devices#latency) of the device: 32 samples at Mid. The ring has none.

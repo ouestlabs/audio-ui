@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ReverbPanel } from "@/registry-audio/bases/base/audio/panels/reverb-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type ReverbState,
   reverbDevice,
-} from "@/registry-audio/bases/base/lib/reverb-device";
-import { createReverbEngine } from "@/registry-audio/bases/base/lib/reverb-engine";
+} from "@/registry-audio/bases/base/devices/reverb/device";
+import { createReverbEngine } from "@/registry-audio/bases/base/devices/reverb/engine";
+import { ReverbPanel } from "@/registry-audio/bases/base/devices/reverb/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

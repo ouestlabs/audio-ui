@@ -1,0 +1,39 @@
+---
+title: Unlimiter
+description: "An unlimiter device: amount, drive, crest, adaptive and a guarded ceiling, a panel that draws the lift for an attack's size, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-unlimiter" />
+
+Gives back the attacks a limiter flattened. It tells an attack by how far a fast follower of the level rises over a slow one, and lifts it: adaptive, by what it is missing to reach the crest, so a healthy attack is left alone. It plays the de-limiter of [audio.js](https://audio.js.org). It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="unlimiter" kind="device" />
+
+## Controls
+
+<DeviceControls device="unlimiter">
+<Control id="amountDb">The most an attack is lifted.</Control>
+<Control id="drive">How much an attack is lifted. Adaptive, 1 lifts it back to the crest; otherwise, the dB of lift for each dB of the attack's size.</Control>
+<Control id="crestDb">How far a healthy attack rises over the sound around it. Adaptive, an attack is lifted by what it is missing to reach it.</Control>
+<Control id="ceilingDb">The level the lifted peaks are kept under, with Guard on.</Control>
+<Control id="adaptive">Lifts each attack by what it is missing, so a healthy one is left alone. Off, every attack is lifted in proportion to its size: a transient exaggerator.</Control>
+<Control id="guard">Keeps the lifted peaks under the ceiling. Off, they can go over 0 dB.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the lift an attack gets for its size, how far the fast follower is over the slow one, through the package's own curves, with the crest when it is adaptive.
+
+<DeviceUsage name="unlimiter" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The browser has no such node. The engine plays the processor of `@audio/dynamics-unlimit`'s manifest as published, in an `AudioWorklet` fed only while it plays: off, or until the worklet is ready, the sound goes round it. Every value on the panel changes as it plays; its followers' times are the package's. It looks at no sound ahead, so it adds no latency.
+
+Measured on a loop of hits pushed 12 dB into a limiter, which took their crest from 11.6 to 9.9 dB, the adaptive unlimiter gave it back to 11.7 dB. On the loop as it was, it added 0.9 dB.

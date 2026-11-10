@@ -1,0 +1,34 @@
+---
+title: Exciter
+description: "An exciter device: a frequency, a drive and an amount, a panel that draws the band it excites, a Web Audio engine and tools for agents."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-exciter" />
+
+Adds presence and air. It takes the highs above a frequency, saturates them into new harmonics above, and adds those to the sound: a voice or a mix comes forward and opens up without a boost that only makes it louder. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+
+## Installation
+
+<Install name="exciter" kind="device" />
+
+## Controls
+
+<DeviceControls device="exciter">
+<Control id="frequencyHz">Where the highs it excites start: lower takes more of the sound, higher only its air.</Control>
+<Control id="drive">How hard the highs are saturated: more makes more, and brighter, harmonics.</Control>
+<Control id="amount">How much of the harmonics is added to the sound. At 0 the sound is as it was.</Control>
+</DeviceControls>
+
+## Panel
+
+The panel draws the band of highs it makes its harmonics from. `exciterBand(state)` is what it draws.
+
+<DeviceUsage name="exciter" />
+
+## Engine
+
+Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
+
+The exciter runs on the audio thread: the exciter of `@audio/effect-exciter` in an `AudioWorklet` loaded from a blob (`EXCITER_WORKLET` is its source), 128 frames at a time: a high-pass, a state-variable filter with a Q of 2, then a soft saturation whose harmonics are added to the sound. A worklet cannot import, so the device carries the kernel as published (`EXCITER_KERNELS`, in its `kernels.ts`). Until it is ready, and in a context with no worklets, the sound passes clean: `ready` resolves once it is in the graph.

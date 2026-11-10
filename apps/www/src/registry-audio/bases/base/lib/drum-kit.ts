@@ -6,19 +6,20 @@
  * to the left, the crash to the right. Every pad is a chain of its own,
  * its sound and its effects as editable as any track's.
  */
+
+import {
+  type DrumSynthState,
+  type DrumSynthVoice,
+  drumSynthDevice,
+  drumSynthPreset,
+} from "@/registry-audio/bases/base/devices/drum-synth/device";
+import { reverbDevice } from "@/registry-audio/bases/base/devices/reverb/device";
 import {
   type DrumPad,
   newRack,
   type Rack,
   type TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
-import {
-  type DrumSynthState,
-  type DrumSynthVoice,
-  drumSynthDevice,
-  drumSynthPreset,
-} from "@/registry-audio/bases/base/lib/drum-synth-device";
-import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
 
 /** The kit's pads: the note each answers, on the notes General MIDI writes drums on, its name and its voice. */
 export const DRUM_KIT_PADS: readonly {

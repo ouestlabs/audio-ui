@@ -1,8 +1,16 @@
 "use client";
 
 import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
-import { type ReactNode, useMemo } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Plot,
   PlotCurve,
@@ -24,13 +32,20 @@ import {
 const WINDOW_SECONDS = 2;
 const TIME_TICKS = [0.5, 1, 1.5];
 const PERCENT_TICKS = [-50, 0, 50];
-const SWITCHES = ["enabled"] as const;
+const IN_THE_TITLE_BAR = ["enabled", "mode"] as const;
+const MODES =
+  phaserDevice.parameters.find((parameter) => parameter.id === "mode")
+    ?.options ?? [];
 const ALL = phaserDevice.parameters
   .map((parameter) => parameter.id)
-  .filter((id) => id !== "enabled");
+  .filter((id) => id !== "enabled" && id !== "mode");
 
-const NO_DELAY = ["delayMs"] as const;
-const NO_CENTER = ["centerHz"] as const;
+/** The controls a mode does not use. */
+const UNUSED = {
+  classic: ["delayMs"],
+  flanger: ["centerHz", "stages"],
+  phaser: ["delayMs", "stages"],
+} as const;
 const SYNCED_OFF = ["rateHz"] as const;
 const FREE_OFF = ["division"] as const;
 
@@ -48,8 +63,11 @@ interface PhaserPanelProps {
 }
 
 /**
- * The face of the phaser-flanger device: what the oscillator does to the swept value over two seconds, over its knobs; the centre goes off in flanger mode and the delay in phaser mode. Controlled like `DevicePanel`, which it uses for them. Its children
- * sit at the end of the title bar.
+ * The face of the phaser-flanger device: what the oscillator does to the swept
+ * value over two seconds, over its knobs, the mode picked in its title bar;
+ * the centre goes off in flanger mode, the delay in either phaser mode, and
+ * the stages but in classic mode. Controlled like `DevicePanel`, which it uses
+ * for them. Its children sit at the end of the title bar.
  */
 function PhaserPanel({
   children,
@@ -59,10 +77,17 @@ function PhaserPanel({
   value,
 }: PhaserPanelProps) {
   const sweep = useMemo(() => phaserSweep(value, tempo), [tempo, value]);
+  const pickMode = useCallback(
+    (mode: string | null) => {
+      if (mode) {
+        onValueChange(phaserDevice.set(value, "mode", mode));
+      }
+    },
+    [onValueChange, value]
+  );
   let unused: readonly (typeof ALL)[number][] = ALL;
   if (value.enabled) {
-    const byMode = value.mode === "phaser" ? NO_DELAY : NO_CENTER;
-    unused = [...byMode, ...(value.sync ? SYNCED_OFF : FREE_OFF)];
+    unused = [...UNUSED[value.mode], ...(value.sync ? SYNCED_OFF : FREE_OFF)];
   }
   return (
     <DeviceFrame className={cn("h-full", className)}>
@@ -72,6 +97,29 @@ function PhaserPanel({
         onValueChange={onValueChange}
         value={value}
       >
+        <Select
+          disabled={!value.enabled}
+          items={MODES}
+          onValueChange={pickMode}
+          value={value.mode}
+        >
+          <SelectTrigger
+            aria-label="Mode"
+            className="w-28 data-[size=sm]:h-6"
+            size="sm"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {MODES.map((mode) => (
+                <SelectItem key={mode.value} value={mode.value}>
+                  {mode.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         {children}
       </DeviceHeader>
       <div
@@ -98,7 +146,7 @@ function PhaserPanel({
           className="grid-cols-5"
           device={phaserDevice}
           disabled={unused}
-          exclude={SWITCHES}
+          exclude={IN_THE_TITLE_BAR}
           onValueChange={onValueChange}
           value={value}
         />

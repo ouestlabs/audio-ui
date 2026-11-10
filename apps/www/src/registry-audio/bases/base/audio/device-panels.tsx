@@ -1,39 +1,53 @@
 import type { ParameterValue } from "@audio-ui/core/device";
 import type { Tempo } from "@audio-ui/core/time";
 import type { ComponentType, ReactNode } from "react";
-import { AutoPanPanel } from "@/registry-audio/bases/base/audio/panels/auto-pan-panel";
-import { ChannelEqPanel } from "@/registry-audio/bases/base/audio/panels/channel-eq-panel";
-import { ChorusPanel } from "@/registry-audio/bases/base/audio/panels/chorus-panel";
-import { CompressorPanel } from "@/registry-audio/bases/base/audio/panels/compressor-panel";
-import { DeesserPanel } from "@/registry-audio/bases/base/audio/panels/deesser-panel";
-import { DelayPanel } from "@/registry-audio/bases/base/audio/panels/delay-panel";
-import { DistortionPanel } from "@/registry-audio/bases/base/audio/panels/distortion-panel";
-import { DrumSynthPanel } from "@/registry-audio/bases/base/audio/panels/drum-synth-panel";
-import { ElectricPianoPanel } from "@/registry-audio/bases/base/audio/panels/electric-piano-panel";
-import { EqualizerPanel } from "@/registry-audio/bases/base/audio/panels/equalizer-panel";
-import { FilterPanel } from "@/registry-audio/bases/base/audio/panels/filter-panel";
-import { FmSynthPanel } from "@/registry-audio/bases/base/audio/panels/fm-synth-panel";
-import { GatePanel } from "@/registry-audio/bases/base/audio/panels/gate-panel";
-import { GuitarPanel } from "@/registry-audio/bases/base/audio/panels/guitar-panel";
-import { LimiterPanel } from "@/registry-audio/bases/base/audio/panels/limiter-panel";
-import { MidSidePanel } from "@/registry-audio/bases/base/audio/panels/mid-side-panel";
-import { MonoSynthPanel } from "@/registry-audio/bases/base/audio/panels/mono-synth-panel";
-import { MultibandPanel } from "@/registry-audio/bases/base/audio/panels/multiband-panel";
-import { OrganPanel } from "@/registry-audio/bases/base/audio/panels/organ-panel";
-import { OverdrivePanel } from "@/registry-audio/bases/base/audio/panels/overdrive-panel";
-import { PhaserPanel } from "@/registry-audio/bases/base/audio/panels/phaser-panel";
-import { PocketSynthPanel } from "@/registry-audio/bases/base/audio/panels/pocket-synth-panel";
-import { PolySynthPanel } from "@/registry-audio/bases/base/audio/panels/poly-synth-panel";
-import { ReduxPanel } from "@/registry-audio/bases/base/audio/panels/redux-panel";
-import { ReverbPanel } from "@/registry-audio/bases/base/audio/panels/reverb-panel";
-import { SamplerPanel } from "@/registry-audio/bases/base/audio/panels/sampler-panel";
-import { SaturatorPanel } from "@/registry-audio/bases/base/audio/panels/saturator-panel";
-import { StringMachinePanel } from "@/registry-audio/bases/base/audio/panels/string-machine-panel";
-import { TapeKeysPanel } from "@/registry-audio/bases/base/audio/panels/tape-keys-panel";
-import { TransientPanel } from "@/registry-audio/bases/base/audio/panels/transient-panel";
-import { UtilityPanel } from "@/registry-audio/bases/base/audio/panels/utility-panel";
-import { VibePanel } from "@/registry-audio/bases/base/audio/panels/vibe-panel";
-import { WaveShaperPanel } from "@/registry-audio/bases/base/audio/panels/wave-shaper-panel";
+import { AutoPanPanel } from "@/registry-audio/bases/base/devices/auto-pan/panel";
+import { BassEnhancerPanel } from "@/registry-audio/bases/base/devices/bass-enhancer/panel";
+import { BinauralPannerPanel } from "@/registry-audio/bases/base/devices/binaural-panner/panel";
+import { ChannelEqPanel } from "@/registry-audio/bases/base/devices/channel-eq/panel";
+import { ChorusPanel } from "@/registry-audio/bases/base/devices/chorus/panel";
+import { CompanderPanel } from "@/registry-audio/bases/base/devices/compander/panel";
+import { CompressorPanel } from "@/registry-audio/bases/base/devices/compressor/panel";
+import { DeesserPanel } from "@/registry-audio/bases/base/devices/deesser/panel";
+import { DelayPanel } from "@/registry-audio/bases/base/devices/delay/panel";
+import { DistortionPanel } from "@/registry-audio/bases/base/devices/distortion/panel";
+import { DrumSynthPanel } from "@/registry-audio/bases/base/devices/drum-synth/panel";
+import { DuckerPanel } from "@/registry-audio/bases/base/devices/ducker/panel";
+import { ElectricPianoPanel } from "@/registry-audio/bases/base/devices/electric-piano/panel";
+import { EqualizerPanel } from "@/registry-audio/bases/base/devices/equalizer/panel";
+import { ExciterPanel } from "@/registry-audio/bases/base/devices/exciter/panel";
+import { ExpanderPanel } from "@/registry-audio/bases/base/devices/expander/panel";
+import { FilterPanel } from "@/registry-audio/bases/base/devices/filter/panel";
+import { FmSynthPanel } from "@/registry-audio/bases/base/devices/fm-synth/panel";
+import { FrequencyShifterPanel } from "@/registry-audio/bases/base/devices/frequency-shifter/panel";
+import { GatePanel } from "@/registry-audio/bases/base/devices/gate/panel";
+import { GraphicEqPanel } from "@/registry-audio/bases/base/devices/graphic-eq/panel";
+import { GuitarPanel } from "@/registry-audio/bases/base/devices/guitar/panel";
+import { LimiterPanel } from "@/registry-audio/bases/base/devices/limiter/panel";
+import { LofiPanel } from "@/registry-audio/bases/base/devices/lofi/panel";
+import { MidSidePanel } from "@/registry-audio/bases/base/devices/mid-side/panel";
+import { MonoSynthPanel } from "@/registry-audio/bases/base/devices/mono-synth/panel";
+import { MultibandPanel } from "@/registry-audio/bases/base/devices/multiband/panel";
+import { OrganPanel } from "@/registry-audio/bases/base/devices/organ/panel";
+import { OverdrivePanel } from "@/registry-audio/bases/base/devices/overdrive/panel";
+import { PhaserPanel } from "@/registry-audio/bases/base/devices/phaser/panel";
+import { PocketSynthPanel } from "@/registry-audio/bases/base/devices/pocket-synth/panel";
+import { PolySynthPanel } from "@/registry-audio/bases/base/devices/poly-synth/panel";
+import { ReduxPanel } from "@/registry-audio/bases/base/devices/redux/panel";
+import { ReverbPanel } from "@/registry-audio/bases/base/devices/reverb/panel";
+import { RotaryPanel } from "@/registry-audio/bases/base/devices/rotary/panel";
+import { SamplerPanel } from "@/registry-audio/bases/base/devices/sampler/panel";
+import { SaturatorPanel } from "@/registry-audio/bases/base/devices/saturator/panel";
+import { StringMachinePanel } from "@/registry-audio/bases/base/devices/string-machine/panel";
+import { StutterPanel } from "@/registry-audio/bases/base/devices/stutter/panel";
+import { TapeKeysPanel } from "@/registry-audio/bases/base/devices/tape-keys/panel";
+import { TiltEqPanel } from "@/registry-audio/bases/base/devices/tilt-eq/panel";
+import { TransientPanel } from "@/registry-audio/bases/base/devices/transient/panel";
+import { UnlimiterPanel } from "@/registry-audio/bases/base/devices/unlimiter/panel";
+import { UtilityPanel } from "@/registry-audio/bases/base/devices/utility/panel";
+import { VibePanel } from "@/registry-audio/bases/base/devices/vibe/panel";
+import { WahPanel } from "@/registry-audio/bases/base/devices/wah/panel";
+import { WaveShaperPanel } from "@/registry-audio/bases/base/devices/wave-shaper/panel";
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
 export interface DevicePanelProps {
@@ -86,13 +100,26 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.chorus": entry(ChorusPanel),
   "audioui.compressor": entry(CompressorPanel, "w-96"),
   "audioui.deesser": entry(DeesserPanel),
-  "audioui.delay": entry(DelayPanel),
-  "audioui.distortion": entry(DistortionPanel),
+  "audioui.delay": entry(DelayPanel, "w-[28rem]"),
+  "audioui.distortion": entry(DistortionPanel, "w-96"),
   "audioui.electric-piano": entry(ElectricPianoPanel, "w-[32rem]"),
   "audioui.equalizer": entry(EqualizerPanel, "w-96"),
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.unlimiter": entry(UnlimiterPanel),
+  "audioui.compander": entry(CompanderPanel),
+  "audioui.ducker": entry(DuckerPanel),
+  "audioui.expander": entry(ExpanderPanel),
+  "audioui.binaural-panner": entry(BinauralPannerPanel),
+  "audioui.stutter": entry(StutterPanel),
+  "audioui.rotary": entry(RotaryPanel, "w-96"),
+  "audioui.bass-enhancer": entry(BassEnhancerPanel),
+  "audioui.exciter": entry(ExciterPanel),
+  "audioui.frequency-shifter": entry(FrequencyShifterPanel, "w-96"),
+  "audioui.wah": entry(WahPanel, "w-[32rem]"),
+  "audioui.graphic-eq": entry(GraphicEqPanel, "w-[28rem]"),
+  "audioui.tilt-eq": entry(TiltEqPanel),
   "audioui.limiter": entry(LimiterPanel),
   "audioui.mid-side": entry(MidSidePanel),
   "audioui.mono-synth": entry(MonoSynthPanel, "w-[40rem]"),
@@ -107,6 +134,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.pocket-synth": entry(PocketSynthPanel),
   "audioui.poly-synth": entry(PolySynthPanel, "w-[40rem]"),
   "audioui.redux": entry(ReduxPanel),
+  "audioui.lofi": entry(LofiPanel),
   "audioui.reverb": entry(ReverbPanel),
   "audioui.sampler": entry(SamplerPanel, "w-[32rem]"),
   "audioui.saturator": entry(SaturatorPanel),
