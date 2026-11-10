@@ -357,7 +357,7 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "fflate"],
     description:
       "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in.",
     files: [

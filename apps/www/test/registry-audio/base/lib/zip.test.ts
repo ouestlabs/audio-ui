@@ -1,15 +1,11 @@
 import { describe, expect, test } from "bun:test";
 import { deflateRawSync } from "node:zlib";
-import { crc32, createZip, readZip } from "@/registry-audio/bases/base/lib/zip";
+import { createZip, readZip } from "@/registry-audio/bases/base/lib/zip";
 
 const text = async (entry: { read: () => Promise<ArrayBuffer> } | undefined) =>
   new TextDecoder().decode(await entry?.read());
 
 describe("zip", () => {
-  test("PRJ-008: the CRC-32 of a known string", () => {
-    expect(crc32(new TextEncoder().encode("123456789"))).toBe(0xcb_f4_39_26);
-  });
-
   test("PRJ-008: an archive written comes back file for file, its paths as they were", async () => {
     const audio = Uint8Array.from({ length: 4096 }, (_, index) => index % 251);
     const zip = await createZip([
