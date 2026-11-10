@@ -302,6 +302,39 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "EXPANDER_KERNELS",
+    file: "devices/expander/kernels.ts",
+    kernels: [
+      {
+        file: "util.js",
+        from: "@audio/dynamics-expander",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "timeCoef",
+      },
+      {
+        file: "envelope.js",
+        from: "@audio/dynamics-expander",
+        internal: true,
+        name: "@audio/dynamics-envelope",
+        use: "envelope",
+      },
+      {
+        file: "util.js",
+        internal: true,
+        name: "@audio/dynamics-expander",
+        use: ["writer", "concat", "db2lin", "lin2db"],
+      },
+      {
+        file: "expander.js",
+        internal: true,
+        name: "@audio/dynamics-expander",
+        use: ["expanderGain", "upwardExpanderGain"],
+      },
+      { file: "audio.js", name: "@audio/dynamics-expander", use: "expander" },
+    ],
+  },
+  {
     constant: "GATE_KERNELS",
     file: "devices/gate/kernels.ts",
     kernels: [

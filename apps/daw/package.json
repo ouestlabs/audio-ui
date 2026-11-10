@@ -24,6 +24,7 @@
     "@audio/decode-mp4": "catalog:",
     "@audio/dynamics-compressor": "catalog:",
     "@audio/dynamics-deesser": "catalog:",
+    "@audio/dynamics-expander": "catalog:",
     "@audio/dynamics-fet": "catalog:",
     "@audio/dynamics-gate": "catalog:",
     "@audio/dynamics-limiter": "catalog:",

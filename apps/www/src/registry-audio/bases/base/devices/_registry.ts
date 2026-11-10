@@ -18,6 +18,7 @@ const DEVICES = [
   "electric-piano",
   "equalizer",
   "exciter",
+  "expander",
   "filter",
   "frequency-shifter",
   "fm-synth",
@@ -822,6 +823,64 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/gate-device",
+      "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/dynamics-expander"],
+    description:
+      "The expander as a device: a mode (downward or upward), a threshold, a ratio, a knee, a range, an attack and a release, the numbers that go on the worklet for a state, the curve a state plays and the worklet's source (the expander of @audio/dynamics-expander), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/expander/device.ts",
+        target: "components/audio-ui/devices/expander/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/expander/kernels.ts",
+        target: "components/audio-ui/devices/expander/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "expander-device",
+    registryDependencies: ["@audio-ui/manifest-worklet"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "An expander on the Web Audio API for an expander state: the expander of @audio/dynamics-expander in an AudioWorklet loaded from a blob, fed only while it plays, the sound passing unchanged until it is ready.",
+    files: [
+      {
+        path: "devices/expander/engine.ts",
+        target: "components/audio-ui/devices/expander/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "expander-engine",
+    registryDependencies: ["@audio-ui/expander-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the expander device: the mode picked in its title bar, its transfer curve against the straight line of a clean sound with a handle on the threshold, over the device knobs.",
+    files: [
+      {
+        path: "devices/expander/panel.tsx",
+        target: "components/audio-ui/devices/expander/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "expander-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/expander-device",
       "@shadcn/select",
     ],
     type: "registry:ui",

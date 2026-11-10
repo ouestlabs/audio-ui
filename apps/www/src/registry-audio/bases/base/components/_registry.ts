@@ -1001,6 +1001,27 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["dynamics", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "An expander you can plug in: its state, a panel that draws its curve and an engine that plays it. Play a loop through it: downward, what falls under the threshold is turned down; upward, the peaks are lifted",
+    files: [
+      {
+        path: "components/device/block-expander.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-expander",
+    registryDependencies: [
+      "@audio-ui/expander-panel",
+      "@audio-ui/expander-device",
+      "@audio-ui/expander-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["distortion", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:

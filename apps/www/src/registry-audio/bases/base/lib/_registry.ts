@@ -486,6 +486,8 @@ const items: RegistryItem[] = [
       "@audio-ui/redux-engine",
       "@audio-ui/lofi-device",
       "@audio-ui/lofi-engine",
+      "@audio-ui/expander-device",
+      "@audio-ui/expander-engine",
       "@audio-ui/binaural-panner-device",
       "@audio-ui/binaural-panner-engine",
       "@audio-ui/stutter-device",

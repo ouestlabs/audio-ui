@@ -32,6 +32,8 @@ import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/d
 import { createEqualizerEngine } from "@/registry-audio/bases/base/devices/equalizer/engine";
 import { exciterDevice } from "@/registry-audio/bases/base/devices/exciter/device";
 import { createExciterEngine } from "@/registry-audio/bases/base/devices/exciter/engine";
+import { expanderDevice } from "@/registry-audio/bases/base/devices/expander/device";
+import { createExpanderEngine } from "@/registry-audio/bases/base/devices/expander/engine";
 import { filterDevice } from "@/registry-audio/bases/base/devices/filter/device";
 import { createFilterEngine } from "@/registry-audio/bases/base/devices/filter/engine";
 import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/device";
@@ -173,6 +175,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(compressorDevice, createCompressorEngine, "Dynamics"),
   entry(limiterDevice, createLimiterEngine, "Dynamics"),
   entry(gateDevice, createGateEngine, "Dynamics"),
+  entry(expanderDevice, createExpanderEngine, "Dynamics"),
   entry(multibandDevice, createMultibandEngine, "Dynamics"),
   entry(transientDevice, createTransientEngine, "Dynamics"),
   entry(deesserDevice, createDeesserEngine, "Dynamics"),

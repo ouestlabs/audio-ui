@@ -11,6 +11,7 @@ import { drumSynthDevice } from "@/registry-audio/bases/base/devices/drum-synth/
 import { electricPianoDevice } from "@/registry-audio/bases/base/devices/electric-piano/device";
 import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
 import { exciterDevice } from "@/registry-audio/bases/base/devices/exciter/device";
+import { expanderDevice } from "@/registry-audio/bases/base/devices/expander/device";
 import { filterDevice } from "@/registry-audio/bases/base/devices/filter/device";
 import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/device";
 import { frequencyShifterDevice } from "@/registry-audio/bases/base/devices/frequency-shifter/device";
@@ -46,6 +47,7 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  expander: expanderDevice,
   "binaural-panner": binauralPannerDevice,
   stutter: stutterDevice,
   rotary: rotaryDevice,

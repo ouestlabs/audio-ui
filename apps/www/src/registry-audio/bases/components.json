@@ -300,6 +300,12 @@
     "title": "Block gate"
   },
   {
+    "categories": ["dynamics", "plot", "knob"],
+    "description": "An expander you can plug in: its state, a panel that draws its curve and an engine that plays it. Play a loop through it: downward, what falls under the threshold is turned down; upward, the peaks are lifted",
+    "name": "block-expander",
+    "title": "Block expander"
+  },
+  {
     "categories": ["distortion", "plot", "knob"],
     "description": "A saturator you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it, pick a curve and turn the drive",
     "name": "block-saturator",

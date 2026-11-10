@@ -32,6 +32,8 @@ import { equalizerDevice } from "@/components/audio-ui/devices/equalizer/device"
 import { createEqualizerEngine } from "@/components/audio-ui/devices/equalizer/engine";
 import { exciterDevice } from "@/components/audio-ui/devices/exciter/device";
 import { createExciterEngine } from "@/components/audio-ui/devices/exciter/engine";
+import { expanderDevice } from "@/components/audio-ui/devices/expander/device";
+import { createExpanderEngine } from "@/components/audio-ui/devices/expander/engine";
 import { filterDevice } from "@/components/audio-ui/devices/filter/device";
 import { createFilterEngine } from "@/components/audio-ui/devices/filter/engine";
 import { fmSynthDevice } from "@/components/audio-ui/devices/fm-synth/device";
@@ -173,6 +175,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(compressorDevice, createCompressorEngine, "Dynamics"),
   entry(limiterDevice, createLimiterEngine, "Dynamics"),
   entry(gateDevice, createGateEngine, "Dynamics"),
+  entry(expanderDevice, createExpanderEngine, "Dynamics"),
   entry(multibandDevice, createMultibandEngine, "Dynamics"),
   entry(transientDevice, createTransientEngine, "Dynamics"),
   entry(deesserDevice, createDeesserEngine, "Dynamics"),

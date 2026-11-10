@@ -14,6 +14,7 @@ import { DrumSynthPanel } from "@/registry-audio/bases/base/devices/drum-synth/p
 import { ElectricPianoPanel } from "@/registry-audio/bases/base/devices/electric-piano/panel";
 import { EqualizerPanel } from "@/registry-audio/bases/base/devices/equalizer/panel";
 import { ExciterPanel } from "@/registry-audio/bases/base/devices/exciter/panel";
+import { ExpanderPanel } from "@/registry-audio/bases/base/devices/expander/panel";
 import { FilterPanel } from "@/registry-audio/bases/base/devices/filter/panel";
 import { FmSynthPanel } from "@/registry-audio/bases/base/devices/fm-synth/panel";
 import { FrequencyShifterPanel } from "@/registry-audio/bases/base/devices/frequency-shifter/panel";
@@ -103,6 +104,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.expander": entry(ExpanderPanel),
   "audioui.binaural-panner": entry(BinauralPannerPanel),
   "audioui.stutter": entry(StutterPanel),
   "audioui.rotary": entry(RotaryPanel, "w-96"),
