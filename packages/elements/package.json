@@ -107,5 +107,8 @@
     "@types/bun": "1.4.2",
     "tsup": "^8.5.0",
     "typescript": "^7.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
