@@ -327,7 +327,7 @@ Parts drawn as SVG use `currentColor`. Classes work as well: the preview above a
 
 | Part | Description |
 | --- | --- |
-| `<audio-ui-meter-channels>` | Generates an `<audio-ui-meter-channel>` per level from its `<template>`. `label` names each channel, `{n}` being its number ("Output {n}"). Renders with `display: contents` |
+| `<audio-ui-meter-channels>` | Generates an `<audio-ui-meter-channel>` per level from its `<template>`. `label` names each channel, `{n}` being its number (`Output {n}`). Renders with `display: contents` |
 | `<audio-ui-meter-channel>` | A channel with `role="meter"`, for its `index`. Carries `data-warning`, `data-clipping`, and `data-clipped` until cleared |
 | `<audio-ui-meter-track>` | The full range of a channel |
 | `<audio-ui-meter-indicator>` | The lit range, scaled to the level |
@@ -407,9 +407,9 @@ The `velocities` property holds each step's velocity as `number[][]` (0 to 1). T
 | `<audio-ui-envelope-graph>` | The drawing surface, filling the envelope. A double click adds a point; carries `data-blocked` briefly when adding is refused |
 | `<audio-ui-envelope-line>` | The curve through the points, in `currentColor`, with a constant stroke width set by `stroke-width` |
 | `<audio-ui-envelope-fill>` | The area under the curve, in `currentColor` |
-| `<audio-ui-envelope-points>` | Generates an `<audio-ui-envelope-point>` per point. `label` names them, with `{n}` and `{count}` placeholders ("Point {n} of {count}" by default) |
+| `<audio-ui-envelope-points>` | Generates an `<audio-ui-envelope-point>` per point. `label` names them, with `{n}` and `{count}` placeholders (`Point {n} of {count}` by default) |
 | `<audio-ui-envelope-point>` | A slider on the point's level, positioned with `left` and `bottom`. Carries `data-dragging`, `data-removable`, and `data-blocked` briefly when removal is refused |
-| `<audio-ui-envelope-segments>` | Generates an `<audio-ui-envelope-segment>` per segment. `label` names them ("Curve {n}" by default) |
+| `<audio-ui-envelope-segments>` | Generates an `<audio-ui-envelope-segment>` per segment. `label` names them (`Curve {n}` by default) |
 | `<audio-ui-envelope-segment>` | A slider on the segment's curve, from -1 to 1, at its midpoint. Drag or Up and Down to bend; double click or Delete to straighten. Carries `data-flat` when the segment cannot bend |
 
 ### Plot
