@@ -9,6 +9,7 @@
     ],
     "catalog": {
       "@audio/beat-detect": "1.1.0",
+      "@audio/biquad": "1.2.2",
       "@audio/decode-aiff": "1.3.1",
       "@audio/decode-caf": "1.4.2",
       "@audio/decode-mp4": "1.3.1",
@@ -22,6 +23,7 @@
       "@audio/effect-phaser": "1.1.6",
       "@audio/effect-pingpong": "1.1.5",
       "@audio/encode": "1.11.0",
+      "@audio/eq-tilt": "1.2.3",
       "@audio/filter-diode-ladder": "1.2.2",
       "@audio/filter-korg35": "1.2.1",
       "@audio/filter-moog-ladder": "1.2.0",

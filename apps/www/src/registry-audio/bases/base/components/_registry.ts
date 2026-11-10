@@ -1259,6 +1259,48 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["eq", "plot", "fader", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A graphic EQ you can plug in: its state, a panel that draws the curve over a fader per band and an engine that plays it. Play a loop through it and pull the faders, the spectrum behind is what comes out",
+    files: [
+      {
+        path: "components/device/block-graphic-eq.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-graphic-eq",
+    registryDependencies: [
+      "@audio-ui/graphic-eq-panel",
+      "@audio-ui/graphic-eq-device",
+      "@audio-ui/graphic-eq-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
+    categories: ["eq", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A tilt EQ you can plug in: its state, a panel that draws the curve it tilts and an engine that plays it. Play a loop through it and turn the tilt: brighter one way, darker the other",
+    files: [
+      {
+        path: "components/device/block-tilt-eq.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-tilt-eq",
+    registryDependencies: [
+      "@audio-ui/tilt-eq-panel",
+      "@audio-ui/tilt-eq-device",
+      "@audio-ui/tilt-eq-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",

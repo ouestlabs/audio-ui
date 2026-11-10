@@ -32,6 +32,8 @@ import { fmSynthDevice } from "@/components/audio-ui/devices/fm-synth/device";
 import { createFmSynthEngine } from "@/components/audio-ui/devices/fm-synth/engine";
 import { gateDevice } from "@/components/audio-ui/devices/gate/device";
 import { createGateEngine } from "@/components/audio-ui/devices/gate/engine";
+import { graphicEqDevice } from "@/components/audio-ui/devices/graphic-eq/device";
+import { createGraphicEqEngine } from "@/components/audio-ui/devices/graphic-eq/engine";
 import { guitarDevice } from "@/components/audio-ui/devices/guitar/device";
 import { createGuitarEngine } from "@/components/audio-ui/devices/guitar/engine";
 import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
@@ -66,6 +68,8 @@ import { stringMachineDevice } from "@/components/audio-ui/devices/string-machin
 import { createStringMachineEngine } from "@/components/audio-ui/devices/string-machine/engine";
 import { tapeKeysDevice } from "@/components/audio-ui/devices/tape-keys/device";
 import { createTapeKeysEngine } from "@/components/audio-ui/devices/tape-keys/engine";
+import { tiltEqDevice } from "@/components/audio-ui/devices/tilt-eq/device";
+import { createTiltEqEngine } from "@/components/audio-ui/devices/tilt-eq/engine";
 import { transientDevice } from "@/components/audio-ui/devices/transient/device";
 import { createTransientEngine } from "@/components/audio-ui/devices/transient/engine";
 import { utilityDevice } from "@/components/audio-ui/devices/utility/device";
@@ -161,6 +165,8 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Tone
   entry(equalizerDevice, createEqualizerEngine, "Tone"),
   entry(channelEqDevice, createChannelEqEngine, "Tone"),
+  entry(graphicEqDevice, createGraphicEqEngine, "Tone"),
+  entry(tiltEqDevice, createTiltEqEngine, "Tone"),
   entry(filterDevice, createFilterEngine, "Tone"),
   // Distortion
   entry(saturatorDevice, createSaturatorEngine, "Distortion"),

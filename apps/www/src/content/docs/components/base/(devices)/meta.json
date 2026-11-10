@@ -12,6 +12,8 @@
     "---Tone---",
     "equalizer",
     "channel-eq",
+    "graphic-eq",
+    "tilt-eq",
     "filter",
     "---Distortion---",
     "overdrive",

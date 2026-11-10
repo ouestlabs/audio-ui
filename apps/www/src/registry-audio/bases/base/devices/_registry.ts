@@ -18,6 +18,7 @@ const DEVICES = [
   "filter",
   "fm-synth",
   "gate",
+  "graphic-eq",
   "limiter",
   "lofi",
   "mid-side",
@@ -25,6 +26,7 @@ const DEVICES = [
   "organ",
   "string-machine",
   "tape-keys",
+  "tilt-eq",
   "guitar",
   "drum-synth",
   "multiband",
@@ -1393,6 +1395,116 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/lofi-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The graphic EQ as a device: ten bands an octave apart, from 31 Hz to 16 kHz (the bands of @audio/eq-graphic), each a bell with a gain of its own, and an output level, the filters a state is and the curve it plays, with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/graphic-eq/device.ts",
+        target: "components/audio-ui/devices/graphic-eq/device.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "graphic-eq-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "A graphic EQ on the Web Audio API for a graphic EQ state: ten peaking filters in series and an output level, the same filters its curve draws, moving without a click.",
+    files: [
+      {
+        path: "devices/graphic-eq/engine.ts",
+        target: "components/audio-ui/devices/graphic-eq/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "graphic-eq-engine",
+    registryDependencies: ["@audio-ui/graphic-eq-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "fader", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the graphic EQ device: the curve it plays over a fader for each of its ten bands, and the output knob beside them.",
+    files: [
+      {
+        path: "devices/graphic-eq/panel.tsx",
+        target: "components/audio-ui/devices/graphic-eq/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "graphic-eq-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/fader",
+      "@audio-ui/plot",
+      "@audio-ui/graphic-eq-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/biquad", "@audio/eq-tilt"],
+    description:
+      "The tilt EQ as a device: a tilt, a pivot and an output level, the numbers that go on the worklet for a state, the curve it plays (the shelves of @audio/biquad) and the worklet's source (the tilt of @audio/eq-tilt), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/tilt-eq/device.ts",
+        target: "components/audio-ui/devices/tilt-eq/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/tilt-eq/kernels.ts",
+        target: "components/audio-ui/devices/tilt-eq/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "tilt-eq-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A tilt EQ on the Web Audio API for a tilt EQ state: the tilt of @audio/eq-tilt in an AudioWorklet loaded from a blob, the sound passing clean until it is ready, then an output level.",
+    files: [
+      {
+        path: "devices/tilt-eq/engine.ts",
+        target: "components/audio-ui/devices/tilt-eq/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "tilt-eq-engine",
+    registryDependencies: ["@audio-ui/tilt-eq-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the tilt EQ device: the curve it plays, tilted around a line at the pivot, over the device knobs.",
+    files: [
+      {
+        path: "devices/tilt-eq/panel.tsx",
+        target: "components/audio-ui/devices/tilt-eq/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "tilt-eq-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/tilt-eq-device",
     ],
     type: "registry:ui",
   },

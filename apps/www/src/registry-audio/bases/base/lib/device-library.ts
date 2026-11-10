@@ -32,6 +32,8 @@ import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/devi
 import { createFmSynthEngine } from "@/registry-audio/bases/base/devices/fm-synth/engine";
 import { gateDevice } from "@/registry-audio/bases/base/devices/gate/device";
 import { createGateEngine } from "@/registry-audio/bases/base/devices/gate/engine";
+import { graphicEqDevice } from "@/registry-audio/bases/base/devices/graphic-eq/device";
+import { createGraphicEqEngine } from "@/registry-audio/bases/base/devices/graphic-eq/engine";
 import { guitarDevice } from "@/registry-audio/bases/base/devices/guitar/device";
 import { createGuitarEngine } from "@/registry-audio/bases/base/devices/guitar/engine";
 import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
@@ -66,6 +68,8 @@ import { stringMachineDevice } from "@/registry-audio/bases/base/devices/string-
 import { createStringMachineEngine } from "@/registry-audio/bases/base/devices/string-machine/engine";
 import { tapeKeysDevice } from "@/registry-audio/bases/base/devices/tape-keys/device";
 import { createTapeKeysEngine } from "@/registry-audio/bases/base/devices/tape-keys/engine";
+import { tiltEqDevice } from "@/registry-audio/bases/base/devices/tilt-eq/device";
+import { createTiltEqEngine } from "@/registry-audio/bases/base/devices/tilt-eq/engine";
 import { transientDevice } from "@/registry-audio/bases/base/devices/transient/device";
 import { createTransientEngine } from "@/registry-audio/bases/base/devices/transient/engine";
 import { utilityDevice } from "@/registry-audio/bases/base/devices/utility/device";
@@ -161,6 +165,8 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   // Tone
   entry(equalizerDevice, createEqualizerEngine, "Tone"),
   entry(channelEqDevice, createChannelEqEngine, "Tone"),
+  entry(graphicEqDevice, createGraphicEqEngine, "Tone"),
+  entry(tiltEqDevice, createTiltEqEngine, "Tone"),
   entry(filterDevice, createFilterEngine, "Tone"),
   // Distortion
   entry(saturatorDevice, createSaturatorEngine, "Distortion"),

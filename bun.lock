@@ -20,6 +20,7 @@
         "@audio-ui/icons": "*",
         "@audio-ui/react": "*",
         "@audio/beat-detect": "catalog:",
+        "@audio/biquad": "catalog:",
         "@audio/decode-aiff": "catalog:",
         "@audio/decode-caf": "catalog:",
         "@audio/decode-mp4": "catalog:",
@@ -33,6 +34,7 @@
         "@audio/effect-phaser": "catalog:",
         "@audio/effect-pingpong": "catalog:",
         "@audio/encode": "catalog:",
+        "@audio/eq-tilt": "catalog:",
         "@audio/filter-diode-ladder": "catalog:",
         "@audio/filter-korg35": "catalog:",
         "@audio/filter-moog-ladder": "catalog:",
@@ -160,6 +162,7 @@
         "@audio-ui/icons": "*",
         "@audio-ui/react": "*",
         "@audio/beat-detect": "catalog:",
+        "@audio/biquad": "catalog:",
         "@audio/decode-aiff": "catalog:",
         "@audio/decode-caf": "catalog:",
         "@audio/decode-mp4": "catalog:",
@@ -173,6 +176,7 @@
         "@audio/effect-phaser": "catalog:",
         "@audio/effect-pingpong": "catalog:",
         "@audio/encode": "catalog:",
+        "@audio/eq-tilt": "catalog:",
         "@audio/filter-diode-ladder": "catalog:",
         "@audio/filter-korg35": "catalog:",
         "@audio/filter-moog-ladder": "catalog:",
@@ -239,6 +243,7 @@
         "@audio/decode-flac": "2.0.0",
         "@audio/decode-mp3": "1.3.1",
         "@audio/decode-wav": "2.0.0",
+        "@audio/eq-graphic": "1.2.4",
         "@cloudflare/vite-plugin": "catalog:",
         "@happy-dom/global-registrator": "^21.0.4",
         "@resvg/resvg-js": "^2.6.2",
@@ -332,6 +337,7 @@
   },
   "catalog": {
     "@audio/beat-detect": "1.1.0",
+    "@audio/biquad": "1.2.2",
     "@audio/decode-aiff": "1.3.1",
     "@audio/decode-caf": "1.4.2",
     "@audio/decode-mp4": "1.3.1",
@@ -345,6 +351,7 @@
     "@audio/effect-phaser": "1.1.6",
     "@audio/effect-pingpong": "1.1.5",
     "@audio/encode": "1.11.0",
+    "@audio/eq-tilt": "1.2.3",
     "@audio/filter-diode-ladder": "1.2.2",
     "@audio/filter-korg35": "1.2.1",
     "@audio/filter-moog-ladder": "1.2.0",
@@ -481,6 +488,10 @@
     "@audio/encode-wavpack": ["@audio/encode-wavpack@1.0.2", "", {}, "sha512-bmz7iOB/IQQ7TW746t5a9H5jeHe9xMfWK+mZSVtJY2KCXuG+5OvQuUu6clNk2IYhSIiEr54Nyc0fmTLJBaxDMw=="],
 
     "@audio/encode-webm": ["@audio/encode-webm@1.3.1", "", { "dependencies": { "@audio/encode-opus": "^1.3.2" } }, "sha512-04iHcWQikUC7Tdi4w+FVYfxUvllsdQryxdDszx46Fc3Bd5rPn6mPKrSs04snYhZmQdcGGo/WM2sOzKoe0a314Q=="],
+
+    "@audio/eq-graphic": ["@audio/eq-graphic@1.2.4", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-7x6JnFerm3GCf+zaY2R2QUUXhiYpb4+kNbYKc295hMWW+RKWTq6OjPdF7Mgj3i5x2hS8Eg20jfginD/4b1uNDA=="],
+
+    "@audio/eq-tilt": ["@audio/eq-tilt@1.2.3", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-V6frxNUk9YuEpm7sxonp4e1xLeQfPLmpyKvXbOS/dnzvL5ZGubJIU3vNfHawrs/ZoRXlM+3b382wd5eLTxU4Ng=="],
 
     "@audio/filter-diode-ladder": ["@audio/filter-diode-ladder@1.2.2", "", {}, "sha512-RBQQUPOjMRImWg5Yiwqy6WHUT75avIafhIOuOh3V+Dbuo+K8Y/6LHJmewzIGd5RzLNEXUqFHgUnKHhgpd5R4zw=="],
 

@@ -372,6 +372,18 @@
     "title": "Block lofi"
   },
   {
+    "categories": ["eq", "plot", "fader", "knob"],
+    "description": "A graphic EQ you can plug in: its state, a panel that draws the curve over a fader per band and an engine that plays it. Play a loop through it and pull the faders, the spectrum behind is what comes out",
+    "name": "block-graphic-eq",
+    "title": "Block graphic eq"
+  },
+  {
+    "categories": ["eq", "plot", "knob"],
+    "description": "A tilt EQ you can plug in: its state, a panel that draws the curve it tilts and an engine that plays it. Play a loop through it and turn the tilt: brighter one way, darker the other",
+    "name": "block-tilt-eq",
+    "title": "Block tilt eq"
+  },
+  {
     "categories": ["mixer", "fader", "meter", "knob"],
     "description": "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",
     "name": "block-mixer",

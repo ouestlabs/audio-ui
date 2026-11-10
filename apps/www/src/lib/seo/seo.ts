@@ -29,6 +29,8 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "vibe",
   "auto-pan",
   "channel-eq",
+  "graphic-eq",
+  "tilt-eq",
   "overdrive",
   "deesser",
   "multiband",

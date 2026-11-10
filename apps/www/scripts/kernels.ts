@@ -7,8 +7,11 @@ interface Kernel {
   /** The module that holds it, in the package. */
   file: string;
   name: string;
-  /** The function the worklet calls, by the name the module exports it under, by default or by name. */
-  use: string;
+  /**
+   * What the worklet calls, by the names the module exports it under, by
+   * default or by name: one function, or several.
+   */
+  use: string | readonly string[];
 }
 
 interface KernelSet {
@@ -80,6 +83,18 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "TILT_EQ_KERNELS",
+    file: "devices/tilt-eq/kernels.ts",
+    kernels: [
+      {
+        file: "biquad.js",
+        name: "@audio/biquad",
+        use: ["lowshelf", "highshelf", "filter"],
+      },
+      { file: "tilt.js", name: "@audio/eq-tilt", use: "tilt" },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [
@@ -103,6 +118,9 @@ export const KERNELS_DIR = `${import.meta.dir}/../src/registry-audio/bases/base`
 
 const PACKAGE_JSON = /package\.json$/;
 const IMPORT = /^\s*import\s/m;
+/** An import of names from a package: `import { a, b } from "pkg"`. */
+const NAMED_IMPORT =
+  /^\s*import\s*\{([^}]*)\}\s*from\s*["']([^"']+)["'];?[ \t]*\n?/gm;
 /** The keyword that exports a declaration, by default or by name: a scope of its own keeps it. */
 const EXPORT = /^export (default )?/gm;
 /** An npm author's email and web page, left out: the name says who wrote it. */
@@ -112,10 +130,43 @@ const CONTACT = /\s*[<(][^>)]*[>)]/g;
 const escaped = (text: string) =>
   text.replaceAll("\\", "\\\\").replaceAll("`", "\\`").replaceAll("${", "\\${");
 
+const namesOf = (use: Kernel["use"]) => (typeof use === "string" ? [use] : use);
+
+/**
+ * A module's source without the imports the set already holds: names from a
+ * package vendored before it in the set, which its scope sees. Any other
+ * import is refused, since a worklet cannot load it.
+ */
+function withoutImports(
+  source: string,
+  where: string,
+  held: ReadonlyMap<string, readonly string[]>
+) {
+  const body = source.replace(NAMED_IMPORT, (_line, list: string, from) => {
+    const names = list.split(",").map((part) => part.trim());
+    const has = held.get(from);
+    if (!(has && names.every((imported) => has.includes(imported)))) {
+      throw new Error(
+        `${where} imports ${from}, which the set does not hold before it: a worklet cannot load it`
+      );
+    }
+    return "";
+  });
+  if (IMPORT.test(body)) {
+    throw new Error(
+      `${where} imports another module: a worklet cannot load it`
+    );
+  }
+  return body;
+}
+
 /** The file a set writes: each kernel's module as installed, in a scope of its own. */
 export async function kernelFile({ constant, kernels }: KernelSet) {
+  const held = new Map(
+    kernels.map((kernel) => [kernel.name, namesOf(kernel.use)] as const)
+  );
   const modules = await Promise.all(
-    kernels.map(async ({ file, name, use }) => {
+    kernels.map(async ({ file, name, use }, index) => {
       const root = Bun.resolveSync(
         `${name}/package.json`,
         import.meta.dir
@@ -124,19 +175,20 @@ export async function kernelFile({ constant, kernels }: KernelSet) {
         `${root}package.json`
       ).json();
       const source = await Bun.file(`${root}${file}`).text();
-      if (IMPORT.test(source)) {
-        throw new Error(
-          `${name}/${file} imports another module: a worklet cannot load it`
-        );
-      }
-      const body = source.replace(EXPORT, "");
+      const before = new Map([...held].filter((_entry, at) => at < index));
+      const body = withoutImports(source, `${name}/${file}`, before).replace(
+        EXPORT,
+        ""
+      );
       const by = (typeof author === "string" ? author : author?.name)?.replace(
         CONTACT,
         ""
       );
+      const names = namesOf(use);
+      const given = typeof use === "string" ? use : `{ ${names.join(", ")} }`;
       return {
-        code: `const ${use} = (() => {\n${body}\nreturn ${use};\n})();\n`,
-        label: ` * - \`${name}\` ${version} (${license}, ${by}): \`${use}\``,
+        code: `const ${given} = (() => {\n${body}\nreturn ${given};\n})();\n`,
+        label: ` * - \`${name}\` ${version} (${license}, ${by}): ${names.map((each) => `\`${each}\``).join(", ")}`,
       };
     })
   );

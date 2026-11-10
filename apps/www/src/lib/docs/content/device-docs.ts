@@ -11,6 +11,7 @@ import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/d
 import { filterDevice } from "@/registry-audio/bases/base/devices/filter/device";
 import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/device";
 import { gateDevice } from "@/registry-audio/bases/base/devices/gate/device";
+import { graphicEqDevice } from "@/registry-audio/bases/base/devices/graphic-eq/device";
 import { guitarDevice } from "@/registry-audio/bases/base/devices/guitar/device";
 import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
 import { lofiDevice } from "@/registry-audio/bases/base/devices/lofi/device";
@@ -28,6 +29,7 @@ import { samplerDevice } from "@/registry-audio/bases/base/devices/sampler/devic
 import { saturatorDevice } from "@/registry-audio/bases/base/devices/saturator/device";
 import { stringMachineDevice } from "@/registry-audio/bases/base/devices/string-machine/device";
 import { tapeKeysDevice } from "@/registry-audio/bases/base/devices/tape-keys/device";
+import { tiltEqDevice } from "@/registry-audio/bases/base/devices/tilt-eq/device";
 import { transientDevice } from "@/registry-audio/bases/base/devices/transient/device";
 import { utilityDevice } from "@/registry-audio/bases/base/devices/utility/device";
 import { vibeDevice } from "@/registry-audio/bases/base/devices/vibe/device";
@@ -37,6 +39,8 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  "graphic-eq": graphicEqDevice,
+  "tilt-eq": tiltEqDevice,
   chorus: chorusDevice,
   compressor: compressorDevice,
   deesser: deesserDevice,

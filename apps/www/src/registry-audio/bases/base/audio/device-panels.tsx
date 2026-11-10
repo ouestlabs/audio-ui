@@ -14,6 +14,7 @@ import { EqualizerPanel } from "@/registry-audio/bases/base/devices/equalizer/pa
 import { FilterPanel } from "@/registry-audio/bases/base/devices/filter/panel";
 import { FmSynthPanel } from "@/registry-audio/bases/base/devices/fm-synth/panel";
 import { GatePanel } from "@/registry-audio/bases/base/devices/gate/panel";
+import { GraphicEqPanel } from "@/registry-audio/bases/base/devices/graphic-eq/panel";
 import { GuitarPanel } from "@/registry-audio/bases/base/devices/guitar/panel";
 import { LimiterPanel } from "@/registry-audio/bases/base/devices/limiter/panel";
 import { LofiPanel } from "@/registry-audio/bases/base/devices/lofi/panel";
@@ -31,6 +32,7 @@ import { SamplerPanel } from "@/registry-audio/bases/base/devices/sampler/panel"
 import { SaturatorPanel } from "@/registry-audio/bases/base/devices/saturator/panel";
 import { StringMachinePanel } from "@/registry-audio/bases/base/devices/string-machine/panel";
 import { TapeKeysPanel } from "@/registry-audio/bases/base/devices/tape-keys/panel";
+import { TiltEqPanel } from "@/registry-audio/bases/base/devices/tilt-eq/panel";
 import { TransientPanel } from "@/registry-audio/bases/base/devices/transient/panel";
 import { UtilityPanel } from "@/registry-audio/bases/base/devices/utility/panel";
 import { VibePanel } from "@/registry-audio/bases/base/devices/vibe/panel";
@@ -94,6 +96,8 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.graphic-eq": entry(GraphicEqPanel, "w-[28rem]"),
+  "audioui.tilt-eq": entry(TiltEqPanel),
   "audioui.limiter": entry(LimiterPanel),
   "audioui.mid-side": entry(MidSidePanel),
   "audioui.mono-synth": entry(MonoSynthPanel, "w-[40rem]"),

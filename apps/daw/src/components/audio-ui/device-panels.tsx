@@ -14,6 +14,7 @@ import { EqualizerPanel } from "@/components/audio-ui/devices/equalizer/panel";
 import { FilterPanel } from "@/components/audio-ui/devices/filter/panel";
 import { FmSynthPanel } from "@/components/audio-ui/devices/fm-synth/panel";
 import { GatePanel } from "@/components/audio-ui/devices/gate/panel";
+import { GraphicEqPanel } from "@/components/audio-ui/devices/graphic-eq/panel";
 import { GuitarPanel } from "@/components/audio-ui/devices/guitar/panel";
 import { LimiterPanel } from "@/components/audio-ui/devices/limiter/panel";
 import { LofiPanel } from "@/components/audio-ui/devices/lofi/panel";
@@ -31,6 +32,7 @@ import { SamplerPanel } from "@/components/audio-ui/devices/sampler/panel";
 import { SaturatorPanel } from "@/components/audio-ui/devices/saturator/panel";
 import { StringMachinePanel } from "@/components/audio-ui/devices/string-machine/panel";
 import { TapeKeysPanel } from "@/components/audio-ui/devices/tape-keys/panel";
+import { TiltEqPanel } from "@/components/audio-ui/devices/tilt-eq/panel";
 import { TransientPanel } from "@/components/audio-ui/devices/transient/panel";
 import { UtilityPanel } from "@/components/audio-ui/devices/utility/panel";
 import { VibePanel } from "@/components/audio-ui/devices/vibe/panel";
@@ -94,6 +96,8 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.graphic-eq": entry(GraphicEqPanel, "w-[28rem]"),
+  "audioui.tilt-eq": entry(TiltEqPanel),
   "audioui.limiter": entry(LimiterPanel),
   "audioui.mid-side": entry(MidSidePanel),
   "audioui.mono-synth": entry(MonoSynthPanel, "w-[40rem]"),

@@ -7,13 +7,13 @@
       "name": "envelope"
     },
     {
-      "count": 3,
+      "count": 4,
       "description": "Fader components for level, gain, and mix controls.",
       "label": "Fader",
       "name": "fader"
     },
     {
-      "count": 27,
+      "count": 29,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -67,7 +67,7 @@
       "name": "dynamics"
     },
     {
-      "count": 3,
+      "count": 5,
       "description": "EQ and filter devices: an equalizer, a channel EQ and a filter, with a curve you drag.",
       "label": "EQ and filters",
       "name": "eq"
@@ -109,7 +109,7 @@
       "name": "tuner"
     },
     {
-      "count": 22,
+      "count": 24,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
       "name": "plot"
@@ -175,5 +175,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 73
+  "totalComponents": 75
 }
