@@ -11,5 +11,6 @@ export * from "./pad/index.ts";
 export * from "./piano/index.ts";
 export * from "./plot/index.ts";
 export * from "./sequencer/index.ts";
+export * from "./timeline/index.ts";
 export * from "./waveform/index.ts";
 export * from "./xypad/index.ts";

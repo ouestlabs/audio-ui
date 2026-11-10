@@ -55,6 +55,7 @@ Every change fires `input`, with `event.detail.value` and `event.detail.reason` 
 | `<audio-ui-piano>` | A keyboard to play, with glides, chords, and a piano or even layout |
 | `<audio-ui-plot>` | Axes to draw curves, lines, bands, live traces and a grid on, with handles to drag |
 | `<audio-ui-sequencer>` | A step sequencer: cells painted on and off, velocities, the step being played |
+| `<audio-ui-timeline>` | An arrangement: a ruler and a playhead, tracks of clips to move, trim and fade, loop ranges, zoom and a navigator |
 | `<audio-ui-waveform>` | A waveform to seek, drawn on a canvas or as bars, from peaks or a live signal, with regions and markers |
 | `<audio-ui-xypad>` | A two-dimensional parameter, a point on a pad |
 

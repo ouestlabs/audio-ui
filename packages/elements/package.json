@@ -68,6 +68,10 @@
       "types": "./dist/sequencer/index.d.ts",
       "import": "./dist/sequencer.js"
     },
+    "./timeline": {
+      "types": "./dist/timeline/index.d.ts",
+      "import": "./dist/timeline.js"
+    },
     "./waveform": {
       "types": "./dist/waveform/index.d.ts",
       "import": "./dist/waveform.js"
