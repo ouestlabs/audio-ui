@@ -320,7 +320,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core", "@audio/dynamics-deesser"],
     description:
-      "The de-esser as a device: a frequency, a threshold, a ratio and a range, its models (the clean split, or the split, band and wide band de-essers of @audio/dynamics-deesser, which tell an s by the highs over the voice's body), the numbers that go on the nodes for a state, the table that keeps the highs above their floor, the response a state draws and the source of the other models' worklet, with no panel and no audio in it.",
+      "The de-esser as a device: a frequency, an over-body level, a ratio and a range, its models (the split, band and wide band de-essers of @audio/dynamics-deesser, which tell an s by the highs over the voice's body), the numbers that go on the worklet for a state, the response a state draws and the source of the worklet, with no panel and no audio in it.",
     files: [
       {
         path: "devices/deesser/device.ts",
@@ -341,7 +341,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A de-esser on the Web Audio API for a de-esser state: a Linkwitz-Riley split at the frequency, the highs read by the compressor's detector and taken down over the threshold, never under the range, and added back to the lows, or the other models in a worklet fed only while one plays.",
+      "A de-esser on the Web Audio API for a de-esser state: the audio.js de-esser in a worklet, the highs passing until it is ready.",
     files: [
       {
         path: "devices/deesser/engine.ts",

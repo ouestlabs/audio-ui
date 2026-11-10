@@ -1,13 +1,13 @@
 ---
 title: De-esser
-description: "A de-esser device: four models, frequency, threshold, ratio, range and listen, a panel that draws what it does at each frequency, a Web Audio engine and tools for agents."
+description: "A de-esser device: three models, frequency, over body, ratio and range, a panel that draws what it does at each frequency, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-deesser" />
 
-Softens the sharp s and t of a voice. When the highs above a frequency get loud, they are taken down, never by more than the range. The clean model reads their level against a threshold; the split, band and wide band models, from [audio.js](https://audio.js.org), read how far they rise over the voice's body, so the same setting works at any recording level. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Softens the sharp s and t of a voice. When the highs above a frequency get loud, they are taken down, never by more than the range. The split, band and wide band models, from [audio.js](https://audio.js.org), read how far they rise over the voice's body, so the same setting works at any recording level. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -19,23 +19,20 @@ Softens the sharp s and t of a voice. When the highs above a frequency get loud,
 <Control id="model">What is taken down, and how an s is told. See [Models](#models). It is picked in the title bar, and the controls the model does not use are drawn off.</Control>
 <Control id="frequencyHz">Where the highs start, or the centre of the band. Drag the handle on the plot across to set it.</Control>
 <Control id="q">How narrow the band model's band is: 1.4 is about an octave.</Control>
-<Control id="thresholdDb">The level of the highs above which the clean model takes them down.</Control>
-<Control id="overBodyDb">How far the highs must rise over the voice's body, in dB, for the other models to take them down.</Control>
-<Control id="ratio">How much the highs are brought down above the threshold.</Control>
+<Control id="overBodyDb">How far the highs must rise over the voice's body, in dB, to be taken down.</Control>
+<Control id="ratio">How much the highs are brought down above that.</Control>
 <Control id="rangeDb">The most the highs are taken down. Drag the handle down to raise it.</Control>
-<Control id="listen">Plays only the highs, to find where the sibilants sit. Clean model only.</Control>
 </DeviceControls>
 
 ## Models
 
 | Model | Tells an s by | Takes down |
 | --- | --- | --- |
-| Clean | the level of the highs over the threshold | the highs over the frequency, by a Linkwitz-Riley split |
 | Split | the highs rising over the voice's body | the highs over the frequency, by a linear-phase split |
 | Band | the same | a band around the frequency, as wide as the Q |
 | Wide band | the same | the whole sound, while the s lasts |
 
-Split, Band and Wide band are the modes of `@audio/dynamics-deesser`, its processor as published in an `AudioWorklet` fed only while one plays. They hear the sound 5 ms ahead of what they cut, so an s is taken down from its start: the device's [latency](/docs/devices#latency) is 5 ms with them, none with the clean model. Until the worklet is ready, the clean model plays for them. A change to one of their values builds the model again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. Their knee, attack and release are the package's: 6 dB, 1 ms and 15 ms.
+Split, Band and Wide band are the modes of `@audio/dynamics-deesser`, its processor as published in an `AudioWorklet`. They hear the sound 5 ms ahead of what they cut, so an s is taken down from its start: the device's [latency](/docs/devices#latency) is 5 ms. Until the worklet is ready, the highs pass unchanged. A change to one of their values builds the model again: at most every 50 ms, the new one first playing the last 100 ms of sound, then taking over in a 30 ms fade. Their knee, attack and release are the package's: 6 dB, 1 ms and 15 ms.
 
 ## Panel
 
@@ -51,8 +48,4 @@ Create it, connect it and update it as for any device: see [The engine](/docs/de
 engine.reduction; // dB taken off the highs, read per frame
 ```
 
-For the clean model, two biquads in a row make each half of a Linkwitz-Riley split, whose low and high halves add back to a flat response when nothing is taken down. A detector reads the highs and writes the gain they get. It is the one of the compressor's [sidechain](/docs/devices#sidechain), with a soft knee of 3 dB, an attack of 0.5 ms and a release of 60 ms. A table keeps the gain from going under the range.
-
-Measured in Chrome, with nothing over the threshold the output is within 0.01 dB of the input from 200 Hz to 12 kHz. At full reduction a 10 kHz tone goes down by 5.1, 9.6 and 15.7 dB for ranges of 6, 12 and 24 dB, which is the curve the panel draws, to the hundredth.
-
-For the split and band models, the panel draws the cut with the clean model's split and a band-pass of the same Q: at the frequency they match the package's linear-phase filters, which fall away faster around it. With the other models, `engine.reduction` reads what is taken off the whole sound, which for a split or a band is less than what the highs lose.
+The panel draws the cut of the split with two Butterworth biquads in a row, a Linkwitz-Riley split, and the band with a band-pass of the same Q: at the frequency they match the package's linear-phase filters, which fall away faster around it. `engine.reduction` reads what is taken off the whole sound, which for a split or a band is less than what the highs lose.
