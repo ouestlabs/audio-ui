@@ -351,7 +351,7 @@ abstract class KnobArcElement extends KnobPartElement {
 
   protected override attached() {
     if (this.#svg.parentNode !== this) {
-      this.append(this.#svg);
+      this.appendChild(this.#svg);
     }
   }
 
@@ -367,7 +367,7 @@ abstract class KnobArcElement extends KnobPartElement {
       );
       this.#path.setAttribute("stroke-width", String(width));
       if (this.#path.parentNode !== this.#svg) {
-        this.#svg.append(this.#path);
+        this.#svg.appendChild(this.#path);
       }
     } else {
       this.#path.remove();
@@ -440,7 +440,7 @@ export class KnobThumbElement extends KnobPartElement {
 
   protected override attached(knob: KnobElement) {
     if (this.input.parentNode !== this) {
-      this.append(this.input);
+      this.appendChild(this.input);
     }
     knob.input = this.input;
   }

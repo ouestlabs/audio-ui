@@ -1,6 +1,6 @@
 # @audio-ui/elements
 
-Headless, accessible audio controls as custom elements: the knob and the fader of audio/ui, for a page in Vue, Svelte, Angular, or plain HTML.
+Headless, accessible audio controls as custom elements: the knob and the fader of audio/ui, for a page in plain HTML, Vue, Svelte or any framework that renders HTML.
 
 - **Headless.** The elements set only what they need to work (display, position, the thumb's rotation) in rules with no specificity. State is in `data-*` attributes to style from, the same as the React parts.
 - **Accessible.** Every control holds a native `<input type="range">`, so focus, the keyboard, screen readers and forms work as they do for a slider.

@@ -407,7 +407,7 @@ export class FaderThumbElement extends FaderPartElement {
 
   protected override attached(fader: FaderElement) {
     if (this.input.parentNode !== this) {
-      this.append(this.input);
+      this.appendChild(this.input);
     }
     this.#direction = getComputedStyle(this).direction === "rtl" ? -1 : 1;
     fader.input = this.input;

@@ -25,6 +25,7 @@ audio-ui/
 ├── packages/
 │   ├── core/       # @audio-ui/core, published (framework-agnostic logic)
 │   ├── ui/         # @audio-ui/react, published (headless primitives)
+│   ├── elements/   # @audio-ui/elements, published: the knob and the fader as custom elements, over core
 │   └── icons/      # @audio-ui/icons, published: audio glyphs (one thin stroke on a 24 grid, in four weights)
 └── skills/         # The agent skills we ship to library users: audio-ui, web-audio, design, core (npx skills add ouestlabs/audio-ui)
 ```
@@ -131,8 +132,8 @@ The "API reference" of each component page is a hand-kept copy of the JSDoc of t
 ### Published packages
 
 - Relative imports carry the `.ts` extension (`./x.ts`, compiled with `rewriteRelativeImportExtensions`). A `.js` specifier breaks the www Turbopack build.
-- Every user-visible change to `packages/core` or `packages/ui` needs a changeset (`bun run changeset`). Never edit `package.json` versions.
-- `packages/ui` has size budgets (`bun run size`): keep new code out of primitives that don't need it.
+- Every user-visible change to `packages/core`, `packages/ui` or `packages/elements` needs a changeset (`bun run changeset`). Never edit `package.json` versions.
+- `packages/ui` and `packages/elements` have size budgets (`bun run size`): keep new code out of primitives that don't need it. In `packages/elements` the same script fails when an entry, imported for its side effect, registers no element.
 
 ### Writing (docs, changesets, comments, commit messages, UI copy)
 
@@ -146,10 +147,11 @@ The "API reference" of each component page is a hand-kept copy of the JSDoc of t
 2. After a registry change: `bun run registry:build` from `apps/www/`, **after** the last lint fix, so the generated JSON matches the formatted source
 3. The checks CI runs on every PR:
    ```sh
-   bunx biome ci packages/core packages/ui
+   bunx biome ci packages/core packages/ui packages/elements
    bun run build:pkg
    (cd packages/core && bunx tsc --noEmit && bun test)
    (cd packages/ui && bunx tsc --noEmit && bun test && bun run size)
+   (cd packages/elements && bunx tsc --noEmit && bun test && bun run size)
    ```
    For `apps/www`: `bun run typecheck` and `bun test`.
 4. For UI changes, look at the page in a browser (dev server on :4000) and tab through the controls.

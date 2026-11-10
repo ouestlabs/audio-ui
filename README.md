@@ -44,6 +44,7 @@ bun run dev    # the docs site on http://localhost:4000
 | `apps/video` | Remotion videos of the real components |
 | `packages/core` | `@audio-ui/core`, framework-agnostic logic |
 | `packages/ui` | `@audio-ui/react`, the headless primitives |
+| `packages/elements` | `@audio-ui/elements`, the knob and the fader as custom elements |
 | `skills/` | The agent skills we ship to people using the library: `audio-ui`, `web-audio`, `design`, `core` |
 
 Before opening a pull request:

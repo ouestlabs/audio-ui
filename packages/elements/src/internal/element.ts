@@ -45,9 +45,9 @@ export function structure(rules: string) {
   if (!style) {
     style = document.createElement("style");
     style.dataset.audioUiElements = "";
-    document.head.prepend(style);
+    document.head.insertBefore(style, document.head.firstChild);
   }
-  style.append(rules);
+  style.appendChild(document.createTextNode(rules));
 }
 
 /** Sets each attribute to its value, and removes the ones whose value is `null`, touching only what changed. */

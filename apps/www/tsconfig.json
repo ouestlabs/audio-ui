@@ -22,6 +22,8 @@
         "../../packages/core/src/primitives/*/index.ts",
         "../../packages/core/src/audio/*/index.ts"
       ],
+      "@audio-ui/elements": ["../../packages/elements/src/index.ts"],
+      "@audio-ui/elements/*": ["../../packages/elements/src/*/index.ts"],
       "@audio-ui/icons": ["../../packages/icons/src/core/index.ts"],
       "@audio-ui/icons/react": [
         "../../packages/icons/src/providers/react/index.tsx"

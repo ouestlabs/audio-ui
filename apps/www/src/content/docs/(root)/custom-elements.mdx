@@ -1,0 +1,244 @@
+---
+title: Custom elements
+description: The knob and the fader as custom elements, with the parts, state attributes and events of the React primitives.
+---
+
+`@audio-ui/elements` holds the knob and the fader of audio/ui as custom elements, for a page in Vue, in Svelte, or with no framework at all. They are the same parts as the [primitives](/docs/primitives) of `@audio-ui/react`, built on the same `@audio-ui/core`: the same keys, drag and wheel, the same native `<input type="range">` in each thumb, the same `data-*` attributes to style from. The two below take the classes of the registry's own Knob and Fader.
+
+<ElementsPreview />
+
+## Installation
+
+```bash
+npm install @audio-ui/elements
+```
+
+Importing a subpath registers its elements. Import it once, where the page starts:
+
+```js
+import "@audio-ui/elements/knob";
+import "@audio-ui/elements/fader";
+```
+
+`@audio-ui/elements` alone registers both. On a server, the import does nothing, and the elements come to life in the browser.
+
+## Usage
+
+<Tabs defaultValue="javascript">
+
+<TabsList>
+  <TabsTrigger value="javascript"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="javascript">
+
+```html
+<audio-ui-knob min="20" max="20000" default-value="1000" scale="log">
+  <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
+  <audio-ui-knob-control>
+    <audio-ui-knob-track></audio-ui-knob-track>
+    <audio-ui-knob-indicator></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+
+<script type="module">
+  import "@audio-ui/elements/knob";
+
+  const knob = document.querySelector("audio-ui-knob");
+  knob.addEventListener("input", (event) => setCutoff(event.detail.value));
+</script>
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+Tell Vue's compiler the tags are custom elements, in `vite.config.js`:
+
+```js
+vue({
+  template: {
+    compilerOptions: { isCustomElement: (tag) => tag.startsWith("audio-ui-") },
+  },
+});
+```
+
+```vue
+<script setup>
+import "@audio-ui/elements/knob";
+import { ref } from "vue";
+
+const cutoff = ref(1000);
+</script>
+
+<template>
+  <audio-ui-knob
+    min="20"
+    max="20000"
+    scale="log"
+    :value="cutoff"
+    @input="cutoff = $event.detail.value"
+  >
+    <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
+    <audio-ui-knob-control>
+      <audio-ui-knob-track />
+      <audio-ui-knob-indicator />
+      <audio-ui-knob-thumb />
+    </audio-ui-knob-control>
+    <audio-ui-knob-value />
+  </audio-ui-knob>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script>
+  import "@audio-ui/elements/knob";
+
+  let cutoff = $state(1000);
+</script>
+
+<audio-ui-knob
+  min="20"
+  max="20000"
+  scale="log"
+  value={cutoff}
+  oninput={(event) => (cutoff = event.detail.value)}
+>
+  <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
+  <audio-ui-knob-control>
+    <audio-ui-knob-track></audio-ui-knob-track>
+    <audio-ui-knob-indicator></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+```
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, take `@audio-ui/react`: the same knob, as components, with typed props, a `render` prop, and the value as React state. React renders the custom elements too, as the preview above shows, but the components fit it better.
+
+```tsx
+import { Knob } from "@audio-ui/react";
+
+const [cutoff, setCutoff] = useState(1000);
+
+<Knob.Root max={20_000} min={20} onValueChange={setCutoff} scale="log" value={cutoff}>
+  <Knob.Label>Cutoff</Knob.Label>
+  <Knob.Control>
+    <Knob.Track />
+    <Knob.Indicator />
+    <Knob.Thumb />
+  </Knob.Control>
+  <Knob.Value />
+</Knob.Root>;
+```
+
+</TabsContent>
+
+</Tabs>
+
+The fader takes the same shape: `<audio-ui-fader>`, with `-label`, `-control`, `-track`, `-indicator`, `-thumb` and `-value` parts.
+
+## Value and events
+
+- **`input`** fires on every change: a drag, a key, the wheel, a reset. `event.detail.value` is the new value and `event.detail.reason` what changed it (`"drag"`, `"keyboard"`, `"wheel"`, `"reset"`, `"input-change"`, and `"track-press"` on a fader). `preventDefault()` refuses it, and the control stays where it was.
+- **`change`** fires once, when a gesture that changed the value ends: the time to start a note, push to an undo stack or save.
+- **`value`**, the property, reads the value and moves the control when you set it. A framework that binds it (`:value` in Vue, `value={}` in Svelte) sets it. While a pointer drags, the control follows the pointer even if the value you set lags behind.
+- **`name`** makes the thumb's input a field of the form around it, submitted with the value.
+
+## Styling
+
+The elements set only what they need to work: `display: block` on the parts that are boxes, `position: relative` and `touch-action: none` on the control, the thumb's rotation or place, in rules with no specificity, so any rule of yours wins. No color, size or spacing comes from them. Style them from the same attributes as the React parts:
+
+```css
+audio-ui-knob-control { width: 4rem; height: 4rem; cursor: grab; }
+audio-ui-knob[data-dragging] audio-ui-knob-control { cursor: grabbing; }
+audio-ui-knob-track, audio-ui-knob-indicator { position: absolute; inset: 0; }
+audio-ui-knob-track { color: var(--muted); }
+audio-ui-knob-indicator { color: var(--primary); }
+audio-ui-knob-thumb:has(input:focus-visible) { outline: 2px solid var(--ring); }
+```
+
+The track and the indicator draw their arc with `currentColor`. A class works too: the preview above uses the classes of the registry's Knob and Fader, as Tailwind writes them.
+
+## API reference
+
+### Knob
+
+`<audio-ui-knob>` groups all parts of the knob and owns its value.
+
+<TypeTable>
+<TypeRow name={"min"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"max"} type={"number"} default={"100"}></TypeRow>
+<TypeRow name={"step"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"large-step"} type={"number"} default={"10"}>Step for Page Up/Page Down and Shift + Arrow keys.</TypeRow>
+<TypeRow name={"value"} type={"number"}>The value. The `value` property reads it and moves the knob.</TypeRow>
+<TypeRow name={"default-value"} type={"number"}>The starting value, and what a double tap, an Alt + click and the Delete key return to. Defaults to the middle of the dial's travel.</TypeRow>
+<TypeRow name={"anchor"} type={"number"}>Value the indicator arc grows from (e.g. `0` on a -1…1 pan knob). Defaults to `min`.</TypeRow>
+<TypeRow name={"drag-mode"} type={"\"circular\" | \"revolution\" | \"vertical\""} default={"\"circular\""}>How a pointer drag turns into value.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"log\""} default={"\"linear\""}>How the value maps onto the dial's travel. The `scale` property also takes your own `{ toPosition, toValue }`.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for the value part and the input's `aria-valuetext`. The `format` property takes the options as an object.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
+<TypeRow name={"name"} type={"string"}>Identifies the field when a form is submitted.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-knob-control>` | The interactive surface: pointer drags, the mouse wheel, a double tap or an Alt + click to reset |
+| `<audio-ui-knob-track>` | The full sweep of the dial, as an SVG arc. `stroke-width` in its 48×48 box, 3 by default |
+| `<audio-ui-knob-indicator>` | The arc from `anchor` to the value, drawn over the track |
+| `<audio-ui-knob-thumb>` | Rotates with the value, and holds the native range input. Its `aria-label`, `aria-labelledby` and `aria-describedby` go to that input |
+| `<audio-ui-knob-value>` | The formatted value, as its text |
+| `<audio-ui-knob-label>` | Names the input when the thumb has no name of its own |
+
+### Fader
+
+`<audio-ui-fader>` groups all parts of the fader and owns its value, with audio defaults: vertical, from -60 to +6. It is a group, named by its label.
+
+<TypeTable>
+<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
+<TypeRow name={"step"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"large-step"} type={"number"} default={"10"}>Step for Page Up/Page Down and Shift + Arrow keys.</TypeRow>
+<TypeRow name={"value"} type={"number"}>The value. The `value` property reads it and moves the fader.</TypeRow>
+<TypeRow name={"default-value"} type={"number"}>The starting value, and what a double click, an Alt + click and the Delete key return to. Defaults to the midpoint.</TypeRow>
+<TypeRow name={"anchor"} type={"number"}>Value the indicator fills from, such as `0` on a -1…1 pan. Defaults to `min`.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}></TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for the value part and the input's `aria-valuetext`.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
+<TypeRow name={"name"} type={"string"}>Identifies the field when a form is submitted.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-fader-control>` | The interactive area: a press on the track jumps to the value under it, a press on the thumb drags it from where it was taken, and the wheel steps |
+| `<audio-ui-fader-track>` | The full range of travel |
+| `<audio-ui-fader-indicator>` | The filled part of the track, from `min` or the `anchor` to the value |
+| `<audio-ui-fader-thumb>` | The draggable thumb, placed at the value, holding the native range input |
+| `<audio-ui-fader-value>` | The formatted value, as its text |
+| `<audio-ui-fader-label>` | Names the group, and the input when the thumb has no name of its own |
+
+### Data attributes
+
+Every part carries the state of its control:
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+<TypeRow name={"data-dragging"}>Present while a pointer drags the control.</TypeRow>
+<TypeRow name={"data-drag-mode"}>On a knob's parts, its `drag-mode`. Style the cursor from it.</TypeRow>
+<TypeRow name={"data-orientation"}>On a fader's parts, `horizontal` or `vertical`.</TypeRow>
+</TypeTable>

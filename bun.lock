@@ -137,6 +137,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@audio-ui/core": "*",
+        "@audio-ui/elements": "*",
         "@audio-ui/icons": "*",
         "@audio-ui/react": "*",
         "@audio/beat-detect": "catalog:",

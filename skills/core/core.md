@@ -6,6 +6,38 @@
 npm install @audio-ui/core   # no dependencies
 ```
 
+## The knob and the fader as custom elements
+
+For a knob or a fader, take `@audio-ui/elements` before writing a binding: they are the same parts as the React primitives, as custom elements, built on these controllers, with the same keys, drag, wheel, native range input and data attributes.
+
+```bash
+npm install @audio-ui/elements
+```
+
+```html
+<audio-ui-knob min="20" max="20000" default-value="1000" scale="log">
+  <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
+  <audio-ui-knob-control>
+    <audio-ui-knob-track></audio-ui-knob-track>
+    <audio-ui-knob-indicator></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+
+<script type="module">
+  import "@audio-ui/elements/knob"; // registers the elements
+  const knob = document.querySelector("audio-ui-knob");
+  knob.addEventListener("input", (event) => setCutoff(event.detail.value));
+</script>
+```
+
+- `input` fires on every change, `event.detail` is `{ value, reason }`, and `preventDefault()` refuses it; `change` fires once a gesture ends. The `value` property reads the value and moves the control.
+- Vue: `compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")` in the Vue plugin's `template` options, then `:value` and `@input="x = $event.detail.value"`. Svelte 5: `value={x}` and `oninput={(event) => (x = event.detail.value)}`.
+- The elements set only display, position, `touch-action` and the thumb's place; style the rest from the tags and the data attributes (`data-dragging`, `data-disabled`, `data-drag-mode`, `data-orientation`). Docs: https://www.audio-ui.dev/docs/custom-elements
+
+The other primitives have no custom element yet: build them on the controllers below.
+
 ## What it exports
 
 | Entry | What |
