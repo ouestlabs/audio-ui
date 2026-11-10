@@ -20,15 +20,14 @@ import {
 } from "./root.ts";
 
 /**
- * One track of the arrangement: a row holding a header beside a lane. Its
- * `height`, in px, is yours to hold: leave it out and the row shares the
- * room it is given, set it and the row keeps it. An
- * `<audio-ui-timeline-track-resize-handle>` changes it, firing
- * `heightinput` (which `preventDefault()` refuses) and `heightchange` with
- * `{ value, reason }`, the value `undefined` when a double click gives the
- * height up. `min-height` (32), `max-height` (480), `step` (8) and
- * `large-step` (32) bound and step it. `selected` marks the picked track,
- * for styling. It carries `data-resizing` and `data-selected`.
+ * A track: a row with a header and a lane. `height` sets its height in
+ * pixels; when unset, rows share the available space. An
+ * `<audio-ui-timeline-track-resize-handle>` changes it and fires
+ * `heightinput`, cancelable with `preventDefault()`, and `heightchange` with
+ * `{ value, reason }`, where `value` is `undefined` when a double click
+ * releases the height. `min-height` (32), `max-height` (480), `step` (8) and
+ * `large-step` (32) bound and step it. `selected` marks the selected track
+ * for styling. Carries `data-resizing` and `data-selected`.
  */
 export class TimelineTrackElement extends TimelinePartElement {
   static readonly observedAttributes = [
@@ -61,7 +60,7 @@ export class TimelineTrackElement extends TimelinePartElement {
     this.repaint();
   }
 
-  /** The height in px, or undefined while the row shares the room there is. Set it to resize the track. */
+  /** The height in pixels, or `undefined` when the row shares the available space. Setting it resizes the track. */
   get height(): number | undefined {
     return this.#height;
   }
@@ -177,19 +176,19 @@ abstract class TimelineTrackPartElement extends TimelinePartElement {
 }
 
 /**
- * The strip beside a track's lane that names it and holds what sets it. It
- * stays at the left edge while the lane scrolls under it, above the lane's
- * parts at the stacking level of `--timeline-track-header-z` (20).
+ * The header beside a track's lane, for its name and controls. Pinned to the
+ * left edge while the lane scrolls, above the lane's parts at
+ * `--timeline-track-header-z` (20).
  */
 export class TimelineTrackHeaderElement extends TimelineTrackPartElement {}
 
 /**
- * Sets the track's height: by dragging, or from the keyboard through the
- * native `<input type="range">` it holds, which carries the accessible
- * name: the arrows move by a step (Down is taller), Page Up and Down by a
- * large one, Home and End to the minimum and the maximum. Place it along
- * the track's lower edge. A double click gives the height up, so the track
- * shares the room again.
+ * Sets the track's height by drag, or through the native `<input
+ * type="range">` it contains, which carries the accessible name: the arrow
+ * keys step (Down is taller), Page Up and Page Down take larger steps, and
+ * Home and End go to the minimum and maximum. Place it along the track's
+ * bottom edge. A double click releases the height, so the track shares the
+ * available space again.
  */
 export class TimelineTrackResizeHandleElement extends TimelineTrackPartElement {
   static readonly observedAttributes = INPUT_NAMES;

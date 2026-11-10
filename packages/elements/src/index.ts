@@ -1,7 +1,7 @@
 /**
- * audio/ui's controls as custom elements, for a page with any framework or
- * none. Importing this module registers every element; import a subpath,
- * such as `@audio-ui/elements/knob`, to register and ship only that one.
+ * Every primitive as Web Components. Importing the package root registers
+ * every element; import an entry point, `@audio-ui/elements/<primitive>`,
+ * to register and bundle a single primitive.
  */
 export * from "./envelope/index.ts";
 export * from "./fader/index.ts";

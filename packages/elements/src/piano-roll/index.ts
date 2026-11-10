@@ -1,8 +1,8 @@
 /**
- * The piano roll as custom elements. Importing this module registers them,
- * with the timeline the roll sits in and the piano down its side. The rows,
- * the notes and the velocity bars are made from the roll's own notes, each
- * from its template if it has one:
+ * Piano roll Web Components. Importing this entry point registers its
+ * elements, along with the timeline and piano elements it is composed of.
+ * Rows, notes and velocity bars are generated from the roll's notes, from a
+ * `<template>` when present:
  *
  * ```html
  * <audio-ui-timeline duration="16" snap-step="0.25">

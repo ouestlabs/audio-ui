@@ -45,20 +45,18 @@ export function rangeAttribute(
 }
 
 /**
- * A stretch of the timeline, such as a loop or a selection, laid on the
- * lane it sits in from `value`'s start to its end (`"start end"`, the whole
- * timeline by default). Dragging its body moves it, on the grid unless
- * Cmd/Ctrl is held, unless `movable="false"`; an
- * `<audio-ui-timeline-range-handle>` per edge resizes it. With `drawable`,
- * dragging across empty lane draws a new range. The native
- * `<input type="range">` it holds moves it from the keyboard and carries its
- * accessible name: Left and Right by a step, Up and Down by its own length,
- * and with Cmd/Ctrl, Left and Right shorten or lengthen it while Up and Down
- * double or halve it. A drag lands an edge on a `snap-points` place within a
- * few px. Changing it fires `rangeinput`, which `preventDefault()` refuses,
- * and `rangechange` when the gesture ends, with `{ value, edge, reason }`.
- * `min-length` is the shortest it can be (the grid step by default), and
- * `min-drawn-width` the least room it is drawn with, in px. It carries
+ * A loop or selection on its lane, from `value` (`"start end"`; the whole
+ * timeline by default). Its body is draggable on the grid, unless Cmd or
+ * Ctrl is held or `movable="false"`; an `<audio-ui-timeline-range-handle>`
+ * per edge resizes it. With `drawable`, a drag on empty lane draws a new
+ * range. Its native `<input type="range">` carries the accessible name and
+ * moves it from the keyboard: Left and Right by a step, Up and Down by its
+ * length, and with Cmd or Ctrl, Left and Right shorten or lengthen it while
+ * Up and Down double or halve it. Edges snap to `snap-points` within a few
+ * pixels. Fires `rangeinput` with `{ value, edge, reason }`, cancelable with
+ * `preventDefault()`, and `rangechange` when the interaction ends.
+ * `min-length` sets the minimum length (the grid step by default) and
+ * `min-drawn-width` the minimum drawn width in pixels. Carries
  * `data-dragging`.
  */
 export class TimelineRangeElement extends TimelinePartElement {
@@ -118,7 +116,7 @@ export class TimelineRangeElement extends TimelinePartElement {
     this.repaint();
   }
 
-  /** The range, `[start, end]` in the timeline's units. Set it to move the range; a gesture moves it from there. */
+  /** The range, `[start, end]` in the timeline's units. Setting it moves the range; subsequent gestures start from the new value. */
   get value(): RangeValue {
     return this.controller?.getSnapshot().value ?? this.#value ?? [0, 0];
   }
@@ -299,10 +297,9 @@ export class TimelineRangeElement extends TimelinePartElement {
 }
 
 /**
- * Resizes one `edge` of the range it sits in, `start` or `end`: by
- * dragging, on the grid unless Cmd/Ctrl is held, or from the keyboard
- * through the native `<input type="range">` it holds, which carries the
- * accessible name. It carries `data-edge`.
+ * Resizes the `edge` (`start` or `end`) of its range by drag, on the grid
+ * unless Cmd or Ctrl is held, or through the native `<input type="range">`
+ * it contains, which carries the accessible name. Carries `data-edge`.
  */
 export class TimelineRangeHandleElement extends TimelinePartElement {
   static readonly observedAttributes = [...INPUT_NAMES, "edge"];

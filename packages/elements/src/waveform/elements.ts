@@ -130,19 +130,16 @@ const stateAttributes = (snapshot: WaveformSeekSnapshot) => ({
 });
 
 /**
- * Groups the parts of a waveform and owns what they show: the audio's shape
- * (its `peaks` property, known upfront, or a live `levels` signal) and, for
- * a seekable one, the playback position in `duration` units. The position
- * comes from `value`, or from a live `source` property it follows as it
- * changes; it is the `--waveform-position` CSS variable (a percentage).
- * Every seek fires an `input` event, which `preventDefault()` refuses, and a
- * seek that moved the position fires a `change` when it ends. Its
- * attributes are the React `Waveform.Root`'s props: `duration` (1 by
- * default), `value`, `default-value`, `step` and `large-step` (a hundredth
- * and a tenth of the duration), `range` (`"start end"`, the stretch shown,
- * the whole audio by default), `loading` and `disabled`. While a live signal
- * is audible it carries `data-active`, and while the position is outside the
- * stretch shown, `data-outside`.
+ * The root of a waveform. Owns the audio's shape, from the `peaks` property
+ * or a live `levels` source, and the playback position in `duration` units,
+ * from `value` or a live `source` property, exposed as
+ * `--waveform-position`. Fires `input` on every seek, cancelable with
+ * `preventDefault()`, and `change` when a seek that moved the position ends.
+ * Attributes mirror the props of the React `Waveform.Root`: `duration` (1),
+ * `value`, `default-value`, `step` and `large-step` (a hundredth and a tenth
+ * of the duration), `range` (`"start end"`, the visible window), `loading`
+ * and `disabled`. Carries `data-active` while a live signal is audible, and
+ * `data-outside` while the position is outside the visible window.
  */
 export class WaveformElement extends ControlRoot<WaveformSeekSnapshot> {
   static readonly observedAttributes = [
@@ -217,7 +214,7 @@ export class WaveformElement extends ControlRoot<WaveformSeekSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** The playback position, from 0 to `duration`. Set it to seek; a gesture moves it from there. */
+  /** The playback position, from 0 to `duration`. Setting it seeks; subsequent gestures start from the new value. */
   get value(): number {
     return this.controller.getSnapshot().value;
   }
@@ -228,7 +225,7 @@ export class WaveformElement extends ControlRoot<WaveformSeekSnapshot> {
     this.paint();
   }
 
-  /** The stretch of the audio shown, `[start, end]` in `duration` units. Takes over from the `range` attribute. */
+  /** The stretch of the audio shown, `[start, end]` in `duration` units. Overrides the `range` attribute. */
   get range(): readonly [number, number] {
     return this.controller.getSnapshot().range;
   }
@@ -385,17 +382,16 @@ abstract class WaveformPartElement extends ControlPart<
 }
 
 /**
- * The seekable surface: a press jumps to the pointer and a drag scrubs. It
- * tracks the hovered position for `<audio-ui-waveform-hover>`, sets
- * `touch-action: none`, and holds the native `<input type="range">` that
- * takes focus and the keys and carries the accessible name: its
- * `aria-label`, `aria-labelledby` and `aria-describedby` move onto it. Its
- * `getAriaValueText(value, duration)` property says how the position is
- * announced, the played share by default ("30%"). With `selectable`, a drag
- * with Shift held selects a stretch instead, firing `selectioninput` (which
- * `preventDefault()` refuses) and `selectioncommit` with `[start, end]`:
- * not `selectionchange`, the browser's own event for text selection.
- * Leave it out for a waveform that is only shown.
+ * The seekable surface: a press seeks to the pointer and a drag scrubs.
+ * Tracks the hovered position and sets `touch-action: none`. Contains the
+ * native `<input type="range">` that receives focus, keyboard input and the
+ * accessible name, moved from its own `aria-label`, `aria-labelledby` and
+ * `aria-describedby`. The `getAriaValueText(value, duration)` property
+ * customizes the announcement (the played share by default, "30%"). With
+ * `selectable`, Shift + drag selects a range and fires `selectioninput`,
+ * cancelable with `preventDefault()`, and `selectioncommit` with `[start,
+ * end]`. These names avoid the browser's `selectionchange` event. Omit the
+ * control for a display-only waveform.
  */
 export class WaveformControlElement extends WaveformPartElement {
   static readonly observedAttributes = [...INPUT_NAMES, "selectable"];
@@ -528,7 +524,10 @@ export class WaveformControlElement extends WaveformPartElement {
   }
 }
 
-/** A handle centered on the playback position, through `--waveform-position`. Hidden from assistive technology. */
+/**
+ * A handle centered on the playback position, through `--waveform-position`.
+ * Hidden from assistive technology.
+ */
 export class WaveformThumbElement extends WaveformPartElement {
   override paint(snapshot: WaveformSeekSnapshot) {
     super.paint(snapshot);
@@ -536,7 +535,10 @@ export class WaveformThumbElement extends WaveformPartElement {
   }
 }
 
-/** A marker at the playback position, with no interaction of its own. Hidden from assistive technology. */
+/**
+ * A non-interactive marker at the playback position. Hidden from assistive
+ * technology.
+ */
 export class WaveformPlayheadElement extends WaveformPartElement {
   override paint(snapshot: WaveformSeekSnapshot) {
     super.paint(snapshot);
@@ -545,10 +547,9 @@ export class WaveformPlayheadElement extends WaveformPartElement {
 }
 
 /**
- * Shown while the pointer is over the control, at the hovered point. Its
- * `format(value, duration)` property writes the hovered position as its
- * text, such as a time; without it, it keeps what it holds. Hidden from
- * assistive technology.
+ * Shown at the hovered position while the pointer is over the control. The
+ * `format(value, duration)` property renders the position as text; otherwise
+ * its content is kept. Hidden from assistive technology.
  */
 export class WaveformHoverElement extends WaveformPartElement {
   readonly #text = new ValueText();
@@ -593,7 +594,7 @@ export class WaveformHoverElement extends WaveformPartElement {
   }
 }
 
-/** A point of interest, such as a cue or a chapter, placed at its `value`. Its content labels it. */
+/** A cue or chapter marker at `value`, labelled by its content. */
 export class WaveformMarkerElement extends WaveformPartElement {
   static readonly observedAttributes = ["value"];
 
@@ -617,14 +618,13 @@ const trackOf = (region: HTMLElement): Element | null =>
   region.offsetParent ?? region.parentElement;
 
 /**
- * A stretch of the audio, such as a loop or a selection, laid over the
- * waveform from `value`'s start to its end (`"start end"` in `duration`
- * units, the whole audio by default). Dragging its body moves it, unless
- * `movable="false"`; an `<audio-ui-waveform-region-handle>` per edge resizes
- * it. Moving it fires `regioninput`, with `{ value, edge, reason }`, which
- * `preventDefault()` refuses, and `regionchange` when the move ends: names
- * of their own, so a listener for the waveform's seeks never takes them. `min-length`
- * is the shortest it can be, the waveform's `step` by default.
+ * A loop or selection over the waveform, from `value` (`"start end"` in
+ * `duration` units; the whole audio by default). Its body is draggable
+ * unless `movable="false"`; an `<audio-ui-waveform-region-handle>` per edge
+ * resizes it. Fires `regioninput` with `{ value, edge, reason }`, cancelable
+ * with `preventDefault()`, and `regionchange` when the interaction ends,
+ * distinct from the root's seek events. `min-length` sets the minimum length
+ * (the waveform's `step` by default).
  */
 export class WaveformRegionElement extends WaveformPartElement {
   static readonly observedAttributes = [
@@ -655,7 +655,7 @@ export class WaveformRegionElement extends WaveformPartElement {
     this.repaint();
   }
 
-  /** The region, `[start, end]` in `duration` units. Set it to move the region; a drag moves it from there. */
+  /** The region, `[start, end]` in `duration` units. Setting it moves the region; subsequent gestures start from the new value. */
   get value(): WaveformRegionValue {
     return this.controller.getSnapshot().value;
   }
@@ -770,12 +770,10 @@ export class WaveformRegionElement extends WaveformPartElement {
 }
 
 /**
- * Resizes one `edge` of the region it sits in, `start` or `end`: by
- * dragging, or from the keyboard through the native `<input type="range">`
- * it holds, which carries the accessible name (its `aria-label` moves onto
- * it). Its `getAriaValueText(value, duration)` property says how the edge's
- * position is announced, its share of the audio by default. It carries
- * `data-edge`.
+ * Resizes the `edge` (`start` or `end`) of its region by drag or through the
+ * native `<input type="range">` it contains, which receives its
+ * `aria-label`. The `getAriaValueText(value, duration)` property customizes
+ * the announcement (the share of the audio by default). Carries `data-edge`.
  */
 export class WaveformRegionHandleElement extends WaveformPartElement {
   static readonly observedAttributes = [...INPUT_NAMES, "edge"];
@@ -977,18 +975,15 @@ function choiceAttribute<T extends string>(
 }
 
 /**
- * Draws the waveform on a canvas it holds, laid out on the device pixel
- * grid: as many bars as fit its width, every edge on a physical pixel, so it
- * stays sharp at any pixel density. It paints only when something changed,
- * and not while off screen. The played part is drawn in the
- * `--waveform-progress-color` CSS color and the rest in `--waveform-color`,
- * both the text color by default. Its attributes are the React
- * `Waveform.Canvas`'s props: `variant` (`mirror`, `bars`, `line`, or `scope`
- * for raw samples), `bar-width` (2), `bar-gap` (1), `bar-radius` (or the
- * `--waveform-bar-radius` CSS length), `min-bar-height` (2), `gain`,
- * `mirrored`, `idle` (`none`, `pulse` or `wave`), `mode` (`static` or
- * `scrolling`, for a live signal), `scroll-speed` (60 px per second) and
- * `line-width` (1.5, for `scope`).
+ * Renders the waveform on a canvas aligned to the device pixel grid, so it
+ * stays sharp at any density. Repaints only on change, and not while off
+ * screen. The played range uses `--waveform-progress-color` and the rest
+ * `--waveform-color`, both the text color by default. Attributes mirror the
+ * props of the React `Waveform.Canvas`: `variant` (`mirror`, `bars`, `line`,
+ * or `scope` for raw samples), `bar-width` (2), `bar-gap` (1), `bar-radius`
+ * (or `--waveform-bar-radius`), `min-bar-height` (2), `gain`, `mirrored`,
+ * `idle` (`none`, `pulse` or `wave`), `mode` (`static` or `scrolling`),
+ * `scroll-speed` (60 px/s) and `line-width` (1.5).
  */
 export class WaveformCanvasElement extends WaveformPainterElement {
   static readonly observedAttributes = [
@@ -1062,14 +1057,13 @@ const DEFAULT_BAR_COUNT = 24;
 const DEFAULT_MIN_LEVEL = 0.08;
 
 /**
- * Draws the waveform as a row of `count` elements (24), one
- * `<audio-ui-waveform-bar>` each, for a visualizer styled in plain CSS: each
- * bar's level, 0…1, is its `--waveform-level` CSS variable, rising at once
- * and falling smoothly, and nothing is written while they rest or sit off
- * screen. Bars the position has passed carry `data-played`. Each bar holds
- * what its `<template>` holds, if it has one. Its attributes are the React
- * `Waveform.Bars`'s props: `count`, `gain`, `idle`, `min-level` (0.08) and
- * `mirrored`.
+ * Renders the waveform as `count` `<audio-ui-waveform-bar>` elements (24)
+ * for CSS-styled visualizers. Each bar's level, 0 to 1, is written to
+ * `--waveform-level`, rising immediately and decaying smoothly, with no
+ * writes while idle or off screen. Bars before the position carry
+ * `data-played`. Bars are filled from its `<template>` when present.
+ * Attributes mirror the props of the React `Waveform.Bars`: `count`, `gain`,
+ * `idle`, `min-level` (0.08) and `mirrored`.
  */
 export class WaveformBarsElement extends WaveformPainterElement {
   static readonly observedAttributes = [
@@ -1136,5 +1130,9 @@ export class WaveformBarsElement extends WaveformPainterElement {
   }
 }
 
-/** One bar of `<audio-ui-waveform-bars>`, for its `index`: size it from `--waveform-level`, such as `height: calc(var(--waveform-level) * 100%)`. */
+/**
+ * A bar of `<audio-ui-waveform-bars>`, for its `index`. Size it from
+ * `--waveform-level`, for example `height: calc(var(--waveform-level) *
+ * 100%)`.
+ */
 export class WaveformBarElement extends ElementBase {}

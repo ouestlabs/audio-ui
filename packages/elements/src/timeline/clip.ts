@@ -62,30 +62,27 @@ export interface TimelineClipEventDetail {
 }
 
 /**
- * A stretch of a source laid on a lane: a recording, a pattern. Its value
- * is its attributes, in the timeline's units: `start`, `length`, `offset`
- * (where in the source it begins), `fade-in`, `fade-out`, `fade-in-shape`
- * and `fade-out-shape` (`linear`, `fast`, `slow` or `smooth`), or its
- * `value` property, `{ start, length, offset, fadeIn, fadeOut }`; without
- * them it covers the whole timeline. Dragging its
- * `<audio-ui-timeline-clip-header>` moves it, on the grid unless Cmd/Ctrl
- * is held, and over other lanes too; pressing its body selects it and puts
- * the cursor there. An `<audio-ui-timeline-clip-handle>` per edge trims it,
- * and an `<audio-ui-timeline-clip-fade-handle>` per fade sets the fade.
- * Changing it fires `clipinput`, which `preventDefault()` refuses, and
- * `clipchange` when the gesture ends, with `{ value, reason, target, lane,
- * delta, copy }`. A press fires `clipselect` with `{ selected, event }` and
- * sets `selected`, unless `preventDefault()` refuses it; Delete or Backspace
- * fires `clipremove`; a move up or down fires `clipdrag` with the `offset`
- * in px. It sets `--clip-offset`, `--clip-source-length`,
- * `--clip-fade-in`, `--clip-fade-out` and their `-max`, `--clip-drag-y`,
- * and `--clip-unit`, the width of one unit for what is placed inside it
- * (the timeline's unit is a share of the lane when fitted), and carries `data-dragging`, `data-fading` and
- * `data-selected`. The native `<input type="range">` it holds moves it from
- * the keyboard and carries its accessible name. `additive` reports every
- * press as one with Shift held, `movable="false"` keeps it in place,
- * `min-length` is the shortest it trims to, and `source-length` where the
- * source runs out.
+ * A region of a source on a lane, such as a recording or a pattern. Its
+ * value comes from the `start`, `length`, `offset` (source offset),
+ * `fade-in`, `fade-out`, `fade-in-shape` and `fade-out-shape` attributes
+ * (`linear`, `fast`, `slow` or `smooth`), or the `value` property; without
+ * them it spans the timeline. Dragging its `<audio-ui-timeline-clip-header>`
+ * moves it on the grid, across lanes, unless Cmd or Ctrl is held; a press on
+ * its body selects it and sets the position.
+ * `<audio-ui-timeline-clip-handle>` trims an edge and
+ * `<audio-ui-timeline-clip-fade-handle>` sets a fade. Fires `clipinput` with
+ * `{ value, reason, target, lane, delta, copy }`, cancelable with
+ * `preventDefault()`, and `clipchange` when the interaction ends;
+ * `clipselect` with `{ selected, event }`, which toggles the `selected`
+ * attribute unless prevented; `clipremove` on Delete or Backspace; and
+ * `clipdrag` with the vertical `offset` in pixels. Sets `--clip-offset`,
+ * `--clip-source-length`, `--clip-fade-in`, `--clip-fade-out`,
+ * `--clip-fade-in-max`, `--clip-fade-out-max`, `--clip-drag-y`, and
+ * `--clip-unit`, the unit width for its own parts. Carries `data-dragging`,
+ * `data-fading` and `data-selected`. Contains a native `<input
+ * type="range">` for keyboard moves and the accessible name. `additive`
+ * reports every press as additive, `movable="false"` locks it, `min-length`
+ * sets the minimum trim, and `source-length` the source's end.
  */
 export class TimelineClipElement extends TimelinePartElement {
   static readonly observedAttributes = [
@@ -145,7 +142,7 @@ export class TimelineClipElement extends TimelinePartElement {
     this.repaint();
   }
 
-  /** The clip as displayed. Set it to move the clip; a gesture moves it from there. */
+  /** The clip as displayed. Setting it moves the clip; subsequent gestures start from the new value. */
   get value(): ClipValue | undefined {
     return this.controller?.getSnapshot().value ?? this.#value;
   }
@@ -420,9 +417,8 @@ abstract class TimelineClipPartElement extends TimelinePartElement {
 }
 
 /**
- * The clip's title bar: dragging it moves the clip, on the grid unless
- * Cmd/Ctrl is held, and over other lanes too. Place it along the clip's top
- * and put the clip's name in it.
+ * The clip's title bar. Dragging it moves the clip on the grid, unless Cmd
+ * or Ctrl is held, and across lanes.
  */
 export class TimelineClipHeaderElement extends TimelineClipPartElement {
   #release: AbortController | undefined;
@@ -536,12 +532,11 @@ abstract class TimelineClipEdgeElement extends TimelineClipPartElement {
 }
 
 /**
- * Trims one `edge` of the clip, `start` or `end`: by dragging, on the grid
- * unless Cmd/Ctrl is held, or from the keyboard through the native
- * `<input type="range">` it holds, which carries the accessible name.
- * Trimming the start moves where in the source the clip begins and leaves
- * its content where it is; trimming the end stops where the source or the
- * timeline does. It carries `data-edge`.
+ * Trims the clip's `edge` (`start` or `end`) by drag, on the grid unless Cmd
+ * or Ctrl is held, or through the native `<input type="range">` it contains,
+ * which carries the accessible name. Trimming the start shifts the source
+ * offset and keeps the content in place; trimming the end stops at the end
+ * of the source or the timeline. Carries `data-edge`.
  */
 export class TimelineClipHandleElement extends TimelineClipEdgeElement {
   override draw() {
@@ -564,12 +559,11 @@ export class TimelineClipHandleElement extends TimelineClipEdgeElement {
 }
 
 /**
- * Sets how long one of the clip's fades lasts, `edge="in"` or `"out"`: by
- * dragging, which is not on the grid, or from the keyboard through the
- * native `<input type="range">` it holds, which carries the accessible
- * name. A double click, or Enter on its input, steps the fade through its
- * shapes, and Delete or Backspace takes the fade away. It sits where its
- * fade ends, from the clip's edge, and carries `data-edge`.
+ * Sets the length of the fade at its `edge` (`in` or `out`) by drag, off the
+ * grid, or through the native `<input type="range">` it contains, which
+ * carries the accessible name. A double click or Enter cycles the fade
+ * shape, and Delete or Backspace removes the fade. Positioned at the end of
+ * its fade. Carries `data-edge`.
  */
 export class TimelineClipFadeHandleElement extends TimelineClipEdgeElement {
   override draw() {
@@ -648,11 +642,10 @@ function ramp(shape: FadeShape, edge: "in" | "out") {
 }
 
 /**
- * Draws one of the clip's fades, `edge="in"` or `"out"`, over its content:
- * the ramp as a line from the clip's edge, as long as the fade, with what it
- * attenuates shaded by `--clip-fade-shade` (the line's own color if it is
- * not set). It spans the clip's height, is hidden while its fade is empty,
- * and ignores the pointer. The line is drawn in `currentColor`.
+ * Renders the fade at its `edge` (`in` or `out`) over the clip: the gain
+ * ramp as a line in `currentColor`, with the attenuated area shaded by
+ * `--clip-fade-shade` (the line color by default). Spans the clip's height,
+ * is hidden while the fade is empty, and ignores the pointer.
  */
 export class TimelineClipFadeElement extends TimelineClipPartElement {
   static readonly observedAttributes = ["edge"];

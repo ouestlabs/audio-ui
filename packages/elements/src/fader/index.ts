@@ -1,5 +1,5 @@
 /**
- * The fader as custom elements. Importing this module registers them:
+ * Fader Web Components. Importing this entry point registers its elements:
  *
  * ```html
  * <audio-ui-fader min="-60" max="6" value="0">

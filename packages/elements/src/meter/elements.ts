@@ -53,15 +53,13 @@ const numberList = (element: Element, name: string) =>
     .filter((level) => !Number.isNaN(level));
 
 /**
- * Groups the channels of a level meter, a group. Levels come from `value`
- * (and `peak`), a level per channel separated by spaces, or the `value` and
- * `peak` properties as arrays; or from a live `source` property, whose
- * frames are written straight to the parts, so a signal updating sixty times
- * a second touches only what changed. `min` and `max` (-60 and 6 by
- * default), `scale` (`linear` or `iec`), `clip-threshold` (0),
- * `warn-threshold`, `orientation` (vertical), `format` and `locale` set how
- * a level reads, and `unit` what each channel says after it ("-6 dB"). A
- * click anywhere on it clears the clips a live source latched.
+ * The root of a level meter, with `role="group"`. Levels come from the
+ * `value` and `peak` attributes or properties, one per channel, or from a
+ * live `source` property whose frames are written directly to the parts,
+ * updating only what changed. `min` and `max` (-60 and 6), `scale` (`linear`
+ * or `iec`), `clip-threshold` (0), `warn-threshold`, `orientation`
+ * (vertical), `format`, `locale` and `unit` define how levels read. A click
+ * clears clip indicators latched by a live source.
  */
 export class MeterElement extends ControlRoot<MeterSnapshot> {
   static readonly observedAttributes = [
@@ -121,7 +119,7 @@ export class MeterElement extends ControlRoot<MeterSnapshot> {
     this.paint();
   }
 
-  /** The level per channel; the length is the channel count. Takes over from the `value` attribute. */
+  /** The level per channel; the length is the channel count. Overrides the `value` attribute. */
   get value(): readonly number[] {
     return this.#value ?? numberList(this, "value");
   }
@@ -132,7 +130,7 @@ export class MeterElement extends ControlRoot<MeterSnapshot> {
     this.paint();
   }
 
-  /** The peak-hold level per channel. Takes over from the `peak` attribute. */
+  /** The peak-hold level per channel. Overrides the `peak` attribute. */
   get peak(): readonly number[] | undefined {
     return (
       this.#peak ??
@@ -158,7 +156,7 @@ export class MeterElement extends ControlRoot<MeterSnapshot> {
     this.paint();
   }
 
-  /** How each level is written: `Intl.NumberFormat` options. Takes over from the `format` attribute. */
+  /** How each level is written: `Intl.NumberFormat` options. Overrides the `format` attribute. */
   get format(): Intl.NumberFormatOptions | undefined {
     return this.#format ?? jsonAttribute(this, "format");
   }
@@ -169,7 +167,7 @@ export class MeterElement extends ControlRoot<MeterSnapshot> {
     this.paint();
   }
 
-  /** How levels spread along the length: `linear`, `iec`, or your own increasing curve. Takes over from the `scale` attribute. */
+  /** How levels spread along the length: `linear`, `iec`, or your own increasing curve. Overrides the `scale` attribute. */
   get scale(): LevelScale {
     if (this.#scale) {
       return this.#scale;
@@ -257,10 +255,10 @@ abstract class MeterPartElement extends ControlPart<
 }
 
 /**
- * Makes one `<audio-ui-meter-channel>` per level, in order, each holding
- * what its `<template>` holds, and makes them again when the channel count
- * changes. `label` names each one, `{n}` its number from 1 ("Output {n}").
- * It takes no room of its own (`display: contents`).
+ * Generates an `<audio-ui-meter-channel>` per level from its `<template>`,
+ * regenerated when the channel count changes. `label` names each channel,
+ * `{n}` being its number from 1 ("Output {n}"). Renders with `display:
+ * contents`.
  */
 export class MeterChannelsElement extends MeterPartElement {
   readonly #stamp = new Stamp(
@@ -297,13 +295,12 @@ export class MeterChannelsElement extends MeterPartElement {
 }
 
 /**
- * One channel of the meter, a `role="meter"` for its `index` in the levels:
- * name it with `aria-label` or an `<audio-ui-meter-label>`. It carries
- * `data-warning` from the warning level up to the clip threshold, and
- * `data-clipping` at or above it; fed by a live source, `data-clipped` too,
- * from the first clip until a click on the meter clears it. Its
- * `getAriaValueText` property, `(formatted, value, index) => string`, says
- * the level, such as "-6 dB"; the formatted level by default.
+ * A channel with `role="meter"`, for its `index`, labelled by `aria-label`
+ * or an `<audio-ui-meter-label>`. Carries `data-warning` from the warning
+ * threshold up to the clip threshold, `data-clipping` at or above it, and
+ * with a live source `data-clipped` until a click clears it. The
+ * `getAriaValueText(formatted, value, index)` property customizes
+ * `aria-valuetext`.
  */
 export class MeterChannelElement extends MeterPartElement {
   /** Returns the channel's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted level. */
@@ -393,7 +390,7 @@ abstract class MeterChannelPartElement extends MeterPartElement {
 /** The full range of a channel, behind the indicator. */
 export class MeterTrackElement extends MeterPartElement {}
 
-/** The lit part of the channel, scaled to the level along the meter's length. */
+/** The lit range of a channel, scaled to the level along the meter's length. */
 export class MeterIndicatorElement extends MeterChannelPartElement {
   override paint(snapshot: MeterSnapshot) {
     super.paint(snapshot);
@@ -408,10 +405,16 @@ export class MeterIndicatorElement extends MeterChannelPartElement {
   }
 }
 
-/** The peak-hold mark, at the channel's peak level; hidden while the channel has none. */
+/**
+ * The peak-hold marker at the channel's peak level. Hidden when the channel
+ * has none.
+ */
 export class MeterPeakElement extends MeterChannelPartElement {}
 
-/** The channel's formatted level (`format` and `locale` on the meter), as its text. */
+/**
+ * Renders the channel's level, formatted with the meter's `format` and
+ * `locale`.
+ */
 export class MeterValueElement extends MeterChannelPartElement {
   readonly #text = new ValueText();
 
@@ -421,7 +424,7 @@ export class MeterValueElement extends MeterChannelPartElement {
   }
 }
 
-/** The accessible label of the channel it sits in. */
+/** The accessible label of its channel. */
 export class MeterLabelElement extends MeterChannelPartElement {
   protected override attached(meter: MeterElement) {
     const { channel } = this;
@@ -442,10 +445,9 @@ export class MeterLabelElement extends MeterChannelPartElement {
 }
 
 /**
- * A graduation of the level scale at `value`, such as -18 dB, placed along
- * the meter's length from its minimum: upward for a vertical meter,
- * rightward for a horizontal one. It sits directly in the meter, beside the
- * channels. Decorative: each channel says its own level.
+ * A scale graduation at `value`, such as -18 dB, placed along the meter's
+ * length from its minimum. Placed directly in the meter, beside the
+ * channels. Decorative: each channel announces its own level.
  */
 export class MeterMarkElement extends MeterPartElement {
   static readonly observedAttributes = ["value"];

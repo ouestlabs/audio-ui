@@ -1,6 +1,7 @@
 /**
- * The timeline as custom elements. Importing this module registers them.
- * Lanes hold what is placed in time; the viewport scrolls and zooms them:
+ * Timeline Web Components. Importing this entry point registers its
+ * elements. Lanes hold the placed parts; the viewport scrolls and zooms
+ * them:
  *
  * ```html
  * <audio-ui-timeline duration="32" snap-step="1">

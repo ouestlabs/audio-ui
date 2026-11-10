@@ -1,8 +1,7 @@
 /**
- * The breakpoint envelope as custom elements. Importing this module
- * registers them. The points element makes a handle per point, and the
- * segments element a handle per segment, each from its template if it has
- * one:
+ * Breakpoint envelope Web Components. Importing this entry point registers
+ * its elements. Points and segment handles are generated, from a
+ * `<template>` when present:
  *
  * ```html
  * <audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.2 1, 0.6 0.5, 1 0">

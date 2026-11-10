@@ -1,7 +1,6 @@
 /**
- * The step sequencer as custom elements. Importing this module registers
- * them. The rows element makes a row per sound and the steps element a step
- * per column, each from its template:
+ * Step sequencer Web Components. Importing this entry point registers its
+ * elements. Rows and steps are generated from nested `<template>`s:
  *
  * ```html
  * <audio-ui-sequencer aria-label="Pattern" default-value="x...x... ..x...x.">

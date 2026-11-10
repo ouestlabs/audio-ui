@@ -117,24 +117,21 @@ const isTimeline = (element: Element | null): element is TimelineElement =>
   element instanceof TimelineElement;
 
 /**
- * Groups the parts of a piano roll and owns its notes, its selection and
- * the pitches it draws. It sits inside an `<audio-ui-timeline>`, which gives
- * it its length, zoom, grid and position: a note starts and lasts in the
- * timeline's units, and every gesture lands on its grid unless Cmd/Ctrl is
- * held. Its notes are its `value` property, `{ id, pitch, start, length,
- * velocity?, chance?, muted? }[]`, and its selection its `selection`
- * property, the ids. Rows run from `max-pitch` (72) at the top down to
- * `min-pitch` (48); with `folded` only the pitches carrying notes have one,
- * and with `folded="scale"` those in the scale as well, set with `scale`
- * (`major`, `minor`, `dorian`…) and `scale-root` (0 for C). `mode` is what a
- * press on empty grid does: `select` (the default) or `draw`, which
- * `draw-style="paint"` turns into a brush. Changing the notes fires
- * `input`, which `preventDefault()` refuses, and `change` when the gesture
- * ends, with `{ value, reason }`; the selection fires `noteselect` with `{
- * selection, reason }`; a pitch that should sound fires `noteon`, which
- * `preventDefault()` keeps silent, and `noteoff`. Its `--piano-roll-rows`
- * CSS variable is how many rows there are, and it carries `data-editing`,
- * `data-folded`, `data-mode` and `data-has-selection`.
+ * The root of a note editor, placed inside an `<audio-ui-timeline>`, which
+ * provides its length, zoom, grid and position. Notes are positioned in
+ * timeline units, and gestures snap to the grid unless Cmd or Ctrl is held.
+ * Notes are set through the `value` property as `{ id, pitch, start, length,
+ * velocity?, chance?, muted? }[]`, and the selection through the `selection`
+ * property as ids. Rows run from `max-pitch` (72) down to `min-pitch` (48);
+ * `folded` keeps only rows with notes, and `folded="scale"` also the scale's
+ * rows, set with `scale` (such as `major`) and `scale-root` (0 for C).
+ * `mode` sets the behavior of a press on empty grid: `select` (default) or
+ * `draw`, with `draw-style="paint"` for brush drawing. Fires `input` with `{
+ * value, reason }`, cancelable with `preventDefault()`, `change` when the
+ * interaction ends, `noteselect` with `{ selection, reason }`, and `noteon`
+ * and `noteoff` for pitches to sound, `noteon` being cancelable. Sets
+ * `--piano-roll-rows` and carries `data-editing`, `data-folded`, `data-mode`
+ * and `data-has-selection`.
  */
 export class PianoRollElement extends ControlRoot<PianoRollSnapshot> {
   static readonly observedAttributes = [
@@ -228,7 +225,7 @@ export class PianoRollElement extends ControlRoot<PianoRollSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** The notes. Set them to draw the roll; a gesture changes them from there. */
+  /** The notes. Setting them draws the roll; subsequent gestures start from the new value. */
   get value(): readonly Note[] {
     return this.controller.getSnapshot().notes;
   }
@@ -250,7 +247,7 @@ export class PianoRollElement extends ControlRoot<PianoRollSnapshot> {
     this.paint();
   }
 
-  /** The scale whose rows are marked `data-in-scale`, such as `{ name: "major", root: 0 }`. Takes over from `scale` and `scale-root`. */
+  /** The scale whose rows are marked `data-in-scale`, such as `{ name: "major", root: 0 }`. Overrides `scale` and `scale-root`. */
   get scale(): Scale | null {
     return this.#scale ?? this.#scaleAttribute();
   }
@@ -451,15 +448,13 @@ abstract class PianoRollLaneElement extends PianoRollPartElement {
 }
 
 /**
- * The surface notes are drawn on: a timeline lane, with the roll's rows
- * stacked down it, and a group that takes focus. A press on empty grid
- * draws a note (`mode="draw"`) or starts a selection rectangle, Shift adding
- * to what is selected; in that mode a double click draws. Focused, Enter
- * adds a note at the playback position, Escape clears the selection and
- * Cmd/Ctrl+A selects every note. From the grid or a note, Cmd/Ctrl+D
- * repeats the selection right after itself, Cmd/Ctrl+C, X and V copy, cut
- * and paste at the playback position, and Q snaps the starts of the
- * selection to the grid.
+ * The note surface: a focusable timeline lane with `role="group"`, with the
+ * rows stacked vertically. A press on empty grid draws a note in draw mode,
+ * or starts a marquee selection, extended with Shift; in select mode a
+ * double click draws. Enter adds a note at the position, Escape clears the
+ * selection and Cmd/Ctrl+A selects all. From the grid or a note, Cmd/Ctrl+D
+ * duplicates the selection after itself, Cmd/Ctrl+C, X and V copy, cut and
+ * paste at the position, and Q quantizes the selection's starts.
  */
 export class PianoRollGridElement extends PianoRollLaneElement {
   #release: AbortController | undefined;
@@ -555,9 +550,8 @@ abstract class PianoRollMakerElement<
 }
 
 /**
- * Makes one `<audio-ui-piano-roll-row>` per row, highest pitch first, each
- * holding what its `<template>` holds, if it has one. It takes no room of
- * its own.
+ * Generates an `<audio-ui-piano-roll-row>` per row, highest pitch first,
+ * from its `<template>` when present. Renders with `display: contents`.
  */
 export class PianoRollRowsElement extends PianoRollMakerElement<number> {
   protected readonly stamp = new Stamp<number>(
@@ -572,11 +566,10 @@ export class PianoRollRowsElement extends PianoRollMakerElement<number> {
 }
 
 /**
- * The band a `pitch` takes across the grid, for shading black-key rows, the
- * rows of the roll's scale, or ruling where an octave starts. It lets
- * presses through and is hidden from assistive technology. It carries
- * `data-active` while its pitch sounds, `data-color` (`black` or `white`),
- * `data-in-scale` and `data-octave` on a C.
+ * The band of a `pitch` across the grid, for row shading, scale highlighting
+ * and octave lines. Ignores the pointer and is hidden from assistive
+ * technology. Carries `data-active` while its pitch sounds, `data-color`
+ * (`black` or `white`), `data-in-scale`, and `data-octave` on C.
  */
 export class PianoRollRowElement extends PianoRollPartElement {
   override paint(snapshot: PianoRollSnapshot) {
@@ -618,10 +611,10 @@ function keepKey(item: Element, key: NoteId) {
 }
 
 /**
- * Makes one `<audio-ui-piano-roll-note>` per note, in the order they are
- * read (by start, then from the highest pitch down), which is also the tab
- * order, each holding what its `<template>` holds: its
- * `<audio-ui-piano-roll-note-handle>`s, a label. It takes no room of its own.
+ * Generates an `<audio-ui-piano-roll-note>` per note in reading order (by
+ * start, then highest pitch first), which is also the tab order, from its
+ * `<template>`, such as with `<audio-ui-piano-roll-note-handle>`s. Renders
+ * with `display: contents`.
  */
 export class PianoRollNotesElement extends PianoRollMakerElement<NoteId> {
   protected readonly stamp = new Stamp<NoteId>(
@@ -662,18 +655,16 @@ abstract class PianoRollNotePartElement extends PianoRollPartElement {
 }
 
 /**
- * One note, placed at its start and pitch: on the timeline's units across
- * and on its row down. Dragging it moves it, and the rest of the selection
- * with it, on the grid unless Cmd/Ctrl is held; with Alt the drag carries
- * copies off. Shift + click adds it to the selection or takes it out, a
- * double click removes it. Focused, the arrow keys move it (Up and Down by
- * a semitone, an octave with Shift), Shift + Left and Right change its
- * length, Enter or Space selects it and Delete removes it, all of them
- * acting on the selection when the note is part of it. It is a toggle
- * button pressed while selected, named by the roll's `getNoteLabel`. Its
- * `--piano-roll-velocity` and `--piano-roll-chance` CSS variables are its
- * velocity and how likely it is to play, and it carries `data-selected` and
- * `data-muted`.
+ * A note, positioned at its start in timeline units and on its pitch's row.
+ * Dragging moves it with the rest of the selection, on the grid unless Cmd
+ * or Ctrl is held; with Alt, the drag copies. Shift + click toggles it in
+ * the selection, and a double click removes it. When focused, the arrow keys
+ * move it (Up and Down by a semitone, by an octave with Shift), Shift + Left
+ * and Right resize it, Enter or Space selects it and Delete removes it,
+ * applying to the whole selection when the note is selected. A toggle button
+ * pressed while selected, labelled by the roll's `getNoteLabel`. Sets
+ * `--piano-roll-velocity` and `--piano-roll-chance`, and carries
+ * `data-selected` and `data-muted`.
  */
 export class PianoRollNoteElement extends PianoRollNotePartElement {
   #release: AbortController | undefined;
@@ -774,12 +765,11 @@ export class PianoRollNoteElement extends PianoRollNotePartElement {
 }
 
 /**
- * One `edge` of the note it sits in, `start` or `end`, dragged to change
- * the note's length: the end makes it longer or shorter, the start trims it
- * from the front while its end stays put. On the grid unless Cmd/Ctrl is
- * held, and for the whole selection when the note is part of it. Shift +
- * Left and Right on the note do the same from the keyboard, so the handle is
- * hidden from assistive technology. It carries `data-edge`.
+ * Resizes its note from its `edge` (`start` or `end`): the end changes the
+ * length, the start trims from the front with the end fixed. Snaps to the
+ * grid unless Cmd or Ctrl is held, and applies to the selection when the
+ * note is selected. Hidden from assistive technology, as Shift + Left and
+ * Right on the note provide the same. Carries `data-edge`.
  */
 export class PianoRollNoteHandleElement extends PianoRollPartElement {
   #release: AbortController | undefined;
@@ -837,7 +827,10 @@ export class PianoRollNoteHandleElement extends PianoRollPartElement {
   }
 }
 
-/** The selection rectangle being dragged across the grid; hidden the rest of the time, and from assistive technology. */
+/**
+ * The selection rectangle during a marquee drag. Hidden otherwise, and from
+ * assistive technology.
+ */
 export class PianoRollMarqueeElement extends PianoRollPartElement {
   override paint(snapshot: PianoRollSnapshot) {
     super.paint(snapshot);
@@ -859,11 +852,11 @@ export class PianoRollMarqueeElement extends PianoRollPartElement {
 }
 
 /**
- * The time the selected notes cover, from the earliest start to the latest
- * end, as a band from top to bottom of what it sits in: the grid, the
- * velocity lane or the ruler. Hidden with no note selected. It lets presses
- * through, all but its `<audio-ui-piano-roll-stretch-handle>`s, and is
- * hidden from assistive technology.
+ * The time range of the selected notes, spanning the height of its
+ * container: the grid, the velocity lane or the ruler. Hidden without a
+ * selection. Ignores the pointer except for its
+ * `<audio-ui-piano-roll-stretch-handle>`s, and is hidden from assistive
+ * technology.
  */
 export class PianoRollSelectionSpanElement extends PianoRollPartElement {
   override paint(snapshot: PianoRollSnapshot) {
@@ -878,9 +871,9 @@ export class PianoRollSelectionSpanElement extends PianoRollPartElement {
 }
 
 /**
- * One `edge` of the selection's span: a drag stretches the selected notes in
- * time from the other edge, on the grid unless Cmd/Ctrl is held. It carries
- * `data-edge`.
+ * An `edge` of the selection span. Dragging it stretches the selected notes
+ * in time from the opposite edge, on the grid unless Cmd or Ctrl is held.
+ * Carries `data-edge`.
  */
 export class PianoRollStretchHandleElement extends PianoRollPartElement {
   #release: AbortController | undefined;
@@ -923,11 +916,10 @@ const levelOf = (element: Element): NoteLevel =>
     : "velocity";
 
 /**
- * A strip under the grid where each note's velocity, or with
- * `level="chance"` its chance to play, stands as a bar placed at the note's
- * start: a timeline lane, like the grid. In draw mode it is a brush: a drag
- * across it sets every bar under the pointer, in the grid cell it is over,
- * to the pointer's height. Put an `<audio-ui-piano-roll-velocities>` in it.
+ * A timeline lane of per-note bars for velocity or, with `level="chance"`,
+ * probability, each at its note's start. In draw mode, a drag sets every bar
+ * under the pointer, per grid cell, to the pointer's height. Contains an
+ * `<audio-ui-piano-roll-velocities>`.
  */
 export class PianoRollVelocityLaneElement extends PianoRollLaneElement {
   #release: AbortController | undefined;
@@ -957,7 +949,10 @@ export class PianoRollVelocityLaneElement extends PianoRollLaneElement {
   }
 }
 
-/** Makes one `<audio-ui-piano-roll-velocity>` per note, each holding what its `<template>` holds, if it has one. */
+/**
+ * Generates an `<audio-ui-piano-roll-velocity>` per note, from its
+ * `<template>` when present.
+ */
 export class PianoRollVelocitiesElement extends PianoRollMakerElement<NoteId> {
   protected readonly stamp = new Stamp<NoteId>(
     this,
@@ -973,16 +968,14 @@ export class PianoRollVelocitiesElement extends PianoRollMakerElement<NoteId> {
 }
 
 /**
- * One note's velocity, or its chance in a `level="chance"` lane, as a bar
- * from the bottom of the lane: its height is the value, through the
- * `--piano-roll-level` CSS variable. Dragging it changes the value of the
- * selection by the same amount when the note is part of it; Shift + click
- * toggles the note in the selection. On a velocity bar, Cmd/Ctrl + drag sets
- * how far the velocity may stray, its `--piano-roll-deviation`. The native
- * `<input type="range">` it holds takes the arrow keys and carries the
- * accessible name, the note's unless it has an `aria-label`. Its
- * `getAriaValueText(level)` property says how the value is announced, a
- * percentage by default.
+ * A note's velocity, or chance in a `level="chance"` lane, rendered as a bar
+ * sized by `--piano-roll-level`. Dragging changes the value, by the same
+ * amount across the selection when the note is selected; Shift + click
+ * toggles the note in the selection; Cmd/Ctrl + drag on a velocity bar sets
+ * the velocity's random deviation, `--piano-roll-deviation`. Contains a
+ * native `<input type="range">` for the keyboard, labelled with the note's
+ * label unless it has an `aria-label`. The `getAriaValueText(level)`
+ * property customizes the announcement (a percentage by default).
  */
 export class PianoRollVelocityElement extends PianoRollNotePartElement {
   static readonly observedAttributes = INPUT_NAMES;
@@ -1093,11 +1086,10 @@ export class PianoRollVelocityElement extends PianoRollNotePartElement {
 }
 
 /**
- * The keyboard down the side of the roll: it lays the `<audio-ui-piano>` it
- * holds on the roll's rows, low end at the bottom, and lights the pitches
- * that sound. Pressing a key sounds it through the roll's `noteon`; with
- * Shift, pressing it selects every note on its row, or deselects them when
- * they all are.
+ * Lays out the `<audio-ui-piano>` it contains on the roll's rows, low end at
+ * the bottom, and lights the sounding pitches. A key press sounds through
+ * the roll's `noteon`; with Shift, it toggles the selection of every note on
+ * its row.
  */
 export class PianoRollKeysElement extends PianoRollPartElement {
   #piano: PianoElement | null = null;

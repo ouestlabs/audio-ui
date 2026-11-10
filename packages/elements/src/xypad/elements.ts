@@ -78,15 +78,15 @@ const stateAttributes = (snapshot: XYPadSnapshot) => ({
 });
 
 /**
- * Groups all parts of the pad and owns its two-dimensional value. Exposes the
- * point's place as CSS variables for crosshairs and guides: `--xy-pad-x`
- * from the left and `--xy-pad-y` from the top, as percentages. Every change
- * fires an `input` event, which `preventDefault()` refuses, and a gesture
- * that ends with a new point fires a `change`. Its attributes are the React
- * `XYPad.Root`'s props: `min-x`, `max-x`, `min-y`, `max-y` (0 to 100 by
- * default), `step-x`, `step-y`, `value` and `default-value` as `"x y"`,
- * `disabled`, `format` (`Intl.NumberFormat` options as JSON), `locale` and
- * `name`, under which its two inputs submit as `name.x` and `name.y`.
+ * The root of a two-dimensional control. Owns the point and renders its
+ * parts from it. Exposes the position as `--xy-pad-x` (from the left) and
+ * `--xy-pad-y` (from the top), as percentages. Fires `input` on every
+ * change, cancelable with `preventDefault()`, and `change` when an
+ * interaction that changed the point ends. Attributes mirror the props of
+ * the React `XYPad.Root`: `min-x`, `max-x`, `min-y`, `max-y` (0 to 100),
+ * `step-x`, `step-y`, `value` and `default-value` as `"x y"`, `disabled`,
+ * `format` (`Intl.NumberFormat` options as JSON), `locale` and `name`, which
+ * submits the inputs as `name.x` and `name.y`.
  */
 export class XYPadElement extends ControlRoot<XYPadSnapshot> {
   static readonly observedAttributes = [
@@ -140,7 +140,7 @@ export class XYPadElement extends ControlRoot<XYPadSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** The point as displayed, `{ x, y }`. Set it to move the pad; a gesture moves it from there. */
+  /** The point as displayed, `{ x, y }`. Setting it moves the pad; subsequent gestures start from the new value. */
   get value(): XYPadPoint {
     return this.controller.getSnapshot().value;
   }
@@ -151,7 +151,7 @@ export class XYPadElement extends ControlRoot<XYPadSnapshot> {
     this.paint();
   }
 
-  /** How each axis is written: `Intl.NumberFormat` options. Takes over from the `format` attribute. */
+  /** How each axis is written: `Intl.NumberFormat` options. Overrides the `format` attribute. */
   get format(): Intl.NumberFormatOptions | undefined {
     return this.#format ?? jsonAttribute(this, "format");
   }
@@ -224,10 +224,9 @@ abstract class XYPadPartElement extends ControlPart<
 }
 
 /**
- * The pad's surface: a press jumps the point to the pointer and a drag
- * follows it; the mouse wheel and the trackpad move it too, and a double
- * click returns it to its default. Its structural style sets
- * `touch-action: none`, so a touch drag does not scroll the page.
+ * The interactive surface. A press moves the point to the pointer and a drag
+ * follows it; the wheel and the trackpad move it; a double click resets it.
+ * Sets `touch-action: none`.
  */
 export class XYPadControlElement extends XYPadPartElement {
   #release: AbortController | undefined;
@@ -277,12 +276,12 @@ const NAMES = [
 ];
 
 /**
- * Marks the point on the pad (`left` and `top` as percentages, centered
- * with `translate`). Holds two native `<input type="range">`s, one per
- * axis: the X input takes focus, both carry the accessible name, and the
- * arrow keys move both axes. Its `aria-label` names the axes after it
- * ("Filter X", "Filter Y"), `label-x` and `label-y` name each one, and
- * `aria-labelledby` and `aria-describedby` go to both.
+ * Marks the point, positioned with `left` and `top` and centered with
+ * `translate`. Contains one native `<input type="range">` per axis: the X
+ * input receives focus, both carry the accessible name, and the arrow keys
+ * move both axes. `aria-label` labels both axes ("Filter X", "Filter Y"),
+ * `label-x` and `label-y` label each, and `aria-labelledby` and
+ * `aria-describedby` apply to both.
  */
 export class XYPadThumbElement extends XYPadPartElement {
   static readonly observedAttributes = NAMES;
@@ -384,7 +383,10 @@ export class XYPadThumbElement extends XYPadPartElement {
   }
 }
 
-/** The formatted point (`format` and `locale` on the pad), `"x, y"`, as its text. */
+/**
+ * Renders the point as `"x, y"`, formatted with the pad's `format` and
+ * `locale`.
+ */
 export class XYPadValueElement extends XYPadPartElement {
   readonly #text = new ValueText();
 
@@ -398,7 +400,10 @@ export class XYPadValueElement extends XYPadPartElement {
   }
 }
 
-/** The accessible label, which names both axis inputs when the thumb has no name of its own. */
+/**
+ * The accessible label. Labels both axis inputs when the thumb has no
+ * accessible name.
+ */
 export class XYPadLabelElement extends XYPadPartElement {
   protected override attached(pad: XYPadElement) {
     pad.labelId = ensureId(this, XYPAD_TAGS.label);

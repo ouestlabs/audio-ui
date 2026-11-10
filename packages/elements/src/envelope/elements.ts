@@ -123,16 +123,15 @@ function pointIn(element: Element, event: MouseEvent) {
 }
 
 /**
- * Groups all parts of the envelope, owns its points and is the box they are
- * placed in (`position: relative`). Every change fires an `input` event,
- * which `preventDefault()` refuses, and an interaction that changed the
- * points fires a `change` when it ends. Its attributes are the React
- * `Envelope.Root`'s props: `value` and `default-value` as points separated
- * by commas, each `x y` or `x y curve` in 0…1 (`"0 0, 0.2 1, 1 0"`),
+ * The root of a breakpoint envelope editor, with `role="group"`. Owns the
+ * points and positions them (`position: relative`). Fires `input` on every
+ * change, cancelable with `preventDefault()`, and `change` when an
+ * interaction that changed the points ends. Attributes mirror the props of
+ * the React `Envelope.Root`: `value` and `default-value` as points separated
+ * by commas, each `x y` or `x y curve` from 0 to 1 (`"0 0, 0.2 1, 1 0"`),
  * `disabled`, `format` (`Intl.NumberFormat` options as JSON), `locale`,
- * `max-points`, `min-points` (2 by default), `snap` (one grid step, or
- * `x y` for each axis) and `step` (the keyboard step, 0.01 by default). It
- * is a group: name it with `aria-label`.
+ * `max-points`, `min-points` (2), `snap` (a grid step, or `x y` per axis)
+ * and `step` (keyboard step, 0.01). Label it with `aria-label`.
  */
 export class EnvelopeElement extends ControlRoot<EnvelopeSnapshot> {
   static readonly observedAttributes = [
@@ -205,7 +204,7 @@ export class EnvelopeElement extends ControlRoot<EnvelopeSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** The points as displayed, in `x` order. Set them to reshape the envelope; a gesture moves them from there. */
+  /** The points as displayed, in `x` order. Setting them reshapes the envelope; subsequent gestures start from the new value. */
   get value(): Breakpoint[] {
     return this.controller.getSnapshot().value;
   }
@@ -216,7 +215,7 @@ export class EnvelopeElement extends ControlRoot<EnvelopeSnapshot> {
     this.paint();
   }
 
-  /** How point coordinates are written: `Intl.NumberFormat` options. Takes over from the `format` attribute. */
+  /** How point coordinates are written: `Intl.NumberFormat` options. Overrides the `format` attribute. */
   get format(): Intl.NumberFormatOptions | undefined {
     return this.#format ?? jsonAttribute(this, "format");
   }
@@ -343,10 +342,11 @@ abstract class EnvelopePartElement extends ControlPart<
 }
 
 /**
- * The drawing surface: it fills the envelope (`position: absolute; inset:
- * 0`), holds the line and the fill, and a double click on it adds a point.
- * With Alt held, dragging a segment bends it and a double click straightens
- * it. Carries `data-blocked` briefly when adding is refused at `max-points`.
+ * The drawing surface, filling the envelope (`position: absolute; inset: 0`)
+ * and containing the line and the fill. A double click adds a point. With
+ * Alt held, a drag bends the segment under the pointer and a double click
+ * straightens it. Carries `data-blocked` briefly when adding is refused at
+ * `max-points`.
  */
 export class EnvelopeGraphElement extends EnvelopePartElement {
   #release: AbortController | undefined;
@@ -429,8 +429,8 @@ abstract class EnvelopeDrawingElement extends EnvelopePartElement {
 }
 
 /**
- * The envelope curve through the points, a line in `currentColor` that keeps
- * its width however the graph stretches: set it with `stroke-width`.
+ * The curve through the points, in `currentColor`, with a stroke width that
+ * stays constant as the graph scales. Set it with `stroke-width`.
  */
 export class EnvelopeLineElement extends EnvelopeDrawingElement {
   constructor() {
@@ -509,10 +509,10 @@ abstract class EnvelopeMakerElement extends EnvelopePartElement {
 }
 
 /**
- * Makes one `<audio-ui-envelope-point>` per point, in `x` order, each
- * holding what its `<template>` holds, if it has one. `label` names them,
- * `{n}` the point's number from 1 and `{count}` how many there are ("Point
- * {n} of {count}" by default). It takes no room of its own.
+ * Generates an `<audio-ui-envelope-point>` per point, in `x` order, from its
+ * `<template>` when present. `label` names the points, with `{n}` and
+ * `{count}` placeholders ("Point {n} of {count}" by default). Renders with
+ * `display: contents`.
  */
 export class EnvelopePointsElement extends EnvelopeMakerElement {
   protected readonly stamp = new Stamp(this, ENVELOPE_TAGS.point, "index");
@@ -523,10 +523,10 @@ export class EnvelopePointsElement extends EnvelopeMakerElement {
 }
 
 /**
- * Makes one `<audio-ui-envelope-segment>` per segment between two points,
- * each holding what its `<template>` holds, if it has one. `label` names
- * them, `{n}` the segment's number from 1 and `{count}` how many there are
- * ("Curve {n}" by default). It takes no room of its own.
+ * Generates an `<audio-ui-envelope-segment>` per segment, from its
+ * `<template>` when present. `label` names the segments, with `{n}` and
+ * `{count}` placeholders ("Curve {n}" by default). Renders with `display:
+ * contents`.
  */
 export class EnvelopeSegmentsElement extends EnvelopeMakerElement {
   protected readonly stamp = new Stamp(this, ENVELOPE_TAGS.segment, "index");
@@ -581,14 +581,13 @@ function pointMove(key: string, index: number, count: number) {
 }
 
 /**
- * A draggable handle for the point at `index`, placed with `left` and
- * `bottom` percentages over the envelope. It is a `role="slider"` on the
- * point's level (`y`). One point at a time is the tab stop: Page Up and
- * Page Down (or Home and End) move between points, the arrow keys move it
- * (Shift for larger steps), and Delete, Alt + click or a double click
- * removes it. It carries `data-dragging` while it is dragged, `data-removable`
- * while it can be removed, and `data-blocked` briefly when removal is
- * refused at `min-points`.
+ * A draggable handle for the point at `index`, positioned with `left` and
+ * `bottom`. A `role="slider"` on the point's level. The points share one tab
+ * stop: Page Up and Page Down (or Home and End) move between points, the
+ * arrow keys move the point (Shift for larger steps), and Delete, Alt +
+ * click or a double click removes it. Carries `data-dragging`,
+ * `data-removable`, and `data-blocked` briefly when removal is refused at
+ * `min-points`.
  */
 export class EnvelopePointElement extends EnvelopeHandleElement {
   override paint(snapshot: EnvelopeSnapshot) {
@@ -697,13 +696,12 @@ export class EnvelopePointElement extends EnvelopeHandleElement {
 }
 
 /**
- * A handle on the middle of the segment leaving the point at `index`: drag
- * it up or down to bend the segment, so it follows the pointer on the
- * curve's midpoint. A `role="slider"` on the curve (-1…1): one handle at a
- * time is the tab stop, Left and Right move between them, Up and Down bend
- * it (Shift for larger steps), and a double click or Delete straightens it.
- * A segment between two points of the same level has nothing to bend, and
- * `data-flat` says so. It carries `data-dragging` while it is bent.
+ * A curve handle at the midpoint of the segment that starts at point
+ * `index`, a `role="slider"` from -1 to 1. Dragging bends the segment so its
+ * midpoint follows the pointer. The handles share one tab stop: Left and
+ * Right move between them, Up and Down bend (Shift for larger steps), and a
+ * double click or Delete straightens. Carries `data-flat` when the segment
+ * joins two points of equal level, and `data-dragging` while bent.
  */
 export class EnvelopeSegmentElement extends EnvelopeHandleElement {
   override paint(snapshot: EnvelopeSnapshot) {

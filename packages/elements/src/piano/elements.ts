@@ -61,17 +61,16 @@ const pitchList = (element: Element, name: string) =>
     .filter((pitch) => Number.isFinite(pitch));
 
 /**
- * A keyboard to play: every key sounds while pressed, by pointer or from the
- * keyboard. Dragging across the keys glides from one to the next, and each
- * pointer holds its own key, so chords can be played on a touch screen. It
- * is laid out like a piano, or with `layout="even"` as one equal share per
- * key, as a piano roll's rows are; `orientation="vertical"` puts the low end
- * at the bottom. The keys are one tab stop, walked with the arrow keys.
- * `min-pitch` and `max-pitch` (48 and 72 by default) or `pitches` say which
- * keys there are; `active-notes` (or `activeNotes`) lights keys from
- * elsewhere. A key that starts sounding fires `noteon`, which
- * `preventDefault()` keeps silent, and one that stops fires `noteoff`. It is
- * a group.
+ * The root of a playable keyboard, with `role="group"`. A key sounds while
+ * pressed, by pointer or keyboard; dragging glides across keys, and each
+ * pointer holds its own key for multi-touch chords. `layout` is `keyboard`
+ * (piano proportions) or `even` (equal shares, as on a piano roll);
+ * `orientation="vertical"` places the low end at the bottom. The keys share
+ * one tab stop, navigated with the arrow keys. `min-pitch` and `max-pitch`
+ * (48 and 72) or `pitches` set the keys; `active-notes` and the
+ * `activeNotes` property light keys externally. Fires `noteon` when a key
+ * starts sounding, cancelable with `preventDefault()`, and `noteoff` when it
+ * stops.
  */
 export class PianoElement extends ControlRoot<PianoSnapshot> {
   static readonly observedAttributes = [
@@ -142,7 +141,7 @@ export class PianoElement extends ControlRoot<PianoSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** Pitches lit from elsewhere, such as a MIDI input, on top of the keys pressed here. Takes over from `active-notes`. */
+  /** Pitches lit from elsewhere, such as a MIDI input, on top of the keys pressed here. Overrides `active-notes`. */
   get activeNotes(): readonly number[] {
     return this.#activeNotes ?? pitchList(this, "active-notes");
   }
@@ -153,7 +152,7 @@ export class PianoElement extends ControlRoot<PianoSnapshot> {
     this.paint();
   }
 
-  /** Only these pitches get keys, instead of `min-pitch` to `max-pitch`. Takes over from `pitches`. */
+  /** Only these pitches get keys, instead of `min-pitch` to `max-pitch`. Overrides `pitches`. */
   get pitches(): readonly number[] | undefined {
     if (this.#pitches) {
       return this.#pitches;
@@ -272,10 +271,9 @@ abstract class PianoPartElement extends ControlPart<
 }
 
 /**
- * Makes one `<audio-ui-piano-key>` for each pitch of the piano, lowest
- * first, in place of the keys a page would write. What its `<template>`
- * holds, such as an `<audio-ui-piano-key-label>`, goes into each key. It
- * takes no room of its own (`display: contents`).
+ * Generates an `<audio-ui-piano-key>` per pitch, lowest first, filled from
+ * its `<template>`, such as with an `<audio-ui-piano-key-label>`. Renders
+ * with `display: contents`.
  */
 export class PianoKeysElement extends PianoPartElement {
   readonly #stamp = new Stamp(this, PIANO_TAGS.key, "pitch");
@@ -302,11 +300,10 @@ export class PianoKeysElement extends PianoPartElement {
 }
 
 /**
- * One key, placed along the keyboard for its pitch. It sounds while pressed:
- * by pointer through the keyboard, or with Enter or Space while focused. It
- * is a button, named after its pitch ("C4") unless it has an `aria-label`.
- * `data-color` is `black` or `white`, and `data-active` is on while it
- * sounds.
+ * A key, positioned for its `pitch`. Sounds while pressed, by pointer or
+ * with Enter and Space when focused. A button labelled with its pitch name
+ * ("C4") unless it has an `aria-label`. Carries `data-color` (`black` or
+ * `white`) and `data-active` while it sounds.
  */
 export class PianoKeyElement extends PianoPartElement {
   #release: AbortController | undefined;
@@ -393,7 +390,10 @@ export class PianoKeyElement extends PianoPartElement {
   }
 }
 
-/** The name of the key it sits in, such as "C4". Hidden from assistive technology, which reads the key's own name. */
+/**
+ * The name of its key, such as "C4". Hidden from assistive technology, which
+ * reads the key's own label.
+ */
 export class PianoKeyLabelElement extends PianoPartElement {
   override paint(snapshot: PianoSnapshot) {
     super.paint(snapshot);

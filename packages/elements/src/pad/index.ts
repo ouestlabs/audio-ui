@@ -1,5 +1,6 @@
 /**
- * The drum pads as custom elements. Importing this module registers them:
+ * Pad grid Web Components. Importing this entry point registers its
+ * elements:
  *
  * ```html
  * <audio-ui-pad aria-label="Drum pads" columns="4">

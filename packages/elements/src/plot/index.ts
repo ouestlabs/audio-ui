@@ -1,7 +1,7 @@
 /**
- * The plot as custom elements. Importing this module registers them. Each
- * drawing covers the plot with an SVG of its own; a curve takes its
- * function, and a trace its live source, as properties:
+ * Plot Web Components. Importing this entry point registers its elements.
+ * Each drawing part renders its own SVG over the plot; curves take their
+ * function, and traces their live source, as properties:
  *
  * ```html
  * <audio-ui-plot min-x="20" max-x="20000" scale-x="log" min-y="-24" max-y="24">

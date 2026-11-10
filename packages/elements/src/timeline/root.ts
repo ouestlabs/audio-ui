@@ -129,20 +129,18 @@ export const stateAttributes = (snapshot: TimelineSnapshot) => ({
 });
 
 /**
- * Groups the parts of a timeline and owns what they share: its length, its
- * zoom, its grid and the playback position. Units are yours: seconds,
- * beats, pulses or steps. `zoom` is how many px one unit takes; leave it out
- * and the timeline fits the width it is given. The position is its
- * `position`, or a live `source` property the playhead follows as it
- * changes. With a `snap-step`, every gesture lands on the grid unless
- * Cmd/Ctrl is held, and `snap-points` (the edges of other clips, the
- * locators) pull a dragged clip or range onto them from a few px away.
- * Moving the position fires `input`, which `preventDefault()` refuses, and
- * `change` when the gesture ends; a new zoom fires `zoomchange`. Its
- * attributes are the React `Timeline.Root`'s props: `duration` (1),
- * `position`, `default-position`, `zoom`, `default-zoom`, `min-zoom`,
- * `max-zoom`, `step`, `large-step`, `snap-step`, `snap-offset`,
- * `snap-points` and `disabled`.
+ * The root of a timeline. Owns the length, zoom, grid and playback position
+ * shared by its parts. Units are arbitrary: seconds, beats, pulses or steps.
+ * `zoom` sets pixels per unit; when unset, the timeline fits its width. The
+ * position comes from `position` or a live `source` property. With
+ * `snap-step`, gestures snap to the grid unless Cmd or Ctrl is held, and
+ * `snap-points`, such as clip edges and locators, attract dragged clips and
+ * ranges within a few pixels. Fires `input` when the position changes,
+ * cancelable with `preventDefault()`, `change` when the interaction ends,
+ * and `zoomchange` when the zoom changes. Attributes mirror the props of the
+ * React `Timeline.Root`: `duration` (1), `position`, `default-position`,
+ * `zoom`, `default-zoom`, `min-zoom`, `max-zoom`, `step`, `large-step`,
+ * `snap-step`, `snap-offset`, `snap-points` and `disabled`.
  */
 export class TimelineElement extends ControlRoot<TimelineSnapshot> {
   static readonly observedAttributes = [
@@ -241,7 +239,7 @@ export class TimelineElement extends ControlRoot<TimelineSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** The playback position, from 0 to `duration`. Set it to move the playhead; a gesture moves it from there. */
+  /** The playback position, from 0 to `duration`. Setting it moves the playhead; subsequent gestures start from the new value. */
   get position(): number {
     return this.controller.getSnapshot().position;
   }
@@ -274,7 +272,7 @@ export class TimelineElement extends ControlRoot<TimelineSnapshot> {
     this.#follow();
   }
 
-  /** Places that pull a dragged clip or range onto them. Takes over from the `snap-points` attribute. */
+  /** Places that pull a dragged clip or range onto them. Overrides the `snap-points` attribute. */
   get snapPoints(): readonly number[] | undefined {
     return this.#snapPoints ?? this.#snapPointsAttribute();
   }
@@ -423,7 +421,10 @@ export class TimelineElement extends ControlRoot<TimelineSnapshot> {
   }
 }
 
-/** What every part of the timeline does: find its timeline, and carry its state. */
+/**
+ * Base class of the timeline's parts: connects a part to its timeline and
+ * reflects the timeline's state.
+ */
 export abstract class TimelinePartElement extends ControlPart<
   TimelineElement,
   TimelineSnapshot

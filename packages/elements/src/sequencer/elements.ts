@@ -108,16 +108,15 @@ const VELOCITY_STEP = 0.05;
 const VELOCITY_LARGE_STEP = 0.25;
 
 /**
- * A grid of steps to switch on and off, a row per sound: the pattern of a
- * drum machine. Pressing a cell flips it, and dragging on carries the new
- * state across every cell the pointer crosses. The cells are one tab stop,
- * walked with the arrow keys. `value` (or `default-value`) is the pattern as
- * text, a word per row and `x` for a step on (`"x...x... ..x...x."`); the
- * `value` and `velocities` properties take arrays. Flipping cells fires
- * `input`, which `preventDefault()` refuses, then `change`; drawing
- * velocities fires `velocityinput` and `velocitychange`. Its `source`
- * property, the step being played, marks that step's cells with
- * `data-current` as the clock ticks. It is a group.
+ * The root of a step sequencer, one row per sound, with `role="group"`. A
+ * press toggles a cell, and dragging applies the new state to every cell
+ * crossed. The cells share one tab stop, navigated with the arrow keys.
+ * `value` and `default-value` hold the pattern as text, one word per row
+ * with `x` for on (`"x...x... ..x...x."`); the `value` and `velocities`
+ * properties accept arrays. Fires `input`, cancelable with
+ * `preventDefault()`, then `change` when cells toggle, and `velocityinput`
+ * and `velocitychange` when velocities change. The `source` property, the
+ * current step, marks its cells with `data-current`.
  */
 export class SequencerElement extends ControlRoot<SequencerSnapshot> {
   static readonly observedAttributes = ["default-value", "disabled", "value"];
@@ -175,7 +174,7 @@ export class SequencerElement extends ControlRoot<SequencerSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** The pattern: a row per sound, each a list of steps. Set it to change the pattern; a gesture changes it from there. */
+  /** The pattern: a row per sound, each a list of steps. Setting it change the pattern; subsequent gestures start from the new value. */
   get value(): Pattern {
     return this.controller.getSnapshot().value;
   }
@@ -361,9 +360,9 @@ const labelList = (element: Element) =>
     .filter(Boolean);
 
 /**
- * Makes one `<audio-ui-sequencer-row>` per row of the pattern, each holding
- * what its `<template>` holds. `labels` names them in order, separated by
- * commas ("Kick, Snare, Closed hat"). It takes no room of its own.
+ * Generates an `<audio-ui-sequencer-row>` per pattern row from its
+ * `<template>`. `labels` names the rows in order, separated by commas
+ * ("Kick, Snare, Closed hat"). Renders with `display: contents`.
  */
 export class SequencerRowsElement extends SequencerPartElement {
   readonly #stamp = new Stamp(
@@ -401,7 +400,10 @@ export class SequencerRowsElement extends SequencerPartElement {
   }
 }
 
-/** One sound's row of steps, a group, for its `index` from the top. Name it with `aria-label`, such as "Kick". */
+/**
+ * A row of steps with `role="group"`, for its `index` from the top. Label it
+ * with `aria-label`, such as "Kick".
+ */
 export class SequencerRowElement extends SequencerPartElement {
   /** Which row it is, from the top. */
   get index(): number {
@@ -415,10 +417,9 @@ export class SequencerRowElement extends SequencerPartElement {
 }
 
 /**
- * Makes one `<audio-ui-sequencer-step>` per step of the row it is in, each
- * holding what its `<template>` holds: a cell, a velocity bar, or both. It
- * takes no room of its own, and neither do its steps (`display: contents`),
- * so the cells are the grid's own items.
+ * Generates an `<audio-ui-sequencer-step>` per step of its row from its
+ * `<template>`: a cell, a velocity bar, or both. It and its steps render
+ * with `display: contents`, so the cells are the grid items.
  */
 export class SequencerStepsElement extends SequencerPartElement {
   readonly #stamp = new Stamp(this, SEQUENCER_TAGS.step, "index");
@@ -446,7 +447,10 @@ export class SequencerStepsElement extends SequencerPartElement {
   }
 }
 
-/** One step a steps element made, for its `index`: what the cells and bars inside it read their step from. */
+/**
+ * A generated step, for its `index`. Cells and velocity bars inside it take
+ * their step from it.
+ */
 export class SequencerStepElement extends ElementBase {}
 
 /** Where a cell or a bar sits: its row from the row around it, its step from its own `step` or the step around it. */
@@ -461,12 +465,11 @@ function addressOf(element: Element): CellAddress | null {
 }
 
 /**
- * One step of a row: a toggle button, pressed when the step is on
- * (`data-on`). Press it and drag on to paint the same state across the
- * cells you cross; focused, Space or Enter flips it, and the arrow keys
- * move to the next cell. It is named after its row and step ("Kick, step
- * 5") unless it has an `aria-label`. The step being played gets
- * `data-current`.
+ * A step: a toggle button, pressed while the step is on (`data-on`). A press
+ * and drag paints the same state across the cells crossed; Space or Enter
+ * toggles it, and the arrow keys move focus. Labelled with its row and step
+ * ("Kick, step 5") unless it has an `aria-label`. Carries `data-current` on
+ * the current step.
  */
 export class SequencerCellElement extends SequencerPartElement {
   /** Its row and step, read when it connects. */
@@ -566,13 +569,12 @@ export class SequencerCellElement extends SequencerPartElement {
 }
 
 /**
- * How loud one step plays, as a bar from the bottom of its box: the height
- * is the velocity, through the `--sequencer-velocity` CSS variable. Pressing
- * it sets the velocity where the pointer is, and dragging on draws across
- * the steps of the row. Alt + click or Delete bring it back to full. A
- * native `<input type="range">` inside takes the arrow keys (Page Up and
- * Page Down for larger steps, Home and End for silent and full) and carries
- * the accessible name: "Step 5" unless it has an `aria-label`.
+ * A step's velocity, rendered as a bar sized by `--sequencer-velocity`. A
+ * press sets the velocity at the pointer, and a drag draws across the row;
+ * Alt + click or Delete resets it to full. Its native `<input type="range">`
+ * takes the keyboard (Page Up and Page Down for larger steps, Home and End
+ * for silent and full) and the accessible name, "Step 5" unless it has an
+ * `aria-label`.
  */
 export class SequencerVelocityElement extends SequencerPartElement {
   static readonly observedAttributes = ["aria-label"];

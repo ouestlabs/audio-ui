@@ -64,15 +64,15 @@ const stateAttributes = (snapshot: FaderSnapshot) => ({
 });
 
 /**
- * Groups all parts of the fader, with audio defaults (vertical, -60 to +6)
- * and mouse-wheel stepping, and owns its value. Every change fires an `input`
- * event, which `preventDefault()` refuses, and a gesture that ends with a new
- * value fires a `change`. While a pointer drags it, the thumb follows the
- * pointer even when a value set from outside lags behind, as with a seek bar
- * driven by playback. Its attributes are the React `Fader.Root`'s props:
- * `min`, `max`, `step`, `large-step`, `value`, `default-value`, `anchor`,
- * `disabled`, `orientation`, `format` (`Intl.NumberFormat` options as JSON),
- * `locale` and `name`. It is a group, named by its label.
+ * The root of a linear control, with audio defaults: vertical, from -60 to
+ * +6. Owns the value and renders its parts from it. Fires `input` on every
+ * change, cancelable with `preventDefault()`, and `change` when an
+ * interaction that changed the value ends. During a drag, the thumb follows
+ * the pointer even when an externally set value lags behind. Attributes
+ * mirror the props of the React `Fader.Root`: `min`, `max`, `step`,
+ * `large-step`, `value`, `default-value`, `anchor`, `disabled`,
+ * `orientation`, `format` (`Intl.NumberFormat` options as JSON), `locale`
+ * and `name`. Has `role="group"`, labelled by its label part.
  */
 export class FaderElement extends ControlRoot<FaderSnapshot> {
   static readonly observedAttributes = [
@@ -128,7 +128,7 @@ export class FaderElement extends ControlRoot<FaderSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** The value as displayed. Set it to move the fader; a gesture moves it from there. */
+  /** The value as displayed. Setting it moves the fader; subsequent gestures start from the new value. */
   get value(): number {
     return this.controller.getSnapshot().value;
   }
@@ -139,7 +139,7 @@ export class FaderElement extends ControlRoot<FaderSnapshot> {
     this.paint();
   }
 
-  /** How the value is written: `Intl.NumberFormat` options. Takes over from the `format` attribute. */
+  /** How the value is written: `Intl.NumberFormat` options. Overrides the `format` attribute. */
   get format(): Intl.NumberFormatOptions | undefined {
     return this.#format ?? jsonAttribute(this, "format");
   }
@@ -217,11 +217,10 @@ abstract class FaderPartElement extends ControlPart<
 }
 
 /**
- * The interactive area: a press on the track jumps to the value under it, a
- * press on the thumb drags it from where it was taken, and the mouse wheel
- * steps. A double click, an Alt + click or the Delete key return to the
- * default. Its structural style sets `touch-action: none`, so a touch drag
- * does not scroll the page.
+ * The interactive area. A press on the track jumps to the pointer, a press
+ * on the thumb drags from where it was grabbed, and the wheel steps. A
+ * double click, Alt + click or Delete resets to the default. Sets
+ * `touch-action: none`.
  */
 export class FaderControlElement extends FaderPartElement {
   #release: AbortController | undefined;
@@ -286,12 +285,12 @@ export class FaderControlElement extends FaderPartElement {
   }
 }
 
-/** The full range of travel, which the indicator and the thumb are placed in. */
+/** The full range of travel, containing the indicator and the thumb. */
 export class FaderTrackElement extends FaderPartElement {}
 
 /**
- * The filled part of the track: from `min` up to the value, or between the
- * fader's `anchor` and the value, on whichever side of it the value is.
+ * The filled range of the track, from `min` to the value, or between
+ * `anchor` and the value.
  */
 export class FaderIndicatorElement extends FaderPartElement {
   override paint(snapshot: FaderSnapshot) {
@@ -308,11 +307,10 @@ export class FaderIndicatorElement extends FaderPartElement {
 }
 
 /**
- * The draggable thumb, placed along the track at the value. Holds the
- * fader's native `<input type="range">`, which takes focus, carries the
- * accessible name and the form value (the fader's `name`), and handles the
- * keyboard. Its `aria-label`, `aria-labelledby` and `aria-describedby` go to
- * that input; set one to `""` to take it away.
+ * The draggable thumb, positioned at the value. Contains the native `<input
+ * type="range">` that receives focus, keyboard input, the accessible name
+ * and the form value. `aria-label`, `aria-labelledby` and `aria-describedby`
+ * set on the thumb are moved to the input; an empty value removes them.
  */
 export class FaderThumbElement extends FaderPartElement {
   static readonly observedAttributes = INPUT_NAMES;
@@ -397,7 +395,7 @@ export class FaderThumbElement extends FaderPartElement {
   }
 }
 
-/** The formatted value (`format` and `locale` on the fader), as its text. */
+/** Renders the value, formatted with the fader's `format` and `locale`. */
 export class FaderValueElement extends FaderPartElement {
   readonly #text = new ValueText();
 
@@ -411,7 +409,10 @@ export class FaderValueElement extends FaderPartElement {
   }
 }
 
-/** The accessible label: it names the fader's group, and the thumb's input when the thumb has no name of its own. */
+/**
+ * The accessible label. Labels the fader's group, and the thumb's input when
+ * the thumb has no accessible name.
+ */
 export class FaderLabelElement extends FaderPartElement {
   protected override attached(fader: FaderElement) {
     fader.labelId = ensureId(this, FADER_TAGS.label);

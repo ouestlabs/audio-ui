@@ -1,5 +1,5 @@
 /**
- * The XY pad as custom elements. Importing this module registers them:
+ * XY pad Web Components. Importing this entry point registers its elements:
  *
  * ```html
  * <audio-ui-xypad min-x="20" max-x="20000" value="1000 50">

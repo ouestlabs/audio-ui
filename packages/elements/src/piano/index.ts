@@ -1,7 +1,7 @@
 /**
- * The piano keyboard as custom elements. Importing this module registers
- * them. `<audio-ui-piano-keys>` makes a key per pitch, each holding what its
- * template holds:
+ * Piano keyboard Web Components. Importing this entry point registers its
+ * elements. `<audio-ui-piano-keys>` generates a key per pitch from its
+ * `<template>`:
  *
  * ```html
  * <audio-ui-piano min-pitch="48" max-pitch="72" aria-label="Piano">

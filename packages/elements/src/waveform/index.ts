@@ -1,7 +1,7 @@
 /**
- * The waveform as custom elements. Importing this module registers them.
- * The audio's shape is the waveform's `peaks` property, or a live `levels`
- * signal; the position is its `value`, or a live `source`:
+ * Waveform Web Components. Importing this entry point registers its
+ * elements. The shape comes from the `peaks` property or a live `levels`
+ * source; the position from `value` or a live `source`:
  *
  * ```html
  * <audio-ui-waveform duration="102">

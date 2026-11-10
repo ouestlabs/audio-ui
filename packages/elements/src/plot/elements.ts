@@ -120,13 +120,11 @@ function placement(point: PlotPoint, plot: PlotSnapshot) {
 }
 
 /**
- * Groups the parts of a plot and owns its two axes: the range of each and
- * how values spread along it, evenly or logarithmically, the way frequency
- * is drawn. Everything placed on the plot (curves, lines, bands, handles) is
- * placed in the axes' units. Its attributes are the React `Plot.Root`'s
- * props: `min-x`, `max-x`, `min-y`, `max-y` (0 to 1 by default), `scale-x`
- * and `scale-y` (`linear` or `log`), `disabled`, and `locale` for its
- * handles' values.
+ * The root of a plot. Defines two axes, each with a range and a scale,
+ * linear or logarithmic, and positions every part in axis units. Attributes
+ * mirror the props of the React `Plot.Root`: `min-x`, `max-x`, `min-y`,
+ * `max-y` (0 to 1), `scale-x` and `scale-y` (`linear` or `log`), `disabled`,
+ * and `locale` for the handles' values.
  */
 export class PlotElement extends ControlRoot<PlotSnapshot> {
   static readonly observedAttributes = [
@@ -178,7 +176,7 @@ export class PlotElement extends ControlRoot<PlotSnapshot> {
     this.paint();
   }
 
-  /** How x values spread across: `linear`, `log`, or your own `{ toPosition, toValue }`. Takes over from the `scale-x` attribute. */
+  /** How x values spread across: `linear`, `log`, or your own `{ toPosition, toValue }`. Overrides the `scale-x` attribute. */
   get scaleX(): ParameterScaleProp {
     return this.#scaleX ?? scaleAttribute(this, "scale-x") ?? "linear";
   }
@@ -189,7 +187,7 @@ export class PlotElement extends ControlRoot<PlotSnapshot> {
     this.paint();
   }
 
-  /** How y values spread up. Takes over from the `scale-y` attribute. */
+  /** How y values spread up. Overrides the `scale-y` attribute. */
   get scaleY(): ParameterScaleProp {
     return this.#scaleY ?? scaleAttribute(this, "scale-y") ?? "linear";
   }
@@ -328,11 +326,10 @@ abstract class PlotDrawingElement extends PlotPartElement {
 const DEFAULT_SAMPLES = 256;
 
 /**
- * A curve across the whole plot: `y = fn(x)` in the axes' units, such as an
- * equalizer's response in dB at each frequency, from its `fn` property. A
- * line in `currentColor`; with `fill-to`, it closes down to that y value and
- * is filled as an area instead. `samples` sets how many points it starts
- * from (256), and it adds more where the curve bends tighter than that shows.
+ * Plots `y = fn(x)` across the plot in axis units, from the `fn` property,
+ * such as a frequency response in dB. Stroked in `currentColor`; with
+ * `fill-to`, closed to that y value and filled instead. `samples` sets the
+ * initial sampling (256), refined adaptively at sharp bends.
  */
 export class PlotCurveElement extends PlotDrawingElement {
   static readonly observedAttributes = ["fill-to", "samples"];
@@ -373,9 +370,9 @@ export class PlotCurveElement extends PlotDrawingElement {
 }
 
 /**
- * A straight line across the plot at a `value`: vertical on the x axis
- * (`axis="x"`, the default), such as a filter's cutoff, or horizontal on
- * the y axis, such as 0 dB. Drawn in `currentColor`.
+ * A straight line at `value`: vertical on the x axis (`axis="x"`, the
+ * default), such as a cutoff, or horizontal on the y axis, such as 0 dB.
+ * Stroked in `currentColor`.
  */
 export class PlotLineElement extends PlotDrawingElement {
   static readonly observedAttributes = ["axis", "value"];
@@ -406,9 +403,9 @@ export class PlotLineElement extends PlotDrawingElement {
 const round = (value: number) => Math.round(value * 1e5) / 1e5;
 
 /**
- * A stretch of the plot between two values, `from` and `to`, on one `axis`,
- * across the whole of the other: the frequencies a sweep can reach, the
- * levels over a threshold. Filled in `currentColor`.
+ * The range of one `axis` between `from` and `to`, spanning the other axis,
+ * such as a sweep range or a level above a threshold. Filled in
+ * `currentColor`.
  */
 export class PlotBandElement extends PlotDrawingElement {
   static readonly observedAttributes = ["axis", "from", "to"];
@@ -440,11 +437,10 @@ export class PlotBandElement extends PlotDrawingElement {
 export type PlotTraceSource = Source<ArrayLike<number>>;
 
 /**
- * A live line across the plot: the list of y values its `source` property
- * holds, such as the spectrum of the sound, spread evenly across the x axis
- * and drawn again each time the source changes. A line in `currentColor`;
- * with `fill-to`, an area. `min` and `max` put the values on a scale of
- * their own, a spectrum in absolute dB behind an equalizer in dB of gain.
+ * A live line from the y values of the `source` property, such as a
+ * spectrum, spread evenly across the x axis and redrawn on each change.
+ * Stroked in `currentColor`; with `fill-to`, filled. `min` and `max` set an
+ * independent value scale, such as absolute dB behind a gain axis.
  */
 export class PlotTraceElement extends PlotDrawingElement {
   static readonly observedAttributes = ["fill-to", "max", "min"];
@@ -517,11 +513,10 @@ export class PlotTraceElement extends PlotDrawingElement {
 }
 
 /**
- * A label at a `value` on one `axis`, such as "1k" under a frequency or
- * "+12" by a gain: placed at the value along the axis (`left` for x, the
- * default, `top` for y) and left to you to set apart from the plot's edge.
- * Hidden from assistive technology, which reads the handles' own values.
- * It carries `data-axis`.
+ * A label at `value` on one `axis`, such as "1k" or "+12", positioned with
+ * `left` (x, the default) or `top` (y). Offset it from the plot's edge with
+ * CSS. Hidden from assistive technology, which reads the handles' values.
+ * Carries `data-axis`.
  */
 export class PlotMarkElement extends PlotPartElement {
   static readonly observedAttributes = ["axis", "value"];
@@ -548,10 +543,9 @@ export class PlotMarkElement extends PlotPartElement {
 export type PlotDotSource = Source<PlotPoint>;
 
 /**
- * A point on the plot that nothing drags: where the signal is right now,
- * such as the input level on a compressor's curve. Its `source` property
- * moves it as the source changes; its `value`, `"x y"`, holds it still.
- * Hidden from assistive technology and from the pointer.
+ * A non-interactive point, such as the input level on a compressor curve.
+ * Follows the `source` property, or stays at its `value` (`"x y"`). Hidden
+ * from assistive technology and ignores the pointer.
  */
 export class PlotDotElement extends PlotPartElement {
   static readonly observedAttributes = ["value"];
@@ -563,7 +557,7 @@ export class PlotDotElement extends PlotPartElement {
     this.repaint();
   }
 
-  /** A live point, followed as it changes. Takes over from `value`. */
+  /** A live point, followed as it changes. Overrides `value`. */
   get source(): PlotDotSource | undefined {
     return this.#source;
   }
@@ -644,16 +638,14 @@ function gridLabel(axis: Axis, across: number, text: string) {
 }
 
 /**
- * Grid lines and their labels, drawn from the axes: round values along each
- * axis, so you do not place each line and label by hand. `axis` says which
- * axes get lines (`x`, `y` or `both`, the default), `x-ticks` and `y-ticks`
- * where they go, `x-count` and `y-count` about how many when they are not
- * given (5), and `labels` which axes are labelled (the ones drawn, or
- * `none`). Its `format(value, axis)` property writes a label, "1k" by
- * default. It covers the plot, is hidden from assistive technology and from
- * the pointer, and marks its parts for styling: `data-part="line"` and
- * `data-part="label"`, each with `data-axis`, and `data-zero` on the line at
- * zero.
+ * Grid lines and labels at round values along the axes. `axis` selects the
+ * axes (`x`, `y` or `both`, the default), `x-ticks` and `y-ticks` set
+ * positions, `x-count` and `y-count` the approximate count when positions
+ * are not set (5), and `labels` the labelled axes (those drawn, or `none`).
+ * The `format(value, axis)` property formats labels ("1k" by default).
+ * Covers the plot, is hidden from assistive technology and ignores the
+ * pointer. Lines carry `data-part="line"`, labels `data-part="label"`, both
+ * `data-axis`, and the zero line `data-zero`.
  */
 export class PlotGridElement extends PlotPartElement {
   static readonly observedAttributes = [
@@ -740,18 +732,16 @@ const HANDLE_NAMES = [
 const UNPLACED: PlotAxis = { max: 1, min: 0, scale: resolveScale("linear") };
 
 /**
- * A point on the plot that can be moved: an equalizer band at its frequency
- * and gain, a filter's cutoff and resonance, a compressor's threshold. Its
- * `value` (`"x y"`) is in the axes' units, and `axis` (`x`, `y` or `both`,
- * the default) can hold it to one of them. Dragging moves it from where it
- * is, never jumping to the pointer, four times finer with Shift; a double
- * click, an Alt + click or the Delete key return it to `default-value`, or
- * the middle of the plot. It holds a native `<input type="range">` per axis
- * it moves along: the first takes focus, the arrow keys move it by a
- * hundredth of the axis (a tenth with Shift), and its `aria-label` names
- * them ("Low X", "Low Y"), or `label-x` and `label-y` each one. Moving it
- * fires `input` on it, which `preventDefault()` refuses, and `change`. It
- * carries `data-axis` and `data-dragging`.
+ * A draggable point in axis units, such as an equalizer band or a filter's
+ * cutoff and resonance. `value` and `default-value` are `"x y"`; `axis`
+ * (`x`, `y` or `both`) constrains movement. Drag is relative, never jumping
+ * to the pointer, and four times finer with Shift; a double click, Alt +
+ * click or Delete resets to `default-value`, or the plot's center. Contains
+ * one native `<input type="range">` per movable axis: the first receives
+ * focus, and the arrow keys move by a hundredth of the axis (a tenth with
+ * Shift). `aria-label` labels the inputs ("Low X", "Low Y"); `label-x` and
+ * `label-y` label each. Fires `input`, cancelable with `preventDefault()`,
+ * and `change`. Carries `data-axis` and `data-dragging`.
  */
 export class PlotHandleElement extends PlotPartElement {
   static readonly observedAttributes = [
@@ -852,7 +842,7 @@ export class PlotHandleElement extends PlotPartElement {
     this.repaint();
   }
 
-  /** The handle's value, in the axes' units. Set it to move the handle; a gesture moves it from there. */
+  /** The handle's value, in the axes' units. Setting it moves the handle; subsequent gestures start from the new value. */
   get value(): PlotPoint {
     return this.controller.getSnapshot().value;
   }
@@ -1007,13 +997,11 @@ const CURSOR_X = "--plot-cursor-x";
 const CURSOR_Y = "--plot-cursor-y";
 
 /**
- * Follows the pointer over the plot, for crosshair lines and a readout of
- * what is under it. It covers the plot, lets pointer events through, and
- * sets `--plot-cursor-x` and `--plot-cursor-y` (0% to 100% across and down)
- * and `data-active` while the pointer is over the plot with a mouse or a
- * pen. Put lines in it that use the two variables, and an
- * `<audio-ui-plot-cursor-readout>`. Its `value` is what is under the
- * pointer, in the axes' units, or null.
+ * Tracks a mouse or pen over the plot, for crosshairs and readouts. Covers
+ * the plot and ignores the pointer. Sets `--plot-cursor-x` and
+ * `--plot-cursor-y` (0% to 100%) and `data-active` while the pointer is over
+ * the plot. The `value` property is the point under the pointer in axis
+ * units, or null.
  */
 export class PlotCursorElement extends PlotPartElement {
   /** What is under the pointer, for the readout to follow. */
@@ -1078,10 +1066,9 @@ export class PlotCursorElement extends PlotPartElement {
 }
 
 /**
- * The value under the pointer, as text, written as the pointer moves: its
- * `format` property turns it into what to show, `"x, y"` in short numbers by
- * default. It sits where the pointer is, inside an
- * `<audio-ui-plot-cursor>`; set its offset and its look with your own CSS.
+ * Renders the value under the pointer as text, inside an
+ * `<audio-ui-plot-cursor>`. The `format` property formats it (`"x, y"` by
+ * default). Positioned at the pointer; offset and style it with CSS.
  */
 export class PlotCursorReadoutElement extends PlotPartElement {
   readonly #text = new ValueText();

@@ -1,7 +1,7 @@
 /**
- * The level meter as custom elements. Importing this module registers them.
- * `<audio-ui-meter-channels>` makes a channel per level, each holding what
- * its template holds:
+ * Level meter Web Components. Importing this entry point registers its
+ * elements. `<audio-ui-meter-channels>` generates a channel per level from
+ * its `<template>`:
  *
  * ```html
  * <audio-ui-meter aria-label="Output" value="-12 -6" unit="dB">

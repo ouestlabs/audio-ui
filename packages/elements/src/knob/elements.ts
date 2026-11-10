@@ -74,14 +74,14 @@ const stateAttributes = (snapshot: KnobSnapshot) => ({
 });
 
 /**
- * Groups all parts of the knob and owns its value. Dragging the
- * `<audio-ui-knob-control>`, turning the mouse wheel over it, the keyboard on
- * the thumb's input, or a double tap (reset) all report through an `input`
- * event on every change, which `preventDefault()` refuses, and a `change`
- * event when the gesture ends. Its attributes are the React `Knob.Root`'s
- * props: `min`, `max`, `step`, `large-step`, `value`, `default-value`,
- * `anchor`, `disabled`, `drag-mode`, `scale` (`linear` or `log`), `format`
- * (`Intl.NumberFormat` options as JSON), `locale` and `name`.
+ * The root of a rotary control. Owns the value and renders its parts from
+ * it. Pointer drag on `<audio-ui-knob-control>`, the wheel, the keyboard on
+ * the thumb's input and a double tap (reset) fire `input` on every change,
+ * cancelable with `preventDefault()`, and `change` when the interaction
+ * ends. Attributes mirror the props of the React `Knob.Root`: `min`, `max`,
+ * `step`, `large-step`, `value`, `default-value`, `anchor`, `disabled`,
+ * `drag-mode`, `scale` (`linear` or `log`), `format` (`Intl.NumberFormat`
+ * options as JSON), `locale` and `name`.
  */
 export class KnobElement extends ControlRoot<KnobSnapshot> {
   static readonly observedAttributes = [
@@ -137,7 +137,7 @@ export class KnobElement extends ControlRoot<KnobSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** The value as displayed. Set it to move the knob; a gesture moves it from there. */
+  /** The value as displayed. Setting it moves the knob; subsequent gestures start from the new value. */
   get value(): number {
     return this.controller.getSnapshot().value;
   }
@@ -148,7 +148,7 @@ export class KnobElement extends ControlRoot<KnobSnapshot> {
     this.paint();
   }
 
-  /** How the value is written: `Intl.NumberFormat` options. Takes over from the `format` attribute. */
+  /** How the value is written: `Intl.NumberFormat` options. Overrides the `format` attribute. */
   get format(): Intl.NumberFormatOptions | undefined {
     return this.#format ?? jsonAttribute(this, "format");
   }
@@ -159,7 +159,7 @@ export class KnobElement extends ControlRoot<KnobSnapshot> {
     this.paint();
   }
 
-  /** How the value maps onto the dial's travel: `linear`, `log`, or your own `{ toPosition, toValue }`. Takes over from the `scale` attribute. */
+  /** How the value maps onto the dial's travel: `linear`, `log`, or your own `{ toPosition, toValue }`. Overrides the `scale` attribute. */
   get scale(): ParameterScaleProp {
     return this.#scale ?? this.#scaleAttribute() ?? "linear";
   }
@@ -234,9 +234,9 @@ abstract class KnobPartElement extends ControlPart<KnobElement, KnobSnapshot> {
 }
 
 /**
- * The interactive surface: pointer drags (see `drag-mode`), mouse-wheel
- * stepping, and a double tap (or Alt + click) to reset. Its structural style
- * sets `touch-action: none`, so a touch drag does not scroll the page.
+ * The interactive surface. Handles pointer drag (see `drag-mode`), wheel
+ * stepping, and a double tap or Alt + click to reset. Sets `touch-action:
+ * none`.
  */
 export class KnobControlElement extends KnobPartElement {
   #release: AbortController | undefined;
@@ -320,14 +320,20 @@ abstract class KnobArcElement extends KnobPartElement {
   protected abstract span(snapshot: KnobSnapshot): [number, number];
 }
 
-/** The full sweep of the dial, as an SVG arc. `stroke-width` sets its width in the 48×48 viewBox, 3 by default. */
+/**
+ * The full sweep of the dial, rendered as an SVG arc in `currentColor`.
+ * `stroke-width` sets its width in the 48×48 viewBox. Defaults to 3.
+ */
 export class KnobTrackElement extends KnobArcElement {
   protected span(): [number, number] {
     return [0, 1];
   }
 }
 
-/** The arc from `anchor` to the value, drawn over the track. `stroke-width` as on the track. */
+/**
+ * The arc from `anchor` to the value, rendered over the track. Accepts
+ * `stroke-width`, as the track does.
+ */
 export class KnobIndicatorElement extends KnobArcElement {
   protected span(snapshot: KnobSnapshot): [number, number] {
     return [
@@ -338,12 +344,11 @@ export class KnobIndicatorElement extends KnobArcElement {
 }
 
 /**
- * Rotates with the value (`rotate`, clockwise from 12 o'clock), so a pointer
- * drawn inside it points at the value. Holds the knob's native
- * `<input type="range">`, which takes focus, carries the accessible name and
- * the form value (the knob's `name`), and handles the keyboard. Its
- * `aria-label`, `aria-labelledby` and `aria-describedby` go to that input;
- * set one to `""` to take it away.
+ * Rotates with the value, clockwise from 12 o'clock, through `rotate`.
+ * Contains the native `<input type="range">` that receives focus, keyboard
+ * input, the accessible name and the form value. `aria-label`,
+ * `aria-labelledby` and `aria-describedby` set on the thumb are moved to the
+ * input; an empty value removes them.
  */
 export class KnobThumbElement extends KnobPartElement {
   static readonly observedAttributes = INPUT_NAMES;
@@ -405,7 +410,7 @@ export class KnobThumbElement extends KnobPartElement {
   }
 }
 
-/** The formatted value (`format` and `locale` on the knob), as its text. */
+/** Renders the value, formatted with the knob's `format` and `locale`. */
 export class KnobValueElement extends KnobPartElement {
   readonly #text = new ValueText();
 
@@ -419,7 +424,10 @@ export class KnobValueElement extends KnobPartElement {
   }
 }
 
-/** The accessible label, which names the thumb's input when the thumb has no name of its own. */
+/**
+ * The accessible label. Labels the thumb's input when the thumb has no
+ * accessible name.
+ */
 export class KnobLabelElement extends KnobPartElement {
   protected override attached(knob: KnobElement) {
     knob.labelId = ensureId(this, KNOB_TAGS.label);

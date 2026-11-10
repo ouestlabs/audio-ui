@@ -46,12 +46,11 @@ function layoutScale(element: HTMLElement) {
 }
 
 /**
- * The scrolling window onto the timeline. Cmd/Ctrl + wheel (and pinch on a
- * trackpad) zooms around the pointer; a bare wheel scrolls as usual. Every
- * zoom change keeps its anchor point in place, or the middle of the view
- * when there is none. A clip moved or trimmed with the pointer held near
- * its edges scrolls it. It reports its scroll offset and width for the
- * navigator. Its structural style sets `overflow-x: auto`.
+ * The scrolling container of the timeline. Cmd/Ctrl + wheel and trackpad
+ * pinch zoom around the pointer; the wheel alone scrolls. Every zoom keeps
+ * its anchor, or the center of the view, in place. Clip moves and trims near
+ * its edges scroll it. Reports its scroll offset and width to the navigator.
+ * Sets `overflow-x: auto`.
  */
 export class TimelineViewportElement extends TimelinePartElement {
   /** The zoom and scroll the last layout was at: holding a point still through a zoom needs where it was before. */
@@ -260,13 +259,13 @@ abstract class TimelineLaneBase extends TimelinePartElement {
 }
 
 /**
- * A strip along the timeline that its parts are placed on: a track, a row of
- * markers. Zoomed, it is as long as the timeline; fitted, it takes the width
- * it is given and the timeline is spread across it. Its `--timeline-unit`
- * CSS variable is the width of one unit. With `seekable`, a press on its
- * bare area moves the position and a drag scrubs; with `selectable` too, a
- * drag selects a stretch of time instead, firing `selectioninput` (which
- * `preventDefault()` refuses) and `selectioncommit` with `[start, end]`.
+ * A lane for placed parts, such as a track's clips or a row of markers. When
+ * zoomed, it spans the timeline's length; when fitted, it spreads the
+ * timeline across its width. Sets `--timeline-unit`, the width of one unit.
+ * With `seekable`, a press on empty space sets the position and a drag
+ * scrubs; with `selectable`, a drag selects a range and fires
+ * `selectioninput`, cancelable with `preventDefault()`, and
+ * `selectioncommit` with `[start, end]`.
  */
 export class TimelineLaneElement extends TimelineLaneBase {
   #release: AbortController | undefined;
@@ -298,15 +297,14 @@ export class TimelineLaneElement extends TimelineLaneBase {
 }
 
 /**
- * The lane that moves the position: a press jumps to the pointer and a drag
- * scrubs, both on the grid unless Cmd/Ctrl is held; with Shift held the drag
- * scrubs four times finer. With `selectable`, a drag that starts with Shift
- * held selects a stretch instead, to loop, firing `selectioninput` and
- * `selectioncommit`. It holds the native `<input type="range">` that takes
- * focus and the keys and carries the accessible name: its `aria-label`
- * moves onto it. Its `getAriaValueText(value, duration)` property says how
- * the position is announced, the number by default. Place
- * `<audio-ui-timeline-mark>`s in it for its labels.
+ * The lane that sets the position: a press seeks to the pointer and a drag
+ * scrubs, on the grid unless Cmd or Ctrl is held, four times finer with
+ * Shift. With `selectable`, a drag started with Shift selects a range and
+ * fires `selectioninput` and `selectioncommit`. Contains the native `<input
+ * type="range">` that receives focus, keyboard input and the accessible
+ * name, moved from its own `aria-label`. The `getAriaValueText(value,
+ * duration)` property customizes the announcement. Holds
+ * `<audio-ui-timeline-mark>` labels.
  */
 export class TimelineRulerElement extends TimelineLaneBase {
   static readonly observedAttributes = [...INPUT_NAMES, "selectable"];
@@ -407,9 +405,8 @@ export class TimelineRulerElement extends TimelineLaneBase {
 }
 
 /**
- * A marker at the playback position, on the lane it sits in. It follows the
- * position through its own `--timeline-offset` CSS variable. Hidden from
- * assistive technology.
+ * A marker at the playback position on its lane, following it through
+ * `--timeline-offset`. Hidden from assistive technology.
  */
 export class TimelinePlayheadElement extends TimelinePartElement {
   #stop: (() => void) | undefined;
@@ -443,14 +440,14 @@ function inField(target: EventTarget | null) {
 }
 
 /**
- * Something placed at `value` on a lane: a bar number on the ruler, a cue, a
- * grid line. Its content is its label. With `movable` it moves: a drag takes
- * it along the lane, on the grid unless Cmd/Ctrl is held, landing on a
- * `snap-points` place within a few px, and Left and Right on something
- * focused inside it move it by `step` (the timeline's by default). Moving it
- * fires `markinput`, which `preventDefault()` refuses, and `markchange` with
- * `{ value, reason }`. A press that stays one keeps its click; a drag does
- * not click. It carries `data-dragging` while it moves.
+ * A part placed at `value` on a lane, such as a bar number, a cue or a grid
+ * line, labelled by its content. With `movable`, a drag moves it on the
+ * grid, unless Cmd or Ctrl is held, snapping to `snap-points` within a few
+ * pixels; Left and Right on a focused descendant move it by `step` (the
+ * timeline's by default). Fires `markinput`, cancelable with
+ * `preventDefault()`, and `markchange` with `{ value, reason }`. A press
+ * without movement keeps its click; a drag suppresses it. Carries
+ * `data-dragging`.
  */
 export class TimelineMarkElement extends TimelinePartElement {
   static readonly observedAttributes = ["movable", "step", "value"];
@@ -602,13 +599,13 @@ export class TimelineMarkElement extends TimelinePartElement {
 }
 
 /**
- * The whole timeline as one bar, with the stretch the viewport shows drawn
- * inside it as `<audio-ui-timeline-navigator-window>`: drag the window to
- * scroll, drag one of its `<audio-ui-timeline-navigator-handle>`s to zoom,
- * double-click to show everything. Place it inside the timeline, outside the
- * viewport. `min-window-width` is the least width the window is drawn at, in
- * px, so its handles keep room at any zoom. Its `getAriaValueText(value,
- * duration)` property says how its window and handles announce a position.
+ * An overview bar of the whole timeline, showing the visible range as
+ * `<audio-ui-timeline-navigator-window>`. Dragging the window scrolls,
+ * dragging an `<audio-ui-timeline-navigator-handle>` zooms, and a double
+ * click fits the whole timeline. Place it inside the timeline, outside the
+ * viewport. `min-window-width` sets the window's minimum drawn width in
+ * pixels. The `getAriaValueText(value, duration)` property customizes the
+ * announcements of the window and handles.
  */
 export class TimelineNavigatorElement extends TimelinePartElement {
   static readonly observedAttributes = ["min-window-width"];
@@ -827,9 +824,9 @@ abstract class TimelineNavigatorPartElement extends TimelinePartElement {
 }
 
 /**
- * The stretch of the timeline the viewport shows. Dragging it scrolls; the
- * native `<input type="range">` it holds scrolls from the keyboard and
- * carries its accessible name.
+ * The visible range of the timeline. Dragging it scrolls the viewport; the
+ * native `<input type="range">` it contains scrolls from the keyboard and
+ * carries the accessible name.
  */
 export class TimelineNavigatorWindowElement extends TimelineNavigatorPartElement {
   draw() {
@@ -857,10 +854,10 @@ export class TimelineNavigatorWindowElement extends TimelineNavigatorPartElement
 }
 
 /**
- * One `edge` of the window, `start` or `end`: dragging it zooms, holding
- * the other edge in place. The native `<input type="range">` it holds does
- * the same from the keyboard and carries its accessible name. It carries
- * `data-edge`.
+ * An `edge` of the navigator window (`start` or `end`). Dragging it zooms
+ * with the opposite edge fixed; the native `<input type="range">` it
+ * contains does the same from the keyboard and carries the accessible name.
+ * Carries `data-edge`.
  */
 export class TimelineNavigatorHandleElement extends TimelineNavigatorPartElement {
   static override readonly observedAttributes = [...INPUT_NAMES, "edge"];

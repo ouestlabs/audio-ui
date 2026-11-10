@@ -1,5 +1,5 @@
 /**
- * The knob as custom elements. Importing this module registers them:
+ * Knob Web Components. Importing this entry point registers its elements:
  *
  * ```html
  * <audio-ui-knob min="0" max="100" value="40">

@@ -42,15 +42,14 @@ export interface PadElementEventMap extends HTMLElementEventMap {
 }
 
 /**
- * A grid of pads to strike: each one sounds while held, by pointer or from
- * the keyboard, and each pointer holds its own pad, so several can be played
- * at once on a touch screen. A strike is harder where a pen or screen
- * presses harder, or else toward the top of the pad. The pads are one tab
- * stop: the left and right arrows walk them in reading order, the up and
- * down arrows by a row of `columns` (4 by default). A strike fires `padon`,
- * which `preventDefault()` keeps silent, and a release fires `padoff`.
- * `active-pads` (or the `activePads` property) lights pads from elsewhere,
- * such as a sequencer. It is a group.
+ * The root of a velocity-sensitive pad grid, with `role="group"`. A pad
+ * sounds while held, by pointer or keyboard, and each pointer holds its own
+ * pad for multi-touch play. Velocity comes from pen or touch pressure, or
+ * from the vertical press position. The pads share one tab stop: Left and
+ * Right move in reading order, Up and Down by a row of `columns` (4). Fires
+ * `padon` on a strike, cancelable with `preventDefault()`, and `padoff` on
+ * release. `active-pads` and the `activePads` property light pads
+ * externally.
  */
 export class PadElement extends ControlRoot<PadSnapshot> {
   static readonly observedAttributes = ["active-pads", "columns", "disabled"];
@@ -91,7 +90,7 @@ export class PadElement extends ControlRoot<PadSnapshot> {
     super.addEventListener(type, listener, options);
   }
 
-  /** Pads lit from elsewhere, on top of the ones held here. Takes over from the `active-pads` attribute. */
+  /** Pads lit from elsewhere, on top of the ones held here. Overrides the `active-pads` attribute. */
   get activePads(): readonly string[] {
     return this.#activePads ?? listAttribute(this, "active-pads");
   }
@@ -195,12 +194,11 @@ function reportPadEvent(
 }
 
 /**
- * One pad, a button: it sounds while held, by pointer, or with Enter or
- * Space while focused. Its accessible name comes from its content, or
- * `aria-label`. `value` names it in the events; pads sharing a
- * `choke-group` stop each other. How hard it was last struck is its
- * `--pad-velocity` CSS variable, from 0 to 1, and `data-active` is on while
- * it sounds.
+ * A pad, a button that sounds while held, by pointer or with Enter and
+ * Space. Labelled by its content or `aria-label`. `value` identifies it in
+ * events, and pads sharing a `choke-group` stop each other. Sets
+ * `--pad-velocity` (0 to 1) to the last strike's velocity, and carries
+ * `data-active` while it sounds.
  */
 export class PadItemElement extends ControlPart<PadElement, PadSnapshot> {
   static readonly observedAttributes = ["choke-group", "disabled", "value"];
