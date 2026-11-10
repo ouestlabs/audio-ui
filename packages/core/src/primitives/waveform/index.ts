@@ -21,6 +21,15 @@ export {
   type WaveformIdle,
 } from "./levels-engine.ts";
 export {
+  attachWaveformBars,
+  type WaveformBarsOptions,
+  type WaveformPlayed,
+} from "./paint-bars.ts";
+export {
+  attachWaveformCanvas,
+  type WaveformCanvasOptions,
+} from "./paint-canvas.ts";
+export {
   fitPeaks,
   type PeakEnvelope,
   peakCount,

@@ -1,11 +1,4 @@
-import { createFrameTask, observeVisibility } from "@audio-ui/core";
-import {
-  createLevelsEngine,
-  peakCount,
-  peakMagnitudes,
-  rangeShares,
-  type WaveformIdle,
-} from "@audio-ui/core/waveform";
+import { attachWaveformBars, type WaveformIdle } from "@audio-ui/core/waveform";
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part.ts";
 import { mergeProps, useRender } from "../../internal/render.ts";
@@ -13,10 +6,6 @@ import { useReducedMotion } from "../../internal/use-reduced-motion.ts";
 import { useWaveformContext, type WaveformState } from "../context.ts";
 
 const LEVEL_PROPERTY = "--waveform-level";
-/** A level has to move this much before its bar is written to again. */
-const PAINT_EPSILON = 0.002;
-/** With reduced motion, the bars repaint this often at most. */
-const REDUCED_MOTION_INTERVAL_MS = 250;
 
 const BAR_STATE_ATTRIBUTES_MAPPING = {
   index: (index: number) => ({ "data-index": String(index) }),
@@ -74,82 +63,20 @@ export function Bars(componentProps: Bars.Props) {
     if (!root) {
       return;
     }
-    const engine = createLevelsEngine({
+    return attachWaveformBars(root, (index) => nodesRef.current[index], {
       count,
+      duration,
       gain,
       idle,
+      levels: live,
       loading,
       minLevel,
       mirrored,
+      peaks,
+      played: position,
+      range,
       reducedMotion,
     });
-    const shown = new Float32Array(engine.levels.length).fill(-1);
-    let input: ArrayLike<number> | undefined;
-    if (live) {
-      input = live.getSnapshot();
-    } else if (peaks) {
-      // The shown stretch at the data's own resolution: the engine fits it to the bars.
-      const [from, to] = rangeShares(range, duration);
-      const entries = Math.max(1, Math.round((to - from) * peakCount(peaks)));
-      input = peakMagnitudes(peaks, from, to, entries);
-    }
-    let visible = true;
-    let clock = 0;
-    let unpaintedMs = 0;
-    let sincePaintMs = Number.POSITIVE_INFINITY;
-
-    const task = createFrameTask((elapsedMs) => {
-      if (!visible) {
-        return false;
-      }
-      unpaintedMs += elapsedMs;
-      sincePaintMs += elapsedMs;
-      if (reducedMotion && sincePaintMs < REDUCED_MOTION_INTERVAL_MS) {
-        return true;
-      }
-      clock += unpaintedMs;
-      unpaintedMs = 0;
-      sincePaintMs = 0;
-      engine.step(clock, input);
-      for (const [index, level] of engine.levels.entries()) {
-        if (Math.abs(level - (shown[index] ?? -1)) > PAINT_EPSILON) {
-          shown[index] = level;
-          nodesRef.current[index]?.style.setProperty(
-            LEVEL_PROPERTY,
-            level.toFixed(4)
-          );
-        }
-      }
-      return !engine.settled;
-    });
-
-    const markPlayed = () => {
-      const played = position.get();
-      for (const [index, node] of nodesRef.current.entries()) {
-        node?.toggleAttribute("data-played", (index + 0.5) / count <= played);
-      }
-    };
-
-    task.flush();
-    markPlayed();
-    const stopObservingVisibility = observeVisibility(root, (next) => {
-      visible = next;
-      if (next) {
-        task.wake();
-      }
-    });
-    const unsubscribePosition = position.subscribe(markPlayed);
-    const unsubscribeLevels = live?.subscribe(() => {
-      input = live.getSnapshot();
-      task.wake();
-    });
-
-    return () => {
-      task.stop();
-      stopObservingVisibility();
-      unsubscribePosition();
-      unsubscribeLevels?.();
-    };
   }, [
     count,
     duration,
