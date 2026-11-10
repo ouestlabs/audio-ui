@@ -19,6 +19,7 @@ import {
 } from "../internal/element.ts";
 import { ValueText } from "../internal/input.ts";
 import { ControlPart, ControlRoot } from "../internal/parts.ts";
+import { Stamp } from "../internal/stamp.ts";
 
 /** The names the meter's elements are registered under, frozen: a page cannot rename them by accident. */
 export const METER_TAGS = Object.freeze({
@@ -262,23 +263,11 @@ abstract class MeterPartElement extends ControlPart<
  * It takes no room of its own (`display: contents`).
  */
 export class MeterChannelsElement extends MeterPartElement {
-  #count = -1;
-  #template: HTMLTemplateElement | undefined;
-  #watch: MutationObserver | undefined;
-
-  override paint(snapshot: MeterSnapshot) {
-    const count = snapshot.frame.levels.length;
-    if (count === this.#count) {
-      return;
-    }
-    this.#count = count;
-    const made = this.#channels();
-    for (const gone of made.slice(count)) {
-      gone.remove();
-    }
-    for (let index = made.length; index < count; index += 1) {
-      const channel = document.createElement(METER_TAGS.channel);
-      channel.setAttribute("index", String(index));
+  readonly #stamp = new Stamp(
+    this,
+    METER_TAGS.channel,
+    "index",
+    (channel, index) => {
       const label = this.getAttribute("label");
       if (label) {
         channel.setAttribute(
@@ -286,50 +275,24 @@ export class MeterChannelsElement extends MeterPartElement {
           label.replaceAll("{n}", String(index + 1))
         );
       }
-      this.#fill(channel);
-      this.appendChild(channel);
+    }
+  );
+  #count = -1;
+
+  override paint(snapshot: MeterSnapshot) {
+    const count = snapshot.frame.levels.length;
+    if (count !== this.#count) {
+      this.#count = count;
+      this.#stamp.update(Array.from({ length: count }, (_, index) => index));
     }
   }
 
   protected override attached() {
-    // A page being read connects the element before its template: the channels take it once it is there.
-    this.#watch = new MutationObserver(() => this.#takeTemplate());
-    this.#watch.observe(this, { childList: true });
-    this.#takeTemplate();
+    this.#stamp.connect();
   }
 
   protected override detached() {
-    this.#watch?.disconnect();
-  }
-
-  #channels() {
-    return [...this.children].filter(
-      (child) => child.localName === METER_TAGS.channel
-    );
-  }
-
-  #takeTemplate() {
-    const template = [...this.children].find(
-      (child): child is HTMLTemplateElement =>
-        child instanceof HTMLTemplateElement
-    );
-    if (template === this.#template) {
-      return;
-    }
-    this.#template = template;
-    for (const channel of this.#channels()) {
-      this.#fill(channel);
-    }
-  }
-
-  /** Puts in `channel` what the template holds, in place of what it held. */
-  #fill(channel: Element) {
-    // Imported, not cloned: a clone stays in the template's document, where no element upgrades.
-    channel.replaceChildren(
-      ...(this.#template
-        ? [document.importNode(this.#template.content, true)]
-        : [])
-    );
+    this.#stamp.disconnect();
   }
 }
 
@@ -368,6 +331,10 @@ export class MeterChannelElement extends MeterPartElement {
   override paint(snapshot: MeterSnapshot) {
     const { config, frame, orientation } = snapshot;
     const { index } = this;
+    // Its template, filled in after it arrived, takes the place of what it held.
+    if (this.#presence.parentNode !== this) {
+      this.appendChild(this.#presence);
+    }
     const view = channelView(frame, index, config);
     reflect(this, {
       "aria-labelledby": this.labelId ?? null,
@@ -394,12 +361,6 @@ export class MeterChannelElement extends MeterPartElement {
     }
     nodes.peak?.toggleAttribute("data-clipping", view.clipping);
     nodes.peak?.toggleAttribute("data-warning", view.warning);
-  }
-
-  protected override attached() {
-    if (this.#presence.parentNode !== this) {
-      this.appendChild(this.#presence);
-    }
   }
 
   /** The first part of `tag` in this channel, not in a channel inside it. */

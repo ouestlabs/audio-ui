@@ -13,6 +13,7 @@ import {
   reflect,
 } from "../internal/element.ts";
 import { ControlPart, ControlRoot, type Painted } from "../internal/parts.ts";
+import { Stamp } from "../internal/stamp.ts";
 
 /** The names the piano's elements are registered under, frozen: a page cannot rename them by accident. */
 export const PIANO_TAGS = Object.freeze({
@@ -272,81 +273,26 @@ abstract class PianoPartElement extends ControlPart<
  * takes no room of its own (`display: contents`).
  */
 export class PianoKeysElement extends PianoPartElement {
+  readonly #stamp = new Stamp(this, PIANO_TAGS.key, "pitch");
   #pitches: readonly number[] = [];
-  #template: HTMLTemplateElement | undefined;
-  #watch: MutationObserver | undefined;
 
   override paint(snapshot: PianoSnapshot) {
-    if (snapshot.pitches === this.#pitches) {
-      return;
-    }
-    this.#pitches = snapshot.pitches;
-    const made = new Map<number, Element>();
-    for (const key of this.#keys()) {
-      made.set(Number(key.getAttribute("pitch")), key);
-    }
-    const keys = snapshot.pitches.map((pitch) => {
-      const existing = made.get(pitch);
-      made.delete(pitch);
-      if (existing) {
-        return existing;
-      }
-      const key = document.createElement(PIANO_TAGS.key);
-      key.setAttribute("pitch", String(pitch));
-      this.#fill(key);
-      return key;
-    });
-    for (const gone of made.values()) {
-      gone.remove();
-    }
-    for (const key of keys) {
-      this.appendChild(key);
+    if (snapshot.pitches !== this.#pitches) {
+      this.#pitches = snapshot.pitches;
+      this.#stamp.update(snapshot.pitches);
     }
   }
 
   protected override attached() {
-    // A page being read connects the element before its template: the keys take it once it is there.
-    this.#watch = new MutationObserver(() => this.#takeTemplate());
-    this.#watch.observe(this, { childList: true });
-    this.#takeTemplate();
+    this.#stamp.connect();
   }
 
   protected override detached() {
-    this.#watch?.disconnect();
+    this.#stamp.disconnect();
   }
 
   protected override state() {
     return {};
-  }
-
-  #keys() {
-    return [...this.children].filter(
-      (child) => child.localName === PIANO_TAGS.key
-    );
-  }
-
-  #takeTemplate() {
-    const template = [...this.children].find(
-      (child): child is HTMLTemplateElement =>
-        child instanceof HTMLTemplateElement
-    );
-    if (template === this.#template) {
-      return;
-    }
-    this.#template = template;
-    for (const key of this.#keys()) {
-      this.#fill(key);
-    }
-  }
-
-  /** Puts in `key` what the template holds, in place of what it held. */
-  #fill(key: Element) {
-    // Imported, not cloned: a clone stays in the template's document, where no element upgrades.
-    key.replaceChildren(
-      ...(this.#template
-        ? [document.importNode(this.#template.content, true)]
-        : [])
-    );
   }
 }
 
