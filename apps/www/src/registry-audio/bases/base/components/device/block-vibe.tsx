@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { VibePanel } from "@/registry-audio/bases/base/audio/panels/vibe-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type VibeState,
   vibeDevice,
-} from "@/registry-audio/bases/base/lib/vibe-device";
-import { createVibeEngine } from "@/registry-audio/bases/base/lib/vibe-engine";
+} from "@/registry-audio/bases/base/devices/vibe/device";
+import { createVibeEngine } from "@/registry-audio/bases/base/devices/vibe/engine";
+import { VibePanel } from "@/registry-audio/bases/base/devices/vibe/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

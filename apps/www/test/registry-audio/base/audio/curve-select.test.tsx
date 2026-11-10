@@ -1,7 +1,7 @@
 import { describe, expect, mock, test } from "bun:test";
 import { fireEvent, render } from "@testing-library/react";
 import { CurveSelect } from "@/registry-audio/bases/base/audio/elements/curve-select";
-import { saturate } from "@/registry-audio/bases/base/lib/saturator-device";
+import { saturate } from "@/registry-audio/bases/base/devices/saturator/device";
 
 const OPTIONS = [
   { label: "Soft", value: "soft" },

@@ -1,17 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { WaveShaperPanel } from "@/registry-audio/bases/base/audio/panels/wave-shaper-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type WaveShaperNote,
   type WaveShaperState,
   waveShaperDevice,
-} from "@/registry-audio/bases/base/lib/wave-shaper-device";
+} from "@/registry-audio/bases/base/devices/wave-shaper/device";
 import {
   createWaveShaperEngine,
   type WaveShaperEngine,
-} from "@/registry-audio/bases/base/lib/wave-shaper-engine";
+} from "@/registry-audio/bases/base/devices/wave-shaper/engine";
+import { WaveShaperPanel } from "@/registry-audio/bases/base/devices/wave-shaper/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /**

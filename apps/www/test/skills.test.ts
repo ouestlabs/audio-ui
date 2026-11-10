@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, test } from "bun:test";
 import { audio } from "@/registry-audio/bases/base/audio/_registry";
 import { components } from "@/registry-audio/bases/base/components/_registry";
+import { devices } from "@/registry-audio/bases/base/devices/_registry";
 import { hooks } from "@/registry-audio/bases/base/hooks/_registry";
 import { lib } from "@/registry-audio/bases/base/lib/_registry";
 import {
@@ -76,7 +77,9 @@ const skills = (
 ).map((path) => path.split("/")[0] ?? "");
 const markdown = await read("**/*.md", SKILLS_DIR);
 const registryNames = new Set(
-  [...audio, ...components, ...hooks, ...lib].map((item) => item.name)
+  [...audio, ...devices, ...components, ...hooks, ...lib].map(
+    (item) => item.name
+  )
 );
 const uiExports = Object.keys(
   (await Bun.file(`${ROOT}/packages/ui/package.json`).json()).exports
@@ -519,7 +522,7 @@ describe("the Claude Code marketplace", () => {
 
 test("components.md names every registry item, but demos and retired items", async () => {
   const catalog = await Bun.file(`${HUB_DIR}/components.md`).text();
-  const items = [...audio, ...hooks, ...lib].filter(
+  const items = [...audio, ...devices, ...hooks, ...lib].filter(
     (item) => !RETIRED.test(item.description ?? "")
   );
   const missing = items

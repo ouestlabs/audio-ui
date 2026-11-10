@@ -1,17 +1,17 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { PocketSynthPanel } from "@/registry-audio/bases/base/audio/panels/pocket-synth-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type PocketSynthNote,
   type PocketSynthState,
   pocketSynthDevice,
-} from "@/registry-audio/bases/base/lib/pocket-synth-device";
+} from "@/registry-audio/bases/base/devices/pocket-synth/device";
 import {
   createPocketSynthEngine,
   type PocketSynthEngine,
-} from "@/registry-audio/bases/base/lib/pocket-synth-engine";
+} from "@/registry-audio/bases/base/devices/pocket-synth/engine";
+import { PocketSynthPanel } from "@/registry-audio/bases/base/devices/pocket-synth/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /**

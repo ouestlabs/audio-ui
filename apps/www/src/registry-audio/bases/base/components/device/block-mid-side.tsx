@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { MidSidePanel } from "@/registry-audio/bases/base/audio/panels/mid-side-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type MidSideState,
   midSideDevice,
-} from "@/registry-audio/bases/base/lib/mid-side-device";
-import { createMidSideEngine } from "@/registry-audio/bases/base/lib/mid-side-engine";
+} from "@/registry-audio/bases/base/devices/mid-side/device";
+import { createMidSideEngine } from "@/registry-audio/bases/base/devices/mid-side/engine";
+import { MidSidePanel } from "@/registry-audio/bases/base/devices/mid-side/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

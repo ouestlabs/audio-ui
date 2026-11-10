@@ -13,6 +13,13 @@ import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
 import type { WarpMode } from "@audio-ui/core/playback";
 import type { Tempo } from "@audio-ui/core/time";
+import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
+import {
+  EQUALIZER_BANDS,
+  equalizerDevice,
+} from "@/registry-audio/bases/base/devices/equalizer/device";
+import { gateDevice } from "@/registry-audio/bases/base/devices/gate/device";
+import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -29,13 +36,6 @@ import {
   type ArrangementSignature,
   createArrangementState,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
-import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
-import {
-  EQUALIZER_BANDS,
-  equalizerDevice,
-} from "@/registry-audio/bases/base/lib/equalizer-device";
-import { gateDevice } from "@/registry-audio/bases/base/lib/gate-device";
-import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
 import { createZip, readZip } from "@/registry-audio/bases/base/lib/zip";
 
 /** A recording an export packs: its file's name in the archive's `audio/` folder, its length in seconds, its channels and rate. */

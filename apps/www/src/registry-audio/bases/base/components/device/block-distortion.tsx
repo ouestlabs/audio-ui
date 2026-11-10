@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { DistortionPanel } from "@/registry-audio/bases/base/audio/panels/distortion-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type DistortionState,
   distortionDevice,
-} from "@/registry-audio/bases/base/lib/distortion-device";
-import { createDistortionEngine } from "@/registry-audio/bases/base/lib/distortion-engine";
+} from "@/registry-audio/bases/base/devices/distortion/device";
+import { createDistortionEngine } from "@/registry-audio/bases/base/devices/distortion/engine";
+import { DistortionPanel } from "@/registry-audio/bases/base/devices/distortion/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

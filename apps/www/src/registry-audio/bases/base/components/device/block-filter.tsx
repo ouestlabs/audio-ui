@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { FilterPanel } from "@/registry-audio/bases/base/audio/panels/filter-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import {
   type FilterState,
   filterDevice,
-} from "@/registry-audio/bases/base/lib/filter-device";
-import { createFilterEngine } from "@/registry-audio/bases/base/lib/filter-engine";
+} from "@/registry-audio/bases/base/devices/filter/device";
+import { createFilterEngine } from "@/registry-audio/bases/base/devices/filter/engine";
+import { FilterPanel } from "@/registry-audio/bases/base/devices/filter/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 
 const MASTER_VOLUME = 0.7;
 const MIN_HZ = 20;

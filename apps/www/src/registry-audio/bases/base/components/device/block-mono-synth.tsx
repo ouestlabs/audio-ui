@@ -2,18 +2,18 @@
 
 import { noteToFrequency } from "@audio-ui/core/pitch";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { MonoSynthPanel } from "@/registry-audio/bases/base/audio/panels/mono-synth-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type MonoSynthNote,
   type MonoSynthState,
   monoSynthDevice,
-} from "@/registry-audio/bases/base/lib/mono-synth-device";
+} from "@/registry-audio/bases/base/devices/mono-synth/device";
 import {
   createMonoSynthEngine,
   type MonoSynthEngine,
-} from "@/registry-audio/bases/base/lib/mono-synth-engine";
+} from "@/registry-audio/bases/base/devices/mono-synth/engine";
+import { MonoSynthPanel } from "@/registry-audio/bases/base/devices/mono-synth/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** The note the panel's keyboard holds: one at a time, under its own name. */

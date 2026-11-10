@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { LimiterPanel } from "@/registry-audio/bases/base/audio/panels/limiter-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type LimiterState,
   limiterDevice,
-} from "@/registry-audio/bases/base/lib/limiter-device";
-import { createLimiterEngine } from "@/registry-audio/bases/base/lib/limiter-engine";
+} from "@/registry-audio/bases/base/devices/limiter/device";
+import { createLimiterEngine } from "@/registry-audio/bases/base/devices/limiter/engine";
+import { LimiterPanel } from "@/registry-audio/bases/base/devices/limiter/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

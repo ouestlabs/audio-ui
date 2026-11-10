@@ -14,7 +14,7 @@ interface Kernel {
 interface KernelSet {
   /** The constant the file exports. */
   constant: string;
-  /** The file it writes, in `registry-audio/bases/base/lib/`. */
+  /** The file it writes, from `registry-audio/bases/base/`. */
   file: string;
   kernels: readonly Kernel[];
 }
@@ -22,7 +22,7 @@ interface KernelSet {
 export const KERNEL_SETS: readonly KernelSet[] = [
   {
     constant: "FILTER_KERNELS",
-    file: "filter-kernels.ts",
+    file: "devices/filter/kernels.ts",
     kernels: [
       {
         file: "moog-ladder.js",
@@ -40,7 +40,7 @@ export const KERNEL_SETS: readonly KernelSet[] = [
   },
 ];
 
-export const KERNELS_DIR = `${import.meta.dir}/../src/registry-audio/bases/base/lib`;
+export const KERNELS_DIR = `${import.meta.dir}/../src/registry-audio/bases/base`;
 
 const PACKAGE_JSON = /package\.json$/;
 const IMPORT = /^\s*import\s/m;

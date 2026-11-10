@@ -45,7 +45,7 @@ const STYLES = ["vega", "nova", "maia", "lyra", "mira", "luma", "rhea", "sera"];
 
 // The folders of a base that hold registry items. Each `_registry.ts` exports
 // an array named after its folder; a later folder wins on a repeated name.
-const REGISTRY_FOLDERS = ["audio", "hooks", "components", "lib"];
+const REGISTRY_FOLDERS = ["audio", "devices", "hooks", "components", "lib"];
 
 // A folder a registry file imports from, and where it lands in a project.
 const INSTALL_FOLDERS: [folder: string, installed: string][] = [

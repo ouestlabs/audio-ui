@@ -5,6 +5,6 @@ import { KERNEL_SETS, KERNELS_DIR, kernelFile } from "./kernels.ts";
 await Promise.all(
   KERNEL_SETS.map(async (set) => {
     await Bun.write(`${KERNELS_DIR}/${set.file}`, await kernelFile(set));
-    console.log(`Wrote lib/${set.file}`);
+    console.log(`Wrote ${set.file}`);
   })
 );

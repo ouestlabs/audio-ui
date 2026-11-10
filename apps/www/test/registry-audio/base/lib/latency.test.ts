@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
-import { deesserDevice } from "@/registry-audio/bases/base/lib/deesser-device";
-import { delayDevice } from "@/registry-audio/bases/base/lib/delay-device";
-import { distortionDevice } from "@/registry-audio/bases/base/lib/distortion-device";
-import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
-import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
-import { overdriveDevice } from "@/registry-audio/bases/base/lib/overdrive-device";
+import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
+import { deesserDevice } from "@/registry-audio/bases/base/devices/deesser/device";
+import { delayDevice } from "@/registry-audio/bases/base/devices/delay/device";
+import { distortionDevice } from "@/registry-audio/bases/base/devices/distortion/device";
+import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
+import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
+import { overdriveDevice } from "@/registry-audio/bases/base/devices/overdrive/device";
+import { saturatorDevice } from "@/registry-audio/bases/base/devices/saturator/device";
+import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shaper/device";
 import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
-import { saturatorDevice } from "@/registry-audio/bases/base/lib/saturator-device";
-import { waveShaperDevice } from "@/registry-audio/bases/base/lib/wave-shaper-device";
 
 describe("the latency devices declare", () => {
   test("oversampling is a number of samples, so it follows the sample rate", () => {

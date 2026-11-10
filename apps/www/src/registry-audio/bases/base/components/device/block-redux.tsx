@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { ReduxPanel } from "@/registry-audio/bases/base/audio/panels/redux-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type ReduxState,
   reduxDevice,
-} from "@/registry-audio/bases/base/lib/redux-device";
-import { createReduxEngine } from "@/registry-audio/bases/base/lib/redux-engine";
+} from "@/registry-audio/bases/base/devices/redux/device";
+import { createReduxEngine } from "@/registry-audio/bases/base/devices/redux/engine";
+import { ReduxPanel } from "@/registry-audio/bases/base/devices/redux/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

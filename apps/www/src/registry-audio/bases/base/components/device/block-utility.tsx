@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { UtilityPanel } from "@/registry-audio/bases/base/audio/panels/utility-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type UtilityState,
   utilityDevice,
-} from "@/registry-audio/bases/base/lib/utility-device";
-import { createUtilityEngine } from "@/registry-audio/bases/base/lib/utility-engine";
+} from "@/registry-audio/bases/base/devices/utility/device";
+import { createUtilityEngine } from "@/registry-audio/bases/base/devices/utility/engine";
+import { UtilityPanel } from "@/registry-audio/bases/base/devices/utility/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 

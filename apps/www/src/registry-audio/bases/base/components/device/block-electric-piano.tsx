@@ -2,18 +2,18 @@
 
 import { noteToFrequency } from "@audio-ui/core/pitch";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ElectricPianoPanel } from "@/registry-audio/bases/base/audio/panels/electric-piano-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type ElectricPianoNote,
   type ElectricPianoState,
   electricPianoDevice,
-} from "@/registry-audio/bases/base/lib/electric-piano-device";
+} from "@/registry-audio/bases/base/devices/electric-piano/device";
 import {
   createElectricPianoEngine,
   type ElectricPianoEngine,
-} from "@/registry-audio/bases/base/lib/electric-piano-engine";
+} from "@/registry-audio/bases/base/devices/electric-piano/engine";
+import { ElectricPianoPanel } from "@/registry-audio/bases/base/devices/electric-piano/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** How many notes ring at once: an eleventh takes the voice held longest. */

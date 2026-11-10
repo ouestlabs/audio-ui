@@ -2,18 +2,18 @@
 
 import { noteToFrequency } from "@audio-ui/core/pitch";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { StringMachinePanel } from "@/registry-audio/bases/base/audio/panels/string-machine-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type StringMachineNote,
   type StringMachineState,
   stringMachineDevice,
-} from "@/registry-audio/bases/base/lib/string-machine-device";
+} from "@/registry-audio/bases/base/devices/string-machine/device";
 import {
   createStringMachineEngine,
   type StringMachineEngine,
-} from "@/registry-audio/bases/base/lib/string-machine-engine";
+} from "@/registry-audio/bases/base/devices/string-machine/engine";
+import { StringMachinePanel } from "@/registry-audio/bases/base/devices/string-machine/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** How many notes sound at once: a ninth takes the voice held longest. */

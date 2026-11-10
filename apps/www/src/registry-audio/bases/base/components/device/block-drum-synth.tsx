@@ -1,18 +1,18 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { DrumSynthPanel } from "@/registry-audio/bases/base/audio/panels/drum-synth-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type DrumSynthNote,
   type DrumSynthState,
   drumSynthDevice,
-} from "@/registry-audio/bases/base/lib/drum-synth-device";
+} from "@/registry-audio/bases/base/devices/drum-synth/device";
 import {
   createDrumSynthEngine,
   type DrumSynthEngine,
-} from "@/registry-audio/bases/base/lib/drum-synth-engine";
+} from "@/registry-audio/bases/base/devices/drum-synth/engine";
+import { DrumSynthPanel } from "@/registry-audio/bases/base/devices/drum-synth/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /**

@@ -47,6 +47,20 @@ import {
   MidiClipPanel,
   type MidiClipRegion,
 } from "@/registry-audio/bases/base/audio/panels/midi-clip-panel";
+import { channelEqDevice } from "@/registry-audio/bases/base/devices/channel-eq/device";
+import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
+import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
+import {
+  monoSynthDevice,
+  monoSynthPreset,
+} from "@/registry-audio/bases/base/devices/mono-synth/device";
+import { organDevice } from "@/registry-audio/bases/base/devices/organ/device";
+import { reverbDevice } from "@/registry-audio/bases/base/devices/reverb/device";
+import {
+  stringMachineDevice,
+  stringMachinePreset,
+} from "@/registry-audio/bases/base/devices/string-machine/device";
+import { vibeDevice } from "@/registry-audio/bases/base/devices/vibe/device";
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
@@ -77,9 +91,7 @@ import {
   MAIN_TRACK,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
-import { channelEqDevice } from "@/registry-audio/bases/base/lib/channel-eq-device";
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
-import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
 import {
   SONG_SCORE,
   SONG_TEMPO,
@@ -87,18 +99,6 @@ import {
   type SongScorePart,
 } from "@/registry-audio/bases/base/lib/demo-song";
 import { drumKit } from "@/registry-audio/bases/base/lib/drum-kit";
-import { limiterDevice } from "@/registry-audio/bases/base/lib/limiter-device";
-import {
-  monoSynthDevice,
-  monoSynthPreset,
-} from "@/registry-audio/bases/base/lib/mono-synth-device";
-import { organDevice } from "@/registry-audio/bases/base/lib/organ-device";
-import { reverbDevice } from "@/registry-audio/bases/base/lib/reverb-device";
-import {
-  stringMachineDevice,
-  stringMachinePreset,
-} from "@/registry-audio/bases/base/lib/string-machine-device";
-import { vibeDevice } from "@/registry-audio/bases/base/lib/vibe-device";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const BARS = 24;

@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { DelayPanel } from "@/registry-audio/bases/base/audio/panels/delay-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type DelayState,
   delayDevice,
-} from "@/registry-audio/bases/base/lib/delay-device";
-import { createDelayEngine } from "@/registry-audio/bases/base/lib/delay-engine";
+} from "@/registry-audio/bases/base/devices/delay/device";
+import { createDelayEngine } from "@/registry-audio/bases/base/devices/delay/engine";
+import { DelayPanel } from "@/registry-audio/bases/base/devices/delay/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 /** A dotted eighth: the echo that has made a thousand guitars sound larger. */

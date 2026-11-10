@@ -2,18 +2,18 @@
 
 import { noteToFrequency } from "@audio-ui/core/pitch";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { GuitarPanel } from "@/registry-audio/bases/base/audio/panels/guitar-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type GuitarNote,
   type GuitarState,
   guitarDevice,
-} from "@/registry-audio/bases/base/lib/guitar-device";
+} from "@/registry-audio/bases/base/devices/guitar/device";
 import {
   createGuitarEngine,
   type GuitarEngine,
-} from "@/registry-audio/bases/base/lib/guitar-engine";
+} from "@/registry-audio/bases/base/devices/guitar/engine";
+import { GuitarPanel } from "@/registry-audio/bases/base/devices/guitar/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** How many strings sound at once: a ninth takes the voice held longest. */

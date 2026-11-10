@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { DeesserPanel } from "@/registry-audio/bases/base/audio/panels/deesser-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import {
   type DeesserState,
   deesserDevice,
-} from "@/registry-audio/bases/base/lib/deesser-device";
-import { createDeesserEngine } from "@/registry-audio/bases/base/lib/deesser-engine";
+} from "@/registry-audio/bases/base/devices/deesser/device";
+import { createDeesserEngine } from "@/registry-audio/bases/base/devices/deesser/engine";
+import { DeesserPanel } from "@/registry-audio/bases/base/devices/deesser/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 
 const MASTER_VOLUME = 0.7;
 const MIN_HZ = 500;

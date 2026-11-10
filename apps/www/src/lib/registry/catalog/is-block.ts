@@ -1,5 +1,6 @@
 import { audio } from "../../../registry-audio/bases/base/audio/_registry";
 import { components } from "../../../registry-audio/bases/base/components/_registry";
+import { devices } from "../../../registry-audio/bases/base/devices/_registry";
 import { hooks } from "../../../registry-audio/bases/base/hooks/_registry";
 import { lib } from "../../../registry-audio/bases/base/lib/_registry";
 
@@ -43,7 +44,10 @@ const PLAY_SWITCH = "use-play-switch";
 
 /** Every registry item by name: what a preview installs is what tells how it is played. */
 const ITEMS = new Map(
-  [...audio, ...components, ...hooks, ...lib].map((item) => [item.name, item])
+  [...audio, ...devices, ...components, ...hooks, ...lib].map((item) => [
+    item.name,
+    item,
+  ])
 );
 
 /** Whether an item, or anything it installs, is `target`. */

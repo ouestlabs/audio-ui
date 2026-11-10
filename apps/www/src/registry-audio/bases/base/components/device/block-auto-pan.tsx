@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { AutoPanPanel } from "@/registry-audio/bases/base/audio/panels/auto-pan-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type AutoPanState,
   autoPanDevice,
-} from "@/registry-audio/bases/base/lib/auto-pan-device";
-import { createAutoPanEngine } from "@/registry-audio/bases/base/lib/auto-pan-engine";
+} from "@/registry-audio/bases/base/devices/auto-pan/device";
+import { createAutoPanEngine } from "@/registry-audio/bases/base/devices/auto-pan/engine";
+import { AutoPanPanel } from "@/registry-audio/bases/base/devices/auto-pan/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 /** Sways on the half note: one cycle every two beats of the loop. */

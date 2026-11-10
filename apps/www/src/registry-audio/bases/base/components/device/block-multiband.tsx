@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { MultibandPanel } from "@/registry-audio/bases/base/audio/panels/multiband-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import {
   type MultibandState,
   multibandDevice,
-} from "@/registry-audio/bases/base/lib/multiband-device";
-import { createMultibandEngine } from "@/registry-audio/bases/base/lib/multiband-engine";
+} from "@/registry-audio/bases/base/devices/multiband/device";
+import { createMultibandEngine } from "@/registry-audio/bases/base/devices/multiband/engine";
+import { MultibandPanel } from "@/registry-audio/bases/base/devices/multiband/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 
 const MASTER_VOLUME = 0.7;
 const MIN_HZ = 20;

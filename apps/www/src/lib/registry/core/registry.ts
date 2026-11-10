@@ -14,6 +14,7 @@
 import * as React from "react";
 import { audio } from "../../../registry-audio/bases/base/audio/_registry";
 import { components } from "../../../registry-audio/bases/base/components/_registry";
+import { devices } from "../../../registry-audio/bases/base/devices/_registry";
 import { lib } from "../../../registry-audio/bases/base/lib/_registry";
 import componentsManifest from "../../../registry-audio/bases/components.json";
 import registryStats from "../../../registry-audio/bases/registry.json";
@@ -232,7 +233,7 @@ function getStats(): StatsData {
 
 /** The sub-registries of each base, which `getMetadata` merges by item name. */
 const SUB_REGISTRIES: Record<string, unknown[][]> = {
-  base: [audio, components, lib],
+  base: [audio, devices, components, lib],
 };
 
 /** Merges one sub-registry's items into `metadata` by name. */
@@ -250,7 +251,7 @@ function getMetadata(base = "base"): MetadataData {
     try {
       const metadata: Record<string, RegistryItem> = {};
 
-      // Directly load audio, catalog, and lib registries for reliability and
+      // Directly load audio, devices, catalog, and lib registries for reliability and
       // performance. This avoids potential issues with the aggregate registry.ts file
       for (const items of SUB_REGISTRIES[base] ?? []) {
         mergeSubRegistry(metadata, items);

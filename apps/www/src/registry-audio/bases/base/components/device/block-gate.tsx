@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { GatePanel } from "@/registry-audio/bases/base/audio/panels/gate-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import {
   type GateState,
   gateDevice,
-} from "@/registry-audio/bases/base/lib/gate-device";
-import { createGateEngine } from "@/registry-audio/bases/base/lib/gate-engine";
+} from "@/registry-audio/bases/base/devices/gate/device";
+import { createGateEngine } from "@/registry-audio/bases/base/devices/gate/engine";
+import { GatePanel } from "@/registry-audio/bases/base/devices/gate/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
 /** A held chord, opened by the kick of the loop: the key is heard by the gate only. */

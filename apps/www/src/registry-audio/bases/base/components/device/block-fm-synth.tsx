@@ -2,18 +2,18 @@
 
 import { noteToFrequency } from "@audio-ui/core/pitch";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { FmSynthPanel } from "@/registry-audio/bases/base/audio/panels/fm-synth-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type FmSynthNote,
   type FmSynthState,
   fmSynthDevice,
-} from "@/registry-audio/bases/base/lib/fm-synth-device";
+} from "@/registry-audio/bases/base/devices/fm-synth/device";
 import {
   createFmSynthEngine,
   type FmSynthEngine,
-} from "@/registry-audio/bases/base/lib/fm-synth-engine";
+} from "@/registry-audio/bases/base/devices/fm-synth/engine";
+import { FmSynthPanel } from "@/registry-audio/bases/base/devices/fm-synth/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** How many notes sound at once: a ninth takes the voice held longest. */

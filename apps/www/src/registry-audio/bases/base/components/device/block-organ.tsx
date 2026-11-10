@@ -2,18 +2,18 @@
 
 import { noteToFrequency } from "@audio-ui/core/pitch";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { OrganPanel } from "@/registry-audio/bases/base/audio/panels/organ-panel";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import {
   type OrganNote,
   type OrganState,
   organDevice,
-} from "@/registry-audio/bases/base/lib/organ-device";
+} from "@/registry-audio/bases/base/devices/organ/device";
 import {
   createOrganEngine,
   type OrganEngine,
-} from "@/registry-audio/bases/base/lib/organ-engine";
+} from "@/registry-audio/bases/base/devices/organ/engine";
+import { OrganPanel } from "@/registry-audio/bases/base/devices/organ/panel";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** How many keys sound at once: a ninth takes the voice held longest. */

@@ -1,17 +1,17 @@
 import { describe, expect, test } from "bun:test";
+import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
+import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
 import type { Arranged } from "@/registry-audio/bases/base/lib/arrangement";
 import {
   apply,
   createArrangementState,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
-import { compressorDevice } from "@/registry-audio/bases/base/lib/compressor-device";
 import {
   exportDawproject,
   importDawproject,
   readDawproject,
   writeDawproject,
 } from "@/registry-audio/bases/base/lib/dawproject";
-import { equalizerDevice } from "@/registry-audio/bases/base/lib/equalizer-device";
 
 const TEMPO = { beatUnit: 4, beatsPerBar: 4, bpm: 120 };
 

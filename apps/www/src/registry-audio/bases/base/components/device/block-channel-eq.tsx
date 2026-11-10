@@ -1,15 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { ChannelEqPanel } from "@/registry-audio/bases/base/audio/panels/channel-eq-panel";
-import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 import {
   type ChannelEqState,
   channelEqDevice,
-} from "@/registry-audio/bases/base/lib/channel-eq-device";
-import { createChannelEqEngine } from "@/registry-audio/bases/base/lib/channel-eq-engine";
+} from "@/registry-audio/bases/base/devices/channel-eq/device";
+import { createChannelEqEngine } from "@/registry-audio/bases/base/devices/channel-eq/engine";
+import { ChannelEqPanel } from "@/registry-audio/bases/base/devices/channel-eq/panel";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
+import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 
 const MASTER_VOLUME = 0.7;
 const MIN_HZ = 20;
