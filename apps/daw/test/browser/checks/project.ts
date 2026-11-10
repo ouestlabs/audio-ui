@@ -253,13 +253,14 @@ export const checks: Checks = {
       await page.waitForSelector("text=Saved", { timeout: 5000 });
       await page.getByRole("button", { name: "More controls" }).click();
       await page.getByRole("menuitem", { name: "New project" }).click();
+      // The test project has a "1 MIDI" track too: wait for the old take to go, not for one to come.
+      const gone = await page
+        .locator('[aria-label="Old take"][data-track-id]')
+        .waitFor({ state: "detached", timeout: 5000 })
+        .then(() => true)
+        .catch(() => false);
+      assert(gone, "the old track is still there");
       await page.waitForSelector('[aria-label="1 MIDI"][data-track-id]');
-      assert(
-        (await page
-          .locator('[aria-label="Old take"][data-track-id]')
-          .count()) === 0,
-        "the old track is still there"
-      );
       await page.waitForSelector("text=Saved", { timeout: 5000 });
       await open(browser, page);
       await page.waitForSelector('[aria-label="1 MIDI"][data-track-id]', {
