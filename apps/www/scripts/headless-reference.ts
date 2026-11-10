@@ -25,6 +25,8 @@ const MAPPING = /[A-Z_]*STATE_ATTRIBUTES(?:_MAPPING)? = \{([\s\S]*?)\};/g;
 const DROPPED = /(\w+): \(\) => null/g;
 const KEBAB = /([a-z0-9])([A-Z])/g;
 const TSX_FILE = /\.tsx$/;
+/** A core painter a part imports, such as `attachWaveformCanvas`: what it writes to the DOM is the part's own. */
+const PAINTER_IMPORT = /\b(attach[A-Z]\w*)\b/g;
 
 const kebab = (key: string) => key.replace(KEBAB, "$1-$2").toLowerCase();
 const sorted = (values: Iterable<string>) => [...new Set(values)].sort();
@@ -84,6 +86,31 @@ function stateAttributesOf(files: Map<string, string>, sources: string[]) {
   );
 }
 
+/** A part's source with the core painters it draws through, whose attributes and variables it sets. */
+function withPainters(source: string, core: Map<string, string>) {
+  const painters = new Set(
+    [...source.matchAll(PAINTER_IMPORT)].map((match) => match[1] ?? "")
+  );
+  const drawn = [...core.values()].filter((text) =>
+    [...painters].some((name) => text.includes(`export function ${name}(`))
+  );
+  return [source, ...drawn].join("\n");
+}
+
+/** The text of every core source file of a primitive, by path, tests aside. */
+async function coreFiles(dir: string): Promise<Map<string, string>> {
+  try {
+    const found = await Array.fromAsync(new Glob("**/*.ts").scan(dir));
+    const files = found.filter((file) => !file.includes("test"));
+    const texts = await Promise.all(
+      files.map((file) => Bun.file(`${dir}/${file}`).text())
+    );
+    return new Map(files.map((file, index) => [file, texts[index] ?? ""]));
+  } catch {
+    return new Map();
+  }
+}
+
 /** The text of every source file under a folder, tests aside. */
 async function sourcesIn(dir: string): Promise<string[]> {
   try {
@@ -108,8 +135,11 @@ export async function reference() {
     sorted(primitives).map(async (primitive) => {
       const dir = `${PRIMITIVES}/${primitive}/elements`;
       const names = await Array.fromAsync(new Glob("*.tsx").scan(dir));
+      const core = await coreFiles(`${CORE_PRIMITIVES}/${primitive}`);
       const texts = await Promise.all(
-        names.map((file) => Bun.file(`${dir}/${file}`).text())
+        names.map(async (file) =>
+          withPainters(await Bun.file(`${dir}/${file}`).text(), core)
+        )
       );
       const sources = [
         ...(await sourcesIn(`${PRIMITIVES}/${primitive}`)),

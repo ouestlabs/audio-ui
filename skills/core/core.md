@@ -6,6 +6,38 @@
 npm install @audio-ui/core   # no dependencies
 ```
 
+## The primitives as custom elements
+
+Before writing a binding, use `@audio-ui/elements`: every primitive as unstyled, accessible Web Components built on these controllers, at API parity with `@audio-ui/react` (parts, keyboard interactions, ARIA semantics, native range inputs, `data-*` attributes).
+
+```bash
+npm install @audio-ui/elements
+```
+
+```html
+<audio-ui-knob min="20" max="20000" default-value="1000" scale="log">
+  <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
+  <audio-ui-knob-control>
+    <audio-ui-knob-track></audio-ui-knob-track>
+    <audio-ui-knob-indicator></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+
+<script type="module">
+  import "@audio-ui/elements/knob"; // registers the elements
+  const knob = document.querySelector("audio-ui-knob");
+  knob.addEventListener("input", (event) => setCutoff(event.detail.value));
+</script>
+```
+
+- `input` fires on every change with `event.detail` `{ value, reason }`; `preventDefault()` rejects the change. `change` fires once when an interaction ends. The `value` property reads and sets the value.
+- Vue: `compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")` in the Vue plugin's `template` options, then `:value` and `@input="x = $event.detail.value"`. Svelte 5: `value={x}` and `oninput={(event) => (x = event.detail.value)}`.
+- The elements apply only display, positioning and `touch-action`, in zero-specificity rules. Style parts by tag and by `data-*` state attributes (`data-dragging`, `data-disabled`, `data-orientation`). API reference: https://www.audio-ui.dev/docs/custom-elements
+
+Each primitive registers from its own entry point, `@audio-ui/elements/<primitive>`. Parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`, distinct from the root's `input` and `change`. Use the controllers below directly only for interfaces the elements do not cover.
+
 ## What it exports
 
 | Entry | What |

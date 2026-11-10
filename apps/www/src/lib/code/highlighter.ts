@@ -8,9 +8,11 @@ import { jsx } from "@tanstack/highlight/languages/jsx";
 import { markdown } from "@tanstack/highlight/languages/markdown";
 import { plaintext } from "@tanstack/highlight/languages/plaintext";
 import { shell } from "@tanstack/highlight/languages/shell";
+import { svelte } from "@tanstack/highlight/languages/svelte";
 import { toml } from "@tanstack/highlight/languages/toml";
 import { ts } from "@tanstack/highlight/languages/ts";
 import { tsx } from "@tanstack/highlight/languages/tsx";
+import { vue } from "@tanstack/highlight/languages/vue";
 import { yaml } from "@tanstack/highlight/languages/yaml";
 
 /** The one highlighter of the site: small and synchronous, so it runs on the server and in the browser alike. */
@@ -25,9 +27,11 @@ export const highlighter = createHighlighter({
     markdown,
     plaintext,
     shell,
+    svelte,
     toml,
     ts,
     tsx,
+    vue,
     yaml,
   ],
 });

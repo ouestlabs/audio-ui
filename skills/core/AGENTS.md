@@ -1,8 +1,8 @@
 # audio/ui core
 
-**Version 1.2.0**  
+**Version 1.4.0**  
 audio/ui  
-October 2026
+November 2026
 
 > **Note:**  
 > This document is for agents and LLMs building audio interfaces with audio/ui. It is generated from `rules/` by `bun run skill:build` in `apps/www`: edit the rules, not this file.

@@ -16,6 +16,7 @@ import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
 import {
   type DescribePosition,
   placedOver,
+  unitLength,
   useTimelineContext,
 } from "../context.ts";
 import {
@@ -41,8 +42,9 @@ const describeNumber: DescribePosition = (value) =>
  * it begins instead of stretching it, and a `Timeline.ClipFadeHandle` per
  * fade. Its content is up to you: it sets `--clip-offset` and
  * `--clip-source-length` so a waveform can show the stretch that is played,
- * and `--clip-fade-in-max` and `--clip-fade-out-max`, how long each fade can
- * grow, to draw the limit of a fade being dragged (`data-fading`).
+ * `--clip-fade-in-max` and `--clip-fade-out-max`, how long each fade can
+ * grow, to draw the limit of a fade being dragged (`data-fading`), and
+ * `--clip-unit`, the width of one unit for what is placed inside it.
  * Its own native `<input type="range">` moves it from the keyboard and
  * carries its accessible name (`aria-label` / `aria-labelledby`); Delete and
  * Backspace on it call `onRemove`. Renders a `<div>` element.
@@ -236,6 +238,8 @@ export function Clip(componentProps: Clip.Props) {
           "--clip-fade-out": fadeOut,
           "--clip-fade-out-max": length - fadeIn,
           "--clip-offset": offset,
+          // A unit inside the clip: fitted, the timeline's unit is a share of the lane, which inside the clip would be a share of the clip.
+          "--clip-unit": unitLength(zoom, length),
           ...(sourceLength === undefined
             ? {}
             : { "--clip-source-length": sourceLength }),

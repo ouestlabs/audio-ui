@@ -1,7 +1,6 @@
 import { type FadeShape, fadeGain } from "@audio-ui/core/timeline";
 import { type PartProps, resolveStyling } from "../../internal/part.ts";
 import { mergeProps, useRender } from "../../internal/render.ts";
-import { UNIT_PROPERTY } from "../context.ts";
 import { type ClipState, useClipContext } from "./clip-context.ts";
 
 const SAMPLES = 16;
@@ -68,7 +67,7 @@ export function ClipFade(componentProps: ClipFade.Props) {
           pointerEvents: "none",
           position: "absolute",
           top: 0,
-          width: `calc(var(${UNIT_PROPERTY}) * var(${property}))`,
+          width: `calc(var(--clip-unit) * var(${property}))`,
           ...(edge === "in" ? { insetInlineStart: 0 } : { insetInlineEnd: 0 }),
         },
         viewBox: "0 0 1 1",
