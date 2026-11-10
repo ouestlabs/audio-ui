@@ -38,7 +38,7 @@ export const SEQUENCER_TAGS = Object.freeze({
   step: "audio-ui-sequencer-step",
   steps: "audio-ui-sequencer-steps",
   velocity: "audio-ui-sequencer-velocity",
-} as const);
+});
 
 /** A live value followed without rendering: here, the step being played. */
 export interface SequencerSource {

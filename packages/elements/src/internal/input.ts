@@ -93,3 +93,39 @@ export class ValueText {
     }
   }
 }
+
+/** The hidden native range input a part holds: it takes focus and the keys, and carries the names set on the part. */
+export function rangeInput(): HTMLInputElement {
+  const input = document.createElement("input");
+  input.type = "range";
+  input.step = "any";
+  hideVisually(input);
+  return input;
+}
+
+/** Moves a name just set on `part` onto its input's names. Returns whether they changed. */
+export function takeName(
+  part: Element,
+  names: Map<string, string>,
+  name: string,
+  next: string | null
+): boolean {
+  // A name never stays on the part, so only its own removal of it comes with no value.
+  if (next === null) {
+    return false;
+  }
+  if (next === "") {
+    names.delete(name);
+  } else {
+    names.set(name, next);
+  }
+  part.removeAttribute(name);
+  return true;
+}
+
+/** The names an input carries, from the ones its part was given. */
+export const inputNames = (names: Map<string, string>) => ({
+  "aria-describedby": names.get("aria-describedby") ?? null,
+  "aria-label": names.get("aria-label") ?? null,
+  "aria-labelledby": names.get("aria-labelledby") ?? null,
+});

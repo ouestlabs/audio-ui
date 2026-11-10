@@ -12,7 +12,7 @@ import { ControlPart, ControlRoot, type Painted } from "../internal/parts.ts";
 export const PAD_TAGS = Object.freeze({
   item: "audio-ui-pad-item",
   root: "audio-ui-pad",
-} as const);
+});
 
 /** What a `padon` event carries: the pad struck, how hard, and how. */
 export interface PadOnDetail {

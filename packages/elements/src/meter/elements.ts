@@ -32,7 +32,7 @@ export const METER_TAGS = Object.freeze({
   root: "audio-ui-meter",
   track: "audio-ui-meter-track",
   value: "audio-ui-meter-value",
-} as const);
+});
 
 /** A live signal, in the shape of an external store: `subscribe` calls back on each new frame, `getSnapshot` returns the latest. */
 export interface MeterSource {

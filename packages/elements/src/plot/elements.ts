@@ -49,7 +49,7 @@ export const PLOT_TAGS = Object.freeze({
   mark: "audio-ui-plot-mark",
   root: "audio-ui-plot",
   trace: "audio-ui-plot-trace",
-} as const);
+});
 
 /** What every part draws from: the plot's two axes, and whether it is disabled. */
 export interface PlotSnapshot {

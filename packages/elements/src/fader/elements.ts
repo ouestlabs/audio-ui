@@ -31,7 +31,7 @@ export const FADER_TAGS = Object.freeze({
   thumb: "audio-ui-fader-thumb",
   track: "audio-ui-fader-track",
   value: "audio-ui-fader-value",
-} as const);
+});
 
 /** What a fader's `input` and `change` events carry, besides the fader itself as their target. */
 export interface FaderEventDetail<Reason extends string> {

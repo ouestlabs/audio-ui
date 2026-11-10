@@ -34,7 +34,7 @@ export const KNOB_TAGS = Object.freeze({
   thumb: "audio-ui-knob-thumb",
   track: "audio-ui-knob-track",
   value: "audio-ui-knob-value",
-} as const);
+});
 
 /** What a knob's `input` and `change` events carry, besides the knob itself as their target. */
 export interface KnobEventDetail<Reason extends string> {

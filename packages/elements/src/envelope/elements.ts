@@ -35,7 +35,7 @@ export const ENVELOPE_TAGS = Object.freeze({
   root: "audio-ui-envelope",
   segment: "audio-ui-envelope-segment",
   segments: "audio-ui-envelope-segments",
-} as const);
+});
 
 /** What an envelope's `input` and `change` events carry, besides the envelope itself as their target. */
 export interface EnvelopeEventDetail<Reason extends string> {

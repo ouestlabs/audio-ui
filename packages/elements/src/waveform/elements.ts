@@ -26,12 +26,17 @@ import {
 } from "@audio-ui/core/waveform";
 import {
   ElementBase,
-  hideVisually,
   listAttribute,
   numberAttribute,
   reflect,
 } from "../internal/element.ts";
-import { INPUT_NAMES, ValueText } from "../internal/input.ts";
+import {
+  INPUT_NAMES,
+  inputNames,
+  rangeInput,
+  takeName,
+  ValueText,
+} from "../internal/input.ts";
 import {
   ControlPart,
   ControlRoot,
@@ -53,7 +58,7 @@ export const WAVEFORM_TAGS = Object.freeze({
   regionHandle: "audio-ui-waveform-region-handle",
   root: "audio-ui-waveform",
   thumb: "audio-ui-waveform-thumb",
-} as const);
+});
 
 /** What a waveform's `input` and `change` events carry, besides the waveform itself as their target. */
 export interface WaveformEventDetail<Reason extends string> {
@@ -378,42 +383,6 @@ abstract class WaveformPartElement extends ControlPart<
     }
   }
 }
-
-/** The hidden native range input a part holds: it takes focus and the keys, and carries the names set on the part. */
-function rangeInput(): HTMLInputElement {
-  const input = document.createElement("input");
-  input.type = "range";
-  input.step = "any";
-  hideVisually(input);
-  return input;
-}
-
-/** Moves a name just set on `part` onto its input's names. Returns whether they changed. */
-function takeName(
-  part: Element,
-  names: Map<string, string>,
-  name: string,
-  next: string | null
-): boolean {
-  // A name never stays on the part, so only its own removal of it comes with no value.
-  if (next === null) {
-    return false;
-  }
-  if (next === "") {
-    names.delete(name);
-  } else {
-    names.set(name, next);
-  }
-  part.removeAttribute(name);
-  return true;
-}
-
-/** The names an input carries, from the ones its part was given. */
-const inputNames = (names: Map<string, string>) => ({
-  "aria-describedby": names.get("aria-describedby") ?? null,
-  "aria-label": names.get("aria-label") ?? null,
-  "aria-labelledby": names.get("aria-labelledby") ?? null,
-});
 
 /**
  * The seekable surface: a press jumps to the pointer and a drag scrubs. It

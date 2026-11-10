@@ -32,7 +32,7 @@ export const XYPAD_TAGS = Object.freeze({
   root: "audio-ui-xypad",
   thumb: "audio-ui-xypad-thumb",
   value: "audio-ui-xypad-value",
-} as const);
+});
 
 /** What an XY pad's `input` and `change` events carry, besides the pad itself as their target. */
 export interface XYPadEventDetail<Reason extends string> {

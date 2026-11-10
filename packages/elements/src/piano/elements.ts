@@ -21,7 +21,7 @@ export const PIANO_TAGS = Object.freeze({
   keyLabel: "audio-ui-piano-key-label",
   keys: "audio-ui-piano-keys",
   root: "audio-ui-piano",
-} as const);
+});
 
 /** What a `noteon` event carries: the pitch played, how hard, and how. */
 export interface PianoNoteOnDetail {
