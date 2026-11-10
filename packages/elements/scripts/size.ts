@@ -6,8 +6,9 @@
  */
 /** Gzipped bytes. About 15% above what each weighs today. */
 const BUDGETS: Record<string, number> = {
+  envelope: 9000,
   fader: 5300,
-  index: 21_500,
+  index: 27_000,
   knob: 6000,
   meter: 4200,
   pad: 3500,

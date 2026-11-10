@@ -3,6 +3,7 @@ import { defineConfig } from "tsup";
 // One entry per control, so `@audio-ui/elements/<name>` registers and ships
 // only that control's elements; what they share is split into common chunks.
 const elements = [
+  "envelope",
   "fader",
   "knob",
   "meter",

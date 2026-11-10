@@ -3,6 +3,7 @@
  * none. Importing this module registers every element; import a subpath,
  * such as `@audio-ui/elements/knob`, to register and ship only that one.
  */
+export * from "./envelope/index.ts";
 export * from "./fader/index.ts";
 export * from "./knob/index.ts";
 export * from "./meter/index.ts";

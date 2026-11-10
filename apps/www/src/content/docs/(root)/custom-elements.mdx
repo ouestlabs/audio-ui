@@ -359,6 +359,45 @@ Flipping cells fires `input`, with `{ value, reason }`, which `preventDefault()`
 | `<audio-ui-sequencer-cell>` | One step, a toggle button pressed when it is on (`data-on`), named after its row and step ("Kick, step 5") |
 | `<audio-ui-sequencer-velocity>` | How loud a step plays, as a bar whose height is the `--sequencer-velocity` CSS variable; a press or a drag sets it, Alt + click or Delete bring it back to full, and a native range input takes the keys |
 
+### Envelope
+
+`<audio-ui-envelope>` is a breakpoint envelope, a group: drag a point to move it, double click the graph to add one, and double click, Alt + click or Delete to remove one. The points are one tab stop: Page Up and Page Down (or Home and End) move between them, and the arrow keys move the focused one. Each segment has a handle on its midpoint that bends it, and Alt + drag on the graph bends the segment under the pointer. The points and segments elements make a handle each, from a `<template>` if they have one:
+
+```html
+<audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.2 1, 0.6 0.5, 1 0">
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill></audio-ui-envelope-fill>
+    <audio-ui-envelope-line></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments></audio-ui-envelope-segments>
+  <audio-ui-envelope-points></audio-ui-envelope-points>
+</audio-ui-envelope>
+```
+
+<TypeTable>
+<TypeRow name={"value"} type={"string"}>The points, separated by commas, each `x y` or `x y curve` in 0 to 1, the curve from -1 to 1. The `value` property takes and gives them as `{ x, y, curve? }[]`.</TypeRow>
+<TypeRow name={"default-value"} type={"string"}>The starting points, written the same way. Defaults to an ADSR shape.</TypeRow>
+<TypeRow name={"min-points"} type={"number"} default={"2"}>Removing a point is refused at this count.</TypeRow>
+<TypeRow name={"max-points"} type={"number"}>Adding a point is refused at this count.</TypeRow>
+<TypeRow name={"snap"} type={"string"} default={"0"}>The grid the pointer puts points on: one step, such as `0.25`, or `"x y"` for each axis (`"0.125 0"` snaps across and leaves the level free). Cmd or Ctrl leaves it.</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"0.01"}>The keyboard step on both axes.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for each point's coordinates.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser's language.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+`input` and `change` carry `{ value, reason, index }`, the reason `drag`, `keyboard`, `add`, `remove` or `curve`. The `getPointValueText(point, index)` and `getCurveValueText(curve, index)` properties write what a screen reader hears, in real units.
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-envelope-graph>` | The drawing surface, filling the envelope: a double click adds a point, and it carries `data-blocked` briefly when adding is refused |
+| `<audio-ui-envelope-line>` | The curve through the points, in `currentColor`; `stroke-width` sets its width, which the stretch leaves alone |
+| `<audio-ui-envelope-fill>` | The area under the curve, in `currentColor` |
+| `<audio-ui-envelope-points>` | Makes an `<audio-ui-envelope-point>` per point; `label` names them, `{n}` the number and `{count}` how many ("Point {n} of {count}" by default) |
+| `<audio-ui-envelope-point>` | A slider on the point's level, placed with `left` and `bottom`. It carries `data-dragging` while dragged, `data-removable` while it can be removed, and `data-blocked` briefly when removal is refused |
+| `<audio-ui-envelope-segments>` | Makes an `<audio-ui-envelope-segment>` per segment; `label` names them ("Curve {n}" by default) |
+| `<audio-ui-envelope-segment>` | A slider on the curve, from -1 to 1, on the segment's midpoint: drag it or press Up and Down to bend, double click or Delete to straighten. `data-flat` marks a segment with nothing to bend |
+
 ### Data attributes
 
 Every part carries the state of its control:
@@ -372,4 +411,5 @@ Every part carries the state of its control:
 <TypeRow name={"data-on"}>On a sequencer's cell or velocity bar, while its step is on.</TypeRow>
 <TypeRow name={"data-current"}>On the cells of the step being played.</TypeRow>
 <TypeRow name={"data-painting"}>On a sequencer and its parts while a pointer paints cells.</TypeRow>
+<TypeRow name={"data-blocked"}>On an envelope's graph or point, briefly, when adding or removing a point is refused.</TypeRow>
 </TypeTable>

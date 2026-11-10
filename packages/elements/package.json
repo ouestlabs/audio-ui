@@ -36,6 +36,10 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./envelope": {
+      "types": "./dist/envelope/index.d.ts",
+      "import": "./dist/envelope.js"
+    },
     "./fader": {
       "types": "./dist/fader/index.d.ts",
       "import": "./dist/fader.js"
