@@ -10,6 +10,7 @@ import { electricPianoDevice } from "@/registry-audio/bases/base/devices/electri
 import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
 import { filterDevice } from "@/registry-audio/bases/base/devices/filter/device";
 import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/device";
+import { frequencyShifterDevice } from "@/registry-audio/bases/base/devices/frequency-shifter/device";
 import { gateDevice } from "@/registry-audio/bases/base/devices/gate/device";
 import { graphicEqDevice } from "@/registry-audio/bases/base/devices/graphic-eq/device";
 import { guitarDevice } from "@/registry-audio/bases/base/devices/guitar/device";
@@ -40,6 +41,7 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  "frequency-shifter": frequencyShifterDevice,
   wah: wahDevice,
   "graphic-eq": graphicEqDevice,
   "tilt-eq": tiltEqDevice,

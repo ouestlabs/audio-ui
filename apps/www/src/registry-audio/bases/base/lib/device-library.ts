@@ -30,6 +30,8 @@ import { filterDevice } from "@/registry-audio/bases/base/devices/filter/device"
 import { createFilterEngine } from "@/registry-audio/bases/base/devices/filter/engine";
 import { fmSynthDevice } from "@/registry-audio/bases/base/devices/fm-synth/device";
 import { createFmSynthEngine } from "@/registry-audio/bases/base/devices/fm-synth/engine";
+import { frequencyShifterDevice } from "@/registry-audio/bases/base/devices/frequency-shifter/device";
+import { createFrequencyShifterEngine } from "@/registry-audio/bases/base/devices/frequency-shifter/engine";
 import { gateDevice } from "@/registry-audio/bases/base/devices/gate/device";
 import { createGateEngine } from "@/registry-audio/bases/base/devices/gate/engine";
 import { graphicEqDevice } from "@/registry-audio/bases/base/devices/graphic-eq/device";
@@ -185,6 +187,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(autoPanDevice, createAutoPanEngine, "Motion"),
   entry(vibeDevice, createVibeEngine, "Motion"),
   entry(wahDevice, createWahEngine, "Motion"),
+  entry(frequencyShifterDevice, createFrequencyShifterEngine, "Motion"),
   // Utility
   entry(utilityDevice, createUtilityEngine, "Utility"),
   entry(midSideDevice, createMidSideEngine, "Utility"),

@@ -390,6 +390,12 @@
     "title": "Block wah"
   },
   {
+    "categories": ["modulation", "plot", "knob"],
+    "description": "A frequency shifter you can plug in: its state, a panel that draws what it does to a note and an engine that plays it. Play a loop through it and turn the shift: its harmonics stop lining up",
+    "name": "block-frequency-shifter",
+    "title": "Block frequency shifter"
+  },
+  {
     "categories": ["mixer", "fader", "meter", "knob"],
     "description": "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",
     "name": "block-mixer",

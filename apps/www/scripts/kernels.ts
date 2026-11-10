@@ -103,6 +103,18 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "FREQUENCY_SHIFTER_KERNELS",
+    file: "devices/frequency-shifter/kernels.ts",
+    kernels: [
+      {
+        file: "frequency-shifter.js",
+        name: "@audio/effect-freqshift",
+        use: "frequencyShifter",
+      },
+      { file: "ring-mod.js", name: "@audio/effect-ringmod", use: "ringMod" },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [

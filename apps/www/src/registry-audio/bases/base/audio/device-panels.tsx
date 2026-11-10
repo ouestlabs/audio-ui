@@ -13,6 +13,7 @@ import { ElectricPianoPanel } from "@/registry-audio/bases/base/devices/electric
 import { EqualizerPanel } from "@/registry-audio/bases/base/devices/equalizer/panel";
 import { FilterPanel } from "@/registry-audio/bases/base/devices/filter/panel";
 import { FmSynthPanel } from "@/registry-audio/bases/base/devices/fm-synth/panel";
+import { FrequencyShifterPanel } from "@/registry-audio/bases/base/devices/frequency-shifter/panel";
 import { GatePanel } from "@/registry-audio/bases/base/devices/gate/panel";
 import { GraphicEqPanel } from "@/registry-audio/bases/base/devices/graphic-eq/panel";
 import { GuitarPanel } from "@/registry-audio/bases/base/devices/guitar/panel";
@@ -97,6 +98,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.frequency-shifter": entry(FrequencyShifterPanel, "w-96"),
   "audioui.wah": entry(WahPanel, "w-[32rem]"),
   "audioui.graphic-eq": entry(GraphicEqPanel, "w-[28rem]"),
   "audioui.tilt-eq": entry(TiltEqPanel),

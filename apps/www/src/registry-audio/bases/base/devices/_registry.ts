@@ -16,6 +16,7 @@ const DEVICES = [
   "electric-piano",
   "equalizer",
   "filter",
+  "frequency-shifter",
   "fm-synth",
   "gate",
   "graphic-eq",
@@ -1567,6 +1568,68 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/wah-device",
+      "@shadcn/select",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio/effect-freqshift",
+      "@audio/effect-ringmod",
+    ],
+    description:
+      "The frequency shifter as a device: a mode (shift or ring), the shift in hertz, the ring's frequency, the shifter's precision and a mix, the numbers that go on the worklet for a state, its latency, what it does to a note and its harmonics and the worklet's source (the frequency shifter of @audio/effect-freqshift and the ring modulator of @audio/effect-ringmod), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/frequency-shifter/device.ts",
+        target: "components/audio-ui/devices/frequency-shifter/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/frequency-shifter/kernels.ts",
+        target: "components/audio-ui/devices/frequency-shifter/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "frequency-shifter-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A frequency shifter on the Web Audio API for a frequency shifter state: an AudioWorklet loaded from a blob that plays both modes, one output each, faded by the mode, the sound passing clean until it is ready.",
+    files: [
+      {
+        path: "devices/frequency-shifter/engine.ts",
+        target: "components/audio-ui/devices/frequency-shifter/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "frequency-shifter-engine",
+    registryDependencies: ["@audio-ui/frequency-shifter-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the frequency shifter device: a note and its harmonics as they go in and as they come out, over the device knobs, the mode picked in its title bar.",
+    files: [
+      {
+        path: "devices/frequency-shifter/panel.tsx",
+        target: "components/audio-ui/devices/frequency-shifter/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "frequency-shifter-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/frequency-shifter-device",
       "@shadcn/select",
     ],
     type: "registry:ui",
