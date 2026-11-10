@@ -6,6 +6,11 @@
 interface Kernel {
   /** The module that holds it, in the package. */
   file: string;
+  /**
+   * The package whose folder finds this one, for a package the device does
+   * not install itself but one of its kernels depends on.
+   */
+  from?: string;
   name: string;
   /**
    * What the worklet calls, by the names the module exports it under, by
@@ -129,6 +134,33 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "ROTARY_KERNELS",
+    file: "devices/rotary/kernels.ts",
+    kernels: [
+      {
+        file: "core/transform.js",
+        from: "@audio/eq-crossover",
+        name: "digital-filter",
+        use: "polesSos",
+      },
+      {
+        file: "iir/butterworth.js",
+        from: "@audio/eq-crossover",
+        name: "digital-filter",
+        use: "butterworth",
+      },
+      {
+        file: "iir/linkwitz-riley.js",
+        from: "@audio/eq-crossover",
+        name: "digital-filter",
+        use: "linkwitzRiley",
+      },
+      { file: "crossover.js", name: "@audio/eq-crossover", use: "crossover" },
+      { file: "biquad.js", name: "@audio/biquad", use: ["step", "state"] },
+      { file: "rotary.js", name: "@audio/effect-rotary", use: "rotary" },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [
@@ -152,9 +184,14 @@ export const KERNELS_DIR = `${import.meta.dir}/../src/registry-audio/bases/base`
 
 const PACKAGE_JSON = /package\.json$/;
 const IMPORT = /^\s*import\s/m;
-/** An import of names from a package: `import { a, b } from "pkg"`. */
-const NAMED_IMPORT =
-  /^\s*import\s*\{([^}]*)\}\s*from\s*["']([^"']+)["'];?[ \t]*\n?/gm;
+/** An import statement: what it takes, and from where. */
+const IMPORT_STATEMENT =
+  /^\s*import\s+(.+?)\s+from\s*["']([^"']+)["'];?[ \t]*\n?/gm;
+const DEFAULT_IMPORT = /^[A-Za-z_$][\w$]*$/;
+const NAMED_IMPORT = /^\{([^}]*)\}$/;
+const DEFAULT_EXPORT = /export default function ([A-Za-z_$][\w$]*)/;
+/** A list of names a module exports, `export { a as b }`: its scope keeps them, so the line goes. */
+const EXPORT_LIST = /^export\s*\{[^}]*\};?[ \t]*\n?/gm;
 /** The keyword that exports a declaration, by default or by name: a scope of its own keeps it. */
 const EXPORT = /^export (default )?/gm;
 /** An npm author's email and web page, left out: the name says who wrote it. */
@@ -166,66 +203,149 @@ const escaped = (text: string) =>
 
 const namesOf = (use: Kernel["use"]) => (typeof use === "string" ? [use] : use);
 
+/** A module's path in its package, with `.` and `..` worked out. */
+function normalized(path: string) {
+  const parts: string[] = [];
+  for (const part of path.split("/")) {
+    if (part === "..") {
+      parts.pop();
+    } else if (part !== "." && part !== "") {
+      parts.push(part);
+    }
+  }
+  return parts.join("/");
+}
+
+/** What a vendored module gives the modules after it: its names, and which one it exports by default. */
+interface Held {
+  byDefault?: string;
+  name: string;
+  names: readonly string[];
+}
+
+/** The module an import names: one of the package's own by its path, or another package, by a path in it or by its name. */
+function heldFor(
+  specifier: string,
+  { file, name }: Pick<Kernel, "file" | "name">,
+  held: ReadonlyMap<string, Held>
+) {
+  if (specifier.startsWith(".")) {
+    const folder = file.split("/").slice(0, -1).join("/");
+    return held.get(`${name}/${normalized(`${folder}/${specifier}`)}`);
+  }
+  return (
+    held.get(specifier) ??
+    [...held.values()].find((module) => module.name === specifier)
+  );
+}
+
 /**
- * A module's source without the imports the set already holds: names from a
- * package vendored before it in the set, which its scope sees. Any other
- * import is refused, since a worklet cannot load it.
+ * A module's source without the imports the set already holds: modules
+ * vendored before it, whose names its scope sees, a default import under
+ * another name kept as an alias. Any other import is refused, since a worklet
+ * cannot load it.
  */
 function withoutImports(
   source: string,
-  where: string,
-  held: ReadonlyMap<string, readonly string[]>
+  kernel: Pick<Kernel, "file" | "name">,
+  held: ReadonlyMap<string, Held>
 ) {
-  const body = source.replace(NAMED_IMPORT, (_line, list: string, from) => {
-    const names = list.split(",").map((part) => part.trim());
-    const has = held.get(from);
-    if (!(has && names.every((imported) => has.includes(imported)))) {
-      throw new Error(
-        `${where} imports ${from}, which the set does not hold before it: a worklet cannot load it`
-      );
+  const where = `${kernel.name}/${kernel.file}`;
+  const aliases: string[] = [];
+  const body = source.replace(
+    IMPORT_STATEMENT,
+    (_line, clause: string, specifier: string) => {
+      const module = heldFor(specifier, kernel, held);
+      if (!module) {
+        throw new Error(
+          `${where} imports ${specifier}, which the set does not hold before it: a worklet cannot load it`
+        );
+      }
+      const named = NAMED_IMPORT.exec(clause.trim());
+      if (DEFAULT_IMPORT.test(clause.trim()) && module.byDefault) {
+        if (clause.trim() !== module.byDefault) {
+          aliases.push(`const ${clause.trim()} = ${module.byDefault};`);
+        }
+        return "";
+      }
+      for (const part of named?.[1]?.split(",") ?? []) {
+        const [imported = "", local = imported] = part
+          .split(" as ")
+          .map((each) => each.trim());
+        if (!module.names.includes(imported)) {
+          throw new Error(
+            `${where} imports ${imported} from ${specifier}, which the set does not take`
+          );
+        }
+        if (local !== imported) {
+          aliases.push(`const ${local} = ${imported};`);
+        }
+      }
+      if (!named) {
+        throw new Error(
+          `${where} imports ${clause} from ${specifier}, a form the set cannot hold`
+        );
+      }
+      return "";
     }
-    return "";
-  });
+  );
   if (IMPORT.test(body)) {
     throw new Error(
       `${where} imports another module: a worklet cannot load it`
     );
   }
-  return body;
+  return [...aliases, body].join("\n");
+}
+
+/** Where a package is installed: by its manifest, or, when it does not export that, by the module wanted. */
+function rootOf(name: string, file: string, base: string) {
+  try {
+    return Bun.resolveSync(`${name}/package.json`, base).replace(
+      PACKAGE_JSON,
+      ""
+    );
+  } catch {
+    const path = Bun.resolveSync(`${name}/${file}`, base);
+    return path.slice(0, path.length - file.length);
+  }
 }
 
 /** The file a set writes: each kernel's module as installed, in a scope of its own. */
 export async function kernelFile({ constant, kernels }: KernelSet) {
-  const held = new Map(
-    kernels.map((kernel) => [kernel.name, namesOf(kernel.use)] as const)
-  );
-  const modules = await Promise.all(
-    kernels.map(async ({ file, name, use }, index) => {
-      const root = Bun.resolveSync(
-        `${name}/package.json`,
-        import.meta.dir
-      ).replace(PACKAGE_JSON, "");
-      const { author, license, version } = await Bun.file(
-        `${root}package.json`
-      ).json();
-      const source = await Bun.file(`${root}${file}`).text();
-      const before = new Map([...held].filter((_entry, at) => at < index));
-      const body = withoutImports(source, `${name}/${file}`, before).replace(
-        EXPORT,
-        ""
-      );
-      const by = (typeof author === "string" ? author : author?.name)?.replace(
-        CONTACT,
-        ""
-      );
-      const names = namesOf(use);
-      const given = typeof use === "string" ? use : `{ ${names.join(", ")} }`;
-      return {
-        code: `const ${given} = (() => {\n${body}\nreturn ${given};\n})();\n`,
-        label: ` * - \`${name}\` ${version} (${license}, ${by}): ${names.map((each) => `\`${each}\``).join(", ")}`,
-      };
+  const read = await Promise.all(
+    kernels.map(async (kernel) => {
+      const base = kernel.from
+        ? rootOf(kernel.from, "package.json", import.meta.dir)
+        : import.meta.dir;
+      const root = rootOf(kernel.name, kernel.file, base);
+      const manifest = await Bun.file(`${root}package.json`).json();
+      const source = await Bun.file(`${root}${kernel.file}`).text();
+      return { kernel, manifest, source };
     })
   );
+  const held = new Map<string, Held>();
+  const modules = read.map(({ kernel, manifest, source }) => {
+    const { file, name, use } = kernel;
+    const body = withoutImports(source, kernel, held)
+      .replace(EXPORT_LIST, "")
+      .replace(EXPORT, "");
+    held.set(`${name}/${file}`, {
+      byDefault: DEFAULT_EXPORT.exec(source)?.[1],
+      name,
+      names: namesOf(use),
+    });
+    const { author, license, version } = manifest;
+    const by = (typeof author === "string" ? author : author?.name)?.replace(
+      CONTACT,
+      ""
+    );
+    const names = namesOf(use);
+    const given = typeof use === "string" ? use : `{ ${names.join(", ")} }`;
+    return {
+      code: `const ${given} = (() => {\n${body}\nreturn ${given};\n})();\n`,
+      label: ` * - \`${name}\` ${version} (${license}, ${by}): ${names.map((each) => `\`${each}\``).join(", ")}`,
+    };
+  });
   return `/**
  * audio.js kernels, each module as published, in its own scope, for an
  * \`AudioWorklet\`, which cannot import them:

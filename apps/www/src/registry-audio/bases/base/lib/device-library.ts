@@ -66,6 +66,8 @@ import { reduxDevice } from "@/registry-audio/bases/base/devices/redux/device";
 import { createReduxEngine } from "@/registry-audio/bases/base/devices/redux/engine";
 import { reverbDevice } from "@/registry-audio/bases/base/devices/reverb/device";
 import { createReverbEngine } from "@/registry-audio/bases/base/devices/reverb/engine";
+import { rotaryDevice } from "@/registry-audio/bases/base/devices/rotary/device";
+import { createRotaryEngine } from "@/registry-audio/bases/base/devices/rotary/engine";
 import { samplerDevice } from "@/registry-audio/bases/base/devices/sampler/device";
 import { createSamplerEngine } from "@/registry-audio/bases/base/devices/sampler/engine";
 import { saturatorDevice } from "@/registry-audio/bases/base/devices/saturator/device";
@@ -194,6 +196,7 @@ export const DEVICE_LIBRARY: readonly LibraryDevice[] = [
   entry(vibeDevice, createVibeEngine, "Motion"),
   entry(wahDevice, createWahEngine, "Motion"),
   entry(frequencyShifterDevice, createFrequencyShifterEngine, "Motion"),
+  entry(rotaryDevice, createRotaryEngine, "Motion"),
   // Utility
   entry(utilityDevice, createUtilityEngine, "Utility"),
   entry(midSideDevice, createMidSideEngine, "Utility"),

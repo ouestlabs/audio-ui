@@ -1385,6 +1385,27 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["modulation", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "A rotary speaker you can plug in: its state, a panel that draws its two bands and an engine that plays it. Play a loop through it and switch to Fast: the rotors wind up",
+    files: [
+      {
+        path: "components/device/block-rotary.tsx",
+        type: "registry:block",
+      },
+    ],
+    name: "block-rotary",
+    registryDependencies: [
+      "@audio-ui/rotary-panel",
+      "@audio-ui/rotary-device",
+      "@audio-ui/rotary-engine",
+      "@audio-ui/use-device-loop",
+      "@audio-ui/use-master-bus",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["mixer", "fader", "meter", "knob"],
     description:
       "Mixing console over an arrangement: a channel for each track with pan, sends, fader, meter, peak, solo and mute, a return track after them and the main track in sight at the right, every meter reading its real signal. It is the view a workstation shows under its tracks",

@@ -37,6 +37,7 @@
         "@audio/effect-phaser": "catalog:",
         "@audio/effect-pingpong": "catalog:",
         "@audio/effect-ringmod": "catalog:",
+        "@audio/effect-rotary": "catalog:",
         "@audio/effect-subbass": "catalog:",
         "@audio/effect-wah": "catalog:",
         "@audio/encode": "catalog:",
@@ -185,9 +186,11 @@
         "@audio/effect-phaser": "catalog:",
         "@audio/effect-pingpong": "catalog:",
         "@audio/effect-ringmod": "catalog:",
+        "@audio/effect-rotary": "catalog:",
         "@audio/effect-subbass": "catalog:",
         "@audio/effect-wah": "catalog:",
         "@audio/encode": "catalog:",
+        "@audio/eq-crossover": "catalog:",
         "@audio/eq-tilt": "catalog:",
         "@audio/filter-diode-ladder": "catalog:",
         "@audio/filter-korg35": "catalog:",
@@ -366,9 +369,11 @@
     "@audio/effect-phaser": "1.1.6",
     "@audio/effect-pingpong": "1.1.5",
     "@audio/effect-ringmod": "1.1.5",
+    "@audio/effect-rotary": "0.1.2",
     "@audio/effect-subbass": "1.2.0",
     "@audio/effect-wah": "1.1.5",
     "@audio/encode": "1.11.0",
+    "@audio/eq-crossover": "1.0.2",
     "@audio/eq-tilt": "1.2.3",
     "@audio/filter-diode-ladder": "1.2.2",
     "@audio/filter-korg35": "1.2.1",
@@ -485,6 +490,8 @@
 
     "@audio/effect-ringmod": ["@audio/effect-ringmod@1.1.5", "", {}, "sha512-631I1cp5HCPwP+hkufumfuH4sq6cQ5j5Ggx6RjC8MFJUJ1bdwt36nXwiseknpJrWlgMSup9wJ+ashDGCvKGp9Q=="],
 
+    "@audio/effect-rotary": ["@audio/effect-rotary@0.1.2", "", { "dependencies": { "@audio/biquad": "^1.1.0", "@audio/eq-crossover": "^1.0.0" } }, "sha512-YDVAKx2/rSjGsNAEgmw4DRT2hhRfHwoirLV9ambGrRPl2Dgc/2XMcYJUZquzJXBeCoGYQBOtuTsfuoBIgzg3VQ=="],
+
     "@audio/effect-subbass": ["@audio/effect-subbass@1.2.0", "", {}, "sha512-tnmct2BusM7W5Yir7fxpnB30QceBqe8lGR6Zk8+XLZgKoxV8PYGZJGR5iuC0lVOYAU6V+Xkfgbdt112yPEYJQw=="],
 
     "@audio/effect-wah": ["@audio/effect-wah@1.1.5", "", {}, "sha512-QHO0gUUcSi5ZEHghXo9Gu2FL8jecLvB/7ccYFCoVwo5YUTdC0sY0unYNdourcqqcaKTF98pcFwWyvB006Ct2Fg=="],
@@ -518,6 +525,8 @@
     "@audio/encode-wavpack": ["@audio/encode-wavpack@1.0.2", "", {}, "sha512-bmz7iOB/IQQ7TW746t5a9H5jeHe9xMfWK+mZSVtJY2KCXuG+5OvQuUu6clNk2IYhSIiEr54Nyc0fmTLJBaxDMw=="],
 
     "@audio/encode-webm": ["@audio/encode-webm@1.3.1", "", { "dependencies": { "@audio/encode-opus": "^1.3.2" } }, "sha512-04iHcWQikUC7Tdi4w+FVYfxUvllsdQryxdDszx46Fc3Bd5rPn6mPKrSs04snYhZmQdcGGo/WM2sOzKoe0a314Q=="],
+
+    "@audio/eq-crossover": ["@audio/eq-crossover@1.0.2", "", { "dependencies": { "digital-filter": "^2.0.0" } }, "sha512-BjW5We/+FTvZVqXLCFPJLgI5YGbTBvvi81+pQ4r/rfZSnLlk4T7uhSUjSVfyCK+S7Jy2aQLHEtAK8wrXa7YPgA=="],
 
     "@audio/eq-graphic": ["@audio/eq-graphic@1.2.4", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-7x6JnFerm3GCf+zaY2R2QUUXhiYpb4+kNbYKc295hMWW+RKWTq6OjPdF7Mgj3i5x2hS8Eg20jfginD/4b1uNDA=="],
 
@@ -1970,6 +1979,8 @@
     "devlop": ["devlop@1.1.0", "", { "dependencies": { "dequal": "^2.0.0" } }, "sha512-RWmIqhcFf1lRYBvNmr7qTNuyCt/7/ns2jbpp1+PalgE/rDQcBT0fioSMUpJ93irlUhC5hrg4cYqe6U+0ImW0rA=="],
 
     "diff": ["diff@8.0.4", "", {}, "sha512-DPi0FmjiSU5EvQV0++GFDOJ9ASQUVFh5kD+OzOnYdi7n3Wpm9hWWGfB/O2blfHcMVTL5WkQXSnRiK9makhrcnw=="],
+
+    "digital-filter": ["digital-filter@2.4.3", "", { "dependencies": { "window-function": "^3.0.1" } }, "sha512-fiM/kLcSF1NRDnDsxoTrOi94hLj1hVIp0r3lvq5QEKB8DALBtwARxwCc5G8HfnzIIMspKYM5/ts67u0f64UC1w=="],
 
     "dom-accessibility-api": ["dom-accessibility-api@0.5.16", "", {}, "sha512-X7BJ2yElsnOJ30pZF4uIIDfBEVgF4XEBxL9Bxhy6dnrm5hkzqmsWHGTiHqRiITNhMyFLyAiWndIJP7Z1NTteDg=="],
 

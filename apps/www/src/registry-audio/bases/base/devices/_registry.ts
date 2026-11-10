@@ -39,6 +39,7 @@ const DEVICES = [
   "poly-synth",
   "redux",
   "reverb",
+  "rotary",
   "sampler",
   "saturator",
   "transient",
@@ -1747,6 +1748,63 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/bass-enhancer-device",
+    ],
+    type: "registry:ui",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: ["@audio-ui/core", "@audio/effect-rotary"],
+    description:
+      "The rotary speaker as a device: a speed (slow, fast or stop), a crossover, a depth, the horn's and the drum's ramps, a width and a mix, the numbers that go on the worklet for a state, its two bands and the worklet's source (the rotary of @audio/effect-rotary, with the crossover it splits the sound with), with no panel and no audio in it.",
+    files: [
+      {
+        path: "devices/rotary/device.ts",
+        target: "components/audio-ui/devices/rotary/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/rotary/kernels.ts",
+        target: "components/audio-ui/devices/rotary/kernels.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "rotary-device",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
+    categories: ["lib", "audio", "device"],
+    dependencies: [],
+    description:
+      "A rotary speaker on the Web Audio API for a rotary state: the rotary of @audio/effect-rotary in an AudioWorklet loaded from a blob, a mono cabinet heard in stereo, the sound passing clean until it is ready.",
+    files: [
+      {
+        path: "devices/rotary/engine.ts",
+        target: "components/audio-ui/devices/rotary/engine.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "rotary-engine",
+    registryDependencies: ["@audio-ui/rotary-device"],
+    type: "registry:lib",
+  },
+  {
+    categories: ["device", "plot", "knob"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The face of the rotary device: the drum's band and the horn's, split at the crossover, over its speed and the device knobs.",
+    files: [
+      {
+        path: "devices/rotary/panel.tsx",
+        target: "components/audio-ui/devices/rotary/panel.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "rotary-panel",
+    registryDependencies: [
+      "@audio-ui/device-panel",
+      "@audio-ui/plot",
+      "@audio-ui/rotary-device",
     ],
     type: "registry:ui",
   },

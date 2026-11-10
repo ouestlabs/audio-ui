@@ -28,6 +28,7 @@ import { pocketSynthDevice } from "@/registry-audio/bases/base/devices/pocket-sy
 import { polySynthDevice } from "@/registry-audio/bases/base/devices/poly-synth/device";
 import { reduxDevice } from "@/registry-audio/bases/base/devices/redux/device";
 import { reverbDevice } from "@/registry-audio/bases/base/devices/reverb/device";
+import { rotaryDevice } from "@/registry-audio/bases/base/devices/rotary/device";
 import { samplerDevice } from "@/registry-audio/bases/base/devices/sampler/device";
 import { saturatorDevice } from "@/registry-audio/bases/base/devices/saturator/device";
 import { stringMachineDevice } from "@/registry-audio/bases/base/devices/string-machine/device";
@@ -43,6 +44,7 @@ import { waveShaperDevice } from "@/registry-audio/bases/base/devices/wave-shape
 export const DEVICE_DOCS = {
   "auto-pan": autoPanDevice,
   "channel-eq": channelEqDevice,
+  rotary: rotaryDevice,
   "bass-enhancer": bassEnhancerDevice,
   exciter: exciterDevice,
   "frequency-shifter": frequencyShifterDevice,

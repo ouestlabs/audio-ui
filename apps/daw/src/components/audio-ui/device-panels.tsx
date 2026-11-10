@@ -31,6 +31,7 @@ import { PocketSynthPanel } from "@/components/audio-ui/devices/pocket-synth/pan
 import { PolySynthPanel } from "@/components/audio-ui/devices/poly-synth/panel";
 import { ReduxPanel } from "@/components/audio-ui/devices/redux/panel";
 import { ReverbPanel } from "@/components/audio-ui/devices/reverb/panel";
+import { RotaryPanel } from "@/components/audio-ui/devices/rotary/panel";
 import { SamplerPanel } from "@/components/audio-ui/devices/sampler/panel";
 import { SaturatorPanel } from "@/components/audio-ui/devices/saturator/panel";
 import { StringMachinePanel } from "@/components/audio-ui/devices/string-machine/panel";
@@ -100,6 +101,7 @@ export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
   "audioui.filter": entry(FilterPanel),
   "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
   "audioui.gate": entry(GatePanel),
+  "audioui.rotary": entry(RotaryPanel, "w-96"),
   "audioui.bass-enhancer": entry(BassEnhancerPanel),
   "audioui.exciter": entry(ExciterPanel),
   "audioui.frequency-shifter": entry(FrequencyShifterPanel, "w-96"),
