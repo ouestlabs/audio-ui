@@ -43,6 +43,7 @@
     "@audio/reverb-freeverb": "catalog:",
     "@audio/reverb-schroeder": "catalog:",
     "@audio/reverb-spring": "catalog:",
+    "@audio/spatial-microshift": "catalog:",
     "@audio/weighting-k": "catalog:",
     "@base-ui/react": "catalog:",
     "@fontsource/bricolage-grotesque": "^5.3.0",

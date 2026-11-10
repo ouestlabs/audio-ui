@@ -7,7 +7,7 @@ interface Kernel {
   /** The module that holds it, in the package. */
   file: string;
   name: string;
-  /** The function it exports by default, the name the worklet calls it by. */
+  /** The function the worklet calls, by the name the module exports it under, by default or by name. */
   use: string;
 }
 
@@ -69,6 +69,17 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "MID_SIDE_KERNELS",
+    file: "devices/mid-side/kernels.ts",
+    kernels: [
+      {
+        file: "microshift.js",
+        name: "@audio/spatial-microshift",
+        use: "shifter",
+      },
+    ],
+  },
+  {
     constant: "FILTER_KERNELS",
     file: "devices/filter/kernels.ts",
     kernels: [
@@ -92,6 +103,8 @@ export const KERNELS_DIR = `${import.meta.dir}/../src/registry-audio/bases/base`
 
 const PACKAGE_JSON = /package\.json$/;
 const IMPORT = /^\s*import\s/m;
+/** The keyword that exports a declaration, by default or by name: a scope of its own keeps it. */
+const EXPORT = /^export (default )?/gm;
 /** An npm author's email and web page, left out: the name says who wrote it. */
 const CONTACT = /\s*[<(][^>)]*[>)]/g;
 
@@ -116,10 +129,7 @@ export async function kernelFile({ constant, kernels }: KernelSet) {
           `${name}/${file} imports another module: a worklet cannot load it`
         );
       }
-      const body = source.replace(
-        `export default function ${use}`,
-        `function ${use}`
-      );
+      const body = source.replace(EXPORT, "");
       const by = (typeof author === "string" ? author : author?.name)?.replace(
         CONTACT,
         ""

@@ -898,13 +898,18 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/spatial-microshift"],
     description:
-      "The mid/side device as a device: a level for the mid, a level for the side and a bass mono frequency, the numbers that go on the nodes for a state, with no panel and no audio in it.",
+      "The mid/side device as a device: a widening (off, a Haas delay or a detune, with their delay, cents and blend), a level for the mid, a level for the side and a bass mono frequency, the numbers that go on the nodes for a state and the source of the detune's worklet (the shifters of @audio/spatial-microshift), with no panel and no audio in it.",
     files: [
       {
         path: "devices/mid-side/device.ts",
         target: "components/audio-ui/devices/mid-side/device.ts",
+        type: "registry:lib",
+      },
+      {
+        path: "devices/mid-side/kernels.ts",
+        target: "components/audio-ui/devices/mid-side/kernels.ts",
         type: "registry:lib",
       },
     ],
@@ -916,7 +921,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A mid/side device on the Web Audio API for a mid/side state: the signal split into mid and side, a level for each, a high-pass on the side for bass mono, and the two added back, moving without a click.",
+      "A mid/side device on the Web Audio API for a mid/side state: the signal widened first, by a Haas delay or a detune in an AudioWorklet loaded from a blob, then split into mid and side, a level for each, a high-pass on the side for bass mono, and the two added back, moving without a click.",
     files: [
       {
         path: "devices/mid-side/engine.ts",
@@ -932,7 +937,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the mid/side device: a square with the side level across and the mid level up, and a handle to drag to both at once, over the bass mono knob.",
+      "The face of the mid/side device: a square with the side level across and the mid level up, and a handle to drag to both at once, over the bass mono and widening knobs, the widening picked in its title bar.",
     files: [
       {
         path: "devices/mid-side/panel.tsx",
@@ -945,6 +950,7 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/mid-side-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },
