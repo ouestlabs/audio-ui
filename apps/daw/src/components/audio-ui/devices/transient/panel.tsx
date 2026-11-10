@@ -4,6 +4,14 @@ import { formatDb } from "@audio-ui/core/analysis";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   Plot,
   PlotGraph,
   PlotGrid,
@@ -22,10 +30,13 @@ import {
 
 const LIMIT_DB = 12;
 const TICKS = [-12, 0, 12];
-const SWITCHES = ["enabled"] as const;
+const IN_THE_TITLE_BAR = ["enabled", "model"] as const;
+const MODELS =
+  transientDevice.parameters.find((parameter) => parameter.id === "model")
+    ?.options ?? [];
 const OFF = transientDevice.parameters
   .map((parameter) => parameter.id)
-  .filter((id) => id !== "enabled");
+  .filter((id) => id !== "enabled" && id !== "model");
 
 const formatMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describeValue = (value: number) => formatDb(value);
@@ -40,8 +51,9 @@ interface TransientPanelProps {
 }
 
 /**
- * The face of the transient shaper device: a square with the sustain across
- * and the attack up, and a handle to drag to both at once. The centre is a
+ * The face of the transient shaper device: the model picked in its title bar,
+ * a square with the sustain across and the attack up, and a handle to drag
+ * to both at once. The centre is a
  * sound left as it is. The output is the knob under it. Controlled like
  * `DevicePanel`, which it uses for the knobs. Its children sit at the end of
  * the title bar.
@@ -59,6 +71,14 @@ function TransientPanel({
       ),
     [onValueChange, value]
   );
+  const pickModel = useCallback(
+    (model: string | null) => {
+      if (model) {
+        onValueChange(transientDevice.set(value, "model", model));
+      }
+    },
+    [onValueChange, value]
+  );
   return (
     <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
@@ -67,6 +87,29 @@ function TransientPanel({
         onValueChange={onValueChange}
         value={value}
       >
+        <Select
+          disabled={!value.enabled}
+          items={MODELS}
+          onValueChange={pickModel}
+          value={value.model}
+        >
+          <SelectTrigger
+            aria-label="Model"
+            className="w-25 data-[size=sm]:h-6"
+            size="sm"
+          >
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              {MODELS.map((model) => (
+                <SelectItem key={model.value} value={model.value}>
+                  {model.label}
+                </SelectItem>
+              ))}
+            </SelectGroup>
+          </SelectContent>
+        </Select>
         {children}
       </DeviceHeader>
       <div
@@ -102,7 +145,7 @@ function TransientPanel({
         <DevicePanel
           device={transientDevice}
           disabled={value.enabled ? undefined : OFF}
-          exclude={SWITCHES}
+          exclude={IN_THE_TITLE_BAR}
           onValueChange={onValueChange}
           value={value}
         />

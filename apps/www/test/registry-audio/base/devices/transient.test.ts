@@ -53,7 +53,7 @@ describe("the transient shaper device", () => {
     expect(transientDevice.kind).toBe("effect");
     expect(
       transientDevice.describe().parameters.map((parameter) => parameter.id)
-    ).toEqual(["enabled", "attackDb", "sustainDb", "outputDb"]);
+    ).toEqual(["enabled", "model", "attackDb", "sustainDb", "outputDb"]);
   });
 
   test("the numbers are the amounts in dB and the output as a gain", () => {
@@ -79,7 +79,7 @@ describe("the transient shaper device", () => {
         enabled: false,
         outputDb: 6,
       })
-    ).toEqual({ attack: 0, output: 1, sustain: 0 });
+    ).toMatchObject({ attack: 0, modelWet: 0, output: 1, sustain: 0 });
   });
 
   test("the audio waits a millisecond for the detector, on or off", () => {

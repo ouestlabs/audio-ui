@@ -167,7 +167,7 @@ function gateStream(opts = {}) {
   }
 }
 
-return { gateStream };
+return { gateStream, default: gate };
 })();
 
 const gate = (() => {

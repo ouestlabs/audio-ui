@@ -38,6 +38,7 @@
     "@audio/dynamics-gate": "catalog:",
     "@audio/dynamics-limiter": "catalog:",
     "@audio/dynamics-opto": "catalog:",
+    "@audio/dynamics-transient-shaper": "catalog:",
     "@audio/dynamics-varimu": "catalog:",
     "@audio/dynamics-vca": "catalog:",
     "@audio/effect-autowah": "catalog:",

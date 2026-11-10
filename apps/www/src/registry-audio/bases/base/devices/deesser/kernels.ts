@@ -165,7 +165,7 @@ function upwardGain(levelDb, threshold, ratio, kneeDb, rangeDb = 12) {
   return r > rangeDb ? rangeDb : r
 }
 
-return { compressorGain };
+return { compressorGain, default: compressor };
 })();
 
 const module4 = (() => {
@@ -444,7 +444,7 @@ function band(lo, hi, M, sr) {
 }
 const i0 = x => { let s = 1, t = 1; for (let k = 1; k < 32; k++) { t *= (x / 2 / k) ** 2; s += t } return s }
 
-return { deesserStream, latency };
+return { deesserStream, latency, default: deesser };
 })();
 
 const deesser = (() => {

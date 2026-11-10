@@ -1,13 +1,13 @@
 ---
 title: Transient shaper
-description: "A transient shaper device: attack and sustain, each up or down by 12 dB, a panel with one handle for both, a Web Audio engine and tools for agents."
+description: "A transient shaper device: a clean or a follower model, attack and sustain, each up or down by 12 dB, a panel with one handle for both, a Web Audio engine and tools for agents."
 component: true
 base: base
 ---
 
 <ComponentPreview styleName="base-nova" name="block-transient" />
 
-Shapes the attack and the sustain of a sound, at any level. A drum gains click or loses it, and a pluck rings longer or shorter. There is no threshold, so a quiet hit and a loud one are shaped alike. It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
+Shapes the attack and the sustain of a sound, at any level. A drum gains click or loses it, and a pluck rings longer or shorter. There is no threshold, so a quiet hit and a loud one are shaped alike. Its model is clean, or the follower of [audio.js](https://audio.js.org). It is a [device](/docs/devices): a state, a panel, an engine and tools, each its own file.
 
 ## Installation
 
@@ -16,6 +16,7 @@ Shapes the attack and the sustain of a sound, at any level. A drum gains click o
 ## Controls
 
 <DeviceControls device="transient">
+<Control id="model">How the attack is told from the sustain. Clean follows the peak against itself smoothed over 25 ms and moves the gain in decibels. Follower is `@audio/dynamics-transient-shaper`: the level against a copy of it 50 times slower, the gain moving in a line between the attack's and the sustain's. It is picked in the title bar.</Control>
 <Control id="attackDb">Turns the start of a hit up or down.</Control>
 <Control id="sustainDb">Turns what rings after the hit up or down.</Control>
 <Control id="outputDb">The level of the output.</Control>
@@ -31,8 +32,10 @@ The panel is a square with the sustain across and the attack up, and one handle 
 
 Create it, connect it and update it as for any device: see [The engine](/docs/devices#the-engine).
 
-The browser has no such node, so a detector reads the signal as an `AudioWorklet` and writes the gain to apply. It follows the peak of the signal, which jumps up and falls over 15 ms so a low note does not ripple it, and the same peak smoothed over 25 ms. They meet when a sound holds and part when a hit starts. How far the peak is over the smoothed one says how much of the moment is attack (6 dB or more is all of it), and the rest is sustain. Only the shape of the envelope counts, not its level.
+The browser has no such node. For the clean model, a detector reads the signal as an `AudioWorklet` and writes the gain to apply. It follows the peak of the signal, which jumps up and falls over 15 ms so a low note does not ripple it, and the same peak smoothed over 25 ms. They meet when a sound holds and part when a hit starts. How far the peak is over the smoothed one says how much of the moment is attack (6 dB or more is all of it), and the rest is sustain. Only the shape of the envelope counts, not its level.
 
 The audio waits a millisecond for the detector, so the gain is up when a hit arrives. That is the [latency](/docs/devices#latency) of the device.
 
 Measured in Chrome on a decaying tone, the sustain moves the tail by what the control says, to the hundredth (+9 gives +9.00 dB and -9 gives -9.00 dB at 60, 200 and 2000 Hz). The attack leaves the tail alone, and +9 on the attack raises the first peak by 8.7 dB, at a level of -6 dB or of -26 dB alike. Taking the attack down lowers the peak by 6 to 7 dB for -9, since the gain needs a moment to fall.
+
+The follower model is the processor of `@audio/dynamics-transient-shaper`'s manifest as published, in an `AudioWorklet` fed from the same delay, so the latency is the same for both models, and only while it plays: until it is ready, the clean model plays for it. Its attack and sustain change as it plays. On the same decaying tone, +9 on the attack raises the first peak by 8.9 dB at -6 dB and at -26 dB, -9 lowers it by 7.3 to 8.4 dB, and the sustain moves the tail by 8.7 to 9.0 dB, from 60 Hz to 2 kHz. A sustain turned up raises the first peak too, by about 1.5 dB: its gain blends with the attack's in a line.

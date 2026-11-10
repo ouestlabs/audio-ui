@@ -283,7 +283,7 @@ function limiterStream(opts = {}) {
   }
 }
 
-return { limiterStream, latency };
+return { limiterStream, latency, default: limiter };
 })();
 
 const limiter = (() => {

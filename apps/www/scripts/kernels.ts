@@ -335,6 +335,23 @@ export const KERNEL_SETS: readonly KernelSet[] = [
     ],
   },
   {
+    constant: "TRANSIENT_KERNELS",
+    file: "devices/transient/kernels.ts",
+    kernels: [
+      {
+        file: "transient-shaper.js",
+        internal: true,
+        name: "@audio/dynamics-transient-shaper",
+        use: "transientShaper",
+      },
+      {
+        file: "audio.js",
+        name: "@audio/dynamics-transient-shaper",
+        use: "transientShaper",
+      },
+    ],
+  },
+  {
     constant: "LIMITER_KERNELS",
     file: "devices/limiter/kernels.ts",
     kernels: [
@@ -486,8 +503,10 @@ function withoutImports(
         );
       }
       const taken = clause.trim();
-      if (DEFAULT_IMPORT.test(taken) && module.byDefault && !module.scope) {
-        if (taken !== module.byDefault) {
+      if (DEFAULT_IMPORT.test(taken) && module.byDefault) {
+        if (module.scope) {
+          aliases.push(`const { default: ${taken} } = ${module.scope};`);
+        } else if (taken !== module.byDefault) {
           aliases.push(`const ${taken} = ${module.byDefault};`);
         }
         return "";
@@ -541,19 +560,18 @@ export async function kernelFile({ constant, kernels }: KernelSet) {
       .replace(EXPORT, "");
     const names = namesOf(use);
     const scope = internal ? `module${index}` : undefined;
-    held.set(path, {
-      byDefault: DEFAULT_EXPORT.exec(source)?.[1],
-      names,
-      scope,
-    });
+    const byDefault = DEFAULT_EXPORT.exec(source)?.[1];
+    held.set(path, { byDefault, names, scope });
     const { author, license, version } = manifest;
     const by = (typeof author === "string" ? author : author?.name)?.replace(
       CONTACT,
       ""
     );
     const given = typeof use === "string" ? use : `{ ${names.join(", ")} }`;
+    // An internal module gives its default export too, to a default import.
+    const returned = byDefault ? [...names, `default: ${byDefault}`] : names;
     const code = scope
-      ? `const ${scope} = (() => {\n${body}\nreturn { ${names.join(", ")} };\n})();\n`
+      ? `const ${scope} = (() => {\n${body}\nreturn { ${returned.join(", ")} };\n})();\n`
       : `const ${given} = (() => {\n${body}\nreturn ${given};\n})();\n`;
     return {
       code,

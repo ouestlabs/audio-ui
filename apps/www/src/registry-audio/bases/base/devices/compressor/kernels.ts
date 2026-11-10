@@ -176,7 +176,7 @@ function upwardGain(levelDb, threshold, ratio, kneeDb, rangeDb = 12) {
   return r > rangeDb ? rangeDb : r
 }
 
-return { compressorGain };
+return { compressorGain, default: compressor };
 })();
 
 const module4 = (() => {
@@ -249,7 +249,7 @@ function vcaStream (opts = {}) {
 	}
 }
 
-return { vcaStream };
+return { vcaStream, default: vca };
 })();
 
 const vca = (() => {
@@ -359,7 +359,7 @@ function fetStream (opts = {}) {
 	}
 }
 
-return { fetStream };
+return { fetStream, default: fet };
 })();
 
 const fet = (() => {
@@ -473,7 +473,7 @@ function optoStream (opts = {}) {
 	}
 }
 
-return { optoStream };
+return { optoStream, default: opto };
 })();
 
 const opto = (() => {
@@ -581,7 +581,7 @@ function varimuStream (opts = {}) {
 	}
 }
 
-return { varimuStream };
+return { varimuStream, default: varimu };
 })();
 
 const varimu = (() => {
@@ -792,7 +792,7 @@ function upwardGain(levelDb, threshold, ratio, kneeDb, rangeDb = 12) {
   return r > rangeDb ? rangeDb : r
 }
 
-return { compress, compressorState };
+return { compress, compressorState, default: compressor };
 })();
 
 const compressor = (() => {

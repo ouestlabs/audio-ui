@@ -2297,25 +2297,30 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/dynamics-transient-shaper"],
     description:
-      "The transient shaper as a device: an attack and a sustain, each up or down by 12 dB, and an output gain, the numbers that go on the nodes for a state and the source of the detector worklet, with no panel and no audio in it.",
+      "The transient shaper as a device: an attack and a sustain, each up or down by 12 dB, and an output gain, its models (clean, or the follower of @audio/dynamics-transient-shaper), the numbers that go on the nodes for a state and the sources of the detector's and the follower's worklets, with no panel and no audio in it.",
     files: [
       {
         path: "devices/transient/device.ts",
         target: "components/audio-ui/devices/transient/device.ts",
         type: "registry:lib",
       },
+      {
+        path: "devices/transient/kernels.ts",
+        target: "components/audio-ui/devices/transient/kernels.ts",
+        type: "registry:lib",
+      },
     ],
     name: "transient-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/manifest-worklet"],
     type: "registry:lib",
   },
   {
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A transient shaper on the Web Audio API for a transient state: a worklet detector reads the shape of the envelope and writes the gain, and the audio waits a millisecond for it so the attack is shaped from its first sample.",
+      "A transient shaper on the Web Audio API for a transient state: a worklet detector reads the shape of the envelope and writes the gain, and the audio waits a millisecond for it so the attack is shaped from its first sample, or the follower model in a worklet fed only while it plays.",
     files: [
       {
         path: "devices/transient/engine.ts",
@@ -2331,7 +2336,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the transient shaper device: a square with the sustain across and the attack up, and a handle to drag to both at once, over the output knob.",
+      "The face of the transient shaper device: the model picked in its title bar, a square with the sustain across and the attack up, and a handle to drag to both at once, over the output knob.",
     files: [
       {
         path: "devices/transient/panel.tsx",
@@ -2344,6 +2349,7 @@ export const devices: RegistryItem[] = [
       "@audio-ui/device-panel",
       "@audio-ui/plot",
       "@audio-ui/transient-device",
+      "@shadcn/select",
     ],
     type: "registry:ui",
   },
