@@ -255,6 +255,21 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "piano"],
+    dependencies: ["@audio-ui/core", "@audio/musicxml"],
+    description:
+      "MusicXML scores to and from notes on a grid of steps: read one, plain or compressed as .mxl, with its first tempo, every part into one clip, write one for a notation app, or download one",
+    files: [
+      {
+        path: "lib/musicxml-file.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "musicxml-file",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core"],
     description:

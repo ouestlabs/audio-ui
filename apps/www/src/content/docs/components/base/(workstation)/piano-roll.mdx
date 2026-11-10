@@ -204,6 +204,26 @@ import { downloadMidiFile, MIDI_FILE_ACCEPT, readMidiFile } from "@/lib/midi-fil
 
 `readMidiFile` puts each note on the nearest step, at least one step long, drops the notes starting past `duration`, keeps the pitches between `minPitch` and `maxPitch` and returns the file's tempo, kept between `minBpm` and `maxBpm` (20 and 200 by default). It takes any `File` or `Blob`, so a drop works the same as an input. `writeMidiFile` goes the other way, at 480 ticks a quarter note, and leaves deactivated notes out; `downloadMidiFile` writes the file and saves it. A step is a sixteenth note: set `stepsPerQuarter` on both sides for another grid.
 
+### MusicXML files
+
+The `musicxml-file` library does the same for a score, the format notation apps write: it reads a `.musicxml` or `.xml` file, or one compressed as `.mxl`, onto the roll's steps and writes one back. `npx shadcn@latest add @audio-ui/musicxml-file`.
+
+```tsx
+import {
+  downloadMusicXmlFile,
+  MUSICXML_FILE_ACCEPT,
+  readMusicXmlFile,
+} from "@/lib/musicxml-file";
+
+const { bpm, notes, title } = await readMusicXmlFile(file, { duration: 64 });
+
+<Button onClick={() => downloadMusicXmlFile(notes, { bpm, filename: "clip.musicxml" })}>
+  Export as MusicXML
+</Button>
+```
+
+`readMusicXmlFile` takes the grid `readMidiFile` takes and returns the score's first tempo and its title. It reads every part into the one clip, in the beats they were written in, through changes of tempo: chords, ties across the bar line, a second voice. It drops the grace notes, which take no time, plays the repeats once, as written, and reads a transposing instrument as written, not as it sounds. The score is parsed by `@audio/musicxml`. `writeMusicXmlFile` writes the notes on their grid, so a notation app shows them where they are.
+
 ### Driving it from an agent
 
 `createPianoRollTools` gives a language model the tools to write on the roll from what a user asks ("a walking bassline in C minor", "up an octave"): `setNotes`, `addNotes`, `removeNotes`, `transpose`, `clear` and `setTempo`, each a description, a zod schema and an `apply` that returns the next state. `npx shadcn@latest add @audio-ui/piano-roll-tools`.

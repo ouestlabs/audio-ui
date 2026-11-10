@@ -90,6 +90,11 @@ import {
   readMidiFile,
 } from "@/registry-audio/bases/base/lib/midi-file";
 import {
+  downloadMusicXmlFile,
+  MUSICXML_FILE_ACCEPT,
+  readMusicXmlFile,
+} from "@/registry-audio/bases/base/lib/musicxml-file";
+import {
   applyNoteEdit,
   canApplyNoteEdit,
   type NoteEdit,
@@ -103,6 +108,9 @@ import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** C2 to C6: more than fits, so the roll scrolls and opens on middle C. */
 const MIN_PITCH = 36;
+/** The files the roll imports: a MIDI file, or a MusicXML score. */
+const FILE_ACCEPT = `${MIDI_FILE_ACCEPT},${MUSICXML_FILE_ACCEPT}`;
+const MIDI_FILE_NAME = /\.midi?$/i;
 const MAX_PITCH = 84;
 const DEFAULT_VOLUME = 0.7;
 /** The clip is four bars long, in whatever signature it is in. */
@@ -557,13 +565,18 @@ export default function BlockPianoRoll() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isDraggingFile, setIsDraggingFile] = useState(false);
 
-  const importMidiFile = useCallback(
+  const importFile = useCallback(
     async (file: File) => {
-      const imported = await readMidiFile(file, {
+      const grid = {
         duration: meter.duration,
         maxPitch: MAX_PITCH,
         minPitch: MIN_PITCH,
-      });
+      };
+      // A MIDI file by its name or its type; anything else is read as a score.
+      const imported =
+        MIDI_FILE_NAME.test(file.name) || file.type.includes("midi")
+          ? await readMidiFile(file, grid)
+          : await readMusicXmlFile(file, grid);
       stop();
       history.edit(imported.notes);
       setTempo((current) => ({ ...current, bpm: imported.bpm }));
@@ -580,10 +593,10 @@ export default function BlockPianoRoll() {
       const file = e.target.files?.[0];
       e.target.value = "";
       if (file) {
-        importMidiFile(file);
+        importFile(file);
       }
     },
-    [importMidiFile]
+    [importFile]
   );
 
   const handleDragOver = useCallback((e: DragEvent<HTMLDivElement>) => {
@@ -609,14 +622,22 @@ export default function BlockPianoRoll() {
       }
       e.preventDefault();
       setIsDraggingFile(false);
-      importMidiFile(file);
+      importFile(file);
     },
-    [importMidiFile]
+    [importFile]
   );
 
   const handleExport = useCallback(
     () =>
       downloadMidiFile(notes, { bpm: tempo.bpm, filename: "piano-roll.mid" }),
+    [notes, tempo.bpm]
+  );
+  const handleExportMusicXml = useCallback(
+    () =>
+      downloadMusicXmlFile(notes, {
+        bpm: tempo.bpm,
+        filename: "piano-roll.musicxml",
+      }),
     [notes, tempo.bpm]
   );
   const clearNotes = useCallback(() => history.edit([]), [history]);
@@ -634,7 +655,7 @@ export default function BlockPianoRoll() {
       role="group"
     >
       <input
-        accept={MIDI_FILE_ACCEPT}
+        accept={FILE_ACCEPT}
         className="sr-only"
         onChange={handleFileInputChange}
         ref={fileInputRef}
@@ -645,7 +666,7 @@ export default function BlockPianoRoll() {
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 z-10 flex items-center justify-center rounded-[inherit] border-2 border-primary border-dashed bg-background/80 font-medium text-sm"
         >
-          Drop a MIDI file to import
+          Drop a MIDI or MusicXML file to import
         </div>
       ) : null}
       {/* Narrow, the tools go under the transport rather than over its position. */}
@@ -757,13 +778,19 @@ export default function BlockPianoRoll() {
                 <DropdownMenuSeparator />
                 <DropdownMenuGroup>
                   <DropdownMenuItem onClick={handleImport}>
-                    Import a MIDI file
+                    Import a MIDI or MusicXML file
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     disabled={notes.length === 0}
                     onClick={handleExport}
                   >
                     Export as a MIDI file
+                  </DropdownMenuItem>
+                  <DropdownMenuItem
+                    disabled={notes.length === 0}
+                    onClick={handleExportMusicXml}
+                  >
+                    Export as MusicXML
                   </DropdownMenuItem>
                   <DropdownMenuItem
                     disabled={notes.length === 0}

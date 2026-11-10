@@ -488,6 +488,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/note-find",
       "@audio-ui/note-edit-menu",
       "@audio-ui/midi-file",
+      "@audio-ui/musicxml-file",
       "@audio-ui/use-master-bus",
       "@audio-ui/use-midi-input",
       "@audio-ui/use-synth-voices",
