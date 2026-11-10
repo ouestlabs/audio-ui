@@ -47,6 +47,10 @@
     "./pad": {
       "types": "./dist/pad/index.d.ts",
       "import": "./dist/pad.js"
+    },
+    "./piano": {
+      "types": "./dist/piano/index.d.ts",
+      "import": "./dist/piano.js"
     }
   },
   "module": "dist/index.js",

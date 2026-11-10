@@ -248,6 +248,28 @@ A strike fires `padon`, with `event.detail` `{ value, velocity, reason }`: `prev
 | --- | --- |
 | `<audio-ui-pad-item>` | One pad, a button named by its content. `value` names it in the events; pads sharing a `choke-group` stop each other; `disabled` silences one. How hard it was last struck is its `--pad-velocity` CSS variable, from 0 to 1 |
 
+### Piano
+
+`<audio-ui-piano>` is a keyboard to play, a group: every key sounds while pressed, by pointer or with Enter or Space. Dragging across the keys glides from one to the next, and each pointer holds its own key, so chords can be played on a touch screen. The keys are one tab stop: the arrows walk them, Shift by an octave.
+
+<TypeTable>
+<TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive: 60 is middle C.</TypeRow>
+<TypeRow name={"max-pitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
+<TypeRow name={"pitches"} type={"string"}>Only these pitches get keys, separated by spaces. The `pitches` property takes an array.</TypeRow>
+<TypeRow name={"active-notes"} type={"string"}>Pitches lit from elsewhere, such as a MIDI input or a sequencer. The `activeNotes` property takes an array.</TypeRow>
+<TypeRow name={"layout"} type={"\"keyboard\" | \"even\""} default={"\"keyboard\""}>How the keys share the length: like a piano, or one equal share each, as a piano roll's rows.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}>Vertical puts the low end at the bottom.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+A key that starts sounding fires `noteon`, with `event.detail` `{ pitch, velocity, reason }`: `preventDefault()` keeps it silent. One that stops fires `noteoff`, with `{ pitch, reason }`.
+
+| Part | What it is |
+| --- | --- |
+| `<audio-ui-piano-keys>` | Makes an `<audio-ui-piano-key>` for each pitch, lowest first, each holding what its `<template>` holds. It takes no room of its own |
+| `<audio-ui-piano-key>` | One key, a button placed for its `pitch` and named after it ("C4"). `data-color` is `black` or `white` |
+| `<audio-ui-piano-key-label>` | The name of the key it sits in, hidden from assistive technology |
+
 ### Data attributes
 
 Every part carries the state of its control:
@@ -257,5 +279,5 @@ Every part carries the state of its control:
 <TypeRow name={"data-dragging"}>Present while a pointer drags the control.</TypeRow>
 <TypeRow name={"data-drag-mode"}>On a knob's parts, its `drag-mode`. Style the cursor from it.</TypeRow>
 <TypeRow name={"data-orientation"}>On a fader's parts, `horizontal` or `vertical`.</TypeRow>
-<TypeRow name={"data-active"}>On a pad, while it sounds.</TypeRow>
+<TypeRow name={"data-active"}>On a pad or a piano key, while it sounds.</TypeRow>
 </TypeTable>
