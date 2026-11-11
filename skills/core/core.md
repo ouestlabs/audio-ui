@@ -38,8 +38,9 @@ npm install @audio-ui/elements
 </script>
 ```
 
-- `input` fires on every change with `event.detail` `{ value, reason }`; `preventDefault()` rejects the change. `change` fires once when an interaction ends. The `value` property reads and sets the value.
-- Vue: `compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")` in the Vue plugin's `template` options, then `:value` and `@input="x = $event.detail.value"`. Svelte 5: `value={x}` and `oninput={(event) => (x = event.detail.value)}`.
+- `input` fires on every change with `event.detail` `{ value, reason }`; `preventDefault()` rejects the change. `change` fires once when an interaction ends. The `value` property reads and sets the value; while `input` is dispatched it reads the value proposed, as a native input's does.
+- Vue: `compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")` in the Vue plugin's `template` options, and `import type {} from "@audio-ui/elements/vue"` once for typed templates (strict templates included). Then `v-model="x"`, or `:value` and `@input` to refuse a value with `preventDefault()`. https://www.audio-ui.dev/docs/elements/vue
+- Svelte 5: `import type {} from "@audio-ui/elements/svelte"` once for typed templates, then `value={x}` and `oninput={(event) => (x = event.detail.value)}`: Svelte binds `bind:value` on native inputs only. https://www.audio-ui.dev/docs/elements/svelte
 - The elements apply only display, positioning and `touch-action`, in zero-specificity rules. Style parts by tag and by `data-*` state attributes (`data-dragging`, `data-disabled`, `data-orientation`). API reference: https://www.audio-ui.dev/docs/elements
 
 Each primitive registers from its own entry point, `@audio-ui/elements/<primitive>`. Parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`, distinct from the root's `input` and `change`. Use the controllers below directly only for interfaces the elements do not cover.
@@ -430,6 +431,8 @@ Give every section the layout the skins expect: `<section class="section">` with
 
 ## Vue
 
+For the primitives, use the elements with `v-model` above. This binding is for a control of your own on a controller.
+
 ```ts
 import { createKnobController, type KnobOptions } from "@audio-ui/core/knob";
 import { onScopeDispose, shallowRef, toValue, watchEffect, type MaybeRefOrGetter } from "vue";
@@ -453,6 +456,8 @@ export function useKnob(options: MaybeRefOrGetter<KnobOptions>) {
 Bind `snapshot.value.angle`, `.formatted` and the rest in the template; call `knob.press` (prepared as in the plain DOM `onPointerDown`), `knob.keyDown` and `knob.type` from `@pointerdown`, `@keydown` and `@input`, and `knob.attachWheel` in `onMounted`. Use `shallowRef`: a deep `reactive` copy of the snapshot breaks its caching.
 
 ## Svelte 5
+
+For the primitives, use the elements with `value` and `oninput` above. This binding is for a control of your own on a controller.
 
 ```ts
 // knob.svelte.ts
