@@ -4,6 +4,7 @@ import {
   type ExpanderState,
   expanderSettings,
 } from "@/registry-audio/bases/base/devices/expander/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.01;
 /** How long after the expander fades out its input is taken away, in ms: the fade is over by then. */
@@ -20,30 +21,6 @@ export interface ExpanderEngine extends DeviceBinding<ExpanderState> {
   readonly ready: Promise<boolean>;
   /** How many dB it is taking off right now, 0 or negative. Read it per frame. */
   readonly reduction: number;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the expander into a context once. `false` when the context cannot run worklets. */
-function loadExpander(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([EXPANDER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -102,7 +79,7 @@ export function createExpanderEngine(
     }
   };
 
-  const ready = loadExpander(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, EXPANDER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

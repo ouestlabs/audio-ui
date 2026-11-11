@@ -4,6 +4,7 @@ import {
   type DuckerState,
   duckerSettings,
 } from "@/registry-audio/bases/base/devices/ducker/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.01;
 /** How long after the ducker fades out its inputs are taken away, in ms: the fade is over by then. */
@@ -22,30 +23,6 @@ export interface DuckerEngine extends SidechainBinding<DuckerState, AudioNode> {
   readonly reduction: number;
   /** Connect the key here: the sound is turned down while it plays. It is only listened to, never heard. With nothing connected, the ducker follows the sound itself. */
   readonly sidechain: AudioNode;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the ducker into a context once. `false` when the context cannot run worklets. */
-function loadDucker(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([DUCKER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -109,7 +86,7 @@ export function createDuckerEngine(
     }
   };
 
-  const ready = loadDucker(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, DUCKER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

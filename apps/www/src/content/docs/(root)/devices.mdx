@@ -143,7 +143,7 @@ Some engines add to this:
 | `reduction` | Compressor, limiter, de-esser | The gain being taken off, in dB. Read it each frame. |
 | `noteOn`, `noteOff` | Instruments | Start and release a note. |
 
-A worklet is loaded from a blob, so there is no file to serve. Until `ready` resolves, a device that needs one passes the signal unchanged. In a context with no worklets it never resolves to `true`.
+A worklet is loaded from a blob, so there is no file to serve. Until `ready` resolves, a device that needs one passes the signal unchanged. In a context with no worklets it never resolves to `true`. Every engine loads its worklet with `loadWorklet(ctx, source)` from `@/lib/audio-worklet`, once per context, and an engine of your own can too: it resolves to `false`, never rejects, where the worklet cannot run.
 
 ## Sidechain
 

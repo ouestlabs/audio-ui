@@ -5,6 +5,7 @@ import {
   type StutterState,
   stutterSettings,
 } from "@/registry-audio/bases/base/devices/stutter/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.01;
 
@@ -17,30 +18,6 @@ export interface StutterEngine {
   /** Resolves once the stutter is in the graph. Until then the sound passes clean. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   update: (state: StutterState, context?: DeviceContext) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the stutter into a context once. `false` when the context cannot run worklets. */
-function loadStutter(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([STUTTER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -90,7 +67,7 @@ export function createStutterEngine(
     (node.parameters.get("slice") as AudioParam).value = settings.slice;
   };
 
-  const ready = loadStutter(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, STUTTER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

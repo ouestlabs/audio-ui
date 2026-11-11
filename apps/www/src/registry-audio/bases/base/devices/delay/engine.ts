@@ -6,6 +6,7 @@ import {
   delaySettings,
   MAX_DELAY_SECONDS,
 } from "@/registry-audio/bases/base/devices/delay/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;
@@ -23,30 +24,6 @@ export interface DelayEngine {
   /** Resolves once the ping-pong, multitap and grain modes are in the graph. Until then they play the echo. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   update: (state: DelayState, context?: DeviceContext) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the worklet's modes into a context once. `false` when the context cannot run worklets. */
-function loadModes(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([DELAY_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -160,7 +137,7 @@ export function createDelayEngine(
   echo.gain.value = 1;
   modesLevel.gain.value = 0;
 
-  const ready = loadModes(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, DELAY_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

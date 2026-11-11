@@ -4,6 +4,7 @@ import {
   type TransientState,
   transientSettings,
 } from "@/registry-audio/bases/base/devices/transient/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.01;
 
@@ -14,30 +15,6 @@ export interface TransientEngine extends DeviceBinding<TransientState> {
   readonly output: AudioNode;
   /** Resolves once the shaper is in the graph. Until then the signal passes unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the shaper into a context once. `false` when the context cannot run worklets. */
-function loadShaper(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([TRANSIENT_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -80,7 +57,7 @@ export function createTransientEngine(
     master.gain.setTargetAtTime(settings.output, ctx.currentTime, RAMP_SECONDS);
   };
   let latest = initial;
-  const ready = loadShaper(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, TRANSIENT_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

@@ -3,6 +3,7 @@ import {
   type BassEnhancerState,
   bassEnhancerSettings,
 } from "@/registry-audio/bases/base/devices/bass-enhancer/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.02;
 
@@ -15,30 +16,6 @@ export interface BassEnhancerEngine {
   /** Resolves once the bass enhancer is in the graph. Until then the sound passes clean. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   update: (state: BassEnhancerState) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the bass enhancer into a context once. `false` when the context cannot run worklets. */
-function loadBassEnhancer(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([BASS_ENHANCER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -83,7 +60,7 @@ export function createBassEnhancerEngine(
     }
   };
 
-  const ready = loadBassEnhancer(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, BASS_ENHANCER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

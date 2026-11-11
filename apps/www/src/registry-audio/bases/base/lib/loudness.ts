@@ -1,3 +1,4 @@
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 /**
  * How loud a sound is, the way streaming services and broadcasters measure
  * it (ITU-R BS.1770): its integrated loudness in LUFS and its true peak in
@@ -197,29 +198,6 @@ export const LOUDNESS_WORKLET = `class LoudnessMeter extends AudioWorkletProcess
 }
 registerProcessor("${PROCESSOR}", LoudnessMeter);`;
 
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-function loadMeter(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([LOUDNESS_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
-}
-
 /** A live loudness meter on a context, as `createLoudnessMeter` makes it. */
 export interface LoudnessMeter {
   /** Starts the integrated loudness over, from the next block. */
@@ -238,7 +216,7 @@ export async function createLoudnessMeter(
   ctx: BaseAudioContext,
   onLoudness: (loudness: LiveLoudness) => void
 ): Promise<LoudnessMeter | null> {
-  if (!(await loadMeter(ctx))) {
+  if (!(await loadWorklet(ctx, LOUDNESS_WORKLET))) {
     return null;
   }
   const node = new AudioWorkletNode(ctx, PROCESSOR, {

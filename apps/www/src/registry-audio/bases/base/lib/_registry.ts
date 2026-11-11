@@ -16,6 +16,21 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "web-audio"],
+    dependencies: [],
+    description:
+      "Loads the source of an AudioWorklet processor into a context, from a blob and once per context: every device engine and lib that runs a worklet loads it this way, and gets false where worklets cannot run.",
+    files: [
+      {
+        path: "lib/audio-worklet.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "audio-worklet",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio", "synth", "piano", "envelope"],
     dependencies: [],
     description:
@@ -82,7 +97,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "loudness",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/audio-worklet"],
     type: "registry:lib",
   },
   {
@@ -326,6 +341,21 @@ const items: RegistryItem[] = [
     type: "registry:lib",
   },
   {
+    categories: ["lib", "audio", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "Chords on an instrument whose engine plays one voice: a note takes the voice that holds it, else a free one, else the one held longest, whose note is let go first. No sound and no engine of its own: it plays the engines it is given.",
+    files: [
+      {
+        path: "lib/polyphony.ts",
+        type: "registry:lib",
+      },
+    ],
+    name: "polyphony",
+    registryDependencies: [],
+    type: "registry:lib",
+  },
+  {
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core", "@audio/note"],
     description:
@@ -337,7 +367,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "voice-pool",
-    registryDependencies: ["@audio-ui/device-library"],
+    registryDependencies: ["@audio-ui/device-library", "@audio-ui/polyphony"],
     type: "registry:lib",
   },
   {
@@ -402,7 +432,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "recording",
-    registryDependencies: ["@audio-ui/arrangement"],
+    registryDependencies: ["@audio-ui/audio-worklet", "@audio-ui/arrangement"],
     type: "registry:lib",
   },
   {
@@ -417,7 +447,7 @@ const items: RegistryItem[] = [
       },
     ],
     name: "clip-player",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/audio-worklet"],
     type: "registry:lib",
   },
   {

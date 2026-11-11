@@ -84,6 +84,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "key-detector",
+    registryDependencies: ["@audio-ui/audio-worklet"],
     type: "registry:lib",
   },
   {
@@ -224,7 +225,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "chorus-engine",
-    registryDependencies: ["@audio-ui/chorus-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/chorus-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -288,7 +292,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "compressor-engine",
-    registryDependencies: ["@audio-ui/compressor-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/compressor-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -346,7 +353,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "deesser-engine",
-    registryDependencies: ["@audio-ui/deesser-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/deesser-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -409,7 +419,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "delay-engine",
-    registryDependencies: ["@audio-ui/delay-device"],
+    registryDependencies: ["@audio-ui/audio-worklet", "@audio-ui/delay-device"],
     type: "registry:lib",
   },
   {
@@ -688,7 +698,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "filter-engine",
-    registryDependencies: ["@audio-ui/filter-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/filter-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -799,7 +812,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "gate-engine",
-    registryDependencies: ["@audio-ui/gate-device"],
+    registryDependencies: ["@audio-ui/audio-worklet", "@audio-ui/gate-device"],
     type: "registry:lib",
   },
   {
@@ -857,7 +870,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "expander-engine",
-    registryDependencies: ["@audio-ui/expander-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/expander-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -919,7 +935,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "ducker-engine",
-    registryDependencies: ["@audio-ui/ducker-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/ducker-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -976,7 +995,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "compander-engine",
-    registryDependencies: ["@audio-ui/compander-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/compander-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -1033,7 +1055,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "unlimiter-engine",
-    registryDependencies: ["@audio-ui/unlimiter-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/unlimiter-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -1145,7 +1170,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "limiter-engine",
-    registryDependencies: ["@audio-ui/limiter-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/limiter-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -1203,7 +1231,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "mid-side-engine",
-    registryDependencies: ["@audio-ui/mid-side-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/mid-side-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -1485,7 +1516,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "phaser-engine",
-    registryDependencies: ["@audio-ui/phaser-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/phaser-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -1651,7 +1685,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "lofi-engine",
-    registryDependencies: ["@audio-ui/lofi-device"],
+    registryDependencies: ["@audio-ui/audio-worklet", "@audio-ui/lofi-device"],
     type: "registry:lib",
   },
   {
@@ -1761,7 +1795,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "tilt-eq-engine",
-    registryDependencies: ["@audio-ui/tilt-eq-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/tilt-eq-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -1822,7 +1859,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "wah-engine",
-    registryDependencies: ["@audio-ui/wah-device"],
+    registryDependencies: ["@audio-ui/audio-worklet", "@audio-ui/wah-device"],
     type: "registry:lib",
   },
   {
@@ -1884,7 +1921,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "frequency-shifter-engine",
-    registryDependencies: ["@audio-ui/frequency-shifter-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/frequency-shifter-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -1942,7 +1982,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "exciter-engine",
-    registryDependencies: ["@audio-ui/exciter-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/exciter-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -1999,7 +2042,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "bass-enhancer-engine",
-    registryDependencies: ["@audio-ui/bass-enhancer-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/bass-enhancer-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -2056,7 +2102,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "rotary-engine",
-    registryDependencies: ["@audio-ui/rotary-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/rotary-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -2113,7 +2162,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "stutter-engine",
-    registryDependencies: ["@audio-ui/stutter-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/stutter-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -2171,7 +2223,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "binaural-panner-engine",
-    registryDependencies: ["@audio-ui/binaural-panner-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/binaural-panner-device",
+    ],
     type: "registry:lib",
   },
   {
@@ -2232,7 +2287,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "redux-engine",
-    registryDependencies: ["@audio-ui/redux-device"],
+    registryDependencies: ["@audio-ui/audio-worklet", "@audio-ui/redux-device"],
     type: "registry:lib",
   },
   {
@@ -2564,7 +2619,10 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "transient-engine",
-    registryDependencies: ["@audio-ui/transient-device"],
+    registryDependencies: [
+      "@audio-ui/audio-worklet",
+      "@audio-ui/transient-device",
+    ],
     type: "registry:lib",
   },
   {

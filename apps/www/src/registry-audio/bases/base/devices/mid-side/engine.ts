@@ -5,6 +5,7 @@ import {
   type MidSideState,
   midSideSettings,
 } from "@/registry-audio/bases/base/devices/mid-side/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.015;
 const HALF = 0.5;
@@ -20,30 +21,6 @@ export interface MidSideEngine extends DeviceBinding<MidSideState> {
   readonly output: AudioNode;
   /** Resolves once the detune is in the graph. Until then it passes the sound as it is. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the detune into a context once. `false` when the context cannot run worklets. */
-function loadDetune(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([DETUNE_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -171,7 +148,7 @@ export function createMidSideEngine(
     param.value = value;
   });
 
-  const ready = loadDetune(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, DETUNE_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

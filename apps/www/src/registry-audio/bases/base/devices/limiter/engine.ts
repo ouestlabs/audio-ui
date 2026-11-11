@@ -4,32 +4,9 @@ import {
   type LimiterState,
   limiterSettings,
 } from "@/registry-audio/bases/base/devices/limiter/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.01;
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the limiter into a context once. `false` when the context cannot run worklets. */
-function loadLimiter(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([LIMITER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
-}
 
 export interface LimiterEngine {
   dispose: () => void;
@@ -92,7 +69,7 @@ export function createLimiterEngine(
     }
   };
 
-  const ready = loadLimiter(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, LIMITER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

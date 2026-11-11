@@ -6,6 +6,7 @@ import {
   type PhaserState,
   phaserSettings,
 } from "@/registry-audio/bases/base/devices/phaser/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.03;
 /** How long after the classic phaser fades out its input is taken away, in ms: the fade is over by then. */
@@ -20,30 +21,6 @@ export interface PhaserEngine {
   /** Resolves once the classic phaser is in the graph. Until then it plays the phaser. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   update: (state: PhaserState, context?: DeviceContext) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the classic phaser into a context once. `false` when the context cannot run worklets. */
-function loadClassic(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([PHASER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -170,7 +147,7 @@ export function createPhaserEngine(
   });
   oscillator.start();
 
-  const ready = loadClassic(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, PHASER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

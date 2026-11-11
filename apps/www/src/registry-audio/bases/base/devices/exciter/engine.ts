@@ -3,6 +3,7 @@ import {
   type ExciterState,
   exciterSettings,
 } from "@/registry-audio/bases/base/devices/exciter/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.02;
 
@@ -15,30 +16,6 @@ export interface ExciterEngine {
   /** Resolves once the exciter is in the graph. Until then the sound passes clean. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   update: (state: ExciterState) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the exciter into a context once. `false` when the context cannot run worklets. */
-function loadExciter(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([EXCITER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -83,7 +60,7 @@ export function createExciterEngine(
     }
   };
 
-  const ready = loadExciter(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, EXCITER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

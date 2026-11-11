@@ -21,10 +21,11 @@ How to get sound out of audio/ui controls and show it live, for AI agents and LL
    - 1.1 [Create the AudioContext lazily, resume it in a gesture](#11-create-the-audiocontext-lazily-resume-it-in-a-gesture)
    - 1.2 [Ramp parameters, never assign them](#12-ramp-parameters-never-assign-them)
    - 1.3 [Schedule on the audio clock](#13-schedule-on-the-audio-clock)
-   - 1.4 [dB on the control, linear gain on the node](#14-db-on-the-control-linear-gain-on-the-node)
-   - 1.5 [Leave headroom below full scale](#15-leave-headroom-below-full-scale)
-   - 1.6 [Play the notes the way the roll shows them](#16-play-the-notes-the-way-the-roll-shows-them)
-   - 1.7 [Clean up what you create](#17-clean-up-what-you-create)
+   - 1.4 [Chords from an instrument that plays one voice](#14-chords-from-an-instrument-that-plays-one-voice)
+   - 1.5 [dB on the control, linear gain on the node](#15-db-on-the-control-linear-gain-on-the-node)
+   - 1.6 [Leave headroom below full scale](#16-leave-headroom-below-full-scale)
+   - 1.7 [Play the notes the way the roll shows them](#17-play-the-notes-the-way-the-roll-shows-them)
+   - 1.8 [Clean up what you create](#18-clean-up-what-you-create)
 2. [Live Data](#2-live-data): **CRITICAL**
    - 2.1 [Signals go through a source, not state](#21-signals-go-through-a-source-not-state)
    - 2.2 [Detect pitch with a period search, not the loudest FFT bin](#22-detect-pitch-with-a-period-search-not-the-loudest-fft-bin)
@@ -173,7 +174,56 @@ function kick(ctx: AudioContext, out: AudioNode, time: number, decay = 0.4) {
 
 A snare is band-passed noise plus a short triangle click, a hat is high-passed noise with a very short decay. The registry's `drum-synthesis` lib is this same code with `triggerKick`, `triggerSnare` and `triggerHihat`, and it has no imports: copy `https://www.audio-ui.dev/r/base-nova/drum-synthesis.json` by hand if you do not use shadcn.
 
-### 1.4 dB on the control, linear gain on the node
+### 1.4 Chords from an instrument that plays one voice
+
+**Impact: HIGH (every held note sounds, and a note past the last voice cuts the oldest one cleanly)**
+
+The engine of an instrument device plays one note at a time: a second `noteOn` moves the held note to the new pitch. One engine played by a keyboard turns every chord into its last note. Making an engine per note on demand leaks nodes and starts each one late, and a pool written by hand tends to cut the newest note instead of the oldest, or never lets the cut note go, so it sticks when its key comes up.
+
+**Incorrect (one engine for every note, or a voice made per key):**
+
+```tsx
+const engine = createPolySynthEngine(ctx, state);
+engine.output.connect(output);
+
+const midi = useMidiInput({
+  onNoteOff: () => engine.noteOff(), // one key up silences the whole chord
+  onNoteOn: (pitch, velocity) =>
+    engine.noteOn({ frequency: midiToHz(pitch), velocity }), // the chord glides to its last note
+});
+```
+
+**Correct (`use-polyphony`: one engine per voice, a note per voice by its id):**
+
+```bash
+npx shadcn@latest add @audio-ui/use-polyphony @audio-ui/poly-synth
+```
+
+```tsx
+import { midiToHz } from "@audio/note";
+import { createPolySynthEngine } from "@/components/audio-ui/devices/poly-synth/engine";
+import { useMasterBus } from "@/hooks/use-master-bus";
+import { useMidiInput } from "@/hooks/use-midi-input";
+import { usePolyphony } from "@/hooks/use-polyphony";
+
+const output = useMasterBus(1);
+const { noteOff, noteOn } = usePolyphony({
+  create: createPolySynthEngine,
+  destination: output,
+  state, // every voice follows it
+  voices: 8, // a ninth note takes the voice held longest
+});
+
+const midi = useMidiInput({
+  onNoteOff: (pitch) => noteOff(`midi-${pitch}`),
+  onNoteOn: (pitch, velocity) =>
+    noteOn({ frequency: midiToHz(pitch), velocity }, `midi-${pitch}`),
+});
+```
+
+A note is named by an id its note off gives again, so a key up releases its own note and nothing else. The voices are made once the destination is there and disposed on unmount. To schedule notes ahead on the audio clock, `createPolyphony(engines)` from `@/lib/polyphony` takes engines you made and connected: `noteOn(note, id, at)`, `noteOff(id, at)`, and `release(at)` on a stop.
+
+### 1.5 dB on the control, linear gain on the node
 
 **Impact: HIGH (correct and safe output levels)**
 
@@ -194,7 +244,7 @@ const toGain = (db: number) => (db <= SILENCE_DB ? 0 : 10 ** (db / 20));
 gain.gain.setTargetAtTime(toGain(db), ctx.currentTime, 0.01);
 ```
 
-### 1.5 Leave headroom below full scale
+### 1.6 Leave headroom below full scale
 
 **Impact: HIGH (no clipping, no sudden loud output)**
 
@@ -220,7 +270,7 @@ voice.gain.setTargetAtTime(VOICE_GAIN, ctx.currentTime, 0.01);
 
 Work the worst case out: voices × voice gain × resonance boost × master gain should stay below 1. A `DynamicsCompressorNode` before `ctx.destination` is a safety net for what you didn't foresee, not a replacement for sizing the gains.
 
-### 1.6 Play the notes the way the roll shows them
+### 1.7 Play the notes the way the roll shows them
 
 **Impact: HIGH (muted notes stay silent, chance and deviation are heard)**
 
@@ -258,7 +308,7 @@ onStep: (step, time) => {
 
 `deviation` is signed: positive strays up from the velocity, negative down. Leave muted notes out of a MIDI export too. `block-piano-roll` plays notes this way.
 
-### 1.7 Clean up what you create
+### 1.8 Clean up what you create
 
 **Impact: MEDIUM (no orphan oscillators or loops after unmount)**
 

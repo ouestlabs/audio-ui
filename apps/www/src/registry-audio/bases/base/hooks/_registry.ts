@@ -234,6 +234,21 @@ export const hooks: RegistryItem[] = [
     type: "registry:hook",
   },
   {
+    categories: ["audio", "synth"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "An instrument whose engine plays one voice, played as chords: as many engines as notes sound at once, made into a destination, each following the state, every note on a voice of its own.",
+    files: [
+      {
+        path: "hooks/use-polyphony.ts",
+        type: "registry:hook",
+      },
+    ],
+    name: "use-polyphony",
+    registryDependencies: ["@audio-ui/polyphony"],
+    type: "registry:hook",
+  },
+  {
     categories: ["audio", "synth", "piano", "envelope"],
     description:
       "Polyphonic synth voices on the Web Audio API: start and release notes with an envelope, a velocity and a pitch bend.",

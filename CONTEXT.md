@@ -36,6 +36,10 @@ _Avoid_: styled component, wrapper
 The seam between musical time (tempo, steps, loop region, seek) and Web Audio scheduling. A drift-free look-ahead clock: it advances a stepping cursor against `AudioContext.currentTime` and emits `(step, audioTime)` boundaries so a caller schedules synthesis sample-accurately, and it exposes a continuous playhead position, but it knows nothing about *what* is played (drum hits, note-pairs). It owns start, stop and seek, plays inside the loop region it is given, and fires a reset on every re-anchor so the caller can flush its scheduled-ahead sound. `use-transport-clock` is a thin adapter over its pure, framework-agnostic core in `@audio-ui/core/time`.
 _Avoid_: scheduler (bare: say the core or the clock), timer, metronome
 
+**Voice**:
+One note an instrument sounds at a time. The engine of an instrument Device is one voice; a host plays chords by giving each note an engine of its own (`createPolyphony`), and a note past the last voice takes the one held longest.
+_Avoid_: channel (a mixer's), oscillator (one part of a voice)
+
 **Arrangement**:
 Everything laid out in time, as one document a host stores and saves: the tracks with their mixes and automation, the clips on them, the tempo, the time signatures, the locators, the loop and its own length. What is selected or copied is not part of it.
 _Avoid_: project (the host's whole saved file), song

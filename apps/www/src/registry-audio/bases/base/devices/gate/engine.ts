@@ -4,6 +4,7 @@ import {
   type GateState,
   gateSettings,
 } from "@/registry-audio/bases/base/devices/gate/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.01;
 
@@ -14,30 +15,6 @@ export interface GateEngine extends DeviceBinding<GateState> {
   readonly output: AudioNode;
   /** Resolves once the gate is in the graph. Until then the gate stays open. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the gate into a context once. `false` when the context cannot run worklets. */
-function loadGate(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([GATE_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -77,7 +54,7 @@ export function createGateEngine(
     }
   };
 
-  const ready = loadGate(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, GATE_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

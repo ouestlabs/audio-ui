@@ -84,6 +84,20 @@ registry-audio/bases/base/
 
 Each of `audio/`, `devices/`, `components/`, `hooks/`, `lib/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/base/`. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js kernels a device runs in an `AudioWorklet` are listed in `apps/www/scripts/kernels.ts` and written by `bun run kernels:build`; `test/kernels.test.ts` fails when a copy no longer matches its package.
 
+Shared audio glue has one home each. Use it rather than writing a copy into a block or an engine:
+
+| Concern | Module |
+| --- | --- |
+| The page's `AudioContext`, resumed in the gesture that starts sound | `lib/web-audio` |
+| A screen's output: one gain and a safety limiter | `hooks/use-master-bus` |
+| Loading a worklet's source into a context, once per context | `lib/audio-worklet` (`loadWorklet`) |
+| Chords on an instrument whose engine plays one voice | `hooks/use-polyphony` over `lib/polyphony`; `lib/voice-pool` for a device of the library |
+| Every device with its engine, by stable id | `lib/device-library` |
+| Steps and the playhead on the audio clock | `hooks/use-transport-clock` over `@audio-ui/core/time` |
+| Editing an arrangement, with undo | `lib/arrangement-state` (`apply(state, command)`), `hooks/use-arrangement` |
+
+State that changes over time keeps one source of truth: an engine object or a pure reducer, with React state only mirroring what the screen shows. Values that move every frame (playheads, meters, spectra) go through a source (`createSource`), never `setState`. An engine that loads a worklet exposes `ready` and checks it was not disposed before it builds on the load.
+
 `registry-audio/bases/{components,registry,seo}.json` are **generated** by `registry:build` from the `_registry.ts` files and `registry-audio/bases/categories.ts`: never edit them by hand. A new category goes in `categories.ts`; a category with zero items fails the build. Item tags not listed there (`ui`, `grid`) are free-form search tags.
 
 ### The site's own code (`apps/www/src/components/`, `lib/`)

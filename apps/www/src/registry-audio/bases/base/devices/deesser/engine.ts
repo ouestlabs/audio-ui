@@ -4,32 +4,9 @@ import {
   type DeesserState,
   deesserSettings,
 } from "@/registry-audio/bases/base/devices/deesser/device";
+import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 const RAMP_SECONDS = 0.01;
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the de-esser into a context once. `false` when the context cannot run worklets. */
-function loadDeesser(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([DEESSER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
-}
 
 export interface DeesserEngine extends DeviceBinding<DeesserState> {
   /** Connect the signal to process here. */
@@ -79,7 +56,7 @@ export function createDeesserEngine(
       model?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
     }
   };
-  const ready = loadDeesser(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, DEESSER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

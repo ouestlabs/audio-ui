@@ -10,8 +10,8 @@ import type { DeviceContext } from "@audio-ui/core/device";
 import type {
   AnyDeviceState,
   LibraryDevice,
-  LibraryEngine,
 } from "@/registry-audio/bases/base/lib/device-library";
+import { createPolyphony } from "@/registry-audio/bases/base/lib/polyphony";
 
 /** A note to play: its pitch and velocity, 0 to 1, and the instrument's own note parameters it sets over them, such as a pad's frequency and cutoff. */
 export interface PlayedNote {
@@ -52,12 +52,6 @@ export function noteParameters(
 export interface VoicePool extends NotePlayer {
   readonly entry: LibraryDevice;
   update: (values: AnyDeviceState, context?: DeviceContext) => void;
-}
-
-interface Voice {
-  engine: LibraryEngine;
-  /** The note it holds, and since when. */
-  holding: { id: string; since: number } | null;
 }
 
 /** A mono instrument: its one engine takes every note, and lets each go by its id. */
@@ -112,62 +106,30 @@ export function createVoicePool(
   if (entry.mono) {
     return createMonoPlayer(ctx, entry, values, context, output);
   }
-  const voices: Voice[] = Array.from({ length: count }, () => {
+  const engines = Array.from({ length: count }, () => {
     const engine = entry.create(ctx, values, context);
     engine.output.connect(output);
-    return { engine, holding: null };
+    return engine;
   });
-
-  const noteOff = (time: number, id: string) => {
-    const voice = voices.find((item) => item.holding?.id === id);
-    if (voice) {
-      voice.engine.noteOff?.({ at: time, id });
-      voice.holding = null;
-    }
-  };
+  const voices = createPolyphony(engines);
 
   return {
     dispose: () => {
-      for (const voice of voices) {
-        voice.engine.dispose();
+      for (const engine of engines) {
+        engine.dispose();
       }
     },
     entry,
-    noteOff,
-    noteOn: (note, time, id) => {
-      // The voice that holds this note already follows it; another takes the oldest one's place.
-      const held = voices.find((voice) => voice.holding?.id === id);
-      const free =
-        held ??
-        voices.find((voice) => !voice.holding) ??
-        voices.reduce((oldest, voice) =>
-          (voice.holding?.since ?? 0) < (oldest.holding?.since ?? 0)
-            ? voice
-            : oldest
-        );
-      if (!free) {
-        return;
-      }
-      if (free.holding && free !== held) {
-        free.engine.noteOff?.({ at: time, id: free.holding.id });
-      }
-      free.engine.noteOn?.(noteParameters(entry, note), { at: time, id });
-      free.holding = held?.holding ?? { id, since: time };
-    },
+    noteOff: (time, id) => voices.noteOff(id, time),
+    noteOn: (note, time, id) =>
+      voices.noteOn(noteParameters(entry, note), id, time),
     ready: async () => {
-      await Promise.all(voices.map((voice) => voice.engine.ready));
+      await Promise.all(engines.map((engine) => engine.ready));
     },
-    release: (time) => {
-      for (const voice of voices) {
-        if (voice.holding) {
-          voice.engine.noteOff?.({ at: time, id: voice.holding.id });
-          voice.holding = null;
-        }
-      }
-    },
+    release: (time) => voices.release(time),
     update: (next, nextContext) => {
-      for (const voice of voices) {
-        voice.engine.update(next, nextContext);
+      for (const engine of engines) {
+        engine.update(next, nextContext);
       }
     },
   };
