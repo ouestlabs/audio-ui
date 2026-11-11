@@ -1086,6 +1086,8 @@ export type ArrangementCommand =
     }
   /** Switches a device on or off. */
   | { type: "toggle-device"; track: string; id: string }
+  /** The track a device with a sidechain listens to; `null`, its own sound. A track cannot key itself, nor be keyed by a group or a return. */
+  | { type: "set-device-key"; track: string; id: string; key: string | null }
   // Sends: how much a track sends to a return, as a gain from 0 to 1.
   /** A drag of a send: a burst, which `settle-clip-edit` closes into one step. */
   | { type: "change-send"; track: string; to: string; level: number }
@@ -2977,6 +2979,30 @@ const handlers: Handlers = {
       (device) => ({ ...device, state: values }),
       edit
     ),
+  "set-device-key": (state, { id, key, track }) => {
+    const source = key === null ? null : trackOf(state.doc, key);
+    const plain =
+      source &&
+      key !== track &&
+      state.doc.tracks.some((item) => item.id === key) &&
+      (source.kind ?? "audio") !== "group";
+    if (key !== null && !plain) {
+      return state;
+    }
+    return changeDevice(
+      state,
+      track,
+      id,
+      (device) => {
+        if ((device.key ?? null) === key) {
+          return device;
+        }
+        const { key: _gone, ...rest } = device;
+        return key === null ? rest : { ...device, key };
+      },
+      edit
+    );
+  },
   "set-send": (state, { level, to, track }) =>
     setSend(state, track, to, level, edit),
   "set-send-mode": (state, { id, pre }) =>

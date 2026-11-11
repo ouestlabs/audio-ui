@@ -18,6 +18,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/registry/bases/base/ui/select";
 import { devicePanel } from "@/registry-audio/bases/base/audio/device-panels";
 import {
   DeviceChain,
@@ -208,6 +216,8 @@ interface ChainProps {
   dispatch: Arrangement["dispatch"];
   /** What the controls follow their envelopes by (AUT-006). */
   following: AutomationFollowing;
+  /** The tracks a device with a sidechain can listen to: every track of clips but the chain's own. */
+  keySources: readonly { id: string; name: string }[];
   /** A note held by an instrument's panel, such as its pad, by its note parameters; `null` lets it go. */
   onHoldNote: (note: Readonly<Record<string, number>> | null) => void;
   /** Parameters of a device moved by hand, by their ids: those automated stop following their envelopes (AUT-003). */
@@ -234,7 +244,11 @@ interface SlotFold {
 }
 
 /** One device on a chain, drawn by its own panel (DEV-008); a rack, by the rack's. */
-function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
+function Slot({
+  device,
+  inRack,
+  ...chain
+}: ChainProps & { device: TrackDevice; inRack: boolean }) {
   const { dispatch, tempo, track } = chain;
   const face = devicePanel(device.device);
   const entry = libraryDevice(device.device);
@@ -304,9 +318,74 @@ function Slot({ device, ...chain }: ChainProps & { device: TrackDevice }) {
         tempo={tempo}
         value={shown}
       >
+        {entry.device.sidechain && !inRack ? (
+          <KeySelect
+            device={device}
+            dispatch={dispatch}
+            sources={chain.keySources}
+            track={track}
+          />
+        ) : null}
         <DeviceChainSlotControls />
       </face.Panel>
     </DeviceChainSlot>
+  );
+}
+
+const OWN_KEY = "own";
+
+/** The track a device's sidechain listens to, picked in its title bar: its own sound, or another track's. */
+function KeySelect({
+  device,
+  dispatch,
+  sources,
+  track,
+}: {
+  device: TrackDevice;
+  dispatch: Arrangement["dispatch"];
+  sources: ChainProps["keySources"];
+  track: string;
+}) {
+  const items = [
+    { label: "Own sound", value: OWN_KEY },
+    ...sources.map((source) => ({ label: source.name, value: source.id })),
+  ];
+  const value = items.some((item) => item.value === device.key)
+    ? (device.key as string)
+    : OWN_KEY;
+  const pick = useCallback(
+    (next: string | null) => {
+      if (next) {
+        dispatch({
+          id: device.id,
+          key: next === OWN_KEY ? null : next,
+          track,
+          type: "set-device-key",
+        });
+      }
+    },
+    [device.id, dispatch, track]
+  );
+  return (
+    <Select items={items} onValueChange={pick} value={value}>
+      <SelectTrigger
+        aria-label="Key from"
+        className="w-28 data-[size=sm]:h-6"
+        size="sm"
+        title="The sound this device listens to"
+      >
+        <SelectValue />
+      </SelectTrigger>
+      <SelectContent>
+        <SelectGroup>
+          {items.map((item) => (
+            <SelectItem key={item.value} value={item.value}>
+              {item.label}
+            </SelectItem>
+          ))}
+        </SelectGroup>
+      </SelectContent>
+    </Select>
   );
 }
 
@@ -393,7 +472,12 @@ function Chain({
       order={order}
     >
       {devices.map((device) => (
-        <Slot device={device} key={device.id} {...chain} />
+        <Slot
+          device={device}
+          inRack={place !== undefined}
+          key={device.id}
+          {...chain}
+        />
       ))}
       {end}
     </DeviceChain>
@@ -835,6 +919,13 @@ export function DeviceView({
   const current = track ? trackOf(doc, track) : undefined;
   const id = current?.id ?? "";
   const trackOverridden = overridden[id];
+  const keySources = useMemo(
+    () =>
+      doc.tracks
+        .filter((item) => item.id !== id && (item.kind ?? "audio") !== "group")
+        .map((item) => ({ id: item.id, name: item.name })),
+    [doc.tracks, id]
+  );
   const following = useMemo(
     () => ({
       duration: doc.duration,
@@ -1016,6 +1107,7 @@ export function DeviceView({
         dispatch={dispatch}
         end={end}
         following={following}
+        keySources={keySources}
         onHoldNote={holdNote}
         onMoved={moved}
         onNoteOff={noteOff}

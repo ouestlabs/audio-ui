@@ -121,7 +121,22 @@ interface PlacedDevice {
   engine: LibraryEngine | RackEngine;
   /** The device of the library it is; a rack is none. */
   entry: LibraryDevice | null;
+  /** The track sound its sidechain listens to now, connected: none, its own. */
+  keyed?: AudioNode | null;
   state: TrackDevice["state"];
+}
+
+/** Takes a device's sidechain off the track it listened to: before the device goes, or listens elsewhere. */
+function unkey(placed: PlacedDevice) {
+  const input = (placed.engine as { sidechain?: AudioNode }).sidechain;
+  if (placed.keyed && input) {
+    try {
+      placed.keyed.disconnect(input);
+    } catch {
+      // Already apart.
+    }
+  }
+  placed.keyed = null;
 }
 
 /** How long a placed device delays the sound, in seconds: a rack, as long as its slowest chain. */
@@ -391,6 +406,7 @@ export async function createArrangementEngine(
     runtime.player?.dispose();
     runtime.instrument?.player.dispose();
     for (const placed of runtime.devices.values()) {
+      unkey(placed);
       placed.engine.dispose();
       placed.bypass?.disconnect();
     }
@@ -401,6 +417,7 @@ export async function createArrangementEngine(
   const dropGone = (runtime: TrackRuntime, wanted: readonly TrackDevice[]) => {
     for (const [id, placed] of runtime.devices) {
       if (!wanted.some((device) => device.id === id && !device.instrument)) {
+        unkey(placed);
         placed.engine.dispose();
         placed.bypass?.disconnect();
         runtime.devices.delete(id);
@@ -508,6 +525,9 @@ export async function createArrangementEngine(
         (placed.engine as LibraryEngine).update(values, deviceContext());
       }
       return;
+    }
+    if (placed) {
+      unkey(placed);
     }
     placed?.engine.dispose();
     runtime.devices.set(device.id, {
@@ -1079,6 +1099,41 @@ export async function createArrangementEngine(
     }
   };
 
+  /**
+   * Each device that takes a sidechain listens to the track its `key` names:
+   * that track's sound after its devices and before its volume. Only a track
+   * of clips can key, and never its own device, so no sound feeds itself.
+   */
+  const syncKeys = (next: ArrangementDoc) => {
+    const plain = new Set(
+      next.tracks
+        .filter((track) => (track.kind ?? "audio") !== "group")
+        .map((track) => track.id)
+    );
+    for (const track of allTracks(next)) {
+      const runtime = runtimes.get(track.id);
+      if (!runtime) {
+        continue;
+      }
+      for (const placed of runtime.devices.values()) {
+        const input = (placed.engine as { sidechain?: AudioNode }).sidechain;
+        const key = placed.device.key;
+        const wanted =
+          input && key && key !== track.id && plain.has(key)
+            ? (mixer.strip(key)?.key ?? null)
+            : null;
+        if (wanted === (placed.keyed ?? null)) {
+          continue;
+        }
+        unkey(placed);
+        if (wanted && input) {
+          wanted.connect(input);
+        }
+        placed.keyed = wanted;
+      }
+    }
+  };
+
   /** A track's devices, and what it plays: the clips of an audio track, the notes of a MIDI one. */
   const syncTrack = (
     track: ArrangementTrack,
@@ -1300,6 +1355,7 @@ export async function createArrangementEngine(
       for (const track of allTracks(next)) {
         syncTrack(track, next, recordings);
       }
+      syncKeys(next);
       recordingsIn = recordings;
       // The latencies may have changed with the devices.
       mixer.update(mixerState(next));

@@ -156,7 +156,7 @@ kick.connect(engine.sidechain); // listened to, not heard
 engine.output.connect(ctx.destination);
 ```
 
-The sidechain is not a parameter: the host routes the signal. A device that takes one says so: `duckerDevice.sidechain` is `true`, and so is `describe().sidechain`, so a host knows to route something to it and an agent can be told. With no key connected, it follows the sound itself.
+The sidechain is not a parameter: the host routes the signal. In an arrangement, a track device's `key` names the track it listens to, and the device view lists the tracks to pick. A device that takes one says so: `duckerDevice.sidechain` is `true`, and so is `describe().sidechain`, so a host knows to route something to it and an agent can be told. With no key connected, it follows the sound itself.
 
 ## Tempo sync
 

@@ -58,6 +58,8 @@ export interface ChainLink {
 export interface MixerStrip {
   /** Where its sound comes in: a clip player, an instrument. Stereo. */
   readonly input: AudioNode;
+  /** Its sound after its devices and before its volume, pan and switch: what a sidechain of another track listens to. Connected anywhere else, it plays twice. */
+  readonly key: AudioNode;
   /** One analyser per channel of what it sends on, after its volume, pan and switch: what a meter reads. */
   readonly meter: readonly AnalyserNode[];
   /** Puts these in series between its input and its volume, in order; with none, the sound goes straight on. */
@@ -209,6 +211,7 @@ export function createMixer(
     return {
       destination: to,
       input,
+      key: chainOut,
       last: new Map(),
       late,
       left,
