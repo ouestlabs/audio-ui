@@ -165,7 +165,7 @@ export const checks: Checks = {
       );
       await page.keyboard.press("Space");
     },
-  "MID-010: a clip's Scale box offers the song's likeliest keys, marks the one picked on the roll, and undo takes it back":
+  "MID-010: a clip's Scale box offers the song's likeliest keys, marks the one picked on the roll and its root, and undo takes it back with the clip still open":
     async (browser) => {
       const page = await open(browser);
       const onTheLane = page.locator('[data-track="track-3"] [data-clip-id]');
@@ -208,9 +208,13 @@ export const checks: Checks = {
         (await page.locator("[data-in-scale]").count()) > 0,
         "the scale picked marks no rows"
       );
+      // In C major the scale's rows are the white keys the roll already shades: the root's rows show it.
+      assert(
+        (await page.locator("[data-scale-root]").count()) > 0,
+        "the root's rows are not marked"
+      );
       await page.getByRole("button", { exact: true, name: "Undo" }).click();
-      // Undo leaves the clip unselected: opened again, it has its scale off.
-      await onTheLane.last().dblclick();
+      // The clip stays open through the undo, its scale off again.
       await page
         .getByRole("button", { name: "Scale: off" })
         .waitFor({ timeout: 5000 });

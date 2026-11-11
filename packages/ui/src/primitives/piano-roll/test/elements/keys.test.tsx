@@ -96,6 +96,13 @@ describe("PianoRoll.Row", () => {
     expect(view.getByTestId("row-61").hasAttribute("data-in-scale")).toBe(
       false
     );
+    // The root's rows are marked apart: in C major, where the scale is the white keys, they are what shows it.
+    expect(view.getByTestId("row-60").hasAttribute("data-scale-root")).toBe(
+      true
+    );
+    expect(view.getByTestId("row-62").hasAttribute("data-scale-root")).toBe(
+      false
+    );
     view.unmount();
     const folded = renderRoll({ folded: "scale", scale }).view;
     expect(folded.queryByTestId("row-61")).toBeNull();

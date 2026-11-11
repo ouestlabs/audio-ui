@@ -2676,12 +2676,33 @@ function paste(
 }
 
 /** Takes back a step of the history, or the state when there is none. */
+/** What stays selected in `doc`: the clips and tracks of `selection` it still holds. */
+function stillThere(
+  selection: ArrangementSelection | null,
+  doc: ArrangementDoc
+): ArrangementSelection | null {
+  if (!selection) {
+    return null;
+  }
+  const clips = selection.clips.filter((id) =>
+    doc.clips.some((clip) => clip.id === id)
+  );
+  const tracks = selection.tracks.filter((id) => trackOf(doc, id));
+  return clips.length > 0 || tracks.length > 0 ? { clips, tracks } : null;
+}
+
+/** Undo or redo: the document of `step`, with what is selected and still in it left selected, so an open clip stays open. */
 function restore(
   state: ArrangementState,
   step: HistoryStep<ArrangementDoc> | null
 ): ArrangementState {
   return step
-    ? { ...state, doc: step.present, history: step.history, selection: null }
+    ? {
+        ...state,
+        doc: step.present,
+        history: step.history,
+        selection: stillThere(state.selection, step.present),
+      }
     : state;
 }
 

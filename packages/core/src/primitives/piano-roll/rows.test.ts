@@ -61,6 +61,13 @@ describe("rollRows", () => {
     expect(rows.scale).toEqual([0, 2, 4, 5, 7, 9, 11]);
   });
 
+  test("knows the pitch class of the scale's root, folded or not, and none without a scale", () => {
+    const scale = { name: "minor", root: 21 } as const;
+    expect(rollRows([], 60, 72, false, scale).root).toBe(9);
+    expect(rollRows([{ pitch: 64 }], 60, 72, "scale", scale).root).toBe(9);
+    expect(rollRows([], 60, 72, false).root).toBeNull();
+  });
+
   test("keeps every row with a scale unfolded, or folded on the notes alone", () => {
     const scale = { name: "pentatonic-minor", root: 9 } as const;
     expect(rollRows([], 60, 63, false, scale).pitches).toHaveLength(4);

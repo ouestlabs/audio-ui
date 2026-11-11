@@ -26,11 +26,12 @@ export namespace Rows {
 
 const ROW_ATTRIBUTES: StateAttributesMapping<Row.State> = {
   inScale: (inScale) => (inScale ? { "data-in-scale": "" } : null),
+  scaleRoot: (scaleRoot) => (scaleRoot ? { "data-scale-root": "" } : null),
 };
 
 /**
  * The band a pitch takes across the grid, for shading black-key rows, the
- * rows of the roll's scale, or ruling where an octave starts. It lets presses through to the grid and is
+ * rows of the roll's scale and of its root, or ruling where an octave starts. It lets presses through to the grid and is
  * hidden from assistive technology. Renders a `<div>` element.
  */
 export function Row(componentProps: Row.Props) {
@@ -46,8 +47,9 @@ export function Row(componentProps: Row.Props) {
       folded: rollState.folded,
       inScale: rows.scale?.includes(((pitch % 12) + 12) % 12) ?? false,
       octave: pitch % 12 === 0,
+      scaleRoot: rows.root === ((pitch % 12) + 12) % 12,
     }),
-    [active, pitch, rollState.disabled, rollState.folded, rows.scale]
+    [active, pitch, rollState.disabled, rollState.folded, rows.root, rows.scale]
   );
   return useRender({
     defaultTagName: "div",
@@ -82,6 +84,8 @@ export namespace Row {
     inScale: boolean;
     /** Whether the row is a C, where an octave starts. */
     octave: boolean;
+    /** Whether the pitch is the root of the roll's `scale`: a C in C major. */
+    scaleRoot: boolean;
   };
   export interface Props extends PartProps<"div", State> {
     /** The MIDI pitch of the row. */
