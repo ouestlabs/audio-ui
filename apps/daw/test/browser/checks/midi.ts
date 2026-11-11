@@ -165,6 +165,60 @@ export const checks: Checks = {
       );
       await page.keyboard.press("Space");
     },
+  "MID-010: a clip's Scale box offers the song's likeliest keys, marks the one picked on the roll and its root, and undo takes it back with the clip still open":
+    async (browser) => {
+      const page = await open(browser);
+      const onTheLane = page.locator('[data-track="track-3"] [data-clip-id]');
+      const before = await onTheLane.count();
+      // C, D, E and F, a bar of quarter notes: a song for the key to be read from.
+      await dropFiles(page, '[data-track="track-3"]', [
+        {
+          bytes: SCORE,
+          name: "Tune.musicxml",
+          type: "application/vnd.recordare.musicxml+xml",
+        },
+      ]);
+      await page.waitForFunction(
+        (count) =>
+          document.querySelectorAll('[data-track="track-3"] [data-clip-id]')
+            .length > count,
+        before,
+        { timeout: 5000 }
+      );
+      await onTheLane.last().dblclick();
+      const trigger = page.getByRole("button", { name: "Scale: off" });
+      await trigger.waitFor({ timeout: 5000 });
+      assert(
+        (await page.locator("[data-in-scale]").count()) === 0,
+        "a clip with its scale off marks rows"
+      );
+      await trigger.click();
+      const detected = page.locator("[data-slot=scale-menu-detect]");
+      await detected.getByRole("menuitem").first().waitFor({ timeout: 5000 });
+      const keys = await detected.getByRole("menuitem").allTextContents();
+      assert(
+        keys.length === 3 && keys.includes("C Major"),
+        `the menu offers ${keys.join(", ")}`
+      );
+      await detected.getByRole("menuitem", { name: "C Major" }).click();
+      await page
+        .getByRole("button", { name: "Scale: C Major" })
+        .waitFor({ timeout: 5000 });
+      assert(
+        (await page.locator("[data-in-scale]").count()) > 0,
+        "the scale picked marks no rows"
+      );
+      // In C major the scale's rows are the white keys the roll already shades: the root's rows show it.
+      assert(
+        (await page.locator("[data-scale-root]").count()) > 0,
+        "the root's rows are not marked"
+      );
+      await page.getByRole("button", { exact: true, name: "Undo" }).click();
+      // The clip stays open through the undo, its scale off again.
+      await page
+        .getByRole("button", { name: "Scale: off" })
+        .waitFor({ timeout: 5000 });
+    },
   "MID-007: the roll's keys are black and white, and a pressed one shows it":
     async (browser) => {
       const page = await open(browser);

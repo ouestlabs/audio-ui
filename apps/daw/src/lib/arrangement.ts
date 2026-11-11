@@ -7,6 +7,7 @@ import {
 import type { ParameterValue } from "@audio-ui/core/device";
 import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
+import type { Scale } from "@audio-ui/core/pitch";
 import type { PlayedClip, WarpMode } from "@audio-ui/core/playback";
 import { unwarpedTime, type WarpMarker, warpedTime } from "@audio-ui/core/time";
 import type { ClipValue } from "@audio-ui/react";
@@ -47,6 +48,8 @@ export interface Arranged {
   recording?: string;
   /** Whether its source plays backwards. */
   reversed?: boolean;
+  /** A MIDI clip's scale: the root and the scale its roll marks, and whether it is on. */
+  scale?: ClipScale;
   /** Where its source begins in the recording it was cut from, once cropped. @default 0 */
   sourceFrom?: number;
   /** How long the recording behind the clip is: trimming stops where it runs out. */
@@ -764,6 +767,12 @@ export interface TimeSelection {
 export interface Clipping {
   length: number;
   parts: (Arranged & { row: number })[];
+}
+
+/** A MIDI clip's scale: a root (0 for C) and a scale's name, kept while it is off. */
+export interface ClipScale extends Scale {
+  /** Whether its roll marks the scale's rows. */
+  on: boolean;
 }
 
 /**

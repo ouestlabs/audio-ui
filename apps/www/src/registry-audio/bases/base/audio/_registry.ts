@@ -682,7 +682,7 @@ export const audio: RegistryItem[] = [
     categories: ["timeline", "piano"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's MIDI clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2, Dupl. Loop), Groove (the swing, on the eighths or the sixteenths, and for a drum clip its steps or its roll) and Notes (transpose, invert, reverse, legato, ×2, ÷2, humanize, velocity ramps) boxes, beside its piano roll (Draw, Fold, the loop brace on the ruler, keys, grid, a velocity or chance lane), or for a drum clip its steps, a row per pad. Notes are drawn a grid step at a time.",
+      "The clip view of an arrangement's MIDI clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2, Dupl. Loop), Groove (the swing, on the eighths or the sixteenths, and for a drum clip its steps or its roll), Scale (the clip's scale marked on the roll, and the keys the song's notes are likeliest in) and Notes (transpose, invert, reverse, legato, ×2, ÷2, humanize, velocity ramps) boxes, beside its piano roll (Draw, Fold, the loop brace on the ruler, keys, grid, a velocity or chance lane), or for a drum clip its steps, a row per pad. Notes are drawn a grid step at a time.",
     files: [
       {
         path: "audio/panels/midi-clip-panel.tsx",
@@ -696,8 +696,10 @@ export const audio: RegistryItem[] = [
       "@audio-ui/drum-step-editor",
       "@audio-ui/knob",
       "@audio-ui/piano-roll",
+      "@audio-ui/scale-menu",
       "@audio-ui/timeline",
       "@shadcn/button",
+      "@shadcn/dropdown-menu",
     ],
     type: "registry:ui",
   },

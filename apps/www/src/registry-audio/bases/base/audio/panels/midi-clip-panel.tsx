@@ -14,7 +14,7 @@ import {
   reverseNotes,
   stretchNotes,
 } from "@audio-ui/core/piano-roll";
-import { pitchName } from "@audio-ui/core/pitch";
+import { pitchName, type Scale } from "@audio-ui/core/pitch";
 import type { PianoRoll as PianoRollPrimitive, Source } from "@audio-ui/react";
 import {
   type MouseEvent,
@@ -26,6 +26,7 @@ import {
   useState,
 } from "react";
 import { Button } from "@/registry/bases/base/ui/button";
+import { DropdownMenuSeparator } from "@/registry/bases/base/ui/dropdown-menu";
 import {
   ClipBox,
   type ClipMeter,
@@ -52,6 +53,16 @@ import {
   PianoRollViewport,
 } from "@/registry-audio/bases/base/audio/elements/piano-roll";
 import {
+  type KeyNote,
+  ScaleMenu,
+  ScaleMenuContent,
+  ScaleMenuDetect,
+  ScaleMenuName,
+  ScaleMenuRoot,
+  ScaleMenuToggle,
+  ScaleMenuTrigger,
+} from "@/registry-audio/bases/base/audio/elements/scale-menu";
+import {
   Timeline,
   TimelineLane,
   TimelineMark,
@@ -61,7 +72,10 @@ import {
   TimelineRangeHandle,
   TimelineRuler,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
-import type { ClipSwing } from "@/registry-audio/bases/base/lib/arrangement";
+import type {
+  ClipScale,
+  ClipSwing,
+} from "@/registry-audio/bases/base/lib/arrangement";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;
@@ -127,6 +141,8 @@ interface MidiClipPanelProps {
   collapsed?: boolean;
   /** The ids of its folded boxes ("midi:loop", "midi:notes"), controlled. */
   foldedBoxes?: readonly string[];
+  /** The notes the Scale box reads the key from: every part of the song, as one part alone is often ambiguous. @default the clip's notes */
+  keyNotes?: readonly KeyNote[];
   name: string;
   /** The clip's notes, in seconds from the start of its source. */
   notes: readonly Note[];
@@ -150,6 +166,8 @@ interface MidiClipPanelProps {
   onRegionChange?: (region: MidiClipRegion) => void;
   /** A name was typed in the strip. */
   onRename?: (name: string) => void;
+  /** A scale was picked, or turned on or off. Leave it out for a panel without the Scale box. */
+  onScaleChange?: (scale: ClipScale) => void;
   /** The swing was turned, or its step changed; `null` plays the clip straight. Leave it out for a panel without the Groove box. */
   onSwingChange?: (swing: ClipSwing | null) => void;
   /** The pen, the roll's fold or the lane was changed. */
@@ -164,6 +182,8 @@ interface MidiClipPanelProps {
   position?: Source<number>;
   /** Where the clip plays in its source, and its loop. */
   region: MidiClipRegion;
+  /** The clip's scale: on, its roll marks the scale's rows, and Fold keeps them. */
+  scale?: ClipScale;
   /** Where the clip starts on the arrangement, what `position` is read against. @default 0 */
   start?: number;
   /** The grid notes are drawn and moved on, in seconds. @default a quarter of `beat` */
@@ -448,6 +468,56 @@ function GrooveBox({
   );
 }
 
+const C_MAJOR: ClipScale = { name: "major", on: false, root: 0 };
+
+/** The Scale box: the clip's scale picked from a menu, turned on or off, and the keys its song's notes are likeliest in. */
+function ScaleBox({
+  keyNotes,
+  onCommit,
+  onScaleChange,
+  scale = C_MAJOR,
+}: {
+  keyNotes: readonly KeyNote[];
+  onCommit?: () => void;
+  onScaleChange: (scale: ClipScale) => void;
+  scale?: ClipScale;
+}) {
+  const turn = useCallback(
+    (on: boolean) => {
+      onScaleChange({ ...scale, on });
+      onCommit?.();
+    },
+    [onCommit, onScaleChange, scale]
+  );
+  const pick = useCallback(
+    ({ name, root }: Scale) => {
+      onScaleChange({ name, on: scale.on, root });
+      onCommit?.();
+    },
+    [onCommit, onScaleChange, scale.on]
+  );
+  return (
+    <ClipBox foldable id="midi:scale" title="Scale">
+      <ScaleMenu
+        enabled={scale.on}
+        onEnabledChange={turn}
+        onScaleChange={pick}
+        scale={scale}
+      >
+        <ScaleMenuTrigger className="h-6 w-full px-2 text-xs" size="xs" />
+        <ScaleMenuContent align="start">
+          <ScaleMenuToggle />
+          <DropdownMenuSeparator />
+          <ScaleMenuRoot />
+          <ScaleMenuName />
+          <DropdownMenuSeparator />
+          <ScaleMenuDetect notes={keyNotes} />
+        </ScaleMenuContent>
+      </ScaleMenu>
+    </ClipBox>
+  );
+}
+
 /** The Notes box: transposing, the note operations and the velocity ramps, on the selected notes or every note. */
 function NotesBox({
   noteCount,
@@ -514,7 +584,7 @@ function NotesBox({
   );
 }
 
-/** The clip's piano roll: Draw at the top left, Fold above the keys, the loop brace on the ruler, and a velocity or chance lane under the notes. */
+/** The clip's piano roll: Draw at the top left, Fold above the keys (onto the scale's rows too when one is marked), the loop brace on the ruler, and a velocity or chance lane under the notes. */
 function ClipRoll({
   bars,
   beat,
@@ -533,6 +603,7 @@ function ClipRoll({
   padNames,
   playhead,
   playing,
+  scale,
   selection,
   setBrace,
   setSelection,
@@ -560,6 +631,8 @@ function ClipRoll({
   padNames: Readonly<Record<number, string>> | undefined;
   playhead: Source<number> | undefined;
   playing: boolean;
+  /** The scale whose rows are marked; `null` marks none. */
+  scale: Scale | null;
   selection: readonly NoteId[];
   setBrace: (range: readonly [number, number]) => void;
   setSelection: (selection: readonly NoteId[]) => void;
@@ -570,7 +643,7 @@ function ClipRoll({
   toggleLevel: () => void;
   value: Note[];
 }) {
-  // Opens on the notes, or on middle C with none: once, each time it shows (key the panel by clip).
+  // Opens on the notes, or on middle C with none, each time it shows (key the panel by clip), and again when it folds or unfolds, as its rows change.
   const viewportRef = useRef<HTMLDivElement>(null);
   const centerRef = useRef(60);
   centerRef.current =
@@ -579,19 +652,39 @@ function ClipRoll({
           value.reduce((sum, note) => sum + note.pitch, 0) / value.length
         )
       : 60;
+  const scaleRows = scale ? `${scale.root} ${scale.name}` : "";
+  const foldsTo = folded ? scaleRows : null;
   useEffect(() => {
-    // A frame later, once the roll has its rows laid out.
-    const frame = requestAnimationFrame(() => {
+    const center = () => {
       const viewport = viewportRef.current;
       if (!viewport) {
+        return;
+      }
+      // A note is a toggle button of the grid: its pressed state is whether it is selected.
+      const drawn = viewport.querySelectorAll(
+        '[data-slot="piano-roll-grid"] [role="button"][aria-pressed]'
+      );
+      if (foldsTo !== null && drawn.length > 0) {
+        // Folded, a row is not a pitch's place: the notes as drawn are.
+        const top = viewport.getBoundingClientRect().top - viewport.scrollTop;
+        let sum = 0;
+        for (const note of drawn) {
+          const box = note.getBoundingClientRect();
+          sum += box.top + box.height / 2 - top;
+        }
+        viewport.scrollTop = sum / drawn.length - viewport.clientHeight / 2;
         return;
       }
       const row = (MAX_PITCH - centerRef.current) / (MAX_PITCH - MIN_PITCH + 1);
       viewport.scrollTop =
         row * viewport.scrollHeight - viewport.clientHeight / 2;
+    };
+    // Two frames later: the roll lays its rows out in a render of its own after this one.
+    let frame = requestAnimationFrame(() => {
+      frame = requestAnimationFrame(center);
     });
     return () => cancelAnimationFrame(frame);
-  }, []);
+  }, [foldsTo]);
   return (
     <Timeline
       className="min-h-0 min-w-0 flex-1"
@@ -602,7 +695,7 @@ function ClipRoll({
     >
       <PianoRoll
         drawStyle="paint"
-        folded={folded}
+        folded={folded && scale ? "scale" : folded}
         maxPitch={MAX_PITCH}
         minPitch={MIN_PITCH}
         mode={drawing ? "draw" : "select"}
@@ -611,6 +704,7 @@ function ClipRoll({
         onSelectionChange={setSelection}
         onValueChange={onNotesChange}
         onValueCommitted={onNotesCommitted}
+        scale={scale}
         selection={selection}
         // Its own height, inline: a page that stretches the rolls it shows to fill it leaves this one be.
         style={ROLL_SIZE}
@@ -732,8 +826,10 @@ function ClipRoll({
  * switch and name, where it starts and ends in its source or with Loop on
  * the stretch that repeats, in bars.beats.sixteenths) and
  * a Notes box (transpose, invert, reverse, legato, ×2, ÷2, humanize and
- * velocity ramps, on the selected notes or every note) beside its piano roll:
- * Draw at the top left, Fold above the keys, the loop brace on the ruler, and
+ * velocity ramps, on the selected notes or every note) beside its piano roll,
+ * and with `onScaleChange` a Scale box (the clip's scale, marked on the roll's
+ * rows when on, and the keys `keyNotes` are likeliest in):
+ * Draw at the top left, Fold above the keys (onto the scale's rows too when it is on), the loop brace on the ruler, and
  * a velocity or chance lane under the notes. Drawing paints a note a grid step
  * at a time; the notes are in seconds, from the start of the clip's source.
  * Key it by the clip, so it opens on each clip's notes.
@@ -746,6 +842,7 @@ function MidiClipPanel({
   className,
   collapsed,
   foldedBoxes,
+  keyNotes,
   onViewChange,
   view,
   name,
@@ -760,10 +857,12 @@ function MidiClipPanel({
   onPadOn,
   onRegionChange,
   onRename,
+  onScaleChange,
   onSwingChange,
   pads,
   position,
   region,
+  scale,
   start: clipStart = 0,
   step = beat / 4,
   swing,
@@ -1044,6 +1143,14 @@ function MidiClipPanel({
               swing={swing}
             />
           ) : null}
+          {onScaleChange ? (
+            <ScaleBox
+              keyNotes={keyNotes ?? notes}
+              onCommit={onNotesCommitted}
+              onScaleChange={onScaleChange}
+              scale={scale}
+            />
+          ) : null}
           <NotesBox
             noteCount={notes.length}
             onEdit={handleNoteEdit}
@@ -1097,6 +1204,7 @@ function MidiClipPanel({
           padNames={padNames}
           playhead={playhead}
           playing={playing}
+          scale={scale?.on ? scale : null}
           selection={selection}
           setBrace={setBrace}
           setSelection={setSelection}

@@ -12,6 +12,7 @@ import type { useArrangement } from "@/hooks/use-arrangement";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import {
   type Arranged,
+  type ClipScale,
   type ClipSwing,
   DRUM_RACK_DEVICE,
 } from "@/lib/arrangement";
@@ -186,6 +187,25 @@ export function ClipEditor({
       ),
     [edit]
   );
+  const changeScale = useCallback(
+    (scale: ClipScale) => edit((current) => ({ ...current, scale })),
+    [edit]
+  );
+  // The key is read from every MIDI clip of the song but its drums: one part alone is often ambiguous.
+  const keyNotes = useMemo(() => {
+    const drumTracks = new Set(
+      doc.tracks
+        .filter((track) =>
+          track.devices?.some((device) => device.device === DRUM_RACK_DEVICE)
+        )
+        .map((track) => track.id)
+    );
+    return doc.clips.flatMap((each) =>
+      each.notes && !drumTracks.has(each.track) && !each.disabled
+        ? each.notes
+        : []
+    );
+  }, [doc.clips, doc.tracks]);
   // A pad's name pressed in the steps: the track plays it, let go at once, as a drum rings on.
   const auditionPad = useCallback(
     (note: number) => {
@@ -215,6 +235,7 @@ export function ClipEditor({
         collapsed={collapsed}
         foldedBoxes={folded}
         key={clip.id}
+        keyNotes={keyNotes}
         name={clip.name}
         notes={clip.notes}
         onActiveChange={setActive}
@@ -227,6 +248,7 @@ export function ClipEditor({
         onPadOn={auditionPad}
         onRegionChange={changeRegion}
         onRename={rename}
+        onScaleChange={pads ? undefined : changeScale}
         onSwingChange={changeSwing}
         onViewChange={setMidiView}
         pads={pads}
@@ -237,6 +259,7 @@ export function ClipEditor({
           offset: clip.value.offset,
           sourceLength: clip.sourceLength,
         }}
+        scale={clip.scale}
         start={clip.value.start}
         swing={clip.swing}
         view={midiView}

@@ -12,6 +12,8 @@ export interface Rows {
   pitchAt: (row: number) => number;
   /** Highest first, which is top to bottom on screen. */
   pitches: readonly number[];
+  /** The pitch class of the scale's root, 0 (C) to 11 (B), or null without a scale. */
+  root: number | null;
   /** The row `pitch` is drawn on; a pitch with no row of its own sits on the row it would be inserted at. */
   rowOf: (pitch: number) => number;
   /** The pitch classes of the roll's scale, 0 (C) to 11 (B), or null without one. */
@@ -24,7 +26,8 @@ export interface Rows {
 function chromatic(
   min: number,
   max: number,
-  scale: readonly number[] | null
+  scale: readonly number[] | null,
+  root: number | null
 ): Rows {
   const pitches: number[] = [];
   for (let pitch = max; pitch >= min; pitch -= 1) {
@@ -34,6 +37,7 @@ function chromatic(
     folded: false,
     pitchAt: (row) => max - row,
     pitches,
+    root,
     rowOf: (pitch) => max - pitch,
     scale,
     step: (pitch, rows) => pitch - rows,
@@ -41,7 +45,11 @@ function chromatic(
 }
 
 /** Only `pitches` (highest first), continuing by semitones past either end. */
-function folded(pitches: number[], scale: readonly number[] | null): Rows {
+function folded(
+  pitches: number[],
+  scale: readonly number[] | null,
+  root: number | null
+): Rows {
   const last = pitches.length - 1;
   const pitchAt = (row: number): number => {
     if (row < 0) {
@@ -64,6 +72,7 @@ function folded(pitches: number[], scale: readonly number[] | null): Rows {
     folded: true,
     pitchAt,
     pitches,
+    root,
     rowOf,
     scale,
     step: (pitch, rows) => pitchAt(rowOf(pitch) + rows),
@@ -83,6 +92,7 @@ export function rollRows(
   scale: Scale | null = null
 ): Rows {
   const classes = scale ? scalePitchClasses(scale) : null;
+  const root = scale ? ((Math.round(scale.root) % 12) + 12) % 12 : null;
   if (fold) {
     const kept = new Set(notes.map((note) => note.pitch));
     if (fold === "scale" && classes) {
@@ -96,8 +106,8 @@ export function rollRows(
       .filter((pitch) => pitch >= min && pitch <= max)
       .sort((a, b) => b - a);
     if (pitches.length > 0) {
-      return folded(pitches, classes);
+      return folded(pitches, classes, root);
     }
   }
-  return chromatic(min, max, classes);
+  return chromatic(min, max, classes, root);
 }

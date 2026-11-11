@@ -628,12 +628,14 @@ export const checks: Checks = {
         "a new ducker listens to its own sound"
       );
       await key.click();
-      const options = await page.getByRole("option").allTextContents();
+      const list = page.locator('[data-slot="select-content"]');
+      await list.getByRole("option").first().waitFor({ timeout: 5000 });
+      const options = await list.getByRole("option").allTextContents();
       assert(
         options.includes("4 Audio") && !options.includes("3 Audio"),
         `Key from lists ${options.join(", ")}`
       );
-      await page.getByRole("option", { name: "4 Audio" }).click();
+      await list.getByRole("option", { name: "4 Audio" }).click();
       await page.waitForFunction(
         () =>
           document

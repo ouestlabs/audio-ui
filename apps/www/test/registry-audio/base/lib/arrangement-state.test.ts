@@ -858,10 +858,19 @@ describe("apply", () => {
     ]);
   });
 
-  test("undo leaves nothing selected", () => {
+  test("undo keeps selected what is still there, so an open clip stays open, and drops what is gone", () => {
     let state = init([at("a", 0, 10)]);
     state = apply(state, { type: "rename-clip", id: "a", name: "Intro" });
     state = apply(state, { type: "select-clip", id: "a", additive: false });
+    expect(apply(state, { type: "undo" }).selection).toEqual({
+      clips: ["a"],
+      tracks: [],
+    });
+    state = apply(state, {
+      type: "add-clip",
+      clip: at("b", 20, 10),
+    });
+    expect(state.selection?.clips).toEqual(["b"]);
     expect(apply(state, { type: "undo" }).selection).toBeNull();
   });
 });
