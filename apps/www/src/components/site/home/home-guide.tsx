@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { JsonLd } from "@/components/site/json-ld";
 import { GroupIcon } from "@/components/site/navigation/group-icon";
-import type { getDocsSpaces } from "@/lib/docs/content/spaces";
+import type { HomeIndex } from "@/lib/docs/content/spaces";
 import { buildFaqJsonLd, type FaqItem } from "@/lib/seo/seo";
 
 const INSTALL = [
@@ -69,7 +69,7 @@ const FAQ: FaqItem[] = [
   },
   {
     answer:
-      "Yes. @audio-ui/core holds the same controllers without React, for Vue, Svelte, Solid, Angular, web components and the plain DOM.",
+      "Yes. @audio-ui/elements has every primitive as a custom element, for plain HTML and any framework, typed for Vue and Svelte templates, and @audio-ui/core holds the logic with no dependency.",
     question: "Can I use it outside React?",
   },
   {
@@ -90,13 +90,14 @@ const LEAD = "max-w-2xl text-pretty text-site-muted-foreground text-sm";
  * install it, every component with what it does, and answers to the usual
  * questions. Search engines and agents read the page without running it.
  */
-export function HomeGuide({
-  spaces,
-}: {
-  spaces: ReturnType<typeof getDocsSpaces>;
-}) {
+export function HomeGuide({ guides, spaces }: HomeIndex) {
+  // The guides close the list: what makes the sound, after what draws it.
+  const columns = [
+    ...spaces,
+    { sections: [{ pages: guides, title: undefined }], title: "Guides" },
+  ];
   return (
-    <div className="flex flex-col gap-16 border-t px-4 py-12 font-site-sans sm:px-6 lg:py-16">
+    <div className="flex flex-col gap-16 px-4 py-12 font-site-sans sm:px-6 lg:py-16">
       <JsonLd data={buildFaqJsonLd(FAQ)} />
       <section
         aria-labelledby="home-about"
@@ -120,15 +121,15 @@ export function HomeGuide({
             CLI copies into your code, for you to own. The{" "}
             <code>@audio-ui/react</code> package on npm gives headless
             primitives: the behavior and the accessibility, no styles.{" "}
-            <code>@audio-ui/core</code> brings the same controllers to Vue,
-            Svelte, Solid, Angular, web components and the plain DOM.
+            <code>@audio-ui/elements</code> brings every primitive to plain HTML
+            and any framework as custom elements, typed for Vue and Svelte.
           </p>
         </div>
         {/* min-w-0: a grid cell would otherwise widen to the commands, which never wrap. */}
         <ul className="flex min-w-0 flex-col gap-4 self-center">
           {INSTALL.map((step) => (
             <li className="flex flex-col gap-1.5" key={step.command}>
-              <span className="text-site-muted-foreground text-xs">
+              <span className="font-site-mono text-[11px] text-site-muted-foreground uppercase tracking-[0.08em]">
                 {step.label}
               </span>
               <div className="flex items-center gap-2 rounded-lg border bg-site-muted/40 py-1 pr-1 pl-3">
@@ -158,7 +159,7 @@ export function HomeGuide({
           the source.
         </p>
         <div className="mt-8 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
-          {spaces.map((space) => (
+          {columns.map((space) => (
             <div key={space.title}>
               <h3 className="flex items-center gap-2 font-medium text-sm">
                 <GroupIcon current={false} title={space.title} />
@@ -167,7 +168,7 @@ export function HomeGuide({
               {space.sections.map((section) => (
                 <div className="mt-4" key={section.title ?? space.title}>
                   {section.title ? (
-                    <h4 className="text-site-muted-foreground text-xs">
+                    <h4 className="font-site-mono text-[11px] text-site-muted-foreground uppercase tracking-[0.08em]">
                       {section.title}
                     </h4>
                   ) : null}

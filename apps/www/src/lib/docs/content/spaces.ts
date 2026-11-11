@@ -42,3 +42,23 @@ export function getDocsSpaces() {
       title: space.title ?? "",
     }));
 }
+
+const COMPONENTS = "/docs/components/";
+const GUIDES = "/docs/guides";
+
+/** What the home lists: the spaces of components (Elements, Workstation, Devices), and the guides' pages. */
+export function getHomeIndex() {
+  const spaces = getDocsSpaces();
+  return {
+    guides: spaces
+      .flatMap((space) => space.sections.flatMap((section) => section.pages))
+      .filter((page) => page.url.startsWith(GUIDES)),
+    spaces: spaces.filter((space) =>
+      space.sections.some((section) =>
+        section.pages.some((page) => page.url.startsWith(COMPONENTS))
+      )
+    ),
+  };
+}
+
+export type HomeIndex = ReturnType<typeof getHomeIndex>;

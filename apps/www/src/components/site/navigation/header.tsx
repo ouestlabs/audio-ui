@@ -9,13 +9,13 @@ import {
 import { LabLink } from "@/components/site/navigation/lab-link";
 import { MainNav } from "@/components/site/navigation/main-nav";
 import { SectionSelect } from "@/components/site/navigation/section-select";
+import { Wordmark } from "@/components/site/navigation/wordmark";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/lib/config";
 import { source } from "@/lib/docs/content/source";
 import { getCategories } from "@/lib/registry/core/registry";
 import { cn } from "@/lib/utils";
 import { Button } from "../../ui/button";
-import { Icons } from "../icons";
 
 type PageTreeNode = ReturnType<typeof source.getPageTree>["children"][number];
 
@@ -78,28 +78,6 @@ function buildCommandMenuGroups(nodes: PageTreeNode[]) {
   });
 }
 
-/**
- * The name, set as audio.js sets its own: the mark, the word in Geist, heavy
- * and tight, then `/ui` close after it, in the regular weight.
- */
-function Wordmark({ className }: { className?: string }) {
-  return (
-    <span
-      aria-hidden
-      className={cn(
-        "flex shrink-0 select-none items-center gap-2 font-(family-name:--font-geist-sans) font-[650] text-foreground leading-none tracking-[-0.05em]",
-        className
-      )}
-    >
-      <Icons.audioUi className="pointer-events-none size-[0.9em]" />
-      <span>
-        audio
-        <span className="font-normal tracking-[-0.02em]">/ui</span>
-      </span>
-    </span>
-  );
-}
-
 function SiteLogo() {
   return (
     <Button
@@ -108,7 +86,7 @@ function SiteLogo() {
       nativeButton={false}
       render={
         <Link aria-label="audio/ui home" className="flex items-center" to="/">
-          <Wordmark className="text-xl" />
+          <Wordmark className="text-foreground text-xl" />
         </Link>
       }
       variant="ghost"
@@ -213,7 +191,7 @@ export function SiteHeader({
                 className="flex items-center"
                 to="/"
               >
-                <Wordmark className="text-xl sm:text-2xl" />
+                <Wordmark className="text-foreground text-xl sm:text-2xl" />
               </Link>
             }
             variant="ghost"
