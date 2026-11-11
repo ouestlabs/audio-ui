@@ -50,7 +50,8 @@ import {
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const TRACK = "track-1";
-const RECORDING = "sound";
+/** What the playground's recordings are named after, apart from those of the registry's demos on the same context. */
+const RECORDING = "home-sound";
 const DEMO = "groove";
 /** Enough peaks for a pixel each, zoomed in as far as it goes. */
 const PEAK_COUNT = 8192;
@@ -105,13 +106,13 @@ interface Sound {
   samples: ClipSamples;
 }
 
-/** The clip that plays the sound on the track, over `length` seconds, round and round. */
-function loopClip(length: number): Arranged {
+/** The clip that plays the recording `recording` on the track, over `length` seconds, round and round. */
+function loopClip(recording: string, length: number): Arranged {
   return {
     id: "loop",
     loop: [0, length],
     name: "Loop",
-    recording: RECORDING,
+    recording,
     sourceLength: length,
     track: TRACK,
     value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start: 0 },
@@ -323,15 +324,19 @@ export function HomePlayground() {
   );
   const changeZoom = useCallback((next: number) => setZoomPx(next), []);
 
+  // The engine keeps a recording by its id once it has it: each sound placed takes an id of its own.
+  const placed = useRef(0);
   /** Puts a sound on the track: its recording, and a clip that loops it from its start to its end. */
   const place = useCallback(
     (recording: RecordingSource, next: Sound) => {
+      placed.current += 1;
+      const id = `${RECORDING}-${placed.current}`;
       setSound(next);
-      setRecordings(new Map([[RECORDING, recording]]));
+      setRecordings(new Map([[id, recording]]));
       dispatch({
         commands: [
           { id: "loop", type: "remove-clip" },
-          { clip: loopClip(next.duration), type: "add-clip" },
+          { clip: loopClip(id, next.duration), type: "add-clip" },
           { duration: next.duration, type: "set-duration" },
           {
             loop: { on: true, range: [0, next.duration] },
