@@ -8,6 +8,7 @@
 /** The formats `encodeAudio` writes. */
 export type AudioFileFormat = "flac" | "mp3" | "wav";
 
+/** What `encodeAudio` writes: the format, its bit depth or bitrate, the channels' sample rate, and a callback for its progress. */
 export interface EncodeAudioOptions {
   /** Bits a sample, for WAV and FLAC: 16 or 24, or 32 for a WAV of floats, which keeps what goes past full scale. @default 16 */
   bitDepth?: 16 | 24 | 32;
