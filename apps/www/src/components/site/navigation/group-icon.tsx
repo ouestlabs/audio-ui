@@ -30,6 +30,7 @@ const GROUP_ICONS = {
 } as const;
 
 const SECTION_ICONS = {
+  components: GridIcon,
   core: BracesIcon,
   docs: NoteIcon,
   elements: ShapesIcon,

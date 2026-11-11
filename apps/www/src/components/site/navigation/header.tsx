@@ -8,7 +8,7 @@ import {
 } from "@/components/site/navigation/header-client";
 import { LabLink } from "@/components/site/navigation/lab-link";
 import { MainNav } from "@/components/site/navigation/main-nav";
-import { SiteNavTabs } from "@/components/site/navigation/nav-tabs";
+import { SectionSelect } from "@/components/site/navigation/section-select";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/lib/config";
 import { source } from "@/lib/docs/content/source";
@@ -104,8 +104,8 @@ function SiteLogo() {
 
 /**
  * From `lg`, the framed layouts have no header: this is what it held, at the
- * top of the navigation sidebar: the logo, the sections as tabs, the search
- * and the theme. GitHub stays in the inset's bar.
+ * top of the navigation sidebar: the logo, the theme, the section menu and the
+ * search. GitHub stays in the inset's bar.
  */
 export function SiteSidebarHeader() {
   const pageTree = source.getPageTree();
@@ -118,7 +118,7 @@ export function SiteSidebarHeader() {
         <SiteLogo />
         <SiteHeaderModeSwitcher />
       </div>
-      <SiteNavTabs items={siteConfig.navItems} />
+      <SectionSelect tree={pageTree} />
       <div className="[&>*]:w-full">
         <SiteHeaderCommandMenu
           commandGroups={commandGroups}
@@ -132,8 +132,8 @@ export function SiteSidebarHeader() {
 
 /**
  * What the navigation sidebar's header holds, for the bar of the inset while
- * that sidebar is shut: the sections as tabs at the start, the search, GitHub
- * and the theme at the end.
+ * that sidebar is shut: the section menu at the start, the search, GitHub and
+ * the theme at the end.
  */
 export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
   if (part === "github") {
@@ -145,11 +145,7 @@ export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
     );
   }
   if (part === "start") {
-    return (
-      <div className="w-48">
-        <SiteNavTabs items={siteConfig.navItems} />
-      </div>
-    );
+    return <SectionSelect compact tree={source.getPageTree()} />;
   }
   const pageTree = source.getPageTree();
   const componentCategories = getCategories();

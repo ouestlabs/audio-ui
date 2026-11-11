@@ -1,9 +1,10 @@
 /**
- * The docs' sections, by the layers of the stack: what the reader learns
- * first, the framework-agnostic core, its adapters (custom elements, React),
- * then the registry they install and own. A section gathers top-level folders
- * of the content whatever their addresses, so a component page keeps its URL
- * under the Registry.
+ * The site's sections, as the switcher at the top of the sidebar lists them:
+ * the docs by the layers of the stack (what the reader learns first, the
+ * framework-agnostic core, its adapters, custom elements and React, then the
+ * registry they install and own), and the components catalog. A docs section
+ * gathers top-level folders of the content whatever their addresses, so a
+ * component page keeps its URL under the Registry.
  */
 export const DOCS_SECTIONS = [
   {
@@ -40,6 +41,13 @@ export const DOCS_SECTIONS = [
     href: "/docs/registry",
     id: "registry",
     label: "Registry",
+  },
+  {
+    description: "Blocks to copy, by category",
+    folders: [],
+    href: "/components",
+    id: "components",
+    label: "Components",
   },
 ] as const;
 

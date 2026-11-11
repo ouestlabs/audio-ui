@@ -85,15 +85,68 @@ const LANDING_PAGES = new Set<string>(
   DOCS_SECTIONS.filter((each) => each.id !== "docs").map((each) => each.href)
 );
 
+type PageTree = ReturnType<typeof source.getPageTree>;
+type PageTreeNode = PageTree["children"][number];
+
+/** Whether a node of the page tree is the page at `url`, or a folder that holds it. */
+function holds(node: PageTreeNode, url: string): boolean {
+  if (node.type === "page") {
+    return node.url === url;
+  }
+  if (node.type === "folder") {
+    return (
+      node.index?.url === url ||
+      node.children.some((child) => holds(child, url))
+    );
+  }
+  return false;
+}
+
+/** The section of the page at `pathname`: the one of the top-level folder that holds it, or the one its address is under. */
+function sectionAt(tree: PageTree, pathname: string): DocsSectionId {
+  const folder = tree.children.find(
+    (item) =>
+      item.type === "folder" &&
+      !EXCLUDED_FOLDERS.includes(item.$id ?? "") &&
+      holds(item, pathname)
+  );
+  return folder?.type === "folder"
+    ? sectionOfFolder(folder.$id ?? "")
+    : sectionOfPath(pathname);
+}
+
+/** A section as the switcher lists it. */
+export interface SiteSection {
+  current: boolean;
+  description: string;
+  href: string;
+  id: DocsSectionId;
+  label: string;
+}
+
+/** The site's sections, the one being read marked. */
+export function useSiteSections(tree: PageTree): SiteSection[] {
+  const pathname = useLocation({ select: (location) => location.pathname });
+  const reading = React.useMemo(
+    () => sectionAt(tree, pathname),
+    [tree, pathname]
+  );
+  return React.useMemo(
+    () =>
+      DOCS_SECTIONS.map((each) => ({ ...each, current: each.id === reading })),
+    [reading]
+  );
+}
+
 /**
  * The docs sidebar's groups for the section being read (the Docs, the Core,
- * the Elements, React or the Registry), with whether each is open, and the
- * sections themselves, the one being read marked. A space folds when the reader says so, remembered in their browser
- * and shared by the desktop sidebar and the mobile menu; every group is open
- * on a first visit and on the server, and the space of the page being read
- * opens when the reader lands on it.
+ * the Elements, React or the Registry), with whether each is open. A space
+ * folds when the reader says so, remembered in their browser and shared by the
+ * desktop sidebar and the mobile menu; every group is open on a first visit
+ * and on the server, and the space of the page being read opens when the
+ * reader lands on it.
  */
-export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
+export function useSidebarGroups(tree: PageTree) {
   const pathname = useLocation({ select: (location) => location.pathname });
   const currentBase = getCurrentBase(pathname);
   const all = React.useMemo(
@@ -117,8 +170,10 @@ export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
   );
   const currentTitle = currentGroup?.title;
   // The section of the page being read: the sidebar shows its groups alone.
-  const reading: DocsSectionId =
-    currentGroup?.section ?? sectionOfPath(pathname);
+  const reading = React.useMemo(
+    () => sectionAt(tree, pathname),
+    [tree, pathname]
+  );
   const groups = all.filter((group) => group.section === reading);
   const sectionLabel = DOCS_SECTIONS.find((each) => each.id === reading)?.label;
   React.useEffect(() => {
@@ -128,11 +183,6 @@ export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
   }, [currentTitle, setOpen]);
 
   return {
-    /** The sections of the docs, the one being read marked. */
-    docsSections: DOCS_SECTIONS.map((each) => ({
-      ...each,
-      current: each.id === reading,
-    })),
     groups: groups.map((group) => {
       // Only a group that folds has a heading, and only when it is not named as its section: the switcher names the section, and a heading that does nothing reads as a button.
       const titled = group.collapsible && group.title !== sectionLabel;
