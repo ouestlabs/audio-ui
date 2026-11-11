@@ -3,11 +3,19 @@ title: Roadmap
 description: What audio/ui ships today, and what comes next.
 ---
 
-**audio/ui** is a toolkit for building audio interfaces in React: headless primitives on npm (`@audio-ui/react`) and styled components for [shadcn/ui](https://ui.shadcn.com/) that you copy, paste and customize.
+**audio/ui** is a toolkit for building audio interfaces on the web: headless primitives on npm, for React (`@audio-ui/react`) and as custom elements for any framework (`@audio-ui/elements`), and styled components for [shadcn/ui](https://ui.shadcn.com/) that you copy, paste and customize.
 
 ## Current Status
 
 Available today:
+
+### Packages
+
+- **[`@audio-ui/core`](/docs/core)**: the logic of every control, with no dependency
+- **[`@audio-ui/engine`](/docs/engine)**: the audio logic (devices, time, analysis, MIDI, scales, playback, files), on audio.js
+- **[`@audio-ui/react`](/docs/react)**: the headless React primitives
+- **[`@audio-ui/elements`](/docs/elements)**: every primitive as custom elements, for plain HTML and any framework, with template types for [Vue](/docs/elements/vue) and [Svelte](/docs/elements/svelte)
+- **[`@audio-ui/icons`](/docs/icons)**: audio glyphs, one thin stroke on a 24 grid
 
 ### Elements
 
@@ -29,11 +37,11 @@ The surfaces of a DAW, controlled and independent of any audio engine:
 
 ### Devices
 
-22 effects and instruments, each a definition, a Web Audio engine and a panel generated from its parameters: dynamics (compressor, multiband, limiter, gate, de-esser, transient shaper), tone (equalizers and a filter), distortion, space and modulation (delay, reverb, chorus, phaser, auto pan), and utility and two instruments. A device reports what it takes off the signal for a meter, and exposes tools for an agent. See [Devices](/docs/devices).
+47 effects and instruments, each a definition, a Web Audio engine and a panel generated from its parameters: dynamics, tone, distortion, space and modulation, and utility, and eleven instruments, synths, keys, a sampler, a drum synth and a guitar. A device reports what it takes off the signal for a meter, and exposes tools for an agent. See [Devices](/docs/devices).
 
 ### Audio engine
 
-The hooks and libraries on the Web Audio API that make the sound, for the components that need it: output, clock and time, synthesis, input and analysis, and the controllers of `@audio-ui/core` for use with no framework. An engine of your own can drive the same components. See [Audio engine](/docs/guides).
+The hooks and libraries on the Web Audio API that make the sound, for the components that need it, over `@audio-ui/engine`: output, clock and time, synthesis, input and analysis. An engine of your own can drive the same components. See [Guides](/docs/guides).
 
 ### Blocks
 
