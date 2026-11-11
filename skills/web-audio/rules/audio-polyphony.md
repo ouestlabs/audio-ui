@@ -29,7 +29,7 @@ npx shadcn@latest add @audio-ui/use-polyphony @audio-ui/poly-synth
 ```
 
 ```tsx
-import { midiToHz } from "@audio/note";
+import { midiToHz } from "@audio-ui/engine/pitch";
 import { createPolySynthEngine } from "@/components/audio-ui/devices/poly-synth/engine";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { useMidiInput } from "@/hooks/use-midi-input";

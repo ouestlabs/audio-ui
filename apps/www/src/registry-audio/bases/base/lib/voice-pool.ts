@@ -5,8 +5,8 @@
  * pad, the instrument's own note parameters.
  */
 
-import { midiToHz } from "@audio/note";
 import type { DeviceContext } from "@audio-ui/engine/device";
+import { midiToHz } from "@audio-ui/engine/pitch";
 import type {
   AnyDeviceState,
   LibraryDevice,

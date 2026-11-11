@@ -58,7 +58,7 @@ import {
   allTracks,
   trackOf,
 } from "@/lib/arrangement-state";
-import { downloadFile } from "@/lib/audio-encode";
+import { downloadFile } from "@audio-ui/engine/files";
 import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,

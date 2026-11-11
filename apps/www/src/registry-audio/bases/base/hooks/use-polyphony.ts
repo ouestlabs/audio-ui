@@ -1,14 +1,11 @@
 "use client";
 
+import type { EngineFactory, InstrumentEngine } from "@audio-ui/engine/device";
 import { useCallback, useMemo } from "react";
 import {
   type DeviceEngineLike,
   useDeviceEngines,
 } from "@/registry-audio/bases/base/hooks/use-device-engines";
-import type {
-  EngineFactory,
-  InstrumentEngine,
-} from "@/registry-audio/bases/base/lib/device-engine";
 import { createPolyphony } from "@/registry-audio/bases/base/lib/polyphony";
 
 /** What a voice needs of an instrument's engine: it plays one note at a time. */

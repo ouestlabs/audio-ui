@@ -131,7 +131,7 @@ Usage and API: [`useUndoHistory`](/docs/hooks/use-undo-history).
 
 The `midi-file` library reads a `.mid` file onto the roll's steps and writes one back.
 
-Usage and API: [`midi-file`](/docs/lib/midi-file).
+Usage and API: [`midi-file`](/docs/engine/files#midi-files).
 
 ### MusicXML files
 
@@ -142,7 +142,7 @@ import {
   downloadMusicXmlFile,
   MUSICXML_FILE_ACCEPT,
   readMusicXmlFile,
-} from "@/lib/musicxml-file";
+} from "@audio-ui/engine/files";
 
 const { bpm, notes, title } = await readMusicXmlFile(file, { duration: 64 });
 

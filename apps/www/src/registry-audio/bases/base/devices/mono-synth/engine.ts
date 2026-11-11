@@ -1,4 +1,5 @@
 import type { NoteTiming } from "@audio-ui/engine/device";
+import { type InstrumentEngine, noiseBuffer } from "@audio-ui/engine/device";
 import {
   attackSeconds,
   contourCents,
@@ -16,10 +17,6 @@ import {
   tuneCents,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/mono-synth/device";
-import {
-  type InstrumentEngine,
-  noiseBuffer,
-} from "@/registry-audio/bases/base/lib/device-engine";
 
 /** What each source adds before the filter: with the resonance, the loudest sound stays under full scale. */
 const SOURCE_GAIN = 0.2;

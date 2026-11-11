@@ -521,10 +521,11 @@ The Signature strip holds time-signature changes: its + adds one at the cursor, 
 
 Drag an audio file from the desktop onto an audio track: the track is outlined while the file is over it, and let go, the file becomes a clip at the grid line under the pointer (anywhere with Cmd/Ctrl), named and as long as the file. Several files follow each other on the track, and a file let go anywhere else in the view does nothing. The block decodes a file at the engine's rate with `decodeAudioChannels` from `lib/audio-decode` (`npx shadcn@latest add @audio-ui/audio-decode`), keeps it as a recording the clip names (`recording`), and takes its peaks with `computePeaks` from `@audio-ui/engine/analysis`: the clip draws its waveform, and it plays.
 
-A file comes in warped, in Beats, so it plays in time at the arrangement's tempo: `analyzeBeat` from the `arrangement` lib reads its tempo once, as it is decoded, with `@audio/beat-detect`, then fits the beat grid on its transients (`detectTransients` from `@audio-ui/engine/analysis`), so a tempo between whole BPM holds over a long file; `warpOnImport` warps the clip. A short file that 1, 2, 4, 8 or 16 bars fit at that tempo is taken as that loop, its tempo the one its length gives; a longer one gets a warp marker on the first beat of each bar, moved onto the nearest transient, and starts on its first beat. The clip panel's BPM shows the tempo it was read at: if a loop was read at twice or half its tempo, ÷2 or ×2 sets it right. A file with no attack, silence or noise, plays as recorded.
+A file comes in warped, in Beats, so it plays in time at the arrangement's tempo: `analyzeBeat` from [`@audio-ui/engine/analysis`](/docs/engine/analysis#a-recording-as-it-comes-in) reads its tempo once, as it is decoded, with `@audio/beat-detect`, then fits the beat grid on its transients (`detectTransients` from `@audio-ui/engine/analysis`), so a tempo between whole BPM holds over a long file; `warpOnImport` warps the clip. A short file that 1, 2, 4, 8 or 16 bars fit at that tempo is taken as that loop, its tempo the one its length gives; a longer one gets a warp marker on the first beat of each bar, moved onto the nearest transient, and starts on its first beat. The clip panel's BPM shows the tempo it was read at: if a loop was read at twice or half its tempo, ÷2 or ×2 sets it right. A file with no attack, silence or noise, plays as recorded.
 
 ```ts
-import { analyzeBeat, warpOnImport } from "@/lib/arrangement";
+import { analyzeBeat } from "@audio-ui/engine/analysis";
+import { warpOnImport } from "@/lib/arrangement";
 
 const clip = warpOnImport(laidDown, analyzeBeat(channels, sampleRate), tempo);
 ```

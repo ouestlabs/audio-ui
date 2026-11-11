@@ -59,7 +59,7 @@
       "expected_output": "The registry Tuner with use-microphone and use-pitch: the microphone started from a click, raw signal, an analyser never connected to the speakers, a period search for the pitch, and a live source, not state per frame.",
       "files": [],
       "expectations": [
-        "Installs `@audio-ui/tuner`, `@audio-ui/use-microphone` and `@audio-ui/use-pitch` from the registry (or uses `detectPitch` and `nearestNote` from `@audio-ui/engine/pitch`), not a hand-written pitch detector",
+        "Installs `@audio-ui/tuner`, `@audio-ui/use-microphone` and `@audio-ui/use-pitch` from the registry (or uses `detectPitch` from `@audio-ui/engine/analysis` and `cents` from `@audio-ui/engine/pitch`), not a hand-written pitch detector",
         "Starts the microphone from a user gesture (a click), so the permission prompt and the context resume have one",
         "Takes the raw microphone signal: echo cancellation, noise suppression and auto gain are off",
         "Does not connect the analyser to `ctx.destination`, so the microphone is not played back",

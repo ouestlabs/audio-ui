@@ -1,11 +1,10 @@
-import type { DeviceReadings } from "@audio-ui/engine/device";
+import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   LIMITER_WORKLET,
   type LimiterState,
   limiterSettings,
 } from "@/registry-audio/bases/base/devices/limiter/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 

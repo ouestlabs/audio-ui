@@ -14,7 +14,7 @@ description: "The settings of an export: the file's format, its bit depth or bit
 ```tsx
 import { useState } from "react";
 import { ExportDialog } from "@/components/audio-ui/export-dialog";
-import { downloadFile } from "@/lib/audio-encode";
+import { downloadFile } from "@audio-ui/engine/files";
 import { DEFAULT_EXPORT_SETTINGS, type ExportSettings, exportSound } from "@/lib/audio-export";
 
 const [open, setOpen] = useState(false);

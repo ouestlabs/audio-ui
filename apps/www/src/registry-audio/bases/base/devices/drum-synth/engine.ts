@@ -1,3 +1,4 @@
+import { type InstrumentEngine, noiseBuffer } from "@audio-ui/engine/device";
 import {
   type DrumSynthNote,
   type DrumSynthState,
@@ -7,10 +8,6 @@ import {
   tuneRatio,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/drum-synth/device";
-import {
-  type InstrumentEngine,
-  noiseBuffer,
-} from "@/registry-audio/bases/base/lib/device-engine";
 
 /** Where a hit's envelope ends, near silence, so the ramp down is exponential all the way. */
 const FLOOR = 0.0001;

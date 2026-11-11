@@ -1,6 +1,6 @@
 "use client";
 
-import { midiToHz } from "@audio/note";
+import { midiToHz } from "@audio-ui/engine/pitch";
 import { type DragEvent, useCallback, useEffect, useState } from "react";
 import {
   type SamplerNote,

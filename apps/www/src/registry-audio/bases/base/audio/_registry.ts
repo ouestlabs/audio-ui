@@ -215,7 +215,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["piano"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine", "@audio/mir-key"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "A menu that picks a root and a scale and turns the scale on or off, in parts you place, beside items of your own; one part offers the keys the notes are likeliest in (by @audio/mir-key).",
     files: [

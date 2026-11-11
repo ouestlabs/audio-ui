@@ -1,4 +1,4 @@
-import type { NoteTiming } from "@audio-ui/engine/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   cutoffHertz,
   releaseSeconds,
@@ -8,7 +8,6 @@ import {
   sliceOf,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/sampler/device";
-import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /*
  * The samples the sampler comes with: short loops made here with oscillators

@@ -1,11 +1,11 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   FREQUENCY_SHIFTER_MODES,
   FREQUENCY_SHIFTER_WORKLET,
   type FrequencyShifterState,
   frequencyShifterSettings,
 } from "@/registry-audio/bases/base/devices/frequency-shifter/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.02;
 

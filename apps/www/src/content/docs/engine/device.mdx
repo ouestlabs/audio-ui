@@ -64,7 +64,73 @@ set.run(state, { amount: 60 });
 
 The schema is the subset that OpenAI, Anthropic, MCP and the AI SDK all accept, and the ranges it gives are the ones the device enforces.
 
+## Engines
+
+What a device's engine is, and the pieces an engine is made of, each the one place its behavior lives.
+
+### Engine contracts
+
+Every `create<Name>Engine` is an `EngineFactory`: a context, the state to start from and the host's context (its tempo) in, an engine out. An effect's engine is an `EffectEngine<State>` (an `input`, an `output`, `update`, `dispose`, and `ready`, `sidechain` or `readings` where it has them); an instrument's is an `InstrumentEngine<State, Note>`, with `noteOn` and `noteOff` and no input. Both are the core's bindings with the nodes to connect, so a host that keeps its own engine implements the same `update` and `dispose`.
+
+### createWorkletStage
+
+A worklet that takes over from the clean sound once it loads, with a fade, and builds nothing once the engine is disposed.
+
+```ts
+import { createWorkletStage } from "@audio-ui/engine/device";
+
+const input = ctx.createGain();
+const output = ctx.createGain();
+let latest = initial;
+const stage = createWorkletStage(ctx, {
+  input,
+  make: () => new AudioWorkletNode(ctx, "my-processor", { parameterData: settingsOf(latest) }),
+  ramp: 0.02,
+  source: MY_PROCESSOR_SOURCE,
+});
+stage.connect(output);
+// update: stage.node?.parameters.get("drive")?.setTargetAtTime(...); dispose: stage.dispose()
+```
+
+### createFeed
+
+Keeps a worklet fed only while the path it plays is heard: connected at once on `set(true)`, taken away 120 ms after `set(false)`, once the path has faded, unless wanted again before.
+
+```ts
+import { createFeed } from "@audio-ui/engine/device";
+
+const feed = createFeed([
+  [input, model, 0, 0],
+  [sidechain, model, 0, 1], // a key on the worklet's second input
+]);
+feed.set(wet > 0); // on every update
+feed.dispose(); // in the engine's dispose
+```
+
+### noiseBuffer
+
+Two seconds of noise from `@audio/synth-noise`, made once per color and context and shared by everything that plays it: `noiseBuffer(ctx)` for white, `noiseBuffer(ctx, "pink")` for pink.
+
+## Measuring an engine
+
+A host that brings its own engine can check it against what the panel draws. `device-measure` renders an engine in an offline audio context and compares it with the curve of the device. It works for any device whose curve is a frequency response, such as the equalizer, the filter and the channel EQ.
+
+```ts
+import { equalizerCurve, equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
+import { measureLatency, measureResponse } from "@audio-ui/engine/device";
+
+const state = equalizerDevice.defaults();
+// Your factory: (ctx, state) => { input, output, dispose }.
+const { worstDb, at } = await measureResponse(createMyEngine, state, equalizerCurve(state));
+// worstDb: how far your engine is from the panel, in dB, and where (at, in Hz).
+
+const latencyMs = await measureLatency(createMyEngine, state);
+// What a host reports to compensate it.
+```
+
+It is a measurement, not a certification: the curve is the device's own and the tolerance is yours.
+
 ## Next
 
 - [Devices](/docs/devices): the four pieces a device of the registry comes in, and what every device shares.
-- [`device-engine`](/docs/lib/device-engine): the engine contracts and the pieces engines are made of.
+- [`device-engine`](/docs/engine/device#engines): the engine contracts and the pieces engines are made of.

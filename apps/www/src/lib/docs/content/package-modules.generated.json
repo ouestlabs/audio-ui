@@ -1206,8 +1206,6 @@
       "arrangement",
       "dawproject",
       "drum-steps",
-      "midi-file",
-      "musicxml-file",
       "recording",
       "use-arrangement",
       "use-piano-roll-playback"
@@ -2353,6 +2351,51 @@
         "summary": "The RMS level of `samples` in dBFS: 0 dB for a square wave at full scale, -3 dB for a sine at full scale."
       },
       {
+        "kind": "function",
+        "name": "createLoudnessMeter",
+        "summary": "Measures what is connected to it while it plays, on the audio thread, and calls `onLoudness` with its momentary, short-term and integrated loudness every 100 ms."
+      },
+      {
+        "kind": "function",
+        "name": "createLoudnessReader",
+        "summary": "Reads loudness block by block: `add` takes the K-weighted mean square of the next 100 ms, summed over the channels, as the meter's processor posts it, and gives the loudness up to it."
+      },
+      {
+        "kind": "interface",
+        "name": "LiveLoudness",
+        "summary": "How loud a sound is while it plays, in LUFS."
+      },
+      {
+        "kind": "const",
+        "name": "LOUDNESS_TARGETS",
+        "summary": "Targets in LUFS: what streaming services, podcasts and broadcast (EBU R 128) ask a file to be."
+      },
+      {
+        "kind": "const",
+        "name": "LOUDNESS_WORKLET",
+        "summary": "The meter's processor: it K-weights each channel of its input (a high shelf, then a high-pass, with the coefficients `@audio/weighting-k` gives for the context's rate), and posts the mean square of each block of 100 ms, summed over the channels."
+      },
+      {
+        "kind": "interface",
+        "name": "Loudness",
+        "summary": "How loud a sound is."
+      },
+      {
+        "kind": "interface",
+        "name": "LoudnessMeter",
+        "summary": "A live loudness meter on a context, as `createLoudnessMeter` makes it."
+      },
+      {
+        "kind": "function",
+        "name": "loudnessGain",
+        "summary": "The gain in dB that brings a sound to `target` LUFS, as far as its true peak stays at or under `ceiling` dBTP: a sound that would pass it lands under the target instead, and nothing is limited."
+      },
+      {
+        "kind": "function",
+        "name": "measureLoudness",
+        "summary": "Measures whole channels at once."
+      },
+      {
         "kind": "interface",
         "name": "AudioPeaks",
         "summary": "The lowest and highest sample of each slice of the audio, -1 to 1: what the Waveform draws as the waveform really is, lopsided where the audio is."
@@ -2388,6 +2431,36 @@
         "summary": "Reduces an analyser's spectrum (`getFloatFrequencyData`: decibels per frequency bin) to `bands.length` levels of 0-1, low to high, written into `bands`."
       },
       {
+        "kind": "interface",
+        "name": "DetectPitchOptions",
+        "summary": "What `detectPitch` looks for."
+      },
+      {
+        "kind": "function",
+        "name": "detectPitch",
+        "summary": "The pitch the samples hold and how clear it is, or nothing: too quiet a signal, or no clear period."
+      },
+      {
+        "kind": "interface",
+        "name": "PitchEstimate",
+        "summary": "What a detection found: the pitch and how periodic the sound is there."
+      },
+      {
+        "kind": "function",
+        "name": "analyzeBeat",
+        "summary": "Reads a recording's beat, once, as it is decoded: what `warpOnImport` warps its clips by."
+      },
+      {
+        "kind": "function",
+        "name": "audioChroma",
+        "summary": "How much of a recording's sound lies in each pitch class, C to B, summing to 1, read once as it is decoded: what a key is read from, with notes or without (`detectKeys` of the Scale menu)."
+      },
+      {
+        "kind": "interface",
+        "name": "BeatAnalysis",
+        "summary": "What a recording's beat is read as when it comes in: its tempo, if it has one, and its transients, in seconds."
+      },
+      {
         "kind": "function",
         "name": "holdPeaks",
         "summary": "Keeps the loudest level each point of a spectrum reached: a peak rises with the spectrum at once, stays put for `hold` seconds, then falls at `fall` dB per second until the spectrum meets it again."
@@ -2421,16 +2494,20 @@
       "packages/engine/src/analysis/filter.ts",
       "packages/engine/src/analysis/format.ts",
       "packages/engine/src/analysis/level.ts",
+      "packages/engine/src/analysis/loudness.ts",
       "packages/engine/src/analysis/peaks.ts",
+      "packages/engine/src/analysis/pitch.ts",
+      "packages/engine/src/analysis/recording.ts",
       "packages/engine/src/analysis/spectrum.ts"
     ],
     "usedBy": [
       "arrangement",
       "audio-export",
-      "loudness",
       "use-audio-levels",
       "use-audio-signal",
+      "use-loudness",
       "use-noise-through-eq",
+      "use-pitch",
       "use-spectrum"
     ]
   },
@@ -2533,6 +2610,61 @@
         "summary": "An on or off parameter: a bypass, a mode, an auto switch."
       },
       {
+        "kind": "function",
+        "name": "createFeed",
+        "summary": "Feeds a worklet only while the path it plays is heard: a worklet fed nothing costs nothing."
+      },
+      {
+        "kind": "function",
+        "name": "createWorkletStage",
+        "summary": "A stage of an engine that runs a worklet: the sound passes clean while the worklet loads, then fades over to it."
+      },
+      {
+        "kind": "interface",
+        "name": "EffectEngine",
+        "summary": "The engine of an effect on the Web Audio API: the binding of its state (`update`, `dispose`, `readings`) between an input and an output."
+      },
+      {
+        "kind": "type",
+        "name": "EngineFactory",
+        "summary": "What every `create<Name>Engine` is: an engine on a context, for the state it starts with and the host's tempo."
+      },
+      {
+        "kind": "const",
+        "name": "FEED_RELEASE_MS",
+        "summary": "How long after a path stops a worklet is still fed, in ms: its fade is over by then."
+      },
+      {
+        "kind": "interface",
+        "name": "Feed",
+        "summary": "Connections made while a path plays and taken away once it has faded out."
+      },
+      {
+        "kind": "type",
+        "name": "FeedConnection",
+        "summary": "A connection a feed makes: `from` into `to`, at an output and an input of their own if given."
+      },
+      {
+        "kind": "interface",
+        "name": "InstrumentEngine",
+        "summary": "The engine of an instrument: one voice, notes in, sound out."
+      },
+      {
+        "kind": "type",
+        "name": "NoiseColor",
+        "summary": "The colors of noise a buffer is made in, as `@audio/synth-noise` makes them."
+      },
+      {
+        "kind": "function",
+        "name": "noiseBuffer",
+        "summary": "Two seconds of noise on a context, from `@audio/synth-noise` (seeded, its peak at 0.9), made once per color and context and shared by everything that plays it: a synth's noise source, a snare's rattle, the pink noise an equalizer is heard through."
+      },
+      {
+        "kind": "interface",
+        "name": "WorkletStage",
+        "summary": "A worklet that takes over from the clean sound once it is in the graph."
+      },
+      {
         "kind": "interface",
         "name": "InstrumentBinding",
         "summary": "What a host gives an instrument to play: a `DeviceBinding` that also takes notes."
@@ -2551,6 +2683,21 @@
         "kind": "interface",
         "name": "SidechainBinding",
         "summary": "What a host gives a device that takes a key signal: a `DeviceBinding` whose engine has a second input, `sidechain`, that the key is connected to."
+      },
+      {
+        "kind": "function",
+        "name": "measureLatency",
+        "summary": "How long an engine delays a signal, in milliseconds: where what comes out of an impulse lines up with it."
+      },
+      {
+        "kind": "function",
+        "name": "measureResponse",
+        "summary": "How far an engine's frequency response is from `curve`, the gain in dB the device draws at each frequency."
+      },
+      {
+        "kind": "interface",
+        "name": "ResponseMeasurement",
+        "summary": "What a measurement of a frequency response found."
       },
       {
         "kind": "interface",
@@ -2582,14 +2729,15 @@
     "package": "@audio-ui/engine",
     "sources": [
       "packages/engine/src/device/define.ts",
+      "packages/engine/src/device/engine.ts",
       "packages/engine/src/device/instrument.ts",
+      "packages/engine/src/device/measure.ts",
       "packages/engine/src/device/tools.ts"
     ],
     "usedBy": [
       "arrangement",
       "arrangement-engine",
       "dawproject",
-      "device-engine",
       "device-library",
       "drum-rack",
       "instrument-rack",
@@ -2597,7 +2745,125 @@
       "rack",
       "use-device-engines",
       "use-device-loop",
+      "use-noise-through-eq",
+      "use-polyphony",
       "voice-pool"
+    ]
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "decodeAudioChannels",
+        "summary": "Decodes raw audio bytes, such as `file.arrayBuffer()`, into every channel's PCM samples at the context's sample rate, ready for `computePeaks`."
+      },
+      {
+        "kind": "function",
+        "name": "decodeAudioSamples",
+        "summary": "Decodes raw audio bytes into one channel's PCM samples, ready for `downsampleWaveform`: `decodeAudioChannels`, then the channel asked for, or the last there is."
+      },
+      {
+        "kind": "type",
+        "name": "AudioFileFormat",
+        "summary": "The formats `encodeAudio` writes."
+      },
+      {
+        "kind": "function",
+        "name": "downloadFile",
+        "summary": "Saves a file through the browser's downloads, named `name`."
+      },
+      {
+        "kind": "interface",
+        "name": "EncodeAudioOptions",
+        "summary": ""
+      },
+      {
+        "kind": "function",
+        "name": "encodeAudio",
+        "summary": "Encodes channels of samples, from -1 to 1, as a file."
+      },
+      {
+        "kind": "function",
+        "name": "downloadMidiFile",
+        "summary": "Saves the notes as a `.mid` file, named `filename`."
+      },
+      {
+        "kind": "const",
+        "name": "MIDI_FILE_ACCEPT",
+        "summary": "What a file input or a drop zone accepts as a MIDI file."
+      },
+      {
+        "kind": "interface",
+        "name": "MidiFileGrid",
+        "summary": "The grid notes are read onto: steps a quarter note, the clip's length in steps, and the pitch and tempo ranges it takes."
+      },
+      {
+        "kind": "function",
+        "name": "readMidiFile",
+        "summary": "Reads a MIDI file's notes onto a grid of steps, with the file's own tempo (clamped to the BPM range)."
+      },
+      {
+        "kind": "function",
+        "name": "readMidiFileParts",
+        "summary": "Reads a MIDI file as parts, for a host that lays each on a track of its own: a part per track and channel, named after its track (and its channel, when a track holds several), its notes in beats as they were written, not quantized and not cut, at least a tick long, and the first program its channel plays."
+      },
+      {
+        "kind": "interface",
+        "name": "ScoreNote",
+        "summary": "A note of a score in beats: where it starts and how long it lasts, in quarter notes."
+      },
+      {
+        "kind": "interface",
+        "name": "ScorePart",
+        "summary": "One part of a score: its name, whether it is drums, and its notes in beats."
+      },
+      {
+        "kind": "function",
+        "name": "writeMidiFile",
+        "summary": "The notes as a Standard MIDI File, the inverse of `readMidiFile`."
+      },
+      {
+        "kind": "function",
+        "name": "downloadMusicXmlFile",
+        "summary": "Saves the notes as a `.musicxml` file, named `filename`."
+      },
+      {
+        "kind": "const",
+        "name": "MUSICXML_FILE_ACCEPT",
+        "summary": "What a file input or a drop zone accepts as a MusicXML file: a score, or one compressed as `.mxl`."
+      },
+      {
+        "kind": "interface",
+        "name": "MusicXmlFileGrid",
+        "summary": "The grid notes are read onto: steps a quarter note, the clip's length in steps, and the pitch and tempo ranges it takes."
+      },
+      {
+        "kind": "function",
+        "name": "readMusicXmlFile",
+        "summary": "Reads a MusicXML score's notes onto a grid of steps, with its first tempo (clamped to the BPM range), every part into the one clip."
+      },
+      {
+        "kind": "function",
+        "name": "readMusicXmlFileParts",
+        "summary": "Reads a MusicXML score as parts, for a host that lays each on a track of its own: a part each, by its name, its notes in beats as they were written, through changes of tempo, not quantized and not cut."
+      },
+      {
+        "kind": "function",
+        "name": "writeMusicXmlFile",
+        "summary": "The notes as a MusicXML score, the inverse of `readMusicXmlFile`, for a notation app to open: on the grid they sit on, so nothing moves."
+      }
+    ],
+    "from": "@audio-ui/engine/files",
+    "package": "@audio-ui/engine",
+    "sources": [
+      "packages/engine/src/files/audio-decode.ts",
+      "packages/engine/src/files/audio-encode.ts",
+      "packages/engine/src/files/midi-file.ts",
+      "packages/engine/src/files/musicxml-file.ts"
+    ],
+    "usedBy": [
+      "audio-export"
     ]
   },
   {
@@ -2654,6 +2920,16 @@
     "exports": [
       {
         "kind": "function",
+        "name": "detectKeys",
+        "summary": "The keys `notes` are likeliest in, likeliest first, at most `count`: each pitch class weighed by how long it sounds, against the major and minor key profiles of `@audio/mir-key` (Krumhansl-Schmuckler)."
+      },
+      {
+        "kind": "interface",
+        "name": "KeyNote",
+        "summary": "What a key is read from: a note's pitch and how long it lasts, in any unit."
+      },
+      {
+        "kind": "function",
         "name": "inScale",
         "summary": "Whether a MIDI pitch is in a scale."
       },
@@ -2691,10 +2967,14 @@
     "from": "@audio-ui/engine/pitch",
     "package": "@audio-ui/engine",
     "sources": [
+      "packages/engine/src/pitch/key.ts",
       "packages/engine/src/pitch/scale.ts"
     ],
     "usedBy": [
-      "arrangement"
+      "arrangement",
+      "use-pitch",
+      "use-synth-voices",
+      "voice-pool"
     ]
   },
   {
@@ -3302,6 +3582,25 @@
       "use-piano-roll-playback",
       "use-timeline-grid",
       "use-transport-clock"
+    ]
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "loadWorklet",
+        "summary": "Loads the source of an `AudioWorklet` processor into a context, from a blob, so there is no file to serve."
+      }
+    ],
+    "from": "@audio-ui/engine/worklet",
+    "package": "@audio-ui/engine",
+    "sources": [
+      "packages/engine/src/worklet/load.ts"
+    ],
+    "usedBy": [
+      "clip-player",
+      "recording"
     ]
   }
 ]

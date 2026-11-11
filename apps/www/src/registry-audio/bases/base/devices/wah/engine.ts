@@ -1,13 +1,12 @@
-import type { DeviceContext } from "@audio-ui/engine/device";
+import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
 import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   WAH_MODES,
   WAH_WORKLET,
   type WahState,
   wahSettings,
 } from "@/registry-audio/bases/base/devices/wah/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.02;
 

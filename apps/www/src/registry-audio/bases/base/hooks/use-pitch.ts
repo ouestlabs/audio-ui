@@ -1,7 +1,7 @@
 "use client";
 
-import { cents } from "@audio/note";
-import yin from "@audio/pitch-yin";
+import { detectPitch, type PitchEstimate } from "@audio-ui/engine/analysis";
+import { cents } from "@audio-ui/engine/pitch";
 import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 
@@ -18,21 +18,6 @@ export interface PitchReading {
   octave: number;
   /** The note as a MIDI note number: A4 is 69. */
   pitch: number;
-}
-
-/** A signal's loudness as an RMS level, from 0 to 1. */
-const rms = (samples: Float32Array) => {
-  let energy = 0;
-  for (const sample of samples) {
-    energy += sample * sample;
-  }
-  return Math.sqrt(energy / samples.length);
-};
-
-/** What a detection found: the pitch and how periodic the sound is there. */
-interface PitchEstimate {
-  confidence: number;
-  frequency: number;
 }
 
 export interface UsePitchOptions {
@@ -88,31 +73,6 @@ function steadied(
   };
 }
 
-/** The pitch the samples hold and how clear it is, or nothing: too quiet a signal, or no clear period. */
-function detect(
-  samples: Float32Array,
-  sampleRate: number,
-  {
-    maxHz,
-    minHz,
-    minLevel,
-    threshold,
-  }: Required<
-    Pick<UsePitchOptions, "maxHz" | "minHz" | "minLevel" | "threshold">
-  >
-): PitchEstimate | null {
-  if (rms(samples) < minLevel) {
-    return null;
-  }
-  const heard = yin(samples, {
-    fs: sampleRate,
-    maxFreq: maxHz,
-    minFreq: minHz,
-    threshold,
-  });
-  return heard ? { confidence: heard.clarity, frequency: heard.freq } : null;
-}
-
 /**
  * The pitch of a signal, live: `null` while nothing clear is playing. Pass the
  * `AnalyserNode` of `useMicrophone` (or any tap on your graph). It is a stable
@@ -150,7 +110,7 @@ export function usePitch(
       }
       lastRun = now;
       analyser.getFloatTimeDomainData(samples);
-      const found = detect(samples, analyser.context.sampleRate, {
+      const found = detectPitch(samples, analyser.context.sampleRate, {
         maxHz,
         minHz,
         minLevel,

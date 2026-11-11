@@ -1,15 +1,15 @@
-import type { DeviceReadings, SidechainBinding } from "@audio-ui/engine/device";
+import type {
+  DeviceReadings,
+  EffectEngine,
+  SidechainBinding,
+} from "@audio-ui/engine/device";
+import { createFeed, type Feed } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   DUCKER_WORKLET,
   type DuckerState,
   duckerSettings,
 } from "@/registry-audio/bases/base/devices/ducker/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
-import {
-  createFeed,
-  type Feed,
-} from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 

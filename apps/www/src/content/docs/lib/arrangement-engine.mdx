@@ -43,7 +43,7 @@ npx shadcn@latest add @audio-ui/audio-encode
 
 ```ts
 import { renderArrangement } from "@/lib/arrangement-engine";
-import { downloadFile, encodeAudio } from "@/lib/audio-encode";
+import { downloadFile, encodeAudio } from "@audio-ui/engine/files";
 
 const rendered = await renderArrangement(doc, recordings, { from: 0, sampleRate: 48_000, to: 30 });
 if (rendered) {

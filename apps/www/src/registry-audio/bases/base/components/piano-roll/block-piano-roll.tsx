@@ -10,6 +10,14 @@ import {
   selectionSpan,
   toggleMuted,
 } from "@audio-ui/core/piano-roll";
+import {
+  downloadMidiFile,
+  downloadMusicXmlFile,
+  MIDI_FILE_ACCEPT,
+  MUSICXML_FILE_ACCEPT,
+  readMidiFile,
+  readMusicXmlFile,
+} from "@audio-ui/engine/files";
 import { rollScale, type Scale } from "@audio-ui/engine/pitch";
 import type { Tempo } from "@audio-ui/engine/time";
 import {
@@ -86,16 +94,6 @@ import {
 import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 import type { TransportRegion } from "@/registry-audio/bases/base/hooks/use-transport-clock";
 import { useUndoHistory } from "@/registry-audio/bases/base/hooks/use-undo-history";
-import {
-  downloadMidiFile,
-  MIDI_FILE_ACCEPT,
-  readMidiFile,
-} from "@/registry-audio/bases/base/lib/midi-file";
-import {
-  downloadMusicXmlFile,
-  MUSICXML_FILE_ACCEPT,
-  readMusicXmlFile,
-} from "@/registry-audio/bases/base/lib/musicxml-file";
 import {
   applyNoteEdit,
   canApplyNoteEdit,

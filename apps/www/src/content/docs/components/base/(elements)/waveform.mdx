@@ -146,7 +146,7 @@ const { bands } = useAudioSignal(analyser);
 
 ```tsx
 import { computePeaks, normalizePeaks } from "@audio-ui/engine/analysis";
-import { decodeAudioChannels } from "@/lib/audio-decode";
+import { decodeAudioChannels } from "@audio-ui/engine/files";
 
 const context = new AudioContext();
 const channels = await decodeAudioChannels(context, await file.arrayBuffer());

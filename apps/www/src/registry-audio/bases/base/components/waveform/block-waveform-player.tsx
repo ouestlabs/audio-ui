@@ -5,6 +5,7 @@ import {
   computePeaks,
   normalizePeaks,
 } from "@audio-ui/engine/analysis";
+import { decodeAudioChannels } from "@audio-ui/engine/files";
 import { LoopIcon } from "@audio-ui/icons/react";
 import { createSource } from "@audio-ui/react";
 import type { ChangeEvent } from "react";
@@ -28,7 +29,6 @@ import {
   WaveformRegion,
   WaveformRegionHandle,
 } from "@/registry-audio/bases/base/audio/elements/waveform";
-import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 // More slices than the waveform has bars at any width or zoom; it keeps each bar's lowest and highest.

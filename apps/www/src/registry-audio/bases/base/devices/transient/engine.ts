@@ -1,10 +1,10 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
+import { createWorkletStage } from "@audio-ui/engine/device";
 import {
   TRANSIENT_WORKLET,
   type TransientState,
   transientSettings,
 } from "@/registry-audio/bases/base/devices/transient/device";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
-import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 

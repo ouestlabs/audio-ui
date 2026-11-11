@@ -1,17 +1,13 @@
-import type { DeviceContext } from "@audio-ui/engine/device";
+import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
+import { createFeed, type Feed } from "@audio-ui/engine/device";
 import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   DELAY_WORKLET,
   type DelayState,
   delaySettings,
   MAX_DELAY_SECONDS,
 } from "@/registry-audio/bases/base/devices/delay/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
-import {
-  createFeed,
-  type Feed,
-} from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;

@@ -53,7 +53,7 @@ synth.connect(analyser);
 const pitch = usePitch(analyser, { minHz: 60, maxHz: 1200, reference: 432 });
 ```
 
-The detector is the YIN algorithm of `@audio/pitch-yin`: `yin(samples, { fs })` for the frequency of an array of samples, and `cents(frequency)` and `midiToHz(note)` from `@audio/note` for the note, its offset in cents and the way back. They are pure functions with no React and no Web Audio, so you can use them off the audio thread, in a test or in any framework.
+The detector is [`detectPitch`](/docs/engine/analysis#pitch) of `@audio-ui/engine/analysis`, the YIN algorithm of `@audio/pitch-yin`, for the frequency of an array of samples, and `cents(frequency)` and `midiToHz(note)` of [`@audio-ui/engine/pitch`](/docs/engine/pitch#notes-and-frequencies) for the note, its offset in cents and the way back. They are pure functions with no React and no Web Audio, so you can use them off the audio thread, in a test or in any framework.
 
 ## Accessibility
 

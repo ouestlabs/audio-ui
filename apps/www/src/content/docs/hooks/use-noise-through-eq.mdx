@@ -17,4 +17,4 @@ const { analyser } = useNoiseThroughEq(bands);
 const spectrum = useSpectrum(analyser);
 ```
 
-It plays while the play switch of its [session](/docs/hooks/use-audio-session) is on, and stops when it goes off or on unmount. A band that comes, goes or changes type rebuilds the chain; a band that moves ramps its filter. The noise is `noiseBuffer(ctx, "pink")` from [`device-engine`](/docs/lib/device-engine).
+It plays while the play switch of its [session](/docs/hooks/use-audio-session) is on, and stops when it goes off or on unmount. A band that comes, goes or changes type rebuilds the chain; a band that moves ramps its filter. The noise is `noiseBuffer(ctx, "pink")` from [`device-engine`](/docs/engine/device#engines).

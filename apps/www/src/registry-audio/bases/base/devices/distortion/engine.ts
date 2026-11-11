@@ -1,10 +1,10 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
 import {
   type DistortionState,
   distortionSettings,
   distortionTable,
   TABLE_DOMAIN,
 } from "@/registry-audio/bases/base/devices/distortion/device";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversampling";
 
 const RAMP_SECONDS = 0.015;

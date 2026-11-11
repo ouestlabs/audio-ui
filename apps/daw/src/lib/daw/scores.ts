@@ -13,11 +13,11 @@ import {
   MIDI_FILE_ACCEPT,
   readMidiFileParts,
   type ScorePart,
-} from "@/lib/midi-file";
+} from "@audio-ui/engine/files";
 import {
   MUSICXML_FILE_ACCEPT,
   readMusicXmlFileParts,
-} from "@/lib/musicxml-file";
+} from "@audio-ui/engine/files";
 
 /** What the import and a drop take as a score: a MIDI file, or a MusicXML score. */
 export const SCORE_ACCEPT = `${MIDI_FILE_ACCEPT},${MUSICXML_FILE_ACCEPT}`;

@@ -1,4 +1,4 @@
-import type { NoteTiming } from "@audio-ui/engine/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   clickGain,
   drawbarGain,
@@ -8,7 +8,6 @@ import {
   type OrganState,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/organ/device";
-import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** Headroom: nine partials a key stay under full scale. */
 const PARTIAL_GAIN = 0.1;

@@ -1,12 +1,9 @@
+import { measureLatency, measureResponse } from "@audio-ui/engine/device";
 import {
   equalizerCurve,
   equalizerDevice,
 } from "@/registry-audio/bases/base/devices/equalizer/device";
 import { createEqualizerEngine } from "@/registry-audio/bases/base/devices/equalizer/engine";
-import {
-  measureLatency,
-  measureResponse,
-} from "@/registry-audio/bases/base/lib/device-measure";
 import { assert, check } from "./harness.ts";
 
 /** An engine that only delays the sound, by `seconds`. */

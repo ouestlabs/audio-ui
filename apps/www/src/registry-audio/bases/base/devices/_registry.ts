@@ -10,7 +10,7 @@ import { deviceItems } from "../../items";
 export const devices: RegistryItem[] = [
   {
     categories: ["lib", "audio", "device"],
-    dependencies: [],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The detector of a key: an AudioWorklet loaded once per context from a blob, which reads a signal and writes the gain a compressor would apply to it. The multiband compressor uses it.",
     files: [
@@ -21,7 +21,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "key-detector",
-    registryDependencies: ["@audio-ui/audio-worklet"],
+    registryDependencies: [],
     type: "registry:lib",
   },
   ...deviceItems("auto-pan", {
@@ -44,7 +44,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("binaural-panner", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/spatial-binaural"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The binaural panner as a device: a direction, a distance, a head's size and a mix, the numbers that go on the worklet for a state, where it sits on the panel's top view and the worklet's source (the binaural panner of @audio/spatial-binaural), with no panel and no audio in it.",
       kernels: true,
@@ -62,7 +62,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("bass-enhancer", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/effect-subbass"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The bass enhancer as a device: a frequency, a drive, an amount and the share of the sub kept, the numbers that go on the worklet for a state, its two bands and the worklet's source (the bass enhancer of @audio/effect-subbass), with no panel and no audio in it.",
       kernels: true,
@@ -97,7 +97,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("chorus", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/effect-chorus"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The chorus as a device: a rate, a depth, a delay, one to eight voices and a mix, the numbers that go on the nodes for a state, the sweep of each voice's delay time and the source of the voices' worklet (the chorus of @audio/effect-chorus), with no panel and no audio in it.",
       kernels: true,
@@ -106,7 +106,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A chorus on the Web Audio API for a chorus state: a short delay whose time an oscillator sweeps, or two to eight voices in an AudioWorklet loaded from a blob, mixed with the dry sound, moving without a click.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -126,7 +126,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A compander on the Web Audio API for a compander state: the compander of @audio/dynamics-compand in an AudioWorklet loaded from a blob, fed only while it plays, the sound passing unchanged until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -154,7 +154,7 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "A compressor on the Web Audio API for a compressor state: the audio.js models in a worklet, the make-up after it, a dry and compressed mix, parameters that move without a click, the signal passing until the worklet is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot"],
@@ -184,12 +184,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("delay", {
     device: {
-      dependencies: [
-        "@audio-ui/engine",
-        "@audio/effect-graindelay",
-        "@audio/effect-multitap",
-        "@audio/effect-pingpong",
-      ],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The delay as a device: its mode (an echo, a ping-pong, a multitap or a grain delay), time, feedback, tone and mix, and the grain delay's pitch, spray, jitter and grain size, the numbers that go on the nodes for a state, the echoes a state makes and the worklet's source, with no panel and no audio in it.",
       kernels: true,
@@ -197,7 +192,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A delay on the Web Audio API for a delay state: an echo that goes round a tone filter so each repeat is darker, mixed with the dry sound, with a time that bends like a tape instead of clicking, and the ping-pong, multitap and grain modes on an AudioWorklet loaded from a blob, fed only while one plays.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -227,11 +222,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("ducker", {
     device: {
-      dependencies: [
-        "@audio-ui/engine",
-        "@audio/dynamics-ducker",
-        "@audio/dynamics-compressor",
-      ],
+      dependencies: ["@audio-ui/engine", "@audio/dynamics-compressor"],
       description:
         "The ducker as a device: a threshold, a ratio, a knee, a range, an attack and a release, the numbers that go on the worklet for a state, the gain it puts on the sound for a level of the key and the worklet's source (the ducker of @audio/dynamics-ducker), with no panel and no audio in it.",
       kernels: true,
@@ -240,7 +231,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A ducker on the Web Audio API for a ducker state: the ducker of @audio/dynamics-ducker in an AudioWorklet loaded from a blob, the sound on its first input and the key from the sidechain on its second, fed only while it plays, the sound passing unchanged until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -263,7 +254,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "piano"],
-      dependencies: ["@audio/note"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Electric Piano device: its four presets, its controls by what they do (tone, pickup, tremolo, output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: ["@audio-ui/piano", "@shadcn/select"],
@@ -295,7 +286,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("exciter", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/effect-exciter"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The exciter as a device: a frequency, a drive and an amount, the numbers that go on the worklet for a state, the band it excites and the worklet's source (the exciter of @audio/effect-exciter), with no panel and no audio in it.",
       kernels: true,
@@ -322,7 +313,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "An expander on the Web Audio API for an expander state: the expander of @audio/dynamics-expander in an AudioWorklet loaded from a blob, fed only while it plays, the sound passing unchanged until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -347,7 +338,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A filter on the Web Audio API for a filter state: the circuit an AudioWorklet loaded from a blob, the signal passing until it is ready and going round it when it is off, moving without a click.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -358,11 +349,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("frequency-shifter", {
     device: {
-      dependencies: [
-        "@audio-ui/engine",
-        "@audio/effect-freqshift",
-        "@audio/effect-ringmod",
-      ],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The frequency shifter as a device: a mode (shift or ring), the shift in hertz, the ring's frequency, the shifter's precision and a mix, the numbers that go on the worklet for a state, its latency, what it does to a note and its harmonics and the worklet's source (the frequency shifter of @audio/effect-freqshift and the ring modulator of @audio/effect-ringmod), with no panel and no audio in it.",
       kernels: true,
@@ -370,7 +357,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A frequency shifter on the Web Audio API for a frequency shifter state: an AudioWorklet loaded from a blob that plays both modes, one output each, faded by the mode, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -393,7 +380,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "piano"],
-      dependencies: ["@audio/note"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The face of the FM Synth device: its eight presets, what every operator shares, each operator's four controls and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: ["@audio-ui/piano", "@shadcn/select"],
@@ -401,7 +388,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("gate", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/dynamics-gate"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The gate as a device: a threshold, a floor, an attack, a hold, a release and a look-ahead, the numbers that go on the worklet for a state, the source of the worklet of @audio/dynamics-gate and the curve a state plays, with no panel and no audio in it.",
       kernels: true,
@@ -450,7 +437,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A limiter on the Web Audio API for a limiter state: the audio.js limiter in a worklet, the signal passing at the input gain until it is ready and going round it when it is off.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -461,7 +448,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("lofi", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/effect-lofi"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The lo-fi as a device: its wow, flutter, hiss, crackle, the band a high-pass and a low-pass leave and a tape drive, the numbers that go on the worklet for a state, the band a state leaves and the worklet's source, with no panel and no audio in it.",
       kernels: true,
@@ -469,7 +456,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A lo-fi on the Web Audio API for a lo-fi state: the kernel of @audio/effect-lofi in an AudioWorklet loaded from a blob, the sound passing clean until it is ready and when it is off.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -480,7 +467,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("mid-side", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/spatial-microshift"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The mid/side device as a device: a widening (off, a Haas delay or a detune, with their delay, cents and blend), a level for the mid, a level for the side and a bass mono frequency, the numbers that go on the nodes for a state and the source of the detune's worklet (the shifters of @audio/spatial-microshift), with no panel and no audio in it.",
       kernels: true,
@@ -489,7 +476,7 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "A mid/side device on the Web Audio API for a mid/side state: the signal widened first, by a Haas delay or a detune in an AudioWorklet loaded from a blob, then split into mid and side, a level for each, a high-pass on the side for bass mono, and the two added back, moving without a click.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -512,7 +499,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "piano"],
-      dependencies: ["@audio-ui/icons", "@audio/note"],
+      dependencies: ["@audio-ui/icons", "@audio-ui/engine"],
       description:
         "The face of the Mono Synth device: its eight presets, the oscillator's wave and the range in its title bar, its controls by what they do (oscillators, filter, envelope, glide and vibrato) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: [
@@ -536,7 +523,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "piano"],
-      dependencies: ["@audio/note"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Organ device: its six registrations and the rotary speaker in its title bar, nine drawbars as faders, its percussion, key click, drive and volume, and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: [
@@ -561,7 +548,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "piano"],
-      dependencies: ["@audio/note"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The face of the String Machine device: its eight presets, its controls by what they do (registers, tone, bow and output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: ["@audio-ui/piano", "@shadcn/select"],
@@ -581,7 +568,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "piano"],
-      dependencies: ["@audio/note"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Tape Keys device: the track its heads read in its title bar, the tape's speed, wow and tone, the volume, and its 35 keys. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: ["@audio-ui/piano", "@shadcn/toggle-group"],
@@ -589,7 +576,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("tilt-eq", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/biquad", "@audio/eq-tilt"],
+      dependencies: ["@audio-ui/engine", "@audio/biquad"],
       description:
         "The tilt EQ as a device: a tilt, a pivot and an output level, the numbers that go on the worklet for a state, the curve it plays (the shelves of @audio/biquad) and the worklet's source (the tilt of @audio/eq-tilt), with no panel and no audio in it.",
       kernels: true,
@@ -619,7 +606,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "piano"],
-      dependencies: ["@audio/note"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The guitar's face: the string's tone, decay and palm mute, the body and the volume, and a keyboard from the open low E up three octaves, controlled, with no audio in it.",
       registryDependencies: ["@audio-ui/piano"],
@@ -633,7 +620,7 @@ export const devices: RegistryItem[] = [
         "A synthesized drum as a device: a kick, a snare, a clap, a closed or an open hat, a tom, a rim or a cymbal, with its tuning, decay, tone and snap, played by velocity. Its state, its description and the tools an agent plays it with.",
     },
     engine: {
-      dependencies: [],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The Drum Synth on the Web Audio API: one engine plays every hit, each made of a falling sine and filtered noise when it comes, from a noise made once per context, ringing for its decay whatever the note's length.",
     },
@@ -685,7 +672,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("phaser", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/effect-phaser"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The phaser-flanger as a device: a mode (phaser, classic or flanger), a rate, a depth, a centre frequency, a delay, the classic phaser's stages, a feedback and a mix, the numbers that go on the nodes for a state, the sweep and the source of the classic phaser's worklet (the phaser of @audio/effect-phaser), with no panel and no audio in it.",
       kernels: true,
@@ -694,7 +681,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A phaser and flanger on the Web Audio API for a phaser state: four all-pass filters and a short delay swept by one oscillator, and the classic phaser's first-order stages in an AudioWorklet loaded from a blob, crossfaded by the mode, with feedback and a mix.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -717,7 +704,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "xypad"],
-      dependencies: ["@audio-ui/icons", "@audio/note"],
+      dependencies: ["@audio-ui/icons", "@audio-ui/engine"],
       description:
         "The face of the Pocket Synth device: a pad that plays it, its waveform and filter, and its volume. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: [
@@ -742,7 +729,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "piano"],
-      dependencies: ["@audio/note"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Poly Synth device: its eight presets, its controls by what they do (oscillators, filter, envelope, vibrato and chorus) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: ["@audio-ui/piano", "@shadcn/select"],
@@ -750,11 +737,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("redux", {
     device: {
-      dependencies: [
-        "@audio-ui/engine",
-        "@audio/effect-bitcrusher",
-        "@audio/effect-noiseshaper",
-      ],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The redux as a device: a number of bits rounded to the nearest level or shaped, a downsample factor and a mix, the numbers that go on the nodes for a state, the stairs of the quantizer and the source of the worklet that holds and shapes, with no panel and no audio in it.",
       kernels: true,
@@ -762,7 +745,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A redux on the Web Audio API for a redux state: a sample hold in an AudioWorklet loaded from a blob, which also shapes the bits, and a quantizer table that rounds them to the nearest level, mixed with the clean sound; the bits are crushed at once and the hold joins when the worklet is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -797,7 +780,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("rotary", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/effect-rotary"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The rotary speaker as a device: a speed (slow, fast or stop), a crossover, a depth, the horn's and the drum's ramps, a width and a mix, the numbers that go on the worklet for a state, its two bands and the worklet's source (the rotary of @audio/effect-rotary, with the crossover it splits the sound with), with no panel and no audio in it.",
       kernels: true,
@@ -827,7 +810,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "pad", "piano"],
-      dependencies: ["@audio/note"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Sampler device: its sample in its title bar, its controls and sixteen pads, one a slice, that play it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: ["@audio-ui/pad", "@shadcn/select"],
@@ -835,7 +818,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("stutter", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/effect-stutter"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The stutter as a device: an interval and a slice in note values, a decay and a mix, the numbers that go on the worklet for a state at a tempo, one interval as the panel draws it and the worklet's source (the stutter of @audio/effect-stutter), with no panel and no audio in it.",
       kernels: true,
@@ -872,14 +855,14 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("transient", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/dynamics-transient-shaper"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The transient shaper as a device: an attack and a sustain, each up or down by 12 dB, and an output gain, the numbers that go on the nodes for a state and the source of the worklet of @audio/dynamics-transient-shaper, with no panel and no audio in it.",
       kernels: true,
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {
-      dependencies: [],
+      dependencies: ["@audio-ui/engine"],
       description:
         "A transient shaper on the Web Audio API for a transient state: the audio.js shaper in a worklet, the signal passing unchanged until it is ready.",
     },
@@ -901,7 +884,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "An unlimiter on the Web Audio API for an unlimiter state: the de-limiter of @audio/dynamics-unlimit in an AudioWorklet loaded from a blob, fed only while it plays, the sound passing unchanged until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -935,7 +918,7 @@ export const devices: RegistryItem[] = [
       registryDependencies: ["@audio-ui/oversampling"],
     },
     engine: {
-      dependencies: [],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The vibe on the Web Audio API: a warm preamp, four all-pass stages swept by an oscillator of the lamp's own wave, mixed half dry in chorus or alone in vibrato, and a bypass when it is off.",
     },
@@ -948,11 +931,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("wah", {
     device: {
-      dependencies: [
-        "@audio-ui/engine",
-        "@audio/effect-autowah",
-        "@audio/effect-wah",
-      ],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The wah as a device: a mode (envelope, sweep or pedal), the band's frequency and resonance, an envelope's range, sensitivity, attack and release, an oscillator's rate or note value and depth, a mix and an output, the numbers that go on the worklet for a state, the band's travel and curve and the worklet's source (the auto-wah of @audio/effect-autowah and the wah of @audio/effect-wah), with no panel and no audio in it.",
       kernels: true,
@@ -961,7 +940,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A wah on the Web Audio API for a wah state: an AudioWorklet loaded from a blob that plays every mode, one output each, faded by the mode, mixed with the clean sound at an output level, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: [],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -986,7 +965,7 @@ export const devices: RegistryItem[] = [
     },
     panel: {
       categories: ["device", "synth", "xypad"],
-      dependencies: ["@audio/note"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Wave Shaper device: a pad that plays it, its waveform and its knobs. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
       registryDependencies: ["@audio-ui/waveform-select", "@audio-ui/xypad"],

@@ -17,6 +17,7 @@ import {
   stretchNotes,
 } from "@audio-ui/core/piano-roll";
 import {
+  type KeyNote,
   rollScale,
   type Scale,
   scalePitchClasses,
@@ -59,7 +60,6 @@ import {
   PianoRollViewport,
 } from "@/registry-audio/bases/base/audio/elements/piano-roll";
 import {
-  type KeyNote,
   ScaleMenu,
   ScaleMenuContent,
   ScaleMenuDetect,

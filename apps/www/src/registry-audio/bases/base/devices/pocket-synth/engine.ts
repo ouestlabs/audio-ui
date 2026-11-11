@@ -1,9 +1,8 @@
-import type { NoteTiming } from "@audio-ui/engine/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import type {
   PocketSynthNote,
   PocketSynthState,
 } from "@/registry-audio/bases/base/devices/pocket-synth/device";
-import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How fast a parameter follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.01;

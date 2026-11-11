@@ -1,15 +1,12 @@
 import { toWebAudioQ } from "@audio-ui/engine/analysis";
+import type { EffectEngine } from "@audio-ui/engine/device";
+import { createFeed, type Feed } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   DETUNE_WORKLET,
   type MidSideState,
   midSideSettings,
 } from "@/registry-audio/bases/base/devices/mid-side/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
-import {
-  createFeed,
-  type Feed,
-} from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.015;
 const HALF = 0.5;

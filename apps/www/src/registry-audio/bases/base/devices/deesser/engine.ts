@@ -1,11 +1,10 @@
-import type { DeviceReadings } from "@audio-ui/engine/device";
+import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
+import { createWorkletStage } from "@audio-ui/engine/device";
 import {
   DEESSER_WORKLET,
   type DeesserState,
   deesserSettings,
 } from "@/registry-audio/bases/base/devices/deesser/device";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
-import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 

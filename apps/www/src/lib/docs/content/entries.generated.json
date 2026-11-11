@@ -3,9 +3,7 @@
     "dependencies": [
       "@audio-ui/core",
       "@audio-ui/engine",
-      "@audio-ui/react",
-      "@audio/beat-detect",
-      "@audio/mir-chroma"
+      "@audio-ui/react"
     ],
     "description": "The document of an arrangement of clips on tracks: its clips, tracks and mixes, how far a clip reaches, where a MIDI clip's notes play, and what a track's volume and pan automation gives at a point of the song",
     "exports": [
@@ -330,21 +328,6 @@
         "summary": "A clip's fades as it is laid down: `EDGE_FADE_SECONDS` at each edge, or half its length when it is shorter."
       },
       {
-        "kind": "interface",
-        "name": "BeatAnalysis",
-        "summary": "What a recording's beat is read as when it comes in: its tempo, if it has one, and its transients, in seconds."
-      },
-      {
-        "kind": "function",
-        "name": "audioChroma",
-        "summary": "How much of a recording's sound lies in each pitch class, C to B, summing to 1, read once as it is decoded: what a key is read from, with notes or without (`detectKeys` of the Scale menu)."
-      },
-      {
-        "kind": "function",
-        "name": "analyzeBeat",
-        "summary": "Reads a recording's beat, once, as it is decoded: what `warpOnImport` warps its clips by."
-      },
-      {
         "kind": "function",
         "name": "warpOnImport",
         "summary": "A clip of a recording just brought in, warped in Beats so it plays in time at `tempo` (CLP-019): a short loop as that loop, any other on the first beat of each bar, starting on its first beat and as long as the whole recording plays."
@@ -490,84 +473,6 @@
   },
   {
     "dependencies": [
-      "@audio/decode-aiff",
-      "@audio/decode-caf",
-      "@audio/decode-mp4",
-      "@audio/resample-sinc"
-    ],
-    "description": "Decoding an audio file into samples at a context's rate, the step before the waveform maths of @audio-ui/engine/analysis: the browser's decoder first, and for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed",
-    "exports": [
-      {
-        "kind": "function",
-        "name": "decodeAudioChannels",
-        "summary": "Decodes raw audio bytes, such as `file.arrayBuffer()`, into every channel's PCM samples at the context's sample rate, ready for `computePeaks`."
-      },
-      {
-        "kind": "function",
-        "name": "decodeAudioSamples",
-        "summary": "Decodes raw audio bytes into one channel's PCM samples, ready for `downsampleWaveform`: `decodeAudioChannels`, then the channel asked for, or the last there is."
-      }
-    ],
-    "files": [
-      "lib/audio-decode.ts"
-    ],
-    "from": "@/lib/audio-decode",
-    "kind": "lib",
-    "name": "audio-decode",
-    "registryDependencies": [],
-    "sources": [
-      "lib/audio-decode.ts"
-    ],
-    "usedBy": [
-      "block-timeline",
-      "block-waveform-player",
-      "waveform-peaks"
-    ]
-  },
-  {
-    "dependencies": [
-      "@audio/encode"
-    ],
-    "description": "Writing sound to a WAV, FLAC or MP3 file, the step after an offline render or a recording: encoded in chunks with its progress, each format's encoder loaded the first time it is used, and saved through the browser's downloads",
-    "exports": [
-      {
-        "kind": "type",
-        "name": "AudioFileFormat",
-        "summary": "The formats `encodeAudio` writes."
-      },
-      {
-        "kind": "interface",
-        "name": "EncodeAudioOptions",
-        "summary": ""
-      },
-      {
-        "kind": "function",
-        "name": "encodeAudio",
-        "summary": "Encodes channels of samples, from -1 to 1, as a file."
-      },
-      {
-        "kind": "function",
-        "name": "downloadFile",
-        "summary": "Saves a file through the browser's downloads, named `name`."
-      }
-    ],
-    "files": [
-      "lib/audio-encode.ts"
-    ],
-    "from": "@/lib/audio-encode",
-    "kind": "lib",
-    "name": "audio-encode",
-    "registryDependencies": [],
-    "sources": [
-      "lib/audio-encode.ts"
-    ],
-    "usedBy": [
-      "audio-export",
-      "export-dialog-demo"
-    ]
-  },
-  {
-    "dependencies": [
       "@audio-ui/engine"
     ],
     "description": "Exporting rendered sound to a file: the settings an export picks (format, bit depth or bitrate, a level left as it is, brought to its peak or to a loudness target) and exportSound, which measures, normalizes and encodes, saying how far it is",
@@ -609,59 +514,13 @@
     "from": "@/lib/audio-export",
     "kind": "lib",
     "name": "audio-export",
-    "registryDependencies": [
-      "audio-encode",
-      "loudness"
-    ],
+    "registryDependencies": [],
     "sources": [
       "lib/audio-export.ts"
     ],
     "usedBy": [
       "export-dialog",
       "export-dialog-demo"
-    ]
-  },
-  {
-    "dependencies": [],
-    "description": "Loads the source of an AudioWorklet processor into a context, from a blob and once per context: every device engine and lib that runs a worklet loads it this way, and gets false where worklets cannot run.",
-    "exports": [
-      {
-        "kind": "function",
-        "name": "loadWorklet",
-        "summary": "Loads the source of an `AudioWorklet` processor into a context, from a blob, so there is no file to serve."
-      }
-    ],
-    "files": [
-      "lib/audio-worklet.ts"
-    ],
-    "from": "@/lib/audio-worklet",
-    "kind": "lib",
-    "name": "audio-worklet",
-    "registryDependencies": [],
-    "sources": [
-      "lib/audio-worklet.ts"
-    ],
-    "usedBy": [
-      "chorus-engine",
-      "clip-player",
-      "compander-engine",
-      "compressor-engine",
-      "delay-engine",
-      "device-engine",
-      "ducker-engine",
-      "expander-engine",
-      "filter-engine",
-      "frequency-shifter-engine",
-      "key-detector",
-      "limiter-engine",
-      "lofi-engine",
-      "loudness",
-      "mid-side-engine",
-      "phaser-engine",
-      "recording",
-      "redux-engine",
-      "unlimiter-engine",
-      "wah-engine"
     ]
   },
   {
@@ -717,9 +576,7 @@
     "from": "@/lib/clip-player",
     "kind": "lib",
     "name": "clip-player",
-    "registryDependencies": [
-      "audio-worklet"
-    ],
+    "registryDependencies": [],
     "sources": [
       "lib/clip-player.ts"
     ],
@@ -901,137 +758,6 @@
   },
   {
     "dependencies": [
-      "@audio-ui/engine",
-      "@audio/synth-noise"
-    ],
-    "description": "What a device's engine is and the pieces engines are made of: the EffectEngine and InstrumentEngine contracts every create<Name>Engine returns, a worklet stage that takes over from the clean sound once loaded, a feed that keeps a worklet fed only while its path is heard, and the noise buffers engines share (from @audio/synth-noise).",
-    "exports": [
-      {
-        "kind": "interface",
-        "name": "EffectEngine",
-        "summary": "The engine of an effect on the Web Audio API: the binding of its state (`update`, `dispose`, `readings`) between an input and an output."
-      },
-      {
-        "kind": "interface",
-        "name": "InstrumentEngine",
-        "summary": "The engine of an instrument: one voice, notes in, sound out."
-      },
-      {
-        "kind": "type",
-        "name": "EngineFactory",
-        "summary": "What every `create<Name>Engine` is: an engine on a context, for the state it starts with and the host's tempo."
-      },
-      {
-        "kind": "interface",
-        "name": "WorkletStage",
-        "summary": "A worklet that takes over from the clean sound once it is in the graph."
-      },
-      {
-        "kind": "function",
-        "name": "createWorkletStage",
-        "summary": "A stage of an engine that runs a worklet: the sound passes clean while the worklet loads, then fades over to it."
-      },
-      {
-        "kind": "const",
-        "name": "FEED_RELEASE_MS",
-        "summary": "How long after a path stops a worklet is still fed, in ms: its fade is over by then."
-      },
-      {
-        "kind": "type",
-        "name": "FeedConnection",
-        "summary": "A connection a feed makes: `from` into `to`, at an output and an input of their own if given."
-      },
-      {
-        "kind": "interface",
-        "name": "Feed",
-        "summary": "Connections made while a path plays and taken away once it has faded out."
-      },
-      {
-        "kind": "function",
-        "name": "createFeed",
-        "summary": "Feeds a worklet only while the path it plays is heard: a worklet fed nothing costs nothing."
-      },
-      {
-        "kind": "type",
-        "name": "NoiseColor",
-        "summary": "The colors of noise a buffer is made in, as `@audio/synth-noise` makes them."
-      },
-      {
-        "kind": "function",
-        "name": "noiseBuffer",
-        "summary": "Two seconds of noise on a context, from `@audio/synth-noise` (seeded, its peak at 0.9), made once per color and context and shared by everything that plays it: a synth's noise source, a snare's rattle, the pink noise an equalizer is heard through."
-      }
-    ],
-    "files": [
-      "lib/device-engine.ts"
-    ],
-    "from": "@/lib/device-engine",
-    "kind": "lib",
-    "name": "device-engine",
-    "registryDependencies": [
-      "audio-worklet"
-    ],
-    "sources": [
-      "lib/device-engine.ts"
-    ],
-    "usedBy": [
-      "auto-pan-engine",
-      "bass-enhancer-engine",
-      "binaural-panner-engine",
-      "channel-eq-engine",
-      "chorus-engine",
-      "compander-engine",
-      "compressor-engine",
-      "deesser-engine",
-      "delay-engine",
-      "device-library",
-      "device-measure",
-      "distortion-engine",
-      "drum-synth-engine",
-      "ducker-engine",
-      "electric-piano-engine",
-      "equalizer-engine",
-      "exciter-engine",
-      "expander-engine",
-      "filter-engine",
-      "fm-synth-engine",
-      "frequency-shifter-engine",
-      "gate-engine",
-      "graphic-eq-engine",
-      "guitar-engine",
-      "limiter-engine",
-      "lofi-engine",
-      "mid-side-engine",
-      "mono-synth-engine",
-      "multiband-engine",
-      "organ-engine",
-      "overdrive-engine",
-      "phaser-engine",
-      "pocket-synth-engine",
-      "poly-synth-engine",
-      "redux-engine",
-      "reverb-engine",
-      "rotary-engine",
-      "sampler-engine",
-      "saturator-engine",
-      "string-machine-engine",
-      "stutter-engine",
-      "tape-keys-engine",
-      "tilt-eq-engine",
-      "transient-engine",
-      "unlimiter-engine",
-      "use-device-engines",
-      "use-device-loop",
-      "use-noise-through-eq",
-      "use-polyphony",
-      "utility-engine",
-      "vibe-engine",
-      "wah-engine",
-      "wave-shaper-engine"
-    ]
-  },
-  {
-    "dependencies": [
       "@audio-ui/engine"
     ],
     "description": "Every device of the registry with its engine, by shelf: what a host needs to build a track's chain from the ids a project stores, and what a device browser lists",
@@ -1074,7 +800,6 @@
     "kind": "lib",
     "name": "device-library",
     "registryDependencies": [
-      "device-engine",
       "auto-pan-device",
       "auto-pan-engine",
       "channel-eq-device",
@@ -1183,43 +908,6 @@
       "rack",
       "voice-pool"
     ]
-  },
-  {
-    "dependencies": [
-      "@audio/measure-latency",
-      "@audio/measure-response"
-    ],
-    "description": "Measure an engine against what its device claims, in an offline audio context: how far its frequency response is from the curve the panel draws (measureResponse) and how long it delays a signal (measureLatency), with audio.js's measuring. For a host that brings its own engine.",
-    "exports": [
-      {
-        "kind": "interface",
-        "name": "ResponseMeasurement",
-        "summary": "What a measurement of a frequency response found."
-      },
-      {
-        "kind": "function",
-        "name": "measureResponse",
-        "summary": "How far an engine's frequency response is from `curve`, the gain in dB the device draws at each frequency."
-      },
-      {
-        "kind": "function",
-        "name": "measureLatency",
-        "summary": "How long an engine delays a signal, in milliseconds: where what comes out of an impulse lines up with it."
-      }
-    ],
-    "files": [
-      "lib/device-measure.ts"
-    ],
-    "from": "@/lib/device-measure",
-    "kind": "lib",
-    "name": "device-measure",
-    "registryDependencies": [
-      "device-engine"
-    ],
-    "sources": [
-      "lib/device-measure.ts"
-    ],
-    "usedBy": []
   },
   {
     "dependencies": [],
@@ -1525,78 +1213,6 @@
     ]
   },
   {
-    "dependencies": [
-      "@audio-ui/engine",
-      "@audio/loudness-lufs",
-      "@audio/loudness-truepeak",
-      "@audio/weighting-k"
-    ],
-    "description": "How loud a sound is, the way streaming services and broadcasters measure it (ITU-R BS.1770): integrated loudness in LUFS, sample and true peak, and the gain that brings it to a target such as -14 LUFS without passing a true-peak ceiling; and while it plays, its momentary, short-term and integrated loudness, measured on the audio thread",
-    "exports": [
-      {
-        "kind": "const",
-        "name": "LOUDNESS_TARGETS",
-        "summary": "Targets in LUFS: what streaming services, podcasts and broadcast (EBU R 128) ask a file to be."
-      },
-      {
-        "kind": "interface",
-        "name": "Loudness",
-        "summary": "How loud a sound is."
-      },
-      {
-        "kind": "function",
-        "name": "measureLoudness",
-        "summary": "Measures whole channels at once."
-      },
-      {
-        "kind": "function",
-        "name": "loudnessGain",
-        "summary": "The gain in dB that brings a sound to `target` LUFS, as far as its true peak stays at or under `ceiling` dBTP: a sound that would pass it lands under the target instead, and nothing is limited."
-      },
-      {
-        "kind": "interface",
-        "name": "LiveLoudness",
-        "summary": "How loud a sound is while it plays, in LUFS."
-      },
-      {
-        "kind": "function",
-        "name": "createLoudnessReader",
-        "summary": "Reads loudness block by block: `add` takes the K-weighted mean square of the next 100 ms, summed over the channels, as the meter's processor posts it, and gives the loudness up to it."
-      },
-      {
-        "kind": "const",
-        "name": "LOUDNESS_WORKLET",
-        "summary": "The meter's processor: it K-weights each channel of its input (a high shelf, then a high-pass, with the coefficients `@audio/weighting-k` gives for the context's rate), and posts the mean square of each block of 100 ms, summed over the channels."
-      },
-      {
-        "kind": "interface",
-        "name": "LoudnessMeter",
-        "summary": "A live loudness meter on a context, as `createLoudnessMeter` makes it."
-      },
-      {
-        "kind": "function",
-        "name": "createLoudnessMeter",
-        "summary": "Measures what is connected to it while it plays, on the audio thread, and calls `onLoudness` with its momentary, short-term and integrated loudness every 100 ms."
-      }
-    ],
-    "files": [
-      "lib/loudness.ts"
-    ],
-    "from": "@/lib/loudness",
-    "kind": "lib",
-    "name": "loudness",
-    "registryDependencies": [
-      "audio-worklet"
-    ],
-    "sources": [
-      "lib/loudness.ts"
-    ],
-    "usedBy": [
-      "audio-export",
-      "use-loudness"
-    ]
-  },
-  {
     "dependencies": [],
     "description": "The source of an AudioWorklet processor that plays one of several audio.js manifests (the audio.js of an @audio/* package): the model sent by message, a parameter it reads as it plays changed at once, a model made again for one it is made with, warmed on the last 100 ms and faded in, its state brought back to rest on silence, and a meter of the gain it takes off.",
     "exports": [
@@ -1626,71 +1242,6 @@
       "limiter-device",
       "transient-device",
       "unlimiter-device"
-    ]
-  },
-  {
-    "dependencies": [
-      "@audio-ui/core",
-      "@audio/midi-parse",
-      "@audio/midi-write"
-    ],
-    "description": "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one; or read one as parts in beats, a part per track and channel with its name and program, for a host that lays each on a track (parsed by @audio/midi-parse, written by @audio/midi-write)",
-    "exports": [
-      {
-        "kind": "const",
-        "name": "MIDI_FILE_ACCEPT",
-        "summary": "What a file input or a drop zone accepts as a MIDI file."
-      },
-      {
-        "kind": "interface",
-        "name": "MidiFileGrid",
-        "summary": "The grid notes are read onto: steps a quarter note, the clip's length in steps, and the pitch and tempo ranges it takes."
-      },
-      {
-        "kind": "function",
-        "name": "readMidiFile",
-        "summary": "Reads a MIDI file's notes onto a grid of steps, with the file's own tempo (clamped to the BPM range)."
-      },
-      {
-        "kind": "interface",
-        "name": "ScoreNote",
-        "summary": "A note of a score in beats: where it starts and how long it lasts, in quarter notes."
-      },
-      {
-        "kind": "interface",
-        "name": "ScorePart",
-        "summary": "One part of a score: its name, whether it is drums, and its notes in beats."
-      },
-      {
-        "kind": "function",
-        "name": "readMidiFileParts",
-        "summary": "Reads a MIDI file as parts, for a host that lays each on a track of its own: a part per track and channel, named after its track (and its channel, when a track holds several), its notes in beats as they were written, not quantized and not cut, at least a tick long, and the first program its channel plays."
-      },
-      {
-        "kind": "function",
-        "name": "writeMidiFile",
-        "summary": "The notes as a Standard MIDI File, the inverse of `readMidiFile`."
-      },
-      {
-        "kind": "function",
-        "name": "downloadMidiFile",
-        "summary": "Saves the notes as a `.mid` file, named `filename`."
-      }
-    ],
-    "files": [
-      "lib/midi-file.ts"
-    ],
-    "from": "@/lib/midi-file",
-    "kind": "lib",
-    "name": "midi-file",
-    "registryDependencies": [],
-    "sources": [
-      "lib/midi-file.ts"
-    ],
-    "usedBy": [
-      "block-piano-roll",
-      "musicxml-file",
-      "piano-roll-midi-file-demo"
     ]
   },
   {
@@ -1752,61 +1303,6 @@
     ],
     "usedBy": [
       "arrangement-engine"
-    ]
-  },
-  {
-    "dependencies": [
-      "@audio-ui/core",
-      "@audio/musicxml",
-      "fflate"
-    ],
-    "description": "MusicXML scores to and from notes on a grid of steps: read one, plain or compressed as .mxl, with its first tempo, every part into one clip, write one for a notation app, or download one",
-    "exports": [
-      {
-        "kind": "const",
-        "name": "MUSICXML_FILE_ACCEPT",
-        "summary": "What a file input or a drop zone accepts as a MusicXML file: a score, or one compressed as `.mxl`."
-      },
-      {
-        "kind": "interface",
-        "name": "MusicXmlFileGrid",
-        "summary": "The grid notes are read onto: steps a quarter note, the clip's length in steps, and the pitch and tempo ranges it takes."
-      },
-      {
-        "kind": "function",
-        "name": "readMusicXmlFileParts",
-        "summary": "Reads a MusicXML score as parts, for a host that lays each on a track of its own: a part each, by its name, its notes in beats as they were written, through changes of tempo, not quantized and not cut."
-      },
-      {
-        "kind": "function",
-        "name": "readMusicXmlFile",
-        "summary": "Reads a MusicXML score's notes onto a grid of steps, with its first tempo (clamped to the BPM range), every part into the one clip."
-      },
-      {
-        "kind": "function",
-        "name": "writeMusicXmlFile",
-        "summary": "The notes as a MusicXML score, the inverse of `readMusicXmlFile`, for a notation app to open: on the grid they sit on, so nothing moves."
-      },
-      {
-        "kind": "function",
-        "name": "downloadMusicXmlFile",
-        "summary": "Saves the notes as a `.musicxml` file, named `filename`."
-      }
-    ],
-    "files": [
-      "lib/musicxml-file.ts"
-    ],
-    "from": "@/lib/musicxml-file",
-    "kind": "lib",
-    "name": "musicxml-file",
-    "registryDependencies": [
-      "midi-file"
-    ],
-    "sources": [
-      "lib/musicxml-file.ts"
-    ],
-    "usedBy": [
-      "block-piano-roll"
     ]
   },
   {
@@ -2016,7 +1512,8 @@
   },
   {
     "dependencies": [
-      "@audio-ui/core"
+      "@audio-ui/core",
+      "@audio-ui/engine"
     ],
     "description": "Recording into an arrangement: an input recorder on an AudioWorklet that keeps each block with its frame on the audio clock, the frames of a take with the latency taken off, and the audio or MIDI clip a take becomes, with record quantization and overdub",
     "exports": [
@@ -2079,7 +1576,6 @@
     "kind": "lib",
     "name": "recording",
     "registryDependencies": [
-      "audio-worklet",
       "arrangement"
     ],
     "sources": [
@@ -2509,9 +2005,7 @@
     "from": "@/hooks/use-device-engines",
     "kind": "hook",
     "name": "use-device-engines",
-    "registryDependencies": [
-      "device-engine"
-    ],
+    "registryDependencies": [],
     "sources": [
       "hooks/use-device-engines.ts"
     ],
@@ -2549,7 +2043,6 @@
     "name": "use-device-loop",
     "registryDependencies": [
       "demo-sound",
-      "device-engine",
       "use-demo-source",
       "use-device-engines",
       "use-play-switch",
@@ -2599,7 +2092,8 @@
   },
   {
     "dependencies": [
-      "@audio-ui/react"
+      "@audio-ui/react",
+      "@audio-ui/engine"
     ],
     "description": "How loud a signal is while it plays, in LUFS, as streaming services and broadcasters measure it (ITU-R BS.1770): its momentary, short-term and integrated loudness, measured on the audio thread, as a live source refreshed every 100 ms without re-rendering",
     "exports": [
@@ -2615,9 +2109,7 @@
     "from": "@/hooks/use-loudness",
     "kind": "hook",
     "name": "use-loudness",
-    "registryDependencies": [
-      "loudness"
-    ],
+    "registryDependencies": [],
     "sources": [
       "hooks/use-loudness.ts"
     ],
@@ -2846,7 +2338,6 @@
     "kind": "hook",
     "name": "use-noise-through-eq",
     "registryDependencies": [
-      "device-engine",
       "use-play-switch",
       "web-audio"
     ],
@@ -2915,8 +2406,7 @@
   {
     "dependencies": [
       "@audio-ui/react",
-      "@audio/note",
-      "@audio/pitch-yin"
+      "@audio-ui/engine"
     ],
     "description": "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
     "exports": [
@@ -2982,7 +2472,9 @@
     ]
   },
   {
-    "dependencies": [],
+    "dependencies": [
+      "@audio-ui/engine"
+    ],
     "description": "An instrument whose engine plays one voice, played as chords: as many engines as notes sound at once, made into a destination, each following the state, every note on a voice of its own.",
     "exports": [
       {
@@ -3013,7 +2505,6 @@
     "kind": "hook",
     "name": "use-polyphony",
     "registryDependencies": [
-      "device-engine",
       "polyphony",
       "use-device-engines"
     ],
@@ -3108,7 +2599,7 @@
   },
   {
     "dependencies": [
-      "@audio/note"
+      "@audio-ui/engine"
     ],
     "description": "Polyphonic synth voices on the Web Audio API: start and release notes with an envelope, a velocity and a pitch bend.",
     "exports": [
@@ -3408,8 +2899,7 @@
   },
   {
     "dependencies": [
-      "@audio-ui/engine",
-      "@audio/note"
+      "@audio-ui/engine"
     ],
     "description": "Note players: what a MIDI track plays through, all taking notes the same way, and the voice pool that plays an instrument of the library with a voice for each note it holds, the oldest given up first.",
     "exports": [

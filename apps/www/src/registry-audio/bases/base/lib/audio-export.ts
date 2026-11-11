@@ -3,16 +3,13 @@
  * rendered channels to the file, measured, brought to a peak or a loudness,
  * then encoded. What `export-dialog` asks for and a render gives.
  */
-import { dbToGain } from "@audio-ui/engine/analysis";
 import {
-  type AudioFileFormat,
-  encodeAudio,
-} from "@/registry-audio/bases/base/lib/audio-encode";
-import {
+  dbToGain,
   type Loudness,
   loudnessGain,
   measureLoudness,
-} from "@/registry-audio/bases/base/lib/loudness";
+} from "@audio-ui/engine/analysis";
+import { type AudioFileFormat, encodeAudio } from "@audio-ui/engine/files";
 
 /** How an export is brought to a level: left as it is, its loudest sample to 0 dBFS, or to a loudness in LUFS with its true peak at -1 dBTP at most. */
 export type ExportNormalize = "off" | "peak" | number;

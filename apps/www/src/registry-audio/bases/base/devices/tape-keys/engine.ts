@@ -1,4 +1,5 @@
 import type { NoteTiming } from "@audio-ui/engine/device";
+import { type InstrumentEngine, noiseBuffer } from "@audio-ui/engine/device";
 import {
   speedCents,
   TAPE_KEYS_HIGHEST,
@@ -9,10 +10,6 @@ import {
   toneHertz,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/tape-keys/device";
-import {
-  type InstrumentEngine,
-  noiseBuffer,
-} from "@/registry-audio/bases/base/lib/device-engine";
 
 type Track = TapeKeysState["station"];
 

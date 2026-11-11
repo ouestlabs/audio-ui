@@ -154,22 +154,21 @@ export const hooks: RegistryItem[] = [
     dependencies: ["@audio-ui/engine"],
     description:
       "The engines of a device on a page: as many as asked, made on a destination's context from the state of the moment, each following the state and the host's tempo, disposed when the destination changes and on unmount, never updated once disposed. One for an effect, one per voice for an instrument.",
-    registryDependencies: ["@audio-ui/device-engine"],
+    registryDependencies: [],
   }),
   hookItem("use-polyphony", {
     categories: ["audio", "synth"],
-    dependencies: [],
+    dependencies: ["@audio-ui/engine"],
     description:
       "An instrument whose engine plays one voice, played as chords: as many engines as notes sound at once, made into a destination, each following the state, every note on a voice of its own.",
     registryDependencies: [
-      "@audio-ui/device-engine",
       "@audio-ui/polyphony",
       "@audio-ui/use-device-engines",
     ],
   }),
   hookItem("use-synth-voices", {
     categories: ["audio", "synth", "piano", "envelope"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Polyphonic synth voices on the Web Audio API: start and release notes with an envelope, a velocity and a pitch bend.",
     registryDependencies: ["@audio-ui/envelope-ramp"],
@@ -236,7 +235,7 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-pitch", {
     categories: ["hooks", "audio", "tuner"],
-    dependencies: ["@audio-ui/react", "@audio/note", "@audio/pitch-yin"],
+    dependencies: ["@audio-ui/react", "@audio-ui/engine"],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
   }),
@@ -248,10 +247,10 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-loudness", {
     categories: ["hooks", "audio", "meter"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio-ui/engine"],
     description:
       "How loud a signal is while it plays, in LUFS, as streaming services and broadcasters measure it (ITU-R BS.1770): its momentary, short-term and integrated loudness, measured on the audio thread, as a live source refreshed every 100 ms without re-rendering",
-    registryDependencies: ["@audio-ui/loudness"],
+    registryDependencies: [],
   }),
   hookItem("use-simulated-levels", {
     categories: ["hooks", "audio", "meter"],
@@ -269,11 +268,7 @@ export const hooks: RegistryItem[] = [
     dependencies: ["@audio-ui/engine"],
     description:
       "Pink noise played through an equalizer that follows your bands, with the analyser after it: what a plot draws is what is heard",
-    registryDependencies: [
-      "@audio-ui/device-engine",
-      "@audio-ui/use-play-switch",
-      "@audio-ui/web-audio",
-    ],
+    registryDependencies: ["@audio-ui/use-play-switch", "@audio-ui/web-audio"],
   }),
   hookItem("use-device-loop", {
     categories: ["hooks", "audio", "device"],
@@ -282,7 +277,6 @@ export const hooks: RegistryItem[] = [
       "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and analysers of what goes in and comes out are there for a meter or a spectrum.",
     registryDependencies: [
       "@audio-ui/demo-sound",
-      "@audio-ui/device-engine",
       "@audio-ui/use-demo-source",
       "@audio-ui/use-device-engines",
       "@audio-ui/use-play-switch",

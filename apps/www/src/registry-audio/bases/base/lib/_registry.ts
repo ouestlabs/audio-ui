@@ -1,71 +1,29 @@
 import type { RegistryItem } from "shadcn/schema";
-import { libItem } from "../../items";
+import { libItem, movedItem } from "../../items";
 
 const items: RegistryItem[] = [
   libItem("web-audio", {
     categories: ["lib", "audio", "web-audio"],
     description: "Web Audio Lib",
   }),
-  libItem("device-engine", {
-    categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: ["@audio-ui/engine", "@audio/synth-noise"],
-    description:
-      "What a device's engine is and the pieces engines are made of: the EffectEngine and InstrumentEngine contracts every create<Name>Engine returns, a worklet stage that takes over from the clean sound once loaded, a feed that keeps a worklet fed only while its path is heard, and the noise buffers engines share (from @audio/synth-noise).",
-    registryDependencies: ["@audio-ui/audio-worklet"],
-  }),
-  libItem("audio-worklet", {
-    categories: ["lib", "audio", "web-audio"],
-    description:
-      "Loads the source of an AudioWorklet processor into a context, from a blob and once per context: every device engine and lib that runs a worklet loads it this way, and gets false where worklets cannot run.",
-  }),
+  movedItem("device-engine", "device"),
+  movedItem("audio-worklet", "worklet"),
   libItem("envelope-ramp", {
     categories: ["lib", "audio", "synth", "piano", "envelope"],
     description:
       "Envelope curves to gain automation: slicing an envelope at its sustain and scheduling its ramps on a GainNode's AudioParam, for synth voices",
   }),
-  libItem("audio-decode", {
-    categories: ["lib", "audio", "waveform"],
-    dependencies: [
-      "@audio/decode-aiff",
-      "@audio/decode-caf",
-      "@audio/decode-mp4",
-      "@audio/resample-sinc",
-    ],
-    description:
-      "Decoding an audio file into samples at a context's rate, the step before the waveform maths of @audio-ui/engine/analysis: the browser's decoder first, and for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed",
-  }),
-  libItem("audio-encode", {
-    categories: ["lib", "audio"],
-    dependencies: ["@audio/encode"],
-    description:
-      "Writing sound to a WAV, FLAC or MP3 file, the step after an offline render or a recording: encoded in chunks with its progress, each format's encoder loaded the first time it is used, and saved through the browser's downloads",
-  }),
-  libItem("loudness", {
-    categories: ["lib", "audio"],
-    dependencies: [
-      "@audio-ui/engine",
-      "@audio/loudness-lufs",
-      "@audio/loudness-truepeak",
-      "@audio/weighting-k",
-    ],
-    description:
-      "How loud a sound is, the way streaming services and broadcasters measure it (ITU-R BS.1770): integrated loudness in LUFS, sample and true peak, and the gain that brings it to a target such as -14 LUFS without passing a true-peak ceiling; and while it plays, its momentary, short-term and integrated loudness, measured on the audio thread",
-    registryDependencies: ["@audio-ui/audio-worklet"],
-  }),
+  movedItem("audio-decode", "files"),
+  movedItem("audio-encode", "files"),
+  movedItem("loudness", "analysis"),
   libItem("audio-export", {
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/engine"],
     description:
       "Exporting rendered sound to a file: the settings an export picks (format, bit depth or bitrate, a level left as it is, brought to its peak or to a loudness target) and exportSound, which measures, normalizes and encodes, saying how far it is",
-    registryDependencies: ["@audio-ui/audio-encode", "@audio-ui/loudness"],
+    registryDependencies: [],
   }),
-  libItem("device-measure", {
-    categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: ["@audio/measure-latency", "@audio/measure-response"],
-    description:
-      "Measure an engine against what its device claims, in an offline audio context: how far its frequency response is from the curve the panel draws (measureResponse) and how long it delays a signal (measureLatency), with audio.js's measuring. For a host that brings its own engine.",
-    registryDependencies: ["@audio-ui/device-engine"],
-  }),
+  movedItem("device-measure", "device"),
   libItem("manifest-worklet", {
     categories: ["lib", "audio", "device", "web-audio"],
     description:
@@ -114,13 +72,7 @@ const items: RegistryItem[] = [
   }),
   libItem("arrangement", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: [
-      "@audio-ui/core",
-      "@audio-ui/engine",
-      "@audio-ui/react",
-      "@audio/beat-detect",
-      "@audio/mir-chroma",
-    ],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine", "@audio-ui/react"],
     description:
       "The document of an arrangement of clips on tracks: its clips, tracks and mixes, how far a clip reaches, where a MIDI clip's notes play, and what a track's volume and pan automation gives at a point of the song",
   }),
@@ -129,19 +81,8 @@ const items: RegistryItem[] = [
     description:
       "Undo and redo as a value: a pure history of any document, with bursts (a drag is one entry), redo that drops on a new change, and a depth limit",
   }),
-  libItem("midi-file", {
-    categories: ["lib", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/midi-parse", "@audio/midi-write"],
-    description:
-      "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one; or read one as parts in beats, a part per track and channel with its name and program, for a host that lays each on a track (parsed by @audio/midi-parse, written by @audio/midi-write)",
-  }),
-  libItem("musicxml-file", {
-    categories: ["lib", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/musicxml", "fflate"],
-    description:
-      "MusicXML scores to and from notes on a grid of steps: read one, plain or compressed as .mxl, with its first tempo, every part into one clip, write one for a notation app, or download one",
-    registryDependencies: ["@audio-ui/midi-file"],
-  }),
+  movedItem("midi-file", "files"),
+  movedItem("musicxml-file", "files"),
   libItem("rack", {
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/engine"],
@@ -170,7 +111,7 @@ const items: RegistryItem[] = [
   }),
   libItem("voice-pool", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/engine", "@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Note players: what a MIDI track plays through, all taking notes the same way, and the voice pool that plays an instrument of the library with a voice for each note it holds, the oldest given up first.",
     registryDependencies: ["@audio-ui/device-library", "@audio-ui/polyphony"],
@@ -204,18 +145,18 @@ const items: RegistryItem[] = [
   }),
   libItem("recording", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "Recording into an arrangement: an input recorder on an AudioWorklet that keeps each block with its frame on the audio clock, the frames of a take with the latency taken off, and the audio or MIDI clip a take becomes, with record quantization and overdub",
     files: ["lib/recording.ts", "lib/input-recorder.ts"],
-    registryDependencies: ["@audio-ui/audio-worklet", "@audio-ui/arrangement"],
+    registryDependencies: ["@audio-ui/arrangement"],
   }),
   libItem("clip-player", {
     categories: ["lib", "audio", "timeline"],
     dependencies: ["@audio-ui/engine"],
     description:
       "A track's player of audio clips on an AudioWorklet: its recordings to the frame on the audio clock, with gain, fades, loops, reverse and warp, in a running or an offline context",
-    registryDependencies: ["@audio-ui/audio-worklet"],
+    registryDependencies: [],
   }),
   libItem("device-library", {
     categories: ["lib", "audio", "device"],
@@ -223,7 +164,6 @@ const items: RegistryItem[] = [
     description:
       "Every device of the registry with its engine, by shelf: what a host needs to build a track's chain from the ids a project stores, and what a device browser lists",
     registryDependencies: [
-      "@audio-ui/device-engine",
       "@audio-ui/auto-pan-device",
       "@audio-ui/auto-pan-engine",
       "@audio-ui/channel-eq-device",
@@ -371,10 +311,10 @@ const items: RegistryItem[] = [
   {
     dependencies: [],
     description:
-      "Moved: the peaks are in @audio-ui/engine/analysis and the decoding is audio-decode, as this lib gave both.",
+      "Moved: the peaks are in @audio-ui/engine/analysis and the decoding in @audio-ui/engine/files, as this lib gave both.",
     files: [],
     name: "waveform-peaks",
-    registryDependencies: ["@audio-ui/audio-decode"],
+    registryDependencies: [],
     type: "registry:lib",
   },
   libItem("sortable-drag", {

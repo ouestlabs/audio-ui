@@ -49,7 +49,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "An eighties polyphonic synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -71,7 +71,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A monophonic analog synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, one note at a time that glides to the next. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -93,7 +93,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A tonewheel organ you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -115,7 +115,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A string machine you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -137,7 +137,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A tape-replay keyboard you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight keys for chords. Play its 35 keys, or a MIDI keyboard from G2 to F5",
     files: [
@@ -159,7 +159,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A plucked guitar: its panel and its engine, eight strings for chords, played from the keyboard or a MIDI keyboard.",
     files: [
@@ -204,7 +204,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -226,7 +226,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "pad"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A slice sampler you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Strike its sixteen pads, play a MIDI keyboard from C2, or drop an audio file on it",
     files: [
@@ -249,7 +249,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "piano"],
-    dependencies: ["@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A tine electric piano you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, ten voices for chords. Play the keyboard, or a MIDI keyboard: a hard key barks and pings",
     files: [
@@ -489,8 +489,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/scale-menu",
       "@audio-ui/note-find",
       "@audio-ui/note-edit-menu",
-      "@audio-ui/midi-file",
-      "@audio-ui/musicxml-file",
       "@audio-ui/use-master-bus",
       "@audio-ui/use-midi-input",
       "@audio-ui/use-synth-voices",
@@ -584,7 +582,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano-roll"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "A piano roll that exports its clip as a .mid file and imports one onto its grid, with the file's tempo",
     files: [
@@ -595,7 +593,6 @@ export const components: RegistryItem[] = [
     ],
     name: "piano-roll-midi-file-demo",
     registryDependencies: [
-      "@audio-ui/midi-file",
       "@audio-ui/piano-roll",
       "@audio-ui/timeline",
       "@shadcn/button",
@@ -676,7 +673,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/scrubber",
       "@audio-ui/timeline",
       "@audio-ui/waveform",
-      "@audio-ui/audio-decode",
       "@shadcn/button",
       "@shadcn/toggle",
       "@audio-ui/web-audio",
@@ -731,7 +727,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/timeline-markers",
       "@audio-ui/track-automation",
       "@audio-ui/use-track-reorder",
-      "@audio-ui/audio-decode",
       "@audio-ui/arrangement-view",
       "@shadcn/button",
       "@shadcn/button-group",
@@ -1735,7 +1730,6 @@ export const components: RegistryItem[] = [
     ],
     name: "export-dialog-demo",
     registryDependencies: [
-      "@audio-ui/audio-encode",
       "@audio-ui/audio-export",
       "@audio-ui/export-dialog",
       "@shadcn/button",

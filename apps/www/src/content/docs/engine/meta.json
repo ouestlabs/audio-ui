@@ -1,4 +1,14 @@
 {
   "title": "Engine",
-  "pages": ["index", "device", "time", "analysis", "pitch", "midi", "playback"]
+  "pages": [
+    "index",
+    "device",
+    "time",
+    "analysis",
+    "pitch",
+    "midi",
+    "files",
+    "playback",
+    "worklet"
+  ]
 }

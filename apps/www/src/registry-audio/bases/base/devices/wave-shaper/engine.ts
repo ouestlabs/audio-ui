@@ -1,11 +1,10 @@
-import type { NoteTiming } from "@audio-ui/engine/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   type WaveShaperNote,
   type WaveShaperState,
   waveShaperCurve,
   waveShaperCutoff,
 } from "@/registry-audio/bases/base/devices/wave-shaper/device";
-import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversampling";
 
 /** How fast a parameter follows a change, as a time constant in seconds. */

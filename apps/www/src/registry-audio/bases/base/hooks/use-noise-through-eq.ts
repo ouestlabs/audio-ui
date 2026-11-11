@@ -5,9 +5,9 @@ import {
   toWebAudioQ,
   WEB_AUDIO_FILTER_TYPES,
 } from "@audio-ui/engine/analysis";
+import { noiseBuffer } from "@audio-ui/engine/device";
 import { useEffect, useRef, useState } from "react";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
-import { noiseBuffer } from "@/registry-audio/bases/base/lib/device-engine";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** The noise's level out: audio.js's pink noise peaks at 0.9, so this keeps it where the demo always played it. */

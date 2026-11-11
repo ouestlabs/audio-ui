@@ -79,7 +79,7 @@ const deviceFile = (name: string, file: string, type: FileType) =>
  * - `<name>-device`: its state, `devices/<name>/device.ts` (and `kernels.ts`
  *   when its engine runs audio.js kernels in a worklet), no panel and no audio
  * - `<name>-engine`: its Web Audio engine, `engine.ts`, over the state and
- *   `device-engine` (the contract it returns)
+ *   `@audio-ui/engine/device` (the contract it returns)
  * - `<name>-panel`: its face, `panel.tsx`, over `device-panel` and the state
  * - `<name>`: all three in one install
  *
@@ -123,11 +123,7 @@ export function deviceItems(
       description: engine.description,
       files: [deviceFile(name, "engine.ts", "registry:lib")],
       name: `${name}-engine`,
-      registryDependencies: [
-        "@audio-ui/device-engine",
-        ...(engine.registryDependencies ?? []),
-        state,
-      ],
+      registryDependencies: [...(engine.registryDependencies ?? []), state],
       type: "registry:lib",
     },
     {
@@ -156,4 +152,20 @@ export function deviceItems(
       type: "registry:ui",
     },
   ];
+}
+
+/**
+ * A lib that moved into `@audio-ui/engine`: its old install name still
+ * answers, with the package in place of the file, so a project that adds it
+ * gets the code it was after.
+ */
+export function movedItem(name: string, module: string): RegistryItem {
+  return {
+    dependencies: ["@audio-ui/engine"],
+    description: `Moved: ${name} is part of @audio-ui/engine now, imported from @audio-ui/engine/${module}.`,
+    files: [],
+    name,
+    registryDependencies: [],
+    type: "registry:lib",
+  };
 }

@@ -1,5 +1,5 @@
 import { toWebAudioQ } from "@audio-ui/engine/analysis";
-import type { DeviceReadings } from "@audio-ui/engine/device";
+import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
 import {
   KEY_DETECTOR_PARAMETERS,
   loadKeyDetector,
@@ -11,7 +11,6 @@ import {
   type MultibandState,
   multibandSettings,
 } from "@/registry-audio/bases/base/devices/multiband/device";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 

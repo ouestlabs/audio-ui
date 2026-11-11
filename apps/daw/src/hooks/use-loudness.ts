@@ -6,7 +6,7 @@ import {
   createLoudnessMeter,
   type LiveLoudness,
   type LoudnessMeter,
-} from "@/lib/loudness";
+} from "@audio-ui/engine/analysis";
 
 const UNMEASURED: LiveLoudness = {
   integrated: Number.NEGATIVE_INFINITY,

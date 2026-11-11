@@ -2,12 +2,12 @@ import { dbToGain } from "@audio-ui/engine/analysis";
 import {
   type AudioFileFormat,
   encodeAudio,
-} from "@/lib/audio-encode";
+} from "@audio-ui/engine/files";
 import {
   type Loudness,
   loudnessGain,
   measureLoudness,
-} from "@/lib/loudness";
+} from "@audio-ui/engine/analysis";
 
 /** How an export is brought to a level: left as it is, its loudest sample to 0 dBFS, or to a loudness in LUFS with its true peak at -1 dBTP at most. */
 export type ExportNormalize = "off" | "peak" | number;

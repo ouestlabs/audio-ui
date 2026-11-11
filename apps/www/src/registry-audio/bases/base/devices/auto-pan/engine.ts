@@ -1,10 +1,9 @@
-import type { DeviceContext } from "@audio-ui/engine/device";
+import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
 import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
 import {
   type AutoPanState,
   autoPanSettings,
 } from "@/registry-audio/bases/base/devices/auto-pan/device";
-import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.03;
 

@@ -4,8 +4,8 @@
  * in its build the Worker would carry every decoder and encoder.
  */
 import { createClientOnlyFn } from "@tanstack/react-start";
-import { decodeAudioChannels as decode } from "@/lib/audio-decode";
-import { encodeAudio as encode } from "@/lib/audio-encode";
+import { decodeAudioChannels as decode } from "@audio-ui/engine/files";
+import { encodeAudio as encode } from "@audio-ui/engine/files";
 import { exportSound as exportFrom } from "@/lib/audio-export";
 
 /** `decodeAudioChannels`, in the browser only: what a dropped or opened file is read through, in any format a browser or `@audio/decode` reads (ARR-007). */
