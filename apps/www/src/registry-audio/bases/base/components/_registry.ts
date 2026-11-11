@@ -49,7 +49,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio/note"],
     description:
       "An eighties polyphonic synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -71,7 +71,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio/note"],
     description:
       "A monophonic analog synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, one note at a time that glides to the next. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -93,7 +93,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio/note"],
     description:
       "A tonewheel organ you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -115,7 +115,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio/note"],
     description:
       "A string machine you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -137,7 +137,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio/note"],
     description:
       "A tape-replay keyboard you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight keys for chords. Play its 35 keys, or a MIDI keyboard from G2 to F5",
     files: [
@@ -159,7 +159,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio/note"],
     description:
       "A plucked guitar: its panel and its engine, eight strings for chords, played from the keyboard or a MIDI keyboard.",
     files: [
@@ -204,7 +204,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio/note"],
     description:
       "An eighties four-operator FM synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, eight voices for chords. Play the keyboard, or a MIDI keyboard",
     files: [
@@ -226,7 +226,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "pad"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio/note"],
     description:
       "A slice sampler you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Strike its sixteen pads, play a MIDI keyboard from C2, or drop an audio file on it",
     files: [
@@ -249,7 +249,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio/note"],
     description:
       "A tine electric piano you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file, ten voices for chords. Play the keyboard, or a MIDI keyboard: a hard key barks and pings",
     files: [
@@ -480,7 +480,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-piano-roll",
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     registryDependencies: [
       "@audio-ui/piano-roll",
       "@audio-ui/timeline",
@@ -505,7 +505,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano-roll"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description: "A scale menu lighting the keys of the scale it picks",
     files: [
       {
@@ -523,7 +523,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano-roll"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "Find notes on a piano roll by pitch, scale, state, velocity, length or chance, and select them",
     files: [
@@ -562,7 +562,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano-roll", "synth"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "A one-bar piano roll on loop with a metronome, played by a synth, which hears edits on its next pass",
     files: [
@@ -671,7 +671,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-waveform-player",
-    dependencies: ["@audio-ui/core", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/icons"],
     registryDependencies: [
       "@audio-ui/scrubber",
       "@audio-ui/timeline",
@@ -697,7 +697,7 @@ export const components: RegistryItem[] = [
       hint: "Click a track or clip to place the cursor, S to split, Cmd/Ctrl + D to duplicate. Drag a clip's title bar to move it (Alt to copy), its edges to trim, its corners to fade. Drag the loop strip to set a loop, M to add a locator, A for the automation, Cmd/Ctrl + scroll to zoom. Drop an audio file on an audio track.",
     },
     name: "block-timeline",
-    dependencies: ["@audio-ui/core", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/icons"],
     registryDependencies: [
       "@audio-ui/timeline",
       "@audio-ui/transport",
@@ -772,7 +772,7 @@ export const components: RegistryItem[] = [
       hint: "Click a band to set its type and width. Double-click empty space to add one, Delete to remove it.",
     },
     name: "plot-demo",
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     registryDependencies: [
       "@audio-ui/plot",
       "@audio-ui/knob",
@@ -785,7 +785,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
     description:
       "A compressor you can plug in: its state, a panel that draws it and a Web Audio engine that plays it, side by side. Play a pulsing signal and turn the knobs",
     files: [
@@ -1540,7 +1540,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-mixer",
-    dependencies: ["@audio-ui/core"],
+    dependencies: [],
     registryDependencies: [
       "@audio-ui/mixer-view",
       "@audio-ui/arrangement",
@@ -1578,7 +1578,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["device-chain", "knob"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: [],
     description:
       "A track's devices in a row with the library beside them: drag a device to where it goes, move, fold, switch off or remove one, and play a loop through each device's own panel and engine. It is the view a workstation shows under its tracks, over an arrangement of one track",
     files: [
@@ -1719,7 +1719,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "transport-demo",
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/engine"],
     registryDependencies: ["@audio-ui/transport"],
     type: "registry:example",
   },

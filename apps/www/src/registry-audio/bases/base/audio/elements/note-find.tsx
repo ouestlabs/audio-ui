@@ -1,7 +1,8 @@
 "use client";
 
+import { pitchClassName } from "@audio-ui/core";
 import type { NoteQuery } from "@audio-ui/core/piano-roll";
-import { pitchClassName, type Scale } from "@audio-ui/core/pitch";
+import { rollScale, type Scale } from "@audio-ui/engine/pitch";
 import {
   type ChangeEvent,
   type ComponentProps,
@@ -69,7 +70,7 @@ function findQuery(fields: FindFields, scale: Scale | null): NoteQuery {
     pitchClasses: fields.pitch === "any" ? undefined : [Number(fields.pitch)],
     scale:
       scale && fields.scale !== "any"
-        ? { scale, within: fields.scale === "in" }
+        ? { scale: rollScale(scale), within: fields.scale === "in" }
         : undefined,
     velocity: rangeOf(fields.velocityFrom, fields.velocityTo, 127),
   };

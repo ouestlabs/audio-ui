@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { BINAURAL_PANNER_KERNELS } from "@/components/audio-ui/devices/binaural-panner/kernels";
 
 /** The largest head, in metres: the worklet's delay line is made for it, so the head can change while it plays. */

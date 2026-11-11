@@ -6,7 +6,7 @@ import {
   type MetronomeRhythm,
   metronomeRhythmSeconds,
   type Tempo,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import {
   type Hotkey,
   matchesKeyboardEvent,

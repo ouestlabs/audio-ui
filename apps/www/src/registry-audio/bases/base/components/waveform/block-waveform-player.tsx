@@ -4,7 +4,7 @@ import {
   type AudioPeaks,
   computePeaks,
   normalizePeaks,
-} from "@audio-ui/core/analysis";
+} from "@audio-ui/engine/analysis";
 import { LoopIcon } from "@audio-ui/icons/react";
 import { createSource } from "@audio-ui/react";
 import type { ChangeEvent } from "react";

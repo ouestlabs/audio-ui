@@ -1,6 +1,6 @@
 "use client";
 
-import type { DeviceContext } from "@audio-ui/core/device";
+import type { DeviceContext } from "@audio-ui/engine/device";
 import { useEffect, useMemo, useState } from "react";
 import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";

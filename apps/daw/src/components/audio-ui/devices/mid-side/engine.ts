@@ -1,5 +1,5 @@
-import { toWebAudioQ } from "@audio-ui/core/analysis";
-import type { DeviceBinding } from "@audio-ui/core/device";
+import { toWebAudioQ } from "@audio-ui/engine/analysis";
+import type { DeviceBinding } from "@audio-ui/engine/device";
 import {
   DETUNE_WORKLET,
   type MidSideState,

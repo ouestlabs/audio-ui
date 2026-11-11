@@ -1,4 +1,4 @@
-import type { DeviceReadings } from "@audio-ui/core/device";
+import type { DeviceReadings } from "@audio-ui/engine/device";
 import {
   DEESSER_WORKLET,
   type DeesserState,

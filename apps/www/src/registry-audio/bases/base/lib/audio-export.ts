@@ -3,7 +3,7 @@
  * rendered channels to the file, measured, brought to a peak or a loudness,
  * then encoded. What `export-dialog` asks for and a render gives.
  */
-import { dbToGain } from "@audio-ui/core/analysis";
+import { dbToGain } from "@audio-ui/engine/analysis";
 import {
   type AudioFileFormat,
   encodeAudio,

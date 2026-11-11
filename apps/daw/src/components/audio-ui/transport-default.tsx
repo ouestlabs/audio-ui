@@ -5,7 +5,7 @@ import {
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { Transport } from "@/components/audio-ui/transport";

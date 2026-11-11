@@ -3,7 +3,7 @@ import { fet } from "@audio/dynamics-fet/audio";
 import { opto } from "@audio/dynamics-opto/audio";
 import { varimu } from "@audio/dynamics-varimu/audio";
 import { vca } from "@audio/dynamics-vca/audio";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { COMPRESSOR_KERNELS } from "@/components/audio-ui/devices/compressor/kernels";
 import { manifestWorklet } from "@/lib/manifest-worklet";
 

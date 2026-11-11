@@ -1,5 +1,5 @@
 import { compandStream } from "@audio/dynamics-compand";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { COMPANDER_KERNELS } from "@/registry-audio/bases/base/devices/compander/kernels";
 import { manifestWorklet } from "@/registry-audio/bases/base/lib/manifest-worklet";
 

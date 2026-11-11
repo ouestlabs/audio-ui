@@ -14,7 +14,7 @@ import {
   type RecordingLoaderMessage,
   type RecordingLoaderReply,
   type RecordingStream,
-} from "@audio-ui/core/playback";
+} from "@audio-ui/engine/playback";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 /**

@@ -1,5 +1,6 @@
 "use client";
 
+import { pitchName } from "@audio-ui/core";
 import {
   duplicateTime,
   fitNotesToScale,
@@ -15,7 +16,11 @@ import {
   reverseNotes,
   stretchNotes,
 } from "@audio-ui/core/piano-roll";
-import { pitchName, type Scale, scalePitchClasses } from "@audio-ui/core/pitch";
+import {
+  rollScale,
+  type Scale,
+  scalePitchClasses,
+} from "@audio-ui/engine/pitch";
 import type { PianoRoll as PianoRollPrimitive, Source } from "@audio-ui/react";
 import {
   type MouseEvent,
@@ -721,6 +726,7 @@ function ClipRoll({
       : 60;
   const scaleRows = scale ? `${scale.root} ${scale.name}` : "";
   const foldsTo = folded ? scaleRows : null;
+  const rolled = useMemo(() => (scale ? rollScale(scale) : null), [scale]);
   useEffect(() => {
     const center = () => {
       const viewport = viewportRef.current;
@@ -771,7 +777,7 @@ function ClipRoll({
         onSelectionChange={setSelection}
         onValueChange={onNotesChange}
         onValueCommitted={onNotesCommitted}
-        scale={scale}
+        scale={rolled}
         selection={selection}
         // Its own height, inline: a page that stretches the rolls it shows to fill it leaves this one be.
         style={ROLL_SIZE}
@@ -1089,7 +1095,7 @@ function MidiClipPanel({
   const fitToScale = useCallback(() => {
     if (marked) {
       editNotes((all, ids, bounds) =>
-        fitNotesToScale(all, ids, marked, bounds)
+        fitNotesToScale(all, ids, rollScale(marked), bounds)
       );
     }
   }, [editNotes, marked]);

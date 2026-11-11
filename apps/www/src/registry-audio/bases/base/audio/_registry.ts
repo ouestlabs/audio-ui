@@ -66,7 +66,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/react"],
     description:
       "A clip of an arrangement on its track's lane: move it, trim and fade it, pick a fade's curve, rename it in place and act on it from its menu. A MIDI clip draws its notes across its body.",
     files: [
@@ -90,7 +90,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Locators and time-signature changes on a timeline's lane: press one to jump there, drag it or use the arrows to move it on the grid, rename or retype it in place, delete either. With the bars of a ruler through those changes, and a hook for the commands behind them.",
     files: [
@@ -112,7 +112,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "A track's automation: a chooser of the parameter its lane shows, Volume or Pan, for its header, and that parameter's envelope over its lane, standing faint at the mix's value until it is drawn, with a hook for automation mode and the gains and pans moved by hand, which play their mix until enabled again.",
     files: [
@@ -215,7 +215,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["piano"],
-    dependencies: ["@audio-ui/core", "@audio/mir-key"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine", "@audio/mir-key"],
     description:
       "A menu that picks a root and a scale and turns the scale on or off, in parts you place, beside items of your own; one part offers the keys the notes are likeliest in (by @audio/mir-key).",
     files: [
@@ -230,7 +230,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["piano"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "Finds notes by what they are: a pitch, ranges of velocity, length and chance, in or out of the scale, active or not, every few, or the rest. A form, or the form in a popover.",
     files: [
@@ -269,7 +269,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["piano"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "A menu of commands over a piano roll's notes (split, join, quantize, legato, time commands, fit to scale, chance, velocity), with their keys: items and submenus you place, beside items of your own. The commands come as data in lib/note-edits, to run from keys or a toolbar too.",
     files: [
@@ -307,7 +307,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "knob"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns.",
     files: [
@@ -408,7 +408,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Every device's panel by the device's stable id, with the width it is drawn at in a row: what draws a track's chain from the ids a project stores, with the face each device has on its own page.",
     files: [
@@ -544,7 +544,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react"],
     description:
       "Curves and draggable points, for equalizers, filters and compressors.",
     files: [
@@ -625,7 +625,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline", "waveform", "knob"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
     description:
       "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform).",
     files: [
@@ -680,7 +680,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline", "piano"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine", "@audio-ui/react"],
     description:
       "The clip view of an arrangement's MIDI clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2, Dupl. Loop), Groove (the swing, on the eighths or the sixteenths, and for a drum clip its steps or its roll), Scale (the clip's scale marked on the roll, Fit notes, and the keys the song's notes are likeliest in; on, transposing by one moves by its steps) and Notes (transpose, invert, reverse, legato, ×2, ÷2, humanize, velocity ramps) boxes, beside its piano roll (Draw, Fold, the loop brace on the ruler, keys, grid, a velocity or chance lane), or for a drum clip its steps, a row per pad. Notes are drawn a grid step at a time.",
     files: [
@@ -704,7 +704,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/react", "@audio-ui/icons"],
     description:
       "A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.",
     files: [
@@ -782,7 +782,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core", "class-variance-authority"],
+    dependencies: ["@audio-ui/engine", "class-variance-authority"],
     description:
       "An audio value as it reads, in steady monospace figures: tempo, level in dB, frequency in Hz or kHz, pan, percent, semitones, time.",
     files: [
@@ -883,7 +883,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "transport",
-    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons", "@audio-ui/engine"],
     registryDependencies: [
       "@audio-ui/bpm-control",
       "@shadcn/button",
@@ -894,7 +894,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
     description:
       "The arrangement of a workstation, controlled: the loop, the ruler, the locators and time signatures, a row per track with its header, meter, automation and clips, the return and group tracks, and the row that takes files and devices dropped on it. State comes in through the arrangement's hooks and every change goes out as a command or a callback, so it runs over an engine of your own.",
     files: [
@@ -928,7 +928,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["mixer"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
     description:
       "The mixer of an arrangement, controlled: a channel for each track and return, then the main track. Each has its pan, its sends, its fader, its meter and its peak, and Solo, Mute and an Arm light; the main track reads its loudness in LUFS and stays in sight at the right while the channels scroll, and a channel moves by its name. Every change is a command of the arrangement.",
     files: [
@@ -957,7 +957,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device-chain"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "The devices of one track of an arrangement, controlled: its chain in a row, each device drawn by its own panel, racks with their macros, chains and zones, drum racks with their pads, devices dropped from a library where they go, and the end of the chain that opens the library or adds a rack. Every change is a command of the arrangement, and what a view remembers, such as a slot folded, goes through a hook you can give.",
     files: [

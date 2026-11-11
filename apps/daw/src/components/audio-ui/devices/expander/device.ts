@@ -1,6 +1,6 @@
 import { expanderGain, upwardExpanderGain } from "@audio/dynamics-expander";
 import { expander } from "@audio/dynamics-expander/audio";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { EXPANDER_KERNELS } from "@/components/audio-ui/devices/expander/kernels";
 import { manifestWorklet } from "@/lib/manifest-worklet";
 

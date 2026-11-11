@@ -1,6 +1,6 @@
 "use client";
 
-import type { Tempo } from "@audio-ui/core/time";
+import type { Tempo } from "@audio-ui/engine/time";
 import { useCallback, useRef, useState } from "react";
 import {
   type Arranged,

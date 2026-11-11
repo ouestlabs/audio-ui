@@ -1,6 +1,6 @@
 "use client";
 
-import { pitchName } from "@audio-ui/core/pitch";
+import { pitchName } from "@audio-ui/core";
 import type { Pad as PadPrimitive } from "@audio-ui/react";
 import {
   type ChangeEvent,

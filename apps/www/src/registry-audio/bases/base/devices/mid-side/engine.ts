@@ -1,4 +1,4 @@
-import { toWebAudioQ } from "@audio-ui/core/analysis";
+import { toWebAudioQ } from "@audio-ui/engine/analysis";
 import {
   DETUNE_WORKLET,
   type MidSideState,

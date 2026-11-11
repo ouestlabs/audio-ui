@@ -1,4 +1,4 @@
-import type { DeviceContext } from "@audio-ui/core/device";
+import type { DeviceContext } from "@audio-ui/engine/device";
 import {
   arrangementFrame,
   heardFrame,
@@ -13,13 +13,13 @@ import {
   STOPPED,
   startsInWindow,
   toFrames,
-} from "@audio-ui/core/playback";
+} from "@audio-ui/engine/playback";
 import {
   type MetronomeRhythm,
   metronomeClicks,
   secondsPerBar,
   secondsPerBeat,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import {
   type Arranged,
   type ArrangementTrack,

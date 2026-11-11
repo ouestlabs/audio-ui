@@ -1,4 +1,4 @@
-import type { Tempo } from "@audio-ui/core/time";
+import type { Tempo } from "@audio-ui/engine/time";
 import {
   triggerHihat,
   triggerKick,

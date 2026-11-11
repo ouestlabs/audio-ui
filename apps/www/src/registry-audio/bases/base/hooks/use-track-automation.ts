@@ -1,8 +1,8 @@
 "use client";
 
 import type { Source } from "@audio-ui/core";
-import type { ParameterValue } from "@audio-ui/core/device";
 import type { Breakpoint } from "@audio-ui/core/envelope";
+import type { ParameterValue } from "@audio-ui/engine/device";
 import { useCallback, useState, useSyncExternalStore } from "react";
 import { AUTOMATED_PARAMETERS } from "@/registry-audio/bases/base/audio/elements/track-automation";
 import {

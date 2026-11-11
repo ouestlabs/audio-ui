@@ -1,7 +1,7 @@
 import lufs from "@audio/loudness-lufs";
 import truepeak from "@audio/loudness-truepeak";
 import kWeighting from "@audio/weighting-k";
-import { peakDb } from "@audio-ui/core/analysis";
+import { peakDb } from "@audio-ui/engine/analysis";
 
 /** Targets in LUFS: what streaming services, podcasts and broadcast (EBU R 128) ask a file to be. */
 export const LOUDNESS_TARGETS = {

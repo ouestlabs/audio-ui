@@ -1,4 +1,4 @@
-import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@audio-ui/core/analysis";
+import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@audio-ui/engine/analysis";
 import {
   EQUALIZER_BANDS,
   type EqualizerState,

@@ -1,8 +1,8 @@
-import type { ParameterValue } from "@audio-ui/core/device";
+import type { ParameterValue } from "@audio-ui/engine/device";
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
-import type { WarpMode } from "@audio-ui/core/playback";
-import type { Tempo } from "@audio-ui/core/time";
+import type { WarpMode } from "@audio-ui/engine/playback";
+import type { Tempo } from "@audio-ui/engine/time";
 import {
   type Arranged,
   type ArrangementTrack,

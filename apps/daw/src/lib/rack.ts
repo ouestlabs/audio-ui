@@ -1,5 +1,5 @@
-import type { DeviceContext, ParameterValue } from "@audio-ui/core/device";
-import { panGains } from "@audio-ui/core/playback";
+import type { DeviceContext, ParameterValue } from "@audio-ui/engine/device";
+import { panGains } from "@audio-ui/engine/playback";
 import type {
   Rack,
   RackChain,

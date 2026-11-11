@@ -1,5 +1,5 @@
-import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@audio-ui/core/analysis";
-import type { DeviceBinding } from "@audio-ui/core/device";
+import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@audio-ui/engine/analysis";
+import type { DeviceBinding } from "@audio-ui/engine/device";
 import {
   EQUALIZER_BANDS,
   type EqualizerState,

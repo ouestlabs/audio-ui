@@ -1,7 +1,7 @@
 "use client";
 
-import type { Device, ParameterDescriptor } from "@audio-ui/core/device";
 import type { Breakpoint } from "@audio-ui/core/envelope";
+import type { Device, ParameterDescriptor } from "@audio-ui/engine/device";
 import { useCallback, useMemo } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";

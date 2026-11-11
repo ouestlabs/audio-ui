@@ -1,12 +1,8 @@
 "use client";
 
 import key from "@audio/mir-key";
-import {
-  pitchClassName,
-  SCALES,
-  type Scale,
-  type ScaleName,
-} from "@audio-ui/core/pitch";
+import { pitchClassName } from "@audio-ui/core";
+import { SCALES, type Scale, type ScaleName } from "@audio-ui/engine/pitch";
 import {
   type ComponentProps,
   createContext,

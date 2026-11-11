@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { GATE_KERNELS } from "@/components/audio-ui/devices/gate/kernels";
 import { manifestWorklet } from "@/lib/manifest-worklet";
 

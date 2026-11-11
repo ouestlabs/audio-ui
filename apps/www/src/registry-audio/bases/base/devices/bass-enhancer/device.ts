@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { BASS_ENHANCER_KERNELS } from "@/registry-audio/bases/base/devices/bass-enhancer/kernels";
 
 /** The kernel's two filters: the sub it takes, under the frequency, and the band its harmonics go to, 2.5 times above. */

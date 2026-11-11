@@ -1,6 +1,6 @@
 /**
  * Decoding an audio file into samples at a context's rate: the Web Audio step
- * before the waveform maths of `@audio-ui/core/analysis` (`computePeaks`,
+ * before the waveform maths of `@audio-ui/engine/analysis` (`computePeaks`,
  * `downsampleWaveform`). The browser's own decoder reads the file first; an
  * AIFF, a CAF or an Apple Lossless file it refuses, as Chrome does, goes
  * through a decoder of its format, then `@audio/resample-sinc` to the

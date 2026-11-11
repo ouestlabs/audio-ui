@@ -4,7 +4,7 @@ import {
   barsBeatsWith,
   secondsPerBar,
   secondsPerBeat,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
 import {
   type ComponentProps,

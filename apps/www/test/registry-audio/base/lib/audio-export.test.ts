@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import decodeWav from "@audio/decode-wav";
-import { peakDb } from "@audio-ui/core/analysis";
+import { peakDb } from "@audio-ui/engine/analysis";
 import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,

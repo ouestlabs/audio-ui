@@ -1,6 +1,6 @@
-import { formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
+import { formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { WAH_KERNELS } from "@/components/audio-ui/devices/wah/kernels";
 import {
   lfoRate,

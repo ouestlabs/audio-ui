@@ -2,7 +2,7 @@ import {
   panGains,
   routedCompensation,
   soloState,
-} from "@audio-ui/core/playback";
+} from "@audio-ui/engine/playback";
 
 /** How fast a control follows a change by hand, as a time constant: settled within 10 ms, with no zipper. */
 const RAMP_SECONDS = 0.003;

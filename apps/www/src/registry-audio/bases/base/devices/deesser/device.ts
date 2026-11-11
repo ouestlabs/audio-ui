@@ -1,6 +1,6 @@
 import { deesser } from "@audio/dynamics-deesser/audio";
-import { biquadResponse, formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { biquadResponse, formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { DEESSER_KERNELS } from "@/registry-audio/bases/base/devices/deesser/kernels";
 import { manifestWorklet } from "@/registry-audio/bases/base/lib/manifest-worklet";
 

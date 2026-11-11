@@ -1,4 +1,4 @@
-import { dbToGain } from "@audio-ui/core/analysis";
+import { dbToGain } from "@audio-ui/engine/analysis";
 import {
   type AudioFileFormat,
   encodeAudio,

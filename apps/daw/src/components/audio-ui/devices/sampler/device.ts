@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 
 /** How many equal slices a sample is cut into: a pad, or a key, each. */
 export const SAMPLER_SLICES = 16;

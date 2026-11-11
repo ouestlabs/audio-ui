@@ -5,7 +5,7 @@ import {
   bandHandleDb,
   formatDb,
   formatHz,
-} from "@audio-ui/core/analysis";
+} from "@audio-ui/engine/analysis";
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";

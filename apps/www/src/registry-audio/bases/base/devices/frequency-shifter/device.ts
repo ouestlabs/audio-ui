@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { FREQUENCY_SHIFTER_KERNELS } from "@/registry-audio/bases/base/devices/frequency-shifter/kernels";
 
 /**

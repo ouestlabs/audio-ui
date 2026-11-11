@@ -1,5 +1,5 @@
 import type { Note } from "@audio-ui/core/piano-roll";
-import { secondsPerBar, secondsPerQuarter } from "@audio-ui/core/time";
+import { secondsPerBar, secondsPerQuarter } from "@audio-ui/engine/time";
 import { DRUM_RACK_DEVICE, NEW_TRACK } from "@/lib/arrangement";
 import {
   type ArrangementCommand,

@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 
 /** How far a drawbar pulls: from 0, silent, to 8, full. */
 export const MAX_DRAWBAR = 8;

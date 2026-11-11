@@ -1,6 +1,6 @@
 "use client";
 
-import { dbToGain, gainToDb, peakDb } from "@audio-ui/core/analysis";
+import { dbToGain, gainToDb, peakDb } from "@audio-ui/engine/analysis";
 import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,

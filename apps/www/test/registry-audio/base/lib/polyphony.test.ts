@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/engine/device";
 import { createPolyphony } from "@/registry-audio/bases/base/lib/polyphony";
 
 /** Engines that write down what they are asked, one log each. */

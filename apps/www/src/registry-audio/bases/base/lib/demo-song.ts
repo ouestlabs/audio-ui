@@ -7,7 +7,7 @@
  * demo plays.
  */
 
-import type { Tempo } from "@audio-ui/core/time";
+import type { Tempo } from "@audio-ui/engine/time";
 import { DRUM_NOTES } from "@/registry-audio/bases/base/lib/drum-kit";
 
 const BPM = 80;

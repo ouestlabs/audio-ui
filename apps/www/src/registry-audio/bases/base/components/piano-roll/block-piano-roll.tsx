@@ -1,5 +1,6 @@
 "use client";
 
+import { pitchClassName } from "@audio-ui/core";
 import {
   findNotes,
   type Note,
@@ -9,8 +10,8 @@ import {
   selectionSpan,
   toggleMuted,
 } from "@audio-ui/core/piano-roll";
-import { pitchClassName, type Scale } from "@audio-ui/core/pitch";
-import type { Tempo } from "@audio-ui/core/time";
+import { rollScale, type Scale } from "@audio-ui/engine/pitch";
+import type { Tempo } from "@audio-ui/engine/time";
 import {
   type ChangeEvent,
   type DragEvent,
@@ -315,6 +316,7 @@ export default function BlockPianoRoll() {
     root: 0,
   });
   const scale = scaleOn ? scaleChoice : null;
+  const rolled = useMemo(() => (scale ? rollScale(scale) : null), [scale]);
   const [selection, setSelection] = useState<readonly NoteId[]>([]);
   const viewportRef = useRef<HTMLDivElement>(null);
   // Opens on middle C, halfway down the range.
@@ -830,7 +832,7 @@ export default function BlockPianoRoll() {
           onSelectionChange={setSelection}
           onValueChange={history.change}
           onValueCommitted={history.commit}
-          scale={scale}
+          scale={rolled}
           selection={selection}
           value={notes}
         >

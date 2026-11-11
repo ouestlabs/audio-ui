@@ -1,6 +1,6 @@
 "use client";
 
-import type { WarpMode } from "@audio-ui/core/playback";
+import type { WarpMode } from "@audio-ui/engine/playback";
 import {
   addWarpMarker,
   moveWarpMarker,
@@ -9,7 +9,7 @@ import {
   type WarpMarker,
   warpedTime,
   warpRate,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import type { Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,

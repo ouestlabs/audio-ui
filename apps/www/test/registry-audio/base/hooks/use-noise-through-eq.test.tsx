@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import type { EqBand } from "@audio-ui/core/analysis";
+import type { EqBand } from "@audio-ui/engine/analysis";
 import { act, renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 

@@ -15,6 +15,7 @@
   },
   "dependencies": {
     "@audio-ui/core": "*",
+    "@audio-ui/engine": "*",
     "@audio-ui/icons": "*",
     "@audio-ui/react": "*",
     "@audio/beat-detect": "catalog:",

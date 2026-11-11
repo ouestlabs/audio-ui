@@ -20,7 +20,7 @@ import {
   stretchNotes,
   toggleMuted,
 } from "@audio-ui/core/piano-roll";
-import type { Scale } from "@audio-ui/core/pitch";
+import { rollScale, type Scale } from "@audio-ui/engine/pitch";
 
 /** What an edit knows of the editor it runs in. */
 export interface NoteEditContext {
@@ -151,7 +151,7 @@ export const PITCH_EDITS: NoteEdit[] = [
   },
   {
     edit: (notes, ids, { bounds, scale }) =>
-      scale ? fitNotesToScale(notes, ids, scale, bounds) : notes,
+      scale ? fitNotesToScale(notes, ids, rollScale(scale), bounds) : notes,
     id: "fit",
     label: "Fit to scale",
     needsScale: true,

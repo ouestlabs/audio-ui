@@ -3,7 +3,7 @@ import type {
   DeviceBinding,
   DeviceContext,
   InstrumentBinding,
-} from "@audio-ui/core/device";
+} from "@audio-ui/engine/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
 
 /**

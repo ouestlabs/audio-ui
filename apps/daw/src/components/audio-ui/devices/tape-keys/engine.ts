@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { InstrumentBinding, NoteTiming } from "@audio-ui/engine/device";
 import {
   speedCents,
   TAPE_KEYS_HIGHEST,

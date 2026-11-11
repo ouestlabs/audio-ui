@@ -8,7 +8,7 @@ import type {
   ParameterDescriptor,
   ParameterValue,
   ToggleParameter,
-} from "@audio-ui/core/device";
+} from "@audio-ui/engine/device";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

@@ -1,10 +1,10 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import {
   DEFAULT_TEMPO,
   SYNCED_DIVISIONS,
   syncedSeconds,
   type Tempo,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import { STUTTER_KERNELS } from "@/registry-audio/bases/base/devices/stutter/kernels";
 
 /**

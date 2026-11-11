@@ -2,8 +2,8 @@ import diodeLadder from "@audio/filter-diode-ladder";
 import korg35 from "@audio/filter-korg35";
 import moogLadder from "@audio/filter-moog-ladder";
 import oberheim from "@audio/filter-oberheim";
-import { formatDb, formatHz, SAMPLE_RATE } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { formatDb, formatHz, SAMPLE_RATE } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { FILTER_KERNELS } from "@/registry-audio/bases/base/devices/filter/kernels";
 
 /** The width a filter has when the resonance is at its lowest: flat, a Butterworth. */

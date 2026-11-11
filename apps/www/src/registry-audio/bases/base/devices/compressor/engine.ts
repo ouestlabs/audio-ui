@@ -1,4 +1,4 @@
-import type { DeviceReadings } from "@audio-ui/core/device";
+import type { DeviceReadings } from "@audio-ui/engine/device";
 import {
   COMPRESSOR_MODELS_WORKLET,
   type CompressorState,

@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/engine/device";
 import { act, renderHook } from "@testing-library/react";
 import { usePolyphony } from "@/registry-audio/bases/base/hooks/use-polyphony";
 

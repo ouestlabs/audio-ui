@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { MID_SIDE_KERNELS } from "@/components/audio-ui/devices/mid-side/kernels";
 
 /** The high-pass that stands for "no bass mono": under the range of hearing, so it passes the whole spectrum. */

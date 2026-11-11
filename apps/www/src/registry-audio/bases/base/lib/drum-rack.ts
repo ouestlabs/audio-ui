@@ -6,7 +6,7 @@
  * its macros over the devices inside, and a pad of a choke group cuts the
  * others of its group short.
  */
-import type { DeviceContext } from "@audio-ui/core/device";
+import type { DeviceContext } from "@audio-ui/engine/device";
 import type {
   DrumSound,
   Rack,

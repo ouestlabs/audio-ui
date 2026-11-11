@@ -1,4 +1,4 @@
-import type { DeviceBinding, DeviceReadings } from "@audio-ui/core/device";
+import type { DeviceBinding, DeviceReadings } from "@audio-ui/engine/device";
 import {
   COMPANDER_WORKLET,
   type CompanderState,

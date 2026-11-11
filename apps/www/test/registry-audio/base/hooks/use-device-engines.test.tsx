@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import type { DeviceContext } from "@audio-ui/core/device";
+import type { DeviceContext } from "@audio-ui/engine/device";
 import { renderHook } from "@testing-library/react";
 import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
 

@@ -8,7 +8,7 @@ const items: RegistryItem[] = [
   }),
   libItem("device-engine", {
     categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: ["@audio-ui/core", "@audio/synth-noise"],
+    dependencies: ["@audio-ui/engine", "@audio/synth-noise"],
     description:
       "What a device's engine is and the pieces engines are made of: the EffectEngine and InstrumentEngine contracts every create<Name>Engine returns, a worklet stage that takes over from the clean sound once loaded, a feed that keeps a worklet fed only while its path is heard, and the noise buffers engines share (from @audio/synth-noise).",
     registryDependencies: ["@audio-ui/audio-worklet"],
@@ -32,7 +32,7 @@ const items: RegistryItem[] = [
       "@audio/resample-sinc",
     ],
     description:
-      "Decoding an audio file into samples at a context's rate, the step before the waveform maths of @audio-ui/core/analysis: the browser's decoder first, and for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed",
+      "Decoding an audio file into samples at a context's rate, the step before the waveform maths of @audio-ui/engine/analysis: the browser's decoder first, and for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed",
   }),
   libItem("audio-encode", {
     categories: ["lib", "audio"],
@@ -43,7 +43,7 @@ const items: RegistryItem[] = [
   libItem("loudness", {
     categories: ["lib", "audio"],
     dependencies: [
-      "@audio-ui/core",
+      "@audio-ui/engine",
       "@audio/loudness-lufs",
       "@audio/loudness-truepeak",
       "@audio/weighting-k",
@@ -54,7 +54,7 @@ const items: RegistryItem[] = [
   }),
   libItem("audio-export", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Exporting rendered sound to a file: the settings an export picks (format, bit depth or bitrate, a level left as it is, brought to its peak or to a loudness target) and exportSound, which measures, normalizes and encodes, saying how far it is",
     registryDependencies: ["@audio-ui/audio-encode", "@audio-ui/loudness"],
@@ -78,13 +78,13 @@ const items: RegistryItem[] = [
   }),
   libItem("synced-rate", {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The rate of an oscillator that is either free, in hertz, or synced: one cycle per note value of the host's tempo. The two parameters a device adds for it, and the function that reads the rate.",
   }),
   libItem("demo-sound", {
     categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The sounds the previews play, by name: Boom bap and Drone, with the kick that goes with the first. Drawn once in code and looped as a buffer, no samples.",
     registryDependencies: ["@audio-ui/drum-synthesis"],
@@ -107,7 +107,7 @@ const items: RegistryItem[] = [
   }),
   libItem("demo-song", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A chill song at 80 BPM on one two-bar loop, E minor seven, G and A, all of it notes for MIDI tracks: its drums on a drum kit's pads, one part each with a fill, and an organ, a pad, a bass and a lead hook. What the arrangement's demo plays.",
     registryDependencies: ["@audio-ui/drum-kit"],
@@ -116,6 +116,7 @@ const items: RegistryItem[] = [
     categories: ["lib", "audio", "timeline"],
     dependencies: [
       "@audio-ui/core",
+      "@audio-ui/engine",
       "@audio-ui/react",
       "@audio/beat-detect",
       "@audio/mir-chroma",
@@ -143,14 +144,14 @@ const items: RegistryItem[] = [
   }),
   libItem("rack", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Racks: devices in parallel chains, each with its volume, pan, switch and solo, lined up on the slowest and summed, and eight macros that turn parameters of the devices inside over a stretch of their travel; the engine that plays one on a track's chain.",
     registryDependencies: ["@audio-ui/arrangement", "@audio-ui/device-library"],
   }),
   libItem("drum-rack", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Drum racks: an instrument whose chains are pads, each answering a note with the instrument at its head, such as a Drum Synth, or else a voice of the drum synthesis or a recording, into its own devices, a pad of a choke group cutting the others short; the engine that plays one on a MIDI track.",
     registryDependencies: [
@@ -163,20 +164,20 @@ const items: RegistryItem[] = [
   }),
   libItem("polyphony", {
     categories: ["lib", "audio", "synth"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Chords on an instrument whose engine plays one voice: a note takes the voice that holds it, else a free one, else the one held longest, whose note is let go first. No sound and no engine of its own: it plays the engines it is given.",
   }),
   libItem("voice-pool", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio-ui/engine", "@audio/note"],
     description:
       "Note players: what a MIDI track plays through, all taking notes the same way, and the voice pool that plays an instrument of the library with a voice for each note it holds, the oldest given up first.",
     registryDependencies: ["@audio-ui/device-library", "@audio-ui/polyphony"],
   }),
   libItem("instrument-rack", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Instrument racks: an instrument whose chains each start with an instrument of the library, then effects, all played by every note in layers and summed as a rack with its macros; the engine that plays one on a MIDI track.",
     registryDependencies: [
@@ -188,7 +189,7 @@ const items: RegistryItem[] = [
   }),
   libItem("dawproject", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core", "fflate"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine", "fflate"],
     description:
       "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in.",
     files: ["lib/dawproject.ts", "lib/zip.ts"],
@@ -211,14 +212,14 @@ const items: RegistryItem[] = [
   }),
   libItem("clip-player", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A track's player of audio clips on an AudioWorklet: its recordings to the frame on the audio clock, with gain, fades, loops, reverse and warp, in a running or an offline context",
     registryDependencies: ["@audio-ui/audio-worklet"],
   }),
   libItem("device-library", {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Every device of the registry with its engine, by shelf: what a host needs to build a track's chain from the ids a project stores, and what a device browser lists",
     registryDependencies: [
@@ -321,13 +322,13 @@ const items: RegistryItem[] = [
   }),
   libItem("mixer-engine", {
     categories: ["lib", "audio", "mixer"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A mixer on the Web Audio API: a channel per track and return, with its chain, volume, constant-power pan, switch, solo, pre or post-fader sends, delay compensation and meters, into a main track",
   }),
   {
     categories: ["lib", "audio", "timeline", "mixer"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
     description:
       "Plays an arrangement on the audio clock: its audio clips, its notes through each track's instrument, its device chains, sends and returns, and an offline render to a buffer, with a hook for the transport, the playhead and the meters",
     files: [
@@ -368,9 +369,9 @@ const items: RegistryItem[] = [
       "One-shot percussion synthesis (kick, snare, hihat) built from oscillators and noise bursts, each with its own tune and decay",
   }),
   {
-    dependencies: ["@audio-ui/core"],
+    dependencies: [],
     description:
-      "Moved: the peaks are in @audio-ui/core/analysis and the decoding is audio-decode, as this lib gave both.",
+      "Moved: the peaks are in @audio-ui/engine/analysis and the decoding is audio-decode, as this lib gave both.",
     files: [],
     name: "waveform-peaks",
     registryDependencies: ["@audio-ui/audio-decode"],

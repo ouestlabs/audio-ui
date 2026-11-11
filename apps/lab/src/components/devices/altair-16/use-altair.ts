@@ -1,4 +1,4 @@
-import { computePeaks } from "@audio-ui/core/analysis";
+import { computePeaks } from "@audio-ui/engine/analysis";
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMasterBus } from "@/hooks/use-master-bus";

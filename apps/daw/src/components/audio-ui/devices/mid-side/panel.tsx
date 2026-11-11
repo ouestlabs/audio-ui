@@ -1,6 +1,6 @@
 "use client";
 
-import { formatDb } from "@audio-ui/core/analysis";
+import { formatDb } from "@audio-ui/engine/analysis";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import {

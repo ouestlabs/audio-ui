@@ -9,7 +9,7 @@ import {
   gridLabel,
   type Tempo,
   TRIPLET_FACTOR,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import { useCallback, useState } from "react";
 
 /** How close an adaptive grid's lines may be, in px: a finer grid halves it, a wider one doubles it. */

@@ -1,6 +1,6 @@
 "use client";
 
-import { peakDb } from "@audio-ui/core/analysis";
+import { peakDb } from "@audio-ui/engine/analysis";
 import { createSource } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 import {

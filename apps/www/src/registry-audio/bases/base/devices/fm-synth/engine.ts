@@ -1,4 +1,4 @@
-import type { NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/engine/device";
 import {
   attackSeconds,
   decaySeconds,

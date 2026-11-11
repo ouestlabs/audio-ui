@@ -1,5 +1,5 @@
-import type { DeviceContext } from "@audio-ui/core/device";
-import { DEFAULT_TEMPO } from "@audio-ui/core/time";
+import type { DeviceContext } from "@audio-ui/engine/device";
+import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
 import {
   CHORUS_WORKLET,
   type ChorusState,

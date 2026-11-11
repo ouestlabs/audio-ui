@@ -1,5 +1,5 @@
 import { latency as lookaheadLatency } from "@audio/dynamics-limiter";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { LIMITER_KERNELS } from "@/registry-audio/bases/base/devices/limiter/kernels";
 import { manifestWorklet } from "@/registry-audio/bases/base/lib/manifest-worklet";
 

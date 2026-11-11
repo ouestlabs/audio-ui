@@ -1,5 +1,5 @@
 import type { Note } from "@audio-ui/core/piano-roll";
-import { secondsPerBar, secondsPerBeat } from "@audio-ui/core/time";
+import { secondsPerBar, secondsPerBeat } from "@audio-ui/engine/time";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { ClipPanel, type ClipSettings } from "@/components/audio-ui/clip-panel";
 import {

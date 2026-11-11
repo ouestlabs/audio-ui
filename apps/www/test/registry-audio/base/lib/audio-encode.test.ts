@@ -2,7 +2,7 @@ import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import decodeFlac from "@audio/decode-flac";
 import decodeMp3 from "@audio/decode-mp3";
 import decodeWav from "@audio/decode-wav";
-import { rmsDb } from "@audio-ui/core/analysis";
+import { rmsDb } from "@audio-ui/engine/analysis";
 import { encodeAudio } from "@/registry-audio/bases/base/lib/audio-encode";
 
 /** Five seconds of two tones, one per side: more than two chunks, the last one short. */

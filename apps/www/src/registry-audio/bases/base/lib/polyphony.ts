@@ -1,4 +1,4 @@
-import type { NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/engine/device";
 
 /** What a voice plays a note on: the engine of an instrument, which holds one note at a time. */
 export interface VoiceEngine<Note> {

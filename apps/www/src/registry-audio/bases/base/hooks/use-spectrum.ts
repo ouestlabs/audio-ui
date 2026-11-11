@@ -6,7 +6,7 @@ import {
   logSpectrum,
   type PeakHoldOptions,
   SPECTRUM_FLOOR_DB,
-} from "@audio-ui/core/analysis";
+} from "@audio-ui/engine/analysis";
 import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 

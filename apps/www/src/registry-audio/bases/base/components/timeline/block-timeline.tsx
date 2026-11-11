@@ -1,12 +1,12 @@
 "use client";
 
-import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
+import { computePeaks, normalizePeaks } from "@audio-ui/engine/analysis";
 import {
   barsBeatsWith,
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import {
   type ComponentProps,

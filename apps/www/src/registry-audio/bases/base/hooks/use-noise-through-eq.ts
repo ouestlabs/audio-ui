@@ -4,7 +4,7 @@ import {
   type EqBand,
   toWebAudioQ,
   WEB_AUDIO_FILTER_TYPES,
-} from "@audio-ui/core/analysis";
+} from "@audio-ui/engine/analysis";
 import { useEffect, useRef, useState } from "react";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { noiseBuffer } from "@/registry-audio/bases/base/lib/device-engine";

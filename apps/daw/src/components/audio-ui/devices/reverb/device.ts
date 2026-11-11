@@ -3,8 +3,8 @@ import fdn from "@audio/reverb-fdn";
 import freeverb from "@audio/reverb-freeverb";
 import schroeder from "@audio/reverb-schroeder";
 import spring from "@audio/reverb-spring";
-import { formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 
 /** The level a tail has fallen to when its decay time is over, in dB: what "decay time" means in a room. */
 export const DECAY_DB = -60;

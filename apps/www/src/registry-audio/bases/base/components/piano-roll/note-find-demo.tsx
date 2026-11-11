@@ -6,7 +6,7 @@ import {
   type NoteId,
   type NoteQuery,
 } from "@audio-ui/core/piano-roll";
-import type { Scale } from "@audio-ui/core/pitch";
+import { rollScale, type Scale } from "@audio-ui/engine/pitch";
 import { useCallback, useState } from "react";
 import { NoteFind } from "@/registry-audio/bases/base/audio/elements/note-find";
 import {
@@ -19,6 +19,7 @@ import {
 import { Timeline } from "@/registry-audio/bases/base/audio/elements/timeline";
 
 const SCALE: Scale = { name: "major", root: 0 };
+const ROLL_SCALE = rollScale(SCALE);
 
 const PHRASE: Note[] = [
   { id: "1", length: 2, pitch: 60, start: 0, velocity: 0.9 },
@@ -55,7 +56,7 @@ export default function NoteFindDemo() {
           minPitch={60}
           onSelectionChange={setSelection}
           onValueChange={setNotes}
-          scale={SCALE}
+          scale={ROLL_SCALE}
           selection={selection}
           value={notes}
         >

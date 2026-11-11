@@ -1,4 +1,4 @@
-import { secondsPerBar, type Tempo } from "@audio-ui/core/time";
+import { secondsPerBar, type Tempo } from "@audio-ui/engine/time";
 import { useAppHotkeys, useHotkeys } from "@tanstack/react-hotkeys";
 import {
   type ChangeEvent,

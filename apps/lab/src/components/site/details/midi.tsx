@@ -1,4 +1,4 @@
-import { pitchName } from "@audio-ui/core/pitch";
+import { pitchName } from "@audio-ui/core";
 import { useState } from "react";
 import { Kbd } from "@/components/ui/kbd";
 import { useMidiInput } from "@/hooks/use-midi-input";

@@ -9,7 +9,7 @@ import {
   eqResponse,
   formatDb,
   formatHz,
-} from "@audio-ui/core/analysis";
+} from "@audio-ui/engine/analysis";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Popover,
