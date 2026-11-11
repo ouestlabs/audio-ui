@@ -6,7 +6,6 @@ import {
   normalizePeaks,
 } from "@audio-ui/engine/analysis";
 import { decodeAudioChannels } from "@audio-ui/engine/files";
-import { createSource } from "@audio-ui/react";
 import { Link } from "@tanstack/react-router";
 import {
   type ChangeEvent,
@@ -22,6 +21,8 @@ import {
   type ClipSamples,
   ClipWaveform,
 } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
+import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";
+import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import {
@@ -33,31 +34,24 @@ import {
   TimelineRuler,
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
-import {
-  type CompressorState,
-  compressorDevice,
-} from "@/registry-audio/bases/base/devices/compressor/device";
-import {
-  type CompressorEngine,
-  createCompressorEngine,
-} from "@/registry-audio/bases/base/devices/compressor/engine";
-import { CompressorPanel } from "@/registry-audio/bases/base/devices/compressor/panel";
-import {
-  type EqualizerState,
-  equalizerDevice,
-} from "@/registry-audio/bases/base/devices/equalizer/device";
-import {
-  createEqualizerEngine,
-  type EqualizerEngine,
-} from "@/registry-audio/bases/base/devices/equalizer/engine";
-import { EqualizerPanel } from "@/registry-audio/bases/base/devices/equalizer/panel";
+import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
+import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
-import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
-import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
+import type { Arranged } from "@/registry-audio/bases/base/lib/arrangement";
+import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
+import {
+  demoTempo,
+  renderDemoSource,
+} from "@/registry-audio/bases/base/lib/demo-sound";
+import {
+  DEVICE_SHELVES,
+  libraryDevice,
+} from "@/registry-audio/bases/base/lib/device-library";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
-const MASTER_VOLUME = 0.7;
+const TRACK = "track-1";
+const RECORDING = "sound";
+const DEMO = "groove";
 /** Enough peaks for a pixel each, zoomed in as far as it goes. */
 const PEAK_COUNT = 8192;
 /** How far in the view zooms: to the samples themselves, this many px apart, as the clip editor goes. */
@@ -72,29 +66,57 @@ const LABEL_STEPS = [
   0.5, 1, 2, 5, 10, 15, 30, 60,
 ];
 const MIN_LABEL_GAP_PX = 56;
-const FFT_SIZE = 4096;
+/** Narrower than this, the library starts folded and leaves the chain the room. */
+const LIBRARY_PX = 560;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
 
-/** A sound the playground plays: its buffer, its name, and its peaks for the waveform. */
+/** The chain the sound starts through: an equalizer, then a compressor. */
+const START = ["audioui.equalizer", "audioui.compressor"].flatMap(
+  (device, index) => {
+    const entry = libraryDevice(device);
+    return entry
+      ? [{ device, id: `start-${index}`, state: entry.device.defaults() }]
+      : [];
+  }
+);
+const TRACKS = [{ color: 0, devices: START, id: TRACK, name: "Sound" }];
+
+/** The library's effects, by shelf: the track plays a sound, so it takes no instrument. */
+const SHELVES = DEVICE_SHELVES.map((shelf) => ({
+  items: shelf.devices
+    .map((entry) => entry.device)
+    .filter((device) => device.kind !== "instrument"),
+  label: shelf.label,
+})).filter((shelf) => shelf.items.length > 0);
+
+/** The metronome stays off: the sound is the only thing that plays. */
+const NO_METRONOME = { on: false, rhythm: "auto" } as const;
+/** Nothing moved by hand: no envelope is drawn, so none is overridden. */
+const NOT_MOVED = {};
+/** What the chain asks of a host with notes and pads: a sound has neither. */
+const IGNORE = () => undefined;
+
+/** A sound the playground plays: its name, its length, and its peaks for the waveform. */
 interface Sound {
-  buffer: AudioBuffer;
+  duration: number;
   name: string;
   peaks: AudioPeaks;
   /** Its samples, mixed to one channel, for a zoom closer than the peaks have detail for. */
   samples: ClipSamples;
 }
 
-/** The engines of the chain, made on the first play: the equalizer, then the compressor, then the page's output. */
-interface Chain {
-  analyser: AnalyserNode;
-  compressor: CompressorEngine;
-  equalizer: EqualizerEngine;
+/** The clip that plays the sound on the track, over `length` seconds, round and round. */
+function loopClip(length: number): Arranged {
+  return {
+    id: "loop",
+    loop: [0, length],
+    name: "Loop",
+    recording: RECORDING,
+    sourceLength: length,
+    track: TRACK,
+    value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start: 0 },
+  };
 }
-
-const channelsOf = (buffer: AudioBuffer) =>
-  Array.from({ length: buffer.numberOfChannels }, (_, channel) =>
-    buffer.getChannelData(channel)
-  );
 
 /** The channels mixed to one, as the waveform draws the sound. */
 function mixOf(channels: readonly Float32Array[]) {
@@ -108,11 +130,14 @@ function mixOf(channels: readonly Float32Array[]) {
   return mix;
 }
 
-function soundOf(buffer: AudioBuffer, name: string): Sound {
-  const channels = channelsOf(buffer);
+function soundOf(
+  channels: Float32Array[],
+  sampleRate: number,
+  name: string
+): Sound {
   const mix = mixOf(channels);
   return {
-    buffer,
+    duration: mix.length / sampleRate,
     name,
     peaks: normalizePeaks(computePeaks(channels, PEAK_COUNT)),
     samples: { frames: mix.length, read: (from, to) => mix.subarray(from, to) },
@@ -160,7 +185,20 @@ function followPlayhead(viewport: HTMLElement | null, x: number) {
 const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
-/** A part of the playground with its registry name under it, a link to its page: what it is made of. */
+/** A registry item's name, a link to its page: what a part of the playground is made of. */
+function PartLink({ name, page }: { name: string; page: string }) {
+  return (
+    <Link
+      className="self-start font-site-mono text-[11px] text-site-muted-foreground transition-colors hover:text-foreground"
+      params={{ _splat: page }}
+      to="/docs/$"
+    >
+      @audio-ui/{name}
+    </Link>
+  );
+}
+
+/** A part of the playground with its registry name under it. */
 function Part({
   children,
   className,
@@ -175,50 +213,44 @@ function Part({
   return (
     <div className={cn("flex min-w-0 flex-col gap-2", className)}>
       {children}
-      <Link
-        className="self-start font-site-mono text-[11px] text-site-muted-foreground transition-colors hover:text-foreground"
-        params={{ _splat: page }}
-        to="/docs/$"
-      >
-        @audio-ui/{name}
-      </Link>
+      <PartLink name={name} page={page} />
     </div>
   );
 }
 
 /**
  * A working playground made of the registry, under the home's title: a
- * sound (a demo loop, or a file of yours) through an equalizer and a
- * compressor, with its waveform to seek in, the spectrum behind the
- * equalizer's curve and a meter of what comes out. Each part is named after
- * its registry item, and all of it follows the customizer's style and theme.
+ * sound (a demo loop, or a file of yours) on a track of an arrangement, with
+ * its waveform to seek in and zoom down to the samples, a meter of what comes
+ * out, and the track's device chain, an equalizer and a compressor to start,
+ * with the library beside it to add any effect of the registry. Each part is
+ * named after its registry item, and all of it follows the customizer's
+ * style and theme.
  */
 export function HomePlayground() {
-  const master = useMasterBus(MASTER_VOLUME);
-  const [equalizer, setEqualizer] = useState<EqualizerState>(() =>
-    equalizerDevice.defaults()
-  );
-  const [compressor, setCompressor] = useState<CompressorState>(() =>
-    compressorDevice.defaults()
-  );
+  const arrangement = useArrangement({
+    duration: 1,
+    initialTracks: TRACKS,
+    tempo: demoTempo(DEMO),
+  });
+  const { dispatch, doc } = arrangement;
   const [sound, setSound] = useState<Sound | null>(null);
-  const [playing, setPlaying] = useState(false);
-  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
-  const [position] = useState(() => createSource(0));
-  const chain = useRef<Chain | null>(null);
-  const voice = useRef<{
-    source: AudioBufferSourceNode;
-    started: number;
-    offset: number;
-  } | null>(null);
-  const offset = useRef(0);
+  const [recordings, setRecordings] = useState<
+    ReadonlyMap<string, RecordingSource>
+  >(() => new Map());
+  const { meter, play, playing, position, stop } = useArrangementEngine({
+    doc,
+    metronome: NO_METRONOME,
+    overridden: NOT_MOVED,
+    recordings,
+  });
   const fileInput = useRef<HTMLInputElement>(null);
   // Pixels per second; null while the whole sound fits the width it is given.
   const [zoomPx, setZoomPx] = useState<number | null>(null);
   const [width, setWidth] = useState(0);
   const lane = useRef<HTMLDivElement>(null);
   const viewport = useRef<HTMLDivElement>(null);
-  const soundDuration = sound?.buffer.duration ?? 0;
+  const soundDuration = sound?.duration ?? 0;
   const fitPx = width > 0 && soundDuration > 0 ? width / soundDuration : 0;
   // As far in as the samples go, a few px apart, as wide as a lane can be laid out.
   const maxZoom = Math.max(
@@ -291,159 +323,101 @@ export function HomePlayground() {
   );
   const changeZoom = useCallback((next: number) => setZoomPx(next), []);
 
+  /** Puts a sound on the track: its recording, and a clip that loops it from its start to its end. */
+  const place = useCallback(
+    (recording: RecordingSource, next: Sound) => {
+      setSound(next);
+      setRecordings(new Map([[RECORDING, recording]]));
+      dispatch({
+        commands: [
+          { id: "loop", type: "remove-clip" },
+          { clip: loopClip(next.duration), type: "add-clip" },
+          { duration: next.duration, type: "set-duration" },
+          {
+            loop: { on: true, range: [0, next.duration] },
+            type: "set-loop",
+          },
+        ],
+        type: "batch",
+      });
+    },
+    [dispatch]
+  );
+
   // The demo loop, rendered once the page's context is there.
   useEffect(() => {
-    const ctx = master?.context;
-    if (!ctx || sound) {
+    const ctx = webAudio.getContext();
+    if (!ctx) {
       return;
     }
     let live = true;
-    renderDemoSource("groove", ctx.sampleRate).then((buffer) => {
+    renderDemoSource(DEMO, ctx.sampleRate).then((buffer) => {
       if (live) {
-        setSound(soundOf(buffer, "groove"));
+        const channels = Array.from(
+          { length: buffer.numberOfChannels },
+          (_, channel) => buffer.getChannelData(channel)
+        );
+        place(buffer, soundOf(channels, buffer.sampleRate, DEMO));
       }
     });
     return () => {
       live = false;
     };
-  }, [master, sound]);
+  }, [place]);
 
-  // The engines follow the panels, whoever turned them.
+  // Zoomed in, the view turns the page as the playhead leaves it.
   useEffect(() => {
-    chain.current?.equalizer.update(equalizer);
-  }, [equalizer]);
-  useEffect(() => {
-    chain.current?.compressor.update(compressor);
-  }, [compressor]);
-
-  const stopVoice = useCallback(() => {
-    const ctx = master?.context;
-    const { current } = voice;
-    if (!(ctx && current && sound)) {
+    if (!playing) {
       return;
     }
-    offset.current =
-      (current.offset + ctx.currentTime - current.started) %
-      sound.buffer.duration;
-    current.source.stop();
-    current.source.disconnect();
-    voice.current = null;
-  }, [master, sound]);
-
-  const startVoice = useCallback(() => {
-    const ctx = webAudio.resume();
-    if (!(ctx && master && sound)) {
-      return;
-    }
-    if (!chain.current) {
-      const eq = createEqualizerEngine(ctx, equalizer);
-      const comp = createCompressorEngine(ctx, compressor);
-      const tap = ctx.createAnalyser();
-      tap.fftSize = FFT_SIZE;
-      eq.output.connect(comp.input);
-      comp.output.connect(master);
-      comp.output.connect(tap);
-      chain.current = { analyser: tap, compressor: comp, equalizer: eq };
-      setAnalyser(tap);
-    }
-    const source = ctx.createBufferSource();
-    source.buffer = sound.buffer;
-    source.loop = true;
-    source.connect(chain.current.equalizer.input);
-    const at = offset.current % sound.buffer.duration;
-    source.start(ctx.currentTime, at);
-    voice.current = { offset: at, source, started: ctx.currentTime };
-  }, [compressor, equalizer, master, sound]);
+    return position.subscribe(() => {
+      if (view.current.zoomed) {
+        followPlayhead(
+          viewport.current,
+          position.getSnapshot() * view.current.px
+        );
+      }
+    });
+  }, [playing, position]);
 
   const toggle = useCallback(() => {
     if (playing) {
-      stopVoice();
-      setPlaying(false);
+      stop();
     } else {
-      startVoice();
-      setPlaying(true);
+      play(position.getSnapshot());
     }
-  }, [playing, startVoice, stopVoice]);
+  }, [play, playing, position, stop]);
 
   const seek = useCallback(
     (value: number) => {
-      offset.current = value;
-      position.set(value);
-      if (voice.current) {
-        stopVoice();
-        offset.current = value;
-        startVoice();
+      if (playing) {
+        play(value);
+      } else {
+        position.set(value);
       }
     },
-    [position, startVoice, stopVoice]
-  );
-
-  // The playhead, read from the audio clock while it plays.
-  useEffect(() => {
-    const ctx = master?.context;
-    if (!(playing && ctx && sound)) {
-      return;
-    }
-    let frame = 0;
-    const tick = () => {
-      const { current } = voice;
-      if (current) {
-        const at =
-          (current.offset + ctx.currentTime - current.started) %
-          sound.buffer.duration;
-        position.set(at);
-        // Zoomed in, the view turns the page as the playhead leaves it.
-        if (view.current.zoomed) {
-          followPlayhead(viewport.current, at * view.current.px);
-        }
-      }
-      frame = requestAnimationFrame(tick);
-    };
-    frame = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(frame);
-  }, [master, playing, position, sound]);
-
-  // Everything goes when the page does.
-  useEffect(
-    () => () => {
-      voice.current?.source.stop();
-      chain.current?.equalizer.dispose();
-      chain.current?.compressor.dispose();
-      chain.current?.analyser.disconnect();
-    },
-    []
+    [play, playing, position]
   );
 
   const load = useCallback(
     async (file: File) => {
-      const ctx = master?.context;
+      const ctx = webAudio.getContext();
       if (!ctx) {
         return;
       }
       const channels = await decodeAudioChannels(ctx, await file.arrayBuffer());
-      const [first] = channels;
-      if (!first) {
+      if (!channels[0]) {
         return;
       }
-      const buffer = ctx.createBuffer(
-        channels.length,
-        first.length,
-        ctx.sampleRate
-      );
-      for (const [index, data] of channels.entries()) {
-        buffer.getChannelData(index).set(data);
-      }
-      const wasPlaying = Boolean(voice.current);
-      if (wasPlaying) {
-        stopVoice();
-      }
-      offset.current = 0;
+      stop();
       position.set(0);
       setZoomPx(null);
-      setSound(soundOf(buffer, file.name));
-      setPlaying(false);
+      place(
+        { channels, sampleRate: ctx.sampleRate },
+        soundOf(channels, ctx.sampleRate, file.name)
+      );
     },
-    [master, position, stopVoice]
+    [place, position, stop]
   );
 
   const pick = useCallback(
@@ -456,18 +430,22 @@ export function HomePlayground() {
     },
     [load]
   );
-  // A sound file dropped anywhere on the playground opens in it.
-  const frame = useRef<HTMLDivElement>(null);
+  // A sound file dropped anywhere on the playground opens in it; a device dragged from the library goes to the chain.
+  const frame = useRef<HTMLElement>(null);
   useEffect(() => {
     const element = frame.current;
     if (!element) {
       return;
     }
-    const allow = (event: DragEvent) => event.preventDefault();
+    const allow = (event: DragEvent) => {
+      if (event.dataTransfer?.types.includes("Files")) {
+        event.preventDefault();
+      }
+    };
     const take = (event: DragEvent) => {
-      event.preventDefault();
       const [file] = event.dataTransfer?.files ?? [];
       if (file?.type.startsWith("audio/")) {
+        event.preventDefault();
         load(file);
       }
     };
@@ -480,167 +458,194 @@ export function HomePlayground() {
   }, [load]);
   const open = useCallback(() => fileInput.current?.click(), []);
 
-  const levels = useAudioLevels(analyser ? [analyser] : NO_ANALYSERS);
-  const spectrum = useSpectrum(analyser);
-  const duration = sound?.buffer.duration ?? 1;
+  // The library: picked, a device goes at the end of the chain; the chain's end opens it, ready to search.
+  const [libraryOpen, setLibraryOpen] = useState<boolean | null>(null);
+  const search = useRef<HTMLInputElement>(null);
+  const openLibrary = useCallback(() => {
+    setLibraryOpen(true);
+    requestAnimationFrame(() => search.current?.focus());
+  }, []);
+  const addDevice = useCallback(
+    (device: string) => {
+      const entry = libraryDevice(device);
+      if (entry) {
+        dispatch({
+          device,
+          state: entry.device.defaults(),
+          track: TRACK,
+          type: "add-device",
+        });
+      }
+    },
+    [dispatch]
+  );
+
+  const levels = useAudioLevels(meter(doc.main.id) ?? NO_ANALYSERS);
 
   return (
     <section
       aria-labelledby="home-playground"
-      className="@container px-4 pb-10 sm:px-6"
+      className="@container border-t"
+      ref={frame}
     >
       <h2 className="sr-only" id="home-playground">
         Playground
       </h2>
-      <div
-        className="flex flex-col gap-5 rounded-xl border bg-card p-4 text-card-foreground"
-        ref={frame}
-      >
-        <div className="flex items-center gap-3">
-          <PlayToggle
-            label="Play the playground"
-            onToggle={toggle}
-            playing={playing}
-          />
-          <span className="min-w-0 truncate font-site-mono text-sm">
-            {sound?.name ?? "Loading…"}
-          </span>
-          <span className="font-site-mono text-site-muted-foreground text-xs tabular-nums">
-            {formatTime(duration)}
-          </span>
-          <input
-            accept="audio/*"
-            className="sr-only"
-            onChange={pick}
-            ref={fileInput}
-            tabIndex={-1}
-            type="file"
-          />
-          <div className="ml-auto flex items-center gap-1">
-            <Button
-              aria-label="Zoom out"
-              disabled={!zoomed}
-              onClick={zoomOut}
-              size="icon-sm"
-              variant="ghost"
-            >
-              −
-            </Button>
-            <Button
-              aria-label="Zoom in"
-              disabled={!sound || zoom >= maxZoom}
-              onClick={zoomIn}
-              size="icon-sm"
-              variant="ghost"
-            >
-              +
-            </Button>
-            <Button onClick={open} size="sm" variant="outline">
-              Open a sound
-            </Button>
-          </div>
-        </div>
-        {/* The sound and what comes out of the chain, side by side, as a track and its meter. */}
-        <div className="flex items-start gap-4">
-          <Part
-            className="flex-1"
-            name="waveform"
-            page="components/base/waveform"
+      <div className="flex items-center gap-3 px-4 pt-4 sm:px-6">
+        <PlayToggle
+          label="Play the playground"
+          onToggle={toggle}
+          playing={playing}
+        />
+        <span className="min-w-0 truncate font-site-mono text-sm">
+          {sound?.name ?? "Loading…"}
+        </span>
+        <span className="font-site-mono text-site-muted-foreground text-xs tabular-nums">
+          {formatTime(soundDuration)}
+        </span>
+        <input
+          accept="audio/*"
+          className="sr-only"
+          onChange={pick}
+          ref={fileInput}
+          tabIndex={-1}
+          type="file"
+        />
+        <div className="ml-auto flex items-center gap-1">
+          <Button
+            aria-label="Zoom out"
+            disabled={!zoomed}
+            onClick={zoomOut}
+            size="icon-sm"
+            variant="ghost"
           >
-            {/* Zoomed with Cmd or Ctrl + wheel, or the buttons above; the ruler seeks, the navigator moves the view. */}
-            <div ref={lane}>
-              <Timeline
-                disabled={!sound}
-                duration={soundDuration || 1}
-                maxZoom={Math.max(maxZoom, 1)}
-                minZoom={fitPx || 0}
-                onPositionChange={seek}
-                onZoomChange={changeZoom}
-                source={position}
-                zoom={fitPx > 0 ? zoom : undefined}
+            −
+          </Button>
+          <Button
+            aria-label="Zoom in"
+            disabled={!sound || zoom >= maxZoom}
+            onClick={zoomIn}
+            size="icon-sm"
+            variant="ghost"
+          >
+            +
+          </Button>
+          <Button onClick={open} size="sm" variant="outline">
+            Open a sound
+          </Button>
+        </div>
+      </div>
+      {/* The sound and what comes out of the chain, side by side, as a track and its meter. */}
+      <div className="flex items-start gap-4 px-4 py-4 sm:px-6">
+        <Part
+          className="flex-1"
+          name="waveform"
+          page="components/base/waveform"
+        >
+          {/* Zoomed with Cmd or Ctrl + wheel, or the buttons above; the ruler seeks, the navigator moves the view. */}
+          <div ref={lane}>
+            <Timeline
+              disabled={!sound}
+              duration={soundDuration || 1}
+              maxZoom={Math.max(maxZoom, 1)}
+              minZoom={fitPx || 0}
+              onPositionChange={seek}
+              onZoomChange={changeZoom}
+              source={position}
+              zoom={fitPx > 0 ? zoom : undefined}
+            >
+              <TimelineViewport
+                className="overflow-y-hidden rounded-lg border"
+                ref={viewport}
+                scrollbar="hidden"
               >
-                <TimelineViewport
-                  className="overflow-y-hidden rounded-lg border"
-                  ref={viewport}
-                  scrollbar="hidden"
-                >
-                  <TimelineRuler
-                    aria-label="Playground time"
-                    getAriaValueText={formatTime}
-                  >
-                    {rulerLabels(soundDuration, zoom, shown).map((mark) => (
-                      <TimelineMark key={mark.at} value={mark.at}>
-                        {mark.text}
-                      </TimelineMark>
-                    ))}
-                  </TimelineRuler>
-                  {/* A press seeks; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
-                  <TimelineLane className="h-28" seekable>
-                    <div
-                      className="absolute inset-y-0 left-0"
-                      style={{
-                        width: `calc(var(--timeline-unit) * ${soundDuration || 1})`,
-                      }}
-                    >
-                      {sound ? (
-                        <ClipWaveform
-                          aria-label={`${sound.name}, waveform`}
-                          className="inset-y-0 h-full text-foreground"
-                          clip={{
-                            sourceLength: soundDuration,
-                            value: { length: soundDuration, offset: 0 },
-                          }}
-                          peaks={sound.peaks}
-                          role="img"
-                          samples={sound.samples}
-                        />
-                      ) : null}
-                    </div>
-                    <TimelinePlayhead />
-                  </TimelineLane>
-                </TimelineViewport>
-                <TimelineNavigator
-                  className="mt-2"
+                <TimelineRuler
+                  aria-label="Playground time"
                   getAriaValueText={formatTime}
-                />
-              </Timeline>
-            </div>
-          </Part>
-          <Part
-            className="items-center"
-            name="meter"
-            page="components/base/meter"
-          >
-            <div className="h-36">
-              <Meter
-                aria-label="Playground output"
-                // Under the same variant as the size's own, so it fills the waveform's height.
-                className="data-[orientation=vertical]:h-full"
-                orientation="vertical"
-                size="sm"
-                source={levels}
+                >
+                  {rulerLabels(soundDuration, zoom, shown).map((mark) => (
+                    <TimelineMark key={mark.at} value={mark.at}>
+                      {mark.text}
+                    </TimelineMark>
+                  ))}
+                </TimelineRuler>
+                {/* A press seeks; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
+                <TimelineLane className="h-28" seekable>
+                  <div
+                    className="absolute inset-y-0 left-0"
+                    style={{
+                      width: `calc(var(--timeline-unit) * ${soundDuration || 1})`,
+                    }}
+                  >
+                    {sound ? (
+                      <ClipWaveform
+                        aria-label={`${sound.name}, waveform`}
+                        className="inset-y-0 h-full text-foreground"
+                        clip={{
+                          sourceLength: soundDuration,
+                          value: { length: soundDuration, offset: 0 },
+                        }}
+                        peaks={sound.peaks}
+                        role="img"
+                        samples={sound.samples}
+                      />
+                    ) : null}
+                  </div>
+                  <TimelinePlayhead />
+                </TimelineLane>
+              </TimelineViewport>
+              <TimelineNavigator
+                className="mt-2"
+                getAriaValueText={formatTime}
               />
-            </div>
-          </Part>
-        </div>
-        {/* The devices keep their width: on a narrow screen their row scrolls, as a rack does, rather than crushing them. */}
-        <div className="-mx-4 overflow-x-auto px-4">
-          <div className="grid min-w-[24rem] gap-5 @[50rem]:grid-cols-2">
-            <Part name="equalizer" page="components/base/equalizer">
-              <EqualizerPanel
-                onValueChange={setEqualizer}
-                spectrum={spectrum}
-                value={equalizer}
-              />
-            </Part>
-            <Part name="compressor" page="components/base/compressor">
-              <CompressorPanel
-                onValueChange={setCompressor}
-                value={compressor}
-              />
-            </Part>
+            </Timeline>
           </div>
+        </Part>
+        <Part
+          className="items-center"
+          name="meter"
+          page="components/base/meter"
+        >
+          <div className="h-36">
+            <Meter
+              aria-label="Playground output"
+              // Under the same variant as the size's own, so it fills the waveform's height.
+              className="data-[orientation=vertical]:h-full"
+              orientation="vertical"
+              size="sm"
+              source={levels}
+            />
+          </div>
+        </Part>
+      </div>
+      {/* The track's chain, from one edge of the inset to the other, the library beside it as in a workstation. */}
+      <div className="flex h-96 border-t">
+        <DeviceBrowser
+          className="h-full"
+          onOpenChange={setLibraryOpen}
+          onPick={addDevice}
+          open={libraryOpen ?? (width === 0 || width >= LIBRARY_PX)}
+          searchRef={search}
+          shelves={SHELVES}
+        />
+        <div className="min-w-0 flex-1 bg-muted/30">
+          <DeviceView
+            arrangement={arrangement}
+            onDeviceMoved={IGNORE}
+            onHoldNote={IGNORE}
+            onNoteOff={IGNORE}
+            onNoteOn={IGNORE}
+            onOpenLibrary={openLibrary}
+            onPadFiles={IGNORE}
+            overridden={NOT_MOVED}
+            position={position}
+            track={TRACK}
+          />
         </div>
+      </div>
+      <div className="flex gap-4 border-t px-4 py-2 sm:px-6">
+        <PartLink name="device-browser" page="components/base/device-browser" />
+        <PartLink name="device-view" page="components/base/device-chain" />
       </div>
     </section>
   );
