@@ -317,7 +317,7 @@ The parts on this page hold the arrangement and fill in what a DAW's arrangement
 
 - `arrangement` (`npx shadcn@latest add @audio-ui/arrangement`) is the document: the types of a clip, a track and a mix, and what reads them. An audio clip names the recording it plays in `recording`, which every piece and copy of it keeps, and a track's `devices` and `sends` are its chain and what it sends to the return tracks. `clipReach` is how far a clip can stretch, `playedNotes` where a MIDI clip's notes play, and `mixAt` what a track plays at a point of the song. Its edits ship with `use-arrangement`, in `lib/arrangement-state`: `lay` puts a clip on a track so it covers what is under it, `land` drops a dragged group (or its copies) on another track, `shiftTrack` and `otherSelected` are what a group drop needs, and `scaleValue` rescales a clip when the tempo changes. Tracks are passed as an order of ids, so nothing assumes how many there are.
 - `use-arrangement` is the state: tracks, clips, selection, each track's mix, its device chain and its sends, the return tracks and the main track, each track's height, the tempo, the time signatures, the locators and the loop, and every operation on them. It keeps undo and redo over all of them together.
-- `use-simulated-clock` is a clock for a timeline that makes no sound, as a live source that loops between two points (to start sound at a position, `use-transport-clock` schedules against the audio clock), and `use-marquee-selection` is the rectangle that selects the clips it touches.
+- `use-marquee-selection` is the rectangle that selects the clips it touches.
 
 ```tsx
 const arrangement = useArrangement({
@@ -597,7 +597,7 @@ The Groove box swings a clip, drums or not: its off-beats, the eighths or the si
 
 The Scale box, with `onScaleChange`, picks the clip's scale: on, the roll marks its rows and Fold keeps them as well as the ones with notes. A clip keeps it as `scale: { root, name, on }`, off as well as on. Its menu offers the keys `keyNotes` and `keyAudio` are likeliest in, three at most: pass every MIDI clip of the song but the drums', and the sound of its audio clips, each recording's `audioChroma` times how long it plays, as a single part is often ambiguous. With the scale on, the Notes box's -1 and +1 move notes by steps of the scale, and Fit notes moves those out of it onto its nearest pitch, the selected notes or every one.
 
-The block plays the whole arrangement through the [arrangement engine](/docs/engine/playback) (`npx shadcn@latest add @audio-ui/arrangement-engine`): its audio clips, its notes, each track's chain and mix, its automation. `useMidiPlayback` (`npx shadcn@latest add @audio-ui/use-midi-playback`) is a lighter way to hear MIDI clips alone, with no recordings and no devices: give it the clips, the tracks, the arrangement's clock and whether it plays; `audible` says whether a track is heard and `levelsAt` gives a track's gain and pan at a time, from its mix or its automation. It returns `onNoteOn` and `onNoteOff` for a MIDI clip's editor, which sound what it auditions. Its voices and its bus are the Audio engine's [Synthesis](/docs/engine/synthesis) and [Output](/docs/engine/output); with an engine of your own, leave both out and play the clips from `playedNotes`.
+The block plays the whole arrangement through the [arrangement engine](/docs/engine/playback) (`npx shadcn@latest add @audio-ui/arrangement-engine`): its audio clips, its notes, each track's chain and mix, its automation. With an engine of your own, play the clips from `playedNotes`.
 
 ### The clip panel
 
@@ -1097,14 +1097,3 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"overridden"} type={"AutomatedParameter[]"}>The parameters moved by hand since, drawn greyed.</TypeRow>
 </TypeTable>
 
-### useMidiPlayback
-
-<TypeTable>
-<TypeRow name={"clips, tracks"} type={"Arranged[], ArrangementTrack[]"}>The arrangement.</TypeRow>
-<TypeRow name={"clock"} type={"Source<number>"}>Where the arrangement plays, in its time.</TypeRow>
-<TypeRow name={"playing"} type={"boolean"}>Whether it plays.</TypeRow>
-<TypeRow name={"loop, looping"} type={"[start, end], boolean"}>The loop, which notes are scheduled up to.</TypeRow>
-<TypeRow name={"audible"} type={"(trackId) => boolean"}>Whether a track is heard: not muted, and in the solo if there is one.</TypeRow>
-<TypeRow name={"levelsAt"} type={"(trackId, time) => { gain, pan }"}>A track's gain and pan at a time.</TypeRow>
-<TypeRow name={"returns"} type={"{ onNoteOn, onNoteOff }"}>For a MIDI clip's editor.</TypeRow>
-</TypeTable>

@@ -13,18 +13,20 @@ export const hooks: RegistryItem[] = [
   },
   {
     description:
-      "Renamed to use-simulated-clock: installs it. It is a clock for a timeline that makes no sound, not one on the audio clock.",
+      "Gone: a playhead with no sound is not a clock. Installs use-transport-clock, the clock on the audio clock.",
     files: [],
     name: "use-playback-clock",
-    registryDependencies: ["@audio-ui/use-simulated-clock"],
+    registryDependencies: ["@audio-ui/use-transport-clock"],
     type: "registry:hook",
   },
-  hookItem("use-simulated-clock", {
-    categories: ["audio", "timeline"],
-    dependencies: ["@audio-ui/react"],
+  {
     description:
-      "A clock for a timeline that makes no sound: it runs while playing, loops between two points, and the playhead follows it without re-rendering React. Not on the audio clock: use use-transport-clock to schedule sound",
-  }),
+      "Gone: a playhead with no sound is not a clock; use-transport-clock moves one on the audio clock, and the arrangement engine's position is where its sound plays. Installs use-transport-clock.",
+    files: [],
+    name: "use-simulated-clock",
+    registryDependencies: ["@audio-ui/use-transport-clock"],
+    type: "registry:hook",
+  },
   hookItem("use-marquee-selection", {
     categories: ["audio", "timeline"],
     description:
@@ -49,19 +51,14 @@ export const hooks: RegistryItem[] = [
     registryDependencies: ["@audio-ui/arrangement", "@audio-ui/undo-history"],
     type: "registry:hook",
   },
-  hookItem("use-midi-playback", {
-    categories: ["audio", "timeline", "piano"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio/note"],
+  {
     description:
-      "Plays an arrangement's MIDI clips while it plays: notes scheduled ahead on the audio clock, each MIDI track through a channel whose gain and pan follow its mix or its automation, and the notes a clip's editor auditions.",
-    registryDependencies: [
-      "@audio-ui/arrangement",
-      "@audio-ui/use-master-bus",
-      "@audio-ui/use-synth-voices",
-      "@audio-ui/envelope-ramp",
-      "@audio-ui/web-audio",
-    ],
-  }),
+      "Gone: the arrangement engine plays MIDI clips through each track's instrument and chain, on the audio clock. Installs arrangement-engine.",
+    files: [],
+    name: "use-midi-playback",
+    registryDependencies: ["@audio-ui/arrangement-engine"],
+    type: "registry:hook",
+  },
   {
     categories: ["timeline", "mixer"],
     description:

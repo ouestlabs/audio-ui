@@ -74,7 +74,6 @@ The surfaces of a DAW: the arrangement, the editors, the piano roll's tools, the
 | `use-time-selection` | `useTimeSelection` from `@/hooks/use-time-selection`, `TimelineTimeSelection` from `@/components/audio-ui/time-selection` | registry only | A stretch of time on some tracks, dragged across bare lanes: `pressLane`, `onSelectionChange`, `time`, the overlay to draw it, and `handleKey` for copy, cut, paste, duplicate, consolidate, loop, fade, delete and open time |
 | `use-timeline-zoom` | `useTimelineZoom` from `@/hooks/use-timeline-zoom` | registry only | A timeline's zoom: fitted beside the track headers until zoomed, `zoomAround(at, factor)`, `zoomTo(start, end)`, `zoomBack()`, `rescale(ratio)` on a tempo change; spread `timeline` on `Timeline` |
 | `use-timeline-grid` | `useTimelineGrid`, `GRID_KEYS`, `GRID_DIVISION_OPTIONS` from `@/hooks/use-timeline-grid` | registry only | A timeline's grid: adaptive or fixed, triplet, snap, `step` to draw, `snapStep` to snap to, `label` for its menu button, `change` for Cmd/Ctrl + 1 to 5 |
-| `use-midi-playback` | `useMidiPlayback` from `@/hooks/use-midi-playback` | registry only | Play an arrangement's MIDI clips on the audio clock, a channel per track following its mix or automation; `onNoteOn`/`onNoteOff` for a clip's editor |
 
 ### Editors
 
@@ -209,7 +208,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `clip-waveform` | `ClipWaveform` from `@/components/audio-ui/clip-waveform` | A clip's recording on a canvas, as the clip plays it, a column per pixel, drawn in the frame of a zoom. Used by `arranged-clip` and `clip-panel` |
 | `use-marquee-selection` | `useMarquee` from `@/hooks/use-marquee-selection` | A selection rectangle for the clips of a timeline |
 | `use-audio-signal` | `useAudioSignal` from `@/hooks/use-audio-signal` | An `AnalyserNode` as live signals for a waveform: loudest sample, frequency bands, raw samples |
-| `use-simulated-clock`, `use-simulated-levels`, `use-play-switch` | from `@/hooks/<name>` | A clock, levels and a play switch for a demo that makes no sound |
+| `use-simulated-levels`, `use-play-switch` | from `@/hooks/<name>` | Levels for a meter demo that makes no sound, and the play switch of a demo's session |
 | `use-audio-session` | `AudioSessionProvider` from `@/hooks/use-audio-session` | A play switch and a microphone switch of their own for a demo and its controls: inside one, `use-play-switch` and `use-microphone` follow it; outside one they stay off |
 | `use-demo-source` | `useDemoSource` from `@/hooks/use-demo-source` | The sound a device plays: the one chosen in its session, else its default from `DEMO_SOURCES` (`@/lib/demo-sound`) |
 | `use-device-loop`, `use-noise-through-eq` | `useDeviceLoop`, `useNoiseThroughEq` from `@/hooks/<name>` | A short loop of drums and plucked notes through an effect's engine (`useDeviceLoop({ create, destination, state })` returns the `engine` and analysers of what goes in, `input`, and comes out, `analyser`), or pink noise through an equalizer's bands: what a device does, heard and measured. They play while the play switch of their `AudioSessionProvider` is on, and stay silent outside one |

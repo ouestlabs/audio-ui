@@ -996,7 +996,6 @@ export const audio: RegistryItem[] = [
       "@audio-ui/timeline-markers",
       "@audio-ui/track-automation",
       "@audio-ui/use-track-reorder",
-      "@audio-ui/use-midi-playback",
       "@audio-ui/use-marquee-selection",
       "@audio-ui/use-timeline-zoom",
       "@audio-ui/use-timeline-grid",
