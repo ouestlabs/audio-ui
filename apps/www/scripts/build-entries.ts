@@ -40,8 +40,6 @@ export interface Entry {
   kind: "hook" | "lib";
   name: string;
   registryDependencies: string[];
-  /** The files in the repository, from `apps/www/src/registry-audio/bases/base/`. */
-  sources: string[];
   usedBy: string[];
 }
 
@@ -115,7 +113,6 @@ export async function buildEntries(): Promise<Entry[]> {
         registryDependencies: (item.registryDependencies ?? []).map((dep) =>
           dep.replace("@audio-ui/", "")
         ),
-        sources: files,
         usedBy: all
           .filter((other) =>
             other.registryDependencies?.includes(`@audio-ui/${item.name}`)
@@ -128,9 +125,8 @@ export async function buildEntries(): Promise<Entry[]> {
   return entries.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-// Normalized: the paths the resolver reaches have no `..` in them, so this prefix can be cut from them.
+// Normalized: the paths the resolver reaches have no `..` in them.
 const PACKAGES = new URL("../../../packages", import.meta.url).pathname;
-const REPOSITORY = new URL("../../..", import.meta.url).pathname;
 export const MODULES_MANIFEST = `${WEB}/src/lib/docs/content/package-modules.generated.json`;
 // `export { a, b as c } from "x"`, `export * as Name from "x"` and `export * from "x"`.
 const EXPORT_FROM =
@@ -155,18 +151,39 @@ const MODULE_PACKAGES = [
 export interface PackageModule {
   /** The adapters that draw it: `@audio-ui/react/knob`, `@audio-ui/elements/knob`. */
   adapters: string[];
+  /** The audio.js packages it builds on, such as `@audio/note`: those its files import, and those whose code its kernels carry. */
+  audiojs: string[];
   exports: EntryExport[];
   /** What a project imports it from, such as `@audio-ui/engine/time`: the module's key. */
   from: string;
   /** The package it is in, what a project installs. */
   package: string;
-  /** The files its exports are declared in, from the repository's root. */
-  sources: string[];
   /** The registry's hooks and libs that import it: the ones with a page of their own. */
   usedBy: string[];
 }
 
 const read = (path: string) => Bun.file(path).text();
+
+// An audio.js package a module's file imports, or a kernels file carries: `from "@audio/note"`, `import("@audio/encode")`, `` - `@audio/effect-lofi` ``.
+const AUDIO_JS = /(?:from\s+"|import\("|^ \* - `)(@audio\/[a-z0-9-]+)/gm;
+
+/** The audio.js packages a module builds on: those the files of its folder import, and those whose code its kernels carry. A module that is its package's root has none of its own. */
+async function audioJsOf(entry: string): Promise<string[]> {
+  const folder = entry.slice(0, entry.lastIndexOf("/"));
+  if (folder.endsWith("/src")) {
+    return [];
+  }
+  const files = [...new Bun.Glob("*.ts").scanSync(folder)].filter(
+    (file) => !file.endsWith(".test.ts")
+  );
+  const texts = await Promise.all(
+    files.map((file) => read(`${folder}/${file}`))
+  );
+  const found = texts.flatMap((text) =>
+    [...text.matchAll(AUDIO_JS)].map((match) => match[1] ?? "")
+  );
+  return [...new Set(found)].sort();
+}
 const resolvePath = (from: string, specifier: string) =>
   new URL(specifier, `file://${from}`).pathname;
 
@@ -397,13 +414,7 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
             exports: resolved.map((each) => each.declared),
             from,
             package: name,
-            sources: [
-              ...new Set(
-                resolved
-                  .filter((each) => each.path.startsWith(PACKAGES))
-                  .map((each) => each.path.replace(REPOSITORY, ""))
-              ),
-            ],
+            audiojs: await audioJsOf(entry),
             usedBy: itemFiles
               .filter((item) =>
                 item.sources.some((text) => text.includes(`from "${from}"`))

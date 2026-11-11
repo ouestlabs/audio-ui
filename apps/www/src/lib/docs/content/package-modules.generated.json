@@ -208,20 +208,7 @@
     ],
     "from": "@audio-ui/core",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/dom/attributes.ts",
-      "packages/core/src/dom/frame.ts",
-      "packages/core/src/dom/pointer.ts",
-      "packages/core/src/dom/visibility.ts",
-      "packages/core/src/shared/math.ts",
-      "packages/core/src/shared/pitch.ts",
-      "packages/core/src/value/events.ts",
-      "packages/core/src/value/format.ts",
-      "packages/core/src/value/range.ts",
-      "packages/core/src/value/scale.ts",
-      "packages/core/src/value/source.ts",
-      "packages/core/src/value/store.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -383,10 +370,7 @@
     ],
     "from": "@audio-ui/core/envelope",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/envelope/controller.ts",
-      "packages/core/src/primitives/envelope/geometry.ts"
-    ],
+    "audiojs": [],
     "usedBy": [
       "arrangement",
       "dawproject",
@@ -467,10 +451,7 @@
     ],
     "from": "@audio-ui/core/fader",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/fader/controller.ts",
-      "packages/core/src/primitives/fader/defaults.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -627,10 +608,7 @@
     ],
     "from": "@audio-ui/core/knob",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/knob/controller.ts",
-      "packages/core/src/primitives/knob/shared.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -742,11 +720,7 @@
     ],
     "from": "@audio-ui/core/meter",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/meter/ballistics.ts",
-      "packages/core/src/primitives/meter/scale.ts",
-      "packages/core/src/primitives/meter/view.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -813,9 +787,7 @@
     ],
     "from": "@audio-ui/core/pad",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/pad/controller.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -892,10 +864,7 @@
     ],
     "from": "@audio-ui/core/piano",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/piano/controller.ts",
-      "packages/core/src/primitives/piano/layout.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -1197,11 +1166,7 @@
     ],
     "from": "@audio-ui/core/piano-roll",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/piano-roll/controller.ts",
-      "packages/core/src/primitives/piano-roll/edits.ts",
-      "packages/core/src/primitives/piano-roll/rows.ts"
-    ],
+    "audiojs": [],
     "usedBy": [
       "arrangement",
       "dawproject",
@@ -1310,12 +1275,7 @@
     ],
     "from": "@audio-ui/core/plot",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/plot/axis.ts",
-      "packages/core/src/primitives/plot/handle.ts",
-      "packages/core/src/primitives/plot/path.ts",
-      "packages/core/src/primitives/plot/ticks.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -1432,10 +1392,7 @@
     ],
     "from": "@audio-ui/core/sequencer",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/sequencer/controller.ts",
-      "packages/core/src/primitives/sequencer/grid.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -1858,18 +1815,7 @@
     ],
     "from": "@audio-ui/core/timeline",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/timeline/clip.ts",
-      "packages/core/src/primitives/timeline/clip-controller.ts",
-      "packages/core/src/primitives/timeline/locators.ts",
-      "packages/core/src/primitives/timeline/navigator.ts",
-      "packages/core/src/primitives/timeline/position.ts",
-      "packages/core/src/primitives/timeline/range-controller.ts",
-      "packages/core/src/primitives/timeline/scale.ts",
-      "packages/core/src/primitives/timeline/snap.ts",
-      "packages/core/src/primitives/timeline/track-controller.ts",
-      "packages/core/src/primitives/timeline/wheel-zoom.ts"
-    ],
+    "audiojs": [],
     "usedBy": [
       "use-timeline-cursor"
     ]
@@ -2143,18 +2089,7 @@
     ],
     "from": "@audio-ui/core/waveform",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/waveform/bar-layout.ts",
-      "packages/core/src/primitives/waveform/level-history.ts",
-      "packages/core/src/primitives/waveform/levels.ts",
-      "packages/core/src/primitives/waveform/levels-engine.ts",
-      "packages/core/src/primitives/waveform/paint-bars.ts",
-      "packages/core/src/primitives/waveform/paint-canvas.ts",
-      "packages/core/src/primitives/waveform/peaks.ts",
-      "packages/core/src/primitives/waveform/region.ts",
-      "packages/core/src/primitives/waveform/scope.ts",
-      "packages/core/src/primitives/waveform/seek.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -2231,10 +2166,7 @@
     ],
     "from": "@audio-ui/core/xypad",
     "package": "@audio-ui/core",
-    "sources": [
-      "packages/core/src/primitives/xypad/controller.ts",
-      "packages/core/src/primitives/xypad/shared.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -2488,17 +2420,13 @@
     ],
     "from": "@audio-ui/engine/analysis",
     "package": "@audio-ui/engine",
-    "sources": [
-      "packages/engine/src/analysis/beat.ts",
-      "packages/engine/src/analysis/compressor.ts",
-      "packages/engine/src/analysis/filter.ts",
-      "packages/engine/src/analysis/format.ts",
-      "packages/engine/src/analysis/level.ts",
-      "packages/engine/src/analysis/loudness.ts",
-      "packages/engine/src/analysis/peaks.ts",
-      "packages/engine/src/analysis/pitch.ts",
-      "packages/engine/src/analysis/recording.ts",
-      "packages/engine/src/analysis/spectrum.ts"
+    "audiojs": [
+      "@audio/beat-detect",
+      "@audio/loudness-lufs",
+      "@audio/loudness-truepeak",
+      "@audio/mir-chroma",
+      "@audio/pitch-yin",
+      "@audio/weighting-k"
     ],
     "usedBy": [
       "arrangement",
@@ -2727,12 +2655,10 @@
     ],
     "from": "@audio-ui/engine/device",
     "package": "@audio-ui/engine",
-    "sources": [
-      "packages/engine/src/device/define.ts",
-      "packages/engine/src/device/engine.ts",
-      "packages/engine/src/device/instrument.ts",
-      "packages/engine/src/device/measure.ts",
-      "packages/engine/src/device/tools.ts"
+    "audiojs": [
+      "@audio/measure-latency",
+      "@audio/measure-response",
+      "@audio/synth-noise"
     ],
     "usedBy": [
       "arrangement",
@@ -2896,7 +2822,29 @@
     ],
     "from": "@audio-ui/engine/dsp",
     "package": "@audio-ui/engine",
-    "sources": [],
+    "audiojs": [
+      "@audio/biquad",
+      "@audio/dynamics-compand",
+      "@audio/dynamics-compressor",
+      "@audio/dynamics-deesser",
+      "@audio/dynamics-expander",
+      "@audio/dynamics-fet",
+      "@audio/dynamics-limiter",
+      "@audio/dynamics-opto",
+      "@audio/dynamics-unlimit",
+      "@audio/dynamics-varimu",
+      "@audio/dynamics-vca",
+      "@audio/effect-distortion",
+      "@audio/filter-diode-ladder",
+      "@audio/filter-korg35",
+      "@audio/filter-moog-ladder",
+      "@audio/filter-oberheim",
+      "@audio/reverb-dattorro",
+      "@audio/reverb-fdn",
+      "@audio/reverb-freeverb",
+      "@audio/reverb-schroeder",
+      "@audio/reverb-spring"
+    ],
     "usedBy": []
   },
   {
@@ -3005,11 +2953,15 @@
     ],
     "from": "@audio-ui/engine/files",
     "package": "@audio-ui/engine",
-    "sources": [
-      "packages/engine/src/files/audio-decode.ts",
-      "packages/engine/src/files/audio-encode.ts",
-      "packages/engine/src/files/midi-file.ts",
-      "packages/engine/src/files/musicxml-file.ts"
+    "audiojs": [
+      "@audio/decode-aiff",
+      "@audio/decode-caf",
+      "@audio/decode-mp4",
+      "@audio/encode",
+      "@audio/midi-parse",
+      "@audio/midi-write",
+      "@audio/musicxml",
+      "@audio/resample-sinc"
     ],
     "usedBy": [
       "audio-export"
@@ -3141,31 +3093,46 @@
     ],
     "from": "@audio-ui/engine/kernels",
     "package": "@audio-ui/engine",
-    "sources": [
-      "packages/engine/src/kernels/bass-enhancer.ts",
-      "packages/engine/src/kernels/binaural-panner.ts",
-      "packages/engine/src/kernels/chorus.ts",
-      "packages/engine/src/kernels/compander.ts",
-      "packages/engine/src/kernels/compressor.ts",
-      "packages/engine/src/kernels/deesser.ts",
-      "packages/engine/src/kernels/delay.ts",
-      "packages/engine/src/kernels/ducker.ts",
-      "packages/engine/src/kernels/exciter.ts",
-      "packages/engine/src/kernels/expander.ts",
-      "packages/engine/src/kernels/filter.ts",
-      "packages/engine/src/kernels/frequency-shifter.ts",
-      "packages/engine/src/kernels/gate.ts",
-      "packages/engine/src/kernels/limiter.ts",
-      "packages/engine/src/kernels/lofi.ts",
-      "packages/engine/src/kernels/mid-side.ts",
-      "packages/engine/src/kernels/phaser.ts",
-      "packages/engine/src/kernels/redux.ts",
-      "packages/engine/src/kernels/rotary.ts",
-      "packages/engine/src/kernels/stutter.ts",
-      "packages/engine/src/kernels/tilt-eq.ts",
-      "packages/engine/src/kernels/transient.ts",
-      "packages/engine/src/kernels/unlimiter.ts",
-      "packages/engine/src/kernels/wah.ts"
+    "audiojs": [
+      "@audio/biquad",
+      "@audio/dynamics-compand",
+      "@audio/dynamics-compressor",
+      "@audio/dynamics-deesser",
+      "@audio/dynamics-ducker",
+      "@audio/dynamics-envelope",
+      "@audio/dynamics-expander",
+      "@audio/dynamics-fet",
+      "@audio/dynamics-gate",
+      "@audio/dynamics-limiter",
+      "@audio/dynamics-opto",
+      "@audio/dynamics-transient-shaper",
+      "@audio/dynamics-unlimit",
+      "@audio/dynamics-varimu",
+      "@audio/dynamics-vca",
+      "@audio/effect-autowah",
+      "@audio/effect-bitcrusher",
+      "@audio/effect-chorus",
+      "@audio/effect-exciter",
+      "@audio/effect-freqshift",
+      "@audio/effect-graindelay",
+      "@audio/effect-lofi",
+      "@audio/effect-multitap",
+      "@audio/effect-noiseshaper",
+      "@audio/effect-phaser",
+      "@audio/effect-pingpong",
+      "@audio/effect-ringmod",
+      "@audio/effect-rotary",
+      "@audio/effect-stutter",
+      "@audio/effect-subbass",
+      "@audio/effect-wah",
+      "@audio/eq-crossover",
+      "@audio/eq-tilt",
+      "@audio/filter-diode-ladder",
+      "@audio/filter-korg35",
+      "@audio/filter-moog-ladder",
+      "@audio/filter-oberheim",
+      "@audio/spatial-binaural",
+      "@audio/spatial-microshift"
     ],
     "usedBy": []
   },
@@ -3210,10 +3177,7 @@
     ],
     "from": "@audio-ui/engine/midi",
     "package": "@audio-ui/engine",
-    "sources": [
-      "packages/engine/src/midi/input.ts",
-      "packages/engine/src/midi/message.ts"
-    ],
+    "audiojs": [],
     "usedBy": [
       "use-midi-input"
     ]
@@ -3279,9 +3243,9 @@
     ],
     "from": "@audio-ui/engine/pitch",
     "package": "@audio-ui/engine",
-    "sources": [
-      "packages/engine/src/pitch/key.ts",
-      "packages/engine/src/pitch/scale.ts"
+    "audiojs": [
+      "@audio/mir-key",
+      "@audio/note"
     ],
     "usedBy": [
       "arrangement",
@@ -3576,18 +3540,7 @@
     ],
     "from": "@audio-ui/engine/playback",
     "package": "@audio-ui/engine",
-    "sources": [
-      "packages/engine/src/playback/clip.ts",
-      "packages/engine/src/playback/loader-worker-source.ts",
-      "packages/engine/src/playback/mixer.ts",
-      "packages/engine/src/playback/note.ts",
-      "packages/engine/src/playback/plan.ts",
-      "packages/engine/src/playback/protocol.ts",
-      "packages/engine/src/playback/render.ts",
-      "packages/engine/src/playback/stream.ts",
-      "packages/engine/src/playback/transport.ts",
-      "packages/engine/src/playback/worklet-source.ts"
-    ],
+    "audiojs": [],
     "usedBy": [
       "arrangement",
       "arrangement-engine",
@@ -3884,13 +3837,7 @@
     ],
     "from": "@audio-ui/engine/time",
     "package": "@audio-ui/engine",
-    "sources": [
-      "packages/engine/src/time/grid.ts",
-      "packages/engine/src/time/meter.ts",
-      "packages/engine/src/time/scheduler.ts",
-      "packages/engine/src/time/tempo.ts",
-      "packages/engine/src/time/warp.ts"
-    ],
+    "audiojs": [],
     "usedBy": [
       "arrangement",
       "arrangement-engine",
@@ -3915,9 +3862,7 @@
     ],
     "from": "@audio-ui/engine/worklet",
     "package": "@audio-ui/engine",
-    "sources": [
-      "packages/engine/src/worklet/load.ts"
-    ],
+    "audiojs": [],
     "usedBy": [
       "clip-player",
       "recording"
@@ -4819,24 +4764,7 @@
     ],
     "from": "@audio-ui/elements",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/envelope/elements.ts",
-      "packages/elements/src/fader/elements.ts",
-      "packages/elements/src/knob/elements.ts",
-      "packages/elements/src/meter/elements.ts",
-      "packages/elements/src/pad/elements.ts",
-      "packages/elements/src/piano/elements.ts",
-      "packages/elements/src/piano-roll/elements.ts",
-      "packages/elements/src/plot/elements.ts",
-      "packages/elements/src/sequencer/elements.ts",
-      "packages/elements/src/timeline/clip.ts",
-      "packages/elements/src/timeline/lanes.ts",
-      "packages/elements/src/timeline/range.ts",
-      "packages/elements/src/timeline/root.ts",
-      "packages/elements/src/timeline/track.ts",
-      "packages/elements/src/waveform/elements.ts",
-      "packages/elements/src/xypad/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -4910,9 +4838,7 @@
     ],
     "from": "@audio-ui/elements/envelope",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/envelope/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -4981,9 +4907,7 @@
     ],
     "from": "@audio-ui/elements/fader",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/fader/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5052,9 +4976,7 @@
     ],
     "from": "@audio-ui/elements/knob",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/knob/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5123,9 +5045,7 @@
     ],
     "from": "@audio-ui/elements/meter",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/meter/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5174,9 +5094,7 @@
     ],
     "from": "@audio-ui/elements/pad",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/pad/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5235,9 +5153,7 @@
     ],
     "from": "@audio-ui/elements/piano",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/piano/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5331,9 +5247,7 @@
     ],
     "from": "@audio-ui/elements/piano-roll",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/piano-roll/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5437,9 +5351,7 @@
     ],
     "from": "@audio-ui/elements/plot",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/plot/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5528,9 +5440,7 @@
     ],
     "from": "@audio-ui/elements/sequencer",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/sequencer/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5684,13 +5594,7 @@
     ],
     "from": "@audio-ui/elements/timeline",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/timeline/clip.ts",
-      "packages/elements/src/timeline/lanes.ts",
-      "packages/elements/src/timeline/range.ts",
-      "packages/elements/src/timeline/root.ts",
-      "packages/elements/src/timeline/track.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5799,9 +5703,7 @@
     ],
     "from": "@audio-ui/elements/waveform",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/waveform/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -5860,9 +5762,7 @@
     ],
     "from": "@audio-ui/elements/xypad",
     "package": "@audio-ui/elements",
-    "sources": [
-      "packages/elements/src/xypad/elements.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6046,23 +5946,7 @@
     ],
     "from": "@audio-ui/react",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/core/src/value/source.ts",
-      "packages/core/src/primitives/timeline/locators.ts",
-      "packages/ui/src/entries/envelope.ts",
-      "packages/ui/src/entries/fader.ts",
-      "packages/ui/src/entries/knob.ts",
-      "packages/ui/src/entries/meter.ts",
-      "packages/ui/src/entries/pad.ts",
-      "packages/ui/src/entries/piano.ts",
-      "packages/ui/src/entries/piano-roll.ts",
-      "packages/ui/src/entries/plot.ts",
-      "packages/ui/src/entries/sequencer.ts",
-      "packages/core/src/primitives/timeline/clip.ts",
-      "packages/ui/src/entries/timeline.ts",
-      "packages/ui/src/entries/waveform.ts",
-      "packages/ui/src/entries/xypad.ts"
-    ],
+    "audiojs": [],
     "usedBy": [
       "arrangement",
       "arrangement-engine",
@@ -6127,16 +6011,7 @@
     ],
     "from": "@audio-ui/react/envelope",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/core/src/primitives/envelope/geometry.ts",
-      "packages/ui/src/primitives/envelope/elements/fill.tsx",
-      "packages/ui/src/primitives/envelope/elements/graph.tsx",
-      "packages/ui/src/primitives/envelope/elements/line.tsx",
-      "packages/ui/src/primitives/envelope/elements/point.tsx",
-      "packages/ui/src/primitives/envelope/elements/points.tsx",
-      "packages/ui/src/primitives/envelope/elements/root.tsx",
-      "packages/ui/src/primitives/envelope/elements/segments.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6185,16 +6060,7 @@
     ],
     "from": "@audio-ui/react/fader",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/ui/src/primitives/fader/elements/control.tsx",
-      "packages/ui/src/primitives/fader/elements/indicator.tsx",
-      "packages/ui/src/primitives/fader/elements/label.tsx",
-      "packages/ui/src/primitives/fader/elements/mark.tsx",
-      "packages/ui/src/primitives/fader/elements/root.tsx",
-      "packages/ui/src/primitives/fader/elements/thumb.tsx",
-      "packages/ui/src/primitives/fader/elements/track.tsx",
-      "packages/ui/src/primitives/fader/elements/value.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6248,17 +6114,7 @@
     ],
     "from": "@audio-ui/react/knob",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/ui/src/primitives/knob/elements/control.tsx",
-      "packages/ui/src/primitives/knob/elements/indicator.tsx",
-      "packages/ui/src/primitives/knob/elements/label.tsx",
-      "packages/ui/src/primitives/knob/elements/mark.tsx",
-      "packages/ui/src/primitives/knob/elements/provider.tsx",
-      "packages/ui/src/primitives/knob/elements/root.tsx",
-      "packages/ui/src/primitives/knob/elements/thumb.tsx",
-      "packages/ui/src/primitives/knob/elements/track.tsx",
-      "packages/ui/src/primitives/knob/elements/value.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6312,17 +6168,7 @@
     ],
     "from": "@audio-ui/react/meter",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/ui/src/primitives/meter/elements/channel.tsx",
-      "packages/ui/src/primitives/meter/elements/channels.tsx",
-      "packages/ui/src/primitives/meter/elements/indicator.tsx",
-      "packages/ui/src/primitives/meter/elements/label.tsx",
-      "packages/ui/src/primitives/meter/elements/mark.tsx",
-      "packages/ui/src/primitives/meter/elements/peak.tsx",
-      "packages/ui/src/primitives/meter/elements/root.tsx",
-      "packages/ui/src/primitives/meter/elements/track.tsx",
-      "packages/ui/src/primitives/meter/elements/value.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6341,10 +6187,7 @@
     ],
     "from": "@audio-ui/react/pad",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/ui/src/primitives/pad/elements/item.tsx",
-      "packages/ui/src/primitives/pad/elements/root.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6373,12 +6216,7 @@
     ],
     "from": "@audio-ui/react/piano",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/ui/src/primitives/piano/elements/key.tsx",
-      "packages/ui/src/primitives/piano/elements/key-label.tsx",
-      "packages/ui/src/primitives/piano/elements/keys.tsx",
-      "packages/ui/src/primitives/piano/elements/root.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6462,19 +6300,7 @@
     ],
     "from": "@audio-ui/react/piano-roll",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/ui/src/primitives/piano/elements/key.tsx",
-      "packages/ui/src/primitives/piano/elements/key-label.tsx",
-      "packages/ui/src/primitives/piano-roll/elements/grid.tsx",
-      "packages/ui/src/primitives/piano-roll/elements/keys.tsx",
-      "packages/ui/src/primitives/piano-roll/elements/marquee.tsx",
-      "packages/ui/src/primitives/piano-roll/elements/note.tsx",
-      "packages/ui/src/primitives/piano-roll/elements/notes.tsx",
-      "packages/ui/src/primitives/piano-roll/elements/root.tsx",
-      "packages/ui/src/primitives/piano-roll/elements/rows.tsx",
-      "packages/ui/src/primitives/piano-roll/elements/selection-span.tsx",
-      "packages/ui/src/primitives/piano-roll/elements/velocity.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6553,21 +6379,7 @@
     ],
     "from": "@audio-ui/react/plot",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/core/src/primitives/plot/ticks.ts",
-      "packages/ui/src/primitives/plot/context.ts",
-      "packages/ui/src/primitives/plot/elements/band.tsx",
-      "packages/ui/src/primitives/plot/elements/cursor.tsx",
-      "packages/ui/src/primitives/plot/elements/curve.tsx",
-      "packages/ui/src/primitives/plot/elements/dot.tsx",
-      "packages/ui/src/primitives/plot/elements/graph.tsx",
-      "packages/ui/src/primitives/plot/elements/grid.tsx",
-      "packages/ui/src/primitives/plot/elements/handle.tsx",
-      "packages/ui/src/primitives/plot/elements/line.tsx",
-      "packages/ui/src/primitives/plot/elements/mark.tsx",
-      "packages/ui/src/primitives/plot/elements/root.tsx",
-      "packages/ui/src/primitives/plot/elements/trace.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6606,12 +6418,7 @@
     ],
     "from": "@audio-ui/react/sequencer",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/ui/src/primitives/sequencer/elements/cell.tsx",
-      "packages/ui/src/primitives/sequencer/elements/root.tsx",
-      "packages/ui/src/primitives/sequencer/elements/rows.tsx",
-      "packages/ui/src/primitives/sequencer/elements/velocity.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6815,26 +6622,7 @@
     ],
     "from": "@audio-ui/react/timeline",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/core/src/primitives/timeline/locators.ts",
-      "packages/core/src/primitives/timeline/clip.ts",
-      "packages/ui/src/primitives/timeline/elements/clip.tsx",
-      "packages/ui/src/primitives/timeline/elements/clip-fade.tsx",
-      "packages/ui/src/primitives/timeline/elements/clip-fade-handle.tsx",
-      "packages/ui/src/primitives/timeline/elements/clip-handle.tsx",
-      "packages/ui/src/primitives/timeline/elements/clip-header.tsx",
-      "packages/ui/src/primitives/timeline/elements/lane.tsx",
-      "packages/ui/src/primitives/timeline/elements/mark.tsx",
-      "packages/ui/src/primitives/timeline/elements/navigator.tsx",
-      "packages/ui/src/primitives/timeline/elements/playhead.tsx",
-      "packages/ui/src/primitives/timeline/elements/range.tsx",
-      "packages/ui/src/primitives/timeline/elements/root.tsx",
-      "packages/ui/src/primitives/timeline/elements/ruler.tsx",
-      "packages/ui/src/primitives/timeline/elements/track.tsx",
-      "packages/ui/src/primitives/timeline/elements/track-header.tsx",
-      "packages/ui/src/primitives/timeline/elements/track-resize-handle.tsx",
-      "packages/ui/src/primitives/timeline/elements/viewport.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6858,9 +6646,7 @@
     ],
     "from": "@audio-ui/react/source",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/core/src/value/source.ts"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6924,17 +6710,7 @@
     ],
     "from": "@audio-ui/react/waveform",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/ui/src/primitives/waveform/elements/bars.tsx",
-      "packages/ui/src/primitives/waveform/elements/canvas.tsx",
-      "packages/ui/src/primitives/waveform/elements/control.tsx",
-      "packages/ui/src/primitives/waveform/elements/hover.tsx",
-      "packages/ui/src/primitives/waveform/elements/marker.tsx",
-      "packages/ui/src/primitives/waveform/elements/playhead.tsx",
-      "packages/ui/src/primitives/waveform/elements/region.tsx",
-      "packages/ui/src/primitives/waveform/elements/root.tsx",
-      "packages/ui/src/primitives/waveform/elements/thumb.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   },
   {
@@ -6968,13 +6744,7 @@
     ],
     "from": "@audio-ui/react/xypad",
     "package": "@audio-ui/react",
-    "sources": [
-      "packages/ui/src/primitives/xypad/elements/control.tsx",
-      "packages/ui/src/primitives/xypad/elements/label.tsx",
-      "packages/ui/src/primitives/xypad/elements/root.tsx",
-      "packages/ui/src/primitives/xypad/elements/thumb.tsx",
-      "packages/ui/src/primitives/xypad/elements/value.tsx"
-    ],
+    "audiojs": [],
     "usedBy": []
   }
 ]

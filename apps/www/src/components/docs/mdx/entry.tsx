@@ -3,13 +3,12 @@ import { highlightedElements } from "@/components/code/block/highlighted-code";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { Command } from "@/components/docs/mdx/install";
 import {
+  audioJsUrl,
   type Entry as EntryData,
   entryOf,
   entryUrl,
   importLine,
   moduleOf,
-  repositoryUrl,
-  sourceUrl,
 } from "@/lib/docs/content/entries";
 
 /** A line of TypeScript as the page's fences draw it. */
@@ -72,19 +71,13 @@ function Facts({ rows }: { rows: [string, React.ReactNode][] }) {
   );
 }
 
-/** Links to source files, each by its file name. */
-function Sources({
-  paths,
-  url,
-}: {
-  paths: readonly string[];
-  url: (path: string) => string;
-}) {
-  return paths.map((path, index) => (
-    <span key={path}>
+/** The audio.js packages a module builds on, each a link to its page on audio.js.org. */
+function AudioJs({ names }: { names: readonly string[] }) {
+  return names.map((name, index) => (
+    <span key={name}>
       {index > 0 ? ", " : null}
-      <a href={url(path)} rel="noreferrer" target="_blank">
-        {path.split("/").at(-1)}
+      <a href={audioJsUrl(name)} rel="noreferrer" target="_blank">
+        <code>{name}</code>
       </a>
     </span>
   ));
@@ -155,10 +148,6 @@ export function Entry({ name }: { name: string }) {
           ],
           ["npm", <Items key="npm" names={entry.dependencies} />],
           ["Used by", <Items key="used" names={entry.usedBy} />],
-          [
-            "Source",
-            <Sources key="source" paths={entry.sources} url={sourceUrl} />,
-          ],
         ]}
       />
       <Exports exports={entry.exports} />
@@ -169,8 +158,8 @@ export function Entry({ name }: { name: string }) {
 /**
  * The head of a published module's page, such as `@audio-ui/engine/time`,
  * read from the package and its sources: the install, the import, the
- * adapters that draw it, the registry's hooks and libs that build on it, and
- * what it exports.
+ * adapters that draw it, the registry's hooks and libs that build on it, the
+ * audio.js packages it is built on, and what it exports.
  */
 export function Module({ from }: { from: string }) {
   const packageModule = moduleOf(from);
@@ -193,14 +182,14 @@ export function Module({ from }: { from: string }) {
                 ["Used by", <Items key="used" names={packageModule.usedBy} />],
               ] as [string, React.ReactNode][])
             : []),
-          [
-            "Source",
-            <Sources
-              key="source"
-              paths={packageModule.sources}
-              url={repositoryUrl}
-            />,
-          ],
+          ...(packageModule.audiojs.length > 0
+            ? ([
+                [
+                  "audio.js",
+                  <AudioJs key="audiojs" names={packageModule.audiojs} />,
+                ],
+              ] as [string, React.ReactNode][])
+            : []),
         ]}
       />
       <Exports exports={packageModule.exports} />

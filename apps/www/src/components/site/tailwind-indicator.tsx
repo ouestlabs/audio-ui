@@ -1,4 +1,4 @@
-const SHOW = true;
+const SHOW = false; // Set to true to show the Tailwind indicator in production
 
 export function TailwindIndicator() {
   if (process.env.NODE_ENV === "production" || !SHOW) {

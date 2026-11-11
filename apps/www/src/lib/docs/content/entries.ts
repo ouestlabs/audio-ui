@@ -1,4 +1,3 @@
-import { siteConfig } from "@/lib/config";
 import manifest from "@/lib/docs/content/entries.generated.json";
 import packageModules from "@/lib/docs/content/package-modules.generated.json";
 
@@ -48,10 +47,6 @@ export function importLine(entry: Pick<Entry, "exports" | "from">): string {
   return `import { ${names.join(", ")} } from "${entry.from}";`;
 }
 
-/** Where an entry's file is in the repository. */
-export const sourceUrl = (path: string) =>
-  `${siteConfig.links.github}/blob/main/apps/www/src/registry-audio/bases/base/${path}`;
-
 /** A module of a published package as its page heads it: what `scripts/build-entries.ts` reads from the package and its sources. */
 export type PackageModule = (typeof packageModules)[number];
 
@@ -66,9 +61,9 @@ export function moduleOf(from: string): PackageModule {
   return found;
 }
 
-/** Where a file of a package is in the repository, from its root. */
-export const repositoryUrl = (path: string) =>
-  `${siteConfig.links.github}/blob/main/${path}`;
+/** An audio.js package's page on audio.js.org: `@audio/note` is at `/modules/note/`. */
+export const audioJsUrl = (name: string) =>
+  `https://audio.js.org/modules/${name.replace("@audio/", "")}/`;
 
 const ENTRY_TAG = /<Entry\s+name="([^"]+)"\s*\/>/g;
 const MODULE_TAG = /<Module\s+from="([^"]+)"\s*\/>/g;
@@ -89,7 +84,6 @@ export function entryMarkdown(entry: Entry): string {
     `- Files: ${list(entry.files)}`,
     `- Depends on: ${list(entry.registryDependencies)}; npm: ${list(entry.dependencies)}`,
     `- Used by: ${list(entry.usedBy)}`,
-    `- Source: ${entry.sources.map(sourceUrl).join(", ")}`,
     "",
     ...exportsMarkdown(entry.exports),
   ].join("\n");
@@ -105,7 +99,7 @@ function exportsMarkdown(exports: Entry["exports"]) {
   ];
 }
 
-/** A module's head as markdown, for an agent: the install, the import, its adapters, what uses it and its exports. */
+/** A module's head as markdown, for an agent: the install, the import, its adapters, what uses it, the audio.js it builds on and its exports. */
 export function moduleMarkdown(packageModule: PackageModule): string {
   const list = (names: readonly string[]) =>
     names.map((name) => `\`${name}\``).join(", ") || "nothing";
@@ -124,7 +118,11 @@ export function moduleMarkdown(packageModule: PackageModule): string {
     ...(packageModule.usedBy.length > 0
       ? [`- Used by: ${list(packageModule.usedBy)}`]
       : []),
-    `- Source: ${packageModule.sources.map(repositoryUrl).join(", ")}`,
+    ...(packageModule.audiojs.length > 0
+      ? [
+          `- audio.js: ${packageModule.audiojs.map((name) => `[\`${name}\`](${audioJsUrl(name)})`).join(", ")}`,
+        ]
+      : []),
     "",
     ...exportsMarkdown(packageModule.exports),
   ].join("\n");
