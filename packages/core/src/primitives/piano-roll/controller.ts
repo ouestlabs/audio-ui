@@ -1,4 +1,3 @@
-import type { Scale } from "../../audio/pitch/scale.ts";
 import { createPointerLock } from "../../dom/gesture.ts";
 import { clamp } from "../../shared/math.ts";
 import {
@@ -35,7 +34,7 @@ import {
   spatialOrder,
   stretchNotes,
 } from "./edits.ts";
-import { type Rows, rollRows } from "./rows.ts";
+import { type RollScale, type Rows, rollRows } from "./rows.ts";
 
 /** How far a pointer moves before a press on the grid or a note becomes a drag. */
 export const DRAG_THRESHOLD = 4;
@@ -166,7 +165,7 @@ export interface PianoRollOptions {
   /** Asks the view to move focus to a note, or to the grid with `null`, once it has rendered. */
   requestFocus?: (target: NoteId | null) => void;
   /** The scale whose rows are marked, and which `folded: "scale"` keeps. */
-  scale?: Scale | null;
+  scale?: RollScale | null;
   selection?: readonly NoteId[];
   timeline: PianoRollTimeline;
   value?: readonly Note[];
@@ -505,7 +504,7 @@ export function createPianoRollController(
           .join(",")
       : "";
     const scale = options.scale ?? null;
-    const key = `${folded}|${min}|${max}|${pitchKey}|${scale?.root}|${scale?.name}`;
+    const key = `${folded}|${min}|${max}|${pitchKey}|${scale?.root}|${scale?.pitchClasses.join(",")}`;
     if (!rowsCache || key !== rowsKey) {
       rowsKey = key;
       rowsCache = rollRows(notes, min, max, folded, scale);

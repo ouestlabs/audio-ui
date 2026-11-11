@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { fadeGain, splitClip } from "../../primitives/timeline/clip.ts";
+import { fadeGain, splitClip } from "@audio-ui/core/timeline";
 import { type ArrangedAudio, type PlayedClip, playedClip } from "./clip.ts";
 import {
   DECLICK_SECONDS,

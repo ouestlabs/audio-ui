@@ -1,5 +1,4 @@
-import { clamp } from "../../shared/math.ts";
-import { type ParameterScaleProp, resolveScale } from "../../value/scale.ts";
+import { clamp, type ParameterScaleProp, resolveScale } from "@audio-ui/core";
 import type { Tempo } from "../time/tempo.ts";
 
 /**

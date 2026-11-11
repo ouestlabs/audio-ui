@@ -17,6 +17,7 @@
       "name": "daw",
       "dependencies": {
         "@audio-ui/core": "*",
+        "@audio-ui/engine": "*",
         "@audio-ui/icons": "*",
         "@audio-ui/react": "*",
         "@audio/beat-detect": "catalog:",
@@ -114,6 +115,7 @@
       "name": "lab",
       "dependencies": {
         "@audio-ui/core": "*",
+        "@audio-ui/engine": "*",
         "@audio-ui/react": "*",
         "@audio/dynamics-compressor": "catalog:",
         "@audio/dynamics-fet": "catalog:",
@@ -164,6 +166,7 @@
       "version": "0.0.0",
       "dependencies": {
         "@audio-ui/core": "workspace:*",
+        "@audio-ui/engine": "workspace:*",
         "@audio-ui/react": "workspace:*",
         "@remotion/bundler": "4.0.535",
         "@remotion/cli": "4.0.535",
@@ -193,6 +196,7 @@
       "dependencies": {
         "@audio-ui/core": "*",
         "@audio-ui/elements": "*",
+        "@audio-ui/engine": "*",
         "@audio-ui/icons": "*",
         "@audio-ui/react": "*",
         "@audio/beat-detect": "catalog:",
@@ -338,9 +342,6 @@
     "packages/core": {
       "name": "@audio-ui/core",
       "version": "0.28.0",
-      "dependencies": {
-        "@audio/note": "1.0.3",
-      },
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
         "@types/bun": "1.4.2",
@@ -356,6 +357,19 @@
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
+        "@types/bun": "1.4.2",
+        "tsup": "^8.5.0",
+        "typescript": "^7.0.2",
+      },
+    },
+    "packages/engine": {
+      "name": "@audio-ui/engine",
+      "version": "0.0.0",
+      "dependencies": {
+        "@audio-ui/core": "^0.28.0",
+        "@audio/note": "1.0.3",
+      },
+      "devDependencies": {
         "@types/bun": "1.4.2",
         "tsup": "^8.5.0",
         "typescript": "^7.0.2",
@@ -511,6 +525,8 @@
     "@audio-ui/core": ["@audio-ui/core@workspace:packages/core"],
 
     "@audio-ui/elements": ["@audio-ui/elements@workspace:packages/elements"],
+
+    "@audio-ui/engine": ["@audio-ui/engine@workspace:packages/engine"],
 
     "@audio-ui/icons": ["@audio-ui/icons@workspace:packages/icons"],
 

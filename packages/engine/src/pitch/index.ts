@@ -1,7 +1,7 @@
-export { isBlackKey, pitchClassName, pitchName } from "../../shared/pitch.ts";
 export {
   inScale,
   nearestInScale,
+  rollScale,
   SCALES,
   type Scale,
   type ScaleName,

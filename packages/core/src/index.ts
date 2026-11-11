@@ -14,7 +14,7 @@ export {
   roundToStep,
   TAU,
 } from "./shared/math.ts";
-export { isBlackKey, pitchName } from "./shared/pitch.ts";
+export { isBlackKey, pitchClassName, pitchName } from "./shared/pitch.ts";
 export {
   type ChangeEventDetails,
   type CommitEventDetails,

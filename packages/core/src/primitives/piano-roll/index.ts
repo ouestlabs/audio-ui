@@ -57,4 +57,4 @@ export {
   stretchNotes,
   toggleMuted,
 } from "./edits.ts";
-export { type Rows, rollRows } from "./rows.ts";
+export { type RollScale, type Rows, rollRows } from "./rows.ts";

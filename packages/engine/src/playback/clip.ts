@@ -1,4 +1,4 @@
-import type { FadeShape } from "../../primitives/timeline/clip.ts";
+import type { FadeShape } from "@audio-ui/core/timeline";
 import { dbToGain } from "../analysis/level.ts";
 import { type WarpMarker, warpedTime, warpMarkers } from "../time/warp.ts";
 import { toFrames } from "./transport.ts";

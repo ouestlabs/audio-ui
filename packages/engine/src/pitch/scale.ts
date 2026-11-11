@@ -5,6 +5,7 @@
  */
 
 import { SCALES as NOTE_SCALES, snapMidi } from "@audio/note";
+import type { RollScale } from "@audio-ui/core/piano-roll";
 
 /** The steps of each scale, as semitones above the root. */
 export const SCALES = {
@@ -47,4 +48,9 @@ export function nearestInScale(pitch: number, scale: Scale): number {
     root: scale.root,
     scale: SCALES[scale.name],
   });
+}
+
+/** A scale as a piano roll reads it: its pitch classes and its root, what `@audio-ui/core/piano-roll` takes. */
+export function rollScale(scale: Scale): RollScale {
+  return { pitchClasses: scalePitchClasses(scale), root: scale.root };
 }

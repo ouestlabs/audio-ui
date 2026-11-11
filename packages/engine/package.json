@@ -1,0 +1,79 @@
+{
+  "name": "@audio-ui/engine",
+  "version": "0.0.0",
+  "description": "The audio logic behind audio/ui's interfaces, with no UI framework in it: devices as parameters, musical time and the look-ahead scheduler, levels and curves, MIDI input, scales, and the clip player.",
+  "keywords": [
+    "audio-ui",
+    "audio",
+    "web-audio",
+    "engine",
+    "framework-agnostic",
+    "tempo",
+    "scheduler",
+    "midi",
+    "devices",
+    "music"
+  ],
+  "homepage": "https://www.audio-ui.dev/docs/engine",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/engine"
+  },
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    "./analysis": {
+      "types": "./dist/analysis/index.d.ts",
+      "import": "./dist/analysis.js"
+    },
+    "./device": {
+      "types": "./dist/device/index.d.ts",
+      "import": "./dist/device.js"
+    },
+    "./midi": {
+      "types": "./dist/midi/index.d.ts",
+      "import": "./dist/midi.js"
+    },
+    "./pitch": {
+      "types": "./dist/pitch/index.d.ts",
+      "import": "./dist/pitch.js"
+    },
+    "./playback": {
+      "types": "./dist/playback/index.d.ts",
+      "import": "./dist/playback.js"
+    },
+    "./time": {
+      "types": "./dist/time/index.d.ts",
+      "import": "./dist/time.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist node_modules .turbo",
+    "dev": "bunx --bun tsup --watch",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "test": "bun test",
+    "worklet:build": "bun scripts/worklet.ts"
+  },
+  "dependencies": {
+    "@audio-ui/core": "^0.28.0",
+    "@audio/note": "1.0.3"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.2",
+    "tsup": "^8.5.0",
+    "typescript": "^7.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

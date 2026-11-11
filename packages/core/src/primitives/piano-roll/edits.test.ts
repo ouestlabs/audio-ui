@@ -398,7 +398,7 @@ describe("fitNotesToScale", () => {
       fitNotesToScale(
         notes,
         new Set([1, 2]),
-        { name: "major", root: 0 },
+        { pitchClasses: [0, 2, 4, 5, 7, 9, 11], root: 0 },
         BOUNDS
       ).map((note) => note.pitch)
     ).toEqual([60, 64]);
@@ -567,7 +567,10 @@ describe("findNotes", () => {
     expect(findNotes(PHRASE, { length: [2, 2] })).toEqual([1, 3]);
     expect(
       findNotes(PHRASE, {
-        scale: { scale: { name: "pentatonic-minor", root: 0 }, within: false },
+        scale: {
+          scale: { pitchClasses: [0, 3, 5, 7, 10], root: 0 },
+          within: false,
+        },
       })
     ).toEqual([2]);
   });

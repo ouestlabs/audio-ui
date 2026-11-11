@@ -1,7 +1,7 @@
 /**
  * Bundles the code that runs off the main thread into one minified module
  * each, written as a string: the clip player's processor
- * (`src/audio/playback/worklet.ts` to `worklet-source.ts`), what a context
+ * (`src/playback/worklet.ts` to `worklet-source.ts`), what a context
  * loads with `audioWorklet.addModule`, and the loader of streamed recordings
  * (`loader-worker.ts` to `loader-worker-source.ts`), what a page starts a
  * Worker from, whatever bundler the project that installs the package uses.
@@ -12,7 +12,9 @@
  * sources cannot.
  */
 
-const PLAYBACK = `${import.meta.dir}/../src/audio/playback`;
+const PLAYBACK = `${import.meta.dir}/../src/playback`;
+/** Where `@audio-ui/core` is in this repository: a bundle takes what it imports from there, so its sources count too. */
+const CORE = `${import.meta.dir}/../../core/src`;
 
 /** Each bundle: its entry, the file it is written to, the constant that holds it and what that constant says. */
 export const BUNDLES = [
@@ -34,9 +36,17 @@ export const BUNDLES = [
   },
 ] as const;
 
-const RELATIVE_IMPORT = /from "(\.{1,2}\/[^"]+\.ts)"/g;
+const IMPORT = /from "(\.{1,2}\/[^"]+\.ts|@audio-ui\/core(?:\/[a-z-]+)?)"/g;
 
-/** The files the entry imports, itself included, following relative imports. */
+/** The source file an import of `@audio-ui/core` resolves to, as the tsconfig's `paths` map it. */
+const coreSource = (specifier: string) => {
+  const subpath = specifier.slice("@audio-ui/core".length + 1);
+  return subpath
+    ? `${CORE}/primitives/${subpath}/index.ts`
+    : `${CORE}/index.ts`;
+};
+
+/** The files the entry imports, itself included, following relative imports and those of `@audio-ui/core`. */
 async function inputsOf(entry: string): Promise<string[]> {
   const seen = new Set<string>();
   const visit = async (path: string) => {
@@ -47,8 +57,12 @@ async function inputsOf(entry: string): Promise<string[]> {
     const source = await Bun.file(path).text();
     const folder = path.slice(0, path.lastIndexOf("/"));
     await Promise.all(
-      [...source.matchAll(RELATIVE_IMPORT)].map(([, specifier]) =>
-        visit(new URL(specifier as string, `file://${folder}/`).pathname)
+      [...source.matchAll(IMPORT)].map(([, specifier = ""]) =>
+        visit(
+          specifier.startsWith("@audio-ui/core")
+            ? new URL(`file://${coreSource(specifier)}`).pathname
+            : new URL(specifier, `file://${folder}/`).pathname
+        )
       )
     );
   };
@@ -56,9 +70,9 @@ async function inputsOf(entry: string): Promise<string[]> {
   return [...seen].sort();
 }
 
-/** A hash of a bundle's sources: their paths from the package and their text. */
+/** A hash of a bundle's sources: their paths from `packages/` and their text. */
 export async function inputsHash(entry: string): Promise<string> {
-  const root = new URL(`file://${import.meta.dir}/../`).pathname;
+  const root = new URL(`file://${import.meta.dir}/../../`).pathname;
   const hasher = new Bun.CryptoHasher("sha256");
   const paths = await inputsOf(entry);
   const texts = await Promise.all(paths.map((path) => Bun.file(path).text()));

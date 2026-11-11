@@ -1,9 +1,5 @@
-import {
-  inScale,
-  nearestInScale,
-  type Scale,
-} from "../../audio/pitch/scale.ts";
 import { type Grid, snapMove } from "../timeline/snap.ts";
+import { pitchClassOf, type RollScale } from "./rows.ts";
 
 /** A note's id: unique within its clip. */
 export type NoteId = number | string;
@@ -597,6 +593,20 @@ export function stretchNotes(
   );
 }
 
+/** The pitch nearest `pitch` whose class is in `classes`: itself when it is, else the lower of two as near. */
+function nearestIn(pitch: number, classes: ReadonlySet<number>): number {
+  const rounded = Math.round(pitch);
+  for (let distance = 0; distance < 12 && classes.size > 0; distance += 1) {
+    if (classes.has(pitchClassOf(rounded - distance))) {
+      return rounded - distance;
+    }
+    if (classes.has(pitchClassOf(rounded + distance))) {
+      return rounded + distance;
+    }
+  }
+  return rounded;
+}
+
 /**
  * Moves each note in `ids` that is out of `scale` to the nearest pitch in it,
  * the lower of two as near. One that would leave the roll stays where it is.
@@ -604,14 +614,15 @@ export function stretchNotes(
 export function fitNotesToScale(
   notes: readonly Note[],
   ids: ReadonlySet<NoteId>,
-  scale: Scale,
+  scale: RollScale,
   bounds: RollBounds
 ): Note[] {
+  const classes = new Set(scale.pitchClasses.map(pitchClassOf));
   return notes.map((note) => {
     if (!ids.has(note.id)) {
       return note;
     }
-    const pitch = nearestInScale(note.pitch, scale);
+    const pitch = nearestIn(note.pitch, classes);
     return pitch === note.pitch ||
       pitch < bounds.minPitch ||
       pitch > bounds.maxPitch
@@ -830,7 +841,7 @@ export interface NoteQuery {
   /** Pitch classes, in any octave: 0 is C, 11 is B. */
   pitchClasses?: readonly number[];
   /** Notes in `scale`, or with `within: false` those out of it. */
-  scale?: { scale: Scale; within: boolean };
+  scale?: { scale: RollScale; within: boolean };
   /** Velocity from…to, 0…1, inclusive. */
   velocity?: readonly [number, number];
 }
@@ -840,7 +851,7 @@ const inRange = (value: number, range?: readonly [number, number]) =>
 
 /** Whether a note meets every condition of `query` but its count. */
 function matches(note: Note, query: NoteQuery): boolean {
-  const pitchClass = ((Math.round(note.pitch) % 12) + 12) % 12;
+  const pitchClass = pitchClassOf(note.pitch);
   return (
     (!query.pitchClasses || query.pitchClasses.includes(pitchClass)) &&
     inRange(note.velocity ?? 1, query.velocity) &&
@@ -848,7 +859,9 @@ function matches(note: Note, query: NoteQuery): boolean {
     inRange(note.chance ?? 1, query.chance) &&
     (query.muted === undefined || (note.muted ?? false) === query.muted) &&
     (!query.scale ||
-      inScale(note.pitch, query.scale.scale) === query.scale.within)
+      query.scale.scale.pitchClasses.some(
+        (each) => pitchClassOf(each) === pitchClass
+      ) === query.scale.within)
   );
 }
 
