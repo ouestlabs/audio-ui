@@ -6,10 +6,12 @@ import {
   chorusSettings,
 } from "@/registry-audio/bases/base/devices/chorus/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import {
+  createFeed,
+  type Feed,
+} from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.03;
-/** How long after the voices fade out their input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
 export interface ChorusEngine {
   dispose: () => void;
@@ -59,8 +61,7 @@ export function createChorusEngine(
   let voices: AudioWorkletNode | null = null;
   let latest = initial;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   const set = (
     state: ChorusState,
@@ -84,19 +85,7 @@ export function createChorusEngine(
       param("delay").value = settings.delay;
       param("voices").value = settings.voices;
     }
-    clearTimeout(unfeed);
-    if (playing && !fed && voices) {
-      input.connect(voices);
-      fed = true;
-    } else if (!playing && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && voices) {
-          input.disconnect(voices);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing);
   };
   const follow = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
@@ -119,6 +108,7 @@ export function createChorusEngine(
         voices: settings.voices,
       },
     });
+    feed = createFeed([[input, voices]]);
     voices.connect(voicesWet);
     set(latest, follow);
     return true;
@@ -127,7 +117,7 @@ export function createChorusEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       oscillator.stop();
       for (const node of [
         input,

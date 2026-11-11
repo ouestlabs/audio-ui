@@ -5,10 +5,12 @@ import {
   expanderSettings,
 } from "@/registry-audio/bases/base/devices/expander/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import {
+  createFeed,
+  type Feed,
+} from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
-/** How long after the expander fades out its input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
 export interface ExpanderEngine extends DeviceBinding<ExpanderState> {
   /** Connect the signal to process here. */
@@ -52,8 +54,7 @@ export function createExpanderEngine(
   let model: AudioWorkletNode | null = null;
   let reduction = 0;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   /** The expander in place of the dry sound while it plays and is loaded, fed only then. */
   const route = () => {
@@ -64,19 +65,7 @@ export function createExpanderEngine(
     for (const [name, value] of Object.entries(settings.modelParams)) {
       model?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
     }
-    clearTimeout(unfeed);
-    if (playing > 0 && !fed && model) {
-      input.connect(model);
-      fed = true;
-    } else if (playing === 0 && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && model) {
-          input.disconnect(model);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing > 0);
   };
 
   const ready = loadWorklet(ctx, EXPANDER_WORKLET).then((ok) => {
@@ -88,6 +77,7 @@ export function createExpanderEngine(
       parameterData: settings.modelParams,
       processorOptions: { model: "expander" },
     });
+    feed = createFeed([[input, model]]);
     model.port.onmessage = (event: MessageEvent<number>) => {
       reduction = event.data;
     };
@@ -99,7 +89,7 @@ export function createExpanderEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       model?.disconnect();
       for (const node of [input, dry, wet, output]) {
         node.disconnect();

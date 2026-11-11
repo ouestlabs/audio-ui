@@ -7,13 +7,15 @@ import {
   MAX_DELAY_SECONDS,
 } from "@/registry-audio/bases/base/devices/delay/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import {
+  createFeed,
+  type Feed,
+} from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;
 /** A change of time glides slower, so the echo bends like a tape instead of clicking. */
 const TIME_RAMP_SECONDS = 0.08;
-/** How long after the worklet's modes fade out their input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
 export interface DelayEngine {
   dispose: () => void;
@@ -72,9 +74,8 @@ export function createDelayEngine(
   let latest = initial;
   let disposed = false;
   let routed = false;
-  let fed = false;
+  let feed: Feed | null = null;
   let sent = initial.mode;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
 
   const apply = (
     state: DelayState,
@@ -115,19 +116,7 @@ export function createDelayEngine(
       ctx.currentTime,
       RAMP_SECONDS
     );
-    clearTimeout(unfeed);
-    if (playing && !fed && modes) {
-      input.connect(modes);
-      fed = true;
-    } else if (!playing && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && modes) {
-          input.disconnect(modes);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing);
   };
 
   // A fresh node has its own defaults: set the first state outright, ramps come after.
@@ -147,6 +136,7 @@ export function createDelayEngine(
         mode: latest.mode === "echo" ? "pingpong" : latest.mode,
       },
     });
+    feed = createFeed([[input, modes]]);
     sent = latest.mode;
     modes.connect(modesTone);
     apply(latest, (param, value) => {
@@ -159,7 +149,7 @@ export function createDelayEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       for (const node of [
         input,
         dry,

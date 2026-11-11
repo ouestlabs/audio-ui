@@ -6,11 +6,13 @@ import {
   midSideSettings,
 } from "@/registry-audio/bases/base/devices/mid-side/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import {
+  createFeed,
+  type Feed,
+} from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.015;
 const HALF = 0.5;
-/** How long after the detune fades out its input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 /** The longest Haas delay, in seconds. */
 const LONGEST_HAAS = 0.035;
 
@@ -100,8 +102,7 @@ export function createMidSideEngine(
   let detune: AudioWorkletNode | null = null;
   let latest = initial;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   const set = (
     state: MidSideState,
@@ -128,19 +129,7 @@ export function createMidSideEngine(
       (detune.parameters.get("cents") as AudioParam).value =
         settings.detuneCents;
     }
-    clearTimeout(unfeed);
-    if (detuning && !fed && detune) {
-      input.connect(detune);
-      fed = true;
-    } else if (!detuning && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && detune) {
-          input.disconnect(detune);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(detuning);
   };
   const follow = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
@@ -160,6 +149,7 @@ export function createMidSideEngine(
         mix: settings.detuneMix,
       },
     });
+    feed = createFeed([[input, detune]]);
     detune.connect(detuned);
     set(latest, follow);
     return true;
@@ -168,7 +158,7 @@ export function createMidSideEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       for (const node of [
         input,
         plain,

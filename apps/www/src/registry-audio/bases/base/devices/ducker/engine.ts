@@ -5,10 +5,12 @@ import {
   duckerSettings,
 } from "@/registry-audio/bases/base/devices/ducker/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import {
+  createFeed,
+  type Feed,
+} from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
-/** How long after the ducker fades out its inputs are taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
 export interface DuckerEngine extends SidechainBinding<DuckerState, AudioNode> {
   /** Connect the signal to process here. */
@@ -57,8 +59,7 @@ export function createDuckerEngine(
   let model: AudioWorkletNode | null = null;
   let reduction = 0;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   /** The ducker in place of the dry sound while it plays and is loaded, fed only then. */
   const route = () => {
@@ -69,21 +70,7 @@ export function createDuckerEngine(
     for (const [name, value] of Object.entries(settings.modelParams)) {
       model?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
     }
-    clearTimeout(unfeed);
-    if (playing > 0 && !fed && model) {
-      input.connect(model, 0, 0);
-      sidechain.connect(model, 0, 1);
-      fed = true;
-    } else if (playing === 0 && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && model) {
-          input.disconnect(model);
-          sidechain.disconnect(model);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing > 0);
   };
 
   const ready = loadWorklet(ctx, DUCKER_WORKLET).then((ok) => {
@@ -96,6 +83,10 @@ export function createDuckerEngine(
       parameterData: settings.modelParams,
       processorOptions: { model: "ducker" },
     });
+    feed = createFeed([
+      [input, model, 0, 0],
+      [sidechain, model, 0, 1],
+    ]);
     model.port.onmessage = (event: MessageEvent<number>) => {
       reduction = event.data;
     };
@@ -107,7 +98,7 @@ export function createDuckerEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       model?.disconnect();
       for (const node of [input, sidechain, dry, wet, output]) {
         node.disconnect();

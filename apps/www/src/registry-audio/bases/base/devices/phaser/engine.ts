@@ -7,10 +7,12 @@ import {
   phaserSettings,
 } from "@/registry-audio/bases/base/devices/phaser/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import {
+  createFeed,
+  type Feed,
+} from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.03;
-/** How long after the classic phaser fades out its input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
 export interface PhaserEngine {
   dispose: () => void;
@@ -90,8 +92,7 @@ export function createPhaserEngine(
   let classic: AudioWorkletNode | null = null;
   let latest = initial;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   const set = (
     state: PhaserState,
@@ -126,19 +127,7 @@ export function createPhaserEngine(
       // A count, not a level: it changes at once, and the worklet fades it in.
       param("stages").value = settings.stages;
     }
-    clearTimeout(unfeed);
-    if (playing && !fed && classic) {
-      input.connect(classic);
-      fed = true;
-    } else if (!playing && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && classic) {
-          input.disconnect(classic);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing);
   };
   const ramp = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
@@ -162,6 +151,7 @@ export function createPhaserEngine(
         stages: settings.stages,
       },
     });
+    feed = createFeed([[input, classic]]);
     classic.connect(classicWet);
     set(latest, ramp);
     return true;
@@ -170,7 +160,7 @@ export function createPhaserEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       oscillator.stop();
       for (const node of [
         input,
