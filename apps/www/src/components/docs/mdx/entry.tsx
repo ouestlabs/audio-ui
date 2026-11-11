@@ -101,6 +101,10 @@ function Summary({ text }: { text: string }) {
 
 /** What a module exports, each with the first sentence of its JSDoc. */
 function Exports({ exports }: { exports: EntryData["exports"] }) {
+  // A module of types only, such as a framework's template types, exports nothing to list.
+  if (exports.length === 0) {
+    return null;
+  }
   return (
     <table>
       <thead>
