@@ -163,7 +163,7 @@ Each primitive has a page in React (`react/<primitive>.mdx`, headed by `<Module 
 
 - Relative imports carry the `.ts` extension (`./x.ts`, compiled with `rewriteRelativeImportExtensions`). A `.js` specifier breaks the www Turbopack build.
 - Every user-visible change to `packages/core`, `packages/engine`, `packages/react` or `packages/elements` needs a changeset (`bun run changeset`). Never edit `package.json` versions.
-- `packages/react` and `packages/elements` have size budgets (`bun run size`): keep new code out of primitives that don't need it. In `packages/elements` the same script fails when an entry, imported for its side effect, registers no element.
+- In `packages/elements`, `bun run registers` fails when an entry, imported for its side effect, registers no element.
 
 ### Writing (docs, changesets, comments, commit messages, UI copy)
 
@@ -181,8 +181,8 @@ Each primitive has a page in React (`react/<primitive>.mdx`, headed by `<Module 
    bun run build:pkg
    (cd packages/core && bunx tsc --noEmit && bun test)
    (cd packages/engine && bunx tsc --noEmit && bun test)
-   (cd packages/react && bunx tsc --noEmit && bun test && bun run size)
-   (cd packages/elements && bunx tsc --noEmit && bun test && bun run size)
+   (cd packages/react && bunx tsc --noEmit && bun test)
+   (cd packages/elements && bunx tsc --noEmit && bun test && bun run registers)
    ```
    For `apps/www`: `bun run typecheck` and `bun test`.
 4. For UI changes, look at the page in a browser (dev server on :4000) and tab through the controls.

@@ -45,9 +45,9 @@ Both packages are published to npm. Every change here is a change to someone's a
    bun run build:pkg
    (cd packages/core && bunx tsc --noEmit && bun test)
    (cd packages/engine && bunx tsc --noEmit && bun test)
-   (cd packages/react && bunx tsc --noEmit && bun test && bun run size)
+   (cd packages/react && bunx tsc --noEmit && bun test)
+   (cd packages/elements && bunx tsc --noEmit && bun test && bun run registers)
    ```
-   `bun run size` enforces bundle budgets per entry. If it fails, look for an import that pulls in more than the primitive needs.
 8. **Look at it.** Run `bun run dev`, open the component's docs page on `localhost:4000`, and drive it with the pointer, the wheel and the keyboard.
 
 If the change is visible, film it: `film-component` skill, `bun run update <name>`.

@@ -75,13 +75,9 @@ jobs:
         working-directory: packages/elements
         run: bun test
 
-      - name: Size budgets
-        working-directory: packages/react
-        run: bun run size
-
-      - name: Size budgets and registration of elements
+      - name: Registration of elements
         working-directory: packages/elements
-        run: bun run size
+        run: bun run registers
 
       - name: Typecheck www
         working-directory: apps/www

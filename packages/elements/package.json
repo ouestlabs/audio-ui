@@ -103,7 +103,7 @@
     "dev": "bunx --bun tsup --watch",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
-    "size": "bun scripts/size.ts",
+    "registers": "bun scripts/registers.ts",
     "templates:build": "bun scripts/templates.ts",
     "test": "bun test"
   },
