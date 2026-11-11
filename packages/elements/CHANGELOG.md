@@ -1,5 +1,11 @@
 # @audio-ui/elements
 
+## 0.3.0
+
+### Minor Changes
+
+- a332f1d: `<audio-ui-piano-roll-row>` carries `data-out-of-scale` on the rows not in the roll's scale.
+
 ## 0.2.0
 
 ### Minor Changes
