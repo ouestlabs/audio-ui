@@ -9,6 +9,7 @@ import {
   pagesAhead,
   playbackRuns,
   playedClips,
+  playedVelocity,
   rescaled,
   STOPPED,
   startsInWindow,
@@ -691,14 +692,10 @@ export async function createArrangementEngine(
     passId: string,
     parameters?: Readonly<Record<string, number>>
   ) => {
-    const { chance, deviation, velocity } = note.note;
-    if (!runtime.instrument || Math.random() >= (chance ?? 1)) {
+    const level = runtime.instrument ? playedVelocity(note.note) : null;
+    if (!runtime.instrument || level === null) {
       return;
     }
-    const level = Math.min(
-      1,
-      Math.max(0, (velocity ?? 1) + Math.random() * (deviation ?? 0))
-    );
     runtime.instrument.player.noteOn(
       { parameters, pitch: note.pitch, velocity: level },
       at / rate,

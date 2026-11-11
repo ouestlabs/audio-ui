@@ -43,6 +43,19 @@ A `PlaybackState` says what plays from a frame of the audio clock on: whether it
 
 A recording too long to hold decoded is read from pages in shared memory. `createPagePool(slots)` makes the pool every streamed recording of a context reads from, `createRecordingStream` a recording in it, and `RECORDING_LOADER_WORKER` is the worker that loads pages into it from a file in the origin private file system. `pagesAhead` lists the pages the next frames will read, soonest first, and `PageCache` keeps them in the pool. A page that is not there yet plays as silence.
 
+## Notes
+
+A note of a clip has a velocity, a chance and a deviation. `playedVelocity(note)` is how hard it plays this time round, or `null` when it does not: a deactivated note never plays, one with a `chance` of 0.5 plays every other time on average, and a `deviation` strays its velocity by up to that much, a new roll each time. The arrangement engine and the piano roll's playback both play notes through it, so a note sounds the same in either.
+
+```ts
+import { playedVelocity } from "@audio-ui/engine/playback";
+
+const velocity = playedVelocity(note);
+if (velocity !== null) {
+  instrument.noteOn({ pitch: note.pitch, velocity }, at);
+}
+```
+
 ## The mixer
 
 ```ts

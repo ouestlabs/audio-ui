@@ -1,6 +1,7 @@
 "use client";
 
 import type { Note } from "@audio-ui/core/piano-roll";
+import { playedVelocity } from "@audio-ui/engine/playback";
 import type { Tempo } from "@audio-ui/engine/time";
 import {
   createSource,
@@ -198,22 +199,14 @@ export function usePianoRollPlayback({
         );
       }
       for (const note of current.notes) {
-        // A deactivated note stays silent, and one with a chance plays that often.
-        if (
-          note.start < step ||
-          note.start >= step + 1 ||
-          note.muted ||
-          Math.random() >= (note.chance ?? 1)
-        ) {
+        const velocity =
+          note.start < step || note.start >= step + 1
+            ? null
+            : playedVelocity(note);
+        if (velocity === null) {
           continue;
         }
         const at = time + (note.start - step) * secondsPerStep;
-        // A deviation strays the velocity by up to its amount, a new roll each time.
-        const velocity = clamp(
-          (note.velocity ?? 1) + Math.random() * (note.deviation ?? 0),
-          0,
-          1
-        );
         triggerNote(note.pitch, current.envelope, velocity, at);
         releaseNote(
           note.pitch,

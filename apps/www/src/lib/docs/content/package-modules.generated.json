@@ -3384,6 +3384,11 @@
         "summary": "Which tracks a solo silences."
       },
       {
+        "kind": "function",
+        "name": "playedVelocity",
+        "summary": "How hard a note plays this time round, from 0 to 1, or `null` when it does not: a deactivated note never plays, one with a `chance` plays that share of the times, and a `deviation` strays its velocity by up to that much, a new roll each time."
+      },
+      {
         "kind": "interface",
         "name": "PlannedRecording",
         "summary": "What the planner needs of a recording: its rate and its length in frames."
@@ -3575,6 +3580,7 @@
       "packages/engine/src/playback/clip.ts",
       "packages/engine/src/playback/loader-worker-source.ts",
       "packages/engine/src/playback/mixer.ts",
+      "packages/engine/src/playback/note.ts",
       "packages/engine/src/playback/plan.ts",
       "packages/engine/src/playback/protocol.ts",
       "packages/engine/src/playback/render.ts",
@@ -3588,7 +3594,8 @@
       "clip-player",
       "dawproject",
       "mixer-engine",
-      "rack"
+      "rack",
+      "use-piano-roll-playback"
     ]
   },
   {
