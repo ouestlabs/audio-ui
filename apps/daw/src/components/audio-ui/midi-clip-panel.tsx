@@ -2,6 +2,7 @@
 
 import {
   duplicateTime,
+  fitNotesToScale,
   humanizeNotes,
   invertNotes,
   legatoNotes,
@@ -14,7 +15,7 @@ import {
   reverseNotes,
   stretchNotes,
 } from "@audio-ui/core/piano-roll";
-import { pitchName, type Scale } from "@audio-ui/core/pitch";
+import { pitchName, type Scale, scalePitchClasses } from "@audio-ui/core/pitch";
 import type { PianoRoll as PianoRollPrimitive, Source } from "@audio-ui/react";
 import {
   type MouseEvent,
@@ -283,6 +284,39 @@ export function noteSelectionReadout(
 }
 
 const TRANSPOSE_STEPS = [-12, -1, 1, 12];
+
+/** The pitch `steps` steps of `scale` from `pitch`, up for a positive count: a pitch out of the scale goes to the next one in it. */
+function scaleStep(pitch: number, scale: Scale, steps: number): number {
+  const classes = scalePitchClasses(scale);
+  const direction = Math.sign(steps);
+  let at = pitch;
+  for (let left = Math.abs(steps); left > 0; ) {
+    at += direction;
+    if (classes.includes(((at % 12) + 12) % 12)) {
+      left -= 1;
+    }
+  }
+  return at;
+}
+
+/** Moves each note in `ids` by `steps` steps of `scale`; one that would leave the roll stays where it is. */
+function stepNotes(
+  notes: readonly Note[],
+  ids: ReadonlySet<NoteId>,
+  scale: Scale,
+  steps: number,
+  bounds: RollBounds
+): Note[] {
+  return notes.map((note) => {
+    if (!ids.has(note.id)) {
+      return note;
+    }
+    const pitch = scaleStep(note.pitch, scale, steps);
+    return pitch < bounds.minPitch || pitch > bounds.maxPitch
+      ? note
+      : { ...note, pitch };
+  });
+}
 const RAMPS = [
   { from: 0.3, label: "↗", name: "Crescendo", to: 1 },
   { from: 1, label: "↘", name: "Decrescendo", to: 0.3 },
@@ -473,12 +507,17 @@ const C_MAJOR: ClipScale = { name: "major", on: false, root: 0 };
 /** The Scale box: the clip's scale picked from a menu, turned on or off, and the keys its song's notes are likeliest in. */
 function ScaleBox({
   keyNotes,
+  noteCount,
   onCommit,
+  onFit,
   onScaleChange,
   scale = C_MAJOR,
 }: {
   keyNotes: readonly KeyNote[];
+  noteCount: number;
   onCommit?: () => void;
+  /** Moves the notes out of the scale onto its nearest pitch: the selected ones, or every one. */
+  onFit: () => void;
   onScaleChange: (scale: ClipScale) => void;
   scale?: ClipScale;
 }) {
@@ -527,6 +566,13 @@ function ScaleBox({
           <ScaleMenuDetect notes={keyNotes} />
         </ScaleMenuContent>
       </ScaleMenu>
+      <ClipToggle
+        disabled={!scale.on || noteCount === 0}
+        onClick={onFit}
+        title="Move the notes out of the scale onto its nearest pitch"
+      >
+        Fit notes
+      </ClipToggle>
     </ClipBox>
   );
 }
@@ -537,14 +583,18 @@ function NotesBox({
   onEdit,
   onRamp,
   onTranspose,
+  scaled,
   selected,
 }: {
   noteCount: number;
   onEdit: (event: MouseEvent<HTMLButtonElement>) => void;
   onRamp: (event: MouseEvent<HTMLButtonElement>) => void;
   onTranspose: (event: MouseEvent<HTMLButtonElement>) => void;
+  /** With the clip's scale on, -1 and +1 move by its steps. */
+  scaled: boolean;
   selected: number;
 }) {
+  const stepName = scaled ? "a step of the scale" : "a semitone";
   return (
     <ClipBox foldable id="midi:notes" title="Notes">
       <p className="text-[10px] text-muted-foreground leading-tight">
@@ -553,7 +603,7 @@ function NotesBox({
       <div className="grid grid-cols-4 gap-0.5">
         {TRANSPOSE_STEPS.map((semitones) => (
           <ClipToggle
-            aria-label={`Transpose ${semitones > 0 ? "up" : "down"} ${Math.abs(semitones) === 12 ? "an octave" : "a semitone"}`}
+            aria-label={`Transpose ${semitones > 0 ? "up" : "down"} ${Math.abs(semitones) === 12 ? "an octave" : stepName}`}
             className="px-0"
             data-semitones={semitones}
             disabled={noteCount === 0}
@@ -979,15 +1029,26 @@ function MidiClipPanel({
     },
     [editNotes, length, loop, offset]
   );
+  // With the scale on, a step is a step of the scale; an octave stays twelve semitones.
+  const marked = scale?.on ? scale : null;
   const handleTranspose = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       const semitones = Number(event.currentTarget.dataset.semitones);
       editNotes((all, ids, bounds) =>
-        moveNotes(all, ids, 0, semitones, bounds)
+        marked && Math.abs(semitones) === 1
+          ? stepNotes(all, ids, marked, semitones, bounds)
+          : moveNotes(all, ids, 0, semitones, bounds)
       );
     },
-    [editNotes]
+    [editNotes, marked]
   );
+  const fitToScale = useCallback(() => {
+    if (marked) {
+      editNotes((all, ids, bounds) =>
+        fitNotesToScale(all, ids, marked, bounds)
+      );
+    }
+  }, [editNotes, marked]);
   const handleRamp = useCallback(
     (event: MouseEvent<HTMLButtonElement>) => {
       const ramp = RAMPS[Number(event.currentTarget.dataset.index)];
@@ -1159,7 +1220,9 @@ function MidiClipPanel({
           {onScaleChange ? (
             <ScaleBox
               keyNotes={keyNotes ?? notes}
+              noteCount={notes.length}
               onCommit={onNotesCommitted}
+              onFit={fitToScale}
               onScaleChange={onScaleChange}
               scale={scale}
             />
@@ -1169,6 +1232,7 @@ function MidiClipPanel({
             onEdit={handleNoteEdit}
             onRamp={handleRamp}
             onTranspose={handleTranspose}
+            scaled={marked !== null}
             selected={selection.length}
           />
         </>

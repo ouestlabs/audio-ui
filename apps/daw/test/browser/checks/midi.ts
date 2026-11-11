@@ -220,6 +220,91 @@ export const checks: Checks = {
         .getByRole("button", { name: "Scale: off" })
         .waitFor({ timeout: 5000 });
     },
+  "MID-011: with the scale on, +1 moves the notes a step of the scale, and Fit notes moves those out of it in":
+    async (browser) => {
+      const page = await open(browser);
+      const onTheLane = page.locator('[data-track="track-3"] [data-clip-id]');
+      const before = await onTheLane.count();
+      // C5, D5, E5 and F5.
+      await dropFiles(page, '[data-track="track-3"]', [
+        {
+          bytes: SCORE,
+          name: "Tune.musicxml",
+          type: "application/vnd.recordare.musicxml+xml",
+        },
+      ]);
+      await page.waitForFunction(
+        (count) =>
+          document.querySelectorAll('[data-track="track-3"] [data-clip-id]')
+            .length > count,
+        before,
+        { timeout: 5000 }
+      );
+      await onTheLane.last().dblclick();
+      const pitches = () =>
+        page
+          .locator(
+            '[data-slot="piano-roll-grid"] [role="button"][aria-pressed]'
+          )
+          .evaluateAll((all) =>
+            all
+              .map(
+                (note) => (note.getAttribute("aria-label") ?? "").split(",")[0]
+              )
+              .sort()
+              .join(" ")
+          );
+      const scaleMenu = page.locator("[data-slot=scale-menu-trigger]");
+      await scaleMenu.click();
+      const detected = page.locator("[data-slot=scale-menu-detect]");
+      await detected.getByRole("menuitem").first().waitFor({ timeout: 5000 });
+      await detected.getByRole("menuitem", { name: "D Minor" }).click();
+      await page
+        .getByRole("button", { name: "Transpose up a step of the scale" })
+        .click();
+      await page.waitForFunction(
+        () =>
+          [
+            ...document.querySelectorAll(
+              '[data-slot="piano-roll-grid"] [role="button"][aria-pressed]'
+            ),
+          ].some((note) => note.getAttribute("aria-label")?.startsWith("G5")),
+        undefined,
+        { timeout: 5000 }
+      );
+      assert(
+        (await pitches()) === "D5 E5 F5 G5",
+        `a step of D minor up gives ${await pitches()}`
+      );
+      // E minor has F sharp, not F: Fit notes moves F to E, the lower of two as near.
+      await scaleMenu.click();
+      await page.getByRole("menuitem", { name: "Root: D" }).hover();
+      await page.getByRole("menuitemradio", { exact: true, name: "E" }).click();
+      await page.getByRole("button", { name: "Scale: E Minor" }).waitFor({
+        timeout: 5000,
+      });
+      // The menu stays open on a root picked: the trigger closes it (Escape would let go of the clip too).
+      if (await page.locator("[data-slot=scale-menu-content]").isVisible()) {
+        await scaleMenu.click();
+      }
+      await page
+        .getByRole("button", { exact: true, name: "Fit notes" })
+        .click();
+      await page.waitForFunction(
+        () =>
+          ![
+            ...document.querySelectorAll(
+              '[data-slot="piano-roll-grid"] [role="button"][aria-pressed]'
+            ),
+          ].some((note) => note.getAttribute("aria-label")?.startsWith("F5")),
+        undefined,
+        { timeout: 5000 }
+      );
+      assert(
+        (await pitches()) === "D5 E5 E5 G5",
+        `fitted to E minor, the notes are ${await pitches()}`
+      );
+    },
   "MID-007: the roll's keys are black and white, and a pressed one shows it":
     async (browser) => {
       const page = await open(browser);
