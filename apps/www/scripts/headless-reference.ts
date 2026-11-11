@@ -12,7 +12,7 @@ import { Glob } from "bun";
 const WEB = `${import.meta.dir}/..`;
 const PRIMITIVES = `${WEB}/../../packages/ui/src/primitives`;
 const CORE_PRIMITIVES = `${WEB}/../../packages/core/src/primitives`;
-const PAGE = `${WEB}/src/content/docs/(root)/headless-styling.mdx`;
+const PAGE = `${WEB}/src/content/docs/react/headless-styling.mdx`;
 export const START = "{/* reference:start */}";
 export const END = "{/* reference:end */}";
 

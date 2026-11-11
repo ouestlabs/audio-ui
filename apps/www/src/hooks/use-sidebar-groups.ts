@@ -4,6 +4,12 @@ import {
   getCurrentBase,
   getGroupsFromFolder,
 } from "@/lib/docs/content/page-tree";
+import {
+  DOCS_SECTIONS,
+  type DocsSectionId,
+  sectionOfFolder,
+  sectionOfPath,
+} from "@/lib/docs/content/sections";
 import type { source } from "@/lib/docs/content/source";
 
 const STORAGE_KEY = "docs-sidebar-collapsed";
@@ -74,10 +80,15 @@ export function useGroupFolding() {
 }
 
 const EXCLUDED_FOLDERS = ["test"];
+/** The landing page of each section but the Docs': named Overview in the sidebar, as the section's row names it already. */
+const LANDING_PAGES = new Set<string>(
+  DOCS_SECTIONS.filter((each) => each.id !== "docs").map((each) => each.href)
+);
 
 /**
- * The docs sidebar's groups (Get started, then each space), with whether each
- * is open. A space folds when the reader says so, remembered in their browser
+ * The docs sidebar's groups for the section being read (the Docs, the Core,
+ * the Elements, React or the Registry), with whether each is open, and the
+ * sections themselves, the one being read marked. A space folds when the reader says so, remembered in their browser
  * and shared by the desktop sidebar and the mobile menu; every group is open
  * on a first visit and on the server, and the space of the page being read
  * opens when the reader lands on it.
@@ -85,22 +96,31 @@ const EXCLUDED_FOLDERS = ["test"];
 export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
   const pathname = useLocation({ select: (location) => location.pathname });
   const currentBase = getCurrentBase(pathname);
-  const groups = React.useMemo(
+  const all = React.useMemo(
     () =>
       tree.children.flatMap((item) =>
         item.type === "folder" && !EXCLUDED_FOLDERS.includes(item.$id ?? "")
-          ? getGroupsFromFolder(item, currentBase)
+          ? getGroupsFromFolder(item, currentBase).map((group) => ({
+              ...group,
+              section: sectionOfFolder(item.$id ?? ""),
+            }))
           : []
       ),
     [currentBase, tree]
   );
   const { collapsed, setOpen } = useGroupFolding();
 
-  const currentTitle = groups.find((group) =>
-    group.sections.some((section) =>
-      section.pages.some((page) => page.url === pathname)
+  const currentGroup = all.find((group) =>
+    group.sections.some((part) =>
+      part.pages.some((page) => page.url === pathname)
     )
-  )?.title;
+  );
+  const currentTitle = currentGroup?.title;
+  // The section of the page being read: the sidebar shows its groups alone.
+  const reading: DocsSectionId =
+    currentGroup?.section ?? sectionOfPath(pathname);
+  const groups = all.filter((group) => group.section === reading);
+  const sectionLabel = DOCS_SECTIONS.find((each) => each.id === reading)?.label;
   React.useEffect(() => {
     if (currentTitle) {
       setOpen(currentTitle, true);
@@ -108,11 +128,33 @@ export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
   }, [currentTitle, setOpen]);
 
   return {
-    groups: groups.map((group) => ({
-      ...group,
-      current: group.title === currentTitle,
-      open: !(group.collapsible && group.title && collapsed.has(group.title)),
+    /** The sections of the docs, the one being read marked. */
+    docsSections: DOCS_SECTIONS.map((each) => ({
+      ...each,
+      current: each.id === reading,
     })),
+    groups: groups.map((group) => {
+      // A group named as its section says nothing the section's row does not: no heading, and it stays open.
+      const titled = group.title !== sectionLabel;
+      return {
+        ...group,
+        collapsible: group.collapsible && titled,
+        current: group.title === currentTitle,
+        open: !(
+          titled &&
+          group.collapsible &&
+          group.title &&
+          collapsed.has(group.title)
+        ),
+        sections: group.sections.map((part) => ({
+          ...part,
+          pages: part.pages.map((page) =>
+            LANDING_PAGES.has(page.url) ? { ...page, name: "Overview" } : page
+          ),
+        })),
+        titled,
+      };
+    }),
     pathname,
     setOpen,
   };

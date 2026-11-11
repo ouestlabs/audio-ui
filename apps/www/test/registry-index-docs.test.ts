@@ -5,7 +5,7 @@ import {
   REFERENCE_ITEMS,
 } from "@/lib/docs/content/registry-items";
 
-const PAGES = ["hooks", "libraries", "utilities"];
+const PAGES = ["hooks/index", "lib/index"];
 const TAG = /<RegistryItems\s+names="([^"]*)"\s*\/>/g;
 
 /** The reference pages' MDX, by page. */
@@ -13,7 +13,7 @@ const pages = await Promise.all(
   PAGES.map(async (page) => ({
     page,
     text: await Bun.file(
-      new URL(`../src/content/docs/reference/${page}.mdx`, import.meta.url)
+      new URL(`../src/content/docs/${page}.mdx`, import.meta.url)
     ).text(),
   }))
 );
@@ -23,7 +23,7 @@ const listed = pages.flatMap(({ page, text }) =>
   )
 );
 
-test("every hook and lib of the registry is listed on a reference page, once", () => {
+test("every hook and lib of the registry is listed on the Hooks or Libraries page, once", () => {
   const counts = new Map<string, number>();
   for (const { name } of listed) {
     counts.set(name, (counts.get(name) ?? 0) + 1);
@@ -33,7 +33,7 @@ test("every hook and lib of the registry is listed on a reference page, once", (
   expect({ missing, twice }).toEqual({ missing: [], twice: [] });
 });
 
-test("a reference page lists only what the registry installs, as the table an agent reads", () => {
+test("the Hooks and Libraries pages list only what the registry installs, as the table an agent reads", () => {
   for (const { text } of pages) {
     const markdown = expandRegistryItems(text);
     expect(markdown).not.toContain("<RegistryItems");

@@ -22,12 +22,34 @@ import { Icons } from "@/components/site/icons";
 import { cn } from "@/lib/utils";
 
 const GROUP_ICONS = {
-  "Audio engine": WaveformIcon,
+  Guides: WaveformIcon,
   Devices: RackIcon,
   Elements: KnobIcon,
   "Get started": PlayIcon,
   Workstation: TracksIcon,
 } as const;
+
+const SECTION_ICONS = {
+  core: BracesIcon,
+  docs: NoteIcon,
+  elements: ShapesIcon,
+  react: DialIcon,
+  registry: CrateIcon,
+} as const;
+
+/** The glyph of a section of the docs, in the color of the text when it is the one being read. */
+export function SectionIcon({ current, id }: { current: boolean; id: string }) {
+  const Icon = SECTION_ICONS[id as keyof typeof SECTION_ICONS];
+  return Icon ? (
+    <Icon
+      className={cn(
+        "size-4 shrink-0",
+        current ? "text-site-foreground" : "text-site-muted-foreground"
+      )}
+      weight="fill"
+    />
+  ) : null;
+}
 
 /** The glyph of a space of the docs (a group of the sidebar): thin and muted, and in the title's color when the page being read is in it. Nothing for the other groups. */
 export function GroupIcon({
@@ -54,9 +76,8 @@ const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
   "/docs/agents": SparkleIcon,
   "/docs/api": BracesIcon,
   "/docs/get-started": InsertIcon,
-  "/docs/headless-styling": DialIcon,
+  "/docs/react/headless-styling": DialIcon,
   "/docs/icons": GridIcon,
-  "/docs/primitives": ShapesIcon,
   "/docs/registry": CrateIcon,
   "/docs/roadmap": PlayheadIcon,
   "/docs/styling": ContrastIcon,

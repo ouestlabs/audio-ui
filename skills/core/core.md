@@ -34,7 +34,7 @@ npm install @audio-ui/elements
 
 - `input` fires on every change with `event.detail` `{ value, reason }`; `preventDefault()` rejects the change. `change` fires once when an interaction ends. The `value` property reads and sets the value.
 - Vue: `compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")` in the Vue plugin's `template` options, then `:value` and `@input="x = $event.detail.value"`. Svelte 5: `value={x}` and `oninput={(event) => (x = event.detail.value)}`.
-- The elements apply only display, positioning and `touch-action`, in zero-specificity rules. Style parts by tag and by `data-*` state attributes (`data-dragging`, `data-disabled`, `data-orientation`). API reference: https://www.audio-ui.dev/docs/custom-elements
+- The elements apply only display, positioning and `touch-action`, in zero-specificity rules. Style parts by tag and by `data-*` state attributes (`data-dragging`, `data-disabled`, `data-orientation`). API reference: https://www.audio-ui.dev/docs/elements
 
 Each primitive registers from its own entry point, `@audio-ui/elements/<primitive>`. Parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`, distinct from the root's `input` and `change`. Use the controllers below directly only for interfaces the elements do not cover.
 

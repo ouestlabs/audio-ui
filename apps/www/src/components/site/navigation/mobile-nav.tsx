@@ -8,7 +8,11 @@ import {
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
-import { GroupIcon, PageIcon } from "@/components/site/navigation/group-icon";
+import {
+  GroupIcon,
+  PageIcon,
+  SectionIcon,
+} from "@/components/site/navigation/group-icon";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -123,7 +127,12 @@ export function MobileNav({
   className?: string;
 }) {
   const [open, setOpen] = React.useState(false);
-  const { groups, pathname, setOpen: setGroupOpen } = useSidebarGroups(tree);
+  const {
+    docsSections,
+    groups,
+    pathname,
+    setOpen: setGroupOpen,
+  } = useSidebarGroups(tree);
   const [chosen, setChosen] = React.useState<Section | null>(null);
   const handleSectionChange = React.useCallback(
     (value: string) => setChosen(value as Section),
@@ -294,51 +303,76 @@ export function MobileNav({
               })}
             </>
           ) : (
-            groups.map((group) => (
-              <div className="flex shrink-0 flex-col gap-0.5" key={group.title}>
-                <GroupLabel
-                  collapsible={group.collapsible}
-                  current={group.current}
-                  onOpenChange={setGroupOpen}
-                  open={group.open}
-                  title={group.title ?? ""}
-                />
-                {group.open
-                  ? group.sections.map((part) => (
-                      <React.Fragment key={part.title ?? "untitled"}>
-                        {part.title ? (
-                          <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
-                            {part.title}
-                          </p>
-                        ) : null}
-                        {part.pages.map((page) => {
-                          const hint = getDocsPageUpdateHint(page.url);
-                          return (
-                            <NavRow
-                              active={page.url === pathname}
-                              href={page.url}
-                              key={page.url}
-                              onNavigate={close}
-                            >
-                              <span className="flex min-w-0 items-center gap-2">
-                                <PageIcon url={page.url} />
-                                {page.name}
-                              </span>
-                              {hint ? (
-                                <span
-                                  aria-hidden="true"
-                                  className="site-rounded-full size-1.5 bg-blue-500"
-                                  title={hint}
-                                />
-                              ) : null}
-                            </NavRow>
-                          );
-                        })}
-                      </React.Fragment>
-                    ))
-                  : null}
+            <>
+              <div className="flex shrink-0 flex-col gap-0.5">
+                {docsSections.map((docsSection) => (
+                  <NavRow
+                    active={docsSection.current}
+                    href={docsSection.href}
+                    key={docsSection.id}
+                    onNavigate={close}
+                  >
+                    <span className="flex min-w-0 items-center gap-2">
+                      <SectionIcon
+                        current={docsSection.current}
+                        id={docsSection.id}
+                      />
+                      {docsSection.label}
+                    </span>
+                  </NavRow>
+                ))}
               </div>
-            ))
+              {groups.map((group) => (
+                <div
+                  className="flex shrink-0 flex-col gap-0.5"
+                  key={group.title}
+                >
+                  {group.titled ? (
+                    <GroupLabel
+                      collapsible={group.collapsible}
+                      current={group.current}
+                      onOpenChange={setGroupOpen}
+                      open={group.open}
+                      title={group.title ?? ""}
+                    />
+                  ) : null}
+                  {group.open
+                    ? group.sections.map((part) => (
+                        <React.Fragment key={part.title ?? "untitled"}>
+                          {part.title ? (
+                            <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
+                              {part.title}
+                            </p>
+                          ) : null}
+                          {part.pages.map((page) => {
+                            const hint = getDocsPageUpdateHint(page.url);
+                            return (
+                              <NavRow
+                                active={page.url === pathname}
+                                href={page.url}
+                                key={page.url}
+                                onNavigate={close}
+                              >
+                                <span className="flex min-w-0 items-center gap-2">
+                                  <PageIcon url={page.url} />
+                                  {page.name}
+                                </span>
+                                {hint ? (
+                                  <span
+                                    aria-hidden="true"
+                                    className="site-rounded-full size-1.5 bg-blue-500"
+                                    title={hint}
+                                  />
+                                ) : null}
+                              </NavRow>
+                            );
+                          })}
+                        </React.Fragment>
+                      ))
+                    : null}
+                </div>
+              ))}
+            </>
           )}
         </nav>
       </PopoverContent>

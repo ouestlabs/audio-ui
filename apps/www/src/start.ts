@@ -56,6 +56,15 @@ const MOVED_PAGES = new Map([
     "/docs/components/base/arrangement",
   ],
   ["/docs/components/base/timeline", "/docs/components/base/arrangement"],
+  // The docs by the stack: pages that moved into the Core, Elements and React sections.
+  ["/docs/primitives", "/docs/react"],
+  ["/docs/headless-styling", "/docs/react/headless-styling"],
+  ["/docs/custom-elements", "/docs/elements"],
+  ["/docs/engine/controllers", "/docs/core/controllers"],
+  ["/docs/primitives.md", "/docs/react.md"],
+  ["/docs/headless-styling.md", "/docs/react/headless-styling.md"],
+  ["/docs/custom-elements.md", "/docs/elements.md"],
+  ["/docs/engine/controllers.md", "/docs/core/controllers.md"],
 ]);
 
 /** What a read of the site's machine surfaces is told to PostHog. A registry file has its own: it counts once it is served (registryFile). */

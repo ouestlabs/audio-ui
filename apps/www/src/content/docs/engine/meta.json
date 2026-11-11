@@ -1,5 +1,5 @@
 {
-  "title": "Audio engine",
+  "title": "Guides",
   "pages": [
     "index",
     "output",
@@ -8,7 +8,6 @@
     "synthesis",
     "demo-sounds",
     "input",
-    "analysis",
-    "controllers"
+    "analysis"
   ]
 }

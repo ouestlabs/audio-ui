@@ -1,0 +1,46 @@
+---
+title: Core
+description: "@audio-ui/core: the framework-agnostic logic under every audio/ui control and device, in modules you import one at a time, the same in React, plain DOM, Vue, Svelte or a worker."
+---
+
+`@audio-ui/core` holds everything that is not a view: values and their scales, the time of a song, notes and scales, a device's description, levels and spectra, the clip player's arithmetic, and the controller of each control. No framework, no DOM required for the logic, no Web Audio. The React primitives and the custom elements are each one adapter over it; a page of your own can be another.
+
+```bash
+npm install @audio-ui/core
+```
+
+Each module is its own entry point, so a page pays only for what it imports.
+
+## Audio
+
+| Module | What it holds |
+| --- | --- |
+| `@audio-ui/core/device` | A device as a description: `defineDevice`, its state, `apply` with what each change did, the bindings an engine implements, and the tools an agent drives it with. See [Devices](/docs/devices). |
+| `@audio-ui/core/time` | Musical time: tempos and signatures, bars and beats, grid divisions and their labels, tempo-synced note values, warp markers, the metronome, and the look-ahead scheduler (`advance`, `positionAt`) a transport clock runs on. |
+| `@audio-ui/core/analysis` | Reading a signal: levels in dB, a log-axis spectrum and its peaks, frequency bands, the response of a biquad and an equalizer, waveform peaks, transients and auto-warp. |
+| `@audio-ui/core/pitch` | Scales: which pitches are in one, and the nearest that is. |
+| `@audio-ui/core/midi` | A MIDI input as a source of notes (`createMidiInput`), a raw message read (`parseMidiMessage`), pitch bend in semitones. |
+| `@audio-ui/core/playback` | What plays when: clips placed in time, the pan law, solo and delay compensation, the clip player's processor and its renderer, and streaming a recording in pages. |
+
+## Controls
+
+The controller of each control: its value, its gesture, its keys and its formatting, whatever draws it. See [Controllers](/docs/core/controllers) for the contract they share.
+
+| Module | Controls |
+| --- | --- |
+| `@audio-ui/core/knob`, `/fader`, `/xypad` | One or two bounded values dragged, stepped and typed. |
+| `@audio-ui/core/meter` | Levels and their peaks, held and falling. |
+| `@audio-ui/core/envelope`, `/plot` | Points on a curve, and a plot's handles, traces and grid. |
+| `@audio-ui/core/piano`, `/pad` | Keys and pads struck with a velocity. |
+| `@audio-ui/core/sequencer`, `/piano-roll` | Steps and notes on a grid: selection, editing, scales, brushes. |
+| `@audio-ui/core/timeline`, `/waveform` | Clips in time, a zoom and a playhead; a recording's peaks and a seek. |
+
+## The root
+
+`@audio-ui/core` itself holds what every module shares: ranges, scales and stepping (`resolveScale`, `roundToStep`), values that change outside a framework (`createSource`, `createStore`), a frame task that sleeps when nothing moves (`createFrameTask`), and the details a change or a commit reports.
+
+## Adapters
+
+- [React](/docs/react): `@audio-ui/react`, the headless primitives.
+- [Elements](/docs/elements): `@audio-ui/elements`, the same primitives as custom elements, for any framework.
+- [Registry](/docs/registry): the styled components, devices, hooks and libraries you install and own.

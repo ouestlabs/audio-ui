@@ -3,7 +3,11 @@
 import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
-import { GroupIcon, PageIcon } from "@/components/site/navigation/group-icon";
+import {
+  GroupIcon,
+  PageIcon,
+  SectionIcon,
+} from "@/components/site/navigation/group-icon";
 import {
   SidebarGroup,
   SidebarGroupContent,
@@ -97,13 +101,46 @@ export function GroupLabel({
   );
 }
 
+/** The docs' sections, by the layers of the stack, at the top of the sidebar: each a link to its landing page, the one being read lit. */
+export function DocsSectionList({
+  sections,
+}: {
+  sections: readonly {
+    current: boolean;
+    href: string;
+    id: string;
+    label: string;
+  }[];
+}) {
+  return (
+    <SidebarGroup>
+      <SidebarMenu className="gap-0.5">
+        {sections.map((section) => (
+          <SidebarMenuItem key={section.id}>
+            <SidebarMenuButton
+              className="h-[30px] border border-transparent font-medium text-[0.8rem] data-[active=true]:border-site-accent data-[active=true]:bg-site-accent"
+              isActive={section.current}
+              render={
+                <Link preload={false} to={section.href}>
+                  <SectionIcon current={section.current} id={section.id} />
+                  <span>{section.label}</span>
+                </Link>
+              }
+            />
+          </SidebarMenuItem>
+        ))}
+      </SidebarMenu>
+    </SidebarGroup>
+  );
+}
+
 /** The docs' links, by section: the list a sidebar shows on the docs and on the home. */
 export function DocsNavigation({
   tree,
 }: {
   tree: ReturnType<typeof source.getPageTree>;
 }) {
-  const { groups, pathname, setOpen } = useSidebarGroups(tree);
+  const { docsSections, groups, pathname, setOpen } = useSidebarGroups(tree);
 
   return (
     // A navigation landmark: screen readers jump to it, and crawlers read it as the site's chrome, not its content.
@@ -112,15 +149,18 @@ export function DocsNavigation({
       className="no-scrollbar scroll-fade-y min-h-0 flex-1 overflow-y-auto overflow-x-hidden px-2 pb-12"
     >
       <div className="h-(--top-spacing) shrink-0" />
+      <DocsSectionList sections={docsSections} />
       {groups.map((group) => (
         <SidebarGroup key={group.title}>
-          <GroupLabel
-            collapsible={group.collapsible}
-            current={group.current}
-            onOpenChange={setOpen}
-            open={group.open}
-            title={group.title ?? ""}
-          />
+          {group.titled ? (
+            <GroupLabel
+              collapsible={group.collapsible}
+              current={group.current}
+              onOpenChange={setOpen}
+              open={group.open}
+              title={group.title ?? ""}
+            />
+          ) : null}
           {group.open ? (
             <SidebarGroupContent>
               {group.sections.map((section) => (
