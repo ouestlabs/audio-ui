@@ -24,7 +24,7 @@ function decoderFor(bytes: Uint8Array) {
   return null;
 }
 
-/** Decodes raw audio bytes (e.g. from `file.arrayBuffer()`) into every channel's PCM samples at the context's sample rate, ready for `computePeaks`. Bytes that no decoder reads as sound reject with the browser's own error. `decodeAudioData` can detach the buffer it's given in some browsers, hence the defensive copy. */
+/** Decodes raw audio bytes, such as `file.arrayBuffer()`, into every channel's PCM samples at the context's sample rate, ready for `computePeaks`. Bytes that no decoder reads as sound reject with the browser's own error. `decodeAudioData` can detach the buffer it's given in some browsers, hence the defensive copy. */
 export async function decodeAudioChannels(
   context: BaseAudioContext,
   buffer: ArrayBuffer

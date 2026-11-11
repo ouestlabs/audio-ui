@@ -499,7 +499,7 @@
       {
         "kind": "function",
         "name": "decodeAudioChannels",
-        "summary": "Decodes raw audio bytes (e.g."
+        "summary": "Decodes raw audio bytes, such as `file.arrayBuffer()`, into every channel's PCM samples at the context's sample rate, ready for `computePeaks`."
       },
       {
         "kind": "function",
