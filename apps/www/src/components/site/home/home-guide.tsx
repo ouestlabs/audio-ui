@@ -1,20 +1,8 @@
 import { Link } from "@tanstack/react-router";
-import { CopyButton } from "@/components/code/copy/copy-button";
 import { JsonLd } from "@/components/site/json-ld";
 import { GroupIcon } from "@/components/site/navigation/group-icon";
 import type { HomeIndex } from "@/lib/docs/content/spaces";
 import { buildFaqJsonLd, type FaqItem } from "@/lib/seo/seo";
-
-const INSTALL = [
-  {
-    command: "npx shadcn@latest add @audio-ui/knob",
-    label: "Styled components, with shadcn/ui and Tailwind CSS v4",
-  },
-  {
-    command: "npm install @audio-ui/react",
-    label: "Headless primitives, for your own design system",
-  },
-];
 
 const AGENTS = [
   {
@@ -86,64 +74,14 @@ const H2 =
 const LEAD = "max-w-2xl text-pretty text-site-muted-foreground text-sm";
 
 /**
- * What the home says under its hero, in its HTML: what audio/ui is, how to
- * install it, every component with what it does, the guides to the sound,
- * and answers to the usual questions. Search engines and agents read the page without running it.
+ * What the home says under its hero, in its HTML: every component with what
+ * it does, the guides to the sound, what an agent gets, and answers to the
+ * usual questions. Search engines and agents read the page without running it.
  */
 export function HomeGuide({ guides, spaces }: HomeIndex) {
   return (
     <div className="flex flex-col gap-16 px-4 py-12 font-site-sans sm:px-6 lg:py-16">
       <JsonLd data={buildFaqJsonLd(FAQ)} />
-      <section
-        aria-labelledby="home-about"
-        className="grid gap-8 lg:grid-cols-2"
-      >
-        <div className="flex flex-col gap-3">
-          <h2 className={H2} id="home-about">
-            Audio controls for any framework, accessible and yours
-          </h2>
-          <p className={LEAD}>
-            audio/ui is an open-source component library for audio interfaces on
-            the web, in React, Vue, Svelte or plain HTML: knobs, faders, XY
-            pads, envelopes, level meters, waveforms, spectrum analyzers,
-            tuners, timelines, step sequencers, drum pads, piano keyboards and
-            piano rolls, and the panels of effects and instruments built from
-            them. Every control works with a pointer and the keyboard, and is
-            announced correctly by screen readers.
-          </p>
-          <p className={LEAD}>
-            Pick the layer that fits your project. The <code>@audio-ui</code>{" "}
-            registry gives styled components and ready blocks that the shadcn
-            CLI copies into your code, for you to own. The{" "}
-            <code>@audio-ui/react</code> package on npm gives headless
-            primitives: the behavior and the accessibility, no styles.{" "}
-            <code>@audio-ui/elements</code> brings every primitive to plain HTML
-            and any framework as custom elements, typed for Vue and Svelte.
-          </p>
-        </div>
-        {/* min-w-0: a grid cell would otherwise widen to the commands, which never wrap. */}
-        <ul className="flex min-w-0 flex-col gap-4 self-center">
-          {INSTALL.map((step) => (
-            <li className="flex flex-col gap-1.5" key={step.command}>
-              <span className="font-site-mono text-[11px] text-site-muted-foreground uppercase tracking-[0.08em]">
-                {step.label}
-              </span>
-              <div className="flex items-center gap-2 rounded-lg border bg-site-muted/40 py-1 pr-1 pl-3">
-                <code className="min-w-0 flex-1 truncate font-mono text-sm">
-                  {step.command}
-                </code>
-                <CopyButton
-                  // In the row, not in a code block's corner.
-                  className="static bg-transparent"
-                  event="copy_command"
-                  value={step.command}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       <section aria-labelledby="home-components">
         <h2 className={H2} id="home-components">
           Every component, by what you build
