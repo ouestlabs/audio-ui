@@ -17,14 +17,6 @@ describe("the latency devices declare", () => {
     expect(oversamplingSeconds("none", 48_000)).toBe(0);
   });
 
-  test("the compressor is the look-ahead of its node, on or off", () => {
-    const on = compressorDevice.defaults();
-    expect(compressorDevice.latency(on, 48_000)).toBeCloseTo(0.006, 9);
-    expect(
-      compressorDevice.latency({ ...on, enabled: false }, 48_000)
-    ).toBeCloseTo(0.006, 9);
-  });
-
   test("the limiter is its look-ahead when it works, nothing when it is off", () => {
     const on = limiterDevice.defaults();
     expect(limiterDevice.latency(on, 48_000)).toBeCloseTo(0.005, 9);
@@ -47,6 +39,9 @@ describe("the latency devices declare", () => {
 
   test("a device with none declared adds none", () => {
     expect(delayDevice.latency(delayDevice.defaults(), 48_000)).toBe(0);
+    expect(compressorDevice.latency(compressorDevice.defaults(), 48_000)).toBe(
+      0
+    );
     expect(equalizerDevice.latency(equalizerDevice.defaults(), 48_000)).toBe(0);
   });
 });

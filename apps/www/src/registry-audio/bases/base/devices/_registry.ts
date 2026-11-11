@@ -75,7 +75,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "The detector of a key: an AudioWorklet loaded once per context from a blob, which reads a signal and writes the gain a compressor would apply to it. The compressor's key and the de-esser use it.",
+      "The detector of a key: an AudioWorklet loaded once per context from a blob, which reads a signal and writes the gain a compressor would apply to it. The multiband compressor uses it.",
     files: [
       {
         path: "devices/key-detector.ts",
@@ -84,7 +84,6 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "key-detector",
-    registryDependencies: ["@audio-ui/compressor-device"],
     type: "registry:lib",
   },
   {
@@ -259,7 +258,7 @@ export const devices: RegistryItem[] = [
       "@audio/dynamics-vca",
     ],
     description:
-      "The compressor as a device: its parameters and what they mean, its models (the browser's clean compressor, and the smooth, VCA, FET, opto and vari-mu compressors of @audio/dynamics-*), the numbers that go on the nodes for a state, the curve a state plays and the source of the models' worklet, with no panel and no audio in it.",
+      "The compressor as a device: its parameters and what they mean, its models (the smooth, VCA, FET, opto and vari-mu compressors of @audio/dynamics-*), the numbers that go on the nodes for a state, the curve a state plays and the source of the models' worklet, with no panel and no audio in it.",
     files: [
       {
         path: "devices/compressor/device.ts",
@@ -280,7 +279,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A compressor on the Web Audio API for a compressor state: the node, its make-up taken back out or kept, a dry and compressed mix aligned to the node's lookahead, parameters that move without a click, a key (a worklet detector that ducks the signal from another one) and the other models in a worklet of their own, fed only while one plays.",
+      "A compressor on the Web Audio API for a compressor state: the audio.js models in a worklet, the make-up after it, a dry and compressed mix, parameters that move without a click, the signal passing until the worklet is ready.",
     files: [
       {
         path: "devices/compressor/engine.ts",
@@ -289,10 +288,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "compressor-engine",
-    registryDependencies: [
-      "@audio-ui/compressor-device",
-      "@audio-ui/key-detector",
-    ],
+    registryDependencies: ["@audio-ui/compressor-device"],
     type: "registry:lib",
   },
   {
@@ -350,10 +346,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "deesser-engine",
-    registryDependencies: [
-      "@audio-ui/deesser-device",
-      "@audio-ui/key-detector",
-    ],
+    registryDependencies: ["@audio-ui/deesser-device"],
     type: "registry:lib",
   },
   {
