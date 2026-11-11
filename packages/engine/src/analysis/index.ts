@@ -23,6 +23,17 @@ export {
 export { formatDb, formatHz } from "./format.ts";
 export { dbToGain, gainToDb, peakDb, rmsDb } from "./level.ts";
 export {
+  createLoudnessMeter,
+  createLoudnessReader,
+  type LiveLoudness,
+  LOUDNESS_TARGETS,
+  LOUDNESS_WORKLET,
+  type Loudness,
+  type LoudnessMeter,
+  loudnessGain,
+  measureLoudness,
+} from "./loudness.ts";
+export {
   type AudioPeaks,
   computePeaks,
   downsampleWaveform,
@@ -31,6 +42,12 @@ export {
   type SpectrumBandsOptions,
   spectrumBands,
 } from "./peaks.ts";
+export {
+  type DetectPitchOptions,
+  detectPitch,
+  type PitchEstimate,
+} from "./pitch.ts";
+export { analyzeBeat, audioChroma, type BeatAnalysis } from "./recording.ts";
 export {
   holdPeaks,
   type LogSpectrumOptions,

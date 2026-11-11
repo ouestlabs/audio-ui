@@ -35,6 +35,10 @@
       "types": "./dist/device/index.d.ts",
       "import": "./dist/device.js"
     },
+    "./files": {
+      "types": "./dist/files/index.d.ts",
+      "import": "./dist/files.js"
+    },
     "./midi": {
       "types": "./dist/midi/index.d.ts",
       "import": "./dist/midi.js"
@@ -50,6 +54,10 @@
     "./time": {
       "types": "./dist/time/index.d.ts",
       "import": "./dist/time.js"
+    },
+    "./worklet": {
+      "types": "./dist/worklet/index.d.ts",
+      "import": "./dist/worklet.js"
     }
   },
   "files": [
@@ -66,9 +74,31 @@
   },
   "dependencies": {
     "@audio-ui/core": "^0.28.0",
-    "@audio/note": "1.0.3"
+    "@audio/beat-detect": "1.1.0",
+    "@audio/decode-aiff": "1.3.1",
+    "@audio/decode-caf": "1.4.2",
+    "@audio/decode-mp4": "1.3.1",
+    "@audio/encode": "1.11.0",
+    "@audio/loudness-lufs": "1.2.0",
+    "@audio/loudness-truepeak": "1.1.7",
+    "@audio/measure-latency": "1.0.2",
+    "@audio/measure-response": "1.0.2",
+    "@audio/midi-parse": "1.0.3",
+    "@audio/midi-write": "1.0.3",
+    "@audio/mir-chroma": "1.1.3",
+    "@audio/mir-key": "1.0.2",
+    "@audio/musicxml": "0.1.0",
+    "@audio/note": "1.0.3",
+    "@audio/pitch-yin": "1.0.6",
+    "@audio/resample-sinc": "1.3.0",
+    "@audio/synth-noise": "2.0.1",
+    "@audio/weighting-k": "1.2.1",
+    "fflate": "0.8.3"
   },
   "devDependencies": {
+    "@audio/decode-flac": "2.0.0",
+    "@audio/decode-mp3": "1.3.1",
+    "@audio/decode-wav": "2.0.0",
     "@types/bun": "1.4.2",
     "tsup": "^8.5.0",
     "typescript": "^7.0.2"

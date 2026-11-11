@@ -1,3 +1,5 @@
+export { cents, midiToHz } from "@audio/note";
+export { detectKeys, type KeyNote } from "./key.ts";
 export {
   inScale,
   nearestInScale,
