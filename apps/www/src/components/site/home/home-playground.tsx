@@ -8,6 +8,7 @@ import {
   normalizePeaks,
 } from "@audio-ui/engine/analysis";
 import { decodeAudioChannels } from "@audio-ui/engine/files";
+import { FolderOpenIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import {
   type ChangeEvent,
@@ -526,13 +527,20 @@ export function HomePlayground() {
             tabIndex={-1}
             type="file"
           />
-          <Button onClick={open} size="sm" variant="outline">
-            Open a sound
+          <Button
+            aria-label="Open a sound"
+            onClick={open}
+            size="icon-sm"
+            title="Open a sound"
+            variant="ghost"
+          >
+            <FolderOpenIcon aria-hidden />
           </Button>
           <div className="w-20">
             <Meter
               aria-label="Playground output"
               orientation="horizontal"
+              peakMarks="hidden"
               size="sm"
               source={levels}
             />
