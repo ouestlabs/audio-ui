@@ -1,5 +1,16 @@
 # @audio-ui/react
 
+## 0.14.0
+
+### Minor Changes
+
+- 48b8920: `PianoRoll.Row` carries `data-scale-root` on the rows of the root of the roll's `scale`, so a style can mark them apart: in C major, whose rows are the white keys, they are what shows the scale.
+
+### Patch Changes
+
+- Updated dependencies [48b8920]
+  - @audio-ui/core@0.28.0
+
 ## 0.13.5
 
 ### Patch Changes
