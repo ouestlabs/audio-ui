@@ -1,0 +1,31 @@
+---
+title: pad
+description: "The drum pads' controller from @audio-ui/core: which pads sound, struck by pointer or keyboard, how hard, which ones choke each other, and the grid's one tab stop."
+---
+
+<CoreModule name="pad" />
+
+## Usage
+
+A pad grid has no value to drag: it reports strikes. The controller holds which pads are sounding and how hard each was struck, and moves the focus around the grid:
+
+```ts
+import { createPadController } from "@audio-ui/core/pad";
+
+const pads = createPadController({
+  values: ["kick", "snare", "closed-hat", "open-hat"],
+  columns: 2,
+  onPadOn: (value, details) => drums.hit(value, details.velocity),
+  onPadOff: (value) => drums.release(value),
+});
+
+element.addEventListener("pointerdown", (event) =>
+  pads.press({ value: "open-hat", chokeGroup: "hats" }, event, element)
+);
+```
+
+`press(pad, event, element)` strikes a pad and holds it until the pointer is released. A pointer strike sounds as hard as the pointer reports, for a pen or a pressure-sensitive screen, or else by where it lands, harder toward the top of the pad and `MIN_VELOCITY` at the very bottom. From the keyboard, Enter or Space strikes the focused pad (`keyOn`) at `KEYBOARD_VELOCITY` until the key is released or the pad loses focus (`keyOff`). Pads that share a `chokeGroup` cut each other off, as an open hi-hat is cut by the closed one.
+
+`navigate(value, event)` moves the focus with the arrows, Home and End, `columns` pads to a row, and returns the pad it moved to; the snapshot's `tabStop` is the one pad in the tab order. `activePads` lights pads from elsewhere, such as the notes a sequence plays, on top of the ones held, and `disabledValues` takes pads out: the arrows step over them.
+
+The [Pad](/docs/components/base/pad) draws this controller in React.

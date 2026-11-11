@@ -1,0 +1,34 @@
+---
+title: knob
+description: "The knob's controller from @audio-ui/core: a bounded value on a dial, turned by a vertical, circular or revolving drag, stepped, scrolled, typed and reset, and the geometry of its arcs."
+---
+
+<CoreModule name="knob" />
+
+## Usage
+
+The controller follows the [contract](/docs/core/controllers) every controller shares: create it once, draw from its snapshot, send it the input.
+
+```ts
+import { createKnobController } from "@audio-ui/core/knob";
+
+const knob = createKnobController({ min: 20, max: 20000, value: 1000, scale: "log", format: { maximumFractionDigits: 0 } });
+```
+
+| Option | Meaning |
+| --- | --- |
+| `value`, `defaultValue`, `min`, `max`, `step`, `largeStep` | As for the [fader](/docs/core/fader) |
+| `scale` | `"linear"`, `"log"`, or a function between 0 and 1 |
+| `dragMode` | How a drag turns into a value: `"vertical"`, `"circular"` (the angle around the centre) or `"revolution"` (the turns of the pointer) |
+| `anchor` | The value the arc grows from, such as 0 on a pan knob |
+| `format`, `locale`, `disabled` | As for the fader |
+
+A knob resets on a double tap and on Alt with a press, inside the controller: it has no reset gesture in the element. `press(event, control)` takes the control, the element that gives the angle; `keyDown(event)` returns `true` when it handled the key. The snapshot has the `angle` of the pointer, the `percent` and the `anchorPercent`, ready for an arc.
+
+A vertical drag covers the whole range over 150 px (`VERTICAL_DRAG_RANGE_PX`), and Shift turns it four times slower (`FINE_DRAG`). On a scale that is not linear, a key or a wheel notch moves 1% of the travel (`POSITION_STEP`), so a log knob steps as evenly as it looks; `steppedValue` is that rule as a function.
+
+## Drawing the dial
+
+The dial sweeps 288 degrees (`SWEEP_ANGLE`), clockwise from the bottom left, with its gap at the bottom. `arcPath(radius, from, to)` is the SVG arc between two positions from 0 to 1 in its 48 by 48 view box, and `pointerAngle` the angle of a pointer around the centre of an element.
+
+The [Knob](/docs/components/base/knob) draws this controller in React.

@@ -1,0 +1,31 @@
+---
+title: sequencer
+description: "The step sequencer's controller from @audio-ui/core: a pattern of steps and their velocities, held or controlled, painted by pointer, toggled from the keyboard, with one tab stop in the grid."
+---
+
+<CoreModule name="sequencer" />
+
+## Usage
+
+A pattern is a row of steps per sound, each on or off, and the velocities are a number from 0 to 1 per step, in the same shape:
+
+```ts
+import { createSequencerController } from "@audio-ui/core/sequencer";
+
+const sequencer = createSequencerController({
+  defaultValue: [
+    [true, false, false, false, true, false, false, false],
+    [false, false, true, false, false, false, true, false],
+  ],
+  onValueCommitted: (pattern) => save(pattern),
+  onVelocityCommitted: (velocities) => saveVelocities(velocities),
+});
+```
+
+A press on a cell, `pressCell(cell, event, root, nodes)`, switches it and paints the same state across every cell the pointer then crosses, so one drag fills a row. `nodes` maps each cell's key (`cellKey`) to its element, which is how the gesture finds the cell under the pointer. `pressVelocity` draws the velocity bars the same way: the bottom of a bar is silent and its top full. A step reads `DEFAULT_VELOCITY` (1) until it is set.
+
+From the keyboard, `moveFocusFrom(cell, event)` moves the focus with the arrows, Home and End, `toggleCell(cell, event)` switches the focused cell, and `setVelocity` sets a step's velocity from a key or a field. The snapshot holds the pattern, the velocities, its size, the tab stop and whether a drag is painting.
+
+`setCell`, `setVelocity`, `isOn` and `velocityAt` are the same edits as plain functions on a pattern, for an engine that keeps the pattern itself.
+
+The [Sequencer](/docs/components/base/sequencer) draws this controller in React.

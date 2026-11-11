@@ -11,7 +11,7 @@ import { Callout } from "@/components/docs/mdx/callout";
 import { DemoSounds } from "@/components/docs/mdx/demo-sounds";
 import { DeviceUsage } from "@/components/docs/mdx/device-usage";
 import { ElementsPreview } from "@/components/docs/mdx/elements-preview";
-import { Entry } from "@/components/docs/mdx/entry";
+import { CoreModule, Entry } from "@/components/docs/mdx/entry";
 import { IconCatalog } from "@/components/docs/mdx/icon-catalog";
 import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
@@ -61,6 +61,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     DeviceControls,
     DeviceUsage,
     IconCatalog,
+    CoreModule,
     Entry,
     CodeBlockCommand,
     InstallAgent: InstallAgentParts,

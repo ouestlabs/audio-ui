@@ -1,0 +1,35 @@
+---
+title: midi
+description: "MIDI input from @audio-ui/core: every connected keyboard and controller as one source through the Web MIDI API, raw messages read into notes, controllers and pitch bend, and pitch bend in semitones."
+---
+
+<CoreModule name="midi" />
+
+## Usage
+
+`createMidiInput` listens to every MIDI input of the page as one source. Make one and share it, so the browser asks for access once, and connect it from a user gesture, since the browser may prompt:
+
+```ts
+import { createMidiInput } from "@audio-ui/core/midi";
+
+const midi = createMidiInput();
+button.addEventListener("click", () => midi.connect());
+
+const stop = midi.listen((message) => {
+  if (message.type === "noteon") {
+    synth.noteOn(message.note, message.velocity);
+  } else if (message.type === "noteoff") {
+    synth.noteOff(message.note);
+  }
+});
+```
+
+Devices plugged in later are heard as they come, and `setInputEnabled(name, false)` silences one by name. The state, with `subscribe` and `getSnapshot` for `useSyncExternalStore` or any store, says whether the browser has Web MIDI (it needs a secure context), whether a device is connected, the names of the inputs, and why it is not connected when it is not. System exclusive access is not asked for.
+
+## Messages
+
+`parseMidiMessage(data)` reads the bytes of one message into a `MidiMessage`: a note on or off, a control change or a pitch bend, on its channel, or `null` for anything else. Values are normalized the way the rest of audio/ui reads them: a velocity or a controller from 0 to 1, a pitch bend from -1 to 1. A note on with a velocity of 0 is read as the note off it stands for.
+
+`pitchBendToSemitones(value, range)` turns a bend into semitones for a receiver that bends `range` semitones each way, `DEFAULT_PITCH_BEND_RANGE` (2) unless told otherwise.
+
+The registry's [`useMidiInput`](/docs/hooks/use-midi-input) wraps this for a React page.

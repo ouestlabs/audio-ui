@@ -1,0 +1,33 @@
+---
+title: piano
+description: "The piano's controller from @audio-ui/core: which keys sound, played by pointer, glide or keyboard, one note per pointer, and where each key sits on a keyboard or a piano roll's rows."
+---
+
+<CoreModule name="piano" />
+
+## Usage
+
+The controller follows the [contract](/docs/core/controllers) every controller shares, with notes in place of a value:
+
+```ts
+import { createPianoController } from "@audio-ui/core/piano";
+
+const piano = createPianoController({
+  layout: "keyboard",
+  minPitch: 48,
+  maxPitch: 72,
+  orientation: "horizontal",
+  onNoteOn: (pitch) => synth.noteOn(pitch),
+  onNoteOff: (pitch) => synth.noteOff(pitch),
+});
+```
+
+The piano reports a note on when a key is pressed and a note off when it is released, one per pointer, so two fingers can hold two keys. `keyOn(pitch, event)` and `keyOff(pitch, event)` do the same for the keyboard, and `navigate(pitch, event)` moves focus between keys with the arrows. `getSnapshot()` gives each key's `placements` and the `active` set, which an element draws.
+
+A pointer press sounds harder toward the near end of a key, from `MIN_VELOCITY` at its very top; a key played from the keyboard sounds at `KEYBOARD_VELOCITY`.
+
+## Layout
+
+`placeKeys(pitches, layout)` says where each key sits along the keyboard, from 0 to 1: `"keyboard"` lays white keys side by side with the black ones between them, as on a piano, and `"even"` gives each key an equal share, as a piano roll's rows are. `keyAt(placements, along, across, layout)` is the key under a point: past `BLACK_KEY_DEPTH` across the keyboard, a press lands on a white key.
+
+The [Piano](/docs/components/base/piano) draws this controller in React.

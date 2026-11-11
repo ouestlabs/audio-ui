@@ -1,0 +1,44 @@
+---
+title: meter
+description: "A level meter's scale, ballistics and painting from @audio-ui/core: where a level sits on an IEC, VU or linear scale, how a VU or a PPM reading follows the level, and the per-frame DOM writes of a channel."
+---
+
+<CoreModule name="meter" />
+
+## Usage
+
+A meter has no gesture, so it has no controller. What it has is a scale, ballistics and a channel to paint.
+
+## The scale
+
+`createMeterConfig` holds how levels are placed and written: `min`, `max`, `warnThreshold`, `clipThreshold`, and `scale`, which is `"iec"` (the deflection of a digital peak meter, with room at the top), `"linear"`, or a function. `position(level)` gives a level's place on the meter, from 0 to 1:
+
+```ts
+import { createMeterConfig } from "@audio-ui/core/meter";
+
+const config = createMeterConfig({ min: -60, max: 6, scale: "iec", clipThreshold: 0 });
+config.position(-18); // 0.467
+```
+
+`iecDeflection` and `vuDeflection` are the two standard curves on their own, and `levelPosition(scale, min, max)` makes the function `position` is.
+
+## Ballistics
+
+The levels come from a live source, and the meter has no clock of its own, so how a reading moves is yours to choose. A ballistic follows a level frame by frame:
+
+```ts
+import { createPpmBallistics, createVuBallistics } from "@audio-ui/core/meter";
+
+const vu = createVuBallistics(); // 300 ms to reach 99% of a step, overshooting it by 1.3%
+const ppm = createPpmBallistics(); // a 5 ms attack, then a fall of 20 dB in 1.5 s
+
+const reading = vu.step(levelDb, elapsedSeconds);
+```
+
+`step(level, seconds)` moves the reading toward a level over a frame and returns it; `reset(value)` puts it somewhere at once. Below `FLOOR_DB` a reading is silence.
+
+## Painting a channel
+
+`channelView(frame, index, config)` is what a channel shows for a reading: the length of its bar, its peak mark, whether it is at the warning level or clipping, and its text. `paintChannel(nodes, view, index, orientation)` writes that straight to the channel's DOM nodes, touching only what changed, so a meter repaints every frame with no render of its framework.
+
+The [Meter](/docs/components/base/meter) draws these in React.

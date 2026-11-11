@@ -128,20 +128,175 @@ export async function buildEntries(): Promise<Entry[]> {
   return entries.sort((a, b) => a.name.localeCompare(b.name));
 }
 
-if (import.meta.main) {
-  const text = `${JSON.stringify(await buildEntries(), null, 2)}\n`;
-  if (process.argv.includes("--check")) {
-    const current = await Bun.file(MANIFEST)
+// Normalized: the paths the resolver reaches have no `..` in them, so this prefix can be cut from them.
+const PACKAGES = new URL("../../../packages", import.meta.url).pathname;
+const CORE_SRC = `${PACKAGES}/core/src`;
+export const CORE_MANIFEST = `${WEB}/src/lib/docs/content/core-modules.generated.json`;
+const RE_EXPORT = /export (?:type )?\{([^}]*)\} from "(\.[^"]+)";/g;
+const NAME_IN_BRACES = /^(?:type\s+)?(\w+)$/;
+
+/** A module of `@audio-ui/core`, as its page heads it. */
+export interface CoreModule {
+  /** The adapters that draw it: `@audio-ui/react/knob`, `@audio-ui/elements/knob`. */
+  adapters: string[];
+  exports: EntryExport[];
+  /** What a project imports it from. */
+  from: string;
+  /** Its subpath, `time`, or `core` for the package's root. */
+  name: string;
+  /** The files its exports are declared in, from `packages/core/src/`. */
+  sources: string[];
+  /** The registry's hooks and libs that import it: the ones with a page of their own. */
+  usedBy: string[];
+}
+
+const read = (path: string) => Bun.file(path).text();
+const resolvePath = (from: string, specifier: string) =>
+  new URL(specifier, `file://${from}`).pathname;
+
+/** Where `name`, exported by the file at `path`, is declared: followed through `export { … } from` until a file declares it. */
+async function declarationOf(
+  path: string,
+  name: string
+): Promise<{ declared: EntryExport; path: string }> {
+  const source = await read(path);
+  const declared = exportsOf(source).find((each) => each.name === name);
+  if (declared) {
+    return { declared, path };
+  }
+  for (const match of source.matchAll(RE_EXPORT)) {
+    const names = (match[1] ?? "")
+      .split(",")
+      .map((each) => NAME_IN_BRACES.exec(each.trim())?.[1])
+      .filter(Boolean);
+    if (names.includes(name)) {
+      return declarationOf(resolvePath(path, match[2] ?? ""), name);
+    }
+  }
+  throw new Error(`${name} is exported by ${path} but declared nowhere`);
+}
+
+/** A module's exports in the order its entry file lists them, each from where it is declared. */
+async function moduleExports(entry: string) {
+  const source = await read(entry);
+  const names = [...source.matchAll(RE_EXPORT)].flatMap((match) =>
+    (match[1] ?? "")
+      .split(",")
+      .map((each) => NAME_IN_BRACES.exec(each.trim())?.[1] ?? "")
+      .filter(Boolean)
+  );
+  return Promise.all(names.map((name) => declarationOf(entry, name)));
+}
+
+/** The files under `folder` that import `from`, as their paths. */
+async function importers(folder: string, from: string) {
+  const files = [...new Bun.Glob("**/*.{ts,tsx}").scanSync(folder)];
+  const found = await Promise.all(
+    files.map(async (file) =>
+      (await read(`${folder}/${file}`)).includes(`from "${from}"`) ? file : ""
+    )
+  );
+  return found.filter(Boolean);
+}
+
+/** The adapters of `@audio-ui/react` and `@audio-ui/elements` with a file that imports `from`. */
+async function adaptersOf(from: string) {
+  const roots = [
+    { name: "@audio-ui/react", src: `${PACKAGES}/ui/src/primitives` },
+    { name: "@audio-ui/elements", src: `${PACKAGES}/elements/src` },
+  ];
+  const found = await Promise.all(
+    roots.map(async (root) => {
+      const files = await importers(root.src, from);
+      const primitives = new Set(
+        files
+          .filter((file) => file.includes("/") && !file.startsWith("internal/"))
+          .map((file) => file.split("/")[0])
+      );
+      return [...primitives].sort().map((each) => `${root.name}/${each}`);
+    })
+  );
+  return found.flat();
+}
+
+export async function buildCoreModules(): Promise<CoreModule[]> {
+  const pkg = (await Bun.file(`${PACKAGES}/core/package.json`).json()) as {
+    exports: Record<string, { types: string }>;
+  };
+  const items = await loadItems(["hooks", "lib"]);
+  const itemFiles = await Promise.all(
+    items.map(async (item) => ({
+      name: item.name,
+      sources: await Promise.all(
+        (item.files ?? []).map((file) => read(`${BASE}/${file.path}`))
+      ),
+    }))
+  );
+  const subpaths = Object.entries(pkg.exports).filter(
+    ([subpath]) => subpath !== "./internal"
+  );
+  return Promise.all(
+    subpaths.map(async ([subpath, target]): Promise<CoreModule> => {
+      const from =
+        subpath === "."
+          ? "@audio-ui/core"
+          : `@audio-ui/core/${subpath.slice(2)}`;
+      // The declaration file names the source: dist/audio/time/index.d.ts is src/audio/time/index.ts.
+      const entry = `${CORE_SRC}/${target.types.replace("./dist/", "").replace(".d.ts", ".ts")}`;
+      const resolved = await moduleExports(entry);
+      return {
+        adapters: await adaptersOf(from),
+        exports: resolved.map((each) => each.declared),
+        from,
+        name: subpath === "." ? "core" : subpath.slice(2),
+        sources: [
+          ...new Set(
+            resolved.map((each) => each.path.replace(`${CORE_SRC}/`, ""))
+          ),
+        ],
+        usedBy: itemFiles
+          .filter((item) =>
+            item.sources.some((text) => text.includes(`from "${from}"`))
+          )
+          .map((item) => item.name)
+          .sort(),
+      };
+    })
+  );
+}
+
+const MANIFESTS = [
+  { build: buildEntries, path: MANIFEST },
+  { build: buildCoreModules, path: CORE_MANIFEST },
+];
+
+/** Writes a manifest, or with `check` says whether it is stale: `true` when it is up to date. */
+async function writeManifest(
+  manifest: (typeof MANIFESTS)[number],
+  check: boolean
+): Promise<boolean> {
+  const text = `${JSON.stringify(await manifest.build(), null, 2)}\n`;
+  const file = manifest.path.split("/").pop();
+  if (check) {
+    const current = await Bun.file(manifest.path)
       .text()
       .catch(() => "");
     if (current !== text) {
-      console.error(
-        "entries.generated.json is stale: run bun scripts/build-entries.ts"
-      );
-      process.exit(1);
+      console.error(`${file} is stale: run bun scripts/build-entries.ts`);
     }
-  } else {
-    await Bun.write(MANIFEST, text);
-    console.log(`${MANIFEST.split("/").pop()} written`);
+    return current === text;
+  }
+  await Bun.write(manifest.path, text);
+  console.log(`${file} written`);
+  return true;
+}
+
+if (import.meta.main) {
+  const check = process.argv.includes("--check");
+  const fresh = await Promise.all(
+    MANIFESTS.map((manifest) => writeManifest(manifest, check))
+  );
+  if (!fresh.every(Boolean)) {
+    process.exit(1);
   }
 }

@@ -1,4 +1,27 @@
 {
   "title": "Core",
-  "pages": ["index", "controllers"]
+  "pages": [
+    "index",
+    "---Audio---",
+    "device",
+    "time",
+    "analysis",
+    "pitch",
+    "midi",
+    "playback",
+    "---Controls---",
+    "controllers",
+    "knob",
+    "fader",
+    "xypad",
+    "meter",
+    "envelope",
+    "plot",
+    "piano",
+    "pad",
+    "sequencer",
+    "piano-roll",
+    "timeline",
+    "waveform"
+  ]
 }

@@ -3,6 +3,8 @@ import { highlightedElements } from "@/components/code/block/highlighted-code";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { Command } from "@/components/docs/mdx/install";
 import {
+  coreModuleOf,
+  coreSourceUrl,
   type Entry as EntryData,
   entryOf,
   entryUrl,
@@ -52,25 +54,8 @@ function Items({ names }: { names: readonly string[] }) {
   );
 }
 
-/** What an entry is made of and part of: its files, what it needs, what needs it, its source. */
-function Overview({ entry }: { entry: EntryData }) {
-  const rows: [string, React.ReactNode][] = [
-    ["Files", <Items key="files" names={entry.files} />],
-    ["Depends on", <Items key="deps" names={entry.registryDependencies} />],
-    ["npm", <Items key="npm" names={entry.dependencies} />],
-    ["Used by", <Items key="used" names={entry.usedBy} />],
-    [
-      "Source",
-      entry.sources.map((path, index) => (
-        <span key={path}>
-          {index > 0 ? ", " : null}
-          <a href={sourceUrl(path)} rel="noreferrer" target="_blank">
-            {path.split("/").at(-1)}
-          </a>
-        </span>
-      )),
-    ],
-  ];
+/** Rows of facts about an entry, a label each. */
+function Facts({ rows }: { rows: [string, React.ReactNode][] }) {
   return (
     <table>
       <tbody>
@@ -80,6 +65,68 @@ function Overview({ entry }: { entry: EntryData }) {
               {label}
             </th>
             <td>{value}</td>
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+}
+
+/** Links to source files, each by its file name. */
+function Sources({
+  paths,
+  url,
+}: {
+  paths: readonly string[];
+  url: (path: string) => string;
+}) {
+  return paths.map((path, index) => (
+    <span key={path}>
+      {index > 0 ? ", " : null}
+      <a href={url(path)} rel="noreferrer" target="_blank">
+        {path.split("/").at(-1)}
+      </a>
+    </span>
+  ));
+}
+
+// A summary's code spans, as JSDoc writes them: `name`.
+const CODE_SPAN = /(`[^`]+`)/;
+
+/** A JSDoc sentence with its code spans drawn as code. */
+function Summary({ text }: { text: string }) {
+  return text
+    .split(CODE_SPAN)
+    .map((piece) =>
+      piece.startsWith("`") ? (
+        <code key={piece}>{piece.slice(1, -1)}</code>
+      ) : (
+        piece
+      )
+    );
+}
+
+/** What a module exports, each with the first sentence of its JSDoc. */
+function Exports({ exports }: { exports: EntryData["exports"] }) {
+  return (
+    <table>
+      <thead>
+        <tr>
+          <th>Export</th>
+          <th>Kind</th>
+          <th>What it is</th>
+        </tr>
+      </thead>
+      <tbody>
+        {exports.map((each) => (
+          <tr key={each.name}>
+            <td>
+              <code>{each.name}</code>
+            </td>
+            <td>{each.kind}</td>
+            <td>
+              <Summary text={each.summary} />
+            </td>
           </tr>
         ))}
       </tbody>
@@ -99,27 +146,52 @@ export function Entry({ name }: { name: string }) {
     <>
       <Command code={`npx shadcn@latest add @audio-ui/${entry.name}`} />
       <Code code={importLine(entry)} />
-      <Overview entry={entry} />
-      <table>
-        <thead>
-          <tr>
-            <th>Export</th>
-            <th>Kind</th>
-            <th>What it is</th>
-          </tr>
-        </thead>
-        <tbody>
-          {entry.exports.map((each) => (
-            <tr key={each.name}>
-              <td>
-                <code>{each.name}</code>
-              </td>
-              <td>{each.kind}</td>
-              <td>{each.summary}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <Facts
+        rows={[
+          ["Files", <Items key="files" names={entry.files} />],
+          [
+            "Depends on",
+            <Items key="deps" names={entry.registryDependencies} />,
+          ],
+          ["npm", <Items key="npm" names={entry.dependencies} />],
+          ["Used by", <Items key="used" names={entry.usedBy} />],
+          [
+            "Source",
+            <Sources key="source" paths={entry.sources} url={sourceUrl} />,
+          ],
+        ]}
+      />
+      <Exports exports={entry.exports} />
+    </>
+  );
+}
+
+/**
+ * The head of a `@audio-ui/core` module's page, read from the package and its
+ * sources: the install, the import, the adapters that draw it, the registry's
+ * hooks and libs that build on it, and what it exports.
+ */
+export function CoreModule({ name }: { name: string }) {
+  const coreModule = coreModuleOf(name);
+  return (
+    <>
+      <Command code="npm install @audio-ui/core" />
+      <Code code={importLine(coreModule)} />
+      <Facts
+        rows={[
+          ["Adapters", <Items key="adapters" names={coreModule.adapters} />],
+          ["Used by", <Items key="used" names={coreModule.usedBy} />],
+          [
+            "Source",
+            <Sources
+              key="source"
+              paths={coreModule.sources}
+              url={coreSourceUrl}
+            />,
+          ],
+        ]}
+      />
+      <Exports exports={coreModule.exports} />
     </>
   );
 }

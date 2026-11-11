@@ -1,0 +1,60 @@
+---
+title: time
+description: "Musical time from @audio-ui/core: tempos and signatures, bars and beats, grid divisions and their labels, tempo-synced note values, warp markers, the metronome, and the look-ahead scheduler a transport clock runs on."
+---
+
+<CoreModule name="time" />
+
+## Usage
+
+A `Tempo` is a BPM and a signature. Every function that turns seconds into music, or music into seconds, reads one:
+
+```ts
+import { barsBeatsAt, secondsPerBar, secondsPerBeat, syncedSeconds } from "@audio-ui/core/time";
+
+const tempo = { bpm: 120, beatsPerBar: 6, beatUnit: 8 };
+
+secondsPerBeat(tempo); // 0.25: an eighth note at 120 BPM
+secondsPerBar(tempo); // 1.5
+barsBeatsAt(2, tempo); // { bar: 2, beat: 3, sixteenth: 1 }
+syncedSeconds("1/8d", tempo); // a dotted eighth, for a delay that follows the tempo
+```
+
+BPM counts quarter notes whatever the signature says, so a 6/8 bar at 120 BPM lasts three quarters. `describeBarsBeats` gives the same position as text for a screen reader, "Bar 2, beat 3".
+
+## The grid
+
+`gridInterval(division, zoom, tempo)` is the step between two grid lines at a zoom in pixels per second, and the step an edit snaps to, so what is drawn is where a drag lands. `"adaptive"` follows the zoom and keeps lines at least 24 px apart; a fixed division (an id of `GRID_DIVISIONS`, from `"4-bars"` to `"1/32"`) stays put. `gridLabel` names the interval as a readout does, "1 bar" or "1/8T", and `barLabelInterval` spaces the bar numbers of a ruler.
+
+## Signature changes and the metronome
+
+`barsOf(tempo, changes, until)` lists the bars up to a time through `SignatureChange`s, with a partial bar where a change cuts one short, and `barsBeatsWith(seconds, tempo, changes)` reads a position through them. `metronomeClicks(tempo, changes, until, rhythm)` lists the clicks over the same changes, each with `accent` on the first of its bar; `METRONOME_RHYTHMS` holds the rhythms it can click at, `"auto"` (the beat) by default.
+
+## The scheduler
+
+A transport clock that plays sound ahead of time calls `advance` on a timer: it returns every step boundary within the next 100 ms, each with the audio time to give to a node's `start()`, and the cursor to call it with next time.
+
+```ts
+import { advance, anchoredCursor, SCHEDULER_POLL_MS } from "@audio-ui/core/time";
+
+const config = { regionStart: 0, regionEnd: 16, secondsPerStep: 60 / 120 / 4 };
+let cursor = anchoredCursor(ctx.currentTime, 0);
+
+setInterval(() => {
+  const next = advance(cursor, ctx.currentTime, config);
+  for (const { step, time } of next.boundaries) {
+    playStep(step, time);
+  }
+  cursor = next.cursor;
+}, SCHEDULER_POLL_MS);
+```
+
+`config` is read fresh on every call, so a tempo change takes effect at the next boundary. `positionAt(now, anchor, config)` is the playhead between boundaries, in fractional steps, and `anchorForTempoChange` keeps it continuous when the tempo moves while playing. A boundary later than half a second is skipped rather than played late. The registry's [`useTransportClock`](/docs/hooks/use-transport-clock) runs this loop for a React page.
+
+## Warp markers
+
+A `WarpMarker` pins a time in a recording to a time on a clip. `warpMarkers` keeps the markers that make a valid map, `warpedTime` and `unwarpedTime` read it both ways, `warpRate` is how fast the recording plays at a point, and `addWarpMarker`, `moveWarpMarker`, `removeWarpMarker` and `scaleWarp` edit it.
+
+## MIDI tempos
+
+A MIDI file stores a tempo as microseconds per quarter note: `bpmToMicrosecondsPerQuarterNote(120)` is 500000, and `microsecondsPerQuarterNoteToBpm` goes back.

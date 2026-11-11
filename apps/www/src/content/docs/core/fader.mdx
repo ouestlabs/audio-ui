@@ -1,0 +1,35 @@
+---
+title: fader
+description: "The fader's controller from @audio-ui/core: a bounded value on a straight travel, dragged, stepped, scrolled, typed and reset, the same whatever draws it."
+---
+
+<CoreModule name="fader" />
+
+## Usage
+
+The controller follows the [contract](/docs/core/controllers) every controller shares: create it once, draw from its snapshot, send it the input.
+
+```ts
+import { createFaderController } from "@audio-ui/core/fader";
+
+const fader = createFaderController({ min: -60, max: 6, value: -12, step: 0.5, orientation: "vertical" });
+const unsubscribe = fader.subscribe(() => draw(fader.getSnapshot()));
+control.addEventListener("pointerdown", (event) => fader.press(event, control, thumb));
+control.addEventListener("keydown", (event) => { if (fader.keyDown(event, control)) event.preventDefault(); });
+const detach = fader.attachWheel(control);
+```
+
+| Option | Meaning |
+| --- | --- |
+| `value`, `defaultValue` | The controlled value, or the uncontrolled start and what a reset returns to |
+| `min`, `max`, `step`, `largeStep` | The range (-60 to 6 unless given), the grid, and the step that Shift takes |
+| `anchor` | The value the fill starts from, for a fader that is centred on a value |
+| `orientation` | `"horizontal"` or `"vertical"` |
+| `format`, `locale` | `Intl.NumberFormat` options for `formatted` |
+| `disabled` | Takes every input away |
+
+`press(event, control, thumb)` takes the thumb too: a press on the thumb keeps the pointer where it grabbed the thumb, so the value does not jump to the pointer. `reset(event)` returns the value to its default: the element calls it on a double-click (listen for `dblclick` on the control), on Alt with a press, and on Delete or Backspace. A double tap on touch is not a reset for a fader, as it is for a knob: a tap on a fader's track sets the value, so two quick taps are two values.
+
+`faderShare(value, min, max)` is where a value sits along the travel, from 0 to 100, for a view that places the thumb itself.
+
+The [Fader](/docs/components/base/fader) draws this controller in React.

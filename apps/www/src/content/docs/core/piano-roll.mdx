@@ -1,0 +1,67 @@
+---
+title: piano-roll
+description: "The piano roll's controller from @audio-ui/core: notes held or controlled, their selection and the pitches sounding, every gesture and key that edits them, the note edits as plain functions, and the rows a roll draws."
+---
+
+<CoreModule name="piano-roll" />
+
+## Usage
+
+A note is a pitch, a start and a length in the timeline's units, with a velocity, a chance, a deviation and a mute. The controller holds the notes, the selection and the pitches sounding, and every gesture and key that edits them; it follows the [contract](/docs/core/controllers) every controller shares:
+
+```ts
+import { createPianoRollController } from "@audio-ui/core/piano-roll";
+
+const roll = createPianoRollController({
+  timeline: { duration: 16, step: 0.25, grid: { offset: 0, step: 0.25 }, zoom: null, position: () => clock.position },
+  defaultValue: [{ id: "n1", pitch: 60, start: 0, length: 1 }],
+  minPitch: 36,
+  maxPitch: 84,
+  onValueCommitted: (notes) => save(notes),
+  onNoteOn: (pitch) => synth.noteOn(pitch),
+  onNoteOff: (pitch) => synth.noteOff(pitch),
+});
+```
+
+| Option | Meaning |
+| --- | --- |
+| `value`, `defaultValue` | The notes, controlled, or the uncontrolled start |
+| `selection`, `defaultSelection`, `onSelectionChange` | The selected notes' ids |
+| `timeline` | Its length, the grid edits snap to, the zoom and the playback position |
+| `minPitch`, `maxPitch`, `minLength` | The bounds every edit keeps a note within: 48 to 72, and the grid step, unless given |
+| `mode` | What a press on empty grid does: `"select"` (the default) starts a selection rectangle, `"draw"` draws a note |
+| `drawStyle` | In draw mode, `"stretch"` (the default) makes the drawn note as long as the drag; `"paint"` draws a note in each grid cell crossed |
+| `scale`, `folded` | The scale the rows shade, and folding the rows to the pitches used or to the scale |
+| `activePitches` | Keys lit from elsewhere, such as the notes playing |
+
+## The input
+
+- `pressGrid(event, grid)` starts a selection rectangle, or draws a note in `"draw"` mode; `addAtPlayback` adds a note at the playback position from the keyboard.
+- `pressNote(id, handle, event, element, grid)` moves a note by its body, or resizes it by an edge; the selected notes move with it, a chord keeping its spacing. `pressStretch(edge, …)` stretches the selection in time from its other edge.
+- `pressVelocity` and `paintLevels` draw the velocity, the deviation or the chance in a lane under the roll.
+- `keyNote`, `keyGrid` and `shortcut` take the keyboard: on a note, the arrows move the selection (Shift changes its length), Enter or Space selects it and Delete removes it; Escape clears the selection, Cmd or Ctrl with A selects every note, with C, X, V and D copies, cuts, pastes at the playhead and duplicates, and Q alone quantizes the selection, or every note with none selected. Each returns `true` when it handled the key.
+- `keyOn` and `keyOff` sound the keyboard beside the roll.
+
+## Edits
+
+Every edit is also a plain function on a list of notes, for a menu, a command or an engine that keeps the notes itself. Each takes the notes, the ids to change and the bounds to keep them in, and returns new notes:
+
+```ts
+import { findNotes, fitNotesToScale, moveNotes, quantizeNotes } from "@audio-ui/core/piano-roll";
+
+const bounds = { duration: 16, minLength: 0.25, minPitch: 0, maxPitch: 127 };
+const all = new Set(notes.map((note) => note.id));
+
+moveNotes(notes, all, 1, 12, bounds); // a beat later, an octave up
+quantizeNotes(notes, all, (time) => Math.round(time), bounds); // starts on the beat
+fitNotesToScale(notes, all, { name: "minor", root: 9 }, bounds); // into A minor
+findNotes(notes, { pitchClasses: [0] }); // the ids of every C
+```
+
+The others edit time and shape: `splitNotes`, `joinNotes`, `chopNotes`, `stretchNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `duplicateNotes`, `duplicateAfter`, `pasteNotes`, `insertTime`, `deleteTime`, `duplicateTime` and `toggleMuted`; and the dynamics: `changeVelocity`, `rampVelocity`, `humanizeNotes`, `setChance` and `setDeviation`. `findNotes` selects by pitch class, scale, velocity, length, chance or mute, every nth of them, or the inverse.
+
+## Rows
+
+`rollRows(notes, min, max, fold, scale)` gives the rows a roll draws, highest pitch first, with `rowOf` and `pitchAt` to go between a pitch and its row: every pitch, only those the notes use, or only those in a scale.
+
+The [Piano roll](/docs/components/base/piano-roll) draws this controller in React.
