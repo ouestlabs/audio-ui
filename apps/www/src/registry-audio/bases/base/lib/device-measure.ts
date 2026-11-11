@@ -1,7 +1,8 @@
 /**
  * Measure an engine against what its device claims. Everything runs in an
  * `OfflineAudioContext`, so a measurement hears exactly what the engine makes,
- * with no clock and no speakers.
+ * with no clock and no speakers; the measuring itself is audio.js's
+ * (`@audio/measure-response`, `@audio/measure-latency`).
  *
  * It is made for the host that brings its own engine: give `measureResponse`
  * your engine's factory, a state and the curve of the device (such as
@@ -10,136 +11,66 @@
  * device's own, and the tolerance is yours to choose.
  */
 
-export const SAMPLE_RATE = 48_000;
+import latency from "@audio/measure-latency";
+import response from "@audio/measure-response";
+import type {
+  EffectEngine,
+  EngineFactory,
+} from "@/registry-audio/bases/base/lib/device-engine";
 
-/** What the checks need of an engine: the shape every device engine has. */
-export interface MeasuredEngine {
-  dispose: () => void;
-  readonly input: AudioNode;
-  readonly output: AudioNode;
-  /** Present on an engine that loads something asynchronously, such as a worklet. */
-  readonly ready?: Promise<boolean>;
-}
+const SAMPLE_RATE = 48_000;
+/** How long an impulse response is listened to for a frequency response, and for a latency, in seconds. */
+const RESPONSE_SECONDS = 0.5;
+const LATENCY_SECONDS = 0.3;
+const RESPONSE_FREQUENCIES = [
+  31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 12_000, 16_000,
+];
+/** A level under this is below what a 24-bit signal can show, so it is not compared. */
+const AUDIBLE_FLOOR_DB = -50;
 
-export type EngineFactory<State> = (
-  ctx: BaseAudioContext,
-  state: State
-) => MeasuredEngine;
+/** What a measurement needs of an engine: an effect's input and output, and what it loads. */
+type MeasuredEngine = Pick<
+  EffectEngine<unknown>,
+  "dispose" | "input" | "output" | "ready"
+>;
 
-/** One channel of a signal, as a function of the sample index. */
-export type Signal = (index: number, channel: number) => number;
+/** A unit impulse `seconds` long, at the measuring rate. */
+const impulseOf = (seconds: number) => {
+  const signal = new Float32Array(Math.round(seconds * SAMPLE_RATE));
+  signal[0] = 1;
+  return signal;
+};
 
-export const sine =
-  (hertz: number, amplitude = 1): Signal =>
-  (index) =>
-    amplitude * Math.sin((2 * Math.PI * hertz * index) / SAMPLE_RATE);
-
-export const impulse =
-  (at = 0): Signal =>
-  (index) =>
-    index === at ? 1 : 0;
-
-export const toLinear = (db: number) => 10 ** (db / 20);
-export const toDb = (linear: number) =>
-  20 * Math.log10(Math.max(linear, 1e-12));
-
-/** Plays `signal` through an engine for `seconds` and returns what comes out, one array per channel. */
-export async function render<State>(
-  create: EngineFactory<State>,
+/** What comes out of an engine for `signal`, once what it loads is in: its impulse response for an impulse. */
+async function renderThrough<State>(
+  create: EngineFactory<State, MeasuredEngine>,
   state: State,
-  signal: Signal,
-  seconds: number,
-  channels = 1
-): Promise<Float32Array[]> {
-  const length = Math.round(seconds * SAMPLE_RATE);
-  const ctx = new OfflineAudioContext(channels, length, SAMPLE_RATE);
-  const buffer = ctx.createBuffer(channels, length, SAMPLE_RATE);
-  for (let channel = 0; channel < channels; channel += 1) {
-    const data = buffer.getChannelData(channel);
-    for (let index = 0; index < length; index += 1) {
-      data[index] = signal(index, channel);
-    }
-  }
+  signal: Float32Array
+): Promise<Float32Array> {
+  const ctx = new OfflineAudioContext(1, signal.length, SAMPLE_RATE);
+  const buffer = ctx.createBuffer(1, signal.length, SAMPLE_RATE);
+  buffer.getChannelData(0).set(signal);
   const source = ctx.createBufferSource();
   source.buffer = buffer;
   const engine = create(ctx, state);
-  if (engine.ready) {
-    await engine.ready;
-  }
+  await engine.ready;
   source.connect(engine.input);
   engine.output.connect(ctx.destination);
   source.start();
   const rendered = await ctx.startRendering();
   engine.dispose();
-  return Array.from({ length: channels }, (_, channel) =>
-    rendered.getChannelData(channel)
-  );
+  return rendered.getChannelData(0);
 }
 
-/** The highest absolute value in `data` between two times, in dB. */
-export function peakDb(
-  data: Float32Array,
-  fromSeconds: number,
-  toSeconds: number
+/** The level of a response at `hertz`, between the two bins around it. */
+function levelAt(
+  { db, freqs }: { db: Float32Array; freqs: Float32Array },
+  hertz: number
 ) {
-  let peak = 0;
-  const end = Math.min(data.length, Math.round(toSeconds * SAMPLE_RATE));
-  for (
-    let index = Math.round(fromSeconds * SAMPLE_RATE);
-    index < end;
-    index += 1
-  ) {
-    peak = Math.max(peak, Math.abs(data[index] ?? 0));
-  }
-  return toDb(peak);
-}
-
-/** The gain of a filter at `hertz` read from its impulse response, in dB: the discrete Fourier transform at one frequency. */
-export function magnitudeDb(response: Float32Array, hertz: number) {
-  let real = 0;
-  let imaginary = 0;
-  const step = (2 * Math.PI * hertz) / SAMPLE_RATE;
-  for (let index = 0; index < response.length; index += 1) {
-    const value = response[index] ?? 0;
-    real += value * Math.cos(step * index);
-    imaginary -= value * Math.sin(step * index);
-  }
-  return toDb(Math.hypot(real, imaginary));
-}
-
-/** Where the highest sample of `data` is, in samples. */
-export function peakIndex(data: Float32Array, from = 0) {
-  let best = from;
-  for (let index = from; index < data.length; index += 1) {
-    if (Math.abs(data[index] ?? 0) > Math.abs(data[best] ?? 0)) {
-      best = index;
-    }
-  }
-  return best;
-}
-
-/**
- * The time a level takes to fall by 60 dB in an impulse response, by Schroeder's
- * backward integration (the method of ISO 3382): the energy left after each
- * instant, read from -5 dB to -35 dB and extended to -60 dB.
- */
-export function reverberationTime(response: Float32Array) {
-  const energy = new Float64Array(response.length);
-  let sum = 0;
-  for (let index = response.length - 1; index >= 0; index -= 1) {
-    const value = response[index] ?? 0;
-    sum += value * value;
-    energy[index] = sum;
-  }
-  const total = energy[0] ?? 1;
-  const at = (db: number) => {
-    const wanted = total * 10 ** (db / 10);
-    const index = energy.findIndex((value) => value <= wanted);
-    return index < 0 ? response.length : index;
-  };
-  const from = at(-5);
-  const to = at(-35);
-  return (((to - from) / SAMPLE_RATE) * 60) / 30;
+  const step = freqs[1] ?? 1;
+  const below = Math.min(freqs.length - 2, Math.floor(hertz / step));
+  const share = hertz / step - below;
+  return (db[below] ?? 0) * (1 - share) + (db[below + 1] ?? 0) * share;
 }
 
 /** What a measurement of a frequency response found. */
@@ -150,33 +81,29 @@ export interface ResponseMeasurement {
   worstDb: number;
 }
 
-const RESPONSE_FREQUENCIES = [
-  31, 62, 125, 250, 500, 1000, 2000, 4000, 8000, 12_000, 16_000,
-];
-const IMPULSE_SECONDS = 0.5;
-/** A level under this is below what a 24-bit signal can show, so it is not compared. */
-const AUDIBLE_FLOOR_DB = -50;
-
 /**
  * How far an engine's frequency response is from `curve`, the gain in dB the
  * device draws at each frequency. The response is read from the engine's
  * impulse response, at 11 frequencies from 31 Hz to 16 kHz.
  */
 export async function measureResponse<State>(
-  create: EngineFactory<State>,
+  create: EngineFactory<State, MeasuredEngine>,
   state: State,
   curve: (hertz: number) => number,
   frequencies: readonly number[] = RESPONSE_FREQUENCIES
 ): Promise<ResponseMeasurement> {
-  const [response] = await render(create, state, impulse(), IMPULSE_SECONDS);
+  const measured = response(
+    await renderThrough(create, state, impulseOf(RESPONSE_SECONDS)),
+    { fs: SAMPLE_RATE }
+  );
   let worstDb = 0;
   let at = 0;
   for (const hertz of frequencies) {
     const wanted = curve(hertz);
-    if (!response || wanted < AUDIBLE_FLOOR_DB) {
+    if (wanted < AUDIBLE_FLOOR_DB) {
       continue;
     }
-    const gap = Math.abs(magnitudeDb(response, hertz) - wanted);
+    const gap = Math.abs(levelAt(measured, hertz) - wanted);
     if (gap > worstDb) {
       worstDb = gap;
       at = hertz;
@@ -185,11 +112,12 @@ export async function measureResponse<State>(
   return { at, worstDb };
 }
 
-/** How long an engine delays a signal, in milliseconds, read where its impulse response peaks. A host reports this to compensate it. */
+/** How long an engine delays a signal, in milliseconds: where what comes out of an impulse lines up with it. A host reports this to compensate it. */
 export async function measureLatency<State>(
-  create: EngineFactory<State>,
+  create: EngineFactory<State, MeasuredEngine>,
   state: State
 ): Promise<number> {
-  const [response] = await render(create, state, impulse(), 0.3);
-  return response ? (peakIndex(response) / SAMPLE_RATE) * 1000 : 0;
+  const reference = impulseOf(LATENCY_SECONDS);
+  const recorded = await renderThrough(create, state, reference);
+  return latency(recorded, reference, { fs: SAMPLE_RATE }).seconds * 1000;
 }

@@ -52,6 +52,8 @@
       "@audio/filter-oberheim": "1.2.1",
       "@audio/loudness-lufs": "1.2.0",
       "@audio/loudness-truepeak": "1.1.7",
+      "@audio/measure-latency": "1.0.2",
+      "@audio/measure-response": "1.0.2",
       "@audio/midi-parse": "1.0.3",
       "@audio/midi-write": "1.0.3",
       "@audio/mir-chroma": "1.1.3",

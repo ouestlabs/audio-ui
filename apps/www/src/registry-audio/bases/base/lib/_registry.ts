@@ -61,8 +61,10 @@ const items: RegistryItem[] = [
   }),
   libItem("device-measure", {
     categories: ["lib", "audio", "device", "web-audio"],
+    dependencies: ["@audio/measure-latency", "@audio/measure-response"],
     description:
-      "Measure an engine against what its device claims, in an offline audio context: how far its frequency response is from the curve the panel draws, how long it delays a signal, and the helpers to render and read a signal. For a host that brings its own engine.",
+      "Measure an engine against what its device claims, in an offline audio context: how far its frequency response is from the curve the panel draws (measureResponse) and how long it delays a signal (measureLatency), with audio.js's measuring. For a host that brings its own engine.",
+    registryDependencies: ["@audio-ui/device-engine"],
   }),
   libItem("manifest-worklet", {
     categories: ["lib", "audio", "device", "web-audio"],
