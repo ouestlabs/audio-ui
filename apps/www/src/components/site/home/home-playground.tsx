@@ -630,33 +630,35 @@ export function HomePlayground() {
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>
-          {/* The level of what comes out, framed as the position is, at the bar's height. */}
-          <ButtonGroup className="self-stretch">
-            <ButtonGroupText>
-              <div className="w-20">
-                <Meter
-                  aria-label="Playground output"
-                  orientation="horizontal"
-                  peakMarks="hidden"
-                  size="sm"
-                  source={levels}
-                />
-              </div>
-            </ButtonGroupText>
-          </ButtonGroup>
-          {/* The main track's volume, in dB as a mixer sets it; its readout hangs over the ruler while it turns, so the bar keeps no room for it. */}
-          <Knob
-            aria-label="Main volume"
-            className="mb-0"
-            formatValue={formatDb}
-            largeStep={6}
-            max={MAX_DB}
-            min={MIN_DB}
-            onValueChange={setVolume}
-            size="xs"
-            step={0.5}
-            value={volume}
-          />
+          {/* The output closes the bar, at its end: the level of what comes out, framed as the position is, and the main volume. */}
+          <div className="ms-auto flex items-center gap-2">
+            <ButtonGroup className="self-stretch">
+              <ButtonGroupText>
+                <div className="w-20">
+                  <Meter
+                    aria-label="Playground output"
+                    orientation="horizontal"
+                    peakMarks="hidden"
+                    size="sm"
+                    source={levels}
+                  />
+                </div>
+              </ButtonGroupText>
+            </ButtonGroup>
+            {/* In dB as a mixer sets it; its readout hangs over the ruler while it turns, so the bar keeps no room for it. */}
+            <Knob
+              aria-label="Main volume"
+              className="mb-0"
+              formatValue={formatDb}
+              largeStep={6}
+              max={MAX_DB}
+              min={MIN_DB}
+              onValueChange={setVolume}
+              size="xs"
+              step={0.5}
+              value={volume}
+            />
+          </div>
         </Transport>
       </div>
       <div className="px-4 py-4 sm:px-6">
