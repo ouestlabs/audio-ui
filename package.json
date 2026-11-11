@@ -54,6 +54,7 @@
       "@audio/loudness-truepeak": "1.1.7",
       "@audio/midi-parse": "1.0.3",
       "@audio/midi-write": "1.0.3",
+      "@audio/mir-key": "1.0.2",
       "@audio/note": "1.0.3",
       "@audio/pitch-yin": "1.0.6",
       "@audio/musicxml": "0.1.0",

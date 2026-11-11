@@ -66,7 +66,6 @@
         "@audio/midi-write": "catalog:",
         "@audio/musicxml": "catalog:",
         "@audio/note": "catalog:",
-        "@audio/pitch-yin": "catalog:",
         "@audio/resample-sinc": "catalog:",
         "@audio/reverb-dattorro": "catalog:",
         "@audio/reverb-fdn": "catalog:",
@@ -240,6 +239,7 @@
         "@audio/loudness-truepeak": "catalog:",
         "@audio/midi-parse": "catalog:",
         "@audio/midi-write": "catalog:",
+        "@audio/mir-key": "catalog:",
         "@audio/musicxml": "catalog:",
         "@audio/note": "catalog:",
         "@audio/pitch-yin": "catalog:",
@@ -447,6 +447,7 @@
     "@audio/loudness-truepeak": "1.1.7",
     "@audio/midi-parse": "1.0.3",
     "@audio/midi-write": "1.0.3",
+    "@audio/mir-key": "1.0.2",
     "@audio/musicxml": "0.1.0",
     "@audio/note": "1.0.3",
     "@audio/pitch-yin": "1.0.6",
@@ -648,6 +649,8 @@
     "@audio/midi-parse": ["@audio/midi-parse@1.0.3", "", {}, "sha512-l454ohl5+X5XeozLAd4hZeS+QUmNLDepL50/6+rxGTf8rnq/QdE/aiqn0xG6QNxkY7ezRujUUh1V1JQ4FPZRYg=="],
 
     "@audio/midi-write": ["@audio/midi-write@1.0.3", "", {}, "sha512-WJI3FBTT7+LBwkp2CH5/6KDEcD0kjINztn7SzcDhYQeJJrlifkiq92yDKfdew+E9o4oDqY3oI3VWMiunt0JquQ=="],
+
+    "@audio/mir-key": ["@audio/mir-key@1.0.2", "", {}, "sha512-b/WZ2Sw5OSMnWY4u1lDXlY2QobnN/SHrQl0jc3oQMwNm2wpFOnpl/9T5KRI54WjQNOAYiX/LBygvssS8qKKSxw=="],
 
     "@audio/musicxml": ["@audio/musicxml@0.1.0", "", {}, "sha512-naW+wO4PPrGNUS/xcPrna/QGX51p5H7/kJS95FOxtWkFStqs35eW8LQeDIojAVnbOggTuxZ3y5FDlT7yS2z5xw=="],
 

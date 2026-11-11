@@ -1,5 +1,6 @@
 "use client";
 
+import key from "@audio/mir-key";
 import {
   pitchClassName,
   SCALES,
@@ -20,6 +21,9 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSub,
@@ -51,6 +55,57 @@ const ROOTS = Array.from({ length: 12 }, (_, root) => root);
 /** "D Dorian": a scale's root and its name. */
 export const scaleLabel = (scale: Scale) =>
   `${pitchClassName(scale.root)} ${SCALE_LABELS[scale.name]}`;
+
+/** What a key is read from: a note's pitch and how long it lasts, in any unit. A muted note counts for nothing. */
+export interface KeyNote {
+  length: number;
+  muted?: boolean;
+  pitch: number;
+}
+
+const PITCH_CLASSES = [
+  "C",
+  "C#",
+  "D",
+  "D#",
+  "E",
+  "F",
+  "F#",
+  "G",
+  "G#",
+  "A",
+  "A#",
+  "B",
+];
+
+/**
+ * The keys `notes` are likeliest in, likeliest first, at most `count`: each
+ * pitch class weighed by how long it sounds, against the major and minor key
+ * profiles of `@audio/mir-key` (Krumhansl-Schmuckler). One part alone is often
+ * ambiguous, as a bass line is: pass every part of the song. None for no notes.
+ */
+export function detectKeys(notes: readonly KeyNote[], count = 3): Scale[] {
+  const chroma = new Array<number>(12).fill(0);
+  for (const note of notes) {
+    if (!note.muted && note.length > 0) {
+      const at = ((Math.round(note.pitch) % 12) + 12) % 12;
+      chroma[at] = (chroma[at] as number) + note.length;
+    }
+  }
+  // One pitch class alone, or none, correlates with nothing.
+  if (chroma.filter((weight) => weight > 0).length < 2) {
+    return [];
+  }
+  return key(chroma)
+    .scores.slice(0, count)
+    .map(({ label }) => {
+      const minor = label.endsWith("m");
+      return {
+        name: minor ? "minor" : "major",
+        root: PITCH_CLASSES.indexOf(minor ? label.slice(0, -1) : label),
+      } satisfies Scale;
+    });
+}
 
 interface ScaleMenuContextValue {
   enabled: boolean;
@@ -212,9 +267,52 @@ function ScaleMenuName() {
   );
 }
 
+/**
+ * The keys the notes are likeliest in, three at most, likeliest first: one
+ * picked sets the root and the scale and turns it on. Pass every part of the
+ * song, not one: a single part is often ambiguous.
+ */
+function ScaleMenuDetect({
+  count = 3,
+  notes,
+}: {
+  /** How many keys it offers. @default 3 */
+  count?: number;
+  /** The notes to read the key from. */
+  notes: readonly KeyNote[];
+}) {
+  const { onEnabledChange, onScaleChange } = useScaleMenu();
+  const keys = useMemo(() => detectKeys(notes, count), [count, notes]);
+  const pick = useCallback(
+    (picked: Scale) => {
+      onScaleChange(picked);
+      onEnabledChange(true);
+    },
+    [onEnabledChange, onScaleChange]
+  );
+  return (
+    <DropdownMenuGroup data-slot="scale-menu-detect">
+      <DropdownMenuLabel>Detected</DropdownMenuLabel>
+      {keys.length === 0 ? (
+        <DropdownMenuItem disabled>No notes to read</DropdownMenuItem>
+      ) : (
+        keys.map((item) => (
+          <DropdownMenuItem
+            key={`${item.root} ${item.name}`}
+            onClick={() => pick(item)}
+          >
+            {scaleLabel(item)}
+          </DropdownMenuItem>
+        ))
+      )}
+    </DropdownMenuGroup>
+  );
+}
+
 export {
   ScaleMenu,
   ScaleMenuContent,
+  ScaleMenuDetect,
   ScaleMenuName,
   ScaleMenuRoot,
   ScaleMenuToggle,
