@@ -658,7 +658,7 @@ export const devices: RegistryItem[] = [
       "@audio/filter-oberheim",
     ],
     description:
-      "The filter as a device: a type, a circuit (clean, two Moog ladders, a diode ladder, a Korg35 or an Oberheim SEM), a cutoff, a resonance and a drive, the numbers that go on the node and the circuit worklet for a state, the worklet's source, and the curve a state plays, an analog circuit's measured on it, with no panel and no audio in it.",
+      "The filter as a device: a type, a circuit (two Moog ladders, a diode ladder, a Korg35 or an Oberheim SEM), a cutoff, a resonance and a drive, the numbers that go on the circuit worklet for a state, the worklet's source, and the curve a state plays, the circuit's measured on it, with no panel and no audio in it.",
     files: [
       {
         path: "devices/filter/device.ts",
@@ -679,7 +679,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A filter on the Web Audio API for a filter state: the clean circuit a biquad node, an analog one an AudioWorklet loaded from a blob and fed only while it plays, the two cross-faded on a change of circuit, and the signal going round them when it is off, moving without a click.",
+      "A filter on the Web Audio API for a filter state: the circuit an AudioWorklet loaded from a blob, the signal passing until it is ready and going round it when it is off, moving without a click.",
     files: [
       {
         path: "devices/filter/engine.ts",

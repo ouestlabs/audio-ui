@@ -199,10 +199,12 @@ check(
         clip("b", "fast", 0, 0.5, "click"),
       ],
       tracks: [
-        // A compressor that looks ahead, set so it leaves an impulse alone.
+        // A limiter that looks ahead, set so it leaves an impulse alone.
         {
           color: 0,
-          devices: [device("d1", "audioui.compressor", { threshold: 0 })],
+          devices: [
+            device("d1", "audioui.limiter", { ceilingDb: 0, gainDb: 0 }),
+          ],
           id: "slow",
           name: "Slow",
         },
@@ -479,8 +481,10 @@ check(
         tracks: [
           {
             color: 0,
-            // A compressor that looks ahead.
-            devices: [device("late", "audioui.compressor")],
+            // A limiter that looks ahead.
+            devices: [
+              device("late", "audioui.limiter", { ceilingDb: 0, gainDb: 0 }),
+            ],
             id: "a",
             name: "A",
           },
@@ -588,8 +592,10 @@ check(
       tracks: [
         {
           color: 0,
-          // A compressor that looks ahead, set so it leaves an impulse alone.
-          devices: [device("d1", "audioui.compressor", { threshold: 0 })],
+          // A limiter that looks ahead, set so it leaves an impulse alone.
+          devices: [
+            device("d1", "audioui.limiter", { ceilingDb: 0, gainDb: 0 }),
+          ],
           id: "drums",
           kind: "group",
           name: "Drums",

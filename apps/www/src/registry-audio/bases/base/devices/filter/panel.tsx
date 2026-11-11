@@ -52,7 +52,7 @@ const IN_THE_TITLE_BAR = ["enabled", "circuit"] as const;
 const OFF = filterDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled");
-/** The clean filter and the SEM have no drive to bend them. */
+/** The SEM has no drive to bend them. */
 const UNDRIVEN_OFF = ["driveDb"] as const;
 const CIRCUITS =
   filterDevice.parameters.find((parameter) => parameter.id === "circuit")

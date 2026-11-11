@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test";
+import { type BiquadType, biquadResponse } from "@audio-ui/core/analysis";
 import {
   CIRCUIT_WORKLET,
   circuitResonance,
@@ -8,7 +9,6 @@ import {
   filterCircuit,
   filterCurve,
   filterDevice,
-  filterSettings,
   resonanceDb,
   resonanceFromDb,
 } from "@/registry-audio/bases/base/devices/filter/device";
@@ -34,16 +34,9 @@ class FakeNode {
 class FakeGain extends FakeNode {
   readonly gain = new FakeParam();
 }
-class FakeFilter extends FakeNode {
-  readonly Q = new FakeParam();
-  readonly frequency = new FakeParam();
-  type = "";
-}
-
 function fakeContext() {
-  const made = { filter: new FakeFilter(), gains: [] as FakeGain[] };
+  const made = { gains: [] as FakeGain[] };
   const ctx = {
-    createBiquadFilter: () => made.filter,
     createGain: () => {
       const gain = new FakeGain();
       made.gains.push(gain);
@@ -54,29 +47,24 @@ function fakeContext() {
   return { ctx: ctx as unknown as BaseAudioContext, made };
 }
 
+/** The 2-pole filter the knob's resonance is a Q of: what the SEM and the ladders' peaks are matched to. */
+const BAND: Record<FilterState["type"], BiquadType> = {
+  bandpass: "bandpass",
+  highpass: "lowcut",
+  lowpass: "highcut",
+  notch: "notch",
+};
+const reference = (state: FilterState) =>
+  biquadResponse({
+    frequency: state.cutoffHz,
+    q: state.resonance,
+    type: BAND[state.type],
+  });
+
 const defaults = filterDevice.defaults();
 
 describe("the filter device", () => {
-  test("each type is the node's own type", () => {
-    const types = (["lowpass", "highpass", "bandpass", "notch"] as const).map(
-      (type) => filterSettings({ ...defaults, type }).type
-    );
-    expect(types).toEqual(["lowpass", "highpass", "bandpass", "notch"]);
-  });
-
-  test("a low-pass and a high-pass read the resonance in decibels, the others linear", () => {
-    const q = (type: "highpass" | "lowpass" | "notch", resonance: number) =>
-      filterSettings({ ...defaults, resonance, type }).q;
-    expect(q("lowpass", 2)).toBeCloseTo(20 * Math.log10(2), 6);
-    expect(q("highpass", 2)).toBeCloseTo(20 * Math.log10(2), 6);
-    expect(q("notch", 2)).toBe(2);
-  });
-
-  test("off, the signal goes round the node", () => {
-    expect(filterSettings({ ...defaults, enabled: false })).toMatchObject({
-      dry: 1,
-      wet: 0,
-    });
+  test("off, the curve is flat", () => {
     expect(filterCurve({ ...defaults, enabled: false })(500)).toBe(0);
   });
 
@@ -123,33 +111,19 @@ describe("the filter device", () => {
 });
 
 describe("createFilterEngine", () => {
-  test("starts the node at the first state", () => {
+  test("passes the signal until the circuits are ready, and says so without worklets", async () => {
     const { ctx, made } = fakeContext();
-    createFilterEngine(ctx, { ...defaults, cutoffHz: 800, type: "highpass" });
-    expect(made.filter.type).toBe("highpass");
-    expect(made.filter.frequency.value).toBe(800);
-  });
-
-  test("an update changes the type and ramps the rest", () => {
-    const { ctx, made } = fakeContext();
-    const engine = createFilterEngine(ctx, defaults);
-    engine.update({ ...defaults, cutoffHz: 3000, type: "notch" });
-    expect(made.filter.type).toBe("notch");
-    expect(made.filter.frequency.targets).toEqual([3000]);
-  });
-
-  test("off, the filtered path is silent and the dry one open", () => {
-    const { ctx, made } = fakeContext();
-    const engine = createFilterEngine(ctx, defaults);
-    engine.update({ ...defaults, enabled: false });
-    const targets = made.gains.flatMap((gain) => gain.gain.targets);
-    expect(targets.sort()).toEqual([0, 1]);
+    const engine = createFilterEngine(ctx, { ...defaults, cutoffHz: 800 });
+    // input, output, wet, dry
+    const [, , wet, dry] = made.gains;
+    expect([wet?.gain.value, dry?.gain.value]).toEqual([0, 1]);
+    expect(await engine.ready).toBe(false);
+    engine.update({ ...defaults, circuit: "diode", cutoffHz: 400 });
   });
 
   test("dispose lets go of every node", () => {
     const { ctx, made } = fakeContext();
     createFilterEngine(ctx, defaults).dispose();
-    expect(made.filter.disconnected).toBe(1);
     expect(made.gains.every((gain) => gain.disconnected === 1)).toBe(true);
   });
 });
@@ -157,24 +131,22 @@ describe("createFilterEngine", () => {
 describe("the filter's circuits", () => {
   const ladders = ["ladder24", "ladder12", "diode", "korg35"] as const;
 
-  test("a clean filter and five analog circuits, clean the one a filter starts with", () => {
+  test("five circuits, the SEM the one a filter starts with", () => {
     const circuit = filterDevice.parameters.find(
       (parameter) => parameter.id === "circuit"
     );
     expect(circuit?.options?.map((option) => option.value)).toEqual([
-      "clean",
       ...ladders,
       "sem",
     ]);
-    expect(defaults.circuit).toBe("clean");
+    expect(defaults.circuit).toBe("sem");
     expect(defaults.driveDb).toBe(0);
-    // A filter saved before the circuits plays as it did.
-    expect(filterDevice.sanitize({ cutoffHz: 500 }).circuit).toBe("clean");
+    expect(filterDevice.sanitize({ cutoffHz: 500 }).circuit).toBe("sem");
   });
 
-  test("a circuit without the type plays the clean filter, and comes back with the type", () => {
-    expect(filterCircuit({ circuit: "diode", type: "highpass" })).toBe("clean");
-    expect(filterCircuit({ circuit: "ladder24", type: "notch" })).toBe("clean");
+  test("a circuit without the type plays the SEM, and comes back with the type", () => {
+    expect(filterCircuit({ circuit: "diode", type: "highpass" })).toBe("sem");
+    expect(filterCircuit({ circuit: "ladder24", type: "notch" })).toBe("sem");
     expect(filterCircuit({ circuit: "ladder24", type: "bandpass" })).toBe(
       "ladder24"
     );
@@ -182,16 +154,16 @@ describe("the filter's circuits", () => {
       "korg35"
     );
     expect(
-      circuitSettings({ ...defaults, circuit: "diode", type: "notch" })
-    ).toBe(null);
+      circuitSettings({ ...defaults, circuit: "diode", type: "notch" }).circuit
+    ).toBe("sem");
   });
 
-  test("the SEM is the clean filter at the same resonance, every type of it, until it saturates", () => {
+  test("the SEM is the 2-pole filter at the same resonance, every type of it, until it saturates", () => {
     for (const type of ["lowpass", "highpass", "bandpass", "notch"] as const) {
       for (const resonance of [0.3, FLAT_Q, 4, 18]) {
         const state = { ...defaults, cutoffHz: 1000, resonance, type };
-        const clean = filterCurve(state);
-        const sem = filterCurve({ ...state, circuit: "sem" });
+        const clean = reference(state);
+        const sem = filterCurve(state);
         let apart = 0;
         for (let hz = 20; hz < 20_000; hz *= 1.02) {
           // A notch's floor is below anything heard: compare it to -60 dB.
@@ -226,7 +198,7 @@ describe("the filter's circuits", () => {
 
   test("the SEM has no drive: its saturation is its own", () => {
     expect(
-      circuitSettings({ ...defaults, circuit: "sem", driveDb: 20 })?.drive
+      circuitSettings({ ...defaults, circuit: "sem", driveDb: 20 }).drive
     ).toBe(1);
   });
 
@@ -236,25 +208,29 @@ describe("the filter's circuits", () => {
       circuit: "ladder24",
       driveDb: 20,
     });
-    expect(settings?.drive).toBeCloseTo(10, 6);
+    expect(settings.drive).toBeCloseTo(10, 6);
   });
 
   /** How far a curve's peak rises over its passband, at 30 Hz, with the cutoff at 1 kHz. */
-  const peakOver = (state: FilterState) => {
-    const curve = filterCurve({ ...state, cutoffHz: 1000 });
+  const peakOverCurve = (curve: (hz: number) => number, _cutoff: number) => {
     let peak = Number.NEGATIVE_INFINITY;
     for (let hz = 200; hz < 5000; hz *= 1.005) {
       peak = Math.max(peak, curve(hz));
     }
     return peak - curve(30);
   };
+  const peakOver = (state: FilterState) =>
+    peakOverCurve(filterCurve({ ...state, cutoffHz: 1000 }), 1000);
 
   for (const circuit of ["ladder24", "ladder12", "diode"] as const) {
-    test(`${circuit}: its resonant peak rises as high as the clean filter's`, () => {
+    test(`${circuit}: its resonant peak rises as high as the 2-pole filter's`, () => {
       for (const resonance of [2, 6, 18]) {
-        const clean = peakOver({ ...defaults, resonance });
+        const flat = peakOverCurve(
+          reference({ ...defaults, cutoffHz: 1000, resonance, circuit: "sem" }),
+          1000
+        );
         expect(peakOver({ ...defaults, circuit, resonance })).toBeCloseTo(
-          clean,
+          flat,
           0
         );
       }
@@ -431,18 +407,5 @@ describe("the ladders' worklet", () => {
     expect(made().process([[]], [[new Float32Array(128)]], parameters(1))).toBe(
       true
     );
-  });
-});
-
-describe("the filter engine's ladders", () => {
-  test("a context with no worklets keeps the clean filter, and says so", async () => {
-    const { ctx, made } = fakeContext();
-    const engine = createFilterEngine(ctx, {
-      ...defaults,
-      circuit: "ladder24",
-    });
-    expect(await engine.ready).toBe(false);
-    engine.update({ ...defaults, circuit: "diode", cutoffHz: 400 });
-    expect(made.filter.frequency.targets).toEqual([400]);
   });
 });
