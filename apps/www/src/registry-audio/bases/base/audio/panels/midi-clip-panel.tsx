@@ -142,6 +142,8 @@ interface MidiClipPanelProps {
   collapsed?: boolean;
   /** The ids of its folded boxes ("midi:loop", "midi:notes"), controlled. */
   foldedBoxes?: readonly string[];
+  /** The sound of the song's recordings the Scale box reads the key from too: a weight per pitch class, C to B, in seconds, such as each audio clip's `audioChroma` times how long it plays. */
+  keyAudio?: readonly number[];
   /** The notes the Scale box reads the key from: every part of the song, as one part alone is often ambiguous. @default the clip's notes */
   keyNotes?: readonly KeyNote[];
   name: string;
@@ -506,6 +508,7 @@ const C_MAJOR: ClipScale = { name: "major", on: false, root: 0 };
 
 /** The Scale box: the clip's scale picked from a menu, turned on or off, and the keys its song's notes are likeliest in. */
 function ScaleBox({
+  keyAudio,
   keyNotes,
   noteCount,
   onCommit,
@@ -513,6 +516,7 @@ function ScaleBox({
   onScaleChange,
   scale = C_MAJOR,
 }: {
+  keyAudio?: readonly number[];
   keyNotes: readonly KeyNote[];
   noteCount: number;
   onCommit?: () => void;
@@ -563,7 +567,7 @@ function ScaleBox({
           <ScaleMenuRoot />
           <ScaleMenuName />
           <DropdownMenuSeparator />
-          <ScaleMenuDetect notes={keyNotes} />
+          <ScaleMenuDetect audio={keyAudio} notes={keyNotes} />
         </ScaleMenuContent>
       </ScaleMenu>
       <ClipToggle
@@ -905,6 +909,7 @@ function MidiClipPanel({
   className,
   collapsed,
   foldedBoxes,
+  keyAudio,
   keyNotes,
   onViewChange,
   view,
@@ -1219,6 +1224,7 @@ function MidiClipPanel({
           ) : null}
           {onScaleChange ? (
             <ScaleBox
+              keyAudio={keyAudio}
               keyNotes={keyNotes ?? notes}
               noteCount={notes.length}
               onCommit={onNotesCommitted}

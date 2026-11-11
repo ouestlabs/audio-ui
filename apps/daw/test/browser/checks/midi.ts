@@ -2,6 +2,7 @@
 import {
   assert,
   type Checks,
+  dropChord,
   dropFiles,
   loudest,
   open,
@@ -220,6 +221,28 @@ export const checks: Checks = {
         .getByRole("button", { name: "Scale: off" })
         .waitFor({ timeout: 5000 });
     },
+  "MID-010: the keys are read from the audio clips too, with no notes": async (
+    browser
+  ) => {
+    const page = await open(browser);
+    // A, C sharp and E held for four seconds: an A major chord, on an audio track.
+    await dropChord(page, '[data-track="track-1"]', "Chord take");
+    await page
+      .locator('[data-track="track-1"] [data-clip-id]')
+      .first()
+      .waitFor({ timeout: 10_000 });
+    const lane = await page.locator('[data-track="track-3"]').boundingBox();
+    assert(lane, "the MIDI lane is there");
+    await page.mouse.dblclick(lane.x + 4, lane.y + lane.height / 2);
+    await page.locator("[data-slot=scale-menu-trigger]").click();
+    const detected = page.locator("[data-slot=scale-menu-detect]");
+    await detected.getByRole("menuitem").first().waitFor({ timeout: 5000 });
+    const keys = await detected.getByRole("menuitem").allTextContents();
+    assert(
+      keys.length === 3 && keys.includes("A Major"),
+      `an empty clip beside an A major chord offers ${keys.join(", ")}`
+    );
+  },
   "MID-011: with the scale on, +1 moves the notes a step of the scale, and Fit notes moves those out of it in":
     async (browser) => {
       const page = await open(browser);

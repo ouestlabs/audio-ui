@@ -94,7 +94,9 @@ Pass `enabled ? scale : null` to whatever marks the scale: a [Piano roll](/docs/
 </ScaleMenuContent>
 ```
 
-Pass every part of the song, not one. On 60 loops of known key, a single bass or guitar part named its key 21 times in 60 (39 times in its first three); the parts of each song together named it 8 times in 10. One part alone is often ambiguous: a bass line in E minor reads as well in C major. `detectKeys(notes, count)` gives the same keys without the menu.
+Pass every part of the song, not one. On 60 loops of known key, a single bass or guitar part named its key 21 times in 60 (39 times in its first three); the parts of each song together named it 8 times in 10. One part alone is often ambiguous: a bass line in E minor reads as well in C major.
+
+Recordings count too: `audio` takes a weight per pitch class, C to B, in the unit of the notes' lengths, such as the `audioChroma(channels, sampleRate)` of each recording (from the `arrangement` lib, `@audio/mir-chroma` on its windows that are not silence) times the seconds it plays. The audio of the same songs, guitar and bass together, had the key first 6 times in 10 and in its first three 9 times in 10. `detectKeys(notes, count, audio)` gives the same keys without the menu.
 
 ## API reference
 
@@ -115,7 +117,7 @@ Pass every part of the song, not one. On 60 loops of known key, a single bass or
 <TypeRow name={"ScaleMenuToggle"}>A checkbox item that turns the scale on or off. Its children are the label, "Mark the scale" when left out.</TypeRow>
 <TypeRow name={"ScaleMenuRoot"}>A submenu of the twelve roots.</TypeRow>
 <TypeRow name={"ScaleMenuName"}>A submenu of the scales.</TypeRow>
-<TypeRow name={"ScaleMenuDetect"}>The keys `notes` (each `{ pitch, length, muted? }`) are likeliest in, `count` at most (3), under a "Detected" label. One picked sets the scale and turns it on.</TypeRow>
+<TypeRow name={"ScaleMenuDetect"}>The keys `notes` (each `{ pitch, length, muted? }`) and `audio` (a weight per pitch class) are likeliest in, `count` at most (3), under a "Detected" label. One picked sets the scale and turns it on.</TypeRow>
 </TypeTable>
 
-The file also exports `SCALE_LABELS`, each scale's name as the menu writes it, `scaleLabel(scale)`, which writes a scale as "D Dorian", and `detectKeys(notes, count)`, the keys `ScaleMenuDetect` offers.
+The file also exports `SCALE_LABELS`, each scale's name as the menu writes it, `scaleLabel(scale)`, which writes a scale as "D Dorian", and `detectKeys(notes, count, audio)`, the keys `ScaleMenuDetect` offers.

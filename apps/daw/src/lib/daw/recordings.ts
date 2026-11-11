@@ -1,5 +1,5 @@
 import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
-import { analyzeBeat, type BeatAnalysis } from "@/lib/arrangement";
+import { analyzeBeat, audioChroma, type BeatAnalysis } from "@/lib/arrangement";
 import type { RecordingSource } from "@/lib/clip-player";
 import { decodeAudioChannels } from "@/lib/daw/audio-files";
 
@@ -20,6 +20,8 @@ export interface RecordingPeaks {
 export interface Recording {
   /** Its beat as it was read when it came in, which warps the clips laid down from it (CLP-019). */
   beat?: BeatAnalysis;
+  /** How much of its sound lies in each pitch class, C to B, summing to 1: what a key is read from (MID-010). */
+  chroma?: readonly number[];
   /** How long it lasts, in seconds. */
   length: number;
   /** The name of the file it came from, without its extension. */
@@ -56,7 +58,7 @@ export const peakCountFor = (seconds: number) =>
 /**
  * Decodes a file's bytes on `context`, at its sample rate (CLP-011: a file at
  * another rate is converted on the way), with the peaks of its loudest
- * channel and its beat. `null` when the bytes are not sound the browser can
+ * channel, its beat and its chroma. `null` when the bytes are not sound the browser can
  * decode.
  */
 export async function decodeRecording(
@@ -74,6 +76,7 @@ export async function decodeRecording(
   );
   return {
     beat: analyzeBeat(channels, context.sampleRate),
+    chroma: audioChroma(channels, context.sampleRate),
     length: first.length / context.sampleRate,
     name,
     peaks: {

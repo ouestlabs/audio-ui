@@ -81,11 +81,18 @@ const PITCH_CLASSES = [
 /**
  * The keys `notes` are likeliest in, likeliest first, at most `count`: each
  * pitch class weighed by how long it sounds, against the major and minor key
- * profiles of `@audio/mir-key` (Krumhansl-Schmuckler). One part alone is often
- * ambiguous, as a bass line is: pass every part of the song. None for no notes.
+ * profiles of `@audio/mir-key` (Krumhansl-Schmuckler). `audio` adds the
+ * sound of recordings, a weight per pitch class in the same unit as the
+ * notes' lengths, such as an `audioChroma` times the seconds it plays. One
+ * part alone is often ambiguous, as a bass line is: pass every part of the
+ * song. None for no notes and no sound.
  */
-export function detectKeys(notes: readonly KeyNote[], count = 3): Scale[] {
-  const chroma = new Array<number>(12).fill(0);
+export function detectKeys(
+  notes: readonly KeyNote[],
+  count = 3,
+  audio?: readonly number[]
+): Scale[] {
+  const chroma = Array.from({ length: 12 }, (_, at) => audio?.[at] ?? 0);
   for (const note of notes) {
     if (!note.muted && note.length > 0) {
       const at = ((Math.round(note.pitch) % 12) + 12) % 12;
@@ -273,16 +280,22 @@ function ScaleMenuName() {
  * song, not one: a single part is often ambiguous.
  */
 function ScaleMenuDetect({
+  audio,
   count = 3,
   notes,
 }: {
   /** How many keys it offers. @default 3 */
   count?: number;
+  /** The sound of recordings to read it from too: a weight per pitch class, C to B, in the unit of the notes' lengths. */
+  audio?: readonly number[];
   /** The notes to read the key from. */
   notes: readonly KeyNote[];
 }) {
   const { onEnabledChange, onScaleChange } = useScaleMenu();
-  const keys = useMemo(() => detectKeys(notes, count), [count, notes]);
+  const keys = useMemo(
+    () => detectKeys(notes, count, audio),
+    [audio, count, notes]
+  );
   const pick = useCallback(
     (picked: Scale) => {
       onScaleChange(picked);
@@ -294,7 +307,7 @@ function ScaleMenuDetect({
     <DropdownMenuGroup data-slot="scale-menu-detect">
       <DropdownMenuLabel>Detected</DropdownMenuLabel>
       {keys.length === 0 ? (
-        <DropdownMenuItem disabled>No notes to read</DropdownMenuItem>
+        <DropdownMenuItem disabled>Nothing to read</DropdownMenuItem>
       ) : (
         keys.map((item) => (
           <DropdownMenuItem

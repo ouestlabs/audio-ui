@@ -62,6 +62,7 @@
     "@audio/loudness-truepeak": "catalog:",
     "@audio/midi-parse": "catalog:",
     "@audio/midi-write": "catalog:",
+    "@audio/mir-chroma": "catalog:",
     "@audio/mir-key": "catalog:",
     "@audio/musicxml": "catalog:",
     "@audio/note": "catalog:",
