@@ -4,7 +4,11 @@ import { playedVelocity } from "./note.ts";
 /** A random source that answers `values` in turn. */
 const rolls = (...values: number[]) => {
   let at = 0;
-  return () => values[at++ % values.length] as number;
+  return () => {
+    const value = values[at % values.length] as number;
+    at += 1;
+    return value;
+  };
 };
 
 describe("playedVelocity", () => {
