@@ -1648,7 +1648,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["tuner"],
     description:
-      "A chromatic tuner on the microphone: the nearest note, a needle on a scale of cents and the frequency, in the primary color when in tune",
+      "A chromatic tuner: start it, play a note and read the nearest note, a needle on a scale of cents and the frequency, in the primary color within 5 cents, with a field for the pitch of A4",
     files: [
       {
         path: "components/tuner/tuner-demo.tsx",
@@ -1656,11 +1656,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "tuner-demo",
-    registryDependencies: [
-      "@audio-ui/tuner",
-      "@audio-ui/use-microphone",
-      "@audio-ui/use-pitch",
-    ],
+    registryDependencies: ["@audio-ui/tuner"],
     type: "registry:example",
   },
   {

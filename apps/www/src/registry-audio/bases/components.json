@@ -481,7 +481,7 @@
   },
   {
     "categories": ["tuner"],
-    "description": "A chromatic tuner on the microphone: the nearest note, a needle on a scale of cents and the frequency, in the primary color when in tune",
+    "description": "A chromatic tuner: start it, play a note and read the nearest note, a needle on a scale of cents and the frequency, in the primary color within 5 cents, with a field for the pitch of A4",
     "name": "tuner-demo",
     "title": "Tuner demo"
   },

@@ -1,7 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import { createSource } from "@audio-ui/react";
-import { act, render, within } from "@testing-library/react";
-import { Tuner } from "@/registry-audio/bases/base/audio/elements/tuner";
+import { act, fireEvent, render, within } from "@testing-library/react";
+import {
+  Tuner,
+  TunerDisplay,
+} from "@/registry-audio/bases/base/audio/elements/tuner";
 import type { PitchReading } from "@/registry-audio/bases/base/hooks/use-pitch";
 
 const reading = (cents: number): PitchReading => ({
@@ -15,12 +18,12 @@ const reading = (cents: number): PitchReading => ({
 
 function setup(initial: PitchReading | null = null, tolerance?: number) {
   const source = createSource<PitchReading | null>(initial);
-  const view = render(<Tuner source={source} tolerance={tolerance} />);
+  const view = render(<TunerDisplay source={source} tolerance={tolerance} />);
   const root = within(view.container).getByRole("meter");
   return { root, source, view };
 }
 
-describe("Tuner", () => {
+describe("TunerDisplay", () => {
   test("is idle and says there is no sound before anything is played", () => {
     const { root } = setup();
     expect(root.hasAttribute("data-idle")).toBe(true);
@@ -77,5 +80,18 @@ describe("Tuner", () => {
     const { root } = setup(sharp);
     expect(root.textContent).toContain("C♯");
     expect(root.getAttribute("aria-valuetext")).toBe("C sharp 5, in tune");
+  });
+});
+
+describe("Tuner", () => {
+  test("is the whole tool: a start button and the pitch of A4", () => {
+    const view = render(<Tuner reference={432} />);
+    const screen = within(view.container);
+    expect(screen.getByRole("button", { name: "Start" })).toBeTruthy();
+    const field = screen.getByLabelText(/A4/) as HTMLInputElement;
+    expect(field.value).toBe("432");
+    fireEvent.change(field, { target: { value: "442" } });
+    expect(field.value).toBe("442");
+    view.unmount();
   });
 });

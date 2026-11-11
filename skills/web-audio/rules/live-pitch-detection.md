@@ -21,11 +21,19 @@ const hz = (loudest * ctx.sampleRate) / analyser.fftSize; // a harmonic, 11 Hz c
 **Correct (the registry's YIN period search on the time-domain samples):**
 
 ```bash
-npx shadcn@latest add @audio-ui/tuner @audio-ui/use-microphone @audio-ui/use-pitch
+npx shadcn@latest add @audio-ui/tuner
 ```
 
 ```tsx
 import { Tuner } from "@/components/audio-ui/tuner";
+
+<Tuner />; // its own start button, the display and the pitch of A4
+```
+
+For a tuner of another shape, the pieces it installs:
+
+```tsx
+import { TunerDisplay } from "@/components/audio-ui/tuner";
 import { useMicrophone } from "@/hooks/use-microphone";
 import { usePitch } from "@/hooks/use-pitch";
 
@@ -33,7 +41,7 @@ const microphone = useMicrophone(); // raw signal, never played back
 const pitch = usePitch(microphone.analyser); // a source: no render per reading
 
 <button onClick={microphone.start}>Listen</button>; // from a click
-<Tuner source={pitch} />;
+<TunerDisplay source={pitch} />;
 ```
 
 For a frequency from samples you already have, `yin(samples, { fs })` from `@audio/pitch-yin` and `cents(frequency)` from `@audio/note` are pure functions, with no React and no Web Audio: they work in any framework. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.

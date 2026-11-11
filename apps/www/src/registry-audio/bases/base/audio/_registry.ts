@@ -289,7 +289,7 @@ export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/react"],
     description:
-      "The note and the pitch of a sound, live from the microphone, with a needle on a scale of cents.",
+      "A chromatic tuner on its own: the nearest note with a needle on a scale of cents, a start button and a field for the pitch of A4. Also the display alone, for a tuner of another shape.",
     files: [
       {
         path: "audio/elements/tuner.tsx",
@@ -297,7 +297,12 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "tuner",
-    registryDependencies: ["@audio-ui/use-pitch"],
+    registryDependencies: [
+      "@audio-ui/use-microphone",
+      "@audio-ui/use-pitch",
+      "@shadcn/button",
+      "@shadcn/input",
+    ],
     type: "registry:ui",
   },
   {

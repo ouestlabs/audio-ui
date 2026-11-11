@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="tuner-demo" />
 
-Tells you which note a sound is and how far from it you are: tune a guitar, check a vocal, find the key of a sample. The note, the needle and the frequency follow the sound frame by frame without re-rendering React, and everything runs on the Web Audio API: the microphone, an `AnalyserNode` and a pitch detector with no audio library.
+Tells you which note a sound is and how far from it you are: tune a guitar, check a vocal, find the key of a sample. The note, the needle and the frequency follow the sound frame by frame without re-rendering React, and everything runs in the tab on the Web Audio API and two audio.js atoms: `@audio/pitch-yin` finds the pitch, `@audio/note` names it. `Tuner` is the whole tool as one element: the display, a start button and a field for the pitch of A4. In tune is within 5 cents.
 
 ## Installation
 
@@ -15,14 +15,20 @@ Tells you which note a sound is and how far from it you are: tune a guitar, chec
 
 ## Usage
 
-Three pieces, each with one job: `useMicrophone` gives the signal, `usePitch` finds its pitch, `Tuner` shows it.
-
-```bash
-npx shadcn@latest add @audio-ui/use-microphone @audio-ui/use-pitch
-```
-
 ```tsx
 import { Tuner } from "@/components/audio-ui/tuner";
+
+<Tuner />;
+```
+
+It asks for the microphone when the start button is pressed: the browser asks for permission then, and a suspended audio context resumes. The microphone is released on stop and when the component unmounts.
+
+## In pieces
+
+For a tuner of another shape, three pieces each have one job: `useMicrophone` gives the signal, `usePitch` finds its pitch, `TunerDisplay` shows it.
+
+```tsx
+import { TunerDisplay } from "@/components/audio-ui/tuner";
 import { useMicrophone } from "@/hooks/use-microphone";
 import { usePitch } from "@/hooks/use-pitch";
 
@@ -30,10 +36,8 @@ const microphone = useMicrophone();
 const pitch = usePitch(microphone.analyser);
 
 <button onClick={microphone.start} type="button">Listen</button>
-<Tuner source={pitch} />;
+<TunerDisplay source={pitch} />;
 ```
-
-Call `start` from a click: the browser asks for permission then, and a suspended audio context resumes. The microphone is released on `stop` and when the component unmounts.
 
 The signal is raw: echo cancellation, noise suppression and automatic gain are what a call needs, and they flatten the very level a tuner reads. The analyser is never connected to the speakers, so nothing plays back.
 
@@ -53,11 +57,19 @@ The detector is the YIN algorithm of `@audio/pitch-yin`: `yin(samples, { fs })` 
 
 ## Accessibility
 
-The tuner is a `meter` of cents, from -50 to +50, and its text value reads the note and how far off it is: "A 4, 12 cents flat", "A 4, in tune", "No sound". The display itself is hidden from assistive technology, so a screen reader does not read a new figure twenty times a second.
+The display is a `meter` of cents, from -50 to +50, and its text value reads the note and how far off it is: "A 4, 12 cents flat", "A 4, in tune", "No sound". The display itself is hidden from assistive technology, so a screen reader does not read a new figure twenty times a second.
 
 ## API reference
 
 ### Tuner
+
+<TypeTable>
+<TypeRow name={"reference"} type={"number"} default={"440"}>The frequency of A4 in hertz the field starts at, such as 432 or 442.</TypeRow>
+<TypeRow name={"tolerance"} type={"number"} default={"5"}>How far from the note still counts as in tune, in cents.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Styles the root.</TypeRow>
+</TypeTable>
+
+### TunerDisplay
 
 <TypeTable>
 <TypeRow name={"source"} type={"Source<PitchReading | null>"}>The live reading, such as `usePitch` returns: the note, its octave, the offset in cents and the frequency, or `null` while nothing clear is playing.</TypeRow>
