@@ -3,6 +3,8 @@
 import {
   type AudioPeaks,
   computePeaks,
+  dbToGain,
+  gainToDb,
   normalizePeaks,
 } from "@audio-ui/engine/analysis";
 import { decodeAudioChannels } from "@audio-ui/engine/files";
@@ -23,8 +25,8 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";
 import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
+import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
-import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import {
   Timeline,
   TimelineLane,
@@ -34,6 +36,7 @@ import {
   TimelineRuler,
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
+import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
@@ -59,7 +62,6 @@ const PEAK_COUNT = 8192;
 const FRAME_PX = 40;
 /** The widest a lane can be laid out, in px. */
 const MOST_LANE_PX = 16_000_000;
-const ZOOM_STEP = 1.5;
 /** How far in from the view's edge the playhead may go before the view turns the page, as a share of the view. */
 const PAGE_MARGIN = 0.1;
 const LABEL_STEPS = [
@@ -70,6 +72,11 @@ const MIN_LABEL_GAP_PX = 56;
 /** Narrower than this, the library starts folded and leaves the chain the room. */
 const LIBRARY_PX = 560;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
+/** The main volume's range, in dB, as a mixer's fader has it. */
+const MIN_DB = -60;
+const MAX_DB = 6;
+const formatDb = (db: number) =>
+  db <= MIN_DB ? "-∞ dB" : `${db > 0 ? "+" : ""}${db.toFixed(1)} dB`;
 
 /** The chain the sound starts through: an equalizer, then a compressor. */
 const START = ["audioui.equalizer", "audioui.compressor"].flatMap(
@@ -314,14 +321,6 @@ export function HomePlayground() {
     };
   }, [zoom]);
 
-  const zoomIn = useCallback(
-    () => setZoomPx(Math.min(maxZoom, zoom * ZOOM_STEP)),
-    [maxZoom, zoom]
-  );
-  const zoomOut = useCallback(
-    () => setZoomPx(Math.max(fitPx, zoom / ZOOM_STEP)),
-    [fitPx, zoom]
-  );
   const changeZoom = useCallback((next: number) => setZoomPx(next), []);
 
   // The engine keeps a recording by its id once it has it: each sound placed takes an id of its own.
@@ -392,6 +391,26 @@ export function HomePlayground() {
       play(position.getSnapshot());
     }
   }, [play, playing, position, stop]);
+  // Stop goes back to the start, as a workstation's does; pause stays where it is.
+  const rewind = useCallback(() => {
+    stop();
+    position.set(0);
+  }, [position, stop]);
+  // The main track's volume, in dB; at the bottom of the range it is silence.
+  const volume = Math.max(MIN_DB, gainToDb(doc.main.mix?.gain ?? 1));
+  const setVolume = useCallback(
+    (db: number) =>
+      dispatch({
+        id: doc.main.id,
+        patch: { gain: db <= MIN_DB ? 0 : dbToGain(db) },
+        type: "change-mix",
+      }),
+    [dispatch, doc.main.id]
+  );
+  const setLooping = useCallback(
+    (on: boolean) => dispatch({ loop: { on }, type: "set-loop" }),
+    [dispatch]
+  );
 
   const seek = useCallback(
     (value: number) => {
@@ -496,58 +515,74 @@ export function HomePlayground() {
       <h2 className="sr-only" id="home-playground">
         Playground
       </h2>
-      <div className="flex items-center gap-3 px-4 pt-4 sm:px-6">
-        <PlayToggle
-          label="Play the playground"
-          onToggle={toggle}
-          playing={playing}
-        />
-        <span className="min-w-0 truncate font-site-mono text-sm">
-          {sound?.name ?? "Loading…"}
-        </span>
-        <span className="font-site-mono text-site-muted-foreground text-xs tabular-nums">
-          {formatTime(soundDuration)}
-        </span>
-        <input
-          accept="audio/*"
-          className="sr-only"
-          onChange={pick}
-          ref={fileInput}
-          tabIndex={-1}
-          type="file"
-        />
-        <div className="ml-auto flex items-center gap-1">
-          <Button
-            aria-label="Zoom out"
-            disabled={!zoomed}
-            onClick={zoomOut}
-            size="icon-sm"
-            variant="ghost"
-          >
-            −
-          </Button>
-          <Button
-            aria-label="Zoom in"
-            disabled={!sound || zoom >= maxZoom}
-            onClick={zoomIn}
-            size="icon-sm"
-            variant="ghost"
-          >
-            +
-          </Button>
-          <Button onClick={open} size="sm" variant="outline">
-            Open a sound
-          </Button>
+      {/* The transport, the sound it plays, and the level of what comes out, as a workstation's top bar. */}
+      <div className="flex flex-col gap-2 px-4 pt-4 sm:px-6">
+        {/* One row when there is room; narrower, the transport above the sound and the meter. The transport sizes by its own container, so it has no width of its own to wrap by. */}
+        <div className="flex flex-col gap-3 @[44rem]:flex-row @[44rem]:items-center @[44rem]:gap-4">
+          <div className="@[44rem]:flex-1">
+            <Transport
+              looping={doc.loop.on}
+              onLoopingChange={setLooping}
+              onPlayPause={toggle}
+              onStop={rewind}
+              playing={playing}
+              source={position}
+              tempo={doc.tempo}
+            />
+          </div>
+          <div className="flex min-w-0 items-center gap-4">
+            <input
+              accept="audio/*"
+              className="sr-only"
+              onChange={pick}
+              ref={fileInput}
+              tabIndex={-1}
+              type="file"
+            />
+            <Button
+              className="shrink-0"
+              onClick={open}
+              size="sm"
+              variant="outline"
+            >
+              Open a sound
+            </Button>
+            <div className="min-w-0 flex-1 @[44rem]:w-40 @[44rem]:flex-none">
+              <Meter
+                aria-label="Playground output"
+                orientation="horizontal"
+                size="sm"
+                source={levels}
+              />
+            </div>
+            {/* The main track's volume, in dB as a mixer's fader sets it. */}
+            <div className="w-32 shrink-0">
+              <Fader
+                aria-label="Main volume"
+                formatValue={formatDb}
+                largeStep={6}
+                max={MAX_DB}
+                min={MIN_DB}
+                onValueChange={setVolume}
+                orientation="horizontal"
+                size="sm"
+                step={0.5}
+                value={volume}
+              />
+            </div>
+          </div>
+        </div>
+        <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
+          <PartLink name="transport" page="components/base/transport" />
+          <div className="flex gap-4">
+            <PartLink name="meter" page="components/base/meter" />
+            <PartLink name="fader" page="components/base/fader" />
+          </div>
         </div>
       </div>
-      {/* The sound and what comes out of the chain, side by side, as a track and its meter. */}
-      <div className="flex items-start gap-4 px-4 py-4 sm:px-6">
-        <Part
-          className="flex-1"
-          name="waveform"
-          page="components/base/waveform"
-        >
-          {/* Zoomed with Cmd or Ctrl + wheel, or the buttons above; the ruler seeks, the navigator moves the view. */}
+      <div className="px-4 py-4 sm:px-6">
+        <Part name="waveform" page="components/base/waveform">
+          {/* Zoomed with Cmd or Ctrl + wheel; the ruler seeks, the navigator moves and zooms the view. */}
           <div ref={lane}>
             <Timeline
               disabled={!sound}
@@ -604,22 +639,6 @@ export function HomePlayground() {
                 getAriaValueText={formatTime}
               />
             </Timeline>
-          </div>
-        </Part>
-        <Part
-          className="items-center"
-          name="meter"
-          page="components/base/meter"
-        >
-          <div className="h-36">
-            <Meter
-              aria-label="Playground output"
-              // Under the same variant as the size's own, so it fills the waveform's height.
-              className="data-[orientation=vertical]:h-full"
-              orientation="vertical"
-              size="sm"
-              source={levels}
-            />
           </div>
         </Part>
       </div>
