@@ -78,6 +78,28 @@ function buildCommandMenuGroups(nodes: PageTreeNode[]) {
   });
 }
 
+/**
+ * The name, set as audio.js sets its own: the mark, the word in Geist, heavy
+ * and tight, then `/ui` close after it, in the regular weight.
+ */
+function Wordmark({ className }: { className?: string }) {
+  return (
+    <span
+      aria-hidden
+      className={cn(
+        "flex shrink-0 select-none items-center gap-2 font-(family-name:--font-geist-sans) font-[650] text-foreground leading-none tracking-[-0.05em]",
+        className
+      )}
+    >
+      <Icons.audioUi className="pointer-events-none size-[0.9em]" />
+      <span>
+        audio
+        <span className="font-normal tracking-[-0.02em]">/ui</span>
+      </span>
+    </span>
+  );
+}
+
 function SiteLogo() {
   return (
     <Button
@@ -85,16 +107,8 @@ function SiteLogo() {
       className="pl-2"
       nativeButton={false}
       render={
-        <Link aria-label="Home" className="flex items-center" to="/">
-          <div
-            aria-hidden
-            className="flex shrink-0 select-none items-center justify-center gap-1 text-muted-foreground"
-          >
-            <Icons.audioUi className="pointer-events-none size-5 text-foreground" />
-            <p className="mt-[-2.3px] text-balance font-medium font-serif text-xl leading-snug">
-              {siteConfig.name}
-            </p>
-          </div>
+        <Link aria-label="audio/ui home" className="flex items-center" to="/">
+          <Wordmark className="text-xl" />
         </Link>
       }
       variant="ghost"
@@ -194,16 +208,12 @@ export function SiteHeader({
             className="hidden pl-2 md:flex"
             nativeButton={false}
             render={
-              <Link aria-label="Home" className="flex items-center" to={"/"}>
-                <div
-                  aria-hidden
-                  className="flex shrink-0 select-none items-center justify-center gap-1 text-muted-foreground"
-                >
-                  <Icons.audioUi className="pointer-events-none size-5 text-foreground" />
-                  <p className="mt-[-2.3px] text-balance font-medium font-serif text-xl leading-snug sm:mt-[-3px] sm:text-2xl">
-                    {siteConfig.name}
-                  </p>
-                </div>
+              <Link
+                aria-label="audio/ui home"
+                className="flex items-center"
+                to="/"
+              >
+                <Wordmark className="text-xl sm:text-2xl" />
               </Link>
             }
             variant="ghost"

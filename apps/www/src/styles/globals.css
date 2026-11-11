@@ -25,7 +25,6 @@
   --font-sans: var(--font-sans);
   --font-heading: var(--font-sans);
   --font-mono: var(--font-mono);
-  --font-inter: var(--font-inter);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -98,11 +97,9 @@
 
 /* Default */
 :root {
-  --font-sans: var(--font-inter);
-  --font-heading: var(--font-inter);
-  --font-sans: Bricolage Grotesque, sans-serif;
-  --font-serif: Instrument Serif, ui-serif, serif;
-  --font-mono: Geist Mono, monospace;
+  --font-sans: var(--font-geist-sans);
+  --font-heading: var(--font-geist-mono);
+  --font-mono: var(--font-geist-mono);
   --radius: 0.625rem;
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);

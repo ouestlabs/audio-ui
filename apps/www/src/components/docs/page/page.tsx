@@ -227,7 +227,7 @@ function DocArticle({
             <div className="flex flex-col gap-2">
               <div className="flex flex-col gap-2">
                 <div className="flex items-start justify-between">
-                  <h1 className="scroll-m-20 font-semibold text-4xl tracking-tight sm:text-3xl xl:text-4xl">
+                  <h1 className="scroll-m-20 font-semibold font-site-heading text-4xl tracking-tight sm:text-3xl xl:text-4xl">
                     {data.heading}
                   </h1>
                   <div className="docs-nav flex items-center gap-2 pt-1.5">

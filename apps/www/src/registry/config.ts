@@ -110,7 +110,7 @@ export const designSystemConfigSchema = z
     chartColor: z
       .enum(THEMES.map((t) => t.name) as [ChartColorName, ...ChartColorName[]])
       .optional(),
-    font: z.enum(fontValues).default("inter"),
+    font: z.enum(fontValues).default("geist"),
     fontHeading: z.enum(fontHeadingValues).default("inherit"),
     iconLibrary: z.enum(
       Object.keys(iconLibraries) as [IconLibraryName, ...IconLibraryName[]]
@@ -181,8 +181,8 @@ export const DEFAULT_CONFIG: DesignSystemConfig = {
   base: "base",
   baseColor: "neutral",
   chartColor: "neutral",
-  font: "inter",
-  fontHeading: "inherit",
+  font: "geist",
+  fontHeading: "geist-mono",
   iconLibrary: "lucide",
   item: "Item",
   menuAccent: "subtle",
