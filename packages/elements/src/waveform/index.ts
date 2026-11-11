@@ -35,6 +35,7 @@ export {
   WaveformCanvasElement,
   type WaveformChangeEvent,
   WaveformControlElement,
+  type WaveformControlElementEventMap,
   type WaveformDescribe,
   WaveformElement,
   type WaveformElementEventMap,

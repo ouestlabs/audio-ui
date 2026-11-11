@@ -48,6 +48,7 @@ import {
 
 export {
   TimelineClipElement,
+  type TimelineClipElementEventMap,
   type TimelineClipEventDetail,
   TimelineClipFadeElement,
   TimelineClipFadeHandleElement,
@@ -56,7 +57,9 @@ export {
 } from "./clip.ts";
 export {
   TimelineLaneElement,
+  type TimelineLaneElementEventMap,
   TimelineMarkElement,
+  type TimelineMarkElementEventMap,
   TimelineNavigatorElement,
   TimelineNavigatorHandleElement,
   TimelineNavigatorWindowElement,
@@ -64,7 +67,12 @@ export {
   TimelineRulerElement,
   TimelineViewportElement,
 } from "./lanes.ts";
-export { TimelineRangeElement, TimelineRangeHandleElement } from "./range.ts";
+export {
+  TimelineRangeElement,
+  type TimelineRangeElementEventMap,
+  type TimelineRangeEventDetail,
+  TimelineRangeHandleElement,
+} from "./range.ts";
 export {
   TIMELINE_TAGS,
   type TimelineChangeEvent,
@@ -79,6 +87,7 @@ export {
 } from "./root.ts";
 export {
   TimelineTrackElement,
+  type TimelineTrackElementEventMap,
   TimelineTrackHeaderElement,
   TimelineTrackResizeHandleElement,
 } from "./track.ts";

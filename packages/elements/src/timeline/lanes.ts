@@ -5,6 +5,8 @@ import {
   createWheelZoom,
   type NavigatorController,
   type NavigatorPart,
+  type RangeChangeEventDetails,
+  type RangeCommitEventDetails,
   type RangeController,
   type RangeOptions,
   type TimelineSelectionHandlers,
@@ -29,6 +31,7 @@ import {
   TIMELINE_TAGS,
   type TimelineDescribe,
   type TimelineElement,
+  type TimelineEventDetail,
   TimelinePartElement,
   UNIT_PROPERTY,
   unitLength,
@@ -258,6 +261,20 @@ abstract class TimelineLaneBase extends TimelinePartElement {
   }
 }
 
+/** What a selection's events carry: the stretch, `[start, end]` in the timeline's units. */
+export interface TimelineSelectionDetail {
+  reason: string;
+  value: readonly [number, number];
+}
+
+/** The events a `selectable` lane or ruler fires, as `addEventListener` types them. */
+export interface TimelineLaneElementEventMap extends HTMLElementEventMap {
+  /** Fired once a selection gesture ends. */
+  selectioncommit: CustomEvent<TimelineSelectionDetail>;
+  /** Fired on every change of the selection. Cancel it, with `preventDefault()`, to refuse it. */
+  selectioninput: CustomEvent<TimelineSelectionDetail>;
+}
+
 /**
  * A lane for placed parts, such as a track's clips or a row of markers. When
  * zoomed, it spans the timeline's length; when fitted, it spreads the
@@ -268,6 +285,27 @@ abstract class TimelineLaneBase extends TimelinePartElement {
  * `selectioncommit` with `[start, end]`.
  */
 export class TimelineLaneElement extends TimelineLaneBase {
+  override addEventListener<K extends keyof TimelineLaneElementEventMap>(
+    type: K,
+    listener: (
+      this: TimelineLaneElement,
+      event: TimelineLaneElementEventMap[K]
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    super.addEventListener(type, listener, options);
+  }
+
   #release: AbortController | undefined;
 
   protected override attached(timeline: TimelineElement) {
@@ -308,6 +346,27 @@ export class TimelineLaneElement extends TimelineLaneBase {
  */
 export class TimelineRulerElement extends TimelineLaneBase {
   static readonly observedAttributes = [...INPUT_NAMES, "selectable"];
+
+  override addEventListener<K extends keyof TimelineLaneElementEventMap>(
+    type: K,
+    listener: (
+      this: TimelineRulerElement,
+      event: TimelineLaneElementEventMap[K]
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    super.addEventListener(type, listener, options);
+  }
 
   /** Returns how the position is announced, e.g. `"bar 3, beat 2"`. Defaults to the number. */
   getAriaValueText: TimelineDescribe | undefined;
@@ -439,6 +498,18 @@ function inField(target: EventTarget | null) {
   );
 }
 
+/** The events a mark fires, as `addEventListener` types them. */
+export interface TimelineMarkElementEventMap extends HTMLElementEventMap {
+  /** Fired once a drag or a key that moved the mark ends. */
+  markchange: CustomEvent<
+    TimelineEventDetail<RangeCommitEventDetails["reason"]>
+  >;
+  /** Fired on every move of the mark. Cancel it, with `preventDefault()`, to refuse it. */
+  markinput: CustomEvent<
+    TimelineEventDetail<RangeChangeEventDetails["reason"]>
+  >;
+}
+
 /**
  * A part placed at `value` on a lane, such as a bar number, a cue or a grid
  * line, labelled by its content. With `movable`, a drag moves it on the
@@ -451,6 +522,27 @@ function inField(target: EventTarget | null) {
  */
 export class TimelineMarkElement extends TimelinePartElement {
   static readonly observedAttributes = ["movable", "step", "value"];
+
+  override addEventListener<K extends keyof TimelineMarkElementEventMap>(
+    type: K,
+    listener: (
+      this: TimelineMarkElement,
+      event: TimelineMarkElementEventMap[K]
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    super.addEventListener(type, listener, options);
+  }
 
   #controller: RangeController | undefined;
   #value: number | undefined;

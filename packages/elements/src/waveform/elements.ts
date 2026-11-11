@@ -381,6 +381,14 @@ abstract class WaveformPartElement extends ControlPart<
   }
 }
 
+/** The events a `selectable` waveform control fires, as `addEventListener` types them. */
+export interface WaveformControlElementEventMap extends HTMLElementEventMap {
+  /** Fired once a selection gesture ends. */
+  selectioncommit: CustomEvent<WaveformRangeDetail>;
+  /** Fired on every change of the selection. Cancel it, with `preventDefault()`, to refuse it. */
+  selectioninput: CustomEvent<WaveformRangeDetail>;
+}
+
 /**
  * The seekable surface: a press seeks to the pointer and a drag scrubs.
  * Tracks the hovered position and sets `touch-action: none`. Contains the
@@ -395,6 +403,27 @@ abstract class WaveformPartElement extends ControlPart<
  */
 export class WaveformControlElement extends WaveformPartElement {
   static readonly observedAttributes = [...INPUT_NAMES, "selectable"];
+
+  override addEventListener<K extends keyof WaveformControlElementEventMap>(
+    type: K,
+    listener: (
+      this: WaveformControlElement,
+      event: WaveformControlElementEventMap[K]
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    super.addEventListener(type, listener, options);
+  }
 
   /** Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`. */
   getAriaValueText: WaveformDescribe | undefined;
@@ -617,6 +646,14 @@ export class WaveformMarkerElement extends WaveformPartElement {
 const trackOf = (region: HTMLElement): Element | null =>
   region.offsetParent ?? region.parentElement;
 
+/** The events a region fires, as `addEventListener` types them. */
+export interface WaveformRegionElementEventMap extends HTMLElementEventMap {
+  /** Fired once a gesture that moved the region ends. */
+  regionchange: CustomEvent<WaveformRangeDetail>;
+  /** Fired on every change of the region. Cancel it, with `preventDefault()`, to refuse it. */
+  regioninput: CustomEvent<WaveformRangeDetail>;
+}
+
 /**
  * A loop or selection over the waveform, from `value` (`"start end"` in
  * `duration` units; the whole audio by default). Its body is draggable
@@ -634,6 +671,27 @@ export class WaveformRegionElement extends WaveformPartElement {
     "movable",
     "value",
   ];
+
+  override addEventListener<K extends keyof WaveformRegionElementEventMap>(
+    type: K,
+    listener: (
+      this: WaveformRegionElement,
+      event: WaveformRegionElementEventMap[K]
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    super.addEventListener(type, listener, options);
+  }
 
   /** The framework-agnostic region behind it: its span, the drags of its body and edges, the keys. */
   readonly controller: WaveformRegionController =
