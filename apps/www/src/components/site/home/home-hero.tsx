@@ -1,6 +1,5 @@
 "use client";
 
-import { SparkleIcon } from "@audio-ui/icons/react";
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
@@ -94,10 +93,8 @@ export function HomeHero() {
         <span className="sr-only">the Web, React, Vue and Svelte</span>
         <HeroReel />
       </h1>
-      <p className="max-w-2xl text-[1.05rem] text-site-muted-foreground sm:text-base">
-        Knobs, faders, meters, waveforms, timelines and piano rolls, as custom
-        elements for any framework, headless React primitives on npm, or React
-        components you install with the shadcn CLI.
+      <p className="text-[1.05rem] text-site-muted-foreground sm:text-base">
+        Accessible audio controls for any framework.
       </p>
       <div className="mt-4 flex flex-wrap items-center gap-2">
         <Button
@@ -112,16 +109,6 @@ export function HomeHero() {
           nativeButton={false}
           render={<Link to="/components">Browse components</Link>}
           variant="outline"
-        />
-        <Button
-          nativeButton={false}
-          render={
-            <Link params={{ _splat: "agents" }} to="/docs/$">
-              <SparkleIcon aria-hidden className="size-4" />
-              For agents
-            </Link>
-          }
-          variant="ghost"
         />
       </div>
     </div>
