@@ -1,5 +1,17 @@
 # @audio-ui/elements
 
+## 0.4.0
+
+### Minor Changes
+
+- 04a9fae: `<audio-ui-piano-roll>`: breaking, the `scale` attribute lists the scale's pitch classes, such as `scale="0 2 4 5 7 9 11"` for a major scale, in place of its name, and the `scale` property takes `{ pitchClasses, root }`. `scale-root` is unchanged.
+
+### Patch Changes
+
+- Updated dependencies [04a9fae]
+- Updated dependencies [04a9fae]
+  - @audio-ui/core@0.29.0
+
 ## 0.3.0
 
 ### Minor Changes
