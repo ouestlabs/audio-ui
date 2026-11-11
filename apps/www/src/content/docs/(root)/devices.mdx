@@ -138,8 +138,8 @@ Some engines add to this:
 
 | Member | On | What it is |
 | --- | --- | --- |
-| `sidechain` | Compressor, gate | The input of the signal that drives the device. |
-| `ready` | Every device that runs a worklet | A promise that resolves once the detector can be in the graph. The compressor makes its detector the first time its key is on. |
+| `sidechain` | Ducker | The input of the signal that drives the device. |
+| `ready` | Every device that runs a worklet | A promise that resolves once the detector can be in the graph. |
 | `reduction` | Compressor, limiter, de-esser | The gain being taken off, in dB. Read it each frame. |
 | `noteOn`, `noteOff` | Instruments | Start and release a note. |
 
@@ -147,16 +147,16 @@ A worklet is loaded from a blob, so there is no file to serve. Until `ready` res
 
 ## Sidechain
 
-A compressor or a gate can follow the level of another signal instead of its own: a kick ducks a pad, a voice ducks the music. Switch **Sidechain** on, and connect the signal to `engine.sidechain`. It is only listened to, never heard.
+A ducker can follow the level of another signal instead of its own: a kick ducks a pad, a voice ducks the music. Connect the signal to `engine.sidechain`. It is only listened to, never heard.
 
 ```ts
-const engine = createCompressorEngine(ctx, { ...state, external: true });
+const engine = createDuckerEngine(ctx, state);
 pad.connect(engine.input);
 kick.connect(engine.sidechain); // listened to, not heard
 engine.output.connect(ctx.destination);
 ```
 
-The sidechain is not a parameter. The state holds the switch and the host routes the signal. A device that takes one says so: `compressorDevice.sidechain` is `true`, and so is `describe().sidechain`, so a host knows to route something to it and an agent can be told. With the sidechain on, what the device does depends on the other signal, so its panel does not draw a transfer curve.
+The sidechain is not a parameter: the host routes the signal. A device that takes one says so: `duckerDevice.sidechain` is `true`, and so is `describe().sidechain`, so a host knows to route something to it and an agent can be told. With no key connected, it follows the sound itself.
 
 ## Tempo sync
 
