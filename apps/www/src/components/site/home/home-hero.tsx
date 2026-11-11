@@ -2,22 +2,29 @@ import { SparkleIcon } from "@audio-ui/icons/react";
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import { Icons } from "@/components/site/icons";
 import { Button } from "@/components/ui/button";
 
-const WORDS = ["Web", "React", "Vue", "Svelte"];
+/** Where audio/ui runs, each with its logo: the web's is JavaScript's, as on the Elements page. */
+const WORDS = [
+  { logo: Icons.javascript, word: "Web" },
+  { logo: Icons.reactColor, word: "React" },
+  { logo: Icons.vue, word: "Vue" },
+  { logo: Icons.svelte, word: "Svelte" },
+];
 /** The reel's rows: the words, then the first again, so the last turn rolls on into it before the reel goes back to the top unseen. */
 const ROWS = [
-  ...WORDS.map((word) => ({ key: word, word })),
-  { key: "again", word: WORDS[0] },
+  ...WORDS.map((each) => ({ ...each, key: each.word })),
+  { ...WORDS[0], key: "again" },
 ];
 const HOLD_MS = 2500;
 const ROLL_MS = 600;
 
 /**
  * The hero's last word, rolling through where audio/ui runs: one strip of
- * words in a slot as wide as the longest, moving up a row at a time. The
- * words are generated content, so the heading reads as the sentence beside
- * it; with reduced motion it stays on the first.
+ * words, each after its logo, in a slot as wide as the longest, moving up a
+ * row at a time. The words are generated content, so the heading reads as
+ * the sentence beside it; with reduced motion it stays on the first.
  */
 function HeroReel() {
   const [row, setRow] = useState(0);
@@ -58,12 +65,14 @@ function HeroReel() {
           transitionProperty: "transform",
         }}
       >
-        {ROWS.map(({ key, word }) => (
-          <span
-            className="before:content-[attr(data-word)]"
-            data-word={word}
-            key={key}
-          />
+        {ROWS.map(({ key, logo: Logo, word }) => (
+          <span className="flex items-center gap-[0.3em]" key={key}>
+            <Logo className="size-[0.8em] shrink-0" />
+            <span
+              className="before:content-[attr(data-word)]"
+              data-word={word}
+            />
+          </span>
         ))}
       </span>
     </span>
