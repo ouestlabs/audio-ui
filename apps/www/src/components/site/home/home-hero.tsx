@@ -4,10 +4,8 @@ import { SparkleIcon } from "@audio-ui/icons/react";
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
-import { ComponentRenderer } from "@/components/catalog/card/component-card-container";
 import { Icons } from "@/components/site/icons";
 import { Button } from "@/components/ui/button";
-import { AudioSessionProvider } from "@/registry-audio/bases/base/hooks/use-audio-session";
 
 /** Where audio/ui runs, each with its logo: the web's is JavaScript's, as on the Elements page. */
 const WORDS = [
@@ -84,61 +82,48 @@ function HeroReel() {
 }
 
 /**
- * The top of the home: what audio/ui is and where to start, and one piece of
- * it at its best, live: the Poly Synth, its knobs over a keyboard you play,
- * in the customizer's style and theme. The hero's own width decides its
- * layout: the synth beside the title when both fit, under it otherwise.
+ * The top of the home, as any page of the site opens: the title, one line,
+ * and the ways in. What audio/ui is shows in what follows, not in a staged
+ * section.
  */
 export function HomeHero() {
   return (
-    <div className="@container shrink-0 px-4 pt-6 pb-8 sm:px-6">
-      <div className="grid gap-8 @[64rem]:grid-cols-[minmax(0,1fr)_minmax(0,40rem)] @[64rem]:items-center">
-        <div className="flex min-w-0 flex-col gap-4">
-          <h1 className="whitespace-nowrap font-medium font-site-heading text-2xl leading-tight sm:text-3xl">
-            Audio UI for{" "}
-            <span className="sr-only">the Web, React, Vue and Svelte</span>
-            <HeroReel />
-          </h1>
-          <p className="max-w-2xl text-balance text-site-muted-foreground text-sm">
-            Knobs, faders, meters, waveforms, timelines and piano rolls, as
-            custom elements for any framework, headless React primitives on npm,
-            or React components you install with the shadcn CLI.
-          </p>
-          <div className="flex flex-wrap items-center gap-2">
-            <Button
-              nativeButton={false}
-              render={
-                <Link params={{ _splat: "get-started" }} to="/docs/$">
-                  Get started <ArrowRightIcon aria-hidden weight="bold" />
-                </Link>
-              }
-            />
-            <Button
-              nativeButton={false}
-              render={<Link to="/components">Browse components</Link>}
-              variant="outline"
-            />
-            <Button
-              nativeButton={false}
-              render={
-                <Link params={{ _splat: "agents" }} to="/docs/$">
-                  <SparkleIcon aria-hidden className="size-4" />
-                  For agents
-                </Link>
-              }
-              variant="ghost"
-            />
-          </div>
-        </div>
-        <section aria-label="Poly Synth, live" className="min-w-0">
-          <AudioSessionProvider>
-            <ComponentRenderer
-              loading={<div className="h-[22rem] rounded-xl border bg-card" />}
-              name="block-poly-synth"
-            />
-          </AudioSessionProvider>
-        </section>
+    <header className="flex shrink-0 flex-col gap-2 px-4 pt-6 pb-8 sm:px-6 lg:pt-8">
+      <h1 className="scroll-m-20 whitespace-nowrap font-semibold font-site-heading text-4xl tracking-tight sm:text-3xl xl:text-4xl">
+        Audio UI for{" "}
+        <span className="sr-only">the Web, React, Vue and Svelte</span>
+        <HeroReel />
+      </h1>
+      <p className="max-w-2xl text-[1.05rem] text-site-muted-foreground sm:text-base">
+        Knobs, faders, meters, waveforms, timelines and piano rolls, as custom
+        elements for any framework, headless React primitives on npm, or React
+        components you install with the shadcn CLI.
+      </p>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <Button
+          nativeButton={false}
+          render={
+            <Link params={{ _splat: "get-started" }} to="/docs/$">
+              Get started <ArrowRightIcon aria-hidden weight="bold" />
+            </Link>
+          }
+        />
+        <Button
+          nativeButton={false}
+          render={<Link to="/components">Browse components</Link>}
+          variant="outline"
+        />
+        <Button
+          nativeButton={false}
+          render={
+            <Link params={{ _splat: "agents" }} to="/docs/$">
+              <SparkleIcon aria-hidden className="size-4" />
+              For agents
+            </Link>
+          }
+          variant="ghost"
+        />
       </div>
-    </div>
+    </header>
   );
 }
