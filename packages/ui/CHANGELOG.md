@@ -1,5 +1,17 @@
 # @audio-ui/react
 
+## 0.16.0
+
+### Minor Changes
+
+- 04a9fae: PianoRoll: breaking, `scale` takes a `RollScale`, `{ pitchClasses, root }`, in place of a named scale such as `{ name: "major", root: 0 }`. `rollScale` of `@audio-ui/engine/pitch` gives a named scale in that shape.
+
+### Patch Changes
+
+- Updated dependencies [04a9fae]
+- Updated dependencies [04a9fae]
+  - @audio-ui/core@0.29.0
+
 ## 0.15.0
 
 ### Minor Changes
