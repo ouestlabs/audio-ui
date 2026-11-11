@@ -18,6 +18,10 @@ import {
 } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import {
+  type ClipSamples,
+  ClipWaveform,
+} from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
 import {
@@ -25,10 +29,10 @@ import {
   TimelineLane,
   TimelineMark,
   TimelineNavigator,
+  TimelinePlayhead,
   TimelineRuler,
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
-import { Waveform } from "@/registry-audio/bases/base/audio/elements/waveform";
 import {
   type CompressorState,
   compressorDevice,
@@ -56,25 +60,28 @@ import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 const MASTER_VOLUME = 0.7;
 /** Enough peaks for a pixel each, zoomed in as far as it goes. */
 const PEAK_COUNT = 8192;
-/** How far in the view zooms, as a multiple of the whole sound fitting the width. */
-const MAX_ZOOM_FACTOR = 16;
+/** How far in the view zooms: to the samples themselves, this many px apart, as the clip editor goes. */
+const FRAME_PX = 40;
+/** The widest a lane can be laid out, in px. */
+const MOST_LANE_PX = 16_000_000;
 const ZOOM_STEP = 1.5;
 /** How far in from the view's edge the playhead may go before the view turns the page, as a share of the view. */
 const PAGE_MARGIN = 0.1;
-const LABEL_STEPS = [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60];
+const LABEL_STEPS = [
+  0.0001, 0.000_25, 0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25,
+  0.5, 1, 2, 5, 10, 15, 30, 60,
+];
 const MIN_LABEL_GAP_PX = 56;
 const FFT_SIZE = 4096;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
-const EMPTY_PEAKS: AudioPeaks = {
-  max: new Float32Array(),
-  min: new Float32Array(),
-};
 
 /** A sound the playground plays: its buffer, its name, and its peaks for the waveform. */
 interface Sound {
   buffer: AudioBuffer;
   name: string;
   peaks: AudioPeaks;
+  /** Its samples, mixed to one channel, for a zoom closer than the peaks have detail for. */
+  samples: ClipSamples;
 }
 
 /** The engines of the chain, made on the first play: the equalizer, then the compressor, then the page's output. */
@@ -89,30 +96,54 @@ const channelsOf = (buffer: AudioBuffer) =>
     buffer.getChannelData(channel)
   );
 
-const soundOf = (buffer: AudioBuffer, name: string): Sound => ({
-  buffer,
-  name,
-  peaks: normalizePeaks(computePeaks(channelsOf(buffer), PEAK_COUNT)),
-});
+/** The channels mixed to one, as the waveform draws the sound. */
+function mixOf(channels: readonly Float32Array[]) {
+  const [first] = channels;
+  const mix = new Float32Array(first?.length ?? 0);
+  for (const channel of channels) {
+    for (let index = 0; index < mix.length; index += 1) {
+      mix[index] = (mix[index] ?? 0) + (channel[index] ?? 0) / channels.length;
+    }
+  }
+  return mix;
+}
+
+function soundOf(buffer: AudioBuffer, name: string): Sound {
+  const channels = channelsOf(buffer);
+  const mix = mixOf(channels);
+  return {
+    buffer,
+    name,
+    peaks: normalizePeaks(computePeaks(channels, PEAK_COUNT)),
+    samples: { frames: mix.length, read: (from, to) => mix.subarray(from, to) },
+  };
+}
 
 /** The seconds the ruler labels: the smallest step that keeps labels apart at this zoom, in pixels per second. */
-function rulerLabels(duration: number, zoom: number) {
+function rulerLabels(
+  duration: number,
+  zoom: number,
+  [from, to]: readonly [number, number]
+) {
   const step =
     LABEL_STEPS.find((candidate) => candidate * zoom >= MIN_LABEL_GAP_PX) ??
     LABEL_STEPS.at(-1) ??
     1;
-  const count = duration > 0 ? Math.floor(duration / step) + 1 : 0;
-  return Array.from(
-    { length: count },
-    (_, index) => Math.round(index * step * 100) / 100
-  );
+  // Only those around what shows: zoomed to the samples, the whole sound would be tens of thousands.
+  const first = Math.max(0, Math.floor(from / step) - 1);
+  const last = Math.min(Math.floor(duration / step), Math.ceil(to / step) + 1);
+  const decimals = Math.max(0, Math.ceil(-Math.log10(step)));
+  return Array.from({ length: Math.max(0, last - first + 1) }, (_, index) => {
+    const at = Number(((first + index) * step).toFixed(6));
+    return { at, text: formatMark(at, decimals) };
+  });
 }
 
-/** A ruler mark: whole seconds as m:ss, finer ones with their hundredths. */
-const formatMark = (seconds: number) =>
-  Number.isInteger(seconds)
+/** A ruler mark: whole seconds as m:ss, finer ones with as many decimals as the step has. */
+const formatMark = (seconds: number, decimals: number) =>
+  decimals === 0
     ? formatTime(seconds)
-    : `${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(2).padStart(5, "0")}`;
+    : `${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(decimals).padStart(3 + decimals, "0")}`;
 
 /** Scrolls a zoomed view to the page that holds `x`, once the playhead nears or passes its edge. */
 function followPlayhead(viewport: HTMLElement | null, x: number) {
@@ -189,6 +220,13 @@ export function HomePlayground() {
   const viewport = useRef<HTMLDivElement>(null);
   const soundDuration = sound?.buffer.duration ?? 0;
   const fitPx = width > 0 && soundDuration > 0 ? width / soundDuration : 0;
+  // As far in as the samples go, a few px apart, as wide as a lane can be laid out.
+  const maxZoom = Math.max(
+    fitPx,
+    sound && soundDuration > 0
+      ? Math.min(sound.samples.frames * FRAME_PX, MOST_LANE_PX) / soundDuration
+      : 0
+  );
   const zoom = Math.max(zoomPx ?? fitPx, fitPx);
   const zoomed = fitPx > 0 && zoom > fitPx * 1.001;
   const view = useRef<{ px: number; zoomed: boolean }>({
@@ -217,9 +255,35 @@ export function HomePlayground() {
     };
   }, []);
 
+  // The stretch that shows, in seconds, for the ruler to mark only that.
+  const [shown, setShown] = useState<readonly [number, number]>([0, 0]);
+  useEffect(() => {
+    const element = viewport.current;
+    if (!(element && zoom > 0)) {
+      return;
+    }
+    let pending = 0;
+    const measure = () => {
+      pending = 0;
+      setShown([
+        element.scrollLeft / zoom,
+        (element.scrollLeft + element.clientWidth) / zoom,
+      ]);
+    };
+    const onScroll = () => {
+      pending ||= requestAnimationFrame(measure);
+    };
+    measure();
+    element.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(pending);
+      element.removeEventListener("scroll", onScroll);
+    };
+  }, [zoom]);
+
   const zoomIn = useCallback(
-    () => setZoomPx(Math.min(fitPx * MAX_ZOOM_FACTOR, zoom * ZOOM_STEP)),
-    [fitPx, zoom]
+    () => setZoomPx(Math.min(maxZoom, zoom * ZOOM_STEP)),
+    [maxZoom, zoom]
   );
   const zoomOut = useCallback(
     () => setZoomPx(Math.max(fitPx, zoom / ZOOM_STEP)),
@@ -464,7 +528,7 @@ export function HomePlayground() {
             </Button>
             <Button
               aria-label="Zoom in"
-              disabled={!sound || zoom >= fitPx * MAX_ZOOM_FACTOR}
+              disabled={!sound || zoom >= maxZoom}
               onClick={zoomIn}
               size="icon-sm"
               variant="ghost"
@@ -488,7 +552,7 @@ export function HomePlayground() {
               <Timeline
                 disabled={!sound}
                 duration={soundDuration || 1}
-                maxZoom={Math.max(fitPx * MAX_ZOOM_FACTOR, 1)}
+                maxZoom={Math.max(maxZoom, 1)}
                 minZoom={fitPx || 0}
                 onPositionChange={seek}
                 onZoomChange={changeZoom}
@@ -504,28 +568,35 @@ export function HomePlayground() {
                     aria-label="Playground time"
                     getAriaValueText={formatTime}
                   >
-                    {rulerLabels(soundDuration, zoom).map((seconds) => (
-                      <TimelineMark key={seconds} value={seconds}>
-                        {formatMark(seconds)}
+                    {rulerLabels(soundDuration, zoom, shown).map((mark) => (
+                      <TimelineMark key={mark.at} value={mark.at}>
+                        {mark.text}
                       </TimelineMark>
                     ))}
                   </TimelineRuler>
-                  <TimelineLane className="h-28">
-                    <Waveform
-                      aria-label="Playground position"
-                      // One bar a pixel, touching: the outline at the screen's resolution.
-                      barGap={0}
-                      barWidth={1}
-                      className="h-28 rounded-none"
-                      disabled={!sound}
-                      duration={soundDuration || 1}
-                      getAriaValueText={formatTime}
-                      loading={!sound}
-                      onValueChange={seek}
-                      source={position}
-                      values={sound?.peaks ?? EMPTY_PEAKS}
-                      variant="playhead"
-                    />
+                  {/* A press seeks; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
+                  <TimelineLane className="h-28" seekable>
+                    <div
+                      className="absolute inset-y-0 left-0"
+                      style={{
+                        width: `calc(var(--timeline-unit) * ${soundDuration || 1})`,
+                      }}
+                    >
+                      {sound ? (
+                        <ClipWaveform
+                          aria-label={`${sound.name}, waveform`}
+                          className="inset-y-0 h-full text-foreground"
+                          clip={{
+                            sourceLength: soundDuration,
+                            value: { length: soundDuration, offset: 0 },
+                          }}
+                          peaks={sound.peaks}
+                          role="img"
+                          samples={sound.samples}
+                        />
+                      ) : null}
+                    </div>
+                    <TimelinePlayhead />
                   </TimelineLane>
                 </TimelineViewport>
                 <TimelineNavigator
