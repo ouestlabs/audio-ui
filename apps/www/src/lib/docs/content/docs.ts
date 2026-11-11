@@ -30,10 +30,15 @@ const docsMenuUpdates = new Map(
   ])
 );
 
+/** The marks name component pages: a hook or a lib named like a component, such as the `arrangement` lib, has none. */
+function markKey(path: string) {
+  return path.startsWith("/docs/components/") ? getDocsComponentKey(path) : "";
+}
+
 export function isDocsPageUpdated(path: string) {
-  return docsMenuUpdates.has(getDocsComponentKey(path));
+  return docsMenuUpdates.has(markKey(path));
 }
 
 export function getDocsPageUpdateHint(path: string) {
-  return docsMenuUpdates.get(getDocsComponentKey(path));
+  return docsMenuUpdates.get(markKey(path));
 }
