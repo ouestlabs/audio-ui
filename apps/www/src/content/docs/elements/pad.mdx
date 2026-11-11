@@ -1,0 +1,29 @@
+---
+title: Pad
+description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
+---
+
+<Module from="@audio-ui/elements/pad" />
+
+## Usage
+
+`<audio-ui-pad>` is a grid of velocity-sensitive pads with `role="group"`. A pad sounds while held, by pointer or with Enter and Space, and each pointer holds its own pad. Velocity comes from pen or touch pressure, or from the vertical press position. The pads share one tab stop and are navigated with the arrow keys.
+
+<ElementsPreview name="pad" />
+
+<TypeTable>
+<TypeRow name={"columns"} type={"number"} default={"4"}>Pads per row, used by Up and Down. Match it in the layout.</TypeRow>
+<TypeRow name={"active-pads"} type={"string"}>Pads lit externally, such as by a sequencer or MIDI input, separated by spaces. The `activePads` property accepts an array.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+| Event | Detail | Description |
+| --- | --- | --- |
+| `padon` | `{ value, velocity, reason }` | A pad is struck. `preventDefault()` keeps it silent |
+| `padoff` | `{ value, reason }` | A pad is released; `reason` is `"choke"` when another pad of its group stopped it |
+
+| Part | Description |
+| --- | --- |
+| `<audio-ui-pad-item>` | A pad, a button labelled by its content. `value` identifies it in events, `choke-group` makes pads stop each other, and `disabled` silences it. Sets `--pad-velocity` (0 to 1) to the last strike's velocity |
+
+The same control in React, and its parts' props: [Pad](/docs/react/pad).

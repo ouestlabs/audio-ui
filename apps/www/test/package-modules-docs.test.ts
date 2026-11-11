@@ -7,6 +7,8 @@ const DOCS = `${import.meta.dir}/../src/content/docs`;
 const SECTIONS = [
   { folder: "core", guides: ["controllers"], package: "@audio-ui/core" },
   { folder: "engine", guides: [], package: "@audio-ui/engine" },
+  { folder: "elements", guides: [], package: "@audio-ui/elements" },
+  { folder: "react", guides: ["headless-styling"], package: "@audio-ui/react" },
 ] as const;
 
 /** A module's page in its folder: a package's root is the folder's overview. */

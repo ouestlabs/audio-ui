@@ -1,0 +1,22 @@
+---
+title: source
+description: "Live values for @audio-ui/react: a source a primitive follows outside React, such as a meter's levels or a playhead's position, with no render per frame."
+---
+
+<Module from="@audio-ui/react/source" />
+
+## Usage
+
+A meter's levels, a playhead's position and a live waveform change every frame. A primitive that shows one takes a `source` and writes what it shows straight to its elements, so following a signal costs no React render. `createSource` makes one that you push to from an audio callback, a worklet's port or a timer:
+
+```tsx
+import { Meter } from "@audio-ui/react";
+import { createSource } from "@audio-ui/react/source";
+
+const levels = createSource({ levels: [-60] });
+analyserLoop((db) => levels.set({ levels: [db] }));
+
+<Meter.Root source={levels}>{/* … */}</Meter.Root>;
+```
+
+It is `@audio-ui/core`'s `createSource`, here under a path of the React package, so a page that only shows values needs nothing else.

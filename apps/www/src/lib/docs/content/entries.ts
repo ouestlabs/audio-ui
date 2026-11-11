@@ -29,9 +29,18 @@ const IMPORTED_NAMES = 5;
 
 /** The line a project imports an entry's values with, the first few by their order in the file. */
 export function importLine(entry: Pick<Entry, "exports" | "from">): string {
-  const values = entry.exports
-    .filter((each) => each.kind !== "interface" && each.kind !== "type")
-    .map((each) => each.name);
+  // A custom element's entry registers its elements: importing it is what a page does.
+  if (entry.from.startsWith("@audio-ui/elements")) {
+    return `import "${entry.from}";`;
+  }
+  // A namespace's members, `Knob.Root`, come with one import of the namespace.
+  const values = [
+    ...new Set(
+      entry.exports
+        .filter((each) => each.kind !== "interface" && each.kind !== "type")
+        .map((each) => each.name.split(".")[0] ?? each.name)
+    ),
+  ];
   const names =
     values.length > IMPORTED_NAMES
       ? [...values.slice(0, IMPORTED_NAMES), "/* … */"]
@@ -109,8 +118,12 @@ export function moduleMarkdown(packageModule: PackageModule): string {
     importLine(packageModule),
     "```",
     "",
-    `- Adapters: ${list(packageModule.adapters)}`,
-    `- Used by: ${list(packageModule.usedBy)}`,
+    ...(packageModule.adapters.length > 0
+      ? [`- Adapters: ${list(packageModule.adapters)}`]
+      : []),
+    ...(packageModule.usedBy.length > 0
+      ? [`- Used by: ${list(packageModule.usedBy)}`]
+      : []),
     `- Source: ${packageModule.sources.map(repositoryUrl).join(", ")}`,
     "",
     ...exportsMarkdown(packageModule.exports),

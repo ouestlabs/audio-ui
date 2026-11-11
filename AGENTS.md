@@ -140,7 +140,7 @@ How items are grouped:
 - A component page is a component a user puts on screen. A hook or a lib is documented on its own entry page; the component page that uses it says what it does in a sentence and links to it.
 - Workstation and Devices parts are controlled and engine-agnostic: state comes in as values and live sources, changes go out through callbacks, never through one of our audio hooks. They must work over an engine of the user's own (an AudioWorklet, WASM).
 
-The "API reference" of each component page is a hand-kept copy of the JSDoc of the matching parts in `packages/ui/src/primitives/<name>/elements/`. Nothing syncs them: change both in the same commit.
+Each primitive has a page in React (`react/<primitive>.mdx`, headed by `<Module from="@audio-ui/react/<primitive>" />`, with its Anatomy and the API reference of its parts) and one in Elements (`elements/<primitive>.mdx`, its attributes, parts and live preview); the component page of the registry links to them and keeps the API reference of the registry component. The parts' API reference is a hand-kept copy of the JSDoc of the matching parts in `packages/ui/src/primitives/<name>/elements/`: `bun scripts/api-reference.ts --write` rewrites the descriptions, and `test/api-reference.test.ts` fails on one that differs.
 
 ---
 

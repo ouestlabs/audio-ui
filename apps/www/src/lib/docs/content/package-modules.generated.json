@@ -2752,7 +2752,148 @@
   },
   {
     "adapters": [],
-    "exports": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "highshelf",
+        "summary": "High-shelf."
+      },
+      {
+        "kind": "function",
+        "name": "lowshelf",
+        "summary": "Low-shelf."
+      },
+      {
+        "kind": "function",
+        "name": "magnitude",
+        "summary": "|H(f)| of one section at frequency `f` — analysis/plotting."
+      },
+      {
+        "kind": "function",
+        "name": "compandStream",
+        "summary": "{ write, flush } streaming primitive underlying the default export's streaming form."
+      },
+      {
+        "kind": "function",
+        "name": "compressorGain",
+        "summary": "Soft-knee downward compression curve."
+      },
+      {
+        "kind": "const",
+        "name": "compressor",
+        "summary": "The smooth compressor's manifest: an AudioWorklet processor's parameters and state, as its package publishes them."
+      },
+      {
+        "kind": "const",
+        "name": "deesser",
+        "summary": "The de-esser's manifest: its processor's parameters and latency."
+      },
+      {
+        "kind": "function",
+        "name": "expanderGain",
+        "summary": "Soft-knee downward expansion curve."
+      },
+      {
+        "kind": "function",
+        "name": "upwardExpanderGain",
+        "summary": "Soft-knee upward expansion curve — the above-threshold complement of expanderGain."
+      },
+      {
+        "kind": "const",
+        "name": "expander",
+        "summary": "The expander's manifest: its processor's parameters and modes."
+      },
+      {
+        "kind": "const",
+        "name": "fet",
+        "summary": "The FET compressor model's manifest."
+      },
+      {
+        "kind": "function",
+        "name": "limiterLatency",
+        "summary": "Samples the output trails the input by: the lookahead, and 96 with `truePeak`."
+      },
+      {
+        "kind": "const",
+        "name": "opto",
+        "summary": "The opto compressor model's manifest."
+      },
+      {
+        "kind": "function",
+        "name": "unlimitDeficitGain",
+        "summary": "adaptive (default) pure mapping: transient deficit (crestTarget − peak-held transientness) → target lift (dB), gated by onset presence."
+      },
+      {
+        "kind": "function",
+        "name": "unlimitGain",
+        "summary": "adaptive:false pure mapping: transientness (fast-over-slow envelope gap, dB) → target lift (dB), before ballistic smoothing."
+      },
+      {
+        "kind": "const",
+        "name": "unlimit",
+        "summary": "The de-limiter's manifest: its processor's parameters."
+      },
+      {
+        "kind": "const",
+        "name": "varimu",
+        "summary": "The vari-mu compressor model's manifest."
+      },
+      {
+        "kind": "const",
+        "name": "vca",
+        "summary": "The VCA compressor model's manifest."
+      },
+      {
+        "kind": "function",
+        "name": "distortion",
+        "summary": "Mutates `data` in place and returns the same reference."
+      },
+      {
+        "kind": "function",
+        "name": "diodeLadder",
+        "summary": "The diode ladder filter, run over a buffer in place."
+      },
+      {
+        "kind": "function",
+        "name": "korg35",
+        "summary": "The Korg35 filter, run over a buffer in place."
+      },
+      {
+        "kind": "function",
+        "name": "moogLadder",
+        "summary": "The Moog ladder filter, two or four poles, run over a buffer in place."
+      },
+      {
+        "kind": "function",
+        "name": "oberheim",
+        "summary": "The Oberheim SEM state-variable filter, run over a buffer in place."
+      },
+      {
+        "kind": "function",
+        "name": "dattorro",
+        "summary": "Process in place."
+      },
+      {
+        "kind": "function",
+        "name": "fdn",
+        "summary": "Process in place."
+      },
+      {
+        "kind": "function",
+        "name": "freeverb",
+        "summary": "Process in place."
+      },
+      {
+        "kind": "function",
+        "name": "schroeder",
+        "summary": "Process a mono buffer in place; returns the same array."
+      },
+      {
+        "kind": "function",
+        "name": "spring",
+        "summary": "Process a mono buffer in place; returns the same array."
+      }
+    ],
     "from": "@audio-ui/engine/dsp",
     "package": "@audio-ui/engine",
     "sources": [],
@@ -2784,7 +2925,7 @@
       {
         "kind": "interface",
         "name": "EncodeAudioOptions",
-        "summary": ""
+        "summary": "What `encodeAudio` writes: the format, its bit depth or bitrate, the channels' sample rate, and a callback for its progress."
       },
       {
         "kind": "function",
@@ -3080,6 +3221,16 @@
   {
     "adapters": [],
     "exports": [
+      {
+        "kind": "function",
+        "name": "cents",
+        "summary": "A pitch's frequency, A4 at 440 Hz unless told."
+      },
+      {
+        "kind": "function",
+        "name": "midiToHz",
+        "summary": "A pitch's frequency, A4 at 440 Hz unless told."
+      },
       {
         "kind": "function",
         "name": "detectKeys",
@@ -3764,5 +3915,3059 @@
       "clip-player",
       "recording"
     ]
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "ENVELOPE_TAGS",
+        "summary": "The names the envelope's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "EnvelopeChangeEvent",
+        "summary": "Fired once an interaction that changed the points ends."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeElement",
+        "summary": "The root of a breakpoint envelope editor, with `role=\"group\"`."
+      },
+      {
+        "kind": "interface",
+        "name": "EnvelopeElementEventMap",
+        "summary": "The events an envelope fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "EnvelopeEventDetail",
+        "summary": "What an envelope's `input` and `change` events carry, besides the envelope itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeFillElement",
+        "summary": "The area under the curve, in `currentColor`."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeGraphElement",
+        "summary": "The drawing surface, filling the envelope (`position: absolute; inset: 0`) and containing the line and the fill."
+      },
+      {
+        "kind": "type",
+        "name": "EnvelopeInputEvent",
+        "summary": "Fired on every change."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeLineElement",
+        "summary": "The curve through the points, in `currentColor`, with a stroke width that stays constant as the graph scales."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopePointElement",
+        "summary": "A draggable handle for the point at `index`, positioned with `left` and `bottom`."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopePointsElement",
+        "summary": "Generates an `<audio-ui-envelope-point>` per point, in `x` order, from its `<template>` when present."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeSegmentElement",
+        "summary": "A curve handle at the midpoint of the segment that starts at point `index`, a `role=\"slider\"` from -1 to 1."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeSegmentsElement",
+        "summary": "Generates an `<audio-ui-envelope-segment>` per segment, from its `<template>` when present."
+      },
+      {
+        "kind": "const",
+        "name": "FADER_TAGS",
+        "summary": "The names the fader's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "FaderChangeEvent",
+        "summary": "Fired once a gesture ends with a new value."
+      },
+      {
+        "kind": "class",
+        "name": "FaderControlElement",
+        "summary": "The interactive area."
+      },
+      {
+        "kind": "class",
+        "name": "FaderElement",
+        "summary": "The root of a linear control, with audio defaults: vertical, from -60 to +6."
+      },
+      {
+        "kind": "interface",
+        "name": "FaderElementEventMap",
+        "summary": "The events a fader fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "FaderEventDetail",
+        "summary": "What a fader's `input` and `change` events carry, besides the fader itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "FaderIndicatorElement",
+        "summary": "The filled range of the track, from `min` to the value, or between `anchor` and the value."
+      },
+      {
+        "kind": "type",
+        "name": "FaderInputEvent",
+        "summary": "Fired on every change."
+      },
+      {
+        "kind": "class",
+        "name": "FaderLabelElement",
+        "summary": "The accessible label."
+      },
+      {
+        "kind": "class",
+        "name": "FaderThumbElement",
+        "summary": "The draggable thumb, positioned at the value."
+      },
+      {
+        "kind": "class",
+        "name": "FaderTrackElement",
+        "summary": "The full range of travel, containing the indicator and the thumb."
+      },
+      {
+        "kind": "class",
+        "name": "FaderValueElement",
+        "summary": "Renders the value, formatted with the fader's `format` and `locale`."
+      },
+      {
+        "kind": "const",
+        "name": "KNOB_TAGS",
+        "summary": "The names the knob's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "KnobChangeEvent",
+        "summary": "Fired once a gesture ends with a new value."
+      },
+      {
+        "kind": "class",
+        "name": "KnobControlElement",
+        "summary": "The interactive surface."
+      },
+      {
+        "kind": "class",
+        "name": "KnobElement",
+        "summary": "The root of a rotary control."
+      },
+      {
+        "kind": "interface",
+        "name": "KnobElementEventMap",
+        "summary": "The events a knob fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "KnobEventDetail",
+        "summary": "What a knob's `input` and `change` events carry, besides the knob itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "KnobIndicatorElement",
+        "summary": "The arc from `anchor` to the value, rendered over the track."
+      },
+      {
+        "kind": "type",
+        "name": "KnobInputEvent",
+        "summary": "Fired on every change."
+      },
+      {
+        "kind": "class",
+        "name": "KnobLabelElement",
+        "summary": "The accessible label."
+      },
+      {
+        "kind": "class",
+        "name": "KnobThumbElement",
+        "summary": "Rotates with the value, clockwise from 12 o'clock, through `rotate`."
+      },
+      {
+        "kind": "class",
+        "name": "KnobTrackElement",
+        "summary": "The full sweep of the dial, rendered as an SVG arc in `currentColor`."
+      },
+      {
+        "kind": "class",
+        "name": "KnobValueElement",
+        "summary": "Renders the value, formatted with the knob's `format` and `locale`."
+      },
+      {
+        "kind": "const",
+        "name": "METER_TAGS",
+        "summary": "The names the meter's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "MeterChannelElement",
+        "summary": "A channel with `role=\"meter\"`, for its `index`, labelled by `aria-label` or an `<audio-ui-meter-label>`."
+      },
+      {
+        "kind": "class",
+        "name": "MeterChannelsElement",
+        "summary": "Generates an `<audio-ui-meter-channel>` per level from its `<template>`, regenerated when the channel count changes."
+      },
+      {
+        "kind": "class",
+        "name": "MeterElement",
+        "summary": "The root of a level meter, with `role=\"group\"`."
+      },
+      {
+        "kind": "class",
+        "name": "MeterIndicatorElement",
+        "summary": "The lit range of a channel, scaled to the level along the meter's length."
+      },
+      {
+        "kind": "class",
+        "name": "MeterLabelElement",
+        "summary": "The accessible label of its channel."
+      },
+      {
+        "kind": "class",
+        "name": "MeterMarkElement",
+        "summary": "A scale graduation at `value`, such as -18 dB, placed along the meter's length from its minimum."
+      },
+      {
+        "kind": "class",
+        "name": "MeterPeakElement",
+        "summary": "The peak-hold marker at the channel's peak level."
+      },
+      {
+        "kind": "interface",
+        "name": "MeterSnapshot",
+        "summary": "What the meter's parts draw from."
+      },
+      {
+        "kind": "interface",
+        "name": "MeterSource",
+        "summary": "A live signal, in the shape of an external store: `subscribe` calls back on each new frame, `getSnapshot` returns the latest."
+      },
+      {
+        "kind": "class",
+        "name": "MeterTrackElement",
+        "summary": "The full range of a channel, behind the indicator."
+      },
+      {
+        "kind": "class",
+        "name": "MeterValueElement",
+        "summary": "Renders the channel's level, formatted with the meter's `format` and `locale`."
+      },
+      {
+        "kind": "const",
+        "name": "PAD_TAGS",
+        "summary": "The names the pad's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "PadElement",
+        "summary": "The root of a velocity-sensitive pad grid, with `role=\"group\"`."
+      },
+      {
+        "kind": "interface",
+        "name": "PadElementEventMap",
+        "summary": "The events a pad grid fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "class",
+        "name": "PadItemElement",
+        "summary": "A pad, a button that sounds while held, by pointer or with Enter and Space."
+      },
+      {
+        "kind": "interface",
+        "name": "PadOffDetail",
+        "summary": "What a `padoff` event carries: the pad released, and why."
+      },
+      {
+        "kind": "type",
+        "name": "PadOffEvent",
+        "summary": "Fired when a pad stops sounding."
+      },
+      {
+        "kind": "interface",
+        "name": "PadOnDetail",
+        "summary": "What a `padon` event carries: the pad struck, how hard, and how."
+      },
+      {
+        "kind": "type",
+        "name": "PadOnEvent",
+        "summary": "Fired when a pad is struck."
+      },
+      {
+        "kind": "const",
+        "name": "PIANO_TAGS",
+        "summary": "The names the piano's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "PianoElement",
+        "summary": "The root of a playable keyboard, with `role=\"group\"`."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoElementEventMap",
+        "summary": "The events a piano fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "class",
+        "name": "PianoKeyElement",
+        "summary": "A key, positioned for its `pitch`."
+      },
+      {
+        "kind": "class",
+        "name": "PianoKeyLabelElement",
+        "summary": "The name of its key, such as \"C4\"."
+      },
+      {
+        "kind": "class",
+        "name": "PianoKeysElement",
+        "summary": "Generates an `<audio-ui-piano-key>` per pitch, lowest first, filled from its `<template>`, such as with an `<audio-ui-piano-key-label>`."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoNoteOffDetail",
+        "summary": "What a `noteoff` event carries: the pitch released, and why."
+      },
+      {
+        "kind": "type",
+        "name": "PianoNoteOffEvent",
+        "summary": "Fired when a key stops sounding."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoNoteOnDetail",
+        "summary": "What a `noteon` event carries: the pitch played, how hard, and how."
+      },
+      {
+        "kind": "type",
+        "name": "PianoNoteOnEvent",
+        "summary": "Fired when a key starts sounding."
+      },
+      {
+        "kind": "const",
+        "name": "PIANO_ROLL_TAGS",
+        "summary": "The names the piano roll's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollElement",
+        "summary": "The root of a note editor, placed inside an `<audio-ui-timeline>`, which provides its length, zoom, grid and position."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoRollElementEventMap",
+        "summary": "The events a piano roll fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoRollEventDetail",
+        "summary": "What a roll's `input` and `change` events carry, besides the roll itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollGridElement",
+        "summary": "The note surface: a focusable timeline lane with `role=\"group\"`, with the rows stacked vertically."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollKeysElement",
+        "summary": "Lays out the `<audio-ui-piano>` it contains on the roll's rows, low end at the bottom, and lights the sounding pitches."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollMarqueeElement",
+        "summary": "The selection rectangle during a marquee drag."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollNoteElement",
+        "summary": "A note, positioned at its start in timeline units and on its pitch's row."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollNoteHandleElement",
+        "summary": "Resizes its note from its `edge` (`start` or `end`): the end changes the length, the start trims from the front with the end fixed."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollNotesElement",
+        "summary": "Generates an `<audio-ui-piano-roll-note>` per note in reading order (by start, then highest pitch first), which is also the tab order, from its `<template>`, such as with `<audio-ui-piano-roll-note-handle>`s."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollRowElement",
+        "summary": "The band of a `pitch` across the grid, for row shading, scale highlighting and octave lines."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollRowsElement",
+        "summary": "Generates an `<audio-ui-piano-roll-row>` per row, highest pitch first, from its `<template>` when present."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollSelectionSpanElement",
+        "summary": "The time range of the selected notes, spanning the height of its container: the grid, the velocity lane or the ruler."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollStretchHandleElement",
+        "summary": "An `edge` of the selection span."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollVelocitiesElement",
+        "summary": "Generates an `<audio-ui-piano-roll-velocity>` per note, from its `<template>` when present."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollVelocityElement",
+        "summary": "A note's velocity, or chance in a `level=\"chance\"` lane, rendered as a bar sized by `--piano-roll-level`."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollVelocityLaneElement",
+        "summary": "A timeline lane of per-note bars for velocity or, with `level=\"chance\"`, probability, each at its note's start."
+      },
+      {
+        "kind": "const",
+        "name": "PLOT_TAGS",
+        "summary": "The names the plot's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "PlotBandElement",
+        "summary": "The range of one `axis` between `from` and `to`, spanning the other axis, such as a sweep range or a level above a threshold."
+      },
+      {
+        "kind": "class",
+        "name": "PlotCursorElement",
+        "summary": "Tracks a mouse or pen over the plot, for crosshairs and readouts."
+      },
+      {
+        "kind": "class",
+        "name": "PlotCursorReadoutElement",
+        "summary": "Renders the value under the pointer as text, inside an `<audio-ui-plot-cursor>`."
+      },
+      {
+        "kind": "class",
+        "name": "PlotCurveElement",
+        "summary": "Plots `y = fn(x)` across the plot in axis units, from the `fn` property, such as a frequency response in dB."
+      },
+      {
+        "kind": "class",
+        "name": "PlotDotElement",
+        "summary": "A non-interactive point, such as the input level on a compressor curve."
+      },
+      {
+        "kind": "type",
+        "name": "PlotDotSource",
+        "summary": "A live point, in the axes' units."
+      },
+      {
+        "kind": "class",
+        "name": "PlotElement",
+        "summary": "The root of a plot."
+      },
+      {
+        "kind": "class",
+        "name": "PlotGridElement",
+        "summary": "Grid lines and labels at round values along the axes."
+      },
+      {
+        "kind": "type",
+        "name": "PlotHandleChangeEvent",
+        "summary": "Fired once a gesture that moved a handle ends, and after each key or input change."
+      },
+      {
+        "kind": "class",
+        "name": "PlotHandleElement",
+        "summary": "A draggable point in axis units, such as an equalizer band or a filter's cutoff and resonance."
+      },
+      {
+        "kind": "interface",
+        "name": "PlotHandleElementEventMap",
+        "summary": "The events a handle fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "PlotHandleEventDetail",
+        "summary": "What a handle's `input` and `change` events carry, besides the handle itself as their target."
+      },
+      {
+        "kind": "type",
+        "name": "PlotHandleInputEvent",
+        "summary": "Fired on every move of a handle."
+      },
+      {
+        "kind": "class",
+        "name": "PlotLineElement",
+        "summary": "A straight line at `value`: vertical on the x axis (`axis=\"x\"`, the default), such as a cutoff, or horizontal on the y axis, such as 0 dB."
+      },
+      {
+        "kind": "class",
+        "name": "PlotMarkElement",
+        "summary": "A label at `value` on one `axis`, such as \"1k\" or \"+12\", positioned with `left` (x, the default) or `top` (y)."
+      },
+      {
+        "kind": "interface",
+        "name": "PlotSnapshot",
+        "summary": "What every part draws from: the plot's two axes, and whether it is disabled."
+      },
+      {
+        "kind": "class",
+        "name": "PlotTraceElement",
+        "summary": "A live line from the y values of the `source` property, such as a spectrum, spread evenly across the x axis and redrawn on each change."
+      },
+      {
+        "kind": "type",
+        "name": "PlotTraceSource",
+        "summary": "A live list of y values, spread evenly across the x axis."
+      },
+      {
+        "kind": "const",
+        "name": "SEQUENCER_TAGS",
+        "summary": "The names the sequencer's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerCellElement",
+        "summary": "A step: a toggle button, pressed while the step is on (`data-on`)."
+      },
+      {
+        "kind": "type",
+        "name": "SequencerChangeEvent",
+        "summary": "Fired when a press, a paint or a key press that changed the pattern ends."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerElement",
+        "summary": "The root of a step sequencer, one row per sound, with `role=\"group\"`."
+      },
+      {
+        "kind": "interface",
+        "name": "SequencerElementEventMap",
+        "summary": "The events a sequencer fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "SequencerEventDetail",
+        "summary": "What a sequencer's `input` and `change` events carry."
+      },
+      {
+        "kind": "type",
+        "name": "SequencerInputEvent",
+        "summary": "Fired while cells are flipped."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerRowElement",
+        "summary": "A row of steps with `role=\"group\"`, for its `index` from the top."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerRowsElement",
+        "summary": "Generates an `<audio-ui-sequencer-row>` per pattern row from its `<template>`."
+      },
+      {
+        "kind": "interface",
+        "name": "SequencerSource",
+        "summary": "A live value followed without rendering: here, the step being played."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerStepElement",
+        "summary": "A generated step, for its `index`."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerStepsElement",
+        "summary": "Generates an `<audio-ui-sequencer-step>` per step of its row from its `<template>`: a cell, a velocity bar, or both."
+      },
+      {
+        "kind": "type",
+        "name": "SequencerVelocityChangeEvent",
+        "summary": "Fired when a drag, a key press or a reset that changed a velocity ends."
+      },
+      {
+        "kind": "interface",
+        "name": "SequencerVelocityDetail",
+        "summary": "What a sequencer's `velocityinput` and `velocitychange` events carry."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerVelocityElement",
+        "summary": "A step's velocity, rendered as a bar sized by `--sequencer-velocity`."
+      },
+      {
+        "kind": "type",
+        "name": "SequencerVelocityInputEvent",
+        "summary": "Fired while a velocity is drawn or nudged."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineClipElement",
+        "summary": "A region of a source on a lane, such as a recording or a pattern."
+      },
+      {
+        "kind": "interface",
+        "name": "TimelineClipEventDetail",
+        "summary": "What a clip's events carry, besides the clip itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineClipFadeElement",
+        "summary": "Renders the fade at its `edge` (`in` or `out`) over the clip: the gain ramp as a line in `currentColor`, with the attenuated area shaded by `--clip-fade-shade` (the line color by default)."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineClipFadeHandleElement",
+        "summary": "Sets the length of the fade at its `edge` (`in` or `out`) by drag, off the grid, or through the native `<input type=\"range\">` it contains, which carries the accessible name."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineClipHandleElement",
+        "summary": "Trims the clip's `edge` (`start` or `end`) by drag, on the grid unless Cmd or Ctrl is held, or through the native `<input type=\"range\">` it contains, which carries the accessible name."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineClipHeaderElement",
+        "summary": "The clip's title bar."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineLaneElement",
+        "summary": "A lane for placed parts, such as a track's clips or a row of markers."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineMarkElement",
+        "summary": "A part placed at `value` on a lane, such as a bar number, a cue or a grid line, labelled by its content."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineNavigatorElement",
+        "summary": "An overview bar of the whole timeline, showing the visible range as `<audio-ui-timeline-navigator-window>`."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineNavigatorHandleElement",
+        "summary": "An `edge` of the navigator window (`start` or `end`)."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineNavigatorWindowElement",
+        "summary": "The visible range of the timeline."
+      },
+      {
+        "kind": "class",
+        "name": "TimelinePlayheadElement",
+        "summary": "A marker at the playback position on its lane, following it through `--timeline-offset`."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineRulerElement",
+        "summary": "The lane that sets the position: a press seeks to the pointer and a drag scrubs, on the grid unless Cmd or Ctrl is held, four times finer with Shift."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineViewportElement",
+        "summary": "The scrolling container of the timeline."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineRangeElement",
+        "summary": "A loop or selection on its lane, from `value` (`\"start end\"`; the whole timeline by default)."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineRangeHandleElement",
+        "summary": "Resizes the `edge` (`start` or `end`) of its range by drag, on the grid unless Cmd or Ctrl is held, or through the native `<input type=\"range\">` it contains, which carries the accessible name."
+      },
+      {
+        "kind": "const",
+        "name": "TIMELINE_TAGS",
+        "summary": "The names the timeline's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "TimelineChangeEvent",
+        "summary": "Fired once a gesture that moved the position ends."
+      },
+      {
+        "kind": "type",
+        "name": "TimelineDescribe",
+        "summary": "Returns how a position is announced."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineElement",
+        "summary": "The root of a timeline."
+      },
+      {
+        "kind": "interface",
+        "name": "TimelineElementEventMap",
+        "summary": "The events a timeline fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "TimelineEventDetail",
+        "summary": "What a timeline's `input` and `change` events carry, besides the timeline itself as their target."
+      },
+      {
+        "kind": "type",
+        "name": "TimelineInputEvent",
+        "summary": "Fired on every move of the position."
+      },
+      {
+        "kind": "interface",
+        "name": "TimelineSettings",
+        "summary": "What the timeline's parts measure and step by, as its attributes set them."
+      },
+      {
+        "kind": "type",
+        "name": "TimelineZoomEvent",
+        "summary": "Fired when the zoom changes, already clamped."
+      },
+      {
+        "kind": "interface",
+        "name": "ViewportMetrics",
+        "summary": "How the viewport is scrolled and zoomed, as last laid out."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineTrackElement",
+        "summary": "A track: a row with a header and a lane."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineTrackHeaderElement",
+        "summary": "The header beside a track's lane, for its name and controls."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineTrackResizeHandleElement",
+        "summary": "Sets the track's height by drag, or through the native `<input type=\"range\">` it contains, which carries the accessible name: the arrow keys step (Down is taller), Page Up and Page Down take larger steps, and Home and End go to the minimum and maximum."
+      },
+      {
+        "kind": "const",
+        "name": "WAVEFORM_TAGS",
+        "summary": "The names the waveform's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformBarElement",
+        "summary": "A bar of `<audio-ui-waveform-bars>`, for its `index`."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformBarsElement",
+        "summary": "Renders the waveform as `count` `<audio-ui-waveform-bar>` elements (24) for CSS-styled visualizers."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformCanvasElement",
+        "summary": "Renders the waveform on a canvas aligned to the device pixel grid, so it stays sharp at any density."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformChangeEvent",
+        "summary": "Fired once a seek that moved the position ends."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformControlElement",
+        "summary": "The seekable surface: a press seeks to the pointer and a drag scrubs."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformDescribe",
+        "summary": "Returns how a position is announced."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformElement",
+        "summary": "The root of a waveform."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformElementEventMap",
+        "summary": "The events a waveform fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformEventDetail",
+        "summary": "What a waveform's `input` and `change` events carry, besides the waveform itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformHoverElement",
+        "summary": "Shown at the hovered position while the pointer is over the control."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformInputEvent",
+        "summary": "Fired on every seek."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformLevelsSource",
+        "summary": "A live signal: the current levels, 0…1 each, or raw samples for the `scope` variant."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformMarkerElement",
+        "summary": "A cue or chapter marker at `value`, labelled by its content."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformPlayheadElement",
+        "summary": "A non-interactive marker at the playback position."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformPositionSource",
+        "summary": "A live playback position, in `duration` units."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformRangeDetail",
+        "summary": "What a selection's and a region's events carry: the stretch, `[start, end]` in `duration` units."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformRegionElement",
+        "summary": "A loop or selection over the waveform, from `value` (`\"start end\"` in `duration` units; the whole audio by default)."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformRegionHandleElement",
+        "summary": "Resizes the `edge` (`start` or `end`) of its region by drag or through the native `<input type=\"range\">` it contains, which receives its `aria-label`."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformThumbElement",
+        "summary": "A handle centered on the playback position, through `--waveform-position`."
+      },
+      {
+        "kind": "const",
+        "name": "XYPAD_TAGS",
+        "summary": "The names the XY pad's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "XYPadChangeEvent",
+        "summary": "Fired once a gesture ends with a new point."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadControlElement",
+        "summary": "The interactive surface."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadElement",
+        "summary": "The root of a two-dimensional control."
+      },
+      {
+        "kind": "interface",
+        "name": "XYPadElementEventMap",
+        "summary": "The events an XY pad fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "XYPadEventDetail",
+        "summary": "What an XY pad's `input` and `change` events carry, besides the pad itself as their target."
+      },
+      {
+        "kind": "type",
+        "name": "XYPadInputEvent",
+        "summary": "Fired on every change."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadLabelElement",
+        "summary": "The accessible label."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadThumbElement",
+        "summary": "Marks the point, positioned with `left` and `top` and centered with `translate`."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadValueElement",
+        "summary": "Renders the point as `\"x, y\"`, formatted with the pad's `format` and `locale`."
+      }
+    ],
+    "from": "@audio-ui/elements",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/envelope/elements.ts",
+      "packages/elements/src/fader/elements.ts",
+      "packages/elements/src/knob/elements.ts",
+      "packages/elements/src/meter/elements.ts",
+      "packages/elements/src/pad/elements.ts",
+      "packages/elements/src/piano/elements.ts",
+      "packages/elements/src/piano-roll/elements.ts",
+      "packages/elements/src/plot/elements.ts",
+      "packages/elements/src/sequencer/elements.ts",
+      "packages/elements/src/timeline/clip.ts",
+      "packages/elements/src/timeline/lanes.ts",
+      "packages/elements/src/timeline/range.ts",
+      "packages/elements/src/timeline/root.ts",
+      "packages/elements/src/timeline/track.ts",
+      "packages/elements/src/waveform/elements.ts",
+      "packages/elements/src/xypad/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "ENVELOPE_TAGS",
+        "summary": "The names the envelope's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "EnvelopeChangeEvent",
+        "summary": "Fired once an interaction that changed the points ends."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeElement",
+        "summary": "The root of a breakpoint envelope editor, with `role=\"group\"`."
+      },
+      {
+        "kind": "interface",
+        "name": "EnvelopeElementEventMap",
+        "summary": "The events an envelope fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "EnvelopeEventDetail",
+        "summary": "What an envelope's `input` and `change` events carry, besides the envelope itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeFillElement",
+        "summary": "The area under the curve, in `currentColor`."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeGraphElement",
+        "summary": "The drawing surface, filling the envelope (`position: absolute; inset: 0`) and containing the line and the fill."
+      },
+      {
+        "kind": "type",
+        "name": "EnvelopeInputEvent",
+        "summary": "Fired on every change."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeLineElement",
+        "summary": "The curve through the points, in `currentColor`, with a stroke width that stays constant as the graph scales."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopePointElement",
+        "summary": "A draggable handle for the point at `index`, positioned with `left` and `bottom`."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopePointsElement",
+        "summary": "Generates an `<audio-ui-envelope-point>` per point, in `x` order, from its `<template>` when present."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeSegmentElement",
+        "summary": "A curve handle at the midpoint of the segment that starts at point `index`, a `role=\"slider\"` from -1 to 1."
+      },
+      {
+        "kind": "class",
+        "name": "EnvelopeSegmentsElement",
+        "summary": "Generates an `<audio-ui-envelope-segment>` per segment, from its `<template>` when present."
+      }
+    ],
+    "from": "@audio-ui/elements/envelope",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/envelope/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "FADER_TAGS",
+        "summary": "The names the fader's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "FaderChangeEvent",
+        "summary": "Fired once a gesture ends with a new value."
+      },
+      {
+        "kind": "class",
+        "name": "FaderControlElement",
+        "summary": "The interactive area."
+      },
+      {
+        "kind": "class",
+        "name": "FaderElement",
+        "summary": "The root of a linear control, with audio defaults: vertical, from -60 to +6."
+      },
+      {
+        "kind": "interface",
+        "name": "FaderElementEventMap",
+        "summary": "The events a fader fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "FaderEventDetail",
+        "summary": "What a fader's `input` and `change` events carry, besides the fader itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "FaderIndicatorElement",
+        "summary": "The filled range of the track, from `min` to the value, or between `anchor` and the value."
+      },
+      {
+        "kind": "type",
+        "name": "FaderInputEvent",
+        "summary": "Fired on every change."
+      },
+      {
+        "kind": "class",
+        "name": "FaderLabelElement",
+        "summary": "The accessible label."
+      },
+      {
+        "kind": "class",
+        "name": "FaderThumbElement",
+        "summary": "The draggable thumb, positioned at the value."
+      },
+      {
+        "kind": "class",
+        "name": "FaderTrackElement",
+        "summary": "The full range of travel, containing the indicator and the thumb."
+      },
+      {
+        "kind": "class",
+        "name": "FaderValueElement",
+        "summary": "Renders the value, formatted with the fader's `format` and `locale`."
+      }
+    ],
+    "from": "@audio-ui/elements/fader",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/fader/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "KNOB_TAGS",
+        "summary": "The names the knob's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "KnobChangeEvent",
+        "summary": "Fired once a gesture ends with a new value."
+      },
+      {
+        "kind": "class",
+        "name": "KnobControlElement",
+        "summary": "The interactive surface."
+      },
+      {
+        "kind": "class",
+        "name": "KnobElement",
+        "summary": "The root of a rotary control."
+      },
+      {
+        "kind": "interface",
+        "name": "KnobElementEventMap",
+        "summary": "The events a knob fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "KnobEventDetail",
+        "summary": "What a knob's `input` and `change` events carry, besides the knob itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "KnobIndicatorElement",
+        "summary": "The arc from `anchor` to the value, rendered over the track."
+      },
+      {
+        "kind": "type",
+        "name": "KnobInputEvent",
+        "summary": "Fired on every change."
+      },
+      {
+        "kind": "class",
+        "name": "KnobLabelElement",
+        "summary": "The accessible label."
+      },
+      {
+        "kind": "class",
+        "name": "KnobThumbElement",
+        "summary": "Rotates with the value, clockwise from 12 o'clock, through `rotate`."
+      },
+      {
+        "kind": "class",
+        "name": "KnobTrackElement",
+        "summary": "The full sweep of the dial, rendered as an SVG arc in `currentColor`."
+      },
+      {
+        "kind": "class",
+        "name": "KnobValueElement",
+        "summary": "Renders the value, formatted with the knob's `format` and `locale`."
+      }
+    ],
+    "from": "@audio-ui/elements/knob",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/knob/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "METER_TAGS",
+        "summary": "The names the meter's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "MeterChannelElement",
+        "summary": "A channel with `role=\"meter\"`, for its `index`, labelled by `aria-label` or an `<audio-ui-meter-label>`."
+      },
+      {
+        "kind": "class",
+        "name": "MeterChannelsElement",
+        "summary": "Generates an `<audio-ui-meter-channel>` per level from its `<template>`, regenerated when the channel count changes."
+      },
+      {
+        "kind": "class",
+        "name": "MeterElement",
+        "summary": "The root of a level meter, with `role=\"group\"`."
+      },
+      {
+        "kind": "class",
+        "name": "MeterIndicatorElement",
+        "summary": "The lit range of a channel, scaled to the level along the meter's length."
+      },
+      {
+        "kind": "class",
+        "name": "MeterLabelElement",
+        "summary": "The accessible label of its channel."
+      },
+      {
+        "kind": "class",
+        "name": "MeterMarkElement",
+        "summary": "A scale graduation at `value`, such as -18 dB, placed along the meter's length from its minimum."
+      },
+      {
+        "kind": "class",
+        "name": "MeterPeakElement",
+        "summary": "The peak-hold marker at the channel's peak level."
+      },
+      {
+        "kind": "interface",
+        "name": "MeterSnapshot",
+        "summary": "What the meter's parts draw from."
+      },
+      {
+        "kind": "interface",
+        "name": "MeterSource",
+        "summary": "A live signal, in the shape of an external store: `subscribe` calls back on each new frame, `getSnapshot` returns the latest."
+      },
+      {
+        "kind": "class",
+        "name": "MeterTrackElement",
+        "summary": "The full range of a channel, behind the indicator."
+      },
+      {
+        "kind": "class",
+        "name": "MeterValueElement",
+        "summary": "Renders the channel's level, formatted with the meter's `format` and `locale`."
+      }
+    ],
+    "from": "@audio-ui/elements/meter",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/meter/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "PAD_TAGS",
+        "summary": "The names the pad's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "PadElement",
+        "summary": "The root of a velocity-sensitive pad grid, with `role=\"group\"`."
+      },
+      {
+        "kind": "interface",
+        "name": "PadElementEventMap",
+        "summary": "The events a pad grid fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "class",
+        "name": "PadItemElement",
+        "summary": "A pad, a button that sounds while held, by pointer or with Enter and Space."
+      },
+      {
+        "kind": "interface",
+        "name": "PadOffDetail",
+        "summary": "What a `padoff` event carries: the pad released, and why."
+      },
+      {
+        "kind": "type",
+        "name": "PadOffEvent",
+        "summary": "Fired when a pad stops sounding."
+      },
+      {
+        "kind": "interface",
+        "name": "PadOnDetail",
+        "summary": "What a `padon` event carries: the pad struck, how hard, and how."
+      },
+      {
+        "kind": "type",
+        "name": "PadOnEvent",
+        "summary": "Fired when a pad is struck."
+      }
+    ],
+    "from": "@audio-ui/elements/pad",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/pad/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "PIANO_TAGS",
+        "summary": "The names the piano's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "PianoElement",
+        "summary": "The root of a playable keyboard, with `role=\"group\"`."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoElementEventMap",
+        "summary": "The events a piano fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "class",
+        "name": "PianoKeyElement",
+        "summary": "A key, positioned for its `pitch`."
+      },
+      {
+        "kind": "class",
+        "name": "PianoKeyLabelElement",
+        "summary": "The name of its key, such as \"C4\"."
+      },
+      {
+        "kind": "class",
+        "name": "PianoKeysElement",
+        "summary": "Generates an `<audio-ui-piano-key>` per pitch, lowest first, filled from its `<template>`, such as with an `<audio-ui-piano-key-label>`."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoNoteOffDetail",
+        "summary": "What a `noteoff` event carries: the pitch released, and why."
+      },
+      {
+        "kind": "type",
+        "name": "PianoNoteOffEvent",
+        "summary": "Fired when a key stops sounding."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoNoteOnDetail",
+        "summary": "What a `noteon` event carries: the pitch played, how hard, and how."
+      },
+      {
+        "kind": "type",
+        "name": "PianoNoteOnEvent",
+        "summary": "Fired when a key starts sounding."
+      }
+    ],
+    "from": "@audio-ui/elements/piano",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/piano/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "PIANO_ROLL_TAGS",
+        "summary": "The names the piano roll's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollElement",
+        "summary": "The root of a note editor, placed inside an `<audio-ui-timeline>`, which provides its length, zoom, grid and position."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoRollElementEventMap",
+        "summary": "The events a piano roll fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "PianoRollEventDetail",
+        "summary": "What a roll's `input` and `change` events carry, besides the roll itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollGridElement",
+        "summary": "The note surface: a focusable timeline lane with `role=\"group\"`, with the rows stacked vertically."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollKeysElement",
+        "summary": "Lays out the `<audio-ui-piano>` it contains on the roll's rows, low end at the bottom, and lights the sounding pitches."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollMarqueeElement",
+        "summary": "The selection rectangle during a marquee drag."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollNoteElement",
+        "summary": "A note, positioned at its start in timeline units and on its pitch's row."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollNoteHandleElement",
+        "summary": "Resizes its note from its `edge` (`start` or `end`): the end changes the length, the start trims from the front with the end fixed."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollNotesElement",
+        "summary": "Generates an `<audio-ui-piano-roll-note>` per note in reading order (by start, then highest pitch first), which is also the tab order, from its `<template>`, such as with `<audio-ui-piano-roll-note-handle>`s."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollRowElement",
+        "summary": "The band of a `pitch` across the grid, for row shading, scale highlighting and octave lines."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollRowsElement",
+        "summary": "Generates an `<audio-ui-piano-roll-row>` per row, highest pitch first, from its `<template>` when present."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollSelectionSpanElement",
+        "summary": "The time range of the selected notes, spanning the height of its container: the grid, the velocity lane or the ruler."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollStretchHandleElement",
+        "summary": "An `edge` of the selection span."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollVelocitiesElement",
+        "summary": "Generates an `<audio-ui-piano-roll-velocity>` per note, from its `<template>` when present."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollVelocityElement",
+        "summary": "A note's velocity, or chance in a `level=\"chance\"` lane, rendered as a bar sized by `--piano-roll-level`."
+      },
+      {
+        "kind": "class",
+        "name": "PianoRollVelocityLaneElement",
+        "summary": "A timeline lane of per-note bars for velocity or, with `level=\"chance\"`, probability, each at its note's start."
+      }
+    ],
+    "from": "@audio-ui/elements/piano-roll",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/piano-roll/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "PLOT_TAGS",
+        "summary": "The names the plot's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "PlotBandElement",
+        "summary": "The range of one `axis` between `from` and `to`, spanning the other axis, such as a sweep range or a level above a threshold."
+      },
+      {
+        "kind": "class",
+        "name": "PlotCursorElement",
+        "summary": "Tracks a mouse or pen over the plot, for crosshairs and readouts."
+      },
+      {
+        "kind": "class",
+        "name": "PlotCursorReadoutElement",
+        "summary": "Renders the value under the pointer as text, inside an `<audio-ui-plot-cursor>`."
+      },
+      {
+        "kind": "class",
+        "name": "PlotCurveElement",
+        "summary": "Plots `y = fn(x)` across the plot in axis units, from the `fn` property, such as a frequency response in dB."
+      },
+      {
+        "kind": "class",
+        "name": "PlotDotElement",
+        "summary": "A non-interactive point, such as the input level on a compressor curve."
+      },
+      {
+        "kind": "type",
+        "name": "PlotDotSource",
+        "summary": "A live point, in the axes' units."
+      },
+      {
+        "kind": "class",
+        "name": "PlotElement",
+        "summary": "The root of a plot."
+      },
+      {
+        "kind": "class",
+        "name": "PlotGridElement",
+        "summary": "Grid lines and labels at round values along the axes."
+      },
+      {
+        "kind": "type",
+        "name": "PlotHandleChangeEvent",
+        "summary": "Fired once a gesture that moved a handle ends, and after each key or input change."
+      },
+      {
+        "kind": "class",
+        "name": "PlotHandleElement",
+        "summary": "A draggable point in axis units, such as an equalizer band or a filter's cutoff and resonance."
+      },
+      {
+        "kind": "interface",
+        "name": "PlotHandleElementEventMap",
+        "summary": "The events a handle fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "PlotHandleEventDetail",
+        "summary": "What a handle's `input` and `change` events carry, besides the handle itself as their target."
+      },
+      {
+        "kind": "type",
+        "name": "PlotHandleInputEvent",
+        "summary": "Fired on every move of a handle."
+      },
+      {
+        "kind": "class",
+        "name": "PlotLineElement",
+        "summary": "A straight line at `value`: vertical on the x axis (`axis=\"x\"`, the default), such as a cutoff, or horizontal on the y axis, such as 0 dB."
+      },
+      {
+        "kind": "class",
+        "name": "PlotMarkElement",
+        "summary": "A label at `value` on one `axis`, such as \"1k\" or \"+12\", positioned with `left` (x, the default) or `top` (y)."
+      },
+      {
+        "kind": "interface",
+        "name": "PlotSnapshot",
+        "summary": "What every part draws from: the plot's two axes, and whether it is disabled."
+      },
+      {
+        "kind": "class",
+        "name": "PlotTraceElement",
+        "summary": "A live line from the y values of the `source` property, such as a spectrum, spread evenly across the x axis and redrawn on each change."
+      },
+      {
+        "kind": "type",
+        "name": "PlotTraceSource",
+        "summary": "A live list of y values, spread evenly across the x axis."
+      }
+    ],
+    "from": "@audio-ui/elements/plot",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/plot/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "SEQUENCER_TAGS",
+        "summary": "The names the sequencer's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerCellElement",
+        "summary": "A step: a toggle button, pressed while the step is on (`data-on`)."
+      },
+      {
+        "kind": "type",
+        "name": "SequencerChangeEvent",
+        "summary": "Fired when a press, a paint or a key press that changed the pattern ends."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerElement",
+        "summary": "The root of a step sequencer, one row per sound, with `role=\"group\"`."
+      },
+      {
+        "kind": "interface",
+        "name": "SequencerElementEventMap",
+        "summary": "The events a sequencer fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "SequencerEventDetail",
+        "summary": "What a sequencer's `input` and `change` events carry."
+      },
+      {
+        "kind": "type",
+        "name": "SequencerInputEvent",
+        "summary": "Fired while cells are flipped."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerRowElement",
+        "summary": "A row of steps with `role=\"group\"`, for its `index` from the top."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerRowsElement",
+        "summary": "Generates an `<audio-ui-sequencer-row>` per pattern row from its `<template>`."
+      },
+      {
+        "kind": "interface",
+        "name": "SequencerSource",
+        "summary": "A live value followed without rendering: here, the step being played."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerStepElement",
+        "summary": "A generated step, for its `index`."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerStepsElement",
+        "summary": "Generates an `<audio-ui-sequencer-step>` per step of its row from its `<template>`: a cell, a velocity bar, or both."
+      },
+      {
+        "kind": "type",
+        "name": "SequencerVelocityChangeEvent",
+        "summary": "Fired when a drag, a key press or a reset that changed a velocity ends."
+      },
+      {
+        "kind": "interface",
+        "name": "SequencerVelocityDetail",
+        "summary": "What a sequencer's `velocityinput` and `velocitychange` events carry."
+      },
+      {
+        "kind": "class",
+        "name": "SequencerVelocityElement",
+        "summary": "A step's velocity, rendered as a bar sized by `--sequencer-velocity`."
+      },
+      {
+        "kind": "type",
+        "name": "SequencerVelocityInputEvent",
+        "summary": "Fired while a velocity is drawn or nudged."
+      }
+    ],
+    "from": "@audio-ui/elements/sequencer",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/sequencer/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "class",
+        "name": "TimelineClipElement",
+        "summary": "A region of a source on a lane, such as a recording or a pattern."
+      },
+      {
+        "kind": "interface",
+        "name": "TimelineClipEventDetail",
+        "summary": "What a clip's events carry, besides the clip itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineClipFadeElement",
+        "summary": "Renders the fade at its `edge` (`in` or `out`) over the clip: the gain ramp as a line in `currentColor`, with the attenuated area shaded by `--clip-fade-shade` (the line color by default)."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineClipFadeHandleElement",
+        "summary": "Sets the length of the fade at its `edge` (`in` or `out`) by drag, off the grid, or through the native `<input type=\"range\">` it contains, which carries the accessible name."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineClipHandleElement",
+        "summary": "Trims the clip's `edge` (`start` or `end`) by drag, on the grid unless Cmd or Ctrl is held, or through the native `<input type=\"range\">` it contains, which carries the accessible name."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineClipHeaderElement",
+        "summary": "The clip's title bar."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineLaneElement",
+        "summary": "A lane for placed parts, such as a track's clips or a row of markers."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineMarkElement",
+        "summary": "A part placed at `value` on a lane, such as a bar number, a cue or a grid line, labelled by its content."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineNavigatorElement",
+        "summary": "An overview bar of the whole timeline, showing the visible range as `<audio-ui-timeline-navigator-window>`."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineNavigatorHandleElement",
+        "summary": "An `edge` of the navigator window (`start` or `end`)."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineNavigatorWindowElement",
+        "summary": "The visible range of the timeline."
+      },
+      {
+        "kind": "class",
+        "name": "TimelinePlayheadElement",
+        "summary": "A marker at the playback position on its lane, following it through `--timeline-offset`."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineRulerElement",
+        "summary": "The lane that sets the position: a press seeks to the pointer and a drag scrubs, on the grid unless Cmd or Ctrl is held, four times finer with Shift."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineViewportElement",
+        "summary": "The scrolling container of the timeline."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineRangeElement",
+        "summary": "A loop or selection on its lane, from `value` (`\"start end\"`; the whole timeline by default)."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineRangeHandleElement",
+        "summary": "Resizes the `edge` (`start` or `end`) of its range by drag, on the grid unless Cmd or Ctrl is held, or through the native `<input type=\"range\">` it contains, which carries the accessible name."
+      },
+      {
+        "kind": "const",
+        "name": "TIMELINE_TAGS",
+        "summary": "The names the timeline's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "TimelineChangeEvent",
+        "summary": "Fired once a gesture that moved the position ends."
+      },
+      {
+        "kind": "type",
+        "name": "TimelineDescribe",
+        "summary": "Returns how a position is announced."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineElement",
+        "summary": "The root of a timeline."
+      },
+      {
+        "kind": "interface",
+        "name": "TimelineElementEventMap",
+        "summary": "The events a timeline fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "TimelineEventDetail",
+        "summary": "What a timeline's `input` and `change` events carry, besides the timeline itself as their target."
+      },
+      {
+        "kind": "type",
+        "name": "TimelineInputEvent",
+        "summary": "Fired on every move of the position."
+      },
+      {
+        "kind": "interface",
+        "name": "TimelineSettings",
+        "summary": "What the timeline's parts measure and step by, as its attributes set them."
+      },
+      {
+        "kind": "type",
+        "name": "TimelineZoomEvent",
+        "summary": "Fired when the zoom changes, already clamped."
+      },
+      {
+        "kind": "interface",
+        "name": "ViewportMetrics",
+        "summary": "How the viewport is scrolled and zoomed, as last laid out."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineTrackElement",
+        "summary": "A track: a row with a header and a lane."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineTrackHeaderElement",
+        "summary": "The header beside a track's lane, for its name and controls."
+      },
+      {
+        "kind": "class",
+        "name": "TimelineTrackResizeHandleElement",
+        "summary": "Sets the track's height by drag, or through the native `<input type=\"range\">` it contains, which carries the accessible name: the arrow keys step (Down is taller), Page Up and Page Down take larger steps, and Home and End go to the minimum and maximum."
+      }
+    ],
+    "from": "@audio-ui/elements/timeline",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/timeline/clip.ts",
+      "packages/elements/src/timeline/lanes.ts",
+      "packages/elements/src/timeline/range.ts",
+      "packages/elements/src/timeline/root.ts",
+      "packages/elements/src/timeline/track.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "WAVEFORM_TAGS",
+        "summary": "The names the waveform's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformBarElement",
+        "summary": "A bar of `<audio-ui-waveform-bars>`, for its `index`."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformBarsElement",
+        "summary": "Renders the waveform as `count` `<audio-ui-waveform-bar>` elements (24) for CSS-styled visualizers."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformCanvasElement",
+        "summary": "Renders the waveform on a canvas aligned to the device pixel grid, so it stays sharp at any density."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformChangeEvent",
+        "summary": "Fired once a seek that moved the position ends."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformControlElement",
+        "summary": "The seekable surface: a press seeks to the pointer and a drag scrubs."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformDescribe",
+        "summary": "Returns how a position is announced."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformElement",
+        "summary": "The root of a waveform."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformElementEventMap",
+        "summary": "The events a waveform fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformEventDetail",
+        "summary": "What a waveform's `input` and `change` events carry, besides the waveform itself as their target."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformHoverElement",
+        "summary": "Shown at the hovered position while the pointer is over the control."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformInputEvent",
+        "summary": "Fired on every seek."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformLevelsSource",
+        "summary": "A live signal: the current levels, 0…1 each, or raw samples for the `scope` variant."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformMarkerElement",
+        "summary": "A cue or chapter marker at `value`, labelled by its content."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformPlayheadElement",
+        "summary": "A non-interactive marker at the playback position."
+      },
+      {
+        "kind": "type",
+        "name": "WaveformPositionSource",
+        "summary": "A live playback position, in `duration` units."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformRangeDetail",
+        "summary": "What a selection's and a region's events carry: the stretch, `[start, end]` in `duration` units."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformRegionElement",
+        "summary": "A loop or selection over the waveform, from `value` (`\"start end\"` in `duration` units; the whole audio by default)."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformRegionHandleElement",
+        "summary": "Resizes the `edge` (`start` or `end`) of its region by drag or through the native `<input type=\"range\">` it contains, which receives its `aria-label`."
+      },
+      {
+        "kind": "class",
+        "name": "WaveformThumbElement",
+        "summary": "A handle centered on the playback position, through `--waveform-position`."
+      }
+    ],
+    "from": "@audio-ui/elements/waveform",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/waveform/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "XYPAD_TAGS",
+        "summary": "The names the XY pad's elements are registered under, frozen: a page cannot rename them by accident."
+      },
+      {
+        "kind": "type",
+        "name": "XYPadChangeEvent",
+        "summary": "Fired once a gesture ends with a new point."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadControlElement",
+        "summary": "The interactive surface."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadElement",
+        "summary": "The root of a two-dimensional control."
+      },
+      {
+        "kind": "interface",
+        "name": "XYPadElementEventMap",
+        "summary": "The events an XY pad fires, as `addEventListener` types them."
+      },
+      {
+        "kind": "interface",
+        "name": "XYPadEventDetail",
+        "summary": "What an XY pad's `input` and `change` events carry, besides the pad itself as their target."
+      },
+      {
+        "kind": "type",
+        "name": "XYPadInputEvent",
+        "summary": "Fired on every change."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadLabelElement",
+        "summary": "The accessible label."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadThumbElement",
+        "summary": "Marks the point, positioned with `left` and `top` and centered with `translate`."
+      },
+      {
+        "kind": "class",
+        "name": "XYPadValueElement",
+        "summary": "Renders the point as `\"x, y\"`, formatted with the pad's `format` and `locale`."
+      }
+    ],
+    "from": "@audio-ui/elements/xypad",
+    "package": "@audio-ui/elements",
+    "sources": [
+      "packages/elements/src/xypad/elements.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "createSource",
+        "summary": "Creates a source you push to yourself, from an audio callback, a WebSocket, a worker or a test: call `set` with each new reading, and whatever reads the source follows."
+      },
+      {
+        "kind": "interface",
+        "name": "Source",
+        "summary": "A value that changes outside React, in the shape `useSyncExternalStore` expects: `subscribe` registers a listener called on each change, and `getSnapshot` returns the current value."
+      },
+      {
+        "kind": "interface",
+        "name": "WritableSource",
+        "summary": "A source that also takes values: what `createSource` returns."
+      },
+      {
+        "kind": "function",
+        "name": "adjacentPoint",
+        "summary": "The nearest of `points` strictly after `from` (`direction` 1) or strictly before it (`direction` -1), or null when there is none that way: what jumping to the next or the previous locator, or cue, needs."
+      },
+      {
+        "kind": "namespace",
+        "name": "Envelope",
+        "summary": "The Envelope primitive's parts, `Envelope.Root` and the rest."
+      },
+      {
+        "kind": "namespace",
+        "name": "Fader",
+        "summary": "The Fader primitive's parts, `Fader.Root` and the rest."
+      },
+      {
+        "kind": "namespace",
+        "name": "Knob",
+        "summary": "The Knob primitive's parts, `Knob.Root` and the rest."
+      },
+      {
+        "kind": "namespace",
+        "name": "Meter",
+        "summary": "The Meter primitive's parts, `Meter.Root` and the rest."
+      },
+      {
+        "kind": "namespace",
+        "name": "Pad",
+        "summary": "The Pad primitive's parts, `Pad.Root` and the rest."
+      },
+      {
+        "kind": "namespace",
+        "name": "Piano",
+        "summary": "The Piano primitive's parts, `Piano.Root` and the rest."
+      },
+      {
+        "kind": "namespace",
+        "name": "PianoRoll",
+        "summary": "The PianoRoll primitive's parts, `PianoRoll.Root` and the rest."
+      },
+      {
+        "kind": "namespace",
+        "name": "Plot",
+        "summary": "The Plot primitive's parts, `Plot.Root` and the rest."
+      },
+      {
+        "kind": "namespace",
+        "name": "Sequencer",
+        "summary": "The Sequencer primitive's parts, `Sequencer.Root` and the rest."
+      },
+      {
+        "kind": "interface",
+        "name": "ClipLimits",
+        "summary": "What a clip edit keeps a clip within: the timeline's length, the shortest it may be, and its source's length."
+      },
+      {
+        "kind": "interface",
+        "name": "ClipValue",
+        "summary": "A clip: a stretch of a source (a recording, a pattern) placed on the timeline."
+      },
+      {
+        "kind": "function",
+        "name": "clipEnd",
+        "summary": "Where the clip ends on the timeline."
+      },
+      {
+        "kind": "function",
+        "name": "copyRange",
+        "summary": "What the stretch from `from` to `to` holds of `items`: the part of each clip inside it, moved so the stretch starts at 0."
+      },
+      {
+        "kind": "function",
+        "name": "coverClips",
+        "summary": "What a clip laid on a lane leaves of the clips already there: they are covered, not stacked."
+      },
+      {
+        "kind": "function",
+        "name": "duplicateClip",
+        "summary": "A copy of the clip placed right after it, or as late as the timeline allows when there is not room for it."
+      },
+      {
+        "kind": "const",
+        "name": "FADE_SHAPES",
+        "summary": "The fade shapes in the order a control steps through them."
+      },
+      {
+        "kind": "type",
+        "name": "FadeShape",
+        "summary": "How a fade rises or falls: evenly, quick then slow, slow then quick, or eased at both ends."
+      },
+      {
+        "kind": "function",
+        "name": "fadeGain",
+        "summary": "The gain a fade of `shape` has `progress` of the way through it, from 0 (silent) to 1 (full): the curve of a fade-in; a fade-out plays it backwards."
+      },
+      {
+        "kind": "function",
+        "name": "insertTime",
+        "summary": "Opens a stretch `length` long at `at`: everything from there moves later, and a clip across `at` is cut in two around the gap."
+      },
+      {
+        "kind": "function",
+        "name": "moveClip",
+        "summary": "Moves the clip to begin at `start`, keeping its length and its place in the source."
+      },
+      {
+        "kind": "function",
+        "name": "nextFadeShape",
+        "summary": "The shape after `shape`, going round, for a control that steps through them."
+      },
+      {
+        "kind": "function",
+        "name": "removeTime",
+        "summary": "Takes the stretch from `from` to `to` out of the timeline: what is in it goes, and everything after it moves back to close the gap."
+      },
+      {
+        "kind": "function",
+        "name": "setClipFadeIn",
+        "summary": "Sets the fade-in's length, which cannot run into the fade-out."
+      },
+      {
+        "kind": "function",
+        "name": "setClipFadeOut",
+        "summary": "Sets the fade-out's length, which cannot run into the fade-in."
+      },
+      {
+        "kind": "function",
+        "name": "setClipFadeShape",
+        "summary": "Gives the fade at `edge` the shape `shape`."
+      },
+      {
+        "kind": "function",
+        "name": "splitClip",
+        "summary": "Cuts the clip in two at `at`, a position on the timeline."
+      },
+      {
+        "kind": "namespace",
+        "name": "Timeline",
+        "summary": "The Timeline primitive's parts, `Timeline.Root` and the rest."
+      },
+      {
+        "kind": "function",
+        "name": "trimClipEnd",
+        "summary": "Trims the clip's end to `end`, as far as the timeline and the source allow."
+      },
+      {
+        "kind": "function",
+        "name": "trimClipStart",
+        "summary": "Trims the clip's start to `start`: what is cut off stays in the source, so the clip's content does not move on the timeline."
+      },
+      {
+        "kind": "namespace",
+        "name": "Waveform",
+        "summary": "The Waveform primitive's parts, `Waveform.Root` and the rest."
+      },
+      {
+        "kind": "namespace",
+        "name": "XYPad",
+        "summary": "The XYPad primitive's parts, `XYPad.Root` and the rest."
+      }
+    ],
+    "from": "@audio-ui/react",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/core/src/value/source.ts",
+      "packages/core/src/primitives/timeline/locators.ts",
+      "packages/ui/src/entries/envelope.ts",
+      "packages/ui/src/entries/fader.ts",
+      "packages/ui/src/entries/knob.ts",
+      "packages/ui/src/entries/meter.ts",
+      "packages/ui/src/entries/pad.ts",
+      "packages/ui/src/entries/piano.ts",
+      "packages/ui/src/entries/piano-roll.ts",
+      "packages/ui/src/entries/plot.ts",
+      "packages/ui/src/entries/sequencer.ts",
+      "packages/core/src/primitives/timeline/clip.ts",
+      "packages/ui/src/entries/timeline.ts",
+      "packages/ui/src/entries/waveform.ts",
+      "packages/ui/src/entries/xypad.ts"
+    ],
+    "usedBy": [
+      "arrangement",
+      "arrangement-engine",
+      "use-arrangement",
+      "use-audio-levels",
+      "use-loudness",
+      "use-piano-roll-playback",
+      "use-pitch",
+      "use-spectrum",
+      "use-time-selection",
+      "use-timeline-cursor"
+    ]
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "type",
+        "name": "Envelope.Breakpoint",
+        "summary": "A point of the ramp, and how the segment leaving it bends: `curve` from -1 to 1, 0 or unset for a straight line."
+      },
+      {
+        "kind": "function",
+        "name": "Envelope.Fill",
+        "summary": "The area under the curve."
+      },
+      {
+        "kind": "function",
+        "name": "Envelope.Graph",
+        "summary": "The drawing surface, a 100×100 stretched viewBox: holds `Line` and `Fill`, and a double click on it adds a point."
+      },
+      {
+        "kind": "function",
+        "name": "Envelope.Line",
+        "summary": "The envelope curve through the points."
+      },
+      {
+        "kind": "function",
+        "name": "Envelope.Point",
+        "summary": "A draggable handle for the point at `index`, positioned with `left`/`bottom` percentages over the `Graph`."
+      },
+      {
+        "kind": "function",
+        "name": "Envelope.Points",
+        "summary": "Renders one child per point, in `x` order."
+      },
+      {
+        "kind": "function",
+        "name": "Envelope.Root",
+        "summary": "Groups all parts of the breakpoint envelope and owns its points, each normalized to 0…1 on both axes and kept sorted by `x`."
+      },
+      {
+        "kind": "function",
+        "name": "Envelope.Segment",
+        "summary": "A handle on the middle of the segment leaving the point at `index`: drag it up or down to bend the segment, so it follows the pointer on the curve's midpoint."
+      },
+      {
+        "kind": "function",
+        "name": "Envelope.Segments",
+        "summary": "Renders one child per segment between two points, in `x` order."
+      }
+    ],
+    "from": "@audio-ui/react/envelope",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/core/src/primitives/envelope/geometry.ts",
+      "packages/ui/src/primitives/envelope/elements/fill.tsx",
+      "packages/ui/src/primitives/envelope/elements/graph.tsx",
+      "packages/ui/src/primitives/envelope/elements/line.tsx",
+      "packages/ui/src/primitives/envelope/elements/point.tsx",
+      "packages/ui/src/primitives/envelope/elements/points.tsx",
+      "packages/ui/src/primitives/envelope/elements/root.tsx",
+      "packages/ui/src/primitives/envelope/elements/segments.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "Fader.Control",
+        "summary": "The interactive area: a press on the track jumps to the value under it, a press on the thumb drags it from where it was taken, plus mouse-wheel stepping."
+      },
+      {
+        "kind": "function",
+        "name": "Fader.Indicator",
+        "summary": "The filled part of the track: from `min` up to the value, or between the Root's `anchor` and the value, on whichever side of it the value is."
+      },
+      {
+        "kind": "function",
+        "name": "Fader.Label",
+        "summary": "Accessible label, associated with the thumb."
+      },
+      {
+        "kind": "function",
+        "name": "Fader.Mark",
+        "summary": "A graduation along the track at `value`: placed from the start of the travel in the fader's direction, where the thumb's center would be at that value."
+      },
+      {
+        "kind": "function",
+        "name": "Fader.Root",
+        "summary": "Groups all parts of the fader, with audio defaults (vertical, -60…+6) and mouse-wheel stepping."
+      },
+      {
+        "kind": "function",
+        "name": "Fader.Thumb",
+        "summary": "The draggable thumb, with a nested `<input type=\"range\">` that carries the accessible name (`aria-label`/`aria-labelledby`) and form value."
+      },
+      {
+        "kind": "function",
+        "name": "Fader.Track",
+        "summary": "The full range of travel."
+      },
+      {
+        "kind": "function",
+        "name": "Fader.Value",
+        "summary": "The formatted value (`format`/`locale` on Root)."
+      }
+    ],
+    "from": "@audio-ui/react/fader",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/ui/src/primitives/fader/elements/control.tsx",
+      "packages/ui/src/primitives/fader/elements/indicator.tsx",
+      "packages/ui/src/primitives/fader/elements/label.tsx",
+      "packages/ui/src/primitives/fader/elements/mark.tsx",
+      "packages/ui/src/primitives/fader/elements/root.tsx",
+      "packages/ui/src/primitives/fader/elements/thumb.tsx",
+      "packages/ui/src/primitives/fader/elements/track.tsx",
+      "packages/ui/src/primitives/fader/elements/value.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "Knob.Control",
+        "summary": "The interactive surface: pointer drags (see `dragMode`), mouse-wheel stepping, and double tap (or Alt + click) to reset."
+      },
+      {
+        "kind": "function",
+        "name": "Knob.Indicator",
+        "summary": "The arc from `anchor` to the value, drawn over the `Track`."
+      },
+      {
+        "kind": "function",
+        "name": "Knob.Label",
+        "summary": "Accessible label, associated with the thumb's input."
+      },
+      {
+        "kind": "function",
+        "name": "Knob.Mark",
+        "summary": "A graduation on the dial at `value`, placed on the knob's scale: a layer the size of the knob, rotated to where `value` sits, so a tick drawn at its top lands on the sweep."
+      },
+      {
+        "kind": "function",
+        "name": "Knob.Provider",
+        "summary": "Sets how every `Knob.Root` below it turns by a drag, unless it has a `dragMode` of its own: wrap an app once to have all its knobs dragged up and down."
+      },
+      {
+        "kind": "function",
+        "name": "Knob.Root",
+        "summary": "Groups all parts of the knob and owns its value."
+      },
+      {
+        "kind": "function",
+        "name": "Knob.Thumb",
+        "summary": "Rotates with the value (`rotate`, clockwise from 12 o'clock), so a pointer drawn inside it points at the value."
+      },
+      {
+        "kind": "function",
+        "name": "Knob.Track",
+        "summary": "The full sweep of the dial, as an SVG arc."
+      },
+      {
+        "kind": "function",
+        "name": "Knob.Value",
+        "summary": "The formatted value (`format`/`locale` on Root)."
+      }
+    ],
+    "from": "@audio-ui/react/knob",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/ui/src/primitives/knob/elements/control.tsx",
+      "packages/ui/src/primitives/knob/elements/indicator.tsx",
+      "packages/ui/src/primitives/knob/elements/label.tsx",
+      "packages/ui/src/primitives/knob/elements/mark.tsx",
+      "packages/ui/src/primitives/knob/elements/provider.tsx",
+      "packages/ui/src/primitives/knob/elements/root.tsx",
+      "packages/ui/src/primitives/knob/elements/thumb.tsx",
+      "packages/ui/src/primitives/knob/elements/track.tsx",
+      "packages/ui/src/primitives/knob/elements/value.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "Meter.Channel",
+        "summary": "One channel of the meter, a `role=\"meter\"`: name it with `aria-label` or a `Meter.Label`."
+      },
+      {
+        "kind": "function",
+        "name": "Meter.Channels",
+        "summary": "Renders one child per channel."
+      },
+      {
+        "kind": "function",
+        "name": "Meter.Indicator",
+        "summary": "The lit part of the channel, scaled to the level."
+      },
+      {
+        "kind": "function",
+        "name": "Meter.Label",
+        "summary": "Accessible label of the channel it is in."
+      },
+      {
+        "kind": "function",
+        "name": "Meter.Mark",
+        "summary": "A graduation of the level scale at `value`, such as -18 dB: placed along the meter's length from its minimum, upward for a vertical meter and rightward for a horizontal one."
+      },
+      {
+        "kind": "function",
+        "name": "Meter.Peak",
+        "summary": "The peak-hold mark, positioned at the channel's peak level; hidden while the channel has none."
+      },
+      {
+        "kind": "function",
+        "name": "Meter.Root",
+        "summary": "Groups the channels of a level meter."
+      },
+      {
+        "kind": "function",
+        "name": "Meter.Track",
+        "summary": "The full range of a channel, behind the indicator."
+      },
+      {
+        "kind": "function",
+        "name": "Meter.Value",
+        "summary": "The channel's formatted level (`format`/`locale` on Root)."
+      }
+    ],
+    "from": "@audio-ui/react/meter",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/ui/src/primitives/meter/elements/channel.tsx",
+      "packages/ui/src/primitives/meter/elements/channels.tsx",
+      "packages/ui/src/primitives/meter/elements/indicator.tsx",
+      "packages/ui/src/primitives/meter/elements/label.tsx",
+      "packages/ui/src/primitives/meter/elements/mark.tsx",
+      "packages/ui/src/primitives/meter/elements/peak.tsx",
+      "packages/ui/src/primitives/meter/elements/root.tsx",
+      "packages/ui/src/primitives/meter/elements/track.tsx",
+      "packages/ui/src/primitives/meter/elements/value.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "Pad.Item",
+        "summary": "One pad."
+      },
+      {
+        "kind": "function",
+        "name": "Pad.Root",
+        "summary": "A grid of pads to strike: each one sounds while held, by pointer or from the keyboard, and each pointer holds its own pad, so several can be played at once on a touch screen."
+      }
+    ],
+    "from": "@audio-ui/react/pad",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/ui/src/primitives/pad/elements/item.tsx",
+      "packages/ui/src/primitives/pad/elements/root.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "Piano.Key",
+        "summary": "One key, placed along the keyboard for its pitch."
+      },
+      {
+        "kind": "function",
+        "name": "Piano.KeyLabel",
+        "summary": "The name of the key it sits in, such as \"C4\"."
+      },
+      {
+        "kind": "function",
+        "name": "Piano.Keys",
+        "summary": "Renders `children` once per key, lowest first: the place to put a `Piano.Key` for each pitch."
+      },
+      {
+        "kind": "function",
+        "name": "Piano.Root",
+        "summary": "A keyboard to play: every key sounds while pressed, by pointer or from the keyboard."
+      }
+    ],
+    "from": "@audio-ui/react/piano",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/ui/src/primitives/piano/elements/key.tsx",
+      "packages/ui/src/primitives/piano/elements/key-label.tsx",
+      "packages/ui/src/primitives/piano/elements/keys.tsx",
+      "packages/ui/src/primitives/piano/elements/root.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "PianoRoll.Key",
+        "summary": "One key, placed along the keyboard for its pitch."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.KeyLabel",
+        "summary": "The name of the key it sits in, such as \"C4\"."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.Grid",
+        "summary": "The surface notes are drawn on: a timeline lane, with the roll's rows stacked down it."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.Keys",
+        "summary": "The keyboard down the side of the roll: a `Piano` laid out on the roll's rows, low end at the bottom."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.Marquee",
+        "summary": "The selection rectangle being dragged across the grid; renders nothing the rest of the time."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.Note",
+        "summary": "One note, placed at its start and pitch: on the timeline's units across and on its row down."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.NoteHandle",
+        "summary": "One edge of the note it sits in, dragged to change the note's length: the end makes it longer or shorter, the start trims it from the front while its end stays put."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.Notes",
+        "summary": "Renders `children` once per note, in the order they are read: by start, then from the highest pitch down."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.Root",
+        "summary": "Groups the parts of a piano roll and owns its notes, its selection and the pitches it draws."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.Row",
+        "summary": "The band a pitch takes across the grid, for shading black-key rows, the rows of the roll's scale and of its root, or ruling where an octave starts."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.Rows",
+        "summary": "Renders `children` once per row, highest pitch first: the place to put a `PianoRoll.Row` on the grid, or a `PianoRoll.Key` in the keys."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.SelectionSpan",
+        "summary": "The time the selected notes cover, from the earliest start to the latest end, as a band from top to bottom of what it sits in: the grid, the velocity lane or the ruler."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.StretchHandle",
+        "summary": "One edge of the selection's span, for its `SelectionSpan`: a drag stretches the selected notes in time from the other edge, on the grid unless Cmd/Ctrl is held."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.Velocity",
+        "summary": "One note's velocity, or its chance in a `level=\"chance\"` lane, as a bar from the bottom of the lane: its height is the value, through the `--piano-roll-level` CSS variable."
+      },
+      {
+        "kind": "function",
+        "name": "PianoRoll.VelocityLane",
+        "summary": "A strip under the grid where each note's velocity, or with `level=\"chance\"` its chance to play, stands as a bar placed at the note's start: a timeline lane, like the grid."
+      }
+    ],
+    "from": "@audio-ui/react/piano-roll",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/ui/src/primitives/piano/elements/key.tsx",
+      "packages/ui/src/primitives/piano/elements/key-label.tsx",
+      "packages/ui/src/primitives/piano-roll/elements/grid.tsx",
+      "packages/ui/src/primitives/piano-roll/elements/keys.tsx",
+      "packages/ui/src/primitives/piano-roll/elements/marquee.tsx",
+      "packages/ui/src/primitives/piano-roll/elements/note.tsx",
+      "packages/ui/src/primitives/piano-roll/elements/notes.tsx",
+      "packages/ui/src/primitives/piano-roll/elements/root.tsx",
+      "packages/ui/src/primitives/piano-roll/elements/rows.tsx",
+      "packages/ui/src/primitives/piano-roll/elements/selection-span.tsx",
+      "packages/ui/src/primitives/piano-roll/elements/velocity.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "Plot.formatTick",
+        "summary": "A tick as short text: 1000 as \"1k\", 0.5 as \"0.5\", -12 as \"-12\"."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.useValueAtPointer",
+        "summary": "Turns a pointer position into a value on the plot: for adding a point where someone double-clicks, or reading out what is under the cursor."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Band",
+        "summary": "A stretch of the plot between two values on one axis, across the whole of the other: the frequencies a sweep can reach, the levels over a threshold."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Cursor",
+        "summary": "Follows the pointer over the plot, for crosshair lines and a readout of what is under it."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.CursorReadout",
+        "summary": "The value under the pointer, as text: `format` turns it into what to show, and the text is written straight into the DOM as the pointer moves."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Curve",
+        "summary": "A curve across the whole plot: `y = fn(x)` in the axes' units, such as an equalizer's response in dB at each frequency."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Dot",
+        "summary": "A point on the plot that nothing drags: where the signal is right now, such as the input level on a compressor's curve."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Graph",
+        "summary": "The drawing surface: an `<svg>` covering the plot, stretched to its size, that `Plot.Curve`, `Plot.Line` and `Plot.Band` draw in."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Grid",
+        "summary": "Grid lines and their labels, drawn from the axes: round values along each axis you give, so you do not place each line and label by hand."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Handle",
+        "summary": "A point on the plot that can be moved: an equalizer band at its frequency and gain, a filter's cutoff and resonance, a compressor's threshold."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Line",
+        "summary": "A straight line across the plot at a value: vertical at an x value, such as a filter's cutoff, or horizontal at a y value, such as 0 dB."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Mark",
+        "summary": "A label at a value on one axis, such as \"1k\" under a frequency or \"+12\" by a gain: placed at the value along the axis and left to you to set apart from the plot's edge."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Root",
+        "summary": "Groups the parts of a plot and owns its two axes: the range of each and how values spread along it, evenly or logarithmically, the way frequency is drawn."
+      },
+      {
+        "kind": "function",
+        "name": "Plot.Trace",
+        "summary": "A live line across the plot: the list of y values a `source` holds, such as the spectrum of the sound, spread evenly across the x axis."
+      }
+    ],
+    "from": "@audio-ui/react/plot",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/core/src/primitives/plot/ticks.ts",
+      "packages/ui/src/primitives/plot/context.ts",
+      "packages/ui/src/primitives/plot/elements/band.tsx",
+      "packages/ui/src/primitives/plot/elements/cursor.tsx",
+      "packages/ui/src/primitives/plot/elements/curve.tsx",
+      "packages/ui/src/primitives/plot/elements/dot.tsx",
+      "packages/ui/src/primitives/plot/elements/graph.tsx",
+      "packages/ui/src/primitives/plot/elements/grid.tsx",
+      "packages/ui/src/primitives/plot/elements/handle.tsx",
+      "packages/ui/src/primitives/plot/elements/line.tsx",
+      "packages/ui/src/primitives/plot/elements/mark.tsx",
+      "packages/ui/src/primitives/plot/elements/root.tsx",
+      "packages/ui/src/primitives/plot/elements/trace.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "Sequencer.Cell",
+        "summary": "One step of a row: a toggle button, pressed when the step is on."
+      },
+      {
+        "kind": "function",
+        "name": "Sequencer.Root",
+        "summary": "A grid of steps to switch on and off, one row per sound: the pattern of a drum machine."
+      },
+      {
+        "kind": "function",
+        "name": "Sequencer.Cells",
+        "summary": "Renders `children` once per step of the row it is in: the place to put a `Sequencer.Cell`."
+      },
+      {
+        "kind": "function",
+        "name": "Sequencer.Row",
+        "summary": "One sound's row of steps."
+      },
+      {
+        "kind": "function",
+        "name": "Sequencer.Rows",
+        "summary": "Renders `children` once per row: the place to put a `Sequencer.Row`."
+      },
+      {
+        "kind": "function",
+        "name": "Sequencer.Velocity",
+        "summary": "How loud one step plays, as a bar from the bottom of its box: the height is the velocity, through the `--sequencer-velocity` CSS variable."
+      }
+    ],
+    "from": "@audio-ui/react/sequencer",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/ui/src/primitives/sequencer/elements/cell.tsx",
+      "packages/ui/src/primitives/sequencer/elements/root.tsx",
+      "packages/ui/src/primitives/sequencer/elements/rows.tsx",
+      "packages/ui/src/primitives/sequencer/elements/velocity.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "adjacentPoint",
+        "summary": "The nearest of `points` strictly after `from` (`direction` 1) or strictly before it (`direction` -1), or null when there is none that way: what jumping to the next or the previous locator, or cue, needs."
+      },
+      {
+        "kind": "interface",
+        "name": "ClipLimits",
+        "summary": "What a clip edit keeps a clip within: the timeline's length, the shortest it may be, and its source's length."
+      },
+      {
+        "kind": "interface",
+        "name": "ClipValue",
+        "summary": "A clip: a stretch of a source (a recording, a pattern) placed on the timeline."
+      },
+      {
+        "kind": "function",
+        "name": "clipEnd",
+        "summary": "Where the clip ends on the timeline."
+      },
+      {
+        "kind": "function",
+        "name": "copyRange",
+        "summary": "What the stretch from `from` to `to` holds of `items`: the part of each clip inside it, moved so the stretch starts at 0."
+      },
+      {
+        "kind": "function",
+        "name": "coverClips",
+        "summary": "What a clip laid on a lane leaves of the clips already there: they are covered, not stacked."
+      },
+      {
+        "kind": "function",
+        "name": "duplicateClip",
+        "summary": "A copy of the clip placed right after it, or as late as the timeline allows when there is not room for it."
+      },
+      {
+        "kind": "const",
+        "name": "FADE_SHAPES",
+        "summary": "The fade shapes in the order a control steps through them."
+      },
+      {
+        "kind": "type",
+        "name": "FadeShape",
+        "summary": "How a fade rises or falls: evenly, quick then slow, slow then quick, or eased at both ends."
+      },
+      {
+        "kind": "function",
+        "name": "fadeGain",
+        "summary": "The gain a fade of `shape` has `progress` of the way through it, from 0 (silent) to 1 (full): the curve of a fade-in; a fade-out plays it backwards."
+      },
+      {
+        "kind": "function",
+        "name": "insertTime",
+        "summary": "Opens a stretch `length` long at `at`: everything from there moves later, and a clip across `at` is cut in two around the gap."
+      },
+      {
+        "kind": "function",
+        "name": "moveClip",
+        "summary": "Moves the clip to begin at `start`, keeping its length and its place in the source."
+      },
+      {
+        "kind": "function",
+        "name": "nextFadeShape",
+        "summary": "The shape after `shape`, going round, for a control that steps through them."
+      },
+      {
+        "kind": "function",
+        "name": "removeTime",
+        "summary": "Takes the stretch from `from` to `to` out of the timeline: what is in it goes, and everything after it moves back to close the gap."
+      },
+      {
+        "kind": "function",
+        "name": "setClipFadeIn",
+        "summary": "Sets the fade-in's length, which cannot run into the fade-out."
+      },
+      {
+        "kind": "function",
+        "name": "setClipFadeOut",
+        "summary": "Sets the fade-out's length, which cannot run into the fade-in."
+      },
+      {
+        "kind": "function",
+        "name": "setClipFadeShape",
+        "summary": "Gives the fade at `edge` the shape `shape`."
+      },
+      {
+        "kind": "function",
+        "name": "splitClip",
+        "summary": "Cuts the clip in two at `at`, a position on the timeline."
+      },
+      {
+        "kind": "function",
+        "name": "trimClipEnd",
+        "summary": "Trims the clip's end to `end`, as far as the timeline and the source allow."
+      },
+      {
+        "kind": "function",
+        "name": "trimClipStart",
+        "summary": "Trims the clip's start to `start`: what is cut off stays in the source, so the clip's content does not move on the timeline."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Clip",
+        "summary": "A stretch of a source laid on a lane: a recording, a pattern."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.ClipFade",
+        "summary": "Draws a fade over the clip's content, as a DAW does: the ramp as a line from the clip's edge, as long as the fade, with what it attenuates shaded by `--clip-fade-shade` (the line's own color if it is not set)."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.ClipFadeHandle",
+        "summary": "Sets how long one of the clip's fades lasts: by dragging, which is not on the grid, or from the keyboard through the native `<input type=\"range\">` it holds, which carries the accessible name."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.ClipHandle",
+        "summary": "Trims one edge of the clip: by dragging, on the grid unless Cmd/Ctrl is held, or from the keyboard through the native `<input type=\"range\">` it holds, which carries the accessible name."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.ClipHeader",
+        "summary": "The clip's title bar: dragging it moves the clip, on the grid unless Cmd/Ctrl is held, and over other lanes too."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Lane",
+        "summary": "A strip along the timeline that its parts are placed on: a track, the ruler's strip, a row of markers."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Mark",
+        "summary": "Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid line."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Navigator",
+        "summary": "The whole timeline as one bar, with the stretch the viewport shows drawn inside it as `Timeline.NavigatorWindow`: drag the window to scroll, drag one of its `Timeline.NavigatorHandle`s to zoom, double-click to show everything."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.NavigatorHandle",
+        "summary": "One edge of the window: dragging it zooms, holding the other edge in place."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.NavigatorWindow",
+        "summary": "The stretch of the timeline the viewport shows."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Playhead",
+        "summary": "A marker at the playback position, on the lane it sits in."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Range",
+        "summary": "A stretch of the timeline, such as a loop, a selection or a clip, laid on the lane it sits in from `value[0]` to `value[1]`."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.RangeHandle",
+        "summary": "Resizes one edge of the range: by dragging, on the grid unless Cmd/Ctrl is held, or from the keyboard through the native `<input type=\"range\">` it holds, which carries the accessible name."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Root",
+        "summary": "Groups the parts of a timeline and owns what they share: its length, its zoom, its grid and the playback position."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Ruler",
+        "summary": "The lane that moves the position: a press jumps to the pointer and a drag scrubs, both on the grid unless Cmd/Ctrl is held; with Shift held the drag scrubs four times finer."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Track",
+        "summary": "One track of the arrangement: a row holding a header beside a lane."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.TrackHeader",
+        "summary": "The strip beside a track's lane that names it and holds what sets it."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.TrackResizeHandle",
+        "summary": "Sets the track's height: by dragging, or from the keyboard through the native `<input type=\"range\">` it holds, which carries the accessible name: the arrows move by a step (Down is taller), Page Up and Down by a large one, Home and End to the minimum and the maximum."
+      },
+      {
+        "kind": "function",
+        "name": "Timeline.Viewport",
+        "summary": "The scrolling window onto the timeline."
+      }
+    ],
+    "from": "@audio-ui/react/timeline",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/core/src/primitives/timeline/locators.ts",
+      "packages/core/src/primitives/timeline/clip.ts",
+      "packages/ui/src/primitives/timeline/elements/clip.tsx",
+      "packages/ui/src/primitives/timeline/elements/clip-fade.tsx",
+      "packages/ui/src/primitives/timeline/elements/clip-fade-handle.tsx",
+      "packages/ui/src/primitives/timeline/elements/clip-handle.tsx",
+      "packages/ui/src/primitives/timeline/elements/clip-header.tsx",
+      "packages/ui/src/primitives/timeline/elements/lane.tsx",
+      "packages/ui/src/primitives/timeline/elements/mark.tsx",
+      "packages/ui/src/primitives/timeline/elements/navigator.tsx",
+      "packages/ui/src/primitives/timeline/elements/playhead.tsx",
+      "packages/ui/src/primitives/timeline/elements/range.tsx",
+      "packages/ui/src/primitives/timeline/elements/root.tsx",
+      "packages/ui/src/primitives/timeline/elements/ruler.tsx",
+      "packages/ui/src/primitives/timeline/elements/track.tsx",
+      "packages/ui/src/primitives/timeline/elements/track-header.tsx",
+      "packages/ui/src/primitives/timeline/elements/track-resize-handle.tsx",
+      "packages/ui/src/primitives/timeline/elements/viewport.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "createSource",
+        "summary": "Creates a source you push to yourself, from an audio callback, a WebSocket, a worker or a test: call `set` with each new reading, and whatever reads the source follows."
+      },
+      {
+        "kind": "interface",
+        "name": "Source",
+        "summary": "A value that changes outside React, in the shape `useSyncExternalStore` expects: `subscribe` registers a listener called on each change, and `getSnapshot` returns the current value."
+      },
+      {
+        "kind": "interface",
+        "name": "WritableSource",
+        "summary": "A source that also takes values: what `createSource` returns."
+      }
+    ],
+    "from": "@audio-ui/react/source",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/core/src/value/source.ts"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "Waveform.Bar",
+        "summary": "One bar of `Waveform.Bars`."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.Bars",
+        "summary": "Draws the waveform as a fixed number of elements, one `Waveform.Bar` each, for a visualizer styled in plain CSS."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.Canvas",
+        "summary": "Draws the waveform on a canvas, laid out on the device pixel grid: as many bars as fit its width, every edge on a physical pixel, so it stays sharp at any pixel density and zoom level."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.Control",
+        "summary": "The seekable surface: a press jumps to the pointer and a drag scrubs."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.Hover",
+        "summary": "Shown while the pointer is over the `Control`, positioned at the hovered point."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.Marker",
+        "summary": "A point of interest on the timeline, such as a cue or a chapter, positioned at `value`."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.Playhead",
+        "summary": "A marker at the playback position, with no interaction of its own."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.Region",
+        "summary": "A stretch of the timeline, such as a loop or a selection, laid over the waveform from `value[0]` to `value[1]`."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.RegionHandle",
+        "summary": "Resizes one edge of the region: by dragging, or from the keyboard through the native `<input type=\"range\">` it holds, which carries the accessible name (`aria-label` / `aria-labelledby`)."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.Root",
+        "summary": "Groups the parts of a waveform and owns what they show: the audio's shape (`peaks`, known upfront, or a live `levels` signal) and, for a seekable one, the playback position in `duration` units."
+      },
+      {
+        "kind": "function",
+        "name": "Waveform.Thumb",
+        "summary": "A handle centered on the playback position."
+      }
+    ],
+    "from": "@audio-ui/react/waveform",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/ui/src/primitives/waveform/elements/bars.tsx",
+      "packages/ui/src/primitives/waveform/elements/canvas.tsx",
+      "packages/ui/src/primitives/waveform/elements/control.tsx",
+      "packages/ui/src/primitives/waveform/elements/hover.tsx",
+      "packages/ui/src/primitives/waveform/elements/marker.tsx",
+      "packages/ui/src/primitives/waveform/elements/playhead.tsx",
+      "packages/ui/src/primitives/waveform/elements/region.tsx",
+      "packages/ui/src/primitives/waveform/elements/root.tsx",
+      "packages/ui/src/primitives/waveform/elements/thumb.tsx"
+    ],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "function",
+        "name": "XYPad.Control",
+        "summary": "The pad surface: a press jumps the value to the pointer and a drag follows it; the mouse wheel / trackpad moves it too."
+      },
+      {
+        "kind": "function",
+        "name": "XYPad.Label",
+        "summary": "Accessible label, associated with both axis inputs."
+      },
+      {
+        "kind": "function",
+        "name": "XYPad.Root",
+        "summary": "Groups all parts of the pad and owns its two-dimensional value."
+      },
+      {
+        "kind": "function",
+        "name": "XYPad.Thumb",
+        "summary": "Marks the value on the pad (`left`/`top` as percentages, centered with `translate`)."
+      },
+      {
+        "kind": "function",
+        "name": "XYPad.Value",
+        "summary": "The formatted value (`format`/`locale` on Root), `\"x, y\"` by default."
+      }
+    ],
+    "from": "@audio-ui/react/xypad",
+    "package": "@audio-ui/react",
+    "sources": [
+      "packages/ui/src/primitives/xypad/elements/control.tsx",
+      "packages/ui/src/primitives/xypad/elements/label.tsx",
+      "packages/ui/src/primitives/xypad/elements/root.tsx",
+      "packages/ui/src/primitives/xypad/elements/thumb.tsx",
+      "packages/ui/src/primitives/xypad/elements/value.tsx"
+    ],
+    "usedBy": []
   }
 ]

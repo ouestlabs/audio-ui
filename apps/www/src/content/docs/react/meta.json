@@ -1,4 +1,22 @@
 {
   "title": "React",
-  "pages": ["index", "headless-styling"]
+  "pages": [
+    "index",
+    "headless-styling",
+    "---Primitives---",
+    "knob",
+    "fader",
+    "xypad",
+    "meter",
+    "envelope",
+    "plot",
+    "piano",
+    "pad",
+    "sequencer",
+    "piano-roll",
+    "timeline",
+    "waveform",
+    "---Live values---",
+    "source"
+  ]
 }

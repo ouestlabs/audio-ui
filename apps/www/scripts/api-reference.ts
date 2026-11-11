@@ -15,6 +15,7 @@ import { Glob } from "bun";
 
 const WEB = `${import.meta.dir}/..`;
 const PAGES = `${WEB}/src/content/docs/components/base`;
+const REACT_PAGES = `${WEB}/src/content/docs/react`;
 const PRIMITIVES = `${WEB}/../../packages/ui/src/primitives`;
 
 const SECTION = /^### (.+)$/gm;
@@ -169,43 +170,53 @@ const PRIMITIVE_OF_PAGE: Record<string, string> = { arrangement: "timeline" };
 export async function sync(write: boolean) {
   const mismatches: Mismatch[] = [];
   const skipped: string[] = [];
-  for await (const page of new Glob("**/*.mdx").scan(PAGES)) {
-    const name = page.split("/").pop()?.replace(".mdx", "") ?? "";
-    const files = await filesOf(PRIMITIVE_OF_PAGE[name] ?? name);
-    if (files.size === 0) {
-      continue;
-    }
-    const path = `${PAGES}/${page}`;
-    let text = await Bun.file(path).text();
-    for (const row of rowsOf(page, text, files, name in PRIMITIVE_OF_PAGE)) {
-      const label = `${page} / ${row.section} / ${row.names.join(", ")}`;
-      if (row.source === undefined) {
-        skipped.push(label);
-      } else if (norm(row.content) !== row.source) {
-        mismatches.push({
-          from: norm(row.content),
-          name: row.names.join(", "),
-          page,
-          section: row.section,
-          to: row.source,
-        });
-        if (UNSAFE_IN_MDX.test(row.source)) {
-          skipped.push(`${label}: braces or angle brackets outside code`);
-        } else {
-          text = text.replace(
-            row.row,
-            row.row.replace(
-              `>${row.content}</TypeRow>`,
-              `>${row.source}</TypeRow>`
-            )
-          );
+  const pages = [
+    ...(await Array.fromAsync(new Glob("**/*.mdx").scan(PAGES))).map(
+      (page) => ({ dir: PAGES, page })
+    ),
+    ...(await Array.fromAsync(new Glob("*.mdx").scan(REACT_PAGES))).map(
+      (page) => ({ dir: REACT_PAGES, page: `react/${page}` })
+    ),
+  ];
+  await Promise.all(
+    pages.map(async ({ dir, page }) => {
+      const name = page.split("/").pop()?.replace(".mdx", "") ?? "";
+      const files = await filesOf(PRIMITIVE_OF_PAGE[name] ?? name);
+      if (files.size === 0) {
+        return;
+      }
+      const path = `${dir}/${page.replace("react/", "")}`;
+      let text = await Bun.file(path).text();
+      for (const row of rowsOf(page, text, files, name in PRIMITIVE_OF_PAGE)) {
+        const label = `${page} / ${row.section} / ${row.names.join(", ")}`;
+        if (row.source === undefined) {
+          skipped.push(label);
+        } else if (norm(row.content) !== row.source) {
+          mismatches.push({
+            from: norm(row.content),
+            name: row.names.join(", "),
+            page,
+            section: row.section,
+            to: row.source,
+          });
+          if (UNSAFE_IN_MDX.test(row.source)) {
+            skipped.push(`${label}: braces or angle brackets outside code`);
+          } else {
+            text = text.replace(
+              row.row,
+              row.row.replace(
+                `>${row.content}</TypeRow>`,
+                `>${row.source}</TypeRow>`
+              )
+            );
+          }
         }
       }
-    }
-    if (write) {
-      await Bun.write(path, text);
-    }
-  }
+      if (write) {
+        await Bun.write(path, text);
+      }
+    })
+  );
   return { mismatches, skipped };
 }
 

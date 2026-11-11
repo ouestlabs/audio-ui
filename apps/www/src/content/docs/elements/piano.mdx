@@ -1,0 +1,35 @@
+---
+title: Piano
+description: "The <audio-ui-piano> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
+---
+
+<Module from="@audio-ui/elements/piano" />
+
+## Usage
+
+`<audio-ui-piano>` is a playable keyboard with `role="group"`. A key sounds while pressed, by pointer or with Enter and Space. Dragging glides across keys, and each pointer holds its own key, so chords can be played on touch screens. The keys share one tab stop and are navigated with the arrow keys, by octave with Shift.
+
+<ElementsPreview name="piano" />
+
+<TypeTable>
+<TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive. 60 is middle C.</TypeRow>
+<TypeRow name={"max-pitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
+<TypeRow name={"pitches"} type={"string"}>Restricts the keys to these pitches, separated by spaces. The `pitches` property accepts an array.</TypeRow>
+<TypeRow name={"active-notes"} type={"string"}>Pitches lit externally, such as by MIDI input. The `activeNotes` property accepts an array.</TypeRow>
+<TypeRow name={"layout"} type={"\"keyboard\" | \"even\""} default={"\"keyboard\""}>Key sizes: piano proportions, or equal shares as on a piano roll.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}>Vertical places the low end at the bottom.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+| Event | Detail | Description |
+| --- | --- | --- |
+| `noteon` | `{ pitch, velocity, reason, event }` | A key starts sounding. `event` is the originating pointer or keyboard event. `preventDefault()` keeps it silent |
+| `noteoff` | `{ pitch, reason, event }` | A key stops sounding |
+
+| Part | Description |
+| --- | --- |
+| `<audio-ui-piano-keys>` | Generates an `<audio-ui-piano-key>` per pitch, lowest first, from its `<template>`. Renders with `display: contents` |
+| `<audio-ui-piano-key>` | A key, a button positioned for its `pitch` and labelled with its name ("C4"). `data-color` is `black` or `white` |
+| `<audio-ui-piano-key-label>` | The name of its key, hidden from assistive technology |
+
+The same control in React, and its parts' props: [Piano](/docs/react/piano).

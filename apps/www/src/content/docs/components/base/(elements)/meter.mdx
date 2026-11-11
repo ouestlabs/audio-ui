@@ -22,22 +22,7 @@ Shows audio levels for a stereo output, a channel strip or any multi-channel sou
 
 ## Anatomy
 
-Import the primitive and assemble its parts.
-
-```tsx
-import { Meter } from "@audio-ui/react";
-
-<Meter.Root>
-  <Meter.Channels>
-    {(index) => (
-      <Meter.Channel index={index}>
-        <Meter.Indicator />
-        <Meter.Peak />
-      </Meter.Channel>
-    )}
-  </Meter.Channels>
-</Meter.Root>
-```
+It is built on the headless [Meter](/docs/react/meter) of `@audio-ui/react`: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -98,72 +83,7 @@ To read the levels in React as well, for a numeric readout for example, use `use
 
 ## API reference
 
-### Root
-
-Groups the channels of a level meter. Levels come either from `value` (and `peak`) as React props, or from a live `source`: with a source the meter writes each frame straight to the DOM, so a signal updating 60 times a second never re-renders React. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"clipThreshold"} type={"number"} default={"0"}>Level at or above which a channel is clipping.</TypeRow>
-<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each level for `Meter.Value` and the channels' `aria-valuetext`. Defaults to one decimal.</TypeRow>
-<TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
-<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
-<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
-<TypeRow name={"orientation"} type={"Orientation"} default={"\"vertical\""}></TypeRow>
-<TypeRow name={"peak"} type={"readonly number[]"}>Peak-hold level per channel. Timing and decay live outside the primitive.</TypeRow>
-<TypeRow name={"scale"} type={"\"linear\" | \"iec\" | (level: number) => number"} default={"\"linear\""}>How levels are spread along the length: evenly, as digital peak meters do with more room at the top (`"iec"`), or by your own increasing curve.</TypeRow>
-<TypeRow name={"warnThreshold"} type={"number"}>Level at or above which a channel is in its warning zone, below the clip threshold: `data-warning`. Unset, there is no warning zone.</TypeRow>
-<TypeRow name={"source"} type={"Source"}>A live signal painted outside React; takes precedence over `value` and `peak`.</TypeRow>
-<TypeRow name={"value"} type={"readonly number[]"}>Level per channel; the array length is the channel count.</TypeRow>
-</TypeTable>
-
-### Channels
-
-Renders one child per channel.
-
-<TypeTable>
-<TypeRow name={"children"} type={"(index: number, channelCount: number) => React.ReactNode"}></TypeRow>
-</TypeTable>
-
-### Channel
-
-One channel of the meter, a `role="meter"`: name it with `aria-label` or a `Meter.Label`. Carries `data-clipping` at or above the clip threshold. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"getAriaValueText"} type={"(formattedValue: string, value: number, index: number) => string"}>Returns the channel's `aria-valuetext`, e.g. `"-6 dB"`. Defaults to the formatted level.</TypeRow>
-<TypeRow name={"index"} type={"number"}>Index of the channel in the levels.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-clipping"}>Whether the level is at or above the clip threshold.</TypeRow>
-</TypeTable>
-
-### Indicator
-
-The lit part of the channel, scaled to the level. Renders a `<div>` element.
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-clipping"}>Whether the level is at or above the clip threshold.</TypeRow>
-</TypeTable>
-
-### Peak
-
-The peak-hold mark, positioned at the channel's peak level; hidden while the channel has none. Renders a `<div>` element.
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-clipping"}>Whether the level is at or above the clip threshold.</TypeRow>
-</TypeTable>
-
-### Value
-
-The channel's formatted level (`format`/`locale` on Root). With a live `source` only the default text is kept current, not a `children` function. Renders a `<span>` element.
-
-### Mark
-
-A graduation of the level scale at `value`, such as -18 dB: placed along the meter's length from its minimum, upward for a vertical meter and rightward for a horizontal one. Sits directly in `Root`, beside the channels. Decorative: each channel announces its own level. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"value"} type={"number"}>Where the mark sits, between `min` and `max`.</TypeRow>
-</TypeTable>
+The props of the headless parts are on [Meter](/docs/react/meter#api-reference).
 
 ### Registry component
 

@@ -24,21 +24,7 @@ Plays or shows notes, for a virtual instrument, a MIDI visualizer or a chord ref
 
 ## Anatomy
 
-Import the primitive and assemble its parts.
-
-```tsx
-import { Piano } from "@audio-ui/react";
-
-<Piano.Root>
-  <Piano.Keys>
-    {(pitch) => (
-      <Piano.Key pitch={pitch}>
-        <Piano.KeyLabel />
-      </Piano.Key>
-    )}
-  </Piano.Keys>
-</Piano.Root>
-```
+It is built on the headless [Piano](/docs/react/piano) of `@audio-ui/react`: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -103,54 +89,7 @@ The keys share one tab stop. On the focused key:
 
 ## API reference
 
-### Root
-
-A keyboard to play: every key sounds while pressed, by pointer or from the keyboard. Dragging across the keys glides from one to the next, and each pointer holds its own key, so chords can be played on a touch screen. It is laid out like a piano, or with `layout="even"` as one equal share per key, the way a piano roll's rows are; `orientation="vertical"` puts the low end at the bottom. The keys are one tab stop, walked with the arrow keys. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"activeNotes"} type={"readonly number[]"}>Pitches lit from elsewhere, such as a MIDI input or a sequencer, on top of the keys pressed here.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
-<TypeRow name={"layout"} type={"Layout"} default={"\"keyboard\""}>How the keys share the length: like a piano, or one equal share each.</TypeRow>
-<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
-<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive: 60 is middle C.</TypeRow>
-<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails: NoteOffEventDetails) => void"}>Fires when a key is released, the pointer glides off it, or it loses focus while held.</TypeRow>
-<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails: NoteOnEventDetails) => void"}>Fires when a key is pressed or glided onto. `eventDetails.cancel()` keeps it silent.</TypeRow>
-<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}></TypeRow>
-<TypeRow name={"pitches"} type={"readonly number[]"}>Only these pitches get keys, instead of `minPitch`…`maxPitch`.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-</TypeTable>
-
-### Keys
-
-Renders `children` once per key, lowest first: the place to put a `Piano.Key` for each pitch. Renders no element of its own.
-
-<TypeTable>
-<TypeRow name={"children"} type={"(pitch: number) => React.ReactNode"}></TypeRow>
-</TypeTable>
-
-### Key
-
-One key, placed along the keyboard for its pitch. It sounds while pressed: by pointer through the keyboard, or with Enter or Space while focused. Its accessible name defaults to the pitch, such as "C4". Renders a `<button>` element.
-
-<TypeTable>
-<TypeRow name={"pitch"} type={"number"}>The MIDI pitch this key plays.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-active"}>Whether the key is sounding: pressed here, or listed in `activeNotes`.</TypeRow>
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-</TypeTable>
-
-### KeyLabel
-
-The name of the key it sits in, such as "C4". Hidden from assistive technology, which reads the key's own name. Renders a `<span>` element.
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-</TypeTable>
+The props of the headless parts are on [Piano](/docs/react/piano#api-reference).
 
 ### Registry component
 

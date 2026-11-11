@@ -180,8 +180,19 @@ export function Module({ from }: { from: string }) {
       <Code code={importLine(packageModule)} />
       <Facts
         rows={[
-          ["Adapters", <Items key="adapters" names={packageModule.adapters} />],
-          ["Used by", <Items key="used" names={packageModule.usedBy} />],
+          ...(packageModule.adapters.length > 0
+            ? ([
+                [
+                  "Adapters",
+                  <Items key="adapters" names={packageModule.adapters} />,
+                ],
+              ] as [string, React.ReactNode][])
+            : []),
+          ...(packageModule.usedBy.length > 0
+            ? ([
+                ["Used by", <Items key="used" names={packageModule.usedBy} />],
+              ] as [string, React.ReactNode][])
+            : []),
           [
             "Source",
             <Sources

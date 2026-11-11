@@ -24,15 +24,7 @@ Triggers sounds, for a drum machine, a sampler or a clip launcher. The registry 
 
 ## Anatomy
 
-Import the primitive and assemble its parts.
-
-```tsx
-import { Pad } from "@audio-ui/react";
-
-<Pad.Root>
-  <Pad.Item value="kick">Kick</Pad.Item>
-</Pad.Root>
-```
+It is built on the headless [Pad](/docs/react/pad) of `@audio-ui/react`: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -98,36 +90,7 @@ The pads share one tab stop. On the focused pad:
 
 ## API reference
 
-### Root
-
-A grid of pads to strike: each one sounds while held, by pointer or from the keyboard, and each pointer holds its own pad, so several can be played at once on a touch screen. A strike is harder where a pen or screen presses harder, or else toward the top of the pad. The pads are one tab stop: the left and right arrows walk them in reading order, the up and down arrows by a row of `columns`. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"activePads"} type={"readonly string[]"}>Pads lit from elsewhere, such as a sequencer or a MIDI input, on top of the ones held here.</TypeRow>
-<TypeRow name={"columns"} type={"number"} default={"4"}>How many pads a row holds: what the up and down arrows move by. Lay the grid out to match.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
-<TypeRow name={"onPadOff"} type={"(value: string, eventDetails: OffEventDetails) => void"}>Fires when a pad is released, loses focus while held, or is choked by another pad of its group (`reason: "choke"`).</TypeRow>
-<TypeRow name={"onPadOn"} type={"(value: string, eventDetails: OnEventDetails) => void"}>Fires when a pad is struck, with `eventDetails.velocity` from 0 to 1. `eventDetails.cancel()` keeps it silent.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-</TypeTable>
-
-### Item
-
-One pad. It sounds while held: by pointer, or with Enter or Space while focused. Its accessible name comes from its content, or `aria-label`. How hard it was last struck is the `--pad-velocity` CSS variable, from 0 to 1. Renders a `<button>` element.
-
-<TypeTable>
-<TypeRow name={"chokeGroup"} type={"string"}>Pads sharing a choke group stop each other: striking one stops the last one struck, held or still ringing.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
-<TypeRow name={"value"} type={"string"}>What identifies this pad in `onPadOn`, `onPadOff` and `activePads`.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-active"}>Whether the pad is sounding: held here, or listed in `activePads`.</TypeRow>
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-</TypeTable>
+The props of the headless parts are on [Pad](/docs/react/pad#api-reference).
 
 ### Registry component
 

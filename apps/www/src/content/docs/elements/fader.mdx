@@ -1,0 +1,38 @@
+---
+title: Fader
+description: "The <audio-ui-fader> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
+---
+
+<Module from="@audio-ui/elements/fader" />
+
+## Usage
+
+`<audio-ui-fader>` is the root of a linear control, with audio defaults: vertical, from -60 to +6. It has `role="group"`, labelled by its label part.
+
+<ElementsPreview name="fader" />
+
+<TypeTable>
+<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
+<TypeRow name={"step"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"large-step"} type={"number"} default={"10"}>Step for Page Up, Page Down and Shift + Arrow keys.</TypeRow>
+<TypeRow name={"value"} type={"number"}>The current value. Mirrored by the `value` property.</TypeRow>
+<TypeRow name={"default-value"} type={"number"}>The initial value, restored by a double click, Alt + click or Delete. Defaults to the midpoint.</TypeRow>
+<TypeRow name={"anchor"} type={"number"}>The value the indicator fills from, such as `0` on a -1 to 1 pan. Defaults to `min`.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}></TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for the value part and `aria-valuetext`.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser locale.</TypeRow>
+<TypeRow name={"name"} type={"string"}>The form field name.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+| Part | Description |
+| --- | --- |
+| `<audio-ui-fader-control>` | The interactive area. A press on the track jumps to the pointer; a press on the thumb drags from where it was grabbed; the wheel steps |
+| `<audio-ui-fader-track>` | The full range of travel |
+| `<audio-ui-fader-indicator>` | The filled range, from `min` or `anchor` to the value |
+| `<audio-ui-fader-thumb>` | The draggable thumb, positioned at the value, containing the native range input |
+| `<audio-ui-fader-value>` | The formatted value |
+| `<audio-ui-fader-label>` | Labels the group, and the input when the thumb has no accessible name |
+
+The same control in React, and its parts' props: [Fader](/docs/react/fader).

@@ -17,7 +17,7 @@ export const MANIFEST = `${WEB}/src/lib/docs/content/entries.generated.json`;
 const FOLDERS = ["audio", "devices", "hooks", "components", "lib"];
 
 const EXPORT =
-  /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export (?:async )?(function|const|interface|type|class) (\w+)/g;
+  /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export (?:declare )?(?:async )?(function|const|interface|type|class) (\w+)/g;
 const JSDOC_LINE = /^\s*\*\s?/gm;
 const JSDOC_EDGES = /^\/\*\*|\*\/$/g;
 const FIRST_SENTENCE = /^(.+?\.)(?:\s|$)/;
@@ -26,7 +26,7 @@ const WHITESPACE = /\s+/g;
 const EXTENSION = /\.tsx?$/;
 
 export interface EntryExport {
-  kind: "class" | "const" | "function" | "interface" | "type";
+  kind: "class" | "const" | "function" | "interface" | "namespace" | "type";
   name: string;
   summary: string;
 }
@@ -132,13 +132,23 @@ export async function buildEntries(): Promise<Entry[]> {
 const PACKAGES = new URL("../../../packages", import.meta.url).pathname;
 const REPOSITORY = new URL("../../..", import.meta.url).pathname;
 export const MODULES_MANIFEST = `${WEB}/src/lib/docs/content/package-modules.generated.json`;
-const RE_EXPORT = /export (?:type )?\{([^}]*)\} from "(\.[^"]+)";/g;
-const NAME_IN_BRACES = /^(?:type\s+)?(\w+)$/;
+// `export { a, b as c } from "x"`, `export * as Name from "x"` and `export * from "x"`.
+const EXPORT_FROM =
+  /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export\s+(?:type\s+)?(?:\{([^}]*)\}|\*\s+as\s+(\w+)|(\*))\s+from\s+"([^"]+)";/g;
+// One name of an export list: `a`, `type a` or `a as b`.
+const LISTED = /^(?:type\s+)?(\w+)(?:\s+as\s+(\w+))?$/;
+// `export default function name`, with its JSDoc, in a module or its declarations.
+const DEFAULT_EXPORT =
+  /(\/\*\*(?:(?!\*\/)[\s\S])*\*\/\s*)?export\s+default\s+(?:declare\s+)?(?:async\s+)?(function|class)?/;
+const OUR_MODULE = /^@audio-ui\/(core|engine)(?:\/([a-z-]+))?$/;
+const SCRIPT_EXTENSION = /\.[cm]?js$/;
 
-/** The framework-agnostic packages whose modules have a page of their own: the folder of each under `packages/`. */
+/** The published packages whose modules have a page of their own: the folder of each under `packages/`. */
 const MODULE_PACKAGES = [
   { folder: "core", name: "@audio-ui/core" },
   { folder: "engine", name: "@audio-ui/engine" },
+  { folder: "elements", name: "@audio-ui/elements" },
+  { folder: "ui", name: "@audio-ui/react" },
 ] as const;
 
 /** A module of a published package, as its page heads it. */
@@ -160,38 +170,171 @@ const read = (path: string) => Bun.file(path).text();
 const resolvePath = (from: string, specifier: string) =>
   new URL(specifier, `file://${from}`).pathname;
 
-/** Where `name`, exported by the file at `path`, is declared: followed through `export { … } from` until a file declares it. */
-async function declarationOf(
-  path: string,
-  name: string
-): Promise<{ declared: EntryExport; path: string }> {
-  const source = await read(path);
-  const declared = exportsOf(source).find((each) => each.name === name);
-  if (declared) {
-    return { declared, path };
-  }
-  for (const match of source.matchAll(RE_EXPORT)) {
-    const names = (match[1] ?? "")
-      .split(",")
-      .map((each) => NAME_IN_BRACES.exec(each.trim())?.[1])
-      .filter(Boolean);
-    if (names.includes(name)) {
-      return declarationOf(resolvePath(path, match[2] ?? ""), name);
-    }
-  }
-  throw new Error(`${name} is exported by ${path} but declared nowhere`);
+interface Resolved {
+  declared: EntryExport;
+  path: string;
 }
 
-/** A module's exports in the order its entry file lists them, each from where it is declared. */
-async function moduleExports(entry: string) {
-  const source = await read(entry);
-  const names = [...source.matchAll(RE_EXPORT)].flatMap((match) =>
-    (match[1] ?? "")
-      .split(",")
-      .map((each) => NAME_IN_BRACES.exec(each.trim())?.[1] ?? "")
-      .filter(Boolean)
+/** The file a specifier names from the file at `from`: a relative path, a module of ours by its source, another package by its declarations, or nothing. */
+async function fileOf(from: string, specifier: string): Promise<string | null> {
+  if (specifier.startsWith(".")) {
+    return resolvePath(from, specifier);
+  }
+  const ours = OUR_MODULE.exec(specifier);
+  if (ours) {
+    const [, pkg, sub] = ours;
+    if (pkg === "engine") {
+      return `${PACKAGES}/engine/src/${sub}/index.ts`;
+    }
+    if (!sub) {
+      return `${PACKAGES}/core/src/index.ts`;
+    }
+    return sub === "internal"
+      ? `${PACKAGES}/core/src/internal.ts`
+      : `${PACKAGES}/core/src/primitives/${sub}/index.ts`;
+  }
+  try {
+    const entry = Bun.resolveSync(
+      specifier,
+      from.slice(0, from.lastIndexOf("/"))
+    );
+    const types = entry.replace(SCRIPT_EXTENSION, ".d.ts");
+    return (await Bun.file(types).exists()) ? types : null;
+  } catch {
+    return null;
+  }
+}
+
+/** `name` as the file declares it itself, or nothing: its default export too. */
+function ownDeclaration(
+  source: string,
+  path: string,
+  name: string
+): Resolved | null {
+  const found = name === "default" ? DEFAULT_EXPORT.exec(source) : null;
+  if (found) {
+    const kind = found[2] === "class" ? "class" : "function";
+    return { declared: { kind, name, summary: summaryOf(found[1]) }, path };
+  }
+  const own = exportsOf(source).find((each) => each.name === name);
+  return own ? { declared: own, path } : null;
+}
+
+/** Where an `export … from` statement sends `name`: the name in the module it reads, or, for `* as name`, the namespace itself. */
+function leadsOf(
+  [, , list, namespace, star, specifier = ""]: RegExpMatchArray,
+  name: string
+): { imported: string; namespace: boolean; specifier: string }[] {
+  if (namespace) {
+    return namespace === name
+      ? [{ imported: name, namespace: true, specifier }]
+      : [];
+  }
+  if (star) {
+    return [{ imported: name, namespace: false, specifier }];
+  }
+  return (list ?? "")
+    .split(",")
+    .map((item) => LISTED.exec(item.trim()))
+    .filter(
+      (match): match is RegExpExecArray =>
+        match !== null && (match[2] ?? match[1]) === name
+    )
+    .map((match) => ({
+      imported: match[1] ?? name,
+      namespace: false,
+      specifier,
+    }));
+}
+
+/** Where `name`, exported by the file at `path`, is declared: followed through every kind of re-export until a file declares it. */
+async function declarationOf(
+  path: string,
+  name: string,
+  seen = new Set<string>()
+): Promise<Resolved | null> {
+  const key = `${path}#${name}`;
+  if (seen.has(key)) {
+    return null;
+  }
+  seen.add(key);
+  const source = await read(path).catch(() => "");
+  const own = ownDeclaration(source, path, name);
+  if (own) {
+    return own;
+  }
+  const leads = [...source.matchAll(EXPORT_FROM)].flatMap((match) =>
+    leadsOf(match, name)
   );
-  return Promise.all(names.map((name) => declarationOf(entry, name)));
+  const found = await Promise.all(
+    leads.map(async (lead): Promise<Resolved | null> => {
+      if (lead.namespace) {
+        const summary = `The ${name} primitive's parts, \`${name}.Root\` and the rest.`;
+        return { declared: { kind: "namespace", name, summary }, path };
+      }
+      const target = await fileOf(path, lead.specifier);
+      return target ? declarationOf(target, lead.imported, seen) : null;
+    })
+  );
+  // The first statement that leads to a declaration is the one that exports it.
+  return found.find((each) => each !== null) ?? null;
+}
+
+/** What one `export … from` statement of `entry` exports, each from where it is declared. */
+async function statementExports(
+  entry: string,
+  [, doc, list, namespace, star, specifier = ""]: RegExpMatchArray
+): Promise<Resolved[]> {
+  const target = await fileOf(entry, specifier);
+  if (!target) {
+    throw new Error(
+      `${entry} re-exports ${specifier}, which resolves to nothing`
+    );
+  }
+  if (namespace) {
+    return (await moduleExports(target)).map((member) => ({
+      declared: {
+        ...member.declared,
+        name: `${namespace}.${member.declared.name}`,
+      },
+      path: member.path,
+    }));
+  }
+  if (star) {
+    return moduleExports(target);
+  }
+  const listed = (list ?? "")
+    .split(",")
+    .map((item) => LISTED.exec(item.trim()))
+    .filter((match) => match !== null);
+  return Promise.all(
+    listed.map(async ([, imported = "", exported = imported]) => {
+      const found = await declarationOf(target, imported);
+      if (!found) {
+        throw new Error(
+          `${exported} is exported by ${entry} but declared nowhere`
+        );
+      }
+      // A re-export documented where it is made speaks for a declaration that is not.
+      const summary = found.declared.summary || summaryOf(doc);
+      return {
+        declared: { ...found.declared, name: exported, summary },
+        path: found.path,
+      };
+    })
+  );
+}
+
+/** A module's exports in the order its file lists them, each from where it is declared, a namespace's members as `Name.member`. */
+async function moduleExports(entry: string): Promise<Resolved[]> {
+  const source = await read(entry);
+  const own = exportsOf(source).map((declared) => ({ declared, path: entry }));
+  const statements = await Promise.all(
+    [...source.matchAll(EXPORT_FROM)].map((match) =>
+      statementExports(entry, match)
+    )
+  );
+  return [...own, ...statements.flat()];
 }
 
 /** The files under `folder` that import `from`, as their paths. */
@@ -256,7 +399,9 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
             package: name,
             sources: [
               ...new Set(
-                resolved.map((each) => each.path.replace(REPOSITORY, ""))
+                resolved
+                  .filter((each) => each.path.startsWith(PACKAGES))
+                  .map((each) => each.path.replace(REPOSITORY, ""))
               ),
             ],
             usedBy: itemFiles
