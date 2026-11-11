@@ -2652,7 +2652,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "vibe-device",
-    registryDependencies: [],
+    registryDependencies: ["@audio-ui/oversampling"],
     type: "registry:lib",
   },
   {

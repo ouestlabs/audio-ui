@@ -1,11 +1,7 @@
 "use client";
 
 import { cents } from "@audio/note";
-import {
-  detectPitch,
-  type PitchDetectionOptions,
-  type PitchEstimate,
-} from "@audio-ui/core/pitch";
+import yin from "@audio/pitch-yin";
 import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 
@@ -24,13 +20,36 @@ export interface PitchReading {
   pitch: number;
 }
 
-export interface UsePitchOptions extends PitchDetectionOptions {
+/** A signal's loudness as an RMS level, from 0 to 1. */
+const rms = (samples: Float32Array) => {
+  let energy = 0;
+  for (const sample of samples) {
+    energy += sample * sample;
+  }
+  return Math.sqrt(energy / samples.length);
+};
+
+/** What a detection found: the pitch and how periodic the sound is there. */
+interface PitchEstimate {
+  confidence: number;
+  frequency: number;
+}
+
+export interface UsePitchOptions {
   /** How long the last note stays after the sound stops, in milliseconds, so a string's decay does not flicker. @default 600 */
   holdMs?: number;
+  /** The highest pitch looked for, in hertz. @default 2000 */
+  maxHz?: number;
   /** How many recent detections the reading is the median of: it drops the octave jumps a plucked string starts with. @default 5 */
   median?: number;
+  /** The lowest pitch looked for, in hertz: lower costs more, and needs at least two of its periods in the samples. @default 40 */
+  minHz?: number;
+  /** How quiet the signal may be, as an RMS level from 0 to 1, before nothing is detected. @default 0.01 */
+  minLevel?: number;
   /** The frequency of A4 in hertz. @default 440 */
   reference?: number;
+  /** YIN's threshold: how aperiodic a period may be and still count. Lower is stricter. @default 0.1 */
+  threshold?: number;
 }
 
 /** Detections per second: enough for a needle, at a third of 60 frames' cost. */
@@ -75,12 +94,12 @@ export function usePitch(
   analyser: AnalyserNode | null,
   {
     holdMs = 600,
-    maxHz,
+    maxHz = 2000,
     median = 5,
-    minHz,
-    minLevel,
+    minHz = 40,
+    minLevel = 0.01,
     reference = 440,
-    threshold,
+    threshold = 0.1,
   }: UsePitchOptions = {}
 ): Source<PitchReading | null> {
   const [source] = useState(() => createSource<PitchReading | null>(null));
@@ -103,12 +122,18 @@ export function usePitch(
       }
       lastRun = now;
       analyser.getFloatTimeDomainData(samples);
-      const found = detectPitch(samples, analyser.context.sampleRate, {
-        maxHz,
-        minHz,
-        minLevel,
-        threshold,
-      });
+      const heard =
+        rms(samples) >= minLevel
+          ? yin(samples, {
+              fs: analyser.context.sampleRate,
+              maxFreq: maxHz,
+              minFreq: minHz,
+              threshold,
+            })
+          : null;
+      const found: PitchEstimate | null = heard
+        ? { confidence: heard.clarity, frequency: heard.freq }
+        : null;
       if (found) {
         lastHeard = now;
         const reading = steadied(recent, found, median, reference);

@@ -360,7 +360,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "tuner"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio-ui/react", "@audio/note", "@audio/pitch-yin"],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
     files: [

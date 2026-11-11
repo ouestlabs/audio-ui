@@ -612,6 +612,46 @@ export const checks: Checks = {
       await own.click();
       assert((await own.innerText()) === "-∞", "a click did not clear it");
     },
+  "MIX-026: a ducker's Key from lists the other tracks of clips, keeps the one picked, and undo takes it back":
+    async (browser) => {
+      const page = await open(browser);
+      await page.getByText("3 Audio", { exact: true }).first().click();
+      await page.getByRole("tab", { name: "Devices" }).click();
+      const library = page.getByRole("region", { name: "Library" });
+      await library.getByLabel("Search the devices").fill("Ducker");
+      await library.getByRole("option").first().dblclick();
+      const devices = page.getByRole("region", { name: "Devices" });
+      const key = devices.getByRole("combobox", { name: "Key from" });
+      await key.waitFor({ timeout: 5000 });
+      assert(
+        ((await key.textContent()) ?? "").includes("Own sound"),
+        "a new ducker listens to its own sound"
+      );
+      await key.click();
+      const options = await page.getByRole("option").allTextContents();
+      assert(
+        options.includes("4 Audio") && !options.includes("3 Audio"),
+        `Key from lists ${options.join(", ")}`
+      );
+      await page.getByRole("option", { name: "4 Audio" }).click();
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector('[aria-label="Key from"]')
+            ?.textContent?.includes("4 Audio"),
+        undefined,
+        { timeout: 5000 }
+      );
+      await page.keyboard.press("ControlOrMeta+z");
+      await page.waitForFunction(
+        () =>
+          document
+            .querySelector('[aria-label="Key from"]')
+            ?.textContent?.includes("Own sound"),
+        undefined,
+        { timeout: 5000 }
+      );
+    },
   "MIX-025: the main track reads the mix's loudness in LUFS until it is clicked":
     async (browser) => {
       const page = await open(browser);

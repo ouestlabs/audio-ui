@@ -80,6 +80,6 @@ function reaches(
 export const takesPlay = (name: string) => reaches(name, PLAY_SWITCH);
 
 /** The previews that can show your own sound: their bar gets a button that turns the microphone on. */
-const MICROPHONE = new Set(["needle-meter-demo", "tuner-demo"]);
+const MICROPHONE = new Set(["needle-meter-demo"]);
 
 export const takesMicrophone = (name: string) => MICROPHONE.has(name);

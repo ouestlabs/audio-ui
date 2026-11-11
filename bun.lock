@@ -239,8 +239,10 @@
         "@audio/loudness-truepeak": "catalog:",
         "@audio/midi-parse": "catalog:",
         "@audio/midi-write": "catalog:",
+        "@audio/mir-key": "catalog:",
         "@audio/musicxml": "catalog:",
         "@audio/note": "catalog:",
+        "@audio/pitch-yin": "catalog:",
         "@audio/resample-sinc": "catalog:",
         "@audio/reverb-dattorro": "catalog:",
         "@audio/reverb-fdn": "catalog:",
@@ -329,7 +331,7 @@
     },
     "packages/core": {
       "name": "@audio-ui/core",
-      "version": "0.25.0",
+      "version": "0.26.0",
       "dependencies": {
         "@audio/note": "1.0.3",
       },
@@ -342,9 +344,9 @@
     },
     "packages/elements": {
       "name": "@audio-ui/elements",
-      "version": "0.1.1",
+      "version": "0.1.2",
       "dependencies": {
-        "@audio-ui/core": "^0.25.0",
+        "@audio-ui/core": "^0.26.0",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
@@ -374,9 +376,9 @@
     },
     "packages/ui": {
       "name": "@audio-ui/react",
-      "version": "0.13.3",
+      "version": "0.13.4",
       "dependencies": {
-        "@audio-ui/core": "^0.25.0",
+        "@audio-ui/core": "^0.26.0",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
@@ -445,8 +447,10 @@
     "@audio/loudness-truepeak": "1.1.7",
     "@audio/midi-parse": "1.0.3",
     "@audio/midi-write": "1.0.3",
+    "@audio/mir-key": "1.0.2",
     "@audio/musicxml": "0.1.0",
     "@audio/note": "1.0.3",
+    "@audio/pitch-yin": "1.0.6",
     "@audio/resample-sinc": "1.3.0",
     "@audio/reverb-dattorro": "1.1.3",
     "@audio/reverb-fdn": "1.1.3",
@@ -646,11 +650,15 @@
 
     "@audio/midi-write": ["@audio/midi-write@1.0.3", "", {}, "sha512-WJI3FBTT7+LBwkp2CH5/6KDEcD0kjINztn7SzcDhYQeJJrlifkiq92yDKfdew+E9o4oDqY3oI3VWMiunt0JquQ=="],
 
+    "@audio/mir-key": ["@audio/mir-key@1.0.2", "", {}, "sha512-b/WZ2Sw5OSMnWY4u1lDXlY2QobnN/SHrQl0jc3oQMwNm2wpFOnpl/9T5KRI54WjQNOAYiX/LBygvssS8qKKSxw=="],
+
     "@audio/musicxml": ["@audio/musicxml@0.1.0", "", {}, "sha512-naW+wO4PPrGNUS/xcPrna/QGX51p5H7/kJS95FOxtWkFStqs35eW8LQeDIojAVnbOggTuxZ3y5FDlT7yS2z5xw=="],
 
     "@audio/note": ["@audio/note@1.0.3", "", {}, "sha512-YwKuvpq6t9O91CNLJhvd/AyqZRSMmxD9DDlGy/kNvpAcHS5+3QFvJeQ+uC33caxtCOksCnX0e1Guch7oYZ8dOQ=="],
 
     "@audio/onset": ["@audio/onset@1.0.3", "", { "dependencies": { "fourier-transform": "^2.2.0", "window-function": "^3.0.0" } }, "sha512-zt/RDdOt6WhSbtd+GCtCg62PvNFynjR3/Sm0suJJfRcRVXM3VDWz3E6Sz27oSOOyEx8Ds6GWJg1XRqY/Wp8J3Q=="],
+
+    "@audio/pitch-yin": ["@audio/pitch-yin@1.0.6", "", {}, "sha512-HRJM6g/tgMBKDnFeXGUgy5xj1RWcevr1vzokyQO+7fpi/+aMTU7gHVU7Qb7QCwyo38hibeWSI/oLkcH9lQCzcA=="],
 
     "@audio/resample-polyphase": ["@audio/resample-polyphase@1.1.0", "", {}, "sha512-mSPyTABEzAcF+/kI2gys0+tI9GCJsYQ81tVpzY81rvLCHbop2HVFsbJLVRHHXD8mTGX9c27ggkthF+QnnHLqSA=="],
 

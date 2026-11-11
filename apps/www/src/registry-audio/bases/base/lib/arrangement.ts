@@ -137,6 +137,8 @@ export interface TrackDevice {
   id: string;
   /** An instrument comes first on a MIDI track, before every effect. */
   instrument?: boolean;
+  /** For a device that takes a sidechain (its description says `sidechain`): the track it listens to, that track's sound after its devices and before its volume, so a muted kick still keys. None: it follows its own sound. */
+  key?: string;
   /** A device switched off passes the sound on unchanged. @default true */
   on?: boolean;
   /** A rack's chains and macros: what a device of the kind `audioui.rack`, `audioui.instrument-rack` or `audioui.drum-rack` holds instead of a state of its own. */

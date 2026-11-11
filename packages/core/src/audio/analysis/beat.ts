@@ -13,16 +13,12 @@ const RISE_SHARE = 0.25;
 /** The slowest and fastest beat a tempo is looked for at. */
 const MIN_BPM = 60;
 const MAX_BPM = 200;
-/** The tempo two that fit are told apart by: the one nearer this, an octave weighing as much as the beat's support. */
-const CENTER_BPM = 120;
-/** How sure a tempo must be, as how much of the rises the beat explains, to be given. */
-const MIN_CONFIDENCE = 0.2;
 /** Two transients are this far apart at least, in seconds. */
 const MIN_GAP_SECONDS = 0.05;
 /** How far around a rise its local level is read, in seconds. */
 const LOCAL_SECONDS = 0.25;
 
-/** A recording's tempo, as `estimateTempo` reads it. */
+/** A recording's tempo, as `@audio/beat-detect` reads it and the registry's `analyzeBeat` fits it to the transients. */
 export interface TempoEstimate {
   bpm: number;
   /** How much of the recording's rises fall on that beat, from 0 to 1. */
@@ -158,114 +154,6 @@ function sampleOf(
     }
   }
   return frame * hop;
-}
-
-/** How strongly the rises fall on a beat of `period` frames from `phase`, the rises read between whole frames. */
-function combAt(strength: Float32Array, period: number, phase: number) {
-  let sum = 0;
-  let beats = 0;
-  for (let at = phase; at < strength.length - 1; at += period) {
-    const index = Math.floor(at);
-    const t = at - index;
-    sum +=
-      (strength[index] as number) * (1 - t) +
-      (strength[index + 1] as number) * t;
-    beats += 1;
-  }
-  return beats > 0 ? sum / beats : 0;
-}
-
-/** The weight of a tempo by how far it lies from `CENTER_BPM`, an octave away weighing a little over half. */
-const octaveWeight = (bpm: number) =>
-  Math.exp(-0.5 * Math.log2(bpm / CENTER_BPM) ** 2);
-
-/**
- * The tempo of `channels`: the beat period their rises repeat at most, in
- * 60 to 200 BPM, weighed toward 120 when two octaves fit, then tuned and
- * placed where its beats meet the most rises. `null` when no beat explains
- * enough of them: noise, a single hit.
- */
-export function estimateTempo(
-  channels: readonly Float32Array[],
-  sampleRate: number
-): TempoEstimate | null {
-  const hop = hopOf(sampleRate);
-  const hopSeconds = hop / sampleRate;
-  const strength = rises(
-    channels,
-    hop,
-    Math.round(sampleRate * WINDOW_SECONDS)
-  );
-  const count = strength.length;
-  const shortest = Math.floor(60 / MAX_BPM / hopSeconds);
-  const longest = Math.ceil(60 / MIN_BPM / hopSeconds);
-  if (count < longest * 2) {
-    return null;
-  }
-  let mean = 0;
-  for (const value of strength) {
-    mean += value;
-  }
-  mean /= count;
-  if (mean <= 0) {
-    return null;
-  }
-  const centered = Float32Array.from(strength, (value) => value - mean);
-  const correlation = (lag: number) => {
-    let sum = 0;
-    for (let index = lag; index < count; index += 1) {
-      sum += (centered[index] as number) * (centered[index - lag] as number);
-    }
-    return sum / (count - lag);
-  };
-  const energy = correlation(0);
-  if (energy <= 0) {
-    return null;
-  }
-  let best = 0;
-  let bestScore = Number.NEGATIVE_INFINITY;
-  for (let lag = shortest; lag <= longest; lag += 1) {
-    const score = correlation(lag) * octaveWeight(60 / (lag * hopSeconds));
-    if (score > bestScore) {
-      bestScore = score;
-      best = lag;
-    }
-  }
-  const confidence = correlation(best) / energy;
-  if (confidence < MIN_CONFIDENCE) {
-    return null;
-  }
-  // Tuned over the whole recording: the period and the phase whose beats meet the most rises.
-  let period = best;
-  let phase = 0;
-  let most = Number.NEGATIVE_INFINITY;
-  for (let tried = best * 0.98; tried <= best * 1.02; tried += best * 0.0005) {
-    for (let start = 0; start < tried; start += 1) {
-      const score = combAt(strength, tried, start);
-      if (score > most) {
-        most = score;
-        period = tried;
-        phase = start;
-      }
-    }
-  }
-  const beat = period * hopSeconds;
-  const transients = detectTransients(channels, sampleRate);
-  // The first beat that has a sound on it: not one in the silence before the music starts.
-  const [first = 0] = transients;
-  const skipped = Math.max(
-    0,
-    Math.ceil((first - phase * hopSeconds - beat / 4) / beat)
-  );
-  const firstBeat = phase * hopSeconds + skipped * beat;
-  const near = transients.find(
-    (time) => Math.abs(time - firstBeat) <= hopSeconds * 2
-  );
-  return {
-    bpm: 60 / beat,
-    confidence: Math.min(1, confidence),
-    firstBeat: near ?? firstBeat,
-  };
 }
 
 /** How a file plays in time at an arrangement's tempo, as `autoWarp` works it out. */

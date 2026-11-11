@@ -1391,3 +1391,73 @@ check(
     assert(beats > 400 && beats < 480, `Beats plays at ${beats} Hz`);
   }
 );
+
+check(
+  "MIX-026: a ducker keyed by another track turns its own down while that track plays, even muted",
+  async () => {
+    const seconds = 1.5;
+    const tone = (from: number, to: number, gain: number) => {
+      const data = Float32Array.from(
+        { length: Math.round(seconds * RATE) },
+        (_, index) => {
+          const time = index / RATE;
+          return time >= from && time < to
+            ? gain * Math.sin(2 * Math.PI * 220 * time)
+            : 0;
+        }
+      );
+      return { channels: [data, data], sampleRate: RATE };
+    };
+    const recordings = new Map([
+      ["pad", tone(0, seconds, 0.2)],
+      ["kick", tone(0.6, 0.9, 0.8)],
+    ]);
+    const docOf = (key?: string) =>
+      arrangement({
+        clips: [
+          clip("p", "pad", 0, seconds, "pad"),
+          clip("k", "kick", 0, seconds, "kick"),
+        ],
+        tracks: [
+          {
+            color: 0,
+            devices: [
+              { ...device("d", "audioui.ducker"), ...(key ? { key } : {}) },
+            ],
+            id: "pad",
+            name: "Pad",
+          },
+          // Muted, as a ghost kick is: heard by the ducker only.
+          {
+            color: 1,
+            id: "kick",
+            mix: { color: 1, gain: 1, muted: true, pan: 0, soloed: false },
+            name: "Kick",
+          },
+        ],
+      });
+    const levelDb = (data: Float32Array, from: number, to: number) => {
+      let sum = 0;
+      const start = Math.round(from * RATE);
+      const end = Math.round(to * RATE);
+      for (let index = start; index < end; index += 1) {
+        sum += (data[index] as number) ** 2;
+      }
+      return 10 * Math.log10(sum / (end - start) + 1e-12);
+    };
+    const keyed = (
+      await render(docOf("kick"), recordings, seconds)
+    ).getChannelData(0);
+    const before = levelDb(keyed, 0.2, 0.5);
+    const during = levelDb(keyed, 0.7, 0.85);
+    assert(
+      during < before - 3,
+      `keyed, the pad goes from ${before.toFixed(1)} dB to ${during.toFixed(1)} dB while the kick plays`
+    );
+    const own = (await render(docOf(), recordings, seconds)).getChannelData(0);
+    assert(
+      Math.abs(levelDb(own, 0.7, 0.85) - levelDb(own, 0.2, 0.5)) < 1,
+      "with no key, the pad stays as loud while the muted kick plays"
+    );
+  }
+);

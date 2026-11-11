@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { warpedTime } from "../time/warp.ts";
-import { autoWarp, detectTransients, estimateTempo } from "./beat.ts";
+import { autoWarp, detectTransients } from "./beat.ts";
 
 const RATE = 48_000;
 
@@ -31,22 +31,6 @@ function groove(bpm: number, seconds: number, start = 0) {
       hit(data, at + beat / 2, 0.25, 3000);
     }
   }
-  return [data, data];
-}
-
-function noise(seconds: number) {
-  // A seeded generator (mulberry32): the same noise every run, with no cycle a beat could be read in.
-  let seed = 7;
-  const next = () => {
-    seed = (seed + 0x6d_2b_79_f5) | 0;
-    let value = Math.imul(seed ^ (seed >>> 15), 1 | seed);
-    value ^= value + Math.imul(value ^ (value >>> 7), 61 | value);
-    return ((value ^ (value >>> 14)) >>> 0) / 4_294_967_296;
-  };
-  const data = Float32Array.from(
-    { length: seconds * RATE },
-    () => next() * 0.6 - 0.3
-  );
   return [data, data];
 }
 
@@ -91,48 +75,13 @@ describe("CLP-018: transients and tempo", () => {
     expect(found[0]).toBeCloseTo(0.25, 2);
     expect(found[1]).toBeCloseTo(1.1, 2);
   });
-
-  test("reads a groove's tempo, and the octave nearest 120 BPM", () => {
-    for (const bpm of [84, 100, 128, 150]) {
-      const estimate = estimateTempo(groove(bpm, 12), RATE);
-      expect(estimate).not.toBeNull();
-      expect(Math.abs((estimate?.bpm ?? 0) - bpm)).toBeLessThan(bpm * 0.005);
-    }
-  });
-
-  test("places the first beat where the groove starts", () => {
-    const estimate = estimateTempo(groove(110, 12, 0.6), RATE);
-    expect(Math.abs((estimate?.firstBeat ?? 0) - 0.6)).toBeLessThan(0.003);
-  });
-
-  test("gives no tempo to a held chord, whose notes beat against each other", () => {
-    const chord = Float32Array.from({ length: RATE * 4 }, (_, index) => {
-      const time = index / RATE;
-      return (
-        (0.3 *
-          (Math.sin(2 * Math.PI * 220 * time) +
-            Math.sin(2 * Math.PI * 277.18 * time) +
-            Math.sin(2 * Math.PI * 329.63 * time))) /
-        3
-      );
-    });
-    expect(estimateTempo([chord, chord], RATE)).toBeNull();
-  });
-
-  test("gives no tempo to noise, or to a single hit", () => {
-    expect(estimateTempo(noise(6), RATE)).toBeNull();
-    const single = new Float32Array(RATE * 4);
-    hit(single, 0.2, 0.9, 80);
-    expect(estimateTempo([single], RATE)).toBeNull();
-  });
 });
 
 describe("CLP-019: warp on import", () => {
   test("a short loop takes the tempo its length gives, marked at its start and end", () => {
     // Two bars at 95 BPM, cut exactly.
     const duration = (2 * 4 * 60) / 95;
-    const channels = groove(95, duration);
-    const estimate = estimateTempo(channels, RATE);
+    const estimate = { bpm: 95, confidence: 1, firstBeat: 0 };
     const warped = autoWarp({ duration, estimate, tempo: 120 });
     expect(warped?.bpm).toBeCloseTo(95, 9);
     expect(warped?.offset).toBe(0);
@@ -144,7 +93,7 @@ describe("CLP-019: warp on import", () => {
 
   test("a longer file gets a marker on each bar's first beat, and starts on the first", () => {
     const channels = groove(128, 40, 0.5);
-    const estimate = estimateTempo(channels, RATE);
+    const estimate = { bpm: 128, confidence: 1, firstBeat: 0.5 };
     const transients = detectTransients(channels, RATE);
     const warped = autoWarp({ duration: 40, estimate, tempo: 120, transients });
     const bar = (4 * 60) / 128;

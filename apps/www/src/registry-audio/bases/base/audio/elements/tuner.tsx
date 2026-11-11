@@ -1,15 +1,21 @@
 "use client";
 
 import type { Source } from "@audio-ui/react";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
-import type { PitchReading } from "@/registry-audio/bases/base/hooks/use-pitch";
+import { Button } from "@/registry/bases/base/ui/button";
+import { Input } from "@/registry/bases/base/ui/input";
+import { useMicrophone } from "@/registry-audio/bases/base/hooks/use-microphone";
+import {
+  type PitchReading,
+  usePitch,
+} from "@/registry-audio/bases/base/hooks/use-pitch";
 
 /** Cents from the note to either end of the gauge: half a semitone, where the next note begins. */
 const RANGE_CENTS = 50;
 const MARKS = [-50, -25, 0, 25, 50];
 
-interface TunerProps {
+interface TunerDisplayProps {
   className?: string;
   /** The live reading, such as `usePitch` returns: `null` while nothing clear is playing. */
   source: Source<PitchReading | null>;
@@ -27,14 +33,14 @@ const spoken = (reading: PitchReading, tolerance: number) => {
 };
 
 /**
- * A chromatic tuner's display: the nearest note, a needle on a scale from 50
+ * The display of a chromatic tuner: the nearest note, a needle on a scale from 50
  * cents flat to 50 sharp, and the frequency. It follows a live `source`
  * frame by frame, written straight into the DOM with no React render, and
  * turns to the primary color, thickens its needle and shows a check when the
  * sound is within `tolerance`: it is never color alone. Exposed as
  * a meter of cents, with the note and how far off it is as its text value.
  */
-function Tuner({ className, source, tolerance = 5 }: TunerProps) {
+function TunerDisplay({ className, source, tolerance = 5 }: TunerDisplayProps) {
   const root = useRef<HTMLDivElement>(null);
   const note = useRef<HTMLSpanElement>(null);
   const octave = useRef<HTMLSpanElement>(null);
@@ -153,4 +159,76 @@ function Tuner({ className, source, tolerance = 5 }: TunerProps) {
   );
 }
 
-export { Tuner };
+const MIN_REFERENCE = 400;
+const MAX_REFERENCE = 480;
+
+interface TunerProps {
+  className?: string;
+  /** The frequency of A4 in hertz the field starts at: 432 or 442, say. @default 440 */
+  reference?: number;
+  /** How far from the note still counts as in tune, in cents. @default 5 */
+  tolerance?: number;
+}
+
+/**
+ * A chromatic tuner on its own: the display of the nearest note and how many
+ * cents off it is, a button to start the microphone and a field for the pitch
+ * of A4. Everything runs in the tab, nothing is recorded or sent. The pieces
+ * are `useMicrophone`, `usePitch` and `TunerDisplay`, for a tuner of another
+ * shape.
+ */
+function Tuner({ className, reference = 440, tolerance = 5 }: TunerProps) {
+  const microphone = useMicrophone();
+  const [a4, setA4] = useState(reference);
+  const pitch = usePitch(microphone.analyser, { reference: a4 });
+  return (
+    <div
+      className={cn(
+        "mx-auto flex w-full max-w-72 flex-col items-center gap-4",
+        className
+      )}
+      data-slot="tuner-tool"
+    >
+      <TunerDisplay source={pitch} tolerance={tolerance} />
+      <div className="flex items-center gap-3">
+        <Button
+          onClick={microphone.isListening ? microphone.stop : microphone.start}
+          size="sm"
+          type="button"
+          variant={microphone.isListening ? "outline" : "default"}
+        >
+          {microphone.isListening ? "Stop" : "Start"}
+        </Button>
+        <label
+          className="flex items-center gap-1.5 text-muted-foreground text-sm"
+          htmlFor="tuner-reference"
+        >
+          A4
+          <Input
+            className="h-7 w-16 text-center tabular-nums"
+            id="tuner-reference"
+            max={MAX_REFERENCE}
+            min={MIN_REFERENCE}
+            onChange={(event) => {
+              const next = Number(event.target.value);
+              if (next >= MIN_REFERENCE && next <= MAX_REFERENCE) {
+                setA4(next);
+              }
+            }}
+            step={1}
+            type="number"
+            value={a4}
+          />
+          Hz
+        </label>
+      </div>
+      {microphone.error ? (
+        <p aria-live="polite" className="text-destructive text-sm">
+          {microphone.error}
+        </p>
+      ) : null}
+    </div>
+  );
+}
+
+export { Tuner, TunerDisplay };

@@ -1,6 +1,6 @@
 import { createSource } from "@audio-ui/react";
 import { type CSSProperties, useLayoutEffect, useState } from "react";
-import { Tuner } from "@/registry-audio/bases/base/audio/elements/tuner";
+import { TunerDisplay } from "@/registry-audio/bases/base/audio/elements/tuner";
 import type { PitchReading } from "@/registry-audio/bases/base/hooks/use-pitch";
 import { MOTION, ramp, tw } from "../motion.ts";
 
@@ -65,7 +65,7 @@ export function TunerShowcase({ t }: { t: number }) {
       className="flex h-full items-center justify-center"
       style={{ "--primary": "var(--success)" } as CSSProperties}
     >
-      <Tuner source={reading} />
+      <TunerDisplay source={reading} />
     </div>
   );
 }

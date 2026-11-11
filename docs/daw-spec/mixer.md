@@ -107,3 +107,7 @@ Test: apps/daw/test/browser/run.ts "MIX-024"; apps/daw/test/devices.test.ts "MIX
 The main track's channel reads the mix's integrated loudness in LUFS (ITU-R BS.1770), under its fader, since it was last clicked: every 400 ms of the main track's sound after its volume, the quiet passages gated out (-70 LUFS, then 10 LU under the rest), so it agrees with the loudness an export of the same passage measures (EXP-010). It goes on while the transport is stopped, where silence counts for nothing.
 Deviation: not in the reference manual's mixer. It reads the mix in the unit the export normalizes to (EXP-005).
 Test: apps/www/test/registry-audio/base/lib/loudness.test.ts "createLoudnessReader"; apps/daw/test/browser/checks/mixer.ts "MIX-025"
+
+### MIX-026 A device listens to another track
+A device that takes a sidechain, the Ducker, has a Key from list in its title bar: its own sound, or any other track of clips. Picked, it follows that track's sound after its devices and before its volume and switch, so a kick muted to be heard only by the ducker still keys it, and the pad it is on turns down while the kick plays. A group, a return and its own track are not offered: none of them could key it without its sound feeding itself. One step of undo.
+Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "MIX-026"; apps/www/test/browser/arrangement-engine.check.ts "MIX-026"; apps/daw/test/browser/checks/mixer.ts "MIX-026"

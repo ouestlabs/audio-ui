@@ -1011,6 +1011,41 @@ describe("devices, sends and return tracks", () => {
     ]);
   });
 
+  test("MIX-026: a device's sidechain listens to another track of clips, one step of undo, never its own track nor a return", () => {
+    let state = init();
+    state = apply(state, {
+      type: "add-device",
+      track: "vox",
+      device: "audioui.ducker",
+      state: {},
+    });
+    const id = state.doc.tracks[0]?.devices?.[0]?.id ?? "";
+    const steps = state.history.past.length;
+    state = apply(state, {
+      type: "set-device-key",
+      track: "vox",
+      id,
+      key: "keys",
+    });
+    expect(state.doc.tracks[0]?.devices?.[0]?.key).toBe("keys");
+    expect(state.history.past.length).toBe(steps + 1);
+    for (const key of ["vox", "reverb", "nope"]) {
+      expect(
+        apply(state, { type: "set-device-key", track: "vox", id, key })
+      ).toBe(state);
+    }
+    expect(
+      apply(state, { type: "set-device-key", track: "vox", id, key: "keys" })
+    ).toBe(state);
+    state = apply(state, {
+      type: "set-device-key",
+      track: "vox",
+      id,
+      key: null,
+    });
+    expect(state.doc.tracks[0]?.devices?.[0]).not.toHaveProperty("key");
+  });
+
   test("DEV-004: moving, switching off and removing a device are one step of undo each", () => {
     let state = init();
     state = apply(state, { type: "add-device", track: "vox", ...compressor });

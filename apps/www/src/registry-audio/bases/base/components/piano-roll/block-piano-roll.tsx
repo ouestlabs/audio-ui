@@ -57,6 +57,7 @@ import {
 import {
   ScaleMenu,
   ScaleMenuContent,
+  ScaleMenuDetect,
   ScaleMenuName,
   ScaleMenuRoot,
   ScaleMenuToggle,
@@ -756,6 +757,8 @@ export default function BlockPianoRoll() {
                 <DropdownMenuSeparator />
                 <ScaleMenuRoot />
                 <ScaleMenuName />
+                <DropdownMenuSeparator />
+                <ScaleMenuDetect notes={notes} />
               </ScaleMenuContent>
             </ScaleMenu>
             <NoteFind onFind={findAndSelect} scale={scale} />
