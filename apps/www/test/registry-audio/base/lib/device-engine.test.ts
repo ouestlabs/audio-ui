@@ -1,7 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { pink, white } from "@audio/synth-noise";
 import {
   createFeed,
   createWorkletStage,
+  noiseBuffer,
 } from "@/registry-audio/bases/base/lib/device-engine";
 
 class FakeParam {
@@ -145,5 +147,34 @@ describe("createFeed", () => {
     feed.dispose();
     await Bun.sleep(10);
     expect(from.connections).toEqual([to]);
+  });
+});
+
+describe("noiseBuffer", () => {
+  /** A context that draws buffers, counting them. */
+  function drawing(sampleRate: number) {
+    let made = 0;
+    const ctx = {
+      createBuffer: (_channels: number, length: number) => {
+        made += 1;
+        const data = new Float32Array(length);
+        return { getChannelData: () => data };
+      },
+      sampleRate,
+    } as unknown as BaseAudioContext;
+    return { ctx, made: () => made };
+  }
+
+  test("is two seconds of audio.js noise, made once per color and context", () => {
+    const { ctx, made } = drawing(4000);
+    expect([...noiseBuffer(ctx).getChannelData(0)]).toEqual([
+      ...white(2, { fs: 4000 }),
+    ]);
+    expect([...noiseBuffer(ctx, "pink").getChannelData(0)]).toEqual([
+      ...pink(2, { fs: 4000 }),
+    ]);
+    expect(noiseBuffer(ctx)).toBe(noiseBuffer(ctx, "white"));
+    expect(made()).toBe(2);
+    expect(noiseBuffer(drawing(4000).ctx)).not.toBe(noiseBuffer(ctx));
   });
 });

@@ -273,7 +273,7 @@ export const hooks: RegistryItem[] = [
     description:
       "Pink noise played through an equalizer that follows your bands, with the analyser after it: what a plot draws is what is heard",
     registryDependencies: [
-      "@audio-ui/demo-sound",
+      "@audio-ui/device-engine",
       "@audio-ui/use-play-switch",
       "@audio-ui/web-audio",
     ],

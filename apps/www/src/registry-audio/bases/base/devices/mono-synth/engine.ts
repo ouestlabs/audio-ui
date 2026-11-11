@@ -16,7 +16,10 @@ import {
   tuneCents,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/mono-synth/device";
-import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
+import {
+  type InstrumentEngine,
+  noiseBuffer,
+} from "@/registry-audio/bases/base/lib/device-engine";
 
 /** What each source adds before the filter: with the resonance, the loudest sound stays under full scale. */
 const SOURCE_GAIN = 0.2;
@@ -26,7 +29,6 @@ const OUTPUT_GAIN = 2;
 const SMOOTHING = 0.02;
 /** The softest note still sounds: a velocity of 0 is this share of a full one. */
 const MIN_LEVEL = 0.25;
-const NOISE_SECONDS = 2;
 const HARMONICS = 96;
 
 export type MonoSynthEngine = InstrumentEngine<MonoSynthState, MonoSynthNote>;
@@ -83,27 +85,6 @@ function pulseWave(ctx: BaseAudioContext, duty: number) {
   return ctx.createPeriodicWave(real, imag);
 }
 
-const noises = new WeakMap<BaseAudioContext, AudioBuffer>();
-
-/** Two seconds of white noise, made once per context. */
-function noiseOf(ctx: BaseAudioContext) {
-  const kept = noises.get(ctx);
-  if (kept) {
-    return kept;
-  }
-  const buffer = ctx.createBuffer(
-    1,
-    ctx.sampleRate * NOISE_SECONDS,
-    ctx.sampleRate
-  );
-  const data = buffer.getChannelData(0);
-  for (let index = 0; index < data.length; index += 1) {
-    data[index] = Math.random() * 2 - 1;
-  }
-  noises.set(ctx, buffer);
-  return buffer;
-}
-
 /**
  * The Mono Synth on the Web Audio API, for a `MonoSynthState`: the whole
  * synth, one note at a time.
@@ -158,7 +139,7 @@ export function createMonoSynthEngine(
   const sub = ctx.createOscillator();
   sub.type = "square";
   const noise = ctx.createBufferSource();
-  noise.buffer = noiseOf(ctx);
+  noise.buffer = noiseBuffer(ctx);
   noise.loop = true;
   const lfo = ctx.createOscillator();
   lfo.frequency.value = rateHertz(initial.rate);

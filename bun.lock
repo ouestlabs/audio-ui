@@ -309,6 +309,7 @@
         "@audio/decode-mp3": "1.3.1",
         "@audio/decode-wav": "2.0.0",
         "@audio/eq-graphic": "1.2.4",
+        "@audio/synth-noise": "catalog:",
         "@cloudflare/vite-plugin": "catalog:",
         "@happy-dom/global-registrator": "^21.0.4",
         "@resvg/resvg-js": "^2.6.2",
@@ -463,6 +464,7 @@
     "@audio/reverb-spring": "1.1.3",
     "@audio/spatial-binaural": "0.1.1",
     "@audio/spatial-microshift": "1.1.3",
+    "@audio/synth-noise": "2.0.1",
     "@audio/weighting-k": "1.2.1",
     "@base-ui/react": "^1.9.0",
     "@cloudflare/vite-plugin": "1.64.0",
@@ -683,6 +685,8 @@
     "@audio/spatial-binaural": ["@audio/spatial-binaural@0.1.1", "", {}, "sha512-N1Upm2h9uqA6yOZZhWf5DgaLe9+bOD9ASe12fadfMfmM3I/nSV5//Nqg51e5pnlNh1ttP6loD/qUO+UsHOT3jg=="],
 
     "@audio/spatial-microshift": ["@audio/spatial-microshift@1.1.3", "", {}, "sha512-xdGFD4IxEqnPjDLb0Pp8zPalqbdlV9ZR3hPWgC2j8VPUpmOELR2siFJLAqcbnrmcupt6y2e7GGhJo71F1lusXQ=="],
+
+    "@audio/synth-noise": ["@audio/synth-noise@2.0.1", "", {}, "sha512-VuuiIKjqfJJ5PoCVn8heWcI1H6gy6EO0l1Hv+oGNnSrch0FP5Vkstjj9UdwINTeyLZVE3pEuAkpE04l7O2TXpg=="],
 
     "@audio/weighting-k": ["@audio/weighting-k@1.2.1", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-tiSLbRzFTQVvS8aUMKBBE+ZDtBNzgYmBWlg8/F00YbaDpR1kepsOSPCE3KqA51ekI4RAT/YPIZi+8yirq76GUQ=="],
 

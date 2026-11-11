@@ -7,10 +7,11 @@ import {
 } from "@audio-ui/core/analysis";
 import { useEffect, useRef, useState } from "react";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
-import { pinkNoise } from "@/registry-audio/bases/base/lib/demo-sound";
+import { noiseBuffer } from "@/registry-audio/bases/base/lib/device-engine";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
-const OUTPUT_GAIN = 0.12;
+/** The noise's level out: audio.js's pink noise peaks at 0.9, so this keeps it where the demo always played it. */
+const OUTPUT_GAIN = 0.09;
 const ANALYSER_SMOOTHING = 0.8;
 const FFT_SIZE = 4096;
 const PARAM_RAMP_SECONDS = 0.02;
@@ -55,7 +56,7 @@ export function useNoiseThroughEq(bands: readonly EqBand[]) {
     }
     ctx.resume();
     const source = ctx.createBufferSource();
-    source.buffer = pinkNoise(ctx);
+    source.buffer = noiseBuffer(ctx, "pink");
     source.loop = true;
     const filters = bandsRef.current.map((band) => {
       const filter = ctx.createBiquadFilter();

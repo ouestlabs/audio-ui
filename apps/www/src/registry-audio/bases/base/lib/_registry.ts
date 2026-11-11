@@ -8,9 +8,9 @@ const items: RegistryItem[] = [
   }),
   libItem("device-engine", {
     categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/synth-noise"],
     description:
-      "What a device's engine is and the pieces engines are made of: the EffectEngine and InstrumentEngine contracts every create<Name>Engine returns, a worklet stage that takes over from the clean sound once loaded, and a feed that keeps a worklet fed only while its path is heard.",
+      "What a device's engine is and the pieces engines are made of: the EffectEngine and InstrumentEngine contracts every create<Name>Engine returns, a worklet stage that takes over from the clean sound once loaded, a feed that keeps a worklet fed only while its path is heard, and the noise buffers engines share (from @audio/synth-noise).",
     registryDependencies: ["@audio-ui/audio-worklet"],
   }),
   libItem("audio-worklet", {

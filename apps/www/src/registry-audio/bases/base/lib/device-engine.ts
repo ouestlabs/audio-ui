@@ -1,3 +1,4 @@
+import { pink, white } from "@audio/synth-noise";
 import type {
   DeviceBinding,
   DeviceContext,
@@ -173,4 +174,37 @@ export function createFeed(
       }
     },
   };
+}
+
+/** How long a noise buffer lasts, in seconds: long enough that its loop is never heard. */
+const NOISE_SECONDS = 2;
+const noises = new WeakMap<BaseAudioContext, Map<NoiseColor, AudioBuffer>>();
+
+/** The colors of noise a buffer is made in, as `@audio/synth-noise` makes them. */
+export type NoiseColor = "pink" | "white";
+
+/**
+ * Two seconds of noise on a context, from `@audio/synth-noise` (seeded, its
+ * peak at 0.9), made once per color and context and shared by everything that
+ * plays it: a synth's noise source, a snare's rattle, the pink noise an
+ * equalizer is heard through. A buffer is only read, so any number of sources
+ * loop the same one.
+ */
+export function noiseBuffer(
+  ctx: BaseAudioContext,
+  color: NoiseColor = "white"
+): AudioBuffer {
+  const kept = noises.get(ctx) ?? new Map<NoiseColor, AudioBuffer>();
+  noises.set(ctx, kept);
+  const cached = kept.get(color);
+  if (cached) {
+    return cached;
+  }
+  const samples = (color === "pink" ? pink : white)(NOISE_SECONDS, {
+    fs: ctx.sampleRate,
+  });
+  const buffer = ctx.createBuffer(1, samples.length, ctx.sampleRate);
+  buffer.getChannelData(0).set(samples);
+  kept.set(color, buffer);
+  return buffer;
 }
