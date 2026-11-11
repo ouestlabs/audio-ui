@@ -1340,12 +1340,8 @@ export function Daw({
         TAKEN.add(event);
         return;
       }
-      if (typing(event.target)) {
-        TAKEN.add(event);
-        return;
-      }
-      // Delete in the clip view, on a device or a locator deletes what is focused there: the clip it is in stays.
-      if (deletesItsOwn(event)) {
+      // Typing, and Delete in the clip view, on a device or a locator, which deletes what is focused there: the clip it is in stays.
+      if (typing(event.target) || deletesItsOwn(event)) {
         TAKEN.add(event);
         return;
       }
