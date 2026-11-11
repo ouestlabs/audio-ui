@@ -1,4 +1,9 @@
 {
   "root": true,
-  "pages": ["(root)", "components", "engine"]
+  "pages": [
+    "(root)",
+    "components",
+    "engine",
+    "reference"
+  ]
 }

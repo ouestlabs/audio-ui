@@ -47,6 +47,7 @@ Renaming or removing an item: also search for its old name in `apps/www/src/cont
 - A demo appears in a docs page through `<ComponentPreview styleName="base-nova" name="<demo-name>" />`.
 - In docs, an installed component is imported as `@/components/audio-ui/<name>` (where the registry puts it), and its source titled `components/audio-ui/<name>.tsx`. `bun test test/install-paths.test.ts` checks every such import.
 - Group first, by the rules in AGENTS.md ("Docs"): a hook or a lib that serves one component gets a section in that component's page, not a page of its own.
+- Every hook and lib is also listed once in a `<RegistryItems names="…" />` table of `docs/reference/hooks.mdx`, `libraries.mdx` or `utilities.mdx`, the group it belongs to; its row is read from its registry description. `test/reference-docs.test.ts` fails on one listed nowhere or twice. A new factory gets a section in `reference/factories.mdx`.
 - A new component page: `apps/www/src/content/docs/components/base/(<space>)/<name>.mdx` (`(elements)`, `(workstation)` or `(devices)`), copying the sections of `(elements)/knob.mdx` (Overview, Installation as `<Install name="<name>" packages="..." />`, Anatomy, Usage, Interaction, API reference); list it in that space's `meta.json`, add the slug to `CANONICAL_COMPONENT_DOC_SLUGS` in `apps/www/src/lib/seo.ts`, and add it to `skills/audio-ui/components.md` (and the Component Selection table in `skills/audio-ui/SKILL.md`).
 
 ## 5. Build and check (from `apps/www/`)

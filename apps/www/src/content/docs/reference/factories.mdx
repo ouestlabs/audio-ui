@@ -1,0 +1,158 @@
+---
+title: Factories
+description: "The factories audio/ui is built from: a device's description, its engine's contracts and building blocks, chords on one-voice instruments, and the hooks that make engines on a page."
+---
+
+A factory is written once and instantiated everywhere it is needed: every device is a `defineDevice`, every engine returns the same contract and is made of the same pieces, every block makes its engines with the same hook. Each composes with the others, and each is typed so that what you pass in decides what you get back.
+
+| Factory | Makes | From |
+| --- | --- | --- |
+| `defineDevice` | A device's description: parameters, defaults, `apply`, agent tools | `@audio-ui/core/device` ([Devices](/docs/devices)) |
+| `EffectEngine`, `InstrumentEngine` | The contract every engine returns | `device-engine` |
+| `createWorkletStage`, `createFeed`, `noiseBuffer` | The pieces an engine is made of | `device-engine` |
+| `createPolyphony` | Chords on engines that play one voice | `polyphony` |
+| `useDeviceEngines` | A device's engines on a page, alive for as long as their destination | `use-device-engines` |
+| `usePolyphony`, `useDeviceLoop` | An instrument played as chords, an effect heard on a loop | `use-polyphony`, `use-device-loop` |
+
+## Engine contracts
+
+```bash
+npx shadcn@latest add @audio-ui/device-engine
+```
+
+Every `create<Name>Engine` is an `EngineFactory`: a function of a context, the state to start from and the host's context (its tempo), returning an engine.
+
+```ts
+type EngineFactory<State, Engine> = (
+  ctx: BaseAudioContext,
+  state: State,
+  context?: DeviceContext
+) => Engine;
+```
+
+An effect's engine is an `EffectEngine<State>`, an instrument's an `InstrumentEngine<State, Note>`. Both are the core's bindings (`DeviceBinding`, `InstrumentBinding`) with the nodes to connect, so a host that keeps its own engine implements the same `update` and `dispose`.
+
+<TypeTable title="EffectEngine<State>">
+<TypeRow name={"input, output"} type={"AudioNode"}>Where the sound goes in, and where it comes out.</TypeRow>
+<TypeRow name={"update"} type={"(state, context?) => void"}>Follows a new state, every parameter on a ramp.</TypeRow>
+<TypeRow name={"dispose"} type={"() => void"}>Lets go of every node it made.</TypeRow>
+<TypeRow name={"ready"} type={"Promise<boolean> | undefined"}>Resolves once what it loads is in the graph, `false` where it cannot be. Until then it plays without it.</TypeRow>
+<TypeRow name={"sidechain"} type={"AudioNode | undefined"}>The input of the signal that drives it, on a device a key drives.</TypeRow>
+<TypeRow name={"readings"} type={"() => DeviceReadings | undefined"}>What it takes off now, such as a gain reduction.</TypeRow>
+</TypeTable>
+
+`InstrumentEngine<State, Note>` has the same `output`, `update`, `dispose` and `ready`, no input, and `noteOn(note, { at, id })` and `noteOff({ at, id })`. It plays one voice: `noteOn` while a note is held moves that note.
+
+## device-engine
+
+The pieces an engine is made of, each the one place its behavior lives.
+
+### createWorkletStage
+
+A worklet that takes over from the clean sound once it loads, with a fade, and builds nothing once the engine is disposed.
+
+```ts
+import { createWorkletStage } from "@/lib/device-engine";
+
+const input = ctx.createGain();
+const output = ctx.createGain();
+let latest = initial;
+const stage = createWorkletStage(ctx, {
+  input,
+  make: () => new AudioWorkletNode(ctx, "my-processor", { parameterData: settingsOf(latest) }),
+  ramp: 0.02,
+  source: MY_PROCESSOR_SOURCE,
+});
+stage.connect(output);
+
+// In update: stage.node?.parameters.get("drive")?.setTargetAtTime(...)
+// In dispose: stage.dispose()
+```
+
+<TypeTable>
+<TypeRow name={"input"} type={"AudioNode"}>What feeds both paths, usually the engine's input.</TypeRow>
+<TypeRow name={"make"} type={"() => AudioWorkletNode"}>Makes the worklet once its source is loaded, from the state the engine holds then.</TypeRow>
+<TypeRow name={"ramp"} type={"number"}>The time constant of the fade, in seconds.</TypeRow>
+<TypeRow name={"source"} type={"string"}>The processor's source, loaded with `loadWorklet` once per context.</TypeRow>
+<TypeRow name={"returns"} type={"{ connect, dispose, node, ready }"}>`connect(destination)` sends both paths on; `node` is the worklet once it plays.</TypeRow>
+</TypeTable>
+
+### createFeed
+
+Keeps a worklet fed only while the path it plays is heard: a worklet fed nothing costs nothing. The connections are made on `set(true)` and taken away 120 ms after `set(false)`, once the path has faded out, unless they are wanted again before.
+
+```ts
+import { createFeed } from "@/lib/device-engine";
+
+// Once the worklet exists, its connections; a key on a second input.
+const feed = createFeed([
+  [input, model, 0, 0],
+  [sidechain, model, 0, 1],
+]);
+feed.set(wet > 0); // on every update
+feed.dispose(); // in the engine's dispose
+```
+
+### noiseBuffer
+
+Two seconds of noise from `@audio/synth-noise`, made once per color and context and shared by everything that plays it: `noiseBuffer(ctx)` for white, `noiseBuffer(ctx, "pink")` for pink. A buffer is only read, so any number of sources loop the same one.
+
+## createPolyphony
+
+```bash
+npx shadcn@latest add @audio-ui/polyphony
+```
+
+Plays chords on engines that hold one note each. A note takes the voice that holds it already, else a free one, else the one held longest, whose note is let go first. It makes no sound and no engine: it takes engines you made and connected, so it schedules ahead on the audio clock as well as it plays live.
+
+```ts
+import { createPolyphony } from "@/lib/polyphony";
+
+const voices = createPolyphony(engines);
+voices.noteOn({ frequency: 440, velocity: 0.8 }, "a4", time);
+voices.noteOff("a4", time + 0.5);
+voices.release(stopTime); // every note held, as a stop does
+```
+
+## useDeviceEngines
+
+```bash
+npx shadcn@latest add @audio-ui/use-device-engines
+```
+
+The lifecycle of a device's engines on a page, written once: made with `create` into `destination` from the state of the moment, following `state` and `context` after that, disposed when the destination or the count changes and on unmount. An update never reaches an engine already disposed, even when a new destination and a new state come in one render.
+
+```tsx
+import { createSaturatorEngine } from "@/components/audio-ui/devices/saturator/engine";
+import { useDeviceEngines } from "@/hooks/use-device-engines";
+import { useMasterBus } from "@/hooks/use-master-bus";
+
+const output = useMasterBus(1);
+const [engine] = useDeviceEngines({ create: createSaturatorEngine, destination: output, state });
+// engine is null until the destination is there; connect a source to engine.input.
+```
+
+<TypeTable title="Options">
+<TypeRow name={"create"} type={"EngineFactory<State, Engine>"}>A device's `create<Name>Engine`.</TypeRow>
+<TypeRow name={"destination"} type={"AudioNode | null"}>Where the engines play, and the context they are made on. `null` makes none.</TypeRow>
+<TypeRow name={"state"} type={"State"}>The device's state: every engine follows it.</TypeRow>
+<TypeRow name={"context"} type={"DeviceContext"}>The host's tempo, given with each update. Memoize it.</TypeRow>
+<TypeRow name={"count"} type={"number"} default={"1"}>How many engines: one per voice for an instrument.</TypeRow>
+</TypeTable>
+
+## usePolyphony
+
+`useDeviceEngines` with one engine per voice and `createPolyphony` over them: an instrument whose engine plays one voice, played as chords from a keyboard or a MIDI input. See [Synthesis](/docs/engine/synthesis#polyphony).
+
+```tsx
+const { noteOff, noteOn } = usePolyphony({ create: createPolySynthEngine, destination: output, state, voices: 8 });
+```
+
+## useDeviceLoop
+
+`useDeviceEngines` with one engine, made while the session's play switch is on, and a loop of drums and plucked notes played through it: what a device does, heard. It returns the `engine` and analysers of what goes in (`input`) and of what comes out (`analyser`), for a meter or a spectrum.
+
+```tsx
+const { analyser, engine, input } = useDeviceLoop({ create: createCompressorEngine, destination: output, state });
+const spectrum = useSpectrum(analyser);
+```

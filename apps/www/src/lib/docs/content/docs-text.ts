@@ -8,6 +8,7 @@ import {
   parseAttrs,
   replaceFrontmatter,
 } from "@/lib/docs/content/mdx-to-markdown";
+import { expandRegistryItems } from "@/lib/docs/content/registry-items";
 
 /** Each docs page's MDX as text, in the bundle: Workers have no files to read, so the build puts them in. */
 const rawDocs = import.meta.glob<string>("/src/content/docs/**/*.mdx", {
@@ -47,12 +48,14 @@ export async function processMdxForLLMs(content: string): Promise<string> {
   if (!content || typeof content !== "string") {
     return content || "";
   }
-  const expanded = expandDemoSounds(
-    expandIconCatalog(
-      expandDeviceUsage(
-        expandInstall(
-          expandDeviceControls(replaceFrontmatter(content))
-        ).replace(ELEMENTS_PREVIEW_REGEX, "")
+  const expanded = expandRegistryItems(
+    expandDemoSounds(
+      expandIconCatalog(
+        expandDeviceUsage(
+          expandInstall(
+            expandDeviceControls(replaceFrontmatter(content))
+          ).replace(ELEMENTS_PREVIEW_REGEX, "")
+        )
       )
     )
   );

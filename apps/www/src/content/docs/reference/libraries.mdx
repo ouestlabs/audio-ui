@@ -1,0 +1,30 @@
+---
+title: Libraries
+description: "Every library of the registry that holds a domain: device engines and the library of devices, racks and the mixer, the arrangement and its notes, the formats of other software, and the demo content."
+---
+
+A library is framework-free: it takes an audio context as a parameter, so it runs in a page, in an `OfflineAudioContext` for an export, and in a test. Its DSP comes from audio.js atoms; it holds the glue and the domain. Install each with `npx shadcn@latest add @audio-ui/<name>`.
+
+## Devices and engines
+
+What an engine is made of, the library of devices, and what plays them: voices, racks, the mixer and the arrangement's engine. See [Factories](/docs/reference/factories) and [Registries](/docs/reference/registries).
+
+<RegistryItems names="device-engine device-library polyphony voice-pool rack drum-rack instrument-rack mixer-engine arrangement-engine clip-player recording" />
+
+## Arrangement and notes
+
+The arrangement as one document, notes as steps, and tools an AI model edits a piano roll with. See [Arrangement](/docs/components/base/arrangement) and [Piano roll](/docs/components/base/piano-roll).
+
+<RegistryItems names="arrangement drum-steps piano-roll-tools" />
+
+## Files and formats
+
+Projects and scores from other software, in and out.
+
+<RegistryItems names="dawproject midi-file musicxml-file" />
+
+## Demo content
+
+The sounds, the song and the kit the previews play, made in code. See [Demo sounds](/docs/engine/demo-sounds).
+
+<RegistryItems names="demo-sound demo-song drum-kit" />

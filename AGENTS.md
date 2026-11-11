@@ -118,6 +118,7 @@ The docs, the catalog's `categoryGroups` and the shipped skill share one map, by
 - `(workstation)/`: the surfaces of a DAW. Arrangement, editors, the piano roll's tools, transport and mixing.
 - `(devices)/`: effects and instruments, like plugins. One page per device, by family.
 - `engine/` (beside `components/`, at `/docs/engine/<page>`): what makes the sound, the hooks and libs that serve several spaces, a page per concept (output, clock and time, synthesis, input, analysis). Its overview says how an engine of the user's own drives the components.
+- `reference/` (at `/docs/reference/<page>`): the architecture (layers, where a context comes from, who owns state), the factories, the registries, and every hook, lib and utility in `<RegistryItems>` tables read from the `_registry.ts` files; `test/reference-docs.test.ts` fails on an item listed nowhere.
 
 How items are grouped:
 
