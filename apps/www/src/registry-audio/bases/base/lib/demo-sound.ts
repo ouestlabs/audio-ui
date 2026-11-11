@@ -553,33 +553,6 @@ export function pinkNoise(
   return buffer;
 }
 
-const PULSE_LOOP_SECONDS = 2;
-const PULSES_PER_LOOP = 8;
-const PULSE_DECAY_SECONDS = 0.18;
-/** Every other pulse is quieter, so a level that follows them moves along a curve. */
-const QUIET_PULSE = 0.35;
-
-/** Noise bursts that start loud and fade, eight to a loop, every other one quieter. `level` scales the loudest. */
-export function pulses(ctx: BaseAudioContext, level = 1): AudioBuffer {
-  const buffer = ctx.createBuffer(
-    1,
-    ctx.sampleRate * PULSE_LOOP_SECONDS,
-    ctx.sampleRate
-  );
-  const data = buffer.getChannelData(0);
-  const pulseLength = data.length / PULSES_PER_LOOP;
-  for (let index = 0; index < data.length; index += 1) {
-    const seconds = (index % pulseLength) / ctx.sampleRate;
-    const accent = Math.floor(index / pulseLength) % 2 === 0 ? 1 : QUIET_PULSE;
-    data[index] =
-      (Math.random() * 2 - 1) *
-      accent *
-      level *
-      Math.exp(-seconds / PULSE_DECAY_SECONDS);
-  }
-  return buffer;
-}
-
 /** A sound a preview can play: what it is called, what it is for, and how it is drawn for a sample rate. */
 export interface DemoSource {
   /** What to listen for, in a sentence. */

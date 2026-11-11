@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   type WaveShaperNote,
   type WaveShaperState,
   waveShaperDevice,
 } from "@/registry-audio/bases/base/devices/wave-shaper/device";
-import {
-  createWaveShaperEngine,
-  type WaveShaperEngine,
-} from "@/registry-audio/bases/base/devices/wave-shaper/engine";
+import { createWaveShaperEngine } from "@/registry-audio/bases/base/devices/wave-shaper/engine";
 import { WaveShaperPanel } from "@/registry-audio/bases/base/devices/wave-shaper/panel";
+import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /**
  * A wave shaper synth you can plug in: its state, a panel that draws and plays
@@ -24,28 +21,11 @@ export default function BlockWaveShaper() {
     waveShaperDevice.defaults()
   );
   const master = useMasterBus(1);
-  const [engine, setEngine] = useState<WaveShaperEngine | null>(null);
-  const stateRef = useRef(state);
-  stateRef.current = state;
-
-  useEffect(() => {
-    const ctx = webAudio.getContext();
-    if (!(ctx && master)) {
-      return;
-    }
-    const synth = createWaveShaperEngine(ctx, stateRef.current);
-    synth.output.connect(master);
-    setEngine(synth);
-    return () => {
-      synth.dispose();
-      setEngine(null);
-    };
-  }, [master]);
-
-  // The engine follows the state, whoever changed it: a button or a knob.
-  useEffect(() => {
-    engine?.update(state);
-  }, [engine, state]);
+  const [engine] = useDeviceEngines({
+    create: createWaveShaperEngine,
+    destination: master,
+    state,
+  });
 
   const play = useCallback(
     (note: WaveShaperNote) => engine?.noteOn(note),

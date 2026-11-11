@@ -1,16 +1,14 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   type DrumSynthNote,
   type DrumSynthState,
   drumSynthDevice,
 } from "@/registry-audio/bases/base/devices/drum-synth/device";
-import {
-  createDrumSynthEngine,
-  type DrumSynthEngine,
-} from "@/registry-audio/bases/base/devices/drum-synth/engine";
+import { createDrumSynthEngine } from "@/registry-audio/bases/base/devices/drum-synth/engine";
 import { DrumSynthPanel } from "@/registry-audio/bases/base/devices/drum-synth/panel";
+import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
@@ -26,28 +24,11 @@ export default function BlockDrumSynth() {
     drumSynthDevice.defaults()
   );
   const master = useMasterBus(1);
-  const [engine, setEngine] = useState<DrumSynthEngine | null>(null);
-  const stateRef = useRef(state);
-  stateRef.current = state;
-
-  useEffect(() => {
-    const ctx = webAudio.getContext();
-    if (!(ctx && master)) {
-      return;
-    }
-    const made = createDrumSynthEngine(ctx, stateRef.current);
-    made.output.connect(master);
-    setEngine(made);
-    return () => {
-      made.dispose();
-      setEngine(null);
-    };
-  }, [master]);
-
-  // The engine follows the state, whoever changed it: a control or a call.
-  useEffect(() => {
-    engine?.update(state);
-  }, [engine, state]);
+  const [engine] = useDeviceEngines({
+    create: createDrumSynthEngine,
+    destination: master,
+    state,
+  });
 
   const strike = useCallback(
     (note: DrumSynthNote) => {

@@ -1,25 +1,19 @@
 "use client";
 
+import { peakDb } from "@audio-ui/core/analysis";
 import { createSource } from "@audio-ui/react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   type CompressorState,
   compressorDevice,
 } from "@/registry-audio/bases/base/devices/compressor/device";
-import {
-  type CompressorEngine,
-  createCompressorEngine,
-} from "@/registry-audio/bases/base/devices/compressor/engine";
+import { createCompressorEngine } from "@/registry-audio/bases/base/devices/compressor/engine";
 import { CompressorPanel } from "@/registry-audio/bases/base/devices/compressor/panel";
-import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
-import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
-import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const FLOOR_DB = -80;
-const FFT_SIZE = 1024;
-/** How fast the level falls back between pulses, in dB per frame. */
+/** How fast the level falls back between hits, in dB per frame. */
 const LEVEL_FALL_DB = 1.2;
 const MASTER_VOLUME = 0.7;
 
@@ -33,75 +27,35 @@ export default function BlockCompressor() {
   const [state, setState] = useState<CompressorState>(() =>
     compressorDevice.defaults()
   );
-  const { playing } = usePlaySwitch();
   const master = useMasterBus(MASTER_VOLUME);
-  const [level] = useState(() => createSource(FLOOR_DB));
-  const engine = useRef<CompressorEngine | null>(null);
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  const { input } = useDeviceLoop({
+    create: createCompressorEngine,
+    destination: master,
+    state,
+  });
 
-  const name = useDemoSource("groove");
+  // The loudest sample going in, in dB, falling back between hits: the dot on the curve rides it.
+  const [level] = useState(() => createSource(FLOOR_DB));
   useEffect(() => {
-    const ctx = webAudio.getContext();
-    if (!(playing && ctx && master)) {
+    if (!input) {
       return;
     }
-    ctx.resume();
-    let cancelled = false;
-    let stop = () => undefined;
-    renderDemoSource(name, ctx.sampleRate).then((signal) => {
-      if (cancelled) {
-        return;
-      }
-      const source = ctx.createBufferSource();
-      source.buffer = signal;
-      source.loop = true;
-      const compressor = createCompressorEngine(ctx, stateRef.current);
-      const tap = ctx.createAnalyser();
-      tap.fftSize = FFT_SIZE;
-      source.connect(tap);
-      source.connect(compressor.input);
-      compressor.output.connect(master);
-      engine.current = compressor;
-      const startAt = ctx.currentTime + 0.05;
-      source.start(startAt);
-
-      const samples = new Float32Array(new ArrayBuffer(tap.fftSize * 4));
-      let held = FLOOR_DB;
-      let frame = 0;
-      const tick = () => {
-        tap.getFloatTimeDomainData(samples);
-        let peak = 0;
-        for (const sample of samples) {
-          peak = Math.max(peak, Math.abs(sample));
-        }
-        const db =
-          peak > 0 ? Math.max(FLOOR_DB, 20 * Math.log10(peak)) : FLOOR_DB;
-        held = Math.max(db, held - LEVEL_FALL_DB);
-        level.set(held);
-        frame = requestAnimationFrame(tick);
-      };
+    const samples = new Float32Array(new ArrayBuffer(input.fftSize * 4));
+    let held = FLOOR_DB;
+    let frame = 0;
+    const tick = () => {
+      input.getFloatTimeDomainData(samples);
+      const db = Math.max(FLOOR_DB, peakDb(samples));
+      held = Math.max(db, held - LEVEL_FALL_DB);
+      level.set(held);
       frame = requestAnimationFrame(tick);
-      stop = () => {
-        cancelAnimationFrame(frame);
-        source.stop();
-        source.disconnect();
-        tap.disconnect();
-        compressor.dispose();
-        engine.current = null;
-        level.set(FLOOR_DB);
-      };
-    });
-    return () => {
-      cancelled = true;
-      stop();
     };
-  }, [level, master, name, playing]);
-
-  // The engine follows the state, whoever changed it: a knob or a call.
-  useEffect(() => {
-    engine.current?.update(state);
-  }, [state]);
+    frame = requestAnimationFrame(tick);
+    return () => {
+      cancelAnimationFrame(frame);
+      level.set(FLOOR_DB);
+    };
+  }, [input, level]);
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">

@@ -152,12 +152,23 @@ export const hooks: RegistryItem[] = [
       "A master output bus with a safety limiter: every source connects into one gain node that a single fader governs.",
     registryDependencies: ["@audio-ui/web-audio"],
   }),
+  hookItem("use-device-engines", {
+    categories: ["hooks", "audio", "device"],
+    dependencies: ["@audio-ui/core"],
+    description:
+      "The engines of a device on a page: as many as asked, made on a destination's context from the state of the moment, each following the state and the host's tempo, disposed when the destination changes and on unmount, never updated once disposed. One for an effect, one per voice for an instrument.",
+    registryDependencies: ["@audio-ui/device-engine"],
+  }),
   hookItem("use-polyphony", {
     categories: ["audio", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
       "An instrument whose engine plays one voice, played as chords: as many engines as notes sound at once, made into a destination, each following the state, every note on a voice of its own.",
-    registryDependencies: ["@audio-ui/polyphony"],
+    registryDependencies: [
+      "@audio-ui/device-engine",
+      "@audio-ui/polyphony",
+      "@audio-ui/use-device-engines",
+    ],
   }),
   hookItem("use-synth-voices", {
     categories: ["audio", "synth", "piano", "envelope"],
@@ -271,23 +282,22 @@ export const hooks: RegistryItem[] = [
     categories: ["hooks", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine follows the state, and an analyser of the output is there for a spectrum.",
+      "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and analysers of what goes in and comes out are there for a meter or a spectrum.",
     registryDependencies: [
       "@audio-ui/demo-sound",
+      "@audio-ui/device-engine",
       "@audio-ui/use-demo-source",
+      "@audio-ui/use-device-engines",
       "@audio-ui/use-play-switch",
       "@audio-ui/web-audio",
     ],
   }),
-  hookItem("use-pulses-through-compressor", {
-    categories: ["hooks", "audio", "plot"],
-    dependencies: ["@audio-ui/react"],
+  {
     description:
-      "A looping pulse played through a compressor that follows your controls, with the level going in as a live source in dB: pair it with a transfer curve's Plot.Dot",
-    registryDependencies: [
-      "@audio-ui/demo-sound",
-      "@audio-ui/use-play-switch",
-      "@audio-ui/web-audio",
-    ],
-  }),
+      "Gone: a device's own block plays its loop through its engine with use-device-loop, and the compressor's panel draws the level going in. Installs use-device-loop.",
+    files: [],
+    name: "use-pulses-through-compressor",
+    registryDependencies: ["@audio-ui/use-device-loop"],
+    type: "registry:hook",
+  },
 ];

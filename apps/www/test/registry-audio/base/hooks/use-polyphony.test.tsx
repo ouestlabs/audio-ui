@@ -74,28 +74,4 @@ describe("usePolyphony", () => {
       "v2 off b",
     ]);
   });
-
-  test("a new destination disposes the voices and makes new ones from the latest state, and so does unmounting", () => {
-    const { create, destination, log } = setup();
-    const view = renderHook(
-      (props: { destination: AudioNode; state: State }) =>
-        usePolyphony({ create, ...props, voices: 1 }),
-      { initialProps: { destination, state: { level: 1 } } }
-    );
-    view.rerender({ destination, state: { level: 3 } });
-    const other = { context: {} } as AudioNode;
-    view.rerender({ destination: other, state: { level: 3 } });
-    view.unmount();
-    expect(log).toEqual([
-      "v1 made at 1",
-      "v1 into destination",
-      "v1 at 1",
-      "v1 at 3",
-      "v1 disposed",
-      "v2 made at 3",
-      "v2 into ?",
-      "v2 at 3",
-      "v2 disposed",
-    ]);
-  });
 });

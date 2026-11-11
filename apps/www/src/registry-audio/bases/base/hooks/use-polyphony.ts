@@ -1,21 +1,19 @@
 "use client";
 
-import type { NoteTiming } from "@audio-ui/core/device";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useMemo } from "react";
 import {
-  createPolyphony,
-  type Polyphony,
-} from "@/registry-audio/bases/base/lib/polyphony";
+  type DeviceEngineLike,
+  useDeviceEngines,
+} from "@/registry-audio/bases/base/hooks/use-device-engines";
+import type {
+  EngineFactory,
+  InstrumentEngine,
+} from "@/registry-audio/bases/base/lib/device-engine";
+import { createPolyphony } from "@/registry-audio/bases/base/lib/polyphony";
 
-/** What a voice needs of an instrument's engine: it plays one note, follows a state, and lets go. */
-export interface PolyphonyEngine<State> {
-  dispose: () => void;
-  noteOff: (timing?: NoteTiming) => void;
-  /** The engine's own note, such as `{ frequency, velocity }`: `never` here, so any note type fits. */
-  noteOn: (note: never, timing?: NoteTiming) => void;
-  readonly output: AudioNode;
-  update: (state: State) => void;
-}
+/** What a voice needs of an instrument's engine: it plays one note at a time. */
+export type PolyphonyEngine<State> = DeviceEngineLike<State> &
+  Pick<InstrumentEngine<State, never>, "noteOff" | "noteOn">;
 
 /** The note an engine plays, as its `noteOn` takes it. */
 type NoteOf<Engine extends PolyphonyEngine<never>> = Parameters<
@@ -23,8 +21,8 @@ type NoteOf<Engine extends PolyphonyEngine<never>> = Parameters<
 >[0];
 
 export interface UsePolyphonyOptions<State, Engine> {
-  /** Makes the engine of one voice for the state it starts with: an instrument's `create…Engine`. */
-  create: (ctx: BaseAudioContext, state: State) => Engine;
+  /** Makes the engine of one voice for the state it starts with: an instrument's `create<Name>Engine`. */
+  create: EngineFactory<State, Engine>;
   /** Where every voice plays, such as the node of `useMasterBus`. The voices are made on its context once it is there. */
   destination: AudioNode | null;
   /** The instrument's state: every voice follows it, whoever changed it. */
@@ -42,21 +40,12 @@ export interface UsePolyphonyReturn<Note, Engine> {
   noteOn: (note: Note, id: string) => void;
 }
 
-const NO_ENGINES: readonly never[] = [];
-
-/** A set of voices: the engines, and what gives each note one. */
-interface Voices<Engine extends PolyphonyEngine<never>> {
-  engines: readonly Engine[];
-  polyphony: Polyphony<NoteOf<Engine>>;
-}
-
 /**
  * An instrument whose engine plays one voice, played as chords: `voices`
- * engines made into `destination`, each note on a voice of its own
- * (`createPolyphony`). Every voice follows `state`, and all are disposed when
- * the destination changes and on unmount. Until the destination is there,
- * notes play nowhere. `noteOn` and `noteOff` keep their identity across
- * renders and always reach the voices playing now.
+ * engines made into `destination` (`useDeviceEngines`), each note on a voice
+ * of its own (`createPolyphony`). Every voice follows `state`, and all are
+ * disposed when the destination changes and on unmount. Until the
+ * destination is there, notes play nowhere.
  */
 export function usePolyphony<State, Engine extends PolyphonyEngine<State>>({
   create,
@@ -67,58 +56,23 @@ export function usePolyphony<State, Engine extends PolyphonyEngine<State>>({
   NoteOf<Engine>,
   Engine
 > {
-  const [made, setMade] = useState<Voices<Engine> | null>(null);
-  /** The voices playing now: the ones a render holds may have just been disposed for a new destination. */
-  const live = useRef<Voices<Engine> | null>(null);
-  // The voices start from the state they are made with; the effect below keeps them following it.
-  const stateRef = useRef(state);
-  stateRef.current = state;
-  const createRef = useRef(create);
-  createRef.current = create;
-
-  useEffect(() => {
-    if (!destination) {
-      return;
-    }
-    const engines = Array.from({ length: voices }, () => {
-      const engine = createRef.current(destination.context, stateRef.current);
-      engine.output.connect(destination);
-      return engine;
-    });
-    const next = {
-      engines,
-      polyphony: createPolyphony<NoteOf<Engine>>(engines),
-    };
-    live.current = next;
-    setMade(next);
-    return () => {
-      live.current = null;
-      for (const engine of engines) {
-        engine.dispose();
-      }
-      setMade(null);
-    };
-  }, [destination, voices]);
-
-  useEffect(() => {
-    // A new destination and a new state can come in one render: the voices it holds are then gone.
-    if (made !== live.current) {
-      return;
-    }
-    for (const engine of made?.engines ?? NO_ENGINES) {
-      engine.update(state);
-    }
-  }, [made, state]);
-
+  const engines = useDeviceEngines({
+    count: voices,
+    create,
+    destination,
+    state,
+  });
+  const polyphony = useMemo(
+    () => createPolyphony<NoteOf<Engine>>(engines),
+    [engines]
+  );
   const noteOn = useCallback(
-    (note: NoteOf<Engine>, id: string) =>
-      live.current?.polyphony.noteOn(note, id),
-    []
+    (note: NoteOf<Engine>, id: string) => polyphony.noteOn(note, id),
+    [polyphony]
   );
   const noteOff = useCallback(
-    (id: string) => live.current?.polyphony.noteOff(id),
-    []
+    (id: string) => polyphony.noteOff(id),
+    [polyphony]
   );
-
-  return { engines: made?.engines ?? NO_ENGINES, noteOff, noteOn };
+  return { engines, noteOff, noteOn };
 }
