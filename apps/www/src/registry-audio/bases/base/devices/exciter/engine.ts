@@ -3,7 +3,7 @@ import {
   type ExciterState,
   exciterSettings,
 } from "@/registry-audio/bases/base/devices/exciter/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.02;
 
@@ -36,21 +36,24 @@ export function createExciterEngine(
 ): ExciterEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
-  const processed = ctx.createGain();
-  const clean = ctx.createGain();
-  input.connect(clean).connect(output);
-  processed.connect(output);
-  processed.gain.value = 0;
-  clean.gain.value = 1;
-
-  let node: AudioWorkletNode | null = null;
   let latest = initial;
-  let disposed = false;
+  const stage = createWorkletStage(ctx, {
+    input,
+    make: () =>
+      new AudioWorkletNode(ctx, "audioui-exciter", {
+        outputChannelCount: [2],
+        parameterData: exciterSettings(latest),
+      }),
+    ramp: RAMP_SECONDS,
+    source: EXCITER_WORKLET,
+  });
+  stage.connect(output);
 
   const follow = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
 
   const apply = (state: ExciterState) => {
+    const { node } = stage;
     if (!node) {
       return;
     }
@@ -60,31 +63,15 @@ export function createExciterEngine(
     }
   };
 
-  const ready = loadWorklet(ctx, EXCITER_WORKLET).then((ok) => {
-    if (!ok || disposed) {
-      return false;
-    }
-    node = new AudioWorkletNode(ctx, "audioui-exciter", {
-      outputChannelCount: [2],
-      parameterData: exciterSettings(latest),
-    });
-    input.connect(node).connect(processed);
-    follow(processed.gain, 1);
-    follow(clean.gain, 0);
-    return true;
-  });
-
   return {
     dispose: () => {
-      disposed = true;
-      for (const each of [input, processed, clean, output]) {
-        each.disconnect();
-      }
-      node?.disconnect();
+      stage.dispose();
+      input.disconnect();
+      output.disconnect();
     },
     input,
     output,
-    ready,
+    ready: stage.ready,
     update: (state) => {
       latest = state;
       apply(state);

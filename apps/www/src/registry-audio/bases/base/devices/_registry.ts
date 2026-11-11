@@ -52,7 +52,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A binaural panner on the Web Audio API for a binaural panner state: the binaural panner of @audio/spatial-binaural in an AudioWorklet loaded from a blob, a turn across the back the short way round, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -71,7 +71,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A bass enhancer on the Web Audio API for a bass enhancer state: the bass enhancer of @audio/effect-subbass in an AudioWorklet loaded from a blob, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -176,7 +176,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A de-esser on the Web Audio API for a de-esser state: the audio.js de-esser in a worklet, the highs passing until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -306,7 +306,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "An exciter on the Web Audio API for an exciter state: the exciter of @audio/effect-exciter in an AudioWorklet loaded from a blob, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -414,7 +414,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A gate on the Web Audio API for a gate state: the audio.js gate in a worklet, with its look-ahead, the signal passing until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -602,7 +602,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A tilt EQ on the Web Audio API for a tilt EQ state: the tilt of @audio/eq-tilt in an AudioWorklet loaded from a blob, the sound passing clean until it is ready, then an output level.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -811,7 +811,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A rotary speaker on the Web Audio API for a rotary state: the rotary of @audio/effect-rotary in an AudioWorklet loaded from a blob, a mono cabinet heard in stereo, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -850,7 +850,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A stutter on the Web Audio API for a stutter state: the stutter of @audio/effect-stutter in an AudioWorklet loaded from a blob, its lengths read against the host's tempo, a fresh cycle when it is turned on, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -890,7 +890,7 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/core"],
       description:
         "A transient shaper on the Web Audio API for a transient state: the audio.js shaper in a worklet, the signal passing unchanged until it is ready.",
-      registryDependencies: ["@audio-ui/audio-worklet"],
+      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],

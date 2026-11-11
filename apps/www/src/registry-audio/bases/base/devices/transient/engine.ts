@@ -4,7 +4,7 @@ import {
   type TransientState,
   transientSettings,
 } from "@/registry-audio/bases/base/devices/transient/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 
@@ -34,57 +34,46 @@ export function createTransientEngine(
 ): TransientEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
-  const bypass = ctx.createGain();
-  const shaped = ctx.createGain();
-  const master = ctx.createGain();
-  input.connect(bypass).connect(master);
-  shaped.connect(master);
-  master.connect(output);
 
   let settings = transientSettings(initial);
+  let latest = initial;
+  const stage = createWorkletStage(ctx, {
+    input,
+    make: () => {
+      settings = transientSettings(latest);
+      return new AudioWorkletNode(ctx, "audioui-transient", {
+        outputChannelCount: [2],
+        parameterData: settings.modelParams,
+        processorOptions: { model: "shaper" },
+      });
+    },
+    ramp: RAMP_SECONDS,
+    source: TRANSIENT_WORKLET,
+  });
+  const master = ctx.createGain();
+  stage.connect(master);
+  master.connect(output);
   master.gain.value = settings.output;
-  shaped.gain.value = 0;
-
-  let shaper: AudioWorkletNode | null = null;
-  let disposed = false;
 
   const route = () => {
     for (const [name, value] of Object.entries(settings.modelParams)) {
-      shaper?.parameters
+      stage.node?.parameters
         .get(name)
         ?.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
     }
     master.gain.setTargetAtTime(settings.output, ctx.currentTime, RAMP_SECONDS);
   };
-  let latest = initial;
-  const ready = loadWorklet(ctx, TRANSIENT_WORKLET).then((ok) => {
-    if (!ok || disposed) {
-      return false;
-    }
-    settings = transientSettings(latest);
-    shaper = new AudioWorkletNode(ctx, "audioui-transient", {
-      outputChannelCount: [2],
-      parameterData: settings.modelParams,
-      processorOptions: { model: "shaper" },
-    });
-    input.connect(shaper);
-    shaper.connect(shaped);
-    bypass.gain.setTargetAtTime(0, ctx.currentTime, RAMP_SECONDS);
-    shaped.gain.setTargetAtTime(1, ctx.currentTime, RAMP_SECONDS);
-    return true;
-  });
 
   return {
     dispose: () => {
-      disposed = true;
-      shaper?.disconnect();
-      for (const node of [input, bypass, shaped, master, output]) {
+      stage.dispose();
+      for (const node of [input, master, output]) {
         node.disconnect();
       }
     },
     input,
     output,
-    ready,
+    ready: stage.ready,
     update: (state) => {
       latest = state;
       settings = transientSettings(state);

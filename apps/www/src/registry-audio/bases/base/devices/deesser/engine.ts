@@ -4,7 +4,7 @@ import {
   type DeesserState,
   deesserSettings,
 } from "@/registry-audio/bases/base/devices/deesser/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 
@@ -39,50 +39,40 @@ export function createDeesserEngine(
 ): DeesserEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
-  const bypass = ctx.createGain();
-  const deessed = ctx.createGain();
-  input.connect(bypass).connect(output);
-  deessed.connect(output);
-  deessed.gain.value = 0;
 
   let settings = deesserSettings(initial);
-  let model: AudioWorkletNode | null = null;
   let reduction = 0;
-  let disposed = false;
   let latest = initial;
+  const stage = createWorkletStage(ctx, {
+    input,
+    make: () => {
+      settings = deesserSettings(latest);
+      const model = new AudioWorkletNode(ctx, "audioui-deesser", {
+        outputChannelCount: [2],
+        parameterData: settings.modelParams,
+        processorOptions: { model: "deesser" },
+      });
+      model.port.onmessage = (event: MessageEvent<number>) => {
+        reduction = event.data;
+      };
+      return model;
+    },
+    ramp: RAMP_SECONDS,
+    source: DEESSER_WORKLET,
+  });
+  stage.connect(output);
 
   const route = () => {
     for (const [name, value] of Object.entries(settings.modelParams)) {
-      model?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
+      stage.node?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
     }
   };
-  const ready = loadWorklet(ctx, DEESSER_WORKLET).then((ok) => {
-    if (!ok || disposed) {
-      return false;
-    }
-    settings = deesserSettings(latest);
-    model = new AudioWorkletNode(ctx, "audioui-deesser", {
-      outputChannelCount: [2],
-      parameterData: settings.modelParams,
-      processorOptions: { model: "deesser" },
-    });
-    model.port.onmessage = (event: MessageEvent<number>) => {
-      reduction = event.data;
-    };
-    input.connect(model);
-    model.connect(deessed);
-    bypass.gain.setTargetAtTime(0, ctx.currentTime, RAMP_SECONDS);
-    deessed.gain.setTargetAtTime(1, ctx.currentTime, RAMP_SECONDS);
-    return true;
-  });
 
   return {
     dispose: () => {
-      disposed = true;
-      model?.disconnect();
-      for (const node of [input, bypass, deessed, output]) {
-        node.disconnect();
-      }
+      stage.dispose();
+      input.disconnect();
+      output.disconnect();
     },
     input,
     output,
@@ -90,7 +80,7 @@ export function createDeesserEngine(
       return reduction;
     },
     readings: (): DeviceReadings => ({ gainReductionDb: reduction }),
-    ready,
+    ready: stage.ready,
     update: (state) => {
       latest = state;
       settings = deesserSettings(state);

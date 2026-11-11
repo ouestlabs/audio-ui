@@ -3,7 +3,7 @@ import {
   type BinauralPannerState,
   binauralPannerSettings,
 } from "@/registry-audio/bases/base/devices/binaural-panner/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.02;
 
@@ -38,22 +38,25 @@ export function createBinauralPannerEngine(
 ): BinauralPannerEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
-  const processed = ctx.createGain();
-  const clean = ctx.createGain();
-  input.connect(clean).connect(output);
-  processed.connect(output);
-  processed.gain.value = 0;
-  clean.gain.value = 1;
-
-  let node: AudioWorkletNode | null = null;
   let latest = initial;
+  const stage = createWorkletStage(ctx, {
+    input,
+    make: () =>
+      new AudioWorkletNode(ctx, "audioui-binaural-panner", {
+        outputChannelCount: [2],
+        parameterData: binauralPannerSettings(latest),
+      }),
+    ramp: RAMP_SECONDS,
+    source: BINAURAL_PANNER_WORKLET,
+  });
+  stage.connect(output);
   let { azimuth } = binauralPannerSettings(initial);
-  let disposed = false;
 
   const follow = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
 
   const apply = (state: BinauralPannerState) => {
+    const { node } = stage;
     if (!node) {
       return;
     }
@@ -68,31 +71,15 @@ export function createBinauralPannerEngine(
     follow(node.parameters.get("azimuth") as AudioParam, azimuth);
   };
 
-  const ready = loadWorklet(ctx, BINAURAL_PANNER_WORKLET).then((ok) => {
-    if (!ok || disposed) {
-      return false;
-    }
-    node = new AudioWorkletNode(ctx, "audioui-binaural-panner", {
-      outputChannelCount: [2],
-      parameterData: binauralPannerSettings(latest),
-    });
-    input.connect(node).connect(processed);
-    follow(processed.gain, 1);
-    follow(clean.gain, 0);
-    return true;
-  });
-
   return {
     dispose: () => {
-      disposed = true;
-      for (const each of [input, processed, clean, output]) {
-        each.disconnect();
-      }
-      node?.disconnect();
+      stage.dispose();
+      input.disconnect();
+      output.disconnect();
     },
     input,
     output,
-    ready,
+    ready: stage.ready,
     update: (state) => {
       latest = state;
       apply(state);

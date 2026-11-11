@@ -3,7 +3,7 @@ import {
   type TiltEqState,
   tiltEqSettings,
 } from "@/registry-audio/bases/base/devices/tilt-eq/device";
-import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.02;
 
@@ -36,19 +36,23 @@ export function createTiltEqEngine(
 ): TiltEqEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
-  const tilted = ctx.createGain();
-  const clean = ctx.createGain();
-  const level = ctx.createGain();
-  input.connect(clean).connect(level);
-  tilted.connect(level);
-  level.connect(output);
-  tilted.gain.value = 0;
-  clean.gain.value = 1;
-  level.gain.value = tiltEqSettings(initial).output;
-
-  let tilt: AudioWorkletNode | null = null;
   let latest = initial;
-  let disposed = false;
+  const stage = createWorkletStage(ctx, {
+    input,
+    make: () => {
+      const settings = tiltEqSettings(latest);
+      return new AudioWorkletNode(ctx, "audioui-tilt-eq", {
+        outputChannelCount: [2],
+        parameterData: { gain: settings.gain, pivot: settings.pivot },
+      });
+    },
+    ramp: RAMP_SECONDS,
+    source: TILT_EQ_WORKLET,
+  });
+  const level = ctx.createGain();
+  stage.connect(level);
+  level.connect(output);
+  level.gain.value = tiltEqSettings(initial).output;
 
   const follow = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
@@ -56,35 +60,27 @@ export function createTiltEqEngine(
   const apply = (state: TiltEqState) => {
     const settings = tiltEqSettings(state);
     follow(level.gain, settings.output);
+    const tilt = stage.node;
     if (tilt) {
       follow(tilt.parameters.get("gain") as AudioParam, settings.gain);
       follow(tilt.parameters.get("pivot") as AudioParam, settings.pivot);
     }
   };
 
-  const ready = loadWorklet(ctx, TILT_EQ_WORKLET).then((ok) => {
-    if (!ok || disposed) {
-      return false;
+  // In the graph, the tilt plays the state as it is by then.
+  const ready = stage.ready.then((ok) => {
+    if (ok) {
+      apply(latest);
     }
-    const settings = tiltEqSettings(latest);
-    tilt = new AudioWorkletNode(ctx, "audioui-tilt-eq", {
-      outputChannelCount: [2],
-      parameterData: { gain: settings.gain, pivot: settings.pivot },
-    });
-    input.connect(tilt).connect(tilted);
-    follow(tilted.gain, 1);
-    follow(clean.gain, 0);
-    apply(latest);
-    return true;
+    return ok;
   });
 
   return {
     dispose: () => {
-      disposed = true;
-      for (const node of [input, tilted, clean, level, output]) {
+      stage.dispose();
+      for (const node of [input, level, output]) {
         node.disconnect();
       }
-      tilt?.disconnect();
     },
     input,
     output,
