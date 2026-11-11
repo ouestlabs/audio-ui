@@ -1,5 +1,16 @@
 # @audio-ui/elements
 
+## 0.2.0
+
+### Minor Changes
+
+- 48b8920: `<audio-ui-piano-roll-row>` carries `data-scale-root` on the rows of the root of the roll's scale.
+
+### Patch Changes
+
+- Updated dependencies [48b8920]
+  - @audio-ui/core@0.28.0
+
 ## 0.1.3
 
 ### Patch Changes

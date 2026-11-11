@@ -1,5 +1,11 @@
 # @audio-ui/core
 
+## 0.28.0
+
+### Minor Changes
+
+- 48b8920: `Rows` of a piano roll carry `root`, the pitch class of the scale's root, or `null` without a scale.
+
 ## 0.27.0
 
 ### Minor Changes
