@@ -7,7 +7,6 @@ import { Vu } from "./ui/vu";
 import { useAntares } from "./use-antares";
 
 const KNEES = ["Hard", "Soft"] as const;
-const MAKEUPS = ["Manual", "Auto"] as const;
 const ENGAGED = ["Out", "In"] as const;
 
 /** Antares-1: the panel. The sound is in `audio/`, what the panel keeps in `use-antares.ts`. */
@@ -133,12 +132,6 @@ export default function Antares1() {
                 onChange={antares.setKnee}
                 options={KNEES}
                 value={panel.knee}
-              />
-              <Selector
-                label="Make-up mode"
-                onChange={antares.setMakeup}
-                options={MAKEUPS}
-                value={panel.auto ? "Auto" : "Manual"}
               />
               <Selector
                 label="Compressor"

@@ -104,13 +104,6 @@ export function useAntares() {
     },
     [panel, update]
   );
-  const setMakeup = useCallback(
-    (value: string) => {
-      setTouched(value === "Auto" ? "Auto make-up" : "Manual make-up");
-      update({ ...panel, auto: value === "Auto" });
-    },
-    [panel, update]
-  );
   const setEngaged = useCallback(
     (value: string) => {
       setTouched(value === "In" ? "Compressor in" : "Compressor out");
@@ -122,7 +115,6 @@ export function useAntares() {
   const inspected = useMemo(
     () => ({
       ...panel,
-      auto: panel.auto ? "auto" : "manual",
       engaged: panel.engaged ? "in" : "out",
       source,
       transport: playing ? "running" : "stopped",
@@ -141,7 +133,6 @@ export function useAntares() {
     ready,
     setEngaged,
     setKnee,
-    setMakeup,
     source,
     toggle,
   };

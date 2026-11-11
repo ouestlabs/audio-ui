@@ -55,7 +55,7 @@ Each primitive registers from its own entry point, `@audio-ui/elements/<primitiv
 | `@audio-ui/core/piano-roll` | `createPianoRollController`; edits that return new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation`, `deleteTime`, `insertTime`, `duplicateTime`; `findNotes`, `selectionSpan` |
 | `@audio-ui/core/timeline` | `createTimelineController`, `createTrackController`, `createClipController`, `createRangeController`, `createNavigatorController`, `createWheelZoom` |
 | `@audio-ui/core/waveform` | `createWaveformController`, `createWaveformRegionController`, `createLevelsEngine`, `createLevelHistory` |
-| `@audio-ui/core/analysis` | `logSpectrum`, `holdPeaks`, `computePeaks`, `downsampleWaveform`, `spectrumBands`, `biquadResponse`, `eqResponse`, `toWebAudioQ`, `compressorOutput`, `webAudioCompressorOutput`, `dbToGain`, `gainToDb`, `rmsDb`, `peakDb`, `formatHz`, `formatDb` |
+| `@audio-ui/core/analysis` | `logSpectrum`, `holdPeaks`, `computePeaks`, `downsampleWaveform`, `spectrumBands`, `biquadResponse`, `eqResponse`, `toWebAudioQ`, `compressorOutput`, `dbToGain`, `gainToDb`, `rmsDb`, `peakDb`, `formatHz`, `formatDb` |
 | `@audio-ui/core/device` | `defineDevice`, `deviceTools`, `DeviceDefinitionError`, `Device`, `DeviceBinding`, `DeviceState`, `DeviceDescription`, `ParameterDescriptor` |
 | `@audio-ui/core/midi` | `parseMidiMessage`, `pitchBendToSemitones`, `createMidiInput` |
 | `@audio-ui/core/time` | `secondsPerQuarter`, `barsBeatsAt`, `gridInterval`, `gridLabel`, `advance`, `positionAt`, `SCHEDULE_AHEAD_SECONDS` |

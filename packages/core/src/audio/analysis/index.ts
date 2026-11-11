@@ -8,7 +8,6 @@ export {
 export {
   type CompressorSettings,
   compressorOutput,
-  webAudioCompressorOutput,
 } from "./compressor.ts";
 export {
   type BiquadSettings,
