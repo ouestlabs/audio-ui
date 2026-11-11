@@ -26,6 +26,7 @@ export namespace Rows {
 
 const ROW_ATTRIBUTES: StateAttributesMapping<Row.State> = {
   inScale: (inScale) => (inScale ? { "data-in-scale": "" } : null),
+  outOfScale: (outOfScale) => (outOfScale ? { "data-out-of-scale": "" } : null),
   scaleRoot: (scaleRoot) => (scaleRoot ? { "data-scale-root": "" } : null),
 };
 
@@ -39,18 +40,27 @@ export function Row(componentProps: Row.Props) {
     componentProps;
   const { rows, state: rollState } = usePianoRollContext("Row");
   const active = useRollView("Row", (view) => view.active.has(pitch));
-  const state = React.useMemo<Row.State>(
-    () => ({
+  const state = React.useMemo<Row.State>(() => {
+    const pitchClass = ((pitch % 12) + 12) % 12;
+    const inScale = rows.scale?.includes(pitchClass) ?? false;
+    return {
       active,
       color: isBlackKey(pitch) ? "black" : "white",
       disabled: rollState.disabled,
       folded: rollState.folded,
-      inScale: rows.scale?.includes(((pitch % 12) + 12) % 12) ?? false,
-      octave: pitch % 12 === 0,
-      scaleRoot: rows.root === ((pitch % 12) + 12) % 12,
-    }),
-    [active, pitch, rollState.disabled, rollState.folded, rows.root, rows.scale]
-  );
+      inScale,
+      octave: pitchClass === 0,
+      outOfScale: rows.scale !== null && !inScale,
+      scaleRoot: rows.root === pitchClass,
+    };
+  }, [
+    active,
+    pitch,
+    rollState.disabled,
+    rollState.folded,
+    rows.root,
+    rows.scale,
+  ]);
   return useRender({
     defaultTagName: "div",
     props: mergeProps<"div">(
@@ -84,6 +94,8 @@ export namespace Row {
     inScale: boolean;
     /** Whether the row is a C, where an octave starts. */
     octave: boolean;
+    /** Whether the roll has a `scale` and the pitch is not in it. */
+    outOfScale: boolean;
     /** Whether the pitch is the root of the roll's `scale`: a C in C major. */
     scaleRoot: boolean;
   };

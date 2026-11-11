@@ -998,14 +998,21 @@ export const checks: Checks = {
         `the start handle moved the end from ${stopped.end.x} to ${held.end.x}`
       );
       // A handle dragged out zooms out, with no double-click: here the end's, the window against the start of the bar.
+      // As far as the bar lets it go, 200 px at most: where the earlier drags left the window depends on their timing,
+      // and past the bar's end the handle stops there, short of the pointer.
       const wide = () => viewport.evaluate((element) => element.scrollWidth);
       const before = await wide();
+      const track = await bar.boundingBox();
+      assert(track, "the overview's bar is there");
+      const room = track.x + track.width - (held.end.x + held.end.width) - 8;
+      const reach = Math.min(200, room);
+      assert(reach > 40, `the end handle has ${room} px left to go`);
       await page.mouse.move(
         held.end.x + held.end.width / 2,
         held.end.y + held.end.height / 2
       );
       await page.mouse.down();
-      await page.mouse.move(held.end.x + held.end.width / 2 + 200, y, {
+      await page.mouse.move(held.end.x + held.end.width / 2 + reach, y, {
         steps: 6,
       });
       await page.mouse.up();
@@ -1014,8 +1021,8 @@ export const checks: Checks = {
       assert(after < before, `zoomed out from ${before} px to ${after} px`);
       const out = await inBar();
       assert(
-        Math.abs(out.end.x - (held.end.x + 200)) <= 2,
-        `the end handle is at ${out.end.x}, the pointer at ${held.end.x + 200}`
+        Math.abs(out.end.x - (held.end.x + reach)) <= 2,
+        `the end handle is at ${out.end.x}, the pointer at ${held.end.x + reach}`
       );
     },
   "ARR-022: a track removed, the page loaded again: a new track takes an id of its own, and shows and goes alone":

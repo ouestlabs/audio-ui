@@ -569,8 +569,9 @@ export class PianoRollRowsElement extends PianoRollMakerElement<number> {
  * The band of a `pitch` across the grid, for row shading, scale highlighting
  * and octave lines. Ignores the pointer and is hidden from assistive
  * technology. Carries `data-active` while its pitch sounds, `data-color`
- * (`black` or `white`), `data-in-scale`, `data-scale-root` on the scale's
- * root, and `data-octave` on C.
+ * (`black` or `white`), `data-in-scale`, `data-out-of-scale` with a scale
+ * the pitch is not in, `data-scale-root` on the scale's root, and
+ * `data-octave` on C.
  */
 export class PianoRollRowElement extends PianoRollPartElement {
   override paint(snapshot: PianoRollSnapshot) {
@@ -584,6 +585,10 @@ export class PianoRollRowElement extends PianoRollPartElement {
       "data-color": isBlackKey(pitch) ? "black" : "white",
       "data-in-scale": snapshot.rows.scale?.includes(pitchClass) ? "" : null,
       "data-octave": pitchClass === 0 ? "" : null,
+      "data-out-of-scale":
+        snapshot.rows.scale && !snapshot.rows.scale.includes(pitchClass)
+          ? ""
+          : null,
       "data-scale-root": snapshot.rows.root === pitchClass ? "" : null,
     });
   }

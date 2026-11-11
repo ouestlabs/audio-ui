@@ -283,7 +283,7 @@ function PianoRollGrid({
       <PianoRollPrimitive.Rows>
         {(pitch) => (
           <PianoRollPrimitive.Row
-            className="data-[color=black]:bg-foreground/13 data-folded:border-t data-folded:border-foreground/25 data-octave:border-t data-octave:border-foreground/25 data-active:bg-primary/10 data-in-scale:bg-linear-to-r data-in-scale:from-primary/10 data-in-scale:to-primary/10 data-in-scale:data-scale-root:from-primary/25 data-in-scale:data-scale-root:to-primary/25"
+            className="data-[color=black]:bg-foreground/13 data-folded:border-t data-folded:border-foreground/25 data-octave:border-t data-octave:border-foreground/25 data-active:bg-primary/10 data-out-of-scale:bg-foreground/13 data-in-scale:data-[color=black]:bg-transparent data-scale-root:bg-linear-to-r data-scale-root:from-primary/8 data-scale-root:to-primary/8 data-scale-root:shadow-[inset_3px_0_0_var(--primary)] data-in-scale:data-scale-root:border-t data-in-scale:data-scale-root:border-primary/60"
             key={pitch}
             pitch={pitch}
           />

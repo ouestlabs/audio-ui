@@ -602,7 +602,7 @@ Every lane sets `--timeline-unit`, the width of one unit; placed parts set `--ti
 <TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest row, a MIDI pitch. 60 is middle C.</TypeRow>
 <TypeRow name={"max-pitch"} type={"number"} default={"72"}>Highest row.</TypeRow>
 <TypeRow name={"folded"} type={"string"}>When present, only pitches with notes get a row; `"scale"` also keeps the scale's pitches.</TypeRow>
-<TypeRow name={"scale"} type={"string"}>Scale name, such as `major`, `minor` or `dorian`, with `scale-root` (0 for C). Its rows carry `data-in-scale`, and those of its root `data-scale-root`.</TypeRow>
+<TypeRow name={"scale"} type={"string"}>Scale name, such as `major`, `minor` or `dorian`, with `scale-root` (0 for C). Its rows carry `data-in-scale` or `data-out-of-scale`, and those of its root `data-scale-root`.</TypeRow>
 <TypeRow name={"mode"} type={"\"select\" | \"draw\""} default={"\"select\""}>Behavior of a press on empty grid: marquee selection or note drawing.</TypeRow>
 <TypeRow name={"draw-style"} type={"\"stretch\" | \"paint\""} default={"\"stretch\""}>In draw mode, `paint` draws a note in each grid cell crossed.</TypeRow>
 <TypeRow name={"min-length"} type={"number"}>Minimum note length. Defaults to the timeline's grid step.</TypeRow>
@@ -621,7 +621,7 @@ The `getNoteLabel(note)` property sets each note's accessible name, "C4, 4 to 6"
 | Part | Description |
 | --- | --- |
 | `<audio-ui-piano-roll-grid>` | The focusable note surface, a timeline lane. Enter adds a note at the position, Escape clears the selection, Cmd/Ctrl+A selects all, and Cmd/Ctrl+D, C, X, V and Q duplicate, copy, cut, paste and quantize |
-| `<audio-ui-piano-roll-rows>` | Generates an `<audio-ui-piano-roll-row>` per pitch, highest first. Rows carry `data-color`, `data-in-scale`, `data-scale-root`, `data-octave` and `data-active` |
+| `<audio-ui-piano-roll-rows>` | Generates an `<audio-ui-piano-roll-row>` per pitch, highest first. Rows carry `data-color`, `data-in-scale`, `data-out-of-scale`, `data-scale-root`, `data-octave` and `data-active` |
 | `<audio-ui-piano-roll-notes>` | Generates an `<audio-ui-piano-roll-note>` per note in reading order, from its `<template>`. Each note is a toggle button positioned at its start and pitch, movable by pointer and keyboard, exposing `--piano-roll-velocity` and `--piano-roll-chance` |
 | `<audio-ui-piano-roll-note-handle>` | Inside a note, resizes it from its `edge` |
 | `<audio-ui-piano-roll-marquee>` | The selection rectangle during a marquee drag |

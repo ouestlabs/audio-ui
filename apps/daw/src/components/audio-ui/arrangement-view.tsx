@@ -915,65 +915,6 @@ export function ArrangementView({
       source={engine.position}
       {...view.timeline}
     >
-      {/* The overview of the whole arrangement, on top as a DAW has it, over the lanes alone. */}
-      <div className="flex shrink-0 border-b">
-        {/* Takes a device or files dropped on it, a track for each. */}
-        <div
-          aria-label="New tracks"
-          className={cn(
-            "flex shrink-0 items-center border-e",
-            dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
-          )}
-          data-add-track=""
-          onDragLeave={fileLeave}
-          onDragOver={dragOver(NEW_TRACK, true)}
-          onDrop={drop(NEW_TRACK, true)}
-          role="group"
-          style={{ width: LEAD_PX }}
-        >
-          {/* One button for every kind of track, each with its keys (KEY-006 to KEY-008). */}
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              render={
-                <Button
-                  className="min-w-0 flex-1 justify-start gap-1.5 rounded-none px-3 font-normal"
-                  size="xs"
-                  variant="ghost"
-                />
-              }
-            >
-              <PlusIcon aria-hidden="true" />
-              {addTrackLabel(dropOn === NEW_TRACK, readingOwn)}
-            </DropdownMenuTrigger>
-            <DropdownMenuContent>
-              <DropdownMenuItem onClick={addAudio}>
-                Audio track
-                <DropdownMenuShortcut>
-                  {shortcuts?.["audio-track"]}
-                </DropdownMenuShortcut>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={addMidi}>
-                MIDI track
-                <DropdownMenuShortcut>
-                  {shortcuts?.["midi-track"]}
-                </DropdownMenuShortcut>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={addDrums}>Drum track</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem onClick={addReturn}>
-                Return track
-                <DropdownMenuShortcut>
-                  {shortcuts?.["return-track"]}
-                </DropdownMenuShortcut>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-        <TimelineNavigator
-          className="h-auto min-w-0 flex-1 rounded-none"
-          getAriaValueText={describe}
-        />
-      </div>
       <TimelineViewport
         className="flex min-h-0 flex-1 flex-col overflow-y-auto bg-muted/30"
         ref={viewportRef}
@@ -1290,6 +1231,65 @@ export function ArrangementView({
           </div>
         </div>
       </TimelineViewport>
+      {/* Under the lanes: the button that adds tracks, and the overview of the whole arrangement over the lanes' width. */}
+      <div className="flex shrink-0 border-t">
+        {/* Takes a device or files dropped on it, a track for each. */}
+        <div
+          aria-label="New tracks"
+          className={cn(
+            "flex shrink-0 items-center border-e",
+            dropOn === NEW_TRACK && "ring-2 ring-primary ring-inset"
+          )}
+          data-add-track=""
+          onDragLeave={fileLeave}
+          onDragOver={dragOver(NEW_TRACK, true)}
+          onDrop={drop(NEW_TRACK, true)}
+          role="group"
+          style={{ width: LEAD_PX }}
+        >
+          {/* One button for every kind of track, each with its keys (KEY-006 to KEY-008). */}
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  className="min-w-0 flex-1 justify-start gap-1.5 rounded-none px-3 font-normal"
+                  size="xs"
+                  variant="ghost"
+                />
+              }
+            >
+              <PlusIcon aria-hidden="true" />
+              {addTrackLabel(dropOn === NEW_TRACK, readingOwn)}
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={addAudio}>
+                Audio track
+                <DropdownMenuShortcut>
+                  {shortcuts?.["audio-track"]}
+                </DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={addMidi}>
+                MIDI track
+                <DropdownMenuShortcut>
+                  {shortcuts?.["midi-track"]}
+                </DropdownMenuShortcut>
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={addDrums}>Drum track</DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={addReturn}>
+                Return track
+                <DropdownMenuShortcut>
+                  {shortcuts?.["return-track"]}
+                </DropdownMenuShortcut>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
+        <TimelineNavigator
+          className="h-auto min-w-0 flex-1 rounded-none"
+          getAriaValueText={describe}
+        />
+      </div>
       {marquee.rect
         ? createPortal(
             <div
