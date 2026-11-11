@@ -1,0 +1,25 @@
+---
+title: useAudioLevels
+description: "The live levels of a signal from its AnalyserNodes, in the shape a Meter paints from: RMS in dB per channel with a peak that holds and falls, refreshed every frame without re-rendering"
+---
+
+<Entry name="use-audio-levels" />
+
+## Usage
+
+```tsx
+import { useAudioLevels } from "@/hooks/use-audio-levels";
+
+// One analyser per channel, made once: a new array restarts the sampling.
+const analysers = useMemo(() => {
+  const analyser = ctx.createAnalyser();
+  output.connect(analyser);
+  return [analyser];
+}, [ctx, output]);
+
+const levels = useAudioLevels(analysers);
+
+<Meter aria-label="Output" source={levels} />;
+```
+
+`useAudioLevels(analysers)` gives `{ levels, peaks }`, one entry per analyser, in dB: the RMS level, how loud the signal sounds, which falls back smoothly as a needle would, and the peak, its loudest sample, which holds, then falls, so a meter's mark shows how near the signal comes to clipping. `rmsDb` and `peakDb` from `@audio-ui/core/analysis` are the two readings. A `ChannelSplitterNode` splits a stereo signal into one analyser per side. While the signal is silent, nothing is published. A [Meter](/docs/components/base/meter) paints it, and the [Mixer](/docs/components/base/mixer) gives one to each channel.

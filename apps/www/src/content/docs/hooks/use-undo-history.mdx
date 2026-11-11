@@ -1,0 +1,27 @@
+---
+title: useUndoHistory
+description: "Undo and redo over a value you own: an edit made in one go, or a gesture that undoes as one."
+---
+
+<Entry name="use-undo-history" />
+
+## Usage
+
+`useUndoHistory` undoes and redoes any value you hold.
+
+```tsx
+import { useUndoHistory } from "@/hooks/use-undo-history";
+
+const [notes, setNotes] = useState<Note[]>([]);
+const history = useUndoHistory(notes, setNotes);
+
+<PianoRoll
+  onValueChange={history.change}
+  onValueCommitted={history.commit}
+  value={notes}
+/>
+<Button disabled={!history.canUndo} onClick={history.undo}>Undo</Button>
+<Button disabled={!history.canRedo} onClick={history.redo}>Redo</Button>
+```
+
+`change` is each step of a gesture and `commit` ends it, so a whole drag undoes in one step. `edit` records a change made in one go, such as a menu command. A new change after an undo drops the redo, and the history keeps the last 100 changes. It works the same for an envelope's points or a sequencer's pattern.

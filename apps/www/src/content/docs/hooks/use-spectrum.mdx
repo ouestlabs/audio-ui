@@ -1,0 +1,23 @@
+---
+title: useSpectrum
+description: "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering, and its held peaks as a second source"
+---
+
+<Entry name="use-spectrum" />
+
+## Usage
+
+```tsx
+import { useSpectrum, useSpectrumPeaks } from "@/hooks/use-spectrum";
+
+const analyser = ctx.createAnalyser();
+analyser.fftSize = 8192; // finer low end
+output.connect(analyser);
+
+const spectrum = useSpectrum(analyser, { minHz: 20, maxHz: 20000 });
+const peaks = useSpectrumPeaks(spectrum, { hold: 1, fall: 24 });
+
+<SpectrumAnalyzer aria-label="Spectrum" peaks={peaks} source={spectrum} />;
+```
+
+`useSpectrum` gives dB per point along a logarithmic frequency axis, 160 points from 20 Hz to 20 kHz unless told otherwise. Draw it with the [Spectrum analyzer](/docs/components/base/spectrum-analyzer), or as a trace on a [Plot](/docs/components/base/plot) behind an equalizer's curve. `useSpectrumPeaks` keeps each point's loudest level for `hold` seconds, then lets it fall at `fall` dB per second.

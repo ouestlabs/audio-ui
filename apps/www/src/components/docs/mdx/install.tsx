@@ -24,7 +24,7 @@ interface InstallParts {
 }
 
 /** A command as the page's fences draw it: with the other package managers beside the one the reader uses. */
-function Command({ code }: { code: string }) {
+export function Command({ code }: { code: string }) {
   const commands = packageManagerCommands(code);
   return (
     <figure className="" data-not-typeset="" data-rehype-pretty-code-figure="">

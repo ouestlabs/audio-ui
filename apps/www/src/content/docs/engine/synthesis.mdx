@@ -5,85 +5,15 @@ description: "Synth voices shaped by an envelope, chords on an instrument that p
 
 ## Synth voices
 
-```bash
-npx shadcn@latest add @audio-ui/use-synth-voices
-```
-
 `useSynthVoices` plays notes on a pool of voices, one per held pitch: an oscillator through a gain shaped by an envelope. The attack and the decay play when the note starts and hold at the sustain level; the release plays when it ends.
 
-```tsx
-import { useMasterBus } from "@/hooks/use-master-bus";
-import { useSynthVoices } from "@/hooks/use-synth-voices";
-
-const output = useMasterBus(0.7);
-const voices = useSynthVoices({ destination: output, oscillatorType: "triangle" });
-
-<Piano
-  onNoteOff={(pitch) => voices.releaseNote(pitch, envelope)}
-  onNoteOn={(pitch) => voices.triggerNote(pitch, envelope)}
-/>;
-```
-
-`envelope` is the points of an [Envelope](/docs/components/base/envelope), `{ x, y }` from 0 to 1, so the shape a user draws is the shape the note plays: the points before the middle (`x` 0.5) are the attack and the decay, the points after it the release. Give `time` to `triggerNote` and `releaseNote` to schedule a note ahead, as a [transport clock](/docs/engine/clock-and-time) does; leave it out to play now.
-
-<TypeTable title="Options">
-<TypeRow name={"destination"} type={"AudioNode | null"}>Where the voices play, such as the master bus.</TypeRow>
-<TypeRow name={"oscillatorType"} type={"OscillatorType"} default={"\"sawtooth\""}>The waveform: `"sine"`, `"triangle"`, `"sawtooth"` or `"square"`.</TypeRow>
-<TypeRow name={"attackDecaySeconds"} type={"number"} default={"0.4"}>How long the first half of the envelope lasts.</TypeRow>
-<TypeRow name={"releaseSeconds"} type={"number"} default={"0.3"}>How long the second half lasts.</TypeRow>
-<TypeRow name={"peakGain"} type={"number"} default={"0.25"}>A voice's gain at the top of the envelope, at full velocity.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Returns">
-<TypeRow name={"triggerNote"} type={"(pitch, envelope, velocity?, time?) => void"}>Starts a voice. `velocity` is 0 to 1. No-op if the pitch already sounds.</TypeRow>
-<TypeRow name={"releaseNote"} type={"(pitch, envelope, time?) => void"}>Plays the release and stops the voice.</TypeRow>
-<TypeRow name={"releaseAll"} type={"() => void"}>Stops every voice at once: on stop, on a seek, on unmount.</TypeRow>
-<TypeRow name={"setPitchBend"} type={"(semitones) => void"}>Retunes every voice, as a pitch bend wheel does. 0 is back to pitch.</TypeRow>
-</TypeTable>
+Usage and API: [`useSynthVoices`](/docs/hooks/use-synth-voices).
 
 ## Polyphony
 
-```bash
-npx shadcn@latest add @audio-ui/use-polyphony
-```
-
 The engine of an instrument [device](/docs/devices) plays one voice. `usePolyphony` plays chords on it: it makes as many engines as notes sound at once into a destination, keeps every one following the state, and gives each note a voice of its own: the one that holds it, else a free one, else the one held longest, whose note is let go first. The engines are disposed when the destination changes and on unmount.
 
-```tsx
-import { createPolySynthEngine } from "@/components/audio-ui/devices/poly-synth/engine";
-import { PolySynthPanel } from "@/components/audio-ui/devices/poly-synth/panel";
-import { useMasterBus } from "@/hooks/use-master-bus";
-import { usePolyphony } from "@/hooks/use-polyphony";
-
-const output = useMasterBus(1);
-const { noteOff, noteOn } = usePolyphony({
-  create: createPolySynthEngine,
-  destination: output,
-  state,
-});
-
-<PolySynthPanel
-  onNoteOff={() => noteOff("panel")}
-  onNoteOn={(note) => noteOn(note, "panel")}
-  onValueChange={setState}
-  value={state}
-/>;
-```
-
-A note is named by an id its note off gives again, such as `midi-60` for a key of a MIDI keyboard. To schedule notes ahead on the audio clock, or outside React, `createPolyphony(engines)` from `@/lib/polyphony` (installed with the hook) does the same with engines you made and connected: `noteOn(note, id, at?)`, `noteOff(id, at?)` and `release(at?)`. The [arrangement](/docs/components/base/arrangement)'s engine plays a MIDI track's instrument this way.
-
-<TypeTable title="Options">
-<TypeRow name={"create"} type={"(ctx, state) => Engine"}>Makes the engine of one voice, such as `createPolySynthEngine`.</TypeRow>
-<TypeRow name={"destination"} type={"AudioNode | null"}>Where every voice plays, such as the master bus. The voices are made on its context once it is there.</TypeRow>
-<TypeRow name={"state"} type={"State"}>The instrument's state: every voice follows it.</TypeRow>
-<TypeRow name={"voices"} type={"number"} default={"8"}>How many notes sound at once. One more takes the voice held longest.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Returns">
-<TypeRow name={"noteOn"} type={"(note, id) => void"}>Starts the note `id` now, on a voice of its own. `note` is the engine's own, such as `{ frequency, velocity }`.</TypeRow>
-<TypeRow name={"noteOff"} type={"(id) => void"}>Lets go of the note `id`. A note no voice holds lets nothing go.</TypeRow>
-<TypeRow name={"engines"} type={"readonly Engine[]"}>The engine of each voice, empty until the destination is there: to give them all the same thing, such as a sample to play.</TypeRow>
-</TypeTable>
+Usage and API: [`usePolyphony`](/docs/hooks/use-polyphony).
 
 ## Envelope ramps
 

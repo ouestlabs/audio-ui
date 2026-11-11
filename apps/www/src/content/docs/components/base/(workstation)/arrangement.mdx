@@ -297,8 +297,8 @@ const grid = useTimelineGrid({ tempo, zoom: view.zoom });
 </Timeline>
 ```
 
-- `use-timeline-zoom` (`npx shadcn@latest add @audio-ui/use-timeline-zoom`) fits the whole arrangement in the room beside the track headers until it is zoomed, and never goes wider. A Cmd/Ctrl + scroll zooms around the pointer; `zoomAround(at, factor)` keeps a time where it is on screen, as the + and - keys do around the cursor, `zoomTo(start, end)` fits a stretch (Z on the selection), and `zoomBack()` steps back through the zooms they left (X). `ratio` and `setRatio` read and set it as a share of the fitted view, and `rescale(ratio)` keeps it on the same bars when the tempo changes.
-- `use-timeline-grid` (`npx shadcn@latest add @audio-ui/use-timeline-grid`) is the grid: adaptive or a fixed division, triplet, snapping. `step` is what the lanes draw, `snapStep` what gestures snap to (0 with snapping off), and `label` names it for the button that opens `TimelineGridMenuItems` with `GRID_DIVISION_OPTIONS`. `change` is what Cmd/Ctrl + 1 to 5 do, by the key's place in `GRID_KEYS`: a finer or wider grid, triplets, snapping, and a grid fixed where it is or following the zoom again.
+- [`useTimelineZoom`](/docs/hooks/use-timeline-zoom) fits the whole arrangement in the room beside the track headers until it is zoomed, and never goes wider. A Cmd/Ctrl + scroll zooms around the pointer; `zoomAround(at, factor)` keeps a time where it is on screen, as the + and - keys do around the cursor, `zoomTo(start, end)` fits a stretch (Z on the selection), and `zoomBack()` steps back through the zooms they left (X). `ratio` and `setRatio` read and set it as a share of the fitted view, and `rescale(ratio)` keeps it on the same bars when the tempo changes.
+- [`useTimelineGrid`](/docs/hooks/use-timeline-grid) is the grid: adaptive or a fixed division, triplet, snapping. `step` is what the lanes draw, `snapStep` what gestures snap to (0 with snapping off), and `label` names it for the button that opens `TimelineGridMenuItems` with `GRID_DIVISION_OPTIONS`. `change` is what Cmd/Ctrl + 1 to 5 do, by the key's place in `GRID_KEYS`: a finer or wider grid, triplets, snapping, and a grid fixed where it is or following the zoom again.
 
 ### Placing your own parts
 
@@ -438,7 +438,7 @@ With snapping on, a dragged clip or loop also lands on the edges of the other cl
 
 ### Arranged tracks
 
-A track's header is `TimelineTrackControls`, from the timeline: its name, gain, pan, mute, solo, color, fold and menu. Its `meter` takes a level down its right edge: `TrackLevel` (`npx shadcn@latest add @audio-ui/track-level`), given `analysers={engine.meter(track.id)}`, is the one that goes there. `useTrackReorder` (`npx shadcn@latest add @audio-ui/use-track-reorder`) moves tracks: give each track a grip, and drag the grip, or press Up or Down on it. Its Solo, Mute and Arm are one toggle group: pressed, Solo is tinted with `--solo` and Mute with `--mute`, a blue and an amber when the theme sets neither, and Arm is a red `Led`. `SWITCH_TONES` gives those two looks to switches of your own, such as a mixer's. A track's color is an index into `TRACK_COLORS`, or a CSS hex of the user's own (`color: "#3e63dd"`): the header's menu offers the palette and a Custom entry that opens the browser's color picker. `trackSwatch(color)` gives the classes and the style that paint either one, for a strip or a dot of your own.
+A track's header is `TimelineTrackControls`, from the timeline: its name, gain, pan, mute, solo, color, fold and menu. Its `meter` takes a level down its right edge: `TrackLevel` (`npx shadcn@latest add @audio-ui/track-level`), given `analysers={engine.meter(track.id)}`, is the one that goes there. [`useTrackReorder`](/docs/hooks/use-track-reorder) moves tracks: give each track a grip, and drag the grip, or press Up or Down on it. Its Solo, Mute and Arm are one toggle group: pressed, Solo is tinted with `--solo` and Mute with `--mute`, a blue and an amber when the theme sets neither, and Arm is a red `Led`. `SWITCH_TONES` gives those two looks to switches of your own, such as a mixer's. A track's color is an index into `TRACK_COLORS`, or a CSS hex of the user's own (`color: "#3e63dd"`): the header's menu offers the palette and a Custom entry that opens the browser's color picker. `trackSwatch(color)` gives the classes and the style that paint either one, for a strip or a dot of your own.
 
 ```tsx
 import {
@@ -486,35 +486,7 @@ A track can sit in a group track: it names it in `group`, and a group's tracks f
 
 ### Time selections
 
-`useTimeSelection` (`npx shadcn@latest add @audio-ui/use-time-selection`) is a stretch of time on some tracks and what the keyboard does with it. Tell it where a press on bare lane began, give its `onSelectionChange` to the lanes, and draw the overlay on the tracks it spans:
-
-```tsx
-import { TimelineTimeSelection } from "@/components/audio-ui/time-selection";
-import { useTimeSelection } from "@/hooks/use-time-selection";
-
-const selection = useTimeSelection({
-  bar,
-  clips,
-  copyOf,
-  dispatch,
-  getPosition: () => engine.position.getSnapshot(),
-  selectedIds,
-  selectedTracks,
-  tracks,
-});
-
-<TimelineLane
-  data-track={track.id}
-  onPointerDown={() => selection.pressLane(track.id)}
-  onSelectionChange={selection.onSelectionChange}
->
-  {selection.time?.tracks.includes(track.id) ? (
-    <TimelineTimeSelection range={selection.time.range} />
-  ) : null}
-</TimelineLane>;
-```
-
-`handleKey` takes a key press, native or React's, and says whether it was one of its own, so a host's other keys can follow: Cmd/Ctrl + C and X copy and cut (the selected clips when no time is selected), V pastes at the cursor and I opens silence there; with a time selection, D duplicates it after itself, J makes one clip per track of it, L loops it and Delete empties it. With Shift too, X, V, D and Delete work on the time itself, on every track, and Cmd/Ctrl + Alt + F makes fades from it. Each is one step of undo.
+`useTimeSelection` is a stretch of time on some tracks and what the keyboard does with it: [`useTimeSelection`](/docs/hooks/use-time-selection).
 
 ### Locators and time signatures
 
@@ -541,7 +513,7 @@ import { TimelineLocator, TimelineSignature } from "@/components/audio-ui/timeli
 
 `useTimelineMarkers` ships with them and holds the commands: spread its `locator` on `TimelineLocator` and its `signature` on `TimelineSignature`, with `editing` set for the change `editingSignature` names. `addLocator` puts a locator at the cursor, `addSignature` a change, opened to be typed. `TimelineBarMarks`, inside a `TimelineRuler`, numbers the bars through those changes, every few bars at a far zoom, and hatches the ones a change cuts short.
 
-`useTimelineCursor` (`npx shadcn@latest add @audio-ui/use-timeline-cursor`) is what the keys do with the cursor. `handleKey` takes M, which adds a locator, and Alt with the arrows, which jump to the next locator or clip edge, of the picked tracks or of every track. `handleArrowKey` takes the plain arrows, Home and End, for when a key reached the view rather than a control with arrows of its own: Left and Right move the cursor on the grid, Up and Down pick a track. Both say whether the key was theirs.
+`useTimelineCursor` is what the keys do with the cursor: M adds a locator, Alt and the arrows jump between locators and clip edges, the plain arrows move it on the grid: [`useTimelineCursor`](/docs/hooks/use-timeline-cursor).
 
 The Signature strip holds time-signature changes: its + adds one at the cursor, in the signature already there, ready to be typed (such as 7/8). From a change on, bars are counted in its signature: the ruler's numbers, the hatched partial bar a change cuts short, and the position in the transport all follow, through `barsOf` and `barsBeatsWith` from `@audio-ui/core/time`. On a change, Left and Right move it by a grid step, Enter edits it and Delete takes it away. The grid's bar-long divisions and the tempo stay those of the song's start. Which change is being typed is yours to hold (`editing` and `onEditingChange`), so a change just added opens ready to type. `parseSignature("7/8")` reads what is typed.
 
@@ -1018,18 +990,6 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"onRemove, onRename"} type={"(id) => void, (id, name) => void"}>The same commands, for a clip's other editors.</TypeRow>
 </TypeTable>
 
-### useTrackReorder
-
-<TypeTable>
-<TypeRow name={"order"} type={"string[]"}>The tracks' ids, top to bottom.</TypeRow>
-<TypeRow name={"onMove"} type={"(id, index) => void"}>A track was dropped at `index`.</TypeRow>
-<TypeRow name={"gripProps(id)"} type={"props"}>For a track's grip: its pointer and key handlers.</TypeRow>
-<TypeRow name={"draggingId"} type={"string | null"}>The track dragged.</TypeRow>
-<TypeRow name={"ghost, ghostRef"} type={"{ id, top, left, width, height } | null, Ref"}>The copy to draw under the pointer, and the ref it takes.</TypeRow>
-<TypeRow name={"TrackGrip"} type={"dragging, trackName, ...gripProps(id)"}>The grip, down the left edge of a track's header.</TypeRow>
-<TypeRow name={"TrackReorderGhost"} type={"ghost, ghostRef, trackName"}>The copy of the dragged track's header under the pointer.</TypeRow>
-</TypeTable>
-
 ### TimelineLocator and TimelineSignature
 
 <TypeTable>
@@ -1049,27 +1009,6 @@ Something placed at `value` on a lane: a bar number on the ruler, a cue, a grid 
 <TypeRow name={"onJump, onPlay, step"} type={"(at) => void, (at) => void, number"}>A marker pressed, a locator double-clicked to play from, and how far the arrows move one.</TypeRow>
 <TypeRow name={"locator, signature"} type={"props"}>To spread on `TimelineLocator` and `TimelineSignature`.</TypeRow>
 <TypeRow name={"addLocator, addSignature, editingSignature"} type={"() => void, () => void, string | null"}>New markers at the cursor, and the change being typed.</TypeRow>
-</TypeTable>
-
-### useTimelineCursor
-
-<TypeTable>
-<TypeRow name={"clips, tracks, locators, selectedIds, selectedTracks, duration"} type={"as useArrangement returns them"}>What the keys move through.</TypeRow>
-<TypeRow name={"getPosition, step"} type={"() => number, number"}>Where the cursor is, and the grid it moves on.</TypeRow>
-<TypeRow name={"onSeek, onPickTrack, onAddLocator"} type={"(seconds) => void, (id) => void, () => void"}>What the keys ask for.</TypeRow>
-<TypeRow name={"handleKey, handleArrowKey"} type={"(event) => boolean"}>M and Alt with the arrows; the plain arrows, Home and End.</TypeRow>
-</TypeTable>
-
-### useTimeSelection
-
-<TypeTable>
-<TypeRow name={"bar"} type={"number"}>How long a stretch Cmd/Ctrl + I opens with nothing selected, in seconds.</TypeRow>
-<TypeRow name={"clips, tracks, selectedIds, selectedTracks"} type={"as useArrangement returns them"}>What a selection and a paste read.</TypeRow>
-<TypeRow name={"copyOf, dispatch"} type={"(time) => Clipping, (command) => void"}>From `useArrangement`.</TypeRow>
-<TypeRow name={"getPosition"} type={"() => number"}>Where the cursor is, in seconds.</TypeRow>
-<TypeRow name={"time, setTime, clear"} type={"{ range, tracks } | null, (time) => void, () => void"}>The stretch of time selected.</TypeRow>
-<TypeRow name={"pressLane, onSelectionChange"} type={"(trackId | null) => void, for TimelineLane"}>A press on bare lane, and the drag from it.</TypeRow>
-<TypeRow name={"handleKey"} type={"(event) => boolean"}>Runs the command a key asks for, and says whether there was one.</TypeRow>
 </TypeTable>
 
 ### useTrackAutomation

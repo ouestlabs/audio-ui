@@ -1,0 +1,20 @@
+---
+title: useSimulatedLevels
+description: "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from: a demo meter that is never at rest"
+---
+
+<Entry name="use-simulated-levels" />
+
+## Usage
+
+Levels that move on their own, in the shape a [Meter](/docs/components/base/meter) paints from: a random walk per channel, with a peak that holds and then falls like a real signal's. For a meter shown without sound, such as a preview that does not ask for the microphone; with a signal, use [`useAudioLevels`](/docs/hooks/use-audio-levels).
+
+```tsx
+import { useSimulatedLevels } from "@/hooks/use-simulated-levels";
+
+const levels = useSimulatedLevels(2, { max: -6, min: -48 });
+
+<Meter source={levels} />;
+```
+
+It is a live source: each frame costs no React render. `min` and `max` keep the levels between two values in dB, for a meter with a narrower scale.

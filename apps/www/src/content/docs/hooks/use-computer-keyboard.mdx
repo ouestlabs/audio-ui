@@ -1,0 +1,23 @@
+---
+title: useComputerKeyboard
+description: "The computer's keyboard as a keyboard of notes, as in a DAW: the middle row from A plays the white keys and the row above the black ones, by where the keys sit; Z and X move an octave, C and V the velocity."
+---
+
+<Entry name="use-computer-keyboard" />
+
+## Usage
+
+The computer's keys as a keyboard of notes while `enabled`: the middle row from A plays the white keys from middle C and the row above the black ones, by the key's `code`, so any layout works. Z and X move an octave, C and V the velocity.
+
+```tsx
+import { useComputerKeyboard } from "@/hooks/use-computer-keyboard";
+
+const keys = useComputerKeyboard({
+  enabled: armed,
+  onNoteOff: (note) => voices.noteOff(`key-${note}`),
+  onNoteOn: (note, velocity) => voices.noteOn({ frequency: midiToHz(note), velocity }, `key-${note}`),
+});
+// keys.octave, keys.velocity for a readout
+```
+
+A key held is one note, released when the key is, when the keys are turned off, or when the window loses focus, so no note sticks. Keys typed into a field, or held with Cmd, Ctrl or Alt, are left to the page. `lib/computer-keyboard` (installed with it) has the layout, `noteOfKey`.

@@ -1,0 +1,28 @@
+---
+title: useMasterBus
+description: "A master output bus with a safety limiter: every source connects into one gain node that a single fader governs."
+---
+
+<Entry name="use-master-bus" />
+
+## Usage
+
+Connect every sound of a screen into one master bus, never straight into `ctx.destination`. One fader then sets the level of everything, and a limiter at the end keeps a loud mix from clipping.
+
+```tsx
+import { useMasterBus } from "@/hooks/use-master-bus";
+
+const [volume, setVolume] = useState(0.7);
+const output = useMasterBus(volume);
+
+const voices = useSynthVoices({ destination: output });
+
+<Fader aria-label="Volume" max={1} min={0} onValueChange={setVolume} value={volume} />;
+```
+
+The bus is a gain, a limiter and a trim that cancels the limiter's make-up gain, so below its threshold (-3 dBFS) the sound passes unchanged. A change of `volume` ramps over 10 ms, so dragging the fader never clicks. The limiter adds a few milliseconds of latency.
+
+<TypeTable>
+<TypeRow name={"useMasterBus(volume)"} type={"GainNode | null"}>The node to connect sources into. `null` on the server and in the first render, before the context exists.</TypeRow>
+<TypeRow name={"volume"} type={"number"}>The bus's gain, 0 to 1 for silence to unity.</TypeRow>
+</TypeTable>

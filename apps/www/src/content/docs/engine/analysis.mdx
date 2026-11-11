@@ -7,47 +7,15 @@ Tap a signal with an `AnalyserNode`, a tap that plays nothing, and these hooks t
 
 ## Levels
 
-```bash
-npx shadcn@latest add @audio-ui/use-audio-levels
-```
+`useAudioLevels` turns one analyser per channel into what a [Meter](/docs/components/base/meter) paints: a level in dB that rises at once and falls at a release rate, and a peak that holds for a moment before it falls, as a live source.
 
-```tsx
-import { useAudioLevels } from "@/hooks/use-audio-levels";
-
-// One analyser per channel, made once: a new array restarts the sampling.
-const analysers = useMemo(() => {
-  const analyser = ctx.createAnalyser();
-  output.connect(analyser);
-  return [analyser];
-}, [ctx, output]);
-
-const levels = useAudioLevels(analysers);
-
-<Meter aria-label="Output" source={levels} />;
-```
-
-`useAudioLevels(analysers)` gives `{ levels, peaks }`, one entry per analyser, in dB: the RMS level, how loud the signal sounds, which falls back smoothly as a needle would, and the peak, its loudest sample, which holds, then falls, so a meter's mark shows how near the signal comes to clipping. `rmsDb` and `peakDb` from `@audio-ui/core/analysis` are the two readings. A `ChannelSplitterNode` splits a stereo signal into one analyser per side. While the signal is silent, nothing is published. A [Meter](/docs/components/base/meter) paints it, and the [Mixer](/docs/components/base/mixer) gives one to each channel.
+Usage and API: [`useAudioLevels`](/docs/hooks/use-audio-levels).
 
 ## Spectrum
 
-```bash
-npx shadcn@latest add @audio-ui/use-spectrum
-```
+`useSpectrum` reads an analyser into a spectrum on a log frequency axis, in dB, as a live source a [Plot](/docs/components/base/plot) draws, and `useSpectrumPeaks` holds its peaks and lets them fall.
 
-```tsx
-import { useSpectrum, useSpectrumPeaks } from "@/hooks/use-spectrum";
-
-const analyser = ctx.createAnalyser();
-analyser.fftSize = 8192; // finer low end
-output.connect(analyser);
-
-const spectrum = useSpectrum(analyser, { minHz: 20, maxHz: 20000 });
-const peaks = useSpectrumPeaks(spectrum, { hold: 1, fall: 24 });
-
-<SpectrumAnalyzer aria-label="Spectrum" peaks={peaks} source={spectrum} />;
-```
-
-`useSpectrum` gives dB per point along a logarithmic frequency axis, 160 points from 20 Hz to 20 kHz unless told otherwise. Draw it with the [Spectrum analyzer](/docs/components/base/spectrum-analyzer), or as a trace on a [Plot](/docs/components/base/plot) behind an equalizer's curve. `useSpectrumPeaks` keeps each point's loudest level for `hold` seconds, then lets it fall at `fall` dB per second.
+Usage and API: [`useSpectrum`](/docs/hooks/use-spectrum).
 
 ## Loudness
 
@@ -70,18 +38,9 @@ It reads every sample, the true peak at four points a sample: about half a secon
 
 ### While it plays
 
-```bash
-npx shadcn@latest add @audio-ui/use-loudness
-```
+`useLoudness` measures a node as it plays, on the audio thread: momentary, short-term and integrated LUFS every 100 ms as a live source, and `clear` to start the integrated loudness over.
 
-```tsx
-import { useLoudness } from "@/hooks/use-loudness";
-
-const { clear, source } = useLoudness(output); // the node to measure, null while there is none
-// source: { momentary: -12.4, shortTerm: -13.1, integrated: -14.2 }, in LUFS
-```
-
-`useLoudness(signal)` measures a signal while it plays: its momentary loudness, over the last 400 ms, its short-term loudness, over the last 3 s, and its integrated loudness, over everything since `clear`, its quiet passages gated out as `measureLoudness` gates them, so the two agree on a whole sound. Each is `-Infinity` until there is enough of the sound to read it, and for silence. The signal is only listened to, in stereo, on the audio thread, where every sample is K-weighted with the filter `@audio/weighting-k` designs for the context's rate; the reading comes every 100 ms as a live source, and nothing is published while it holds still. The [Mixer](/docs/components/base/mixer) reads its main track's this way. Outside React, `createLoudnessMeter(ctx, onLoudness)` from the same lib does it: connect what to measure to its `input`.
+Usage and API: [`useLoudness`](/docs/hooks/use-loudness).
 
 ## The functions behind them
 

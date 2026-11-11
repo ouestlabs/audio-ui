@@ -1,0 +1,44 @@
+---
+title: useMidiInput
+description: "The notes of the page's MIDI input, with velocity and pitch bend: every component that calls it hears the same devices."
+---
+
+<Entry name="use-midi-input" />
+
+## Usage
+
+`useMidiInput` hears the page's MIDI input: every component that calls it hears the same devices, and connecting from one connects them all. Browsers ask for permission, so connect from a click, with `requestAccess` or with the ready-made button (`npx shadcn@latest add @audio-ui/midi-connect-control`).
+
+```tsx
+import { useMidiInput } from "@/hooks/use-midi-input";
+
+const midi = useMidiInput({
+  onNoteOff: (pitch) => voices.releaseNote(pitch, envelope),
+  onNoteOn: (pitch, velocity) => voices.triggerNote(pitch, envelope, velocity),
+  onPitchBend: voices.setPitchBend,
+});
+
+<button onClick={midi.requestAccess} type="button">Connect MIDI</button>
+<Piano activeNotes={midi.activeNotes} maxPitch={72} minPitch={48} />
+```
+
+`activeNotes` lights the keys held on the device, on a [Piano](/docs/components/base/piano) or a [Piano roll](/docs/components/base/piano-roll).
+
+<TypeTable title="Options">
+<TypeRow name={"onNoteOn"} type={"(pitch, velocity) => void"}>A key was pressed, with its velocity from 0 to 1.</TypeRow>
+<TypeRow name={"onNoteOff"} type={"(pitch) => void"}>A key was released.</TypeRow>
+<TypeRow name={"onPitchBend"} type={"(semitones) => void"}>The pitch bend wheel moved: ±2 semitones at its ends, 0 at rest.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Returns">
+<TypeRow name={"requestAccess"} type={"() => void"}>Connects the page's MIDI input. Call it from a click.</TypeRow>
+<TypeRow name={"disconnect"} type={"() => void"}>Stops listening, for the whole page. Notes already sounding keep sounding: release them yourself.</TypeRow>
+<TypeRow name={"activeNotes"} type={"number[]"}>The pitches held on the device.</TypeRow>
+<TypeRow name={"isSupported, isConnected"} type={"boolean"}>Whether the browser has Web MIDI, and whether the page listens.</TypeRow>
+<TypeRow name={"inputNames"} type={"string[]"}>The names of the connected devices.</TypeRow>
+<TypeRow name={"mutedInputs"} type={"string[]"}>The names of the devices switched off with `setInputEnabled`: their keys are not heard.</TypeRow>
+<TypeRow name={"setInputEnabled"} type={"(name: string, enabled: boolean) => void"}>Switches a device off by its name, for the whole page, or on again. It holds before the device connects.</TypeRow>
+<TypeRow name={"error"} type={"string | null"}>Why connecting failed, such as a refused permission.</TypeRow>
+</TypeTable>
+
+Without React, `@audio-ui/core/midi` reads the messages themselves and the MIDI files.

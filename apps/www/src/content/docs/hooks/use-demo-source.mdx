@@ -1,0 +1,18 @@
+---
+title: useDemoSource
+description: "The sound a device plays: the one chosen in its session, such as from a preview's bar, else the one that shows best what the device does. It tells the session its default, so a bar can offer the choice only where there is one. Outside a session it is always the default."
+---
+
+<Entry name="use-demo-source" />
+
+## Usage
+
+The sound a device plays: the one chosen in its [session](/docs/hooks/use-audio-session), such as from a preview's bar, else `fallback`, the one that shows best what the device does. It tells the session its fallback, so a bar offers the choice only where there is one.
+
+```tsx
+import { useDemoSource } from "@/hooks/use-demo-source";
+
+const name = useDemoSource("groove"); // one of DEMO_SOURCES
+```
+
+The sounds are [`demo-sound`](/docs/lib/demo-sound)'s, made in code. Outside a session it is always `fallback`.

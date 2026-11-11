@@ -1,0 +1,25 @@
+---
+title: useTimelineZoom
+description: "The zoom of an arrangement's timeline: it fits the view beside the track headers until it is zoomed, zooms around a time that stays put on screen, fits a stretch of time, steps back through the zooms it left, and keeps its bars when the tempo changes."
+---
+
+<Entry name="use-timeline-zoom" />
+
+## Usage
+
+```tsx
+import { useTimelineGrid } from "@/hooks/use-timeline-grid";
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+
+const viewportRef = useRef<HTMLDivElement>(null);
+const view = useTimelineZoom({ duration, viewportRef });
+const grid = useTimelineGrid({ tempo, zoom: view.zoom });
+
+<Timeline duration={duration} snapStep={grid.snapStep} {...view.timeline}>
+  <TimelineViewport ref={viewportRef}>{/* the lanes draw a line every grid.step */}</TimelineViewport>
+</Timeline>;
+```
+
+`useTimelineZoom` fits the whole arrangement in the room beside the track headers until it is zoomed, and never goes wider. A Cmd/Ctrl + scroll zooms around the pointer; `zoomAround(at, factor)` keeps a time where it is on screen, as the + and - keys do around the cursor, `zoomTo(start, end)` fits a stretch (Z on the selection), and `zoomBack()` steps back through the zooms they left (X). `ratio` and `setRatio` read and set it as a share of the fitted view, and `rescale(ratio)` keeps it on the same bars when the tempo changes.
+
+It is one of the parts the [Arrangement](/docs/components/base/arrangement) composes.

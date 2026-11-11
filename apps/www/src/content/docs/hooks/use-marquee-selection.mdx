@@ -1,0 +1,23 @@
+---
+title: useMarquee
+description: "A selection rectangle for the clips of a timeline: drag across bare lane (with Shift, or in a multi-select mode) and the clips it touches join the selection"
+---
+
+<Entry name="use-marquee-selection" />
+
+## Usage
+
+A marquee for the clips of a timeline: Shift and drag across bare lane draws a rectangle, and the clips it touches join the selection. Spread its `handlers` on the timeline's viewport and draw `rect`.
+
+```tsx
+import { useMarquee } from "@/hooks/use-marquee-selection";
+
+const marquee = useMarquee(selectedIds, select, multi);
+
+<TimelineViewport {...marquee.handlers}>
+  {/* lanes */}
+  {marquee.rect ? <div className="absolute border border-primary bg-primary/10" style={marquee.rect} /> : null}
+</TimelineViewport>;
+```
+
+It is told the selection when the drag began, to add to it with `multi`, and reports the clips it touches as it grows.

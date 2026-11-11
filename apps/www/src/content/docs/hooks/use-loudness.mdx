@@ -1,0 +1,17 @@
+---
+title: useLoudness
+description: "How loud a signal is while it plays, in LUFS, as streaming services and broadcasters measure it (ITU-R BS.1770): its momentary, short-term and integrated loudness, measured on the audio thread, as a live source refreshed every 100 ms without re-rendering"
+---
+
+<Entry name="use-loudness" />
+
+## Usage
+
+```tsx
+import { useLoudness } from "@/hooks/use-loudness";
+
+const { clear, source } = useLoudness(output); // the node to measure, null while there is none
+// source: { momentary: -12.4, shortTerm: -13.1, integrated: -14.2 }, in LUFS
+```
+
+`useLoudness(signal)` measures a signal while it plays: its momentary loudness, over the last 400 ms, its short-term loudness, over the last 3 s, and its integrated loudness, over everything since `clear`, its quiet passages gated out as `measureLoudness` gates them, so the two agree on a whole sound. Each is `-Infinity` until there is enough of the sound to read it, and for silence. The signal is only listened to, in stereo, on the audio thread, where every sample is K-weighted with the filter `@audio/weighting-k` designs for the context's rate; the reading comes every 100 ms as a live source, and nothing is published while it holds still. The [Mixer](/docs/components/base/mixer) reads its main track's this way. Outside React, `createLoudnessMeter(ctx, onLoudness)` from the same lib does it: connect what to measure to its `input`.

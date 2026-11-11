@@ -1,0 +1,24 @@
+---
+title: useTrackReorder
+description: "Reorders tracks: drag a track's grip to move it, with the view scrolling at its edges and a copy of its header under the pointer, or press Up and Down on the grip. With the grip, the copy and the line where the track would land."
+---
+
+<Entry name="use-track-reorder" />
+
+## Usage
+
+`useTrackReorder` moves tracks: give each track a grip, and drag the grip, or press Up or Down on it. The copy of the dragged track's header follows the pointer, the others slide aside, and the view scrolls at its edges, with no render while it moves (`sortable-drag`). The grip and the copy are `TrackGrip` and `TrackReorderGhost`, installed with it.
+
+It is one of the parts the [Arrangement](/docs/components/base/arrangement) composes.
+
+## API
+
+<TypeTable>
+<TypeRow name={"order"} type={"string[]"}>The tracks' ids, top to bottom.</TypeRow>
+<TypeRow name={"onMove"} type={"(id, index) => void"}>A track was dropped at `index`.</TypeRow>
+<TypeRow name={"gripProps(id)"} type={"props"}>For a track's grip: its pointer and key handlers.</TypeRow>
+<TypeRow name={"draggingId"} type={"string | null"}>The track dragged.</TypeRow>
+<TypeRow name={"ghost, ghostRef"} type={"{ id, top, left, width, height } | null, Ref"}>The copy to draw under the pointer, and the ref it takes.</TypeRow>
+<TypeRow name={"TrackGrip"} type={"dragging, trackName, ...gripProps(id)"}>The grip, down the left edge of a track's header.</TypeRow>
+<TypeRow name={"TrackReorderGhost"} type={"ghost, ghostRef, trackName"}>The copy of the dragged track's header under the pointer.</TypeRow>
+</TypeTable>

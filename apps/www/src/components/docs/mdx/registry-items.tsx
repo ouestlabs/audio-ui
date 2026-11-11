@@ -1,4 +1,13 @@
+import { Link } from "@tanstack/react-router";
+import { entryUrl } from "@/lib/docs/content/entries";
 import { namesOf, registryItemRows } from "@/lib/docs/content/registry-items";
+
+/** An item's install name, a link to its entry page when it has one. */
+function RowName({ name }: { name: string }) {
+  const url = entryUrl(name);
+  const label = <code>{`@audio-ui/${name}`}</code>;
+  return url ? <Link to={url}>{label}</Link> : label;
+}
 
 /**
  * Hooks or libs of the registry as a table: each item's install name, where
@@ -20,7 +29,7 @@ export function RegistryItems({ names }: { names: string }) {
         {rows.map((row) => (
           <tr key={row.name}>
             <td>
-              <code>{`@audio-ui/${row.name}`}</code>
+              <RowName name={row.name} />
             </td>
             <td>
               <code>{row.from}</code>

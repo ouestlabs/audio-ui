@@ -1,0 +1,25 @@
+---
+title: useTimelineGrid
+description: "The grid of an arrangement's timeline: adaptive to the zoom or a fixed division, straight or triplet, snapping or not, its name for a menu button, and the changes Cmd/Ctrl + 1 to 5 make."
+---
+
+<Entry name="use-timeline-grid" />
+
+## Usage
+
+```tsx
+import { useTimelineGrid } from "@/hooks/use-timeline-grid";
+import { useTimelineZoom } from "@/hooks/use-timeline-zoom";
+
+const viewportRef = useRef<HTMLDivElement>(null);
+const view = useTimelineZoom({ duration, viewportRef });
+const grid = useTimelineGrid({ tempo, zoom: view.zoom });
+
+<Timeline duration={duration} snapStep={grid.snapStep} {...view.timeline}>
+  <TimelineViewport ref={viewportRef}>{/* the lanes draw a line every grid.step */}</TimelineViewport>
+</Timeline>;
+```
+
+`useTimelineGrid` is the grid: adaptive or a fixed division, triplet, snapping. `step` is what the lanes draw, `snapStep` what gestures snap to (0 with snapping off), and `label` names it for the button that opens `TimelineGridMenuItems` with `GRID_DIVISION_OPTIONS`. `change` is what Cmd/Ctrl + 1 to 5 do, by the key's place in `GRID_KEYS`: a finer or wider grid, triplets, snapping, and a grid fixed where it is or following the zoom again.
+
+It is one of the parts the [Arrangement](/docs/components/base/arrangement) composes.

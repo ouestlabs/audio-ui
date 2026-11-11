@@ -1,0 +1,40 @@
+---
+title: useDeviceEngines
+description: "The engines of a device on a page: as many as asked, made on a destination's context from the state of the moment, each following the state and the host's tempo, disposed when the destination changes and on unmount, never updated once disposed. One for an effect, one per voice for an instrument."
+---
+
+<Entry name="use-device-engines" />
+
+## Usage
+
+The lifecycle of a device's engines on a page, written once: made with `create` into `destination` from the state of the moment, following `state` and `context` after that, disposed when the destination or the count changes and on unmount.
+
+```tsx
+import { createSaturatorEngine } from "@/components/audio-ui/devices/saturator/engine";
+import { useDeviceEngines } from "@/hooks/use-device-engines";
+import { useMasterBus } from "@/hooks/use-master-bus";
+
+const output = useMasterBus(1);
+const [engine] = useDeviceEngines({ create: createSaturatorEngine, destination: output, state });
+// engine is null until the destination is there: connect a source to engine.input.
+```
+
+An effect takes one engine; an instrument played as chords takes one per voice, which is what [`usePolyphony`](/docs/hooks/use-polyphony) does with `count`. [`useDeviceLoop`](/docs/hooks/use-device-loop) is one engine made while a demo loop plays.
+
+## Lifecycle
+
+- The engines are made on the destination's context, so they live in the graph they play into, a page's or an `OfflineAudioContext`.
+- A new destination or a new `count` disposes them all and makes new ones from the latest state; `null` disposes them and makes none.
+- An update never reaches an engine already disposed, even when a new destination and a new state arrive in one render.
+- `context` (the host's tempo) is given with each update: memoize it, or every render updates every engine.
+
+## API
+
+<TypeTable title="Options">
+<TypeRow name={"create"} type={"EngineFactory<State, Engine>"}>A device's `create<Name>Engine`.</TypeRow>
+<TypeRow name={"destination"} type={"AudioNode | null"}>Where the engines play, and the context they are made on.</TypeRow>
+<TypeRow name={"state"} type={"State"}>The device's state: every engine follows it.</TypeRow>
+<TypeRow name={"context"} type={"DeviceContext"}>The host's tempo, given with each update.</TypeRow>
+<TypeRow name={"count"} type={"number"} default={"1"}>How many engines.</TypeRow>
+<TypeRow name={"returns"} type={"readonly Engine[]"}>The engines playing now, empty until the destination is there.</TypeRow>
+</TypeTable>
