@@ -1,16 +1,16 @@
 import {
-  type DrumPad,
-  newRack,
-  type Rack,
-  type TrackDevice,
-} from "@/lib/arrangement";
-import {
   type DrumSynthState,
   type DrumSynthVoice,
   drumSynthDevice,
   drumSynthPreset,
 } from "@/components/audio-ui/devices/drum-synth/device";
 import { reverbDevice } from "@/components/audio-ui/devices/reverb/device";
+import {
+  type DrumPad,
+  newRack,
+  type Rack,
+  type TrackDevice,
+} from "@/lib/arrangement";
 
 /** The kit's pads: the note each answers, on the notes General MIDI writes drums on, its name and its voice. */
 export const DRUM_KIT_PADS: readonly {

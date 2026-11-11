@@ -1,11 +1,8 @@
 import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { WAH_KERNELS } from "@audio-ui/engine/kernels";
 import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
-import { WAH_KERNELS } from "@/components/audio-ui/devices/wah/kernels";
-import {
-  lfoRate,
-  SYNCED_RATE_PARAMETERS,
-} from "@/lib/synced-rate";
+import { lfoRate, SYNCED_RATE_PARAMETERS } from "@/lib/synced-rate";
 
 /**
  * A wah as a device: a resonant band-pass whose frequency an envelope of the

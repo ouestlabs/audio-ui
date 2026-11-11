@@ -2,8 +2,6 @@
 
 import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback } from "react";
-import { cn } from "@/lib/utils";
-import { Piano } from "@/components/audio-ui/piano";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -16,6 +14,8 @@ import {
   type GuitarState,
   guitarDevice,
 } from "@/components/audio-ui/devices/guitar/device";
+import { Piano } from "@/components/audio-ui/piano";
+import { cn } from "@/lib/utils";
 
 /** The controls by what they do. */
 const GROUPS = [

@@ -84,7 +84,10 @@ function PlotTraceArea({ className, ...props }: PlotPrimitive.Trace.Props) {
 function PlotDot({ className, ...props }: PlotPrimitive.Dot.Props) {
   return (
     <PlotPrimitive.Dot
-      className={cn("rounded-full bg-primary ring-4 ring-primary/25 size-2.5 rounded-full", className)}
+      className={cn(
+        "rounded-full bg-primary ring-4 ring-primary/25 size-2.5",
+        className
+      )}
       data-slot="plot-dot"
       {...props}
     />
@@ -137,7 +140,7 @@ function PlotGrid({ className, ...props }: PlotPrimitive.Grid.Props) {
   return (
     <PlotPrimitive.Grid
       className={cn(
-        "text-muted-foreground rounded-[inherit] text-[10px] text-muted-foreground tabular-nums leading-none",
+        "text-muted-foreground rounded-[inherit] text-[10px] tabular-nums leading-none",
         // The lines at the edges (0 dB, the dry sound) follow the rounded corners of the frame.
         "[&>svg]:overflow-hidden! [&>svg]:rounded-[inherit]",
         "[&_[data-part=line]]:stroke-border [&_[data-part=line][data-zero]]:stroke-foreground/30",

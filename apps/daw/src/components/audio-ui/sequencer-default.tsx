@@ -3,15 +3,11 @@
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Button } from "@/components/ui/button";
 import { Sequencer } from "@/components/audio-ui/sequencer";
+import { Button } from "@/components/ui/button";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { useTransportClock } from "@/hooks/use-transport-clock";
-import {
-  triggerHihat,
-  triggerKick,
-  triggerSnare,
-} from "@/lib/drum-synthesis";
+import { triggerHihat, triggerKick, triggerSnare } from "@/lib/drum-synthesis";
 import { webAudio } from "@/lib/web-audio";
 
 const STEPS = 16;

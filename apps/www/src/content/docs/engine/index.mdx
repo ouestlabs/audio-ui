@@ -12,6 +12,8 @@ It is one package, `npm install @audio-ui/engine`, and each module is its own en
 | Module | What it holds |
 | --- | --- |
 | [`device`](/docs/engine/device) | A device as a description: `defineDevice`, its state, `apply` with what each change did, the tools an agent drives it with, and its engine: the contracts an engine implements, the pieces engines are made of, and the checks that measure one. |
+| [`dsp`](/docs/engine/dsp) | The audio.js processors the devices are built on: dynamics models and gain curves, filter circuits, reverbs and shelves, under one dependency. |
+| [`kernels`](/docs/engine/kernels) | The audio.js code each device runs in an `AudioWorklet`, in a string, since a worklet cannot import. |
 | [`time`](/docs/engine/time) | Musical time: tempos and signatures, bars and beats, grid divisions, tempo-synced note values, warp markers, the metronome, and the look-ahead scheduler a transport clock runs on. |
 | [`analysis`](/docs/engine/analysis) | Reading a signal: levels in dB, a log-axis spectrum and its peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients and auto-warp, and loudness, of a file and live. |
 | [`pitch`](/docs/engine/pitch) | Named scales: the pitch classes each keeps, the nearest pitch in one, and a scale as a piano roll reads it. |

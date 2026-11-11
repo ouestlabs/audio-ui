@@ -3,6 +3,8 @@
   "pages": [
     "index",
     "device",
+    "dsp",
+    "kernels",
     "time",
     "analysis",
     "pitch",

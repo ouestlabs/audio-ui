@@ -10,7 +10,8 @@ const meterVariants = cva("", {
   },
   variants: {
     size: {
-      default: "data-[orientation=vertical]:h-48 data-[orientation=vertical]:[--meter-thickness:--spacing(3.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(3)]",
+      default:
+        "data-[orientation=vertical]:h-48 data-[orientation=vertical]:[--meter-thickness:--spacing(3.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(3)]",
       lg: "data-[orientation=vertical]:h-64 data-[orientation=vertical]:[--meter-thickness:--spacing(4.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(4)]",
       sm: "data-[orientation=vertical]:h-32 data-[orientation=vertical]:[--meter-thickness:--spacing(2.5)] data-[orientation=horizontal]:[--meter-thickness:--spacing(2)]",
     },

@@ -1,10 +1,7 @@
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { CHORUS_KERNELS } from "@audio-ui/engine/kernels";
 import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
-import { CHORUS_KERNELS } from "@/components/audio-ui/devices/chorus/kernels";
-import {
-  lfoRate,
-  SYNCED_RATE_PARAMETERS,
-} from "@/lib/synced-rate";
+import { lfoRate, SYNCED_RATE_PARAMETERS } from "@/lib/synced-rate";
 
 /**
  * A chorus as a device: a short delay swept by a slow oscillator, or up to

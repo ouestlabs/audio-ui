@@ -8,19 +8,6 @@ import {
 } from "@audio-ui/engine/analysis";
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
-import { cn } from "@/lib/utils";
-import { Toggle } from "@/components/ui/toggle";
-import { FilterTypeSelect } from "@/components/audio-ui/filter-type-select";
-import {
-  Plot,
-  PlotArea,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -34,6 +21,19 @@ import {
   equalizerDevice,
   FILTER_TAKES,
 } from "@/components/audio-ui/devices/equalizer/device";
+import { FilterTypeSelect } from "@/components/audio-ui/filter-type-select";
+import {
+  Plot,
+  PlotArea,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
+import { Toggle } from "@/components/ui/toggle";
+import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

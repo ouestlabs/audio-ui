@@ -3,9 +3,12 @@
  * page is prerendered and the server never decodes or encodes, and with them
  * in its build the Worker would carry every decoder and encoder.
  */
+
+import {
+  decodeAudioChannels as decode,
+  encodeAudio as encode,
+} from "@audio-ui/engine/files";
 import { createClientOnlyFn } from "@tanstack/react-start";
-import { decodeAudioChannels as decode } from "@audio-ui/engine/files";
-import { encodeAudio as encode } from "@audio-ui/engine/files";
 import { exportSound as exportFrom } from "@/lib/audio-export";
 
 /** `decodeAudioChannels`, in the browser only: what a dropped or opened file is read through, in any format a browser or `@audio/decode` reads (ARR-007). */

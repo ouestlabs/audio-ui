@@ -1,6 +1,6 @@
 import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { ROTARY_KERNELS } from "@/components/audio-ui/devices/rotary/kernels";
+import { ROTARY_KERNELS } from "@audio-ui/engine/kernels";
 
 /**
  * How fast the horn and the drum turn at each speed, in turns a second: the

@@ -11,7 +11,6 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -27,6 +26,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 /** Each scale's name, as the menu writes it. */
 export const SCALE_LABELS: Record<ScaleName, string> = {

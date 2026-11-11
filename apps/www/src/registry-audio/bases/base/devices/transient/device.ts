@@ -1,5 +1,5 @@
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { TRANSIENT_KERNELS } from "@/registry-audio/bases/base/devices/transient/kernels";
+import { TRANSIENT_KERNELS } from "@audio-ui/engine/kernels";
 import { manifestWorklet } from "@/registry-audio/bases/base/lib/manifest-worklet";
 
 /**

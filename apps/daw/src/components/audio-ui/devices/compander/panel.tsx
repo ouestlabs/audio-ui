@@ -1,14 +1,6 @@
 "use client";
 
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -21,6 +13,14 @@ import {
   companderCurve,
   companderDevice,
 } from "@/components/audio-ui/devices/compander/device";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const MIN_DB = -90;
 const MAX_DB = 0;

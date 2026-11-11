@@ -2,12 +2,6 @@
 
 import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback } from "react";
-import { cn } from "@/lib/utils";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
-import { Piano } from "@/components/audio-ui/piano";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -20,6 +14,9 @@ import {
   type TapeKeysState,
   tapeKeysDevice,
 } from "@/components/audio-ui/devices/tape-keys/device";
+import { Piano } from "@/components/audio-ui/piano";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { cn } from "@/lib/utils";
 
 /** The controls by what they do. */
 const GROUPS = [

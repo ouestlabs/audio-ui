@@ -1,0 +1,23 @@
+---
+title: kernels
+description: "The audio.js kernels each device of the registry runs in an AudioWorklet, from @audio-ui/engine: every module as published, in a string, since a worklet cannot import."
+---
+
+<Module from="@audio-ui/engine/kernels" />
+
+## Usage
+
+An `AudioWorklet` cannot import a module, so a processor that runs audio.js code carries it with it. Each constant here is a device's kernels, every module as published in its own scope, with its package's name, version and license in the comment above it. A device writes its processor after them and loads the whole with [`loadWorklet`](/docs/engine/worklet):
+
+```ts
+import { DELAY_KERNELS } from "@audio-ui/engine/kernels";
+import { loadWorklet } from "@audio-ui/engine/worklet";
+
+const DELAY_WORKLET = `${DELAY_KERNELS}
+class DelayProcessor extends AudioWorkletProcessor { /* calls pingPong, multitap, graindelay */ }
+registerProcessor("audioui-delay", DelayProcessor);`;
+
+await loadWorklet(ctx, DELAY_WORKLET);
+```
+
+The strings are written from the installed packages by `bun run kernels:build` in `packages/engine`, and a test fails when one no longer matches its package, after a version bump.

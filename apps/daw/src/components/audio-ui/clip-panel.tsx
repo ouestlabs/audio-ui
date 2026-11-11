@@ -46,10 +46,7 @@ import {
   TimelineRangeHandle,
   TimelineViewport,
 } from "@/components/audio-ui/timeline";
-import {
-  type ClipPeaks,
-  clipPeakCount,
-} from "@/lib/arrangement";
+import { type ClipPeaks, clipPeakCount } from "@/lib/arrangement";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {

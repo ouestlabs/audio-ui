@@ -21,13 +21,11 @@ import {
 } from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
+import { CaretDownIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
-import { cn } from "@/lib/utils";
+import { BpmControl } from "@/components/audio-ui/bpm-control";
 import { Button } from "@/components/ui/button";
-import {
-  ButtonGroup,
-  ButtonGroupText,
-} from "@/components/ui/button-group";
+import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";
 import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
@@ -50,8 +48,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { BpmControl } from "@/components/audio-ui/bpm-control";
-import { CaretDownIcon } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 const SIGNATURES = ["4/4", "3/4", "6/8", "5/4", "7/8", "2/4"] as const;
 
@@ -253,8 +250,7 @@ function RecordMenu({
           />
         }
       >
-        <CaretDownIcon
-        />
+        <CaretDownIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-auto min-w-40">
         {onCountInChange ? (
@@ -395,8 +391,7 @@ function MetronomeMenu({
           />
         }
       >
-        <CaretDownIcon
-        />
+        <CaretDownIcon />
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-auto min-w-48">
         {sounds && onSoundChange ? (

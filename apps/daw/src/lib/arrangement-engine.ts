@@ -35,10 +35,7 @@ import {
   type TrackDevice,
   withCrossfades,
 } from "@/lib/arrangement";
-import {
-  type ArrangementDoc,
-  allTracks,
-} from "@/lib/arrangement-state";
+import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
 import {
   type ClipPlayer,
   createClipPlayer,
@@ -76,10 +73,7 @@ import {
   playedState,
   type RackEngine,
 } from "@/lib/rack";
-import {
-  createVoicePool,
-  type VoicePool,
-} from "@/lib/voice-pool";
+import { createVoicePool, type VoicePool } from "@/lib/voice-pool";
 
 /**
  * How far ahead a play is scheduled, so every part of the engine has heard of

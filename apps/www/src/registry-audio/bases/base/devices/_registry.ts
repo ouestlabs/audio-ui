@@ -47,7 +47,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The binaural panner as a device: a direction, a distance, a head's size and a mix, the numbers that go on the worklet for a state, where it sits on the panel's top view and the worklet's source (the binaural panner of @audio/spatial-binaural), with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -65,7 +64,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The bass enhancer as a device: a frequency, a drive, an amount and the share of the sub kept, the numbers that go on the worklet for a state, its two bands and the worklet's source (the bass enhancer of @audio/effect-subbass), with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -100,7 +98,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The chorus as a device: a rate, a depth, a delay, one to eight voices and a mix, the numbers that go on the nodes for a state, the sweep of each voice's delay time and the source of the voices' worklet (the chorus of @audio/effect-chorus), with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/synced-rate"],
     },
     engine: {
@@ -117,10 +114,9 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("compander", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/dynamics-compand"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The compander as a device: the level out at -90, -60, -20 and 0 dB in, an attack and a release, the numbers that go on the worklet for a state, the curve a state plays, measured from the package's own stream, and the worklet's source (the compander of @audio/dynamics-compand), with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {
@@ -137,17 +133,9 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("compressor", {
     device: {
-      dependencies: [
-        "@audio-ui/engine",
-        "@audio/dynamics-compressor",
-        "@audio/dynamics-fet",
-        "@audio/dynamics-opto",
-        "@audio/dynamics-varimu",
-        "@audio/dynamics-vca",
-      ],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The compressor as a device: its parameters and what they mean, its models (the smooth, VCA, FET, opto and vari-mu compressors of @audio/dynamics-*), the numbers that go on the nodes for a state, the curve a state plays and the source of the models' worklet, with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {
@@ -165,10 +153,9 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("deesser", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/dynamics-deesser"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The de-esser as a device: a frequency, an over-body level, a ratio and a range, its models (the split, band and wide band de-essers of @audio/dynamics-deesser, which tell an s by the highs over the voice's body), the numbers that go on the worklet for a state, the response a state draws and the source of the worklet, with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {
@@ -187,7 +174,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The delay as a device: its mode (an echo, a ping-pong, a multitap or a grain delay), time, feedback, tone and mix, and the grain delay's pitch, spray, jitter and grain size, the numbers that go on the nodes for a state, the echoes a state makes and the worklet's source, with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -203,7 +189,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("distortion", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/effect-distortion"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The distortion as a device: a curve (tanh, cubic, hard or fold, the curves of @audio/effect-distortion), a drive, a tone, a mix and an output level, the numbers that go on the nodes for a state, the table of each curve and the transfer curve a state plays, with no panel and no audio in it.",
       registryDependencies: ["@audio-ui/oversampling"],
@@ -222,10 +208,9 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("ducker", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/dynamics-compressor"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The ducker as a device: a threshold, a ratio, a knee, a range, an attack and a release, the numbers that go on the worklet for a state, the gain it puts on the sound for a level of the key and the worklet's source (the ducker of @audio/dynamics-ducker), with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {
@@ -289,7 +274,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The exciter as a device: a frequency, a drive and an amount, the numbers that go on the worklet for a state, the band it excites and the worklet's source (the exciter of @audio/effect-exciter), with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -304,10 +288,9 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("expander", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/dynamics-expander"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The expander as a device: a mode (downward or upward), a threshold, a ratio, a knee, a range, an attack and a release, the numbers that go on the worklet for a state, the curve a state plays and the worklet's source (the expander of @audio/dynamics-expander), with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {
@@ -324,16 +307,9 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("filter", {
     device: {
-      dependencies: [
-        "@audio-ui/engine",
-        "@audio/filter-diode-ladder",
-        "@audio/filter-korg35",
-        "@audio/filter-moog-ladder",
-        "@audio/filter-oberheim",
-      ],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The filter as a device: a type, a circuit (two Moog ladders, a diode ladder, a Korg35 or an Oberheim SEM), a cutoff, a resonance and a drive, the numbers that go on the circuit worklet for a state, the worklet's source, and the curve a state plays, the circuit's measured on it, with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -352,7 +328,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The frequency shifter as a device: a mode (shift or ring), the shift in hertz, the ring's frequency, the shifter's precision and a mix, the numbers that go on the worklet for a state, its latency, what it does to a note and its harmonics and the worklet's source (the frequency shifter of @audio/effect-freqshift and the ring modulator of @audio/effect-ringmod), with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -391,7 +366,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The gate as a device: a threshold, a floor, an attack, a hold, a release and a look-ahead, the numbers that go on the worklet for a state, the source of the worklet of @audio/dynamics-gate and the curve a state plays, with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {
@@ -425,10 +399,9 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("limiter", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/dynamics-limiter"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The limiter as a device: an input gain, a ceiling and a release, the lookahead brickwall limiter of @audio/dynamics-limiter with its look-ahead and true peak, the numbers that go on the nodes for a state, the curve a state plays and the source of its worklet, with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: [
         "@audio-ui/oversampling",
         "@audio-ui/manifest-worklet",
@@ -451,7 +424,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The lo-fi as a device: its wow, flutter, hiss, crackle, the band a high-pass and a low-pass leave and a tape drive, the numbers that go on the worklet for a state, the band a state leaves and the worklet's source, with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -470,7 +442,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The mid/side device as a device: a widening (off, a Haas delay or a detune, with their delay, cents and blend), a level for the mid, a level for the side and a bass mono frequency, the numbers that go on the nodes for a state and the source of the detune's worklet (the shifters of @audio/spatial-microshift), with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       dependencies: ["@audio-ui/engine"],
@@ -576,10 +547,9 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("tilt-eq", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/biquad"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The tilt EQ as a device: a tilt, a pivot and an output level, the numbers that go on the worklet for a state, the curve it plays (the shelves of @audio/biquad) and the worklet's source (the tilt of @audio/eq-tilt), with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -675,7 +645,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The phaser-flanger as a device: a mode (phaser, classic or flanger), a rate, a depth, a centre frequency, a delay, the classic phaser's stages, a feedback and a mix, the numbers that go on the nodes for a state, the sweep and the source of the classic phaser's worklet (the phaser of @audio/effect-phaser), with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/synced-rate"],
     },
     engine: {
@@ -740,7 +709,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The redux as a device: a number of bits rounded to the nearest level or shaped, a downsample factor and a mix, the numbers that go on the nodes for a state, the stairs of the quantizer and the source of the worklet that holds and shapes, with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -756,14 +724,7 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("reverb", {
     device: {
-      dependencies: [
-        "@audio-ui/engine",
-        "@audio/reverb-dattorro",
-        "@audio/reverb-fdn",
-        "@audio/reverb-freeverb",
-        "@audio/reverb-schroeder",
-        "@audio/reverb-spring",
-      ],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The reverb as a device: its type (a room, a plate, a hall, a spring, a Freeverb or a Schroeder), decay, pre-delay, damping and mix, the numbers that go on the nodes for a state, the decay a state draws and the impulse response of its room, with no panel and no audio in it.",
     },
@@ -783,7 +744,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The rotary speaker as a device: a speed (slow, fast or stop), a crossover, a depth, the horn's and the drum's ramps, a width and a mix, the numbers that go on the worklet for a state, its two bands and the worklet's source (the rotary of @audio/effect-rotary, with the crossover it splits the sound with), with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -821,7 +781,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The stutter as a device: an interval and a slice in note values, a decay and a mix, the numbers that go on the worklet for a state at a tempo, one interval as the panel draws it and the worklet's source (the stutter of @audio/effect-stutter), with no panel and no audio in it.",
-      kernels: true,
     },
     engine: {
       description:
@@ -858,7 +817,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The transient shaper as a device: an attack and a sustain, each up or down by 12 dB, and an output gain, the numbers that go on the nodes for a state and the source of the worklet of @audio/dynamics-transient-shaper, with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {
@@ -875,10 +833,9 @@ export const devices: RegistryItem[] = [
   }),
   ...deviceItems("unlimiter", {
     device: {
-      dependencies: ["@audio-ui/engine", "@audio/dynamics-unlimit"],
+      dependencies: ["@audio-ui/engine"],
       description:
         "The unlimiter as a device: an amount, a drive, a crest, adaptive and a guarded ceiling, the numbers that go on the worklet for a state, the lift it gives an attack by its size and the worklet's source (the de-limiter of @audio/dynamics-unlimit), with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/manifest-worklet"],
     },
     engine: {
@@ -934,7 +891,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The wah as a device: a mode (envelope, sweep or pedal), the band's frequency and resonance, an envelope's range, sensitivity, attack and release, an oscillator's rate or note value and depth, a mix and an output, the numbers that go on the worklet for a state, the band's travel and curve and the worklet's source (the auto-wah of @audio/effect-autowah and the wah of @audio/effect-wah), with no panel and no audio in it.",
-      kernels: true,
       registryDependencies: ["@audio-ui/synced-rate"],
     },
     engine: {

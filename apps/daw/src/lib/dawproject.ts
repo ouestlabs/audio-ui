@@ -1,8 +1,15 @@
-import type { ParameterValue } from "@audio-ui/engine/device";
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
+import type { ParameterValue } from "@audio-ui/engine/device";
 import type { WarpMode } from "@audio-ui/engine/playback";
 import type { Tempo } from "@audio-ui/engine/time";
+import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
+import {
+  EQUALIZER_BANDS,
+  equalizerDevice,
+} from "@/components/audio-ui/devices/equalizer/device";
+import { gateDevice } from "@/components/audio-ui/devices/gate/device";
+import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -19,13 +26,6 @@ import {
   type ArrangementSignature,
   createArrangementState,
 } from "@/lib/arrangement-state";
-import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
-import {
-  EQUALIZER_BANDS,
-  equalizerDevice,
-} from "@/components/audio-ui/devices/equalizer/device";
-import { gateDevice } from "@/components/audio-ui/devices/gate/device";
-import { limiterDevice } from "@/components/audio-ui/devices/limiter/device";
 import { createZip, readZip } from "@/lib/zip";
 
 /** A recording an export packs: its file's name in the archive's `audio/` folder, its length in seconds, its channels and rate. */

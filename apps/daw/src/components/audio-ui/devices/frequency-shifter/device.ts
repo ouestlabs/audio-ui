@@ -1,6 +1,6 @@
 import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { FREQUENCY_SHIFTER_KERNELS } from "@/components/audio-ui/devices/frequency-shifter/kernels";
+import { FREQUENCY_SHIFTER_KERNELS } from "@audio-ui/engine/kernels";
 
 /**
  * How long the shifter's Hilbert filter is for each precision, in taps: a

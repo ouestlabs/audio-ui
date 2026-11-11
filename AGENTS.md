@@ -83,13 +83,13 @@ Published to npm: **don't break its public API without a changeset**.
 registry-audio/bases/base/
 ├── audio/elements/  # Styled elements over each primitive (knob.tsx, fader.tsx, timeline.tsx…)
 ├── audio/panels/    # Panels that are no device's own: clip, rack, drum rack, the generic device-panel
-├── devices/<name>/  # A device, named as it installs: device.ts, engine.ts, panel.tsx (and kernels.ts for a worklet's)
+├── devices/<name>/  # A device, named as it installs: device.ts, engine.ts, panel.tsx
 ├── components/      # Catalog by category folder: block-{component}-{variant}.tsx + {component}-*-demo.tsx
 ├── hooks/           # use-web-audio, use-transport-clock, use-spectrum…
 └── lib/             # web-audio, musical-time, waveform-dsp, lookahead-scheduler…
 ```
 
-Each of `audio/`, `devices/`, `components/`, `hooks/`, `lib/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/base/`. Items are declared through the factories of `registry-audio/bases/items.ts` (`libItem`, `hookItem`, `deviceItems`), which write a file's path, target and type and a device's four items from one description. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js kernels a device runs in an `AudioWorklet` are listed in `apps/www/scripts/kernels.ts` and written by `bun run kernels:build`; `test/kernels.test.ts` fails when a copy no longer matches its package.
+Each of `audio/`, `devices/`, `components/`, `hooks/`, `lib/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/base/`. Items are declared through the factories of `registry-audio/bases/items.ts` (`libItem`, `hookItem`, `deviceItems`), which write a file's path, target and type and a device's four items from one description. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js a device runs is the engine's: its worklet's kernels come from `@audio-ui/engine/kernels` (listed in `packages/engine/scripts/kernels.ts`, written by `bun run kernels:build` there, checked by its `kernels.test.ts`) and the processors its description uses from `@audio-ui/engine/dsp`; a registry file never imports an `@audio/*` atom.
 
 Shared audio glue has one home each. Use it rather than writing a copy into a block or an engine:
 

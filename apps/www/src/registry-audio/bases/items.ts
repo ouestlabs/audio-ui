@@ -76,8 +76,9 @@ const deviceFile = (name: string, file: string, type: FileType) =>
 /**
  * A device as the registry ships it: four items from one description.
  *
- * - `<name>-device`: its state, `devices/<name>/device.ts` (and `kernels.ts`
- *   when its engine runs audio.js kernels in a worklet), no panel and no audio
+ * - `<name>-device`: its state, `devices/<name>/device.ts` (and the source of
+ *   its worklet, over `@audio-ui/engine/kernels`, when it runs one), no panel
+ *   and no audio
  * - `<name>-engine`: its Web Audio engine, `engine.ts`, over the state and
  *   `@audio-ui/engine/device` (the contract it returns)
  * - `<name>-panel`: its face, `panel.tsx`, over `device-panel` and the state
@@ -94,7 +95,7 @@ export function deviceItems(
     panel,
     tags = [],
   }: {
-    device: DevicePartSpec & { kernels?: boolean };
+    device: DevicePartSpec;
     engine: DevicePartSpec;
     panel: DevicePartSpec & { categories: string[] };
     tags?: string[];
@@ -107,12 +108,7 @@ export function deviceItems(
       categories,
       dependencies: device.dependencies ?? [],
       description: device.description,
-      files: [
-        deviceFile(name, "device.ts", "registry:lib"),
-        ...(device.kernels
-          ? [deviceFile(name, "kernels.ts", "registry:lib")]
-          : []),
-      ],
+      files: [deviceFile(name, "device.ts", "registry:lib")],
       name: `${name}-device`,
       registryDependencies: device.registryDependencies ?? [],
       type: "registry:lib",

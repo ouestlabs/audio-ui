@@ -2,16 +2,6 @@
 
 import { formatDb, formatHz } from "@audio-ui/engine/analysis";
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotArea,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotLine,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -22,6 +12,16 @@ import {
   tiltEqCurve,
   tiltEqDevice,
 } from "@/components/audio-ui/devices/tilt-eq/device";
+import {
+  Plot,
+  PlotArea,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotLine,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

@@ -1,14 +1,7 @@
 "use client";
 
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
 import { CurveSelect } from "@/components/audio-ui/curve-select";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -20,6 +13,13 @@ import {
   distortionDevice,
   distortionShape,
 } from "@/components/audio-ui/devices/distortion/device";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const TICKS = [-0.5, 0, 0.5];
 const UNITY = (input: number) => input;

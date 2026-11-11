@@ -1,0 +1,27 @@
+---
+title: dsp
+description: "The audio.js processors the registry's devices are built on, from @audio-ui/engine: compressor and expander models, the gain curves of dynamics, filter circuits, reverbs and biquad shelves, under one dependency."
+---
+
+<Module from="@audio-ui/engine/dsp" />
+
+## Usage
+
+A device of the registry describes its parameters itself, and takes the processors it is made of from here: the models a compressor offers, the gain curve a panel draws, the circuits of a filter, the reverbs a room is rendered with. They are the audio.js atoms' own, under the names the devices use, so a project that installs a device depends on `@audio-ui/engine` and not on each atom:
+
+```ts
+import { compressorGain, moogLadder } from "@audio-ui/engine/dsp";
+
+// At -10 dB in, a -20 dB threshold, 4:1 and a 6 dB knee: -7.5 dB of gain.
+compressorGain(-10, -20, 4, 6);
+```
+
+| What | Exports |
+| --- | --- |
+| Dynamics models, each the manifest of an `AudioWorklet` processor | `compressor`, `fet`, `opto`, `varimu`, `vca`, `deesser`, `expander`, `unlimit` |
+| Gain curves, for a panel's transfer curve | `compressorGain`, `expanderGain`, `upwardExpanderGain`, `unlimitGain`, `unlimitDeficitGain`, `compandStream` |
+| Filter circuits | `moogLadder`, `diodeLadder`, `korg35`, `oberheim` |
+| Reverbs | `dattorro`, `fdn`, `freeverb`, `schroeder`, `spring` |
+| Shaping and filters | `distortion`, `lowshelf`, `highshelf`, `magnitude`, `limiterLatency` |
+
+A device's engine runs the same atoms in an `AudioWorklet` through [`kernels`](/docs/engine/kernels).

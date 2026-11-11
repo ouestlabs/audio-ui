@@ -1,11 +1,11 @@
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { STUTTER_KERNELS } from "@audio-ui/engine/kernels";
 import {
   DEFAULT_TEMPO,
   SYNCED_DIVISIONS,
   syncedSeconds,
   type Tempo,
 } from "@audio-ui/engine/time";
-import { STUTTER_KERNELS } from "@/registry-audio/bases/base/devices/stutter/kernels";
 
 /**
  * A stutter as a device: a slice of the sound caught at the start of every

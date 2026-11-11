@@ -8,6 +8,7 @@ import {
   fadeGain,
   Timeline as TimelinePrimitive,
 } from "@audio-ui/react";
+import { CaretRightIcon } from "@phosphor-icons/react";
 import {
   type CSSProperties,
   type FocusEvent,
@@ -19,7 +20,9 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
+import { Fader } from "@/components/audio-ui/fader";
+import { Knob } from "@/components/audio-ui/knob";
+import { Led } from "@/components/audio-ui/led";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -37,18 +40,9 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
-import { Fader } from "@/components/audio-ui/fader";
-import { Knob } from "@/components/audio-ui/knob";
-import { Led } from "@/components/audio-ui/led";
-import type {
-  Mix,
-  TrackColor,
-} from "@/lib/arrangement";
-import { CaretRightIcon } from "@phosphor-icons/react";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { Mix, TrackColor } from "@/lib/arrangement";
+import { cn } from "@/lib/utils";
 
 function Timeline({ className, ...props }: TimelinePrimitive.Root.Props) {
   return (
@@ -196,10 +190,7 @@ function TimelinePlayhead({
 }: TimelinePrimitive.Playhead.Props) {
   return (
     <TimelinePrimitive.Playhead
-      className={cn(
-        "bg-primary pointer-events-none inset-y-0 w-px",
-        className
-      )}
+      className={cn("bg-primary pointer-events-none inset-y-0 w-px", className)}
       data-slot="timeline-playhead"
       {...props}
     />
@@ -352,7 +343,10 @@ function TimelineClipFade({
 }: TimelinePrimitive.ClipFade.Props) {
   return (
     <TimelinePrimitive.ClipFade
-      className={cn("text-foreground/80 [--clip-fade-shade:color-mix(in_oklab,var(--background)_55%,transparent)]", className)}
+      className={cn(
+        "text-foreground/80 [--clip-fade-shade:color-mix(in_oklab,var(--background)_55%,transparent)]",
+        className
+      )}
       data-slot="timeline-clip-fade"
       {...props}
     />
@@ -436,7 +430,10 @@ function TimelineNavigator({
 }: TimelinePrimitive.Navigator.Props) {
   return (
     <TimelinePrimitive.Navigator
-      className={cn("h-6 rounded-[min(var(--radius-sm),6px)] bg-muted shrink-0 select-none", className)}
+      className={cn(
+        "h-6 rounded-[min(var(--radius-sm),6px)] bg-muted shrink-0 select-none",
+        className
+      )}
       data-slot="timeline-navigator"
       minWindowWidth={48}
       {...props}

@@ -1,7 +1,7 @@
-import { deesser } from "@audio/dynamics-deesser/audio";
 import { biquadResponse, formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
-import { DEESSER_KERNELS } from "@/components/audio-ui/devices/deesser/kernels";
+import { deesser } from "@audio-ui/engine/dsp";
+import { DEESSER_KERNELS } from "@audio-ui/engine/kernels";
 import { manifestWorklet } from "@/lib/manifest-worklet";
 
 /** The Q of each biquad of the crossover the panel's curve draws: two of them in a row are a Linkwitz-Riley filter, whose low and high halves add back to a flat response. */

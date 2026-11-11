@@ -1,14 +1,6 @@
 "use client";
 
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotArea,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -19,6 +11,14 @@ import {
   stutterCycle,
   stutterDevice,
 } from "@/components/audio-ui/devices/stutter/device";
+import {
+  Plot,
+  PlotArea,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const SWITCHES = ["enabled"] as const;
 const OFF = stutterDevice.parameters

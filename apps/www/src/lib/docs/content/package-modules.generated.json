@@ -2752,6 +2752,14 @@
   },
   {
     "adapters": [],
+    "exports": [],
+    "from": "@audio-ui/engine/dsp",
+    "package": "@audio-ui/engine",
+    "sources": [],
+    "usedBy": []
+  },
+  {
+    "adapters": [],
     "exports": [
       {
         "kind": "function",
@@ -2865,6 +2873,160 @@
     "usedBy": [
       "audio-export"
     ]
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
+        "name": "BASS_ENHANCER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-subbass` 1.2.0 (MIT, Dmitry Iv.): `subbass`"
+      },
+      {
+        "kind": "const",
+        "name": "BINAURAL_PANNER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/spatial-binaural` 0.1.1 (MIT, Dmitry Iv.): `binaural`"
+      },
+      {
+        "kind": "const",
+        "name": "CHORUS_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-chorus` 2.0.2 (MIT, Dmitry Iv.): `chorus`"
+      },
+      {
+        "kind": "const",
+        "name": "COMPANDER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compand` 0.1.7 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compand` 0.1.7 (MIT, Dmitry Iv.): `compandStream`, as `module3` - `@audio/dynamics-compand` 0.1.7 (MIT, Dmitry Iv.): `compand`"
+      },
+      {
+        "kind": "const",
+        "name": "COMPRESSOR_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `compressorGain`, as `module3` - `@audio/dynamics-vca` 0.2.5 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module4` - `@audio/dynamics-vca` 0.2.5 (MIT, Dmitry Iv.): `vcaStream`, as `module5` - `@audio/dynamics-vca` 0.2.5 (MIT, Dmitry Iv.): `vca` - `@audio/dynamics-fet` 0.2.5 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module7` - `@audio/dynamics-fet` 0.2.5 (MIT, Dmitry Iv.): `fetStream`, as `module8` - `@audio/dynamics-fet` 0.2.5 (MIT, Dmitry Iv.): `fet` - `@audio/dynamics-opto` 0.2.5 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module10` - `@audio/dynamics-opto` 0.2.5 (MIT, Dmitry Iv.): `optoStream`, as `module11` - `@audio/dynamics-opto` 0.2.5 (MIT, Dmitry Iv.): `opto` - `@audio/dynamics-varimu` 0.2.4 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module13` - `@audio/dynamics-varimu` 0.2.4 (MIT, Dmitry Iv.): `varimuStream`, as `module14` - `@audio/dynamics-varimu` 0.2.4 (MIT, Dmitry Iv.): `varimu` - `@audio/dynamics-compressor` 0.3.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, `timeCoef`, as `module16` - `@audio/dynamics-compressor` 0.3.1 (MIT, Dmitry Iv.): `compress`, `compressorState`, as `module17` - `@audio/dynamics-compressor` 0.3.1 (MIT, Dmitry Iv.): `compressor`"
+      },
+      {
+        "kind": "const",
+        "name": "DEESSER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `compressorGain`, as `module3` - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `lowpass`, `highpass`, `step`, `state`, as `module4` - `@audio/dynamics-deesser` 0.4.1 (MIT, Dmitry Iv.): `writer`, `db2lin`, `timeCoef`, `smoother`, as `module5` - `@audio/dynamics-deesser` 0.4.1 (MIT, Dmitry Iv.): `deesserStream`, `latency`, as `module6` - `@audio/dynamics-deesser` 0.4.1 (MIT, Dmitry Iv.): `deesser`"
+      },
+      {
+        "kind": "const",
+        "name": "DELAY_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-pingpong` 1.1.5 (MIT, Dmitry Iv.): `pingPong` - `@audio/effect-multitap` 1.1.6 (MIT, Dmitry Iv.): `multitap` - `@audio/effect-graindelay` 1.1.6 (MIT, Dmitry Iv.): `graindelay`"
+      },
+      {
+        "kind": "const",
+        "name": "DUCKER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-compressor` 0.2.1 (MIT, Dmitry Iv.): `compressorGain`, as `module3` - `@audio/dynamics-ducker` 0.1.9 (MIT, Dmitry Iv.): `db2lin`, `lin2db`, as `module4` - `@audio/dynamics-ducker` 0.1.9 (MIT, Dmitry Iv.): `ducker`"
+      },
+      {
+        "kind": "const",
+        "name": "EXCITER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-exciter` 1.2.1 (MIT, Dmitry Iv.): `exciter`"
+      },
+      {
+        "kind": "const",
+        "name": "EXPANDER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `expanderGain`, `upwardExpanderGain`, as `module3` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `expander`"
+      },
+      {
+        "kind": "const",
+        "name": "FILTER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/filter-moog-ladder` 1.2.0 (MIT, Dmitry Iv.): `moogLadder` - `@audio/filter-diode-ladder` 1.2.2 (MIT, Dmitry Iv.): `diodeLadder` - `@audio/filter-korg35` 1.2.1 (MIT, Dmitry Iv.): `korg35` - `@audio/filter-oberheim` 1.2.1 (MIT, Dmitry Iv.): `oberheim`"
+      },
+      {
+        "kind": "const",
+        "name": "FREQUENCY_SHIFTER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-freqshift` 1.1.6 (MIT, Dmitry Iv.): `frequencyShifter` - `@audio/effect-ringmod` 1.1.5 (MIT, Dmitry Iv.): `ringMod`"
+      },
+      {
+        "kind": "const",
+        "name": "GATE_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-gate` 0.1.7 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `timeCoef`, as `module2` - `@audio/dynamics-gate` 0.1.7 (MIT, Dmitry Iv.): `gateStream`, as `module3` - `@audio/dynamics-gate` 0.1.7 (MIT, Dmitry Iv.): `gate`"
+      },
+      {
+        "kind": "const",
+        "name": "LIMITER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-limiter` 0.2.1 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `timeCoef`, as `module0` - `@audio/dynamics-limiter` 0.2.1 (MIT, Dmitry Iv.): `limiterStream`, `latency`, as `module1` - `@audio/dynamics-limiter` 0.2.1 (MIT, Dmitry Iv.): `limiter`"
+      },
+      {
+        "kind": "const",
+        "name": "LOFI_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-lofi` 1.1.6 (MIT, Dmitry Iv.): `lofi`"
+      },
+      {
+        "kind": "const",
+        "name": "MID_SIDE_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/spatial-microshift` 1.1.3 (MIT, Dmitry Iv.): `shifter`"
+      },
+      {
+        "kind": "const",
+        "name": "PHASER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-phaser` 1.1.6 (MIT, Dmitry Iv.): `phaser`"
+      },
+      {
+        "kind": "const",
+        "name": "REDUX_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-bitcrusher` 1.1.5 (MIT, Dmitry Iv.): `bitcrusher` - `@audio/effect-noiseshaper` 1.1.5 (MIT, Dmitry Iv.): `noiseShaping`"
+      },
+      {
+        "kind": "const",
+        "name": "ROTARY_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `polesSos` - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `butterworth` - `digital-filter` 2.4.3 (MIT, Dmitry Iv.): `linkwitzRiley` - `@audio/eq-crossover` 1.0.2 (MIT, Dmitry Iv.): `crossover` - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `step`, `state` - `@audio/effect-rotary` 0.1.2 (MIT, Dmitry Iv.): `rotary`"
+      },
+      {
+        "kind": "const",
+        "name": "STUTTER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-stutter` 1.1.6 (MIT, Dmitry Iv.): `stutter`"
+      },
+      {
+        "kind": "const",
+        "name": "TILT_EQ_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/biquad` 1.2.2 (MIT, Dmitry Iv.): `lowshelf`, `highshelf`, `filter` - `@audio/eq-tilt` 1.2.3 (MIT, Dmitry Iv.): `tilt`"
+      },
+      {
+        "kind": "const",
+        "name": "TRANSIENT_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-transient-shaper` 0.1.6 (MIT, Dmitry Iv.): `transientShaper`, as `module0` - `@audio/dynamics-transient-shaper` 0.1.6 (MIT, Dmitry Iv.): `transientShaper`"
+      },
+      {
+        "kind": "const",
+        "name": "UNLIMITER_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `timeCoef`, as `module0` - `@audio/dynamics-envelope` 0.1.4 (MIT, Dmitry Iv.): `envelope`, as `module1` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module2` - `@audio/dynamics-expander` 0.2.2 (MIT, Dmitry Iv.): `upwardExpanderGain`, as `module3` - `@audio/dynamics-unlimit` 0.1.2 (MIT, Dmitry Iv.): `writer`, `concat`, `db2lin`, `lin2db`, as `module4` - `@audio/dynamics-unlimit` 0.1.2 (MIT, Dmitry Iv.): `unlimitGain`, `unlimitDeficitGain`, as `module5` - `@audio/dynamics-unlimit` 0.1.2 (MIT, Dmitry Iv.): `unlimit`"
+      },
+      {
+        "kind": "const",
+        "name": "WAH_KERNELS",
+        "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-autowah` 1.1.5 (MIT, Dmitry Iv.): `autoWah` - `@audio/effect-wah` 1.1.5 (MIT, Dmitry Iv.): `wah`"
+      }
+    ],
+    "from": "@audio-ui/engine/kernels",
+    "package": "@audio-ui/engine",
+    "sources": [
+      "packages/engine/src/kernels/bass-enhancer.ts",
+      "packages/engine/src/kernels/binaural-panner.ts",
+      "packages/engine/src/kernels/chorus.ts",
+      "packages/engine/src/kernels/compander.ts",
+      "packages/engine/src/kernels/compressor.ts",
+      "packages/engine/src/kernels/deesser.ts",
+      "packages/engine/src/kernels/delay.ts",
+      "packages/engine/src/kernels/ducker.ts",
+      "packages/engine/src/kernels/exciter.ts",
+      "packages/engine/src/kernels/expander.ts",
+      "packages/engine/src/kernels/filter.ts",
+      "packages/engine/src/kernels/frequency-shifter.ts",
+      "packages/engine/src/kernels/gate.ts",
+      "packages/engine/src/kernels/limiter.ts",
+      "packages/engine/src/kernels/lofi.ts",
+      "packages/engine/src/kernels/mid-side.ts",
+      "packages/engine/src/kernels/phaser.ts",
+      "packages/engine/src/kernels/redux.ts",
+      "packages/engine/src/kernels/rotary.ts",
+      "packages/engine/src/kernels/stutter.ts",
+      "packages/engine/src/kernels/tilt-eq.ts",
+      "packages/engine/src/kernels/transient.ts",
+      "packages/engine/src/kernels/unlimiter.ts",
+      "packages/engine/src/kernels/wah.ts"
+    ],
+    "usedBy": []
   },
   {
     "adapters": [],

@@ -1,5 +1,6 @@
 "use client";
 
+import { pitchName } from "@audio-ui/core";
 import {
   duplicateTime,
   fitNotesToScale,
@@ -15,7 +16,6 @@ import {
   reverseNotes,
   stretchNotes,
 } from "@audio-ui/core/piano-roll";
-import { pitchName } from "@audio-ui/core";
 import {
   rollScale,
   type Scale,
@@ -31,8 +31,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { Button } from "@/components/ui/button";
-import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import {
   ClipBox,
   type ClipMeter,
@@ -78,10 +76,9 @@ import {
   TimelineRangeHandle,
   TimelineRuler,
 } from "@/components/audio-ui/timeline";
-import type {
-  ClipScale,
-  ClipSwing,
-} from "@/lib/arrangement";
+import { Button } from "@/components/ui/button";
+import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import type { ClipScale, ClipSwing } from "@/lib/arrangement";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;

@@ -1,7 +1,7 @@
 import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { WAH_KERNELS } from "@audio-ui/engine/kernels";
 import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
-import { WAH_KERNELS } from "@/registry-audio/bases/base/devices/wah/kernels";
 import {
   lfoRate,
   SYNCED_RATE_PARAMETERS,

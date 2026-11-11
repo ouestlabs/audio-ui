@@ -10,16 +10,6 @@ import type {
   ToggleParameter,
 } from "@audio-ui/engine/device";
 import { type ReactNode, useCallback } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Toggle } from "@/components/ui/toggle";
 import {
   FilterTypeSelect,
   isFilterType,
@@ -29,6 +19,16 @@ import {
   isWaveform,
   WaveformSelect,
 } from "@/components/audio-ui/waveform-select";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Toggle } from "@/components/ui/toggle";
+import { cn } from "@/lib/utils";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;
 type AnyState = Record<string, ParameterValue>;
