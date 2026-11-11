@@ -1,5 +1,7 @@
 import type { RegistryItem } from "shadcn/schema";
+import { hookItem } from "../../items";
 
+/** The hooks: React integration over the libs and the Web Audio API, each in `hooks/`. */
 export const hooks: RegistryItem[] = [
   {
     description:
@@ -17,36 +19,17 @@ export const hooks: RegistryItem[] = [
     registryDependencies: ["@audio-ui/use-simulated-clock"],
     type: "registry:hook",
   },
-  {
+  hookItem("use-simulated-clock", {
     categories: ["audio", "timeline"],
     dependencies: ["@audio-ui/react"],
     description:
       "A clock for a timeline that makes no sound: it runs while playing, loops between two points, and the playhead follows it without re-rendering React. Not on the audio clock: use use-transport-clock to schedule sound",
-    files: [
-      {
-        path: "hooks/use-simulated-clock.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-simulated-clock",
-    registryDependencies: [],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-marquee-selection", {
     categories: ["audio", "timeline"],
-    dependencies: [],
     description:
       "A selection rectangle for the clips of a timeline: drag across bare lane (with Shift, or in a multi-select mode) and the clips it touches join the selection",
-    files: [
-      {
-        path: "hooks/use-marquee-selection.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-marquee-selection",
-    registryDependencies: [],
-    type: "registry:hook",
-  },
+  }),
   {
     categories: ["audio", "timeline"],
     dependencies: ["@audio-ui/react"],
@@ -66,18 +49,11 @@ export const hooks: RegistryItem[] = [
     registryDependencies: ["@audio-ui/arrangement", "@audio-ui/undo-history"],
     type: "registry:hook",
   },
-  {
+  hookItem("use-midi-playback", {
     categories: ["audio", "timeline", "piano"],
     dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio/note"],
     description:
       "Plays an arrangement's MIDI clips while it plays: notes scheduled ahead on the audio clock, each MIDI track through a channel whose gain and pan follow its mix or its automation, and the notes a clip's editor auditions.",
-    files: [
-      {
-        path: "hooks/use-midi-playback.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-midi-playback",
     registryDependencies: [
       "@audio-ui/arrangement",
       "@audio-ui/use-master-bus",
@@ -85,8 +61,7 @@ export const hooks: RegistryItem[] = [
       "@audio-ui/envelope-ramp",
       "@audio-ui/web-audio",
     ],
-    type: "registry:hook",
-  },
+  }),
   {
     categories: ["timeline", "mixer"],
     description:
@@ -105,19 +80,11 @@ export const hooks: RegistryItem[] = [
     registryDependencies: ["@audio-ui/sortable-drag"],
     type: "registry:hook",
   },
-  {
+  hookItem("use-timeline-zoom", {
     categories: ["timeline"],
     description:
       "The zoom of an arrangement's timeline: it fits the view beside the track headers until it is zoomed, zooms around a time that stays put on screen, fits a stretch of time, steps back through the zooms it left, and keeps its bars when the tempo changes.",
-    files: [
-      {
-        path: "hooks/use-timeline-zoom.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-timeline-zoom",
-    type: "registry:hook",
-  },
+  }),
   {
     categories: ["timeline"],
     dependencies: ["@audio-ui/react"],
@@ -140,62 +107,31 @@ export const hooks: RegistryItem[] = [
     ],
     type: "registry:hook",
   },
-  {
+  hookItem("use-timeline-cursor", {
     categories: ["timeline"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
       "What the keyboard does with an arrangement's cursor: the arrows on the grid, Home and End, Up and Down to pick a track, Alt and the arrows to jump between locators and clip edges, M to add a locator.",
-    files: [
-      {
-        path: "hooks/use-timeline-cursor.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-timeline-cursor",
     registryDependencies: ["@audio-ui/arrangement"],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-timeline-grid", {
     categories: ["timeline"],
     dependencies: ["@audio-ui/core"],
     description:
       "The grid of an arrangement's timeline: adaptive to the zoom or a fixed division, straight or triplet, snapping or not, its name for a menu button, and the changes Cmd/Ctrl + 1 to 5 make.",
-    files: [
-      {
-        path: "hooks/use-timeline-grid.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-timeline-grid",
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-transport-clock", {
     categories: ["audio", "sequencer", "piano"],
+    dependencies: ["@audio-ui/core"],
     description:
       "A look-ahead transport clock on the audio clock: it calls back with the audio time of each step so notes are scheduled sample-accurately, with a loop region, seek and tempo changes.",
-    files: [
-      {
-        path: "hooks/use-transport-clock.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-transport-clock",
-    dependencies: ["@audio-ui/core"],
     registryDependencies: ["@audio-ui/web-audio"],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-piano-roll-playback", {
     categories: ["audio", "piano", "sequencer"],
     dependencies: ["@audio-ui/core", "@audio-ui/react"],
     description:
       "Plays a piano roll's notes, which you own: play, pause and stop, a loop or once through, a metronome, seeking, and the notes the roll auditions, with a playhead for the timeline and a clock for the transport.",
-    files: [
-      {
-        path: "hooks/use-piano-roll-playback.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-piano-roll-playback",
     registryDependencies: [
       "@audio-ui/drum-synthesis",
       "@audio-ui/use-transport-clock",
@@ -203,81 +139,39 @@ export const hooks: RegistryItem[] = [
       "@audio-ui/envelope-ramp",
       "@audio-ui/web-audio",
     ],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-undo-history", {
     categories: ["timeline", "piano", "envelope"],
     description:
       "Undo and redo over a value you own: an edit made in one go, or a gesture that undoes as one.",
-    files: [
-      {
-        path: "hooks/use-undo-history.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-undo-history",
     registryDependencies: ["@audio-ui/undo-history"],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-master-bus", {
     categories: ["audio", "synth", "sequencer"],
     description:
       "A master output bus with a safety limiter: every source connects into one gain node that a single fader governs.",
-    files: [
-      {
-        path: "hooks/use-master-bus.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-master-bus",
     registryDependencies: ["@audio-ui/web-audio"],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-polyphony", {
     categories: ["audio", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
       "An instrument whose engine plays one voice, played as chords: as many engines as notes sound at once, made into a destination, each following the state, every note on a voice of its own.",
-    files: [
-      {
-        path: "hooks/use-polyphony.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-polyphony",
     registryDependencies: ["@audio-ui/polyphony"],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-synth-voices", {
     categories: ["audio", "synth", "piano", "envelope"],
+    dependencies: ["@audio-ui/core", "@audio/note"],
     description:
       "Polyphonic synth voices on the Web Audio API: start and release notes with an envelope, a velocity and a pitch bend.",
-    files: [
-      {
-        path: "hooks/use-synth-voices.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-synth-voices",
-    dependencies: ["@audio-ui/core", "@audio/note"],
     registryDependencies: ["@audio-ui/envelope-ramp"],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-midi-input", {
     categories: ["audio", "piano", "synth"],
     dependencies: ["@audio-ui/core"],
     description:
       "The notes of the page's MIDI input, with velocity and pitch bend: every component that calls it hears the same devices.",
-    files: [
-      {
-        path: "hooks/use-midi-input.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-midi-input",
-    registryDependencies: [],
-    type: "registry:hook",
-  },
+  }),
   {
     categories: ["audio", "piano", "synth"],
     description:
@@ -296,212 +190,104 @@ export const hooks: RegistryItem[] = [
     registryDependencies: [],
     type: "registry:hook",
   },
-  {
+  hookItem("use-audio-signal", {
     categories: ["audio", "waveform"],
     dependencies: ["@audio-ui/core"],
     description:
       "An AnalyserNode as live signals for a waveform: the loudest sample of the moment, frequency bands and the raw samples, read every frame without re-rendering",
-    files: [
-      {
-        path: "hooks/use-audio-signal.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-audio-signal",
-    registryDependencies: [],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-demo-source", {
     categories: ["hooks", "audio"],
     description:
       "The sound a device plays: the one chosen in its session, such as from a preview's bar, else the one that shows best what the device does. It tells the session its default, so a bar can offer the choice only where there is one. Outside a session it is always the default.",
-    files: [
-      {
-        path: "hooks/use-demo-source.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-demo-source",
     registryDependencies: [
       "@audio-ui/demo-sound",
       "@audio-ui/use-audio-session",
     ],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-audio-session", {
     categories: ["hooks", "audio"],
     description:
       "A session of its own for a demo and its controls: a play switch and a microphone switch that nothing outside it follows. Holds no audio, so two previews on a page never play together. Outside a session the switches stay off.",
-    files: [
-      {
-        path: "hooks/use-audio-session.tsx",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-audio-session",
-    registryDependencies: [],
-    type: "registry:hook",
-  },
-  {
+    files: ["hooks/use-audio-session.tsx"],
+  }),
+  hookItem("use-play-switch", {
     categories: ["hooks", "audio"],
     description:
       "The play switch of the nearest session: a button in its bar flips it, every component inside the session that reads it follows. Holds no audio, so a demo can leave its play button to its host.",
-    files: [
-      {
-        path: "hooks/use-play-switch.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-play-switch",
     registryDependencies: ["@audio-ui/use-audio-session"],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-microphone", {
     categories: ["hooks", "audio", "tuner"],
     description:
       "The microphone as an AnalyserNode on the shared AudioContext: raw signal, never connected to the speakers, released on stop and on unmount. The session's switch, usePageMicrophone, lets a button turn it on for a demo",
-    files: [
-      {
-        path: "hooks/use-microphone.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-microphone",
     registryDependencies: [
       "@audio-ui/web-audio",
       "@audio-ui/use-audio-session",
     ],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-pitch", {
     categories: ["hooks", "audio", "tuner"],
     dependencies: ["@audio-ui/react", "@audio/note", "@audio/pitch-yin"],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
-    files: [
-      {
-        path: "hooks/use-pitch.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-pitch",
-    registryDependencies: [],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-audio-levels", {
     categories: ["hooks", "audio", "meter"],
     dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The live levels of a signal from its AnalyserNodes, in the shape a Meter paints from: RMS in dB per channel with a peak that holds and falls, refreshed every frame without re-rendering",
-    files: [
-      {
-        path: "hooks/use-audio-levels.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-audio-levels",
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-loudness", {
     categories: ["hooks", "audio", "meter"],
     dependencies: ["@audio-ui/react"],
     description:
       "How loud a signal is while it plays, in LUFS, as streaming services and broadcasters measure it (ITU-R BS.1770): its momentary, short-term and integrated loudness, measured on the audio thread, as a live source refreshed every 100 ms without re-rendering",
-    files: [
-      {
-        path: "hooks/use-loudness.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-loudness",
     registryDependencies: ["@audio-ui/loudness"],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-simulated-levels", {
     categories: ["hooks", "audio", "meter"],
-    dependencies: [],
     description:
       "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from: a demo meter that is never at rest",
-    files: [
-      {
-        path: "hooks/use-simulated-levels.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-simulated-levels",
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-spectrum", {
     categories: ["hooks", "audio", "plot"],
     dependencies: ["@audio-ui/react", "@audio-ui/core"],
     description:
       "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering, and its held peaks as a second source",
-    files: [
-      {
-        path: "hooks/use-spectrum.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-spectrum",
-    registryDependencies: [],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-noise-through-eq", {
     categories: ["hooks", "audio", "plot"],
     dependencies: ["@audio-ui/core"],
     description:
       "Pink noise played through an equalizer that follows your bands, with the analyser after it: what a plot draws is what is heard",
-    files: [
-      {
-        path: "hooks/use-noise-through-eq.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-noise-through-eq",
     registryDependencies: [
       "@audio-ui/demo-sound",
       "@audio-ui/use-play-switch",
       "@audio-ui/web-audio",
     ],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-device-loop", {
     categories: ["hooks", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
       "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine follows the state, and an analyser of the output is there for a spectrum.",
-    files: [
-      {
-        path: "hooks/use-device-loop.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-device-loop",
     registryDependencies: [
       "@audio-ui/demo-sound",
       "@audio-ui/use-demo-source",
       "@audio-ui/use-play-switch",
       "@audio-ui/web-audio",
     ],
-    type: "registry:hook",
-  },
-  {
+  }),
+  hookItem("use-pulses-through-compressor", {
     categories: ["hooks", "audio", "plot"],
     dependencies: ["@audio-ui/react"],
     description:
       "A looping pulse played through a compressor that follows your controls, with the level going in as a live source in dB: pair it with a transfer curve's Plot.Dot",
-    files: [
-      {
-        path: "hooks/use-pulses-through-compressor.ts",
-        type: "registry:hook",
-      },
-    ],
-    name: "use-pulses-through-compressor",
     registryDependencies: [
       "@audio-ui/demo-sound",
       "@audio-ui/use-play-switch",
       "@audio-ui/web-audio",
     ],
-    type: "registry:hook",
-  },
+  }),
 ];

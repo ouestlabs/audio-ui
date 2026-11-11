@@ -82,7 +82,7 @@ registry-audio/bases/base/
 └── lib/             # web-audio, musical-time, waveform-dsp, lookahead-scheduler…
 ```
 
-Each of `audio/`, `devices/`, `components/`, `hooks/`, `lib/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/base/`. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js kernels a device runs in an `AudioWorklet` are listed in `apps/www/scripts/kernels.ts` and written by `bun run kernels:build`; `test/kernels.test.ts` fails when a copy no longer matches its package.
+Each of `audio/`, `devices/`, `components/`, `hooks/`, `lib/` has an `_registry.ts`: **update the matching one when adding anything**. File paths inside are relative to `bases/base/`. Items are declared through the factories of `registry-audio/bases/items.ts` (`libItem`, `hookItem`, `deviceItems`), which write a file's path, target and type and a device's four items from one description. A device's folder mirrors where it installs (`components/audio-ui/devices/<name>/`), each file with its `target`. The audio.js kernels a device runs in an `AudioWorklet` are listed in `apps/www/scripts/kernels.ts` and written by `bun run kernels:build`; `test/kernels.test.ts` fails when a copy no longer matches its package.
 
 Shared audio glue has one home each. Use it rather than writing a copy into a block or an engine:
 

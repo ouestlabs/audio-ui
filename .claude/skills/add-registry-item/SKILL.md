@@ -31,11 +31,11 @@ Before writing, open the closest existing item of the same kind and copy its sha
 
 ## 3. Register it
 
-Add the entry to the matching `_registry.ts`:
+Add the entry to the matching `_registry.ts`, through the factories of `bases/items.ts`: `libItem(name, spec)` (file `lib/<name>.ts` unless `files` says otherwise), `hookItem(name, spec)` (`hooks/<name>.ts`), `deviceItems(name, parts)`. Write an item out in full only when it fits none of them (an alias with no file, files of several types):
 
 - `name` is the install name (`npx shadcn add @audio-ui/<name>`), usually the file name without extension
 - `files[].path` is relative to `bases/base/`
-- `target` (optional, per file): where the file lands in a project, for the items that belong in a folder of their own. A device's files (`device.ts`, `engine.ts`, `panel.tsx`, and `kernels.ts` when its engine runs audio.js kernels in a worklet: list them in `apps/www/scripts/kernels.ts` and run `bun run kernels:build`) sit in `devices/<name>/` and install to `components/audio-ui/devices/<name>/`, and the build rewrites every import of them to match. Add the name to `DEVICES` in `devices/_registry.ts` for the item that installs all of it. Everything else installs flat by its type.
+- `target` (optional, per file): where the file lands in a project, for the items that belong in a folder of their own. A device's files (`device.ts`, `engine.ts`, `panel.tsx`, and `kernels.ts` when its engine runs audio.js kernels in a worklet: list them in `apps/www/scripts/kernels.ts` and run `bun run kernels:build`) sit in `devices/<name>/` and install to `components/audio-ui/devices/<name>/`, and the build rewrites every import of them to match. Declare a device with one `deviceItems("<name>", { device, engine, panel })` in `devices/_registry.ts`: it makes the `<name>-device`, `<name>-engine` and `<name>-panel` items, their paths and targets, the dependencies every part has (the state, `device-panel`, `@audio-ui/react`) and the `<name>` item that installs all three. Everything else installs flat by its type.
 - `registryDependencies`: `"@audio-ui/<name>"` for our items, `"@shadcn/<name>"` for shadcn's
 - `dependencies`: the npm packages the file imports (`"@audio-ui/react"`, `"zod"`)
 - `categories` (blocks and demos): the category folder at least. A new category also goes in `bases/categories.ts` (label + description); a category with no items fails the build.
