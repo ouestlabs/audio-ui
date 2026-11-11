@@ -29,6 +29,7 @@ import {
   WaveformRegionHandle,
 } from "@/registry-audio/bases/base/audio/elements/waveform";
 import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
+import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 // More slices than the waveform has bars at any width or zoom; it keeps each bar's lowest and highest.
 const PEAK_COUNT = 4096;
@@ -194,15 +195,16 @@ export default function BlockWaveformPlayer() {
 
       // Decoding a long file takes a moment: the waveform sweeps meanwhile.
       setDecoding(true);
-      const context = new AudioContext();
+      const context = webAudio.getContext();
       try {
-        const channels = await decodeAudioChannels(
-          context,
-          await blob.arrayBuffer()
-        );
-        setPeaks(normalizePeaks(computePeaks(channels, PEAK_COUNT)));
+        if (context) {
+          const channels = await decodeAudioChannels(
+            context,
+            await blob.arrayBuffer()
+          );
+          setPeaks(normalizePeaks(computePeaks(channels, PEAK_COUNT)));
+        }
       } finally {
-        await context.close();
         setDecoding(false);
       }
     },

@@ -679,6 +679,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/audio-decode",
       "@shadcn/button",
       "@shadcn/toggle",
+      "@audio-ui/web-audio",
     ],
     type: "registry:block",
   },

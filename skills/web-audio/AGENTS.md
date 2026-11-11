@@ -61,17 +61,20 @@ useEffect(() => {
 }, []);
 ```
 
-**Correct:**
+**Correct (the page's one context, from the registry lib):**
+
+```bash
+npx shadcn@latest add @audio-ui/web-audio
+```
 
 ```tsx
 "use client";
 
-let ctx: AudioContext | null = null;
-export const getContext = () => (ctx ??= new AudioContext());
+import { webAudio } from "@/lib/web-audio";
 
 <Button
-  onClick={async () => {
-    await getContext().resume();
+  onClick={() => {
+    webAudio.resume(); // made on first use, resumed unless it runs; null on the server
     start();
   }}
 >
@@ -79,9 +82,9 @@ export const getContext = () => (ctx ??= new AudioContext());
 </Button>
 ```
 
-A note that starts on a press (a pad, a key) must not wait for `resume()`: on the first press the promise can stay pending until the pointer is released, and the voice arrives after the key is up. Call `ctx.resume()` without awaiting it, schedule the voice at `ctx.currentTime` now, and add a one-time `pointerup` listener that resumes as well.
+A note that starts on a press (a pad, a key) must not wait for the resume: on the first press the promise can stay pending until the pointer is released, and the voice arrives after the key is up. `webAudio.resume()` does not wait; schedule the voice at `ctx.currentTime` now, and add a one-time `pointerup` listener that resumes as well.
 
-The registry ships this as a lib: `npx shadcn@latest add @audio-ui/web-audio`. Use one context per page; every connected node must come from it.
+Use one context per page; every connected node must come from it. An engine or a lib takes it as a parameter, so it also runs on an `OfflineAudioContext`; a hook given a node uses that node's context.
 
 On touch, `pointerdown` does not count as a user activation: a pad that starts the context on strike can stay silent for its first tap. Resume the context on `pointerup` or `click` as well (`touchend` on older iOS), and keep playing from `pointerdown` once it runs.
 

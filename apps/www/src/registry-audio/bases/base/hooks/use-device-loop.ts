@@ -100,7 +100,7 @@ export function useDeviceLoop<State, Engine extends EffectEngine<State>>({
     let cancelled = false;
     let stop = () => undefined;
     // Resumed in the effect of the press that turned the switch on.
-    ctx.resume();
+    webAudio.resume();
     Promise.all([
       renderDemoSource(name, ctx.sampleRate),
       key ? renderDemoSource(demoKey(name), ctx.sampleRate) : null,

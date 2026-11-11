@@ -379,10 +379,7 @@ export default function BlockPianoRoll() {
   // A MIDI keyboard plays the roll's voices and lights its keys, once the page's MIDI input is connected.
   const midiNoteOn = useCallback(
     (pitch: number, velocity: number) => {
-      const ctx = webAudio.getContext();
-      if (ctx?.state === "suspended") {
-        ctx.resume();
-      }
+      webAudio.resume();
       triggerNote(pitch, DEFAULT_NOTE_ENVELOPE, velocity);
     },
     [triggerNote]

@@ -51,7 +51,7 @@ const context = {
   sampleRate: 100,
 };
 mock.module("@/registry-audio/bases/base/lib/web-audio", () => ({
-  webAudio: { getContext: () => context },
+  webAudio: { getContext: () => context, resume: () => context },
 }));
 
 const { AudioSessionProvider } = await import(

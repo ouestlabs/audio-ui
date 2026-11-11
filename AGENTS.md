@@ -88,7 +88,7 @@ Shared audio glue has one home each. Use it rather than writing a copy into a bl
 
 | Concern | Module |
 | --- | --- |
-| The page's `AudioContext`, resumed in the gesture that starts sound | `lib/web-audio` |
+| The page's `AudioContext`, and resuming it in the gesture that starts sound | `lib/web-audio` (`webAudio.getContext()`, `webAudio.resume()`); engines and libs take `ctx` instead, a hook given a node uses its context |
 | A screen's output: one gain and a safety limiter | `hooks/use-master-bus` |
 | Loading a worklet's source into a context, once per context | `lib/audio-worklet` (`loadWorklet`) |
 | Chords on an instrument whose engine plays one voice | `hooks/use-polyphony` over `lib/polyphony`; `lib/voice-pool` for a device of the library |

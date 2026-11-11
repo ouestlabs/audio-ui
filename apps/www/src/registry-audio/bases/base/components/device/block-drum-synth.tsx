@@ -32,10 +32,7 @@ export default function BlockDrumSynth() {
 
   const strike = useCallback(
     (note: DrumSynthNote) => {
-      const ctx = webAudio.getContext();
-      if (ctx?.state === "suspended") {
-        ctx.resume();
-      }
+      webAudio.resume();
       engine?.noteOn(note);
     },
     [engine]

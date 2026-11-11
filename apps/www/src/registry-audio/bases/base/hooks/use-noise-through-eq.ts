@@ -54,7 +54,7 @@ export function useNoiseThroughEq(bands: readonly EqBand[]) {
     if (!ctx) {
       return;
     }
-    ctx.resume();
+    webAudio.resume();
     const source = ctx.createBufferSource();
     source.buffer = noiseBuffer(ctx, "pink");
     source.loop = true;

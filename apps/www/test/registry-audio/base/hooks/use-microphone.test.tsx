@@ -8,7 +8,7 @@ const context = {
   state: "running",
 };
 mock.module("@/registry-audio/bases/base/lib/web-audio", () => ({
-  webAudio: { getContext: () => context },
+  webAudio: { getContext: () => context, resume: () => context },
 }));
 
 const { useMicrophone } = await import(
