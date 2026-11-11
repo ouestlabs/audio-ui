@@ -610,6 +610,8 @@ function TransportTempo({
 const NO_SIGNATURES: readonly SignatureChange[] = [];
 
 interface TransportProps {
+  /** More of the bar after its own clusters, such as a file menu or an output's level and volume: button groups of your own, in the same bar. */
+  children?: ReactNode;
   className?: string;
   /** How many bars the metronome counts in before a take: 0, 1, 2 or 4. @default 0 */
   countIn?: number;
@@ -666,6 +668,7 @@ interface TransportProps {
  * by color alone.
  */
 function Transport({
+  children,
   className,
   countIn = 0,
   looping,
@@ -804,6 +807,7 @@ function Transport({
           tempo={tempo}
         />
       ) : null}
+      {children}
     </Toolbar.Root>
   );
 }
