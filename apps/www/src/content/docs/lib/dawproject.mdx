@@ -1,0 +1,19 @@
+---
+title: dawproject
+description: "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in."
+---
+
+<Entry name="dawproject" />
+
+## Usage
+
+The open DAWproject exchange format (a zip of XML and audio): an arrangement out to a `.dawproject` file other DAWs open, and one of theirs in, with a report of what was left out.
+
+```ts
+import { exportDawproject, importDawproject } from "@/lib/dawproject";
+
+const { file, report } = await exportDawproject(doc, recordings, (id) => bytesOfRecording(id));
+const opened = await importDawproject(droppedFile); // { doc, recordings, report }
+```
+
+It carries the tracks, mix, sends, clips, notes, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter with their settings. `zip` (installed with it, on `fflate`) reads and writes the archive.

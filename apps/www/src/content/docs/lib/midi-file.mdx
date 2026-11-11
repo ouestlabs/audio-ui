@@ -1,0 +1,40 @@
+---
+title: midi-file
+description: "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one; or read one as parts in beats, a part per track and channel with its name and program, for a host that lays each on a track (parsed by @audio/midi-parse, written by @audio/midi-write)"
+---
+
+<Entry name="midi-file" />
+
+## Usage
+
+<ComponentPreview styleName="base-nova" name="piano-roll-midi-file-demo" />
+
+The `midi-file` library reads a `.mid` file onto the roll's steps and writes one back.
+
+```tsx
+import { downloadMidiFile, MIDI_FILE_ACCEPT, readMidiFile } from "@/lib/midi-file";
+
+<input
+  accept={MIDI_FILE_ACCEPT}
+  onChange={async (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const { bpm, notes } = await readMidiFile(file, {
+        duration: 64,
+        maxPitch: 84,
+        minPitch: 36,
+      });
+      setNotes(notes);
+      setBpm(bpm);
+    }
+  }}
+  type="file"
+/>
+<Button onClick={() => downloadMidiFile(notes, { bpm, filename: "clip.mid" })}>
+  Export
+</Button>
+```
+
+`readMidiFile` puts each note on the nearest step, at least one step long, drops the notes starting past `duration`, keeps the pitches between `minPitch` and `maxPitch` and returns the file's tempo, kept between `minBpm` and `maxBpm` (20 and 200 by default). It takes any `File` or `Blob`, so a drop works the same as an input. `writeMidiFile` goes the other way, at 480 ticks a quarter note, and leaves deactivated notes out; `downloadMidiFile` writes the file and saves it. A step is a sixteenth note: set `stepsPerQuarter` on both sides for another grid.
+
+For a host that lays each part on a track of its own, such as a DAW, `readMidiFileParts(file)` reads a file as parts instead: one per track and channel, named after its track, with the General MIDI program it asks for and whether it is the drums of channel 10, its notes in beats as they were written, not quantized. The file is parsed by `@audio/midi-parse`.

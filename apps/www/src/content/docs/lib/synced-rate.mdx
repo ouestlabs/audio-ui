@@ -1,0 +1,18 @@
+---
+title: synced-rate
+description: "The rate of an oscillator that is either free, in hertz, or synced: one cycle per note value of the host's tempo. The two parameters a device adds for it, and the function that reads the rate."
+---
+
+<Entry name="synced-rate" />
+
+## Usage
+
+A modulation rate in hertz, or a note value that follows the host's tempo: what an auto pan, a chorus or a phaser's LFO runs at.
+
+```ts
+import { lfoRate } from "@/lib/synced-rate";
+
+const hertz = lfoRate(state, tempo); // state.sync ? the division at the tempo : state.rateHz
+```
+
+The tempo comes from the host's `DeviceContext`, given with each `update`.

@@ -1,0 +1,21 @@
+---
+title: drum-rack
+description: "Drum racks: an instrument whose chains are pads, each answering a note with the instrument at its head, such as a Drum Synth, or else a voice of the drum synthesis or a recording, into its own devices, a pad of a choke group cutting the others short; the engine that plays one on a MIDI track."
+---
+
+<Entry name="drum-rack" />
+
+## Usage
+
+An instrument of pads: each chain answers a note with the instrument at its head (a [Drum Synth](/docs/components/base/drum-synth), say), or a voice of the drum synthesis or a recording, into its own devices, summed as a rack with its macros. A pad of a choke group cuts the others short.
+
+```ts
+import { createDrumRackEngine, padsOf } from "@/lib/drum-rack";
+
+const drums = createDrumRackEngine(ctx, libraryDevice);
+drums.output.connect(destination);
+drums.update(rack, { tempo });
+const pads = padsOf(rack, 36); // the chains a note plays
+```
+
+Start a rack from [`drum-kit`](/docs/lib/drum-kit); its face is the [Drum rack panel](/docs/components/base/rack#drum-racks), and the [arrangement engine](/docs/lib/arrangement-engine) plays it on a MIDI track.

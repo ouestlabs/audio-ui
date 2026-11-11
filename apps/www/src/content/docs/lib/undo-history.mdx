@@ -1,0 +1,20 @@
+---
+title: undo-history
+description: "Undo and redo as a value: a pure history of any document, with bursts (a drag is one entry), redo that drops on a new change, and a depth limit"
+---
+
+<Entry name="undo-history" />
+
+## Usage
+
+Undo and redo of any value, as a value: the steps behind it and after it, a gesture recorded as one step, and the last 100 kept.
+
+```ts
+import { canUndo, emptyHistory, recordChange, redo, undo } from "@/lib/undo-history";
+
+let history = emptyHistory<Note[]>();
+history = recordChange(history, notesBefore); // before an edit
+const step = undo(history, notesNow); // { history, present } to go back to, null with nothing to undo
+```
+
+`beginChange` and `settleChange` make a drag one step. In React, [`useUndoHistory`](/docs/hooks/use-undo-history) holds it for you; the arrangement's undo is built on it.

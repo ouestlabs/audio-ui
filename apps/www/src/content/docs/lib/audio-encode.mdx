@@ -1,0 +1,19 @@
+---
+title: audio-encode
+description: "Writing sound to a WAV, FLAC or MP3 file, the step after an offline render or a recording: encoded in chunks with its progress, each format's encoder loaded the first time it is used, and saved through the browser's downloads"
+---
+
+<Entry name="audio-encode" />
+
+## Usage
+
+Sound saved as a file: WAV (16 or 24-bit, or 32-bit float), FLAC or MP3 at a bitrate, encoded in chunks with its progress, from what an `OfflineAudioContext` rendered or a recording kept.
+
+```ts
+import { downloadFile, encodeAudio } from "@/lib/audio-encode";
+
+const file = await encodeAudio(channels, { bitDepth: 24, format: "wav", sampleRate, onProgress: (done) => setProgress(done) });
+downloadFile(file, "mix.wav");
+```
+
+[`audio-export`](/docs/lib/audio-export) adds loudness normalization on top of it.

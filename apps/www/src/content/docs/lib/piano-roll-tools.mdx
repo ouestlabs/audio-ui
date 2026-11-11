@@ -1,0 +1,19 @@
+---
+title: piano-roll-tools
+description: "AI-native tool surface for a piano roll, createPianoRollTools builds typed, agent-agnostic tools (setNotes/addNotes/removeNotes/transpose/clear/setTempo) an LLM calls to compose melodies and basslines from natural language, parameterized by the roll's pitch range and grid"
+---
+
+<Entry name="piano-roll-tools" />
+
+## Usage
+
+Typed tools an AI model uses to edit a piano roll, through tool calls: adding, moving and deleting notes, each call checked against a schema (zod) and clamped into the roll's range, the notes coming in as values and going out as new ones.
+
+```ts
+import { createPianoRollTools } from "@/lib/piano-roll-tools";
+
+const tools = createPianoRollTools({ maxPitch: 84, minPitch: 36 });
+// Give tools to your model, then apply what it calls to the notes you hold.
+```
+
+The tools change the notes you hold, never the roll directly, so an undo, a playback and the roll follow them as they would a person's edit. See [Piano roll](/docs/components/base/piano-roll).

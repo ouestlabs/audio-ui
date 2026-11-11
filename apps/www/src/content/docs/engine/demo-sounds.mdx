@@ -13,34 +13,9 @@ One at a time, through the same master bus as a preview.
 
 ## Ask for one by name
 
-```bash
-npx shadcn@latest add @audio-ui/demo-sound
-```
-
 `DEMO_SOURCES` holds the sounds by name, with a title and what to listen for. `renderDemoSource` draws one for a sample rate and keeps it, so the same buffer comes back each time.
 
-```tsx
-import { renderDemoSource } from "@/lib/demo-sound";
-
-const buffer = await renderDemoSource("groove", ctx.sampleRate);
-const source = ctx.createBufferSource();
-source.buffer = buffer;
-source.loop = true;
-source.connect(output);
-source.start();
-```
-
-A device chooses its own sound. `useDeviceLoop` plays one through an engine, gives back its tempo for a time parameter that syncs to it, and a session lets a preview's bar change the sound:
-
-```tsx
-import { useDemoSource } from "@/hooks/use-demo-source";
-import { useDeviceLoop } from "@/hooks/use-device-loop";
-
-// A de-esser plays the groove by default; a gate plays the chord and is keyed by the kick that goes with it.
-useDeviceLoop({ create, destination, source: "groove", state });
-```
-
-`useDemoSource("groove")` returns the sound chosen in the nearest `AudioSessionProvider`, or `"groove"` when nobody has chosen. Outside a session it is always the default.
+Usage and API: [`demo-sound`](/docs/lib/demo-sound).
 
 ## How they are made
 

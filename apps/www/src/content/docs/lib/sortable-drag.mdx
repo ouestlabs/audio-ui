@@ -1,0 +1,32 @@
+---
+title: sortable-drag
+description: "The gesture of reordering a row by dragging one of its items: the others slide aside, the item shows dimmed where it would land, what follows the pointer settles there, the view scrolls at its edges. No render while it moves."
+---
+
+<Entry name="sortable-drag" />
+
+## Usage
+
+The gesture of reordering a row by dragging one of its items: the others slide aside, the item shows dimmed where it would land, a copy follows the pointer, and the view scrolls at its edges, all without a React render while it moves.
+
+```ts
+import { startSortableDrag } from "@/lib/sortable-drag";
+
+onPointerDown={(event) =>
+  startSortableDrag({
+    axis: "y",
+    from: index,
+    ghost: () => ghostRef.current,
+    items: rows,
+    onEnd: (to, released) => {
+      if (released && to !== null) move(index, to);
+    },
+    onLift: () => setDragging(true),
+    scroller: listRef.current,
+    x: event.clientX,
+    y: event.clientY,
+  })
+}
+```
+
+[`useTrackReorder`](/docs/hooks/use-track-reorder), the [Device chain](/docs/components/base/device-chain) and the [Mixer](/docs/components/base/mixer) reorder with it.

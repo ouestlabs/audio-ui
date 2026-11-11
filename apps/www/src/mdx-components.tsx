@@ -15,7 +15,6 @@ import { Entry } from "@/components/docs/mdx/entry";
 import { IconCatalog } from "@/components/docs/mdx/icon-catalog";
 import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
-import { RegistryItems } from "@/components/docs/mdx/registry-items";
 import {
   KeyRow,
   KeyTable,
@@ -62,7 +61,6 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     DeviceControls,
     DeviceUsage,
     IconCatalog,
-    RegistryItems,
     Entry,
     CodeBlockCommand,
     InstallAgent: InstallAgentParts,

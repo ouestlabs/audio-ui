@@ -1,0 +1,21 @@
+---
+title: polyphony
+description: "Chords on an instrument whose engine plays one voice: a note takes the voice that holds it, else a free one, else the one held longest, whose note is let go first. No sound and no engine of its own: it plays the engines it is given."
+---
+
+<Entry name="polyphony" />
+
+## Usage
+
+Plays chords on engines that hold one note each. A note takes the voice that holds it already, else a free one, else the one held longest, whose note is let go first. It makes no sound and no engine: it takes engines you made and connected, so it schedules ahead on the audio clock as well as it plays live.
+
+```ts
+import { createPolyphony } from "@/lib/polyphony";
+
+const voices = createPolyphony(engines);
+voices.noteOn({ frequency: 440, velocity: 0.8 }, "a4", time);
+voices.noteOff("a4", time + 0.5);
+voices.release(stopTime); // every note held, as a stop does
+```
+
+Notes are ordered by when they came, not by a clock. On a page, [`usePolyphony`](/docs/hooks/use-polyphony) makes the engines and gives you `noteOn` and `noteOff`; for a device of the library, [`voice-pool`](/docs/lib/voice-pool) plays on it.

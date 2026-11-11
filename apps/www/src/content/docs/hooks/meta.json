@@ -1,7 +1,6 @@
 {
   "title": "Hooks",
   "pages": [
-    "index",
     "---Engines and output---",
     "use-master-bus",
     "use-device-engines",

@@ -1,0 +1,24 @@
+---
+title: manifest-worklet
+description: "The source of an AudioWorklet processor that plays one of several audio.js manifests (the audio.js of an @audio/* package): the model sent by message, a parameter it reads as it plays changed at once, a model made again for one it is made with, warmed on the last 100 ms and faded in, its state brought back to rest on silence, and a meter of the gain it takes off."
+---
+
+<Entry name="manifest-worklet" />
+
+## Usage
+
+The source of an `AudioWorklet` processor that plays one of several audio.js manifests (the `audio.js` of an `@audio/*` package) as a device's models: a model picked by message, a parameter the manifest reads as it plays changed at once, a change that needs a new instance faded in over the old one, and a meter of the gain it takes off.
+
+```ts
+import { manifestWorklet } from "@/lib/manifest-worklet";
+
+// As the compressor's device.ts makes its models' processor:
+export const COMPRESSOR_MODELS_WORKLET = manifestWorklet({
+  kernels: COMPRESSOR_KERNELS, // the manifests, as the device's kernels.ts vendors them
+  models: { fet: "fet", opto: "opto", smooth: "compressor", varimu: "varimu", vca: "vca" },
+  processor: "audioui-compressor-models",
+});
+// then loadWorklet(ctx, COMPRESSOR_MODELS_WORKLET), and an AudioWorkletNode of "audioui-compressor-models" with processorOptions: { model: "smooth" }
+```
+
+The compressor, gate, expander, ducker, compander, unlimiter and others play their audio.js models through it.

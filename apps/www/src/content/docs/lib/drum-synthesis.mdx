@@ -1,0 +1,20 @@
+---
+title: drum-synthesis
+description: "One-shot percussion synthesis (kick, snare, hihat) built from oscillators and noise bursts, each with its own tune and decay"
+---
+
+<Entry name="drum-synthesis" />
+
+## Usage
+
+A kick, a snare and a hihat made from oscillators and noise, with no samples to load. Each starts at `time` and plays out on its own.
+
+```tsx
+import { triggerHihat, triggerKick, triggerSnare } from "@/lib/drum-synthesis";
+
+triggerKick(ctx, output, time);
+triggerSnare(ctx, output, time, { tune: 2 });
+triggerHihat(ctx, output, time, { decay: 0.5 }); // a longer decay rings open
+```
+
+`tune` shifts a hit in semitones from its own pitch and `decay` sets how long it lasts, in seconds. The [Pad](/docs/components/base/pad) page plays a kit with them.

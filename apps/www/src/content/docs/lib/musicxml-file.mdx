@@ -1,0 +1,19 @@
+---
+title: musicxml-file
+description: "MusicXML scores to and from notes on a grid of steps: read one, plain or compressed as .mxl, with its first tempo, every part into one clip, write one for a notation app, or download one"
+---
+
+<Entry name="musicxml-file" />
+
+## Usage
+
+A MusicXML score onto a roll's steps, a part at a time, and notes back out as a score: what notation software reads and writes.
+
+```ts
+import { downloadMusicXmlFile, readMusicXmlFile } from "@/lib/musicxml-file";
+
+const { bpm, notes } = await readMusicXmlFile(file, { duration: 64, maxPitch: 84, minPitch: 36 });
+downloadMusicXmlFile(notes, { bpm, filename: "clip.musicxml" });
+```
+
+`readMusicXmlFileParts` gives each part on its own; `writeMusicXmlFile` the score as a string. For a `.mid` file, see [`midi-file`](/docs/lib/midi-file).
