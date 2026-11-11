@@ -220,6 +220,7 @@ const items: RegistryItem[] = [
     description:
       "Every device of the registry with its engine, by shelf: what a host needs to build a track's chain from the ids a project stores, and what a device browser lists",
     registryDependencies: [
+      "@audio-ui/device-engine",
       "@audio-ui/auto-pan-device",
       "@audio-ui/auto-pan-engine",
       "@audio-ui/channel-eq-device",
