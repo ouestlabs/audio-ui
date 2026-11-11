@@ -6,6 +6,7 @@ import {
 } from "@/components/site/home/home-figures";
 import { HomeGuide } from "@/components/site/home/home-guide";
 import { HomeHero } from "@/components/site/home/home-hero";
+import { HomePlayground } from "@/components/site/home/home-playground";
 import { JsonLd } from "@/components/site/json-ld";
 import { siteConfig } from "@/lib/config";
 import packageModules from "@/lib/docs/content/package-modules.generated.json";
@@ -120,6 +121,7 @@ function IndexPage() {
     <>
       <JsonLd data={buildSoftwareJsonLd()} />
       <HomeHero />
+      <HomePlayground />
       <HomeFigures figures={figures} />
       {/* Under it, the page in words: what search engines and agents read without running it. */}
       <HomeGuide guides={guides} spaces={spaces} />
