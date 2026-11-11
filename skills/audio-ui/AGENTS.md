@@ -449,7 +449,7 @@ Common hooks (check the part's API reference for the exact list, don't invent na
 
 | Hook | Examples |
 | --- | --- |
-| Data attributes | `data-disabled`, `data-dragging`, `data-orientation` (Fader), `data-active` (Knob.Mark, live Waveform), `data-clipping` (Meter), `data-selected`, `data-scrubbing`, `data-in-scale`, `data-scale-root` (PianoRoll.Row), `data-muted` (PianoRoll.Note), `data-has-selection` (PianoRoll.Root) |
+| Data attributes | `data-disabled`, `data-dragging`, `data-orientation` (Fader), `data-active` (Knob.Mark, live Waveform), `data-clipping` (Meter), `data-selected`, `data-scrubbing`, `data-in-scale`, `data-out-of-scale`, `data-scale-root` (PianoRoll.Row), `data-muted` (PianoRoll.Note), `data-has-selection` (PianoRoll.Root) |
 | CSS variables | `--xy-pad-x` / `--xy-pad-y`, `--knob-mark-angle`, `--waveform-position`, `--waveform-level`, `--timeline-unit`, `--sequencer-velocity`, `--piano-roll-velocity`, `--piano-roll-chance`, `--piano-roll-level`, `--piano-roll-deviation` |
 
 Read the part list in the docs' **Anatomy** section: a part outside its parent does nothing.

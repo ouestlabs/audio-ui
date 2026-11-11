@@ -482,19 +482,32 @@ function ScaleBox({
   onScaleChange: (scale: ClipScale) => void;
   scale?: ClipScale;
 }) {
-  const turn = useCallback(
-    (on: boolean) => {
-      onScaleChange({ ...scale, on });
+  // A pick in the menu sets the scale and turns it on, then asks to turn it on: the second call reads what the first set, not the scale this render had.
+  const latest = useRef(scale);
+  latest.current = scale;
+  const change = useCallback(
+    (next: ClipScale) => {
+      const was = latest.current;
+      if (
+        next.on === was.on &&
+        next.name === was.name &&
+        next.root === was.root
+      ) {
+        return;
+      }
+      latest.current = next;
+      onScaleChange(next);
       onCommit?.();
     },
-    [onCommit, onScaleChange, scale]
+    [onCommit, onScaleChange]
+  );
+  const turn = useCallback(
+    (on: boolean) => change({ ...latest.current, on }),
+    [change]
   );
   const pick = useCallback(
-    ({ name, root }: Scale) => {
-      onScaleChange({ name, on: scale.on, root });
-      onCommit?.();
-    },
-    [onCommit, onScaleChange, scale.on]
+    ({ name, root }: Scale) => change({ name, on: true, root }),
+    [change]
   );
   return (
     <ClipBox foldable id="midi:scale" title="Scale">

@@ -103,6 +103,12 @@ describe("PianoRoll.Row", () => {
     expect(view.getByTestId("row-62").hasAttribute("data-scale-root")).toBe(
       false
     );
+    expect(view.getByTestId("row-61").hasAttribute("data-out-of-scale")).toBe(
+      true
+    );
+    expect(view.getByTestId("row-62").hasAttribute("data-out-of-scale")).toBe(
+      false
+    );
     view.unmount();
     const folded = renderRoll({ folded: "scale", scale }).view;
     expect(folded.queryByTestId("row-61")).toBeNull();

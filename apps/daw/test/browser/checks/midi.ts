@@ -200,18 +200,19 @@ export const checks: Checks = {
         keys.length === 3 && keys.includes("C Major"),
         `the menu offers ${keys.join(", ")}`
       );
-      await detected.getByRole("menuitem", { name: "C Major" }).click();
+      // Not the scale a clip starts with: a pick sets it and turns it on, in one step.
+      await detected.getByRole("menuitem", { name: "D Minor" }).click();
       await page
-        .getByRole("button", { name: "Scale: C Major" })
+        .getByRole("button", { name: "Scale: D Minor" })
         .waitFor({ timeout: 5000 });
       assert(
         (await page.locator("[data-in-scale]").count()) > 0,
         "the scale picked marks no rows"
       );
-      // In C major the scale's rows are the white keys the roll already shades: the root's rows show it.
       assert(
-        (await page.locator("[data-scale-root]").count()) > 0,
-        "the root's rows are not marked"
+        (await page.locator("[data-scale-root]").count()) > 0 &&
+          (await page.locator("[data-out-of-scale]").count()) > 0,
+        "the root's rows, or the ones out of the scale, are not marked"
       );
       await page.getByRole("button", { exact: true, name: "Undo" }).click();
       // The clip stays open through the undo, its scale off again.

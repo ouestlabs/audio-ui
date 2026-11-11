@@ -107,7 +107,7 @@ A note is `{ id, pitch, start, length, velocity?, deviation?, muted?, chance? }`
 
 `onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch.
 
-`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row`, and `data-scale-root` on its root's: in C major, whose rows are the white keys a roll already shades, the root's rows are what show it), and `folded="scale"` keeps only those rows and the ones carrying notes. `@audio-ui/core/pitch` holds the scales (`SCALES`, `inScale`, `nearestInScale`), and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation` and `changeLevel`, and the time commands `deleteTime`, `insertTime` and `duplicateTime`; `selectionSpan` gives the time a selection covers and `findNotes` the notes a query matches, by pitch, velocity, length, chance, scale, state or count.
+`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row` in it, `data-out-of-scale` on the others, and `data-scale-root` on its root's): the styles leave the scale's rows clear, shade the others in place of the black keys, and edge the root's in the primary color, and `folded="scale"` keeps only those rows and the ones carrying notes. `@audio-ui/core/pitch` holds the scales (`SCALES`, `inScale`, `nearestInScale`), and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation` and `changeLevel`, and the time commands `deleteTime`, `insertTime` and `duplicateTime`; `selectionSpan` gives the time a selection covers and `findNotes` the notes a query matches, by pitch, velocity, length, chance, scale, state or count.
 
 The toolbar of the preview above is three menus that install on their own: the [Scale menu](/docs/components/base/scale-menu) picks the scale the roll marks, [Note find](/docs/components/base/note-find) selects notes by what they are, and the [Note edit menu](/docs/components/base/note-edit-menu) runs the commands above on the selection.
 
@@ -355,6 +355,7 @@ The band a pitch takes across the grid, for shading black-key rows, the rows of 
 <TypeRow name={"data-color"}>`"black"` or `"white"`.</TypeRow>
 <TypeRow name={"data-folded"}>Whether the roll is folded.</TypeRow>
 <TypeRow name={"data-in-scale"}>Whether the pitch is in the roll's `scale`.</TypeRow>
+<TypeRow name={"data-out-of-scale"}>Whether the roll has a `scale` and the pitch is not in it.</TypeRow>
 <TypeRow name={"data-scale-root"}>Whether the pitch is the root of the roll's `scale`: a C in C major.</TypeRow>
 <TypeRow name={"data-octave"}>Whether the row is a C, where an octave starts.</TypeRow>
 </TypeTable>

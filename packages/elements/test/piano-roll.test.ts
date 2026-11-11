@@ -84,6 +84,10 @@ describe("the piano roll's rows and notes", () => {
     ]);
     expect(rows[0]?.getAttribute("data-color")).toBe("black");
     expect(rows[3]?.hasAttribute("data-octave")).toBe(true);
+    // With no scale, no row is out of one.
+    expect(rows.some((row) => row.hasAttribute("data-out-of-scale"))).toBe(
+      false
+    );
     expect(roll.style.getPropertyValue("--piano-roll-rows")).toBe("4");
   });
 
@@ -96,6 +100,8 @@ describe("the piano roll's rows and notes", () => {
     expect(row(61)?.hasAttribute("data-in-scale")).toBe(true);
     expect(row(61)?.hasAttribute("data-scale-root")).toBe(false);
     expect(row(60)?.hasAttribute("data-in-scale")).toBe(false);
+    expect(row(60)?.hasAttribute("data-out-of-scale")).toBe(true);
+    expect(row(61)?.hasAttribute("data-out-of-scale")).toBe(false);
   });
 
   test("makes a named toggle button per note, placed at its start and on its row", async () => {

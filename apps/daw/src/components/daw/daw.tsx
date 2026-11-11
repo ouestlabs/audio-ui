@@ -255,6 +255,19 @@ function onSurface(target: EventTarget | null) {
   );
 }
 
+/** The parts with a Delete of their own: a note, a step or a warp marker of the clip view, a device, a locator, a time signature. */
+const OWN_DELETE =
+  '[data-slot="midi-clip-panel"], [data-slot="clip-panel"], [data-slot="clip-view"], [data-slot="device-chain"], [data-slot="timeline-locator"], [data-slot="timeline-signature"]';
+
+/** Whether Delete or Backspace goes to a part that deletes what is focused in it, and not to the selected clips or track. */
+function deletesItsOwn(event: KeyboardEvent) {
+  return (
+    (event.key === "Delete" || event.key === "Backspace") &&
+    event.target instanceof Element &&
+    event.target.closest(OWN_DELETE) !== null
+  );
+}
+
 /** Whether a key press goes to a field being typed in rather than to the app. */
 function typing(target: EventTarget | null) {
   return (
@@ -1328,6 +1341,11 @@ export function Daw({
         return;
       }
       if (typing(event.target)) {
+        TAKEN.add(event);
+        return;
+      }
+      // Delete in the clip view, on a device or a locator deletes what is focused there: the clip it is in stays.
+      if (deletesItsOwn(event)) {
         TAKEN.add(event);
         return;
       }

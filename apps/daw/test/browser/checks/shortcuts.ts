@@ -73,6 +73,42 @@ export const checks: Checks = {
         before
       );
     },
+  "KEY-012: Delete on a note of the clip view takes the note, and the clip stays":
+    async (browser) => {
+      const page = await open(browser);
+      const lane = await page.locator('[data-track="track-3"]').boundingBox();
+      assert(lane, "the MIDI lane is there");
+      await page.mouse.dblclick(lane.x + 4, lane.y + lane.height / 2);
+      const grid = await page.waitForSelector("[data-slot=piano-roll-grid]", {
+        timeout: 5000,
+      });
+      const box = await grid.boundingBox();
+      assert(box, "the piano roll is open");
+      await page.getByRole("button", { exact: true, name: "Draw" }).click();
+      await page.mouse.click(box.x + 20, box.y + box.height / 2);
+      await page.getByRole("button", { exact: true, name: "Draw" }).click();
+      const notes = page.locator(
+        '[data-slot="piano-roll-grid"] [role="button"][aria-pressed]'
+      );
+      await notes.first().waitFor({ timeout: 5000 });
+      const clips = page.locator('[data-track="track-3"] [data-clip-id]');
+      const before = await clips.count();
+      await notes.first().click();
+      await page.keyboard.press("Delete");
+      await page.waitForFunction(
+        () =>
+          document.querySelectorAll(
+            '[data-slot="piano-roll-grid"] [role="button"][aria-pressed]'
+          ).length === 0,
+        undefined,
+        { timeout: 5000 }
+      );
+      await page.waitForTimeout(100);
+      assert(
+        (await clips.count()) === before,
+        "Delete on a note took its clip too"
+      );
+    },
   "the bar zooms, lists the keys, and a lane's menu sets the grid": async (
     browser
   ) => {
