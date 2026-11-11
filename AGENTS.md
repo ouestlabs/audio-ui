@@ -117,13 +117,16 @@ The docs, the catalog's `categoryGroups` and the shipped skill share one map, by
 - `(elements)/`: the pieces of any audio interface. Controls, keyboards and pads, displays.
 - `(workstation)/`: the surfaces of a DAW. Arrangement, editors, the piano roll's tools, transport and mixing.
 - `(devices)/`: effects and instruments, like plugins. One page per device, by family.
-- `engine/` (beside `components/`, at `/docs/engine/<page>`): what makes the sound, the hooks and libs that serve several spaces, a page per concept (output, clock and time, synthesis, input, analysis). Its overview says how an engine of the user's own drives the components.
-The docs are in sections by the layers of the stack (`lib/docs/content/sections.ts`), switched at the top of the sidebar: **Docs** (`(root)/`, `engine/` guides), **Core** (`core/`, `@audio-ui/core` and its modules), **Elements** (`elements/`, custom elements), **React** (`react/`, the primitives), **Registry** (`(registry)/`, `components/`, `hooks/`, `lib/`). A folder in parentheses adds no URL segment, so a component page stays at `/docs/components/base/<name>`. Every hook and lib is listed once in a `<RegistryItems>` table of `hooks/index.mdx` or `lib/index.mdx`, read from the `_registry.ts` files; `test/registry-index-docs.test.ts` fails on one listed nowhere. A page that moves gets an entry in `MOVED_PAGES` (`src/start.ts`).
+- `engine/` (beside `components/`, at `/docs/engine/<page>`): guides to what makes the sound, a page per concept (output, clock and time, synthesis, input, analysis), each linking to the hook and lib entries it uses. Its overview says how an engine of the user's own drives the components.
+
+The docs are in sections by the layers of the stack (`lib/docs/content/sections.ts`), switched at the top of the sidebar: **Docs** (`(root)/`, `engine/` guides), **Core** (`core/`, `@audio-ui/core` and its modules), **Elements** (`elements/`, custom elements), **React** (`react/`, the primitives), **Registry** (`(registry)/`, `components/`, `hooks/`, `lib/`). A folder in parentheses adds no URL segment, so a component page stays at `/docs/components/base/<name>`. A page that moves gets an entry in `MOVED_PAGES` (`src/start.ts`).
+
+Every hook and lib has its own entry page, `hooks/<name>.mdx` or `lib/<name>.mdx`, listed once in that folder's `meta.json`. It opens with `<Entry name="<name>" />`, which draws the install command, the import, the files, what it depends on, what uses it and its exports from `lib/docs/content/entries.generated.json` (written by `registry:build` from the `_registry.ts` files and the sources), then goes on with a written Usage section. `test/registry-entries-docs.test.ts` fails on an entry with no page or a page with no entry.
 
 How items are grouped:
 
 - One item is something a user installs for itself. Split only where a piece is useful without the rest; code that only one piece uses ships in that piece's item (an item can hold several files).
-- One page is a component a user puts on screen. A hook or a lib that serves one component is documented in a section of that component's page.
+- A component page is a component a user puts on screen. A hook or a lib is documented on its own entry page; the component page that uses it says what it does in a sentence and links to it.
 - Workstation and Devices parts are controlled and engine-agnostic: state comes in as values and live sources, changes go out through callbacks, never through one of our audio hooks. They must work over an engine of the user's own (an AudioWorklet, WASM).
 
 The "API reference" of each component page is a hand-kept copy of the JSDoc of the matching parts in `packages/ui/src/primitives/<name>/elements/`. Nothing syncs them: change both in the same commit.

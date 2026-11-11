@@ -46,8 +46,8 @@ Renaming or removing an item: also search for its old name in `apps/www/src/cont
 
 - A demo appears in a docs page through `<ComponentPreview styleName="base-nova" name="<demo-name>" />`.
 - In docs, an installed component is imported as `@/components/audio-ui/<name>` (where the registry puts it), and its source titled `components/audio-ui/<name>.tsx`. `bun test test/install-paths.test.ts` checks every such import.
-- Group first, by the rules in AGENTS.md ("Docs"): a hook or a lib that serves one component gets a section in that component's page, not a page of its own.
-- Every hook and lib is also listed once in a `<RegistryItems names="…" />` table of `docs/hooks/index.mdx` or `docs/lib/index.mdx`, in the group it belongs to; its row is read from its registry description. `test/registry-index-docs.test.ts` fails on one listed nowhere or twice.
+- Every hook and lib gets its own entry page, `docs/hooks/<name>.mdx` or `docs/lib/<name>.mdx`: frontmatter `title` (the hook's name, or the lib's file name) and `description`, then `<Entry name="<name>" />` and a `## Usage` section with an example checked against the source. List it once in that folder's `meta.json`, under the `---Group---` it belongs to. Run `bun run registry:build` so `entries.generated.json` knows it; `test/registry-entries-docs.test.ts` fails on an entry with no page or a page with no entry.
+- A component page or an engine guide that uses the hook or the lib says what it does in a sentence and links to its entry, rather than repeating its usage.
 - A new component page: `apps/www/src/content/docs/components/base/(<space>)/<name>.mdx` (`(elements)`, `(workstation)` or `(devices)`), copying the sections of `(elements)/knob.mdx` (Overview, Installation as `<Install name="<name>" packages="..." />`, Anatomy, Usage, Interaction, API reference); list it in that space's `meta.json`, add the slug to `CANONICAL_COMPONENT_DOC_SLUGS` in `apps/www/src/lib/seo.ts`, and add it to `skills/audio-ui/components.md` (and the Component Selection table in `skills/audio-ui/SKILL.md`).
 
 ## 5. Build and check (from `apps/www/`)
