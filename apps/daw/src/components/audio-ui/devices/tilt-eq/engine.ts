@@ -1,3 +1,5 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
+import { createWorkletStage } from "@audio-ui/engine/device";
 import {
   TILT_EQ_WORKLET,
   type TiltEqState,
@@ -6,39 +8,9 @@ import {
 
 const RAMP_SECONDS = 0.02;
 
-export interface TiltEqEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface TiltEqEngine extends EffectEngine<TiltEqState> {
   /** Resolves once the tilt is in the graph. Until then the sound passes clean. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: TiltEqState) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the tilt into a context once. `false` when the context cannot run worklets. */
-function loadTilt(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([TILT_EQ_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -59,19 +31,23 @@ export function createTiltEqEngine(
 ): TiltEqEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
-  const tilted = ctx.createGain();
-  const clean = ctx.createGain();
-  const level = ctx.createGain();
-  input.connect(clean).connect(level);
-  tilted.connect(level);
-  level.connect(output);
-  tilted.gain.value = 0;
-  clean.gain.value = 1;
-  level.gain.value = tiltEqSettings(initial).output;
-
-  let tilt: AudioWorkletNode | null = null;
   let latest = initial;
-  let disposed = false;
+  const stage = createWorkletStage(ctx, {
+    input,
+    make: () => {
+      const settings = tiltEqSettings(latest);
+      return new AudioWorkletNode(ctx, "audioui-tilt-eq", {
+        outputChannelCount: [2],
+        parameterData: { gain: settings.gain, pivot: settings.pivot },
+      });
+    },
+    ramp: RAMP_SECONDS,
+    source: TILT_EQ_WORKLET,
+  });
+  const level = ctx.createGain();
+  stage.connect(level);
+  level.connect(output);
+  level.gain.value = tiltEqSettings(initial).output;
 
   const follow = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
@@ -79,35 +55,27 @@ export function createTiltEqEngine(
   const apply = (state: TiltEqState) => {
     const settings = tiltEqSettings(state);
     follow(level.gain, settings.output);
+    const tilt = stage.node;
     if (tilt) {
       follow(tilt.parameters.get("gain") as AudioParam, settings.gain);
       follow(tilt.parameters.get("pivot") as AudioParam, settings.pivot);
     }
   };
 
-  const ready = loadTilt(ctx).then((ok) => {
-    if (!ok || disposed) {
-      return false;
+  // In the graph, the tilt plays the state as it is by then.
+  const ready = stage.ready.then((ok) => {
+    if (ok) {
+      apply(latest);
     }
-    const settings = tiltEqSettings(latest);
-    tilt = new AudioWorkletNode(ctx, "audioui-tilt-eq", {
-      outputChannelCount: [2],
-      parameterData: { gain: settings.gain, pivot: settings.pivot },
-    });
-    input.connect(tilt).connect(tilted);
-    follow(tilted.gain, 1);
-    follow(clean.gain, 0);
-    apply(latest);
-    return true;
+    return ok;
   });
 
   return {
     dispose: () => {
-      disposed = true;
-      for (const node of [input, tilted, clean, level, output]) {
+      stage.dispose();
+      for (const node of [input, level, output]) {
         node.disconnect();
       }
-      tilt?.disconnect();
     },
     input,
     output,

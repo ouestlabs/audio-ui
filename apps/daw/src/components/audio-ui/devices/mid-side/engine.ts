@@ -1,5 +1,7 @@
 import { toWebAudioQ } from "@audio-ui/engine/analysis";
-import type { DeviceBinding } from "@audio-ui/engine/device";
+import type { EffectEngine } from "@audio-ui/engine/device";
+import { createFeed, type Feed } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   DETUNE_WORKLET,
   type MidSideState,
@@ -8,42 +10,12 @@ import {
 
 const RAMP_SECONDS = 0.015;
 const HALF = 0.5;
-/** How long after the detune fades out its input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 /** The longest Haas delay, in seconds. */
 const LONGEST_HAAS = 0.035;
 
-export interface MidSideEngine extends DeviceBinding<MidSideState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface MidSideEngine extends EffectEngine<MidSideState> {
   /** Resolves once the detune is in the graph. Until then it passes the sound as it is. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the detune into a context once. `false` when the context cannot run worklets. */
-function loadDetune(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([DETUNE_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -123,8 +95,7 @@ export function createMidSideEngine(
   let detune: AudioWorkletNode | null = null;
   let latest = initial;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   const set = (
     state: MidSideState,
@@ -151,19 +122,7 @@ export function createMidSideEngine(
       (detune.parameters.get("cents") as AudioParam).value =
         settings.detuneCents;
     }
-    clearTimeout(unfeed);
-    if (detuning && !fed && detune) {
-      input.connect(detune);
-      fed = true;
-    } else if (!detuning && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && detune) {
-          input.disconnect(detune);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(detuning);
   };
   const follow = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
@@ -171,7 +130,7 @@ export function createMidSideEngine(
     param.value = value;
   });
 
-  const ready = loadDetune(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, DETUNE_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }
@@ -183,6 +142,7 @@ export function createMidSideEngine(
         mix: settings.detuneMix,
       },
     });
+    feed = createFeed([[input, detune]]);
     detune.connect(detuned);
     set(latest, follow);
     return true;
@@ -191,7 +151,7 @@ export function createMidSideEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       for (const node of [
         input,
         plain,

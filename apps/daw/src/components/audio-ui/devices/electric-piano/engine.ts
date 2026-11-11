@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/engine/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   driveGain,
   type ElectricPianoNote,
@@ -23,11 +23,10 @@ const RELEASE = 0.18;
 const RESTRIKE = 0.008;
 const DRIVE_MAKEUP = 0.8;
 
-export interface ElectricPianoEngine
-  extends InstrumentBinding<ElectricPianoState, ElectricPianoNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type ElectricPianoEngine = InstrumentEngine<
+  ElectricPianoState,
+  ElectricPianoNote
+>;
 
 interface Voice {
   amp: GainNode;

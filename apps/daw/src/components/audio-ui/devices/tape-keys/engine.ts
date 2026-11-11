@@ -1,4 +1,5 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/engine/device";
+import type { NoteTiming } from "@audio-ui/engine/device";
+import { type InstrumentEngine, noiseBuffer } from "@audio-ui/engine/device";
 import {
   speedCents,
   TAPE_KEYS_HIGHEST,
@@ -52,13 +53,8 @@ const MAX_FLUTTER_CENTS = 6;
 const WOW_HERTZ = 0.55;
 const FLUTTER_HERTZ = 6.7;
 const SMOOTHING = 0.03;
-const NOISE_SECONDS = 2;
 
-export interface TapeKeysEngine
-  extends InstrumentBinding<TapeKeysState, TapeKeysNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type TapeKeysEngine = InstrumentEngine<TapeKeysState, TapeKeysNote>;
 
 interface Voice {
   amp: GainNode;
@@ -94,27 +90,6 @@ function saturationCurve() {
     curve[index] = Math.tanh(x * 1.3) / Math.tanh(1.3);
   }
   return curve;
-}
-
-const noises = new WeakMap<BaseAudioContext, AudioBuffer>();
-
-/** Two seconds of white noise, made once per context. */
-function noiseOf(ctx: BaseAudioContext) {
-  const kept = noises.get(ctx);
-  if (kept) {
-    return kept;
-  }
-  const buffer = ctx.createBuffer(
-    1,
-    ctx.sampleRate * NOISE_SECONDS,
-    ctx.sampleRate
-  );
-  const data = buffer.getChannelData(0);
-  for (let index = 0; index < data.length; index += 1) {
-    data[index] = Math.random() * 2 - 1;
-  }
-  noises.set(ctx, buffer);
-  return buffer;
 }
 
 /** Where a key's level stands `elapsed` seconds into its tape: up its attack, then gone once the strip runs out. */
@@ -238,7 +213,7 @@ export function createTapeKeysEngine(
     };
     const breath = (level: number, center: number, q: number) => {
       const source = ctx.createBufferSource();
-      source.buffer = noiseOf(ctx);
+      source.buffer = noiseBuffer(ctx);
       source.loop = true;
       source.loopStart = Math.random();
       const filter = ctx.createBiquadFilter();

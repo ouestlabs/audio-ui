@@ -1,6 +1,6 @@
 "use client";
 
-import { midiToHz } from "@audio/note";
+import { midiToHz } from "@audio-ui/engine/pitch";
 import { SawtoothIcon, SquareIcon, TriangleIcon } from "@audio-ui/icons/react";
 import { type ReactNode, useCallback, useState } from "react";
 import {

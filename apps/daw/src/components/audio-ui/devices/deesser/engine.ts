@@ -1,4 +1,5 @@
-import type { DeviceBinding, DeviceReadings } from "@audio-ui/engine/device";
+import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
+import { createWorkletStage } from "@audio-ui/engine/device";
 import {
   DEESSER_WORKLET,
   type DeesserState,
@@ -7,35 +8,7 @@ import {
 
 const RAMP_SECONDS = 0.01;
 
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the de-esser into a context once. `false` when the context cannot run worklets. */
-function loadDeesser(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([DEESSER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
-}
-
-export interface DeesserEngine extends DeviceBinding<DeesserState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface DeesserEngine extends EffectEngine<DeesserState> {
   /** What the highs are taking off right now, in dB. */
   readings: () => DeviceReadings;
   /** Resolves once the de-esser is in the graph. Until then the highs pass unchanged. A context with no worklets never resolves it to `true`. */
@@ -62,50 +35,40 @@ export function createDeesserEngine(
 ): DeesserEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
-  const bypass = ctx.createGain();
-  const deessed = ctx.createGain();
-  input.connect(bypass).connect(output);
-  deessed.connect(output);
-  deessed.gain.value = 0;
 
   let settings = deesserSettings(initial);
-  let model: AudioWorkletNode | null = null;
   let reduction = 0;
-  let disposed = false;
   let latest = initial;
+  const stage = createWorkletStage(ctx, {
+    input,
+    make: () => {
+      settings = deesserSettings(latest);
+      const model = new AudioWorkletNode(ctx, "audioui-deesser", {
+        outputChannelCount: [2],
+        parameterData: settings.modelParams,
+        processorOptions: { model: "deesser" },
+      });
+      model.port.onmessage = (event: MessageEvent<number>) => {
+        reduction = event.data;
+      };
+      return model;
+    },
+    ramp: RAMP_SECONDS,
+    source: DEESSER_WORKLET,
+  });
+  stage.connect(output);
 
   const route = () => {
     for (const [name, value] of Object.entries(settings.modelParams)) {
-      model?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
+      stage.node?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
     }
   };
-  const ready = loadDeesser(ctx).then((ok) => {
-    if (!ok || disposed) {
-      return false;
-    }
-    settings = deesserSettings(latest);
-    model = new AudioWorkletNode(ctx, "audioui-deesser", {
-      outputChannelCount: [2],
-      parameterData: settings.modelParams,
-      processorOptions: { model: "deesser" },
-    });
-    model.port.onmessage = (event: MessageEvent<number>) => {
-      reduction = event.data;
-    };
-    input.connect(model);
-    model.connect(deessed);
-    bypass.gain.setTargetAtTime(0, ctx.currentTime, RAMP_SECONDS);
-    deessed.gain.setTargetAtTime(1, ctx.currentTime, RAMP_SECONDS);
-    return true;
-  });
 
   return {
     dispose: () => {
-      disposed = true;
-      model?.disconnect();
-      for (const node of [input, bypass, deessed, output]) {
-        node.disconnect();
-      }
+      stage.dispose();
+      input.disconnect();
+      output.disconnect();
     },
     input,
     output,
@@ -113,7 +76,7 @@ export function createDeesserEngine(
       return reduction;
     },
     readings: (): DeviceReadings => ({ gainReductionDb: reduction }),
-    ready,
+    ready: stage.ready,
     update: (state) => {
       latest = state;
       settings = deesserSettings(state);
