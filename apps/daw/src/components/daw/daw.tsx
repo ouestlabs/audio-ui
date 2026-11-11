@@ -1458,6 +1458,16 @@ export function Daw({
 
   const shownTrack = selectedTrack ? trackOf(doc, selectedTrack) : undefined;
   const sendRows = Math.ceil(doc.returns.length / SENDS_PER_ROW);
+  // The height the panel opens at, read when it opens, folds or shows another view: a drag of the line saves the
+  // height as it goes, and a size that changed under the drag would make the panel start over and drop the drag.
+  const shownDevices = shownTrack?.devices;
+  const openSize = useMemo(
+    () =>
+      folded
+        ? STRIP
+        : `${heightOf(viewHeights.current[shown], shown, shownDevices, sendRows)}px`,
+    [folded, sendRows, shown, shownDevices]
+  );
   const panelTitle = titleOf(shown, selectedClip, shownTrack);
   // What the panel holds, open: the clip view's own caret folds the panel to its bar.
   let content: ReactNode;
@@ -1636,16 +1646,13 @@ export function Daw({
                   viewportRef={viewportRef}
                 />
               </ResizablePanel>
-              <ResizableHandle />
+              {/* Over its neighbours: the detail view's strip folds it on a press anywhere, and would take the line's own. */}
+              <ResizableHandle className="z-10" />
               <ResizablePanel
                 className="flex flex-col"
                 collapsedSize={STRIP}
                 collapsible
-                defaultSize={
-                  folded
-                    ? STRIP
-                    : `${heightOf(viewHeights.current[shown], shown, shownTrack?.devices, sendRows)}px`
-                }
+                defaultSize={openSize}
                 groupResizeBehavior="preserve-pixel-size"
                 id={shown}
                 key={panelKey(shown, sendRows)}
