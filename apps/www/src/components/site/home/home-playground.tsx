@@ -8,8 +8,7 @@ import {
   normalizePeaks,
 } from "@audio-ui/engine/analysis";
 import { decodeAudioChannels } from "@audio-ui/engine/files";
-import { FolderOpenIcon } from "@phosphor-icons/react/ssr";
-import { Link } from "@tanstack/react-router";
+import { Toolbar } from "@base-ui/react/toolbar";
 import {
   type ChangeEvent,
   useCallback,
@@ -17,7 +16,24 @@ import {
   useRef,
   useState,
 } from "react";
-import { Button } from "@/components/ui/button";
+import { IconPlaceholder } from "@/components/icon-placeholder";
+import { cn } from "@/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
+import {
+  ButtonGroup,
+  ButtonGroupText,
+} from "@/registry/bases/base/ui/button-group";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/registry/bases/base/ui/dropdown-menu";
 import {
   type ClipSamples,
   ClipWaveform,
@@ -42,6 +58,9 @@ import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-leve
 import type { Arranged } from "@/registry-audio/bases/base/lib/arrangement";
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
 import {
+  DEMO_SOURCES,
+  type DemoSource,
+  type DemoSourceName,
   demoTempo,
   renderDemoSource,
 } from "@/registry-audio/bases/base/lib/demo-sound";
@@ -54,7 +73,13 @@ import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 const TRACK = "track-1";
 /** What the playground's recordings are named after, apart from those of the registry's demos on the same context. */
 const RECORDING = "home-sound";
-const DEMO = "groove";
+const DEMO: DemoSourceName = "groove";
+/** The demo sounds the menu offers: those to listen through, not the keys a gate follows. */
+const DEMOS = (Object.keys(DEMO_SOURCES) as DemoSourceName[]).filter(
+  (name) => !(DEMO_SOURCES[name] as DemoSource).isKey
+);
+/** The menu's value for a sound of your own. */
+const UPLOADED = "uploaded";
 /** Enough peaks for a pixel each, zoomed in as far as it goes. */
 const PEAK_COUNT = 8192;
 /** How far in the view zooms: to the samples themselves, this many px apart, as the clip editor goes. */
@@ -105,6 +130,8 @@ const IGNORE = () => undefined;
 
 /** A sound the playground plays: its name, its length, and its peaks for the waveform. */
 interface Sound {
+  /** The demo it is, or null for a file of yours. */
+  demo: DemoSourceName | null;
   duration: number;
   name: string;
   peaks: AudioPeaks;
@@ -140,10 +167,12 @@ function mixOf(channels: readonly Float32Array[]) {
 function soundOf(
   channels: Float32Array[],
   sampleRate: number,
-  name: string
+  name: string,
+  demo: DemoSourceName | null = null
 ): Sound {
   const mix = mixOf(channels);
   return {
+    demo,
     duration: mix.length / sampleRate,
     name,
     peaks: normalizePeaks(computePeaks(channels, PEAK_COUNT)),
@@ -191,29 +220,6 @@ function followPlayhead(viewport: HTMLElement | null, x: number) {
 
 const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
-
-/** The registry items the playground is made of, in the order they show, each with its docs page. */
-const PARTS = [
-  { name: "transport", page: "components/base/transport" },
-  { name: "meter", page: "components/base/meter" },
-  { name: "knob", page: "components/base/knob" },
-  { name: "waveform", page: "components/base/waveform" },
-  { name: "device-browser", page: "components/base/device-browser" },
-  { name: "device-view", page: "components/base/device-chain" },
-];
-
-/** A registry item's name, a link to its page: what a part of the playground is made of. */
-function PartLink({ name, page }: { name: string; page: string }) {
-  return (
-    <Link
-      className="font-site-mono text-[11px] text-site-muted-foreground transition-colors hover:text-foreground"
-      params={{ _splat: page }}
-      to="/docs/$"
-    >
-      @audio-ui/{name}
-    </Link>
-  );
-}
 
 /**
  * A working playground made of the registry, under the home's title: a
@@ -337,6 +343,22 @@ export function HomePlayground() {
     [dispatch]
   );
 
+  /** Puts a demo sound on the track, at its own tempo, for a delay synced to it. */
+  const placeDemo = useCallback(
+    (buffer: AudioBuffer, name: DemoSourceName) => {
+      const channels = Array.from(
+        { length: buffer.numberOfChannels },
+        (_, channel) => buffer.getChannelData(channel)
+      );
+      place(
+        buffer,
+        soundOf(channels, buffer.sampleRate, DEMO_SOURCES[name].title, name)
+      );
+      dispatch({ tempo: demoTempo(name), type: "set-tempo" });
+    },
+    [dispatch, place]
+  );
+
   // The demo loop, rendered once the page's context is there.
   useEffect(() => {
     const ctx = webAudio.getContext();
@@ -346,17 +368,13 @@ export function HomePlayground() {
     let live = true;
     renderDemoSource(DEMO, ctx.sampleRate).then((buffer) => {
       if (live) {
-        const channels = Array.from(
-          { length: buffer.numberOfChannels },
-          (_, channel) => buffer.getChannelData(channel)
-        );
-        place(buffer, soundOf(channels, buffer.sampleRate, DEMO));
+        placeDemo(buffer, DEMO);
       }
     });
     return () => {
       live = false;
     };
-  }, [place]);
+  }, [placeDemo]);
 
   // Zoomed in, the view turns the page as the playhead leaves it.
   useEffect(() => {
@@ -432,6 +450,23 @@ export function HomePlayground() {
     },
     [place, position, stop]
   );
+  // A demo picked in the menu, drawn for the context's rate, from its start.
+  const chooseSound = useCallback(
+    (value: string) => {
+      const ctx = webAudio.getContext();
+      if (!(ctx && value in DEMO_SOURCES)) {
+        return;
+      }
+      const name = value as DemoSourceName;
+      renderDemoSource(name, ctx.sampleRate).then((buffer) => {
+        stop();
+        position.set(0);
+        setZoomPx(null);
+        placeDemo(buffer, name);
+      });
+    },
+    [placeDemo, position, stop]
+  );
 
   const pick = useCallback(
     (event: ChangeEvent<HTMLInputElement>) => {
@@ -443,8 +478,10 @@ export function HomePlayground() {
     },
     [load]
   );
-  // A sound file dropped anywhere on the playground opens in it; a device dragged from the library goes to the chain.
+  // A sound file dropped anywhere on the playground opens in it, and the waveform shows where while it is dragged over;
+  // a device dragged from the library goes to the chain.
   const frame = useRef<HTMLElement>(null);
+  const [dropping, setDropping] = useState(false);
   useEffect(() => {
     const element = frame.current;
     if (!element) {
@@ -453,9 +490,16 @@ export function HomePlayground() {
     const allow = (event: DragEvent) => {
       if (event.dataTransfer?.types.includes("Files")) {
         event.preventDefault();
+        setDropping(true);
+      }
+    };
+    const leave = (event: DragEvent) => {
+      if (!element.contains(event.relatedTarget as Node | null)) {
+        setDropping(false);
       }
     };
     const take = (event: DragEvent) => {
+      setDropping(false);
       const [file] = event.dataTransfer?.files ?? [];
       if (file?.type.startsWith("audio/")) {
         event.preventDefault();
@@ -463,9 +507,11 @@ export function HomePlayground() {
       }
     };
     element.addEventListener("dragover", allow);
+    element.addEventListener("dragleave", leave);
     element.addEventListener("drop", take);
     return () => {
       element.removeEventListener("dragover", allow);
+      element.removeEventListener("dragleave", leave);
       element.removeEventListener("drop", take);
     };
   }, [load]);
@@ -504,47 +550,100 @@ export function HomePlayground() {
       <h2 className="sr-only" id="home-playground">
         Playground
       </h2>
-      {/* The transport, and at its right a sound to open, the level of what comes out and its volume, as a workstation's top bar.
-          Narrower, the one above the other: the transport sizes by its own container, so it has no width of its own to wrap by. */}
-      <div className="flex flex-col gap-3 px-4 pt-4 sm:px-6 @[40rem]:flex-row @[40rem]:items-center @[40rem]:gap-4">
-        <div className="@[40rem]:flex-1">
-          <Transport
-            looping={doc.loop.on}
-            onLoopingChange={setLooping}
-            onPlayPause={toggle}
-            onStop={rewind}
-            playing={playing}
-            source={position}
-            tempo={doc.tempo}
-          />
-        </div>
-        <div className="flex items-center gap-3">
-          <input
-            accept="audio/*"
-            className="sr-only"
-            onChange={pick}
-            ref={fileInput}
-            tabIndex={-1}
-            type="file"
-          />
-          <Button
-            aria-label="Open a sound"
-            onClick={open}
-            size="icon-sm"
-            title="Open a sound"
-            variant="ghost"
-          >
-            <FolderOpenIcon aria-hidden />
-          </Button>
-          <div className="w-20">
-            <Meter
-              aria-label="Playground output"
-              orientation="horizontal"
-              peakMarks="hidden"
-              size="sm"
-              source={levels}
-            />
-          </div>
+      <input
+        accept="audio/*"
+        className="sr-only"
+        onChange={pick}
+        ref={fileInput}
+        tabIndex={-1}
+        type="file"
+      />
+      {/* The transport, with the sound and the output as more of its clusters: one bar, one row of arrow keys. */}
+      <div className="px-4 pt-4 sm:px-6">
+        <Transport
+          looping={doc.loop.on}
+          onLoopingChange={setLooping}
+          onPlayPause={toggle}
+          onStop={rewind}
+          playing={playing}
+          source={position}
+          tempo={doc.tempo}
+        >
+          <ButtonGroup>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Toolbar.Button
+                    aria-label="Sound"
+                    render={<Button size="icon" variant="outline" />}
+                    title="Sound"
+                  />
+                }
+              >
+                <IconPlaceholder
+                  hugeicons="Upload01Icon"
+                  lucide="UploadIcon"
+                  phosphor="UploadIcon"
+                  remixicon="RiUploadLine"
+                  tabler="IconUpload"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-72">
+                <DropdownMenuItem onClick={open}>
+                  Upload a file…
+                  <span className="ms-auto text-muted-foreground text-xs">
+                    WAV, MP3, FLAC and more
+                  </span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel>Sound</DropdownMenuLabel>
+                  <DropdownMenuRadioGroup
+                    onValueChange={chooseSound}
+                    value={sound?.demo ?? UPLOADED}
+                  >
+                    {sound && sound.demo === null ? (
+                      <DropdownMenuRadioItem closeOnClick value={UPLOADED}>
+                        <span className="truncate">{sound.name}</span>
+                      </DropdownMenuRadioItem>
+                    ) : null}
+                    {DEMOS.map((name) => (
+                      <DropdownMenuRadioItem
+                        closeOnClick
+                        key={name}
+                        value={name}
+                      >
+                        <span className="flex flex-col gap-0.5">
+                          {DEMO_SOURCES[name].title}
+                          <span className="text-muted-foreground text-xs">
+                            {DEMO_SOURCES[name].about}
+                          </span>
+                        </span>
+                      </DropdownMenuRadioItem>
+                    ))}
+                  </DropdownMenuRadioGroup>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                <p className="px-2 py-1.5 text-muted-foreground text-xs">
+                  Or drop an audio file on the waveform.
+                </p>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ButtonGroup>
+          {/* The level of what comes out, framed as the position is, at the bar's height. */}
+          <ButtonGroup className="self-stretch">
+            <ButtonGroupText>
+              <div className="w-20">
+                <Meter
+                  aria-label="Playground output"
+                  orientation="horizontal"
+                  peakMarks="hidden"
+                  size="sm"
+                  source={levels}
+                />
+              </div>
+            </ButtonGroupText>
+          </ButtonGroup>
           {/* The main track's volume, in dB as a mixer sets it; its readout hangs over the ruler while it turns, so the bar keeps no room for it. */}
           <Knob
             aria-label="Main volume"
@@ -558,11 +657,11 @@ export function HomePlayground() {
             step={0.5}
             value={volume}
           />
-        </div>
+        </Transport>
       </div>
       <div className="px-4 py-4 sm:px-6">
         {/* Zoomed with Cmd or Ctrl + wheel; the ruler seeks, the navigator moves and zooms the view. */}
-        <div ref={lane}>
+        <div className="relative" ref={lane}>
           <Timeline
             disabled={!sound}
             duration={soundDuration || 1}
@@ -615,6 +714,16 @@ export function HomePlayground() {
             </TimelineViewport>
             <TimelineNavigator className="mt-2" getAriaValueText={formatTime} />
           </Timeline>
+          {/* While a file is dragged over the playground: where it lands. */}
+          <div
+            aria-hidden="true"
+            className={cn(
+              "pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-lg border-2 border-primary border-dashed bg-background/85 font-medium text-sm opacity-0 transition-opacity duration-150 motion-reduce:transition-none",
+              dropping && "opacity-100"
+            )}
+          >
+            Drop an audio file to play it
+          </div>
         </div>
       </div>
       {/* The track's chain, from one edge of the inset to the other, the library beside it as in a workstation. */}
@@ -641,12 +750,6 @@ export function HomePlayground() {
             track={TRACK}
           />
         </div>
-      </div>
-      {/* What it is made of, in one line: each registry item, a link to its page. */}
-      <div className="flex flex-wrap gap-x-4 gap-y-1 border-t px-4 py-2 sm:px-6">
-        {PARTS.map((part) => (
-          <PartLink key={part.name} name={part.name} page={part.page} />
-        ))}
       </div>
     </section>
   );
