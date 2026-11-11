@@ -35,6 +35,8 @@ import {
 import {
   ControlPart,
   ControlRoot,
+  proposeChange,
+  readValue,
   reportChange,
   reportCommit,
 } from "../internal/parts.ts";
@@ -228,7 +230,7 @@ export class PianoRollElement extends ControlRoot<PianoRollSnapshot> {
 
   /** The notes. Setting them draws the roll; subsequent gestures start from the new value. */
   get value(): readonly Note[] {
-    return this.controller.getSnapshot().notes;
+    return readValue(this, this.controller.getSnapshot().notes);
   }
 
   set value(value: readonly Note[]) {
@@ -338,7 +340,7 @@ export class PianoRollElement extends ControlRoot<PianoRollSnapshot> {
         }
       },
       onValueChange: (value, details) => {
-        if (!reportChange(this, { reason: details.reason, value })) {
+        if (!proposeChange(this, { reason: details.reason, value })) {
           details.cancel();
           return;
         }

@@ -40,6 +40,8 @@ import {
 import {
   ControlPart,
   ControlRoot,
+  proposeChange,
+  readValue,
   reportChange,
   reportCommit,
 } from "../internal/parts.ts";
@@ -216,7 +218,7 @@ export class WaveformElement extends ControlRoot<WaveformSeekSnapshot> {
 
   /** The playback position, from 0 to `duration`. Setting it seeks; subsequent gestures start from the new value. */
   get value(): number {
-    return this.controller.getSnapshot().value;
+    return readValue(this, this.controller.getSnapshot().value);
   }
 
   set value(value: number) {
@@ -309,7 +311,7 @@ export class WaveformElement extends ControlRoot<WaveformSeekSnapshot> {
       largeStep: numberAttribute(this, "large-step") ?? duration / 10,
       loading: this.hasAttribute("loading"),
       onValueChange: (value, details) => {
-        if (!reportChange(this, { reason: details.reason, value })) {
+        if (!proposeChange(this, { reason: details.reason, value })) {
           details.cancel();
           return;
         }

@@ -18,7 +18,8 @@ import { INPUT_NAMES, ThumbInput, ValueText } from "../internal/input.ts";
 import {
   ControlPart,
   ControlRoot,
-  reportChange,
+  proposeChange,
+  readValue,
   reportCommit,
 } from "../internal/parts.ts";
 
@@ -130,7 +131,7 @@ export class FaderElement extends ControlRoot<FaderSnapshot> {
 
   /** The value as displayed. Setting it moves the fader; subsequent gestures start from the new value. */
   get value(): number {
-    return this.controller.getSnapshot().value;
+    return readValue(this, this.controller.getSnapshot().value);
   }
 
   set value(value: number) {
@@ -180,7 +181,7 @@ export class FaderElement extends ControlRoot<FaderSnapshot> {
       max: numberAttribute(this, "max"),
       min: numberAttribute(this, "min"),
       onValueChange: (value, details) => {
-        if (!reportChange(this, { reason: details.reason, value })) {
+        if (!proposeChange(this, { reason: details.reason, value })) {
           details.cancel();
           return;
         }

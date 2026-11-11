@@ -38,6 +38,22 @@ type OwnEvents<Map> = {
     : never]: Map[Name];
 };
 
+/**
+ * What `v-model` binds on an element that fires `input` and has a `value`:
+ * Vue checks it as a component's `modelValue`, then reads and writes the
+ * element's `value` on `input`, as on a native input.
+ */
+type Model<T extends Tag> = "input" extends keyof OwnEvents<
+  ElementTemplates[T]["events"]
+>
+  ? HTMLElementTagNameMap[T] extends { value: infer Value }
+    ? {
+        modelValue?: Value;
+        "onUpdate:modelValue"?: (value: Value) => void;
+      }
+    : unknown
+  : unknown;
+
 /** An element as Vue reads a component in a template: its properties from `$props`, its events from `$emit`. */
 type DefineCustomElement<T extends Tag> = new () => HTMLElementTagNameMap[T] & {
   /** @deprecated Types the element in templates only: an element has no `$props`. */
@@ -47,6 +63,7 @@ type DefineCustomElement<T extends Tag> = new () => HTMLElementTagNameMap[T] & {
   > &
     Attributes<T> &
     Properties<T> &
+    Model<T> &
     PublicProps;
   /** @deprecated Types the element in templates only: an element has no `$emit`. */
   $emit: EmitFn<{
