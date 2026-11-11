@@ -20,6 +20,7 @@ export {
   type SoloTrack,
   soloState,
 } from "./mixer.ts";
+export { playedVelocity } from "./note.ts";
 export { type PlannedRecording, pagesAhead } from "./plan.ts";
 export {
   CLIP_PLAYER_PROCESSOR,
