@@ -20,6 +20,14 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import { PlayToggle } from "@/registry-audio/bases/base/audio/elements/play-toggle";
+import {
+  Timeline,
+  TimelineLane,
+  TimelineMark,
+  TimelineNavigator,
+  TimelineRuler,
+  TimelineViewport,
+} from "@/registry-audio/bases/base/audio/elements/timeline";
 import { Waveform } from "@/registry-audio/bases/base/audio/elements/waveform";
 import {
   type CompressorState,
@@ -46,7 +54,15 @@ import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const MASTER_VOLUME = 0.7;
-const PEAK_COUNT = 480;
+/** Enough peaks for a pixel each, zoomed in as far as it goes. */
+const PEAK_COUNT = 8192;
+/** How far in the view zooms, as a multiple of the whole sound fitting the width. */
+const MAX_ZOOM_FACTOR = 16;
+const ZOOM_STEP = 1.5;
+/** How far in from the view's edge the playhead may go before the view turns the page, as a share of the view. */
+const PAGE_MARGIN = 0.1;
+const LABEL_STEPS = [0.1, 0.25, 0.5, 1, 2, 5, 10, 15, 30, 60];
+const MIN_LABEL_GAP_PX = 56;
 const FFT_SIZE = 4096;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
 const EMPTY_PEAKS: AudioPeaks = {
@@ -78,6 +94,37 @@ const soundOf = (buffer: AudioBuffer, name: string): Sound => ({
   name,
   peaks: normalizePeaks(computePeaks(channelsOf(buffer), PEAK_COUNT)),
 });
+
+/** The seconds the ruler labels: the smallest step that keeps labels apart at this zoom, in pixels per second. */
+function rulerLabels(duration: number, zoom: number) {
+  const step =
+    LABEL_STEPS.find((candidate) => candidate * zoom >= MIN_LABEL_GAP_PX) ??
+    LABEL_STEPS.at(-1) ??
+    1;
+  const count = duration > 0 ? Math.floor(duration / step) + 1 : 0;
+  return Array.from(
+    { length: count },
+    (_, index) => Math.round(index * step * 100) / 100
+  );
+}
+
+/** A ruler mark: whole seconds as m:ss, finer ones with their hundredths. */
+const formatMark = (seconds: number) =>
+  Number.isInteger(seconds)
+    ? formatTime(seconds)
+    : `${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(2).padStart(5, "0")}`;
+
+/** Scrolls a zoomed view to the page that holds `x`, once the playhead nears or passes its edge. */
+function followPlayhead(viewport: HTMLElement | null, x: number) {
+  if (!viewport) {
+    return;
+  }
+  const margin = viewport.clientWidth * PAGE_MARGIN;
+  const { clientWidth, scrollLeft } = viewport;
+  if (x < scrollLeft || x > scrollLeft + clientWidth - margin) {
+    viewport.scrollLeft = Math.max(0, x - margin);
+  }
+}
 
 const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
@@ -135,6 +182,50 @@ export function HomePlayground() {
   } | null>(null);
   const offset = useRef(0);
   const fileInput = useRef<HTMLInputElement>(null);
+  // Pixels per second; null while the whole sound fits the width it is given.
+  const [zoomPx, setZoomPx] = useState<number | null>(null);
+  const [width, setWidth] = useState(0);
+  const lane = useRef<HTMLDivElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
+  const soundDuration = sound?.buffer.duration ?? 0;
+  const fitPx = width > 0 && soundDuration > 0 ? width / soundDuration : 0;
+  const zoom = Math.max(zoomPx ?? fitPx, fitPx);
+  const zoomed = fitPx > 0 && zoom > fitPx * 1.001;
+  const view = useRef<{ px: number; zoomed: boolean }>({
+    px: 0,
+    zoomed: false,
+  });
+  view.current = { px: zoom, zoomed };
+
+  // The width the whole sound fits, measured on the next frame, outside the layout pass that resized it.
+  useEffect(() => {
+    const element = lane.current;
+    if (!element) {
+      return;
+    }
+    let measure = 0;
+    const observer = new ResizeObserver(([entry]) => {
+      cancelAnimationFrame(measure);
+      measure = requestAnimationFrame(() =>
+        setWidth(entry?.contentRect.width ?? 0)
+      );
+    });
+    observer.observe(element);
+    return () => {
+      cancelAnimationFrame(measure);
+      observer.disconnect();
+    };
+  }, []);
+
+  const zoomIn = useCallback(
+    () => setZoomPx(Math.min(fitPx * MAX_ZOOM_FACTOR, zoom * ZOOM_STEP)),
+    [fitPx, zoom]
+  );
+  const zoomOut = useCallback(
+    () => setZoomPx(Math.max(fitPx, zoom / ZOOM_STEP)),
+    [fitPx, zoom]
+  );
+  const changeZoom = useCallback((next: number) => setZoomPx(next), []);
 
   // The demo loop, rendered once the page's context is there.
   useEffect(() => {
@@ -233,10 +324,14 @@ export function HomePlayground() {
     const tick = () => {
       const { current } = voice;
       if (current) {
-        position.set(
+        const at =
           (current.offset + ctx.currentTime - current.started) %
-            sound.buffer.duration
-        );
+          sound.buffer.duration;
+        position.set(at);
+        // Zoomed in, the view turns the page as the playhead leaves it.
+        if (view.current.zoomed) {
+          followPlayhead(viewport.current, at * view.current.px);
+        }
       }
       frame = requestAnimationFrame(tick);
     };
@@ -280,6 +375,7 @@ export function HomePlayground() {
       }
       offset.current = 0;
       position.set(0);
+      setZoomPx(null);
       setSound(soundOf(buffer, file.name));
       setPlaying(false);
     },
@@ -356,14 +452,29 @@ export function HomePlayground() {
             tabIndex={-1}
             type="file"
           />
-          <Button
-            className="ml-auto"
-            onClick={open}
-            size="sm"
-            variant="outline"
-          >
-            Open a sound
-          </Button>
+          <div className="ml-auto flex items-center gap-1">
+            <Button
+              aria-label="Zoom out"
+              disabled={!zoomed}
+              onClick={zoomOut}
+              size="icon-sm"
+              variant="ghost"
+            >
+              −
+            </Button>
+            <Button
+              aria-label="Zoom in"
+              disabled={!sound || zoom >= fitPx * MAX_ZOOM_FACTOR}
+              onClick={zoomIn}
+              size="icon-sm"
+              variant="ghost"
+            >
+              +
+            </Button>
+            <Button onClick={open} size="sm" variant="outline">
+              Open a sound
+            </Button>
+          </div>
         </div>
         {/* The sound and what comes out of the chain, side by side, as a track and its meter. */}
         <div className="flex items-start gap-4">
@@ -372,25 +483,64 @@ export function HomePlayground() {
             name="waveform"
             page="components/base/waveform"
           >
-            <Waveform
-              aria-label="Playground position"
-              className="h-20"
-              disabled={!sound}
-              duration={duration}
-              getAriaValueText={formatTime}
-              loading={!sound}
-              onValueChange={seek}
-              source={position}
-              values={sound?.peaks ?? EMPTY_PEAKS}
-              variant="playhead"
-            />
+            {/* Zoomed with Cmd or Ctrl + wheel, or the buttons above; the ruler seeks, the navigator moves the view. */}
+            <div ref={lane}>
+              <Timeline
+                disabled={!sound}
+                duration={soundDuration || 1}
+                maxZoom={Math.max(fitPx * MAX_ZOOM_FACTOR, 1)}
+                minZoom={fitPx || 0}
+                onPositionChange={seek}
+                onZoomChange={changeZoom}
+                source={position}
+                zoom={fitPx > 0 ? zoom : undefined}
+              >
+                <TimelineViewport
+                  className="overflow-y-hidden rounded-lg border"
+                  ref={viewport}
+                  scrollbar="hidden"
+                >
+                  <TimelineRuler
+                    aria-label="Playground time"
+                    getAriaValueText={formatTime}
+                  >
+                    {rulerLabels(soundDuration, zoom).map((seconds) => (
+                      <TimelineMark key={seconds} value={seconds}>
+                        {formatMark(seconds)}
+                      </TimelineMark>
+                    ))}
+                  </TimelineRuler>
+                  <TimelineLane className="h-28">
+                    <Waveform
+                      aria-label="Playground position"
+                      // One bar a pixel, touching: the outline at the screen's resolution.
+                      barGap={0}
+                      barWidth={1}
+                      className="h-28 rounded-none"
+                      disabled={!sound}
+                      duration={soundDuration || 1}
+                      getAriaValueText={formatTime}
+                      loading={!sound}
+                      onValueChange={seek}
+                      source={position}
+                      values={sound?.peaks ?? EMPTY_PEAKS}
+                      variant="playhead"
+                    />
+                  </TimelineLane>
+                </TimelineViewport>
+                <TimelineNavigator
+                  className="mt-2"
+                  getAriaValueText={formatTime}
+                />
+              </Timeline>
+            </div>
           </Part>
           <Part
             className="items-center"
             name="meter"
             page="components/base/meter"
           >
-            <div className="h-20">
+            <div className="h-36">
               <Meter
                 aria-label="Playground output"
                 // Under the same variant as the size's own, so it fills the waveform's height.
