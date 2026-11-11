@@ -6,11 +6,7 @@ import {
   gateSettings,
 } from "@/registry-audio/bases/base/devices/gate/device";
 import { createGateEngine } from "@/registry-audio/bases/base/devices/gate/engine";
-import {
-  limiterCurve,
-  limiterDevice,
-  limiterSettings,
-} from "@/registry-audio/bases/base/devices/limiter/device";
+import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
 import { createLimiterEngine } from "@/registry-audio/bases/base/devices/limiter/engine";
 import {
   utilityDevice,
@@ -149,65 +145,16 @@ describe("the utility device", () => {
   });
 });
 
-describe("the limiter device", () => {
+describe("the limiter engine", () => {
   const defaults = limiterDevice.defaults();
 
-  test("a signal under the ceiling is as loud as the gain makes it", () => {
-    const curve = limiterCurve({ ...defaults, ceilingDb: -6, gainDb: 3 });
-    expect(curve(-30)).toBeCloseTo(-27, 0);
-  });
-
-  test("a signal over the ceiling stays near it, far over barely moves it", () => {
-    const curve = limiterCurve({ ...defaults, ceilingDb: -6, gainDb: 0 });
-    expect(curve(0)).toBeLessThan(-5);
-    expect(curve(0)).toBeGreaterThan(-6.5);
-    expect(curve(-3) - curve(0)).toBeLessThan(0.2);
-  });
-
-  test("the curve never goes above the ceiling, whatever the input and the gain", () => {
-    for (const gainDb of [0, 12, 24]) {
-      const curve = limiterCurve({ ...defaults, ceilingDb: -3, gainDb });
-      for (const inputDb of [-30, -6, 0, 12, 40]) {
-        expect(curve(inputDb)).toBeLessThanOrEqual(-3);
-      }
-    }
-  });
-
-  test("the engine ends in a 4x hard clip scaled to the ceiling", () => {
-    const { ctx, made } = fakeContext();
-    createLimiterEngine(ctx, { ...defaults, ceilingDb: -6 });
-    const [clip] = made.shapers;
-    expect(Array.from(clip?.curve ?? [])).toEqual([-1, 1]);
-    expect(
-      made.gains.some((g) => Math.abs(g.gain.value - 10 ** (6 / 20)) < 1e-9)
-    ).toBe(true);
-    expect(
-      made.gains.some((g) => Math.abs(g.gain.value - 10 ** (-6 / 20)) < 1e-9)
-    ).toBe(true);
-  });
-
-  test("off is the straight line", () => {
-    expect(limiterCurve({ ...defaults, enabled: false })(-12)).toBe(-12);
-    expect(limiterSettings({ ...defaults, enabled: false })).toMatchObject({
-      gain: 1,
-      wet: 0,
-    });
-  });
-
-  test("the engine is a ratio of 20 with no knee, takes its make-up out and reads the reduction", () => {
-    const { ctx, made } = fakeContext();
-    const engine = createLimiterEngine(ctx, {
-      ...defaults,
-      ceilingDb: -6,
-      releaseMs: 200,
-    });
-    expect(made.compressor.ratio.value).toBe(20);
-    expect(made.compressor.knee.value).toBe(0);
-    expect(made.compressor.threshold.value).toBe(-6);
-    expect(made.compressor.release.value).toBe(0.2);
-    expect(engine.reduction).toBe(-3);
-    engine.update({ ...defaults, ceilingDb: -12 });
-    expect(made.compressor.threshold.targets).toEqual([-12]);
+  test("passes the signal at the input gain without worklets, and reads no reduction", async () => {
+    const { ctx } = fakeContext();
+    const engine = createLimiterEngine(ctx, { ...defaults, gainDb: 6 });
+    expect(await engine.ready).toBe(false);
+    expect(engine.reduction).toBe(0);
+    engine.update({ ...defaults, gainDb: 3 });
+    engine.dispose();
   });
 });
 

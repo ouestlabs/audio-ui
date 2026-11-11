@@ -25,9 +25,9 @@ describe("the latency devices declare", () => {
     ).toBeCloseTo(0.006, 9);
   });
 
-  test("the limiter is the look-ahead and the oversampling when it works, nothing when it is off", () => {
+  test("the limiter is its look-ahead when it works, nothing when it is off", () => {
     const on = limiterDevice.defaults();
-    expect(limiterDevice.latency(on, 48_000)).toBeCloseTo(0.01, 9);
+    expect(limiterDevice.latency(on, 48_000)).toBeCloseTo(0.005, 9);
     expect(limiterDevice.latency({ ...on, enabled: false }, 48_000)).toBe(0);
   });
 

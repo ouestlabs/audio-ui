@@ -3,14 +3,6 @@
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/lib/utils";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
   Plot,
   PlotCurve,
   PlotGraph,
@@ -27,20 +19,16 @@ import {
   type LimiterState,
   limiterCurve,
   limiterDevice,
-  limiterUnused,
 } from "@/components/audio-ui/devices/limiter/device";
 
 const MIN_DB = -48;
 const MAX_DB = 0;
 const DB_TICKS = [-48, -24, 0];
 const UNITY = (inputDb: number) => inputDb;
-const IN_THE_TITLE_BAR = ["enabled", "model"] as const;
-const MODELS =
-  limiterDevice.parameters.find((parameter) => parameter.id === "model")
-    ?.options ?? [];
+const IN_THE_TITLE_BAR = ["enabled"] as const;
 const OFF = limiterDevice.parameters
   .map((parameter) => parameter.id)
-  .filter((id) => id !== "enabled" && id !== "model");
+  .filter((id) => id !== "enabled");
 
 const describeValue = (value: number) => `${value.toFixed(1)} dB`;
 
@@ -53,10 +41,9 @@ interface LimiterPanelProps {
 }
 
 /**
- * The face of the limiter device: the model picked in its title bar, its
- * transfer curve against the straight line of a clean sound, with a handle
+ * The face of the limiter device: its transfer curve against the straight line of a clean sound, with a handle
  * where the limiting starts: drag it up and down for the ceiling and across
- * for the input gain, over the knobs, those the model does not use drawn off.
+ * for the input gain, over the knobs.
  * Controlled like `DevicePanel`, which it uses for the knobs. Its children sit
  * at the end of the title bar.
  */
@@ -67,14 +54,6 @@ function LimiterPanel({
   value,
 }: LimiterPanelProps) {
   const curve = useMemo(() => limiterCurve(value), [value]);
-  const pickModel = useCallback(
-    (model: string | null) => {
-      if (model) {
-        onValueChange(limiterDevice.set(value, "model", model));
-      }
-    },
-    [onValueChange, value]
-  );
   const change = useCallback(
     ({ x, y }: { x: number; y: number }) =>
       onValueChange(
@@ -90,29 +69,6 @@ function LimiterPanel({
         onValueChange={onValueChange}
         value={value}
       >
-        <Select
-          disabled={!value.enabled}
-          items={MODELS}
-          onValueChange={pickModel}
-          value={value.model}
-        >
-          <SelectTrigger
-            aria-label="Model"
-            className="w-32 data-[size=sm]:h-6"
-            size="sm"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {MODELS.map((model) => (
-                <SelectItem key={model.value} value={model.value}>
-                  {model.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
         {children}
       </DeviceHeader>
       <div
@@ -156,7 +112,7 @@ function LimiterPanel({
         <DevicePanel
           className="grid-cols-3"
           device={limiterDevice}
-          disabled={value.enabled ? limiterUnused(value.model) : OFF}
+          disabled={value.enabled ? undefined : OFF}
           exclude={IN_THE_TITLE_BAR}
           onValueChange={onValueChange}
           value={value}

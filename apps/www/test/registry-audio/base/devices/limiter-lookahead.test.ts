@@ -6,14 +6,13 @@ import {
   limiterCurve,
   limiterDevice,
   limiterSettings,
-  limiterUnused,
 } from "@/registry-audio/bases/base/devices/limiter/device";
 import { madeProcessor, type Processor } from "./manifest-processor";
 
 const RATE = 48_000;
 const BLOCK = 128;
 const defaults = limiterDevice.defaults();
-const lookahead = { ...defaults, model: "lookahead" as const };
+const lookahead = defaults;
 
 /** A stereo sine at `amplitude`, frames `start` on. */
 const sine = (start: number, amplitude: number) =>
@@ -43,11 +42,11 @@ function played(
   return out;
 }
 
-describe("the limiter's look-ahead model", () => {
+describe("the limiter's model", () => {
   test("plays the processor of @audio/dynamics-limiter as published, sample for sample", () => {
     for (const truePeak of [false, true]) {
       const state = { ...lookahead, truePeak };
-      const { processor } = madeProcessor(LIMITER_WORKLET, "lookahead", RATE);
+      const { processor } = madeProcessor(LIMITER_WORKLET, "brickwall", RATE);
       const {
         ceiling,
         lookahead: ahead,
@@ -87,7 +86,7 @@ describe("the limiter's look-ahead model", () => {
   });
 
   test("lets no sample over the ceiling, however hard it is pushed", () => {
-    const { processor } = madeProcessor(LIMITER_WORKLET, "lookahead", RATE);
+    const { processor } = madeProcessor(LIMITER_WORKLET, "brickwall", RATE);
     const ceiling = 10 ** (defaults.ceilingDb / 20);
     let loudest = 0;
     for (let block = 0; block < 100; block += 1) {
@@ -108,7 +107,7 @@ describe("the limiter's look-ahead model", () => {
       expect(late).toBe(latency({ lookahead: 2, sampleRate: RATE, truePeak }));
       const { posted, processor } = madeProcessor(
         LIMITER_WORKLET,
-        "lookahead",
+        "brickwall",
         RATE
       );
       // A click under the ceiling, at frame 10.
@@ -123,7 +122,7 @@ describe("the limiter's look-ahead model", () => {
       const at = outs.findIndex((sample) => Math.abs(sample) > 0.25);
       expect(at - 10).toBe(late);
       // Under the ceiling, nothing is taken off, even as the sound starts.
-      const steady = madeProcessor(LIMITER_WORKLET, "lookahead", RATE);
+      const steady = madeProcessor(LIMITER_WORKLET, "brickwall", RATE);
       for (let block = 0; block < 40; block += 1) {
         played(steady.processor, sine(block * BLOCK, 0.3), state);
       }
@@ -135,21 +134,15 @@ describe("the limiter's look-ahead model", () => {
   });
 });
 
-describe("the limiter's models", () => {
-  test("the clean one does not use the look-ahead nor true peak", () => {
-    expect(limiterUnused("clean")).toEqual(["lookaheadMs", "truePeak"]);
-    expect(limiterUnused("lookahead")).toEqual([]);
-  });
-
-  test("the look-ahead model plays in place of the node, its parameters in its manifest's units", () => {
+describe("the limiter device", () => {
+  test("the worklet is made in its manifest's units, a toggle as 0 or 1", () => {
     const settings = limiterSettings({ ...lookahead, truePeak: true });
     expect(settings).toMatchObject({
       modelParams: { ceiling: -1, lookahead: 5, release: 100, truePeak: 1 },
-      modelWet: 1,
-      wet: 0,
+      wet: 1,
     });
     expect(limiterSettings({ ...lookahead, enabled: false })).toMatchObject({
-      modelWet: 0,
+      gain: 1,
       wet: 0,
     });
   });
@@ -158,6 +151,7 @@ describe("the limiter's models", () => {
     const curve = limiterCurve({ ...lookahead, ceilingDb: -3, gainDb: 6 });
     expect(curve(-12)).toBe(-6);
     expect(curve(0)).toBe(-3);
+    expect(limiterCurve({ ...lookahead, enabled: false })(-12)).toBe(-12);
     expect(limiterDevice.latency({ ...lookahead, enabled: false }, RATE)).toBe(
       0
     );

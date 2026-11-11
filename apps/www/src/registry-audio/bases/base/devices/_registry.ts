@@ -1119,7 +1119,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core", "@audio/dynamics-limiter"],
     description:
-      "The limiter as a device: an input gain, a ceiling and a release, its models (the browser's clean compressor and a clip, or the lookahead brickwall limiter of @audio/dynamics-limiter with its look-ahead and true peak), the numbers that go on the nodes for a state, the curve a state plays and the source of the look-ahead model's worklet, with no panel and no audio in it.",
+      "The limiter as a device: an input gain, a ceiling and a release, the lookahead brickwall limiter of @audio/dynamics-limiter with its look-ahead and true peak, the numbers that go on the nodes for a state, the curve a state plays and the source of its worklet, with no panel and no audio in it.",
     files: [
       {
         path: "devices/limiter/device.ts",
@@ -1143,7 +1143,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A limiter on the Web Audio API for a limiter state: the browser compressor node at a ratio of 20 with no knee, its make-up taken back out, or the look-ahead model in a worklet fed only while it plays, the signal going round both when it is off.",
+      "A limiter on the Web Audio API for a limiter state: the audio.js limiter in a worklet, the signal passing at the input gain until it is ready and going round it when it is off.",
     files: [
       {
         path: "devices/limiter/engine.ts",
@@ -1159,7 +1159,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the limiter device: the model picked in its title bar, its transfer curve against the straight line of a clean sound with a handle for the ceiling and the input gain, over the device knobs, those the model does not use drawn off.",
+      "The face of the limiter device: its transfer curve against the straight line of a clean sound with a handle for the ceiling and the input gain, over the device knobs.",
     files: [
       {
         path: "devices/limiter/panel.tsx",
