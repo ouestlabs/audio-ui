@@ -29,7 +29,7 @@ function Code({ code }: { code: string }) {
 /** Items by name, each a link to its entry when it has one. */
 function Items({ names }: { names: readonly string[] }) {
   if (names.length === 0) {
-    return <span className="text-site-muted-foreground">Nothing</span>;
+    return <span className="text-muted-foreground">Nothing</span>;
   }
   return (
     <>

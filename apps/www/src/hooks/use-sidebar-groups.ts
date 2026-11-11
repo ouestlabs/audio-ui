@@ -134,8 +134,8 @@ export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
       current: each.id === reading,
     })),
     groups: groups.map((group) => {
-      // A group named as its section says nothing the section's row does not: no heading, and it stays open.
-      const titled = group.title !== sectionLabel;
+      // Only a group that folds has a heading, and only when it is not named as its section: the switcher names the section, and a heading that does nothing reads as a button.
+      const titled = group.collapsible && group.title !== sectionLabel;
       return {
         ...group,
         collapsible: group.collapsible && titled,

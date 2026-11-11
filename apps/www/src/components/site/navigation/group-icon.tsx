@@ -44,7 +44,7 @@ export function SectionIcon({ current, id }: { current: boolean; id: string }) {
     <Icon
       className={cn(
         "size-4 shrink-0",
-        current ? "text-site-foreground" : "text-site-muted-foreground"
+        current ? "text-foreground" : "text-muted-foreground"
       )}
       weight="fill"
     />

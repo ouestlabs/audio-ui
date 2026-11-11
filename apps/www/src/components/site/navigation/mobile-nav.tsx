@@ -8,11 +8,8 @@ import {
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
-import {
-  GroupIcon,
-  PageIcon,
-  SectionIcon,
-} from "@/components/site/navigation/group-icon";
+import { DocsSectionSelect } from "@/components/docs/page/sidebar";
+import { GroupIcon, PageIcon } from "@/components/site/navigation/group-icon";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
@@ -304,23 +301,8 @@ export function MobileNav({
             </>
           ) : (
             <>
-              <div className="flex shrink-0 flex-col gap-0.5">
-                {docsSections.map((docsSection) => (
-                  <NavRow
-                    active={docsSection.current}
-                    href={docsSection.href}
-                    key={docsSection.id}
-                    onNavigate={close}
-                  >
-                    <span className="flex min-w-0 items-center gap-2">
-                      <SectionIcon
-                        current={docsSection.current}
-                        id={docsSection.id}
-                      />
-                      {docsSection.label}
-                    </span>
-                  </NavRow>
-                ))}
+              <div className="shrink-0">
+                <DocsSectionSelect sections={docsSections} />
               </div>
               {groups.map((group) => (
                 <div
