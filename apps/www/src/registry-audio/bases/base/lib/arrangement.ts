@@ -1,4 +1,5 @@
 import detectBeat from "@audio/beat-detect";
+import chroma from "@audio/mir-chroma";
 import {
   autoWarp,
   detectTransients,
@@ -1040,6 +1041,48 @@ function fittedGrid(
   }
   start -= Math.floor(start / period) * period;
   return { bpm: 60 / period, firstBeat: start };
+}
+
+/** The window a recording's chroma is read on, in samples: a power of two, as the FFT takes, near 0.17 s at 48 kHz. */
+const CHROMA_WINDOW = 8192;
+/** A window quieter than this, as a mean square, is silence: it says nothing of the key. */
+const CHROMA_SILENCE = 1e-6;
+
+/**
+ * How much of a recording's sound lies in each pitch class, C to B, summing
+ * to 1, read once as it is decoded: what a key is read from, with notes or
+ * without (`detectKeys` of the Scale menu). Its channels mixed, it is the
+ * chroma of `@audio/mir-chroma` on each window that is not silence, averaged.
+ * All zeros for a recording that is all silence.
+ */
+export function audioChroma(
+  channels: readonly Float32Array[],
+  sampleRate: number
+): number[] {
+  const length = channels[0]?.length ?? 0;
+  const sum = new Array<number>(12).fill(0);
+  const mix = new Float32Array(CHROMA_WINDOW);
+  let frames = 0;
+  for (let at = 0; at + CHROMA_WINDOW <= length; at += CHROMA_WINDOW) {
+    let energy = 0;
+    for (let frame = 0; frame < CHROMA_WINDOW; frame += 1) {
+      let sample = 0;
+      for (const channel of channels) {
+        sample += channel[at + frame] as number;
+      }
+      sample /= channels.length;
+      mix[frame] = sample;
+      energy += sample * sample;
+    }
+    if (energy / CHROMA_WINDOW >= CHROMA_SILENCE) {
+      const read = chroma(mix, { fs: sampleRate });
+      for (let pitchClass = 0; pitchClass < 12; pitchClass += 1) {
+        sum[pitchClass] = (sum[pitchClass] as number) + (read[pitchClass] ?? 0);
+      }
+      frames += 1;
+    }
+  }
+  return frames > 0 ? sum.map((value) => value / frames) : sum;
 }
 
 /**

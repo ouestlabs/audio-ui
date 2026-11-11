@@ -206,6 +206,24 @@ export function ClipEditor({
         : []
     );
   }, [doc.clips, doc.tracks]);
+  // The sound of the song's audio clips too: each recording's chroma, moved by the clip's transposition, for as long as it plays.
+  const keyAudio = useMemo(() => {
+    const sum = new Array<number>(12).fill(0);
+    for (const each of doc.clips) {
+      const chroma = each.recording
+        ? recordings.get(each.recording)?.chroma
+        : undefined;
+      if (!chroma || each.disabled) {
+        continue;
+      }
+      const shift = Math.round(each.transpose ?? 0);
+      for (const [pitchClass, share] of chroma.entries()) {
+        const at = (((pitchClass + shift) % 12) + 12) % 12;
+        sum[at] = (sum[at] as number) + share * each.value.length;
+      }
+    }
+    return sum;
+  }, [doc.clips, recordings]);
   // A pad's name pressed in the steps: the track plays it, let go at once, as a drum rings on.
   const auditionPad = useCallback(
     (note: number) => {
@@ -235,6 +253,7 @@ export function ClipEditor({
         collapsed={collapsed}
         foldedBoxes={folded}
         key={clip.id}
+        keyAudio={keyAudio}
         keyNotes={keyNotes}
         name={clip.name}
         notes={clip.notes}

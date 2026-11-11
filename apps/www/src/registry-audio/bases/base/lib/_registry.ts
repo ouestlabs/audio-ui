@@ -226,7 +226,12 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio", "timeline"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio/beat-detect"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio-ui/react",
+      "@audio/beat-detect",
+      "@audio/mir-chroma",
+    ],
     description:
       "The document of an arrangement of clips on tracks: its clips, tracks and mixes, how far a clip reaches, where a MIDI clip's notes play, and what a track's volume and pan automation gives at a point of the song",
     files: [
