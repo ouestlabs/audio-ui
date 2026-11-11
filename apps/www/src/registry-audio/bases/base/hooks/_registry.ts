@@ -68,7 +68,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["audio", "timeline", "piano"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio/note"],
     description:
       "Plays an arrangement's MIDI clips while it plays: notes scheduled ahead on the audio clock, each MIDI track through a channel whose gain and pan follow its mix or its automation, and the notes a clip's editor auditions.",
     files: [
@@ -244,7 +244,7 @@ export const hooks: RegistryItem[] = [
       },
     ],
     name: "use-synth-voices",
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/note"],
     registryDependencies: ["@audio-ui/envelope-ramp"],
     type: "registry:hook",
   },
@@ -360,7 +360,7 @@ export const hooks: RegistryItem[] = [
   },
   {
     categories: ["hooks", "audio", "tuner"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
     files: [

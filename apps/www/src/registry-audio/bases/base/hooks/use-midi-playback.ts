@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import type { Source } from "@audio-ui/react";
 import { useCallback, useEffect, useRef } from "react";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
@@ -55,7 +55,7 @@ function scheduleTone(
   const oscillator = context.createOscillator();
   const gain = context.createGain();
   oscillator.type = "triangle";
-  oscillator.frequency.setValueAtTime(noteToFrequency(pitch), at);
+  oscillator.frequency.setValueAtTime(midiToHz(pitch), at);
   gain.gain.value = 0;
   oscillator.connect(gain).connect(destination);
   const peak = NOTE_PEAK * velocity;

@@ -4,14 +4,6 @@ import { formatDb } from "@audio-ui/core/analysis";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/registry/bases/base/ui/select";
-import {
   Plot,
   PlotGraph,
   PlotGrid,
@@ -30,13 +22,10 @@ import {
 
 const LIMIT_DB = 12;
 const TICKS = [-12, 0, 12];
-const IN_THE_TITLE_BAR = ["enabled", "model"] as const;
-const MODELS =
-  transientDevice.parameters.find((parameter) => parameter.id === "model")
-    ?.options ?? [];
+const IN_THE_TITLE_BAR = ["enabled"] as const;
 const OFF = transientDevice.parameters
   .map((parameter) => parameter.id)
-  .filter((id) => id !== "enabled" && id !== "model");
+  .filter((id) => id !== "enabled");
 
 const formatMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describeValue = (value: number) => formatDb(value);
@@ -51,8 +40,7 @@ interface TransientPanelProps {
 }
 
 /**
- * The face of the transient shaper device: the model picked in its title bar,
- * a square with the sustain across and the attack up, and a handle to drag
+ * The face of the transient shaper device: a square with the sustain across and the attack up, and a handle to drag
  * to both at once. The centre is a
  * sound left as it is. The output is the knob under it. Controlled like
  * `DevicePanel`, which it uses for the knobs. Its children sit at the end of
@@ -71,14 +59,6 @@ function TransientPanel({
       ),
     [onValueChange, value]
   );
-  const pickModel = useCallback(
-    (model: string | null) => {
-      if (model) {
-        onValueChange(transientDevice.set(value, "model", model));
-      }
-    },
-    [onValueChange, value]
-  );
   return (
     <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
@@ -87,29 +67,6 @@ function TransientPanel({
         onValueChange={onValueChange}
         value={value}
       >
-        <Select
-          disabled={!value.enabled}
-          items={MODELS}
-          onValueChange={pickModel}
-          value={value.model}
-        >
-          <SelectTrigger
-            aria-label="Model"
-            className="w-25 data-[size=sm]:h-6"
-            size="sm"
-          >
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectGroup>
-              {MODELS.map((model) => (
-                <SelectItem key={model.value} value={model.value}>
-                  {model.label}
-                </SelectItem>
-              ))}
-            </SelectGroup>
-          </SelectContent>
-        </Select>
         {children}
       </DeviceHeader>
       <div

@@ -6,11 +6,7 @@ import {
   gateSettings,
 } from "@/registry-audio/bases/base/devices/gate/device";
 import { createGateEngine } from "@/registry-audio/bases/base/devices/gate/engine";
-import {
-  limiterCurve,
-  limiterDevice,
-  limiterSettings,
-} from "@/registry-audio/bases/base/devices/limiter/device";
+import { limiterDevice } from "@/registry-audio/bases/base/devices/limiter/device";
 import { createLimiterEngine } from "@/registry-audio/bases/base/devices/limiter/engine";
 import {
   utilityDevice,
@@ -149,65 +145,16 @@ describe("the utility device", () => {
   });
 });
 
-describe("the limiter device", () => {
+describe("the limiter engine", () => {
   const defaults = limiterDevice.defaults();
 
-  test("a signal under the ceiling is as loud as the gain makes it", () => {
-    const curve = limiterCurve({ ...defaults, ceilingDb: -6, gainDb: 3 });
-    expect(curve(-30)).toBeCloseTo(-27, 0);
-  });
-
-  test("a signal over the ceiling stays near it, far over barely moves it", () => {
-    const curve = limiterCurve({ ...defaults, ceilingDb: -6, gainDb: 0 });
-    expect(curve(0)).toBeLessThan(-5);
-    expect(curve(0)).toBeGreaterThan(-6.5);
-    expect(curve(-3) - curve(0)).toBeLessThan(0.2);
-  });
-
-  test("the curve never goes above the ceiling, whatever the input and the gain", () => {
-    for (const gainDb of [0, 12, 24]) {
-      const curve = limiterCurve({ ...defaults, ceilingDb: -3, gainDb });
-      for (const inputDb of [-30, -6, 0, 12, 40]) {
-        expect(curve(inputDb)).toBeLessThanOrEqual(-3);
-      }
-    }
-  });
-
-  test("the engine ends in a 4x hard clip scaled to the ceiling", () => {
-    const { ctx, made } = fakeContext();
-    createLimiterEngine(ctx, { ...defaults, ceilingDb: -6 });
-    const [clip] = made.shapers;
-    expect(Array.from(clip?.curve ?? [])).toEqual([-1, 1]);
-    expect(
-      made.gains.some((g) => Math.abs(g.gain.value - 10 ** (6 / 20)) < 1e-9)
-    ).toBe(true);
-    expect(
-      made.gains.some((g) => Math.abs(g.gain.value - 10 ** (-6 / 20)) < 1e-9)
-    ).toBe(true);
-  });
-
-  test("off is the straight line", () => {
-    expect(limiterCurve({ ...defaults, enabled: false })(-12)).toBe(-12);
-    expect(limiterSettings({ ...defaults, enabled: false })).toMatchObject({
-      gain: 1,
-      wet: 0,
-    });
-  });
-
-  test("the engine is a ratio of 20 with no knee, takes its make-up out and reads the reduction", () => {
-    const { ctx, made } = fakeContext();
-    const engine = createLimiterEngine(ctx, {
-      ...defaults,
-      ceilingDb: -6,
-      releaseMs: 200,
-    });
-    expect(made.compressor.ratio.value).toBe(20);
-    expect(made.compressor.knee.value).toBe(0);
-    expect(made.compressor.threshold.value).toBe(-6);
-    expect(made.compressor.release.value).toBe(0.2);
-    expect(engine.reduction).toBe(-3);
-    engine.update({ ...defaults, ceilingDb: -12 });
-    expect(made.compressor.threshold.targets).toEqual([-12]);
+  test("passes the signal at the input gain without worklets, and reads no reduction", async () => {
+    const { ctx } = fakeContext();
+    const engine = createLimiterEngine(ctx, { ...defaults, gainDb: 6 });
+    expect(await engine.ready).toBe(false);
+    expect(engine.reduction).toBe(0);
+    engine.update({ ...defaults, gainDb: 3 });
+    engine.dispose();
   });
 });
 
@@ -221,27 +168,28 @@ describe("the gate device", () => {
     expect(gateCurve({ ...defaults, enabled: false })(-80)).toBe(-80);
   });
 
-  test("the times go to the detector in seconds, and the floor is a gain", () => {
-    const settings = gateSettings({
-      ...defaults,
-      attackMs: 2,
-      floorDb: -40,
-      holdMs: 50,
-      lookaheadMs: 5,
-      releaseMs: 200,
+  test("the worklet gets the times in milliseconds and the floor as the range", () => {
+    expect(
+      gateSettings({
+        ...defaults,
+        attackMs: 2,
+        floorDb: -40,
+        holdMs: 50,
+        lookaheadMs: 5,
+        releaseMs: 200,
+      }).modelParams
+    ).toMatchObject({
+      attack: 2,
+      hold: 50,
+      lookahead: 5,
+      range: -40,
+      release: 200,
     });
-    expect(settings).toMatchObject({
-      attack: 0.002,
-      hold: 0.05,
-      lookahead: 0.005,
-      release: 0.2,
-    });
-    expect(settings.floor).toBeCloseTo(0.01, 9);
   });
 
   test("off, the gate is open and has no look-ahead", () => {
     const off = gateSettings({ ...defaults, enabled: false, lookaheadMs: 5 });
-    expect(off).toMatchObject({ floor: 1, lookahead: 0 });
+    expect(off.modelParams).toMatchObject({ lookahead: 0, range: 0 });
     expect(gateDevice.latency({ ...defaults, lookaheadMs: 5 }, 48_000)).toBe(
       0.005
     );
@@ -253,55 +201,15 @@ describe("the gate device", () => {
     ).toBe(0);
   });
 
-  test("the detector source is a processor with the five parameters the engine sets", () => {
+  test("the worklet source is the processor the engine makes", () => {
     expect(GATE_WORKLET).toContain('registerProcessor("audioui-gate"');
-    for (const name of ["threshold", "floor", "attack", "hold", "release"]) {
-      expect(GATE_WORKLET).toContain(`name: "${name}"`);
-    }
   });
 
-  test("the engine delays the signal by the look-ahead, stays open without worklets and follows updates", async () => {
-    const { ctx, made } = fakeContext();
+  test("the engine stays open without worklets and follows updates", async () => {
+    const { ctx } = fakeContext();
     const engine = createGateEngine(ctx, { ...defaults, lookaheadMs: 4 });
-    expect(made.delay.delayTime.value).toBeCloseTo(0.004, 9);
     expect(await engine.ready).toBe(false);
     engine.update({ ...defaults, lookaheadMs: 8 });
-    expect(made.delay.delayTime.targets.at(-1)).toBeCloseTo(0.008, 9);
-  });
-});
-
-describe("the gate's key", () => {
-  const defaults = gateDevice.defaults();
-
-  test("it says it takes a key, and the key is a switch, not a signal in the state", () => {
-    expect(gateDevice.sidechain).toBe(true);
-    expect(gateDevice.describe().sidechain).toBe(true);
-    expect(defaults.external).toBe(false);
-    expect(gateSettings({ ...defaults, external: true })).toMatchObject({
-      outerKey: 1,
-      ownKey: 0,
-    });
-    expect(gateSettings(defaults)).toMatchObject({ outerKey: 0, ownKey: 1 });
-  });
-
-  test("the engine has a sidechain input that only the key switch opens", () => {
-    const { ctx, made } = fakeContext();
-    const engine = createGateEngine(ctx, { ...defaults, external: true });
-    expect(engine.sidechain).toBeDefined();
-    expect(engine.sidechain).not.toBe(engine.input);
-    const keys = made.gains.filter(
-      (gain) => gain.gain.value === 0 || gain.gain.value === 1
-    );
-    expect(keys.length).toBeGreaterThanOrEqual(2);
-    engine.update({ ...defaults, external: false });
-    const targets = made.gains.flatMap((gain) => gain.gain.targets);
-    expect(targets).toContain(1);
-    expect(targets).toContain(0);
-  });
-
-  test("an agent can switch the key on", () => {
-    expect(gateDevice.apply(defaults, { external: true }).state.external).toBe(
-      true
-    );
+    engine.dispose();
   });
 });

@@ -12,6 +12,11 @@
   "dependencies": {
     "@audio-ui/core": "*",
     "@audio-ui/react": "*",
+    "@audio/dynamics-compressor": "catalog:",
+    "@audio/dynamics-fet": "catalog:",
+    "@audio/dynamics-opto": "catalog:",
+    "@audio/dynamics-varimu": "catalog:",
+    "@audio/dynamics-vca": "catalog:",
     "@base-ui/react": "catalog:",
     "@fontsource/bricolage-grotesque": "^5.3.0",
     "@fontsource/instrument-serif": "^5.3.0",

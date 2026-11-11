@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   type PolySynthNote,
@@ -106,7 +106,7 @@ export default function BlockPolySynth() {
   const midi = useMidiInput({
     onNoteOff: (pitch: number) => noteOff(`midi-${pitch}`),
     onNoteOn: (pitch: number, velocity: number) =>
-      noteOn({ frequency: noteToFrequency(pitch), velocity }, `midi-${pitch}`),
+      noteOn({ frequency: midiToHz(pitch), velocity }, `midi-${pitch}`),
   });
 
   return (

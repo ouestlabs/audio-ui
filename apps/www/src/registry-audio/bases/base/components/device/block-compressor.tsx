@@ -14,10 +14,7 @@ import { CompressorPanel } from "@/registry-audio/bases/base/devices/compressor/
 import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
-import {
-  demoKey,
-  renderDemoSource,
-} from "@/registry-audio/bases/base/lib/demo-sound";
+import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const FLOOR_DB = -80;
@@ -30,7 +27,7 @@ const MASTER_VOLUME = 0.7;
  * A compressor you can plug in: its state, a panel that draws it, an engine
  * that plays it, side by side. Each is its own file and none knows the others:
  * the state is a plain object, so a host keeps its own and uses what it needs.
- * Play it from its session and turn the knobs; switch Sidechain on and a kick ducks a held chord.
+ * Play it from its session and turn the knobs.
  */
 export default function BlockCompressor() {
   const [state, setState] = useState<CompressorState>(() =>
@@ -43,9 +40,7 @@ export default function BlockCompressor() {
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  // With the key on, a held chord is ducked by the kick of a loop: the key is heard by the compressor only.
-  const keyed = state.external;
-  const name = useDemoSource(keyed ? "chord" : "groove");
+  const name = useDemoSource("groove");
   useEffect(() => {
     const ctx = webAudio.getContext();
     if (!(playing && ctx && master)) {
@@ -54,33 +49,22 @@ export default function BlockCompressor() {
     ctx.resume();
     let cancelled = false;
     let stop = () => undefined;
-    const buffers = Promise.all([
-      renderDemoSource(name, ctx.sampleRate),
-      keyed ? renderDemoSource(demoKey(name), ctx.sampleRate) : null,
-    ]);
-    buffers.then(([signal, key]) => {
+    renderDemoSource(name, ctx.sampleRate).then((signal) => {
       if (cancelled) {
         return;
       }
       const source = ctx.createBufferSource();
       source.buffer = signal;
       source.loop = true;
-      const keySource = key ? ctx.createBufferSource() : null;
       const compressor = createCompressorEngine(ctx, stateRef.current);
       const tap = ctx.createAnalyser();
       tap.fftSize = FFT_SIZE;
       source.connect(tap);
       source.connect(compressor.input);
-      if (keySource && key) {
-        keySource.buffer = key;
-        keySource.loop = true;
-        keySource.connect(compressor.sidechain);
-      }
       compressor.output.connect(master);
       engine.current = compressor;
       const startAt = ctx.currentTime + 0.05;
       source.start(startAt);
-      keySource?.start(startAt);
 
       const samples = new Float32Array(new ArrayBuffer(tap.fftSize * 4));
       let held = FLOOR_DB;
@@ -102,8 +86,6 @@ export default function BlockCompressor() {
         cancelAnimationFrame(frame);
         source.stop();
         source.disconnect();
-        keySource?.stop();
-        keySource?.disconnect();
         tap.disconnect();
         compressor.dispose();
         engine.current = null;
@@ -114,7 +96,7 @@ export default function BlockCompressor() {
       cancelled = true;
       stop();
     };
-  }, [keyed, level, master, name, playing]);
+  }, [level, master, name, playing]);
 
   // The engine follows the state, whoever changed it: a knob or a call.
   useEffect(() => {

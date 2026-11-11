@@ -86,7 +86,7 @@ interface DeesserPanelProps {
  * The face of the de-esser device: the model picked in its title bar, what it
  * does at each frequency when the highs are taken down as far as the range
  * allows, with a handle on the curve at the frequency to drag across, and
- * down for the range. The threshold, the ratio and the listen switch are the
+ * down for the range. The over body, the ratio and the range are the
  * knobs under it, those the model does not use drawn off. Controlled like
  * `DevicePanel`, which it uses for them. Its children sit at the end of the
  * title bar.

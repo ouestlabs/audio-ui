@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
@@ -55,7 +55,7 @@ function GuitarPanel({
   value,
 }: GuitarPanelProps) {
   const play = useCallback(
-    (pitch: number) => onNoteOn?.({ frequency: noteToFrequency(pitch) }),
+    (pitch: number) => onNoteOn?.({ frequency: midiToHz(pitch) }),
     [onNoteOn]
   );
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);

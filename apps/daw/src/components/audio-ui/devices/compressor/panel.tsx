@@ -41,15 +41,13 @@ const GROUPS = [
   { label: "Time", parameters: ["attackMs", "releaseMs"] },
   {
     label: "Output",
-    parameters: ["makeupDb", "mix", "autoMakeup", "external"],
+    parameters: ["makeupDb", "mix"],
   },
 ] as const;
 const IN_THE_TITLE_BAR = ["enabled", "model"] as const;
 const MODELS =
   compressorDevice.parameters.find((parameter) => parameter.id === "model")
     ?.options ?? [];
-/** With auto make-up on, the node's own make-up plays and this knob does nothing. */
-const MAKEUP_OFF = ["makeupDb"] as const;
 
 interface CompressorPanelProps {
   /** Whatever the host puts next to the name: a play button, a reading. */
@@ -84,13 +82,7 @@ function CompressorPanel({
     },
     [onValueChange, value]
   );
-  const keyed = value.model === "clean" && value.external;
-  let unused: readonly (keyof CompressorState)[] | undefined = value.autoMakeup
-    ? MAKEUP_OFF
-    : undefined;
-  if (value.model !== "clean") {
-    unused = compressorUnused(value.model);
-  }
+  const unused = compressorUnused(value.model);
   const dot = useMemo(
     () =>
       level && {
@@ -155,7 +147,7 @@ function CompressorPanel({
         </DeviceHeader>
         <div className="flex min-h-0 grow flex-col gap-2 p-2">
           <Plot
-            aria-label={keyed ? "Threshold of the sidechain" : "Transfer curve"}
+            aria-label="Transfer curve"
             className="h-28 min-h-16 grow"
             maxX={MAX_DB}
             maxY={MAX_DB}
@@ -177,9 +169,9 @@ function CompressorPanel({
                 className="stroke-foreground/40"
                 value={value.thresholdDb}
               />
-              {keyed ? null : <PlotCurve fn={output} />}
+              <PlotCurve fn={output} />
             </PlotGraph>
-            {dot && !keyed ? (
+            {dot ? (
               <PlotDot
                 className="group-data-idle/compressor:hidden"
                 source={dot}

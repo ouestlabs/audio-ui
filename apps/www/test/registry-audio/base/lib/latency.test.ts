@@ -1,6 +1,5 @@
 import { describe, expect, test } from "bun:test";
 import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
-import { deesserDevice } from "@/registry-audio/bases/base/devices/deesser/device";
 import { delayDevice } from "@/registry-audio/bases/base/devices/delay/device";
 import { distortionDevice } from "@/registry-audio/bases/base/devices/distortion/device";
 import { equalizerDevice } from "@/registry-audio/bases/base/devices/equalizer/device";
@@ -18,17 +17,9 @@ describe("the latency devices declare", () => {
     expect(oversamplingSeconds("none", 48_000)).toBe(0);
   });
 
-  test("the compressor is the look-ahead of its node, on or off", () => {
-    const on = compressorDevice.defaults();
-    expect(compressorDevice.latency(on, 48_000)).toBeCloseTo(0.006, 9);
-    expect(
-      compressorDevice.latency({ ...on, enabled: false }, 48_000)
-    ).toBeCloseTo(0.006, 9);
-  });
-
-  test("the limiter is the look-ahead and the oversampling when it works, nothing when it is off", () => {
+  test("the limiter is its look-ahead when it works, nothing when it is off", () => {
     const on = limiterDevice.defaults();
-    expect(limiterDevice.latency(on, 48_000)).toBeCloseTo(0.01, 9);
+    expect(limiterDevice.latency(on, 48_000)).toBeCloseTo(0.005, 9);
     expect(limiterDevice.latency({ ...on, enabled: false }, 48_000)).toBe(0);
   });
 
@@ -48,7 +39,9 @@ describe("the latency devices declare", () => {
 
   test("a device with none declared adds none", () => {
     expect(delayDevice.latency(delayDevice.defaults(), 48_000)).toBe(0);
+    expect(compressorDevice.latency(compressorDevice.defaults(), 48_000)).toBe(
+      0
+    );
     expect(equalizerDevice.latency(equalizerDevice.defaults(), 48_000)).toBe(0);
-    expect(deesserDevice.latency(deesserDevice.defaults(), 48_000)).toBe(0);
   });
 });

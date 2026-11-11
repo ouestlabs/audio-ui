@@ -165,7 +165,7 @@ function writeDevice(device: TrackDevice): string | null {
       return element("Compressor", { ...common, deviceName: "Compressor" }, [
         enabled,
         real("Attack", at("attack"), num(state.attackMs) / 1000, "seconds"),
-        bool("AutoMakeup", at("auto"), state.autoMakeup === true),
+        bool("AutoMakeup", at("auto"), false),
         real("OutputGain", at("output"), num(state.makeupDb), "decibel"),
         real("Ratio", at("ratio"), num(state.ratio), "linear"),
         real("Release", at("release"), num(state.releaseMs) / 1000, "seconds"),
@@ -704,9 +704,6 @@ function readDevice(
     case "Compressor":
       return made(compressorDevice, {
         attackMs: seconds("Attack"),
-        autoMakeup: kid(el, "AutoMakeup")
-          ? kid(el, "AutoMakeup")?.getAttribute("value") === "true"
-          : undefined,
         makeupDb: decibel("OutputGain"),
         ratio: valueIn(kid(el, "Ratio"), "linear") ?? undefined,
         releaseMs: seconds("Release"),

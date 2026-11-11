@@ -1,7 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { transientShaper } from "@audio/dynamics-transient-shaper/audio";
 import {
-  TRANSIENT_FOLLOWER_WORKLET,
+  TRANSIENT_WORKLET,
   transientDevice,
   transientSettings,
 } from "@/registry-audio/bases/base/devices/transient/device";
@@ -10,7 +10,7 @@ import { madeProcessor } from "./manifest-processor";
 const RATE = 48_000;
 const BLOCK = 128;
 const defaults = transientDevice.defaults();
-const follower = { ...defaults, model: "follower" as const };
+const follower = defaults;
 
 /** Hits: a decaying tone every 250 ms. */
 const hits = (start: number) =>
@@ -34,13 +34,9 @@ const parametersOf = (state = follower) =>
     )
   );
 
-describe("the transient shaper's follower model", () => {
+describe("the transient shaper's model", () => {
   test("plays the processor of @audio/dynamics-transient-shaper as published, its amounts changed as it plays", () => {
-    const { processor } = madeProcessor(
-      TRANSIENT_FOLLOWER_WORKLET,
-      "follower",
-      RATE
-    );
+    const { processor } = madeProcessor(TRANSIENT_WORKLET, "shaper", RATE);
     const first = parametersOf();
     const run = transientShaper({
       currentTime: 0,
@@ -78,7 +74,5 @@ describe("the transient shaper's follower model", () => {
     });
     expect(20 * Math.log10(1 + modelParams.attackGain)).toBeCloseTo(6, 9);
     expect(20 * Math.log10(1 + modelParams.sustainGain)).toBeCloseTo(-6, 9);
-    expect(transientSettings(follower).modelWet).toBe(1);
-    expect(transientSettings(defaults).modelWet).toBe(0);
   });
 });

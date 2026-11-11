@@ -29,17 +29,17 @@ describe("scalePitchClasses", () => {
   });
 
   test("the whole-tone scale is every other key, so a semitone up is the other one", () => {
-    expect(scalePitchClasses({ name: "whole-tone", root: 0 })).toEqual([
+    expect(scalePitchClasses({ name: "whole", root: 0 })).toEqual([
       0, 2, 4, 6, 8, 10,
     ]);
-    expect(scalePitchClasses({ name: "whole-tone", root: 1 })).toEqual([
+    expect(scalePitchClasses({ name: "whole", root: 1 })).toEqual([
       1, 3, 5, 7, 9, 11,
     ]);
   });
 
   test("wraps a root past B around the octave", () => {
-    expect(scalePitchClasses({ name: "major-pentatonic", root: 14 })).toEqual(
-      scalePitchClasses({ name: "major-pentatonic", root: 2 })
+    expect(scalePitchClasses({ name: "pentatonic-major", root: 14 })).toEqual(
+      scalePitchClasses({ name: "pentatonic-major", root: 2 })
     );
   });
 });
@@ -62,7 +62,7 @@ describe("nearestInScale", () => {
     const cMajor = { name: "major", root: 0 } as const;
     expect(nearestInScale(61, cMajor)).toBe(60);
     expect(nearestInScale(66, cMajor)).toBe(65);
-    const pentatonic = { name: "minor-pentatonic", root: 0 } as const;
+    const pentatonic = { name: "pentatonic-minor", root: 0 } as const;
     expect(nearestInScale(62, pentatonic)).toBe(63);
     expect(nearestInScale(61, pentatonic)).toBe(60);
   });

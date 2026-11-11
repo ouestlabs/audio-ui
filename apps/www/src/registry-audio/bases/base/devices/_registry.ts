@@ -75,7 +75,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "The detector of a key: an AudioWorklet loaded once per context from a blob, which reads a signal and writes the gain a compressor would apply to it. The compressor's key and the de-esser use it.",
+      "The detector of a key: an AudioWorklet loaded once per context from a blob, which reads a signal and writes the gain a compressor would apply to it. The multiband compressor uses it.",
     files: [
       {
         path: "devices/key-detector.ts",
@@ -84,7 +84,6 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "key-detector",
-    registryDependencies: ["@audio-ui/compressor-device"],
     type: "registry:lib",
   },
   {
@@ -259,7 +258,7 @@ export const devices: RegistryItem[] = [
       "@audio/dynamics-vca",
     ],
     description:
-      "The compressor as a device: its parameters and what they mean, its models (the browser's clean compressor, and the smooth, VCA, FET, opto and vari-mu compressors of @audio/dynamics-*), the numbers that go on the nodes for a state, the curve a state plays and the source of the models' worklet, with no panel and no audio in it.",
+      "The compressor as a device: its parameters and what they mean, its models (the smooth, VCA, FET, opto and vari-mu compressors of @audio/dynamics-*), the numbers that go on the nodes for a state, the curve a state plays and the source of the models' worklet, with no panel and no audio in it.",
     files: [
       {
         path: "devices/compressor/device.ts",
@@ -280,7 +279,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A compressor on the Web Audio API for a compressor state: the node, its make-up taken back out or kept, a dry and compressed mix aligned to the node's lookahead, parameters that move without a click, a key (a worklet detector that ducks the signal from another one) and the other models in a worklet of their own, fed only while one plays.",
+      "A compressor on the Web Audio API for a compressor state: the audio.js models in a worklet, the make-up after it, a dry and compressed mix, parameters that move without a click, the signal passing until the worklet is ready.",
     files: [
       {
         path: "devices/compressor/engine.ts",
@@ -289,10 +288,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "compressor-engine",
-    registryDependencies: [
-      "@audio-ui/compressor-device",
-      "@audio-ui/key-detector",
-    ],
+    registryDependencies: ["@audio-ui/compressor-device"],
     type: "registry:lib",
   },
   {
@@ -320,7 +316,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core", "@audio/dynamics-deesser"],
     description:
-      "The de-esser as a device: a frequency, a threshold, a ratio and a range, its models (the clean split, or the split, band and wide band de-essers of @audio/dynamics-deesser, which tell an s by the highs over the voice's body), the numbers that go on the nodes for a state, the table that keeps the highs above their floor, the response a state draws and the source of the other models' worklet, with no panel and no audio in it.",
+      "The de-esser as a device: a frequency, an over-body level, a ratio and a range, its models (the split, band and wide band de-essers of @audio/dynamics-deesser, which tell an s by the highs over the voice's body), the numbers that go on the worklet for a state, the response a state draws and the source of the worklet, with no panel and no audio in it.",
     files: [
       {
         path: "devices/deesser/device.ts",
@@ -341,7 +337,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A de-esser on the Web Audio API for a de-esser state: a Linkwitz-Riley split at the frequency, the highs read by the compressor's detector and taken down over the threshold, never under the range, and added back to the lows, or the other models in a worklet fed only while one plays.",
+      "A de-esser on the Web Audio API for a de-esser state: the audio.js de-esser in a worklet, the highs passing until it is ready.",
     files: [
       {
         path: "devices/deesser/engine.ts",
@@ -350,10 +346,7 @@ export const devices: RegistryItem[] = [
       },
     ],
     name: "deesser-engine",
-    registryDependencies: [
-      "@audio-ui/deesser-device",
-      "@audio-ui/key-detector",
-    ],
+    registryDependencies: ["@audio-ui/deesser-device"],
     type: "registry:lib",
   },
   {
@@ -582,7 +575,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Electric Piano device: its four presets, its controls by what they do (tone, pickup, tremolo, output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -665,7 +658,7 @@ export const devices: RegistryItem[] = [
       "@audio/filter-oberheim",
     ],
     description:
-      "The filter as a device: a type, a circuit (clean, two Moog ladders, a diode ladder, a Korg35 or an Oberheim SEM), a cutoff, a resonance and a drive, the numbers that go on the node and the circuit worklet for a state, the worklet's source, and the curve a state plays, an analog circuit's measured on it, with no panel and no audio in it.",
+      "The filter as a device: a type, a circuit (two Moog ladders, a diode ladder, a Korg35 or an Oberheim SEM), a cutoff, a resonance and a drive, the numbers that go on the circuit worklet for a state, the worklet's source, and the curve a state plays, the circuit's measured on it, with no panel and no audio in it.",
     files: [
       {
         path: "devices/filter/device.ts",
@@ -686,7 +679,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A filter on the Web Audio API for a filter state: the clean circuit a biquad node, an analog one an AudioWorklet loaded from a blob and fed only while it plays, the two cross-faded on a change of circuit, and the signal going round them when it is off, moving without a click.",
+      "A filter on the Web Audio API for a filter state: the circuit an AudioWorklet loaded from a blob, the signal passing until it is ready and going round it when it is off, moving without a click.",
     files: [
       {
         path: "devices/filter/engine.ts",
@@ -753,7 +746,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the FM Synth device: its eight presets, what every operator shares, each operator's four controls and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -776,7 +769,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core", "@audio/dynamics-gate"],
     description:
-      "The gate as a device: a threshold, a floor, an attack, a hold, a release and a look-ahead, its models (clean, with a sidechain, or the hysteresis gate of @audio/dynamics-gate), the numbers that go on the nodes for a state, the detector worklet, the source of the hysteresis model's worklet and the curve a state plays, with no panel and no audio in it.",
+      "The gate as a device: a threshold, a floor, an attack, a hold, a release and a look-ahead, the numbers that go on the worklet for a state, the source of the worklet of @audio/dynamics-gate and the curve a state plays, with no panel and no audio in it.",
     files: [
       {
         path: "devices/gate/device.ts",
@@ -797,7 +790,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A gate on the Web Audio API for a gate state: a worklet detector reads the key and writes the gain (threshold, attack, hold, release), and a delay in front of the gain gives the look-ahead, or the hysteresis model in a worklet fed only while it plays.",
+      "A gate on the Web Audio API for a gate state: the audio.js gate in a worklet, with its look-ahead, the signal passing until it is ready.",
     files: [
       {
         path: "devices/gate/engine.ts",
@@ -813,7 +806,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the gate device: the model picked in its title bar, its transfer curve against the straight line of a clean sound with a handle on the threshold and a line where the hysteresis model closes, over the device knobs, those the model does not use drawn off.",
+      "The face of the gate device: its transfer curve against the straight line of a clean sound with a handle on the threshold and a line where it closes, over the device knobs.",
     files: [
       {
         path: "devices/gate/panel.tsx",
@@ -1097,7 +1090,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The guitar's face: the string's tone, decay and palm mute, the body and the volume, and a keyboard from the open low E up three octaves, controlled, with no audio in it.",
     files: [
@@ -1119,7 +1112,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core", "@audio/dynamics-limiter"],
     description:
-      "The limiter as a device: an input gain, a ceiling and a release, its models (the browser's clean compressor and a clip, or the lookahead brickwall limiter of @audio/dynamics-limiter with its look-ahead and true peak), the numbers that go on the nodes for a state, the curve a state plays and the source of the look-ahead model's worklet, with no panel and no audio in it.",
+      "The limiter as a device: an input gain, a ceiling and a release, the lookahead brickwall limiter of @audio/dynamics-limiter with its look-ahead and true peak, the numbers that go on the nodes for a state, the curve a state plays and the source of its worklet, with no panel and no audio in it.",
     files: [
       {
         path: "devices/limiter/device.ts",
@@ -1143,7 +1136,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: [],
     description:
-      "A limiter on the Web Audio API for a limiter state: the browser compressor node at a ratio of 20 with no knee, its make-up taken back out, or the look-ahead model in a worklet fed only while it plays, the signal going round both when it is off.",
+      "A limiter on the Web Audio API for a limiter state: the audio.js limiter in a worklet, the signal passing at the input gain until it is ready and going round it when it is off.",
     files: [
       {
         path: "devices/limiter/engine.ts",
@@ -1159,7 +1152,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the limiter device: the model picked in its title bar, its transfer curve against the straight line of a clean sound with a handle for the ceiling and the input gain, over the device knobs, those the model does not use drawn off.",
+      "The face of the limiter device: its transfer curve against the straight line of a clean sound with a handle for the ceiling and the input gain, over the device knobs.",
     files: [
       {
         path: "devices/limiter/panel.tsx",
@@ -1268,7 +1261,12 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio-ui/icons"],
+    dependencies: [
+      "@audio-ui/react",
+      "@audio-ui/core",
+      "@audio-ui/icons",
+      "@audio/note",
+    ],
     description:
       "The face of the Mono Synth device: its eight presets, the oscillator's wave and the range in its title bar, its controls by what they do (oscillators, filter, envelope, glide and vibrato) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -1377,7 +1375,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Organ device: its six registrations and the rotary speaker in its title bar, nine drawbars as faders, its percussion, key click, drive and volume, and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -1545,7 +1543,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "xypad"],
-    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons", "@audio/note"],
     description:
       "The face of the Pocket Synth device: a pad that plays it, its waveform and filter, and its volume. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -1600,7 +1598,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Poly Synth device: its eight presets, its controls by what they do (oscillators, filter, envelope, vibrato and chorus) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -2351,7 +2349,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "pad", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Sampler device: its sample in its title bar, its controls and sixteen pads, one a slice, that play it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -2460,7 +2458,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the String Machine device: its eight presets, its controls by what they do (registers, tone, bow and output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -2513,7 +2511,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "piano"],
-    dependencies: ["@audio-ui/react", "@audio-ui/core"],
+    dependencies: ["@audio-ui/react", "@audio-ui/core", "@audio/note"],
     description:
       "The face of the Tape Keys device: the track its heads read in its title bar, the tape's speed, wow and tone, the volume, and its 35 keys. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [
@@ -2536,7 +2534,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core", "@audio/dynamics-transient-shaper"],
     description:
-      "The transient shaper as a device: an attack and a sustain, each up or down by 12 dB, and an output gain, its models (clean, or the follower of @audio/dynamics-transient-shaper), the numbers that go on the nodes for a state and the sources of the detector's and the follower's worklets, with no panel and no audio in it.",
+      "The transient shaper as a device: an attack and a sustain, each up or down by 12 dB, and an output gain, the numbers that go on the nodes for a state and the source of the worklet of @audio/dynamics-transient-shaper, with no panel and no audio in it.",
     files: [
       {
         path: "devices/transient/device.ts",
@@ -2557,7 +2555,7 @@ export const devices: RegistryItem[] = [
     categories: ["lib", "audio", "device"],
     dependencies: ["@audio-ui/core"],
     description:
-      "A transient shaper on the Web Audio API for a transient state: a worklet detector reads the shape of the envelope and writes the gain, and the audio waits a millisecond for it so the attack is shaped from its first sample, or the follower model in a worklet fed only while it plays.",
+      "A transient shaper on the Web Audio API for a transient state: the audio.js shaper in a worklet, the signal passing unchanged until it is ready.",
     files: [
       {
         path: "devices/transient/engine.ts",
@@ -2573,7 +2571,7 @@ export const devices: RegistryItem[] = [
     categories: ["device", "plot", "knob"],
     dependencies: ["@audio-ui/react"],
     description:
-      "The face of the transient shaper device: the model picked in its title bar, a square with the sustain across and the attack up, and a handle to drag to both at once, over the output knob.",
+      "The face of the transient shaper device: a square with the sustain across and the attack up, and a handle to drag to both at once, over the output knob.",
     files: [
       {
         path: "devices/transient/panel.tsx",
@@ -2730,7 +2728,7 @@ export const devices: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "xypad"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/react", "@audio/note"],
     description:
       "The face of the Wave Shaper device: a pad that plays it, its waveform and its knobs. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
     files: [

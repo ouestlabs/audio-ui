@@ -341,7 +341,6 @@ const MAIN: ArrangementTrack = {
     }),
     device("master-glue", compressorDevice, {
       attackMs: 30,
-      autoMakeup: false,
       ratio: 2,
       releaseMs: 200,
       thresholdDb: -20,

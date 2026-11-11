@@ -8,7 +8,6 @@ import {
   formatDb,
   formatHz,
   toWebAudioQ,
-  webAudioCompressorOutput,
 } from "./index.ts";
 
 describe("biquadResponse", () => {
@@ -296,106 +295,6 @@ describe("shelves have the node's fixed slope", () => {
       for (const hz of [100, 800, 1000, 1500, 8000]) {
         expect(resonant(hz)).toBe(flat(hz));
       }
-    }
-  });
-});
-
-describe("webAudioCompressorOutput", () => {
-  // The peak in dBFS of a sine of the input level through Chrome's
-  // DynamicsCompressorNode, steady state, attack 3 ms, release 250 ms.
-  const measured: [
-    thresholdDb: number,
-    kneeDb: number,
-    ratio: number,
-    Record<number, number>,
-  ][] = [
-    [
-      -24,
-      0,
-      4,
-      {
-        "-60": -49.2,
-        "-40": -29.2,
-        "-30": -19.2,
-        "-24": -13.2,
-        "-18": -11.57,
-        "-12": -9.99,
-        "-6": -8.46,
-        "0": -6.92,
-      },
-    ],
-    [
-      -24,
-      30,
-      4,
-      {
-        "-60": -57.61,
-        "-40": -37.61,
-        "-30": -27.61,
-        "-24": -21.61,
-        "-18": -15.75,
-        "-12": -10.27,
-        "-6": -5.38,
-        "0": -1.49,
-      },
-    ],
-    [
-      -12,
-      0,
-      12,
-      {
-        "-60": -53.4,
-        "-40": -33.4,
-        "-30": -23.4,
-        "-24": -17.4,
-        "-18": -11.4,
-        "-12": -5.4,
-        "-6": -4.74,
-        "0": -4.16,
-      },
-    ],
-  ];
-
-  for (const [thresholdDb, kneeDb, ratio, row] of measured) {
-    test(`threshold ${thresholdDb}, knee ${kneeDb}, ratio ${ratio}: exact below the threshold, within 0.3 dB above`, () => {
-      const output = webAudioCompressorOutput({ kneeDb, ratio, thresholdDb });
-      for (const [input, expected] of Object.entries(row)) {
-        const tolerance = Number(input) <= thresholdDb ? 0.02 : 0.3;
-        expect(Math.abs(output(Number(input)) - expected)).toBeLessThan(
-          tolerance
-        );
-      }
-    });
-  }
-
-  test("adds the node's own make-up gain: 0.6 of what the curve takes off at full scale", () => {
-    const output = webAudioCompressorOutput({
-      kneeDb: 0,
-      ratio: 4,
-      thresholdDb: -24,
-    });
-    // Full scale comes out at -24 + 24 / 4 = -18, so 10.8 dB is added.
-    expect(output(-60)).toBeCloseTo(-60 + 10.8, 6);
-  });
-
-  test("is not the textbook curve, which has no make-up and a centred knee", () => {
-    const settings = { kneeDb: 30, ratio: 4, thresholdDb: -24 };
-    expect(webAudioCompressorOutput(settings)(-60)).not.toBe(
-      compressorOutput(settings)(-60)
-    );
-  });
-
-  test("never lets the output rise above the input by more than the make-up", () => {
-    const output = webAudioCompressorOutput({
-      kneeDb: 6,
-      ratio: 8,
-      thresholdDb: -20,
-    });
-    let previous = Number.NEGATIVE_INFINITY;
-    for (let db = -80; db <= 0; db += 1) {
-      const out = output(db);
-      expect(out).toBeGreaterThanOrEqual(previous);
-      previous = out;
     }
   });
 });

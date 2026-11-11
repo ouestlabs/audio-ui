@@ -1,10 +1,8 @@
 "use client";
 
+import { cents } from "@audio/note";
 import {
-  CONCERT_PITCH_HZ,
   detectPitch,
-  type Note,
-  nearestNote,
   type PitchDetectionOptions,
   type PitchEstimate,
 } from "@audio-ui/core/pitch";
@@ -12,10 +10,18 @@ import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 
 /** What a tuner shows: the note nearest the sound, and how far from it the sound is. */
-export interface PitchReading extends Note {
+export interface PitchReading {
+  /** How far the frequency is from the note, from -50 (flat) to +50 (sharp) cents. */
+  cents: number;
   /** How periodic the sound is, from 0 to 1. */
   confidence: number;
   frequency: number;
+  /** The note's name, sharps for the black keys: `"A"`, `"C#"`. */
+  name: string;
+  /** The octave in scientific pitch notation: middle C is C4. */
+  octave: number;
+  /** The note as a MIDI note number: A4 is 69. */
+  pitch: number;
 }
 
 export interface UsePitchOptions extends PitchDetectionOptions {
@@ -45,8 +51,19 @@ function steadied(
     recent.shift();
   }
   const steady = middle(recent);
-  const note = nearestNote(steady, reference);
-  return note ? { ...note, confidence, frequency: steady } : null;
+  if (!(steady > 0)) {
+    return null;
+  }
+  const note = cents(steady, { a4: reference });
+  const [, name = "", octave = "0"] = /^(.*?)(-?\d+)$/.exec(note.name) ?? [];
+  return {
+    cents: note.cents,
+    confidence,
+    frequency: steady,
+    name,
+    octave: Number(octave),
+    pitch: note.midi,
+  };
 }
 
 /**
@@ -62,7 +79,7 @@ export function usePitch(
     median = 5,
     minHz,
     minLevel,
-    reference = CONCERT_PITCH_HZ,
+    reference = 440,
     threshold,
   }: UsePitchOptions = {}
 ): Source<PitchReading | null> {

@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import {
   type DragEvent,
   useCallback,
@@ -112,7 +112,7 @@ export default function BlockSampler() {
   const midi = useMidiInput({
     onNoteOff: (pitch: number) => noteOff(`midi-${pitch}`),
     onNoteOn: (pitch: number, velocity: number) =>
-      noteOn({ frequency: noteToFrequency(pitch), velocity }, `midi-${pitch}`),
+      noteOn({ frequency: midiToHz(pitch), velocity }, `midi-${pitch}`),
   });
 
   // A file dropped on the sampler is decoded and played in place of its own sample.

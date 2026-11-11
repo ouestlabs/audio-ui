@@ -3,7 +3,6 @@ import type { CompressorState } from "@/components/audio-ui/devices/compressor/d
 /** The panel's controls, as the panel speaks them: a knob on 0 to 10, a switch with its stops. */
 export interface Panel {
   attack: number;
-  auto: boolean;
   /** Whether the compressor is in the signal's path. */
   engaged: boolean;
   input: number;
@@ -28,7 +27,6 @@ export type Knob =
 
 export const DEFAULTS: Panel = {
   attack: 3,
-  auto: true,
   engaged: true,
   input: 5,
   knee: "Soft",
@@ -58,12 +56,11 @@ export const outputGain = (value: number) => unit(value) ** 2;
 export function stateOf(panel: Panel): CompressorState {
   return {
     attackMs: attackMs(panel.attack),
-    autoMakeup: panel.auto,
     enabled: panel.engaged,
-    external: false,
     kneeDb: panel.knee === "Soft" ? 8 : 0,
     makeupDb: makeupDb(panel.makeup),
     mix: mixPercent(panel.mix),
+    model: "smooth",
     ratio: ratioOf(panel.ratio),
     releaseMs: releaseMs(panel.release),
     thresholdDb: thresholdDb(panel.threshold),

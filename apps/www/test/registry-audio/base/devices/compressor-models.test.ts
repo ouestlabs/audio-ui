@@ -9,7 +9,6 @@ import {
   compressorUnused,
   modelCurve,
 } from "@/registry-audio/bases/base/devices/compressor/device";
-import { createCompressorEngine } from "@/registry-audio/bases/base/devices/compressor/engine";
 import { madeProcessor, type Processor } from "./manifest-processor";
 
 const RATE = 48_000;
@@ -291,85 +290,23 @@ describe("modelCurve", () => {
 });
 
 describe("compressorUnused", () => {
-  test("the clean model uses everything; the others not its auto make-up and sidechain, nor a knob their manifest has no parameter for", () => {
-    expect(compressorUnused("clean")).toEqual([]);
-    expect(compressorUnused("vca")).toEqual(["autoMakeup", "external"]);
-    expect(compressorUnused("opto")).toEqual([
-      "autoMakeup",
-      "external",
-      "releaseMs",
-    ]);
-    expect(compressorUnused("varimu")).toEqual([
-      "autoMakeup",
-      "external",
-      "ratio",
-    ]);
+  test("a model does not use a knob its manifest has no parameter for", () => {
+    expect(compressorUnused("smooth")).toEqual([]);
+    expect(compressorUnused("vca")).toEqual([]);
+    expect(compressorUnused("opto")).toEqual(["releaseMs"]);
+    expect(compressorUnused("varimu")).toEqual(["ratio"]);
   });
 });
 
 describe("compressorSettings with a model", () => {
-  test("the model plays the mix, with the make-up after it; the node and the key are silent", () => {
+  test("the model plays the mix, with the make-up after it", () => {
     const settings = compressorSettings({
       ...defaults,
-      external: true,
       makeupDb: 4,
       mix: 80,
       model: "fet",
     });
-    expect(settings).toMatchObject({
-      external: false,
-      keyedWet: 0,
-      modelTrimDb: 4,
-      modelWet: 0.8,
-      nativeWet: 0,
-    });
+    expect(settings).toMatchObject({ modelTrimDb: 4, wet: 0.8 });
     expect(settings.dry).toBeCloseTo(0.2, 9);
-  });
-});
-
-describe("the engine with a model", () => {
-  test("in a context with no worklets the node plays for it, at its mix", () => {
-    class Param {
-      value = 0;
-      setTargetAtTime() {
-        return this;
-      }
-      setValueAtTime() {
-        return this;
-      }
-    }
-    class Node {
-      connect<T>(destination: T) {
-        return destination;
-      }
-      disconnect = () => undefined;
-    }
-    const gains: { gain: Param }[] = [];
-    const ctx = {
-      createDelay: () => Object.assign(new Node(), { delayTime: new Param() }),
-      createDynamicsCompressor: () =>
-        Object.assign(new Node(), {
-          attack: new Param(),
-          knee: new Param(),
-          ratio: new Param(),
-          reduction: -3,
-          release: new Param(),
-          threshold: new Param(),
-        }),
-      createGain: () => {
-        const gain = Object.assign(new Node(), { gain: new Param() });
-        gains.push(gain);
-        return gain;
-      },
-      currentTime: 0,
-    } as unknown as BaseAudioContext;
-    const engine = createCompressorEngine(ctx, {
-      ...defaults,
-      mix: 60,
-      model: "vca",
-    });
-    // input, output, dry, trim, wet: the node's wet carries the mix.
-    expect(gains[4]?.gain.value).toBeCloseTo(0.6, 9);
-    expect(engine.reduction).toBe(-3);
   });
 });

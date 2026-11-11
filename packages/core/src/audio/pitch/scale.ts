@@ -1,24 +1,17 @@
 /**
- * Scales: the pitch classes a scale keeps above its root, inside one octave.
- * A scale is a root (a pitch class, 0 for C) and the name of its steps.
+ * Scales on a root: which pitch classes a scale keeps. The steps of most come
+ * from `@audio/note`, with the three church modes it does not list added; the
+ * snapping is its `snapMidi`.
  */
+
+import { SCALES as NOTE_SCALES, snapMidi } from "@audio/note";
 
 /** The steps of each scale, as semitones above the root. */
 export const SCALES = {
-  blues: [0, 3, 5, 6, 7, 10],
-  chromatic: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
-  dorian: [0, 2, 3, 5, 7, 9, 10],
-  "harmonic-minor": [0, 2, 3, 5, 7, 8, 11],
+  ...NOTE_SCALES,
   locrian: [0, 1, 3, 5, 6, 8, 10],
   lydian: [0, 2, 4, 6, 7, 9, 11],
-  major: [0, 2, 4, 5, 7, 9, 11],
-  "major-pentatonic": [0, 2, 4, 7, 9],
-  "melodic-minor": [0, 2, 3, 5, 7, 9, 11],
-  minor: [0, 2, 3, 5, 7, 8, 10],
-  "minor-pentatonic": [0, 3, 5, 7, 10],
-  mixolydian: [0, 2, 4, 5, 7, 9, 10],
   phrygian: [0, 1, 3, 5, 7, 8, 10],
-  "whole-tone": [0, 2, 4, 6, 8, 10],
 } as const satisfies Record<string, readonly number[]>;
 
 export type ScaleName = keyof typeof SCALES;
@@ -49,15 +42,8 @@ export function inScale(pitch: number, scale: Scale): boolean {
  * nearest one, the lower of two as near.
  */
 export function nearestInScale(pitch: number, scale: Scale): number {
-  const classes = scalePitchClasses(scale);
-  const rounded = Math.round(pitch);
-  for (let distance = 0; distance <= 6; distance += 1) {
-    if (classes.includes(pitchClass(rounded - distance))) {
-      return rounded - distance;
-    }
-    if (classes.includes(pitchClass(rounded + distance))) {
-      return rounded + distance;
-    }
-  }
-  return rounded;
+  return snapMidi(Math.round(pitch), {
+    root: scale.root,
+    scale: SCALES[scale.name],
+  });
 }

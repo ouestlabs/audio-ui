@@ -104,21 +104,15 @@ describe("the de-esser's models", () => {
       range: -10,
       split: 7000,
     });
-    expect(settings.modelWet).toBe(1);
-    expect(deesserSettings(defaults).modelWet).toBe(0);
-    // Listen is the clean model's: the others never mute the lows.
-    expect(
-      deesserSettings({ ...defaults, listen: true, model: "split" }).lowGain
-    ).toBe(1);
   });
 
-  test("each model draws off what it does not use, and only the others look ahead", () => {
-    expect(deesserUnused("clean")).toEqual(["q", "overBodyDb"]);
-    expect(deesserUnused("band")).toEqual(["thresholdDb", "listen"]);
-    expect(deesserUnused("broadband")).toEqual(["thresholdDb", "listen", "q"]);
-    expect(deesserDevice.latency(defaults, RATE)).toBe(0);
-    expect(deesserDevice.latency({ ...defaults, model: "split" }, RATE)).toBe(
-      latency(RATE) / RATE
+  test("each model draws off what it does not use, and all look ahead", () => {
+    expect(deesserUnused("band")).toEqual([]);
+    expect(deesserUnused("split")).toEqual(["q"]);
+    expect(deesserUnused("broadband")).toEqual(["q"]);
+    expect(deesserDevice.latency(defaults, RATE)).toBe(latency(RATE) / RATE);
+    expect(deesserDevice.latency({ ...defaults, enabled: false }, RATE)).toBe(
+      0
     );
   });
 

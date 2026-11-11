@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -93,7 +93,7 @@ function ElectricPianoPanel({
   const play = useCallback(
     (pitch: number, details: { velocity?: number }) =>
       onNoteOn?.({
-        frequency: noteToFrequency(pitch),
+        frequency: midiToHz(pitch),
         velocity: details.velocity ?? 0.8,
       }),
     [onNoteOn]

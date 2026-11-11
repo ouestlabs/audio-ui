@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import { SawtoothIcon, SquareIcon, TriangleIcon } from "@audio-ui/icons/react";
 import { type ReactNode, useCallback, useState } from "react";
 import { cn } from "@/lib/utils";
@@ -130,7 +130,7 @@ function MonoSynthPanel({
   const play = useCallback(
     (pitch: number, details: { velocity?: number }) =>
       onNoteOn?.({
-        frequency: noteToFrequency(pitch),
+        frequency: midiToHz(pitch),
         velocity: details.velocity ?? 0.8,
       }),
     [onNoteOn]

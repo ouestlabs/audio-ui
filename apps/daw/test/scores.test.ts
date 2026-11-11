@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { encodeMidiFile } from "@audio-ui/core/midi";
+import writeMidi from "@audio/midi-write";
 import { secondsPerBar, secondsPerQuarter } from "@audio-ui/core/time";
 import { DRUM_RACK_DEVICE, NEW_TRACK } from "@/lib/arrangement";
 import { newProject } from "@/lib/daw/project";
@@ -155,19 +155,10 @@ describe("reading a score", () => {
       [
         // A copy on an ArrayBuffer of its own, as a file part takes.
         new Uint8Array(
-          encodeMidiFile({
-            bpm: 90,
-            notes: [
-              {
-                channel: 0,
-                durationTicks: 480,
-                note: 60,
-                startTick: 0,
-                velocity: 1,
-              },
-            ],
-            ticksPerQuarterNote: 480,
-          })
+          writeMidi(
+            [{ channel: 0, duration: 60 / 90, midi: 60, time: 0, velocity: 1 }],
+            { bpm: 90 }
+          )
         ),
       ],
       "Tune.mid",

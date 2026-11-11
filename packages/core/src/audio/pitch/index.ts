@@ -5,13 +5,6 @@ export {
   type PitchEstimate,
 } from "./detect.ts";
 export {
-  CONCERT_PITCH_HZ,
-  frequencyToNote,
-  type Note,
-  nearestNote,
-  noteToFrequency,
-} from "./note.ts";
-export {
   inScale,
   nearestInScale,
   SCALES,

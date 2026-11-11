@@ -567,7 +567,7 @@ describe("findNotes", () => {
     expect(findNotes(PHRASE, { length: [2, 2] })).toEqual([1, 3]);
     expect(
       findNotes(PHRASE, {
-        scale: { scale: { name: "minor-pentatonic", root: 0 }, within: false },
+        scale: { scale: { name: "pentatonic-minor", root: 0 }, within: false },
       })
     ).toEqual([2]);
   });

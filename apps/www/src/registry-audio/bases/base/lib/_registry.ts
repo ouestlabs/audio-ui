@@ -256,9 +256,9 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/midi-parse"],
+    dependencies: ["@audio-ui/core", "@audio/midi-parse", "@audio/midi-write"],
     description:
-      "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one; or read one as parts in beats, a part per track and channel with its name and program, for a host that lays each on a track (parsed by @audio/midi-parse)",
+      "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one; or read one as parts in beats, a part per track and channel with its name and program, for a host that lays each on a track (parsed by @audio/midi-parse, written by @audio/midi-write)",
     files: [
       {
         path: "lib/midi-file.ts",
@@ -322,7 +322,7 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio/note"],
     description:
       "Note players: what a MIDI track plays through, all taking notes the same way, and the voice pool that plays an instrument of the library with a voice for each note it holds, the oldest given up first.",
     files: [
@@ -357,7 +357,7 @@ const items: RegistryItem[] = [
   },
   {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "fflate"],
     description:
       "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in.",
     files: [

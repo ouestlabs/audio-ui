@@ -1,5 +1,5 @@
+import { midiToHz } from "@audio/note";
 import type { DeviceContext } from "@audio-ui/core/device";
-import { noteToFrequency } from "@audio-ui/core/pitch";
 import type {
   AnyDeviceState,
   LibraryDevice,
@@ -35,7 +35,7 @@ export function noteParameters(
     ...Object.fromEntries(
       entry.device.note.map((parameter) => [parameter.id, parameter.default])
     ),
-    frequency: noteToFrequency(note.pitch),
+    frequency: midiToHz(note.pitch),
     velocity: note.velocity,
     ...note.parameters,
   };

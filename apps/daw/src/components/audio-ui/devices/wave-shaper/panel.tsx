@@ -1,6 +1,6 @@
 "use client";
 
-import { noteToFrequency } from "@audio-ui/core/pitch";
+import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/lib/utils";
 import { WaveformSelect } from "@/components/audio-ui/waveform-select";
@@ -69,7 +69,7 @@ function WaveShaperPanel({
       held === undefined
         ? position
         : {
-            x: waveShaperPosition(noteToFrequency(held)) * PAD_MAX,
+            x: waveShaperPosition(midiToHz(held)) * PAD_MAX,
             y: position.y,
           },
     [held, position]
