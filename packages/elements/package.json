@@ -84,6 +84,12 @@
     "./xypad": {
       "types": "./dist/xypad/index.d.ts",
       "import": "./dist/xypad.js"
+    },
+    "./svelte": {
+      "types": "./dist/svelte.d.ts"
+    },
+    "./vue": {
+      "types": "./dist/vue.d.ts"
     }
   },
   "module": "dist/index.js",
@@ -98,6 +104,7 @@
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
     "size": "bun scripts/size.ts",
+    "templates:build": "bun scripts/templates.ts",
     "test": "bun test"
   },
   "dependencies": {
@@ -106,8 +113,22 @@
   "devDependencies": {
     "@happy-dom/global-registrator": "^21.0.4",
     "@types/bun": "1.4.2",
+    "svelte": "^5.57.3",
     "tsup": "^8.5.0",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vue": "^3.5.45"
+  },
+  "peerDependencies": {
+    "svelte": ">=5",
+    "vue": ">=3.5"
+  },
+  "peerDependenciesMeta": {
+    "svelte": {
+      "optional": true
+    },
+    "vue": {
+      "optional": true
+    }
   },
   "publishConfig": {
     "access": "public"
