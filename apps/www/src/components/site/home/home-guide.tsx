@@ -84,12 +84,12 @@ export function HomeGuide({ guides, spaces }: HomeIndex) {
       <JsonLd data={buildFaqJsonLd(FAQ)} />
       <section aria-labelledby="home-components">
         <h2 className={H2} id="home-components">
-          Every component, by what you build
+          Components, by what you're building
         </h2>
         <p className={`${LEAD} mt-3`}>
-          Controls and displays for any audio interface, the surfaces of a DAW,
-          and the effects and instruments you plug in. Each page has a live
-          preview, the install command, the API and the source.
+          The controls and displays of any audio interface, the surfaces of a
+          DAW, and effects and instruments to plug in. Every page has a live
+          preview, the install command, the API reference and the source.
         </p>
         <div className="mt-8 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
           {spaces.map((space) => (
