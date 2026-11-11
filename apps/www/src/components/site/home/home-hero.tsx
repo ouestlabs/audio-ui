@@ -88,7 +88,7 @@ function HeroReel() {
  */
 export function HomeHero() {
   return (
-    <header className="flex shrink-0 flex-col gap-2 px-4 pt-6 pb-8 sm:px-6 lg:pt-8">
+    <div className="flex shrink-0 flex-col gap-2 px-4 pt-6 pb-8 sm:px-6 lg:pt-8">
       <h1 className="scroll-m-20 whitespace-nowrap font-semibold font-site-heading text-4xl tracking-tight sm:text-3xl xl:text-4xl">
         Audio UI for{" "}
         <span className="sr-only">the Web, React, Vue and Svelte</span>
@@ -124,6 +124,6 @@ export function HomeHero() {
           variant="ghost"
         />
       </div>
-    </header>
+    </div>
   );
 }
