@@ -14,6 +14,7 @@ import {
   RackIcon,
   ShapesIcon,
   SparkleIcon,
+  SpeakerIcon,
   TracksIcon,
   WaveformIcon,
 } from "@audio-ui/icons/react";
@@ -33,6 +34,7 @@ const SECTION_ICONS = {
   components: GridIcon,
   core: BracesIcon,
   docs: NoteIcon,
+  engine: SpeakerIcon,
   elements: ShapesIcon,
   react: DialIcon,
   registry: CrateIcon,

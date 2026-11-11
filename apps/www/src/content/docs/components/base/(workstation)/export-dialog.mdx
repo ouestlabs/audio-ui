@@ -37,12 +37,12 @@ async function exportMix(picked: ExportSettings) {
 />;
 ```
 
-The dialog picks the settings and renders nothing itself: Export closes it and hands `onExport` the settings. Render the sound your own way (an `OfflineAudioContext`, [`renderArrangement`](/docs/engine/playback#playing-an-arrangement), an engine of your own), then `exportSound` from `audio-export` turns the channels into the file. `settings` and `onSettingsChange` keep the choice wherever you want it remembered.
+The dialog picks the settings and renders nothing itself: Export closes it and hands `onExport` the settings. Render the sound your own way (an `OfflineAudioContext`, [`renderArrangement`](/docs/guides/playback#playing-an-arrangement), an engine of your own), then `exportSound` from `audio-export` turns the channels into the file. `settings` and `onSettingsChange` keep the choice wherever you want it remembered.
 
 - **Format**: WAV or FLAC, at 16 or 24 bits (a WAV also at 32-bit float, which keeps what goes past full scale), or MP3, at 128 to 320 kbps.
 - **Normalize**: off, the file holds the render as it is; peak, the loudest sample reaches 0 dBFS; or a loudness target, -14 LUFS for streaming, -16 for podcasts, -23 for broadcast, reached as far as the true peak stays at or under -1 dBTP. A sound that would pass the ceiling lands under its target, and nothing is limited.
 
-`exportSound` says how far it is through its last argument, `(stage, done)`: `"measuring"`, then `"encoding"` from 0 to 1. Measuring reads every sample at once, and the page waits about half a second a minute of stereo, after it has painted the stage, so show it. The result's `loudness` is how loud the file came out, in LUFS and dBTP, and `gain` the dB it was brought by. The [loudness](/docs/engine/analysis#loudness) and [file](/docs/engine/playback#to-a-file) libs it is built on work on their own too.
+`exportSound` says how far it is through its last argument, `(stage, done)`: `"measuring"`, then `"encoding"` from 0 to 1. Measuring reads every sample at once, and the page waits about half a second a minute of stereo, after it has painted the stage, so show it. The result's `loudness` is how loud the file came out, in LUFS and dBTP, and `gain` the dB it was brought by. The [loudness](/docs/guides/analysis#loudness) and [file](/docs/guides/playback#to-a-file) libs it is built on work on their own too.
 
 ## API reference
 

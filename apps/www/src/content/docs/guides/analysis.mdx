@@ -1,0 +1,37 @@
+---
+title: Analysis
+description: "Live levels and spectra from an analyser, in the shape a meter or a plot reads, and the analysis functions behind them."
+---
+
+Tap a signal with an `AnalyserNode`, a tap that plays nothing, and these hooks turn it into a live [source](/docs/guides#your-own-engine) a component repaints from, with no React render per frame.
+
+## Levels
+
+`useAudioLevels` turns one analyser per channel into what a [Meter](/docs/components/base/meter) paints: a level in dB that rises at once and falls at a release rate, and a peak that holds for a moment before it falls, as a live source.
+
+Usage and API: [`useAudioLevels`](/docs/hooks/use-audio-levels).
+
+## Spectrum
+
+`useSpectrum` reads an analyser into a spectrum on a log frequency axis, in dB, as a live source a [Plot](/docs/components/base/plot) draws, and `useSpectrumPeaks` holds its peaks and lets them fall.
+
+Usage and API: [`useSpectrum`](/docs/hooks/use-spectrum).
+
+## Loudness
+
+`loudness` measures a whole sound the way streaming services and broadcasters do (ITU-R BS.1770): its integrated loudness in LUFS, its loudest sample, and its true peak, the loudest point of the waveform between the samples. `loudnessGain` is the gain that brings it to a target as far as its true peak stays under a ceiling, -1 dBTP unless told otherwise: a sound that would pass it lands under the target instead, and nothing is limited.
+
+Usage and API: [`loudness`](/docs/lib/loudness).
+
+## The functions behind them
+
+`@audio-ui/engine/analysis` holds the math as plain functions, for an engine of your own or a worker:
+
+- `rmsDb(samples)`: The RMS level of samples, in dBFS: how loud they sound.
+- `peakDb(samples)`: The level of their loudest sample, in dBFS: how near they come to clipping.
+- `dbToGain(db)`, `gainToDb(gain)`: dB and gain, both ways.
+- `logSpectrum(bins, sampleRate, out, { minHz, maxHz })`: An analyser's bins on a log frequency axis, written into `out`.
+- `holdPeaks(spectrum, peaks, holding, elapsed, { hold, fall })`: Held peaks, a frame at a time.
+- `computePeaks(channels, buckets)`: A waveform's peaks, for a [Waveform](/docs/components/base/waveform).
+- `formatDb(db)`, `formatHz(hz)`: A level and a frequency as text, such as "-6.0 dB" and "1.2 kHz".
+- `biquadResponse`, `eqResponse`, `compressorOutput`: What a filter, an equalizer and a compressor do, to draw their curves.

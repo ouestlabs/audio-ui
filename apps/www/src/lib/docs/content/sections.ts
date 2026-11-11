@@ -1,15 +1,15 @@
 /**
  * The site's sections, as the switcher at the top of the sidebar lists them:
  * the docs by the layers of the stack (what the reader learns first, the
- * framework-agnostic core, its adapters, custom elements and React, then the
- * registry they install and own), and the components catalog. A docs section
+ * framework-agnostic core and engine, the adapters, custom elements and React,
+ * then the registry they install and own), and the components catalog. A docs section
  * gathers top-level folders of the content whatever their addresses, so a
  * component page keeps its URL under the Registry.
  */
 export const DOCS_SECTIONS = [
   {
     description: "Get started, guides and agents",
-    folders: ["(root)", "engine"],
+    folders: ["(root)", "guides"],
     href: "/docs",
     id: "docs",
     label: "Docs",
@@ -20,6 +20,13 @@ export const DOCS_SECTIONS = [
     href: "/docs/core",
     id: "core",
     label: "Core",
+  },
+  {
+    description: "Devices, time, levels and MIDI",
+    folders: ["engine"],
+    href: "/docs/engine",
+    id: "engine",
+    label: "Engine",
   },
   {
     description: "Custom elements, any framework",

@@ -1,13 +1,4 @@
 {
-  "title": "Guides",
-  "pages": [
-    "index",
-    "output",
-    "clock-and-time",
-    "playback",
-    "synthesis",
-    "demo-sounds",
-    "input",
-    "analysis"
-  ]
+  "title": "Engine",
+  "pages": ["index", "device", "time", "analysis", "pitch", "midi", "playback"]
 }

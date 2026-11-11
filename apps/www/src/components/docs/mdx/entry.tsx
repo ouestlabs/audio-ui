@@ -3,12 +3,12 @@ import { highlightedElements } from "@/components/code/block/highlighted-code";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { Command } from "@/components/docs/mdx/install";
 import {
-  coreModuleOf,
-  coreSourceUrl,
   type Entry as EntryData,
   entryOf,
   entryUrl,
   importLine,
+  moduleOf,
+  repositoryUrl,
   sourceUrl,
 } from "@/lib/docs/content/entries";
 
@@ -167,31 +167,32 @@ export function Entry({ name }: { name: string }) {
 }
 
 /**
- * The head of a `@audio-ui/core` module's page, read from the package and its
- * sources: the install, the import, the adapters that draw it, the registry's
- * hooks and libs that build on it, and what it exports.
+ * The head of a published module's page, such as `@audio-ui/engine/time`,
+ * read from the package and its sources: the install, the import, the
+ * adapters that draw it, the registry's hooks and libs that build on it, and
+ * what it exports.
  */
-export function CoreModule({ name }: { name: string }) {
-  const coreModule = coreModuleOf(name);
+export function Module({ from }: { from: string }) {
+  const packageModule = moduleOf(from);
   return (
     <>
-      <Command code="npm install @audio-ui/core" />
-      <Code code={importLine(coreModule)} />
+      <Command code={`npm install ${packageModule.package}`} />
+      <Code code={importLine(packageModule)} />
       <Facts
         rows={[
-          ["Adapters", <Items key="adapters" names={coreModule.adapters} />],
-          ["Used by", <Items key="used" names={coreModule.usedBy} />],
+          ["Adapters", <Items key="adapters" names={packageModule.adapters} />],
+          ["Used by", <Items key="used" names={packageModule.usedBy} />],
           [
             "Source",
             <Sources
               key="source"
-              paths={coreModule.sources}
-              url={coreSourceUrl}
+              paths={packageModule.sources}
+              url={repositoryUrl}
             />,
           ],
         ]}
       />
-      <Exports exports={coreModule.exports} />
+      <Exports exports={packageModule.exports} />
     </>
   );
 }

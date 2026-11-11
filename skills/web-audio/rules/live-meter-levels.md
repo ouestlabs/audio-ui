@@ -41,7 +41,7 @@ A mono source through a `ChannelSplitterNode` leaves the second analyser at zero
 Without the registry, the same loop is a few lines per channel:
 
 ```ts
-import { peakDb, rmsDb } from "@audio-ui/core/analysis";
+import { peakDb, rmsDb } from "@audio-ui/engine/analysis";
 import { createSource } from "@audio-ui/react";
 
 const buffer = new Float32Array(analyser.fftSize);

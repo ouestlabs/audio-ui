@@ -1,42 +1,24 @@
 ---
-title: Overview
-description: "What makes the sound behind the components: the hooks and libraries audio/ui ships on the Web Audio API, and how an engine of your own drives the same components."
+title: Engine
+description: "@audio-ui/engine: the audio logic behind audio/ui's interfaces, with no UI framework in it: devices as parameters, musical time and the look-ahead scheduler, levels and curves, MIDI input, scales and the clip player."
 ---
 
-The components draw and take input; they never make a sound. Something else plays: the hooks and libraries on these pages, which run on the browser's Web Audio API, or an engine of your own, such as one in an AudioWorklet or in WebAssembly.
+`@audio-ui/engine` holds what makes and times the sound: a device as named parameters and the tools an agent drives it with, musical time and the look-ahead scheduler a transport runs on, levels and the curves a panel draws, the page's MIDI input, named scales, and the clip player that plays an arrangement in an `AudioWorklet`. It runs on the main thread, in a worker or in a worklet, under any framework or none.
 
-- [Output](/docs/engine/output): The page's one audio context, and a master bus with a limiter that every sound goes through.
-- [Clock and time](/docs/engine/clock-and-time): A transport clock that schedules notes ahead on the audio clock, and the musical time it counts in.
-- [Playback](/docs/engine/playback): An arrangement's audio clips played on the audio clock to the frame, a player per track in an AudioWorklet, and the mixer's arithmetic.
-- [Synthesis](/docs/engine/synthesis): Synth voices shaped by an envelope, and drum hits.
-- [Demo sounds](/docs/engine/demo-sounds): The sounds the previews play, made in code: listen to each and ask for one by name.
-- [Input](/docs/engine/input): A MIDI keyboard and the microphone.
-- [Analysis](/docs/engine/analysis): Live levels and spectra for meters and plots.
+It is one package, `npm install @audio-ui/engine`, and each module is its own entry point, so a page pays only for what it imports. It builds on [`@audio-ui/core`](/docs/core), the logic of the controls, and on [audio.js](https://audio.js.org) where an atom does the job.
 
-Each installs on its own with `npx shadcn@latest add @audio-ui/<name>`, to `hooks/` or `lib/`, and the components that need one name it on their page. Every one has a page of its own in the [Registry](/docs/registry), under Hooks and Libraries.
+## Modules
 
-## Your own engine
+| Module | What it holds |
+| --- | --- |
+| [`device`](/docs/engine/device) | A device as a description: `defineDevice`, its state, `apply` with what each change did, the bindings an engine implements, and the tools an agent drives it with. |
+| [`time`](/docs/engine/time) | Musical time: tempos and signatures, bars and beats, grid divisions, tempo-synced note values, warp markers, the metronome, and the look-ahead scheduler a transport clock runs on. |
+| [`analysis`](/docs/engine/analysis) | Reading a signal: levels in dB, a log-axis spectrum and its peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients and auto-warp. |
+| [`pitch`](/docs/engine/pitch) | Named scales: the pitch classes each keeps, the nearest pitch in one, and a scale as a piano roll reads it. |
+| [`midi`](/docs/engine/midi) | MIDI input as a source of notes, a raw message read, pitch bend in semitones. |
+| [`playback`](/docs/engine/playback) | What plays when: clips placed in frames, the transport on the audio clock, the clip player's processor, streamed recordings, and the mixer's pan law, solo and delay compensation. |
 
-Every component takes its state as values and reports changes through callbacks, so an engine of your own drives it the same way the hooks do:
+## Next
 
-- **Values that change on a gesture**, such as a gain, a clip or a note, are props: `value` and `onValueChange`, and `onValueCommitted` when the gesture ends.
-- **Values that change every frame**, such as a playhead, a level or a spectrum, are live sources. A component reads one through its `source` prop and repaints without a React render.
-
-`createSource` makes a source you push to from anywhere: an audio callback, a worker, a message from an AudioWorklet.
-
-```tsx
-import { createSource } from "@audio-ui/react";
-
-// Made once, outside a render.
-const position = createSource(0);
-
-// Wherever your engine reports where it is, such as each animation frame:
-engine.onPosition((seconds) => position.set(seconds));
-
-<Transport source={position} tempo={tempo} playing={playing} onPlayPause={toggle} />;
-<Timeline duration={duration} source={position}>{/* … */}</Timeline>;
-```
-
-A source is `{ getSnapshot, subscribe }`, the shape `useSyncExternalStore` reads, so any store that has those two works too. The hooks on these pages return sources in the same shape, which is why a component cannot tell them from yours.
-
-Without React, `@audio-ui/core` holds the same logic as plain functions: the scheduler and the musical time in `@audio-ui/core/time`, the analysis in `@audio-ui/core/analysis`, MIDI in `@audio-ui/core/midi` and pitch in `@audio-ui/core/pitch`.
+- [Guides](/docs/guides): how an engine drives the components, output, the clock, synthesis, input and analysis.
+- [Registry](/docs/registry): the hooks, libraries and devices built on the engine, which you install and own.

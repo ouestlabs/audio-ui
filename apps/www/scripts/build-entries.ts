@@ -130,21 +130,27 @@ export async function buildEntries(): Promise<Entry[]> {
 
 // Normalized: the paths the resolver reaches have no `..` in them, so this prefix can be cut from them.
 const PACKAGES = new URL("../../../packages", import.meta.url).pathname;
-const CORE_SRC = `${PACKAGES}/core/src`;
-export const CORE_MANIFEST = `${WEB}/src/lib/docs/content/core-modules.generated.json`;
+const REPOSITORY = new URL("../../..", import.meta.url).pathname;
+export const MODULES_MANIFEST = `${WEB}/src/lib/docs/content/package-modules.generated.json`;
 const RE_EXPORT = /export (?:type )?\{([^}]*)\} from "(\.[^"]+)";/g;
 const NAME_IN_BRACES = /^(?:type\s+)?(\w+)$/;
 
-/** A module of `@audio-ui/core`, as its page heads it. */
-export interface CoreModule {
+/** The framework-agnostic packages whose modules have a page of their own: the folder of each under `packages/`. */
+const MODULE_PACKAGES = [
+  { folder: "core", name: "@audio-ui/core" },
+  { folder: "engine", name: "@audio-ui/engine" },
+] as const;
+
+/** A module of a published package, as its page heads it. */
+export interface PackageModule {
   /** The adapters that draw it: `@audio-ui/react/knob`, `@audio-ui/elements/knob`. */
   adapters: string[];
   exports: EntryExport[];
-  /** What a project imports it from. */
+  /** What a project imports it from, such as `@audio-ui/engine/time`: the module's key. */
   from: string;
-  /** Its subpath, `time`, or `core` for the package's root. */
-  name: string;
-  /** The files its exports are declared in, from `packages/core/src/`. */
+  /** The package it is in, what a project installs. */
+  package: string;
+  /** The files its exports are declared in, from the repository's root. */
   sources: string[];
   /** The registry's hooks and libs that import it: the ones with a page of their own. */
   usedBy: string[];
@@ -219,10 +225,7 @@ async function adaptersOf(from: string) {
   return found.flat();
 }
 
-export async function buildCoreModules(): Promise<CoreModule[]> {
-  const pkg = (await Bun.file(`${PACKAGES}/core/package.json`).json()) as {
-    exports: Record<string, { types: string }>;
-  };
+export async function buildPackageModules(): Promise<PackageModule[]> {
   const items = await loadItems(["hooks", "lib"]);
   const itemFiles = await Promise.all(
     items.map(async (item) => ({
@@ -232,42 +235,47 @@ export async function buildCoreModules(): Promise<CoreModule[]> {
       ),
     }))
   );
-  const subpaths = Object.entries(pkg.exports).filter(
-    ([subpath]) => subpath !== "./internal"
-  );
-  return Promise.all(
-    subpaths.map(async ([subpath, target]): Promise<CoreModule> => {
-      const from =
-        subpath === "."
-          ? "@audio-ui/core"
-          : `@audio-ui/core/${subpath.slice(2)}`;
-      // The declaration file names the source: dist/audio/time/index.d.ts is src/audio/time/index.ts.
-      const entry = `${CORE_SRC}/${target.types.replace("./dist/", "").replace(".d.ts", ".ts")}`;
-      const resolved = await moduleExports(entry);
-      return {
-        adapters: await adaptersOf(from),
-        exports: resolved.map((each) => each.declared),
-        from,
-        name: subpath === "." ? "core" : subpath.slice(2),
-        sources: [
-          ...new Set(
-            resolved.map((each) => each.path.replace(`${CORE_SRC}/`, ""))
-          ),
-        ],
-        usedBy: itemFiles
-          .filter((item) =>
-            item.sources.some((text) => text.includes(`from "${from}"`))
-          )
-          .map((item) => item.name)
-          .sort(),
-      };
+  const modules = await Promise.all(
+    MODULE_PACKAGES.map(async ({ folder, name }) => {
+      const pkg = (await Bun.file(
+        `${PACKAGES}/${folder}/package.json`
+      ).json()) as { exports: Record<string, { types: string }> };
+      const subpaths = Object.entries(pkg.exports).filter(
+        ([subpath]) => subpath !== "./internal"
+      );
+      return Promise.all(
+        subpaths.map(async ([subpath, target]): Promise<PackageModule> => {
+          const from = subpath === "." ? name : `${name}/${subpath.slice(2)}`;
+          // The declaration file names the source: dist/time/index.d.ts is src/time/index.ts.
+          const entry = `${PACKAGES}/${folder}/src/${target.types.replace("./dist/", "").replace(".d.ts", ".ts")}`;
+          const resolved = await moduleExports(entry);
+          return {
+            adapters: await adaptersOf(from),
+            exports: resolved.map((each) => each.declared),
+            from,
+            package: name,
+            sources: [
+              ...new Set(
+                resolved.map((each) => each.path.replace(REPOSITORY, ""))
+              ),
+            ],
+            usedBy: itemFiles
+              .filter((item) =>
+                item.sources.some((text) => text.includes(`from "${from}"`))
+              )
+              .map((item) => item.name)
+              .sort(),
+          };
+        })
+      );
     })
   );
+  return modules.flat();
 }
 
 const MANIFESTS = [
   { build: buildEntries, path: MANIFEST },
-  { build: buildCoreModules, path: CORE_MANIFEST },
+  { build: buildPackageModules, path: MODULES_MANIFEST },
 ];
 
 /** Writes a manifest, or with `check` says whether it is stale: `true` when it is up to date. */

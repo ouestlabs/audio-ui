@@ -6,6 +6,12 @@
 npm install @audio-ui/core   # no dependencies
 ```
 
+The audio logic behind the controls (devices, musical time and the scheduler, levels and curves, MIDI input, named scales, the clip player) is `@audio-ui/engine`, built on core with no UI framework either:
+
+```bash
+npm install @audio-ui/engine
+```
+
 ## The primitives as custom elements
 
 Before writing a binding, use `@audio-ui/elements`: every primitive as unstyled, accessible Web Components built on these controllers, at API parity with `@audio-ui/react` (parts, keyboard interactions, ARIA semantics, native range inputs, `data-*` attributes).
@@ -55,11 +61,11 @@ Each primitive registers from its own entry point, `@audio-ui/elements/<primitiv
 | `@audio-ui/core/piano-roll` | `createPianoRollController`; edits that return new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation`, `deleteTime`, `insertTime`, `duplicateTime`; `findNotes`, `selectionSpan` |
 | `@audio-ui/core/timeline` | `createTimelineController`, `createTrackController`, `createClipController`, `createRangeController`, `createNavigatorController`, `createWheelZoom` |
 | `@audio-ui/core/waveform` | `createWaveformController`, `createWaveformRegionController`, `createLevelsEngine`, `createLevelHistory` |
-| `@audio-ui/core/analysis` | `logSpectrum`, `holdPeaks`, `computePeaks`, `downsampleWaveform`, `spectrumBands`, `biquadResponse`, `eqResponse`, `toWebAudioQ`, `compressorOutput`, `dbToGain`, `gainToDb`, `rmsDb`, `peakDb`, `formatHz`, `formatDb` |
-| `@audio-ui/core/device` | `defineDevice`, `deviceTools`, `DeviceDefinitionError`, `Device`, `DeviceBinding`, `DeviceState`, `DeviceDescription`, `ParameterDescriptor` |
-| `@audio-ui/core/midi` | `parseMidiMessage`, `pitchBendToSemitones`, `createMidiInput` |
-| `@audio-ui/core/time` | `secondsPerQuarter`, `barsBeatsAt`, `gridInterval`, `gridLabel`, `advance`, `positionAt`, `SCHEDULE_AHEAD_SECONDS` |
-| `@audio-ui/core/pitch` | `pitchName`, `SCALES`, `inScale`, `nearestInScale`, `scalePitchClasses` |
+| `@audio-ui/engine/analysis` | `logSpectrum`, `holdPeaks`, `computePeaks`, `downsampleWaveform`, `spectrumBands`, `biquadResponse`, `eqResponse`, `toWebAudioQ`, `compressorOutput`, `dbToGain`, `gainToDb`, `rmsDb`, `peakDb`, `formatHz`, `formatDb` |
+| `@audio-ui/engine/device` | `defineDevice`, `deviceTools`, `DeviceDefinitionError`, `Device`, `DeviceBinding`, `DeviceState`, `DeviceDescription`, `ParameterDescriptor` |
+| `@audio-ui/engine/midi` | `parseMidiMessage`, `pitchBendToSemitones`, `createMidiInput` |
+| `@audio-ui/engine/time` | `secondsPerQuarter`, `barsBeatsAt`, `gridInterval`, `gridLabel`, `advance`, `positionAt`, `SCHEDULE_AHEAD_SECONDS` |
+| `@audio-ui/engine/pitch` | `SCALES`, `inScale`, `nearestInScale`, `scalePitchClasses`, `rollScale` (a named scale as the piano roll reads it) |
 
 Never import `@audio-ui/core/internal`: it may change in any release.
 

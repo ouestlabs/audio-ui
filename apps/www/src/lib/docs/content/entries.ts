@@ -1,6 +1,6 @@
 import { siteConfig } from "@/lib/config";
-import coreModules from "@/lib/docs/content/core-modules.generated.json";
 import manifest from "@/lib/docs/content/entries.generated.json";
+import packageModules from "@/lib/docs/content/package-modules.generated.json";
 
 /** A hook or a lib as its entry page heads it: what `scripts/build-entries.ts` reads from the registry and the sources. */
 export type Entry = (typeof manifest)[number];
@@ -43,26 +43,26 @@ export function importLine(entry: Pick<Entry, "exports" | "from">): string {
 export const sourceUrl = (path: string) =>
   `${siteConfig.links.github}/blob/main/apps/www/src/registry-audio/bases/base/${path}`;
 
-/** A module of `@audio-ui/core` as its page heads it: what `scripts/build-entries.ts` reads from the package and its sources. */
-export type CoreModule = (typeof coreModules)[number];
+/** A module of a published package as its page heads it: what `scripts/build-entries.ts` reads from the package and its sources. */
+export type PackageModule = (typeof packageModules)[number];
 
-const coreByName = new Map(coreModules.map((each) => [each.name, each]));
+const moduleByImport = new Map(packageModules.map((each) => [each.from, each]));
 
-/** A module of `@audio-ui/core` by its subpath, `core` for the root; a name the package does not export throws. */
-export function coreModuleOf(name: string): CoreModule {
-  const found = coreByName.get(name);
+/** A module by what a project imports it from, such as `@audio-ui/engine/time`; one the packages do not export throws. */
+export function moduleOf(from: string): PackageModule {
+  const found = moduleByImport.get(from);
   if (!found) {
-    throw new Error(`No module "${name}" in @audio-ui/core.`);
+    throw new Error(`No module "${from}" in the packages.`);
   }
   return found;
 }
 
-/** Where a file of `@audio-ui/core` is in the repository, from `packages/core/src/`. */
-export const coreSourceUrl = (path: string) =>
-  `${siteConfig.links.github}/blob/main/packages/core/src/${path}`;
+/** Where a file of a package is in the repository, from its root. */
+export const repositoryUrl = (path: string) =>
+  `${siteConfig.links.github}/blob/main/${path}`;
 
 const ENTRY_TAG = /<Entry\s+name="([^"]+)"\s*\/>/g;
-const CORE_MODULE_TAG = /<CoreModule\s+name="([^"]+)"\s*\/>/g;
+const MODULE_TAG = /<Module\s+from="([^"]+)"\s*\/>/g;
 
 /** An entry's head as markdown, for an agent: the install, the import, what it needs and what needs it, and its exports. */
 export function entryMarkdown(entry: Entry): string {
@@ -96,32 +96,32 @@ function exportsMarkdown(exports: Entry["exports"]) {
   ];
 }
 
-/** A core module's head as markdown, for an agent: the install, the import, its adapters, what uses it and its exports. */
-export function coreModuleMarkdown(coreModule: CoreModule): string {
+/** A module's head as markdown, for an agent: the install, the import, its adapters, what uses it and its exports. */
+export function moduleMarkdown(packageModule: PackageModule): string {
   const list = (names: readonly string[]) =>
     names.map((name) => `\`${name}\``).join(", ") || "nothing";
   return [
     "```bash",
-    "npm install @audio-ui/core",
+    `npm install ${packageModule.package}`,
     "```",
     "",
     "```ts",
-    importLine(coreModule),
+    importLine(packageModule),
     "```",
     "",
-    `- Adapters: ${list(coreModule.adapters)}`,
-    `- Used by: ${list(coreModule.usedBy)}`,
-    `- Source: ${coreModule.sources.map(coreSourceUrl).join(", ")}`,
+    `- Adapters: ${list(packageModule.adapters)}`,
+    `- Used by: ${list(packageModule.usedBy)}`,
+    `- Source: ${packageModule.sources.map(repositoryUrl).join(", ")}`,
     "",
-    ...exportsMarkdown(coreModule.exports),
+    ...exportsMarkdown(packageModule.exports),
   ].join("\n");
 }
 
-/** Each `<Entry name="…" />` and `<CoreModule name="…" />` of a page as its head in markdown. */
+/** Each `<Entry name="…" />` and `<Module from="…" />` of a page as its head in markdown. */
 export function expandEntries(content: string) {
   return content
     .replace(ENTRY_TAG, (_tag, name: string) => entryMarkdown(entryOf(name)))
-    .replace(CORE_MODULE_TAG, (_tag, name: string) =>
-      coreModuleMarkdown(coreModuleOf(name))
+    .replace(MODULE_TAG, (_tag, from: string) =>
+      moduleMarkdown(moduleOf(from))
     );
 }

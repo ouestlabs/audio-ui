@@ -22,7 +22,7 @@ const voices = useSynthVoices({ destination: output, oscillatorType: "triangle" 
 />;
 ```
 
-`envelope` is the points of an [Envelope](/docs/components/base/envelope), `{ x, y }` from 0 to 1, so the shape a user draws is the shape the note plays: the points before the middle (`x` 0.5) are the attack and the decay, the points after it the release. Give `time` to `triggerNote` and `releaseNote` to schedule a note ahead, as a [transport clock](/docs/engine/clock-and-time) does; leave it out to play now.
+`envelope` is the points of an [Envelope](/docs/components/base/envelope), `{ x, y }` from 0 to 1, so the shape a user draws is the shape the note plays: the points before the middle (`x` 0.5) are the attack and the decay, the points after it the release. Give `time` to `triggerNote` and `releaseNote` to schedule a note ahead, as a [transport clock](/docs/guides/clock-and-time) does; leave it out to play now.
 
 <TypeTable title="Options">
 <TypeRow name={"destination"} type={"AudioNode | null"}>Where the voices play, such as the master bus.</TypeRow>

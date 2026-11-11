@@ -65,6 +65,31 @@ const MOVED_PAGES = new Map([
   ["/docs/headless-styling.md", "/docs/react/headless-styling.md"],
   ["/docs/custom-elements.md", "/docs/elements.md"],
   ["/docs/engine/controllers.md", "/docs/core/controllers.md"],
+  // The guides left /docs/engine for the engine package's pages; the two whose
+  // names a module took, analysis and playback, now open that module's page.
+  ["/docs/engine/output", "/docs/guides/output"],
+  ["/docs/engine/clock-and-time", "/docs/guides/clock-and-time"],
+  ["/docs/engine/synthesis", "/docs/guides/synthesis"],
+  ["/docs/engine/demo-sounds", "/docs/guides/demo-sounds"],
+  ["/docs/engine/input", "/docs/guides/input"],
+  ["/docs/engine/output.md", "/docs/guides/output.md"],
+  ["/docs/engine/clock-and-time.md", "/docs/guides/clock-and-time.md"],
+  ["/docs/engine/synthesis.md", "/docs/guides/synthesis.md"],
+  ["/docs/engine/demo-sounds.md", "/docs/guides/demo-sounds.md"],
+  ["/docs/engine/input.md", "/docs/guides/input.md"],
+  // The audio modules left @audio-ui/core for @audio-ui/engine.
+  ["/docs/core/device", "/docs/engine/device"],
+  ["/docs/core/time", "/docs/engine/time"],
+  ["/docs/core/analysis", "/docs/engine/analysis"],
+  ["/docs/core/pitch", "/docs/engine/pitch"],
+  ["/docs/core/midi", "/docs/engine/midi"],
+  ["/docs/core/playback", "/docs/engine/playback"],
+  ["/docs/core/device.md", "/docs/engine/device.md"],
+  ["/docs/core/time.md", "/docs/engine/time.md"],
+  ["/docs/core/analysis.md", "/docs/engine/analysis.md"],
+  ["/docs/core/pitch.md", "/docs/engine/pitch.md"],
+  ["/docs/core/midi.md", "/docs/engine/midi.md"],
+  ["/docs/core/playback.md", "/docs/engine/playback.md"],
 ]);
 
 /** What a read of the site's machine surfaces is told to PostHog. A registry file has its own: it counts once it is served (registryFile). */

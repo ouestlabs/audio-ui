@@ -1,16 +1,16 @@
 ---
 title: time
-description: "Musical time from @audio-ui/core: tempos and signatures, bars and beats, grid divisions and their labels, tempo-synced note values, warp markers, the metronome, and the look-ahead scheduler a transport clock runs on."
+description: "Musical time from @audio-ui/engine: tempos and signatures, bars and beats, grid divisions and their labels, tempo-synced note values, warp markers, the metronome, and the look-ahead scheduler a transport clock runs on."
 ---
 
-<CoreModule name="time" />
+<Module from="@audio-ui/engine/time" />
 
 ## Usage
 
 A `Tempo` is a BPM and a signature. Every function that turns seconds into music, or music into seconds, reads one:
 
 ```ts
-import { barsBeatsAt, secondsPerBar, secondsPerBeat, syncedSeconds } from "@audio-ui/core/time";
+import { barsBeatsAt, secondsPerBar, secondsPerBeat, syncedSeconds } from "@audio-ui/engine/time";
 
 const tempo = { bpm: 120, beatsPerBar: 6, beatUnit: 8 };
 
@@ -35,7 +35,7 @@ BPM counts quarter notes whatever the signature says, so a 6/8 bar at 120 BPM la
 A transport clock that plays sound ahead of time calls `advance` on a timer: it returns every step boundary within the next 100 ms, each with the audio time to give to a node's `start()`, and the cursor to call it with next time.
 
 ```ts
-import { advance, anchoredCursor, SCHEDULER_POLL_MS } from "@audio-ui/core/time";
+import { advance, anchoredCursor, SCHEDULER_POLL_MS } from "@audio-ui/engine/time";
 
 const config = { regionStart: 0, regionEnd: 16, secondsPerStep: 60 / 120 / 4 };
 let cursor = anchoredCursor(ctx.currentTime, 0);

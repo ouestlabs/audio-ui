@@ -3,11 +3,11 @@ title: waveform
 description: "A waveform's drawing and controllers from @audio-ui/core: peaks fitted to bars and painted sharp on a canvas, live levels and a scrolling history, an oscilloscope trace, a seekable position and a region dragged on it."
 ---
 
-<CoreModule name="waveform" />
+<Module from="@audio-ui/core/waveform" />
 
 ## Usage
 
-A waveform draws either a recording's shape, known upfront, or a live signal. The shape is its peaks: a level per slice from 0 to 1, or the lowest and highest sample of each slice, which draws the waveform as it really is, lopsided where the audio is. [`computePeaks`](/docs/core/analysis#waveforms) makes them from samples.
+A waveform draws either a recording's shape, known upfront, or a live signal. The shape is its peaks: a level per slice from 0 to 1, or the lowest and highest sample of each slice, which draws the waveform as it really is, lopsided where the audio is. [`computePeaks`](/docs/engine/analysis#waveforms) makes them from samples.
 
 ## Painting
 

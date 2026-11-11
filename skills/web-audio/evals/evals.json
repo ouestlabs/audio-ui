@@ -59,7 +59,7 @@
       "expected_output": "The registry Tuner with use-microphone and use-pitch: the microphone started from a click, raw signal, an analyser never connected to the speakers, a period search for the pitch, and a live source, not state per frame.",
       "files": [],
       "expectations": [
-        "Installs `@audio-ui/tuner`, `@audio-ui/use-microphone` and `@audio-ui/use-pitch` from the registry (or uses `detectPitch` and `nearestNote` from `@audio-ui/core/pitch`), not a hand-written pitch detector",
+        "Installs `@audio-ui/tuner`, `@audio-ui/use-microphone` and `@audio-ui/use-pitch` from the registry (or uses `detectPitch` and `nearestNote` from `@audio-ui/engine/pitch`), not a hand-written pitch detector",
         "Starts the microphone from a user gesture (a click), so the permission prompt and the context resume have one",
         "Takes the raw microphone signal: echo cancellation, noise suppression and auto gain are off",
         "Does not connect the analyser to `ctx.destination`, so the microphone is not played back",
@@ -74,7 +74,7 @@
       "expected_output": "use-midi-input connected from a button click, velocity from 0 to 1 scaling the voice gain, a note on with velocity 0 treated as a release, pitch bend in semitones, and the AudioContext resumed because MIDI is not a gesture.",
       "files": [],
       "expectations": [
-        "Uses `useMidiInput` (registry `@audio-ui/use-midi-input`) or `createMidiInput` and `parseMidiMessage` from `@audio-ui/core/midi`, not its own `onmidimessage` handlers on each component",
+        "Uses `useMidiInput` (registry `@audio-ui/use-midi-input`) or `createMidiInput` and `parseMidiMessage` from `@audio-ui/engine/midi`, not its own `onmidimessage` handlers on each component",
         "Asks for MIDI access from a click (a connect button such as `MidiConnectControl`), never on mount",
         "Scales a voice's gain by the note's velocity from 0 to 1, not a fixed gain",
         "Treats a note on with velocity 0 as a note off",
@@ -89,8 +89,8 @@
       "files": [],
       "expectations": [
         "Says that a `lowpass` or `highpass` BiquadFilterNode reads its `Q` in decibels, so `Q.value = 2` is a 2 dB resonance, not a linear Q of 2",
-        "Converts with `toWebAudioQ` from `@audio-ui/core/analysis` (20 * log10 of the linear Q), or sets Q to about 6.02 dB for a linear Q of 2",
-        "Draws the curve with `biquadResponse` or `eqResponse` from `@audio-ui/core/analysis` rather than a hand-made formula, so the plot equals `getFrequencyResponse`",
+        "Converts with `toWebAudioQ` from `@audio-ui/engine/analysis` (20 * log10 of the linear Q), or sets Q to about 6.02 dB for a linear Q of 2",
+        "Draws the curve with `biquadResponse` or `eqResponse` from `@audio-ui/engine/analysis` rather than a hand-made formula, so the plot equals `getFrequencyResponse`",
         "Mentions that a shelf's Q is ignored by the node",
         "Sets parameters on the node with `setTargetAtTime`, not `.value =`, while it plays"
       ]

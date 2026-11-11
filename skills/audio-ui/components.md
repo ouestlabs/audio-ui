@@ -172,14 +172,14 @@ Audio effects and instruments, like plugins in a DAW. A device is a state (`<nam
 
 ## Audio engine
 
-What makes the sound, on the Web Audio API: install each on its own, to `hooks/` or `lib/`. All optional: the components take values and live sources, so an engine of your own (an AudioWorklet, WASM) drives them the same way, through `createSource` from `@audio-ui/react`. Docs: https://www.audio-ui.dev/docs/engine.
+What makes the sound, on the Web Audio API: install each on its own, to `hooks/` or `lib/`. All optional: the components take values and live sources, so an engine of your own (an AudioWorklet, WASM) drives them the same way, through `createSource` from `@audio-ui/react`. Docs: https://www.audio-ui.dev/docs/guides.
 
 | Name | Import | Use it for |
 | --- | --- | --- |
 | `web-audio` | `webAudio` from `@/lib/web-audio` | The page's one `AudioContext`: `webAudio.getContext()`, `null` on the server; `webAudio.resume()` from the gesture that starts sound (a click, a pad, a MIDI note) gives it and resumes it; `webAudio.configure(options)` before the first call sets its latency or output. Engines and libs take the context as a parameter instead; a hook given a node uses that node's |
 | `use-master-bus` | `useMasterBus` from `@/hooks/use-master-bus` | One gain and a safety limiter that every sound of a screen connects into, set by one volume |
 | `use-transport-clock` | `useTransportClock` from `@/hooks/use-transport-clock` | Schedule notes ahead on the audio clock: `onStep(step, time)` on each step, a loop region, seek with `reanchor`, `getPosition` for a playhead |
-| `clip-player` | `loadClipPlayer`, `createClipPlayer` from `@/lib/clip-player` | A track's audio clips played to the frame on the audio clock, in an AudioWorklet: `setClips(playedClips(...), recordings)`, `schedule(state)` with a `PlaybackState` from `@audio-ui/core/playback`, `synced()` before an offline render |
+| `clip-player` | `loadClipPlayer`, `createClipPlayer` from `@/lib/clip-player` | A track's audio clips played to the frame on the audio clock, in an AudioWorklet: `setClips(playedClips(...), recordings)`, `schedule(state)` with a `PlaybackState` from `@audio-ui/engine/playback`, `synced()` before an offline render |
 | `arrangement-engine` | `useArrangementEngine` from `@/hooks/use-arrangement-engine`, `renderArrangement` from `@/lib/arrangement-engine` | Play the document of `useArrangement` on the audio clock: audio clips, notes through each MIDI track's instrument, device chains, sends, returns and the main track; `play(from)`, `stop()`, `position` (a live source of seconds), `meter(id)`, `status`, a `metronome` option on the audio clock that an export never has; `renderArrangement` for an offline render |
 | `mixer-engine` | `createMixer` from `@/lib/mixer-engine` | A mixing desk of your own sources: a channel per track and return with a chain, volume, constant-power pan, switch, solo, pre or post-fader sends, delay compensation and meters |
 | `device-library` | `libraryDevice`, `DEVICE_LIBRARY`, `DEVICE_SHELVES` from `@/lib/device-library` | Every device with its engine, by its stable id (`audioui.compressor`): turn a project's device ids into engines, list them in a browser |

@@ -1,37 +1,57 @@
 ---
-title: Analysis
-description: "Live levels and spectra from an analyser, in the shape a meter or a plot reads, and the analysis functions behind them."
+title: analysis
+description: "Reading a signal, from @audio-ui/engine: levels in dB, a spectrum on a log axis and its held peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients and auto-warp. Plain functions, for the main thread, a worker or a worklet."
 ---
 
-Tap a signal with an `AnalyserNode`, a tap that plays nothing, and these hooks turn it into a live [source](/docs/engine#your-own-engine) a component repaints from, with no React render per frame.
+<Module from="@audio-ui/engine/analysis" />
+
+## Usage
+
+The functions take samples, bins or settings and return numbers, with no Web Audio node in them, so they run wherever the data is.
 
 ## Levels
 
-`useAudioLevels` turns one analyser per channel into what a [Meter](/docs/components/base/meter) paints: a level in dB that rises at once and falls at a release rate, and a peak that holds for a moment before it falls, as a live source.
+```ts
+import { dbToGain, formatDb, gainToDb, peakDb, rmsDb } from "@audio-ui/engine/analysis";
 
-Usage and API: [`useAudioLevels`](/docs/hooks/use-audio-levels).
+rmsDb(samples); // how loud they sound: -3 dB for a sine at full scale
+peakDb(samples); // how near they come to clipping: 0 dB for the same sine
+dbToGain(-6.02); // 0.5
+formatDb(-6.5); // "-6.5 dB"
+```
+
+The registry's [`useAudioLevels`](/docs/hooks/use-audio-levels) reads an analyser through them into what a [Meter](/docs/components/base/meter) draws.
 
 ## Spectrum
 
-`useSpectrum` reads an analyser into a spectrum on a log frequency axis, in dB, as a live source a [Plot](/docs/components/base/plot) draws, and `useSpectrumPeaks` holds its peaks and lets them fall.
+`logSpectrum(bins, sampleRate, out, { minHz, maxHz })` resamples an analyser's bins (`getFloatFrequencyData`) onto a log frequency axis, written into `out`, as many points as it holds. `holdPeaks(spectrum, peaks, holding, elapsed, { hold, fall })` keeps each point's loudest level for `hold` seconds, then lets it fall at `fall` dB a second, one frame at a time. `spectrumBands` reduces a spectrum to a few levels from 0 to 1, for bars. [`useSpectrum`](/docs/hooks/use-spectrum) runs them on every frame.
 
-Usage and API: [`useSpectrum`](/docs/hooks/use-spectrum).
+## Curves
 
-## Loudness
+A filter, an equalizer and a compressor each have a curve a panel draws. Each function returns the curve as a function, to be sampled at as many points as the plot has:
 
-`loudness` measures a whole sound the way streaming services and broadcasters do (ITU-R BS.1770): its integrated loudness in LUFS, its loudest sample, and its true peak, the loudest point of the waveform between the samples. `loudnessGain` is the gain that brings it to a target as far as its true peak stays under a ceiling, -1 dBTP unless told otherwise: a sound that would pass it lands under the target instead, and nothing is limited.
+```ts
+import { biquadResponse, compressorOutput, eqResponse } from "@audio-ui/engine/analysis";
 
-Usage and API: [`loudness`](/docs/lib/loudness).
+const cut = biquadResponse({ type: "highcut", frequency: 1000 });
+cut(1000); // -3.01 dB at the cutoff
 
-## The functions behind them
+const eq = eqResponse([
+  { type: "peak", frequency: 1000, gainDb: 6, q: 1 },
+  { type: "highshelf", frequency: 8000, gainDb: -3 },
+]);
+eq(1000); // 6 dB: the bands add up at each frequency
 
-`@audio-ui/core/analysis` holds the math as plain functions, for an engine of your own or a worker:
+const compressor = compressorOutput({ thresholdDb: -20, ratio: 4 });
+compressor(-8); // -17: 12 dB over the threshold comes out 3 dB over
+```
 
-- `rmsDb(samples)`: The RMS level of samples, in dBFS: how loud they sound.
-- `peakDb(samples)`: The level of their loudest sample, in dBFS: how near they come to clipping.
-- `dbToGain(db)`, `gainToDb(gain)`: dB and gain, both ways.
-- `logSpectrum(bins, sampleRate, out, { minHz, maxHz })`: An analyser's bins on a log frequency axis, written into `out`.
-- `holdPeaks(spectrum, peaks, holding, elapsed, { hold, fall })`: Held peaks, a frame at a time.
-- `computePeaks(channels, buckets)`: A waveform's peaks, for a [Waveform](/docs/components/base/waveform).
-- `formatDb(db)`, `formatHz(hz)`: A level and a frequency as text, such as "-6.0 dB" and "1.2 kHz".
-- `biquadResponse`, `eqResponse`, `compressorOutput`: What a filter, an equalizer and a compressor do, to draw their curves.
+The band types are the ones an equalizer shows (`lowcut`, `highcut`, `lowshelf`, `highshelf`, `peak`, `notch`, `bandpass`). `WEB_AUDIO_FILTER_TYPES` maps each to the `BiquadFilterNode` type that sounds as drawn, and `toWebAudioQ` converts a band's Q for the node. `bandHandleDb` and `bandGainForHandle` place a band's handle on the summed curve and back, so a dragged handle stays under the pointer.
+
+## Waveforms
+
+`computePeaks(channels, buckets)` reduces a recording to the lowest and highest sample of each slice, across its channels, which is what a [Waveform](/docs/components/base/waveform) draws; `normalizePeaks` scales them to full height.
+
+## Tempo and transients
+
+`detectTransients(channels, sampleRate)` finds where a recording's level rises sharply, in seconds. `autoWarp` works out how a recording plays in time at an arrangement's tempo, from a tempo estimate and those transients: a short recording that 1, 2, 4, 8 or 16 bars fit at its tempo is taken as that loop, marked at its start and end; any other gets a warp marker on the first beat of each bar, moved onto a transient within an eighth of a beat. It returns the tempo, the offset of the first beat and the markers, or `null` when there is no tempo to go by.

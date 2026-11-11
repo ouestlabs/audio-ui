@@ -12,7 +12,7 @@ A device is an effect or an instrument that you can plug in, not a widget with a
 | **Engine** | Plays a state with Web Audio nodes | `engine` |
 | **Tools** | What an agent calls to change the state | `deviceTools` |
 
-`npx shadcn@latest add @audio-ui/compressor` installs a device's state, engine and panel in `components/audio-ui/devices/compressor/`. Each piece also installs on its own (`@audio-ui/compressor-device`, `-engine`, `-panel`), so a host with its own engine takes only the state and the panel. The tools come from `@audio-ui/core/device`. Every device page has a block that wires the pieces to a loop: `@audio-ui/block-compressor`. To put several in a row, in the order the sound goes through them, use the [Device chain](/docs/components/base/device-chain).
+`npx shadcn@latest add @audio-ui/compressor` installs a device's state, engine and panel in `components/audio-ui/devices/compressor/`. Each piece also installs on its own (`@audio-ui/compressor-device`, `-engine`, `-panel`), so a host with its own engine takes only the state and the panel. The tools come from `@audio-ui/engine/device`. Every device page has a block that wires the pieces to a loop: `@audio-ui/block-compressor`. To put several in a row, in the order the sound goes through them, use the [Device chain](/docs/components/base/device-chain).
 
 ## One description
 
@@ -196,7 +196,7 @@ A device with no gain to take off has no `readings()`, and a host that draws a m
 The tools are derived from the parameters of the device, with a JSON Schema input, so any agent can use them. They are not tied to an SDK.
 
 ```ts
-import { deviceTools } from "@audio-ui/core/device";
+import { deviceTools } from "@audio-ui/engine/device";
 
 const [set, reset] = deviceTools(compressorDevice);
 // set.name === "audioui_compressor_set"
@@ -218,7 +218,7 @@ Usage and API: [`device-measure`](/docs/lib/device-measure).
 `defineDevice` is the one extension point, and the core keeps no list of devices. A device you define gets the same panel, tools and bindings as the ones here.
 
 ```tsx
-import { defineDevice } from "@audio-ui/core/device";
+import { defineDevice } from "@audio-ui/engine/device";
 import { DevicePanel } from "@/components/audio-ui/device-panel";
 
 const tremolo = defineDevice({
@@ -244,7 +244,7 @@ An instrument is the same with `kind: "instrument"`. Its parameters shape the so
 A host that has its own audio engine, such as a DAW with one in a worklet, keeps the state and the panel and turns the state into its own messages. A `DeviceBinding` is just that:
 
 ```ts
-import type { DeviceBinding } from "@audio-ui/core/device";
+import type { DeviceBinding } from "@audio-ui/engine/device";
 
 const binding: DeviceBinding<CompressorState> = {
   update: (state) => engine.post({ type: "compressor", ...compressorSettings(state) }),

@@ -1,0 +1,35 @@
+---
+title: pitch
+description: "Named scales from @audio-ui/engine: the steps of each scale, the pitch classes a scale on a root keeps, whether a pitch is in it and the nearest one that is, and the scale as a piano roll reads it."
+---
+
+<Module from="@audio-ui/engine/pitch" />
+
+## Usage
+
+Pitches are MIDI note numbers, 60 being middle C. A `Scale` is a name of `SCALES` on a root pitch class, 0 being C:
+
+```ts
+import { inScale, nearestInScale, rollScale, scalePitchClasses } from "@audio-ui/engine/pitch";
+
+const aMinor = { name: "minor", root: 9 };
+
+scalePitchClasses(aMinor); // [0, 2, 4, 5, 7, 9, 11]
+inScale(61, aMinor); // false: C# is not in A minor
+nearestInScale(61, aMinor); // 60: of two as near, the lower
+rollScale(aMinor); // { pitchClasses: [0, 2, 4, 5, 7, 9, 11], root: 9 }
+```
+
+`SCALES` holds the steps of each scale as semitones above its root: `chromatic`, the major and minor scales (natural, harmonic, melodic), the two pentatonics, the blues, the whole-tone scale and the modes (dorian, phrygian, lydian, mixolydian, locrian). The tables and the snapping are `@audio/note`'s, with the three modes it does not list added.
+
+## On a piano roll
+
+A piano roll knows a scale only as the pitch classes it keeps and its root, a [`RollScale`](/docs/core/piano-roll): it shades the rows out of the scale, folds onto it and fits notes into it without knowing any scale by name. `rollScale(scale)` gives a named scale in that shape:
+
+```tsx
+const scale = useMemo(() => rollScale({ name: "dorian", root: 2 }), []);
+
+<PianoRoll.Root scale={scale} />;
+```
+
+A pitch's name and whether it is a black key are the keyboard's own: `pitchName`, `pitchClassName` and `isBlackKey` are in [`@audio-ui/core`](/docs/core).

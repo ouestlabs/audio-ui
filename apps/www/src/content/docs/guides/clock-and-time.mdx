@@ -11,7 +11,7 @@ Usage and API: [`useTransportClock`](/docs/hooks/use-transport-clock).
 
 ## Musical time
 
-`@audio-ui/core/time` turns seconds into bars and beats and back. A tempo is `{ bpm, beatsPerBar, beatUnit }`: `bpm` counts quarter notes, and `beatsPerBar` and `beatUnit` are the time signature, 6/8 being `{ beatsPerBar: 6, beatUnit: 8 }`.
+`@audio-ui/engine/time` turns seconds into bars and beats and back. A tempo is `{ bpm, beatsPerBar, beatUnit }`: `bpm` counts quarter notes, and `beatsPerBar` and `beatUnit` are the time signature, 6/8 being `{ beatsPerBar: 6, beatUnit: 8 }`.
 
 ```tsx
 import {
@@ -19,7 +19,7 @@ import {
   describeBarsBeats,
   secondsPerBar,
   secondsPerBeat,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 
 const tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 120 };
 secondsPerBeat(tempo); // 0.5

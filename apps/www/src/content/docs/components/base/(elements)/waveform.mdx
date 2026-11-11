@@ -142,10 +142,10 @@ const { bands } = useAudioSignal(analyser);
 
 ## Feeding real audio
 
-`values` is a plain prop: the component does not decode audio. `@audio-ui/core/analysis` and the `audio-decode` lib (`npx shadcn@latest add @audio-ui/audio-decode`) turn a real audio file into `values`: `decodeAudioChannels` (from `audio-decode`) reads every channel's PCM samples at the context's sample rate, with the browser's own decoder, or for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed; `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
+`values` is a plain prop: the component does not decode audio. `@audio-ui/engine/analysis` and the `audio-decode` lib (`npx shadcn@latest add @audio-ui/audio-decode`) turn a real audio file into `values`: `decodeAudioChannels` (from `audio-decode`) reads every channel's PCM samples at the context's sample rate, with the browser's own decoder, or for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed; `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
 
 ```tsx
-import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
+import { computePeaks, normalizePeaks } from "@audio-ui/engine/analysis";
 import { decodeAudioChannels } from "@/lib/audio-decode";
 
 const context = new AudioContext();

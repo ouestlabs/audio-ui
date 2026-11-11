@@ -602,7 +602,7 @@ Every lane sets `--timeline-unit`, the width of one unit; placed parts set `--ti
 <TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest row, a MIDI pitch. 60 is middle C.</TypeRow>
 <TypeRow name={"max-pitch"} type={"number"} default={"72"}>Highest row.</TypeRow>
 <TypeRow name={"folded"} type={"string"}>When present, only pitches with notes get a row; `"scale"` also keeps the scale's pitches.</TypeRow>
-<TypeRow name={"scale"} type={"string"}>Scale name, such as `major`, `minor` or `dorian`, with `scale-root` (0 for C). Its rows carry `data-in-scale` or `data-out-of-scale`, and those of its root `data-scale-root`.</TypeRow>
+<TypeRow name={"scale"} type={"string"}>The scale's pitch classes, from 0 (C) to 11 (B), such as `0 2 4 5 7 9 11` for a major scale, with `scale-root` (0 for C). Its rows carry `data-in-scale` or `data-out-of-scale`, and those of its root `data-scale-root`. The `scale` property takes `{ pitchClasses, root }`, which `rollScale` of `@audio-ui/engine/pitch` gives for a scale by name.</TypeRow>
 <TypeRow name={"mode"} type={"\"select\" | \"draw\""} default={"\"select\""}>Behavior of a press on empty grid: marquee selection or note drawing.</TypeRow>
 <TypeRow name={"draw-style"} type={"\"stretch\" | \"paint\""} default={"\"stretch\""}>In draw mode, `paint` draws a note in each grid cell crossed.</TypeRow>
 <TypeRow name={"min-length"} type={"number"}>Minimum note length. Defaults to the timeline's grid step.</TypeRow>

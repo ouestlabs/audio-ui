@@ -1,0 +1,64 @@
+---
+title: Playback
+description: "Playing an arrangement's audio clips on the audio clock, to the frame: a transport in frames, a player per track in an AudioWorklet, and the mixer's arithmetic."
+---
+
+An arrangement plays when each of its tracks reads its clips on the audio clock: its recordings, at their places, through their gains and fades, round the loop. `@audio-ui/engine/playback` is that reading, with no React and no audio node in it, so it runs the same in an AudioWorklet, in an offline render and in a test.
+
+```bash
+npm install @audio-ui/core
+```
+
+## Frames, on both sides
+
+Every time is counted in whole frames: frames of the audio clock (a context's `currentFrame`) on one side, frames of the arrangement on the other. A `PlaybackState` joins them: from the clock's frame `at`, the arrangement's frame `position` plays, round its `loop` while it is on. Whole frames are what keep a loop of any length from drifting, and a recording played at speed 1 from being changed by a single bit.
+
+```ts
+import { playbackRuns, toFrames } from "@audio-ui/engine/playback";
+
+const rate = context.sampleRate;
+const state = {
+  at: Math.ceil((context.currentTime + 0.02) * rate), // a little ahead, so every track hears of it in time
+  loop: [toFrames(8, rate), toFrames(16, rate)] as const,
+  playing: true,
+  position: toFrames(cursor, rate),
+};
+
+// The arrangement's frames a block of 128 plays, cut where the loop comes round.
+playbackRuns(state, currentFrame, 128);
+```
+
+Every part of an engine reads the same state: each track's player, the scheduler of the notes (`startsInWindow` gives what starts in its look-ahead window, and the clock's frame it starts at), and the playhead (`heardFrame` turns what the speakers play now into a frame). They agree to the frame.
+
+## A player per track
+
+`TrackRenderer` is a track's player without the audio thread. It reads clips as `playedClip` turns them into frames, the recordings they name, and the states of the transport as they come, each from its own frame.
+
+Usage and API: [`clip-player`](/docs/lib/clip-player).
+
+## The mixer's arithmetic
+
+<TypeTable title="Mixer">
+<TypeRow name={"panGains(pan)"} type={"[left, right]"}>The gains for a pan from -1 to 1: constant power on sine curves, 0 dB on both channels in the centre, +3 dB on the side it is turned to at either end. Each channel keeps its own gain, so nothing of one moves into the other.</TypeRow>
+<TypeRow name={"soloState(tracks, { inPlace? })"} type={"{ heard, sends }"}>Which tracks a solo lets through, and which sends. Soloed tracks are heard and the others silenced with their sends; the returns stay heard with `inPlace` (the default), and a soloed return is heard with what every track sends it.</TypeRow>
+<TypeRow name={"delayCompensation(tracks, returns)"} type={"Compensation"}>How many frames each path waits so all of them meet the main track on the same frame, from the latency each device chain declares, and the frames the whole mix comes out late.</TypeRow>
+</TypeTable>
+
+## Playing an arrangement
+
+`arrangement-engine` plays the document `useArrangement` holds: each audio track through a clip player, each MIDI track through the instrument of its chain with a voice for each note it holds (so a monophonic instrument plays chords), every device chain, every send and return, and the main track, on one transport counted in frames of the audio clock. The document comes in as a value; the engine follows it while it plays, and the interface never touches the audio.
+
+Usage and API: [`arrangement-engine`](/docs/lib/arrangement-engine).
+
+## The mixer
+
+`mixer-engine` is the mixing desk the engine plays through, usable on its own with sources of your own: a channel per track and per return (a track that names a `group` plays into that track's channel), each with a device chain (`setChain`), a volume, a pan, a switch and a solo, sends taken before or after the volume, pan and switch as each return asks, delay compensation from the latency each chain declares, a meter per channel, and the main track to the output. Nothing limits the main track, so a mix over full scale shows on the meters as it would in the file.
+
+Usage and API: [`mixer-engine`](/docs/lib/mixer-engine).
+
+## The device library
+
+`device-library` is every device of the registry with its engine, by shelf: `libraryDevice("audioui.compressor")` gives the description and `create(context, state)` its engine, which is how a host turns the ids a project stores into sound, and `DEVICE_SHELVES` is what a device browser lists.
+
+Usage and API: [`device-library`](/docs/lib/device-library).
+

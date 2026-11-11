@@ -1,16 +1,16 @@
 ---
 title: device
-description: "A device as a description, from @audio-ui/core: defineDevice and its parameters, a state and apply with what each change did, the bindings an engine implements, and the tools an agent drives it with."
+description: "A device as a description, from @audio-ui/engine: defineDevice and its parameters, a state and apply with what each change did, the bindings an engine implements, and the tools an agent drives it with."
 ---
 
-<CoreModule name="device" />
+<Module from="@audio-ui/engine/device" />
 
 ## Usage
 
 `defineDevice` describes an effect or an instrument by its parameters, with no sound and no view in it. What comes back holds everything that reads or changes a state of it:
 
 ```ts
-import { defineDevice } from "@audio-ui/core/device";
+import { defineDevice } from "@audio-ui/engine/device";
 
 export const driveDevice = defineDevice({
   id: "drive",
@@ -55,7 +55,7 @@ A device makes no sound. An engine does, and it implements a binding: `update(st
 `deviceTools(device)` derives the tools a model calls to drive it: `<id>_set` takes any parameters by id, `<id>_reset` puts some or all back, and an instrument played by notes also gets `<id>_play`. Each has a JSON Schema input and a `run(state, input)` that never throws on a model's input:
 
 ```ts
-import { deviceTools } from "@audio-ui/core/device";
+import { deviceTools } from "@audio-ui/engine/device";
 
 const [set] = deviceTools(driveDevice);
 set.run(state, { amount: 60 });

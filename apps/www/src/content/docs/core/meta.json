@@ -2,13 +2,6 @@
   "title": "Core",
   "pages": [
     "index",
-    "---Audio---",
-    "device",
-    "time",
-    "analysis",
-    "pitch",
-    "midi",
-    "playback",
     "---Controls---",
     "controllers",
     "knob",

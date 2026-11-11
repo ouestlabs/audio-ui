@@ -27,7 +27,7 @@ base: base
 ## Usage
 
 ```tsx
-import type { Scale } from "@audio-ui/core/pitch";
+import type { Scale } from "@audio-ui/engine/pitch";
 import {
   ScaleMenu,
   ScaleMenuContent,
@@ -57,9 +57,9 @@ const [scale, setScale] = useState<Scale>({ name: "major", root: 0 });
 </ScaleMenu>;
 ```
 
-A scale is `{ root, name }`: `root` is a pitch class, 0 for C to 11 for B, and `name` one of the scales in `SCALES` from `@audio-ui/core/pitch` (`"major"`, `"minor"`, `"dorian"`, `"blues"`…). The menu keeps the scale while it is off, so turning it back on brings back the last one; picking a root or a scale turns it on.
+A scale is `{ root, name }`: `root` is a pitch class, 0 for C to 11 for B, and `name` one of the scales in `SCALES` from `@audio-ui/engine/pitch` (`"major"`, `"minor"`, `"dorian"`, `"blues"`…). The menu keeps the scale while it is off, so turning it back on brings back the last one; picking a root or a scale turns it on.
 
-Pass `enabled ? scale : null` to whatever marks the scale: a [Piano roll](/docs/components/base/piano-roll)'s `scale` marks its rows, and `inScale(pitch, scale)` from `@audio-ui/core/pitch` tells whether any pitch is in it.
+Pass `enabled ? scale : null` to whatever marks the scale: a [Piano roll](/docs/components/base/piano-roll)'s `scale` marks its rows, and `inScale(pitch, scale)` from `@audio-ui/engine/pitch` tells whether any pitch is in it.
 
 ### Items of your own
 

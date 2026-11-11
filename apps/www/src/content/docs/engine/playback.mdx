@@ -1,64 +1,69 @@
 ---
-title: Playback
-description: "Playing an arrangement's audio clips on the audio clock, to the frame: a transport in frames, a player per track in an AudioWorklet, and the mixer's arithmetic."
+title: playback
+description: "What plays when, from @audio-ui/engine: audio clips placed in frames, the transport's state on the audio clock, the clip player's processor and its renderer, recordings streamed in pages, and the mixer's pan law, solo and delay compensation."
 ---
 
-An arrangement plays when each of its tracks reads its clips on the audio clock: its recordings, at their places, through their gains and fades, round the loop. `@audio-ui/core/playback` is that reading, with no React and no audio node in it, so it runs the same in an AudioWorklet, in an offline render and in a test.
+<Module from="@audio-ui/engine/playback" />
 
-```bash
-npm install @audio-ui/core
-```
+## Usage
 
-## Frames, on both sides
+An arrangement plays as blocks of frames on the audio thread. This module holds the arithmetic of that: which frame of the arrangement plays at a frame of the audio clock, which clips sound in a block and where each reads its recording, and how the mixer lines its paths up. The registry's [`clip-player`](/docs/lib/clip-player) runs it in an `AudioWorklet`, and the [`arrangement-engine`](/docs/lib/arrangement-engine) and [`mixer-engine`](/docs/lib/mixer-engine) build on it.
 
-Every time is counted in whole frames: frames of the audio clock (a context's `currentFrame`) on one side, frames of the arrangement on the other. A `PlaybackState` joins them: from the clock's frame `at`, the arrangement's frame `position` plays, round its `loop` while it is on. Whole frames are what keep a loop of any length from drifting, and a recording played at speed 1 from being changed by a single bit.
+## The clip player
+
+`CLIP_PLAYER_WORKLET` is the player's processor as the source of a module. Load it once into a context, then make a player per track:
 
 ```ts
-import { playbackRuns, toFrames } from "@audio-ui/core/playback";
+import { CLIP_PLAYER_PROCESSOR, CLIP_PLAYER_WORKLET, playedClips } from "@audio-ui/engine/playback";
 
-const rate = context.sampleRate;
-const state = {
-  at: Math.ceil((context.currentTime + 0.02) * rate), // a little ahead, so every track hears of it in time
-  loop: [toFrames(8, rate), toFrames(16, rate)] as const,
-  playing: true,
-  position: toFrames(cursor, rate),
-};
+const url = URL.createObjectURL(new Blob([CLIP_PLAYER_WORKLET], { type: "text/javascript" }));
+await ctx.audioWorklet.addModule(url);
 
-// The arrangement's frames a block of 128 plays, cut where the loop comes round.
-playbackRuns(state, currentFrame, 128);
+const player = new AudioWorkletNode(ctx, CLIP_PLAYER_PROCESSOR, {
+  numberOfInputs: 0,
+  numberOfOutputs: 1,
+  outputChannelCount: [2],
+});
+player.connect(ctx.destination);
+
+player.port.postMessage({ type: "recording", id: "take-1", channels, sampleRate: buffer.sampleRate });
+player.port.postMessage({ type: "clips", clips: playedClips(track.clips, (clip) => clip.recordingId, ctx.sampleRate) });
+player.port.postMessage({ type: "state", state: { at: 0, loop: null, playing: true, position: 0 } });
 ```
 
-Every part of an engine reads the same state: each track's player, the scheduler of the notes (`startsInWindow` gives what starts in its look-ahead window, and the clock's frame it starts at), and the playhead (`heardFrame` turns what the speakers play now into a frame). They agree to the frame.
+A recording posted through one player is there for every player of the context. `playedClips` turns an arrangement's clips into what the player reads, in whole frames: the clips that play, each with its place, its fades, its gain, its loop and its warp or stretch. The messages a player takes are `ClipPlayerMessage`: a decoded or a streamed recording, `forget`, the clips, a state of the transport, `sync` (answered once every message before it is in) and `dispose`.
 
-## A player per track
+## The transport
 
-`TrackRenderer` is a track's player without the audio thread. It reads clips as `playedClip` turns them into frames, the recordings they name, and the states of the transport as they come, each from its own frame.
+A `PlaybackState` says what plays from a frame of the audio clock on: whether it plays, the frame of the arrangement at that frame, and the loop. `STOPPED` is the state at rest. `playbackRuns(state, frame, count)` cuts a block into runs of consecutive frames of the arrangement, cut where the loop comes round; `arrangementFrame` is the one frame, `rescaled` carries a state through a change of tempo, and `heardFrame` turns the context's time of what is heard now (`getOutputTimestamp().contextTime`) into a frame of the audio clock, for a playhead that matches the speakers.
 
-Usage and API: [`clip-player`](/docs/lib/clip-player).
+`TrackRenderer` is what one track plays, block after block. A state that arrives late takes over at once and still plays the frames its clock says, and a stop or a jump fades out over `DECLICK_SECONDS` (2 ms), so it does not click.
 
-## The mixer's arithmetic
+## Streamed recordings
 
-<TypeTable title="Mixer">
-<TypeRow name={"panGains(pan)"} type={"[left, right]"}>The gains for a pan from -1 to 1: constant power on sine curves, 0 dB on both channels in the centre, +3 dB on the side it is turned to at either end. Each channel keeps its own gain, so nothing of one moves into the other.</TypeRow>
-<TypeRow name={"soloState(tracks, { inPlace? })"} type={"{ heard, sends }"}>Which tracks a solo lets through, and which sends. Soloed tracks are heard and the others silenced with their sends; the returns stay heard with `inPlace` (the default), and a soloed return is heard with what every track sends it.</TypeRow>
-<TypeRow name={"delayCompensation(tracks, returns)"} type={"Compensation"}>How many frames each path waits so all of them meet the main track on the same frame, from the latency each device chain declares, and the frames the whole mix comes out late.</TypeRow>
-</TypeTable>
-
-## Playing an arrangement
-
-`arrangement-engine` plays the document `useArrangement` holds: each audio track through a clip player, each MIDI track through the instrument of its chain with a voice for each note it holds (so a monophonic instrument plays chords), every device chain, every send and return, and the main track, on one transport counted in frames of the audio clock. The document comes in as a value; the engine follows it while it plays, and the interface never touches the audio.
-
-Usage and API: [`arrangement-engine`](/docs/lib/arrangement-engine).
+A recording too long to hold decoded is read from pages in shared memory. `createPagePool(slots)` makes the pool every streamed recording of a context reads from, `createRecordingStream` a recording in it, and `RECORDING_LOADER_WORKER` is the worker that loads pages into it from a file in the origin private file system. `pagesAhead` lists the pages the next frames will read, soonest first, and `PageCache` keeps them in the pool. A page that is not there yet plays as silence.
 
 ## The mixer
 
-`mixer-engine` is the mixing desk the engine plays through, usable on its own with sources of your own: a channel per track and per return (a track that names a `group` plays into that track's channel), each with a device chain (`setChain`), a volume, a pan, a switch and a solo, sends taken before or after the volume, pan and switch as each return asks, delay compensation from the latency each chain declares, a meter per channel, and the main track to the output. Nothing limits the main track, so a mix over full scale shows on the meters as it would in the file.
+```ts
+import { delayCompensation, panGains, soloState } from "@audio-ui/engine/playback";
 
-Usage and API: [`mixer-engine`](/docs/lib/mixer-engine).
+panGains(0); // [1, 1]: both channels at unity in the centre
+panGains(-1); // [1.414, 0]: the side it is turned to at +3 dB
 
-## The device library
+const solo = soloState([
+  { id: "drums", kind: "track", soloed: true },
+  { id: "bass", kind: "track", soloed: false },
+  { id: "verb", kind: "return", soloed: false },
+]);
+solo.heard("bass"); // false
+solo.sends("drums", "verb"); // true: a soloed track's sends still reach its return
 
-`device-library` is every device of the registry with its engine, by shelf: `libraryDevice("audioui.compressor")` gives the description and `create(context, state)` its engine, which is how a host turns the ids a project stores into sound, and `DEVICE_SHELVES` is what a device browser lists.
+const { tracks, total } = delayCompensation(
+  [{ id: "drums", latency: 128 }, { id: "bass", latency: 0 }],
+  []
+);
+// bass waits 128 frames after its chain, so both reach the main track together
+```
 
-Usage and API: [`device-library`](/docs/lib/device-library).
-
+`soloState` takes groups too: a group is heard while a track in it is soloed. `routedCompensation` lines paths up wherever they meet, at a group, a return or the main track, for a mixer that routes tracks into groups.

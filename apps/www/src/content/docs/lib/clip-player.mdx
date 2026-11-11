@@ -10,7 +10,7 @@ description: "A track's player of audio clips on an AudioWorklet: its recordings
 `TrackRenderer` is a track's player without the audio thread. It reads clips as `playedClip` turns them into frames, the recordings they name, and the states of the transport as they come, each from its own frame.
 
 ```ts
-import { playedClips, TrackRenderer } from "@audio-ui/core/playback";
+import { playedClips, TrackRenderer } from "@audio-ui/engine/playback";
 
 const player = new TrackRenderer(rate, recordings); // Map of id to { channels, sampleRate }
 player.setClips(playedClips(clipsOfTheTrack, (clip) => clip.recording, rate));
@@ -28,7 +28,7 @@ player.render(output, currentFrame, 128); // adds into output, a Float32Array pe
 In a browser the player runs in an AudioWorklet, and the `clip-player` library does the wiring: it loads the worklet once per context, posts each recording once for all the players of a context (into shared memory when the page is cross-origin isolated, so an offline render reads the same samples), and says when a player has heard everything, which an offline render waits for before it starts.
 
 ```ts
-import { playedClips } from "@audio-ui/core/playback";
+import { playedClips } from "@audio-ui/engine/playback";
 import { createClipPlayer, loadClipPlayer } from "@/lib/clip-player";
 
 if (await loadClipPlayer(context)) {
@@ -49,7 +49,7 @@ import {
   CLIP_PLAYER_PROCESSOR,
   CLIP_PLAYER_WORKLET,
   type ClipPlayerMessage,
-} from "@audio-ui/core/playback";
+} from "@audio-ui/engine/playback";
 
 const url = URL.createObjectURL(
   new Blob([CLIP_PLAYER_WORKLET], { type: "text/javascript" })
@@ -101,7 +101,7 @@ const recordings = new Map<string, StreamedSource>([
 const engine = useArrangementEngine({ doc, recordings });
 ```
 
-Without the library, `@audio-ui/core/playback` has the pieces:
+Without the library, `@audio-ui/engine/playback` has the pieces:
 
 - `createPagePool` and `createRecordingStream` make the pool and each recording's directory of pages.
 - `RECORDING_LOADER_WORKER` is the loader, as the source of a module, to start as a Worker and post `RecordingLoaderMessage`s.

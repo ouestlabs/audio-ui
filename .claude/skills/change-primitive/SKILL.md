@@ -1,6 +1,6 @@
 ---
 name: change-primitive
-description: "Change, fix or add a headless primitive or its logic in the published packages @audio-ui/react (packages/ui) or @audio-ui/core (packages/core): props, parts, keyboard or pointer behavior, ARIA, scales, timeline or waveform math. Use for any edit under packages/, since each one needs tests, a changeset and the matching docs API reference."
+description: "Change, fix or add a headless primitive or its logic in the published packages @audio-ui/react (packages/ui), @audio-ui/core (packages/core) or @audio-ui/engine (packages/engine): props, parts, keyboard or pointer behavior, ARIA, scales, timeline or waveform math. Use for any edit under packages/, since each one needs tests, a changeset and the matching docs API reference."
 ---
 
 # Change a primitive
@@ -12,6 +12,7 @@ Both packages are published to npm. Every change here is a change to someone's a
 - **Logic that doesn't need React** (geometry, value mapping, clip operations, peaks): `packages/core/src/primitives/<name>/`, with a `*.test.ts` next to it. Shared helpers: `packages/core/src/{shared,value,dom}/`.
 - **React parts**: `packages/ui/src/primitives/<name>/elements/<part>.tsx`, the context in `context.ts`, tests in `test/`. The public surface is `packages/ui/src/entries/<name>.ts`, re-exported by `index.ts`.
 - A new export from core that adapters need but users don't goes in `packages/core/src/internal.ts`, not `index.ts`.
+- **Audio logic** (devices, time, analysis, MIDI, scales, playback), and anything built on an audio.js atom: `packages/engine/src/<module>/`. Core takes no dependency; the engine imports core only through its public entries.
 
 ## Rules
 
@@ -25,7 +26,7 @@ Both packages are published to npm. Every change here is a change to someone's a
 1. **Test first.** Reproduce the bug or describe the new behavior in a test (`bun test` in the package). Pointer and keyboard tests for parts live in `packages/ui/src/primitives/<name>/test/`.
 2. **Change the code** in core first if the logic is framework-free, then the React part.
 3. **Docs API reference.** The JSDoc of each part in `elements/` and the `<TypeRow>` lines under "API reference" in `apps/www/src/content/docs/components/base/(<space>)/<name>.mdx` are hand-kept copies of each other. Change both, word for word.
-   A change to `@audio-ui/core` also shows on its module's page, `apps/www/src/content/docs/core/<module>.mdx`: its head (exports and their JSDoc's first sentence, adapters, sources) is generated, so run `bun run registry:build` in `apps/www` (`test/entries.test.ts` fails on a stale manifest), and update the written Usage when the behavior it describes changed. A new subpath export needs a page with `<CoreModule name="<module>" />`, listed in `core/meta.json`; `test/core-modules-docs.test.ts` fails without one.
+   A change to `@audio-ui/core` or `@audio-ui/engine` also shows on its module's page, `apps/www/src/content/docs/core/<module>.mdx` or `engine/<module>.mdx`: its head (exports and their JSDoc's first sentence, adapters, sources) is generated, so run `bun run registry:build` in `apps/www` (`test/entries.test.ts` fails on a stale manifest), and update the written Usage when the behavior it describes changed. A new subpath export needs a page with `<Module from="@audio-ui/<package>/<module>" />`, listed in that folder's `meta.json`; `test/package-modules-docs.test.ts` fails without one. A change under `packages/engine/src/playback/` (or to core's timeline, which the clip player bundles) needs `bun run worklet:build` in `packages/engine`.
 4. **Shipped skill.** If a prop, part, data attribute or CSS variable that `skills/audio-ui/` names changed, update it; `bun test test/skills.test.ts` in `apps/www` checks the names.
 5. **Registry element.** If the styled element in `apps/www/src/registry-audio/bases/base/audio/elements/<name>.tsx` should use the new prop or part, update it and follow the `add-registry-item` skill's build step.
 6. **Changeset.** `bun run changeset`, or write `.changeset/<short-name>.md` by hand:
@@ -40,9 +41,10 @@ Both packages are published to npm. Every change here is a change to someone's a
 7. **Check like CI** (from the repo root):
    ```sh
    bun run lint:fix
-   bunx biome ci packages/core packages/ui
+   bunx biome ci packages/core packages/engine packages/ui
    bun run build:pkg
    (cd packages/core && bunx tsc --noEmit && bun test)
+   (cd packages/engine && bunx tsc --noEmit && bun test)
    (cd packages/ui && bunx tsc --noEmit && bun test && bun run size)
    ```
    `bun run size` enforces bundle budgets per entry. If it fails, look for an import that pulls in more than the primitive needs.

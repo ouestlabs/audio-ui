@@ -1,6 +1,6 @@
 ---
 title: audio-decode
-description: "Decoding an audio file into samples at a context's rate, the step before the waveform maths of @audio-ui/core/analysis: the browser's decoder first, and for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed"
+description: "Decoding an audio file into samples at a context's rate, the step before the waveform maths of @audio-ui/engine/analysis: the browser's decoder first, and for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed"
 ---
 
 <Entry name="audio-decode" />
@@ -15,4 +15,4 @@ import { decodeAudioChannels } from "@/lib/audio-decode";
 const channels = await decodeAudioChannels(ctx, await file.arrayBuffer());
 ```
 
-The samples are at the context's sample rate, so they play as they are and `computePeaks` (from `@audio-ui/core/analysis`) draws them. The waveform player and the arrangement decode dropped files this way.
+The samples are at the context's sample rate, so they play as they are and `computePeaks` (from `@audio-ui/engine/analysis`) draws them. The waveform player and the arrangement decode dropped files this way.

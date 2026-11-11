@@ -560,7 +560,7 @@ A mono source through a `ChannelSplitterNode` leaves the second analyser at zero
 Without the registry, the same loop is a few lines per channel:
 
 ```ts
-import { peakDb, rmsDb } from "@audio-ui/core/analysis";
+import { peakDb, rmsDb } from "@audio-ui/engine/analysis";
 import { createSource } from "@audio-ui/react";
 
 const buffer = new Float32Array(analyser.fftSize);
@@ -641,7 +641,7 @@ const midi = useMidiInput({
 <Piano activeNotes={midi.activeNotes} aria-label="Piano" />
 ```
 
-Every component that calls `useMidiInput` hears the same devices, and one `MidiConnectControl` (or `midi.requestAccess` from a click) connects them all. Held keys are released when the device goes away. Without React, `createMidiInput()` from `@audio-ui/core/midi` is the same input as a source, and `parseMidiMessage` reads a raw message (channel, velocity from 0 to 1, pitch bend from -1 to 1).
+Every component that calls `useMidiInput` hears the same devices, and one `MidiConnectControl` (or `midi.requestAccess` from a click) connects them all. Held keys are released when the device goes away. Without React, `createMidiInput()` from `@audio-ui/engine/midi` is the same input as a source, and `parseMidiMessage` reads a raw message (channel, velocity from 0 to 1, pitch bend from -1 to 1).
 
 ### 2.6 Playheads and playback position
 
@@ -692,7 +692,7 @@ function Track({ file }: { file: ArrayBuffer }) {
 **Correct:**
 
 ```ts
-// npx shadcn@latest add @audio-ui/audio-decode, then: import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis"
+// npx shadcn@latest add @audio-ui/audio-decode, then: import { computePeaks, normalizePeaks } from "@audio-ui/engine/analysis"
 const channels = await decodeAudioChannels(ctx, file);
 const values = normalizePeaks(computePeaks(channels, 4096)); // once, at load
 ```
@@ -789,11 +789,11 @@ const spectrum = useSpectrum(analyser); // Source<Float32Array>, dB per point on
 <PlotTraceArea fillTo={-100} max={-10} min={-100} source={spectrum} />
 ```
 
-Without the registry, the same loop uses `logSpectrum` and `holdPeaks` from `@audio-ui/core/analysis`, and a `Plot.Trace` on the source. Set the analyser's `minDecibels` and `maxDecibels` first, or `getFloatFrequencyData` reads a different range than the plot shows:
+Without the registry, the same loop uses `logSpectrum` and `holdPeaks` from `@audio-ui/engine/analysis`, and a `Plot.Trace` on the source. Set the analyser's `minDecibels` and `maxDecibels` first, or `getFloatFrequencyData` reads a different range than the plot shows:
 
 ```ts
 import { createSource } from "@audio-ui/react";
-import { holdPeaks, logSpectrum } from "@audio-ui/core/analysis";
+import { holdPeaks, logSpectrum } from "@audio-ui/engine/analysis";
 
 analyser.fftSize = 4096;
 analyser.minDecibels = -96;

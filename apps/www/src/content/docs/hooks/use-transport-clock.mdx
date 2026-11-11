@@ -28,7 +28,7 @@ const clock = useTransportClock({
 <Button onClick={clock.isPlaying ? clock.stop : clock.start}>Play</Button>;
 ```
 
-The clock knows when, never what: `onStep` decides what plays. `onReset` runs on every start, stop, seek and loop change, to drop what was already scheduled ahead. For a playhead, read `getPosition()` in an animation frame and push it to a [source](/docs/engine#your-own-engine): it gives fractional steps, so the playhead glides between them.
+The clock knows when, never what: `onStep` decides what plays. `onReset` runs on every start, stop, seek and loop change, to drop what was already scheduled ahead. For a playhead, read `getPosition()` in an animation frame and push it to a [source](/docs/guides#your-own-engine): it gives fractional steps, so the playhead glides between them.
 
 The [piano roll](/docs/components/base/piano-roll#playing-the-notes) plays its notes with this clock through `usePianoRollPlayback`, which is a good example to copy.
 
@@ -49,4 +49,4 @@ The [piano roll](/docs/components/base/piano-roll#playing-the-notes) plays its n
 <TypeRow name={"secondsPerStep"} type={"number"}>A step's length at the current tempo, to place a note's end.</TypeRow>
 </TypeTable>
 
-The scheduling itself is plain functions in `@audio-ui/core/time` (`advance`, `anchoredCursor`, `positionAt`, `SCHEDULE_AHEAD_SECONDS`): the hook only connects them to React and the audio context, so an engine outside React uses them directly.
+The scheduling itself is plain functions in `@audio-ui/engine/time` (`advance`, `anchoredCursor`, `positionAt`, `SCHEDULE_AHEAD_SECONDS`): the hook only connects them to React and the audio context, so an engine outside React uses them directly.

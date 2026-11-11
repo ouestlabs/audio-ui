@@ -1,10 +1,10 @@
 import { expect, test } from "bun:test";
 import {
-  buildCoreModules,
   buildEntries,
-  CORE_MANIFEST,
+  buildPackageModules,
   exportsOf,
   MANIFEST,
+  MODULES_MANIFEST,
 } from "../scripts/build-entries.ts";
 
 test("the entries' manifest is what the registry and the sources say", async () => {
@@ -12,9 +12,9 @@ test("the entries' manifest is what the registry and the sources say", async () 
   expect(await Bun.file(MANIFEST).text()).toBe(built);
 });
 
-test("the core modules' manifest is what the package and its sources say", async () => {
-  const built = `${JSON.stringify(await buildCoreModules(), null, 2)}\n`;
-  expect(await Bun.file(CORE_MANIFEST).text()).toBe(built);
+test("the package modules' manifest is what the packages and their sources say", async () => {
+  const built = `${JSON.stringify(await buildPackageModules(), null, 2)}\n`;
+  expect(await Bun.file(MODULES_MANIFEST).text()).toBe(built);
 });
 
 test("an export is read with the first sentence of its JSDoc, tags left out", () => {

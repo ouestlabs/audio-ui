@@ -10,7 +10,7 @@ description: "How loud a sound is, the way streaming services and broadcasters m
 `loudness` measures a whole sound the way streaming services and broadcasters do (ITU-R BS.1770): its integrated loudness in LUFS, its loudest sample, and its true peak, the loudest point of the waveform between the samples. `loudnessGain` is the gain that brings it to a target as far as its true peak stays under a ceiling, -1 dBTP unless told otherwise: a sound that would pass it lands under the target instead, and nothing is limited.
 
 ```ts
-import { dbToGain } from "@audio-ui/core/analysis";
+import { dbToGain } from "@audio-ui/engine/analysis";
 import { LOUDNESS_TARGETS, loudnessGain, measureLoudness } from "@/lib/loudness";
 
 const loudness = measureLoudness(channels, sampleRate); // { lufs: -19.2, peak: -3.1, truePeak: -2.8 }
