@@ -27,7 +27,13 @@ export function entryUrl(name: string): string | undefined {
 const IMPORTED_NAMES = 5;
 
 /** The line a project imports an entry's values with, the first few by their order in the file. */
-export function importLine(entry: Pick<Entry, "exports" | "from">): string {
+export function importLine(
+  entry: Pick<Entry, "exports" | "from"> & { typesOnly?: boolean }
+): string {
+  // An entry of types only, such as a framework's template types, is imported for them alone.
+  if (entry.typesOnly) {
+    return `import type {} from "${entry.from}";`;
+  }
   // A custom element's entry registers its elements: importing it is what a page does.
   if (entry.from.startsWith("@audio-ui/elements")) {
     return `import "${entry.from}";`;

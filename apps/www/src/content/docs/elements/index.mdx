@@ -55,7 +55,7 @@ Registration is a no-op on the server: server-rendered markup upgrades once the 
 
 <TabsContent value="vue">
 
-Declare the tags as custom elements to Vue's compiler, in `vite.config.js`:
+Declare the tags as custom elements to Vue's compiler, in `vite.config.js`. [Vue](/docs/elements/vue) has the template types and the rest:
 
 ```js
 vue({
@@ -78,8 +78,7 @@ const cutoff = ref(1000);
     min="20"
     max="20000"
     scale="log"
-    :value="cutoff"
-    @input="cutoff = $event.detail.value"
+    v-model="cutoff"
   >
     <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
     <audio-ui-knob-control>
@@ -95,6 +94,8 @@ const cutoff = ref(1000);
 </TabsContent>
 
 <TabsContent value="svelte">
+
+[Svelte](/docs/elements/svelte) has the template types and the rest.
 
 ```svelte
 <script>
@@ -154,7 +155,7 @@ Every control follows the same contract:
 | --- | --- | --- |
 | `input` | Event | Fires on every change. `event.detail` holds the new `value` and the `reason` for the change, such as `"drag"`, `"keyboard"`, `"wheel"`, `"reset"` or `"input-change"`. Calling `preventDefault()` rejects the change. |
 | `change` | Event | Fires once when an interaction that changed the value ends. Use it to commit: start a note, record an undo step, save. |
-| `value` | Property | Reads the current value, and sets it. Framework bindings (`:value` in Vue, `value={}` in Svelte) write this property. During a drag, the control follows the pointer even when the bound value lags behind. |
+| `value` | Property | Reads the current value, and sets it. While `input` is dispatched it reads the value proposed, as a native input's does, so `event.target.value` is the new one. Framework bindings (`v-model` in Vue, `value={}` in Svelte) read and write this property. During a drag, the control follows the pointer even when the bound value lags behind. |
 | `name` | Attribute | Submits the value with the enclosing form, through the control's native range input. |
 
 A part that holds a value of its own fires events prefixed with its name, for example `clipinput` and `clipchange` on a timeline clip. These never collide with the control's own `input` and `change`, and they bubble, so a single listener on the root can handle every part.
