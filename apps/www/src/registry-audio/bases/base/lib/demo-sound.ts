@@ -274,7 +274,7 @@ function drawDrums(
 
 /** What the drums, the bass, the keys and the line play, over two bars. */
 /** A note of the groove, as a MIDI clip holds it: its pitch, and its start and length in beats, swing included. */
-export interface GrooveNote {
+interface GrooveNote {
   length: number;
   pitch: number;
   start: number;
@@ -291,7 +291,7 @@ const KEY_STEPS = [5.5, 9.5];
  * The groove's bass, keys and plucked line as notes, for MIDI tracks to play:
  * the same notes, on the same steps and with the same swing as the groove.
  */
-export const GROOVE_SCORE: Record<"bass" | "keys" | "pluck", GrooveNote[]> = {
+const GROOVE_SCORE: Record<"bass" | "keys" | "pluck", GrooveNote[]> = {
   bass: BASS.map(([step, steps, bar]) => ({
     length: steps / 4,
     pitch: pitchOf(BASS_ROOTS_HZ[bar] ?? 55),
@@ -355,7 +355,7 @@ const GROOVE_PARTS = {
 };
 
 /** One of the groove's parts on its own: its drums, its bass, its keys or its plucked line. */
-export type GroovePart = keyof typeof GROOVE_PARTS;
+type GroovePart = keyof typeof GROOVE_PARTS;
 
 function drawGroove(ctx: BaseAudioContext, out: AudioNode) {
   const mix = ctx.createGain();
@@ -405,7 +405,7 @@ async function drawLoop(
  * Drawn once per sample rate by the drum voices of the library, then looped as
  * a buffer.
  */
-export function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
+function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
   const cached = rendered.get(sampleRate);
   if (cached) {
     return cached;
@@ -423,7 +423,7 @@ const parts = new Map<string, Promise<AudioBuffer>>();
  * `renderDemoLoop` since both are drawn from the same notes and hits. The four
  * parts played together are the groove.
  */
-export function renderGroovePart(
+function renderGroovePart(
   part: GroovePart,
   sampleRate: number
 ): Promise<AudioBuffer> {
@@ -449,7 +449,7 @@ const beats = new Map<number, Promise<AudioBuffer>>();
  * track of an arrangement plays, in step with `renderDemoLoop` since both are
  * drawn from the same hits.
  */
-export function renderBeatLoop(sampleRate: number): Promise<AudioBuffer> {
+function renderBeatLoop(sampleRate: number): Promise<AudioBuffer> {
   const cached = beats.get(sampleRate);
   if (cached) {
     return cached;
@@ -470,7 +470,7 @@ const keyed = new Map<number, Promise<AudioBuffer>>();
  * The kick of the groove on its own: the key a sidechain listens to, in step
  * with `renderDemoLoop` since both are drawn from the same beats.
  */
-export function renderKickLoop(sampleRate: number): Promise<AudioBuffer> {
+function renderKickLoop(sampleRate: number): Promise<AudioBuffer> {
   const cached = keyed.get(sampleRate);
   if (cached) {
     return cached;
@@ -491,7 +491,7 @@ const CHORD_LEVEL = 0.12;
  * cycles of the loop, and the loop kept is the second one drawn, once the
  * filter has settled.
  */
-export function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
+function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
   const cached = held.get(sampleRate);
   if (cached) {
     return cached;

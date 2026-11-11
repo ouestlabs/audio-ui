@@ -4,7 +4,7 @@ export interface EnvelopePoint {
 }
 
 /** Floor under which gain automation never ramps, exponential-style approach to silence without hitting exactly 0 (which some ramp curves reject) or an audible hard stop. */
-export const MIN_GAIN = 0.0001;
+const MIN_GAIN = 0.0001;
 
 /** Where an envelope's attack/decay phase ends and its release phase begins, as a fraction of the 0-1 curve. A note holds at the curve's value here for as long as the key is down. */
 export const SUSTAIN_SPLIT_X = 0.5;

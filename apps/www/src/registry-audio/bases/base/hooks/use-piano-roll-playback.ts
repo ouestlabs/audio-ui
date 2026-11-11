@@ -17,7 +17,7 @@ import type { EnvelopePoint } from "@/registry-audio/bases/base/lib/envelope-ram
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /** A step is a sixteenth note whatever the signature: BPM counts quarter notes. */
-export const STEPS_PER_QUARTER = 4;
+const STEPS_PER_QUARTER = 4;
 
 /** ADSR-shaped, matching the Envelope primitive's own default. */
 export const DEFAULT_NOTE_ENVELOPE: EnvelopePoint[] = [
