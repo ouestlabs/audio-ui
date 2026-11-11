@@ -1,5 +1,13 @@
 # @audio-ui/core
 
+## 0.26.0
+
+### Minor Changes
+
+- 7c53f71: Removes `parseMidiFile`, `encodeMidiFile`, `MidiFileError` and their types from `@audio-ui/core/midi`, and `ticksToSeconds`, `secondsToTicks` and `TempoChange` from `@audio-ui/core/time`. Reading and writing Standard MIDI Files is the job of `@audio/midi-parse` and `@audio/midi-write`; the `midi-file` registry item now wraps them for the grid of steps. `parseMidiMessage` and `createMidiInput` are unchanged.
+- 7c53f71: Removes `webAudioCompressorOutput` from `@audio-ui/core/analysis`, the curve of the browser's compressor node, which no device uses any more. `compressorOutput` is unchanged.
+- 7c53f71: `@audio-ui/core/pitch` no longer converts between notes and frequencies: `noteToFrequency`, `frequencyToNote`, `nearestNote`, `Note` and `CONCERT_PITCH_HZ` are removed, so use `midiToHz`, `hzToMidi` and `cents` from `@audio/note`. Scales now come from `@audio/note`, a new dependency, which renames three of them: `pentatonic-major`, `pentatonic-minor` and `whole` replace `major-pentatonic`, `minor-pentatonic` and `whole-tone`. `lydian`, `phrygian` and `locrian` are kept. `detectPitch`, `pitchName` and `isBlackKey` are unchanged.
+
 ## 0.25.0
 
 ### Minor Changes
