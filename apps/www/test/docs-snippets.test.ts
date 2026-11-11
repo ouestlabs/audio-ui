@@ -24,7 +24,7 @@ function valueImportsOf(snippet: string) {
 
 const DOCS = [
   "../../../skills/core/core.md",
-  "../src/content/docs/engine/controllers.mdx",
+  "../src/content/docs/core/controllers.mdx",
 ];
 
 describe("documentation snippets", () => {

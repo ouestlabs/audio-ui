@@ -1,13 +1,12 @@
 import { describe, expect, test } from "bun:test";
 import decodeWav from "@audio/decode-wav";
-import { peakDb } from "@audio-ui/core/analysis";
+import { measureLoudness, peakDb } from "@audio-ui/engine/analysis";
 import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,
   type ExportStage,
   exportSound,
 } from "@/registry-audio/bases/base/lib/audio-export";
-import { measureLoudness } from "@/registry-audio/bases/base/lib/loudness";
 
 const RATE = 48_000;
 /** A float WAV, so the gain reads back exactly. */

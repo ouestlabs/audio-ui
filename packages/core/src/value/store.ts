@@ -5,6 +5,7 @@ export interface Store<T> {
   subscribe: (listener: () => void) => () => void;
 }
 
+/** A store holding `initial`: `set` tells every listener, unless the value is the same one. */
 export function createStore<T>(initial: T): Store<T> {
   let value = initial;
   const listeners = new Set<() => void>();

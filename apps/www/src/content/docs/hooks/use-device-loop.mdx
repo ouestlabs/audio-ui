@@ -1,0 +1,29 @@
+---
+title: useDeviceLoop
+description: "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and analysers of what goes in and comes out are there for a meter or a spectrum."
+---
+
+<Entry name="use-device-loop" />
+
+## Usage
+
+A short loop of drums and plucked notes played through an effect's engine and out to a destination: what a device does, heard. It plays while the play switch of its [session](/docs/hooks/use-audio-session) is on, so the play button belongs to the host, and it is silent outside one.
+
+```tsx
+import { createCompressorEngine } from "@/components/audio-ui/devices/compressor/engine";
+import { useDeviceLoop } from "@/hooks/use-device-loop";
+import { useMasterBus } from "@/hooks/use-master-bus";
+import { useSpectrum } from "@/hooks/use-spectrum";
+
+const output = useMasterBus(0.7);
+const { analyser, engine, input } = useDeviceLoop({ create: createCompressorEngine, destination: output, state });
+const spectrum = useSpectrum(analyser); // what comes out
+```
+
+The engine is made when the loop starts and disposed when it stops ([`useDeviceEngines`](/docs/hooks/use-device-engines)), following `state` and the tempo of the sound it plays, for a time parameter synced to it. `key` feeds the engine's `sidechain` with the kick that goes with the sound, as a ducker needs. `source` picks the sound unless the session has another chosen (see [`useDemoSource`](/docs/hooks/use-demo-source)).
+
+<TypeTable title="Returns">
+<TypeRow name={"engine"} type={"Engine | null"}>The engine while the loop plays: read what it measures, such as a gain reduction.</TypeRow>
+<TypeRow name={"input, analyser"} type={"AnalyserNode | null"}>What goes in, at the level the engine hears it, and what comes out.</TypeRow>
+<TypeRow name={"playing, tempo"} type={"boolean, Tempo"}>Whether it plays, and the tempo of its sound.</TypeRow>
+</TypeTable>

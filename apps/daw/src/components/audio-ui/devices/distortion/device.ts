@@ -1,6 +1,6 @@
-import distortion from "@audio/effect-distortion";
-import { formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { distortion } from "@audio-ui/engine/dsp";
 import { oversamplingSeconds } from "@/lib/oversampling";
 
 const TABLE_SAMPLES = 16_384;

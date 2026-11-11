@@ -1,0 +1,17 @@
+---
+title: Input
+description: "A MIDI keyboard and the microphone: the notes of the page's MIDI input, and the microphone as an analyser."
+---
+
+## A MIDI keyboard
+
+`useMidiInput` hears the page's MIDI input: every component that calls it hears the same devices, and connecting from one connects them all. Browsers ask for permission, so connect from a click, with `requestAccess` or with the ready-made button (`npx shadcn@latest add @audio-ui/midi-connect-control`).
+
+Usage and API: [`useMidiInput`](/docs/hooks/use-midi-input).
+
+## The microphone
+
+`useMicrophone` taps the microphone into an `AnalyserNode` on the page's audio context. The signal is raw: echo cancellation, noise suppression and automatic gain are off, since they flatten a tuner or a meter. The analyser is never connected to the speakers.
+
+Usage and API: [`useMicrophone`](/docs/hooks/use-microphone).
+

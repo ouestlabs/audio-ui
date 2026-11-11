@@ -35,6 +35,7 @@ Sound and live data for audio/ui controls. Getting sound out takes an AudioConte
 - `audio-ramp-parameters` - `setTargetAtTime`, never `param.value =` from a drag
 - `audio-schedule-on-audio-clock` - Start notes at an AudioContext time from a look-ahead clock, never from timers
 - `audio-play-note-state` - Skip muted notes, roll each note's chance, stray its velocity by its deviation
+- `audio-polyphony` - `use-polyphony` for chords on an instrument whose engine plays one voice: a voice per note, the oldest given up
 - `audio-db-to-gain` - dB on the control, `10 ** (db / 20)` on the GainNode
 - `audio-headroom` - Size voices, resonance and master volume so the loudest case stays under full scale
 - `audio-cleanup` - Stop and disconnect nodes, cancel frames on unmount

@@ -1,0 +1,136 @@
+---
+title: device
+description: "A device as a description, from @audio-ui/engine: defineDevice and its parameters, a state and apply with what each change did, the bindings an engine implements, and the tools an agent drives it with."
+---
+
+<Module from="@audio-ui/engine/device" />
+
+## Usage
+
+`defineDevice` describes an effect or an instrument by its parameters, with no sound and no view in it. What comes back holds everything that reads or changes a state of it:
+
+```ts
+import { defineDevice } from "@audio-ui/engine/device";
+
+export const driveDevice = defineDevice({
+  id: "drive",
+  name: "Drive",
+  description: "Soft clipping with a tone control.",
+  parameters: [
+    { id: "amount", label: "Amount", min: 0, max: 100, default: 25, unit: "%" },
+    { id: "tone", label: "Tone", min: 200, max: 20000, default: 4000, scale: "log", unit: "Hz" },
+    { id: "bypass", label: "Bypass", kind: "toggle", default: false },
+  ],
+});
+
+const state = driveDevice.defaults(); // { amount: 25, tone: 4000, bypass: false }
+```
+
+A parameter is a number in a range (on a scale, in steps, with a unit), a `"toggle"`, or a `"choice"` from a list of options. A definition that cannot work, such as a default out of its range, a log scale that starts at 0 or a choice whose default is not one of its options, throws `DeviceDefinitionError` when the module loads, not when a user turns a knob.
+
+## Changing a state
+
+A state is a plain object, so it is stored, sent and undone like any other. `set(state, id, value)` changes one parameter, clamped and snapped; `apply(state, changes)` changes several and says what happened to each:
+
+```ts
+const { state: next, changes, rejected } = driveDevice.apply(state, {
+  amount: 140,
+  tone: "bright",
+  gain: 3,
+});
+// changes:  [{ id: "amount", from: 25, to: 100, adjusted: true }]
+// rejected: [{ id: "tone", reason: "not a number" }, { id: "gain", reason: "unknown parameter" }]
+```
+
+A value out of range is brought in and marked `adjusted`; a value of the wrong type, or an id the device does not have, is rejected and the parameter is left as it was. `sanitize` makes a valid state of anything, such as a preset saved by an older version. `normalize` and `denormalize` place a value along its travel from 0 to 1, on its scale, which is what a knob draws, and `format` prints it with its unit, "4000 Hz".
+
+## Bindings
+
+A device makes no sound. An engine does, and it implements a binding: `update(state, context)` whenever the state changes, `dispose()` when it goes, and `readings()` for a meter, such as the gain reduction of a compressor. An `InstrumentBinding` also takes `noteOn` and `noteOff`, and a `SidechainBinding` has a second input for a key signal. `playNote(instrument, note, seconds)` plays a note on one and lets it go when the time is up.
+
+`latency(state, sampleRate)` is how long the device delays the sound, for a host to compensate; `describe()` is the device as JSON, what a catalog lists.
+
+## Tools for an agent
+
+`deviceTools(device)` derives the tools a model calls to drive it: `<id>_set` takes any parameters by id, `<id>_reset` puts some or all back, and an instrument played by notes also gets `<id>_play`. Each has a JSON Schema input and a `run(state, input)` that never throws on a model's input:
+
+```ts
+import { deviceTools } from "@audio-ui/engine/device";
+
+const [set] = deviceTools(driveDevice);
+set.run(state, { amount: 60 });
+// { state: { amount: 60, tone: 4000, bypass: false }, summary: "Amount: 25 % to 60 %" }
+```
+
+The schema is the subset that OpenAI, Anthropic, MCP and the AI SDK all accept, and the ranges it gives are the ones the device enforces.
+
+## Engines
+
+What a device's engine is, and the pieces an engine is made of, each the one place its behavior lives.
+
+### Engine contracts
+
+Every `create<Name>Engine` is an `EngineFactory`: a context, the state to start from and the host's context (its tempo) in, an engine out. An effect's engine is an `EffectEngine<State>` (an `input`, an `output`, `update`, `dispose`, and `ready`, `sidechain` or `readings` where it has them); an instrument's is an `InstrumentEngine<State, Note>`, with `noteOn` and `noteOff` and no input. Both are the core's bindings with the nodes to connect, so a host that keeps its own engine implements the same `update` and `dispose`.
+
+### createWorkletStage
+
+A worklet that takes over from the clean sound once it loads, with a fade, and builds nothing once the engine is disposed.
+
+```ts
+import { createWorkletStage } from "@audio-ui/engine/device";
+
+const input = ctx.createGain();
+const output = ctx.createGain();
+let latest = initial;
+const stage = createWorkletStage(ctx, {
+  input,
+  make: () => new AudioWorkletNode(ctx, "my-processor", { parameterData: settingsOf(latest) }),
+  ramp: 0.02,
+  source: MY_PROCESSOR_SOURCE,
+});
+stage.connect(output);
+// update: stage.node?.parameters.get("drive")?.setTargetAtTime(...); dispose: stage.dispose()
+```
+
+### createFeed
+
+Keeps a worklet fed only while the path it plays is heard: connected at once on `set(true)`, taken away 120 ms after `set(false)`, once the path has faded, unless wanted again before.
+
+```ts
+import { createFeed } from "@audio-ui/engine/device";
+
+const feed = createFeed([
+  [input, model, 0, 0],
+  [sidechain, model, 0, 1], // a key on the worklet's second input
+]);
+feed.set(wet > 0); // on every update
+feed.dispose(); // in the engine's dispose
+```
+
+### noiseBuffer
+
+Two seconds of noise from `@audio/synth-noise`, made once per color and context and shared by everything that plays it: `noiseBuffer(ctx)` for white, `noiseBuffer(ctx, "pink")` for pink.
+
+## Measuring an engine
+
+A host that brings its own engine can check it against what the panel draws. `device-measure` renders an engine in an offline audio context and compares it with the curve of the device. It works for any device whose curve is a frequency response, such as the equalizer, the filter and the channel EQ.
+
+```ts
+import { equalizerCurve, equalizerDevice } from "@/components/audio-ui/devices/equalizer/device";
+import { measureLatency, measureResponse } from "@audio-ui/engine/device";
+
+const state = equalizerDevice.defaults();
+// Your factory: (ctx, state) => { input, output, dispose }.
+const { worstDb, at } = await measureResponse(createMyEngine, state, equalizerCurve(state));
+// worstDb: how far your engine is from the panel, in dB, and where (at, in Hz).
+
+const latencyMs = await measureLatency(createMyEngine, state);
+// What a host reports to compensate it.
+```
+
+It is a measurement, not a certification: the curve is the device's own and the tolerance is yours.
+
+## Next
+
+- [Devices](/docs/devices): the four pieces a device of the registry comes in, and what every device shares.
+- [`device-engine`](/docs/engine/device#engines): the engine contracts and the pieces engines are made of.

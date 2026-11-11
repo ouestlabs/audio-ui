@@ -1,4 +1,4 @@
-import type { DeviceBinding } from "@audio-ui/core/device";
+import type { DeviceBinding } from "@audio-ui/engine/device";
 import {
   UNLIMITER_WORKLET,
   type UnlimiterState,

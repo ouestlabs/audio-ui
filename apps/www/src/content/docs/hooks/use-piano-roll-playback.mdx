@@ -1,0 +1,46 @@
+---
+title: usePianoRollPlayback
+description: "Plays a piano roll's notes, which you own: play, pause and stop, a loop or once through, a metronome, seeking, and the notes the roll auditions, with a playhead for the timeline and a clock for the transport."
+---
+
+<Entry name="use-piano-roll-playback" />
+
+## Usage
+
+<ComponentPreview styleName="base-nova" name="piano-roll-playback-demo" />
+
+`usePianoRollPlayback` plays the notes you hold through a synth: play, pause and stop, a loop or once through, a metronome, and the notes the roll auditions.
+
+```tsx
+import { useMasterBus } from "@/hooks/use-master-bus";
+import { meterOf, usePianoRollPlayback } from "@/hooks/use-piano-roll-playback";
+import { useSynthVoices } from "@/hooks/use-synth-voices";
+
+const tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 120 };
+const meter = meterOf(tempo, 4); // four bars, in steps
+
+const output = useMasterBus(0.7);
+const voices = useSynthVoices({ destination: output });
+const playback = usePianoRollPlayback({ meter, notes, tempo, voices });
+
+<Timeline
+  duration={meter.duration}
+  onPositionChange={playback.seek}
+  snapStep={1}
+  source={playback.position}
+>
+  <PianoRoll
+    activePitches={playback.playingPitches}
+    onNoteOff={playback.onNoteOff}
+    onNoteOn={playback.onNoteOn}
+    onValueChange={setNotes}
+    value={notes}
+  >
+    {/* … */}
+  </PianoRoll>
+</Timeline>;
+```
+
+The voices and the bus come from [Synthesis](/docs/guides/synthesis) and [Output](/docs/guides/output), and the clock under the hook from [Clock and time](/docs/guides/clock-and-time). The hook plays the notes; it does not hold them, so an undo, a file import or an agent can change them and the next pass plays the change. Time is in steps, four to a quarter note whatever the signature; `meterOf(tempo, bars)` gives a clip's length in steps and where its bars and beats fall. Notes are scheduled ahead on the audio clock, so they keep time when the page is busy, and each plays as the roll draws it: a deactivated note stays silent, a `chance` plays that often, a `deviation` strays its velocity each time round.
+
+It returns `play` (on from the playhead), `pause` (stops where it is), `stop` (back to the start of the loop), `seek`, `isPlaying`, `playingPitches`, `onNoteOn` and `onNoteOff` for the roll, `position` (in steps) for the timeline's `source`, and `clock` (in seconds) for a [Transport](/docs/components/base/transport)'s `source`. It also takes `looping` (on by default), a `loopRegion` of steps, whose `commitLoopRegion` makes a moved loop heard at once, `metronome` with the `destination` it clicks into, and the `envelope` the notes play with.

@@ -26,7 +26,7 @@ export function DemoSounds() {
     if (!(playing && ctx && master)) {
       return;
     }
-    ctx.resume();
+    webAudio.resume();
     let cancelled = false;
     let stop = () => undefined;
     renderDemoSource(playing, ctx.sampleRate).then((buffer) => {

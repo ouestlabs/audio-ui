@@ -1,0 +1,20 @@
+---
+title: instrument-rack
+description: "Instrument racks: an instrument whose chains each start with an instrument of the library, then effects, all played by every note in layers and summed as a rack with its macros; the engine that plays one on a MIDI track."
+---
+
+<Entry name="instrument-rack" />
+
+## Usage
+
+An instrument whose chains each start with an instrument of the library, then effects, played by every note whose key and velocity fall in a chain's zone, in layers, and summed as a rack with its macros: a split, or soft and hard layers.
+
+```ts
+import { createInstrumentRackEngine } from "@/lib/instrument-rack";
+
+const instrument = createInstrumentRackEngine(ctx, libraryDevice, 8); // 8 voices a chain
+instrument.output.connect(destination);
+instrument.update(rack, { tempo });
+```
+
+`chainInstrument` finds the instrument at the head of a chain. Zones come from `inZone` and `FULL_ZONE` in [`arrangement`](/docs/lib/arrangement); the [arrangement engine](/docs/lib/arrangement-engine) plays it on a MIDI track.

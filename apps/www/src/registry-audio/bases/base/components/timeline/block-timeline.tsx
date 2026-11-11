@@ -1,12 +1,17 @@
 "use client";
 
-import { computePeaks, normalizePeaks } from "@audio-ui/core/analysis";
+import {
+  analyzeBeat,
+  computePeaks,
+  normalizePeaks,
+} from "@audio-ui/engine/analysis";
+import { decodeAudioChannels } from "@audio-ui/engine/files";
 import {
   barsBeatsWith,
   type MetronomeRhythm,
   secondsPerBar,
   type Tempo,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import {
   type ComponentProps,
@@ -76,7 +81,6 @@ import { useTrackAutomation } from "@/registry-audio/bases/base/hooks/use-track-
 import {
   type Arranged,
   type ArrangementTrack,
-  analyzeBeat,
   type ClipSwing,
   DRUM_RACK_DEVICE,
   NEW_TRACK,
@@ -90,7 +94,6 @@ import {
   audioClipsIn,
   MAIN_TRACK,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
-import { decodeAudioChannels } from "@/registry-audio/bases/base/lib/audio-decode";
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
 import {
   SONG_SCORE,

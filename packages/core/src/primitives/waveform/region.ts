@@ -11,14 +11,18 @@ import {
   type RangeValue,
 } from "../../value/range.ts";
 
+/** What a change to a region moves: its start, its end, or the whole region with `"both"`. */
 export type WaveformRegionEdge = RangeEdge;
+/** A region as `[start, end]`, in `duration` units. */
 export type WaveformRegionValue = RangeValue;
 
+/** What `onValueChange` receives with each change to a region: which `edge` moved, the reason (`"drag"`, `"keyboard"` or `"input-change"`), the event, and `cancel()` to refuse the change. */
 export type WaveformRegionChangeEventDetails = (
   | ChangeEventDetails<"drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"input-change", Event>
 ) & { edge: WaveformRegionEdge };
+/** What `onValueCommitted` receives once a gesture on a region ends: which edge moved, the reason and the event behind it. */
 export type WaveformRegionCommitEventDetails = (
   | CommitEventDetails<"drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
@@ -60,6 +64,7 @@ export interface WaveformRegionSnapshot {
   value: WaveformRegionValue;
 }
 
+/** What `createWaveformRegionController` returns: the snapshot to draw from, and the presses, keys and typed values that move its edges. */
 export interface WaveformRegionController {
   /** How far an edge can go: the limits of its position, which stop short of the other edge. */
   edgeRange: (edge: WaveformRegionEdge) => readonly [number, number];

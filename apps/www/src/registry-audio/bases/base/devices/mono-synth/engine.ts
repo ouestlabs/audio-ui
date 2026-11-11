@@ -1,4 +1,5 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/engine/device";
+import { type InstrumentEngine, noiseBuffer } from "@audio-ui/engine/device";
 import {
   attackSeconds,
   contourCents,
@@ -25,14 +26,9 @@ const OUTPUT_GAIN = 2;
 const SMOOTHING = 0.02;
 /** The softest note still sounds: a velocity of 0 is this share of a full one. */
 const MIN_LEVEL = 0.25;
-const NOISE_SECONDS = 2;
 const HARMONICS = 96;
 
-export interface MonoSynthEngine
-  extends InstrumentBinding<MonoSynthState, MonoSynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type MonoSynthEngine = InstrumentEngine<MonoSynthState, MonoSynthNote>;
 
 /**
  * A curve an envelope follows from `start`: from `from` towards `target`, and
@@ -84,27 +80,6 @@ function pulseWave(ctx: BaseAudioContext, duty: number) {
     imag[n] = k * (1 - Math.cos(2 * Math.PI * n * duty));
   }
   return ctx.createPeriodicWave(real, imag);
-}
-
-const noises = new WeakMap<BaseAudioContext, AudioBuffer>();
-
-/** Two seconds of white noise, made once per context. */
-function noiseOf(ctx: BaseAudioContext) {
-  const kept = noises.get(ctx);
-  if (kept) {
-    return kept;
-  }
-  const buffer = ctx.createBuffer(
-    1,
-    ctx.sampleRate * NOISE_SECONDS,
-    ctx.sampleRate
-  );
-  const data = buffer.getChannelData(0);
-  for (let index = 0; index < data.length; index += 1) {
-    data[index] = Math.random() * 2 - 1;
-  }
-  noises.set(ctx, buffer);
-  return buffer;
 }
 
 /**
@@ -161,7 +136,7 @@ export function createMonoSynthEngine(
   const sub = ctx.createOscillator();
   sub.type = "square";
   const noise = ctx.createBufferSource();
-  noise.buffer = noiseOf(ctx);
+  noise.buffer = noiseBuffer(ctx);
   noise.loop = true;
   const lfo = ctx.createOscillator();
   lfo.frequency.value = rateHertz(initial.rate);

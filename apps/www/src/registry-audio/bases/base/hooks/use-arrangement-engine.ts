@@ -160,9 +160,7 @@ export function useArrangementEngine({
         return;
       }
       // Resumed in the gesture that asks to play, as browsers require.
-      if (ctx.state !== "running") {
-        ctx.resume();
-      }
+      webAudio.resume();
       engine.play(from, at);
       position.set(from);
       setPlaying(true);

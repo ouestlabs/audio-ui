@@ -2,16 +2,6 @@
 
 import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback, useState } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Piano } from "@/components/audio-ui/piano";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -24,6 +14,16 @@ import {
   stringMachineDevice,
   stringMachinePreset,
 } from "@/components/audio-ui/devices/string-machine/device";
+import { Piano } from "@/components/audio-ui/piano";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 /** The controls by what they do, as the machine's panel lays them out. */
 const GROUPS = [

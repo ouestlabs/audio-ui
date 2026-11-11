@@ -1,0 +1,20 @@
+---
+title: useNoiseThroughEq
+description: "Pink noise played through an equalizer that follows your bands, with the analyser after it: what a plot draws is what is heard"
+---
+
+<Entry name="use-noise-through-eq" />
+
+## Usage
+
+Pink noise played through an equalizer that follows `bands`, so what a plot draws is what is heard: the filters play the bands from the moment the noise starts. Returns the analyser after the filters, for a spectrum.
+
+```tsx
+import { useNoiseThroughEq } from "@/hooks/use-noise-through-eq";
+import { useSpectrum } from "@/hooks/use-spectrum";
+
+const { analyser } = useNoiseThroughEq(bands);
+const spectrum = useSpectrum(analyser);
+```
+
+It plays while the play switch of its [session](/docs/hooks/use-audio-session) is on, and stops when it goes off or on unmount. A band that comes, goes or changes type rebuilds the chain; a band that moves ramps its filter. The noise is `noiseBuffer(ctx, "pink")` from [`device-engine`](/docs/engine/device#engines).

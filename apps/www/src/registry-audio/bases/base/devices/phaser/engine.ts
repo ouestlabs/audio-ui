@@ -1,5 +1,7 @@
-import type { DeviceContext } from "@audio-ui/core/device";
-import { DEFAULT_TEMPO } from "@audio-ui/core/time";
+import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
+import { createFeed, type Feed } from "@audio-ui/engine/device";
+import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   PHASER_STAGES,
   PHASER_WORKLET,
@@ -8,42 +10,10 @@ import {
 } from "@/registry-audio/bases/base/devices/phaser/device";
 
 const RAMP_SECONDS = 0.03;
-/** How long after the classic phaser fades out its input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
-export interface PhaserEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface PhaserEngine extends EffectEngine<PhaserState> {
   /** Resolves once the classic phaser is in the graph. Until then it plays the phaser. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: PhaserState, context?: DeviceContext) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the classic phaser into a context once. `false` when the context cannot run worklets. */
-function loadClassic(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([PHASER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -113,8 +83,7 @@ export function createPhaserEngine(
   let classic: AudioWorkletNode | null = null;
   let latest = initial;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   const set = (
     state: PhaserState,
@@ -149,19 +118,7 @@ export function createPhaserEngine(
       // A count, not a level: it changes at once, and the worklet fades it in.
       param("stages").value = settings.stages;
     }
-    clearTimeout(unfeed);
-    if (playing && !fed && classic) {
-      input.connect(classic);
-      fed = true;
-    } else if (!playing && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && classic) {
-          input.disconnect(classic);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing);
   };
   const ramp = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
@@ -170,7 +127,7 @@ export function createPhaserEngine(
   });
   oscillator.start();
 
-  const ready = loadClassic(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, PHASER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }
@@ -185,6 +142,7 @@ export function createPhaserEngine(
         stages: settings.stages,
       },
     });
+    feed = createFeed([[input, classic]]);
     classic.connect(classicWet);
     set(latest, ramp);
     return true;
@@ -193,7 +151,7 @@ export function createPhaserEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       oscillator.stop();
       for (const node of [
         input,

@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 /** Where each of the four stages turns the phase with the lamp dark, in hertz: spread wide, as the circuit's four capacitors are. */

@@ -7,6 +7,8 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/tuner";
 import type { PitchReading } from "@/registry-audio/bases/base/hooks/use-pitch";
 
+const A4_LABEL = /A4/;
+
 const reading = (cents: number): PitchReading => ({
   cents,
   confidence: 0.98,
@@ -88,7 +90,7 @@ describe("Tuner", () => {
     const view = render(<Tuner reference={432} />);
     const screen = within(view.container);
     expect(screen.getByRole("button", { name: "Start" })).toBeTruthy();
-    const field = screen.getByLabelText(/A4/) as HTMLInputElement;
+    const field = screen.getByLabelText(A4_LABEL) as HTMLInputElement;
     expect(field.value).toBe("432");
     fireEvent.change(field, { target: { value: "442" } });
     expect(field.value).toBe("442");

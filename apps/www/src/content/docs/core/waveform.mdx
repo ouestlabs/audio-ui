@@ -1,0 +1,55 @@
+---
+title: waveform
+description: "A waveform's drawing and controllers from @audio-ui/core: peaks fitted to bars and painted sharp on a canvas, live levels and a scrolling history, an oscilloscope trace, a seekable position and a region dragged on it."
+---
+
+<Module from="@audio-ui/core/waveform" />
+
+## Usage
+
+A waveform draws either a recording's shape, known upfront, or a live signal. The shape is its peaks: a level per slice from 0 to 1, or the lowest and highest sample of each slice, which draws the waveform as it really is, lopsided where the audio is. [`computePeaks`](/docs/engine/analysis#waveforms) makes them from samples.
+
+## Painting
+
+`attachWaveformCanvas(canvas, options)` draws on a canvas, as many bars as fit its width with every edge on a device pixel, so it stays sharp at any density and zoom. It paints only when something changed, and not at all while it is off screen, and returns what stops it:
+
+```ts
+import { attachWaveformCanvas } from "@audio-ui/core/waveform";
+
+const stop = attachWaveformCanvas(canvas, {
+  peaks,
+  duration: buffer.duration,
+  range: [0, buffer.duration],
+  played: { get: () => audio.currentTime / buffer.duration, subscribe: onTimeUpdate },
+  variant: "mirror",
+});
+```
+
+`variant` is `"mirror"` (centred on the middle line), `"bars"` (standing on the baseline), `"line"` or `"scope"` for raw samples. `range` is the stretch shown, for a zoomed view; the played share is drawn in the `--waveform-progress-color` CSS color and the rest in `--waveform-color`. With `levels`, a live source, it follows a signal instead: across the width, or in `mode: "scrolling"` as a record of the loudest that moves at `scrollSpeed`. `idle` makes the bars rest, breathe or ripple while there is no signal, `loading` sweeps them while the audio is on its way, and `reducedMotion` repaints a moving waveform four times a second at most.
+
+`attachWaveformBars` draws the same as one element per bar, writing each bar's level to a CSS variable, for bars styled in CSS. The layout and the fitting are functions of their own: `barLayout` and `barRects` place bars on the pixel grid, `fitPeaks` fits a stretch of peaks to one high and one low per bar, `createLevelsEngine` turns a live input into a level per bar, `createLevelHistory` keeps the scrolling record, and `scopePoints` is the trace through raw samples.
+
+## Seeking
+
+`createWaveformController` makes a waveform seekable, and follows the [contract](/docs/core/controllers) every controller shares. Its position is in the units of `duration`, held, controlled with `value`, or live with `source`, which it follows without a render:
+
+```ts
+import { createWaveformController } from "@audio-ui/core/waveform";
+
+const seek = createWaveformController({
+  duration: buffer.duration,
+  range: [0, buffer.duration],
+  step: 5,
+  largeStep: 30,
+  onValueCommitted: (seconds) => {
+    audio.currentTime = seconds;
+  },
+});
+surface.addEventListener("pointerdown", (event) => seek.pressSeek(event, surface));
+```
+
+`pressSeek` follows a drag, `keyDown` takes the arrows (`step`), Page Up, Page Down and Shift (`largeStep`), `typeAt` sets the position from an input, and `hoverAt` with `leave` keeps the position under the pointer in `hover`, a store. A drag with Shift held selects a stretch instead, reported to the handlers given to `setSelection`. `toShare` and `atShare` convert between a position and a share of the shown stretch.
+
+`createWaveformRegionController` drives a region on the waveform, `[start, end]`: `press(edge, event, handle, track, shownRange)` drags one edge, or the whole region with `"both"`, keeping it at least `minLength` long; `keyDown(edge, event)` moves an edge with the arrows and Page keys and sends it to its ends with Home and End, and `typeAt` sets it from an input.
+
+The [Waveform](/docs/components/base/waveform) draws these in React.

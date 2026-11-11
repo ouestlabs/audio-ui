@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio/note";
-import type { DeviceContext } from "@audio-ui/core/device";
+import type { DeviceContext } from "@audio-ui/engine/device";
 import type {
   AnyDeviceState,
   LibraryDevice,

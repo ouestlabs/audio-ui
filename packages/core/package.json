@@ -11,15 +11,13 @@
     "controller",
     "knob",
     "fader",
-    "web-audio",
-    "midi",
     "vue",
     "svelte",
     "solid",
     "web-components",
     "music"
   ],
-  "homepage": "https://www.audio-ui.dev/docs/engine/controllers",
+  "homepage": "https://www.audio-ui.dev/docs/core",
   "bugs": {
     "url": "https://github.com/ouestlabs/audio-ui/issues"
   },
@@ -47,30 +45,6 @@
     "./fader": {
       "types": "./dist/primitives/fader/index.d.ts",
       "import": "./dist/fader.js"
-    },
-    "./analysis": {
-      "types": "./dist/audio/analysis/index.d.ts",
-      "import": "./dist/analysis.js"
-    },
-    "./device": {
-      "types": "./dist/audio/device/index.d.ts",
-      "import": "./dist/device.js"
-    },
-    "./midi": {
-      "types": "./dist/audio/midi/index.d.ts",
-      "import": "./dist/midi.js"
-    },
-    "./pitch": {
-      "types": "./dist/audio/pitch/index.d.ts",
-      "import": "./dist/pitch.js"
-    },
-    "./playback": {
-      "types": "./dist/audio/playback/index.d.ts",
-      "import": "./dist/playback.js"
-    },
-    "./time": {
-      "types": "./dist/audio/time/index.d.ts",
-      "import": "./dist/time.js"
     },
     "./knob": {
       "types": "./dist/primitives/knob/index.d.ts",
@@ -124,11 +98,7 @@
     "dev": "bunx --bun tsup --watch",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
-    "test": "bun test",
-    "worklet:build": "bun scripts/worklet.ts"
-  },
-  "dependencies": {
-    "@audio/note": "1.0.3"
+    "test": "bun test"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^21.0.4",

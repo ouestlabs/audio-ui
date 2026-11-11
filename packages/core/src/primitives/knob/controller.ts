@@ -30,23 +30,29 @@ import {
   WHEEL_DELTA_EPSILON,
 } from "./shared.ts";
 
+/** How a drag turns a knob: up and down, around its centre, or by the turns of the pointer. */
 export type KnobDragMode = "circular" | "revolution" | "vertical";
 
+/** What `onValueChange` receives with each change: the reason, the event behind it, and `cancel()` to refuse the change. */
 export type KnobChangeEventDetails =
   | ChangeEventDetails<"drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"wheel", WheelEvent>
   | ChangeEventDetails<"reset", KeyboardEvent | PointerEvent>
   | ChangeEventDetails<"input-change", Event>;
+/** Why the value changed: `"drag"`, `"keyboard"`, `"wheel"`, `"input-change"` (a typed value) or `"reset"`. */
 export type KnobChangeEventReason = KnobChangeEventDetails["reason"];
+/** What `onValueCommitted` receives once a gesture ends: the reason and the event behind it. */
 export type KnobCommitEventDetails =
   | CommitEventDetails<"drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
   | CommitEventDetails<"wheel", WheelEvent>
   | CommitEventDetails<"reset", KeyboardEvent | PointerEvent>
   | CommitEventDetails<"input-change", Event>;
+/** Why the value was committed: the same reasons as a change. */
 export type KnobCommitEventReason = KnobCommitEventDetails["reason"];
 
+/** The options of `createKnobController`: the value, held or controlled, its range, scale, steps and anchor, the drag mode, the formatting and the callbacks. */
 export interface KnobOptions {
   /** Value the indicator arc grows from, such as `0` on a -1…1 pan. Defaults to `min`. */
   anchor?: number;
@@ -100,6 +106,7 @@ export interface KnobSnapshot {
   value: number;
 }
 
+/** What `createKnobController` returns: the snapshot to draw from, and the press, keys, wheel, typed value and reset that turn it. */
 export interface KnobController {
   /** Listens to wheel steps on `element`; returns what removes the listener. */
   attachWheel: (element: HTMLElement) => () => void;

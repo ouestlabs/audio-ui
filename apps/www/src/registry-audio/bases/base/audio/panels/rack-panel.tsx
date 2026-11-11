@@ -1,6 +1,6 @@
 "use client";
 
-import { pitchName } from "@audio-ui/core/pitch";
+import { pitchName } from "@audio-ui/core";
 
 import { type ReactNode, useCallback, useState } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";

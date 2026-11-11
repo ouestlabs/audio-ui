@@ -1,16 +1,20 @@
 import detectBeat from "@audio/beat-detect";
 import chroma from "@audio/mir-chroma";
+import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
+import type { Note } from "@audio-ui/core/piano-roll";
 import {
   autoWarp,
   detectTransients,
   type TempoEstimate,
-} from "@audio-ui/core/analysis";
-import type { ParameterValue } from "@audio-ui/core/device";
-import { type Breakpoint, levelAt } from "@audio-ui/core/envelope";
-import type { Note } from "@audio-ui/core/piano-roll";
-import type { Scale } from "@audio-ui/core/pitch";
-import type { PlayedClip, WarpMode } from "@audio-ui/core/playback";
-import { unwarpedTime, type WarpMarker, warpedTime } from "@audio-ui/core/time";
+} from "@audio-ui/engine/analysis";
+import type { ParameterValue } from "@audio-ui/engine/device";
+import type { Scale } from "@audio-ui/engine/pitch";
+import type { PlayedClip, WarpMode } from "@audio-ui/engine/playback";
+import {
+  unwarpedTime,
+  type WarpMarker,
+  warpedTime,
+} from "@audio-ui/engine/time";
 import type { ClipValue } from "@audio-ui/react";
 
 /** What a clip's menu does to it. */

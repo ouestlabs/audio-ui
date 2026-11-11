@@ -18,14 +18,6 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
 import { ClipWaveform } from "@/components/audio-ui/clip-waveform";
 import {
   TimelineClip,
@@ -36,6 +28,13 @@ import {
   trackSwatch,
 } from "@/components/audio-ui/timeline";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
   type Arranged,
   type ClipAction,
   type ClipPeaks,
@@ -44,6 +43,7 @@ import {
   playedNotes,
   type TrackColor,
 } from "@/lib/arrangement";
+import { cn } from "@/lib/utils";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
 const UNDER_HEAD = { height: "calc(100% - 1.25rem)", top: "1.25rem" };

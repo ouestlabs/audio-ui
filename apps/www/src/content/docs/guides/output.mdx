@@ -1,0 +1,17 @@
+---
+title: Output
+description: "The page's one audio context, and a master bus with a safety limiter that every sound of a screen goes through."
+---
+
+## The audio context
+
+A page has one `AudioContext`, shared by every hook and engine on it, made the first time something asks for it. Ask for it where you need it:
+
+Usage and API: [`web-audio`](/docs/lib/web-audio).
+
+## The master bus
+
+Connect every sound of a screen into one master bus, never straight into `ctx.destination`. One fader then sets the level of everything, and a limiter at the end keeps a loud mix from clipping.
+
+Usage and API: [`useMasterBus`](/docs/hooks/use-master-bus).
+

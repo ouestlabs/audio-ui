@@ -1,5 +1,6 @@
 import { type LevelScale, levelPosition } from "./scale.ts";
 
+/** Which way a meter's bars run. */
 export type MeterOrientation = "horizontal" | "vertical";
 
 /** Levels read to one decimal: finer than a meter can be read, and a plain number rather than a share of the range. */
@@ -26,6 +27,7 @@ export interface MeterChannelView {
   warning: boolean;
 }
 
+/** What `createMeterConfig` returns: the range, the warning and clipping levels, the position of a level along the meter, and how a level is written. */
 export interface MeterConfig {
   clipThreshold: number;
   format: Intl.NumberFormatOptions;
@@ -69,6 +71,7 @@ export function createMeterConfig(options: {
   };
 }
 
+/** What a channel shows for its reading in `frame`: the length of its bar, its peak mark, whether it warns or clips, and its text. */
 export function channelView(
   frame: MeterFrame,
   index: number,
@@ -90,6 +93,7 @@ export function channelView(
   };
 }
 
+/** A part of a channel that a live source writes to. */
 export type MeterChannelPart = "channel" | "indicator" | "peak" | "value";
 
 /** The DOM nodes of one channel that a live source writes to. */
@@ -105,6 +109,7 @@ export interface MeterChannelNodes {
   value?: HTMLElement;
 }
 
+/** Sets `attribute` on `node` as an empty attribute, or removes it. */
 export function setPresence(
   node: HTMLElement,
   attribute: string,

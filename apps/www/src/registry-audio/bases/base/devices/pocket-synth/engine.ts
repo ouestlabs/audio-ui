@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import type {
   PocketSynthNote,
   PocketSynthState,
@@ -12,11 +12,10 @@ const RELEASE_SECONDS = 0.05;
 const LEVEL = 0.3;
 const RESONANCE = 5;
 
-export interface PocketSynthEngine
-  extends InstrumentBinding<PocketSynthState, PocketSynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type PocketSynthEngine = InstrumentEngine<
+  PocketSynthState,
+  PocketSynthNote
+>;
 
 interface Voice {
   envelope: GainNode;

@@ -1,4 +1,4 @@
-import type { DeviceBinding } from "@audio-ui/core/device";
+import type { DeviceBinding } from "@audio-ui/engine/device";
 import {
   GATE_WORKLET,
   type GateState,

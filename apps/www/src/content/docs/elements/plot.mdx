@@ -1,0 +1,52 @@
+---
+title: Plot
+description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
+---
+
+<Module from="@audio-ui/elements/plot" />
+
+## Usage
+
+`<audio-ui-plot>` defines two axes and lays out everything drawn on them in axis units, for response curves, filter displays and transfer functions. Each drawing part renders its own SVG covering the plot, in `currentColor`, with a constant stroke width. Curves take their function and traces their live source as properties:
+
+<ElementsPreview name="plot" />
+
+```html
+<audio-ui-plot min-x="20" max-x="20000" scale-x="log" min-y="-24" max-y="24">
+  <audio-ui-plot-grid></audio-ui-plot-grid>
+  <audio-ui-plot-line axis="y" value="0"></audio-ui-plot-line>
+  <audio-ui-plot-curve></audio-ui-plot-curve>
+  <audio-ui-plot-handle aria-label="Low" value="200 6"></audio-ui-plot-handle>
+</audio-ui-plot>
+<script type="module">
+  document.querySelector("audio-ui-plot-curve").fn = (hz) => response(hz);
+</script>
+```
+
+<TypeTable>
+<TypeRow name={"min-x"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"max-x"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"min-y"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"max-y"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"scale-x"} type={"\"linear\" | \"log\""} default={"\"linear\""}>The `scaleX` property also accepts a custom `{ toPosition, toValue }`.</TypeRow>
+<TypeRow name={"scale-y"} type={"\"linear\" | \"log\""} default={"\"linear\""}></TypeRow>
+<TypeRow name={"locale"} type={"string"}>Locale of the handles' values. Defaults to the browser locale.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+The `valueAt(clientX, clientY)` method converts a pointer position into axis units.
+
+| Part | Description |
+| --- | --- |
+| `<audio-ui-plot-curve>` | `y = fn(x)` across the plot, from the `fn` property. `fill-to` closes it to a y value as an area; `samples` sets the initial sampling (256), refined adaptively at sharp bends |
+| `<audio-ui-plot-line>` | A line at `value`: vertical on the x `axis` (default), horizontal on the y axis |
+| `<audio-ui-plot-band>` | The range of one `axis` between `from` and `to`, spanning the other axis |
+| `<audio-ui-plot-trace>` | A live line from the `source` property, `{ getSnapshot, subscribe }`, redrawn on each change. Supports `fill-to`; `min` and `max` set an independent value scale |
+| `<audio-ui-plot-grid>` | Grid lines and labels at round values. `axis` (`x`, `y` or `both`), `x-ticks` and `y-ticks`, `x-count` and `y-count`, `labels` (`none` or an axis), and a `format(value, axis)` property. Lines carry `data-part="line"`, labels `data-part="label"`, both `data-axis`, and the zero line `data-zero` |
+| `<audio-ui-plot-mark>` | A label at `value` on one `axis`, hidden from assistive technology |
+| `<audio-ui-plot-dot>` | A non-interactive point: a static `value` (`"x y"`) or the live point of its `source` property |
+| `<audio-ui-plot-handle>` | A draggable point, with `value` and `default-value` as `"x y"`, optionally constrained to one `axis`. Relative drag (Shift for fine), reset on double click, Alt + click or Delete. Contains a native range input per axis, labelled from its `aria-label` ("Low X") or `label-x` and `label-y`. Fires `input` and `change` with `{ value, reason }` |
+| `<audio-ui-plot-cursor>` | Tracks a mouse or pen over the plot, setting `--plot-cursor-x`, `--plot-cursor-y` and `data-active` |
+| `<audio-ui-plot-cursor-readout>` | Inside the cursor, the value under the pointer as text, formatted by its `format` property |
+
+The same control in React, and its parts' props: [Plot](/docs/react/plot).

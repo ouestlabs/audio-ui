@@ -1,4 +1,4 @@
-import type { InstrumentBinding } from "@audio-ui/core/device";
+import { type InstrumentEngine, noiseBuffer } from "@audio-ui/engine/device";
 import {
   type DrumSynthNote,
   type DrumSynthState,
@@ -9,35 +9,11 @@ import {
   volumeGain,
 } from "@/registry-audio/bases/base/devices/drum-synth/device";
 
-/** How long the noise every hit reads from lasts, in seconds: each hit starts somewhere in it, so no two sound the same. */
-const NOISE_SECONDS = 2;
 /** Where a hit's envelope ends, near silence, so the ramp down is exponential all the way. */
 const FLOOR = 0.0001;
 const SMOOTHING = 0.03;
 
-export interface DrumSynthEngine
-  extends InstrumentBinding<DrumSynthState, DrumSynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
-
-/** White noise, made once per context and shared by every hit. */
-const noises = new WeakMap<BaseAudioContext, AudioBuffer>();
-
-function noiseOf(ctx: BaseAudioContext): AudioBuffer {
-  const kept = noises.get(ctx);
-  if (kept) {
-    return kept;
-  }
-  const length = Math.ceil(ctx.sampleRate * NOISE_SECONDS);
-  const buffer = ctx.createBuffer(1, length, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  for (let index = 0; index < length; index += 1) {
-    data[index] = Math.random() * 2 - 1;
-  }
-  noises.set(ctx, buffer);
-  return buffer;
-}
+export type DrumSynthEngine = InstrumentEngine<DrumSynthState, DrumSynthNote>;
 
 /** A hit's level falling from `level` at `time` to silence over `decay` seconds, into `into`. */
 function envelope(
@@ -71,9 +47,11 @@ function noiseHit(
     type: BiquadFilterType;
   }
 ) {
-  const length = Math.min(NOISE_SECONDS, decay + 0.02);
+  // Each hit starts somewhere in the shared noise, so no two sound the same.
+  const noise = noiseBuffer(ctx);
+  const length = Math.min(noise.duration, decay + 0.02);
   const source = ctx.createBufferSource();
-  source.buffer = noiseOf(ctx);
+  source.buffer = noise;
   const filter = ctx.createBiquadFilter();
   filter.type = type;
   filter.frequency.value = Math.min(ctx.sampleRate / 2 - 100, frequency);
@@ -84,7 +62,7 @@ function noiseHit(
     filter.disconnect();
     gain.disconnect();
   };
-  source.start(time, Math.random() * (NOISE_SECONDS - length), length);
+  source.start(time, Math.random() * (noise.duration - length), length);
 }
 
 /** A tone whose pitch falls from `sweep` times `frequency` to it over `drop` seconds, `decay` seconds long from `time`. */

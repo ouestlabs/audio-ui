@@ -1,5 +1,7 @@
 "use client";
 
+import { LOUDNESS_TARGETS } from "@audio-ui/engine/analysis";
+import type { AudioFileFormat } from "@audio-ui/engine/files";
 import {
   type ComponentProps,
   type ReactNode,
@@ -25,12 +27,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/registry/bases/base/ui/select";
-import type { AudioFileFormat } from "@/registry-audio/bases/base/lib/audio-encode";
 import type {
   ExportNormalize,
   ExportSettings,
 } from "@/registry-audio/bases/base/lib/audio-export";
-import { LOUDNESS_TARGETS } from "@/registry-audio/bases/base/lib/loudness";
 
 interface SettingItem {
   label: string;

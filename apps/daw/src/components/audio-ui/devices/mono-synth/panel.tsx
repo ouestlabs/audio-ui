@@ -3,20 +3,6 @@
 import { midiToHz } from "@audio/note";
 import { SawtoothIcon, SquareIcon, TriangleIcon } from "@audio-ui/icons/react";
 import { type ReactNode, useCallback, useState } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
-import { Piano } from "@/components/audio-ui/piano";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -29,6 +15,17 @@ import {
   monoSynthDevice,
   monoSynthPreset,
 } from "@/components/audio-ui/devices/mono-synth/device";
+import { Piano } from "@/components/audio-ui/piano";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { cn } from "@/lib/utils";
 
 /** The controls by what they do, as the synth's panel lays them out. */
 const GROUPS = [

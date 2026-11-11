@@ -1,5 +1,5 @@
 import type { NoteLevel } from "@audio-ui/core/piano-roll";
-import type { GridDivision, MetronomeRhythm } from "@audio-ui/core/time";
+import type { GridDivision, MetronomeRhythm } from "@audio-ui/engine/time";
 import { type RefObject, useCallback, useEffect, useState } from "react";
 
 import { rackDevices } from "@/lib/arrangement";

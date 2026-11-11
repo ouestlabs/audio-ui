@@ -22,19 +22,7 @@ Controls two values at once, such as filter cutoff and resonance, pan and mix, o
 
 ## Anatomy
 
-Import the primitive and assemble its parts.
-
-```tsx
-import { XYPad } from "@audio-ui/react";
-
-<XYPad.Root>
-  <XYPad.Label />
-  <XYPad.Control>
-    <XYPad.Thumb />
-  </XYPad.Control>
-  <XYPad.Value />
-</XYPad.Root>
-```
+It is built on the headless [XYPad](/docs/react/xypad) of `@audio-ui/react`: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -101,76 +89,7 @@ Wheel and trackpad input over the pad moves the point by the scrolled distance: 
 
 ## API reference
 
-### Root
-
-Groups all parts of the pad and owns its two-dimensional value. Exposes the value position as CSS variables for crosshairs and guides: `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top), as percentages. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"defaultValue"} type={"Point"}>Uncontrolled starting value. Defaults to the center of the pad.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
-<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each axis for `XYPad.Value` and the inputs' `aria-valuetext`.</TypeRow>
-<TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
-<TypeRow name={"maxX"} type={"number"} default={"100"}></TypeRow>
-<TypeRow name={"maxY"} type={"number"} default={"100"}></TypeRow>
-<TypeRow name={"minX"} type={"number"} default={"0"}></TypeRow>
-<TypeRow name={"minY"} type={"number"} default={"0"}></TypeRow>
-<TypeRow name={"onValueChange"} type={"(value: Point, eventDetails: ChangeEventDetails) => void"}>Fires on every change: press, drag, keyboard, wheel and input changes.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"(value: Point, eventDetails: CommitEventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
-<TypeRow name={"stepX"} type={"number"} default={"1"}></TypeRow>
-<TypeRow name={"name"} type={"string"}>Names the pad for a form: its two inputs submit as `name.x` and `name.y`.</TypeRow>
-<TypeRow name={"stepY"} type={"number"} default={"1"}></TypeRow>
-<TypeRow name={"value"} type={"Point"}></TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
-</TypeTable>
-
-### Control
-
-The pad surface: a press jumps the value to the pointer and a drag follows it; the mouse wheel / trackpad moves it too. Sets `touch-action: none` so touch drags don't scroll the page. Renders a `<div>` element.
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
-</TypeTable>
-
-### Thumb
-
-Marks the value on the pad (`left`/`top` as percentages, centered with `translate`). Holds two native `<input type="range">`s, one per axis: the X input takes focus, both carry the accessible name, and the arrow keys move both axes. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"getAriaLabel"} type={"(axis: Axis) => string"}>Names each axis input. Defaults to `aria-label` followed by "X" / "Y".</TypeRow>
-<TypeRow name={"getAriaValueText"} type={"(formattedValue: string, value: number, axis: Axis) => string"}>Returns an axis input's `aria-valuetext`. Defaults to the formatted value.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
-</TypeTable>
-
-### Value
-
-The formatted value (`format`/`locale` on Root), `"x, y"` by default. Renders a `<output>` element.
-
-<TypeTable>
-<TypeRow name={"children"} type={"| React.ReactNode | ((formattedX: string, formattedY: string, value: Point) => React.ReactNode)"}></TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
-</TypeTable>
-
-### Label
-
-Accessible label, associated with both axis inputs. Renders a `<div>` element.
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a pointer is dragging on the pad.</TypeRow>
-</TypeTable>
+The props of the headless parts are on [XYPad](/docs/react/xypad#api-reference).
 
 ### Registry component
 
@@ -207,10 +126,6 @@ Accessible label, associated with both axis inputs. Renders a `<div>` element.
 `@audio-ui/react/xypad` exposes `XYPad.Root`, `XYPad.Control` (the pad surface), `XYPad.Thumb` (positioned at the value, holds the axis inputs), `XYPad.Value` (formatted `<output>`), and `XYPad.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`. Draw grids and crosshairs with your own elements and the `--xy-pad-x` / `--xy-pad-y` variables.
 
 ## Examples
-
-### Live value readout
-
-<ComponentPreview styleName="base-nova" name="xypad-live-value-demo" />
 
 ### Bipolar ranges (pan and mix style)
 

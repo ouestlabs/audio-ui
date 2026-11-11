@@ -1,13 +1,6 @@
 "use client";
 
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -18,6 +11,13 @@ import {
   vibeDevice,
   vibeLight,
 } from "@/components/audio-ui/devices/vibe/device";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 /** Two seconds of the lamp, whatever its speed: the plot shows how it pulses meanwhile. */
 const WINDOW_SECONDS = 2;

@@ -40,12 +40,14 @@ const INTL_UNITS = new Set<string>(Intl.supportedValuesOf("unit"));
 const RULE_ID =
   /`((?:audio|live|values|a11y|core|design|style|ai)-(?!ui`)[a-z0-9-]+)`/g;
 const CORE_ENTRY = /(?<!node_modules\/)@audio-ui\/core\/([a-z0-9-]+)/g;
+const ENGINE_ENTRY = /(?<!node_modules\/)@audio-ui\/engine\/([a-z0-9-]+)/g;
 // A fenced code block of a markdown file.
 const CODE_FENCE = /```\w*\n([\s\S]*?)```/g;
 // An `@audio-ui/core/<entry>` import specifier in code.
 const CORE_SPECIFIER = /"@audio-ui\/core\/([a-z-]+)"/g;
-// A row of core.md's export table: the entry, then the names it exports.
-const CORE_EXPORT_ROW = /^\| `@audio-ui\/core(?:\/([a-z-]+))?` \| (.+) \|$/gm;
+// A row of core.md's export table: the package, the entry, then the names it exports.
+const CORE_EXPORT_ROW =
+  /^\| `@audio-ui\/(core|engine)(?:\/([a-z-]+))?` \| (.+) \|$/gm;
 const IDENTIFIER = /`([A-Za-z_][A-Za-z0-9_]*)`/g;
 
 // A number in a selector, such as the `.5` of a decimal value.
@@ -54,7 +56,7 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set(["react", "core", "elements"]);
+const PACKAGES = new Set(["react", "core", "elements", "engine"]);
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
@@ -86,6 +88,9 @@ const uiExports = Object.keys(
 );
 const coreExports = Object.keys(
   (await Bun.file(`${ROOT}/packages/core/package.json`).json()).exports
+);
+const engineExports = Object.keys(
+  (await Bun.file(`${ROOT}/packages/engine/package.json`).json()).exports
 );
 const uiSource = (await read("**/*.{ts,tsx}", `${ROOT}/packages/ui/src`))
   .map((file) => file.text)
@@ -163,6 +168,13 @@ describe.each(markdown)("$path", ({ path, text }) => {
     expect(missing).toEqual([]);
   });
 
+  test("every @audio-ui/engine/<entry> is exported", () => {
+    const missing = matches(text, ENGINE_ENTRY).filter(
+      (entry) => !engineExports.includes(`./${entry}`)
+    );
+    expect(missing).toEqual([]);
+  });
+
   test("every Intl unit it suggests exists", () => {
     const invalid = matches(text, INTL_UNIT).filter(
       (unit) => !INTL_UNITS.has(unit)
@@ -217,20 +229,21 @@ describe.each(withRules)("skills/%s rules", (name) => {
 test("core.md lists only names its entries export", async () => {
   const core = await Bun.file(`${CORE_DIR}/core.md`).text();
   const rows = await Promise.all(
-    [...core.matchAll(CORE_EXPORT_ROW)].map(async ([, entry, names = ""]) => {
-      // A primitive lives in primitives/<entry>, an audio module in audio/<entry>.
-      const primitive = `${ROOT}/packages/core/src/primitives/${entry}/index.ts`;
-      let index = `${ROOT}/packages/core/src/index.ts`;
-      if (entry) {
-        index = (await Bun.file(primitive).exists())
-          ? primitive
-          : `${ROOT}/packages/core/src/audio/${entry}/index.ts`;
+    [...core.matchAll(CORE_EXPORT_ROW)].map(
+      async ([, pkg, entry, names = ""]) => {
+        // A core primitive lives in primitives/<entry>, an engine module in <entry>.
+        let index = `${ROOT}/packages/core/src/index.ts`;
+        if (pkg === "engine") {
+          index = `${ROOT}/packages/engine/src/${entry}/index.ts`;
+        } else if (entry) {
+          index = `${ROOT}/packages/core/src/primitives/${entry}/index.ts`;
+        }
+        const source = await Bun.file(index).text();
+        return matches(names, IDENTIFIER)
+          .filter((name) => !source.includes(name))
+          .map((name) => `${entry ?? "."}: ${name}`);
       }
-      const source = await Bun.file(index).text();
-      return matches(names, IDENTIFIER)
-        .filter((name) => !source.includes(name))
-        .map((name) => `${entry ?? "."}: ${name}`);
-    })
+    )
   );
   expect(rows.flat()).toEqual([]);
 });

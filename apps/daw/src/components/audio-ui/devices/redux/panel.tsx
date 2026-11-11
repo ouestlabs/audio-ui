@@ -1,13 +1,6 @@
 "use client";
 
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -18,6 +11,13 @@ import {
   reduxCurve,
   reduxDevice,
 } from "@/components/audio-ui/devices/redux/device";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const TICKS = [-0.5, 0, 0.5];
 const UNITY = (input: number) => input;

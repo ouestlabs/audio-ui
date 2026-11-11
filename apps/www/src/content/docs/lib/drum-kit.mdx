@@ -1,0 +1,16 @@
+---
+title: drum-kit
+description: "A drum kit to start a drum rack from: a pad per drum on the General MIDI notes, each a Drum Synth at the head of its chain, the snare and the clap in a small room, the hats in one choke group."
+---
+
+<Entry name="drum-kit" />
+
+## Usage
+
+A drum kit to start a [drum rack](/docs/lib/drum-rack) from: a pad per drum on the General MIDI notes (`DRUM_NOTES`), each a Drum Synth at the head of its chain, the snare and the clap in a small room, the hats in one choke group.
+
+```ts
+import { drumKit } from "@/lib/drum-kit";
+
+const rack = drumKit(); // pass it as `rack` with the add-device command
+```

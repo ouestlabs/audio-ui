@@ -1,3 +1,4 @@
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import type { RecordedBlock } from "@/registry-audio/bases/base/lib/recording";
 
 const PROCESSOR = "audioui-input-recorder";
@@ -32,29 +33,6 @@ const WORKLET = `class InputRecorder extends AudioWorkletProcessor {
 }
 registerProcessor("${PROCESSOR}", InputRecorder);`;
 
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-function loadRecorder(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
-}
-
 /** An input recorder on a context, as `createInputRecorder` makes it. */
 export interface InputRecorder {
   dispose: () => void;
@@ -76,7 +54,7 @@ export async function createInputRecorder(
   ctx: BaseAudioContext,
   onBlock?: (block: RecordedBlock) => void
 ): Promise<InputRecorder | null> {
-  if (!(await loadRecorder(ctx))) {
+  if (!(await loadWorklet(ctx, WORKLET))) {
     return null;
   }
   const node = new AudioWorkletNode(ctx, PROCESSOR, {

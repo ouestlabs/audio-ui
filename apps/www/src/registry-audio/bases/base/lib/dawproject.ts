@@ -8,11 +8,12 @@
  * compressor, gate and limiter, whose settings the format describes. The
  * rest is left out, and a report says what, one line each.
  */
-import type { ParameterValue } from "@audio-ui/core/device";
+
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { Note } from "@audio-ui/core/piano-roll";
-import type { WarpMode } from "@audio-ui/core/playback";
-import type { Tempo } from "@audio-ui/core/time";
+import type { ParameterValue } from "@audio-ui/engine/device";
+import type { WarpMode } from "@audio-ui/engine/playback";
+import type { Tempo } from "@audio-ui/engine/time";
 import { compressorDevice } from "@/registry-audio/bases/base/devices/compressor/device";
 import {
   EQUALIZER_BANDS,

@@ -1,18 +1,8 @@
 "use client";
 
-import { formatDb, formatHz } from "@audio-ui/core/analysis";
+import { formatDb, formatHz } from "@audio-ui/engine/analysis";
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -23,6 +13,16 @@ import {
   multibandBands,
   multibandDevice,
 } from "@/components/audio-ui/devices/multiband/device";
+import {
+  Plot,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

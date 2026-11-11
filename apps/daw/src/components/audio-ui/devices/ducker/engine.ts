@@ -1,4 +1,4 @@
-import type { DeviceReadings, SidechainBinding } from "@audio-ui/core/device";
+import type { DeviceReadings, SidechainBinding } from "@audio-ui/engine/device";
 import {
   DUCKER_WORKLET,
   type DuckerState,

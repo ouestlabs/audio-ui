@@ -4,6 +4,12 @@ import {
   getCurrentBase,
   getGroupsFromFolder,
 } from "@/lib/docs/content/page-tree";
+import {
+  DOCS_SECTIONS,
+  type DocsSectionId,
+  sectionOfFolder,
+  sectionOfPath,
+} from "@/lib/docs/content/sections";
 import type { source } from "@/lib/docs/content/source";
 
 const STORAGE_KEY = "docs-sidebar-collapsed";
@@ -74,33 +80,102 @@ export function useGroupFolding() {
 }
 
 const EXCLUDED_FOLDERS = ["test"];
+/** The landing page of each section but the Docs': named Overview in the sidebar, as the section's row names it already. */
+const LANDING_PAGES = new Set<string>(
+  DOCS_SECTIONS.filter((each) => each.id !== "docs").map((each) => each.href)
+);
+
+type PageTree = ReturnType<typeof source.getPageTree>;
+type PageTreeNode = PageTree["children"][number];
+
+/** Whether a node of the page tree is the page at `url`, or a folder that holds it. */
+function holds(node: PageTreeNode, url: string): boolean {
+  if (node.type === "page") {
+    return node.url === url;
+  }
+  if (node.type === "folder") {
+    return (
+      node.index?.url === url ||
+      node.children.some((child) => holds(child, url))
+    );
+  }
+  return false;
+}
+
+/** The section of the page at `pathname`: the one of the top-level folder that holds it, or the one its address is under. */
+function sectionAt(tree: PageTree, pathname: string): DocsSectionId {
+  const folder = tree.children.find(
+    (item) =>
+      item.type === "folder" &&
+      !EXCLUDED_FOLDERS.includes(item.$id ?? "") &&
+      holds(item, pathname)
+  );
+  return folder?.type === "folder"
+    ? sectionOfFolder(folder.$id ?? "")
+    : sectionOfPath(pathname);
+}
+
+/** A section as the switcher lists it. */
+export interface SiteSection {
+  current: boolean;
+  description: string;
+  href: string;
+  id: DocsSectionId;
+  label: string;
+}
+
+/** The site's sections, the one being read marked. */
+export function useSiteSections(tree: PageTree): SiteSection[] {
+  const pathname = useLocation({ select: (location) => location.pathname });
+  const reading = React.useMemo(
+    () => sectionAt(tree, pathname),
+    [tree, pathname]
+  );
+  return React.useMemo(
+    () =>
+      DOCS_SECTIONS.map((each) => ({ ...each, current: each.id === reading })),
+    [reading]
+  );
+}
 
 /**
- * The docs sidebar's groups (Get started, then each space), with whether each
- * is open. A space folds when the reader says so, remembered in their browser
- * and shared by the desktop sidebar and the mobile menu; every group is open
- * on a first visit and on the server, and the space of the page being read
- * opens when the reader lands on it.
+ * The docs sidebar's groups for the section being read (the Docs, the Core,
+ * the Elements, React or the Registry), with whether each is open. A space
+ * folds when the reader says so, remembered in their browser and shared by the
+ * desktop sidebar and the mobile menu; every group is open on a first visit
+ * and on the server, and the space of the page being read opens when the
+ * reader lands on it.
  */
-export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
+export function useSidebarGroups(tree: PageTree) {
   const pathname = useLocation({ select: (location) => location.pathname });
   const currentBase = getCurrentBase(pathname);
-  const groups = React.useMemo(
+  const all = React.useMemo(
     () =>
       tree.children.flatMap((item) =>
         item.type === "folder" && !EXCLUDED_FOLDERS.includes(item.$id ?? "")
-          ? getGroupsFromFolder(item, currentBase)
+          ? getGroupsFromFolder(item, currentBase).map((group) => ({
+              ...group,
+              section: sectionOfFolder(item.$id ?? ""),
+            }))
           : []
       ),
     [currentBase, tree]
   );
   const { collapsed, setOpen } = useGroupFolding();
 
-  const currentTitle = groups.find((group) =>
-    group.sections.some((section) =>
-      section.pages.some((page) => page.url === pathname)
+  const currentGroup = all.find((group) =>
+    group.sections.some((part) =>
+      part.pages.some((page) => page.url === pathname)
     )
-  )?.title;
+  );
+  const currentTitle = currentGroup?.title;
+  // The section of the page being read: the sidebar shows its groups alone.
+  const reading = React.useMemo(
+    () => sectionAt(tree, pathname),
+    [tree, pathname]
+  );
+  const groups = all.filter((group) => group.section === reading);
+  const sectionLabel = DOCS_SECTIONS.find((each) => each.id === reading)?.label;
   React.useEffect(() => {
     if (currentTitle) {
       setOpen(currentTitle, true);
@@ -108,11 +183,28 @@ export function useSidebarGroups(tree: ReturnType<typeof source.getPageTree>) {
   }, [currentTitle, setOpen]);
 
   return {
-    groups: groups.map((group) => ({
-      ...group,
-      current: group.title === currentTitle,
-      open: !(group.collapsible && group.title && collapsed.has(group.title)),
-    })),
+    groups: groups.map((group) => {
+      // Only a group that folds has a heading, and only when it is not named as its section: the switcher names the section, and a heading that does nothing reads as a button.
+      const titled = group.collapsible && group.title !== sectionLabel;
+      return {
+        ...group,
+        collapsible: group.collapsible && titled,
+        current: group.title === currentTitle,
+        open: !(
+          titled &&
+          group.collapsible &&
+          group.title &&
+          collapsed.has(group.title)
+        ),
+        sections: group.sections.map((part) => ({
+          ...part,
+          pages: part.pages.map((page) =>
+            LANDING_PAGES.has(page.url) ? { ...page, name: "Overview" } : page
+          ),
+        })),
+        titled,
+      };
+    }),
     pathname,
     setOpen,
   };

@@ -24,6 +24,7 @@ export interface ClipValue {
 /** How a fade rises or falls: evenly, quick then slow, slow then quick, or eased at both ends. */
 export type FadeShape = "fast" | "linear" | "slow" | "smooth";
 
+/** The fade shapes in the order a control steps through them. */
 export const FADE_SHAPES: readonly FadeShape[] = [
   "linear",
   "fast",
@@ -57,6 +58,7 @@ export function fadeGain(shape: FadeShape, progress: number): number {
   }
 }
 
+/** What a clip edit keeps a clip within: the timeline's length, the shortest it may be, and its source's length. */
 export interface ClipLimits {
   /** The length of the timeline the clip sits on. */
   duration: number;

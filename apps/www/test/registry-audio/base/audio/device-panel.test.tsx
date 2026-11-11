@@ -1,5 +1,5 @@
 import { describe, expect, mock, test } from "bun:test";
-import { defineDevice } from "@audio-ui/core/device";
+import { defineDevice } from "@audio-ui/engine/device";
 import { fireEvent, render, within } from "@testing-library/react";
 import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 

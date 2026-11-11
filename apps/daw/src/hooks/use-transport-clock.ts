@@ -9,7 +9,7 @@ import {
   type SchedulerAnchor,
   type SchedulerConfig,
   type SchedulerCursor,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { webAudio } from "@/lib/web-audio";
 

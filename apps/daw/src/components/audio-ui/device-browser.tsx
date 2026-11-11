@@ -1,6 +1,11 @@
 "use client";
 
 import {
+  CaretLeftIcon,
+  CaretRightIcon,
+  MagnifyingGlassIcon,
+} from "@phosphor-icons/react";
+import {
   type ChangeEvent,
   type ComponentProps,
   type DragEvent,
@@ -10,15 +15,14 @@ import {
   useId,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
+import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
   InputGroupAddon,
   InputGroupInput,
 } from "@/components/ui/input-group";
-import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
-import { CaretRightIcon, CaretLeftIcon, MagnifyingGlassIcon } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 /** A device as the library lists it: a device definition is one. */
 export interface DeviceBrowserItem {

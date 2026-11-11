@@ -1,0 +1,13 @@
+{
+  "title": "Guides",
+  "pages": [
+    "index",
+    "output",
+    "clock-and-time",
+    "playback",
+    "synthesis",
+    "demo-sounds",
+    "input",
+    "analysis"
+  ]
+}

@@ -3,7 +3,7 @@ import {
   SYNCED_DIVISIONS,
   syncedSeconds,
   type Tempo,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 
 /** The slowest and the fastest an oscillator is allowed to run, in hertz: a synced one is held between them. */
 const MIN_RATE_HZ = 0.02;

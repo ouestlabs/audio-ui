@@ -1,6 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import writeMidi from "@audio/midi-write";
-import { secondsPerBar, secondsPerQuarter } from "@audio-ui/core/time";
+import { secondsPerBar, secondsPerQuarter } from "@audio-ui/engine/time";
 import { DRUM_RACK_DEVICE, NEW_TRACK } from "@/lib/arrangement";
 import { newProject } from "@/lib/daw/project";
 import {

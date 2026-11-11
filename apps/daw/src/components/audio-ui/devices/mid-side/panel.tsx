@@ -1,23 +1,7 @@
 "use client";
 
-import { formatDb } from "@audio-ui/core/analysis";
+import { formatDb } from "@audio-ui/engine/analysis";
 import { type ReactNode, useCallback } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Plot,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotLine,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -27,6 +11,22 @@ import {
   type MidSideState,
   midSideDevice,
 } from "@/components/audio-ui/devices/mid-side/device";
+import {
+  Plot,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotLine,
+} from "@/components/audio-ui/plot";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const MIN_DB = -24;
 const MAX_DB = 12;

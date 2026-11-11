@@ -1,0 +1,29 @@
+---
+title: Synthesis
+description: "Synth voices shaped by an envelope, chords on an instrument that plays one voice, the ramps that shape them, and drum hits made from oscillators and noise."
+---
+
+## Synth voices
+
+`useSynthVoices` plays notes on a pool of voices, one per held pitch: an oscillator through a gain shaped by an envelope. The attack and the decay play when the note starts and hold at the sustain level; the release plays when it ends.
+
+Usage and API: [`useSynthVoices`](/docs/hooks/use-synth-voices).
+
+## Polyphony
+
+The engine of an instrument [device](/docs/devices) plays one voice. `usePolyphony` plays chords on it: it makes as many engines as notes sound at once into a destination, keeps every one following the state, and gives each note a voice of its own: the one that holds it, else a free one, else the one held longest, whose note is let go first. The engines are disposed when the destination changes and on unmount.
+
+Usage and API: [`usePolyphony`](/docs/hooks/use-polyphony).
+
+## Envelope ramps
+
+The ramps behind the voices, for your own sounds: `scheduleEnvelopeRamp(param, points, startTime, seconds, peak, from)` runs a gain through an envelope's points, and `sliceEnvelope(points, fromX, toX)` takes a part of one, such as the release after `SUSTAIN_SPLIT_X`. A ramp cancels what was scheduled on the param first, so starting a note again never clicks.
+
+Usage and API: [`envelope-ramp`](/docs/lib/envelope-ramp).
+
+## Drum hits
+
+A kick, a snare and a hihat made from oscillators and noise, with no samples to load. Each starts at `time` and plays out on its own.
+
+Usage and API: [`drum-synthesis`](/docs/lib/drum-synthesis).
+

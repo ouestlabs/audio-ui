@@ -1,0 +1,23 @@
+---
+title: audio-export
+description: "Exporting rendered sound to a file: the settings an export picks (format, bit depth or bitrate, a level left as it is, brought to its peak or to a loudness target) and exportSound, which measures, normalizes and encodes, saying how far it is"
+---
+
+<Entry name="audio-export" />
+
+## Usage
+
+An export in one call: it measures the sound's loudness, normalizes it if asked (to its peak, or to -14, -16 or -23 LUFS with the true peak kept under -1 dBTP), encodes it, and says how loud the file came out.
+
+```ts
+import { DEFAULT_EXPORT_SETTINGS, exportSound } from "@/lib/audio-export";
+
+const exported = await exportSound(
+  channels,
+  sampleRate,
+  { ...DEFAULT_EXPORT_SETTINGS, normalize: -14 }, // "off", "peak", or a target in LUFS
+  (stage, done) => setProgress(stage, done)
+);
+```
+
+The [Export dialog](/docs/components/base/export-dialog) holds its settings; the measuring is [`loudness`](/docs/engine/analysis#loudness) and the encoding [`audio-encode`](/docs/engine/files#writing-a-file).

@@ -1,7 +1,13 @@
 "use client";
 
 import type { Source } from "@audio-ui/react";
-import { useEffect, useRef, useState } from "react";
+import {
+  type ChangeEvent,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Input } from "@/registry/bases/base/ui/input";
@@ -181,6 +187,13 @@ function Tuner({ className, reference = 440, tolerance = 5 }: TunerProps) {
   const microphone = useMicrophone();
   const [a4, setA4] = useState(reference);
   const pitch = usePitch(microphone.analyser, { reference: a4 });
+  // A number outside the range, or a field left empty while typing, keeps the last one.
+  const changeA4 = useCallback((event: ChangeEvent<HTMLInputElement>) => {
+    const next = Number(event.target.value);
+    if (next >= MIN_REFERENCE && next <= MAX_REFERENCE) {
+      setA4(next);
+    }
+  }, []);
   return (
     <div
       className={cn(
@@ -209,12 +222,7 @@ function Tuner({ className, reference = 440, tolerance = 5 }: TunerProps) {
             id="tuner-reference"
             max={MAX_REFERENCE}
             min={MIN_REFERENCE}
-            onChange={(event) => {
-              const next = Number(event.target.value);
-              if (next >= MIN_REFERENCE && next <= MAX_REFERENCE) {
-                setA4(next);
-              }
-            }}
+            onChange={changeA4}
             step={1}
             type="number"
             value={a4}

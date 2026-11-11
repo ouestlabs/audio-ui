@@ -54,13 +54,10 @@ export default function PadDemo() {
 
   const strike = useCallback(
     (value: string, details: PadPrimitive.Root.OnEventDetails) => {
-      const ctx = webAudio.getContext();
+      const ctx = webAudio.resume();
       const pad = PADS.find((item) => item.value === value);
       if (!(ctx && master && pad)) {
         return;
-      }
-      if (ctx.state === "suspended") {
-        ctx.resume();
       }
       // Each hit goes through a gain of its own: how hard the pad was struck.
       const hit = ctx.createGain();
@@ -80,7 +77,7 @@ export default function PadDemo() {
   // Drum hits ring on after the pad is released: only a choke stops them.
   const choke = useCallback(
     (value: string, details: PadPrimitive.Root.OffEventDetails) => {
-      const ctx = webAudio.getContext();
+      const ctx = webAudio.resume();
       if (!ctx || details.reason !== "choke") {
         return;
       }

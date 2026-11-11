@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   type WaveShaperNote,
   type WaveShaperState,
@@ -16,11 +16,10 @@ const LEVEL = 0.4;
 /** Two oscillators in one voice: each at half, so the pair is not louder than one. */
 const OSCILLATOR_LEVEL = 0.5;
 
-export interface WaveShaperEngine
-  extends InstrumentBinding<WaveShaperState, WaveShaperNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type WaveShaperEngine = InstrumentEngine<
+  WaveShaperState,
+  WaveShaperNote
+>;
 
 interface Voice {
   detuned: OscillatorNode;

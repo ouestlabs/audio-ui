@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 
 const MIN_FREQUENCY = 30;
 const MAX_FREQUENCY = 1046;

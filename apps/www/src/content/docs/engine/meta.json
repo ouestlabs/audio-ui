@@ -1,14 +1,16 @@
 {
-  "title": "Audio engine",
+  "title": "Engine",
   "pages": [
     "index",
-    "output",
-    "clock-and-time",
-    "playback",
-    "synthesis",
-    "demo-sounds",
-    "input",
+    "device",
+    "dsp",
+    "kernels",
+    "time",
     "analysis",
-    "controllers"
+    "pitch",
+    "midi",
+    "files",
+    "playback",
+    "worklet"
   ]
 }

@@ -1,14 +1,7 @@
 "use client";
 
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -19,6 +12,13 @@ import {
   chorusDevice,
   chorusSweep,
 } from "@/components/audio-ui/devices/chorus/device";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 /** Two seconds of the sweep: the slowest rate is a cycle in 20 s, the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;

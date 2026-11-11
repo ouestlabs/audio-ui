@@ -92,7 +92,7 @@ describe("the piano roll's rows and notes", () => {
   });
 
   test("marks the rows of its scale, and the root's apart", () => {
-    const { roll } = renderRoll('scale="major" scale-root="2"');
+    const { roll } = renderRoll('scale="1 2 4 6 7 9 11" scale-root="2"');
     const row = (pitch: number) =>
       roll.querySelector(`audio-ui-piano-roll-row[pitch="${pitch}"]`);
     expect(row(62)?.hasAttribute("data-in-scale")).toBe(true);

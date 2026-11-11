@@ -4,9 +4,9 @@ import {
   type Note,
   type NoteId,
   type PianoRollOptions,
+  type RollScale,
   type Rows,
 } from "@audio-ui/core/piano-roll";
-import type { Scale } from "@audio-ui/core/pitch";
 import * as React from "react";
 import { shallowEqual } from "../../internal/equal.ts";
 import { type PartProps, resolveStyling } from "../../internal/part.ts";
@@ -280,8 +280,8 @@ export namespace Root {
       value: Note[],
       eventDetails: ValueCommitEventDetails
     ) => void;
-    /** The scale whose rows are marked `data-in-scale`, such as `{ name: "major", root: 0 }` for C major. */
-    scale?: Scale | null;
+    /** The scale whose rows are marked `data-in-scale`, as its pitch classes and its root: `{ pitchClasses: [0, 2, 4, 5, 7, 9, 11], root: 0 }` for C major. */
+    scale?: RollScale | null;
     /** The ids of the selected notes. */
     selection?: readonly NoteId[];
     /** The notes. */

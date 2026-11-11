@@ -1,6 +1,6 @@
-import { formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
-import { EXCITER_KERNELS } from "@/registry-audio/bases/base/devices/exciter/kernels";
+import { formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { EXCITER_KERNELS } from "@audio-ui/engine/kernels";
 
 /** The damping of the kernel's high-pass, a Q of 2. */
 const DAMPING = 0.5;

@@ -1,14 +1,6 @@
 "use client";
 
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotLine,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -20,6 +12,14 @@ import {
   binauralPlace,
   binauralPoint,
 } from "@/components/audio-ui/devices/binaural-panner/device";
+import {
+  Plot,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotLine,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const SWITCHES = ["enabled"] as const;
 const OFF = binauralPannerDevice.parameters

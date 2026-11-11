@@ -1,0 +1,21 @@
+---
+title: useTimelineCursor
+description: "What the keyboard does with an arrangement's cursor: the arrows on the grid, Home and End, Up and Down to pick a track, Alt and the arrows to jump between locators and clip edges, M to add a locator."
+---
+
+<Entry name="use-timeline-cursor" />
+
+## Usage
+
+`useTimelineCursor` is what the keys do with the cursor. `handleKey` takes M, which adds a locator, and Alt with the arrows, which jump to the next locator or clip edge, of the picked tracks or of every track. `handleArrowKey` takes the plain arrows, Home and End, for when a key reached the view rather than a control with arrows of its own: Left and Right move the cursor on the grid, Up and Down pick a track. Both say whether the key was theirs.
+
+It is one of the parts the [Arrangement](/docs/components/base/arrangement) composes.
+
+## API
+
+<TypeTable>
+<TypeRow name={"clips, tracks, locators, selectedIds, selectedTracks, duration"} type={"as useArrangement returns them"}>What the keys move through.</TypeRow>
+<TypeRow name={"getPosition, step"} type={"() => number, number"}>Where the cursor is, and the grid it moves on.</TypeRow>
+<TypeRow name={"onSeek, onPickTrack, onAddLocator"} type={"(seconds) => void, (id) => void, () => void"}>What the keys ask for.</TypeRow>
+<TypeRow name={"handleKey, handleArrowKey"} type={"(event) => boolean"}>M and Alt with the arrows; the plain arrows, Home and End.</TypeRow>
+</TypeTable>

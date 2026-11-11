@@ -65,9 +65,7 @@ export function useMicrophone(): UseMicrophoneReturn {
           noiseSuppression: false,
         },
       });
-      if (ctx.state === "suspended") {
-        await ctx.resume();
-      }
+      webAudio.resume();
       if (asked !== requestRef.current) {
         // Not wanted any more: released at once, or the browser keeps recording.
         for (const track of stream.getTracks()) {

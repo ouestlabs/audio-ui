@@ -1,0 +1,39 @@
+---
+title: Knob
+description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
+---
+
+<Module from="@audio-ui/elements/knob" />
+
+## Usage
+
+`<audio-ui-knob>` is the root of a rotary control. It owns the value and renders its parts from it.
+
+<ElementsPreview name="knob" />
+
+<TypeTable>
+<TypeRow name={"min"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"max"} type={"number"} default={"100"}></TypeRow>
+<TypeRow name={"step"} type={"number"} default={"1"}></TypeRow>
+<TypeRow name={"large-step"} type={"number"} default={"10"}>Step for Page Up, Page Down and Shift + Arrow keys.</TypeRow>
+<TypeRow name={"value"} type={"number"}>The current value. Mirrored by the `value` property.</TypeRow>
+<TypeRow name={"default-value"} type={"number"}>The initial value, restored by a double tap, Alt + click or Delete. Defaults to the middle of the travel.</TypeRow>
+<TypeRow name={"anchor"} type={"number"}>The value the indicator arc starts from, such as `0` on a -1 to 1 pan. Defaults to `min`.</TypeRow>
+<TypeRow name={"drag-mode"} type={"\"circular\" | \"revolution\" | \"vertical\""} default={"\"circular\""}>How pointer movement maps to the value.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"log\""} default={"\"linear\""}>How the value maps onto the travel. The `scale` property also accepts a custom `{ toPosition, toValue }`.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON, for the value part and `aria-valuetext`. The `format` property accepts the options object.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser locale.</TypeRow>
+<TypeRow name={"name"} type={"string"}>The form field name.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+| Part | Description |
+| --- | --- |
+| `<audio-ui-knob-control>` | The interactive surface: pointer drag, wheel, double tap or Alt + click to reset |
+| `<audio-ui-knob-track>` | The full sweep, drawn as an SVG arc. `stroke-width` sets its width in the 48×48 viewBox (3 by default) |
+| `<audio-ui-knob-indicator>` | The arc from `anchor` to the value |
+| `<audio-ui-knob-thumb>` | Rotates with the value and contains the native range input, to which its `aria-label`, `aria-labelledby` and `aria-describedby` are moved |
+| `<audio-ui-knob-value>` | The formatted value |
+| `<audio-ui-knob-label>` | Labels the input when the thumb has no accessible name |
+
+The same control in React, and its parts' props: [Knob](/docs/react/knob).

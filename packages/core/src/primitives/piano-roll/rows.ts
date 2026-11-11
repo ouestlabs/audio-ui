@@ -1,4 +1,17 @@
-import { type Scale, scalePitchClasses } from "../../audio/pitch/scale.ts";
+/**
+ * A scale as a piano roll reads it: the pitch classes it keeps and the one it
+ * starts on, each from 0 (C) to 11 (B). C major is
+ * `{ pitchClasses: [0, 2, 4, 5, 7, 9, 11], root: 0 }`; a scale by name, such
+ * as `@audio-ui/engine/pitch`'s, gives its pitch classes.
+ */
+export interface RollScale {
+  pitchClasses: readonly number[];
+  root: number;
+}
+
+/** A pitch's class, 0 (C) to 11 (B). */
+export const pitchClassOf = (pitch: number) =>
+  ((Math.round(pitch) % 12) + 12) % 12;
 
 /**
  * The rows a piano roll draws, highest pitch first, and the conversions
@@ -89,10 +102,12 @@ export function rollRows(
   min: number,
   max: number,
   fold: boolean | "scale",
-  scale: Scale | null = null
+  scale: RollScale | null = null
 ): Rows {
-  const classes = scale ? scalePitchClasses(scale) : null;
-  const root = scale ? ((Math.round(scale.root) % 12) + 12) % 12 : null;
+  const classes = scale
+    ? [...new Set(scale.pitchClasses.map(pitchClassOf))].sort((a, b) => a - b)
+    : null;
+  const root = scale ? pitchClassOf(scale.root) : null;
   if (fold) {
     const kept = new Set(notes.map((note) => note.pitch));
     if (fold === "scale" && classes) {

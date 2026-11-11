@@ -5,6 +5,7 @@ import { valueAtOffset } from "./scale.ts";
 /** How far one unit of wheel delta zooms, as an exponent. */
 export const WHEEL_ZOOM_SENSITIVITY = 0.0015;
 
+/** The options of `createWheelZoom`: the timeline's length, the zoom as drawn, where its start sits, and the function that applies a zoom. */
 export interface WheelZoomOptions {
   disabled?: boolean;
   /** px per unit as drawn: the zoom, or what fitting the width gives. */
@@ -20,6 +21,7 @@ export interface WheelZoomOptions {
   ) => boolean;
 }
 
+/** What `createWheelZoom` returns: the wheel handler, `setOptions`, and `dispose`. */
 export interface WheelZoomController {
   /** Drops the zoom that waits for the next frame. */
   dispose: () => void;

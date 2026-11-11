@@ -15,23 +15,29 @@ type Details<Reason extends string, E extends Event> = ChangeEventDetails<
   activeThumbIndex: number;
 };
 
+/** What `onValueChange` receives with each change: the reason, the event behind it, and `cancel()` to refuse the change. */
 export type FaderChangeEventDetails =
   | Details<"drag" | "track-press", PointerEvent>
   | Details<"keyboard", KeyboardEvent>
   | Details<"input-change", Event>
   | Details<"wheel", WheelEvent>
   | Details<"reset", KeyboardEvent | MouseEvent | PointerEvent>;
+/** Why the value changed: `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"` (a typed value) or `"reset"`. */
 export type FaderChangeEventReason = FaderChangeEventDetails["reason"];
+/** What `onValueCommitted` receives once a gesture ends: the reason and the event behind it. */
 export type FaderCommitEventDetails =
   | CommitEventDetails<"drag" | "track-press", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
   | CommitEventDetails<"input-change", Event>
   | CommitEventDetails<"wheel", WheelEvent>
   | CommitEventDetails<"reset", KeyboardEvent | MouseEvent | PointerEvent>;
+/** Why the value was committed: the same reasons as a change. */
 export type FaderCommitEventReason = FaderCommitEventDetails["reason"];
 
+/** Which way a fader's travel runs. */
 export type FaderOrientation = "horizontal" | "vertical";
 
+/** The options of `createFaderController`: the value, held or controlled, its range, steps, anchor and orientation, its formatting and the callbacks. */
 export interface FaderOptions {
   /** Value the fill starts from, such as `0` on a -1…1 pan. Defaults to `min`. */
   anchor?: number;
@@ -78,6 +84,7 @@ export interface FaderSnapshot {
   value: number;
 }
 
+/** What `createFaderController` returns: the snapshot to draw from, and the press, keys, wheel, typed value and reset that change it. */
 export interface FaderController {
   /** Listens to wheel steps on `element`; returns what removes the listener. */
   attachWheel: (element: HTMLElement) => () => void;

@@ -1,4 +1,4 @@
-import { pitchName } from "@audio-ui/core/pitch";
+import { pitchName } from "@audio-ui/core";
 import { XYPad } from "@audio-ui/react/xypad";
 import { inScale, ROOT, type Scale, SPAN } from "../audio/scales";
 

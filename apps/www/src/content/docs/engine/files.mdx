@@ -1,0 +1,78 @@
+---
+title: files
+description: "Files from @audio-ui/engine: an audio file decoded into samples at a context's rate, sound written to WAV, FLAC or MP3, notes read from and written to a MIDI file, and a score read from and written to MusicXML."
+---
+
+<Module from="@audio-ui/engine/files" />
+
+## Audio files
+
+A file's audio as samples at the context's rate, one array per channel: what the browser decodes, and AIFF, CAF or Apple Lossless where it cannot (Chrome does not), with audio.js decoders.
+
+```ts
+import { decodeAudioChannels } from "@audio-ui/engine/files";
+
+const channels = await decodeAudioChannels(ctx, await file.arrayBuffer());
+```
+
+The samples are at the context's sample rate, so they play as they are and `computePeaks` (from `@audio-ui/engine/analysis`) draws them. The waveform player and the arrangement decode dropped files this way.
+
+## Writing a file
+
+Sound saved as a file: WAV (16 or 24-bit, or 32-bit float), FLAC or MP3 at a bitrate, encoded in chunks with its progress, from what an `OfflineAudioContext` rendered or a recording kept.
+
+```ts
+import { downloadFile, encodeAudio } from "@audio-ui/engine/files";
+
+const file = await encodeAudio(channels, { bitDepth: 24, format: "wav", sampleRate, onProgress: (done) => setProgress(done) });
+downloadFile(file, "mix.wav");
+```
+
+[`audio-export`](/docs/lib/audio-export) adds loudness normalization on top of it.
+
+## MIDI files
+
+<ComponentPreview styleName="base-nova" name="piano-roll-midi-file-demo" />
+
+The `midi-file` library reads a `.mid` file onto the roll's steps and writes one back.
+
+```tsx
+import { downloadMidiFile, MIDI_FILE_ACCEPT, readMidiFile } from "@audio-ui/engine/files";
+
+<input
+  accept={MIDI_FILE_ACCEPT}
+  onChange={async (event) => {
+    const file = event.target.files?.[0];
+    if (file) {
+      const { bpm, notes } = await readMidiFile(file, {
+        duration: 64,
+        maxPitch: 84,
+        minPitch: 36,
+      });
+      setNotes(notes);
+      setBpm(bpm);
+    }
+  }}
+  type="file"
+/>
+<Button onClick={() => downloadMidiFile(notes, { bpm, filename: "clip.mid" })}>
+  Export
+</Button>
+```
+
+`readMidiFile` puts each note on the nearest step, at least one step long, drops the notes starting past `duration`, keeps the pitches between `minPitch` and `maxPitch` and returns the file's tempo, kept between `minBpm` and `maxBpm` (20 and 200 by default). It takes any `File` or `Blob`, so a drop works the same as an input. `writeMidiFile` goes the other way, at 480 ticks a quarter note, and leaves deactivated notes out; `downloadMidiFile` writes the file and saves it. A step is a sixteenth note: set `stepsPerQuarter` on both sides for another grid.
+
+For a host that lays each part on a track of its own, such as a DAW, `readMidiFileParts(file)` reads a file as parts instead: one per track and channel, named after its track, with the General MIDI program it asks for and whether it is the drums of channel 10, its notes in beats as they were written, not quantized. The file is parsed by `@audio/midi-parse`.
+
+## MusicXML files
+
+A MusicXML score onto a roll's steps, a part at a time, and notes back out as a score: what notation software reads and writes.
+
+```ts
+import { downloadMusicXmlFile, readMusicXmlFile } from "@audio-ui/engine/files";
+
+const { bpm, notes } = await readMusicXmlFile(file, { duration: 64, maxPitch: 84, minPitch: 36 });
+downloadMusicXmlFile(notes, { bpm, filename: "clip.musicxml" });
+```
+
+`readMusicXmlFileParts` gives each part on its own; `writeMusicXmlFile` the score as a string. For a `.mid` file, see [`midi-file`](/docs/engine/files#midi-files).

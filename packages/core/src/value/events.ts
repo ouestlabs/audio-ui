@@ -1,7 +1,8 @@
 /**
- * Change/commit event details for interactions the underlying controls don't
- * handle themselves (e.g. wheel), so every input reaches consumers through the
- * same `eventDetails` contract: `reason`, `event`, `cancel()`.
+ * What a change reports: why it happened (`reason`), the event behind it, the
+ * element that triggered it, and `cancel()` to refuse the change. Every input
+ * of every controller, the wheel included, reaches its callbacks in this one
+ * shape.
  */
 export interface ChangeEventDetails<Reason extends string, E extends Event> {
   allowPropagation: () => void;
@@ -13,11 +14,13 @@ export interface ChangeEventDetails<Reason extends string, E extends Event> {
   trigger: Element | undefined;
 }
 
+/** What a commit reports once a gesture ends: why it happened (`reason`) and the event behind it. */
 export interface CommitEventDetails<Reason extends string, E extends Event> {
   event: E;
   reason: Reason;
 }
 
+/** The details of a change for `reason` and `event`, with `cancel()` to refuse it and `allowPropagation()` to let the event go on. */
 export function createChangeEventDetails<
   Reason extends string,
   E extends Event,

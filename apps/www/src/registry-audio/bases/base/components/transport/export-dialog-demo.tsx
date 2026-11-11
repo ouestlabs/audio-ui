@@ -1,9 +1,9 @@
 "use client";
 
+import { downloadFile } from "@audio-ui/engine/files";
 import { useCallback, useState } from "react";
 import { Button } from "@/registry/bases/base/ui/button";
 import { ExportDialog } from "@/registry-audio/bases/base/audio/elements/export-dialog";
-import { downloadFile } from "@/registry-audio/bases/base/lib/audio-encode";
 import {
   DEFAULT_EXPORT_SETTINGS,
   type ExportSettings,

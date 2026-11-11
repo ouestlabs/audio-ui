@@ -1,11 +1,8 @@
-import { formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
-import { PHASER_KERNELS } from "@/components/audio-ui/devices/phaser/kernels";
-import {
-  lfoRate,
-  SYNCED_RATE_PARAMETERS,
-} from "@/lib/synced-rate";
+import { formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { PHASER_KERNELS } from "@audio-ui/engine/kernels";
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
+import { lfoRate, SYNCED_RATE_PARAMETERS } from "@/lib/synced-rate";
 
 /** The all-pass stages of the phaser: each pair makes one notch. */
 export const PHASER_STAGES = 4;

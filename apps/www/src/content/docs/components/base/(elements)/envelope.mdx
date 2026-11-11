@@ -25,24 +25,7 @@ Edits a ramp made of breakpoints, such as an ADSR shape or an automation curve. 
 
 ## Anatomy
 
-Import the primitive and assemble its parts.
-
-```tsx
-import { Envelope } from "@audio-ui/react";
-
-<Envelope.Root>
-  <Envelope.Graph>
-    <Envelope.Fill />
-    <Envelope.Line />
-  </Envelope.Graph>
-  <Envelope.Segments>
-    <Envelope.Segment />
-  </Envelope.Segments>
-  <Envelope.Points>
-    <Envelope.Point />
-  </Envelope.Points>
-</Envelope.Root>
-```
+It is built on the headless [Envelope](/docs/react/envelope) of `@audio-ui/react`: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -118,80 +101,7 @@ Each segment has a handle on its curve. The handles share one tab stop:
 
 ## API reference
 
-### Root
-
-Groups all parts of the breakpoint envelope and owns its points, each normalized to 0…1 on both axes and kept sorted by `x`. Points are dragged and nudged with the keyboard; a double click on the `Graph` adds one and a double click (or Delete) on a `Point` removes it, within `minPoints` / `maxPoints`. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"defaultValue"} type={"GeomPoint[]"}>Uncontrolled starting points. Defaults to an ADSR-like shape.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
-<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats point coordinates for each point's `aria-valuetext`.</TypeRow>
-<TypeRow name={"locale"} type={"Intl.LocalesArgument"}></TypeRow>
-<TypeRow name={"maxPoints"} type={"number"}>Ceiling on the number of points; adding is blocked at this count. Equal to `minPoints`, the shape is fixed.</TypeRow>
-<TypeRow name={"minPoints"} type={"number"} default={"2"}>Floor on the number of points; removal is blocked at this count.</TypeRow>
-<TypeRow name={"onValueChange"} type={"(value: GeomPoint[], eventDetails: ChangeEventDetails) => void"}>Fires on every change: drag, keyboard, add and remove.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"(value: GeomPoint[], eventDetails: CommitEventDetails) => void"}>Fires when an interaction that changed the points ends.</TypeRow>
-<TypeRow name={"step"} type={"number"} default={"0.01"}>Keyboard step on both axes, in normalized units.</TypeRow>
-<TypeRow name={"snap"} type={"number | { x: number; y: number }"} default={"0"}>Grid the pointer snaps points to, in normalized units: 0.25 snaps to quarters, 0 is no grid, and `{ x, y }` sets a step for each axis (`{ x: 0.125, y: 0 }` snaps across and leaves the level free). Holding Cmd/Ctrl leaves the grid, and Shift's fine drag ignores it. Keys move by `step`.</TypeRow>
-<TypeRow name={"value"} type={"GeomPoint[]"}></TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
-</TypeTable>
-
-### Graph
-
-The drawing surface, a 100×100 stretched viewBox: holds `Line` and `Fill`, and a double click on it adds a point. Carries `data-blocked` briefly when adding is refused at `maxPoints`. Renders a `<svg>` element.
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
-<TypeRow name={"data-blocked"}>Briefly true after an add was refused at `maxPoints`.</TypeRow>
-</TypeTable>
-
-### Line
-
-The envelope curve through the points. Renders a `<polyline>` element.
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
-</TypeTable>
-
-### Fill
-
-The area under the curve. Renders a `<polyline>` element.
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
-</TypeTable>
-
-### Points
-
-Renders one child per point, in `x` order.
-
-<TypeTable>
-<TypeRow name={"children"} type={"(point: GeomPoint, index: number, points: GeomPoint[]) => React.ReactNode"}></TypeRow>
-</TypeTable>
-
-### Point
-
-A draggable handle for the point at `index`, positioned with `left`/`bottom` percentages over the `Graph`. It is a `role="slider"` on the point's level (`y`): give it an `aria-label`. One point at a time is the tab stop; arrow keys move it (Shift for larger steps), Delete or a double click removes it. Carries `data-blocked` briefly when removal is refused at `minPoints`. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"getAriaValueText"} type={"(point: GeomPoint, index: number) => string"}>Returns the point's `aria-valuetext`. Defaults to the formatted `x, y`.</TypeRow>
-<TypeRow name={"index"} type={"number"}>Index of the point in the (sorted) value.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-dragging"}>Whether a point is being dragged.</TypeRow>
-<TypeRow name={"data-blocked"}>Briefly true after a removal was refused at `minPoints`.</TypeRow>
-<TypeRow name={"data-removable"}>Whether the point can currently be removed.</TypeRow>
-</TypeTable>
+The props of the headless parts are on [Envelope](/docs/react/envelope#api-reference).
 
 ### Registry component
 
@@ -231,4 +141,3 @@ A draggable handle for the point at `index`, positioned with `left`/`bottom` per
 ### ADSR with its stages read out
 
 <ComponentPreview styleName="base-nova" name="envelope-adsr-demo" />
-

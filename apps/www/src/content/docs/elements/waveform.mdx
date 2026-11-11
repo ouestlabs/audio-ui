@@ -1,0 +1,51 @@
+---
+title: Waveform
+description: "The <audio-ui-waveform> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
+---
+
+<Module from="@audio-ui/elements/waveform" />
+
+## Usage
+
+`<audio-ui-waveform>` displays audio and, with a control part, seeks through it: a press seeks to the pointer, a drag scrubs, and the keyboard steps. The shape comes from the `peaks` property or a live `levels` source; the position from `value` or a live `source`, exposed as `--waveform-position`:
+
+<ElementsPreview name="waveform" />
+
+```html
+<audio-ui-waveform duration="102">
+  <audio-ui-waveform-control aria-label="Seek">
+    <audio-ui-waveform-canvas></audio-ui-waveform-canvas>
+    <audio-ui-waveform-playhead></audio-ui-waveform-playhead>
+  </audio-ui-waveform-control>
+</audio-ui-waveform>
+<script type="module">
+  document.querySelector("audio-ui-waveform").peaks = peaks;
+</script>
+```
+
+<TypeTable>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit of the position, typically seconds.</TypeRow>
+<TypeRow name={"value"} type={"number"}>The playback position, from 0 to `duration`.</TypeRow>
+<TypeRow name={"default-value"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"step"} type={"number"}>Arrow key step. Defaults to `duration / 100`.</TypeRow>
+<TypeRow name={"large-step"} type={"number"}>Page Up, Page Down and Shift + Arrow step. Defaults to `duration / 10`.</TypeRow>
+<TypeRow name={"range"} type={"string"}>The visible window, `"start end"`, for clips and zoomed views. Defaults to the whole audio. Sets `data-outside` while the position is outside it.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"}>Seeking is disabled and the bars animate until the audio is available.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+`input` and `change` carry `{ value, reason }`. The root carries `data-active` while a live signal is audible.
+
+| Part | Description |
+| --- | --- |
+| `<audio-ui-waveform-control>` | The seekable surface, containing the native range input. `getAriaValueText(value, duration)` customizes its announcement. With `selectable`, Shift + drag selects a range and fires `selectioninput` and `selectioncommit` with `[start, end]` |
+| `<audio-ui-waveform-canvas>` | Renders on a canvas aligned to device pixels. `variant` (`mirror`, `bars`, `line`, or `scope` for raw samples), `bar-width`, `bar-gap`, `bar-radius`, `min-bar-height`, `gain`, `mirrored`, `idle`, `mode` (`static` or `scrolling`), `scroll-speed`, `line-width`. Colors from `--waveform-color` and `--waveform-progress-color` |
+| `<audio-ui-waveform-bars>` | Generates `count` `<audio-ui-waveform-bar>` elements (24), each sized by `--waveform-level`, for CSS-styled visualizers. Played bars carry `data-played`. Also `gain`, `idle`, `min-level`, `mirrored` |
+| `<audio-ui-waveform-playhead>` | A marker at the position |
+| `<audio-ui-waveform-thumb>` | A handle centered on the position |
+| `<audio-ui-waveform-hover>` | Shown at the hovered position; its `format(value, duration)` property renders it as text |
+| `<audio-ui-waveform-marker>` | A cue at `value`, labelled by its content |
+| `<audio-ui-waveform-region>` | A loop or selection from `value` (`"start end"`). Draggable unless `movable="false"`. Fires `regioninput` and `regionchange` with `{ value, edge, reason }` |
+| `<audio-ui-waveform-region-handle>` | Resizes the region's `edge` (`start` or `end`) by drag or through its native range input |
+
+The same control in React, and its parts' props: [Waveform](/docs/react/waveform).

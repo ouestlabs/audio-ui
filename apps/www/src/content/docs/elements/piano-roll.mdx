@@ -1,0 +1,62 @@
+---
+title: Piano roll
+description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
+---
+
+<Module from="@audio-ui/elements/piano-roll" />
+
+## Usage
+
+`<audio-ui-piano-roll>` is a note editor placed inside an `<audio-ui-timeline>`, which provides its length, zoom, grid and position. Its entry point also registers the timeline and piano elements. Notes are set through the `value` property as `{ id, pitch, start, length, velocity?, chance?, muted? }[]`, and the selection through the `selection` property. Rows, notes and velocity bars are generated from them:
+
+<ElementsPreview name="piano-roll" />
+
+```html
+<audio-ui-timeline duration="16" snap-step="0.25">
+  <audio-ui-piano-roll mode="draw">
+    <audio-ui-piano-roll-keys>
+      <audio-ui-piano aria-label="Keys"><audio-ui-piano-keys></audio-ui-piano-keys></audio-ui-piano>
+    </audio-ui-piano-roll-keys>
+    <audio-ui-timeline-viewport>
+      <audio-ui-piano-roll-grid aria-label="Notes">
+        <audio-ui-piano-roll-rows></audio-ui-piano-roll-rows>
+        <audio-ui-piano-roll-notes></audio-ui-piano-roll-notes>
+        <audio-ui-timeline-playhead></audio-ui-timeline-playhead>
+      </audio-ui-piano-roll-grid>
+    </audio-ui-timeline-viewport>
+  </audio-ui-piano-roll>
+</audio-ui-timeline>
+```
+
+<TypeTable>
+<TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest row, a MIDI pitch. 60 is middle C.</TypeRow>
+<TypeRow name={"max-pitch"} type={"number"} default={"72"}>Highest row.</TypeRow>
+<TypeRow name={"folded"} type={"string"}>When present, only pitches with notes get a row; `"scale"` also keeps the scale's pitches.</TypeRow>
+<TypeRow name={"scale"} type={"string"}>The scale's pitch classes, from 0 (C) to 11 (B), such as `0 2 4 5 7 9 11` for a major scale, with `scale-root` (0 for C). Its rows carry `data-in-scale` or `data-out-of-scale`, and those of its root `data-scale-root`. The `scale` property takes `{ pitchClasses, root }`, which `rollScale` of `@audio-ui/engine/pitch` gives for a scale by name.</TypeRow>
+<TypeRow name={"mode"} type={"\"select\" | \"draw\""} default={"\"select\""}>Behavior of a press on empty grid: marquee selection or note drawing.</TypeRow>
+<TypeRow name={"draw-style"} type={"\"stretch\" | \"paint\""} default={"\"stretch\""}>In draw mode, `paint` draws a note in each grid cell crossed.</TypeRow>
+<TypeRow name={"min-length"} type={"number"}>Minimum note length. Defaults to the timeline's grid step.</TypeRow>
+<TypeRow name={"active-pitches"} type={"string"}>Pitches lit externally, separated by spaces, such as MIDI input or playing notes.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+| Event | Detail | Description |
+| --- | --- | --- |
+| `input`, `change` | `{ value, reason }` | The notes change, then the gesture ends |
+| `noteselect` | `{ selection, reason }` | The selection changes. `preventDefault()` rejects it |
+| `noteon`, `noteoff` | `{ pitch, reason, event }` | A pitch starts or stops sounding. `preventDefault()` on `noteon` keeps it silent |
+
+The `getNoteLabel(note)` property sets each note's accessible name, "C4, 4 to 6" by default.
+
+| Part | Description |
+| --- | --- |
+| `<audio-ui-piano-roll-grid>` | The focusable note surface, a timeline lane. Enter adds a note at the position, Escape clears the selection, Cmd/Ctrl+A selects all, and Cmd/Ctrl+D, C, X, V and Q duplicate, copy, cut, paste and quantize |
+| `<audio-ui-piano-roll-rows>` | Generates an `<audio-ui-piano-roll-row>` per pitch, highest first. Rows carry `data-color`, `data-in-scale`, `data-out-of-scale`, `data-scale-root`, `data-octave` and `data-active` |
+| `<audio-ui-piano-roll-notes>` | Generates an `<audio-ui-piano-roll-note>` per note in reading order, from its `<template>`. Each note is a toggle button positioned at its start and pitch, movable by pointer and keyboard, exposing `--piano-roll-velocity` and `--piano-roll-chance` |
+| `<audio-ui-piano-roll-note-handle>` | Inside a note, resizes it from its `edge` |
+| `<audio-ui-piano-roll-marquee>` | The selection rectangle during a marquee drag |
+| `<audio-ui-piano-roll-selection-span>` | The time range of the selection; an `<audio-ui-piano-roll-stretch-handle>` per `edge` stretches it |
+| `<audio-ui-piano-roll-velocity-lane>` | A lane of per-note bars, through `<audio-ui-piano-roll-velocities>`, for velocity or, with `level="chance"`, probability. Each `<audio-ui-piano-roll-velocity>` is sized by `--piano-roll-level` and contains a native range input |
+| `<audio-ui-piano-roll-keys>` | Lays out the `<audio-ui-piano>` it contains on the roll's rows. Keys sound through the roll; Shift + press selects the notes of that row |
+
+The same control in React, and its parts' props: [PianoRoll](/docs/react/piano-roll).

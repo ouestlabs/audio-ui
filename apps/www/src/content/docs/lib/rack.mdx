@@ -1,0 +1,21 @@
+---
+title: rack
+description: "Racks: devices in parallel chains, each with its volume, pan, switch and solo, lined up on the slowest and summed, and eight macros that turn parameters of the devices inside over a stretch of their travel; the engine that plays one on a track's chain."
+---
+
+<Entry name="rack" />
+
+## Usage
+
+Devices in parallel chains, each with its own volume, pan, switch and solo, lined up on the slowest and summed, and eight macros mapped onto the parameters inside, each over a range. It is what plays a rack on a track's chain, in the [arrangement engine](/docs/lib/arrangement-engine); its face is the [Rack panel](/docs/components/base/rack).
+
+```ts
+import { createRackEngine, rackLatency } from "@/lib/rack";
+
+const engine = createRackEngine(ctx, libraryDevice); // find: a device of the library by its id
+source.connect(engine.input);
+engine.output.connect(destination);
+engine.update(rack, { tempo }); // the rack as the document holds it
+```
+
+`macroPositions` gives each mapped parameter's value for the macros' positions, `heardChains` the chains a solo leaves heard, and `rackLatency(rack, find, sampleRate)` how late the slowest chain is, for delay compensation; a rack's engine also says so with `latency()`.

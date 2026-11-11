@@ -3,8 +3,8 @@ import {
   type EqBand,
   eqResponse,
   formatHz,
-} from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+} from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 
 const MAX_DB = 18;
 

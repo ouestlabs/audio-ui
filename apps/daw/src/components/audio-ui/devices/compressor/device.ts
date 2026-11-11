@@ -1,10 +1,6 @@
-import { compressor } from "@audio/dynamics-compressor/audio";
-import { fet } from "@audio/dynamics-fet/audio";
-import { opto } from "@audio/dynamics-opto/audio";
-import { varimu } from "@audio/dynamics-varimu/audio";
-import { vca } from "@audio/dynamics-vca/audio";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
-import { COMPRESSOR_KERNELS } from "@/components/audio-ui/devices/compressor/kernels";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { compressor, fet, opto, varimu, vca } from "@audio-ui/engine/dsp";
+import { COMPRESSOR_KERNELS } from "@audio-ui/engine/kernels";
 import { manifestWorklet } from "@/lib/manifest-worklet";
 
 /**

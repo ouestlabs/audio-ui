@@ -1,0 +1,32 @@
+---
+title: plot
+description: "A plot's axes, paths, ticks and handles from @audio-ui/core: values placed on linear or log axes, curves and traces as SVG paths, round tick values, and the controller of a handle dragged on the plot."
+---
+
+<Module from="@audio-ui/core/plot" />
+
+## Usage
+
+A plot draws curves, such as an equalizer's response, and traces, such as a spectrum, on two axes. A `PlotAxis` is a range and a scale, and every function here places values on it:
+
+```ts
+import { LINEAR_SCALE, LOGARITHMIC_SCALE } from "@audio-ui/core";
+import { axisTicks, curvePath, formatTick, positionOn } from "@audio-ui/core/plot";
+
+const frequency = { min: 20, max: 20000, scale: LOGARITHMIC_SCALE };
+const gain = { min: -24, max: 24, scale: LINEAR_SCALE };
+
+positionOn(frequency, 632.5); // 0.5: the middle of a log axis
+axisTicks(frequency); // [100, 1000, 10000]: by powers of ten on a log axis
+formatTick(1000); // "1k"
+
+const d = curvePath((hz) => eq(hz), frequency, gain, 256); // an SVG path in a 1 by 1 box
+```
+
+`curvePath(fn, x, y, samples)` samples a function across the x axis into an SVG path, adding points where the curve bends tighter than `samples` shows, such as a knee, and `tracePath(values, y)` draws values spread evenly across it, both in a 1 by 1 box with y going up, so one `viewBox` and a transform fit them to any size. `fillTo` closes a path down to a level, to fill under it. `valueOn` is the inverse of `positionOn`.
+
+## Handles
+
+`createPlotHandleController` drives a handle on the plot, such as an equalizer band's, and follows the [contract](/docs/core/controllers) every controller shares. Its options are `axis` (`"both"` by default, or one axis), `defaultValue`, `disabled`, the `measure(fresh)` function that returns the plot's box in the viewport, and the change and commit callbacks. `press(event, element)` follows the drag, `keyDown(event)` moves the handle by a step, `typeAt(along, position, event)` sets it on one axis from a typed value, and `reset(event)` returns it to its default.
+
+The [Plot](/docs/components/base/plot) draws these in React.

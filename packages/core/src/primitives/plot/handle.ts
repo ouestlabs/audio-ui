@@ -15,18 +15,22 @@ export interface PlotPoint {
 /** The axes a handle moves along; the other keeps its value. */
 export type PlotHandleAxis = "both" | "x" | "y";
 
+/** What `onValueChange` receives with each change: the reason, the event behind it, and `cancel()` to refuse the change. */
 export type PlotHandleChangeEventDetails =
   | ChangeEventDetails<"drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"input-change", Event>
   | ChangeEventDetails<"reset", Event>;
+/** Why the value changed: `"drag"`, `"keyboard"`, `"input-change"` (a typed value) or `"reset"`. */
 export type PlotHandleChangeEventReason =
   PlotHandleChangeEventDetails["reason"];
+/** What `onValueCommitted` receives once a gesture ends: the reason and the event behind it. */
 export type PlotHandleCommitEventDetails =
   | CommitEventDetails<"drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
   | CommitEventDetails<"input-change", Event>
   | CommitEventDetails<"reset", Event>;
+/** Why the value was committed: the same reasons as a change. */
 export type PlotHandleCommitEventReason =
   PlotHandleCommitEventDetails["reason"];
 
@@ -36,6 +40,7 @@ const LARGE_KEY_STEP = 0.1;
 /** Shift slows a drag down to this share of the pointer's travel. */
 const FINE_DRAG = 0.25;
 
+/** The options of `createPlotHandleController`: the value, held or controlled, the axes it moves along, how to measure the plot, and the callbacks. */
 export interface PlotHandleOptions {
   /** The axes the handle moves along. @default "both" */
   axis?: PlotHandleAxis;
@@ -70,6 +75,7 @@ export interface PlotHandleSnapshot {
   value: PlotPoint;
 }
 
+/** What `createPlotHandleController` returns: the snapshot to draw from, and the press, keys, typed values and reset that move the handle. */
 export interface PlotHandleController {
   getSnapshot: () => PlotHandleSnapshot;
   /** Handles a key on an axis input: arrows move a hundredth of the axis, Shift or Page Up/Down a tenth, Delete or Backspace reset. Returns `true` when the handle takes the key. */

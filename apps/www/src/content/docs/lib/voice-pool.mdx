@@ -1,0 +1,25 @@
+---
+title: voice-pool
+description: "Note players: what a MIDI track plays through, all taking notes the same way, and the voice pool that plays an instrument of the library with a voice for each note it holds, the oldest given up first."
+---
+
+<Entry name="voice-pool" />
+
+## Usage
+
+What a MIDI track plays through: an instrument of the [device library](/docs/lib/device-library) with a voice for each note it holds ([`createPolyphony`](/docs/lib/polyphony)), or the one engine of a mono instrument, which glides from note to note. Every player takes notes the same way, by pitch and velocity, at times of the audio clock, each by an id its note off gives again.
+
+```ts
+import { libraryDevice } from "@/lib/device-library";
+import { createVoicePool } from "@/lib/voice-pool";
+
+const entry = libraryDevice("audioui.poly-synth");
+if (entry) {
+  const player = createVoicePool(ctx, entry, entry.device.defaults(), { tempo }, 8, output);
+  await player.ready();
+  player.noteOn({ pitch: 60, velocity: 0.8 }, time, "c4");
+  player.noteOff(time + 0.5, "c4");
+}
+```
+
+`noteParameters` turns a played note into what the instrument's `noteOn` takes: its note defaults, the pitch's frequency, the velocity, then the note's own parameters (a pad's tune or cutoff).

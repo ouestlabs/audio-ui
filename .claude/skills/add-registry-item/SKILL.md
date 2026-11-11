@@ -26,15 +26,16 @@ Before writing, open the closest existing item of the same kind and copy its sha
 - Import audio elements from `@/registry-audio/bases/base/audio/elements/...` and shadcn parts from `@/registry/bases/base/ui/...`.
 - Live signals (playheads, meters, spectra) go through a source or a ref, never a `setState` per frame.
 - Set a Web Audio parameter with `setTargetAtTime`, not `.value =`, so a drag never clicks.
+- Reuse the shared audio glue listed in `AGENTS.md` ("Shared audio glue"): an engine loads its worklet with `loadWorklet` (`lib/audio-worklet`), an instrument block plays chords with `usePolyphony`. Add the item to `registryDependencies`.
 - A hook or lib stays free of app imports (`@/app/...`), since it is copied into other projects.
 
 ## 3. Register it
 
-Add the entry to the matching `_registry.ts`:
+Add the entry to the matching `_registry.ts`, through the factories of `bases/items.ts`: `libItem(name, spec)` (file `lib/<name>.ts` unless `files` says otherwise), `hookItem(name, spec)` (`hooks/<name>.ts`), `deviceItems(name, parts)`. Write an item out in full only when it fits none of them (an alias with no file, files of several types):
 
 - `name` is the install name (`npx shadcn add @audio-ui/<name>`), usually the file name without extension
 - `files[].path` is relative to `bases/base/`
-- `target` (optional, per file): where the file lands in a project, for the items that belong in a folder of their own. A device's files (`device.ts`, `engine.ts`, `panel.tsx`, and `kernels.ts` when its engine runs audio.js kernels in a worklet: list them in `apps/www/scripts/kernels.ts` and run `bun run kernels:build`) sit in `devices/<name>/` and install to `components/audio-ui/devices/<name>/`, and the build rewrites every import of them to match. Add the name to `DEVICES` in `devices/_registry.ts` for the item that installs all of it. Everything else installs flat by its type.
+- `target` (optional, per file): where the file lands in a project, for the items that belong in a folder of their own. A device's files (`device.ts`, `engine.ts`, `panel.tsx`; the audio.js its worklet runs comes from `@audio-ui/engine/kernels`, listed in `packages/engine/scripts/kernels.ts` and written by `bun run kernels:build` there, and the processors its description uses from `@audio-ui/engine/dsp`: never import an `@audio/*` atom in the registry) sit in `devices/<name>/` and install to `components/audio-ui/devices/<name>/`, and the build rewrites every import of them to match. Declare a device with one `deviceItems("<name>", { device, engine, panel })` in `devices/_registry.ts`: it makes the `<name>-device`, `<name>-engine` and `<name>-panel` items, their paths and targets, the dependencies every part has (the state, `device-panel`, `@audio-ui/react`) and the `<name>` item that installs all three. Everything else installs flat by its type.
 - `registryDependencies`: `"@audio-ui/<name>"` for our items, `"@shadcn/<name>"` for shadcn's
 - `dependencies`: the npm packages the file imports (`"@audio-ui/react"`, `"zod"`)
 - `categories` (blocks and demos): the category folder at least. A new category also goes in `bases/categories.ts` (label + description); a category with no items fails the build.
@@ -45,7 +46,8 @@ Renaming or removing an item: also search for its old name in `apps/www/src/cont
 
 - A demo appears in a docs page through `<ComponentPreview styleName="base-nova" name="<demo-name>" />`.
 - In docs, an installed component is imported as `@/components/audio-ui/<name>` (where the registry puts it), and its source titled `components/audio-ui/<name>.tsx`. `bun test test/install-paths.test.ts` checks every such import.
-- Group first, by the rules in AGENTS.md ("Docs"): a hook or a lib that serves one component gets a section in that component's page, not a page of its own.
+- Every hook and lib gets its own entry page, `docs/hooks/<name>.mdx` or `docs/lib/<name>.mdx`: frontmatter `title` (the hook's name, or the lib's file name) and `description`, then `<Entry name="<name>" />` and a `## Usage` section with an example checked against the source. List it once in that folder's `meta.json`, under the `---Group---` it belongs to. Run `bun run registry:build` so `entries.generated.json` knows it; `test/registry-entries-docs.test.ts` fails on an entry with no page or a page with no entry.
+- A component page or an engine guide that uses the hook or the lib says what it does in a sentence and links to its entry, rather than repeating its usage.
 - A new component page: `apps/www/src/content/docs/components/base/(<space>)/<name>.mdx` (`(elements)`, `(workstation)` or `(devices)`), copying the sections of `(elements)/knob.mdx` (Overview, Installation as `<Install name="<name>" packages="..." />`, Anatomy, Usage, Interaction, API reference); list it in that space's `meta.json`, add the slug to `CANONICAL_COMPONENT_DOC_SLUGS` in `apps/www/src/lib/seo.ts`, and add it to `skills/audio-ui/components.md` (and the Component Selection table in `skills/audio-ui/SKILL.md`).
 
 ## 5. Build and check (from `apps/www/`)

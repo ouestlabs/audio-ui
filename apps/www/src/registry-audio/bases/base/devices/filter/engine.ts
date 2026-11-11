@@ -1,3 +1,5 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   CIRCUIT_WORKLET,
   circuitSettings,
@@ -7,39 +9,9 @@ import {
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.015;
 
-export interface FilterEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface FilterEngine extends EffectEngine<FilterState> {
   /** Resolves once the circuits are in the graph. Until then the signal passes unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: FilterState) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the circuits into a context once. `false` when the context cannot run worklets. */
-function loadCircuits(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([CIRCUIT_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -99,7 +71,7 @@ export function createFilterEngine(
     follow(dry.gain, state.enabled ? 0 : 1);
   };
 
-  const ready = loadCircuits(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, CIRCUIT_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

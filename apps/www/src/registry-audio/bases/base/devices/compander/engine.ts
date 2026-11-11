@@ -1,4 +1,6 @@
-import type { DeviceBinding, DeviceReadings } from "@audio-ui/core/device";
+import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
+import { createFeed, type Feed } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   COMPANDER_WORKLET,
   type CompanderState,
@@ -6,44 +8,14 @@ import {
 } from "@/registry-audio/bases/base/devices/compander/device";
 
 const RAMP_SECONDS = 0.01;
-/** How long after the compander fades out its input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
-export interface CompanderEngine extends DeviceBinding<CompanderState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface CompanderEngine extends EffectEngine<CompanderState> {
   /** What it is taking off right now, in dB: where its curve is under the straight line of a clean sound. */
   readings: () => DeviceReadings;
   /** Resolves once the compander is in the graph. Until then the sound passes unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   /** How many dB it is taking off right now, 0 or negative. Read it per frame. */
   readonly reduction: number;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the compander into a context once. `false` when the context cannot run worklets. */
-function loadCompander(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([COMPANDER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -75,8 +47,7 @@ export function createCompanderEngine(
   let model: AudioWorkletNode | null = null;
   let reduction = 0;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   /** The compander in place of the dry sound while it plays and is loaded, fed only then. */
   const route = () => {
@@ -87,22 +58,10 @@ export function createCompanderEngine(
     for (const [name, value] of Object.entries(settings.modelParams)) {
       model?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
     }
-    clearTimeout(unfeed);
-    if (playing > 0 && !fed && model) {
-      input.connect(model);
-      fed = true;
-    } else if (playing === 0 && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && model) {
-          input.disconnect(model);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing > 0);
   };
 
-  const ready = loadCompander(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, COMPANDER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }
@@ -111,6 +70,7 @@ export function createCompanderEngine(
       parameterData: settings.modelParams,
       processorOptions: { model: "compander" },
     });
+    feed = createFeed([[input, model]]);
     model.port.onmessage = (event: MessageEvent<number>) => {
       reduction = event.data;
     };
@@ -122,7 +82,7 @@ export function createCompanderEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       model?.disconnect();
       for (const node of [input, dry, wet, output]) {
         node.disconnect();

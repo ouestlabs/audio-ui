@@ -1,0 +1,24 @@
+---
+title: useArrangement
+description: "The state of an arrangement of clips on tracks, with its operations: selection, group moves and copies, split, duplicate, delete, adding and removing tracks, per-track mix and height, and undo and redo over tracks and clips"
+---
+
+<Entry name="use-arrangement" />
+
+## Usage
+
+The state of an arrangement in a component: its document (the tracks with their mixes, the clips, the tempo, the time signatures, the locators, the loop), its selection, its undo, and the view of its tracks (heights and folds). Every change is a command sent with `dispatch`, applied by `apply(state, command)` from `lib/arrangement-state`, which installs with it.
+
+```tsx
+import { useArrangement } from "@/hooks/use-arrangement";
+
+const arrangement = useArrangement({ duration: 64, initialClips, initialTracks, tempo });
+
+arrangement.dispatch({ type: "rename-clip", id: "verse-bass", name: "Bass" });
+arrangement.dispatch({ type: "undo" });
+// arrangement.clips, .tracks, .selectedIds, .mixOf(trackId), .canUndo, .doc for the engine
+```
+
+The document is a plain value: `doc` is what [`useArrangementEngine`](/docs/lib/arrangement-engine) plays and what a project saves. A command that changes nothing records no step, and a gesture (a drag) is one step of undo. The hook returns the state's parts and what is read from them (`selectedIds`, `mixOf`, `canUndo`, `canRedo`), `copyOf` for a time selection's clipboard, and `resizeTrack` and `toggleFold` for the view.
+
+It is the state under the [Arrangement](/docs/components/base/arrangement).

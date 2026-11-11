@@ -1,24 +1,7 @@
 "use client";
 
-import { formatDb, formatHz } from "@audio-ui/core/analysis";
+import { formatDb, formatHz } from "@audio-ui/engine/analysis";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Plot,
-  PlotArea,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -30,6 +13,23 @@ import {
   wahDevice,
   wahReach,
 } from "@/components/audio-ui/devices/wah/device";
+import {
+  Plot,
+  PlotArea,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

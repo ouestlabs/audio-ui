@@ -114,13 +114,15 @@ export function DocsNavigation({
       <div className="h-(--top-spacing) shrink-0" />
       {groups.map((group) => (
         <SidebarGroup key={group.title}>
-          <GroupLabel
-            collapsible={group.collapsible}
-            current={group.current}
-            onOpenChange={setOpen}
-            open={group.open}
-            title={group.title ?? ""}
-          />
+          {group.titled ? (
+            <GroupLabel
+              collapsible={group.collapsible}
+              current={group.current}
+              onOpenChange={setOpen}
+              open={group.open}
+              title={group.title ?? ""}
+            />
+          ) : null}
           {group.open ? (
             <SidebarGroupContent>
               {group.sections.map((section) => (

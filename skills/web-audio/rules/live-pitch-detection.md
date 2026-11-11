@@ -44,22 +44,22 @@ const pitch = usePitch(microphone.analyser); // a source: no render per reading
 <TunerDisplay source={pitch} />;
 ```
 
-For a frequency from samples you already have, `yin(samples, { fs })` from `@audio/pitch-yin` and `cents(frequency)` from `@audio/note` are pure functions, with no React and no Web Audio: they work in any framework. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
+For a frequency from samples you already have, `detectPitch` from `@audio-ui/engine/analysis` and `cents(frequency)` from `@audio-ui/engine/pitch` are pure functions, with no React and no Web Audio: they work in any framework. The analyser's `fftSize` must hold two periods of the lowest pitch: 4096 at 48 kHz reaches about 40 Hz.
 
-Without the registry, `yin(samples, { fs, minFreq, maxFreq })` returns `{ freq, clarity }`, or `null` when the signal has no clear pitch (noise, a chord); gate silence yourself on its RMS level. `cents(frequency)` from `@audio/note` returns `{ midi, name, hz, cents }` (`name` carries the octave, `"A#4"`, and positive `cents` means sharp), so guard a frequency that is not positive and finite. Feed an `AnalyserNode` that is never connected to the speakers, read it in a `requestAnimationFrame` loop, and publish the reading through a source:
+Without the registry, `detectPitch(samples, sampleRate, { minHz, maxHz, minLevel, threshold })` returns `{ frequency, confidence }`, or `null` when the signal is quieter than `minLevel` (an RMS level) or has no clear pitch (noise, a chord); it is YIN, from `@audio/pitch-yin`. `cents(frequency)` returns `{ midi, name, hz, cents }` (`name` carries the octave, `"A#4"`, and positive `cents` means sharp), so guard a frequency that is not positive and finite. Feed an `AnalyserNode` that is never connected to the speakers, read it in a `requestAnimationFrame` loop, and publish the reading through a source:
 
 ```ts
+import { detectPitch } from "@audio-ui/engine/analysis";
+import { cents } from "@audio-ui/engine/pitch";
 import { createSource } from "@audio-ui/react";
-import { cents } from "@audio/note";
-import yin from "@audio/pitch-yin";
 
 const reading = createSource<{ name: string; cents: number } | null>(null);
 const samples = new Float32Array(analyser.fftSize);
 
 function tick() {
   analyser.getFloatTimeDomainData(samples);
-  const pitch = yin(samples, { fs: ctx.sampleRate, minFreq: 40, maxFreq: 2000 });
-  const note = pitch && pitch.clarity > 0.8 ? cents(pitch.freq) : null;
+  const pitch = detectPitch(samples, ctx.sampleRate, { maxHz: 2000, minHz: 40, minLevel: 0.01, threshold: 0.1 });
+  const note = pitch && pitch.confidence > 0.8 ? cents(pitch.frequency) : null;
   reading.set(note);
   frame = requestAnimationFrame(tick);
 }

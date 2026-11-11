@@ -48,7 +48,7 @@
       "expected_output": "The compressor as a device: defineDevice's state stored in the project, the controlled panel, the host's own engine driven through a DeviceBinding or compressorSettings, and deviceTools for the assistant, with a device id stored rather than the panel.",
       "files": [],
       "expectations": [
-        "Keeps the compressor's settings as a plain state object (the `compressorDevice` state of `@audio-ui/core/device`) in the project, not inside a component's `useState` with audio nodes",
+        "Keeps the compressor's settings as a plain state object (the `compressorDevice` state of `@audio-ui/engine/device`) in the project, not inside a component's `useState` with audio nodes",
         "Stores the device's `id` (`audioui.compressor`) and its state in the project file, and repairs a loaded state with `device.sanitize`",
         "Uses the controlled panel (`CompressorPanel` or `DevicePanel`) with `value` and `onValueChange`, not a component that owns its state",
         "Drives the project's own engine from the state (a `DeviceBinding` with `update(state)` and `dispose()`, or the numbers of `compressorSettings`), instead of the Web Audio engine of the registry",

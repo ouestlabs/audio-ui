@@ -1,6 +1,11 @@
 "use client";
 
 import type { Note } from "@audio-ui/core/piano-roll";
+import {
+  downloadMidiFile,
+  MIDI_FILE_ACCEPT,
+  readMidiFile,
+} from "@audio-ui/engine/files";
 import { type ChangeEvent, useCallback, useRef, useState } from "react";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
@@ -11,11 +16,6 @@ import {
   PianoRollViewport,
 } from "@/registry-audio/bases/base/audio/elements/piano-roll";
 import { Timeline } from "@/registry-audio/bases/base/audio/elements/timeline";
-import {
-  downloadMidiFile,
-  MIDI_FILE_ACCEPT,
-  readMidiFile,
-} from "@/registry-audio/bases/base/lib/midi-file";
 
 const DURATION = 32;
 const MIN_PITCH = 48;

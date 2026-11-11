@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   clickGain,
   drawbarGain,
@@ -31,10 +31,7 @@ const ROTARY = {
 /** The horns take a moment to reach a new speed. */
 const SPEED_TIME = 0.7;
 
-export interface OrganEngine extends InstrumentBinding<OrganState, OrganNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type OrganEngine = InstrumentEngine<OrganState, OrganNote>;
 
 interface Voice {
   amp: GainNode;

@@ -1,0 +1,162 @@
+{
+  "name": "@audio-ui/engine",
+  "version": "0.0.0",
+  "description": "The audio logic behind audio/ui's interfaces, with no UI framework in it: devices as parameters, musical time and the look-ahead scheduler, levels and curves, MIDI input, scales, and the clip player.",
+  "keywords": [
+    "audio-ui",
+    "audio",
+    "web-audio",
+    "engine",
+    "framework-agnostic",
+    "tempo",
+    "scheduler",
+    "midi",
+    "devices",
+    "music"
+  ],
+  "homepage": "https://www.audio-ui.dev/docs/engine",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/engine"
+  },
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    "./analysis": {
+      "types": "./dist/analysis/index.d.ts",
+      "import": "./dist/analysis.js"
+    },
+    "./device": {
+      "types": "./dist/device/index.d.ts",
+      "import": "./dist/device.js"
+    },
+    "./dsp": {
+      "types": "./dist/dsp/index.d.ts",
+      "import": "./dist/dsp.js"
+    },
+    "./files": {
+      "types": "./dist/files/index.d.ts",
+      "import": "./dist/files.js"
+    },
+    "./kernels": {
+      "types": "./dist/kernels/index.d.ts",
+      "import": "./dist/kernels.js"
+    },
+    "./midi": {
+      "types": "./dist/midi/index.d.ts",
+      "import": "./dist/midi.js"
+    },
+    "./pitch": {
+      "types": "./dist/pitch/index.d.ts",
+      "import": "./dist/pitch.js"
+    },
+    "./playback": {
+      "types": "./dist/playback/index.d.ts",
+      "import": "./dist/playback.js"
+    },
+    "./time": {
+      "types": "./dist/time/index.d.ts",
+      "import": "./dist/time.js"
+    },
+    "./worklet": {
+      "types": "./dist/worklet/index.d.ts",
+      "import": "./dist/worklet.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist node_modules .turbo",
+    "dev": "bunx --bun tsup --watch",
+    "kernels:build": "bun scripts/build-kernels.ts",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "test": "bun test",
+    "worklet:build": "bun scripts/worklet.ts"
+  },
+  "dependencies": {
+    "@audio-ui/core": "^0.28.0",
+    "@audio/beat-detect": "1.1.0",
+    "@audio/biquad": "1.2.2",
+    "@audio/decode-aiff": "1.3.1",
+    "@audio/decode-caf": "1.4.2",
+    "@audio/decode-mp4": "1.3.1",
+    "@audio/dynamics-compand": "0.1.7",
+    "@audio/dynamics-compressor": "0.3.1",
+    "@audio/dynamics-deesser": "0.4.1",
+    "@audio/dynamics-expander": "0.2.2",
+    "@audio/dynamics-fet": "0.2.5",
+    "@audio/dynamics-limiter": "0.2.1",
+    "@audio/dynamics-opto": "0.2.5",
+    "@audio/dynamics-unlimit": "0.1.2",
+    "@audio/dynamics-varimu": "0.2.4",
+    "@audio/dynamics-vca": "0.2.5",
+    "@audio/effect-distortion": "1.1.5",
+    "@audio/encode": "1.11.0",
+    "@audio/filter-diode-ladder": "1.2.2",
+    "@audio/filter-korg35": "1.2.1",
+    "@audio/filter-moog-ladder": "1.2.0",
+    "@audio/filter-oberheim": "1.2.1",
+    "@audio/loudness-lufs": "1.2.0",
+    "@audio/loudness-truepeak": "1.1.7",
+    "@audio/measure-latency": "1.0.2",
+    "@audio/measure-response": "1.0.2",
+    "@audio/midi-parse": "1.0.3",
+    "@audio/midi-write": "1.0.3",
+    "@audio/mir-chroma": "1.1.3",
+    "@audio/mir-key": "1.0.2",
+    "@audio/musicxml": "0.1.0",
+    "@audio/note": "1.0.3",
+    "@audio/pitch-yin": "1.0.6",
+    "@audio/resample-sinc": "1.3.0",
+    "@audio/reverb-dattorro": "1.1.3",
+    "@audio/reverb-fdn": "1.1.3",
+    "@audio/reverb-freeverb": "1.0.5",
+    "@audio/reverb-schroeder": "1.1.3",
+    "@audio/reverb-spring": "1.1.3",
+    "@audio/synth-noise": "2.0.1",
+    "@audio/weighting-k": "1.2.1",
+    "fflate": "0.8.3"
+  },
+  "devDependencies": {
+    "@audio/decode-flac": "2.0.0",
+    "@audio/decode-mp3": "1.3.1",
+    "@audio/decode-wav": "2.0.0",
+    "@audio/dynamics-ducker": "0.1.9",
+    "@audio/dynamics-gate": "0.1.7",
+    "@audio/dynamics-transient-shaper": "0.1.6",
+    "@audio/effect-autowah": "1.1.5",
+    "@audio/effect-bitcrusher": "1.1.5",
+    "@audio/effect-chorus": "2.0.2",
+    "@audio/effect-exciter": "1.2.1",
+    "@audio/effect-freqshift": "1.1.6",
+    "@audio/effect-graindelay": "1.1.6",
+    "@audio/effect-lofi": "1.1.6",
+    "@audio/effect-multitap": "1.1.6",
+    "@audio/effect-noiseshaper": "1.1.5",
+    "@audio/effect-phaser": "1.1.6",
+    "@audio/effect-pingpong": "1.1.5",
+    "@audio/effect-ringmod": "1.1.5",
+    "@audio/effect-rotary": "0.1.2",
+    "@audio/effect-stutter": "1.1.6",
+    "@audio/effect-subbass": "1.2.0",
+    "@audio/effect-wah": "1.1.5",
+    "@audio/eq-crossover": "1.0.2",
+    "@audio/eq-tilt": "1.2.3",
+    "@audio/spatial-binaural": "0.1.1",
+    "@audio/spatial-microshift": "1.1.3",
+    "@types/bun": "1.4.2",
+    "tsup": "^8.5.0",
+    "typescript": "^7.0.2"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

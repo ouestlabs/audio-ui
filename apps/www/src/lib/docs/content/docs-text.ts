@@ -1,6 +1,7 @@
 import { expandDemoSounds } from "@/lib/docs/content/demo-sound-docs";
 import { expandDeviceControls } from "@/lib/docs/content/device-docs";
 import { expandDeviceUsage } from "@/lib/docs/content/device-usage";
+import { expandEntries } from "@/lib/docs/content/entries";
 import { expandIconCatalog } from "@/lib/docs/content/icon-docs";
 import { expandInstall } from "@/lib/docs/content/install-docs";
 import {
@@ -47,12 +48,14 @@ export async function processMdxForLLMs(content: string): Promise<string> {
   if (!content || typeof content !== "string") {
     return content || "";
   }
-  const expanded = expandDemoSounds(
-    expandIconCatalog(
-      expandDeviceUsage(
-        expandInstall(
-          expandDeviceControls(replaceFrontmatter(content))
-        ).replace(ELEMENTS_PREVIEW_REGEX, "")
+  const expanded = expandEntries(
+    expandDemoSounds(
+      expandIconCatalog(
+        expandDeviceUsage(
+          expandInstall(
+            expandDeviceControls(replaceFrontmatter(content))
+          ).replace(ELEMENTS_PREVIEW_REGEX, "")
+        )
       )
     )
   );

@@ -1,5 +1,6 @@
-import type { DeviceContext } from "@audio-ui/core/device";
-import { DEFAULT_TEMPO } from "@audio-ui/core/time";
+import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
+import { createWorkletStage } from "@audio-ui/engine/device";
+import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
 import {
   STUTTER_WORKLET,
   type StutterState,
@@ -8,39 +9,9 @@ import {
 
 const RAMP_SECONDS = 0.01;
 
-export interface StutterEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface StutterEngine extends EffectEngine<StutterState> {
   /** Resolves once the stutter is in the graph. Until then the sound passes clean. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: StutterState, context?: DeviceContext) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the stutter into a context once. `false` when the context cannot run worklets. */
-function loadStutter(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([STUTTER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -64,21 +35,24 @@ export function createStutterEngine(
   let tempo = context?.tempo ?? DEFAULT_TEMPO;
   const input = ctx.createGain();
   const output = ctx.createGain();
-  const processed = ctx.createGain();
-  const clean = ctx.createGain();
-  input.connect(clean).connect(output);
-  processed.connect(output);
-  processed.gain.value = 0;
-  clean.gain.value = 1;
-
-  let node: AudioWorkletNode | null = null;
   let latest = initial;
-  let disposed = false;
+  const stage = createWorkletStage(ctx, {
+    input,
+    make: () =>
+      new AudioWorkletNode(ctx, "audioui-stutter", {
+        outputChannelCount: [2],
+        parameterData: stutterSettings(latest, tempo),
+      }),
+    ramp: RAMP_SECONDS,
+    source: STUTTER_WORKLET,
+  });
+  stage.connect(output);
 
   const follow = (param: AudioParam, value: number) =>
     param.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
 
   const apply = (state: StutterState) => {
+    const { node } = stage;
     if (!node) {
       return;
     }
@@ -90,36 +64,20 @@ export function createStutterEngine(
     (node.parameters.get("slice") as AudioParam).value = settings.slice;
   };
 
-  const ready = loadStutter(ctx).then((ok) => {
-    if (!ok || disposed) {
-      return false;
-    }
-    node = new AudioWorkletNode(ctx, "audioui-stutter", {
-      outputChannelCount: [2],
-      parameterData: stutterSettings(latest, tempo),
-    });
-    input.connect(node).connect(processed);
-    follow(processed.gain, 1);
-    follow(clean.gain, 0);
-    return true;
-  });
-
   return {
     dispose: () => {
-      disposed = true;
-      for (const each of [input, processed, clean, output]) {
-        each.disconnect();
-      }
-      node?.disconnect();
+      stage.dispose();
+      input.disconnect();
+      output.disconnect();
     },
     input,
     output,
-    ready,
+    ready: stage.ready,
     update: (state, next) => {
       tempo = next?.tempo ?? tempo;
       // Turned on: catch a slice from now.
       if (state.enabled && !latest.enabled) {
-        node?.port.postMessage("trigger");
+        stage.node?.port.postMessage("trigger");
       }
       latest = state;
       apply(state);

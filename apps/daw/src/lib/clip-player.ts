@@ -14,7 +14,7 @@ import {
   type RecordingLoaderMessage,
   type RecordingLoaderReply,
   type RecordingStream,
-} from "@audio-ui/core/playback";
+} from "@audio-ui/engine/playback";
 
 /**
  * A recording kept in a file of the origin private file system and streamed

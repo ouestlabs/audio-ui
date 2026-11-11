@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   cutoffHertz,
   releaseSeconds,
@@ -249,14 +249,12 @@ const pitchOf = (frequency: number) => 69 + 12 * Math.log2(frequency / 440);
 const rate = (semitones: number) => 2 ** (semitones / 12);
 
 export interface SamplerEngine
-  extends InstrumentBinding<SamplerState, SamplerNote> {
+  extends InstrumentEngine<SamplerState, SamplerNote> {
   /**
    * Plays a file of your own in place of the sample the state names, until
    * the state names another; `null` goes back to the state's.
    */
   load: (buffer: AudioBuffer | null) => void;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
   /** Resolves once the state's sample is rendered: a note before plays nothing. */
   readonly ready: Promise<boolean>;
 }

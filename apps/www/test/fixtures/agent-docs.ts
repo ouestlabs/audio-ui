@@ -30,7 +30,7 @@ export const PAGES = [
     data: { description: "What makes the sound.", title: "Overview" },
     path: "engine/index.mdx",
     slugs: ["engine"],
-    url: "/docs/engine",
+    url: "/docs/guides",
   },
   {
     data: {
@@ -39,7 +39,7 @@ export const PAGES = [
     },
     path: "engine/clock-and-time.mdx",
     slugs: ["engine", "clock-and-time"],
-    url: "/docs/engine/clock-and-time",
+    url: "/docs/guides/clock-and-time",
   },
 ];
 
@@ -48,12 +48,12 @@ const PAGE_TREE = {
   children: [
     {
       children: [
-        { name: "Overview", type: "page", url: "/docs/engine" },
+        { name: "Overview", type: "page", url: "/docs/guides" },
         { name: "Time", type: "separator" },
         {
           name: "Clock and time",
           type: "page",
-          url: "/docs/engine/clock-and-time",
+          url: "/docs/guides/clock-and-time",
         },
       ],
       name: "Audio engine",

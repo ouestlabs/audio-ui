@@ -1,4 +1,4 @@
-import type { Tempo } from "@audio-ui/core/time";
+import type { Tempo } from "@audio-ui/engine/time";
 import {
   triggerHihat,
   triggerKick,
@@ -274,7 +274,7 @@ function drawDrums(
 
 /** What the drums, the bass, the keys and the line play, over two bars. */
 /** A note of the groove, as a MIDI clip holds it: its pitch, and its start and length in beats, swing included. */
-export interface GrooveNote {
+interface GrooveNote {
   length: number;
   pitch: number;
   start: number;
@@ -291,7 +291,7 @@ const KEY_STEPS = [5.5, 9.5];
  * The groove's bass, keys and plucked line as notes, for MIDI tracks to play:
  * the same notes, on the same steps and with the same swing as the groove.
  */
-export const GROOVE_SCORE: Record<"bass" | "keys" | "pluck", GrooveNote[]> = {
+const _GROOVE_SCORE: Record<"bass" | "keys" | "pluck", GrooveNote[]> = {
   bass: BASS.map(([step, steps, bar]) => ({
     length: steps / 4,
     pitch: pitchOf(BASS_ROOTS_HZ[bar] ?? 55),
@@ -355,7 +355,7 @@ const GROOVE_PARTS = {
 };
 
 /** One of the groove's parts on its own: its drums, its bass, its keys or its plucked line. */
-export type GroovePart = keyof typeof GROOVE_PARTS;
+type GroovePart = keyof typeof GROOVE_PARTS;
 
 function drawGroove(ctx: BaseAudioContext, out: AudioNode) {
   const mix = ctx.createGain();
@@ -405,7 +405,7 @@ async function drawLoop(
  * Drawn once per sample rate by the drum voices of the library, then looped as
  * a buffer.
  */
-export function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
+function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
   const cached = rendered.get(sampleRate);
   if (cached) {
     return cached;
@@ -423,7 +423,7 @@ const parts = new Map<string, Promise<AudioBuffer>>();
  * `renderDemoLoop` since both are drawn from the same notes and hits. The four
  * parts played together are the groove.
  */
-export function renderGroovePart(
+function _renderGroovePart(
   part: GroovePart,
   sampleRate: number
 ): Promise<AudioBuffer> {
@@ -449,7 +449,7 @@ const beats = new Map<number, Promise<AudioBuffer>>();
  * track of an arrangement plays, in step with `renderDemoLoop` since both are
  * drawn from the same hits.
  */
-export function renderBeatLoop(sampleRate: number): Promise<AudioBuffer> {
+function _renderBeatLoop(sampleRate: number): Promise<AudioBuffer> {
   const cached = beats.get(sampleRate);
   if (cached) {
     return cached;
@@ -470,7 +470,7 @@ const keyed = new Map<number, Promise<AudioBuffer>>();
  * The kick of the groove on its own: the key a sidechain listens to, in step
  * with `renderDemoLoop` since both are drawn from the same beats.
  */
-export function renderKickLoop(sampleRate: number): Promise<AudioBuffer> {
+function renderKickLoop(sampleRate: number): Promise<AudioBuffer> {
   const cached = keyed.get(sampleRate);
   if (cached) {
     return cached;
@@ -491,7 +491,7 @@ const CHORD_LEVEL = 0.12;
  * cycles of the loop, and the loop kept is the second one drawn, once the
  * filter has settled.
  */
-export function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
+function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
   const cached = held.get(sampleRate);
   if (cached) {
     return cached;
@@ -527,58 +527,7 @@ export function renderHeldChord(sampleRate: number): Promise<AudioBuffer> {
   return buffer;
 }
 
-/* Two signals made of noise for the plots, then the catalogue of the sounds a preview plays. */
-
-const NOISE_SECONDS = 4;
-
-/** Pink noise: equal energy per octave, so a flat equalizer looks flat. Paul Kellet's filter. */
-export function pinkNoise(
-  ctx: BaseAudioContext,
-  seconds = NOISE_SECONDS
-): AudioBuffer {
-  const buffer = ctx.createBuffer(1, ctx.sampleRate * seconds, ctx.sampleRate);
-  const data = buffer.getChannelData(0);
-  let [b0, b1, b2, b3, b4, b5, b6] = [0, 0, 0, 0, 0, 0, 0];
-  for (let index = 0; index < data.length; index += 1) {
-    const white = Math.random() * 2 - 1;
-    b0 = 0.998_86 * b0 + white * 0.055_517_9;
-    b1 = 0.993_32 * b1 + white * 0.075_075_9;
-    b2 = 0.969 * b2 + white * 0.153_852;
-    b3 = 0.8665 * b3 + white * 0.310_485_6;
-    b4 = 0.55 * b4 + white * 0.532_952_2;
-    b5 = -0.7616 * b5 - white * 0.016_898;
-    data[index] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + white * 0.5362) * 0.11;
-    b6 = white * 0.115_926;
-  }
-  return buffer;
-}
-
-const PULSE_LOOP_SECONDS = 2;
-const PULSES_PER_LOOP = 8;
-const PULSE_DECAY_SECONDS = 0.18;
-/** Every other pulse is quieter, so a level that follows them moves along a curve. */
-const QUIET_PULSE = 0.35;
-
-/** Noise bursts that start loud and fade, eight to a loop, every other one quieter. `level` scales the loudest. */
-export function pulses(ctx: BaseAudioContext, level = 1): AudioBuffer {
-  const buffer = ctx.createBuffer(
-    1,
-    ctx.sampleRate * PULSE_LOOP_SECONDS,
-    ctx.sampleRate
-  );
-  const data = buffer.getChannelData(0);
-  const pulseLength = data.length / PULSES_PER_LOOP;
-  for (let index = 0; index < data.length; index += 1) {
-    const seconds = (index % pulseLength) / ctx.sampleRate;
-    const accent = Math.floor(index / pulseLength) % 2 === 0 ? 1 : QUIET_PULSE;
-    data[index] =
-      (Math.random() * 2 - 1) *
-      accent *
-      level *
-      Math.exp(-seconds / PULSE_DECAY_SECONDS);
-  }
-  return buffer;
-}
+/* The catalogue of the sounds a preview plays. */
 
 /** A sound a preview can play: what it is called, what it is for, and how it is drawn for a sample rate. */
 export interface DemoSource {

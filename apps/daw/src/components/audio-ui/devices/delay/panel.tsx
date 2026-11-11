@@ -1,24 +1,7 @@
 "use client";
 
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Plot,
-  PlotCursor,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotLine,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -32,6 +15,23 @@ import {
   GRAIN_PARAMETERS,
   nearestDivision,
 } from "@/components/audio-ui/devices/delay/device";
+import {
+  Plot,
+  PlotCursor,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotLine,
+} from "@/components/audio-ui/plot";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */
 const WINDOW_MS = 3000;

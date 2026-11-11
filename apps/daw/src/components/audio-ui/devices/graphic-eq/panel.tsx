@@ -1,17 +1,7 @@
 "use client";
 
-import { formatDb, formatHz } from "@audio-ui/core/analysis";
+import { formatDb, formatHz } from "@audio-ui/engine/analysis";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import { Fader } from "@/components/audio-ui/fader";
-import {
-  Plot,
-  PlotArea,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -23,6 +13,16 @@ import {
   graphicEqCurve,
   graphicEqDevice,
 } from "@/components/audio-ui/devices/graphic-eq/device";
+import { Fader } from "@/components/audio-ui/fader";
+import {
+  Plot,
+  PlotArea,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

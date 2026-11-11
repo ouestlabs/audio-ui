@@ -20,6 +20,7 @@ export interface BarLayout {
   width: number;
 }
 
+/** What `barLayout` lays bars out for: the canvas's size and pixel ratio, the bars' width, gap and shortest height, and the variant. */
 export interface BarLayoutOptions {
   /** Space between bars, in CSS pixels. */
   barGap: number;
@@ -36,6 +37,7 @@ export interface BarLayoutOptions {
   width: number;
 }
 
+/** A bar's rectangle on the bitmap, in whole device pixels. */
 export interface BarRect {
   height: number;
   width: number;

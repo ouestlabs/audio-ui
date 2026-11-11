@@ -1,3 +1,4 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
 import {
   lampCycle,
   speedHertz,
@@ -13,14 +14,7 @@ const STAGE_Q = 0.5;
 const SMOOTHING = 0.03;
 const HARMONICS = 48;
 
-export interface VibeEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: VibeState) => void;
-}
+export type VibeEngine = EffectEngine<VibeState>;
 
 /** The lamp's light as an oscillator's wave, from -1 to 1, by its Fourier series. */
 function lampWave(ctx: BaseAudioContext) {

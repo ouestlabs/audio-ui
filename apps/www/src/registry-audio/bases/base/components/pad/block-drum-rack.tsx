@@ -160,14 +160,11 @@ export default function BlockDrumRack() {
 
   const strike = useCallback(
     (id: string, details: PadPrimitive.Root.OnEventDetails) => {
-      const ctx = webAudio.getContext();
+      const ctx = webAudio.resume();
       const index = kitRef.current.findIndex((item) => item.id === id);
       const sound = kitRef.current[index];
       if (!(ctx && master && sound)) {
         return;
-      }
-      if (ctx.state === "suspended") {
-        ctx.resume();
       }
       setSelected(index);
       // Each hit goes through a gain of its own: how hard it was struck, at the pad's level.
@@ -186,7 +183,7 @@ export default function BlockDrumRack() {
   // Drum hits ring on after the pad is released: only a choke stops them.
   const choke = useCallback(
     (id: string, details: PadPrimitive.Root.OffEventDetails) => {
-      const ctx = webAudio.getContext();
+      const ctx = webAudio.resume();
       if (!ctx || details.reason !== "choke") {
         return;
       }

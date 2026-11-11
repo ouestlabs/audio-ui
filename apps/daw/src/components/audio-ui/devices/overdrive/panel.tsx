@@ -1,19 +1,8 @@
 "use client";
 
-import { formatDb, formatHz } from "@audio-ui/core/analysis";
+import { formatDb, formatHz } from "@audio-ui/engine/analysis";
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotArea,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotTraceArea,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -24,6 +13,17 @@ import {
   overdriveBand,
   overdriveDevice,
 } from "@/components/audio-ui/devices/overdrive/device";
+import {
+  Plot,
+  PlotArea,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

@@ -15,7 +15,7 @@
 
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import type { WarpMode } from "@audio-ui/core/playback";
+import type { WarpMode } from "@audio-ui/engine/playback";
 import {
   type Browser,
   type BrowserContext,

@@ -54,10 +54,7 @@ export default function SpectrumAnalyzerDemo() {
     if (!playing) {
       return;
     }
-    const ctx = webAudio.getContext();
-    if (ctx?.state === "suspended") {
-      ctx.resume();
-    }
+    webAudio.resume();
     for (const pitch of CHORD) {
       triggerNote(pitch, ENVELOPE, 0.6);
     }
@@ -71,10 +68,7 @@ export default function SpectrumAnalyzerDemo() {
   // A MIDI keyboard, connected from the bar, plays the same voices.
   const noteOn = useCallback(
     (pitch: number, velocity: number) => {
-      const ctx = webAudio.getContext();
-      if (ctx?.state === "suspended") {
-        ctx.resume();
-      }
+      webAudio.resume();
       triggerNote(pitch, ENVELOPE, velocity);
     },
     [triggerNote]

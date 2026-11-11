@@ -1,5 +1,6 @@
 "use client";
 
+import { pitchClassName } from "@audio-ui/core";
 import {
   findNotes,
   type Note,
@@ -9,8 +10,16 @@ import {
   selectionSpan,
   toggleMuted,
 } from "@audio-ui/core/piano-roll";
-import { pitchClassName, type Scale } from "@audio-ui/core/pitch";
-import type { Tempo } from "@audio-ui/core/time";
+import {
+  downloadMidiFile,
+  downloadMusicXmlFile,
+  MIDI_FILE_ACCEPT,
+  MUSICXML_FILE_ACCEPT,
+  readMidiFile,
+  readMusicXmlFile,
+} from "@audio-ui/engine/files";
+import { rollScale, type Scale } from "@audio-ui/engine/pitch";
+import type { Tempo } from "@audio-ui/engine/time";
 import {
   type ChangeEvent,
   type DragEvent,
@@ -85,16 +94,6 @@ import {
 import { useSynthVoices } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 import type { TransportRegion } from "@/registry-audio/bases/base/hooks/use-transport-clock";
 import { useUndoHistory } from "@/registry-audio/bases/base/hooks/use-undo-history";
-import {
-  downloadMidiFile,
-  MIDI_FILE_ACCEPT,
-  readMidiFile,
-} from "@/registry-audio/bases/base/lib/midi-file";
-import {
-  downloadMusicXmlFile,
-  MUSICXML_FILE_ACCEPT,
-  readMusicXmlFile,
-} from "@/registry-audio/bases/base/lib/musicxml-file";
 import {
   applyNoteEdit,
   canApplyNoteEdit,
@@ -315,6 +314,7 @@ export default function BlockPianoRoll() {
     root: 0,
   });
   const scale = scaleOn ? scaleChoice : null;
+  const rolled = useMemo(() => (scale ? rollScale(scale) : null), [scale]);
   const [selection, setSelection] = useState<readonly NoteId[]>([]);
   const viewportRef = useRef<HTMLDivElement>(null);
   // Opens on middle C, halfway down the range.
@@ -379,10 +379,7 @@ export default function BlockPianoRoll() {
   // A MIDI keyboard plays the roll's voices and lights its keys, once the page's MIDI input is connected.
   const midiNoteOn = useCallback(
     (pitch: number, velocity: number) => {
-      const ctx = webAudio.getContext();
-      if (ctx?.state === "suspended") {
-        ctx.resume();
-      }
+      webAudio.resume();
       triggerNote(pitch, DEFAULT_NOTE_ENVELOPE, velocity);
     },
     [triggerNote]
@@ -833,7 +830,7 @@ export default function BlockPianoRoll() {
           onSelectionChange={setSelection}
           onValueChange={history.change}
           onValueCommitted={history.commit}
-          scale={scale}
+          scale={rolled}
           selection={selection}
           value={notes}
         >

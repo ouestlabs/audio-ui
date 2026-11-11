@@ -1,9 +1,8 @@
 import { defineConfig } from "tsup";
 
-// Two kinds of entry, each its own `@audio-ui/core/<name>` subpath that ships
-// only that module:
-// - primitives/<name>: the logic of a UI primitive (a knob, a timeline...).
-// - audio/<name>: audio and music logic with no UI in it (pitch, MIDI...).
+// Each primitive is its own `@audio-ui/core/<name>` subpath that ships only
+// the logic of that UI primitive (a knob, a timeline...). The audio logic is
+// `@audio-ui/engine`'s.
 const primitives = [
   "envelope",
   "fader",
@@ -18,7 +17,6 @@ const primitives = [
   "waveform",
   "xypad",
 ];
-const audio = ["analysis", "device", "midi", "pitch", "playback", "time"];
 
 // Declarations are emitted by `tsc -p tsconfig.build.json` (see build:pkg):
 // tsup's dts step injects the deprecated `baseUrl` option, which TypeScript 6
@@ -30,9 +28,6 @@ export default defineConfig({
     internal: "src/internal.ts",
     ...Object.fromEntries(
       primitives.map((name) => [name, `src/primitives/${name}/index.ts`])
-    ),
-    ...Object.fromEntries(
-      audio.map((name) => [name, `src/audio/${name}/index.ts`])
     ),
   },
   format: ["esm"],

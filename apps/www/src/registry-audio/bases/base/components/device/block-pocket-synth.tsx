@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useState } from "react";
 import {
   type PocketSynthNote,
   type PocketSynthState,
   pocketSynthDevice,
 } from "@/registry-audio/bases/base/devices/pocket-synth/device";
-import {
-  createPocketSynthEngine,
-  type PocketSynthEngine,
-} from "@/registry-audio/bases/base/devices/pocket-synth/engine";
+import { createPocketSynthEngine } from "@/registry-audio/bases/base/devices/pocket-synth/engine";
 import { PocketSynthPanel } from "@/registry-audio/bases/base/devices/pocket-synth/panel";
+import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 /**
  * A synth you can plug in: its state, a panel that draws and plays it and an
@@ -24,28 +21,11 @@ export default function BlockPocketSynth() {
     pocketSynthDevice.defaults()
   );
   const master = useMasterBus(1);
-  const [engine, setEngine] = useState<PocketSynthEngine | null>(null);
-  const stateRef = useRef(state);
-  stateRef.current = state;
-
-  useEffect(() => {
-    const ctx = webAudio.getContext();
-    if (!(ctx && master)) {
-      return;
-    }
-    const synth = createPocketSynthEngine(ctx, stateRef.current);
-    synth.output.connect(master);
-    setEngine(synth);
-    return () => {
-      synth.dispose();
-      setEngine(null);
-    };
-  }, [master]);
-
-  // The engine follows the state, whoever changed it: a button or a call.
-  useEffect(() => {
-    engine?.update(state);
-  }, [engine, state]);
+  const [engine] = useDeviceEngines({
+    create: createPocketSynthEngine,
+    destination: master,
+    state,
+  });
 
   const play = useCallback(
     (note: PocketSynthNote) => engine?.noteOn(note),

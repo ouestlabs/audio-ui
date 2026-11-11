@@ -1,0 +1,38 @@
+---
+title: Clock and time
+description: "A transport clock that schedules notes ahead on the audio clock, with a loop, seeking and tempo changes, and the musical time it counts in."
+---
+
+## The transport clock
+
+A timer in JavaScript drifts and stalls when the page is busy or in the background; the audio clock does not. `useTransportClock` looks a little ahead on the audio clock and calls you back with the exact audio time of each step, so you schedule the sound at that time and it plays on the beat whatever the page is doing.
+
+Usage and API: [`useTransportClock`](/docs/hooks/use-transport-clock).
+
+## Musical time
+
+`@audio-ui/engine/time` turns seconds into bars and beats and back. A tempo is `{ bpm, beatsPerBar, beatUnit }`: `bpm` counts quarter notes, and `beatsPerBar` and `beatUnit` are the time signature, 6/8 being `{ beatsPerBar: 6, beatUnit: 8 }`.
+
+```tsx
+import {
+  barsBeatsAt,
+  describeBarsBeats,
+  secondsPerBar,
+  secondsPerBeat,
+} from "@audio-ui/engine/time";
+
+const tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 120 };
+secondsPerBeat(tempo); // 0.5
+secondsPerBar(tempo); // 2
+barsBeatsAt(5, tempo); // { bar: 3, beat: 3, sixteenth: 1 }
+describeBarsBeats(5, tempo); // "Bar 3, beat 3", for aria-valuetext
+```
+
+- `secondsPerQuarter`, `secondsPerBeat`, `secondsPerBar`: How long a quarter note, a beat and a bar last at a tempo.
+- `barsBeatsAt`, `describeBarsBeats`: Where a time falls, in bars, beats and sixteenths, as numbers or as words.
+- `barsOf`, `barsBeatsWith`: The same along a song whose time signature changes.
+- `gridInterval`, `gridLabel`, `GRID_DIVISIONS`: The grid a timeline snaps to at a zoom: bars, beats, triplets, an adaptive grid.
+- `warpedTime`, `warpMarkers`: Time stretched by warp markers, as a clip that follows the tempo.
+- `syncedSeconds`, `SYNCED_DIVISIONS`: The length of a note value, such as `1/8` or `1/4T`, for a delay or an LFO in sync.
+
+The [Transport](/docs/components/base/transport) and the [Timeline](/docs/components/base/arrangement) count in this time, so a bar means the same everywhere.

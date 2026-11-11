@@ -1,0 +1,34 @@
+---
+title: useMicrophone
+description: "The microphone as an AnalyserNode on the shared AudioContext: raw signal, never connected to the speakers, released on stop and on unmount. The session's switch, usePageMicrophone, lets a button turn it on for a demo"
+---
+
+<Entry name="use-microphone" />
+
+## Usage
+
+`useMicrophone` taps the microphone into an `AnalyserNode` on the page's audio context. The signal is raw: echo cancellation, noise suppression and automatic gain are off, since they flatten a tuner or a meter. The analyser is never connected to the speakers.
+
+```tsx
+import { useMicrophone } from "@/hooks/use-microphone";
+
+const mic = useMicrophone();
+// Memoized: a new array restarts the sampling.
+const analysers = useMemo(() => (mic.analyser ? [mic.analyser] : []), [mic.analyser]);
+const levels = useAudioLevels(analysers);
+
+<button onClick={mic.isListening ? mic.stop : mic.start} type="button">
+  {mic.isListening ? "Stop" : "Listen"}
+</button>
+<Meter aria-label="Microphone" source={levels} />
+```
+
+Give the analyser to anything that reads one: [levels and spectra](/docs/guides/analysis), or the pitch a [Tuner](/docs/components/base/tuner) shows.
+
+<TypeTable title="Returns">
+<TypeRow name={"start"} type={"() => Promise<void>"}>Asks for the microphone and listens. Call it from a click.</TypeRow>
+<TypeRow name={"stop"} type={"() => void"}>Releases the microphone. Unmounting does too.</TypeRow>
+<TypeRow name={"analyser"} type={"AnalyserNode | null"}>The signal while it listens, `null` otherwise.</TypeRow>
+<TypeRow name={"isListening"} type={"boolean"}>Whether it listens.</TypeRow>
+<TypeRow name={"error"} type={"string | null"}>Why it could not listen, such as a refused permission.</TypeRow>
+</TypeTable>

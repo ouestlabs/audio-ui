@@ -4,7 +4,7 @@ import {
   secondsPerBar,
   secondsPerBeat,
   secondsPerQuarter,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";

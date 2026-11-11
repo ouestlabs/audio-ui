@@ -1,0 +1,20 @@
+---
+title: oversampling
+description: "What a waveshaper that oversamples costs in time, and a delay that holds a dry path back by it, so a distortion mixed with its dry sound does not comb. Measured in Chrome."
+---
+
+<Entry name="oversampling" />
+
+## Usage
+
+Waveshaping without aliasing, and the latency it costs: a `WaveShaperNode` oversampled 2x or 4x delays the sound a little, so a dry path mixed beside it has to wait as long.
+
+```ts
+import { createOversamplingDelay, oversamplingSeconds } from "@/lib/oversampling";
+
+shaper.oversample = "4x";
+const dryDelay = createOversamplingDelay(ctx, "4x"); // the dry path waits as long as the shaper
+const latency = oversamplingSeconds("4x", ctx.sampleRate); // what a device declares
+```
+
+The saturator, overdrive and wave shaper use it.

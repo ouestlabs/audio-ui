@@ -12,8 +12,10 @@ export const STATE_ATTRIBUTES_MAPPING = {
   value: () => null,
 };
 
+/** One of the pad's two axes. */
 export type Axis = "x" | "y";
 
+/** Where `value` sits between `min` and `max`, from 0 to 1. */
 export function toPercent(value: number, min: number, max: number): number {
   return clamp((value - min) / (max - min || 1), 0, 1);
 }

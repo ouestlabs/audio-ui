@@ -38,6 +38,7 @@ const DEFAULT_VALUE: Breakpoint[] = [
 
 export type EnvelopeIndexed<T> = T & { index: number };
 
+/** What `onValueChange` receives with each change: the `index` of the point or segment, the reason, the event behind it, and `cancel()` to refuse the change. */
 export type EnvelopeChangeEventDetails = EnvelopeIndexed<
   | ChangeEventDetails<"drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
@@ -45,7 +46,9 @@ export type EnvelopeChangeEventDetails = EnvelopeIndexed<
   | ChangeEventDetails<"remove", MouseEvent | KeyboardEvent>
   | ChangeEventDetails<"curve", PointerEvent | KeyboardEvent | MouseEvent>
 >;
+/** Why the points changed: `"drag"`, `"keyboard"`, `"add"`, `"remove"` or `"curve"` (a bend). */
 export type EnvelopeChangeEventReason = EnvelopeChangeEventDetails["reason"];
+/** What `onValueCommitted` receives once a gesture ends: the `index` of the point or segment, the reason and the event behind it. */
 export type EnvelopeCommitEventDetails = EnvelopeIndexed<
   | CommitEventDetails<"drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
@@ -53,8 +56,10 @@ export type EnvelopeCommitEventDetails = EnvelopeIndexed<
   | CommitEventDetails<"remove", MouseEvent | KeyboardEvent>
   | CommitEventDetails<"curve", PointerEvent | KeyboardEvent | MouseEvent>
 >;
+/** Why the points were committed: the same reasons as a change. */
 export type EnvelopeCommitEventReason = EnvelopeCommitEventDetails["reason"];
 
+/** The options of `createEnvelopeController`: the points, held or controlled, how few and how many there may be, the grid they snap to, the keyboard step, the formatting and the callbacks. */
 export interface EnvelopeOptions {
   /** Uncontrolled starting points. Defaults to an ADSR-like shape. */
   defaultValue?: Breakpoint[];
@@ -117,6 +122,7 @@ export interface EnvelopeSnapshot {
   value: Breakpoint[];
 }
 
+/** What `createEnvelopeController` returns: the snapshot to draw from, and a call for each gesture and key that moves, adds, removes, bends or straightens. */
 export interface EnvelopeController {
   /** Adds a point at `at` (normalized 0…1), snapped unless Cmd/Ctrl is held; blocked at `maxPoints`. Returns the new index, or null. */
   addPointAt: (

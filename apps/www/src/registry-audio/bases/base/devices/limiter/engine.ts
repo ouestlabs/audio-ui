@@ -1,4 +1,5 @@
-import type { DeviceReadings } from "@audio-ui/core/device";
+import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   LIMITER_WORKLET,
   type LimiterState,
@@ -7,43 +8,13 @@ import {
 
 const RAMP_SECONDS = 0.01;
 
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the limiter into a context once. `false` when the context cannot run worklets. */
-function loadLimiter(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([LIMITER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
-}
-
-export interface LimiterEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface LimiterEngine extends EffectEngine<LimiterState> {
   /** What it is taking off right now, in dB. */
   readings: () => DeviceReadings;
   /** Resolves once the limiter is in the graph. Until then the signal passes at the input gain. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   /** How many dB the limiter is taking off right now, 0 or negative. Read it per frame. */
   readonly reduction: number;
-  update: (state: LimiterState) => void;
 }
 
 /**
@@ -92,7 +63,7 @@ export function createLimiterEngine(
     }
   };
 
-  const ready = loadLimiter(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, LIMITER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

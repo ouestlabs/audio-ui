@@ -1,0 +1,32 @@
+---
+title: usePitch
+description: "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading"
+---
+
+<Entry name="use-pitch" />
+
+## Usage
+
+The pitch of a signal, live, from an `AnalyserNode`: the nearest note, how many cents off it is, and how clear the sound is. YIN from `@audio/pitch-yin`, run about twenty times a second, the median of the last few readings, and a gate on quiet so silence reads nothing.
+
+```tsx
+import { useMicrophone } from "@/hooks/use-microphone";
+import { usePitch } from "@/hooks/use-pitch";
+
+const microphone = useMicrophone();
+const pitch = usePitch(microphone.analyser, { reference: 440 });
+// pitch.getSnapshot(): { name: "A", octave: 4, cents: -3, frequency, pitch, confidence } | null
+
+<TunerDisplay source={pitch} />;
+```
+
+It returns a live source, so a reading costs no React render: subscribe in the leaf that shows it. The last note holds for `holdMs` after the sound stops, so a string's decay does not flicker. The [Tuner](/docs/components/base/tuner) is built on it.
+
+<TypeTable title="Options">
+<TypeRow name={"reference"} type={"number"} default={"440"}>The frequency of A4.</TypeRow>
+<TypeRow name={"minHz, maxHz"} type={"number"} default={"40, 2000"}>The range looked in. Lower costs more.</TypeRow>
+<TypeRow name={"minLevel"} type={"number"} default={"0.01"}>The RMS level under which nothing is detected.</TypeRow>
+<TypeRow name={"median"} type={"number"} default={"5"}>How many readings the result is the median of.</TypeRow>
+<TypeRow name={"holdMs"} type={"number"} default={"600"}>How long the last note stays after the sound stops.</TypeRow>
+<TypeRow name={"threshold"} type={"number"} default={"0.1"}>YIN's threshold: lower is stricter.</TypeRow>
+</TypeTable>

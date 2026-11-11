@@ -18,10 +18,8 @@
       "@/*": ["./src/*"],
       "@audio-ui/core": ["../../packages/core/src/index.ts"],
       "@audio-ui/core/internal": ["../../packages/core/src/internal.ts"],
-      "@audio-ui/core/*": [
-        "../../packages/core/src/primitives/*/index.ts",
-        "../../packages/core/src/audio/*/index.ts"
-      ],
+      "@audio-ui/core/*": ["../../packages/core/src/primitives/*/index.ts"],
+      "@audio-ui/engine/*": ["../../packages/engine/src/*/index.ts"],
       "@audio-ui/elements": ["../../packages/elements/src/index.ts"],
       "@audio-ui/elements/*": ["../../packages/elements/src/*/index.ts"],
       "@audio-ui/icons": ["../../packages/icons/src/core/index.ts"],

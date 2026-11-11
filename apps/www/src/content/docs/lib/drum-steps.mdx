@@ -1,0 +1,19 @@
+---
+title: drum-steps
+description: "A drum clip's notes as steps: a row per pad, a step per stretch of the grid, with each step's velocity, chance and shift, and the edits a step sequencer makes on the notes (switch a step, set its level, fill a row every n steps)."
+---
+
+<Entry name="drum-steps" />
+
+## Usage
+
+A drum clip's notes as steps, a row per pad, as a step sequencer shows them, and the edits a step sequencer makes, back onto the notes.
+
+```ts
+import { stepsOf, withStep } from "@/lib/drum-steps";
+
+const steps = stepsOf(notes, grid); // each step's velocity, chance, shift and repeats, by row
+const next = withStep(notes, grid, { row: 0, step: 4 }, true); // a hit on the kick, fifth step
+```
+
+`withStepLevel` sets a step's velocity or chance, `withStepRepeats` rolls it, and `filledEvery` fills a row every 2, 4 or 8 steps. The notes stay the clip's own: the [drum step editor](/docs/components/base/arrangement#drums) draws them as steps and edits them through these.

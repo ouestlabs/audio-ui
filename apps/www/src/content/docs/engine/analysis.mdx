@@ -1,65 +1,68 @@
 ---
-title: Analysis
-description: "Live levels and spectra from an analyser, in the shape a meter or a plot reads, and the analysis functions behind them."
+title: analysis
+description: "Reading a signal, from @audio-ui/engine: levels in dB, a spectrum on a log axis and its held peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients and auto-warp. Plain functions, for the main thread, a worker or a worklet."
 ---
 
-Tap a signal with an `AnalyserNode`, a tap that plays nothing, and these hooks turn it into a live [source](/docs/engine#your-own-engine) a component repaints from, with no React render per frame.
+<Module from="@audio-ui/engine/analysis" />
+
+## Usage
+
+The functions take samples, bins or settings and return numbers, with no Web Audio node in them, so they run wherever the data is.
 
 ## Levels
 
-```bash
-npx shadcn@latest add @audio-ui/use-audio-levels
+```ts
+import { dbToGain, formatDb, gainToDb, peakDb, rmsDb } from "@audio-ui/engine/analysis";
+
+rmsDb(samples); // how loud they sound: -3 dB for a sine at full scale
+peakDb(samples); // how near they come to clipping: 0 dB for the same sine
+dbToGain(-6.02); // 0.5
+formatDb(-6.5); // "-6.5 dB"
 ```
 
-```tsx
-import { useAudioLevels } from "@/hooks/use-audio-levels";
-
-// One analyser per channel, made once: a new array restarts the sampling.
-const analysers = useMemo(() => {
-  const analyser = ctx.createAnalyser();
-  output.connect(analyser);
-  return [analyser];
-}, [ctx, output]);
-
-const levels = useAudioLevels(analysers);
-
-<Meter aria-label="Output" source={levels} />;
-```
-
-`useAudioLevels(analysers)` gives `{ levels, peaks }`, one entry per analyser, in dB: the RMS level, how loud the signal sounds, which falls back smoothly as a needle would, and the peak, its loudest sample, which holds, then falls, so a meter's mark shows how near the signal comes to clipping. `rmsDb` and `peakDb` from `@audio-ui/core/analysis` are the two readings. A `ChannelSplitterNode` splits a stereo signal into one analyser per side. While the signal is silent, nothing is published. A [Meter](/docs/components/base/meter) paints it, and the [Mixer](/docs/components/base/mixer) gives one to each channel.
+The registry's [`useAudioLevels`](/docs/hooks/use-audio-levels) reads an analyser through them into what a [Meter](/docs/components/base/meter) draws.
 
 ## Spectrum
 
-```bash
-npx shadcn@latest add @audio-ui/use-spectrum
+`logSpectrum(bins, sampleRate, out, { minHz, maxHz })` resamples an analyser's bins (`getFloatFrequencyData`) onto a log frequency axis, written into `out`, as many points as it holds. `holdPeaks(spectrum, peaks, holding, elapsed, { hold, fall })` keeps each point's loudest level for `hold` seconds, then lets it fall at `fall` dB a second, one frame at a time. `spectrumBands` reduces a spectrum to a few levels from 0 to 1, for bars. [`useSpectrum`](/docs/hooks/use-spectrum) runs them on every frame.
+
+## Curves
+
+A filter, an equalizer and a compressor each have a curve a panel draws. Each function returns the curve as a function, to be sampled at as many points as the plot has:
+
+```ts
+import { biquadResponse, compressorOutput, eqResponse } from "@audio-ui/engine/analysis";
+
+const cut = biquadResponse({ type: "highcut", frequency: 1000 });
+cut(1000); // -3.01 dB at the cutoff
+
+const eq = eqResponse([
+  { type: "peak", frequency: 1000, gainDb: 6, q: 1 },
+  { type: "highshelf", frequency: 8000, gainDb: -3 },
+]);
+eq(1000); // 6 dB: the bands add up at each frequency
+
+const compressor = compressorOutput({ thresholdDb: -20, ratio: 4 });
+compressor(-8); // -17: 12 dB over the threshold comes out 3 dB over
 ```
 
-```tsx
-import { useSpectrum, useSpectrumPeaks } from "@/hooks/use-spectrum";
+The band types are the ones an equalizer shows (`lowcut`, `highcut`, `lowshelf`, `highshelf`, `peak`, `notch`, `bandpass`). `WEB_AUDIO_FILTER_TYPES` maps each to the `BiquadFilterNode` type that sounds as drawn, and `toWebAudioQ` converts a band's Q for the node. `bandHandleDb` and `bandGainForHandle` place a band's handle on the summed curve and back, so a dragged handle stays under the pointer.
 
-const analyser = ctx.createAnalyser();
-analyser.fftSize = 8192; // finer low end
-output.connect(analyser);
+## Waveforms
 
-const spectrum = useSpectrum(analyser, { minHz: 20, maxHz: 20000 });
-const peaks = useSpectrumPeaks(spectrum, { hold: 1, fall: 24 });
+`computePeaks(channels, buckets)` reduces a recording to the lowest and highest sample of each slice, across its channels, which is what a [Waveform](/docs/components/base/waveform) draws; `normalizePeaks` scales them to full height.
 
-<SpectrumAnalyzer aria-label="Spectrum" peaks={peaks} source={spectrum} />;
-```
+## Tempo and transients
 
-`useSpectrum` gives dB per point along a logarithmic frequency axis, 160 points from 20 Hz to 20 kHz unless told otherwise. Draw it with the [Spectrum analyzer](/docs/components/base/spectrum-analyzer), or as a trace on a [Plot](/docs/components/base/plot) behind an equalizer's curve. `useSpectrumPeaks` keeps each point's loudest level for `hold` seconds, then lets it fall at `fall` dB per second.
+`detectTransients(channels, sampleRate)` finds where a recording's level rises sharply, in seconds. `autoWarp` works out how a recording plays in time at an arrangement's tempo, from a tempo estimate and those transients: a short recording that 1, 2, 4, 8 or 16 bars fit at its tempo is taken as that loop, marked at its start and end; any other gets a warp marker on the first beat of each bar, moved onto a transient within an eighth of a beat. It returns the tempo, the offset of the first beat and the markers, or `null` when there is no tempo to go by.
 
 ## Loudness
 
 `loudness` measures a whole sound the way streaming services and broadcasters do (ITU-R BS.1770): its integrated loudness in LUFS, its loudest sample, and its true peak, the loudest point of the waveform between the samples. `loudnessGain` is the gain that brings it to a target as far as its true peak stays under a ceiling, -1 dBTP unless told otherwise: a sound that would pass it lands under the target instead, and nothing is limited.
 
-```bash
-npx shadcn@latest add @audio-ui/loudness
-```
-
 ```ts
-import { dbToGain } from "@audio-ui/core/analysis";
-import { LOUDNESS_TARGETS, loudnessGain, measureLoudness } from "@/lib/loudness";
+import { dbToGain } from "@audio-ui/engine/analysis";
+import { LOUDNESS_TARGETS, loudnessGain, measureLoudness } from "@audio-ui/engine/analysis";
 
 const loudness = measureLoudness(channels, sampleRate); // { lufs: -19.2, peak: -3.1, truePeak: -2.8 }
 const gain = dbToGain(loudnessGain(loudness, LOUDNESS_TARGETS.streaming));
@@ -70,28 +73,17 @@ It reads every sample, the true peak at four points a sample: about half a secon
 
 ### While it plays
 
-```bash
-npx shadcn@latest add @audio-ui/use-loudness
-```
+`useLoudness` measures a node as it plays, on the audio thread: momentary, short-term and integrated LUFS every 100 ms as a live source, and `clear` to start the integrated loudness over.
 
-```tsx
-import { useLoudness } from "@/hooks/use-loudness";
+Usage and API: [`useLoudness`](/docs/hooks/use-loudness).
 
-const { clear, source } = useLoudness(output); // the node to measure, null while there is none
-// source: { momentary: -12.4, shortTerm: -13.1, integrated: -14.2 }, in LUFS
-```
+## Pitch
 
-`useLoudness(signal)` measures a signal while it plays: its momentary loudness, over the last 400 ms, its short-term loudness, over the last 3 s, and its integrated loudness, over everything since `clear`, its quiet passages gated out as `measureLoudness` gates them, so the two agree on a whole sound. Each is `-Infinity` until there is enough of the sound to read it, and for silence. The signal is only listened to, in stereo, on the audio thread, where every sample is K-weighted with the filter `@audio/weighting-k` designs for the context's rate; the reading comes every 100 ms as a live source, and nothing is published while it holds still. The [Mixer](/docs/components/base/mixer) reads its main track's this way. Outside React, `createLoudnessMeter(ctx, onLoudness)` from the same lib does it: connect what to measure to its `input`.
+`detectPitch(samples, sampleRate, { minHz, maxHz, minLevel, threshold })` is the pitch a stretch of samples holds: the YIN algorithm of `@audio/pitch-yin`, between `minHz` and `maxHz`, which a stretch must hold two periods of the lowest of. It returns `{ frequency, confidence }`, or `null` for a signal quieter than `minLevel`, an RMS level from 0 to 1, or with no clear period, such as noise or a chord. A tuner reads it a few dozen times a second and keeps the median of the last few readings; [`usePitch`](/docs/hooks/use-pitch) does that for a React page.
 
-## The functions behind them
+## A recording as it comes in
 
-`@audio-ui/core/analysis` holds the math as plain functions, for an engine of your own or a worker:
+Two readings are taken once, as a recording is decoded:
 
-- `rmsDb(samples)`: The RMS level of samples, in dBFS: how loud they sound.
-- `peakDb(samples)`: The level of their loudest sample, in dBFS: how near they come to clipping.
-- `dbToGain(db)`, `gainToDb(gain)`: dB and gain, both ways.
-- `logSpectrum(bins, sampleRate, out, { minHz, maxHz })`: An analyser's bins on a log frequency axis, written into `out`.
-- `holdPeaks(spectrum, peaks, holding, elapsed, { hold, fall })`: Held peaks, a frame at a time.
-- `computePeaks(channels, buckets)`: A waveform's peaks, for a [Waveform](/docs/components/base/waveform).
-- `formatDb(db)`, `formatHz(hz)`: A level and a frequency as text, such as "-6.0 dB" and "1.2 kHz".
-- `biquadResponse`, `eqResponse`, `compressorOutput`: What a filter, an equalizer and a compressor do, to draw their curves.
+- `analyzeBeat(channels, sampleRate)` reads its tempo with `@audio/beat-detect` and fits the beat grid on its transients, to the sample, so a tempo between whole BPM holds over a long file. It returns `{ estimate, transients }`, the estimate `null` for a sound with no attack (silence, noise), which is what `autoWarp` takes.
+- `audioChroma(channels, sampleRate)` is how much of its sound lies in each pitch class, C to B, summing to 1: the chroma of `@audio/mir-chroma` on each stretch that is not silence, averaged. It is what a key is read from, with [`detectKeys`](/docs/engine/pitch#keys).

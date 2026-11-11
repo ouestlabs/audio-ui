@@ -1,0 +1,70 @@
+---
+title: Timeline
+description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
+---
+
+<Module from="@audio-ui/elements/timeline" />
+
+## Usage
+
+`<audio-ui-timeline>` is the root of an arrangement: a ruler that sets the position, lanes of clips that move, trim and fade, loop ranges, and a viewport that scrolls and zooms. Units are arbitrary: seconds, beats or steps.
+
+<ElementsPreview name="timeline" />
+
+```html
+<audio-ui-timeline duration="32" snap-step="1">
+  <audio-ui-timeline-viewport>
+    <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
+    <audio-ui-timeline-track>
+      <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
+      <audio-ui-timeline-lane seekable>
+        <audio-ui-timeline-clip aria-label="Beat" start="4" length="8">
+          <audio-ui-timeline-clip-header>Beat</audio-ui-timeline-clip-header>
+        </audio-ui-timeline-clip>
+        <audio-ui-timeline-playhead></audio-ui-timeline-playhead>
+      </audio-ui-timeline-lane>
+    </audio-ui-timeline-track>
+  </audio-ui-timeline-viewport>
+</audio-ui-timeline>
+```
+
+<TypeTable>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the timeline, in its units.</TypeRow>
+<TypeRow name={"position"} type={"number"}>The playback position. The `source` property follows a live position instead.</TypeRow>
+<TypeRow name={"default-position"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"zoom"} type={"number"}>Pixels per unit. When unset, the timeline fits its width.</TypeRow>
+<TypeRow name={"default-zoom"} type={"number"}></TypeRow>
+<TypeRow name={"min-zoom"} type={"number"} default={"0"}></TypeRow>
+<TypeRow name={"max-zoom"} type={"number"}></TypeRow>
+<TypeRow name={"snap-step"} type={"number"} default={"0"}>Grid spacing. Gestures snap to it unless Cmd or Ctrl is held; 0 disables the grid.</TypeRow>
+<TypeRow name={"snap-offset"} type={"number"} default={"0"}>Where the grid starts.</TypeRow>
+<TypeRow name={"snap-points"} type={"string"}>Magnetic positions for dragged clips and ranges, separated by spaces, such as clip edges and locators.</TypeRow>
+<TypeRow name={"step"} type={"number"}>Arrow key step. Defaults to `snap-step`, or `duration / 100`.</TypeRow>
+<TypeRow name={"large-step"} type={"number"}>Page Up and Page Down step. Defaults to ten steps.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
+</TypeTable>
+
+| Event | Detail | Description |
+| --- | --- | --- |
+| `input`, `change` | `{ value, reason }` | The position changes, then the gesture ends |
+| `zoomchange` | `{ value, reason }` | The zoom changes, already clamped. `preventDefault()` rejects it |
+
+Every lane sets `--timeline-unit`, the width of one unit; placed parts set `--timeline-offset` and `--timeline-length`.
+
+| Part | Description |
+| --- | --- |
+| `<audio-ui-timeline-viewport>` | The scrolling container. Cmd/Ctrl + wheel and pinch zoom around the pointer |
+| `<audio-ui-timeline-ruler>` | The lane that sets the position, containing the native range input. With `selectable`, Shift + drag selects a range and fires `selectioninput` and `selectioncommit` |
+| `<audio-ui-timeline-lane>` | A lane for placed parts. `seekable` sets the position from a press on empty space; with `selectable`, a drag selects a range |
+| `<audio-ui-timeline-playhead>` | A marker at the position |
+| `<audio-ui-timeline-mark>` | A part placed at `value`, such as a bar number. With `movable`, it can be dragged and fires `markinput` and `markchange` |
+| `<audio-ui-timeline-range>` | A loop or selection, `value` as `"start end"`. Draggable, resizable with an `<audio-ui-timeline-range-handle>` per `edge`, and with `drawable`, drawn on empty lane. Fires `rangeinput` and `rangechange` with `{ value, edge, reason }` |
+| `<audio-ui-timeline-navigator>` | An overview bar. Its `<audio-ui-timeline-navigator-window>` scrolls, its `<audio-ui-timeline-navigator-handle>`s zoom, and a double click fits the whole timeline |
+| `<audio-ui-timeline-track>` | A row with a header and a lane, sized by `height` in pixels. An `<audio-ui-timeline-track-resize-handle>` changes it and fires `heightinput` and `heightchange`. `<audio-ui-timeline-track-header>` stays pinned while the lane scrolls |
+| `<audio-ui-timeline-clip>` | A region of a source: `start`, `length`, `offset`, `fade-in`, `fade-out`, `fade-in-shape`, `fade-out-shape`, `source-length`. A press selects it (`clipselect`, then the `selected` attribute) and sets the position; Delete fires `clipremove`. Fires `clipinput` and `clipchange` with `{ value, reason, target, lane, delta, copy }`. Sets `--clip-unit` for its own parts |
+| `<audio-ui-timeline-clip-header>` | Moves the clip by drag, across lanes |
+| `<audio-ui-timeline-clip-handle>` | Trims the clip's `edge`, shifting the source offset rather than stretching |
+| `<audio-ui-timeline-clip-fade-handle>` | Sets the fade at its `edge` (`in` or `out`). Double click or Enter cycles its shape |
+| `<audio-ui-timeline-clip-fade>` | Renders the fade at its `edge`, shaded with `--clip-fade-shade` |
+
+The same control in React, and its parts' props: [Timeline](/docs/react/timeline).

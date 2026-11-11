@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 
 /** The keys the panel's keyboard shows, as MIDI notes: the open low E to the E three octaves up. Any pitch plays. */
 export const GUITAR_LOWEST = 40;

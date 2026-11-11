@@ -1,6 +1,7 @@
 /** The longest step the clock takes, so a task that slept or sat in a hidden tab never jumps ahead. */
 const MAX_STEP_MS = 100;
 
+/** What `createFrameTask` returns: wake it when something moves, flush it to step at once, stop it for good. */
 export interface FrameTask {
   /** Run a step now, without waiting for the pending frame. */
   flush: () => void;

@@ -1,5 +1,7 @@
-import type { DeviceContext } from "@audio-ui/core/device";
-import { DEFAULT_TEMPO } from "@audio-ui/core/time";
+import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
+import { createFeed, type Feed } from "@audio-ui/engine/device";
+import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   DELAY_WORKLET,
   type DelayState,
@@ -11,42 +13,10 @@ import {
 const RAMP_SECONDS = 0.02;
 /** A change of time glides slower, so the echo bends like a tape instead of clicking. */
 const TIME_RAMP_SECONDS = 0.08;
-/** How long after the worklet's modes fade out their input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
-export interface DelayEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface DelayEngine extends EffectEngine<DelayState> {
   /** Resolves once the ping-pong, multitap and grain modes are in the graph. Until then they play the echo. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: DelayState, context?: DeviceContext) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the worklet's modes into a context once. `false` when the context cannot run worklets. */
-function loadModes(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([DELAY_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -95,9 +65,8 @@ export function createDelayEngine(
   let latest = initial;
   let disposed = false;
   let routed = false;
-  let fed = false;
+  let feed: Feed | null = null;
   let sent = initial.mode;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
 
   const apply = (
     state: DelayState,
@@ -138,19 +107,7 @@ export function createDelayEngine(
       ctx.currentTime,
       RAMP_SECONDS
     );
-    clearTimeout(unfeed);
-    if (playing && !fed && modes) {
-      input.connect(modes);
-      fed = true;
-    } else if (!playing && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && modes) {
-          input.disconnect(modes);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing);
   };
 
   // A fresh node has its own defaults: set the first state outright, ramps come after.
@@ -160,7 +117,7 @@ export function createDelayEngine(
   echo.gain.value = 1;
   modesLevel.gain.value = 0;
 
-  const ready = loadModes(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, DELAY_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }
@@ -170,6 +127,7 @@ export function createDelayEngine(
         mode: latest.mode === "echo" ? "pingpong" : latest.mode,
       },
     });
+    feed = createFeed([[input, modes]]);
     sent = latest.mode;
     modes.connect(modesTone);
     apply(latest, (param, value) => {
@@ -182,7 +140,7 @@ export function createDelayEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       for (const node of [
         input,
         dry,

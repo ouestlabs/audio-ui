@@ -1,8 +1,9 @@
 "use client";
 
 import type { Source } from "@audio-ui/core";
-import type { ParameterValue } from "@audio-ui/core/device";
-import { secondsPerBeat, type Tempo } from "@audio-ui/core/time";
+import type { ParameterValue } from "@audio-ui/engine/device";
+import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
+import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 import {
   type ReactNode,
   useCallback,
@@ -10,6 +11,18 @@ import {
   useState,
   useSyncExternalStore,
 } from "react";
+import {
+  DeviceChain,
+  DeviceChainSlot,
+  DeviceChainSlotControls,
+} from "@/components/audio-ui/device-chain";
+import { devicePanel } from "@/components/audio-ui/device-panels";
+import { DrumRackPanel } from "@/components/audio-ui/drum-rack-panel";
+import {
+  type RackChainMix,
+  RackPanel,
+  type RackParameter,
+} from "@/components/audio-ui/rack-panel";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -25,18 +38,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { devicePanel } from "@/components/audio-ui/device-panels";
-import {
-  DeviceChain,
-  DeviceChainSlot,
-  DeviceChainSlotControls,
-} from "@/components/audio-ui/device-chain";
-import { DrumRackPanel } from "@/components/audio-ui/drum-rack-panel";
-import {
-  type RackChainMix,
-  RackPanel,
-  type RackParameter,
-} from "@/components/audio-ui/rack-panel";
 import type { useArrangement } from "@/hooks/use-arrangement";
 import {
   type AutomationFollowing,
@@ -61,11 +62,7 @@ import {
 } from "@/lib/arrangement";
 import { trackOf } from "@/lib/arrangement-state";
 import { libraryDevice } from "@/lib/device-library";
-import {
-  DRUM_KIT_PADS,
-  drumKit,
-} from "@/lib/drum-kit";
-import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
+import { DRUM_KIT_PADS, drumKit } from "@/lib/drum-kit";
 
 type Arrangement = ReturnType<typeof useArrangement>;
 

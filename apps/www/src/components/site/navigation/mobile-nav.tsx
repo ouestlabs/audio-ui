@@ -1,29 +1,23 @@
 "use client";
 
-import {
-  BookOpenIcon,
-  CaretDownIcon,
-  CubeIcon,
-} from "@phosphor-icons/react/ssr";
+import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
 import { GroupIcon, PageIcon } from "@/components/site/navigation/group-icon";
+import { SectionSelect } from "@/components/site/navigation/section-select";
 import { Button } from "@/components/ui/button";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useGroupFolding, useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { getDocsPageUpdateHint } from "@/lib/docs/content/docs";
 import type { source } from "@/lib/docs/content/source";
 import type { CategoryInfo } from "@/lib/registry/core/registry";
 import { cn, isActive, isFileUrl, normalizeSlug } from "@/lib/utils";
 import { categoryGroups } from "@/registry-audio/bases/categories";
-
-type Section = "components" | "docs";
 
 const rowClassName =
   "flex h-9 shrink-0 items-center justify-between gap-3 rounded-(--menu-inner-radius) px-2 font-medium text-[0.8rem] text-site-foreground no-underline transition-colors hover:bg-site-muted";
@@ -124,13 +118,7 @@ export function MobileNav({
 }) {
   const [open, setOpen] = React.useState(false);
   const { groups, pathname, setOpen: setGroupOpen } = useSidebarGroups(tree);
-  const [chosen, setChosen] = React.useState<Section | null>(null);
-  const handleSectionChange = React.useCallback(
-    (value: string) => setChosen(value as Section),
-    []
-  );
-  const section: Section =
-    chosen ?? (isActive(pathname, "/components") ? "components" : "docs");
+  const section = isActive(pathname, "/components") ? "components" : "docs";
   const close = React.useCallback(() => setOpen(false), []);
 
   // The menu is for below `lg`: from there up the sidebar is the navigation.
@@ -204,39 +192,9 @@ export function MobileNav({
         side="bottom"
         sideOffset={16}
       >
-        <Tabs
-          className="shrink-0"
-          onValueChange={handleSectionChange}
-          value={section}
-        >
-          <TabsList
-            aria-label="Sections"
-            className="w-full rounded-(--menu-inner-radius) bg-site-foreground/8 **:data-[slot=tabs-indicator]:rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
-          >
-            <TabsTrigger
-              className="rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
-              value="docs"
-            >
-              <BookOpenIcon
-                aria-hidden
-                className="size-4 in-data-active:text-primary"
-                weight={section === "docs" ? "fill" : "regular"}
-              />
-              Docs
-            </TabsTrigger>
-            <TabsTrigger
-              className="rounded-[max(calc(var(--menu-inner-radius)-3px),0px)]"
-              value="components"
-            >
-              <CubeIcon
-                aria-hidden
-                className="size-4 in-data-active:text-primary"
-                weight={section === "components" ? "fill" : "regular"}
-              />
-              Components
-            </TabsTrigger>
-          </TabsList>
-        </Tabs>
+        <div className="shrink-0">
+          <SectionSelect tree={tree} />
+        </div>
         <nav
           aria-label={section}
           className="scroll-fade-y no-scrollbar -mx-2 flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto overscroll-contain px-2 *:shrink-0"
@@ -296,13 +254,15 @@ export function MobileNav({
           ) : (
             groups.map((group) => (
               <div className="flex shrink-0 flex-col gap-0.5" key={group.title}>
-                <GroupLabel
-                  collapsible={group.collapsible}
-                  current={group.current}
-                  onOpenChange={setGroupOpen}
-                  open={group.open}
-                  title={group.title ?? ""}
-                />
+                {group.titled ? (
+                  <GroupLabel
+                    collapsible={group.collapsible}
+                    current={group.current}
+                    onOpenChange={setGroupOpen}
+                    open={group.open}
+                    title={group.title ?? ""}
+                  />
+                ) : null}
                 {group.open
                   ? group.sections.map((part) => (
                       <React.Fragment key={part.title ?? "untitled"}>

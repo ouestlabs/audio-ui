@@ -128,6 +128,7 @@ function movedThumb(
 /** A keypress moves the window or an edge by this share of the timeline. */
 const NUDGE_SHARE = 0.02;
 
+/** The options of `createNavigatorController`: the timeline's length, how the viewport is laid out, the functions that scroll and zoom it, and the narrowest the window may be. */
 export interface NavigatorOptions {
   disabled?: boolean;
   duration: number;
@@ -147,6 +148,7 @@ export interface NavigatorOptions {
   ) => boolean;
 }
 
+/** What `createNavigatorController` returns: the stretch the window shows, and the presses, keys, typed values and double click that move it. */
 export interface NavigatorController {
   /** Double click shows everything. */
   doubleClick: (event: MouseEvent) => void;

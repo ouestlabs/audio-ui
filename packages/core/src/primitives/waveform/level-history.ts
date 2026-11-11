@@ -1,6 +1,7 @@
 /** Without a reading for this long, the signal has stopped and so does the scroll. */
 const MIN_STALL_MS = 250;
 
+/** What `createLevelHistory` returns: feed it levels, step it every frame, and read the window it scrolls and how far the newest entry has slid in. */
 export interface LevelHistory {
   /** Give the current level, read at `nowMs`. The loudest one given since the last entry is what gets recorded. */
   feed: (level: number, nowMs: number) => void;

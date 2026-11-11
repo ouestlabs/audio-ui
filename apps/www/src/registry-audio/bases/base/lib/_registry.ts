@@ -1,321 +1,100 @@
 import type { RegistryItem } from "shadcn/schema";
+import { libItem, movedItem } from "../../items";
 
 const items: RegistryItem[] = [
-  {
+  libItem("web-audio", {
     categories: ["lib", "audio", "web-audio"],
-    dependencies: [],
     description: "Web Audio Lib",
-    files: [
-      {
-        path: "lib/web-audio.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "web-audio",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  movedItem("device-engine", "device"),
+  movedItem("audio-worklet", "worklet"),
+  libItem("envelope-ramp", {
     categories: ["lib", "audio", "synth", "piano", "envelope"],
-    dependencies: [],
     description:
       "Envelope curves to gain automation: slicing an envelope at its sustain and scheduling its ramps on a GainNode's AudioParam, for synth voices",
-    files: [
-      {
-        path: "lib/envelope-ramp.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "envelope-ramp",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "waveform"],
-    dependencies: [
-      "@audio/decode-aiff",
-      "@audio/decode-caf",
-      "@audio/decode-mp4",
-      "@audio/resample-sinc",
-    ],
-    description:
-      "Decoding an audio file into samples at a context's rate, the step before the waveform maths of @audio-ui/core/analysis: the browser's decoder first, and for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed",
-    files: [
-      {
-        path: "lib/audio-decode.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "audio-decode",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  movedItem("audio-decode", "files"),
+  movedItem("audio-encode", "files"),
+  movedItem("loudness", "analysis"),
+  libItem("audio-export", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio/encode"],
-    description:
-      "Writing sound to a WAV, FLAC or MP3 file, the step after an offline render or a recording: encoded in chunks with its progress, each format's encoder loaded the first time it is used, and saved through the browser's downloads",
-    files: [
-      {
-        path: "lib/audio-encode.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "audio-encode",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio"],
-    dependencies: [
-      "@audio-ui/core",
-      "@audio/loudness-lufs",
-      "@audio/loudness-truepeak",
-      "@audio/weighting-k",
-    ],
-    description:
-      "How loud a sound is, the way streaming services and broadcasters measure it (ITU-R BS.1770): integrated loudness in LUFS, sample and true peak, and the gain that brings it to a target such as -14 LUFS without passing a true-peak ceiling; and while it plays, its momentary, short-term and integrated loudness, measured on the audio thread",
-    files: [
-      {
-        path: "lib/loudness.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "loudness",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Exporting rendered sound to a file: the settings an export picks (format, bit depth or bitrate, a level left as it is, brought to its peak or to a loudness target) and exportSound, which measures, normalizes and encodes, saying how far it is",
-    files: [
-      {
-        path: "lib/audio-export.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "audio-export",
-    registryDependencies: ["@audio-ui/audio-encode", "@audio-ui/loudness"],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: [],
-    description:
-      "Measure an engine against what its device claims, in an offline audio context: how far its frequency response is from the curve the panel draws, how long it delays a signal, and the helpers to render and read a signal. For a host that brings its own engine.",
-    files: [
-      {
-        path: "lib/device-measure.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "device-measure",
     registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  movedItem("device-measure", "device"),
+  libItem("manifest-worklet", {
     categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: [],
     description:
       "The source of an AudioWorklet processor that plays one of several audio.js manifests (the audio.js of an @audio/* package): the model sent by message, a parameter it reads as it plays changed at once, a model made again for one it is made with, warmed on the last 100 ms and faded in, its state brought back to rest on silence, and a meter of the gain it takes off.",
-    files: [
-      {
-        path: "lib/manifest-worklet.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "manifest-worklet",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("oversampling", {
     categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: [],
     description:
       "What a waveshaper that oversamples costs in time, and a delay that holds a dry path back by it, so a distortion mixed with its dry sound does not comb. Measured in Chrome.",
-    files: [
-      {
-        path: "lib/oversampling.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "oversampling",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("synced-rate", {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The rate of an oscillator that is either free, in hertz, or synced: one cycle per note value of the host's tempo. The two parameters a device adds for it, and the function that reads the rate.",
-    files: [
-      {
-        path: "lib/synced-rate.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "synced-rate",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("demo-sound", {
     categories: ["lib", "audio", "device", "web-audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The sounds the previews play, by name: Boom bap and Drone, with the kick that goes with the first. Drawn once in code and looped as a buffer, no samples.",
-    files: [
-      {
-        path: "lib/demo-sound.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "demo-sound",
     registryDependencies: ["@audio-ui/drum-synthesis"],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("drum-kit", {
     categories: ["lib", "audio"],
-    dependencies: [],
     description:
       "A drum kit to start a drum rack from: a pad per drum on the General MIDI notes, each a Drum Synth at the head of its chain, the snare and the clap in a small room, the hats in one choke group.",
-    files: [
-      {
-        path: "lib/drum-kit.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "drum-kit",
     registryDependencies: [
       "@audio-ui/arrangement",
       "@audio-ui/drum-synth-device",
       "@audio-ui/reverb-device",
     ],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("drum-steps", {
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/core"],
     description:
       "A drum clip's notes as steps: a row per pad, a step per stretch of the grid, with each step's velocity, chance and shift, and the edits a step sequencer makes on the notes (switch a step, set its level, fill a row every n steps).",
-    files: [
-      {
-        path: "lib/drum-steps.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "drum-steps",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("demo-song", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A chill song at 80 BPM on one two-bar loop, E minor seven, G and A, all of it notes for MIDI tracks: its drums on a drum kit's pads, one part each with a fill, and an organ, a pad, a bass and a lead hook. What the arrangement's demo plays.",
-    files: [
-      {
-        path: "lib/demo-song.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "demo-song",
     registryDependencies: ["@audio-ui/drum-kit"],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("arrangement", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: [
-      "@audio-ui/core",
-      "@audio-ui/react",
-      "@audio/beat-detect",
-      "@audio/mir-chroma",
-    ],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine", "@audio-ui/react"],
     description:
       "The document of an arrangement of clips on tracks: its clips, tracks and mixes, how far a clip reaches, where a MIDI clip's notes play, and what a track's volume and pan automation gives at a point of the song",
-    files: [
-      {
-        path: "lib/arrangement.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "arrangement",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("undo-history", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: [],
     description:
       "Undo and redo as a value: a pure history of any document, with bursts (a drag is one entry), redo that drops on a new change, and a depth limit",
-    files: [
-      {
-        path: "lib/undo-history.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "undo-history",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/midi-parse", "@audio/midi-write"],
-    description:
-      "MIDI files to and from notes on a grid of steps: read one, with its tempo, write one, or download one; or read one as parts in beats, a part per track and channel with its name and program, for a host that lays each on a track (parsed by @audio/midi-parse, written by @audio/midi-write)",
-    files: [
-      {
-        path: "lib/midi-file.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "midi-file",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "piano"],
-    dependencies: ["@audio-ui/core", "@audio/musicxml", "fflate"],
-    description:
-      "MusicXML scores to and from notes on a grid of steps: read one, plain or compressed as .mxl, with its first tempo, every part into one clip, write one for a notation app, or download one",
-    files: [
-      {
-        path: "lib/musicxml-file.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "musicxml-file",
-    registryDependencies: ["@audio-ui/midi-file"],
-    type: "registry:lib",
-  },
-  {
+  }),
+  movedItem("midi-file", "files"),
+  movedItem("musicxml-file", "files"),
+  libItem("rack", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Racks: devices in parallel chains, each with its volume, pan, switch and solo, lined up on the slowest and summed, and eight macros that turn parameters of the devices inside over a stretch of their travel; the engine that plays one on a track's chain.",
-    files: [
-      {
-        path: "lib/rack.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "rack",
     registryDependencies: ["@audio-ui/arrangement", "@audio-ui/device-library"],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("drum-rack", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Drum racks: an instrument whose chains are pads, each answering a note with the instrument at its head, such as a Drum Synth, or else a voice of the drum synthesis or a recording, into its own devices, a pad of a choke group cutting the others short; the engine that plays one on a MIDI track.",
-    files: [
-      {
-        path: "lib/drum-rack.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "drum-rack",
     registryDependencies: [
       "@audio-ui/arrangement",
       "@audio-ui/drum-synthesis",
@@ -323,59 +102,38 @@ const items: RegistryItem[] = [
       "@audio-ui/rack",
       "@audio-ui/voice-pool",
     ],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("polyphony", {
+    categories: ["lib", "audio", "synth"],
+    dependencies: ["@audio-ui/engine"],
+    description:
+      "Chords on an instrument whose engine plays one voice: a note takes the voice that holds it, else a free one, else the one held longest, whose note is let go first. No sound and no engine of its own: it plays the engines it is given.",
+  }),
+  libItem("voice-pool", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core", "@audio/note"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Note players: what a MIDI track plays through, all taking notes the same way, and the voice pool that plays an instrument of the library with a voice for each note it holds, the oldest given up first.",
-    files: [
-      {
-        path: "lib/voice-pool.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "voice-pool",
-    registryDependencies: ["@audio-ui/device-library"],
-    type: "registry:lib",
-  },
-  {
+    registryDependencies: ["@audio-ui/device-library", "@audio-ui/polyphony"],
+  }),
+  libItem("instrument-rack", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Instrument racks: an instrument whose chains each start with an instrument of the library, then effects, all played by every note in layers and summed as a rack with its macros; the engine that plays one on a MIDI track.",
-    files: [
-      {
-        path: "lib/instrument-rack.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "instrument-rack",
     registryDependencies: [
       "@audio-ui/arrangement",
       "@audio-ui/device-library",
       "@audio-ui/rack",
       "@audio-ui/voice-pool",
     ],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("dawproject", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/core", "fflate"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine", "fflate"],
     description:
       "An arrangement to and from DAWproject, the open exchange format other DAWs read and write: tracks, returns and the main track with their mix and sends, audio clips with fades, loop and warp, MIDI clips, volume and pan automation, locators, tempo and time signatures, and the equalizer, compressor, gate and limiter; a report says what was left out. With the zip archives it is packed in.",
-    files: [
-      {
-        path: "lib/dawproject.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "lib/zip.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "dawproject",
+    files: ["lib/dawproject.ts", "lib/zip.ts"],
     registryDependencies: [
       "@audio-ui/arrangement",
       "@audio-ui/use-arrangement",
@@ -384,54 +142,27 @@ const items: RegistryItem[] = [
       "@audio-ui/gate-device",
       "@audio-ui/limiter-device",
     ],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("recording", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "Recording into an arrangement: an input recorder on an AudioWorklet that keeps each block with its frame on the audio clock, the frames of a take with the latency taken off, and the audio or MIDI clip a take becomes, with record quantization and overdub",
-    files: [
-      {
-        path: "lib/recording.ts",
-        type: "registry:lib",
-      },
-      {
-        path: "lib/input-recorder.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "recording",
+    files: ["lib/recording.ts", "lib/input-recorder.ts"],
     registryDependencies: ["@audio-ui/arrangement"],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("clip-player", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A track's player of audio clips on an AudioWorklet: its recordings to the frame on the audio clock, with gain, fades, loops, reverse and warp, in a running or an offline context",
-    files: [
-      {
-        path: "lib/clip-player.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "clip-player",
     registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("device-library", {
     categories: ["lib", "audio", "device"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Every device of the registry with its engine, by shelf: what a host needs to build a track's chain from the ids a project stores, and what a device browser lists",
-    files: [
-      {
-        path: "lib/device-library.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "device-library",
     registryDependencies: [
       "@audio-ui/auto-pan-device",
       "@audio-ui/auto-pan-engine",
@@ -528,26 +259,16 @@ const items: RegistryItem[] = [
       "@audio-ui/wave-shaper-device",
       "@audio-ui/wave-shaper-engine",
     ],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("mixer-engine", {
     categories: ["lib", "audio", "mixer"],
-    dependencies: ["@audio-ui/core"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A mixer on the Web Audio API: a channel per track and return, with its chain, volume, constant-power pan, switch, solo, pre or post-fader sends, delay compensation and meters, into a main track",
-    files: [
-      {
-        path: "lib/mixer-engine.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "mixer-engine",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
+  }),
   {
     categories: ["lib", "audio", "timeline", "mixer"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
     description:
       "Plays an arrangement on the audio clock: its audio clips, its notes through each track's instrument, its device chains, sends and returns, and an offline render to a buffer, with a hook for the transport, the playhead and the meters",
     files: [
@@ -576,36 +297,31 @@ const items: RegistryItem[] = [
     ],
     type: "registry:lib",
   },
-  {
+  libItem("piano-roll-tools", {
     categories: ["lib", "audio", "piano", "ai"],
     dependencies: ["zod"],
     description:
       "AI-native tool surface for a piano roll, createPianoRollTools builds typed, agent-agnostic tools (setNotes/addNotes/removeNotes/transpose/clear/setTempo) an LLM calls to compose melodies and basslines from natural language, parameterized by the roll's pitch range and grid",
-    files: [
-      {
-        path: "lib/piano-roll-tools.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "piano-roll-tools",
-    registryDependencies: [],
-    type: "registry:lib",
-  },
-  {
+  }),
+  libItem("drum-synthesis", {
     categories: ["lib", "audio", "synth", "sequencer"],
-    dependencies: [],
     description:
       "One-shot percussion synthesis (kick, snare, hihat) built from oscillators and noise bursts, each with its own tune and decay",
-    files: [
-      {
-        path: "lib/drum-synthesis.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "drum-synthesis",
+  }),
+  {
+    dependencies: [],
+    description:
+      "Moved: the peaks are in @audio-ui/engine/analysis and the decoding in @audio-ui/engine/files, as this lib gave both.",
+    files: [],
+    name: "waveform-peaks",
     registryDependencies: [],
     type: "registry:lib",
   },
+  libItem("sortable-drag", {
+    categories: ["lib", "audio"],
+    description:
+      "The gesture of reordering a row by dragging one of its items: the others slide aside, the item shows dimmed where it would land, what follows the pointer settles there, the view scrolls at its edges. No render while it moves.",
+  }),
 ];
 
 /**
@@ -633,28 +349,6 @@ const movedToCore: [name: string, entry: string][] = [
 
 export const lib: RegistryItem[] = [
   ...items,
-  {
-    dependencies: ["@audio-ui/core"],
-    description:
-      "Moved: the peaks are in @audio-ui/core/analysis and the decoding is audio-decode, as this lib gave both.",
-    files: [],
-    name: "waveform-peaks",
-    registryDependencies: ["@audio-ui/audio-decode"],
-    type: "registry:lib",
-  },
-  {
-    categories: ["lib", "audio"],
-    description:
-      "The gesture of reordering a row by dragging one of its items: the others slide aside, the item shows dimmed where it would land, what follows the pointer settles there, the view scrolls at its edges. No render while it moves.",
-    files: [
-      {
-        path: "lib/sortable-drag.ts",
-        type: "registry:lib",
-      },
-    ],
-    name: "sortable-drag",
-    type: "registry:lib",
-  },
   ...movedToCore.map(
     ([name, entry]): RegistryItem => ({
       dependencies: ["@audio-ui/core"],

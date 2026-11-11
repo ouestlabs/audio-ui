@@ -1,5 +1,6 @@
 "use client";
 
+import { CaretLeftIcon, XIcon } from "@phosphor-icons/react";
 import {
   type ComponentProps,
   createContext,
@@ -16,7 +17,6 @@ import {
   useState,
 } from "react";
 import { createPortal, flushSync } from "react-dom";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   ContextMenu,
@@ -28,7 +28,7 @@ import {
 } from "@/components/ui/context-menu";
 import { Toggle } from "@/components/ui/toggle";
 import { startSortableDrag } from "@/lib/sortable-drag";
-import { XIcon, CaretLeftIcon } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 /** The type a dragged device carries, with its id as the data: what a library sets and the chain takes. */
 export const DEVICE_DRAG_TYPE = "application/x-audio-ui-device";
@@ -575,7 +575,10 @@ function SlotRemove() {
 function SlotFold() {
   const { folded, title, toggleFold } = useSlot();
   const arrow = (
-    <CaretLeftIcon aria-hidden="true" className={cn("transition-transform", folded && "size-3.5 rotate-180")} />
+    <CaretLeftIcon
+      aria-hidden="true"
+      className={cn("transition-transform", folded && "size-3.5 rotate-180")}
+    />
   );
   // Folded, the whole strip is what is pressed: this only says so, and is how the keyboard unfolds it.
   if (folded) {

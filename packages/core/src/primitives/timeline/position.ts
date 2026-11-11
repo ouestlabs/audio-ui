@@ -9,15 +9,18 @@ import type { Source } from "../../value/source.ts";
 import { clampZoom } from "./scale.ts";
 import { bypassesGrid, type Grid, snapToGrid } from "./snap.ts";
 
+/** What `onPositionChange` receives with each move of the playhead: the reason (`"press"`, `"drag"`, `"keyboard"` or `"input-change"`), the event, and `cancel()` to refuse the move. */
 export type TimelinePositionChangeEventDetails =
   | ChangeEventDetails<"press" | "drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"input-change", Event>;
+/** What `onPositionCommitted` receives once a move of the playhead ends: the reason and the event behind it. */
 export type TimelinePositionCommitEventDetails =
   | CommitEventDetails<"press" | "drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
   | CommitEventDetails<"input-change", Event>;
 
+/** What `onZoomChange` receives with each zoom: the reason (`"wheel"`, `"drag"`, `"keyboard"`, `"input-change"` or `"double-click"`), the event, and `cancel()` to refuse it. */
 export type TimelineZoomChangeEventDetails =
   | ChangeEventDetails<"wheel", WheelEvent>
   | ChangeEventDetails<"drag", PointerEvent>
@@ -25,6 +28,7 @@ export type TimelineZoomChangeEventDetails =
   | ChangeEventDetails<"input-change", Event>
   | ChangeEventDetails<"double-click", MouseEvent>;
 
+/** The options of `createTimelineController`: the position and the zoom, each held, controlled or (the position) live, the timeline's length, grid and steps, the zoom's bounds, and the callbacks. */
 export interface TimelineOptions {
   /** Uncontrolled starting position. @default 0 */
   defaultPosition?: number;
@@ -93,6 +97,7 @@ export interface TimelineSelectionHandlers {
   ) => void;
 }
 
+/** What `createTimelineController` returns: the snapshot to draw from, and the presses, keys, typed values and zooms that move the playhead or the view. */
 export interface TimelineController {
   /** Reports the end of a gesture that moved the position. */
   commitSeek: (

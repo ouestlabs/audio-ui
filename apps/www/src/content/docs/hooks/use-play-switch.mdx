@@ -1,0 +1,18 @@
+---
+title: usePlaySwitch
+description: "The play switch of the nearest session: a button in its bar flips it, every component inside the session that reads it follows. Holds no audio, so a demo can leave its play button to its host."
+---
+
+<Entry name="use-play-switch" />
+
+## Usage
+
+The play switch of the nearest [session](/docs/hooks/use-audio-session): a button in its bar flips it, and every component inside the session that reads it follows. It holds no audio, only whether the sound should be on, so a demo leaves its play button to its host.
+
+```tsx
+import { usePlaySwitch } from "@/hooks/use-play-switch";
+
+const { playing, toggle } = usePlaySwitch();
+```
+
+It returns `playing`, `toggle`, `setPlaying`, and `attach`, which a control calls to say it shows the switch (the switch turns off when the last one goes). Outside a session it stays off and does nothing. [`useDeviceLoop`](/docs/hooks/use-device-loop) plays while it is on.

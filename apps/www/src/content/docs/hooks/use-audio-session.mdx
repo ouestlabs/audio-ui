@@ -1,0 +1,27 @@
+---
+title: AudioSessionProvider
+description: "A session of its own for a demo and its controls: a play switch and a microphone switch that nothing outside it follows. Holds no audio, so two previews on a page never play together. Outside a session the switches stay off."
+---
+
+<Entry name="use-audio-session" />
+
+## Usage
+
+What one preview shares between its bar and the demo it shows: whether the sound should play, whether the microphone should listen, and which sound is played. It holds no audio, only those, so two sessions on a page never touch each other.
+
+```tsx
+import { AudioSessionProvider } from "@/hooks/use-audio-session";
+import { usePlaySwitch } from "@/hooks/use-play-switch";
+
+function PlayButton() {
+  const { playing, toggle } = usePlaySwitch();
+  return <Button onClick={toggle}>{playing ? "Stop" : "Play"}</Button>;
+}
+
+<AudioSessionProvider>
+  <PlayButton />
+  <BlockCompressor />
+</AudioSessionProvider>;
+```
+
+Inside one, [`usePlaySwitch`](/docs/hooks/use-play-switch), the microphone switch of [`useMicrophone`](/docs/hooks/use-microphone) and [`useDemoSource`](/docs/hooks/use-demo-source) follow it; outside one they stay off. A switch turns off when the last control showing it goes.

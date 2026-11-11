@@ -1,4 +1,4 @@
-import { pitchName } from "@audio-ui/core/pitch";
+import { pitchName } from "@audio-ui/core";
 import { Fader } from "@audio-ui/react/fader";
 import { useCallback } from "react";
 

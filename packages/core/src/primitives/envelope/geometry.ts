@@ -57,6 +57,7 @@ export function curveForMidpoint(
   return clamp((2 * Math.log((1 - share) / share)) / CURVE_RATE, -1, 1);
 }
 
+/** The points in order along x. */
 export function sortPoints<T extends GeomPoint>(points: T[]): T[] {
   return [...points].sort((a, b) => a.x - b.x);
 }
@@ -66,6 +67,7 @@ export function roundCoord(n: number): number {
   return Math.round(n * 10) / 10;
 }
 
+/** The points kept on the graph: each within 0 and 1, a curve within -1 and 1 (dropped when it is flat), in order along x. */
 export function sanitizePoints(points: Breakpoint[]): Breakpoint[] {
   return sortPoints(
     points.map((p) => {
@@ -78,6 +80,7 @@ export function sanitizePoints(points: Breakpoint[]): Breakpoint[] {
   );
 }
 
+/** Whether two lists hold the same points, curves included, in the same order. */
 export function samePoints(a: Breakpoint[], b: Breakpoint[]): boolean {
   return (
     a.length === b.length &&

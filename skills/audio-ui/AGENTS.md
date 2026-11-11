@@ -721,7 +721,7 @@ npx shadcn@latest add @audio-ui/block-compressor
 ```
 
 ```tsx
-import { deviceTools } from "@audio-ui/core/device";
+import { deviceTools } from "@audio-ui/engine/device";
 import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
 import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
 import { createCompressorEngine } from "@/components/audio-ui/devices/compressor/engine";
@@ -736,7 +736,7 @@ const [set] = deviceTools(compressorDevice); // for any agent: JSON Schema in, a
 const { state: next, summary } = set.run(state, modelInput); // clamped, refused by name, never throws
 ```
 
-A device of your own is `defineDevice({ id, name, description, parameters })` from `@audio-ui/core/device`: `DevicePanel` and `deviceTools` work on it with no further code, and a host with its own engine implements `DeviceBinding` (`update(state)`, `dispose()`) instead of using the Web Audio one. Keep the state a plain object keyed by parameter id and store the device's `id`, not the panel that draws it.
+A device of your own is `defineDevice({ id, name, description, parameters })` from `@audio-ui/engine/device`: `DevicePanel` and `deviceTools` work on it with no further code, and a host with its own engine implements `DeviceBinding` (`update(state)`, `dispose()`) instead of using the Web Audio one. Keep the state a plain object keyed by parameter id and store the device's `id`, not the panel that draws it.
 
 An instrument is a device with `kind: "instrument"`: its parameters shape the timbre (a `choice` parameter holds a waveform or a filter type) and its engine adds `noteOn(note)` and `noteOff()` next to `update(state)`. `block-pocket-synth` is the reference: the panel is controlled and sends notes out through `onNoteOn` and `onNoteOff`, so it plays through any engine, or none.
 
@@ -744,7 +744,7 @@ An agent can play an instrument that declares its `note` (a pitch, a cutoff, eac
 
 A host that brings its own engine can measure it against the panel: `measureResponse(createEngine, state, curve)` from `device-measure` returns how far, in dB, its response is from the curve the device draws, and `measureLatency(createEngine, state)` how long it delays a signal, both rendered offline. It is a measurement, not a certification: the curve is the device's own and the tolerance is the host's.
 
-A time parameter that follows the tempo is a `choice` of `SYNCED_DIVISIONS` from `@audio-ui/core/time` (`1/8`, `1/8t` triplet, `1/8d` dotted) beside a toggle; the host gives the engine its tempo as `update(state, { tempo })`, never as a tool parameter, and `syncedSeconds(division, tempo)` is how long one lasts. A device that delays the sound declares `latency(state, sampleRate)` in seconds, and `device.latency(state, sampleRate)` is what a host that compensates latency asks for.
+A time parameter that follows the tempo is a `choice` of `SYNCED_DIVISIONS` from `@audio-ui/engine/time` (`1/8`, `1/8t` triplet, `1/8d` dotted) beside a toggle; the host gives the engine its tempo as `update(state, { tempo })`, never as a tool parameter, and `syncedSeconds(division, tempo)` is how long one lasts. A device that delays the sound declares `latency(state, sampleRate)` in seconds, and `device.latency(state, sampleRate)` is what a host that compensates latency asks for.
 
 A device that listens to a second signal (a gate opened by a kick) declares `sidechain: true` in `defineDevice`, and its engine has a `sidechain` input to connect the key to (`SidechainBinding`). The key is a signal, never a parameter: the state holds only the switch that says to listen to it, and an agent can switch it on but the host routes the signal.
 

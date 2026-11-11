@@ -1,0 +1,19 @@
+{
+  "title": "Elements",
+  "pages": [
+    "index",
+    "---Elements---",
+    "knob",
+    "fader",
+    "xypad",
+    "meter",
+    "envelope",
+    "plot",
+    "piano",
+    "pad",
+    "sequencer",
+    "piano-roll",
+    "timeline",
+    "waveform"
+  ]
+}

@@ -1,4 +1,4 @@
-import type { DeviceContext } from "@audio-ui/core/device";
+import type { DeviceContext } from "@audio-ui/engine/device";
 import {
   arrangementFrame,
   heardFrame,
@@ -13,13 +13,13 @@ import {
   STOPPED,
   startsInWindow,
   toFrames,
-} from "@audio-ui/core/playback";
+} from "@audio-ui/engine/playback";
 import {
   type MetronomeRhythm,
   metronomeClicks,
   secondsPerBar,
   secondsPerBeat,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import {
   type Arranged,
   type ArrangementTrack,
@@ -35,10 +35,7 @@ import {
   type TrackDevice,
   withCrossfades,
 } from "@/lib/arrangement";
-import {
-  type ArrangementDoc,
-  allTracks,
-} from "@/lib/arrangement-state";
+import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
 import {
   type ClipPlayer,
   createClipPlayer,
@@ -76,10 +73,7 @@ import {
   playedState,
   type RackEngine,
 } from "@/lib/rack";
-import {
-  createVoicePool,
-  type VoicePool,
-} from "@/lib/voice-pool";
+import { createVoicePool, type VoicePool } from "@/lib/voice-pool";
 
 /**
  * How far ahead a play is scheduled, so every part of the engine has heard of

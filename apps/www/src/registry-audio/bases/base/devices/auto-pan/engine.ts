@@ -1,5 +1,5 @@
-import type { DeviceContext } from "@audio-ui/core/device";
-import { DEFAULT_TEMPO } from "@audio-ui/core/time";
+import type { DeviceContext, EffectEngine } from "@audio-ui/engine/device";
+import { DEFAULT_TEMPO } from "@audio-ui/engine/time";
 import {
   type AutoPanState,
   autoPanSettings,
@@ -7,14 +7,7 @@ import {
 
 const RAMP_SECONDS = 0.03;
 
-export interface AutoPanEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: AutoPanState, context?: DeviceContext) => void;
-}
+export type AutoPanEngine = EffectEngine<AutoPanState>;
 
 /**
  * An auto pan and tremolo on the Web Audio API for an `AutoPanState`:

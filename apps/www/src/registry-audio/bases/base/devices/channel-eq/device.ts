@@ -1,5 +1,5 @@
-import { type EqBand, eqResponse, formatHz } from "@audio-ui/core/analysis";
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type EqBand, eqResponse, formatHz } from "@audio-ui/engine/analysis";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 
 const LOW_HZ = 100;
 const HIGH_HZ = 6000;

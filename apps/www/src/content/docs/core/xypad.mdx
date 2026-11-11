@@ -1,0 +1,26 @@
+---
+title: xypad
+description: "The XY pad's controller from @audio-ui/core: two parameters on one gesture, a point dragged, stepped per axis, typed per axis and reset."
+---
+
+<Module from="@audio-ui/core/xypad" />
+
+## Usage
+
+The controller follows the [contract](/docs/core/controllers) every controller shares: create it once, draw from its snapshot, send it the input.
+
+```ts
+import { createXYPadController } from "@audio-ui/core/xypad";
+
+const pad = createXYPadController({ minX: 0, maxX: 1, minY: 0, maxY: 1, value: { x: 0.5, y: 0.5 }, stepX: 0.01, stepY: 0.01 });
+```
+
+| Option | Meaning |
+| --- | --- |
+| `value`, `defaultValue` | A point, `{ x, y }` |
+| `minX`, `maxX`, `stepX`, `minY`, `maxY`, `stepY` | Each axis's range and grid |
+| `format`, `locale`, `disabled` | Formats each axis separately, as `formatted.x` and `formatted.y` |
+
+A pad has two parameters on one gesture. `type(axis, value, event)` takes the axis first, because a text input is per axis. Shift with the arrows, and Page Up and Page Down, move ten steps at once (`LARGE_STEP_MULTIPLIER`). `reset(event)` returns both axes to their defaults: the element calls it on a double-click, and the controller itself resets on Alt with a press and on Delete or Backspace. A double tap is not a reset here, since a tap on a pad places the point, so two quick taps are two points and not a request to go back.
+
+The [XY Pad](/docs/components/base/xypad) draws this controller in React.

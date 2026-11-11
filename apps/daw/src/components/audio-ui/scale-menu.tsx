@@ -1,12 +1,8 @@
 "use client";
 
 import key from "@audio/mir-key";
-import {
-  pitchClassName,
-  SCALES,
-  type Scale,
-  type ScaleName,
-} from "@audio-ui/core/pitch";
+import { pitchClassName } from "@audio-ui/core";
+import { SCALES, type Scale, type ScaleName } from "@audio-ui/engine/pitch";
 import {
   type ComponentProps,
   createContext,
@@ -15,7 +11,6 @@ import {
   useCallback,
   useMemo,
 } from "react";
-import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -31,6 +26,7 @@ import {
   DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 /** Each scale's name, as the menu writes it. */
 export const SCALE_LABELS: Record<ScaleName, string> = {

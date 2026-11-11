@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { cn } from "@/lib/utils";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -11,6 +10,7 @@ import {
   type UtilityState,
   utilityDevice,
 } from "@/components/audio-ui/devices/utility/device";
+import { cn } from "@/lib/utils";
 
 const KNOBS = ["gainDb", "pan", "width"] as const;
 const OFF = utilityDevice.parameters

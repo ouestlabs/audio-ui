@@ -1,3 +1,4 @@
+import { loadWorklet } from "@audio-ui/engine/worklet";
 /**
  * The processor of the key, as the source of an `AudioWorklet`. It reads the
  * key and writes the gain to apply, one value per sample: the level of the key
@@ -70,8 +71,6 @@ export const KEY_DETECTOR_PARAMETERS = [
   "threshold",
 ] as const;
 
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
 /**
  * Loads the detector of the key into a context once: an `AudioWorklet`
  * registered as `audioui-compressor-key`, which reads a signal and writes the
@@ -79,22 +78,5 @@ const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
  * worklets.
  */
 export function loadKeyDetector(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([KEY_DETECTOR_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
+  return loadWorklet(ctx, KEY_DETECTOR_WORKLET);
 }

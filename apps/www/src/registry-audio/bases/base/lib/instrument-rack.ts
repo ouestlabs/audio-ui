@@ -4,7 +4,7 @@
  * layers, through that chain's effects, and the rack sums them with its
  * macros as any rack does.
  */
-import type { DeviceContext } from "@audio-ui/core/device";
+import type { DeviceContext } from "@audio-ui/engine/device";
 import {
   type ChainZone,
   inZone,

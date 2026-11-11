@@ -1,0 +1,18 @@
+---
+title: demo-song
+description: "A chill song at 80 BPM on one two-bar loop, E minor seven, G and A, all of it notes for MIDI tracks: its drums on a drum kit's pads, one part each with a fill, and an organ, a pad, a bass and a lead hook. What the arrangement's demo plays."
+---
+
+<Entry name="demo-song" />
+
+## Usage
+
+The arrangement demo's song: a chill song at 80 BPM on one two-bar loop (intro, verse, chorus, outro), every part notes, played by a drum kit's pads, an organ, a pad, a bass and a lead.
+
+```ts
+import { SONG_SCORE, SONG_TEMPO } from "@/lib/demo-song";
+
+const notes = SONG_SCORE["drums-fill"]; // a part's notes, in quarter notes
+```
+
+The [Arrangement](/docs/components/base/arrangement) block lays its parts out as clips.

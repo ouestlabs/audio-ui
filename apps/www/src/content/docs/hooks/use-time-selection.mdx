@@ -1,0 +1,52 @@
+---
+title: useTimeSelection
+description: "A stretch of time on some tracks of an arrangement, drawn by dragging across bare lanes, with its overlay and what the keyboard does with it: copy, cut, paste, duplicate, consolidate, loop, fade, delete and open time, each one step of undo."
+---
+
+<Entry name="use-time-selection" />
+
+## Usage
+
+`useTimeSelection` is a stretch of time on some tracks and what the keyboard does with it. Tell it where a press on bare lane began, give its `onSelectionChange` to the lanes, and draw the overlay on the tracks it spans:
+
+```tsx
+import { TimelineTimeSelection } from "@/components/audio-ui/time-selection";
+import { useTimeSelection } from "@/hooks/use-time-selection";
+
+const selection = useTimeSelection({
+  bar,
+  clips,
+  copyOf,
+  dispatch,
+  getPosition: () => engine.position.getSnapshot(),
+  selectedIds,
+  selectedTracks,
+  tracks,
+});
+
+<TimelineLane
+  data-track={track.id}
+  onPointerDown={() => selection.pressLane(track.id)}
+  onSelectionChange={selection.onSelectionChange}
+>
+  {selection.time?.tracks.includes(track.id) ? (
+    <TimelineTimeSelection range={selection.time.range} />
+  ) : null}
+</TimelineLane>;
+```
+
+`handleKey` takes a key press, native or React's, and says whether it was one of its own, so a host's other keys can follow: Cmd/Ctrl + C and X copy and cut (the selected clips when no time is selected), V pastes at the cursor and I opens silence there; with a time selection, D duplicates it after itself, J makes one clip per track of it, L loops it and Delete empties it. With Shift too, X, V, D and Delete work on the time itself, on every track, and Cmd/Ctrl + Alt + F makes fades from it. Each is one step of undo.
+
+It is one of the parts the [Arrangement](/docs/components/base/arrangement) composes.
+
+## API
+
+<TypeTable>
+<TypeRow name={"bar"} type={"number"}>How long a stretch Cmd/Ctrl + I opens with nothing selected, in seconds.</TypeRow>
+<TypeRow name={"clips, tracks, selectedIds, selectedTracks"} type={"as useArrangement returns them"}>What a selection and a paste read.</TypeRow>
+<TypeRow name={"copyOf, dispatch"} type={"(time) => Clipping, (command) => void"}>From `useArrangement`.</TypeRow>
+<TypeRow name={"getPosition"} type={"() => number"}>Where the cursor is, in seconds.</TypeRow>
+<TypeRow name={"time, setTime, clear"} type={"{ range, tracks } | null, (time) => void, () => void"}>The stretch of time selected.</TypeRow>
+<TypeRow name={"pressLane, onSelectionChange"} type={"(trackId | null) => void, for TimelineLane"}>A press on bare lane, and the drag from it.</TypeRow>
+<TypeRow name={"handleKey"} type={"(event) => boolean"}>Runs the command a key asks for, and says whether there was one.</TypeRow>
+</TypeTable>

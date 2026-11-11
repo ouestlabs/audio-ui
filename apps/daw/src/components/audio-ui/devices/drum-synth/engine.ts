@@ -1,4 +1,4 @@
-import type { InstrumentBinding } from "@audio-ui/core/device";
+import type { InstrumentBinding } from "@audio-ui/engine/device";
 import {
   type DrumSynthNote,
   type DrumSynthState,

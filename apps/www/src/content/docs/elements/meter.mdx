@@ -1,0 +1,39 @@
+---
+title: Meter
+description: "The <audio-ui-meter> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
+---
+
+<Module from="@audio-ui/elements/meter" />
+
+## Usage
+
+`<audio-ui-meter>` displays one or more level channels. Levels come from the `value` and `peak` attributes or properties, one per channel, or from a live `source` property, `{ getSnapshot, subscribe }`, whose frames are written directly to the parts. A click clears clip indicators latched by a live source.
+
+<ElementsPreview name="meter" />
+
+<TypeTable>
+<TypeRow name={"value"} type={"string"}>One level per channel, such as `"-12 -6"`. The count sets the number of channels.</TypeRow>
+<TypeRow name={"peak"} type={"string"}>One peak-hold level per channel. Hold time and decay are managed outside the meter.</TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"iec\""} default={"\"linear\""}>How levels map onto the length. The `scale` property also accepts a custom increasing curve.</TypeRow>
+<TypeRow name={"clip-threshold"} type={"number"} default={"0"}>Level at or above which a channel is clipping.</TypeRow>
+<TypeRow name={"warn-threshold"} type={"number"}>Level at or above which a channel enters its warning zone. None by default.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}></TypeRow>
+<TypeRow name={"unit"} type={"string"}>Appended to each channel's `aria-valuetext`, such as `dB`. The `getAriaValueText` property overrides the text.</TypeRow>
+<TypeRow name={"format"} type={"string"}>`Intl.NumberFormat` options as JSON. One decimal by default.</TypeRow>
+<TypeRow name={"locale"} type={"string"}>Defaults to the browser locale.</TypeRow>
+</TypeTable>
+
+| Part | Description |
+| --- | --- |
+| `<audio-ui-meter-channels>` | Generates an `<audio-ui-meter-channel>` per level from its `<template>`. `label` names each channel, `{n}` being its number (`Output {n}`). Renders with `display: contents` |
+| `<audio-ui-meter-channel>` | A channel with `role="meter"`, for its `index`. Carries `data-warning`, `data-clipping`, and `data-clipped` until cleared |
+| `<audio-ui-meter-track>` | The full range of a channel |
+| `<audio-ui-meter-indicator>` | The lit range, scaled to the level |
+| `<audio-ui-meter-peak>` | The peak-hold marker, hidden when the channel has none |
+| `<audio-ui-meter-value>` | The formatted level |
+| `<audio-ui-meter-label>` | Labels its channel |
+| `<audio-ui-meter-mark>` | A scale graduation at its `value`, such as -18 |
+
+The same control in React, and its parts' props: [Meter](/docs/react/meter).

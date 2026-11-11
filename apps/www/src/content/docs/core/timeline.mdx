@@ -1,0 +1,48 @@
+---
+title: timeline
+description: "An arrangement's timeline from @audio-ui/core: the playhead and the zoom, clips placed, moved, trimmed, split and faded, ranges such as a loop, the navigator, track heights, snapping to a grid, and a wheel zoom around the pointer."
+---
+
+<Module from="@audio-ui/core/timeline" />
+
+## Usage
+
+A timeline is made of several controllers, each with no view attached and each following the [contract](/docs/core/controllers) every controller shares, and of plain functions that edit clips. Positions are in the timeline's own units, seconds or beats, and the zoom is in pixels per unit.
+
+## The playhead and the zoom
+
+`createTimelineController` holds the playback position and the zoom: held, controlled with `position` and `zoom`, or live with `source`, which it follows without a render. A press or a drag on the ruler moves the position, the keys step it by `step` and `largeStep`, and a Shift + drag on the ruler selects a stretch, reported to the handlers given to it. A `zoom` of `null` fits the timeline to its width.
+
+`createWheelZoom` zooms with the wheel around the pointer, holding the value under it still; `anchoredScroll` is where to scroll so a value stays put through a zoom, and `clampZoom` keeps a zoom within its bounds.
+
+## Clips
+
+A clip is a stretch of a source, a recording or a pattern, placed on the timeline: where it starts, how long it is, where in the source it begins (`offset`), and its fades. Every edit is a plain function that returns a new clip:
+
+```ts
+import { moveClip, setClipFadeIn, splitClip, trimClipStart } from "@audio-ui/core/timeline";
+
+const clip = { start: 4, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
+const limits = { duration: 64, sourceLength: 8 };
+
+trimClipStart(clip, 5, limits); // { start: 5, length: 7, offset: 1, … }: the content stays put
+splitClip(clip, 6); // two clips, the second reading the source from 2
+moveClip(clip, 10, limits); // { start: 10, … }
+setClipFadeIn(clip, 2); // a fade-in that cannot run into the fade-out
+```
+
+`duplicateClip`, `trimClipEnd`, `setClipFadeOut` and `setClipFadeShape` complete them; a fade's shape is one of `FADE_SHAPES` (`linear`, `fast`, `slow`, `smooth`), and `fadeGain` is its gain partway through. On a lane, `coverClips` lays a clip over others the way an arrangement does, covering rather than stacking them, and `insertTime`, `removeTime` and `copyRange` edit a stretch of time across every clip in it.
+
+`createClipController` is a clip's gestures: moved by its body, trimmed by its edges, faded by its fade handles, from the pointer or the keys, and selected.
+
+## Ranges, the navigator and tracks
+
+- `createRangeController` is a span on the timeline, such as the loop or a selection: moved or resized by its body or its edges, drawn across empty lane, and moved from the keys and inputs.
+- `createNavigatorController` is the overview bar with the visible stretch inside it: moving the window scrolls, moving an edge zooms and holds the other edge still. `visibleRange`, `thumbOf` and `rangeOfThumb` convert between them.
+- `createTrackController` reports what a drag, a key, an input or a double click asks of a track's height; the parent holds the height and sets it.
+
+## Snapping
+
+A `Grid` is lines `step` apart from an `offset`, with snap points such as clip edges that pull from `SNAP_RADIUS_PX` away. `snapToGrid(value, grid)` gives the snap point within reach or the nearest line, `snapMove`, `snapSpanMove` and `snapRangeMove` place something dragged, and `bypassesGrid(event)` says when a gesture asks to ignore the grid: Cmd on a Mac, Ctrl elsewhere.
+
+The [Arrangement](/docs/components/base/arrangement) draws these in React.

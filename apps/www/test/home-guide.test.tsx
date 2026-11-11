@@ -38,7 +38,7 @@ describe("getDocsSpaces", () => {
               {
                 description: "What makes the sound.",
                 title: "Overview",
-                url: "/docs/engine",
+                url: "/docs/guides",
               },
             ],
             title: undefined,
@@ -48,7 +48,7 @@ describe("getDocsSpaces", () => {
               {
                 description: "A clock that schedules notes ahead.",
                 title: "Clock and time",
-                url: "/docs/engine/clock-and-time",
+                url: "/docs/guides/clock-and-time",
               },
             ],
             title: "Time",
@@ -64,7 +64,7 @@ describe("HomeGuide", () => {
   test("links every page of every space, with what it does", async () => {
     const { container } = await renderGuide();
     const link = container.querySelector(
-      'a[href="/docs/engine/clock-and-time"]'
+      'a[href="/docs/guides/clock-and-time"]'
     );
     expect(link?.textContent).toBe("Clock and time");
     expect(container.textContent).toContain(

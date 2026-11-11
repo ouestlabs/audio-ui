@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { type BiquadType, biquadResponse } from "@audio-ui/core/analysis";
+import { type BiquadType, biquadResponse } from "@audio-ui/engine/analysis";
 import {
   CIRCUIT_WORKLET,
   circuitResonance,

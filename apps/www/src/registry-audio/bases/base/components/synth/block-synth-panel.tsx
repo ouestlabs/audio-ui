@@ -94,9 +94,7 @@ export default function BlockSynthPanel() {
     if (!(power && ctx && chain.current)) {
       return;
     }
-    if (ctx.state !== "running") {
-      ctx.resume();
-    }
+    webAudio.resume();
     let step = 0;
     let next = ctx.currentTime + 0.05;
     const playNote = (at: number, note: number) => {

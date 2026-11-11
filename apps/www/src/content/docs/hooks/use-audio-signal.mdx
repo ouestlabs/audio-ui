@@ -1,0 +1,22 @@
+---
+title: useAudioSignal
+description: "An AnalyserNode as live signals for a waveform: the loudest sample of the moment, frequency bands and the raw samples, read every frame without re-rendering"
+---
+
+<Entry name="use-audio-signal" />
+
+## Usage
+
+An `AnalyserNode` as three live signals for a live waveform: `level`, the loudest sample of the moment, for a waveform that scrolls; `bands`, the spectrum as log-spaced bands, for bars that dance; and `samples`, the raw waveform, for a scope. Each is read only while something is subscribed to it.
+
+```tsx
+import { LiveWaveform } from "@/components/audio-ui/waveform";
+import { useAudioSignal } from "@/hooks/use-audio-signal";
+
+const signal = useAudioSignal(analyser, { bandCount: 32 });
+
+<LiveWaveform source={signal.level} />;
+<LiveWaveform shape="scope" source={signal.samples} />;
+```
+
+It returns stable sources, so sampling never re-renders the component that calls it; without an analyser they fall silent. See [Waveform](/docs/components/base/waveform#live-signals).

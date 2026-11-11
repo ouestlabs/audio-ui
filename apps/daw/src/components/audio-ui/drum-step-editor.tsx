@@ -2,6 +2,7 @@
 
 import type { Note } from "@audio-ui/core/piano-roll";
 import type { Source } from "@audio-ui/react";
+import { DotsThreeIcon } from "@phosphor-icons/react";
 import {
   type MouseEvent,
   useCallback,
@@ -10,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { cn } from "@/lib/utils";
+import { Sequencer } from "@/components/audio-ui/sequencer";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -19,7 +20,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Sequencer } from "@/components/audio-ui/sequencer";
 import {
   filledEvery,
   MAX_REPEATS,
@@ -28,7 +28,7 @@ import {
   withStep,
   withStepRepeats,
 } from "@/lib/drum-steps";
-import { DotsThreeIcon } from "@phosphor-icons/react";
+import { cn } from "@/lib/utils";
 
 /** A pad of the drum rack that plays the clip: the note it answers and its name. */
 export interface DrumStepPad {

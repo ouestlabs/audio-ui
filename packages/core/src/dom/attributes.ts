@@ -1,3 +1,4 @@
+/** The data attributes a part renders: `data-<part>` (or `data-<component>`), `data-orientation`, `data-disabled`, and `data-<key>` for every other option given, its value as text. */
 export function getDataAttributes(
   component: string,
   options: {

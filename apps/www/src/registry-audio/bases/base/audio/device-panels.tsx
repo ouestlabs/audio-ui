@@ -1,5 +1,5 @@
-import type { ParameterValue } from "@audio-ui/core/device";
-import type { Tempo } from "@audio-ui/core/time";
+import type { ParameterValue } from "@audio-ui/engine/device";
+import type { Tempo } from "@audio-ui/engine/time";
 import type { ComponentType, ReactNode } from "react";
 import { AutoPanPanel } from "@/registry-audio/bases/base/devices/auto-pan/panel";
 import { BassEnhancerPanel } from "@/registry-audio/bases/base/devices/bass-enhancer/panel";

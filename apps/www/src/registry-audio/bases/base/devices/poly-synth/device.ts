@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 
 /*
  * The controls read 0 to 10, as a panel's sliders do; each one is mapped to

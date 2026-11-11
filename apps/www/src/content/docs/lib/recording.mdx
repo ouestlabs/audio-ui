@@ -1,0 +1,25 @@
+---
+title: recording
+description: "Recording into an arrangement: an input recorder on an AudioWorklet that keeps each block with its frame on the audio clock, the frames of a take with the latency taken off, and the audio or MIDI clip a take becomes, with record quantization and overdub"
+---
+
+<Entry name="recording" />
+
+## Usage
+
+Recording into the arrangement: an input recorder on an `AudioWorklet` (installed with it as `input-recorder`) that keeps blocks of the input with their frame on the audio clock, and the clips a take becomes, audio or MIDI.
+
+```ts
+import { createInputRecorder } from "@/lib/input-recorder";
+import { audioTakeClip, takeFrames } from "@/lib/recording";
+
+const recorder = await createInputRecorder(ctx); // null where worklets cannot run
+input.connect(recorder.input);
+recorder.start();
+// … the take …
+const blocks = await recorder.stop();
+const [from, to] = takeFrames({ from, latency, playAt, playFrom, sampleRate: ctx.sampleRate, to });
+const clip = audioTakeClip({ id, length, name: "Take 1", recording: id, start, track });
+```
+
+`takeFrames` lines the take up with the arrangement, taking the input's latency off; `sliceBlocks` keeps the frames inside it; `midiTakeClip` makes a MIDI clip of the notes played, quantized if asked; `overdubbed` merges a take over a clip. The [Transport](/docs/components/base/transport) shows Record, count-in and Punch; what is recorded and when is the host's.

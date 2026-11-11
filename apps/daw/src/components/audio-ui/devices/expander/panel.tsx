@@ -1,23 +1,6 @@
 "use client";
 
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotLine,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -28,6 +11,23 @@ import {
   expanderCurve,
   expanderDevice,
 } from "@/components/audio-ui/devices/expander/device";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotLine,
+} from "@/components/audio-ui/plot";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const MIN_DB = -80;
 const MAX_IN_DB = 0;

@@ -1,4 +1,5 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/engine/device";
+import { type InstrumentEngine, noiseBuffer } from "@audio-ui/engine/device";
 import {
   attackSeconds,
   contourCents,
@@ -22,7 +23,6 @@ const VOICE_GAIN = 4;
 const SMOOTHING = 0.02;
 /** The softest note still sounds: a velocity of 0 is this share of a full one. */
 const MIN_LEVEL = 0.25;
-const NOISE_SECONDS = 2;
 const HARMONICS = 96;
 const MIDDLE_C = 261.63;
 /** How long a voice rings after its release starts, as releases. */
@@ -35,11 +35,7 @@ const CHORUS = {
   Off: { depth: 0.0018, rate: 0.5, wet: 0 },
 } as const;
 
-export interface PolySynthEngine
-  extends InstrumentBinding<PolySynthState, PolySynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type PolySynthEngine = InstrumentEngine<PolySynthState, PolySynthNote>;
 
 interface Voice {
   amp: GainNode;
@@ -65,27 +61,6 @@ function pulseWave(ctx: BaseAudioContext, duty: number) {
     imag[n] = k * (1 - Math.cos(2 * Math.PI * n * duty));
   }
   return ctx.createPeriodicWave(real, imag);
-}
-
-const noises = new WeakMap<BaseAudioContext, AudioBuffer>();
-
-/** Two seconds of white noise, made once per context and shared by every voice. */
-function noiseOf(ctx: BaseAudioContext) {
-  const kept = noises.get(ctx);
-  if (kept) {
-    return kept;
-  }
-  const buffer = ctx.createBuffer(
-    1,
-    ctx.sampleRate * NOISE_SECONDS,
-    ctx.sampleRate
-  );
-  const data = buffer.getChannelData(0);
-  for (let index = 0; index < data.length; index += 1) {
-    data[index] = Math.random() * 2 - 1;
-  }
-  noises.set(ctx, buffer);
-  return buffer;
 }
 
 /**
@@ -212,7 +187,7 @@ export function createPolySynthEngine(
       lfoDepth.connect(oscillator.detune);
     }
     const source = ctx.createBufferSource();
-    source.buffer = noiseOf(ctx);
+    source.buffer = noiseBuffer(ctx);
     source.loop = true;
     const mixes = {
       noise: ctx.createGain(),

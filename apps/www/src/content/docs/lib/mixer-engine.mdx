@@ -1,0 +1,22 @@
+---
+title: mixer-engine
+description: "A mixer on the Web Audio API: a channel per track and return, with its chain, volume, constant-power pan, switch, solo, pre or post-fader sends, delay compensation and meters, into a main track"
+---
+
+<Entry name="mixer-engine" />
+
+## Usage
+
+`mixer-engine` is the mixing desk the engine plays through, usable on its own with sources of your own: a channel per track and per return (a track that names a `group` plays into that track's channel), each with a device chain (`setChain`), a volume, a pan, a switch and a solo, sends taken before or after the volume, pan and switch as each return asks, delay compensation from the latency each chain declares, a meter per channel, and the main track to the output. Nothing limits the main track, so a mix over full scale shows on the meters as it would in the file.
+
+```ts
+import { createMixer } from "@/lib/mixer-engine";
+
+const mixer = createMixer(context);
+mixer.update({
+  main: { gain: 1 },
+  returns: [{ gain: 1, id: "hall", latency: 0, on: true, pan: 0, pre: false, soloed: false }],
+  tracks: [{ gain: 0.8, id: "vox", latency: 288, on: true, pan: -0.2, sends: { hall: 0.3 }, soloed: false }],
+});
+source.connect(mixer.strip("vox")!.input);
+```

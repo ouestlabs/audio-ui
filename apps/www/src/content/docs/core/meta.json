@@ -1,0 +1,20 @@
+{
+  "title": "Core",
+  "pages": [
+    "index",
+    "---Controls---",
+    "controllers",
+    "knob",
+    "fader",
+    "xypad",
+    "meter",
+    "envelope",
+    "plot",
+    "piano",
+    "pad",
+    "sequencer",
+    "piano-roll",
+    "timeline",
+    "waveform"
+  ]
+}

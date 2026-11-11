@@ -1,22 +1,7 @@
 "use client";
 
-import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/core/time";
+import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -27,6 +12,21 @@ import {
   phaserDevice,
   phaserSweep,
 } from "@/components/audio-ui/devices/phaser/device";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;

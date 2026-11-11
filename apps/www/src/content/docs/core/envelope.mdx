@@ -1,0 +1,54 @@
+---
+title: envelope
+description: "The envelope's controller from @audio-ui/core: breakpoints held or controlled, moved, added, removed and bent by pointer and keyboard, and the geometry that draws a bent segment."
+---
+
+<Module from="@audio-ui/core/envelope" />
+
+## Usage
+
+An envelope is a list of breakpoints, each a point from 0 to 1 on both axes, with a `curve` from -1 to 1 for how the segment leaving it bends (0, or none, for a straight line). The controller holds that list and every gesture on it, and follows the [contract](/docs/core/controllers) every controller shares:
+
+```ts
+import { createEnvelopeController } from "@audio-ui/core/envelope";
+
+const envelope = createEnvelopeController({
+  defaultValue: [
+    { x: 0, y: 0 },
+    { x: 0.1, y: 1, curve: -0.5 },
+    { x: 0.4, y: 0.6 },
+    { x: 1, y: 0 },
+  ],
+  minPoints: 2,
+  snap: 0.05,
+  onValueCommitted: (points) => save(points),
+});
+const unsubscribe = envelope.subscribe(() => draw(envelope.getSnapshot()));
+```
+
+| Option | Meaning |
+| --- | --- |
+| `value`, `defaultValue` | The points, controlled, or the uncontrolled start (an ADSR-like shape unless given) |
+| `minPoints`, `maxPoints` | How few (2 by default) and how many points it may have |
+| `snap` | A grid step for both axes, or `{ x, y }` for each, 0 leaving an axis free; Cmd or Ctrl held skips it |
+| `step` | What an arrow key moves a point by, 0.01 by default |
+| `format`, `locale` | How `formatPoint` writes a point for a screen reader |
+| `disabled` | Takes every input away |
+
+## The input
+
+Each gesture has its own call, given the element it happens on and the graph's element, which gives the coordinates:
+
+- `pressPoint(index, event, handle, graph)` drags a point, or removes it with Alt held; a point stays between its neighbours, so points never cross.
+- `pressSegment(index, event, handle, graph)` drags a segment's handle to bend it, and `pressBend(event, graph)`, an Alt + press on the graph, bends the segment under the pointer.
+- `addPointAt({ x, y }, event)` adds a point and returns its index, or `null` at `maxPoints`; `removePoint(index, event)` takes one away, down to `minPoints`.
+- `straightenSegment(index, event)` and `straightenAt({ x, y }, event)` make a bent segment straight again.
+- `keyPoint(index, event)` moves a focused point with the arrows, Shift for a larger step, and removes it with Delete or Backspace; `keySegment(index, event)` bends a focused segment with Up and Down and straightens it with Delete. Each returns `true` when it handled the key.
+
+The snapshot holds the points and what is being dragged (`draggingIndex`, `draggingSegmentIndex`), with `blockedIndex` and `isAddBlocked` for a moment after a removal or an addition was refused, for a view to show it. `dispose()` releases that feedback's timers when the view goes.
+
+## Geometry
+
+The rest of the module draws the envelope: `polylinePoints` is the polyline through the points with each bent segment sampled, `levelAt` the level along a bent segment, `curveForMidpoint` the curve that puts a segment's middle at a height, and `segmentNear` the segment under a point. `sortPoints`, `sanitizePoints`, `clampToNeighbors` and `insertPoint` keep a list valid.
+
+The [Envelope](/docs/components/base/envelope) draws this controller in React.

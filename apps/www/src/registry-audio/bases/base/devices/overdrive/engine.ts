@@ -1,3 +1,4 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
 import {
   type OverdriveState,
   overdriveSettings,
@@ -8,14 +9,7 @@ import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversam
 
 const RAMP_SECONDS = 0.015;
 
-export interface OverdriveEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: OverdriveState) => void;
-}
+export type OverdriveEngine = EffectEngine<OverdriveState>;
 
 /**
  * An overdrive on the Web Audio API for an `OverdriveState`:

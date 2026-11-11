@@ -1,0 +1,20 @@
+---
+title: arrangement
+description: "The document of an arrangement of clips on tracks: its clips, tracks and mixes, how far a clip reaches, where a MIDI clip's notes play, and what a track's volume and pan automation gives at a point of the song"
+---
+
+<Entry name="arrangement" />
+
+## Usage
+
+The arrangement as one document: its tracks (with their mixes, device chains, sends, groups and racks), its clips, tempo, time signatures, locators, loop and length, and what is read from them. It holds the types and the reads; the edits are commands in `arrangement-state`, installed with [`useArrangement`](/docs/hooks/use-arrangement).
+
+```ts
+import { clipReach, mixOf, playedNotes } from "@/lib/arrangement";
+
+const mix = mixOf(track); // its volume, pan, switch and sends
+const notes = playedNotes(clip); // a MIDI clip's notes as it plays them, its loop and transpose applied
+const reach = clipReach(clip); // how far it may be stretched: undefined when it loops
+```
+
+Everything the [Arrangement](/docs/components/base/arrangement), its clip views and the [arrangement engine](/docs/lib/arrangement-engine) read comes from here, so a host's own engine reads the same document.

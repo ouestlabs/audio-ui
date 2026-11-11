@@ -1,4 +1,4 @@
-import { pitchName } from "@audio-ui/core/pitch";
+import { pitchName } from "@audio-ui/core";
 import { Knob } from "@audio-ui/react/knob";
 import { useCallback } from "react";
 import { ROOT, SPAN } from "../audio/engine";

@@ -1,24 +1,16 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import {
   type EqualizerState,
   equalizerDevice,
 } from "@/registry-audio/bases/base/devices/equalizer/device";
-import {
-  createEqualizerEngine,
-  type EqualizerEngine,
-} from "@/registry-audio/bases/base/devices/equalizer/engine";
+import { createEqualizerEngine } from "@/registry-audio/bases/base/devices/equalizer/engine";
 import { EqualizerPanel } from "@/registry-audio/bases/base/devices/equalizer/panel";
-import { useDemoSource } from "@/registry-audio/bases/base/hooks/use-demo-source";
+import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { usePlaySwitch } from "@/registry-audio/bases/base/hooks/use-play-switch";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
-import { renderDemoSource } from "@/registry-audio/bases/base/lib/demo-sound";
-import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
-const FFT_SIZE = 4096;
-const ANALYSER_SMOOTHING = 0.8;
 const MASTER_VOLUME = 0.7;
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -35,59 +27,13 @@ export default function BlockEqualizer() {
   const [state, setState] = useState<EqualizerState>(
     () => equalizerDevice.apply(equalizerDevice.defaults(), START).state
   );
-  const { playing } = usePlaySwitch();
-  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   const master = useMasterBus(MASTER_VOLUME);
-  const engine = useRef<EqualizerEngine | null>(null);
-  const stateRef = useRef(state);
-  stateRef.current = state;
+  const { analyser } = useDeviceLoop({
+    create: createEqualizerEngine,
+    destination: master,
+    state,
+  });
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
-
-  const name = useDemoSource("groove");
-  useEffect(() => {
-    const ctx = webAudio.getContext();
-    if (!(playing && ctx && master)) {
-      return;
-    }
-    ctx.resume();
-    let cancelled = false;
-    let stop = () => undefined;
-    renderDemoSource(name, ctx.sampleRate).then((buffer) => {
-      if (cancelled) {
-        return;
-      }
-      const source = ctx.createBufferSource();
-      source.buffer = buffer;
-      source.loop = true;
-      const eq = createEqualizerEngine(ctx, stateRef.current);
-      const tap = ctx.createAnalyser();
-      tap.fftSize = FFT_SIZE;
-      tap.smoothingTimeConstant = ANALYSER_SMOOTHING;
-      source.connect(eq.input);
-      eq.output.connect(tap);
-      eq.output.connect(master);
-      engine.current = eq;
-      source.start();
-      setAnalyser(tap);
-      stop = () => {
-        source.stop();
-        source.disconnect();
-        tap.disconnect();
-        eq.dispose();
-        engine.current = null;
-        setAnalyser(null);
-      };
-    });
-    return () => {
-      cancelled = true;
-      stop();
-    };
-  }, [master, name, playing]);
-
-  // The engine follows the state, whoever changed it: a handle, a knob or a call.
-  useEffect(() => {
-    engine.current?.update(state);
-  }, [state]);
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">

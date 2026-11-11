@@ -1,4 +1,15 @@
 {
   "root": true,
-  "pages": ["(root)", "components", "engine"]
+  "pages": [
+    "(root)",
+    "guides",
+    "core",
+    "engine",
+    "elements",
+    "react",
+    "(registry)",
+    "components",
+    "hooks",
+    "lib"
+  ]
 }

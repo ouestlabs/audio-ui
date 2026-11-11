@@ -2,7 +2,7 @@ import type {
   MetronomeRhythm,
   SignatureChange,
   Tempo,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import { EnvelopeIcon } from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
 import {

@@ -2,23 +2,6 @@
 
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Plot,
-  PlotCurve,
-  PlotDot,
-  PlotGraph,
-  PlotGrid,
-  PlotLine,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -30,6 +13,23 @@ import {
   compressorDevice,
   compressorUnused,
 } from "@/components/audio-ui/devices/compressor/device";
+import {
+  Plot,
+  PlotCurve,
+  PlotDot,
+  PlotGraph,
+  PlotGrid,
+  PlotLine,
+} from "@/components/audio-ui/plot";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const MIN_DB = -60;
 const MAX_DB = 6;

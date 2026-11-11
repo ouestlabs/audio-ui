@@ -111,6 +111,7 @@ function scopePath(points: ScopePoint[]): Path2D {
   return path;
 }
 
+/** The options of `attachWaveformCanvas`: the peaks or a live signal, the stretch shown and the played share, the variant, the bars' size, and how the drawing moves. */
 export interface WaveformCanvasOptions {
   /** Space between bars, in CSS pixels, snapped to whole device pixels. @default 1 */
   barGap?: number;

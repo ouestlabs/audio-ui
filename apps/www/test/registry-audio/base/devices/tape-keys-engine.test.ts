@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { deviceTools } from "@audio-ui/core/device";
+import { deviceTools } from "@audio-ui/engine/device";
 import {
   speedCents,
   TAPE_SECONDS,

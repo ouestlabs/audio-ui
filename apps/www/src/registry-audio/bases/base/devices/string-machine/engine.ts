@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   attackSeconds,
   cutoffHertz,
@@ -42,11 +42,10 @@ const SOURCES: readonly {
   { detune: 0, ratio: 0.25, register: "bass", type: "triangle" },
 ];
 
-export interface StringMachineEngine
-  extends InstrumentBinding<StringMachineState, StringMachineNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type StringMachineEngine = InstrumentEngine<
+  StringMachineState,
+  StringMachineNote
+>;
 
 interface Voice {
   amp: GainNode;

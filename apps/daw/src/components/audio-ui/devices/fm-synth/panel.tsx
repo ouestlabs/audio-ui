@@ -2,16 +2,6 @@
 
 import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback, useState } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Piano } from "@/components/audio-ui/piano";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -24,6 +14,16 @@ import {
   fmSynthDevice,
   fmSynthPreset,
 } from "@/components/audio-ui/devices/fm-synth/device";
+import { Piano } from "@/components/audio-ui/piano";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 /** The controls by what they do: what every operator shares, then each operator's four. */
 const GROUPS = [

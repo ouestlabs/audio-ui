@@ -1,0 +1,83 @@
+---
+title: Fader
+description: "The headless Fader of @audio-ui/react: its parts, what each renders and owns, and their props."
+---
+
+<Module from="@audio-ui/react/fader" />
+
+## Anatomy
+
+Import the primitive and assemble its parts.
+
+```tsx
+import { Fader } from "@audio-ui/react";
+
+<Fader.Root>
+  <Fader.Label />
+  <Fader.Control>
+    <Fader.Track>
+      <Fader.Indicator />
+    </Fader.Track>
+    <Fader.Mark value={50} />
+    <Fader.Thumb />
+  </Fader.Control>
+  <Fader.Value />
+</Fader.Root>
+```
+
+## API reference
+
+### Root
+
+Groups all parts of the fader, with audio defaults (vertical, -60…+6) and mouse-wheel stepping. While a pointer drags it, the thumb follows the pointer even if a controlled `value` lags behind, as with a seek bar driven by playback time or automation. To reject a value, call `eventDetails.cancel()`. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"anchor"} type={"number"}>Value the `Indicator` fills from, such as `0` on a -1…1 pan. Defaults to `min`.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"}>Uncontrolled starting value, and what a double click, an Alt + click or the Delete key return to; defaults to the midpoint of `min…max`.</TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails: ChangeEventDetails) => void"}>Fires on drag, track press, keyboard, wheel and form input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails: CommitEventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"vertical\""}></TypeRow>
+<TypeRow name={"value"} type={"number"}></TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Control
+
+The interactive area: pointer presses and drags, plus mouse-wheel stepping. Sets `touch-action: none` so touch drags don't scroll the page. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Indicator
+
+The filled part of the track: from `min` up to the value, or between the Root's `anchor` and the value, on whichever side of it the value is. Renders a `<div>` element.
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+### Mark
+
+A graduation along the track at `value`: placed from the start of the travel in the fader's direction, where the thumb's center would be at that value. It carries `data-active` while the value has reached it from the anchor, and `data-orientation`. Decorative: the thumb's input announces the value. Render your own tick and label inside it. Renders a `<div>` element.
+
+<TypeTable>
+<TypeRow name={"value"} type={"number"}>Where the mark sits, between `min` and `max`.</TypeRow>
+</TypeTable>
+
+<TypeTable title="Data attributes">
+<TypeRow name={"data-active"}>Whether the value has reached this mark from the anchor.</TypeRow>
+<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
+</TypeTable>
+
+## Styled
+
+The registry's styled Fader, its usage and interaction: [Fader](/docs/components/base/fader).

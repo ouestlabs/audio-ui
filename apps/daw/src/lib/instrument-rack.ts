@@ -1,4 +1,4 @@
-import type { DeviceContext } from "@audio-ui/core/device";
+import type { DeviceContext } from "@audio-ui/engine/device";
 import {
   type ChainZone,
   inZone,

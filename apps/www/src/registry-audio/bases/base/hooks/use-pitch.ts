@@ -1,7 +1,7 @@
 "use client";
 
-import { cents } from "@audio/note";
-import yin from "@audio/pitch-yin";
+import { detectPitch, type PitchEstimate } from "@audio-ui/engine/analysis";
+import { cents } from "@audio-ui/engine/pitch";
 import { createSource, type Source } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 
@@ -20,21 +20,6 @@ export interface PitchReading {
   pitch: number;
 }
 
-/** A signal's loudness as an RMS level, from 0 to 1. */
-const rms = (samples: Float32Array) => {
-  let energy = 0;
-  for (const sample of samples) {
-    energy += sample * sample;
-  }
-  return Math.sqrt(energy / samples.length);
-};
-
-/** What a detection found: the pitch and how periodic the sound is there. */
-interface PitchEstimate {
-  confidence: number;
-  frequency: number;
-}
-
 export interface UsePitchOptions {
   /** How long the last note stays after the sound stops, in milliseconds, so a string's decay does not flicker. @default 600 */
   holdMs?: number;
@@ -51,6 +36,9 @@ export interface UsePitchOptions {
   /** YIN's threshold: how aperiodic a period may be and still count. Lower is stricter. @default 0.1 */
   threshold?: number;
 }
+
+/** A note's name as `@audio/note` writes it, split into its letter and its octave: `"A#4"`. */
+const NOTE_NAME = /^(.*?)(-?\d+)$/;
 
 /** Detections per second: enough for a needle, at a third of 60 frames' cost. */
 const DETECTIONS_PER_SECOND = 20;
@@ -74,7 +62,7 @@ function steadied(
     return null;
   }
   const note = cents(steady, { a4: reference });
-  const [, name = "", octave = "0"] = /^(.*?)(-?\d+)$/.exec(note.name) ?? [];
+  const [, name = "", octave = "0"] = NOTE_NAME.exec(note.name) ?? [];
   return {
     cents: note.cents,
     confidence,
@@ -122,18 +110,12 @@ export function usePitch(
       }
       lastRun = now;
       analyser.getFloatTimeDomainData(samples);
-      const heard =
-        rms(samples) >= minLevel
-          ? yin(samples, {
-              fs: analyser.context.sampleRate,
-              maxFreq: maxHz,
-              minFreq: minHz,
-              threshold,
-            })
-          : null;
-      const found: PitchEstimate | null = heard
-        ? { confidence: heard.clarity, frequency: heard.freq }
-        : null;
+      const found = detectPitch(samples, analyser.context.sampleRate, {
+        maxHz,
+        minHz,
+        minLevel,
+        threshold,
+      });
       if (found) {
         lastHeard = now;
         const reading = steadied(recent, found, median, reference);

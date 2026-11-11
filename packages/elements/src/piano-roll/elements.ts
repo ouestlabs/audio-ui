@@ -15,10 +15,10 @@ import {
   type PianoRollNoteOffEventDetails,
   type PianoRollOptions,
   type PianoRollSnapshot,
+  type RollScale,
   selectionSpan,
   spatialOrder,
 } from "@audio-ui/core/piano-roll";
-import { SCALES, type Scale, type ScaleName } from "@audio-ui/core/pitch";
 import type { TimelineSnapshot } from "@audio-ui/core/timeline";
 import {
   connectPart,
@@ -124,7 +124,8 @@ const isTimeline = (element: Element | null): element is TimelineElement =>
  * velocity?, chance?, muted? }[]`, and the selection through the `selection`
  * property as ids. Rows run from `max-pitch` (72) down to `min-pitch` (48);
  * `folded` keeps only rows with notes, and `folded="scale"` also the scale's
- * rows, set with `scale` (such as `major`) and `scale-root` (0 for C).
+ * rows, set with `scale` as its pitch classes (`0 2 4 5 7 9 11` for a major
+ * scale) and `scale-root` as its root's (0 for C).
  * `mode` sets the behavior of a press on empty grid: `select` (default) or
  * `draw`, with `draw-style="paint"` for brush drawing. Fires `input` with `{
  * value, reason }`, cancelable with `preventDefault()`, `change` when the
@@ -170,7 +171,7 @@ export class PianoRollElement extends ControlRoot<PianoRollSnapshot> {
 
   #value: readonly Note[] | undefined;
   #selection: readonly NoteId[] | undefined;
-  #scale: Scale | null | undefined;
+  #scale: RollScale | null | undefined;
   #seen: { disabled: boolean; duration: number; zoom: number | null } | null =
     null;
   #stopTimeline: (() => void) | undefined;
@@ -247,12 +248,12 @@ export class PianoRollElement extends ControlRoot<PianoRollSnapshot> {
     this.paint();
   }
 
-  /** The scale whose rows are marked `data-in-scale`, such as `{ name: "major", root: 0 }`. Overrides `scale` and `scale-root`. */
-  get scale(): Scale | null {
+  /** The scale whose rows are marked `data-in-scale`, as its pitch classes and its root: `{ pitchClasses: [0, 2, 4, 5, 7, 9, 11], root: 0 }` for C major. Overrides `scale` and `scale-root`. */
+  get scale(): RollScale | null {
     return this.#scale ?? this.#scaleAttribute();
   }
 
-  set scale(scale: Scale | null) {
+  set scale(scale: RollScale | null) {
     this.#scale = scale;
     this.configure();
     this.paint();
@@ -364,13 +365,12 @@ export class PianoRollElement extends ControlRoot<PianoRollSnapshot> {
     this.controller.setOptions(options);
   }
 
-  #scaleAttribute(): Scale | null {
-    const name = this.getAttribute("scale");
-    return name !== null && name in SCALES
-      ? {
-          name: name as ScaleName,
-          root: numberAttribute(this, "scale-root") ?? 0,
-        }
+  #scaleAttribute(): RollScale | null {
+    const pitchClasses = listAttribute(this, "scale")
+      .map(Number)
+      .filter(Number.isFinite);
+    return pitchClasses.length > 0
+      ? { pitchClasses, root: numberAttribute(this, "scale-root") ?? 0 }
       : null;
   }
 

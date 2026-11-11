@@ -15,10 +15,12 @@ const UNMEASURED_PRESSURE = 0.5;
 /** Home and End land on the first and last pads, then look inward for one that is enabled. */
 const SCAN_FROM_END: Partial<Record<string, number>> = { End: -1, Home: 1 };
 
+/** What `onPadOn` receives with a strike: its `velocity`, from 0 to 1, the reason (`"press"` or `"keyboard"`), the event, and `cancel()` to refuse it. */
 export type PadOnEventDetails = { velocity: number } & (
   | ChangeEventDetails<"press", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
 );
+/** What `onPadOff` receives when a pad stops: the reason (`"press"`, `"keyboard"`, or `"choke"` when another pad of its choke group cut it) and the event. */
 export type PadOffEventDetails =
   | CommitEventDetails<"press", PointerEvent>
   | CommitEventDetails<"keyboard", FocusEvent | KeyboardEvent>
@@ -31,6 +33,7 @@ export interface PadTarget {
   value: string;
 }
 
+/** The options of `createPadController`: the pads in reading order, the columns of the grid, the pads lit or disabled from elsewhere, and the callbacks. */
 export interface PadOptions {
   /** Pads lit from elsewhere, on top of the ones held here. */
   activePads?: readonly string[];
@@ -45,6 +48,7 @@ export interface PadOptions {
   values: readonly string[];
 }
 
+/** What a view draws the pads from: the ones sounding and how hard, the tab stop, and whether the grid is disabled. */
 export interface PadSnapshot {
   /** Pads sounding: held here, or listed in `activePads`. */
   active: ReadonlySet<string>;
@@ -55,6 +59,7 @@ export interface PadSnapshot {
   velocities: ReadonlyMap<string, number>;
 }
 
+/** What `createPadController` returns: the snapshot to draw from, and the strikes, keys and focus moves of the grid. */
 export interface PadController {
   /** Moves the tab stop to `value`, leaving focus where it is. */
   focusPad: (value: string) => void;

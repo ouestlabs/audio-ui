@@ -1,6 +1,6 @@
 "use client";
 
-import type { WarpMode } from "@audio-ui/core/playback";
+import type { WarpMode } from "@audio-ui/engine/playback";
 import {
   addWarpMarker,
   moveWarpMarker,
@@ -9,7 +9,7 @@ import {
   type WarpMarker,
   warpedTime,
   warpRate,
-} from "@audio-ui/core/time";
+} from "@audio-ui/engine/time";
 import type { Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,
@@ -46,10 +46,7 @@ import {
   TimelineRangeHandle,
   TimelineViewport,
 } from "@/components/audio-ui/timeline";
-import {
-  type ClipPeaks,
-  clipPeakCount,
-} from "@/lib/arrangement";
+import { type ClipPeaks, clipPeakCount } from "@/lib/arrangement";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {

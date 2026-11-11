@@ -1,15 +1,6 @@
 "use client";
 
 import { type ReactNode, useCallback, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-  PlotLine,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -20,6 +11,15 @@ import {
   duckerCurve,
   duckerDevice,
 } from "@/components/audio-ui/devices/ducker/device";
+import {
+  Plot,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+  PlotLine,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const MIN_KEY_DB = -60;
 const MAX_KEY_DB = 0;

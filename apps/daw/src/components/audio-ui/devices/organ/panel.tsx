@@ -2,21 +2,6 @@
 
 import { midiToHz } from "@audio/note";
 import { type ReactNode, useCallback, useState } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Select,
-  SelectContent,
-  SelectGroup,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  ToggleGroup,
-  ToggleGroupItem,
-} from "@/components/ui/toggle-group";
-import { Fader } from "@/components/audio-ui/fader";
-import { Piano } from "@/components/audio-ui/piano";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -32,6 +17,18 @@ import {
   organDevice,
   organPreset,
 } from "@/components/audio-ui/devices/organ/device";
+import { Fader } from "@/components/audio-ui/fader";
+import { Piano } from "@/components/audio-ui/piano";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { cn } from "@/lib/utils";
 
 /** The controls by what they do, beside the drawbars. */
 const GROUPS = [

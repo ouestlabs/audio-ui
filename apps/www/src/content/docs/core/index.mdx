@@ -1,0 +1,34 @@
+---
+title: Core
+description: "@audio-ui/core: the framework-agnostic logic under every audio/ui control and device, in modules you import one at a time, the same in React, plain DOM, Vue, Svelte or a worker."
+---
+
+`@audio-ui/core` holds the logic of every control that is not its view: the controller of each one, its geometry, values and their scales, and the sources a view follows outside its render. No framework, no DOM required for the logic, no Web Audio, and no dependency. The React primitives and the custom elements are each one adapter over it; a page of your own can be another. What makes and times the sound is in [Engine](/docs/engine).
+
+It is one package, `npm install @audio-ui/core`, and each module is its own entry point, so a page pays only for what it imports.
+
+## Controls
+
+The controller of each control: its value, its gesture, its keys and its formatting, whatever draws it. [Controllers](/docs/core/controllers) is the contract they share.
+
+| Module | Controls |
+| --- | --- |
+| [`knob`](/docs/core/knob), [`fader`](/docs/core/fader), [`xypad`](/docs/core/xypad) | One or two bounded values dragged, stepped and typed. |
+| [`meter`](/docs/core/meter) | Levels on a scale, their ballistics, painted every frame. |
+| [`envelope`](/docs/core/envelope), [`plot`](/docs/core/plot) | Points on a curve, and a plot's axes, paths, ticks and handles. |
+| [`piano`](/docs/core/piano), [`pad`](/docs/core/pad) | Keys and pads struck with a velocity. |
+| [`sequencer`](/docs/core/sequencer), [`piano-roll`](/docs/core/piano-roll) | Steps and notes on a grid: selection, editing, scales. |
+| [`timeline`](/docs/core/timeline), [`waveform`](/docs/core/waveform) | Clips in time, a zoom and a playhead; a recording's peaks and a seek. |
+
+## The root
+
+`@audio-ui/core` itself holds what every module shares: ranges, scales and stepping (`resolveScale`, `roundToStep`), values that change outside a framework (`createSource`, `createStore`), a frame task that sleeps when nothing moves (`createFrameTask`), and the details a change or a commit reports.
+
+<Module from="@audio-ui/core" />
+
+## Adapters
+
+- [React](/docs/react): `@audio-ui/react`, the headless primitives.
+- [Elements](/docs/elements): `@audio-ui/elements`, the same primitives as custom elements, for any framework.
+- [Engine](/docs/engine): `@audio-ui/engine`, the audio logic: devices, musical time, levels, MIDI input, scales and the clip player.
+- [Registry](/docs/registry): the styled components, devices, hooks and libraries you install and own.

@@ -14,7 +14,8 @@ import {
   type RecordingLoaderMessage,
   type RecordingLoaderReply,
   type RecordingStream,
-} from "@audio-ui/core/playback";
+} from "@audio-ui/engine/playback";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 
 /**
  * A recording kept in a file of the origin private file system and streamed
@@ -148,7 +149,6 @@ export interface ClipPlayer {
   synced: () => Promise<void>;
 }
 
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
 /** The recordings each context's players already hold. */
 const posted = new WeakMap<BaseAudioContext, Set<string>>();
 /** A recording's channels in shared memory, made once, so every context reads the same samples. */
@@ -159,24 +159,7 @@ const shared = new WeakMap<object, Float32Array[]>();
  * `CLIP_PLAYER_PROCESSOR`. `false` when the context cannot run worklets.
  */
 export function loadClipPlayer(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  const worklet = ctx.audioWorklet;
-  if (!(worklet && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([CLIP_PLAYER_WORKLET], { type: "text/javascript" })
-  );
-  const done = worklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
+  return loadWorklet(ctx, CLIP_PLAYER_WORKLET);
 }
 
 /**

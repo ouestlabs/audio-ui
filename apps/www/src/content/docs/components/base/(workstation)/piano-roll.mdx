@@ -27,46 +27,7 @@ A piano roll for writing a phrase: a keyboard down the side, notes on a grid, an
 
 ## Anatomy
 
-Import the registry components for the ready-made look, or compose the primitive's parts yourself.
-
-```tsx
-import { PianoRoll, Timeline } from "@audio-ui/react";
-
-<Timeline.Root duration={16} snapStep={1}>
-  <PianoRoll.Root>
-    <PianoRoll.Keys>
-      <PianoRoll.Rows>
-        {(pitch) => (
-          <PianoRoll.Key pitch={pitch}>
-            <PianoRoll.KeyLabel />
-          </PianoRoll.Key>
-        )}
-      </PianoRoll.Rows>
-    </PianoRoll.Keys>
-    <PianoRoll.Grid aria-label="Notes">
-      <PianoRoll.Rows>{(pitch) => <PianoRoll.Row pitch={pitch} />}</PianoRoll.Rows>
-      <PianoRoll.SelectionSpan>
-        <PianoRoll.StretchHandle edge="start" />
-        <PianoRoll.StretchHandle edge="end" />
-      </PianoRoll.SelectionSpan>
-      <PianoRoll.Notes>
-        {(note) => (
-          <PianoRoll.Note key={note.id} note={note}>
-            <PianoRoll.NoteHandle edge="start" />
-            <PianoRoll.NoteHandle edge="end" />
-          </PianoRoll.Note>
-        )}
-      </PianoRoll.Notes>
-      <PianoRoll.Marquee />
-    </PianoRoll.Grid>
-    <PianoRoll.VelocityLane aria-label="Velocity">
-      <PianoRoll.Notes>
-        {(note) => <PianoRoll.Velocity key={note.id} note={note} />}
-      </PianoRoll.Notes>
-    </PianoRoll.VelocityLane>
-  </PianoRoll.Root>
-</Timeline.Root>;
-```
+It is built on the headless [PianoRoll](/docs/react/piano-roll) of `@audio-ui/react`: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -107,7 +68,7 @@ A note is `{ id, pitch, start, length, velocity?, deviation?, muted?, chance? }`
 
 `onNoteOn` and `onNoteOff` say when a pitch should sound or stop: a key pressed, a note drawn, picked up or moved to a new pitch.
 
-`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row` in it, `data-out-of-scale` on the others, and `data-scale-root` on its root's): the styles leave the scale's rows clear, shade the others in place of the black keys, and edge the root's in the primary color, and `folded="scale"` keeps only those rows and the ones carrying notes. `@audio-ui/core/pitch` holds the scales (`SCALES`, `inScale`, `nearestInScale`), and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation` and `changeLevel`, and the time commands `deleteTime`, `insertTime` and `duplicateTime`; `selectionSpan` gives the time a selection covers and `findNotes` the notes a query matches, by pitch, velocity, length, chance, scale, state or count.
+`scale` marks the rows of a scale (`data-in-scale` on each `PianoRoll.Row` in it, `data-out-of-scale` on the others, and `data-scale-root` on its root's): the styles leave the scale's rows clear, shade the others in place of the black keys, and edge the root's in the primary color, and `folded="scale"` keeps only those rows and the ones carrying notes. The roll takes a scale as its pitch classes and its root; `@audio-ui/engine/pitch` holds the scales by name (`SCALES`, `inScale`, `nearestInScale`) and `rollScale`, which gives one in that shape, and `@audio-ui/core/piano-roll` the edits a toolbar or a menu applies to the selection, each returning the new notes: `splitNotes`, `chopNotes`, `joinNotes`, `legatoNotes`, `reverseNotes`, `invertNotes`, `stretchNotes`, `fitNotesToScale`, `rampVelocity`, `humanizeNotes`, `toggleMuted`, `setChance`, `setDeviation` and `changeLevel`, and the time commands `deleteTime`, `insertTime` and `duplicateTime`; `selectionSpan` gives the time a selection covers and `findNotes` the notes a query matches, by pitch, velocity, length, chance, scale, state or count.
 
 The toolbar of the preview above is three menus that install on their own: the [Scale menu](/docs/components/base/scale-menu) picks the scale the roll marks, [Note find](/docs/components/base/note-find) selects notes by what they are, and the [Note edit menu](/docs/components/base/note-edit-menu) runs the commands above on the selection.
 
@@ -115,96 +76,23 @@ The toolbar of the preview above is three menus that install on their own: the [
 
 <ComponentPreview styleName="base-nova" name="piano-roll-playback-demo" />
 
-`usePianoRollPlayback` plays the notes you hold through a synth: play, pause and stop, a loop or once through, a metronome, and the notes the roll auditions. `npx shadcn@latest add @audio-ui/use-piano-roll-playback`.
+`usePianoRollPlayback` plays the notes you hold through a synth: play, pause and stop, a loop or once through, a metronome, and the notes the roll auditions.
 
-```tsx
-import { useMasterBus } from "@/hooks/use-master-bus";
-import { meterOf, usePianoRollPlayback } from "@/hooks/use-piano-roll-playback";
-import { useSynthVoices } from "@/hooks/use-synth-voices";
-
-const tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 120 };
-const meter = meterOf(tempo, 4); // four bars, in steps
-
-const output = useMasterBus(0.7);
-const voices = useSynthVoices({ destination: output });
-const playback = usePianoRollPlayback({ meter, notes, tempo, voices });
-
-<Timeline
-  duration={meter.duration}
-  onPositionChange={playback.seek}
-  snapStep={1}
-  source={playback.position}
->
-  <PianoRoll
-    activePitches={playback.playingPitches}
-    onNoteOff={playback.onNoteOff}
-    onNoteOn={playback.onNoteOn}
-    onValueChange={setNotes}
-    value={notes}
-  >
-    {/* … */}
-  </PianoRoll>
-</Timeline>;
-```
-
-The voices and the bus come from [Synthesis](/docs/engine/synthesis) and [Output](/docs/engine/output), and the clock under the hook from [Clock and time](/docs/engine/clock-and-time). The hook plays the notes; it does not hold them, so an undo, a file import or an agent can change them and the next pass plays the change. Time is in steps, four to a quarter note whatever the signature; `meterOf(tempo, bars)` gives a clip's length in steps and where its bars and beats fall. Notes are scheduled ahead on the audio clock, so they keep time when the page is busy, and each plays as the roll draws it: a deactivated note stays silent, a `chance` plays that often, a `deviation` strays its velocity each time round.
-
-It returns `play` (on from the playhead), `pause` (stops where it is), `stop` (back to the start of the loop), `seek`, `isPlaying`, `playingPitches`, `onNoteOn` and `onNoteOff` for the roll, `position` (in steps) for the timeline's `source`, and `clock` (in seconds) for a [Transport](/docs/components/base/transport)'s `source`. It also takes `looping` (on by default), a `loopRegion` of steps, whose `commitLoopRegion` makes a moved loop heard at once, `metronome` with the `destination` it clicks into, and the `envelope` the notes play with.
+Usage and API: [`usePianoRollPlayback`](/docs/hooks/use-piano-roll-playback).
 
 ### Undo and redo
 
-`useUndoHistory` undoes and redoes any value you hold. `npx shadcn@latest add @audio-ui/use-undo-history`.
+`useUndoHistory` undoes and redoes any value you hold.
 
-```tsx
-import { useUndoHistory } from "@/hooks/use-undo-history";
-
-const [notes, setNotes] = useState<Note[]>([]);
-const history = useUndoHistory(notes, setNotes);
-
-<PianoRoll
-  onValueChange={history.change}
-  onValueCommitted={history.commit}
-  value={notes}
-/>
-<Button disabled={!history.canUndo} onClick={history.undo}>Undo</Button>
-<Button disabled={!history.canRedo} onClick={history.redo}>Redo</Button>
-```
-
-`change` is each step of a gesture and `commit` ends it, so a whole drag undoes in one step. `edit` records a change made in one go, such as a menu command. A new change after an undo drops the redo, and the history keeps the last 100 changes. It works the same for an envelope's points or a sequencer's pattern.
+Usage and API: [`useUndoHistory`](/docs/hooks/use-undo-history).
 
 ### MIDI files
 
 <ComponentPreview styleName="base-nova" name="piano-roll-midi-file-demo" />
 
-The `midi-file` library reads a `.mid` file onto the roll's steps and writes one back. `npx shadcn@latest add @audio-ui/midi-file`.
+The `midi-file` library reads a `.mid` file onto the roll's steps and writes one back.
 
-```tsx
-import { downloadMidiFile, MIDI_FILE_ACCEPT, readMidiFile } from "@/lib/midi-file";
-
-<input
-  accept={MIDI_FILE_ACCEPT}
-  onChange={async (event) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      const { bpm, notes } = await readMidiFile(file, {
-        duration: 64,
-        maxPitch: 84,
-        minPitch: 36,
-      });
-      setNotes(notes);
-      setBpm(bpm);
-    }
-  }}
-  type="file"
-/>
-<Button onClick={() => downloadMidiFile(notes, { bpm, filename: "clip.mid" })}>
-  Export
-</Button>
-```
-
-`readMidiFile` puts each note on the nearest step, at least one step long, drops the notes starting past `duration`, keeps the pitches between `minPitch` and `maxPitch` and returns the file's tempo, kept between `minBpm` and `maxBpm` (20 and 200 by default). It takes any `File` or `Blob`, so a drop works the same as an input. `writeMidiFile` goes the other way, at 480 ticks a quarter note, and leaves deactivated notes out; `downloadMidiFile` writes the file and saves it. A step is a sixteenth note: set `stepsPerQuarter` on both sides for another grid.
-
-For a host that lays each part on a track of its own, such as a DAW, `readMidiFileParts(file)` reads a file as parts instead: one per track and channel, named after its track, with the General MIDI program it asks for and whether it is the drums of channel 10, its notes in beats as they were written, not quantized. The file is parsed by `@audio/midi-parse`.
+Usage and API: [`midi-file`](/docs/engine/files#midi-files).
 
 ### MusicXML files
 
@@ -215,7 +103,7 @@ import {
   downloadMusicXmlFile,
   MUSICXML_FILE_ACCEPT,
   readMusicXmlFile,
-} from "@/lib/musicxml-file";
+} from "@audio-ui/engine/files";
 
 const { bpm, notes, title } = await readMusicXmlFile(file, { duration: 64 });
 
@@ -287,151 +175,7 @@ The pitch range and the grid are in the schemas, and every note a model writes i
 
 ## API reference
 
-### Root
-
-Groups the parts of a piano roll and owns its notes and selection. Must be used within a `Timeline`. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"value"} type={"Note[]"}>The notes.</TypeRow>
-<TypeRow name={"defaultValue"} type={"Note[]"}>Uncontrolled starting notes.</TypeRow>
-<TypeRow name={"selection"} type={"NoteId[]"}>The ids of the selected notes.</TypeRow>
-<TypeRow name={"defaultSelection"} type={"NoteId[]"}>Uncontrolled starting selection.</TypeRow>
-<TypeRow name={"minPitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive: 60 is middle C.</TypeRow>
-<TypeRow name={"maxPitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
-<TypeRow name={"minLength"} type={"number"}>The shortest a note can be, in the timeline's units. Defaults to the timeline's grid step.</TypeRow>
-<TypeRow name={"mode"} type={"\"draw\" | \"select\""} default={"\"select\""}>What a press on empty grid does: draw a note, or start a selection rectangle (a double-click draws).</TypeRow>
-<TypeRow name={"drawStyle"} type={"\"paint\" | \"stretch\""} default={"\"stretch\""}>What a drag does after a press on the grid in draw mode: stretch the note drawn, or paint a note in each grid cell the pointer crosses, on the pitch under it, or with Alt on the first one.</TypeRow>
-<TypeRow name={"folded"} type={"boolean | \"scale\""} default={"false"}>Whether only the pitches carrying notes get a row, and with `"scale"` those in `scale` too. A roll with nothing to fold onto keeps them all.</TypeRow>
-<TypeRow name={"scale"} type={"Scale | null"}>The scale whose rows are marked `data-in-scale`, such as `{ name: "major", root: 0 }` for C major.</TypeRow>
-<TypeRow name={"activePitches"} type={"number[]"}>Pitches lit from elsewhere, such as a MIDI input or the notes playing, on the keys and rows.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"}></TypeRow>
-<TypeRow name={"createNoteId"} type={"() => NoteId"}>Returns the id of a note drawn, added or duplicated. Defaults to `"note-<n>"`, skipping ids in use.</TypeRow>
-<TypeRow name={"getNoteLabel"} type={"(note: Note) => string"}>Returns a note's accessible name. Defaults to its pitch and where it starts and ends, such as "C4, 4 to 6".</TypeRow>
-<TypeRow name={"onValueChange"} type={"(value: Note[], eventDetails) => void"}>Fires while notes are drawn, moved, resized, duplicated or removed.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"(value: Note[], eventDetails) => void"}>Fires when a gesture that changed the notes ends, and after each edit from the keyboard.</TypeRow>
-<TypeRow name={"onSelectionChange"} type={"(selection: NoteId[], eventDetails) => void"}>Fires when notes are selected or deselected.</TypeRow>
-<TypeRow name={"onNoteOn"} type={"(pitch: number, eventDetails) => void"}>Fires when a pitch should sound: a key pressed, a note drawn, picked up or moved to a new pitch. `eventDetails.cancel()` keeps it silent.</TypeRow>
-<TypeRow name={"onNoteOff"} type={"(pitch: number, eventDetails) => void"}>Fires when a pitch stops sounding.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-<TypeRow name={"data-editing"}>Present while a gesture edits the notes.</TypeRow>
-<TypeRow name={"data-folded"}>Present when folded.</TypeRow>
-<TypeRow name={"data-has-selection"}>Present while notes are selected.</TypeRow>
-<TypeRow name={"data-mode"}>`"draw"` or `"select"`.</TypeRow>
-</TypeTable>
-
-### Keys
-
-The keyboard down the side: a `Piano` laid out on the roll's rows, low end at the bottom. Pressing a key sounds it through the roll's `onNoteOn`; with Shift, pressing it (or Shift + Enter) selects every note on its row, or deselects them when they all are. Put a `PianoRoll.Key` per row inside, with `PianoRoll.Rows`. Renders a `<div>` element.
-
-### Rows
-
-Renders `children` once per row, from the highest pitch down: the place to put a `PianoRoll.Key` or a `PianoRoll.Row`. Renders no element of its own.
-
-<TypeTable>
-<TypeRow name={"children"} type={"(pitch: number) => React.ReactNode"}></TypeRow>
-</TypeTable>
-
-### Key and KeyLabel
-
-The same parts as [Piano](/docs/components/base/piano): a key of the keyboard, and its label.
-
-### Grid
-
-The surface notes are drawn on: a timeline lane, with the roll's rows stacked down it. A press on empty grid draws a note (`mode="draw"`), whose end then follows the pointer, or starts a selection rectangle, Shift adding to what is selected; in that mode a double-click draws. Focused, Enter adds a note at the playback position, Escape clears the selection and Cmd/Ctrl+A selects every note. From the grid or a note, Cmd/Ctrl+D repeats the selection right after itself, Cmd/Ctrl+C, X and V copy, cut and paste at the playback position, and Q snaps the starts of the selection (every note, with none selected) to the grid. Renders a `<div>` element.
-
-### Row
-
-The band a pitch takes across the grid, for shading black-key rows, the rows of the roll's scale, or ruling where an octave starts. It lets presses through to the grid and is hidden from assistive technology. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"pitch"} type={"number"}>The MIDI pitch of the row.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-active"}>Whether the pitch is sounding.</TypeRow>
-<TypeRow name={"data-color"}>`"black"` or `"white"`.</TypeRow>
-<TypeRow name={"data-folded"}>Whether the roll is folded.</TypeRow>
-<TypeRow name={"data-in-scale"}>Whether the pitch is in the roll's `scale`.</TypeRow>
-<TypeRow name={"data-out-of-scale"}>Whether the roll has a `scale` and the pitch is not in it.</TypeRow>
-<TypeRow name={"data-scale-root"}>Whether the pitch is the root of the roll's `scale`: a C in C major.</TypeRow>
-<TypeRow name={"data-octave"}>Whether the row is a C, where an octave starts.</TypeRow>
-</TypeTable>
-
-### Notes
-
-Renders `children` once per note, in the order they are read: by start, then from the highest pitch down. That order is also the tab order. Renders no element of its own.
-
-<TypeTable>
-<TypeRow name={"children"} type={"(note: Note) => React.ReactNode"}></TypeRow>
-</TypeTable>
-
-### Note
-
-One note, placed on its row from its start, as long as its length. A toggle button named after its pitch and span (`getNoteLabel` on `Root`). Its `--piano-roll-velocity` and `--piano-roll-chance` CSS variables are its velocity and how likely it is to play. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"note"} type={"Note"}>The note to draw: the roll's copy of it is used once it is edited.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-selected"}>Whether the note is in the selection: also `aria-pressed`.</TypeRow>
-<TypeRow name={"data-muted"}>Whether the note is deactivated: it stays on the roll and does not play.</TypeRow>
-<TypeRow name={"data-disabled"}>Present when disabled.</TypeRow>
-</TypeTable>
-
-### NoteHandle
-
-One edge of the note it sits in, dragged to change the note's length: the end makes it longer or shorter, the start trims it from the front while its end stays put. On the grid unless Cmd/Ctrl is held, and for the whole selection when the note is part of it. Shift + Left and Right on the note do the same from the keyboard, so the handle is hidden from assistive technology. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"edge"} type={"\"start\" | \"end\""}>The edge of the note this handle drags.</TypeRow>
-</TypeTable>
-
-### Marquee
-
-The selection rectangle being dragged across the grid; renders nothing the rest of the time. Hidden from assistive technology. Renders a `<div>` element.
-
-### SelectionSpan
-
-The time the selected notes cover, from the earliest start to the latest end, as a band from top to bottom of what it sits in: the grid, the velocity lane or the ruler. Renders nothing with no note selected. It lets presses through, all but its `PianoRoll.StretchHandle`s, and is hidden from assistive technology. Renders a `<div>` element.
-
-### StretchHandle
-
-One edge of the selection's span, for its `SelectionSpan`: a drag stretches the selected notes in time from the other edge, on the grid unless Cmd/Ctrl is held. The Notes edits that double and halve lengths do the same from the keyboard, so it is hidden from assistive technology. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"edge"} type={"\"start\" | \"end\""}>The edge of the span this handle drags; the other stays put.</TypeRow>
-</TypeTable>
-
-### VelocityLane
-
-A strip under the grid where each note's velocity, or with `level="chance"` its chance to play, stands as a bar placed at the note's start: a timeline lane, like the grid. In draw mode it is a brush: a drag across it sets every bar under the pointer, in the grid cell it is over, to the pointer's height. Put a `PianoRoll.Velocity` per note inside, with `PianoRoll.Notes`. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"level"} type={"\"velocity\" | \"chance\""} default={"\"velocity\""}>What the bars stand for: each note's velocity, or its chance to play.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-level"}>`"velocity"` or `"chance"`.</TypeRow>
-<TypeRow name={"data-mode"}>`"draw"` or `"select"`: in draw mode the lane is a brush.</TypeRow>
-</TypeTable>
-
-### Velocity
-
-One note's velocity, or its chance in a `level="chance"` lane, as a bar from the bottom of the lane: its height is the value, through the `--piano-roll-level` CSS variable. Dragging it up or down changes the value of the selection by the same amount when the note is part of it, so a phrase keeps its dynamics; Shift + click toggles the note in the selection. On a velocity bar, Cmd/Ctrl + drag sets how far the velocity may stray each time the note plays, its `--piano-roll-deviation`. A native `<input type="range">` inside takes the arrow keys (Page Up/Down for larger steps, Home/End for none and full) and carries the accessible name, which defaults to the note's. The next drawn note gets the velocity set last. Renders a `<div>` element.
-
-<TypeTable>
-<TypeRow name={"note"} type={"Note"}>The note whose velocity this is.</TypeRow>
-<TypeRow name={"getAriaValueText"} type={"(velocity: number) => string"}>Returns how a velocity, 0…1, is announced. Defaults to a percentage.</TypeRow>
-</TypeTable>
-
-<TypeTable title="Data attributes">
-<TypeRow name={"data-selected"}>Whether the note is in the selection.</TypeRow>
-<TypeRow name={"data-muted"}>Whether the note is deactivated.</TypeRow>
-</TypeTable>
+The props of the headless parts are on [PianoRoll](/docs/react/piano-roll#api-reference).
 
 ### Registry components
 

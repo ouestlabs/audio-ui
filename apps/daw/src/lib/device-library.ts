@@ -5,7 +5,7 @@ import type {
   NoteTiming,
   ParameterDescriptor,
   ParameterValue,
-} from "@audio-ui/core/device";
+} from "@audio-ui/engine/device";
 import { autoPanDevice } from "@/components/audio-ui/devices/auto-pan/device";
 import { createAutoPanEngine } from "@/components/audio-ui/devices/auto-pan/engine";
 import { bassEnhancerDevice } from "@/components/audio-ui/devices/bass-enhancer/device";

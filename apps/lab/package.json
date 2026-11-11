@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@audio-ui/core": "*",
+    "@audio-ui/engine": "*",
     "@audio-ui/react": "*",
     "@audio/dynamics-compressor": "catalog:",
     "@audio/dynamics-fet": "catalog:",

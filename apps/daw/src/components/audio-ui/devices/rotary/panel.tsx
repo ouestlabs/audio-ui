@@ -1,16 +1,7 @@
 "use client";
 
-import { formatDb, formatHz } from "@audio-ui/core/analysis";
+import { formatDb, formatHz } from "@audio-ui/engine/analysis";
 import { type ReactNode, useMemo } from "react";
-import { cn } from "@/lib/utils";
-import {
-  Plot,
-  PlotArea,
-  PlotCursor,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-} from "@/components/audio-ui/plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -21,6 +12,15 @@ import {
   rotaryBands,
   rotaryDevice,
 } from "@/components/audio-ui/devices/rotary/device";
+import {
+  Plot,
+  PlotArea,
+  PlotCursor,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+} from "@/components/audio-ui/plot";
+import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;

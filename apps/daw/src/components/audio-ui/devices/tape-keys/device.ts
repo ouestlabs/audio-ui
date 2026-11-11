@@ -1,4 +1,4 @@
-import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 
 /** The 35 keys that have a tape under them, as MIDI notes: G2 to F5. */
 export const TAPE_KEYS_LOWEST = 43;

@@ -90,7 +90,7 @@ describe("PianoRoll.Row", () => {
   });
 
   test("marks the rows of the roll's scale, and folds onto them", () => {
-    const scale = { name: "major", root: 0 } as const;
+    const scale = { pitchClasses: [0, 2, 4, 5, 7, 9, 11], root: 0 };
     const { view } = renderRoll({ scale });
     expect(view.getByTestId("row-62").hasAttribute("data-in-scale")).toBe(true);
     expect(view.getByTestId("row-61").hasAttribute("data-in-scale")).toBe(
