@@ -11,21 +11,19 @@ import { decodeAudioChannels } from "@audio-ui/engine/files";
 import { Link } from "@tanstack/react-router";
 import {
   type ChangeEvent,
-  type ReactNode,
   useCallback,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 import {
   type ClipSamples,
   ClipWaveform,
 } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";
 import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
-import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
+import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
   Timeline,
@@ -193,36 +191,26 @@ function followPlayhead(viewport: HTMLElement | null, x: number) {
 const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
+/** The registry items the playground is made of, in the order they show, each with its docs page. */
+const PARTS = [
+  { name: "transport", page: "components/base/transport" },
+  { name: "meter", page: "components/base/meter" },
+  { name: "knob", page: "components/base/knob" },
+  { name: "waveform", page: "components/base/waveform" },
+  { name: "device-browser", page: "components/base/device-browser" },
+  { name: "device-view", page: "components/base/device-chain" },
+];
+
 /** A registry item's name, a link to its page: what a part of the playground is made of. */
 function PartLink({ name, page }: { name: string; page: string }) {
   return (
     <Link
-      className="self-start font-site-mono text-[11px] text-site-muted-foreground transition-colors hover:text-foreground"
+      className="font-site-mono text-[11px] text-site-muted-foreground transition-colors hover:text-foreground"
       params={{ _splat: page }}
       to="/docs/$"
     >
       @audio-ui/{name}
     </Link>
-  );
-}
-
-/** A part of the playground with its registry name under it. */
-function Part({
-  children,
-  className,
-  name,
-  page,
-}: {
-  children: ReactNode;
-  className?: string;
-  name: string;
-  page: string;
-}) {
-  return (
-    <div className={cn("flex min-w-0 flex-col gap-2", className)}>
-      {children}
-      <PartLink name={name} page={page} />
-    </div>
   );
 }
 
@@ -515,132 +503,111 @@ export function HomePlayground() {
       <h2 className="sr-only" id="home-playground">
         Playground
       </h2>
-      {/* The transport, the sound it plays, and the level of what comes out, as a workstation's top bar. */}
-      <div className="flex flex-col gap-2 px-4 pt-4 sm:px-6">
-        {/* One row when there is room; narrower, the transport above the sound and the meter. The transport sizes by its own container, so it has no width of its own to wrap by. */}
-        <div className="flex flex-col gap-3 @[44rem]:flex-row @[44rem]:items-center @[44rem]:gap-4">
-          <div className="@[44rem]:flex-1">
-            <Transport
-              looping={doc.loop.on}
-              onLoopingChange={setLooping}
-              onPlayPause={toggle}
-              onStop={rewind}
-              playing={playing}
-              source={position}
-              tempo={doc.tempo}
-            />
-          </div>
-          <div className="flex min-w-0 items-center gap-4">
-            <input
-              accept="audio/*"
-              className="sr-only"
-              onChange={pick}
-              ref={fileInput}
-              tabIndex={-1}
-              type="file"
-            />
-            <Button
-              className="shrink-0"
-              onClick={open}
-              size="sm"
-              variant="outline"
-            >
-              Open a sound
-            </Button>
-            <div className="min-w-0 flex-1 @[44rem]:w-40 @[44rem]:flex-none">
-              <Meter
-                aria-label="Playground output"
-                orientation="horizontal"
-                size="sm"
-                source={levels}
-              />
-            </div>
-            {/* The main track's volume, in dB as a mixer's fader sets it. */}
-            <div className="w-32 shrink-0">
-              <Fader
-                aria-label="Main volume"
-                formatValue={formatDb}
-                largeStep={6}
-                max={MAX_DB}
-                min={MIN_DB}
-                onValueChange={setVolume}
-                orientation="horizontal"
-                size="sm"
-                step={0.5}
-                value={volume}
-              />
-            </div>
-          </div>
+      {/* The transport, and at its right a sound to open, the level of what comes out and its volume, as a workstation's top bar.
+          Narrower, the one above the other: the transport sizes by its own container, so it has no width of its own to wrap by. */}
+      <div className="flex flex-col gap-3 px-4 pt-4 sm:px-6 @[40rem]:flex-row @[40rem]:items-center @[40rem]:gap-4">
+        <div className="@[40rem]:flex-1">
+          <Transport
+            looping={doc.loop.on}
+            onLoopingChange={setLooping}
+            onPlayPause={toggle}
+            onStop={rewind}
+            playing={playing}
+            source={position}
+            tempo={doc.tempo}
+          />
         </div>
-        <div className="flex flex-wrap justify-between gap-x-4 gap-y-1">
-          <PartLink name="transport" page="components/base/transport" />
-          <div className="flex gap-4">
-            <PartLink name="meter" page="components/base/meter" />
-            <PartLink name="fader" page="components/base/fader" />
+        <div className="flex items-center gap-3">
+          <input
+            accept="audio/*"
+            className="sr-only"
+            onChange={pick}
+            ref={fileInput}
+            tabIndex={-1}
+            type="file"
+          />
+          <Button onClick={open} size="sm" variant="outline">
+            Open a sound
+          </Button>
+          <div className="w-20">
+            <Meter
+              aria-label="Playground output"
+              orientation="horizontal"
+              size="sm"
+              source={levels}
+            />
           </div>
+          {/* The main track's volume, in dB as a mixer sets it; its readout hangs over the ruler while it turns, so the bar keeps no room for it. */}
+          <Knob
+            aria-label="Main volume"
+            className="mb-0"
+            formatValue={formatDb}
+            largeStep={6}
+            max={MAX_DB}
+            min={MIN_DB}
+            onValueChange={setVolume}
+            size="xs"
+            step={0.5}
+            value={volume}
+          />
         </div>
       </div>
       <div className="px-4 py-4 sm:px-6">
-        <Part name="waveform" page="components/base/waveform">
-          {/* Zoomed with Cmd or Ctrl + wheel; the ruler seeks, the navigator moves and zooms the view. */}
-          <div ref={lane}>
-            <Timeline
-              disabled={!sound}
-              duration={soundDuration || 1}
-              maxZoom={Math.max(maxZoom, 1)}
-              minZoom={fitPx || 0}
-              onPositionChange={seek}
-              onZoomChange={changeZoom}
-              source={position}
-              zoom={fitPx > 0 ? zoom : undefined}
+        {/* Zoomed with Cmd or Ctrl + wheel; the ruler seeks, the navigator moves and zooms the view. */}
+        <div ref={lane}>
+          <Timeline
+            disabled={!sound}
+            duration={soundDuration || 1}
+            maxZoom={Math.max(maxZoom, 1)}
+            minZoom={fitPx || 0}
+            onPositionChange={seek}
+            onZoomChange={changeZoom}
+            source={position}
+            zoom={fitPx > 0 ? zoom : undefined}
+          >
+            <TimelineViewport
+              className="overflow-y-hidden rounded-lg border"
+              ref={viewport}
+              scrollbar="hidden"
             >
-              <TimelineViewport
-                className="overflow-y-hidden rounded-lg border"
-                ref={viewport}
-                scrollbar="hidden"
-              >
-                <TimelineRuler
-                  aria-label="Playground time"
-                  getAriaValueText={formatTime}
-                >
-                  {rulerLabels(soundDuration, zoom, shown).map((mark) => (
-                    <TimelineMark key={mark.at} value={mark.at}>
-                      {mark.text}
-                    </TimelineMark>
-                  ))}
-                </TimelineRuler>
-                {/* A press seeks; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
-                <TimelineLane className="h-28" seekable>
-                  <div
-                    className="absolute inset-y-0 left-0"
-                    style={{
-                      width: `calc(var(--timeline-unit) * ${soundDuration || 1})`,
-                    }}
-                  >
-                    {sound ? (
-                      <ClipWaveform
-                        aria-label={`${sound.name}, waveform`}
-                        className="inset-y-0 h-full text-foreground"
-                        clip={{
-                          sourceLength: soundDuration,
-                          value: { length: soundDuration, offset: 0 },
-                        }}
-                        peaks={sound.peaks}
-                        role="img"
-                        samples={sound.samples}
-                      />
-                    ) : null}
-                  </div>
-                  <TimelinePlayhead />
-                </TimelineLane>
-              </TimelineViewport>
-              <TimelineNavigator
-                className="mt-2"
+              <TimelineRuler
+                aria-label="Playground time"
                 getAriaValueText={formatTime}
-              />
-            </Timeline>
-          </div>
-        </Part>
+              >
+                {rulerLabels(soundDuration, zoom, shown).map((mark) => (
+                  <TimelineMark key={mark.at} value={mark.at}>
+                    {mark.text}
+                  </TimelineMark>
+                ))}
+              </TimelineRuler>
+              {/* A press seeks; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
+              <TimelineLane className="h-28" seekable>
+                <div
+                  className="absolute inset-y-0 left-0"
+                  style={{
+                    width: `calc(var(--timeline-unit) * ${soundDuration || 1})`,
+                  }}
+                >
+                  {sound ? (
+                    <ClipWaveform
+                      aria-label={`${sound.name}, waveform`}
+                      className="inset-y-0 h-full text-foreground"
+                      clip={{
+                        sourceLength: soundDuration,
+                        value: { length: soundDuration, offset: 0 },
+                      }}
+                      peaks={sound.peaks}
+                      role="img"
+                      samples={sound.samples}
+                    />
+                  ) : null}
+                </div>
+                <TimelinePlayhead />
+              </TimelineLane>
+            </TimelineViewport>
+            <TimelineNavigator className="mt-2" getAriaValueText={formatTime} />
+          </Timeline>
+        </div>
       </div>
       {/* The track's chain, from one edge of the inset to the other, the library beside it as in a workstation. */}
       <div className="flex h-96 border-t">
@@ -667,9 +634,11 @@ export function HomePlayground() {
           />
         </div>
       </div>
-      <div className="flex gap-4 border-t px-4 py-2 sm:px-6">
-        <PartLink name="device-browser" page="components/base/device-browser" />
-        <PartLink name="device-view" page="components/base/device-chain" />
+      {/* What it is made of, in one line: each registry item, a link to its page. */}
+      <div className="flex flex-wrap gap-x-4 gap-y-1 border-t px-4 py-2 sm:px-6">
+        {PARTS.map((part) => (
+          <PartLink key={part.name} name={part.name} page={part.page} />
+        ))}
       </div>
     </section>
   );
