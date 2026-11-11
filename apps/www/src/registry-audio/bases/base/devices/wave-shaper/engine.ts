@@ -1,10 +1,11 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import {
   type WaveShaperNote,
   type WaveShaperState,
   waveShaperCurve,
   waveShaperCutoff,
 } from "@/registry-audio/bases/base/devices/wave-shaper/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversampling";
 
 /** How fast a parameter follows a change, as a time constant in seconds. */
@@ -16,11 +17,10 @@ const LEVEL = 0.4;
 /** Two oscillators in one voice: each at half, so the pair is not louder than one. */
 const OSCILLATOR_LEVEL = 0.5;
 
-export interface WaveShaperEngine
-  extends InstrumentBinding<WaveShaperState, WaveShaperNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type WaveShaperEngine = InstrumentEngine<
+  WaveShaperState,
+  WaveShaperNote
+>;
 
 interface Voice {
   detuned: OscillatorNode;

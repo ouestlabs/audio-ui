@@ -3,18 +3,12 @@ import {
   saturatorSettings,
   saturatorTable,
 } from "@/registry-audio/bases/base/devices/saturator/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import { createOversamplingDelay } from "@/registry-audio/bases/base/lib/oversampling";
 
 const RAMP_SECONDS = 0.015;
 
-export interface SaturatorEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: SaturatorState) => void;
-}
+export type SaturatorEngine = EffectEngine<SaturatorState>;
 
 /**
  * A saturator on the Web Audio API for a `SaturatorState`:

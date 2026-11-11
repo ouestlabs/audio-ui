@@ -3,19 +3,15 @@ import {
   type BinauralPannerState,
   binauralPannerSettings,
 } from "@/registry-audio/bases/base/devices/binaural-panner/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.02;
 
-export interface BinauralPannerEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface BinauralPannerEngine
+  extends EffectEngine<BinauralPannerState> {
   /** Resolves once the panner is in the graph. Until then the sound passes clean. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: BinauralPannerState) => void;
 }
 
 /**

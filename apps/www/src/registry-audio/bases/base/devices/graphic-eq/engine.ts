@@ -3,17 +3,11 @@ import {
   type GraphicEqState,
   graphicEqBands,
 } from "@/registry-audio/bases/base/devices/graphic-eq/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.02;
 
-export interface GraphicEqEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: GraphicEqState) => void;
-}
+export type GraphicEqEngine = EffectEngine<GraphicEqState>;
 
 /**
  * A graphic EQ on the Web Audio API for a `GraphicEqState`:

@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import {
   bodyDecibels,
   decaySeconds,
@@ -8,6 +8,7 @@ import {
   toneHertz,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/guitar/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** What a string is brought to: picked hard, its attack peaks near -12 dB before the volume, where the pick's burst is loudest. */
 const STRING_GAIN = 0.3;
@@ -22,11 +23,7 @@ const BODY_HERTZ = 180;
 const BODY_Q = 1.1;
 const SMOOTHING = 0.03;
 
-export interface GuitarEngine
-  extends InstrumentBinding<GuitarState, GuitarNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type GuitarEngine = InstrumentEngine<GuitarState, GuitarNote>;
 
 interface Voice {
   amp: GainNode;

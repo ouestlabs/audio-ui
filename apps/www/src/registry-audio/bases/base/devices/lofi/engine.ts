@@ -4,19 +4,14 @@ import {
   lofiSettings,
 } from "@/registry-audio/bases/base/devices/lofi/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;
 
-export interface LofiEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface LofiEngine extends EffectEngine<LofiState> {
   /** Resolves once the lo-fi is in the graph. Until then the sound passes clean. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: LofiState) => void;
 }
 
 /**

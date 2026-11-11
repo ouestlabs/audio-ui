@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import {
   attackSeconds,
   contourCents,
@@ -13,6 +13,7 @@ import {
   vibratoCents,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/poly-synth/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** What each source adds before the filter: with the resonance, a chord of voices stays under full scale. */
 const SOURCE_GAIN = 0.1;
@@ -35,11 +36,7 @@ const CHORUS = {
   Off: { depth: 0.0018, rate: 0.5, wet: 0 },
 } as const;
 
-export interface PolySynthEngine
-  extends InstrumentBinding<PolySynthState, PolySynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type PolySynthEngine = InstrumentEngine<PolySynthState, PolySynthNote>;
 
 interface Voice {
   amp: GainNode;

@@ -1,8 +1,9 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import type {
   PocketSynthNote,
   PocketSynthState,
 } from "@/registry-audio/bases/base/devices/pocket-synth/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How fast a parameter follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.01;
@@ -12,11 +13,10 @@ const RELEASE_SECONDS = 0.05;
 const LEVEL = 0.3;
 const RESONANCE = 5;
 
-export interface PocketSynthEngine
-  extends InstrumentBinding<PocketSynthState, PocketSynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type PocketSynthEngine = InstrumentEngine<
+  PocketSynthState,
+  PocketSynthNote
+>;
 
 interface Voice {
   envelope: GainNode;

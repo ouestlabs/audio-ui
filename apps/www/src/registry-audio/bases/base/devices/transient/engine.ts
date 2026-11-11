@@ -1,18 +1,14 @@
-import type { DeviceBinding } from "@audio-ui/core/device";
 import {
   TRANSIENT_WORKLET,
   type TransientState,
   transientSettings,
 } from "@/registry-audio/bases/base/devices/transient/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 
-export interface TransientEngine extends DeviceBinding<TransientState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface TransientEngine extends EffectEngine<TransientState> {
   /** Resolves once the shaper is in the graph. Until then the signal passes unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
 }

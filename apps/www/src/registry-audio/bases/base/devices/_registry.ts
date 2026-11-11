@@ -52,7 +52,6 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A binaural panner on the Web Audio API for a binaural panner state: the binaural panner of @audio/spatial-binaural in an AudioWorklet loaded from a blob, a turn across the back the short way round, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -71,7 +70,6 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A bass enhancer on the Web Audio API for a bass enhancer state: the bass enhancer of @audio/effect-subbass in an AudioWorklet loaded from a blob, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -108,10 +106,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A chorus on the Web Audio API for a chorus state: a short delay whose time an oscillator sweeps, or two to eight voices in an AudioWorklet loaded from a blob, mixed with the dry sound, moving without a click.",
-      registryDependencies: [
-        "@audio-ui/audio-worklet",
-        "@audio-ui/device-engine",
-      ],
+      registryDependencies: ["@audio-ui/audio-worklet"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -131,10 +126,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A compander on the Web Audio API for a compander state: the compander of @audio/dynamics-compand in an AudioWorklet loaded from a blob, fed only while it plays, the sound passing unchanged until it is ready.",
-      registryDependencies: [
-        "@audio-ui/audio-worklet",
-        "@audio-ui/device-engine",
-      ],
+      registryDependencies: ["@audio-ui/audio-worklet"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -182,7 +174,6 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A de-esser on the Web Audio API for a de-esser state: the audio.js de-esser in a worklet, the highs passing until it is ready.",
-      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -206,10 +197,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A delay on the Web Audio API for a delay state: an echo that goes round a tone filter so each repeat is darker, mixed with the dry sound, with a time that bends like a tape instead of clicking, and the ping-pong, multitap and grain modes on an AudioWorklet loaded from a blob, fed only while one plays.",
-      registryDependencies: [
-        "@audio-ui/audio-worklet",
-        "@audio-ui/device-engine",
-      ],
+      registryDependencies: ["@audio-ui/audio-worklet"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -252,10 +240,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A ducker on the Web Audio API for a ducker state: the ducker of @audio/dynamics-ducker in an AudioWorklet loaded from a blob, the sound on its first input and the key from the sidechain on its second, fed only while it plays, the sound passing unchanged until it is ready.",
-      registryDependencies: [
-        "@audio-ui/audio-worklet",
-        "@audio-ui/device-engine",
-      ],
+      registryDependencies: ["@audio-ui/audio-worklet"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -318,7 +303,6 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "An exciter on the Web Audio API for an exciter state: the exciter of @audio/effect-exciter in an AudioWorklet loaded from a blob, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -338,10 +322,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "An expander on the Web Audio API for an expander state: the expander of @audio/dynamics-expander in an AudioWorklet loaded from a blob, fed only while it plays, the sound passing unchanged until it is ready.",
-      registryDependencies: [
-        "@audio-ui/audio-worklet",
-        "@audio-ui/device-engine",
-      ],
+      registryDependencies: ["@audio-ui/audio-worklet"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -429,7 +410,6 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A gate on the Web Audio API for a gate state: the audio.js gate in a worklet, with its look-ahead, the signal passing until it is ready.",
-      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -509,10 +489,7 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/core"],
       description:
         "A mid/side device on the Web Audio API for a mid/side state: the signal widened first, by a Haas delay or a detune in an AudioWorklet loaded from a blob, then split into mid and side, a level for each, a high-pass on the side for bass mono, and the two added back, moving without a click.",
-      registryDependencies: [
-        "@audio-ui/audio-worklet",
-        "@audio-ui/device-engine",
-      ],
+      registryDependencies: ["@audio-ui/audio-worklet"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -620,7 +597,6 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A tilt EQ on the Web Audio API for a tilt EQ state: the tilt of @audio/eq-tilt in an AudioWorklet loaded from a blob, the sound passing clean until it is ready, then an output level.",
-      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -718,10 +694,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A phaser and flanger on the Web Audio API for a phaser state: four all-pass filters and a short delay swept by one oscillator, and the classic phaser's first-order stages in an AudioWorklet loaded from a blob, crossfaded by the mode, with feedback and a mix.",
-      registryDependencies: [
-        "@audio-ui/audio-worklet",
-        "@audio-ui/device-engine",
-      ],
+      registryDependencies: ["@audio-ui/audio-worklet"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -832,7 +805,6 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A rotary speaker on the Web Audio API for a rotary state: the rotary of @audio/effect-rotary in an AudioWorklet loaded from a blob, a mono cabinet heard in stereo, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -871,7 +843,6 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "A stutter on the Web Audio API for a stutter state: the stutter of @audio/effect-stutter in an AudioWorklet loaded from a blob, its lengths read against the host's tempo, a fresh cycle when it is turned on, the sound passing clean until it is ready.",
-      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -911,7 +882,6 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/core"],
       description:
         "A transient shaper on the Web Audio API for a transient state: the audio.js shaper in a worklet, the signal passing unchanged until it is ready.",
-      registryDependencies: ["@audio-ui/device-engine"],
     },
     panel: {
       categories: ["device", "plot", "knob"],
@@ -931,10 +901,7 @@ export const devices: RegistryItem[] = [
     engine: {
       description:
         "An unlimiter on the Web Audio API for an unlimiter state: the de-limiter of @audio/dynamics-unlimit in an AudioWorklet loaded from a blob, fed only while it plays, the sound passing unchanged until it is ready.",
-      registryDependencies: [
-        "@audio-ui/audio-worklet",
-        "@audio-ui/device-engine",
-      ],
+      registryDependencies: ["@audio-ui/audio-worklet"],
     },
     panel: {
       categories: ["device", "plot", "knob"],

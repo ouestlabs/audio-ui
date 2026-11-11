@@ -4,17 +4,11 @@ import {
   type AutoPanState,
   autoPanSettings,
 } from "@/registry-audio/bases/base/devices/auto-pan/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.03;
 
-export interface AutoPanEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: AutoPanState, context?: DeviceContext) => void;
-}
+export type AutoPanEngine = EffectEngine<AutoPanState>;
 
 /**
  * An auto pan and tremolo on the Web Audio API for an `AutoPanState`:

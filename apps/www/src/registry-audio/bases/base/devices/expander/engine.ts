@@ -1,10 +1,11 @@
-import type { DeviceBinding, DeviceReadings } from "@audio-ui/core/device";
+import type { DeviceReadings } from "@audio-ui/core/device";
 import {
   EXPANDER_WORKLET,
   type ExpanderState,
   expanderSettings,
 } from "@/registry-audio/bases/base/devices/expander/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import {
   createFeed,
   type Feed,
@@ -12,11 +13,7 @@ import {
 
 const RAMP_SECONDS = 0.01;
 
-export interface ExpanderEngine extends DeviceBinding<ExpanderState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface ExpanderEngine extends EffectEngine<ExpanderState> {
   /** What it is taking off right now, in dB: downward, while it turns the sound down. */
   readings: () => DeviceReadings;
   /** Resolves once the expander is in the graph. Until then the sound passes unchanged. A context with no worklets never resolves it to `true`. */

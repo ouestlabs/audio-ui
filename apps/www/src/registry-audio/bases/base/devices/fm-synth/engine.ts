@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import {
   attackSeconds,
   decaySeconds,
@@ -13,6 +13,7 @@ import {
   vibratoCents,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/fm-synth/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** What one voice can reach at full velocity, all its carriers together: struck alone, where a whole synth summed eight. */
 const VOICE_GAIN = 0.8;
@@ -38,11 +39,7 @@ const amount = (level: number) => (level / 10) ** 2;
 const keyScale = (frequency: number) =>
   Math.min(1, (MIDDLE_C / frequency) ** 0.5);
 
-export interface FmSynthEngine
-  extends InstrumentBinding<FmSynthState, FmSynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type FmSynthEngine = InstrumentEngine<FmSynthState, FmSynthNote>;
 
 interface OperatorNodes {
   envelope: GainNode;

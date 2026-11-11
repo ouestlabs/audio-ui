@@ -1,11 +1,11 @@
 import { toWebAudioQ } from "@audio-ui/core/analysis";
-import type { DeviceBinding } from "@audio-ui/core/device";
 import {
   DETUNE_WORKLET,
   type MidSideState,
   midSideSettings,
 } from "@/registry-audio/bases/base/devices/mid-side/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import {
   createFeed,
   type Feed,
@@ -16,11 +16,7 @@ const HALF = 0.5;
 /** The longest Haas delay, in seconds. */
 const LONGEST_HAAS = 0.035;
 
-export interface MidSideEngine extends DeviceBinding<MidSideState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface MidSideEngine extends EffectEngine<MidSideState> {
   /** Resolves once the detune is in the graph. Until then it passes the sound as it is. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
 }

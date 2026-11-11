@@ -1,19 +1,16 @@
-import type { DeviceBinding, DeviceReadings } from "@audio-ui/core/device";
+import type { DeviceReadings } from "@audio-ui/core/device";
 import {
   COMPRESSOR_MODELS_WORKLET,
   type CompressorState,
   compressorSettings,
 } from "@/registry-audio/bases/base/devices/compressor/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How fast a parameter follows a change, as a time constant in seconds: fast enough to feel direct, slow enough not to click. */
 const RAMP_SECONDS = 0.01;
 
-export interface CompressorEngine extends DeviceBinding<CompressorState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface CompressorEngine extends EffectEngine<CompressorState> {
   /** What it is taking off right now, in dB. */
   readings: () => DeviceReadings;
   /** Resolves once the model is in the graph. Until then the signal passes unchanged. A context with no worklets never resolves it to `true`. */

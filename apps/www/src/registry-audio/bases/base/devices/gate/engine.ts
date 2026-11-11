@@ -1,18 +1,14 @@
-import type { DeviceBinding } from "@audio-ui/core/device";
 import {
   GATE_WORKLET,
   type GateState,
   gateSettings,
 } from "@/registry-audio/bases/base/devices/gate/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 
-export interface GateEngine extends DeviceBinding<GateState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface GateEngine extends EffectEngine<GateState> {
   /** Resolves once the gate is in the graph. Until then the gate stays open. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
 }

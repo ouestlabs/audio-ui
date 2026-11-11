@@ -1,4 +1,3 @@
-import type { InstrumentBinding } from "@audio-ui/core/device";
 import {
   type DrumSynthNote,
   type DrumSynthState,
@@ -8,6 +7,7 @@ import {
   tuneRatio,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/drum-synth/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How long the noise every hit reads from lasts, in seconds: each hit starts somewhere in it, so no two sound the same. */
 const NOISE_SECONDS = 2;
@@ -15,11 +15,7 @@ const NOISE_SECONDS = 2;
 const FLOOR = 0.0001;
 const SMOOTHING = 0.03;
 
-export interface DrumSynthEngine
-  extends InstrumentBinding<DrumSynthState, DrumSynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type DrumSynthEngine = InstrumentEngine<DrumSynthState, DrumSynthNote>;
 
 /** White noise, made once per context and shared by every hit. */
 const noises = new WeakMap<BaseAudioContext, AudioBuffer>();

@@ -1,10 +1,11 @@
-import type { DeviceBinding, DeviceReadings } from "@audio-ui/core/device";
+import type { DeviceReadings } from "@audio-ui/core/device";
 import {
   COMPANDER_WORKLET,
   type CompanderState,
   companderSettings,
 } from "@/registry-audio/bases/base/devices/compander/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import {
   createFeed,
   type Feed,
@@ -12,11 +13,7 @@ import {
 
 const RAMP_SECONDS = 0.01;
 
-export interface CompanderEngine extends DeviceBinding<CompanderState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface CompanderEngine extends EffectEngine<CompanderState> {
   /** What it is taking off right now, in dB: where its curve is under the straight line of a clean sound. */
   readings: () => DeviceReadings;
   /** Resolves once the compander is in the graph. Until then the sound passes unchanged. A context with no worklets never resolves it to `true`. */

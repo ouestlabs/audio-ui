@@ -1,20 +1,15 @@
 import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@audio-ui/core/analysis";
-import type { DeviceBinding } from "@audio-ui/core/device";
 import {
   EQUALIZER_BANDS,
   type EqualizerState,
   equalizerBands,
 } from "@/registry-audio/bases/base/devices/equalizer/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How fast a parameter follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;
 
-export interface EqualizerEngine extends DeviceBinding<EqualizerState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type EqualizerEngine = EffectEngine<EqualizerState>;
 
 /**
  * An equalizer on the Web Audio API for an `EqualizerState`:

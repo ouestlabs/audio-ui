@@ -78,7 +78,8 @@ const deviceFile = (name: string, file: string, type: FileType) =>
  *
  * - `<name>-device`: its state, `devices/<name>/device.ts` (and `kernels.ts`
  *   when its engine runs audio.js kernels in a worklet), no panel and no audio
- * - `<name>-engine`: its Web Audio engine, `engine.ts`, over the state
+ * - `<name>-engine`: its Web Audio engine, `engine.ts`, over the state and
+ *   `device-engine` (the contract it returns)
  * - `<name>-panel`: its face, `panel.tsx`, over `device-panel` and the state
  * - `<name>`: all three in one install
  *
@@ -122,7 +123,11 @@ export function deviceItems(
       description: engine.description,
       files: [deviceFile(name, "engine.ts", "registry:lib")],
       name: `${name}-engine`,
-      registryDependencies: [...(engine.registryDependencies ?? []), state],
+      registryDependencies: [
+        "@audio-ui/device-engine",
+        ...(engine.registryDependencies ?? []),
+        state,
+      ],
       type: "registry:lib",
     },
     {

@@ -7,6 +7,7 @@ import {
   MAX_DELAY_SECONDS,
 } from "@/registry-audio/bases/base/devices/delay/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import {
   createFeed,
   type Feed,
@@ -17,15 +18,9 @@ const RAMP_SECONDS = 0.02;
 /** A change of time glides slower, so the echo bends like a tape instead of clicking. */
 const TIME_RAMP_SECONDS = 0.08;
 
-export interface DelayEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface DelayEngine extends EffectEngine<DelayState> {
   /** Resolves once the ping-pong, multitap and grain modes are in the graph. Until then they play the echo. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: DelayState, context?: DeviceContext) => void;
 }
 
 /**

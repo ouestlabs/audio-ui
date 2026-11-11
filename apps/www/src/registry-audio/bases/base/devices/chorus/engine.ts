@@ -6,6 +6,7 @@ import {
   chorusSettings,
 } from "@/registry-audio/bases/base/devices/chorus/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import {
   createFeed,
   type Feed,
@@ -13,15 +14,9 @@ import {
 
 const RAMP_SECONDS = 0.03;
 
-export interface ChorusEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface ChorusEngine extends EffectEngine<ChorusState> {
   /** Resolves once the voices are in the graph. Until then the chorus plays one. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: ChorusState, context?: DeviceContext) => void;
 }
 
 /**

@@ -1,18 +1,15 @@
-import type { DeviceBinding, DeviceReadings } from "@audio-ui/core/device";
+import type { DeviceReadings } from "@audio-ui/core/device";
 import {
   DEESSER_WORKLET,
   type DeesserState,
   deesserSettings,
 } from "@/registry-audio/bases/base/devices/deesser/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 
-export interface DeesserEngine extends DeviceBinding<DeesserState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface DeesserEngine extends EffectEngine<DeesserState> {
   /** What the highs are taking off right now, in dB. */
   readings: () => DeviceReadings;
   /** Resolves once the de-esser is in the graph. Until then the highs pass unchanged. A context with no worklets never resolves it to `true`. */

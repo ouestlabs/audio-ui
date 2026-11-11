@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import {
   attackSeconds,
   cutoffHertz,
@@ -9,6 +9,7 @@ import {
   type StringMachineState,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/string-machine/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** What each oscillator adds before the filter. */
 const SOURCE_GAIN = 0.11;
@@ -42,11 +43,10 @@ const SOURCES: readonly {
   { detune: 0, ratio: 0.25, register: "bass", type: "triangle" },
 ];
 
-export interface StringMachineEngine
-  extends InstrumentBinding<StringMachineState, StringMachineNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type StringMachineEngine = InstrumentEngine<
+  StringMachineState,
+  StringMachineNote
+>;
 
 interface Voice {
   amp: GainNode;

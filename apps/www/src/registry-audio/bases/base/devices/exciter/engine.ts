@@ -3,19 +3,14 @@ import {
   type ExciterState,
   exciterSettings,
 } from "@/registry-audio/bases/base/devices/exciter/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import { createWorkletStage } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.02;
 
-export interface ExciterEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface ExciterEngine extends EffectEngine<ExciterState> {
   /** Resolves once the exciter is in the graph. Until then the sound passes clean. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: ExciterState) => void;
 }
 
 /**

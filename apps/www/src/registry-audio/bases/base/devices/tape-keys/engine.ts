@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import {
   speedCents,
   TAPE_KEYS_HIGHEST,
@@ -9,6 +9,7 @@ import {
   toneHertz,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/tape-keys/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 type Track = TapeKeysState["station"];
 
@@ -54,11 +55,7 @@ const FLUTTER_HERTZ = 6.7;
 const SMOOTHING = 0.03;
 const NOISE_SECONDS = 2;
 
-export interface TapeKeysEngine
-  extends InstrumentBinding<TapeKeysState, TapeKeysNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type TapeKeysEngine = InstrumentEngine<TapeKeysState, TapeKeysNote>;
 
 interface Voice {
   amp: GainNode;

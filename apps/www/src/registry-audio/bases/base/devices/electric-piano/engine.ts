@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import {
   driveGain,
   type ElectricPianoNote,
@@ -7,6 +7,7 @@ import {
   ringSeconds,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/electric-piano/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How far up the bell's modulator sits: fourteen times the pitch. */
 const BELL_RATIO = 14;
@@ -23,11 +24,10 @@ const RELEASE = 0.18;
 const RESTRIKE = 0.008;
 const DRIVE_MAKEUP = 0.8;
 
-export interface ElectricPianoEngine
-  extends InstrumentBinding<ElectricPianoState, ElectricPianoNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type ElectricPianoEngine = InstrumentEngine<
+  ElectricPianoState,
+  ElectricPianoNote
+>;
 
 interface Voice {
   amp: GainNode;

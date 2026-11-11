@@ -5,18 +5,13 @@ import {
   reduxTable,
 } from "@/registry-audio/bases/base/devices/redux/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.015;
 
-export interface ReduxEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface ReduxEngine extends EffectEngine<ReduxState> {
   /** Resolves once the sample hold is in the graph. Until then the bits are rounded to the nearest level and the rate is not reduced. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: ReduxState) => void;
 }
 
 /**

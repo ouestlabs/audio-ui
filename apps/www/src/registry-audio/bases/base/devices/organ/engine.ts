@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import {
   clickGain,
   drawbarGain,
@@ -8,6 +8,7 @@ import {
   type OrganState,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/organ/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** Headroom: nine partials a key stay under full scale. */
 const PARTIAL_GAIN = 0.1;
@@ -31,10 +32,7 @@ const ROTARY = {
 /** The horns take a moment to reach a new speed. */
 const SPEED_TIME = 0.7;
 
-export interface OrganEngine extends InstrumentBinding<OrganState, OrganNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type OrganEngine = InstrumentEngine<OrganState, OrganNote>;
 
 interface Voice {
   amp: GainNode;

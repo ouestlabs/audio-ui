@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/core/device";
+import type { NoteTiming } from "@audio-ui/core/device";
 import {
   attackSeconds,
   contourCents,
@@ -16,6 +16,7 @@ import {
   tuneCents,
   volumeGain,
 } from "@/registry-audio/bases/base/devices/mono-synth/device";
+import type { InstrumentEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** What each source adds before the filter: with the resonance, the loudest sound stays under full scale. */
 const SOURCE_GAIN = 0.2;
@@ -28,11 +29,7 @@ const MIN_LEVEL = 0.25;
 const NOISE_SECONDS = 2;
 const HARMONICS = 96;
 
-export interface MonoSynthEngine
-  extends InstrumentBinding<MonoSynthState, MonoSynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type MonoSynthEngine = InstrumentEngine<MonoSynthState, MonoSynthNote>;
 
 /**
  * A curve an envelope follows from `start`: from `from` towards `target`, and

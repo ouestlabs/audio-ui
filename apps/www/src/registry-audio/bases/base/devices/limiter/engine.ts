@@ -5,22 +5,17 @@ import {
   limiterSettings,
 } from "@/registry-audio/bases/base/devices/limiter/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 const RAMP_SECONDS = 0.01;
 
-export interface LimiterEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface LimiterEngine extends EffectEngine<LimiterState> {
   /** What it is taking off right now, in dB. */
   readings: () => DeviceReadings;
   /** Resolves once the limiter is in the graph. Until then the signal passes at the input gain. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   /** How many dB the limiter is taking off right now, 0 or negative. Read it per frame. */
   readonly reduction: number;
-  update: (state: LimiterState) => void;
 }
 
 /**

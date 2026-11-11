@@ -1,10 +1,10 @@
-import type { DeviceBinding } from "@audio-ui/core/device";
 import {
   UNLIMITER_WORKLET,
   type UnlimiterState,
   unlimiterSettings,
 } from "@/registry-audio/bases/base/devices/unlimiter/device";
 import { loadWorklet } from "@/registry-audio/bases/base/lib/audio-worklet";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 import {
   createFeed,
   type Feed,
@@ -12,11 +12,7 @@ import {
 
 const RAMP_SECONDS = 0.01;
 
-export interface UnlimiterEngine extends DeviceBinding<UnlimiterState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface UnlimiterEngine extends EffectEngine<UnlimiterState> {
   /** Resolves once the unlimiter is in the graph. Until then the sound passes unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
 }

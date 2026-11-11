@@ -3,6 +3,7 @@ import {
   reverbImpulse,
   reverbSettings,
 } from "@/registry-audio/bases/base/devices/reverb/device";
+import type { EffectEngine } from "@/registry-audio/bases/base/lib/device-engine";
 
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;
@@ -11,14 +12,7 @@ const CROSSFADE_SECONDS = 0.08;
 /** How long a knob rests before its room is made, in milliseconds: the impulse is a table of a few hundred thousand points, and a type other than the room takes tens of milliseconds to ring. */
 const REBUILD_MS = 120;
 
-export interface ReverbEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: ReverbState) => void;
-}
+export type ReverbEngine = EffectEngine<ReverbState>;
 
 /**
  * A reverb on the Web Audio API for a `ReverbState`:
