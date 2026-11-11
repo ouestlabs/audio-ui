@@ -1,10 +1,5 @@
 export { isBlackKey, pitchClassName, pitchName } from "../../shared/pitch.ts";
 export {
-  detectPitch,
-  type PitchDetectionOptions,
-  type PitchEstimate,
-} from "./detect.ts";
-export {
   inScale,
   nearestInScale,
   SCALES,

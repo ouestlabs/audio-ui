@@ -55,6 +55,7 @@
       "@audio/midi-parse": "1.0.3",
       "@audio/midi-write": "1.0.3",
       "@audio/note": "1.0.3",
+      "@audio/pitch-yin": "1.0.6",
       "@audio/musicxml": "0.1.0",
       "@audio/resample-sinc": "1.3.0",
       "@audio/reverb-dattorro": "1.1.3",

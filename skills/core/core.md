@@ -59,7 +59,7 @@ Each primitive registers from its own entry point, `@audio-ui/elements/<primitiv
 | `@audio-ui/core/device` | `defineDevice`, `deviceTools`, `DeviceDefinitionError`, `Device`, `DeviceBinding`, `DeviceState`, `DeviceDescription`, `ParameterDescriptor` |
 | `@audio-ui/core/midi` | `parseMidiMessage`, `pitchBendToSemitones`, `createMidiInput` |
 | `@audio-ui/core/time` | `secondsPerQuarter`, `barsBeatsAt`, `gridInterval`, `gridLabel`, `advance`, `positionAt`, `SCHEDULE_AHEAD_SECONDS` |
-| `@audio-ui/core/pitch` | `detectPitch`, `pitchName`, `SCALES`, `inScale`, `nearestInScale`, `scalePitchClasses` |
+| `@audio-ui/core/pitch` | `pitchName`, `SCALES`, `inScale`, `nearestInScale`, `scalePitchClasses` |
 
 Never import `@audio-ui/core/internal`: it may change in any release.
 

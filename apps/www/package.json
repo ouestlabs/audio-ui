@@ -75,6 +75,7 @@
     "@audio/midi-write": "catalog:",
     "@audio/musicxml": "catalog:",
     "@audio/note": "catalog:",
+    "@audio/pitch-yin": "catalog:",
     "@audio/resample-sinc": "catalog:",
     "@audio/reverb-dattorro": "catalog:",
     "@audio/reverb-fdn": "catalog:",
