@@ -1,4 +1,5 @@
 import { type DeviceState, defineDevice } from "@audio-ui/core/device";
+import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 /** Where each of the four stages turns the phase with the lamp dark, in hertz: spread wide, as the circuit's four capacitors are. */
 export const VIBE_STAGES = [90, 480, 1900, 5200] as const;
@@ -48,6 +49,9 @@ export const vibeDevice = defineDevice({
   description:
     "A photocell vibe: a lamp that rises fast and fades slowly sweeps four phase-shift stages spread wide apart, a throb in chorus or a pitch wobble in vibrato, with the speed, the intensity and the level.",
   id: "audioui.vibe",
+  // The preamp oversamples 2x on every path through it; off, the sound passes untouched.
+  latency: (state, sampleRate) =>
+    state.enabled ? oversamplingSeconds("2x", sampleRate) : 0,
   name: "Vibe",
   parameters: [
     { default: true, id: "enabled", kind: "toggle", label: "On" },

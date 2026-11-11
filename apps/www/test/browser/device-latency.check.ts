@@ -13,17 +13,26 @@ const AT = 2000;
  */
 const PHASE_FRAMES = 8;
 
+/** How loud a sample must be, against the loudest, to count as where the sound starts. */
+const ONSET = 0.05;
+
 /**
  * Where an impulse comes out of a device's engine, at its defaults: the frame
- * of its loudest sample, less the frame it went in at.
+ * of its loudest sample and the frame it starts at, less the frame it went in
+ * at. A device that mixes the dry sound in, or repeats it, has a loudest
+ * sample that is not the delayed one, so either may match what it declares. A
+ * single sample can fall between the samples a sample-rate reducer holds, so
+ * when nothing comes out, a short burst goes in instead.
  */
-async function measure(entry: (typeof DEVICE_LIBRARY)[number]) {
+async function measure(entry: (typeof DEVICE_LIBRARY)[number], length: number) {
   const ctx = new OfflineAudioContext(2, RATE / 2, RATE);
   const engine = entry.create(ctx, entry.device.defaults());
   await engine.ready;
   const buffer = ctx.createBuffer(2, RATE / 2, RATE);
-  buffer.getChannelData(0)[AT] = 0.5;
-  buffer.getChannelData(1)[AT] = 0.5;
+  for (let frame = 0; frame < length; frame += 1) {
+    buffer.getChannelData(0)[AT + frame] = 0.5;
+    buffer.getChannelData(1)[AT + frame] = 0.5;
+  }
   const source = ctx.createBufferSource();
   source.buffer = buffer;
   source.connect(engine.input as AudioNode);
@@ -36,13 +45,25 @@ async function measure(entry: (typeof DEVICE_LIBRARY)[number]) {
       loudest = index;
     }
   }
+  const top = Math.abs(out[loudest] as number);
+  let onset = 0;
+  while (onset < out.length && Math.abs(out[onset] as number) < top * ONSET) {
+    onset += 1;
+  }
   engine.dispose();
   return {
     declared: Math.round(
       entry.device.latency(entry.device.defaults(), RATE) * RATE
     ),
-    peak: Math.abs(out[loudest] as number) > 1e-4 ? loudest - AT : null,
+    onset: top > 1e-4 ? onset - AT : null,
+    peak: top > 1e-4 ? loudest - AT : null,
   };
+}
+
+/** The impulse first; a burst when the device lets it through unheard. */
+async function measured(entry: (typeof DEVICE_LIBRARY)[number]) {
+  const impulse = await measure(entry, 1);
+  return impulse.peak === null ? measure(entry, 64) : impulse;
 }
 
 check(
@@ -53,13 +74,15 @@ check(
       (item) => item.device.kind === "effect"
     ).reduce<Promise<string[]>>(async (found, entry) => {
       const list = await found;
-      const { declared, peak } = await measure(entry);
-      return peak === null || Math.abs(peak - declared) > PHASE_FRAMES
-        ? [
+      const { declared, onset, peak } = await measured(entry);
+      const near = (frame: number | null) =>
+        frame !== null && Math.abs(frame - declared) <= PHASE_FRAMES;
+      return near(peak) || near(onset)
+        ? list
+        : [
             ...list,
-            `${entry.device.id}: declares ${declared}, its impulse peaks at ${peak ?? "nothing"}`,
-          ]
-        : list;
+            `${entry.device.id}: declares ${declared}, its sound starts at ${onset ?? "nothing"} and peaks at ${peak ?? "nothing"}`,
+          ];
     }, Promise.resolve([]));
     assert(wrong.length === 0, wrong.join("; "));
   }
