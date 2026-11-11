@@ -1,5 +1,6 @@
 import { type MidiMessage, parseMidiMessage } from "./message.ts";
 
+/** What `createMidiInput` knows of the page's MIDI: whether it is supported and connected, the inputs, the muted ones, and why it is not connected. */
 export interface MidiInputState {
   /** Whether a device is connected and its messages are coming in. */
   connected: boolean;
@@ -13,6 +14,7 @@ export interface MidiInputState {
   supported: boolean;
 }
 
+/** The page's MIDI inputs as one source: connect, listen to messages, switch inputs off, and follow its state. */
 export interface MidiInput {
   /** Asks for access and listens to every input. Call it from a user gesture: browsers may prompt for permission. */
   connect: () => Promise<void>;

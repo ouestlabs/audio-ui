@@ -23,7 +23,7 @@
       {
         "kind": "function",
         "name": "getDataAttributes",
-        "summary": ""
+        "summary": "The data attributes a part renders: `data-<part>` (or `data-<component>`), `data-orientation`, `data-disabled`, and `data-<key>` for every other option given, its value as text."
       },
       {
         "kind": "function",
@@ -33,7 +33,7 @@
       {
         "kind": "interface",
         "name": "FrameTask",
-        "summary": ""
+        "summary": "What `createFrameTask` returns: wake it when something moves, flush it to step at once, stop it for good."
       },
       {
         "kind": "function",
@@ -48,12 +48,12 @@
       {
         "kind": "type",
         "name": "Point",
-        "summary": ""
+        "summary": "A point on two axes."
       },
       {
         "kind": "const",
         "name": "clamp",
-        "summary": ""
+        "summary": "`value` kept within `min` and `max`."
       },
       {
         "kind": "const",
@@ -63,27 +63,27 @@
       {
         "kind": "const",
         "name": "clampUnit",
-        "summary": ""
+        "summary": "`value` kept within 0 and 1."
       },
       {
         "kind": "const",
         "name": "degToRad",
-        "summary": ""
+        "summary": "An angle in degrees, in radians."
       },
       {
         "kind": "const",
         "name": "PI_HALF",
-        "summary": ""
+        "summary": "A quarter turn in radians: π/2."
       },
       {
         "kind": "const",
         "name": "quantizeRound",
-        "summary": ""
+        "summary": "`value` rounded to the nearest multiple of `interval`."
       },
       {
         "kind": "const",
         "name": "radToDeg",
-        "summary": ""
+        "summary": "An angle in radians, in degrees."
       },
       {
         "kind": "function",
@@ -93,7 +93,7 @@
       {
         "kind": "const",
         "name": "TAU",
-        "summary": ""
+        "summary": "A full turn in radians: 2π."
       },
       {
         "kind": "function",
@@ -108,17 +108,17 @@
       {
         "kind": "interface",
         "name": "ChangeEventDetails",
-        "summary": "Change/commit event details for interactions the underlying controls don't handle themselves (e.g."
+        "summary": "What a change reports: why it happened (`reason`), the event behind it, the element that triggered it, and `cancel()` to refuse the change."
       },
       {
         "kind": "interface",
         "name": "CommitEventDetails",
-        "summary": ""
+        "summary": "What a commit reports once a gesture ends: why it happened (`reason`) and the event behind it."
       },
       {
         "kind": "function",
         "name": "createChangeEventDetails",
-        "summary": ""
+        "summary": "The details of a change for `reason` and `event`, with `cancel()` to refuse it and `allowPropagation()` to let the event go on."
       },
       {
         "kind": "function",
@@ -143,7 +143,7 @@
       {
         "kind": "interface",
         "name": "RangeLimits",
-        "summary": ""
+        "summary": "What a range is kept within: the timeline's length and the shortest it may be."
       },
       {
         "kind": "type",
@@ -168,12 +168,12 @@
       {
         "kind": "type",
         "name": "ParameterScaleProp",
-        "summary": ""
+        "summary": "A scale as an option takes it: `\"linear\"`, `\"log\"`, or a scale of your own."
       },
       {
         "kind": "function",
         "name": "resolveScale",
-        "summary": ""
+        "summary": "The scale an option names: `\"linear\"` and `\"log\"` as `LINEAR_SCALE` and `LOGARITHMIC_SCALE`, a scale of your own as it is."
       },
       {
         "kind": "function",
@@ -188,12 +188,12 @@
       {
         "kind": "interface",
         "name": "WritableSource",
-        "summary": ""
+        "summary": "A source that also takes values: what `createSource` returns."
       },
       {
         "kind": "function",
         "name": "createStore",
-        "summary": ""
+        "summary": "A store holding `initial`: `set` tells every listener, unless the value is the same one."
       },
       {
         "kind": "interface",
@@ -233,32 +233,32 @@
       {
         "kind": "type",
         "name": "EnvelopeChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change: the `index` of the point or segment, the reason, the event behind it, and `cancel()` to refuse the change."
       },
       {
         "kind": "type",
         "name": "EnvelopeChangeEventReason",
-        "summary": ""
+        "summary": "Why the points changed: `\"drag\"`, `\"keyboard\"`, `\"add\"`, `\"remove\"` or `\"curve\"` (a bend)."
       },
       {
         "kind": "type",
         "name": "EnvelopeCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture ends: the `index` of the point or segment, the reason and the event behind it."
       },
       {
         "kind": "type",
         "name": "EnvelopeCommitEventReason",
-        "summary": ""
+        "summary": "Why the points were committed: the same reasons as a change."
       },
       {
         "kind": "interface",
         "name": "EnvelopeController",
-        "summary": ""
+        "summary": "What `createEnvelopeController` returns: the snapshot to draw from, and a call for each gesture and key that moves, adds, removes, bends or straightens."
       },
       {
         "kind": "interface",
         "name": "EnvelopeOptions",
-        "summary": ""
+        "summary": "The options of `createEnvelopeController`: the points, held or controlled, how few and how many there may be, the grid they snap to, the keyboard step, the formatting and the callbacks."
       },
       {
         "kind": "type",
@@ -348,12 +348,12 @@
       {
         "kind": "function",
         "name": "samePoints",
-        "summary": ""
+        "summary": "Whether two lists hold the same points, curves included, in the same order."
       },
       {
         "kind": "function",
         "name": "sanitizePoints",
-        "summary": ""
+        "summary": "The points kept on the graph: each within 0 and 1, a curve within -1 and 1 (dropped when it is flat), in order along x."
       },
       {
         "kind": "function",
@@ -373,7 +373,7 @@
       {
         "kind": "function",
         "name": "sortPoints",
-        "summary": ""
+        "summary": "The points in order along x."
       }
     ],
     "from": "@audio-ui/core/envelope",
@@ -402,37 +402,37 @@
       {
         "kind": "type",
         "name": "FaderChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change: the reason, the event behind it, and `cancel()` to refuse the change."
       },
       {
         "kind": "type",
         "name": "FaderChangeEventReason",
-        "summary": ""
+        "summary": "Why the value changed: `\"drag\"`, `\"track-press\"`, `\"keyboard\"`, `\"wheel\"`, `\"input-change\"` (a typed value) or `\"reset\"`."
       },
       {
         "kind": "type",
         "name": "FaderCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture ends: the reason and the event behind it."
       },
       {
         "kind": "type",
         "name": "FaderCommitEventReason",
-        "summary": ""
+        "summary": "Why the value was committed: the same reasons as a change."
       },
       {
         "kind": "interface",
         "name": "FaderController",
-        "summary": ""
+        "summary": "What `createFaderController` returns: the snapshot to draw from, and the press, keys, wheel, typed value and reset that change it."
       },
       {
         "kind": "interface",
         "name": "FaderOptions",
-        "summary": ""
+        "summary": "The options of `createFaderController`: the value, held or controlled, its range, steps, anchor and orientation, its formatting and the callbacks."
       },
       {
         "kind": "type",
         "name": "FaderOrientation",
-        "summary": ""
+        "summary": "Which way a fader's travel runs."
       },
       {
         "kind": "interface",
@@ -447,17 +447,17 @@
       {
         "kind": "const",
         "name": "DEFAULT_MAX",
-        "summary": ""
+        "summary": "The top of a fader's range unless given: 6."
       },
       {
         "kind": "const",
         "name": "DEFAULT_MIN",
-        "summary": ""
+        "summary": "The bottom of a fader's range unless given: -60, as for a level in dB."
       },
       {
         "kind": "const",
         "name": "WHEEL_DELTA_EPSILON",
-        "summary": ""
+        "summary": "A wheel movement smaller than this is ignored."
       }
     ],
     "from": "@audio-ui/core/fader",
@@ -504,12 +504,12 @@
       {
         "kind": "interface",
         "name": "BiquadSettings",
-        "summary": ""
+        "summary": "One filter as `biquadResponse` draws it: its type, frequency, gain and Q, at a sample rate."
       },
       {
         "kind": "type",
         "name": "BiquadType",
-        "summary": ""
+        "summary": "The kinds of band an equalizer draws: cuts, shelves, a peak, a notch and a band-pass."
       },
       {
         "kind": "function",
@@ -529,7 +529,7 @@
       {
         "kind": "interface",
         "name": "EqBand",
-        "summary": ""
+        "summary": "One band of an equalizer: a filter that can be switched out of the chain."
       },
       {
         "kind": "function",
@@ -609,7 +609,7 @@
       {
         "kind": "interface",
         "name": "SpectrumBandsOptions",
-        "summary": ""
+        "summary": "The frequencies and levels `spectrumBands` spreads its bands over."
       },
       {
         "kind": "function",
@@ -624,7 +624,7 @@
       {
         "kind": "interface",
         "name": "LogSpectrumOptions",
-        "summary": ""
+        "summary": "The frequencies the axis of `logSpectrum` spans."
       },
       {
         "kind": "function",
@@ -634,7 +634,7 @@
       {
         "kind": "interface",
         "name": "PeakHoldOptions",
-        "summary": ""
+        "summary": "How long `holdPeaks` holds a peak, and how fast it lets it fall."
       },
       {
         "kind": "const",
@@ -679,12 +679,12 @@
       {
         "kind": "interface",
         "name": "Device",
-        "summary": ""
+        "summary": "A defined device: its parameters, and everything that reads or changes a state of it, with no sound and no view."
       },
       {
         "kind": "interface",
         "name": "DeviceApplied",
-        "summary": ""
+        "summary": "What `apply` returns: the new state, the changes made, and the changes refused with their reason."
       },
       {
         "kind": "interface",
@@ -704,7 +704,7 @@
       {
         "kind": "interface",
         "name": "DeviceDefinition",
-        "summary": ""
+        "summary": "What `defineDevice` takes: the device's id, name, description and parameters, and whether it is an instrument, takes a sidechain or adds latency."
       },
       {
         "kind": "class",
@@ -749,7 +749,7 @@
       {
         "kind": "type",
         "name": "ParameterDescriptor",
-        "summary": ""
+        "summary": "A parameter of a device: a number, a toggle or a choice."
       },
       {
         "kind": "type",
@@ -789,7 +789,7 @@
       {
         "kind": "interface",
         "name": "DeviceToolResult",
-        "summary": ""
+        "summary": "What a tool's `run` returns: the state after the call, a summary for the model, and the note to play for a `<id>_play` call."
       },
       {
         "kind": "function",
@@ -840,12 +840,12 @@
       {
         "kind": "interface",
         "name": "MidiInput",
-        "summary": ""
+        "summary": "The page's MIDI inputs as one source: connect, listen to messages, switch inputs off, and follow its state."
       },
       {
         "kind": "interface",
         "name": "MidiInputState",
-        "summary": ""
+        "summary": "What `createMidiInput` knows of the page's MIDI: whether it is supported and connected, the inputs, the muted ones, and why it is not connected."
       },
       {
         "kind": "const",
@@ -922,7 +922,7 @@
       {
         "kind": "type",
         "name": "ScaleName",
-        "summary": ""
+        "summary": "The name of a scale of `SCALES`."
       },
       {
         "kind": "function",
@@ -946,7 +946,7 @@
       {
         "kind": "interface",
         "name": "ArrangedAudio",
-        "summary": ""
+        "summary": "An audio clip as an arrangement holds it, in seconds: where it lies, the stretch of its recording it plays, its gain, loop, direction and warp."
       },
       {
         "kind": "function",
@@ -1272,7 +1272,7 @@
       {
         "kind": "type",
         "name": "FixedGridDivision",
-        "summary": ""
+        "summary": "The id of a fixed grid division: `\"4-bars\"` to `\"1/32\"`."
       },
       {
         "kind": "const",
@@ -1287,7 +1287,7 @@
       {
         "kind": "interface",
         "name": "GridIntervalOptions",
-        "summary": ""
+        "summary": "How close adaptive grid lines may be, and whether the grid is in triplets."
       },
       {
         "kind": "function",
@@ -1307,7 +1307,7 @@
       {
         "kind": "type",
         "name": "MetronomeRhythm",
-        "summary": ""
+        "summary": "The id of a metronome rhythm: `\"auto\"` (the beat), a bar, or a note value, straight or triplet."
       },
       {
         "kind": "function",
@@ -1322,7 +1322,7 @@
       {
         "kind": "type",
         "name": "SyncedDivision",
-        "summary": ""
+        "summary": "A note value as `syncedSeconds` reads it: `\"1/8\"`, its triplet `\"1/8t\"` or its dotted `\"1/8d\"`."
       },
       {
         "kind": "function",
@@ -1412,22 +1412,22 @@
       {
         "kind": "interface",
         "name": "SchedulerConfig",
-        "summary": ""
+        "summary": "What the scheduler steps through: the window of steps it loops over and how long a step lasts, read on every call."
       },
       {
         "kind": "interface",
         "name": "SchedulerCursor",
-        "summary": ""
+        "summary": "Where the scheduler is: the next step it will emit and when."
       },
       {
         "kind": "interface",
         "name": "StepBoundary",
-        "summary": ""
+        "summary": "A step to play and the audio time it starts at."
       },
       {
         "kind": "interface",
         "name": "BarsBeats",
-        "summary": ""
+        "summary": "A position in bars, beats and sixteenths, each counted from one."
       },
       {
         "kind": "function",
@@ -1447,7 +1447,7 @@
       {
         "kind": "const",
         "name": "DEFAULT_TEMPO",
-        "summary": ""
+        "summary": "120 BPM in 4/4."
       },
       {
         "kind": "function",
@@ -1462,7 +1462,7 @@
       {
         "kind": "function",
         "name": "secondsPerBar",
-        "summary": ""
+        "summary": "Seconds per bar: a beat times the beats in a bar."
       },
       {
         "kind": "function",
@@ -1561,37 +1561,37 @@
       {
         "kind": "type",
         "name": "KnobChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change: the reason, the event behind it, and `cancel()` to refuse the change."
       },
       {
         "kind": "type",
         "name": "KnobChangeEventReason",
-        "summary": ""
+        "summary": "Why the value changed: `\"drag\"`, `\"keyboard\"`, `\"wheel\"`, `\"input-change\"` (a typed value) or `\"reset\"`."
       },
       {
         "kind": "type",
         "name": "KnobCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture ends: the reason and the event behind it."
       },
       {
         "kind": "type",
         "name": "KnobCommitEventReason",
-        "summary": ""
+        "summary": "Why the value was committed: the same reasons as a change."
       },
       {
         "kind": "interface",
         "name": "KnobController",
-        "summary": ""
+        "summary": "What `createKnobController` returns: the snapshot to draw from, and the press, keys, wheel, typed value and reset that turn it."
       },
       {
         "kind": "type",
         "name": "KnobDragMode",
-        "summary": ""
+        "summary": "How a drag turns a knob: up and down, around its centre, or by the turns of the pointer."
       },
       {
         "kind": "interface",
         "name": "KnobOptions",
-        "summary": ""
+        "summary": "The options of `createKnobController`: the value, held or controlled, its range, scale, steps and anchor, the drag mode, the formatting and the callbacks."
       },
       {
         "kind": "interface",
@@ -1616,7 +1616,7 @@
       {
         "kind": "const",
         "name": "CENTER_DEAD_ZONE_MIN_PX",
-        "summary": ""
+        "summary": "The smallest the hub's dead zone may be, in px, however small the knob."
       },
       {
         "kind": "const",
@@ -1626,12 +1626,12 @@
       {
         "kind": "const",
         "name": "DEFAULT_ARC_STROKE_WIDTH",
-        "summary": ""
+        "summary": "The width of the track and indicator arcs in the 48 by 48 view box, unless given."
       },
       {
         "kind": "const",
         "name": "DOUBLE_TAP_MAX_MS",
-        "summary": ""
+        "summary": "The longest two taps may be apart, in ms, to count as a double tap and reset the value."
       },
       {
         "kind": "const",
@@ -1641,12 +1641,12 @@
       {
         "kind": "const",
         "name": "LARGE_POSITION_STEP",
-        "summary": ""
+        "summary": "With a scale that is not linear, a large step (Shift or Page Up and Down) moves this share of the travel."
       },
       {
         "kind": "const",
         "name": "LINEAR",
-        "summary": ""
+        "summary": "The linear scale, resolved once."
       },
       {
         "kind": "const",
@@ -1656,7 +1656,7 @@
       {
         "kind": "function",
         "name": "pointerAngle",
-        "summary": ""
+        "summary": "The angle of a pointer around the centre of `rect`, in radians, 0 pointing right."
       },
       {
         "kind": "const",
@@ -1696,7 +1696,7 @@
       {
         "kind": "const",
         "name": "WHEEL_DELTA_EPSILON",
-        "summary": ""
+        "summary": "A wheel movement smaller than this is ignored."
       }
     ],
     "from": "@audio-ui/core/knob",
@@ -1761,7 +1761,7 @@
       {
         "kind": "function",
         "name": "channelView",
-        "summary": ""
+        "summary": "What a channel shows for its reading in `frame`: the length of its bar, its peak mark, whether it warns or clips, and its text."
       },
       {
         "kind": "function",
@@ -1781,7 +1781,7 @@
       {
         "kind": "type",
         "name": "MeterChannelPart",
-        "summary": ""
+        "summary": "A part of a channel that a live source writes to."
       },
       {
         "kind": "interface",
@@ -1791,7 +1791,7 @@
       {
         "kind": "interface",
         "name": "MeterConfig",
-        "summary": ""
+        "summary": "What `createMeterConfig` returns: the range, the warning and clipping levels, the position of a level along the meter, and how a level is written."
       },
       {
         "kind": "interface",
@@ -1801,7 +1801,7 @@
       {
         "kind": "type",
         "name": "MeterOrientation",
-        "summary": ""
+        "summary": "Which way a meter's bars run."
       },
       {
         "kind": "function",
@@ -1811,7 +1811,7 @@
       {
         "kind": "function",
         "name": "setPresence",
-        "summary": ""
+        "summary": "Sets `attribute` on `node` as an empty attribute, or removes it."
       }
     ],
     "from": "@audio-ui/core/meter",
@@ -1847,27 +1847,27 @@
       {
         "kind": "interface",
         "name": "PadController",
-        "summary": ""
+        "summary": "What `createPadController` returns: the snapshot to draw from, and the strikes, keys and focus moves of the grid."
       },
       {
         "kind": "type",
         "name": "PadOffEventDetails",
-        "summary": ""
+        "summary": "What `onPadOff` receives when a pad stops: the reason (`\"press\"`, `\"keyboard\"`, or `\"choke\"` when another pad of its choke group cut it) and the event."
       },
       {
         "kind": "type",
         "name": "PadOnEventDetails",
-        "summary": ""
+        "summary": "What `onPadOn` receives with a strike: its `velocity`, from 0 to 1, the reason (`\"press\"` or `\"keyboard\"`), the event, and `cancel()` to refuse it."
       },
       {
         "kind": "interface",
         "name": "PadOptions",
-        "summary": ""
+        "summary": "The options of `createPadController`: the pads in reading order, the columns of the grid, the pads lit or disabled from elsewhere, and the callbacks."
       },
       {
         "kind": "interface",
         "name": "PadSnapshot",
-        "summary": ""
+        "summary": "What a view draws the pads from: the ones sounding and how hard, the tab stop, and whether the grid is disabled."
       },
       {
         "kind": "interface",
@@ -1916,27 +1916,27 @@
       {
         "kind": "interface",
         "name": "PianoController",
-        "summary": ""
+        "summary": "What `createPianoController` returns: the snapshot to draw from, and the presses, keys and focus moves of the keyboard."
       },
       {
         "kind": "type",
         "name": "PianoNoteOffEventDetails",
-        "summary": ""
+        "summary": "What `onNoteOff` receives when a key stops: the reason (`\"press\"`, `\"glide\"` or `\"keyboard\"`) and the event."
       },
       {
         "kind": "type",
         "name": "PianoNoteOnEventDetails",
-        "summary": ""
+        "summary": "What `onNoteOn` receives when a key sounds: its `velocity`, from 0 to 1, the reason (`\"press\"`, `\"glide\"` or `\"keyboard\"`), the event, and `cancel()` to refuse it."
       },
       {
         "kind": "interface",
         "name": "PianoOptions",
-        "summary": ""
+        "summary": "The options of `createPianoController`: the pitches, their layout and orientation, the notes lit from elsewhere, and the callbacks."
       },
       {
         "kind": "interface",
         "name": "PianoSnapshot",
-        "summary": ""
+        "summary": "What a view draws the keyboard from: the pitches and where each key sits, the ones sounding, and the tab stop."
       },
       {
         "kind": "const",
@@ -1951,7 +1951,7 @@
       {
         "kind": "interface",
         "name": "KeyPlacement",
-        "summary": ""
+        "summary": "Where a key sits along the keyboard, how much of it it takes, and whether it is black."
       },
       {
         "kind": "function",
@@ -1996,27 +1996,27 @@
       {
         "kind": "type",
         "name": "PianoRollChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change: the `edit` it made (one for every change of a gesture), the reason, the event behind it, and `cancel()` to refuse the change."
       },
       {
         "kind": "type",
         "name": "PianoRollChangeEventReason",
-        "summary": ""
+        "summary": "Why the notes changed: `\"draw\"`, `\"drag\"`, `\"keyboard\"`, `\"double-click\"` or `\"input-change\"`."
       },
       {
         "kind": "type",
         "name": "PianoRollCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture ends: the `edit` it made (one for every change of a gesture), the reason and the event behind it."
       },
       {
         "kind": "type",
         "name": "PianoRollCommitEventReason",
-        "summary": ""
+        "summary": "Why the notes were committed: the same reasons as a change."
       },
       {
         "kind": "interface",
         "name": "PianoRollController",
-        "summary": ""
+        "summary": "What `createPianoRollController` returns: the snapshot to draw from, and a call for each gesture, key and command that edits the notes or the selection."
       },
       {
         "kind": "type",
@@ -2036,7 +2036,7 @@
       {
         "kind": "type",
         "name": "PianoRollNoteOffEventDetails",
-        "summary": ""
+        "summary": "What `onNoteOff` receives when a pitch stops: the reason and the event."
       },
       {
         "kind": "type",
@@ -2046,12 +2046,12 @@
       {
         "kind": "interface",
         "name": "PianoRollOptions",
-        "summary": ""
+        "summary": "The options of `createPianoRollController`: the notes and the selection, each held or controlled, the timeline, the pitch range and shortest note, the mode, the draw style, the scale and folding, and the callbacks."
       },
       {
         "kind": "type",
         "name": "PianoRollSelectionEventDetails",
-        "summary": ""
+        "summary": "What `onSelectionChange` receives: the reason (`\"press\"`, `\"marquee\"`, `\"draw\"`, `\"drag\"`, `\"keyboard\"` or `\"double-click\"`), the event, and `cancel()` to refuse it."
       },
       {
         "kind": "interface",
@@ -2151,12 +2151,12 @@
       {
         "kind": "interface",
         "name": "Note",
-        "summary": ""
+        "summary": "A note on the roll: its pitch, start and length, how hard and how likely it plays, how far its velocity may stray, and whether it is deactivated."
       },
       {
         "kind": "type",
         "name": "NoteId",
-        "summary": ""
+        "summary": "A note's id: unique within its clip."
       },
       {
         "kind": "type",
@@ -2186,7 +2186,7 @@
       {
         "kind": "interface",
         "name": "RollBounds",
-        "summary": ""
+        "summary": "What every edit keeps a note within: the timeline's length, the pitch range and the shortest length."
       },
       {
         "kind": "function",
@@ -2316,32 +2316,32 @@
       {
         "kind": "type",
         "name": "PlotHandleChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change: the reason, the event behind it, and `cancel()` to refuse the change."
       },
       {
         "kind": "type",
         "name": "PlotHandleChangeEventReason",
-        "summary": ""
+        "summary": "Why the value changed: `\"drag\"`, `\"keyboard\"`, `\"input-change\"` (a typed value) or `\"reset\"`."
       },
       {
         "kind": "type",
         "name": "PlotHandleCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture ends: the reason and the event behind it."
       },
       {
         "kind": "type",
         "name": "PlotHandleCommitEventReason",
-        "summary": ""
+        "summary": "Why the value was committed: the same reasons as a change."
       },
       {
         "kind": "interface",
         "name": "PlotHandleController",
-        "summary": ""
+        "summary": "What `createPlotHandleController` returns: the snapshot to draw from, and the press, keys, typed values and reset that move the handle."
       },
       {
         "kind": "interface",
         "name": "PlotHandleOptions",
-        "summary": ""
+        "summary": "The options of `createPlotHandleController`: the value, held or controlled, the axes it moves along, how to measure the plot, and the callbacks."
       },
       {
         "kind": "interface",
@@ -2408,12 +2408,12 @@
       {
         "kind": "interface",
         "name": "SequencerController",
-        "summary": ""
+        "summary": "What `createSequencerController` returns: the snapshot to draw from, and the presses, paint strokes, keys and focus moves that edit the grid."
       },
       {
         "kind": "interface",
         "name": "SequencerOptions",
-        "summary": ""
+        "summary": "The options of `createSequencerController`: the pattern and the velocities, each held or controlled, and the callbacks."
       },
       {
         "kind": "interface",
@@ -2423,27 +2423,27 @@
       {
         "kind": "type",
         "name": "SequencerValueChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change to the pattern: the reason (`\"press\"`, `\"paint\"` or `\"keyboard\"`), the event, and `cancel()` to refuse it."
       },
       {
         "kind": "type",
         "name": "SequencerValueCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture on the pattern ends: the reason and the event."
       },
       {
         "kind": "type",
         "name": "SequencerVelocityChangeEventDetails",
-        "summary": ""
+        "summary": "What `onVelocityChange` receives with each change to the velocities: the reason (`\"drag\"`, `\"keyboard\"`, `\"input-change\"` or `\"reset\"`), the event, and `cancel()` to refuse it."
       },
       {
         "kind": "type",
         "name": "SequencerVelocityCommitEventDetails",
-        "summary": ""
+        "summary": "What `onVelocityCommitted` receives once a gesture on the velocities ends: the reason and the event."
       },
       {
         "kind": "interface",
         "name": "CellAddress",
-        "summary": ""
+        "summary": "A cell of the grid: its row and its step."
       },
       {
         "kind": "function",
@@ -2453,7 +2453,7 @@
       {
         "kind": "const",
         "name": "cellKey",
-        "summary": ""
+        "summary": "A cell's address as a string key, `\"row:step\"`."
       },
       {
         "kind": "const",
@@ -2473,7 +2473,7 @@
       {
         "kind": "type",
         "name": "Pattern",
-        "summary": ""
+        "summary": "Which steps are on: a row per sound, a cell per step."
       },
       {
         "kind": "function",
@@ -2519,7 +2519,7 @@
       {
         "kind": "interface",
         "name": "ClipLimits",
-        "summary": ""
+        "summary": "What a clip edit keeps a clip within: the timeline's length, the shortest it may be, and its source's length."
       },
       {
         "kind": "interface",
@@ -2549,7 +2549,7 @@
       {
         "kind": "const",
         "name": "FADE_SHAPES",
-        "summary": ""
+        "summary": "The fade shapes in the order a control steps through them."
       },
       {
         "kind": "type",
@@ -2614,27 +2614,27 @@
       {
         "kind": "type",
         "name": "ClipChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change to a clip: what moved (`target`), for a move how far and over which lane, whether Alt asks for a copy, the reason (`\"drag\"`, `\"keyboard\"`, `\"input-change\"` or `\"double-click\"`), the event, and `cancel()` to refuse the change."
       },
       {
         "kind": "type",
         "name": "ClipCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture on a clip ends: what moved, the reason and the event behind it."
       },
       {
         "kind": "interface",
         "name": "ClipController",
-        "summary": ""
+        "summary": "What `createClipController` returns: the snapshot to draw from, and the presses, keys, typed values and fade shapes that move, trim and fade the clip, and select it."
       },
       {
         "kind": "interface",
         "name": "ClipOptions",
-        "summary": ""
+        "summary": "The options of `createClipController`: the clip and its selection, each held or controlled, the timeline's length, grid, steps and zoom, the shortest length, the source's length, and the callbacks."
       },
       {
         "kind": "interface",
         "name": "ClipSnapshot",
-        "summary": ""
+        "summary": "What a view draws a clip from: its value, whether it is selected, and what a drag is moving and by how much."
       },
       {
         "kind": "type",
@@ -2689,7 +2689,7 @@
       {
         "kind": "interface",
         "name": "NavigatorController",
-        "summary": ""
+        "summary": "What `createNavigatorController` returns: the stretch the window shows, and the presses, keys, typed values and double click that move it."
       },
       {
         "kind": "interface",
@@ -2699,7 +2699,7 @@
       {
         "kind": "interface",
         "name": "NavigatorOptions",
-        "summary": ""
+        "summary": "The options of `createNavigatorController`: the timeline's length, how the viewport is laid out, the functions that scroll and zoom it, and the narrowest the window may be."
       },
       {
         "kind": "type",
@@ -2729,22 +2729,22 @@
       {
         "kind": "interface",
         "name": "TimelineController",
-        "summary": ""
+        "summary": "What `createTimelineController` returns: the snapshot to draw from, and the presses, keys, typed values and zooms that move the playhead or the view."
       },
       {
         "kind": "interface",
         "name": "TimelineOptions",
-        "summary": ""
+        "summary": "The options of `createTimelineController`: the position and the zoom, each held, controlled or (the position) live, the timeline's length, grid and steps, the zoom's bounds, and the callbacks."
       },
       {
         "kind": "type",
         "name": "TimelinePositionChangeEventDetails",
-        "summary": ""
+        "summary": "What `onPositionChange` receives with each move of the playhead: the reason (`\"press\"`, `\"drag\"`, `\"keyboard\"` or `\"input-change\"`), the event, and `cancel()` to refuse the move."
       },
       {
         "kind": "type",
         "name": "TimelinePositionCommitEventDetails",
-        "summary": ""
+        "summary": "What `onPositionCommitted` receives once a move of the playhead ends: the reason and the event behind it."
       },
       {
         "kind": "interface",
@@ -2759,7 +2759,7 @@
       {
         "kind": "type",
         "name": "TimelineZoomChangeEventDetails",
-        "summary": ""
+        "summary": "What `onZoomChange` receives with each zoom: the reason (`\"wheel\"`, `\"drag\"`, `\"keyboard\"`, `\"input-change\"` or `\"double-click\"`), the event, and `cancel()` to refuse it."
       },
       {
         "kind": "function",
@@ -2779,22 +2779,22 @@
       {
         "kind": "type",
         "name": "RangeChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change to a range: which `edge` moved, or `\"both\"`, the reason (`\"drag\"`, `\"draw\"`, `\"keyboard\"` or `\"input-change\"`), the event, and `cancel()` to refuse the change."
       },
       {
         "kind": "type",
         "name": "RangeCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture on a range ends: which edge moved, the reason and the event behind it."
       },
       {
         "kind": "interface",
         "name": "RangeController",
-        "summary": ""
+        "summary": "What `createRangeController` returns: the snapshot to draw from, and the presses, draws, keys and typed values that move and resize the range."
       },
       {
         "kind": "interface",
         "name": "RangeOptions",
-        "summary": ""
+        "summary": "The options of `createRangeController`: the range, held or controlled, the timeline's length, grid, steps and zoom, the shortest length, whether it can be moved or drawn, and the callbacks."
       },
       {
         "kind": "interface",
@@ -2884,27 +2884,27 @@
       {
         "kind": "interface",
         "name": "TrackController",
-        "summary": ""
+        "summary": "What `createTrackController` returns: the snapshot to draw from, and the presses, keys, typed values and reset that ask for a height."
       },
       {
         "kind": "type",
         "name": "TrackHeightChangeEventDetails",
-        "summary": ""
+        "summary": "What `onHeightChange` receives with each resize of a track: the reason (`\"drag\"`, `\"keyboard\"`, `\"input-change\"` or `\"double-click\"`), the event, and `cancel()` to refuse it."
       },
       {
         "kind": "type",
         "name": "TrackHeightCommitEventDetails",
-        "summary": ""
+        "summary": "What `onHeightCommitted` receives once a resize ends: the reason and the event behind it."
       },
       {
         "kind": "interface",
         "name": "TrackOptions",
-        "summary": ""
+        "summary": "The options of `createTrackController`: the height its parent holds, its bounds and steps, how to measure it, and the callbacks."
       },
       {
         "kind": "interface",
         "name": "TrackSnapshot",
-        "summary": ""
+        "summary": "What a view draws a track's resize handle from: whether a resize is under way."
       },
       {
         "kind": "function",
@@ -2919,12 +2919,12 @@
       {
         "kind": "interface",
         "name": "WheelZoomController",
-        "summary": ""
+        "summary": "What `createWheelZoom` returns: the wheel handler, `setOptions`, and `dispose`."
       },
       {
         "kind": "interface",
         "name": "WheelZoomOptions",
-        "summary": ""
+        "summary": "The options of `createWheelZoom`: the timeline's length, the zoom as drawn, where its start sits, and the function that applies a zoom."
       }
     ],
     "from": "@audio-ui/core/timeline",
@@ -2959,12 +2959,12 @@
       {
         "kind": "interface",
         "name": "BarLayoutOptions",
-        "summary": ""
+        "summary": "What `barLayout` lays bars out for: the canvas's size and pixel ratio, the bars' width, gap and shortest height, and the variant."
       },
       {
         "kind": "interface",
         "name": "BarRect",
-        "summary": ""
+        "summary": "A bar's rectangle on the bitmap, in whole device pixels."
       },
       {
         "kind": "function",
@@ -3019,7 +3019,7 @@
       {
         "kind": "interface",
         "name": "LevelHistory",
-        "summary": ""
+        "summary": "What `createLevelHistory` returns: feed it levels, step it every frame, and read the window it scrolls and how far the newest entry has slid in."
       },
       {
         "kind": "function",
@@ -3044,12 +3044,12 @@
       {
         "kind": "interface",
         "name": "LevelsEngine",
-        "summary": ""
+        "summary": "What `createLevelsEngine` returns: step it every frame with the input, and read the levels and whether they have settled."
       },
       {
         "kind": "interface",
         "name": "LevelsEngineOptions",
-        "summary": ""
+        "summary": "What a levels engine fits its input to: the bar count, the gain, the shortest level, whether the bars mirror, and what they do while idle, loading or with reduced motion."
       },
       {
         "kind": "type",
@@ -3064,7 +3064,7 @@
       {
         "kind": "interface",
         "name": "WaveformBarsOptions",
-        "summary": ""
+        "summary": "The options of `attachWaveformBars`: the bar count, the peaks or a live signal, the stretch shown and the played share, and how the bars move."
       },
       {
         "kind": "interface",
@@ -3079,7 +3079,7 @@
       {
         "kind": "interface",
         "name": "WaveformCanvasOptions",
-        "summary": ""
+        "summary": "The options of `attachWaveformCanvas`: the peaks or a live signal, the stretch shown and the played share, the variant, the bars' size, and how the drawing moves."
       },
       {
         "kind": "function",
@@ -3119,22 +3119,22 @@
       {
         "kind": "type",
         "name": "WaveformRegionChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change to a region: which `edge` moved, the reason (`\"drag\"`, `\"keyboard\"` or `\"input-change\"`), the event, and `cancel()` to refuse the change."
       },
       {
         "kind": "type",
         "name": "WaveformRegionCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture on a region ends: which edge moved, the reason and the event behind it."
       },
       {
         "kind": "interface",
         "name": "WaveformRegionController",
-        "summary": ""
+        "summary": "What `createWaveformRegionController` returns: the snapshot to draw from, and the presses, keys and typed values that move its edges."
       },
       {
         "kind": "type",
         "name": "WaveformRegionEdge",
-        "summary": ""
+        "summary": "What a change to a region moves: its start, its end, or the whole region with `\"both\"`."
       },
       {
         "kind": "interface",
@@ -3149,17 +3149,17 @@
       {
         "kind": "type",
         "name": "WaveformRegionValue",
-        "summary": ""
+        "summary": "A region as `[start, end]`, in `duration` units."
       },
       {
         "kind": "interface",
         "name": "ScopeOptions",
-        "summary": ""
+        "summary": "The box `scopePoints` draws into, in px, its inset, and the gain applied to the samples."
       },
       {
         "kind": "interface",
         "name": "ScopePoint",
-        "summary": ""
+        "summary": "A point of the trace, in px."
       },
       {
         "kind": "function",
@@ -3174,22 +3174,22 @@
       {
         "kind": "type",
         "name": "WaveformSeekChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each seek: the reason (`\"press\"`, `\"drag\"`, `\"keyboard\"` or `\"input-change\"`), the event, and `cancel()` to refuse it."
       },
       {
         "kind": "type",
         "name": "WaveformSeekCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a seek ends: the reason and the event behind it."
       },
       {
         "kind": "interface",
         "name": "WaveformSeekController",
-        "summary": ""
+        "summary": "What `createWaveformController` returns: the snapshot to draw from, the hover, and the presses, keys and typed values that seek."
       },
       {
         "kind": "interface",
         "name": "WaveformSeekOptions",
-        "summary": ""
+        "summary": "The options of `createWaveformController`: the position, held, controlled or live, the audio's length and the stretch shown, the steps, and the callbacks."
       },
       {
         "kind": "interface",
@@ -3204,7 +3204,7 @@
       {
         "kind": "type",
         "name": "WaveformSelectionCommitEventDetails",
-        "summary": ""
+        "summary": "The end of a stretch selected with Shift held: the reason and the event behind it."
       },
       {
         "kind": "interface",
@@ -3242,37 +3242,37 @@
       {
         "kind": "type",
         "name": "XYPadChangeEventDetails",
-        "summary": ""
+        "summary": "What `onValueChange` receives with each change: the reason, the event behind it, and `cancel()` to refuse the change."
       },
       {
         "kind": "type",
         "name": "XYPadChangeEventReason",
-        "summary": ""
+        "summary": "Why the value changed: `\"press\"`, `\"drag\"`, `\"keyboard\"`, `\"wheel\"`, `\"input-change\"` (a typed value) or `\"reset\"`."
       },
       {
         "kind": "type",
         "name": "XYPadCommitEventDetails",
-        "summary": ""
+        "summary": "What `onValueCommitted` receives once a gesture ends: the reason and the event behind it."
       },
       {
         "kind": "type",
         "name": "XYPadCommitEventReason",
-        "summary": ""
+        "summary": "Why the value was committed: the same reasons as a change."
       },
       {
         "kind": "interface",
         "name": "XYPadController",
-        "summary": ""
+        "summary": "What `createXYPadController` returns: the snapshot to draw from, and the press, keys, wheel, typed values and reset that move the point."
       },
       {
         "kind": "interface",
         "name": "XYPadOptions",
-        "summary": ""
+        "summary": "The options of `createXYPadController`: the point, held or controlled, each axis's range and step, the formatting and the callbacks."
       },
       {
         "kind": "interface",
         "name": "XYPadPoint",
-        "summary": ""
+        "summary": "A point on the pad, in the units of each axis."
       },
       {
         "kind": "interface",
@@ -3282,7 +3282,7 @@
       {
         "kind": "type",
         "name": "Axis",
-        "summary": ""
+        "summary": "One of the pad's two axes."
       },
       {
         "kind": "const",
@@ -3297,7 +3297,7 @@
       {
         "kind": "function",
         "name": "toPercent",
-        "summary": ""
+        "summary": "Where `value` sits between `min` and `max`, from 0 to 1."
       }
     ],
     "from": "@audio-ui/core/xypad",

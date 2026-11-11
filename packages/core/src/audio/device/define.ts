@@ -59,6 +59,7 @@ export interface ChoiceParameter {
   options: readonly ChoiceOption[];
 }
 
+/** A parameter of a device: a number, a toggle or a choice. */
 export type ParameterDescriptor =
   | NumberParameter
   | ToggleParameter
@@ -79,6 +80,7 @@ export type DeviceState<
       : number;
 };
 
+/** What `defineDevice` takes: the device's id, name, description and parameters, and whether it is an instrument, takes a sidechain or adds latency. */
 export interface DeviceDefinition<
   Parameters extends readonly ParameterDescriptor[],
 > {
@@ -162,6 +164,7 @@ export interface DeviceRejection {
     | "unknown parameter";
 }
 
+/** What `apply` returns: the new state, the changes made, and the changes refused with their reason. */
 export interface DeviceApplied<State> {
   /** What changed, in the order asked. A value equal to the current one is not a change. */
   changes: DeviceChange[];
@@ -203,6 +206,7 @@ export interface DeviceContext {
   tempo: Tempo;
 }
 
+/** A defined device: its parameters, and everything that reads or changes a state of it, with no sound and no view. */
 export interface Device<Parameters extends readonly ParameterDescriptor[]> {
   /**
    * Applies several changes at once and says what happened to each: the

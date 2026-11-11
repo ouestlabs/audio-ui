@@ -21,6 +21,7 @@ const MIN_Q = 0.05;
 /** The quietest a magnitude is drawn, so a notch's null stays on the plot. */
 const MIN_MAGNITUDE = 1e-9;
 
+/** The kinds of band an equalizer draws: cuts, shelves, a peak, a notch and a band-pass. */
 export type BiquadType =
   | "bandpass"
   | "highcut"
@@ -56,6 +57,7 @@ export function toWebAudioQ(type: BiquadType, q = Math.SQRT1_2): number {
   return q;
 }
 
+/** One filter as `biquadResponse` draws it: its type, frequency, gain and Q, at a sample rate. */
 export interface BiquadSettings {
   frequency: number;
   /** Gain in dB: used by peaks and shelves, ignored by the rest. */
@@ -177,6 +179,7 @@ export function biquadResponse(
   };
 }
 
+/** One band of an equalizer: a filter that can be switched out of the chain. */
 export interface EqBand extends BiquadSettings {
   /** Whether the band is in the chain. @default true */
   on?: boolean;

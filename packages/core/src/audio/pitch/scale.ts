@@ -14,6 +14,7 @@ export const SCALES = {
   phrygian: [0, 1, 3, 5, 7, 8, 10],
 } as const satisfies Record<string, readonly number[]>;
 
+/** The name of a scale of `SCALES`. */
 export type ScaleName = keyof typeof SCALES;
 
 /** A scale on a root: C major is `{ name: "major", root: 0 }`. */

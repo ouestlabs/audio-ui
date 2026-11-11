@@ -51,12 +51,14 @@ type WithTarget<Details> = Details & {
   target: ClipTarget;
 };
 
+/** What `onValueChange` receives with each change to a clip: what moved (`target`), for a move how far and over which lane, whether Alt asks for a copy, the reason (`"drag"`, `"keyboard"`, `"input-change"` or `"double-click"`), the event, and `cancel()` to refuse the change. */
 export type ClipChangeEventDetails = WithTarget<
   | ChangeEventDetails<"drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"input-change", Event>
   | ChangeEventDetails<"double-click", MouseEvent>
 >;
+/** What `onValueCommitted` receives once a gesture on a clip ends: what moved, the reason and the event behind it. */
 export type ClipCommitEventDetails = WithTarget<
   | CommitEventDetails<"drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
@@ -67,6 +69,7 @@ export type ClipCommitEventDetails = WithTarget<
 /** How far an edge is searched, in the timeline's units: far enough to reach any limit. */
 const FAR = 1e12;
 
+/** The options of `createClipController`: the clip and its selection, each held or controlled, the timeline's length, grid, steps and zoom, the shortest length, the source's length, and the callbacks. */
 export interface ClipOptions {
   /** Whether additive selection reports every press, as one with Shift, Cmd or Ctrl does. */
   additive?: boolean;
@@ -103,6 +106,7 @@ export interface ClipOptions {
   zoom: number | null;
 }
 
+/** What a view draws a clip from: its value, whether it is selected, and what a drag is moving and by how much. */
 export interface ClipSnapshot {
   disabled: boolean;
   /** Whether a pointer is moving, trimming or fading the clip. */
@@ -344,6 +348,7 @@ interface ClipGesture {
 /** The edges a fade or a trim moves. */
 type EdgeTarget = "fade-in" | "fade-out" | "trim-start" | "trim-end";
 
+/** What `createClipController` returns: the snapshot to draw from, and the presses, keys, typed values and fade shapes that move, trim and fade the clip, and select it. */
 export interface ClipController {
   /** Steps a fade to its next shape, from a double click or the keys. */
   cycleFadeShape: (

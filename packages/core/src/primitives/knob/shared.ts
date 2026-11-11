@@ -16,6 +16,7 @@ export const SWEEP_ANGLE = radToDeg(TAU - 2 * ANGLE_GAP_RAD);
 /** Outer edge of the arcs in the viewBox; each stroke is centered inside it. */
 export const ARC_OUTER_RADIUS = 23;
 
+/** The width of the track and indicator arcs in the 48 by 48 view box, unless given. */
 export const DEFAULT_ARC_STROKE_WIDTH = 3;
 
 /** Vertical drag: pointer travel, in px, for the whole `min…max` range. */
@@ -24,13 +25,16 @@ export const VERTICAL_DRAG_RANGE_PX = 150;
 /** Circular drag: inside this fraction of the diameter the angle is synced but not accumulated, so crossing the hub doesn't jump. */
 export const CENTER_DEAD_ZONE_REL = 0.08;
 
+/** The smallest the hub's dead zone may be, in px, however small the knob. */
 export const CENTER_DEAD_ZONE_MIN_PX = 2;
 
 /** A press that moves less than this is a tap; two quick taps reset the value. */
 export const TAP_MAX_MOVE_PX = 12;
 
+/** The longest two taps may be apart, in ms, to count as a double tap and reset the value. */
 export const DOUBLE_TAP_MAX_MS = 320;
 
+/** A wheel movement smaller than this is ignored. */
 export const WHEEL_DELTA_EPSILON = 0.1;
 
 /** Holding Shift turns the knob this much slower than the pointer moves. */
@@ -39,6 +43,7 @@ export const FINE_DRAG = 0.25;
 /** With a scale that isn't linear, a key or wheel notch moves this share of the travel. */
 export const POSITION_STEP = 0.01;
 
+/** With a scale that is not linear, a large step (Shift or Page Up and Down) moves this share of the travel. */
 export const LARGE_POSITION_STEP = 0.1;
 
 /** `disabled`, `dragging` and the drag mode become data attributes; the numbers stay in `state`. */
@@ -77,6 +82,7 @@ export function steppedValue(
   return Math.abs(next - current) < step ? current + direction * step : next;
 }
 
+/** The linear scale, resolved once. */
 export const LINEAR = resolveScale("linear");
 
 /** SVG arc along the dial between two normalized positions (0…1). */
@@ -94,6 +100,7 @@ export function arcPath(radius: number, from: number, to: number): string {
   return `M ${start.x} ${start.y} A ${radius} ${radius} 0 ${largeArc} 1 ${end.x} ${end.y}`;
 }
 
+/** The angle of a pointer around the centre of `rect`, in radians, 0 pointing right. */
 export function pointerAngle(
   clientX: number,
   clientY: number,

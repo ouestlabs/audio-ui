@@ -1,8 +1,10 @@
+/** A point of the trace, in px. */
 export interface ScopePoint {
   x: number;
   y: number;
 }
 
+/** The box `scopePoints` draws into, in px, its inset, and the gain applied to the samples. */
 export interface ScopeOptions {
   /** Visual gain applied to the samples. */
   gain: number;

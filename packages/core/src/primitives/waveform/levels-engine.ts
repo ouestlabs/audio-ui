@@ -21,6 +21,7 @@ const SWEEP_LEVEL = 0.55;
  */
 export type WaveformIdle = "none" | "pulse" | "wave";
 
+/** What a levels engine fits its input to: the bar count, the gain, the shortest level, whether the bars mirror, and what they do while idle, loading or with reduced motion. */
 export interface LevelsEngineOptions {
   count: number;
   /** Visual gain applied to the input. */
@@ -36,6 +37,7 @@ export interface LevelsEngineOptions {
   reducedMotion: boolean;
 }
 
+/** What `createLevelsEngine` returns: step it every frame with the input, and read the levels and whether they have settled. */
 export interface LevelsEngine {
   /** The level each bar shows, 0…1, never below `minLevel`. */
   readonly levels: Float32Array;

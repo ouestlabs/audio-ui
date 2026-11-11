@@ -6,17 +6,20 @@ import {
   createChangeEventDetails,
 } from "../../value/events.ts";
 
+/** What `onHeightChange` receives with each resize of a track: the reason (`"drag"`, `"keyboard"`, `"input-change"` or `"double-click"`), the event, and `cancel()` to refuse it. */
 export type TrackHeightChangeEventDetails =
   | ChangeEventDetails<"drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"input-change", Event>
   | ChangeEventDetails<"double-click", MouseEvent>;
+/** What `onHeightCommitted` receives once a resize ends: the reason and the event behind it. */
 export type TrackHeightCommitEventDetails =
   | CommitEventDetails<"drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
   | CommitEventDetails<"input-change", Event>
   | CommitEventDetails<"double-click", MouseEvent>;
 
+/** The options of `createTrackController`: the height its parent holds, its bounds and steps, how to measure it, and the callbacks. */
 export interface TrackOptions {
   /** The height in px, or `undefined` for the row to share what room there is. */
   height?: number;
@@ -36,11 +39,13 @@ export interface TrackOptions {
   step: number;
 }
 
+/** What a view draws a track's resize handle from: whether a resize is under way. */
 export interface TrackSnapshot {
   /** Whether a pointer is resizing the track. */
   resizing: boolean;
 }
 
+/** What `createTrackController` returns: the snapshot to draw from, and the presses, keys, typed values and reset that ask for a height. */
 export interface TrackController {
   getSnapshot: () => TrackSnapshot;
   /** Handles a key on the handle's input: the arrows move by a step (Down is taller), Page keys by a large one, Home and End go to the limits. Returns `true` when the handle takes the key. */

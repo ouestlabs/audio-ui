@@ -25,6 +25,7 @@ export interface PlayedStretch {
   speed: number;
 }
 
+/** An audio clip as an arrangement holds it, in seconds: where it lies, the stretch of its recording it plays, its gain, loop, direction and warp. */
 export interface ArrangedAudio {
   /** A deactivated clip stays where it is and plays nothing. */
   disabled?: boolean;

@@ -9,6 +9,7 @@ export interface Source<T> {
   subscribe: (listener: () => void) => () => void;
 }
 
+/** A source that also takes values: what `createSource` returns. */
 export interface WritableSource<T> extends Source<T> {
   /** Publish a value. Subscribers are told every time, so the same array, updated in place, can be published again. */
   set: (value: T) => void;

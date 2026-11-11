@@ -22,6 +22,7 @@ export interface JsonSchema {
 /** How long a note lasts when a call does not say, and the shortest and longest it may ask for, in seconds. */
 export const NOTE_DURATION = { default: 0.5, max: 30, min: 0.05 } as const;
 
+/** What a tool's `run` returns: the state after the call, a summary for the model, and the note to play for a `<id>_play` call. */
 export interface DeviceToolResult<State> {
   /** How long the note lasts, in seconds, for the call of a `<id>_play` tool. The host gives it to `playNote`. */
   duration?: number;

@@ -1,3 +1,4 @@
+/** Which steps are on: a row per sound, a cell per step. */
 export type Pattern = readonly (readonly boolean[])[];
 
 /** Loudness per step, 0…1: a row per sound, like the pattern. A step it does not list is at full. */
@@ -39,6 +40,7 @@ export function velocityAtY(box: DOMRect, clientY: number): number {
   return Math.min(1, Math.max(0, (box.bottom - clientY) / box.height));
 }
 
+/** A cell of the grid: its row and its step. */
 export interface CellAddress {
   row: number;
   step: number;
@@ -109,4 +111,5 @@ export function cellAtPoint(
   return null;
 }
 
+/** A cell's address as a string key, `"row:step"`. */
 export const cellKey = ({ row, step }: CellAddress) => `${row}:${step}`;

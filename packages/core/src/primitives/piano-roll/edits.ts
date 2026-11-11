@@ -5,8 +5,10 @@ import {
 } from "../../audio/pitch/scale.ts";
 import { type Grid, snapMove } from "../timeline/snap.ts";
 
+/** A note's id: unique within its clip. */
 export type NoteId = number | string;
 
+/** A note on the roll: its pitch, start and length, how hard and how likely it plays, how far its velocity may stray, and whether it is deactivated. */
 export interface Note {
   /** How likely the note is to play each time it comes round, 0…1. @default 1 */
   chance?: number;
@@ -25,6 +27,7 @@ export interface Note {
   velocity?: number;
 }
 
+/** What every edit keeps a note within: the timeline's length, the pitch range and the shortest length. */
 export interface RollBounds {
   duration: number;
   maxPitch: number;

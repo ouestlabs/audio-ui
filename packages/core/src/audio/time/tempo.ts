@@ -17,6 +17,7 @@ export interface Tempo {
   bpm: number;
 }
 
+/** 120 BPM in 4/4. */
 export const DEFAULT_TEMPO: Tempo = { beatsPerBar: 4, beatUnit: 4, bpm: 120 };
 
 const SECONDS_PER_MINUTE = 60;
@@ -44,6 +45,7 @@ export function secondsPerBeat(tempo: Tempo): number {
   return secondsPerQuarter(tempo) * (4 / beatUnitOf(tempo));
 }
 
+/** Seconds per bar: a beat times the beats in a bar. */
 export function secondsPerBar(tempo: Tempo): number {
   return secondsPerBeat(tempo) * beatsPerBarOf(tempo);
 }
@@ -58,6 +60,7 @@ export function microsecondsPerQuarterNoteToBpm(microseconds: number): number {
   return (SECONDS_PER_MINUTE * MICROSECONDS_PER_SECOND) / microseconds;
 }
 
+/** A position in bars, beats and sixteenths, each counted from one. */
 export interface BarsBeats {
   /** One-based, the way every DAW counts them. */
   bar: number;

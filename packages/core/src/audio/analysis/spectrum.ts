@@ -10,6 +10,7 @@
 /** The quietest a point is drawn: what a silent bin, `-Infinity` dB, becomes. */
 export const SPECTRUM_FLOOR_DB = -140;
 
+/** The frequencies the axis of `logSpectrum` spans. */
 export interface LogSpectrumOptions {
   /** Highest frequency on the axis. @default 20000 */
   maxHz?: number;
@@ -76,6 +77,7 @@ export function logSpectrum(
   return out;
 }
 
+/** How long `holdPeaks` holds a peak, and how fast it lets it fall. */
 export interface PeakHoldOptions {
   /** How fast a peak falls once its hold is over, in dB per second. @default 24 */
   fall?: number;

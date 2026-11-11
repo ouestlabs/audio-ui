@@ -24,6 +24,7 @@ export const GRID_DIVISIONS = [
   { id: "1/32", note: 32 },
 ] as const;
 
+/** The id of a fixed grid division: `"4-bars"` to `"1/32"`. */
 export type FixedGridDivision = (typeof GRID_DIVISIONS)[number]["id"];
 
 /** `adaptive` follows the zoom; a fixed division stays put however far you zoom. */
@@ -81,6 +82,7 @@ export function divisionAt(seconds: number, tempo: Tempo): FixedGridDivision {
   return found;
 }
 
+/** How close adaptive grid lines may be, and whether the grid is in triplets. */
 export interface GridIntervalOptions {
   /** The closest two adaptive lines may be, in px. @default 24 */
   minSpacing?: number;
@@ -184,6 +186,7 @@ export const METRONOME_RHYTHMS = [
   { denominator: 16, id: "1/16t", triplet: true },
 ] as const;
 
+/** The id of a metronome rhythm: `"auto"` (the beat), a bar, or a note value, straight or triplet. */
 export type MetronomeRhythm = (typeof METRONOME_RHYTHMS)[number]["id"];
 
 /**
@@ -247,6 +250,7 @@ export const SYNCED_DIVISIONS = SYNCED_NOTES.flatMap((note) => {
   ];
 });
 
+/** A note value as `syncedSeconds` reads it: `"1/8"`, its triplet `"1/8t"` or its dotted `"1/8d"`. */
 export type SyncedDivision = string;
 
 /**

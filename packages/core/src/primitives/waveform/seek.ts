@@ -8,10 +8,12 @@ import {
 import type { Source } from "../../value/source.ts";
 import { createStore, type Store } from "../../value/store.ts";
 
+/** What `onValueChange` receives with each seek: the reason (`"press"`, `"drag"`, `"keyboard"` or `"input-change"`), the event, and `cancel()` to refuse it. */
 export type WaveformSeekChangeEventDetails =
   | ChangeEventDetails<"press" | "drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"input-change", Event>;
+/** What `onValueCommitted` receives once a seek ends: the reason and the event behind it. */
 export type WaveformSeekCommitEventDetails =
   | CommitEventDetails<"press" | "drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
@@ -22,11 +24,13 @@ export type WaveformSelectionChangeEventDetails = ChangeEventDetails<
   "drag",
   PointerEvent
 >;
+/** The end of a stretch selected with Shift held: the reason and the event behind it. */
 export type WaveformSelectionCommitEventDetails = CommitEventDetails<
   "drag",
   PointerEvent
 >;
 
+/** The options of `createWaveformController`: the position, held, controlled or live, the audio's length and the stretch shown, the steps, and the callbacks. */
 export interface WaveformSeekOptions {
   /** Uncontrolled starting position. @default 0 */
   defaultValue?: number;
@@ -81,6 +85,7 @@ export interface WaveformSeekSnapshot {
   value: number;
 }
 
+/** What `createWaveformController` returns: the snapshot to draw from, the hover, and the presses, keys and typed values that seek. */
 export interface WaveformSeekController {
   /** The value at `share` of the way across the shown stretch. */
   atShare: (share: number) => number;

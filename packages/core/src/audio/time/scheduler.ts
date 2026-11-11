@@ -24,6 +24,7 @@ export const SCHEDULER_POLL_MS = 25;
  */
 export const MAX_CATCH_UP_SECONDS = 0.5;
 
+/** What the scheduler steps through: the window of steps it loops over and how long a step lasts, read on every call. */
 export interface SchedulerConfig {
   /** One past the last step of the window, exclusive. `totalSteps` for a full-grid clock. */
   regionEnd: number;
@@ -37,6 +38,7 @@ export interface SchedulerConfig {
   secondsPerStep: number;
 }
 
+/** Where the scheduler is: the next step it will emit and when. */
 export interface SchedulerCursor {
   /** The step the next emitted boundary will carry. */
   nextStep: number;
@@ -44,6 +46,7 @@ export interface SchedulerCursor {
   nextStepTime: number;
 }
 
+/** A step to play and the audio time it starts at. */
 export interface StepBoundary {
   step: number;
   /** Absolute audio time, pass straight to node `.start()`/`.stop()` for sample-accurate scheduling. */

@@ -21,6 +21,7 @@ export interface WaveformPlayed {
   subscribe: (listener: () => void) => () => void;
 }
 
+/** The options of `attachWaveformBars`: the bar count, the peaks or a live signal, the stretch shown and the played share, and how the bars move. */
 export interface WaveformBarsOptions {
   /** How many bars there are. */
   count: number;

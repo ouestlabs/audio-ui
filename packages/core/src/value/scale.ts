@@ -38,8 +38,10 @@ export const LOGARITHMIC_SCALE: ParameterScale = {
   },
 };
 
+/** A scale as an option takes it: `"linear"`, `"log"`, or a scale of your own. */
 export type ParameterScaleProp = "linear" | "log" | ParameterScale;
 
+/** The scale an option names: `"linear"` and `"log"` as `LINEAR_SCALE` and `LOGARITHMIC_SCALE`, a scale of your own as it is. */
 export function resolveScale(scale: ParameterScaleProp): ParameterScale {
   if (scale === "log") {
     return LOGARITHMIC_SCALE;

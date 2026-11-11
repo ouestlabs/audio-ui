@@ -20,22 +20,27 @@ import {
 const EMPTY_PATTERN: readonly (readonly boolean[])[] = [];
 const EMPTY_VELOCITIES: readonly (readonly number[])[] = [];
 
+/** What `onValueChange` receives with each change to the pattern: the reason (`"press"`, `"paint"` or `"keyboard"`), the event, and `cancel()` to refuse it. */
 export type SequencerValueChangeEventDetails =
   | ChangeEventDetails<"press" | "paint", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>;
+/** What `onValueCommitted` receives once a gesture on the pattern ends: the reason and the event. */
 export type SequencerValueCommitEventDetails =
   | CommitEventDetails<"press" | "paint", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>;
 
+/** What `onVelocityChange` receives with each change to the velocities: the reason (`"drag"`, `"keyboard"`, `"input-change"` or `"reset"`), the event, and `cancel()` to refuse it. */
 export type SequencerVelocityChangeEventDetails =
   | ChangeEventDetails<"drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"input-change" | "reset", Event>;
+/** What `onVelocityCommitted` receives once a gesture on the velocities ends: the reason and the event. */
 export type SequencerVelocityCommitEventDetails =
   | CommitEventDetails<"drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
   | CommitEventDetails<"input-change" | "reset", Event>;
 
+/** The options of `createSequencerController`: the pattern and the velocities, each held or controlled, and the callbacks. */
 export interface SequencerOptions {
   /** Uncontrolled starting pattern: a row per sound, each a list of steps. */
   defaultValue?: Pattern;
@@ -80,6 +85,7 @@ export interface SequencerSnapshot {
 /** Which element a pointer gesture reads its cells from: a map of the cell elements by key. */
 export type SequencerCellNodes = ReadonlyMap<string, Element>;
 
+/** What `createSequencerController` returns: the snapshot to draw from, and the presses, paint strokes, keys and focus moves that edit the grid. */
 export interface SequencerController {
   getSnapshot: () => SequencerSnapshot;
   /** Where an arrow, Home or End key takes the focus from `from`: the new tab stop, or null when the key is not the grid's. */

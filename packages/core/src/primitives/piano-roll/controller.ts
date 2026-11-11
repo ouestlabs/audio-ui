@@ -65,19 +65,24 @@ type Edited<Details> = Details & {
   edit: PianoRollEdit;
 };
 
+/** What `onValueChange` receives with each change: the `edit` it made (one for every change of a gesture), the reason, the event behind it, and `cancel()` to refuse the change. */
 export type PianoRollChangeEventDetails =
   | Edited<ChangeEventDetails<"draw" | "drag", PointerEvent>>
   | Edited<ChangeEventDetails<"keyboard", KeyboardEvent>>
   | Edited<ChangeEventDetails<"double-click", MouseEvent>>
   | Edited<ChangeEventDetails<"input-change", Event>>;
+/** Why the notes changed: `"draw"`, `"drag"`, `"keyboard"`, `"double-click"` or `"input-change"`. */
 export type PianoRollChangeEventReason = PianoRollChangeEventDetails["reason"];
+/** What `onValueCommitted` receives once a gesture ends: the `edit` it made (one for every change of a gesture), the reason and the event behind it. */
 export type PianoRollCommitEventDetails =
   | Edited<CommitEventDetails<"draw" | "drag", PointerEvent>>
   | Edited<CommitEventDetails<"keyboard", KeyboardEvent>>
   | Edited<CommitEventDetails<"double-click", MouseEvent>>
   | Edited<CommitEventDetails<"input-change", Event>>;
+/** Why the notes were committed: the same reasons as a change. */
 export type PianoRollCommitEventReason = PianoRollCommitEventDetails["reason"];
 
+/** What `onSelectionChange` receives: the reason (`"press"`, `"marquee"`, `"draw"`, `"drag"`, `"keyboard"` or `"double-click"`), the event, and `cancel()` to refuse it. */
 export type PianoRollSelectionEventDetails =
   | ChangeEventDetails<"press" | "marquee" | "draw" | "drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
@@ -94,6 +99,7 @@ export type PianoRollNoteOnEventDetails =
   | WithVelocity<ChangeEventDetails<"keyboard", KeyboardEvent>>
   | WithVelocity<ChangeEventDetails<"draw" | "drag", PointerEvent>>;
 
+/** What `onNoteOff` receives when a pitch stops: the reason and the event. */
 export type PianoRollNoteOffEventDetails =
   | CommitEventDetails<"press" | "glide" | "draw" | "drag", PointerEvent>
   | CommitEventDetails<"keyboard", FocusEvent | KeyboardEvent>;
@@ -122,6 +128,7 @@ export interface PianoRollTimeline {
   zoom: number | null;
 }
 
+/** The options of `createPianoRollController`: the notes and the selection, each held or controlled, the timeline, the pitch range and shortest note, the mode, the draw style, the scale and folding, and the callbacks. */
 export interface PianoRollOptions {
   activePitches?: readonly number[];
   /** Returns the id of a note drawn, added or duplicated. Defaults to `"note-<n>"`, skipping ids in use. */
@@ -186,6 +193,7 @@ export interface PianoRollSnapshot {
 /** Which pointer handle a note gesture takes: its body, or one of its edges. */
 export type PianoRollNoteHandle = "end" | "move" | "start";
 
+/** What `createPianoRollController` returns: the snapshot to draw from, and a call for each gesture, key and command that edits the notes or the selection. */
 export interface PianoRollController {
   /** Adds a note at the playback position, from the keyboard. Returns `true` when the note is added. */
   addAtPlayback: (event: KeyboardEvent) => boolean;

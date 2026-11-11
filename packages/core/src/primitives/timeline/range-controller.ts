@@ -26,17 +26,20 @@ type Edged<Details> = Details & {
   edge: RangeEdge;
 };
 
+/** What `onValueChange` receives with each change to a range: which `edge` moved, or `"both"`, the reason (`"drag"`, `"draw"`, `"keyboard"` or `"input-change"`), the event, and `cancel()` to refuse the change. */
 export type RangeChangeEventDetails = Edged<
   | ChangeEventDetails<"drag" | "draw", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"input-change", Event>
 >;
+/** What `onValueCommitted` receives once a gesture on a range ends: which edge moved, the reason and the event behind it. */
 export type RangeCommitEventDetails = Edged<
   | CommitEventDetails<"drag" | "draw", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
   | CommitEventDetails<"input-change", Event>
 >;
 
+/** The options of `createRangeController`: the range, held or controlled, the timeline's length, grid, steps and zoom, the shortest length, whether it can be moved or drawn, and the callbacks. */
 export interface RangeOptions {
   defaultValue?: RangeValue;
   disabled?: boolean;
@@ -72,6 +75,7 @@ export interface RangeSnapshot {
   value: RangeValue;
 }
 
+/** What `createRangeController` returns: the snapshot to draw from, and the presses, draws, keys and typed values that move and resize the range. */
 export interface RangeController {
   /** Keys on a handle's input: arrows and Page keys move the edge, Home and End go to its limits. Returns `true` when the handle takes the key. */
   edgeKeyDown: (edge: "end" | "start", event: KeyboardEvent) => boolean;

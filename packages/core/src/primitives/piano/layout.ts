@@ -12,6 +12,7 @@ export const BLACK_KEY_DEPTH = 0.6;
 /** A black key's width, as a share of a white key's. */
 const BLACK_KEY_WIDTH = 0.65;
 
+/** Where a key sits along the keyboard, how much of it it takes, and whether it is black. */
 export interface KeyPlacement {
   black: boolean;
   pitch: number;

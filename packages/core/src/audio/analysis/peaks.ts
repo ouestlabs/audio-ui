@@ -116,6 +116,7 @@ export function normalizeWaveform(values: number[]): number[] {
   return values.map((value) => value / peak);
 }
 
+/** The frequencies and levels `spectrumBands` spreads its bands over. */
 export interface SpectrumBandsOptions {
   /** The level drawn as 1, in decibels: `AnalyserNode.maxDecibels`. @default -30 */
   maxDb?: number;

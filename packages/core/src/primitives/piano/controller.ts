@@ -20,14 +20,17 @@ const MIDDLE_C = 60;
 /** One octave: what Shift + an arrow key, Page Up and Page Down move by. */
 const OCTAVE = 12;
 
+/** What `onNoteOn` receives when a key sounds: its `velocity`, from 0 to 1, the reason (`"press"`, `"glide"` or `"keyboard"`), the event, and `cancel()` to refuse it. */
 export type PianoNoteOnEventDetails = { velocity: number } & (
   | ChangeEventDetails<"press" | "glide", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
 );
+/** What `onNoteOff` receives when a key stops: the reason (`"press"`, `"glide"` or `"keyboard"`) and the event. */
 export type PianoNoteOffEventDetails =
   | CommitEventDetails<"press" | "glide", PointerEvent>
   | CommitEventDetails<"keyboard", FocusEvent | KeyboardEvent>;
 
+/** The options of `createPianoController`: the pitches, their layout and orientation, the notes lit from elsewhere, and the callbacks. */
 export interface PianoOptions {
   activeNotes?: readonly number[];
   disabled?: boolean;
@@ -43,6 +46,7 @@ export interface PianoOptions {
   pitches?: readonly number[];
 }
 
+/** What a view draws the keyboard from: the pitches and where each key sits, the ones sounding, and the tab stop. */
 export interface PianoSnapshot {
   /** Pitches sounding: pressed here, or listed in `activeNotes`. */
   active: ReadonlySet<number>;
@@ -56,6 +60,7 @@ export interface PianoSnapshot {
   tabStop: number | undefined;
 }
 
+/** What `createPianoController` returns: the snapshot to draw from, and the presses, keys and focus moves of the keyboard. */
 export interface PianoController {
   /** Moves the tab stop to `pitch`, leaving focus where it is. */
   focusKey: (pitch: number) => void;

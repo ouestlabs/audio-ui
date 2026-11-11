@@ -6,6 +6,7 @@ export type RangeValue = readonly [start: number, end: number];
 /** What a change moves: one edge, or the whole range with `both`. */
 export type RangeEdge = "both" | "end" | "start";
 
+/** What a range is kept within: the timeline's length and the shortest it may be. */
 export interface RangeLimits {
   duration: number;
   /** The shortest a range may be resized to. */

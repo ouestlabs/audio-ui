@@ -8,26 +8,32 @@ import {
 import { createPairFormatter } from "../../value/format.ts";
 import { type Axis, LARGE_STEP_MULTIPLIER, toPercent } from "./shared.ts";
 
+/** A point on the pad, in the units of each axis. */
 export interface XYPadPoint {
   x: number;
   y: number;
 }
 
+/** What `onValueChange` receives with each change: the reason, the event behind it, and `cancel()` to refuse the change. */
 export type XYPadChangeEventDetails =
   | ChangeEventDetails<"press" | "drag", PointerEvent>
   | ChangeEventDetails<"keyboard", KeyboardEvent>
   | ChangeEventDetails<"wheel", WheelEvent>
   | ChangeEventDetails<"reset", KeyboardEvent | MouseEvent | PointerEvent>
   | ChangeEventDetails<"input-change", Event>;
+/** Why the value changed: `"press"`, `"drag"`, `"keyboard"`, `"wheel"`, `"input-change"` (a typed value) or `"reset"`. */
 export type XYPadChangeEventReason = XYPadChangeEventDetails["reason"];
+/** What `onValueCommitted` receives once a gesture ends: the reason and the event behind it. */
 export type XYPadCommitEventDetails =
   | CommitEventDetails<"press" | "drag", PointerEvent>
   | CommitEventDetails<"keyboard", KeyboardEvent>
   | CommitEventDetails<"wheel", WheelEvent>
   | CommitEventDetails<"reset", KeyboardEvent | MouseEvent | PointerEvent>
   | CommitEventDetails<"input-change", Event>;
+/** Why the value was committed: the same reasons as a change. */
 export type XYPadCommitEventReason = XYPadCommitEventDetails["reason"];
 
+/** The options of `createXYPadController`: the point, held or controlled, each axis's range and step, the formatting and the callbacks. */
 export interface XYPadOptions {
   /** Uncontrolled starting point, and what a reset returns to; defaults to the center of the pad. */
   defaultValue?: XYPadPoint;
@@ -79,6 +85,7 @@ export interface XYPadSnapshot {
   value: XYPadPoint;
 }
 
+/** What `createXYPadController` returns: the snapshot to draw from, and the press, keys, wheel, typed values and reset that move the point. */
 export interface XYPadController {
   /** Listens to wheel and trackpad scrolling on `element`; returns what removes the listener. */
   attachWheel: (element: HTMLElement) => () => void;
