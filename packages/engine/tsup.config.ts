@@ -6,7 +6,9 @@ import { defineConfig } from "tsup";
 const modules = [
   "analysis",
   "device",
+  "dsp",
   "files",
+  "kernels",
   "midi",
   "pitch",
   "playback",
