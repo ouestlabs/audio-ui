@@ -144,7 +144,7 @@ const MODULE_PACKAGES = [
   { folder: "core", name: "@audio-ui/core" },
   { folder: "engine", name: "@audio-ui/engine" },
   { folder: "elements", name: "@audio-ui/elements" },
-  { folder: "ui", name: "@audio-ui/react" },
+  { folder: "react", name: "@audio-ui/react" },
 ] as const;
 
 /** A module of a published package, as its page heads it. */
@@ -368,7 +368,7 @@ async function importers(folder: string, from: string) {
 /** The adapters of `@audio-ui/react` and `@audio-ui/elements` with a file that imports `from`. */
 async function adaptersOf(from: string) {
   const roots = [
-    { name: "@audio-ui/react", src: `${PACKAGES}/ui/src/primitives` },
+    { name: "@audio-ui/react", src: `${PACKAGES}/react/src/primitives` },
     { name: "@audio-ui/elements", src: `${PACKAGES}/elements/src` },
   ];
   const found = await Promise.all(

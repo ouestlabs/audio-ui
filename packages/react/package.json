@@ -31,7 +31,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ouestlabs/audio-ui.git",
-    "directory": "packages/ui"
+    "directory": "packages/react"
   },
   "license": "MIT",
   "sideEffects": false,

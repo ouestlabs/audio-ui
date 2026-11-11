@@ -1,6 +1,6 @@
 ---
 name: change-primitive
-description: "Change, fix or add a headless primitive or its logic in the published packages @audio-ui/react (packages/ui), @audio-ui/core (packages/core) or @audio-ui/engine (packages/engine): props, parts, keyboard or pointer behavior, ARIA, scales, timeline or waveform math. Use for any edit under packages/, since each one needs tests, a changeset and the matching docs API reference."
+description: "Change, fix or add a headless primitive or its logic in the published packages @audio-ui/react (packages/react), @audio-ui/core (packages/core) or @audio-ui/engine (packages/engine): props, parts, keyboard or pointer behavior, ARIA, scales, timeline or waveform math. Use for any edit under packages/, since each one needs tests, a changeset and the matching docs API reference."
 ---
 
 # Change a primitive
@@ -10,7 +10,7 @@ Both packages are published to npm. Every change here is a change to someone's a
 ## Where the code goes
 
 - **Logic that doesn't need React** (geometry, value mapping, clip operations, peaks): `packages/core/src/primitives/<name>/`, with a `*.test.ts` next to it. Shared helpers: `packages/core/src/{shared,value,dom}/`.
-- **React parts**: `packages/ui/src/primitives/<name>/elements/<part>.tsx`, the context in `context.ts`, tests in `test/`. The public surface is `packages/ui/src/entries/<name>.ts`, re-exported by `index.ts`.
+- **React parts**: `packages/react/src/primitives/<name>/elements/<part>.tsx`, the context in `context.ts`, tests in `test/`. The public surface is `packages/react/src/entries/<name>.ts`, re-exported by `index.ts`.
 - A new export from core that adapters need but users don't goes in `packages/core/src/internal.ts`, not `index.ts`.
 - **Audio logic** (devices, time, analysis, MIDI, scales, playback), and anything built on an audio.js atom: `packages/engine/src/<module>/`. Core takes no dependency; the engine imports core only through its public entries.
 
@@ -23,7 +23,7 @@ Both packages are published to npm. Every change here is a change to someone's a
 
 ## Steps
 
-1. **Test first.** Reproduce the bug or describe the new behavior in a test (`bun test` in the package). Pointer and keyboard tests for parts live in `packages/ui/src/primitives/<name>/test/`.
+1. **Test first.** Reproduce the bug or describe the new behavior in a test (`bun test` in the package). Pointer and keyboard tests for parts live in `packages/react/src/primitives/<name>/test/`.
 2. **Change the code** in core first if the logic is framework-free, then the React part.
 3. **Docs API reference.** The JSDoc of each part in `elements/` and the `<TypeRow>` lines under "API reference" in `apps/www/src/content/docs/react/<name>.mdx` are copies of each other: change the JSDoc, then `bun scripts/api-reference.ts --write` in `apps/www` rewrites the rows (`test/api-reference.test.ts` fails on one that differs). A change to a custom element goes on `elements/<name>.mdx`, and the registry component's own props stay on its component page.
    A change to `@audio-ui/core` or `@audio-ui/engine` also shows on its module's page, `apps/www/src/content/docs/core/<module>.mdx` or `engine/<module>.mdx`: its head (exports and their JSDoc's first sentence, adapters, sources) is generated, so run `bun run registry:build` in `apps/www` (`test/entries.test.ts` fails on a stale manifest), and update the written Usage when the behavior it describes changed. A new subpath export needs a page with `<Module from="@audio-ui/<package>/<module>" />`, listed in that folder's `meta.json`; `test/package-modules-docs.test.ts` fails without one. A change under `packages/engine/src/playback/` (or to core's timeline, which the clip player bundles) needs `bun run worklet:build` in `packages/engine`.
@@ -41,11 +41,11 @@ Both packages are published to npm. Every change here is a change to someone's a
 7. **Check like CI** (from the repo root):
    ```sh
    bun run lint:fix
-   bunx biome ci packages/core packages/engine packages/ui
+   bunx biome ci packages/core packages/engine packages/react
    bun run build:pkg
    (cd packages/core && bunx tsc --noEmit && bun test)
    (cd packages/engine && bunx tsc --noEmit && bun test)
-   (cd packages/ui && bunx tsc --noEmit && bun test && bun run size)
+   (cd packages/react && bunx tsc --noEmit && bun test && bun run size)
    ```
    `bun run size` enforces bundle budgets per entry. If it fails, look for an import that pulls in more than the primitive needs.
 8. **Look at it.** Run `bun run dev`, open the component's docs page on `localhost:4000`, and drive it with the pointer, the wheel and the keyboard.

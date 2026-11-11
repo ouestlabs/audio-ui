@@ -92,7 +92,7 @@ The knob resets on a double tap by itself, because a tap on a knob changes nothi
 
 Read the signatures in the `*Controller` type of each module before calling one: they are the source of truth.
 
-The React primitives are the reference implementation of each adapter: `packages/ui/src/primitives/<name>/elements/` in https://github.com/ouestlabs/audio-ui shows which part gets which listener and attribute.
+The React primitives are the reference implementation of each adapter: `packages/react/src/primitives/<name>/elements/` in https://github.com/ouestlabs/audio-ui shows which part gets which listener and attribute.
 
 ## A knob in the plain DOM
 

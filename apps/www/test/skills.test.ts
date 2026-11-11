@@ -84,7 +84,7 @@ const registryNames = new Set(
   )
 );
 const uiExports = Object.keys(
-  (await Bun.file(`${ROOT}/packages/ui/package.json`).json()).exports
+  (await Bun.file(`${ROOT}/packages/react/package.json`).json()).exports
 );
 const coreExports = Object.keys(
   (await Bun.file(`${ROOT}/packages/core/package.json`).json()).exports
@@ -92,7 +92,7 @@ const coreExports = Object.keys(
 const engineExports = Object.keys(
   (await Bun.file(`${ROOT}/packages/engine/package.json`).json()).exports
 );
-const uiSource = (await read("**/*.{ts,tsx}", `${ROOT}/packages/ui/src`))
+const uiSource = (await read("**/*.{ts,tsx}", `${ROOT}/packages/react/src`))
   .map((file) => file.text)
   .join("\n");
 const withRules = await readSkillNames();
