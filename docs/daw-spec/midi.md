@@ -37,3 +37,8 @@ Test: apps/www/test/arrangement-playback.test.ts "MID-005"
 ### MID-006 Looped MIDI clips
 A looped MIDI clip plays the notes of its loop on every pass, each pass on the arrangement's frames.
 Test: apps/www/test/arrangement.test.ts (playedNotes)
+
+### MID-010 A clip's scale
+A MIDI clip's Scale box picks a root and a scale and turns it on: on, the roll marks the scale's rows and Fold keeps those rows as well as the ones with notes. Its menu offers the three keys the song is likeliest in, read from every MIDI clip but the drums': one picked sets the scale and turns it on. The clip keeps its scale, off as well as on, and a consolidated clip takes the first one's. Each pick is one step of undo. A drum clip has no Scale box.
+Deviation: the reference keeps one scale for the whole song beside each clip's; here it is the clip's alone, and the key is offered, not set.
+Test: apps/www/test/registry-audio/base/audio/scale-menu.test.tsx "detectKeys"; apps/daw/test/browser/checks/midi.ts "MID-010"

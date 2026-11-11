@@ -666,11 +666,12 @@ export function consolidate(
       value,
     };
     if (first.notes) {
-      // The notes as they are written, so the first clip's swing still plays them.
+      // The notes as they are written, so the first clip's swing still plays them, and its scale still marks them.
       return [
         {
           ...whole,
           notes: mergedNotes(inside, from, to),
+          ...(first.scale ? { scale: first.scale } : {}),
           ...(first.swing ? { swing: first.swing } : {}),
         },
       ];
