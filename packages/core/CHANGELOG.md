@@ -1,5 +1,12 @@
 # @audio-ui/core
 
+## 0.27.0
+
+### Minor Changes
+
+- 0453b7a: Removes `estimateTempo` from `@audio-ui/core/analysis`: `@audio/beat-detect` reads the tempo, and the registry's `analyzeBeat` fits its grid to `detectTransients`. `TempoEstimate`, `detectTransients` and `autoWarp` are unchanged.
+- 0453b7a: Removes `detectPitch` and its types from `@audio-ui/core/pitch`: use `yin` from `@audio/pitch-yin`, which returns `{ freq, clarity }`. A level gate is yours to add.
+
 ## 0.26.0
 
 ### Minor Changes
