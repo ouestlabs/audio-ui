@@ -8,6 +8,8 @@ import {
   normalizePeaks,
 } from "@audio-ui/engine/analysis";
 import { decodeAudioChannels } from "@audio-ui/engine/files";
+import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
+import { createSource } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
 import {
   type ChangeEvent,
@@ -68,6 +70,12 @@ import {
   DEVICE_SHELVES,
   libraryDevice,
 } from "@/registry-audio/bases/base/lib/device-library";
+import {
+  createInputRecorder,
+  type InputRecorder,
+  playCountIn,
+} from "@/registry-audio/bases/base/lib/input-recorder";
+import { sliceBlocks } from "@/registry-audio/bases/base/lib/recording";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const TRACK = "track-1";
@@ -96,6 +104,10 @@ const MIN_LABEL_GAP_PX = 56;
 /** Narrower than this, the library starts folded and leaves the chain the room. */
 const LIBRARY_PX = 560;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
+/** How far ahead of now a take (or its count-in) starts, in seconds: room for the first click to be scheduled. */
+const COUNT_IN_LEAD = 0.05;
+/** A take shorter than this, in seconds, is dropped: it ended within the count-in. */
+const SHORTEST_TAKE = 0.1;
 /** The main volume's range, in dB, as a mixer's fader has it. */
 const MIN_DB = -60;
 const MAX_DB = 6;
@@ -222,6 +234,159 @@ const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
 /**
+ * A take from the microphone: `record(true)` asks for it and starts after the
+ * count-in, `end` (or `record(false)`) stops and hands the take to `onTake`,
+ * in channels at the context's rate. `onStart` stops what plays first, so the
+ * speakers never come back in through the microphone. `clock` counts the take
+ * in seconds, negative through the count-in, for a transport to read.
+ */
+function useTake({
+  onStart,
+  onTake,
+  tempo,
+}: {
+  onStart: () => void;
+  onTake: (channels: Float32Array[], sampleRate: number) => void;
+  tempo: Tempo;
+}) {
+  const [recording, setRecording] = useState(false);
+  const [countIn, setCountIn] = useState(0);
+  const [clock] = useState(() => createSource(0));
+  const take = useRef<{
+    from: number;
+    recorder: InputRecorder;
+    source: MediaStreamAudioSourceNode;
+    stream: MediaStream;
+  } | null>(null);
+
+  const start = useCallback(async () => {
+    const ctx = webAudio.resume();
+    if (!ctx || take.current) {
+      return;
+    }
+    onStart();
+    let stream: MediaStream;
+    try {
+      stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          autoGainControl: false,
+          echoCancellation: false,
+          noiseSuppression: false,
+        },
+      });
+    } catch {
+      return;
+    }
+    const recorder = await createInputRecorder(ctx);
+    if (!recorder) {
+      for (const track of stream.getTracks()) {
+        track.stop();
+      }
+      return;
+    }
+    const source = ctx.createMediaStreamSource(stream);
+    source.connect(recorder.input);
+    const beatSeconds = secondsPerBeat(tempo);
+    const { beatsPerBar } = tempo;
+    const beats = countIn * beatsPerBar;
+    const at = ctx.currentTime + COUNT_IN_LEAD;
+    playCountIn(ctx, { at, beatSeconds, beats, beatsPerBar });
+    recorder.start();
+    take.current = { from: at + beats * beatSeconds, recorder, source, stream };
+    setRecording(true);
+  }, [countIn, onStart, tempo]);
+
+  const end = useCallback(async () => {
+    const { current } = take;
+    const ctx = webAudio.getContext();
+    take.current = null;
+    setRecording(false);
+    clock.set(0);
+    if (!(current && ctx)) {
+      return;
+    }
+    const { currentTime: to, sampleRate } = ctx;
+    const blocks = await current.recorder.stop();
+    current.source.disconnect();
+    for (const track of current.stream.getTracks()) {
+      track.stop();
+    }
+    current.recorder.dispose();
+    const channels = sliceBlocks(
+      blocks,
+      [Math.round(current.from * sampleRate), Math.round(to * sampleRate)],
+      2
+    );
+    // Ended within the count-in, or as good as: there is nothing to keep.
+    if ((channels[0]?.length ?? 0) >= sampleRate * SHORTEST_TAKE) {
+      onTake(channels, sampleRate);
+    }
+  }, [clock, onTake]);
+
+  const record = useCallback(
+    (on: boolean) => (on ? start() : end()),
+    [end, start]
+  );
+
+  // The take's clock, read from the audio clock while it records.
+  useEffect(() => {
+    const ctx = webAudio.getContext();
+    if (!(recording && ctx)) {
+      return;
+    }
+    let frame = 0;
+    const tick = () => {
+      clock.set(ctx.currentTime - (take.current?.from ?? 0));
+      frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [clock, recording]);
+
+  // The microphone goes when the page does, mid-take or not.
+  useEffect(
+    () => () => {
+      for (const track of take.current?.stream.getTracks() ?? []) {
+        track.stop();
+      }
+      take.current?.recorder.dispose();
+    },
+    []
+  );
+
+  return { clock, countIn, end, record, recording, setCountIn };
+}
+
+/** Over the waveform: while a file is dragged over the playground, where it lands; while a take records, that the sound to come is on its way. */
+function LaneOverlay({
+  dropping,
+  recording,
+}: {
+  dropping: boolean;
+  recording: boolean;
+}) {
+  return (
+    <div
+      aria-hidden="true"
+      className={cn(
+        "pointer-events-none absolute inset-0 z-20 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed bg-background/85 font-medium text-sm opacity-0 transition-opacity duration-150 motion-reduce:transition-none",
+        recording ? "border-destructive" : "border-primary",
+        (dropping || recording) && "opacity-100"
+      )}
+    >
+      {recording ? (
+        <>
+          <span className="size-2 animate-pulse rounded-full bg-destructive motion-reduce:animate-none" />
+          Recording from the microphone
+        </>
+      ) : (
+        "Drop an audio file to play it"
+      )}
+    </div>
+  );
+}
+
+/**
  * A working playground made of the registry, under the home's title: a
  * sound (a demo loop, or a file of yours) on a track of an arrangement, with
  * its waveform to seek in and zoom down to the samples, a meter of what comes
@@ -322,11 +487,11 @@ export function HomePlayground() {
   const placed = useRef(0);
   /** Puts a sound on the track: its recording, and a clip that loops it from its start to its end. */
   const place = useCallback(
-    (recording: RecordingSource, next: Sound) => {
+    (decoded: RecordingSource, next: Sound) => {
       placed.current += 1;
       const id = `${RECORDING}-${placed.current}`;
       setSound(next);
-      setRecordings(new Map([[id, recording]]));
+      setRecordings(new Map([[id, decoded]]));
       dispatch({
         commands: [
           { id: "loop", type: "remove-clip" },
@@ -391,18 +556,41 @@ export function HomePlayground() {
     });
   }, [playing, position]);
 
+  // A take from the microphone becomes the sound, as a file opened would.
+  const takes = useRef(0);
+  const takeDone = useCallback(
+    (channels: Float32Array[], sampleRate: number) => {
+      takes.current += 1;
+      position.set(0);
+      setZoomPx(null);
+      place(
+        { channels, sampleRate },
+        soundOf(channels, sampleRate, `Take ${takes.current}`)
+      );
+    },
+    [place, position]
+  );
+  const take = useTake({ onStart: stop, onTake: takeDone, tempo: doc.tempo });
+  const { recording } = take;
+
   const toggle = useCallback(() => {
-    if (playing) {
+    if (recording) {
+      take.end();
+    } else if (playing) {
       stop();
     } else {
       play(position.getSnapshot());
     }
-  }, [play, playing, position, stop]);
+  }, [play, playing, position, recording, stop, take]);
   // Stop goes back to the start, as a workstation's does; pause stays where it is.
   const rewind = useCallback(() => {
+    if (recording) {
+      take.end();
+      return;
+    }
     stop();
     position.set(0);
-  }, [position, stop]);
+  }, [position, recording, stop, take]);
   // The main track's volume, in dB; at the bottom of the range it is silence.
   const volume = Math.max(MIN_DB, gainToDb(doc.main.mix?.gain ?? 1));
   const setVolume = useCallback(
@@ -498,7 +686,7 @@ export function HomePlayground() {
         setDropping(false);
       }
     };
-    const take = (event: DragEvent) => {
+    const receive = (event: DragEvent) => {
       setDropping(false);
       const [file] = event.dataTransfer?.files ?? [];
       if (file?.type.startsWith("audio/")) {
@@ -508,11 +696,11 @@ export function HomePlayground() {
     };
     element.addEventListener("dragover", allow);
     element.addEventListener("dragleave", leave);
-    element.addEventListener("drop", take);
+    element.addEventListener("drop", receive);
     return () => {
       element.removeEventListener("dragover", allow);
       element.removeEventListener("dragleave", leave);
-      element.removeEventListener("drop", take);
+      element.removeEventListener("drop", receive);
     };
   }, [load]);
   const open = useCallback(() => fileInput.current?.click(), []);
@@ -561,12 +749,16 @@ export function HomePlayground() {
       {/* The transport, with the sound and the output as more of its clusters: one bar, one row of arrow keys. */}
       <div className="px-4 pt-4 sm:px-6">
         <Transport
+          countIn={take.countIn}
           looping={doc.loop.on}
+          onCountInChange={take.setCountIn}
           onLoopingChange={setLooping}
           onPlayPause={toggle}
+          onRecordChange={take.record}
           onStop={rewind}
           playing={playing}
-          source={position}
+          recording={recording}
+          source={recording ? take.clock : position}
           tempo={doc.tempo}
         >
           <ButtonGroup>
@@ -716,16 +908,7 @@ export function HomePlayground() {
             </TimelineViewport>
             <TimelineNavigator className="mt-2" getAriaValueText={formatTime} />
           </Timeline>
-          {/* While a file is dragged over the playground: where it lands. */}
-          <div
-            aria-hidden="true"
-            className={cn(
-              "pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-lg border-2 border-primary border-dashed bg-background/85 font-medium text-sm opacity-0 transition-opacity duration-150 motion-reduce:transition-none",
-              dropping && "opacity-100"
-            )}
-          >
-            Drop an audio file to play it
-          </div>
+          <LaneOverlay dropping={dropping} recording={recording} />
         </div>
       </div>
       {/* The track's chain, from one edge of the inset to the other, the library beside it as in a workstation. */}
