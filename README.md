@@ -2,9 +2,9 @@
 
 # audio/ui
 
-Accessible, composable Audio UI components for React: knobs, faders, meters, pads, waveforms, timelines, piano rolls and the synths, mixers and players made from them.
+Accessible, composable Audio UI components for the web, in React, Vue, Svelte or plain HTML: knobs, faders, meters, pads, waveforms, timelines, piano rolls and the synths, mixers and players made from them.
 
-- **Primitives on npm.** Headless, accessible parts with the behavior built in and the styling left to you: [`@audio-ui/react`](packages/react), on the framework-agnostic [`@audio-ui/core`](packages/core).
+- **Primitives on npm.** Headless, accessible parts with the behavior built in and the styling left to you: [`@audio-ui/react`](packages/react) for React, and [`@audio-ui/elements`](packages/elements) as custom elements for any framework, typed for Vue and Svelte templates, both on the framework-agnostic [`@audio-ui/core`](packages/core).
 - **Components you own.** A shadcn registry of styled components, blocks and hooks built on the primitives, copied into your project with the CLI.
 - **Web Audio API first.** Meters, spectrum analyzers and tuners read real signals from `AnalyserNode`s, and live values move without re-rendering React.
 
