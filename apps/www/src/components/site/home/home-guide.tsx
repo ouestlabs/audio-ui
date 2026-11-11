@@ -86,7 +86,7 @@ const H2 =
 const LEAD = "max-w-2xl text-pretty text-site-muted-foreground text-sm";
 
 /**
- * What the home says under its demo, in its HTML: what audio/ui is, how to
+ * What the home says under its hero, in its HTML: what audio/ui is, how to
  * install it, every component with what it does, and answers to the usual
  * questions. Search engines and agents read the page without running it.
  */
