@@ -99,8 +99,8 @@ describe("the rotary's worklet", () => {
         Float32Array.from(input),
         reference
       );
-      expect([...left]).toEqual([...(expectedLeft ?? [])]);
-      expect([...right]).toEqual([...(expectedRight ?? [])]);
+      expect([...left]).toEqual([...expectedLeft]);
+      expect([...right]).toEqual([...expectedRight]);
     }
   });
 });

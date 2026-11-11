@@ -889,6 +889,58 @@ function ClipRoll({
 }
 
 /**
+ * What the strip reads out: with notes held, how many and what they are (shown
+ * nowhere else), else how many notes the clip has.
+ */
+function MidiClipStatus({
+  held,
+  meter,
+  notes,
+}: {
+  held: readonly Note[];
+  meter: ClipMeter;
+  notes: readonly Note[];
+}) {
+  if (held.length === 0) {
+    return `${notes.length} ${notes.length === 1 ? "note" : "notes"}`;
+  }
+  return (
+    <>
+      <span>{`${held.length} of ${notes.length} selected`}</span>
+      {noteSelectionReadout(held, meter).map((field) => (
+        <span className="whitespace-nowrap" key={field.label}>
+          {field.label} <span className="text-foreground">{field.value}</span>
+        </span>
+      ))}
+    </>
+  );
+}
+
+/** Each pad's name by its note, for the roll's rows: nothing for a clip with no pads. */
+function padNamesOf(
+  pads: MidiClipPanelProps["pads"]
+): Record<number, string> | undefined {
+  return pads
+    ? Object.fromEntries(pads.map((pad) => [pad.note, pad.name]))
+    : undefined;
+}
+
+/** The step a clip's playhead is on, steps of `step` from `from`, as a source: -1 before the clip starts. */
+function stepSource(
+  playhead: Source<number>,
+  step: number,
+  from: number
+): Source<number> {
+  return {
+    getSnapshot: () => {
+      const time = playhead.getSnapshot();
+      return time < 0 ? -1 : Math.floor((time - from) / step + 1e-6);
+    },
+    subscribe: playhead.subscribe,
+  };
+}
+
+/**
  * The clip view of an arrangement's MIDI clip, as a DAW's: a Clip box (its
  * switch and name, where it starts and ends in its source or with Loop on
  * the stretch that repeats, in bars.beats.sixteenths) and
@@ -979,24 +1031,11 @@ function MidiClipPanel({
     start: clipStart,
   });
   const stepFrom = loop?.[0] ?? offset;
-  const playedStep = useMemo<Source<number> | undefined>(
-    () =>
-      playhead && {
-        getSnapshot: () => {
-          const time = playhead.getSnapshot();
-          return time < 0 ? -1 : Math.floor((time - stepFrom) / step + 1e-6);
-        },
-        subscribe: playhead.subscribe,
-      },
+  const playedStep = useMemo(
+    () => (playhead ? stepSource(playhead, step, stepFrom) : undefined),
     [playhead, step, stepFrom]
   );
-  const padNames = useMemo(
-    () =>
-      drums
-        ? Object.fromEntries(drums.map((pad) => [pad.note, pad.name]))
-        : undefined,
-    [drums]
-  );
+  const padNames = useMemo(() => padNamesOf(drums), [drums]);
   const value = useMemo(() => [...notes], [notes]);
   const bars = useMemo(
     () =>
@@ -1154,21 +1193,6 @@ function MidiClipPanel({
     const ids = new Set<NoteId>(selection);
     return notes.filter((note) => ids.has(note.id));
   }, [notes, selection]);
-  // With notes held, the strip reads them out: what they are is shown nowhere else.
-  const status =
-    held.length > 0 ? (
-      <>
-        <span>{`${held.length} of ${notes.length} selected`}</span>
-        {noteSelectionReadout(held, meter).map((field) => (
-          <span className="whitespace-nowrap" key={field.label}>
-            {field.label} <span className="text-foreground">{field.value}</span>
-          </span>
-        ))}
-      </>
-    ) : (
-      `${notes.length} ${notes.length === 1 ? "note" : "notes"}`
-    );
-
   return (
     <ClipView
       actions={children}
@@ -1252,7 +1276,7 @@ function MidiClipPanel({
       onCollapsedChange={onCollapsedChange}
       onFoldedBoxesChange={onFoldedBoxesChange}
       onRename={onRename}
-      status={status}
+      status={<MidiClipStatus held={held} meter={meter} notes={notes} />}
     >
       {drums && showSteps ? (
         <DrumStepEditor

@@ -274,6 +274,20 @@ function ScaleMenuName() {
   );
 }
 
+/** One key the notes may be in, as an item of the menu. */
+function ScaleMenuDetected({
+  onPick,
+  scale,
+}: {
+  onPick: (scale: Scale) => void;
+  scale: Scale;
+}) {
+  const pick = useCallback(() => onPick(scale), [onPick, scale]);
+  return (
+    <DropdownMenuItem onClick={pick}>{scaleLabel(scale)}</DropdownMenuItem>
+  );
+}
+
 /**
  * The keys the notes are likeliest in, three at most, likeliest first: one
  * picked sets the root and the scale and turns it on. Pass every part of the
@@ -310,12 +324,11 @@ function ScaleMenuDetect({
         <DropdownMenuItem disabled>Nothing to read</DropdownMenuItem>
       ) : (
         keys.map((item) => (
-          <DropdownMenuItem
+          <ScaleMenuDetected
             key={`${item.root} ${item.name}`}
-            onClick={() => pick(item)}
-          >
-            {scaleLabel(item)}
-          </DropdownMenuItem>
+            onPick={pick}
+            scale={item}
+          />
         ))
       )}
     </DropdownMenuGroup>

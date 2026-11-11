@@ -83,14 +83,14 @@ describe("audioChroma", () => {
 
   test("a key is read from sound alone, as from notes", () => {
     // I-IV-V in G major, a second each.
-    const chords = [
+    const progression = [
       [196, 246.94, 293.66],
       [261.63, 329.63, 392],
       [293.66, 369.99, 440],
       [196, 246.94, 293.66],
     ];
     const sum = new Array(12).fill(0);
-    for (const chord of chords) {
+    for (const chord of progression) {
       const read = audioChroma(tones(chord, 1), RATE);
       for (const [at, value] of read.entries()) {
         sum[at] += value;

@@ -52,6 +52,9 @@ export interface UsePitchOptions {
   threshold?: number;
 }
 
+/** A note's name as `@audio/note` writes it, split into its letter and its octave: `"A#4"`. */
+const NOTE_NAME = /^(.*?)(-?\d+)$/;
+
 /** Detections per second: enough for a needle, at a third of 60 frames' cost. */
 const DETECTIONS_PER_SECOND = 20;
 
@@ -74,7 +77,7 @@ function steadied(
     return null;
   }
   const note = cents(steady, { a4: reference });
-  const [, name = "", octave = "0"] = /^(.*?)(-?\d+)$/.exec(note.name) ?? [];
+  const [, name = "", octave = "0"] = NOTE_NAME.exec(note.name) ?? [];
   return {
     cents: note.cents,
     confidence,
@@ -83,6 +86,31 @@ function steadied(
     octave: Number(octave),
     pitch: note.midi,
   };
+}
+
+/** The pitch the samples hold and how clear it is, or nothing: too quiet a signal, or no clear period. */
+function detect(
+  samples: Float32Array,
+  sampleRate: number,
+  {
+    maxHz,
+    minHz,
+    minLevel,
+    threshold,
+  }: Required<
+    Pick<UsePitchOptions, "maxHz" | "minHz" | "minLevel" | "threshold">
+  >
+): PitchEstimate | null {
+  if (rms(samples) < minLevel) {
+    return null;
+  }
+  const heard = yin(samples, {
+    fs: sampleRate,
+    maxFreq: maxHz,
+    minFreq: minHz,
+    threshold,
+  });
+  return heard ? { confidence: heard.clarity, frequency: heard.freq } : null;
 }
 
 /**
@@ -122,18 +150,12 @@ export function usePitch(
       }
       lastRun = now;
       analyser.getFloatTimeDomainData(samples);
-      const heard =
-        rms(samples) >= minLevel
-          ? yin(samples, {
-              fs: analyser.context.sampleRate,
-              maxFreq: maxHz,
-              minFreq: minHz,
-              threshold,
-            })
-          : null;
-      const found: PitchEstimate | null = heard
-        ? { confidence: heard.clarity, frequency: heard.freq }
-        : null;
+      const found = detect(samples, analyser.context.sampleRate, {
+        maxHz,
+        minHz,
+        minLevel,
+        threshold,
+      });
       if (found) {
         lastHeard = now;
         const reading = steadied(recent, found, median, reference);
