@@ -44,7 +44,7 @@ const AGENTS = [
 const FAQ: FaqItem[] = [
   {
     answer:
-      "An open-source library of accessible audio components for React: knobs, faders, meters, waveforms, timelines, step sequencers, piano rolls and more, as headless primitives on npm or as styled shadcn/ui components you own.",
+      "An open-source library of accessible audio components for the web: knobs, faders, meters, waveforms, timelines, step sequencers, piano rolls and more, as headless React primitives and custom elements on npm, or as styled shadcn/ui components you own.",
     question: "What is audio/ui?",
   },
   {
@@ -87,15 +87,10 @@ const LEAD = "max-w-2xl text-pretty text-site-muted-foreground text-sm";
 
 /**
  * What the home says under its hero, in its HTML: what audio/ui is, how to
- * install it, every component with what it does, and answers to the usual
- * questions. Search engines and agents read the page without running it.
+ * install it, every component with what it does, the guides to the sound,
+ * and answers to the usual questions. Search engines and agents read the page without running it.
  */
 export function HomeGuide({ guides, spaces }: HomeIndex) {
-  // The guides close the list: what makes the sound, after what draws it.
-  const columns = [
-    ...spaces,
-    { sections: [{ pages: guides, title: undefined }], title: "Guides" },
-  ];
   return (
     <div className="flex flex-col gap-16 px-4 py-12 font-site-sans sm:px-6 lg:py-16">
       <JsonLd data={buildFaqJsonLd(FAQ)} />
@@ -105,15 +100,16 @@ export function HomeGuide({ guides, spaces }: HomeIndex) {
       >
         <div className="flex flex-col gap-3">
           <h2 className={H2} id="home-about">
-            Audio controls for React, accessible and yours
+            Audio controls for any framework, accessible and yours
           </h2>
           <p className={LEAD}>
-            audio/ui is an open-source component library for audio interfaces in
-            React: knobs, faders, XY pads, envelopes, level meters, waveforms,
-            spectrum analyzers, tuners, timelines, step sequencers, drum pads,
-            piano keyboards and piano rolls, and the panels of effects and
-            instruments built from them. Every control works with a pointer and
-            the keyboard, and is announced correctly by screen readers.
+            audio/ui is an open-source component library for audio interfaces on
+            the web, in React, Vue, Svelte or plain HTML: knobs, faders, XY
+            pads, envelopes, level meters, waveforms, spectrum analyzers,
+            tuners, timelines, step sequencers, drum pads, piano keyboards and
+            piano rolls, and the panels of effects and instruments built from
+            them. Every control works with a pointer and the keyboard, and is
+            announced correctly by screen readers.
           </p>
           <p className={LEAD}>
             Pick the layer that fits your project. The <code>@audio-ui</code>{" "}
@@ -154,12 +150,11 @@ export function HomeGuide({ guides, spaces }: HomeIndex) {
         </h2>
         <p className={`${LEAD} mt-3`}>
           Controls and displays for any audio interface, the surfaces of a DAW,
-          the effects and instruments you plug in, and the hooks that make the
-          sound. Each page has a live preview, the install command, the API and
-          the source.
+          and the effects and instruments you plug in. Each page has a live
+          preview, the install command, the API and the source.
         </p>
-        <div className="mt-8 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-4">
-          {columns.map((space) => (
+        <div className="mt-8 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+          {spaces.map((space) => (
             <div key={space.title}>
               <h3 className="flex items-center gap-2 font-medium text-sm">
                 <GroupIcon current={false} title={space.title} />
@@ -193,6 +188,32 @@ export function HomeGuide({ guides, spaces }: HomeIndex) {
             </div>
           ))}
         </div>
+      </section>
+
+      <section aria-labelledby="home-guides">
+        <h2 className={H2} id="home-guides">
+          What makes the sound
+        </h2>
+        <p className={`${LEAD} mt-3`}>
+          Guides to the sound under the components, each with the hooks and
+          libraries it uses. An engine of your own drives the same components.
+        </p>
+        <ul className="mt-8 grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-4">
+          {guides.map((page) => (
+            <li key={page.url}>
+              <Link
+                className="font-medium text-sm hover:underline"
+                preload={false}
+                to={page.url}
+              >
+                {page.title}
+              </Link>
+              <p className="text-pretty text-site-muted-foreground text-xs leading-relaxed">
+                {page.description}
+              </p>
+            </li>
+          ))}
+        </ul>
       </section>
 
       <section
