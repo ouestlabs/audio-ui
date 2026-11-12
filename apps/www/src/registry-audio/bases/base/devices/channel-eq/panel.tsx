@@ -1,5 +1,4 @@
-import { formatDb, formatHz } from "@audio-ui/engine/analysis";
-import { formatLevel } from "@audio-ui/engine/format";
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
@@ -39,11 +38,11 @@ const OFF = channelEqDevice.parameters
 const formatDbMark = (db: number) =>
   formatLevel(db, "dB", { decimals: 0, unit: false });
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${formatDb(point.y)}`;
+  `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 const getAriaLabel = (axis: "x" | "y") =>
   axis === "x" ? "Mid frequency" : "Mid gain";
 const describeValue = (value: number, axis: "x" | "y") =>
-  axis === "x" ? formatHz(value) : formatDb(value);
+  axis === "x" ? formatFrequency(value) : formatLevel(value);
 
 interface ChannelEqPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */

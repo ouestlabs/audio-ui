@@ -5,8 +5,6 @@ import {
   biquadResponse,
   compressorOutput,
   eqResponse,
-  formatDb,
-  formatHz,
   toWebAudioQ,
 } from "./index.ts";
 
@@ -157,20 +155,6 @@ describe("compressorOutput", () => {
   });
 });
 
-describe("formatting", () => {
-  test("names a frequency in Hz and kHz", () => {
-    expect(formatHz(120)).toBe("120 Hz");
-    expect(formatHz(1200)).toBe("1.2 kHz");
-    expect(formatHz(12_000)).toBe("12 kHz");
-  });
-
-  test("signs a gain and never prints a negative zero", () => {
-    expect(formatDb(3)).toBe("+3.0 dB");
-    expect(formatDb(-6.5)).toBe("-6.5 dB");
-    expect(formatDb(-0.01)).toBe("0.0 dB");
-  });
-});
-
 describe("sampleRate", () => {
   const peak = { frequency: 12_000, gainDb: 12, q: 3, type: "peak" } as const;
 
@@ -296,13 +280,5 @@ describe("shelves have the node's fixed slope", () => {
         expect(resonant(hz)).toBe(flat(hz));
       }
     }
-  });
-});
-
-describe("readouts that cannot read", () => {
-  test("format nothing for a value that is not a number", () => {
-    expect(formatHz(Number.NaN)).toBe("");
-    expect(formatDb(Number.NaN)).toBe("");
-    expect(formatDb(Number.NEGATIVE_INFINITY)).toBe("-∞ dB");
   });
 });

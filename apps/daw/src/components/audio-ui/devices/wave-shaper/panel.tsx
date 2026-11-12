@@ -1,5 +1,3 @@
-"use client";
-
 import { midiToHz } from "@audio-ui/engine/pitch";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {

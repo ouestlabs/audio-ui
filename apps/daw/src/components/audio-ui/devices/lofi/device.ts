@@ -1,5 +1,6 @@
-import { formatHz, SAMPLE_RATE } from "@audio-ui/engine/analysis";
+import { SAMPLE_RATE } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { LOFI_KERNELS } from "@audio-ui/engine/kernels";
 
 /**
@@ -53,7 +54,7 @@ export const lofiDevice = defineDevice({
     },
     {
       default: 6000,
-      format: formatHz,
+      format: formatFrequency,
       id: "lowpassHz",
       label: "Low-pass",
       max: 18_000,
@@ -63,7 +64,7 @@ export const lofiDevice = defineDevice({
     },
     {
       default: 60,
-      format: formatHz,
+      format: formatFrequency,
       id: "highpassHz",
       label: "High-pass",
       max: 500,

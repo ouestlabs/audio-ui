@@ -1,5 +1,3 @@
-"use client";
-
 import type { Source } from "@audio-ui/core";
 import type { ParameterValue } from "@audio-ui/engine/device";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";

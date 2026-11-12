@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, type ReactNode, use, useState } from "react";
 
 /** A value others can follow, in the shape `useSyncExternalStore` takes. */

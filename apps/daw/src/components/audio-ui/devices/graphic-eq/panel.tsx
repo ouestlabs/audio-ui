@@ -1,6 +1,4 @@
-"use client";
-
-import { formatDb, formatHz } from "@audio-ui/engine/analysis";
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
@@ -40,7 +38,7 @@ const LABELS = Object.fromEntries(
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${formatDb(point.y)}`;
+  `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 
 type BandId = (typeof GRAPHIC_EQ_BANDS)[number]["id"];
 
@@ -62,7 +60,7 @@ function Band({ disabled, id, mark, onChange, value }: BandProps) {
         aria-label={LABELS[id]}
         className="min-h-0 flex-1 [--fader-min-height:5rem]"
         disabled={disabled}
-        formatValue={formatDb}
+        formatValue={formatLevel}
         max={BAND.max}
         min={BAND.min}
         onValueChange={change}

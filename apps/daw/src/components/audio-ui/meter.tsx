@@ -1,5 +1,3 @@
-"use client";
-
 import { Meter as MeterPrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/lib/utils";

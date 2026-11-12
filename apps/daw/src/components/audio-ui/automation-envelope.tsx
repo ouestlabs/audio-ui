@@ -1,5 +1,3 @@
-"use client";
-
 import { Envelope as EnvelopePrimitive } from "@audio-ui/react";
 import { cn } from "@/lib/utils";
 

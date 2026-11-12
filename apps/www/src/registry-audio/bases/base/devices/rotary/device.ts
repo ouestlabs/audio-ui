@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { ROTARY_KERNELS } from "@audio-ui/engine/kernels";
 
 /**
@@ -38,7 +38,7 @@ export const rotaryDevice = defineDevice({
     },
     {
       default: 800,
-      format: formatHz,
+      format: formatFrequency,
       id: "crossoverHz",
       label: "Crossover",
       max: 3000,

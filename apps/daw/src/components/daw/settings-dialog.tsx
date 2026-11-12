@@ -1,5 +1,3 @@
-"use client";
-
 import {
   gridLabel,
   METRONOME_RHYTHMS,

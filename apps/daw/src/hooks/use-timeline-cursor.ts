@@ -1,5 +1,3 @@
-"use client";
-
 import { snapMove } from "@audio-ui/core/timeline";
 import { adjacentPoint } from "@audio-ui/react";
 import { useCallback } from "react";

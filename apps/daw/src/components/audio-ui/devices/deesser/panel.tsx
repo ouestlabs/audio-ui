@@ -1,6 +1,4 @@
-"use client";
-
-import { formatDb, formatHz } from "@audio-ui/engine/analysis";
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
@@ -53,9 +51,9 @@ const OFF = deesserDevice.parameters
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${formatDb(point.y)}`;
+  `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 const describeValue = (value: number, axis: "x" | "y") =>
-  axis === "x" ? formatHz(value) : formatDb(value);
+  axis === "x" ? formatFrequency(value) : formatLevel(value);
 const getAriaLabel = (axis: "x" | "y") =>
   axis === "x" ? "Frequency" : "Reduction at the frequency";
 

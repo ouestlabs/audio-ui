@@ -1,6 +1,7 @@
-import { biquadResponse, formatHz } from "@audio-ui/engine/analysis";
+import { biquadResponse } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { deesser } from "@audio-ui/engine/dsp";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { DEESSER_KERNELS } from "@audio-ui/engine/kernels";
 import { manifestWorklet } from "@/lib/manifest-worklet";
 
@@ -41,7 +42,7 @@ export const deesserDevice = defineDevice({
     },
     {
       default: 6500,
-      format: formatHz,
+      format: formatFrequency,
       id: "frequencyHz",
       label: "Frequency",
       max: 12_000,

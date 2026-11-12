@@ -1,5 +1,3 @@
-"use client";
-
 import {
   DEFAULT_TEMPO,
   type MetronomeRhythm,

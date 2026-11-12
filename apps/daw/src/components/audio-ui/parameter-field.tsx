@@ -1,5 +1,3 @@
-"use client";
-
 import { NumberField } from "@base-ui/react/number-field";
 import {
   ArrowsHorizontalIcon,

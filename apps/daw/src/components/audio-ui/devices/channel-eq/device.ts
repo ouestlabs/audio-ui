@@ -1,5 +1,6 @@
-import { type EqBand, eqResponse, formatHz } from "@audio-ui/engine/analysis";
+import { type EqBand, eqResponse } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 
 const LOW_HZ = 100;
 const HIGH_HZ = 6000;
@@ -31,7 +32,7 @@ export const channelEqDevice = defineDevice({
     },
     {
       default: 1000,
-      format: formatHz,
+      format: formatFrequency,
       id: "midHz",
       label: "Mid freq",
       max: 7500,

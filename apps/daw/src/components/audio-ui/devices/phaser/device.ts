@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { PHASER_KERNELS } from "@audio-ui/engine/kernels";
 import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { lfoRate, SYNCED_RATE_PARAMETERS } from "@/lib/synced-rate";
@@ -55,7 +55,7 @@ export const phaserDevice = defineDevice({
     },
     {
       default: 1200,
-      format: formatHz,
+      format: formatFrequency,
       id: "centerHz",
       label: "Center",
       max: 8000,

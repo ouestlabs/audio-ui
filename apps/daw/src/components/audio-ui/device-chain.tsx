@@ -1,5 +1,3 @@
-"use client";
-
 import { CaretLeftIcon, XIcon } from "@phosphor-icons/react";
 import {
   type ComponentProps,

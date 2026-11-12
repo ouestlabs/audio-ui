@@ -1,5 +1,3 @@
-"use client";
-
 import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
 import { useCallback, useRef, useState } from "react";
 import type {

@@ -1,9 +1,6 @@
-import {
-  type BiquadType,
-  biquadResponse,
-  formatHz,
-} from "@audio-ui/engine/analysis";
+import { type BiquadType, biquadResponse } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { oversamplingSeconds } from "@/registry-audio/bases/base/lib/oversampling";
 
 const TABLE_SAMPLES = 4096;
@@ -28,7 +25,7 @@ export const overdriveDevice = defineDevice({
     { default: true, id: "enabled", kind: "toggle", label: "On" },
     {
       default: 800,
-      format: formatHz,
+      format: formatFrequency,
       id: "bandHz",
       label: "Band",
       max: 8000,
@@ -57,7 +54,7 @@ export const overdriveDevice = defineDevice({
     },
     {
       default: 4500,
-      format: formatHz,
+      format: formatFrequency,
       id: "toneHz",
       label: "Tone",
       max: 20_000,

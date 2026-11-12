@@ -1,4 +1,4 @@
-import { formatDb, formatHz } from "@audio-ui/engine/analysis";
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -31,7 +31,7 @@ const OFF = exciterDevice.parameters
   .filter((id) => id !== "enabled");
 
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${formatDb(point.y)}`;
+  `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 
 interface ExciterPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */

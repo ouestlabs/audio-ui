@@ -12,12 +12,11 @@ The functions take samples, bins or settings and return numbers, with no Web Aud
 ## Levels
 
 ```ts
-import { dbToGain, formatDb, gainToDb, peakDb, rmsDb } from "@audio-ui/engine/analysis";
+import { dbToGain, gainToDb, peakDb, rmsDb } from "@audio-ui/engine/analysis";
 
 rmsDb(samples); // how loud they sound: -3 dB for a sine at full scale
 peakDb(samples); // how near they come to clipping: 0 dB for the same sine
 dbToGain(-6.02); // 0.5
-formatDb(-6.5); // "-6.5 dB"
 ```
 
 <ForFrameworks only="react">

@@ -1,5 +1,3 @@
-"use client";
-
 import { type ComponentProps, useLayoutEffect, useRef } from "react";
 import {
   type ClipPeaks,

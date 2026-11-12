@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { EXCITER_KERNELS } from "@audio-ui/engine/kernels";
 
 /** The damping of the kernel's high-pass, a Q of 2. */
@@ -18,7 +18,7 @@ export const exciterDevice = defineDevice({
     { default: true, id: "enabled", kind: "toggle", label: "On" },
     {
       default: 3000,
-      format: formatHz,
+      format: formatFrequency,
       id: "frequencyHz",
       label: "Frequency",
       max: 8000,

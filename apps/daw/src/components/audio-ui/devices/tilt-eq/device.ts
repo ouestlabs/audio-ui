@@ -1,6 +1,7 @@
-import { formatHz, SAMPLE_RATE } from "@audio-ui/engine/analysis";
+import { SAMPLE_RATE } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { highshelf, lowshelf, magnitude } from "@audio-ui/engine/dsp";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { TILT_EQ_KERNELS } from "@audio-ui/engine/kernels";
 
 /** The width of the tilt's two shelves, as `@audio/eq-tilt` has them: gentler than a shelf's usual slope. */
@@ -30,7 +31,7 @@ export const tiltEqDevice = defineDevice({
     },
     {
       default: 1000,
-      format: formatHz,
+      format: formatFrequency,
       id: "pivotHz",
       label: "Pivot",
       max: 10_000,

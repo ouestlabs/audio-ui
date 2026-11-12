@@ -1,5 +1,3 @@
-"use client";
-
 import type { Note } from "@audio-ui/core/piano-roll";
 import type { Source } from "@audio-ui/react";
 import { DotsThreeIcon } from "@phosphor-icons/react";
