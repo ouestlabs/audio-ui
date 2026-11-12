@@ -33,5 +33,5 @@ Usage and API: [`loudness`](/docs/engine/analysis#loudness).
 - `logSpectrum(bins, sampleRate, out, { minHz, maxHz })`: An analyser's bins on a log frequency axis, written into `out`.
 - `holdPeaks(spectrum, peaks, holding, elapsed, { hold, fall })`: Held peaks, a frame at a time.
 - `computePeaks(channels, buckets)`: A waveform's peaks, for a [Waveform](/docs/components/base/waveform).
-- `formatDb(db)`, `formatHz(hz)`: A level and a frequency as text, such as "-6.0 dB" and "1.2 kHz".
+- `formatLevel(db)`, `formatFrequency(hz)` of [`@audio-ui/engine/format`](/docs/engine/format): A level and a frequency as text, such as "-6.0 dB" and "1.2 kHz".
 - `biquadResponse`, `eqResponse`, `compressorOutput`: What a filter, an equalizer and a compressor do, to draw their curves.

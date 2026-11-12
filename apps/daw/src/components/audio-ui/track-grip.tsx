@@ -1,5 +1,3 @@
-"use client";
-
 import type { ComponentProps, CSSProperties, Ref } from "react";
 import { createPortal } from "react-dom";
 import type { TrackGhost } from "@/hooks/use-track-reorder";

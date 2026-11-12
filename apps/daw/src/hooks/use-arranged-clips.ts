@@ -1,5 +1,3 @@
-"use client";
-
 import type { FadeShape, Timeline as TimelinePrimitive } from "@audio-ui/react";
 import { type RefObject, useCallback, useState } from "react";
 import type { Arranged, ArrangementTrack, ClipAction } from "@/lib/arrangement";

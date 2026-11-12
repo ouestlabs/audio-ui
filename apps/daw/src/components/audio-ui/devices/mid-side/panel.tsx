@@ -1,5 +1,3 @@
-"use client";
-
 import { formatDb } from "@audio-ui/engine/analysis";
 import { type ReactNode, useCallback } from "react";
 import {

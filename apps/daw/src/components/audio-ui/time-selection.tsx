@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/lib/utils";
 
 /** A stretch of time selected on a track, drawn over its lane: put it inside a `TimelineLane`. */

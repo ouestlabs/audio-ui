@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { DELAY_KERNELS } from "@audio-ui/engine/kernels";
 import {
   DEFAULT_TEMPO,
@@ -69,7 +69,7 @@ export const delayDevice = defineDevice({
     },
     {
       default: 6000,
-      format: formatHz,
+      format: formatFrequency,
       id: "toneHz",
       label: "Tone",
       max: 20_000,

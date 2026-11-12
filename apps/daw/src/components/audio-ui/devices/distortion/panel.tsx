@@ -1,5 +1,3 @@
-"use client";
-
 import { type ReactNode, useCallback, useMemo } from "react";
 import { CurveSelect } from "@/components/audio-ui/curve-select";
 import {

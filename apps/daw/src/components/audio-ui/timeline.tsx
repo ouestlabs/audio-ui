@@ -1,5 +1,3 @@
-"use client";
-
 import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
 import { CurveIcon } from "@audio-ui/icons/react";
 import {

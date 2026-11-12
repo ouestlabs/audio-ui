@@ -1,5 +1,3 @@
-"use client";
-
 import { formatDb, formatHz } from "@audio-ui/engine/analysis";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {

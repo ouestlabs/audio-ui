@@ -1,5 +1,9 @@
-import { formatDb, formatHz } from "@audio-ui/engine/analysis";
-import { formatPan, formatTime } from "@audio-ui/engine/format";
+import {
+  formatFrequency,
+  formatLevel,
+  formatPan,
+  formatTime,
+} from "@audio-ui/engine/format";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/registry/bases/base/lib/utils";
 
@@ -24,9 +28,9 @@ export function formatValue(value: number, kind: ValueKind): string {
     case "bpm":
       return `${value.toFixed(2)} BPM`;
     case "db":
-      return formatDb(value);
+      return formatLevel(value);
     case "hz":
-      return formatHz(value);
+      return formatFrequency(value);
     case "pan":
       return formatPan(value);
     case "percent":

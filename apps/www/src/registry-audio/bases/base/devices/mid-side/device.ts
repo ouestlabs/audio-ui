@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { MID_SIDE_KERNELS } from "@audio-ui/engine/kernels";
 
 /** The high-pass that stands for "no bass mono": under the range of hearing, so it passes the whole spectrum. */
@@ -50,7 +50,7 @@ export const midSideDevice = defineDevice({
     },
     {
       default: 0,
-      format: (hz: number) => (hz <= PASS_HZ ? "Off" : formatHz(hz)),
+      format: (hz: number) => (hz <= PASS_HZ ? "Off" : formatFrequency(hz)),
       id: "bassMonoHz",
       label: "Bass mono",
       max: 500,

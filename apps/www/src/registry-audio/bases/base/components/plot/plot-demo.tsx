@@ -5,10 +5,8 @@ import {
   biquadResponse,
   type EqBand,
   eqResponse,
-  formatDb,
-  formatHz,
 } from "@audio-ui/engine/analysis";
-import { formatLevel } from "@audio-ui/engine/format";
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Popover,
@@ -75,9 +73,9 @@ const DEFAULT_Q = Math.SQRT1_2;
 const formatDbMark = (db: number) =>
   formatLevel(db, "dB", { decimals: 0, unit: false });
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${formatDb(point.y)}`;
+  `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 const describeValue = (value: number, axis: "x" | "y") =>
-  axis === "x" ? formatHz(value) : formatDb(value);
+  axis === "x" ? formatFrequency(value) : formatLevel(value);
 const clampGain = (gainDb: number) =>
   Math.min(MAX_DB, Math.max(-MAX_DB, gainDb));
 

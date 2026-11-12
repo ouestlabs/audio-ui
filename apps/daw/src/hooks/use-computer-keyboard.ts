@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import {
   COMPUTER_KEYBOARD_OCTAVES,

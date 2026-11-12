@@ -1,5 +1,3 @@
-"use client";
-
 import { pitchName } from "@audio-ui/core";
 import { PlusIcon, XIcon } from "@phosphor-icons/react";
 import { type ReactNode, useCallback, useState } from "react";

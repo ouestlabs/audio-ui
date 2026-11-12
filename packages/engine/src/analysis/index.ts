@@ -20,7 +20,6 @@ export {
   toWebAudioQ,
   WEB_AUDIO_FILTER_TYPES,
 } from "./filter.ts";
-export { formatDb, formatHz } from "./format.ts";
 export { dbToGain, gainToDb, peakDb, rmsDb } from "./level.ts";
 export {
   createLoudnessMeter,

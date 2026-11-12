@@ -1,5 +1,3 @@
-"use client";
-
 import { dbToGain, gainToDb, peakDb } from "@audio-ui/engine/analysis";
 import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
 import {

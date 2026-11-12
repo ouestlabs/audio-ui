@@ -1,5 +1,3 @@
-"use client";
-
 import type { Source } from "@audio-ui/react";
 import { useCallback, useMemo, useState } from "react";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";

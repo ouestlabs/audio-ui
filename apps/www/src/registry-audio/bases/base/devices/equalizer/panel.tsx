@@ -1,10 +1,5 @@
-import {
-  bandGainForHandle,
-  bandHandleDb,
-  formatDb,
-  formatHz,
-} from "@audio-ui/engine/analysis";
-import { formatLevel } from "@audio-ui/engine/format";
+import { bandGainForHandle, bandHandleDb } from "@audio-ui/engine/analysis";
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
@@ -63,9 +58,9 @@ const FILTER_ITEMS =
 const formatDbMark = (db: number) =>
   formatLevel(db, "dB", { decimals: 0, unit: false });
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${formatDb(point.y)}`;
+  `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 const describeValue = (value: number, axis: "x" | "y") =>
-  axis === "x" ? formatHz(value) : formatDb(value);
+  axis === "x" ? formatFrequency(value) : formatLevel(value);
 const clampGain = (gainDb: number) =>
   Math.min(MAX_DB, Math.max(-MAX_DB, gainDb));
 

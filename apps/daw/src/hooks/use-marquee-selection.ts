@@ -1,5 +1,3 @@
-"use client";
-
 import { type PointerEvent, useCallback, useRef, useState } from "react";
 
 export interface Marquee {

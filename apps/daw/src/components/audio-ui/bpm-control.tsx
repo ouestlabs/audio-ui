@@ -1,5 +1,3 @@
-"use client";
-
 import { ParameterField } from "@/components/audio-ui/parameter-field";
 import { cn } from "@/lib/utils";
 

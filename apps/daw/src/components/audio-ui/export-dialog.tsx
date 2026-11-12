@@ -1,5 +1,3 @@
-"use client";
-
 import { LOUDNESS_TARGETS } from "@audio-ui/engine/analysis";
 import type { AudioFileFormat } from "@audio-ui/engine/files";
 import {

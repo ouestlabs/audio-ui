@@ -1,5 +1,3 @@
-"use client";
-
 import { Meter } from "@/components/audio-ui/meter";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
 
