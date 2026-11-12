@@ -17,6 +17,8 @@ export function CopyCss() {
   const [config] = useConfig();
   const [styling] = useStyling();
   const { copyToClipboard, isCopied } = useCopyToClipboard();
+  const label = styling === "tailwind" ? "Copy Tailwind theme" : "Copy CSS";
+  const shown = isCopied ? "Copied" : label;
 
   const copy = useCallback(() => {
     // The URL's choices first, the saved ones after, as the page applies them.
@@ -39,16 +41,20 @@ export function CopyCss() {
 
   return (
     <Button
-      aria-label="Copy the theme as CSS"
+      aria-label={
+        styling === "tailwind"
+          ? "Copy the Tailwind theme"
+          : "Copy the theme as CSS"
+      }
       className={ACTION_BUTTON_CLASS}
       onClick={copy}
       size="sm"
       variant="ghost"
     >
       <div className="flex min-w-0 flex-col justify-start text-left">
-        <div className="text-site-muted-foreground text-xs">Theme</div>
+        <div className="text-site-muted-foreground text-xs">Export</div>
         <div className="truncate font-medium text-site-foreground text-sm">
-          {isCopied ? "Copied" : "Copy CSS"}
+          {shown}
         </div>
       </div>
       {isCopied ? (
