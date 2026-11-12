@@ -28,6 +28,7 @@ import {
   type RefObject,
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -87,12 +88,15 @@ import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arra
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import type {
   Arranged,
+  ArrangementTrack,
   Clipping,
   TimeSelection,
+  TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { renderArrangement } from "@/registry-audio/bases/base/lib/arrangement-engine";
 import type {
   ArrangementCommand,
+  ArrangementDoc,
   ArrangementLocator,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
 import {
@@ -185,6 +189,23 @@ const FADE_POINTS = 24;
 const SHORTEST_SELECTION = 0.01;
 /** How far the arrows move the level, in dB. */
 const LEVEL_STEP = 0.5;
+/** How far Louder and Quieter move the selection's level, in dB. */
+const LEVEL_NUDGE = 3;
+/** How near a snap point a press lands on it, in px, as the timeline's own gestures do. */
+const SNAP_PX = 8;
+/** What the zoom keys do to the zoom: in twice, out by half, or 0 for the whole sound. */
+const ZOOM_KEYS: Record<string, number | undefined> = {
+  "+": 2,
+  "-": 0.5,
+  "0": 0,
+  "=": 2,
+  _: 0.5,
+};
+/** Which way the arrows move the cursor. */
+const CARET_KEYS: Record<string, number | undefined> = {
+  ArrowLeft: -1,
+  ArrowRight: 1,
+};
 /** How far the arrows move a locator, in seconds. */
 const LOCATOR_STEP = 0.1;
 const formatDb = (db: number) =>
@@ -780,14 +801,19 @@ function shapeStretch(
  * The edits of the sound, as an audio editor makes them, each one step of
  * undo: on the time selected, Cut and Copy; Paste makes room for what it lays
  * down, over the selection if there is one; Delete and Crop close the gap they
- * leave; Mark puts a locator at the selection's start, or at the cursor. The
- * arrangement's length and loop follow the sound's. `handleKey` is the
- * keyboard of all of them, with Undo and Redo.
+ * leave; Mark puts a locator at the selection's start, or at the cursor;
+ * Louder and Quieter move the selection's level by 3 dB. The arrangement's
+ * length and loop follow the sound's. Each is sent by `act` with the name the
+ * history lists. `handleKey` is the keyboard of all of them, with Undo and
+ * Redo.
  */
 function useClipEdits({
+  act,
   arrangement,
   position,
 }: {
+  /** Sends a command as a step of the history, by the name the history lists. */
+  act: (label: string, command: ArrangementCommand) => void;
   arrangement: ReturnType<typeof useArrangement>;
   position: ReturnType<typeof createSource<number>>;
 }) {
@@ -798,8 +824,8 @@ function useClipEdits({
 
   /** One step of undo: the edit, then the arrangement's length and loop set to the sound's new length. */
   const commit = useCallback(
-    (commands: ArrangementCommand[], next: number) =>
-      dispatch({
+    (label: string, commands: ArrangementCommand[], next: number) =>
+      act(label, {
         commands: [
           ...commands,
           { duration: next, type: "set-duration" },
@@ -807,18 +833,22 @@ function useClipEdits({
         ],
         type: "batch",
       }),
-    [dispatch]
+    [act]
   );
-  const remove = useCallback(() => {
-    if (!time) {
-      return;
-    }
-    const [from, to] = time.range;
-    const next = length - (to - from);
-    commit([...removing(from, to), ...splice(from, next)], next);
-    setTime(null);
-    position.set(from);
-  }, [commit, length, position, time]);
+  const removeAs = useCallback(
+    (label: string) => {
+      if (!time) {
+        return;
+      }
+      const [from, to] = time.range;
+      const next = length - (to - from);
+      commit(label, [...removing(from, to), ...splice(from, next)], next);
+      setTime(null);
+      position.set(from);
+    },
+    [commit, length, position, time]
+  );
+  const remove = useCallback(() => removeAs("Delete"), [removeAs]);
   const copy = useCallback(() => {
     if (time) {
       setClipboard(copyOf(time));
@@ -827,9 +857,9 @@ function useClipEdits({
   const cut = useCallback(() => {
     if (time) {
       setClipboard(copyOf(time));
-      remove();
+      removeAs("Cut");
     }
-  }, [copyOf, remove, time]);
+  }, [copyOf, removeAs, time]);
   const paste = useCallback(() => {
     if (!clipboard) {
       return;
@@ -838,6 +868,7 @@ function useClipEdits({
     const over = time ? time.range[1] - time.range[0] : 0;
     const next = length - over + clipboard.length;
     commit(
+      "Paste",
       [
         ...(time ? removing(time.range[0], time.range[1]) : []),
         { at, length: clipboard.length, type: "insert-time" },
@@ -854,17 +885,17 @@ function useClipEdits({
       return;
     }
     const [from, to] = time.range;
-    commit([...removing(to, length), ...removing(0, from)], to - from);
+    commit("Crop", [...removing(to, length), ...removing(0, from)], to - from);
     setTime({ range: [0, to - from], tracks: [TRACK] });
     position.set(0);
   }, [commit, length, position, time]);
   const mark = useCallback(
     () =>
-      dispatch({
+      act("Mark", {
         at: time ? time.range[0] : position.getSnapshot(),
         type: "add-locator",
       }),
-    [dispatch, position, time]
+    [act, position, time]
   );
   const selectAll = useCallback(
     () => setTime({ range: [0, length], tracks: [TRACK] }),
@@ -877,18 +908,33 @@ function useClipEdits({
     () => doc.clips.filter((clip) => clip.track === TRACK),
     [doc.clips]
   );
-  /** Fades and level on the selection, as one step: what is in it becomes clips of its own, shaped. */
+  /** Fades and level on the selection, as one step named `label`: what is in it becomes clips of its own, shaped. */
   const shape = useCallback(
-    (next: StretchShape) => {
+    (next: StretchShape, label: string) => {
       if (time) {
-        dispatch({
+        act(label, {
           commands: shapeStretch(clips, time.range, next),
           type: "batch",
         });
       }
     },
-    [clips, dispatch, time]
+    [act, clips, time]
   );
+  /** The selection's level moved by `db`, up to the top of the range: past 0 dB, it is a boost. */
+  const nudge = useCallback(
+    (db: number) => {
+      if (time) {
+        const now = shapeOf(clips, time.range);
+        shape(
+          { ...now, gain: Math.min(MAX_DB, Math.max(MIN_DB, now.gain + db)) },
+          db > 0 ? "Louder" : "Quieter"
+        );
+      }
+    },
+    [clips, shape, time]
+  );
+  const louder = useCallback(() => nudge(LEVEL_NUDGE), [nudge]);
+  const quieter = useCallback(() => nudge(-LEVEL_NUDGE), [nudge]);
 
   const handleKey = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
@@ -909,6 +955,8 @@ function useClipEdits({
         escape: clear,
         k: crop,
         m: mark,
+        // Shift with Up and Down: louder and quieter.
+        ...(event.shiftKey ? { arrowdown: quieter, arrowup: louder } : {}),
       };
       const command = (event.metaKey || event.ctrlKey ? withMod : alone)[
         event.key.toLowerCase()
@@ -918,7 +966,20 @@ function useClipEdits({
         command();
       }
     },
-    [clear, copy, crop, cut, mark, paste, redo, remove, selectAll, undo]
+    [
+      clear,
+      copy,
+      crop,
+      cut,
+      louder,
+      mark,
+      paste,
+      quieter,
+      redo,
+      remove,
+      selectAll,
+      undo,
+    ]
   );
 
   return {
@@ -928,8 +989,10 @@ function useClipEdits({
     crop,
     cut,
     handleKey,
+    louder,
     mark,
     paste,
+    quieter,
     redo,
     remove,
     selectAll,
@@ -970,6 +1033,15 @@ function EditMenu({ edits }: { edits: ReturnType<typeof useClipEdits> }) {
       <ContextMenuItem disabled={!selected} onClick={edits.crop}>
         Crop
         <ContextMenuShortcut>K</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem disabled={!selected} onClick={edits.louder}>
+        Louder
+        <ContextMenuShortcut>⇧↑</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem disabled={!selected} onClick={edits.quieter}>
+        Quieter
+        <ContextMenuShortcut>⇧↓</ContextMenuShortcut>
       </ContextMenuItem>
       <ContextMenuSeparator />
       <ContextMenuItem onClick={edits.mark}>
@@ -1322,8 +1394,9 @@ function levelAt(event: PointerEvent<HTMLElement>, gain: number) {
 /**
  * The level of the selection: a line across it where the gain it lets
  * through stands, 0 dB at the top and silence at the bottom, dragged up and
- * down from anywhere along it, or moved with Up and Down. It shows the level
- * as it moves and takes effect as it lets go.
+ * down from anywhere along it, or moved with Up and Down, which go on past
+ * 0 dB to the top of the range, the line staying at the top. It shows the
+ * level as it moves and takes effect as it lets go.
  */
 function LevelHandle({
   gain,
@@ -1367,7 +1440,7 @@ function LevelHandle({
       if (step !== undefined) {
         event.preventDefault();
         event.stopPropagation();
-        onCommit(Math.min(0, Math.max(MIN_DB, gain + step)));
+        onCommit(Math.min(MAX_DB, Math.max(MIN_DB, gain + step)));
       }
     },
     [gain, onCommit]
@@ -1378,7 +1451,7 @@ function LevelHandle({
       <span
         aria-label="Selection level"
         aria-orientation="vertical"
-        aria-valuemax={0}
+        aria-valuemax={MAX_DB}
         aria-valuemin={MIN_DB}
         aria-valuenow={gain}
         aria-valuetext={formatDb(gain)}
@@ -1461,7 +1534,10 @@ function SelectionFrame({
       setEdge(null);
       if (fading.current) {
         fading.current = false;
-        shape({ ...current, fadeIn: next.fadeIn, fadeOut: next.fadeOut });
+        shape(
+          { ...current, fadeIn: next.fadeIn, fadeOut: next.fadeOut },
+          "Fade"
+        );
         setPreview(null);
       }
     },
@@ -1473,17 +1549,19 @@ function SelectionFrame({
   );
   const settleLevel = useCallback(
     (gain: number) => {
-      shape({ ...current, gain });
+      shape({ ...current, gain }, "Level");
       setPreview(null);
     },
     [current, shape]
   );
   const curveIn = useCallback(
-    (fadeInShape: FadeShape) => shape({ ...current, fadeInShape }),
+    (fadeInShape: FadeShape) =>
+      shape({ ...current, fadeInShape }, "Fade-in curve"),
     [current, shape]
   );
   const curveOut = useCallback(
-    (fadeOutShape: FadeShape) => shape({ ...current, fadeOutShape }),
+    (fadeOutShape: FadeShape) =>
+      shape({ ...current, fadeOutShape }, "Fade-out curve"),
     [current, shape]
   );
   if (!time) {
@@ -1577,7 +1655,7 @@ function SoundClips({
       <div
         // Presses go through to the lane, which seeks and selects: a clip here takes no gesture of its own.
         className={cn(
-          "pointer-events-none absolute inset-y-0",
+          "pointer-events-none absolute inset-y-0 overflow-hidden",
           hidden && "invisible"
         )}
         key={clip.id}
@@ -1631,13 +1709,90 @@ function LocatorLane({
   ) : null;
 }
 
+/** A selection from `a` to `b`, either way round, or none when they meet. */
+const spanOf = (a: number, b: number): TimeSelection | null =>
+  near(a, b)
+    ? null
+    : { range: [Math.min(a, b), Math.max(a, b)], tracks: [TRACK] };
+
+/** The edge of `range` farther from `at`: what a Shift + click keeps. */
+const farEdge = (range: readonly [number, number], at: number) =>
+  Math.abs(at - range[0]) > Math.abs(at - range[1]) ? range[0] : range[1];
+
+/**
+ * What Shift and the arrows move: the selection's free end (`head`), the other
+ * kept (`fixed`, the one kept last, else its start); with no selection, both
+ * at the cursor `now`.
+ */
+function keyedEdges(
+  range: readonly [number, number] | null,
+  kept: number | null,
+  now: number
+) {
+  if (!range) {
+    return { fixed: now, head: now };
+  }
+  const fixed = kept !== null && near(kept, range[1]) ? range[1] : range[0];
+  return { fixed, head: fixed === range[0] ? range[1] : range[0] };
+}
+
+/** `at`, or the cue within `SNAP_PX` of it at this zoom, as a press lands. */
+function snapNear(cues: Cues, at: number, zoom: number) {
+  const reach = SNAP_PX / zoom;
+  let found = at;
+  for (const point of cues.points) {
+    if (
+      Math.abs(point - at) <= reach &&
+      Math.abs(point - at) < Math.abs(found - at || reach)
+    ) {
+      found = point;
+    }
+  }
+  return found;
+}
+
+/** Where an arrow takes the cursor from `head`: a step of `unit` seconds, or with `toCue`, the next cue that way, three px past it at least. */
+function stepCaret({
+  cues,
+  direction,
+  duration,
+  head,
+  toCue,
+  unit,
+  zoom,
+}: {
+  cues: Cues;
+  direction: number;
+  duration: number;
+  head: number;
+  toCue: boolean;
+  unit: number;
+  zoom: number;
+}) {
+  if (!toCue) {
+    return head + direction * unit;
+  }
+  const past = 3 / zoom;
+  return direction > 0
+    ? (cues.points.find((point) => point > head + past) ?? duration)
+    : (cues.points.filter((point) => point < head - past).at(-1) ?? 0);
+}
+
+/** Scrolls the view to `x` px when it is out of sight, to the middle of it. */
+function reveal(element: HTMLElement, x: number) {
+  if (x < element.scrollLeft || x > element.scrollLeft + element.clientWidth) {
+    element.scrollLeft = x - element.clientWidth / 2;
+  }
+}
+
 /**
  * The sound's lane: the waveform on a timeline, fitted to the width, zoomed
  * with a pinch or Cmd or Ctrl + wheel down to the samples, the wheel and the
  * navigator moving the view, which glides with the playhead as it plays. A
  * press seeks, a drag selects, a double-click selects between two cues and a
- * triple-click the sound between two pauses; presses and edges snap to the
- * onsets, the seams and the locators.
+ * triple-click the sound between two pauses, and Shift + click extends the
+ * selection; presses and edges snap to the onsets, the seams and the
+ * locators. Its keys move the cursor and zoom, and pass the rest to the edits.
  * While a take records, the lane is the take's, drawn as it comes in a view
  * that fits it; while a file is dragged over the editor, it shows where it
  * lands.
@@ -1701,21 +1856,148 @@ function ClipLane({
     [clips, duration, locators, sounds]
   );
 
-  // A press on the lane lets go of the selection, and gives the lane the keys; a drag from there selects.
-  const { clear, setTime } = edits;
+  // A press on the bare lane lets go of the selection, and gives the lane the keys; a drag from there selects.
+  // With Shift, the selection reaches the press instead, from its far edge or the cursor, and a drag carries it on.
+  const { clear, handleKey, setTime, time } = edits;
+  const extending = useRef<{ fixed: number; pressed: number } | null>(null);
   const press = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
-      if (event.button === 0) {
-        clear();
-      }
       surface.current?.focus({ preventScroll: true });
+      if (event.button !== 0 || event.target !== event.currentTarget || !zoom) {
+        return;
+      }
+      if (!event.shiftKey) {
+        extending.current = null;
+        clear();
+        return;
+      }
+      const box = event.currentTarget.getBoundingClientRect();
+      const raw = Math.min(
+        duration,
+        Math.max(0, (event.clientX - box.left) / zoom)
+      );
+      const pressed =
+        event.metaKey || event.ctrlKey ? raw : snapNear(cues, raw, zoom);
+      const fixed = time
+        ? farEdge(time.range, pressed)
+        : position.getSnapshot();
+      extending.current = { fixed, pressed };
+      setTime(spanOf(fixed, pressed));
     },
-    [clear]
+    [clear, cues, duration, position, setTime, time, zoom]
   );
   const select = useCallback(
-    (range: readonly [number, number]) =>
-      setTime({ range: [range[0], range[1]], tracks: [TRACK] }),
+    (range: readonly [number, number]) => {
+      const from = extending.current;
+      if (!from) {
+        setTime({ range: [range[0], range[1]], tracks: [TRACK] });
+        return;
+      }
+      // The drag's own end, the one that is not where it was pressed.
+      setTime(
+        spanOf(from.fixed, near(range[0], from.pressed) ? range[1] : range[0])
+      );
+    },
     [setTime]
+  );
+
+  // A zoom by a key holds the selection's middle, or the cursor, where it is on the screen, or brings it to the middle.
+  const zoomAnchor = useRef<{ at: number; x: number } | null>(null);
+  useLayoutEffect(() => {
+    const anchor = zoomAnchor.current;
+    const element = viewport.current;
+    zoomAnchor.current = null;
+    if (anchor && element) {
+      element.scrollLeft = anchor.at * zoom - anchor.x;
+    }
+  }, [zoom]);
+  const zoomBy = useCallback(
+    (factor: number) => {
+      const element = viewport.current;
+      const next =
+        factor === 0
+          ? fitPx
+          : Math.min(maxZoom, Math.max(fitPx, zoom * factor));
+      if (!element || Math.abs(next - zoom) < 1e-9) {
+        return;
+      }
+      const at =
+        time && !playing
+          ? (time.range[0] + time.range[1]) / 2
+          : position.getSnapshot();
+      const x = at * zoom - element.scrollLeft;
+      zoomAnchor.current = {
+        at,
+        x: x >= 0 && x <= element.clientWidth ? x : element.clientWidth / 2,
+      };
+      setZoomPx(factor === 0 ? null : next);
+    },
+    [fitPx, maxZoom, playing, position, time, zoom]
+  );
+
+  // The arrows move the cursor a hundredth of the view, Alt from cue to cue, Home and End to the ends; with Shift, the selection's free end.
+  const anchorEdge = useRef<number | null>(null);
+  const moveCaret = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      const element = viewport.current;
+      const direction = CARET_KEYS[event.key];
+      const ends = event.key === "Home" || event.key === "End";
+      if (!(element && zoom && (direction || ends))) {
+        return false;
+      }
+      const { fixed, head } = keyedEdges(
+        event.shiftKey ? (time?.range ?? null) : null,
+        anchorEdge.current,
+        position.getSnapshot()
+      );
+      const target = ends
+        ? Number(event.key === "End") * duration
+        : stepCaret({
+            cues,
+            direction: direction ?? 0,
+            duration,
+            head,
+            toCue: event.altKey,
+            unit: element.clientWidth / zoom / 100,
+            zoom,
+          });
+      const to = Math.min(duration, Math.max(0, target));
+      if (event.shiftKey) {
+        anchorEdge.current = fixed;
+        setTime(spanOf(fixed, to));
+        // The cursor goes with the free end, but a playing sound is not sent there.
+        if (!playing) {
+          onSeek(to);
+        }
+      } else {
+        onSeek(to);
+      }
+      reveal(element, to * zoom);
+      return true;
+    },
+    [cues, duration, onSeek, playing, position, setTime, time, zoom]
+  );
+  const keyDown = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (typing(event.target)) {
+        return;
+      }
+      // The view's own keys, from the waveform itself: a part in it, such as the ruler, keeps its arrows.
+      const own = event.target === event.currentTarget;
+      const plain = !(event.metaKey || event.ctrlKey || event.altKey);
+      const factor = plain ? ZOOM_KEYS[event.key] : undefined;
+      if (own && factor !== undefined) {
+        event.preventDefault();
+        zoomBy(factor);
+        return;
+      }
+      if (own && !(event.metaKey || event.ctrlKey) && moveCaret(event)) {
+        event.preventDefault();
+        return;
+      }
+      handleKey(event);
+    },
+    [handleKey, moveCaret, zoomBy]
   );
   // A double-click on the bare lane selects between the cues either side, a triple-click the sound between pauses.
   const pick = useCallback(
@@ -1759,7 +2041,7 @@ function ClipLane({
             <ContextMenuTrigger
               aria-label="Sound, waveform: drag to select, right-click to edit"
               className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
-              onKeyDown={edits.handleKey}
+              onKeyDown={keyDown}
               ref={surface}
               role="group"
               tabIndex={0}
@@ -1895,6 +2177,161 @@ function Readouts({
 }
 
 /**
+ * What B plays: the sound as it was before the edits, its recording whole
+ * through no device, at `gain` dB to match the loudness the edits give it.
+ * It holds while the clips and the tracks it was matched for are the ones
+ * there are.
+ */
+interface Comparison {
+  clips: readonly Arranged[];
+  gain: number;
+  length: number;
+  recording: string;
+  tracks: readonly ArrangementTrack[];
+}
+
+/** A track with every device of it switched off: the sound passes through as it comes. */
+const unprocessed = (track: ArrangementTrack): ArrangementTrack => ({
+  ...track,
+  devices: track.devices?.map((device) => ({ ...device, on: false })),
+});
+
+/** The document B plays: the recording whole, matched, through no device, the main volume as it is. */
+function beforeEdits(
+  doc: ArrangementDoc,
+  { gain, length, recording }: Comparison
+): ArrangementDoc {
+  return {
+    ...doc,
+    clips: [{ ...loopClip(recording, length), gain }],
+    duration: length,
+    loop: { ...doc.loop, range: [0, length] },
+    main: unprocessed(doc.main),
+    tracks: doc.tracks.map(unprocessed),
+  };
+}
+
+/** Where Play starts: in a selection, from the cursor if it is inside it, else its start; else from the cursor, or the start once at the end. */
+function playFrom(
+  range: readonly [number, number] | null,
+  at: number,
+  duration: number
+) {
+  if (range) {
+    return at > range[0] && at < range[1] ? at : range[0];
+  }
+  return at >= duration ? 0 : at;
+}
+
+/** A device's name, as the library gives it. */
+const deviceName = (device: TrackDevice) =>
+  libraryDevice(device.device)?.device.name ?? "Device";
+
+/** What a change to the chain did: a device added or taken away, or the one whose settings changed. */
+function chainStepName(before: ArrangementDoc, after: ArrangementDoc) {
+  const was = before.tracks.find((track) => track.id === TRACK)?.devices ?? [];
+  const now = after.tracks.find((track) => track.id === TRACK)?.devices ?? [];
+  const added = now.find((device) => !was.some((old) => old.id === device.id));
+  const gone = was.find((device) => !now.some((kept) => kept.id === device.id));
+  if (added) {
+    return `Add ${deviceName(added)}`;
+  }
+  if (gone) {
+    return `Remove ${deviceName(gone)}`;
+  }
+  const changed = now.find((device, index) => device !== was[index]);
+  return changed ? deviceName(changed) : "Devices";
+}
+
+/** A step of the history in a few words: the name it was sent with, else what changed from `before` to `after`. */
+function stepName(
+  before: ArrangementDoc,
+  after: ArrangementDoc,
+  named: WeakMap<ArrangementDoc, string>
+) {
+  const own = named.get(after);
+  if (own) {
+    return own;
+  }
+  if (after.main !== before.main) {
+    return "Main volume";
+  }
+  if (after.loop.on !== before.loop.on) {
+    return after.loop.on ? "Loop on" : "Loop off";
+  }
+  if (after.locators !== before.locators) {
+    return "Locators";
+  }
+  return after.tracks === before.tracks ? "Edit" : chainStepName(before, after);
+}
+
+/** The history's steps, the latest first, each to go back or forward to; only while the menu is open. */
+function HistorySteps({
+  dispatch,
+  doc,
+  history,
+  named,
+}: {
+  dispatch: ReturnType<typeof useArrangement>["dispatch"];
+  doc: ArrangementDoc;
+  history: ReturnType<typeof useArrangement>["history"];
+  named: WeakMap<ArrangementDoc, string>;
+}) {
+  const entries = [
+    ...history.past,
+    ...(history.pending ? [history.pending] : []),
+    doc,
+    ...[...history.future].reverse(),
+  ];
+  const current = entries.length - 1 - history.future.length;
+  const steps = entries
+    .map((entry, step) => ({
+      label:
+        step === 0
+          ? (named.get(entry) ?? (entry.clips.length ? "Earlier" : "No sound"))
+          : stepName(entries[step - 1] as ArrangementDoc, entry, named),
+      step,
+    }))
+    .reverse();
+  const goTo = useCallback(
+    (value: unknown) => {
+      const target = Number(value);
+      for (let step = current; step > target; step -= 1) {
+        dispatch({ type: "undo" });
+      }
+      for (let step = current; step < target; step += 1) {
+        dispatch({ type: "redo" });
+      }
+    },
+    [current, dispatch]
+  );
+  return (
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>History</DropdownMenuLabel>
+      <DropdownMenuRadioGroup onValueChange={goTo} value={String(current)}>
+        {steps.map(({ label, step }) => (
+          <DropdownMenuRadioItem closeOnClick key={step} value={String(step)}>
+            <span
+              className={cn(
+                "truncate",
+                step > current && "text-muted-foreground"
+              )}
+            >
+              {label}
+            </span>
+            {step > current ? (
+              <span className="ms-auto text-muted-foreground text-xs">
+                Undone
+              </span>
+            ) : null}
+          </DropdownMenuRadioItem>
+        ))}
+      </DropdownMenuRadioGroup>
+    </DropdownMenuGroup>
+  );
+}
+
+/**
  * An audio editor for one sound: a demo loop, a file of yours (uploaded or
  * dropped) or a take from the microphone, on a track of an arrangement. The
  * transport plays, loops and records; the waveform seeks and zooms down to the
@@ -1908,7 +2345,18 @@ export default function BlockAudioEditor() {
     initialTracks: TRACKS,
     tempo: demoTempo(DEMO),
   });
-  const { dispatch, doc } = arrangement;
+  const { dispatch, doc, history } = arrangement;
+  // Each step's name, by the document it made: what the history menu lists. The first name a document is given stays.
+  const named = useRef(new WeakMap<ArrangementDoc, string>());
+  const act = useCallback(
+    (label: string, command: ArrangementCommand) => {
+      const next = dispatch(command).doc;
+      if (!named.current.has(next)) {
+        named.current.set(next, label);
+      }
+    },
+    [dispatch]
+  );
   // Every sound placed stays, by its recording's id, so an undo past a new sound brings the old one back whole.
   const [sounds, setSounds] = useState<ReadonlyMap<string, Sound>>(
     () => new Map()
@@ -1923,27 +2371,55 @@ export default function BlockAudioEditor() {
   const latestClips = useRef(clips);
   latestClips.current = clips;
   const sound = sounds.get(clips[0]?.recording ?? "") ?? null;
+  // What Play was pressed over: the selection then, played to its end, or round it with the loop on.
+  const [played, setPlayed] = useState<readonly [number, number] | null>(null);
+  // B: the sound before the edits, while the clips and the chain are the ones it was matched for.
+  const [compare, setCompare] = useState<Comparison | null>(null);
+  const comparing =
+    compare && compare.clips === doc.clips && compare.tracks === doc.tracks
+      ? compare
+      : null;
+  const heard = useMemo(() => {
+    if (comparing) {
+      return beforeEdits(doc, comparing);
+    }
+    if (!played) {
+      return doc;
+    }
+    const end = Math.min(doc.duration, played[1]);
+    return {
+      ...doc,
+      duration: end,
+      loop: { ...doc.loop, range: [played[0], end] as const },
+    };
+  }, [comparing, doc, played]);
   const { meter, play, playing, position, stop } = useArrangementEngine({
-    doc,
+    doc: heard,
     metronome: NO_METRONOME,
     overridden: NOT_MOVED,
     recordings,
   });
+  // Stopped, the next Play looks at the selection again.
+  useEffect(() => {
+    if (!playing) {
+      setPlayed(null);
+    }
+  }, [playing]);
   const fileInput = useRef<HTMLInputElement>(null);
-  const edits = useClipEdits({ arrangement, position });
+  const edits = useClipEdits({ act, arrangement, position });
   const { clear: clearSelection } = edits;
 
   // The engine keeps a recording by its id once it has it: each sound placed takes an id of its own.
   const placed = useRef(0);
-  /** Puts a sound on the track: its recording, and a clip that loops it from its start to its end. */
+  /** Puts a sound on the track, as the step `label`: its recording, a clip that loops it from its start to its end, and the tempo it plays at, if it has one. */
   const place = useCallback(
-    (decoded: RecordingSource, next: Sound) => {
+    (decoded: RecordingSource, next: Sound, label: string, tempo?: Tempo) => {
       placed.current += 1;
       const id = `${RECORDING}-${placed.current}`;
       setSounds((current) => new Map(current).set(id, next));
       setRecordings((current) => new Map(current).set(id, decoded));
       clearSelection();
-      dispatch({
+      act(label, {
         commands: [
           ...latestClips.current.map((clip) => ({
             id: clip.id,
@@ -1955,11 +2431,12 @@ export default function BlockAudioEditor() {
             loop: { on: true, range: [0, next.duration] },
             type: "set-loop",
           },
+          ...(tempo ? [{ tempo, type: "set-tempo" as const }] : []),
         ],
         type: "batch",
       });
     },
-    [clearSelection, dispatch]
+    [act, clearSelection]
   );
 
   /** Puts a demo sound on the track, at its own tempo, for a delay synced to it. */
@@ -1969,13 +2446,15 @@ export default function BlockAudioEditor() {
         { length: buffer.numberOfChannels },
         (_, channel) => buffer.getChannelData(channel)
       );
+      const { title } = DEMO_SOURCES[name];
       place(
         buffer,
-        soundOf(channels, buffer.sampleRate, DEMO_SOURCES[name].title, name)
+        soundOf(channels, buffer.sampleRate, title, name),
+        `Open ${title}`,
+        demoTempo(name)
       );
-      dispatch({ tempo: demoTempo(name), type: "set-tempo" });
     },
-    [dispatch, place]
+    [place]
   );
 
   // The demo loop, rendered once the page's context is there.
@@ -2001,9 +2480,11 @@ export default function BlockAudioEditor() {
     (channels: Float32Array[], sampleRate: number) => {
       takes.current += 1;
       position.set(0);
+      const name = `Take ${takes.current}`;
       place(
         { channels, sampleRate },
-        soundOf(channels, sampleRate, `Take ${takes.current}`)
+        soundOf(channels, sampleRate, name),
+        `Record ${name}`
       );
     },
     [place, position]
@@ -2011,15 +2492,27 @@ export default function BlockAudioEditor() {
   const take = useTake({ onStart: stop, onTake: takeDone, tempo: doc.tempo });
   const { recording } = take;
 
+  // Play plays the selection when there is one, to its end or round it with the loop on; else on from the cursor.
   const toggle = useCallback(() => {
     if (recording) {
       take.end();
     } else if (playing) {
       stop();
     } else {
-      play(position.getSnapshot());
+      const range = edits.time?.range ?? null;
+      setPlayed(range);
+      play(playFrom(range, position.getSnapshot(), doc.duration));
     }
-  }, [play, playing, position, recording, stop, take]);
+  }, [
+    doc.duration,
+    edits.time,
+    play,
+    playing,
+    position,
+    recording,
+    stop,
+    take,
+  ]);
   // Stop goes back to the start, as a workstation's does; pause stays where it is.
   const rewind = useCallback(() => {
     if (recording) {
@@ -2031,18 +2524,24 @@ export default function BlockAudioEditor() {
   }, [position, recording, stop, take]);
   // The main track's volume, in dB; at the bottom of the range it is silence.
   const volume = Math.max(MIN_DB, gainToDb(doc.main.mix?.gain ?? 1));
+  // A turn of the knob is one step, closed as it lets go.
   const setVolume = useCallback(
     (db: number) =>
-      dispatch({
+      act("Main volume", {
         id: doc.main.id,
         patch: { gain: db <= MIN_DB ? 0 : dbToGain(db) },
         type: "change-mix",
       }),
-    [dispatch, doc.main.id]
+    [act, doc.main.id]
+  );
+  const settleVolume = useCallback(
+    () => dispatch({ type: "settle-clip-edit" }),
+    [dispatch]
   );
   const setLooping = useCallback(
-    (on: boolean) => dispatch({ loop: { on }, type: "set-loop" }),
-    [dispatch]
+    (on: boolean) =>
+      act(on ? "Loop on" : "Loop off", { loop: { on }, type: "set-loop" }),
+    [act]
   );
 
   // The export: the selection, or else the whole sound, rendered through the chain as it plays, then encoded and saved.
@@ -2088,20 +2587,69 @@ export default function BlockAudioEditor() {
     [doc, exportRange, recordings, sound]
   );
 
+  // B: the sound as it was before the edits, matched to the loudness the edits give it (the main volume left out of both), or the edits again.
+  const toggleCompare = useCallback(async () => {
+    const source = clips[0]?.recording;
+    if (comparing || !(sound && source)) {
+      setCompare(null);
+      return;
+    }
+    setStatus("Matching the loudness…");
+    const rendered = await renderArrangement(
+      {
+        ...doc,
+        main: {
+          ...doc.main,
+          mix: doc.main.mix ? { ...doc.main.mix, gain: 1 } : undefined,
+        },
+      },
+      recordings,
+      { from: 0, sampleRate: sound.sampleRate, to: doc.duration }
+    );
+    if (!rendered) {
+      setStatus("This browser cannot render offline");
+      return;
+    }
+    const { lufs } = measureLoudness(
+      Array.from({ length: rendered.numberOfChannels }, (_, channel) =>
+        rendered.getChannelData(channel)
+      ),
+      rendered.sampleRate
+    );
+    setStatus("");
+    setCompare({
+      clips: doc.clips,
+      gain:
+        Number.isFinite(lufs) && Number.isFinite(sound.lufs)
+          ? lufs - sound.lufs
+          : 0,
+      length: sound.duration,
+      recording: source,
+      tracks: doc.tracks,
+    });
+  }, [clips, comparing, doc, recordings, sound]);
+
   // A locator's own gestures: press to put the cursor there, double-click to play from there, drag, rename, delete.
   const locatorActions = useMemo<LocatorActions>(
     () => ({
       onJump: (at) => position.set(at),
-      onMove: (id, to) => dispatch({ id, to, type: "move-locator" }),
-      onPlay: (at) => play(at),
-      onRemove: (id) => dispatch({ id, type: "remove-locator" }),
-      onRename: (id, name) => dispatch({ id, name, type: "rename-locator" }),
+      onMove: (id, to) =>
+        act("Move a locator", { id, to, type: "move-locator" }),
+      onPlay: (at) => {
+        setPlayed(null);
+        play(at);
+      },
+      onRemove: (id) => act("Delete a locator", { id, type: "remove-locator" }),
+      onRename: (id, name) =>
+        act(`Rename ${name}`, { id, name, type: "rename-locator" }),
     }),
-    [dispatch, play, position]
+    [act, play, position]
   );
+  // A seek while it plays plays on from there, the whole sound.
   const seek = useCallback(
     (value: number) => {
       if (playing) {
+        setPlayed(null);
         play(value);
       } else {
         position.set(value);
@@ -2124,7 +2672,8 @@ export default function BlockAudioEditor() {
       position.set(0);
       place(
         { channels, sampleRate: ctx.sampleRate },
-        soundOf(channels, ctx.sampleRate, file.name)
+        soundOf(channels, ctx.sampleRate, file.name),
+        `Open ${file.name}`
       );
     },
     [place, position, stop]
@@ -2207,7 +2756,7 @@ export default function BlockAudioEditor() {
     (device: string) => {
       const entry = libraryDevice(device);
       if (entry) {
-        dispatch({
+        act(`Add ${entry.device.name}`, {
           device,
           state: entry.device.defaults(),
           track: TRACK,
@@ -2215,8 +2764,46 @@ export default function BlockAudioEditor() {
         });
       }
     },
-    [dispatch]
+    [act]
   );
+
+  // The editor's own keys, wherever its focus is but in a field: Space plays and pauses, L loops, R records, B compares.
+  const keys = useRef<Record<string, (() => void) | undefined>>({});
+  keys.current = {
+    " ": toggle,
+    b: toggleCompare,
+    l: () => setLooping(!doc.loop.on),
+    r: () => take.record(!recording),
+  };
+  useEffect(() => {
+    const element = frame.current;
+    if (!element) {
+      return;
+    }
+    const keydown = (event: globalThis.KeyboardEvent) => {
+      const command = keys.current[event.key.toLowerCase()];
+      // A button or a link takes Space for itself.
+      const control =
+        event.key === " " &&
+        event.target instanceof Element &&
+        event.target.closest("button, a") !== null;
+      if (
+        !command ||
+        control ||
+        event.repeat ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.altKey ||
+        typing(event.target)
+      ) {
+        return;
+      }
+      event.preventDefault();
+      command();
+    };
+    element.addEventListener("keydown", keydown);
+    return () => element.removeEventListener("keydown", keydown);
+  }, []);
 
   const levels = useAudioLevels(meter(doc.main.id) ?? NO_ANALYSERS);
 
@@ -2337,6 +2924,60 @@ export default function BlockAudioEditor() {
                 tabler="IconArrowForwardUp"
               />
             </Toolbar.Button>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Toolbar.Button
+                    aria-label="History"
+                    disabled={!(arrangement.canUndo || arrangement.canRedo)}
+                    render={<Button size="icon" variant="outline" />}
+                    title="History"
+                  />
+                }
+              >
+                <IconPlaceholder
+                  hugeicons="HistoryIcon"
+                  lucide="HistoryIcon"
+                  phosphor="ClockCounterClockwiseIcon"
+                  remixicon="RiHistoryLine"
+                  tabler="IconHistory"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="start"
+                className="max-h-80 w-60 overflow-y-auto"
+              >
+                <HistorySteps
+                  dispatch={dispatch}
+                  doc={doc}
+                  history={history}
+                  named={named.current}
+                />
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </ButtonGroup>
+          <ButtonGroup>
+            <Toolbar.Button
+              aria-label="Before the edits"
+              aria-pressed={comparing !== null}
+              disabled={!sound}
+              onClick={toggleCompare}
+              render={
+                <Button
+                  size="icon"
+                  variant={comparing ? "default" : "outline"}
+                />
+              }
+              title="Hear it before the edits (B)"
+            >
+              <IconPlaceholder
+                hugeicons="ArrowLeftRightIcon"
+                lucide="ArrowLeftRightIcon"
+                phosphor="ArrowsLeftRightIcon"
+                remixicon="RiArrowLeftRightLine"
+                tabler="IconArrowsLeftRight"
+              />
+            </Toolbar.Button>
           </ButtonGroup>
           <ButtonGroup>
             <Toolbar.Button
@@ -2381,6 +3022,7 @@ export default function BlockAudioEditor() {
               max={MAX_DB}
               min={MIN_DB}
               onValueChange={setVolume}
+              onValueCommitted={settleVolume}
               size="xs"
               step={0.5}
               value={volume}
@@ -2406,7 +3048,11 @@ export default function BlockAudioEditor() {
         duration={doc.duration}
         position={recording ? take.clock : position}
         sound={sound}
-        status={status}
+        status={
+          comparing
+            ? `Before the edits, ${formatDb(comparing.gain)} to match`
+            : status
+        }
         time={edits.time}
       />
       <ExportDialog
