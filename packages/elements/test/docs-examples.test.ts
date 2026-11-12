@@ -79,8 +79,10 @@ describe("the docs' examples", () => {
   });
 
   test("each page shows its examples in both stylings", async () => {
-    for (const page of pages) {
-      const text = await Bun.file(`${PAGES}/${page}`).text();
+    const texts = await Promise.all(
+      pages.map((page) => Bun.file(`${PAGES}/${page}`).text())
+    );
+    for (const text of texts) {
       expect(text).toContain('<ForStyling only="css">');
       expect(text).toContain('<ForStyling only="tailwind">');
     }
