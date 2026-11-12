@@ -11,6 +11,20 @@ Audio controls have many details: a knob has to drag, respond to the wheel and t
 
 Use the layer that fits your project. They share the same behavior.
 
+<ForFrameworks only="vue svelte web">
+
+**`@audio-ui/elements`** are the primitives as custom elements: behavior and accessibility, no styles, in Vue, Svelte, plain HTML and any framework that renders HTML. [Vue](/docs/elements/vue) and [Svelte](/docs/elements/svelte) get template types, and Vue binds a value with `v-model`.
+
+```bash
+npm install @audio-ui/elements
+```
+
+In React, the same primitives are **`@audio-ui/react`**, and **the `@audio-ui` registry** has them styled, for shadcn/ui and Tailwind CSS v4.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
 **`@audio-ui/react`** are headless primitives from npm: behavior and accessibility, no styles. Pick them when you have your own design system.
 
 ```bash
@@ -29,9 +43,33 @@ npx shadcn@latest add @audio-ui/knob
 npm install @audio-ui/elements
 ```
 
+</ForFrameworks>
+
 All three are open source. With the registry you receive the actual code, so you can read it, change it and learn from it.
 
 ## Top components
+
+<ForFrameworks only="vue svelte web">
+
+Each links to its element's page, with a live preview, its attributes and its usage in your framework. Register any of them with `import "@audio-ui/elements/<name>"`.
+
+<TypeTable title="Top components">
+<TypeRow name="Knob">Rotary parameter with drag, wheel, keyboard and reset. [Docs](/docs/elements/knob).</TypeRow>
+<TypeRow name="Fader">Linear gain or parameter slider. [Docs](/docs/elements/fader).</TypeRow>
+<TypeRow name="XY Pad">Two parameters on one surface. [Docs](/docs/elements/xypad).</TypeRow>
+<TypeRow name="Envelope">Breakpoint editor for ADSR and other ramps. [Docs](/docs/elements/envelope).</TypeRow>
+<TypeRow name="Meter">Stereo and multi-channel level with peak hold. [Docs](/docs/elements/meter).</TypeRow>
+<TypeRow name="Waveform">Seekable waveform with a loop region. [Docs](/docs/elements/waveform).</TypeRow>
+<TypeRow name="Plot">Draggable curves for EQs, filters and compressors. [Docs](/docs/elements/plot).</TypeRow>
+<TypeRow name="Timeline">Zoomable arrangement view with a smooth playhead. [Docs](/docs/elements/timeline).</TypeRow>
+<TypeRow name="Sequencer">Step grid to draw a pattern. [Docs](/docs/elements/sequencer).</TypeRow>
+<TypeRow name="Pad">Drum pads with velocity. [Docs](/docs/elements/pad).</TypeRow>
+<TypeRow name="Piano Roll">Note editor with a velocity lane. [Docs](/docs/elements/piano-roll).</TypeRow>
+</TypeTable>
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
 
 Each links to its docs, with a live preview, the API and the source. Install any of them with `npx shadcn@latest add @audio-ui/<name>`.
 
@@ -51,6 +89,8 @@ Each links to its docs, with a live preview, the API and the source. Install any
 
 Looking for a whole screen? The [component catalog](/components) has composed blocks (a pocket synth, a wave shaper, a waveform player) you can install the same way.
 
+</ForFrameworks>
+
 ## Built for agents
 
 audio/ui is made to be used by AI coding agents as much as by people. Open code, one consistent API and plain markdown docs mean an agent can find the right component, read how it works and wire it up without guessing.
@@ -68,4 +108,14 @@ audio/ui is made to be used by AI coding agents as much as by people. Open code,
 
 ## Next steps
 
+<ForFrameworks only="vue svelte web">
+
+Head over to [Get started](/docs/get-started) to add audio/ui to your project, with [Vue](/docs/elements/vue) or [Svelte](/docs/elements/svelte) for their setup, or open [Knob](/docs/elements/knob) to place your first element.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
 Head over to [Get started](/docs/get-started) to add audio/ui to your project, or open [Knob](/docs/components/base/knob) to install your first component.
+
+</ForFrameworks>

@@ -3,6 +3,8 @@
  * agents (/llm/*, /llms-full.txt). Code fences are left untouched.
  */
 
+import { FRAMEWORKS } from "@/lib/docs/content/frameworks";
+
 const FENCE_SPLIT_REGEX = /(^```[^\n]*\n[\s\S]*?^```[ \t]*$)/m;
 const FENCE_META_REGEX = /^(```\w+) component\b/;
 const FRONTMATTER_REGEX = /^---\n([\s\S]*?)\n---\n*/;
@@ -35,6 +37,8 @@ const TABS_TRIGGER_REGEX =
 const TABS_CONTENT_REGEX = /<TabsContent\s+value="([^"]+)"\s*>\n*/g;
 const TABS_WRAPPER_REGEX = /<\/?(?:Code|Framework)?Tabs(?:\s[^>]*)?>\n*/g;
 const STEP_REGEX = /<Step>([\s\S]*?)<\/Step>/g;
+const FOR_FRAMEWORKS_REGEX = /<ForFrameworks\s+only="([^"]+)"\s*>\n*/g;
+const FOR_FRAMEWORKS_END_REGEX = /<\/ForFrameworks>\n*/g;
 const ATTRIBUTE_REGEX = /attribute/i;
 const KEYS_REGEX = /keys/i;
 const QUOTED_REGEX = /^(["'])(.*)\1$/;
@@ -143,9 +147,20 @@ export function replaceFrontmatter(content: string) {
   return `${head ? `${head}\n\n` : ""}${content.slice(match[0].length)}`;
 }
 
+/** The frameworks a `<ForFrameworks>` block is for, by name: "Vue, Svelte and Web". */
+function frameworkNames(only: string) {
+  const names = only
+    .split(" ")
+    .map((id) => FRAMEWORKS.find((each) => each.id === id)?.label ?? id);
+  return names.length > 1
+    ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`
+    : (names[0] ?? only);
+}
+
 /**
- * The reference tables as Markdown tables, the tabs as labelled sections, the
- * steps as numbered lines. What has no Markdown form (icons) is dropped.
+ * The reference tables as Markdown tables, the tabs and the blocks for some
+ * frameworks as labelled sections, the steps as numbered lines. What has no
+ * Markdown form (icons) is dropped.
  */
 export function mdxToMarkdown(content: string) {
   let labels = new Map<string, string>();
@@ -173,6 +188,11 @@ export function mdxToMarkdown(content: string) {
           (_, value: string) => `**${labels.get(value) ?? value}**\n\n`
         )
         .replace(/<\/TabsContent>\n*/g, "")
+        .replace(
+          FOR_FRAMEWORKS_REGEX,
+          (_, only: string) => `**In ${frameworkNames(only)}**\n\n`
+        )
+        .replace(FOR_FRAMEWORKS_END_REGEX, "")
         .replace(TABS_WRAPPER_REGEX, "")
         .replace(/<Steps>\n*/g, () => {
           step = 0;

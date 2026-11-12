@@ -12,6 +12,7 @@ import { DemoSounds } from "@/components/docs/mdx/demo-sounds";
 import { DeviceUsage } from "@/components/docs/mdx/device-usage";
 import { ElementsPreview } from "@/components/docs/mdx/elements-preview";
 import { Entry, Module } from "@/components/docs/mdx/entry";
+import { ForFrameworks } from "@/components/docs/mdx/for-frameworks";
 import { FrameworkTabs } from "@/components/docs/mdx/framework-tabs";
 import { IconCatalog } from "@/components/docs/mdx/icon-catalog";
 import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
@@ -59,6 +60,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Control,
     DemoSounds,
     ElementsPreview,
+    ForFrameworks,
     FrameworkTabs,
     DeviceControls,
     DeviceUsage,
