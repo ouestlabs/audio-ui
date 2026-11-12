@@ -1,5 +1,11 @@
 # @audio-ui/engine
 
+## 0.7.0
+
+### Minor Changes
+
+- b6e52a5: Files: `normalizeChannels` brings a sound to a peak in dBFS or a loudness in LUFS under a true-peak ceiling, `panChannels` sets a stereo sound's balance, `filterChannels` runs it through a high-pass, low-pass or notch, and `gainChannels` changes its level in dB.
+
 ## 0.6.0
 
 ### Minor Changes
