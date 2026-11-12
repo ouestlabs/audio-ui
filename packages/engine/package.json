@@ -125,6 +125,8 @@
     "@audio/reverb-freeverb": "1.0.5",
     "@audio/reverb-schroeder": "1.1.3",
     "@audio/reverb-spring": "1.1.3",
+    "@audio/shift": "1.2.0",
+    "@audio/stretch": "2.3.0",
     "@audio/synth-noise": "2.0.1",
     "@audio/weighting-k": "1.2.1",
     "fflate": "0.8.3"

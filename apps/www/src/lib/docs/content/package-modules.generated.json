@@ -3035,6 +3035,41 @@
         "kind": "function",
         "name": "panChannels",
         "summary": "A sound's balance: -1 is all left, 1 all right, 0 as it is."
+      },
+      {
+        "kind": "const",
+        "name": "SHIFT_METHODS",
+        "summary": "How a pitch is shifted: let the library choose from the sound (`auto`), or a method by name."
+      },
+      {
+        "kind": "type",
+        "name": "ShiftMethod",
+        "summary": ""
+      },
+      {
+        "kind": "const",
+        "name": "STRETCH_METHODS",
+        "summary": "The ways a sound is stretched in time with its pitch kept, each with what it suits: a phase vocoder that keeps the attacks of drums (`transient`), one for general music (`pvocLock`), waveform overlap-add for speech made shorter (`wsola`) or longer (`pvsola`), a vocoder with the harmonic and percussive parts apart for full mixes (`hybrid`), and the extreme stretch of ambient textures (`paulstretch`)."
+      },
+      {
+        "kind": "type",
+        "name": "StretchMethod",
+        "summary": ""
+      },
+      {
+        "kind": "function",
+        "name": "shiftChannels",
+        "summary": "Every channel `semitones` higher or lower, its length unchanged."
+      },
+      {
+        "kind": "function",
+        "name": "speedChannels",
+        "summary": "The sound played `speed` times as fast, its pitch moving with it as on a tape or a record: 2 is twice as fast and an octave up."
+      },
+      {
+        "kind": "function",
+        "name": "stretchChannels",
+        "summary": "Every channel `factor` times as long, its pitch unchanged: 2 is twice as slow, 0.5 twice as fast."
       }
     ],
     "from": "@audio-ui/engine/files",
@@ -3048,7 +3083,9 @@
       "@audio/midi-parse",
       "@audio/midi-write",
       "@audio/musicxml",
-      "@audio/resample-sinc"
+      "@audio/resample-sinc",
+      "@audio/shift",
+      "@audio/stretch"
     ],
     "typesOnly": false,
     "usedBy": [

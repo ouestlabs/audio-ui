@@ -1,6 +1,6 @@
 ---
 title: useBake
-description: "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat, Add silence, Normalize, Pan and Filter over it."
+description: "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat, Add silence, Normalize, Pan, Filter, Stretch, Pitch and Speed over it."
 ---
 
 <Entry name="use-bake" />
@@ -12,7 +12,7 @@ An edit of the arrangement (a cut, a fade, a gain) leaves the recording as it wa
 ```tsx
 import { useBake } from "@/hooks/use-bake";
 
-const { bake, filter, normalize, pad, pan, repeat, reverse } = useBake({
+const { bake, filter, normalize, pad, pan, repeat, reverse, shift, speed, stretch } = useBake({
   doc, // the arrangement's document
   onBaked, // (sound, label) => void: puts the sound on the track as a step of the history
   recordings,
@@ -28,6 +28,9 @@ const { bake, filter, normalize, pad, pan, repeat, reverse } = useBake({
 <MenuItem onClick={() => normalize({ lufs: -16 })}>Normalize to -16 LUFS</MenuItem>;
 <MenuItem onClick={() => pan(-0.5)}>Half left</MenuItem>;
 <MenuItem onClick={() => filter("highpass", 80)}>Thin the lows</MenuItem>;
+<MenuItem onClick={() => stretch(1.5, "transient")}>1.5 times as long, pitch kept</MenuItem>;
+<MenuItem onClick={() => shift(-2, "formant")}>Down 2 semitones, voice kept</MenuItem>;
+<MenuItem onClick={() => speed(2)}>Twice as fast, pitch with it</MenuItem>;
 
 // Any operation: channels in, channels out.
 bake("Resample", ({ channels, sampleRate }) => ({
@@ -36,4 +39,4 @@ bake("Resample", ({ channels, sampleRate }) => ({
 }));
 ```
 
-`reverse`, `repeat(times)`, `pad(seconds, where)`, `normalize(target)`, `pan(value)` and `filter(type, frequency)` are the operations of `reverseChannels`, `repeatChannels`, `padChannels`, `normalizeChannels`, `panChannels` and `filterChannels` of [`@audio-ui/engine/files`](/docs/engine/files). A browser that cannot render offline says so through `setStatus`.
+`reverse`, `repeat(times)`, `pad(seconds, where)`, `normalize(target)`, `pan(value)`, `filter(type, frequency)`, `stretch(factor, method)`, `shift(semitones, method)` and `speed(value)` are the operations of `reverseChannels`, `repeatChannels`, `padChannels`, `normalizeChannels`, `panChannels`, `filterChannels`, `stretchChannels`, `shiftChannels` and `speedChannels` of [`@audio-ui/engine/files`](/docs/engine/files). A browser that cannot render offline says so through `setStatus`.
