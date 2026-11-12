@@ -5,13 +5,9 @@ description: "The <audio-ui-sequencer> custom element of @audio-ui/elements: its
 
 `<audio-ui-sequencer>` is a step grid with one row per sound and `role="group"`. Pressing a cell toggles it, and dragging applies the new state to every cell crossed. The cells share one tab stop and are navigated with the arrow keys. Rows and steps are generated from templates:
 
-<ElementsPreview name="sequencer" />
-
-## Usage
+<ElementsPreview name="sequencer">
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
-
-The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -301,7 +297,11 @@ In React, the same control is the [Sequencer](/docs/react/sequencer) primitive o
 
 </FrameworkTabs>
 
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
+
 {/* usage:end */}
+
+</ElementsPreview>
 
 <ForFrameworks only="web react">
 

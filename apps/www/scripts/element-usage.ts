@@ -530,8 +530,6 @@ export function usageBlock(page: string): string | null {
   return [
     START,
     "",
-    "The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.",
-    "",
     '<FrameworkTabs defaultValue="web">',
     "",
     "<TabsList>",
@@ -564,23 +562,32 @@ export function usageBlock(page: string): string | null {
     "",
     "</FrameworkTabs>",
     "",
+    "The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.",
+    "",
     END,
   ].join("\n");
 }
 
-/** A page's text with its block written: replaced between the markers, or put under the live preview. */
+const CLOSE = /^\n*<\/ElementsPreview>/;
+const LEADING_BREAKS = /^\n+/;
+
+/** A page's text with its usage block written inside its live preview, as the code the preview shows. */
 export function withUsage(page: string, text: string): string {
   const block = usageBlock(page);
   if (!block) {
     return text;
   }
-  const start = text.indexOf(START);
-  const end = text.indexOf(END);
-  if (start >= 0 && end > start) {
-    return `${text.slice(0, start)}${block}${text.slice(end + END.length)}`;
+  const open = `<ElementsPreview name="${page}"`;
+  const from = text.indexOf(open);
+  if (from < 0) {
+    return text;
   }
-  const preview = new RegExp(`<ElementsPreview name="${page}" />\\n`);
-  return text.replace(preview, (found) => `${found}\n${block}\n`);
+  const end = text.indexOf(END);
+  // The preview and, once written, its heading and block: all of it is written again.
+  let to = end >= 0 ? end + END.length : text.indexOf("\n", from) + 1;
+  const close = text.slice(to).match(CLOSE);
+  to += close ? close[0].length : 0;
+  return `${text.slice(0, from)}${open}>\n\n${block}\n\n</ElementsPreview>\n\n${text.slice(to).replace(LEADING_BREAKS, "")}`;
 }
 
 const STYLING_START =

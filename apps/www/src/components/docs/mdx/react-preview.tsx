@@ -24,6 +24,7 @@ import {
   useMemo,
   useState,
 } from "react";
+import { PreviewCode } from "@/components/docs/mdx/preview-code";
 import { PreviewPanel } from "@/components/preview/frame/preview-frame";
 import { Frame } from "@/components/site/layout/frame";
 import { usePreviewLook } from "@/hooks/use-preview-look";
@@ -454,7 +455,14 @@ const PREVIEWS: Record<ReactPreviewName, () => ReactNode> = {
  * the parts take the skin's Tailwind classes, or the classes of the CSS
  * Modules sheet the page shows, scoped to the preview.
  */
-export function ReactPreview({ name }: { name: ReactPreviewName }) {
+export function ReactPreview({
+  children,
+  name,
+}: {
+  /** The code of the preview, shown under it: a few lines until View Code. */
+  children?: ReactNode;
+  name: ReactPreviewName;
+}) {
   const { style, styling } = usePreviewLook();
   const part = useCallback(
     (key: string) => {
@@ -479,6 +487,7 @@ export function ReactPreview({ name }: { name: ReactPreviewName }) {
           </PartContext>
         </div>
       </PreviewPanel>
+      {children ? <PreviewCode>{children}</PreviewCode> : null}
     </Frame>
   );
 }

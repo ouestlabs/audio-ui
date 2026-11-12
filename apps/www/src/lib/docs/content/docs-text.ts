@@ -23,8 +23,8 @@ const registryItems = import.meta.glob<{ files?: { content?: string }[] }>(
 );
 
 const TAG_REGEX = /<(ComponentPreview|ComponentSource)(\s+[^>]+)\/>/g;
-/** The live preview of the custom elements: their markup is in the page's code, which a reader of the text gets. */
-const ELEMENTS_PREVIEW_REGEX = /<ElementsPreview[^>]*\/>\n*/g;
+/** The live preview of the custom elements and of the React primitives: its code is the page's, which a reader of the text gets; only the tags around it go. */
+const ELEMENTS_PREVIEW_REGEX = /<\/?(?:Elements|React)Preview[^>]*>\n*/g;
 
 /** A docs page's MDX as written, by its path in the content folder, such as `components/base/(elements)/knob.mdx`. */
 export async function readRawDoc(path: string): Promise<string> {

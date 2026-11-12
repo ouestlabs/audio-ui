@@ -19,7 +19,7 @@ describe("React usage", () => {
     ).toEqual([]);
   });
 
-  test("each page opens on its live preview, with its code right under it", async () => {
+  test("each page opens on its live preview, with its code inside it", async () => {
     const texts = await Promise.all(
       Object.keys(REACT_USAGES).map(async (page) => ({
         page,
@@ -27,14 +27,13 @@ describe("React usage", () => {
       }))
     );
     for (const { page, text } of texts) {
-      expect(text.indexOf(`<ReactPreview name="${page}" />`)).toBeGreaterThan(
-        -1
+      const open = text.indexOf(`<ReactPreview name="${page}">`);
+      expect(open).toBeGreaterThan(-1);
+      // The code is what the preview shows under it: inside it, before the install and the API.
+      expect(text.indexOf("usage:start")).toBeGreaterThan(open);
+      expect(text.indexOf("</ReactPreview>")).toBeLessThan(
+        text.indexOf("<Module")
       );
-      // Then the code, right under it, and the install and the API after.
-      expect(text.indexOf(`<ReactPreview name="${page}" />`)).toBeLessThan(
-        text.indexOf("## Usage")
-      );
-      expect(text.indexOf("## Usage")).toBeLessThan(text.indexOf("<Module"));
     }
   });
 });

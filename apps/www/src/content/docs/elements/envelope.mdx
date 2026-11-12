@@ -5,13 +5,9 @@ description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its 
 
 `<audio-ui-envelope>` is a breakpoint envelope editor with `role="group"`. Points are dragged to move, added with a double click on the graph, and removed with a double click, Alt + click or Delete. Each segment has a curve handle at its midpoint, and Alt + drag on the graph bends the segment under the pointer. The points share one tab stop: Page Up and Page Down (or Home and End) move between them, and the arrow keys move the focused point. Points and segment handles are generated, from a `<template>` when one is provided:
 
-<ElementsPreview name="envelope" />
-
-## Usage
+<ElementsPreview name="envelope">
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
-
-The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -325,7 +321,11 @@ In React, the same control is the [Envelope](/docs/react/envelope) primitive of 
 
 </FrameworkTabs>
 
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
+
 {/* usage:end */}
+
+</ElementsPreview>
 
 ## API reference
 

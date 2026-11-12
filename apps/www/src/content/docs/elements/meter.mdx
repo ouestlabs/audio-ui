@@ -5,13 +5,9 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 
 `<audio-ui-meter>` displays one or more level channels. Levels come from the `value` and `peak` attributes or properties, one per channel, or from a live `source` property, `{ getSnapshot, subscribe }`, whose frames are written directly to the parts. A click clears clip indicators latched by a live source.
 
-<ElementsPreview name="meter" />
-
-## Usage
+<ElementsPreview name="meter">
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
-
-The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -292,7 +288,11 @@ In React, the same control is the [Meter](/docs/react/meter) primitive of `@audi
 
 </FrameworkTabs>
 
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
+
 {/* usage:end */}
+
+</ElementsPreview>
 
 ## API reference
 

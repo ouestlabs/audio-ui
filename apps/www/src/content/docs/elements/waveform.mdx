@@ -5,13 +5,9 @@ description: "The <audio-ui-waveform> custom element of @audio-ui/elements: its 
 
 `<audio-ui-waveform>` displays audio and, with a control part, seeks through it: a press seeks to the pointer, a drag scrubs, and the keyboard steps. The shape comes from the `peaks` property or a live `levels` source; the position from `value` or a live `source`, exposed as `--waveform-position`:
 
-<ElementsPreview name="waveform" />
-
-## Usage
+<ElementsPreview name="waveform">
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
-
-The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -385,7 +381,11 @@ In React, the same control is the [Waveform](/docs/react/waveform) primitive of 
 
 </FrameworkTabs>
 
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
+
 {/* usage:end */}
+
+</ElementsPreview>
 
 ## API reference
 

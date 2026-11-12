@@ -5,13 +5,9 @@ description: "The <audio-ui-xypad> custom element of @audio-ui/elements: its att
 
 `<audio-ui-xypad>` controls a two-dimensional value `{ x, y }`. A press moves the point to the pointer and a drag follows it; the wheel, the trackpad and the arrow keys move it; a double click or Delete resets it. The position is exposed as `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top), as percentages.
 
-<ElementsPreview name="xypad" />
-
-## Usage
+<ElementsPreview name="xypad">
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
-
-The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -353,7 +349,11 @@ In React, the same control is the [XYPad](/docs/react/xypad) primitive of `@audi
 
 </FrameworkTabs>
 
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
+
 {/* usage:end */}
+
+</ElementsPreview>
 
 ## API reference
 

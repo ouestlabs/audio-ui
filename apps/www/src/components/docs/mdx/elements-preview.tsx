@@ -11,6 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { PreviewCode } from "@/components/docs/mdx/preview-code";
 import { PreviewPanel } from "@/components/preview/frame/preview-frame";
 import { Frame } from "@/components/site/layout/frame";
 import { usePreviewLook } from "@/hooks/use-preview-look";
@@ -578,7 +579,14 @@ const PREVIEWS: Record<ElementsPreviewName, () => ReactNode> = {
  * A live preview of one primitive as custom elements, rendered once its
  * entry point has registered them, with the last event it fired below it.
  */
-export function ElementsPreview({ name }: { name: ElementsPreviewName }) {
+export function ElementsPreview({
+  children,
+  name,
+}: {
+  /** The code of the preview, shown under it: a few lines until View Code. */
+  children?: ReactNode;
+  name: ElementsPreviewName;
+}) {
   const { style: look, styling } = usePreviewLook();
   const skin = SKINS[name];
   const part = useCallback(
@@ -641,6 +649,7 @@ export function ElementsPreview({ name }: { name: ElementsPreviewName }) {
           ref={eventRef}
         />
       </PreviewPanel>
+      {children ? <PreviewCode>{children}</PreviewCode> : null}
     </Frame>
   );
 }

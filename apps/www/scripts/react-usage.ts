@@ -18,6 +18,8 @@ const PAGES = `${import.meta.dir}/../src/content/docs/react`;
 const START =
   "{/* usage:start: written by `bun scripts/react-usage.ts --write` */}";
 const END = "{/* usage:end */}";
+const LEADING_BREAKS = /^\n+/;
+const CLOSE = /^\n*<\/ReactPreview>/;
 const FRONTMATTER = /^---\n[\s\S]*?\n---\n/;
 
 /** The block a page holds, markers included. */
@@ -27,8 +29,6 @@ export function usageBlock(page: string): string | null {
   }
   return [
     START,
-    "",
-    "The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.",
     "",
     ...STYLINGS.flatMap(({ id }) => {
       const snippets = reactSnippets(page, id);
@@ -51,35 +51,32 @@ export function usageBlock(page: string): string | null {
         "",
       ];
     }),
+    "The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.",
+    "",
     END,
   ].join("\n");
 }
 
-const HEADING = "## Usage\n\n";
-const LEADING_BREAKS = /^\n+/;
-
-/** A page's text with its preview at the top and its usage block, with its heading, right under the preview. */
+/** A page's text with its preview, and its usage block inside it as the code the preview shows. */
 export function withUsage(page: string, text: string): string {
   const block = usageBlock(page);
   if (!block) {
     return text;
   }
-  // Wherever an earlier run put the block, it goes: it is written again under the preview.
-  const start = text.indexOf(START);
-  const end = text.indexOf(END);
+  const open = `<ReactPreview name="${page}"`;
   let rest = text;
-  if (start >= 0 && end > start) {
-    const from = text.lastIndexOf(HEADING, start);
-    const heading = from >= 0 && start - from === HEADING.length ? from : start;
-    rest = `${text.slice(0, heading)}${text.slice(end + END.length).replace(LEADING_BREAKS, "")}`;
+  const from = rest.indexOf(open);
+  const end = rest.indexOf(END);
+  if (from >= 0) {
+    // Wherever an earlier run put the preview and its block, they go: both are written again.
+    let to = end >= 0 ? end + END.length : rest.indexOf("\n", from) + 1;
+    const close = rest.slice(to).match(CLOSE);
+    to += close ? close[0].length : 0;
+    rest = `${rest.slice(0, from)}${rest.slice(to).replace(LEADING_BREAKS, "")}`;
   }
-  const preview = `<ReactPreview name="${page}" />\n`;
-  const withPreview = rest.includes(preview)
-    ? rest
-    : rest.replace(FRONTMATTER, (head) => `${head}\n${preview}`);
-  return withPreview.replace(
-    preview,
-    (found) => `${found}\n${HEADING}${block}\n\n`
+  return rest.replace(
+    FRONTMATTER,
+    (head) => `${head}\n${open}>\n\n${block}\n\n</ReactPreview>\n\n`
   );
 }
 
