@@ -13,6 +13,7 @@ const modules = [
   "midi",
   "pitch",
   "playback",
+  "repair",
   "time",
   "worklet",
 ];

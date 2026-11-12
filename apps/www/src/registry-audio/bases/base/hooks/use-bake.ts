@@ -18,6 +18,7 @@ import {
   formatLevel,
   formatPan,
 } from "@audio-ui/engine/format";
+import { type Repair, repairChannels } from "@audio-ui/engine/repair";
 import { useCallback, useMemo } from "react";
 import { renderTrackClips } from "@/registry-audio/bases/base/lib/arrangement-engine";
 import type { ArrangementDoc } from "@/registry-audio/bases/base/lib/arrangement-state";
@@ -85,7 +86,8 @@ export async function renderEdited(
  * its channels to `change`, and gives the result to `onBaked` as one step of
  * undo. `reverse`, `repeat` and `pad` change the structure of a sound;
  * `normalize`, `pan` and `filter` its level, balance and tone; `stretch`,
- * `shift` and `speed` its time and pitch; each is over `bake`. A browser that cannot render offline says so.
+ * `shift` and `speed` its time and pitch; `repair` takes a defect out of it; each
+ * is over `bake`. A browser that cannot render offline says so.
  */
 export function useBake({
   doc,
@@ -140,6 +142,12 @@ export function useBake({
             sampleRate: rate,
           })
         ),
+      /** One defect taken out of the sound, by the method made for it. */
+      repair: (repair: Repair, label: string) =>
+        bake(label, ({ channels, sampleRate: rate }) => ({
+          channels: repairChannels(channels, rate, repair),
+          sampleRate: rate,
+        })),
       /** The sound `factor` times as long at the same pitch, by `method`. */
       stretch: (factor: number, method: StretchMethod) =>
         bake(
