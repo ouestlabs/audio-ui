@@ -8,6 +8,7 @@ import {
   Meter,
   Pad,
   Piano,
+  PianoRoll,
   Plot,
   Sequencer,
   Timeline,
@@ -41,6 +42,7 @@ export type ReactPreviewName =
   | "meter"
   | "pad"
   | "piano"
+  | "piano-roll"
   | "plot"
   | "sequencer"
   | "timeline"
@@ -370,6 +372,68 @@ function TimelinePreview() {
   );
 }
 
+const NOTES = [
+  { id: "a", length: 1, pitch: 60, start: 0, velocity: 0.9 },
+  { id: "b", length: 1, pitch: 64, start: 1, velocity: 0.6 },
+  { id: "c", length: 1, pitch: 67, start: 2, velocity: 0.75 },
+  { id: "d", length: 2, pitch: 72, start: 3, velocity: 1 },
+  { id: "e", length: 1.5, pitch: 69, start: 5, velocity: 0.5 },
+  { id: "f", length: 1.5, pitch: 65, start: 6.5, velocity: 0.7 },
+];
+
+function PianoRollPreview() {
+  const p = usePart("piano-roll");
+  return (
+    <Timeline.Root className={p("Timeline.Root")} duration={8} snapStep={0.5}>
+      <PianoRoll.Root
+        className={p("Root")}
+        defaultValue={NOTES}
+        maxPitch={74}
+        minPitch={57}
+        mode="draw"
+      >
+        <PianoRoll.Keys className={p("Keys")}>
+          <PianoRoll.Rows>
+            {(pitch) => <PianoRoll.Key className={p("Key")} pitch={pitch} />}
+          </PianoRoll.Rows>
+        </PianoRoll.Keys>
+        <Timeline.Viewport className={p("Timeline.Viewport")}>
+          <PianoRoll.Grid aria-label="Notes" className={p("Grid")}>
+            <PianoRoll.Rows>
+              {(pitch) => <PianoRoll.Row className={p("Row")} pitch={pitch} />}
+            </PianoRoll.Rows>
+            <PianoRoll.Notes>
+              {(note) => (
+                <PianoRoll.Note
+                  className={p("Note")}
+                  key={note.id}
+                  note={note}
+                />
+              )}
+            </PianoRoll.Notes>
+            <PianoRoll.Marquee className={p("Marquee")} />
+            <Timeline.Playhead className={p("Timeline.Playhead")} />
+          </PianoRoll.Grid>
+        </Timeline.Viewport>
+        <PianoRoll.VelocityLane
+          aria-label="Velocity"
+          className={p("VelocityLane")}
+        >
+          <PianoRoll.Notes>
+            {(note) => (
+              <PianoRoll.Velocity
+                className={p("Velocity")}
+                key={note.id}
+                note={note}
+              />
+            )}
+          </PianoRoll.Notes>
+        </PianoRoll.VelocityLane>
+      </PianoRoll.Root>
+    </Timeline.Root>
+  );
+}
+
 const PREVIEWS: Record<ReactPreviewName, () => ReactNode> = {
   envelope: EnvelopePreview,
   fader: FaderPreview,
@@ -377,6 +441,7 @@ const PREVIEWS: Record<ReactPreviewName, () => ReactNode> = {
   meter: MeterPreview,
   pad: PadPreview,
   piano: PianoPreview,
+  "piano-roll": PianoRollPreview,
   plot: PlotPreview,
   sequencer: SequencerPreview,
   timeline: TimelinePreview,

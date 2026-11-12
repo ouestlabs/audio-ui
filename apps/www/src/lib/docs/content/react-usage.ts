@@ -8,6 +8,8 @@ import type { StylingId } from "@/lib/docs/content/stylings";
  * for each part in place of its tag.
  */
 export interface ReactUsage {
+  /** Other primitives the JSX uses, imported with it. */
+  also?: readonly string[];
   /** The primitive's entry, `@audio-ui/react/<entry>`, and its skin. */
   entry: string;
   /** The JSX, one tag a line, two spaces a level. */
@@ -103,6 +105,39 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
     ],
     name: "Piano",
   },
+  "piano-roll": {
+    also: ["Timeline"],
+    entry: "piano-roll",
+    lines: [
+      "<Timeline.Root duration={8} snapStep={0.5}>",
+      '  <PianoRoll.Root minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">',
+      "    <PianoRoll.Keys>",
+      "      <PianoRoll.Rows>",
+      "        {(pitch) => <PianoRoll.Key pitch={pitch} />}",
+      "      </PianoRoll.Rows>",
+      "    </PianoRoll.Keys>",
+      "    <Timeline.Viewport>",
+      '      <PianoRoll.Grid aria-label="Notes">',
+      "        <PianoRoll.Rows>",
+      "          {(pitch) => <PianoRoll.Row pitch={pitch} />}",
+      "        </PianoRoll.Rows>",
+      "        <PianoRoll.Notes>",
+      "          {(note) => <PianoRoll.Note key={note.id} note={note} />}",
+      "        </PianoRoll.Notes>",
+      "        <PianoRoll.Marquee />",
+      "        <Timeline.Playhead />",
+      "      </PianoRoll.Grid>",
+      "    </Timeline.Viewport>",
+      '    <PianoRoll.VelocityLane aria-label="Velocity">',
+      "      <PianoRoll.Notes>",
+      "        {(note) => <PianoRoll.Velocity key={note.id} note={note} />}",
+      "      </PianoRoll.Notes>",
+      "    </PianoRoll.VelocityLane>",
+      "  </PianoRoll.Root>",
+      "</Timeline.Root>",
+    ],
+    name: "PianoRoll",
+  },
   plot: {
     entry: "plot",
     lines: [
@@ -194,6 +229,13 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
 
 /** What a snippet needs that the JSX leaves out, by page: a pattern to start from. */
 const SETUP: Record<string, readonly string[]> = {
+  "piano-roll": [
+    "const notes = [",
+    '  { id: "a", pitch: 60, start: 0, length: 1, velocity: 0.9 },',
+    '  { id: "b", pitch: 64, start: 1, length: 1, velocity: 0.6 },',
+    '  { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },',
+    "];",
+  ],
   timeline: [
     "const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };",
   ],
@@ -227,14 +269,50 @@ const SETUP: Record<string, readonly string[]> = {
 };
 
 const PART = /<([A-Z][A-Za-z]*)\.([A-Z][A-Za-z]*)/;
+const DOT = ".";
+const CONSONANT_Y = /[^aeiou]y$/;
 const UPPER = /([a-z])([A-Z])/g;
 const TAG = /audio-ui-[a-z-]+/g;
+/** A piano root inside a roll's keys: React's roll has the keys themselves. */
+const NESTED_PIANO = /audio-ui-piano-roll-keys audio-ui-piano \{[^}]*\}\n\n/;
 
 const kebab = (name: string) => name.replace(UPPER, "$1-$2").toLowerCase();
+/** A part's name in the plural, as the holder of the parts the elements generate is named: Velocity is Velocities. */
+const plural = (name: string) =>
+  CONSONANT_Y.test(name) ? `${name.slice(0, -1)}ies` : `${name}s`;
 const camel = (name: string) => name.charAt(0).toLowerCase() + name.slice(1);
 
 /** The element tag a part is styled as in the skins: `Knob.Thumb` is `audio-ui-knob-thumb`. */
+/**
+ * Where a page's skin names a part differently than its React part: the parts
+ * of another primitive it uses (a piano roll sits in a timeline), and a part
+ * the elements generate under another's name (a piano roll's keys are the
+ * piano's).
+ */
+const TAGS: Record<string, Record<string, string>> = {
+  "piano-roll": {
+    Key: "audio-ui-piano-keys",
+    "Timeline.Playhead": "audio-ui-timeline-playhead",
+    "Timeline.Root": "audio-ui-timeline",
+    "Timeline.Viewport": "audio-ui-timeline-viewport",
+  },
+};
+
+/** The tags of a skin's sheet that stand for a React part's class: `audio-ui-piano-key` is the roll's `key`. */
+const CLASS_OF_TAG: Record<string, Record<string, string>> = {
+  "piano-roll": {
+    "audio-ui-piano-key": "key",
+    "audio-ui-timeline": "timelineRoot",
+    "audio-ui-timeline-playhead": "timelinePlayhead",
+    "audio-ui-timeline-viewport": "timelineViewport",
+  },
+};
+
 function tagOf(entry: string, part: string) {
+  const named = TAGS[entry]?.[part];
+  if (named) {
+    return named;
+  }
   return part === "Root"
     ? `audio-ui-${entry}`
     : `audio-ui-${entry}-${kebab(part)}`;
@@ -242,7 +320,7 @@ function tagOf(entry: string, part: string) {
 
 /** The class a part takes in a CSS Modules sheet: its name, the root being `root`. */
 export const moduleClass = (part: string, prefix = "") =>
-  `${prefix}${camel(part)}`;
+  `${prefix}${camel(part.replace(DOT, ""))}`;
 
 /**
  * What the elements do for themselves and the headless parts leave to you: a
@@ -303,11 +381,14 @@ const forReact = <T extends string | undefined>(value: T): T =>
 
 function tailwindOf(entry: string, part: string) {
   const extra = STRUCTURE[entry]?.[moduleClass(part)]?.tw;
-  const own = SKINS[entry]?.tailwind[tagOf(entry, part)];
+  const own = TAGS[entry]?.[part]?.endsWith("s")
+    ? undefined
+    : SKINS[entry]?.tailwind[tagOf(entry, part)];
   if (own) {
     return extra ? `${own} ${extra}` : own;
   }
-  const holder = SKINS[entry]?.tailwind[tagOf(entry, `${part}s`)];
+  const holder =
+    SKINS[entry]?.tailwind[TAGS[entry]?.[part] ?? tagOf(entry, plural(part))];
   const child = holder
     ?.split(" ")
     .filter((name) => CHILD.test(name))
@@ -334,8 +415,14 @@ function withStructure(entry: string, css: string): string {
 
 /** The skin's stylesheet as CSS Modules write it: a class for each part in place of its tag. */
 export function moduleCss(entry: string, prefix = ""): string {
-  const css = forReact(withStructure(entry, SKINS[entry]?.css ?? ""));
+  const css = forReact(
+    withStructure(entry, SKINS[entry]?.css ?? "").replace(NESTED_PIANO, "")
+  );
   return css.replace(TAG, (tag) => {
+    const alias = CLASS_OF_TAG[entry]?.[tag];
+    if (alias) {
+      return `.${prefix}${alias}`;
+    }
     if (tag === `audio-ui-${entry}`) {
       return `.${prefix}root`;
     }
@@ -358,10 +445,15 @@ export function reactJsx(page: string, styling: StylingId): string[] {
   const sheet = styled(moduleCss(usage.entry));
   return usage.lines.map((line) => {
     const match = line.match(PART);
-    if (!(match && match[1] === usage.name)) {
+    const primitive = match?.[1] ?? "";
+    const foreign = primitive !== usage.name;
+    if (
+      !match ||
+      (foreign && !TAGS[usage.entry]?.[`${primitive}.${match[2]}`])
+    ) {
       return line;
     }
-    const part = match[2] ?? "";
+    const part = foreign ? `${primitive}.${match[2]}` : (match[2] ?? "");
     const at = (match.index ?? 0) + match[0].length;
     if (styling === "tailwind") {
       const classes = tailwindClasses(usage.entry, part);
@@ -384,7 +476,7 @@ export function reactSnippets(page: string, styling: StylingId) {
   }
   const setup = SETUP[page] ?? [];
   const tsx = [
-    `import { ${usage.name} } from "@audio-ui/react";`,
+    `import { ${[usage.name, ...(usage.also ?? [])].join(", ")} } from "@audio-ui/react";`,
     ...(styling === "css"
       ? [`import styles from "./${page}.module.css";`]
       : []),
