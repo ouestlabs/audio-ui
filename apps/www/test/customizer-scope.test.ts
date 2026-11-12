@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { pageScope } from "@/lib/design-system/customizer-scope";
 import { themeStylesheet } from "@/lib/design-system/theme-stylesheet";
+import { SKIN_VARIABLES } from "@/lib/docs/content/element-skins";
 import { DEFAULT_CONFIG } from "@/registry/config";
 
 const DOCS = `${import.meta.dir}/../src/content/docs`;
@@ -31,7 +32,8 @@ describe("pageScope", () => {
 });
 
 describe("themeStylesheet", () => {
-  const css = themeStylesheet(DEFAULT_CONFIG);
+  const css = themeStylesheet(DEFAULT_CONFIG, "css");
+  const tailwind = themeStylesheet(DEFAULT_CONFIG, "tailwind");
 
   test("loads the font first, then names it", () => {
     expect(css.startsWith('@import url("https://fonts.googleapis.com/')).toBe(
@@ -40,22 +42,37 @@ describe("themeStylesheet", () => {
     expect(css).toContain("--font-sans:");
   });
 
-  test("holds the light and the dark colors", () => {
+  test("holds the light and the dark colors the examples read", () => {
     expect(css).toMatch(LIGHT_PRIMARY);
     expect(css).toMatch(DARK_PRIMARY);
+    for (const name of SKIN_VARIABLES) {
+      expect(css).toContain(`--${name}:`);
+    }
   });
 
-  test("leaves out the registry's own variables", () => {
+  test("leaves out what the examples do not read", () => {
     expect(css).not.toContain("--chart-");
     expect(css).not.toContain("--sidebar");
+    expect(css).not.toContain("--destructive");
   });
 
   test("the lyra style has square corners, whatever the radius", () => {
-    const lyra = themeStylesheet({
-      ...DEFAULT_CONFIG,
-      radius: "large",
-      style: "lyra",
-    });
+    const lyra = themeStylesheet(
+      { ...DEFAULT_CONFIG, radius: "large", style: "lyra" },
+      "css"
+    );
     expect(lyra).toMatch(NO_RADIUS);
+  });
+
+  test("for Tailwind, names the colors and the radius scale its classes use", () => {
+    expect(tailwind).toContain('@import "tailwindcss";');
+    expect(tailwind).toContain("@theme inline {");
+    expect(tailwind).toContain("--color-primary: var(--primary);");
+    expect(tailwind).toContain("--radius-md: calc(var(--radius) - 2px);");
+    expect(tailwind).toContain("--font-sans:");
+    // The font loads before Tailwind's own import, as CSS wants its imports first.
+    expect(tailwind.indexOf("fonts.googleapis")).toBeLessThan(
+      tailwind.indexOf("tailwindcss")
+    );
   });
 });

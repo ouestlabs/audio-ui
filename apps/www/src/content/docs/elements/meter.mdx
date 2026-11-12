@@ -11,6 +11,8 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
+The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+
 <FrameworkTabs defaultValue="web">
 
 <TabsList>
@@ -22,7 +24,43 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 
 <TabsContent value="web">
 
+<ForStyling only="css">
+
 ```html
+<style>
+  audio-ui-meter {
+    display: flex;
+    gap: 0.375rem;
+    height: 11rem;
+  }
+
+  audio-ui-meter-channel {
+    position: relative;
+    display: block;
+    width: 0.75rem;
+    height: 100%;
+    overflow: hidden;
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--muted);
+  }
+
+  audio-ui-meter-indicator {
+    position: absolute;
+    bottom: 0;
+    display: block;
+    background: var(--primary);
+  }
+
+  audio-ui-meter-peak {
+    position: absolute;
+    right: 0;
+    left: 0;
+    display: block;
+    height: 0.125rem;
+    background: var(--foreground);
+  }
+</style>
+
 <audio-ui-meter min="-60" max="6" value="-18 -10">
   <audio-ui-meter-channel index="0" aria-label="Left">
     <audio-ui-meter-indicator></audio-ui-meter-indicator>
@@ -42,9 +80,37 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 </script>
 ```
 
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```html
+<audio-ui-meter class="flex h-44 gap-1.5" min="-60" max="6" value="-18 -10">
+  <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
+    <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
+    <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="1" aria-label="Right">
+    <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
+    <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+
+<script type="module">
+  import "@audio-ui/elements/meter";
+
+  const meter = document.querySelector("audio-ui-meter");
+  meter.value = "-12 -6";
+</script>
+```
+
+</ForStyling>
+
 </TabsContent>
 
 <TabsContent value="vue">
+
+<ForStyling only="css">
 
 ```vue
 <script setup lang="ts">
@@ -66,11 +132,75 @@ const levels = ref("-18 -10");
     </audio-ui-meter-channel>
   </audio-ui-meter>
 </template>
+
+<style>
+audio-ui-meter {
+  display: flex;
+  gap: 0.375rem;
+  height: 11rem;
+}
+
+audio-ui-meter-channel {
+  position: relative;
+  display: block;
+  width: 0.75rem;
+  height: 100%;
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--muted);
+}
+
+audio-ui-meter-indicator {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  background: var(--primary);
+}
+
+audio-ui-meter-peak {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: block;
+  height: 0.125rem;
+  background: var(--foreground);
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/meter";
+import { ref } from "vue";
+
+const levels = ref("-18 -10");
+</script>
+
+<template>
+  <audio-ui-meter class="flex h-44 gap-1.5" min="-60" max="6" :value="levels">
+    <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
+      <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary" />
+      <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground" />
+    </audio-ui-meter-channel>
+    <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="1" aria-label="Right">
+      <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary" />
+      <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground" />
+    </audio-ui-meter-channel>
+  </audio-ui-meter>
+</template>
+```
+
+</ForStyling>
 
 </TabsContent>
 
 <TabsContent value="svelte">
+
+<ForStyling only="css">
 
 ```svelte
 <script lang="ts">
@@ -89,7 +219,68 @@ const levels = ref("-18 -10");
     <audio-ui-meter-peak></audio-ui-meter-peak>
   </audio-ui-meter-channel>
 </audio-ui-meter>
+
+<style>
+:global {
+  audio-ui-meter {
+    display: flex;
+    gap: 0.375rem;
+    height: 11rem;
+  }
+
+  audio-ui-meter-channel {
+    position: relative;
+    display: block;
+    width: 0.75rem;
+    height: 100%;
+    overflow: hidden;
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--muted);
+  }
+
+  audio-ui-meter-indicator {
+    position: absolute;
+    bottom: 0;
+    display: block;
+    background: var(--primary);
+  }
+
+  audio-ui-meter-peak {
+    position: absolute;
+    right: 0;
+    left: 0;
+    display: block;
+    height: 0.125rem;
+    background: var(--foreground);
+  }
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/meter";
+
+  let levels = $state("-18 -10");
+</script>
+
+<audio-ui-meter class="flex h-44 gap-1.5" min="-60" max="6" value={levels}>
+  <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
+    <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
+    <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="1" aria-label="Right">
+    <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
+    <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+```
+
+</ForStyling>
 
 </TabsContent>
 

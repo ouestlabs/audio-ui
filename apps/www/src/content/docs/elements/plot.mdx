@@ -11,6 +11,8 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
+The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+
 <FrameworkTabs defaultValue="web">
 
 <TabsList>
@@ -22,7 +24,52 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
 
 <TabsContent value="web">
 
+<ForStyling only="css">
+
 ```html
+<style>
+  audio-ui-plot {
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: 11rem;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--muted);
+  }
+
+  audio-ui-plot-grid {
+    color: var(--muted-foreground);
+    font-size: 10px;
+  }
+
+  audio-ui-plot-grid [data-part="line"] {
+    stroke: var(--border);
+  }
+
+  audio-ui-plot-grid [data-part="label"][data-axis="x"] {
+    bottom: 0.25rem;
+    translate: 0.25rem 0;
+  }
+
+  audio-ui-plot-grid [data-part="label"][data-axis="y"] {
+    left: 0.25rem;
+    translate: 0 -100%;
+  }
+
+  audio-ui-plot-curve {
+    color: color-mix(in oklab, var(--primary) 15%, transparent);
+  }
+
+  audio-ui-plot-handle {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background: var(--primary);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+    cursor: grab;
+  }
+</style>
+
 <audio-ui-plot min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
   <audio-ui-plot-grid></audio-ui-plot-grid>
   <audio-ui-plot-curve fill-to="0"></audio-ui-plot-curve>
@@ -43,9 +90,38 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
 </script>
 ```
 
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```html
+<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
+  <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
+  <audio-ui-plot-curve class="text-primary/15" fill-to="0"></audio-ui-plot-curve>
+  <audio-ui-plot-handle class="size-4 cursor-grab rounded-full bg-primary ring-4 ring-primary/20" aria-label="Band" value="800 6"></audio-ui-plot-handle>
+</audio-ui-plot>
+
+<script type="module">
+  import "@audio-ui/elements/plot";
+
+  const plotHandle = document.querySelector("audio-ui-plot-handle");
+
+  // The curve: its level in dB at each frequency, such as a filter's response.
+  const response = (hz) => 0;
+  document.querySelector("audio-ui-plot-curve").fn = response;
+  plotHandle.addEventListener("input", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</ForStyling>
+
 </TabsContent>
 
 <TabsContent value="vue">
+
+<ForStyling only="css">
 
 ```vue
 <script setup lang="ts">
@@ -65,11 +141,82 @@ const response: (hz: number) => number = (hz) => 0;
     <audio-ui-plot-handle aria-label="Band" v-model="band" />
   </audio-ui-plot>
 </template>
+
+<style>
+audio-ui-plot {
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  height: 11rem;
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--muted);
+}
+
+audio-ui-plot-grid {
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+
+audio-ui-plot-grid [data-part="line"] {
+  stroke: var(--border);
+}
+
+audio-ui-plot-grid [data-part="label"][data-axis="x"] {
+  bottom: 0.25rem;
+  translate: 0.25rem 0;
+}
+
+audio-ui-plot-grid [data-part="label"][data-axis="y"] {
+  left: 0.25rem;
+  translate: 0 -100%;
+}
+
+audio-ui-plot-curve {
+  color: color-mix(in oklab, var(--primary) 15%, transparent);
+}
+
+audio-ui-plot-handle {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+  cursor: grab;
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/plot";
+import { ref } from "vue";
+
+const band = ref({ x: 800, y: 6 });
+
+// The curve: its level in dB at each frequency, such as a filter's response.
+const response: (hz: number) => number = (hz) => 0;
+</script>
+
+<template>
+  <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
+    <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" />
+    <audio-ui-plot-curve class="text-primary/15" fill-to="0" :fn="response" />
+    <audio-ui-plot-handle class="size-4 cursor-grab rounded-full bg-primary ring-4 ring-primary/20" aria-label="Band" v-model="band" />
+  </audio-ui-plot>
+</template>
+```
+
+</ForStyling>
 
 </TabsContent>
 
 <TabsContent value="svelte">
+
+<ForStyling only="css">
 
 ```svelte
 <script lang="ts">
@@ -86,7 +233,75 @@ const response: (hz: number) => number = (hz) => 0;
   <audio-ui-plot-curve fill-to="0" fn={response}></audio-ui-plot-curve>
   <audio-ui-plot-handle aria-label="Band" value={band} oninput={(event) => (band = event.detail.value)}></audio-ui-plot-handle>
 </audio-ui-plot>
+
+<style>
+:global {
+  audio-ui-plot {
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: 11rem;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--muted);
+  }
+
+  audio-ui-plot-grid {
+    color: var(--muted-foreground);
+    font-size: 10px;
+  }
+
+  audio-ui-plot-grid [data-part="line"] {
+    stroke: var(--border);
+  }
+
+  audio-ui-plot-grid [data-part="label"][data-axis="x"] {
+    bottom: 0.25rem;
+    translate: 0.25rem 0;
+  }
+
+  audio-ui-plot-grid [data-part="label"][data-axis="y"] {
+    left: 0.25rem;
+    translate: 0 -100%;
+  }
+
+  audio-ui-plot-curve {
+    color: color-mix(in oklab, var(--primary) 15%, transparent);
+  }
+
+  audio-ui-plot-handle {
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background: var(--primary);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+    cursor: grab;
+  }
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/plot";
+
+  let band = $state({ x: 800, y: 6 });
+
+  // The curve: its level in dB at each frequency, such as a filter's response.
+  const response: (hz: number) => number = (hz) => 0;
+</script>
+
+<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
+  <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
+  <audio-ui-plot-curve class="text-primary/15" fill-to="0" fn={response}></audio-ui-plot-curve>
+  <audio-ui-plot-handle class="size-4 cursor-grab rounded-full bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} oninput={(event) => (band = event.detail.value)}></audio-ui-plot-handle>
+</audio-ui-plot>
+```
+
+</ForStyling>
 
 </TabsContent>
 

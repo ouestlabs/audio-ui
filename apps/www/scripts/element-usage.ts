@@ -2,11 +2,17 @@
  * Writes the usage of each custom element in every framework into its page:
  * one set of framework tabs under the live preview, between two markers,
  * built from the table below, so the HTML, the Vue and the Svelte of an
- * element always say the same thing. React points to the primitive.
+ * element always say the same thing, each in the two ways of styling it
+ * (`src/lib/docs/content/element-skins.ts`). React points to the primitive.
  *
  *   bun scripts/element-usage.ts          check: lists the pages that differ, exits 1
  *   bun scripts/element-usage.ts --write  writes them
  */
+
+import { themeStylesheet } from "../src/lib/design-system/theme-stylesheet.ts";
+import { SKINS } from "../src/lib/docs/content/element-skins.ts";
+import { STYLINGS, type StylingId } from "../src/lib/docs/content/stylings.ts";
+import { DEFAULT_CONFIG } from "../src/registry/config.ts";
 
 const PAGES = `${import.meta.dir}/../src/content/docs/elements`;
 const START =
@@ -336,8 +342,27 @@ function declarations(usage: Usage, typed: boolean): string[] {
   ]);
 }
 
-/** The element's markup in a flavor: the binding on its tag, empty tags closed as the flavor writes them. */
-function markup(usage: Usage, flavor: Flavor): string[] {
+/** A tag's line with its classes, when it has some: the attribute goes right after the tag's name. */
+function withClass(line: string, classes: Readonly<Record<string, string>>) {
+  const trimmed = line.trimStart();
+  if (!trimmed.startsWith("<") || trimmed.startsWith("</")) {
+    return line;
+  }
+  const [tag = ""] = trimmed.slice(1).split(TAG_END);
+  const names = classes[tag];
+  if (!names) {
+    return line;
+  }
+  const at = line.indexOf(tag) + tag.length;
+  return `${line.slice(0, at)} class="${names}"${line.slice(at)}`;
+}
+
+/** The element's markup in a flavor: the binding on its tag, the classes of the styling, empty tags closed as the flavor writes them. */
+function markup(
+  usage: Usage,
+  flavor: Flavor,
+  classes: Readonly<Record<string, string>> = {}
+): string[] {
   const bind = binding(usage.follow, flavor);
   const close = `</${usage.root.slice(1).split(TAG_END)[0]}>`;
   const lines = [
@@ -345,7 +370,7 @@ function markup(usage: Usage, flavor: Flavor): string[] {
     ...usage.inner.map((line) => `  ${line}`),
     close,
   ].map((line) =>
-    line
+    withClass(line, classes)
       .replace(BIND, line.includes(BIND) ? bind : "")
       .replace(PROPS, propertyBindings(usage, line, flavor))
   );
@@ -363,7 +388,17 @@ const variable = (tag: string) =>
     .replace("audio-ui-", "")
     .replace(KEBAB, (_, letter: string) => letter.toUpperCase());
 
-function webSnippet(usage: Usage): string {
+/** What a snippet holds of the styling: the classes on its tags, or the stylesheet in its own block. */
+function styles(page: string, styling: StylingId) {
+  const skin = SKINS[page];
+  return {
+    classes: styling === "tailwind" ? (skin?.tailwind ?? {}) : {},
+    css: styling === "css" ? (skin?.css ?? "") : "",
+  };
+}
+
+function webSnippet(page: string, usage: Usage, styling: StylingId): string {
+  const { classes, css } = styles(page, styling);
   const tag = usage.target ?? usage.root.slice(1).split(TAG_END)[0] ?? "";
   const name = variable(tag);
   const { follow } = usage;
@@ -377,7 +412,8 @@ function webSnippet(usage: Usage): string {
         ];
   return [
     "```html",
-    ...markup(usage, "web"),
+    ...(css ? ["<style>", ...indent(css.split("\n"), 2), "</style>", ""] : []),
+    ...markup(usage, "web", classes),
     "",
     '<script type="module">',
     `  import "@audio-ui/elements/${usage.entry}";`,
@@ -397,7 +433,8 @@ function webSnippet(usage: Usage): string {
   ].join("\n");
 }
 
-function vueSnippet(usage: Usage): string {
+function vueSnippet(page: string, usage: Usage, styling: StylingId): string {
+  const { classes, css } = styles(page, styling);
   const { follow } = usage;
   const state =
     follow.kind === "event"
@@ -416,13 +453,16 @@ function vueSnippet(usage: Usage): string {
     "</script>",
     "",
     "<template>",
-    ...indent(markup(usage, "vue"), 2),
+    ...indent(markup(usage, "vue", classes), 2),
     "</template>",
+    // Not scoped: the parts some of the elements make themselves, such as a piano's keys, are not in the template.
+    ...(css ? ["", "<style>", css, "</style>"] : []),
     "```",
   ].join("\n");
 }
 
-function svelteSnippet(usage: Usage): string {
+function svelteSnippet(page: string, usage: Usage, styling: StylingId): string {
+  const { classes, css } = styles(page, styling);
   const { follow } = usage;
   const state =
     follow.kind === "event"
@@ -441,9 +481,32 @@ function svelteSnippet(usage: Usage): string {
     ),
     "</script>",
     "",
-    ...markup(usage, "svelte"),
+    ...markup(usage, "svelte", classes),
+    // Global: the parts some of the elements make themselves, such as a piano's keys, are not in the markup.
+    ...(css
+      ? [
+          "",
+          "<style>",
+          ":global {",
+          ...indent(css.split("\n"), 2),
+          "}",
+          "</style>",
+        ]
+      : []),
     "```",
   ].join("\n");
+}
+
+/** One framework's snippet in each styling, each for the readers who chose it. */
+function inStylings(snippet: (styling: StylingId) => string): string[] {
+  return STYLINGS.flatMap(({ id }) => [
+    `<ForStyling only="${id}">`,
+    "",
+    snippet(id),
+    "",
+    "</ForStyling>",
+    "",
+  ]);
 }
 
 /** The block a page holds, markers included. */
@@ -454,6 +517,8 @@ export function usageBlock(page: string): string | null {
   }
   return [
     START,
+    "",
+    "The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).",
     "",
     '<FrameworkTabs defaultValue="web">',
     "",
@@ -466,20 +531,17 @@ export function usageBlock(page: string): string | null {
     "",
     '<TabsContent value="web">',
     "",
-    webSnippet(usage),
-    "",
+    ...inStylings((styling) => webSnippet(page, usage, styling)),
     "</TabsContent>",
     "",
     '<TabsContent value="vue">',
     "",
-    vueSnippet(usage),
-    "",
+    ...inStylings((styling) => vueSnippet(page, usage, styling)),
     "</TabsContent>",
     "",
     '<TabsContent value="svelte">',
     "",
-    svelteSnippet(usage),
-    "",
+    ...inStylings((styling) => svelteSnippet(page, usage, styling)),
     "</TabsContent>",
     "",
     '<TabsContent value="react">',
@@ -509,13 +571,47 @@ export function withUsage(page: string, text: string): string {
   return text.replace(preview, (found) => `${found}\n${block}\n`);
 }
 
+const STYLING_START =
+  "{/* styling:start: written by `bun scripts/element-usage.ts --write` */}";
+const STYLING_END = "{/* styling:end */}";
+
+/** The overview's theme variables, as the default theme writes them in each styling. */
+export function stylingBlock(): string {
+  return [
+    STYLING_START,
+    "",
+    ...STYLINGS.flatMap(({ id }) => [
+      `<ForStyling only="${id}">`,
+      "",
+      "```css",
+      themeStylesheet(DEFAULT_CONFIG, id).trim(),
+      "```",
+      "",
+      "</ForStyling>",
+      "",
+    ]),
+    STYLING_END,
+  ].join("\n");
+}
+
+/** The overview's text with its theme block written between the markers. */
+export function withStyling(text: string): string {
+  const start = text.indexOf(STYLING_START);
+  const end = text.indexOf(STYLING_END);
+  if (start < 0 || end < start) {
+    return text;
+  }
+  return `${text.slice(0, start)}${stylingBlock()}${text.slice(end + STYLING_END.length)}`;
+}
+
 if (import.meta.main) {
   const write = process.argv.includes("--write");
   const pages = await Promise.all(
-    Object.keys(USAGES).map(async (page) => {
+    [...Object.keys(USAGES), "index"].map(async (page) => {
       const path = `${PAGES}/${page}.mdx`;
       const text = await Bun.file(path).text();
-      return { next: withUsage(page, text), page, path, text };
+      const next = page === "index" ? withStyling(text) : withUsage(page, text);
+      return { next, page, path, text };
     })
   );
   const stale = pages.filter(({ next, text }) => next !== text);

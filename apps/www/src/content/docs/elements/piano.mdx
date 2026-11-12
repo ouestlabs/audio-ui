@@ -11,6 +11,8 @@ description: "The <audio-ui-piano> custom element of @audio-ui/elements: its att
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
+The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+
 <FrameworkTabs defaultValue="web">
 
 <TabsList>
@@ -22,7 +24,43 @@ description: "The <audio-ui-piano> custom element of @audio-ui/elements: its att
 
 <TabsContent value="web">
 
+<ForStyling only="css">
+
 ```html
+<style>
+  audio-ui-piano {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: 7rem;
+  }
+
+  audio-ui-piano-key {
+    z-index: 0;
+    top: 0;
+    box-sizing: border-box;
+    height: 100%;
+    border: 1px solid var(--border);
+    border-radius: 0 0 4px 4px;
+    background: var(--background);
+    cursor: pointer;
+    outline: none;
+  }
+
+  audio-ui-piano-key[data-color="black"] {
+    z-index: 1;
+    height: 62%;
+    border-color: var(--foreground);
+    background: var(--foreground);
+  }
+
+  audio-ui-piano-key[data-active] {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+</style>
+
 <audio-ui-piano aria-label="Keys" min-pitch="48" max-pitch="71">
   <audio-ui-piano-keys></audio-ui-piano-keys>
 </audio-ui-piano>
@@ -37,9 +75,32 @@ description: "The <audio-ui-piano> custom element of @audio-ui/elements: its att
 </script>
 ```
 
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```html
+<audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="48" max-pitch="71">
+  <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
+</audio-ui-piano>
+
+<script type="module">
+  import "@audio-ui/elements/piano";
+
+  const piano = document.querySelector("audio-ui-piano");
+  piano.addEventListener("noteon", (event) =>
+    console.log(event.detail.pitch)
+  );
+</script>
+```
+
+</ForStyling>
+
 </TabsContent>
 
 <TabsContent value="vue">
+
+<ForStyling only="css">
 
 ```vue
 <script setup lang="ts">
@@ -51,11 +112,65 @@ import "@audio-ui/elements/piano";
     <audio-ui-piano-keys />
   </audio-ui-piano>
 </template>
+
+<style>
+audio-ui-piano {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  height: 7rem;
+}
+
+audio-ui-piano-key {
+  z-index: 0;
+  top: 0;
+  box-sizing: border-box;
+  height: 100%;
+  border: 1px solid var(--border);
+  border-radius: 0 0 4px 4px;
+  background: var(--background);
+  cursor: pointer;
+  outline: none;
+}
+
+audio-ui-piano-key[data-color="black"] {
+  z-index: 1;
+  height: 62%;
+  border-color: var(--foreground);
+  background: var(--foreground);
+}
+
+audio-ui-piano-key[data-active] {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/piano";
+</script>
+
+<template>
+  <audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="48" max-pitch="71" @noteon="(event) => console.log(event.detail.pitch)">
+    <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary" />
+  </audio-ui-piano>
+</template>
+```
+
+</ForStyling>
 
 </TabsContent>
 
 <TabsContent value="svelte">
+
+<ForStyling only="css">
 
 ```svelte
 <script lang="ts">
@@ -65,7 +180,59 @@ import "@audio-ui/elements/piano";
 <audio-ui-piano aria-label="Keys" min-pitch="48" max-pitch="71" onnoteon={(event) => console.log(event.detail.pitch)}>
   <audio-ui-piano-keys></audio-ui-piano-keys>
 </audio-ui-piano>
+
+<style>
+:global {
+  audio-ui-piano {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: 7rem;
+  }
+
+  audio-ui-piano-key {
+    z-index: 0;
+    top: 0;
+    box-sizing: border-box;
+    height: 100%;
+    border: 1px solid var(--border);
+    border-radius: 0 0 4px 4px;
+    background: var(--background);
+    cursor: pointer;
+    outline: none;
+  }
+
+  audio-ui-piano-key[data-color="black"] {
+    z-index: 1;
+    height: 62%;
+    border-color: var(--foreground);
+    background: var(--foreground);
+  }
+
+  audio-ui-piano-key[data-active] {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/piano";
+</script>
+
+<audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="48" max-pitch="71" onnoteon={(event) => console.log(event.detail.pitch)}>
+  <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
+</audio-ui-piano>
+```
+
+</ForStyling>
 
 </TabsContent>
 

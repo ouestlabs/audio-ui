@@ -4,6 +4,7 @@
  */
 
 import { FRAMEWORKS } from "@/lib/docs/content/frameworks";
+import { STYLINGS } from "@/lib/docs/content/stylings";
 
 const FENCE_SPLIT_REGEX = /(^```[^\n]*\n[\s\S]*?^```[ \t]*$)/m;
 const FENCE_META_REGEX = /^(```\w+) component\b/;
@@ -39,6 +40,8 @@ const TABS_WRAPPER_REGEX = /<\/?(?:Code|Framework)?Tabs(?:\s[^>]*)?>\n*/g;
 const STEP_REGEX = /<Step>([\s\S]*?)<\/Step>/g;
 const FOR_FRAMEWORKS_REGEX = /<ForFrameworks\s+only="([^"]+)"\s*>\n*/g;
 const FOR_FRAMEWORKS_END_REGEX = /<\/ForFrameworks>\n*/g;
+const FOR_STYLING_REGEX = /<ForStyling\s+only="([^"]+)"\s*>\n*/g;
+const FOR_STYLING_END_REGEX = /<\/ForStyling>\n*/g;
 const ATTRIBUTE_REGEX = /attribute/i;
 const KEYS_REGEX = /keys/i;
 const QUOTED_REGEX = /^(["'])(.*)\1$/;
@@ -197,6 +200,12 @@ export function mdxToMarkdown(content: string) {
           (_, only: string) => `**In ${frameworkNames(only)}**\n\n`
         )
         .replace(FOR_FRAMEWORKS_END_REGEX, "")
+        .replace(
+          FOR_STYLING_REGEX,
+          (_, only: string) =>
+            `*With ${STYLINGS.find((each) => each.id === only)?.label ?? only}*\n\n`
+        )
+        .replace(FOR_STYLING_END_REGEX, "")
         .replace(TABS_WRAPPER_REGEX, "")
         .replace(/<Steps>\n*/g, () => {
           step = 0;

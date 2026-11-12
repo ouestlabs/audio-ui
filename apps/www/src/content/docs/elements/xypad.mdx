@@ -11,6 +11,8 @@ description: "The <audio-ui-xypad> custom element of @audio-ui/elements: its att
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
+The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+
 <FrameworkTabs defaultValue="web">
 
 <TabsList>
@@ -22,7 +24,69 @@ description: "The <audio-ui-xypad> custom element of @audio-ui/elements: its att
 
 <TabsContent value="web">
 
+<ForStyling only="css">
+
 ```html
+<style>
+  audio-ui-xypad {
+    display: block;
+    width: 12rem;
+  }
+
+  audio-ui-xypad-control {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--muted);
+    cursor: crosshair;
+  }
+
+  /* The crosshair follows the point. */
+  audio-ui-xypad-control::before,
+  audio-ui-xypad-control::after {
+    content: "";
+    position: absolute;
+    background: var(--border);
+    pointer-events: none;
+  }
+
+  audio-ui-xypad-control::before {
+    top: 0;
+    bottom: 0;
+    left: var(--xy-pad-x);
+    width: 1px;
+  }
+
+  audio-ui-xypad-control::after {
+    top: var(--xy-pad-y);
+    right: 0;
+    left: 0;
+    height: 1px;
+  }
+
+  audio-ui-xypad-thumb {
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background: var(--primary);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+  }
+
+  audio-ui-xypad-value {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--muted-foreground);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+</style>
+
 <audio-ui-xypad value="30 70">
   <audio-ui-xypad-control>
     <audio-ui-xypad-thumb aria-label="Filter"></audio-ui-xypad-thumb>
@@ -40,9 +104,35 @@ description: "The <audio-ui-xypad> custom element of @audio-ui/elements: its att
 </script>
 ```
 
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```html
+<audio-ui-xypad class="block w-48" value="30 70">
+  <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
+    <audio-ui-xypad-thumb class="absolute size-4 rounded-full bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
+  </audio-ui-xypad-control>
+  <audio-ui-xypad-value class="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums"></audio-ui-xypad-value>
+</audio-ui-xypad>
+
+<script type="module">
+  import "@audio-ui/elements/xypad";
+
+  const xypad = document.querySelector("audio-ui-xypad");
+  xypad.addEventListener("input", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</ForStyling>
+
 </TabsContent>
 
 <TabsContent value="vue">
+
+<ForStyling only="css">
 
 ```vue
 <script setup lang="ts">
@@ -60,11 +150,97 @@ const point = ref({ x: 30, y: 70 });
     <audio-ui-xypad-value />
   </audio-ui-xypad>
 </template>
+
+<style>
+audio-ui-xypad {
+  display: block;
+  width: 12rem;
+}
+
+audio-ui-xypad-control {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--muted);
+  cursor: crosshair;
+}
+
+/* The crosshair follows the point. */
+audio-ui-xypad-control::before,
+audio-ui-xypad-control::after {
+  content: "";
+  position: absolute;
+  background: var(--border);
+  pointer-events: none;
+}
+
+audio-ui-xypad-control::before {
+  top: 0;
+  bottom: 0;
+  left: var(--xy-pad-x);
+  width: 1px;
+}
+
+audio-ui-xypad-control::after {
+  top: var(--xy-pad-y);
+  right: 0;
+  left: 0;
+  height: 1px;
+}
+
+audio-ui-xypad-thumb {
+  position: absolute;
+  width: 1rem;
+  height: 1rem;
+  border-radius: 9999px;
+  background: var(--primary);
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+}
+
+audio-ui-xypad-value {
+  display: block;
+  margin-top: 0.5rem;
+  color: var(--muted-foreground);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/xypad";
+import { ref } from "vue";
+
+const point = ref({ x: 30, y: 70 });
+</script>
+
+<template>
+  <audio-ui-xypad class="block w-48" v-model="point">
+    <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
+      <audio-ui-xypad-thumb class="absolute size-4 rounded-full bg-primary ring-4 ring-primary/20" aria-label="Filter" />
+    </audio-ui-xypad-control>
+    <audio-ui-xypad-value class="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums" />
+  </audio-ui-xypad>
+</template>
+```
+
+</ForStyling>
 
 </TabsContent>
 
 <TabsContent value="svelte">
+
+<ForStyling only="css">
 
 ```svelte
 <script lang="ts">
@@ -79,7 +255,90 @@ const point = ref({ x: 30, y: 70 });
   </audio-ui-xypad-control>
   <audio-ui-xypad-value></audio-ui-xypad-value>
 </audio-ui-xypad>
+
+<style>
+:global {
+  audio-ui-xypad {
+    display: block;
+    width: 12rem;
+  }
+
+  audio-ui-xypad-control {
+    position: relative;
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--muted);
+    cursor: crosshair;
+  }
+
+  /* The crosshair follows the point. */
+  audio-ui-xypad-control::before,
+  audio-ui-xypad-control::after {
+    content: "";
+    position: absolute;
+    background: var(--border);
+    pointer-events: none;
+  }
+
+  audio-ui-xypad-control::before {
+    top: 0;
+    bottom: 0;
+    left: var(--xy-pad-x);
+    width: 1px;
+  }
+
+  audio-ui-xypad-control::after {
+    top: var(--xy-pad-y);
+    right: 0;
+    left: 0;
+    height: 1px;
+  }
+
+  audio-ui-xypad-thumb {
+    position: absolute;
+    width: 1rem;
+    height: 1rem;
+    border-radius: 9999px;
+    background: var(--primary);
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+  }
+
+  audio-ui-xypad-value {
+    display: block;
+    margin-top: 0.5rem;
+    color: var(--muted-foreground);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+  }
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/xypad";
+
+  let point = $state({ x: 30, y: 70 });
+</script>
+
+<audio-ui-xypad class="block w-48" value={point} oninput={(event) => (point = event.detail.value)}>
+  <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
+    <audio-ui-xypad-thumb class="absolute size-4 rounded-full bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
+  </audio-ui-xypad-control>
+  <audio-ui-xypad-value class="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums"></audio-ui-xypad-value>
+</audio-ui-xypad>
+```
+
+</ForStyling>
 
 </TabsContent>
 

@@ -11,6 +11,8 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
+The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+
 <FrameworkTabs defaultValue="web">
 
 <TabsList>
@@ -22,7 +24,44 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 
 <TabsContent value="web">
 
+<ForStyling only="css">
+
 ```html
+<style>
+  audio-ui-pad {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 18rem;
+  }
+
+  audio-ui-pad-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    outline: none;
+    user-select: none;
+    transition:
+      color 150ms,
+      background-color 150ms;
+  }
+
+  audio-ui-pad-item:focus-visible {
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  audio-ui-pad-item[data-active] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+</style>
+
 <audio-ui-pad aria-label="Drums">
   <audio-ui-pad-item value="kick">Kick</audio-ui-pad-item>
   <audio-ui-pad-item value="snare">Snare</audio-ui-pad-item>
@@ -40,9 +79,35 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 </script>
 ```
 
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```html
+<audio-ui-pad class="grid w-72 grid-cols-4 gap-2" aria-label="Drums">
+  <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</audio-ui-pad-item>
+  <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</audio-ui-pad-item>
+  <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</audio-ui-pad-item>
+  <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="clap">Clap</audio-ui-pad-item>
+</audio-ui-pad>
+
+<script type="module">
+  import "@audio-ui/elements/pad";
+
+  const pad = document.querySelector("audio-ui-pad");
+  pad.addEventListener("padon", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</ForStyling>
+
 </TabsContent>
 
 <TabsContent value="vue">
+
+<ForStyling only="css">
 
 ```vue
 <script setup lang="ts">
@@ -57,11 +122,69 @@ import "@audio-ui/elements/pad";
     <audio-ui-pad-item value="clap">Clap</audio-ui-pad-item>
   </audio-ui-pad>
 </template>
+
+<style>
+audio-ui-pad {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.5rem;
+  width: 18rem;
+}
+
+audio-ui-pad-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--muted);
+  color: var(--muted-foreground);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  outline: none;
+  user-select: none;
+  transition:
+    color 150ms,
+    background-color 150ms;
+}
+
+audio-ui-pad-item:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+audio-ui-pad-item[data-active] {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/pad";
+</script>
+
+<template>
+  <audio-ui-pad class="grid w-72 grid-cols-4 gap-2" aria-label="Drums" @padon="(event) => console.log(event.detail.value)">
+    <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</audio-ui-pad-item>
+    <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</audio-ui-pad-item>
+    <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</audio-ui-pad-item>
+    <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="clap">Clap</audio-ui-pad-item>
+  </audio-ui-pad>
+</template>
+```
+
+</ForStyling>
 
 </TabsContent>
 
 <TabsContent value="svelte">
+
+<ForStyling only="css">
 
 ```svelte
 <script lang="ts">
@@ -74,7 +197,63 @@ import "@audio-ui/elements/pad";
   <audio-ui-pad-item value="hat">Hat</audio-ui-pad-item>
   <audio-ui-pad-item value="clap">Clap</audio-ui-pad-item>
 </audio-ui-pad>
+
+<style>
+:global {
+  audio-ui-pad {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.5rem;
+    width: 18rem;
+  }
+
+  audio-ui-pad-item {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    aspect-ratio: 1;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--muted);
+    color: var(--muted-foreground);
+    font-size: 0.75rem;
+    line-height: 1rem;
+    outline: none;
+    user-select: none;
+    transition:
+      color 150ms,
+      background-color 150ms;
+  }
+
+  audio-ui-pad-item:focus-visible {
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  audio-ui-pad-item[data-active] {
+    background: var(--primary);
+    color: var(--primary-foreground);
+  }
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/pad";
+</script>
+
+<audio-ui-pad class="grid w-72 grid-cols-4 gap-2" aria-label="Drums" onpadon={(event) => console.log(event.detail.value)}>
+  <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</audio-ui-pad-item>
+  <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</audio-ui-pad-item>
+  <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</audio-ui-pad-item>
+  <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="clap">Clap</audio-ui-pad-item>
+</audio-ui-pad>
+```
+
+</ForStyling>
 
 </TabsContent>
 

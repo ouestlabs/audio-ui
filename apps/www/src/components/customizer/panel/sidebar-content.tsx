@@ -15,6 +15,7 @@ import { IconLibraryPicker } from "@/components/customizer/pickers/icon-library-
 import { MenuColorPicker } from "@/components/customizer/pickers/menu-picker";
 import { RadiusPicker } from "@/components/customizer/pickers/radius-picker";
 import { StylePicker } from "@/components/customizer/pickers/style-picker";
+import { StylingPicker } from "@/components/customizer/pickers/styling-picker";
 import { ThemePicker } from "@/components/customizer/pickers/theme-picker";
 import { FieldGroup } from "@/components/ui/field";
 import { useConfig } from "@/hooks/use-config";
@@ -47,16 +48,21 @@ export function CustomizerSidebarContent({
   );
 
   const strip = layout === "strip";
-  // On a page of the custom elements, the choices that change them alone, and their theme as CSS for the output.
+  // On a page of the custom elements: how the examples are styled and their look, with the theme as CSS for the output.
   const forElements = useCustomizerScope() === "elements";
   const pickers = forElements ? (
     <>
-      <StylePicker anchorRef={anchorRef} isMobile={isMobile} styles={STYLES} />
-      <BaseColorPicker anchorRef={anchorRef} isMobile={isMobile} />
+      <StylingPicker anchorRef={anchorRef} isMobile={isMobile} />
       <ThemePicker
         anchorRef={anchorRef}
         isMobile={isMobile}
+        label="Accent"
         themes={availableThemes}
+      />
+      <RadiusPicker
+        anchorRef={anchorRef}
+        defaultNote="0.625rem, the theme's"
+        isMobile={isMobile}
       />
       <FontPicker
         anchorRef={anchorRef}
@@ -65,7 +71,6 @@ export function CustomizerSidebarContent({
         label="Font"
         param="font"
       />
-      <RadiusPicker anchorRef={anchorRef} isMobile={isMobile} />
     </>
   ) : (
     <>

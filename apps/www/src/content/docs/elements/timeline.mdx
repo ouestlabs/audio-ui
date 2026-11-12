@@ -11,6 +11,8 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
+The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+
 <FrameworkTabs defaultValue="web">
 
 <TabsList>
@@ -22,7 +24,118 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
 
 <TabsContent value="web">
 
+<ForStyling only="css">
+
 ```html
+<style>
+  audio-ui-timeline {
+    display: block;
+    width: 100%;
+    max-width: 36rem;
+  }
+
+  audio-ui-timeline-viewport {
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  audio-ui-timeline-ruler {
+    height: 1.5rem;
+    margin-inline-start: 5rem;
+    background: var(--muted);
+    cursor: pointer;
+  }
+
+  audio-ui-timeline-mark {
+    height: 100%;
+    padding-inline-start: 0.25rem;
+    border-inline-start: 1px solid var(--border);
+    color: var(--muted-foreground);
+    font-size: 10px;
+  }
+
+  audio-ui-timeline-range {
+    top: 0;
+    bottom: 0;
+    background: color-mix(in oklab, var(--primary) 15%, transparent);
+  }
+
+  audio-ui-timeline-track {
+    height: 3.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  audio-ui-timeline-track-header {
+    width: 5rem;
+    padding: 0.5rem;
+    border-inline-end: 1px solid var(--border);
+    background: var(--background);
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  audio-ui-timeline-clip {
+    top: 0.25rem;
+    bottom: 0.25rem;
+    overflow: hidden;
+    border-radius: calc(var(--radius) - 4px);
+    background: color-mix(in oklab, var(--primary) 15%, transparent);
+  }
+
+  audio-ui-timeline-clip[data-selected] {
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  audio-ui-timeline-clip-header {
+    overflow: hidden;
+    padding-inline: 0.375rem;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: grab;
+  }
+
+  audio-ui-timeline-clip-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.375rem;
+    cursor: ew-resize;
+  }
+
+  audio-ui-timeline-clip-handle[edge="start"] {
+    left: 0;
+  }
+
+  audio-ui-timeline-clip-handle[edge="end"] {
+    right: 0;
+  }
+
+  audio-ui-timeline-playhead {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--foreground);
+  }
+
+  audio-ui-timeline-navigator {
+    height: 0.75rem;
+    margin-top: 0.5rem;
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--muted);
+  }
+
+  audio-ui-timeline-navigator-window {
+    top: 0;
+    bottom: 0;
+    border-radius: calc(var(--radius) - 4px);
+    background: color-mix(in oklab, var(--primary) 25%, transparent);
+    cursor: grab;
+  }
+</style>
+
 <audio-ui-timeline duration="32" snap-step="1">
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
@@ -48,9 +161,43 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
 </script>
 ```
 
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```html
+<audio-ui-timeline class="block w-full max-w-xl" duration="32" snap-step="1">
+  <audio-ui-timeline-viewport class="rounded-md border">
+    <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
+    <audio-ui-timeline-track class="h-14 border-t">
+      <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
+      <audio-ui-timeline-lane seekable>
+        <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
+          <audio-ui-timeline-clip-header class="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">Beat</audio-ui-timeline-clip-header>
+        </audio-ui-timeline-clip>
+        <audio-ui-timeline-playhead class="inset-y-0 w-px bg-foreground"></audio-ui-timeline-playhead>
+      </audio-ui-timeline-lane>
+    </audio-ui-timeline-track>
+  </audio-ui-timeline-viewport>
+</audio-ui-timeline>
+
+<script type="module">
+  import "@audio-ui/elements/timeline";
+
+  const timeline = document.querySelector("audio-ui-timeline");
+  timeline.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</ForStyling>
+
 </TabsContent>
 
 <TabsContent value="vue">
+
+<ForStyling only="css">
 
 ```vue
 <script setup lang="ts">
@@ -73,11 +220,151 @@ import "@audio-ui/elements/timeline";
     </audio-ui-timeline-viewport>
   </audio-ui-timeline>
 </template>
+
+<style>
+audio-ui-timeline {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+}
+
+audio-ui-timeline-viewport {
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+}
+
+audio-ui-timeline-ruler {
+  height: 1.5rem;
+  margin-inline-start: 5rem;
+  background: var(--muted);
+  cursor: pointer;
+}
+
+audio-ui-timeline-mark {
+  height: 100%;
+  padding-inline-start: 0.25rem;
+  border-inline-start: 1px solid var(--border);
+  color: var(--muted-foreground);
+  font-size: 10px;
+}
+
+audio-ui-timeline-range {
+  top: 0;
+  bottom: 0;
+  background: color-mix(in oklab, var(--primary) 15%, transparent);
+}
+
+audio-ui-timeline-track {
+  height: 3.5rem;
+  border-top: 1px solid var(--border);
+}
+
+audio-ui-timeline-track-header {
+  width: 5rem;
+  padding: 0.5rem;
+  border-inline-end: 1px solid var(--border);
+  background: var(--background);
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+audio-ui-timeline-clip {
+  top: 0.25rem;
+  bottom: 0.25rem;
+  overflow: hidden;
+  border-radius: calc(var(--radius) - 4px);
+  background: color-mix(in oklab, var(--primary) 15%, transparent);
+}
+
+audio-ui-timeline-clip[data-selected] {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+audio-ui-timeline-clip-header {
+  overflow: hidden;
+  padding-inline: 0.375rem;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: grab;
+}
+
+audio-ui-timeline-clip-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.375rem;
+  cursor: ew-resize;
+}
+
+audio-ui-timeline-clip-handle[edge="start"] {
+  left: 0;
+}
+
+audio-ui-timeline-clip-handle[edge="end"] {
+  right: 0;
+}
+
+audio-ui-timeline-playhead {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--foreground);
+}
+
+audio-ui-timeline-navigator {
+  height: 0.75rem;
+  margin-top: 0.5rem;
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--muted);
+}
+
+audio-ui-timeline-navigator-window {
+  top: 0;
+  bottom: 0;
+  border-radius: calc(var(--radius) - 4px);
+  background: color-mix(in oklab, var(--primary) 25%, transparent);
+  cursor: grab;
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/timeline";
+</script>
+
+<template>
+  <audio-ui-timeline class="block w-full max-w-xl" duration="32" snap-step="1" @change="(event) => console.log(event.detail.value)">
+    <audio-ui-timeline-viewport class="rounded-md border">
+      <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
+      <audio-ui-timeline-track class="h-14 border-t">
+        <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
+        <audio-ui-timeline-lane seekable>
+          <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
+            <audio-ui-timeline-clip-header class="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">Beat</audio-ui-timeline-clip-header>
+          </audio-ui-timeline-clip>
+          <audio-ui-timeline-playhead class="inset-y-0 w-px bg-foreground" />
+        </audio-ui-timeline-lane>
+      </audio-ui-timeline-track>
+    </audio-ui-timeline-viewport>
+  </audio-ui-timeline>
+</template>
+```
+
+</ForStyling>
 
 </TabsContent>
 
 <TabsContent value="svelte">
+
+<ForStyling only="css">
 
 ```svelte
 <script lang="ts">
@@ -98,7 +385,145 @@ import "@audio-ui/elements/timeline";
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
 </audio-ui-timeline>
+
+<style>
+:global {
+  audio-ui-timeline {
+    display: block;
+    width: 100%;
+    max-width: 36rem;
+  }
+
+  audio-ui-timeline-viewport {
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  audio-ui-timeline-ruler {
+    height: 1.5rem;
+    margin-inline-start: 5rem;
+    background: var(--muted);
+    cursor: pointer;
+  }
+
+  audio-ui-timeline-mark {
+    height: 100%;
+    padding-inline-start: 0.25rem;
+    border-inline-start: 1px solid var(--border);
+    color: var(--muted-foreground);
+    font-size: 10px;
+  }
+
+  audio-ui-timeline-range {
+    top: 0;
+    bottom: 0;
+    background: color-mix(in oklab, var(--primary) 15%, transparent);
+  }
+
+  audio-ui-timeline-track {
+    height: 3.5rem;
+    border-top: 1px solid var(--border);
+  }
+
+  audio-ui-timeline-track-header {
+    width: 5rem;
+    padding: 0.5rem;
+    border-inline-end: 1px solid var(--border);
+    background: var(--background);
+    font-size: 0.75rem;
+    line-height: 1rem;
+  }
+
+  audio-ui-timeline-clip {
+    top: 0.25rem;
+    bottom: 0.25rem;
+    overflow: hidden;
+    border-radius: calc(var(--radius) - 4px);
+    background: color-mix(in oklab, var(--primary) 15%, transparent);
+  }
+
+  audio-ui-timeline-clip[data-selected] {
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  audio-ui-timeline-clip-header {
+    overflow: hidden;
+    padding-inline: 0.375rem;
+    background: var(--primary);
+    color: var(--primary-foreground);
+    font-size: 10px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: grab;
+  }
+
+  audio-ui-timeline-clip-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.375rem;
+    cursor: ew-resize;
+  }
+
+  audio-ui-timeline-clip-handle[edge="start"] {
+    left: 0;
+  }
+
+  audio-ui-timeline-clip-handle[edge="end"] {
+    right: 0;
+  }
+
+  audio-ui-timeline-playhead {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--foreground);
+  }
+
+  audio-ui-timeline-navigator {
+    height: 0.75rem;
+    margin-top: 0.5rem;
+    border-radius: calc(var(--radius) - 4px);
+    background: var(--muted);
+  }
+
+  audio-ui-timeline-navigator-window {
+    top: 0;
+    bottom: 0;
+    border-radius: calc(var(--radius) - 4px);
+    background: color-mix(in oklab, var(--primary) 25%, transparent);
+    cursor: grab;
+  }
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/timeline";
+</script>
+
+<audio-ui-timeline class="block w-full max-w-xl" duration="32" snap-step="1" onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-timeline-viewport class="rounded-md border">
+    <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
+    <audio-ui-timeline-track class="h-14 border-t">
+      <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
+      <audio-ui-timeline-lane seekable>
+        <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
+          <audio-ui-timeline-clip-header class="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">Beat</audio-ui-timeline-clip-header>
+        </audio-ui-timeline-clip>
+        <audio-ui-timeline-playhead class="inset-y-0 w-px bg-foreground"></audio-ui-timeline-playhead>
+      </audio-ui-timeline-lane>
+    </audio-ui-timeline-track>
+  </audio-ui-timeline-viewport>
+</audio-ui-timeline>
+```
+
+</ForStyling>
 
 </TabsContent>
 

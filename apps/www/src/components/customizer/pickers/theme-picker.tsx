@@ -26,10 +26,13 @@ export function ThemePicker({
   themes,
   isMobile,
   anchorRef,
+  label = "Theme",
 }: {
   themes: readonly Theme[];
   isMobile: boolean;
   anchorRef: React.RefObject<HTMLDivElement | null>;
+  /** What the choice is called: the accent, for the custom elements. */
+  label?: string;
 }) {
   const { resolvedTheme } = useTheme();
   const mounted = useMounted();
@@ -79,7 +82,7 @@ export function ThemePicker({
       <Picker>
         <PickerTrigger>
           <div className="min-w-0 flex-1 pr-10 text-left">
-            <div className="text-site-muted-foreground text-xs">Theme</div>
+            <div className="text-site-muted-foreground text-xs">{label}</div>
             <div className="truncate font-medium text-site-foreground text-sm">
               {mounted ? currentTheme?.title : "..."}
             </div>

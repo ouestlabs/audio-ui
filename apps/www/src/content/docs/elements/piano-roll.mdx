@@ -11,6 +11,8 @@ description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: it
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
+The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+
 <FrameworkTabs defaultValue="web">
 
 <TabsList>
@@ -22,7 +24,119 @@ description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: it
 
 <TabsContent value="web">
 
+<ForStyling only="css">
+
 ```html
+<style>
+  audio-ui-timeline {
+    display: block;
+    width: 100%;
+    max-width: 36rem;
+  }
+
+  audio-ui-piano-roll {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  audio-ui-piano-roll-keys {
+    height: 12rem;
+    border-inline-end: 1px solid var(--border);
+  }
+
+  audio-ui-piano-roll-keys audio-ui-piano {
+    display: block;
+    height: 100%;
+  }
+
+  audio-ui-piano-roll-keys audio-ui-piano-key {
+    z-index: 0;
+    top: auto;
+    right: 0;
+    left: 0;
+    box-sizing: border-box;
+    height: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--background);
+    cursor: pointer;
+    outline: none;
+  }
+
+  audio-ui-piano-roll-keys audio-ui-piano-key[data-color="black"] {
+    z-index: 1;
+    right: 35%;
+    height: 62%;
+    border-color: var(--foreground);
+    background: var(--foreground);
+  }
+
+  audio-ui-piano-roll-keys audio-ui-piano-key[data-active] {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+
+  audio-ui-piano-roll-grid {
+    height: 12rem;
+    outline: none;
+  }
+
+  audio-ui-piano-roll-row[data-color="black"] {
+    background: color-mix(in oklab, var(--muted) 70%, transparent);
+  }
+
+  audio-ui-piano-roll-row[data-octave] {
+    border-bottom: 1px solid var(--border);
+  }
+
+  audio-ui-piano-roll-note {
+    border-radius: 2px;
+    background: color-mix(
+      in oklab,
+      var(--primary) calc(40% + 60% * var(--piano-roll-velocity)),
+      transparent
+    );
+    cursor: grab;
+    outline: none;
+  }
+
+  audio-ui-piano-roll-note[data-selected] {
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  audio-ui-piano-roll-marquee {
+    border: 1px dashed var(--primary);
+    background: color-mix(in oklab, var(--primary) 8%, transparent);
+  }
+
+  audio-ui-piano-roll-velocity-lane {
+    grid-column-start: 2;
+    height: 3rem;
+    border-top: 1px solid var(--border);
+  }
+
+  audio-ui-piano-roll-velocity {
+    width: 3px;
+    translate: -1px 0;
+    background: var(--primary);
+  }
+
+  audio-ui-timeline-viewport {
+    scrollbar-width: none;
+  }
+
+  audio-ui-timeline-playhead {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--foreground);
+  }
+</style>
+
 <audio-ui-timeline duration="8" snap-step="0.5">
   <audio-ui-piano-roll min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys>
@@ -50,9 +164,45 @@ description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: it
 </script>
 ```
 
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```html
+<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5">
+  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74">
+    <audio-ui-piano-roll-keys class="h-48 border-e">
+      <audio-ui-piano class="block h-full" aria-label="Keys">
+        <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
+      </audio-ui-piano>
+    </audio-ui-piano-roll-keys>
+    <audio-ui-timeline-viewport class="[scrollbar-width:none]">
+      <audio-ui-piano-roll-grid class="h-48 outline-none" aria-label="Notes">
+        <audio-ui-piano-roll-rows class="*:data-[color=black]:bg-muted/70 *:data-octave:border-b"></audio-ui-piano-roll-rows>
+        <audio-ui-piano-roll-notes class="*:cursor-grab *:rounded-[2px] *:bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] *:outline-none *:data-selected:ring-2 *:data-selected:ring-ring"></audio-ui-piano-roll-notes>
+        <audio-ui-timeline-playhead class="inset-y-0 w-px bg-foreground"></audio-ui-timeline-playhead>
+      </audio-ui-piano-roll-grid>
+    </audio-ui-timeline-viewport>
+  </audio-ui-piano-roll>
+</audio-ui-timeline>
+
+<script type="module">
+  import "@audio-ui/elements/piano-roll";
+
+  const pianoRoll = document.querySelector("audio-ui-piano-roll");
+  pianoRoll.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</ForStyling>
+
 </TabsContent>
 
 <TabsContent value="vue">
+
+<ForStyling only="css">
 
 ```vue
 <script setup lang="ts">
@@ -77,11 +227,154 @@ import "@audio-ui/elements/piano-roll";
     </audio-ui-piano-roll>
   </audio-ui-timeline>
 </template>
+
+<style>
+audio-ui-timeline {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+}
+
+audio-ui-piano-roll {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) - 2px);
+}
+
+audio-ui-piano-roll-keys {
+  height: 12rem;
+  border-inline-end: 1px solid var(--border);
+}
+
+audio-ui-piano-roll-keys audio-ui-piano {
+  display: block;
+  height: 100%;
+}
+
+audio-ui-piano-roll-keys audio-ui-piano-key {
+  z-index: 0;
+  top: auto;
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  height: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--border);
+  border-radius: 0;
+  background: var(--background);
+  cursor: pointer;
+  outline: none;
+}
+
+audio-ui-piano-roll-keys audio-ui-piano-key[data-color="black"] {
+  z-index: 1;
+  right: 35%;
+  height: 62%;
+  border-color: var(--foreground);
+  background: var(--foreground);
+}
+
+audio-ui-piano-roll-keys audio-ui-piano-key[data-active] {
+  border-color: var(--primary);
+  background: var(--primary);
+}
+
+audio-ui-piano-roll-grid {
+  height: 12rem;
+  outline: none;
+}
+
+audio-ui-piano-roll-row[data-color="black"] {
+  background: color-mix(in oklab, var(--muted) 70%, transparent);
+}
+
+audio-ui-piano-roll-row[data-octave] {
+  border-bottom: 1px solid var(--border);
+}
+
+audio-ui-piano-roll-note {
+  border-radius: 2px;
+  background: color-mix(
+    in oklab,
+    var(--primary) calc(40% + 60% * var(--piano-roll-velocity)),
+    transparent
+  );
+  cursor: grab;
+  outline: none;
+}
+
+audio-ui-piano-roll-note[data-selected] {
+  box-shadow: 0 0 0 2px var(--ring);
+}
+
+audio-ui-piano-roll-marquee {
+  border: 1px dashed var(--primary);
+  background: color-mix(in oklab, var(--primary) 8%, transparent);
+}
+
+audio-ui-piano-roll-velocity-lane {
+  grid-column-start: 2;
+  height: 3rem;
+  border-top: 1px solid var(--border);
+}
+
+audio-ui-piano-roll-velocity {
+  width: 3px;
+  translate: -1px 0;
+  background: var(--primary);
+}
+
+audio-ui-timeline-viewport {
+  scrollbar-width: none;
+}
+
+audio-ui-timeline-playhead {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--foreground);
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/piano-roll";
+</script>
+
+<template>
+  <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5">
+    <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
+      <audio-ui-piano-roll-keys class="h-48 border-e">
+        <audio-ui-piano class="block h-full" aria-label="Keys">
+          <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary" />
+        </audio-ui-piano>
+      </audio-ui-piano-roll-keys>
+      <audio-ui-timeline-viewport class="[scrollbar-width:none]">
+        <audio-ui-piano-roll-grid class="h-48 outline-none" aria-label="Notes">
+          <audio-ui-piano-roll-rows class="*:data-[color=black]:bg-muted/70 *:data-octave:border-b" />
+          <audio-ui-piano-roll-notes class="*:cursor-grab *:rounded-[2px] *:bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] *:outline-none *:data-selected:ring-2 *:data-selected:ring-ring" />
+          <audio-ui-timeline-playhead class="inset-y-0 w-px bg-foreground" />
+        </audio-ui-piano-roll-grid>
+      </audio-ui-timeline-viewport>
+    </audio-ui-piano-roll>
+  </audio-ui-timeline>
+</template>
+```
+
+</ForStyling>
 
 </TabsContent>
 
 <TabsContent value="svelte">
+
+<ForStyling only="css">
 
 ```svelte
 <script lang="ts">
@@ -104,7 +397,148 @@ import "@audio-ui/elements/piano-roll";
     </audio-ui-timeline-viewport>
   </audio-ui-piano-roll>
 </audio-ui-timeline>
+
+<style>
+:global {
+  audio-ui-timeline {
+    display: block;
+    width: 100%;
+    max-width: 36rem;
+  }
+
+  audio-ui-piano-roll {
+    display: grid;
+    grid-template-columns: 3rem 1fr;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    border-radius: calc(var(--radius) - 2px);
+  }
+
+  audio-ui-piano-roll-keys {
+    height: 12rem;
+    border-inline-end: 1px solid var(--border);
+  }
+
+  audio-ui-piano-roll-keys audio-ui-piano {
+    display: block;
+    height: 100%;
+  }
+
+  audio-ui-piano-roll-keys audio-ui-piano-key {
+    z-index: 0;
+    top: auto;
+    right: 0;
+    left: 0;
+    box-sizing: border-box;
+    height: 100%;
+    border: 0;
+    border-bottom: 1px solid var(--border);
+    border-radius: 0;
+    background: var(--background);
+    cursor: pointer;
+    outline: none;
+  }
+
+  audio-ui-piano-roll-keys audio-ui-piano-key[data-color="black"] {
+    z-index: 1;
+    right: 35%;
+    height: 62%;
+    border-color: var(--foreground);
+    background: var(--foreground);
+  }
+
+  audio-ui-piano-roll-keys audio-ui-piano-key[data-active] {
+    border-color: var(--primary);
+    background: var(--primary);
+  }
+
+  audio-ui-piano-roll-grid {
+    height: 12rem;
+    outline: none;
+  }
+
+  audio-ui-piano-roll-row[data-color="black"] {
+    background: color-mix(in oklab, var(--muted) 70%, transparent);
+  }
+
+  audio-ui-piano-roll-row[data-octave] {
+    border-bottom: 1px solid var(--border);
+  }
+
+  audio-ui-piano-roll-note {
+    border-radius: 2px;
+    background: color-mix(
+      in oklab,
+      var(--primary) calc(40% + 60% * var(--piano-roll-velocity)),
+      transparent
+    );
+    cursor: grab;
+    outline: none;
+  }
+
+  audio-ui-piano-roll-note[data-selected] {
+    box-shadow: 0 0 0 2px var(--ring);
+  }
+
+  audio-ui-piano-roll-marquee {
+    border: 1px dashed var(--primary);
+    background: color-mix(in oklab, var(--primary) 8%, transparent);
+  }
+
+  audio-ui-piano-roll-velocity-lane {
+    grid-column-start: 2;
+    height: 3rem;
+    border-top: 1px solid var(--border);
+  }
+
+  audio-ui-piano-roll-velocity {
+    width: 3px;
+    translate: -1px 0;
+    background: var(--primary);
+  }
+
+  audio-ui-timeline-viewport {
+    scrollbar-width: none;
+  }
+
+  audio-ui-timeline-playhead {
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: var(--foreground);
+  }
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/piano-roll";
+</script>
+
+<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5">
+  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
+    <audio-ui-piano-roll-keys class="h-48 border-e">
+      <audio-ui-piano class="block h-full" aria-label="Keys">
+        <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
+      </audio-ui-piano>
+    </audio-ui-piano-roll-keys>
+    <audio-ui-timeline-viewport class="[scrollbar-width:none]">
+      <audio-ui-piano-roll-grid class="h-48 outline-none" aria-label="Notes">
+        <audio-ui-piano-roll-rows class="*:data-[color=black]:bg-muted/70 *:data-octave:border-b"></audio-ui-piano-roll-rows>
+        <audio-ui-piano-roll-notes class="*:cursor-grab *:rounded-[2px] *:bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] *:outline-none *:data-selected:ring-2 *:data-selected:ring-ring"></audio-ui-piano-roll-notes>
+        <audio-ui-timeline-playhead class="inset-y-0 w-px bg-foreground"></audio-ui-timeline-playhead>
+      </audio-ui-piano-roll-grid>
+    </audio-ui-timeline-viewport>
+  </audio-ui-piano-roll>
+</audio-ui-timeline>
+```
+
+</ForStyling>
 
 </TabsContent>
 

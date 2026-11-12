@@ -11,6 +11,8 @@ description: "The <audio-ui-waveform> custom element of @audio-ui/elements: its 
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
+The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+
 <FrameworkTabs defaultValue="web">
 
 <TabsList>
@@ -22,7 +24,74 @@ description: "The <audio-ui-waveform> custom element of @audio-ui/elements: its 
 
 <TabsContent value="web">
 
+<ForStyling only="css">
+
 ```html
+<style>
+  audio-ui-waveform {
+    display: block;
+    width: 100%;
+    max-width: 36rem;
+  }
+
+  audio-ui-waveform-control {
+    position: relative;
+    display: block;
+    height: 5rem;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--muted);
+    cursor: pointer;
+  }
+
+  audio-ui-waveform-canvas {
+    position: absolute;
+    inset: 0;
+    --waveform-progress-color: var(--primary);
+    color: var(--muted-foreground);
+  }
+
+  audio-ui-waveform-region {
+    top: 0;
+    bottom: 0;
+    background: color-mix(in oklab, var(--primary) 10%, transparent);
+  }
+
+  audio-ui-waveform-region-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.25rem;
+    background: var(--primary);
+    cursor: ew-resize;
+  }
+
+  audio-ui-waveform-region-handle[edge="start"] {
+    left: 0;
+  }
+
+  audio-ui-waveform-region-handle[edge="end"] {
+    right: 0;
+  }
+
+  audio-ui-waveform-playhead {
+    top: 0;
+    bottom: 0;
+    width: 0.125rem;
+    background: var(--foreground);
+  }
+
+  audio-ui-waveform-hover {
+    top: -1.5rem;
+    translate: -50% 0;
+    padding-inline: 0.25rem;
+    border-radius: 0.25rem;
+    background: var(--popover);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 10px;
+    pointer-events: none;
+  }
+</style>
+
 <audio-ui-waveform duration="96" value="30">
   <audio-ui-waveform-control aria-label="Seek">
     <audio-ui-waveform-canvas></audio-ui-waveform-canvas>
@@ -44,9 +113,39 @@ description: "The <audio-ui-waveform> custom element of @audio-ui/elements: its 
 </script>
 ```
 
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```html
+<audio-ui-waveform class="block w-full max-w-xl" duration="96" value="30">
+  <audio-ui-waveform-control class="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
+    <audio-ui-waveform-canvas class="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]"></audio-ui-waveform-canvas>
+    <audio-ui-waveform-playhead class="inset-y-0 w-0.5 bg-foreground"></audio-ui-waveform-playhead>
+  </audio-ui-waveform-control>
+</audio-ui-waveform>
+
+<script type="module">
+  import "@audio-ui/elements/waveform";
+
+  const waveform = document.querySelector("audio-ui-waveform");
+
+  // Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+  const peaks = [];
+  waveform.peaks = peaks;
+  waveform.addEventListener("input", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</ForStyling>
+
 </TabsContent>
 
 <TabsContent value="vue">
+
+<ForStyling only="css">
 
 ```vue
 <script setup lang="ts">
@@ -67,11 +166,105 @@ const peaks: number[] = [];
     </audio-ui-waveform-control>
   </audio-ui-waveform>
 </template>
+
+<style>
+audio-ui-waveform {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+}
+
+audio-ui-waveform-control {
+  position: relative;
+  display: block;
+  height: 5rem;
+  border-radius: calc(var(--radius) - 2px);
+  background: var(--muted);
+  cursor: pointer;
+}
+
+audio-ui-waveform-canvas {
+  position: absolute;
+  inset: 0;
+  --waveform-progress-color: var(--primary);
+  color: var(--muted-foreground);
+}
+
+audio-ui-waveform-region {
+  top: 0;
+  bottom: 0;
+  background: color-mix(in oklab, var(--primary) 10%, transparent);
+}
+
+audio-ui-waveform-region-handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 0.25rem;
+  background: var(--primary);
+  cursor: ew-resize;
+}
+
+audio-ui-waveform-region-handle[edge="start"] {
+  left: 0;
+}
+
+audio-ui-waveform-region-handle[edge="end"] {
+  right: 0;
+}
+
+audio-ui-waveform-playhead {
+  top: 0;
+  bottom: 0;
+  width: 0.125rem;
+  background: var(--foreground);
+}
+
+audio-ui-waveform-hover {
+  top: -1.5rem;
+  translate: -50% 0;
+  padding-inline: 0.25rem;
+  border-radius: 0.25rem;
+  background: var(--popover);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  pointer-events: none;
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/waveform";
+import { ref } from "vue";
+
+const position = ref(30);
+
+// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+const peaks: number[] = [];
+</script>
+
+<template>
+  <audio-ui-waveform class="block w-full max-w-xl" duration="96" :peaks="peaks" v-model="position">
+    <audio-ui-waveform-control class="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
+      <audio-ui-waveform-canvas class="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]" />
+      <audio-ui-waveform-playhead class="inset-y-0 w-0.5 bg-foreground" />
+    </audio-ui-waveform-control>
+  </audio-ui-waveform>
+</template>
+```
+
+</ForStyling>
 
 </TabsContent>
 
 <TabsContent value="svelte">
+
+<ForStyling only="css">
 
 ```svelte
 <script lang="ts">
@@ -89,7 +282,98 @@ const peaks: number[] = [];
     <audio-ui-waveform-playhead></audio-ui-waveform-playhead>
   </audio-ui-waveform-control>
 </audio-ui-waveform>
+
+<style>
+:global {
+  audio-ui-waveform {
+    display: block;
+    width: 100%;
+    max-width: 36rem;
+  }
+
+  audio-ui-waveform-control {
+    position: relative;
+    display: block;
+    height: 5rem;
+    border-radius: calc(var(--radius) - 2px);
+    background: var(--muted);
+    cursor: pointer;
+  }
+
+  audio-ui-waveform-canvas {
+    position: absolute;
+    inset: 0;
+    --waveform-progress-color: var(--primary);
+    color: var(--muted-foreground);
+  }
+
+  audio-ui-waveform-region {
+    top: 0;
+    bottom: 0;
+    background: color-mix(in oklab, var(--primary) 10%, transparent);
+  }
+
+  audio-ui-waveform-region-handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 0.25rem;
+    background: var(--primary);
+    cursor: ew-resize;
+  }
+
+  audio-ui-waveform-region-handle[edge="start"] {
+    left: 0;
+  }
+
+  audio-ui-waveform-region-handle[edge="end"] {
+    right: 0;
+  }
+
+  audio-ui-waveform-playhead {
+    top: 0;
+    bottom: 0;
+    width: 0.125rem;
+    background: var(--foreground);
+  }
+
+  audio-ui-waveform-hover {
+    top: -1.5rem;
+    translate: -50% 0;
+    padding-inline: 0.25rem;
+    border-radius: 0.25rem;
+    background: var(--popover);
+    font-family: var(--font-mono, ui-monospace, monospace);
+    font-size: 10px;
+    pointer-events: none;
+  }
+}
+</style>
 ```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/waveform";
+
+  let position = $state(30);
+
+  // Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+  const peaks: number[] = [];
+</script>
+
+<audio-ui-waveform class="block w-full max-w-xl" duration="96" peaks={peaks} value={position} oninput={(event) => (position = event.detail.value)}>
+  <audio-ui-waveform-control class="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
+    <audio-ui-waveform-canvas class="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]"></audio-ui-waveform-canvas>
+    <audio-ui-waveform-playhead class="inset-y-0 w-0.5 bg-foreground"></audio-ui-waveform-playhead>
+  </audio-ui-waveform-control>
+</audio-ui-waveform>
+```
+
+</ForStyling>
 
 </TabsContent>
 

@@ -6,31 +6,36 @@ import { ACTION_BUTTON_CLASS } from "@/components/customizer/actions/action-butt
 import { Button } from "@/components/ui/button";
 import { useConfig } from "@/hooks/use-config";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { useStyling } from "@/hooks/use-styling";
 import { useDesignSystemSearchParams } from "@/lib/design-system/search-params";
 import { themeStylesheet } from "@/lib/design-system/theme-stylesheet";
 import { DEFAULT_CONFIG } from "@/registry/config";
 
-/** The theme on screen as CSS, for the custom elements in a project of any framework: one click copies it. */
+/** The theme on screen as CSS, in the styling the examples show, for the custom elements in a project of any framework: one click copies it. */
 export function CopyCss() {
   const [params] = useDesignSystemSearchParams();
   const [config] = useConfig();
+  const [styling] = useStyling();
   const { copyToClipboard, isCopied } = useCopyToClipboard();
 
   const copy = useCallback(() => {
     // The URL's choices first, the saved ones after, as the page applies them.
     copyToClipboard(
-      themeStylesheet({
-        ...DEFAULT_CONFIG,
-        baseColor: params.baseColor ?? config.baseColor,
-        chartColor: params.chartColor ?? config.chartColor,
-        font: params.font ?? config.font,
-        menuAccent: params.menuAccent ?? config.menuAccent,
-        radius: params.radius ?? config.radius,
-        style: params.style ?? config.style,
-        theme: params.theme ?? config.theme,
-      })
+      themeStylesheet(
+        {
+          ...DEFAULT_CONFIG,
+          baseColor: params.baseColor ?? config.baseColor,
+          chartColor: params.chartColor ?? config.chartColor,
+          font: params.font ?? config.font,
+          menuAccent: params.menuAccent ?? config.menuAccent,
+          radius: params.radius ?? config.radius,
+          style: params.style ?? config.style,
+          theme: params.theme ?? config.theme,
+        },
+        styling
+      )
     );
-  }, [config, copyToClipboard, params]);
+  }, [config, copyToClipboard, params, styling]);
 
   return (
     <Button

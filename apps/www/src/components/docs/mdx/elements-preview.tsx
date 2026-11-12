@@ -2,9 +2,19 @@
 
 import { createSource } from "@audio-ui/core";
 import type { MeterElement, PlotCurveElement } from "@audio-ui/elements";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import {
+  createContext,
+  type ReactNode,
+  use,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import { PreviewPanel } from "@/components/preview/frame/preview-frame";
 import { Frame } from "@/components/site/layout/frame";
+import { useStyling } from "@/hooks/use-styling";
+import { SKINS } from "@/lib/docs/content/element-skins";
 
 /** The primitives with a live preview, by entry point. */
 export type ElementsPreviewName =
@@ -99,77 +109,46 @@ function describe(detail: Record<string, unknown> | null): string {
   return "";
 }
 
-/** The styles of the previews' generated parts, scoped to the preview, from the theme's tokens. */
-const STYLES = `
-[data-slot="elements-preview"] audio-ui-piano-key { top: 0; height: 100%; box-sizing: border-box; border: 1px solid var(--border); border-radius: 0 0 4px 4px; background: var(--background); z-index: 0; cursor: pointer; outline: none; }
-[data-slot="elements-preview"] audio-ui-piano-key[data-color="black"] { height: 62%; background: var(--foreground); z-index: 1; border-color: var(--foreground); }
-[data-slot="elements-preview"] audio-ui-piano-key[data-active] { background: var(--primary); border-color: var(--primary); }
-[data-slot="elements-preview"] audio-ui-envelope-point { width: 12px; height: 12px; border-radius: 9999px; background: var(--background); border: 2px solid var(--primary); cursor: grab; outline: none; }
-[data-slot="elements-preview"] audio-ui-envelope-point:focus-visible, [data-slot="elements-preview"] audio-ui-envelope-point[data-dragging] { background: var(--primary); }
-[data-slot="elements-preview"] audio-ui-envelope-segment { width: 8px; height: 8px; border-radius: 9999px; background: var(--muted-foreground); opacity: 0.5; cursor: ns-resize; outline: none; }
-[data-slot="elements-preview"] audio-ui-envelope-segment[data-flat] { display: none; }
-[data-slot="elements-preview"] audio-ui-piano-roll-row[data-color="black"] { background: color-mix(in oklab, var(--muted) 70%, transparent); }
-[data-slot="elements-preview"] audio-ui-piano-roll-row[data-octave] { border-bottom: 1px solid var(--border); }
-[data-slot="elements-preview"] audio-ui-piano-roll-note { background: color-mix(in oklab, var(--primary) calc(40% + 60% * var(--piano-roll-velocity)), transparent); border-radius: 2px; outline: none; cursor: grab; }
-[data-slot="elements-preview"] audio-ui-piano-roll-note[data-selected] { box-shadow: 0 0 0 2px var(--ring); }
-[data-slot="elements-preview"] audio-ui-piano-roll-velocity { width: 3px; background: var(--primary); translate: -1px 0; }
-[data-slot="elements-preview"] audio-ui-piano-roll-marquee { border: 1px dashed var(--primary); background: color-mix(in oklab, var(--primary) 8%, transparent); }
-[data-slot="elements-preview"] audio-ui-piano-roll-keys audio-ui-piano-key { top: auto; left: 0; right: 0; border: 0; border-bottom: 1px solid var(--border); border-radius: 0; }
-[data-slot="elements-preview"] audio-ui-piano-roll-keys audio-ui-piano-key[data-color="black"] { right: 35%; }
-[data-slot="elements-preview"] audio-ui-timeline-viewport, [data-slot="elements-preview"] audio-ui-piano-roll audio-ui-timeline-viewport { scrollbar-width: none; }
-`;
+/** The classes of a part by its tag: the skin's Tailwind ones, or none when a stylesheet styles the parts. */
+const PartContext = createContext<(tag: string) => string | undefined>(
+  () => undefined
+);
 
 function Knob() {
+  const part = use(PartContext);
   return (
     <audio-ui-knob
-      className="cn-knob cn-knob-size-default group/knob relative mb-8 inline-flex outline-none"
+      className={part("audio-ui-knob")}
       max="100"
       min="0"
       value="40"
     >
-      <audio-ui-knob-control
-        className="cn-knob-control transform-[translateZ(0)] relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] active:cursor-grabbing"
-        data-slot="knob-control"
-      >
-        <div className="cn-knob-body cn-knob-body-size-default absolute z-0" />
-        <audio-ui-knob-track className="cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full opacity-22" />
-        <audio-ui-knob-indicator className="cn-knob-arc pointer-events-none absolute inset-0 z-1 block size-full" />
+      <audio-ui-knob-control className={part("audio-ui-knob-control")}>
+        <audio-ui-knob-track className={part("audio-ui-knob-track")} />
+        <audio-ui-knob-indicator className={part("audio-ui-knob-indicator")} />
         <audio-ui-knob-thumb
           aria-label="Cutoff"
-          className="pointer-events-none absolute inset-0 z-2"
-        >
-          <svg
-            aria-hidden="true"
-            className="cn-knob-indicator block size-full"
-            viewBox="0 0 48 48"
-          >
-            <line
-              stroke="currentColor"
-              strokeLinecap="round"
-              strokeWidth={2.75}
-              x1={24}
-              x2={24}
-              y1={11.53}
-              y2={18.84}
-            />
-          </svg>
-        </audio-ui-knob-thumb>
+          className={part("audio-ui-knob-thumb")}
+        />
       </audio-ui-knob-control>
-      <audio-ui-knob-value className="cn-knob-value pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap" />
+      <audio-ui-knob-value className={part("audio-ui-knob-value")} />
     </audio-ui-knob>
   );
 }
 
 function Fader() {
+  const part = use(PartContext);
   return (
-    <audio-ui-fader className="group/fader relative h-40" value="-6">
-      <audio-ui-fader-control className="relative flex h-full w-auto touch-none select-none flex-col items-center">
-        <audio-ui-fader-track className="cn-fader-track cn-fader-track-size-default relative grow cursor-pointer select-none overflow-hidden">
-          <audio-ui-fader-indicator className="cn-fader-range absolute w-full select-none" />
+    <audio-ui-fader className={part("audio-ui-fader")} value="-6">
+      <audio-ui-fader-control className={part("audio-ui-fader-control")}>
+        <audio-ui-fader-track className={part("audio-ui-fader-track")}>
+          <audio-ui-fader-indicator
+            className={part("audio-ui-fader-indicator")}
+          />
         </audio-ui-fader-track>
         <audio-ui-fader-thumb
           aria-label="Volume"
-          className="cn-fader-thumb cn-fader-thumb-size-default absolute z-10 block shrink-0 cursor-grab select-none outline-none active:cursor-grabbing"
+          className={part("audio-ui-fader-thumb")}
         />
       </audio-ui-fader-control>
     </audio-ui-fader>
@@ -179,11 +158,12 @@ function Fader() {
 const PADS = ["Kick", "Snare", "Clap", "Rim", "Hat", "Open", "Tom", "Ride"];
 
 function Pad() {
+  const part = use(PartContext);
   return (
-    <audio-ui-pad aria-label="Drums" className="grid w-72 grid-cols-4 gap-2">
+    <audio-ui-pad aria-label="Drums" className={part("audio-ui-pad")}>
       {PADS.map((label) => (
         <audio-ui-pad-item
-          className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground"
+          className={part("audio-ui-pad-item")}
           key={label}
           value={label}
         >
@@ -195,42 +175,37 @@ function Pad() {
 }
 
 function Piano() {
+  const part = use(PartContext);
   return (
     <audio-ui-piano
       aria-label="Keys"
-      className="relative block h-28 w-full max-w-lg"
+      className={part("audio-ui-piano")}
       max-pitch="71"
       min-pitch="48"
     >
-      <audio-ui-piano-keys />
+      <audio-ui-piano-keys className={part("audio-ui-piano-keys")} />
     </audio-ui-piano>
   );
 }
 
 function XYPad() {
+  const part = use(PartContext);
   return (
-    <audio-ui-xypad className="block w-48" value="30 70">
-      <audio-ui-xypad-control className="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted">
-        <div
-          className="pointer-events-none absolute inset-y-0 w-px bg-border"
-          style={{ left: "var(--xy-pad-x)" }}
-        />
-        <div
-          className="pointer-events-none absolute inset-x-0 h-px bg-border"
-          style={{ top: "var(--xy-pad-y)" }}
-        />
+    <audio-ui-xypad className={part("audio-ui-xypad")} value="30 70">
+      <audio-ui-xypad-control className={part("audio-ui-xypad-control")}>
         <audio-ui-xypad-thumb
           aria-label="Filter"
-          className="absolute size-4 rounded-full bg-primary ring-4 ring-primary/20"
+          className={part("audio-ui-xypad-thumb")}
         />
       </audio-ui-xypad-control>
-      <audio-ui-xypad-value className="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums" />
+      <audio-ui-xypad-value className={part("audio-ui-xypad-value")} />
     </audio-ui-xypad>
   );
 }
 
 /** Two channels moving like a signal, from a live source the meter follows. */
 function Meter() {
+  const part = use(PartContext);
   const ref = useRef<HTMLElement>(null);
   useEffect(() => {
     const meter = ref.current;
@@ -259,7 +234,7 @@ function Meter() {
   }, []);
   return (
     <audio-ui-meter
-      className="flex h-44 gap-1.5"
+      className={part("audio-ui-meter")}
       max="6"
       min="-60"
       ref={ref}
@@ -269,12 +244,14 @@ function Meter() {
       {[0, 1].map((index) => (
         <audio-ui-meter-channel
           aria-label={index === 0 ? "Left" : "Right"}
-          className="relative block h-full w-3 overflow-hidden rounded-sm bg-muted"
+          className={part("audio-ui-meter-channel")}
           index={index}
           key={index}
         >
-          <audio-ui-meter-indicator className="absolute bottom-0 block bg-primary" />
-          <audio-ui-meter-peak className="absolute inset-x-0 block h-0.5 bg-foreground" />
+          <audio-ui-meter-indicator
+            className={part("audio-ui-meter-indicator")}
+          />
+          <audio-ui-meter-peak className={part("audio-ui-meter-peak")} />
         </audio-ui-meter-channel>
       ))}
     </audio-ui-meter>
@@ -285,22 +262,23 @@ const ROWS = ["Kick", "Snare", "Hat"];
 const STEPS = Array.from({ length: 16 }, (_, index) => index);
 
 function Sequencer() {
+  const part = use(PartContext);
   return (
     <audio-ui-sequencer
       aria-label="Pattern"
-      className="grid w-full max-w-xl gap-1"
+      className={part("audio-ui-sequencer")}
       default-value="x...x...x...x... ....x.......x... x.x.x.x.x.x.x.xx"
     >
       {ROWS.map((label, row) => (
         <audio-ui-sequencer-row
           aria-label={label}
-          className="grid grid-cols-16 gap-1"
+          className={part("audio-ui-sequencer-row")}
           index={row}
           key={label}
         >
           {STEPS.map((step) => (
             <audio-ui-sequencer-cell
-              className="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary"
+              className={part("audio-ui-sequencer-cell")}
               key={step}
               step={step}
             />
@@ -312,18 +290,21 @@ function Sequencer() {
 }
 
 function Envelope() {
+  const part = use(PartContext);
   return (
     <audio-ui-envelope
       aria-label="Amp envelope"
-      className="block h-40 w-full max-w-md rounded-md bg-muted"
+      className={part("audio-ui-envelope")}
       default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0"
     >
       <audio-ui-envelope-graph>
-        <audio-ui-envelope-fill className="text-primary opacity-15" />
-        <audio-ui-envelope-line className="text-primary [stroke-width:2px]" />
+        <audio-ui-envelope-fill className={part("audio-ui-envelope-fill")} />
+        <audio-ui-envelope-line className={part("audio-ui-envelope-line")} />
       </audio-ui-envelope-graph>
-      <audio-ui-envelope-segments />
-      <audio-ui-envelope-points />
+      <audio-ui-envelope-segments
+        className={part("audio-ui-envelope-segments")}
+      />
+      <audio-ui-envelope-points className={part("audio-ui-envelope-points")} />
     </audio-ui-envelope>
   );
 }
@@ -333,6 +314,7 @@ const bell = (center: number, gain: number) => (hz: number) =>
   gain * Math.exp(-(Math.log2(hz / center) ** 2) * 1.6);
 
 function Plot() {
+  const part = use(PartContext);
   const curveRef = useRef<HTMLElement>(null);
   const handleRef = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -353,22 +335,22 @@ function Plot() {
   }, []);
   return (
     <audio-ui-plot
-      className="block h-44 w-full max-w-lg rounded-md bg-muted"
+      className={part("audio-ui-plot")}
       max-x="20000"
       max-y="18"
       min-x="20"
       min-y="-18"
       scale-x="log"
     >
-      <audio-ui-plot-grid className="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" />
+      <audio-ui-plot-grid className={part("audio-ui-plot-grid")} />
       <audio-ui-plot-curve
-        className="text-primary/15"
+        className={part("audio-ui-plot-curve")}
         fill-to="0"
         ref={curveRef}
       />
       <audio-ui-plot-handle
         aria-label="Band"
-        className="size-4 cursor-grab rounded-full bg-primary ring-4 ring-primary/20"
+        className={part("audio-ui-plot-handle")}
         ref={handleRef}
         value="800 6"
       />
@@ -385,36 +367,41 @@ const formatSeconds = (value: number) =>
   `${Math.floor(value / 60)}:${String(Math.floor(value % 60)).padStart(2, "0")}`;
 
 function Waveform() {
+  const part = use(PartContext);
   return (
     <audio-ui-waveform
-      className="block w-full max-w-xl"
+      className={part("audio-ui-waveform")}
       duration="96"
       peaks={PEAKS}
       value="30"
     >
       <audio-ui-waveform-control
         aria-label="Seek"
-        className="relative block h-20 cursor-pointer rounded-md bg-muted"
+        className={part("audio-ui-waveform-control")}
       >
-        <audio-ui-waveform-canvas className="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]" />
+        <audio-ui-waveform-canvas
+          className={part("audio-ui-waveform-canvas")}
+        />
         <audio-ui-waveform-region
-          className="inset-y-0 bg-primary/10"
+          className={part("audio-ui-waveform-region")}
           default-value="54 72"
         >
           <audio-ui-waveform-region-handle
             aria-label="Loop start"
-            className="absolute inset-y-0 left-0 w-1 cursor-ew-resize bg-primary"
+            className={part("audio-ui-waveform-region-handle")}
             edge="start"
           />
           <audio-ui-waveform-region-handle
             aria-label="Loop end"
-            className="absolute inset-y-0 right-0 w-1 cursor-ew-resize bg-primary"
+            className={part("audio-ui-waveform-region-handle")}
             edge="end"
           />
         </audio-ui-waveform-region>
-        <audio-ui-waveform-playhead className="inset-y-0 w-0.5 bg-foreground" />
+        <audio-ui-waveform-playhead
+          className={part("audio-ui-waveform-playhead")}
+        />
         <audio-ui-waveform-hover
-          className="pointer-events-none -top-6 -translate-x-1/2 rounded bg-popover px-1 font-mono text-[10px] shadow-sm"
+          className={part("audio-ui-waveform-hover")}
           format={formatSeconds}
         />
       </audio-ui-waveform-control>
@@ -425,20 +412,23 @@ function Waveform() {
 const BARS = [0, 4, 8, 12, 16, 20, 24, 28];
 
 function Timeline() {
+  const part = use(PartContext);
   return (
     <audio-ui-timeline
-      className="block w-full max-w-xl"
+      className={part("audio-ui-timeline")}
       duration="32"
       snap-step="1"
     >
-      <audio-ui-timeline-viewport className="rounded-md border">
+      <audio-ui-timeline-viewport
+        className={part("audio-ui-timeline-viewport")}
+      >
         <audio-ui-timeline-ruler
           aria-label="Position"
-          className="ms-20 h-6 cursor-pointer bg-muted"
+          className={part("audio-ui-timeline-ruler")}
         >
           {BARS.map((bar) => (
             <audio-ui-timeline-mark
-              className="h-full border-s ps-1 text-[10px] text-muted-foreground"
+              className={part("audio-ui-timeline-mark")}
               key={bar}
               value={bar}
             >
@@ -447,7 +437,7 @@ function Timeline() {
           ))}
           <audio-ui-timeline-range
             aria-label="Loop"
-            className="inset-y-0 bg-primary/15"
+            className={part("audio-ui-timeline-range")}
             value="8 16"
           />
         </audio-ui-timeline-ruler>
@@ -455,40 +445,51 @@ function Timeline() {
           { clip: "Beat", length: 8, name: "Drums", start: 0 },
           { clip: "Bass line", length: 12, name: "Bass", start: 8 },
         ].map((track) => (
-          <audio-ui-timeline-track className="h-14 border-t" key={track.name}>
-            <audio-ui-timeline-track-header className="w-20 border-e bg-background p-2 text-xs">
+          <audio-ui-timeline-track
+            className={part("audio-ui-timeline-track")}
+            key={track.name}
+          >
+            <audio-ui-timeline-track-header
+              className={part("audio-ui-timeline-track-header")}
+            >
               {track.name}
             </audio-ui-timeline-track-header>
             <audio-ui-timeline-lane seekable="">
               <audio-ui-timeline-clip
                 aria-label={track.clip}
-                className="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring"
+                className={part("audio-ui-timeline-clip")}
                 length={track.length}
                 start={track.start}
               >
-                <audio-ui-timeline-clip-header className="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">
+                <audio-ui-timeline-clip-header
+                  className={part("audio-ui-timeline-clip-header")}
+                >
                   {track.clip}
                 </audio-ui-timeline-clip-header>
                 <audio-ui-timeline-clip-handle
                   aria-label="Trim start"
-                  className="absolute inset-y-0 left-0 w-1.5 cursor-ew-resize"
+                  className={part("audio-ui-timeline-clip-handle")}
                   edge="start"
                 />
                 <audio-ui-timeline-clip-handle
                   aria-label="Trim end"
-                  className="absolute inset-y-0 right-0 w-1.5 cursor-ew-resize"
+                  className={part("audio-ui-timeline-clip-handle")}
                   edge="end"
                 />
               </audio-ui-timeline-clip>
-              <audio-ui-timeline-playhead className="inset-y-0 w-px bg-foreground" />
+              <audio-ui-timeline-playhead
+                className={part("audio-ui-timeline-playhead")}
+              />
             </audio-ui-timeline-lane>
           </audio-ui-timeline-track>
         ))}
       </audio-ui-timeline-viewport>
-      <audio-ui-timeline-navigator className="mt-2 h-3 rounded-sm bg-muted">
+      <audio-ui-timeline-navigator
+        className={part("audio-ui-timeline-navigator")}
+      >
         <audio-ui-timeline-navigator-window
           aria-label="View"
-          className="inset-y-0 cursor-grab rounded-sm bg-primary/25"
+          className={part("audio-ui-timeline-navigator-window")}
         />
       </audio-ui-timeline-navigator>
     </audio-ui-timeline>
@@ -505,40 +506,53 @@ const NOTES = [
 ];
 
 function PianoRoll() {
+  const part = use(PartContext);
   return (
     <audio-ui-timeline
-      className="block w-full max-w-xl"
+      className={part("audio-ui-timeline")}
       duration="8"
       snap-step="0.5"
     >
       <audio-ui-piano-roll
-        className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border"
+        className={part("audio-ui-piano-roll")}
         max-pitch="74"
         min-pitch="57"
         mode="draw"
         value={NOTES}
       >
-        <audio-ui-piano-roll-keys className="h-48 border-e">
-          <audio-ui-piano aria-label="Keys" className="block h-full">
-            <audio-ui-piano-keys />
+        <audio-ui-piano-roll-keys className={part("audio-ui-piano-roll-keys")}>
+          <audio-ui-piano aria-label="Keys" className={part("audio-ui-piano")}>
+            <audio-ui-piano-keys className={part("audio-ui-piano-keys")} />
           </audio-ui-piano>
         </audio-ui-piano-roll-keys>
-        <audio-ui-timeline-viewport>
+        <audio-ui-timeline-viewport
+          className={part("audio-ui-timeline-viewport")}
+        >
           <audio-ui-piano-roll-grid
             aria-label="Notes"
-            className="h-48 outline-none"
+            className={part("audio-ui-piano-roll-grid")}
           >
-            <audio-ui-piano-roll-rows />
-            <audio-ui-piano-roll-notes />
-            <audio-ui-piano-roll-marquee />
-            <audio-ui-timeline-playhead className="inset-y-0 w-px bg-foreground" />
+            <audio-ui-piano-roll-rows
+              className={part("audio-ui-piano-roll-rows")}
+            />
+            <audio-ui-piano-roll-notes
+              className={part("audio-ui-piano-roll-notes")}
+            />
+            <audio-ui-piano-roll-marquee
+              className={part("audio-ui-piano-roll-marquee")}
+            />
+            <audio-ui-timeline-playhead
+              className={part("audio-ui-timeline-playhead")}
+            />
           </audio-ui-piano-roll-grid>
         </audio-ui-timeline-viewport>
         <audio-ui-piano-roll-velocity-lane
           aria-label="Velocity"
-          className="col-start-2 h-12 border-t"
+          className={part("audio-ui-piano-roll-velocity-lane")}
         >
-          <audio-ui-piano-roll-velocities />
+          <audio-ui-piano-roll-velocities
+            className={part("audio-ui-piano-roll-velocities")}
+          />
         </audio-ui-piano-roll-velocity-lane>
       </audio-ui-piano-roll>
     </audio-ui-timeline>
@@ -565,6 +579,12 @@ const PREVIEWS: Record<ElementsPreviewName, () => ReactNode> = {
  * entry point has registered them, with the last event it fired below it.
  */
 export function ElementsPreview({ name }: { name: ElementsPreviewName }) {
+  const [styling] = useStyling();
+  const skin = SKINS[name];
+  const part = useCallback(
+    (tag: string) => (styling === "tailwind" ? skin?.tailwind[tag] : undefined),
+    [skin, styling]
+  );
   const [registered, setRegistered] = useState(false);
   const panelRef = useRef<HTMLDivElement>(null);
   const eventRef = useRef<HTMLOutputElement>(null);
@@ -600,14 +620,19 @@ export function ElementsPreview({ name }: { name: ElementsPreviewName }) {
   const Preview = PREVIEWS[name];
   return (
     <Frame className="mt-4 mb-8" data-slot="elements-preview">
-      <style>{STYLES}</style>
+      {styling === "css" && skin ? (
+        // The stylesheet the page shows, scoped to this preview.
+        <style>{`@scope ([data-slot="elements-preview"]) {\n${skin.css}\n}`}</style>
+      ) : null}
       <PreviewPanel className="min-h-64 gap-4 px-4">
         {registered ? (
           <div
             className="flex w-full items-center justify-center"
             ref={panelRef}
           >
-            <Preview />
+            <PartContext value={part}>
+              <Preview />
+            </PartContext>
           </div>
         ) : null}
         <output
