@@ -50,6 +50,7 @@ import {
 } from "@/registry/bases/base/ui/context-menu";
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuGroup,
   DropdownMenuItem,
@@ -57,6 +58,10 @@ import {
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { ArrangedTake } from "@/registry-audio/bases/base/audio/elements/arranged-clip";
@@ -67,7 +72,6 @@ import {
 import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";
 import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
 import { ExportDialog } from "@/registry-audio/bases/base/audio/elements/export-dialog";
-import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
   Timeline,
@@ -170,7 +174,7 @@ const LEVEL_SECONDS = 0.02;
 const MIN_TAKE_SPAN = 8;
 /** How far along the view a take goes before the view doubles, as a share of it. */
 const TAKE_SPAN_ROOM = 0.9;
-/** The main volume's range, in dB, as a mixer's fader has it. */
+/** A selection's level range, in dB: silence at the bottom, a boost of 6 dB at the top. */
 const MIN_DB = -60;
 const MAX_DB = 6;
 /** A rate's needless decimal, as "48.0 kHz" would have it. */
@@ -2196,7 +2200,7 @@ const unprocessed = (track: ArrangementTrack): ArrangementTrack => ({
   devices: track.devices?.map((device) => ({ ...device, on: false })),
 });
 
-/** The document B plays: the recording whole, matched, through no device, the main volume as it is. */
+/** The document B plays: the recording whole, matched, through no device. */
 function beforeEdits(
   doc: ArrangementDoc,
   { gain, length, recording }: Comparison
@@ -2252,9 +2256,6 @@ function stepName(
   const own = named.get(after);
   if (own) {
     return own;
-  }
-  if (after.main !== before.main) {
-    return "Main volume";
   }
   if (after.loop.on !== before.loop.on) {
     return after.loop.on ? "Loop on" : "Loop off";
@@ -2332,12 +2333,123 @@ function HistorySteps({
 }
 
 /**
+ * The bar's actions as one menu, where the bar has no room for them: Undo and
+ * Redo with the history, Loop when the transport has no room for its own
+ * either, Before the edits and Export, each with its key.
+ */
+function MoreMenu({
+  arrangement,
+  comparing,
+  edits,
+  frame,
+  named,
+  onCompare,
+  onExport,
+  onLoopingChange,
+  sound,
+}: {
+  arrangement: ReturnType<typeof useArrangement>;
+  comparing: boolean;
+  edits: ReturnType<typeof useClipEdits>;
+  /** The editor, whose transport tells whether its own Loop shows. */
+  frame: RefObject<HTMLDivElement | null>;
+  named: WeakMap<ArrangementDoc, string>;
+  onCompare: () => void;
+  onExport: () => void;
+  onLoopingChange: (on: boolean) => void;
+  /** Whether there is a sound to compare and export. */
+  sound: boolean;
+}) {
+  const { canRedo, canUndo, dispatch, doc, history } = arrangement;
+  // Read as it opens: the transport hides its Loop on a bar this narrow.
+  const [loopHidden, setLoopHidden] = useState(false);
+  const opened = useCallback(
+    (open: boolean) => {
+      if (open) {
+        const loop = frame.current?.querySelector<HTMLElement>(
+          '[data-slot="transport"] button[aria-label="Loop"]'
+        );
+        setLoopHidden(loop?.offsetParent === null);
+      }
+    },
+    [frame]
+  );
+  const mod = modKey();
+  return (
+    <DropdownMenu onOpenChange={opened}>
+      <DropdownMenuTrigger
+        render={
+          <Toolbar.Button
+            aria-label="More"
+            render={<Button size="icon" variant="outline" />}
+            title="More"
+          />
+        }
+      >
+        <IconPlaceholder
+          hugeicons="MoreHorizontalIcon"
+          lucide="EllipsisIcon"
+          phosphor="DotsThreeIcon"
+          remixicon="RiMoreLine"
+          tabler="IconDots"
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-56">
+        <DropdownMenuItem disabled={!canUndo} onClick={edits.undo}>
+          Undo
+          <DropdownMenuShortcut>{mod}Z</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuItem disabled={!canRedo} onClick={edits.redo}>
+          Redo
+          <DropdownMenuShortcut>⇧{mod}Z</DropdownMenuShortcut>
+        </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger disabled={!(canUndo || canRedo)}>
+            History
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="max-h-80 w-60 overflow-y-auto">
+            <HistorySteps
+              dispatch={dispatch}
+              doc={doc}
+              history={history}
+              named={named}
+            />
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSeparator />
+        {loopHidden ? (
+          <DropdownMenuCheckboxItem
+            checked={doc.loop.on}
+            onCheckedChange={onLoopingChange}
+          >
+            Loop
+            <DropdownMenuShortcut>L</DropdownMenuShortcut>
+          </DropdownMenuCheckboxItem>
+        ) : null}
+        <DropdownMenuCheckboxItem
+          checked={comparing}
+          disabled={!sound}
+          onCheckedChange={onCompare}
+        >
+          Before the edits
+          <DropdownMenuShortcut>B</DropdownMenuShortcut>
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem disabled={!sound} onClick={onExport}>
+          Export…
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/**
  * An audio editor for one sound: a demo loop, a file of yours (uploaded or
  * dropped) or a take from the microphone, on a track of an arrangement. The
  * transport plays, loops and records; the waveform seeks and zooms down to the
- * samples; the meter and the main volume close the bar; under it, the
- * track's device chain, an equalizer and a compressor to start, with the
- * library beside it to add any effect.
+ * samples; the output's meter closes the bar, whose actions fold into one
+ * menu when it is narrow; under it, the track's device chain, an equalizer
+ * and a compressor to start, with the library beside it to add any effect.
  */
 export default function BlockAudioEditor() {
   const arrangement = useArrangement({
@@ -2522,22 +2634,6 @@ export default function BlockAudioEditor() {
     stop();
     position.set(0);
   }, [position, recording, stop, take]);
-  // The main track's volume, in dB; at the bottom of the range it is silence.
-  const volume = Math.max(MIN_DB, gainToDb(doc.main.mix?.gain ?? 1));
-  // A turn of the knob is one step, closed as it lets go.
-  const setVolume = useCallback(
-    (db: number) =>
-      act("Main volume", {
-        id: doc.main.id,
-        patch: { gain: db <= MIN_DB ? 0 : dbToGain(db) },
-        type: "change-mix",
-      }),
-    [act, doc.main.id]
-  );
-  const settleVolume = useCallback(
-    () => dispatch({ type: "settle-clip-edit" }),
-    [dispatch]
-  );
   const setLooping = useCallback(
     (on: boolean) =>
       act(on ? "Loop on" : "Loop off", { loop: { on }, type: "set-loop" }),
@@ -2587,7 +2683,7 @@ export default function BlockAudioEditor() {
     [doc, exportRange, recordings, sound]
   );
 
-  // B: the sound as it was before the edits, matched to the loudness the edits give it (the main volume left out of both), or the edits again.
+  // B: the sound as it was before the edits, matched to the loudness the edits give it, or the edits again.
   const toggleCompare = useCallback(async () => {
     const source = clips[0]?.recording;
     if (comparing || !(sound && source)) {
@@ -2595,17 +2691,11 @@ export default function BlockAudioEditor() {
       return;
     }
     setStatus("Matching the loudness…");
-    const rendered = await renderArrangement(
-      {
-        ...doc,
-        main: {
-          ...doc.main,
-          mix: doc.main.mix ? { ...doc.main.mix, gain: 1 } : undefined,
-        },
-      },
-      recordings,
-      { from: 0, sampleRate: sound.sampleRate, to: doc.duration }
-    );
+    const rendered = await renderArrangement(doc, recordings, {
+      from: 0,
+      sampleRate: sound.sampleRate,
+      to: doc.duration,
+    });
     if (!rendered) {
       setStatus("This browser cannot render offline");
       return;
@@ -2893,7 +2983,7 @@ export default function BlockAudioEditor() {
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>
-          <ButtonGroup>
+          <ButtonGroup className="hidden @2xl/transport:flex">
             <Toolbar.Button
               aria-label="Undo"
               disabled={!arrangement.canUndo}
@@ -2956,7 +3046,7 @@ export default function BlockAudioEditor() {
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>
-          <ButtonGroup>
+          <ButtonGroup className="hidden @2xl/transport:flex">
             <Toolbar.Button
               aria-label="Before the edits"
               aria-pressed={comparing !== null}
@@ -2979,7 +3069,7 @@ export default function BlockAudioEditor() {
               />
             </Toolbar.Button>
           </ButtonGroup>
-          <ButtonGroup>
+          <ButtonGroup className="hidden @2xl/transport:flex">
             <Toolbar.Button
               aria-label="Export"
               disabled={!sound}
@@ -2996,38 +3086,34 @@ export default function BlockAudioEditor() {
               />
             </Toolbar.Button>
           </ButtonGroup>
-          {/* The output closes the bar, at its end: the level of what comes out, framed as the position is, and the main volume. */}
-          <div className="ms-auto flex items-center gap-2">
-            <ButtonGroup className="self-stretch">
-              <ButtonGroupText>
-                <div className="w-20">
-                  <Meter
-                    aria-label="Output"
-                    orientation="horizontal"
-                    peakMarks="hidden"
-                    size="sm"
-                    source={levels}
-                  />
-                </div>
-              </ButtonGroupText>
-            </ButtonGroup>
-            {/* In dB as a mixer sets it; its readout hangs over the ruler while it turns, so the bar keeps no room for it. */}
-            <Knob
-              aria-label="Main volume"
-              className="mb-0"
-              defaultValue={0}
-              dragMode="vertical"
-              formatValue={formatDb}
-              largeStep={6}
-              max={MAX_DB}
-              min={MIN_DB}
-              onValueChange={setVolume}
-              onValueCommitted={settleVolume}
-              size="xs"
-              step={0.5}
-              value={volume}
+          {/* Narrow, the bar's actions are one menu. */}
+          <ButtonGroup className="@2xl/transport:hidden">
+            <MoreMenu
+              arrangement={arrangement}
+              comparing={comparing !== null}
+              edits={edits}
+              frame={frame}
+              named={named.current}
+              onCompare={toggleCompare}
+              onExport={openExport}
+              onLoopingChange={setLooping}
+              sound={sound !== null}
             />
-          </div>
+          </ButtonGroup>
+          {/* The output closes the bar, at its end: the level of what comes out, framed as the position is; on the narrowest bar, the room goes to the controls. */}
+          <ButtonGroup className="ms-auto hidden self-stretch @md/transport:flex">
+            <ButtonGroupText>
+              <div className="w-20">
+                <Meter
+                  aria-label="Output"
+                  orientation="horizontal"
+                  peakMarks="hidden"
+                  size="sm"
+                  source={levels}
+                />
+              </div>
+            </ButtonGroupText>
+          </ButtonGroup>
         </Transport>
       </div>
       <ClipLane

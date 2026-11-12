@@ -700,7 +700,6 @@ export const components: RegistryItem[] = [
       "@audio-ui/device-browser",
       "@audio-ui/device-view",
       "@audio-ui/export-dialog",
-      "@audio-ui/knob",
       "@audio-ui/meter",
       "@audio-ui/timeline",
       "@audio-ui/timeline-markers",
