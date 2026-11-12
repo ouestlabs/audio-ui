@@ -79,7 +79,6 @@ const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
   "/docs/agents": SparkleIcon,
   "/docs/api": BracesIcon,
   "/docs/get-started": InsertIcon,
-  "/docs/react/headless-styling": DialIcon,
   "/docs/icons": GridIcon,
   "/docs/registry": CrateIcon,
   "/docs/roadmap": PlayheadIcon,
