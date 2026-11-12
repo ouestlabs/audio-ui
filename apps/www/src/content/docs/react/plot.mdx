@@ -3,7 +3,104 @@ title: Plot
 description: "The headless Plot of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
+<ReactPreview name="plot" />
+
 <Module from="@audio-ui/react/plot" />
+
+## Usage
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+
+<ForStyling only="css">
+
+```css title="plot.module.css"
+.root {
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  height: calc(var(--spacing, 0.25rem) * 44);
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+  position: relative;
+}
+
+.grid {
+  color: var(--muted-foreground, oklch(0.556 0 0));
+  font-size: 10px;
+}
+
+.grid [data-part="line"] {
+  stroke: var(--border, oklch(0.922 0 0));
+}
+
+.grid [data-part="label"][data-axis="x"] {
+  bottom: calc(var(--spacing, 0.25rem) * 1);
+  translate: 0.25rem 0;
+}
+
+.grid [data-part="label"][data-axis="y"] {
+  left: calc(var(--spacing, 0.25rem) * 1);
+  translate: 0 -100%;
+}
+
+.curve {
+  color: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
+  fill: currentColor;
+  stroke: none;
+}
+
+.handle {
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 4);
+  border-radius: var(--radius, 0.625rem);
+  background: var(--primary, oklch(0.205 0 0));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
+  cursor: grab;
+}
+```
+
+```tsx title="plot.tsx"
+import { Plot } from "@audio-ui/react";
+import styles from "./plot.module.css";
+
+// The curve: its level in dB at each frequency, such as a filter's response.
+const response = (hz: number) =>
+  6 * Math.exp(-(Math.log2(hz / 800) ** 2) * 1.6);
+
+<Plot.Root className={styles.root} minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+  <Plot.Grid className={styles.grid} x={{}} y={{}} />
+  <Plot.Graph>
+    <Plot.Curve className={styles.curve} fn={response} fillTo={0} />
+  </Plot.Graph>
+  <Plot.Handle className={styles.handle} aria-label="Band" defaultValue={{ x: 800, y: 6 }} />
+</Plot.Root>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```tsx title="plot.tsx"
+import { Plot } from "@audio-ui/react";
+
+// The curve: its level in dB at each frequency, such as a filter's response.
+const response = (hz: number) =>
+  6 * Math.exp(-(Math.log2(hz / 800) ** 2) * 1.6);
+
+<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted relative" minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+  <Plot.Grid className="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" x={{}} y={{}} />
+  <Plot.Graph>
+    <Plot.Curve className="text-primary/15 fill-current stroke-none" fn={response} fillTo={0} />
+  </Plot.Graph>
+  <Plot.Handle className="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" defaultValue={{ x: 800, y: 6 }} />
+</Plot.Root>
+```
+
+</ForStyling>
+
+{/* usage:end */}
 
 ## Anatomy
 

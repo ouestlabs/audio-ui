@@ -17,6 +17,24 @@ export interface ReactUsage {
 }
 
 export const REACT_USAGES: Record<string, ReactUsage> = {
+  envelope: {
+    entry: "envelope",
+    lines: [
+      '<Envelope.Root aria-label="Amp envelope" defaultValue={points}>',
+      "  <Envelope.Graph>",
+      "    <Envelope.Fill />",
+      "    <Envelope.Line />",
+      "  </Envelope.Graph>",
+      "  <Envelope.Segments>",
+      "    {(_, index) => <Envelope.Segment index={index} />}",
+      "  </Envelope.Segments>",
+      "  <Envelope.Points>",
+      "    {(_, index) => <Envelope.Point index={index} />}",
+      "  </Envelope.Points>",
+      "</Envelope.Root>",
+    ],
+    name: "Envelope",
+  },
   fader: {
     entry: "fader",
     lines: [
@@ -85,6 +103,19 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
     ],
     name: "Piano",
   },
+  plot: {
+    entry: "plot",
+    lines: [
+      '<Plot.Root minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">',
+      "  <Plot.Grid x={{}} y={{}} />",
+      "  <Plot.Graph>",
+      "    <Plot.Curve fn={response} fillTo={0} />",
+      "  </Plot.Graph>",
+      '  <Plot.Handle aria-label="Band" defaultValue={{ x: 800, y: 6 }} />',
+      "</Plot.Root>",
+    ],
+    name: "Plot",
+  },
   sequencer: {
     entry: "sequencer",
     lines: [
@@ -102,6 +133,22 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
     ],
     name: "Sequencer",
   },
+  waveform: {
+    entry: "waveform",
+    lines: [
+      "<Waveform.Root duration={96} peaks={peaks} defaultValue={30}>",
+      '  <Waveform.Control aria-label="Seek">',
+      "    <Waveform.Canvas />",
+      "    <Waveform.Region defaultValue={[54, 72]}>",
+      '      <Waveform.RegionHandle edge="start" aria-label="Loop start" />',
+      '      <Waveform.RegionHandle edge="end" aria-label="Loop end" />',
+      "    </Waveform.Region>",
+      "    <Waveform.Playhead />",
+      "  </Waveform.Control>",
+      "</Waveform.Root>",
+    ],
+    name: "Waveform",
+  },
   xypad: {
     entry: "xypad",
     lines: [
@@ -118,6 +165,24 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
 
 /** What a snippet needs that the JSX leaves out, by page: a pattern to start from. */
 const SETUP: Record<string, readonly string[]> = {
+  envelope: [
+    "const points = [",
+    "  { x: 0, y: 0 },",
+    "  { x: 0.12, y: 1 },",
+    "  { x: 0.35, y: 0.6, curve: 0.4 },",
+    "  { x: 0.75, y: 0.6 },",
+    "  { x: 1, y: 0 },",
+    "];",
+  ],
+  plot: [
+    "// The curve: its level in dB at each frequency, such as a filter's response.",
+    "const response = (hz: number) =>",
+    "  6 * Math.exp(-(Math.log2(hz / 800) ** 2) * 1.6);",
+  ],
+  waveform: [
+    "// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.",
+    "const peaks: number[] = [];",
+  ],
   sequencer: [
     "const pattern = [",
     "  [true, false, false, false, true, false, false, false],",
@@ -144,6 +209,39 @@ function tagOf(entry: string, part: string) {
 export const moduleClass = (part: string, prefix = "") =>
   `${prefix}${camel(part)}`;
 
+/**
+ * What the elements do for themselves and the headless parts leave to you: a
+ * box to position its parts in, an SVG that fills it, a color for a shape's
+ * fill or stroke. Added to the skin, by the part's class.
+ */
+const STRUCTURE: Record<string, Record<string, { css: string; tw: string }>> = {
+  envelope: {
+    fill: { css: "fill: currentColor;", tw: "fill-current" },
+    graph: {
+      css: "display: block;\n  width: 100%;\n  height: 100%;\n  overflow: visible;",
+      tw: "block size-full overflow-visible",
+    },
+    line: {
+      css: "fill: none;\n  stroke: currentColor;\n  stroke-linejoin: round;",
+      tw: "fill-none stroke-current [stroke-linejoin:round]",
+    },
+    root: { css: "position: relative;", tw: "relative" },
+  },
+  plot: {
+    curve: {
+      css: "fill: currentColor;\n  stroke: none;",
+      tw: "fill-current stroke-none",
+    },
+    root: { css: "position: relative;", tw: "relative" },
+  },
+  waveform: {
+    canvas: {
+      css: "display: block;\n  width: 100%;\n  height: 100%;",
+      tw: "block size-full",
+    },
+  },
+};
+
 const CHILD = /^\*:/;
 
 /**
@@ -152,21 +250,39 @@ const CHILD = /^\*:/;
  * (a piano's keys), takes those classes itself in React.
  */
 export function tailwindClasses(entry: string, part: string) {
+  const extra = STRUCTURE[entry]?.[moduleClass(part)]?.tw;
   const own = SKINS[entry]?.tailwind[tagOf(entry, part)];
   if (own) {
-    return own;
+    return extra ? `${own} ${extra}` : own;
   }
   const holder = SKINS[entry]?.tailwind[tagOf(entry, `${part}s`)];
-  return holder
+  const child = holder
     ?.split(" ")
     .filter((name) => CHILD.test(name))
     .map((name) => name.replace(CHILD, ""))
     .join(" ");
+  return [child, extra].filter(Boolean).join(" ") || undefined;
+}
+
+/** The skin's sheet with the structure the headless parts need: into the part's own rule, or a rule of its own. */
+function withStructure(entry: string, css: string): string {
+  let result = css;
+  for (const [part, { css: rules }] of Object.entries(STRUCTURE[entry] ?? {})) {
+    const tag =
+      part === "root"
+        ? `audio-ui-${entry}`
+        : `audio-ui-${entry}-${kebab(part)}`;
+    const rule = new RegExp(`(^${tag} \\{[^}]*?)\\n\\}`, "m");
+    result = rule.test(result)
+      ? result.replace(rule, `$1\n  ${rules}\n}`)
+      : `${result}\n\n${tag} {\n  ${rules}\n}`;
+  }
+  return result;
 }
 
 /** The skin's stylesheet as CSS Modules write it: a class for each part in place of its tag. */
 export function moduleCss(entry: string, prefix = ""): string {
-  const css = SKINS[entry]?.css ?? "";
+  const css = withStructure(entry, SKINS[entry]?.css ?? "");
   return css.replace(TAG, (tag) => {
     if (tag === `audio-ui-${entry}`) {
       return `.${prefix}root`;

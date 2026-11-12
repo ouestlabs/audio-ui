@@ -2,12 +2,15 @@
 
 import { createSource } from "@audio-ui/core";
 import {
+  Envelope,
   Fader,
   Knob,
   Meter,
   Pad,
   Piano,
+  Plot,
   Sequencer,
+  Waveform,
   XYPad,
 } from "@audio-ui/react";
 import {
@@ -30,12 +33,15 @@ import {
 
 /** The primitives with a live preview. */
 export type ReactPreviewName =
+  | "envelope"
   | "fader"
   | "knob"
   | "meter"
   | "pad"
   | "piano"
+  | "plot"
   | "sequencer"
+  | "waveform"
   | "xypad";
 
 /** In front of the classes of the preview's sheet, which a page's own utilities (`grid`) would otherwise meet. */
@@ -194,13 +200,109 @@ function PianoPreview() {
   );
 }
 
+const ENVELOPE = [
+  { x: 0, y: 0 },
+  { x: 0.12, y: 1 },
+  { curve: 0.4, x: 0.35, y: 0.6 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0 },
+];
+
+function EnvelopePreview() {
+  const p = usePart("envelope");
+  return (
+    <Envelope.Root
+      aria-label="Amp envelope"
+      className={p("Root")}
+      defaultValue={ENVELOPE}
+    >
+      <Envelope.Graph className={p("Graph")}>
+        <Envelope.Fill className={p("Fill")} />
+        <Envelope.Line className={p("Line")} />
+      </Envelope.Graph>
+      <Envelope.Segments>
+        {(_, index) => (
+          <Envelope.Segment className={p("Segment")} index={index} />
+        )}
+      </Envelope.Segments>
+      <Envelope.Points>
+        {(_, index) => <Envelope.Point className={p("Point")} index={index} />}
+      </Envelope.Points>
+    </Envelope.Root>
+  );
+}
+
+/** A peaking band's response in dB at `hz`. */
+const bell = (hz: number) => 6 * Math.exp(-(Math.log2(hz / 800) ** 2) * 1.6);
+
+function PlotPreview() {
+  const p = usePart("plot");
+  return (
+    <Plot.Root
+      className={p("Root")}
+      maxX={20_000}
+      maxY={18}
+      minX={20}
+      minY={-18}
+      scaleX="log"
+    >
+      <Plot.Grid className={p("Grid")} x={{}} y={{}} />
+      <Plot.Graph>
+        <Plot.Curve className={p("Curve")} fillTo={0} fn={bell} />
+      </Plot.Graph>
+      <Plot.Handle
+        aria-label="Band"
+        className={p("Handle")}
+        defaultValue={{ x: 800, y: 6 }}
+      />
+    </Plot.Root>
+  );
+}
+
+const PEAKS = Array.from({ length: 480 }, (_, index) => {
+  const envelope = 0.25 + 0.75 * Math.abs(Math.sin(index / 37));
+  return envelope * (0.35 + 0.65 * Math.abs(Math.sin(index / 3.3)));
+});
+
+function WaveformPreview() {
+  const p = usePart("waveform");
+  return (
+    <Waveform.Root
+      className={p("Root")}
+      defaultValue={30}
+      duration={96}
+      peaks={PEAKS}
+    >
+      <Waveform.Control aria-label="Seek" className={p("Control")}>
+        <Waveform.Canvas className={p("Canvas")} />
+        <Waveform.Region className={p("Region")} defaultValue={[54, 72]}>
+          <Waveform.RegionHandle
+            aria-label="Loop start"
+            className={p("RegionHandle")}
+            edge="start"
+          />
+          <Waveform.RegionHandle
+            aria-label="Loop end"
+            className={p("RegionHandle")}
+            edge="end"
+          />
+        </Waveform.Region>
+        <Waveform.Playhead className={p("Playhead")} />
+      </Waveform.Control>
+    </Waveform.Root>
+  );
+}
+
 const PREVIEWS: Record<ReactPreviewName, () => ReactNode> = {
+  envelope: EnvelopePreview,
   fader: FaderPreview,
   knob: KnobPreview,
   meter: MeterPreview,
   pad: PadPreview,
   piano: PianoPreview,
+  plot: PlotPreview,
   sequencer: SequencerPreview,
+  waveform: WaveformPreview,
   xypad: XYPadPreview,
 };
 
