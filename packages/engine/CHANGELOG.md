@@ -1,5 +1,11 @@
 # @audio-ui/engine
 
+## 0.12.0
+
+### Minor Changes
+
+- 9945114: Analysis: `bandShares` reads a sound as slices and tells, for each, the share of its lows, mids and highs, to colour a waveform by its frequencies.
+
 ## 0.11.0
 
 ### Minor Changes
