@@ -72,7 +72,7 @@ export interface FrameworkSection {
 
 /**
  * The switcher's four sections: the Docs, one set of primitives, the core
- * with the engine, and the registry. The primitives are the section being
+ * with the engine, and the registry, for React or no framework chosen. The primitives are the section being
  * read when it is one of them, else the framework's: React's for React and
  * for no framework chosen, the elements for the others, from their guide.
  * Either is named Primitives: the framework menu under it names the framework.
@@ -84,7 +84,9 @@ export function menuSections(
   const framed = framework && framework !== "react" ? "elements" : "react";
   const primitives =
     reading === "react" || reading === "elements" ? reading : framed;
-  return ["docs", primitives, "core", "registry"].flatMap((id) => {
+  // The registry is React's: a reader of another framework is not shown it.
+  const registry = framework && framework !== "react" ? [] : ["registry"];
+  return ["docs", primitives, "core", ...registry].flatMap((id) => {
     const section = DOCS_SECTIONS.find((each) => each.id === id);
     if (!section) {
       return [];

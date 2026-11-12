@@ -33,7 +33,7 @@ async function monthlyDownloads(): Promise<number | null> {
 
 /** The component spaces, the guides and the figures, read once on the server. */
 const loadHome = createServerFn({ method: "GET" }).handler(async () => {
-  const { guides, spaces } = getHomeIndex();
+  const { elements, guides, spaces } = getHomeIndex();
   // A space's component pages, not the overview it may link to.
   const pagesOf = (name: string) =>
     spaces
@@ -45,14 +45,17 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
     {
       href: "/components",
       label: "Components",
+      reactOnly: true,
       value: String(pagesOf("Elements") + pagesOf("Workstation")),
     },
     {
       href: "/docs/devices",
       label: "Devices",
+      reactOnly: true,
       value: String(pagesOf("Devices")),
     },
     {
+      elementsHref: "/docs/elements",
       href: "/docs/react",
       label: "Primitives",
       // The primitives are the entries the elements and React share: the elements' own, less the types of its frameworks.
@@ -73,7 +76,7 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
           },
         ]),
   ];
-  return { figures, guides, spaces };
+  return { elements, figures, guides, spaces };
 });
 
 const title = "audio/ui: the Audio UI Component Library for React";
@@ -113,7 +116,7 @@ export const Route = createFileRoute("/_site/")({
 });
 
 function IndexPage() {
-  const { figures, guides, spaces } = Route.useLoaderData();
+  const { elements, figures, guides, spaces } = Route.useLoaderData();
   return (
     <>
       <JsonLd data={buildSoftwareJsonLd()} />
@@ -131,7 +134,12 @@ function IndexPage() {
         className="h-6 shrink-0 border-t bg-[repeating-linear-gradient(-45deg,var(--border)_0_1px,transparent_1px_7px)]"
       />
       {/* Under it, the page in words, the library's figures with the components: what search engines and agents read without running it. */}
-      <HomeGuide figures={figures} guides={guides} spaces={spaces} />
+      <HomeGuide
+        elements={elements}
+        figures={figures}
+        guides={guides}
+        spaces={spaces}
+      />
     </>
   );
 }

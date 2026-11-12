@@ -5,6 +5,7 @@ import {
 } from "@/components/site/home/home-figures";
 import { JsonLd } from "@/components/site/json-ld";
 import { GroupIcon } from "@/components/site/navigation/group-icon";
+import { useFramework } from "@/hooks/use-framework";
 import type { HomeIndex } from "@/lib/docs/content/spaces";
 import { buildFaqJsonLd, type FaqItem } from "@/lib/seo/seo";
 
@@ -83,10 +84,14 @@ const LEAD = "max-w-2xl text-pretty text-site-muted-foreground text-sm";
  * usual questions. Search engines and agents read the page without running it.
  */
 export function HomeGuide({
+  elements,
   figures,
   guides,
   spaces,
 }: HomeIndex & { figures: HomeFigure[] }) {
+  // A reader of another framework than React sees what is theirs: the elements, not the registry and its guides.
+  const [framework] = useFramework();
+  const forReact = framework === null || framework === "react";
   return (
     <div className="flex flex-col gap-16 px-4 pb-12 font-site-sans sm:px-6 lg:pb-16">
       <JsonLd data={buildFaqJsonLd(FAQ)} />
@@ -97,9 +102,41 @@ export function HomeGuide({
         </h2>
         {/* From one edge of the panel to the other, out of the section's own margins. */}
         <div className="-mx-4 sm:-mx-6">
-          <HomeFigures figures={figures} />
+          <HomeFigures
+            figures={
+              forReact
+                ? figures
+                : figures
+                    .filter((each) => !each.reactOnly)
+                    .map((each) => ({
+                      ...each,
+                      href: each.elementsHref ?? each.href,
+                    }))
+            }
+          />
         </div>
-        <div className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+        {forReact ? null : (
+          <ul className="mt-10 grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
+            {elements.map((page) => (
+              <li key={page.url}>
+                <Link
+                  className="font-medium text-sm hover:underline"
+                  preload={false}
+                  to={page.url}
+                >
+                  {page.title}
+                </Link>
+                <p className="text-pretty text-site-muted-foreground text-xs leading-relaxed">
+                  {page.description}
+                </p>
+              </li>
+            ))}
+          </ul>
+        )}
+        <div
+          className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3"
+          hidden={!forReact}
+        >
           {spaces.map((space) => (
             <div key={space.title}>
               <h3 className="flex items-center gap-2 font-medium text-sm">
@@ -136,7 +173,7 @@ export function HomeGuide({
         </div>
       </section>
 
-      <section aria-labelledby="home-guides">
+      <section aria-labelledby="home-guides" hidden={!forReact}>
         <h2 className={H2} id="home-guides">
           What makes the sound
         </h2>

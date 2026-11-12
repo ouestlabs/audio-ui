@@ -101,6 +101,8 @@ function HeroReel() {
  * section.
  */
 export function HomeHero() {
+  const [framework] = useFramework();
+  const forReact = framework === null || framework === "react";
   return (
     <div className="flex shrink-0 flex-col gap-2 px-4 pt-6 pb-8 sm:px-6 lg:pt-8">
       <h1 className="scroll-m-20 whitespace-nowrap font-semibold font-site-heading text-4xl tracking-tight sm:text-3xl xl:text-4xl">
@@ -120,11 +122,24 @@ export function HomeHero() {
             </Link>
           }
         />
-        <Button
-          nativeButton={false}
-          render={<Link to="/components">Browse components</Link>}
-          variant="outline"
-        />
+        {/* The registry's catalog is React's: a reader of another framework browses the elements. */}
+        {forReact ? (
+          <Button
+            nativeButton={false}
+            render={<Link to="/components">Browse components</Link>}
+            variant="outline"
+          />
+        ) : (
+          <Button
+            nativeButton={false}
+            render={
+              <Link params={{ _splat: "elements" }} to="/docs/$">
+                Browse elements
+              </Link>
+            }
+            variant="outline"
+          />
+        )}
       </div>
     </div>
   );

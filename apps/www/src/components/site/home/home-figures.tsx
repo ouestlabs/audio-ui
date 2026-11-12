@@ -1,7 +1,11 @@
 /** A figure of the home: a count, what it counts, and where it can be checked. */
 export interface HomeFigure {
+  /** Where a reader of another framework than React checks it, when not at `href`. */
+  elementsHref?: string;
   href: string;
   label: string;
+  /** It counts the registry, which only a React app installs: not shown to a reader of another framework. */
+  reactOnly?: boolean;
   value: string;
 }
 

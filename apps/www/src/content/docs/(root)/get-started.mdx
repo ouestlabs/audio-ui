@@ -3,7 +3,7 @@ title: Installation
 description: A quick guide to adding audio/ui components to your application.
 ---
 
-audio/ui installs as the framework it is used in wants it: in React, the styled components copied into a shadcn project or the headless primitives; elsewhere, the custom elements. The tab follows the framework chosen in the sidebar, and a tab picked chooses it. The [Introduction](/docs) compares the three.
+audio/ui installs as the framework it is used in wants it: in React, the styled components copied into a shadcn project or the headless primitives; elsewhere, the custom elements. With your framework chosen in the sidebar, this page shows its install alone. The [Introduction](/docs) compares them.
 
 ## Your framework
 
@@ -102,6 +102,8 @@ Import an entry once, before the elements are used: it registers them, and the m
 
 </FrameworkTabs>
 
+<ForFrameworks only="react">
+
 The rest of this guide sets up the styled components, in a React app with shadcn/ui.
 
 ## Prerequisites
@@ -140,10 +142,22 @@ If your package manager still resolves the old version, bypass its cache: with B
 
 Components are styled with a design token system defined by CSS variables and implemented with Tailwind CSS, following the same conventions as shadcn/ui so they're fully customizable. See the [Styling guide](/docs/styling) for details.
 
+</ForFrameworks>
+
 ## Work with an AI agent
 
 Give your agent the [Agent skill](/docs/agents) and connect the [MCP server](/docs/mcp), so it picks the right component and reads the docs live. Every docs page is also served as markdown, with a Copy Markdown button, and [llms.txt](/llms.txt) maps them all.
 
 ## Next Steps
 
+<ForFrameworks only="vue svelte web">
+
+Open the [Knob](/docs/elements/knob) to place your first element, with its code in your framework, or [Custom elements](/docs/elements) for every one of them.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
 Head over to the [Knob](/docs/components/base/knob) docs to install your first component, or browse the [component catalog](/components) for ready-to-use blocks.
+
+</ForFrameworks>

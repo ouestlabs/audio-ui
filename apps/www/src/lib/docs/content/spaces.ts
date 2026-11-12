@@ -1,4 +1,7 @@
-import { getGroupsFromFolder } from "@/lib/docs/content/page-tree";
+import {
+  getAllPagesFromFolder,
+  getGroupsFromFolder,
+} from "@/lib/docs/content/page-tree";
 import { source } from "@/lib/docs/content/source";
 
 export interface SpacePage {
@@ -45,11 +48,40 @@ export function getDocsSpaces() {
 
 const COMPONENTS = "/docs/components/";
 const GUIDES = "/docs/guides";
+const ELEMENTS = "/docs/elements/";
+/** The elements' pages that are guides to a framework, not elements. */
+const FRAMEWORK_PAGES = new Set([
+  "/docs/elements/svelte",
+  "/docs/elements/vue",
+]);
 
-/** What the home lists: the spaces of components (Elements, Workstation, Devices), and the guides' pages. */
+/** The custom elements' pages, as their sidebar orders them: what the home lists for a reader of Vue, Svelte or the web. */
+function elementPages(): SpacePage[] {
+  const byUrl = new Map(source.getPages().map((page) => [page.url, page]));
+  return source
+    .getPageTree()
+    .children.flatMap((node) =>
+      node.type === "folder" ? getAllPagesFromFolder(node) : []
+    )
+    .flatMap((node): SpacePage[] => {
+      const page = byUrl.get(node.url);
+      return page?.url.startsWith(ELEMENTS) && !FRAMEWORK_PAGES.has(page.url)
+        ? [
+            {
+              description: page.data.description ?? "",
+              title: page.data.title,
+              url: page.url,
+            },
+          ]
+        : [];
+    });
+}
+
+/** What the home lists: the spaces of components (Elements, Workstation, Devices), the custom elements' pages, and the guides' pages. */
 export function getHomeIndex() {
   const spaces = getDocsSpaces();
   return {
+    elements: elementPages(),
     guides: spaces
       .flatMap((space) => space.sections.flatMap((section) => section.pages))
       .filter((page) => page.url.startsWith(GUIDES)),
