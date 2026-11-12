@@ -54,7 +54,7 @@ export const audio: RegistryItem[] = [
   },
   {
     description:
-      "A clip's recording drawn on a canvas, a column per pixel of the screen, as its clip plays it: looped, reversed, warped. It draws only what the view shows, and a zoom in the frame it happens.",
+      "A clip's recording drawn on a canvas, a column per pixel of the screen, as its clip plays it: looped, reversed, warped, optionally coloured column by column by the lows, mids and highs it holds. It draws only what the view shows, and a zoom in the frame it happens.",
     files: [
       {
         path: "audio/elements/clip-waveform.tsx",

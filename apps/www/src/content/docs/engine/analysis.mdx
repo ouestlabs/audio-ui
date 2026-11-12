@@ -110,3 +110,14 @@ checkAcx(channels, sampleRate).noiseFloor.value; // the quietest pause of half a
 ```
 
 `reportSound` reads every sample, a few seconds a minute of stereo on a laptop, so call it where the page can wait.
+
+## Colouring a waveform
+
+```ts
+import { bandShares } from "@audio-ui/engine/analysis";
+
+const { low, mid, high } = bandShares(channels, sampleRate, 8192);
+low[slice]; // 0 to 1: the share of the slice under 250 Hz, the loudest of the three bands being 1
+```
+
+`bandShares` cuts a sound into `count` slices and tells, for each, how its energy is spread over the lows (under 250 Hz), the mids and the highs (over 2.5 kHz). Give the three arrays to `ClipWaveform`'s `tint`, with `mode: "temperature"` (warm where the lows lead, cool where the highs do) or `"bands"` (lows red, mids green, highs blue).

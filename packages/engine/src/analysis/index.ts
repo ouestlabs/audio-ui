@@ -63,3 +63,4 @@ export {
   type PeakHoldOptions,
   SPECTRUM_FLOOR_DB,
 } from "./spectrum.ts";
+export { type BandShares, bandShares } from "./tint.ts";

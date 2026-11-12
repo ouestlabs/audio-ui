@@ -5,6 +5,7 @@ import {
   type ClipReading,
   clipFramePositions,
   clipPeakCount,
+  clipWaveform,
   clipWaveformBands,
   framesToRead,
   sampleBands,
@@ -22,6 +23,20 @@ export interface ClipSamples {
     from: number,
     to: number
   ) => ArrayLike<number> | Promise<ArrayLike<number>>;
+}
+
+/**
+ * What each slice of a recording is made of, to colour its waveform by: the
+ * share of its lows, mids and highs (each from 0 to 1) over as many slices as
+ * its peaks, and how to colour them: `temperature` warm where the lows lead and
+ * cool where the highs do, `bands` the lows as red, the mids green and the
+ * highs blue.
+ */
+export interface ClipTint {
+  high: ArrayLike<number>;
+  low: ArrayLike<number>;
+  mid: ArrayLike<number>;
+  mode: "bands" | "temperature";
 }
 
 /** The samples last read for a view, frames `from` to `to`: being read, or read. */
@@ -53,6 +68,8 @@ interface Ink {
   context: CanvasRenderingContext2D;
   rows: number;
   scale: number;
+  /** One colour a column, when the waveform is tinted. */
+  tints?: string[];
   zero: number;
 }
 
@@ -117,6 +134,69 @@ function sampleWindow(
   return stretch;
 }
 
+/** Whether a colour (`rgb(...)`, as a computed style gives) is light: the ink of a dark theme. */
+function isLight(color: string) {
+  const [red = 0, green = 0, blue = 0] = (color.match(/[\d.]+/g) ?? []).map(
+    Number
+  );
+  return (0.2126 * red + 0.7152 * green + 0.0722 * blue) / 255 > 0.5;
+}
+
+/**
+ * A colour for each column from the share of lows, mids and highs it holds:
+ * `temperature` goes from orange through the ink's own grey to blue as the
+ * highs outweigh the lows, at a lightness that reads on the screen; `bands`
+ * mixes the lows as red, the mids as green and the highs as blue.
+ */
+function tintColumns(
+  tint: ClipTint,
+  clip: ClipReading,
+  columns: number,
+  range: readonly [number, number],
+  light: boolean
+): string[] {
+  const read = (values: ArrayLike<number>) =>
+    clipWaveform(clip, values, columns, range);
+  const low = read(tint.low);
+  const mid = read(tint.mid);
+  const high = read(tint.high);
+  const lightness = light ? 0.82 : 0.48;
+  return Array.from({ length: columns }, (_, column) => {
+    const l = low[column] ?? 0;
+    const m = mid[column] ?? 0;
+    const h = high[column] ?? 0;
+    const total = l + m + h;
+    if (tint.mode === "bands") {
+      const top = Math.max(l, m, h) || 1;
+      const mix = [l, m, h].map((value) =>
+        Math.round((light ? 90 : 20) + (value / top) * (light ? 165 : 190))
+      );
+      return `rgb(${mix[0]} ${mix[1]} ${mix[2]})`;
+    }
+    // 0 where the lows are all of it, 1 where the highs are, the mids between.
+    const place = total > 0 ? (0.5 * m + h) / total : 0.5;
+    const warm = place < 0.5;
+    const chroma = 0.15 * Math.abs(2 * place - 1);
+    return `oklch(${lightness} ${chroma.toFixed(3)} ${warm ? 55 : 250})`;
+  });
+}
+
+/** A gradient along the canvas with one stop a column, so each column wears its own colour. */
+function gradientOf(
+  context: CanvasRenderingContext2D,
+  colors: readonly string[]
+) {
+  const gradient = context.createLinearGradient(0, 0, colors.length, 0);
+  const every = Math.max(1, Math.floor(colors.length / 1000));
+  for (let column = 0; column < colors.length; column += every) {
+    gradient.addColorStop(
+      Math.min(1, (column + 0.5) / colors.length),
+      colors[column] as string
+    );
+  }
+  return gradient;
+}
+
 /**
  * Paints a clip's waveform on its canvas, a column per pixel of the screen, for
  * the stretch of the clip the view shows: however wide the zoom makes the clip,
@@ -130,6 +210,7 @@ function paintWaveform(
     kept,
     peaks,
     samples,
+    tint,
     view,
   }: {
     clip: ClipReading;
@@ -137,6 +218,7 @@ function paintWaveform(
     kept: { current: SampleWindow | null };
     peaks: ClipPeaks;
     samples: ClipSamples | undefined;
+    tint: ClipTint | undefined;
     view: HTMLElement | null;
   }
 ) {
@@ -184,7 +266,16 @@ function paintWaveform(
   };
   const drawPeaks = () => {
     canvas.dataset.detail = "peaks";
-    inkBands(ink, clipWaveformBands(clip, peaks, columns, range));
+    // Tinted, each column wears the colour of what it holds; closer in, where it draws samples, the ink is plain.
+    inkBands(
+      tint
+        ? {
+            ...ink,
+            tints: tintColumns(tint, clip, columns, range, isLight(ink.color)),
+          }
+        : ink,
+      clipWaveformBands(clip, peaks, columns, range)
+    );
   };
   if (!samples) {
     drawPeaks();
@@ -246,12 +337,13 @@ function paintWaveform(
  * and silence is still a line.
  */
 function inkBands(
-  { color, columns, context, rows, scale, zero }: Ink,
+  { color, columns, context, rows, scale, tints, zero }: Ink,
   { max, min }: { max: readonly number[]; min: readonly number[] }
 ) {
   const height = rows / 2;
-  context.fillStyle = color;
-  context.strokeStyle = color;
+  const ink = tints ? gradientOf(context, tints) : color;
+  context.fillStyle = ink;
+  context.strokeStyle = ink;
   context.lineWidth = scale;
   context.lineJoin = "round";
   context.beginPath();
@@ -322,12 +414,15 @@ function ClipWaveform({
   clip,
   peaks,
   samples,
+  tint,
   ...props
 }: Omit<ComponentProps<"canvas">, "ref"> & {
   clip: ClipReading;
   peaks: ClipPeaks;
   /** The recording's samples, for a zoom closer than its peaks have detail for: drawn as the sound's lowest and highest samples, and past a frame per pixel, as a line through them. */
   samples?: ClipSamples;
+  /** Colours each column by the lows, mids and highs it holds, over the peaks. */
+  tint?: ClipTint;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const kept = useRef<SampleWindow | null>(null);
@@ -354,6 +449,7 @@ function ClipWaveform({
         kept,
         peaks,
         samples,
+        tint,
         view,
       });
     };
@@ -396,7 +492,7 @@ function ClipWaveform({
       themed.disconnect();
       view?.removeEventListener("scroll", scrolled);
     };
-  }, [clip, peaks, samples]);
+  }, [clip, peaks, samples, tint]);
   return (
     <canvas
       className={cn("pointer-events-none absolute", className)}

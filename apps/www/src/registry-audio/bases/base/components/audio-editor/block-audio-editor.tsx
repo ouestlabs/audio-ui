@@ -1,5 +1,7 @@
 import {
   type AudioPeaks,
+  type BandShares,
+  bandShares,
   computePeaks,
   dbToGain,
   detectSilences,
@@ -91,6 +93,7 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
 import {
   type ClipSamples,
+  type ClipTint,
   ClipWaveform,
 } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";
@@ -302,6 +305,8 @@ interface Sound {
   sampleRate: number;
   /** Its samples, mixed to one channel, for a zoom closer than the peaks have detail for. */
   samples: ClipSamples;
+  /** The share of its lows, mids and highs per slice of its peaks, read when a view first asks for it. */
+  shares: () => BandShares;
 }
 
 /** The clip that plays the recording `recording` on the track, over `length` seconds, round and round. */
@@ -329,6 +334,15 @@ function mixOf(channels: readonly Float32Array[]) {
   return mix;
 }
 
+/** `make`, run once, the first time it is called. */
+function lazily<T>(make: () => T): () => T {
+  let made: { value: T } | null = null;
+  return () => {
+    made ??= { value: make() };
+    return made.value;
+  };
+}
+
 function soundOf(
   channels: Float32Array[],
   sampleRate: number,
@@ -348,6 +362,7 @@ function soundOf(
     peak,
     sampleRate,
     peaks: normalizePeaks(computePeaks(channels, PEAK_COUNT)),
+    shares: lazily(() => bandShares(channels, sampleRate, PEAK_COUNT)),
     rms: rmsDb(mix),
     samples: { frames: mix.length, read: (from, to) => mix.subarray(from, to) },
   };
@@ -1324,10 +1339,16 @@ function RepairItems({
 }
 
 /** What the sound lane draws: the waveform, or the spectrogram on one of its frequency axes. */
-type View = "wave" | SpectrogramScale;
+type View = "bands" | "temperature" | "wave" | SpectrogramScale;
 
 const VIEWS: readonly { label: string; note: string; value: View }[] = [
   { label: "Waveform", note: "Level over time", value: "wave" },
+  {
+    label: "Waveform, warm to cool",
+    note: "Colour by pitch",
+    value: "temperature",
+  },
+  { label: "Waveform, by band", note: "Lows, mids, highs", value: "bands" },
   { label: "Spectrogram", note: "Octaves", value: "log" },
   { label: "Spectrogram, mel", note: "Pitch scale", value: "mel" },
   { label: "Spectrogram, ERB", note: "Hearing filters", value: "erb" },
@@ -2098,6 +2119,14 @@ function SelectionFrame({
   );
 }
 
+/** What colours a sound's waveform in a view: its shares of lows, mids and highs, or nothing for the plain one. */
+function tintOf(sound: Sound, view: View): ClipTint | undefined {
+  if (view !== "temperature" && view !== "bands") {
+    return undefined;
+  }
+  return { ...sound.shares(), mode: view };
+}
+
 /** The track's clips on the lane, each drawing its part of the sound it plays, at the clip editor's detail. */
 function SoundClips({
   band,
@@ -2132,7 +2161,7 @@ function SoundClips({
           width: `calc(var(--timeline-unit) * ${clip.value.length})`,
         }}
       >
-        {view === "wave" ? (
+        {view === "wave" || view === "temperature" || view === "bands" ? (
           // Its level scales what it draws, as it scales what it plays.
           <div
             className="absolute inset-0"
@@ -2148,6 +2177,7 @@ function SoundClips({
               peaks={sound.peaks}
               role="img"
               samples={sound.samples}
+              tint={tintOf(sound, view)}
             />
           </div>
         ) : (
@@ -2577,7 +2607,10 @@ function ClipLane({
                       position={takeClock}
                     />
                   ) : null}
-                  {view === "wave" || !sound ? null : (
+                  {view === "wave" ||
+                  view === "temperature" ||
+                  view === "bands" ||
+                  !sound ? null : (
                     <SpectrogramAxis
                       band={band}
                       pointer={pointerHertz}
