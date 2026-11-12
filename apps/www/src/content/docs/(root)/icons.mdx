@@ -9,7 +9,7 @@ Audio has things a general icon set does not draw: a knob, a rack unit, the shap
 
 ## Weights
 
-Each glyph comes in four weights, picked with the `weight` prop of its icon:
+Each glyph comes in four weights, picked with `weight`.
 
 - `regular` is the thin line, 1.5 on the 24 grid. It is the default.
 - `bold` is a thicker line, 2.25, for a small size or a state to show.
@@ -18,11 +18,15 @@ Each glyph comes in four weights, picked with the `weight` prop of its icon:
 
 ## Use them
 
-The icons are in `@audio-ui/icons`, on npm. Install it, and an icon is a React component named for what it draws, with `Icon` after: `KnobIcon`, `TracksIcon`, `SineIcon`, `LowpassIcon`. It is `1em` wide unless `size` says otherwise, and it takes the color of its text.
+The icons are in `@audio-ui/icons`, on npm.
 
 ```sh
 npm install @audio-ui/icons
 ```
+
+<ForFrameworks only="react">
+
+An icon is a React component named for what it draws, with `Icon` after: `KnobIcon`, `TracksIcon`, `SineIcon`, `LowpassIcon`. It is `1em` wide unless `size` says otherwise, and it takes the color of its text.
 
 ```tsx
 import { KnobIcon } from "@audio-ui/icons/react";
@@ -31,6 +35,46 @@ import { KnobIcon } from "@audio-ui/icons/react";
 ```
 
 The package works without React. `@audio-ui/icons` holds the glyphs as data, the catalog and `toSvg`, which gives the text of an SVG file for any glyph in any weight; `draw` gives the same drawing as plain nodes, for a Vue, Svelte or custom element adapter to render. **Copy SVG** and **Download** on this page give the same text.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+The glyphs are data, under `glyphs`, named for what they draw: `glyphs.knob`, `glyphs.tracks`, `glyphs.sine`, `glyphs.lowpass`. `toSvg` gives the text of an SVG for any glyph, in any weight and size, drawn in the color of its text; `draw` gives the same drawing as plain nodes. **Copy SVG** and **Download** on this page give the same text.
+
+```ts
+import { glyphs, toSvg } from "@audio-ui/icons";
+
+const knob = toSvg(glyphs.knob, { size: 20, weight: "bold" });
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="vue">
+
+```vue
+<template>
+  <span class="text-muted-foreground" v-html="knob" />
+</template>
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+```svelte
+<span class="text-muted-foreground">{@html knob}</span>
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+```js
+document.querySelector(".knob-icon").innerHTML = knob;
+```
+
+</ForFrameworks>
 
 ## Draw one
 

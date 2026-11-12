@@ -20,9 +20,12 @@ import { RADII, type RadiusValue } from "@/registry/config";
 export function RadiusPicker({
   isMobile,
   anchorRef,
+  defaultNote = "Use radius from style",
 }: {
   isMobile: boolean;
   anchorRef: React.RefObject<HTMLDivElement | null>;
+  /** What the default radius is: the style's, or the theme's where no style applies. */
+  defaultNote?: string;
 }) {
   const mounted = useMounted();
   const [params, setParams] = useDesignSystemSearchParams();
@@ -78,7 +81,7 @@ export function RadiusPicker({
                   <div className="flex flex-col justify-start pointer-coarse:gap-1">
                     <div>{defaultRadius.label}</div>
                     <div className="pointer-coarse:text-sm text-site-muted-foreground text-xs">
-                      Use radius from style
+                      {defaultNote}
                     </div>
                   </div>
                 </PickerRadioItem>

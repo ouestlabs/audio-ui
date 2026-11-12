@@ -4,6 +4,7 @@ import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
+import { FrameworkSelect } from "@/components/site/navigation/framework-select";
 import { GroupIcon, PageIcon } from "@/components/site/navigation/group-icon";
 import { SectionSelect } from "@/components/site/navigation/section-select";
 import { Button } from "@/components/ui/button";
@@ -192,8 +193,9 @@ export function MobileNav({
         side="bottom"
         sideOffset={16}
       >
-        <div className="shrink-0">
+        <div className="flex shrink-0 flex-col gap-2">
           <SectionSelect tree={tree} />
+          <FrameworkSelect tree={tree} />
         </div>
         <nav
           aria-label={section}

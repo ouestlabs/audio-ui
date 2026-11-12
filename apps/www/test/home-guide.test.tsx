@@ -7,6 +7,7 @@ import {
   RouterProvider,
 } from "@tanstack/react-router";
 import { act, render } from "@testing-library/react";
+import { NuqsTestingAdapter } from "nuqs/adapters/testing";
 
 const { getDocsSpaces, getHomeIndex } = await import(
   "@/lib/docs/content/spaces"
@@ -23,7 +24,12 @@ async function renderGuide() {
   const router = createRouter({
     history: createMemoryHistory({ initialEntries: ["/"] }),
     routeTree: createRootRoute({
-      component: () => <HomeGuide {...getHomeIndex()} />,
+      component: () => (
+        // The site reads the reader's framework from the address, as nuqs gives it.
+        <NuqsTestingAdapter>
+          <HomeGuide figures={[]} {...getHomeIndex()} />
+        </NuqsTestingAdapter>
+      ),
     }),
   });
   await act(() => router.load());

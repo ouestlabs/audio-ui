@@ -49,7 +49,13 @@ setInterval(() => {
 }, SCHEDULER_POLL_MS);
 ```
 
-`config` is read fresh on every call, so a tempo change takes effect at the next boundary. `positionAt(now, anchor, config)` is the playhead between boundaries, in fractional steps, and `anchorForTempoChange` keeps it continuous when the tempo moves while playing. A boundary later than half a second is skipped rather than played late. The registry's [`useTransportClock`](/docs/hooks/use-transport-clock) runs this loop for a React page.
+`config` is read fresh on every call, so a tempo change takes effect at the next boundary. `positionAt(now, anchor, config)` is the playhead between boundaries, in fractional steps, and `anchorForTempoChange` keeps it continuous when the tempo moves while playing. A boundary later than half a second is skipped rather than played late.
+
+<ForFrameworks only="react">
+
+The registry's [`useTransportClock`](/docs/hooks/use-transport-clock) runs this loop for a React page.
+
+</ForFrameworks>
 
 ## Warp markers
 

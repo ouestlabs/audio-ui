@@ -28,7 +28,22 @@ The controller of each control: its value, its gesture, its keys and its formatt
 
 ## Adapters
 
+<ForFrameworks only="react">
+
 - [React](/docs/react): `@audio-ui/react`, the headless primitives.
-- [Elements](/docs/elements): `@audio-ui/elements`, the same primitives as custom elements, for any framework.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web any">
+
+- [Elements](/docs/elements): `@audio-ui/elements`, the primitives as custom elements, for any framework.
+
+</ForFrameworks>
+
 - [Engine](/docs/engine): `@audio-ui/engine`, the audio logic: devices, musical time, levels, MIDI input, scales and the clip player.
+
+<ForFrameworks only="react">
+
 - [Registry](/docs/registry): the styled components, devices, hooks and libraries you install and own.
+
+</ForFrameworks>

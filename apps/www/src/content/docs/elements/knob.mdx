@@ -3,13 +3,529 @@ title: Knob
 description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/knob" />
-
-## Usage
-
 `<audio-ui-knob>` is the root of a rotary control. It owns the value and renders its parts from it.
 
 <ElementsPreview name="knob" />
+
+## Usage
+
+{/* usage:start: written by `bun scripts/element-usage.ts --write` */}
+
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+<ForStyling only="css">
+
+```html
+<style>
+  audio-ui-knob {
+    position: relative;
+    display: inline-flex;
+    width: calc(var(--spacing, 0.25rem) * 12);
+    height: calc(var(--spacing, 0.25rem) * 12);
+    margin-bottom: calc(var(--spacing, 0.25rem) * 8);
+    outline: none;
+  }
+
+  audio-ui-knob-control {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    clip-path: circle(50% at 50% 50%);
+    cursor: grab;
+    outline: none;
+    touch-action: none;
+    user-select: none;
+  }
+
+  audio-ui-knob-control:active {
+    cursor: grabbing;
+  }
+
+  /* The knob's face. */
+  audio-ui-knob-control::before {
+    content: "";
+    position: absolute;
+    inset: calc(var(--spacing, 0.25rem) * 1.5);
+    border-radius: 9999px;
+    background: var(--card, oklch(1 0 0));
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
+  }
+
+  audio-ui-knob-track,
+  audio-ui-knob-indicator {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: var(--primary, oklch(0.205 0 0));
+    pointer-events: none;
+  }
+
+  audio-ui-knob-track {
+    opacity: 0.22;
+  }
+
+  audio-ui-knob-track path,
+  audio-ui-knob-indicator path {
+    stroke: currentColor;
+  }
+
+  audio-ui-knob-thumb {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    color: var(--primary, oklch(0.205 0 0));
+    pointer-events: none;
+  }
+
+  /* The mark on the face: the thumb turns with the value. */
+  audio-ui-knob-thumb::after {
+    content: "";
+    position: absolute;
+    top: 24%;
+    left: 50%;
+    width: 6%;
+    height: 15%;
+    translate: -50% 0;
+    border-radius: 9999px;
+    background: currentColor;
+  }
+
+  audio-ui-knob-value {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    z-index: 10;
+    margin-top: calc(var(--spacing, 0.25rem) * 1);
+    padding: calc(var(--spacing, 0.25rem) * 0.5) calc(var(--spacing, 0.25rem) * 1.5);
+    translate: -50% 0;
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--foreground, oklch(0.145 0 0));
+    color: var(--background, oklch(1 0 0));
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  audio-ui-knob-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+</style>
+
+<audio-ui-knob min="0" max="100" value="40">
+  <audio-ui-knob-label>Volume</audio-ui-knob-label>
+  <audio-ui-knob-control>
+    <audio-ui-knob-track></audio-ui-knob-track>
+    <audio-ui-knob-indicator></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+
+<script type="module">
+  import "@audio-ui/elements/knob";
+
+  const knob = document.querySelector("audio-ui-knob");
+  knob.addEventListener("input", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```html
+<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" value="40">
+  <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
+  <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing">
+    <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current"></audio-ui-knob-track>
+    <audio-ui-knob-indicator class="pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current"></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb class="pointer-events-none absolute inset-0 z-2 text-primary after:absolute after:top-[24%] after:left-1/2 after:h-[15%] after:w-[6%] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']"></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value class="pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-sm bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none"></audio-ui-knob-value>
+</audio-ui-knob>
+
+<script type="module">
+  import "@audio-ui/elements/knob";
+
+  const knob = document.querySelector("audio-ui-knob");
+  knob.addEventListener("input", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ForStyling only="css">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/knob";
+import { ref } from "vue";
+
+const volume = ref(40);
+</script>
+
+<template>
+  <audio-ui-knob min="0" max="100" v-model="volume">
+    <audio-ui-knob-label>Volume</audio-ui-knob-label>
+    <audio-ui-knob-control>
+      <audio-ui-knob-track />
+      <audio-ui-knob-indicator />
+      <audio-ui-knob-thumb />
+    </audio-ui-knob-control>
+    <audio-ui-knob-value />
+  </audio-ui-knob>
+</template>
+
+<style>
+audio-ui-knob {
+  position: relative;
+  display: inline-flex;
+  width: calc(var(--spacing, 0.25rem) * 12);
+  height: calc(var(--spacing, 0.25rem) * 12);
+  margin-bottom: calc(var(--spacing, 0.25rem) * 8);
+  outline: none;
+}
+
+audio-ui-knob-control {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  clip-path: circle(50% at 50% 50%);
+  cursor: grab;
+  outline: none;
+  touch-action: none;
+  user-select: none;
+}
+
+audio-ui-knob-control:active {
+  cursor: grabbing;
+}
+
+/* The knob's face. */
+audio-ui-knob-control::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--spacing, 0.25rem) * 1.5);
+  border-radius: 9999px;
+  background: var(--card, oklch(1 0 0));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
+}
+
+audio-ui-knob-track,
+audio-ui-knob-indicator {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: var(--primary, oklch(0.205 0 0));
+  pointer-events: none;
+}
+
+audio-ui-knob-track {
+  opacity: 0.22;
+}
+
+audio-ui-knob-track path,
+audio-ui-knob-indicator path {
+  stroke: currentColor;
+}
+
+audio-ui-knob-thumb {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  color: var(--primary, oklch(0.205 0 0));
+  pointer-events: none;
+}
+
+/* The mark on the face: the thumb turns with the value. */
+audio-ui-knob-thumb::after {
+  content: "";
+  position: absolute;
+  top: 24%;
+  left: 50%;
+  width: 6%;
+  height: 15%;
+  translate: -50% 0;
+  border-radius: 9999px;
+  background: currentColor;
+}
+
+audio-ui-knob-value {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 10;
+  margin-top: calc(var(--spacing, 0.25rem) * 1);
+  padding: calc(var(--spacing, 0.25rem) * 0.5) calc(var(--spacing, 0.25rem) * 1.5);
+  translate: -50% 0;
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--foreground, oklch(0.145 0 0));
+  color: var(--background, oklch(1 0 0));
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+audio-ui-knob-label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+</style>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/knob";
+import { ref } from "vue";
+
+const volume = ref(40);
+</script>
+
+<template>
+  <audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" v-model="volume">
+    <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
+    <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing">
+      <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
+      <audio-ui-knob-indicator class="pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current" />
+      <audio-ui-knob-thumb class="pointer-events-none absolute inset-0 z-2 text-primary after:absolute after:top-[24%] after:left-1/2 after:h-[15%] after:w-[6%] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']" />
+    </audio-ui-knob-control>
+    <audio-ui-knob-value class="pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-sm bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none" />
+  </audio-ui-knob>
+</template>
+```
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+<ForStyling only="css">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/knob";
+
+  let volume = $state(40);
+</script>
+
+<audio-ui-knob min="0" max="100" value={volume} oninput={(event) => (volume = event.detail.value)}>
+  <audio-ui-knob-label>Volume</audio-ui-knob-label>
+  <audio-ui-knob-control>
+    <audio-ui-knob-track></audio-ui-knob-track>
+    <audio-ui-knob-indicator></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+
+<style>
+:global {
+  audio-ui-knob {
+    position: relative;
+    display: inline-flex;
+    width: calc(var(--spacing, 0.25rem) * 12);
+    height: calc(var(--spacing, 0.25rem) * 12);
+    margin-bottom: calc(var(--spacing, 0.25rem) * 8);
+    outline: none;
+  }
+
+  audio-ui-knob-control {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    width: 100%;
+    height: 100%;
+    clip-path: circle(50% at 50% 50%);
+    cursor: grab;
+    outline: none;
+    touch-action: none;
+    user-select: none;
+  }
+
+  audio-ui-knob-control:active {
+    cursor: grabbing;
+  }
+
+  /* The knob's face. */
+  audio-ui-knob-control::before {
+    content: "";
+    position: absolute;
+    inset: calc(var(--spacing, 0.25rem) * 1.5);
+    border-radius: 9999px;
+    background: var(--card, oklch(1 0 0));
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
+  }
+
+  audio-ui-knob-track,
+  audio-ui-knob-indicator {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: block;
+    width: 100%;
+    height: 100%;
+    color: var(--primary, oklch(0.205 0 0));
+    pointer-events: none;
+  }
+
+  audio-ui-knob-track {
+    opacity: 0.22;
+  }
+
+  audio-ui-knob-track path,
+  audio-ui-knob-indicator path {
+    stroke: currentColor;
+  }
+
+  audio-ui-knob-thumb {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    color: var(--primary, oklch(0.205 0 0));
+    pointer-events: none;
+  }
+
+  /* The mark on the face: the thumb turns with the value. */
+  audio-ui-knob-thumb::after {
+    content: "";
+    position: absolute;
+    top: 24%;
+    left: 50%;
+    width: 6%;
+    height: 15%;
+    translate: -50% 0;
+    border-radius: 9999px;
+    background: currentColor;
+  }
+
+  audio-ui-knob-value {
+    position: absolute;
+    top: 100%;
+    left: 50%;
+    z-index: 10;
+    margin-top: calc(var(--spacing, 0.25rem) * 1);
+    padding: calc(var(--spacing, 0.25rem) * 0.5) calc(var(--spacing, 0.25rem) * 1.5);
+    translate: -50% 0;
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--foreground, oklch(0.145 0 0));
+    color: var(--background, oklch(1 0 0));
+    font-size: 10px;
+    font-weight: 500;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  audio-ui-knob-label {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+  }
+}
+</style>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/knob";
+
+  let volume = $state(40);
+</script>
+
+<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" value={volume} oninput={(event) => (volume = event.detail.value)}>
+  <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
+  <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing">
+    <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current"></audio-ui-knob-track>
+    <audio-ui-knob-indicator class="pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current"></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb class="pointer-events-none absolute inset-0 z-2 text-primary after:absolute after:top-[24%] after:left-1/2 after:h-[15%] after:w-[6%] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']"></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value class="pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-sm bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none"></audio-ui-knob-value>
+</audio-ui-knob>
+```
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Knob](/docs/react/knob) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+{/* usage:end */}
+
+## API reference
+
+<Module from="@audio-ui/elements/knob" />
 
 <TypeTable>
 <TypeRow name={"min"} type={"number"} default={"0"}></TypeRow>
@@ -36,4 +552,8 @@ description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attr
 | `<audio-ui-knob-value>` | The formatted value |
 | `<audio-ui-knob-label>` | Labels the input when the thumb has no accessible name |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Knob](/docs/react/knob).
+
+</ForFrameworks>

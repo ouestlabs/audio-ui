@@ -2026,9 +2026,11 @@ function ClipLane({
   );
 
   return (
-    <div className="px-4 py-4 sm:px-6">
-      <div className="relative" ref={lane}>
+    // Given a height, the waveform takes what the rest leaves; in the flow of a page it keeps its own.
+    <div className="flex flex-1 flex-col px-4 py-4 sm:px-6">
+      <div className="relative flex flex-1 flex-col" ref={lane}>
         <Timeline
+          className="flex-1"
           disabled={!sound || recording}
           duration={shownDuration || 1}
           maxZoom={Math.max(maxZoom, 1)}
@@ -2044,14 +2046,14 @@ function ClipLane({
           <ContextMenu>
             <ContextMenuTrigger
               aria-label="Sound, waveform: drag to select, right-click to edit"
-              className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              className="flex flex-1 flex-col rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
               onKeyDown={keyDown}
               ref={surface}
               role="group"
               tabIndex={0}
             >
               <TimelineViewport
-                className="overflow-y-hidden rounded-lg border"
+                className="flex flex-1 flex-col overflow-y-hidden rounded-lg border"
                 ref={viewport}
                 scrollbar="hidden"
               >
@@ -2065,7 +2067,7 @@ function ClipLane({
                 <LocatorLane actions={locatorActions} locators={locators} />
                 {/* A press seeks and a drag selects; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
                 <TimelineLane
-                  className="h-28"
+                  className="min-h-28 flex-1"
                   onClick={pick}
                   onPointerDown={press}
                   onSelectionChange={select}
@@ -2898,7 +2900,7 @@ export default function BlockAudioEditor() {
   const levels = useAudioLevels(meter(doc.main.id) ?? NO_ANALYSERS);
 
   return (
-    <div className="@container w-full min-w-0" ref={frame}>
+    <div className="@container flex w-full min-w-0 flex-1 flex-col" ref={frame}>
       <input
         accept="audio/*"
         className="sr-only"
@@ -3154,7 +3156,7 @@ export default function BlockAudioEditor() {
         settings={exportSettings}
       />
       {/* The track's chain, from one edge of the inset to the other, the library beside it as in a workstation. */}
-      <div className="flex h-96 border-t">
+      <div className="flex h-96 shrink-0 border-t">
         <DeviceBrowser
           className="h-full"
           onOpenChange={setLibraryOpen}

@@ -25,10 +25,12 @@ export function getThemeStyleElement() {
   return { element, existed: false };
 }
 
-/** Writes a theme's variables: shared and light ones on `:root`, dark ones on `.dark`. */
-export function writeThemeVars(
-  element: HTMLStyleElement,
-  { dark, light, theme }: ThemeCssVars
-) {
-  element.textContent = `:root {\n${declarations(theme)}${declarations(light)}}\n\n.dark {\n${declarations(dark)}}\n`;
+/** A theme's variables as CSS: shared and light ones on `:root`, dark ones on `.dark`. */
+export function themeCss({ dark, light, theme }: ThemeCssVars) {
+  return `:root {\n${declarations(theme)}${declarations(light)}}\n\n.dark {\n${declarations(dark)}}\n`;
+}
+
+/** Writes a theme's variables into the page's `<style>`. */
+export function writeThemeVars(element: HTMLStyleElement, vars: ThemeCssVars) {
+  element.textContent = themeCss(vars);
 }

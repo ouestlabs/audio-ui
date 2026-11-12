@@ -1,9 +1,9 @@
 ---
 title: Custom elements
-description: Every primitive as framework-agnostic Web Components, with the parts, state attributes and events of the React primitives.
+description: Every primitive as framework-agnostic Web Components, with their parts, state attributes and events, in Vue, Svelte, plain HTML and any framework.
 ---
 
-`@audio-ui/elements` provides every primitive as a set of unstyled, accessible custom elements. Each one is built on `@audio-ui/core` and keeps API parity with [`@audio-ui/react`](/docs/react): the same parts, keyboard interactions, ARIA semantics and `data-*` state attributes. The elements work in plain HTML and in any framework that renders HTML, such as Vue, Svelte, Angular or Lit. Every element has a page with its attributes, its parts and a live preview.
+`@audio-ui/elements` provides every primitive as a set of unstyled, accessible custom elements, built on `@audio-ui/core`: their parts, keyboard interactions, ARIA semantics and `data-*` state attributes. The elements work in plain HTML and in any framework that renders HTML, such as Vue, Svelte, Angular or Lit. Every element has a page with its attributes, its parts, a live preview and its usage in your framework.
 
 ## Installation
 
@@ -21,16 +21,16 @@ Registration is a no-op on the server: server-rendered markup upgrades once the 
 
 ## Usage
 
-<Tabs defaultValue="javascript">
+<FrameworkTabs defaultValue="web">
 
 <TabsList>
-  <TabsTrigger value="javascript"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
   <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
   <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
   <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
 </TabsList>
 
-<TabsContent value="javascript">
+<TabsContent value="web">
 
 ```html
 <audio-ui-knob min="20" max="20000" default-value="1000" scale="log">
@@ -55,9 +55,9 @@ Registration is a no-op on the server: server-rendered markup upgrades once the 
 
 <TabsContent value="vue">
 
-Declare the tags as custom elements to Vue's compiler, in `vite.config.js`. [Vue](/docs/elements/vue) has the template types and the rest:
+Declare the tags as custom elements to Vue's compiler, in `vite.config.ts`, then register the elements the app uses, once, as in any page:
 
-```js
+```ts
 vue({
   template: {
     compilerOptions: { isCustomElement: (tag) => tag.startsWith("audio-ui-") },
@@ -65,8 +65,16 @@ vue({
 });
 ```
 
+**Types.** `@audio-ui/elements/vue` adds every element to Vue's `GlobalComponents`. Import it once, in a file the project's `tsconfig.json` includes. Templates are then checked as for a component: an element's attributes (`min`, `drag-mode`), the properties it has a setter for (`value`, `format`) and its own events, with the type of their `detail`, such as a knob's `input` or a clip's `clipinput`. Strict templates (`vueCompilerOptions.strictTemplates`) are supported. The import adds nothing to the bundle.
+
+```ts
+import type {} from "@audio-ui/elements/vue";
+```
+
+**Binding.** `v-model` binds an element's `value`: Vue reads it on every `input` and writes it when the model changes. The knob, the fader, the XY pad, the envelope, the sequencer, the waveform, the piano roll and a plot's handles take `v-model`.
+
 ```vue
-<script setup>
+<script setup lang="ts">
 import "@audio-ui/elements/knob";
 import { ref } from "vue";
 
@@ -74,12 +82,7 @@ const cutoff = ref(1000);
 </script>
 
 <template>
-  <audio-ui-knob
-    min="20"
-    max="20000"
-    scale="log"
-    v-model="cutoff"
-  >
+  <audio-ui-knob min="20" max="20000" scale="log" v-model="cutoff">
     <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
     <audio-ui-knob-control>
       <audio-ui-knob-track />
@@ -91,14 +94,52 @@ const cutoff = ref(1000);
 </template>
 ```
 
+`v-model` keeps every value the element proposes. To refuse one, bind `:value` and listen to `@input`, which can call `preventDefault()`:
+
+```vue
+<script setup lang="ts">
+import type { KnobInputEvent } from "@audio-ui/elements/knob";
+import { ref } from "vue";
+
+const cutoff = ref(1000);
+const limit = ref(8000);
+
+function onInput(event: KnobInputEvent) {
+  if (event.detail.value > limit.value) {
+    event.preventDefault();
+  } else {
+    cutoff.value = event.detail.value;
+  }
+}
+</script>
+
+<template>
+  <audio-ui-knob :value="cutoff" @input="onInput" />
+</template>
+```
+
+A part with a value of its own, such as a timeline clip or a range, fires events prefixed with its name: bind it with `:value` and `@clipinput` or `@rangeinput`.
+
 </TabsContent>
 
 <TabsContent value="svelte">
 
-[Svelte](/docs/elements/svelte) has the template types and the rest.
+Svelte renders the tags as they are written. Register the elements the app uses, once, as in any page:
+
+```ts
+import "@audio-ui/elements/knob";
+```
+
+**Types.** `@audio-ui/elements/svelte` adds every element to `SvelteHTMLElements`, in `svelte/elements`. Import it once, in a file the project's `tsconfig.json` includes. Templates are then checked: an element's attributes (`min`, `drag-mode`), the properties it has a setter for (`value`, `format`) and an `on…` handler for each of its own events, with the type of their `detail`, such as a knob's `oninput` or a clip's `onclipinput`. The import adds nothing to the bundle.
+
+```ts
+import type {} from "@audio-ui/elements/svelte";
+```
+
+**Binding.** Svelte binds `bind:value` on `<input>`, `<textarea>` and `<select>` only. Bind an element with `value` and `oninput`:
 
 ```svelte
-<script>
+<script lang="ts">
   import "@audio-ui/elements/knob";
 
   let cutoff = $state(1000);
@@ -120,6 +161,8 @@ const cutoff = ref(1000);
   <audio-ui-knob-value></audio-ui-knob-value>
 </audio-ui-knob>
 ```
+
+Svelte sets what a template gives an element as a property when the element has one, `value`, `scale` and `format` among them, and as an attribute otherwise. A listener that refuses a value calls `event.preventDefault()` instead of assigning it. A part with a value of its own, such as a timeline clip or a range, fires events prefixed with its name: bind it with `value` and `onclipinput` or `onrangeinput`.
 
 </TabsContent>
 
@@ -145,7 +188,7 @@ const [cutoff, setCutoff] = useState(1000);
 
 </TabsContent>
 
-</Tabs>
+</FrameworkTabs>
 
 ## Value and events
 
@@ -162,18 +205,104 @@ A part that holds a value of its own fires events prefixed with its name, for ex
 
 ## Styling
 
-The elements apply only the styles their behavior depends on: the display of each box, the positioning of placed parts, `touch-action` on interactive surfaces. These rules are wrapped in `:where()`, so they carry no specificity and any rule of yours takes precedence. No color, size or spacing is set. Style the parts by tag and by the same state attributes as the React parts:
+The elements apply only the styles their behavior depends on: the display of each box, the positioning of placed parts, `touch-action` on interactive surfaces. These rules are wrapped in `:where()`, so they carry no specificity and any rule of yours takes precedence. No color, size or spacing is set. Style the parts by tag and by the same state attributes as the React parts, with a stylesheet or with classes. Parts drawn as SVG use `currentColor`.
+
+The examples on every element's page do both, and the **Styling** choice of the customizer says which one they show. They read the theme's variables. The CSS examples carry the default theme's values as fallbacks, so they work as pasted; to change the look, define the variables once in your own stylesheet. The Tailwind examples need them, named for their classes:
+
+{/* styling:start: written by `bun scripts/element-usage.ts --write` */}
+
+<ForStyling only="css">
 
 ```css
-audio-ui-knob-control { width: 4rem; height: 4rem; cursor: grab; }
-audio-ui-knob[data-dragging] audio-ui-knob-control { cursor: grabbing; }
-audio-ui-knob-track, audio-ui-knob-indicator { position: absolute; inset: 0; }
-audio-ui-knob-track { color: var(--muted); }
-audio-ui-knob-indicator { color: var(--primary); }
-audio-ui-knob-thumb:has(input:focus-visible) { outline: 2px solid var(--ring); }
+:root {
+  --background: oklch(1 0 0);
+  --border: oklch(0.922 0 0);
+  --card: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --input: oklch(0.922 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --popover: oklch(1 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --radius: 0.625rem;
+  --ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --card: oklch(0.205 0 0);
+  --foreground: oklch(0.985 0 0);
+  --input: oklch(1 0 0 / 15%);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --popover: oklch(0.205 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --ring: oklch(0.556 0 0);
+}
 ```
 
-Parts drawn as SVG use `currentColor`. Classes work as well: the knob and fader previews apply the registry's Tailwind classes.
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```css
+@import "tailwindcss";
+
+@theme inline {
+  --color-background: var(--background);
+  --color-border: var(--border);
+  --color-card: var(--card);
+  --color-foreground: var(--foreground);
+  --color-input: var(--input);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-popover: var(--popover);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+}
+
+:root {
+  --background: oklch(1 0 0);
+  --border: oklch(0.922 0 0);
+  --card: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --input: oklch(0.922 0 0);
+  --muted: oklch(0.97 0 0);
+  --muted-foreground: oklch(0.556 0 0);
+  --popover: oklch(1 0 0);
+  --primary: oklch(0.205 0 0);
+  --primary-foreground: oklch(0.985 0 0);
+  --radius: 0.625rem;
+  --ring: oklch(0.708 0 0);
+}
+
+.dark {
+  --background: oklch(0.145 0 0);
+  --border: oklch(1 0 0 / 10%);
+  --card: oklch(0.205 0 0);
+  --foreground: oklch(0.985 0 0);
+  --input: oklch(1 0 0 / 15%);
+  --muted: oklch(0.269 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+  --popover: oklch(0.205 0 0);
+  --primary: oklch(0.922 0 0);
+  --primary-foreground: oklch(0.205 0 0);
+  --ring: oklch(0.556 0 0);
+}
+```
+
+</ForStyling>
+
+{/* styling:end */}
+
+The **Accent**, **Radius** and **Font** of the customizer restyle every preview, and **Copy CSS** gives this stylesheet with your choices.
 
 ## Elements
 

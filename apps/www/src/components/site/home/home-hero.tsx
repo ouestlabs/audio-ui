@@ -5,6 +5,7 @@ import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Icons } from "@/components/site/icons";
 import { Button } from "@/components/ui/button";
+import { useFramework } from "@/hooks/use-framework";
 
 /** Where audio/ui runs, each with its logo: the web's is JavaScript's, as on the Elements page. */
 const WORDS = [
@@ -24,14 +25,28 @@ const ROLL_MS = 600;
 /**
  * The hero's last word, rolling through where audio/ui runs: one strip of
  * words, each after its logo, in a slot as wide as the longest, moving up a
- * row at a time. The words are generated content, so the heading reads as
- * the sentence beside it; with reduced motion it stays on the first.
+ * row at a time. With a framework chosen in the sidebar, it rolls to that one
+ * and stays. The words are generated content, so the heading reads as the
+ * sentence beside it; with reduced motion it stays on the first, or on the
+ * one chosen.
  */
 function HeroReel() {
+  const [framework] = useFramework();
+  // The row of the framework chosen, its word being its id: web, react, vue, svelte.
+  const chosen = framework
+    ? WORDS.findIndex((each) => each.word.toLowerCase() === framework)
+    : -1;
   const [row, setRow] = useState(0);
   const [rolling, setRolling] = useState(true);
 
   useEffect(() => {
+    if (chosen >= 0) {
+      setRolling(
+        !window.matchMedia("(prefers-reduced-motion: reduce)").matches
+      );
+      setRow(chosen);
+      return;
+    }
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       return;
     }
@@ -54,7 +69,7 @@ function HeroReel() {
       window.clearInterval(timer);
       window.clearTimeout(wrap);
     };
-  }, []);
+  }, [chosen]);
 
   return (
     <span aria-hidden="true" className="inline-flex h-lh overflow-hidden">
@@ -86,6 +101,8 @@ function HeroReel() {
  * section.
  */
 export function HomeHero() {
+  const [framework] = useFramework();
+  const forReact = framework === null || framework === "react";
   return (
     <div className="flex shrink-0 flex-col gap-2 px-4 pt-6 pb-8 sm:px-6 lg:pt-8">
       <h1 className="scroll-m-20 whitespace-nowrap font-semibold font-site-heading text-4xl tracking-tight sm:text-3xl xl:text-4xl">
@@ -105,11 +122,24 @@ export function HomeHero() {
             </Link>
           }
         />
-        <Button
-          nativeButton={false}
-          render={<Link to="/components">Browse components</Link>}
-          variant="outline"
-        />
+        {/* The registry's catalog is React's: a reader of another framework browses the elements. */}
+        {forReact ? (
+          <Button
+            nativeButton={false}
+            render={<Link to="/components">Browse components</Link>}
+            variant="outline"
+          />
+        ) : (
+          <Button
+            nativeButton={false}
+            render={
+              <Link params={{ _splat: "elements" }} to="/docs/$">
+                Browse elements
+              </Link>
+            }
+            variant="outline"
+          />
+        )}
       </div>
     </div>
   );

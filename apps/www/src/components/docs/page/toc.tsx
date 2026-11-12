@@ -8,6 +8,7 @@ import {
   FrameHeader,
 } from "@/components/site/layout/frame";
 import { Button } from "@/components/ui/button";
+import { useFramework } from "@/hooks/use-framework";
 import { cn } from "@/lib/utils";
 
 const LINE_WIDTH_BY_DEPTH: Record<number, string> = {
@@ -88,8 +89,26 @@ function useActiveItem(itemIds: string[]) {
   return activeId;
 }
 
+/**
+ * The headings of the page that are on it: a block for another framework
+ * (`<ForFrameworks>`) takes its headings with it. Read again whenever the
+ * framework changes; all of them on the server and before the page hydrates.
+ */
+function useShownHeadings<Item extends { url: string }>(written: Item[]) {
+  const [framework] = useFramework();
+  // Which framework the headings were read for, with them.
+  const [shown, setShown] = React.useState({ framework, items: written });
+  React.useEffect(() => {
+    const on = written.filter((item) =>
+      document.getElementById(decodeURIComponent(item.url.slice(1)))
+    );
+    setShown({ framework, items: on.length === written.length ? written : on });
+  }, [framework, written]);
+  return shown.items;
+}
+
 export function DocsTableOfContents({
-  toc,
+  toc: written,
   className,
 }: {
   toc: {
@@ -99,6 +118,7 @@ export function DocsTableOfContents({
   }[];
   className?: string;
 }) {
+  const toc = useShownHeadings(written);
   const [pinned, setPinned] = React.useState(false);
   const itemIds = React.useMemo(
     () => toc.map((item) => item.url.replace("#", "")),

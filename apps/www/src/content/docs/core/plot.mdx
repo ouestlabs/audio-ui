@@ -29,4 +29,14 @@ const d = curvePath((hz) => eq(hz), frequency, gain, 256); // an SVG path in a 1
 
 `createPlotHandleController` drives a handle on the plot, such as an equalizer band's, and follows the [contract](/docs/core/controllers) every controller shares. Its options are `axis` (`"both"` by default, or one axis), `defaultValue`, `disabled`, the `measure(fresh)` function that returns the plot's box in the viewport, and the change and commit callbacks. `press(event, element)` follows the drag, `keyDown(event)` moves the handle by a step, `typeAt(along, position, event)` sets it on one axis from a typed value, and `reset(event)` returns it to its default.
 
+<ForFrameworks only="react">
+
 The [Plot](/docs/components/base/plot) draws these in React.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+[`<audio-ui-plot>`](/docs/elements/plot) draws these in your framework.
+
+</ForFrameworks>

@@ -1,11 +1,15 @@
 /** A figure of the home: a count, what it counts, and where it can be checked. */
 export interface HomeFigure {
+  /** Where a reader of another framework than React checks it, when not at `href`. */
+  elementsHref?: string;
   href: string;
   label: string;
+  /** It counts the registry, which only a React app installs: not shown to a reader of another framework. */
+  reactOnly?: boolean;
   value: string;
 }
 
-/** The figures under the hero, from one edge of the panel to the other, each a link to where it can be checked; the labels set in mono. */
+/** The library in figures, under the components' lead, from one edge of the panel to the other, each a link to where it can be checked; the labels set in mono. */
 export function HomeFigures({ figures }: { figures: HomeFigure[] }) {
   return (
     <section aria-label="In figures">

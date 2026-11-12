@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { CopyCss } from "@/components/customizer/actions/copy-css";
 import { CopyPreset } from "@/components/customizer/actions/copy-preset";
 import { OpenPreset } from "@/components/customizer/actions/open-preset";
 import { RandomButton } from "@/components/customizer/actions/random-button";
@@ -11,12 +12,19 @@ import { BasePicker } from "@/components/customizer/pickers/base-picker";
 import { ChartColorPicker } from "@/components/customizer/pickers/chart-color-picker";
 import { FontPicker } from "@/components/customizer/pickers/font-picker";
 import { IconLibraryPicker } from "@/components/customizer/pickers/icon-library-picker";
+import {
+  DensityPicker,
+  SizePicker,
+} from "@/components/customizer/pickers/look-pickers";
 import { MenuColorPicker } from "@/components/customizer/pickers/menu-picker";
 import { RadiusPicker } from "@/components/customizer/pickers/radius-picker";
 import { StylePicker } from "@/components/customizer/pickers/style-picker";
+import { StylingPicker } from "@/components/customizer/pickers/styling-picker";
 import { ThemePicker } from "@/components/customizer/pickers/theme-picker";
 import { FieldGroup } from "@/components/ui/field";
 import { useConfig } from "@/hooks/use-config";
+import { useCustomizerScope } from "@/hooks/use-customizer-scope";
+import { ELEMENT_CHOICES } from "@/lib/design-system/customizer-scope";
 import { FONT_HEADING_OPTIONS, FONTS } from "@/lib/design-system/fonts";
 import { useDesignSystemSearchParams } from "@/lib/design-system/search-params";
 import { getThemesForBaseColor, STYLES } from "@/registry/config";
@@ -44,8 +52,26 @@ export function CustomizerSidebarContent({
   );
 
   const strip = layout === "strip";
-
-  const pickers = (
+  // On a page of the custom elements: how the examples are styled and their look, with the theme as CSS for the output.
+  const forElements = useCustomizerScope() === "elements";
+  const pickers = forElements ? (
+    <>
+      <StylingPicker anchorRef={anchorRef} isMobile={isMobile} />
+      <ThemePicker
+        anchorRef={anchorRef}
+        isMobile={isMobile}
+        label="Accent"
+        themes={availableThemes}
+      />
+      <RadiusPicker
+        anchorRef={anchorRef}
+        defaultNote="0.625rem, the theme's"
+        isMobile={isMobile}
+      />
+      <SizePicker anchorRef={anchorRef} isMobile={isMobile} />
+      <DensityPicker anchorRef={anchorRef} isMobile={isMobile} />
+    </>
+  ) : (
     <>
       <BasePicker anchorRef={anchorRef} isMobile={isMobile} />
       <StylePicker anchorRef={anchorRef} isMobile={isMobile} styles={STYLES} />
@@ -76,6 +102,20 @@ export function CustomizerSidebarContent({
       <MenuAccentPicker anchorRef={anchorRef} isMobile={isMobile} />
     </>
   );
+  const actions = forElements ? (
+    <>
+      <CopyCss />
+      <RandomButton choices={ELEMENT_CHOICES} />
+      <ResetButton />
+    </>
+  ) : (
+    <>
+      <CopyPreset />
+      <OpenPreset />
+      <RandomButton />
+      <ResetButton />
+    </>
+  );
 
   return (
     <>
@@ -89,10 +129,7 @@ export function CustomizerSidebarContent({
         {strip ? (
           <div className="flex w-max flex-row gap-2 p-2">
             {pickers}
-            <CopyPreset />
-            <OpenPreset />
-            <RandomButton />
-            <ResetButton />
+            {actions}
           </div>
         ) : (
           <div className="p-2">
@@ -102,10 +139,7 @@ export function CustomizerSidebarContent({
       </div>
       {!strip && (
         <div className="mt-auto flex shrink-0 flex-col gap-0 p-3">
-          <CopyPreset />
-          <OpenPreset />
-          <RandomButton />
-          <ResetButton />
+          {actions}
         </div>
       )}
     </>

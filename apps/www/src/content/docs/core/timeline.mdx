@@ -45,4 +45,14 @@ setClipFadeIn(clip, 2); // a fade-in that cannot run into the fade-out
 
 A `Grid` is lines `step` apart from an `offset`, with snap points such as clip edges that pull from `SNAP_RADIUS_PX` away. `snapToGrid(value, grid)` gives the snap point within reach or the nearest line, `snapMove`, `snapSpanMove` and `snapRangeMove` place something dragged, and `bypassesGrid(event)` says when a gesture asks to ignore the grid: Cmd on a Mac, Ctrl elsewhere.
 
+<ForFrameworks only="react">
+
 The [Arrangement](/docs/components/base/arrangement) draws these in React.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+[`<audio-ui-timeline>`](/docs/elements/timeline) draws these in your framework.
+
+</ForFrameworks>

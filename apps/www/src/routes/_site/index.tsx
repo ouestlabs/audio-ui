@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { useEffect } from "react";
 import {
-  type HomeFigure,
-  HomeFigures,
-} from "@/components/site/home/home-figures";
+  setEditorExpanded,
+  useEditorExpanded,
+} from "@/components/site/home/editor-expanded";
+import type { HomeFigure } from "@/components/site/home/home-figures";
 import { HomeGuide } from "@/components/site/home/home-guide";
 import { HomeHero } from "@/components/site/home/home-hero";
 import { JsonLd } from "@/components/site/json-ld";
@@ -36,7 +38,7 @@ async function monthlyDownloads(): Promise<number | null> {
 
 /** The component spaces, the guides and the figures, read once on the server. */
 const loadHome = createServerFn({ method: "GET" }).handler(async () => {
-  const { guides, spaces } = getHomeIndex();
+  const { elements, guides, spaces } = getHomeIndex();
   // A space's component pages, not the overview it may link to.
   const pagesOf = (name: string) =>
     spaces
@@ -48,14 +50,17 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
     {
       href: "/components",
       label: "Components",
+      reactOnly: true,
       value: String(pagesOf("Elements") + pagesOf("Workstation")),
     },
     {
       href: "/docs/devices",
       label: "Devices",
+      reactOnly: true,
       value: String(pagesOf("Devices")),
     },
     {
+      elementsHref: "/docs/elements",
       href: "/docs/react",
       label: "Primitives",
       // The primitives are the entries the elements and React share: the elements' own, less the types of its frameworks.
@@ -76,12 +81,14 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
           },
         ]),
   ];
-  return { figures, guides, spaces };
+  return { elements, figures, guides, spaces };
 });
 
 const title = "audio/ui: the Audio UI Component Library for React";
 
 export const Route = createFileRoute("/_site/")({
+  // Its audio editor is the registry's, for every framework: each choice of the customizer shows on it.
+  staticData: { customizer: "all" },
   component: IndexPage,
   // The docs do not change while the site runs: read once, not on every visit.
   gcTime: Number.POSITIVE_INFINITY,
@@ -116,21 +123,39 @@ export const Route = createFileRoute("/_site/")({
 });
 
 function IndexPage() {
-  const { figures, guides, spaces } = Route.useLoaderData();
+  const { elements, figures, guides, spaces } = Route.useLoaderData();
+  // The bar's button gives the editor the whole inset; leaving the home gives it back.
+  const expanded = useEditorExpanded();
+  useEffect(() => () => setEditorExpanded(false), []);
   return (
     <>
       <JsonLd data={buildSoftwareJsonLd()} />
-      <HomeHero />
+      {expanded ? null : <HomeHero />}
       {/* Under the title, the registry's audio editor itself: what a user installs, working. */}
-      <section aria-labelledby="home-editor" className="border-t">
+      <section
+        aria-labelledby="home-editor"
+        className={expanded ? "flex flex-1 flex-col" : "border-t"}
+      >
         <h2 className="sr-only" id="home-editor">
           Audio editor
         </h2>
         <BlockAudioEditor />
       </section>
-      <HomeFigures figures={figures} />
-      {/* Under it, the page in words: what search engines and agents read without running it. */}
-      <HomeGuide guides={guides} spaces={spaces} />
+      {/* A hatched band between the editor and the rest of the page: the editor ends here. */}
+      <div
+        aria-hidden="true"
+        className="h-6 shrink-0 border-t bg-[repeating-linear-gradient(-45deg,var(--border)_0_1px,transparent_1px_7px)]"
+        hidden={expanded}
+      />
+      {/* Under it, the page in words, the library's figures with the components: what search engines and agents read without running it. */}
+      {expanded ? null : (
+        <HomeGuide
+          elements={elements}
+          figures={figures}
+          guides={guides}
+          spaces={spaces}
+        />
+      )}
     </>
   );
 }

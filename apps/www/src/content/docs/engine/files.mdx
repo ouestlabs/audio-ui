@@ -28,7 +28,11 @@ const file = await encodeAudio(channels, { bitDepth: 24, format: "wav", sampleRa
 downloadFile(file, "mix.wav");
 ```
 
+<ForFrameworks only="react">
+
 [`audio-export`](/docs/lib/audio-export) adds loudness normalization on top of it.
+
+</ForFrameworks>
 
 ## MIDI files
 

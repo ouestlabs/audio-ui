@@ -1,5 +1,7 @@
 import { Link } from "@tanstack/react-router";
+import { ExpandEditor } from "@/components/site/home/expand-editor";
 import type { CommandMenuGroup } from "@/components/site/navigation/command-menu";
+import { FrameworkSelect } from "@/components/site/navigation/framework-select";
 import { GitHubLink } from "@/components/site/navigation/github-link";
 import {
   SiteHeaderCommandMenu,
@@ -96,8 +98,8 @@ function SiteLogo() {
 
 /**
  * From `lg`, the framed layouts have no header: this is what it held, at the
- * top of the navigation sidebar: the logo, the theme, the section menu and the
- * search. GitHub stays in the inset's bar.
+ * top of the navigation sidebar: the logo, the theme, the section menu, the
+ * framework menu and the search. GitHub stays in the inset's bar.
  */
 export function SiteSidebarHeader() {
   const pageTree = source.getPageTree();
@@ -111,6 +113,7 @@ export function SiteSidebarHeader() {
         <SiteHeaderModeSwitcher />
       </div>
       <SectionSelect tree={pageTree} />
+      <FrameworkSelect tree={pageTree} />
       <div className="[&>*]:w-full">
         <SiteHeaderCommandMenu
           commandGroups={commandGroups}
@@ -131,13 +134,19 @@ export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
   if (part === "github") {
     return (
       <>
+        <ExpandEditor />
         <LabLink />
         <GitHubLink />
       </>
     );
   }
   if (part === "start") {
-    return <SectionSelect compact tree={source.getPageTree()} />;
+    return (
+      <div className="flex items-center gap-2">
+        <SectionSelect compact tree={source.getPageTree()} />
+        <FrameworkSelect compact tree={source.getPageTree()} />
+      </div>
+    );
   }
   const pageTree = source.getPageTree();
   const componentCategories = getCategories();

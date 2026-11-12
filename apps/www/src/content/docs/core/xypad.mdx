@@ -23,4 +23,14 @@ const pad = createXYPadController({ minX: 0, maxX: 1, minY: 0, maxY: 1, value: {
 
 A pad has two parameters on one gesture. `type(axis, value, event)` takes the axis first, because a text input is per axis. Shift with the arrows, and Page Up and Page Down, move ten steps at once (`LARGE_STEP_MULTIPLIER`). `reset(event)` returns both axes to their defaults: the element calls it on a double-click, and the controller itself resets on Alt with a press and on Delete or Backspace. A double tap is not a reset here, since a tap on a pad places the point, so two quick taps are two points and not a request to go back.
 
+<ForFrameworks only="react">
+
 The [XY Pad](/docs/components/base/xypad) draws this controller in React.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+[`<audio-ui-xypad>`](/docs/elements/xypad) draws this controller in your framework.
+
+</ForFrameworks>

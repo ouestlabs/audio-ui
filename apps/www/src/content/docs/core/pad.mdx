@@ -28,4 +28,14 @@ element.addEventListener("pointerdown", (event) =>
 
 `navigate(value, event)` moves the focus with the arrows, Home and End, `columns` pads to a row, and returns the pad it moved to; the snapshot's `tabStop` is the one pad in the tab order. `activePads` lights pads from elsewhere, such as the notes a sequence plays, on top of the ones held, and `disabledValues` takes pads out: the arrows step over them.
 
+<ForFrameworks only="react">
+
 The [Pad](/docs/components/base/pad) draws this controller in React.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+[`<audio-ui-pad>`](/docs/elements/pad) draws this controller in your framework.
+
+</ForFrameworks>

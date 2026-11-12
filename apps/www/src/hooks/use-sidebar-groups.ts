@@ -1,5 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import * as React from "react";
+import { useFramework } from "@/hooks/use-framework";
+import { menuSections, needsReact } from "@/lib/docs/content/frameworks";
 import {
   getCurrentBase,
   getGroupsFromFolder,
@@ -80,6 +82,11 @@ export function useGroupFolding() {
 }
 
 const EXCLUDED_FOLDERS = ["test"];
+/** The folders of a section open to any framework that only a React app uses: the guides, on the registry's hooks and libraries. */
+const REACT_FOLDERS: readonly string[] = ["guides"];
+/** The pages of a section open to any framework that only a React app uses: the REST API serves the registry's components. */
+const REACT_PAGES = new Set(["/docs/api"]);
+const NO_FOLDERS: readonly string[] = [];
 /** The landing page of each section but the Docs': named Overview in the sidebar, as the section's row names it already. */
 const LANDING_PAGES = new Set<string>(
   DOCS_SECTIONS.filter((each) => each.id !== "docs").map((each) => each.href)
@@ -124,17 +131,25 @@ export interface SiteSection {
   label: string;
 }
 
-/** The site's sections, the one being read marked. */
+/**
+ * The switcher's sections, the one being read marked: the primitives of the
+ * framework, React's in a section for React alone, else the one chosen.
+ */
 export function useSiteSections(tree: PageTree): SiteSection[] {
   const pathname = useLocation({ select: (location) => location.pathname });
+  const [chosen] = useFramework();
   const reading = React.useMemo(
     () => sectionAt(tree, pathname),
     [tree, pathname]
   );
+  const framework = needsReact(reading) ? "react" : chosen;
   return React.useMemo(
     () =>
-      DOCS_SECTIONS.map((each) => ({ ...each, current: each.id === reading })),
-    [reading]
+      menuSections(framework, reading).map((each) => ({
+        ...each,
+        current: each.id === reading,
+      })),
+    [framework, reading]
   );
 }
 
@@ -155,12 +170,17 @@ export function useSidebarGroups(tree: PageTree) {
         item.type === "folder" && !EXCLUDED_FOLDERS.includes(item.$id ?? "")
           ? getGroupsFromFolder(item, currentBase).map((group) => ({
               ...group,
+              folder: (item.$id ?? "").split("/").at(-1) ?? "",
               section: sectionOfFolder(item.$id ?? ""),
             }))
           : []
       ),
     [currentBase, tree]
   );
+  // The folders a reader of the framework chosen has no use for: the guides use the registry's hooks.
+  const [framework] = useFramework();
+  const otherThanReact = framework !== null && framework !== "react";
+  const unused = otherThanReact ? REACT_FOLDERS : NO_FOLDERS;
   const { collapsed, setOpen } = useGroupFolding();
 
   const currentGroup = all.find((group) =>
@@ -174,7 +194,9 @@ export function useSidebarGroups(tree: PageTree) {
     () => sectionAt(tree, pathname),
     [tree, pathname]
   );
-  const groups = all.filter((group) => group.section === reading);
+  const groups = all.filter(
+    (group) => group.section === reading && !unused.includes(group.folder)
+  );
   const sectionLabel = DOCS_SECTIONS.find((each) => each.id === reading)?.label;
   React.useEffect(() => {
     if (currentTitle) {
@@ -198,9 +220,11 @@ export function useSidebarGroups(tree: PageTree) {
         ),
         sections: group.sections.map((part) => ({
           ...part,
-          pages: part.pages.map((page) =>
-            LANDING_PAGES.has(page.url) ? { ...page, name: "Overview" } : page
-          ),
+          pages: part.pages
+            .filter((page) => !(otherThanReact && REACT_PAGES.has(page.url)))
+            .map((page) =>
+              LANDING_PAGES.has(page.url) ? { ...page, name: "Overview" } : page
+            ),
         })),
         titled,
       };

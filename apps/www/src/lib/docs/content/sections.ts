@@ -1,10 +1,11 @@
 /**
- * The site's sections, as the switcher at the top of the sidebar lists them:
- * the docs by the layers of the stack (what the reader learns first, the
- * framework-agnostic core and engine, the adapters, custom elements and React,
- * then the registry they install and own), and the components catalog. A docs section
- * gathers top-level folders of the content whatever their addresses, so a
- * component page keeps its URL under the Registry.
+ * The site's sections: the Docs (what the reader learns first), the
+ * primitives (custom elements, and React's), the framework-agnostic core with
+ * the engine, and the registry they install and own, with its catalog. The
+ * switcher at the top of the sidebar shows one set of primitives, the reader's
+ * framework's (`menuSections`). A section gathers top-level folders of the
+ * content whatever their addresses, so a component page keeps its URL under
+ * the Registry.
  */
 export const DOCS_SECTIONS = [
   {
@@ -15,18 +16,11 @@ export const DOCS_SECTIONS = [
     label: "Docs",
   },
   {
-    description: "Framework-agnostic logic and audio",
-    folders: ["core"],
+    description: "Logic and audio: core and engine",
+    folders: ["core", "engine"],
     href: "/docs/core",
     id: "core",
     label: "Core",
-  },
-  {
-    description: "Devices, time, levels and MIDI",
-    folders: ["engine"],
-    href: "/docs/engine",
-    id: "engine",
-    label: "Engine",
   },
   {
     description: "Custom elements, any framework",
@@ -43,20 +37,16 @@ export const DOCS_SECTIONS = [
     label: "React",
   },
   {
-    description: "Components, devices, hooks and libraries",
+    description: "Components, devices, hooks and the catalog",
     folders: ["(registry)", "components", "hooks", "lib"],
     href: "/docs/registry",
     id: "registry",
     label: "Registry",
   },
-  {
-    description: "Blocks to copy, by category",
-    folders: [],
-    href: "/components",
-    id: "components",
-    label: "Components",
-  },
 ] as const;
+
+/** The components catalog: its own page, read as part of the Registry. */
+const CATALOG = "/components";
 
 export type DocsSection = (typeof DOCS_SECTIONS)[number];
 export type DocsSectionId = DocsSection["id"];
@@ -75,6 +65,9 @@ export function sectionOfFolder(folder: string): DocsSectionId {
 
 /** The section an address is in when no page of the tree says so: the one whose landing page it is under, the Docs otherwise. */
 export function sectionOfPath(pathname: string): DocsSectionId {
+  if (pathname === CATALOG || pathname.startsWith(`${CATALOG}/`)) {
+    return "registry";
+  }
   const under = DOCS_SECTIONS.filter(
     (section) =>
       section.href !== "/docs" &&
