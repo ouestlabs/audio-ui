@@ -41,13 +41,85 @@ const REACT_ONLY: readonly string[] = ["react", "registry"];
 /** Whether a section is for React alone: read there, the framework is React, whatever the reader chose. */
 export const needsReact = (section: string) => REACT_ONLY.includes(section);
 
-/** Where Elements starts for a reader of each framework: its own guide, or the elements themselves. */
-export const ELEMENTS_GUIDE: Record<FrameworkId, string> = {
-  react: "/docs/elements",
-  svelte: "/docs/elements/svelte",
-  vue: "/docs/elements/vue",
-  web: "/docs/elements",
-};
+/** The addresses only a React app uses: React's primitives, the registry with its catalog, its guides and its API. */
+const REACT_ADDRESSES = [
+  "/components",
+  "/docs/api",
+  "/docs/components",
+  "/docs/devices",
+  "/docs/guides",
+  "/docs/hooks",
+  "/docs/lib",
+  "/docs/react",
+  "/docs/registry",
+  "/docs/styling",
+];
+
+const under = (url: string, prefix: string) =>
+  url === prefix || url.startsWith(`${prefix}/`);
+
+/**
+ * Whether a page is one a reader of `framework` is shown, in the search as in
+ * the sidebar: for React, all but the elements; for the others, all but what
+ * only a React app uses; every page with no framework chosen.
+ */
+export function shownTo(url: string, framework: FrameworkId | null): boolean {
+  if (!framework) {
+    return true;
+  }
+  if (framework === "react") {
+    return !under(url, "/docs/elements");
+  }
+  return !REACT_ADDRESSES.some((prefix) => under(url, prefix));
+}
+
+/** The elements' overview, whose tabs show a reader the setup of their framework. */
+export const ELEMENTS = "/docs/elements";
+/** React's primitives, the elements' twins. */
+const REACT_PRIMITIVES = "/docs/react";
+/** The primitives with a page in both Elements and React, by their last segment, the overviews with them. */
+const TWINS = new Set([
+  "",
+  "envelope",
+  "fader",
+  "knob",
+  "meter",
+  "pad",
+  "piano",
+  "piano-roll",
+  "plot",
+  "sequencer",
+  "timeline",
+  "waveform",
+  "xypad",
+]);
+
+/**
+ * The same primitive's page as the framework reads it, when `pathname` is its
+ * twin in the other: React's for React, the elements' for the others. Null
+ * when the page is already the framework's own, has no twin, or no framework
+ * is chosen.
+ */
+export function twinPage(
+  pathname: string,
+  framework: FrameworkId | null
+): string | null {
+  if (!framework) {
+    return null;
+  }
+  const [from, to] =
+    framework === "react"
+      ? [ELEMENTS, REACT_PRIMITIVES]
+      : [REACT_PRIMITIVES, ELEMENTS];
+  if (!under(pathname, from)) {
+    return null;
+  }
+  const slug = pathname.slice(from.length + 1);
+  if (!TWINS.has(slug)) {
+    return null;
+  }
+  return slug ? `${to}/${slug}` : to;
+}
 
 /** How the switcher names the primitives, whichever they are: the framework is the other menu's to name. */
 const PRIMITIVES: Record<string, { description: string; label: string }> = {
@@ -61,7 +133,7 @@ const PRIMITIVES: Record<string, { description: string; label: string }> = {
   },
 };
 
-/** A section as the switcher lists it: its link, the framework's guide for Elements. */
+/** A section as the switcher lists it. */
 export interface FrameworkSection {
   description: string;
   folders: readonly string[];
@@ -74,7 +146,7 @@ export interface FrameworkSection {
  * The switcher's four sections: the Docs, one set of primitives, the core
  * with the engine, and the registry, for React or no framework chosen. The primitives are the section being
  * read when it is one of them, else the framework's: React's for React and
- * for no framework chosen, the elements for the others, from their guide.
+ * for no framework chosen, the elements for the others.
  * Either is named Primitives: the framework menu under it names the framework.
  */
 export function menuSections(
@@ -91,8 +163,6 @@ export function menuSections(
     if (!section) {
       return [];
     }
-    const guide =
-      id === "elements" && framework ? ELEMENTS_GUIDE[framework] : null;
-    return [{ ...section, ...PRIMITIVES[id], href: guide ?? section.href }];
+    return [{ ...section, ...PRIMITIVES[id] }];
   });
 }

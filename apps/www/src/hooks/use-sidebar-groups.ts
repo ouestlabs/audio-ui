@@ -84,6 +84,8 @@ export function useGroupFolding() {
 const EXCLUDED_FOLDERS = ["test"];
 /** The folders of a section open to any framework that only a React app uses: the guides, on the registry's hooks and libraries. */
 const REACT_FOLDERS: readonly string[] = ["guides"];
+/** The pages of a section open to any framework that only a React app uses: the REST API serves the registry's components. */
+const REACT_PAGES = new Set(["/docs/api"]);
 const NO_FOLDERS: readonly string[] = [];
 /** The landing page of each section but the Docs': named Overview in the sidebar, as the section's row names it already. */
 const LANDING_PAGES = new Set<string>(
@@ -177,8 +179,8 @@ export function useSidebarGroups(tree: PageTree) {
   );
   // The folders a reader of the framework chosen has no use for: the guides use the registry's hooks.
   const [framework] = useFramework();
-  const unused =
-    framework && framework !== "react" ? REACT_FOLDERS : NO_FOLDERS;
+  const otherThanReact = framework !== null && framework !== "react";
+  const unused = otherThanReact ? REACT_FOLDERS : NO_FOLDERS;
   const { collapsed, setOpen } = useGroupFolding();
 
   const currentGroup = all.find((group) =>
@@ -218,9 +220,11 @@ export function useSidebarGroups(tree: PageTree) {
         ),
         sections: group.sections.map((part) => ({
           ...part,
-          pages: part.pages.map((page) =>
-            LANDING_PAGES.has(page.url) ? { ...page, name: "Overview" } : page
-          ),
+          pages: part.pages
+            .filter((page) => !(otherThanReact && REACT_PAGES.has(page.url)))
+            .map((page) =>
+              LANDING_PAGES.has(page.url) ? { ...page, name: "Overview" } : page
+            ),
         })),
         titled,
       };

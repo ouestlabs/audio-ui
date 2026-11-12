@@ -5,7 +5,7 @@ import {
   CheckIcon,
   CodeIcon,
 } from "@phosphor-icons/react/ssr";
-import { useNavigate } from "@tanstack/react-router";
+import { useLocation, useNavigate } from "@tanstack/react-router";
 import { useCallback } from "react";
 import { Icons } from "@/components/site/icons";
 import {
@@ -18,11 +18,12 @@ import {
 import { rememberFramework, useFramework } from "@/hooks/use-framework";
 import { useSiteSections } from "@/hooks/use-sidebar-groups";
 import {
-  ELEMENTS_GUIDE,
+  ELEMENTS,
   FRAMEWORKS,
   type Framework,
   type FrameworkId,
   needsReact,
+  twinPage,
 } from "@/lib/docs/content/frameworks";
 import type { source } from "@/lib/docs/content/source";
 
@@ -99,7 +100,7 @@ function FrameworkItem({
  * names it, the sidebar puts its sections first, and the pages show their code
  * and their install for it. Its button shows the framework chosen, or that
  * none is; in a section for React alone (React, the registry, its catalog),
- * React, and another framework picked there opens its guide. `compact` draws the button on one line, for the bar of the inset
+ * React, and another framework picked there opens the elements, its own. `compact` draws the button on one line, for the bar of the inset
  * while the sidebar is shut.
  */
 export function FrameworkSelect({
@@ -115,17 +116,22 @@ export function FrameworkSelect({
   const reading = useSiteSections(tree).find((section) => section.current);
   const forReact = reading ? needsReact(reading.id) : false;
   const framework = forReact ? "react" : chosen;
-  // Another framework picked there: what is made for it is its guide, not this section.
+  // Another framework picked there: what is made for it is the elements, not this section.
+  const pathname = useLocation({ select: (location) => location.pathname });
   const choose = useCallback(
     (next: FrameworkId | null) => {
-      if (forReact && next && next !== "react") {
+      // A primitive's page goes to its twin in the framework picked; a section for React alone, to the elements.
+      const twin = next ? twinPage(pathname, next) : null;
+      const away =
+        twin ?? (forReact && next && next !== "react" ? ELEMENTS : null);
+      if (next && away) {
         rememberFramework(next);
-        navigate({ href: `${ELEMENTS_GUIDE[next]}?framework=${next}` });
+        navigate({ href: `${away}?framework=${next}` });
         return;
       }
       setChosen(next);
     },
-    [forReact, navigate, setChosen]
+    [forReact, navigate, pathname, setChosen]
   );
   const current = FRAMEWORKS.find((each) => each.id === framework) ?? null;
   const shown = current ?? ANY;

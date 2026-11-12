@@ -39,8 +39,10 @@ import {
 import { Kbd, KbdGroup } from "@/components/ui/kbd";
 import { Separator } from "@/components/ui/separator";
 import { useConfig } from "@/hooks/use-config";
+import { useFramework } from "@/hooks/use-framework";
 import { useIsMac } from "@/hooks/use-is-mac";
 import { useMutationObserver } from "@/hooks/use-mutation-observer";
+import { shownTo } from "@/lib/docs/content/frameworks";
 import type { CategoryInfo } from "@/lib/registry/core/registry";
 import { cn, normalizeSlug } from "@/lib/utils";
 
@@ -88,6 +90,21 @@ export function CommandMenu({
 }) {
   const router = useRouter();
   const isMac = useIsMac();
+  // The pages of the reader's framework alone, and the catalog's categories for React or no framework.
+  const [framework] = useFramework();
+  const shownGroups = React.useMemo(
+    () =>
+      groups
+        .map((group) => ({
+          ...group,
+          pages: group.pages.filter((page) => shownTo(page.url, framework)),
+        }))
+        .filter((group) => group.pages.length > 0),
+    [framework, groups]
+  );
+  const categories = shownTo("/components", framework)
+    ? componentCategories
+    : NO_COMPONENT_CATEGORIES;
   const [config] = useConfig();
   const [open, setOpen] = React.useState(false);
   const [selectedType, setSelectedType] = React.useState<HighlightType | null>(
@@ -267,7 +284,7 @@ export function CommandMenu({
                   ))}
                 </CommandGroup>
               )}
-              {groups.map((group) => (
+              {shownGroups.map((group) => (
                 <CommandGroup
                   className="p-0! **:[[cmdk-group-heading]]:scroll-mt-16 **:[[cmdk-group-heading]]:p-3! **:[[cmdk-group-heading]]:pb-1!"
                   heading={group.name}
@@ -300,12 +317,12 @@ export function CommandMenu({
                   ))}
                 </CommandGroup>
               ))}
-              {componentCategories.length > 0 && (
+              {categories.length > 0 && (
                 <CommandGroup
                   className="p-0! **:[[cmdk-group-heading]]:p-3!"
                   heading="Components"
                 >
-                  {componentCategories.map((category) => (
+                  {categories.map((category) => (
                     <CommandMenuItem
                       highlightType="category"
                       href={`/components/${normalizeSlug(category.name)}`}

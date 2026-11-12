@@ -4,17 +4,20 @@ import {
   ArrowRightIcon,
   ArrowUpRightIcon,
 } from "@phosphor-icons/react/ssr";
-import { Link, notFound } from "@tanstack/react-router";
+import { Link, notFound, useNavigate } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { findNeighbour } from "fumadocs-core/page-tree";
 import type { MDXProps } from "mdx/types";
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { DocsComponentCatalogSection } from "@/components/docs/catalog/component-catalog-section";
 import { DocsCopyPage } from "@/components/docs/page/copy-page";
 import { JsonLd } from "@/components/site/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useFramework } from "@/hooks/use-framework";
+import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { siteConfig } from "@/lib/config";
+import { twinPage } from "@/lib/docs/content/frameworks";
 import { getPageImage, source } from "@/lib/docs/content/source";
 import {
   buildBreadcrumbJsonLd,
@@ -95,6 +98,43 @@ export const loadDocPage = createServerFn({ method: "GET" })
   });
 
 type Neighbours = ReturnType<typeof findNeighbour>;
+
+/** A primitive's page read in the other framework than the one chosen: its twin, in place of it. */
+function useFrameworkTwin(url: string) {
+  const [framework] = useFramework();
+  const navigate = useNavigate();
+  useEffect(() => {
+    const twin = twinPage(url, framework);
+    if (twin) {
+      navigate({ href: twin, replace: true });
+    }
+  }, [framework, navigate, url]);
+}
+
+/**
+ * The pages before and after `url` as the sidebar lists them for the reader:
+ * within the section being read, and only what the framework chosen uses.
+ * The page tree's own order for a page the sidebar does not list.
+ */
+function useNeighbours(
+  pageTree: Parameters<typeof findNeighbour>[0],
+  url: string
+): Neighbours {
+  const { groups } = useSidebarGroups(pageTree);
+  const pages = groups.flatMap((group) =>
+    group.sections.flatMap((section) => section.pages)
+  );
+  const at = pages.findIndex((page) => page.url === url);
+  if (at < 0) {
+    return findNeighbour(pageTree, url);
+  }
+  const before = pages[at - 1];
+  const after = pages[at + 1];
+  return {
+    next: after ? { ...after, type: "page" } : undefined,
+    previous: before ? { ...before, type: "page" } : undefined,
+  };
+}
 
 /** The previous and next pages as icon buttons, beside the title. */
 function DocsNeighbourIcons({ neighbours }: { neighbours: Neighbours }) {
@@ -209,7 +249,8 @@ function DocArticle({
   props: DocArticleProps;
   toc: Parameters<typeof DocsTableOfContents>[0]["toc"];
 }) {
-  const neighbours = findNeighbour(pageTree, data.url);
+  const neighbours = useNeighbours(pageTree, data.url);
+  useFrameworkTwin(data.url);
 
   return (
     <>
