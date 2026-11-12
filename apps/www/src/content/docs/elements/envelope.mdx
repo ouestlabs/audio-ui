@@ -11,7 +11,7 @@ description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its 
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
-The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -33,17 +33,17 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     width: 100%;
     max-width: 28rem;
     height: 10rem;
-    border-radius: calc(var(--radius) - 2px);
-    background: var(--muted);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-envelope-fill {
-    color: var(--primary);
+    color: var(--primary, oklch(0.205 0 0));
     opacity: 0.15;
   }
 
   audio-ui-envelope-line {
-    color: var(--primary);
+    color: var(--primary, oklch(0.205 0 0));
     stroke-width: 2px;
   }
 
@@ -51,23 +51,23 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     box-sizing: border-box;
     width: 0.75rem;
     height: 0.75rem;
-    border: 2px solid var(--primary);
+    border: 2px solid var(--primary, oklch(0.205 0 0));
     border-radius: 9999px;
-    background: var(--background);
+    background: var(--background, oklch(1 0 0));
     cursor: grab;
     outline: none;
   }
 
   audio-ui-envelope-point:focus-visible,
   audio-ui-envelope-point[data-dragging] {
-    background: var(--primary);
+    background: var(--primary, oklch(0.205 0 0));
   }
 
   audio-ui-envelope-segment {
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 9999px;
-    background: var(--muted-foreground);
+    background: var(--muted-foreground, oklch(0.556 0 0));
     opacity: 0.5;
     cursor: ns-resize;
     outline: none;
@@ -151,17 +151,17 @@ audio-ui-envelope {
   width: 100%;
   max-width: 28rem;
   height: 10rem;
-  border-radius: calc(var(--radius) - 2px);
-  background: var(--muted);
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
 }
 
 audio-ui-envelope-fill {
-  color: var(--primary);
+  color: var(--primary, oklch(0.205 0 0));
   opacity: 0.15;
 }
 
 audio-ui-envelope-line {
-  color: var(--primary);
+  color: var(--primary, oklch(0.205 0 0));
   stroke-width: 2px;
 }
 
@@ -169,23 +169,23 @@ audio-ui-envelope-point {
   box-sizing: border-box;
   width: 0.75rem;
   height: 0.75rem;
-  border: 2px solid var(--primary);
+  border: 2px solid var(--primary, oklch(0.205 0 0));
   border-radius: 9999px;
-  background: var(--background);
+  background: var(--background, oklch(1 0 0));
   cursor: grab;
   outline: none;
 }
 
 audio-ui-envelope-point:focus-visible,
 audio-ui-envelope-point[data-dragging] {
-  background: var(--primary);
+  background: var(--primary, oklch(0.205 0 0));
 }
 
 audio-ui-envelope-segment {
   width: 0.5rem;
   height: 0.5rem;
   border-radius: 9999px;
-  background: var(--muted-foreground);
+  background: var(--muted-foreground, oklch(0.556 0 0));
   opacity: 0.5;
   cursor: ns-resize;
   outline: none;
@@ -247,17 +247,17 @@ import "@audio-ui/elements/envelope";
     width: 100%;
     max-width: 28rem;
     height: 10rem;
-    border-radius: calc(var(--radius) - 2px);
-    background: var(--muted);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-envelope-fill {
-    color: var(--primary);
+    color: var(--primary, oklch(0.205 0 0));
     opacity: 0.15;
   }
 
   audio-ui-envelope-line {
-    color: var(--primary);
+    color: var(--primary, oklch(0.205 0 0));
     stroke-width: 2px;
   }
 
@@ -265,23 +265,23 @@ import "@audio-ui/elements/envelope";
     box-sizing: border-box;
     width: 0.75rem;
     height: 0.75rem;
-    border: 2px solid var(--primary);
+    border: 2px solid var(--primary, oklch(0.205 0 0));
     border-radius: 9999px;
-    background: var(--background);
+    background: var(--background, oklch(1 0 0));
     cursor: grab;
     outline: none;
   }
 
   audio-ui-envelope-point:focus-visible,
   audio-ui-envelope-point[data-dragging] {
-    background: var(--primary);
+    background: var(--primary, oklch(0.205 0 0));
   }
 
   audio-ui-envelope-segment {
     width: 0.5rem;
     height: 0.5rem;
     border-radius: 9999px;
-    background: var(--muted-foreground);
+    background: var(--muted-foreground, oklch(0.556 0 0));
     opacity: 0.5;
     cursor: ns-resize;
     outline: none;

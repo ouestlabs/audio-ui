@@ -11,7 +11,7 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
-The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -35,41 +35,41 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
   }
 
   audio-ui-timeline-viewport {
-    border: 1px solid var(--border);
-    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid var(--border, oklch(0.922 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
   }
 
   audio-ui-timeline-ruler {
     height: 1.5rem;
     margin-inline-start: 5rem;
-    background: var(--muted);
+    background: var(--muted, oklch(0.97 0 0));
     cursor: pointer;
   }
 
   audio-ui-timeline-mark {
     height: 100%;
     padding-inline-start: 0.25rem;
-    border-inline-start: 1px solid var(--border);
-    color: var(--muted-foreground);
+    border-inline-start: 1px solid var(--border, oklch(0.922 0 0));
+    color: var(--muted-foreground, oklch(0.556 0 0));
     font-size: 10px;
   }
 
   audio-ui-timeline-range {
     top: 0;
     bottom: 0;
-    background: color-mix(in oklab, var(--primary) 15%, transparent);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
   }
 
   audio-ui-timeline-track {
     height: 3.5rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-timeline-track-header {
     width: 5rem;
     padding: 0.5rem;
-    border-inline-end: 1px solid var(--border);
-    background: var(--background);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+    background: var(--background, oklch(1 0 0));
     font-size: 0.75rem;
     line-height: 1rem;
   }
@@ -78,19 +78,19 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     top: 0.25rem;
     bottom: 0.25rem;
     overflow: hidden;
-    border-radius: calc(var(--radius) - 4px);
-    background: color-mix(in oklab, var(--primary) 15%, transparent);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
   }
 
   audio-ui-timeline-clip[data-selected] {
-    box-shadow: 0 0 0 2px var(--ring);
+    box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
   }
 
   audio-ui-timeline-clip-header {
     overflow: hidden;
     padding-inline: 0.375rem;
-    background: var(--primary);
-    color: var(--primary-foreground);
+    background: var(--primary, oklch(0.205 0 0));
+    color: var(--primary-foreground, oklch(0.985 0 0));
     font-size: 10px;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -117,21 +117,21 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     top: 0;
     bottom: 0;
     width: 1px;
-    background: var(--foreground);
+    background: var(--foreground, oklch(0.145 0 0));
   }
 
   audio-ui-timeline-navigator {
     height: 0.75rem;
     margin-top: 0.5rem;
-    border-radius: calc(var(--radius) - 4px);
-    background: var(--muted);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-timeline-navigator-window {
     top: 0;
     bottom: 0;
-    border-radius: calc(var(--radius) - 4px);
-    background: color-mix(in oklab, var(--primary) 25%, transparent);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 25%, transparent);
     cursor: grab;
   }
 </style>
@@ -229,41 +229,41 @@ audio-ui-timeline {
 }
 
 audio-ui-timeline-viewport {
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--border, oklch(0.922 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
 }
 
 audio-ui-timeline-ruler {
   height: 1.5rem;
   margin-inline-start: 5rem;
-  background: var(--muted);
+  background: var(--muted, oklch(0.97 0 0));
   cursor: pointer;
 }
 
 audio-ui-timeline-mark {
   height: 100%;
   padding-inline-start: 0.25rem;
-  border-inline-start: 1px solid var(--border);
-  color: var(--muted-foreground);
+  border-inline-start: 1px solid var(--border, oklch(0.922 0 0));
+  color: var(--muted-foreground, oklch(0.556 0 0));
   font-size: 10px;
 }
 
 audio-ui-timeline-range {
   top: 0;
   bottom: 0;
-  background: color-mix(in oklab, var(--primary) 15%, transparent);
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
 }
 
 audio-ui-timeline-track {
   height: 3.5rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border, oklch(0.922 0 0));
 }
 
 audio-ui-timeline-track-header {
   width: 5rem;
   padding: 0.5rem;
-  border-inline-end: 1px solid var(--border);
-  background: var(--background);
+  border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+  background: var(--background, oklch(1 0 0));
   font-size: 0.75rem;
   line-height: 1rem;
 }
@@ -272,19 +272,19 @@ audio-ui-timeline-clip {
   top: 0.25rem;
   bottom: 0.25rem;
   overflow: hidden;
-  border-radius: calc(var(--radius) - 4px);
-  background: color-mix(in oklab, var(--primary) 15%, transparent);
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
 }
 
 audio-ui-timeline-clip[data-selected] {
-  box-shadow: 0 0 0 2px var(--ring);
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
 }
 
 audio-ui-timeline-clip-header {
   overflow: hidden;
   padding-inline: 0.375rem;
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: var(--primary, oklch(0.205 0 0));
+  color: var(--primary-foreground, oklch(0.985 0 0));
   font-size: 10px;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -311,21 +311,21 @@ audio-ui-timeline-playhead {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: var(--foreground);
+  background: var(--foreground, oklch(0.145 0 0));
 }
 
 audio-ui-timeline-navigator {
   height: 0.75rem;
   margin-top: 0.5rem;
-  border-radius: calc(var(--radius) - 4px);
-  background: var(--muted);
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--muted, oklch(0.97 0 0));
 }
 
 audio-ui-timeline-navigator-window {
   top: 0;
   bottom: 0;
-  border-radius: calc(var(--radius) - 4px);
-  background: color-mix(in oklab, var(--primary) 25%, transparent);
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 25%, transparent);
   cursor: grab;
 }
 </style>
@@ -395,41 +395,41 @@ import "@audio-ui/elements/timeline";
   }
 
   audio-ui-timeline-viewport {
-    border: 1px solid var(--border);
-    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid var(--border, oklch(0.922 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
   }
 
   audio-ui-timeline-ruler {
     height: 1.5rem;
     margin-inline-start: 5rem;
-    background: var(--muted);
+    background: var(--muted, oklch(0.97 0 0));
     cursor: pointer;
   }
 
   audio-ui-timeline-mark {
     height: 100%;
     padding-inline-start: 0.25rem;
-    border-inline-start: 1px solid var(--border);
-    color: var(--muted-foreground);
+    border-inline-start: 1px solid var(--border, oklch(0.922 0 0));
+    color: var(--muted-foreground, oklch(0.556 0 0));
     font-size: 10px;
   }
 
   audio-ui-timeline-range {
     top: 0;
     bottom: 0;
-    background: color-mix(in oklab, var(--primary) 15%, transparent);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
   }
 
   audio-ui-timeline-track {
     height: 3.5rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-timeline-track-header {
     width: 5rem;
     padding: 0.5rem;
-    border-inline-end: 1px solid var(--border);
-    background: var(--background);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+    background: var(--background, oklch(1 0 0));
     font-size: 0.75rem;
     line-height: 1rem;
   }
@@ -438,19 +438,19 @@ import "@audio-ui/elements/timeline";
     top: 0.25rem;
     bottom: 0.25rem;
     overflow: hidden;
-    border-radius: calc(var(--radius) - 4px);
-    background: color-mix(in oklab, var(--primary) 15%, transparent);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
   }
 
   audio-ui-timeline-clip[data-selected] {
-    box-shadow: 0 0 0 2px var(--ring);
+    box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
   }
 
   audio-ui-timeline-clip-header {
     overflow: hidden;
     padding-inline: 0.375rem;
-    background: var(--primary);
-    color: var(--primary-foreground);
+    background: var(--primary, oklch(0.205 0 0));
+    color: var(--primary-foreground, oklch(0.985 0 0));
     font-size: 10px;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -477,21 +477,21 @@ import "@audio-ui/elements/timeline";
     top: 0;
     bottom: 0;
     width: 1px;
-    background: var(--foreground);
+    background: var(--foreground, oklch(0.145 0 0));
   }
 
   audio-ui-timeline-navigator {
     height: 0.75rem;
     margin-top: 0.5rem;
-    border-radius: calc(var(--radius) - 4px);
-    background: var(--muted);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-timeline-navigator-window {
     top: 0;
     bottom: 0;
-    border-radius: calc(var(--radius) - 4px);
-    background: color-mix(in oklab, var(--primary) 25%, transparent);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 25%, transparent);
     cursor: grab;
   }
 }

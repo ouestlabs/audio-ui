@@ -11,7 +11,7 @@ description: "The <audio-ui-fader> custom element of @audio-ui/elements: its att
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
-The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -50,7 +50,7 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     width: 0.5rem;
     overflow: hidden;
     border-radius: 9999px;
-    background: color-mix(in oklab, var(--input) 90%, transparent);
+    background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
     cursor: pointer;
     user-select: none;
   }
@@ -58,7 +58,7 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
   audio-ui-fader-indicator {
     position: absolute;
     width: 100%;
-    background: var(--primary);
+    background: var(--primary, oklch(0.205 0 0));
     user-select: none;
   }
 
@@ -69,9 +69,9 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     flex-shrink: 0;
     width: 1rem;
     height: 1.5rem;
-    border: 1px solid var(--ring);
-    border-radius: calc(var(--radius) - 2px);
-    background: var(--card);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--card, oklch(1 0 0));
     outline: none;
     cursor: grab;
     user-select: none;
@@ -79,12 +79,12 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
   }
 
   audio-ui-fader-thumb:hover {
-    box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring) 40%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
   }
 
   audio-ui-fader-thumb:has(:focus-visible),
   audio-ui-fader-thumb:active {
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
   }
 
   audio-ui-fader-thumb:active {
@@ -185,7 +185,7 @@ audio-ui-fader-track {
   width: 0.5rem;
   overflow: hidden;
   border-radius: 9999px;
-  background: color-mix(in oklab, var(--input) 90%, transparent);
+  background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
   cursor: pointer;
   user-select: none;
 }
@@ -193,7 +193,7 @@ audio-ui-fader-track {
 audio-ui-fader-indicator {
   position: absolute;
   width: 100%;
-  background: var(--primary);
+  background: var(--primary, oklch(0.205 0 0));
   user-select: none;
 }
 
@@ -204,9 +204,9 @@ audio-ui-fader-thumb {
   flex-shrink: 0;
   width: 1rem;
   height: 1.5rem;
-  border: 1px solid var(--ring);
-  border-radius: calc(var(--radius) - 2px);
-  background: var(--card);
+  border: 1px solid var(--ring, oklch(0.708 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--card, oklch(1 0 0));
   outline: none;
   cursor: grab;
   user-select: none;
@@ -214,12 +214,12 @@ audio-ui-fader-thumb {
 }
 
 audio-ui-fader-thumb:hover {
-  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring) 40%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
 }
 
 audio-ui-fader-thumb:has(:focus-visible),
 audio-ui-fader-thumb:active {
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
 }
 
 audio-ui-fader-thumb:active {
@@ -300,7 +300,7 @@ const level = ref(-6);
     width: 0.5rem;
     overflow: hidden;
     border-radius: 9999px;
-    background: color-mix(in oklab, var(--input) 90%, transparent);
+    background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
     cursor: pointer;
     user-select: none;
   }
@@ -308,7 +308,7 @@ const level = ref(-6);
   audio-ui-fader-indicator {
     position: absolute;
     width: 100%;
-    background: var(--primary);
+    background: var(--primary, oklch(0.205 0 0));
     user-select: none;
   }
 
@@ -319,9 +319,9 @@ const level = ref(-6);
     flex-shrink: 0;
     width: 1rem;
     height: 1.5rem;
-    border: 1px solid var(--ring);
-    border-radius: calc(var(--radius) - 2px);
-    background: var(--card);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--card, oklch(1 0 0));
     outline: none;
     cursor: grab;
     user-select: none;
@@ -329,12 +329,12 @@ const level = ref(-6);
   }
 
   audio-ui-fader-thumb:hover {
-    box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring) 40%, transparent);
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
   }
 
   audio-ui-fader-thumb:has(:focus-visible),
   audio-ui-fader-thumb:active {
-    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring) 50%, transparent);
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
   }
 
   audio-ui-fader-thumb:active {

@@ -11,7 +11,7 @@ description: "The <audio-ui-piano> custom element of @audio-ui/elements: its att
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
-The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -41,9 +41,9 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     top: 0;
     box-sizing: border-box;
     height: 100%;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: 0 0 4px 4px;
-    background: var(--background);
+    background: var(--background, oklch(1 0 0));
     cursor: pointer;
     outline: none;
   }
@@ -51,13 +51,13 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
   audio-ui-piano-key[data-color="black"] {
     z-index: 1;
     height: 62%;
-    border-color: var(--foreground);
-    background: var(--foreground);
+    border-color: var(--foreground, oklch(0.145 0 0));
+    background: var(--foreground, oklch(0.145 0 0));
   }
 
   audio-ui-piano-key[data-active] {
-    border-color: var(--primary);
-    background: var(--primary);
+    border-color: var(--primary, oklch(0.205 0 0));
+    background: var(--primary, oklch(0.205 0 0));
   }
 </style>
 
@@ -127,9 +127,9 @@ audio-ui-piano-key {
   top: 0;
   box-sizing: border-box;
   height: 100%;
-  border: 1px solid var(--border);
+  border: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: 0 0 4px 4px;
-  background: var(--background);
+  background: var(--background, oklch(1 0 0));
   cursor: pointer;
   outline: none;
 }
@@ -137,13 +137,13 @@ audio-ui-piano-key {
 audio-ui-piano-key[data-color="black"] {
   z-index: 1;
   height: 62%;
-  border-color: var(--foreground);
-  background: var(--foreground);
+  border-color: var(--foreground, oklch(0.145 0 0));
+  background: var(--foreground, oklch(0.145 0 0));
 }
 
 audio-ui-piano-key[data-active] {
-  border-color: var(--primary);
-  background: var(--primary);
+  border-color: var(--primary, oklch(0.205 0 0));
+  background: var(--primary, oklch(0.205 0 0));
 }
 </style>
 ```
@@ -196,9 +196,9 @@ import "@audio-ui/elements/piano";
     top: 0;
     box-sizing: border-box;
     height: 100%;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: 0 0 4px 4px;
-    background: var(--background);
+    background: var(--background, oklch(1 0 0));
     cursor: pointer;
     outline: none;
   }
@@ -206,13 +206,13 @@ import "@audio-ui/elements/piano";
   audio-ui-piano-key[data-color="black"] {
     z-index: 1;
     height: 62%;
-    border-color: var(--foreground);
-    background: var(--foreground);
+    border-color: var(--foreground, oklch(0.145 0 0));
+    background: var(--foreground, oklch(0.145 0 0));
   }
 
   audio-ui-piano-key[data-active] {
-    border-color: var(--primary);
-    background: var(--primary);
+    border-color: var(--primary, oklch(0.205 0 0));
+    background: var(--primary, oklch(0.205 0 0));
   }
 }
 </style>

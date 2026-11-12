@@ -388,12 +388,24 @@ const variable = (tag: string) =>
     .replace("audio-ui-", "")
     .replace(KEBAB, (_, letter: string) => letter.toUpperCase());
 
+const DEFAULT_LIGHT =
+  themeStylesheet(DEFAULT_CONFIG, "css").split(".dark")[0] ?? "";
+const VARIABLE_USE = /var\(--([a-z-]+)\)/g;
+
+/** A stylesheet that works pasted as it is: each theme variable falls back to the default theme's value. */
+function withFallbacks(css: string) {
+  return css.replace(VARIABLE_USE, (use, name: string) => {
+    const value = DEFAULT_LIGHT.match(new RegExp(`--${name}: ([^;]+);`))?.[1];
+    return value ? `var(--${name}, ${value})` : use;
+  });
+}
+
 /** What a snippet holds of the styling: the classes on its tags, or the stylesheet in its own block. */
 function styles(page: string, styling: StylingId) {
   const skin = SKINS[page];
   return {
     classes: styling === "tailwind" ? (skin?.tailwind ?? {}) : {},
-    css: styling === "css" ? (skin?.css ?? "") : "",
+    css: styling === "css" ? withFallbacks(skin?.css ?? "") : "",
   };
 }
 
@@ -518,7 +530,7 @@ export function usageBlock(page: string): string | null {
   return [
     START,
     "",
-    "The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).",
+    "The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.",
     "",
     '<FrameworkTabs defaultValue="web">',
     "",

@@ -11,7 +11,7 @@ description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: it
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
-The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -38,13 +38,13 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     display: grid;
     grid-template-columns: 3rem 1fr;
     overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid var(--border, oklch(0.922 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
   }
 
   audio-ui-piano-roll-keys {
     height: 12rem;
-    border-inline-end: 1px solid var(--border);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-piano-roll-keys audio-ui-piano {
@@ -60,9 +60,9 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     box-sizing: border-box;
     height: 100%;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: 0;
-    background: var(--background);
+    background: var(--background, oklch(1 0 0));
     cursor: pointer;
     outline: none;
   }
@@ -71,13 +71,13 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     z-index: 1;
     right: 35%;
     height: 62%;
-    border-color: var(--foreground);
-    background: var(--foreground);
+    border-color: var(--foreground, oklch(0.145 0 0));
+    background: var(--foreground, oklch(0.145 0 0));
   }
 
   audio-ui-piano-roll-keys audio-ui-piano-key[data-active] {
-    border-color: var(--primary);
-    background: var(--primary);
+    border-color: var(--primary, oklch(0.205 0 0));
+    background: var(--primary, oklch(0.205 0 0));
   }
 
   audio-ui-piano-roll-grid {
@@ -86,18 +86,18 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
   }
 
   audio-ui-piano-roll-row[data-color="black"] {
-    background: color-mix(in oklab, var(--muted) 70%, transparent);
+    background: color-mix(in oklab, var(--muted, oklch(0.97 0 0)) 70%, transparent);
   }
 
   audio-ui-piano-roll-row[data-octave] {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-piano-roll-note {
     border-radius: 2px;
     background: color-mix(
       in oklab,
-      var(--primary) calc(40% + 60% * var(--piano-roll-velocity)),
+      var(--primary, oklch(0.205 0 0)) calc(40% + 60% * var(--piano-roll-velocity)),
       transparent
     );
     cursor: grab;
@@ -105,24 +105,24 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
   }
 
   audio-ui-piano-roll-note[data-selected] {
-    box-shadow: 0 0 0 2px var(--ring);
+    box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
   }
 
   audio-ui-piano-roll-marquee {
-    border: 1px dashed var(--primary);
-    background: color-mix(in oklab, var(--primary) 8%, transparent);
+    border: 1px dashed var(--primary, oklch(0.205 0 0));
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 8%, transparent);
   }
 
   audio-ui-piano-roll-velocity-lane {
     grid-column-start: 2;
     height: 3rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-piano-roll-velocity {
     width: 3px;
     translate: -1px 0;
-    background: var(--primary);
+    background: var(--primary, oklch(0.205 0 0));
   }
 
   audio-ui-timeline-viewport {
@@ -133,7 +133,7 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     top: 0;
     bottom: 0;
     width: 1px;
-    background: var(--foreground);
+    background: var(--foreground, oklch(0.145 0 0));
   }
 </style>
 
@@ -239,13 +239,13 @@ audio-ui-piano-roll {
   display: grid;
   grid-template-columns: 3rem 1fr;
   overflow: hidden;
-  border: 1px solid var(--border);
-  border-radius: calc(var(--radius) - 2px);
+  border: 1px solid var(--border, oklch(0.922 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
 }
 
 audio-ui-piano-roll-keys {
   height: 12rem;
-  border-inline-end: 1px solid var(--border);
+  border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
 }
 
 audio-ui-piano-roll-keys audio-ui-piano {
@@ -261,9 +261,9 @@ audio-ui-piano-roll-keys audio-ui-piano-key {
   box-sizing: border-box;
   height: 100%;
   border: 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: 0;
-  background: var(--background);
+  background: var(--background, oklch(1 0 0));
   cursor: pointer;
   outline: none;
 }
@@ -272,13 +272,13 @@ audio-ui-piano-roll-keys audio-ui-piano-key[data-color="black"] {
   z-index: 1;
   right: 35%;
   height: 62%;
-  border-color: var(--foreground);
-  background: var(--foreground);
+  border-color: var(--foreground, oklch(0.145 0 0));
+  background: var(--foreground, oklch(0.145 0 0));
 }
 
 audio-ui-piano-roll-keys audio-ui-piano-key[data-active] {
-  border-color: var(--primary);
-  background: var(--primary);
+  border-color: var(--primary, oklch(0.205 0 0));
+  background: var(--primary, oklch(0.205 0 0));
 }
 
 audio-ui-piano-roll-grid {
@@ -287,18 +287,18 @@ audio-ui-piano-roll-grid {
 }
 
 audio-ui-piano-roll-row[data-color="black"] {
-  background: color-mix(in oklab, var(--muted) 70%, transparent);
+  background: color-mix(in oklab, var(--muted, oklch(0.97 0 0)) 70%, transparent);
 }
 
 audio-ui-piano-roll-row[data-octave] {
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--border, oklch(0.922 0 0));
 }
 
 audio-ui-piano-roll-note {
   border-radius: 2px;
   background: color-mix(
     in oklab,
-    var(--primary) calc(40% + 60% * var(--piano-roll-velocity)),
+    var(--primary, oklch(0.205 0 0)) calc(40% + 60% * var(--piano-roll-velocity)),
     transparent
   );
   cursor: grab;
@@ -306,24 +306,24 @@ audio-ui-piano-roll-note {
 }
 
 audio-ui-piano-roll-note[data-selected] {
-  box-shadow: 0 0 0 2px var(--ring);
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
 }
 
 audio-ui-piano-roll-marquee {
-  border: 1px dashed var(--primary);
-  background: color-mix(in oklab, var(--primary) 8%, transparent);
+  border: 1px dashed var(--primary, oklch(0.205 0 0));
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 8%, transparent);
 }
 
 audio-ui-piano-roll-velocity-lane {
   grid-column-start: 2;
   height: 3rem;
-  border-top: 1px solid var(--border);
+  border-top: 1px solid var(--border, oklch(0.922 0 0));
 }
 
 audio-ui-piano-roll-velocity {
   width: 3px;
   translate: -1px 0;
-  background: var(--primary);
+  background: var(--primary, oklch(0.205 0 0));
 }
 
 audio-ui-timeline-viewport {
@@ -334,7 +334,7 @@ audio-ui-timeline-playhead {
   top: 0;
   bottom: 0;
   width: 1px;
-  background: var(--foreground);
+  background: var(--foreground, oklch(0.145 0 0));
 }
 </style>
 ```
@@ -410,13 +410,13 @@ import "@audio-ui/elements/piano-roll";
     display: grid;
     grid-template-columns: 3rem 1fr;
     overflow: hidden;
-    border: 1px solid var(--border);
-    border-radius: calc(var(--radius) - 2px);
+    border: 1px solid var(--border, oklch(0.922 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
   }
 
   audio-ui-piano-roll-keys {
     height: 12rem;
-    border-inline-end: 1px solid var(--border);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-piano-roll-keys audio-ui-piano {
@@ -432,9 +432,9 @@ import "@audio-ui/elements/piano-roll";
     box-sizing: border-box;
     height: 100%;
     border: 0;
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: 0;
-    background: var(--background);
+    background: var(--background, oklch(1 0 0));
     cursor: pointer;
     outline: none;
   }
@@ -443,13 +443,13 @@ import "@audio-ui/elements/piano-roll";
     z-index: 1;
     right: 35%;
     height: 62%;
-    border-color: var(--foreground);
-    background: var(--foreground);
+    border-color: var(--foreground, oklch(0.145 0 0));
+    background: var(--foreground, oklch(0.145 0 0));
   }
 
   audio-ui-piano-roll-keys audio-ui-piano-key[data-active] {
-    border-color: var(--primary);
-    background: var(--primary);
+    border-color: var(--primary, oklch(0.205 0 0));
+    background: var(--primary, oklch(0.205 0 0));
   }
 
   audio-ui-piano-roll-grid {
@@ -458,18 +458,18 @@ import "@audio-ui/elements/piano-roll";
   }
 
   audio-ui-piano-roll-row[data-color="black"] {
-    background: color-mix(in oklab, var(--muted) 70%, transparent);
+    background: color-mix(in oklab, var(--muted, oklch(0.97 0 0)) 70%, transparent);
   }
 
   audio-ui-piano-roll-row[data-octave] {
-    border-bottom: 1px solid var(--border);
+    border-bottom: 1px solid var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-piano-roll-note {
     border-radius: 2px;
     background: color-mix(
       in oklab,
-      var(--primary) calc(40% + 60% * var(--piano-roll-velocity)),
+      var(--primary, oklch(0.205 0 0)) calc(40% + 60% * var(--piano-roll-velocity)),
       transparent
     );
     cursor: grab;
@@ -477,24 +477,24 @@ import "@audio-ui/elements/piano-roll";
   }
 
   audio-ui-piano-roll-note[data-selected] {
-    box-shadow: 0 0 0 2px var(--ring);
+    box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
   }
 
   audio-ui-piano-roll-marquee {
-    border: 1px dashed var(--primary);
-    background: color-mix(in oklab, var(--primary) 8%, transparent);
+    border: 1px dashed var(--primary, oklch(0.205 0 0));
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 8%, transparent);
   }
 
   audio-ui-piano-roll-velocity-lane {
     grid-column-start: 2;
     height: 3rem;
-    border-top: 1px solid var(--border);
+    border-top: 1px solid var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-piano-roll-velocity {
     width: 3px;
     translate: -1px 0;
-    background: var(--primary);
+    background: var(--primary, oklch(0.205 0 0));
   }
 
   audio-ui-timeline-viewport {
@@ -505,7 +505,7 @@ import "@audio-ui/elements/piano-roll";
     top: 0;
     bottom: 0;
     width: 1px;
-    background: var(--foreground);
+    background: var(--foreground, oklch(0.145 0 0));
   }
 }
 </style>

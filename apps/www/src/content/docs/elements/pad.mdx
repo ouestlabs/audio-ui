@@ -11,7 +11,7 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
-The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -40,9 +40,9 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     align-items: center;
     justify-content: center;
     aspect-ratio: 1;
-    border-radius: calc(var(--radius) - 2px);
-    background: var(--muted);
-    color: var(--muted-foreground);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
+    color: var(--muted-foreground, oklch(0.556 0 0));
     font-size: 0.75rem;
     line-height: 1rem;
     outline: none;
@@ -53,12 +53,12 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
   }
 
   audio-ui-pad-item:focus-visible {
-    box-shadow: 0 0 0 2px var(--ring);
+    box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
   }
 
   audio-ui-pad-item[data-active] {
-    background: var(--primary);
-    color: var(--primary-foreground);
+    background: var(--primary, oklch(0.205 0 0));
+    color: var(--primary-foreground, oklch(0.985 0 0));
   }
 </style>
 
@@ -136,9 +136,9 @@ audio-ui-pad-item {
   align-items: center;
   justify-content: center;
   aspect-ratio: 1;
-  border-radius: calc(var(--radius) - 2px);
-  background: var(--muted);
-  color: var(--muted-foreground);
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+  color: var(--muted-foreground, oklch(0.556 0 0));
   font-size: 0.75rem;
   line-height: 1rem;
   outline: none;
@@ -149,12 +149,12 @@ audio-ui-pad-item {
 }
 
 audio-ui-pad-item:focus-visible {
-  box-shadow: 0 0 0 2px var(--ring);
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
 }
 
 audio-ui-pad-item[data-active] {
-  background: var(--primary);
-  color: var(--primary-foreground);
+  background: var(--primary, oklch(0.205 0 0));
+  color: var(--primary-foreground, oklch(0.985 0 0));
 }
 </style>
 ```
@@ -212,9 +212,9 @@ import "@audio-ui/elements/pad";
     align-items: center;
     justify-content: center;
     aspect-ratio: 1;
-    border-radius: calc(var(--radius) - 2px);
-    background: var(--muted);
-    color: var(--muted-foreground);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
+    color: var(--muted-foreground, oklch(0.556 0 0));
     font-size: 0.75rem;
     line-height: 1rem;
     outline: none;
@@ -225,12 +225,12 @@ import "@audio-ui/elements/pad";
   }
 
   audio-ui-pad-item:focus-visible {
-    box-shadow: 0 0 0 2px var(--ring);
+    box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
   }
 
   audio-ui-pad-item[data-active] {
-    background: var(--primary);
-    color: var(--primary-foreground);
+    background: var(--primary, oklch(0.205 0 0));
+    color: var(--primary-foreground, oklch(0.985 0 0));
   }
 }
 </style>

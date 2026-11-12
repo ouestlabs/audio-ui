@@ -11,7 +11,7 @@ description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attr
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
-The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -60,8 +60,8 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     position: absolute;
     inset: 0.375rem;
     border-radius: 9999px;
-    background: var(--card);
-    box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
+    background: var(--card, oklch(1 0 0));
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
   }
 
   audio-ui-knob-track,
@@ -72,7 +72,7 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     display: block;
     width: 100%;
     height: 100%;
-    color: var(--primary);
+    color: var(--primary, oklch(0.205 0 0));
     pointer-events: none;
   }
 
@@ -89,7 +89,7 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     position: absolute;
     inset: 0;
     z-index: 2;
-    color: var(--primary);
+    color: var(--primary, oklch(0.205 0 0));
     pointer-events: none;
   }
 
@@ -114,9 +114,9 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     margin-top: 0.25rem;
     padding: 0.125rem 0.375rem;
     translate: -50% 0;
-    border-radius: calc(var(--radius) - 4px);
-    background: var(--foreground);
-    color: var(--background);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--foreground, oklch(0.145 0 0));
+    color: var(--background, oklch(1 0 0));
     font-size: 10px;
     font-weight: 500;
     line-height: 1;
@@ -244,8 +244,8 @@ audio-ui-knob-control::before {
   position: absolute;
   inset: 0.375rem;
   border-radius: 9999px;
-  background: var(--card);
-  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
+  background: var(--card, oklch(1 0 0));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
 }
 
 audio-ui-knob-track,
@@ -256,7 +256,7 @@ audio-ui-knob-indicator {
   display: block;
   width: 100%;
   height: 100%;
-  color: var(--primary);
+  color: var(--primary, oklch(0.205 0 0));
   pointer-events: none;
 }
 
@@ -273,7 +273,7 @@ audio-ui-knob-thumb {
   position: absolute;
   inset: 0;
   z-index: 2;
-  color: var(--primary);
+  color: var(--primary, oklch(0.205 0 0));
   pointer-events: none;
 }
 
@@ -298,9 +298,9 @@ audio-ui-knob-value {
   margin-top: 0.25rem;
   padding: 0.125rem 0.375rem;
   translate: -50% 0;
-  border-radius: calc(var(--radius) - 4px);
-  background: var(--foreground);
-  color: var(--background);
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--foreground, oklch(0.145 0 0));
+  color: var(--background, oklch(1 0 0));
   font-size: 10px;
   font-weight: 500;
   line-height: 1;
@@ -407,8 +407,8 @@ const volume = ref(40);
     position: absolute;
     inset: 0.375rem;
     border-radius: 9999px;
-    background: var(--card);
-    box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
+    background: var(--card, oklch(1 0 0));
+    box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
   }
 
   audio-ui-knob-track,
@@ -419,7 +419,7 @@ const volume = ref(40);
     display: block;
     width: 100%;
     height: 100%;
-    color: var(--primary);
+    color: var(--primary, oklch(0.205 0 0));
     pointer-events: none;
   }
 
@@ -436,7 +436,7 @@ const volume = ref(40);
     position: absolute;
     inset: 0;
     z-index: 2;
-    color: var(--primary);
+    color: var(--primary, oklch(0.205 0 0));
     pointer-events: none;
   }
 
@@ -461,9 +461,9 @@ const volume = ref(40);
     margin-top: 0.25rem;
     padding: 0.125rem 0.375rem;
     translate: -50% 0;
-    border-radius: calc(var(--radius) - 4px);
-    background: var(--foreground);
-    color: var(--background);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--foreground, oklch(0.145 0 0));
+    color: var(--background, oklch(1 0 0));
     font-size: 10px;
     font-weight: 500;
     line-height: 1;

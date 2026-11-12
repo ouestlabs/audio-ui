@@ -11,7 +11,7 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
-The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -33,17 +33,17 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     width: 100%;
     max-width: 32rem;
     height: 11rem;
-    border-radius: calc(var(--radius) - 2px);
-    background: var(--muted);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-plot-grid {
-    color: var(--muted-foreground);
+    color: var(--muted-foreground, oklch(0.556 0 0));
     font-size: 10px;
   }
 
   audio-ui-plot-grid [data-part="line"] {
-    stroke: var(--border);
+    stroke: var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-plot-grid [data-part="label"][data-axis="x"] {
@@ -57,15 +57,15 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
   }
 
   audio-ui-plot-curve {
-    color: color-mix(in oklab, var(--primary) 15%, transparent);
+    color: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
   }
 
   audio-ui-plot-handle {
     width: 1rem;
     height: 1rem;
     border-radius: 9999px;
-    background: var(--primary);
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+    background: var(--primary, oklch(0.205 0 0));
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
   }
 </style>
@@ -148,17 +148,17 @@ audio-ui-plot {
   width: 100%;
   max-width: 32rem;
   height: 11rem;
-  border-radius: calc(var(--radius) - 2px);
-  background: var(--muted);
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
 }
 
 audio-ui-plot-grid {
-  color: var(--muted-foreground);
+  color: var(--muted-foreground, oklch(0.556 0 0));
   font-size: 10px;
 }
 
 audio-ui-plot-grid [data-part="line"] {
-  stroke: var(--border);
+  stroke: var(--border, oklch(0.922 0 0));
 }
 
 audio-ui-plot-grid [data-part="label"][data-axis="x"] {
@@ -172,15 +172,15 @@ audio-ui-plot-grid [data-part="label"][data-axis="y"] {
 }
 
 audio-ui-plot-curve {
-  color: color-mix(in oklab, var(--primary) 15%, transparent);
+  color: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
 }
 
 audio-ui-plot-handle {
   width: 1rem;
   height: 1rem;
   border-radius: 9999px;
-  background: var(--primary);
-  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+  background: var(--primary, oklch(0.205 0 0));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
   cursor: grab;
 }
 </style>
@@ -241,17 +241,17 @@ const response: (hz: number) => number = (hz) => 0;
     width: 100%;
     max-width: 32rem;
     height: 11rem;
-    border-radius: calc(var(--radius) - 2px);
-    background: var(--muted);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-plot-grid {
-    color: var(--muted-foreground);
+    color: var(--muted-foreground, oklch(0.556 0 0));
     font-size: 10px;
   }
 
   audio-ui-plot-grid [data-part="line"] {
-    stroke: var(--border);
+    stroke: var(--border, oklch(0.922 0 0));
   }
 
   audio-ui-plot-grid [data-part="label"][data-axis="x"] {
@@ -265,15 +265,15 @@ const response: (hz: number) => number = (hz) => 0;
   }
 
   audio-ui-plot-curve {
-    color: color-mix(in oklab, var(--primary) 15%, transparent);
+    color: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
   }
 
   audio-ui-plot-handle {
     width: 1rem;
     height: 1rem;
     border-radius: 9999px;
-    background: var(--primary);
-    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
+    background: var(--primary, oklch(0.205 0 0));
+    box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
   }
 }

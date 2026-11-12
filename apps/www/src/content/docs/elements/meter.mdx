@@ -11,7 +11,7 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
-The styles read the theme's CSS variables, set up under [Styling](/docs/elements#styling).
+The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -40,15 +40,15 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     width: 0.75rem;
     height: 100%;
     overflow: hidden;
-    border-radius: calc(var(--radius) - 4px);
-    background: var(--muted);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-meter-indicator {
     position: absolute;
     bottom: 0;
     display: block;
-    background: var(--primary);
+    background: var(--primary, oklch(0.205 0 0));
   }
 
   audio-ui-meter-peak {
@@ -57,7 +57,7 @@ The styles read the theme's CSS variables, set up under [Styling](/docs/elements
     left: 0;
     display: block;
     height: 0.125rem;
-    background: var(--foreground);
+    background: var(--foreground, oklch(0.145 0 0));
   }
 </style>
 
@@ -146,15 +146,15 @@ audio-ui-meter-channel {
   width: 0.75rem;
   height: 100%;
   overflow: hidden;
-  border-radius: calc(var(--radius) - 4px);
-  background: var(--muted);
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--muted, oklch(0.97 0 0));
 }
 
 audio-ui-meter-indicator {
   position: absolute;
   bottom: 0;
   display: block;
-  background: var(--primary);
+  background: var(--primary, oklch(0.205 0 0));
 }
 
 audio-ui-meter-peak {
@@ -163,7 +163,7 @@ audio-ui-meter-peak {
   left: 0;
   display: block;
   height: 0.125rem;
-  background: var(--foreground);
+  background: var(--foreground, oklch(0.145 0 0));
 }
 </style>
 ```
@@ -234,15 +234,15 @@ const levels = ref("-18 -10");
     width: 0.75rem;
     height: 100%;
     overflow: hidden;
-    border-radius: calc(var(--radius) - 4px);
-    background: var(--muted);
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-meter-indicator {
     position: absolute;
     bottom: 0;
     display: block;
-    background: var(--primary);
+    background: var(--primary, oklch(0.205 0 0));
   }
 
   audio-ui-meter-peak {
@@ -251,7 +251,7 @@ const levels = ref("-18 -10");
     left: 0;
     display: block;
     height: 0.125rem;
-    background: var(--foreground);
+    background: var(--foreground, oklch(0.145 0 0));
   }
 }
 </style>
