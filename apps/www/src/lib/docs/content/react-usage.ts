@@ -1,4 +1,5 @@
 import { SKINS } from "@/lib/docs/content/element-skins";
+import type { PrimitiveExample } from "@/lib/docs/content/primitive-examples";
 import type { StylingId } from "@/lib/docs/content/stylings";
 
 /**
@@ -468,8 +469,33 @@ export function reactJsx(page: string, styling: StylingId): string[] {
   });
 }
 
+const ATTRIBUTE = /\s+([A-Za-z][\w-]*)=(\{[^{}]*\}|"[^"]*")/g;
+
+/** A root's line with an example's props over its own: a string as text, the rest as an expression. */
+function withProps(
+  line: string,
+  props: Readonly<Record<string, boolean | number | string>>
+): string {
+  const tag = line.match(PART)?.[0] ?? "";
+  const kept = new Map(
+    [...line.matchAll(ATTRIBUTE)].map((match) => [
+      match[1] ?? "",
+      match[2] ?? "",
+    ])
+  );
+  for (const [name, value] of Object.entries(props)) {
+    kept.set(name, typeof value === "string" ? `"${value}"` : `{${value}}`);
+  }
+  const attributes = [...kept].map(([name, value]) => `${name}=${value}`);
+  return `${tag}${attributes.length > 0 ? ` ${attributes.join(" ")}` : ""}>`;
+}
+
 /** The code blocks of a page in a styling: its component, and for CSS its module. */
-export function reactSnippets(page: string, styling: StylingId) {
+export function reactSnippets(
+  page: string,
+  styling: StylingId,
+  example?: PrimitiveExample
+) {
   const usage = REACT_USAGES[page];
   if (!usage) {
     return null;
@@ -482,7 +508,11 @@ export function reactSnippets(page: string, styling: StylingId) {
       : []),
     ...(setup.length > 0 ? ["", ...setup] : []),
     "",
-    ...reactJsx(page, styling),
+    ...(example
+      ? reactJsx(page, styling).map((line, index) =>
+          index === 0 ? withProps(line, example.props) : line
+        )
+      : reactJsx(page, styling)),
   ].join("\n");
   return {
     css: styling === "css" ? moduleCss(usage.entry) : null,

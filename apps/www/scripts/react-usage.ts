@@ -7,6 +7,7 @@
  *   bun scripts/react-usage.ts --write  writes them
  */
 
+import { EXAMPLES } from "../src/lib/docs/content/primitive-examples.ts";
 import {
   REACT_USAGES,
   reactSnippets,
@@ -63,6 +64,75 @@ export function usageBlock(page: string): string | null {
   ].join("\n");
 }
 
+const EXAMPLES_START =
+  "{/* examples:start: written by `bun scripts/react-usage.ts --write` */}";
+const EXAMPLES_END = "{/* examples:end */}";
+const API = "## API reference";
+
+/** One example's code in each styling, as the usage block writes it. */
+function exampleBlock(page: string, id: string) {
+  const example = EXAMPLES[page]?.find((each) => each.id === id);
+  return [
+    ...STYLINGS.flatMap(({ id: styling }) => {
+      const snippets = reactSnippets(page, styling, example);
+      return [
+        `<ForStyling only="${styling}">`,
+        "",
+        `<CodeFile title="${page}.tsx" open>`,
+        "",
+        "```tsx",
+        snippets?.tsx ?? "",
+        "```",
+        "",
+        "</CodeFile>",
+        "",
+        "</ForStyling>",
+        "",
+      ];
+    }),
+  ].join("\n");
+}
+
+/** The Examples of a page: a section between its Anatomy and its API reference, a preview and its code each. */
+export function examplesBlock(page: string): string | null {
+  const examples = EXAMPLES[page];
+  if (!(examples && REACT_USAGES[page])) {
+    return null;
+  }
+  return [
+    EXAMPLES_START,
+    "",
+    "## Examples",
+    "",
+    ...examples.flatMap((example) => [
+      `### ${example.title}`,
+      "",
+      example.description,
+      "",
+      `<ReactPreview name="${page}" example="${example.id}">`,
+      "",
+      exampleBlock(page, example.id),
+      "</ReactPreview>",
+      "",
+    ]),
+    EXAMPLES_END,
+  ].join("\n");
+}
+
+/** A page's text with its examples written between their markers, or put before its API reference. */
+export function withExamples(page: string, text: string): string {
+  const block = examplesBlock(page);
+  if (!block) {
+    return text;
+  }
+  const start = text.indexOf(EXAMPLES_START);
+  const end = text.indexOf(EXAMPLES_END);
+  if (start >= 0 && end > start) {
+    return `${text.slice(0, start)}${block}${text.slice(end + EXAMPLES_END.length)}`;
+  }
+  return text.replace(API, `${block}\n\n${API}`);
+}
+
 /** A page's text with its preview, and its usage block inside it as the code the preview shows. */
 export function withUsage(page: string, text: string): string {
   const block = usageBlock(page);
@@ -92,7 +162,12 @@ if (import.meta.main) {
     Object.keys(REACT_USAGES).map(async (page) => {
       const path = `${PAGES}/${page}.mdx`;
       const text = await Bun.file(path).text();
-      return { next: withUsage(page, text), page, path, text };
+      return {
+        next: withExamples(page, withUsage(page, text)),
+        page,
+        path,
+        text,
+      };
     })
   );
   const stale = pages.filter(({ next, text }) => next !== text);

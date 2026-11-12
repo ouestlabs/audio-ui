@@ -29,6 +29,7 @@ import { PreviewPanel } from "@/components/preview/frame/preview-frame";
 import { Frame } from "@/components/site/layout/frame";
 import { usePreviewLook } from "@/hooks/use-preview-look";
 import { SKINS } from "@/lib/docs/content/element-skins";
+import { exampleOf } from "@/lib/docs/content/primitive-examples";
 import {
   moduleClass,
   moduleCss,
@@ -63,10 +64,19 @@ function usePart(entry: string) {
   return useCallback((name: string) => part(`${entry}:${name}`), [entry, part]);
 }
 
-function KnobPreview() {
+/** What an example gives a preview's root, over its own props. */
+type RootProps = Readonly<Record<string, boolean | number | string>>;
+
+function KnobPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("knob");
   return (
-    <Knob.Root className={p("Root")} defaultValue={40} max={100} min={0}>
+    <Knob.Root
+      className={p("Root")}
+      defaultValue={40}
+      max={100}
+      min={0}
+      {...rootProps}
+    >
       <Knob.Label className={p("Label")}>Volume</Knob.Label>
       <Knob.Control className={p("Control")}>
         <Knob.Track className={p("Track")} />
@@ -435,7 +445,10 @@ function PianoRollPreview() {
   );
 }
 
-const PREVIEWS: Record<ReactPreviewName, () => ReactNode> = {
+const PREVIEWS: Record<
+  ReactPreviewName,
+  (props: { rootProps?: RootProps }) => ReactNode
+> = {
   envelope: EnvelopePreview,
   fader: FaderPreview,
   knob: KnobPreview,
@@ -457,10 +470,13 @@ const PREVIEWS: Record<ReactPreviewName, () => ReactNode> = {
  */
 export function ReactPreview({
   children,
+  example,
   name,
 }: {
   /** The code of the preview, shown under it: a few lines until View Code. */
   children?: ReactNode;
+  /** An example of the page's primitive, from `primitive-examples.ts`: its props over the usage's. */
+  example?: string;
   name: ReactPreviewName;
 }) {
   const { style, styling } = usePreviewLook();
@@ -483,7 +499,7 @@ export function ReactPreview({
       <PreviewPanel className="min-h-64 gap-4 px-4">
         <div className="flex w-full items-center justify-center">
           <PartContext value={part}>
-            <Preview />
+            <Preview rootProps={exampleOf(name, example)?.props} />
           </PartContext>
         </div>
       </PreviewPanel>

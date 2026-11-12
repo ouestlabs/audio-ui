@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { withUsage } from "../scripts/react-usage.ts";
+import { withExamples, withUsage } from "../scripts/react-usage.ts";
 import { REACT_USAGES } from "../src/lib/docs/content/react-usage.ts";
 
 const PAGES = `${import.meta.dir}/../src/content/docs/react`;
@@ -14,7 +14,9 @@ describe("React usage", () => {
     );
     expect(
       pages
-        .filter(({ page, text }) => withUsage(page, text) !== text)
+        .filter(
+          ({ page, text }) => withExamples(page, withUsage(page, text)) !== text
+        )
         .map(({ page }) => page)
     ).toEqual([]);
   });
