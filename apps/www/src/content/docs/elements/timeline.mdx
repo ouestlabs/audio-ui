@@ -146,15 +146,19 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
     top: calc(var(--spacing, 0.25rem) * 0.5);
     bottom: calc(var(--spacing, 0.25rem) * 0.5);
     width: calc(var(--spacing, 0.25rem) * 2);
-    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
     border: 1px solid var(--ring, oklch(0.708 0 0));
-    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    /* Concentric with the window: its radius less the gap around the handle. */
+    border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
     background: var(--card, oklch(1 0 0));
     cursor: ew-resize;
   }
 
+  audio-ui-timeline-navigator-handle[edge="start"] {
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+  }
+
   audio-ui-timeline-navigator-handle[edge="end"] {
-    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+    translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
   }
 
   audio-ui-timeline-navigator-window {
@@ -229,8 +233,8 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
   </audio-ui-timeline-viewport>
   <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
     <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
   </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
@@ -404,15 +408,19 @@ audio-ui-timeline-navigator-handle {
   top: calc(var(--spacing, 0.25rem) * 0.5);
   bottom: calc(var(--spacing, 0.25rem) * 0.5);
   width: calc(var(--spacing, 0.25rem) * 2);
-  margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
   border: 1px solid var(--ring, oklch(0.708 0 0));
-  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  /* Concentric with the window: its radius less the gap around the handle. */
+  border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
   background: var(--card, oklch(1 0 0));
   cursor: ew-resize;
 }
 
+audio-ui-timeline-navigator-handle[edge="start"] {
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+}
+
 audio-ui-timeline-navigator-handle[edge="end"] {
-  translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+  translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
 }
 
 audio-ui-timeline-navigator-window {
@@ -463,8 +471,8 @@ import "@audio-ui/elements/timeline";
     </audio-ui-timeline-viewport>
     <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
       <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
-      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
-      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="start" aria-label="View start" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="end" aria-label="View end" />
     </audio-ui-timeline-navigator>
   </audio-ui-timeline>
 </template>
@@ -629,15 +637,19 @@ import "@audio-ui/elements/timeline";
     top: calc(var(--spacing, 0.25rem) * 0.5);
     bottom: calc(var(--spacing, 0.25rem) * 0.5);
     width: calc(var(--spacing, 0.25rem) * 2);
-    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
     border: 1px solid var(--ring, oklch(0.708 0 0));
-    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    /* Concentric with the window: its radius less the gap around the handle. */
+    border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
     background: var(--card, oklch(1 0 0));
     cursor: ew-resize;
   }
 
+  audio-ui-timeline-navigator-handle[edge="start"] {
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+  }
+
   audio-ui-timeline-navigator-handle[edge="end"] {
-    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+    translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
   }
 
   audio-ui-timeline-navigator-window {
@@ -688,8 +700,8 @@ import "@audio-ui/elements/timeline";
   </audio-ui-timeline-viewport>
   <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
     <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
   </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 ```
@@ -889,15 +901,19 @@ The parts, nested as they go in the markup.
     top: calc(var(--spacing, 0.25rem) * 0.5);
     bottom: calc(var(--spacing, 0.25rem) * 0.5);
     width: calc(var(--spacing, 0.25rem) * 2);
-    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
     border: 1px solid var(--ring, oklch(0.708 0 0));
-    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    /* Concentric with the window: its radius less the gap around the handle. */
+    border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
     background: var(--card, oklch(1 0 0));
     cursor: ew-resize;
   }
 
+  audio-ui-timeline-navigator-handle[edge="start"] {
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+  }
+
   audio-ui-timeline-navigator-handle[edge="end"] {
-    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+    translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
   }
 
   audio-ui-timeline-navigator-window {
@@ -972,8 +988,8 @@ The parts, nested as they go in the markup.
   </audio-ui-timeline-viewport>
   <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
     <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
   </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
@@ -1147,15 +1163,19 @@ audio-ui-timeline-navigator-handle {
   top: calc(var(--spacing, 0.25rem) * 0.5);
   bottom: calc(var(--spacing, 0.25rem) * 0.5);
   width: calc(var(--spacing, 0.25rem) * 2);
-  margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
   border: 1px solid var(--ring, oklch(0.708 0 0));
-  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  /* Concentric with the window: its radius less the gap around the handle. */
+  border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
   background: var(--card, oklch(1 0 0));
   cursor: ew-resize;
 }
 
+audio-ui-timeline-navigator-handle[edge="start"] {
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+}
+
 audio-ui-timeline-navigator-handle[edge="end"] {
-  translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+  translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
 }
 
 audio-ui-timeline-navigator-window {
@@ -1206,8 +1226,8 @@ import "@audio-ui/elements/timeline";
     </audio-ui-timeline-viewport>
     <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
       <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
-      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
-      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="start" aria-label="View start" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="end" aria-label="View end" />
     </audio-ui-timeline-navigator>
   </audio-ui-timeline>
 </template>
@@ -1372,15 +1392,19 @@ import "@audio-ui/elements/timeline";
     top: calc(var(--spacing, 0.25rem) * 0.5);
     bottom: calc(var(--spacing, 0.25rem) * 0.5);
     width: calc(var(--spacing, 0.25rem) * 2);
-    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
     border: 1px solid var(--ring, oklch(0.708 0 0));
-    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    /* Concentric with the window: its radius less the gap around the handle. */
+    border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
     background: var(--card, oklch(1 0 0));
     cursor: ew-resize;
   }
 
+  audio-ui-timeline-navigator-handle[edge="start"] {
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+  }
+
   audio-ui-timeline-navigator-handle[edge="end"] {
-    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+    translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
   }
 
   audio-ui-timeline-navigator-window {
@@ -1431,8 +1455,8 @@ import "@audio-ui/elements/timeline";
   </audio-ui-timeline-viewport>
   <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
     <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
   </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 ```
@@ -1596,15 +1620,19 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
     top: calc(var(--spacing, 0.25rem) * 0.5);
     bottom: calc(var(--spacing, 0.25rem) * 0.5);
     width: calc(var(--spacing, 0.25rem) * 2);
-    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
     border: 1px solid var(--ring, oklch(0.708 0 0));
-    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    /* Concentric with the window: its radius less the gap around the handle. */
+    border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
     background: var(--card, oklch(1 0 0));
     cursor: ew-resize;
   }
 
+  audio-ui-timeline-navigator-handle[edge="start"] {
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+  }
+
   audio-ui-timeline-navigator-handle[edge="end"] {
-    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+    translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
   }
 
   audio-ui-timeline-navigator-window {
@@ -1679,8 +1707,8 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
   </audio-ui-timeline-viewport>
   <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
     <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
   </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
@@ -1854,15 +1882,19 @@ audio-ui-timeline-navigator-handle {
   top: calc(var(--spacing, 0.25rem) * 0.5);
   bottom: calc(var(--spacing, 0.25rem) * 0.5);
   width: calc(var(--spacing, 0.25rem) * 2);
-  margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
   border: 1px solid var(--ring, oklch(0.708 0 0));
-  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  /* Concentric with the window: its radius less the gap around the handle. */
+  border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
   background: var(--card, oklch(1 0 0));
   cursor: ew-resize;
 }
 
+audio-ui-timeline-navigator-handle[edge="start"] {
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+}
+
 audio-ui-timeline-navigator-handle[edge="end"] {
-  translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+  translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
 }
 
 audio-ui-timeline-navigator-window {
@@ -1913,8 +1945,8 @@ import "@audio-ui/elements/timeline";
     </audio-ui-timeline-viewport>
     <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
       <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
-      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
-      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="start" aria-label="View start" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="end" aria-label="View end" />
     </audio-ui-timeline-navigator>
   </audio-ui-timeline>
 </template>
@@ -2079,15 +2111,19 @@ import "@audio-ui/elements/timeline";
     top: calc(var(--spacing, 0.25rem) * 0.5);
     bottom: calc(var(--spacing, 0.25rem) * 0.5);
     width: calc(var(--spacing, 0.25rem) * 2);
-    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
     border: 1px solid var(--ring, oklch(0.708 0 0));
-    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    /* Concentric with the window: its radius less the gap around the handle. */
+    border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
     background: var(--card, oklch(1 0 0));
     cursor: ew-resize;
   }
 
+  audio-ui-timeline-navigator-handle[edge="start"] {
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+  }
+
   audio-ui-timeline-navigator-handle[edge="end"] {
-    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+    translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
   }
 
   audio-ui-timeline-navigator-window {
@@ -2138,8 +2174,8 @@ import "@audio-ui/elements/timeline";
   </audio-ui-timeline-viewport>
   <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
     <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
-    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
   </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 ```

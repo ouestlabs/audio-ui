@@ -172,15 +172,19 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   top: calc(var(--spacing, 0.25rem) * 0.5);
   bottom: calc(var(--spacing, 0.25rem) * 0.5);
   width: calc(var(--spacing, 0.25rem) * 2);
-  margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
   border: 1px solid var(--ring, oklch(0.708 0 0));
-  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  /* Concentric with the window: its radius less the gap around the handle. */
+  border-radius: max(calc(var(--radius, 0.625rem) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
   background: var(--card, oklch(1 0 0));
   cursor: ew-resize;
 }
 
+.navigatorHandle[data-edge="start"] {
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+}
+
 .navigatorHandle[data-edge="end"] {
-  translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+  translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
 }
 
 .navigatorWindow {
@@ -240,8 +244,8 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   </Timeline.Viewport>
   <Timeline.Navigator className="mt-2 h-3 rounded-sm bg-muted relative">
     <Timeline.NavigatorWindow className="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
-    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
-    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[data-edge=start]]:ms-0.5" edge="start" aria-label="View start" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[data-edge=start]]:ms-0.5" edge="end" aria-label="View end" />
   </Timeline.Navigator>
 </Timeline.Root>
 ```
@@ -380,8 +384,8 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   </Timeline.Viewport>
   <Timeline.Navigator className="mt-2 h-3 rounded-sm bg-muted relative">
     <Timeline.NavigatorWindow className="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
-    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
-    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[data-edge=start]]:ms-0.5" edge="start" aria-label="View start" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[data-edge=start]]:ms-0.5" edge="end" aria-label="View end" />
   </Timeline.Navigator>
 </Timeline.Root>
 ```
@@ -469,8 +473,8 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   </Timeline.Viewport>
   <Timeline.Navigator className="mt-2 h-3 rounded-sm bg-muted relative">
     <Timeline.NavigatorWindow className="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
-    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
-    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[data-edge=start]]:ms-0.5" edge="start" aria-label="View start" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[data-edge=start]]:ms-0.5" edge="end" aria-label="View end" />
   </Timeline.Navigator>
 </Timeline.Root>
 ```

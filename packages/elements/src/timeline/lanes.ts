@@ -849,7 +849,8 @@ abstract class TimelineNavigatorPartElement extends TimelinePartElement {
     _previous: string | null,
     next: string | null
   ) {
-    if (takeName(this, this.#names, name, next)) {
+    // Only an accessible name moves to the input: `edge` stays on the part, which reads it.
+    if (INPUT_NAMES.includes(name) && takeName(this, this.#names, name, next)) {
       reflect(this.input, inputNames(this.#names));
     }
     this.draw();
