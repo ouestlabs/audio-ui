@@ -1070,7 +1070,7 @@ const LEVEL_KEYS: Record<string, number | undefined> = {
   ArrowUp: LEVEL_STEP,
 };
 
-/** The level at the pointer, up the frame the grip is in: 0 dB at its top, silence at its bottom; `gain` while it has no height. */
+/** The level at the pointer, up the frame the line is in: 0 dB at its top, silence at its bottom; `gain` while it has no height. */
 function levelAt(event: PointerEvent<HTMLElement>, gain: number) {
   const box = event.currentTarget.parentElement?.getBoundingClientRect();
   if (!box || box.height <= 0) {
@@ -1085,9 +1085,9 @@ function levelAt(event: PointerEvent<HTMLElement>, gain: number) {
 
 /**
  * The level of the selection: a line across it where the gain it lets
- * through stands, 0 dB at the top and silence at the bottom, and a grip in its
- * middle to drag up and down, or move with Up and Down. It shows the level as
- * it moves and takes effect as it lets go.
+ * through stands, 0 dB at the top and silence at the bottom, dragged up and
+ * down from anywhere along it, or moved with Up and Down. It shows the level
+ * as it moves and takes effect as it lets go.
  */
 function LevelHandle({
   gain,
@@ -1138,11 +1138,7 @@ function LevelHandle({
   );
   return (
     <>
-      <span
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-x-0 z-10 border-primary border-t border-dashed"
-        style={{ top }}
-      />
+      {/* The line is the grip, anywhere along it; its ends stay the edges' own, for a drag of the selection's start and end. */}
       <span
         aria-label="Selection level"
         aria-orientation="vertical"
@@ -1150,7 +1146,8 @@ function LevelHandle({
         aria-valuemin={MIN_DB}
         aria-valuenow={gain}
         aria-valuetext={formatDb(gain)}
-        className="pointer-events-auto absolute left-1/2 z-20 h-2 w-6 -translate-x-1/2 -translate-y-1/2 cursor-ns-resize touch-none rounded-full border border-primary bg-background outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        className="group/level pointer-events-auto absolute inset-x-2 z-10 h-3 -translate-y-1/2 cursor-ns-resize touch-none rounded-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        data-dragging={dragging ? "" : undefined}
         onKeyDown={key}
         onLostPointerCapture={release}
         onPointerDown={press}
@@ -1159,7 +1156,12 @@ function LevelHandle({
         role="slider"
         style={{ top }}
         tabIndex={0}
-      />
+      >
+        <span
+          aria-hidden="true"
+          className="pointer-events-none absolute -inset-x-2 top-1/2 border-primary border-t border-dashed group-hover/level:border-solid group-data-dragging/level:border-solid"
+        />
+      </span>
       {dragging ? (
         <span
           className="pointer-events-none absolute left-1/2 z-20 -translate-x-1/2 translate-y-2 rounded-sm bg-foreground px-1 text-[10px] text-background tabular-nums"
@@ -1182,7 +1184,7 @@ const TRIMS: Record<string, "end" | "start" | undefined> = {
  * The selection as a frame over the waveform, as an audio editor draws one:
  * its edges drag, showing their time to the millisecond as they do; a handle
  * in each top corner fades it in and out (a double-click on one picks its
- * curve); the level's grip in its middle sets how loud it plays. Fades and
+ * curve); the level's line across it sets how loud it plays. Fades and
  * level take effect as a gesture ends, one step of undo each: what is in the
  * selection becomes clips of its own, shaped.
  */
