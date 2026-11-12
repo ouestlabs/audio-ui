@@ -2459,12 +2459,23 @@
         "kind": "const",
         "name": "SPECTRUM_FLOOR_DB",
         "summary": "The quietest a point is drawn: what a silent bin, `-Infinity` dB, becomes."
+      },
+      {
+        "kind": "interface",
+        "name": "BandShares",
+        "summary": "What each slice of a sound is made of: the share of its lows, mids and highs, the loudest of the three being 1."
+      },
+      {
+        "kind": "function",
+        "name": "bandShares",
+        "summary": "Reads a sound as `count` slices of equal length, each by how its energy is spread over three bands: the lows under 250 Hz, the highs over 2.5 kHz and the mids between."
       }
     ],
     "from": "@audio-ui/engine/analysis",
     "package": "@audio-ui/engine",
     "audiojs": [
       "@audio/beat-detect",
+      "@audio/biquad",
       "@audio/loudness-lufs",
       "@audio/loudness-truepeak",
       "@audio/mir-chroma",
