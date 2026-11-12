@@ -8,6 +8,7 @@ const modules = [
   "device",
   "dsp",
   "files",
+  "format",
   "kernels",
   "midi",
   "pitch",

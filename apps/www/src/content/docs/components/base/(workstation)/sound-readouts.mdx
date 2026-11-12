@@ -1,0 +1,66 @@
+---
+title: Sound readouts
+description: "The row of a sound's facts under its waveform, as parts: its level in the measure you pick, its sample rate and its channels, each a menu that says what to convert it to."
+---
+
+<ComponentPreview styleName="base-nova" name="sound-readouts-demo" />
+
+## Installation
+
+<Install name="sound-readouts" />
+
+## Usage
+
+```tsx
+import {
+  SoundChannels,
+  SoundLevel,
+  SoundRate,
+  SoundReadout,
+  SoundReadouts,
+} from "@/components/audio-ui/sound-readouts";
+
+<SoundReadouts>
+  <SoundLevel levels={{ loudness: -19.5, peak: -2.1, rms: -19.4 }} />
+  <SoundReadout>-2.1 dBFS</SoundReadout>
+  <SoundRate onResample={resample} sampleRate={48_000} />
+  <SoundChannels channels={2} onMix={mix} />
+</SoundReadouts>;
+```
+
+The parts show; they convert nothing. `SoundRate` calls `onResample` with the rate picked, from 8 kHz to 384 kHz, and `SoundChannels` calls `onMix` with `mono`, `stereo`, `5.1` or `7.1`: convert the sound your own way, or with `resampleChannels` and `mixChannels` from `@audio-ui/engine/files`. `SoundLevel` keeps the measure it shows (Peak, RMS or Loudness) itself, or take it over with `measure` and `onMeasureChange`.
+
+The [audio editor](/docs/components/base/audio-editor) puts these parts under its waveform and replaces the sound with the converted one, as a step of undo.
+
+## API reference
+
+### SoundReadouts
+
+The row. A `<div>`, with its own props.
+
+### SoundLevel
+
+<TypeTable>
+<TypeRow name={"levels"} type={"{ peak: number; rms: number; loudness: number }"}>What each measure reads, in dB: the peak and the RMS in dBFS, the loudness in LUFS.</TypeRow>
+<TypeRow name={"defaultMeasure"} type={"\"peak\" | \"rms\" | \"loudness\""} default={"\"loudness\""}>The measure shown at first.</TypeRow>
+<TypeRow name={"measure"} type={"\"peak\" | \"rms\" | \"loudness\""}>The measure shown, when you hold it yourself.</TypeRow>
+<TypeRow name={"onMeasureChange"} type={"(measure) => void"}>Called with the measure picked.</TypeRow>
+</TypeTable>
+
+### SoundRate
+
+<TypeTable>
+<TypeRow name={"sampleRate"} type={"number"}>The sound's rate, in Hz.</TypeRow>
+<TypeRow name={"onResample"} type={"(rate: number) => void"}>Called with the rate picked.</TypeRow>
+</TypeTable>
+
+### SoundChannels
+
+<TypeTable>
+<TypeRow name={"channels"} type={"number"}>How many channels the sound has.</TypeRow>
+<TypeRow name={"onMix"} type={"(layout: \"mono\" | \"stereo\" | \"5.1\" | \"7.1\") => void"}>Called with the layout picked.</TypeRow>
+</TypeTable>
+
+### SoundReadout
+
+A plain value in the row, such as the peak beside a level that is a menu. A `<span>`.

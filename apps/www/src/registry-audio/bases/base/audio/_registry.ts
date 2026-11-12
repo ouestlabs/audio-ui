@@ -249,6 +249,21 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["audio-editor"],
+    description:
+      "The row of a sound's facts under its waveform, as parts: SoundLevel shows its peak, RMS or loudness with the others one click away, SoundRate its sample rate with the rates to resample to, SoundChannels its channels with the layouts to mix to (mono, stereo, 5.1, 7.1), and SoundReadout a plain value beside them. Controlled: the menus send the rate or the layout picked",
+    files: [
+      {
+        path: "audio/elements/sound-readouts.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "sound-readouts",
+    dependencies: ["@audio-ui/engine"],
+    registryDependencies: ["@shadcn/dropdown-menu"],
+    type: "registry:ui",
+  },
+  {
     categories: ["transport"],
     description:
       "The settings of an export in a dialog: the file's format, its bit depth or bitrate, and its level, left as it is, brought to its peak, or to a loudness target for streaming, podcasts or broadcast. Controlled: Export sends the settings",
@@ -850,7 +865,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/react", "@audio-ui/icons", "@audio-ui/engine"],
     description:
       "A compact player: play and pause, the position, a seek bar and the length.",
     files: [

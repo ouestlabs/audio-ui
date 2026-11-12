@@ -701,6 +701,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/device-view",
       "@audio-ui/export-dialog",
       "@audio-ui/meter",
+      "@audio-ui/sound-readouts",
       "@audio-ui/timeline",
       "@audio-ui/timeline-markers",
       "@audio-ui/transport",
@@ -1781,6 +1782,20 @@ export const components: RegistryItem[] = [
       "@audio-ui/export-dialog",
       "@shadcn/button",
     ],
+    type: "registry:example",
+  },
+  {
+    categories: ["audio-editor"],
+    description:
+      "A sound's facts as parts: its level in the measure you pick, its sample rate and its channels, each a menu that says what to convert it to",
+    files: [
+      {
+        path: "components/audio-editor/sound-readouts-readouts-demo.tsx",
+        type: "registry:example",
+      },
+    ],
+    name: "sound-readouts-demo",
+    registryDependencies: ["@audio-ui/sound-readouts"],
     type: "registry:example",
   },
 ];

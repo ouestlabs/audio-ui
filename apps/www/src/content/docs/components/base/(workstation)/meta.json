@@ -20,6 +20,7 @@
     "device-browser",
     "rack",
     "---Export---",
-    "export-dialog"
+    "export-dialog",
+    "sound-readouts"
   ]
 }

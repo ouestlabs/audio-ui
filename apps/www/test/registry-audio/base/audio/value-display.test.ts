@@ -9,8 +9,8 @@ describe("formatValue", () => {
     expect(formatValue(440, "hz")).toBe("440 Hz");
     expect(formatValue(1200, "hz")).toBe("1.2 kHz");
     expect(formatValue(0, "pan")).toBe("C");
-    expect(formatValue(-0.3, "pan")).toBe("L 30");
-    expect(formatValue(1, "pan")).toBe("R 100");
+    expect(formatValue(-0.3, "pan")).toBe("L30");
+    expect(formatValue(1, "pan")).toBe("R100");
     expect(formatValue(0.5, "percent")).toBe("50 %");
     expect(formatValue(3, "semitones")).toBe("+3 st");
     expect(formatValue(0, "semitones")).toBe("0 st");

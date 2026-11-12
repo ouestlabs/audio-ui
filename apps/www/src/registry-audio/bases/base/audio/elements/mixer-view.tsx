@@ -1,6 +1,7 @@
 "use client";
 
 import { dbToGain, gainToDb, peakDb } from "@audio-ui/engine/analysis";
+import { formatLevel, formatPan as formatPanOf } from "@audio-ui/engine/format";
 import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,
@@ -64,19 +65,17 @@ const SILENT_SOURCE = {
 const decibels = (gain: number) => Math.max(MIN_DB, gainToDb(gain));
 const gainOf = (db: number) => (db <= MIN_DB ? 0 : dbToGain(db));
 const formatDb = (db: number) =>
-  db <= MIN_DB ? "-∞" : `${db > 0 ? "+" : ""}${db.toFixed(1)}`;
-const formatPan = (pan: number) => {
-  const amount = Math.round(Math.abs(pan) * 50);
-  if (amount === 0) {
-    return "C";
-  }
-  return `${amount}${pan < 0 ? "L" : "R"}`;
-};
+  formatLevel(db <= MIN_DB ? Number.NEGATIVE_INFINITY : db, "dB", {
+    unit: false,
+  });
+const formatPan = (pan: number) => formatPanOf(pan);
 const formatSend = (level: number) =>
-  level <= 0 ? "-∞ dB" : `${gainToDb(level).toFixed(1)} dB`;
+  formatLevel(level <= 0 ? Number.NEGATIVE_INFINITY : gainToDb(level), "dB", {
+    sign: false,
+  });
 
 const formatLufs = (lufs: number, digits: number) =>
-  Number.isFinite(lufs) ? lufs.toFixed(digits) : "-∞";
+  formatLevel(lufs, "LUFS", { decimals: digits, unit: false });
 
 /** The main track's meter is read to the dB: a scale beside it. */
 const MAIN_MARKS = [0, -6, -12, -24, -48];

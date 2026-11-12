@@ -520,5 +520,11 @@
     "description": "The export dialog over two seconds of a chord: pick a format and a level, and Export saves the file and says how loud it came out, in LUFS and dBTP",
     "name": "export-dialog-demo",
     "title": "Export dialog demo"
+  },
+  {
+    "categories": ["audio-editor"],
+    "description": "A sound's facts as parts: its level in the measure you pick, its sample rate and its channels, each a menu that says what to convert it to",
+    "name": "sound-readouts-demo",
+    "title": "Sound readouts demo"
   }
 ]

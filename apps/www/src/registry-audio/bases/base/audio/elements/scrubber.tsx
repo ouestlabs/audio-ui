@@ -1,5 +1,6 @@
 "use client";
 
+import { formatTime } from "@audio-ui/engine/format";
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { type Source, Timeline as TimelinePrimitive } from "@audio-ui/react";
 import { useCallback, useEffect, useRef } from "react";
@@ -11,13 +12,8 @@ const THUMB_SIZE = "0.875rem";
 
 /** 75 as "1:15", 3725 as "1:02:05". */
 function formatClock(seconds: number): string {
-  const total = Math.max(0, Math.floor(seconds));
-  const hours = Math.floor(total / 3600);
-  const minutes = Math.floor((total % 3600) / 60);
-  const rest = String(total % 60).padStart(2, "0");
-  return hours > 0
-    ? `${hours}:${String(minutes).padStart(2, "0")}:${rest}`
-    : `${minutes}:${rest}`;
+  // A clock reads the second it is in: it does not round up to the next.
+  return formatTime(Math.max(0, Math.floor(seconds)));
 }
 
 /** The position as a clock, written straight into the DOM as the source moves. */
