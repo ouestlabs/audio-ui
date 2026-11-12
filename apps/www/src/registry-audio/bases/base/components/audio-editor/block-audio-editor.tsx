@@ -2105,6 +2105,8 @@ export default function BlockAudioEditor() {
             <Knob
               aria-label="Main volume"
               className="mb-0"
+              defaultValue={0}
+              dragMode="vertical"
               formatValue={formatDb}
               largeStep={6}
               max={MAX_DB}
