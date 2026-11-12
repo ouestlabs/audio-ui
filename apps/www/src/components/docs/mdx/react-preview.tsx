@@ -10,6 +10,7 @@ import {
   Piano,
   Plot,
   Sequencer,
+  Timeline,
   Waveform,
   XYPad,
 } from "@audio-ui/react";
@@ -42,6 +43,7 @@ export type ReactPreviewName =
   | "piano"
   | "plot"
   | "sequencer"
+  | "timeline"
   | "waveform"
   | "xypad";
 
@@ -299,6 +301,75 @@ function WaveformPreview() {
   );
 }
 
+const BARS = [0, 4, 8, 12, 16, 20, 24, 28];
+const TRACKS = [
+  { clip: "Beat", length: 8, name: "Drums", start: 0 },
+  { clip: "Bass line", length: 12, name: "Bass", start: 8 },
+];
+
+function TimelinePreview() {
+  const p = usePart("timeline");
+  return (
+    <Timeline.Root className={p("Root")} duration={32} snapStep={1}>
+      <Timeline.Viewport className={p("Viewport")}>
+        <Timeline.Ruler aria-label="Position" className={p("Ruler")}>
+          {BARS.map((bar) => (
+            <Timeline.Mark className={p("Mark")} key={bar} value={bar}>
+              {bar / 4 + 1}
+            </Timeline.Mark>
+          ))}
+          <Timeline.Range
+            aria-label="Loop"
+            className={p("Range")}
+            defaultValue={[8, 16]}
+          />
+        </Timeline.Ruler>
+        {TRACKS.map((track) => (
+          <Timeline.Track className={p("Track")} key={track.name}>
+            <Timeline.TrackHeader className={p("TrackHeader")}>
+              {track.name}
+            </Timeline.TrackHeader>
+            <Timeline.Lane className={p("Lane")}>
+              <Timeline.Clip
+                aria-label={track.clip}
+                className={p("Clip")}
+                defaultValue={{
+                  fadeIn: 0,
+                  fadeOut: 0,
+                  length: track.length,
+                  offset: 0,
+                  start: track.start,
+                }}
+              >
+                <Timeline.ClipHeader className={p("ClipHeader")}>
+                  {track.clip}
+                </Timeline.ClipHeader>
+                <Timeline.ClipHandle
+                  aria-label="Trim start"
+                  className={p("ClipHandle")}
+                  edge="start"
+                />
+                <Timeline.ClipHandle
+                  aria-label="Trim end"
+                  className={p("ClipHandle")}
+                  edge="end"
+                />
+              </Timeline.Clip>
+              <Timeline.Playhead className={p("Playhead")} />
+            </Timeline.Lane>
+          </Timeline.Track>
+        ))}
+      </Timeline.Viewport>
+      <Timeline.Navigator className={p("Navigator")}>
+        <Timeline.NavigatorWindow
+          aria-label="View"
+          className={p("NavigatorWindow")}
+        />
+      </Timeline.Navigator>
+    </Timeline.Root>
+  );
+}
+
 const PREVIEWS: Record<ReactPreviewName, () => ReactNode> = {
   envelope: EnvelopePreview,
   fader: FaderPreview,
@@ -308,6 +379,7 @@ const PREVIEWS: Record<ReactPreviewName, () => ReactNode> = {
   piano: PianoPreview,
   plot: PlotPreview,
   sequencer: SequencerPreview,
+  timeline: TimelinePreview,
   waveform: WaveformPreview,
   xypad: XYPadPreview,
 };

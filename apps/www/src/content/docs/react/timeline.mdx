@@ -3,6 +3,204 @@ title: Timeline
 description: "The headless Timeline of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
+<ReactPreview name="timeline" />
+
+## Usage
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+
+<ForStyling only="css">
+
+```css title="timeline.module.css"
+.root {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+}
+
+.viewport {
+  border: 1px solid var(--border, oklch(0.922 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+}
+
+.ruler {
+  height: calc(var(--spacing, 0.25rem) * 6);
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 20);
+  background: var(--muted, oklch(0.97 0 0));
+  cursor: pointer;
+  position: relative;
+}
+
+.mark {
+  height: 100%;
+  padding-inline-start: calc(var(--spacing, 0.25rem) * 1);
+  border-inline-start: 1px solid var(--border, oklch(0.922 0 0));
+  color: var(--muted-foreground, oklch(0.556 0 0));
+  font-size: 10px;
+}
+
+.range {
+  top: 0;
+  bottom: 0;
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
+}
+
+.track {
+  height: calc(var(--spacing, 0.25rem) * 14);
+  border-top: 1px solid var(--border, oklch(0.922 0 0));
+  display: flex;
+}
+
+.trackHeader {
+  width: calc(var(--spacing, 0.25rem) * 20);
+  padding: calc(var(--spacing, 0.25rem) * 2);
+  border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+  background: var(--background, oklch(1 0 0));
+  font-size: 0.75rem;
+  line-height: 1rem;
+}
+
+.clip {
+  top: calc(var(--spacing, 0.25rem) * 1);
+  bottom: calc(var(--spacing, 0.25rem) * 1);
+  overflow: hidden;
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
+}
+
+.clip[data-selected] {
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
+}
+
+.clipHeader {
+  overflow: hidden;
+  padding-inline: calc(var(--spacing, 0.25rem) * 1.5);
+  background: var(--primary, oklch(0.205 0 0));
+  color: var(--primary-foreground, oklch(0.985 0 0));
+  font-size: 10px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: grab;
+}
+
+.clipHandle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--spacing, 0.25rem) * 1.5);
+  cursor: ew-resize;
+}
+
+.clipHandle[data-edge="start"] {
+  left: 0;
+}
+
+.clipHandle[data-edge="end"] {
+  right: 0;
+}
+
+.playhead {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--foreground, oklch(0.145 0 0));
+}
+
+.navigator {
+  height: calc(var(--spacing, 0.25rem) * 3);
+  margin-top: calc(var(--spacing, 0.25rem) * 2);
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--muted, oklch(0.97 0 0));
+  position: relative;
+}
+
+.navigatorWindow {
+  top: 0;
+  bottom: 0;
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 25%, transparent);
+  cursor: grab;
+}
+
+.lane {
+  position: relative;
+  flex: 1 1 0;
+  min-width: 0;
+}
+```
+
+```tsx title="timeline.tsx"
+import { Timeline } from "@audio-ui/react";
+import styles from "./timeline.module.css";
+
+const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
+
+<Timeline.Root className={styles.root} duration={32} snapStep={1}>
+  <Timeline.Viewport className={styles.viewport}>
+    <Timeline.Ruler className={styles.ruler} aria-label="Position">
+      <Timeline.Mark className={styles.mark} value={0}>1</Timeline.Mark>
+      <Timeline.Mark className={styles.mark} value={8}>3</Timeline.Mark>
+      <Timeline.Range className={styles.range} aria-label="Loop" defaultValue={[8, 16]} />
+    </Timeline.Ruler>
+    <Timeline.Track className={styles.track}>
+      <Timeline.TrackHeader className={styles.trackHeader}>Drums</Timeline.TrackHeader>
+      <Timeline.Lane className={styles.lane}>
+        <Timeline.Clip className={styles.clip} aria-label="Beat" defaultValue={beat}>
+          <Timeline.ClipHeader className={styles.clipHeader}>Beat</Timeline.ClipHeader>
+          <Timeline.ClipHandle className={styles.clipHandle} edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className={styles.clipHandle} edge="end" aria-label="Trim end" />
+        </Timeline.Clip>
+        <Timeline.Playhead className={styles.playhead} />
+      </Timeline.Lane>
+    </Timeline.Track>
+  </Timeline.Viewport>
+  <Timeline.Navigator className={styles.navigator}>
+    <Timeline.NavigatorWindow className={styles.navigatorWindow} aria-label="View" />
+  </Timeline.Navigator>
+</Timeline.Root>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```tsx title="timeline.tsx"
+import { Timeline } from "@audio-ui/react";
+
+const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
+
+<Timeline.Root className="block w-full max-w-xl" duration={32} snapStep={1}>
+  <Timeline.Viewport className="rounded-md border">
+    <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
+      <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
+      <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={8}>3</Timeline.Mark>
+      <Timeline.Range className="inset-y-0 bg-primary/15" aria-label="Loop" defaultValue={[8, 16]} />
+    </Timeline.Ruler>
+    <Timeline.Track className="h-14 border-t flex">
+      <Timeline.TrackHeader className="w-20 border-e bg-background p-2 text-xs">Drums</Timeline.TrackHeader>
+      <Timeline.Lane className="relative min-w-0 flex-1">
+        <Timeline.Clip className="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" defaultValue={beat}>
+          <Timeline.ClipHeader className="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">Beat</Timeline.ClipHeader>
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Trim end" />
+        </Timeline.Clip>
+        <Timeline.Playhead className="inset-y-0 w-px bg-foreground" />
+      </Timeline.Lane>
+    </Timeline.Track>
+  </Timeline.Viewport>
+  <Timeline.Navigator className="mt-2 h-3 rounded-sm bg-muted relative">
+    <Timeline.NavigatorWindow className="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
+  </Timeline.Navigator>
+</Timeline.Root>
+```
+
+</ForStyling>
+
+{/* usage:end */}
+
+
 <Module from="@audio-ui/react/timeline" />
 
 ## Anatomy

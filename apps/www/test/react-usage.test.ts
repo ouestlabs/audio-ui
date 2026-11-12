@@ -19,7 +19,7 @@ describe("React usage", () => {
     ).toEqual([]);
   });
 
-  test("each page opens on its live preview", async () => {
+  test("each page opens on its live preview, with its code right under it", async () => {
     const texts = await Promise.all(
       Object.keys(REACT_USAGES).map(async (page) => ({
         page,
@@ -30,9 +30,11 @@ describe("React usage", () => {
       expect(text.indexOf(`<ReactPreview name="${page}" />`)).toBeGreaterThan(
         -1
       );
+      // Then the code, right under it, and the install and the API after.
       expect(text.indexOf(`<ReactPreview name="${page}" />`)).toBeLessThan(
-        text.indexOf("<Module")
+        text.indexOf("## Usage")
       );
+      expect(text.indexOf("## Usage")).toBeLessThan(text.indexOf("<Module"));
     }
   });
 });

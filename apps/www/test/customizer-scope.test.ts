@@ -27,7 +27,7 @@ describe("pageScope", () => {
 
   test("a page with no preview follows none", async () => {
     expect(await scopeOf("core/knob.mdx")).toBe("none");
-    expect(await scopeOf("react/timeline.mdx")).toBe("none");
+    expect(await scopeOf("react/piano-roll.mdx")).toBe("none");
     expect(await scopeOf("elements/index.mdx")).toBe("none");
   });
 });

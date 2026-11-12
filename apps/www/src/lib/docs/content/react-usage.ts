@@ -133,6 +133,35 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
     ],
     name: "Sequencer",
   },
+  timeline: {
+    entry: "timeline",
+    lines: [
+      "<Timeline.Root duration={32} snapStep={1}>",
+      "  <Timeline.Viewport>",
+      '    <Timeline.Ruler aria-label="Position">',
+      "      <Timeline.Mark value={0}>1</Timeline.Mark>",
+      "      <Timeline.Mark value={8}>3</Timeline.Mark>",
+      '      <Timeline.Range aria-label="Loop" defaultValue={[8, 16]} />',
+      "    </Timeline.Ruler>",
+      "    <Timeline.Track>",
+      "      <Timeline.TrackHeader>Drums</Timeline.TrackHeader>",
+      "      <Timeline.Lane>",
+      '        <Timeline.Clip aria-label="Beat" defaultValue={beat}>',
+      "          <Timeline.ClipHeader>Beat</Timeline.ClipHeader>",
+      '          <Timeline.ClipHandle edge="start" aria-label="Trim start" />',
+      '          <Timeline.ClipHandle edge="end" aria-label="Trim end" />',
+      "        </Timeline.Clip>",
+      "        <Timeline.Playhead />",
+      "      </Timeline.Lane>",
+      "    </Timeline.Track>",
+      "  </Timeline.Viewport>",
+      "  <Timeline.Navigator>",
+      '    <Timeline.NavigatorWindow aria-label="View" />',
+      "  </Timeline.Navigator>",
+      "</Timeline.Root>",
+    ],
+    name: "Timeline",
+  },
   waveform: {
     entry: "waveform",
     lines: [
@@ -165,6 +194,9 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
 
 /** What a snippet needs that the JSX leaves out, by page: a pattern to start from. */
 const SETUP: Record<string, readonly string[]> = {
+  timeline: [
+    "const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };",
+  ],
   envelope: [
     "const points = [",
     "  { x: 0, y: 0 },",
@@ -236,6 +268,15 @@ const STRUCTURE: Record<string, Record<string, { css: string; tw: string }>> = {
       tw: "fill-current stroke-none",
     },
     root: { css: "position: relative;", tw: "relative" },
+  },
+  timeline: {
+    lane: {
+      css: "position: relative;\n  flex: 1 1 0;\n  min-width: 0;",
+      tw: "relative min-w-0 flex-1",
+    },
+    navigator: { css: "position: relative;", tw: "relative" },
+    ruler: { css: "position: relative;", tw: "relative" },
+    track: { css: "display: flex;", tw: "flex" },
   },
   waveform: {
     canvas: {

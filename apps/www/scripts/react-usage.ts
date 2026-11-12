@@ -19,7 +19,6 @@ const START =
   "{/* usage:start: written by `bun scripts/react-usage.ts --write` */}";
 const END = "{/* usage:end */}";
 const FRONTMATTER = /^---\n[\s\S]*?\n---\n/;
-const MODULE = /<Module from="[^"]+" \/>\n/;
 
 /** The block a page holds, markers included. */
 export function usageBlock(page: string): string | null {
@@ -56,24 +55,31 @@ export function usageBlock(page: string): string | null {
   ].join("\n");
 }
 
-/** A page's text with its preview at the top and its usage block written under the head. */
+const HEADING = "## Usage\n\n";
+const LEADING_BREAKS = /^\n+/;
+
+/** A page's text with its preview at the top and its usage block, with its heading, right under the preview. */
 export function withUsage(page: string, text: string): string {
   const block = usageBlock(page);
   if (!block) {
     return text;
   }
+  // Wherever an earlier run put the block, it goes: it is written again under the preview.
   const start = text.indexOf(START);
   const end = text.indexOf(END);
+  let rest = text;
   if (start >= 0 && end > start) {
-    return `${text.slice(0, start)}${block}${text.slice(end + END.length)}`;
+    const from = text.lastIndexOf(HEADING, start);
+    const heading = from >= 0 && start - from === HEADING.length ? from : start;
+    rest = `${text.slice(0, heading)}${text.slice(end + END.length).replace(LEADING_BREAKS, "")}`;
   }
   const preview = `<ReactPreview name="${page}" />\n`;
-  const withPreview = text.includes(preview)
-    ? text
-    : text.replace(FRONTMATTER, (head) => `${head}\n${preview}`);
+  const withPreview = rest.includes(preview)
+    ? rest
+    : rest.replace(FRONTMATTER, (head) => `${head}\n${preview}`);
   return withPreview.replace(
-    MODULE,
-    (found) => `${found}\n## Usage\n\n${block}\n`
+    preview,
+    (found) => `${found}\n${HEADING}${block}\n\n`
   );
 }
 
