@@ -1,5 +1,46 @@
 import { describe, expect, test } from "bun:test";
 import "../src/index.ts";
+import type { KnobElement } from "../src/knob/index.ts";
+import { key } from "./helpers.ts";
+
+/**
+ * What a two-way binding does, as Vue's `v-model` on an element: it reads
+ * `event.target.value` on `input`, then writes the value it read back.
+ */
+describe("a two-way binding", () => {
+  function renderKnob() {
+    document.body.innerHTML = `
+      <audio-ui-knob min="0" max="100" value="50">
+        <audio-ui-knob-control><audio-ui-knob-thumb aria-label="Cutoff"></audio-ui-knob-thumb></audio-ui-knob-control>
+      </audio-ui-knob>`;
+    const knob = document.querySelector("audio-ui-knob") as KnobElement;
+    return { input: knob.querySelector("input") as HTMLInputElement, knob };
+  }
+
+  test("reads the new value on input, as from a native input", () => {
+    const { input, knob } = renderKnob();
+    const read: number[] = [];
+    knob.addEventListener("input", (event) => {
+      read.push((event.target as KnobElement).value, event.detail.value);
+    });
+    key(input, "ArrowUp");
+    key(input, "ArrowUp");
+    expect(read).toEqual([51, 51, 52, 52]);
+    expect(knob.value).toBe(52);
+  });
+
+  test("a refused value is read only while its input is dispatched", () => {
+    const { input, knob } = renderKnob();
+    const read: number[] = [];
+    knob.addEventListener("input", (event) => {
+      read.push(knob.value);
+      event.preventDefault();
+    });
+    key(input, "ArrowUp");
+    expect(read).toEqual([51]);
+    expect(knob.value).toBe(50);
+  });
+});
 
 /**
  * What a framework does to a custom element that the HTML parser does not:

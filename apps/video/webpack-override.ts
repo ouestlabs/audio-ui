@@ -98,7 +98,7 @@ export const webpackOverride: WebpackOverrideFn = (config) => ({
       "@": www,
       "@audio-ui/core$": path.join(core, "index.ts"),
       "@audio-ui/core/internal$": path.join(core, "internal.ts"),
-      "@audio-ui/react$": path.join(root, "packages/ui/src/index.ts"),
+      "@audio-ui/react$": path.join(root, "packages/react/src/index.ts"),
       react: path.dirname(require.resolve("react/package.json")),
       "react-dom": path.dirname(require.resolve("react-dom/package.json")),
     },

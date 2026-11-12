@@ -68,7 +68,7 @@ Groups the parts of a timeline and owns what they share: its length, its zoom, i
 <TypeRow name={"onZoomChange"} type={"(zoom: number, eventDetails: ZoomChangeEventDetails) => void"}>Fires when the zoom changes, already clamped. `eventDetails.cancel()` keeps the zoom where it was.</TypeRow>
 <TypeRow name={"position"} type={"number"}>Playback position, from 0 to `duration`.</TypeRow>
 <TypeRow name={"snapOffset"} type={"number"} default={"0"}>Where the grid's lines start, in your units.</TypeRow>
-<TypeRow name={"snapPoints"} type={"readonly number[]"}>Places that pull a dragged clip or range onto them from a few px away, ahead of the grid: the edges of other clips, the locators. Cmd/Ctrl lets go of them too.</TypeRow>
+<TypeRow name={"snapPoints"} type={"readonly number[]"}>Places that pull a press, or a dragged clip or range, onto them from a few px away, ahead of the grid: the edges of other clips, the locators. Cmd/Ctrl lets go of them too.</TypeRow>
 <TypeRow name={"snapStep"} type={"number"} default={"0"}>Distance between grid lines, in your units. 0 is no grid.</TypeRow>
 <TypeRow name={"source"} type={"Source"}>A live position followed outside React; takes precedence over `position`.</TypeRow>
 <TypeRow name={"step"} type={"number"}>Step for the arrow keys. Defaults to `snapStep`, or a hundredth of `duration`.</TypeRow>

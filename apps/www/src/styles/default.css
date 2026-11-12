@@ -63,8 +63,8 @@
 }
 
 :root {
-  --site-font-sans: var(--font-sans, var(--font-inter));
-  --site-font-heading: var(--font-heading, var(--font-inter));
+  --site-font-sans: var(--font-sans, var(--font-geist-sans));
+  --site-font-heading: var(--font-heading, var(--font-geist-mono));
   --site-font-mono: var(--font-mono);
 
   --site-radius-xs: calc(var(--radius) * 0.2);

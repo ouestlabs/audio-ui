@@ -16,7 +16,7 @@ const root = `${import.meta.dir}/..`;
 const DOCS = `${root}/src/content/docs`;
 
 const fontData = await Bun.file(
-  `${root}/src/lib/fonts/InstrumentSerif-Regular.ttf`
+  `${root}/src/lib/fonts/GeistMono-SemiBold.ttf`
 ).arrayBuffer();
 
 async function png(
@@ -30,9 +30,9 @@ async function png(
       ? [
           {
             data: fontData,
-            name: "Instrument Serif",
+            name: "Geist Mono",
             style: "normal",
-            weight: 700,
+            weight: 600,
           },
         ]
       : [],

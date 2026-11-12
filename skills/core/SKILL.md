@@ -39,7 +39,7 @@ metadata:
 
 ## Workflow
 
-1. **Install.** For a knob or a fader, `@audio-ui/elements`: the custom elements, ready to style (see [core.md](./core.md)). For the other controls, `@audio-ui/core` (no dependencies), and read [core.md](./core.md): the entries, a plain DOM knob, and Vue and Svelte bindings.
+1. **Install.** `@audio-ui/elements`: every primitive as custom elements, ready to style, typed for Vue templates (`import type {} from "@audio-ui/elements/vue"`, then `v-model`) and Svelte's (`import type {} from "@audio-ui/elements/svelte"`, then `value` and `oninput`); see [core.md](./core.md). Write a binding over `@audio-ui/core` (no dependencies) only for a control the elements do not cover: [core.md](./core.md) has the entries, a plain DOM knob, and Vue and Svelte bindings.
 2. **Create one controller per control**, once (`core-one-controller`), wire a hidden `<input type="range">` to it (`core-native-range-input`), and draw from `getSnapshot()` (`core-draw-from-snapshot`).
 3. **Handle the pointer the way the rules say** (`core-pointer-handler`) and call the removers on teardown (`core-cleanup`).
 4. **Look.** The `design` skill has the skins and `styles/dom.css` for the plain DOM; sound and live data come from the `web-audio` skill.

@@ -1,6 +1,8 @@
 import type { RangeEdge, RangeValue } from "@audio-ui/core";
 import {
   createRangeController,
+  type RangeChangeEventDetails,
+  type RangeCommitEventDetails,
   type RangeController,
   type RangeOptions,
   type TimelineSnapshot,
@@ -44,6 +46,25 @@ export function rangeAttribute(
     : undefined;
 }
 
+/** What a range's events carry: which edge moved, or `"both"`, and the range, `[start, end]` in the timeline's units. */
+export interface TimelineRangeEventDetail<Reason extends string> {
+  edge: RangeChangeEventDetails["edge"];
+  reason: Reason;
+  value: RangeValue;
+}
+
+/** The events a range fires, as `addEventListener` types them. */
+export interface TimelineRangeElementEventMap extends HTMLElementEventMap {
+  /** Fired once a gesture that moved the range ends. */
+  rangechange: CustomEvent<
+    TimelineRangeEventDetail<RangeCommitEventDetails["reason"]>
+  >;
+  /** Fired on every change of the range. Cancel it, with `preventDefault()`, to refuse it. */
+  rangeinput: CustomEvent<
+    TimelineRangeEventDetail<RangeChangeEventDetails["reason"]>
+  >;
+}
+
 /**
  * A loop or selection on its lane, from `value` (`"start end"`; the whole
  * timeline by default). Its body is draggable on the grid, unless Cmd or
@@ -70,6 +91,27 @@ export class TimelineRangeElement extends TimelinePartElement {
     "movable",
     "value",
   ];
+
+  override addEventListener<K extends keyof TimelineRangeElementEventMap>(
+    type: K,
+    listener: (
+      this: TimelineRangeElement,
+      event: TimelineRangeElementEventMap[K]
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    super.addEventListener(type, listener, options);
+  }
 
   /** Returns how a position is announced, for the range and its handles. Defaults to the number. */
   getAriaValueText: TimelineDescribe | undefined;

@@ -2,6 +2,8 @@ import {
   createTrackController,
   type TimelineSnapshot,
   type TrackController,
+  type TrackHeightChangeEventDetails,
+  type TrackHeightCommitEventDetails,
   type TrackOptions,
 } from "@audio-ui/core/timeline";
 import { numberAttribute, reflect } from "../internal/element.ts";
@@ -16,8 +18,21 @@ import {
   reflectOwn,
   TIMELINE_TAGS,
   type TimelineElement,
+  type TimelineEventDetail,
   TimelinePartElement,
 } from "./root.ts";
+
+/** The events a track fires, as `addEventListener` types them: its height, in pixels. */
+export interface TimelineTrackElementEventMap extends HTMLElementEventMap {
+  /** Fired once a resize ends. */
+  heightchange: CustomEvent<
+    TimelineEventDetail<TrackHeightCommitEventDetails["reason"]>
+  >;
+  /** Fired on every change of the height. Cancel it, with `preventDefault()`, to refuse it. */
+  heightinput: CustomEvent<
+    TimelineEventDetail<TrackHeightChangeEventDetails["reason"]>
+  >;
+}
 
 /**
  * A track: a row with a header and a lane. `height` sets its height in
@@ -38,6 +53,27 @@ export class TimelineTrackElement extends TimelinePartElement {
     "selected",
     "step",
   ];
+
+  override addEventListener<K extends keyof TimelineTrackElementEventMap>(
+    type: K,
+    listener: (
+      this: TimelineTrackElement,
+      event: TimelineTrackElementEventMap[K]
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    super.addEventListener(type, listener, options);
+  }
 
   /** The framework-agnostic track behind its height: what a drag, a key or a double click asks of it. */
   readonly controller: TrackController = createTrackController({

@@ -8,20 +8,18 @@ type PreviewFont = {
   };
 };
 
-const BUILT_IN_PREVIEW_FONTS = new Set<FontName>(["inter"]);
+const BUILT_IN_PREVIEW_FONTS = new Set<FontName>(["geist", "geist-mono"]);
 
 const loadedPreviewFonts = new Set<string>();
 
 const LOCAL_PREVIEW_FONT_VARIABLES: Partial<Record<FontName, string>> = {
   geist: "--font-geist-sans",
   "geist-mono": "--font-geist-mono",
-  inter: "--font-inter",
 };
 
 const LOCAL_PREVIEW_FONT_FAMILIES: Partial<Record<FontName, string>> = {
   geist: "var(--font-geist-sans, 'Geist Variable'), sans-serif",
-  "geist-mono": "var(--font-geist-mono, 'Geist Mono'), monospace",
-  inter: "var(--font-inter, 'Inter Variable'), sans-serif",
+  "geist-mono": "var(--font-geist-mono, 'Geist Mono Variable'), monospace",
 };
 
 function hasLocalPreviewFont(fontName: FontName) {

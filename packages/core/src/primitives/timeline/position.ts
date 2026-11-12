@@ -7,7 +7,13 @@ import {
 } from "../../value/events.ts";
 import type { Source } from "../../value/source.ts";
 import { clampZoom } from "./scale.ts";
-import { bypassesGrid, type Grid, snapToGrid } from "./snap.ts";
+import {
+  bypassesGrid,
+  type Grid,
+  SNAP_RADIUS_PX,
+  snapToGrid,
+  withSnapRadius,
+} from "./snap.ts";
 
 /** What `onPositionChange` receives with each move of the playhead: the reason (`"press"`, `"drag"`, `"keyboard"` or `"input-change"`), the event, and `cancel()` to refuse the move. */
 export type TimelinePositionChangeEventDetails =
@@ -265,6 +271,14 @@ export function createTimelineController(
     notify();
   };
 
+  /** The grid a press lands on: its points pull from a few px away at the zoom held now. */
+  const pressGrid = () => {
+    const zoom = heldZoom();
+    return zoom !== null && zoom > 0
+      ? withSnapRadius(options.grid, SNAP_RADIUS_PX / zoom)
+      : options.grid;
+  };
+
   const pressSeek: TimelineController["pressSeek"] = (
     event,
     handle,
@@ -283,7 +297,7 @@ export function createTimelineController(
         heldZoom(),
         options.duration
       );
-      return bypassesGrid(pointer) ? raw : snapToGrid(raw, options.grid);
+      return bypassesGrid(pointer) ? raw : snapToGrid(raw, pressGrid());
     };
     const anchor = landingAt(event);
     const gesture: {
@@ -390,7 +404,7 @@ export function createTimelineController(
         heldZoom(),
         options.duration
       );
-      return bypassesGrid(pointer) ? raw : snapToGrid(raw, options.grid);
+      return bypassesGrid(pointer) ? raw : snapToGrid(raw, pressGrid());
     };
     if (event.shiftKey && selection.onSelectionChange) {
       // Shift selects a stretch, as on a DAW's ruler; a plain press seeks.

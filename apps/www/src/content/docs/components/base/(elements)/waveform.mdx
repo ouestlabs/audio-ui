@@ -259,6 +259,8 @@ The props of the headless parts are on [Waveform](/docs/react/waveform#api-refer
 <TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units; feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
 <TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when a selection that changed ends.</TypeRow>
 <TypeRow name={"shape"} type={"\"mirror\" | \"bars\" | \"line\""} default={"\"mirror\""}>How the amplitudes are drawn.</TypeRow>
+<TypeRow name={"barWidth"} type={"number"} default={"2"}>Bar width, in CSS pixels, snapped to whole device pixels.</TypeRow>
+<TypeRow name={"barGap"} type={"number"} default={"1"}>Space between bars, in CSS pixels, snapped to whole device pixels.</TypeRow>
 <TypeRow name={"variant"} type={"\"default\" | \"playhead\""} default={"\"default\""}>`playhead` adds a playhead line and a handle.</TypeRow>
 <TypeRow name={"className"} type={"string"}>Classes for the waveform surface.</TypeRow>
 </TypeTable>

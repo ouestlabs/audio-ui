@@ -35,6 +35,7 @@ export {
   WaveformCanvasElement,
   type WaveformChangeEvent,
   WaveformControlElement,
+  type WaveformControlElementEventMap,
   type WaveformDescribe,
   WaveformElement,
   type WaveformElementEventMap,
@@ -47,6 +48,7 @@ export {
   type WaveformPositionSource,
   type WaveformRangeDetail,
   WaveformRegionElement,
+  type WaveformRegionElementEventMap,
   WaveformRegionHandleElement,
   WaveformThumbElement,
 } from "./elements.ts";

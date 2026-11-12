@@ -134,6 +134,33 @@ export function reportChange<Detail>(
   );
 }
 
+/** The value each element's `input` proposes, while that event is dispatched. */
+const proposals = new WeakMap<Element, { value: unknown }>();
+
+/**
+ * Fires `input` on `element` for a new value, as `reportChange` does, and
+ * while it is dispatched `readValue` reads the value proposed: a listener
+ * that reads `event.target.value`, as a framework's two-way binding does,
+ * gets the new value, as from a native input.
+ */
+export function proposeChange<Detail extends { value: unknown }>(
+  element: Element,
+  detail: Detail
+) {
+  proposals.set(element, detail);
+  try {
+    return reportChange(element, detail);
+  } finally {
+    proposals.delete(element);
+  }
+}
+
+/** What `element`'s `value` reads: the value its `input` proposes while that is dispatched, `current` otherwise. */
+export function readValue<Value>(element: Element, current: Value): Value {
+  const proposal = proposals.get(element);
+  return proposal ? (proposal.value as Value) : current;
+}
+
 /** Fires `change` on `element` once a gesture that changed the value ends, or the event named `type`. */
 export function reportCommit<Detail>(
   element: Element,

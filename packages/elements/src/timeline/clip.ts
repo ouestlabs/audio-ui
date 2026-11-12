@@ -1,4 +1,7 @@
-import { createChangeEventDetails } from "@audio-ui/core";
+import {
+  type ChangeEventDetails,
+  createChangeEventDetails,
+} from "@audio-ui/core";
 import {
   type ClipController,
   type ClipOptions,
@@ -61,6 +64,20 @@ export interface TimelineClipEventDetail {
   value: ClipValue;
 }
 
+/** The events a clip fires, as `addEventListener` types them. They bubble, so one listener on the timeline hears every clip. */
+export interface TimelineClipElementEventMap extends HTMLElementEventMap {
+  /** Fired once a gesture that moved, trimmed or faded the clip ends. */
+  clipchange: CustomEvent<TimelineClipEventDetail>;
+  /** Fired while the clip is dragged across lanes, with its vertical `offset` in pixels. */
+  clipdrag: CustomEvent<{ offset: number }>;
+  /** Fired on every move, trim or fade. Cancel it, with `preventDefault()`, to refuse it. */
+  clipinput: CustomEvent<TimelineClipEventDetail>;
+  /** Fired on Delete or Backspace. */
+  clipremove: CustomEvent<ChangeEventDetails<"keyboard", KeyboardEvent>>;
+  /** Fired when a press selects or deselects the clip. Cancel it to leave `selected` as it is. */
+  clipselect: CustomEvent<{ event: PointerEvent; selected: boolean }>;
+}
+
 /**
  * A region of a source on a lane, such as a recording or a pattern. Its
  * value comes from the `start`, `length`, `offset` (source offset),
@@ -97,6 +114,27 @@ export class TimelineClipElement extends TimelinePartElement {
     "selected",
     "source-length",
   ];
+
+  override addEventListener<K extends keyof TimelineClipElementEventMap>(
+    type: K,
+    listener: (
+      this: TimelineClipElement,
+      event: TimelineClipElementEventMap[K]
+    ) => unknown,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void;
+  override addEventListener(
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ) {
+    super.addEventListener(type, listener, options);
+  }
 
   /** Returns how a position is announced. Defaults to the number. */
   getAriaValueText: TimelineDescribe | undefined;

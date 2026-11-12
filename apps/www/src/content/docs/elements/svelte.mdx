@@ -1,0 +1,54 @@
+---
+title: Svelte
+description: "The elements in Svelte: the template types of @audio-ui/elements/svelte, and binding a value."
+---
+
+<Module from="@audio-ui/elements/svelte" />
+
+## Setup
+
+Svelte renders the tags as they are written. Register the elements the app uses, once, as in any page:
+
+```ts
+import "@audio-ui/elements/knob";
+```
+
+## Types
+
+`@audio-ui/elements/svelte` adds every element to `SvelteHTMLElements`, in `svelte/elements`. Import it once, in a file the project's `tsconfig.json` includes:
+
+```ts
+import type {} from "@audio-ui/elements/svelte";
+```
+
+Templates are then checked: an element's attributes (`min`, `drag-mode`), the properties it has a setter for (`value`, `format`) and an `on…` handler for each of its own events, with the type of their `detail`, such as a knob's `oninput` or a clip's `onclipinput`. The import adds nothing to the bundle.
+
+## Binding
+
+Svelte binds `bind:value` on `<input>`, `<textarea>` and `<select>` only. Bind an element with `value` and `oninput`:
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/knob";
+
+  let cutoff = $state(1000);
+</script>
+
+<audio-ui-knob
+  min="20"
+  max="20000"
+  scale="log"
+  value={cutoff}
+  oninput={(event) => (cutoff = event.detail.value)}
+>
+  <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
+  <audio-ui-knob-control>
+    <audio-ui-knob-track></audio-ui-knob-track>
+    <audio-ui-knob-indicator></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+```
+
+Svelte sets what a template gives an element as a property when the element has one, `value`, `scale` and `format` among them, and as an attribute otherwise. A listener that refuses a value calls `event.preventDefault()` instead of assigning it. A part with a value of its own, such as a timeline clip or a range, fires events prefixed with its name: bind it with `value` and `onclipinput` or `onrangeinput`.

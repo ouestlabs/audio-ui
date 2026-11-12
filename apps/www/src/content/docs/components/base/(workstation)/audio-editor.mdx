@@ -1,0 +1,67 @@
+---
+title: Audio editor
+description: "An audio editor for one sound: a transport that plays, loops and records, a waveform that zooms down to the samples and edits with undo, and the track's device chain with its library."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-audio-editor" />
+
+One sound on one track, edited as a workstation edits a clip. The sound is a demo loop, a file uploaded from the sound menu or dropped on the editor, or a take recorded from the microphone. It plays on the audio clock through the [arrangement](/docs/components/base/arrangement) engine, through the track's [device chain](/docs/components/base/device-chain), into a [meter](/docs/components/base/meter).
+
+## Installation
+
+```bash
+npx shadcn@latest add @audio-ui/block-audio-editor
+```
+
+It installs the block to `components/examples/block-audio-editor.tsx`, with every item it is made of.
+
+## What it is made of
+
+- **Bar.** The [transport](/docs/components/base/transport): play or pause, stop, the position, loop and record with its count-in. With a selection, Play plays it, round and round with the loop on, else to its end. Its `children` hold the sound menu, Undo and Redo with the history, Before the edits, Export and the output's meter, so the whole bar is one toolbar. On a narrow bar, Undo, Redo, the history, Before the edits and Export fold into one menu, with Loop once the transport has no room for its own, and on the narrowest the meter gives its room to the controls.
+- **Sound menu.** Upload a file, or pick a demo sound. A file dropped anywhere on the editor opens too, and the waveform shows where it lands while it is dragged over.
+- **Waveform.** A [timeline](/docs/components/base/arrangement) of one lane with the clip's waveform, fitted to the width. The ruler seeks; a pinch, or Cmd or Ctrl and the wheel, zooms down to the samples, a dot each, in a few gestures; zoomed in, the wheel and the navigator move the view, which glides with the playhead as it plays, holding it in the middle. A view moved by hand stays where it is put till the playhead passes its edge.
+- **Editing.** A drag over the waveform selects a stretch of it; a double-click selects from one onset to the next, as a text selects a word, and a triple-click the sound from one pause to the next. Presses and edges snap to the onsets, the edits' seams and the locators from a few pixels away, unless Cmd or Ctrl is held. A right-click opens the edits, each with its key. Cut, Delete and Crop close the gap they leave; Paste makes room for what it lays down, over the selection if there is one; each seam an edit leaves crossfades over 10 ms, so it never clicks; Mark puts a locator at the selection's start, or at the cursor, on a strip over the sound; Louder and Quieter move the selection's level by 3 dB, up to +6 dB. Each edit is one step of undo, with Undo and Redo in the bar, and the history beside them lists every step by name, to go back or forward to any of them. They are commands of the [arrangement](/docs/components/base/arrangement), so the sound plays as it is edited.
+- **Fades and level.** The selection is a frame over the waveform. Its edges drag, with their time to the millisecond; a handle in each top corner fades it in and out, and a double-click on one picks its curve; its level is the line across it, dragged up or down from anywhere along it, 0 dB at the top and silence at the bottom. As a gesture ends, what is in the selection becomes clips of its own with those fades and that level, one step of undo, and the waveform draws them.
+- **Before the edits.** The button, or B, plays the sound as it came in, whole and through no device, at the loudness the edits and the chain give it, so the two compare by ear and not by level. An edit, or B again, brings the edits back.
+- **Export and readouts.** Export opens the [export dialog](/docs/components/base/export-dialog): the selection, or else the whole sound, is rendered offline through the same engine and chain that play it, then saved as WAV, MP3 or FLAC, at its level, to its peak or to a loudness. Under the waveform, the playhead's time to the millisecond, the selection's length (or the sound's), and how loud the sound came in, its peak, its rate and its channels.
+- **Recording.** Record asks for the microphone and starts after the count-in, if one is set in Record's menu. The take draws itself as it comes, in red, in a view that fits it, and becomes the sound when Record, Play or Stop ends it. Nothing plays during a take, so the speakers never come back in through the microphone.
+- **Device chain.** The track's [devices](/docs/devices), an equalizer and a compressor to start, each with its own panel. The [device browser](/docs/components/base/device-browser) beside it adds any effect of the library to the end of the chain.
+
+## Interaction
+
+| Key or gesture | Does |
+| --- | --- |
+| Space | Play or pause, the selection if there is one |
+| L | Loop on or off |
+| R | Record, or stop recording |
+| B | Hear the sound before the edits, or with them again |
+| Left, Right | Move between the bar's controls |
+| Pinch, or Cmd or Ctrl + wheel | Zoom the waveform |
+| Wheel, zoomed in | Scroll the waveform |
+| =, - and 0 on the waveform | Zoom in, out, and to the whole sound, about the cursor or the selection |
+| Left, Right on the waveform | Move the cursor a hundredth of the view |
+| Alt + Left, Right | Move the cursor to the cue before or after |
+| Home, End | Move the cursor to the start or the end |
+| Shift + Left, Right, Home, End | Move the selection's free end |
+| Press on the ruler or the waveform | Seek |
+| Drag over the waveform | Select a stretch, snapped to the onsets and locators |
+| Cmd or Ctrl while dragging | Let go of the snapping |
+| Double-click the waveform | Select from one onset to the next |
+| Triple-click the waveform | Select the sound between two pauses |
+| Shift + click or drag | Extend the selection to the pointer |
+| Right-click the waveform | Open the edits |
+| Cmd or Ctrl + X, C, V | Cut, copy, paste |
+| Delete or Backspace | Delete the selection |
+| K | Crop to the selection |
+| M | Mark: a locator |
+| Cmd or Ctrl + A | Select all |
+| Escape | Let go of the selection |
+| Drag the selection's edges | Resize it |
+| Drag a top corner of the selection | Fade it in or out |
+| Drag the selection's level line | Its level |
+| Up, Down on the selection's level | Its level by 0.5 dB |
+| Shift + Up, Down | Louder, quieter by 3 dB |
+| Cmd or Ctrl + Z, Shift + Cmd or Ctrl + Z | Undo, redo |
+| Drop an audio file | Make it the sound |

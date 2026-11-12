@@ -15,7 +15,7 @@ Accessible, composable audio controls, in three layers:
 | --- | --- | --- |
 | `@audio-ui` registry (shadcn) | Styled components and blocks copied into the project | The project has a `components.json` (shadcn/ui, Tailwind v4) |
 | `@audio-ui/react` (npm) | Headless React primitives: behavior, input handling and ARIA, no styles | React without shadcn, or the project brings its own design system. Ready skins: the `design` skill |
-| `@audio-ui/core` (npm) | Framework-free controllers: value math, scales, pointer, wheel and keyboard handling, live sources | Vue, Svelte, Solid, Angular, web components or the plain DOM → the `core` skill |
+| `@audio-ui/elements` (npm) | The same primitives as custom elements: behavior, input handling and ARIA, no styles, typed for Vue and Svelte templates | Vue, Svelte, Solid, Angular, Lit or plain HTML → the `core` skill, which also has the framework-free controllers of `@audio-ui/core` for a control of your own |
 
 Run commands with the project's package manager, read from its lockfile: `npx shadcn@latest`, `pnpm dlx shadcn@latest`, `bunx --bun shadcn@latest` or `yarn dlx shadcn@latest`. Examples use `npx`.
 
@@ -28,13 +28,13 @@ audio/ui ships as one plugin of four skills. Each one loads when its job comes u
 | `audio-ui` | Pick, install and wire the components: layers, component selection, values and events, accessibility, styling, AI control |
 | `web-audio` | Sound and live data: the AudioContext, click-free ramps, scheduling, meters, spectra, playheads, microphone and MIDI input |
 | `design` | How it looks: retro, minimal and modern skins, materials, and composing a look from a brief |
-| `core` | Outside React: the framework-free controllers for Vue, Svelte, Solid, Angular, web components and the plain DOM |
+| `core` | Outside React: the custom elements for Vue, Svelte and plain HTML (template types, `v-model`), and the framework-free controllers for a control of your own |
 
 ## When to Apply
 
 - Adding a knob, fader, XY pad, envelope, meter, waveform, plot, timeline, sequencer, drum pad, piano or piano roll
 - Building a synth, mixer, DAW, sampler, recorder or player interface
-- Choosing between the registry, the headless package and the framework-free controllers
+- Choosing between the registry, the headless React package and the custom elements
 - Making a control controlled, deciding what happens on change and on commit, or keeping it usable with a keyboard and a screen reader
 - Styling `@audio-ui/react` primitives with your own design system
 - Letting a chat, voice or agent compose, edit or mix through the interface

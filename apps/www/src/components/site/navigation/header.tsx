@@ -9,13 +9,13 @@ import {
 import { LabLink } from "@/components/site/navigation/lab-link";
 import { MainNav } from "@/components/site/navigation/main-nav";
 import { SectionSelect } from "@/components/site/navigation/section-select";
+import { Wordmark } from "@/components/site/navigation/wordmark";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/lib/config";
 import { source } from "@/lib/docs/content/source";
 import { getCategories } from "@/lib/registry/core/registry";
 import { cn } from "@/lib/utils";
 import { Button } from "../../ui/button";
-import { Icons } from "../icons";
 
 type PageTreeNode = ReturnType<typeof source.getPageTree>["children"][number];
 
@@ -85,16 +85,8 @@ function SiteLogo() {
       className="pl-2"
       nativeButton={false}
       render={
-        <Link aria-label="Home" className="flex items-center" to="/">
-          <div
-            aria-hidden
-            className="flex shrink-0 select-none items-center justify-center gap-1 text-muted-foreground"
-          >
-            <Icons.audioUi className="pointer-events-none size-5 text-foreground" />
-            <p className="mt-[-2.3px] text-balance font-medium font-serif text-xl leading-snug">
-              {siteConfig.name}
-            </p>
-          </div>
+        <Link aria-label="audio/ui home" className="flex items-center" to="/">
+          <Wordmark className="text-foreground text-xl" />
         </Link>
       }
       variant="ghost"
@@ -194,16 +186,12 @@ export function SiteHeader({
             className="hidden pl-2 md:flex"
             nativeButton={false}
             render={
-              <Link aria-label="Home" className="flex items-center" to={"/"}>
-                <div
-                  aria-hidden
-                  className="flex shrink-0 select-none items-center justify-center gap-1 text-muted-foreground"
-                >
-                  <Icons.audioUi className="pointer-events-none size-5 text-foreground" />
-                  <p className="mt-[-2.3px] text-balance font-medium font-serif text-xl leading-snug sm:mt-[-3px] sm:text-2xl">
-                    {siteConfig.name}
-                  </p>
-                </div>
+              <Link
+                aria-label="audio/ui home"
+                className="flex items-center"
+                to="/"
+              >
+                <Wordmark className="text-foreground text-xl sm:text-2xl" />
               </Link>
             }
             variant="ghost"

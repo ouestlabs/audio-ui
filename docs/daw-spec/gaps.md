@@ -1,6 +1,6 @@
 # Gaps
 
-What building `apps/daw` found missing or broken in audio/ui, and what fixed it. A gap is fixed where it lives (`packages/core`, `packages/ui` or the registry), with tests, a changeset and the docs, then installed again in the app; `apps/daw` never works around one.
+What building `apps/daw` found missing or broken in audio/ui, and what fixed it. A gap is fixed where it lives (`packages/core`, `packages/react` or the registry), with tests, a changeset and the docs, then installed again in the app; `apps/daw` never works around one.
 
 Each entry: where it was found, what is wrong, the rule it breaks, and the fix with its commit once there is one.
 

@@ -2,8 +2,18 @@ import { createChangeEventDetails } from "../../value/events.ts";
 import type { TimelineZoomChangeEventDetails } from "./position.ts";
 import { valueAtOffset } from "./scale.ts";
 
-/** How far one unit of wheel delta zooms, as an exponent. */
-export const WHEEL_ZOOM_SENSITIVITY = 0.0015;
+/**
+ * How far one pixel of wheel delta zooms, as an exponent. A trackpad's pinch
+ * comes as the wheel with Ctrl, about -100 ln s of delta for a spread of s:
+ * the zoom goes by s², so a few pinches go from a whole timeline to its finest.
+ */
+export const WHEEL_ZOOM_SENSITIVITY = 0.02;
+
+/** The most one frame zooms by, as an exponent: twice in or half out, so a mouse's notch never jumps further. */
+const MOST_PER_FRAME = Math.LN2;
+
+/** Pixels in a line and a page of wheel delta, for a wheel that counts in those. */
+const DELTA_PX = [1, 16, 400] as const;
 
 /** The options of `createWheelZoom`: the timeline's length, the zoom as drawn, where its start sits, and the function that applies a zoom. */
 export interface WheelZoomOptions {
@@ -32,8 +42,9 @@ export interface WheelZoomController {
 
 /**
  * A wheel zoom around the pointer. A trackpad sends wheel events faster than
- * frames, and each zoom lays the whole timeline out again: the deltas are
- * added up and applied once per frame, anchored on where the pointer was.
+ * frames, and each zoom lays the whole timeline out again: the deltas, in
+ * pixels whatever the wheel counts in, are added up and applied once per
+ * frame, anchored on where the pointer was.
  */
 export function createWheelZoom(
   initial: WheelZoomOptions
@@ -65,8 +76,12 @@ export function createWheelZoom(
       current,
       options.origin()
     );
+    const exponent = Math.min(
+      MOST_PER_FRAME,
+      Math.max(-MOST_PER_FRAME, -batch.delta * WHEEL_ZOOM_SENSITIVITY)
+    );
     options.zoomTo(
-      current * Math.exp(-batch.delta * WHEEL_ZOOM_SENSITIVITY),
+      current * Math.exp(exponent),
       createChangeEventDetails(
         "wheel",
         event
@@ -90,7 +105,9 @@ export function createWheelZoom(
       }
       event.preventDefault();
       pending = {
-        delta: (pending?.delta ?? 0) + event.deltaY,
+        delta:
+          (pending?.delta ?? 0) +
+          event.deltaY * (DELTA_PX[event.deltaMode] ?? 1),
         element,
         event,
       };

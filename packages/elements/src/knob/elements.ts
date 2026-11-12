@@ -21,7 +21,8 @@ import { INPUT_NAMES, ThumbInput, ValueText } from "../internal/input.ts";
 import {
   ControlPart,
   ControlRoot,
-  reportChange,
+  proposeChange,
+  readValue,
   reportCommit,
 } from "../internal/parts.ts";
 
@@ -139,7 +140,7 @@ export class KnobElement extends ControlRoot<KnobSnapshot> {
 
   /** The value as displayed. Setting it moves the knob; subsequent gestures start from the new value. */
   get value(): number {
-    return this.controller.getSnapshot().value;
+    return readValue(this, this.controller.getSnapshot().value);
   }
 
   set value(value: number) {
@@ -200,7 +201,7 @@ export class KnobElement extends ControlRoot<KnobSnapshot> {
       max: numberAttribute(this, "max"),
       min: numberAttribute(this, "min"),
       onValueChange: (value, details) => {
-        if (!reportChange(this, { reason: details.reason, value })) {
+        if (!proposeChange(this, { reason: details.reason, value })) {
           details.cancel();
           return;
         }

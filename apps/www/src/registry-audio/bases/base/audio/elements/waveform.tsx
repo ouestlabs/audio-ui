@@ -16,7 +16,8 @@ type WaveformProps = Omit<WaveformPrimitive.Root.Props, "levels" | "peaks"> &
   Pick<
     WaveformPrimitive.Control.Props,
     "getAriaValueText" | "onSelectionChange" | "onSelectionCommitted"
-  > & {
+  > &
+  Pick<WaveformPrimitive.Canvas.Props, "barGap" | "barWidth"> & {
     /** How the amplitudes are drawn. */
     shape?: WaveformShape;
     /** The audio's shape, at any resolution: amplitudes (0-1), or `{ min, max }` samples (-1-1) per slice. */
@@ -28,6 +29,8 @@ function Waveform({
   "aria-describedby": ariaDescribedBy,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
+  barGap,
+  barWidth,
   children,
   className,
   getAriaValueText,
@@ -60,6 +63,8 @@ function Waveform({
         onSelectionCommitted={onSelectionCommitted}
       >
         <WaveformPrimitive.Canvas
+          barGap={barGap}
+          barWidth={barWidth}
           className={cn("cn-waveform-canvas block size-full", EDGE_FADE)}
           variant={shape}
         />

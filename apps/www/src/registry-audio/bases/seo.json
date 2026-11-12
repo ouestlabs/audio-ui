@@ -146,6 +146,11 @@
     "intro": "Browse {{count}} transport components for audio/ui, built on top of shadcn/ui.",
     "title": "Transport"
   },
+  "audio-editor": {
+    "description": "An audio editor for one sound: transport, recording, a waveform that zooms to the samples and a device chain. {{count}} components.",
+    "intro": "Browse {{count}} audio editor components for audio/ui, built on top of shadcn/ui.",
+    "title": "Audio editor"
+  },
   "timeline": {
     "description": "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls. {{count}} components.",
     "intro": "Browse {{count}} timeline components for audio/ui, built on top of shadcn/ui.",

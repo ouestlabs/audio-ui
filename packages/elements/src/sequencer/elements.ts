@@ -24,6 +24,8 @@ import {
   ControlPart,
   ControlRoot,
   type Painted,
+  proposeChange,
+  readValue,
   reportChange,
   reportCommit,
 } from "../internal/parts.ts";
@@ -176,7 +178,7 @@ export class SequencerElement extends ControlRoot<SequencerSnapshot> {
 
   /** The pattern: a row per sound, each a list of steps. Setting it change the pattern; subsequent gestures start from the new value. */
   get value(): Pattern {
-    return this.controller.getSnapshot().value;
+    return readValue(this, this.controller.getSnapshot().value);
   }
 
   set value(value: Pattern | string) {
@@ -260,7 +262,7 @@ export class SequencerElement extends ControlRoot<SequencerSnapshot> {
       defaultVelocities: this.#defaultVelocities,
       disabled: this.hasAttribute("disabled"),
       onValueChange: (value, details) => {
-        if (!reportChange(this, { reason: details.reason, value })) {
+        if (!proposeChange(this, { reason: details.reason, value })) {
           details.cancel();
           return;
         }

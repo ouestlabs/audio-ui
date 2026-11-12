@@ -3,11 +3,19 @@ title: Roadmap
 description: What audio/ui ships today, and what comes next.
 ---
 
-**audio/ui** is a toolkit for building audio interfaces in React: headless primitives on npm (`@audio-ui/react`) and styled components for [shadcn/ui](https://ui.shadcn.com/) that you copy, paste and customize.
+**audio/ui** is a toolkit for building audio interfaces on the web: headless primitives on npm, for React (`@audio-ui/react`) and as custom elements for any framework (`@audio-ui/elements`), and styled components for [shadcn/ui](https://ui.shadcn.com/) that you copy, paste and customize.
 
 ## Current Status
 
 Available today:
+
+### Packages
+
+- **[`@audio-ui/core`](/docs/core)**: the logic of every control, with no dependency
+- **[`@audio-ui/engine`](/docs/engine)**: the audio logic (devices, time, analysis, MIDI, scales, playback, files), on audio.js
+- **[`@audio-ui/react`](/docs/react)**: the headless React primitives
+- **[`@audio-ui/elements`](/docs/elements)**: every primitive as custom elements, for plain HTML and any framework, with template types for [Vue](/docs/elements/vue) and [Svelte](/docs/elements/svelte)
+- **[`@audio-ui/icons`](/docs/icons)**: audio glyphs, one thin stroke on a 24 grid
 
 ### Elements
 
@@ -29,11 +37,11 @@ The surfaces of a DAW, controlled and independent of any audio engine:
 
 ### Devices
 
-22 effects and instruments, each a definition, a Web Audio engine and a panel generated from its parameters: dynamics (compressor, multiband, limiter, gate, de-esser, transient shaper), tone (equalizers and a filter), distortion, space and modulation (delay, reverb, chorus, phaser, auto pan), and utility and two instruments. A device reports what it takes off the signal for a meter, and exposes tools for an agent. See [Devices](/docs/devices).
+47 effects and instruments, each a definition, a Web Audio engine and a panel generated from its parameters: dynamics, tone, distortion, space and modulation, and utility, and eleven instruments, synths, keys, a sampler, a drum synth and a guitar. A device reports what it takes off the signal for a meter, and exposes tools for an agent. See [Devices](/docs/devices).
 
 ### Audio engine
 
-The hooks and libraries on the Web Audio API that make the sound, for the components that need it: output, clock and time, synthesis, input and analysis, and the controllers of `@audio-ui/core` for use with no framework. An engine of your own can drive the same components. See [Audio engine](/docs/guides).
+The hooks and libraries on the Web Audio API that make the sound, for the components that need it, over `@audio-ui/engine`: output, clock and time, synthesis, input and analysis. An engine of your own can drive the same components. See [Guides](/docs/guides).
 
 ### Blocks
 
@@ -46,7 +54,7 @@ Pre-assembled patterns: a mixing console, a drum rack, a piano roll, a timeline,
 
 ## What's Next
 
-- **Adapters beyond React**: the controllers of `@audio-ui/core` already drive a control with no framework, so the next step is to package that: custom elements over the controllers, and Vue and Svelte adapters, each one kept in step with the React primitives. How many to maintain is still to decide. A page would show one knob and one fader in React, Vue, Svelte and a web component, all on the same store and in sync.
+- **Native Vue and Svelte packages**: the [custom elements](/docs/elements) work in any framework, with template types and binding for [Vue](/docs/elements/vue) and [Svelte](/docs/elements/svelte). A package per framework stays thin only once each part's attributes and handlers come from `@audio-ui/core`, as its logic already does, so that comes first.
 - **Agents**: the Agent Skill and the MCP server have a link on the home page and a page each. They should be easier to find, from the documentation overview and from the component pages, with what an agent gets from each in a few lines.
 - **Devices**: a device is a definition, an engine and a panel, and the panel is generated from the parameters alone, with no code of its own per device. That is shown on the Devices page as one device in two skins; it should be shown as the idea it is, with the contract (the parameters, the readings, the tools for an agent) in plain view.
 - **More audio components**: further audio-specific patterns and controls.

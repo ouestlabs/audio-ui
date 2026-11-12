@@ -31,7 +31,7 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ouestlabs/audio-ui.git",
-    "directory": "packages/ui"
+    "directory": "packages/react"
   },
   "license": "MIT",
   "sideEffects": false,
@@ -107,7 +107,6 @@
     "dev": "bunx --bun tsup --watch",
     "lint": "biome check --write .",
     "lint:fix": "biome check --write --unsafe .",
-    "size": "bun scripts/size.ts",
     "test": "bun test"
   },
   "dependencies": {

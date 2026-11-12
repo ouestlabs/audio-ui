@@ -20,7 +20,8 @@ import {
 import {
   ControlPart,
   ControlRoot,
-  reportChange,
+  proposeChange,
+  readValue,
   reportCommit,
 } from "../internal/parts.ts";
 import { Stamp } from "../internal/stamp.ts";
@@ -206,7 +207,7 @@ export class EnvelopeElement extends ControlRoot<EnvelopeSnapshot> {
 
   /** The points as displayed, in `x` order. Setting them reshapes the envelope; subsequent gestures start from the new value. */
   get value(): Breakpoint[] {
-    return this.controller.getSnapshot().value;
+    return readValue(this, this.controller.getSnapshot().value);
   }
 
   set value(value: Breakpoint[] | string) {
@@ -306,7 +307,7 @@ export class EnvelopeElement extends ControlRoot<EnvelopeSnapshot> {
       minPoints: numberAttribute(this, "min-points"),
       onValueChange: (value, details) => {
         const detail = { index: details.index, reason: details.reason, value };
-        if (!reportChange(this, detail)) {
+        if (!proposeChange(this, detail)) {
           details.cancel();
           return;
         }

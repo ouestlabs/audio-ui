@@ -242,7 +242,7 @@ export function generateHomeOG(): ReactElement {
         backgroundColor: tokens.background,
         display: "flex",
         flexDirection: "column",
-        fontFamily: "Instrument Serif, Georgia, serif",
+        fontFamily: "Geist Mono, monospace",
         height: "100%",
         overflow: "hidden",
         position: "relative",
@@ -262,7 +262,7 @@ export function generateHomeOG(): ReactElement {
           style={{
             color: tokens.foreground,
             fontSize: "88px",
-            fontWeight: 700,
+            fontWeight: 600,
             letterSpacing: "-0.01em",
             lineHeight: 1,
           }}
@@ -411,7 +411,7 @@ export function generateDocsOG({
         backgroundColor: tokens.background,
         display: "flex",
         flexDirection: "column",
-        fontFamily: "Instrument Serif, Georgia, serif",
+        fontFamily: "Geist Mono, monospace",
         height: "100%",
         overflow: "hidden",
         padding: "72px 80px",
@@ -437,7 +437,7 @@ export function generateDocsOG({
         style={{
           color: tokens.foreground,
           fontSize: "88px",
-          fontWeight: 700,
+          fontWeight: 600,
           letterSpacing: "-0.01em",
           lineHeight: 1,
           marginTop: "auto",

@@ -21,7 +21,8 @@ import { ValueText } from "../internal/input.ts";
 import {
   ControlPart,
   ControlRoot,
-  reportChange,
+  proposeChange,
+  readValue,
   reportCommit,
 } from "../internal/parts.ts";
 
@@ -142,7 +143,7 @@ export class XYPadElement extends ControlRoot<XYPadSnapshot> {
 
   /** The point as displayed, `{ x, y }`. Setting it moves the pad; subsequent gestures start from the new value. */
   get value(): XYPadPoint {
-    return this.controller.getSnapshot().value;
+    return readValue(this, this.controller.getSnapshot().value);
   }
 
   set value(value: XYPadPoint | string) {
@@ -192,7 +193,7 @@ export class XYPadElement extends ControlRoot<XYPadSnapshot> {
       minX: numberAttribute(this, "min-x"),
       minY: numberAttribute(this, "min-y"),
       onValueChange: (value, details) => {
-        if (!reportChange(this, { reason: details.reason, value })) {
+        if (!proposeChange(this, { reason: details.reason, value })) {
           details.cancel();
           return;
         }

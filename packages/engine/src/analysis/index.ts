@@ -48,6 +48,7 @@ export {
   type PitchEstimate,
 } from "./pitch.ts";
 export { analyzeBeat, audioChroma, type BeatAnalysis } from "./recording.ts";
+export { detectSilences, type SilenceOptions } from "./silence.ts";
 export {
   holdPeaks,
   type LogSpectrumOptions,

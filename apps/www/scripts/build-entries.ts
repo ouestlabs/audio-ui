@@ -144,7 +144,7 @@ const MODULE_PACKAGES = [
   { folder: "core", name: "@audio-ui/core" },
   { folder: "engine", name: "@audio-ui/engine" },
   { folder: "elements", name: "@audio-ui/elements" },
-  { folder: "ui", name: "@audio-ui/react" },
+  { folder: "react", name: "@audio-ui/react" },
 ] as const;
 
 /** A module of a published package, as its page heads it. */
@@ -158,6 +158,8 @@ export interface PackageModule {
   from: string;
   /** The package it is in, what a project installs. */
   package: string;
+  /** Whether it holds types only, such as `@audio-ui/elements/vue`: a project imports it with `import type {}`. */
+  typesOnly: boolean;
   /** The registry's hooks and libs that import it: the ones with a page of their own. */
   usedBy: string[];
 }
@@ -368,7 +370,7 @@ async function importers(folder: string, from: string) {
 /** The adapters of `@audio-ui/react` and `@audio-ui/elements` with a file that imports `from`. */
 async function adaptersOf(from: string) {
   const roots = [
-    { name: "@audio-ui/react", src: `${PACKAGES}/ui/src/primitives` },
+    { name: "@audio-ui/react", src: `${PACKAGES}/react/src/primitives` },
     { name: "@audio-ui/elements", src: `${PACKAGES}/elements/src` },
   ];
   const found = await Promise.all(
@@ -399,7 +401,9 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
     MODULE_PACKAGES.map(async ({ folder, name }) => {
       const pkg = (await Bun.file(
         `${PACKAGES}/${folder}/package.json`
-      ).json()) as { exports: Record<string, { types: string }> };
+      ).json()) as {
+        exports: Record<string, { import?: string; types: string }>;
+      };
       const subpaths = Object.entries(pkg.exports).filter(
         ([subpath]) => subpath !== "./internal"
       );
@@ -415,6 +419,7 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
             from,
             package: name,
             audiojs: await audioJsOf(entry),
+            typesOnly: target.import === undefined,
             usedBy: itemFiles
               .filter((item) =>
                 item.sources.some((text) => text.includes(`from "${from}"`))

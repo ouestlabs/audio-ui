@@ -224,6 +224,12 @@ export const categories: CategoryDef[] = [
   },
   {
     description:
+      "An audio editor for one sound: transport, recording, a waveform that zooms to the samples and a device chain.",
+    label: "Audio editor",
+    name: "audio-editor",
+  },
+  {
+    description:
       "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
     docs: "arrangement",
     label: "Timeline",
@@ -270,6 +276,7 @@ export const categoryGroups: { label: string; names: string[] }[] = [
     label: "Workstation",
     names: [
       "timeline",
+      "audio-editor",
       "piano-roll",
       "sequencer",
       "transport",

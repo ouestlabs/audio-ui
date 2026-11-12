@@ -14,10 +14,10 @@ audio-ui/
 │   └── www/        # TanStack Start docs site + registry → localhost:4000
 └── packages/
     ├── core/       # @audio-ui/core, published npm package (framework-agnostic logic)
-    └── ui/         # @audio-ui/react, published npm package (headless primitives)
+    └── react/      # @audio-ui/react, published npm package (headless primitives)
 ```
 
-Changes to `packages/core` (`@audio-ui/core`) and `packages/ui` (`@audio-ui/react`) are published to npm and require a changeset (`bun run changeset`). Everything below focuses on the registry in `apps/www`, which is the main contribution surface.
+Changes to `packages/core` (`@audio-ui/core`) and `packages/react` (`@audio-ui/react`) are published to npm and require a changeset (`bun run changeset`). Everything below focuses on the registry in `apps/www`, which is the main contribution surface.
 
 ---
 

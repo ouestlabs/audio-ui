@@ -1,14 +1,13 @@
 ---
 title: Introduction
-description: Accessible audio controls for React, as headless primitives on npm and as styled components you copy into your shadcn/ui project. Built to be used by people and by AI agents.
+description: Accessible audio controls for React and any framework, as headless primitives and custom elements on npm and as styled components you copy into your shadcn/ui project. Built to be used by people and by AI agents.
 ---
 
-**audio/ui** is a set of accessible, composable audio controls for React: knobs, faders, XY pads, envelopes, meters, waveforms, timelines, sequencers, drum pads, piano keyboards and piano rolls.
-
+**audio/ui** is a set of accessible, composable audio controls for the web, in React, Vue, Svelte or plain HTML: knobs, faders, XY pads, envelopes, meters, waveforms, timelines, sequencers, drum pads, piano keyboards and piano rolls.
 
 Audio controls have many details: a knob has to drag, respond to the wheel and the keyboard, reset on double click, and be announced correctly by a screen reader. audio/ui implements them once.
 
-## Two layers
+## Three layers
 
 Use the layer that fits your project. They share the same behavior.
 
@@ -24,7 +23,13 @@ npm install @audio-ui/react
 npx shadcn@latest add @audio-ui/knob
 ```
 
-Both are open source. With the registry you receive the actual code, so you can read it, change it and learn from it.
+**`@audio-ui/elements`** are the same primitives as custom elements: behavior and accessibility, no styles, in plain HTML and any framework. Pick them outside React. [Vue](/docs/elements/vue) and [Svelte](/docs/elements/svelte) get template types, and Vue binds a value with `v-model`.
+
+```bash
+npm install @audio-ui/elements
+```
+
+All three are open source. With the registry you receive the actual code, so you can read it, change it and learn from it.
 
 ## Top components
 

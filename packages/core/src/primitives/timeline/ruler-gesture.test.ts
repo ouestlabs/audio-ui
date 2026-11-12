@@ -158,6 +158,54 @@ describe("Timeline lane press with a selection", () => {
   });
 });
 
+describe("Timeline snap points under a press", () => {
+  // 10 px a unit: the points pull from 8 px, 0.8 units, away.
+  const grid = { offset: 0, points: [3, 7.5], step: 0 };
+
+  test("a press on the lane lands on a point within reach, and a drag's end does too", () => {
+    const onSelectionChange = mock(
+      (_range: unknown, _details: unknown) => undefined
+    );
+    const timeline = create({ grid });
+    timeline.pressSeek(
+      pointer("pointerdown", { clientX: 35 }),
+      handle,
+      handle,
+      { onSelectionChange, onSelectionCommitted: () => undefined }
+    );
+    expect(timeline.getSnapshot().position).toBe(3);
+    document.dispatchEvent(pointer("pointermove", { clientX: 69 }));
+    expect(onSelectionChange.mock.calls.at(-1)?.[0]).toEqual([3, 7.5]);
+    document.dispatchEvent(pointer("pointerup", { clientX: 69, buttons: 0 }));
+  });
+
+  test("a point out of reach leaves the press where it is, and so does Cmd or Ctrl", () => {
+    const timeline = create({ grid });
+    timeline.pressSeek(pointer("pointerdown", { clientX: 50 }), handle, handle);
+    expect(timeline.getSnapshot().position).toBe(5);
+    document.dispatchEvent(pointer("pointerup", { clientX: 50, buttons: 0 }));
+    const held = create({ grid });
+    held.pressSeek(
+      Object.assign(pointer("pointerdown", { clientX: 35 }), { metaKey: true }),
+      handle,
+      handle
+    );
+    expect(held.getSnapshot().position).toBe(3.5);
+    document.dispatchEvent(pointer("pointerup", { clientX: 35, buttons: 0 }));
+  });
+
+  test("a press on the ruler lands on a point within reach", () => {
+    const timeline = create({ grid });
+    timeline.pressRuler(
+      pointer("pointerdown", { clientX: 73 }),
+      handle,
+      handle
+    );
+    expect(timeline.getSnapshot().position).toBe(7.5);
+    document.dispatchEvent(pointer("pointerup", { clientX: 73, buttons: 0 }));
+  });
+});
+
 describe("Timeline pointers", () => {
   test("a second finger on the ruler is ignored, and the first goes on seeking", () => {
     const onPositionChange = mock(() => undefined);

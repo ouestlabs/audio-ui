@@ -41,7 +41,29 @@ knob.addEventListener("input", (event) => setCutoff(event.detail.value));
 knob.addEventListener("change", () => savePreset());
 ```
 
-`input` fires on every change, with `event.detail.value` and `event.detail.reason`; `preventDefault()` rejects the change. `change` fires once when an interaction that changed the value ends. The `value` property reads and sets the value. Parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`.
+`input` fires on every change, with `event.detail.value` and `event.detail.reason`; `preventDefault()` rejects the change. `change` fires once when an interaction that changed the value ends. The `value` property reads and sets the value; while `input` is dispatched it reads the value proposed, as a native input's does. Parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`.
+
+## Vue and Svelte
+
+Each framework has template types for every element: its attributes, its properties and its events with their `detail`. Import them once in a project:
+
+```ts
+import type {} from "@audio-ui/elements/vue"; // or "@audio-ui/elements/svelte"
+```
+
+In Vue, declare the tags as custom elements (`compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")`), then bind a value with `v-model`:
+
+```vue
+<audio-ui-knob min="20" max="20000" scale="log" v-model="cutoff" />
+```
+
+In Svelte, which binds `bind:value` on native inputs only, bind it with `value` and `oninput`:
+
+```svelte
+<audio-ui-knob min="20" max="20000" scale="log" value={cutoff} oninput={(event) => (cutoff = event.detail.value)} />
+```
+
+`vue` and `svelte` are optional peer dependencies, for the types alone.
 
 ## Elements
 
@@ -62,7 +84,7 @@ knob.addEventListener("change", () => savePreset());
 
 ## Documentation
 
-API reference for every element and part: <https://www.audio-ui.dev/docs/custom-elements>.
+API reference for every element and part: <https://www.audio-ui.dev/docs/elements>. Vue: <https://www.audio-ui.dev/docs/elements/vue>. Svelte: <https://www.audio-ui.dev/docs/elements/svelte>.
 
 ## License
 

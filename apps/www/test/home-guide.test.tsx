@@ -8,7 +8,9 @@ import {
 } from "@tanstack/react-router";
 import { act, render } from "@testing-library/react";
 
-const { getDocsSpaces } = await import("@/lib/docs/content/spaces");
+const { getDocsSpaces, getHomeIndex } = await import(
+  "@/lib/docs/content/spaces"
+);
 const { HomeGuide } = await import("@/components/site/home/home-guide");
 const { buildFaqJsonLd } = await import("@/lib/seo/seo");
 
@@ -21,7 +23,7 @@ async function renderGuide() {
   const router = createRouter({
     history: createMemoryHistory({ initialEntries: ["/"] }),
     routeTree: createRootRoute({
-      component: () => <HomeGuide spaces={getDocsSpaces()} />,
+      component: () => <HomeGuide {...getHomeIndex()} />,
     }),
   });
   await act(() => router.load());

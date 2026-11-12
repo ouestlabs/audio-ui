@@ -16,7 +16,7 @@ import { Glob } from "bun";
 const WEB = `${import.meta.dir}/..`;
 const PAGES = `${WEB}/src/content/docs/components/base`;
 const REACT_PAGES = `${WEB}/src/content/docs/react`;
-const PRIMITIVES = `${WEB}/../../packages/ui/src/primitives`;
+const PRIMITIVES = `${WEB}/../../packages/react/src/primitives`;
 
 const SECTION = /^### (.+)$/gm;
 const TYPE_ROW =

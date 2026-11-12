@@ -32,7 +32,8 @@ import { ValueText } from "../internal/input.ts";
 import {
   ControlPart,
   ControlRoot,
-  reportChange,
+  proposeChange,
+  readValue,
   reportCommit,
 } from "../internal/parts.ts";
 
@@ -844,7 +845,7 @@ export class PlotHandleElement extends PlotPartElement {
 
   /** The handle's value, in the axes' units. Setting it moves the handle; subsequent gestures start from the new value. */
   get value(): PlotPoint {
-    return this.controller.getSnapshot().value;
+    return readValue(this, this.controller.getSnapshot().value);
   }
 
   set value(value: PlotPoint | string) {
@@ -913,7 +914,7 @@ export class PlotHandleElement extends PlotPartElement {
       disabled: plot.disabled || this.hasAttribute("disabled"),
       measure: (fresh: boolean) => this.root?.measure(fresh) ?? null,
       onValueChange: (value, details) => {
-        if (!reportChange(this, { reason: details.reason, value })) {
+        if (!proposeChange(this, { reason: details.reason, value })) {
           details.cancel();
           return;
         }
