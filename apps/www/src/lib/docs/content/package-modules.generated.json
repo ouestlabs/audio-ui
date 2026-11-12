@@ -2436,6 +2436,21 @@
         "summary": "What `detectSilences` takes, both optional."
       },
       {
+        "kind": "interface",
+        "name": "Spectrogram",
+        "summary": "A sound's frequencies over time, as a grid of levels."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectrogramOptions",
+        "summary": "What `spectrogram` takes, all optional."
+      },
+      {
+        "kind": "function",
+        "name": "spectrogram",
+        "summary": "Reads a sound's frequencies over time: its channels mixed to one, cut into overlapping frames of a Hann window, each frame's magnitudes in dB under the level a full-scale sine reads at, kept as one byte a bin."
+      },
+      {
         "kind": "function",
         "name": "holdPeaks",
         "summary": "Keeps the loudest level each point of a spectrum reached: a peak rises with the spectrum at once, stays put for `hold` seconds, then falls at `fall` dB per second until the spectrum meets it again."
@@ -2469,6 +2484,7 @@
       "@audio/loudness-truepeak",
       "@audio/mir-chroma",
       "@audio/pitch-yin",
+      "@audio/stft",
       "@audio/weighting-k"
     ],
     "typesOnly": false,
@@ -2481,6 +2497,7 @@
       "use-noise-through-eq",
       "use-pitch",
       "use-sound-report",
+      "use-sound-spectrogram",
       "use-spectrum"
     ]
   },

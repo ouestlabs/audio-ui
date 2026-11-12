@@ -388,6 +388,7 @@
       "use-bake",
       "use-clip-edits",
       "use-sound-report",
+      "use-sound-spectrogram",
       "use-time-selection",
       "use-timeline-cursor"
     ]
@@ -687,7 +688,8 @@
       "block-mixer",
       "block-timeline",
       "use-bake",
-      "use-sound-report"
+      "use-sound-report",
+      "use-sound-spectrogram"
     ]
   },
   {
@@ -1991,7 +1993,8 @@
     ],
     "usedBy": [
       "block-audio-editor",
-      "use-sound-report"
+      "use-sound-report",
+      "use-sound-spectrogram"
     ]
   },
   {
@@ -2651,6 +2654,33 @@
     "from": "@/hooks/use-sound-report",
     "kind": "hook",
     "name": "use-sound-report",
+    "registryDependencies": [
+      "arrangement",
+      "clip-player",
+      "use-bake"
+    ],
+    "usedBy": [
+      "block-audio-editor"
+    ]
+  },
+  {
+    "dependencies": [
+      "@audio-ui/engine"
+    ],
+    "description": "Reads the frequencies of the sound of a track as edited over time, held as a grid until it is cleared",
+    "exports": [
+      {
+        "kind": "function",
+        "name": "useSoundSpectrogram",
+        "summary": "Reads the frequencies of the sound as edited over time."
+      }
+    ],
+    "files": [
+      "hooks/use-sound-spectrogram.ts"
+    ],
+    "from": "@/hooks/use-sound-spectrogram",
+    "kind": "hook",
+    "name": "use-sound-spectrogram",
     "registryDependencies": [
       "arrangement",
       "clip-player",

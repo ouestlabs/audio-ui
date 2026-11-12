@@ -170,6 +170,17 @@ export const hooks: RegistryItem[] = [
       "@audio-ui/use-bake",
     ],
   }),
+  hookItem("use-sound-spectrogram", {
+    categories: ["audio", "timeline"],
+    dependencies: ["@audio-ui/engine"],
+    description:
+      "Reads the frequencies of the sound of a track as edited over time, held as a grid until it is cleared",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/clip-player",
+      "@audio-ui/use-bake",
+    ],
+  }),
   hookItem("use-silence-hover", {
     categories: ["audio", "timeline"],
     description:

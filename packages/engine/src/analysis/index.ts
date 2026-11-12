@@ -57,6 +57,11 @@ export {
 } from "./report.ts";
 export { detectSilences, type SilenceOptions } from "./silence.ts";
 export {
+  type Spectrogram,
+  type SpectrogramOptions,
+  spectrogram,
+} from "./spectrogram.ts";
+export {
   holdPeaks,
   type LogSpectrumOptions,
   logSpectrum,

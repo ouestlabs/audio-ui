@@ -97,6 +97,7 @@ import {
   SoundReadouts,
 } from "@/registry-audio/bases/base/audio/elements/sound-readouts";
 import { SoundReport } from "@/registry-audio/bases/base/audio/elements/sound-report";
+import { SoundSpectrogramDialog } from "@/registry-audio/bases/base/audio/elements/sound-spectrogram";
 import {
   Timeline,
   TimelineClip,
@@ -118,6 +119,7 @@ import { useBake } from "@/registry-audio/bases/base/hooks/use-bake";
 import { useClipEdits } from "@/registry-audio/bases/base/hooks/use-clip-edits";
 import { useSilenceHover } from "@/registry-audio/bases/base/hooks/use-silence-hover";
 import { useSoundReport } from "@/registry-audio/bases/base/hooks/use-sound-report";
+import { useSoundSpectrogram } from "@/registry-audio/bases/base/hooks/use-sound-spectrogram";
 import { useStatusLine } from "@/registry-audio/bases/base/hooks/use-status-line";
 import type {
   Arranged,
@@ -1215,9 +1217,11 @@ function RepairItems({
 function AnalyzeItems({
   disabled,
   onAnalyze,
+  onSpectrogram,
 }: {
   disabled: boolean;
   onAnalyze: () => void;
+  onSpectrogram: () => void;
 }) {
   return (
     <DropdownMenuGroup>
@@ -1226,6 +1230,12 @@ function AnalyzeItems({
         Analyze sound
         <span className="ms-auto text-muted-foreground text-xs">
           Key, tempo, ACX
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuItem disabled={disabled} onClick={onSpectrogram}>
+        Spectrogram
+        <span className="ms-auto text-muted-foreground text-xs">
+          Frequencies over time
         </span>
       </DropdownMenuItem>
     </DropdownMenuGroup>
@@ -2587,6 +2597,7 @@ function MoreMenu({
   onExport,
   onAnalyze,
   onLoopingChange,
+  onSpectrogram,
   sound,
   structure,
 }: {
@@ -2594,6 +2605,7 @@ function MoreMenu({
   comparing: boolean;
   edits: ReturnType<typeof useClipEdits>;
   onAnalyze: () => void;
+  onSpectrogram: () => void;
   structure: Structure;
   /** The editor, whose transport tells whether its own Loop shows. */
   frame: RefObject<HTMLDivElement | null>;
@@ -2681,7 +2693,11 @@ function MoreMenu({
             <DropdownMenuSeparator />
             <RepairItems disabled={!sound} structure={structure} />
             <DropdownMenuSeparator />
-            <AnalyzeItems disabled={!sound} onAnalyze={onAnalyze} />
+            <AnalyzeItems
+              disabled={!sound}
+              onAnalyze={onAnalyze}
+              onSpectrogram={onSpectrogram}
+            />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
@@ -3060,6 +3076,25 @@ export default function BlockAudioEditor() {
     setStatus,
     track: TRACK,
   });
+  const {
+    clear: clearSpectrogram,
+    grid: spectrogramGrid,
+    show: showSpectrogram,
+  } = useSoundSpectrogram({
+    doc,
+    recordings,
+    sampleRate: sound?.sampleRate ?? 48_000,
+    setStatus,
+    track: TRACK,
+  });
+  const closeSpectrogram = useCallback(
+    (shown: boolean) => {
+      if (!shown) {
+        clearSpectrogram();
+      }
+    },
+    [clearSpectrogram]
+  );
   const closeReport = useCallback(
     (shown: boolean) => {
       if (!shown) {
@@ -3422,7 +3457,11 @@ export default function BlockAudioEditor() {
                 <DropdownMenuSeparator />
                 <RepairItems disabled={!sound} structure={baking} />
                 <DropdownMenuSeparator />
-                <AnalyzeItems disabled={!sound} onAnalyze={analyze} />
+                <AnalyzeItems
+                  disabled={!sound}
+                  onAnalyze={analyze}
+                  onSpectrogram={showSpectrogram}
+                />
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>
@@ -3478,6 +3517,7 @@ export default function BlockAudioEditor() {
               onCompare={toggleCompare}
               onExport={openExport}
               onLoopingChange={setLooping}
+              onSpectrogram={showSpectrogram}
               sound={sound !== null}
               structure={baking}
             />
@@ -3526,6 +3566,10 @@ export default function BlockAudioEditor() {
         time={edits.time}
       />
       <SoundReport onOpenChange={closeReport} report={report} />
+      <SoundSpectrogramDialog
+        grid={spectrogramGrid}
+        onOpenChange={closeSpectrogram}
+      />
       <ExportDialog
         onExport={runExport}
         onOpenChange={setExporting}

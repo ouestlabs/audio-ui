@@ -110,3 +110,15 @@ checkAcx(channels, sampleRate).noiseFloor.value; // the quietest pause of half a
 ```
 
 `reportSound` reads every sample, a few seconds a minute of stereo on a laptop, so call it where the page can wait.
+
+## Frequencies over time
+
+```ts
+import { spectrogram } from "@audio-ui/engine/analysis";
+
+const grid = spectrogram(channels, sampleRate, { frameSize: 2048, range: 90 });
+grid.levels[frame * grid.bins + bin]; // 0 (90 dB under full scale) to 255 (full scale)
+bin * grid.hertzPerBin; // a bin's frequency
+```
+
+The channels are mixed to one and cut into overlapping frames of a Hann window, `frameSize` samples each (1024 by default) and a quarter of a frame apart. More samples tell the frequencies apart, fewer tell the moments apart. The grid keeps one byte a bin, so a minute of sound at 48 kHz is about 11 MB.

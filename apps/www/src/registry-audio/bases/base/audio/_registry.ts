@@ -265,6 +265,21 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["audio-editor"],
+    dependencies: ["@audio-ui/engine"],
+    description:
+      "A sound's frequencies over time, drawn in the text colour on a canvas with its frequency and time scales, alone or in a dialog. Controlled: the dialog is open while a grid is set",
+    files: [
+      {
+        path: "audio/elements/sound-spectrogram.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "sound-spectrogram",
+    registryDependencies: ["@shadcn/dialog"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["audio-editor"],
     dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "What a sound was read as, in a dialog: its loudness and true peak, its key and tempo when it has them, and each of ACX's audiobook requirements with whether the sound meets it. Controlled: it is open while a report is set",

@@ -1,0 +1,28 @@
+---
+title: useSoundSpectrogram
+description: "Reads the frequencies of the sound of a track as edited over time, held as a grid until it is cleared."
+---
+
+<Entry name="use-sound-spectrogram" />
+
+## Usage
+
+`useSoundSpectrogram` renders what a track's clips play, as [`useBake`](/docs/hooks/use-bake) does, and reads it with `spectrogram` of [`@audio-ui/engine/analysis`](/docs/engine/analysis): one byte a bin, frame after frame. [`SoundSpectrogramDialog`](/docs/components/base/sound-spectrogram) draws it.
+
+```tsx
+import { useSoundSpectrogram } from "@/hooks/use-sound-spectrogram";
+import { SoundSpectrogramDialog } from "@/components/audio-ui/sound-spectrogram";
+
+const { clear, grid, show } = useSoundSpectrogram({
+  doc, // the arrangement's document
+  recordings,
+  sampleRate: 48_000,
+  setStatus, // what the editor says while it works
+  track: "track-1",
+});
+
+<MenuItem onClick={show}>Spectrogram</MenuItem>;
+<SoundSpectrogramDialog grid={grid} onOpenChange={(open) => !open && clear()} />;
+```
+
+`grid` is `null` until `show` has read the sound, and again after `clear`.

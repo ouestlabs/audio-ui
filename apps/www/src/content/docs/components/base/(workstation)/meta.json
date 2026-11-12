@@ -22,6 +22,7 @@
     "---Export---",
     "export-dialog",
     "sound-readouts",
-    "sound-report"
+    "sound-report",
+    "sound-spectrogram"
   ]
 }

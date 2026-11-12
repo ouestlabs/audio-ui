@@ -32,6 +32,7 @@
     "use-clip-edits",
     "use-silence-hover",
     "use-sound-report",
+    "use-sound-spectrogram",
     "use-track-reorder",
     "use-marquee-selection",
     "---Sessions and demos---",

@@ -1,0 +1,22 @@
+---
+title: Sound Spectrogram
+description: "A sound's frequencies over time, drawn in the text colour on a canvas with its frequency and time scales, alone or in a dialog."
+---
+
+## Installation
+
+<Install name="sound-spectrogram" packages="@audio-ui/engine" />
+
+## Usage
+
+`SoundSpectrogram` draws the grid `spectrogram` of [`@audio-ui/engine/analysis`](/docs/engine/analysis) gives: time runs left to right, frequency from 0 Hz at the bottom to the Nyquist limit at the top, and the louder a bin the more opaque it is, in the text colour. `SoundSpectrogramDialog` is the same in a dialog, controlled: it is open while `grid` is set. [`useSoundSpectrogram`](/docs/hooks/use-sound-spectrogram) reads the sound of a track into it.
+
+```tsx
+import {
+  SoundSpectrogram,
+  SoundSpectrogramDialog,
+} from "@/components/audio-ui/sound-spectrogram";
+
+<SoundSpectrogram grid={grid} />;
+<SoundSpectrogramDialog grid={grid} onOpenChange={(open) => !open && clear()} />;
+```
