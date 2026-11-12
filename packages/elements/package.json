@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/elements",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "description": "Accessible, headless custom elements for audio interfaces.",
   "keywords": [
     "audio-ui",
