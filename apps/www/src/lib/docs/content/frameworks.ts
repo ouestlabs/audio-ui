@@ -38,8 +38,11 @@ export function isFramework(value: unknown): value is FrameworkId {
 /** The sections only a React app uses: the primitives for React, the registry and its catalog. */
 const REACT_ONLY: readonly string[] = ["react", "registry", "components"];
 
+/** Whether a section is for React alone: read there, the framework is React, whatever the reader chose. */
+export const needsReact = (section: string) => REACT_ONLY.includes(section);
+
 /** Where Elements starts for a reader of each framework: its own guide, or the elements themselves. */
-const ELEMENTS_GUIDE: Record<FrameworkId, string> = {
+export const ELEMENTS_GUIDE: Record<FrameworkId, string> = {
   react: "/docs/elements",
   svelte: "/docs/elements/svelte",
   vue: "/docs/elements/vue",

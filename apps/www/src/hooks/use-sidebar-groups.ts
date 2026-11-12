@@ -1,7 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import * as React from "react";
 import { useFramework } from "@/hooks/use-framework";
-import { sectionsFor } from "@/lib/docs/content/frameworks";
+import { needsReact, sectionsFor } from "@/lib/docs/content/frameworks";
 import {
   getCurrentBase,
   getGroupsFromFolder,
@@ -128,14 +128,19 @@ export interface SiteSection {
   reactOnly: boolean;
 }
 
-/** The site's sections, the one being read marked, in the order a reader of the chosen framework wants them. */
+/**
+ * The site's sections, the one being read marked, in the order a reader of
+ * the framework wants them: React's in a section for React alone, else the one
+ * chosen.
+ */
 export function useSiteSections(tree: PageTree): SiteSection[] {
   const pathname = useLocation({ select: (location) => location.pathname });
-  const [framework] = useFramework();
+  const [chosen] = useFramework();
   const reading = React.useMemo(
     () => sectionAt(tree, pathname),
     [tree, pathname]
   );
+  const framework = needsReact(reading) ? "react" : chosen;
   return React.useMemo(
     () =>
       sectionsFor(framework).map((each) => ({

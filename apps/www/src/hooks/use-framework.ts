@@ -21,7 +21,8 @@ function read(): FrameworkId | null {
   return chosen;
 }
 
-function write(next: FrameworkId | null) {
+/** Keeps a choice in the browser and tells every reader of it, the address left as it is: a choice that goes to another page carries it in that page's link. */
+export function rememberFramework(next: FrameworkId | null) {
   chosen = next;
   try {
     if (next) {
@@ -57,12 +58,12 @@ export function useFramework() {
   // A link that names a framework chooses it, for the pages that come next.
   React.useEffect(() => {
     if (isFramework(param) && param !== read()) {
-      write(param);
+      rememberFramework(param);
     }
   }, [param]);
   const choose = React.useCallback(
     (next: FrameworkId | null) => {
-      write(next);
+      rememberFramework(next);
       setParam(next);
     },
     [setParam]
