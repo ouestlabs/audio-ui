@@ -159,6 +159,17 @@ export const hooks: RegistryItem[] = [
       "@audio-ui/clip-player",
     ],
   }),
+  hookItem("use-sound-report", {
+    categories: ["audio", "timeline"],
+    dependencies: ["@audio-ui/engine"],
+    description:
+      "Reads the sound of a track as edited, to tell what it is: its loudness, key and tempo, and whether it meets ACX's audiobook requirements, held as a report until it is cleared",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/clip-player",
+      "@audio-ui/use-bake",
+    ],
+  }),
   hookItem("use-silence-hover", {
     categories: ["audio", "timeline"],
     description:

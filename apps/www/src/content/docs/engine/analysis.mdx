@@ -94,3 +94,19 @@ Two readings are taken once, as a recording is decoded:
 
 - `analyzeBeat(channels, sampleRate)` reads its tempo with `@audio/beat-detect` and fits the beat grid on its transients, to the sample, so a tempo between whole BPM holds over a long file. It returns `{ estimate, transients }`, the estimate `null` for a sound with no attack (silence, noise), which is what `autoWarp` takes.
 - `audioChroma(channels, sampleRate)` is how much of its sound lies in each pitch class, C to B, summing to 1: the chroma of `@audio/mir-chroma` on each stretch that is not silence, averaged. It is what a key is read from, with [`detectKeys`](/docs/engine/pitch#keys).
+
+## Reading a sound
+
+```ts
+import { checkAcx, reportSound } from "@audio-ui/engine/analysis";
+
+const report = reportSound(channels, sampleRate);
+report.loudness.lufs; // -19.5
+report.key; // { name: "minor", root: 9 }, or null
+report.tempo; // 128, or null for a sound with no beat
+report.acx.pass; // RMS -23 to -18 dBFS, peak at most -3 dBFS, noise floor at most -60 dBFS
+
+checkAcx(channels, sampleRate).noiseFloor.value; // the quietest pause of half a second, in dBFS RMS, or null
+```
+
+`reportSound` reads every sample, a few seconds a minute of stereo on a laptop, so call it where the page can wait.

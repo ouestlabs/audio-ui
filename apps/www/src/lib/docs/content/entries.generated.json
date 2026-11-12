@@ -387,6 +387,7 @@
       "use-arrangement",
       "use-bake",
       "use-clip-edits",
+      "use-sound-report",
       "use-time-selection",
       "use-timeline-cursor"
     ]
@@ -685,7 +686,8 @@
       "block-device-chain",
       "block-mixer",
       "block-timeline",
-      "use-bake"
+      "use-bake",
+      "use-sound-report"
     ]
   },
   {
@@ -1967,6 +1969,11 @@
       },
       {
         "kind": "function",
+        "name": "renderEdited",
+        "summary": "What the track's clips play over the whole arrangement, as plain channels: the cuts, fades and gains made, not the track's devices."
+      },
+      {
+        "kind": "function",
         "name": "useBake",
         "summary": "Changes the samples of the sound as edited."
       }
@@ -1983,7 +1990,8 @@
       "clip-player"
     ],
     "usedBy": [
-      "block-audio-editor"
+      "block-audio-editor",
+      "use-sound-report"
     ]
   },
   {
@@ -2623,6 +2631,33 @@
     "usedBy": [
       "meter-size-default-demo",
       "needle-meter-demo"
+    ]
+  },
+  {
+    "dependencies": [
+      "@audio-ui/engine"
+    ],
+    "description": "Reads the sound of a track as edited, to tell what it is: its loudness, key and tempo, and whether it meets ACX's audiobook requirements, held as a report until it is cleared",
+    "exports": [
+      {
+        "kind": "function",
+        "name": "useSoundReport",
+        "summary": "Reads the sound as edited, to tell what it is: its loudness, key and tempo, and whether it meets ACX's audiobook requirements."
+      }
+    ],
+    "files": [
+      "hooks/use-sound-report.ts"
+    ],
+    "from": "@/hooks/use-sound-report",
+    "kind": "hook",
+    "name": "use-sound-report",
+    "registryDependencies": [
+      "arrangement",
+      "clip-player",
+      "use-bake"
+    ],
+    "usedBy": [
+      "block-audio-editor"
     ]
   },
   {

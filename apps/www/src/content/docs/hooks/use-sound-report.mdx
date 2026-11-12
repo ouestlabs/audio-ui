@@ -1,0 +1,28 @@
+---
+title: useSoundReport
+description: "Reads the sound of a track as edited, to tell what it is: its loudness, key and tempo, and whether it meets ACX's audiobook requirements, held as a report until it is cleared."
+---
+
+<Entry name="use-sound-report" />
+
+## Usage
+
+`useSoundReport` renders what a track's clips play, as [`useBake`](/docs/hooks/use-bake) does, and reads it with `reportSound` of [`@audio-ui/engine/analysis`](/docs/engine/analysis): the loudness and true peak, the likeliest key, the tempo when the sound has a beat, and `checkAcx`'s verdict on each of ACX's audiobook requirements (RMS between -23 and -18 dBFS, peak at most -3 dBFS, noise floor at most -60 dBFS on the quietest pause).
+
+```tsx
+import { useSoundReport } from "@/hooks/use-sound-report";
+import { SoundReport } from "@/components/audio-ui/sound-report";
+
+const { analyze, clear, report } = useSoundReport({
+  doc, // the arrangement's document
+  recordings,
+  sampleRate: 48_000,
+  setStatus, // what the editor says while it works
+  track: "track-1",
+});
+
+<MenuItem onClick={analyze}>Analyze sound</MenuItem>;
+<SoundReport onOpenChange={(open) => !open && clear()} report={report} />;
+```
+
+`report` is `null` until `analyze` has read the sound, and again after `clear`. [`SoundReport`](/docs/components/base/sound-report) draws it in a dialog.

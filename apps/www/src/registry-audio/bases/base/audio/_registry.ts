@@ -264,6 +264,21 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["audio-editor"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    description:
+      "What a sound was read as, in a dialog: its loudness and true peak, its key and tempo when it has them, and each of ACX's audiobook requirements with whether the sound meets it. Controlled: it is open while a report is set",
+    files: [
+      {
+        path: "audio/elements/sound-report.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "sound-report",
+    registryDependencies: ["@shadcn/dialog"],
+    type: "registry:ui",
+  },
+  {
     categories: ["transport"],
     description:
       "The settings of an export in a dialog: the file's format, its bit depth or bitrate, and its level, left as it is, brought to its peak, or to a loudness target for streaming, podcasts or broadcast. Controlled: Export sends the settings",

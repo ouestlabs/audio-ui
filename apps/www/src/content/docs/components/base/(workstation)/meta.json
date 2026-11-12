@@ -21,6 +21,7 @@
     "rack",
     "---Export---",
     "export-dialog",
-    "sound-readouts"
+    "sound-readouts",
+    "sound-report"
   ]
 }
