@@ -177,10 +177,15 @@ export function TypeRow(props: TypeRowProps) {
   }
 
   return (
-    <Collapsible onOpenChange={setOpen} open={open}>
+    // The whole row takes the hover, its description with its header: one color.
+    <Collapsible
+      className="transition-colors hover:bg-site-muted/50 has-focus-visible:bg-site-muted/50"
+      onOpenChange={setOpen}
+      open={open}
+    >
       <CollapsibleTrigger
         className={cn(
-          "group flex w-full items-start gap-2 px-3 pt-2.5 text-left outline-none transition-colors hover:bg-site-muted/50 focus-visible:bg-site-muted/50",
+          "group flex w-full items-start gap-2 px-3 pt-2.5 text-left outline-none",
           "pb-2.5"
         )}
       >
