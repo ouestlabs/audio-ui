@@ -165,6 +165,15 @@ const JUMP_SECONDS = 8;
 const WHEEL_PX = [1, 16, 400] as const;
 /** Half the crossfade an edit's seam gets, in seconds: the two sides play through each other over twice this, so a seam never clicks. */
 const SPLICE = 0.005;
+
+/** How near an edge a pause has to start or end to be the silence at the start or the end of the sound, in seconds. */
+const EDGE_EPS = 0.01;
+
+/** The length a shrunk pause keeps, in seconds, as audio.js's `shrink` does by default. */
+const SHRINK_GAP = 0.3;
+
+/** The lengths a pause can be shrunk to: 0 takes it out whole. */
+const SHRINK_GAPS = [0, 0.1, 0.3, 0.5] as const;
 const LABEL_STEPS = [
   0.0001, 0.000_25, 0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25,
   0.5, 1, 2, 5, 10, 15, 30, 60,
@@ -838,11 +847,17 @@ function shapeStretch(
 function useClipEdits({
   act,
   arrangement,
+  notify,
+  pauses,
   position,
 }: {
   /** Sends a command as a step of the history, by the name the history lists. */
   act: (label: string, command: ArrangementCommand) => void;
   arrangement: ReturnType<typeof useArrangement>;
+  /** Says something in the editor's status line, for what an edit had nothing to do on. */
+  notify: (text: string) => void;
+  /** The silences of the sound as it lies, in order, as [from, to]: what trimming and shrinking take out. */
+  pauses: readonly (readonly [number, number])[];
   position: ReturnType<typeof createSource<number>>;
 }) {
   const { copyOf, dispatch, doc } = arrangement;
@@ -917,6 +932,62 @@ function useClipEdits({
     setTime({ range: [0, to - from], tracks: [TRACK] });
     position.set(0);
   }, [commit, length, position, time]);
+  // The silence at the start and at the end taken off, as a clip of audio.js's `trim`.
+  const trimSilence = useCallback(() => {
+    const lead = pauses.find(([from]) => from <= EDGE_EPS);
+    const tail = pauses.find(([, to]) => to >= length - EDGE_EPS);
+    const cutTail = tail && tail !== lead ? tail[1] - tail[0] : 0;
+    const cutLead = lead ? lead[1] - lead[0] : 0;
+    if (cutLead + cutTail <= 0) {
+      notify("No silence at the start or the end");
+      return;
+    }
+    const next = length - cutLead - cutTail;
+    commit(
+      "Trim silence",
+      [
+        ...(tail && tail !== lead ? removing(tail[0], tail[1]) : []),
+        ...(lead ? removing(lead[0], lead[1]) : []),
+      ],
+      next
+    );
+    setTime(null);
+    position.set(0);
+  }, [commit, length, notify, pauses, position]);
+  // Every pause between sounds cut down to `gap` seconds, as audio.js's `shrink`: the middle of each taken out, last first so the places hold.
+  const shrinkPauses = useCallback(
+    (gap = SHRINK_GAP) => {
+      const inside = pauses.filter(
+        ([from, to]) =>
+          from > EDGE_EPS && to < length - EDGE_EPS && to - from > gap
+      );
+      if (inside.length === 0) {
+        notify(`No pause longer than ${gap} s`);
+        return;
+      }
+      const taken = inside.reduce(
+        (sum, [from, to]) => sum + (to - from - gap),
+        0
+      );
+      const commands: ArrangementCommand[] = [];
+      for (const [from, to] of [...inside].reverse()) {
+        commands.push(...removing(from + gap / 2, to - gap / 2));
+      }
+      // The seams, from the start: each one sits where it ended up after the cuts before it.
+      let before = 0;
+      for (const [from, to] of inside) {
+        commands.push(...splice(from + gap / 2 - before, length - taken));
+        before += to - from - gap;
+      }
+      commit(
+        gap === 0 ? "Remove pauses" : `Shrink pauses to ${gap} s`,
+        commands,
+        length - taken
+      );
+      setTime(null);
+    },
+    [commit, length, notify, pauses]
+  );
   const mark = useCallback(
     () =>
       act("Mark", {
@@ -1017,6 +1088,8 @@ function useClipEdits({
     crop,
     cut,
     handleKey,
+    shrinkPauses,
+    trimSilence,
     louder,
     mark,
     paste,
@@ -1035,6 +1108,53 @@ function useClipEdits({
 
 /** The key that goes with the others on this system: Command on Apple's, Control elsewhere. */
 const modKey = () => (APPLE.test(navigator.userAgent) ? "⌘" : "Ctrl+");
+
+/** One length a pause can be shrunk to. */
+function ShrinkItem({
+  edits,
+  gap,
+}: {
+  edits: ReturnType<typeof useClipEdits>;
+  gap: number;
+}) {
+  const shrink = useCallback(() => edits.shrinkPauses(gap), [edits, gap]);
+  return (
+    <DropdownMenuItem onClick={shrink}>
+      {gap === 0 ? "Remove them" : `To ${gap} s`}
+    </DropdownMenuItem>
+  );
+}
+
+/** What the edits that clean a sound up are called, in the Process menu and the bar's folded menu. */
+function ProcessItems({
+  disabled,
+  edits,
+}: {
+  disabled: boolean;
+  edits: ReturnType<typeof useClipEdits>;
+}) {
+  return (
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>Structure</DropdownMenuLabel>
+      <DropdownMenuItem disabled={disabled} onClick={edits.trimSilence}>
+        Trim silence
+        <span className="ms-auto text-muted-foreground text-xs">
+          Start and end
+        </span>
+      </DropdownMenuItem>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Shrink pauses
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-48">
+          {SHRINK_GAPS.map((gap) => (
+            <ShrinkItem edits={edits} gap={gap} key={gap} />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    </DropdownMenuGroup>
+  );
+}
 
 /** The waveform's menu: the edits, each with its key. It renders only while open, so it reads the system then. */
 function EditMenu({ edits }: { edits: ReturnType<typeof useClipEdits> }) {
@@ -1517,6 +1637,29 @@ const TRIMS: Record<string, "end" | "start" | undefined> = {
   "trim-start": "start",
 };
 
+/** The pause under the pointer, as a band across the waveform with how long it lasts: a silence an edit can take out. */
+function SilenceZone({ pause }: { pause: readonly [number, number] | null }) {
+  if (!pause) {
+    return null;
+  }
+  const [from, to] = pause;
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-y-0 z-1 flex items-start justify-center border-foreground/25 border-x bg-[repeating-linear-gradient(-45deg,color-mix(in_oklab,var(--foreground)_14%,transparent)_0_1px,transparent_1px_6px)]"
+      data-slot="silence-zone"
+      style={{
+        left: `calc(var(--timeline-unit) * ${from})`,
+        width: `calc(var(--timeline-unit) * ${to - from})`,
+      }}
+    >
+      <span className="mt-1 shrink-0 whitespace-nowrap rounded-sm bg-background/90 px-1.5 py-0.5 font-mono text-[10px] text-muted-foreground tabular-nums">
+        Silence {formatPrecise(to - from)}
+      </span>
+    </div>
+  );
+}
+
 /**
  * The selection as a frame over the waveform, as an audio editor draws one:
  * its edges drag, showing their time to the millisecond as they do; a handle
@@ -1914,6 +2057,28 @@ function ClipLane({
     },
     [clear, cues, duration, position, setTime, time, zoom]
   );
+  // The silence the pointer is over, shown as a zone while it is there.
+  const [hoveredPause, setHoveredPause] = useState<
+    readonly [number, number] | null
+  >(null);
+  const overLane = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (!zoom || event.buttons !== 0) {
+        setHoveredPause(null);
+        return;
+      }
+      const box = event.currentTarget.getBoundingClientRect();
+      const at = (event.clientX - box.left) / zoom;
+      const found = cues.pauses.find(([a, b]) => at >= a && at <= b) ?? null;
+      setHoveredPause((current) =>
+        current?.[0] === found?.[0] && current?.[1] === found?.[1]
+          ? current
+          : found
+      );
+    },
+    [cues.pauses, zoom]
+  );
+  const leaveLane = useCallback(() => setHoveredPause(null), []);
   const select = useCallback(
     (range: readonly [number, number]) => {
       const from = extending.current;
@@ -2094,6 +2259,8 @@ function ClipLane({
                   className="min-h-28 flex-1"
                   onClick={pick}
                   onPointerDown={press}
+                  onPointerLeave={leaveLane}
+                  onPointerMove={overLane}
                   onSelectionChange={select}
                   seekable
                 >
@@ -2111,6 +2278,7 @@ function ClipLane({
                     hidden={recording}
                     sounds={sounds}
                   />
+                  {recording ? null : <SilenceZone pause={hoveredPause} />}
                   {recording ? null : (
                     <SelectionFrame duration={duration} edits={edits} />
                   )}
@@ -2610,6 +2778,14 @@ function MoreMenu({
             />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger disabled={!sound}>
+            Process
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-64">
+            <ProcessItems disabled={!sound} edits={edits} />
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
         <DropdownMenuSeparator />
         {loopHidden ? (
           <DropdownMenuCheckboxItem
@@ -2716,7 +2892,20 @@ export default function BlockAudioEditor() {
     }
   }, [playing]);
   const fileInput = useRef<HTMLInputElement>(null);
-  const edits = useClipEdits({ act, arrangement, position });
+  // What the status line says, for a few seconds.
+  const [status, setStatus] = useState("");
+  const say = setStatus;
+  const cueList = useMemo(
+    () => cuesOf(clips, sounds, doc.locators, doc.duration),
+    [clips, doc.duration, doc.locators, sounds]
+  );
+  const edits = useClipEdits({
+    act,
+    arrangement,
+    notify: say,
+    pauses: cueList.pauses,
+    position,
+  });
   const { clear: clearSelection } = edits;
 
   // The engine keeps a recording by its id once it has it: each sound placed takes an id of its own.
@@ -2841,7 +3030,6 @@ export default function BlockAudioEditor() {
   // The export: the selection, or else the whole sound, rendered through the chain as it plays, then encoded and saved.
   const [exporting, setExporting] = useState(false);
   const [exportSettings, setExportSettings] = useState(DEFAULT_EXPORT_SETTINGS);
-  const [status, setStatus] = useState("");
   const exportRange = edits.time?.range ?? [0, doc.duration];
   const openExport = useCallback(() => setExporting(true), []);
   useEffect(() => {
@@ -3301,6 +3489,29 @@ export default function BlockAudioEditor() {
                   history={history}
                   named={named.current}
                 />
+              </DropdownMenuContent>
+            </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Toolbar.Button
+                    aria-label="Process"
+                    disabled={!sound}
+                    render={<Button size="icon" variant="outline" />}
+                    title="Process"
+                  />
+                }
+              >
+                <IconPlaceholder
+                  hugeicons="MagicWand01Icon"
+                  lucide="WandSparklesIcon"
+                  phosphor="MagicWandIcon"
+                  remixicon="RiMagicLine"
+                  tabler="IconWand"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-64">
+                <ProcessItems disabled={!sound} edits={edits} />
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>
