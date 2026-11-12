@@ -1,6 +1,6 @@
 ---
-title: Clip Spectrogram
-description: "A clip's recording drawn as a spectrogram, computed on the GPU at every zoom by gl-spectrogram, on the frequency axis of your choice, in the text colour over the ground under it."
+title: Spectrogram Lane
+description: "The spectrograms of a lane's clips on one canvas and one WebGL context, computed on the GPU at every zoom by gl-spectrogram, on the frequency axis of your choice, with a frequency axis to go beside them."
 ---
 
 ## Installation
@@ -9,47 +9,38 @@ description: "A clip's recording drawn as a spectrogram, computed on the GPU at 
 
 ## Usage
 
-`ClipSpectrogram` is placed as [`ClipWaveform`](/docs/components/base/arrangement) is: a canvas that fills the box of the clip it lies in, drawing only the stretch the view shows. Instead of peaks it draws the frequencies of the recording, each column an FFT computed on the GPU by `gl-spectrogram`, so a steady tone is one row thin and a click one column thin at any zoom. The audio editor switches its lane between the two from its View menu.
+`SpectrogramLane` draws the spectrograms of all of a lane's clips on one canvas, each in its own part of it, placed as the clips are on the lane. Instead of peaks it draws the frequencies of the recording, each column an FFT computed on the GPU by `gl-spectrogram`, so a steady tone is one row thin and a click one column thin at any zoom. All the clips share one WebGL context: a browser keeps some sixteen and drops the oldest past that, so a canvas a clip would lose its picture once a sound is cut into enough pieces. The audio editor switches its lane between the waveform and the spectrogram from its View menu.
 
 ```tsx
-import { ClipSpectrogram } from "@/components/audio-ui/clip-spectrogram";
+import { SpectrogramLane } from "@/components/audio-ui/clip-spectrogram";
 
-<ClipSpectrogram
-  clip={{ sourceLength: sound.duration, value: { length: clip.length, offset: clip.offset } }}
-  className="inset-y-0 h-full text-foreground"
-  sampleRate={sound.sampleRate}
-  samples={sound.samples} // { frames, read(from, to) }: the recording mixed to one
+<SpectrogramLane
+  className="h-full text-foreground"
+  clips={clips} // { id, start, clip, gain, sampleRate, samples }[], start in seconds on the lane
   scale="log" // "log" octaves, "mel", "erb" or "lin" hertz
+  zoom={pixelsPerSecond}
 />;
 ```
 
 | Prop | Type | |
 | --- | --- | --- |
-| `clip` | `ClipReading` | What the clip reads: its length, offset and source length. |
-| `samples` | `{ frames, read }` | The recording's samples, mixed to one. |
-| `sampleRate` | `number` | The recording's rate, in hertz. |
+| `clips` | `SpectrogramClip[]` | The clips to draw: `id`, `start` on the lane in seconds, what the `clip` reads (its length, offset and source length), its `gain`, the recording's `sampleRate` and its `samples` (`{ frames, read }`, mixed to one). |
+| `zoom` | `number` | The lane's pixels a second. |
 | `scale` | `"log" \| "mel" \| "erb" \| "lin"` | The frequency axis. Default `"log"`. |
-| `gain` | `number` | A factor on the picture, as a clip's level plays. Default `1`. |
 | `pointerHertz` | `{ set }` | Told the frequency under the pointer, or `null` off the picture. |
 | `band` | `SpectrogramBand` | The frequencies shown, as shares of the axis. Default all. |
 
-Over a clip the pointer reads the cell under it, its frequency and level, in a small label. `SpectrogramAxis` draws the frequency axis down the left edge of the lane, as audio.js does: labels roundest first (20k, 2k, 200, 20, then between as room allows), each with its tick at the row its frequency sits on, shorter ticks between, and the frequency under the pointer marked on it. Put it in the lane with the clips, on the same `scale`; it holds still as the lane scrolls. The pointer's frequency goes from the clips to the axis through a `pointerHertz` source (`createSource<number | null>(null)`): give the same one to both.
-
-```tsx
-import { SpectrogramAxis } from "@/components/audio-ui/clip-spectrogram";
-
-<SpectrogramAxis pointer={pointerHertz} sampleRate={sound.sampleRate} scale="log" />;
-```
+Over a clip the pointer reads the cell under it, its frequency and level, in a small label. `SpectrogramAxis` draws the frequency axis down the left edge of the lane, as audio.js does: labels roundest first (20k, 2k, 200, 20, then between as room allows), each with its tick at the row its frequency sits on, shorter ticks between, and the frequency under the pointer marked on it. Put it in the lane with the clips, on the same `scale`; it holds still as the lane scrolls. The pointer's frequency goes from the lane to the axis through a `pointerHertz` source (`createSource<number | null>(null)`): give the same one to both.
 
 ### Zooming the frequencies
 
-`band` is the frequencies the picture shows, as shares of its axis from 0 (the floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: a `createSource<readonly [number, number]>([0, 1])` given to the clips and the axis. Shift and the wheel over the picture zoom it about the pointer, the wheel over the axis moves it, Ctrl, Command or a pinch over the axis zooms it, and a double-click on the axis shows all of it again. The axis labels what is in view: round values, 1-2-5 a decade across a wide span, even steps across a narrow one. `zoomBand` and `panBand` are the arithmetic, to drive it from your own controls.
+`band` is the frequencies the pictures show, as shares of its axis from 0 (the floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: a `createSource<readonly [number, number]>([0, 1])` given to the clips and the axis. Shift and the wheel over the picture zoom it about the pointer, the wheel over the axis moves it, Ctrl, Command or a pinch over the axis zooms it, and a double-click on the axis shows all of it again. The axis labels what is in view: round values, 1-2-5 a decade across a wide span, even steps across a narrow one. `zoomBand` and `panBand` are the arithmetic, to drive it from your own controls.
 
 ```tsx
 const [band] = useState(() => createSource<readonly [number, number]>([0, 1]));
 
-<ClipSpectrogram band={band} {...rest} />;
+<SpectrogramLane band={band} {...rest} />;
 <SpectrogramAxis band={band} pointer={pointerHertz} sampleRate={rate} scale="log" />;
 ```
 
-It needs WebGL 2 and draws nothing without it. A reversed, looped or warped clip is drawn from its source in order.
+It needs WebGL 2 and draws nothing without it. 

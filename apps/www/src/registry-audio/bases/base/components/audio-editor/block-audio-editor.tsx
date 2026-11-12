@@ -85,10 +85,11 @@ import {
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { ArrangedTake } from "@/registry-audio/bases/base/audio/elements/arranged-clip";
 import {
-  ClipSpectrogram,
   type PointerHertz,
   SpectrogramAxis,
   type SpectrogramBand,
+  type SpectrogramClip,
+  SpectrogramLane,
   type SpectrogramScale,
 } from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
 import {
@@ -2135,6 +2136,7 @@ function SoundClips({
   pointerHertz,
   sounds,
   view,
+  zoom,
 }: {
   band: SpectrogramBand;
   clips: readonly Arranged[];
@@ -2145,8 +2147,43 @@ function SoundClips({
   /** While a take records over them: kept in place, unseen. */
   hidden: boolean;
   sounds: ReadonlyMap<string, Sound>;
+  /** The lane's pixels a second. */
+  zoom: number;
 }) {
-  return clips.map((clip) => {
+  const spectrogram = !(
+    view === "wave" ||
+    view === "temperature" ||
+    view === "bands"
+  );
+  // The clips a spectrogram draws, on one canvas and one WebGL context.
+  const drawn = useMemo<SpectrogramClip[]>(
+    () =>
+      spectrogram
+        ? clips.flatMap((clip) => {
+            const sound = sounds.get(clip.recording ?? "");
+            return sound
+              ? [
+                  {
+                    clip: {
+                      sourceLength: clip.sourceLength ?? sound.duration,
+                      value: {
+                        length: clip.value.length,
+                        offset: clip.value.offset,
+                      },
+                    },
+                    gain: dbToGain(clip.gain ?? 0),
+                    id: clip.id,
+                    sampleRate: sound.sampleRate,
+                    samples: sound.samples,
+                    start: clip.value.start,
+                  },
+                ]
+              : [];
+          })
+        : [],
+    [clips, sounds, spectrogram]
+  );
+  const parts = clips.map((clip) => {
     const sound = sounds.get(clip.recording ?? "");
     return sound ? (
       <div
@@ -2180,27 +2217,28 @@ function SoundClips({
               tint={tintOf(sound, view)}
             />
           </div>
-        ) : (
-          <ClipSpectrogram
-            aria-label={`${sound.name}, spectrogram`}
-            band={band}
-            className="inset-y-0 h-full text-foreground"
-            clip={{
-              sourceLength: clip.sourceLength ?? sound.duration,
-              value: { length: clip.value.length, offset: clip.value.offset },
-            }}
-            gain={dbToGain(clip.gain ?? 0)}
-            pointerHertz={pointerHertz}
-            role="img"
-            sampleRate={sound.sampleRate}
-            samples={sound.samples}
-            scale={view}
-          />
-        )}
+        ) : null}
         <FadeShade value={clip.value} />
       </div>
     ) : null;
   });
+  return (
+    <>
+      {spectrogram && drawn.length > 0 ? (
+        <SpectrogramLane
+          aria-label="Spectrogram"
+          band={band}
+          className={cn("h-full text-foreground", hidden && "invisible")}
+          clips={drawn}
+          pointerHertz={pointerHertz}
+          role="img"
+          scale={view as SpectrogramScale}
+          zoom={zoom}
+        />
+      ) : null}
+      {parts}
+    </>
+  );
 }
 
 /** The locators, on a strip of their own over the sound, once there is one: Mark puts them there. */
@@ -2625,6 +2663,7 @@ function ClipLane({
                     pointerHertz={pointerHertz}
                     sounds={sounds}
                     view={view}
+                    zoom={zoom}
                   />
                   {recording ? null : <SilenceZone pause={silence.pause} />}
                   {recording ? null : (
