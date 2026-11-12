@@ -1,4 +1,6 @@
 import {
+  type DitherMethod,
+  ditherChannels,
   type FilterType,
   filterChannels,
   type NormalizeTarget,
@@ -142,6 +144,12 @@ export function useBake({
             sampleRate: rate,
           })
         ),
+      /** The sound rounded to `bits` bits, its error made into noise by `method`. */
+      dither: (bits: number, method: DitherMethod) =>
+        bake(`Dither to ${bits} bits`, ({ channels, sampleRate: rate }) => ({
+          channels: ditherChannels(channels, bits, method),
+          sampleRate: rate,
+        })),
       /** One defect taken out of the sound, by the method made for it. */
       repair: (repair: Repair, label: string) =>
         bake(label, ({ channels, sampleRate: rate }) => ({

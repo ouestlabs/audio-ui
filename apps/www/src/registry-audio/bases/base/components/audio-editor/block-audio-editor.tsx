@@ -11,6 +11,7 @@ import {
 } from "@audio-ui/engine/analysis";
 import {
   type ChannelLayout,
+  type DitherMethod,
   decodeAudioChannels,
   downloadFile,
   type FilterType,
@@ -738,6 +739,7 @@ function ShrinkItem({
 /** The operations that change a sound's samples, as the Process menu offers them. */
 type Structure = Pick<
   ReturnType<typeof useBake>,
+  | "dither"
   | "filter"
   | "normalize"
   | "pad"
@@ -768,6 +770,32 @@ const PANS = [
   { label: "Half right", pan: 0.5 },
   { label: "Right", pan: 1 },
 ] as const;
+const DITHERS = [
+  { method: "tpdf", note: "Steady noise" },
+  { method: "shaped", note: "Noise moved up" },
+  { method: "feedback", note: "No added noise" },
+] as const satisfies readonly { method: DitherMethod; note: string }[];
+const DITHER_NAMES: Record<DitherMethod, string> = {
+  feedback: "Error feedback",
+  shaped: "Noise-shaped",
+  tpdf: "Triangular",
+};
+const DEPTHS = [16, 8] as const;
+
+/** One bit depth by one method. */
+function DitherItem({
+  bits,
+  dither,
+  method,
+}: {
+  bits: number;
+  dither: Structure["dither"];
+  method: DitherMethod;
+}) {
+  const run = useCallback(() => dither(bits, method), [bits, dither, method]);
+  return <DropdownMenuItem onClick={run}>{bits} bits</DropdownMenuItem>;
+}
+
 const FILTERS = [
   {
     frequency: 40,
@@ -1158,6 +1186,33 @@ function ToneItems({
               pan={structure.pan}
               value={each.pan}
             />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Dither
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-64">
+          {DITHERS.map((each) => (
+            <DropdownMenuSub key={each.method}>
+              <DropdownMenuSubTrigger>
+                {DITHER_NAMES[each.method]}
+                <span className="ms-auto text-muted-foreground text-xs">
+                  {each.note}
+                </span>
+              </DropdownMenuSubTrigger>
+              <DropdownMenuSubContent className="w-40">
+                {DEPTHS.map((bits) => (
+                  <DitherItem
+                    bits={bits}
+                    dither={structure.dither}
+                    key={bits}
+                    method={each.method}
+                  />
+                ))}
+              </DropdownMenuSubContent>
+            </DropdownMenuSub>
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>

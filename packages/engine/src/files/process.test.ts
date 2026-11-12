@@ -1,5 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import {
+  DITHER_METHODS,
+  ditherChannels,
   filterChannels,
   gainChannels,
   normalizeChannels,
@@ -107,5 +109,55 @@ describe("filterChannels", () => {
     expect(
       filterChannels([source], RATE, { frequency: 30_000, type: "lowpass" })[0]
     ).toEqual(source);
+  });
+});
+
+describe("ditherChannels", () => {
+  const steady = [new Float32Array(RATE).fill(0.3)];
+  const high = (error: Float32Array) => {
+    // The energy of the error's difference from sample to sample: what sits near the top of the band.
+    let sum = 0;
+    for (let index = 1; index < error.length; index += 1) {
+      sum += ((error[index] as number) - (error[index - 1] as number)) ** 2;
+    }
+    return sum / error.length;
+  };
+  const errorOf = (out: Float32Array) => out.map((sample) => sample - 0.3);
+
+  test("every method lands on the steps of the depth, and keeps the length", () => {
+    for (const method of DITHER_METHODS) {
+      const [out] = ditherChannels(steady, 8, method);
+      expect(out).toHaveLength(RATE);
+      // The feedback method of the atom counts 2^(bits-1) steps, the others one less.
+      const steps = method === "feedback" ? 128 : 127;
+      for (const sample of (out ?? new Float32Array()).subarray(0, 200)) {
+        expect(
+          Math.abs(sample * steps - Math.round(sample * steps))
+        ).toBeLessThan(1e-3);
+      }
+    }
+  });
+
+  test("the dither makes the average of a steady level come out right", () => {
+    const [out] = ditherChannels(steady, 8, "tpdf");
+    const mean =
+      (out ?? new Float32Array()).reduce((sum, sample) => sum + sample, 0) /
+      RATE;
+    expect(mean).toBeCloseTo(0.3, 2);
+  });
+
+  test("shaped moves the error up: more of it varies from sample to sample than flat", () => {
+    const [flat] = ditherChannels(steady, 8, "tpdf");
+    const [shaped] = ditherChannels(steady, 8, "shaped");
+    expect(high(errorOf(shaped ?? new Float32Array()))).toBeGreaterThan(
+      high(errorOf(flat ?? new Float32Array())) * 2
+    );
+  });
+
+  test("the source is left as it is", () => {
+    const channel = Float32Array.of(0.1234, -0.5);
+    const copy = Float32Array.from(channel);
+    ditherChannels([channel], 8);
+    expect(channel).toEqual(copy);
   });
 });

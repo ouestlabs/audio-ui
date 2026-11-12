@@ -3038,6 +3038,21 @@
         "summary": "The notes as a MusicXML score, the inverse of `readMusicXmlFile`, for a notation app to open: on the grid they sit on, so nothing moves."
       },
       {
+        "kind": "const",
+        "name": "DITHER_METHODS",
+        "summary": "How a sound is brought to fewer bits: `tpdf` adds triangular noise one step wide before rounding, so the error is steady noise instead of distortion that follows the sound; `shaped` does the same with the error fed back through two delays, which moves the noise up toward the highest frequencies, where the ear hears it least; `feedback` rounds with the error fed back once (`@audio/effect-noiseshaper`), with no added noise."
+      },
+      {
+        "kind": "type",
+        "name": "DitherMethod",
+        "summary": ""
+      },
+      {
+        "kind": "function",
+        "name": "ditherChannels",
+        "summary": "Every channel rounded to `bits` bits, by one of `DITHER_METHODS`, the way a sound is mastered to 16 bits or 8: as many steps as that depth has, and the error made into noise by the method."
+      },
+      {
         "kind": "type",
         "name": "FilterType",
         "summary": "A filter's shape: what it lets through, 12 dB an octave."
@@ -3110,6 +3125,7 @@
       "@audio/decode-aiff",
       "@audio/decode-caf",
       "@audio/decode-mp4",
+      "@audio/effect-noiseshaper",
       "@audio/encode",
       "@audio/midi-parse",
       "@audio/midi-write",

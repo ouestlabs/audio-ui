@@ -4,6 +4,7 @@ import {
   notch,
   process as processSection,
 } from "@audio/biquad";
+import noiseShaping from "@audio/effect-noiseshaper";
 import { loudnessGain, measureLoudness } from "../analysis/loudness.ts";
 
 const dbToGain = (db: number) => 10 ** (db / 20);
@@ -87,6 +88,54 @@ export function filterChannels(
   return channels.map((channel) => {
     const out = Float32Array.from(channel);
     processSection(out, coefficients);
+    return out;
+  });
+}
+
+/**
+ * How a sound is brought to fewer bits: `tpdf` adds triangular noise one
+ * step wide before rounding, so the error is steady noise instead of
+ * distortion that follows the sound; `shaped` does the same with the error
+ * fed back through two delays, which moves the noise up toward the highest
+ * frequencies, where the ear hears it least; `feedback` rounds with the
+ * error fed back once (`@audio/effect-noiseshaper`), with no added noise.
+ */
+export const DITHER_METHODS = ["tpdf", "shaped", "feedback"] as const;
+
+export type DitherMethod = (typeof DITHER_METHODS)[number];
+
+const triangular = () => Math.random() - Math.random();
+
+/**
+ * Every channel rounded to `bits` bits, by one of `DITHER_METHODS`, the way
+ * a sound is mastered to 16 bits or 8: as many steps as that depth has, and
+ * the error made into noise by the method. A source is not changed.
+ */
+export function ditherChannels(
+  channels: readonly Float32Array[],
+  bits: number,
+  method: DitherMethod = "tpdf"
+): Float32Array[] {
+  const depth = Math.max(1, Math.min(24, Math.round(bits)));
+  const levels = 2 ** (depth - 1) - 1;
+  const step = 1 / levels;
+  return channels.map((channel) => {
+    const out = new Float32Array(channel.length);
+    if (method === "feedback") {
+      out.set(channel);
+      return noiseShaping(out, { bits: depth }) as Float32Array;
+    }
+    // NTF = (1 - z^-1)^2: the error of the two samples before is taken off the next.
+    let e1 = 0;
+    let e2 = 0;
+    for (let index = 0; index < channel.length; index += 1) {
+      const wanted =
+        (channel[index] as number) - (method === "shaped" ? 2 * e1 - e2 : 0);
+      const made = Math.round((wanted + triangular() * step) * levels) * step;
+      out[index] = made;
+      e2 = e1;
+      e1 = made - wanted;
+    }
     return out;
   });
 }
