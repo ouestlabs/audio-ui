@@ -58,7 +58,8 @@ const MOVED_PAGES = new Map([
   ["/docs/components/base/timeline", "/docs/components/base/arrangement"],
   // The docs by the stack: pages that moved into the Core, Elements and React sections.
   ["/docs/primitives", "/docs/react"],
-  ["/docs/headless-styling", "/docs/react/headless-styling"],
+  ["/docs/headless-styling", "/docs/react"],
+  ["/docs/react/headless-styling", "/docs/react"],
   ["/docs/custom-elements", "/docs/elements"],
   // The frameworks' guides became the tabs of the elements' overview, which follow the framework chosen.
   ["/docs/elements/vue", "/docs/elements"],
@@ -67,7 +68,8 @@ const MOVED_PAGES = new Map([
   ["/docs/elements/svelte.md", "/docs/elements.md"],
   ["/docs/engine/controllers", "/docs/core/controllers"],
   ["/docs/primitives.md", "/docs/react.md"],
-  ["/docs/headless-styling.md", "/docs/react/headless-styling.md"],
+  ["/docs/headless-styling.md", "/docs/react.md"],
+  ["/docs/react/headless-styling.md", "/docs/react.md"],
   ["/docs/custom-elements.md", "/docs/elements.md"],
   ["/docs/engine/controllers.md", "/docs/core/controllers.md"],
   // The guides left /docs/engine for the engine package's pages; the two whose

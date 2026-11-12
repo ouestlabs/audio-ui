@@ -3,7 +3,189 @@ title: Knob
 description: "The headless Knob of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
-<Module from="@audio-ui/react/knob" />
+<ReactPreview name="knob">
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+<ForStyling only="css">
+
+<CodeFile title="knob.tsx" open>
+
+```tsx
+import { Knob } from "@audio-ui/react";
+import styles from "./knob.module.css";
+
+<Knob.Root className={styles.root} min={0} max={100} defaultValue={40}>
+  <Knob.Label className={styles.label}>Volume</Knob.Label>
+  <Knob.Control className={styles.control}>
+    <Knob.Track className={styles.track} />
+    <Knob.Indicator className={styles.indicator} />
+    <Knob.Thumb className={styles.thumb} />
+  </Knob.Control>
+  <Knob.Value className={styles.value} />
+</Knob.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="knob.module.css">
+
+```css
+.root {
+  position: relative;
+  display: inline-flex;
+  width: calc(var(--spacing, 0.25rem) * 12);
+  height: calc(var(--spacing, 0.25rem) * 12);
+  margin-bottom: calc(var(--spacing, 0.25rem) * 8);
+  outline: none;
+}
+
+.control {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  width: 100%;
+  height: 100%;
+  clip-path: circle(50% at 50% 50%);
+  cursor: grab;
+  outline: none;
+  touch-action: none;
+  user-select: none;
+}
+
+.control:active {
+  cursor: grabbing;
+}
+
+/* Dragged up and down, it is a fader: the cursor says so, whatever the state. */
+.control[data-drag-mode="vertical"],
+.control[data-drag-mode="vertical"]:active {
+  cursor: ns-resize;
+}
+
+/* The knob's face. */
+.control::before {
+  content: "";
+  position: absolute;
+  inset: calc(var(--spacing, 0.25rem) * 1.5);
+  border-radius: 9999px;
+  background: var(--card, oklch(1 0 0));
+  box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
+}
+
+.track,
+.indicator {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  display: block;
+  width: 100%;
+  height: 100%;
+  color: var(--primary, oklch(0.205 0 0));
+  pointer-events: none;
+}
+
+.track {
+  opacity: 0.22;
+}
+
+.track path,
+.indicator path {
+  stroke: currentColor;
+}
+
+.thumb {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  color: var(--primary, oklch(0.205 0 0));
+  pointer-events: none;
+}
+
+/* The mark on the face: the thumb turns with the value. */
+.thumb::after {
+  content: "";
+  position: absolute;
+  top: 24%;
+  left: 50%;
+  width: 6%;
+  height: 15%;
+  translate: -50% 0;
+  border-radius: 9999px;
+  background: currentColor;
+}
+
+.value {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  z-index: 10;
+  margin-top: calc(var(--spacing, 0.25rem) * 1);
+  padding: calc(var(--spacing, 0.25rem) * 0.5) calc(var(--spacing, 0.25rem) * 1.5);
+  translate: -50% 0;
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--foreground, oklch(0.145 0 0));
+  color: var(--background, oklch(1 0 0));
+  font-size: 10px;
+  font-weight: 500;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.label {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="knob.tsx" open>
+
+```tsx
+import { Knob } from "@audio-ui/react";
+
+<Knob.Root className="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min={0} max={100} defaultValue={40}>
+  <Knob.Label className="sr-only">Volume</Knob.Label>
+  <Knob.Control className="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
+    <Knob.Track className="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
+    <Knob.Indicator className="pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current" />
+    <Knob.Thumb className="pointer-events-none absolute inset-0 z-2 text-primary after:absolute after:top-[24%] after:left-1/2 after:h-[15%] after:w-[6%] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']" />
+  </Knob.Control>
+  <Knob.Value className="pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-sm bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none" />
+</Knob.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+{/* usage:end */}
+
+</ReactPreview>
+
 
 ## Anatomy
 
@@ -23,6 +205,118 @@ import { Knob } from "@audio-ui/react";
   <Knob.Label />
 </Knob.Root>
 ```
+
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### Vertical drag
+
+`dragMode="vertical"` maps a vertical drag to the value, as a fader does: up raises it, down lowers it, and the pointer's path around the dial no longer matters.
+
+<ReactPreview name="knob" example="vertical">
+
+<ForStyling only="css">
+
+<CodeFile title="knob.tsx" open>
+
+```tsx
+import { Knob } from "@audio-ui/react";
+import styles from "./knob.module.css";
+
+<Knob.Root className={styles.root} min={0} max={100} defaultValue={40} dragMode="vertical">
+  <Knob.Label className={styles.label}>Volume</Knob.Label>
+  <Knob.Control className={styles.control}>
+    <Knob.Track className={styles.track} />
+    <Knob.Indicator className={styles.indicator} />
+    <Knob.Thumb className={styles.thumb} />
+  </Knob.Control>
+  <Knob.Value className={styles.value} />
+</Knob.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="knob.tsx" open>
+
+```tsx
+import { Knob } from "@audio-ui/react";
+
+<Knob.Root className="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min={0} max={100} defaultValue={40} dragMode="vertical">
+  <Knob.Label className="sr-only">Volume</Knob.Label>
+  <Knob.Control className="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
+    <Knob.Track className="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
+    <Knob.Indicator className="pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current" />
+    <Knob.Thumb className="pointer-events-none absolute inset-0 z-2 text-primary after:absolute after:top-[24%] after:left-1/2 after:h-[15%] after:w-[6%] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']" />
+  </Knob.Control>
+  <Knob.Value className="pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-sm bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none" />
+</Knob.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+### Logarithmic scale
+
+`scale="log"` spreads the travel by ratio, so each turn covers the same number of octaves: the way a frequency knob wants to be turned. It needs a positive `min`.
+
+<ReactPreview name="knob" example="log">
+
+<ForStyling only="css">
+
+<CodeFile title="knob.tsx" open>
+
+```tsx
+import { Knob } from "@audio-ui/react";
+import styles from "./knob.module.css";
+
+<Knob.Root className={styles.root} min={20} max={20000} defaultValue={1000} scale="log">
+  <Knob.Label className={styles.label}>Volume</Knob.Label>
+  <Knob.Control className={styles.control}>
+    <Knob.Track className={styles.track} />
+    <Knob.Indicator className={styles.indicator} />
+    <Knob.Thumb className={styles.thumb} />
+  </Knob.Control>
+  <Knob.Value className={styles.value} />
+</Knob.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="knob.tsx" open>
+
+```tsx
+import { Knob } from "@audio-ui/react";
+
+<Knob.Root className="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min={20} max={20000} defaultValue={1000} scale="log">
+  <Knob.Label className="sr-only">Volume</Knob.Label>
+  <Knob.Control className="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
+    <Knob.Track className="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
+    <Knob.Indicator className="pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current" />
+    <Knob.Thumb className="pointer-events-none absolute inset-0 z-2 text-primary after:absolute after:top-[24%] after:left-1/2 after:h-[15%] after:w-[6%] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']" />
+  </Knob.Control>
+  <Knob.Value className="pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-sm bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none" />
+</Knob.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
 
 ## API reference
 
@@ -155,3 +449,7 @@ Sets how every `Knob.Root` below it turns by a drag, unless the knob has a `drag
 ## Styled
 
 The registry's styled Knob, its usage and interaction: [Knob](/docs/components/base/knob).
+
+## Package
+
+<Module from="@audio-ui/react/knob" />

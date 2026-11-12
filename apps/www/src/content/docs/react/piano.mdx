@@ -3,7 +3,98 @@ title: Piano
 description: "The headless Piano of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
-<Module from="@audio-ui/react/piano" />
+<ReactPreview name="piano">
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+<ForStyling only="css">
+
+<CodeFile title="piano.tsx" open>
+
+```tsx
+import { Piano } from "@audio-ui/react";
+import styles from "./piano.module.css";
+
+<Piano.Root className={styles.root} aria-label="Keys" minPitch={48} maxPitch={71}>
+  <Piano.Keys>
+    {(pitch) => <Piano.Key className={styles.key} pitch={pitch} />}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="piano.module.css">
+
+```css
+.root {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  height: calc(var(--spacing, 0.25rem) * 28);
+}
+
+.key {
+  z-index: 0;
+  top: 0;
+  box-sizing: border-box;
+  height: 100%;
+  border: 1px solid var(--border, oklch(0.922 0 0));
+  border-radius: 0 0 4px 4px;
+  background: var(--background, oklch(1 0 0));
+  cursor: pointer;
+  outline: none;
+}
+
+.key[data-color="black"] {
+  z-index: 1;
+  height: 62%;
+  border-color: var(--foreground, oklch(0.145 0 0));
+  background: var(--foreground, oklch(0.145 0 0));
+}
+
+.key[data-active] {
+  border-color: var(--primary, oklch(0.205 0 0));
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano.tsx" open>
+
+```tsx
+import { Piano } from "@audio-ui/react";
+
+<Piano.Root className="relative block h-28 w-full max-w-lg data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Keys" minPitch={48} maxPitch={71}>
+  <Piano.Keys className="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary">
+    {(pitch) => <Piano.Key className="top-0 z-0 h-full cursor-pointer rounded-b-[4px] border border-border bg-background outline-none data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+{/* usage:end */}
+
+</ReactPreview>
+
 
 ## Anatomy
 
@@ -22,6 +113,102 @@ import { Piano } from "@audio-ui/react";
   </Piano.Keys>
 </Piano.Root>
 ```
+
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### One octave
+
+`minPitch` and `maxPitch` are MIDI pitches, both inclusive: 60 to 71 is the octave from middle C.
+
+<ReactPreview name="piano" example="octave">
+
+<ForStyling only="css">
+
+<CodeFile title="piano.tsx" open>
+
+```tsx
+import { Piano } from "@audio-ui/react";
+import styles from "./piano.module.css";
+
+<Piano.Root className={styles.root} aria-label="Keys" minPitch={60} maxPitch={71}>
+  <Piano.Keys>
+    {(pitch) => <Piano.Key className={styles.key} pitch={pitch} />}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano.tsx" open>
+
+```tsx
+import { Piano } from "@audio-ui/react";
+
+<Piano.Root className="relative block h-28 w-full max-w-lg data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Keys" minPitch={60} maxPitch={71}>
+  <Piano.Keys className="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary">
+    {(pitch) => <Piano.Key className="top-0 z-0 h-full cursor-pointer rounded-b-[4px] border border-border bg-background outline-none data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+### Five octaves
+
+The keys shrink to fit the width: 36 to 96 is five octaves, with their black keys in place.
+
+<ReactPreview name="piano" example="wide">
+
+<ForStyling only="css">
+
+<CodeFile title="piano.tsx" open>
+
+```tsx
+import { Piano } from "@audio-ui/react";
+import styles from "./piano.module.css";
+
+<Piano.Root className={styles.root} aria-label="Keys" minPitch={36} maxPitch={96}>
+  <Piano.Keys>
+    {(pitch) => <Piano.Key className={styles.key} pitch={pitch} />}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano.tsx" open>
+
+```tsx
+import { Piano } from "@audio-ui/react";
+
+<Piano.Root className="relative block h-28 w-full max-w-lg data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Keys" minPitch={36} maxPitch={96}>
+  <Piano.Keys className="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary">
+    {(pitch) => <Piano.Key className="top-0 z-0 h-full cursor-pointer rounded-b-[4px] border border-border bg-background outline-none data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
 
 ## API reference
 
@@ -77,3 +264,7 @@ The name of the key it sits in, such as "C4". Hidden from assistive technology, 
 ## Styled
 
 The registry's styled Piano, its usage and interaction: [Piano](/docs/components/base/piano).
+
+## Package
+
+<Module from="@audio-ui/react/piano" />

@@ -3,7 +3,128 @@ title: Plot
 description: "The headless Plot of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
-<Module from="@audio-ui/react/plot" />
+<ReactPreview name="plot">
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+<ForStyling only="css">
+
+<CodeFile title="plot.tsx" open>
+
+```tsx
+import { Plot } from "@audio-ui/react";
+import styles from "./plot.module.css";
+
+// A peaking band's response in dB at each frequency, around its center.
+const bell = (hz: number, { x, y }: { x: number; y: number }) =>
+  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
+
+// In the component: the curve follows the handle.
+const [band, setBand] = useState({ x: 800, y: 6 });
+
+<Plot.Root className={styles.root} minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+  <Plot.Grid className={styles.grid} x={{}} y={{}} />
+  <Plot.Graph>
+    <Plot.Curve className={styles.curve} fn={(hz) => bell(hz, band)} fillTo={0} />
+  </Plot.Graph>
+  <Plot.Handle className={styles.handle} aria-label="Band" value={band} onValueChange={setBand} />
+</Plot.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="plot.module.css">
+
+```css
+.root {
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  height: calc(var(--spacing, 0.25rem) * 44);
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+  position: relative;
+}
+
+.grid {
+  color: var(--muted-foreground, oklch(0.556 0 0));
+  font-size: 10px;
+}
+
+.grid [data-part="line"] {
+  stroke: var(--border, oklch(0.922 0 0));
+}
+
+.grid [data-part="label"][data-axis="x"] {
+  bottom: calc(var(--spacing, 0.25rem) * 1);
+  translate: 0.25rem 0;
+}
+
+.grid [data-part="label"][data-axis="y"] {
+  left: calc(var(--spacing, 0.25rem) * 1);
+  translate: 0 -100%;
+}
+
+.curve {
+  color: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 15%, transparent);
+  fill: currentColor;
+  stroke: none;
+}
+
+.handle {
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 4);
+  border-radius: var(--radius, 0.625rem);
+  background: var(--primary, oklch(0.205 0 0));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
+  cursor: grab;
+}
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="plot.tsx" open>
+
+```tsx
+import { Plot } from "@audio-ui/react";
+
+// A peaking band's response in dB at each frequency, around its center.
+const bell = (hz: number, { x, y }: { x: number; y: number }) =>
+  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
+
+// In the component: the curve follows the handle.
+const [band, setBand] = useState({ x: 800, y: 6 });
+
+<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+  <Plot.Grid className="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" x={{}} y={{}} />
+  <Plot.Graph>
+    <Plot.Curve className="text-primary/15 fill-current stroke-none" fn={(hz) => bell(hz, band)} fillTo={0} />
+  </Plot.Graph>
+  <Plot.Handle className="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} onValueChange={setBand} />
+</Plot.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+{/* usage:end */}
+
+</ReactPreview>
+
 
 ## Anatomy
 
@@ -28,6 +149,138 @@ import { Plot } from "@audio-ui/react";
   <Plot.Handle />
 </Plot.Root>
 ```
+
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### Linear axis
+
+`scaleX` spreads the x axis: `log` for frequency, as in the usage, or `linear` for values that grow by addition.
+
+<ReactPreview name="plot" example="linear">
+
+<ForStyling only="css">
+
+<CodeFile title="plot.tsx" open>
+
+```tsx
+import { Plot } from "@audio-ui/react";
+import styles from "./plot.module.css";
+
+// A peaking band's response in dB at each frequency, around its center.
+const bell = (hz: number, { x, y }: { x: number; y: number }) =>
+  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
+
+// In the component: the curve follows the handle.
+const [band, setBand] = useState({ x: 800, y: 6 });
+
+<Plot.Root className={styles.root} minX={20} maxX={20000} minY={-18} maxY={18} scaleX="linear">
+  <Plot.Grid className={styles.grid} x={{}} y={{}} />
+  <Plot.Graph>
+    <Plot.Curve className={styles.curve} fn={(hz) => bell(hz, band)} fillTo={0} />
+  </Plot.Graph>
+  <Plot.Handle className={styles.handle} aria-label="Band" value={band} onValueChange={setBand} />
+</Plot.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="plot.tsx" open>
+
+```tsx
+import { Plot } from "@audio-ui/react";
+
+// A peaking band's response in dB at each frequency, around its center.
+const bell = (hz: number, { x, y }: { x: number; y: number }) =>
+  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
+
+// In the component: the curve follows the handle.
+const [band, setBand] = useState({ x: 800, y: 6 });
+
+<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" minX={20} maxX={20000} minY={-18} maxY={18} scaleX="linear">
+  <Plot.Grid className="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" x={{}} y={{}} />
+  <Plot.Graph>
+    <Plot.Curve className="text-primary/15 fill-current stroke-none" fn={(hz) => bell(hz, band)} fillTo={0} />
+  </Plot.Graph>
+  <Plot.Handle className="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} onValueChange={setBand} />
+</Plot.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+### Narrow gain range
+
+`minY` and `maxY` set the y axis: here plus or minus 6 dB, so the same curve fills more of the plot.
+
+<ReactPreview name="plot" example="narrow">
+
+<ForStyling only="css">
+
+<CodeFile title="plot.tsx" open>
+
+```tsx
+import { Plot } from "@audio-ui/react";
+import styles from "./plot.module.css";
+
+// A peaking band's response in dB at each frequency, around its center.
+const bell = (hz: number, { x, y }: { x: number; y: number }) =>
+  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
+
+// In the component: the curve follows the handle.
+const [band, setBand] = useState({ x: 800, y: 6 });
+
+<Plot.Root className={styles.root} minX={20} maxX={20000} minY={-6} maxY={6} scaleX="log">
+  <Plot.Grid className={styles.grid} x={{}} y={{}} />
+  <Plot.Graph>
+    <Plot.Curve className={styles.curve} fn={(hz) => bell(hz, band)} fillTo={0} />
+  </Plot.Graph>
+  <Plot.Handle className={styles.handle} aria-label="Band" value={band} onValueChange={setBand} />
+</Plot.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="plot.tsx" open>
+
+```tsx
+import { Plot } from "@audio-ui/react";
+
+// A peaking band's response in dB at each frequency, around its center.
+const bell = (hz: number, { x, y }: { x: number; y: number }) =>
+  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
+
+// In the component: the curve follows the handle.
+const [band, setBand] = useState({ x: 800, y: 6 });
+
+<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" minX={20} maxX={20000} minY={-6} maxY={6} scaleX="log">
+  <Plot.Grid className="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" x={{}} y={{}} />
+  <Plot.Graph>
+    <Plot.Curve className="text-primary/15 fill-current stroke-none" fn={(hz) => bell(hz, band)} fillTo={0} />
+  </Plot.Graph>
+  <Plot.Handle className="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} onValueChange={setBand} />
+</Plot.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
 
 ## API reference
 
@@ -195,3 +448,7 @@ A label at a value on one axis, such as "1k" under a frequency or "+12" by a gai
 ## Styled
 
 The registry's styled Plot, its usage and interaction: [Plot](/docs/components/base/plot).
+
+## Package
+
+<Module from="@audio-ui/react/plot" />

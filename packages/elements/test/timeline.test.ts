@@ -464,3 +464,26 @@ describe("the timeline's clips", () => {
     expect(place()).toEqual(["30", "20", "10"]);
   });
 });
+
+describe("the navigator's handles", () => {
+  test("a handle keeps its edge when it is set after the part exists, as a framework does", () => {
+    document.body.innerHTML = `
+      <audio-ui-timeline duration="100">
+        <audio-ui-timeline-navigator>
+          <audio-ui-timeline-navigator-window aria-label="View"></audio-ui-timeline-navigator-window>
+          <audio-ui-timeline-navigator-handle aria-label="View end"></audio-ui-timeline-navigator-handle>
+        </audio-ui-timeline-navigator>
+      </audio-ui-timeline>`;
+    const handle = document.querySelector(
+      "audio-ui-timeline-navigator-handle"
+    ) as HTMLElement;
+    handle.setAttribute("edge", "end");
+    expect(handle.getAttribute("edge")).toBe("end");
+    expect(handle.getAttribute("data-edge")).toBe("end");
+    // The accessible name still moves to the input, and leaves the part.
+    expect(handle.hasAttribute("aria-label")).toBe(false);
+    expect(handle.querySelector("input")?.getAttribute("aria-label")).toBe(
+      "View end"
+    );
+  });
+});

@@ -3,7 +3,101 @@ title: Pad
 description: "The headless Pad of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
-<Module from="@audio-ui/react/pad" />
+<ReactPreview name="pad">
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+<ForStyling only="css">
+
+<CodeFile title="pad.tsx" open>
+
+```tsx
+import { Pad } from "@audio-ui/react";
+import styles from "./pad.module.css";
+
+<Pad.Root className={styles.root} aria-label="Drums">
+  <Pad.Item className={styles.item} value="kick">Kick</Pad.Item>
+  <Pad.Item className={styles.item} value="snare">Snare</Pad.Item>
+  <Pad.Item className={styles.item} value="hat">Hat</Pad.Item>
+  <Pad.Item className={styles.item} value="clap">Clap</Pad.Item>
+</Pad.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="pad.module.css">
+
+```css
+.root {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(var(--spacing, 0.25rem) * 2 * var(--density, 1));
+  width: calc(var(--spacing, 0.25rem) * 72);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+  color: var(--muted-foreground, oklch(0.556 0 0));
+  font-size: 0.75rem;
+  line-height: 1rem;
+  outline: none;
+  user-select: none;
+  transition:
+    color 150ms,
+    background-color 150ms;
+}
+
+.item:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
+}
+
+.item[data-active] {
+  background: var(--primary, oklch(0.205 0 0));
+  color: var(--primary-foreground, oklch(0.985 0 0));
+}
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="pad.tsx" open>
+
+```tsx
+import { Pad } from "@audio-ui/react";
+
+<Pad.Root className="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums">
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="clap">Clap</Pad.Item>
+</Pad.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+{/* usage:end */}
+
+</ReactPreview>
+
 
 ## Anatomy
 
@@ -16,6 +110,59 @@ import { Pad } from "@audio-ui/react";
   <Pad.Item value="kick">Kick</Pad.Item>
 </Pad.Root>
 ```
+
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### Disabled
+
+`disabled` stops every pad from sounding and from taking the focus, and sets `data-disabled` on them for the look.
+
+<ReactPreview name="pad" example="disabled">
+
+<ForStyling only="css">
+
+<CodeFile title="pad.tsx" open>
+
+```tsx
+import { Pad } from "@audio-ui/react";
+import styles from "./pad.module.css";
+
+<Pad.Root className={styles.root} aria-label="Drums" disabled={true}>
+  <Pad.Item className={styles.item} value="kick">Kick</Pad.Item>
+  <Pad.Item className={styles.item} value="snare">Snare</Pad.Item>
+  <Pad.Item className={styles.item} value="hat">Hat</Pad.Item>
+  <Pad.Item className={styles.item} value="clap">Clap</Pad.Item>
+</Pad.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="pad.tsx" open>
+
+```tsx
+import { Pad } from "@audio-ui/react";
+
+<Pad.Root className="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums" disabled={true}>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="clap">Clap</Pad.Item>
+</Pad.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
 
 ## API reference
 
@@ -53,3 +200,7 @@ One pad. It sounds while held: by pointer, or with Enter or Space while focused.
 ## Styled
 
 The registry's styled Pad, its usage and interaction: [Pad](/docs/components/base/pad).
+
+## Package
+
+<Module from="@audio-ui/react/pad" />

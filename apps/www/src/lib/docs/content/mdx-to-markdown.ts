@@ -41,6 +41,8 @@ const STEP_REGEX = /<Step>([\s\S]*?)<\/Step>/g;
 const FOR_FRAMEWORKS_REGEX = /<ForFrameworks\s+only="([^"]+)"\s*>\n*/g;
 const FOR_FRAMEWORKS_END_REGEX = /<\/ForFrameworks>\n*/g;
 const FOR_STYLING_REGEX = /<ForStyling\s+only="([^"]+)"\s*>\n*/g;
+const CODE_FILE_REGEX = /<CodeFile\s+title="([^"]+)"[^>]*>\n*/g;
+const CODE_FILE_END_REGEX = /<\/CodeFile>\n*/g;
 const FOR_STYLING_END_REGEX = /<\/ForStyling>\n*/g;
 const ATTRIBUTE_REGEX = /attribute/i;
 const KEYS_REGEX = /keys/i;
@@ -206,6 +208,8 @@ export function mdxToMarkdown(content: string) {
             `*With ${STYLINGS.find((each) => each.id === only)?.label ?? only}*\n\n`
         )
         .replace(FOR_STYLING_END_REGEX, "")
+        .replace(CODE_FILE_REGEX, (_, title: string) => `**${title}**\n\n`)
+        .replace(CODE_FILE_END_REGEX, "")
         .replace(TABS_WRAPPER_REGEX, "")
         .replace(/<Steps>\n*/g, () => {
           step = 0;

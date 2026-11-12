@@ -8,6 +8,7 @@ import { CodeTabs } from "@/components/code/block/code-tabs";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { DocsComponentSource } from "@/components/code/source/docs-component-source";
 import { Callout } from "@/components/docs/mdx/callout";
+import { CodeFile } from "@/components/docs/mdx/code-file";
 import { DemoSounds } from "@/components/docs/mdx/demo-sounds";
 import { DeviceUsage } from "@/components/docs/mdx/device-usage";
 import { ElementsPreview } from "@/components/docs/mdx/elements-preview";
@@ -18,6 +19,7 @@ import { FrameworkTabs } from "@/components/docs/mdx/framework-tabs";
 import { IconCatalog } from "@/components/docs/mdx/icon-catalog";
 import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
+import { ReactPreview } from "@/components/docs/mdx/react-preview";
 import {
   KeyRow,
   KeyTable,
@@ -62,7 +64,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     DemoSounds,
     ElementsPreview,
     ForFrameworks,
+    CodeFile,
     ForStyling,
+    ReactPreview,
     FrameworkTabs,
     DeviceControls,
     DeviceUsage,

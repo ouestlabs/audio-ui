@@ -29,7 +29,7 @@ export function Command({ code }: { code: string }) {
   return (
     <figure className="" data-not-typeset="" data-rehype-pretty-code-figure="">
       <pre
-        className="scrollbar-y min-w-0 overflow-x-auto py-3.5 pr-14 pl-4 outline-none has-data-[slot=tabs]:p-0 th-code th-code--shell"
+        className="scrollbar-y min-w-0 overflow-x-auto py-3.5 pr-14 pl-4 outline-none has-data-[slot=tabs]:px-0 has-data-[slot=tabs]:py-0 th-code th-code--shell"
         data-language="shell"
       >
         {commands ? (

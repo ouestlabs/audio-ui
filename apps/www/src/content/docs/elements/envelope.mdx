@@ -5,13 +5,9 @@ description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its 
 
 `<audio-ui-envelope>` is a breakpoint envelope editor with `role="group"`. Points are dragged to move, added with a double click on the graph, and removed with a double click, Alt + click or Delete. Each segment has a curve handle at its midpoint, and Alt + drag on the graph bends the segment under the pointer. The points share one tab stop: Page Up and Page Down (or Home and End) move between them, and the arrow keys move the focused point. Points and segment handles are generated, from a `<template>` when one is provided:
 
-<ElementsPreview name="envelope" />
-
-## Usage
+<ElementsPreview name="envelope">
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
-
-The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -25,6 +21,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 <TabsContent value="web">
 
 <ForStyling only="css">
+
+<CodeFile title="envelope.html" open>
 
 ```html
 <style>
@@ -76,6 +74,15 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   audio-ui-envelope-segment[data-flat] {
     display: none;
   }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0">
@@ -97,12 +104,16 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
 
+<CodeFile title="envelope.html" open>
+
 ```html
-<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0">
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0">
   <audio-ui-envelope-graph>
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
@@ -121,6 +132,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -128,6 +141,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 <TabsContent value="vue">
 
 <ForStyling only="css">
+
+<CodeFile title="envelope.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -194,12 +209,25 @@ audio-ui-envelope-segment {
 audio-ui-envelope-segment[data-flat] {
   display: none;
 }
+
+audio-ui-envelope[data-disabled],
+audio-ui-envelope[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-envelope[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
+
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="envelope.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -207,7 +235,7 @@ import "@audio-ui/elements/envelope";
 </script>
 
 <template>
-  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" @change="(event) => console.log(event.detail.value)">
     <audio-ui-envelope-graph>
       <audio-ui-envelope-fill class="text-primary opacity-15" />
       <audio-ui-envelope-line class="text-primary [stroke-width:2px]" />
@@ -218,6 +246,8 @@ import "@audio-ui/elements/envelope";
 </template>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -225,6 +255,8 @@ import "@audio-ui/elements/envelope";
 <TabsContent value="svelte">
 
 <ForStyling only="css">
+
+<CodeFile title="envelope.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -290,20 +322,33 @@ import "@audio-ui/elements/envelope";
   audio-ui-envelope-segment[data-flat] {
     display: none;
   }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="envelope.svelte" open>
 
 ```svelte
 <script lang="ts">
   import "@audio-ui/elements/envelope";
 </script>
 
-<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-envelope-graph>
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
@@ -312,6 +357,8 @@ import "@audio-ui/elements/envelope";
   <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
 </audio-ui-envelope>
 ```
+
+</CodeFile>
 
 </ForStyling>
 
@@ -327,9 +374,776 @@ In React, the same control is the [Envelope](/docs/react/envelope) primitive of 
 
 {/* usage:end */}
 
-## API reference
+</ElementsPreview>
 
-<Module from="@audio-ui/elements/envelope" />
+{/* anatomy:start: written by `bun scripts/element-usage.ts --write` */}
+
+## Anatomy
+
+The parts, nested as they go in the markup.
+
+```html
+<audio-ui-envelope>
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill></audio-ui-envelope-fill>
+    <audio-ui-envelope-line></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments></audio-ui-envelope-segments>
+  <audio-ui-envelope-points></audio-ui-envelope-points>
+</audio-ui-envelope>
+```
+
+{/* anatomy:end */}
+
+{/* examples:start: written by `bun scripts/element-usage.ts --write` */}
+
+## Examples
+
+### Limited points
+
+`maxPoints` caps how many points the envelope holds: a double click on the graph is refused at the limit, and the graph says so with `data-blocked`.
+
+<ElementsPreview name="envelope" example="limited">
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+<ForStyling only="css">
+
+<CodeFile title="envelope.html" open>
+
+```html
+<style>
+  audio-ui-envelope {
+    display: block;
+    width: 100%;
+    max-width: 28rem;
+    height: calc(var(--spacing, 0.25rem) * 40);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
+  }
+
+  audio-ui-envelope-fill {
+    color: var(--primary, oklch(0.205 0 0));
+    opacity: 0.15;
+  }
+
+  audio-ui-envelope-line {
+    color: var(--primary, oklch(0.205 0 0));
+    stroke-width: 2px;
+  }
+
+  audio-ui-envelope-point {
+    box-sizing: border-box;
+    width: calc(var(--spacing, 0.25rem) * 3);
+    height: calc(var(--spacing, 0.25rem) * 3);
+    border: 2px solid var(--primary, oklch(0.205 0 0));
+    border-radius: var(--radius, 0.625rem);
+    background: var(--background, oklch(1 0 0));
+    cursor: grab;
+    outline: none;
+  }
+
+  audio-ui-envelope-point:focus-visible,
+  audio-ui-envelope-point[data-dragging] {
+    background: var(--primary, oklch(0.205 0 0));
+  }
+
+  audio-ui-envelope-segment {
+    width: calc(var(--spacing, 0.25rem) * 2);
+    height: calc(var(--spacing, 0.25rem) * 2);
+    border-radius: var(--radius, 0.625rem);
+    background: var(--muted-foreground, oklch(0.556 0 0));
+    opacity: 0.5;
+    cursor: ns-resize;
+    outline: none;
+  }
+
+  audio-ui-envelope-segment[data-flat] {
+    display: none;
+  }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
+</style>
+
+<audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5">
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill></audio-ui-envelope-fill>
+    <audio-ui-envelope-line></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments></audio-ui-envelope-segments>
+  <audio-ui-envelope-points></audio-ui-envelope-points>
+</audio-ui-envelope>
+
+<script type="module">
+  import "@audio-ui/elements/envelope";
+
+  const envelope = document.querySelector("audio-ui-envelope");
+  envelope.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="envelope.html" open>
+
+```html
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5">
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
+    <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden"></audio-ui-envelope-segments>
+  <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
+</audio-ui-envelope>
+
+<script type="module">
+  import "@audio-ui/elements/envelope";
+
+  const envelope = document.querySelector("audio-ui-envelope");
+  envelope.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ForStyling only="css">
+
+<CodeFile title="envelope.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/envelope";
+</script>
+
+<template>
+  <audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5" @change="(event) => console.log(event.detail.value)">
+    <audio-ui-envelope-graph>
+      <audio-ui-envelope-fill />
+      <audio-ui-envelope-line />
+    </audio-ui-envelope-graph>
+    <audio-ui-envelope-segments />
+    <audio-ui-envelope-points />
+  </audio-ui-envelope>
+</template>
+
+<style>
+audio-ui-envelope {
+  display: block;
+  width: 100%;
+  max-width: 28rem;
+  height: calc(var(--spacing, 0.25rem) * 40);
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+}
+
+audio-ui-envelope-fill {
+  color: var(--primary, oklch(0.205 0 0));
+  opacity: 0.15;
+}
+
+audio-ui-envelope-line {
+  color: var(--primary, oklch(0.205 0 0));
+  stroke-width: 2px;
+}
+
+audio-ui-envelope-point {
+  box-sizing: border-box;
+  width: calc(var(--spacing, 0.25rem) * 3);
+  height: calc(var(--spacing, 0.25rem) * 3);
+  border: 2px solid var(--primary, oklch(0.205 0 0));
+  border-radius: var(--radius, 0.625rem);
+  background: var(--background, oklch(1 0 0));
+  cursor: grab;
+  outline: none;
+}
+
+audio-ui-envelope-point:focus-visible,
+audio-ui-envelope-point[data-dragging] {
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+audio-ui-envelope-segment {
+  width: calc(var(--spacing, 0.25rem) * 2);
+  height: calc(var(--spacing, 0.25rem) * 2);
+  border-radius: var(--radius, 0.625rem);
+  background: var(--muted-foreground, oklch(0.556 0 0));
+  opacity: 0.5;
+  cursor: ns-resize;
+  outline: none;
+}
+
+audio-ui-envelope-segment[data-flat] {
+  display: none;
+}
+
+audio-ui-envelope[data-disabled],
+audio-ui-envelope[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-envelope[data-disabled] {
+  opacity: 0.5;
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="envelope.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/envelope";
+</script>
+
+<template>
+  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5" @change="(event) => console.log(event.detail.value)">
+    <audio-ui-envelope-graph>
+      <audio-ui-envelope-fill class="text-primary opacity-15" />
+      <audio-ui-envelope-line class="text-primary [stroke-width:2px]" />
+    </audio-ui-envelope-graph>
+    <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden" />
+    <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary" />
+  </audio-ui-envelope>
+</template>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+<ForStyling only="css">
+
+<CodeFile title="envelope.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/envelope";
+</script>
+
+<audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5" onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill></audio-ui-envelope-fill>
+    <audio-ui-envelope-line></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments></audio-ui-envelope-segments>
+  <audio-ui-envelope-points></audio-ui-envelope-points>
+</audio-ui-envelope>
+
+<style>
+:global {
+  audio-ui-envelope {
+    display: block;
+    width: 100%;
+    max-width: 28rem;
+    height: calc(var(--spacing, 0.25rem) * 40);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
+  }
+
+  audio-ui-envelope-fill {
+    color: var(--primary, oklch(0.205 0 0));
+    opacity: 0.15;
+  }
+
+  audio-ui-envelope-line {
+    color: var(--primary, oklch(0.205 0 0));
+    stroke-width: 2px;
+  }
+
+  audio-ui-envelope-point {
+    box-sizing: border-box;
+    width: calc(var(--spacing, 0.25rem) * 3);
+    height: calc(var(--spacing, 0.25rem) * 3);
+    border: 2px solid var(--primary, oklch(0.205 0 0));
+    border-radius: var(--radius, 0.625rem);
+    background: var(--background, oklch(1 0 0));
+    cursor: grab;
+    outline: none;
+  }
+
+  audio-ui-envelope-point:focus-visible,
+  audio-ui-envelope-point[data-dragging] {
+    background: var(--primary, oklch(0.205 0 0));
+  }
+
+  audio-ui-envelope-segment {
+    width: calc(var(--spacing, 0.25rem) * 2);
+    height: calc(var(--spacing, 0.25rem) * 2);
+    border-radius: var(--radius, 0.625rem);
+    background: var(--muted-foreground, oklch(0.556 0 0));
+    opacity: 0.5;
+    cursor: ns-resize;
+    outline: none;
+  }
+
+  audio-ui-envelope-segment[data-flat] {
+    display: none;
+  }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="envelope.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/envelope";
+</script>
+
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5" onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
+    <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden"></audio-ui-envelope-segments>
+  <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
+</audio-ui-envelope>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Envelope](/docs/react/envelope) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+</ElementsPreview>
+
+### Coarse steps
+
+`step` rounds every point to a multiple of it, along both axes: a dragged point lands on a grid of tenths.
+
+<ElementsPreview name="envelope" example="coarse">
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+<ForStyling only="css">
+
+<CodeFile title="envelope.html" open>
+
+```html
+<style>
+  audio-ui-envelope {
+    display: block;
+    width: 100%;
+    max-width: 28rem;
+    height: calc(var(--spacing, 0.25rem) * 40);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
+  }
+
+  audio-ui-envelope-fill {
+    color: var(--primary, oklch(0.205 0 0));
+    opacity: 0.15;
+  }
+
+  audio-ui-envelope-line {
+    color: var(--primary, oklch(0.205 0 0));
+    stroke-width: 2px;
+  }
+
+  audio-ui-envelope-point {
+    box-sizing: border-box;
+    width: calc(var(--spacing, 0.25rem) * 3);
+    height: calc(var(--spacing, 0.25rem) * 3);
+    border: 2px solid var(--primary, oklch(0.205 0 0));
+    border-radius: var(--radius, 0.625rem);
+    background: var(--background, oklch(1 0 0));
+    cursor: grab;
+    outline: none;
+  }
+
+  audio-ui-envelope-point:focus-visible,
+  audio-ui-envelope-point[data-dragging] {
+    background: var(--primary, oklch(0.205 0 0));
+  }
+
+  audio-ui-envelope-segment {
+    width: calc(var(--spacing, 0.25rem) * 2);
+    height: calc(var(--spacing, 0.25rem) * 2);
+    border-radius: var(--radius, 0.625rem);
+    background: var(--muted-foreground, oklch(0.556 0 0));
+    opacity: 0.5;
+    cursor: ns-resize;
+    outline: none;
+  }
+
+  audio-ui-envelope-segment[data-flat] {
+    display: none;
+  }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
+</style>
+
+<audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1">
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill></audio-ui-envelope-fill>
+    <audio-ui-envelope-line></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments></audio-ui-envelope-segments>
+  <audio-ui-envelope-points></audio-ui-envelope-points>
+</audio-ui-envelope>
+
+<script type="module">
+  import "@audio-ui/elements/envelope";
+
+  const envelope = document.querySelector("audio-ui-envelope");
+  envelope.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="envelope.html" open>
+
+```html
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1">
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
+    <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden"></audio-ui-envelope-segments>
+  <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
+</audio-ui-envelope>
+
+<script type="module">
+  import "@audio-ui/elements/envelope";
+
+  const envelope = document.querySelector("audio-ui-envelope");
+  envelope.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ForStyling only="css">
+
+<CodeFile title="envelope.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/envelope";
+</script>
+
+<template>
+  <audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1" @change="(event) => console.log(event.detail.value)">
+    <audio-ui-envelope-graph>
+      <audio-ui-envelope-fill />
+      <audio-ui-envelope-line />
+    </audio-ui-envelope-graph>
+    <audio-ui-envelope-segments />
+    <audio-ui-envelope-points />
+  </audio-ui-envelope>
+</template>
+
+<style>
+audio-ui-envelope {
+  display: block;
+  width: 100%;
+  max-width: 28rem;
+  height: calc(var(--spacing, 0.25rem) * 40);
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+}
+
+audio-ui-envelope-fill {
+  color: var(--primary, oklch(0.205 0 0));
+  opacity: 0.15;
+}
+
+audio-ui-envelope-line {
+  color: var(--primary, oklch(0.205 0 0));
+  stroke-width: 2px;
+}
+
+audio-ui-envelope-point {
+  box-sizing: border-box;
+  width: calc(var(--spacing, 0.25rem) * 3);
+  height: calc(var(--spacing, 0.25rem) * 3);
+  border: 2px solid var(--primary, oklch(0.205 0 0));
+  border-radius: var(--radius, 0.625rem);
+  background: var(--background, oklch(1 0 0));
+  cursor: grab;
+  outline: none;
+}
+
+audio-ui-envelope-point:focus-visible,
+audio-ui-envelope-point[data-dragging] {
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+audio-ui-envelope-segment {
+  width: calc(var(--spacing, 0.25rem) * 2);
+  height: calc(var(--spacing, 0.25rem) * 2);
+  border-radius: var(--radius, 0.625rem);
+  background: var(--muted-foreground, oklch(0.556 0 0));
+  opacity: 0.5;
+  cursor: ns-resize;
+  outline: none;
+}
+
+audio-ui-envelope-segment[data-flat] {
+  display: none;
+}
+
+audio-ui-envelope[data-disabled],
+audio-ui-envelope[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-envelope[data-disabled] {
+  opacity: 0.5;
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="envelope.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/envelope";
+</script>
+
+<template>
+  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1" @change="(event) => console.log(event.detail.value)">
+    <audio-ui-envelope-graph>
+      <audio-ui-envelope-fill class="text-primary opacity-15" />
+      <audio-ui-envelope-line class="text-primary [stroke-width:2px]" />
+    </audio-ui-envelope-graph>
+    <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden" />
+    <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary" />
+  </audio-ui-envelope>
+</template>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+<ForStyling only="css">
+
+<CodeFile title="envelope.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/envelope";
+</script>
+
+<audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1" onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill></audio-ui-envelope-fill>
+    <audio-ui-envelope-line></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments></audio-ui-envelope-segments>
+  <audio-ui-envelope-points></audio-ui-envelope-points>
+</audio-ui-envelope>
+
+<style>
+:global {
+  audio-ui-envelope {
+    display: block;
+    width: 100%;
+    max-width: 28rem;
+    height: calc(var(--spacing, 0.25rem) * 40);
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--muted, oklch(0.97 0 0));
+  }
+
+  audio-ui-envelope-fill {
+    color: var(--primary, oklch(0.205 0 0));
+    opacity: 0.15;
+  }
+
+  audio-ui-envelope-line {
+    color: var(--primary, oklch(0.205 0 0));
+    stroke-width: 2px;
+  }
+
+  audio-ui-envelope-point {
+    box-sizing: border-box;
+    width: calc(var(--spacing, 0.25rem) * 3);
+    height: calc(var(--spacing, 0.25rem) * 3);
+    border: 2px solid var(--primary, oklch(0.205 0 0));
+    border-radius: var(--radius, 0.625rem);
+    background: var(--background, oklch(1 0 0));
+    cursor: grab;
+    outline: none;
+  }
+
+  audio-ui-envelope-point:focus-visible,
+  audio-ui-envelope-point[data-dragging] {
+    background: var(--primary, oklch(0.205 0 0));
+  }
+
+  audio-ui-envelope-segment {
+    width: calc(var(--spacing, 0.25rem) * 2);
+    height: calc(var(--spacing, 0.25rem) * 2);
+    border-radius: var(--radius, 0.625rem);
+    background: var(--muted-foreground, oklch(0.556 0 0));
+    opacity: 0.5;
+    cursor: ns-resize;
+    outline: none;
+  }
+
+  audio-ui-envelope-segment[data-flat] {
+    display: none;
+  }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="envelope.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/envelope";
+</script>
+
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1" onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-envelope-graph>
+    <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
+    <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
+  </audio-ui-envelope-graph>
+  <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden"></audio-ui-envelope-segments>
+  <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
+</audio-ui-envelope>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Envelope](/docs/react/envelope) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+</ElementsPreview>
+
+{/* examples:end */}
+
+## API reference
 
 <TypeTable>
 <TypeRow name={"value"} type={"string"}>The points, separated by commas, each `x y` or `x y curve`: coordinates from 0 to 1, curve from -1 to 1. The `value` property reads and sets them as `{ x, y, curve? }[]`.</TypeRow>
@@ -360,3 +1174,7 @@ In React, the same control is the [Envelope](/docs/react/envelope) primitive of 
 The same control in React, and its parts' props: [Envelope](/docs/react/envelope).
 
 </ForFrameworks>
+
+## Package
+
+<Module from="@audio-ui/elements/envelope" />

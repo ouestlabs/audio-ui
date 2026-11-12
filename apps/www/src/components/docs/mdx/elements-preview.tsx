@@ -3,7 +3,6 @@
 import { createSource } from "@audio-ui/core";
 import type { MeterElement, PlotCurveElement } from "@audio-ui/elements";
 import {
-  type CSSProperties,
   createContext,
   type ReactNode,
   use,
@@ -12,12 +11,13 @@ import {
   useRef,
   useState,
 } from "react";
+import { PreviewCode } from "@/components/docs/mdx/preview-code";
 import { PreviewPanel } from "@/components/preview/frame/preview-frame";
 import { Frame } from "@/components/site/layout/frame";
-import { useDensity, useSize } from "@/hooks/use-look";
-import { useStyling } from "@/hooks/use-styling";
+import { usePreviewLook } from "@/hooks/use-preview-look";
+import { elementAttributes } from "@/lib/docs/content/element-attributes";
 import { SKINS } from "@/lib/docs/content/element-skins";
-import { DENSITIES, SIZES } from "@/lib/docs/content/stylings";
+import { exampleOf } from "@/lib/docs/content/primitive-examples";
 
 /** The primitives with a live preview, by entry point. */
 export type ElementsPreviewName =
@@ -117,7 +117,10 @@ const PartContext = createContext<(tag: string) => string | undefined>(
   () => undefined
 );
 
-function Knob() {
+/** The attributes an example gives a preview's root element, over its own. */
+type RootAttributes = Readonly<Record<string, string | undefined>>;
+
+function Knob({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
     <audio-ui-knob
@@ -125,6 +128,7 @@ function Knob() {
       max="100"
       min="0"
       value="40"
+      {...rootAttributes}
     >
       <audio-ui-knob-control className={part("audio-ui-knob-control")}>
         <audio-ui-knob-track className={part("audio-ui-knob-track")} />
@@ -139,10 +143,14 @@ function Knob() {
   );
 }
 
-function Fader() {
+function Fader({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
-    <audio-ui-fader className={part("audio-ui-fader")} value="-6">
+    <audio-ui-fader
+      className={part("audio-ui-fader")}
+      value="-6"
+      {...rootAttributes}
+    >
       <audio-ui-fader-control className={part("audio-ui-fader-control")}>
         <audio-ui-fader-track className={part("audio-ui-fader-track")}>
           <audio-ui-fader-indicator
@@ -160,10 +168,14 @@ function Fader() {
 
 const PADS = ["Kick", "Snare", "Clap", "Rim", "Hat", "Open", "Tom", "Ride"];
 
-function Pad() {
+function Pad({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
-    <audio-ui-pad aria-label="Drums" className={part("audio-ui-pad")}>
+    <audio-ui-pad
+      aria-label="Drums"
+      className={part("audio-ui-pad")}
+      {...rootAttributes}
+    >
       {PADS.map((label) => (
         <audio-ui-pad-item
           className={part("audio-ui-pad-item")}
@@ -177,7 +189,7 @@ function Pad() {
   );
 }
 
-function Piano() {
+function Piano({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
     <audio-ui-piano
@@ -185,16 +197,21 @@ function Piano() {
       className={part("audio-ui-piano")}
       max-pitch="71"
       min-pitch="48"
+      {...rootAttributes}
     >
       <audio-ui-piano-keys className={part("audio-ui-piano-keys")} />
     </audio-ui-piano>
   );
 }
 
-function XYPad() {
+function XYPad({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
-    <audio-ui-xypad className={part("audio-ui-xypad")} value="30 70">
+    <audio-ui-xypad
+      className={part("audio-ui-xypad")}
+      value="30 70"
+      {...rootAttributes}
+    >
       <audio-ui-xypad-control className={part("audio-ui-xypad-control")}>
         <audio-ui-xypad-thumb
           aria-label="Filter"
@@ -207,7 +224,7 @@ function XYPad() {
 }
 
 /** Two channels moving like a signal, from a live source the meter follows. */
-function Meter() {
+function Meter({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   const ref = useRef<HTMLElement>(null);
   useEffect(() => {
@@ -243,6 +260,7 @@ function Meter() {
       ref={ref}
       unit="dB"
       warn-threshold="-12"
+      {...rootAttributes}
     >
       {[0, 1].map((index) => (
         <audio-ui-meter-channel
@@ -264,13 +282,14 @@ function Meter() {
 const ROWS = ["Kick", "Snare", "Hat"];
 const STEPS = Array.from({ length: 16 }, (_, index) => index);
 
-function Sequencer() {
+function Sequencer({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
     <audio-ui-sequencer
       aria-label="Pattern"
       className={part("audio-ui-sequencer")}
       default-value="x...x...x...x... ....x.......x... x.x.x.x.x.x.x.xx"
+      {...rootAttributes}
     >
       {ROWS.map((label, row) => (
         <audio-ui-sequencer-row
@@ -292,13 +311,14 @@ function Sequencer() {
   );
 }
 
-function Envelope() {
+function Envelope({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
     <audio-ui-envelope
       aria-label="Amp envelope"
       className={part("audio-ui-envelope")}
       default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0"
+      {...rootAttributes}
     >
       <audio-ui-envelope-graph>
         <audio-ui-envelope-fill className={part("audio-ui-envelope-fill")} />
@@ -316,7 +336,7 @@ function Envelope() {
 const bell = (center: number, gain: number) => (hz: number) =>
   gain * Math.exp(-(Math.log2(hz / center) ** 2) * 1.6);
 
-function Plot() {
+function Plot({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   const curveRef = useRef<HTMLElement>(null);
   const handleRef = useRef<HTMLElement>(null);
@@ -344,6 +364,7 @@ function Plot() {
       min-x="20"
       min-y="-18"
       scale-x="log"
+      {...rootAttributes}
     >
       <audio-ui-plot-grid className={part("audio-ui-plot-grid")} />
       <audio-ui-plot-curve
@@ -369,7 +390,7 @@ const PEAKS = Array.from({ length: 480 }, (_, index) => {
 const formatSeconds = (value: number) =>
   `${Math.floor(value / 60)}:${String(Math.floor(value % 60)).padStart(2, "0")}`;
 
-function Waveform() {
+function Waveform({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
     <audio-ui-waveform
@@ -377,6 +398,7 @@ function Waveform() {
       duration="96"
       peaks={PEAKS}
       value="30"
+      {...rootAttributes}
     >
       <audio-ui-waveform-control
         aria-label="Seek"
@@ -414,13 +436,16 @@ function Waveform() {
 
 const BARS = [0, 4, 8, 12, 16, 20, 24, 28];
 
-function Timeline() {
+function Timeline({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
     <audio-ui-timeline
       className={part("audio-ui-timeline")}
       duration="32"
+      max-zoom="80"
+      min-zoom="12"
       snap-step="1"
+      {...rootAttributes}
     >
       <audio-ui-timeline-viewport
         className={part("audio-ui-timeline-viewport")}
@@ -451,6 +476,7 @@ function Timeline() {
           <audio-ui-timeline-track
             className={part("audio-ui-timeline-track")}
             key={track.name}
+            style={{ minWidth: "max-content" }}
           >
             <audio-ui-timeline-track-header
               className={part("audio-ui-timeline-track-header")}
@@ -494,6 +520,16 @@ function Timeline() {
           aria-label="View"
           className={part("audio-ui-timeline-navigator-window")}
         />
+        <audio-ui-timeline-navigator-handle
+          aria-label="View start"
+          className={part("audio-ui-timeline-navigator-handle")}
+          edge="start"
+        />
+        <audio-ui-timeline-navigator-handle
+          aria-label="View end"
+          className={part("audio-ui-timeline-navigator-handle")}
+          edge="end"
+        />
       </audio-ui-timeline-navigator>
     </audio-ui-timeline>
   );
@@ -508,13 +544,16 @@ const NOTES = [
   { id: "f", length: 1.5, pitch: 65, start: 6.5, velocity: 0.7 },
 ];
 
-function PianoRoll() {
+function PianoRoll({ rootAttributes }: { rootAttributes?: RootAttributes }) {
   const part = use(PartContext);
   return (
     <audio-ui-timeline
       className={part("audio-ui-timeline")}
       duration="8"
+      max-zoom="300"
+      min-zoom="40"
       snap-step="0.5"
+      {...rootAttributes}
     >
       <audio-ui-piano-roll
         className={part("audio-ui-piano-roll")}
@@ -562,7 +601,10 @@ function PianoRoll() {
   );
 }
 
-const PREVIEWS: Record<ElementsPreviewName, () => ReactNode> = {
+const PREVIEWS: Record<
+  ElementsPreviewName,
+  (props: { rootAttributes?: RootAttributes }) => ReactNode
+> = {
   envelope: Envelope,
   fader: Fader,
   knob: Knob,
@@ -581,15 +623,18 @@ const PREVIEWS: Record<ElementsPreviewName, () => ReactNode> = {
  * A live preview of one primitive as custom elements, rendered once its
  * entry point has registered them, with the last event it fired below it.
  */
-export function ElementsPreview({ name }: { name: ElementsPreviewName }) {
-  const [styling] = useStyling();
-  const [size] = useSize();
-  const [density] = useDensity();
-  // The spacing unit and the density the examples read, set on the preview alone.
-  const look = {
-    "--density": DENSITIES.find((each) => each.id === density)?.factor,
-    "--spacing": `${0.25 * (SIZES.find((each) => each.id === size)?.factor ?? 1)}rem`,
-  } as CSSProperties;
+export function ElementsPreview({
+  children,
+  example,
+  name,
+}: {
+  /** The code of the preview, shown under it: a few lines until View Code. */
+  children?: ReactNode;
+  /** An example of the page's element, from `primitive-examples.ts`: its attributes over the usage's. */
+  example?: string;
+  name: ElementsPreviewName;
+}) {
+  const { style: look, styling } = usePreviewLook();
   const skin = SKINS[name];
   const part = useCallback(
     (tag: string) => (styling === "tailwind" ? skin?.tailwind[tag] : undefined),
@@ -628,6 +673,8 @@ export function ElementsPreview({ name }: { name: ElementsPreviewName }) {
   }, [name, registered]);
 
   const Preview = PREVIEWS[name];
+  const given = exampleOf(name, example)?.props;
+  const attributes = given ? elementAttributes(given) : undefined;
   return (
     <Frame className="mt-4 mb-8" data-slot="elements-preview" style={look}>
       {styling === "css" && skin ? (
@@ -641,7 +688,7 @@ export function ElementsPreview({ name }: { name: ElementsPreviewName }) {
             ref={panelRef}
           >
             <PartContext value={part}>
-              <Preview />
+              <Preview rootAttributes={attributes} />
             </PartContext>
           </div>
         ) : null}
@@ -651,6 +698,7 @@ export function ElementsPreview({ name }: { name: ElementsPreviewName }) {
           ref={eventRef}
         />
       </PreviewPanel>
+      {children ? <PreviewCode>{children}</PreviewCode> : null}
     </Frame>
   );
 }

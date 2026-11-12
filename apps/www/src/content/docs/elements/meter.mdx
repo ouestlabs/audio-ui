@@ -5,13 +5,9 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 
 `<audio-ui-meter>` displays one or more level channels. Levels come from the `value` and `peak` attributes or properties, one per channel, or from a live `source` property, `{ getSnapshot, subscribe }`, whose frames are written directly to the parts. A click clears clip indicators latched by a live source.
 
-<ElementsPreview name="meter" />
-
-## Usage
+<ElementsPreview name="meter">
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
-
-The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -25,6 +21,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 <TabsContent value="web">
 
 <ForStyling only="css">
+
+<CodeFile title="meter.html" open>
 
 ```html
 <style>
@@ -59,6 +57,15 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
     height: calc(var(--spacing, 0.25rem) * 0.5);
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-meter[data-disabled],
+  audio-ui-meter[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-meter[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-meter min="-60" max="6" value="-18 -10">
@@ -80,12 +87,16 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
 
+<CodeFile title="meter.html" open>
+
 ```html
-<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-60" max="6" value="-18 -10">
+<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-60" max="6" value="-18 -10">
   <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
     <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
     <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
@@ -104,6 +115,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -111,6 +124,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 <TabsContent value="vue">
 
 <ForStyling only="css">
+
+<CodeFile title="meter.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -165,12 +180,25 @@ audio-ui-meter-peak {
   height: calc(var(--spacing, 0.25rem) * 0.5);
   background: var(--foreground, oklch(0.145 0 0));
 }
+
+audio-ui-meter[data-disabled],
+audio-ui-meter[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-meter[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
+
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="meter.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -181,7 +209,7 @@ const levels = ref("-18 -10");
 </script>
 
 <template>
-  <audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-60" max="6" :value="levels">
+  <audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-60" max="6" :value="levels">
     <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
       <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary" />
       <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground" />
@@ -194,6 +222,8 @@ const levels = ref("-18 -10");
 </template>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -201,6 +231,8 @@ const levels = ref("-18 -10");
 <TabsContent value="svelte">
 
 <ForStyling only="css">
+
+<CodeFile title="meter.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -253,13 +285,26 @@ const levels = ref("-18 -10");
     height: calc(var(--spacing, 0.25rem) * 0.5);
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-meter[data-disabled],
+  audio-ui-meter[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-meter[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="meter.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -268,7 +313,7 @@ const levels = ref("-18 -10");
   let levels = $state("-18 -10");
 </script>
 
-<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-60" max="6" value={levels}>
+<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-60" max="6" value={levels}>
   <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
     <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
     <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
@@ -279,6 +324,8 @@ const levels = ref("-18 -10");
   </audio-ui-meter-channel>
 </audio-ui-meter>
 ```
+
+</CodeFile>
 
 </ForStyling>
 
@@ -294,9 +341,374 @@ In React, the same control is the [Meter](/docs/react/meter) primitive of `@audi
 
 {/* usage:end */}
 
-## API reference
+</ElementsPreview>
 
-<Module from="@audio-ui/elements/meter" />
+{/* anatomy:start: written by `bun scripts/element-usage.ts --write` */}
+
+## Anatomy
+
+The parts, nested as they go in the markup.
+
+```html
+<audio-ui-meter>
+  <audio-ui-meter-channel>
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel>
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+```
+
+{/* anatomy:end */}
+
+{/* examples:start: written by `bun scripts/element-usage.ts --write` */}
+
+## Examples
+
+### Narrow range
+
+`min` and `max` set the levels the bar spans: here the top 24 dB, where a mix meter spends its time.
+
+<ElementsPreview name="meter" example="range">
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+<ForStyling only="css">
+
+<CodeFile title="meter.html" open>
+
+```html
+<style>
+  audio-ui-meter {
+    display: flex;
+    gap: calc(var(--spacing, 0.25rem) * 1.5 * var(--density, 1));
+    height: calc(var(--spacing, 0.25rem) * 44);
+  }
+
+  audio-ui-meter-channel {
+    position: relative;
+    display: block;
+    width: calc(var(--spacing, 0.25rem) * 3);
+    height: 100%;
+    overflow: hidden;
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--muted, oklch(0.97 0 0));
+  }
+
+  audio-ui-meter-indicator {
+    position: absolute;
+    bottom: 0;
+    display: block;
+    background: var(--primary, oklch(0.205 0 0));
+  }
+
+  audio-ui-meter-peak {
+    position: absolute;
+    right: 0;
+    left: 0;
+    display: block;
+    height: calc(var(--spacing, 0.25rem) * 0.5);
+    background: var(--foreground, oklch(0.145 0 0));
+  }
+
+  audio-ui-meter[data-disabled],
+  audio-ui-meter[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-meter[data-disabled] {
+    opacity: 0.5;
+  }
+</style>
+
+<audio-ui-meter min="-24" max="0" value="-18 -10">
+  <audio-ui-meter-channel index="0" aria-label="Left">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel index="1" aria-label="Right">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+
+<script type="module">
+  import "@audio-ui/elements/meter";
+
+  const meter = document.querySelector("audio-ui-meter");
+  meter.value = "-12 -6";
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="meter.html" open>
+
+```html
+<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-24" max="0" value="-18 -10">
+  <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
+    <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
+    <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="1" aria-label="Right">
+    <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
+    <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+
+<script type="module">
+  import "@audio-ui/elements/meter";
+
+  const meter = document.querySelector("audio-ui-meter");
+  meter.value = "-12 -6";
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ForStyling only="css">
+
+<CodeFile title="meter.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/meter";
+import { ref } from "vue";
+
+const levels = ref("-18 -10");
+</script>
+
+<template>
+  <audio-ui-meter min="-24" max="0" :value="levels">
+    <audio-ui-meter-channel index="0" aria-label="Left">
+      <audio-ui-meter-indicator />
+      <audio-ui-meter-peak />
+    </audio-ui-meter-channel>
+    <audio-ui-meter-channel index="1" aria-label="Right">
+      <audio-ui-meter-indicator />
+      <audio-ui-meter-peak />
+    </audio-ui-meter-channel>
+  </audio-ui-meter>
+</template>
+
+<style>
+audio-ui-meter {
+  display: flex;
+  gap: calc(var(--spacing, 0.25rem) * 1.5 * var(--density, 1));
+  height: calc(var(--spacing, 0.25rem) * 44);
+}
+
+audio-ui-meter-channel {
+  position: relative;
+  display: block;
+  width: calc(var(--spacing, 0.25rem) * 3);
+  height: 100%;
+  overflow: hidden;
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--muted, oklch(0.97 0 0));
+}
+
+audio-ui-meter-indicator {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+audio-ui-meter-peak {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: block;
+  height: calc(var(--spacing, 0.25rem) * 0.5);
+  background: var(--foreground, oklch(0.145 0 0));
+}
+
+audio-ui-meter[data-disabled],
+audio-ui-meter[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-meter[data-disabled] {
+  opacity: 0.5;
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="meter.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/meter";
+import { ref } from "vue";
+
+const levels = ref("-18 -10");
+</script>
+
+<template>
+  <audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-24" max="0" :value="levels">
+    <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
+      <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary" />
+      <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground" />
+    </audio-ui-meter-channel>
+    <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="1" aria-label="Right">
+      <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary" />
+      <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground" />
+    </audio-ui-meter-channel>
+  </audio-ui-meter>
+</template>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+<ForStyling only="css">
+
+<CodeFile title="meter.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/meter";
+
+  let levels = $state("-18 -10");
+</script>
+
+<audio-ui-meter min="-24" max="0" value={levels}>
+  <audio-ui-meter-channel index="0" aria-label="Left">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel index="1" aria-label="Right">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+
+<style>
+:global {
+  audio-ui-meter {
+    display: flex;
+    gap: calc(var(--spacing, 0.25rem) * 1.5 * var(--density, 1));
+    height: calc(var(--spacing, 0.25rem) * 44);
+  }
+
+  audio-ui-meter-channel {
+    position: relative;
+    display: block;
+    width: calc(var(--spacing, 0.25rem) * 3);
+    height: 100%;
+    overflow: hidden;
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--muted, oklch(0.97 0 0));
+  }
+
+  audio-ui-meter-indicator {
+    position: absolute;
+    bottom: 0;
+    display: block;
+    background: var(--primary, oklch(0.205 0 0));
+  }
+
+  audio-ui-meter-peak {
+    position: absolute;
+    right: 0;
+    left: 0;
+    display: block;
+    height: calc(var(--spacing, 0.25rem) * 0.5);
+    background: var(--foreground, oklch(0.145 0 0));
+  }
+
+  audio-ui-meter[data-disabled],
+  audio-ui-meter[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-meter[data-disabled] {
+    opacity: 0.5;
+  }
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="meter.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/meter";
+
+  let levels = $state("-18 -10");
+</script>
+
+<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-24" max="0" value={levels}>
+  <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
+    <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
+    <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="1" aria-label="Right">
+    <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
+    <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Meter](/docs/react/meter) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+</ElementsPreview>
+
+{/* examples:end */}
+
+## API reference
 
 <TypeTable>
 <TypeRow name={"value"} type={"string"}>One level per channel, such as `"-12 -6"`. The count sets the number of channels.</TypeRow>
@@ -328,3 +740,7 @@ In React, the same control is the [Meter](/docs/react/meter) primitive of `@audi
 The same control in React, and its parts' props: [Meter](/docs/react/meter).
 
 </ForFrameworks>
+
+## Package
+
+<Module from="@audio-ui/elements/meter" />

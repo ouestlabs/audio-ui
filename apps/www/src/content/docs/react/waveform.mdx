@@ -3,7 +3,148 @@ title: Waveform
 description: "The headless Waveform of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
-<Module from="@audio-ui/react/waveform" />
+<ReactPreview name="waveform">
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+<ForStyling only="css">
+
+<CodeFile title="waveform.tsx" open>
+
+```tsx
+import { Waveform } from "@audio-ui/react";
+import styles from "./waveform.module.css";
+
+// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+const peaks: number[] = [];
+
+<Waveform.Root className={styles.root} duration={96} peaks={peaks} defaultValue={30}>
+  <Waveform.Control className={styles.control} aria-label="Seek">
+    <Waveform.Canvas className={styles.canvas} />
+    <Waveform.Region className={styles.region} defaultValue={[54, 72]}>
+      <Waveform.RegionHandle className={styles.regionHandle} edge="start" aria-label="Loop start" />
+      <Waveform.RegionHandle className={styles.regionHandle} edge="end" aria-label="Loop end" />
+    </Waveform.Region>
+    <Waveform.Playhead className={styles.playhead} />
+  </Waveform.Control>
+</Waveform.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="waveform.module.css">
+
+```css
+.root {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+}
+
+.control {
+  position: relative;
+  display: block;
+  height: calc(var(--spacing, 0.25rem) * 20);
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+  cursor: pointer;
+}
+
+.canvas {
+  position: absolute;
+  inset: 0;
+  --waveform-progress-color: var(--primary, oklch(0.205 0 0));
+  color: var(--muted-foreground, oklch(0.556 0 0));
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.region {
+  top: 0;
+  bottom: 0;
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 10%, transparent);
+}
+
+.regionHandle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: calc(var(--spacing, 0.25rem) * 1);
+  background: var(--primary, oklch(0.205 0 0));
+  cursor: ew-resize;
+}
+
+.regionHandle[data-edge="start"] {
+  left: 0;
+}
+
+.regionHandle[data-edge="end"] {
+  right: 0;
+}
+
+.playhead {
+  top: 0;
+  bottom: 0;
+  width: calc(var(--spacing, 0.25rem) * 0.5);
+  background: var(--foreground, oklch(0.145 0 0));
+}
+
+.hover {
+  top: calc(var(--spacing, 0.25rem) * -6);
+  translate: -50% 0;
+  padding-inline: calc(var(--spacing, 0.25rem) * 1);
+  border-radius: 0.25rem;
+  background: var(--popover, oklch(1 0 0));
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 10px;
+  pointer-events: none;
+}
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="waveform.tsx" open>
+
+```tsx
+import { Waveform } from "@audio-ui/react";
+
+// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+const peaks: number[] = [];
+
+<Waveform.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={96} peaks={peaks} defaultValue={30}>
+  <Waveform.Control className="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
+    <Waveform.Canvas className="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)] block size-full" />
+    <Waveform.Region className="inset-y-0 bg-primary/10" defaultValue={[54, 72]}>
+      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Loop start" />
+      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Loop end" />
+    </Waveform.Region>
+    <Waveform.Playhead className="inset-y-0 w-0.5 bg-foreground" />
+  </Waveform.Control>
+</Waveform.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+{/* usage:end */}
+
+</ReactPreview>
+
 
 ## Anatomy
 
@@ -26,6 +167,73 @@ import { Waveform } from "@audio-ui/react";
   </Waveform.Control>
 </Waveform.Root>
 ```
+
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### A longer sound
+
+`duration` is the sound's length in the unit `value` is in: the position and the region scale with it.
+
+<ReactPreview name="waveform" example="long">
+
+<ForStyling only="css">
+
+<CodeFile title="waveform.tsx" open>
+
+```tsx
+import { Waveform } from "@audio-ui/react";
+import styles from "./waveform.module.css";
+
+// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+const peaks: number[] = [];
+
+<Waveform.Root className={styles.root} duration={240} peaks={peaks} defaultValue={90}>
+  <Waveform.Control className={styles.control} aria-label="Seek">
+    <Waveform.Canvas className={styles.canvas} />
+    <Waveform.Region className={styles.region} defaultValue={[54, 72]}>
+      <Waveform.RegionHandle className={styles.regionHandle} edge="start" aria-label="Loop start" />
+      <Waveform.RegionHandle className={styles.regionHandle} edge="end" aria-label="Loop end" />
+    </Waveform.Region>
+    <Waveform.Playhead className={styles.playhead} />
+  </Waveform.Control>
+</Waveform.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="waveform.tsx" open>
+
+```tsx
+import { Waveform } from "@audio-ui/react";
+
+// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+const peaks: number[] = [];
+
+<Waveform.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={240} peaks={peaks} defaultValue={90}>
+  <Waveform.Control className="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
+    <Waveform.Canvas className="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)] block size-full" />
+    <Waveform.Region className="inset-y-0 bg-primary/10" defaultValue={[54, 72]}>
+      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Loop start" />
+      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Loop end" />
+    </Waveform.Region>
+    <Waveform.Playhead className="inset-y-0 w-0.5 bg-foreground" />
+  </Waveform.Control>
+</Waveform.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
 
 ## API reference
 
@@ -212,3 +420,7 @@ Shown while the pointer is over the `Control`, positioned at the hovered point. 
 ## Styled
 
 The registry's styled Waveform, its usage and interaction: [Waveform](/docs/components/base/waveform).
+
+## Package
+
+<Module from="@audio-ui/react/waveform" />

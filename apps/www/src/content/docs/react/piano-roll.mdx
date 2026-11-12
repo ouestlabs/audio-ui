@@ -3,7 +3,223 @@ title: PianoRoll
 description: "The headless PianoRoll of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
-<Module from="@audio-ui/react/piano-roll" />
+<ReactPreview name="piano-roll">
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+<ForStyling only="css">
+
+<CodeFile title="piano-roll.tsx" open>
+
+```tsx
+import { PianoRoll, Timeline } from "@audio-ui/react";
+import styles from "./piano-roll.module.css";
+
+const notes = [
+  { id: "a", pitch: 60, start: 0, length: 1, velocity: 0.9 },
+  { id: "b", pitch: 64, start: 1, length: 1, velocity: 0.6 },
+  { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
+];
+
+<Timeline.Root className={styles.timelineRoot} duration={8} snapStep={0.5} minZoom={40} maxZoom={300}>
+  <PianoRoll.Root className={styles.root} minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+    <PianoRoll.Keys className={styles.keys}>
+      <PianoRoll.Rows>
+        {(pitch) => <PianoRoll.Key className={styles.key} pitch={pitch} />}
+      </PianoRoll.Rows>
+    </PianoRoll.Keys>
+    <Timeline.Viewport className={styles.timelineViewport}>
+      <PianoRoll.Grid className={styles.grid} aria-label="Notes">
+        <PianoRoll.Rows>
+          {(pitch) => <PianoRoll.Row className={styles.row} pitch={pitch} />}
+        </PianoRoll.Rows>
+        <PianoRoll.Notes>
+          {(note) => <PianoRoll.Note className={styles.note} key={note.id} note={note} />}
+        </PianoRoll.Notes>
+        <PianoRoll.Marquee className={styles.marquee} />
+        <Timeline.Playhead className={styles.timelinePlayhead} />
+      </PianoRoll.Grid>
+    </Timeline.Viewport>
+    <PianoRoll.VelocityLane className={styles.velocityLane} aria-label="Velocity">
+      <PianoRoll.Notes>
+        {(note) => <PianoRoll.Velocity className={styles.velocity} key={note.id} note={note} />}
+      </PianoRoll.Notes>
+    </PianoRoll.VelocityLane>
+  </PianoRoll.Root>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="piano-roll.module.css">
+
+```css
+.timelineRoot {
+  display: block;
+  width: 100%;
+  max-width: 36rem;
+}
+
+.root {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  overflow: hidden;
+  border: 1px solid var(--border, oklch(0.922 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+}
+
+.keys {
+  height: calc(var(--spacing, 0.25rem) * 48);
+  border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+}
+
+.keys .key {
+  z-index: 0;
+  top: auto;
+  right: 0;
+  left: 0;
+  box-sizing: border-box;
+  height: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--border, oklch(0.922 0 0));
+  border-radius: 0;
+  background: var(--background, oklch(1 0 0));
+  cursor: pointer;
+  outline: none;
+}
+
+.keys .key[data-color="black"] {
+  z-index: 1;
+  right: 35%;
+  height: 62%;
+  border-color: var(--foreground, oklch(0.145 0 0));
+  background: var(--foreground, oklch(0.145 0 0));
+}
+
+.keys .key[data-active] {
+  border-color: var(--primary, oklch(0.205 0 0));
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+.grid {
+  height: calc(var(--spacing, 0.25rem) * 48);
+  outline: none;
+}
+
+.row[data-color="black"] {
+  background: color-mix(in oklab, var(--muted, oklch(0.97 0 0)) 70%, transparent);
+}
+
+.row[data-octave] {
+  border-bottom: 1px solid var(--border, oklch(0.922 0 0));
+}
+
+.note {
+  border-radius: 2px;
+  background: color-mix(
+    in oklab,
+    var(--primary, oklch(0.205 0 0)) calc(40% + 60% * var(--piano-roll-velocity)),
+    transparent
+  );
+  cursor: grab;
+  outline: none;
+}
+
+.note[data-selected] {
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
+}
+
+.marquee {
+  border: 1px dashed var(--primary, oklch(0.205 0 0));
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 8%, transparent);
+}
+
+.velocityLane {
+  grid-column-start: 2;
+  height: calc(var(--spacing, 0.25rem) * 12);
+  border-top: 1px solid var(--border, oklch(0.922 0 0));
+}
+
+.velocity {
+  width: 3px;
+  translate: -1px 0;
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+.timelineViewport {
+  scrollbar-width: none;
+}
+
+.timelinePlayhead {
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  background: var(--foreground, oklch(0.145 0 0));
+}
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano-roll.tsx" open>
+
+```tsx
+import { PianoRoll, Timeline } from "@audio-ui/react";
+
+const notes = [
+  { id: "a", pitch: 60, start: 0, length: 1, velocity: 0.9 },
+  { id: "b", pitch: 64, start: 1, length: 1, velocity: 0.6 },
+  { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
+];
+
+<Timeline.Root className="block w-full max-w-xl" duration={8} snapStep={0.5} minZoom={40} maxZoom={300}>
+  <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+    <PianoRoll.Keys className="h-48 border-e">
+      <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
+        {(pitch) => <PianoRoll.Key className="inset-x-0 top-auto z-0 h-full cursor-pointer border-0 border-border border-b bg-background outline-none data-[color=black]:right-[35%] data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
+      </PianoRoll.Rows>
+    </PianoRoll.Keys>
+    <Timeline.Viewport className="[scrollbar-width:none]">
+      <PianoRoll.Grid className="h-48 outline-none" aria-label="Notes">
+        <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
+          {(pitch) => <PianoRoll.Row className="data-[color=black]:bg-muted/70 data-octave:border-b" pitch={pitch} />}
+        </PianoRoll.Rows>
+        <PianoRoll.Notes className="*:cursor-grab *:rounded-[2px] *:bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] *:outline-none *:data-selected:ring-2 *:data-selected:ring-ring">
+          {(note) => <PianoRoll.Note className="cursor-grab rounded-[2px] bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] outline-none data-selected:ring-2 data-selected:ring-ring" key={note.id} note={note} />}
+        </PianoRoll.Notes>
+        <PianoRoll.Marquee className="border border-primary border-dashed bg-primary/8" />
+        <Timeline.Playhead className="inset-y-0 w-px bg-foreground" />
+      </PianoRoll.Grid>
+    </Timeline.Viewport>
+    <PianoRoll.VelocityLane className="col-start-2 h-12 border-t" aria-label="Velocity">
+      <PianoRoll.Notes className="*:cursor-grab *:rounded-[2px] *:bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] *:outline-none *:data-selected:ring-2 *:data-selected:ring-ring">
+        {(note) => <PianoRoll.Velocity className="w-[3px] -translate-x-px bg-primary" key={note.id} note={note} />}
+      </PianoRoll.Notes>
+    </PianoRoll.VelocityLane>
+  </PianoRoll.Root>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+{/* usage:end */}
+
+</ReactPreview>
+
 
 ## Anatomy
 
@@ -47,6 +263,210 @@ import { PianoRoll, Timeline } from "@audio-ui/react";
   </PianoRoll.Root>
 </Timeline.Root>;
 ```
+
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### A longer clip
+
+The roll takes its length from the timeline around it: `duration` is in beats here, and the notes keep their place on a grid twice as wide.
+
+<ReactPreview name="piano-roll" example="longer">
+
+<ForStyling only="css">
+
+<CodeFile title="piano-roll.tsx" open>
+
+```tsx
+import { PianoRoll, Timeline } from "@audio-ui/react";
+import styles from "./piano-roll.module.css";
+
+const notes = [
+  { id: "a", pitch: 60, start: 0, length: 1, velocity: 0.9 },
+  { id: "b", pitch: 64, start: 1, length: 1, velocity: 0.6 },
+  { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
+];
+
+<Timeline.Root className={styles.timelineRoot} duration={16} snapStep={0.5} minZoom={40} maxZoom={300}>
+  <PianoRoll.Root className={styles.root} minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+    <PianoRoll.Keys className={styles.keys}>
+      <PianoRoll.Rows>
+        {(pitch) => <PianoRoll.Key className={styles.key} pitch={pitch} />}
+      </PianoRoll.Rows>
+    </PianoRoll.Keys>
+    <Timeline.Viewport className={styles.timelineViewport}>
+      <PianoRoll.Grid className={styles.grid} aria-label="Notes">
+        <PianoRoll.Rows>
+          {(pitch) => <PianoRoll.Row className={styles.row} pitch={pitch} />}
+        </PianoRoll.Rows>
+        <PianoRoll.Notes>
+          {(note) => <PianoRoll.Note className={styles.note} key={note.id} note={note} />}
+        </PianoRoll.Notes>
+        <PianoRoll.Marquee className={styles.marquee} />
+        <Timeline.Playhead className={styles.timelinePlayhead} />
+      </PianoRoll.Grid>
+    </Timeline.Viewport>
+    <PianoRoll.VelocityLane className={styles.velocityLane} aria-label="Velocity">
+      <PianoRoll.Notes>
+        {(note) => <PianoRoll.Velocity className={styles.velocity} key={note.id} note={note} />}
+      </PianoRoll.Notes>
+    </PianoRoll.VelocityLane>
+  </PianoRoll.Root>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano-roll.tsx" open>
+
+```tsx
+import { PianoRoll, Timeline } from "@audio-ui/react";
+
+const notes = [
+  { id: "a", pitch: 60, start: 0, length: 1, velocity: 0.9 },
+  { id: "b", pitch: 64, start: 1, length: 1, velocity: 0.6 },
+  { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
+];
+
+<Timeline.Root className="block w-full max-w-xl" duration={16} snapStep={0.5} minZoom={40} maxZoom={300}>
+  <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+    <PianoRoll.Keys className="h-48 border-e">
+      <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
+        {(pitch) => <PianoRoll.Key className="inset-x-0 top-auto z-0 h-full cursor-pointer border-0 border-border border-b bg-background outline-none data-[color=black]:right-[35%] data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
+      </PianoRoll.Rows>
+    </PianoRoll.Keys>
+    <Timeline.Viewport className="[scrollbar-width:none]">
+      <PianoRoll.Grid className="h-48 outline-none" aria-label="Notes">
+        <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
+          {(pitch) => <PianoRoll.Row className="data-[color=black]:bg-muted/70 data-octave:border-b" pitch={pitch} />}
+        </PianoRoll.Rows>
+        <PianoRoll.Notes className="*:cursor-grab *:rounded-[2px] *:bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] *:outline-none *:data-selected:ring-2 *:data-selected:ring-ring">
+          {(note) => <PianoRoll.Note className="cursor-grab rounded-[2px] bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] outline-none data-selected:ring-2 data-selected:ring-ring" key={note.id} note={note} />}
+        </PianoRoll.Notes>
+        <PianoRoll.Marquee className="border border-primary border-dashed bg-primary/8" />
+        <Timeline.Playhead className="inset-y-0 w-px bg-foreground" />
+      </PianoRoll.Grid>
+    </Timeline.Viewport>
+    <PianoRoll.VelocityLane className="col-start-2 h-12 border-t" aria-label="Velocity">
+      <PianoRoll.Notes className="*:cursor-grab *:rounded-[2px] *:bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] *:outline-none *:data-selected:ring-2 *:data-selected:ring-ring">
+        {(note) => <PianoRoll.Velocity className="w-[3px] -translate-x-px bg-primary" key={note.id} note={note} />}
+      </PianoRoll.Notes>
+    </PianoRoll.VelocityLane>
+  </PianoRoll.Root>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+### A finer grid
+
+`snapStep` is the distance between grid lines, and what a note snaps to: sixteenth notes, a quarter of a beat.
+
+<ReactPreview name="piano-roll" example="fine">
+
+<ForStyling only="css">
+
+<CodeFile title="piano-roll.tsx" open>
+
+```tsx
+import { PianoRoll, Timeline } from "@audio-ui/react";
+import styles from "./piano-roll.module.css";
+
+const notes = [
+  { id: "a", pitch: 60, start: 0, length: 1, velocity: 0.9 },
+  { id: "b", pitch: 64, start: 1, length: 1, velocity: 0.6 },
+  { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
+];
+
+<Timeline.Root className={styles.timelineRoot} duration={8} snapStep={0.25} minZoom={40} maxZoom={300}>
+  <PianoRoll.Root className={styles.root} minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+    <PianoRoll.Keys className={styles.keys}>
+      <PianoRoll.Rows>
+        {(pitch) => <PianoRoll.Key className={styles.key} pitch={pitch} />}
+      </PianoRoll.Rows>
+    </PianoRoll.Keys>
+    <Timeline.Viewport className={styles.timelineViewport}>
+      <PianoRoll.Grid className={styles.grid} aria-label="Notes">
+        <PianoRoll.Rows>
+          {(pitch) => <PianoRoll.Row className={styles.row} pitch={pitch} />}
+        </PianoRoll.Rows>
+        <PianoRoll.Notes>
+          {(note) => <PianoRoll.Note className={styles.note} key={note.id} note={note} />}
+        </PianoRoll.Notes>
+        <PianoRoll.Marquee className={styles.marquee} />
+        <Timeline.Playhead className={styles.timelinePlayhead} />
+      </PianoRoll.Grid>
+    </Timeline.Viewport>
+    <PianoRoll.VelocityLane className={styles.velocityLane} aria-label="Velocity">
+      <PianoRoll.Notes>
+        {(note) => <PianoRoll.Velocity className={styles.velocity} key={note.id} note={note} />}
+      </PianoRoll.Notes>
+    </PianoRoll.VelocityLane>
+  </PianoRoll.Root>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano-roll.tsx" open>
+
+```tsx
+import { PianoRoll, Timeline } from "@audio-ui/react";
+
+const notes = [
+  { id: "a", pitch: 60, start: 0, length: 1, velocity: 0.9 },
+  { id: "b", pitch: 64, start: 1, length: 1, velocity: 0.6 },
+  { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
+];
+
+<Timeline.Root className="block w-full max-w-xl" duration={8} snapStep={0.25} minZoom={40} maxZoom={300}>
+  <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+    <PianoRoll.Keys className="h-48 border-e">
+      <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
+        {(pitch) => <PianoRoll.Key className="inset-x-0 top-auto z-0 h-full cursor-pointer border-0 border-border border-b bg-background outline-none data-[color=black]:right-[35%] data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
+      </PianoRoll.Rows>
+    </PianoRoll.Keys>
+    <Timeline.Viewport className="[scrollbar-width:none]">
+      <PianoRoll.Grid className="h-48 outline-none" aria-label="Notes">
+        <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
+          {(pitch) => <PianoRoll.Row className="data-[color=black]:bg-muted/70 data-octave:border-b" pitch={pitch} />}
+        </PianoRoll.Rows>
+        <PianoRoll.Notes className="*:cursor-grab *:rounded-[2px] *:bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] *:outline-none *:data-selected:ring-2 *:data-selected:ring-ring">
+          {(note) => <PianoRoll.Note className="cursor-grab rounded-[2px] bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] outline-none data-selected:ring-2 data-selected:ring-ring" key={note.id} note={note} />}
+        </PianoRoll.Notes>
+        <PianoRoll.Marquee className="border border-primary border-dashed bg-primary/8" />
+        <Timeline.Playhead className="inset-y-0 w-px bg-foreground" />
+      </PianoRoll.Grid>
+    </Timeline.Viewport>
+    <PianoRoll.VelocityLane className="col-start-2 h-12 border-t" aria-label="Velocity">
+      <PianoRoll.Notes className="*:cursor-grab *:rounded-[2px] *:bg-[color-mix(in_oklab,var(--primary)_calc(40%+60%*var(--piano-roll-velocity)),transparent)] *:outline-none *:data-selected:ring-2 *:data-selected:ring-ring">
+        {(note) => <PianoRoll.Velocity className="w-[3px] -translate-x-px bg-primary" key={note.id} note={note} />}
+      </PianoRoll.Notes>
+    </PianoRoll.VelocityLane>
+  </PianoRoll.Root>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
 
 ## API reference
 
@@ -199,3 +619,7 @@ One note's velocity, or its chance in a `level="chance"` lane, as a bar from the
 ## Styled
 
 The registry's styled Piano roll, its usage and interaction: [Piano roll](/docs/components/base/piano-roll).
+
+## Package
+
+<Module from="@audio-ui/react/piano-roll" />

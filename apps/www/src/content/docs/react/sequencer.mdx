@@ -3,7 +3,117 @@ title: Sequencer
 description: "The headless Sequencer of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
-<Module from="@audio-ui/react/sequencer" />
+<ReactPreview name="sequencer">
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+<ForStyling only="css">
+
+<CodeFile title="sequencer.tsx" open>
+
+```tsx
+import { Sequencer } from "@audio-ui/react";
+import styles from "./sequencer.module.css";
+
+const pattern = [
+  [true, false, false, false, true, false, false, false],
+  [false, false, true, false, false, false, true, false],
+];
+
+<Sequencer.Root className={styles.root} aria-label="Pattern" defaultValue={pattern}>
+  <Sequencer.Rows>
+    {(row) => (
+      <Sequencer.Row className={styles.row} index={row}>
+        <Sequencer.Cells>
+          {(step) => <Sequencer.Cell className={styles.cell} step={step} />}
+        </Sequencer.Cells>
+      </Sequencer.Row>
+    )}
+  </Sequencer.Rows>
+</Sequencer.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="sequencer.module.css">
+
+```css
+.root {
+  display: grid;
+  gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+  width: 100%;
+  max-width: 36rem;
+}
+
+.row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+}
+
+.cell {
+  aspect-ratio: 1;
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--muted, oklch(0.97 0 0));
+  outline: none;
+}
+
+.cell:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
+}
+
+.cell[data-on] {
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="sequencer.tsx" open>
+
+```tsx
+import { Sequencer } from "@audio-ui/react";
+
+const pattern = [
+  [true, false, false, false, true, false, false, false],
+  [false, false, true, false, false, false, true, false],
+];
+
+<Sequencer.Root className="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" defaultValue={pattern}>
+  <Sequencer.Rows>
+    {(row) => (
+      <Sequencer.Row className="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index={row}>
+        <Sequencer.Cells>
+          {(step) => <Sequencer.Cell className="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step={step} />}
+        </Sequencer.Cells>
+      </Sequencer.Row>
+    )}
+  </Sequencer.Rows>
+</Sequencer.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+{/* usage:end */}
+
+</ReactPreview>
+
 
 ## Anatomy
 
@@ -24,6 +134,79 @@ import { Sequencer } from "@audio-ui/react";
   </Sequencer.Rows>
 </Sequencer.Root>;
 ```
+
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### Disabled
+
+`disabled` freezes the pattern: no cell toggles, and `data-disabled` is set on the root.
+
+<ReactPreview name="sequencer" example="disabled">
+
+<ForStyling only="css">
+
+<CodeFile title="sequencer.tsx" open>
+
+```tsx
+import { Sequencer } from "@audio-ui/react";
+import styles from "./sequencer.module.css";
+
+const pattern = [
+  [true, false, false, false, true, false, false, false],
+  [false, false, true, false, false, false, true, false],
+];
+
+<Sequencer.Root className={styles.root} aria-label="Pattern" defaultValue={pattern} disabled={true}>
+  <Sequencer.Rows>
+    {(row) => (
+      <Sequencer.Row className={styles.row} index={row}>
+        <Sequencer.Cells>
+          {(step) => <Sequencer.Cell className={styles.cell} step={step} />}
+        </Sequencer.Cells>
+      </Sequencer.Row>
+    )}
+  </Sequencer.Rows>
+</Sequencer.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="sequencer.tsx" open>
+
+```tsx
+import { Sequencer } from "@audio-ui/react";
+
+const pattern = [
+  [true, false, false, false, true, false, false, false],
+  [false, false, true, false, false, false, true, false],
+];
+
+<Sequencer.Root className="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" defaultValue={pattern} disabled={true}>
+  <Sequencer.Rows>
+    {(row) => (
+      <Sequencer.Row className="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index={row}>
+        <Sequencer.Cells>
+          {(step) => <Sequencer.Cell className="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step={step} />}
+        </Sequencer.Cells>
+      </Sequencer.Row>
+    )}
+  </Sequencer.Rows>
+</Sequencer.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
 
 ## API reference
 
@@ -109,3 +292,7 @@ How loud one step plays, as a bar from the bottom of its box: the height is the 
 ## Styled
 
 The registry's styled Sequencer, its usage and interaction: [Sequencer](/docs/components/base/sequencer).
+
+## Package
+
+<Module from="@audio-ui/react/sequencer" />

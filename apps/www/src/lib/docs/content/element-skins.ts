@@ -17,7 +17,7 @@ export interface ElementSkin {
   tailwind: Readonly<Record<string, string>>;
 }
 
-export const SKINS: Record<string, ElementSkin> = {
+const BASE_SKINS: Record<string, ElementSkin> = {
   envelope: {
     css: `audio-ui-envelope {
   display: block;
@@ -178,6 +178,12 @@ audio-ui-knob-control:active {
   cursor: grabbing;
 }
 
+/* Dragged up and down, it is a fader: the cursor says so, whatever the state. */
+audio-ui-knob-control[data-drag-mode="vertical"],
+audio-ui-knob-control[data-drag-mode="vertical"]:active {
+  cursor: ns-resize;
+}
+
 /* The knob's face. */
 audio-ui-knob-control::before {
   content: "";
@@ -263,7 +269,7 @@ audio-ui-knob-label {
     tailwind: {
       "audio-ui-knob": "relative mb-8 inline-flex size-12 outline-none",
       "audio-ui-knob-control":
-        "relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing",
+        "relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize",
       "audio-ui-knob-indicator":
         "pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current",
       "audio-ui-knob-label": "sr-only",
@@ -622,6 +628,22 @@ audio-ui-sequencer-cell[data-on] {
 audio-ui-timeline-viewport {
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) - 2px);
+  scrollbar-width: none;
+}
+
+/* The ruler's corner above the track headers stays put as the timeline scrolls. */
+audio-ui-timeline-viewport::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: block;
+  width: calc(var(--spacing, 0.25rem) * 20);
+  height: calc(var(--spacing, 0.25rem) * 6);
+  margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+  border-inline-end: 1px solid var(--border);
+  background: var(--muted);
 }
 
 audio-ui-timeline-ruler {
@@ -687,6 +709,7 @@ audio-ui-timeline-clip-handle {
   top: 0;
   bottom: 0;
   width: calc(var(--spacing, 0.25rem) * 1.5);
+  background: color-mix(in oklab, var(--primary) 35%, transparent);
   cursor: ew-resize;
 }
 
@@ -712,6 +735,25 @@ audio-ui-timeline-navigator {
   background: var(--muted);
 }
 
+audio-ui-timeline-navigator-handle {
+  top: calc(var(--spacing, 0.25rem) * 0.5);
+  bottom: calc(var(--spacing, 0.25rem) * 0.5);
+  width: calc(var(--spacing, 0.25rem) * 2);
+  border: 1px solid var(--ring);
+  /* Concentric with the window: its radius less the gap around the handle. */
+  border-radius: max(calc(var(--radius) - 4px - var(--spacing, 0.25rem) * 0.5), 0px);
+  background: var(--card);
+  cursor: ew-resize;
+}
+
+audio-ui-timeline-navigator-handle[edge="start"] {
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 0.5);
+}
+
+audio-ui-timeline-navigator-handle[edge="end"] {
+  translate: calc(-100% - var(--spacing, 0.25rem) * 0.5) 0;
+}
+
 audio-ui-timeline-navigator-window {
   top: 0;
   bottom: 0;
@@ -724,12 +766,14 @@ audio-ui-timeline-navigator-window {
       "audio-ui-timeline-clip":
         "inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring",
       "audio-ui-timeline-clip-handle":
-        "absolute inset-y-0 w-1.5 cursor-ew-resize [&[edge=end]]:right-0 [&[edge=start]]:left-0",
+        "absolute inset-y-0 w-1.5 cursor-ew-resize bg-primary/35 [&[edge=end]]:right-0 [&[edge=start]]:left-0",
       "audio-ui-timeline-clip-header":
         "cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground",
       "audio-ui-timeline-mark":
         "h-full border-s ps-1 text-[10px] text-muted-foreground",
       "audio-ui-timeline-navigator": "mt-2 h-3 rounded-sm bg-muted",
+      "audio-ui-timeline-navigator-handle":
+        "inset-y-0.5 w-2 cursor-ew-resize rounded-[max(calc(var(--radius)-6px),0px)] border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.125rem)] [&[edge=start]]:ms-0.5",
       "audio-ui-timeline-navigator-window":
         "inset-y-0 cursor-grab rounded-sm bg-primary/25",
       "audio-ui-timeline-playhead": "inset-y-0 w-px bg-foreground",
@@ -738,7 +782,8 @@ audio-ui-timeline-navigator-window {
       "audio-ui-timeline-track": "h-14 border-t",
       "audio-ui-timeline-track-header":
         "w-20 border-e bg-background p-2 text-xs",
-      "audio-ui-timeline-viewport": "rounded-md border",
+      "audio-ui-timeline-viewport":
+        "rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']",
     },
   },
   waveform: {
@@ -888,6 +933,42 @@ audio-ui-xypad-value {
     },
   },
 };
+
+/** The root's tag of an element, where the primitive's `disabled` shows. */
+const ROOT: Record<string, string> = { "piano-roll": "audio-ui-piano-roll" };
+
+/**
+ * Every skin dims a disabled root and says no with the cursor over all of
+ * it, its parts included: they each ask for their own cursor otherwise.
+ */
+function withDisabled(name: string, skin: ElementSkin): ElementSkin {
+  const root = ROOT[name] ?? `audio-ui-${name}`;
+  const classes = skin.tailwind[root] ?? "";
+  return {
+    css: `${skin.css}
+
+${root}[data-disabled],
+${root}[data-disabled] * {
+  cursor: not-allowed;
+}
+
+${root}[data-disabled] {
+  opacity: 0.5;
+}`,
+    tailwind: {
+      ...skin.tailwind,
+      [root]:
+        `${classes} data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed`.trim(),
+    },
+  };
+}
+
+export const SKINS: Record<string, ElementSkin> = Object.fromEntries(
+  Object.entries(BASE_SKINS).map(([name, skin]) => [
+    name,
+    withDisabled(name, skin),
+  ])
+);
 
 /** The theme variables an example's stylesheet reads, from the skins themselves. */
 const VARIABLE = /var\(--([a-z-]+)\)/g;

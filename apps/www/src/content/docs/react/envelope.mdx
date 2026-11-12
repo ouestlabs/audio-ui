@@ -3,7 +3,157 @@ title: Envelope
 description: "The headless Envelope of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
-<Module from="@audio-ui/react/envelope" />
+<ReactPreview name="envelope">
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+<ForStyling only="css">
+
+<CodeFile title="envelope.tsx" open>
+
+```tsx
+import { Envelope } from "@audio-ui/react";
+import styles from "./envelope.module.css";
+
+const points = [
+  { x: 0, y: 0 },
+  { x: 0.12, y: 1 },
+  { x: 0.35, y: 0.6, curve: 0.4 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0 },
+];
+
+<Envelope.Root className={styles.root} aria-label="Amp envelope" defaultValue={points}>
+  <Envelope.Graph className={styles.graph}>
+    <Envelope.Fill className={styles.fill} />
+    <Envelope.Line className={styles.line} />
+  </Envelope.Graph>
+  <Envelope.Segments>
+    {(_, index) => <Envelope.Segment className={styles.segment} index={index} />}
+  </Envelope.Segments>
+  <Envelope.Points>
+    {(_, index) => <Envelope.Point className={styles.point} index={index} />}
+  </Envelope.Points>
+</Envelope.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="envelope.module.css">
+
+```css
+.root {
+  display: block;
+  width: 100%;
+  max-width: 28rem;
+  height: calc(var(--spacing, 0.25rem) * 40);
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+  position: relative;
+}
+
+.fill {
+  color: var(--primary, oklch(0.205 0 0));
+  opacity: 0.15;
+  fill: currentColor;
+}
+
+.line {
+  color: var(--primary, oklch(0.205 0 0));
+  stroke-width: 2px;
+  fill: none;
+  stroke: currentColor;
+  stroke-linejoin: round;
+}
+
+.point {
+  box-sizing: border-box;
+  width: calc(var(--spacing, 0.25rem) * 3);
+  height: calc(var(--spacing, 0.25rem) * 3);
+  border: 2px solid var(--primary, oklch(0.205 0 0));
+  border-radius: var(--radius, 0.625rem);
+  background: var(--background, oklch(1 0 0));
+  cursor: grab;
+  outline: none;
+}
+
+.point:focus-visible,
+.point[data-dragging] {
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+.segment {
+  width: calc(var(--spacing, 0.25rem) * 2);
+  height: calc(var(--spacing, 0.25rem) * 2);
+  border-radius: var(--radius, 0.625rem);
+  background: var(--muted-foreground, oklch(0.556 0 0));
+  opacity: 0.5;
+  cursor: ns-resize;
+  outline: none;
+}
+
+.segment[data-flat] {
+  display: none;
+}
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+
+.graph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="envelope.tsx" open>
+
+```tsx
+import { Envelope } from "@audio-ui/react";
+
+const points = [
+  { x: 0, y: 0 },
+  { x: 0.12, y: 1 },
+  { x: 0.35, y: 0.6, curve: 0.4 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0 },
+];
+
+<Envelope.Root className="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" aria-label="Amp envelope" defaultValue={points}>
+  <Envelope.Graph className="block size-full overflow-visible">
+    <Envelope.Fill className="text-primary opacity-15 fill-current" />
+    <Envelope.Line className="text-primary [stroke-width:2px] fill-none stroke-current [stroke-linejoin:round]" />
+  </Envelope.Graph>
+  <Envelope.Segments className="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden">
+    {(_, index) => <Envelope.Segment className="size-2 cursor-ns-resize rounded-lg bg-muted-foreground opacity-50 outline-none data-flat:hidden" index={index} />}
+  </Envelope.Segments>
+  <Envelope.Points className="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary">
+    {(_, index) => <Envelope.Point className="size-3 cursor-grab rounded-lg border-2 border-primary bg-background outline-none focus-visible:bg-primary data-dragging:bg-primary" index={index} />}
+  </Envelope.Points>
+</Envelope.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+{/* usage:end */}
+
+</ReactPreview>
+
 
 ## Anatomy
 
@@ -25,6 +175,162 @@ import { Envelope } from "@audio-ui/react";
   </Envelope.Points>
 </Envelope.Root>
 ```
+
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### Limited points
+
+`maxPoints` caps how many points the envelope holds: a double click on the graph is refused at the limit, and the graph says so with `data-blocked`.
+
+<ReactPreview name="envelope" example="limited">
+
+<ForStyling only="css">
+
+<CodeFile title="envelope.tsx" open>
+
+```tsx
+import { Envelope } from "@audio-ui/react";
+import styles from "./envelope.module.css";
+
+const points = [
+  { x: 0, y: 0 },
+  { x: 0.12, y: 1 },
+  { x: 0.35, y: 0.6, curve: 0.4 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0 },
+];
+
+<Envelope.Root className={styles.root} aria-label="Amp envelope" defaultValue={points} maxPoints={5}>
+  <Envelope.Graph className={styles.graph}>
+    <Envelope.Fill className={styles.fill} />
+    <Envelope.Line className={styles.line} />
+  </Envelope.Graph>
+  <Envelope.Segments>
+    {(_, index) => <Envelope.Segment className={styles.segment} index={index} />}
+  </Envelope.Segments>
+  <Envelope.Points>
+    {(_, index) => <Envelope.Point className={styles.point} index={index} />}
+  </Envelope.Points>
+</Envelope.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="envelope.tsx" open>
+
+```tsx
+import { Envelope } from "@audio-ui/react";
+
+const points = [
+  { x: 0, y: 0 },
+  { x: 0.12, y: 1 },
+  { x: 0.35, y: 0.6, curve: 0.4 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0 },
+];
+
+<Envelope.Root className="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" aria-label="Amp envelope" defaultValue={points} maxPoints={5}>
+  <Envelope.Graph className="block size-full overflow-visible">
+    <Envelope.Fill className="text-primary opacity-15 fill-current" />
+    <Envelope.Line className="text-primary [stroke-width:2px] fill-none stroke-current [stroke-linejoin:round]" />
+  </Envelope.Graph>
+  <Envelope.Segments className="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden">
+    {(_, index) => <Envelope.Segment className="size-2 cursor-ns-resize rounded-lg bg-muted-foreground opacity-50 outline-none data-flat:hidden" index={index} />}
+  </Envelope.Segments>
+  <Envelope.Points className="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary">
+    {(_, index) => <Envelope.Point className="size-3 cursor-grab rounded-lg border-2 border-primary bg-background outline-none focus-visible:bg-primary data-dragging:bg-primary" index={index} />}
+  </Envelope.Points>
+</Envelope.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+### Coarse steps
+
+`step` rounds every point to a multiple of it, along both axes: a dragged point lands on a grid of tenths.
+
+<ReactPreview name="envelope" example="coarse">
+
+<ForStyling only="css">
+
+<CodeFile title="envelope.tsx" open>
+
+```tsx
+import { Envelope } from "@audio-ui/react";
+import styles from "./envelope.module.css";
+
+const points = [
+  { x: 0, y: 0 },
+  { x: 0.12, y: 1 },
+  { x: 0.35, y: 0.6, curve: 0.4 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0 },
+];
+
+<Envelope.Root className={styles.root} aria-label="Amp envelope" defaultValue={points} step={0.1}>
+  <Envelope.Graph className={styles.graph}>
+    <Envelope.Fill className={styles.fill} />
+    <Envelope.Line className={styles.line} />
+  </Envelope.Graph>
+  <Envelope.Segments>
+    {(_, index) => <Envelope.Segment className={styles.segment} index={index} />}
+  </Envelope.Segments>
+  <Envelope.Points>
+    {(_, index) => <Envelope.Point className={styles.point} index={index} />}
+  </Envelope.Points>
+</Envelope.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="envelope.tsx" open>
+
+```tsx
+import { Envelope } from "@audio-ui/react";
+
+const points = [
+  { x: 0, y: 0 },
+  { x: 0.12, y: 1 },
+  { x: 0.35, y: 0.6, curve: 0.4 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0 },
+];
+
+<Envelope.Root className="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" aria-label="Amp envelope" defaultValue={points} step={0.1}>
+  <Envelope.Graph className="block size-full overflow-visible">
+    <Envelope.Fill className="text-primary opacity-15 fill-current" />
+    <Envelope.Line className="text-primary [stroke-width:2px] fill-none stroke-current [stroke-linejoin:round]" />
+  </Envelope.Graph>
+  <Envelope.Segments className="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden">
+    {(_, index) => <Envelope.Segment className="size-2 cursor-ns-resize rounded-lg bg-muted-foreground opacity-50 outline-none data-flat:hidden" index={index} />}
+  </Envelope.Segments>
+  <Envelope.Points className="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary">
+    {(_, index) => <Envelope.Point className="size-3 cursor-grab rounded-lg border-2 border-primary bg-background outline-none focus-visible:bg-primary data-dragging:bg-primary" index={index} />}
+  </Envelope.Points>
+</Envelope.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
 
 ## API reference
 
@@ -106,3 +412,7 @@ A draggable handle for the point at `index`, positioned with `left`/`bottom` per
 ## Styled
 
 The registry's styled Envelope, its usage and interaction: [Envelope](/docs/components/base/envelope).
+
+## Package
+
+<Module from="@audio-ui/react/envelope" />

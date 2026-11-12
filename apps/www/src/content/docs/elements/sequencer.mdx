@@ -5,13 +5,9 @@ description: "The <audio-ui-sequencer> custom element of @audio-ui/elements: its
 
 `<audio-ui-sequencer>` is a step grid with one row per sound and `role="group"`. Pressing a cell toggles it, and dragging applies the new state to every cell crossed. The cells share one tab stop and are navigated with the arrow keys. Rows and steps are generated from templates:
 
-<ElementsPreview name="sequencer" />
-
-## Usage
+<ElementsPreview name="sequencer">
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
-
-The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.
 
 <FrameworkTabs defaultValue="web">
 
@@ -25,6 +21,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 <TabsContent value="web">
 
 <ForStyling only="css">
+
+<CodeFile title="sequencer.html" open>
 
 ```html
 <style>
@@ -56,6 +54,15 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   audio-ui-sequencer-cell[data-on] {
     background: var(--primary, oklch(0.205 0 0));
   }
+
+  audio-ui-sequencer[data-disabled],
+  audio-ui-sequencer[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-sequencer[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-sequencer aria-label="Pattern" default-value="x.x. ..x.">
@@ -83,12 +90,16 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
 
+<CodeFile title="sequencer.html" open>
+
 ```html
-<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" default-value="x.x. ..x.">
+<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x.">
   <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>
@@ -113,6 +124,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -120,6 +133,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 <TabsContent value="vue">
 
 <ForStyling only="css">
+
+<CodeFile title="sequencer.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -172,12 +187,25 @@ audio-ui-sequencer-cell:focus-visible {
 audio-ui-sequencer-cell[data-on] {
   background: var(--primary, oklch(0.205 0 0));
 }
+
+audio-ui-sequencer[data-disabled],
+audio-ui-sequencer[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-sequencer[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
+
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="sequencer.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -185,7 +213,7 @@ import "@audio-ui/elements/sequencer";
 </script>
 
 <template>
-  <audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" default-value="x.x. ..x." @change="(event) => console.log(event.detail.value)">
+  <audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." @change="(event) => console.log(event.detail.value)">
     <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
       <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0" />
       <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1" />
@@ -202,6 +230,8 @@ import "@audio-ui/elements/sequencer";
 </template>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -209,6 +239,8 @@ import "@audio-ui/elements/sequencer";
 <TabsContent value="svelte">
 
 <ForStyling only="css">
+
+<CodeFile title="sequencer.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -260,20 +292,33 @@ import "@audio-ui/elements/sequencer";
   audio-ui-sequencer-cell[data-on] {
     background: var(--primary, oklch(0.205 0 0));
   }
+
+  audio-ui-sequencer[data-disabled],
+  audio-ui-sequencer[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-sequencer[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="sequencer.svelte" open>
 
 ```svelte
 <script lang="ts">
   import "@audio-ui/elements/sequencer";
 </script>
 
-<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" default-value="x.x. ..x." onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>
@@ -289,6 +334,8 @@ import "@audio-ui/elements/sequencer";
 </audio-ui-sequencer>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -302,6 +349,8 @@ In React, the same control is the [Sequencer](/docs/react/sequencer) primitive o
 </FrameworkTabs>
 
 {/* usage:end */}
+
+</ElementsPreview>
 
 <ForFrameworks only="web react">
 
@@ -321,9 +370,385 @@ In plain HTML, a row of `<template>` gives the rows and their steps from labels:
 
 </ForFrameworks>
 
-## API reference
+{/* anatomy:start: written by `bun scripts/element-usage.ts --write` */}
 
-<Module from="@audio-ui/elements/sequencer" />
+## Anatomy
+
+The parts, nested as they go in the markup.
+
+```html
+<audio-ui-sequencer>
+  <audio-ui-sequencer-row>
+    <audio-ui-sequencer-cell></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+  <audio-ui-sequencer-row>
+    <audio-ui-sequencer-cell></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+</audio-ui-sequencer>
+```
+
+{/* anatomy:end */}
+
+{/* examples:start: written by `bun scripts/element-usage.ts --write` */}
+
+## Examples
+
+### Disabled
+
+`disabled` freezes the pattern: no cell toggles, and `data-disabled` is set on the root.
+
+<ElementsPreview name="sequencer" example="disabled">
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+<ForStyling only="css">
+
+<CodeFile title="sequencer.html" open>
+
+```html
+<style>
+  audio-ui-sequencer {
+    display: grid;
+    gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+    width: 100%;
+    max-width: 36rem;
+  }
+
+  audio-ui-sequencer-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+  }
+
+  audio-ui-sequencer-cell {
+    aspect-ratio: 1;
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--muted, oklch(0.97 0 0));
+    outline: none;
+  }
+
+  audio-ui-sequencer-cell:focus-visible {
+    box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
+  }
+
+  audio-ui-sequencer-cell[data-on] {
+    background: var(--primary, oklch(0.205 0 0));
+  }
+
+  audio-ui-sequencer[data-disabled],
+  audio-ui-sequencer[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-sequencer[data-disabled] {
+    opacity: 0.5;
+  }
+</style>
+
+<audio-ui-sequencer aria-label="Pattern" default-value="x.x. ..x." disabled>
+  <audio-ui-sequencer-row index="0" aria-label="Kick">
+    <audio-ui-sequencer-cell step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+  <audio-ui-sequencer-row index="1" aria-label="Snare">
+    <audio-ui-sequencer-cell step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+</audio-ui-sequencer>
+
+<script type="module">
+  import "@audio-ui/elements/sequencer";
+
+  const sequencer = document.querySelector("audio-ui-sequencer");
+  sequencer.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="sequencer.html" open>
+
+```html
+<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." disabled>
+  <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+  <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="1" aria-label="Snare">
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+</audio-ui-sequencer>
+
+<script type="module">
+  import "@audio-ui/elements/sequencer";
+
+  const sequencer = document.querySelector("audio-ui-sequencer");
+  sequencer.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ForStyling only="css">
+
+<CodeFile title="sequencer.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/sequencer";
+</script>
+
+<template>
+  <audio-ui-sequencer aria-label="Pattern" default-value="x.x. ..x." disabled @change="(event) => console.log(event.detail.value)">
+    <audio-ui-sequencer-row index="0" aria-label="Kick">
+      <audio-ui-sequencer-cell step="0" />
+      <audio-ui-sequencer-cell step="1" />
+      <audio-ui-sequencer-cell step="2" />
+      <audio-ui-sequencer-cell step="3" />
+    </audio-ui-sequencer-row>
+    <audio-ui-sequencer-row index="1" aria-label="Snare">
+      <audio-ui-sequencer-cell step="0" />
+      <audio-ui-sequencer-cell step="1" />
+      <audio-ui-sequencer-cell step="2" />
+      <audio-ui-sequencer-cell step="3" />
+    </audio-ui-sequencer-row>
+  </audio-ui-sequencer>
+</template>
+
+<style>
+audio-ui-sequencer {
+  display: grid;
+  gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+  width: 100%;
+  max-width: 36rem;
+}
+
+audio-ui-sequencer-row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+}
+
+audio-ui-sequencer-cell {
+  aspect-ratio: 1;
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--muted, oklch(0.97 0 0));
+  outline: none;
+}
+
+audio-ui-sequencer-cell:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
+}
+
+audio-ui-sequencer-cell[data-on] {
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+audio-ui-sequencer[data-disabled],
+audio-ui-sequencer[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-sequencer[data-disabled] {
+  opacity: 0.5;
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="sequencer.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/sequencer";
+</script>
+
+<template>
+  <audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." disabled @change="(event) => console.log(event.detail.value)">
+    <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
+      <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0" />
+      <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1" />
+      <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="2" />
+      <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="3" />
+    </audio-ui-sequencer-row>
+    <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="1" aria-label="Snare">
+      <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0" />
+      <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1" />
+      <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="2" />
+      <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="3" />
+    </audio-ui-sequencer-row>
+  </audio-ui-sequencer>
+</template>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+<ForStyling only="css">
+
+<CodeFile title="sequencer.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/sequencer";
+</script>
+
+<audio-ui-sequencer aria-label="Pattern" default-value="x.x. ..x." disabled onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-sequencer-row index="0" aria-label="Kick">
+    <audio-ui-sequencer-cell step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+  <audio-ui-sequencer-row index="1" aria-label="Snare">
+    <audio-ui-sequencer-cell step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+</audio-ui-sequencer>
+
+<style>
+:global {
+  audio-ui-sequencer {
+    display: grid;
+    gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+    width: 100%;
+    max-width: 36rem;
+  }
+
+  audio-ui-sequencer-row {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+  }
+
+  audio-ui-sequencer-cell {
+    aspect-ratio: 1;
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--muted, oklch(0.97 0 0));
+    outline: none;
+  }
+
+  audio-ui-sequencer-cell:focus-visible {
+    box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
+  }
+
+  audio-ui-sequencer-cell[data-on] {
+    background: var(--primary, oklch(0.205 0 0));
+  }
+
+  audio-ui-sequencer[data-disabled],
+  audio-ui-sequencer[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-sequencer[data-disabled] {
+    opacity: 0.5;
+  }
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="sequencer.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/sequencer";
+</script>
+
+<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." disabled onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+  <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="1" aria-label="Snare">
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+</audio-ui-sequencer>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Sequencer](/docs/react/sequencer) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+</ElementsPreview>
+
+{/* examples:end */}
+
+## API reference
 
 <TypeTable>
 <TypeRow name={"value"} type={"string"}>The pattern as text: one word per row, one character per step, `x` for on and `.` for off. The `value` property reads and sets it as `boolean[][]`.</TypeRow>
@@ -351,3 +776,7 @@ The `velocities` property holds each step's velocity as `number[][]` (0 to 1). T
 The same control in React, and its parts' props: [Sequencer](/docs/react/sequencer).
 
 </ForFrameworks>
+
+## Package
+
+<Module from="@audio-ui/elements/sequencer" />

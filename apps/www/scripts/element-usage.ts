@@ -10,7 +10,12 @@
  */
 
 import { themeStylesheet } from "../src/lib/design-system/theme-stylesheet.ts";
+import { elementAttributes } from "../src/lib/docs/content/element-attributes.ts";
 import { SKINS } from "../src/lib/docs/content/element-skins.ts";
+import {
+  EXAMPLES,
+  type PrimitiveExample,
+} from "../src/lib/docs/content/primitive-examples.ts";
 import { STYLINGS, type StylingId } from "../src/lib/docs/content/stylings.ts";
 import { DEFAULT_CONFIG } from "../src/registry/config.ts";
 
@@ -193,7 +198,7 @@ export const USAGES: Record<string, Usage> = {
       "</audio-ui-piano-roll>",
     ],
     react: "PianoRoll",
-    root: '<audio-ui-timeline duration="8" snap-step="0.5">',
+    root: '<audio-ui-timeline duration="8" snap-step="0.5" min-zoom="40" max-zoom="300">',
     target: "audio-ui-piano-roll",
   },
   plot: {
@@ -237,7 +242,7 @@ export const USAGES: Record<string, Usage> = {
     inner: [
       "<audio-ui-timeline-viewport>",
       '  <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>',
-      "  <audio-ui-timeline-track>",
+      '  <audio-ui-timeline-track style="min-width: max-content">',
       "    <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>",
       "    <audio-ui-timeline-lane seekable>",
       '      <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">',
@@ -247,9 +252,14 @@ export const USAGES: Record<string, Usage> = {
       "    </audio-ui-timeline-lane>",
       "  </audio-ui-timeline-track>",
       "</audio-ui-timeline-viewport>",
+      "<audio-ui-timeline-navigator>",
+      '  <audio-ui-timeline-navigator-window aria-label="View"></audio-ui-timeline-navigator-window>',
+      '  <audio-ui-timeline-navigator-handle edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>',
+      '  <audio-ui-timeline-navigator-handle edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>',
+      "</audio-ui-timeline-navigator>",
     ],
     react: "Timeline",
-    root: '<audio-ui-timeline duration="32" snap-step="1"%bind%>',
+    root: '<audio-ui-timeline duration="32" snap-step="1" min-zoom="12" max-zoom="80"%bind%>',
   },
   waveform: {
     entry: "waveform",
@@ -393,7 +403,7 @@ const DEFAULT_LIGHT =
 const VARIABLE_USE = /var\(--([a-z-]+)\)/g;
 
 /** A stylesheet that works pasted as it is: each theme variable falls back to the default theme's value. */
-function withFallbacks(css: string) {
+export function withFallbacks(css: string) {
   return css.replace(VARIABLE_USE, (use, name: string) => {
     const value = DEFAULT_LIGHT.match(new RegExp(`--${name}: ([^;]+);`))?.[1];
     return value ? `var(--${name}, ${value})` : use;
@@ -509,29 +519,68 @@ function svelteSnippet(page: string, usage: Usage, styling: StylingId): string {
   ].join("\n");
 }
 
-/** One framework's snippet in each styling, each for the readers who chose it. */
-function inStylings(snippet: (styling: StylingId) => string): string[] {
+/** One framework's snippet in each styling, each for the readers who chose it, as a file with its name. */
+function inStylings(
+  file: string,
+  snippet: (styling: StylingId) => string
+): string[] {
   return STYLINGS.flatMap(({ id }) => [
     `<ForStyling only="${id}">`,
     "",
+    `<CodeFile title="${file}" open>`,
+    "",
     snippet(id),
+    "",
+    "</CodeFile>",
     "",
     "</ForStyling>",
     "",
   ]);
 }
 
-/** The block a page holds, markers included. */
-export function usageBlock(page: string): string | null {
-  const usage = USAGES[page];
-  if (!usage) {
+const ROOT_ATTRIBUTE = /\s([a-z][a-z-]*)="([^"]*)"/g;
+
+/** A usage with an example's attributes on its root, and its starting value in the binding. */
+function exampleUsage(usage: Usage, example: PrimitiveExample): Usage {
+  const { value, ...attributes } = elementAttributes(example.props);
+  const [tag = ""] = usage.root.slice(1).split(TAG_END);
+  const kept = new Map(
+    [...usage.root.matchAll(ROOT_ATTRIBUTE)].map((match) => [
+      match[1] ?? "",
+      match[2] ?? "",
+    ])
+  );
+  for (const [name, text] of Object.entries(attributes)) {
+    kept.set(name, text ?? "");
+  }
+  const written = [...kept].map(([name, text]) =>
+    text === "" && example.props.disabled === true && name === "disabled"
+      ? name
+      : `${name}="${text}"`
+  );
+  const bind = usage.root.includes(BIND) ? BIND : "";
+  return {
+    ...usage,
+    follow:
+      value !== undefined && usage.follow.kind === "model"
+        ? { ...usage.follow, initial: value, web: value }
+        : usage.follow,
+    root: `<${tag}${written.length > 0 ? ` ${written.join(" ")}` : ""}${bind}>`,
+  };
+}
+
+/** The block a page holds, markers included; an example's, with no markers, written inside its preview. */
+export function usageBlock(
+  page: string,
+  example?: PrimitiveExample
+): string | null {
+  const base = USAGES[page];
+  if (!base) {
     return null;
   }
+  const usage = example ? exampleUsage(base, example) : base;
   return [
-    START,
-    "",
-    "The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.",
-    "",
+    ...(example ? [] : [START, ""]),
     '<FrameworkTabs defaultValue="web">',
     "",
     "<TabsList>",
@@ -543,17 +592,21 @@ export function usageBlock(page: string): string | null {
     "",
     '<TabsContent value="web">',
     "",
-    ...inStylings((styling) => webSnippet(page, usage, styling)),
+    ...inStylings(`${page}.html`, (styling) =>
+      webSnippet(page, usage, styling)
+    ),
     "</TabsContent>",
     "",
     '<TabsContent value="vue">',
     "",
-    ...inStylings((styling) => vueSnippet(page, usage, styling)),
+    ...inStylings(`${page}.vue`, (styling) => vueSnippet(page, usage, styling)),
     "</TabsContent>",
     "",
     '<TabsContent value="svelte">',
     "",
-    ...inStylings((styling) => svelteSnippet(page, usage, styling)),
+    ...inStylings(`${page}.svelte`, (styling) =>
+      svelteSnippet(page, usage, styling)
+    ),
     "</TabsContent>",
     "",
     '<TabsContent value="react">',
@@ -563,24 +616,122 @@ export function usageBlock(page: string): string | null {
     "</TabsContent>",
     "",
     "</FrameworkTabs>",
-    "",
-    END,
+    ...(example ? [] : ["", END]),
   ].join("\n");
 }
 
-/** A page's text with its block written: replaced between the markers, or put under the live preview. */
+const CLOSE = /^\n*<\/ElementsPreview>/;
+const LEADING_BREAKS = /^\n+/;
+
+/** A page's text with its usage block written inside its live preview, as the code the preview shows. */
 export function withUsage(page: string, text: string): string {
   const block = usageBlock(page);
   if (!block) {
     return text;
   }
-  const start = text.indexOf(START);
-  const end = text.indexOf(END);
-  if (start >= 0 && end > start) {
-    return `${text.slice(0, start)}${block}${text.slice(end + END.length)}`;
+  const open = `<ElementsPreview name="${page}"`;
+  const from = text.indexOf(open);
+  if (from < 0) {
+    return text;
   }
-  const preview = new RegExp(`<ElementsPreview name="${page}" />\\n`);
-  return text.replace(preview, (found) => `${found}\n${block}\n`);
+  const end = text.indexOf(END);
+  // The preview and, once written, its heading and block: all of it is written again.
+  let to = end >= 0 ? end + END.length : text.indexOf("\n", from) + 1;
+  const close = text.slice(to).match(CLOSE);
+  to += close ? close[0].length : 0;
+  return `${text.slice(0, from)}${open}>\n\n${block}\n\n</ElementsPreview>\n\n${text.slice(to).replace(LEADING_BREAKS, "")}`;
+}
+
+const ANATOMY_START =
+  "{/* anatomy:start: written by `bun scripts/element-usage.ts --write` */}";
+const ANATOMY_END = "{/* anatomy:end */}";
+const EXAMPLES_START =
+  "{/* examples:start: written by `bun scripts/element-usage.ts --write` */}";
+const EXAMPLES_END = "{/* examples:end */}";
+const API = "## API reference";
+const OPEN_TAG = /<(audio-ui-[a-z-]+)[^>]*>/g;
+const TEXT_BETWEEN = />[^<\n]+<\//g;
+
+/** The parts of an element, nested as they go in the markup, with no attribute and no text. */
+export function anatomyBlock(page: string): string | null {
+  const usage = USAGES[page];
+  if (!usage) {
+    return null;
+  }
+  const lines = [usage.root, ...usage.inner.map((line) => `  ${line}`)];
+  const close = `</${usage.root.slice(1).split(TAG_END)[0]}>`;
+  return [
+    ANATOMY_START,
+    "",
+    "## Anatomy",
+    "",
+    "The parts, nested as they go in the markup.",
+    "",
+    "```html",
+    ...[...lines, close].map((line) =>
+      line.replace(OPEN_TAG, "<$1>").replace(TEXT_BETWEEN, "></")
+    ),
+    "```",
+    "",
+    ANATOMY_END,
+  ].join("\n");
+}
+
+/** The Examples of a page: a preview and its code each, from the table shared with the React pages. */
+export function examplesBlock(page: string): string | null {
+  const examples = EXAMPLES[page];
+  if (!(examples && USAGES[page])) {
+    return null;
+  }
+  return [
+    EXAMPLES_START,
+    "",
+    "## Examples",
+    "",
+    ...examples.flatMap((example) => [
+      `### ${example.title}`,
+      "",
+      example.description,
+      "",
+      `<ElementsPreview name="${page}" example="${example.id}">`,
+      "",
+      usageBlock(page, example) ?? "",
+      "",
+      "</ElementsPreview>",
+      "",
+    ]),
+    EXAMPLES_END,
+  ].join("\n");
+}
+
+/** A page's text with a block written between its markers, or put before its API reference. */
+function withBlock(
+  text: string,
+  block: string | null,
+  [start, end]: readonly [string, string]
+) {
+  if (!block) {
+    return text;
+  }
+  const from = text.indexOf(start);
+  const to = text.indexOf(end);
+  if (from >= 0 && to > from) {
+    return `${text.slice(0, from)}${block}${text.slice(to + end.length)}`;
+  }
+  return text.replace(API, `${block}\n\n${API}`);
+}
+
+/** A page's text with its usage, its anatomy and its examples written. */
+export function withAll(page: string, text: string): string {
+  const used = withUsage(page, text);
+  const anatomy = withBlock(used, anatomyBlock(page), [
+    ANATOMY_START,
+    ANATOMY_END,
+  ]);
+  return withBlock(anatomy, examplesBlock(page), [
+    EXAMPLES_START,
+    EXAMPLES_END,
+  ]);
 }
 
 const STYLING_START =
@@ -622,7 +773,7 @@ if (import.meta.main) {
     [...Object.keys(USAGES), "index"].map(async (page) => {
       const path = `${PAGES}/${page}.mdx`;
       const text = await Bun.file(path).text();
-      const next = page === "index" ? withStyling(text) : withUsage(page, text);
+      const next = page === "index" ? withStyling(text) : withAll(page, text);
       return { next, page, path, text };
     })
   );
