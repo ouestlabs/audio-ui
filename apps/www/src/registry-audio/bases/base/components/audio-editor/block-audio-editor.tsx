@@ -85,6 +85,7 @@ import {
   ClipSpectrogram,
   type PointerHertz,
   SpectrogramAxis,
+  type SpectrogramBand,
   type SpectrogramScale,
 } from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
 import {
@@ -2044,12 +2045,14 @@ function SelectionFrame({
 
 /** The track's clips on the lane, each drawing its part of the sound it plays, at the clip editor's detail. */
 function SoundClips({
+  band,
   clips,
   hidden,
   pointerHertz,
   sounds,
   view,
 }: {
+  band: SpectrogramBand;
   clips: readonly Arranged[];
   /** What each clip draws. */
   view: View;
@@ -2095,6 +2098,7 @@ function SoundClips({
         ) : (
           <ClipSpectrogram
             aria-label={`${sound.name}, spectrogram`}
+            band={band}
             className="inset-y-0 h-full text-foreground"
             clip={{
               sourceLength: clip.sourceLength ?? sound.duration,
@@ -2320,6 +2324,10 @@ function ClipLane({
   const silence = useSilenceHover({ pauses: cues.pauses, zoom });
   // The frequency under the pointer on a spectrogram, to mark on its axis.
   const [pointerHertz] = useState(() => createSource<number | null>(null));
+  // The frequencies a spectrogram shows, as shares of its axis: a zoom is a change of it, not of the render.
+  const [band] = useState(() =>
+    createSource<readonly [number, number]>([0, 1])
+  );
   const select = useCallback(
     (range: readonly [number, number]) => {
       const from = extending.current;
@@ -2516,12 +2524,14 @@ function ClipLane({
                   ) : null}
                   {view === "wave" || !sound ? null : (
                     <SpectrogramAxis
+                      band={band}
                       pointer={pointerHertz}
                       sampleRate={sound.sampleRate}
                       scale={view}
                     />
                   )}
                   <SoundClips
+                    band={band}
                     clips={clips}
                     hidden={recording}
                     pointerHertz={pointerHertz}

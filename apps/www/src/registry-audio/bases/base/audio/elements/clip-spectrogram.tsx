@@ -25,6 +25,44 @@ export interface PointerHertz {
   subscribe: (listener: () => void) => () => void;
 }
 
+/**
+ * The frequencies a spectrogram shows, as shares of its axis from 0 (the
+ * floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: the
+ * clips draw this band, the axis labels it. `[0, 1]` is all of it.
+ */
+export interface SpectrogramBand {
+  getSnapshot: () => readonly [number, number];
+  set: (band: readonly [number, number]) => void;
+  subscribe: (listener: () => void) => () => void;
+}
+
+/** The narrowest band a zoom reaches, as a share of the axis. */
+const NARROWEST = 0.02;
+
+const clamp01 = (value: number) => Math.min(1, Math.max(0, value));
+
+/** The band `factor` times as wide (under 1 zooms in), the share `at` of it (0 at its foot) staying where it is. */
+export function zoomBand(
+  [low, high]: readonly [number, number],
+  at: number,
+  factor: number
+): [number, number] {
+  const span = Math.min(1, Math.max(NARROWEST, (high - low) * factor));
+  const kept = low + at * (high - low);
+  const from = Math.min(1 - span, Math.max(0, kept - at * span));
+  return [from, from + span];
+}
+
+/** The band moved by `share` of its own width, up or down, kept inside the axis. */
+export function panBand(
+  [low, high]: readonly [number, number],
+  share: number
+): [number, number] {
+  const span = high - low;
+  const from = Math.min(1 - span, Math.max(0, low + share * span));
+  return [from, from + span];
+}
+
 /** The pixels drawn past each edge of the view, so a scroll shows them at once. */
 const OVERSCAN = 256;
 const THEME_ATTRIBUTES = ["class", "data-theme", "style"];
@@ -75,10 +113,12 @@ interface Held {
   gone: boolean;
   paints: number;
   renderer: Spectrogram | null;
+  scales: Record<Scale, Axis> | null;
 }
 
 /** What one paint draws. */
 interface Paint {
+  band: SpectrogramBand | undefined;
   clip: ClipReading;
   gain: number;
   sampleRate: number;
@@ -101,7 +141,7 @@ async function paintSpectrogram(
   body: HTMLElement,
   view: HTMLElement | null,
   held: Held,
-  { clip, gain, sampleRate, samples, scale }: Paint
+  { band, clip, gain, sampleRate, samples, scale }: Paint
 ): Promise<boolean> {
   held.paints += 1;
   const paint = held.paints;
@@ -116,12 +156,13 @@ async function paintSpectrogram(
   ]);
   const data = await samples.read(0, samples.frames);
   if (!held.renderer) {
-    const { default: Renderer } = await import("gl-spectrogram");
+    const { default: Renderer, scales } = await import("gl-spectrogram");
     if (held.gone || paint !== held.paints) {
       return false;
     }
     try {
       held.renderer = new Renderer(canvas, { data, sampleRate });
+      held.scales = scales;
     } catch {
       canvas.style.display = "none";
       return false;
@@ -130,9 +171,16 @@ async function paintSpectrogram(
   if (held.gone || paint !== held.paints) {
     return false;
   }
+  const [from, to] = band?.getSnapshot() ?? [0, 1];
+  const axis = held.scales?.[scale];
+  const nyquist = sampleRate / 2;
   held.renderer
     .update({
       background: groundOf(body),
+      band:
+        axis && (from > 0 || to < 1)
+          ? [axis.of(from, axis.low, nyquist), axis.of(to, axis.low, nyquist)]
+          : null,
       color: getComputedStyle(canvas).color,
       data,
       gain,
@@ -146,6 +194,34 @@ async function paintSpectrogram(
   return held.renderer.pending;
 }
 
+/** Shift and the wheel over a picture zoom its frequencies about the pointer: up is closer. */
+function zoomOnWheel(
+  event: WheelEvent,
+  canvas: HTMLCanvasElement,
+  band: SpectrogramBand | undefined
+) {
+  const box = canvas.getBoundingClientRect();
+  const inside =
+    event.clientX >= box.left &&
+    event.clientX <= box.right &&
+    event.clientY >= box.top &&
+    event.clientY <= box.bottom;
+  if (!(band && event.shiftKey && inside)) {
+    return;
+  }
+  event.preventDefault();
+  event.stopPropagation();
+  // A shifted wheel may arrive on either axis.
+  const delta = event.deltaY || event.deltaX;
+  band.set(
+    zoomBand(
+      band.getSnapshot(),
+      clamp01(1 - (event.clientY - box.top) / box.height),
+      Math.exp(delta * 0.002)
+    )
+  );
+}
+
 /**
  * A clip's recording as a spectrogram across the element it lies in: its
  * frequencies over the stretch of the clip the view shows, computed on the
@@ -157,6 +233,7 @@ async function paintSpectrogram(
  */
 function ClipSpectrogram({
   className,
+  band,
   clip,
   gain = 1,
   pointerHertz,
@@ -165,6 +242,8 @@ function ClipSpectrogram({
   scale = "log",
   ...props
 }: Omit<ComponentProps<"canvas">, "ref"> & {
+  /** The frequencies shown, as shares of the axis: Shift and the wheel over the picture zooms it, about the pointer. */
+  band?: SpectrogramBand;
   clip: ClipReading;
   /** A gain factor on the picture, as a clip's level plays. @default 1 */
   gain?: number;
@@ -185,7 +264,12 @@ function ClipSpectrogram({
       return;
     }
     const view = canvas.closest<HTMLElement>('[data-slot="timeline-viewport"]');
-    const held: Held = { gone: false, paints: 0, renderer: null };
+    const held: Held = {
+      gone: false,
+      paints: 0,
+      renderer: null,
+      scales: null,
+    };
     // The cell under the pointer: its frequency and level, read where the picture is drawn.
     const moved = (event: PointerEvent) => {
       const box = canvas.getBoundingClientRect();
@@ -215,12 +299,16 @@ function ClipSpectrogram({
     };
     view?.addEventListener("pointermove", moved, { passive: true });
     view?.addEventListener("pointerleave", left);
+    // Shift and the wheel zoom the frequencies over this picture, before the lane scrolls time with it.
+    const wheeled = (event: WheelEvent) => zoomOnWheel(event, canvas, band);
+    view?.addEventListener("wheel", wheeled, { capture: true, passive: false });
     let frame = 0;
     let drawnLeft = 0;
     const draw = async () => {
       frame = 0;
       drawnLeft = view?.scrollLeft ?? 0;
       const more = await paintSpectrogram(canvas, body, view, held, {
+        band,
         clip,
         gain,
         sampleRate,
@@ -240,6 +328,7 @@ function ClipSpectrogram({
       }
     };
     later();
+    const unsubscribe = band?.subscribe(later);
     const resized = new ResizeObserver(later);
     resized.observe(body);
     if (view) {
@@ -258,9 +347,11 @@ function ClipSpectrogram({
       view?.removeEventListener("scroll", scrolled);
       view?.removeEventListener("pointermove", moved);
       view?.removeEventListener("pointerleave", left);
+      view?.removeEventListener("wheel", wheeled, { capture: true });
+      unsubscribe?.();
       held.renderer?.destroy();
     };
-  }, [clip, gain, pointerHertz, sampleRate, samples, scale]);
+  }, [band, clip, gain, pointerHertz, sampleRate, samples, scale]);
   return (
     <>
       <canvas
@@ -320,6 +411,8 @@ const AXIS_LABELS: Record<SpectrogramScale, readonly number[]> = {
 
 const NO_SUBSCRIPTION = () => () => undefined;
 const NO_POINTER = () => null;
+const NO_BAND: readonly [number, number] = [0, 1];
+const NO_BAND_SNAPSHOT = () => NO_BAND;
 
 /** The room a label takes in the lane, in CSS px: its text and a gap. */
 const LABEL_ROOM = 15;
@@ -338,20 +431,20 @@ const hertzLabel = (hertz: number) =>
 
 /**
  * The labels that fit, roundest first, each `LABEL_ROOM` px from the ones
- * kept and inside the lane, as `[hertz, px from the foot]`.
+ * kept and inside the lane, as `[hertz, px from the foot]`; `place` gives a
+ * frequency's px from the foot, in the band in view.
  */
 function labelled(
-  axis: Axis,
-  scale: SpectrogramScale,
-  nyquist: number,
+  candidates: readonly number[],
+  rowOf: (hertz: number) => number,
   height: number
 ): [number, number][] {
   const kept: [number, number][] = [];
-  for (const hertz of AXIS_LABELS[scale]) {
-    if (hertz < axis.low || hertz > nyquist) {
+  for (const hertz of candidates) {
+    const px = rowOf(hertz);
+    if (px < 0 || px > height) {
       continue;
     }
-    const px = axis.at(hertz, axis.low, nyquist) * height;
     // The tick stays where the frequency is; its text is kept inside the lane.
     const text = Math.min(height - 6, Math.max(6, px));
     if (kept.every(([, other]) => Math.abs(other - text) >= LABEL_ROOM)) {
@@ -359,6 +452,54 @@ function labelled(
     }
   }
   return kept;
+}
+
+/** The 1-2-5 step just above `least`. */
+function niceStep(least: number): number {
+  const power = 10 ** Math.floor(Math.log10(least));
+  return (
+    [1, 2, 5, 10]
+      .map((multiple) => multiple * power)
+      .find((step) => step >= least * (1 - 1e-9)) ?? power * 10
+  );
+}
+
+/**
+ * The frequencies to label in the band from `low` to `high`, roundest first:
+ * the axis' own list while all of it shows; zoomed in, the round values in
+ * view, 1-2-5 a decade across a wide span of a log-spaced axis, even steps
+ * across a narrow one.
+ */
+function candidatesFor(
+  scale: SpectrogramScale,
+  full: boolean,
+  low: number,
+  high: number
+): number[] {
+  if (full) {
+    return [...AXIS_LABELS[scale]];
+  }
+  if (scale !== "lin" && high / low > 3) {
+    const out: number[] = [];
+    for (const multiple of [1, 5, 2, 3, 4, 6, 7, 8, 9]) {
+      for (let decade = 1e4; decade >= 1; decade /= 10) {
+        if (multiple * decade >= low && multiple * decade <= high) {
+          out.push(multiple * decade);
+        }
+      }
+    }
+    return out;
+  }
+  const step = niceStep((high - low) / 6);
+  const out: number[] = [];
+  for (
+    let hertz = Math.floor(high / step) * step;
+    hertz >= low;
+    hertz -= step
+  ) {
+    out.push(Number(hertz.toPrecision(12)));
+  }
+  return out;
 }
 
 /** The ticks between the labels, unlabelled: 1-2-5 a decade apart on a log-spaced axis, every 2.5k on a linear one. */
@@ -391,10 +532,13 @@ function minorHertz(scale: SpectrogramScale, nyquist: number): number[] {
  * clips, given the same `scale` and the recording's `sampleRate`.
  */
 function SpectrogramAxis({
+  band,
   pointer,
   sampleRate,
   scale,
 }: {
+  /** The frequencies shown, as shares of the axis: the wheel over the axis moves it, with Ctrl or Command zooms it, a double-click shows all. */
+  band?: SpectrogramBand;
   /** The frequency under the pointer, in hertz, to mark on the axis. */
   pointer?: PointerHertz;
   sampleRate: number;
@@ -417,6 +561,7 @@ function SpectrogramAxis({
   }, []);
   // As tall as the lane it sits in: a percentage of it does not resolve in a flex box.
   const holder = useRef<HTMLDivElement>(null);
+  const strip = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
   useLayoutEffect(() => {
     const lane = holder.current?.parentElement;
@@ -429,29 +574,76 @@ function SpectrogramAxis({
     resized.observe(lane);
     return () => resized.disconnect();
   }, []);
+  // The wheel over the axis moves the band, and zooms it with Ctrl, Command or a pinch: before the lane scrolls time with it.
+  useEffect(() => {
+    const element = strip.current;
+    if (!(element && band)) {
+      return;
+    }
+    const wheeled = (event: WheelEvent) => {
+      event.preventDefault();
+      event.stopPropagation();
+      const box = element.getBoundingClientRect();
+      const current = band.getSnapshot();
+      band.set(
+        event.ctrlKey || event.metaKey
+          ? zoomBand(
+              current,
+              clamp01(1 - (event.clientY - box.top) / box.height),
+              Math.exp(event.deltaY * 0.01)
+            )
+          : panBand(current, -event.deltaY / box.height)
+      );
+    };
+    const reset = () => band.set([0, 1]);
+    element.addEventListener("wheel", wheeled, { passive: false });
+    element.addEventListener("dblclick", reset);
+    return () => {
+      element.removeEventListener("wheel", wheeled);
+      element.removeEventListener("dblclick", reset);
+    };
+  }, [band]);
   const heard = useSyncExternalStore(
     pointer?.subscribe ?? NO_SUBSCRIPTION,
     pointer?.getSnapshot ?? NO_POINTER,
     NO_POINTER
   );
+  const [from, to] = useSyncExternalStore(
+    band?.subscribe ?? NO_SUBSCRIPTION,
+    band?.getSnapshot ?? NO_BAND_SNAPSHOT,
+    NO_BAND_SNAPSHOT
+  );
   const axis = axes?.[scale];
   const nyquist = sampleRate / 2;
+  const full = from <= 0 && to >= 1;
+  // A frequency's px from the foot, in the band in view.
   const at = (hertz: number) =>
-    axis ? axis.at(hertz, axis.low, nyquist) * height : 0;
+    axis
+      ? ((axis.at(hertz, axis.low, nyquist) - from) / (to - from)) * height
+      : 0;
   const marked = heard === null || !axis ? null : at(heard);
-  const labels = (axis ? labelled(axis, scale, nyquist, height) : []).filter(
+  const candidates = axis
+    ? candidatesFor(
+        scale,
+        full,
+        axis.of(from, axis.low, nyquist),
+        axis.of(to, axis.low, nyquist)
+      )
+    : [];
+  const labels = labelled(candidates, at, height).filter(
     ([, px]) => marked === null || Math.abs(px - marked) >= LABEL_ROOM
   );
   const kept = new Set(labels.map(([hertz]) => hertz));
-  const minor = axis
-    ? minorHertz(scale, nyquist).filter(
-        (hertz) =>
-          !kept.has(hertz) &&
-          hertz >= axis.low &&
-          at(hertz) >= 2 &&
-          at(hertz) <= height - 2
-      )
-    : [];
+  const minor =
+    axis && full
+      ? minorHertz(scale, nyquist).filter(
+          (hertz) =>
+            !kept.has(hertz) &&
+            hertz >= axis.low &&
+            at(hertz) >= 2 &&
+            at(hertz) <= height - 2
+        )
+      : [];
   return (
     <div
       aria-hidden="true"
@@ -461,7 +653,10 @@ function SpectrogramAxis({
       style={{ height }}
     >
       {/* A strip of its own, on the picture's left: the labels read against a plain ground, each before its tick at the picture's edge. */}
-      <div className="absolute inset-y-0 start-0 w-11 border-e bg-background">
+      <div
+        className="pointer-events-auto absolute inset-y-0 start-0 w-11 touch-none border-e bg-background"
+        ref={strip}
+      >
         {minor.map((hertz) => (
           <span
             className="absolute end-0 h-px w-1 bg-foreground/30"
