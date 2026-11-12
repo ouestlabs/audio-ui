@@ -11,6 +11,76 @@ description: "The <audio-ui-piano> custom element of @audio-ui/elements: its att
 
 <ElementsPreview name="piano" />
 
+{/* usage:start: written by `bun scripts/element-usage.ts --write` */}
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-piano aria-label="Keys" min-pitch="48" max-pitch="71">
+  <audio-ui-piano-keys></audio-ui-piano-keys>
+</audio-ui-piano>
+
+<script type="module">
+  import "@audio-ui/elements/piano";
+
+  const piano = document.querySelector("audio-ui-piano");
+  piano.addEventListener("noteon", (event) =>
+    console.log(event.detail.pitch)
+  );
+</script>
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/piano";
+</script>
+
+<template>
+  <audio-ui-piano aria-label="Keys" min-pitch="48" max-pitch="71" @noteon="(event) => console.log(event.detail.pitch)">
+    <audio-ui-piano-keys />
+  </audio-ui-piano>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/piano";
+</script>
+
+<audio-ui-piano aria-label="Keys" min-pitch="48" max-pitch="71" onnoteon={(event) => console.log(event.detail.pitch)}>
+  <audio-ui-piano-keys></audio-ui-piano-keys>
+</audio-ui-piano>
+```
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Piano](/docs/react/piano) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+{/* usage:end */}
+
 <TypeTable>
 <TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive. 60 is middle C.</TypeRow>
 <TypeRow name={"max-pitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>

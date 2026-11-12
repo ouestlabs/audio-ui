@@ -11,6 +11,115 @@ description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: it
 
 <ElementsPreview name="piano-roll" />
 
+{/* usage:start: written by `bun scripts/element-usage.ts --write` */}
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-timeline duration="8" snap-step="0.5">
+  <audio-ui-piano-roll min-pitch="57" max-pitch="74">
+    <audio-ui-piano-roll-keys>
+      <audio-ui-piano aria-label="Keys">
+        <audio-ui-piano-keys></audio-ui-piano-keys>
+      </audio-ui-piano>
+    </audio-ui-piano-roll-keys>
+    <audio-ui-timeline-viewport>
+      <audio-ui-piano-roll-grid aria-label="Notes">
+        <audio-ui-piano-roll-rows></audio-ui-piano-roll-rows>
+        <audio-ui-piano-roll-notes></audio-ui-piano-roll-notes>
+        <audio-ui-timeline-playhead></audio-ui-timeline-playhead>
+      </audio-ui-piano-roll-grid>
+    </audio-ui-timeline-viewport>
+  </audio-ui-piano-roll>
+</audio-ui-timeline>
+
+<script type="module">
+  import "@audio-ui/elements/piano-roll";
+
+  const pianoRoll = document.querySelector("audio-ui-piano-roll");
+  pianoRoll.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/piano-roll";
+</script>
+
+<template>
+  <audio-ui-timeline duration="8" snap-step="0.5">
+    <audio-ui-piano-roll min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
+      <audio-ui-piano-roll-keys>
+        <audio-ui-piano aria-label="Keys">
+          <audio-ui-piano-keys />
+        </audio-ui-piano>
+      </audio-ui-piano-roll-keys>
+      <audio-ui-timeline-viewport>
+        <audio-ui-piano-roll-grid aria-label="Notes">
+          <audio-ui-piano-roll-rows />
+          <audio-ui-piano-roll-notes />
+          <audio-ui-timeline-playhead />
+        </audio-ui-piano-roll-grid>
+      </audio-ui-timeline-viewport>
+    </audio-ui-piano-roll>
+  </audio-ui-timeline>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/piano-roll";
+</script>
+
+<audio-ui-timeline duration="8" snap-step="0.5">
+  <audio-ui-piano-roll min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
+    <audio-ui-piano-roll-keys>
+      <audio-ui-piano aria-label="Keys">
+        <audio-ui-piano-keys></audio-ui-piano-keys>
+      </audio-ui-piano>
+    </audio-ui-piano-roll-keys>
+    <audio-ui-timeline-viewport>
+      <audio-ui-piano-roll-grid aria-label="Notes">
+        <audio-ui-piano-roll-rows></audio-ui-piano-roll-rows>
+        <audio-ui-piano-roll-notes></audio-ui-piano-roll-notes>
+        <audio-ui-timeline-playhead></audio-ui-timeline-playhead>
+      </audio-ui-piano-roll-grid>
+    </audio-ui-timeline-viewport>
+  </audio-ui-piano-roll>
+</audio-ui-timeline>
+```
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [PianoRoll](/docs/react/piano-roll) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+{/* usage:end */}
+
 ```html
 <audio-ui-timeline duration="16" snap-step="0.25">
   <audio-ui-piano-roll mode="draw">

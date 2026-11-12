@@ -11,6 +11,109 @@ description: "The <audio-ui-sequencer> custom element of @audio-ui/elements: its
 
 <ElementsPreview name="sequencer" />
 
+{/* usage:start: written by `bun scripts/element-usage.ts --write` */}
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-sequencer aria-label="Pattern" default-value="x.x. ..x.">
+  <audio-ui-sequencer-row index="0" aria-label="Kick">
+    <audio-ui-sequencer-cell step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+  <audio-ui-sequencer-row index="1" aria-label="Snare">
+    <audio-ui-sequencer-cell step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+</audio-ui-sequencer>
+
+<script type="module">
+  import "@audio-ui/elements/sequencer";
+
+  const sequencer = document.querySelector("audio-ui-sequencer");
+  sequencer.addEventListener("change", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/sequencer";
+</script>
+
+<template>
+  <audio-ui-sequencer aria-label="Pattern" default-value="x.x. ..x." @change="(event) => console.log(event.detail.value)">
+    <audio-ui-sequencer-row index="0" aria-label="Kick">
+      <audio-ui-sequencer-cell step="0" />
+      <audio-ui-sequencer-cell step="1" />
+      <audio-ui-sequencer-cell step="2" />
+      <audio-ui-sequencer-cell step="3" />
+    </audio-ui-sequencer-row>
+    <audio-ui-sequencer-row index="1" aria-label="Snare">
+      <audio-ui-sequencer-cell step="0" />
+      <audio-ui-sequencer-cell step="1" />
+      <audio-ui-sequencer-cell step="2" />
+      <audio-ui-sequencer-cell step="3" />
+    </audio-ui-sequencer-row>
+  </audio-ui-sequencer>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/sequencer";
+</script>
+
+<audio-ui-sequencer aria-label="Pattern" default-value="x.x. ..x." onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-sequencer-row index="0" aria-label="Kick">
+    <audio-ui-sequencer-cell step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+  <audio-ui-sequencer-row index="1" aria-label="Snare">
+    <audio-ui-sequencer-cell step="0"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="1"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="2"></audio-ui-sequencer-cell>
+    <audio-ui-sequencer-cell step="3"></audio-ui-sequencer-cell>
+  </audio-ui-sequencer-row>
+</audio-ui-sequencer>
+```
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Sequencer](/docs/react/sequencer) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+{/* usage:end */}
+
 ```html
 <audio-ui-sequencer aria-label="Pattern" default-value="x...x... ..x...x.">
   <audio-ui-sequencer-rows labels="Kick, Snare">

@@ -11,6 +11,100 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 
 <ElementsPreview name="meter" />
 
+{/* usage:start: written by `bun scripts/element-usage.ts --write` */}
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-meter min="-60" max="6" value="-18 -10">
+  <audio-ui-meter-channel index="0" aria-label="Left">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel index="1" aria-label="Right">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+
+<script type="module">
+  import "@audio-ui/elements/meter";
+
+  const meter = document.querySelector("audio-ui-meter");
+  meter.value = "-12 -6";
+</script>
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/meter";
+import { ref } from "vue";
+
+const levels = ref("-18 -10");
+</script>
+
+<template>
+  <audio-ui-meter min="-60" max="6" :value="levels">
+    <audio-ui-meter-channel index="0" aria-label="Left">
+      <audio-ui-meter-indicator />
+      <audio-ui-meter-peak />
+    </audio-ui-meter-channel>
+    <audio-ui-meter-channel index="1" aria-label="Right">
+      <audio-ui-meter-indicator />
+      <audio-ui-meter-peak />
+    </audio-ui-meter-channel>
+  </audio-ui-meter>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/meter";
+
+  let levels = $state("-18 -10");
+</script>
+
+<audio-ui-meter min="-60" max="6" value={levels}>
+  <audio-ui-meter-channel index="0" aria-label="Left">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel index="1" aria-label="Right">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+```
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Meter](/docs/react/meter) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+{/* usage:end */}
+
 <TypeTable>
 <TypeRow name={"value"} type={"string"}>One level per channel, such as `"-12 -6"`. The count sets the number of channels.</TypeRow>
 <TypeRow name={"peak"} type={"string"}>One peak-hold level per channel. Hold time and decay are managed outside the meter.</TypeRow>

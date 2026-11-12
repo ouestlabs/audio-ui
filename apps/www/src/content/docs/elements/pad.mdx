@@ -11,6 +11,85 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 
 <ElementsPreview name="pad" />
 
+{/* usage:start: written by `bun scripts/element-usage.ts --write` */}
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-pad aria-label="Drums">
+  <audio-ui-pad-item value="kick">Kick</audio-ui-pad-item>
+  <audio-ui-pad-item value="snare">Snare</audio-ui-pad-item>
+  <audio-ui-pad-item value="hat">Hat</audio-ui-pad-item>
+  <audio-ui-pad-item value="clap">Clap</audio-ui-pad-item>
+</audio-ui-pad>
+
+<script type="module">
+  import "@audio-ui/elements/pad";
+
+  const pad = document.querySelector("audio-ui-pad");
+  pad.addEventListener("padon", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/pad";
+</script>
+
+<template>
+  <audio-ui-pad aria-label="Drums" @padon="(event) => console.log(event.detail.value)">
+    <audio-ui-pad-item value="kick">Kick</audio-ui-pad-item>
+    <audio-ui-pad-item value="snare">Snare</audio-ui-pad-item>
+    <audio-ui-pad-item value="hat">Hat</audio-ui-pad-item>
+    <audio-ui-pad-item value="clap">Clap</audio-ui-pad-item>
+  </audio-ui-pad>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/pad";
+</script>
+
+<audio-ui-pad aria-label="Drums" onpadon={(event) => console.log(event.detail.value)}>
+  <audio-ui-pad-item value="kick">Kick</audio-ui-pad-item>
+  <audio-ui-pad-item value="snare">Snare</audio-ui-pad-item>
+  <audio-ui-pad-item value="hat">Hat</audio-ui-pad-item>
+  <audio-ui-pad-item value="clap">Clap</audio-ui-pad-item>
+</audio-ui-pad>
+```
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Pad](/docs/react/pad) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+{/* usage:end */}
+
 <TypeTable>
 <TypeRow name={"columns"} type={"number"} default={"4"}>Pads per row, used by Up and Down. Match it in the layout.</TypeRow>
 <TypeRow name={"active-pads"} type={"string"}>Pads lit externally, such as by a sequencer or MIDI input, separated by spaces. The `activePads` property accepts an array.</TypeRow>
