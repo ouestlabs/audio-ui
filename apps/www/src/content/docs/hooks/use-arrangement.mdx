@@ -19,6 +19,6 @@ arrangement.dispatch({ type: "undo" });
 // arrangement.clips, .tracks, .selectedIds, .mixOf(trackId), .canUndo, .doc for the engine
 ```
 
-The document is a plain value: `doc` is what [`useArrangementEngine`](/docs/lib/arrangement-engine) plays and what a project saves. A command that changes nothing records no step, and a gesture (a drag) is one step of undo. The hook returns the state's parts and what is read from them (`selectedIds`, `mixOf`, `canUndo`, `canRedo`), `copyOf` for a time selection's clipboard, and `resizeTrack` and `toggleFold` for the view.
+The document is a plain value: `doc` is what [`useArrangementEngine`](/docs/lib/arrangement-engine) plays and what a project saves. A command that changes nothing records no step, and a gesture (a drag) is one step of undo. The hook returns the state's parts and what is read from them (`selectedIds`, `mixOf`, `canUndo`, `canRedo`), `history` for a list of the steps (the documents before each change, the one being made and the ones undone, each a step a menu can go back or forward to with as many `undo` or `redo`), `copyOf` for a time selection's clipboard, and `resizeTrack` and `toggleFold` for the view.
 
 It is the state under the [Arrangement](/docs/components/base/arrangement).

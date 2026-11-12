@@ -159,6 +159,8 @@ export function useArrangement({
     /** The heights set by hand, by track id, a folded track's kept for when it opens. */
     handHeights: heights,
     heights: shownHeights,
+    /** The steps of undo and redo, for a list of them: the documents before each change (`past`, the oldest first), one being made (`pending`), and the ones undone (`future`, the next to redo last). */
+    history,
     locators: doc.locators,
     loop: doc.loop,
     /** The main track: its devices and its mix. */
