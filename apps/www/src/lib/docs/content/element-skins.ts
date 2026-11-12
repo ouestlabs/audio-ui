@@ -631,6 +631,21 @@ audio-ui-timeline-viewport {
   scrollbar-width: none;
 }
 
+/* The ruler's corner above the track headers stays put as the timeline scrolls. */
+audio-ui-timeline-viewport::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: block;
+  width: calc(var(--spacing, 0.25rem) * 20);
+  height: calc(var(--spacing, 0.25rem) * 6);
+  margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+  border-inline-end: 1px solid var(--border);
+  background: var(--muted);
+}
+
 audio-ui-timeline-ruler {
   height: calc(var(--spacing, 0.25rem) * 6);
   margin-inline-start: calc(var(--spacing, 0.25rem) * 20);
@@ -694,6 +709,7 @@ audio-ui-timeline-clip-handle {
   top: 0;
   bottom: 0;
   width: calc(var(--spacing, 0.25rem) * 1.5);
+  background: color-mix(in oklab, var(--primary) 35%, transparent);
   cursor: ew-resize;
 }
 
@@ -719,6 +735,21 @@ audio-ui-timeline-navigator {
   background: var(--muted);
 }
 
+audio-ui-timeline-navigator-handle {
+  top: calc(var(--spacing, 0.25rem) * 0.5);
+  bottom: calc(var(--spacing, 0.25rem) * 0.5);
+  width: calc(var(--spacing, 0.25rem) * 2);
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+  border: 1px solid var(--ring);
+  border-radius: calc(var(--radius) - 4px);
+  background: var(--card);
+  cursor: ew-resize;
+}
+
+audio-ui-timeline-navigator-handle[edge="end"] {
+  translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+}
+
 audio-ui-timeline-navigator-window {
   top: 0;
   bottom: 0;
@@ -731,12 +762,14 @@ audio-ui-timeline-navigator-window {
       "audio-ui-timeline-clip":
         "inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring",
       "audio-ui-timeline-clip-handle":
-        "absolute inset-y-0 w-1.5 cursor-ew-resize [&[edge=end]]:right-0 [&[edge=start]]:left-0",
+        "absolute inset-y-0 w-1.5 cursor-ew-resize bg-primary/35 [&[edge=end]]:right-0 [&[edge=start]]:left-0",
       "audio-ui-timeline-clip-header":
         "cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground",
       "audio-ui-timeline-mark":
         "h-full border-s ps-1 text-[10px] text-muted-foreground",
       "audio-ui-timeline-navigator": "mt-2 h-3 rounded-sm bg-muted",
+      "audio-ui-timeline-navigator-handle":
+        "inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]",
       "audio-ui-timeline-navigator-window":
         "inset-y-0 cursor-grab rounded-sm bg-primary/25",
       "audio-ui-timeline-playhead": "inset-y-0 w-px bg-foreground",
@@ -745,7 +778,8 @@ audio-ui-timeline-navigator-window {
       "audio-ui-timeline-track": "h-14 border-t",
       "audio-ui-timeline-track-header":
         "w-20 border-e bg-background p-2 text-xs",
-      "audio-ui-timeline-viewport": "rounded-md border [scrollbar-width:none]",
+      "audio-ui-timeline-viewport":
+        "rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']",
     },
   },
   waveform: {

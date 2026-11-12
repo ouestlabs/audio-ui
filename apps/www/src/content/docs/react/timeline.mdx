@@ -24,7 +24,7 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
       <Timeline.Mark className={styles.mark} value={8}>3</Timeline.Mark>
       <Timeline.Range className={styles.range} aria-label="Loop" defaultValue={[8, 16]} />
     </Timeline.Ruler>
-    <Timeline.Track className={styles.track}>
+    <Timeline.Track className={styles.track} style={{ minWidth: "max-content" }}>
       <Timeline.TrackHeader className={styles.trackHeader}>Drums</Timeline.TrackHeader>
       <Timeline.Lane className={styles.lane}>
         <Timeline.Clip className={styles.clip} aria-label="Beat" defaultValue={beat}>
@@ -38,6 +38,8 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   </Timeline.Viewport>
   <Timeline.Navigator className={styles.navigator}>
     <Timeline.NavigatorWindow className={styles.navigatorWindow} aria-label="View" />
+    <Timeline.NavigatorHandle className={styles.navigatorHandle} edge="start" aria-label="View start" />
+    <Timeline.NavigatorHandle className={styles.navigatorHandle} edge="end" aria-label="View end" />
   </Timeline.Navigator>
 </Timeline.Root>
 ```
@@ -57,6 +59,21 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   border: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: calc(var(--radius, 0.625rem) - 2px);
   scrollbar-width: none;
+}
+
+/* The ruler's corner above the track headers stays put as the timeline scrolls. */
+.viewport::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: block;
+  width: calc(var(--spacing, 0.25rem) * 20);
+  height: calc(var(--spacing, 0.25rem) * 6);
+  margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+  border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+  background: var(--muted, oklch(0.97 0 0));
 }
 
 .ruler {
@@ -124,6 +141,7 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   top: 0;
   bottom: 0;
   width: calc(var(--spacing, 0.25rem) * 1.5);
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
   cursor: ew-resize;
 }
 
@@ -150,6 +168,21 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   position: relative;
 }
 
+.navigatorHandle {
+  top: calc(var(--spacing, 0.25rem) * 0.5);
+  bottom: calc(var(--spacing, 0.25rem) * 0.5);
+  width: calc(var(--spacing, 0.25rem) * 2);
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+  border: 1px solid var(--ring, oklch(0.708 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--card, oklch(1 0 0));
+  cursor: ew-resize;
+}
+
+.navigatorHandle[data-edge="end"] {
+  translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+}
+
 .navigatorWindow {
   top: 0;
   bottom: 0;
@@ -169,8 +202,7 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
 .lane {
   position: relative;
-  flex: 1 1 0;
-  min-width: 0;
+  flex: 1 0 auto;
 }
 ```
 
@@ -188,19 +220,19 @@ import { Timeline } from "@audio-ui/react";
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
 <Timeline.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={32} snapStep={1} minZoom={12} maxZoom={80}>
-  <Timeline.Viewport className="rounded-md border [scrollbar-width:none]">
+  <Timeline.Viewport className="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
     <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={8}>3</Timeline.Mark>
       <Timeline.Range className="inset-y-0 bg-primary/15" aria-label="Loop" defaultValue={[8, 16]} />
     </Timeline.Ruler>
-    <Timeline.Track className="h-14 border-t flex">
+    <Timeline.Track className="h-14 border-t flex" style={{ minWidth: "max-content" }}>
       <Timeline.TrackHeader className="w-20 border-e bg-background p-2 text-xs">Drums</Timeline.TrackHeader>
-      <Timeline.Lane className="relative min-w-0 flex-1">
+      <Timeline.Lane className="relative flex-[1_0_auto]">
         <Timeline.Clip className="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" defaultValue={beat}>
           <Timeline.ClipHeader className="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">Beat</Timeline.ClipHeader>
-          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Trim start" />
-          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Trim end" />
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize bg-primary/35 [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize bg-primary/35 [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Trim end" />
         </Timeline.Clip>
         <Timeline.Playhead className="inset-y-0 w-px bg-foreground" />
       </Timeline.Lane>
@@ -208,6 +240,8 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   </Timeline.Viewport>
   <Timeline.Navigator className="mt-2 h-3 rounded-sm bg-muted relative">
     <Timeline.NavigatorWindow className="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
   </Timeline.Navigator>
 </Timeline.Root>
 ```
@@ -292,7 +326,7 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
       <Timeline.Mark className={styles.mark} value={8}>3</Timeline.Mark>
       <Timeline.Range className={styles.range} aria-label="Loop" defaultValue={[8, 16]} />
     </Timeline.Ruler>
-    <Timeline.Track className={styles.track}>
+    <Timeline.Track className={styles.track} style={{ minWidth: "max-content" }}>
       <Timeline.TrackHeader className={styles.trackHeader}>Drums</Timeline.TrackHeader>
       <Timeline.Lane className={styles.lane}>
         <Timeline.Clip className={styles.clip} aria-label="Beat" defaultValue={beat}>
@@ -306,6 +340,8 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   </Timeline.Viewport>
   <Timeline.Navigator className={styles.navigator}>
     <Timeline.NavigatorWindow className={styles.navigatorWindow} aria-label="View" />
+    <Timeline.NavigatorHandle className={styles.navigatorHandle} edge="start" aria-label="View start" />
+    <Timeline.NavigatorHandle className={styles.navigatorHandle} edge="end" aria-label="View end" />
   </Timeline.Navigator>
 </Timeline.Root>
 ```
@@ -324,19 +360,19 @@ import { Timeline } from "@audio-ui/react";
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
 <Timeline.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={64} snapStep={1} minZoom={12} maxZoom={80}>
-  <Timeline.Viewport className="rounded-md border [scrollbar-width:none]">
+  <Timeline.Viewport className="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
     <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={8}>3</Timeline.Mark>
       <Timeline.Range className="inset-y-0 bg-primary/15" aria-label="Loop" defaultValue={[8, 16]} />
     </Timeline.Ruler>
-    <Timeline.Track className="h-14 border-t flex">
+    <Timeline.Track className="h-14 border-t flex" style={{ minWidth: "max-content" }}>
       <Timeline.TrackHeader className="w-20 border-e bg-background p-2 text-xs">Drums</Timeline.TrackHeader>
-      <Timeline.Lane className="relative min-w-0 flex-1">
+      <Timeline.Lane className="relative flex-[1_0_auto]">
         <Timeline.Clip className="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" defaultValue={beat}>
           <Timeline.ClipHeader className="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">Beat</Timeline.ClipHeader>
-          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Trim start" />
-          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Trim end" />
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize bg-primary/35 [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize bg-primary/35 [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Trim end" />
         </Timeline.Clip>
         <Timeline.Playhead className="inset-y-0 w-px bg-foreground" />
       </Timeline.Lane>
@@ -344,6 +380,8 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   </Timeline.Viewport>
   <Timeline.Navigator className="mt-2 h-3 rounded-sm bg-muted relative">
     <Timeline.NavigatorWindow className="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
   </Timeline.Navigator>
 </Timeline.Root>
 ```
@@ -377,7 +415,7 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
       <Timeline.Mark className={styles.mark} value={8}>3</Timeline.Mark>
       <Timeline.Range className={styles.range} aria-label="Loop" defaultValue={[8, 16]} />
     </Timeline.Ruler>
-    <Timeline.Track className={styles.track}>
+    <Timeline.Track className={styles.track} style={{ minWidth: "max-content" }}>
       <Timeline.TrackHeader className={styles.trackHeader}>Drums</Timeline.TrackHeader>
       <Timeline.Lane className={styles.lane}>
         <Timeline.Clip className={styles.clip} aria-label="Beat" defaultValue={beat}>
@@ -391,6 +429,8 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   </Timeline.Viewport>
   <Timeline.Navigator className={styles.navigator}>
     <Timeline.NavigatorWindow className={styles.navigatorWindow} aria-label="View" />
+    <Timeline.NavigatorHandle className={styles.navigatorHandle} edge="start" aria-label="View start" />
+    <Timeline.NavigatorHandle className={styles.navigatorHandle} edge="end" aria-label="View end" />
   </Timeline.Navigator>
 </Timeline.Root>
 ```
@@ -409,19 +449,19 @@ import { Timeline } from "@audio-ui/react";
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
 <Timeline.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={32} snapStep={4} minZoom={12} maxZoom={80}>
-  <Timeline.Viewport className="rounded-md border [scrollbar-width:none]">
+  <Timeline.Viewport className="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
     <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={8}>3</Timeline.Mark>
       <Timeline.Range className="inset-y-0 bg-primary/15" aria-label="Loop" defaultValue={[8, 16]} />
     </Timeline.Ruler>
-    <Timeline.Track className="h-14 border-t flex">
+    <Timeline.Track className="h-14 border-t flex" style={{ minWidth: "max-content" }}>
       <Timeline.TrackHeader className="w-20 border-e bg-background p-2 text-xs">Drums</Timeline.TrackHeader>
-      <Timeline.Lane className="relative min-w-0 flex-1">
+      <Timeline.Lane className="relative flex-[1_0_auto]">
         <Timeline.Clip className="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" defaultValue={beat}>
           <Timeline.ClipHeader className="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">Beat</Timeline.ClipHeader>
-          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Trim start" />
-          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Trim end" />
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize bg-primary/35 [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize bg-primary/35 [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Trim end" />
         </Timeline.Clip>
         <Timeline.Playhead className="inset-y-0 w-px bg-foreground" />
       </Timeline.Lane>
@@ -429,6 +469,8 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   </Timeline.Viewport>
   <Timeline.Navigator className="mt-2 h-3 rounded-sm bg-muted relative">
     <Timeline.NavigatorWindow className="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
+    <Timeline.NavigatorHandle className="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[data-edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
   </Timeline.Navigator>
 </Timeline.Root>
 ```

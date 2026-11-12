@@ -38,6 +38,21 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
     scrollbar-width: none;
   }
 
+  /* The ruler's corner above the track headers stays put as the timeline scrolls. */
+  audio-ui-timeline-viewport::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    display: block;
+    width: calc(var(--spacing, 0.25rem) * 20);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+    background: var(--muted, oklch(0.97 0 0));
+  }
+
   audio-ui-timeline-ruler {
     height: calc(var(--spacing, 0.25rem) * 6);
     margin-inline-start: calc(var(--spacing, 0.25rem) * 20);
@@ -101,6 +116,7 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
     top: 0;
     bottom: 0;
     width: calc(var(--spacing, 0.25rem) * 1.5);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
     cursor: ew-resize;
   }
 
@@ -126,6 +142,21 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
     background: var(--muted, oklch(0.97 0 0));
   }
 
+  audio-ui-timeline-navigator-handle {
+    top: calc(var(--spacing, 0.25rem) * 0.5);
+    bottom: calc(var(--spacing, 0.25rem) * 0.5);
+    width: calc(var(--spacing, 0.25rem) * 2);
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--card, oklch(1 0 0));
+    cursor: ew-resize;
+  }
+
+  audio-ui-timeline-navigator-handle[edge="end"] {
+    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+  }
+
   audio-ui-timeline-navigator-window {
     top: 0;
     bottom: 0;
@@ -147,7 +178,7 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
 <audio-ui-timeline duration="32" snap-step="1" min-zoom="12" max-zoom="80">
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track>
+    <audio-ui-timeline-track style="min-width: max-content">
       <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">
@@ -157,6 +188,11 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator>
+    <audio-ui-timeline-navigator-window aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
 <script type="module">
@@ -179,9 +215,9 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
 
 ```html
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" min-zoom="12" max-zoom="80">
-  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track class="h-14 border-t">
+    <audio-ui-timeline-track class="h-14 border-t" style="min-width: max-content">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
@@ -191,6 +227,11 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
+    <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
 <script type="module">
@@ -224,7 +265,7 @@ import "@audio-ui/elements/timeline";
   <audio-ui-timeline duration="32" snap-step="1" min-zoom="12" max-zoom="80" @change="(event) => console.log(event.detail.value)">
     <audio-ui-timeline-viewport>
       <audio-ui-timeline-ruler aria-label="Position" />
-      <audio-ui-timeline-track>
+      <audio-ui-timeline-track style="min-width: max-content">
         <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
         <audio-ui-timeline-lane seekable>
           <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">
@@ -234,6 +275,11 @@ import "@audio-ui/elements/timeline";
         </audio-ui-timeline-lane>
       </audio-ui-timeline-track>
     </audio-ui-timeline-viewport>
+    <audio-ui-timeline-navigator>
+      <audio-ui-timeline-navigator-window aria-label="View" />
+      <audio-ui-timeline-navigator-handle edge="start" aria-label="View start" />
+      <audio-ui-timeline-navigator-handle edge="end" aria-label="View end" />
+    </audio-ui-timeline-navigator>
   </audio-ui-timeline>
 </template>
 
@@ -248,6 +294,21 @@ audio-ui-timeline-viewport {
   border: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: calc(var(--radius, 0.625rem) - 2px);
   scrollbar-width: none;
+}
+
+/* The ruler's corner above the track headers stays put as the timeline scrolls. */
+audio-ui-timeline-viewport::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: block;
+  width: calc(var(--spacing, 0.25rem) * 20);
+  height: calc(var(--spacing, 0.25rem) * 6);
+  margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+  border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+  background: var(--muted, oklch(0.97 0 0));
 }
 
 audio-ui-timeline-ruler {
@@ -313,6 +374,7 @@ audio-ui-timeline-clip-handle {
   top: 0;
   bottom: 0;
   width: calc(var(--spacing, 0.25rem) * 1.5);
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
   cursor: ew-resize;
 }
 
@@ -336,6 +398,21 @@ audio-ui-timeline-navigator {
   margin-top: calc(var(--spacing, 0.25rem) * 2);
   border-radius: calc(var(--radius, 0.625rem) - 4px);
   background: var(--muted, oklch(0.97 0 0));
+}
+
+audio-ui-timeline-navigator-handle {
+  top: calc(var(--spacing, 0.25rem) * 0.5);
+  bottom: calc(var(--spacing, 0.25rem) * 0.5);
+  width: calc(var(--spacing, 0.25rem) * 2);
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+  border: 1px solid var(--ring, oklch(0.708 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--card, oklch(1 0 0));
+  cursor: ew-resize;
+}
+
+audio-ui-timeline-navigator-handle[edge="end"] {
+  translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
 }
 
 audio-ui-timeline-navigator-window {
@@ -372,9 +449,9 @@ import "@audio-ui/elements/timeline";
 
 <template>
   <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" min-zoom="12" max-zoom="80" @change="(event) => console.log(event.detail.value)">
-    <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
+    <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
       <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
-      <audio-ui-timeline-track class="h-14 border-t">
+      <audio-ui-timeline-track class="h-14 border-t" style="min-width: max-content">
         <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
         <audio-ui-timeline-lane seekable>
           <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
@@ -384,6 +461,11 @@ import "@audio-ui/elements/timeline";
         </audio-ui-timeline-lane>
       </audio-ui-timeline-track>
     </audio-ui-timeline-viewport>
+    <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
+      <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
+    </audio-ui-timeline-navigator>
   </audio-ui-timeline>
 </template>
 ```
@@ -408,7 +490,7 @@ import "@audio-ui/elements/timeline";
 <audio-ui-timeline duration="32" snap-step="1" min-zoom="12" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track>
+    <audio-ui-timeline-track style="min-width: max-content">
       <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">
@@ -418,6 +500,11 @@ import "@audio-ui/elements/timeline";
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator>
+    <audio-ui-timeline-navigator-window aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
 <style>
@@ -432,6 +519,21 @@ import "@audio-ui/elements/timeline";
     border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: calc(var(--radius, 0.625rem) - 2px);
     scrollbar-width: none;
+  }
+
+  /* The ruler's corner above the track headers stays put as the timeline scrolls. */
+  audio-ui-timeline-viewport::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    display: block;
+    width: calc(var(--spacing, 0.25rem) * 20);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-timeline-ruler {
@@ -497,6 +599,7 @@ import "@audio-ui/elements/timeline";
     top: 0;
     bottom: 0;
     width: calc(var(--spacing, 0.25rem) * 1.5);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
     cursor: ew-resize;
   }
 
@@ -520,6 +623,21 @@ import "@audio-ui/elements/timeline";
     margin-top: calc(var(--spacing, 0.25rem) * 2);
     border-radius: calc(var(--radius, 0.625rem) - 4px);
     background: var(--muted, oklch(0.97 0 0));
+  }
+
+  audio-ui-timeline-navigator-handle {
+    top: calc(var(--spacing, 0.25rem) * 0.5);
+    bottom: calc(var(--spacing, 0.25rem) * 0.5);
+    width: calc(var(--spacing, 0.25rem) * 2);
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--card, oklch(1 0 0));
+    cursor: ew-resize;
+  }
+
+  audio-ui-timeline-navigator-handle[edge="end"] {
+    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
   }
 
   audio-ui-timeline-navigator-window {
@@ -556,9 +674,9 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" min-zoom="12" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
-  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track class="h-14 border-t">
+    <audio-ui-timeline-track class="h-14 border-t" style="min-width: max-content">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
@@ -568,6 +686,11 @@ import "@audio-ui/elements/timeline";
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
+    <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 ```
 
@@ -609,6 +732,11 @@ The parts, nested as they go in the markup.
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator>
+    <audio-ui-timeline-navigator-window></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 ```
 
@@ -653,6 +781,21 @@ The parts, nested as they go in the markup.
     scrollbar-width: none;
   }
 
+  /* The ruler's corner above the track headers stays put as the timeline scrolls. */
+  audio-ui-timeline-viewport::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    display: block;
+    width: calc(var(--spacing, 0.25rem) * 20);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+    background: var(--muted, oklch(0.97 0 0));
+  }
+
   audio-ui-timeline-ruler {
     height: calc(var(--spacing, 0.25rem) * 6);
     margin-inline-start: calc(var(--spacing, 0.25rem) * 20);
@@ -716,6 +859,7 @@ The parts, nested as they go in the markup.
     top: 0;
     bottom: 0;
     width: calc(var(--spacing, 0.25rem) * 1.5);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
     cursor: ew-resize;
   }
 
@@ -741,6 +885,21 @@ The parts, nested as they go in the markup.
     background: var(--muted, oklch(0.97 0 0));
   }
 
+  audio-ui-timeline-navigator-handle {
+    top: calc(var(--spacing, 0.25rem) * 0.5);
+    bottom: calc(var(--spacing, 0.25rem) * 0.5);
+    width: calc(var(--spacing, 0.25rem) * 2);
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--card, oklch(1 0 0));
+    cursor: ew-resize;
+  }
+
+  audio-ui-timeline-navigator-handle[edge="end"] {
+    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+  }
+
   audio-ui-timeline-navigator-window {
     top: 0;
     bottom: 0;
@@ -762,7 +921,7 @@ The parts, nested as they go in the markup.
 <audio-ui-timeline duration="64" snap-step="1" min-zoom="12" max-zoom="80">
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track>
+    <audio-ui-timeline-track style="min-width: max-content">
       <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">
@@ -772,6 +931,11 @@ The parts, nested as they go in the markup.
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator>
+    <audio-ui-timeline-navigator-window aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
 <script type="module">
@@ -794,9 +958,9 @@ The parts, nested as they go in the markup.
 
 ```html
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" min-zoom="12" max-zoom="80">
-  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track class="h-14 border-t">
+    <audio-ui-timeline-track class="h-14 border-t" style="min-width: max-content">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
@@ -806,6 +970,11 @@ The parts, nested as they go in the markup.
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
+    <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
 <script type="module">
@@ -839,7 +1008,7 @@ import "@audio-ui/elements/timeline";
   <audio-ui-timeline duration="64" snap-step="1" min-zoom="12" max-zoom="80" @change="(event) => console.log(event.detail.value)">
     <audio-ui-timeline-viewport>
       <audio-ui-timeline-ruler aria-label="Position" />
-      <audio-ui-timeline-track>
+      <audio-ui-timeline-track style="min-width: max-content">
         <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
         <audio-ui-timeline-lane seekable>
           <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">
@@ -849,6 +1018,11 @@ import "@audio-ui/elements/timeline";
         </audio-ui-timeline-lane>
       </audio-ui-timeline-track>
     </audio-ui-timeline-viewport>
+    <audio-ui-timeline-navigator>
+      <audio-ui-timeline-navigator-window aria-label="View" />
+      <audio-ui-timeline-navigator-handle edge="start" aria-label="View start" />
+      <audio-ui-timeline-navigator-handle edge="end" aria-label="View end" />
+    </audio-ui-timeline-navigator>
   </audio-ui-timeline>
 </template>
 
@@ -863,6 +1037,21 @@ audio-ui-timeline-viewport {
   border: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: calc(var(--radius, 0.625rem) - 2px);
   scrollbar-width: none;
+}
+
+/* The ruler's corner above the track headers stays put as the timeline scrolls. */
+audio-ui-timeline-viewport::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: block;
+  width: calc(var(--spacing, 0.25rem) * 20);
+  height: calc(var(--spacing, 0.25rem) * 6);
+  margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+  border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+  background: var(--muted, oklch(0.97 0 0));
 }
 
 audio-ui-timeline-ruler {
@@ -928,6 +1117,7 @@ audio-ui-timeline-clip-handle {
   top: 0;
   bottom: 0;
   width: calc(var(--spacing, 0.25rem) * 1.5);
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
   cursor: ew-resize;
 }
 
@@ -951,6 +1141,21 @@ audio-ui-timeline-navigator {
   margin-top: calc(var(--spacing, 0.25rem) * 2);
   border-radius: calc(var(--radius, 0.625rem) - 4px);
   background: var(--muted, oklch(0.97 0 0));
+}
+
+audio-ui-timeline-navigator-handle {
+  top: calc(var(--spacing, 0.25rem) * 0.5);
+  bottom: calc(var(--spacing, 0.25rem) * 0.5);
+  width: calc(var(--spacing, 0.25rem) * 2);
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+  border: 1px solid var(--ring, oklch(0.708 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--card, oklch(1 0 0));
+  cursor: ew-resize;
+}
+
+audio-ui-timeline-navigator-handle[edge="end"] {
+  translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
 }
 
 audio-ui-timeline-navigator-window {
@@ -987,9 +1192,9 @@ import "@audio-ui/elements/timeline";
 
 <template>
   <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" min-zoom="12" max-zoom="80" @change="(event) => console.log(event.detail.value)">
-    <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
+    <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
       <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
-      <audio-ui-timeline-track class="h-14 border-t">
+      <audio-ui-timeline-track class="h-14 border-t" style="min-width: max-content">
         <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
         <audio-ui-timeline-lane seekable>
           <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
@@ -999,6 +1204,11 @@ import "@audio-ui/elements/timeline";
         </audio-ui-timeline-lane>
       </audio-ui-timeline-track>
     </audio-ui-timeline-viewport>
+    <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
+      <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
+    </audio-ui-timeline-navigator>
   </audio-ui-timeline>
 </template>
 ```
@@ -1023,7 +1233,7 @@ import "@audio-ui/elements/timeline";
 <audio-ui-timeline duration="64" snap-step="1" min-zoom="12" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track>
+    <audio-ui-timeline-track style="min-width: max-content">
       <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">
@@ -1033,6 +1243,11 @@ import "@audio-ui/elements/timeline";
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator>
+    <audio-ui-timeline-navigator-window aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
 <style>
@@ -1047,6 +1262,21 @@ import "@audio-ui/elements/timeline";
     border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: calc(var(--radius, 0.625rem) - 2px);
     scrollbar-width: none;
+  }
+
+  /* The ruler's corner above the track headers stays put as the timeline scrolls. */
+  audio-ui-timeline-viewport::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    display: block;
+    width: calc(var(--spacing, 0.25rem) * 20);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-timeline-ruler {
@@ -1112,6 +1342,7 @@ import "@audio-ui/elements/timeline";
     top: 0;
     bottom: 0;
     width: calc(var(--spacing, 0.25rem) * 1.5);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
     cursor: ew-resize;
   }
 
@@ -1135,6 +1366,21 @@ import "@audio-ui/elements/timeline";
     margin-top: calc(var(--spacing, 0.25rem) * 2);
     border-radius: calc(var(--radius, 0.625rem) - 4px);
     background: var(--muted, oklch(0.97 0 0));
+  }
+
+  audio-ui-timeline-navigator-handle {
+    top: calc(var(--spacing, 0.25rem) * 0.5);
+    bottom: calc(var(--spacing, 0.25rem) * 0.5);
+    width: calc(var(--spacing, 0.25rem) * 2);
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--card, oklch(1 0 0));
+    cursor: ew-resize;
+  }
+
+  audio-ui-timeline-navigator-handle[edge="end"] {
+    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
   }
 
   audio-ui-timeline-navigator-window {
@@ -1171,9 +1417,9 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" min-zoom="12" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
-  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track class="h-14 border-t">
+    <audio-ui-timeline-track class="h-14 border-t" style="min-width: max-content">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
@@ -1183,6 +1429,11 @@ import "@audio-ui/elements/timeline";
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
+    <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 ```
 
@@ -1237,6 +1488,21 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
     scrollbar-width: none;
   }
 
+  /* The ruler's corner above the track headers stays put as the timeline scrolls. */
+  audio-ui-timeline-viewport::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    display: block;
+    width: calc(var(--spacing, 0.25rem) * 20);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+    background: var(--muted, oklch(0.97 0 0));
+  }
+
   audio-ui-timeline-ruler {
     height: calc(var(--spacing, 0.25rem) * 6);
     margin-inline-start: calc(var(--spacing, 0.25rem) * 20);
@@ -1300,6 +1566,7 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
     top: 0;
     bottom: 0;
     width: calc(var(--spacing, 0.25rem) * 1.5);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
     cursor: ew-resize;
   }
 
@@ -1325,6 +1592,21 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
     background: var(--muted, oklch(0.97 0 0));
   }
 
+  audio-ui-timeline-navigator-handle {
+    top: calc(var(--spacing, 0.25rem) * 0.5);
+    bottom: calc(var(--spacing, 0.25rem) * 0.5);
+    width: calc(var(--spacing, 0.25rem) * 2);
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--card, oklch(1 0 0));
+    cursor: ew-resize;
+  }
+
+  audio-ui-timeline-navigator-handle[edge="end"] {
+    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
+  }
+
   audio-ui-timeline-navigator-window {
     top: 0;
     bottom: 0;
@@ -1346,7 +1628,7 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
 <audio-ui-timeline duration="32" snap-step="4" min-zoom="12" max-zoom="80">
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track>
+    <audio-ui-timeline-track style="min-width: max-content">
       <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">
@@ -1356,6 +1638,11 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator>
+    <audio-ui-timeline-navigator-window aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
 <script type="module">
@@ -1378,9 +1665,9 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
 
 ```html
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" min-zoom="12" max-zoom="80">
-  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track class="h-14 border-t">
+    <audio-ui-timeline-track class="h-14 border-t" style="min-width: max-content">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
@@ -1390,6 +1677,11 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
+    <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
 <script type="module">
@@ -1423,7 +1715,7 @@ import "@audio-ui/elements/timeline";
   <audio-ui-timeline duration="32" snap-step="4" min-zoom="12" max-zoom="80" @change="(event) => console.log(event.detail.value)">
     <audio-ui-timeline-viewport>
       <audio-ui-timeline-ruler aria-label="Position" />
-      <audio-ui-timeline-track>
+      <audio-ui-timeline-track style="min-width: max-content">
         <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
         <audio-ui-timeline-lane seekable>
           <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">
@@ -1433,6 +1725,11 @@ import "@audio-ui/elements/timeline";
         </audio-ui-timeline-lane>
       </audio-ui-timeline-track>
     </audio-ui-timeline-viewport>
+    <audio-ui-timeline-navigator>
+      <audio-ui-timeline-navigator-window aria-label="View" />
+      <audio-ui-timeline-navigator-handle edge="start" aria-label="View start" />
+      <audio-ui-timeline-navigator-handle edge="end" aria-label="View end" />
+    </audio-ui-timeline-navigator>
   </audio-ui-timeline>
 </template>
 
@@ -1447,6 +1744,21 @@ audio-ui-timeline-viewport {
   border: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: calc(var(--radius, 0.625rem) - 2px);
   scrollbar-width: none;
+}
+
+/* The ruler's corner above the track headers stays put as the timeline scrolls. */
+audio-ui-timeline-viewport::before {
+  content: "";
+  position: sticky;
+  top: 0;
+  left: 0;
+  z-index: 5;
+  display: block;
+  width: calc(var(--spacing, 0.25rem) * 20);
+  height: calc(var(--spacing, 0.25rem) * 6);
+  margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+  border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+  background: var(--muted, oklch(0.97 0 0));
 }
 
 audio-ui-timeline-ruler {
@@ -1512,6 +1824,7 @@ audio-ui-timeline-clip-handle {
   top: 0;
   bottom: 0;
   width: calc(var(--spacing, 0.25rem) * 1.5);
+  background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
   cursor: ew-resize;
 }
 
@@ -1535,6 +1848,21 @@ audio-ui-timeline-navigator {
   margin-top: calc(var(--spacing, 0.25rem) * 2);
   border-radius: calc(var(--radius, 0.625rem) - 4px);
   background: var(--muted, oklch(0.97 0 0));
+}
+
+audio-ui-timeline-navigator-handle {
+  top: calc(var(--spacing, 0.25rem) * 0.5);
+  bottom: calc(var(--spacing, 0.25rem) * 0.5);
+  width: calc(var(--spacing, 0.25rem) * 2);
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+  border: 1px solid var(--ring, oklch(0.708 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--card, oklch(1 0 0));
+  cursor: ew-resize;
+}
+
+audio-ui-timeline-navigator-handle[edge="end"] {
+  translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
 }
 
 audio-ui-timeline-navigator-window {
@@ -1571,9 +1899,9 @@ import "@audio-ui/elements/timeline";
 
 <template>
   <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" min-zoom="12" max-zoom="80" @change="(event) => console.log(event.detail.value)">
-    <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
+    <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
       <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
-      <audio-ui-timeline-track class="h-14 border-t">
+      <audio-ui-timeline-track class="h-14 border-t" style="min-width: max-content">
         <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
         <audio-ui-timeline-lane seekable>
           <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
@@ -1583,6 +1911,11 @@ import "@audio-ui/elements/timeline";
         </audio-ui-timeline-lane>
       </audio-ui-timeline-track>
     </audio-ui-timeline-viewport>
+    <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
+      <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start" />
+      <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end" />
+    </audio-ui-timeline-navigator>
   </audio-ui-timeline>
 </template>
 ```
@@ -1607,7 +1940,7 @@ import "@audio-ui/elements/timeline";
 <audio-ui-timeline duration="32" snap-step="4" min-zoom="12" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track>
+    <audio-ui-timeline-track style="min-width: max-content">
       <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip aria-label="Beat" start="0" length="8">
@@ -1617,6 +1950,11 @@ import "@audio-ui/elements/timeline";
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator>
+    <audio-ui-timeline-navigator-window aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 
 <style>
@@ -1631,6 +1969,21 @@ import "@audio-ui/elements/timeline";
     border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: calc(var(--radius, 0.625rem) - 2px);
     scrollbar-width: none;
+  }
+
+  /* The ruler's corner above the track headers stays put as the timeline scrolls. */
+  audio-ui-timeline-viewport::before {
+    content: "";
+    position: sticky;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    display: block;
+    width: calc(var(--spacing, 0.25rem) * 20);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    margin-bottom: calc(var(--spacing, 0.25rem) * -6);
+    border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
+    background: var(--muted, oklch(0.97 0 0));
   }
 
   audio-ui-timeline-ruler {
@@ -1696,6 +2049,7 @@ import "@audio-ui/elements/timeline";
     top: 0;
     bottom: 0;
     width: calc(var(--spacing, 0.25rem) * 1.5);
+    background: color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 35%, transparent);
     cursor: ew-resize;
   }
 
@@ -1719,6 +2073,21 @@ import "@audio-ui/elements/timeline";
     margin-top: calc(var(--spacing, 0.25rem) * 2);
     border-radius: calc(var(--radius, 0.625rem) - 4px);
     background: var(--muted, oklch(0.97 0 0));
+  }
+
+  audio-ui-timeline-navigator-handle {
+    top: calc(var(--spacing, 0.25rem) * 0.5);
+    bottom: calc(var(--spacing, 0.25rem) * 0.5);
+    width: calc(var(--spacing, 0.25rem) * 2);
+    margin-inline-start: calc(var(--spacing, 0.25rem) * 1);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 4px);
+    background: var(--card, oklch(1 0 0));
+    cursor: ew-resize;
+  }
+
+  audio-ui-timeline-navigator-handle[edge="end"] {
+    translate: calc(-100% - var(--spacing, 0.25rem) * 1) 0;
   }
 
   audio-ui-timeline-navigator-window {
@@ -1755,9 +2124,9 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" min-zoom="12" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
-  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none] before:sticky before:top-0 before:left-0 before:z-5 before:-mb-6 before:block before:h-6 before:w-20 before:border-e before:bg-muted before:content-['']">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track class="h-14 border-t">
+    <audio-ui-timeline-track class="h-14 border-t" style="min-width: max-content">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
       <audio-ui-timeline-lane seekable>
         <audio-ui-timeline-clip class="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" start="0" length="8">
@@ -1767,6 +2136,11 @@ import "@audio-ui/elements/timeline";
       </audio-ui-timeline-lane>
     </audio-ui-timeline-track>
   </audio-ui-timeline-viewport>
+  <audio-ui-timeline-navigator class="mt-2 h-3 rounded-sm bg-muted">
+    <audio-ui-timeline-navigator-window class="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View"></audio-ui-timeline-navigator-window>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="start" aria-label="View start"></audio-ui-timeline-navigator-handle>
+    <audio-ui-timeline-navigator-handle class="inset-y-0.5 ms-1 w-2 cursor-ew-resize rounded-sm border border-ring bg-card [&[edge=end]]:-translate-x-[calc(100%+0.25rem)]" edge="end" aria-label="View end"></audio-ui-timeline-navigator-handle>
+  </audio-ui-timeline-navigator>
 </audio-ui-timeline>
 ```
 

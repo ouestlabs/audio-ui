@@ -179,7 +179,7 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
       "      <Timeline.Mark value={8}>3</Timeline.Mark>",
       '      <Timeline.Range aria-label="Loop" defaultValue={[8, 16]} />',
       "    </Timeline.Ruler>",
-      "    <Timeline.Track>",
+      '    <Timeline.Track style={{ minWidth: "max-content" }}>',
       "      <Timeline.TrackHeader>Drums</Timeline.TrackHeader>",
       "      <Timeline.Lane>",
       '        <Timeline.Clip aria-label="Beat" defaultValue={beat}>',
@@ -193,6 +193,8 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
       "  </Timeline.Viewport>",
       "  <Timeline.Navigator>",
       '    <Timeline.NavigatorWindow aria-label="View" />',
+      '    <Timeline.NavigatorHandle edge="start" aria-label="View start" />',
+      '    <Timeline.NavigatorHandle edge="end" aria-label="View end" />',
       "  </Timeline.Navigator>",
       "</Timeline.Root>",
     ],
@@ -350,8 +352,8 @@ const STRUCTURE: Record<string, Record<string, { css: string; tw: string }>> = {
   },
   timeline: {
     lane: {
-      css: "position: relative;\n  flex: 1 1 0;\n  min-width: 0;",
-      tw: "relative min-w-0 flex-1",
+      css: "position: relative;\n  flex: 1 0 auto;",
+      tw: "relative flex-[1_0_auto]",
     },
     navigator: { css: "position: relative;", tw: "relative" },
     ruler: { css: "position: relative;", tw: "relative" },

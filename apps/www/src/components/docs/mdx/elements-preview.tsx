@@ -476,6 +476,7 @@ function Timeline({ rootAttributes }: { rootAttributes?: RootAttributes }) {
           <audio-ui-timeline-track
             className={part("audio-ui-timeline-track")}
             key={track.name}
+            style={{ minWidth: "max-content" }}
           >
             <audio-ui-timeline-track-header
               className={part("audio-ui-timeline-track-header")}
@@ -518,6 +519,16 @@ function Timeline({ rootAttributes }: { rootAttributes?: RootAttributes }) {
         <audio-ui-timeline-navigator-window
           aria-label="View"
           className={part("audio-ui-timeline-navigator-window")}
+        />
+        <audio-ui-timeline-navigator-handle
+          aria-label="View start"
+          className={part("audio-ui-timeline-navigator-handle")}
+          edge="start"
+        />
+        <audio-ui-timeline-navigator-handle
+          aria-label="View end"
+          className={part("audio-ui-timeline-navigator-handle")}
+          edge="end"
         />
       </audio-ui-timeline-navigator>
     </audio-ui-timeline>

@@ -329,6 +329,9 @@ function WaveformPreview({ rootProps }: { rootProps?: RootProps }) {
   );
 }
 
+/** As wide as its lane, so a header sticks along the whole of a zoomed timeline. */
+const TRACK_WIDTH = { minWidth: "max-content" };
+
 const BARS = [0, 4, 8, 12, 16, 20, 24, 28];
 const TRACKS = [
   { clip: "Beat", length: 8, name: "Drums", start: 0 },
@@ -360,7 +363,11 @@ function TimelinePreview({ rootProps }: { rootProps?: RootProps }) {
           />
         </Timeline.Ruler>
         {TRACKS.map((track) => (
-          <Timeline.Track className={p("Track")} key={track.name}>
+          <Timeline.Track
+            className={p("Track")}
+            key={track.name}
+            style={TRACK_WIDTH}
+          >
             <Timeline.TrackHeader className={p("TrackHeader")}>
               {track.name}
             </Timeline.TrackHeader>
@@ -399,6 +406,16 @@ function TimelinePreview({ rootProps }: { rootProps?: RootProps }) {
         <Timeline.NavigatorWindow
           aria-label="View"
           className={p("NavigatorWindow")}
+        />
+        <Timeline.NavigatorHandle
+          aria-label="View start"
+          className={p("NavigatorHandle")}
+          edge="start"
+        />
+        <Timeline.NavigatorHandle
+          aria-label="View end"
+          className={p("NavigatorHandle")}
+          edge="end"
         />
       </Timeline.Navigator>
     </Timeline.Root>
