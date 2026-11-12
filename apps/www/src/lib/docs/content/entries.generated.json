@@ -370,6 +370,7 @@
       "block-mixer",
       "block-timeline",
       "clip-edits",
+      "clip-spectrogram",
       "clip-waveform",
       "dawproject",
       "device-view",

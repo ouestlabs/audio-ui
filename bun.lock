@@ -195,6 +195,7 @@
         "fumadocs-core": "16.17.1",
         "fumadocs-mdx": "15.4.7",
         "fumadocs-ui": "16.17.1",
+        "gl-spectrogram": "2.4.0",
         "input-otp": "^1.4.2",
         "jotai": "3.0.1",
         "lucide-react": "catalog:",
@@ -274,7 +275,7 @@
     },
     "packages/engine": {
       "name": "@audio-ui/engine",
-      "version": "0.9.0",
+      "version": "0.10.0",
       "dependencies": {
         "@audio-ui/core": "^0.29.1",
         "@audio/beat-detect": "1.1.0",
@@ -2434,6 +2435,8 @@
     "get-stream": ["get-stream@9.0.1", "", { "dependencies": { "@sec-ant/readable-stream": "^0.4.1", "is-stream": "^4.0.1" } }, "sha512-kVCxPF3vQM/N0B1PmoqVUqgHP+EeVjmZSQn+1oCRPxd2P21P2F19lIgbR3HBosbB1PUhOAoctJnfEn2GbN2eZA=="],
 
     "github-slugger": ["github-slugger@2.0.0", "", {}, "sha512-IaOQ9puYtjrkq7Y0Ygl9KDZnrf/aiUJYUpVf89y8kyaxbRG7Y1SrX/jaumrv81vc61+kiMempujsM3Yw7w5qcw=="],
+
+    "gl-spectrogram": ["gl-spectrogram@2.4.0", "", {}, "sha512-hiFOcgHfd/y9yzlVCUv7Q9Z00SvwB85N5LdXdXTBJfRQi5A+t1Br4Pu3ZKJ31/DCGhIiTwYf0IMnM3qETuIW8A=="],
 
     "glob-parent": ["glob-parent@5.1.2", "", { "dependencies": { "is-glob": "^4.0.1" } }, "sha512-AOIgSQCepiJYwP3ARnGx+5VnTu2HBYdzbGP45eLw1vr3zB3vZLeyed1sC9hnbcOc9/SrMyM5RPQrkGz4aS9Zow=="],
 
