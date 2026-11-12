@@ -83,6 +83,7 @@ import {
 import { ArrangedTake } from "@/registry-audio/bases/base/audio/elements/arranged-clip";
 import {
   ClipSpectrogram,
+  SpectrogramAxis,
   type SpectrogramScale,
 } from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
 import {
@@ -2398,6 +2399,12 @@ function ClipLane({
                       position={takeClock}
                     />
                   ) : null}
+                  {view === "wave" || !sound ? null : (
+                    <SpectrogramAxis
+                      sampleRate={sound.sampleRate}
+                      scale={view}
+                    />
+                  )}
                   <SoundClips
                     clips={clips}
                     hidden={recording}

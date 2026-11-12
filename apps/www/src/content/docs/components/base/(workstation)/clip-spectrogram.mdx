@@ -5,7 +5,7 @@ description: "A clip's recording drawn as a spectrogram, computed on the GPU at 
 
 ## Installation
 
-<Install name="clip-spectrogram" packages="gl-spectrogram" />
+<Install name="clip-spectrogram" packages="@audio-ui/engine gl-spectrogram" />
 
 ## Usage
 
@@ -30,5 +30,13 @@ import { ClipSpectrogram } from "@/components/audio-ui/clip-spectrogram";
 | `sampleRate` | `number` | The recording's rate, in hertz. |
 | `scale` | `"log" \| "mel" \| "erb" \| "lin"` | The frequency axis. Default `"log"`. |
 | `gain` | `number` | A factor on the picture, as a clip's level plays. Default `1`. |
+
+Over a clip the pointer reads the cell under it, its frequency and level, in a small label. `SpectrogramAxis` draws the frequency labels down the left edge of the lane, on the same `scale`; put it in the lane with the clips and it holds still as the lane scrolls.
+
+```tsx
+import { SpectrogramAxis } from "@/components/audio-ui/clip-spectrogram";
+
+<SpectrogramAxis sampleRate={sound.sampleRate} scale="log" />;
+```
 
 It needs WebGL 2 and draws nothing without it. A reversed, looped or warped clip is drawn from its source in order.

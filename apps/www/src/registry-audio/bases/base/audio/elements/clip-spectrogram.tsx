@@ -1,6 +1,13 @@
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import type Spectrogram from "gl-spectrogram";
-import type { Scale } from "gl-spectrogram";
-import { type ComponentProps, useLayoutEffect, useRef } from "react";
+import type { Axis, Cell, Scale } from "gl-spectrogram";
+import {
+  type ComponentProps,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   type ClipReading,
@@ -159,6 +166,7 @@ function ClipSpectrogram({
   scale?: SpectrogramScale;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
+  const [reading, setReading] = useState<Reading | null>(null);
   useLayoutEffect(() => {
     const canvas = ref.current;
     const body = canvas?.parentElement;
@@ -167,6 +175,31 @@ function ClipSpectrogram({
     }
     const view = canvas.closest<HTMLElement>('[data-slot="timeline-viewport"]');
     const held: Held = { gone: false, paints: 0, renderer: null };
+    // The cell under the pointer: its frequency and level, read where the picture is drawn.
+    const moved = (event: PointerEvent) => {
+      const box = canvas.getBoundingClientRect();
+      const x = event.clientX - box.left;
+      const y = event.clientY - box.top;
+      const cell =
+        x >= 0 && y >= 0 && x <= box.width && y <= box.height
+          ? (held.renderer?.pick(x, y) ?? null)
+          : null;
+      const own = body.getBoundingClientRect();
+      setReading(
+        cell
+          ? {
+              left: event.clientX - own.left,
+              text: readingOf(cell, held.renderer?.levels[0] ?? -80),
+              height: own.height,
+              top: event.clientY - own.top,
+              width: own.width,
+            }
+          : null
+      );
+    };
+    const left = () => setReading(null);
+    view?.addEventListener("pointermove", moved, { passive: true });
+    view?.addEventListener("pointerleave", left);
     let frame = 0;
     let drawnLeft = 0;
     const draw = async () => {
@@ -208,17 +241,149 @@ function ClipSpectrogram({
       resized.disconnect();
       themed.disconnect();
       view?.removeEventListener("scroll", scrolled);
+      view?.removeEventListener("pointermove", moved);
+      view?.removeEventListener("pointerleave", left);
       held.renderer?.destroy();
     };
   }, [clip, gain, sampleRate, samples, scale]);
   return (
-    <canvas
-      className={cn("pointer-events-none absolute", className)}
-      data-slot="timeline-clip-spectrogram"
-      ref={ref}
-      {...props}
-    />
+    <>
+      <canvas
+        className={cn("pointer-events-none absolute", className)}
+        data-slot="timeline-clip-spectrogram"
+        ref={ref}
+        {...props}
+      />
+      {reading ? (
+        <span
+          className="pointer-events-none absolute z-10 whitespace-nowrap rounded-sm bg-foreground px-1 font-mono text-[10px] text-background tabular-nums"
+          data-slot="timeline-clip-spectrogram-reading"
+          style={{
+            left: Math.min(reading.left + 12, reading.width - 120),
+            top:
+              reading.top + 12 > reading.height - 18
+                ? reading.top - 22
+                : reading.top + 12,
+          }}
+        >
+          {reading.text}
+        </span>
+      ) : null}
+    </>
   );
 }
 
-export { ClipSpectrogram };
+/** Where the pointer is on a clip, and what it reads there. */
+interface Reading {
+  height: number;
+  left: number;
+  text: string;
+  top: number;
+  width: number;
+}
+
+/** A cell as text: the middle of its frequencies and its level, or the floor it is under. */
+const readingOf = (cell: Cell, floor: number) =>
+  `${formatFrequency((cell.low + cell.high) / 2)} · ${
+    cell.level < floor
+      ? `under ${formatLevel(floor, "dB", { decimals: 0, sign: false })}`
+      : formatLevel(cell.level, "dB", { sign: false })
+  }`;
+
+/** The labels of the frequency axis, in hertz: those that fit under the Nyquist limit are shown. */
+const AXIS_TICKS = [
+  50, 100, 200, 500, 1000, 2000, 5000, 10_000, 15_000, 20_000,
+] as const;
+
+/** The shortest gap between two labels, in CSS px. */
+const LABEL_GAP = 14;
+
+/** The labels that fit: from the top down, each at least `LABEL_GAP` px under the one before it. */
+function spacedTicks(axis: Axis, nyquist: number, height: number) {
+  const kept: { at: number; hertz: number }[] = [];
+  let last = Number.POSITIVE_INFINITY;
+  for (const hertz of [...AXIS_TICKS].reverse()) {
+    if (hertz <= axis.low || hertz >= nyquist) {
+      continue;
+    }
+    const at = axis.at(hertz, axis.low, nyquist);
+    // Not at the very top, where the ruler's own labels are.
+    if (at * height <= height - LABEL_GAP && last - at * height >= LABEL_GAP) {
+      kept.push({ at, hertz });
+      last = at * height;
+    }
+  }
+  return kept;
+}
+
+/**
+ * The frequencies a spectrogram's rows stand for, as labels down the left
+ * edge of the lane: each at the row its frequency sits on, by the axis the
+ * picture is spaced on. It holds still as the lane scrolls. Put it in the
+ * lane's box with the clips, given the same `scale` and the recording's
+ * `sampleRate`.
+ */
+function SpectrogramAxis({
+  sampleRate,
+  scale,
+}: {
+  sampleRate: number;
+  scale: SpectrogramScale;
+}) {
+  const [axes, setAxes] = useState<Record<Scale, Axis> | null>(null);
+  useEffect(() => {
+    let live = true;
+    import("gl-spectrogram").then(
+      (module) => {
+        if (live) {
+          setAxes(module.scales);
+        }
+      },
+      () => undefined
+    );
+    return () => {
+      live = false;
+    };
+  }, []);
+  // As tall as the lane it sits in: a percentage of it does not resolve in a flex box.
+  const holder = useRef<HTMLDivElement>(null);
+  const [height, setHeight] = useState(0);
+  useLayoutEffect(() => {
+    const lane = holder.current?.parentElement;
+    if (!lane) {
+      return;
+    }
+    const measure = () => setHeight(lane.clientHeight);
+    measure();
+    const resized = new ResizeObserver(measure);
+    resized.observe(lane);
+    return () => resized.disconnect();
+  }, []);
+  const axis = axes?.[scale];
+  const ticks = axis ? spacedTicks(axis, sampleRate / 2, height) : [];
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none sticky start-0 z-10 w-0"
+      data-slot="spectrogram-axis"
+      ref={holder}
+      style={{ height }}
+    >
+      {/* A strip of its own, on the picture's left: the labels read against a plain ground, each with a tick at the picture's edge. */}
+      <div className="absolute inset-y-0 start-0 w-12 border-e bg-background">
+        {ticks.map(({ at, hertz }) => (
+          <span
+            className="absolute end-0 flex -translate-y-1/2 items-center gap-1 text-[10px] text-muted-foreground tabular-nums"
+            key={hertz}
+            style={{ bottom: Math.min(height - 8, Math.max(8, at * height)) }}
+          >
+            {formatFrequency(hertz)}
+            <span className="h-px w-1.5 bg-foreground/40" />
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+export { ClipSpectrogram, SpectrogramAxis };
