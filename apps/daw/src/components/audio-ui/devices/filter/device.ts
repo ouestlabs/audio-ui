@@ -1,4 +1,4 @@
-import { formatDb, formatHz, SAMPLE_RATE } from "@audio-ui/engine/analysis";
+import { SAMPLE_RATE } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import {
   diodeLadder,
@@ -6,6 +6,7 @@ import {
   moogLadder,
   oberheim,
 } from "@audio-ui/engine/dsp";
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import { FILTER_KERNELS } from "@audio-ui/engine/kernels";
 
 /** The width a filter has when the resonance is at its lowest: flat, a Butterworth. */
@@ -52,7 +53,7 @@ export const filterDevice = defineDevice({
     },
     {
       default: 1200,
-      format: formatHz,
+      format: formatFrequency,
       id: "cutoffHz",
       label: "Cutoff",
       max: 20_000,
@@ -72,7 +73,7 @@ export const filterDevice = defineDevice({
     },
     {
       default: 0,
-      format: formatDb,
+      format: formatLevel,
       id: "driveDb",
       label: "Drive",
       max: 20,

@@ -1,4 +1,3 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import {
   dattorro,
@@ -7,6 +6,7 @@ import {
   schroeder,
   spring,
 } from "@audio-ui/engine/dsp";
+import { formatFrequency } from "@audio-ui/engine/format";
 
 /** The level a tail has fallen to when its decay time is over, in dB: what "decay time" means in a room. */
 export const DECAY_DB = -60;
@@ -60,7 +60,7 @@ export const reverbDevice = defineDevice({
     },
     {
       default: 7000,
-      format: formatHz,
+      format: formatFrequency,
       id: "dampingHz",
       label: "Damping",
       max: 20_000,

@@ -2,9 +2,9 @@ import {
   type BiquadType,
   type EqBand,
   eqResponse,
-  formatHz,
 } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 
 const MAX_DB = 18;
 
@@ -17,7 +17,7 @@ const hz = <const Id extends string>(
 ) =>
   ({
     default: at,
-    format: formatHz,
+    format: formatFrequency,
     id,
     label,
     max,

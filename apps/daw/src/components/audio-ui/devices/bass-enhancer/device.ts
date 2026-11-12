@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { BASS_ENHANCER_KERNELS } from "@audio-ui/engine/kernels";
 
 /** The kernel's two filters: the sub it takes, under the frequency, and the band its harmonics go to, 2.5 times above. */
@@ -21,7 +21,7 @@ export const bassEnhancerDevice = defineDevice({
     { default: true, id: "enabled", kind: "toggle", label: "On" },
     {
       default: 80,
-      format: formatHz,
+      format: formatFrequency,
       id: "frequencyHz",
       label: "Frequency",
       max: 200,

@@ -1,4 +1,4 @@
-import { formatDb } from "@audio-ui/engine/analysis";
+import { formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useCallback } from "react";
 import {
   DeviceFrame,
@@ -26,7 +26,7 @@ const OFF = transientDevice.parameters
   .filter((id) => id !== "enabled");
 
 const formatMark = (db: number) => (db > 0 ? `+${db}` : String(db));
-const describeValue = (value: number) => formatDb(value);
+const describeValue = (value: number) => formatLevel(value);
 const getAriaLabel = (axis: "x" | "y") => (axis === "x" ? "Sustain" : "Attack");
 
 interface TransientPanelProps {

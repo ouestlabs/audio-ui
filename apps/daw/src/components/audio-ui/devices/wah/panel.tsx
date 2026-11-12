@@ -1,4 +1,4 @@
-import { formatDb, formatHz } from "@audio-ui/engine/analysis";
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
@@ -61,7 +61,7 @@ const FREE_OFF = ["division"] as const;
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${formatDb(point.y)}`;
+  `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 
 interface WahPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */

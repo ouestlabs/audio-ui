@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { WAH_KERNELS } from "@audio-ui/engine/kernels";
 import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
 import { lfoRate, SYNCED_RATE_PARAMETERS } from "@/lib/synced-rate";
@@ -29,7 +29,7 @@ export const wahDevice = defineDevice({
     },
     {
       default: 400,
-      format: formatHz,
+      format: formatFrequency,
       id: "frequencyHz",
       label: "Frequency",
       max: 5000,
@@ -39,7 +39,7 @@ export const wahDevice = defineDevice({
     },
     {
       default: 3000,
-      format: formatHz,
+      format: formatFrequency,
       id: "rangeHz",
       label: "Range",
       max: 6000,

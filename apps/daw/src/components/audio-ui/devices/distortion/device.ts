@@ -1,6 +1,6 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
 import { distortion } from "@audio-ui/engine/dsp";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { oversamplingSeconds } from "@/lib/oversampling";
 
 const TABLE_SAMPLES = 16_384;
@@ -48,7 +48,7 @@ export const distortionDevice = defineDevice({
     },
     {
       default: 6000,
-      format: formatHz,
+      format: formatFrequency,
       id: "toneHz",
       label: "Tone",
       max: 20_000,

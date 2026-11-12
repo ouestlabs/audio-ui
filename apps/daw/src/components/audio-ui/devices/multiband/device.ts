@@ -1,5 +1,6 @@
-import { biquadResponse, formatHz } from "@audio-ui/engine/analysis";
+import { biquadResponse } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 
 /** The Q of each biquad of a crossover: two in a row are a Linkwitz-Riley filter, whose halves add back to a flat response. */
 export const CROSSOVER_Q = Math.SQRT1_2;
@@ -26,7 +27,7 @@ export const multibandDevice = defineDevice({
     { default: true, id: "enabled", kind: "toggle", label: "On" },
     {
       default: 200,
-      format: formatHz,
+      format: formatFrequency,
       id: "lowHz",
       label: "Low split",
       max: 1000,
@@ -36,7 +37,7 @@ export const multibandDevice = defineDevice({
     },
     {
       default: 3000,
-      format: formatHz,
+      format: formatFrequency,
       id: "highHz",
       label: "High split",
       max: 12_000,

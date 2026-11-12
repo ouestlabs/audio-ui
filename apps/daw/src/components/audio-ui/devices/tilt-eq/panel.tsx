@@ -1,4 +1,4 @@
-import { formatDb, formatHz } from "@audio-ui/engine/analysis";
+import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useMemo } from "react";
 import {
   DeviceFrame,
@@ -32,7 +32,7 @@ const OFF = tiltEqDevice.parameters
 
 const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${formatDb(point.y)}`;
+  `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 
 interface TiltEqPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */

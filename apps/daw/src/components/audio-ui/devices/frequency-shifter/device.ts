@@ -1,5 +1,5 @@
-import { formatHz } from "@audio-ui/engine/analysis";
 import { type DeviceState, defineDevice } from "@audio-ui/engine/device";
+import { formatFrequency } from "@audio-ui/engine/format";
 import { FREQUENCY_SHIFTER_KERNELS } from "@audio-ui/engine/kernels";
 
 /**
@@ -47,7 +47,7 @@ export const frequencyShifterDevice = defineDevice({
     },
     {
       default: 440,
-      format: formatHz,
+      format: formatFrequency,
       id: "frequencyHz",
       label: "Frequency",
       max: 5000,
