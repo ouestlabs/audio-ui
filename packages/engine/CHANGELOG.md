@@ -1,5 +1,11 @@
 # @audio-ui/engine
 
+## 0.4.0
+
+### Minor Changes
+
+- b5ff6dd: Format: a new `@audio-ui/engine/format` module writes audio quantities as text the way the standards and the tools do: levels (dBFS, dBTP, LUFS, gain), frequencies and sample rates, times, notes, pans, ratios, tempos and channel layouts. Every function takes the same options (decimals, locale, true minus, spacing, sign, unit), and `createFormatter` binds a set of defaults once.
+
 ## 0.3.0
 
 ### Minor Changes
