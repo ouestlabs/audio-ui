@@ -7,15 +7,15 @@ import {
   type IconProps,
   InsertIcon,
   KnobIcon,
-  NoteIcon,
+  MetronomeIcon,
   PlayheadIcon,
   PlayIcon,
   RackIcon,
   ShapesIcon,
   SparkleIcon,
   SpeakerIcon,
+  TapeIcon,
   TracksIcon,
-  TuningForkIcon,
   WaveformIcon,
 } from "@audio-ui/icons/react";
 import type { ComponentType } from "react";
@@ -33,7 +33,7 @@ const GROUP_ICONS = {
 const SECTION_ICONS = {
   components: GridIcon,
   core: BracesIcon,
-  docs: TuningForkIcon,
+  docs: TapeIcon,
   engine: SpeakerIcon,
   elements: ShapesIcon,
   react: ShapesIcon,
@@ -75,7 +75,7 @@ export function GroupIcon({
 }
 
 const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
-  "/docs": NoteIcon,
+  "/docs": MetronomeIcon,
   "/docs/agents": SparkleIcon,
   "/docs/api": BracesIcon,
   "/docs/get-started": InsertIcon,
