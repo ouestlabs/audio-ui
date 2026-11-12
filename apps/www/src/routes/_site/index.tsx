@@ -87,6 +87,8 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
 const title = "audio/ui: the Audio UI Component Library for React";
 
 export const Route = createFileRoute("/_site/")({
+  // Its audio editor is the registry's, for every framework: each choice of the customizer shows on it.
+  staticData: { customizer: "all" },
   component: IndexPage,
   // The docs do not change while the site runs: read once, not on every visit.
   gcTime: Number.POSITIVE_INFINITY,

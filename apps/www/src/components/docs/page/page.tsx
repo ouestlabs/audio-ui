@@ -17,6 +17,11 @@ import { Button } from "@/components/ui/button";
 import { useFramework } from "@/hooks/use-framework";
 import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { siteConfig } from "@/lib/config";
+import {
+  type CustomizerScope,
+  pageScope,
+} from "@/lib/design-system/customizer-scope";
+import { readRawDoc } from "@/lib/docs/content/docs-text";
 import { twinPage } from "@/lib/docs/content/frameworks";
 import { getPageImage, source } from "@/lib/docs/content/source";
 import {
@@ -40,6 +45,8 @@ export interface DocPageData {
   base: string | null;
   breadcrumbPath: string;
   componentName: string | null;
+  /** What the customizer changes on the page, from its MDX. */
+  customizer: CustomizerScope;
   description: string | null;
   head: PageHead;
   heading: string;
@@ -65,7 +72,7 @@ function componentDocSeo(
 /** Reads a docs page's frontmatter and works out its SEO: a component's page may be another's canonical. */
 export const loadDocPage = createServerFn({ method: "GET" })
   .validator((slugs: string[]) => slugs)
-  .handler(({ data: slugs }): DocPageData => {
+  .handler(async ({ data: slugs }): Promise<DocPageData> => {
     const page = source.getPage(slugs);
     if (!page) {
       throw notFound();
@@ -78,6 +85,7 @@ export const loadDocPage = createServerFn({ method: "GET" })
       base: doc.base ?? null,
       breadcrumbPath: seo?.canonicalPath ?? page.url,
       componentName: isComponentDoc ? (slugs[2] ?? null) : null,
+      customizer: pageScope(await readRawDoc(page.path)),
       description: doc.description ?? null,
       head: buildPageMetadata({
         description:

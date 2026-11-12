@@ -25,6 +25,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { useComponentsLayoutState, useConfig } from "@/hooks/use-config";
+import { useCustomizerScope } from "@/hooks/use-customizer-scope";
 import { useMounted } from "@/hooks/use-mounted";
 import { cn } from "@/lib/utils";
 
@@ -172,8 +173,10 @@ export function FramedLayout({
   // Below `lg` the customizer is a sheet: it starts shut, whatever the sidebar's remembered state.
   const isDesktop = useIsDesktopCustomizer();
   const [sheetOpen, setSheetOpen] = useState(false);
-  const desktopOpen = mounted ? config.customizerOpen : true;
-  const customizerOpen = isDesktop ? desktopOpen : sheetOpen;
+  // A page where nothing follows the customizer shows neither it nor its button.
+  const customizable = useCustomizerScope() !== "none";
+  const desktopOpen = customizable && (mounted ? config.customizerOpen : true);
+  const customizerOpen = customizable && (isDesktop ? desktopOpen : sheetOpen);
 
   // From here the state tells which sidebars are shut: the stored note the page started with is done.
   useEffect(() => {
@@ -254,8 +257,15 @@ export function FramedLayout({
                   </div>
                   {siteEnd}
                 </div>
-                <Separator className="hidden lg:block" orientation="vertical" />
-                <CustomizeToggle />
+                {customizable ? (
+                  <>
+                    <Separator
+                      className="hidden lg:block"
+                      orientation="vertical"
+                    />
+                    <CustomizeToggle />
+                  </>
+                ) : null}
               </div>
             </FrameHeader>
             <FrameContent className="flex min-h-0 flex-1 flex-col [timeline-scope:--frame-y]">
@@ -273,9 +283,11 @@ export function FramedLayout({
           </Frame>
         </InsetPane>
         {/* The choices read the URL: their own boundary keeps the page around them rendered. */}
-        <Suspense fallback={<CustomizerSkeleton />}>
-          <CustomizerPanel />
-        </Suspense>
+        {customizable ? (
+          <Suspense fallback={<CustomizerSkeleton />}>
+            <CustomizerPanel />
+          </Suspense>
+        ) : null}
       </SidebarProvider>
     </CustomizerContext>
   );

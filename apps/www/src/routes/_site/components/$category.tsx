@@ -22,6 +22,8 @@ import { normalizeSlug } from "@/lib/utils";
 import { categories } from "@/registry-audio/bases/categories";
 
 export const Route = createFileRoute("/_site/components/$category")({
+  // The registry draws it: every choice of the customizer shows on it.
+  staticData: { customizer: "all" },
   beforeLoad: ({ params }) => {
     if (!getCategoryInfo(normalizeSlug(params.category))) {
       throw notFound();

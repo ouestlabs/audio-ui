@@ -17,6 +17,8 @@ const allCatalogItems = searchCatalog("");
 const title = "Audio UI Components";
 
 export const Route = createFileRoute("/_site/components/")({
+  // The registry draws it: every choice of the customizer shows on it.
+  staticData: { customizer: "all" },
   component: ComponentsPage,
   head: () =>
     buildPageMetadata({

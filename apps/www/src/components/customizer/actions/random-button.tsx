@@ -32,7 +32,8 @@ function randomItem<T>(array: readonly T[]): T {
   return array[Math.floor(Math.random() * array.length)];
 }
 
-export function RandomButton() {
+/** Shuffles the design: every choice, or only `choices` when given, a locked one keeping its value as the others not given do. */
+export function RandomButton({ choices }: { choices?: ReadonlySet<string> }) {
   const { locks } = useLocks();
   const [params, setParams] = useDesignSystemSearchParams();
   const [config, setConfig] = useConfig();
@@ -84,7 +85,10 @@ export function RandomButton() {
     const pick = <K extends keyof typeof effectiveParams>(
       key: K,
       randomValue: () => (typeof effectiveParams)[K]
-    ) => (locks.has(key) ? effectiveParams[key] : randomValue());
+    ) =>
+      locks.has(key) || (choices && !choices.has(key))
+        ? effectiveParams[key]
+        : randomValue();
 
     const baseColor = pick("baseColor", () => randomItem(BASE_COLORS).name);
     const selectedStyle = pick("style", () => randomItem(STYLES).name);
@@ -153,7 +157,14 @@ export function RandomButton() {
     );
     setParams(paramsToUpdate);
     setConfig((prev) => ({ ...prev, ...newValues }));
-  }, [setParams, setConfig, locks, effectiveParams, fontHeadingChoices]);
+  }, [
+    choices,
+    setParams,
+    setConfig,
+    locks,
+    effectiveParams,
+    fontHeadingChoices,
+  ]);
 
   React.useEffect(() => {
     const down = (e: KeyboardEvent) => {

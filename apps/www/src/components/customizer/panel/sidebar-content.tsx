@@ -1,6 +1,7 @@
 "use client";
 
 import * as React from "react";
+import { CopyCss } from "@/components/customizer/actions/copy-css";
 import { CopyPreset } from "@/components/customizer/actions/copy-preset";
 import { OpenPreset } from "@/components/customizer/actions/open-preset";
 import { RandomButton } from "@/components/customizer/actions/random-button";
@@ -17,6 +18,8 @@ import { StylePicker } from "@/components/customizer/pickers/style-picker";
 import { ThemePicker } from "@/components/customizer/pickers/theme-picker";
 import { FieldGroup } from "@/components/ui/field";
 import { useConfig } from "@/hooks/use-config";
+import { useCustomizerScope } from "@/hooks/use-customizer-scope";
+import { ELEMENT_CHOICES } from "@/lib/design-system/customizer-scope";
 import { FONT_HEADING_OPTIONS, FONTS } from "@/lib/design-system/fonts";
 import { useDesignSystemSearchParams } from "@/lib/design-system/search-params";
 import { getThemesForBaseColor, STYLES } from "@/registry/config";
@@ -44,8 +47,27 @@ export function CustomizerSidebarContent({
   );
 
   const strip = layout === "strip";
-
-  const pickers = (
+  // On a page of the custom elements, the choices that change them alone, and their theme as CSS for the output.
+  const forElements = useCustomizerScope() === "elements";
+  const pickers = forElements ? (
+    <>
+      <StylePicker anchorRef={anchorRef} isMobile={isMobile} styles={STYLES} />
+      <BaseColorPicker anchorRef={anchorRef} isMobile={isMobile} />
+      <ThemePicker
+        anchorRef={anchorRef}
+        isMobile={isMobile}
+        themes={availableThemes}
+      />
+      <FontPicker
+        anchorRef={anchorRef}
+        fonts={FONTS}
+        isMobile={isMobile}
+        label="Font"
+        param="font"
+      />
+      <RadiusPicker anchorRef={anchorRef} isMobile={isMobile} />
+    </>
+  ) : (
     <>
       <BasePicker anchorRef={anchorRef} isMobile={isMobile} />
       <StylePicker anchorRef={anchorRef} isMobile={isMobile} styles={STYLES} />
@@ -76,6 +98,20 @@ export function CustomizerSidebarContent({
       <MenuAccentPicker anchorRef={anchorRef} isMobile={isMobile} />
     </>
   );
+  const actions = forElements ? (
+    <>
+      <CopyCss />
+      <RandomButton choices={ELEMENT_CHOICES} />
+      <ResetButton />
+    </>
+  ) : (
+    <>
+      <CopyPreset />
+      <OpenPreset />
+      <RandomButton />
+      <ResetButton />
+    </>
+  );
 
   return (
     <>
@@ -89,10 +125,7 @@ export function CustomizerSidebarContent({
         {strip ? (
           <div className="flex w-max flex-row gap-2 p-2">
             {pickers}
-            <CopyPreset />
-            <OpenPreset />
-            <RandomButton />
-            <ResetButton />
+            {actions}
           </div>
         ) : (
           <div className="p-2">
@@ -102,10 +135,7 @@ export function CustomizerSidebarContent({
       </div>
       {!strip && (
         <div className="mt-auto flex shrink-0 flex-col gap-0 p-3">
-          <CopyPreset />
-          <OpenPreset />
-          <RandomButton />
-          <ResetButton />
+          {actions}
         </div>
       )}
     </>
