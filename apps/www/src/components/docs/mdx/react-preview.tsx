@@ -342,6 +342,7 @@ function TimelinePreview({ rootProps }: { rootProps?: RootProps }) {
       className={p("Root")}
       duration={32}
       maxZoom={80}
+      minZoom={12}
       snapStep={1}
       {...rootProps}
     >
@@ -420,6 +421,7 @@ function PianoRollPreview({ rootProps }: { rootProps?: RootProps }) {
       className={p("Timeline.Root")}
       duration={8}
       maxZoom={300}
+      minZoom={40}
       snapStep={0.5}
       {...rootProps}
     >

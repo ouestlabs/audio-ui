@@ -110,7 +110,7 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
     also: ["Timeline"],
     entry: "piano-roll",
     lines: [
-      "<Timeline.Root duration={8} snapStep={0.5} maxZoom={300}>",
+      "<Timeline.Root duration={8} snapStep={0.5} minZoom={40} maxZoom={300}>",
       '  <PianoRoll.Root minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">',
       "    <PianoRoll.Keys>",
       "      <PianoRoll.Rows>",
@@ -172,7 +172,7 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
   timeline: {
     entry: "timeline",
     lines: [
-      "<Timeline.Root duration={32} snapStep={1} maxZoom={80}>",
+      "<Timeline.Root duration={32} snapStep={1} minZoom={12} maxZoom={80}>",
       "  <Timeline.Viewport>",
       '    <Timeline.Ruler aria-label="Position">',
       "      <Timeline.Mark value={0}>1</Timeline.Mark>",

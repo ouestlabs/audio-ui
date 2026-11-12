@@ -144,7 +144,7 @@ description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: it
   }
 </style>
 
-<audio-ui-timeline duration="8" snap-step="0.5" max-zoom="300">
+<audio-ui-timeline duration="8" snap-step="0.5" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys>
       <audio-ui-piano aria-label="Keys">
@@ -180,7 +180,7 @@ description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: it
 <CodeFile title="piano-roll.html" open>
 
 ```html
-<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5" max-zoom="300">
+<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
@@ -225,7 +225,7 @@ import "@audio-ui/elements/piano-roll";
 </script>
 
 <template>
-  <audio-ui-timeline duration="8" snap-step="0.5" max-zoom="300">
+  <audio-ui-timeline duration="8" snap-step="0.5" min-zoom="40" max-zoom="300">
     <audio-ui-piano-roll min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
       <audio-ui-piano-roll-keys>
         <audio-ui-piano aria-label="Keys">
@@ -377,7 +377,7 @@ import "@audio-ui/elements/piano-roll";
 </script>
 
 <template>
-  <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5" max-zoom="300">
+  <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5" min-zoom="40" max-zoom="300">
     <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
       <audio-ui-piano-roll-keys class="h-48 border-e">
         <audio-ui-piano class="block h-full" aria-label="Keys">
@@ -413,7 +413,7 @@ import "@audio-ui/elements/piano-roll";
   import "@audio-ui/elements/piano-roll";
 </script>
 
-<audio-ui-timeline duration="8" snap-step="0.5" max-zoom="300">
+<audio-ui-timeline duration="8" snap-step="0.5" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
     <audio-ui-piano-roll-keys>
       <audio-ui-piano aria-label="Keys">
@@ -565,7 +565,7 @@ import "@audio-ui/elements/piano-roll";
   import "@audio-ui/elements/piano-roll";
 </script>
 
-<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5" max-zoom="300">
+<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
@@ -773,7 +773,7 @@ The roll takes its length from the timeline around it: `duration` is in beats he
   }
 </style>
 
-<audio-ui-timeline duration="16" snap-step="0.5" max-zoom="300">
+<audio-ui-timeline duration="16" snap-step="0.5" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys>
       <audio-ui-piano aria-label="Keys">
@@ -809,7 +809,7 @@ The roll takes its length from the timeline around it: `duration` is in beats he
 <CodeFile title="piano-roll.html" open>
 
 ```html
-<audio-ui-timeline class="block w-full max-w-xl" duration="16" snap-step="0.5" max-zoom="300">
+<audio-ui-timeline class="block w-full max-w-xl" duration="16" snap-step="0.5" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
@@ -854,7 +854,7 @@ import "@audio-ui/elements/piano-roll";
 </script>
 
 <template>
-  <audio-ui-timeline duration="16" snap-step="0.5" max-zoom="300">
+  <audio-ui-timeline duration="16" snap-step="0.5" min-zoom="40" max-zoom="300">
     <audio-ui-piano-roll min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
       <audio-ui-piano-roll-keys>
         <audio-ui-piano aria-label="Keys">
@@ -1006,7 +1006,7 @@ import "@audio-ui/elements/piano-roll";
 </script>
 
 <template>
-  <audio-ui-timeline class="block w-full max-w-xl" duration="16" snap-step="0.5" max-zoom="300">
+  <audio-ui-timeline class="block w-full max-w-xl" duration="16" snap-step="0.5" min-zoom="40" max-zoom="300">
     <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
       <audio-ui-piano-roll-keys class="h-48 border-e">
         <audio-ui-piano class="block h-full" aria-label="Keys">
@@ -1042,7 +1042,7 @@ import "@audio-ui/elements/piano-roll";
   import "@audio-ui/elements/piano-roll";
 </script>
 
-<audio-ui-timeline duration="16" snap-step="0.5" max-zoom="300">
+<audio-ui-timeline duration="16" snap-step="0.5" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
     <audio-ui-piano-roll-keys>
       <audio-ui-piano aria-label="Keys">
@@ -1194,7 +1194,7 @@ import "@audio-ui/elements/piano-roll";
   import "@audio-ui/elements/piano-roll";
 </script>
 
-<audio-ui-timeline class="block w-full max-w-xl" duration="16" snap-step="0.5" max-zoom="300">
+<audio-ui-timeline class="block w-full max-w-xl" duration="16" snap-step="0.5" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
@@ -1369,7 +1369,7 @@ In React, the same control is the [PianoRoll](/docs/react/piano-roll) primitive 
   }
 </style>
 
-<audio-ui-timeline duration="8" snap-step="0.25" max-zoom="300">
+<audio-ui-timeline duration="8" snap-step="0.25" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys>
       <audio-ui-piano aria-label="Keys">
@@ -1405,7 +1405,7 @@ In React, the same control is the [PianoRoll](/docs/react/piano-roll) primitive 
 <CodeFile title="piano-roll.html" open>
 
 ```html
-<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.25" max-zoom="300">
+<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.25" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
@@ -1450,7 +1450,7 @@ import "@audio-ui/elements/piano-roll";
 </script>
 
 <template>
-  <audio-ui-timeline duration="8" snap-step="0.25" max-zoom="300">
+  <audio-ui-timeline duration="8" snap-step="0.25" min-zoom="40" max-zoom="300">
     <audio-ui-piano-roll min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
       <audio-ui-piano-roll-keys>
         <audio-ui-piano aria-label="Keys">
@@ -1602,7 +1602,7 @@ import "@audio-ui/elements/piano-roll";
 </script>
 
 <template>
-  <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.25" max-zoom="300">
+  <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.25" min-zoom="40" max-zoom="300">
     <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
       <audio-ui-piano-roll-keys class="h-48 border-e">
         <audio-ui-piano class="block h-full" aria-label="Keys">
@@ -1638,7 +1638,7 @@ import "@audio-ui/elements/piano-roll";
   import "@audio-ui/elements/piano-roll";
 </script>
 
-<audio-ui-timeline duration="8" snap-step="0.25" max-zoom="300">
+<audio-ui-timeline duration="8" snap-step="0.25" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
     <audio-ui-piano-roll-keys>
       <audio-ui-piano aria-label="Keys">
@@ -1790,7 +1790,7 @@ import "@audio-ui/elements/piano-roll";
   import "@audio-ui/elements/piano-roll";
 </script>
 
-<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.25" max-zoom="300">
+<audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.25" min-zoom="40" max-zoom="300">
   <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
