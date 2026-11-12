@@ -102,6 +102,59 @@ import { Pad } from "@audio-ui/react";
 </Pad.Root>
 ```
 
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### Disabled
+
+`disabled` stops every pad from sounding and from taking the focus, and sets `data-disabled` on them for the look.
+
+<ReactPreview name="pad" example="disabled">
+
+<ForStyling only="css">
+
+<CodeFile title="pad.tsx" open>
+
+```tsx
+import { Pad } from "@audio-ui/react";
+import styles from "./pad.module.css";
+
+<Pad.Root className={styles.root} aria-label="Drums" disabled={true}>
+  <Pad.Item className={styles.item} value="kick">Kick</Pad.Item>
+  <Pad.Item className={styles.item} value="snare">Snare</Pad.Item>
+  <Pad.Item className={styles.item} value="hat">Hat</Pad.Item>
+  <Pad.Item className={styles.item} value="clap">Clap</Pad.Item>
+</Pad.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="pad.tsx" open>
+
+```tsx
+import { Pad } from "@audio-ui/react";
+
+<Pad.Root className="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums" disabled={true}>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="clap">Clap</Pad.Item>
+</Pad.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
+
 ## API reference
 
 ### Root

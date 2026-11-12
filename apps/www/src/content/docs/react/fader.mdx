@@ -144,6 +144,114 @@ import { Fader } from "@audio-ui/react";
 </Fader.Root>
 ```
 
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### Custom range
+
+`min` and `max` set the travel: here a trim of plus or minus 12 dB, resting at 0.
+
+<ReactPreview name="fader" example="range">
+
+<ForStyling only="css">
+
+<CodeFile title="fader.tsx" open>
+
+```tsx
+import { Fader } from "@audio-ui/react";
+import styles from "./fader.module.css";
+
+<Fader.Root className={styles.root} defaultValue={0} max={12} min={-12}>
+  <Fader.Control className={styles.control}>
+    <Fader.Track className={styles.track}>
+      <Fader.Indicator className={styles.indicator} />
+    </Fader.Track>
+    <Fader.Thumb className={styles.thumb} aria-label="Volume" />
+  </Fader.Control>
+</Fader.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="fader.tsx" open>
+
+```tsx
+import { Fader } from "@audio-ui/react";
+
+<Fader.Root className="relative h-40" defaultValue={0} max={12} min={-12}>
+  <Fader.Control className="relative flex h-full w-auto touch-none select-none flex-col items-center">
+    <Fader.Track className="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
+      <Fader.Indicator className="absolute w-full select-none bg-primary" />
+    </Fader.Track>
+    <Fader.Thumb className="absolute z-10 block h-6 w-4 shrink-0 cursor-grab select-none rounded-md border border-ring bg-card outline-none transition-shadow hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing active:ring-3 active:ring-ring/50" aria-label="Volume" />
+  </Fader.Control>
+</Fader.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+### Anchored indicator
+
+`anchor` is the value the indicator grows from: on a trim, it fills away from 0 in either direction rather than from the bottom.
+
+<ReactPreview name="fader" example="anchor">
+
+<ForStyling only="css">
+
+<CodeFile title="fader.tsx" open>
+
+```tsx
+import { Fader } from "@audio-ui/react";
+import styles from "./fader.module.css";
+
+<Fader.Root className={styles.root} defaultValue={4} anchor={0} max={12} min={-12}>
+  <Fader.Control className={styles.control}>
+    <Fader.Track className={styles.track}>
+      <Fader.Indicator className={styles.indicator} />
+    </Fader.Track>
+    <Fader.Thumb className={styles.thumb} aria-label="Volume" />
+  </Fader.Control>
+</Fader.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="fader.tsx" open>
+
+```tsx
+import { Fader } from "@audio-ui/react";
+
+<Fader.Root className="relative h-40" defaultValue={4} anchor={0} max={12} min={-12}>
+  <Fader.Control className="relative flex h-full w-auto touch-none select-none flex-col items-center">
+    <Fader.Track className="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
+      <Fader.Indicator className="absolute w-full select-none bg-primary" />
+    </Fader.Track>
+    <Fader.Thumb className="absolute z-10 block h-6 w-4 shrink-0 cursor-grab select-none rounded-md border border-ring bg-card outline-none transition-shadow hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing active:ring-3 active:ring-ring/50" aria-label="Volume" />
+  </Fader.Control>
+</Fader.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
+
 ## API reference
 
 ### Root

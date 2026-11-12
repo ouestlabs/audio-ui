@@ -159,6 +159,73 @@ import { Waveform } from "@audio-ui/react";
 </Waveform.Root>
 ```
 
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### A longer sound
+
+`duration` is the sound's length in the unit `value` is in: the position and the region scale with it.
+
+<ReactPreview name="waveform" example="long">
+
+<ForStyling only="css">
+
+<CodeFile title="waveform.tsx" open>
+
+```tsx
+import { Waveform } from "@audio-ui/react";
+import styles from "./waveform.module.css";
+
+// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+const peaks: number[] = [];
+
+<Waveform.Root className={styles.root} duration={240} peaks={peaks} defaultValue={90}>
+  <Waveform.Control className={styles.control} aria-label="Seek">
+    <Waveform.Canvas className={styles.canvas} />
+    <Waveform.Region className={styles.region} defaultValue={[54, 72]}>
+      <Waveform.RegionHandle className={styles.regionHandle} edge="start" aria-label="Loop start" />
+      <Waveform.RegionHandle className={styles.regionHandle} edge="end" aria-label="Loop end" />
+    </Waveform.Region>
+    <Waveform.Playhead className={styles.playhead} />
+  </Waveform.Control>
+</Waveform.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="waveform.tsx" open>
+
+```tsx
+import { Waveform } from "@audio-ui/react";
+
+// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+const peaks: number[] = [];
+
+<Waveform.Root className="block w-full max-w-xl" duration={240} peaks={peaks} defaultValue={90}>
+  <Waveform.Control className="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
+    <Waveform.Canvas className="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)] block size-full" />
+    <Waveform.Region className="inset-y-0 bg-primary/10" defaultValue={[54, 72]}>
+      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Loop start" />
+      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Loop end" />
+    </Waveform.Region>
+    <Waveform.Playhead className="inset-y-0 w-0.5 bg-foreground" />
+  </Waveform.Control>
+</Waveform.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
+
 ## API reference
 
 ### Root

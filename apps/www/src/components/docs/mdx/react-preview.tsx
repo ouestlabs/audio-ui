@@ -88,10 +88,10 @@ function KnobPreview({ rootProps }: { rootProps?: RootProps }) {
   );
 }
 
-function FaderPreview() {
+function FaderPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("fader");
   return (
-    <Fader.Root className={p("Root")} defaultValue={-6}>
+    <Fader.Root className={p("Root")} defaultValue={-6} {...rootProps}>
       <Fader.Control className={p("Control")}>
         <Fader.Track className={p("Track")}>
           <Fader.Indicator className={p("Indicator")} />
@@ -104,10 +104,10 @@ function FaderPreview() {
 
 const PADS = ["Kick", "Snare", "Clap", "Rim", "Hat", "Open", "Tom", "Ride"];
 
-function PadPreview() {
+function PadPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("pad");
   return (
-    <Pad.Root aria-label="Drums" className={p("Root")}>
+    <Pad.Root aria-label="Drums" className={p("Root")} {...rootProps}>
       {PADS.map((label) => (
         <Pad.Item className={p("Item")} key={label} value={label}>
           {label}
@@ -117,10 +117,14 @@ function PadPreview() {
   );
 }
 
-function XYPadPreview() {
+function XYPadPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("xypad");
   return (
-    <XYPad.Root className={p("Root")} defaultValue={{ x: 30, y: 70 }}>
+    <XYPad.Root
+      className={p("Root")}
+      defaultValue={{ x: 30, y: 70 }}
+      {...rootProps}
+    >
       <XYPad.Control className={p("Control")}>
         <XYPad.Thumb aria-label="Filter" className={p("Thumb")} />
       </XYPad.Control>
@@ -130,7 +134,7 @@ function XYPadPreview() {
 }
 
 /** Two channels moving like a signal, from a live source the meter follows. */
-function MeterPreview() {
+function MeterPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("meter");
   const source = useMemo(
     () => createSource({ levels: [-60, -60], peaks: [-60, -60] }),
@@ -156,7 +160,13 @@ function MeterPreview() {
     return () => cancelAnimationFrame(frame);
   }, [source]);
   return (
-    <Meter.Root className={p("Root")} max={6} min={-60} source={source}>
+    <Meter.Root
+      className={p("Root")}
+      max={6}
+      min={-60}
+      source={source}
+      {...rootProps}
+    >
       <Meter.Channels>
         {(index) => (
           <Meter.Channel
@@ -179,13 +189,14 @@ const PATTERN = [
   "x.x.x.x.x.x.x.xx",
 ].map((row) => [...row].map((step) => step === "x"));
 
-function SequencerPreview() {
+function SequencerPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("sequencer");
   return (
     <Sequencer.Root
       aria-label="Pattern"
       className={p("Root")}
       defaultValue={PATTERN}
+      {...rootProps}
     >
       <Sequencer.Rows>
         {(row) => (
@@ -200,7 +211,7 @@ function SequencerPreview() {
   );
 }
 
-function PianoPreview() {
+function PianoPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("piano");
   return (
     <Piano.Root
@@ -208,6 +219,7 @@ function PianoPreview() {
       className={p("Root")}
       maxPitch={71}
       minPitch={48}
+      {...rootProps}
     >
       <Piano.Keys>
         {(pitch) => <Piano.Key className={p("Key")} pitch={pitch} />}
@@ -224,13 +236,14 @@ const ENVELOPE = [
   { x: 1, y: 0 },
 ];
 
-function EnvelopePreview() {
+function EnvelopePreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("envelope");
   return (
     <Envelope.Root
       aria-label="Amp envelope"
       className={p("Root")}
       defaultValue={ENVELOPE}
+      {...rootProps}
     >
       <Envelope.Graph className={p("Graph")}>
         <Envelope.Fill className={p("Fill")} />
@@ -252,7 +265,7 @@ function EnvelopePreview() {
 const bell = (hz: number, { x, y }: { x: number; y: number }) =>
   y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
 
-function PlotPreview() {
+function PlotPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("plot");
   // The curve follows the handle as it is dragged.
   const [band, setBand] = useState({ x: 800, y: 6 });
@@ -265,6 +278,7 @@ function PlotPreview() {
       minX={20}
       minY={-18}
       scaleX="log"
+      {...rootProps}
     >
       <Plot.Grid className={p("Grid")} x={{}} y={{}} />
       <Plot.Graph>
@@ -285,7 +299,7 @@ const PEAKS = Array.from({ length: 480 }, (_, index) => {
   return envelope * (0.35 + 0.65 * Math.abs(Math.sin(index / 3.3)));
 });
 
-function WaveformPreview() {
+function WaveformPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("waveform");
   return (
     <Waveform.Root
@@ -293,6 +307,7 @@ function WaveformPreview() {
       defaultValue={30}
       duration={96}
       peaks={PEAKS}
+      {...rootProps}
     >
       <Waveform.Control aria-label="Seek" className={p("Control")}>
         <Waveform.Canvas className={p("Canvas")} />
@@ -320,10 +335,15 @@ const TRACKS = [
   { clip: "Bass line", length: 12, name: "Bass", start: 8 },
 ];
 
-function TimelinePreview() {
+function TimelinePreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("timeline");
   return (
-    <Timeline.Root className={p("Root")} duration={32} snapStep={1}>
+    <Timeline.Root
+      className={p("Root")}
+      duration={32}
+      snapStep={1}
+      {...rootProps}
+    >
       <Timeline.Viewport className={p("Viewport")}>
         <Timeline.Ruler aria-label="Position" className={p("Ruler")}>
           {BARS.map((bar) => (
@@ -392,10 +412,15 @@ const NOTES = [
   { id: "f", length: 1.5, pitch: 65, start: 6.5, velocity: 0.7 },
 ];
 
-function PianoRollPreview() {
+function PianoRollPreview({ rootProps }: { rootProps?: RootProps }) {
   const p = usePart("piano-roll");
   return (
-    <Timeline.Root className={p("Timeline.Root")} duration={8} snapStep={0.5}>
+    <Timeline.Root
+      className={p("Timeline.Root")}
+      duration={8}
+      snapStep={0.5}
+      {...rootProps}
+    >
       <PianoRoll.Root
         className={p("Root")}
         defaultValue={NOTES}

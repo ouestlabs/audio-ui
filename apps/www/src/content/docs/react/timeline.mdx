@@ -255,6 +255,182 @@ import { Timeline } from "@audio-ui/react";
 </Timeline.Root>
 ```
 
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### A longer timeline
+
+`duration` is in your units: 64 gives the arrangement twice the room, and the clips keep their length.
+
+<ReactPreview name="timeline" example="longer">
+
+<ForStyling only="css">
+
+<CodeFile title="timeline.tsx" open>
+
+```tsx
+import { Timeline } from "@audio-ui/react";
+import styles from "./timeline.module.css";
+
+const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
+
+<Timeline.Root className={styles.root} duration={64} snapStep={1}>
+  <Timeline.Viewport className={styles.viewport}>
+    <Timeline.Ruler className={styles.ruler} aria-label="Position">
+      <Timeline.Mark className={styles.mark} value={0}>1</Timeline.Mark>
+      <Timeline.Mark className={styles.mark} value={8}>3</Timeline.Mark>
+      <Timeline.Range className={styles.range} aria-label="Loop" defaultValue={[8, 16]} />
+    </Timeline.Ruler>
+    <Timeline.Track className={styles.track}>
+      <Timeline.TrackHeader className={styles.trackHeader}>Drums</Timeline.TrackHeader>
+      <Timeline.Lane className={styles.lane}>
+        <Timeline.Clip className={styles.clip} aria-label="Beat" defaultValue={beat}>
+          <Timeline.ClipHeader className={styles.clipHeader}>Beat</Timeline.ClipHeader>
+          <Timeline.ClipHandle className={styles.clipHandle} edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className={styles.clipHandle} edge="end" aria-label="Trim end" />
+        </Timeline.Clip>
+        <Timeline.Playhead className={styles.playhead} />
+      </Timeline.Lane>
+    </Timeline.Track>
+  </Timeline.Viewport>
+  <Timeline.Navigator className={styles.navigator}>
+    <Timeline.NavigatorWindow className={styles.navigatorWindow} aria-label="View" />
+  </Timeline.Navigator>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="timeline.tsx" open>
+
+```tsx
+import { Timeline } from "@audio-ui/react";
+
+const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
+
+<Timeline.Root className="block w-full max-w-xl" duration={64} snapStep={1}>
+  <Timeline.Viewport className="rounded-md border">
+    <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
+      <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
+      <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={8}>3</Timeline.Mark>
+      <Timeline.Range className="inset-y-0 bg-primary/15" aria-label="Loop" defaultValue={[8, 16]} />
+    </Timeline.Ruler>
+    <Timeline.Track className="h-14 border-t flex">
+      <Timeline.TrackHeader className="w-20 border-e bg-background p-2 text-xs">Drums</Timeline.TrackHeader>
+      <Timeline.Lane className="relative min-w-0 flex-1">
+        <Timeline.Clip className="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" defaultValue={beat}>
+          <Timeline.ClipHeader className="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">Beat</Timeline.ClipHeader>
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Trim end" />
+        </Timeline.Clip>
+        <Timeline.Playhead className="inset-y-0 w-px bg-foreground" />
+      </Timeline.Lane>
+    </Timeline.Track>
+  </Timeline.Viewport>
+  <Timeline.Navigator className="mt-2 h-3 rounded-sm bg-muted relative">
+    <Timeline.NavigatorWindow className="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
+  </Timeline.Navigator>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+### A coarser grid
+
+`snapStep` is the distance between grid lines, and what a dragged clip snaps to: four units, a bar.
+
+<ReactPreview name="timeline" example="coarse">
+
+<ForStyling only="css">
+
+<CodeFile title="timeline.tsx" open>
+
+```tsx
+import { Timeline } from "@audio-ui/react";
+import styles from "./timeline.module.css";
+
+const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
+
+<Timeline.Root className={styles.root} duration={32} snapStep={4}>
+  <Timeline.Viewport className={styles.viewport}>
+    <Timeline.Ruler className={styles.ruler} aria-label="Position">
+      <Timeline.Mark className={styles.mark} value={0}>1</Timeline.Mark>
+      <Timeline.Mark className={styles.mark} value={8}>3</Timeline.Mark>
+      <Timeline.Range className={styles.range} aria-label="Loop" defaultValue={[8, 16]} />
+    </Timeline.Ruler>
+    <Timeline.Track className={styles.track}>
+      <Timeline.TrackHeader className={styles.trackHeader}>Drums</Timeline.TrackHeader>
+      <Timeline.Lane className={styles.lane}>
+        <Timeline.Clip className={styles.clip} aria-label="Beat" defaultValue={beat}>
+          <Timeline.ClipHeader className={styles.clipHeader}>Beat</Timeline.ClipHeader>
+          <Timeline.ClipHandle className={styles.clipHandle} edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className={styles.clipHandle} edge="end" aria-label="Trim end" />
+        </Timeline.Clip>
+        <Timeline.Playhead className={styles.playhead} />
+      </Timeline.Lane>
+    </Timeline.Track>
+  </Timeline.Viewport>
+  <Timeline.Navigator className={styles.navigator}>
+    <Timeline.NavigatorWindow className={styles.navigatorWindow} aria-label="View" />
+  </Timeline.Navigator>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="timeline.tsx" open>
+
+```tsx
+import { Timeline } from "@audio-ui/react";
+
+const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
+
+<Timeline.Root className="block w-full max-w-xl" duration={32} snapStep={4}>
+  <Timeline.Viewport className="rounded-md border">
+    <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
+      <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
+      <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={8}>3</Timeline.Mark>
+      <Timeline.Range className="inset-y-0 bg-primary/15" aria-label="Loop" defaultValue={[8, 16]} />
+    </Timeline.Ruler>
+    <Timeline.Track className="h-14 border-t flex">
+      <Timeline.TrackHeader className="w-20 border-e bg-background p-2 text-xs">Drums</Timeline.TrackHeader>
+      <Timeline.Lane className="relative min-w-0 flex-1">
+        <Timeline.Clip className="inset-y-1 overflow-hidden rounded-sm bg-primary/15 data-selected:ring-2 data-selected:ring-ring" aria-label="Beat" defaultValue={beat}>
+          <Timeline.ClipHeader className="cursor-grab truncate bg-primary px-1.5 text-[10px] text-primary-foreground">Beat</Timeline.ClipHeader>
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className="absolute inset-y-0 w-1.5 cursor-ew-resize [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Trim end" />
+        </Timeline.Clip>
+        <Timeline.Playhead className="inset-y-0 w-px bg-foreground" />
+      </Timeline.Lane>
+    </Timeline.Track>
+  </Timeline.Viewport>
+  <Timeline.Navigator className="mt-2 h-3 rounded-sm bg-muted relative">
+    <Timeline.NavigatorWindow className="inset-y-0 cursor-grab rounded-sm bg-primary/25" aria-label="View" />
+  </Timeline.Navigator>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
+
 ## API reference
 
 ### Root

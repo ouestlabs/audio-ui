@@ -116,6 +116,67 @@ import { Meter } from "@audio-ui/react";
 </Meter.Root>
 ```
 
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### Narrow range
+
+`min` and `max` set the levels the bar spans: here the top 24 dB, where a mix meter spends its time.
+
+<ReactPreview name="meter" example="range">
+
+<ForStyling only="css">
+
+<CodeFile title="meter.tsx" open>
+
+```tsx
+import { Meter } from "@audio-ui/react";
+import styles from "./meter.module.css";
+
+<Meter.Root className={styles.root} min={-24} max={0} value={[-18, -10]}>
+  <Meter.Channels>
+    {(index) => (
+      <Meter.Channel className={styles.channel} index={index} aria-label={index === 0 ? "Left" : "Right"}>
+        <Meter.Indicator className={styles.indicator} />
+        <Meter.Peak className={styles.peak} />
+      </Meter.Channel>
+    )}
+  </Meter.Channels>
+</Meter.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="meter.tsx" open>
+
+```tsx
+import { Meter } from "@audio-ui/react";
+
+<Meter.Root className="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min={-24} max={0} value={[-18, -10]}>
+  <Meter.Channels>
+    {(index) => (
+      <Meter.Channel className="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index={index} aria-label={index === 0 ? "Left" : "Right"}>
+        <Meter.Indicator className="absolute bottom-0 block bg-primary" />
+        <Meter.Peak className="absolute inset-x-0 block h-0.5 bg-foreground" />
+      </Meter.Channel>
+    )}
+  </Meter.Channels>
+</Meter.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
+
 ## API reference
 
 ### Root

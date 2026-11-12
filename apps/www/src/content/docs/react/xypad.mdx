@@ -132,6 +132,106 @@ import { XYPad } from "@audio-ui/react";
 </XYPad.Root>
 ```
 
+{/* examples:start: written by `bun scripts/react-usage.ts --write` */}
+
+## Examples
+
+### Coarse steps
+
+`stepX` and `stepY` round each axis to a multiple of them: the point jumps from tens to tens.
+
+<ReactPreview name="xypad" example="coarse">
+
+<ForStyling only="css">
+
+<CodeFile title="xypad.tsx" open>
+
+```tsx
+import { XYPad } from "@audio-ui/react";
+import styles from "./xypad.module.css";
+
+<XYPad.Root className={styles.root} stepX={10} stepY={10}>
+  <XYPad.Control className={styles.control}>
+    <XYPad.Thumb className={styles.thumb} aria-label="Filter" />
+  </XYPad.Control>
+  <XYPad.Value className={styles.value} />
+</XYPad.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="xypad.tsx" open>
+
+```tsx
+import { XYPad } from "@audio-ui/react";
+
+<XYPad.Root className="block w-48" stepX={10} stepY={10}>
+  <XYPad.Control className="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
+    <XYPad.Thumb className="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
+  </XYPad.Control>
+  <XYPad.Value className="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums" />
+</XYPad.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+### Disabled
+
+`disabled` freezes the point and takes it out of the tab order.
+
+<ReactPreview name="xypad" example="disabled">
+
+<ForStyling only="css">
+
+<CodeFile title="xypad.tsx" open>
+
+```tsx
+import { XYPad } from "@audio-ui/react";
+import styles from "./xypad.module.css";
+
+<XYPad.Root className={styles.root} disabled={true}>
+  <XYPad.Control className={styles.control}>
+    <XYPad.Thumb className={styles.thumb} aria-label="Filter" />
+  </XYPad.Control>
+  <XYPad.Value className={styles.value} />
+</XYPad.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="xypad.tsx" open>
+
+```tsx
+import { XYPad } from "@audio-ui/react";
+
+<XYPad.Root className="block w-48" disabled={true}>
+  <XYPad.Control className="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
+    <XYPad.Thumb className="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
+  </XYPad.Control>
+  <XYPad.Value className="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums" />
+</XYPad.Root>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</ReactPreview>
+
+{/* examples:end */}
+
 ## API reference
 
 ### Root
