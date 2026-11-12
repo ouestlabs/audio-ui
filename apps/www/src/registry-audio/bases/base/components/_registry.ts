@@ -682,7 +682,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["audio-editor"],
     description:
-      "An audio editor for one sound: a demo loop, a file uploaded or dropped on it, or a take from the microphone after a count-in, drawn live as it records. The transport plays, loops and records, the sound menu picks or uploads, Undo and Redo follow, the meter and the main volume close the bar; the waveform seeks, zooms down to the samples and selects, its menu cuts, copies, pastes, deletes, crops and marks with their shortcuts, and the selection's corners fade it and its grip sets its level; under it the track's device chain, an equalizer and a compressor to start, with the library beside it to add any effect. It plays on the audio clock through the arrangement engine",
+      "An audio editor for one sound: a demo loop, a file uploaded or dropped on it, or a take from the microphone after a count-in, drawn live as it records. The transport plays, loops and records, the sound menu picks or uploads, Undo and Redo follow, the meter and the main volume close the bar; the waveform seeks, zooms down to the samples and selects, its menu cuts, copies, pastes, deletes, crops and marks with their shortcuts, and the selection's corners fade it and its grip sets its level; Export renders the selection, or the whole sound, through the chain and saves it as WAV, MP3 or FLAC, and the readouts under the waveform give the time to the millisecond, the selection's length, the sound's loudness, peak, rate and channels; under it the track's device chain, an equalizer and a compressor to start, with the library beside it to add any effect. It plays on the audio clock through the arrangement engine",
     files: [
       {
         path: "components/audio-editor/block-audio-editor.tsx",
@@ -699,6 +699,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/clip-waveform",
       "@audio-ui/device-browser",
       "@audio-ui/device-view",
+      "@audio-ui/export-dialog",
       "@audio-ui/knob",
       "@audio-ui/meter",
       "@audio-ui/timeline",
@@ -709,6 +710,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/arrangement-engine",
       "@audio-ui/use-audio-levels",
       "@audio-ui/arrangement",
+      "@audio-ui/audio-export",
       "@audio-ui/clip-player",
       "@audio-ui/demo-sound",
       "@audio-ui/device-library",

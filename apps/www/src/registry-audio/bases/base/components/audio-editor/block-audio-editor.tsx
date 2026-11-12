@@ -5,9 +5,10 @@ import {
   computePeaks,
   dbToGain,
   gainToDb,
+  measureLoudness,
   normalizePeaks,
 } from "@audio-ui/engine/analysis";
-import { decodeAudioChannels } from "@audio-ui/engine/files";
+import { decodeAudioChannels, downloadFile } from "@audio-ui/engine/files";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
 import {
   createSource,
@@ -61,6 +62,7 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";
 import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
+import { ExportDialog } from "@/registry-audio/bases/base/audio/elements/export-dialog";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
@@ -85,10 +87,16 @@ import type {
   Clipping,
   TimeSelection,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import { renderArrangement } from "@/registry-audio/bases/base/lib/arrangement-engine";
 import type {
   ArrangementCommand,
   ArrangementLocator,
 } from "@/registry-audio/bases/base/lib/arrangement-state";
+import {
+  DEFAULT_EXPORT_SETTINGS,
+  type ExportSettings,
+  exportSound,
+} from "@/registry-audio/bases/base/lib/audio-export";
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
 import {
   DEMO_SOURCES,
@@ -152,6 +160,14 @@ const TAKE_SPAN_ROOM = 0.9;
 /** The main volume's range, in dB, as a mixer's fader has it. */
 const MIN_DB = -60;
 const MAX_DB = 6;
+/** A rate's needless decimal, as "48.0 kHz" would have it. */
+const TRAILING_ZERO = /\.0$/;
+/** A file name's extension, which an export replaces with its own. */
+const EXTENSION = /\.[a-z0-9]+$/i;
+/** What a file name keeps of a sound's name: letters and digits, the rest joined by dashes. */
+const NOT_NAME = /[^a-z0-9]+/g;
+/** How long an export's last word stays under the waveform, in ms. */
+const STATUS_MS = 5000;
 /** The systems whose shortcuts take Command. */
 const APPLE = /Mac|iPhone|iPad/;
 /** How many points draw a fade's curve. */
@@ -193,11 +209,18 @@ const IGNORE = () => undefined;
 
 /** A sound the editor plays: its name, its length, and its peaks for the waveform. */
 interface Sound {
+  /** How many channels it has: 1 is mono, 2 stereo. */
+  channels: number;
   /** The demo it is, or null for a file of yours. */
   demo: DemoSourceName | null;
   duration: number;
+  /** Its integrated loudness, in LUFS, as it came in. */
+  lufs: number;
   name: string;
+  /** Its loudest sample, in dBFS, as it came in. */
+  peak: number;
   peaks: AudioPeaks;
+  sampleRate: number;
   /** Its samples, mixed to one channel, for a zoom closer than the peaks have detail for. */
   samples: ClipSamples;
 }
@@ -234,10 +257,15 @@ function soundOf(
   demo: DemoSourceName | null = null
 ): Sound {
   const mix = mixOf(channels);
+  const { lufs, peak } = measureLoudness(channels, sampleRate);
   return {
+    channels: channels.length,
     demo,
     duration: mix.length / sampleRate,
+    lufs,
     name,
+    peak,
+    sampleRate,
     peaks: normalizePeaks(computePeaks(channels, PEAK_COUNT)),
     samples: { frames: mix.length, read: (from, to) => mix.subarray(from, to) },
   };
@@ -1519,6 +1547,84 @@ function ClipLane({
   );
 }
 
+/** A level in dB with one decimal, or -∞ for silence. */
+const formatLevel = (db: number, unit: string) =>
+  `${Number.isFinite(db) ? db.toFixed(1) : "-∞"} ${unit}`;
+
+/** A sample rate in kHz, without a needless decimal. */
+const formatRate = (rate: number) =>
+  `${(rate / 1000).toFixed(1).replace(TRAILING_ZERO, "")} kHz`;
+
+const CHANNEL_NAMES: Record<number, string | undefined> = {
+  1: "mono",
+  2: "stereo",
+};
+
+/** The time where `source` is, to the millisecond, written into its text as it moves, without a render. */
+function LiveTime({ source }: { source: Source<number> }) {
+  const text = useRef<HTMLSpanElement>(null);
+  useEffect(() => {
+    const node = text.current?.firstChild;
+    if (!(node instanceof Text)) {
+      return;
+    }
+    const write = () => {
+      node.data = formatPrecise(Math.max(0, source.getSnapshot()));
+    };
+    write();
+    return source.subscribe(write);
+  }, [source]);
+  return (
+    <span className="text-foreground" ref={text}>
+      0:00.000
+    </span>
+  );
+}
+
+/**
+ * Under the waveform, as an audio editor shows them: where the playhead is to
+ * the millisecond and how long the selection is, or the sound; on the right
+ * how loud the sound came in, its peak, its rate and its channels. An
+ * export's progress shows here too.
+ */
+function Readouts({
+  duration,
+  position,
+  sound,
+  status,
+  time,
+}: {
+  duration: number;
+  position: Source<number>;
+  sound: Sound | null;
+  status: string;
+  time: TimeSelection | null;
+}) {
+  return (
+    <div className="flex flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 pb-3 font-mono text-[11px] text-muted-foreground tabular-nums sm:px-6">
+      <div className="flex items-center gap-3">
+        <LiveTime source={position} />
+        <span>
+          {time
+            ? `Selection ${formatPrecise(time.range[1] - time.range[0])}`
+            : formatPrecise(duration)}
+        </span>
+        <span aria-live="polite">{status}</span>
+      </div>
+      {sound ? (
+        <div className="flex items-center gap-3">
+          <span>{formatLevel(sound.lufs, "LUFS")}</span>
+          <span>{formatLevel(sound.peak, "dBFS")}</span>
+          <span>{formatRate(sound.sampleRate)}</span>
+          <span>
+            {CHANNEL_NAMES[sound.channels] ?? `${sound.channels} channels`}
+          </span>
+        </div>
+      ) : null}
+    </div>
+  );
+}
+
 /**
  * An audio editor for one sound: a demo loop, a file of yours (uploaded or
  * dropped) or a take from the microphone, on a track of an arrangement. The
@@ -1668,6 +1774,49 @@ export default function BlockAudioEditor() {
   const setLooping = useCallback(
     (on: boolean) => dispatch({ loop: { on }, type: "set-loop" }),
     [dispatch]
+  );
+
+  // The export: the selection, or else the whole sound, rendered through the chain as it plays, then encoded and saved.
+  const [exporting, setExporting] = useState(false);
+  const [exportSettings, setExportSettings] = useState(DEFAULT_EXPORT_SETTINGS);
+  const [status, setStatus] = useState("");
+  const exportRange = edits.time?.range ?? [0, doc.duration];
+  const openExport = useCallback(() => setExporting(true), []);
+  useEffect(() => {
+    if (!status) {
+      return;
+    }
+    const timer = window.setTimeout(() => setStatus(""), STATUS_MS);
+    return () => window.clearTimeout(timer);
+  }, [status]);
+  const runExport = useCallback(
+    async (settings: ExportSettings) => {
+      const [from, to] = exportRange;
+      const name = `${(sound?.name ?? "sound").replace(EXTENSION, "").toLowerCase().replace(NOT_NAME, "-")}.${settings.format}`;
+      setStatus("Rendering…");
+      const rendered = await renderArrangement(doc, recordings, {
+        from,
+        sampleRate: sound?.sampleRate,
+        to,
+      });
+      if (!rendered) {
+        setStatus("This browser cannot render offline");
+        return;
+      }
+      const channels = Array.from(
+        { length: rendered.numberOfChannels },
+        (_, channel) => rendered.getChannelData(channel)
+      );
+      setStatus("Encoding…");
+      const { file, loudness } = await exportSound(
+        channels,
+        rendered.sampleRate,
+        settings
+      );
+      downloadFile(file, name);
+      setStatus(`Saved ${name}, ${formatLevel(loudness.lufs, "LUFS")}`);
+    },
+    [doc, exportRange, recordings, sound]
   );
 
   // A locator's own gestures: press to put the cursor there, double-click to play from there, drag, rename, delete.
@@ -1920,6 +2069,23 @@ export default function BlockAudioEditor() {
               />
             </Toolbar.Button>
           </ButtonGroup>
+          <ButtonGroup>
+            <Toolbar.Button
+              aria-label="Export"
+              disabled={!sound}
+              onClick={openExport}
+              render={<Button size="icon" variant="outline" />}
+              title="Export"
+            >
+              <IconPlaceholder
+                hugeicons="Download01Icon"
+                lucide="DownloadIcon"
+                phosphor="DownloadSimpleIcon"
+                remixicon="RiDownloadLine"
+                tabler="IconDownload"
+              />
+            </Toolbar.Button>
+          </ButtonGroup>
           {/* The output closes the bar, at its end: the level of what comes out, framed as the position is, and the main volume. */}
           <div className="ms-auto flex items-center gap-2">
             <ButtonGroup className="self-stretch">
@@ -1964,6 +2130,25 @@ export default function BlockAudioEditor() {
         sounds={sounds}
         take={take}
         takeName={`Take ${takes.current + 1}`}
+      />
+      <Readouts
+        duration={doc.duration}
+        position={recording ? take.clock : position}
+        sound={sound}
+        status={status}
+        time={edits.time}
+      />
+      <ExportDialog
+        onExport={runExport}
+        onOpenChange={setExporting}
+        onSettingsChange={setExportSettings}
+        open={exporting}
+        range={
+          edits.time
+            ? `The selection, ${formatPrecise(exportRange[0])} to ${formatPrecise(exportRange[1])}`
+            : `The whole sound, ${formatPrecise(doc.duration)}`
+        }
+        settings={exportSettings}
       />
       {/* The track's chain, from one edge of the inset to the other, the library beside it as in a workstation. */}
       <div className="flex h-96 border-t">

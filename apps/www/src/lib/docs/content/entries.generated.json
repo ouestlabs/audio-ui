@@ -511,6 +511,7 @@
     "name": "audio-export",
     "registryDependencies": [],
     "usedBy": [
+      "block-audio-editor",
       "export-dialog",
       "export-dialog-demo"
     ]
