@@ -38,6 +38,7 @@ describe("takesPlay", () => {
     const effects = DEVICES.filter(
       (name) =>
         ![
+          "block-audio-editor",
           "block-device-browser",
           "block-drum-rack",
           "block-mixer",

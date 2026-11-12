@@ -680,6 +680,45 @@ export const components: RegistryItem[] = [
     type: "registry:block",
   },
   {
+    categories: ["audio-editor"],
+    description:
+      "An audio editor for one sound: a demo loop, a file uploaded or dropped on it, or a take from the microphone after a count-in, drawn live as it records. The transport plays, loops and records, the sound menu picks or uploads, the meter and the main volume close the bar; the waveform seeks and zooms down to the samples; under it the track's device chain, an equalizer and a compressor to start, with the library beside it to add any effect. It plays on the audio clock through the arrangement engine",
+    files: [
+      {
+        path: "components/audio-editor/block-audio-editor.tsx",
+        type: "registry:block",
+      },
+    ],
+    meta: {
+      hint: "Play, loop or record from the transport; pick a sound or upload one from its menu, or drop an audio file on the editor. Cmd/Ctrl + scroll zooms the waveform down to the samples; the ruler seeks. Add an effect from the library to the chain.",
+    },
+    name: "block-audio-editor",
+    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
+    registryDependencies: [
+      "@audio-ui/arranged-clip",
+      "@audio-ui/clip-waveform",
+      "@audio-ui/device-browser",
+      "@audio-ui/device-view",
+      "@audio-ui/knob",
+      "@audio-ui/meter",
+      "@audio-ui/timeline",
+      "@audio-ui/transport",
+      "@audio-ui/use-arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/use-audio-levels",
+      "@audio-ui/arrangement",
+      "@audio-ui/clip-player",
+      "@audio-ui/demo-sound",
+      "@audio-ui/device-library",
+      "@audio-ui/recording",
+      "@audio-ui/web-audio",
+      "@shadcn/button",
+      "@shadcn/button-group",
+      "@shadcn/dropdown-menu",
+    ],
+    type: "registry:block",
+  },
+  {
     categories: ["timeline"],
     description:
       "An arrangement timeline made for a whole screen: a bar ruler that seeks on the grid, a loop strip, a lane per track with clips to move between tracks, trim and fade on the grid, a cursor to put anywhere on a track, and a split at the cursor, a transport with play or pause, stop, loop, a metronome and a tempo and signature that keep the arrangement's musical positions, a playhead following the sound, and a navigator to zoom and scroll. It plays on the audio clock through the arrangement engine: audio clips loop a drum beat and a pad and draw their waveform, MIDI clips draw their notes, play a bass and chords through a synth and open on a piano roll in the clip panel; double-click a MIDI lane for a new clip. Drop an audio file on an audio track for a clip of it that plays, as long as the file; a clip dragged near an edge of the view scrolls it. Each track's meter reads its channel. In automation mode each track draws an envelope of its volume or pan over its clips, which its channel follows as it plays. Open it at full size and the tracks take the screen",

@@ -70,6 +70,7 @@ const CANONICAL_COMPONENT_DOC_SLUGS = [
   "sequencer",
   "spectrum-analyzer",
   "arrangement",
+  "audio-editor",
   "transport",
   "tuner",
   "waveform",

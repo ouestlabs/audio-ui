@@ -365,6 +365,7 @@
       "arrangement-editor",
       "arrangement-engine",
       "arrangement-view",
+      "block-audio-editor",
       "block-device-chain",
       "block-mixer",
       "block-timeline",
@@ -457,6 +458,7 @@
     ],
     "usedBy": [
       "arrangement-view",
+      "block-audio-editor",
       "block-device-chain",
       "block-mixer",
       "block-timeline",
@@ -569,6 +571,7 @@
     "registryDependencies": [],
     "usedBy": [
       "arrangement-engine",
+      "block-audio-editor",
       "block-device-chain",
       "block-mixer",
       "block-timeline"
@@ -722,6 +725,7 @@
       "drum-synthesis"
     ],
     "usedBy": [
+      "block-audio-editor",
       "block-auto-pan",
       "block-chorus",
       "block-delay",
@@ -874,6 +878,7 @@
     ],
     "usedBy": [
       "arrangement-engine",
+      "block-audio-editor",
       "block-device-browser",
       "block-device-chain",
       "block-mixer",
@@ -1516,7 +1521,9 @@
     "registryDependencies": [
       "arrangement"
     ],
-    "usedBy": []
+    "usedBy": [
+      "block-audio-editor"
+    ]
   },
   {
     "dependencies": [],
@@ -1690,6 +1697,7 @@
       "arrangement-editor",
       "arrangement-engine",
       "arrangement-view",
+      "block-audio-editor",
       "block-device-chain",
       "block-mixer",
       "block-timeline",
@@ -1722,6 +1730,7 @@
     "name": "use-audio-levels",
     "registryDependencies": [],
     "usedBy": [
+      "block-audio-editor",
       "block-timeline",
       "mixer-view",
       "needle-meter-demo",
@@ -2806,6 +2815,7 @@
     "registryDependencies": [],
     "usedBy": [
       "arrangement-engine",
+      "block-audio-editor",
       "block-device-chain",
       "block-drum-rack",
       "block-drum-synth",

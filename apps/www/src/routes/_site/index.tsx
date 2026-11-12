@@ -6,12 +6,12 @@ import {
 } from "@/components/site/home/home-figures";
 import { HomeGuide } from "@/components/site/home/home-guide";
 import { HomeHero } from "@/components/site/home/home-hero";
-import { HomePlayground } from "@/components/site/home/home-playground";
 import { JsonLd } from "@/components/site/json-ld";
 import { siteConfig } from "@/lib/config";
 import packageModules from "@/lib/docs/content/package-modules.generated.json";
 import { getHomeIndex } from "@/lib/docs/content/spaces";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
+import BlockAudioEditor from "@/registry-audio/bases/base/components/audio-editor/block-audio-editor";
 
 const PACKAGES = ["react", "core", "engine", "elements", "icons"];
 
@@ -121,7 +121,13 @@ function IndexPage() {
     <>
       <JsonLd data={buildSoftwareJsonLd()} />
       <HomeHero />
-      <HomePlayground />
+      {/* Under the title, the registry's audio editor itself: what a user installs, working. */}
+      <section aria-labelledby="home-editor" className="border-t">
+        <h2 className="sr-only" id="home-editor">
+          Audio editor
+        </h2>
+        <BlockAudioEditor />
+      </section>
       <HomeFigures figures={figures} />
       {/* Under it, the page in words: what search engines and agents read without running it. */}
       <HomeGuide guides={guides} spaces={spaces} />

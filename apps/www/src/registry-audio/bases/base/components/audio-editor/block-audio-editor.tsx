@@ -20,7 +20,7 @@ import {
   useState,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
-import { cn } from "@/lib/utils";
+import { cn } from "@/registry/bases/base/lib/utils";
 import { Button } from "@/registry/bases/base/ui/button";
 import {
   ButtonGroup,
@@ -85,8 +85,8 @@ import {
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const TRACK = "track-1";
-/** What the playground's recordings are named after, apart from those of the registry's demos on the same context. */
-const RECORDING = "home-sound";
+/** What the editor's recordings are named after, apart from those of other demos on the same context. */
+const RECORDING = "audio-editor-sound";
 const DEMO: DemoSourceName = "groove";
 /** The demo sounds the menu offers: those to listen through, not the keys a gate follows. */
 const DEMOS = (Object.keys(DEMO_SOURCES) as DemoSourceName[]).filter(
@@ -107,7 +107,7 @@ const LABEL_STEPS = [
   0.5, 1, 2, 5, 10, 15, 30, 60,
 ];
 const MIN_LABEL_GAP_PX = 56;
-/** Narrower than this, the playground starts with its library folded, leaving the chain the room. */
+/** Narrower than this, the editor starts with its library folded, leaving the chain the room. */
 const LIBRARY_PX = 600;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
 /** How far ahead of now a take (or its count-in) starts, in seconds: room for the first click to be scheduled. */
@@ -152,7 +152,7 @@ const NOT_MOVED = {};
 /** What the chain asks of a host with notes and pads: a sound has neither. */
 const IGNORE = () => undefined;
 
-/** A sound the playground plays: its name, its length, and its peaks for the waveform. */
+/** A sound the editor plays: its name, its length, and its peaks for the waveform. */
 interface Sound {
   /** The demo it is, or null for a file of yours. */
   demo: DemoSourceName | null;
@@ -404,7 +404,7 @@ function useTake({
   return { clock, countIn, end, levels, record, recording, setCountIn };
 }
 
-/** Over the waveform, while a file is dragged over the playground: where it lands. */
+/** Over the waveform, while a file is dragged over the editor: where it lands. */
 function DropOverlay({ dropping }: { dropping: boolean }) {
   return (
     <div
@@ -448,7 +448,7 @@ function useWidth(ref: RefObject<HTMLElement | null>) {
  * with Cmd or Ctrl + wheel down to the samples, the ruler seeking and the
  * navigator moving the view, which turns the page as the playhead leaves it.
  * While a take records, the lane is the take's, drawn as it comes in a view
- * that fits it; while a file is dragged over the playground, it shows where it
+ * that fits it; while a file is dragged over the editor, it shows where it
  * lands.
  */
 function ClipLane({
@@ -574,10 +574,7 @@ function ClipLane({
             ref={viewport}
             scrollbar="hidden"
           >
-            <TimelineRuler
-              aria-label="Playground time"
-              getAriaValueText={formatTime}
-            >
+            <TimelineRuler aria-label="Time" getAriaValueText={formatTime}>
               {rulerLabels(shownDuration, zoom, shown).map((mark) => (
                 <TimelineMark key={mark.at} value={mark.at}>
                   {mark.text}
@@ -630,15 +627,14 @@ function ClipLane({
 }
 
 /**
- * A working playground made of the registry, under the home's title: a
- * sound (a demo loop, or a file of yours) on a track of an arrangement, with
- * its waveform to seek in and zoom down to the samples, a meter of what comes
- * out, and the track's device chain, an equalizer and a compressor to start,
- * with the library beside it to add any effect of the registry. Each part is
- * named after its registry item, and all of it follows the customizer's
- * style and theme.
+ * An audio editor for one sound: a demo loop, a file of yours (uploaded or
+ * dropped) or a take from the microphone, on a track of an arrangement. The
+ * transport plays, loops and records; the waveform seeks and zooms down to the
+ * samples; the meter and the main volume close the bar; under it, the
+ * track's device chain, an equalizer and a compressor to start, with the
+ * library beside it to add any effect.
  */
-export function HomePlayground() {
+export default function BlockAudioEditor() {
   const arrangement = useArrangement({
     duration: 1,
     initialTracks: TRACKS,
@@ -822,9 +818,9 @@ export function HomePlayground() {
     },
     [load]
   );
-  // A sound file dropped anywhere on the playground opens in it, and the waveform shows where while it is dragged over;
+  // A sound file dropped anywhere on the editor opens in it, and the waveform shows where while it is dragged over;
   // a device dragged from the library goes to the chain.
-  const frame = useRef<HTMLElement>(null);
+  const frame = useRef<HTMLDivElement>(null);
   const [dropping, setDropping] = useState(false);
   useEffect(() => {
     const element = frame.current;
@@ -887,14 +883,7 @@ export function HomePlayground() {
   const levels = useAudioLevels(meter(doc.main.id) ?? NO_ANALYSERS);
 
   return (
-    <section
-      aria-labelledby="home-playground"
-      className="@container border-t"
-      ref={frame}
-    >
-      <h2 className="sr-only" id="home-playground">
-        Playground
-      </h2>
+    <div className="@container w-full min-w-0" ref={frame}>
       <input
         accept="audio/*"
         className="sr-only"
@@ -985,7 +974,7 @@ export function HomePlayground() {
               <ButtonGroupText>
                 <div className="w-20">
                   <Meter
-                    aria-label="Playground output"
+                    aria-label="Output"
                     orientation="horizontal"
                     peakMarks="hidden"
                     size="sm"
@@ -1044,6 +1033,6 @@ export function HomePlayground() {
           />
         </div>
       </div>
-    </section>
+    </div>
   );
 }

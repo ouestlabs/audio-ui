@@ -1,0 +1,37 @@
+---
+title: Audio editor
+description: "An audio editor for one sound: a transport that plays, loops and records, a waveform that zooms down to the samples, and the track's device chain with its library."
+component: true
+base: base
+---
+
+<ComponentPreview styleName="base-nova" name="block-audio-editor" />
+
+One sound on one track, edited as a workstation edits a clip. The sound is a demo loop, a file uploaded from the sound menu or dropped on the editor, or a take recorded from the microphone. It plays on the audio clock through the [arrangement](/docs/components/base/arrangement) engine, through the track's [device chain](/docs/components/base/device-chain), into a [meter](/docs/components/base/meter) and the main volume.
+
+## Installation
+
+```bash
+npx shadcn@latest add @audio-ui/block-audio-editor
+```
+
+It installs the block to `components/examples/block-audio-editor.tsx`, with every item it is made of.
+
+## What it is made of
+
+- **Bar.** The [transport](/docs/components/base/transport): play or pause, stop, the position, loop and record with its count-in. Its `children` hold the sound menu, the output's meter and a [knob](/docs/components/base/knob) for the main volume, so the whole bar is one toolbar.
+- **Sound menu.** Upload a file, or pick a demo sound. A file dropped anywhere on the editor opens too, and the waveform shows where it lands while it is dragged over.
+- **Waveform.** A [timeline](/docs/components/base/arrangement) of one lane with the clip's waveform, fitted to the width. The ruler seeks; Cmd or Ctrl and the wheel zoom down to the samples, a dot each; the navigator moves the view, which turns the page as the playhead leaves it.
+- **Recording.** Record asks for the microphone and starts after the count-in, if one is set in Record's menu. The take draws itself as it comes, in red, in a view that fits it, and becomes the sound when Record, Play or Stop ends it. Nothing plays during a take, so the speakers never come back in through the microphone.
+- **Device chain.** The track's [devices](/docs/devices), an equalizer and a compressor to start, each with its own panel. The [device browser](/docs/components/base/device-browser) beside it adds any effect of the library to the end of the chain.
+
+## Interaction
+
+| Key or gesture | Does |
+| --- | --- |
+| Left, Right | Move between the bar's controls |
+| Up, Down on the knob | Turn the main volume by 0.5 dB |
+| Page Up, Page Down on the knob | Turn it by 6 dB |
+| Cmd or Ctrl + wheel | Zoom the waveform |
+| Press on the ruler or the lane | Seek |
+| Drop an audio file | Make it the sound |
