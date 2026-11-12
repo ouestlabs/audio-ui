@@ -3,7 +3,6 @@ import {
   BracesIcon,
   ContrastIcon,
   CrateIcon,
-  DialIcon,
   GridIcon,
   type IconProps,
   InsertIcon,
@@ -16,6 +15,7 @@ import {
   SparkleIcon,
   SpeakerIcon,
   TracksIcon,
+  TuningForkIcon,
   WaveformIcon,
 } from "@audio-ui/icons/react";
 import type { ComponentType } from "react";
@@ -33,10 +33,10 @@ const GROUP_ICONS = {
 const SECTION_ICONS = {
   components: GridIcon,
   core: BracesIcon,
-  docs: NoteIcon,
+  docs: TuningForkIcon,
   engine: SpeakerIcon,
   elements: ShapesIcon,
-  react: DialIcon,
+  react: ShapesIcon,
   registry: CrateIcon,
 } as const;
 
