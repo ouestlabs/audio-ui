@@ -41,3 +41,12 @@ export {
   normalizeChannels,
   panChannels,
 } from "./process.ts";
+export {
+  SHIFT_METHODS,
+  type ShiftMethod,
+  STRETCH_METHODS,
+  type StretchMethod,
+  shiftChannels,
+  speedChannels,
+  stretchChannels,
+} from "./time-pitch.ts";

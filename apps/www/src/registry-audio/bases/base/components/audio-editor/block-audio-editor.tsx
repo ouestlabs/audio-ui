@@ -18,6 +18,8 @@ import {
   mixChannels,
   type NormalizeTarget,
   resampleChannels,
+  type ShiftMethod,
+  type StretchMethod,
 } from "@audio-ui/engine/files";
 import {
   formatLevel,
@@ -676,7 +678,15 @@ function ShrinkItem({
 /** The operations that change a sound's samples, as the Process menu offers them. */
 type Structure = Pick<
   ReturnType<typeof useBake>,
-  "filter" | "normalize" | "pad" | "pan" | "repeat" | "reverse"
+  | "filter"
+  | "normalize"
+  | "pad"
+  | "pan"
+  | "repeat"
+  | "reverse"
+  | "shift"
+  | "speed"
+  | "stretch"
 >;
 
 const REPEATS = [2, 3, 4, 8] as const;
@@ -723,6 +733,155 @@ const FILTERS = [
     type: "lowpass",
   },
 ] as const;
+
+const STRETCHES = [
+  { method: "transient", note: "Music with drums" },
+  { method: "pvocLock", note: "General music" },
+  { method: "wsola", note: "Speech, shorter" },
+  { method: "pvsola", note: "Speech, longer" },
+  { method: "hybrid", note: "Full mixes" },
+  { method: "paulstretch", note: "Ambient, extreme" },
+] as const satisfies readonly { method: StretchMethod; note: string }[];
+const STRETCH_NAMES: Record<StretchMethod, string> = {
+  hybrid: "Hybrid",
+  paulstretch: "PaulStretch",
+  pvocLock: "Phase vocoder",
+  pvsola: "Vocoder and overlap-add",
+  transient: "Transient-aware",
+  wsola: "Overlap-add",
+};
+const FACTORS = [0.5, 0.75, 1.25, 1.5, 2] as const;
+const SPEEDS = [0.5, 0.75, 1.25, 1.5, 2] as const;
+const SHIFTS = [
+  { method: "auto", note: "Chosen from the sound" },
+  { method: "transient", note: "Music with drums" },
+  { method: "phaseLock", note: "General music" },
+  { method: "formant", note: "Voice, keeps its character" },
+] as const satisfies readonly { method: ShiftMethod; note: string }[];
+const SHIFT_NAMES: Record<ShiftMethod, string> = {
+  auto: "Automatic",
+  formant: "Formant-preserving",
+  phaseLock: "Phase-locked",
+  psola: "Pitch-synchronous",
+  transient: "Transient-aware",
+  wsola: "Overlap-add",
+};
+const SEMITONES = [12, 7, 5, 2, -2, -5, -7, -12] as const;
+
+/** One count of a method: stretch by a factor. */
+function StretchItem({
+  factor,
+  method,
+  stretch,
+}: {
+  factor: number;
+  method: StretchMethod;
+  stretch: Structure["stretch"];
+}) {
+  const run = useCallback(
+    () => stretch(factor, method),
+    [factor, method, stretch]
+  );
+  return (
+    <DropdownMenuItem onClick={run}>
+      {Math.round(factor * 100)} % as long
+    </DropdownMenuItem>
+  );
+}
+
+/** One method of stretching, its factors in a submenu. */
+function StretchMethodItem({
+  method,
+  note,
+  stretch,
+}: {
+  method: StretchMethod;
+  note: string;
+  stretch: Structure["stretch"];
+}) {
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        {STRETCH_NAMES[method]}
+        <span className="ms-auto text-muted-foreground text-xs">{note}</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuSubContent className="w-48">
+        {FACTORS.map((factor) => (
+          <StretchItem
+            factor={factor}
+            key={factor}
+            method={method}
+            stretch={stretch}
+          />
+        ))}
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+  );
+}
+
+/** One speed. */
+function SpeedItem({
+  speed,
+  value,
+}: {
+  speed: Structure["speed"];
+  value: number;
+}) {
+  const run = useCallback(() => speed(value), [speed, value]);
+  return <DropdownMenuItem onClick={run}>×{value}</DropdownMenuItem>;
+}
+
+/** One shift, in semitones. */
+function ShiftItem({
+  method,
+  semitones,
+  shift,
+}: {
+  method: ShiftMethod;
+  semitones: number;
+  shift: Structure["shift"];
+}) {
+  const run = useCallback(
+    () => shift(semitones, method),
+    [method, semitones, shift]
+  );
+  return (
+    <DropdownMenuItem onClick={run}>
+      {semitones > 0 ? "+" : ""}
+      {semitones} semitones
+    </DropdownMenuItem>
+  );
+}
+
+/** One method of shifting a pitch, its steps in a submenu. */
+function ShiftMethodItem({
+  method,
+  note,
+  shift,
+}: {
+  method: ShiftMethod;
+  note: string;
+  shift: Structure["shift"];
+}) {
+  return (
+    <DropdownMenuSub>
+      <DropdownMenuSubTrigger>
+        {SHIFT_NAMES[method]}
+        <span className="ms-auto text-muted-foreground text-xs">{note}</span>
+      </DropdownMenuSubTrigger>
+      <DropdownMenuSubContent className="w-48">
+        {SEMITONES.map((semitones) => (
+          <ShiftItem
+            key={semitones}
+            method={method}
+            semitones={semitones}
+            shift={shift}
+          />
+        ))}
+      </DropdownMenuSubContent>
+    </DropdownMenuSub>
+  );
+}
 
 /** One level a sound is normalized to. */
 function NormalizeItem({
@@ -915,6 +1074,61 @@ function ToneItems({
               note={each.note}
               type={each.type}
             />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    </DropdownMenuGroup>
+  );
+}
+
+/** The Process menu's third group: a sound's time and pitch. */
+function TimeItems({
+  disabled,
+  structure,
+}: {
+  disabled: boolean;
+  structure: Structure;
+}) {
+  return (
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>Time and pitch</DropdownMenuLabel>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Stretch
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-72">
+          {STRETCHES.map((each) => (
+            <StretchMethodItem
+              key={each.method}
+              method={each.method}
+              note={each.note}
+              stretch={structure.stretch}
+            />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Pitch
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-72">
+          {SHIFTS.map((each) => (
+            <ShiftMethodItem
+              key={each.method}
+              method={each.method}
+              note={each.note}
+              shift={structure.shift}
+            />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Speed
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-48">
+          {SPEEDS.map((value) => (
+            <SpeedItem key={value} speed={structure.speed} value={value} />
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -2364,6 +2578,8 @@ function MoreMenu({
             />
             <DropdownMenuSeparator />
             <ToneItems disabled={!sound} structure={structure} />
+            <DropdownMenuSeparator />
+            <TimeItems disabled={!sound} structure={structure} />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
@@ -3080,6 +3296,8 @@ export default function BlockAudioEditor() {
                 />
                 <DropdownMenuSeparator />
                 <ToneItems disabled={!sound} structure={baking} />
+                <DropdownMenuSeparator />
+                <TimeItems disabled={!sound} structure={baking} />
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>

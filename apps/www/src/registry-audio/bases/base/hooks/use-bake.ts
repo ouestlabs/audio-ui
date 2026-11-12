@@ -7,6 +7,11 @@ import {
   panChannels,
   repeatChannels,
   reverseChannels,
+  type ShiftMethod,
+  type StretchMethod,
+  shiftChannels,
+  speedChannels,
+  stretchChannels,
 } from "@audio-ui/engine/files";
 import {
   formatFrequency,
@@ -50,8 +55,8 @@ interface BakeOptions {
  * what the track's clips play (the cuts, fades and gains already made), hands
  * its channels to `change`, and gives the result to `onBaked` as one step of
  * undo. `reverse`, `repeat` and `pad` change the structure of a sound;
- * `normalize`, `pan` and `filter` its level, balance and tone; each is over
- * `bake`. A browser that cannot render offline says so.
+ * `normalize`, `pan` and `filter` its level, balance and tone; `stretch`,
+ * `shift` and `speed` its time and pitch; each is over `bake`. A browser that cannot render offline says so.
  */
 export function useBake({
   doc,
@@ -118,6 +123,30 @@ export function useBake({
             sampleRate: rate,
           })
         ),
+      /** The sound `factor` times as long at the same pitch, by `method`. */
+      stretch: (factor: number, method: StretchMethod) =>
+        bake(
+          `Stretch to ${Math.round(factor * 100)} %`,
+          ({ channels, sampleRate: rate }) => ({
+            channels: stretchChannels(channels, rate, { factor, method }),
+            sampleRate: rate,
+          })
+        ),
+      /** The pitch `semitones` higher or lower at the same length, by `method`. */
+      shift: (semitones: number, method: ShiftMethod) =>
+        bake(
+          `Pitch ${semitones > 0 ? "+" : ""}${semitones} st`,
+          ({ channels, sampleRate: rate }) => ({
+            channels: shiftChannels(channels, rate, { method, semitones }),
+            sampleRate: rate,
+          })
+        ),
+      /** The sound `speed` times as fast, its pitch moving with it. */
+      speed: (speed: number) =>
+        bake(`Speed ×${speed}`, ({ channels, sampleRate: rate }) => ({
+          channels: speedChannels(channels, rate, speed),
+          sampleRate: rate,
+        })),
       /** One gain on every channel, to a peak in dBFS or a loudness in LUFS. */
       normalize: (target: NormalizeTarget) =>
         bake(
