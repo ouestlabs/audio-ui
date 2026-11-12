@@ -51,6 +51,35 @@ interface BakeOptions {
 }
 
 /**
+ * What the track's clips play over the whole arrangement, as plain channels:
+ * the cuts, fades and gains made, not the track's devices. `null` in a
+ * browser that cannot render offline.
+ */
+export async function renderEdited(
+  doc: ArrangementDoc,
+  track: string,
+  recordings: ReadonlyMap<string, RecordingSource>,
+  sampleRate: number
+): Promise<BakedSound | null> {
+  const rendered = await renderTrackClips(
+    doc,
+    track,
+    [0, doc.duration],
+    recordings,
+    { sampleRate }
+  );
+  if (!rendered) {
+    return null;
+  }
+  return {
+    channels: Array.from({ length: rendered.numberOfChannels }, (_, index) =>
+      rendered.getChannelData(index)
+    ),
+    sampleRate: rendered.sampleRate,
+  };
+}
+
+/**
  * Changes the samples of the sound as edited. `bake(label, change)` renders
  * what the track's clips play (the cuts, fades and gains already made), hands
  * its channels to `change`, and gives the result to `onBaked` as one step of
@@ -75,24 +104,12 @@ export function useBake({
       setStatus(label);
       // One frame to show it: the render and the operation read every sample.
       await new Promise((resolve) => window.setTimeout(resolve, 20));
-      const rendered = await renderTrackClips(
-        doc,
-        track,
-        [0, doc.duration],
-        recordings,
-        { sampleRate }
-      );
+      const rendered = await renderEdited(doc, track, recordings, sampleRate);
       if (!rendered) {
         setStatus("This browser cannot render offline");
         return;
       }
-      const next = await change({
-        channels: Array.from(
-          { length: rendered.numberOfChannels },
-          (_, index) => rendered.getChannelData(index)
-        ),
-        sampleRate: rendered.sampleRate,
-      });
+      const next = await change(rendered);
       stop();
       onBaked(next, label);
       setStatus("");

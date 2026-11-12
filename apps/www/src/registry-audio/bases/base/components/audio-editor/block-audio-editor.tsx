@@ -95,6 +95,7 @@ import {
   SoundReadout,
   SoundReadouts,
 } from "@/registry-audio/bases/base/audio/elements/sound-readouts";
+import { SoundReport } from "@/registry-audio/bases/base/audio/elements/sound-report";
 import {
   Timeline,
   TimelineClip,
@@ -115,6 +116,7 @@ import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-leve
 import { useBake } from "@/registry-audio/bases/base/hooks/use-bake";
 import { useClipEdits } from "@/registry-audio/bases/base/hooks/use-clip-edits";
 import { useSilenceHover } from "@/registry-audio/bases/base/hooks/use-silence-hover";
+import { useSoundReport } from "@/registry-audio/bases/base/hooks/use-sound-report";
 import { useStatusLine } from "@/registry-audio/bases/base/hooks/use-status-line";
 import type {
   Arranged,
@@ -1132,6 +1134,27 @@ function TimeItems({
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
+    </DropdownMenuGroup>
+  );
+}
+
+/** The Process menu's last group: what the sound is, read and told. */
+function AnalyzeItems({
+  disabled,
+  onAnalyze,
+}: {
+  disabled: boolean;
+  onAnalyze: () => void;
+}) {
+  return (
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>Analysis</DropdownMenuLabel>
+      <DropdownMenuItem disabled={disabled} onClick={onAnalyze}>
+        Analyze sound
+        <span className="ms-auto text-muted-foreground text-xs">
+          Key, tempo, ACX
+        </span>
+      </DropdownMenuItem>
     </DropdownMenuGroup>
   );
 }
@@ -2489,6 +2512,7 @@ function MoreMenu({
   named,
   onCompare,
   onExport,
+  onAnalyze,
   onLoopingChange,
   sound,
   structure,
@@ -2496,6 +2520,7 @@ function MoreMenu({
   arrangement: ReturnType<typeof useArrangement>;
   comparing: boolean;
   edits: ReturnType<typeof useClipEdits>;
+  onAnalyze: () => void;
   structure: Structure;
   /** The editor, whose transport tells whether its own Loop shows. */
   frame: RefObject<HTMLDivElement | null>;
@@ -2580,6 +2605,8 @@ function MoreMenu({
             <ToneItems disabled={!sound} structure={structure} />
             <DropdownMenuSeparator />
             <TimeItems disabled={!sound} structure={structure} />
+            <DropdownMenuSeparator />
+            <AnalyzeItems disabled={!sound} onAnalyze={onAnalyze} />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
@@ -2947,6 +2974,25 @@ export default function BlockAudioEditor() {
     track: TRACK,
   });
   const { bake } = baking;
+  const {
+    analyze,
+    clear: clearReport,
+    report,
+  } = useSoundReport({
+    doc,
+    recordings,
+    sampleRate: sound?.sampleRate ?? 48_000,
+    setStatus,
+    track: TRACK,
+  });
+  const closeReport = useCallback(
+    (shown: boolean) => {
+      if (!shown) {
+        clearReport();
+      }
+    },
+    [clearReport]
+  );
   const resampleTo = useCallback(
     (rate: number) => {
       if (rate === sound?.sampleRate) {
@@ -3298,6 +3344,8 @@ export default function BlockAudioEditor() {
                 <ToneItems disabled={!sound} structure={baking} />
                 <DropdownMenuSeparator />
                 <TimeItems disabled={!sound} structure={baking} />
+                <DropdownMenuSeparator />
+                <AnalyzeItems disabled={!sound} onAnalyze={analyze} />
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>
@@ -3349,6 +3397,7 @@ export default function BlockAudioEditor() {
               edits={edits}
               frame={frame}
               named={named.current}
+              onAnalyze={analyze}
               onCompare={toggleCompare}
               onExport={openExport}
               onLoopingChange={setLooping}
@@ -3399,6 +3448,7 @@ export default function BlockAudioEditor() {
         }
         time={edits.time}
       />
+      <SoundReport onOpenChange={closeReport} report={report} />
       <ExportDialog
         onExport={runExport}
         onOpenChange={setExporting}

@@ -2396,6 +2396,36 @@
         "summary": "What a recording's beat is read as when it comes in: its tempo, if it has one, and its transients, in seconds."
       },
       {
+        "kind": "const",
+        "name": "ACX",
+        "summary": "What ACX asks of an audiobook: the RMS between -23 and -18 dBFS, the peak at most -3 dBFS, the noise floor at most -60 dBFS RMS."
+      },
+      {
+        "kind": "interface",
+        "name": "AcxCheck",
+        "summary": "One requirement and how the sound stands against it."
+      },
+      {
+        "kind": "interface",
+        "name": "AcxReport",
+        "summary": "A sound against the ACX audiobook requirements."
+      },
+      {
+        "kind": "function",
+        "name": "checkAcx",
+        "summary": "Checks a sound against ACX's requirements for an audiobook."
+      },
+      {
+        "kind": "function",
+        "name": "reportSound",
+        "summary": "Reads a sound once, to tell what it is: its loudness, its key, its tempo, and whether it meets ACX's requirements."
+      },
+      {
+        "kind": "interface",
+        "name": "SoundReport",
+        "summary": "What `reportSound` reads from a sound."
+      },
+      {
         "kind": "function",
         "name": "detectSilences",
         "summary": "Where `channels` pause between their sounds, as `[from, to]` in seconds, in order: each stretch of at least `minDuration` where every sample of every channel stays under the threshold, found to a block of 1024 frames."
@@ -2450,6 +2480,7 @@
       "use-loudness",
       "use-noise-through-eq",
       "use-pitch",
+      "use-sound-report",
       "use-spectrum"
     ]
   },

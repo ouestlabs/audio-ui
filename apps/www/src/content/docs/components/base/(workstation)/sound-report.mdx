@@ -1,0 +1,23 @@
+---
+title: Sound Report
+description: "What a sound was read as, in a dialog: its loudness and true peak, its key and tempo when it has them, and each of ACX's audiobook requirements with whether the sound meets it."
+---
+
+## Installation
+
+<Install name="sound-report" packages="@audio-ui/core @audio-ui/engine" />
+
+## Usage
+
+`SoundReport` is controlled: it is open while `report` is set, and `onOpenChange(false)` is where you clear it. The report is the one `reportSound` of [`@audio-ui/engine/analysis`](/docs/engine/analysis) gives, held by [`useSoundReport`](/docs/hooks/use-sound-report).
+
+```tsx
+import { SoundReport } from "@/components/audio-ui/sound-report";
+
+<SoundReport onOpenChange={(open) => !open && clear()} report={report} />;
+```
+
+| Prop | Type | |
+| --- | --- | --- |
+| `report` | `SoundReport \| null` | What the sound was read as. `null` closes the dialog. |
+| `onOpenChange` | `(open: boolean) => void` | The dialog was dismissed. |
