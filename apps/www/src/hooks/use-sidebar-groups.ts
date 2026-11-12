@@ -1,7 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import * as React from "react";
 import { useFramework } from "@/hooks/use-framework";
-import { needsReact, sectionsFor } from "@/lib/docs/content/frameworks";
+import { menuSections, needsReact } from "@/lib/docs/content/frameworks";
 import {
   getCurrentBase,
   getGroupsFromFolder,
@@ -124,14 +124,11 @@ export interface SiteSection {
   href: string;
   id: DocsSectionId;
   label: string;
-  /** For a reader of another framework: it needs React. */
-  reactOnly: boolean;
 }
 
 /**
- * The site's sections, the one being read marked, in the order a reader of
- * the framework wants them: React's in a section for React alone, else the one
- * chosen.
+ * The switcher's sections, the one being read marked: the primitives of the
+ * framework, React's in a section for React alone, else the one chosen.
  */
 export function useSiteSections(tree: PageTree): SiteSection[] {
   const pathname = useLocation({ select: (location) => location.pathname });
@@ -143,7 +140,7 @@ export function useSiteSections(tree: PageTree): SiteSection[] {
   const framework = needsReact(reading) ? "react" : chosen;
   return React.useMemo(
     () =>
-      sectionsFor(framework).map((each) => ({
+      menuSections(framework, reading).map((each) => ({
         ...each,
         current: each.id === reading,
       })),
