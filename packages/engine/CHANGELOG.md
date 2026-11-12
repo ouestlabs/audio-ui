@@ -1,5 +1,11 @@
 # @audio-ui/engine
 
+## 0.6.0
+
+### Minor Changes
+
+- 023f1ca: Files: `reverseChannels`, `repeatChannels` and `padChannels` of `@audio-ui/engine/files` play a sound from its end, put it end to end a number of times, and add silence before and after it.
+
 ## 0.5.0
 
 ### Minor Changes
