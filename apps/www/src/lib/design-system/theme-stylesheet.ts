@@ -24,6 +24,7 @@ const tailwindTheme = () =>
     ),
     "  --radius-sm: calc(var(--radius) - 4px);",
     "  --radius-md: calc(var(--radius) - 2px);",
+    "  --radius-lg: var(--radius);",
     "}",
   ].join("\n");
 

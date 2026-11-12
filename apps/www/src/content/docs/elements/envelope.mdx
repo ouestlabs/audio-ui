@@ -52,7 +52,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
     width: calc(var(--spacing, 0.25rem) * 3);
     height: calc(var(--spacing, 0.25rem) * 3);
     border: 2px solid var(--primary, oklch(0.205 0 0));
-    border-radius: 9999px;
+    border-radius: var(--radius, 0.625rem);
     background: var(--background, oklch(1 0 0));
     cursor: grab;
     outline: none;
@@ -66,7 +66,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   audio-ui-envelope-segment {
     width: calc(var(--spacing, 0.25rem) * 2);
     height: calc(var(--spacing, 0.25rem) * 2);
-    border-radius: 9999px;
+    border-radius: var(--radius, 0.625rem);
     background: var(--muted-foreground, oklch(0.556 0 0));
     opacity: 0.5;
     cursor: ns-resize;
@@ -107,8 +107,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
   </audio-ui-envelope-graph>
-  <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-full *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden"></audio-ui-envelope-segments>
-  <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-full *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
+  <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden"></audio-ui-envelope-segments>
+  <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
 </audio-ui-envelope>
 
 <script type="module">
@@ -170,7 +170,7 @@ audio-ui-envelope-point {
   width: calc(var(--spacing, 0.25rem) * 3);
   height: calc(var(--spacing, 0.25rem) * 3);
   border: 2px solid var(--primary, oklch(0.205 0 0));
-  border-radius: 9999px;
+  border-radius: var(--radius, 0.625rem);
   background: var(--background, oklch(1 0 0));
   cursor: grab;
   outline: none;
@@ -184,7 +184,7 @@ audio-ui-envelope-point[data-dragging] {
 audio-ui-envelope-segment {
   width: calc(var(--spacing, 0.25rem) * 2);
   height: calc(var(--spacing, 0.25rem) * 2);
-  border-radius: 9999px;
+  border-radius: var(--radius, 0.625rem);
   background: var(--muted-foreground, oklch(0.556 0 0));
   opacity: 0.5;
   cursor: ns-resize;
@@ -212,8 +212,8 @@ import "@audio-ui/elements/envelope";
       <audio-ui-envelope-fill class="text-primary opacity-15" />
       <audio-ui-envelope-line class="text-primary [stroke-width:2px]" />
     </audio-ui-envelope-graph>
-    <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-full *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden" />
-    <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-full *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary" />
+    <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden" />
+    <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary" />
   </audio-ui-envelope>
 </template>
 ```
@@ -266,7 +266,7 @@ import "@audio-ui/elements/envelope";
     width: calc(var(--spacing, 0.25rem) * 3);
     height: calc(var(--spacing, 0.25rem) * 3);
     border: 2px solid var(--primary, oklch(0.205 0 0));
-    border-radius: 9999px;
+    border-radius: var(--radius, 0.625rem);
     background: var(--background, oklch(1 0 0));
     cursor: grab;
     outline: none;
@@ -280,7 +280,7 @@ import "@audio-ui/elements/envelope";
   audio-ui-envelope-segment {
     width: calc(var(--spacing, 0.25rem) * 2);
     height: calc(var(--spacing, 0.25rem) * 2);
-    border-radius: 9999px;
+    border-radius: var(--radius, 0.625rem);
     background: var(--muted-foreground, oklch(0.556 0 0));
     opacity: 0.5;
     cursor: ns-resize;
@@ -308,8 +308,8 @@ import "@audio-ui/elements/envelope";
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
   </audio-ui-envelope-graph>
-  <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-full *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden"></audio-ui-envelope-segments>
-  <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-full *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
+  <audio-ui-envelope-segments class="*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden"></audio-ui-envelope-segments>
+  <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
 </audio-ui-envelope>
 ```
 

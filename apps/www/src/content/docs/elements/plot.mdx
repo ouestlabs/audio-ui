@@ -63,7 +63,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   audio-ui-plot-handle {
     width: calc(var(--spacing, 0.25rem) * 4);
     height: calc(var(--spacing, 0.25rem) * 4);
-    border-radius: 9999px;
+    border-radius: var(--radius, 0.625rem);
     background: var(--primary, oklch(0.205 0 0));
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
@@ -98,7 +98,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
   <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
   <audio-ui-plot-curve class="text-primary/15" fill-to="0"></audio-ui-plot-curve>
-  <audio-ui-plot-handle class="size-4 cursor-grab rounded-full bg-primary ring-4 ring-primary/20" aria-label="Band" value="800 6"></audio-ui-plot-handle>
+  <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value="800 6"></audio-ui-plot-handle>
 </audio-ui-plot>
 
 <script type="module">
@@ -178,7 +178,7 @@ audio-ui-plot-curve {
 audio-ui-plot-handle {
   width: calc(var(--spacing, 0.25rem) * 4);
   height: calc(var(--spacing, 0.25rem) * 4);
-  border-radius: 9999px;
+  border-radius: var(--radius, 0.625rem);
   background: var(--primary, oklch(0.205 0 0));
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
   cursor: grab;
@@ -205,7 +205,7 @@ const response: (hz: number) => number = (hz) => 0;
   <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
     <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" />
     <audio-ui-plot-curve class="text-primary/15" fill-to="0" :fn="response" />
-    <audio-ui-plot-handle class="size-4 cursor-grab rounded-full bg-primary ring-4 ring-primary/20" aria-label="Band" v-model="band" />
+    <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" v-model="band" />
   </audio-ui-plot>
 </template>
 ```
@@ -271,7 +271,7 @@ const response: (hz: number) => number = (hz) => 0;
   audio-ui-plot-handle {
     width: calc(var(--spacing, 0.25rem) * 4);
     height: calc(var(--spacing, 0.25rem) * 4);
-    border-radius: 9999px;
+    border-radius: var(--radius, 0.625rem);
     background: var(--primary, oklch(0.205 0 0));
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
@@ -297,7 +297,7 @@ const response: (hz: number) => number = (hz) => 0;
 <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
   <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
   <audio-ui-plot-curve class="text-primary/15" fill-to="0" fn={response}></audio-ui-plot-curve>
-  <audio-ui-plot-handle class="size-4 cursor-grab rounded-full bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} oninput={(event) => (band = event.detail.value)}></audio-ui-plot-handle>
+  <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} oninput={(event) => (band = event.detail.value)}></audio-ui-plot-handle>
 </audio-ui-plot>
 ```
 

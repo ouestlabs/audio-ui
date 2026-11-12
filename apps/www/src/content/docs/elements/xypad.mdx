@@ -68,9 +68,10 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 
   audio-ui-xypad-thumb {
     position: absolute;
+    z-index: 1;
     width: calc(var(--spacing, 0.25rem) * 4);
     height: calc(var(--spacing, 0.25rem) * 4);
-    border-radius: 9999px;
+    border-radius: var(--radius, 0.625rem);
     background: var(--primary, oklch(0.205 0 0));
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
   }
@@ -111,7 +112,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 ```html
 <audio-ui-xypad class="block w-48" value="30 70">
   <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
-    <audio-ui-xypad-thumb class="absolute size-4 rounded-full bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
+    <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
   </audio-ui-xypad-control>
   <audio-ui-xypad-value class="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums"></audio-ui-xypad-value>
 </audio-ui-xypad>
@@ -192,9 +193,10 @@ audio-ui-xypad-control::after {
 
 audio-ui-xypad-thumb {
   position: absolute;
+  z-index: 1;
   width: calc(var(--spacing, 0.25rem) * 4);
   height: calc(var(--spacing, 0.25rem) * 4);
-  border-radius: 9999px;
+  border-radius: var(--radius, 0.625rem);
   background: var(--primary, oklch(0.205 0 0));
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
 }
@@ -227,7 +229,7 @@ const point = ref({ x: 30, y: 70 });
 <template>
   <audio-ui-xypad class="block w-48" v-model="point">
     <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
-      <audio-ui-xypad-thumb class="absolute size-4 rounded-full bg-primary ring-4 ring-primary/20" aria-label="Filter" />
+      <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
     </audio-ui-xypad-control>
     <audio-ui-xypad-value class="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums" />
   </audio-ui-xypad>
@@ -298,9 +300,10 @@ const point = ref({ x: 30, y: 70 });
 
   audio-ui-xypad-thumb {
     position: absolute;
+    z-index: 1;
     width: calc(var(--spacing, 0.25rem) * 4);
     height: calc(var(--spacing, 0.25rem) * 4);
-    border-radius: 9999px;
+    border-radius: var(--radius, 0.625rem);
     background: var(--primary, oklch(0.205 0 0));
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
   }
@@ -332,7 +335,7 @@ const point = ref({ x: 30, y: 70 });
 
 <audio-ui-xypad class="block w-48" value={point} oninput={(event) => (point = event.detail.value)}>
   <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
-    <audio-ui-xypad-thumb class="absolute size-4 rounded-full bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
+    <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
   </audio-ui-xypad-control>
   <audio-ui-xypad-value class="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums"></audio-ui-xypad-value>
 </audio-ui-xypad>

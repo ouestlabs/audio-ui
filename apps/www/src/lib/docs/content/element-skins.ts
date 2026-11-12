@@ -43,7 +43,7 @@ audio-ui-envelope-point {
   width: calc(var(--spacing, 0.25rem) * 3);
   height: calc(var(--spacing, 0.25rem) * 3);
   border: 2px solid var(--primary);
-  border-radius: 9999px;
+  border-radius: var(--radius);
   background: var(--background);
   cursor: grab;
   outline: none;
@@ -57,7 +57,7 @@ audio-ui-envelope-point[data-dragging] {
 audio-ui-envelope-segment {
   width: calc(var(--spacing, 0.25rem) * 2);
   height: calc(var(--spacing, 0.25rem) * 2);
-  border-radius: 9999px;
+  border-radius: var(--radius);
   background: var(--muted-foreground);
   opacity: 0.5;
   cursor: ns-resize;
@@ -72,9 +72,9 @@ audio-ui-envelope-segment[data-flat] {
       "audio-ui-envelope-fill": "text-primary opacity-15",
       "audio-ui-envelope-line": "text-primary [stroke-width:2px]",
       "audio-ui-envelope-points":
-        "*:size-3 *:cursor-grab *:rounded-full *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary",
+        "*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary",
       "audio-ui-envelope-segments":
-        "*:size-2 *:cursor-ns-resize *:rounded-full *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden",
+        "*:size-2 *:cursor-ns-resize *:rounded-lg *:bg-muted-foreground *:opacity-50 *:outline-none *:data-flat:hidden",
     },
   },
   fader: {
@@ -560,7 +560,7 @@ audio-ui-plot-curve {
 audio-ui-plot-handle {
   width: calc(var(--spacing, 0.25rem) * 4);
   height: calc(var(--spacing, 0.25rem) * 4);
-  border-radius: 9999px;
+  border-radius: var(--radius);
   background: var(--primary);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
   cursor: grab;
@@ -571,7 +571,7 @@ audio-ui-plot-handle {
       "audio-ui-plot-grid":
         "text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border",
       "audio-ui-plot-handle":
-        "size-4 cursor-grab rounded-full bg-primary ring-4 ring-primary/20",
+        "size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20",
     },
   },
   sequencer: {
@@ -859,9 +859,10 @@ audio-ui-xypad-control::after {
 
 audio-ui-xypad-thumb {
   position: absolute;
+  z-index: 1;
   width: calc(var(--spacing, 0.25rem) * 4);
   height: calc(var(--spacing, 0.25rem) * 4);
-  border-radius: 9999px;
+  border-radius: var(--radius);
   background: var(--primary);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
 }
@@ -881,7 +882,7 @@ audio-ui-xypad-value {
       "audio-ui-xypad-control":
         "relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']",
       "audio-ui-xypad-thumb":
-        "absolute size-4 rounded-full bg-primary ring-4 ring-primary/20",
+        "absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20",
       "audio-ui-xypad-value":
         "mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums",
     },
