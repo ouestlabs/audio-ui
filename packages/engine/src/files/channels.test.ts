@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { mixChannels, resampleChannels } from "./channels.ts";
+import {
+  mixChannels,
+  padChannels,
+  repeatChannels,
+  resampleChannels,
+  reverseChannels,
+} from "./channels.ts";
 
 const tone = (length: number, value: number) =>
   new Float32Array(length).fill(value);
@@ -59,5 +65,39 @@ describe("resampleChannels", () => {
     const down = resampleChannels(channels, 48_000, 24_000);
     expect(down).toHaveLength(2);
     expect(Math.abs((down[0]?.length ?? 0) - 240)).toBeLessThanOrEqual(2);
+  });
+});
+
+describe("reverseChannels", () => {
+  test("plays each channel from its end, and leaves the source alone", () => {
+    const source = Float32Array.of(1, 2, 3);
+    const [reversed] = reverseChannels([source]);
+    expect([...(reversed ?? [])]).toEqual([3, 2, 1]);
+    expect([...source]).toEqual([1, 2, 3]);
+  });
+});
+
+describe("repeatChannels", () => {
+  test("puts the sound end to end the number of times asked", () => {
+    const [out] = repeatChannels([Float32Array.of(1, 2)], 3);
+    expect([...(out ?? [])]).toEqual([1, 2, 1, 2, 1, 2]);
+  });
+
+  test("fewer than one is the sound once", () => {
+    const [out] = repeatChannels([Float32Array.of(1, 2)], 0);
+    expect([...(out ?? [])]).toEqual([1, 2]);
+  });
+});
+
+describe("padChannels", () => {
+  test("adds silence before and after, on every channel", () => {
+    const out = padChannels([Float32Array.of(1), Float32Array.of(2)], {
+      after: 2,
+      before: 1,
+    });
+    expect(out.map((channel) => [...channel])).toEqual([
+      [0, 1, 0, 0],
+      [0, 2, 0, 0],
+    ]);
   });
 });

@@ -108,6 +108,7 @@ import { Transport } from "@/registry-audio/bases/base/audio/elements/transport"
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
+import { useBake } from "@/registry-audio/bases/base/hooks/use-bake";
 import { useClipEdits } from "@/registry-audio/bases/base/hooks/use-clip-edits";
 import { useSilenceHover } from "@/registry-audio/bases/base/hooks/use-silence-hover";
 import { useStatusLine } from "@/registry-audio/bases/base/hooks/use-status-line";
@@ -295,18 +296,6 @@ function loopClip(recording: string, length: number): Arranged {
     track: TRACK,
     value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start: 0 },
   };
-}
-
-/** The samples of a recording held in memory, or null for one streamed from a file. */
-function channelsOfRecording(
-  recording: RecordingSource
-): readonly Float32Array[] | null {
-  if (recording instanceof AudioBuffer) {
-    return Array.from({ length: recording.numberOfChannels }, (_, channel) =>
-      recording.getChannelData(channel)
-    );
-  }
-  return typeof recording.channels === "number" ? null : recording.channels;
 }
 
 /** The channels mixed to one, as the waveform draws the sound. */
@@ -682,13 +671,41 @@ function ShrinkItem({
   );
 }
 
+/** The operations that change a sound's samples, as the Process menu offers them. */
+type Structure = Pick<ReturnType<typeof useBake>, "pad" | "repeat" | "reverse">;
+
+const REPEATS = [2, 3, 4, 8] as const;
+const PADS = [0.5, 1, 2] as const;
+
+/** One count of repeats. */
+function RepeatItem({
+  repeat,
+  times,
+}: {
+  repeat: Structure["repeat"];
+  times: number;
+}) {
+  const run = useCallback(() => repeat(times), [repeat, times]);
+  return <DropdownMenuItem onClick={run}>{times} times</DropdownMenuItem>;
+}
+
+/** One length of silence, added at the end. */
+function PadItem({ pad, seconds }: { pad: Structure["pad"]; seconds: number }) {
+  const run = useCallback(() => pad(seconds, "end"), [pad, seconds]);
+  return (
+    <DropdownMenuItem onClick={run}>{seconds} s at the end</DropdownMenuItem>
+  );
+}
+
 /** What the edits that clean a sound up are called, in the Process menu and the bar's folded menu. */
 function ProcessItems({
   disabled,
   edits,
+  structure,
 }: {
   disabled: boolean;
   edits: ReturnType<typeof useClipEdits>;
+  structure: Structure;
 }) {
   return (
     <DropdownMenuGroup>
@@ -706,6 +723,29 @@ function ProcessItems({
         <DropdownMenuSubContent className="w-48">
           {SHRINK_GAPS.map((gap) => (
             <ShrinkItem edits={edits} gap={gap} key={gap} />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+      <DropdownMenuItem disabled={disabled} onClick={structure.reverse}>
+        Reverse
+      </DropdownMenuItem>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Repeat
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-48">
+          {REPEATS.map((times) => (
+            <RepeatItem key={times} repeat={structure.repeat} times={times} />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Add silence
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-48">
+          {PADS.map((seconds) => (
+            <PadItem key={seconds} pad={structure.pad} seconds={seconds} />
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -2068,10 +2108,12 @@ function MoreMenu({
   onExport,
   onLoopingChange,
   sound,
+  structure,
 }: {
   arrangement: ReturnType<typeof useArrangement>;
   comparing: boolean;
   edits: ReturnType<typeof useClipEdits>;
+  structure: Structure;
   /** The editor, whose transport tells whether its own Loop shows. */
   frame: RefObject<HTMLDivElement | null>;
   named: WeakMap<ArrangementDoc, string>;
@@ -2146,7 +2188,11 @@ function MoreMenu({
             Process
           </DropdownMenuSubTrigger>
           <DropdownMenuSubContent className="w-64">
-            <ProcessItems disabled={!sound} edits={edits} />
+            <ProcessItems
+              disabled={!sound}
+              edits={edits}
+              structure={structure}
+            />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
@@ -2491,67 +2537,52 @@ export default function BlockAudioEditor() {
     [play, playing, position]
   );
 
-  // The sound of the track in another rate or another layout: its samples converted, put on the track as a sound of its own, an edit of the history.
-  const convert = useCallback(
-    async (
-      label: string,
-      change: (
-        channels: Float32Array[],
-        sampleRate: number
-      ) => { channels: Float32Array[]; sampleRate: number }
-    ) => {
-      const id = clips[0]?.recording;
-      const current = sound;
-      const from = id ? recordings.get(id) : undefined;
-      if (!(current && from)) {
-        return;
+  // The sound as edited, its samples changed and put on the track as a sound of its own: a step of the history.
+  const baked = useCallback(
+    (next: { channels: Float32Array[]; sampleRate: number }, label: string) => {
+      if (sound) {
+        place(
+          next,
+          soundOf(next.channels, next.sampleRate, sound.name, sound.demo),
+          label
+        );
       }
-      setStatus(label);
-      // One frame to show it: the conversion reads every sample.
-      await new Promise((resolve) => window.setTimeout(resolve, 20));
-      // A recording streamed from a long file is not in memory to convert.
-      const source = channelsOfRecording(from);
-      if (!source) {
-        setStatus("");
-        return;
-      }
-      const next = change([...source], from.sampleRate);
-      stop();
-      place(
-        next,
-        soundOf(next.channels, next.sampleRate, current.name, current.demo),
-        label
-      );
-      setStatus("");
     },
-    [clips, place, recordings, sound, stop, setStatus]
+    [place, sound]
   );
+  const baking = useBake({
+    doc,
+    onBaked: baked,
+    recordings,
+    sampleRate: sound?.sampleRate ?? 48_000,
+    setStatus,
+    stop,
+    track: TRACK,
+  });
+  const { bake } = baking;
   const resampleTo = useCallback(
     (rate: number) => {
       if (rate === sound?.sampleRate) {
         return;
       }
-      convert(
-        `Resample to ${formatSampleRate(rate)}`,
-        (channels, sampleRate) => ({
-          channels: resampleChannels(channels, sampleRate, rate),
-          sampleRate: rate,
-        })
-      );
+      bake(`Resample to ${formatSampleRate(rate)}`, (from) => ({
+        channels: resampleChannels(from.channels, from.sampleRate, rate),
+        sampleRate: rate,
+      }));
     },
-    [convert, sound?.sampleRate]
+    [bake, sound?.sampleRate]
   );
   const mixTo = useCallback(
     (layout: ChannelLayout) => {
       if (LAYOUT_CHANNELS[layout] === sound?.channels) {
         return;
       }
-      convert(`Mix to ${layout}`, (channels, sampleRate) => ({
-        channels: mixChannels(channels, layout),
-        sampleRate,
+      bake(`Mix to ${layout}`, (from) => ({
+        channels: mixChannels(from.channels, layout),
+        sampleRate: from.sampleRate,
       }));
     },
-    [convert, sound?.channels]
+    [bake, sound?.channels]
   );
 
   const load = useCallback(
@@ -2871,7 +2902,11 @@ export default function BlockAudioEditor() {
                 />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="start" className="w-64">
-                <ProcessItems disabled={!sound} edits={edits} />
+                <ProcessItems
+                  disabled={!sound}
+                  edits={edits}
+                  structure={baking}
+                />
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>
@@ -2927,6 +2962,7 @@ export default function BlockAudioEditor() {
               onExport={openExport}
               onLoopingChange={setLooping}
               sound={sound !== null}
+              structure={baking}
             />
           </ButtonGroup>
           {/* The output closes the bar, at its end: the level of what comes out, framed as the position is; on the narrowest bar, the room goes to the controls. */}

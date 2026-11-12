@@ -1,0 +1,36 @@
+---
+title: useBake
+description: "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat and Add silence over it."
+---
+
+<Entry name="use-bake" />
+
+## Usage
+
+An edit of the arrangement (a cut, a fade, a gain) leaves the recording as it was. An operation on samples (a reverse, a filter, a resample) needs the sound as it plays. `useBake` renders what the track's clips play over the whole arrangement, gives its channels to your operation, and hands the result to `onBaked`, which puts it on the track as a sound of its own: one step of undo.
+
+```tsx
+import { useBake } from "@/hooks/use-bake";
+
+const { bake, pad, repeat, reverse } = useBake({
+  doc, // the arrangement's document
+  onBaked, // (sound, label) => void: puts the sound on the track as a step of the history
+  recordings,
+  sampleRate: 48_000, // the rate the edited sound is rendered at
+  setStatus, // what the editor says while it works
+  stop, // stops what plays
+  track: "track-1",
+});
+
+<MenuItem onClick={reverse}>Reverse</MenuItem>;
+<MenuItem onClick={() => repeat(4)}>Repeat 4 times</MenuItem>;
+<MenuItem onClick={() => pad(1, "end")}>Add 1 s of silence</MenuItem>;
+
+// Any operation: channels in, channels out.
+bake("Resample", ({ channels, sampleRate }) => ({
+  channels: resampleChannels(channels, sampleRate, 44_100),
+  sampleRate: 44_100,
+}));
+```
+
+`reverse`, `repeat(times)` and `pad(seconds, where)` are the operations of `reverseChannels`, `repeatChannels` and `padChannels` of [`@audio-ui/engine/files`](/docs/engine/files). A browser that cannot render offline says so through `setStatus`.

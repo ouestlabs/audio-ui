@@ -10,7 +10,10 @@ export {
   type ChannelLayout,
   LAYOUT_CHANNELS,
   mixChannels,
+  padChannels,
+  repeatChannels,
   resampleChannels,
+  reverseChannels,
 } from "./channels.ts";
 export {
   downloadMidiFile,

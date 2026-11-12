@@ -148,6 +148,17 @@ export const hooks: RegistryItem[] = [
       "@audio-ui/use-arrangement",
     ],
   }),
+  hookItem("use-bake", {
+    categories: ["audio", "timeline"],
+    dependencies: ["@audio-ui/engine"],
+    description:
+      "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat and Add silence over it",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/arrangement-engine",
+      "@audio-ui/clip-player",
+    ],
+  }),
   hookItem("use-silence-hover", {
     categories: ["audio", "timeline"],
     description:

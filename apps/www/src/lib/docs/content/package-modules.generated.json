@@ -2918,8 +2918,23 @@
       },
       {
         "kind": "function",
+        "name": "padChannels",
+        "summary": "Silence, in samples, added before and after the sound."
+      },
+      {
+        "kind": "function",
+        "name": "repeatChannels",
+        "summary": "The sound played `times` times in a row, the first included."
+      },
+      {
+        "kind": "function",
         "name": "resampleChannels",
         "summary": "Every channel at another sample rate, by a windowed sinc: the same sound, heard as a converter of that rate would give it, over `channels.length` arrays as long as the new rate needs."
+      },
+      {
+        "kind": "function",
+        "name": "reverseChannels",
+        "summary": "Every channel played backwards: the end first."
       },
       {
         "kind": "function",
@@ -3006,7 +3021,8 @@
     ],
     "typesOnly": false,
     "usedBy": [
-      "audio-export"
+      "audio-export",
+      "use-bake"
     ]
   },
   {
