@@ -35,6 +35,7 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
   audio-ui-timeline-viewport {
     border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: calc(var(--radius, 0.625rem) - 2px);
+    scrollbar-width: none;
   }
 
   audio-ui-timeline-ruler {
@@ -178,7 +179,7 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
 
 ```html
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1">
-  <audio-ui-timeline-viewport class="rounded-md border">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
@@ -246,6 +247,7 @@ audio-ui-timeline {
 audio-ui-timeline-viewport {
   border: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: calc(var(--radius, 0.625rem) - 2px);
+  scrollbar-width: none;
 }
 
 audio-ui-timeline-ruler {
@@ -370,7 +372,7 @@ import "@audio-ui/elements/timeline";
 
 <template>
   <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" @change="(event) => console.log(event.detail.value)">
-    <audio-ui-timeline-viewport class="rounded-md border">
+    <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
       <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
       <audio-ui-timeline-track class="h-14 border-t">
         <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
@@ -429,6 +431,7 @@ import "@audio-ui/elements/timeline";
   audio-ui-timeline-viewport {
     border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: calc(var(--radius, 0.625rem) - 2px);
+    scrollbar-width: none;
   }
 
   audio-ui-timeline-ruler {
@@ -553,7 +556,7 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" onchange={(event) => console.log(event.detail.value)}>
-  <audio-ui-timeline-viewport class="rounded-md border">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
@@ -647,6 +650,7 @@ The parts, nested as they go in the markup.
   audio-ui-timeline-viewport {
     border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: calc(var(--radius, 0.625rem) - 2px);
+    scrollbar-width: none;
   }
 
   audio-ui-timeline-ruler {
@@ -790,7 +794,7 @@ The parts, nested as they go in the markup.
 
 ```html
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1">
-  <audio-ui-timeline-viewport class="rounded-md border">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
@@ -858,6 +862,7 @@ audio-ui-timeline {
 audio-ui-timeline-viewport {
   border: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: calc(var(--radius, 0.625rem) - 2px);
+  scrollbar-width: none;
 }
 
 audio-ui-timeline-ruler {
@@ -982,7 +987,7 @@ import "@audio-ui/elements/timeline";
 
 <template>
   <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" @change="(event) => console.log(event.detail.value)">
-    <audio-ui-timeline-viewport class="rounded-md border">
+    <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
       <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
       <audio-ui-timeline-track class="h-14 border-t">
         <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
@@ -1041,6 +1046,7 @@ import "@audio-ui/elements/timeline";
   audio-ui-timeline-viewport {
     border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: calc(var(--radius, 0.625rem) - 2px);
+    scrollbar-width: none;
   }
 
   audio-ui-timeline-ruler {
@@ -1165,7 +1171,7 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" onchange={(event) => console.log(event.detail.value)}>
-  <audio-ui-timeline-viewport class="rounded-md border">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
@@ -1228,6 +1234,7 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
   audio-ui-timeline-viewport {
     border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: calc(var(--radius, 0.625rem) - 2px);
+    scrollbar-width: none;
   }
 
   audio-ui-timeline-ruler {
@@ -1371,7 +1378,7 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
 
 ```html
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4">
-  <audio-ui-timeline-viewport class="rounded-md border">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
@@ -1439,6 +1446,7 @@ audio-ui-timeline {
 audio-ui-timeline-viewport {
   border: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: calc(var(--radius, 0.625rem) - 2px);
+  scrollbar-width: none;
 }
 
 audio-ui-timeline-ruler {
@@ -1563,7 +1571,7 @@ import "@audio-ui/elements/timeline";
 
 <template>
   <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" @change="(event) => console.log(event.detail.value)">
-    <audio-ui-timeline-viewport class="rounded-md border">
+    <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
       <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
       <audio-ui-timeline-track class="h-14 border-t">
         <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>
@@ -1622,6 +1630,7 @@ import "@audio-ui/elements/timeline";
   audio-ui-timeline-viewport {
     border: 1px solid var(--border, oklch(0.922 0 0));
     border-radius: calc(var(--radius, 0.625rem) - 2px);
+    scrollbar-width: none;
   }
 
   audio-ui-timeline-ruler {
@@ -1746,7 +1755,7 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" onchange={(event) => console.log(event.detail.value)}>
-  <audio-ui-timeline-viewport class="rounded-md border">
+  <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
       <audio-ui-timeline-track-header class="w-20 border-e bg-background p-2 text-xs">Drums</audio-ui-timeline-track-header>

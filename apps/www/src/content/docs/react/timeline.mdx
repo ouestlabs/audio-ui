@@ -56,6 +56,7 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 .viewport {
   border: 1px solid var(--border, oklch(0.922 0 0));
   border-radius: calc(var(--radius, 0.625rem) - 2px);
+  scrollbar-width: none;
 }
 
 .ruler {
@@ -187,7 +188,7 @@ import { Timeline } from "@audio-ui/react";
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
 <Timeline.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={32} snapStep={1}>
-  <Timeline.Viewport className="rounded-md border">
+  <Timeline.Viewport className="rounded-md border [scrollbar-width:none]">
     <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={8}>3</Timeline.Mark>
@@ -323,7 +324,7 @@ import { Timeline } from "@audio-ui/react";
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
 <Timeline.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={64} snapStep={1}>
-  <Timeline.Viewport className="rounded-md border">
+  <Timeline.Viewport className="rounded-md border [scrollbar-width:none]">
     <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={8}>3</Timeline.Mark>
@@ -408,7 +409,7 @@ import { Timeline } from "@audio-ui/react";
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
 <Timeline.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={32} snapStep={4}>
-  <Timeline.Viewport className="rounded-md border">
+  <Timeline.Viewport className="rounded-md border [scrollbar-width:none]">
     <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={8}>3</Timeline.Mark>

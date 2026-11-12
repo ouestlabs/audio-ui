@@ -628,6 +628,7 @@ audio-ui-sequencer-cell[data-on] {
 audio-ui-timeline-viewport {
   border: 1px solid var(--border);
   border-radius: calc(var(--radius) - 2px);
+  scrollbar-width: none;
 }
 
 audio-ui-timeline-ruler {
@@ -744,7 +745,7 @@ audio-ui-timeline-navigator-window {
       "audio-ui-timeline-track": "h-14 border-t",
       "audio-ui-timeline-track-header":
         "w-20 border-e bg-background p-2 text-xs",
-      "audio-ui-timeline-viewport": "rounded-md border",
+      "audio-ui-timeline-viewport": "rounded-md border [scrollbar-width:none]",
     },
   },
   waveform: {
