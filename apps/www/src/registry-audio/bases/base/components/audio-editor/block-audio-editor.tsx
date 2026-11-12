@@ -9,7 +9,13 @@ import {
 } from "@audio-ui/engine/analysis";
 import { decodeAudioChannels } from "@audio-ui/engine/files";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
-import { createSource, type Source } from "@audio-ui/react";
+import {
+  createSource,
+  type FadeShape,
+  fadeGain,
+  type Source,
+  type Timeline as TimelinePrimitive,
+} from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
 import {
   type ChangeEvent,
@@ -57,9 +63,11 @@ import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device
 import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
-import { TimelineTimeSelection } from "@/registry-audio/bases/base/audio/elements/time-selection";
 import {
   Timeline,
+  TimelineClip,
+  TimelineClipFadeHandle,
+  TimelineClipHandle,
   TimelineLane,
   TimelineMark,
   TimelineNavigator,
@@ -146,6 +154,12 @@ const MIN_DB = -60;
 const MAX_DB = 6;
 /** The systems whose shortcuts take Command. */
 const APPLE = /Mac|iPhone|iPad/;
+/** How many points draw a fade's curve. */
+const FADE_POINTS = 24;
+/** The shortest a selection can be made by its edges, in seconds. */
+const SHORTEST_SELECTION = 0.01;
+/** How far the arrows move the level, in dB. */
+const LEVEL_STEP = 0.5;
 /** How far the arrows move a locator, in seconds. */
 const LOCATOR_STEP = 0.1;
 const formatDb = (db: number) =>
@@ -482,6 +496,132 @@ function typing(target: EventTarget | null) {
 const removing = (from: number, to: number): ArrangementCommand[] =>
   to > from ? [{ from, to, type: "remove-time" }] : [];
 
+/** What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB. */
+interface StretchShape {
+  fadeIn: number;
+  fadeInShape: FadeShape;
+  fadeOut: number;
+  fadeOutShape: FadeShape;
+  gain: number;
+}
+
+const FLAT: StretchShape = {
+  fadeIn: 0,
+  fadeInShape: "linear",
+  fadeOut: 0,
+  fadeOutShape: "linear",
+  gain: 0,
+};
+
+const clipEnd = (clip: Arranged) => clip.value.start + clip.value.length;
+/** Two times the same, to the frame. */
+const near = (a: number, b: number) => Math.abs(a - b) < 1e-4;
+
+/** What the selection has now: the shape of the one clip it covers exactly, or none. */
+function shapeOf(
+  clips: readonly Arranged[],
+  [from, to]: readonly [number, number]
+): StretchShape {
+  const clip = clips.find(
+    (item) => near(item.value.start, from) && near(clipEnd(item), to)
+  );
+  return clip
+    ? {
+        fadeIn: clip.value.fadeIn,
+        fadeInShape: clip.value.fadeInShape ?? "linear",
+        fadeOut: clip.value.fadeOut,
+        fadeOutShape: clip.value.fadeOutShape ?? "linear",
+        gain: clip.gain ?? 0,
+      }
+    : FLAT;
+}
+
+/** A clip's piece from `from` to `to` on the timeline, the source following, with no fades of its own. */
+function pieceOf(
+  clip: Arranged,
+  id: string,
+  from: number,
+  to: number
+): Arranged {
+  return {
+    ...clip,
+    id,
+    value: {
+      ...clip.value,
+      fadeIn: 0,
+      fadeOut: 0,
+      length: to - from,
+      offset: clip.value.offset + (from - clip.value.start),
+      start: from,
+    },
+  };
+}
+
+/**
+ * The track's clips with the stretch from `from` to `to` cut out of them as
+ * clips of their own, the shape on those: the fade-in on the first, the
+ * fade-out on the last, the level on all. What is outside keeps its fade on
+ * its own outer end. The commands that make it, as one step.
+ */
+function shapeStretch(
+  clips: readonly Arranged[],
+  [from, to]: readonly [number, number],
+  shape: StretchShape
+): ArrangementCommand[] {
+  const touched = clips.filter(
+    (clip) => clip.value.start < to && clipEnd(clip) > from
+  );
+  const outside: Arranged[] = [];
+  const inside: Arranged[] = [];
+  for (const clip of touched) {
+    const { start } = clip.value;
+    const end = clipEnd(clip);
+    const a = Math.max(start, from);
+    const b = Math.min(end, to);
+    if (start < from) {
+      outside.push({
+        ...pieceOf(clip, clip.id, start, from),
+        value: {
+          ...pieceOf(clip, clip.id, start, from).value,
+          fadeIn: Math.min(clip.value.fadeIn, from - start),
+        },
+      });
+    }
+    inside.push(
+      pieceOf(clip, start < from ? `${clip.id}@${a}` : clip.id, a, b)
+    );
+    if (end > to) {
+      const after = pieceOf(clip, `${clip.id}@${to}`, to, end);
+      outside.push({
+        ...after,
+        value: {
+          ...after.value,
+          fadeOut: Math.min(clip.value.fadeOut, end - to),
+        },
+      });
+    }
+  }
+  const last = inside.length - 1;
+  const shaped = inside.map((clip, index) => ({
+    ...clip,
+    gain: shape.gain,
+    value: {
+      ...clip.value,
+      fadeIn: index === 0 ? Math.min(shape.fadeIn, clip.value.length) : 0,
+      fadeInShape: shape.fadeInShape,
+      fadeOut: index === last ? Math.min(shape.fadeOut, clip.value.length) : 0,
+      fadeOutShape: shape.fadeOutShape,
+    },
+  }));
+  return [
+    ...touched.map((clip) => ({ id: clip.id, type: "remove-clip" as const })),
+    ...[...outside, ...shaped].map((clip) => ({
+      clip,
+      type: "add-clip" as const,
+    })),
+  ];
+}
+
 /**
  * The edits of the sound, as an audio editor makes them, each one step of
  * undo: on the time selected, Cut and Copy; Paste makes room for what it lays
@@ -575,6 +715,22 @@ function useClipEdits({
   const clear = useCallback(() => setTime(null), []);
   const undo = useCallback(() => dispatch({ type: "undo" }), [dispatch]);
   const redo = useCallback(() => dispatch({ type: "redo" }), [dispatch]);
+  const clips = useMemo(
+    () => doc.clips.filter((clip) => clip.track === TRACK),
+    [doc.clips]
+  );
+  /** Fades and level on the selection, as one step: what is in it becomes clips of its own, shaped. */
+  const shape = useCallback(
+    (next: StretchShape) => {
+      if (time) {
+        dispatch({
+          commands: shapeStretch(clips, time.range, next),
+          type: "batch",
+        });
+      }
+    },
+    [clips, dispatch, time]
+  );
 
   const handleKey = useCallback(
     (event: KeyboardEvent<HTMLElement>) => {
@@ -620,6 +776,9 @@ function useClipEdits({
     remove,
     selectAll,
     setTime,
+    shape,
+    /** What the selection has now: its fades and level, read from the clip it covers exactly. */
+    shapeNow: time ? shapeOf(clips, time.range) : FLAT,
     time,
     undo,
   };
@@ -795,6 +954,346 @@ function useTakeSpan(recording: boolean, clock: Source<number>) {
   return span;
 }
 
+/** A time to the millisecond, as an edge being dragged shows it: m:ss.mmm. */
+const formatPrecise = (seconds: number) =>
+  `${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(3).padStart(6, "0")}`;
+
+/** A fade's edge along the waveform, from its start over `span`, as the gain it lets through, 0…1, at each point. */
+function fadeEdge(
+  from: number,
+  span: number,
+  rising: boolean,
+  shape: FadeShape
+) {
+  return Array.from({ length: FADE_POINTS + 1 }, (_, index) => {
+    const progress = index / FADE_POINTS;
+    return [
+      from + span * progress,
+      fadeGain(shape, rising ? progress : 1 - progress),
+    ] as const;
+  });
+}
+
+/** The shade over what a fade takes away, above and below the waveform's middle, and the line along its edge. */
+function fadePaths(edge: readonly (readonly [number, number])[]) {
+  const first = edge[0]?.[0] ?? 0;
+  const last = edge.at(-1)?.[0] ?? 0;
+  const top = edge.map(([x, gain]) => `L${x} ${0.5 - gain / 2}`).join("");
+  const bottom = edge.map(([x, gain]) => `L${x} ${0.5 + gain / 2}`).join("");
+  return {
+    line: `M${edge.map(([x, gain]) => `${x} ${0.5 - gain / 2}`).join("L")}M${edge.map(([x, gain]) => `${x} ${0.5 + gain / 2}`).join("L")}`,
+    shade: `M${first} 0${top}L${last} 0ZM${first} 1${bottom}L${last} 1Z`,
+  };
+}
+
+/** One fade over a clip's waveform: what it takes away shaded, the curve it follows drawn. */
+function FadePaths({ edge }: { edge: readonly (readonly [number, number])[] }) {
+  const { line, shade } = fadePaths(edge);
+  return (
+    <>
+      <path className="fill-background/60" d={shade} />
+      <path
+        className="fill-none stroke-foreground/50"
+        d={line}
+        vectorEffect="non-scaling-stroke"
+      />
+    </>
+  );
+}
+
+/** A clip's fades over its waveform, as the arrangement draws them. */
+function FadeShade({ value }: { value: Arranged["value"] }) {
+  const { fadeIn, fadeOut, length } = value;
+  if (!(length > 0 && (fadeIn > 0 || fadeOut > 0))) {
+    return null;
+  }
+  return (
+    <svg
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-0 size-full"
+      preserveAspectRatio="none"
+      viewBox={`0 0 ${length} 1`}
+    >
+      {fadeIn > 0 ? (
+        <FadePaths
+          edge={fadeEdge(0, fadeIn, true, value.fadeInShape ?? "linear")}
+        />
+      ) : null}
+      {fadeOut > 0 ? (
+        <FadePaths
+          edge={fadeEdge(
+            length - fadeOut,
+            fadeOut,
+            false,
+            value.fadeOutShape ?? "linear"
+          )}
+        />
+      ) : null}
+    </svg>
+  );
+}
+
+/** The gain a level lets through, 0…1: silence at the bottom of the range. */
+const ratioOf = (db: number) => (db <= MIN_DB ? 0 : Math.min(1, dbToGain(db)));
+
+/** What Up and Down do to the level, in dB. */
+const LEVEL_KEYS: Record<string, number | undefined> = {
+  ArrowDown: -LEVEL_STEP,
+  ArrowUp: LEVEL_STEP,
+};
+
+/** The level at the pointer, up the frame the grip is in: 0 dB at its top, silence at its bottom; `gain` while it has no height. */
+function levelAt(event: PointerEvent<HTMLElement>, gain: number) {
+  const box = event.currentTarget.parentElement?.getBoundingClientRect();
+  if (!box || box.height <= 0) {
+    return gain;
+  }
+  const ratio = Math.min(
+    1,
+    Math.max(0, 1 - (event.clientY - box.top) / box.height)
+  );
+  return ratio <= dbToGain(MIN_DB) ? MIN_DB : gainToDb(ratio);
+}
+
+/**
+ * The level of the selection: a line across it where the gain it lets
+ * through stands, 0 dB at the top and silence at the bottom, and a grip in its
+ * middle to drag up and down, or move with Up and Down. It shows the level as
+ * it moves and takes effect as it lets go.
+ */
+function LevelHandle({
+  gain,
+  onChange,
+  onCommit,
+}: {
+  gain: number;
+  onChange: (db: number) => void;
+  onCommit: (db: number) => void;
+}) {
+  const [dragging, setDragging] = useState(false);
+  const latest = useRef(gain);
+  const top = `${(1 - ratioOf(gain)) * 100}%`;
+  const press = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      event.stopPropagation();
+      event.currentTarget.setPointerCapture(event.pointerId);
+      latest.current = gain;
+      setDragging(true);
+    },
+    [gain]
+  );
+  const move = useCallback(
+    (event: PointerEvent<HTMLElement>) => {
+      if (dragging) {
+        latest.current = levelAt(event, gain);
+        onChange(latest.current);
+      }
+    },
+    [dragging, gain, onChange]
+  );
+  const release = useCallback(() => {
+    if (dragging) {
+      setDragging(false);
+      onCommit(latest.current);
+    }
+  }, [dragging, onCommit]);
+  const key = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      const step = LEVEL_KEYS[event.key];
+      if (step !== undefined) {
+        event.preventDefault();
+        event.stopPropagation();
+        onCommit(Math.min(0, Math.max(MIN_DB, gain + step)));
+      }
+    },
+    [gain, onCommit]
+  );
+  return (
+    <>
+      <span
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-x-0 z-10 border-primary border-t border-dashed"
+        style={{ top }}
+      />
+      <span
+        aria-label="Selection level"
+        aria-orientation="vertical"
+        aria-valuemax={0}
+        aria-valuemin={MIN_DB}
+        aria-valuenow={gain}
+        aria-valuetext={formatDb(gain)}
+        className="pointer-events-auto absolute left-1/2 z-20 h-2 w-6 -translate-x-1/2 -translate-y-1/2 cursor-ns-resize touch-none rounded-full border border-primary bg-background outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        onKeyDown={key}
+        onLostPointerCapture={release}
+        onPointerDown={press}
+        onPointerMove={move}
+        onPointerUp={release}
+        role="slider"
+        style={{ top }}
+        tabIndex={0}
+      />
+      {dragging ? (
+        <span
+          className="pointer-events-none absolute left-1/2 z-20 -translate-x-1/2 translate-y-2 rounded-sm bg-foreground px-1 text-[10px] text-background tabular-nums"
+          style={{ top }}
+        >
+          {formatDb(gain)}
+        </span>
+      ) : null}
+    </>
+  );
+}
+
+/** A drag of the selection's edge, as the frame reports it. */
+const TRIMS: Record<string, "end" | "start" | undefined> = {
+  "trim-end": "end",
+  "trim-start": "start",
+};
+
+/**
+ * The selection as a frame over the waveform, as an audio editor draws one:
+ * its edges drag, showing their time to the millisecond as they do; a handle
+ * in each top corner fades it in and out (a double-click on one picks its
+ * curve); the level's grip in its middle sets how loud it plays. Fades and
+ * level take effect as a gesture ends, one step of undo each: what is in the
+ * selection becomes clips of its own, shaped.
+ */
+function SelectionFrame({
+  duration,
+  edits,
+}: {
+  duration: number;
+  edits: ReturnType<typeof useClipEdits>;
+}) {
+  const { setTime, shape, shapeNow, time } = edits;
+  const [preview, setPreview] = useState<StretchShape | null>(null);
+  const [edge, setEdge] = useState<"end" | "start" | null>(null);
+  const fading = useRef<boolean>(false);
+  const current = preview ?? shapeNow;
+  const [from, to] = time?.range ?? [0, 0];
+  const change = useCallback(
+    (
+      next: TimelinePrimitive.Clip.Value,
+      details: TimelinePrimitive.Clip.ChangeEventDetails
+    ) => {
+      const trim = TRIMS[details.target];
+      fading.current = !trim;
+      if (trim) {
+        setEdge(trim);
+        setTime({
+          range: [next.start, next.start + next.length],
+          tracks: [TRACK],
+        });
+      } else {
+        setPreview({ ...current, fadeIn: next.fadeIn, fadeOut: next.fadeOut });
+      }
+    },
+    [current, setTime]
+  );
+  const commit = useCallback(
+    (next: TimelinePrimitive.Clip.Value) => {
+      setEdge(null);
+      if (fading.current) {
+        fading.current = false;
+        shape({ ...current, fadeIn: next.fadeIn, fadeOut: next.fadeOut });
+        setPreview(null);
+      }
+    },
+    [current, shape]
+  );
+  const level = useCallback(
+    (gain: number) => setPreview({ ...current, gain }),
+    [current]
+  );
+  const settleLevel = useCallback(
+    (gain: number) => {
+      shape({ ...current, gain });
+      setPreview(null);
+    },
+    [current, shape]
+  );
+  const curveIn = useCallback(
+    (fadeInShape: FadeShape) => shape({ ...current, fadeInShape }),
+    [current, shape]
+  );
+  const curveOut = useCallback(
+    (fadeOutShape: FadeShape) => shape({ ...current, fadeOutShape }),
+    [current, shape]
+  );
+  if (!time) {
+    return null;
+  }
+  const value = {
+    fadeIn: current.fadeIn,
+    fadeInShape: current.fadeInShape,
+    fadeOut: current.fadeOut,
+    fadeOutShape: current.fadeOutShape,
+    length: to - from,
+    offset: from,
+    start: from,
+  };
+  return (
+    <TimelineClip
+      aria-label="Selection"
+      className="pointer-events-none z-20"
+      minLength={SHORTEST_SELECTION}
+      movable={false}
+      onValueChange={change}
+      onValueCommitted={commit}
+      // It is the selection already: a press on a handle does not pick it as a clip.
+      selected={false}
+      sourceLength={duration}
+      value={value}
+    >
+      {/* The fades as they will be, while a corner drags; the clips draw them once they are. */}
+      {preview ? <FadeShade value={value} /> : null}
+      <TimelineClipHandle
+        aria-label="Selection start"
+        className="pointer-events-auto"
+        edge="start"
+      />
+      <TimelineClipHandle
+        aria-label="Selection end"
+        className="pointer-events-auto"
+        edge="end"
+      />
+      <TimelineClipFadeHandle
+        aria-label="Fade in"
+        // Always shown: they belong to the selection, which has no hover of its own.
+        className="pointer-events-auto opacity-100"
+        edge="in"
+        onShapeChange={curveIn}
+        shape={current.fadeInShape}
+      />
+      <TimelineClipFadeHandle
+        aria-label="Fade out"
+        // Always shown: they belong to the selection, which has no hover of its own.
+        className="pointer-events-auto opacity-100"
+        edge="out"
+        onShapeChange={curveOut}
+        shape={current.fadeOutShape}
+      />
+      <LevelHandle
+        gain={current.gain}
+        onChange={level}
+        onCommit={settleLevel}
+      />
+      {edge ? (
+        <span
+          className={cn(
+            "pointer-events-none absolute bottom-1 z-20 rounded-sm bg-foreground px-1 text-[10px] text-background tabular-nums",
+            edge === "start" ? "left-1" : "right-1"
+          )}
+        >
+          {edge === "start"
+            ? `Start ${formatPrecise(from)}`
+            : `End ${formatPrecise(to)}`}
+        </span>
+      ) : null}
+    </TimelineClip>
+  );
+}
+
 /** The track's clips on the lane, each drawing its part of the sound it plays, at the clip editor's detail. */
 function SoundClips({
   clips,
@@ -821,17 +1320,24 @@ function SoundClips({
           width: `calc(var(--timeline-unit) * ${clip.value.length})`,
         }}
       >
-        <ClipWaveform
-          aria-label={`${sound.name}, waveform`}
-          className="inset-y-0 h-full text-foreground"
-          clip={{
-            sourceLength: clip.sourceLength ?? sound.duration,
-            value: { length: clip.value.length, offset: clip.value.offset },
-          }}
-          peaks={sound.peaks}
-          role="img"
-          samples={sound.samples}
-        />
+        {/* Its level scales what it draws, as it scales what it plays. */}
+        <div
+          className="absolute inset-0"
+          style={{ transform: `scaleY(${dbToGain(clip.gain ?? 0)})` }}
+        >
+          <ClipWaveform
+            aria-label={`${sound.name}, waveform`}
+            className="inset-y-0 h-full text-foreground"
+            clip={{
+              sourceLength: clip.sourceLength ?? sound.duration,
+              value: { length: clip.value.length, offset: clip.value.offset },
+            }}
+            peaks={sound.peaks}
+            role="img"
+            samples={sound.samples}
+          />
+        </div>
+        <FadeShade value={clip.value} />
       </div>
     ) : null;
   });
@@ -923,7 +1429,7 @@ function ClipLane({
   useFollowPlayhead({ playing, position, px: zoom, viewport, zoomed });
 
   // A press on the lane lets go of the selection, and gives the lane the keys; a drag from there selects.
-  const { clear, setTime, time } = edits;
+  const { clear, setTime } = edits;
   const press = useCallback(
     (event: PointerEvent<HTMLDivElement>) => {
       if (event.button === 0) {
@@ -996,9 +1502,9 @@ function ClipLane({
                     hidden={recording}
                     sounds={sounds}
                   />
-                  {time && !recording ? (
-                    <TimelineTimeSelection range={time.range} />
-                  ) : null}
+                  {recording ? null : (
+                    <SelectionFrame duration={duration} edits={edits} />
+                  )}
                   <TimelinePlayhead />
                 </TimelineLane>
               </TimelineViewport>
