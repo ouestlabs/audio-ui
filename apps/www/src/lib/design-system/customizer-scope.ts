@@ -14,7 +14,7 @@ declare module "@tanstack/react-router" {
 
 /** A preview or a source of the registry: it follows every choice, the icon library in its code included. */
 const REGISTRY_TAG = /<Component(?:Preview|Source)\b/;
-const ELEMENTS_TAG = /<ElementsPreview\b/;
+const ELEMENTS_TAG = /<(?:Elements|React)Preview\b/;
 
 /** What the customizer changes on a docs page, from its MDX. */
 export function pageScope(mdx: string): CustomizerScope {

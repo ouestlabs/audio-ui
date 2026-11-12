@@ -18,6 +18,7 @@ import { FrameworkTabs } from "@/components/docs/mdx/framework-tabs";
 import { IconCatalog } from "@/components/docs/mdx/icon-catalog";
 import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
+import { ReactPreview } from "@/components/docs/mdx/react-preview";
 import {
   KeyRow,
   KeyTable,
@@ -63,6 +64,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ElementsPreview,
     ForFrameworks,
     ForStyling,
+    ReactPreview,
     FrameworkTabs,
     DeviceControls,
     DeviceUsage,

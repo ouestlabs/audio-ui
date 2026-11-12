@@ -3,7 +3,83 @@ title: Pad
 description: "The headless Pad of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
+<ReactPreview name="pad" />
+
 <Module from="@audio-ui/react/pad" />
+
+## Usage
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+
+<ForStyling only="css">
+
+```css title="pad.module.css"
+.root {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: calc(var(--spacing, 0.25rem) * 2 * var(--density, 1));
+  width: calc(var(--spacing, 0.25rem) * 72);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  aspect-ratio: 1;
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+  color: var(--muted-foreground, oklch(0.556 0 0));
+  font-size: 0.75rem;
+  line-height: 1rem;
+  outline: none;
+  user-select: none;
+  transition:
+    color 150ms,
+    background-color 150ms;
+}
+
+.item:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
+}
+
+.item[data-active] {
+  background: var(--primary, oklch(0.205 0 0));
+  color: var(--primary-foreground, oklch(0.985 0 0));
+}
+```
+
+```tsx title="pad.tsx"
+import { Pad } from "@audio-ui/react";
+import styles from "./pad.module.css";
+
+<Pad.Root className={styles.root} aria-label="Drums">
+  <Pad.Item className={styles.item} value="kick">Kick</Pad.Item>
+  <Pad.Item className={styles.item} value="snare">Snare</Pad.Item>
+  <Pad.Item className={styles.item} value="hat">Hat</Pad.Item>
+  <Pad.Item className={styles.item} value="clap">Clap</Pad.Item>
+</Pad.Root>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```tsx title="pad.tsx"
+import { Pad } from "@audio-ui/react";
+
+<Pad.Root className="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums">
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</Pad.Item>
+  <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="clap">Clap</Pad.Item>
+</Pad.Root>
+```
+
+</ForStyling>
+
+{/* usage:end */}
 
 ## Anatomy
 

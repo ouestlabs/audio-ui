@@ -393,7 +393,7 @@ const DEFAULT_LIGHT =
 const VARIABLE_USE = /var\(--([a-z-]+)\)/g;
 
 /** A stylesheet that works pasted as it is: each theme variable falls back to the default theme's value. */
-function withFallbacks(css: string) {
+export function withFallbacks(css: string) {
   return css.replace(VARIABLE_USE, (use, name: string) => {
     const value = DEFAULT_LIGHT.match(new RegExp(`--${name}: ([^;]+);`))?.[1];
     return value ? `var(--${name}, ${value})` : use;

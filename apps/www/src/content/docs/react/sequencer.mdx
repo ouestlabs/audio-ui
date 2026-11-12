@@ -3,7 +3,99 @@ title: Sequencer
 description: "The headless Sequencer of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
+<ReactPreview name="sequencer" />
+
 <Module from="@audio-ui/react/sequencer" />
+
+## Usage
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+
+<ForStyling only="css">
+
+```css title="sequencer.module.css"
+.root {
+  display: grid;
+  gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+  width: 100%;
+  max-width: 36rem;
+}
+
+.row {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
+}
+
+.cell {
+  aspect-ratio: 1;
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--muted, oklch(0.97 0 0));
+  outline: none;
+}
+
+.cell:focus-visible {
+  box-shadow: 0 0 0 2px var(--ring, oklch(0.708 0 0));
+}
+
+.cell[data-on] {
+  background: var(--primary, oklch(0.205 0 0));
+}
+```
+
+```tsx title="sequencer.tsx"
+import { Sequencer } from "@audio-ui/react";
+import styles from "./sequencer.module.css";
+
+const pattern = [
+  [true, false, false, false, true, false, false, false],
+  [false, false, true, false, false, false, true, false],
+];
+
+<Sequencer.Root className={styles.root} aria-label="Pattern" defaultValue={pattern}>
+  <Sequencer.Rows>
+    {(row) => (
+      <Sequencer.Row className={styles.row} index={row}>
+        <Sequencer.Cells>
+          {(step) => <Sequencer.Cell step={step} />}
+        </Sequencer.Cells>
+      </Sequencer.Row>
+    )}
+  </Sequencer.Rows>
+</Sequencer.Root>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```tsx title="sequencer.tsx"
+import { Sequencer } from "@audio-ui/react";
+
+const pattern = [
+  [true, false, false, false, true, false, false, false],
+  [false, false, true, false, false, false, true, false],
+];
+
+<Sequencer.Root className="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" defaultValue={pattern}>
+  <Sequencer.Rows>
+    {(row) => (
+      <Sequencer.Row className="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index={row}>
+        <Sequencer.Cells>
+          {(step) => <Sequencer.Cell step={step} />}
+        </Sequencer.Cells>
+      </Sequencer.Row>
+    )}
+  </Sequencer.Rows>
+</Sequencer.Root>
+```
+
+</ForStyling>
+
+{/* usage:end */}
 
 ## Anatomy
 

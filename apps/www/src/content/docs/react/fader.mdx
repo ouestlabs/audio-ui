@@ -3,7 +3,117 @@ title: Fader
 description: "The headless Fader of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
+<ReactPreview name="fader" />
+
 <Module from="@audio-ui/react/fader" />
+
+## Usage
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+
+<ForStyling only="css">
+
+```css title="fader.module.css"
+.root {
+  position: relative;
+  height: calc(var(--spacing, 0.25rem) * 40);
+}
+
+.control {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: auto;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+}
+
+.track {
+  position: relative;
+  flex-grow: 1;
+  width: calc(var(--spacing, 0.25rem) * 2);
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
+  cursor: pointer;
+  user-select: none;
+}
+
+.indicator {
+  position: absolute;
+  width: 100%;
+  background: var(--primary, oklch(0.205 0 0));
+  user-select: none;
+}
+
+.thumb {
+  position: absolute;
+  z-index: 10;
+  display: block;
+  flex-shrink: 0;
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 6);
+  border: 1px solid var(--ring, oklch(0.708 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--card, oklch(1 0 0));
+  outline: none;
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 150ms;
+}
+
+.thumb:hover {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
+}
+
+.thumb:has(:focus-visible),
+.thumb:active {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
+}
+
+.thumb:active {
+  cursor: grabbing;
+}
+```
+
+```tsx title="fader.tsx"
+import { Fader } from "@audio-ui/react";
+import styles from "./fader.module.css";
+
+<Fader.Root className={styles.root} defaultValue={-6}>
+  <Fader.Control className={styles.control}>
+    <Fader.Track className={styles.track}>
+      <Fader.Indicator className={styles.indicator} />
+    </Fader.Track>
+    <Fader.Thumb className={styles.thumb} aria-label="Volume" />
+  </Fader.Control>
+</Fader.Root>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```tsx title="fader.tsx"
+import { Fader } from "@audio-ui/react";
+
+<Fader.Root className="relative h-40" defaultValue={-6}>
+  <Fader.Control className="relative flex h-full w-auto touch-none select-none flex-col items-center">
+    <Fader.Track className="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
+      <Fader.Indicator className="absolute w-full select-none bg-primary" />
+    </Fader.Track>
+    <Fader.Thumb className="absolute z-10 block h-6 w-4 shrink-0 cursor-grab select-none rounded-md border border-ring bg-card outline-none transition-shadow hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing active:ring-3 active:ring-ring/50" aria-label="Volume" />
+  </Fader.Control>
+</Fader.Root>
+```
+
+</ForStyling>
+
+{/* usage:end */}
 
 ## Anatomy
 

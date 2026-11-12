@@ -3,7 +3,90 @@ title: Meter
 description: "The headless Meter of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
+<ReactPreview name="meter" />
+
 <Module from="@audio-ui/react/meter" />
+
+## Usage
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+
+<ForStyling only="css">
+
+```css title="meter.module.css"
+.root {
+  display: flex;
+  gap: calc(var(--spacing, 0.25rem) * 1.5 * var(--density, 1));
+  height: calc(var(--spacing, 0.25rem) * 44);
+}
+
+.channel {
+  position: relative;
+  display: block;
+  width: calc(var(--spacing, 0.25rem) * 3);
+  height: 100%;
+  overflow: hidden;
+  border-radius: calc(var(--radius, 0.625rem) - 4px);
+  background: var(--muted, oklch(0.97 0 0));
+}
+
+.indicator {
+  position: absolute;
+  bottom: 0;
+  display: block;
+  background: var(--primary, oklch(0.205 0 0));
+}
+
+.peak {
+  position: absolute;
+  right: 0;
+  left: 0;
+  display: block;
+  height: calc(var(--spacing, 0.25rem) * 0.5);
+  background: var(--foreground, oklch(0.145 0 0));
+}
+```
+
+```tsx title="meter.tsx"
+import { Meter } from "@audio-ui/react";
+import styles from "./meter.module.css";
+
+<Meter.Root className={styles.root} min={-60} max={6} value={[-18, -10]}>
+  <Meter.Channels>
+    {(index) => (
+      <Meter.Channel className={styles.channel} index={index} aria-label={index === 0 ? "Left" : "Right"}>
+        <Meter.Indicator className={styles.indicator} />
+        <Meter.Peak className={styles.peak} />
+      </Meter.Channel>
+    )}
+  </Meter.Channels>
+</Meter.Root>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```tsx title="meter.tsx"
+import { Meter } from "@audio-ui/react";
+
+<Meter.Root className="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min={-60} max={6} value={[-18, -10]}>
+  <Meter.Channels>
+    {(index) => (
+      <Meter.Channel className="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index={index} aria-label={index === 0 ? "Left" : "Right"}>
+        <Meter.Indicator className="absolute bottom-0 block bg-primary" />
+        <Meter.Peak className="absolute inset-x-0 block h-0.5 bg-foreground" />
+      </Meter.Channel>
+    )}
+  </Meter.Channels>
+</Meter.Root>
+```
+
+</ForStyling>
+
+{/* usage:end */}
 
 ## Anatomy
 

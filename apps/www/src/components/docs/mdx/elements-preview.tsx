@@ -3,7 +3,6 @@
 import { createSource } from "@audio-ui/core";
 import type { MeterElement, PlotCurveElement } from "@audio-ui/elements";
 import {
-  type CSSProperties,
   createContext,
   type ReactNode,
   use,
@@ -14,10 +13,8 @@ import {
 } from "react";
 import { PreviewPanel } from "@/components/preview/frame/preview-frame";
 import { Frame } from "@/components/site/layout/frame";
-import { useDensity, useSize } from "@/hooks/use-look";
-import { useStyling } from "@/hooks/use-styling";
+import { usePreviewLook } from "@/hooks/use-preview-look";
 import { SKINS } from "@/lib/docs/content/element-skins";
-import { DENSITIES, SIZES } from "@/lib/docs/content/stylings";
 
 /** The primitives with a live preview, by entry point. */
 export type ElementsPreviewName =
@@ -582,14 +579,7 @@ const PREVIEWS: Record<ElementsPreviewName, () => ReactNode> = {
  * entry point has registered them, with the last event it fired below it.
  */
 export function ElementsPreview({ name }: { name: ElementsPreviewName }) {
-  const [styling] = useStyling();
-  const [size] = useSize();
-  const [density] = useDensity();
-  // The spacing unit and the density the examples read, set on the preview alone.
-  const look = {
-    "--density": DENSITIES.find((each) => each.id === density)?.factor,
-    "--spacing": `${0.25 * (SIZES.find((each) => each.id === size)?.factor ?? 1)}rem`,
-  } as CSSProperties;
+  const { style: look, styling } = usePreviewLook();
   const skin = SKINS[name];
   const part = useCallback(
     (tag: string) => (styling === "tailwind" ? skin?.tailwind[tag] : undefined),

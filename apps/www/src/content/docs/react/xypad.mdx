@@ -3,7 +3,109 @@ title: XYPad
 description: "The headless XYPad of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
+<ReactPreview name="xypad" />
+
 <Module from="@audio-ui/react/xypad" />
+
+## Usage
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+
+<ForStyling only="css">
+
+```css title="xypad.module.css"
+.root {
+  display: block;
+  width: calc(var(--spacing, 0.25rem) * 48);
+}
+
+.control {
+  position: relative;
+  display: block;
+  aspect-ratio: 1;
+  overflow: hidden;
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--muted, oklch(0.97 0 0));
+  cursor: crosshair;
+}
+
+/* The crosshair follows the point. */
+.control::before,
+.control::after {
+  content: "";
+  position: absolute;
+  background: var(--border, oklch(0.922 0 0));
+  pointer-events: none;
+}
+
+.control::before {
+  top: 0;
+  bottom: 0;
+  left: var(--xy-pad-x);
+  width: 1px;
+}
+
+.control::after {
+  top: var(--xy-pad-y);
+  right: 0;
+  left: 0;
+  height: 1px;
+}
+
+.thumb {
+  position: absolute;
+  z-index: 1;
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 4);
+  border-radius: var(--radius, 0.625rem);
+  background: var(--primary, oklch(0.205 0 0));
+  box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
+}
+
+.value {
+  display: block;
+  margin-top: calc(var(--spacing, 0.25rem) * 2);
+  color: var(--muted-foreground, oklch(0.556 0 0));
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: 0.75rem;
+  line-height: 1rem;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+```
+
+```tsx title="xypad.tsx"
+import { XYPad } from "@audio-ui/react";
+import styles from "./xypad.module.css";
+
+<XYPad.Root className={styles.root} defaultValue={{ x: 30, y: 70 }}>
+  <XYPad.Control className={styles.control}>
+    <XYPad.Thumb className={styles.thumb} aria-label="Filter" />
+  </XYPad.Control>
+  <XYPad.Value className={styles.value} />
+</XYPad.Root>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```tsx title="xypad.tsx"
+import { XYPad } from "@audio-ui/react";
+
+<XYPad.Root className="block w-48" defaultValue={{ x: 30, y: 70 }}>
+  <XYPad.Control className="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
+    <XYPad.Thumb className="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
+  </XYPad.Control>
+  <XYPad.Value className="mt-2 block text-center font-mono text-muted-foreground text-xs tabular-nums" />
+</XYPad.Root>
+```
+
+</ForStyling>
+
+{/* usage:end */}
 
 ## Anatomy
 
