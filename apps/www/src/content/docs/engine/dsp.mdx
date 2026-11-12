@@ -7,7 +7,7 @@ description: "The audio.js processors the registry's devices are built on, from 
 
 ## Usage
 
-A device of the registry describes its parameters itself, and takes the processors it is made of from here: the models a compressor offers, the gain curve a panel draws, the circuits of a filter, the reverbs a room is rendered with. They are the audio.js atoms' own, under the names the devices use, so a project that installs a device depends on `@audio-ui/engine` and not on each atom:
+A device describes its parameters itself, and takes the processors it is made of from here: the models a compressor offers, the gain curve a panel draws, the circuits of a filter, the reverbs a room is rendered with. They are the audio.js atoms' own, under the names the devices use, so a project depends on `@audio-ui/engine` and not on each atom:
 
 ```ts
 import { compressorGain, moogLadder } from "@audio-ui/engine/dsp";

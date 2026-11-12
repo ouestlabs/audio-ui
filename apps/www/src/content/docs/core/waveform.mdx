@@ -52,4 +52,14 @@ surface.addEventListener("pointerdown", (event) => seek.pressSeek(event, surface
 
 `createWaveformRegionController` drives a region on the waveform, `[start, end]`: `press(edge, event, handle, track, shownRange)` drags one edge, or the whole region with `"both"`, keeping it at least `minLength` long; `keyDown(edge, event)` moves an edge with the arrows and Page keys and sends it to its ends with Home and End, and `typeAt` sets it from an input.
 
+<ForFrameworks only="react">
+
 The [Waveform](/docs/components/base/waveform) draws these in React.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+[`<audio-ui-waveform>`](/docs/elements/waveform) draws these in your framework.
+
+</ForFrameworks>

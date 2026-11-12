@@ -1,9 +1,9 @@
 ---
 title: Agent Skill
-description: Give your coding agent the audio/ui skill so it picks the right component, wires it to Web Audio without clicks, keeps live data out of React and styles the primitives.
+description: Give your coding agent the audio/ui skill so it picks the right component, wires it to Web Audio without clicks, keeps live data out of the render and styles the primitives.
 ---
 
-The audio/ui skill gives a coding agent the library's rules: which layer and component fit a task, how to install them, how to wire them to the Web Audio API, how to feed meters and playheads without re-rendering React, how to style the headless primitives, and how to let an AI model drive them.
+The audio/ui skill gives a coding agent the library's rules: which layer and component fit a task, how to install them, how to wire them to the Web Audio API, how to feed meters and playheads without a render per frame, how to style the headless primitives, and how to let an AI model drive them.
 
 ## Install the skill
 
@@ -37,6 +37,8 @@ The skills live in the [audio-ui repository](https://github.com/ouestlabs/audio-
 
 ## What it does
 
+<ForFrameworks only="react">
+
 Once installed, the agent uses it whenever you ask for a knob, fader, XY pad, meter, waveform, timeline, sequencer, piano roll or any synth, mixer or DAW interface in React. It will:
 
 1. Read your project to see if it uses shadcn/ui, plain React or another framework, then choose the registry, `@audio-ui/react` or `@audio-ui/core`.
@@ -44,6 +46,20 @@ Once installed, the agent uses it whenever you ask for a knob, fader, XY pad, me
 3. Install it with your package manager.
 4. Connect the control to your audio code the safe way, without clicks while dragging, and feed live displays without re-rendering React.
 5. Check keyboard access and accessible names.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+Once installed, the agent uses it whenever you ask for a knob, fader, XY pad, meter, waveform, timeline, sequencer, piano roll or any synth, mixer or DAW interface in Vue, Svelte or plain HTML. It will:
+
+1. Read your project to see its framework, then take the custom elements of `@audio-ui/elements`, with the `core` skill's rules.
+2. Find the right element and read its docs before writing code.
+3. Install it with your package manager, and set up the elements for your framework.
+4. Connect the control to your audio code the safe way, without clicks while dragging, and feed live displays without a render per frame.
+5. Check keyboard access and accessible names.
+
+</ForFrameworks>
 
 ## Add the MCP server
 

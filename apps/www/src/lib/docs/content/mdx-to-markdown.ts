@@ -151,7 +151,11 @@ export function replaceFrontmatter(content: string) {
 function frameworkNames(only: string) {
   const names = only
     .split(" ")
-    .map((id) => FRAMEWORKS.find((each) => each.id === id)?.label ?? id);
+    .map((id) =>
+      id === "any"
+        ? "any framework"
+        : (FRAMEWORKS.find((each) => each.id === id)?.label ?? id)
+    );
   return names.length > 1
     ? `${names.slice(0, -1).join(", ")} and ${names.at(-1)}`
     : (names[0] ?? only);

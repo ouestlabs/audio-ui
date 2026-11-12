@@ -51,4 +51,14 @@ The snapshot holds the points and what is being dragged (`draggingIndex`, `dragg
 
 The rest of the module draws the envelope: `polylinePoints` is the polyline through the points with each bent segment sampled, `levelAt` the level along a bent segment, `curveForMidpoint` the curve that puts a segment's middle at a height, and `segmentNear` the segment under a point. `sortPoints`, `sanitizePoints`, `clampToNeighbors` and `insertPoint` keep a list valid.
 
+<ForFrameworks only="react">
+
 The [Envelope](/docs/components/base/envelope) draws this controller in React.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+[`<audio-ui-envelope>`](/docs/elements/envelope) draws this controller in your framework.
+
+</ForFrameworks>

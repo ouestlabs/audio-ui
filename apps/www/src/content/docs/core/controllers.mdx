@@ -3,7 +3,7 @@ title: Controllers
 description: "The logic under each primitive, from @audio-ui/core: one controller per control, with the same contract whatever draws it. A React part is one adapter of it; a plain DOM page, Vue or Svelte can be another."
 ---
 
-The primitives in `@audio-ui/react` are a view over a controller from `@audio-ui/core`. The controller holds the value, the gesture, the keys and the formatting, and says nothing about how the control is drawn. Use it directly to drive a control from any framework, or from no framework at all.
+Every primitive, React's and the custom elements alike, is a view over a controller from `@audio-ui/core`. The controller holds the value, the gesture, the keys and the formatting, and says nothing about how the control is drawn. Use it directly to drive a control from any framework, or from no framework at all.
 
 ```ts
 import { createFaderController } from "@audio-ui/core/fader";
@@ -22,7 +22,7 @@ Every controller follows the same steps, whatever the control:
 
 The value moves in two steps. `onValueChange` reports every change during a drag, and `onValueCommitted` fires once when the gesture ends. Both carry a `reason` (a drag, a key, the wheel, a typed value, a reset) and the event that caused them, and each controller's `*EventReason` type lists its own. Save to the second one.
 
-The React primitives are the reference implementation of each adapter: the part that owns an element is the one that attaches its listeners and attributes.
+The primitives of `@audio-ui/react` and `@audio-ui/elements` are its reference adapters: the part that owns an element is the one that attaches its listeners and attributes.
 
 ## Next
 

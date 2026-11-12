@@ -41,4 +41,14 @@ const reading = vu.step(levelDb, elapsedSeconds);
 
 `channelView(frame, index, config)` is what a channel shows for a reading: the length of its bar, its peak mark, whether it is at the warning level or clipping, and its text. `paintChannel(nodes, view, index, orientation)` writes that straight to the channel's DOM nodes, touching only what changed, so a meter repaints every frame with no render of its framework.
 
+<ForFrameworks only="react">
+
 The [Meter](/docs/components/base/meter) draws these in React.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+[`<audio-ui-meter>`](/docs/elements/meter) draws these in your framework.
+
+</ForFrameworks>

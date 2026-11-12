@@ -20,7 +20,11 @@ dbToGain(-6.02); // 0.5
 formatDb(-6.5); // "-6.5 dB"
 ```
 
+<ForFrameworks only="react">
+
 The registry's [`useAudioLevels`](/docs/hooks/use-audio-levels) reads an analyser through them into what a [Meter](/docs/components/base/meter) draws.
+
+</ForFrameworks>
 
 ## Spectrum
 
@@ -50,7 +54,7 @@ The band types are the ones an equalizer shows (`lowcut`, `highcut`, `lowshelf`,
 
 ## Waveforms
 
-`computePeaks(channels, buckets)` reduces a recording to the lowest and highest sample of each slice, across its channels, which is what a [Waveform](/docs/components/base/waveform) draws; `normalizePeaks` scales them to full height.
+`computePeaks(channels, buckets)` reduces a recording to the lowest and highest sample of each slice, across its channels, which is what a waveform draws; `normalizePeaks` scales them to full height.
 
 ## Tempo and transients
 
@@ -71,11 +75,15 @@ const normalized = channels.map((channel) => channel.map((sample) => sample * ga
 
 It reads every sample, the true peak at four points a sample: about half a second a minute of loud stereo on a laptop, so measure where the page can wait, as an export does. `LOUDNESS_TARGETS` holds -14 LUFS for streaming, -16 for podcasts and -23 for broadcast (EBU R 128).
 
+<ForFrameworks only="react">
+
 ### While it plays
 
 `useLoudness` measures a node as it plays, on the audio thread: momentary, short-term and integrated LUFS every 100 ms as a live source, and `clear` to start the integrated loudness over.
 
 Usage and API: [`useLoudness`](/docs/hooks/use-loudness).
+
+</ForFrameworks>
 
 ## Pitch
 

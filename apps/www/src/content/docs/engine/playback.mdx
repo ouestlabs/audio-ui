@@ -7,7 +7,13 @@ description: "What plays when, from @audio-ui/engine: audio clips placed in fram
 
 ## Usage
 
-An arrangement plays as blocks of frames on the audio thread. This module holds the arithmetic of that: which frame of the arrangement plays at a frame of the audio clock, which clips sound in a block and where each reads its recording, and how the mixer lines its paths up. The registry's [`clip-player`](/docs/lib/clip-player) runs it in an `AudioWorklet`, and the [`arrangement-engine`](/docs/lib/arrangement-engine) and [`mixer-engine`](/docs/lib/mixer-engine) build on it.
+An arrangement plays as blocks of frames on the audio thread. This module holds the arithmetic of that: which frame of the arrangement plays at a frame of the audio clock, which clips sound in a block and where each reads its recording, and how the mixer lines its paths up.
+
+<ForFrameworks only="react">
+
+The registry's [`clip-player`](/docs/lib/clip-player) runs it in an `AudioWorklet`, and the [`arrangement-engine`](/docs/lib/arrangement-engine) and [`mixer-engine`](/docs/lib/mixer-engine) build on it.
+
+</ForFrameworks>
 
 ## The clip player
 

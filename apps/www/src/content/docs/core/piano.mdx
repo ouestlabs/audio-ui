@@ -30,4 +30,14 @@ A pointer press sounds harder toward the near end of a key, from `MIN_VELOCITY` 
 
 `placeKeys(pitches, layout)` says where each key sits along the keyboard, from 0 to 1: `"keyboard"` lays white keys side by side with the black ones between them, as on a piano, and `"even"` gives each key an equal share, as a piano roll's rows are. `keyAt(placements, along, across, layout)` is the key under a point: past `BLACK_KEY_DEPTH` across the keyboard, a press lands on a white key.
 
+<ForFrameworks only="react">
+
 The [Piano](/docs/components/base/piano) draws this controller in React.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+[`<audio-ui-piano>`](/docs/elements/piano) draws this controller in your framework.
+
+</ForFrameworks>
