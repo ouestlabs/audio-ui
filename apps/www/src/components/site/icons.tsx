@@ -1,5 +1,5 @@
 import { SparkleIcon } from "@audio-ui/icons/react";
-import { FileIcon } from "@phosphor-icons/react/ssr";
+import { FileHtmlIcon, FileIcon } from "@phosphor-icons/react/ssr";
 
 type IconProps = React.SVGAttributes<SVGElement>;
 
@@ -432,6 +432,12 @@ export function getIconForLanguageExtension(
       return <Icons.json {...props} />;
     case "css":
       return <Icons.css className="fill-foreground" {...props} />;
+    case "vue":
+      return <Icons.vue {...props} />;
+    case "svelte":
+      return <Icons.svelte {...props} />;
+    case "html":
+      return <FileHtmlIcon {...(props as any)} />;
     case "js":
     case "jsx":
     case "ts":

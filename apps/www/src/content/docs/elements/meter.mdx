@@ -22,6 +22,8 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 
 <ForStyling only="css">
 
+<CodeFile title="meter.html" open>
+
 ```html
 <style>
   audio-ui-meter {
@@ -76,9 +78,13 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="meter.html" open>
 
 ```html
 <audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-60" max="6" value="-18 -10">
@@ -100,6 +106,8 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -107,6 +115,8 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 <TabsContent value="vue">
 
 <ForStyling only="css">
+
+<CodeFile title="meter.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -164,9 +174,13 @@ audio-ui-meter-peak {
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="meter.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -190,6 +204,8 @@ const levels = ref("-18 -10");
 </template>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -197,6 +213,8 @@ const levels = ref("-18 -10");
 <TabsContent value="svelte">
 
 <ForStyling only="css">
+
+<CodeFile title="meter.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -253,9 +271,13 @@ const levels = ref("-18 -10");
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="meter.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -275,6 +297,8 @@ const levels = ref("-18 -10");
   </audio-ui-meter-channel>
 </audio-ui-meter>
 ```
+
+</CodeFile>
 
 </ForStyling>
 

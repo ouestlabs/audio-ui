@@ -22,6 +22,8 @@ description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its 
 
 <ForStyling only="css">
 
+<CodeFile title="envelope.html" open>
+
 ```html
 <style>
   audio-ui-envelope {
@@ -93,9 +95,13 @@ description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its 
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="envelope.html" open>
 
 ```html
 <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0">
@@ -117,6 +123,8 @@ description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its 
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -124,6 +132,8 @@ description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its 
 <TabsContent value="vue">
 
 <ForStyling only="css">
+
+<CodeFile title="envelope.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -193,9 +203,13 @@ audio-ui-envelope-segment[data-flat] {
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="envelope.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -214,6 +228,8 @@ import "@audio-ui/elements/envelope";
 </template>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -221,6 +237,8 @@ import "@audio-ui/elements/envelope";
 <TabsContent value="svelte">
 
 <ForStyling only="css">
+
+<CodeFile title="envelope.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -290,9 +308,13 @@ import "@audio-ui/elements/envelope";
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="envelope.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -308,6 +330,8 @@ import "@audio-ui/elements/envelope";
   <audio-ui-envelope-points class="*:size-3 *:cursor-grab *:rounded-lg *:border-2 *:border-primary *:bg-background *:outline-none *:focus-visible:bg-primary *:data-dragging:bg-primary"></audio-ui-envelope-points>
 </audio-ui-envelope>
 ```
+
+</CodeFile>
 
 </ForStyling>
 

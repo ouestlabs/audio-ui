@@ -22,6 +22,8 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
 
 <ForStyling only="css">
 
+<CodeFile title="plot.html" open>
+
 ```html
 <style>
   audio-ui-plot {
@@ -86,9 +88,13 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="plot.html" open>
 
 ```html
 <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
@@ -111,6 +117,8 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -118,6 +126,8 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
 <TabsContent value="vue">
 
 <ForStyling only="css">
+
+<CodeFile title="plot.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -182,9 +192,13 @@ audio-ui-plot-handle {
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="plot.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -206,6 +220,8 @@ const response: (hz: number) => number = (hz) => 0;
 </template>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -213,6 +229,8 @@ const response: (hz: number) => number = (hz) => 0;
 <TabsContent value="svelte">
 
 <ForStyling only="css">
+
+<CodeFile title="plot.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -276,9 +294,13 @@ const response: (hz: number) => number = (hz) => 0;
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="plot.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -296,6 +318,8 @@ const response: (hz: number) => number = (hz) => 0;
   <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} oninput={(event) => (band = event.detail.value)}></audio-ui-plot-handle>
 </audio-ui-plot>
 ```
+
+</CodeFile>
 
 </ForStyling>
 

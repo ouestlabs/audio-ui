@@ -22,6 +22,8 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 
 <ForStyling only="css">
 
+<CodeFile title="pad.html" open>
+
 ```html
 <style>
   audio-ui-pad {
@@ -75,9 +77,13 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="pad.html" open>
 
 ```html
 <audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums">
@@ -97,6 +103,8 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -104,6 +112,8 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 <TabsContent value="vue">
 
 <ForStyling only="css">
+
+<CodeFile title="pad.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -155,9 +165,13 @@ audio-ui-pad-item[data-active] {
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="pad.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -174,6 +188,8 @@ import "@audio-ui/elements/pad";
 </template>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -181,6 +197,8 @@ import "@audio-ui/elements/pad";
 <TabsContent value="svelte">
 
 <ForStyling only="css">
+
+<CodeFile title="pad.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -232,9 +250,13 @@ import "@audio-ui/elements/pad";
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="pad.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -248,6 +270,8 @@ import "@audio-ui/elements/pad";
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="clap">Clap</audio-ui-pad-item>
 </audio-ui-pad>
 ```
+
+</CodeFile>
 
 </ForStyling>
 

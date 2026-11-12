@@ -509,12 +509,19 @@ function svelteSnippet(page: string, usage: Usage, styling: StylingId): string {
   ].join("\n");
 }
 
-/** One framework's snippet in each styling, each for the readers who chose it. */
-function inStylings(snippet: (styling: StylingId) => string): string[] {
+/** One framework's snippet in each styling, each for the readers who chose it, as a file with its name. */
+function inStylings(
+  file: string,
+  snippet: (styling: StylingId) => string
+): string[] {
   return STYLINGS.flatMap(({ id }) => [
     `<ForStyling only="${id}">`,
     "",
+    `<CodeFile title="${file}" open>`,
+    "",
     snippet(id),
+    "",
+    "</CodeFile>",
     "",
     "</ForStyling>",
     "",
@@ -541,17 +548,21 @@ export function usageBlock(page: string): string | null {
     "",
     '<TabsContent value="web">',
     "",
-    ...inStylings((styling) => webSnippet(page, usage, styling)),
+    ...inStylings(`${page}.html`, (styling) =>
+      webSnippet(page, usage, styling)
+    ),
     "</TabsContent>",
     "",
     '<TabsContent value="vue">',
     "",
-    ...inStylings((styling) => vueSnippet(page, usage, styling)),
+    ...inStylings(`${page}.vue`, (styling) => vueSnippet(page, usage, styling)),
     "</TabsContent>",
     "",
     '<TabsContent value="svelte">',
     "",
-    ...inStylings((styling) => svelteSnippet(page, usage, styling)),
+    ...inStylings(`${page}.svelte`, (styling) =>
+      svelteSnippet(page, usage, styling)
+    ),
     "</TabsContent>",
     "",
     '<TabsContent value="react">',

@@ -22,6 +22,8 @@ description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attr
 
 <ForStyling only="css">
 
+<CodeFile title="knob.html" open>
+
 ```html
 <style>
   audio-ui-knob {
@@ -154,9 +156,13 @@ description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attr
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="knob.html" open>
 
 ```html
 <audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" value="40">
@@ -179,6 +185,8 @@ description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attr
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -186,6 +194,8 @@ description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attr
 <TabsContent value="vue">
 
 <ForStyling only="css">
+
+<CodeFile title="knob.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -319,9 +329,13 @@ audio-ui-knob-label {
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="knob.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -344,6 +358,8 @@ const volume = ref(40);
 </template>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -351,6 +367,8 @@ const volume = ref(40);
 <TabsContent value="svelte">
 
 <ForStyling only="css">
+
+<CodeFile title="knob.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -483,9 +501,13 @@ const volume = ref(40);
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="knob.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -504,6 +526,8 @@ const volume = ref(40);
   <audio-ui-knob-value class="pointer-events-none absolute top-full left-1/2 z-10 mt-1 -translate-x-1/2 whitespace-nowrap rounded-sm bg-foreground px-1.5 py-0.5 font-medium text-[10px] text-background tabular-nums leading-none"></audio-ui-knob-value>
 </audio-ui-knob>
 ```
+
+</CodeFile>
 
 </ForStyling>
 

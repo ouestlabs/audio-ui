@@ -22,6 +22,8 @@ description: "The <audio-ui-piano> custom element of @audio-ui/elements: its att
 
 <ForStyling only="css">
 
+<CodeFile title="piano.html" open>
+
 ```html
 <style>
   audio-ui-piano {
@@ -71,9 +73,13 @@ description: "The <audio-ui-piano> custom element of @audio-ui/elements: its att
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="piano.html" open>
 
 ```html
 <audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="48" max-pitch="71">
@@ -90,6 +96,8 @@ description: "The <audio-ui-piano> custom element of @audio-ui/elements: its att
 </script>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -97,6 +105,8 @@ description: "The <audio-ui-piano> custom element of @audio-ui/elements: its att
 <TabsContent value="vue">
 
 <ForStyling only="css">
+
+<CodeFile title="piano.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -144,9 +154,13 @@ audio-ui-piano-key[data-active] {
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="piano.vue" open>
 
 ```vue
 <script setup lang="ts">
@@ -160,6 +174,8 @@ import "@audio-ui/elements/piano";
 </template>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 </TabsContent>
@@ -167,6 +183,8 @@ import "@audio-ui/elements/piano";
 <TabsContent value="svelte">
 
 <ForStyling only="css">
+
+<CodeFile title="piano.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -214,9 +232,13 @@ import "@audio-ui/elements/piano";
 </style>
 ```
 
+</CodeFile>
+
 </ForStyling>
 
 <ForStyling only="tailwind">
+
+<CodeFile title="piano.svelte" open>
 
 ```svelte
 <script lang="ts">
@@ -227,6 +249,8 @@ import "@audio-ui/elements/piano";
   <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
 </audio-ui-piano>
 ```
+
+</CodeFile>
 
 </ForStyling>
 
