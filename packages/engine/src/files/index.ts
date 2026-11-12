@@ -34,6 +34,9 @@ export {
   writeMusicXmlFile,
 } from "./musicxml-file.ts";
 export {
+  DITHER_METHODS,
+  type DitherMethod,
+  ditherChannels,
   type FilterType,
   filterChannels,
   gainChannels,

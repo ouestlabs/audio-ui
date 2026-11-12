@@ -1,6 +1,6 @@
 ---
 title: useBake
-description: "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat, Add silence, Normalize, Pan, Filter, Stretch, Pitch, Speed and Repair over it."
+description: "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat, Add silence, Normalize, Pan, Filter, Stretch, Pitch, Speed, Dither and Repair over it."
 ---
 
 <Entry name="use-bake" />
@@ -40,4 +40,4 @@ bake("Resample", ({ channels, sampleRate }) => ({
 }));
 ```
 
-`reverse`, `repeat(times)`, `pad(seconds, where)`, `normalize(target)`, `pan(value)`, `filter(type, frequency)`, `stretch(factor, method)`, `shift(semitones, method)`, `speed(value)` and `repair(kind, label)` are the operations of `reverseChannels`, `repeatChannels`, `padChannels`, `normalizeChannels`, `panChannels`, `filterChannels`, `stretchChannels`, `shiftChannels` and `speedChannels` of [`@audio-ui/engine/files`](/docs/engine/files), and `repairChannels` of [`@audio-ui/engine/repair`](/docs/engine/repair). A browser that cannot render offline says so through `setStatus`.
+`reverse`, `repeat(times)`, `pad(seconds, where)`, `normalize(target)`, `pan(value)`, `filter(type, frequency)`, `stretch(factor, method)`, `shift(semitones, method)`, `speed(value)`, `dither(bits, method)` and `repair(kind, label)` are the operations of `reverseChannels`, `repeatChannels`, `padChannels`, `normalizeChannels`, `panChannels`, `filterChannels`, `stretchChannels`, `shiftChannels`, `speedChannels` and `ditherChannels` of [`@audio-ui/engine/files`](/docs/engine/files), and `repairChannels` of [`@audio-ui/engine/repair`](/docs/engine/repair). A browser that cannot render offline says so through `setStatus`.
