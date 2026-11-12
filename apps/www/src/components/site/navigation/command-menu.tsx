@@ -181,7 +181,15 @@ export function CommandMenu({
             className="justify-between gap-2 bg-site-foreground/8 pr-1.5 hover:bg-site-foreground/12"
             variant="secondary"
           >
-            <MagnifyingGlassIcon aria-hidden className="shrink-0 opacity-60" />
+            <span className="flex min-w-0 items-center gap-2">
+              <MagnifyingGlassIcon
+                aria-hidden
+                className="shrink-0 opacity-60"
+              />
+              <span className="truncate font-normal text-muted-foreground">
+                Search…
+              </span>
+            </span>
             <KbdGroup>
               <Kbd className="border">{isMac ? "⌘" : "Ctrl"}</Kbd>
               <Kbd className="border">K</Kbd>
