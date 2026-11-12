@@ -7,9 +7,7 @@ description: Accessible audio controls for React and any framework, as headless 
 
 Audio controls have many details: a knob has to drag, respond to the wheel and the keyboard, reset on double click, and be announced correctly by a screen reader. audio/ui implements them once.
 
-## Three layers
-
-Use the layer that fits your project. They share the same behavior.
+## What to install
 
 <ForFrameworks only="vue svelte web">
 
@@ -19,11 +17,11 @@ Use the layer that fits your project. They share the same behavior.
 npm install @audio-ui/elements
 ```
 
-In React, the same primitives are **`@audio-ui/react`**, and **the `@audio-ui` registry** has them styled, for shadcn/ui and Tailwind CSS v4.
-
 </ForFrameworks>
 
 <ForFrameworks only="react">
+
+Use the layer that fits your project. All three share the same behavior.
 
 **`@audio-ui/react`** are headless primitives from npm: behavior and accessibility, no styles. Pick them when you have your own design system.
 
@@ -43,9 +41,9 @@ npx shadcn@latest add @audio-ui/knob
 npm install @audio-ui/elements
 ```
 
-</ForFrameworks>
-
 All three are open source. With the registry you receive the actual code, so you can read it, change it and learn from it.
+
+</ForFrameworks>
 
 ## Top components
 
