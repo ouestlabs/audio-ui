@@ -80,9 +80,49 @@ function groundOf(element: Element): string {
   return "white";
 }
 
+/** The recording's samples, mixed to one. */
+export interface SpectrogramSamples {
+  frames: number;
+  read: (
+    from: number,
+    to: number
+  ) => ArrayLike<number> | Promise<ArrayLike<number>>;
+}
+
+/** A clip of the lane to draw: where it starts on the lane, what it reads and at what level. */
+export interface SpectrogramClip {
+  clip: ClipReading;
+  /** A gain factor on its picture, as the clip's level plays. */
+  gain: number;
+  id: string;
+  /** The recording's sample rate, in hertz. */
+  sampleRate: number;
+  samples: SpectrogramSamples;
+  /** Where the clip starts on the lane, in seconds. */
+  start: number;
+}
+
+/** What the lane keeps between paints: a renderer a clip, all on one WebGL context. */
+interface Held {
+  context: WebGL2RenderingContext | null;
+  data: Map<string, ArrayLike<number>>;
+  gone: boolean;
+  paints: number;
+  renderers: Map<string, { renderer: Spectrogram; x: number; width: number }>;
+  scales: Record<Scale, Axis> | null;
+}
+
+/** What one paint draws. */
+interface Paint {
+  band: SpectrogramBand | undefined;
+  clips: readonly SpectrogramClip[];
+  scale: SpectrogramScale;
+  zoom: number;
+}
+
 /**
- * Sizes the canvas to the stretch of its box the view shows, and gives that
- * stretch as shares of the box from 0 to 1, or hides it when none shows.
+ * Sizes the canvas to the stretch of its lane the view shows, and gives that
+ * stretch in CSS px from the lane's left, or hides it when none shows.
  */
 function place(
   canvas: HTMLCanvasElement,
@@ -105,96 +145,178 @@ function place(
   const ratio = window.devicePixelRatio || 1;
   canvas.width = Math.round((to - from) * ratio);
   canvas.height = Math.round(canvas.clientHeight * ratio);
-  return { from: from / box.width, ratio, to: to / box.width };
+  return { from, ratio, to };
 }
 
-/** What a spectrogram keeps between paints: its renderer once made, and whether it is let go. */
-interface Held {
-  gone: boolean;
-  paints: number;
-  renderer: Spectrogram | null;
-  scales: Record<Scale, Axis> | null;
+/** The renderer of a clip, made on the lane's one context: the first makes it, the others share it. */
+async function rendererOf(
+  canvas: HTMLCanvasElement,
+  held: Held,
+  entry: SpectrogramClip,
+  data: ArrayLike<number>
+): Promise<Spectrogram | null> {
+  const known = held.renderers.get(entry.id)?.renderer;
+  if (known) {
+    return known;
+  }
+  const { default: Renderer, scales } = await import("gl-spectrogram");
+  if (held.gone) {
+    return null;
+  }
+  try {
+    const renderer = new Renderer(held.context ?? canvas, {
+      data,
+      sampleRate: entry.sampleRate,
+    });
+    held.context ??= renderer.gl as WebGL2RenderingContext;
+    held.scales = scales;
+    held.data.set(entry.id, data);
+    held.renderers.set(entry.id, { renderer, width: 0, x: 0 });
+    return renderer;
+  } catch {
+    canvas.style.display = "none";
+    return null;
+  }
 }
 
-/** What one paint draws. */
-interface Paint {
-  band: SpectrogramBand | undefined;
-  clip: ClipReading;
-  gain: number;
-  sampleRate: number;
-  samples: SpectrogramSamples;
-  scale: SpectrogramScale;
+/** A clip the view shows: its part of the canvas, in CSS px from the canvas' left, and its samples. */
+interface Visible {
+  data: ArrayLike<number>;
+  entry: SpectrogramClip;
+  /** Where the clip starts on the lane, in px. */
+  left: number;
+  width: number;
+  x: number;
 }
 
-/** The recording's samples, mixed to one. */
-interface SpectrogramSamples {
-  frames: number;
-  read: (
-    from: number,
-    to: number
-  ) => ArrayLike<number> | Promise<ArrayLike<number>>;
+/** Updates a clip's renderer for its part of the canvas and draws it; true while it has columns not yet whole. */
+function drawClip(
+  held: Held,
+  renderer: Spectrogram,
+  { data, entry, left, width, x }: Visible,
+  shared: {
+    band: readonly [number, number];
+    color: string;
+    ground: string;
+    height: number;
+    ratio: number;
+    scale: SpectrogramScale;
+    zoom: number;
+  }
+): boolean {
+  const { band, color, ground, height, ratio, scale, zoom } = shared;
+  const [start = 0, end = 0] = clipFramePositions(
+    entry.clip,
+    entry.samples.frames,
+    1,
+    [(x - left) / zoom, (x + width - left) / zoom]
+  );
+  const axis = held.scales?.[scale];
+  const nyquist = entry.sampleRate / 2;
+  const [low, high] = band;
+  // The data is handed over only when it changed: the same samples are not uploaded again.
+  const changed = held.data.get(entry.id) !== data;
+  held.data.set(entry.id, data);
+  renderer.update({
+    background: ground,
+    band:
+      axis && (low > 0 || high < 1)
+        ? [axis.of(low, axis.low, nyquist), axis.of(high, axis.low, nyquist)]
+        : null,
+    color,
+    ...(changed ? { data } : {}),
+    gain: entry.gain,
+    pixelRatio: ratio,
+    range: [Math.min(start, end), Math.max(start, end)],
+    sampleRate: entry.sampleRate,
+    scale,
+    viewport: [x, 0, width, height],
+  });
+  renderer.clear().render();
+  return renderer.pending;
 }
 
-/** Draws the stretch of the clip the view shows, unless a later paint has begun or the element is gone. */
-async function paintSpectrogram(
+/** Draws every clip of the lane the view shows, each into its own part of the one canvas; true while some column is not yet whole. */
+async function paintLane(
   canvas: HTMLCanvasElement,
   body: HTMLElement,
   view: HTMLElement | null,
   held: Held,
-  { band, clip, gain, sampleRate, samples, scale }: Paint
+  { band, clips, scale, zoom }: Paint
 ): Promise<boolean> {
   held.paints += 1;
   const paint = held.paints;
-  const placed = sampleRate > 0 ? place(canvas, body, view) : null;
+  const placed = zoom > 0 ? place(canvas, body, view) : null;
   if (!placed) {
     return false;
   }
-  const { length } = clip.value;
-  const [start = 0, end = 0] = clipFramePositions(clip, samples.frames, 1, [
-    placed.from * length,
-    placed.to * length,
-  ]);
-  const data = await samples.read(0, samples.frames);
-  if (!held.renderer) {
-    const { default: Renderer, scales } = await import("gl-spectrogram");
-    if (held.gone || paint !== held.paints) {
-      return false;
-    }
-    try {
-      held.renderer = new Renderer(canvas, { data, sampleRate });
-      held.scales = scales;
-    } catch {
-      canvas.style.display = "none";
-      return false;
-    }
-  }
+  // The clips the view shows, with their samples read together.
+  const seen = clips.flatMap((entry) => {
+    const left = entry.start * zoom;
+    const x0 = Math.max(left, placed.from);
+    const x1 = Math.min(left + entry.clip.value.length * zoom, placed.to);
+    return x1 > x0 && entry.sampleRate > 0
+      ? [{ entry, left, width: x1 - x0, x: x0 }]
+      : [];
+  });
+  const visible: Visible[] = await Promise.all(
+    seen.map(async (each) => ({
+      ...each,
+      data: await each.entry.samples.read(0, each.entry.samples.frames),
+      x: each.x,
+    }))
+  );
   if (held.gone || paint !== held.paints) {
     return false;
   }
-  const [from, to] = band?.getSnapshot() ?? [0, 1];
-  const axis = held.scales?.[scale];
-  const nyquist = sampleRate / 2;
-  held.renderer
-    .update({
-      background: groundOf(body),
-      band:
-        axis && (from > 0 || to < 1)
-          ? [axis.of(from, axis.low, nyquist), axis.of(to, axis.low, nyquist)]
-          : null,
-      color: getComputedStyle(canvas).color,
-      data,
-      gain,
-      pixelRatio: placed.ratio,
-      range: [Math.min(start, end), Math.max(start, end)],
-      sampleRate,
-      scale,
-    })
-    .clear()
-    .render();
-  return held.renderer.pending;
+  const renderers = await Promise.all(
+    visible.map((each) => rendererOf(canvas, held, each.entry, each.data))
+  );
+  if (held.gone || paint !== held.paints) {
+    return false;
+  }
+  const shared = {
+    band: band?.getSnapshot() ?? ([0, 1] as const),
+    color: getComputedStyle(canvas).color,
+    ground: groundOf(body),
+    height: canvas.clientHeight,
+    ratio: placed.ratio,
+    scale,
+    zoom,
+  };
+  // One clear for the whole canvas: the renderers only draw into their parts.
+  const gl = held.context;
+  gl?.clearColor(0, 0, 0, 0);
+  gl?.clear(gl.COLOR_BUFFER_BIT);
+  let pending = false;
+  for (const [index, each] of visible.entries()) {
+    const renderer = renderers[index];
+    const slot = held.renderers.get(each.entry.id);
+    if (renderer && slot) {
+      slot.x = each.x - placed.from;
+      slot.width = each.width;
+      pending =
+        drawClip(
+          held,
+          renderer,
+          { ...each, x: each.x - placed.from },
+          shared
+        ) || pending;
+    }
+  }
+  // Clips the lane no longer has let go of their textures.
+  const alive = new Set(clips.map((entry) => entry.id));
+  for (const [id, slot] of held.renderers) {
+    if (!alive.has(id)) {
+      slot.renderer.destroy();
+      held.renderers.delete(id);
+      held.data.delete(id);
+    }
+  }
+  return pending;
 }
 
-/** Shift and the wheel over a picture zoom its frequencies about the pointer: up is closer. */
+/** Shift and the wheel over the picture zoom its frequencies about the pointer: up is closer. */
 function zoomOnWheel(
   event: WheelEvent,
   canvas: HTMLCanvasElement,
@@ -223,37 +345,32 @@ function zoomOnWheel(
 }
 
 /**
- * A clip's recording as a spectrogram across the element it lies in: its
- * frequencies over the stretch of the clip the view shows, computed on the
- * GPU by `gl-spectrogram` at every zoom, in the text colour over the ground
- * under it. Place it as `ClipWaveform` is placed, with `className`; `scale`
- * is the frequency axis and `gain` a level to preview. A reversed, looped or
- * warped clip is drawn from its source in order. It needs WebGL 2, and draws
- * nothing without it.
+ * The spectrograms of a lane's clips on one canvas, each in its own part of
+ * it: their frequencies over the stretch of the lane the view shows, computed
+ * on the GPU by `gl-spectrogram` at every zoom, in the text colour over the
+ * ground under it. All of them share one WebGL context, since a browser
+ * keeps some sixteen and drops the oldest past that. Put it in the lane's
+ * box, `zoom` being the lane's pixels a second; `scale` is the frequency
+ * axis. A reversed, looped or warped clip is drawn from its source in order.
+ * It needs WebGL 2, and draws nothing without it.
  */
-function ClipSpectrogram({
-  className,
+function SpectrogramLane({
   band,
-  clip,
-  gain = 1,
+  className,
+  clips,
   pointerHertz,
-  sampleRate,
-  samples,
   scale = "log",
+  zoom,
   ...props
 }: Omit<ComponentProps<"canvas">, "ref"> & {
   /** The frequencies shown, as shares of the axis: Shift and the wheel over the picture zooms it, about the pointer. */
   band?: SpectrogramBand;
-  clip: ClipReading;
-  /** A gain factor on the picture, as a clip's level plays. @default 1 */
-  gain?: number;
+  clips: readonly SpectrogramClip[];
   /** Told the frequency under the pointer, in hertz, or null off the picture: for `SpectrogramAxis` to mark. */
   pointerHertz?: Pick<PointerHertz, "set">;
-  /** The recording's sample rate, in hertz. */
-  sampleRate: number;
-  /** The recording's samples, mixed to one. */
-  samples: SpectrogramSamples;
   scale?: SpectrogramScale;
+  /** The lane's pixels a second. */
+  zoom: number;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const [reading, setReading] = useState<Reading | null>(null);
@@ -265,28 +382,37 @@ function ClipSpectrogram({
     }
     const view = canvas.closest<HTMLElement>('[data-slot="timeline-viewport"]');
     const held: Held = {
+      context: null,
+      data: new Map(),
       gone: false,
       paints: 0,
-      renderer: null,
+      renderers: new Map(),
       scales: null,
     };
-    // The cell under the pointer: its frequency and level, read where the picture is drawn.
+    // The cell under the pointer: its frequency and level, read in the clip it is over.
     const moved = (event: PointerEvent) => {
       const box = canvas.getBoundingClientRect();
       const x = event.clientX - box.left;
       const y = event.clientY - box.top;
-      const cell =
-        x >= 0 && y >= 0 && x <= box.width && y <= box.height
-          ? (held.renderer?.pick(x, y) ?? null)
-          : null;
+      let cell: Cell | null = null;
+      let floor = -80;
+      if (x >= 0 && y >= 0 && x <= box.width && y <= box.height) {
+        for (const slot of held.renderers.values()) {
+          if (x >= slot.x && x <= slot.x + slot.width) {
+            cell = slot.renderer.pick(x - slot.x, y);
+            [floor] = slot.renderer.levels;
+            break;
+          }
+        }
+      }
       const own = body.getBoundingClientRect();
       pointerHertz?.set(cell ? (cell.low + cell.high) / 2 : null);
       setReading(
         cell
           ? {
-              left: event.clientX - own.left,
-              text: readingOf(cell, held.renderer?.levels[0] ?? -80),
               height: own.height,
+              left: event.clientX - own.left,
+              text: readingOf(cell, floor),
               top: event.clientY - own.top,
               width: own.width,
             }
@@ -307,13 +433,11 @@ function ClipSpectrogram({
     const draw = async () => {
       frame = 0;
       drawnLeft = view?.scrollLeft ?? 0;
-      const more = await paintSpectrogram(canvas, body, view, held, {
+      const more = await paintLane(canvas, body, view, held, {
         band,
-        clip,
-        gain,
-        sampleRate,
-        samples,
+        clips,
         scale,
+        zoom,
       });
       if (more) {
         later();
@@ -349,13 +473,15 @@ function ClipSpectrogram({
       view?.removeEventListener("pointerleave", left);
       view?.removeEventListener("wheel", wheeled, { capture: true });
       unsubscribe?.();
-      held.renderer?.destroy();
+      for (const { renderer } of held.renderers.values()) {
+        renderer.destroy();
+      }
     };
-  }, [band, clip, gain, pointerHertz, sampleRate, samples, scale]);
+  }, [band, clips, pointerHertz, scale, zoom]);
   return (
     <>
       <canvas
-        className={cn("pointer-events-none absolute", className)}
+        className={cn("pointer-events-none absolute inset-y-0", className)}
         data-slot="timeline-clip-spectrogram"
         ref={ref}
         {...props}
@@ -698,4 +824,4 @@ function SpectrogramAxis({
   );
 }
 
-export { ClipSpectrogram, SpectrogramAxis };
+export { SpectrogramAxis, SpectrogramLane };
