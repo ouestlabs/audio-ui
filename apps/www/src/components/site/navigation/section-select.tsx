@@ -3,6 +3,7 @@
 import { CaretUpDownIcon, CheckIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import { SectionIcon } from "@/components/site/navigation/group-icon";
+import { Badge } from "@/components/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,12 +22,19 @@ function SectionBadge({ current, id }: { current: boolean; id: string }) {
   );
 }
 
-/** A section's name over what it holds. */
+/** A section's name over what it holds; marked React when the reader's framework is another. */
 function SectionText({ section }: { section: SiteSection }) {
   return (
     <span className="flex min-w-0 flex-1 flex-col">
-      <span className="truncate font-medium text-foreground text-sm">
-        {section.label}
+      <span className="flex min-w-0 items-center gap-1.5">
+        <span className="truncate font-medium text-foreground text-sm">
+          {section.label}
+        </span>
+        {section.reactOnly ? (
+          <Badge className="shrink-0" variant="outline">
+            React
+          </Badge>
+        ) : null}
       </span>
       <span className="truncate text-muted-foreground text-xs">
         {section.description}
@@ -37,8 +45,9 @@ function SectionText({ section }: { section: SiteSection }) {
 
 /**
  * The site's sections as one menu: the docs by the layers of the stack, then
- * the components catalog. Its button shows the section being read, and each
- * item is a link to a section's landing page. `compact` draws the button on
+ * the components catalog, in the order the reader's framework wants them, the
+ * React ones marked for a reader of another. Its button shows the section
+ * being read, and each item is a link to a section's landing page. `compact` draws the button on
  * one line, for the bar of the inset while the sidebar is shut.
  */
 export function SectionSelect({

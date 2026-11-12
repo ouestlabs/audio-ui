@@ -33,7 +33,7 @@ const TABS_LIST_REGEX = /<TabsList>([\s\S]*?)<\/TabsList>\n*/g;
 const TABS_TRIGGER_REGEX =
   /<TabsTrigger\s+value="([^"]+)"\s*>([\s\S]*?)<\/TabsTrigger>/g;
 const TABS_CONTENT_REGEX = /<TabsContent\s+value="([^"]+)"\s*>\n*/g;
-const TABS_WRAPPER_REGEX = /<\/?(?:Code)?Tabs(?:\s[^>]*)?>\n*/g;
+const TABS_WRAPPER_REGEX = /<\/?(?:Code|Framework)?Tabs(?:\s[^>]*)?>\n*/g;
 const STEP_REGEX = /<Step>([\s\S]*?)<\/Step>/g;
 const ATTRIBUTE_REGEX = /attribute/i;
 const KEYS_REGEX = /keys/i;

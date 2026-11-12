@@ -21,16 +21,16 @@ Registration is a no-op on the server: server-rendered markup upgrades once the 
 
 ## Usage
 
-<Tabs defaultValue="javascript">
+<FrameworkTabs defaultValue="web">
 
 <TabsList>
-  <TabsTrigger value="javascript"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
   <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
   <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
   <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
 </TabsList>
 
-<TabsContent value="javascript">
+<TabsContent value="web">
 
 ```html
 <audio-ui-knob min="20" max="20000" default-value="1000" scale="log">
@@ -145,7 +145,7 @@ const [cutoff, setCutoff] = useState(1000);
 
 </TabsContent>
 
-</Tabs>
+</FrameworkTabs>
 
 ## Value and events
 
