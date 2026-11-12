@@ -1,9 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
-import {
-  type HomeFigure,
-  HomeFigures,
-} from "@/components/site/home/home-figures";
+import type { HomeFigure } from "@/components/site/home/home-figures";
 import { HomeGuide } from "@/components/site/home/home-guide";
 import { HomeHero } from "@/components/site/home/home-hero";
 import { JsonLd } from "@/components/site/json-ld";
@@ -128,9 +125,8 @@ function IndexPage() {
         </h2>
         <BlockAudioEditor />
       </section>
-      <HomeFigures figures={figures} />
-      {/* Under it, the page in words: what search engines and agents read without running it. */}
-      <HomeGuide guides={guides} spaces={spaces} />
+      {/* Under it, the page in words, the library's figures with the components: what search engines and agents read without running it. */}
+      <HomeGuide figures={figures} guides={guides} spaces={spaces} />
     </>
   );
 }

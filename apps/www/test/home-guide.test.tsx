@@ -23,7 +23,7 @@ async function renderGuide() {
   const router = createRouter({
     history: createMemoryHistory({ initialEntries: ["/"] }),
     routeTree: createRootRoute({
-      component: () => <HomeGuide {...getHomeIndex()} />,
+      component: () => <HomeGuide figures={[]} {...getHomeIndex()} />,
     }),
   });
   await act(() => router.load());

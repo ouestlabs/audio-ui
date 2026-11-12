@@ -1,4 +1,8 @@
 import { Link } from "@tanstack/react-router";
+import {
+  type HomeFigure,
+  HomeFigures,
+} from "@/components/site/home/home-figures";
 import { JsonLd } from "@/components/site/json-ld";
 import { GroupIcon } from "@/components/site/navigation/group-icon";
 import type { HomeIndex } from "@/lib/docs/content/spaces";
@@ -78,7 +82,11 @@ const LEAD = "max-w-2xl text-pretty text-site-muted-foreground text-sm";
  * it does, the guides to the sound, what an agent gets, and answers to the
  * usual questions. Search engines and agents read the page without running it.
  */
-export function HomeGuide({ guides, spaces }: HomeIndex) {
+export function HomeGuide({
+  figures,
+  guides,
+  spaces,
+}: HomeIndex & { figures: HomeFigure[] }) {
   return (
     <div className="flex flex-col gap-16 px-4 py-12 font-site-sans sm:px-6 lg:py-16">
       <JsonLd data={buildFaqJsonLd(FAQ)} />
@@ -91,7 +99,10 @@ export function HomeGuide({ guides, spaces }: HomeIndex) {
           DAW, and effects and instruments to plug in. Every page has a live
           preview, the install command, the API reference and the source.
         </p>
-        <div className="mt-8 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
+        <div className="mt-8">
+          <HomeFigures figures={figures} />
+        </div>
+        <div className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
           {spaces.map((space) => (
             <div key={space.title}>
               <h3 className="flex items-center gap-2 font-medium text-sm">
