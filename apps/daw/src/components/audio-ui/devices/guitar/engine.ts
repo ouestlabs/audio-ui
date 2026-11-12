@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/engine/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   bodyDecibels,
   decaySeconds,
@@ -22,11 +22,7 @@ const BODY_HERTZ = 180;
 const BODY_Q = 1.1;
 const SMOOTHING = 0.03;
 
-export interface GuitarEngine
-  extends InstrumentBinding<GuitarState, GuitarNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type GuitarEngine = InstrumentEngine<GuitarState, GuitarNote>;
 
 interface Voice {
   amp: GainNode;

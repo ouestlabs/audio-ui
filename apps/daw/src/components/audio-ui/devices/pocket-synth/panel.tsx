@@ -1,6 +1,6 @@
 "use client";
 
-import { midiToHz } from "@audio/note";
+import { midiToHz } from "@audio-ui/engine/pitch";
 import { type ReactNode, useCallback, useId, useMemo, useState } from "react";
 import { DeviceFrame, DeviceHeader } from "@/components/audio-ui/device-panel";
 import {

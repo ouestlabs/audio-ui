@@ -1,4 +1,4 @@
-import type { InstrumentBinding, NoteTiming } from "@audio-ui/engine/device";
+import type { InstrumentEngine, NoteTiming } from "@audio-ui/engine/device";
 import {
   attackSeconds,
   decaySeconds,
@@ -38,11 +38,7 @@ const amount = (level: number) => (level / 10) ** 2;
 const keyScale = (frequency: number) =>
   Math.min(1, (MIDDLE_C / frequency) ** 0.5);
 
-export interface FmSynthEngine
-  extends InstrumentBinding<FmSynthState, FmSynthNote> {
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-}
+export type FmSynthEngine = InstrumentEngine<FmSynthState, FmSynthNote>;
 
 interface OperatorNodes {
   envelope: GainNode;

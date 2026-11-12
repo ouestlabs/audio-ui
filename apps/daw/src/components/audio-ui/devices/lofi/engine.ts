@@ -1,3 +1,5 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   LOFI_WORKLET,
   type LofiState,
@@ -7,39 +9,9 @@ import {
 /** How fast a knob follows a change, as a time constant in seconds. */
 const RAMP_SECONDS = 0.02;
 
-export interface LofiEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface LofiEngine extends EffectEngine<LofiState> {
   /** Resolves once the lo-fi is in the graph. Until then the sound passes clean. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: LofiState) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the lo-fi into a context once. `false` when the context cannot run worklets. */
-function loadLofi(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([LOFI_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -91,7 +63,7 @@ export function createLofiEngine(
     }
   };
 
-  const ready = loadLofi(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, LOFI_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }

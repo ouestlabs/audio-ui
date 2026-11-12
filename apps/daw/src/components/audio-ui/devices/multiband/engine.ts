@@ -1,5 +1,5 @@
 import { toWebAudioQ } from "@audio-ui/engine/analysis";
-import type { DeviceBinding, DeviceReadings } from "@audio-ui/engine/device";
+import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
 import {
   KEY_DETECTOR_PARAMETERS,
   loadKeyDetector,
@@ -14,11 +14,7 @@ import {
 
 const RAMP_SECONDS = 0.01;
 
-export interface MultibandEngine extends DeviceBinding<MultibandState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface MultibandEngine extends EffectEngine<MultibandState> {
   /** What each band is taking off right now, in dB. */
   readings: () => DeviceReadings;
   /** Resolves once the detectors are in the graph. Until then the bands pass unchanged. A context with no worklets never resolves it to `true`. */

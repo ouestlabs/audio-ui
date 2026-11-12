@@ -18,6 +18,7 @@ export function MidiConnectControl() {
     <ButtonGroup>
       <Button
         onClick={midi.isConnected ? midi.disconnect : midi.requestAccess}
+        size="sm"
         type="button"
         variant="outline"
       >

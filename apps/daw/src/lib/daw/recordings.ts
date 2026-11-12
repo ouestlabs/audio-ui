@@ -1,5 +1,10 @@
-import { computePeaks, normalizePeaks } from "@audio-ui/engine/analysis";
-import { analyzeBeat, audioChroma, type BeatAnalysis } from "@/lib/arrangement";
+import {
+  analyzeBeat,
+  audioChroma,
+  type BeatAnalysis,
+  computePeaks,
+  normalizePeaks,
+} from "@audio-ui/engine/analysis";
 import type { RecordingSource } from "@/lib/clip-player";
 import { decodeAudioChannels } from "@/lib/daw/audio-files";
 

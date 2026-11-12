@@ -23,8 +23,12 @@ export interface UseMidiInputReturn {
   inputNames: string[];
   isConnected: boolean;
   isSupported: boolean;
+  /** The names of the devices switched off with `setInputEnabled`: their keys are not heard. */
+  mutedInputs: string[];
   /** Connects the page's MIDI input. Call it from a user gesture (e.g. a button click): browsers may prompt for permission. */
   requestAccess: () => void;
+  /** Switches a device off by its name, for the whole page, or on again. It holds before the device connects. */
+  setInputEnabled: (name: string, enabled: boolean) => void;
 }
 
 /**
@@ -81,6 +85,8 @@ export function useMidiInput({
     inputNames: state.inputs,
     isConnected: state.connected,
     isSupported: state.supported,
+    mutedInputs: state.muted,
     requestAccess: midiInput.connect,
+    setInputEnabled: midiInput.setInputEnabled,
   };
 }

@@ -1,4 +1,6 @@
-import type { DeviceBinding, DeviceReadings } from "@audio-ui/engine/device";
+import type { DeviceReadings, EffectEngine } from "@audio-ui/engine/device";
+import { createFeed, type Feed } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   EXPANDER_WORKLET,
   type ExpanderState,
@@ -6,44 +8,14 @@ import {
 } from "@/components/audio-ui/devices/expander/device";
 
 const RAMP_SECONDS = 0.01;
-/** How long after the expander fades out its input is taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
-export interface ExpanderEngine extends DeviceBinding<ExpanderState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface ExpanderEngine extends EffectEngine<ExpanderState> {
   /** What it is taking off right now, in dB: downward, while it turns the sound down. */
   readings: () => DeviceReadings;
   /** Resolves once the expander is in the graph. Until then the sound passes unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
   /** How many dB it is taking off right now, 0 or negative. Read it per frame. */
   readonly reduction: number;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the expander into a context once. `false` when the context cannot run worklets. */
-function loadExpander(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([EXPANDER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -75,8 +47,7 @@ export function createExpanderEngine(
   let model: AudioWorkletNode | null = null;
   let reduction = 0;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   /** The expander in place of the dry sound while it plays and is loaded, fed only then. */
   const route = () => {
@@ -87,22 +58,10 @@ export function createExpanderEngine(
     for (const [name, value] of Object.entries(settings.modelParams)) {
       model?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
     }
-    clearTimeout(unfeed);
-    if (playing > 0 && !fed && model) {
-      input.connect(model);
-      fed = true;
-    } else if (playing === 0 && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && model) {
-          input.disconnect(model);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing > 0);
   };
 
-  const ready = loadExpander(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, EXPANDER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }
@@ -111,6 +70,7 @@ export function createExpanderEngine(
       parameterData: settings.modelParams,
       processorOptions: { model: "expander" },
     });
+    feed = createFeed([[input, model]]);
     model.port.onmessage = (event: MessageEvent<number>) => {
       reduction = event.data;
     };
@@ -122,7 +82,7 @@ export function createExpanderEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       model?.disconnect();
       for (const node of [input, dry, wet, output]) {
         node.disconnect();

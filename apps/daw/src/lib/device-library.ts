@@ -1,8 +1,9 @@
 import type {
   Device,
-  DeviceContext,
   DeviceState,
-  NoteTiming,
+  EffectEngine,
+  EngineFactory,
+  InstrumentEngine,
   ParameterDescriptor,
   ParameterValue,
 } from "@audio-ui/engine/device";
@@ -104,30 +105,27 @@ import { createWaveShaperEngine } from "@/components/audio-ui/devices/wave-shape
 /** A device's state as a host keeps it: a value for each parameter id. */
 export type AnyDeviceState = Readonly<Record<string, ParameterValue>>;
 
-/** What a host needs of a device's engine to put it on a track. */
-export interface LibraryEngine {
-  dispose: () => void;
-  /** Where an effect takes the sound in; an instrument has none. */
-  readonly input?: AudioNode;
-  /** An instrument's: lets a note go, at a time of the audio clock. */
-  noteOff?: (timing?: NoteTiming) => void;
-  /** An instrument's: starts a note, at a time of the audio clock. */
-  noteOn?: (note: Record<string, number>, timing?: NoteTiming) => void;
-  readonly output: AudioNode;
-  /** Resolves once an engine that runs a worklet has it in the graph. */
-  readonly ready?: Promise<boolean>;
-  /** The key input of a device that takes one. */
-  readonly sidechain?: AudioNode;
-  update: (state: AnyDeviceState, context?: DeviceContext) => void;
-}
+/**
+ * Any engine of the library, an effect's or an instrument's, as a host holds
+ * them side by side on a track: what both contracts share, an effect's input
+ * and key where it has them, an instrument's notes where it has them, its
+ * note as the parameters its `note` descriptors name.
+ */
+export type LibraryEngine = Omit<
+  EffectEngine<AnyDeviceState>,
+  "input" | "sidechain"
+> &
+  Partial<Pick<EffectEngine<AnyDeviceState>, "input" | "sidechain">> &
+  Partial<
+    Pick<
+      InstrumentEngine<AnyDeviceState, Record<string, number>>,
+      "noteOff" | "noteOn"
+    >
+  >;
 
 /** A device of the library: its description, how to make its engine, and the shelf it sits on. */
 export interface LibraryDevice {
-  create: (
-    ctx: BaseAudioContext,
-    state: AnyDeviceState,
-    context?: DeviceContext
-  ) => LibraryEngine;
+  create: EngineFactory<AnyDeviceState, LibraryEngine>;
   device: Device<readonly ParameterDescriptor[]>;
   /** An instrument whose engine is the whole of it, one note at a time: a host makes one and gives it every note, as it glides from one to the next. */
   mono?: boolean;
@@ -137,14 +135,11 @@ export interface LibraryDevice {
 /** Pairs a device with its engine, checked against each other, for a list that holds them all. */
 function entry<const Parameters extends readonly ParameterDescriptor[]>(
   device: Device<Parameters>,
-  create: (
-    ctx: BaseAudioContext,
-    state: DeviceState<Parameters>,
-    context?: DeviceContext
-  ) => Omit<LibraryEngine, "noteOn" | "update"> & {
-    noteOn?: (note: never, timing?: NoteTiming) => void;
-    update: (state: DeviceState<Parameters>, context?: DeviceContext) => void;
-  },
+  create: EngineFactory<
+    DeviceState<Parameters>,
+    | EffectEngine<DeviceState<Parameters>>
+    | InstrumentEngine<DeviceState<Parameters>, never>
+  >,
   shelf: string,
   options: { mono?: boolean } = {}
 ): LibraryDevice {

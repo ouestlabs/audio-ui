@@ -9,6 +9,7 @@ import {
   pagesAhead,
   playbackRuns,
   playedClips,
+  playedVelocity,
   rescaled,
   STOPPED,
   startsInWindow,
@@ -685,14 +686,10 @@ export async function createArrangementEngine(
     passId: string,
     parameters?: Readonly<Record<string, number>>
   ) => {
-    const { chance, deviation, velocity } = note.note;
-    if (!runtime.instrument || Math.random() >= (chance ?? 1)) {
+    const level = runtime.instrument ? playedVelocity(note.note) : null;
+    if (!runtime.instrument || level === null) {
       return;
     }
-    const level = Math.min(
-      1,
-      Math.max(0, (velocity ?? 1) + Math.random() * (deviation ?? 0))
-    );
     runtime.instrument.player.noteOn(
       { parameters, pitch: note.pitch, velocity: level },
       at / rate,
@@ -1098,6 +1095,19 @@ export async function createArrangementEngine(
    * that track's sound after its devices and before its volume. Only a track
    * of clips can key, and never its own device, so no sound feeds itself.
    */
+  /** What a device on `track` should listen to: the key of the track it names, when it may. */
+  const keyOf = (
+    placed: PlacedDevice,
+    track: string,
+    plain: ReadonlySet<string>
+  ): AudioNode | null => {
+    const { sidechain } = placed.engine as { sidechain?: AudioNode };
+    const { key } = placed.device;
+    if (!(sidechain && key) || key === track || !plain.has(key)) {
+      return null;
+    }
+    return mixer.strip(key)?.key ?? null;
+  };
   const syncKeys = (next: ArrangementDoc) => {
     const plain = new Set(
       next.tracks
@@ -1105,23 +1115,15 @@ export async function createArrangementEngine(
         .map((track) => track.id)
     );
     for (const track of allTracks(next)) {
-      const runtime = runtimes.get(track.id);
-      if (!runtime) {
-        continue;
-      }
-      for (const placed of runtime.devices.values()) {
-        const input = (placed.engine as { sidechain?: AudioNode }).sidechain;
-        const key = placed.device.key;
-        const wanted =
-          input && key && key !== track.id && plain.has(key)
-            ? (mixer.strip(key)?.key ?? null)
-            : null;
+      for (const placed of runtimes.get(track.id)?.devices.values() ?? []) {
+        const wanted = keyOf(placed, track.id, plain);
         if (wanted === (placed.keyed ?? null)) {
           continue;
         }
         unkey(placed);
-        if (wanted && input) {
-          wanted.connect(input);
+        const { sidechain } = placed.engine as { sidechain?: AudioNode };
+        if (wanted && sidechain) {
+          wanted.connect(sidechain);
         }
         placed.keyed = wanted;
       }

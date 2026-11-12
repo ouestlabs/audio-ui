@@ -1,4 +1,5 @@
 import { toWebAudioQ, WEB_AUDIO_FILTER_TYPES } from "@audio-ui/engine/analysis";
+import type { EffectEngine } from "@audio-ui/engine/device";
 import {
   type ChannelEqState,
   channelEqBands,
@@ -6,14 +7,7 @@ import {
 
 const RAMP_SECONDS = 0.02;
 
-export interface ChannelEqEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: ChannelEqState) => void;
-}
+export type ChannelEqEngine = EffectEngine<ChannelEqState>;
 
 /**
  * A channel EQ on the Web Audio API for a `ChannelEqState`:
