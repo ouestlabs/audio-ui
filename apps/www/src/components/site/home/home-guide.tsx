@@ -94,13 +94,8 @@ export function HomeGuide({
         <h2 className={H2} id="home-components">
           What you can build
         </h2>
-        <p className={`${LEAD} mt-3`}>
-          Elements for any audio interface, the Workstation for a DAW, and
-          Devices to plug in. Each page has a live preview, the install command,
-          the API reference and the source.
-        </p>
         {/* From one edge of the panel to the other, out of the section's own margins. */}
-        <div className="-mx-4 mt-8 sm:-mx-6">
+        <div className="-mx-4 mt-6 sm:-mx-6">
           <HomeFigures figures={figures} />
         </div>
         <div className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
