@@ -9,10 +9,11 @@ import {
 } from "@audio-ui/engine/analysis";
 import { decodeAudioChannels } from "@audio-ui/engine/files";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
-import { createSource } from "@audio-ui/react";
+import { createSource, type Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
 import {
   type ChangeEvent,
+  type RefObject,
   useCallback,
   useEffect,
   useRef,
@@ -36,6 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
+import { ArrangedTake } from "@/registry-audio/bases/base/audio/elements/arranged-clip";
 import {
   type ClipSamples,
   ClipWaveform,
@@ -75,7 +77,11 @@ import {
   type InputRecorder,
   playCountIn,
 } from "@/registry-audio/bases/base/lib/input-recorder";
-import { sliceBlocks } from "@/registry-audio/bases/base/lib/recording";
+import {
+  blockPeak,
+  type RecordedBlock,
+  sliceBlocks,
+} from "@/registry-audio/bases/base/lib/recording";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const TRACK = "track-1";
@@ -101,13 +107,19 @@ const LABEL_STEPS = [
   0.5, 1, 2, 5, 10, 15, 30, 60,
 ];
 const MIN_LABEL_GAP_PX = 56;
-/** Narrower than this, the library starts folded and leaves the chain the room. */
-const LIBRARY_PX = 560;
+/** Narrower than this, the playground starts with its library folded, leaving the chain the room. */
+const LIBRARY_PX = 600;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
 /** How far ahead of now a take (or its count-in) starts, in seconds: room for the first click to be scheduled. */
 const COUNT_IN_LEAD = 0.05;
 /** A take shorter than this, in seconds, is dropped: it ended within the count-in. */
 const SHORTEST_TAKE = 0.1;
+/** How long a stretch each level of a take drawn live covers, in seconds, as the workstation draws one. */
+const LEVEL_SECONDS = 0.02;
+/** The shortest view a take records into, in seconds: it doubles whenever the take nears its end. */
+const MIN_TAKE_SPAN = 8;
+/** How far along the view a take goes before the view doubles, as a share of it. */
+const TAKE_SPAN_ROOM = 0.9;
 /** The main volume's range, in dB, as a mixer's fader has it. */
 const MIN_DB = -60;
 const MAX_DB = 6;
@@ -234,11 +246,39 @@ const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
 
 /**
+ * The levels of a take as its blocks come in, from the clock frame
+ * `gate.from` on: the loudest of each `LEVEL_SECONDS`, published as they fill.
+ */
+function liveLevels(rate: number) {
+  const list: number[] = [];
+  const levels = createSource<readonly number[]>(list);
+  const gate = { from: Number.POSITIVE_INFINITY };
+  const span = Math.round(LEVEL_SECONDS * rate);
+  let peak = 0;
+  let filled = 0;
+  const hear = (block: RecordedBlock) => {
+    if (block.frame < gate.from) {
+      return;
+    }
+    peak = Math.max(peak, blockPeak(block));
+    filled += block.channels[0]?.length ?? 0;
+    if (filled >= span) {
+      list.push(peak);
+      peak = 0;
+      filled = 0;
+      levels.set([...list]);
+    }
+  };
+  return { gate, hear, levels };
+}
+
+/**
  * A take from the microphone: `record(true)` asks for it and starts after the
  * count-in, `end` (or `record(false)`) stops and hands the take to `onTake`,
  * in channels at the context's rate. `onStart` stops what plays first, so the
  * speakers never come back in through the microphone. `clock` counts the take
- * in seconds, negative through the count-in, for a transport to read.
+ * in seconds, negative through the count-in, for a transport to read, and
+ * `levels` what came in so far, for the take to be drawn as it records.
  */
 function useTake({
   onStart,
@@ -252,6 +292,7 @@ function useTake({
   const [recording, setRecording] = useState(false);
   const [countIn, setCountIn] = useState(0);
   const [clock] = useState(() => createSource(0));
+  const [levels, setLevels] = useState<Source<readonly number[]> | null>(null);
   const take = useRef<{
     from: number;
     recorder: InputRecorder;
@@ -277,7 +318,8 @@ function useTake({
     } catch {
       return;
     }
-    const recorder = await createInputRecorder(ctx);
+    const drawn = liveLevels(ctx.sampleRate);
+    const recorder = await createInputRecorder(ctx, drawn.hear);
     if (!recorder) {
       for (const track of stream.getTracks()) {
         track.stop();
@@ -292,7 +334,11 @@ function useTake({
     const at = ctx.currentTime + COUNT_IN_LEAD;
     playCountIn(ctx, { at, beatSeconds, beats, beatsPerBar });
     recorder.start();
-    take.current = { from: at + beats * beatSeconds, recorder, source, stream };
+    const from = at + beats * beatSeconds;
+    // Drawn from the take's first frame on, after the count-in.
+    drawn.gate.from = Math.round(from * ctx.sampleRate);
+    take.current = { from, recorder, source, stream };
+    setLevels(drawn.levels);
     setRecording(true);
   }, [countIn, onStart, tempo]);
 
@@ -301,6 +347,7 @@ function useTake({
     const ctx = webAudio.getContext();
     take.current = null;
     setRecording(false);
+    setLevels(null);
     clock.set(0);
     if (!(current && ctx)) {
       return;
@@ -354,34 +401,230 @@ function useTake({
     []
   );
 
-  return { clock, countIn, end, record, recording, setCountIn };
+  return { clock, countIn, end, levels, record, recording, setCountIn };
 }
 
-/** Over the waveform: while a file is dragged over the playground, where it lands; while a take records, that the sound to come is on its way. */
-function LaneOverlay({
-  dropping,
-  recording,
-}: {
-  dropping: boolean;
-  recording: boolean;
-}) {
+/** Over the waveform, while a file is dragged over the playground: where it lands. */
+function DropOverlay({ dropping }: { dropping: boolean }) {
   return (
     <div
       aria-hidden="true"
       className={cn(
-        "pointer-events-none absolute inset-0 z-20 flex items-center justify-center gap-2 rounded-lg border-2 border-dashed bg-background/85 font-medium text-sm opacity-0 transition-opacity duration-150 motion-reduce:transition-none",
-        recording ? "border-destructive" : "border-primary",
-        (dropping || recording) && "opacity-100"
+        "pointer-events-none absolute inset-0 z-20 flex items-center justify-center rounded-lg border-2 border-primary border-dashed bg-background/85 font-medium text-sm opacity-0 transition-opacity duration-150 motion-reduce:transition-none",
+        dropping && "opacity-100"
       )}
     >
-      {recording ? (
-        <>
-          <span className="size-2 animate-pulse rounded-full bg-destructive motion-reduce:animate-none" />
-          Recording from the microphone
-        </>
-      ) : (
-        "Drop an audio file to play it"
-      )}
+      Drop an audio file to play it
+    </div>
+  );
+}
+
+/** The width of an element, measured on the next frame, outside the layout pass that resized it. */
+function useWidth(ref: RefObject<HTMLElement | null>) {
+  const [width, setWidth] = useState(0);
+  useEffect(() => {
+    const element = ref.current;
+    if (!element) {
+      return;
+    }
+    let measure = 0;
+    const observer = new ResizeObserver(([entry]) => {
+      cancelAnimationFrame(measure);
+      measure = requestAnimationFrame(() =>
+        setWidth(entry?.contentRect.width ?? 0)
+      );
+    });
+    observer.observe(element);
+    return () => {
+      cancelAnimationFrame(measure);
+      observer.disconnect();
+    };
+  }, [ref]);
+  return width;
+}
+
+/**
+ * The sound's lane: the waveform on a timeline, fitted to the width, zoomed
+ * with Cmd or Ctrl + wheel down to the samples, the ruler seeking and the
+ * navigator moving the view, which turns the page as the playhead leaves it.
+ * While a take records, the lane is the take's, drawn as it comes in a view
+ * that fits it; while a file is dragged over the playground, it shows where it
+ * lands.
+ */
+function ClipLane({
+  dropping,
+  onSeek,
+  playing,
+  position,
+  sound,
+  take,
+  takeName,
+}: {
+  dropping: boolean;
+  onSeek: (seconds: number) => void;
+  playing: boolean;
+  position: Source<number>;
+  sound: Sound | null;
+  take: ReturnType<typeof useTake>;
+  takeName: string;
+}) {
+  const { clock: takeClock, levels: takeLevels, recording } = take;
+  const lane = useRef<HTMLDivElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
+  const width = useWidth(lane);
+  // Pixels per second; null while the whole sound fits the width it is given, and back to null for each new sound.
+  const [zoomPx, setZoomPx] = useState<number | null>(null);
+  const [zoomedSound, setZoomedSound] = useState(sound);
+  if (zoomedSound !== sound) {
+    setZoomedSound(sound);
+    setZoomPx(null);
+  }
+  // While a take records, the view is the take's, in seconds; null otherwise.
+  const [takeSpan, setTakeSpan] = useState<number | null>(null);
+  const soundDuration = sound?.duration ?? 0;
+  const shownDuration = takeSpan ?? soundDuration;
+  const fitPx = width > 0 && shownDuration > 0 ? width / shownDuration : 0;
+  // As far in as the samples go, a few px apart, as wide as a lane can be laid out; a take recording stays fitted.
+  const maxZoom = Math.max(
+    fitPx,
+    sound && soundDuration > 0 && takeSpan === null
+      ? Math.min(sound.samples.frames * FRAME_PX, MOST_LANE_PX) / soundDuration
+      : 0
+  );
+  const zoom = takeSpan === null ? Math.max(zoomPx ?? fitPx, fitPx) : fitPx;
+  const view = useRef<{ px: number; zoomed: boolean }>({
+    px: 0,
+    zoomed: false,
+  });
+  view.current = { px: zoom, zoomed: fitPx > 0 && zoom > fitPx * 1.001 };
+  const changeZoom = useCallback((next: number) => setZoomPx(next), []);
+
+  // The stretch that shows, in seconds, for the ruler to mark only that.
+  const [shown, setShown] = useState<readonly [number, number]>([0, 0]);
+  useEffect(() => {
+    const element = viewport.current;
+    if (!(element && zoom > 0)) {
+      return;
+    }
+    let pending = 0;
+    const measure = () => {
+      pending = 0;
+      setShown([
+        element.scrollLeft / zoom,
+        (element.scrollLeft + element.clientWidth) / zoom,
+      ]);
+    };
+    const onScroll = () => {
+      pending ||= requestAnimationFrame(measure);
+    };
+    measure();
+    element.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      cancelAnimationFrame(pending);
+      element.removeEventListener("scroll", onScroll);
+    };
+  }, [zoom]);
+
+  // Zoomed in, the view turns the page as the playhead leaves it.
+  useEffect(() => {
+    if (!playing) {
+      return;
+    }
+    return position.subscribe(() => {
+      if (view.current.zoomed) {
+        followPlayhead(
+          viewport.current,
+          position.getSnapshot() * view.current.px
+        );
+      }
+    });
+  }, [playing, position]);
+
+  // While a take records, the view fits it: MIN_TAKE_SPAN to start, doubled as the take nears its end.
+  useEffect(() => {
+    if (!recording) {
+      setTakeSpan(null);
+      return;
+    }
+    let span = MIN_TAKE_SPAN;
+    setTakeSpan(span);
+    return takeClock.subscribe(() => {
+      if (takeClock.getSnapshot() > span * TAKE_SPAN_ROOM) {
+        span *= 2;
+        setTakeSpan(span);
+      }
+    });
+  }, [recording, takeClock]);
+
+  return (
+    <div className="px-4 py-4 sm:px-6">
+      <div className="relative" ref={lane}>
+        <Timeline
+          disabled={!sound || recording}
+          duration={shownDuration || 1}
+          maxZoom={Math.max(maxZoom, 1)}
+          minZoom={fitPx || 0}
+          onPositionChange={onSeek}
+          onZoomChange={changeZoom}
+          source={recording ? takeClock : position}
+          zoom={fitPx > 0 ? zoom : undefined}
+        >
+          <TimelineViewport
+            className="overflow-y-hidden rounded-lg border"
+            ref={viewport}
+            scrollbar="hidden"
+          >
+            <TimelineRuler
+              aria-label="Playground time"
+              getAriaValueText={formatTime}
+            >
+              {rulerLabels(shownDuration, zoom, shown).map((mark) => (
+                <TimelineMark key={mark.at} value={mark.at}>
+                  {mark.text}
+                </TimelineMark>
+              ))}
+            </TimelineRuler>
+            {/* A press seeks; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
+            <TimelineLane className="h-28" seekable>
+              {/* A take recording draws itself as it comes, as the workstation draws one; then it is the sound. */}
+              {recording && takeLevels ? (
+                <ArrangedTake
+                  from={0}
+                  levels={takeLevels}
+                  name={takeName}
+                  position={takeClock}
+                />
+              ) : null}
+              <div
+                className={cn(
+                  "absolute inset-y-0 left-0",
+                  recording && "invisible"
+                )}
+                style={{
+                  width: `calc(var(--timeline-unit) * ${soundDuration || 1})`,
+                }}
+              >
+                {sound ? (
+                  <ClipWaveform
+                    aria-label={`${sound.name}, waveform`}
+                    className="inset-y-0 h-full text-foreground"
+                    clip={{
+                      sourceLength: soundDuration,
+                      value: { length: soundDuration, offset: 0 },
+                    }}
+                    peaks={sound.peaks}
+                    role="img"
+                    samples={sound.samples}
+                  />
+                ) : null}
+              </div>
+              <TimelinePlayhead />
+            </TimelineLane>
+          </TimelineViewport>
+          <TimelineNavigator className="mt-2" getAriaValueText={formatTime} />
+        </Timeline>
+        <DropOverlay dropping={dropping} />
+      </div>
     </div>
   );
 }
@@ -413,75 +656,6 @@ export function HomePlayground() {
     recordings,
   });
   const fileInput = useRef<HTMLInputElement>(null);
-  // Pixels per second; null while the whole sound fits the width it is given.
-  const [zoomPx, setZoomPx] = useState<number | null>(null);
-  const [width, setWidth] = useState(0);
-  const lane = useRef<HTMLDivElement>(null);
-  const viewport = useRef<HTMLDivElement>(null);
-  const soundDuration = sound?.duration ?? 0;
-  const fitPx = width > 0 && soundDuration > 0 ? width / soundDuration : 0;
-  // As far in as the samples go, a few px apart, as wide as a lane can be laid out.
-  const maxZoom = Math.max(
-    fitPx,
-    sound && soundDuration > 0
-      ? Math.min(sound.samples.frames * FRAME_PX, MOST_LANE_PX) / soundDuration
-      : 0
-  );
-  const zoom = Math.max(zoomPx ?? fitPx, fitPx);
-  const zoomed = fitPx > 0 && zoom > fitPx * 1.001;
-  const view = useRef<{ px: number; zoomed: boolean }>({
-    px: 0,
-    zoomed: false,
-  });
-  view.current = { px: zoom, zoomed };
-
-  // The width the whole sound fits, measured on the next frame, outside the layout pass that resized it.
-  useEffect(() => {
-    const element = lane.current;
-    if (!element) {
-      return;
-    }
-    let measure = 0;
-    const observer = new ResizeObserver(([entry]) => {
-      cancelAnimationFrame(measure);
-      measure = requestAnimationFrame(() =>
-        setWidth(entry?.contentRect.width ?? 0)
-      );
-    });
-    observer.observe(element);
-    return () => {
-      cancelAnimationFrame(measure);
-      observer.disconnect();
-    };
-  }, []);
-
-  // The stretch that shows, in seconds, for the ruler to mark only that.
-  const [shown, setShown] = useState<readonly [number, number]>([0, 0]);
-  useEffect(() => {
-    const element = viewport.current;
-    if (!(element && zoom > 0)) {
-      return;
-    }
-    let pending = 0;
-    const measure = () => {
-      pending = 0;
-      setShown([
-        element.scrollLeft / zoom,
-        (element.scrollLeft + element.clientWidth) / zoom,
-      ]);
-    };
-    const onScroll = () => {
-      pending ||= requestAnimationFrame(measure);
-    };
-    measure();
-    element.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      cancelAnimationFrame(pending);
-      element.removeEventListener("scroll", onScroll);
-    };
-  }, [zoom]);
-
-  const changeZoom = useCallback((next: number) => setZoomPx(next), []);
 
   // The engine keeps a recording by its id once it has it: each sound placed takes an id of its own.
   const placed = useRef(0);
@@ -541,28 +715,12 @@ export function HomePlayground() {
     };
   }, [placeDemo]);
 
-  // Zoomed in, the view turns the page as the playhead leaves it.
-  useEffect(() => {
-    if (!playing) {
-      return;
-    }
-    return position.subscribe(() => {
-      if (view.current.zoomed) {
-        followPlayhead(
-          viewport.current,
-          position.getSnapshot() * view.current.px
-        );
-      }
-    });
-  }, [playing, position]);
-
   // A take from the microphone becomes the sound, as a file opened would.
   const takes = useRef(0);
   const takeDone = useCallback(
     (channels: Float32Array[], sampleRate: number) => {
       takes.current += 1;
       position.set(0);
-      setZoomPx(null);
       place(
         { channels, sampleRate },
         soundOf(channels, sampleRate, `Take ${takes.current}`)
@@ -630,7 +788,6 @@ export function HomePlayground() {
       }
       stop();
       position.set(0);
-      setZoomPx(null);
       place(
         { channels, sampleRate: ctx.sampleRate },
         soundOf(channels, ctx.sampleRate, file.name)
@@ -649,7 +806,6 @@ export function HomePlayground() {
       renderDemoSource(name, ctx.sampleRate).then((buffer) => {
         stop();
         position.set(0);
-        setZoomPx(null);
         placeDemo(buffer, name);
       });
     },
@@ -707,6 +863,7 @@ export function HomePlayground() {
 
   // The library: picked, a device goes at the end of the chain; the chain's end opens it, ready to search.
   const [libraryOpen, setLibraryOpen] = useState<boolean | null>(null);
+  const width = useWidth(frame);
   const search = useRef<HTMLInputElement>(null);
   const openLibrary = useCallback(() => {
     setLibraryOpen(true);
@@ -853,64 +1010,15 @@ export function HomePlayground() {
           </div>
         </Transport>
       </div>
-      <div className="px-4 py-4 sm:px-6">
-        {/* Zoomed with Cmd or Ctrl + wheel; the ruler seeks, the navigator moves and zooms the view. */}
-        <div className="relative" ref={lane}>
-          <Timeline
-            disabled={!sound}
-            duration={soundDuration || 1}
-            maxZoom={Math.max(maxZoom, 1)}
-            minZoom={fitPx || 0}
-            onPositionChange={seek}
-            onZoomChange={changeZoom}
-            source={position}
-            zoom={fitPx > 0 ? zoom : undefined}
-          >
-            <TimelineViewport
-              className="overflow-y-hidden rounded-lg border"
-              ref={viewport}
-              scrollbar="hidden"
-            >
-              <TimelineRuler
-                aria-label="Playground time"
-                getAriaValueText={formatTime}
-              >
-                {rulerLabels(soundDuration, zoom, shown).map((mark) => (
-                  <TimelineMark key={mark.at} value={mark.at}>
-                    {mark.text}
-                  </TimelineMark>
-                ))}
-              </TimelineRuler>
-              {/* A press seeks; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
-              <TimelineLane className="h-28" seekable>
-                <div
-                  className="absolute inset-y-0 left-0"
-                  style={{
-                    width: `calc(var(--timeline-unit) * ${soundDuration || 1})`,
-                  }}
-                >
-                  {sound ? (
-                    <ClipWaveform
-                      aria-label={`${sound.name}, waveform`}
-                      className="inset-y-0 h-full text-foreground"
-                      clip={{
-                        sourceLength: soundDuration,
-                        value: { length: soundDuration, offset: 0 },
-                      }}
-                      peaks={sound.peaks}
-                      role="img"
-                      samples={sound.samples}
-                    />
-                  ) : null}
-                </div>
-                <TimelinePlayhead />
-              </TimelineLane>
-            </TimelineViewport>
-            <TimelineNavigator className="mt-2" getAriaValueText={formatTime} />
-          </Timeline>
-          <LaneOverlay dropping={dropping} recording={recording} />
-        </div>
-      </div>
+      <ClipLane
+        dropping={dropping}
+        onSeek={seek}
+        playing={playing}
+        position={position}
+        sound={sound}
+        take={take}
+        takeName={`Take ${takes.current + 1}`}
+      />
       {/* The track's chain, from one edge of the inset to the other, the library beside it as in a workstation. */}
       <div className="flex h-96 border-t">
         <DeviceBrowser
