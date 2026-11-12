@@ -28,12 +28,15 @@
     "use-timeline-grid",
     "use-timeline-cursor",
     "use-time-selection",
+    "use-clip-edits",
+    "use-silence-hover",
     "use-track-reorder",
     "use-marquee-selection",
     "---Sessions and demos---",
     "use-audio-session",
     "use-play-switch",
     "use-demo-source",
-    "use-noise-through-eq"
+    "use-noise-through-eq",
+    "use-status-line"
   ]
 }

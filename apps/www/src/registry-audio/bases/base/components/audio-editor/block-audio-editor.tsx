@@ -99,10 +99,12 @@ import { Transport } from "@/registry-audio/bases/base/audio/elements/transport"
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
+import { useClipEdits } from "@/registry-audio/bases/base/hooks/use-clip-edits";
+import { useSilenceHover } from "@/registry-audio/bases/base/hooks/use-silence-hover";
+import { useStatusLine } from "@/registry-audio/bases/base/hooks/use-status-line";
 import type {
   Arranged,
   ArrangementTrack,
-  Clipping,
   TimeSelection,
   TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
@@ -117,6 +119,14 @@ import {
   type ExportSettings,
   exportSound,
 } from "@/registry-audio/bases/base/lib/audio-export";
+import {
+  MAX_DB,
+  MIN_DB,
+  near,
+  SHRINK_GAPS,
+  type StretchShape,
+  typing,
+} from "@/registry-audio/bases/base/lib/clip-edits";
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
 import {
   DEMO_SOURCES,
@@ -163,17 +173,6 @@ const GLIDE = 0.3;
 const JUMP_SECONDS = 8;
 /** Pixels in a line and a page of wheel delta, for a wheel that counts in those. */
 const WHEEL_PX = [1, 16, 400] as const;
-/** Half the crossfade an edit's seam gets, in seconds: the two sides play through each other over twice this, so a seam never clicks. */
-const SPLICE = 0.005;
-
-/** How near an edge a pause has to start or end to be the silence at the start or the end of the sound, in seconds. */
-const EDGE_EPS = 0.01;
-
-/** The length a shrunk pause keeps, in seconds, as audio.js's `shrink` does by default. */
-const SHRINK_GAP = 0.3;
-
-/** The lengths a pause can be shrunk to: 0 takes it out whole. */
-const SHRINK_GAPS = [0, 0.1, 0.3, 0.5] as const;
 const LABEL_STEPS = [
   0.0001, 0.000_25, 0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25,
   0.5, 1, 2, 5, 10, 15, 30, 60,
@@ -192,9 +191,6 @@ const LEVEL_SECONDS = 0.02;
 const MIN_TAKE_SPAN = 8;
 /** How far along the view a take goes before the view doubles, as a share of it. */
 const TAKE_SPAN_ROOM = 0.9;
-/** A selection's level range, in dB: silence at the bottom, a boost of 6 dB at the top. */
-const MIN_DB = -60;
-const MAX_DB = 6;
 /** A rate's needless decimal, as "48.0 kHz" would have it. */
 const TRAILING_ZERO = /\.0$/;
 /** A file name's extension, which an export replaces with its own. */
@@ -211,8 +207,6 @@ const FADE_POINTS = 24;
 const SHORTEST_SELECTION = 0.01;
 /** How far the arrows move the level, in dB. */
 const LEVEL_STEP = 0.5;
-/** How far Louder and Quieter move the selection's level, in dB. */
-const LEVEL_NUDGE = 3;
 /** How near a snap point a press lands on it, in px, as the timeline's own gestures do. */
 const SNAP_PX = 8;
 /** What the zoom keys do to the zoom: in twice, out by half, or 0 for the whole sound. */
@@ -575,30 +569,6 @@ function useWidth(ref: RefObject<HTMLElement | null>) {
   return width;
 }
 
-/** Whether a key went to a field you type in, where its keys are its own. */
-function typing(target: EventTarget | null) {
-  return (
-    (target instanceof HTMLInputElement && target.type !== "range") ||
-    target instanceof HTMLTextAreaElement ||
-    (target instanceof HTMLElement && target.isContentEditable)
-  );
-}
-
-/** Taking the time from `from` to `to` out, the time after it moving in: nothing when it is empty. */
-const removing = (from: number, to: number): ArrangementCommand[] =>
-  to > from ? [{ from, to, type: "remove-time" }] : [];
-
-/** The crossfade of an edit's seam at `at`, in a sound `length` long: the clip that ends there and the one that starts there play through each other. None at either end. */
-const splice = (at: number, length: number): ArrangementCommand[] =>
-  at > 0 && at < length
-    ? [
-        {
-          time: { range: [at - SPLICE, at + SPLICE], tracks: [TRACK] },
-          type: "fade-time",
-        },
-      ]
-    : [];
-
 /** Where the sound's gestures stop, on the timeline: the points an edge snaps to and a double-click stops at, and the pauses a triple-click stops at. */
 interface Cues {
   /** The pauses between its sounds, in order, as [from, to]. */
@@ -684,426 +654,6 @@ function soundAt(cues: Cues, at: number, duration: number): [number, number] {
     cues.pauses.filter(([, to]) => to <= at).at(-1)?.[1] ?? 0,
     cues.pauses.find(([from]) => from > at)?.[0] ?? duration,
   ];
-}
-
-/** What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB. */
-interface StretchShape {
-  fadeIn: number;
-  fadeInShape: FadeShape;
-  fadeOut: number;
-  fadeOutShape: FadeShape;
-  gain: number;
-}
-
-const FLAT: StretchShape = {
-  fadeIn: 0,
-  fadeInShape: "linear",
-  fadeOut: 0,
-  fadeOutShape: "linear",
-  gain: 0,
-};
-
-const clipEnd = (clip: Arranged) => clip.value.start + clip.value.length;
-/** Two times the same, to the frame. */
-const near = (a: number, b: number) => Math.abs(a - b) < 1e-4;
-
-/** What the selection has now: the shape of the one clip it covers exactly, or none. */
-function shapeOf(
-  clips: readonly Arranged[],
-  [from, to]: readonly [number, number]
-): StretchShape {
-  const clip = clips.find(
-    (item) => near(item.value.start, from) && near(clipEnd(item), to)
-  );
-  return clip
-    ? {
-        fadeIn: clip.value.fadeIn,
-        fadeInShape: clip.value.fadeInShape ?? "linear",
-        fadeOut: clip.value.fadeOut,
-        fadeOutShape: clip.value.fadeOutShape ?? "linear",
-        gain: clip.gain ?? 0,
-      }
-    : FLAT;
-}
-
-/** A clip's piece from `from` to `to` on the timeline, the source following, with no fades of its own. */
-function pieceOf(
-  clip: Arranged,
-  id: string,
-  from: number,
-  to: number
-): Arranged {
-  return {
-    ...clip,
-    id,
-    value: {
-      ...clip.value,
-      fadeIn: 0,
-      fadeOut: 0,
-      length: to - from,
-      offset: clip.value.offset + (from - clip.value.start),
-      start: from,
-    },
-  };
-}
-
-/**
- * The track's clips with the stretch from `from` to `to` cut out of them as
- * clips of their own, the shape on those: the fade-in on the first, the
- * fade-out on the last, the level on all. What is outside keeps its fade on
- * its own outer end, and a piece on a clip's own edge keeps its fade there,
- * the crossfade of a seam. The commands that make it, as one step.
- */
-function shapeStretch(
-  clips: readonly Arranged[],
-  [from, to]: readonly [number, number],
-  shape: StretchShape
-): ArrangementCommand[] {
-  const touched = clips.filter(
-    (clip) => clip.value.start < to && clipEnd(clip) > from
-  );
-  const outside: Arranged[] = [];
-  const inside: Arranged[] = [];
-  for (const clip of touched) {
-    const { start } = clip.value;
-    const end = clipEnd(clip);
-    const a = Math.max(start, from);
-    const b = Math.min(end, to);
-    if (start < from) {
-      outside.push({
-        ...pieceOf(clip, clip.id, start, from),
-        value: {
-          ...pieceOf(clip, clip.id, start, from).value,
-          fadeIn: Math.min(clip.value.fadeIn, from - start),
-        },
-      });
-    }
-    const piece = pieceOf(
-      clip,
-      start < from ? `${clip.id}@${a}` : clip.id,
-      a,
-      b
-    );
-    // A clip's own edge keeps its fade: the crossfade of a seam there.
-    inside.push({
-      ...piece,
-      value: {
-        ...piece.value,
-        fadeIn: a === start ? clip.value.fadeIn : 0,
-        fadeOut: b === end ? clip.value.fadeOut : 0,
-      },
-    });
-    if (end > to) {
-      const after = pieceOf(clip, `${clip.id}@${to}`, to, end);
-      outside.push({
-        ...after,
-        value: {
-          ...after.value,
-          fadeOut: Math.min(clip.value.fadeOut, end - to),
-        },
-      });
-    }
-  }
-  const last = inside.length - 1;
-  // The selection's own fades on its two ends, when it has them; elsewhere, what the pieces keep of their clips'.
-  const ownIn = (index: number) => index === 0 && shape.fadeIn > 0;
-  const ownOut = (index: number) => index === last && shape.fadeOut > 0;
-  const shaped = inside.map((clip, index) => ({
-    ...clip,
-    gain: shape.gain,
-    value: {
-      ...clip.value,
-      fadeIn: ownIn(index)
-        ? Math.min(shape.fadeIn, clip.value.length)
-        : clip.value.fadeIn,
-      fadeInShape: ownIn(index) ? shape.fadeInShape : clip.value.fadeInShape,
-      fadeOut: ownOut(index)
-        ? Math.min(shape.fadeOut, clip.value.length)
-        : clip.value.fadeOut,
-      fadeOutShape: ownOut(index)
-        ? shape.fadeOutShape
-        : clip.value.fadeOutShape,
-    },
-  }));
-  return [
-    ...touched.map((clip) => ({ id: clip.id, type: "remove-clip" as const })),
-    ...[...outside, ...shaped].map((clip) => ({
-      clip,
-      type: "add-clip" as const,
-    })),
-  ];
-}
-
-/**
- * The edits of the sound, as an audio editor makes them, each one step of
- * undo: on the time selected, Cut and Copy; Paste makes room for what it lays
- * down, over the selection if there is one; Delete and Crop close the gap they
- * leave; Mark puts a locator at the selection's start, or at the cursor;
- * Louder and Quieter move the selection's level by 3 dB. The arrangement's
- * length and loop follow the sound's. Each is sent by `act` with the name the
- * history lists. `handleKey` is the keyboard of all of them, with Undo and
- * Redo.
- */
-function useClipEdits({
-  act,
-  arrangement,
-  notify,
-  pauses,
-  position,
-}: {
-  /** Sends a command as a step of the history, by the name the history lists. */
-  act: (label: string, command: ArrangementCommand) => void;
-  arrangement: ReturnType<typeof useArrangement>;
-  /** Says something in the editor's status line, for what an edit had nothing to do on. */
-  notify: (text: string) => void;
-  /** The silences of the sound as it lies, in order, as [from, to]: what trimming and shrinking take out. */
-  pauses: readonly (readonly [number, number])[];
-  position: ReturnType<typeof createSource<number>>;
-}) {
-  const { copyOf, dispatch, doc } = arrangement;
-  const [time, setTime] = useState<TimeSelection | null>(null);
-  const [clipboard, setClipboard] = useState<Clipping | null>(null);
-  const length = doc.duration;
-
-  /** One step of undo: the edit, then the arrangement's length and loop set to the sound's new length. */
-  const commit = useCallback(
-    (label: string, commands: ArrangementCommand[], next: number) =>
-      act(label, {
-        commands: [
-          ...commands,
-          { duration: next, type: "set-duration" },
-          { loop: { range: [0, next] }, type: "set-loop" },
-        ],
-        type: "batch",
-      }),
-    [act]
-  );
-  const removeAs = useCallback(
-    (label: string) => {
-      if (!time) {
-        return;
-      }
-      const [from, to] = time.range;
-      const next = length - (to - from);
-      commit(label, [...removing(from, to), ...splice(from, next)], next);
-      setTime(null);
-      position.set(from);
-    },
-    [commit, length, position, time]
-  );
-  const remove = useCallback(() => removeAs("Delete"), [removeAs]);
-  const copy = useCallback(() => {
-    if (time) {
-      setClipboard(copyOf(time));
-    }
-  }, [copyOf, time]);
-  const cut = useCallback(() => {
-    if (time) {
-      setClipboard(copyOf(time));
-      removeAs("Cut");
-    }
-  }, [copyOf, removeAs, time]);
-  const paste = useCallback(() => {
-    if (!clipboard) {
-      return;
-    }
-    const at = time ? time.range[0] : Math.min(position.getSnapshot(), length);
-    const over = time ? time.range[1] - time.range[0] : 0;
-    const next = length - over + clipboard.length;
-    commit(
-      "Paste",
-      [
-        ...(time ? removing(time.range[0], time.range[1]) : []),
-        { at, length: clipboard.length, type: "insert-time" },
-        { at, clipping: clipboard, track: TRACK, type: "paste" },
-        ...splice(at, next),
-        ...splice(at + clipboard.length, next),
-      ],
-      next
-    );
-    setTime({ range: [at, at + clipboard.length], tracks: [TRACK] });
-  }, [clipboard, commit, length, position, time]);
-  const crop = useCallback(() => {
-    if (!time) {
-      return;
-    }
-    const [from, to] = time.range;
-    commit("Crop", [...removing(to, length), ...removing(0, from)], to - from);
-    setTime({ range: [0, to - from], tracks: [TRACK] });
-    position.set(0);
-  }, [commit, length, position, time]);
-  // The silence at the start and at the end taken off, as a clip of audio.js's `trim`.
-  const trimSilence = useCallback(() => {
-    const lead = pauses.find(([from]) => from <= EDGE_EPS);
-    const tail = pauses.find(([, to]) => to >= length - EDGE_EPS);
-    const cutTail = tail && tail !== lead ? tail[1] - tail[0] : 0;
-    const cutLead = lead ? lead[1] - lead[0] : 0;
-    if (cutLead + cutTail <= 0) {
-      notify("No silence at the start or the end");
-      return;
-    }
-    const next = length - cutLead - cutTail;
-    commit(
-      "Trim silence",
-      [
-        ...(tail && tail !== lead ? removing(tail[0], tail[1]) : []),
-        ...(lead ? removing(lead[0], lead[1]) : []),
-      ],
-      next
-    );
-    setTime(null);
-    position.set(0);
-  }, [commit, length, notify, pauses, position]);
-  // Every pause between sounds cut down to `gap` seconds, as audio.js's `shrink`: the middle of each taken out, last first so the places hold.
-  const shrinkPauses = useCallback(
-    (gap = SHRINK_GAP) => {
-      const inside = pauses.filter(
-        ([from, to]) =>
-          from > EDGE_EPS && to < length - EDGE_EPS && to - from > gap
-      );
-      if (inside.length === 0) {
-        notify(`No pause longer than ${gap} s`);
-        return;
-      }
-      const taken = inside.reduce(
-        (sum, [from, to]) => sum + (to - from - gap),
-        0
-      );
-      const commands: ArrangementCommand[] = [];
-      for (const [from, to] of [...inside].reverse()) {
-        commands.push(...removing(from + gap / 2, to - gap / 2));
-      }
-      // The seams, from the start: each one sits where it ended up after the cuts before it.
-      let before = 0;
-      for (const [from, to] of inside) {
-        commands.push(...splice(from + gap / 2 - before, length - taken));
-        before += to - from - gap;
-      }
-      commit(
-        gap === 0 ? "Remove pauses" : `Shrink pauses to ${gap} s`,
-        commands,
-        length - taken
-      );
-      setTime(null);
-    },
-    [commit, length, notify, pauses]
-  );
-  const mark = useCallback(
-    () =>
-      act("Mark", {
-        at: time ? time.range[0] : position.getSnapshot(),
-        type: "add-locator",
-      }),
-    [act, position, time]
-  );
-  const selectAll = useCallback(
-    () => setTime({ range: [0, length], tracks: [TRACK] }),
-    [length]
-  );
-  const clear = useCallback(() => setTime(null), []);
-  const undo = useCallback(() => dispatch({ type: "undo" }), [dispatch]);
-  const redo = useCallback(() => dispatch({ type: "redo" }), [dispatch]);
-  const clips = useMemo(
-    () => doc.clips.filter((clip) => clip.track === TRACK),
-    [doc.clips]
-  );
-  /** Fades and level on the selection, as one step named `label`: what is in it becomes clips of its own, shaped. */
-  const shape = useCallback(
-    (next: StretchShape, label: string) => {
-      if (time) {
-        act(label, {
-          commands: shapeStretch(clips, time.range, next),
-          type: "batch",
-        });
-      }
-    },
-    [act, clips, time]
-  );
-  /** The selection's level moved by `db`, up to the top of the range: past 0 dB, it is a boost. */
-  const nudge = useCallback(
-    (db: number) => {
-      if (time) {
-        const now = shapeOf(clips, time.range);
-        shape(
-          { ...now, gain: Math.min(MAX_DB, Math.max(MIN_DB, now.gain + db)) },
-          db > 0 ? "Louder" : "Quieter"
-        );
-      }
-    },
-    [clips, shape, time]
-  );
-  const louder = useCallback(() => nudge(LEVEL_NUDGE), [nudge]);
-  const quieter = useCallback(() => nudge(-LEVEL_NUDGE), [nudge]);
-
-  const handleKey = useCallback(
-    (event: KeyboardEvent<HTMLElement>) => {
-      if (typing(event.target)) {
-        return;
-      }
-      const withMod: Record<string, (() => void) | undefined> = {
-        a: selectAll,
-        c: copy,
-        v: paste,
-        x: cut,
-        y: redo,
-        z: event.shiftKey ? redo : undo,
-      };
-      const alone: Record<string, (() => void) | undefined> = {
-        backspace: remove,
-        delete: remove,
-        escape: clear,
-        k: crop,
-        m: mark,
-        // Shift with Up and Down: louder and quieter.
-        ...(event.shiftKey ? { arrowdown: quieter, arrowup: louder } : {}),
-      };
-      const command = (event.metaKey || event.ctrlKey ? withMod : alone)[
-        event.key.toLowerCase()
-      ];
-      if (command) {
-        event.preventDefault();
-        command();
-      }
-    },
-    [
-      clear,
-      copy,
-      crop,
-      cut,
-      louder,
-      mark,
-      paste,
-      quieter,
-      redo,
-      remove,
-      selectAll,
-      undo,
-    ]
-  );
-
-  return {
-    clear,
-    clipboard,
-    copy,
-    crop,
-    cut,
-    handleKey,
-    shrinkPauses,
-    trimSilence,
-    louder,
-    mark,
-    paste,
-    quieter,
-    redo,
-    remove,
-    selectAll,
-    setTime,
-    shape,
-    /** What the selection has now: its fades and level, read from the clip it covers exactly. */
-    shapeNow: time ? shapeOf(clips, time.range) : FLAT,
-    time,
-    undo,
-  };
 }
 
 /** The key that goes with the others on this system: Command on Apple's, Control elsewhere. */
@@ -2058,27 +1608,7 @@ function ClipLane({
     [clear, cues, duration, position, setTime, time, zoom]
   );
   // The silence the pointer is over, shown as a zone while it is there.
-  const [hoveredPause, setHoveredPause] = useState<
-    readonly [number, number] | null
-  >(null);
-  const overLane = useCallback(
-    (event: PointerEvent<HTMLDivElement>) => {
-      if (!zoom || event.buttons !== 0) {
-        setHoveredPause(null);
-        return;
-      }
-      const box = event.currentTarget.getBoundingClientRect();
-      const at = (event.clientX - box.left) / zoom;
-      const found = cues.pauses.find(([a, b]) => at >= a && at <= b) ?? null;
-      setHoveredPause((current) =>
-        current?.[0] === found?.[0] && current?.[1] === found?.[1]
-          ? current
-          : found
-      );
-    },
-    [cues.pauses, zoom]
-  );
-  const leaveLane = useCallback(() => setHoveredPause(null), []);
+  const silence = useSilenceHover({ pauses: cues.pauses, zoom });
   const select = useCallback(
     (range: readonly [number, number]) => {
       const from = extending.current;
@@ -2259,8 +1789,8 @@ function ClipLane({
                   className="min-h-28 flex-1"
                   onClick={pick}
                   onPointerDown={press}
-                  onPointerLeave={leaveLane}
-                  onPointerMove={overLane}
+                  onPointerLeave={silence.onPointerLeave}
+                  onPointerMove={silence.onPointerMove}
                   onSelectionChange={select}
                   seekable
                 >
@@ -2278,7 +1808,7 @@ function ClipLane({
                     hidden={recording}
                     sounds={sounds}
                   />
-                  {recording ? null : <SilenceZone pause={hoveredPause} />}
+                  {recording ? null : <SilenceZone pause={silence.pause} />}
                   {recording ? null : (
                     <SelectionFrame duration={duration} edits={edits} />
                   )}
@@ -2893,7 +2423,7 @@ export default function BlockAudioEditor() {
   }, [playing]);
   const fileInput = useRef<HTMLInputElement>(null);
   // What the status line says, for a few seconds.
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useStatusLine(STATUS_MS);
   const say = setStatus;
   const cueList = useMemo(
     () => cuesOf(clips, sounds, doc.locators, doc.duration),
@@ -2905,6 +2435,7 @@ export default function BlockAudioEditor() {
     notify: say,
     pauses: cueList.pauses,
     position,
+    track: TRACK,
   });
   const { clear: clearSelection } = edits;
 
@@ -3032,13 +2563,6 @@ export default function BlockAudioEditor() {
   const [exportSettings, setExportSettings] = useState(DEFAULT_EXPORT_SETTINGS);
   const exportRange = edits.time?.range ?? [0, doc.duration];
   const openExport = useCallback(() => setExporting(true), []);
-  useEffect(() => {
-    if (!status) {
-      return;
-    }
-    const timer = window.setTimeout(() => setStatus(""), STATUS_MS);
-    return () => window.clearTimeout(timer);
-  }, [status]);
   const runExport = useCallback(
     async (settings: ExportSettings) => {
       const [from, to] = exportRange;
@@ -3066,7 +2590,7 @@ export default function BlockAudioEditor() {
       downloadFile(file, name);
       setStatus(`Saved ${name}, ${formatLevel(loudness.lufs, "LUFS")}`);
     },
-    [doc, exportRange, recordings, sound]
+    [doc, exportRange, recordings, sound, setStatus]
   );
 
   // B: the sound as it was before the edits, matched to the loudness the edits give it, or the edits again.
@@ -3103,7 +2627,7 @@ export default function BlockAudioEditor() {
       recording: source,
       tracks: doc.tracks,
     });
-  }, [clips, comparing, doc, recordings, sound]);
+  }, [clips, comparing, doc, recordings, sound, setStatus]);
 
   // A locator's own gestures: press to put the cursor there, double-click to play from there, drag, rename, delete.
   const locatorActions = useMemo<LocatorActions>(
@@ -3167,7 +2691,7 @@ export default function BlockAudioEditor() {
       );
       setStatus("");
     },
-    [clips, place, recordings, sound, stop]
+    [clips, place, recordings, sound, stop, setStatus]
   );
   const resampleTo = useCallback(
     (rate: number) => {

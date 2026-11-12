@@ -369,6 +369,7 @@
       "block-device-chain",
       "block-mixer",
       "block-timeline",
+      "clip-edits",
       "clip-waveform",
       "dawproject",
       "device-view",
@@ -384,6 +385,7 @@
       "timeline",
       "track-automation",
       "use-arrangement",
+      "use-clip-edits",
       "use-time-selection",
       "use-timeline-cursor"
     ]
@@ -514,6 +516,111 @@
       "block-audio-editor",
       "export-dialog",
       "export-dialog-demo"
+    ]
+  },
+  {
+    "dependencies": [],
+    "description": "The pure parts of editing one sound on a track of an arrangement: taking time out and the crossfade at its seam, the fades and level of a stretch of time, how far a pause is shrunk, and which keys are a field's own",
+    "exports": [
+      {
+        "kind": "const",
+        "name": "SPLICE",
+        "summary": "The crossfade of an edit's seam: half of it each side of the cut, in seconds."
+      },
+      {
+        "kind": "const",
+        "name": "EDGE_EPS",
+        "summary": "How near an edge a pause has to start or end to be the silence at the start or the end of the sound, in seconds."
+      },
+      {
+        "kind": "const",
+        "name": "SHRINK_GAP",
+        "summary": "The length a shrunk pause keeps, in seconds, as audio.js's `shrink` does by default."
+      },
+      {
+        "kind": "const",
+        "name": "SHRINK_GAPS",
+        "summary": "The lengths a pause can be shrunk to: 0 takes it out whole."
+      },
+      {
+        "kind": "const",
+        "name": "LEVEL_NUDGE",
+        "summary": "How far Louder and Quieter move the selection's level, in dB."
+      },
+      {
+        "kind": "const",
+        "name": "MIN_DB",
+        "summary": "A selection's level range, in dB: silence at the bottom, a boost of 6 dB at the top."
+      },
+      {
+        "kind": "const",
+        "name": "MAX_DB",
+        "summary": ""
+      },
+      {
+        "kind": "function",
+        "name": "typing",
+        "summary": "Whether a key went to a field you type in, where its keys are its own."
+      },
+      {
+        "kind": "const",
+        "name": "removing",
+        "summary": "Taking the time from `from` to `to` out, the time after it moving in: nothing when it is empty."
+      },
+      {
+        "kind": "const",
+        "name": "splice",
+        "summary": "The crossfade of an edit's seam at `at`, in a sound `length` long: the clip that ends there and the one that starts there play through each other."
+      },
+      {
+        "kind": "interface",
+        "name": "StretchShape",
+        "summary": "What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB."
+      },
+      {
+        "kind": "const",
+        "name": "FLAT",
+        "summary": ""
+      },
+      {
+        "kind": "const",
+        "name": "clipEnd",
+        "summary": ""
+      },
+      {
+        "kind": "const",
+        "name": "near",
+        "summary": "Two times the same, to the frame."
+      },
+      {
+        "kind": "function",
+        "name": "shapeOf",
+        "summary": "What the selection has now: the shape of the one clip it covers exactly, or none."
+      },
+      {
+        "kind": "function",
+        "name": "pieceOf",
+        "summary": "A clip's piece from `from` to `to` on the timeline, the source following, with no fades of its own."
+      },
+      {
+        "kind": "function",
+        "name": "shapeStretch",
+        "summary": "The track's clips with the stretch from `from` to `to` cut out of them as clips of their own, the shape on those: the fade-in on the first, the fade-out on the last, the level on all."
+      }
+    ],
+    "files": [
+      "lib/clip-edits.ts"
+    ],
+    "from": "@/lib/clip-edits",
+    "kind": "lib",
+    "name": "clip-edits",
+    "registryDependencies": [
+      "arrangement",
+      "use-arrangement"
+    ],
+    "usedBy": [
+      "block-audio-editor",
+      "use-clip-edits"
     ]
   },
   {
@@ -1702,11 +1809,13 @@
       "block-device-chain",
       "block-mixer",
       "block-timeline",
+      "clip-edits",
       "dawproject",
       "device-view",
       "mixer-view",
       "timeline-markers",
       "track-automation",
+      "use-clip-edits",
       "use-time-selection"
     ]
   },
@@ -1841,6 +1950,33 @@
     "name": "use-audio-signal",
     "registryDependencies": [],
     "usedBy": []
+  },
+  {
+    "dependencies": [
+      "@audio-ui/react"
+    ],
+    "description": "The edits of one sound on a track, each one step of undo: Cut, Copy, Paste, Delete, Crop, Mark, Louder and Quieter on a time selection, Trim silence and Shrink pauses from the pauses it is given, and the keyboard of all of them with Undo and Redo",
+    "exports": [
+      {
+        "kind": "function",
+        "name": "useClipEdits",
+        "summary": "The edits of the sound, as an audio editor makes them, each one step of undo: on the time selected, Cut and Copy; Paste makes room for what it lays down, over the selection if there is one; Delete and Crop close the gap they leave; Mark puts a locator at the selection's start, or at the cursor; Louder and Quieter move the selection's level by 3 dB."
+      }
+    ],
+    "files": [
+      "hooks/use-clip-edits.ts"
+    ],
+    "from": "@/hooks/use-clip-edits",
+    "kind": "hook",
+    "name": "use-clip-edits",
+    "registryDependencies": [
+      "arrangement",
+      "clip-edits",
+      "use-arrangement"
+    ],
+    "usedBy": [
+      "block-audio-editor"
+    ]
   },
   {
     "dependencies": [],
@@ -2403,6 +2539,32 @@
   },
   {
     "dependencies": [],
+    "description": "The pause under the pointer on a lane, to draw as a zone while it is there: give the lane its pointer handlers and the zoom it is drawn at",
+    "exports": [
+      {
+        "kind": "type",
+        "name": "Pause",
+        "summary": "A stretch of time with nothing in it, as `[from, to]` in the timeline's units."
+      },
+      {
+        "kind": "function",
+        "name": "useSilenceHover",
+        "summary": "The pause the pointer is over on a lane, to draw as a zone while it is there."
+      }
+    ],
+    "files": [
+      "hooks/use-silence-hover.ts"
+    ],
+    "from": "@/hooks/use-silence-hover",
+    "kind": "hook",
+    "name": "use-silence-hover",
+    "registryDependencies": [],
+    "usedBy": [
+      "block-audio-editor"
+    ]
+  },
+  {
+    "dependencies": [],
     "description": "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from: a demo meter that is never at rest",
     "exports": [
       {
@@ -2468,6 +2630,27 @@
       "plot-demo",
       "spectrum-analyzer",
       "spectrum-analyzer-demo"
+    ]
+  },
+  {
+    "dependencies": [],
+    "description": "A line of status an editor says things on, what it is doing and what an action had nothing to do on, which clears itself after a few seconds",
+    "exports": [
+      {
+        "kind": "function",
+        "name": "useStatusLine",
+        "summary": "A line of status an editor says things on: what it is doing (\"Rendering…\") and what an action had nothing to do on."
+      }
+    ],
+    "files": [
+      "hooks/use-status-line.ts"
+    ],
+    "from": "@/hooks/use-status-line",
+    "kind": "hook",
+    "name": "use-status-line",
+    "registryDependencies": [],
+    "usedBy": [
+      "block-audio-editor"
     ]
   },
   {
