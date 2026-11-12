@@ -6,6 +6,13 @@ export {
   encodeAudio,
 } from "./audio-encode.ts";
 export {
+  CHANNEL_LAYOUTS,
+  type ChannelLayout,
+  LAYOUT_CHANNELS,
+  mixChannels,
+  resampleChannels,
+} from "./channels.ts";
+export {
   downloadMidiFile,
   MIDI_FILE_ACCEPT,
   type MidiFileGrid,

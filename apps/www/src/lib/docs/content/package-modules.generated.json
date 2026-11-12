@@ -2907,6 +2907,31 @@
         "summary": "Encodes channels of samples, from -1 to 1, as a file."
       },
       {
+        "kind": "const",
+        "name": "CHANNEL_LAYOUTS",
+        "summary": "The layouts a sound can be mixed to: one channel, two, or the surround layouts of film."
+      },
+      {
+        "kind": "type",
+        "name": "ChannelLayout",
+        "summary": ""
+      },
+      {
+        "kind": "const",
+        "name": "LAYOUT_CHANNELS",
+        "summary": "How many channels a layout has."
+      },
+      {
+        "kind": "function",
+        "name": "mixChannels",
+        "summary": "The same sound in another layout: a down-mix folds the centre and the surrounds into the sides at -3 dB and drops the low-frequency channel, and scales so the sum stays at full scale at most; an up-mix keeps the sides where they are, spreads them to the surrounds at -6 dB and leaves the centre and the low-frequency channel silent."
+      },
+      {
+        "kind": "function",
+        "name": "resampleChannels",
+        "summary": "Every channel at another sample rate, by a windowed sinc: the same sound, heard as a converter of that rate would give it, over `channels.length` arrays as long as the new rate needs."
+      },
+      {
         "kind": "function",
         "name": "downloadMidiFile",
         "summary": "Saves the notes as a `.mid` file, named `filename`."

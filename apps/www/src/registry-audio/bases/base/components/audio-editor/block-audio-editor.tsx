@@ -9,8 +9,17 @@ import {
   gainToDb,
   measureLoudness,
   normalizePeaks,
+  rmsDb,
 } from "@audio-ui/engine/analysis";
-import { decodeAudioChannels, downloadFile } from "@audio-ui/engine/files";
+import {
+  CHANNEL_LAYOUTS,
+  type ChannelLayout,
+  decodeAudioChannels,
+  downloadFile,
+  LAYOUT_CHANNELS,
+  mixChannels,
+  resampleChannels,
+} from "@audio-ui/engine/files";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
 import {
   createSource,
@@ -258,6 +267,8 @@ interface Sound {
   /** Its loudest sample, in dBFS, as it came in. */
   peak: number;
   peaks: AudioPeaks;
+  /** Its level as a whole, the root mean square of its samples, in dBFS, as it came in. */
+  rms: number;
   sampleRate: number;
   /** Its samples, mixed to one channel, for a zoom closer than the peaks have detail for. */
   samples: ClipSamples;
@@ -274,6 +285,18 @@ function loopClip(recording: string, length: number): Arranged {
     track: TRACK,
     value: { fadeIn: 0, fadeOut: 0, length, offset: 0, start: 0 },
   };
+}
+
+/** The samples of a recording held in memory, or null for one streamed from a file. */
+function channelsOfRecording(
+  recording: RecordingSource
+): readonly Float32Array[] | null {
+  if (recording instanceof AudioBuffer) {
+    return Array.from({ length: recording.numberOfChannels }, (_, channel) =>
+      recording.getChannelData(channel)
+    );
+  }
+  return typeof recording.channels === "number" ? null : recording.channels;
 }
 
 /** The channels mixed to one, as the waveform draws the sound. */
@@ -307,6 +330,7 @@ function soundOf(
     peak,
     sampleRate,
     peaks: normalizePeaks(computePeaks(channels, PEAK_COUNT)),
+    rms: rmsDb(mix),
     samples: { frames: mix.length, read: (from, to) => mix.subarray(from, to) },
   };
 }
@@ -2113,6 +2137,8 @@ const formatRate = (rate: number) =>
   `${(rate / 1000).toFixed(1).replace(TRAILING_ZERO, "")} kHz`;
 
 const CHANNEL_NAMES: Record<number, string | undefined> = {
+  6: "5.1",
+  8: "7.1",
   1: "mono",
   2: "stereo",
 };
@@ -2144,14 +2170,171 @@ function LiveTime({ source }: { source: Source<number> }) {
  * how loud the sound came in, its peak, its rate and its channels. An
  * export's progress shows here too.
  */
+const LEVELS = [
+  {
+    id: "peak",
+    label: "Peak",
+    unit: "dBFS",
+    value: (sound: Sound) => sound.peak,
+  },
+  { id: "rms", label: "RMS", unit: "dBFS", value: (sound: Sound) => sound.rms },
+  {
+    id: "loudness",
+    label: "Loudness",
+    unit: "LUFS",
+    value: (sound: Sound) => sound.lufs,
+  },
+] as const;
+
+type LevelId = (typeof LEVELS)[number]["id"];
+
+/** The rates a sound can be converted to, each with what it is used for. */
+const RATES = [
+  { note: "Telephone, walkie-talkie", rate: 8000 },
+  { note: "Low-quality PCM", rate: 11_025 },
+  { note: "VoIP, wideband speech", rate: 16_000 },
+  { note: "Low-quality MPEG", rate: 22_050 },
+  { note: "Audio CD, MP3", rate: 44_100 },
+  { note: "Video, professional audio", rate: 48_000 },
+  { note: "High-resolution audio", rate: 96_000 },
+] as const;
+
+const LAYOUT_NOTES: Record<ChannelLayout, string> = {
+  "5.1": "Surround with LFE",
+  "7.1": "Surround, sides and back",
+  mono: "One channel, sides summed",
+  stereo: "Left and right",
+};
+
+const READOUT_TRIGGER =
+  "rounded-sm px-1 outline-none transition-colors hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring/50 data-popup-open:bg-muted data-popup-open:text-foreground";
+
+/** A readout that is a button: the measure of the sound shown, and the others one click away. */
+function LevelReadout({ sound }: { sound: Sound }) {
+  const [shown, setShown] = useState<LevelId>("loudness");
+  const current = LEVELS.find((level) => level.id === shown) ?? LEVELS[2];
+  const choose = useCallback((value: string) => setShown(value as LevelId), []);
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label="Level measure"
+        className={READOUT_TRIGGER}
+        title="Level measure"
+      >
+        {formatLevel(current.value(sound), current.unit)}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-52" side="top">
+        <DropdownMenuRadioGroup onValueChange={choose} value={shown}>
+          {LEVELS.map((level) => (
+            <DropdownMenuRadioItem key={level.id} value={level.id}>
+              {level.label}
+              <DropdownMenuShortcut>
+                {formatLevel(level.value(sound), level.unit)}
+              </DropdownMenuShortcut>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** The sample rate of the sound, and the menu that converts it. */
+function RateReadout({
+  onResample,
+  sound,
+}: {
+  onResample: (rate: number) => void;
+  sound: Sound;
+}) {
+  const choose = useCallback(
+    (value: string) => onResample(Number(value)),
+    [onResample]
+  );
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label="Sample rate"
+        className={READOUT_TRIGGER}
+        title="Resample"
+      >
+        {formatRate(sound.sampleRate)}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="max-h-72 min-w-64" side="top">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Resample to</DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuRadioGroup
+          onValueChange={choose}
+          value={String(sound.sampleRate)}
+        >
+          {RATES.map((each) => (
+            <DropdownMenuRadioItem key={each.rate} value={String(each.rate)}>
+              {`${each.rate / 1000} kHz`}
+              <DropdownMenuShortcut>{each.note}</DropdownMenuShortcut>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/** The channels of the sound, and the menu that mixes them to another layout. */
+function ChannelsReadout({
+  onMix,
+  sound,
+}: {
+  onMix: (layout: ChannelLayout) => void;
+  sound: Sound;
+}) {
+  const choose = useCallback(
+    (value: string) => onMix(value as ChannelLayout),
+    [onMix]
+  );
+  const current = CHANNEL_LAYOUTS.find(
+    (layout) => LAYOUT_CHANNELS[layout] === sound.channels
+  );
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        aria-label="Channels"
+        className={READOUT_TRIGGER}
+        title="Mix to"
+      >
+        {CHANNEL_NAMES[sound.channels] ?? `${sound.channels} channels`}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="min-w-64" side="top">
+        <DropdownMenuGroup>
+          <DropdownMenuLabel>Mix to</DropdownMenuLabel>
+        </DropdownMenuGroup>
+        <DropdownMenuRadioGroup onValueChange={choose} value={current ?? ""}>
+          {CHANNEL_LAYOUTS.map((layout) => (
+            <DropdownMenuRadioItem key={layout} value={layout}>
+              {layout}
+              <DropdownMenuShortcut>
+                {LAYOUT_NOTES[layout]}
+              </DropdownMenuShortcut>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 function Readouts({
   duration,
+  onMix,
+  onResample,
   position,
   sound,
   status,
   time,
 }: {
   duration: number;
+  onMix: (layout: ChannelLayout) => void;
+  onResample: (rate: number) => void;
   position: Source<number>;
   sound: Sound | null;
   status: string;
@@ -2169,13 +2352,11 @@ function Readouts({
         <span aria-live="polite">{status}</span>
       </div>
       {sound ? (
-        <div className="flex items-center gap-3">
-          <span>{formatLevel(sound.lufs, "LUFS")}</span>
-          <span>{formatLevel(sound.peak, "dBFS")}</span>
-          <span>{formatRate(sound.sampleRate)}</span>
-          <span>
-            {CHANNEL_NAMES[sound.channels] ?? `${sound.channels} channels`}
-          </span>
+        <div className="flex items-center gap-1">
+          <LevelReadout sound={sound} />
+          <span className="px-1">{formatLevel(sound.peak, "dBFS")}</span>
+          <RateReadout onResample={onResample} sound={sound} />
+          <ChannelsReadout onMix={onMix} sound={sound} />
         </div>
       ) : null}
     </div>
@@ -2750,6 +2931,66 @@ export default function BlockAudioEditor() {
     [play, playing, position]
   );
 
+  // The sound of the track in another rate or another layout: its samples converted, put on the track as a sound of its own, an edit of the history.
+  const convert = useCallback(
+    async (
+      label: string,
+      change: (
+        channels: Float32Array[],
+        sampleRate: number
+      ) => { channels: Float32Array[]; sampleRate: number }
+    ) => {
+      const id = clips[0]?.recording;
+      const current = sound;
+      const from = id ? recordings.get(id) : undefined;
+      if (!(current && from)) {
+        return;
+      }
+      setStatus(label);
+      // One frame to show it: the conversion reads every sample.
+      await new Promise((resolve) => window.setTimeout(resolve, 20));
+      // A recording streamed from a long file is not in memory to convert.
+      const source = channelsOfRecording(from);
+      if (!source) {
+        setStatus("");
+        return;
+      }
+      const next = change([...source], from.sampleRate);
+      stop();
+      place(
+        next,
+        soundOf(next.channels, next.sampleRate, current.name, current.demo),
+        label
+      );
+      setStatus("");
+    },
+    [clips, place, recordings, sound, stop]
+  );
+  const resampleTo = useCallback(
+    (rate: number) => {
+      if (rate === sound?.sampleRate) {
+        return;
+      }
+      convert(`Resample to ${formatRate(rate)}`, (channels, sampleRate) => ({
+        channels: resampleChannels(channels, sampleRate, rate),
+        sampleRate: rate,
+      }));
+    },
+    [convert, sound?.sampleRate]
+  );
+  const mixTo = useCallback(
+    (layout: ChannelLayout) => {
+      if (LAYOUT_CHANNELS[layout] === sound?.channels) {
+        return;
+      }
+      convert(`Mix to ${layout}`, (channels, sampleRate) => ({
+        channels: mixChannels(channels, layout),
+        sampleRate,
+      }));
+    },
+    [convert, sound?.channels]
+  );
+
   const load = useCallback(
     async (file: File) => {
       const ctx = webAudio.getContext();
@@ -3134,6 +3375,8 @@ export default function BlockAudioEditor() {
       />
       <Readouts
         duration={doc.duration}
+        onMix={mixTo}
+        onResample={resampleTo}
         position={recording ? take.clock : position}
         sound={sound}
         status={
