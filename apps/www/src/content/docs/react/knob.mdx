@@ -9,7 +9,28 @@ description: "The headless Knob of @audio-ui/react: its parts, what each renders
 
 <ForStyling only="css">
 
-```css title="knob.module.css"
+<CodeFile title="knob.tsx" open>
+
+```tsx
+import { Knob } from "@audio-ui/react";
+import styles from "./knob.module.css";
+
+<Knob.Root className={styles.root} min={0} max={100} defaultValue={40}>
+  <Knob.Label className={styles.label}>Volume</Knob.Label>
+  <Knob.Control className={styles.control}>
+    <Knob.Track className={styles.track} />
+    <Knob.Indicator className={styles.indicator} />
+    <Knob.Thumb className={styles.thumb} />
+  </Knob.Control>
+  <Knob.Value className={styles.value} />
+</Knob.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="knob.module.css">
+
+```css
 .root {
   position: relative;
   display: inline-flex;
@@ -120,26 +141,15 @@ description: "The headless Knob of @audio-ui/react: its parts, what each renders
 }
 ```
 
-```tsx title="knob.tsx"
-import { Knob } from "@audio-ui/react";
-import styles from "./knob.module.css";
-
-<Knob.Root className={styles.root} min={0} max={100} defaultValue={40}>
-  <Knob.Label className={styles.label}>Volume</Knob.Label>
-  <Knob.Control className={styles.control}>
-    <Knob.Track className={styles.track} />
-    <Knob.Indicator className={styles.indicator} />
-    <Knob.Thumb className={styles.thumb} />
-  </Knob.Control>
-  <Knob.Value className={styles.value} />
-</Knob.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="knob.tsx"
+<CodeFile title="knob.tsx" open>
+
+```tsx
 import { Knob } from "@audio-ui/react";
 
 <Knob.Root className="relative mb-8 inline-flex size-12 outline-none" min={0} max={100} defaultValue={40}>
@@ -153,9 +163,9 @@ import { Knob } from "@audio-ui/react";
 </Knob.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

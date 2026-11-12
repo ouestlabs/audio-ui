@@ -9,7 +9,32 @@ description: "The headless Waveform of @audio-ui/react: its parts, what each ren
 
 <ForStyling only="css">
 
-```css title="waveform.module.css"
+<CodeFile title="waveform.tsx" open>
+
+```tsx
+import { Waveform } from "@audio-ui/react";
+import styles from "./waveform.module.css";
+
+// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+const peaks: number[] = [];
+
+<Waveform.Root className={styles.root} duration={96} peaks={peaks} defaultValue={30}>
+  <Waveform.Control className={styles.control} aria-label="Seek">
+    <Waveform.Canvas className={styles.canvas} />
+    <Waveform.Region className={styles.region} defaultValue={[54, 72]}>
+      <Waveform.RegionHandle className={styles.regionHandle} edge="start" aria-label="Loop start" />
+      <Waveform.RegionHandle className={styles.regionHandle} edge="end" aria-label="Loop end" />
+    </Waveform.Region>
+    <Waveform.Playhead className={styles.playhead} />
+  </Waveform.Control>
+</Waveform.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="waveform.module.css">
+
+```css
 .root {
   display: block;
   width: 100%;
@@ -77,30 +102,15 @@ description: "The headless Waveform of @audio-ui/react: its parts, what each ren
 }
 ```
 
-```tsx title="waveform.tsx"
-import { Waveform } from "@audio-ui/react";
-import styles from "./waveform.module.css";
-
-// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
-const peaks: number[] = [];
-
-<Waveform.Root className={styles.root} duration={96} peaks={peaks} defaultValue={30}>
-  <Waveform.Control className={styles.control} aria-label="Seek">
-    <Waveform.Canvas className={styles.canvas} />
-    <Waveform.Region className={styles.region} defaultValue={[54, 72]}>
-      <Waveform.RegionHandle className={styles.regionHandle} edge="start" aria-label="Loop start" />
-      <Waveform.RegionHandle className={styles.regionHandle} edge="end" aria-label="Loop end" />
-    </Waveform.Region>
-    <Waveform.Playhead className={styles.playhead} />
-  </Waveform.Control>
-</Waveform.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="waveform.tsx"
+<CodeFile title="waveform.tsx" open>
+
+```tsx
 import { Waveform } from "@audio-ui/react";
 
 // Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
@@ -118,9 +128,9 @@ const peaks: number[] = [];
 </Waveform.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

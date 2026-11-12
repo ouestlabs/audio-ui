@@ -35,24 +35,30 @@ export function usageBlock(page: string): string | null {
       return [
         `<ForStyling only="${id}">`,
         "",
-        ...(snippets?.css
-          ? [
-              `\`\`\`css title="${page}.module.css"`,
-              withFallbacks(snippets.css),
-              "```",
-              "",
-            ]
-          : []),
-        `\`\`\`tsx title="${page}.tsx"`,
+        `<CodeFile title="${page}.tsx" open>`,
+        "",
+        "```tsx",
         snippets?.tsx ?? "",
         "```",
         "",
+        "</CodeFile>",
+        "",
+        ...(snippets?.css
+          ? [
+              `<CodeFile title="${page}.module.css">`,
+              "",
+              "```css",
+              withFallbacks(snippets.css),
+              "```",
+              "",
+              "</CodeFile>",
+              "",
+            ]
+          : []),
         "</ForStyling>",
         "",
       ];
     }),
-    "The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.",
-    "",
     END,
   ].join("\n");
 }

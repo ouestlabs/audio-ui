@@ -9,7 +9,51 @@ description: "The headless PianoRoll of @audio-ui/react: its parts, what each re
 
 <ForStyling only="css">
 
-```css title="piano-roll.module.css"
+<CodeFile title="piano-roll.tsx" open>
+
+```tsx
+import { PianoRoll, Timeline } from "@audio-ui/react";
+import styles from "./piano-roll.module.css";
+
+const notes = [
+  { id: "a", pitch: 60, start: 0, length: 1, velocity: 0.9 },
+  { id: "b", pitch: 64, start: 1, length: 1, velocity: 0.6 },
+  { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
+];
+
+<Timeline.Root className={styles.timelineRoot} duration={8} snapStep={0.5}>
+  <PianoRoll.Root className={styles.root} minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+    <PianoRoll.Keys className={styles.keys}>
+      <PianoRoll.Rows>
+        {(pitch) => <PianoRoll.Key className={styles.key} pitch={pitch} />}
+      </PianoRoll.Rows>
+    </PianoRoll.Keys>
+    <Timeline.Viewport className={styles.timelineViewport}>
+      <PianoRoll.Grid className={styles.grid} aria-label="Notes">
+        <PianoRoll.Rows>
+          {(pitch) => <PianoRoll.Row className={styles.row} pitch={pitch} />}
+        </PianoRoll.Rows>
+        <PianoRoll.Notes>
+          {(note) => <PianoRoll.Note className={styles.note} key={note.id} note={note} />}
+        </PianoRoll.Notes>
+        <PianoRoll.Marquee className={styles.marquee} />
+        <Timeline.Playhead className={styles.timelinePlayhead} />
+      </PianoRoll.Grid>
+    </Timeline.Viewport>
+    <PianoRoll.VelocityLane className={styles.velocityLane} aria-label="Velocity">
+      <PianoRoll.Notes>
+        {(note) => <PianoRoll.Velocity className={styles.velocity} key={note.id} note={note} />}
+      </PianoRoll.Notes>
+    </PianoRoll.VelocityLane>
+  </PianoRoll.Root>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="piano-roll.module.css">
+
+```css
 .timelineRoot {
   display: block;
   width: 100%;
@@ -114,49 +158,15 @@ description: "The headless PianoRoll of @audio-ui/react: its parts, what each re
 }
 ```
 
-```tsx title="piano-roll.tsx"
-import { PianoRoll, Timeline } from "@audio-ui/react";
-import styles from "./piano-roll.module.css";
-
-const notes = [
-  { id: "a", pitch: 60, start: 0, length: 1, velocity: 0.9 },
-  { id: "b", pitch: 64, start: 1, length: 1, velocity: 0.6 },
-  { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
-];
-
-<Timeline.Root className={styles.timelineRoot} duration={8} snapStep={0.5}>
-  <PianoRoll.Root className={styles.root} minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
-    <PianoRoll.Keys className={styles.keys}>
-      <PianoRoll.Rows>
-        {(pitch) => <PianoRoll.Key className={styles.key} pitch={pitch} />}
-      </PianoRoll.Rows>
-    </PianoRoll.Keys>
-    <Timeline.Viewport className={styles.timelineViewport}>
-      <PianoRoll.Grid className={styles.grid} aria-label="Notes">
-        <PianoRoll.Rows>
-          {(pitch) => <PianoRoll.Row className={styles.row} pitch={pitch} />}
-        </PianoRoll.Rows>
-        <PianoRoll.Notes>
-          {(note) => <PianoRoll.Note className={styles.note} key={note.id} note={note} />}
-        </PianoRoll.Notes>
-        <PianoRoll.Marquee className={styles.marquee} />
-        <Timeline.Playhead className={styles.timelinePlayhead} />
-      </PianoRoll.Grid>
-    </Timeline.Viewport>
-    <PianoRoll.VelocityLane className={styles.velocityLane} aria-label="Velocity">
-      <PianoRoll.Notes>
-        {(note) => <PianoRoll.Velocity className={styles.velocity} key={note.id} note={note} />}
-      </PianoRoll.Notes>
-    </PianoRoll.VelocityLane>
-  </PianoRoll.Root>
-</Timeline.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="piano-roll.tsx"
+<CodeFile title="piano-roll.tsx" open>
+
+```tsx
 import { PianoRoll, Timeline } from "@audio-ui/react";
 
 const notes = [
@@ -193,9 +203,9 @@ const notes = [
 </Timeline.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

@@ -9,7 +9,44 @@ description: "The headless Timeline of @audio-ui/react: its parts, what each ren
 
 <ForStyling only="css">
 
-```css title="timeline.module.css"
+<CodeFile title="timeline.tsx" open>
+
+```tsx
+import { Timeline } from "@audio-ui/react";
+import styles from "./timeline.module.css";
+
+const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
+
+<Timeline.Root className={styles.root} duration={32} snapStep={1}>
+  <Timeline.Viewport className={styles.viewport}>
+    <Timeline.Ruler className={styles.ruler} aria-label="Position">
+      <Timeline.Mark className={styles.mark} value={0}>1</Timeline.Mark>
+      <Timeline.Mark className={styles.mark} value={8}>3</Timeline.Mark>
+      <Timeline.Range className={styles.range} aria-label="Loop" defaultValue={[8, 16]} />
+    </Timeline.Ruler>
+    <Timeline.Track className={styles.track}>
+      <Timeline.TrackHeader className={styles.trackHeader}>Drums</Timeline.TrackHeader>
+      <Timeline.Lane className={styles.lane}>
+        <Timeline.Clip className={styles.clip} aria-label="Beat" defaultValue={beat}>
+          <Timeline.ClipHeader className={styles.clipHeader}>Beat</Timeline.ClipHeader>
+          <Timeline.ClipHandle className={styles.clipHandle} edge="start" aria-label="Trim start" />
+          <Timeline.ClipHandle className={styles.clipHandle} edge="end" aria-label="Trim end" />
+        </Timeline.Clip>
+        <Timeline.Playhead className={styles.playhead} />
+      </Timeline.Lane>
+    </Timeline.Track>
+  </Timeline.Viewport>
+  <Timeline.Navigator className={styles.navigator}>
+    <Timeline.NavigatorWindow className={styles.navigatorWindow} aria-label="View" />
+  </Timeline.Navigator>
+</Timeline.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="timeline.module.css">
+
+```css
 .root {
   display: block;
   width: 100%;
@@ -127,42 +164,15 @@ description: "The headless Timeline of @audio-ui/react: its parts, what each ren
 }
 ```
 
-```tsx title="timeline.tsx"
-import { Timeline } from "@audio-ui/react";
-import styles from "./timeline.module.css";
-
-const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
-
-<Timeline.Root className={styles.root} duration={32} snapStep={1}>
-  <Timeline.Viewport className={styles.viewport}>
-    <Timeline.Ruler className={styles.ruler} aria-label="Position">
-      <Timeline.Mark className={styles.mark} value={0}>1</Timeline.Mark>
-      <Timeline.Mark className={styles.mark} value={8}>3</Timeline.Mark>
-      <Timeline.Range className={styles.range} aria-label="Loop" defaultValue={[8, 16]} />
-    </Timeline.Ruler>
-    <Timeline.Track className={styles.track}>
-      <Timeline.TrackHeader className={styles.trackHeader}>Drums</Timeline.TrackHeader>
-      <Timeline.Lane className={styles.lane}>
-        <Timeline.Clip className={styles.clip} aria-label="Beat" defaultValue={beat}>
-          <Timeline.ClipHeader className={styles.clipHeader}>Beat</Timeline.ClipHeader>
-          <Timeline.ClipHandle className={styles.clipHandle} edge="start" aria-label="Trim start" />
-          <Timeline.ClipHandle className={styles.clipHandle} edge="end" aria-label="Trim end" />
-        </Timeline.Clip>
-        <Timeline.Playhead className={styles.playhead} />
-      </Timeline.Lane>
-    </Timeline.Track>
-  </Timeline.Viewport>
-  <Timeline.Navigator className={styles.navigator}>
-    <Timeline.NavigatorWindow className={styles.navigatorWindow} aria-label="View" />
-  </Timeline.Navigator>
-</Timeline.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="timeline.tsx"
+<CodeFile title="timeline.tsx" open>
+
+```tsx
 import { Timeline } from "@audio-ui/react";
 
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
@@ -192,9 +202,9 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 </Timeline.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

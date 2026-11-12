@@ -9,7 +9,39 @@ description: "The headless Envelope of @audio-ui/react: its parts, what each ren
 
 <ForStyling only="css">
 
-```css title="envelope.module.css"
+<CodeFile title="envelope.tsx" open>
+
+```tsx
+import { Envelope } from "@audio-ui/react";
+import styles from "./envelope.module.css";
+
+const points = [
+  { x: 0, y: 0 },
+  { x: 0.12, y: 1 },
+  { x: 0.35, y: 0.6, curve: 0.4 },
+  { x: 0.75, y: 0.6 },
+  { x: 1, y: 0 },
+];
+
+<Envelope.Root className={styles.root} aria-label="Amp envelope" defaultValue={points}>
+  <Envelope.Graph className={styles.graph}>
+    <Envelope.Fill className={styles.fill} />
+    <Envelope.Line className={styles.line} />
+  </Envelope.Graph>
+  <Envelope.Segments>
+    {(_, index) => <Envelope.Segment className={styles.segment} index={index} />}
+  </Envelope.Segments>
+  <Envelope.Points>
+    {(_, index) => <Envelope.Point className={styles.point} index={index} />}
+  </Envelope.Points>
+</Envelope.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="envelope.module.css">
+
+```css
 .root {
   display: block;
   width: 100%;
@@ -72,37 +104,15 @@ description: "The headless Envelope of @audio-ui/react: its parts, what each ren
 }
 ```
 
-```tsx title="envelope.tsx"
-import { Envelope } from "@audio-ui/react";
-import styles from "./envelope.module.css";
-
-const points = [
-  { x: 0, y: 0 },
-  { x: 0.12, y: 1 },
-  { x: 0.35, y: 0.6, curve: 0.4 },
-  { x: 0.75, y: 0.6 },
-  { x: 1, y: 0 },
-];
-
-<Envelope.Root className={styles.root} aria-label="Amp envelope" defaultValue={points}>
-  <Envelope.Graph className={styles.graph}>
-    <Envelope.Fill className={styles.fill} />
-    <Envelope.Line className={styles.line} />
-  </Envelope.Graph>
-  <Envelope.Segments>
-    {(_, index) => <Envelope.Segment className={styles.segment} index={index} />}
-  </Envelope.Segments>
-  <Envelope.Points>
-    {(_, index) => <Envelope.Point className={styles.point} index={index} />}
-  </Envelope.Points>
-</Envelope.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="envelope.tsx"
+<CodeFile title="envelope.tsx" open>
+
+```tsx
 import { Envelope } from "@audio-ui/react";
 
 const points = [
@@ -127,9 +137,9 @@ const points = [
 </Envelope.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

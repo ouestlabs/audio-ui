@@ -9,7 +9,33 @@ description: "The headless Plot of @audio-ui/react: its parts, what each renders
 
 <ForStyling only="css">
 
-```css title="plot.module.css"
+<CodeFile title="plot.tsx" open>
+
+```tsx
+import { Plot } from "@audio-ui/react";
+import styles from "./plot.module.css";
+
+// A peaking band's response in dB at each frequency, around its center.
+const bell = (hz: number, { x, y }: { x: number; y: number }) =>
+  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
+
+// In the component: the curve follows the handle.
+const [band, setBand] = useState({ x: 800, y: 6 });
+
+<Plot.Root className={styles.root} minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+  <Plot.Grid className={styles.grid} x={{}} y={{}} />
+  <Plot.Graph>
+    <Plot.Curve className={styles.curve} fn={(hz) => bell(hz, band)} fillTo={0} />
+  </Plot.Graph>
+  <Plot.Handle className={styles.handle} aria-label="Band" value={band} onValueChange={setBand} />
+</Plot.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="plot.module.css">
+
+```css
 .root {
   display: block;
   width: 100%;
@@ -55,31 +81,15 @@ description: "The headless Plot of @audio-ui/react: its parts, what each renders
 }
 ```
 
-```tsx title="plot.tsx"
-import { Plot } from "@audio-ui/react";
-import styles from "./plot.module.css";
-
-// A peaking band's response in dB at each frequency, around its center.
-const bell = (hz: number, { x, y }: { x: number; y: number }) =>
-  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
-
-// In the component: the curve follows the handle.
-const [band, setBand] = useState({ x: 800, y: 6 });
-
-<Plot.Root className={styles.root} minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
-  <Plot.Grid className={styles.grid} x={{}} y={{}} />
-  <Plot.Graph>
-    <Plot.Curve className={styles.curve} fn={(hz) => bell(hz, band)} fillTo={0} />
-  </Plot.Graph>
-  <Plot.Handle className={styles.handle} aria-label="Band" value={band} onValueChange={setBand} />
-</Plot.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="plot.tsx"
+<CodeFile title="plot.tsx" open>
+
+```tsx
 import { Plot } from "@audio-ui/react";
 
 // A peaking band's response in dB at each frequency, around its center.
@@ -98,9 +108,9 @@ const [band, setBand] = useState({ x: 800, y: 6 });
 </Plot.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

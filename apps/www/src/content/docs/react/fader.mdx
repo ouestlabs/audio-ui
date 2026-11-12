@@ -9,7 +9,27 @@ description: "The headless Fader of @audio-ui/react: its parts, what each render
 
 <ForStyling only="css">
 
-```css title="fader.module.css"
+<CodeFile title="fader.tsx" open>
+
+```tsx
+import { Fader } from "@audio-ui/react";
+import styles from "./fader.module.css";
+
+<Fader.Root className={styles.root} defaultValue={-6}>
+  <Fader.Control className={styles.control}>
+    <Fader.Track className={styles.track}>
+      <Fader.Indicator className={styles.indicator} />
+    </Fader.Track>
+    <Fader.Thumb className={styles.thumb} aria-label="Volume" />
+  </Fader.Control>
+</Fader.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="fader.module.css">
+
+```css
 .root {
   position: relative;
   height: calc(var(--spacing, 0.25rem) * 40);
@@ -74,25 +94,15 @@ description: "The headless Fader of @audio-ui/react: its parts, what each render
 }
 ```
 
-```tsx title="fader.tsx"
-import { Fader } from "@audio-ui/react";
-import styles from "./fader.module.css";
-
-<Fader.Root className={styles.root} defaultValue={-6}>
-  <Fader.Control className={styles.control}>
-    <Fader.Track className={styles.track}>
-      <Fader.Indicator className={styles.indicator} />
-    </Fader.Track>
-    <Fader.Thumb className={styles.thumb} aria-label="Volume" />
-  </Fader.Control>
-</Fader.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="fader.tsx"
+<CodeFile title="fader.tsx" open>
+
+```tsx
 import { Fader } from "@audio-ui/react";
 
 <Fader.Root className="relative h-40" defaultValue={-6}>
@@ -105,9 +115,9 @@ import { Fader } from "@audio-ui/react";
 </Fader.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

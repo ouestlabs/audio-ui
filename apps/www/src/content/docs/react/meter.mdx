@@ -9,7 +9,29 @@ description: "The headless Meter of @audio-ui/react: its parts, what each render
 
 <ForStyling only="css">
 
-```css title="meter.module.css"
+<CodeFile title="meter.tsx" open>
+
+```tsx
+import { Meter } from "@audio-ui/react";
+import styles from "./meter.module.css";
+
+<Meter.Root className={styles.root} min={-60} max={6} value={[-18, -10]}>
+  <Meter.Channels>
+    {(index) => (
+      <Meter.Channel className={styles.channel} index={index} aria-label={index === 0 ? "Left" : "Right"}>
+        <Meter.Indicator className={styles.indicator} />
+        <Meter.Peak className={styles.peak} />
+      </Meter.Channel>
+    )}
+  </Meter.Channels>
+</Meter.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="meter.module.css">
+
+```css
 .root {
   display: flex;
   gap: calc(var(--spacing, 0.25rem) * 1.5 * var(--density, 1));
@@ -43,27 +65,15 @@ description: "The headless Meter of @audio-ui/react: its parts, what each render
 }
 ```
 
-```tsx title="meter.tsx"
-import { Meter } from "@audio-ui/react";
-import styles from "./meter.module.css";
-
-<Meter.Root className={styles.root} min={-60} max={6} value={[-18, -10]}>
-  <Meter.Channels>
-    {(index) => (
-      <Meter.Channel className={styles.channel} index={index} aria-label={index === 0 ? "Left" : "Right"}>
-        <Meter.Indicator className={styles.indicator} />
-        <Meter.Peak className={styles.peak} />
-      </Meter.Channel>
-    )}
-  </Meter.Channels>
-</Meter.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="meter.tsx"
+<CodeFile title="meter.tsx" open>
+
+```tsx
 import { Meter } from "@audio-ui/react";
 
 <Meter.Root className="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min={-60} max={6} value={[-18, -10]}>
@@ -78,9 +88,9 @@ import { Meter } from "@audio-ui/react";
 </Meter.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

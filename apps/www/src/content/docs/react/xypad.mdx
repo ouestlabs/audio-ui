@@ -9,7 +9,25 @@ description: "The headless XYPad of @audio-ui/react: its parts, what each render
 
 <ForStyling only="css">
 
-```css title="xypad.module.css"
+<CodeFile title="xypad.tsx" open>
+
+```tsx
+import { XYPad } from "@audio-ui/react";
+import styles from "./xypad.module.css";
+
+<XYPad.Root className={styles.root} defaultValue={{ x: 30, y: 70 }}>
+  <XYPad.Control className={styles.control}>
+    <XYPad.Thumb className={styles.thumb} aria-label="Filter" />
+  </XYPad.Control>
+  <XYPad.Value className={styles.value} />
+</XYPad.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="xypad.module.css">
+
+```css
 .root {
   display: block;
   width: calc(var(--spacing, 0.25rem) * 48);
@@ -70,23 +88,15 @@ description: "The headless XYPad of @audio-ui/react: its parts, what each render
 }
 ```
 
-```tsx title="xypad.tsx"
-import { XYPad } from "@audio-ui/react";
-import styles from "./xypad.module.css";
-
-<XYPad.Root className={styles.root} defaultValue={{ x: 30, y: 70 }}>
-  <XYPad.Control className={styles.control}>
-    <XYPad.Thumb className={styles.thumb} aria-label="Filter" />
-  </XYPad.Control>
-  <XYPad.Value className={styles.value} />
-</XYPad.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="xypad.tsx"
+<CodeFile title="xypad.tsx" open>
+
+```tsx
 import { XYPad } from "@audio-ui/react";
 
 <XYPad.Root className="block w-48" defaultValue={{ x: 30, y: 70 }}>
@@ -97,9 +107,9 @@ import { XYPad } from "@audio-ui/react";
 </XYPad.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

@@ -562,8 +562,6 @@ export function usageBlock(page: string): string | null {
     "",
     "</FrameworkTabs>",
     "",
-    "The styles read the theme's CSS variables, which [Styling](/docs/elements#styling) sets.",
-    "",
     END,
   ].join("\n");
 }

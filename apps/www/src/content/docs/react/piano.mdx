@@ -9,7 +9,24 @@ description: "The headless Piano of @audio-ui/react: its parts, what each render
 
 <ForStyling only="css">
 
-```css title="piano.module.css"
+<CodeFile title="piano.tsx" open>
+
+```tsx
+import { Piano } from "@audio-ui/react";
+import styles from "./piano.module.css";
+
+<Piano.Root className={styles.root} aria-label="Keys" minPitch={48} maxPitch={71}>
+  <Piano.Keys>
+    {(pitch) => <Piano.Key className={styles.key} pitch={pitch} />}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="piano.module.css">
+
+```css
 .root {
   position: relative;
   display: block;
@@ -43,22 +60,15 @@ description: "The headless Piano of @audio-ui/react: its parts, what each render
 }
 ```
 
-```tsx title="piano.tsx"
-import { Piano } from "@audio-ui/react";
-import styles from "./piano.module.css";
-
-<Piano.Root className={styles.root} aria-label="Keys" minPitch={48} maxPitch={71}>
-  <Piano.Keys>
-    {(pitch) => <Piano.Key className={styles.key} pitch={pitch} />}
-  </Piano.Keys>
-</Piano.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="piano.tsx"
+<CodeFile title="piano.tsx" open>
+
+```tsx
 import { Piano } from "@audio-ui/react";
 
 <Piano.Root className="relative block h-28 w-full max-w-lg" aria-label="Keys" minPitch={48} maxPitch={71}>
@@ -68,9 +78,9 @@ import { Piano } from "@audio-ui/react";
 </Piano.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

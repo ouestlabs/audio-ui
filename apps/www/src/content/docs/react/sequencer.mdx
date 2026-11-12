@@ -9,7 +9,35 @@ description: "The headless Sequencer of @audio-ui/react: its parts, what each re
 
 <ForStyling only="css">
 
-```css title="sequencer.module.css"
+<CodeFile title="sequencer.tsx" open>
+
+```tsx
+import { Sequencer } from "@audio-ui/react";
+import styles from "./sequencer.module.css";
+
+const pattern = [
+  [true, false, false, false, true, false, false, false],
+  [false, false, true, false, false, false, true, false],
+];
+
+<Sequencer.Root className={styles.root} aria-label="Pattern" defaultValue={pattern}>
+  <Sequencer.Rows>
+    {(row) => (
+      <Sequencer.Row className={styles.row} index={row}>
+        <Sequencer.Cells>
+          {(step) => <Sequencer.Cell className={styles.cell} step={step} />}
+        </Sequencer.Cells>
+      </Sequencer.Row>
+    )}
+  </Sequencer.Rows>
+</Sequencer.Root>
+```
+
+</CodeFile>
+
+<CodeFile title="sequencer.module.css">
+
+```css
 .root {
   display: grid;
   gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
@@ -40,33 +68,15 @@ description: "The headless Sequencer of @audio-ui/react: its parts, what each re
 }
 ```
 
-```tsx title="sequencer.tsx"
-import { Sequencer } from "@audio-ui/react";
-import styles from "./sequencer.module.css";
-
-const pattern = [
-  [true, false, false, false, true, false, false, false],
-  [false, false, true, false, false, false, true, false],
-];
-
-<Sequencer.Root className={styles.root} aria-label="Pattern" defaultValue={pattern}>
-  <Sequencer.Rows>
-    {(row) => (
-      <Sequencer.Row className={styles.row} index={row}>
-        <Sequencer.Cells>
-          {(step) => <Sequencer.Cell className={styles.cell} step={step} />}
-        </Sequencer.Cells>
-      </Sequencer.Row>
-    )}
-  </Sequencer.Rows>
-</Sequencer.Root>
-```
+</CodeFile>
 
 </ForStyling>
 
 <ForStyling only="tailwind">
 
-```tsx title="sequencer.tsx"
+<CodeFile title="sequencer.tsx" open>
+
+```tsx
 import { Sequencer } from "@audio-ui/react";
 
 const pattern = [
@@ -87,9 +97,9 @@ const pattern = [
 </Sequencer.Root>
 ```
 
-</ForStyling>
+</CodeFile>
 
-The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+</ForStyling>
 
 {/* usage:end */}
 

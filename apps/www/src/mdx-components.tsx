@@ -8,6 +8,7 @@ import { CodeTabs } from "@/components/code/block/code-tabs";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { DocsComponentSource } from "@/components/code/source/docs-component-source";
 import { Callout } from "@/components/docs/mdx/callout";
+import { CodeFile } from "@/components/docs/mdx/code-file";
 import { DemoSounds } from "@/components/docs/mdx/demo-sounds";
 import { DeviceUsage } from "@/components/docs/mdx/device-usage";
 import { ElementsPreview } from "@/components/docs/mdx/elements-preview";
@@ -63,6 +64,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     DemoSounds,
     ElementsPreview,
     ForFrameworks,
+    CodeFile,
     ForStyling,
     ReactPreview,
     FrameworkTabs,
