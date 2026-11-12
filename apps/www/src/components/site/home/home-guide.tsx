@@ -92,12 +92,12 @@ export function HomeGuide({
       <JsonLd data={buildFaqJsonLd(FAQ)} />
       <section aria-labelledby="home-components">
         <h2 className={H2} id="home-components">
-          Components, by what you're building
+          What you can build
         </h2>
         <p className={`${LEAD} mt-3`}>
-          The controls and displays of any audio interface, the surfaces of a
-          DAW, and effects and instruments to plug in. Every page has a live
-          preview, the install command, the API reference and the source.
+          Elements for any audio interface, the Workstation for a DAW, and
+          Devices to plug in. Each page has a live preview, the install command,
+          the API reference and the source.
         </p>
         {/* From one edge of the panel to the other, out of the section's own margins. */}
         <div className="-mx-4 mt-8 sm:-mx-6">
