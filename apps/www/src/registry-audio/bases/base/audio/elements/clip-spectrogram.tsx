@@ -7,6 +7,7 @@ import {
   useLayoutEffect,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -16,6 +17,13 @@ import {
 
 /** The frequency axes a spectrogram is spaced on: octaves, mel, equal space per auditory filter, or hertz. */
 export type SpectrogramScale = Scale;
+
+/** A frequency held where the clips and the axis both reach it: the clips say it, the axis reads it. */
+export interface PointerHertz {
+  getSnapshot: () => number | null;
+  set: (hertz: number | null) => void;
+  subscribe: (listener: () => void) => () => void;
+}
 
 /** The pixels drawn past each edge of the view, so a scroll shows them at once. */
 const OVERSCAN = 256;
@@ -151,6 +159,7 @@ function ClipSpectrogram({
   className,
   clip,
   gain = 1,
+  pointerHertz,
   sampleRate,
   samples,
   scale = "log",
@@ -159,6 +168,8 @@ function ClipSpectrogram({
   clip: ClipReading;
   /** A gain factor on the picture, as a clip's level plays. @default 1 */
   gain?: number;
+  /** Told the frequency under the pointer, in hertz, or null off the picture: for `SpectrogramAxis` to mark. */
+  pointerHertz?: Pick<PointerHertz, "set">;
   /** The recording's sample rate, in hertz. */
   sampleRate: number;
   /** The recording's samples, mixed to one. */
@@ -185,6 +196,7 @@ function ClipSpectrogram({
           ? (held.renderer?.pick(x, y) ?? null)
           : null;
       const own = body.getBoundingClientRect();
+      pointerHertz?.set(cell ? (cell.low + cell.high) / 2 : null);
       setReading(
         cell
           ? {
@@ -197,7 +209,10 @@ function ClipSpectrogram({
           : null
       );
     };
-    const left = () => setReading(null);
+    const left = () => {
+      pointerHertz?.set(null);
+      setReading(null);
+    };
     view?.addEventListener("pointermove", moved, { passive: true });
     view?.addEventListener("pointerleave", left);
     let frame = 0;
@@ -245,7 +260,7 @@ function ClipSpectrogram({
       view?.removeEventListener("pointerleave", left);
       held.renderer?.destroy();
     };
-  }, [clip, gain, sampleRate, samples, scale]);
+  }, [clip, gain, pointerHertz, sampleRate, samples, scale]);
   return (
     <>
       <canvas
@@ -282,51 +297,106 @@ interface Reading {
   width: number;
 }
 
-/** A cell as text: the middle of its frequencies and its level, or the floor it is under. */
-const readingOf = (cell: Cell, floor: number) =>
-  `${formatFrequency((cell.low + cell.high) / 2)} · ${
-    cell.level < floor
-      ? `under ${formatLevel(floor, "dB", { decimals: 0, sign: false })}`
-      : formatLevel(cell.level, "dB", { sign: false })
-  }`;
+/** A cell as text: the middle of its frequencies and its level, the frequency alone under the floor, where there is nothing to read. */
+const readingOf = (cell: Cell, floor: number) => {
+  const hertz = formatFrequency((cell.low + cell.high) / 2);
+  return cell.level < floor
+    ? hertz
+    : `${hertz} · ${formatLevel(cell.level, "dB", { sign: false })}`;
+};
 
-/** The labels of the frequency axis, in hertz: those that fit under the Nyquist limit are shown. */
-const AXIS_TICKS = [
-  50, 100, 200, 500, 1000, 2000, 5000, 10_000, 15_000, 20_000,
-] as const;
+/**
+ * The frequencies each axis labels, roundest first, a decade apart and then
+ * between as room allows: a small lane keeps 20k, 2k, 200 and 20. Ordered on
+ * each axis by what it spaces rows by, so the labels fall where the ear
+ * looks for them.
+ */
+const AXIS_LABELS: Record<SpectrogramScale, readonly number[]> = {
+  erb: [20_000, 2000, 200, 10_000, 5000, 1000, 500, 100],
+  lin: [20_000, 10_000, 5000, 15_000],
+  log: [20_000, 2000, 200, 20, 10_000, 1000, 100, 5000, 500, 50],
+  mel: [20_000, 2000, 200, 10_000, 5000, 1000, 500, 3000],
+};
 
-/** The shortest gap between two labels, in CSS px. */
-const LABEL_GAP = 14;
+const NO_SUBSCRIPTION = () => () => undefined;
+const NO_POINTER = () => null;
 
-/** The labels that fit: from the top down, each at least `LABEL_GAP` px under the one before it. */
-function spacedTicks(axis: Axis, nyquist: number, height: number) {
-  const kept: { at: number; hertz: number }[] = [];
-  let last = Number.POSITIVE_INFINITY;
-  for (const hertz of [...AXIS_TICKS].reverse()) {
-    if (hertz <= axis.low || hertz >= nyquist) {
+/** The room a label takes in the lane, in CSS px: its text and a gap. */
+const LABEL_ROOM = 15;
+
+/** A frequency the pointer reads, as the axis writes it: three significant digits, five characters at most (12.3k, 523, 52.3). */
+const readHertz = (hertz: number) =>
+  hertz >= 1000
+    ? `${+(hertz / 1000).toPrecision(3)}k`
+    : `${+hertz.toPrecision(3)}`;
+
+/** A frequency as the axis writes it, no unit: 500, 1.25k, 20k. */
+const hertzLabel = (hertz: number) =>
+  hertz >= 1000
+    ? `${+(hertz / 1000).toFixed(3)}k`
+    : `${+hertz.toFixed(hertz < 100 ? 1 : 0)}`;
+
+/**
+ * The labels that fit, roundest first, each `LABEL_ROOM` px from the ones
+ * kept and inside the lane, as `[hertz, px from the foot]`.
+ */
+function labelled(
+  axis: Axis,
+  scale: SpectrogramScale,
+  nyquist: number,
+  height: number
+): [number, number][] {
+  const kept: [number, number][] = [];
+  for (const hertz of AXIS_LABELS[scale]) {
+    if (hertz < axis.low || hertz > nyquist) {
       continue;
     }
-    const at = axis.at(hertz, axis.low, nyquist);
-    // Not at the very top, where the ruler's own labels are.
-    if (at * height <= height - LABEL_GAP && last - at * height >= LABEL_GAP) {
-      kept.push({ at, hertz });
-      last = at * height;
+    const px = axis.at(hertz, axis.low, nyquist) * height;
+    // The tick stays where the frequency is; its text is kept inside the lane.
+    const text = Math.min(height - 6, Math.max(6, px));
+    if (kept.every(([, other]) => Math.abs(other - text) >= LABEL_ROOM)) {
+      kept.push([hertz, text]);
     }
   }
   return kept;
 }
 
+/** The ticks between the labels, unlabelled: 1-2-5 a decade apart on a log-spaced axis, every 2.5k on a linear one. */
+function minorHertz(scale: SpectrogramScale, nyquist: number): number[] {
+  if (scale === "lin") {
+    return Array.from(
+      { length: Math.floor(nyquist / 2500) },
+      (_, index) => (index + 1) * 2500
+    );
+  }
+  const out: number[] = [];
+  for (let decade = 10; decade < nyquist; decade *= 10) {
+    for (const multiple of [1, 2, 3, 4, 5, 6, 7, 8, 9]) {
+      const hertz = multiple * decade;
+      if (hertz < nyquist) {
+        out.push(hertz);
+      }
+    }
+  }
+  return out;
+}
+
 /**
- * The frequencies a spectrogram's rows stand for, as labels down the left
- * edge of the lane: each at the row its frequency sits on, by the axis the
- * picture is spaced on. It holds still as the lane scrolls. Put it in the
- * lane's box with the clips, given the same `scale` and the recording's
- * `sampleRate`.
+ * The frequencies a spectrogram's rows stand for, as an axis down the left
+ * edge of the lane, as audio.js draws it: labels roundest first (20k, 2k,
+ * 200, then between as room allows), each with its tick at the row its
+ * frequency sits on by the axis the picture is spaced on, and shorter ticks
+ * between. `pointer`, a frequency, is marked on it as the pointer reads it.
+ * It holds still as the lane scrolls. Put it in the lane's box with the
+ * clips, given the same `scale` and the recording's `sampleRate`.
  */
 function SpectrogramAxis({
+  pointer,
   sampleRate,
   scale,
 }: {
+  /** The frequency under the pointer, in hertz, to mark on the axis. */
+  pointer?: PointerHertz;
   sampleRate: number;
   scale: SpectrogramScale;
 }) {
@@ -359,8 +429,29 @@ function SpectrogramAxis({
     resized.observe(lane);
     return () => resized.disconnect();
   }, []);
+  const heard = useSyncExternalStore(
+    pointer?.subscribe ?? NO_SUBSCRIPTION,
+    pointer?.getSnapshot ?? NO_POINTER,
+    NO_POINTER
+  );
   const axis = axes?.[scale];
-  const ticks = axis ? spacedTicks(axis, sampleRate / 2, height) : [];
+  const nyquist = sampleRate / 2;
+  const at = (hertz: number) =>
+    axis ? axis.at(hertz, axis.low, nyquist) * height : 0;
+  const marked = heard === null || !axis ? null : at(heard);
+  const labels = (axis ? labelled(axis, scale, nyquist, height) : []).filter(
+    ([, px]) => marked === null || Math.abs(px - marked) >= LABEL_ROOM
+  );
+  const kept = new Set(labels.map(([hertz]) => hertz));
+  const minor = axis
+    ? minorHertz(scale, nyquist).filter(
+        (hertz) =>
+          !kept.has(hertz) &&
+          hertz >= axis.low &&
+          at(hertz) >= 2 &&
+          at(hertz) <= height - 2
+      )
+    : [];
   return (
     <div
       aria-hidden="true"
@@ -369,18 +460,44 @@ function SpectrogramAxis({
       ref={holder}
       style={{ height }}
     >
-      {/* A strip of its own, on the picture's left: the labels read against a plain ground, each with a tick at the picture's edge. */}
-      <div className="absolute inset-y-0 start-0 w-12 border-e bg-background">
-        {ticks.map(({ at, hertz }) => (
+      {/* A strip of its own, on the picture's left: the labels read against a plain ground, each before its tick at the picture's edge. */}
+      <div className="absolute inset-y-0 start-0 w-11 border-e bg-background">
+        {minor.map((hertz) => (
           <span
-            className="absolute end-0 flex -translate-y-1/2 items-center gap-1 text-[10px] text-muted-foreground tabular-nums"
+            className="absolute end-0 h-px w-1 bg-foreground/30"
             key={hertz}
-            style={{ bottom: Math.min(height - 8, Math.max(8, at * height)) }}
-          >
-            {formatFrequency(hertz)}
-            <span className="h-px w-1.5 bg-foreground/40" />
+            style={{ bottom: at(hertz) }}
+          />
+        ))}
+        {labels.map(([hertz, px]) => (
+          <span key={hertz}>
+            <span
+              className="absolute end-0 h-px w-1.5 bg-foreground/50"
+              style={{ bottom: at(hertz) }}
+            />
+            <span
+              className="absolute end-2 translate-y-1/2 text-[10px] text-muted-foreground tabular-nums"
+              style={{ bottom: px }}
+            >
+              {hertzLabel(hertz)}
+            </span>
           </span>
         ))}
+        {marked === null || heard === null ? null : (
+          <>
+            <span
+              className="absolute end-0 h-px w-2 bg-foreground"
+              style={{ bottom: marked }}
+            />
+            <span
+              className="absolute end-2 translate-y-1/2 rounded-s-sm bg-foreground px-1 text-[10px] text-background tabular-nums"
+              data-slot="spectrogram-axis-pointer"
+              style={{ bottom: Math.min(height - 6, Math.max(6, marked)) }}
+            >
+              {readHertz(heard)}
+            </span>
+          </>
+        )}
       </div>
     </div>
   );

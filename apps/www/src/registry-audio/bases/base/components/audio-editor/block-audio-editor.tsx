@@ -83,6 +83,7 @@ import {
 import { ArrangedTake } from "@/registry-audio/bases/base/audio/elements/arranged-clip";
 import {
   ClipSpectrogram,
+  type PointerHertz,
   SpectrogramAxis,
   type SpectrogramScale,
 } from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
@@ -195,11 +196,15 @@ const GLIDE = 0.3;
 const JUMP_SECONDS = 8;
 /** Pixels in a line and a page of wheel delta, for a wheel that counts in those. */
 const WHEEL_PX = [1, 16, 400] as const;
+/** The steps a time reads well in, 1-2-5 and then minutes': the labels and the ticks between them fall on these. */
 const LABEL_STEPS = [
-  0.0001, 0.000_25, 0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25,
-  0.5, 1, 2, 5, 10, 15, 30, 60,
+  0.000_02, 0.000_05, 0.0001, 0.0002, 0.0005, 0.001, 0.002, 0.005, 0.01, 0.02,
+  0.05, 0.1, 0.2, 0.5, 1, 2, 5, 10, 15, 30, 60, 120, 300, 600, 900, 1800, 3600,
 ];
-const MIN_LABEL_GAP_PX = 56;
+/** The least room between two labels, in px: a label and its tick take a good part of it. */
+const MIN_LABEL_GAP_PX = 72;
+/** The room a label's text takes after its tick, at most: the ticks between the labels keep clear of it. */
+const LABEL_TEXT_PX = 44;
 /** Narrower than this, the editor starts with its library folded, leaving the chain the room. */
 const LIBRARY_PX = 600;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
@@ -346,11 +351,57 @@ function soundOf(
   };
 }
 
-/** The step between the ruler's labels: the smallest that keeps them apart at this zoom, in pixels per second. */
-const labelStep = (zoom: number) =>
-  LABEL_STEPS.find((candidate) => candidate * zoom >= MIN_LABEL_GAP_PX) ??
-  LABEL_STEPS.at(-1) ??
-  1;
+/**
+ * The step between the ruler's labels: the smallest at least `MIN_LABEL_GAP_PX`
+ * apart at this zoom that has ticks to put between them, else the smallest
+ * that is apart enough. In pixels per second.
+ */
+const labelStep = (zoom: number) => {
+  const apart = LABEL_STEPS.filter(
+    (candidate) => candidate * zoom >= MIN_LABEL_GAP_PX
+  );
+  return (
+    apart.find((candidate) => minorStep(candidate, zoom) !== null) ??
+    apart[0] ??
+    LABEL_STEPS.at(-1) ??
+    1
+  );
+};
+
+/**
+ * The step of the ticks between the labels: the finest of the steps that
+ * divides the labels' evenly and leaves room after each label for its text,
+ * or none.
+ */
+const minorStep = (step: number, zoom: number) =>
+  LABEL_STEPS.find(
+    (candidate) =>
+      candidate < step * (1 - 1e-9) &&
+      Math.abs(step / candidate - Math.round(step / candidate)) < 1e-6 &&
+      candidate * zoom >= LABEL_TEXT_PX
+  ) ?? null;
+
+/** The times of the ticks between the labels around what shows, none on a label. */
+function rulerTicks(
+  duration: number,
+  minor: number,
+  step: number,
+  [from, to]: readonly [number, number]
+) {
+  const first = Math.max(0, Math.floor(from / minor) - 1);
+  const last = Math.min(
+    Math.floor(duration / minor),
+    Math.ceil(to / minor) + 1
+  );
+  const ticks: number[] = [];
+  for (let index = first; index <= last; index += 1) {
+    const ratio = (index * minor) / step;
+    if (Math.abs(ratio - Math.round(ratio)) > 1e-6) {
+      ticks.push(Number((index * minor).toFixed(6)));
+    }
+  }
+  return ticks;
+}
 
 /** The seconds the ruler labels around what shows, from `from` to `to`, at this zoom. */
 function rulerLabels(
@@ -1509,6 +1560,30 @@ function RulerMarks({
   zoom: number;
 }) {
   const step = labelStep(zoom);
+  const minor = minorStep(step, zoom);
+  // The time under the pointer: its tick and time over the ruler, the labels near it giving way.
+  const [hover, setHover] = useState<number | null>(null);
+  useEffect(() => {
+    const element = viewport.current;
+    if (!(element && zoom > 0)) {
+      return;
+    }
+    const moved = (event: Event) => {
+      if (!(event instanceof window.PointerEvent)) {
+        return;
+      }
+      const box = element.getBoundingClientRect();
+      const at = (event.clientX - box.left + element.scrollLeft) / zoom;
+      setHover(Math.min(duration, Math.max(0, at)));
+    };
+    const left = () => setHover(null);
+    element.addEventListener("pointermove", moved, { passive: true });
+    element.addEventListener("pointerleave", left);
+    return () => {
+      element.removeEventListener("pointermove", moved);
+      element.removeEventListener("pointerleave", left);
+    };
+  }, [duration, viewport, zoom]);
   const [shown, setShown] = useState<readonly [number, number]>([0, 0]);
   useEffect(() => {
     const element = viewport.current;
@@ -1536,11 +1611,45 @@ function RulerMarks({
       element.removeEventListener("scroll", onScroll);
     };
   }, [step, viewport, zoom]);
-  return rulerLabels(duration, zoom, shown).map((mark) => (
-    <TimelineMark key={mark.at} value={mark.at}>
-      {mark.text}
-    </TimelineMark>
-  ));
+  const labels = rulerLabels(duration, zoom, shown).filter(
+    (mark) =>
+      hover === null ||
+      Math.abs(mark.at - hover) * zoom >= MIN_LABEL_GAP_PX * 0.8
+  );
+  const ticks = minor
+    ? rulerTicks(duration, minor, step, shown).filter(
+        (at) => hover === null || Math.abs(at - hover) * zoom >= 4
+      )
+    : [];
+  return (
+    <>
+      {ticks.map((at) => (
+        <TimelineMark
+          className="inset-y-auto bottom-0 h-1.5 items-end border-border ps-0"
+          key={`tick-${at}`}
+          value={at}
+        />
+      ))}
+      {labels.map((mark) => (
+        // The first one has the viewport's own edge for its tick.
+        <TimelineMark
+          className={mark.at === 0 ? "border-s-0" : undefined}
+          key={mark.at}
+          value={mark.at}
+        >
+          {mark.text}
+        </TimelineMark>
+      ))}
+      {hover === null ? null : (
+        <TimelineMark
+          className="z-10 border-foreground font-medium text-foreground"
+          value={hover}
+        >
+          {formatPrecise(hover)}
+        </TimelineMark>
+      )}
+    </>
+  );
 }
 
 /** While a take records, the view it records into, in seconds: MIN_TAKE_SPAN to start, doubled as the take nears its end; null otherwise. */
@@ -1937,12 +2046,15 @@ function SelectionFrame({
 function SoundClips({
   clips,
   hidden,
+  pointerHertz,
   sounds,
   view,
 }: {
   clips: readonly Arranged[];
   /** What each clip draws. */
   view: View;
+  /** Told the frequency under the pointer on a spectrogram. */
+  pointerHertz: Pick<PointerHertz, "set">;
   /** While a take records over them: kept in place, unseen. */
   hidden: boolean;
   sounds: ReadonlyMap<string, Sound>;
@@ -1989,6 +2101,7 @@ function SoundClips({
               value: { length: clip.value.length, offset: clip.value.offset },
             }}
             gain={dbToGain(clip.gain ?? 0)}
+            pointerHertz={pointerHertz}
             role="img"
             sampleRate={sound.sampleRate}
             samples={sound.samples}
@@ -2205,6 +2318,8 @@ function ClipLane({
   );
   // The silence the pointer is over, shown as a zone while it is there.
   const silence = useSilenceHover({ pauses: cues.pauses, zoom });
+  // The frequency under the pointer on a spectrogram, to mark on its axis.
+  const [pointerHertz] = useState(() => createSource<number | null>(null));
   const select = useCallback(
     (range: readonly [number, number]) => {
       const from = extending.current;
@@ -2401,6 +2516,7 @@ function ClipLane({
                   ) : null}
                   {view === "wave" || !sound ? null : (
                     <SpectrogramAxis
+                      pointer={pointerHertz}
                       sampleRate={sound.sampleRate}
                       scale={view}
                     />
@@ -2408,6 +2524,7 @@ function ClipLane({
                   <SoundClips
                     clips={clips}
                     hidden={recording}
+                    pointerHertz={pointerHertz}
                     sounds={sounds}
                     view={view}
                   />

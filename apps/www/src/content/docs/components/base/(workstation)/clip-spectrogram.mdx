@@ -30,13 +30,14 @@ import { ClipSpectrogram } from "@/components/audio-ui/clip-spectrogram";
 | `sampleRate` | `number` | The recording's rate, in hertz. |
 | `scale` | `"log" \| "mel" \| "erb" \| "lin"` | The frequency axis. Default `"log"`. |
 | `gain` | `number` | A factor on the picture, as a clip's level plays. Default `1`. |
+| `pointerHertz` | `{ set }` | Told the frequency under the pointer, or `null` off the picture. |
 
-Over a clip the pointer reads the cell under it, its frequency and level, in a small label. `SpectrogramAxis` draws the frequency labels down the left edge of the lane, on the same `scale`; put it in the lane with the clips and it holds still as the lane scrolls.
+Over a clip the pointer reads the cell under it, its frequency and level, in a small label. `SpectrogramAxis` draws the frequency axis down the left edge of the lane, as audio.js does: labels roundest first (20k, 2k, 200, 20, then between as room allows), each with its tick at the row its frequency sits on, shorter ticks between, and the frequency under the pointer marked on it. Put it in the lane with the clips, on the same `scale`; it holds still as the lane scrolls. The pointer's frequency goes from the clips to the axis through a `pointerHertz` source (`createSource<number | null>(null)`): give the same one to both.
 
 ```tsx
 import { SpectrogramAxis } from "@/components/audio-ui/clip-spectrogram";
 
-<SpectrogramAxis sampleRate={sound.sampleRate} scale="log" />;
+<SpectrogramAxis pointer={pointerHertz} sampleRate={sound.sampleRate} scale="log" />;
 ```
 
 It needs WebGL 2 and draws nothing without it. A reversed, looped or warped clip is drawn from its source in order.
