@@ -31,6 +31,7 @@ import { ClipSpectrogram } from "@/components/audio-ui/clip-spectrogram";
 | `scale` | `"log" \| "mel" \| "erb" \| "lin"` | The frequency axis. Default `"log"`. |
 | `gain` | `number` | A factor on the picture, as a clip's level plays. Default `1`. |
 | `pointerHertz` | `{ set }` | Told the frequency under the pointer, or `null` off the picture. |
+| `band` | `SpectrogramBand` | The frequencies shown, as shares of the axis. Default all. |
 
 Over a clip the pointer reads the cell under it, its frequency and level, in a small label. `SpectrogramAxis` draws the frequency axis down the left edge of the lane, as audio.js does: labels roundest first (20k, 2k, 200, 20, then between as room allows), each with its tick at the row its frequency sits on, shorter ticks between, and the frequency under the pointer marked on it. Put it in the lane with the clips, on the same `scale`; it holds still as the lane scrolls. The pointer's frequency goes from the clips to the axis through a `pointerHertz` source (`createSource<number | null>(null)`): give the same one to both.
 
@@ -38,6 +39,17 @@ Over a clip the pointer reads the cell under it, its frequency and level, in a s
 import { SpectrogramAxis } from "@/components/audio-ui/clip-spectrogram";
 
 <SpectrogramAxis pointer={pointerHertz} sampleRate={sound.sampleRate} scale="log" />;
+```
+
+### Zooming the frequencies
+
+`band` is the frequencies the picture shows, as shares of its axis from 0 (the floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: a `createSource<readonly [number, number]>([0, 1])` given to the clips and the axis. Shift and the wheel over the picture zoom it about the pointer, the wheel over the axis moves it, Ctrl, Command or a pinch over the axis zooms it, and a double-click on the axis shows all of it again. The axis labels what is in view: round values, 1-2-5 a decade across a wide span, even steps across a narrow one. `zoomBand` and `panBand` are the arithmetic, to drive it from your own controls.
+
+```tsx
+const [band] = useState(() => createSource<readonly [number, number]>([0, 1]));
+
+<ClipSpectrogram band={band} {...rest} />;
+<SpectrogramAxis band={band} pointer={pointerHertz} sampleRate={rate} scale="log" />;
 ```
 
 It needs WebGL 2 and draws nothing without it. A reversed, looped or warped clip is drawn from its source in order.
