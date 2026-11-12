@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowRightIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import { useEffect, useState } from "react";

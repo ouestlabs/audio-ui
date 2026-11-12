@@ -1,5 +1,3 @@
-"use client";
-
 import type { Source } from "@audio-ui/core";
 import {
   createVuBallistics,

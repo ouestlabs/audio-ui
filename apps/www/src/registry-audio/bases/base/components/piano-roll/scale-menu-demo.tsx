@@ -1,5 +1,3 @@
-"use client";
-
 import { inScale, type Scale } from "@audio-ui/engine/pitch";
 import { useState } from "react";
 import { DropdownMenuSeparator } from "@/registry/bases/base/ui/dropdown-menu";

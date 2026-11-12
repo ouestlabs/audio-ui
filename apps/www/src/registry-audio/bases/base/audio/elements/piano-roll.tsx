@@ -1,5 +1,3 @@
-"use client";
-
 import {
   PianoRoll as PianoRollPrimitive,
   Timeline as TimelinePrimitive,

@@ -1,5 +1,3 @@
-"use client";
-
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { Button } from "@/registry/bases/base/ui/button";
 

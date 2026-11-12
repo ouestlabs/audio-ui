@@ -1,5 +1,3 @@
-"use client";
-
 import { MagnifyingGlassIcon } from "@phosphor-icons/react/ssr";
 import type { CommandMenuGroup } from "@/components/site/navigation/command-menu";
 import { Button } from "@/components/ui/button";

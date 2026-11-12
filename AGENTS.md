@@ -149,7 +149,7 @@ Each primitive has a page in React (`react/<primitive>.mdx`, headed by `<Module 
 ### Registry items (`registry-audio/bases/base/components/{category}/`)
 
 - Filename `block-{component}-{variant}.tsx` (blocks) or `{component}-{feature}-demo.tsx` (demos); default export `Block{Component}{Variant}` / `{Component}{Feature}Demo`, PascalCase of the filename, no params
-- `"use client"` only if the file uses hooks, state or browser APIs
+- No `"use client"` directive: the site is TanStack Start, where it means nothing
 - Icons via `IconPlaceholder` (`@/components/icon-placeholder`) with a name for all five libraries (`lucide`, `phosphor`, `tabler`, `hugeicons`, `remixicon`), sized with `className="size-4"`, never a numeric `size`
 - Each icon name is a string literal: the shadcn CLI turns `IconPlaceholder` into an import, so `lucide={playing ? "PauseIcon" : "PlayIcon"}` installs as invalid code. Render one element per icon (`{playing ? <IconPlaceholder … /> : <IconPlaceholder … />}`); `apps/www/test/install-paths.test.ts` fails on an expression
 - Icon-only interactive elements get `aria-label`; decorative icons get `aria-hidden="true"`

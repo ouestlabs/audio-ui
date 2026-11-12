@@ -1,5 +1,3 @@
-"use client";
-
 import {
   type BiquadType,
   bandGainForHandle,
@@ -10,6 +8,7 @@ import {
   formatDb,
   formatHz,
 } from "@audio-ui/engine/analysis";
+import { formatLevel } from "@audio-ui/engine/format";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Popover,
@@ -73,7 +72,8 @@ const BAND_TYPES: { label: string; value: BiquadType }[] = [
 /** The width a band has when it was never given one. */
 const DEFAULT_Q = Math.SQRT1_2;
 
-const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
+const formatDbMark = (db: number) =>
+  formatLevel(db, "dB", { decimals: 0, unit: false });
 const describePointer = (point: { x: number; y: number }) =>
   `${formatHz(point.x)} · ${formatDb(point.y)}`;
 const describeValue = (value: number, axis: "x" | "y") =>

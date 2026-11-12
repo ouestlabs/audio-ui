@@ -1,5 +1,3 @@
-"use client";
-
 import { Combobox as ComboboxPrimitive } from "@base-ui/react";
 import * as React from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";

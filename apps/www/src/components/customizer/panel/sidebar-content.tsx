@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { CopyCss } from "@/components/customizer/actions/copy-css";
 import { CopyPreset } from "@/components/customizer/actions/copy-preset";

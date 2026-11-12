@@ -1,5 +1,3 @@
-"use client";
-
 import { Knob as KnobPrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import type { ReactNode } from "react";

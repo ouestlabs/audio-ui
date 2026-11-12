@@ -1,5 +1,3 @@
-"use client";
-
 import type { ComponentProps, CSSProperties, Ref } from "react";
 import { createPortal } from "react-dom";
 import { cn } from "@/registry/bases/base/lib/utils";

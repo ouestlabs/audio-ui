@@ -1,5 +1,3 @@
-"use client";
-
 import { Suspense } from "react";
 import { ComponentSidebarContent } from "@/components/catalog/sidebar/component-sidebar-content";
 import { DocsNavigation } from "@/components/docs/page/sidebar";

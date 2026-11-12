@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowCounterClockwiseIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import {

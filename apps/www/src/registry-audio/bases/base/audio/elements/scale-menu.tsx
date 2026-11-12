@@ -1,5 +1,3 @@
-"use client";
-
 import { pitchClassName } from "@audio-ui/core";
 import {
   detectKeys,

@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { CodeCollapsibleWrapper } from "@/components/code/block/code-collapsible-wrapper";
 import { HighlightedCode } from "@/components/code/block/highlighted-code";

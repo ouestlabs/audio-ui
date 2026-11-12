@@ -1,5 +1,3 @@
-"use client";
-
 import type { Note, NoteId } from "@audio-ui/core/piano-roll";
 import { useCallback, useRef, useState } from "react";
 import {

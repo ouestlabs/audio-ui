@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useState } from "react";
 import { Button } from "@/registry/bases/base/ui/button";
 import { Led } from "@/registry-audio/bases/base/audio/elements/led";

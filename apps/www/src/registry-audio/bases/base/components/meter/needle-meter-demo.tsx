@@ -1,5 +1,3 @@
-"use client";
-
 import { useMemo } from "react";
 import { NeedleMeter } from "@/registry-audio/bases/base/audio/elements/needle-meter";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";

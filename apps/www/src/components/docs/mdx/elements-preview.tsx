@@ -1,5 +1,3 @@
-"use client";
-
 import { createSource } from "@audio-ui/core";
 import type { MeterElement, PlotCurveElement } from "@audio-ui/elements";
 import {

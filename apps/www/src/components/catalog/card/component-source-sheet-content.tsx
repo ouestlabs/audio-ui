@@ -1,5 +1,3 @@
-"use client";
-
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { CodeBlockCommand } from "@/components/code/block/code-block-command";

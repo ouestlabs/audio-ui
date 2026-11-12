@@ -1,5 +1,3 @@
-"use client";
-
 import { dbToGain, gainToDb, peakDb } from "@audio-ui/engine/analysis";
 import { formatLevel, formatPan as formatPanOf } from "@audio-ui/engine/format";
 import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";

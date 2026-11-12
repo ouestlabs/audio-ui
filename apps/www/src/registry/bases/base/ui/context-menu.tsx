@@ -1,5 +1,3 @@
-"use client";
-
 import { ContextMenu as ContextMenuPrimitive } from "@base-ui/react/context-menu";
 import type * as React from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";

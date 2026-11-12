@@ -1,5 +1,3 @@
-"use client";
-
 import { useTheme } from "next-themes";
 import { use, useCallback, useId, useMemo } from "react";
 import { useMounted } from "@/hooks/use-mounted";

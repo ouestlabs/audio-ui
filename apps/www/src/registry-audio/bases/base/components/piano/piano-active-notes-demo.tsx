@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
 

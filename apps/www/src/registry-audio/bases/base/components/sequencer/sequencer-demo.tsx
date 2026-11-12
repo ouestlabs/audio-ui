@@ -1,5 +1,3 @@
-"use client";
-
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";

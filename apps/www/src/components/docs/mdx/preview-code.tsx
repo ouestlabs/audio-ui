@@ -1,5 +1,3 @@
-"use client";
-
 import { type ReactNode, useCallback, useState } from "react";
 import { FrameContent } from "@/components/site/layout/frame";
 import { Button } from "@/components/ui/button";

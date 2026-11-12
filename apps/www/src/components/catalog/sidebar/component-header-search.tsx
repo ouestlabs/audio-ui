@@ -1,5 +1,3 @@
-"use client";
-
 import { MagnifyingGlassIcon, XIcon } from "@phosphor-icons/react/ssr";
 import { useLocation, useRouter } from "@tanstack/react-router";
 import { useQueryState } from "nuqs";

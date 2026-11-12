@@ -1,5 +1,3 @@
-"use client";
-
 import type { EngineFactory, InstrumentEngine } from "@audio-ui/engine/device";
 import { useCallback, useMemo } from "react";
 import {

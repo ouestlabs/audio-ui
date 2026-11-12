@@ -1,5 +1,3 @@
-"use client";
-
 import { CaretRightIcon, CheckIcon, CopyIcon } from "@phosphor-icons/react/ssr";
 import { type ReactNode, useCallback, useRef, useState } from "react";
 import { getIconForLanguageExtension } from "@/components/site/icons";

@@ -1,5 +1,3 @@
-"use client";
-
 import type { WarpMode } from "@audio-ui/engine/playback";
 import {
   addWarpMarker,

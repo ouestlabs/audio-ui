@@ -1,5 +1,3 @@
-"use client";
-
 import { CaretUpDownIcon, CheckIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import { SectionIcon } from "@/components/site/navigation/group-icon";

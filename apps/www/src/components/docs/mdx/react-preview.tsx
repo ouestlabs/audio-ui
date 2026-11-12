@@ -1,5 +1,3 @@
-"use client";
-
 import { createSource } from "@audio-ui/core";
 import {
   Envelope,

@@ -1,5 +1,3 @@
-"use client";
-
 import { type RefObject, useCallback } from "react";
 import {
   Picker,

@@ -1,5 +1,3 @@
-"use client";
-
 import { createMidiInput, pitchBendToSemitones } from "@audio-ui/engine/midi";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 

@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { LockButton } from "@/components/customizer/actions/lock-button";
 import {

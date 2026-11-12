@@ -1,5 +1,3 @@
-"use client";
-
 import { Button } from "@/registry/bases/base/ui/button";
 import {
   ButtonGroup,

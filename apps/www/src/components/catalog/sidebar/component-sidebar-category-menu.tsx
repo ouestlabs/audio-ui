@@ -1,5 +1,3 @@
-"use client";
-
 import { GridIcon } from "@audio-ui/icons/react";
 import { Link, useLocation } from "@tanstack/react-router";
 import * as React from "react";

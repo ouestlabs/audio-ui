@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Led } from "@/registry-audio/bases/base/audio/elements/led";
 import { RockerSwitch } from "@/registry-audio/bases/base/audio/elements/rocker-switch";

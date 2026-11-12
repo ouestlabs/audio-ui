@@ -1,5 +1,3 @@
-"use client";
-
 import { CurveIcon } from "@audio-ui/icons/react";
 import { useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";

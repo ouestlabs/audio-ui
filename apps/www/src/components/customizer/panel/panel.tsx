@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { CustomizerChoicesSkeleton } from "@/components/site/layout/framed-skeleton";
 import {

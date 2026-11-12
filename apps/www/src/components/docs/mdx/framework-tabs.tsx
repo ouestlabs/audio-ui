@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback } from "react";
 import { Tabs } from "@/components/ui/tabs";
 import { useFramework } from "@/hooks/use-framework";

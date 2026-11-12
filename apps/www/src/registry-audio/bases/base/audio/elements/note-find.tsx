@@ -1,5 +1,3 @@
-"use client";
-
 import { pitchClassName } from "@audio-ui/core";
 import type { NoteQuery } from "@audio-ui/core/piano-roll";
 import { rollScale, type Scale } from "@audio-ui/engine/pitch";

@@ -1,5 +1,3 @@
-"use client";
-
 import type * as React from "react";
 import { CopyRegistry } from "@/components/code/copy/copy-registry";
 import { MicrophoneSwitch } from "@/components/preview/controls/microphone-switch";

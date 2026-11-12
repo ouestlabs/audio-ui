@@ -1,4 +1,4 @@
-"use client";
+import { formatFrequency } from "@audio-ui/engine/format";
 
 import type { Plot as PlotPrimitive, Source } from "@audio-ui/react";
 import { cn } from "@/registry/bases/base/lib/utils";
@@ -12,8 +12,6 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import { useSpectrumPeaks } from "@/registry-audio/bases/base/hooks/use-spectrum";
 
-const formatHz = (hz: number) =>
-  hz >= 1000 ? `${Number((hz / 1000).toFixed(1))} kHz` : `${Math.round(hz)} Hz`;
 /** Every 20 dB strictly inside the scale, so no label sits on an edge. */
 const dbTicks = (min: number, max: number) => {
   const ticks: number[] = [];
@@ -25,7 +23,7 @@ const dbTicks = (min: number, max: number) => {
   return ticks;
 };
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${Math.round(point.y)} dB`;
+  `${formatFrequency(point.x)} · ${Math.round(point.y)} dB`;
 
 type SpectrumAnalyzerProps = Omit<
   PlotPrimitive.Root.Props,

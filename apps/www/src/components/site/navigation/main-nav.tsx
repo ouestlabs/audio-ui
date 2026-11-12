@@ -1,5 +1,3 @@
-"use client";
-
 import { ArrowSquareOutIcon } from "@phosphor-icons/react/ssr";
 import { Link, useLocation } from "@tanstack/react-router";
 import * as React from "react";

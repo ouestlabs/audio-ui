@@ -1,5 +1,3 @@
-"use client";
-
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { Device, ParameterDescriptor } from "@audio-ui/engine/device";
 import { useCallback, useMemo } from "react";

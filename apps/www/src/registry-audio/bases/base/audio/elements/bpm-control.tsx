@@ -1,5 +1,3 @@
-"use client";
-
 import { cn } from "@/registry/bases/base/lib/utils";
 import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
 

@@ -1,5 +1,3 @@
-"use client";
-
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 

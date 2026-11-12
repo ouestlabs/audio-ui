@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 import { MixerView } from "@/registry-audio/bases/base/audio/elements/mixer-view";
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";

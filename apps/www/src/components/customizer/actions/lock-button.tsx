@@ -1,5 +1,3 @@
-"use client";
-
 import { LockSimpleIcon, LockSimpleOpenIcon } from "@phosphor-icons/react/ssr";
 import { useCallback } from "react";
 import {

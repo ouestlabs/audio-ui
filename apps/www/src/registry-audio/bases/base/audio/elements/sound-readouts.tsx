@@ -1,5 +1,3 @@
-"use client";
-
 import { formatLevel, formatSampleRate } from "@audio-ui/engine/format";
 import { type ComponentProps, useCallback, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";

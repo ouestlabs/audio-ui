@@ -1,5 +1,3 @@
-"use client";
-
 import type { Note } from "@audio-ui/core/piano-roll";
 import {
   downloadMidiFile,

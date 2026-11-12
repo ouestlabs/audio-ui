@@ -1,5 +1,3 @@
-"use client";
-
 import { MicrophoneIcon, MicrophoneSlashIcon } from "@phosphor-icons/react/ssr";
 import { useEffect } from "react";
 import { Button } from "@/components/ui/button";

@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { lazy, Suspense } from "react";
 import type { IconLibraryName } from "shadcn/icons";

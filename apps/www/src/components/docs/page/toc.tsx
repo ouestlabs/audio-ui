@@ -1,5 +1,3 @@
-"use client";
-
 import { PushPinIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import {

@@ -1,5 +1,3 @@
-"use client";
-
 import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useState } from "react";
 import { Scrubber } from "@/registry-audio/bases/base/audio/elements/scrubber";

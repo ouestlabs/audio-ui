@@ -1,5 +1,3 @@
-"use client";
-
 import type * as React from "react";
 import { useCallback } from "react";
 import { Tabs } from "@/components/ui/tabs";

@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";

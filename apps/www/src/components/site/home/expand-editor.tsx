@@ -1,5 +1,3 @@
-"use client";
-
 import { CornersInIcon, CornersOutIcon } from "@phosphor-icons/react/ssr";
 import { useLocation } from "@tanstack/react-router";
 import { useCallback, useEffect } from "react";

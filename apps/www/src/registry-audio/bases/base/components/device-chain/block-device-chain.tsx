@@ -1,5 +1,3 @@
-"use client";
-
 import { useCallback, useEffect, useState } from "react";
 import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";

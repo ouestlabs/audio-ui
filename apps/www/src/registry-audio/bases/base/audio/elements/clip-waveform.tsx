@@ -1,5 +1,3 @@
-"use client";
-
 import { type ComponentProps, useLayoutEffect, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

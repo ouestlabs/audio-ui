@@ -1,5 +1,3 @@
-"use client";
-
 import { detectPitch, type PitchEstimate } from "@audio-ui/engine/analysis";
 import { cents } from "@audio-ui/engine/pitch";
 import { createSource, type Source } from "@audio-ui/react";

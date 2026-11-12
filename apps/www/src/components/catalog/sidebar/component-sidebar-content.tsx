@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 
 import { ComponentSidebarCategoryMenu } from "./component-sidebar-category-menu";
