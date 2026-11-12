@@ -88,14 +88,15 @@ export function HomeGuide({
   spaces,
 }: HomeIndex & { figures: HomeFigure[] }) {
   return (
-    <div className="flex flex-col gap-16 px-4 py-12 font-site-sans sm:px-6 lg:py-16">
+    <div className="flex flex-col gap-16 px-4 pb-12 font-site-sans sm:px-6 lg:pb-16">
       <JsonLd data={buildFaqJsonLd(FAQ)} />
       <section aria-labelledby="home-components">
-        <h2 className={H2} id="home-components">
-          What you can build
+        {/* Named for screen readers and search engines: the figures and the columns say what it holds. */}
+        <h2 className="sr-only" id="home-components">
+          Components
         </h2>
         {/* From one edge of the panel to the other, out of the section's own margins. */}
-        <div className="-mx-4 mt-6 sm:-mx-6">
+        <div className="-mx-4 sm:-mx-6">
           <HomeFigures figures={figures} />
         </div>
         <div className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">

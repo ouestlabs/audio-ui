@@ -118,13 +118,18 @@ function IndexPage() {
     <>
       <JsonLd data={buildSoftwareJsonLd()} />
       <HomeHero />
-      {/* Under the title, the registry's audio editor itself: what a user installs, working, ruled off from what follows. */}
-      <section aria-labelledby="home-editor" className="border-y">
+      {/* Under the title, the registry's audio editor itself: what a user installs, working. */}
+      <section aria-labelledby="home-editor" className="border-t">
         <h2 className="sr-only" id="home-editor">
           Audio editor
         </h2>
         <BlockAudioEditor />
       </section>
+      {/* A hatched band between the editor and the rest of the page: the editor ends here. */}
+      <div
+        aria-hidden="true"
+        className="h-6 shrink-0 border-t bg-[repeating-linear-gradient(-45deg,var(--border)_0_1px,transparent_1px_7px)]"
+      />
       {/* Under it, the page in words, the library's figures with the components: what search engines and agents read without running it. */}
       <HomeGuide figures={figures} guides={guides} spaces={spaces} />
     </>
