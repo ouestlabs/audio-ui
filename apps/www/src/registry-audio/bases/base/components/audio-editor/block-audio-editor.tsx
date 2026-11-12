@@ -2196,7 +2196,12 @@ const RATES = [
   { note: "Low-quality MPEG", rate: 22_050 },
   { note: "Audio CD, MP3", rate: 44_100 },
   { note: "Video, professional audio", rate: 48_000 },
-  { note: "High-resolution audio", rate: 96_000 },
+  { note: "Pro recording for CD", rate: 88_200 },
+  { note: "DVD-Audio, Blu-ray", rate: 96_000 },
+  { note: "HDCD, CD production", rate: 176_400 },
+  { note: "Pro video, Blu-ray", rate: 192_000 },
+  { note: "DXD, SACD editing", rate: 352_800 },
+  { note: "Highest in common software", rate: 384_000 },
 ] as const;
 
 const LAYOUT_NOTES: Record<ChannelLayout, string> = {
@@ -2223,12 +2228,12 @@ function LevelReadout({ sound }: { sound: Sound }) {
       >
         {formatLevel(current.value(sound), current.unit)}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-52" side="top">
+      <DropdownMenuContent align="end" className="w-64" side="top">
         <DropdownMenuRadioGroup onValueChange={choose} value={shown}>
           {LEVELS.map((level) => (
             <DropdownMenuRadioItem key={level.id} value={level.id}>
-              {level.label}
-              <DropdownMenuShortcut>
+              <span className="whitespace-nowrap">{level.label}</span>
+              <DropdownMenuShortcut className="tracking-normal">
                 {formatLevel(level.value(sound), level.unit)}
               </DropdownMenuShortcut>
             </DropdownMenuRadioItem>
@@ -2260,7 +2265,7 @@ function RateReadout({
       >
         {formatRate(sound.sampleRate)}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="max-h-72 min-w-64" side="top">
+      <DropdownMenuContent align="end" className="max-h-80 w-80" side="top">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Resample to</DropdownMenuLabel>
         </DropdownMenuGroup>
@@ -2270,8 +2275,10 @@ function RateReadout({
         >
           {RATES.map((each) => (
             <DropdownMenuRadioItem key={each.rate} value={String(each.rate)}>
-              {`${each.rate / 1000} kHz`}
-              <DropdownMenuShortcut>{each.note}</DropdownMenuShortcut>
+              <span className="whitespace-nowrap">{`${each.rate / 1000} kHz`}</span>
+              <DropdownMenuShortcut className="tracking-normal">
+                {each.note}
+              </DropdownMenuShortcut>
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
@@ -2304,15 +2311,15 @@ function ChannelsReadout({
       >
         {CHANNEL_NAMES[sound.channels] ?? `${sound.channels} channels`}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="min-w-64" side="top">
+      <DropdownMenuContent align="end" className="w-72" side="top">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Mix to</DropdownMenuLabel>
         </DropdownMenuGroup>
         <DropdownMenuRadioGroup onValueChange={choose} value={current ?? ""}>
           {CHANNEL_LAYOUTS.map((layout) => (
             <DropdownMenuRadioItem key={layout} value={layout}>
-              {layout}
-              <DropdownMenuShortcut>
+              <span className="whitespace-nowrap">{layout}</span>
+              <DropdownMenuShortcut className="tracking-normal">
                 {LAYOUT_NOTES[layout]}
               </DropdownMenuShortcut>
             </DropdownMenuRadioItem>
@@ -2580,11 +2587,15 @@ function MoreMenu({
       <DropdownMenuContent align="start" className="w-56">
         <DropdownMenuItem disabled={!canUndo} onClick={edits.undo}>
           Undo
-          <DropdownMenuShortcut>{mod}Z</DropdownMenuShortcut>
+          <DropdownMenuShortcut className="tracking-normal">
+            {mod}Z
+          </DropdownMenuShortcut>
         </DropdownMenuItem>
         <DropdownMenuItem disabled={!canRedo} onClick={edits.redo}>
           Redo
-          <DropdownMenuShortcut>⇧{mod}Z</DropdownMenuShortcut>
+          <DropdownMenuShortcut className="tracking-normal">
+            ⇧{mod}Z
+          </DropdownMenuShortcut>
         </DropdownMenuItem>
         <DropdownMenuSub>
           <DropdownMenuSubTrigger disabled={!(canUndo || canRedo)}>
@@ -2606,7 +2617,9 @@ function MoreMenu({
             onCheckedChange={onLoopingChange}
           >
             Loop
-            <DropdownMenuShortcut>L</DropdownMenuShortcut>
+            <DropdownMenuShortcut className="tracking-normal">
+              L
+            </DropdownMenuShortcut>
           </DropdownMenuCheckboxItem>
         ) : null}
         <DropdownMenuCheckboxItem
@@ -2615,7 +2628,9 @@ function MoreMenu({
           onCheckedChange={onCompare}
         >
           Before the edits
-          <DropdownMenuShortcut>B</DropdownMenuShortcut>
+          <DropdownMenuShortcut className="tracking-normal">
+            B
+          </DropdownMenuShortcut>
         </DropdownMenuCheckboxItem>
         <DropdownMenuSeparator />
         <DropdownMenuItem disabled={!sound} onClick={onExport}>
