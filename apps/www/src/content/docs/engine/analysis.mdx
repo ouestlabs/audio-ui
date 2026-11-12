@@ -1,6 +1,6 @@
 ---
 title: analysis
-description: "Reading a signal, from @audio-ui/engine: levels in dB, a spectrum on a log axis and its held peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients and auto-warp. Plain functions, for the main thread, a worker or a worklet."
+description: "Reading a signal, from @audio-ui/engine: levels in dB, a spectrum on a log axis and its held peaks, the curves of a filter, an equalizer and a compressor, waveform peaks, transients, pauses and auto-warp. Plain functions, for the main thread, a worker or a worklet."
 ---
 
 <Module from="@audio-ui/engine/analysis" />
@@ -54,7 +54,7 @@ The band types are the ones an equalizer shows (`lowcut`, `highcut`, `lowshelf`,
 
 ## Tempo and transients
 
-`detectTransients(channels, sampleRate)` finds where a recording's level rises sharply, in seconds. `autoWarp` works out how a recording plays in time at an arrangement's tempo, from a tempo estimate and those transients: a short recording that 1, 2, 4, 8 or 16 bars fit at its tempo is taken as that loop, marked at its start and end; any other gets a warp marker on the first beat of each bar, moved onto a transient within an eighth of a beat. It returns the tempo, the offset of the first beat and the markers, or `null` when there is no tempo to go by.
+`detectTransients(channels, sampleRate)` finds where a recording's level rises sharply, in seconds. `detectSilences(channels, sampleRate)` finds where it pauses between its sounds, as `[from, to]` in seconds: each stretch of at least 60 ms where every sample stays under -34 dBFS, or 20 dB under the loudest sample of a quiet recording (`threshold` in dBFS and `minDuration` in seconds set your own). Between them, an editor selects a sound as a text selects a word: from one transient to the next, or from one pause to the next. `autoWarp` works out how a recording plays in time at an arrangement's tempo, from a tempo estimate and those transients: a short recording that 1, 2, 4, 8 or 16 bars fit at its tempo is taken as that loop, marked at its start and end; any other gets a warp marker on the first beat of each bar, moved onto a transient within an eighth of a beat. It returns the tempo, the offset of the first beat and the markers, or `null` when there is no tempo to go by.
 
 ## Loudness
 

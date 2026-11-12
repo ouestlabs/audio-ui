@@ -1810,7 +1810,7 @@
       {
         "kind": "const",
         "name": "WHEEL_ZOOM_SENSITIVITY",
-        "summary": "How far one unit of wheel delta zooms, as an exponent."
+        "summary": "How far one pixel of wheel delta zooms, as an exponent."
       },
       {
         "kind": "interface",
@@ -2404,6 +2404,16 @@
         "kind": "interface",
         "name": "BeatAnalysis",
         "summary": "What a recording's beat is read as when it comes in: its tempo, if it has one, and its transients, in seconds."
+      },
+      {
+        "kind": "function",
+        "name": "detectSilences",
+        "summary": "Where `channels` pause between their sounds, as `[from, to]` in seconds, in order: each stretch of at least `minDuration` where every sample of every channel stays under the threshold, found to a block of 1024 frames."
+      },
+      {
+        "kind": "interface",
+        "name": "SilenceOptions",
+        "summary": "What `detectSilences` takes, both optional."
       },
       {
         "kind": "function",
