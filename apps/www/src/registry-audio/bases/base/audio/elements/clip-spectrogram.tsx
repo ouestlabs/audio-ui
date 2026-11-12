@@ -189,7 +189,7 @@ function ClipSpectrogram({
         cell
           ? {
               left: event.clientX - own.left,
-              text: readingOf(cell),
+              text: readingOf(cell, held.renderer?.levels[0] ?? -80),
               height: own.height,
               top: event.clientY - own.top,
               width: own.width,
@@ -282,9 +282,13 @@ interface Reading {
   width: number;
 }
 
-/** A cell as text: the middle of its frequencies and its level. */
-const readingOf = (cell: Cell) =>
-  `${formatFrequency((cell.low + cell.high) / 2)} · ${formatLevel(cell.level, "dB", { sign: false })}`;
+/** A cell as text: the middle of its frequencies and its level, or the floor it is under. */
+const readingOf = (cell: Cell, floor: number) =>
+  `${formatFrequency((cell.low + cell.high) / 2)} · ${
+    cell.level < floor
+      ? `under ${formatLevel(floor, "dB", { decimals: 0, sign: false })}`
+      : formatLevel(cell.level, "dB", { sign: false })
+  }`;
 
 /** The labels of the frequency axis, in hertz: those that fit under the Nyquist limit are shown. */
 const AXIS_TICKS = [
@@ -303,7 +307,8 @@ function spacedTicks(axis: Axis, nyquist: number, height: number) {
       continue;
     }
     const at = axis.at(hertz, axis.low, nyquist);
-    if (last - at * height >= LABEL_GAP) {
+    // Not at the very top, where the ruler's own labels are.
+    if (at * height <= height - LABEL_GAP && last - at * height >= LABEL_GAP) {
       kept.push({ at, hertz });
       last = at * height;
     }
@@ -364,15 +369,19 @@ function SpectrogramAxis({
       ref={holder}
       style={{ height }}
     >
-      {ticks.map(({ at, hertz }) => (
-        <span
-          className="absolute start-1 -translate-y-1/2 whitespace-nowrap rounded-sm bg-background/70 px-1 text-[10px] text-foreground tabular-nums"
-          key={hertz}
-          style={{ bottom: Math.min(height - 10, Math.max(10, at * height)) }}
-        >
-          {formatFrequency(hertz)}
-        </span>
-      ))}
+      {/* A strip of its own, on the picture's left: the labels read against a plain ground, each with a tick at the picture's edge. */}
+      <div className="absolute inset-y-0 start-0 w-12 border-e bg-background">
+        {ticks.map(({ at, hertz }) => (
+          <span
+            className="absolute end-0 flex -translate-y-1/2 items-center gap-1 text-[10px] text-muted-foreground tabular-nums"
+            key={hertz}
+            style={{ bottom: Math.min(height - 8, Math.max(8, at * height)) }}
+          >
+            {formatFrequency(hertz)}
+            <span className="h-px w-1.5 bg-foreground/40" />
+          </span>
+        ))}
+      </div>
     </div>
   );
 }
