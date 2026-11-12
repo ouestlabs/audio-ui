@@ -3,13 +3,11 @@ title: Envelope
 description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/envelope" />
-
-## Usage
-
 `<audio-ui-envelope>` is a breakpoint envelope editor with `role="group"`. Points are dragged to move, added with a double click on the graph, and removed with a double click, Alt + click or Delete. Each segment has a curve handle at its midpoint, and Alt + drag on the graph bends the segment under the pointer. The points share one tab stop: Page Up and Page Down (or Home and End) move between them, and the arrow keys move the focused point. Points and segment handles are generated, from a `<template>` when one is provided:
 
 <ElementsPreview name="envelope" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -96,16 +94,9 @@ In React, the same control is the [Envelope](/docs/react/envelope) primitive of 
 
 {/* usage:end */}
 
-```html
-<audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.2 1, 0.6 0.5, 1 0">
-  <audio-ui-envelope-graph>
-    <audio-ui-envelope-fill></audio-ui-envelope-fill>
-    <audio-ui-envelope-line></audio-ui-envelope-line>
-  </audio-ui-envelope-graph>
-  <audio-ui-envelope-segments></audio-ui-envelope-segments>
-  <audio-ui-envelope-points></audio-ui-envelope-points>
-</audio-ui-envelope>
-```
+## API reference
+
+<Module from="@audio-ui/elements/envelope" />
 
 <TypeTable>
 <TypeRow name={"value"} type={"string"}>The points, separated by commas, each `x y` or `x y curve`: coordinates from 0 to 1, curve from -1 to 1. The `value` property reads and sets them as `{ x, y, curve? }[]`.</TypeRow>
@@ -131,4 +122,8 @@ In React, the same control is the [Envelope](/docs/react/envelope) primitive of 
 | `<audio-ui-envelope-segments>` | Generates an `<audio-ui-envelope-segment>` per segment. `label` names them (`Curve {n}` by default) |
 | `<audio-ui-envelope-segment>` | A slider on the segment's curve, from -1 to 1, at its midpoint. Drag or Up and Down to bend; double click or Delete to straighten. Carries `data-flat` when the segment cannot bend |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Envelope](/docs/react/envelope).
+
+</ForFrameworks>

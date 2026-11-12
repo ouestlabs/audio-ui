@@ -3,13 +3,11 @@ title: Timeline
 description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/timeline" />
-
-## Usage
-
 `<audio-ui-timeline>` is the root of an arrangement: a ruler that sets the position, lanes of clips that move, trim and fade, loop ranges, and a viewport that scrolls and zooms. Units are arbitrary: seconds, beats or steps.
 
 <ElementsPreview name="timeline" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -114,22 +112,9 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
 
 {/* usage:end */}
 
-```html
-<audio-ui-timeline duration="32" snap-step="1">
-  <audio-ui-timeline-viewport>
-    <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
-    <audio-ui-timeline-track>
-      <audio-ui-timeline-track-header>Drums</audio-ui-timeline-track-header>
-      <audio-ui-timeline-lane seekable>
-        <audio-ui-timeline-clip aria-label="Beat" start="4" length="8">
-          <audio-ui-timeline-clip-header>Beat</audio-ui-timeline-clip-header>
-        </audio-ui-timeline-clip>
-        <audio-ui-timeline-playhead></audio-ui-timeline-playhead>
-      </audio-ui-timeline-lane>
-    </audio-ui-timeline-track>
-  </audio-ui-timeline-viewport>
-</audio-ui-timeline>
-```
+## API reference
+
+<Module from="@audio-ui/elements/timeline" />
 
 <TypeTable>
 <TypeRow name={"duration"} type={"number"} default={"1"}>Length of the timeline, in its units.</TypeRow>
@@ -170,4 +155,8 @@ Every lane sets `--timeline-unit`, the width of one unit; placed parts set `--ti
 | `<audio-ui-timeline-clip-fade-handle>` | Sets the fade at its `edge` (`in` or `out`). Double click or Enter cycles its shape |
 | `<audio-ui-timeline-clip-fade>` | Renders the fade at its `edge`, shaded with `--clip-fade-shade` |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Timeline](/docs/react/timeline).
+
+</ForFrameworks>

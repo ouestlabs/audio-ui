@@ -3,13 +3,11 @@ title: Meter
 description: "The <audio-ui-meter> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/meter" />
-
-## Usage
-
 `<audio-ui-meter>` displays one or more level channels. Levels come from the `value` and `peak` attributes or properties, one per channel, or from a live `source` property, `{ getSnapshot, subscribe }`, whose frames are written directly to the parts. A click clears clip indicators latched by a live source.
 
 <ElementsPreview name="meter" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -105,6 +103,10 @@ In React, the same control is the [Meter](/docs/react/meter) primitive of `@audi
 
 {/* usage:end */}
 
+## API reference
+
+<Module from="@audio-ui/elements/meter" />
+
 <TypeTable>
 <TypeRow name={"value"} type={"string"}>One level per channel, such as `"-12 -6"`. The count sets the number of channels.</TypeRow>
 <TypeRow name={"peak"} type={"string"}>One peak-hold level per channel. Hold time and decay are managed outside the meter.</TypeRow>
@@ -130,4 +132,8 @@ In React, the same control is the [Meter](/docs/react/meter) primitive of `@audi
 | `<audio-ui-meter-label>` | Labels its channel |
 | `<audio-ui-meter-mark>` | A scale graduation at its `value`, such as -18 |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Meter](/docs/react/meter).
+
+</ForFrameworks>

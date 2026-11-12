@@ -3,13 +3,11 @@ title: Piano roll
 description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/piano-roll" />
-
-## Usage
-
 `<audio-ui-piano-roll>` is a note editor placed inside an `<audio-ui-timeline>`, which provides its length, zoom, grid and position. Its entry point also registers the timeline and piano elements. Notes are set through the `value` property as `{ id, pitch, start, length, velocity?, chance?, muted? }[]`, and the selection through the `selection` property. Rows, notes and velocity bars are generated from them:
 
 <ElementsPreview name="piano-roll" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -120,22 +118,9 @@ In React, the same control is the [PianoRoll](/docs/react/piano-roll) primitive 
 
 {/* usage:end */}
 
-```html
-<audio-ui-timeline duration="16" snap-step="0.25">
-  <audio-ui-piano-roll mode="draw">
-    <audio-ui-piano-roll-keys>
-      <audio-ui-piano aria-label="Keys"><audio-ui-piano-keys></audio-ui-piano-keys></audio-ui-piano>
-    </audio-ui-piano-roll-keys>
-    <audio-ui-timeline-viewport>
-      <audio-ui-piano-roll-grid aria-label="Notes">
-        <audio-ui-piano-roll-rows></audio-ui-piano-roll-rows>
-        <audio-ui-piano-roll-notes></audio-ui-piano-roll-notes>
-        <audio-ui-timeline-playhead></audio-ui-timeline-playhead>
-      </audio-ui-piano-roll-grid>
-    </audio-ui-timeline-viewport>
-  </audio-ui-piano-roll>
-</audio-ui-timeline>
-```
+## API reference
+
+<Module from="@audio-ui/elements/piano-roll" />
 
 <TypeTable>
 <TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest row, a MIDI pitch. 60 is middle C.</TypeRow>
@@ -168,4 +153,8 @@ The `getNoteLabel(note)` property sets each note's accessible name, "C4, 4 to 6"
 | `<audio-ui-piano-roll-velocity-lane>` | A lane of per-note bars, through `<audio-ui-piano-roll-velocities>`, for velocity or, with `level="chance"`, probability. Each `<audio-ui-piano-roll-velocity>` is sized by `--piano-roll-level` and contains a native range input |
 | `<audio-ui-piano-roll-keys>` | Lays out the `<audio-ui-piano>` it contains on the roll's rows. Keys sound through the roll; Shift + press selects the notes of that row |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [PianoRoll](/docs/react/piano-roll).
+
+</ForFrameworks>

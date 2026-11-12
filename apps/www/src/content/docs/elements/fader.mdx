@@ -3,13 +3,11 @@ title: Fader
 description: "The <audio-ui-fader> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/fader" />
-
-## Usage
-
 `<audio-ui-fader>` is the root of a linear control, with audio defaults: vertical, from -60 to +6. It has `role="group"`, labelled by its label part.
 
 <ElementsPreview name="fader" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -101,6 +99,10 @@ In React, the same control is the [Fader](/docs/react/fader) primitive of `@audi
 
 {/* usage:end */}
 
+## API reference
+
+<Module from="@audio-ui/elements/fader" />
+
 <TypeTable>
 <TypeRow name={"min"} type={"number"} default={"-60"}></TypeRow>
 <TypeRow name={"max"} type={"number"} default={"6"}></TypeRow>
@@ -125,4 +127,8 @@ In React, the same control is the [Fader](/docs/react/fader) primitive of `@audi
 | `<audio-ui-fader-value>` | The formatted value |
 | `<audio-ui-fader-label>` | Labels the group, and the input when the thumb has no accessible name |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Fader](/docs/react/fader).
+
+</ForFrameworks>

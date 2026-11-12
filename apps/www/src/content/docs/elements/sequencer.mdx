@@ -3,13 +3,11 @@ title: Sequencer
 description: "The <audio-ui-sequencer> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/sequencer" />
-
-## Usage
-
 `<audio-ui-sequencer>` is a step grid with one row per sound and `role="group"`. Pressing a cell toggles it, and dragging applies the new state to every cell crossed. The cells share one tab stop and are navigated with the arrow keys. Rows and steps are generated from templates:
 
 <ElementsPreview name="sequencer" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -114,6 +112,10 @@ In React, the same control is the [Sequencer](/docs/react/sequencer) primitive o
 
 {/* usage:end */}
 
+<ForFrameworks only="web react">
+
+In plain HTML, a row of `<template>` gives the rows and their steps from labels:
+
 ```html
 <audio-ui-sequencer aria-label="Pattern" default-value="x...x... ..x...x.">
   <audio-ui-sequencer-rows labels="Kick, Snare">
@@ -125,6 +127,12 @@ In React, the same control is the [Sequencer](/docs/react/sequencer) primitive o
   </audio-ui-sequencer-rows>
 </audio-ui-sequencer>
 ```
+
+</ForFrameworks>
+
+## API reference
+
+<Module from="@audio-ui/elements/sequencer" />
 
 <TypeTable>
 <TypeRow name={"value"} type={"string"}>The pattern as text: one word per row, one character per step, `x` for on and `.` for off. The `value` property reads and sets it as `boolean[][]`.</TypeRow>
@@ -147,4 +155,8 @@ The `velocities` property holds each step's velocity as `number[][]` (0 to 1). T
 | `<audio-ui-sequencer-cell>` | A step, a toggle button pressed when on (`data-on`), labelled with its row and step ("Kick, step 5") |
 | `<audio-ui-sequencer-velocity>` | A step's velocity as a bar sized by `--sequencer-velocity`. Press or drag to set it; Alt + click or Delete resets it to full; its native range input takes the keyboard |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Sequencer](/docs/react/sequencer).
+
+</ForFrameworks>

@@ -3,13 +3,11 @@ title: XY pad
 description: "The <audio-ui-xypad> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/xypad" />
-
-## Usage
-
 `<audio-ui-xypad>` controls a two-dimensional value `{ x, y }`. A press moves the point to the pointer and a drag follows it; the wheel, the trackpad and the arrow keys move it; a double click or Delete resets it. The position is exposed as `--xy-pad-x` (from the left) and `--xy-pad-y` (from the top), as percentages.
 
 <ElementsPreview name="xypad" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -95,6 +93,10 @@ In React, the same control is the [XYPad](/docs/react/xypad) primitive of `@audi
 
 {/* usage:end */}
 
+## API reference
+
+<Module from="@audio-ui/elements/xypad" />
+
 <TypeTable>
 <TypeRow name={"min-x"} type={"number"} default={"0"}></TypeRow>
 <TypeRow name={"max-x"} type={"number"} default={"100"}></TypeRow>
@@ -119,4 +121,8 @@ In React, the same control is the [XYPad](/docs/react/xypad) primitive of `@audi
 | `<audio-ui-xypad-value>` | Both axes, formatted as `"x, y"` |
 | `<audio-ui-xypad-label>` | Labels both inputs when the thumb has no accessible name |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [XYPad](/docs/react/xypad).
+
+</ForFrameworks>

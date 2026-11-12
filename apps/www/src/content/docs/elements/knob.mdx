@@ -3,13 +3,11 @@ title: Knob
 description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/knob" />
-
-## Usage
-
 `<audio-ui-knob>` is the root of a rotary control. It owns the value and renders its parts from it.
 
 <ElementsPreview name="knob" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -104,6 +102,10 @@ In React, the same control is the [Knob](/docs/react/knob) primitive of `@audio-
 
 {/* usage:end */}
 
+## API reference
+
+<Module from="@audio-ui/elements/knob" />
+
 <TypeTable>
 <TypeRow name={"min"} type={"number"} default={"0"}></TypeRow>
 <TypeRow name={"max"} type={"number"} default={"100"}></TypeRow>
@@ -129,4 +131,8 @@ In React, the same control is the [Knob](/docs/react/knob) primitive of `@audio-
 | `<audio-ui-knob-value>` | The formatted value |
 | `<audio-ui-knob-label>` | Labels the input when the thumb has no accessible name |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Knob](/docs/react/knob).
+
+</ForFrameworks>

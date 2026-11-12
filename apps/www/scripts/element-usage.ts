@@ -14,6 +14,8 @@ const START =
 const END = "{/* usage:end */}";
 /** Where a binding goes in a tag of the markup. */
 const BIND = "%bind%";
+/** Where a part takes its properties. */
+const PROPS = "%props%";
 /** What ends a tag's name: a space, the bracket or the binding's mark. */
 const TAG_END = /[\s>%]/;
 const KEBAB = /-([a-z])/g;
@@ -41,12 +43,30 @@ type Follow =
     }
   | { event: string; kind: "event"; read: string };
 
+/** A JavaScript value a part takes as a property, which no attribute carries: a function or an array. */
+interface Property {
+  /** What it holds, as the comment over its declaration says. */
+  about: string;
+  /** Its first value, as the scripts declare it. */
+  initial: string;
+  /** The part's property. */
+  property: string;
+  /** The part, whose line in the markup holds `%props%`. */
+  tag: string;
+  /** Its TypeScript type, for the Vue and Svelte scripts. */
+  type: string;
+  /** The name the scripts give it. */
+  value: string;
+}
+
 interface Usage {
   /** The element's entry point, and its page. */
   entry: string;
   follow: Follow;
   /** The markup inside the root, one line a tag, two spaces a level; `%bind%` where the followed part takes its binding. */
   inner: readonly string[];
+  /** The values its parts take as properties. */
+  properties?: readonly Property[];
   /** The React primitive's name, as its page is titled. */
   react: string;
   /** The root tag and its attributes; `%bind%` where it takes the binding. */
@@ -180,8 +200,19 @@ export const USAGES: Record<string, Usage> = {
     },
     inner: [
       "<audio-ui-plot-grid></audio-ui-plot-grid>",
-      '<audio-ui-plot-curve fill-to="0"></audio-ui-plot-curve>',
+      '<audio-ui-plot-curve fill-to="0"%props%></audio-ui-plot-curve>',
       '<audio-ui-plot-handle aria-label="Band"%bind%></audio-ui-plot-handle>',
+    ],
+    properties: [
+      {
+        about:
+          "The curve: its level in dB at each frequency, such as a filter's response.",
+        initial: "(hz) => 0",
+        property: "fn",
+        tag: "audio-ui-plot-curve",
+        type: "(hz: number) => number",
+        value: "response",
+      },
     ],
     react: "Plot",
     root: '<audio-ui-plot min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">',
@@ -224,7 +255,18 @@ export const USAGES: Record<string, Usage> = {
       "</audio-ui-waveform-control>",
     ],
     react: "Waveform",
-    root: '<audio-ui-waveform duration="96"%bind%>',
+    properties: [
+      {
+        about:
+          "Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.",
+        initial: "[]",
+        property: "peaks",
+        tag: "audio-ui-waveform",
+        type: "number[]",
+        value: "peaks",
+      },
+    ],
+    root: '<audio-ui-waveform duration="96"%props%%bind%>',
   },
   xypad: {
     entry: "xypad",
@@ -270,6 +312,30 @@ function binding(follow: Follow, flavor: Flavor): string {
     : ` value={${follow.name}}`;
 }
 
+/** What a line's tag takes of the properties, in a flavor of markup: plain HTML sets them from its script. */
+function propertyBindings(usage: Usage, line: string, flavor: Flavor) {
+  const [tag] = line.trim().slice(1).split(TAG_END);
+  return (usage.properties ?? [])
+    .filter((each) => each.tag === tag && flavor !== "web")
+    .map((each) =>
+      flavor === "vue"
+        ? ` :${each.property}="${each.value}"`
+        : ` ${each.property}={${each.value}}`
+    )
+    .join("");
+}
+
+/** The properties' declarations in a script, each under what it holds; typed in Vue's and Svelte's. */
+function declarations(usage: Usage, typed: boolean): string[] {
+  return (usage.properties ?? []).flatMap((each) => [
+    "",
+    `// ${each.about}`,
+    typed
+      ? `const ${each.value}: ${each.type} = ${each.initial};`
+      : `const ${each.value} = ${each.initial};`,
+  ]);
+}
+
 /** The element's markup in a flavor: the binding on its tag, empty tags closed as the flavor writes them. */
 function markup(usage: Usage, flavor: Flavor): string[] {
   const bind = binding(usage.follow, flavor);
@@ -278,7 +344,11 @@ function markup(usage: Usage, flavor: Flavor): string[] {
     usage.root,
     ...usage.inner.map((line) => `  ${line}`),
     close,
-  ].map((line) => line.replace(BIND, line.includes(BIND) ? bind : ""));
+  ].map((line) =>
+    line
+      .replace(BIND, line.includes(BIND) ? bind : "")
+      .replace(PROPS, propertyBindings(usage, line, flavor))
+  );
   return flavor === "vue"
     ? lines.map((line) => line.replace(EMPTY_TAG, "<$1$2 />"))
     : lines;
@@ -313,6 +383,14 @@ function webSnippet(usage: Usage): string {
     `  import "@audio-ui/elements/${usage.entry}";`,
     "",
     `  const ${name} = document.querySelector("${tag}");`,
+    ...indent(declarations(usage, false), 2),
+    ...indent(
+      (usage.properties ?? []).map(
+        (each) =>
+          `${each.tag === tag ? name : `document.querySelector("${each.tag}")`}.${each.property} = ${each.value};`
+      ),
+      2
+    ),
     ...indent(listen, 2),
     "</script>",
     "```",
@@ -334,6 +412,7 @@ function vueSnippet(usage: Usage): string {
     '<script setup lang="ts">',
     `import "@audio-ui/elements/${usage.entry}";`,
     ...state,
+    ...declarations(usage, true),
     "</script>",
     "",
     "<template>",
@@ -352,7 +431,14 @@ function svelteSnippet(usage: Usage): string {
   return [
     "```svelte",
     '<script lang="ts">',
-    ...indent([`import "@audio-ui/elements/${usage.entry}";`, ...state], 2),
+    ...indent(
+      [
+        `import "@audio-ui/elements/${usage.entry}";`,
+        ...state,
+        ...declarations(usage, true),
+      ],
+      2
+    ),
     "</script>",
     "",
     ...markup(usage, "svelte"),

@@ -3,13 +3,11 @@ title: Waveform
 description: "The <audio-ui-waveform> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/waveform" />
-
-## Usage
-
 `<audio-ui-waveform>` displays audio and, with a control part, seeks through it: a press seeks to the pointer, a drag scrubs, and the keyboard steps. The shape comes from the `peaks` property or a live `levels` source; the position from `value` or a live `source`, exposed as `--waveform-position`:
 
 <ElementsPreview name="waveform" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -36,6 +34,10 @@ description: "The <audio-ui-waveform> custom element of @audio-ui/elements: its 
   import "@audio-ui/elements/waveform";
 
   const waveform = document.querySelector("audio-ui-waveform");
+
+  // Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+  const peaks = [];
+  waveform.peaks = peaks;
   waveform.addEventListener("input", (event) =>
     console.log(event.detail.value)
   );
@@ -52,10 +54,13 @@ import "@audio-ui/elements/waveform";
 import { ref } from "vue";
 
 const position = ref(30);
+
+// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+const peaks: number[] = [];
 </script>
 
 <template>
-  <audio-ui-waveform duration="96" v-model="position">
+  <audio-ui-waveform duration="96" :peaks="peaks" v-model="position">
     <audio-ui-waveform-control aria-label="Seek">
       <audio-ui-waveform-canvas />
       <audio-ui-waveform-playhead />
@@ -73,9 +78,12 @@ const position = ref(30);
   import "@audio-ui/elements/waveform";
 
   let position = $state(30);
+
+  // Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
+  const peaks: number[] = [];
 </script>
 
-<audio-ui-waveform duration="96" value={position} oninput={(event) => (position = event.detail.value)}>
+<audio-ui-waveform duration="96" peaks={peaks} value={position} oninput={(event) => (position = event.detail.value)}>
   <audio-ui-waveform-control aria-label="Seek">
     <audio-ui-waveform-canvas></audio-ui-waveform-canvas>
     <audio-ui-waveform-playhead></audio-ui-waveform-playhead>
@@ -95,17 +103,9 @@ In React, the same control is the [Waveform](/docs/react/waveform) primitive of 
 
 {/* usage:end */}
 
-```html
-<audio-ui-waveform duration="102">
-  <audio-ui-waveform-control aria-label="Seek">
-    <audio-ui-waveform-canvas></audio-ui-waveform-canvas>
-    <audio-ui-waveform-playhead></audio-ui-waveform-playhead>
-  </audio-ui-waveform-control>
-</audio-ui-waveform>
-<script type="module">
-  document.querySelector("audio-ui-waveform").peaks = peaks;
-</script>
-```
+## API reference
+
+<Module from="@audio-ui/elements/waveform" />
 
 <TypeTable>
 <TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit of the position, typically seconds.</TypeRow>
@@ -132,4 +132,8 @@ In React, the same control is the [Waveform](/docs/react/waveform) primitive of 
 | `<audio-ui-waveform-region>` | A loop or selection from `value` (`"start end"`). Draggable unless `movable="false"`. Fires `regioninput` and `regionchange` with `{ value, edge, reason }` |
 | `<audio-ui-waveform-region-handle>` | Resizes the region's `edge` (`start` or `end`) by drag or through its native range input |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Waveform](/docs/react/waveform).
+
+</ForFrameworks>

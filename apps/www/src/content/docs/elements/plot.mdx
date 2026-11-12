@@ -3,13 +3,11 @@ title: Plot
 description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/plot" />
-
-## Usage
-
 `<audio-ui-plot>` defines two axes and lays out everything drawn on them in axis units, for response curves, filter displays and transfer functions. Each drawing part renders its own SVG covering the plot, in `currentColor`, with a constant stroke width. Curves take their function and traces their live source as properties:
 
 <ElementsPreview name="plot" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -35,6 +33,10 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
   import "@audio-ui/elements/plot";
 
   const plotHandle = document.querySelector("audio-ui-plot-handle");
+
+  // The curve: its level in dB at each frequency, such as a filter's response.
+  const response = (hz) => 0;
+  document.querySelector("audio-ui-plot-curve").fn = response;
   plotHandle.addEventListener("input", (event) =>
     console.log(event.detail.value)
   );
@@ -51,12 +53,15 @@ import "@audio-ui/elements/plot";
 import { ref } from "vue";
 
 const band = ref({ x: 800, y: 6 });
+
+// The curve: its level in dB at each frequency, such as a filter's response.
+const response: (hz: number) => number = (hz) => 0;
 </script>
 
 <template>
   <audio-ui-plot min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
     <audio-ui-plot-grid />
-    <audio-ui-plot-curve fill-to="0" />
+    <audio-ui-plot-curve fill-to="0" :fn="response" />
     <audio-ui-plot-handle aria-label="Band" v-model="band" />
   </audio-ui-plot>
 </template>
@@ -71,11 +76,14 @@ const band = ref({ x: 800, y: 6 });
   import "@audio-ui/elements/plot";
 
   let band = $state({ x: 800, y: 6 });
+
+  // The curve: its level in dB at each frequency, such as a filter's response.
+  const response: (hz: number) => number = (hz) => 0;
 </script>
 
 <audio-ui-plot min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
   <audio-ui-plot-grid></audio-ui-plot-grid>
-  <audio-ui-plot-curve fill-to="0"></audio-ui-plot-curve>
+  <audio-ui-plot-curve fill-to="0" fn={response}></audio-ui-plot-curve>
   <audio-ui-plot-handle aria-label="Band" value={band} oninput={(event) => (band = event.detail.value)}></audio-ui-plot-handle>
 </audio-ui-plot>
 ```
@@ -92,17 +100,9 @@ In React, the same control is the [Plot](/docs/react/plot) primitive of `@audio-
 
 {/* usage:end */}
 
-```html
-<audio-ui-plot min-x="20" max-x="20000" scale-x="log" min-y="-24" max-y="24">
-  <audio-ui-plot-grid></audio-ui-plot-grid>
-  <audio-ui-plot-line axis="y" value="0"></audio-ui-plot-line>
-  <audio-ui-plot-curve></audio-ui-plot-curve>
-  <audio-ui-plot-handle aria-label="Low" value="200 6"></audio-ui-plot-handle>
-</audio-ui-plot>
-<script type="module">
-  document.querySelector("audio-ui-plot-curve").fn = (hz) => response(hz);
-</script>
-```
+## API reference
+
+<Module from="@audio-ui/elements/plot" />
 
 <TypeTable>
 <TypeRow name={"min-x"} type={"number"} default={"0"}></TypeRow>
@@ -130,4 +130,8 @@ The `valueAt(clientX, clientY)` method converts a pointer position into axis uni
 | `<audio-ui-plot-cursor>` | Tracks a mouse or pen over the plot, setting `--plot-cursor-x`, `--plot-cursor-y` and `data-active` |
 | `<audio-ui-plot-cursor-readout>` | Inside the cursor, the value under the pointer as text, formatted by its `format` property |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Plot](/docs/react/plot).
+
+</ForFrameworks>

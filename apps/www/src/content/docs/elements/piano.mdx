@@ -3,13 +3,11 @@ title: Piano
 description: "The <audio-ui-piano> custom element of @audio-ui/elements: its attributes, its parts and a live preview."
 ---
 
-<Module from="@audio-ui/elements/piano" />
-
-## Usage
-
 `<audio-ui-piano>` is a playable keyboard with `role="group"`. A key sounds while pressed, by pointer or with Enter and Space. Dragging glides across keys, and each pointer holds its own key, so chords can be played on touch screens. The keys share one tab stop and are navigated with the arrow keys, by octave with Shift.
 
 <ElementsPreview name="piano" />
+
+## Usage
 
 {/* usage:start: written by `bun scripts/element-usage.ts --write` */}
 
@@ -81,6 +79,10 @@ In React, the same control is the [Piano](/docs/react/piano) primitive of `@audi
 
 {/* usage:end */}
 
+## API reference
+
+<Module from="@audio-ui/elements/piano" />
+
 <TypeTable>
 <TypeRow name={"min-pitch"} type={"number"} default={"48"}>Lowest MIDI pitch, inclusive. 60 is middle C.</TypeRow>
 <TypeRow name={"max-pitch"} type={"number"} default={"72"}>Highest MIDI pitch, inclusive.</TypeRow>
@@ -102,4 +104,8 @@ In React, the same control is the [Piano](/docs/react/piano) primitive of `@audi
 | `<audio-ui-piano-key>` | A key, a button positioned for its `pitch` and labelled with its name ("C4"). `data-color` is `black` or `white` |
 | `<audio-ui-piano-key-label>` | The name of its key, hidden from assistive technology |
 
+<ForFrameworks only="react">
+
 The same control in React, and its parts' props: [Piano](/docs/react/piano).
+
+</ForFrameworks>
