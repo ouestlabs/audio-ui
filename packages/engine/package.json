@@ -47,6 +47,10 @@
       "types": "./dist/format/index.d.ts",
       "import": "./dist/format.js"
     },
+    "./repair": {
+      "types": "./dist/repair/index.d.ts",
+      "import": "./dist/repair.js"
+    },
     "./kernels": {
       "types": "./dist/kernels/index.d.ts",
       "import": "./dist/kernels.js"
@@ -92,6 +96,7 @@
     "@audio/decode-aiff": "1.3.1",
     "@audio/decode-caf": "1.4.2",
     "@audio/decode-mp4": "1.3.1",
+    "@audio/denoise": "0.11.2",
     "@audio/dynamics-compand": "0.1.7",
     "@audio/dynamics-compressor": "0.3.1",
     "@audio/dynamics-deesser": "0.4.1",

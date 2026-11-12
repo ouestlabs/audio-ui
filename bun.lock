@@ -274,7 +274,7 @@
     },
     "packages/engine": {
       "name": "@audio-ui/engine",
-      "version": "0.7.0",
+      "version": "0.9.0",
       "dependencies": {
         "@audio-ui/core": "^0.29.1",
         "@audio/beat-detect": "1.1.0",
@@ -282,6 +282,7 @@
         "@audio/decode-aiff": "1.3.1",
         "@audio/decode-caf": "1.4.2",
         "@audio/decode-mp4": "1.3.1",
+        "@audio/denoise": "0.11.2",
         "@audio/dynamics-compand": "0.1.7",
         "@audio/dynamics-compressor": "0.3.1",
         "@audio/dynamics-deesser": "0.4.1",
@@ -540,6 +541,42 @@
 
     "@audio/decode-wav": ["@audio/decode-wav@2.0.0", "", {}, "sha512-fs5MxpGxGwhftXGmIgKT1zzEshQ0vlNkNN/HdHXTZevPenHOxEDblVHKZbhC0ip7jlIi4aV4If6aC+VKrWb6Hw=="],
 
+    "@audio/denoise": ["@audio/denoise@0.11.2", "", { "dependencies": { "@audio/denoise-debleed": "^0.3.0", "@audio/denoise-debreath": "^0.4.0", "@audio/denoise-declick": "^0.4.0", "@audio/denoise-declip": "^0.5.1", "@audio/denoise-decrackle": "^0.4.0", "@audio/denoise-dehum": "^0.7.1", "@audio/denoise-deplosive": "^0.3.0", "@audio/denoise-dereverb": "^0.6.0", "@audio/denoise-desilence": "^0.2.1", "@audio/denoise-desqueak": "^0.3.0", "@audio/denoise-detect": "^0.7.1", "@audio/denoise-dewind": "^0.4.0", "@audio/denoise-dewow": "^0.3.0", "@audio/denoise-omlsa": "^0.6.0", "@audio/denoise-repair": "^0.4.0", "@audio/denoise-spectral": "^0.3.0", "@audio/denoise-wiener": "^0.4.0", "@audio/dynamics-gate": "^0.1.4", "@audio/noise-estimate": "^2.3.0", "@audio/quality": "^1.0.0", "@audio/stft": "^2.0.0", "@audio/vad": "^2.0.1" } }, "sha512-xXvZvVA4fIb7wQf33qQ8LcTB1KXhDgmzLhO7fYPG4vvSueIko7NIpqFNsd1y1O6vCKf7p4l+hwldgIaeS8Sehg=="],
+
+    "@audio/denoise-debleed": ["@audio/denoise-debleed@0.3.0", "", { "dependencies": { "fourier-transform": "^2.4.0" } }, "sha512-suYNnU+8cg9UEvq0W+JHTc3kyN69bcOeuDes5A5a0LCXkGnrDXmh2N9bHPQM5oqJC+rSeKDnswznAYFYAhbdNQ=="],
+
+    "@audio/denoise-debreath": ["@audio/denoise-debreath@0.4.0", "", { "dependencies": { "@audio/biquad": "^1.1.0", "@audio/vad": "^2.0.1" } }, "sha512-GAPo9nIlBF2SktyAyLXJR5UklSszjIKP7/WiPVSTZBxTs9nv1kcMEU1j0HXv6aWStP57tFYb17IziekT1mrl3g=="],
+
+    "@audio/denoise-declick": ["@audio/denoise-declick@0.4.0", "", { "dependencies": { "@audio/lpc": "^1.2.0" } }, "sha512-6WcvIJG27gNGlCFFKKsqV5fOxH0cpbGtpDUiLeb68XmzJTNh1231ufyZboa/nbglhaT1sq2kBshzJbIxP77qRw=="],
+
+    "@audio/denoise-declip": ["@audio/denoise-declip@0.5.1", "", { "dependencies": { "@audio/lpc": "^1.2.0", "fourier-transform": "^2.4.0" } }, "sha512-cBnv5iVEMLYVrF0AvsFjv98rBZ5d8C3hv/k1K8HvTKg27lG7nfgfvK93Vuf8dAgg17ZTnXPbACcj2egn6bOVFQ=="],
+
+    "@audio/denoise-decrackle": ["@audio/denoise-decrackle@0.4.0", "", { "dependencies": { "@audio/lpc": "^1.2.0" } }, "sha512-kvVLUwAsREovUC13yNzczClgC629cQcNCPnoDF7P/TxQL/93aFQMhcqrRluc6Zq9eAlSi/Y347ZqBoEArLyoSA=="],
+
+    "@audio/denoise-dehum": ["@audio/denoise-dehum@0.7.1", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-PNl01i9gWJYEnsimYvQuRNOdnGmVOZ/M2LyCpg69vbe7PGcOoOnqgsZbt/p0QA1djUN1dB5/rzjEhtO8RIKyyA=="],
+
+    "@audio/denoise-deplosive": ["@audio/denoise-deplosive@0.3.0", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-arfvoabE0ajjvUWa1jj+vKbyuYponWHBCuZM4NrQVnVngVTj/hItnGbH8NDTPyvowx/AdKmC6beceHHA1xii3w=="],
+
+    "@audio/denoise-dereverb": ["@audio/denoise-dereverb@0.6.0", "", { "dependencies": { "@audio/stft": "^2.0.0" } }, "sha512-keKfvuKA45Q2dYP8BuspVgx2y5foIzMygBuRmIpt7InPAbQmQUgr3/Vbgv2f74EV07e1KyvR3K5uvtDTQOkGaQ=="],
+
+    "@audio/denoise-desilence": ["@audio/denoise-desilence@0.2.1", "", { "dependencies": { "@audio/stft": "^2.0.0", "@audio/vad": "^2.0.1" } }, "sha512-NeKAb/LDMmRcPY/24hyNTDKAjJsTHOVKywGKQVK3k9tP89jAeQ7TgVKctkvz/o92QpenwA8ox8Xql2LCvGMRQw=="],
+
+    "@audio/denoise-desqueak": ["@audio/denoise-desqueak@0.3.0", "", { "dependencies": { "@audio/biquad": "^1.2.1", "@audio/denoise-dehum": "^0.6.0", "@audio/denoise-omlsa": "^0.6.0", "@audio/stft": "^2.0.0", "fourier-transform": "^2.4.0" } }, "sha512-j77hMQVrNUomM9/yd7vEopwkKmJ0OpGlwvhABzqeGz6cxUVDiDu48YaHSw5cH5QDL+rDRIB/wzKl97Oo1T9lxQ=="],
+
+    "@audio/denoise-detect": ["@audio/denoise-detect@0.7.1", "", { "dependencies": { "@audio/denoise-declick": "^0.4.0", "@audio/denoise-dehum": "^0.7.1", "@audio/denoise-dereverb": "^0.6.0", "@audio/denoise-dewind": "^0.4.0", "@audio/denoise-omlsa": "^0.6.0", "@audio/denoise-wiener": "^0.4.0", "@audio/dynamics-deesser": "^0.4.0", "@audio/lpc": "^1.2.0", "@audio/stft": "^2.0.0" } }, "sha512-iiy2B6FawI13NPWWeqScVHT7VOLpxv0w4TY9P4aBpPzm+GzETH8w2zcBHey48J7OUsxqV1j9+JMvvn9FAcj3Ow=="],
+
+    "@audio/denoise-dewind": ["@audio/denoise-dewind@0.4.0", "", { "dependencies": { "@audio/stft": "^2.0.0", "fourier-transform": "^2.4.0" } }, "sha512-AxUHJV7WC4NR6E7uCWxypUQhzIshvQCWrUbPydJvhr6Ly1EVt/USlqey+YxZHU9g1JCXPjCHQHe5YRYNfIK67w=="],
+
+    "@audio/denoise-dewow": ["@audio/denoise-dewow@0.3.0", "", { "dependencies": { "@audio/biquad": "^1.2.1", "@audio/pitch-pyin": "^1.0.1", "@audio/resample-sinc": "^1.1.2", "@audio/stft": "^2.0.0" } }, "sha512-6oBv1/f0j+3k0Lc0BKLBq1s7gIs9q2S3n7DXVtsLfLNmlkpoioJ9B1WO8CEr5tCPE+oC5xa3SsIRISMzOm6lzg=="],
+
+    "@audio/denoise-omlsa": ["@audio/denoise-omlsa@0.6.0", "", { "dependencies": { "@audio/noise-estimate": "^2.3.0", "@audio/stft": "^2.0.0", "fourier-transform": "^2.3.0" } }, "sha512-e4LggiFVsDmCES3cqGU9gqM0z/lw0EYwwxA+u9XvMMqDO/vJE4Lj40tBMCPkIevIFg3XUbSodo5gq1L0Px0U+w=="],
+
+    "@audio/denoise-repair": ["@audio/denoise-repair@0.4.0", "", { "dependencies": { "@audio/lpc": "^1.1.0", "@audio/sinusoidal-track": "^1.0.2", "@audio/stft": "^2.0.0", "fourier-transform": "^2.3.0" } }, "sha512-U48Yk0Baf6AU9KkAz1Qdi1PDkla3qSIzFH1uuuR/as8/jRSKRqPmSPW04KQHXkruXJerrcvLN+9mSttWIpL9PA=="],
+
+    "@audio/denoise-spectral": ["@audio/denoise-spectral@0.3.0", "", { "dependencies": { "@audio/noise-estimate": "^2.3.0", "@audio/stft": "^2.0.0" } }, "sha512-dxNtciO8vEq3HG0NWGXBTZW1Cm+IZx2V6ZFL87O4eyJtjjmYm1/gwyBMX8vgaUtLhUbN6am2ICp01YCmgMsCaQ=="],
+
+    "@audio/denoise-wiener": ["@audio/denoise-wiener@0.4.0", "", { "dependencies": { "@audio/noise-estimate": "^2.3.0", "@audio/stft": "^2.0.0" } }, "sha512-IlEM5l4bQlHPFRcIgbzE/0rD5Xq19s0YO72OpNU2zlolgdejKn7O2macoX3iguNtYljMsCjWJH0cXdWuB+1F6A=="],
+
     "@audio/dynamics-compand": ["@audio/dynamics-compand@0.1.7", "", { "dependencies": { "@audio/dynamics-envelope": "^0.1.0" } }, "sha512-TnhUDM+G+wY9z0F1LvVnIGxnbyohHJ8bRKEIv/GzkwnnLh/mgoAEzBymEgDrauTI0jD/LV7Kr9X9UFoobVuJFQ=="],
 
     "@audio/dynamics-compressor": ["@audio/dynamics-compressor@0.3.1", "", {}, "sha512-xN18QJ8fGULtGYyZ6+ybhDcQpJo4sLWeKaWSNq1RlPdjVHcBy7kRKetsJnyVooAb3B1HW9GNPLlt5EuKMRlLEA=="],
@@ -650,6 +687,8 @@
 
     "@audio/loudness-truepeak": ["@audio/loudness-truepeak@1.1.7", "", {}, "sha512-4kVZOM5vTSV+gDyM9aru6+K+1i6knOtw1L2xzokkTlRk03FihC4RNnmPkpCJr0a0+ZSPCljqLgXaZdcSkUzPTw=="],
 
+    "@audio/lpc": ["@audio/lpc@1.2.0", "", {}, "sha512-D+ZowW7+Ub4BTPCw5iJfQOXer4imNhZ8x2ykqCPCQpzW6WoOcIXlhopLctaZZG13QOXVhOfj5VGlRkj6xCAQRQ=="],
+
     "@audio/measure-ir": ["@audio/measure-ir@1.0.2", "", { "dependencies": { "fourier-transform": "^2.2.0" } }, "sha512-lQK7pPjg9+tFm0L5n88IuH99yhe8L8atA9+AQiEsYQP7xGvs6Msn4XLNc0WWYEE3huCQo6FJr8hDIt5mVNtSmw=="],
 
     "@audio/measure-latency": ["@audio/measure-latency@1.0.2", "", { "dependencies": { "@audio/measure-ir": "^1.0.0" } }, "sha512-Uvk4+GZdnAwKpnmgEsGE4oQp/YihhbkP4wFyAG+M1oqqe9GAgTZiIhuJ4p2GCAZWV0/ca02C7Zoz7Vk+YPuW3Q=="],
@@ -666,11 +705,17 @@
 
     "@audio/musicxml": ["@audio/musicxml@0.1.0", "", {}, "sha512-naW+wO4PPrGNUS/xcPrna/QGX51p5H7/kJS95FOxtWkFStqs35eW8LQeDIojAVnbOggTuxZ3y5FDlT7yS2z5xw=="],
 
+    "@audio/noise-estimate": ["@audio/noise-estimate@2.3.0", "", { "dependencies": { "@audio/stft": "^2.0.0" } }, "sha512-n47pLPo2eanhSfrtyniyN/MdAVsasIlR1yoVDzCkEaedJEEf9RY+iBKp4BFsJ5lw39EhxjRGpMhco8iinol6XQ=="],
+
     "@audio/note": ["@audio/note@1.0.3", "", {}, "sha512-YwKuvpq6t9O91CNLJhvd/AyqZRSMmxD9DDlGy/kNvpAcHS5+3QFvJeQ+uC33caxtCOksCnX0e1Guch7oYZ8dOQ=="],
 
     "@audio/onset": ["@audio/onset@1.0.3", "", { "dependencies": { "fourier-transform": "^2.2.0", "window-function": "^3.0.0" } }, "sha512-zt/RDdOt6WhSbtd+GCtCg62PvNFynjR3/Sm0suJJfRcRVXM3VDWz3E6Sz27oSOOyEx8Ds6GWJg1XRqY/Wp8J3Q=="],
 
+    "@audio/pitch-pyin": ["@audio/pitch-pyin@1.0.1", "", {}, "sha512-ecBicUx+arjwggUy/p0EbHRB9b28zoU5n3ESp0RRy/udvAT6c1bqCyqxFpaobDPG4oPVFLFEcVfmrOMFHgixqw=="],
+
     "@audio/pitch-yin": ["@audio/pitch-yin@1.0.6", "", {}, "sha512-HRJM6g/tgMBKDnFeXGUgy5xj1RWcevr1vzokyQO+7fpi/+aMTU7gHVU7Qb7QCwyo38hibeWSI/oLkcH9lQCzcA=="],
+
+    "@audio/quality": ["@audio/quality@1.0.1", "", { "dependencies": { "fourier-transform": "^2.2.0" } }, "sha512-vVQFB98yadQmu8V6dXM2veuYp62wEXyFbUoKlL3CbmcqHUz0WmymSQkbUUuoLXib7bqwiy+0VITBIdzicirOBQ=="],
 
     "@audio/resample-polyphase": ["@audio/resample-polyphase@1.1.0", "", {}, "sha512-mSPyTABEzAcF+/kI2gys0+tI9GCJsYQ81tVpzY81rvLCHbop2HVFsbJLVRHHXD8mTGX9c27ggkthF+QnnHLqSA=="],
 
@@ -718,11 +763,15 @@
 
     "@audio/shift-wsola": ["@audio/shift-wsola@1.1.0", "", { "dependencies": { "@audio/resample-sinc": "^1.1.0", "@audio/stretch-wsola": "^1.0.1" } }, "sha512-Ii4HX8qtr3p4XiqjdgPs8eLvr/lopa2RMSYiDlD+15HuwbNbSj7i394iiG32gKK2/mwHcnx0D0CVKQTLCotDZg=="],
 
+    "@audio/sinusoidal-track": ["@audio/sinusoidal-track@1.0.2", "", { "dependencies": { "@audio/window": "^1.0.2", "fourier-transform": "^2.2.0" } }, "sha512-w8oDST6XEmOwS2fcdrP3Q06nWmPLg0igtZXYFNUPrN3wyMVkjlzMBSjCBztcn1Bz5IIdeyfgGpioM3WqjLpLdg=="],
+
     "@audio/spatial-binaural": ["@audio/spatial-binaural@0.1.1", "", {}, "sha512-N1Upm2h9uqA6yOZZhWf5DgaLe9+bOD9ASe12fadfMfmM3I/nSV5//Nqg51e5pnlNh1ttP6loD/qUO+UsHOT3jg=="],
 
     "@audio/spatial-microshift": ["@audio/spatial-microshift@1.1.3", "", {}, "sha512-xdGFD4IxEqnPjDLb0Pp8zPalqbdlV9ZR3hPWgC2j8VPUpmOELR2siFJLAqcbnrmcupt6y2e7GGhJo71F1lusXQ=="],
 
     "@audio/spectral-pvoc": ["@audio/spectral-pvoc@1.1.1", "", {}, "sha512-v3mHH7fLFvJSLLif3TH2YhhWxgpwG6y2YbDcazHS8JgOhcBrF44RMzHjfLlpd8j7H7FtBbQNmrcyqy3F+wNuqQ=="],
+
+    "@audio/stft": ["@audio/stft@2.0.0", "", { "dependencies": { "fourier-transform": "^2.3.0", "window-function": "^3.0.0" } }, "sha512-LXBAOKP01lEd4UQYWPI3/ErL367jTrUTZMFgN57QJFTmoQegRn3IRyXQz297OL0hfb4xm5UkBb9zjggWdcl4wQ=="],
 
     "@audio/stretch": ["@audio/stretch@2.3.0", "", { "dependencies": { "@audio/stretch-hybrid": "^1.2.3", "@audio/stretch-paulstretch": "^1.2.2", "@audio/stretch-pghi": "^1.3.0", "@audio/stretch-psola": "^1.2.3", "@audio/stretch-pvoc": "^1.2.3", "@audio/stretch-pvoc-lock": "^1.3.3", "@audio/stretch-pvsola": "^1.0.0", "@audio/stretch-sms": "^1.2.2", "@audio/stretch-transient": "^1.2.3", "@audio/stretch-wsola": "^2.0.0" } }, "sha512-uMiYRHexiwz2GA10XQVVD8WCT9hKBw1t4qVOlKaUxUrXMwuz15vruK7aUZo3B9g+hTDzro7Bg5RO4SnoeFGe9w=="],
 
@@ -748,7 +797,11 @@
 
     "@audio/synth-noise": ["@audio/synth-noise@2.0.1", "", {}, "sha512-VuuiIKjqfJJ5PoCVn8heWcI1H6gy6EO0l1Hv+oGNnSrch0FP5Vkstjj9UdwINTeyLZVE3pEuAkpE04l7O2TXpg=="],
 
+    "@audio/vad": ["@audio/vad@2.0.1", "", { "dependencies": { "@audio/noise-estimate": "^2.2.0", "@audio/stft": "^2.0.0", "fourier-transform": "^2.4.0" } }, "sha512-dvzqufPt4B4hjaF3UBK02m5F3yvoorrP9JxMavFOy5DEq2tcPwhQgx65azKOD+AUox77dxXl4YI3uMk90+RxHg=="],
+
     "@audio/weighting-k": ["@audio/weighting-k@1.2.1", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-tiSLbRzFTQVvS8aUMKBBE+ZDtBNzgYmBWlg8/F00YbaDpR1kepsOSPCE3KqA51ekI4RAT/YPIZi+8yirq76GUQ=="],
+
+    "@audio/window": ["@audio/window@1.0.4", "", { "dependencies": { "window-function": "^3.0.1" } }, "sha512-t3w1XDPA9YJxRos8Qm4TLMO9F0FIDuXdrsrjTZPa09WbRyKUN14flSi2c0pyHkDnHLn0YueCK8VZIQLD8VTIbw=="],
 
     "@babel/code-frame": ["@babel/code-frame@7.29.7", "", { "dependencies": { "@babel/helper-validator-identifier": "^7.29.7", "js-tokens": "^4.0.0", "picocolors": "^1.1.1" } }, "sha512-Aup7aUOfpbAUg2ROOJN6Iw5f9DMBlzu0mIkm/malLQFN/YQgO48wCj0Kxa3sEHJvPVFg7siR+qRInwXd2qhQKw=="],
 
@@ -3323,6 +3376,8 @@
     "@antfu/install-pkg/tinyexec": ["tinyexec@1.2.4", "", {}, "sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg=="],
 
     "@audio/decode-mp4/@audio/decode-flac": ["@audio/decode-flac@1.3.5", "", { "dependencies": { "@wasm-audio-decoders/flac": "~0.2.10", "codec-parser": "~2.5.0" } }, "sha512-ZaPeaprVjBpFfTFRjrfzWpxj5MBVJZR0j90g7aCfDTb82KFEdsVaf5cMrrVCKKrnSu0b2VBqXnEm6JZY1poTpA=="],
+
+    "@audio/denoise-desqueak/@audio/denoise-dehum": ["@audio/denoise-dehum@0.6.0", "", { "dependencies": { "@audio/biquad": "^1.1.0" } }, "sha512-NZ0iYmGa++ep84hZehT+Xq8ZCZ8V4D6GCLKGhJ5D8GAqZyNMIs/AvI9BKiMlFYUSrV9H/3NukJ9IrCubD+Hcbw=="],
 
     "@audio/dynamics-deesser/@audio/dynamics-compressor": ["@audio/dynamics-compressor@0.2.1", "", { "dependencies": { "@audio/dynamics-envelope": "^0.1.0" } }, "sha512-8g7pplFtHtTj4o+/mo4HRf9+yoKZdRrLSQzGwQRKObcMft+4nLxDB0B8fA5ROQ4BoO98n10DF5fep3ofyOQbmQ=="],
 

@@ -1,0 +1,29 @@
+---
+title: repair
+description: "Defects taken out of a recording, each by the method made for it: clicks, crackle, mains hum, steady and changing noise, clipping, wind, plosives, breaths and reverb, or one that finds the defect itself, on audio.js's denoise family."
+---
+
+<Module from="@audio-ui/engine/repair" />
+
+## Usage
+
+`repairChannels` takes channels, their sample rate and one repair of `REPAIRS`, and gives back channels of the same length with that defect taken out. Each channel is processed on its own, the source is left as it is, and a sound with no such defect comes back as it was.
+
+```ts
+import { REPAIRS, repairChannels } from "@audio-ui/engine/repair";
+
+repairChannels(channels, 48_000, "hum60"); // mains hum and its harmonics at 60 Hz
+repairChannels(channels, 48_000, "clean"); // finds what the sound carries and picks the method
+```
+
+| Repair | Takes out |
+| --- | --- |
+| `clean` | What the sound carries, found by the library |
+| `clicks`, `crackle` | Impulses (vinyl ticks, mouth clicks, splices) and dense ones (shellac), rebuilt from the sound around them |
+| `hum50`, `hum60` | Mains hum and its harmonics |
+| `noise`, `speechNoise` | Steady broadband noise, and noise that changes under a voice |
+| `clipping` | Peaks cut at full scale, rebuilt |
+| `wind`, `plosives` | Low rumble, and the bursts of p and b |
+| `breaths`, `reverb` | Breaths between phrases, and a room's late reverb |
+
+The registry's [`useBake`](/docs/hooks/use-bake) runs them as steps of undo from the audio editor's Process menu.

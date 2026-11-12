@@ -26,6 +26,7 @@ import {
   formatSampleRate,
   formatTime,
 } from "@audio-ui/engine/format";
+import type { Repair } from "@audio-ui/engine/repair";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
 import {
   createSource,
@@ -684,6 +685,7 @@ type Structure = Pick<
   | "normalize"
   | "pad"
   | "pan"
+  | "repair"
   | "repeat"
   | "reverse"
   | "shift"
@@ -735,6 +737,46 @@ const FILTERS = [
     type: "lowpass",
   },
 ] as const;
+
+const REPAIR_ITEMS = [
+  { label: "Clean automatically", note: "Finds the defect", repair: "clean" },
+  { label: "Remove clicks", note: "Vinyl, mouth, splices", repair: "clicks" },
+  { label: "Remove crackle", note: "Shellac, dense ticks", repair: "crackle" },
+  { label: "Remove hum, 50 Hz", note: "Europe, Africa, Asia", repair: "hum50" },
+  { label: "Remove hum, 60 Hz", note: "Americas", repair: "hum60" },
+  { label: "Remove noise", note: "Steady hiss", repair: "noise" },
+  {
+    label: "Remove noise from speech",
+    note: "Changing noise",
+    repair: "speechNoise",
+  },
+  { label: "Repair clipping", note: "Rebuilds cut peaks", repair: "clipping" },
+  { label: "Remove wind", note: "Low rumble", repair: "wind" },
+  { label: "Soften plosives", note: "P and b bursts", repair: "plosives" },
+  { label: "Reduce breaths", note: "Between phrases", repair: "breaths" },
+  { label: "Reduce reverb", note: "A room's tail", repair: "reverb" },
+] as const satisfies readonly { label: string; note: string; repair: Repair }[];
+
+/** One repair. */
+function RepairItem({
+  label,
+  note,
+  repair,
+  run,
+}: {
+  label: string;
+  note: string;
+  repair: Repair;
+  run: Structure["repair"];
+}) {
+  const start = useCallback(() => run(repair, label), [label, repair, run]);
+  return (
+    <DropdownMenuItem onClick={start}>
+      {label}
+      <span className="ms-auto text-muted-foreground text-xs">{note}</span>
+    </DropdownMenuItem>
+  );
+}
 
 const STRETCHES = [
   { method: "transient", note: "Music with drums" },
@@ -1131,6 +1173,37 @@ function TimeItems({
         <DropdownMenuSubContent className="w-48">
           {SPEEDS.map((value) => (
             <SpeedItem key={value} speed={structure.speed} value={value} />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    </DropdownMenuGroup>
+  );
+}
+
+/** The Process menu's group of repairs: each defect taken out by the method made for it. */
+function RepairItems({
+  disabled,
+  structure,
+}: {
+  disabled: boolean;
+  structure: Structure;
+}) {
+  return (
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>Repair</DropdownMenuLabel>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Remove a defect
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-80">
+          {REPAIR_ITEMS.map((each) => (
+            <RepairItem
+              key={each.repair}
+              label={each.label}
+              note={each.note}
+              repair={each.repair}
+              run={structure.repair}
+            />
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -2606,6 +2679,8 @@ function MoreMenu({
             <DropdownMenuSeparator />
             <TimeItems disabled={!sound} structure={structure} />
             <DropdownMenuSeparator />
+            <RepairItems disabled={!sound} structure={structure} />
+            <DropdownMenuSeparator />
             <AnalyzeItems disabled={!sound} onAnalyze={onAnalyze} />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
@@ -3344,6 +3419,8 @@ export default function BlockAudioEditor() {
                 <ToneItems disabled={!sound} structure={baking} />
                 <DropdownMenuSeparator />
                 <TimeItems disabled={!sound} structure={baking} />
+                <DropdownMenuSeparator />
+                <RepairItems disabled={!sound} structure={baking} />
                 <DropdownMenuSeparator />
                 <AnalyzeItems disabled={!sound} onAnalyze={analyze} />
               </DropdownMenuContent>

@@ -3236,6 +3236,35 @@
     "exports": [
       {
         "kind": "const",
+        "name": "REPAIRS",
+        "summary": "The defects of a recording that can be taken out of it, each by the method made for it: `clean` finds what the sound carries and picks the method itself; `clicks` and `crackle` rebuild impulses from the sound around them (vinyl ticks, mouth clicks, shellac); `hum50` and `hum60` take out the mains hum and its harmonics; `noise` and `speechNoise` take out steady broadband noise, and noise that changes under a voice; `clipping` rebuilds peaks cut at full scale; `wind` and `plosives` take out low rumble and the bursts of p and b; `breaths` and `reverb` take down the breaths between phrases and a room's late reverb."
+      },
+      {
+        "kind": "type",
+        "name": "Repair",
+        "summary": ""
+      },
+      {
+        "kind": "function",
+        "name": "repairChannels",
+        "summary": "Every channel with one defect taken out, by the method made for it, each channel on its own."
+      }
+    ],
+    "from": "@audio-ui/engine/repair",
+    "package": "@audio-ui/engine",
+    "audiojs": [
+      "@audio/denoise"
+    ],
+    "typesOnly": false,
+    "usedBy": [
+      "use-bake"
+    ]
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
+        "kind": "const",
         "name": "BASS_ENHANCER_KERNELS",
         "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-subbass` 1.2.0 (MIT, Dmitry Iv.): `subbass`"
       },

@@ -12,6 +12,7 @@
     "files",
     "format",
     "playback",
+    "repair",
     "worklet"
   ]
 }
