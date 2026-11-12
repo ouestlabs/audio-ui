@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/engine",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "The audio logic behind audio/ui's interfaces, with no UI framework in it: devices as parameters, musical time and the look-ahead scheduler, levels and curves, MIDI input, scales, and the clip player.",
   "keywords": [
     "audio-ui",
