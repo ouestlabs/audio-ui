@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { highlightedElements } from "@/components/code/block/highlighted-code";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { Command } from "@/components/docs/mdx/install";
+import { useFramework } from "@/hooks/use-framework";
 import {
   audioJsUrl,
   type Entry as EntryData,
@@ -88,15 +89,17 @@ const CODE_SPAN = /(`[^`]+`)/;
 
 /** A JSDoc sentence with its code spans drawn as code. */
 function Summary({ text }: { text: string }) {
-  return text
-    .split(CODE_SPAN)
-    .map((piece) =>
-      piece.startsWith("`") ? (
-        <code key={piece}>{piece.slice(1, -1)}</code>
-      ) : (
-        piece
-      )
+  // Keyed by where each piece starts: a sentence can quote the same name twice.
+  let at = 0;
+  return text.split(CODE_SPAN).map((piece) => {
+    const start = at;
+    at += piece.length;
+    return piece.startsWith("`") ? (
+      <code key={start}>{piece.slice(1, -1)}</code>
+    ) : (
+      piece
     );
+  });
 }
 
 /** What a module exports, each with the first sentence of its JSDoc. */
@@ -163,28 +166,36 @@ export function Entry({ name }: { name: string }) {
  * The head of a published module's page, such as `@audio-ui/engine/time`,
  * read from the package and its sources: the install, the import, the
  * adapters that draw it, the registry's hooks and libs that build on it, the
- * audio.js packages it is built on, and what it exports.
+ * audio.js packages it is built on, and what it exports. The adapters and
+ * the registry follow the reader's framework.
  */
 export function Module({ from }: { from: string }) {
   const packageModule = moduleOf(from);
+  // The reader's framework: React's adapter for React, the elements' for the others; the registry's users, React's alone.
+  const [framework] = useFramework();
+  const adapterOf =
+    framework === "react" ? "@audio-ui/react" : "@audio-ui/elements";
+  const adapters = framework
+    ? packageModule.adapters.filter((name) => name.startsWith(adapterOf))
+    : packageModule.adapters;
+  const usedBy = framework && framework !== "react" ? [] : packageModule.usedBy;
   return (
     <>
       <Command code={`npm install ${packageModule.package}`} />
       <Code code={importLine(packageModule)} />
       <Facts
         rows={[
-          ...(packageModule.adapters.length > 0
-            ? ([
-                [
-                  "Adapters",
-                  <Items key="adapters" names={packageModule.adapters} />,
-                ],
-              ] as [string, React.ReactNode][])
+          ...(adapters.length > 0
+            ? ([["Adapters", <Items key="adapters" names={adapters} />]] as [
+                string,
+                React.ReactNode,
+              ][])
             : []),
-          ...(packageModule.usedBy.length > 0
-            ? ([
-                ["Used by", <Items key="used" names={packageModule.usedBy} />],
-              ] as [string, React.ReactNode][])
+          ...(usedBy.length > 0
+            ? ([["Used by", <Items key="used" names={usedBy} />]] as [
+                string,
+                React.ReactNode,
+              ][])
             : []),
           ...(packageModule.audiojs.length > 0
             ? ([

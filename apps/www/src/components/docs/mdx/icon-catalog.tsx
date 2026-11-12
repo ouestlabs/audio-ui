@@ -15,6 +15,7 @@ import * as React from "react";
 import { ComponentEmptyState } from "@/components/catalog/card/component-empty-state";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useFramework } from "@/hooks/use-framework";
 import { cn } from "@/lib/utils";
 
 const SIZES = [16, 24, 32] as const;
@@ -235,6 +236,12 @@ function Inspector({
   const timer = React.useRef<number | undefined>(undefined);
   const Icon = icons[entry.name as keyof typeof icons];
   const svg = toSvg(glyphs[entry.glyph], { weight });
+  // The name the reader's code writes: the component in React, the glyph elsewhere.
+  const [framework] = useFramework();
+  const name =
+    framework && framework !== "react"
+      ? `glyphs.${entry.glyph}`
+      : `${entry.name}Icon`;
 
   const flash = React.useCallback((what: string) => {
     setCopied(what);
@@ -254,8 +261,8 @@ function Inspector({
   );
   const copySvg = React.useCallback(() => copy(svg, "SVG copied"), [copy, svg]);
   const copyName = React.useCallback(
-    () => copy(`${entry.name}Icon`, "Name copied"),
-    [copy, entry.name]
+    () => copy(name, "Name copied"),
+    [copy, name]
   );
   const save = React.useCallback(() => {
     download(`${entry.name.toLowerCase()}.svg`, svg);
@@ -276,7 +283,7 @@ function Inspector({
             {entry.name}
           </p>
           <p className="truncate text-site-muted-foreground text-xs">
-            {entry.category} · <code>{entry.name}Icon</code>
+            {entry.category} · <code>{name}</code>
           </p>
         </div>
       </div>
