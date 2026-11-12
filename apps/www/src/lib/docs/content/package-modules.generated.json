@@ -3023,6 +3023,111 @@
     "adapters": [],
     "exports": [
       {
+        "kind": "interface",
+        "name": "FormatOptions",
+        "summary": "What every formatter takes, over its own defaults."
+      },
+      {
+        "kind": "type",
+        "name": "LevelUnit",
+        "summary": "The units of a level: decibels of a gain, of full scale, of a true peak, of a voltage; loudness in LUFS and its range in LU."
+      },
+      {
+        "kind": "function",
+        "name": "formatLevel",
+        "summary": "A level or a gain: `-6.0 dBFS`, `-23.0 LUFS`, `+3.0 dB`, `-1.0 dBTP`."
+      },
+      {
+        "kind": "type",
+        "name": "FrequencyStyle",
+        "summary": "How a frequency is written: by size (`auto`), always in hertz, or always in kilohertz."
+      },
+      {
+        "kind": "function",
+        "name": "formatFrequency",
+        "summary": "A frequency: `120 Hz`, `1.2 kHz`, `12 kHz`."
+      },
+      {
+        "kind": "function",
+        "name": "formatSampleRate",
+        "summary": "A sample rate: `44.1 kHz`, `48 kHz`, `11.025 kHz`: in kilohertz, with the places it needs and no more."
+      },
+      {
+        "kind": "type",
+        "name": "TimeStyle",
+        "summary": "How a time is written: a clock to the second, a clock to the millisecond, or a length in seconds."
+      },
+      {
+        "kind": "function",
+        "name": "formatTime",
+        "summary": "A time: `1:05` (`clock`), `1:05.250` (`precise`, to the millisecond, with hours past an hour: `1:02:03.500`), or `65.25 s` (`seconds`)."
+      },
+      {
+        "kind": "function",
+        "name": "formatDuration",
+        "summary": "A length of time by its size: `120 ms` under a second, `1.25 s` above."
+      },
+      {
+        "kind": "function",
+        "name": "formatTempo",
+        "summary": "The tempo, `120 BPM`, with a decimal only when it has one."
+      },
+      {
+        "kind": "interface",
+        "name": "NoteOptions",
+        "summary": "How a note is spelled: sharps or flats, the octave of the middle C (`4` in scientific pitch, `3` on Yamaha's), and the typographic ♯ and ♭ or plain `#` and `b`."
+      },
+      {
+        "kind": "function",
+        "name": "formatNote",
+        "summary": "A MIDI note as a name: `60` is `C4`, `61` `C#4`, `69` `A4`."
+      },
+      {
+        "kind": "type",
+        "name": "PanStyle",
+        "summary": "How a pan is written: `L30`, `C`, `R30` (`lr`), or a signed number, `-30`, `0`, `+30` (`signed`)."
+      },
+      {
+        "kind": "function",
+        "name": "formatPan",
+        "summary": "A pan from -1 (left) to 1 (right) as a percentage of the way: `L50`, `C`, `R100`."
+      },
+      {
+        "kind": "function",
+        "name": "formatPercent",
+        "summary": "A share as a percentage."
+      },
+      {
+        "kind": "function",
+        "name": "formatRatio",
+        "summary": "A compressor's ratio: `4.0:1`, and `∞:1` for a limiter."
+      },
+      {
+        "kind": "function",
+        "name": "formatChannels",
+        "summary": "The layout of a sound by its channel count: `mono`, `stereo`, `quad`, `5.1`, `7.1`; any other count as `N ch`."
+      },
+      {
+        "kind": "interface",
+        "name": "Formatter",
+        "summary": "The formatters of this module with options bound: each call may still override them."
+      },
+      {
+        "kind": "function",
+        "name": "createFormatter",
+        "summary": "A set of formatters that share their options: a locale, a true minus, a thin space, a note spelling."
+      }
+    ],
+    "from": "@audio-ui/engine/format",
+    "package": "@audio-ui/engine",
+    "audiojs": [],
+    "typesOnly": false,
+    "usedBy": []
+  },
+  {
+    "adapters": [],
+    "exports": [
+      {
         "kind": "const",
         "name": "BASS_ENHANCER_KERNELS",
         "summary": "audio.js kernels, each module as published, in its own scope, for an `AudioWorklet`, which cannot import them: - `@audio/effect-subbass` 1.2.0 (MIT, Dmitry Iv.): `subbass`"

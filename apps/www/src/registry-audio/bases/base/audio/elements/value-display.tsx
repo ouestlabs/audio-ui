@@ -1,4 +1,5 @@
 import { formatDb, formatHz } from "@audio-ui/engine/analysis";
+import { formatPan, formatTime } from "@audio-ui/engine/format";
 import { cva, type VariantProps } from "class-variance-authority";
 import { cn } from "@/registry/bases/base/lib/utils";
 
@@ -17,23 +18,6 @@ const SIGNED = new Intl.NumberFormat("en-US", {
   signDisplay: "exceptZero",
 });
 
-/** Minutes, seconds and milliseconds: 1:02.345. */
-function formatTime(seconds: number) {
-  const whole = Math.max(0, seconds);
-  const minutes = Math.floor(whole / 60);
-  const rest = whole - minutes * 60;
-  return `${minutes}:${rest.toFixed(3).padStart(6, "0")}`;
-}
-
-/** A pan from -1 to 1: C in the middle, L or R and how far, in percent. */
-function formatPan(pan: number) {
-  const amount = Math.round(Math.abs(pan) * 100);
-  if (amount === 0) {
-    return "C";
-  }
-  return `${pan < 0 ? "L" : "R"} ${amount}`;
-}
-
 /** How a value of each kind reads: as a DAW shows it. */
 export function formatValue(value: number, kind: ValueKind): string {
   switch (kind) {
@@ -50,7 +34,7 @@ export function formatValue(value: number, kind: ValueKind): string {
     case "semitones":
       return `${SIGNED.format(value)} st`;
     default:
-      return formatTime(value);
+      return formatTime(value, "precise");
   }
 }
 

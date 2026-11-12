@@ -6,6 +6,7 @@ import {
   normalizePeaks,
 } from "@audio-ui/engine/analysis";
 import { decodeAudioChannels } from "@audio-ui/engine/files";
+import { formatTime } from "@audio-ui/engine/format";
 import { LoopIcon } from "@audio-ui/icons/react";
 import { createSource } from "@audio-ui/react";
 import type { ChangeEvent } from "react";
@@ -97,10 +98,8 @@ function followPlayhead(viewport: HTMLElement | null, x: number) {
   }
 }
 
-const formatTime = (seconds: number) => {
-  const whole = Math.max(0, Math.floor(seconds));
-  return `${Math.floor(whole / 60)}:${String(whole % 60).padStart(2, "0")}`;
-};
+const formatClock = (seconds: number) =>
+  formatTime(Math.max(0, Math.floor(seconds)));
 
 interface LoopState {
   on: boolean;
@@ -386,10 +385,10 @@ export default function BlockWaveformPlayer() {
             ref={viewportRef}
             scrollbar="hidden"
           >
-            <TimelineRuler aria-label="Position" getAriaValueText={formatTime}>
+            <TimelineRuler aria-label="Position" getAriaValueText={formatClock}>
               {labels.map((seconds) => (
                 <TimelineMark key={seconds} value={seconds}>
-                  {formatTime(seconds)}
+                  {formatClock(seconds)}
                 </TimelineMark>
               ))}
             </TimelineRuler>
@@ -400,7 +399,7 @@ export default function BlockWaveformPlayer() {
                 className="h-20 rounded-none"
                 disabled={!ready}
                 duration={duration || 1}
-                getAriaValueText={formatTime}
+                getAriaValueText={formatClock}
                 loading={decoding || !ready}
                 onSelectionChange={setLoop}
                 onValueChange={handleSeek}
@@ -413,12 +412,12 @@ export default function BlockWaveformPlayer() {
                     <WaveformRegionHandle
                       aria-label="Loop start"
                       edge="start"
-                      getAriaValueText={formatTime}
+                      getAriaValueText={formatClock}
                     />
                     <WaveformRegionHandle
                       aria-label="Loop end"
                       edge="end"
-                      getAriaValueText={formatTime}
+                      getAriaValueText={formatClock}
                     />
                   </WaveformRegion>
                 ) : null}
@@ -427,11 +426,11 @@ export default function BlockWaveformPlayer() {
                     {index + 1}
                   </WaveformMarker>
                 ))}
-                <WaveformHover format={formatTime} />
+                <WaveformHover format={formatClock} />
               </Waveform>
             </TimelineLane>
           </TimelineViewport>
-          <TimelineNavigator className="mt-2" getAriaValueText={formatTime} />
+          <TimelineNavigator className="mt-2" getAriaValueText={formatClock} />
         </Timeline>
       </div>
       {ready ? (

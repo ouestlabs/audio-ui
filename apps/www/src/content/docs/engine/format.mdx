@@ -1,0 +1,63 @@
+---
+title: format
+description: "Audio quantities as text from @audio-ui/engine, the way the standards and the tools write them: levels in dBFS, dBTP and LUFS, frequencies and sample rates, times, notes, pans, ratios, tempos, channel layouts, each a function of the value and options, and createFormatter to bind a locale, a true minus or a spacing once."
+---
+
+<Module from="@audio-ui/engine/format" />
+
+## Usage
+
+Each quantity is one function, with the unit it is written in and the conventions of the field built in: a number and its unit apart by a space (SI, ISO 80000), one decimal for a level (EBU R128, ITU-R BS.1770), `kHz` with a small k, `m:ss.mmm` for a time, a middle C of `C4`.
+
+```ts
+import {
+  formatChannels,
+  formatFrequency,
+  formatLevel,
+  formatNote,
+  formatPan,
+  formatSampleRate,
+  formatTime,
+} from "@audio-ui/engine/format";
+
+formatLevel(-23, "LUFS"); // "-23.0 LUFS"
+formatLevel(-1.04, "dBTP"); // "-1.0 dBTP"
+formatLevel(3, "dB"); // "+3.0 dB": a gain carries its sign, a level does not
+formatLevel(Number.NEGATIVE_INFINITY, "dBFS"); // "-∞ dBFS"
+formatFrequency(1200); // "1.2 kHz"
+formatSampleRate(44_100); // "44.1 kHz"
+formatTime(65.25, "precise"); // "1:05.250"
+formatNote(61); // "C#4"
+formatPan(-0.3); // "L30"
+formatChannels(6); // "5.1"
+```
+
+## Options
+
+Every function takes the same options last, over its own defaults:
+
+| Option | What it does |
+| --- | --- |
+| `decimals` | The places. A trailing zero is kept, so a column lines up. |
+| `locale` | The decimal mark: `"fr"` writes a comma. A point by default, whatever the browser's locale. |
+| `minus` | `"unicode"` writes the typographic minus U+2212 in place of the hyphen. |
+| `space` | What goes between the number and its unit: `" "` a narrow no-break space, `""` none. |
+| `sign` | Whether a positive carries a `+`. |
+| `unit` | `false` writes the number alone, for a scale or a column that says the unit once. |
+
+## One set of defaults
+
+`createFormatter` binds the options you always want, so a product writes its quantities one way everywhere:
+
+```ts
+import { createFormatter } from "@audio-ui/engine/format";
+
+const format = createFormatter({ locale: "fr", minus: "unicode" });
+
+format.level(-23, "LUFS"); // "−23,0 LUFS"
+format.frequency(1500); // "1,5 kHz"
+format.time(1.5, "precise"); // "0:01,500"
+format.level(-23, "LUFS", { locale: "en" }); // a call can still override
+```
+
+`formatHz` and `formatDb` of [`@audio-ui/engine/analysis`](/docs/engine/analysis) are `formatFrequency` and `formatLevel` with their defaults.

@@ -43,6 +43,10 @@
       "types": "./dist/files/index.d.ts",
       "import": "./dist/files.js"
     },
+    "./format": {
+      "types": "./dist/format/index.d.ts",
+      "import": "./dist/format.js"
+    },
     "./kernels": {
       "types": "./dist/kernels/index.d.ts",
       "import": "./dist/kernels.js"

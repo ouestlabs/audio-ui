@@ -157,7 +157,7 @@
       "name": "transport"
     },
     {
-      "count": 1,
+      "count": 2,
       "description": "An audio editor for one sound: transport, recording, a waveform that zooms to the samples and a device chain.",
       "label": "Audio editor",
       "name": "audio-editor"
@@ -181,5 +181,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 87
+  "totalComponents": 88
 }
