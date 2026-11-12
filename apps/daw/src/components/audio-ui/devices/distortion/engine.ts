@@ -1,3 +1,4 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
 import {
   type DistortionState,
   distortionSettings,
@@ -8,14 +9,7 @@ import { createOversamplingDelay } from "@/lib/oversampling";
 
 const RAMP_SECONDS = 0.015;
 
-export interface DistortionEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: DistortionState) => void;
-}
+export type DistortionEngine = EffectEngine<DistortionState>;
 
 /**
  * A distortion on the Web Audio API for a `DistortionState`:

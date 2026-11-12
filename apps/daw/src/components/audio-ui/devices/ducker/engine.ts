@@ -1,4 +1,10 @@
-import type { DeviceReadings, SidechainBinding } from "@audio-ui/engine/device";
+import type {
+  DeviceReadings,
+  EffectEngine,
+  SidechainBinding,
+} from "@audio-ui/engine/device";
+import { createFeed, type Feed } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   DUCKER_WORKLET,
   type DuckerState,
@@ -6,14 +12,10 @@ import {
 } from "@/components/audio-ui/devices/ducker/device";
 
 const RAMP_SECONDS = 0.01;
-/** How long after the ducker fades out its inputs are taken away, in ms: the fade is over by then. */
-const UNFEED_MS = 120;
 
-export interface DuckerEngine extends SidechainBinding<DuckerState, AudioNode> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface DuckerEngine
+  extends EffectEngine<DuckerState>,
+    SidechainBinding<DuckerState, AudioNode> {
   /** What it is taking off right now, in dB. */
   readings: () => DeviceReadings;
   /** Resolves once the ducker is in the graph. Until then the sound passes unchanged. A context with no worklets never resolves it to `true`. */
@@ -22,30 +24,6 @@ export interface DuckerEngine extends SidechainBinding<DuckerState, AudioNode> {
   readonly reduction: number;
   /** Connect the key here: the sound is turned down while it plays. It is only listened to, never heard. With nothing connected, the ducker follows the sound itself. */
   readonly sidechain: AudioNode;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the ducker into a context once. `false` when the context cannot run worklets. */
-function loadDucker(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([DUCKER_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -80,8 +58,7 @@ export function createDuckerEngine(
   let model: AudioWorkletNode | null = null;
   let reduction = 0;
   let disposed = false;
-  let fed = false;
-  let unfeed: ReturnType<typeof setTimeout> | undefined;
+  let feed: Feed | null = null;
 
   /** The ducker in place of the dry sound while it plays and is loaded, fed only then. */
   const route = () => {
@@ -92,24 +69,10 @@ export function createDuckerEngine(
     for (const [name, value] of Object.entries(settings.modelParams)) {
       model?.parameters.get(name)?.setValueAtTime(value, ctx.currentTime);
     }
-    clearTimeout(unfeed);
-    if (playing > 0 && !fed && model) {
-      input.connect(model, 0, 0);
-      sidechain.connect(model, 0, 1);
-      fed = true;
-    } else if (playing === 0 && fed) {
-      // Once the fade is over: a worklet fed nothing costs nothing.
-      unfeed = setTimeout(() => {
-        if (fed && model) {
-          input.disconnect(model);
-          sidechain.disconnect(model);
-          fed = false;
-        }
-      }, UNFEED_MS);
-    }
+    feed?.set(playing > 0);
   };
 
-  const ready = loadDucker(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, DUCKER_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }
@@ -119,6 +82,10 @@ export function createDuckerEngine(
       parameterData: settings.modelParams,
       processorOptions: { model: "ducker" },
     });
+    feed = createFeed([
+      [input, model, 0, 0],
+      [sidechain, model, 0, 1],
+    ]);
     model.port.onmessage = (event: MessageEvent<number>) => {
       reduction = event.data;
     };
@@ -130,7 +97,7 @@ export function createDuckerEngine(
   return {
     dispose: () => {
       disposed = true;
-      clearTimeout(unfeed);
+      feed?.dispose();
       model?.disconnect();
       for (const node of [input, sidechain, dry, wet, output]) {
         node.disconnect();

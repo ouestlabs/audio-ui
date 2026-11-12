@@ -1,3 +1,4 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
 import {
   type UtilityState,
   utilitySettings,
@@ -6,14 +7,7 @@ import {
 const RAMP_SECONDS = 0.015;
 const HALF = 0.5;
 
-export interface UtilityEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
-  update: (state: UtilityState) => void;
-}
+export type UtilityEngine = EffectEngine<UtilityState>;
 
 /**
  * A utility on the Web Audio API for a `UtilityState`:

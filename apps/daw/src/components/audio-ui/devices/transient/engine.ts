@@ -1,4 +1,5 @@
-import type { DeviceBinding } from "@audio-ui/engine/device";
+import type { EffectEngine } from "@audio-ui/engine/device";
+import { createWorkletStage } from "@audio-ui/engine/device";
 import {
   TRANSIENT_WORKLET,
   type TransientState,
@@ -7,37 +8,9 @@ import {
 
 const RAMP_SECONDS = 0.01;
 
-export interface TransientEngine extends DeviceBinding<TransientState> {
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface TransientEngine extends EffectEngine<TransientState> {
   /** Resolves once the shaper is in the graph. Until then the signal passes unchanged. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the shaper into a context once. `false` when the context cannot run worklets. */
-function loadShaper(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([TRANSIENT_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -57,57 +30,46 @@ export function createTransientEngine(
 ): TransientEngine {
   const input = ctx.createGain();
   const output = ctx.createGain();
-  const bypass = ctx.createGain();
-  const shaped = ctx.createGain();
-  const master = ctx.createGain();
-  input.connect(bypass).connect(master);
-  shaped.connect(master);
-  master.connect(output);
 
   let settings = transientSettings(initial);
+  let latest = initial;
+  const stage = createWorkletStage(ctx, {
+    input,
+    make: () => {
+      settings = transientSettings(latest);
+      return new AudioWorkletNode(ctx, "audioui-transient", {
+        outputChannelCount: [2],
+        parameterData: settings.modelParams,
+        processorOptions: { model: "shaper" },
+      });
+    },
+    ramp: RAMP_SECONDS,
+    source: TRANSIENT_WORKLET,
+  });
+  const master = ctx.createGain();
+  stage.connect(master);
+  master.connect(output);
   master.gain.value = settings.output;
-  shaped.gain.value = 0;
-
-  let shaper: AudioWorkletNode | null = null;
-  let disposed = false;
 
   const route = () => {
     for (const [name, value] of Object.entries(settings.modelParams)) {
-      shaper?.parameters
+      stage.node?.parameters
         .get(name)
         ?.setTargetAtTime(value, ctx.currentTime, RAMP_SECONDS);
     }
     master.gain.setTargetAtTime(settings.output, ctx.currentTime, RAMP_SECONDS);
   };
-  let latest = initial;
-  const ready = loadShaper(ctx).then((ok) => {
-    if (!ok || disposed) {
-      return false;
-    }
-    settings = transientSettings(latest);
-    shaper = new AudioWorkletNode(ctx, "audioui-transient", {
-      outputChannelCount: [2],
-      parameterData: settings.modelParams,
-      processorOptions: { model: "shaper" },
-    });
-    input.connect(shaper);
-    shaper.connect(shaped);
-    bypass.gain.setTargetAtTime(0, ctx.currentTime, RAMP_SECONDS);
-    shaped.gain.setTargetAtTime(1, ctx.currentTime, RAMP_SECONDS);
-    return true;
-  });
 
   return {
     dispose: () => {
-      disposed = true;
-      shaper?.disconnect();
-      for (const node of [input, bypass, shaped, master, output]) {
+      stage.dispose();
+      for (const node of [input, master, output]) {
         node.disconnect();
       }
     },
     input,
     output,
-    ready,
+    ready: stage.ready,
     update: (state) => {
       latest = state;
       settings = transientSettings(state);

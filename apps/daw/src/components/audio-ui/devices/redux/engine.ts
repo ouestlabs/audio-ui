@@ -1,3 +1,5 @@
+import type { EffectEngine } from "@audio-ui/engine/device";
+import { loadWorklet } from "@audio-ui/engine/worklet";
 import {
   REDUX_WORKLET,
   type ReduxState,
@@ -7,39 +9,9 @@ import {
 
 const RAMP_SECONDS = 0.015;
 
-export interface ReduxEngine {
-  dispose: () => void;
-  /** Connect the signal to process here. */
-  readonly input: AudioNode;
-  /** Connect this to the destination, or to the next device. */
-  readonly output: AudioNode;
+export interface ReduxEngine extends EffectEngine<ReduxState> {
   /** Resolves once the sample hold is in the graph. Until then the bits are rounded to the nearest level and the rate is not reduced. A context with no worklets never resolves it to `true`. */
   readonly ready: Promise<boolean>;
-  update: (state: ReduxState) => void;
-}
-
-const loaded = new WeakMap<BaseAudioContext, Promise<boolean>>();
-
-/** Loads the sample hold into a context once. `false` when the context cannot run worklets. */
-function loadHold(ctx: BaseAudioContext): Promise<boolean> {
-  const cached = loaded.get(ctx);
-  if (cached) {
-    return cached;
-  }
-  // A page without a secure origin has no worklets.
-  if (!("audioWorklet" in ctx && typeof AudioWorkletNode !== "undefined")) {
-    return Promise.resolve(false);
-  }
-  const url = URL.createObjectURL(
-    new Blob([REDUX_WORKLET], { type: "text/javascript" })
-  );
-  const done = ctx.audioWorklet
-    .addModule(url)
-    .then(() => true)
-    .catch(() => false)
-    .finally(() => URL.revokeObjectURL(url));
-  loaded.set(ctx, done);
-  return done;
 }
 
 /**
@@ -85,7 +57,7 @@ export function createReduxEngine(
   };
   table();
 
-  const ready = loadHold(ctx).then((ok) => {
+  const ready = loadWorklet(ctx, REDUX_WORKLET).then((ok) => {
     if (!ok || disposed) {
       return false;
     }
