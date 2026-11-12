@@ -11,9 +11,9 @@ A timeline is made of several controllers, each with no view attached and each f
 
 ## The playhead and the zoom
 
-`createTimelineController` holds the playback position and the zoom: held, controlled with `position` and `zoom`, or live with `source`, which it follows without a render. A press or a drag on the ruler moves the position, the keys step it by `step` and `largeStep`, and a Shift + drag on the ruler selects a stretch, reported to the handlers given to it. A `zoom` of `null` fits the timeline to its width.
+`createTimelineController` holds the playback position and the zoom: held, controlled with `position` and `zoom`, or live with `source`, which it follows without a render. A press or a drag on the ruler or a lane moves the position, onto a snap point of the grid within a few pixels, the keys step it by `step` and `largeStep`, and a Shift + drag on the ruler selects a stretch, reported to the handlers given to it. A `zoom` of `null` fits the timeline to its width.
 
-`createWheelZoom` zooms with the wheel around the pointer, holding the value under it still; `anchoredScroll` is where to scroll so a value stays put through a zoom, and `clampZoom` keeps a zoom within its bounds.
+`createWheelZoom` zooms with the wheel around the pointer, holding the value under it still, once per frame. A trackpad's pinch zooms by the square of the fingers' spread, so a few pinches go from the whole timeline to its finest zoom, and no frame zooms more than twice in or half out, so a mouse's notch never jumps further; `anchoredScroll` is where to scroll so a value stays put through a zoom, and `clampZoom` keeps a zoom within its bounds.
 
 ## Clips
 
