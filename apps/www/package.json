@@ -85,6 +85,7 @@
     "fumadocs-core": "16.17.1",
     "fumadocs-mdx": "15.4.7",
     "fumadocs-ui": "16.17.1",
+    "gl-spectrogram": "2.4.0",
     "input-otp": "^1.4.2",
     "jotai": "3.0.1",
     "lucide-react": "catalog:",

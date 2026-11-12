@@ -66,6 +66,20 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    dependencies: ["gl-spectrogram"],
+    description:
+      "A clip's recording drawn as a spectrogram, computed on the GPU at every zoom by gl-spectrogram, on the frequency axis of your choice (octaves, mel, ERB or hertz). It draws only what the view shows, in the text colour over the ground under it, and nothing without WebGL 2.",
+    files: [
+      {
+        path: "audio/elements/clip-spectrogram.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "clip-spectrogram",
+    registryDependencies: ["@audio-ui/arrangement"],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react"],
     description:
       "A clip of an arrangement on its track's lane: move it, trim and fade it, pick a fade's curve, rename it in place and act on it from its menu. A MIDI clip draws its notes across its body.",

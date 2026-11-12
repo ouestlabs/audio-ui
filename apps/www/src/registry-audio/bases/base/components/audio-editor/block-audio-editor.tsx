@@ -82,6 +82,10 @@ import {
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { ArrangedTake } from "@/registry-audio/bases/base/audio/elements/arranged-clip";
 import {
+  ClipSpectrogram,
+  type SpectrogramScale,
+} from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
+import {
   type ClipSamples,
   ClipWaveform,
 } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
@@ -1211,6 +1215,50 @@ function RepairItems({
   );
 }
 
+/** What the sound lane draws: the waveform, or the spectrogram on one of its frequency axes. */
+type View = "wave" | SpectrogramScale;
+
+const VIEWS: readonly { label: string; note: string; value: View }[] = [
+  { label: "Waveform", note: "Level over time", value: "wave" },
+  { label: "Spectrogram", note: "Octaves", value: "log" },
+  { label: "Spectrogram, mel", note: "Pitch scale", value: "mel" },
+  { label: "Spectrogram, ERB", note: "Hearing filters", value: "erb" },
+  { label: "Spectrogram, hertz", note: "Linear", value: "lin" },
+];
+
+const isView = (value: string): value is View =>
+  VIEWS.some((each) => each.value === value);
+
+/** The ways to draw the sound, as radio items. */
+function ViewItems({
+  onViewChange,
+  view,
+}: {
+  onViewChange: (view: View) => void;
+  view: View;
+}) {
+  const change = useCallback(
+    (value: string) => {
+      if (isView(value)) {
+        onViewChange(value);
+      }
+    },
+    [onViewChange]
+  );
+  return (
+    <DropdownMenuRadioGroup onValueChange={change} value={view}>
+      {VIEWS.map((each) => (
+        <DropdownMenuRadioItem closeOnClick key={each.value} value={each.value}>
+          {each.label}
+          <span className="ms-auto text-muted-foreground text-xs">
+            {each.note}
+          </span>
+        </DropdownMenuRadioItem>
+      ))}
+    </DropdownMenuRadioGroup>
+  );
+}
+
 /** The Process menu's last group: what the sound is, read and told. */
 function AnalyzeItems({
   disabled,
@@ -1889,8 +1937,11 @@ function SoundClips({
   clips,
   hidden,
   sounds,
+  view,
 }: {
   clips: readonly Arranged[];
+  /** What each clip draws. */
+  view: View;
   /** While a take records over them: kept in place, unseen. */
   hidden: boolean;
   sounds: ReadonlyMap<string, Sound>;
@@ -1910,23 +1961,39 @@ function SoundClips({
           width: `calc(var(--timeline-unit) * ${clip.value.length})`,
         }}
       >
-        {/* Its level scales what it draws, as it scales what it plays. */}
-        <div
-          className="absolute inset-0"
-          style={{ transform: `scaleY(${dbToGain(clip.gain ?? 0)})` }}
-        >
-          <ClipWaveform
-            aria-label={`${sound.name}, waveform`}
+        {view === "wave" ? (
+          // Its level scales what it draws, as it scales what it plays.
+          <div
+            className="absolute inset-0"
+            style={{ transform: `scaleY(${dbToGain(clip.gain ?? 0)})` }}
+          >
+            <ClipWaveform
+              aria-label={`${sound.name}, waveform`}
+              className="inset-y-0 h-full text-foreground"
+              clip={{
+                sourceLength: clip.sourceLength ?? sound.duration,
+                value: { length: clip.value.length, offset: clip.value.offset },
+              }}
+              peaks={sound.peaks}
+              role="img"
+              samples={sound.samples}
+            />
+          </div>
+        ) : (
+          <ClipSpectrogram
+            aria-label={`${sound.name}, spectrogram`}
             className="inset-y-0 h-full text-foreground"
             clip={{
               sourceLength: clip.sourceLength ?? sound.duration,
               value: { length: clip.value.length, offset: clip.value.offset },
             }}
-            peaks={sound.peaks}
+            gain={dbToGain(clip.gain ?? 0)}
             role="img"
+            sampleRate={sound.sampleRate}
             samples={sound.samples}
+            scale={view}
           />
-        </div>
+        )}
         <FadeShade value={clip.value} />
       </div>
     ) : null;
@@ -2056,6 +2123,7 @@ function ClipLane({
   sounds,
   take,
   takeName,
+  view,
 }: {
   /** The track's clips: one for the sound, several once it is cut. */
   clips: readonly Arranged[];
@@ -2072,6 +2140,8 @@ function ClipLane({
   sounds: ReadonlyMap<string, Sound>;
   take: ReturnType<typeof useTake>;
   takeName: string;
+  /** What the lane draws: the waveform or a spectrogram. */
+  view: View;
 }) {
   const { clock: takeClock, levels: takeLevels, recording } = take;
   const sound = sounds.get(clips[0]?.recording ?? "") ?? null;
@@ -2332,6 +2402,7 @@ function ClipLane({
                     clips={clips}
                     hidden={recording}
                     sounds={sounds}
+                    view={view}
                   />
                   {recording ? null : <SilenceZone pause={silence.pause} />}
                   {recording ? null : (
@@ -2587,8 +2658,10 @@ function MoreMenu({
   onExport,
   onAnalyze,
   onLoopingChange,
+  onViewChange,
   sound,
   structure,
+  view,
 }: {
   arrangement: ReturnType<typeof useArrangement>;
   comparing: boolean;
@@ -2601,8 +2674,10 @@ function MoreMenu({
   onCompare: () => void;
   onExport: () => void;
   onLoopingChange: (on: boolean) => void;
+  onViewChange: (view: View) => void;
   /** Whether there is a sound to compare and export. */
   sound: boolean;
+  view: View;
 }) {
   const { canRedo, canUndo, dispatch, doc, history } = arrangement;
   // Read as it opens: the transport hides its Loop on a bar this narrow.
@@ -2662,6 +2737,14 @@ function MoreMenu({
               history={history}
               named={named}
             />
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger disabled={!sound}>
+            View
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-72">
+            <ViewItems onViewChange={onViewChange} view={view} />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSub>
@@ -2927,6 +3010,7 @@ export default function BlockAudioEditor() {
   );
 
   // The export: the selection, or else the whole sound, rendered through the chain as it plays, then encoded and saved.
+  const [view, setView] = useState<View>("wave");
   const [exporting, setExporting] = useState(false);
   const [exportSettings, setExportSettings] = useState(DEFAULT_EXPORT_SETTINGS);
   const exportRange = edits.time?.range ?? [0, doc.duration];
@@ -3425,6 +3509,29 @@ export default function BlockAudioEditor() {
                 <AnalyzeItems disabled={!sound} onAnalyze={analyze} />
               </DropdownMenuContent>
             </DropdownMenu>
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                render={
+                  <Toolbar.Button
+                    aria-label="View"
+                    disabled={!sound}
+                    render={<Button size="icon" variant="outline" />}
+                    title="View"
+                  />
+                }
+              >
+                <IconPlaceholder
+                  hugeicons="AudioWave01Icon"
+                  lucide="AudioLinesIcon"
+                  phosphor="WaveformIcon"
+                  remixicon="RiPulseLine"
+                  tabler="IconWaveSine"
+                />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-72">
+                <ViewItems onViewChange={setView} view={view} />
+              </DropdownMenuContent>
+            </DropdownMenu>
           </ButtonGroup>
           <ButtonGroup className="hidden @2xl/transport:flex">
             <Toolbar.Button
@@ -3478,8 +3585,10 @@ export default function BlockAudioEditor() {
               onCompare={toggleCompare}
               onExport={openExport}
               onLoopingChange={setLooping}
+              onViewChange={setView}
               sound={sound !== null}
               structure={baking}
+              view={view}
             />
           </ButtonGroup>
           {/* The output closes the bar, at its end: the level of what comes out, framed as the position is; on the narrowest bar, the room goes to the controls. */}
@@ -3511,6 +3620,7 @@ export default function BlockAudioEditor() {
         sounds={sounds}
         take={take}
         takeName={`Take ${takes.current + 1}`}
+        view={view}
       />
       <Readouts
         duration={doc.duration}

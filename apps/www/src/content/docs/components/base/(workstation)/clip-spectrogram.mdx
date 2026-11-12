@@ -1,0 +1,34 @@
+---
+title: Clip Spectrogram
+description: "A clip's recording drawn as a spectrogram, computed on the GPU at every zoom by gl-spectrogram, on the frequency axis of your choice, in the text colour over the ground under it."
+---
+
+## Installation
+
+<Install name="clip-spectrogram" packages="gl-spectrogram" />
+
+## Usage
+
+`ClipSpectrogram` is placed as [`ClipWaveform`](/docs/components/base/arrangement) is: a canvas that fills the box of the clip it lies in, drawing only the stretch the view shows. Instead of peaks it draws the frequencies of the recording, each column an FFT computed on the GPU by `gl-spectrogram`, so a steady tone is one row thin and a click one column thin at any zoom. The audio editor switches its lane between the two from its View menu.
+
+```tsx
+import { ClipSpectrogram } from "@/components/audio-ui/clip-spectrogram";
+
+<ClipSpectrogram
+  clip={{ sourceLength: sound.duration, value: { length: clip.length, offset: clip.offset } }}
+  className="inset-y-0 h-full text-foreground"
+  sampleRate={sound.sampleRate}
+  samples={sound.samples} // { frames, read(from, to) }: the recording mixed to one
+  scale="log" // "log" octaves, "mel", "erb" or "lin" hertz
+/>;
+```
+
+| Prop | Type | |
+| --- | --- | --- |
+| `clip` | `ClipReading` | What the clip reads: its length, offset and source length. |
+| `samples` | `{ frames, read }` | The recording's samples, mixed to one. |
+| `sampleRate` | `number` | The recording's rate, in hertz. |
+| `scale` | `"log" \| "mel" \| "erb" \| "lin"` | The frequency axis. Default `"log"`. |
+| `gain` | `number` | A factor on the picture, as a clip's level plays. Default `1`. |
+
+It needs WebGL 2 and draws nothing without it. A reversed, looped or warped clip is drawn from its source in order.
