@@ -118,8 +118,8 @@ function IndexPage() {
     <>
       <JsonLd data={buildSoftwareJsonLd()} />
       <HomeHero />
-      {/* Under the title, the registry's audio editor itself: what a user installs, working. */}
-      <section aria-labelledby="home-editor" className="border-t">
+      {/* Under the title, the registry's audio editor itself: what a user installs, working, ruled off from what follows. */}
+      <section aria-labelledby="home-editor" className="border-y">
         <h2 className="sr-only" id="home-editor">
           Audio editor
         </h2>

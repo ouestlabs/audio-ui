@@ -99,7 +99,8 @@ export function HomeGuide({
           DAW, and effects and instruments to plug in. Every page has a live
           preview, the install command, the API reference and the source.
         </p>
-        <div className="mt-8">
+        {/* From one edge of the panel to the other, out of the section's own margins. */}
+        <div className="-mx-4 mt-8 sm:-mx-6">
           <HomeFigures figures={figures} />
         </div>
         <div className="mt-10 grid gap-x-8 gap-y-10 sm:grid-cols-2 xl:grid-cols-3">
