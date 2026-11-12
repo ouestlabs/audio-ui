@@ -74,6 +74,17 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
     ],
     name: "Pad",
   },
+  piano: {
+    entry: "piano",
+    lines: [
+      '<Piano.Root aria-label="Keys" minPitch={48} maxPitch={71}>',
+      "  <Piano.Keys>",
+      "    {(pitch) => <Piano.Key pitch={pitch} />}",
+      "  </Piano.Keys>",
+      "</Piano.Root>",
+    ],
+    name: "Piano",
+  },
   sequencer: {
     entry: "sequencer",
     lines: [
@@ -115,7 +126,7 @@ const SETUP: Record<string, readonly string[]> = {
   ],
 };
 
-const PART = /^\s*<([A-Z][A-Za-z]*)\.([A-Z][A-Za-z]*)/;
+const PART = /<([A-Z][A-Za-z]*)\.([A-Z][A-Za-z]*)/;
 const UPPER = /([a-z])([A-Z])/g;
 const TAG = /audio-ui-[a-z-]+/g;
 
@@ -130,22 +141,38 @@ function tagOf(entry: string, part: string) {
 }
 
 /** The class a part takes in a CSS Modules sheet: its name, the root being `root`. */
-export const moduleClass = (part: string) => camel(part);
+export const moduleClass = (part: string, prefix = "") =>
+  `${prefix}${camel(part)}`;
 
-/** The skin's Tailwind classes for a part of a primitive, if it has some. */
+const CHILD = /^\*:/;
+
+/**
+ * The skin's Tailwind classes for a part of a primitive, if it has some. A
+ * part the elements generate, styled with `*:` from the part that holds it
+ * (a piano's keys), takes those classes itself in React.
+ */
 export function tailwindClasses(entry: string, part: string) {
-  return SKINS[entry]?.tailwind[tagOf(entry, part)];
+  const own = SKINS[entry]?.tailwind[tagOf(entry, part)];
+  if (own) {
+    return own;
+  }
+  const holder = SKINS[entry]?.tailwind[tagOf(entry, `${part}s`)];
+  return holder
+    ?.split(" ")
+    .filter((name) => CHILD.test(name))
+    .map((name) => name.replace(CHILD, ""))
+    .join(" ");
 }
 
 /** The skin's stylesheet as CSS Modules write it: a class for each part in place of its tag. */
-export function moduleCss(entry: string): string {
+export function moduleCss(entry: string, prefix = ""): string {
   const css = SKINS[entry]?.css ?? "";
   return css.replace(TAG, (tag) => {
     if (tag === `audio-ui-${entry}`) {
-      return ".root";
+      return `.${prefix}root`;
     }
     const rest = tag.slice(`audio-ui-${entry}-`.length);
-    return `.${rest.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())}`;
+    return `.${prefix}${rest.replace(/-([a-z])/g, (_, c: string) => c.toUpperCase())}`;
   });
 }
 
@@ -167,8 +194,7 @@ export function reactJsx(page: string, styling: StylingId): string[] {
       return line;
     }
     const part = match[2] ?? "";
-    const at =
-      line.indexOf(`${match[1]}.${part}`) + match[1].length + 1 + part.length;
+    const at = (match.index ?? 0) + match[0].length;
     if (styling === "tailwind") {
       const classes = tailwindClasses(usage.entry, part);
       return classes

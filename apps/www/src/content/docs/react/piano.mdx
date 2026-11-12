@@ -3,7 +3,80 @@ title: Piano
 description: "The headless Piano of @audio-ui/react: its parts, what each renders and owns, and their props."
 ---
 
+<ReactPreview name="piano" />
+
 <Module from="@audio-ui/react/piano" />
+
+## Usage
+
+{/* usage:start: written by `bun scripts/react-usage.ts --write` */}
+
+The styles read the theme's CSS variables, which the [elements' overview](/docs/elements#styling) sets.
+
+<ForStyling only="css">
+
+```css title="piano.module.css"
+.root {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  height: calc(var(--spacing, 0.25rem) * 28);
+}
+
+.key {
+  z-index: 0;
+  top: 0;
+  box-sizing: border-box;
+  height: 100%;
+  border: 1px solid var(--border, oklch(0.922 0 0));
+  border-radius: 0 0 4px 4px;
+  background: var(--background, oklch(1 0 0));
+  cursor: pointer;
+  outline: none;
+}
+
+.key[data-color="black"] {
+  z-index: 1;
+  height: 62%;
+  border-color: var(--foreground, oklch(0.145 0 0));
+  background: var(--foreground, oklch(0.145 0 0));
+}
+
+.key[data-active] {
+  border-color: var(--primary, oklch(0.205 0 0));
+  background: var(--primary, oklch(0.205 0 0));
+}
+```
+
+```tsx title="piano.tsx"
+import { Piano } from "@audio-ui/react";
+import styles from "./piano.module.css";
+
+<Piano.Root className={styles.root} aria-label="Keys" minPitch={48} maxPitch={71}>
+  <Piano.Keys>
+    {(pitch) => <Piano.Key className={styles.key} pitch={pitch} />}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+```tsx title="piano.tsx"
+import { Piano } from "@audio-ui/react";
+
+<Piano.Root className="relative block h-28 w-full max-w-lg" aria-label="Keys" minPitch={48} maxPitch={71}>
+  <Piano.Keys className="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary">
+    {(pitch) => <Piano.Key className="top-0 z-0 h-full cursor-pointer rounded-b-[4px] border border-border bg-background outline-none data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
+  </Piano.Keys>
+</Piano.Root>
+```
+
+</ForStyling>
+
+{/* usage:end */}
 
 ## Anatomy
 

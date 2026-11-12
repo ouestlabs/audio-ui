@@ -1,7 +1,15 @@
 "use client";
 
 import { createSource } from "@audio-ui/core";
-import { Fader, Knob, Meter, Pad, Sequencer, XYPad } from "@audio-ui/react";
+import {
+  Fader,
+  Knob,
+  Meter,
+  Pad,
+  Piano,
+  Sequencer,
+  XYPad,
+} from "@audio-ui/react";
 import {
   createContext,
   type ReactNode,
@@ -26,8 +34,12 @@ export type ReactPreviewName =
   | "knob"
   | "meter"
   | "pad"
+  | "piano"
   | "sequencer"
   | "xypad";
+
+/** In front of the classes of the preview's sheet, which a page's own utilities (`grid`) would otherwise meet. */
+const PREFIX = "preview-";
 
 /** The class of a part by its name: the skin's Tailwind ones, or the sheet's class for it. */
 const PartContext = createContext<(part: string) => string | undefined>(
@@ -166,11 +178,28 @@ function SequencerPreview() {
   );
 }
 
+function PianoPreview() {
+  const p = usePart("piano");
+  return (
+    <Piano.Root
+      aria-label="Keys"
+      className={p("Root")}
+      maxPitch={71}
+      minPitch={48}
+    >
+      <Piano.Keys>
+        {(pitch) => <Piano.Key className={p("Key")} pitch={pitch} />}
+      </Piano.Keys>
+    </Piano.Root>
+  );
+}
+
 const PREVIEWS: Record<ReactPreviewName, () => ReactNode> = {
   fader: FaderPreview,
   knob: KnobPreview,
   meter: MeterPreview,
   pad: PadPreview,
+  piano: PianoPreview,
   sequencer: SequencerPreview,
   xypad: XYPadPreview,
 };
@@ -187,7 +216,7 @@ export function ReactPreview({ name }: { name: ReactPreviewName }) {
       const [entry = "", partName = ""] = key.split(":");
       return styling === "tailwind"
         ? tailwindClasses(entry, partName)
-        : moduleClass(partName);
+        : moduleClass(partName, PREFIX);
     },
     [styling]
   );
@@ -196,7 +225,7 @@ export function ReactPreview({ name }: { name: ReactPreviewName }) {
     <Frame className="mt-4 mb-8" data-slot="react-preview" style={style}>
       {styling === "css" && SKINS[name] ? (
         // The sheet the page shows, scoped to this preview.
-        <style>{`@scope ([data-slot="react-preview"]) {\n${moduleCss(name)}\n}`}</style>
+        <style>{`@scope ([data-slot="react-preview"]) {\n${moduleCss(name, PREFIX)}\n}`}</style>
       ) : null}
       <PreviewPanel className="min-h-64 gap-4 px-4">
         <div className="flex w-full items-center justify-center">

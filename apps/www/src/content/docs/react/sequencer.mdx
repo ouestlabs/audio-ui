@@ -60,7 +60,7 @@ const pattern = [
     {(row) => (
       <Sequencer.Row className={styles.row} index={row}>
         <Sequencer.Cells>
-          {(step) => <Sequencer.Cell step={step} />}
+          {(step) => <Sequencer.Cell className={styles.cell} step={step} />}
         </Sequencer.Cells>
       </Sequencer.Row>
     )}
@@ -85,7 +85,7 @@ const pattern = [
     {(row) => (
       <Sequencer.Row className="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index={row}>
         <Sequencer.Cells>
-          {(step) => <Sequencer.Cell step={step} />}
+          {(step) => <Sequencer.Cell className="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step={step} />}
         </Sequencer.Cells>
       </Sequencer.Row>
     )}
