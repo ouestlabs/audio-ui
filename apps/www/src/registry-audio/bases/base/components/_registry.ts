@@ -707,6 +707,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/transport",
       "@audio-ui/use-arrangement",
       "@audio-ui/use-time-selection",
+      "@audio-ui/use-bake",
       "@audio-ui/use-clip-edits",
       "@audio-ui/use-silence-hover",
       "@audio-ui/use-status-line",

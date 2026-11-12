@@ -385,6 +385,7 @@
       "timeline",
       "track-automation",
       "use-arrangement",
+      "use-bake",
       "use-clip-edits",
       "use-time-selection",
       "use-timeline-cursor"
@@ -465,6 +466,7 @@
       "block-mixer",
       "block-timeline",
       "mixer-view",
+      "use-bake",
       "use-midi-playback"
     ]
   },
@@ -682,7 +684,8 @@
       "block-audio-editor",
       "block-device-chain",
       "block-mixer",
-      "block-timeline"
+      "block-timeline",
+      "use-bake"
     ]
   },
   {
@@ -1950,6 +1953,38 @@
     "name": "use-audio-signal",
     "registryDependencies": [],
     "usedBy": []
+  },
+  {
+    "dependencies": [
+      "@audio-ui/engine"
+    ],
+    "description": "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat and Add silence over it",
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "BakedSound",
+        "summary": "A sound as plain samples: what an operation reads and writes."
+      },
+      {
+        "kind": "function",
+        "name": "useBake",
+        "summary": "Changes the samples of the sound as edited."
+      }
+    ],
+    "files": [
+      "hooks/use-bake.ts"
+    ],
+    "from": "@/hooks/use-bake",
+    "kind": "hook",
+    "name": "use-bake",
+    "registryDependencies": [
+      "arrangement",
+      "arrangement-engine",
+      "clip-player"
+    ],
+    "usedBy": [
+      "block-audio-editor"
+    ]
   },
   {
     "dependencies": [

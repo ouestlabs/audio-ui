@@ -192,3 +192,39 @@ export function resampleChannels(
   }
   return channels.map((channel) => resample(channel, { from, to }));
 }
+
+/** Every channel played backwards: the end first. */
+export function reverseChannels(
+  channels: readonly Float32Array[]
+): Float32Array[] {
+  return channels.map((channel) => Float32Array.from(channel).reverse());
+}
+
+/** The sound played `times` times in a row, the first included. Fewer than one is one. */
+export function repeatChannels(
+  channels: readonly Float32Array[],
+  times: number
+): Float32Array[] {
+  const count = Math.max(1, Math.floor(times));
+  return channels.map((channel) => {
+    const out = new Float32Array(channel.length * count);
+    for (let index = 0; index < count; index += 1) {
+      out.set(channel, index * channel.length);
+    }
+    return out;
+  });
+}
+
+/** Silence, in samples, added before and after the sound. */
+export function padChannels(
+  channels: readonly Float32Array[],
+  { after = 0, before = 0 }: { after?: number; before?: number }
+): Float32Array[] {
+  const start = Math.max(0, Math.round(before));
+  const end = Math.max(0, Math.round(after));
+  return channels.map((channel) => {
+    const out = new Float32Array(start + channel.length + end);
+    out.set(channel, start);
+    return out;
+  });
+}
