@@ -33,7 +33,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
     display: block;
     width: 100%;
     max-width: 32rem;
-    height: 7rem;
+    height: calc(var(--spacing, 0.25rem) * 28);
   }
 
   audio-ui-piano-key {
@@ -119,7 +119,7 @@ audio-ui-piano {
   display: block;
   width: 100%;
   max-width: 32rem;
-  height: 7rem;
+  height: calc(var(--spacing, 0.25rem) * 28);
 }
 
 audio-ui-piano-key {
@@ -188,7 +188,7 @@ import "@audio-ui/elements/piano";
     display: block;
     width: 100%;
     max-width: 32rem;
-    height: 7rem;
+    height: calc(var(--spacing, 0.25rem) * 28);
   }
 
   audio-ui-piano-key {

@@ -12,6 +12,10 @@ import { BasePicker } from "@/components/customizer/pickers/base-picker";
 import { ChartColorPicker } from "@/components/customizer/pickers/chart-color-picker";
 import { FontPicker } from "@/components/customizer/pickers/font-picker";
 import { IconLibraryPicker } from "@/components/customizer/pickers/icon-library-picker";
+import {
+  DensityPicker,
+  SizePicker,
+} from "@/components/customizer/pickers/look-pickers";
 import { MenuColorPicker } from "@/components/customizer/pickers/menu-picker";
 import { RadiusPicker } from "@/components/customizer/pickers/radius-picker";
 import { StylePicker } from "@/components/customizer/pickers/style-picker";
@@ -64,13 +68,8 @@ export function CustomizerSidebarContent({
         defaultNote="0.625rem, the theme's"
         isMobile={isMobile}
       />
-      <FontPicker
-        anchorRef={anchorRef}
-        fonts={FONTS}
-        isMobile={isMobile}
-        label="Font"
-        param="font"
-      />
+      <SizePicker anchorRef={anchorRef} isMobile={isMobile} />
+      <DensityPicker anchorRef={anchorRef} isMobile={isMobile} />
     </>
   ) : (
     <>

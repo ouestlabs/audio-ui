@@ -23,7 +23,7 @@ export const SKINS: Record<string, ElementSkin> = {
   display: block;
   width: 100%;
   max-width: 28rem;
-  height: 10rem;
+  height: calc(var(--spacing, 0.25rem) * 40);
   border-radius: calc(var(--radius) - 2px);
   background: var(--muted);
 }
@@ -40,8 +40,8 @@ audio-ui-envelope-line {
 
 audio-ui-envelope-point {
   box-sizing: border-box;
-  width: 0.75rem;
-  height: 0.75rem;
+  width: calc(var(--spacing, 0.25rem) * 3);
+  height: calc(var(--spacing, 0.25rem) * 3);
   border: 2px solid var(--primary);
   border-radius: 9999px;
   background: var(--background);
@@ -55,8 +55,8 @@ audio-ui-envelope-point[data-dragging] {
 }
 
 audio-ui-envelope-segment {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: calc(var(--spacing, 0.25rem) * 2);
+  height: calc(var(--spacing, 0.25rem) * 2);
   border-radius: 9999px;
   background: var(--muted-foreground);
   opacity: 0.5;
@@ -80,7 +80,7 @@ audio-ui-envelope-segment[data-flat] {
   fader: {
     css: `audio-ui-fader {
   position: relative;
-  height: 10rem;
+  height: calc(var(--spacing, 0.25rem) * 40);
 }
 
 audio-ui-fader-control {
@@ -97,7 +97,7 @@ audio-ui-fader-control {
 audio-ui-fader-track {
   position: relative;
   flex-grow: 1;
-  width: 0.5rem;
+  width: calc(var(--spacing, 0.25rem) * 2);
   overflow: hidden;
   border-radius: 9999px;
   background: color-mix(in oklab, var(--input) 90%, transparent);
@@ -117,8 +117,8 @@ audio-ui-fader-thumb {
   z-index: 10;
   display: block;
   flex-shrink: 0;
-  width: 1rem;
-  height: 1.5rem;
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 6);
   border: 1px solid var(--ring);
   border-radius: calc(var(--radius) - 2px);
   background: var(--card);
@@ -155,9 +155,9 @@ audio-ui-fader-thumb:active {
     css: `audio-ui-knob {
   position: relative;
   display: inline-flex;
-  width: 3rem;
-  height: 3rem;
-  margin-bottom: 2rem;
+  width: calc(var(--spacing, 0.25rem) * 12);
+  height: calc(var(--spacing, 0.25rem) * 12);
+  margin-bottom: calc(var(--spacing, 0.25rem) * 8);
   outline: none;
 }
 
@@ -182,7 +182,7 @@ audio-ui-knob-control:active {
 audio-ui-knob-control::before {
   content: "";
   position: absolute;
-  inset: 0.375rem;
+  inset: calc(var(--spacing, 0.25rem) * 1.5);
   border-radius: 9999px;
   background: var(--card);
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground) 10%, transparent);
@@ -235,8 +235,8 @@ audio-ui-knob-value {
   top: 100%;
   left: 50%;
   z-index: 10;
-  margin-top: 0.25rem;
-  padding: 0.125rem 0.375rem;
+  margin-top: calc(var(--spacing, 0.25rem) * 1);
+  padding: calc(var(--spacing, 0.25rem) * 0.5) calc(var(--spacing, 0.25rem) * 1.5);
   translate: -50% 0;
   border-radius: calc(var(--radius) - 4px);
   background: var(--foreground);
@@ -278,14 +278,14 @@ audio-ui-knob-label {
   meter: {
     css: `audio-ui-meter {
   display: flex;
-  gap: 0.375rem;
-  height: 11rem;
+  gap: calc(var(--spacing, 0.25rem) * 1.5 * var(--density, 1));
+  height: calc(var(--spacing, 0.25rem) * 44);
 }
 
 audio-ui-meter-channel {
   position: relative;
   display: block;
-  width: 0.75rem;
+  width: calc(var(--spacing, 0.25rem) * 3);
   height: 100%;
   overflow: hidden;
   border-radius: calc(var(--radius) - 4px);
@@ -304,11 +304,12 @@ audio-ui-meter-peak {
   right: 0;
   left: 0;
   display: block;
-  height: 0.125rem;
+  height: calc(var(--spacing, 0.25rem) * 0.5);
   background: var(--foreground);
 }`,
     tailwind: {
-      "audio-ui-meter": "flex h-44 gap-1.5",
+      "audio-ui-meter":
+        "flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]",
       "audio-ui-meter-channel":
         "relative block h-full w-3 overflow-hidden rounded-sm bg-muted",
       "audio-ui-meter-indicator": "absolute bottom-0 block bg-primary",
@@ -319,8 +320,8 @@ audio-ui-meter-peak {
     css: `audio-ui-pad {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 0.5rem;
-  width: 18rem;
+  gap: calc(var(--spacing, 0.25rem) * 2 * var(--density, 1));
+  width: calc(var(--spacing, 0.25rem) * 72);
 }
 
 audio-ui-pad-item {
@@ -349,7 +350,8 @@ audio-ui-pad-item[data-active] {
   color: var(--primary-foreground);
 }`,
     tailwind: {
-      "audio-ui-pad": "grid w-72 grid-cols-4 gap-2",
+      "audio-ui-pad":
+        "grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]",
       "audio-ui-pad-item":
         "flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground",
     },
@@ -360,7 +362,7 @@ audio-ui-pad-item[data-active] {
   display: block;
   width: 100%;
   max-width: 32rem;
-  height: 7rem;
+  height: calc(var(--spacing, 0.25rem) * 28);
 }
 
 audio-ui-piano-key {
@@ -408,7 +410,7 @@ audio-ui-piano-roll {
 }
 
 audio-ui-piano-roll-keys {
-  height: 12rem;
+  height: calc(var(--spacing, 0.25rem) * 48);
   border-inline-end: 1px solid var(--border);
 }
 
@@ -446,7 +448,7 @@ audio-ui-piano-roll-keys audio-ui-piano-key[data-active] {
 }
 
 audio-ui-piano-roll-grid {
-  height: 12rem;
+  height: calc(var(--spacing, 0.25rem) * 48);
   outline: none;
 }
 
@@ -480,7 +482,7 @@ audio-ui-piano-roll-marquee {
 
 audio-ui-piano-roll-velocity-lane {
   grid-column-start: 2;
-  height: 3rem;
+  height: calc(var(--spacing, 0.25rem) * 12);
   border-top: 1px solid var(--border);
 }
 
@@ -527,7 +529,7 @@ audio-ui-timeline-playhead {
   display: block;
   width: 100%;
   max-width: 32rem;
-  height: 11rem;
+  height: calc(var(--spacing, 0.25rem) * 44);
   border-radius: calc(var(--radius) - 2px);
   background: var(--muted);
 }
@@ -542,12 +544,12 @@ audio-ui-plot-grid [data-part="line"] {
 }
 
 audio-ui-plot-grid [data-part="label"][data-axis="x"] {
-  bottom: 0.25rem;
+  bottom: calc(var(--spacing, 0.25rem) * 1);
   translate: 0.25rem 0;
 }
 
 audio-ui-plot-grid [data-part="label"][data-axis="y"] {
-  left: 0.25rem;
+  left: calc(var(--spacing, 0.25rem) * 1);
   translate: 0 -100%;
 }
 
@@ -556,8 +558,8 @@ audio-ui-plot-curve {
 }
 
 audio-ui-plot-handle {
-  width: 1rem;
-  height: 1rem;
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 4);
   border-radius: 9999px;
   background: var(--primary);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
@@ -575,7 +577,7 @@ audio-ui-plot-handle {
   sequencer: {
     css: `audio-ui-sequencer {
   display: grid;
-  gap: 0.25rem;
+  gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
   width: 100%;
   max-width: 36rem;
 }
@@ -584,7 +586,7 @@ audio-ui-sequencer-row {
   display: grid;
   grid-auto-flow: column;
   grid-auto-columns: 1fr;
-  gap: 0.25rem;
+  gap: calc(var(--spacing, 0.25rem) * 1 * var(--density, 1));
 }
 
 audio-ui-sequencer-cell {
@@ -602,10 +604,12 @@ audio-ui-sequencer-cell[data-on] {
   background: var(--primary);
 }`,
     tailwind: {
-      "audio-ui-sequencer": "grid w-full max-w-xl gap-1",
+      "audio-ui-sequencer":
+        "grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]",
       "audio-ui-sequencer-cell":
         "aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary",
-      "audio-ui-sequencer-row": "grid grid-flow-col auto-cols-fr gap-1",
+      "audio-ui-sequencer-row":
+        "grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]",
     },
   },
   timeline: {
@@ -621,15 +625,15 @@ audio-ui-timeline-viewport {
 }
 
 audio-ui-timeline-ruler {
-  height: 1.5rem;
-  margin-inline-start: 5rem;
+  height: calc(var(--spacing, 0.25rem) * 6);
+  margin-inline-start: calc(var(--spacing, 0.25rem) * 20);
   background: var(--muted);
   cursor: pointer;
 }
 
 audio-ui-timeline-mark {
   height: 100%;
-  padding-inline-start: 0.25rem;
+  padding-inline-start: calc(var(--spacing, 0.25rem) * 1);
   border-inline-start: 1px solid var(--border);
   color: var(--muted-foreground);
   font-size: 10px;
@@ -642,13 +646,13 @@ audio-ui-timeline-range {
 }
 
 audio-ui-timeline-track {
-  height: 3.5rem;
+  height: calc(var(--spacing, 0.25rem) * 14);
   border-top: 1px solid var(--border);
 }
 
 audio-ui-timeline-track-header {
-  width: 5rem;
-  padding: 0.5rem;
+  width: calc(var(--spacing, 0.25rem) * 20);
+  padding: calc(var(--spacing, 0.25rem) * 2);
   border-inline-end: 1px solid var(--border);
   background: var(--background);
   font-size: 0.75rem;
@@ -656,8 +660,8 @@ audio-ui-timeline-track-header {
 }
 
 audio-ui-timeline-clip {
-  top: 0.25rem;
-  bottom: 0.25rem;
+  top: calc(var(--spacing, 0.25rem) * 1);
+  bottom: calc(var(--spacing, 0.25rem) * 1);
   overflow: hidden;
   border-radius: calc(var(--radius) - 4px);
   background: color-mix(in oklab, var(--primary) 15%, transparent);
@@ -669,7 +673,7 @@ audio-ui-timeline-clip[data-selected] {
 
 audio-ui-timeline-clip-header {
   overflow: hidden;
-  padding-inline: 0.375rem;
+  padding-inline: calc(var(--spacing, 0.25rem) * 1.5);
   background: var(--primary);
   color: var(--primary-foreground);
   font-size: 10px;
@@ -682,7 +686,7 @@ audio-ui-timeline-clip-handle {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 0.375rem;
+  width: calc(var(--spacing, 0.25rem) * 1.5);
   cursor: ew-resize;
 }
 
@@ -702,8 +706,8 @@ audio-ui-timeline-playhead {
 }
 
 audio-ui-timeline-navigator {
-  height: 0.75rem;
-  margin-top: 0.5rem;
+  height: calc(var(--spacing, 0.25rem) * 3);
+  margin-top: calc(var(--spacing, 0.25rem) * 2);
   border-radius: calc(var(--radius) - 4px);
   background: var(--muted);
 }
@@ -747,7 +751,7 @@ audio-ui-timeline-navigator-window {
 audio-ui-waveform-control {
   position: relative;
   display: block;
-  height: 5rem;
+  height: calc(var(--spacing, 0.25rem) * 20);
   border-radius: calc(var(--radius) - 2px);
   background: var(--muted);
   cursor: pointer;
@@ -770,7 +774,7 @@ audio-ui-waveform-region-handle {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 0.25rem;
+  width: calc(var(--spacing, 0.25rem) * 1);
   background: var(--primary);
   cursor: ew-resize;
 }
@@ -786,14 +790,14 @@ audio-ui-waveform-region-handle[edge="end"] {
 audio-ui-waveform-playhead {
   top: 0;
   bottom: 0;
-  width: 0.125rem;
+  width: calc(var(--spacing, 0.25rem) * 0.5);
   background: var(--foreground);
 }
 
 audio-ui-waveform-hover {
-  top: -1.5rem;
+  top: calc(var(--spacing, 0.25rem) * -6);
   translate: -50% 0;
-  padding-inline: 0.25rem;
+  padding-inline: calc(var(--spacing, 0.25rem) * 1);
   border-radius: 0.25rem;
   background: var(--popover);
   font-family: var(--font-mono, ui-monospace, monospace);
@@ -817,7 +821,7 @@ audio-ui-waveform-hover {
   xypad: {
     css: `audio-ui-xypad {
   display: block;
-  width: 12rem;
+  width: calc(var(--spacing, 0.25rem) * 48);
 }
 
 audio-ui-xypad-control {
@@ -855,8 +859,8 @@ audio-ui-xypad-control::after {
 
 audio-ui-xypad-thumb {
   position: absolute;
-  width: 1rem;
-  height: 1rem;
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 4);
   border-radius: 9999px;
   background: var(--primary);
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary) 20%, transparent);
@@ -864,7 +868,7 @@ audio-ui-xypad-thumb {
 
 audio-ui-xypad-value {
   display: block;
-  margin-top: 0.5rem;
+  margin-top: calc(var(--spacing, 0.25rem) * 2);
   color: var(--muted-foreground);
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.75rem;

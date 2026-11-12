@@ -6,6 +6,7 @@ import { ACTION_BUTTON_CLASS } from "@/components/customizer/actions/action-butt
 import { Button } from "@/components/ui/button";
 import { useConfig } from "@/hooks/use-config";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { useDensity, useSize } from "@/hooks/use-look";
 import { useStyling } from "@/hooks/use-styling";
 import { useDesignSystemSearchParams } from "@/lib/design-system/search-params";
 import { themeStylesheet } from "@/lib/design-system/theme-stylesheet";
@@ -16,6 +17,8 @@ export function CopyCss() {
   const [params] = useDesignSystemSearchParams();
   const [config] = useConfig();
   const [styling] = useStyling();
+  const [size] = useSize();
+  const [density] = useDensity();
   const { copyToClipboard, isCopied } = useCopyToClipboard();
   const label = styling === "tailwind" ? "Copy Tailwind theme" : "Copy CSS";
   const shown = isCopied ? "Copied" : label;
@@ -34,10 +37,11 @@ export function CopyCss() {
           style: params.style ?? config.style,
           theme: params.theme ?? config.theme,
         },
-        styling
+        styling,
+        { density, size }
       )
     );
-  }, [config, copyToClipboard, params, styling]);
+  }, [config, copyToClipboard, density, params, size, styling]);
 
   return (
     <Button

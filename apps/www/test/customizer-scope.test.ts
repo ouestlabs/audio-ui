@@ -35,13 +35,6 @@ describe("themeStylesheet", () => {
   const css = themeStylesheet(DEFAULT_CONFIG, "css");
   const tailwind = themeStylesheet(DEFAULT_CONFIG, "tailwind");
 
-  test("loads the font first, then names it", () => {
-    expect(css.startsWith('@import url("https://fonts.googleapis.com/')).toBe(
-      true
-    );
-    expect(css).toContain("--font-sans:");
-  });
-
   test("holds the light and the dark colors the examples read", () => {
     expect(css).toMatch(LIGHT_PRIMARY);
     expect(css).toMatch(DARK_PRIMARY);
@@ -54,6 +47,16 @@ describe("themeStylesheet", () => {
     expect(css).not.toContain("--chart-");
     expect(css).not.toContain("--sidebar");
     expect(css).not.toContain("--destructive");
+  });
+
+  test("writes the spacing unit and the density only when they are not the default", () => {
+    expect(css).not.toContain("--spacing");
+    const roomy = themeStylesheet(DEFAULT_CONFIG, "css", {
+      density: "roomy",
+      size: "large",
+    });
+    expect(roomy).toContain("--spacing: 0.3125rem;");
+    expect(roomy).toContain("--density: 1.5;");
   });
 
   test("the lyra style has square corners, whatever the radius", () => {
@@ -69,10 +72,5 @@ describe("themeStylesheet", () => {
     expect(tailwind).toContain("@theme inline {");
     expect(tailwind).toContain("--color-primary: var(--primary);");
     expect(tailwind).toContain("--radius-md: calc(var(--radius) - 2px);");
-    expect(tailwind).toContain("--font-sans:");
-    // The font loads before Tailwind's own import, as CSS wants its imports first.
-    expect(tailwind.indexOf("fonts.googleapis")).toBeLessThan(
-      tailwind.indexOf("tailwindcss")
-    );
   });
 });

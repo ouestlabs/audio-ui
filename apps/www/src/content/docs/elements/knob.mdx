@@ -31,9 +31,9 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   audio-ui-knob {
     position: relative;
     display: inline-flex;
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: 2rem;
+    width: calc(var(--spacing, 0.25rem) * 12);
+    height: calc(var(--spacing, 0.25rem) * 12);
+    margin-bottom: calc(var(--spacing, 0.25rem) * 8);
     outline: none;
   }
 
@@ -58,7 +58,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   audio-ui-knob-control::before {
     content: "";
     position: absolute;
-    inset: 0.375rem;
+    inset: calc(var(--spacing, 0.25rem) * 1.5);
     border-radius: 9999px;
     background: var(--card, oklch(1 0 0));
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
@@ -111,8 +111,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
     top: 100%;
     left: 50%;
     z-index: 10;
-    margin-top: 0.25rem;
-    padding: 0.125rem 0.375rem;
+    margin-top: calc(var(--spacing, 0.25rem) * 1);
+    padding: calc(var(--spacing, 0.25rem) * 0.5) calc(var(--spacing, 0.25rem) * 1.5);
     translate: -50% 0;
     border-radius: calc(var(--radius, 0.625rem) - 4px);
     background: var(--foreground, oklch(0.145 0 0));
@@ -215,9 +215,9 @@ const volume = ref(40);
 audio-ui-knob {
   position: relative;
   display: inline-flex;
-  width: 3rem;
-  height: 3rem;
-  margin-bottom: 2rem;
+  width: calc(var(--spacing, 0.25rem) * 12);
+  height: calc(var(--spacing, 0.25rem) * 12);
+  margin-bottom: calc(var(--spacing, 0.25rem) * 8);
   outline: none;
 }
 
@@ -242,7 +242,7 @@ audio-ui-knob-control:active {
 audio-ui-knob-control::before {
   content: "";
   position: absolute;
-  inset: 0.375rem;
+  inset: calc(var(--spacing, 0.25rem) * 1.5);
   border-radius: 9999px;
   background: var(--card, oklch(1 0 0));
   box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
@@ -295,8 +295,8 @@ audio-ui-knob-value {
   top: 100%;
   left: 50%;
   z-index: 10;
-  margin-top: 0.25rem;
-  padding: 0.125rem 0.375rem;
+  margin-top: calc(var(--spacing, 0.25rem) * 1);
+  padding: calc(var(--spacing, 0.25rem) * 0.5) calc(var(--spacing, 0.25rem) * 1.5);
   translate: -50% 0;
   border-radius: calc(var(--radius, 0.625rem) - 4px);
   background: var(--foreground, oklch(0.145 0 0));
@@ -378,9 +378,9 @@ const volume = ref(40);
   audio-ui-knob {
     position: relative;
     display: inline-flex;
-    width: 3rem;
-    height: 3rem;
-    margin-bottom: 2rem;
+    width: calc(var(--spacing, 0.25rem) * 12);
+    height: calc(var(--spacing, 0.25rem) * 12);
+    margin-bottom: calc(var(--spacing, 0.25rem) * 8);
     outline: none;
   }
 
@@ -405,7 +405,7 @@ const volume = ref(40);
   audio-ui-knob-control::before {
     content: "";
     position: absolute;
-    inset: 0.375rem;
+    inset: calc(var(--spacing, 0.25rem) * 1.5);
     border-radius: 9999px;
     background: var(--card, oklch(1 0 0));
     box-shadow: 0 0 0 1px color-mix(in oklab, var(--foreground, oklch(0.145 0 0)) 10%, transparent);
@@ -458,8 +458,8 @@ const volume = ref(40);
     top: 100%;
     left: 50%;
     z-index: 10;
-    margin-top: 0.25rem;
-    padding: 0.125rem 0.375rem;
+    margin-top: calc(var(--spacing, 0.25rem) * 1);
+    padding: calc(var(--spacing, 0.25rem) * 0.5) calc(var(--spacing, 0.25rem) * 1.5);
     translate: -50% 0;
     border-radius: calc(var(--radius, 0.625rem) - 4px);
     background: var(--foreground, oklch(0.145 0 0));

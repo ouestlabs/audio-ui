@@ -214,8 +214,6 @@ The examples on every element's page do both, and the **Styling** choice of the 
 <ForStyling only="css">
 
 ```css
-@import url("https://fonts.googleapis.com/css2?family=Geist&display=swap");
-
 :root {
   --background: oklch(1 0 0);
   --border: oklch(0.922 0 0);
@@ -229,7 +227,6 @@ The examples on every element's page do both, and the **Styling** choice of the 
   --primary-foreground: oklch(0.985 0 0);
   --radius: 0.625rem;
   --ring: oklch(0.708 0 0);
-  --font-sans: "Geist", sans-serif;
 }
 
 .dark {
@@ -252,7 +249,6 @@ The examples on every element's page do both, and the **Styling** choice of the 
 <ForStyling only="tailwind">
 
 ```css
-@import url("https://fonts.googleapis.com/css2?family=Geist&display=swap");
 @import "tailwindcss";
 
 @theme inline {
@@ -269,7 +265,6 @@ The examples on every element's page do both, and the **Styling** choice of the 
   --color-ring: var(--ring);
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
-  --font-sans: "Geist", sans-serif;
 }
 
 :root {

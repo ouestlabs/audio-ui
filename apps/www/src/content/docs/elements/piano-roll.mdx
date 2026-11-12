@@ -43,7 +43,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   }
 
   audio-ui-piano-roll-keys {
-    height: 12rem;
+    height: calc(var(--spacing, 0.25rem) * 48);
     border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
   }
 
@@ -81,7 +81,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   }
 
   audio-ui-piano-roll-grid {
-    height: 12rem;
+    height: calc(var(--spacing, 0.25rem) * 48);
     outline: none;
   }
 
@@ -115,7 +115,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 
   audio-ui-piano-roll-velocity-lane {
     grid-column-start: 2;
-    height: 3rem;
+    height: calc(var(--spacing, 0.25rem) * 12);
     border-top: 1px solid var(--border, oklch(0.922 0 0));
   }
 
@@ -244,7 +244,7 @@ audio-ui-piano-roll {
 }
 
 audio-ui-piano-roll-keys {
-  height: 12rem;
+  height: calc(var(--spacing, 0.25rem) * 48);
   border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
 }
 
@@ -282,7 +282,7 @@ audio-ui-piano-roll-keys audio-ui-piano-key[data-active] {
 }
 
 audio-ui-piano-roll-grid {
-  height: 12rem;
+  height: calc(var(--spacing, 0.25rem) * 48);
   outline: none;
 }
 
@@ -316,7 +316,7 @@ audio-ui-piano-roll-marquee {
 
 audio-ui-piano-roll-velocity-lane {
   grid-column-start: 2;
-  height: 3rem;
+  height: calc(var(--spacing, 0.25rem) * 12);
   border-top: 1px solid var(--border, oklch(0.922 0 0));
 }
 
@@ -415,7 +415,7 @@ import "@audio-ui/elements/piano-roll";
   }
 
   audio-ui-piano-roll-keys {
-    height: 12rem;
+    height: calc(var(--spacing, 0.25rem) * 48);
     border-inline-end: 1px solid var(--border, oklch(0.922 0 0));
   }
 
@@ -453,7 +453,7 @@ import "@audio-ui/elements/piano-roll";
   }
 
   audio-ui-piano-roll-grid {
-    height: 12rem;
+    height: calc(var(--spacing, 0.25rem) * 48);
     outline: none;
   }
 
@@ -487,7 +487,7 @@ import "@audio-ui/elements/piano-roll";
 
   audio-ui-piano-roll-velocity-lane {
     grid-column-start: 2;
-    height: 3rem;
+    height: calc(var(--spacing, 0.25rem) * 12);
     border-top: 1px solid var(--border, oklch(0.922 0 0));
   }
 

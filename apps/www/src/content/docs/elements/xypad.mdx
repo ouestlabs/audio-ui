@@ -30,7 +30,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 <style>
   audio-ui-xypad {
     display: block;
-    width: 12rem;
+    width: calc(var(--spacing, 0.25rem) * 48);
   }
 
   audio-ui-xypad-control {
@@ -68,8 +68,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 
   audio-ui-xypad-thumb {
     position: absolute;
-    width: 1rem;
-    height: 1rem;
+    width: calc(var(--spacing, 0.25rem) * 4);
+    height: calc(var(--spacing, 0.25rem) * 4);
     border-radius: 9999px;
     background: var(--primary, oklch(0.205 0 0));
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
@@ -77,7 +77,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 
   audio-ui-xypad-value {
     display: block;
-    margin-top: 0.5rem;
+    margin-top: calc(var(--spacing, 0.25rem) * 2);
     color: var(--muted-foreground, oklch(0.556 0 0));
     font-family: var(--font-mono, ui-monospace, monospace);
     font-size: 0.75rem;
@@ -154,7 +154,7 @@ const point = ref({ x: 30, y: 70 });
 <style>
 audio-ui-xypad {
   display: block;
-  width: 12rem;
+  width: calc(var(--spacing, 0.25rem) * 48);
 }
 
 audio-ui-xypad-control {
@@ -192,8 +192,8 @@ audio-ui-xypad-control::after {
 
 audio-ui-xypad-thumb {
   position: absolute;
-  width: 1rem;
-  height: 1rem;
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 4);
   border-radius: 9999px;
   background: var(--primary, oklch(0.205 0 0));
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
@@ -201,7 +201,7 @@ audio-ui-xypad-thumb {
 
 audio-ui-xypad-value {
   display: block;
-  margin-top: 0.5rem;
+  margin-top: calc(var(--spacing, 0.25rem) * 2);
   color: var(--muted-foreground, oklch(0.556 0 0));
   font-family: var(--font-mono, ui-monospace, monospace);
   font-size: 0.75rem;
@@ -260,7 +260,7 @@ const point = ref({ x: 30, y: 70 });
 :global {
   audio-ui-xypad {
     display: block;
-    width: 12rem;
+    width: calc(var(--spacing, 0.25rem) * 48);
   }
 
   audio-ui-xypad-control {
@@ -298,8 +298,8 @@ const point = ref({ x: 30, y: 70 });
 
   audio-ui-xypad-thumb {
     position: absolute;
-    width: 1rem;
-    height: 1rem;
+    width: calc(var(--spacing, 0.25rem) * 4);
+    height: calc(var(--spacing, 0.25rem) * 4);
     border-radius: 9999px;
     background: var(--primary, oklch(0.205 0 0));
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
@@ -307,7 +307,7 @@ const point = ref({ x: 30, y: 70 });
 
   audio-ui-xypad-value {
     display: block;
-    margin-top: 0.5rem;
+    margin-top: calc(var(--spacing, 0.25rem) * 2);
     color: var(--muted-foreground, oklch(0.556 0 0));
     font-family: var(--font-mono, ui-monospace, monospace);
     font-size: 0.75rem;

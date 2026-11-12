@@ -32,7 +32,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
     display: block;
     width: 100%;
     max-width: 28rem;
-    height: 10rem;
+    height: calc(var(--spacing, 0.25rem) * 40);
     border-radius: calc(var(--radius, 0.625rem) - 2px);
     background: var(--muted, oklch(0.97 0 0));
   }
@@ -49,8 +49,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
 
   audio-ui-envelope-point {
     box-sizing: border-box;
-    width: 0.75rem;
-    height: 0.75rem;
+    width: calc(var(--spacing, 0.25rem) * 3);
+    height: calc(var(--spacing, 0.25rem) * 3);
     border: 2px solid var(--primary, oklch(0.205 0 0));
     border-radius: 9999px;
     background: var(--background, oklch(1 0 0));
@@ -64,8 +64,8 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   }
 
   audio-ui-envelope-segment {
-    width: 0.5rem;
-    height: 0.5rem;
+    width: calc(var(--spacing, 0.25rem) * 2);
+    height: calc(var(--spacing, 0.25rem) * 2);
     border-radius: 9999px;
     background: var(--muted-foreground, oklch(0.556 0 0));
     opacity: 0.5;
@@ -150,7 +150,7 @@ audio-ui-envelope {
   display: block;
   width: 100%;
   max-width: 28rem;
-  height: 10rem;
+  height: calc(var(--spacing, 0.25rem) * 40);
   border-radius: calc(var(--radius, 0.625rem) - 2px);
   background: var(--muted, oklch(0.97 0 0));
 }
@@ -167,8 +167,8 @@ audio-ui-envelope-line {
 
 audio-ui-envelope-point {
   box-sizing: border-box;
-  width: 0.75rem;
-  height: 0.75rem;
+  width: calc(var(--spacing, 0.25rem) * 3);
+  height: calc(var(--spacing, 0.25rem) * 3);
   border: 2px solid var(--primary, oklch(0.205 0 0));
   border-radius: 9999px;
   background: var(--background, oklch(1 0 0));
@@ -182,8 +182,8 @@ audio-ui-envelope-point[data-dragging] {
 }
 
 audio-ui-envelope-segment {
-  width: 0.5rem;
-  height: 0.5rem;
+  width: calc(var(--spacing, 0.25rem) * 2);
+  height: calc(var(--spacing, 0.25rem) * 2);
   border-radius: 9999px;
   background: var(--muted-foreground, oklch(0.556 0 0));
   opacity: 0.5;
@@ -246,7 +246,7 @@ import "@audio-ui/elements/envelope";
     display: block;
     width: 100%;
     max-width: 28rem;
-    height: 10rem;
+    height: calc(var(--spacing, 0.25rem) * 40);
     border-radius: calc(var(--radius, 0.625rem) - 2px);
     background: var(--muted, oklch(0.97 0 0));
   }
@@ -263,8 +263,8 @@ import "@audio-ui/elements/envelope";
 
   audio-ui-envelope-point {
     box-sizing: border-box;
-    width: 0.75rem;
-    height: 0.75rem;
+    width: calc(var(--spacing, 0.25rem) * 3);
+    height: calc(var(--spacing, 0.25rem) * 3);
     border: 2px solid var(--primary, oklch(0.205 0 0));
     border-radius: 9999px;
     background: var(--background, oklch(1 0 0));
@@ -278,8 +278,8 @@ import "@audio-ui/elements/envelope";
   }
 
   audio-ui-envelope-segment {
-    width: 0.5rem;
-    height: 0.5rem;
+    width: calc(var(--spacing, 0.25rem) * 2);
+    height: calc(var(--spacing, 0.25rem) * 2);
     border-radius: 9999px;
     background: var(--muted-foreground, oklch(0.556 0 0));
     opacity: 0.5;

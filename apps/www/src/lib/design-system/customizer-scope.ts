@@ -24,9 +24,8 @@ export function pageScope(mdx: string): CustomizerScope {
   return ELEMENTS_TAG.test(mdx) ? "elements" : "none";
 }
 
-/** The choices that change the custom elements' examples: their accent, font and radius. The others are the registry's own. */
+/** The choices that change the custom elements' examples: their accent and radius. The others are the registry's own. */
 export const ELEMENT_CHOICES: ReadonlySet<string> = new Set([
-  "font",
   "radius",
   "theme",
 ]);

@@ -37,7 +37,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   audio-ui-waveform-control {
     position: relative;
     display: block;
-    height: 5rem;
+    height: calc(var(--spacing, 0.25rem) * 20);
     border-radius: calc(var(--radius, 0.625rem) - 2px);
     background: var(--muted, oklch(0.97 0 0));
     cursor: pointer;
@@ -60,7 +60,7 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 0.25rem;
+    width: calc(var(--spacing, 0.25rem) * 1);
     background: var(--primary, oklch(0.205 0 0));
     cursor: ew-resize;
   }
@@ -76,14 +76,14 @@ The styles read the theme's CSS variables, which [Styling](/docs/elements#stylin
   audio-ui-waveform-playhead {
     top: 0;
     bottom: 0;
-    width: 0.125rem;
+    width: calc(var(--spacing, 0.25rem) * 0.5);
     background: var(--foreground, oklch(0.145 0 0));
   }
 
   audio-ui-waveform-hover {
-    top: -1.5rem;
+    top: calc(var(--spacing, 0.25rem) * -6);
     translate: -50% 0;
-    padding-inline: 0.25rem;
+    padding-inline: calc(var(--spacing, 0.25rem) * 1);
     border-radius: 0.25rem;
     background: var(--popover, oklch(1 0 0));
     font-family: var(--font-mono, ui-monospace, monospace);
@@ -177,7 +177,7 @@ audio-ui-waveform {
 audio-ui-waveform-control {
   position: relative;
   display: block;
-  height: 5rem;
+  height: calc(var(--spacing, 0.25rem) * 20);
   border-radius: calc(var(--radius, 0.625rem) - 2px);
   background: var(--muted, oklch(0.97 0 0));
   cursor: pointer;
@@ -200,7 +200,7 @@ audio-ui-waveform-region-handle {
   position: absolute;
   top: 0;
   bottom: 0;
-  width: 0.25rem;
+  width: calc(var(--spacing, 0.25rem) * 1);
   background: var(--primary, oklch(0.205 0 0));
   cursor: ew-resize;
 }
@@ -216,14 +216,14 @@ audio-ui-waveform-region-handle[edge="end"] {
 audio-ui-waveform-playhead {
   top: 0;
   bottom: 0;
-  width: 0.125rem;
+  width: calc(var(--spacing, 0.25rem) * 0.5);
   background: var(--foreground, oklch(0.145 0 0));
 }
 
 audio-ui-waveform-hover {
-  top: -1.5rem;
+  top: calc(var(--spacing, 0.25rem) * -6);
   translate: -50% 0;
-  padding-inline: 0.25rem;
+  padding-inline: calc(var(--spacing, 0.25rem) * 1);
   border-radius: 0.25rem;
   background: var(--popover, oklch(1 0 0));
   font-family: var(--font-mono, ui-monospace, monospace);
@@ -294,7 +294,7 @@ const peaks: number[] = [];
   audio-ui-waveform-control {
     position: relative;
     display: block;
-    height: 5rem;
+    height: calc(var(--spacing, 0.25rem) * 20);
     border-radius: calc(var(--radius, 0.625rem) - 2px);
     background: var(--muted, oklch(0.97 0 0));
     cursor: pointer;
@@ -317,7 +317,7 @@ const peaks: number[] = [];
     position: absolute;
     top: 0;
     bottom: 0;
-    width: 0.25rem;
+    width: calc(var(--spacing, 0.25rem) * 1);
     background: var(--primary, oklch(0.205 0 0));
     cursor: ew-resize;
   }
@@ -333,14 +333,14 @@ const peaks: number[] = [];
   audio-ui-waveform-playhead {
     top: 0;
     bottom: 0;
-    width: 0.125rem;
+    width: calc(var(--spacing, 0.25rem) * 0.5);
     background: var(--foreground, oklch(0.145 0 0));
   }
 
   audio-ui-waveform-hover {
-    top: -1.5rem;
+    top: calc(var(--spacing, 0.25rem) * -6);
     translate: -50% 0;
-    padding-inline: 0.25rem;
+    padding-inline: calc(var(--spacing, 0.25rem) * 1);
     border-radius: 0.25rem;
     background: var(--popover, oklch(1 0 0));
     font-family: var(--font-mono, ui-monospace, monospace);
