@@ -6120,8 +6120,10 @@
     "usedBy": [
       "arrangement",
       "arrangement-engine",
+      "clip-edits",
       "use-arrangement",
       "use-audio-levels",
+      "use-clip-edits",
       "use-loudness",
       "use-piano-roll-playback",
       "use-pitch",

@@ -1,0 +1,25 @@
+---
+title: useSilenceHover
+description: "The pause under the pointer on a lane, to draw as a zone while it is there: give the lane its pointer handlers and the zoom it is drawn at."
+---
+
+<Entry name="use-silence-hover" />
+
+## Usage
+
+Give it the pauses of a sound, as `[from, to]` pairs, and the zoom the lane is drawn at. It returns the pause under the pointer and the two handlers that find it.
+
+```tsx
+import { useSilenceHover } from "@/hooks/use-silence-hover";
+
+const silence = useSilenceHover({ pauses, zoom });
+
+<TimelineLane
+  onPointerLeave={silence.onPointerLeave}
+  onPointerMove={silence.onPointerMove}
+>
+  {silence.pause ? <SilenceZone pause={silence.pause} /> : null}
+</TimelineLane>;
+```
+
+Nothing is under the pointer while a button is held, as in a drag, so a selection is not drawn over by a zone. The pauses come from [`detectSilences`](/docs/engine/analysis#detectsilences).

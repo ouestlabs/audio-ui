@@ -1,0 +1,22 @@
+---
+title: clip-edits
+description: "The pure parts of editing one sound on a track of an arrangement: taking time out and the crossfade at its seam, the fades and level of a stretch of time, how far a pause is shrunk, and which keys are a field's own."
+---
+
+<Entry name="clip-edits" />
+
+## Usage
+
+The functions [`useClipEdits`](/docs/hooks/use-clip-edits) is made of, with no React in them, so a command list can be built and tested on its own.
+
+```ts
+import { removing, shapeStretch, splice, SPLICE } from "@/lib/clip-edits";
+
+// Take 2 s to 3.5 s out, then crossfade the seam it leaves.
+const commands = [...removing(2, 3.5), ...splice("track-1", 2, length - 1.5)];
+
+// The clips of a track with a fade and a level put on a stretch of them.
+const shaped = shapeStretch(clips, [2, 4], { fadeIn: 0.1, fadeInShape: "linear", fadeOut: 0.2, fadeOutShape: "cos", gain: -3 });
+```
+
+`removing(from, to)` is the command that takes a stretch of time out and closes the gap; `splice(track, at, length)` the short crossfade at a seam, none at either end of the sound. `shapeOf(clips, range)` reads the fades and level a selection has now. `typing(target)` tells whether a key went to a field, where the keys are its own.

@@ -1,0 +1,21 @@
+---
+title: useStatusLine
+description: "A line of status an editor says things on, what it is doing and what an action had nothing to do on, which clears itself after a few seconds."
+---
+
+<Entry name="use-status-line" />
+
+## Usage
+
+```tsx
+import { useStatusLine } from "@/hooks/use-status-line";
+
+const [status, say] = useStatusLine(); // clears after 5 s; pass milliseconds to change it
+
+say("Rendering…");
+say("No silence at the start or the end");
+
+<span aria-live="polite">{status}</span>;
+```
+
+Saying something else replaces the message and starts its time again; saying an empty string clears it. [`useClipEdits`](/docs/hooks/use-clip-edits) takes `say` as its `notify`.

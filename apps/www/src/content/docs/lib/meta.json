@@ -28,6 +28,7 @@
     "---Sound in and out---",
     "audio-export",
     "---Editing---",
+    "clip-edits",
     "undo-history",
     "sortable-drag",
     "---Demo content---",
