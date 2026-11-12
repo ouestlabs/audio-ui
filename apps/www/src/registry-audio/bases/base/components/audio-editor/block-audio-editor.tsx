@@ -2265,7 +2265,7 @@ function RateReadout({
       >
         {formatRate(sound.sampleRate)}
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="max-h-80 w-80" side="top">
+      <DropdownMenuContent align="end" className="w-80" side="top">
         <DropdownMenuGroup>
           <DropdownMenuLabel>Resample to</DropdownMenuLabel>
         </DropdownMenuGroup>
