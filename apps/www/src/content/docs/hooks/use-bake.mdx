@@ -1,6 +1,6 @@
 ---
 title: useBake
-description: "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat and Add silence over it."
+description: "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat, Add silence, Normalize, Pan and Filter over it."
 ---
 
 <Entry name="use-bake" />
@@ -12,7 +12,7 @@ An edit of the arrangement (a cut, a fade, a gain) leaves the recording as it wa
 ```tsx
 import { useBake } from "@/hooks/use-bake";
 
-const { bake, pad, repeat, reverse } = useBake({
+const { bake, filter, normalize, pad, pan, repeat, reverse } = useBake({
   doc, // the arrangement's document
   onBaked, // (sound, label) => void: puts the sound on the track as a step of the history
   recordings,
@@ -25,6 +25,9 @@ const { bake, pad, repeat, reverse } = useBake({
 <MenuItem onClick={reverse}>Reverse</MenuItem>;
 <MenuItem onClick={() => repeat(4)}>Repeat 4 times</MenuItem>;
 <MenuItem onClick={() => pad(1, "end")}>Add 1 s of silence</MenuItem>;
+<MenuItem onClick={() => normalize({ lufs: -16 })}>Normalize to -16 LUFS</MenuItem>;
+<MenuItem onClick={() => pan(-0.5)}>Half left</MenuItem>;
+<MenuItem onClick={() => filter("highpass", 80)}>Thin the lows</MenuItem>;
 
 // Any operation: channels in, channels out.
 bake("Resample", ({ channels, sampleRate }) => ({
@@ -33,4 +36,4 @@ bake("Resample", ({ channels, sampleRate }) => ({
 }));
 ```
 
-`reverse`, `repeat(times)` and `pad(seconds, where)` are the operations of `reverseChannels`, `repeatChannels` and `padChannels` of [`@audio-ui/engine/files`](/docs/engine/files). A browser that cannot render offline says so through `setStatus`.
+`reverse`, `repeat(times)`, `pad(seconds, where)`, `normalize(target)`, `pan(value)` and `filter(type, frequency)` are the operations of `reverseChannels`, `repeatChannels`, `padChannels`, `normalizeChannels`, `panChannels` and `filterChannels` of [`@audio-ui/engine/files`](/docs/engine/files). A browser that cannot render offline says so through `setStatus`.

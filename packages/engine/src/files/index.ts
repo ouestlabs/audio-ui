@@ -33,3 +33,11 @@ export {
   readMusicXmlFileParts,
   writeMusicXmlFile,
 } from "./musicxml-file.ts";
+export {
+  type FilterType,
+  filterChannels,
+  gainChannels,
+  type NormalizeTarget,
+  normalizeChannels,
+  panChannels,
+} from "./process.ts";

@@ -3005,11 +3005,42 @@
         "kind": "function",
         "name": "writeMusicXmlFile",
         "summary": "The notes as a MusicXML score, the inverse of `readMusicXmlFile`, for a notation app to open: on the grid they sit on, so nothing moves."
+      },
+      {
+        "kind": "type",
+        "name": "FilterType",
+        "summary": "A filter's shape: what it lets through, 12 dB an octave."
+      },
+      {
+        "kind": "function",
+        "name": "filterChannels",
+        "summary": "Every channel through one filter of the cookbook, at `frequency` in hertz and a `q` (one over the square root of two by default, the flattest)."
+      },
+      {
+        "kind": "function",
+        "name": "gainChannels",
+        "summary": "Every channel, `db` louder or quieter."
+      },
+      {
+        "kind": "type",
+        "name": "NormalizeTarget",
+        "summary": "What a sound is normalized to: its loudest sample, or its integrated loudness held under a true-peak ceiling."
+      },
+      {
+        "kind": "function",
+        "name": "normalizeChannels",
+        "summary": "The sound, with one gain on every channel, so the balance between them stays: to a peak in dBFS, or to a loudness in LUFS as far as its true peak stays under `ceiling` (-1 dBTP by default)."
+      },
+      {
+        "kind": "function",
+        "name": "panChannels",
+        "summary": "A sound's balance: -1 is all left, 1 all right, 0 as it is."
       }
     ],
     "from": "@audio-ui/engine/files",
     "package": "@audio-ui/engine",
     "audiojs": [
+      "@audio/biquad",
       "@audio/decode-aiff",
       "@audio/decode-caf",
       "@audio/decode-mp4",
@@ -3128,7 +3159,9 @@
     "package": "@audio-ui/engine",
     "audiojs": [],
     "typesOnly": false,
-    "usedBy": []
+    "usedBy": [
+      "use-bake"
+    ]
   },
   {
     "adapters": [],

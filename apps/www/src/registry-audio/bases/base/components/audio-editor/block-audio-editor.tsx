@@ -13,8 +13,10 @@ import {
   type ChannelLayout,
   decodeAudioChannels,
   downloadFile,
+  type FilterType,
   LAYOUT_CHANNELS,
   mixChannels,
+  type NormalizeTarget,
   resampleChannels,
 } from "@audio-ui/engine/files";
 import {
@@ -672,10 +674,116 @@ function ShrinkItem({
 }
 
 /** The operations that change a sound's samples, as the Process menu offers them. */
-type Structure = Pick<ReturnType<typeof useBake>, "pad" | "repeat" | "reverse">;
+type Structure = Pick<
+  ReturnType<typeof useBake>,
+  "filter" | "normalize" | "pad" | "pan" | "repeat" | "reverse"
+>;
 
 const REPEATS = [2, 3, 4, 8] as const;
 const PADS = [0.5, 1, 2] as const;
+const NORMALIZE_TARGETS = [
+  { label: "Peak to -1 dBFS", note: "Safe ceiling", target: { peak: -1 } },
+  {
+    label: "-23 LUFS",
+    note: "Broadcast, EBU R128",
+    target: { lufs: -23 },
+  },
+  { label: "-16 LUFS", note: "Podcasts", target: { lufs: -16 } },
+  { label: "-14 LUFS", note: "Streaming", target: { lufs: -14 } },
+] as const;
+const PANS = [
+  { label: "Left", pan: -1 },
+  { label: "Half left", pan: -0.5 },
+  { label: "Half right", pan: 0.5 },
+  { label: "Right", pan: 1 },
+] as const;
+const FILTERS = [
+  {
+    frequency: 40,
+    label: "Remove rumble",
+    note: "High-pass 40 Hz",
+    type: "highpass",
+  },
+  {
+    frequency: 80,
+    label: "Thin the lows",
+    note: "High-pass 80 Hz",
+    type: "highpass",
+  },
+  {
+    frequency: 8000,
+    label: "Soften the highs",
+    note: "Low-pass 8 kHz",
+    type: "lowpass",
+  },
+  {
+    frequency: 3000,
+    label: "Telephone",
+    note: "Low-pass 3 kHz",
+    type: "lowpass",
+  },
+] as const;
+
+/** One level a sound is normalized to. */
+function NormalizeItem({
+  label,
+  normalize,
+  note,
+  target,
+}: {
+  label: string;
+  normalize: Structure["normalize"];
+  note: string;
+  target: NormalizeTarget;
+}) {
+  const run = useCallback(() => normalize(target), [normalize, target]);
+  return (
+    <DropdownMenuItem onClick={run}>
+      {label}
+      <span className="ms-auto text-muted-foreground text-xs">{note}</span>
+    </DropdownMenuItem>
+  );
+}
+
+/** One balance. */
+function PanItem({
+  label,
+  pan,
+  value,
+}: {
+  label: string;
+  pan: Structure["pan"];
+  value: number;
+}) {
+  const run = useCallback(() => pan(value), [pan, value]);
+  return <DropdownMenuItem onClick={run}>{label}</DropdownMenuItem>;
+}
+
+/** One filter. */
+function FilterItem({
+  filter,
+  frequency,
+  label,
+  note,
+  type,
+}: {
+  filter: Structure["filter"];
+  frequency: number;
+  label: string;
+  note: string;
+  type: FilterType;
+}) {
+  const run = useCallback(
+    () => filter(type, frequency),
+    [filter, frequency, type]
+  );
+  return (
+    <DropdownMenuItem onClick={run}>
+      {label}
+      <span className="ms-auto text-muted-foreground text-xs">{note}</span>
+    </DropdownMenuItem>
+  );
+}
 
 /** One count of repeats. */
 function RepeatItem({
@@ -746,6 +854,67 @@ function ProcessItems({
         <DropdownMenuSubContent className="w-48">
           {PADS.map((seconds) => (
             <PadItem key={seconds} pad={structure.pad} seconds={seconds} />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    </DropdownMenuGroup>
+  );
+}
+
+/** The Process menu's second group: a sound's level, balance and tone. */
+function ToneItems({
+  disabled,
+  structure,
+}: {
+  disabled: boolean;
+  structure: Structure;
+}) {
+  return (
+    <DropdownMenuGroup>
+      <DropdownMenuLabel>Level and tone</DropdownMenuLabel>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Normalize
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-64">
+          {NORMALIZE_TARGETS.map((each) => (
+            <NormalizeItem
+              key={each.label}
+              label={each.label}
+              normalize={structure.normalize}
+              note={each.note}
+              target={each.target}
+            />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>Pan</DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-48">
+          {PANS.map((each) => (
+            <PanItem
+              key={each.label}
+              label={each.label}
+              pan={structure.pan}
+              value={each.pan}
+            />
+          ))}
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger disabled={disabled}>
+          Filter
+        </DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-64">
+          {FILTERS.map((each) => (
+            <FilterItem
+              filter={structure.filter}
+              frequency={each.frequency}
+              key={each.label}
+              label={each.label}
+              note={each.note}
+              type={each.type}
+            />
           ))}
         </DropdownMenuSubContent>
       </DropdownMenuSub>
@@ -2193,6 +2362,8 @@ function MoreMenu({
               edits={edits}
               structure={structure}
             />
+            <DropdownMenuSeparator />
+            <ToneItems disabled={!sound} structure={structure} />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
@@ -2907,6 +3078,8 @@ export default function BlockAudioEditor() {
                   edits={edits}
                   structure={baking}
                 />
+                <DropdownMenuSeparator />
+                <ToneItems disabled={!sound} structure={baking} />
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>
