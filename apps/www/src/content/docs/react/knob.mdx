@@ -57,6 +57,12 @@ import styles from "./knob.module.css";
   cursor: grabbing;
 }
 
+/* Dragged up and down, it is a fader: the cursor says so, whatever the state. */
+.control[data-drag-mode="vertical"],
+.control[data-drag-mode="vertical"]:active {
+  cursor: ns-resize;
+}
+
 /* The knob's face. */
 .control::before {
   content: "";
@@ -154,7 +160,7 @@ import { Knob } from "@audio-ui/react";
 
 <Knob.Root className="relative mb-8 inline-flex size-12 outline-none" min={0} max={100} defaultValue={40}>
   <Knob.Label className="sr-only">Volume</Knob.Label>
-  <Knob.Control className="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing">
+  <Knob.Control className="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
     <Knob.Track className="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
     <Knob.Indicator className="pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current" />
     <Knob.Thumb className="pointer-events-none absolute inset-0 z-2 text-primary after:absolute after:top-[24%] after:left-1/2 after:h-[15%] after:w-[6%] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']" />
@@ -233,7 +239,7 @@ import { Knob } from "@audio-ui/react";
 
 <Knob.Root className="relative mb-8 inline-flex size-12 outline-none" min={0} max={100} defaultValue={40} dragMode="vertical">
   <Knob.Label className="sr-only">Volume</Knob.Label>
-  <Knob.Control className="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing">
+  <Knob.Control className="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
     <Knob.Track className="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
     <Knob.Indicator className="pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current" />
     <Knob.Thumb className="pointer-events-none absolute inset-0 z-2 text-primary after:absolute after:top-[24%] after:left-1/2 after:h-[15%] after:w-[6%] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']" />
@@ -286,7 +292,7 @@ import { Knob } from "@audio-ui/react";
 
 <Knob.Root className="relative mb-8 inline-flex size-12 outline-none" min={20} max={20000} defaultValue={1000} scale="log">
   <Knob.Label className="sr-only">Volume</Knob.Label>
-  <Knob.Control className="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing">
+  <Knob.Control className="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
     <Knob.Track className="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
     <Knob.Indicator className="pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current" />
     <Knob.Thumb className="pointer-events-none absolute inset-0 z-2 text-primary after:absolute after:top-[24%] after:left-1/2 after:h-[15%] after:w-[6%] after:-translate-x-1/2 after:rounded-full after:bg-current after:content-['']" />

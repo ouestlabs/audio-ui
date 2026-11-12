@@ -401,6 +401,823 @@ In React, the same control is the [Fader](/docs/react/fader) primitive of `@audi
 
 </ElementsPreview>
 
+{/* anatomy:start: written by `bun scripts/element-usage.ts --write` */}
+
+## Anatomy
+
+The parts, nested as they go in the markup.
+
+```html
+<audio-ui-fader>
+  <audio-ui-fader-control>
+    <audio-ui-fader-track>
+      <audio-ui-fader-indicator></audio-ui-fader-indicator>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+</audio-ui-fader>
+```
+
+{/* anatomy:end */}
+
+{/* examples:start: written by `bun scripts/element-usage.ts --write` */}
+
+## Examples
+
+### Custom range
+
+`min` and `max` set the travel: here a trim of plus or minus 12 dB, resting at 0.
+
+<ElementsPreview name="fader" example="range">
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+<ForStyling only="css">
+
+<CodeFile title="fader.html" open>
+
+```html
+<style>
+  audio-ui-fader {
+    position: relative;
+    height: calc(var(--spacing, 0.25rem) * 40);
+  }
+
+  audio-ui-fader-control {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: auto;
+    height: 100%;
+    touch-action: none;
+    user-select: none;
+  }
+
+  audio-ui-fader-track {
+    position: relative;
+    flex-grow: 1;
+    width: calc(var(--spacing, 0.25rem) * 2);
+    overflow: hidden;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  audio-ui-fader-indicator {
+    position: absolute;
+    width: 100%;
+    background: var(--primary, oklch(0.205 0 0));
+    user-select: none;
+  }
+
+  audio-ui-fader-thumb {
+    position: absolute;
+    z-index: 10;
+    display: block;
+    flex-shrink: 0;
+    width: calc(var(--spacing, 0.25rem) * 4);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--card, oklch(1 0 0));
+    outline: none;
+    cursor: grab;
+    user-select: none;
+    transition: box-shadow 150ms;
+  }
+
+  audio-ui-fader-thumb:hover {
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
+  }
+
+  audio-ui-fader-thumb:has(:focus-visible),
+  audio-ui-fader-thumb:active {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
+  }
+
+  audio-ui-fader-thumb:active {
+    cursor: grabbing;
+  }
+</style>
+
+<audio-ui-fader max="12" min="-12" value="0">
+  <audio-ui-fader-control>
+    <audio-ui-fader-track>
+      <audio-ui-fader-indicator></audio-ui-fader-indicator>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb aria-label="Volume"></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+</audio-ui-fader>
+
+<script type="module">
+  import "@audio-ui/elements/fader";
+
+  const fader = document.querySelector("audio-ui-fader");
+  fader.addEventListener("input", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="fader.html" open>
+
+```html
+<audio-ui-fader class="relative h-40" max="12" min="-12" value="0">
+  <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
+    <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
+      <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb class="absolute z-10 block h-6 w-4 shrink-0 cursor-grab select-none rounded-md border border-ring bg-card outline-none transition-shadow hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing active:ring-3 active:ring-ring/50" aria-label="Volume"></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+</audio-ui-fader>
+
+<script type="module">
+  import "@audio-ui/elements/fader";
+
+  const fader = document.querySelector("audio-ui-fader");
+  fader.addEventListener("input", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ForStyling only="css">
+
+<CodeFile title="fader.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/fader";
+import { ref } from "vue";
+
+const level = ref(0);
+</script>
+
+<template>
+  <audio-ui-fader max="12" min="-12" v-model="level">
+    <audio-ui-fader-control>
+      <audio-ui-fader-track>
+        <audio-ui-fader-indicator />
+      </audio-ui-fader-track>
+      <audio-ui-fader-thumb aria-label="Volume" />
+    </audio-ui-fader-control>
+  </audio-ui-fader>
+</template>
+
+<style>
+audio-ui-fader {
+  position: relative;
+  height: calc(var(--spacing, 0.25rem) * 40);
+}
+
+audio-ui-fader-control {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: auto;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+}
+
+audio-ui-fader-track {
+  position: relative;
+  flex-grow: 1;
+  width: calc(var(--spacing, 0.25rem) * 2);
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
+  cursor: pointer;
+  user-select: none;
+}
+
+audio-ui-fader-indicator {
+  position: absolute;
+  width: 100%;
+  background: var(--primary, oklch(0.205 0 0));
+  user-select: none;
+}
+
+audio-ui-fader-thumb {
+  position: absolute;
+  z-index: 10;
+  display: block;
+  flex-shrink: 0;
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 6);
+  border: 1px solid var(--ring, oklch(0.708 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--card, oklch(1 0 0));
+  outline: none;
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 150ms;
+}
+
+audio-ui-fader-thumb:hover {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
+}
+
+audio-ui-fader-thumb:has(:focus-visible),
+audio-ui-fader-thumb:active {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
+}
+
+audio-ui-fader-thumb:active {
+  cursor: grabbing;
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="fader.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/fader";
+import { ref } from "vue";
+
+const level = ref(0);
+</script>
+
+<template>
+  <audio-ui-fader class="relative h-40" max="12" min="-12" v-model="level">
+    <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
+      <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
+        <audio-ui-fader-indicator class="absolute w-full select-none bg-primary" />
+      </audio-ui-fader-track>
+      <audio-ui-fader-thumb class="absolute z-10 block h-6 w-4 shrink-0 cursor-grab select-none rounded-md border border-ring bg-card outline-none transition-shadow hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing active:ring-3 active:ring-ring/50" aria-label="Volume" />
+    </audio-ui-fader-control>
+  </audio-ui-fader>
+</template>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+<ForStyling only="css">
+
+<CodeFile title="fader.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/fader";
+
+  let level = $state(0);
+</script>
+
+<audio-ui-fader max="12" min="-12" value={level} oninput={(event) => (level = event.detail.value)}>
+  <audio-ui-fader-control>
+    <audio-ui-fader-track>
+      <audio-ui-fader-indicator></audio-ui-fader-indicator>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb aria-label="Volume"></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+</audio-ui-fader>
+
+<style>
+:global {
+  audio-ui-fader {
+    position: relative;
+    height: calc(var(--spacing, 0.25rem) * 40);
+  }
+
+  audio-ui-fader-control {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: auto;
+    height: 100%;
+    touch-action: none;
+    user-select: none;
+  }
+
+  audio-ui-fader-track {
+    position: relative;
+    flex-grow: 1;
+    width: calc(var(--spacing, 0.25rem) * 2);
+    overflow: hidden;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  audio-ui-fader-indicator {
+    position: absolute;
+    width: 100%;
+    background: var(--primary, oklch(0.205 0 0));
+    user-select: none;
+  }
+
+  audio-ui-fader-thumb {
+    position: absolute;
+    z-index: 10;
+    display: block;
+    flex-shrink: 0;
+    width: calc(var(--spacing, 0.25rem) * 4);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--card, oklch(1 0 0));
+    outline: none;
+    cursor: grab;
+    user-select: none;
+    transition: box-shadow 150ms;
+  }
+
+  audio-ui-fader-thumb:hover {
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
+  }
+
+  audio-ui-fader-thumb:has(:focus-visible),
+  audio-ui-fader-thumb:active {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
+  }
+
+  audio-ui-fader-thumb:active {
+    cursor: grabbing;
+  }
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="fader.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/fader";
+
+  let level = $state(0);
+</script>
+
+<audio-ui-fader class="relative h-40" max="12" min="-12" value={level} oninput={(event) => (level = event.detail.value)}>
+  <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
+    <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
+      <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb class="absolute z-10 block h-6 w-4 shrink-0 cursor-grab select-none rounded-md border border-ring bg-card outline-none transition-shadow hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing active:ring-3 active:ring-ring/50" aria-label="Volume"></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+</audio-ui-fader>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Fader](/docs/react/fader) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+</ElementsPreview>
+
+### Anchored indicator
+
+`anchor` is the value the indicator grows from: on a trim, it fills away from 0 in either direction rather than from the bottom.
+
+<ElementsPreview name="fader" example="anchor">
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+<ForStyling only="css">
+
+<CodeFile title="fader.html" open>
+
+```html
+<style>
+  audio-ui-fader {
+    position: relative;
+    height: calc(var(--spacing, 0.25rem) * 40);
+  }
+
+  audio-ui-fader-control {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: auto;
+    height: 100%;
+    touch-action: none;
+    user-select: none;
+  }
+
+  audio-ui-fader-track {
+    position: relative;
+    flex-grow: 1;
+    width: calc(var(--spacing, 0.25rem) * 2);
+    overflow: hidden;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  audio-ui-fader-indicator {
+    position: absolute;
+    width: 100%;
+    background: var(--primary, oklch(0.205 0 0));
+    user-select: none;
+  }
+
+  audio-ui-fader-thumb {
+    position: absolute;
+    z-index: 10;
+    display: block;
+    flex-shrink: 0;
+    width: calc(var(--spacing, 0.25rem) * 4);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--card, oklch(1 0 0));
+    outline: none;
+    cursor: grab;
+    user-select: none;
+    transition: box-shadow 150ms;
+  }
+
+  audio-ui-fader-thumb:hover {
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
+  }
+
+  audio-ui-fader-thumb:has(:focus-visible),
+  audio-ui-fader-thumb:active {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
+  }
+
+  audio-ui-fader-thumb:active {
+    cursor: grabbing;
+  }
+</style>
+
+<audio-ui-fader anchor="0" max="12" min="-12" value="4">
+  <audio-ui-fader-control>
+    <audio-ui-fader-track>
+      <audio-ui-fader-indicator></audio-ui-fader-indicator>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb aria-label="Volume"></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+</audio-ui-fader>
+
+<script type="module">
+  import "@audio-ui/elements/fader";
+
+  const fader = document.querySelector("audio-ui-fader");
+  fader.addEventListener("input", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="fader.html" open>
+
+```html
+<audio-ui-fader class="relative h-40" anchor="0" max="12" min="-12" value="4">
+  <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
+    <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
+      <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb class="absolute z-10 block h-6 w-4 shrink-0 cursor-grab select-none rounded-md border border-ring bg-card outline-none transition-shadow hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing active:ring-3 active:ring-ring/50" aria-label="Volume"></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+</audio-ui-fader>
+
+<script type="module">
+  import "@audio-ui/elements/fader";
+
+  const fader = document.querySelector("audio-ui-fader");
+  fader.addEventListener("input", (event) =>
+    console.log(event.detail.value)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ForStyling only="css">
+
+<CodeFile title="fader.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/fader";
+import { ref } from "vue";
+
+const level = ref(4);
+</script>
+
+<template>
+  <audio-ui-fader anchor="0" max="12" min="-12" v-model="level">
+    <audio-ui-fader-control>
+      <audio-ui-fader-track>
+        <audio-ui-fader-indicator />
+      </audio-ui-fader-track>
+      <audio-ui-fader-thumb aria-label="Volume" />
+    </audio-ui-fader-control>
+  </audio-ui-fader>
+</template>
+
+<style>
+audio-ui-fader {
+  position: relative;
+  height: calc(var(--spacing, 0.25rem) * 40);
+}
+
+audio-ui-fader-control {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: auto;
+  height: 100%;
+  touch-action: none;
+  user-select: none;
+}
+
+audio-ui-fader-track {
+  position: relative;
+  flex-grow: 1;
+  width: calc(var(--spacing, 0.25rem) * 2);
+  overflow: hidden;
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
+  cursor: pointer;
+  user-select: none;
+}
+
+audio-ui-fader-indicator {
+  position: absolute;
+  width: 100%;
+  background: var(--primary, oklch(0.205 0 0));
+  user-select: none;
+}
+
+audio-ui-fader-thumb {
+  position: absolute;
+  z-index: 10;
+  display: block;
+  flex-shrink: 0;
+  width: calc(var(--spacing, 0.25rem) * 4);
+  height: calc(var(--spacing, 0.25rem) * 6);
+  border: 1px solid var(--ring, oklch(0.708 0 0));
+  border-radius: calc(var(--radius, 0.625rem) - 2px);
+  background: var(--card, oklch(1 0 0));
+  outline: none;
+  cursor: grab;
+  user-select: none;
+  transition: box-shadow 150ms;
+}
+
+audio-ui-fader-thumb:hover {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
+}
+
+audio-ui-fader-thumb:has(:focus-visible),
+audio-ui-fader-thumb:active {
+  box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
+}
+
+audio-ui-fader-thumb:active {
+  cursor: grabbing;
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="fader.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/fader";
+import { ref } from "vue";
+
+const level = ref(4);
+</script>
+
+<template>
+  <audio-ui-fader class="relative h-40" anchor="0" max="12" min="-12" v-model="level">
+    <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
+      <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
+        <audio-ui-fader-indicator class="absolute w-full select-none bg-primary" />
+      </audio-ui-fader-track>
+      <audio-ui-fader-thumb class="absolute z-10 block h-6 w-4 shrink-0 cursor-grab select-none rounded-md border border-ring bg-card outline-none transition-shadow hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing active:ring-3 active:ring-ring/50" aria-label="Volume" />
+    </audio-ui-fader-control>
+  </audio-ui-fader>
+</template>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+<ForStyling only="css">
+
+<CodeFile title="fader.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/fader";
+
+  let level = $state(4);
+</script>
+
+<audio-ui-fader anchor="0" max="12" min="-12" value={level} oninput={(event) => (level = event.detail.value)}>
+  <audio-ui-fader-control>
+    <audio-ui-fader-track>
+      <audio-ui-fader-indicator></audio-ui-fader-indicator>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb aria-label="Volume"></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+</audio-ui-fader>
+
+<style>
+:global {
+  audio-ui-fader {
+    position: relative;
+    height: calc(var(--spacing, 0.25rem) * 40);
+  }
+
+  audio-ui-fader-control {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: auto;
+    height: 100%;
+    touch-action: none;
+    user-select: none;
+  }
+
+  audio-ui-fader-track {
+    position: relative;
+    flex-grow: 1;
+    width: calc(var(--spacing, 0.25rem) * 2);
+    overflow: hidden;
+    border-radius: 9999px;
+    background: color-mix(in oklab, var(--input, oklch(0.922 0 0)) 90%, transparent);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  audio-ui-fader-indicator {
+    position: absolute;
+    width: 100%;
+    background: var(--primary, oklch(0.205 0 0));
+    user-select: none;
+  }
+
+  audio-ui-fader-thumb {
+    position: absolute;
+    z-index: 10;
+    display: block;
+    flex-shrink: 0;
+    width: calc(var(--spacing, 0.25rem) * 4);
+    height: calc(var(--spacing, 0.25rem) * 6);
+    border: 1px solid var(--ring, oklch(0.708 0 0));
+    border-radius: calc(var(--radius, 0.625rem) - 2px);
+    background: var(--card, oklch(1 0 0));
+    outline: none;
+    cursor: grab;
+    user-select: none;
+    transition: box-shadow 150ms;
+  }
+
+  audio-ui-fader-thumb:hover {
+    box-shadow: 0 0 0 2px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 40%, transparent);
+  }
+
+  audio-ui-fader-thumb:has(:focus-visible),
+  audio-ui-fader-thumb:active {
+    box-shadow: 0 0 0 3px color-mix(in oklab, var(--ring, oklch(0.708 0 0)) 50%, transparent);
+  }
+
+  audio-ui-fader-thumb:active {
+    cursor: grabbing;
+  }
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="fader.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/fader";
+
+  let level = $state(4);
+</script>
+
+<audio-ui-fader class="relative h-40" anchor="0" max="12" min="-12" value={level} oninput={(event) => (level = event.detail.value)}>
+  <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
+    <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
+      <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb class="absolute z-10 block h-6 w-4 shrink-0 cursor-grab select-none rounded-md border border-ring bg-card outline-none transition-shadow hover:ring-2 hover:ring-ring/40 has-focus-visible:ring-3 has-focus-visible:ring-ring/50 active:cursor-grabbing active:ring-3 active:ring-ring/50" aria-label="Volume"></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+</audio-ui-fader>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Fader](/docs/react/fader) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+</ElementsPreview>
+
+{/* examples:end */}
+
 ## API reference
 
 <TypeTable>

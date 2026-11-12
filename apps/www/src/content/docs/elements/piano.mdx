@@ -268,6 +268,552 @@ In React, the same control is the [Piano](/docs/react/piano) primitive of `@audi
 
 </ElementsPreview>
 
+{/* anatomy:start: written by `bun scripts/element-usage.ts --write` */}
+
+## Anatomy
+
+The parts, nested as they go in the markup.
+
+```html
+<audio-ui-piano>
+  <audio-ui-piano-keys></audio-ui-piano-keys>
+</audio-ui-piano>
+```
+
+{/* anatomy:end */}
+
+{/* examples:start: written by `bun scripts/element-usage.ts --write` */}
+
+## Examples
+
+### One octave
+
+`minPitch` and `maxPitch` are MIDI pitches, both inclusive: 60 to 71 is the octave from middle C.
+
+<ElementsPreview name="piano" example="octave">
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+<ForStyling only="css">
+
+<CodeFile title="piano.html" open>
+
+```html
+<style>
+  audio-ui-piano {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: calc(var(--spacing, 0.25rem) * 28);
+  }
+
+  audio-ui-piano-key {
+    z-index: 0;
+    top: 0;
+    box-sizing: border-box;
+    height: 100%;
+    border: 1px solid var(--border, oklch(0.922 0 0));
+    border-radius: 0 0 4px 4px;
+    background: var(--background, oklch(1 0 0));
+    cursor: pointer;
+    outline: none;
+  }
+
+  audio-ui-piano-key[data-color="black"] {
+    z-index: 1;
+    height: 62%;
+    border-color: var(--foreground, oklch(0.145 0 0));
+    background: var(--foreground, oklch(0.145 0 0));
+  }
+
+  audio-ui-piano-key[data-active] {
+    border-color: var(--primary, oklch(0.205 0 0));
+    background: var(--primary, oklch(0.205 0 0));
+  }
+</style>
+
+<audio-ui-piano aria-label="Keys" min-pitch="60" max-pitch="71">
+  <audio-ui-piano-keys></audio-ui-piano-keys>
+</audio-ui-piano>
+
+<script type="module">
+  import "@audio-ui/elements/piano";
+
+  const piano = document.querySelector("audio-ui-piano");
+  piano.addEventListener("noteon", (event) =>
+    console.log(event.detail.pitch)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano.html" open>
+
+```html
+<audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="60" max-pitch="71">
+  <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
+</audio-ui-piano>
+
+<script type="module">
+  import "@audio-ui/elements/piano";
+
+  const piano = document.querySelector("audio-ui-piano");
+  piano.addEventListener("noteon", (event) =>
+    console.log(event.detail.pitch)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ForStyling only="css">
+
+<CodeFile title="piano.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/piano";
+</script>
+
+<template>
+  <audio-ui-piano aria-label="Keys" min-pitch="60" max-pitch="71" @noteon="(event) => console.log(event.detail.pitch)">
+    <audio-ui-piano-keys />
+  </audio-ui-piano>
+</template>
+
+<style>
+audio-ui-piano {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  height: calc(var(--spacing, 0.25rem) * 28);
+}
+
+audio-ui-piano-key {
+  z-index: 0;
+  top: 0;
+  box-sizing: border-box;
+  height: 100%;
+  border: 1px solid var(--border, oklch(0.922 0 0));
+  border-radius: 0 0 4px 4px;
+  background: var(--background, oklch(1 0 0));
+  cursor: pointer;
+  outline: none;
+}
+
+audio-ui-piano-key[data-color="black"] {
+  z-index: 1;
+  height: 62%;
+  border-color: var(--foreground, oklch(0.145 0 0));
+  background: var(--foreground, oklch(0.145 0 0));
+}
+
+audio-ui-piano-key[data-active] {
+  border-color: var(--primary, oklch(0.205 0 0));
+  background: var(--primary, oklch(0.205 0 0));
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/piano";
+</script>
+
+<template>
+  <audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="60" max-pitch="71" @noteon="(event) => console.log(event.detail.pitch)">
+    <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary" />
+  </audio-ui-piano>
+</template>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+<ForStyling only="css">
+
+<CodeFile title="piano.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/piano";
+</script>
+
+<audio-ui-piano aria-label="Keys" min-pitch="60" max-pitch="71" onnoteon={(event) => console.log(event.detail.pitch)}>
+  <audio-ui-piano-keys></audio-ui-piano-keys>
+</audio-ui-piano>
+
+<style>
+:global {
+  audio-ui-piano {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: calc(var(--spacing, 0.25rem) * 28);
+  }
+
+  audio-ui-piano-key {
+    z-index: 0;
+    top: 0;
+    box-sizing: border-box;
+    height: 100%;
+    border: 1px solid var(--border, oklch(0.922 0 0));
+    border-radius: 0 0 4px 4px;
+    background: var(--background, oklch(1 0 0));
+    cursor: pointer;
+    outline: none;
+  }
+
+  audio-ui-piano-key[data-color="black"] {
+    z-index: 1;
+    height: 62%;
+    border-color: var(--foreground, oklch(0.145 0 0));
+    background: var(--foreground, oklch(0.145 0 0));
+  }
+
+  audio-ui-piano-key[data-active] {
+    border-color: var(--primary, oklch(0.205 0 0));
+    background: var(--primary, oklch(0.205 0 0));
+  }
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/piano";
+</script>
+
+<audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="60" max-pitch="71" onnoteon={(event) => console.log(event.detail.pitch)}>
+  <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
+</audio-ui-piano>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Piano](/docs/react/piano) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+</ElementsPreview>
+
+### Five octaves
+
+The keys shrink to fit the width: 36 to 96 is five octaves, with their black keys in place.
+
+<ElementsPreview name="piano" example="wide">
+
+<FrameworkTabs defaultValue="web">
+
+<TabsList>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+</TabsList>
+
+<TabsContent value="web">
+
+<ForStyling only="css">
+
+<CodeFile title="piano.html" open>
+
+```html
+<style>
+  audio-ui-piano {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: calc(var(--spacing, 0.25rem) * 28);
+  }
+
+  audio-ui-piano-key {
+    z-index: 0;
+    top: 0;
+    box-sizing: border-box;
+    height: 100%;
+    border: 1px solid var(--border, oklch(0.922 0 0));
+    border-radius: 0 0 4px 4px;
+    background: var(--background, oklch(1 0 0));
+    cursor: pointer;
+    outline: none;
+  }
+
+  audio-ui-piano-key[data-color="black"] {
+    z-index: 1;
+    height: 62%;
+    border-color: var(--foreground, oklch(0.145 0 0));
+    background: var(--foreground, oklch(0.145 0 0));
+  }
+
+  audio-ui-piano-key[data-active] {
+    border-color: var(--primary, oklch(0.205 0 0));
+    background: var(--primary, oklch(0.205 0 0));
+  }
+</style>
+
+<audio-ui-piano aria-label="Keys" min-pitch="36" max-pitch="96">
+  <audio-ui-piano-keys></audio-ui-piano-keys>
+</audio-ui-piano>
+
+<script type="module">
+  import "@audio-ui/elements/piano";
+
+  const piano = document.querySelector("audio-ui-piano");
+  piano.addEventListener("noteon", (event) =>
+    console.log(event.detail.pitch)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano.html" open>
+
+```html
+<audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="36" max-pitch="96">
+  <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
+</audio-ui-piano>
+
+<script type="module">
+  import "@audio-ui/elements/piano";
+
+  const piano = document.querySelector("audio-ui-piano");
+  piano.addEventListener("noteon", (event) =>
+    console.log(event.detail.pitch)
+  );
+</script>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ForStyling only="css">
+
+<CodeFile title="piano.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/piano";
+</script>
+
+<template>
+  <audio-ui-piano aria-label="Keys" min-pitch="36" max-pitch="96" @noteon="(event) => console.log(event.detail.pitch)">
+    <audio-ui-piano-keys />
+  </audio-ui-piano>
+</template>
+
+<style>
+audio-ui-piano {
+  position: relative;
+  display: block;
+  width: 100%;
+  max-width: 32rem;
+  height: calc(var(--spacing, 0.25rem) * 28);
+}
+
+audio-ui-piano-key {
+  z-index: 0;
+  top: 0;
+  box-sizing: border-box;
+  height: 100%;
+  border: 1px solid var(--border, oklch(0.922 0 0));
+  border-radius: 0 0 4px 4px;
+  background: var(--background, oklch(1 0 0));
+  cursor: pointer;
+  outline: none;
+}
+
+audio-ui-piano-key[data-color="black"] {
+  z-index: 1;
+  height: 62%;
+  border-color: var(--foreground, oklch(0.145 0 0));
+  background: var(--foreground, oklch(0.145 0 0));
+}
+
+audio-ui-piano-key[data-active] {
+  border-color: var(--primary, oklch(0.205 0 0));
+  background: var(--primary, oklch(0.205 0 0));
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano.vue" open>
+
+```vue
+<script setup lang="ts">
+import "@audio-ui/elements/piano";
+</script>
+
+<template>
+  <audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="36" max-pitch="96" @noteon="(event) => console.log(event.detail.pitch)">
+    <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary" />
+  </audio-ui-piano>
+</template>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+<ForStyling only="css">
+
+<CodeFile title="piano.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/piano";
+</script>
+
+<audio-ui-piano aria-label="Keys" min-pitch="36" max-pitch="96" onnoteon={(event) => console.log(event.detail.pitch)}>
+  <audio-ui-piano-keys></audio-ui-piano-keys>
+</audio-ui-piano>
+
+<style>
+:global {
+  audio-ui-piano {
+    position: relative;
+    display: block;
+    width: 100%;
+    max-width: 32rem;
+    height: calc(var(--spacing, 0.25rem) * 28);
+  }
+
+  audio-ui-piano-key {
+    z-index: 0;
+    top: 0;
+    box-sizing: border-box;
+    height: 100%;
+    border: 1px solid var(--border, oklch(0.922 0 0));
+    border-radius: 0 0 4px 4px;
+    background: var(--background, oklch(1 0 0));
+    cursor: pointer;
+    outline: none;
+  }
+
+  audio-ui-piano-key[data-color="black"] {
+    z-index: 1;
+    height: 62%;
+    border-color: var(--foreground, oklch(0.145 0 0));
+    background: var(--foreground, oklch(0.145 0 0));
+  }
+
+  audio-ui-piano-key[data-active] {
+    border-color: var(--primary, oklch(0.205 0 0));
+    background: var(--primary, oklch(0.205 0 0));
+  }
+}
+</style>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+<ForStyling only="tailwind">
+
+<CodeFile title="piano.svelte" open>
+
+```svelte
+<script lang="ts">
+  import "@audio-ui/elements/piano";
+</script>
+
+<audio-ui-piano class="relative block h-28 w-full max-w-lg" aria-label="Keys" min-pitch="36" max-pitch="96" onnoteon={(event) => console.log(event.detail.pitch)}>
+  <audio-ui-piano-keys class="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
+</audio-ui-piano>
+```
+
+</CodeFile>
+
+</ForStyling>
+
+</TabsContent>
+
+<TabsContent value="react">
+
+In React, the same control is the [Piano](/docs/react/piano) primitive of `@audio-ui/react`, with the same parts as React components and its value as props.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+</ElementsPreview>
+
+{/* examples:end */}
+
 ## API reference
 
 <TypeTable>

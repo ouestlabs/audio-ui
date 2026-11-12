@@ -3,8 +3,8 @@ import {
   stylingBlock,
   USAGES,
   usageBlock,
+  withAll,
   withStyling,
-  withUsage,
 } from "../scripts/element-usage.ts";
 import { SKINS } from "../src/lib/docs/content/element-skins.ts";
 
@@ -24,7 +24,7 @@ describe("Element usage", () => {
     );
     expect(
       pages
-        .filter(({ page, text }) => withUsage(page, text) !== text)
+        .filter(({ page, text }) => withAll(page, text) !== text)
         .map(({ page }) => page)
     ).toEqual([]);
   });

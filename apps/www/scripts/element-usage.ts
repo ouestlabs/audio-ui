@@ -10,7 +10,12 @@
  */
 
 import { themeStylesheet } from "../src/lib/design-system/theme-stylesheet.ts";
+import { elementAttributes } from "../src/lib/docs/content/element-attributes.ts";
 import { SKINS } from "../src/lib/docs/content/element-skins.ts";
+import {
+  EXAMPLES,
+  type PrimitiveExample,
+} from "../src/lib/docs/content/primitive-examples.ts";
 import { STYLINGS, type StylingId } from "../src/lib/docs/content/stylings.ts";
 import { DEFAULT_CONFIG } from "../src/registry/config.ts";
 
@@ -528,15 +533,49 @@ function inStylings(
   ]);
 }
 
-/** The block a page holds, markers included. */
-export function usageBlock(page: string): string | null {
-  const usage = USAGES[page];
-  if (!usage) {
+const ROOT_ATTRIBUTE = /\s([a-z][a-z-]*)="([^"]*)"/g;
+
+/** A usage with an example's attributes on its root, and its starting value in the binding. */
+function exampleUsage(usage: Usage, example: PrimitiveExample): Usage {
+  const { value, ...attributes } = elementAttributes(example.props);
+  const [tag = ""] = usage.root.slice(1).split(TAG_END);
+  const kept = new Map(
+    [...usage.root.matchAll(ROOT_ATTRIBUTE)].map((match) => [
+      match[1] ?? "",
+      match[2] ?? "",
+    ])
+  );
+  for (const [name, text] of Object.entries(attributes)) {
+    kept.set(name, text ?? "");
+  }
+  const written = [...kept].map(([name, text]) =>
+    text === "" && example.props.disabled === true && name === "disabled"
+      ? name
+      : `${name}="${text}"`
+  );
+  const bind = usage.root.includes(BIND) ? BIND : "";
+  return {
+    ...usage,
+    follow:
+      value !== undefined && usage.follow.kind === "model"
+        ? { ...usage.follow, initial: value, web: value }
+        : usage.follow,
+    root: `<${tag}${written.length > 0 ? ` ${written.join(" ")}` : ""}${bind}>`,
+  };
+}
+
+/** The block a page holds, markers included; an example's, with no markers, written inside its preview. */
+export function usageBlock(
+  page: string,
+  example?: PrimitiveExample
+): string | null {
+  const base = USAGES[page];
+  if (!base) {
     return null;
   }
+  const usage = example ? exampleUsage(base, example) : base;
   return [
-    START,
-    "",
+    ...(example ? [] : [START, ""]),
     '<FrameworkTabs defaultValue="web">',
     "",
     "<TabsList>",
@@ -572,8 +611,7 @@ export function usageBlock(page: string): string | null {
     "</TabsContent>",
     "",
     "</FrameworkTabs>",
-    "",
-    END,
+    ...(example ? [] : ["", END]),
   ].join("\n");
 }
 
@@ -597,6 +635,98 @@ export function withUsage(page: string, text: string): string {
   const close = text.slice(to).match(CLOSE);
   to += close ? close[0].length : 0;
   return `${text.slice(0, from)}${open}>\n\n${block}\n\n</ElementsPreview>\n\n${text.slice(to).replace(LEADING_BREAKS, "")}`;
+}
+
+const ANATOMY_START =
+  "{/* anatomy:start: written by `bun scripts/element-usage.ts --write` */}";
+const ANATOMY_END = "{/* anatomy:end */}";
+const EXAMPLES_START =
+  "{/* examples:start: written by `bun scripts/element-usage.ts --write` */}";
+const EXAMPLES_END = "{/* examples:end */}";
+const API = "## API reference";
+const OPEN_TAG = /<(audio-ui-[a-z-]+)[^>]*>/g;
+const TEXT_BETWEEN = />[^<\n]+<\//g;
+
+/** The parts of an element, nested as they go in the markup, with no attribute and no text. */
+export function anatomyBlock(page: string): string | null {
+  const usage = USAGES[page];
+  if (!usage) {
+    return null;
+  }
+  const lines = [usage.root, ...usage.inner.map((line) => `  ${line}`)];
+  const close = `</${usage.root.slice(1).split(TAG_END)[0]}>`;
+  return [
+    ANATOMY_START,
+    "",
+    "## Anatomy",
+    "",
+    "The parts, nested as they go in the markup.",
+    "",
+    "```html",
+    ...[...lines, close].map((line) =>
+      line.replace(OPEN_TAG, "<$1>").replace(TEXT_BETWEEN, "></")
+    ),
+    "```",
+    "",
+    ANATOMY_END,
+  ].join("\n");
+}
+
+/** The Examples of a page: a preview and its code each, from the table shared with the React pages. */
+export function examplesBlock(page: string): string | null {
+  const examples = EXAMPLES[page];
+  if (!(examples && USAGES[page])) {
+    return null;
+  }
+  return [
+    EXAMPLES_START,
+    "",
+    "## Examples",
+    "",
+    ...examples.flatMap((example) => [
+      `### ${example.title}`,
+      "",
+      example.description,
+      "",
+      `<ElementsPreview name="${page}" example="${example.id}">`,
+      "",
+      usageBlock(page, example) ?? "",
+      "",
+      "</ElementsPreview>",
+      "",
+    ]),
+    EXAMPLES_END,
+  ].join("\n");
+}
+
+/** A page's text with a block written between its markers, or put before its API reference. */
+function withBlock(
+  text: string,
+  block: string | null,
+  [start, end]: readonly [string, string]
+) {
+  if (!block) {
+    return text;
+  }
+  const from = text.indexOf(start);
+  const to = text.indexOf(end);
+  if (from >= 0 && to > from) {
+    return `${text.slice(0, from)}${block}${text.slice(to + end.length)}`;
+  }
+  return text.replace(API, `${block}\n\n${API}`);
+}
+
+/** A page's text with its usage, its anatomy and its examples written. */
+export function withAll(page: string, text: string): string {
+  const used = withUsage(page, text);
+  const anatomy = withBlock(used, anatomyBlock(page), [
+    ANATOMY_START,
+    ANATOMY_END,
+  ]);
+  return withBlock(anatomy, examplesBlock(page), [
+    EXAMPLES_START,
+    EXAMPLES_END,
+  ]);
 }
 
 const STYLING_START =
@@ -638,7 +768,7 @@ if (import.meta.main) {
     [...Object.keys(USAGES), "index"].map(async (page) => {
       const path = `${PAGES}/${page}.mdx`;
       const text = await Bun.file(path).text();
-      const next = page === "index" ? withStyling(text) : withUsage(page, text);
+      const next = page === "index" ? withStyling(text) : withAll(page, text);
       return { next, page, path, text };
     })
   );

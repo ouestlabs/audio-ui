@@ -178,6 +178,12 @@ audio-ui-knob-control:active {
   cursor: grabbing;
 }
 
+/* Dragged up and down, it is a fader: the cursor says so, whatever the state. */
+audio-ui-knob-control[data-drag-mode="vertical"],
+audio-ui-knob-control[data-drag-mode="vertical"]:active {
+  cursor: ns-resize;
+}
+
 /* The knob's face. */
 audio-ui-knob-control::before {
   content: "";
@@ -263,7 +269,7 @@ audio-ui-knob-label {
     tailwind: {
       "audio-ui-knob": "relative mb-8 inline-flex size-12 outline-none",
       "audio-ui-knob-control":
-        "relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing",
+        "relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize",
       "audio-ui-knob-indicator":
         "pointer-events-none absolute inset-0 z-1 block size-full text-primary [&_path]:stroke-current",
       "audio-ui-knob-label": "sr-only",
