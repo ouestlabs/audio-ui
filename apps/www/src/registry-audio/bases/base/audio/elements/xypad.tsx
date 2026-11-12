@@ -1,5 +1,3 @@
-"use client";
-
 import { XYPad as XYPadPrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";

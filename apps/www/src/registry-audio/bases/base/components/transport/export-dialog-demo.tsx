@@ -1,5 +1,3 @@
-"use client";
-
 import { downloadFile } from "@audio-ui/engine/files";
 import { useCallback, useState } from "react";
 import { Button } from "@/registry/bases/base/ui/button";

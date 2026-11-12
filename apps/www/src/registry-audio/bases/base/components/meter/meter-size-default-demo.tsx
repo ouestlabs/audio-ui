@@ -1,5 +1,3 @@
-"use client";
-
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import { useSimulatedLevels } from "@/registry-audio/bases/base/hooks/use-simulated-levels";
 

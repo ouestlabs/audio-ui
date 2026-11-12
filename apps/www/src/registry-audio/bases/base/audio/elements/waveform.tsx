@@ -1,5 +1,3 @@
-"use client";
-
 import { Waveform as WaveformPrimitive } from "@audio-ui/react";
 import type { ComponentProps } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";

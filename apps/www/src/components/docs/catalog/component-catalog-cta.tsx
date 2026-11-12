@@ -1,5 +1,3 @@
-"use client";
-
 import { Link } from "@tanstack/react-router";
 import { SeoLinkedText } from "@/components/catalog/category/component-category-seo-content";
 import { cn } from "@/lib/utils";

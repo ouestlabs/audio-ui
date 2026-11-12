@@ -1,5 +1,3 @@
-"use client";
-
 import type { Pad as PadPrimitive } from "@audio-ui/react";
 import { useCallback, useRef } from "react";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";

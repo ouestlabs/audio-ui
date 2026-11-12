@@ -1,6 +1,5 @@
-"use client";
-
 import { formatDb, formatHz } from "@audio-ui/engine/analysis";
+import { formatLevel } from "@audio-ui/engine/format";
 import { type ReactNode, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -32,7 +31,8 @@ const OFF = tiltEqDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled");
 
-const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
+const formatDbMark = (db: number) =>
+  formatLevel(db, "dB", { decimals: 0, unit: false });
 const describePointer = (point: { x: number; y: number }) =>
   `${formatHz(point.x)} · ${formatDb(point.y)}`;
 

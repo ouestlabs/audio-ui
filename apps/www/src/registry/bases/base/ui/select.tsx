@@ -1,5 +1,3 @@
-"use client";
-
 import { Select as SelectPrimitive } from "@base-ui/react/select";
 import type * as React from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";

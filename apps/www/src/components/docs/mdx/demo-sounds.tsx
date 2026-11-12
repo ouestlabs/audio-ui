@@ -1,5 +1,3 @@
-"use client";
-
 import { PauseIcon, PlayIcon } from "@phosphor-icons/react/ssr";
 import { useCallback, useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";

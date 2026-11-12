@@ -1,5 +1,3 @@
-"use client";
-
 import { Plot as PlotPrimitive } from "@audio-ui/react";
 import { cn } from "@/registry/bases/base/lib/utils";
 

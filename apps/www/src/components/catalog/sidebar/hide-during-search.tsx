@@ -1,5 +1,3 @@
-"use client";
-
 import { useQueryStates } from "nuqs";
 import type { ReactNode } from "react";
 import { parseAsSearchStringClient } from "@/lib/nuqs";

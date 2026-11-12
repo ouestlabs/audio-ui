@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { DesignSystemContext } from "@/components/customizer/design-system-provider";
 import {

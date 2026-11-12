@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { useConfig } from "@/hooks/use-config";
 import { isInIframe, useIframeMessageListener } from "@/hooks/use-iframe-sync";

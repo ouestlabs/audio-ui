@@ -1,5 +1,3 @@
-"use client";
-
 import { PianoKeysIcon } from "@phosphor-icons/react/ssr";
 import { Button } from "@/components/ui/button";
 import {

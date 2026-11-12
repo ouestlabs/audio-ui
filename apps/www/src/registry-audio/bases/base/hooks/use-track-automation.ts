@@ -1,5 +1,3 @@
-"use client";
-
 import type { Source } from "@audio-ui/core";
 import type { Breakpoint } from "@audio-ui/core/envelope";
 import type { ParameterValue } from "@audio-ui/engine/device";

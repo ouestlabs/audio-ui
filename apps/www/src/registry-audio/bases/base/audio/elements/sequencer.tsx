@@ -1,5 +1,3 @@
-"use client";
-
 import { Sequencer as SequencerPrimitive } from "@audio-ui/react";
 import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";

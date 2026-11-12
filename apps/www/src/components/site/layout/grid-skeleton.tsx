@@ -1,5 +1,3 @@
-"use client";
-
 import { PreviewLoading } from "@/components/preview/frame/preview-frame";
 import {
   Frame,

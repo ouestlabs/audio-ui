@@ -103,15 +103,9 @@ export default function BlockPlayerWidget() { ... }
 export default function KnobDemo() { ... }
 ```
 
-### `"use client"` Directive
+### No `"use client"` directive
 
-**Add `"use client"` only when the file uses:**
-
-- React hooks (`useState`, `useEffect`, `useRef`, etc.)
-- Event handlers that modify state
-- Browser APIs (`window`, `document`, `AudioContext`, etc.)
-
-Stateless compositions that only render UI do **not** need it.
+The site is TanStack Start, where the directive means nothing: leave it out of every file.
 
 ### Import Patterns
 
@@ -342,7 +336,6 @@ bun run lint:fix
 
 - File at `src/registry-audio/bases/base/components/{category}/block-{component}-{variant}.tsx`
 - Default export named `Block{ComponentVariant}` matching the filename
-- `"use client"` added only if hooks/state/event handlers are used
 - Audio components imported from `@/registry-audio/bases/base/audio/...`
 - shadcn components imported from `@/registry/bases/base/ui/...`
 - Icons via `IconPlaceholder` with all five library props, sized with `className`

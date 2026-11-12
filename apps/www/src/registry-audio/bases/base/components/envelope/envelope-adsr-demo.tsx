@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { Envelope } from "@/registry-audio/bases/base/audio/elements/envelope";
 

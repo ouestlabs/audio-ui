@@ -1,5 +1,3 @@
-"use client";
-
 import { PreviewBar } from "@/components/preview/frame/preview-frame";
 import {
   HostedPreview,

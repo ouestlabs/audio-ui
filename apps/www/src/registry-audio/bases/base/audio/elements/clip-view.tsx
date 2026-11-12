@@ -1,5 +1,3 @@
-"use client";
-
 import type { Source } from "@audio-ui/react";
 import {
   type ChangeEvent,

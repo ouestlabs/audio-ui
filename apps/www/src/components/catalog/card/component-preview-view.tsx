@@ -1,5 +1,3 @@
-"use client";
-
 import type { CatalogItem } from "../types";
 import { ComponentGrid } from "./component-grid";
 

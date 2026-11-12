@@ -1,5 +1,3 @@
-"use client";
-
 import { SidebarIcon, SlidersHorizontalIcon } from "@phosphor-icons/react/ssr";
 import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import {

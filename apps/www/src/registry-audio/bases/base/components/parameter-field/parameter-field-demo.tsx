@@ -1,5 +1,3 @@
-"use client";
-
 import { useState } from "react";
 import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
 

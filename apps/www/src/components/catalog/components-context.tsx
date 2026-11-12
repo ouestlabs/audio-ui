@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, use } from "react";
 import type { ComponentCatalogItem } from "@/lib/registry/core/registry";
 

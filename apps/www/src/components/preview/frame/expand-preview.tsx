@@ -1,5 +1,3 @@
-"use client";
-
 import type { Dialog as DialogPrimitive } from "@base-ui/react/dialog";
 import {
   ArrowsOutSimpleIcon,

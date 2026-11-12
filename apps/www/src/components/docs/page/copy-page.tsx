@@ -1,5 +1,3 @@
-"use client";
-
 import { CheckIcon, CopyIcon } from "@phosphor-icons/react/ssr";
 import { useCallback } from "react";
 import { Button } from "@/components/ui/button";

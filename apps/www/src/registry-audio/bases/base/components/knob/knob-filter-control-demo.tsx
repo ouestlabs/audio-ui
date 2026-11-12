@@ -1,4 +1,3 @@
-"use client";
 import { useState } from "react";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 

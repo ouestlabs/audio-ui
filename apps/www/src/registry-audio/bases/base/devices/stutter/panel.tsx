@@ -1,5 +1,3 @@
-"use client";
-
 import { type ReactNode, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

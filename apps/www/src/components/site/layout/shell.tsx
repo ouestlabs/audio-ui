@@ -1,5 +1,3 @@
-"use client";
-
 import { useLocation } from "@tanstack/react-router";
 import { Suspense, useMemo } from "react";
 import {

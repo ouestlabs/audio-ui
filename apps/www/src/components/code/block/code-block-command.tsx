@@ -1,5 +1,3 @@
-"use client";
-
 import { TerminalIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { CopyButton } from "@/components/code/copy/copy-button";

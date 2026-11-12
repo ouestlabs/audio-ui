@@ -1,5 +1,3 @@
-"use client";
-
 import { useQueryStates } from "nuqs";
 import { Suspense, useMemo } from "react";
 import { Skeleton } from "@/components/ui/skeleton";

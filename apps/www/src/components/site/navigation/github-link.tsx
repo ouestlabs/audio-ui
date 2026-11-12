@@ -1,5 +1,3 @@
-"use client";
-
 import { Icons } from "@/components/site/icons";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup, ButtonGroupText } from "@/components/ui/button-group";

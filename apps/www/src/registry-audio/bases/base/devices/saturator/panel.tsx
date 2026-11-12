@@ -1,5 +1,3 @@
-"use client";
-
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { CurveSelect } from "@/registry-audio/bases/base/audio/elements/curve-select";

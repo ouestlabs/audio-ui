@@ -1,5 +1,3 @@
-"use client";
-
 import {
   MessageScroller as MessageScrollerPrimitive,
   useMessageScroller,

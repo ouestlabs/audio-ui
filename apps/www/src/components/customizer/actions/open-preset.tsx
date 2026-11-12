@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { ACTION_BUTTON_CLASS } from "@/components/customizer/actions/action-button";
 import { Button } from "@/components/ui/button";

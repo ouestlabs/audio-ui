@@ -1,5 +1,3 @@
-"use client";
-
 import { ListIcon } from "@phosphor-icons/react/ssr";
 import { useTheme } from "next-themes";
 import { useCallback, useEffect, useRef } from "react";

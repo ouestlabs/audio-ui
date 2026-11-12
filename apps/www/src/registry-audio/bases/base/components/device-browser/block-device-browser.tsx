@@ -1,5 +1,3 @@
-"use client";
-
 import { type DragEvent, useCallback, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";

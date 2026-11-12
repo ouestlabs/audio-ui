@@ -1,5 +1,3 @@
-"use client";
-
 import * as React from "react";
 import { useMenuColor } from "@/components/customizer/use-menu-color";
 import { useConfig } from "@/hooks/use-config";

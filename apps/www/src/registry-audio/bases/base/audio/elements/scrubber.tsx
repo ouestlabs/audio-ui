@@ -1,5 +1,3 @@
-"use client";
-
 import { formatTime } from "@audio-ui/engine/format";
 import { PauseIcon, PlayIcon } from "@audio-ui/icons/react";
 import { type Source, Timeline as TimelinePrimitive } from "@audio-ui/react";

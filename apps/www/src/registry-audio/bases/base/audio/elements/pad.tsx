@@ -1,5 +1,3 @@
-"use client";
-
 import { Pad as PadPrimitive } from "@audio-ui/react";
 import type { CSSProperties } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
