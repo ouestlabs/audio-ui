@@ -287,6 +287,14 @@ function Slot({
     () => dispatch({ id: device.id, track, type: "toggle-device" }),
     [device.id, dispatch, track]
   );
+  // The square of the title bar is the device's own `enabled` toggle when it has one: the folded strip presses that same state, not a second one.
+  const hasEnabled = entry?.device.parameters.some(
+    (parameter) => parameter.id === "enabled" && parameter.kind === "toggle"
+  );
+  const setEnabled = useCallback(
+    (on: boolean) => change({ ...shown, enabled: on } as never),
+    [change, shown]
+  );
   const { activeNotes, onHoldNote } = chain;
   const release = useCallback(() => onHoldNote(null), [onHoldNote]);
   const [folded, setFolded] = chain.useEntry("deviceFolded", device.id, false);
@@ -303,9 +311,9 @@ function Slot({
   return (
     <DeviceChainSlot
       className={face.width}
-      enabled={device.on !== false}
+      enabled={hasEnabled ? shown.enabled !== false : device.on !== false}
       folded={folded}
-      onEnabledChange={toggle}
+      onEnabledChange={hasEnabled ? setEnabled : toggle}
       onFoldedChange={setFolded}
       title={entry.device.name}
       value={device.id}
