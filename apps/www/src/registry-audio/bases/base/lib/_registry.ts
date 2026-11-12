@@ -16,6 +16,15 @@ const items: RegistryItem[] = [
   movedItem("audio-decode", "files"),
   movedItem("audio-encode", "files"),
   movedItem("loudness", "analysis"),
+  libItem("clip-edits", {
+    categories: ["lib", "audio", "timeline"],
+    description:
+      "The pure parts of editing one sound on a track of an arrangement: taking time out and the crossfade at its seam, the fades and level of a stretch of time, how far a pause is shrunk, and which keys are a field's own",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/use-arrangement",
+    ],
+  }),
   libItem("audio-export", {
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/engine"],

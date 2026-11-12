@@ -1,0 +1,28 @@
+---
+title: useClipEdits
+description: "The edits of one sound on a track, each one step of undo: Cut, Copy, Paste, Delete, Crop, Mark, Louder and Quieter on a time selection, Trim silence and Shrink pauses from the pauses it is given, and the keyboard of all of them with Undo and Redo."
+---
+
+<Entry name="use-clip-edits" />
+
+## Usage
+
+`useClipEdits` is what an audio editor does with a sound laid on one track of an [arrangement](/docs/hooks/use-arrangement): the selection, the clipboard, and each edit as a step of the history. The arrangement's length and loop follow the sound's after every one.
+
+```tsx
+import { useClipEdits } from "@/hooks/use-clip-edits";
+
+const edits = useClipEdits({
+  act, // (label, command) => void: sends a command as a named step of undo
+  arrangement,
+  notify: setStatus, // what an edit says when it had nothing to do
+  pauses, // [from, to][] of the silences of the sound as it lies
+  position, // the playhead's source
+  track: "track-1",
+});
+
+<ContextMenuItem disabled={!edits.time} onClick={edits.cut}>Cut</ContextMenuItem>;
+<div onKeyDown={edits.handleKey} />;
+```
+
+`time` is the selection, `setTime` sets it. `cut`, `copy`, `paste`, `remove` and `crop` work on it; `louder` and `quieter` move its level by 3 dB and `shape` sets its fades and level; `mark` puts a locator at its start. `trimSilence` takes off the silence at the start and the end, and `shrinkPauses(gap)` cuts every pause between sounds down to `gap` seconds, `0` removing them. The pure parts are in [clip-edits](/docs/lib/clip-edits); [`useSilenceHover`](/docs/hooks/use-silence-hover) shows a pause as a zone.

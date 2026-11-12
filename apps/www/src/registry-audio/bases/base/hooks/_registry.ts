@@ -137,6 +137,27 @@ export const hooks: RegistryItem[] = [
       "@audio-ui/web-audio",
     ],
   }),
+  hookItem("use-clip-edits", {
+    categories: ["audio", "timeline"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "The edits of one sound on a track, each one step of undo: Cut, Copy, Paste, Delete, Crop, Mark, Louder and Quieter on a time selection, Trim silence and Shrink pauses from the pauses it is given, and the keyboard of all of them with Undo and Redo",
+    registryDependencies: [
+      "@audio-ui/arrangement",
+      "@audio-ui/clip-edits",
+      "@audio-ui/use-arrangement",
+    ],
+  }),
+  hookItem("use-silence-hover", {
+    categories: ["audio", "timeline"],
+    description:
+      "The pause under the pointer on a lane, to draw as a zone while it is there: give the lane its pointer handlers and the zoom it is drawn at",
+  }),
+  hookItem("use-status-line", {
+    categories: ["audio"],
+    description:
+      "A line of status an editor says things on, what it is doing and what an action had nothing to do on, which clears itself after a few seconds",
+  }),
   hookItem("use-undo-history", {
     categories: ["timeline", "piano", "envelope"],
     description:
