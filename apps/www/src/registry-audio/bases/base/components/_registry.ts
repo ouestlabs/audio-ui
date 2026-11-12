@@ -690,7 +690,7 @@ export const components: RegistryItem[] = [
       },
     ],
     meta: {
-      hint: "Drag over the waveform to select, right-click it to edit: Cmd/Ctrl + X, C, V, Delete, K to crop, M to mark, Cmd/Ctrl + Z to undo. Pick a sound or upload one from its menu, or drop an audio file. Cmd/Ctrl + scroll zooms to the samples. Add an effect from the library to the chain.",
+      hint: "Drag over the waveform to select, right-click it to edit: Cmd/Ctrl + X, C, V, Delete, K to crop, M to mark, Cmd/Ctrl + Z to undo. Pick a sound or upload one from its menu, or drop an audio file. Double-click selects a hit, triple-click a sound between pauses. A pinch or Cmd/Ctrl + scroll zooms to the samples. Add an effect from the library to the chain.",
     },
     name: "block-audio-editor",
     dependencies: ["@audio-ui/engine", "@audio-ui/react"],

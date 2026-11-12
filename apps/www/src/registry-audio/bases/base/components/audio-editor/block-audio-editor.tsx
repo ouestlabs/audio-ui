@@ -4,6 +4,8 @@ import {
   type AudioPeaks,
   computePeaks,
   dbToGain,
+  detectSilences,
+  detectTransients,
   gainToDb,
   measureLoudness,
   normalizePeaks,
@@ -21,6 +23,7 @@ import { Toolbar } from "@base-ui/react/toolbar";
 import {
   type ChangeEvent,
   type KeyboardEvent,
+  type MouseEvent,
   type PointerEvent,
   type RefObject,
   useCallback,
@@ -137,8 +140,14 @@ const PEAK_COUNT = 8192;
 const FRAME_PX = 40;
 /** The widest a lane can be laid out, in px. */
 const MOST_LANE_PX = 16_000_000;
-/** How far in from the view's edge the playhead may go before the view turns the page, as a share of the view. */
-const PAGE_MARGIN = 0.1;
+/** How long a view following the playhead takes to bring it back to its middle, in seconds: of its lead past the middle, e^(-dt / GLIDE) is left after dt. */
+const GLIDE = 0.3;
+/** A jump of the playhead, as a share of what a second of playing moves it: a seek, not a frame late. */
+const JUMP_SECONDS = 8;
+/** Pixels in a line and a page of wheel delta, for a wheel that counts in those. */
+const WHEEL_PX = [1, 16, 400] as const;
+/** Half the crossfade an edit's seam gets, in seconds: the two sides play through each other over twice this, so a seam never clicks. */
+const SPLICE = 0.005;
 const LABEL_STEPS = [
   0.0001, 0.000_25, 0.0005, 0.001, 0.0025, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25,
   0.5, 1, 2, 5, 10, 15, 30, 60,
@@ -217,6 +226,10 @@ interface Sound {
   /** Its integrated loudness, in LUFS, as it came in. */
   lufs: number;
   name: string;
+  /** Where its sounds start, in seconds of it: what an edge snaps to and a double-click stops at. */
+  onsets: number[];
+  /** Its pauses between sounds, as [from, to] in seconds of it: what a triple-click stops at. */
+  pauses: [number, number][];
   /** Its loudest sample, in dBFS, as it came in. */
   peak: number;
   peaks: AudioPeaks;
@@ -264,6 +277,8 @@ function soundOf(
     duration: mix.length / sampleRate,
     lufs,
     name,
+    onsets: detectTransients(channels, sampleRate),
+    pauses: detectSilences(channels, sampleRate),
     peak,
     sampleRate,
     peaks: normalizePeaks(computePeaks(channels, PEAK_COUNT)),
@@ -271,16 +286,19 @@ function soundOf(
   };
 }
 
-/** The seconds the ruler labels: the smallest step that keeps labels apart at this zoom, in pixels per second. */
+/** The step between the ruler's labels: the smallest that keeps them apart at this zoom, in pixels per second. */
+const labelStep = (zoom: number) =>
+  LABEL_STEPS.find((candidate) => candidate * zoom >= MIN_LABEL_GAP_PX) ??
+  LABEL_STEPS.at(-1) ??
+  1;
+
+/** The seconds the ruler labels around what shows, from `from` to `to`, at this zoom. */
 function rulerLabels(
   duration: number,
   zoom: number,
   [from, to]: readonly [number, number]
 ) {
-  const step =
-    LABEL_STEPS.find((candidate) => candidate * zoom >= MIN_LABEL_GAP_PX) ??
-    LABEL_STEPS.at(-1) ??
-    1;
+  const step = labelStep(zoom);
   // Only those around what shows: zoomed to the samples, the whole sound would be tens of thousands.
   const first = Math.max(0, Math.floor(from / step) - 1);
   const last = Math.min(Math.floor(duration / step), Math.ceil(to / step) + 1);
@@ -297,18 +315,6 @@ const formatMark = (seconds: number, decimals: number) =>
   decimals === 0
     ? formatTime(seconds)
     : `${Math.floor(seconds / 60)}:${(seconds % 60).toFixed(decimals).padStart(3 + decimals, "0")}`;
-
-/** Scrolls a zoomed view to the page that holds `x`, once the playhead nears or passes its edge. */
-function followPlayhead(viewport: HTMLElement | null, x: number) {
-  if (!viewport) {
-    return;
-  }
-  const margin = viewport.clientWidth * PAGE_MARGIN;
-  const { clientWidth, scrollLeft } = viewport;
-  if (x < scrollLeft || x > scrollLeft + clientWidth - margin) {
-    viewport.scrollLeft = Math.max(0, x - margin);
-  }
-}
 
 const formatTime = (seconds: number) =>
   `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, "0")}`;
@@ -524,6 +530,104 @@ function typing(target: EventTarget | null) {
 const removing = (from: number, to: number): ArrangementCommand[] =>
   to > from ? [{ from, to, type: "remove-time" }] : [];
 
+/** The crossfade of an edit's seam at `at`, in a sound `length` long: the clip that ends there and the one that starts there play through each other. None at either end. */
+const splice = (at: number, length: number): ArrangementCommand[] =>
+  at > 0 && at < length
+    ? [
+        {
+          time: { range: [at - SPLICE, at + SPLICE], tracks: [TRACK] },
+          type: "fade-time",
+        },
+      ]
+    : [];
+
+/** Where the sound's gestures stop, on the timeline: the points an edge snaps to and a double-click stops at, and the pauses a triple-click stops at. */
+interface Cues {
+  /** The pauses between its sounds, in order, as [from, to]. */
+  pauses: [number, number][];
+  /** Its onsets, its clips' edges, the locators, its start and its end, in order. */
+  points: number[];
+}
+
+/** The cues of the clips as they lie: each one's onsets and pauses, from its sound, where it plays them. */
+function cuesOf(
+  clips: readonly Arranged[],
+  sounds: ReadonlyMap<string, Sound>,
+  locators: readonly ArrangementLocator[],
+  duration: number
+): Cues {
+  const points = [0, duration, ...locators.map((locator) => locator.at)];
+  const pauses: [number, number][] = [];
+  for (const clip of clips) {
+    const { length, offset, start } = clip.value;
+    points.push(start, start + length);
+    const sound = sounds.get(clip.recording ?? "");
+    for (const onset of sound?.onsets ?? []) {
+      if (onset >= offset && onset <= offset + length) {
+        points.push(start + onset - offset);
+      }
+    }
+    for (const [a, b] of sound?.pauses ?? []) {
+      const from = Math.max(a, offset);
+      const to = Math.min(b, offset + length);
+      if (to > from) {
+        pauses.push([start + from - offset, start + to - offset]);
+      }
+    }
+  }
+  pauses.sort((p, q) => p[0] - q[0]);
+  // Pauses that meet across a seam are one.
+  const joined: [number, number][] = [];
+  for (const pause of pauses) {
+    const last = joined.at(-1);
+    if (last && pause[0] <= last[1] + 1e-6) {
+      last[1] = Math.max(last[1], pause[1]);
+    } else {
+      joined.push([pause[0], pause[1]]);
+    }
+  }
+  const inside = points
+    .filter((point) => point >= 0 && point <= duration)
+    .map((point) => Number(point.toFixed(6)));
+  return {
+    pauses: joined,
+    points: [...new Set(inside)].sort((a, b) => a - b),
+  };
+}
+
+/** The pause `at` is in, if it is in one. */
+const pauseAt = (cues: Cues, at: number) =>
+  cues.pauses.find(([from, to]) => at >= from && at <= to);
+
+/** What a double-click selects at `at`, as a text's word: the pause it is in, else the stretch between the cues either side. */
+function fragmentAt(
+  cues: Cues,
+  at: number,
+  duration: number
+): [number, number] {
+  const pause = pauseAt(cues, at);
+  if (pause) {
+    return [pause[0], pause[1]];
+  }
+  const edges = [...cues.points, ...cues.pauses.flat()].sort((a, b) => a - b);
+  return [
+    edges.filter((edge) => edge <= at).at(-1) ?? 0,
+    edges.find((edge) => edge > at) ?? duration,
+  ];
+}
+
+/** What a triple-click selects at `at`, as a text's line: the pause it is in, else the sound between the pauses either side. */
+function soundAt(cues: Cues, at: number, duration: number): [number, number] {
+  const pause = pauseAt(cues, at);
+  if (pause) {
+    return [pause[0], pause[1]];
+  }
+  return [
+    cues.pauses.filter(([, to]) => to <= at).at(-1)?.[1] ?? 0,
+    cues.pauses.find(([from]) => from > at)?.[0] ?? duration,
+  ];
+}
+
 /** What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB. */
 interface StretchShape {
   fadeIn: number;
@@ -589,7 +693,8 @@ function pieceOf(
  * The track's clips with the stretch from `from` to `to` cut out of them as
  * clips of their own, the shape on those: the fade-in on the first, the
  * fade-out on the last, the level on all. What is outside keeps its fade on
- * its own outer end. The commands that make it, as one step.
+ * its own outer end, and a piece on a clip's own edge keeps its fade there,
+ * the crossfade of a seam. The commands that make it, as one step.
  */
 function shapeStretch(
   clips: readonly Arranged[],
@@ -615,9 +720,21 @@ function shapeStretch(
         },
       });
     }
-    inside.push(
-      pieceOf(clip, start < from ? `${clip.id}@${a}` : clip.id, a, b)
+    const piece = pieceOf(
+      clip,
+      start < from ? `${clip.id}@${a}` : clip.id,
+      a,
+      b
     );
+    // A clip's own edge keeps its fade: the crossfade of a seam there.
+    inside.push({
+      ...piece,
+      value: {
+        ...piece.value,
+        fadeIn: a === start ? clip.value.fadeIn : 0,
+        fadeOut: b === end ? clip.value.fadeOut : 0,
+      },
+    });
     if (end > to) {
       const after = pieceOf(clip, `${clip.id}@${to}`, to, end);
       outside.push({
@@ -630,15 +747,24 @@ function shapeStretch(
     }
   }
   const last = inside.length - 1;
+  // The selection's own fades on its two ends, when it has them; elsewhere, what the pieces keep of their clips'.
+  const ownIn = (index: number) => index === 0 && shape.fadeIn > 0;
+  const ownOut = (index: number) => index === last && shape.fadeOut > 0;
   const shaped = inside.map((clip, index) => ({
     ...clip,
     gain: shape.gain,
     value: {
       ...clip.value,
-      fadeIn: index === 0 ? Math.min(shape.fadeIn, clip.value.length) : 0,
-      fadeInShape: shape.fadeInShape,
-      fadeOut: index === last ? Math.min(shape.fadeOut, clip.value.length) : 0,
-      fadeOutShape: shape.fadeOutShape,
+      fadeIn: ownIn(index)
+        ? Math.min(shape.fadeIn, clip.value.length)
+        : clip.value.fadeIn,
+      fadeInShape: ownIn(index) ? shape.fadeInShape : clip.value.fadeInShape,
+      fadeOut: ownOut(index)
+        ? Math.min(shape.fadeOut, clip.value.length)
+        : clip.value.fadeOut,
+      fadeOutShape: ownOut(index)
+        ? shape.fadeOutShape
+        : clip.value.fadeOutShape,
     },
   }));
   return [
@@ -688,7 +814,8 @@ function useClipEdits({
       return;
     }
     const [from, to] = time.range;
-    commit(removing(from, to), length - (to - from));
+    const next = length - (to - from);
+    commit([...removing(from, to), ...splice(from, next)], next);
     setTime(null);
     position.set(from);
   }, [commit, length, position, time]);
@@ -709,13 +836,16 @@ function useClipEdits({
     }
     const at = time ? time.range[0] : Math.min(position.getSnapshot(), length);
     const over = time ? time.range[1] - time.range[0] : 0;
+    const next = length - over + clipboard.length;
     commit(
       [
         ...(time ? removing(time.range[0], time.range[1]) : []),
         { at, length: clipboard.length, type: "insert-time" },
         { at, clipping: clipboard, track: TRACK, type: "paste" },
+        ...splice(at, next),
+        ...splice(at + clipboard.length, next),
       ],
-      length - over + clipboard.length
+      next
     );
     setTime({ range: [at, at + clipboard.length], tracks: [TRACK] });
   }, [clipboard, commit, length, position, time]);
@@ -899,7 +1029,36 @@ function laneZoom({
   };
 }
 
-/** Zoomed in, the view turns the page as the playhead leaves it, while it plays. */
+/**
+ * Where a view `width` px wide, scrolled to `left`, goes for a playhead now at
+ * `x` that was at `from` a frame `dt` seconds ago, in px: centred on it when
+ * it was out of sight, else drawn to the middle once past it, its lead
+ * shrinking by e^(-dt / GLIDE); null to stay as it is.
+ */
+function followScroll(
+  x: number,
+  from: number,
+  left: number,
+  width: number,
+  dt: number
+): number | null {
+  const middle = left + width / 2;
+  if (from < left || from > left + width) {
+    return x - width / 2;
+  }
+  return x > middle
+    ? x - width / 2 - Math.max(0, from - middle) * Math.exp(-dt / GLIDE)
+    : null;
+}
+
+/**
+ * Zoomed in, the view glides with the playhead as it plays, holding it in the
+ * middle: from the start the playhead walks to the middle, and at the end on
+ * past it. Played from past the middle, it glides there. One out of sight (a
+ * seek, the loop come round) is centred at once. A view moved by hand stays
+ * where it is put till the playhead, seen in it, passes its right edge; then
+ * it glides to the middle from there.
+ */
 function useFollowPlayhead({
   playing,
   position,
@@ -916,25 +1075,95 @@ function useFollowPlayhead({
   const view = useRef({ px, zoomed });
   view.current = { px, zoomed };
   useEffect(() => {
-    if (!playing) {
+    const element = viewport.current;
+    if (!(playing && element)) {
       return;
     }
-    return position.subscribe(() => {
-      if (view.current.zoomed) {
-        followPlayhead(
-          viewport.current,
-          position.getSnapshot() * view.current.px
-        );
+    let then = performance.now();
+    // Where the playhead was the frame before, in px, and the scroll this set last.
+    let was: number | null = null;
+    let placed = element.scrollLeft;
+    let steered = false;
+    const scrolled = () => {
+      if (Math.abs(element.scrollLeft - placed) > 1) {
+        steered = true;
+      }
+    };
+    element.addEventListener("scroll", scrolled, { passive: true });
+    const unsubscribe = position.subscribe(() => {
+      const now = performance.now();
+      const dt = (now - then) / 1000;
+      then = now;
+      const { px: zoom, zoomed: on } = view.current;
+      const x = position.getSnapshot() * zoom;
+      const jumped =
+        was === null || x < was || x - was > JUMP_SECONDS * dt * zoom;
+      const from = jumped ? x : (was ?? x);
+      was = x;
+      const { clientWidth: width, scrollLeft: left } = element;
+      // Moved by hand, the view waits for the playhead to pass its right edge in sight.
+      const seen = from >= left && from <= left + width;
+      if (steered && !(seen && x > left + width)) {
+        return;
+      }
+      steered = false;
+      const target = on ? followScroll(x, from, left, width, dt) : null;
+      if (target !== null) {
+        placed = Math.min(element.scrollWidth - width, Math.max(0, target));
+        element.scrollLeft = placed;
       }
     });
+    return () => {
+      unsubscribe();
+      element.removeEventListener("scroll", scrolled);
+    };
   }, [playing, position, viewport]);
 }
 
-/** The stretch of the timeline that shows, in seconds, read as the view scrolls: what the ruler marks. */
-function useShownStretch(
+/** Over a zoomed view, the plain wheel scrolls time, as Shift and the wheel do, rather than the page under it. */
+function useWheelScrollsTime(
   viewport: RefObject<HTMLDivElement | null>,
-  zoom: number
+  zoomed: boolean
 ) {
+  const on = useRef(zoomed);
+  on.current = zoomed;
+  useEffect(() => {
+    const element = viewport.current;
+    if (!element) {
+      return;
+    }
+    const wheel = (event: WheelEvent) => {
+      if (
+        !on.current ||
+        event.ctrlKey ||
+        event.metaKey ||
+        Math.abs(event.deltaX) >= Math.abs(event.deltaY)
+      ) {
+        return;
+      }
+      event.preventDefault();
+      element.scrollLeft += event.deltaY * (WHEEL_PX[event.deltaMode] ?? 1);
+    };
+    element.addEventListener("wheel", wheel, { passive: false });
+    return () => element.removeEventListener("wheel", wheel);
+  }, [viewport]);
+}
+
+/**
+ * The ruler's marks around what shows, read as the view scrolls. Kept to whole
+ * steps of the labels, a scroll renders them only as one comes into view or
+ * leaves it, and nothing else of the lane.
+ */
+function RulerMarks({
+  duration,
+  viewport,
+  zoom,
+}: {
+  duration: number;
+  viewport: RefObject<HTMLDivElement | null>;
+  zoom: number;
+}) {
+  const step = labelStep(zoom);
   const [shown, setShown] = useState<readonly [number, number]>([0, 0]);
   useEffect(() => {
     const element = viewport.current;
@@ -944,10 +1173,13 @@ function useShownStretch(
     let pending = 0;
     const measure = () => {
       pending = 0;
-      setShown([
-        element.scrollLeft / zoom,
-        (element.scrollLeft + element.clientWidth) / zoom,
-      ]);
+      const from = Math.floor(element.scrollLeft / zoom / step) * step;
+      const to =
+        Math.ceil((element.scrollLeft + element.clientWidth) / zoom / step) *
+        step;
+      setShown((current) =>
+        current[0] === from && current[1] === to ? current : [from, to]
+      );
     };
     const onScroll = () => {
       pending ||= requestAnimationFrame(measure);
@@ -958,8 +1190,12 @@ function useShownStretch(
       cancelAnimationFrame(pending);
       element.removeEventListener("scroll", onScroll);
     };
-  }, [viewport, zoom]);
-  return shown;
+  }, [step, viewport, zoom]);
+  return rulerLabels(duration, zoom, shown).map((mark) => (
+    <TimelineMark key={mark.at} value={mark.at}>
+      {mark.text}
+    </TimelineMark>
+  ));
 }
 
 /** While a take records, the view it records into, in seconds: MIN_TAKE_SPAN to start, doubled as the take nears its end; null otherwise. */
@@ -1397,8 +1633,11 @@ function LocatorLane({
 
 /**
  * The sound's lane: the waveform on a timeline, fitted to the width, zoomed
- * with Cmd or Ctrl + wheel down to the samples, the ruler seeking and the
- * navigator moving the view, which turns the page as the playhead leaves it.
+ * with a pinch or Cmd or Ctrl + wheel down to the samples, the wheel and the
+ * navigator moving the view, which glides with the playhead as it plays. A
+ * press seeks, a drag selects, a double-click selects between two cues and a
+ * triple-click the sound between two pauses; presses and edges snap to the
+ * onsets, the seams and the locators.
  * While a take records, the lane is the take's, drawn as it comes in a view
  * that fits it; while a file is dragged over the editor, it shows where it
  * lands.
@@ -1455,8 +1694,12 @@ function ClipLane({
     zoomPx,
   });
   const changeZoom = useCallback((next: number) => setZoomPx(next), []);
-  const shown = useShownStretch(viewport, zoom);
   useFollowPlayhead({ playing, position, px: zoom, viewport, zoomed });
+  useWheelScrollsTime(viewport, zoomed);
+  const cues = useMemo(
+    () => cuesOf(clips, sounds, locators, duration),
+    [clips, duration, locators, sounds]
+  );
 
   // A press on the lane lets go of the selection, and gives the lane the keys; a drag from there selects.
   const { clear, setTime } = edits;
@@ -1474,6 +1717,27 @@ function ClipLane({
       setTime({ range: [range[0], range[1]], tracks: [TRACK] }),
     [setTime]
   );
+  // A double-click on the bare lane selects between the cues either side, a triple-click the sound between pauses.
+  const pick = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      if (event.detail < 2 || event.target !== event.currentTarget || !zoom) {
+        return;
+      }
+      const box = event.currentTarget.getBoundingClientRect();
+      const at = Math.min(
+        duration,
+        Math.max(0, (event.clientX - box.left) / zoom)
+      );
+      const range =
+        event.detail === 2
+          ? fragmentAt(cues, at, duration)
+          : soundAt(cues, at, duration);
+      if (range[1] > range[0]) {
+        setTime({ range, tracks: [TRACK] });
+      }
+    },
+    [cues, duration, setTime, zoom]
+  );
 
   return (
     <div className="px-4 py-4 sm:px-6">
@@ -1485,6 +1749,8 @@ function ClipLane({
           minZoom={fitPx || 0}
           onPositionChange={onSeek}
           onZoomChange={changeZoom}
+          // Presses and edges land on the sound's onsets, its seams and the locators from a few px away; Cmd or Ctrl lets go of them.
+          snapPoints={recording ? undefined : cues.points}
           source={recording ? takeClock : position}
           zoom={fitPx > 0 ? zoom : undefined}
         >
@@ -1504,16 +1770,17 @@ function ClipLane({
                 scrollbar="hidden"
               >
                 <TimelineRuler aria-label="Time" getAriaValueText={formatTime}>
-                  {rulerLabels(shownDuration, zoom, shown).map((mark) => (
-                    <TimelineMark key={mark.at} value={mark.at}>
-                      {mark.text}
-                    </TimelineMark>
-                  ))}
+                  <RulerMarks
+                    duration={shownDuration}
+                    viewport={viewport}
+                    zoom={zoom}
+                  />
                 </TimelineRuler>
                 <LocatorLane actions={locatorActions} locators={locators} />
                 {/* A press seeks and a drag selects; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
                 <TimelineLane
                   className="h-28"
+                  onClick={pick}
                   onPointerDown={press}
                   onSelectionChange={select}
                   seekable
