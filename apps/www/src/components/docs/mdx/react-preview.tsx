@@ -20,6 +20,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useState,
 } from "react";
 import { PreviewPanel } from "@/components/preview/frame/preview-frame";
 import { Frame } from "@/components/site/layout/frame";
@@ -232,11 +233,15 @@ function EnvelopePreview() {
   );
 }
 
-/** A peaking band's response in dB at `hz`. */
-const bell = (hz: number) => 6 * Math.exp(-(Math.log2(hz / 800) ** 2) * 1.6);
+/** A peaking band's response in dB at `hz`, around the band's center. */
+const bell = (hz: number, { x, y }: { x: number; y: number }) =>
+  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);
 
 function PlotPreview() {
   const p = usePart("plot");
+  // The curve follows the handle as it is dragged.
+  const [band, setBand] = useState({ x: 800, y: 6 });
+  const curve = useCallback((hz: number) => bell(hz, band), [band]);
   return (
     <Plot.Root
       className={p("Root")}
@@ -248,12 +253,13 @@ function PlotPreview() {
     >
       <Plot.Grid className={p("Grid")} x={{}} y={{}} />
       <Plot.Graph>
-        <Plot.Curve className={p("Curve")} fillTo={0} fn={bell} />
+        <Plot.Curve className={p("Curve")} fillTo={0} fn={curve} />
       </Plot.Graph>
       <Plot.Handle
         aria-label="Band"
         className={p("Handle")}
-        defaultValue={{ x: 800, y: 6 }}
+        onValueChange={setBand}
+        value={band}
       />
     </Plot.Root>
   );

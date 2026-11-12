@@ -56,11 +56,11 @@ The styles read the theme's CSS variables, which the [elements' overview](/docs/
   cursor: ew-resize;
 }
 
-.regionHandle[edge="start"] {
+.regionHandle[data-edge="start"] {
   left: 0;
 }
 
-.regionHandle[edge="end"] {
+.regionHandle[data-edge="end"] {
   right: 0;
 }
 
@@ -116,8 +116,8 @@ const peaks: number[] = [];
   <Waveform.Control className="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
     <Waveform.Canvas className="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)] block size-full" />
     <Waveform.Region className="inset-y-0 bg-primary/10" defaultValue={[54, 72]}>
-      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[edge=end]]:right-0 [&[edge=start]]:left-0" edge="start" aria-label="Loop start" />
-      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[edge=end]]:right-0 [&[edge=start]]:left-0" edge="end" aria-label="Loop end" />
+      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="start" aria-label="Loop start" />
+      <Waveform.RegionHandle className="absolute inset-y-0 w-1 cursor-ew-resize bg-primary [&[data-edge=end]]:right-0 [&[data-edge=start]]:left-0" edge="end" aria-label="Loop end" />
     </Waveform.Region>
     <Waveform.Playhead className="inset-y-0 w-0.5 bg-foreground" />
   </Waveform.Control>

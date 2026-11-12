@@ -109,9 +109,9 @@ export const REACT_USAGES: Record<string, ReactUsage> = {
       '<Plot.Root minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">',
       "  <Plot.Grid x={{}} y={{}} />",
       "  <Plot.Graph>",
-      "    <Plot.Curve fn={response} fillTo={0} />",
+      "    <Plot.Curve fn={(hz) => bell(hz, band)} fillTo={0} />",
       "  </Plot.Graph>",
-      '  <Plot.Handle aria-label="Band" defaultValue={{ x: 800, y: 6 }} />',
+      '  <Plot.Handle aria-label="Band" value={band} onValueChange={setBand} />',
       "</Plot.Root>",
     ],
     name: "Plot",
@@ -175,9 +175,12 @@ const SETUP: Record<string, readonly string[]> = {
     "];",
   ],
   plot: [
-    "// The curve: its level in dB at each frequency, such as a filter's response.",
-    "const response = (hz: number) =>",
-    "  6 * Math.exp(-(Math.log2(hz / 800) ** 2) * 1.6);",
+    "// A peaking band's response in dB at each frequency, around its center.",
+    "const bell = (hz: number, { x, y }: { x: number; y: number }) =>",
+    "  y * Math.exp(-(Math.log2(hz / x) ** 2) * 1.6);",
+    "",
+    "// In the component: the curve follows the handle.",
+    "const [band, setBand] = useState({ x: 800, y: 6 });",
   ],
   waveform: [
     "// Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.",
@@ -250,6 +253,14 @@ const CHILD = /^\*:/;
  * (a piano's keys), takes those classes itself in React.
  */
 export function tailwindClasses(entry: string, part: string) {
+  return forReact(tailwindOf(entry, part));
+}
+
+/** What the elements read from an attribute, the React parts carry as a data attribute. */
+const forReact = <T extends string | undefined>(value: T): T =>
+  value?.replaceAll("[edge=", "[data-edge=") as T;
+
+function tailwindOf(entry: string, part: string) {
   const extra = STRUCTURE[entry]?.[moduleClass(part)]?.tw;
   const own = SKINS[entry]?.tailwind[tagOf(entry, part)];
   if (own) {
@@ -282,7 +293,7 @@ function withStructure(entry: string, css: string): string {
 
 /** The skin's stylesheet as CSS Modules write it: a class for each part in place of its tag. */
 export function moduleCss(entry: string, prefix = ""): string {
-  const css = withStructure(entry, SKINS[entry]?.css ?? "");
+  const css = forReact(withStructure(entry, SKINS[entry]?.css ?? ""));
   return css.replace(TAG, (tag) => {
     if (tag === `audio-ui-${entry}`) {
       return `.${prefix}root`;
