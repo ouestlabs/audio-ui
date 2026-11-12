@@ -84,6 +84,15 @@ description: "The <audio-ui-xypad> custom element of @audio-ui/elements: its att
     font-variant-numeric: tabular-nums;
     text-align: center;
   }
+
+  audio-ui-xypad[data-disabled],
+  audio-ui-xypad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-xypad[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-xypad value="30 70">
@@ -112,7 +121,7 @@ description: "The <audio-ui-xypad> custom element of @audio-ui/elements: its att
 <CodeFile title="xypad.html" open>
 
 ```html
-<audio-ui-xypad class="block w-48" value="30 70">
+<audio-ui-xypad class="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" value="30 70">
   <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
     <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
   </audio-ui-xypad-control>
@@ -217,6 +226,15 @@ audio-ui-xypad-value {
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
+
+audio-ui-xypad[data-disabled],
+audio-ui-xypad[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-xypad[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -237,7 +255,7 @@ const point = ref({ x: 30, y: 70 });
 </script>
 
 <template>
-  <audio-ui-xypad class="block w-48" v-model="point">
+  <audio-ui-xypad class="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" v-model="point">
     <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
       <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
     </audio-ui-xypad-control>
@@ -332,6 +350,15 @@ const point = ref({ x: 30, y: 70 });
     font-variant-numeric: tabular-nums;
     text-align: center;
   }
+
+  audio-ui-xypad[data-disabled],
+  audio-ui-xypad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-xypad[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -351,7 +378,7 @@ const point = ref({ x: 30, y: 70 });
   let point = $state({ x: 30, y: 70 });
 </script>
 
-<audio-ui-xypad class="block w-48" value={point} oninput={(event) => (point = event.detail.value)}>
+<audio-ui-xypad class="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" value={point} oninput={(event) => (point = event.detail.value)}>
   <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
     <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
   </audio-ui-xypad-control>
@@ -479,6 +506,15 @@ The parts, nested as they go in the markup.
     font-variant-numeric: tabular-nums;
     text-align: center;
   }
+
+  audio-ui-xypad[data-disabled],
+  audio-ui-xypad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-xypad[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-xypad step-x="10" step-y="10" value="30 70">
@@ -507,7 +543,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="xypad.html" open>
 
 ```html
-<audio-ui-xypad class="block w-48" step-x="10" step-y="10" value="30 70">
+<audio-ui-xypad class="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" step-x="10" step-y="10" value="30 70">
   <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
     <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
   </audio-ui-xypad-control>
@@ -612,6 +648,15 @@ audio-ui-xypad-value {
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
+
+audio-ui-xypad[data-disabled],
+audio-ui-xypad[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-xypad[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -632,7 +677,7 @@ const point = ref({ x: 30, y: 70 });
 </script>
 
 <template>
-  <audio-ui-xypad class="block w-48" step-x="10" step-y="10" v-model="point">
+  <audio-ui-xypad class="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" step-x="10" step-y="10" v-model="point">
     <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
       <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
     </audio-ui-xypad-control>
@@ -727,6 +772,15 @@ const point = ref({ x: 30, y: 70 });
     font-variant-numeric: tabular-nums;
     text-align: center;
   }
+
+  audio-ui-xypad[data-disabled],
+  audio-ui-xypad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-xypad[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -746,7 +800,7 @@ const point = ref({ x: 30, y: 70 });
   let point = $state({ x: 30, y: 70 });
 </script>
 
-<audio-ui-xypad class="block w-48" step-x="10" step-y="10" value={point} oninput={(event) => (point = event.detail.value)}>
+<audio-ui-xypad class="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" step-x="10" step-y="10" value={point} oninput={(event) => (point = event.detail.value)}>
   <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
     <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
   </audio-ui-xypad-control>
@@ -851,6 +905,15 @@ In React, the same control is the [XYPad](/docs/react/xypad) primitive of `@audi
     font-variant-numeric: tabular-nums;
     text-align: center;
   }
+
+  audio-ui-xypad[data-disabled],
+  audio-ui-xypad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-xypad[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-xypad disabled value="30 70">
@@ -879,7 +942,7 @@ In React, the same control is the [XYPad](/docs/react/xypad) primitive of `@audi
 <CodeFile title="xypad.html" open>
 
 ```html
-<audio-ui-xypad class="block w-48" disabled value="30 70">
+<audio-ui-xypad class="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" disabled value="30 70">
   <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
     <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
   </audio-ui-xypad-control>
@@ -984,6 +1047,15 @@ audio-ui-xypad-value {
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
+
+audio-ui-xypad[data-disabled],
+audio-ui-xypad[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-xypad[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -1004,7 +1076,7 @@ const point = ref({ x: 30, y: 70 });
 </script>
 
 <template>
-  <audio-ui-xypad class="block w-48" disabled v-model="point">
+  <audio-ui-xypad class="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" disabled v-model="point">
     <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
       <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
     </audio-ui-xypad-control>
@@ -1099,6 +1171,15 @@ const point = ref({ x: 30, y: 70 });
     font-variant-numeric: tabular-nums;
     text-align: center;
   }
+
+  audio-ui-xypad[data-disabled],
+  audio-ui-xypad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-xypad[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -1118,7 +1199,7 @@ const point = ref({ x: 30, y: 70 });
   let point = $state({ x: 30, y: 70 });
 </script>
 
-<audio-ui-xypad class="block w-48" disabled value={point} oninput={(event) => (point = event.detail.value)}>
+<audio-ui-xypad class="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" disabled value={point} oninput={(event) => (point = event.detail.value)}>
   <audio-ui-xypad-control class="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
     <audio-ui-xypad-thumb class="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter"></audio-ui-xypad-thumb>
   </audio-ui-xypad-control>

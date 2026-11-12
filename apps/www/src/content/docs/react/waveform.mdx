@@ -100,6 +100,15 @@ const peaks: number[] = [];
   font-size: 10px;
   pointer-events: none;
 }
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 </CodeFile>
@@ -116,7 +125,7 @@ import { Waveform } from "@audio-ui/react";
 // Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
 const peaks: number[] = [];
 
-<Waveform.Root className="block w-full max-w-xl" duration={96} peaks={peaks} defaultValue={30}>
+<Waveform.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={96} peaks={peaks} defaultValue={30}>
   <Waveform.Control className="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
     <Waveform.Canvas className="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)] block size-full" />
     <Waveform.Region className="inset-y-0 bg-primary/10" defaultValue={[54, 72]}>
@@ -206,7 +215,7 @@ import { Waveform } from "@audio-ui/react";
 // Min and max pairs across the sound, from computePeaks in @audio-ui/engine/analysis.
 const peaks: number[] = [];
 
-<Waveform.Root className="block w-full max-w-xl" duration={240} peaks={peaks} defaultValue={90}>
+<Waveform.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={240} peaks={peaks} defaultValue={90}>
   <Waveform.Control className="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
     <Waveform.Canvas className="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)] block size-full" />
     <Waveform.Region className="inset-y-0 bg-primary/10" defaultValue={[54, 72]}>

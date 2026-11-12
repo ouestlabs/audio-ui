@@ -66,6 +66,15 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
   }
+
+  audio-ui-plot[data-disabled],
+  audio-ui-plot[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-plot[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-plot min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
@@ -97,7 +106,7 @@ description: "The <audio-ui-plot> custom element of @audio-ui/elements: its attr
 <CodeFile title="plot.html" open>
 
 ```html
-<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
+<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
   <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
   <audio-ui-plot-curve class="text-primary/15" fill-to="0"></audio-ui-plot-curve>
   <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value="800 6"></audio-ui-plot-handle>
@@ -189,6 +198,15 @@ audio-ui-plot-handle {
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
   cursor: grab;
 }
+
+audio-ui-plot[data-disabled],
+audio-ui-plot[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-plot[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -212,7 +230,7 @@ const response: (hz: number) => number = (hz) => 0;
 </script>
 
 <template>
-  <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
+  <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
     <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" />
     <audio-ui-plot-curve class="text-primary/15" fill-to="0" :fn="response" />
     <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" v-model="band" />
@@ -290,6 +308,15 @@ const response: (hz: number) => number = (hz) => 0;
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
   }
+
+  audio-ui-plot[data-disabled],
+  audio-ui-plot[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-plot[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -312,7 +339,7 @@ const response: (hz: number) => number = (hz) => 0;
   const response: (hz: number) => number = (hz) => 0;
 </script>
 
-<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
+<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="log">
   <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
   <audio-ui-plot-curve class="text-primary/15" fill-to="0" fn={response}></audio-ui-plot-curve>
   <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} oninput={(event) => (band = event.detail.value)}></audio-ui-plot-handle>
@@ -420,6 +447,15 @@ The parts, nested as they go in the markup.
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
   }
+
+  audio-ui-plot[data-disabled],
+  audio-ui-plot[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-plot[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-plot min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="linear">
@@ -451,7 +487,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="plot.html" open>
 
 ```html
-<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="linear">
+<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="linear">
   <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
   <audio-ui-plot-curve class="text-primary/15" fill-to="0"></audio-ui-plot-curve>
   <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value="800 6"></audio-ui-plot-handle>
@@ -543,6 +579,15 @@ audio-ui-plot-handle {
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
   cursor: grab;
 }
+
+audio-ui-plot[data-disabled],
+audio-ui-plot[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-plot[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -566,7 +611,7 @@ const response: (hz: number) => number = (hz) => 0;
 </script>
 
 <template>
-  <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="linear">
+  <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="linear">
     <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" />
     <audio-ui-plot-curve class="text-primary/15" fill-to="0" :fn="response" />
     <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" v-model="band" />
@@ -644,6 +689,15 @@ const response: (hz: number) => number = (hz) => 0;
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
   }
+
+  audio-ui-plot[data-disabled],
+  audio-ui-plot[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-plot[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -666,7 +720,7 @@ const response: (hz: number) => number = (hz) => 0;
   const response: (hz: number) => number = (hz) => 0;
 </script>
 
-<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="linear">
+<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-x="20" max-x="20000" min-y="-18" max-y="18" scale-x="linear">
   <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
   <audio-ui-plot-curve class="text-primary/15" fill-to="0" fn={response}></audio-ui-plot-curve>
   <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} oninput={(event) => (band = event.detail.value)}></audio-ui-plot-handle>
@@ -752,6 +806,15 @@ In React, the same control is the [Plot](/docs/react/plot) primitive of `@audio-
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
   }
+
+  audio-ui-plot[data-disabled],
+  audio-ui-plot[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-plot[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-plot min-x="20" max-x="20000" min-y="-6" max-y="6" scale-x="log">
@@ -783,7 +846,7 @@ In React, the same control is the [Plot](/docs/react/plot) primitive of `@audio-
 <CodeFile title="plot.html" open>
 
 ```html
-<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-6" max-y="6" scale-x="log">
+<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-x="20" max-x="20000" min-y="-6" max-y="6" scale-x="log">
   <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
   <audio-ui-plot-curve class="text-primary/15" fill-to="0"></audio-ui-plot-curve>
   <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value="800 6"></audio-ui-plot-handle>
@@ -875,6 +938,15 @@ audio-ui-plot-handle {
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
   cursor: grab;
 }
+
+audio-ui-plot[data-disabled],
+audio-ui-plot[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-plot[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -898,7 +970,7 @@ const response: (hz: number) => number = (hz) => 0;
 </script>
 
 <template>
-  <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-6" max-y="6" scale-x="log">
+  <audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-x="20" max-x="20000" min-y="-6" max-y="6" scale-x="log">
     <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" />
     <audio-ui-plot-curve class="text-primary/15" fill-to="0" :fn="response" />
     <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" v-model="band" />
@@ -976,6 +1048,15 @@ const response: (hz: number) => number = (hz) => 0;
     box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
     cursor: grab;
   }
+
+  audio-ui-plot[data-disabled],
+  audio-ui-plot[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-plot[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -998,7 +1079,7 @@ const response: (hz: number) => number = (hz) => 0;
   const response: (hz: number) => number = (hz) => 0;
 </script>
 
-<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted" min-x="20" max-x="20000" min-y="-6" max-y="6" scale-x="log">
+<audio-ui-plot class="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-x="20" max-x="20000" min-y="-6" max-y="6" scale-x="log">
   <audio-ui-plot-grid class="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border"></audio-ui-plot-grid>
   <audio-ui-plot-curve class="text-primary/15" fill-to="0" fn={response}></audio-ui-plot-curve>
   <audio-ui-plot-handle class="size-4 cursor-grab rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Band" value={band} oninput={(event) => (band = event.detail.value)}></audio-ui-plot-handle>

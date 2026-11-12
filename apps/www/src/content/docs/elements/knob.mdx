@@ -140,6 +140,15 @@ description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attr
     white-space: nowrap;
     border-width: 0;
   }
+
+  audio-ui-knob[data-disabled],
+  audio-ui-knob[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-knob[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-knob min="0" max="100" value="40">
@@ -171,7 +180,7 @@ description: "The <audio-ui-knob> custom element of @audio-ui/elements: its attr
 <CodeFile title="knob.html" open>
 
 ```html
-<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" value="40">
+<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="0" max="100" value="40">
   <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
   <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
     <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current"></audio-ui-knob-track>
@@ -338,6 +347,15 @@ audio-ui-knob-label {
   white-space: nowrap;
   border-width: 0;
 }
+
+audio-ui-knob[data-disabled],
+audio-ui-knob[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-knob[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -358,7 +376,7 @@ const volume = ref(40);
 </script>
 
 <template>
-  <audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" v-model="volume">
+  <audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="0" max="100" v-model="volume">
     <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
     <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
       <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
@@ -515,6 +533,15 @@ const volume = ref(40);
     white-space: nowrap;
     border-width: 0;
   }
+
+  audio-ui-knob[data-disabled],
+  audio-ui-knob[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-knob[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -534,7 +561,7 @@ const volume = ref(40);
   let volume = $state(40);
 </script>
 
-<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" value={volume} oninput={(event) => (volume = event.detail.value)}>
+<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="0" max="100" value={volume} oninput={(event) => (volume = event.detail.value)}>
   <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
   <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
     <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current"></audio-ui-knob-track>
@@ -724,6 +751,15 @@ The parts, nested as they go in the markup.
     white-space: nowrap;
     border-width: 0;
   }
+
+  audio-ui-knob[data-disabled],
+  audio-ui-knob[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-knob[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-knob min="0" max="100" drag-mode="vertical" value="40">
@@ -755,7 +791,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="knob.html" open>
 
 ```html
-<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" drag-mode="vertical" value="40">
+<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="0" max="100" drag-mode="vertical" value="40">
   <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
   <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
     <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current"></audio-ui-knob-track>
@@ -922,6 +958,15 @@ audio-ui-knob-label {
   white-space: nowrap;
   border-width: 0;
 }
+
+audio-ui-knob[data-disabled],
+audio-ui-knob[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-knob[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -942,7 +987,7 @@ const volume = ref(40);
 </script>
 
 <template>
-  <audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" drag-mode="vertical" v-model="volume">
+  <audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="0" max="100" drag-mode="vertical" v-model="volume">
     <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
     <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
       <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
@@ -1099,6 +1144,15 @@ const volume = ref(40);
     white-space: nowrap;
     border-width: 0;
   }
+
+  audio-ui-knob[data-disabled],
+  audio-ui-knob[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-knob[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -1118,7 +1172,7 @@ const volume = ref(40);
   let volume = $state(40);
 </script>
 
-<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="0" max="100" drag-mode="vertical" value={volume} oninput={(event) => (volume = event.detail.value)}>
+<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="0" max="100" drag-mode="vertical" value={volume} oninput={(event) => (volume = event.detail.value)}>
   <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
   <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
     <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current"></audio-ui-knob-track>
@@ -1282,6 +1336,15 @@ In React, the same control is the [Knob](/docs/react/knob) primitive of `@audio-
     white-space: nowrap;
     border-width: 0;
   }
+
+  audio-ui-knob[data-disabled],
+  audio-ui-knob[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-knob[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-knob min="20" max="20000" scale="log" value="1000">
@@ -1313,7 +1376,7 @@ In React, the same control is the [Knob](/docs/react/knob) primitive of `@audio-
 <CodeFile title="knob.html" open>
 
 ```html
-<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="20" max="20000" scale="log" value="1000">
+<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="20" max="20000" scale="log" value="1000">
   <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
   <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
     <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current"></audio-ui-knob-track>
@@ -1480,6 +1543,15 @@ audio-ui-knob-label {
   white-space: nowrap;
   border-width: 0;
 }
+
+audio-ui-knob[data-disabled],
+audio-ui-knob[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-knob[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -1500,7 +1572,7 @@ const volume = ref(1000);
 </script>
 
 <template>
-  <audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="20" max="20000" scale="log" v-model="volume">
+  <audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="20" max="20000" scale="log" v-model="volume">
     <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
     <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
       <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current" />
@@ -1657,6 +1729,15 @@ const volume = ref(1000);
     white-space: nowrap;
     border-width: 0;
   }
+
+  audio-ui-knob[data-disabled],
+  audio-ui-knob[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-knob[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -1676,7 +1757,7 @@ const volume = ref(1000);
   let volume = $state(1000);
 </script>
 
-<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none" min="20" max="20000" scale="log" value={volume} oninput={(event) => (volume = event.detail.value)}>
+<audio-ui-knob class="relative mb-8 inline-flex size-12 outline-none data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="20" max="20000" scale="log" value={volume} oninput={(event) => (volume = event.detail.value)}>
   <audio-ui-knob-label class="sr-only">Volume</audio-ui-knob-label>
   <audio-ui-knob-control class="relative isolate flex size-full cursor-grab touch-none select-none outline-none [clip-path:circle(50%_at_50%_50%)] before:absolute before:inset-1.5 before:rounded-full before:bg-card before:ring-1 before:ring-foreground/10 before:content-[''] active:cursor-grabbing data-[drag-mode=vertical]:cursor-ns-resize data-[drag-mode=vertical]:active:cursor-ns-resize">
     <audio-ui-knob-track class="pointer-events-none absolute inset-0 z-1 block size-full text-primary opacity-22 [&_path]:stroke-current"></audio-ui-knob-track>

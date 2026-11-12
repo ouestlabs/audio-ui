@@ -157,6 +157,15 @@ const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
   cursor: grab;
 }
 
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+
 .lane {
   position: relative;
   flex: 1 1 0;
@@ -177,7 +186,7 @@ import { Timeline } from "@audio-ui/react";
 
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
-<Timeline.Root className="block w-full max-w-xl" duration={32} snapStep={1}>
+<Timeline.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={32} snapStep={1}>
   <Timeline.Viewport className="rounded-md border">
     <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
@@ -313,7 +322,7 @@ import { Timeline } from "@audio-ui/react";
 
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
-<Timeline.Root className="block w-full max-w-xl" duration={64} snapStep={1}>
+<Timeline.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={64} snapStep={1}>
   <Timeline.Viewport className="rounded-md border">
     <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>
@@ -398,7 +407,7 @@ import { Timeline } from "@audio-ui/react";
 
 const beat = { start: 0, length: 8, offset: 0, fadeIn: 0, fadeOut: 0 };
 
-<Timeline.Root className="block w-full max-w-xl" duration={32} snapStep={4}>
+<Timeline.Root className="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration={32} snapStep={4}>
   <Timeline.Viewport className="rounded-md border">
     <Timeline.Ruler className="ms-20 h-6 cursor-pointer bg-muted relative" aria-label="Position">
       <Timeline.Mark className="h-full border-s ps-1 text-[10px] text-muted-foreground" value={0}>1</Timeline.Mark>

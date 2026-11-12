@@ -86,6 +86,15 @@ import styles from "./xypad.module.css";
   font-variant-numeric: tabular-nums;
   text-align: center;
 }
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 </CodeFile>
@@ -99,7 +108,7 @@ import styles from "./xypad.module.css";
 ```tsx
 import { XYPad } from "@audio-ui/react";
 
-<XYPad.Root className="block w-48" defaultValue={{ x: 30, y: 70 }}>
+<XYPad.Root className="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" defaultValue={{ x: 30, y: 70 }}>
   <XYPad.Control className="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
     <XYPad.Thumb className="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
   </XYPad.Control>
@@ -169,7 +178,7 @@ import styles from "./xypad.module.css";
 ```tsx
 import { XYPad } from "@audio-ui/react";
 
-<XYPad.Root className="block w-48" stepX={10} stepY={10}>
+<XYPad.Root className="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" stepX={10} stepY={10}>
   <XYPad.Control className="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
     <XYPad.Thumb className="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
   </XYPad.Control>
@@ -216,7 +225,7 @@ import styles from "./xypad.module.css";
 ```tsx
 import { XYPad } from "@audio-ui/react";
 
-<XYPad.Root className="block w-48" disabled={true}>
+<XYPad.Root className="block w-48 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" disabled={true}>
   <XYPad.Control className="relative block aspect-square cursor-crosshair overflow-hidden rounded-md bg-muted before:pointer-events-none before:absolute before:inset-y-0 before:left-(--xy-pad-x) before:w-px before:bg-border before:content-[''] after:pointer-events-none after:absolute after:inset-x-0 after:top-(--xy-pad-y) after:h-px after:bg-border after:content-['']">
     <XYPad.Thumb className="absolute z-1 size-4 rounded-lg bg-primary ring-4 ring-primary/20" aria-label="Filter" />
   </XYPad.Control>

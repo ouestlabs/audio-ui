@@ -133,6 +133,15 @@ description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: it
     width: 1px;
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-piano-roll[data-disabled],
+  audio-ui-piano-roll[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-piano-roll[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-timeline duration="8" snap-step="0.5">
@@ -172,7 +181,7 @@ description: "The <audio-ui-piano-roll> custom element of @audio-ui/elements: it
 
 ```html
 <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5">
-  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74">
+  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
         <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
@@ -342,6 +351,15 @@ audio-ui-timeline-playhead {
   width: 1px;
   background: var(--foreground, oklch(0.145 0 0));
 }
+
+audio-ui-piano-roll[data-disabled],
+audio-ui-piano-roll[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-piano-roll[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -360,7 +378,7 @@ import "@audio-ui/elements/piano-roll";
 
 <template>
   <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5">
-    <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
+    <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
       <audio-ui-piano-roll-keys class="h-48 border-e">
         <audio-ui-piano class="block h-full" aria-label="Keys">
           <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary" />
@@ -521,6 +539,15 @@ import "@audio-ui/elements/piano-roll";
     width: 1px;
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-piano-roll[data-disabled],
+  audio-ui-piano-roll[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-piano-roll[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -539,7 +566,7 @@ import "@audio-ui/elements/piano-roll";
 </script>
 
 <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.5">
-  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
         <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
@@ -735,6 +762,15 @@ The roll takes its length from the timeline around it: `duration` is in beats he
     width: 1px;
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-piano-roll[data-disabled],
+  audio-ui-piano-roll[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-piano-roll[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-timeline duration="16" snap-step="0.5">
@@ -774,7 +810,7 @@ The roll takes its length from the timeline around it: `duration` is in beats he
 
 ```html
 <audio-ui-timeline class="block w-full max-w-xl" duration="16" snap-step="0.5">
-  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74">
+  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
         <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
@@ -944,6 +980,15 @@ audio-ui-timeline-playhead {
   width: 1px;
   background: var(--foreground, oklch(0.145 0 0));
 }
+
+audio-ui-piano-roll[data-disabled],
+audio-ui-piano-roll[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-piano-roll[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -962,7 +1007,7 @@ import "@audio-ui/elements/piano-roll";
 
 <template>
   <audio-ui-timeline class="block w-full max-w-xl" duration="16" snap-step="0.5">
-    <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
+    <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
       <audio-ui-piano-roll-keys class="h-48 border-e">
         <audio-ui-piano class="block h-full" aria-label="Keys">
           <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary" />
@@ -1123,6 +1168,15 @@ import "@audio-ui/elements/piano-roll";
     width: 1px;
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-piano-roll[data-disabled],
+  audio-ui-piano-roll[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-piano-roll[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -1141,7 +1195,7 @@ import "@audio-ui/elements/piano-roll";
 </script>
 
 <audio-ui-timeline class="block w-full max-w-xl" duration="16" snap-step="0.5">
-  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
         <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
@@ -1304,6 +1358,15 @@ In React, the same control is the [PianoRoll](/docs/react/piano-roll) primitive 
     width: 1px;
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-piano-roll[data-disabled],
+  audio-ui-piano-roll[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-piano-roll[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-timeline duration="8" snap-step="0.25">
@@ -1343,7 +1406,7 @@ In React, the same control is the [PianoRoll](/docs/react/piano-roll) primitive 
 
 ```html
 <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.25">
-  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74">
+  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74">
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
         <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>
@@ -1513,6 +1576,15 @@ audio-ui-timeline-playhead {
   width: 1px;
   background: var(--foreground, oklch(0.145 0 0));
 }
+
+audio-ui-piano-roll[data-disabled],
+audio-ui-piano-roll[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-piano-roll[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -1531,7 +1603,7 @@ import "@audio-ui/elements/piano-roll";
 
 <template>
   <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.25">
-    <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
+    <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" @change="(event) => console.log(event.detail.value)">
       <audio-ui-piano-roll-keys class="h-48 border-e">
         <audio-ui-piano class="block h-full" aria-label="Keys">
           <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary" />
@@ -1692,6 +1764,15 @@ import "@audio-ui/elements/piano-roll";
     width: 1px;
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-piano-roll[data-disabled],
+  audio-ui-piano-roll[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-piano-roll[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -1710,7 +1791,7 @@ import "@audio-ui/elements/piano-roll";
 </script>
 
 <audio-ui-timeline class="block w-full max-w-xl" duration="8" snap-step="0.25">
-  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
+  <audio-ui-piano-roll class="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min-pitch="57" max-pitch="74" onchange={(event) => console.log(event.detail.value)}>
     <audio-ui-piano-roll-keys class="h-48 border-e">
       <audio-ui-piano class="block h-full" aria-label="Keys">
         <audio-ui-piano-keys class="*:inset-x-0 *:top-auto *:z-0 *:h-full *:cursor-pointer *:border-0 *:border-border *:border-b *:bg-background *:outline-none *:data-[color=black]:right-[35%] *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary"></audio-ui-piano-keys>

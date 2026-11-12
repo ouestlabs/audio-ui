@@ -58,6 +58,15 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
     background: var(--primary, oklch(0.205 0 0));
     color: var(--primary-foreground, oklch(0.985 0 0));
   }
+
+  audio-ui-pad[data-disabled],
+  audio-ui-pad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-pad[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-pad aria-label="Drums">
@@ -86,7 +95,7 @@ description: "The <audio-ui-pad> custom element of @audio-ui/elements: its attri
 <CodeFile title="pad.html" open>
 
 ```html
-<audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums">
+<audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums">
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</audio-ui-pad-item>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</audio-ui-pad-item>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</audio-ui-pad-item>
@@ -162,6 +171,15 @@ audio-ui-pad-item[data-active] {
   background: var(--primary, oklch(0.205 0 0));
   color: var(--primary-foreground, oklch(0.985 0 0));
 }
+
+audio-ui-pad[data-disabled],
+audio-ui-pad[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-pad[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -179,7 +197,7 @@ import "@audio-ui/elements/pad";
 </script>
 
 <template>
-  <audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums" @padon="(event) => console.log(event.detail.value)">
+  <audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums" @padon="(event) => console.log(event.detail.value)">
     <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</audio-ui-pad-item>
     <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</audio-ui-pad-item>
     <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</audio-ui-pad-item>
@@ -246,6 +264,15 @@ import "@audio-ui/elements/pad";
     background: var(--primary, oklch(0.205 0 0));
     color: var(--primary-foreground, oklch(0.985 0 0));
   }
+
+  audio-ui-pad[data-disabled],
+  audio-ui-pad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-pad[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -263,7 +290,7 @@ import "@audio-ui/elements/pad";
   import "@audio-ui/elements/pad";
 </script>
 
-<audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums" onpadon={(event) => console.log(event.detail.value)}>
+<audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums" onpadon={(event) => console.log(event.detail.value)}>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</audio-ui-pad-item>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</audio-ui-pad-item>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</audio-ui-pad-item>
@@ -365,6 +392,15 @@ The parts, nested as they go in the markup.
     background: var(--primary, oklch(0.205 0 0));
     color: var(--primary-foreground, oklch(0.985 0 0));
   }
+
+  audio-ui-pad[data-disabled],
+  audio-ui-pad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-pad[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-pad aria-label="Drums" disabled>
@@ -393,7 +429,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="pad.html" open>
 
 ```html
-<audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums" disabled>
+<audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums" disabled>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</audio-ui-pad-item>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</audio-ui-pad-item>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</audio-ui-pad-item>
@@ -469,6 +505,15 @@ audio-ui-pad-item[data-active] {
   background: var(--primary, oklch(0.205 0 0));
   color: var(--primary-foreground, oklch(0.985 0 0));
 }
+
+audio-ui-pad[data-disabled],
+audio-ui-pad[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-pad[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -486,7 +531,7 @@ import "@audio-ui/elements/pad";
 </script>
 
 <template>
-  <audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums" disabled @padon="(event) => console.log(event.detail.value)">
+  <audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums" disabled @padon="(event) => console.log(event.detail.value)">
     <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</audio-ui-pad-item>
     <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</audio-ui-pad-item>
     <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</audio-ui-pad-item>
@@ -553,6 +598,15 @@ import "@audio-ui/elements/pad";
     background: var(--primary, oklch(0.205 0 0));
     color: var(--primary-foreground, oklch(0.985 0 0));
   }
+
+  audio-ui-pad[data-disabled],
+  audio-ui-pad[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-pad[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -570,7 +624,7 @@ import "@audio-ui/elements/pad";
   import "@audio-ui/elements/pad";
 </script>
 
-<audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums" disabled onpadon={(event) => console.log(event.detail.value)}>
+<audio-ui-pad class="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums" disabled onpadon={(event) => console.log(event.detail.value)}>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</audio-ui-pad-item>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</audio-ui-pad-item>
   <audio-ui-pad-item class="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</audio-ui-pad-item>

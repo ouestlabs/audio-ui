@@ -156,6 +156,15 @@ const notes = [
   width: 1px;
   background: var(--foreground, oklch(0.145 0 0));
 }
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 </CodeFile>
@@ -176,7 +185,7 @@ const notes = [
 ];
 
 <Timeline.Root className="block w-full max-w-xl" duration={8} snapStep={0.5}>
-  <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+  <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
     <PianoRoll.Keys className="h-48 border-e">
       <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
         {(pitch) => <PianoRoll.Key className="inset-x-0 top-auto z-0 h-full cursor-pointer border-0 border-border border-b bg-background outline-none data-[color=black]:right-[35%] data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
@@ -325,7 +334,7 @@ const notes = [
 ];
 
 <Timeline.Root className="block w-full max-w-xl" duration={16} snapStep={0.5}>
-  <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+  <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
     <PianoRoll.Keys className="h-48 border-e">
       <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
         {(pitch) => <PianoRoll.Key className="inset-x-0 top-auto z-0 h-full cursor-pointer border-0 border-border border-b bg-background outline-none data-[color=black]:right-[35%] data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
@@ -424,7 +433,7 @@ const notes = [
 ];
 
 <Timeline.Root className="block w-full max-w-xl" duration={8} snapStep={0.25}>
-  <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
+  <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
     <PianoRoll.Keys className="h-48 border-e">
       <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
         {(pitch) => <PianoRoll.Key className="inset-x-0 top-auto z-0 h-full cursor-pointer border-0 border-border border-b bg-background outline-none data-[color=black]:right-[35%] data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}

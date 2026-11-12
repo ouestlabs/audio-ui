@@ -54,6 +54,15 @@ description: "The <audio-ui-sequencer> custom element of @audio-ui/elements: its
   audio-ui-sequencer-cell[data-on] {
     background: var(--primary, oklch(0.205 0 0));
   }
+
+  audio-ui-sequencer[data-disabled],
+  audio-ui-sequencer[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-sequencer[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-sequencer aria-label="Pattern" default-value="x.x. ..x.">
@@ -90,7 +99,7 @@ description: "The <audio-ui-sequencer> custom element of @audio-ui/elements: its
 <CodeFile title="sequencer.html" open>
 
 ```html
-<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" default-value="x.x. ..x.">
+<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x.">
   <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>
@@ -178,6 +187,15 @@ audio-ui-sequencer-cell:focus-visible {
 audio-ui-sequencer-cell[data-on] {
   background: var(--primary, oklch(0.205 0 0));
 }
+
+audio-ui-sequencer[data-disabled],
+audio-ui-sequencer[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-sequencer[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -195,7 +213,7 @@ import "@audio-ui/elements/sequencer";
 </script>
 
 <template>
-  <audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" default-value="x.x. ..x." @change="(event) => console.log(event.detail.value)">
+  <audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." @change="(event) => console.log(event.detail.value)">
     <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
       <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0" />
       <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1" />
@@ -274,6 +292,15 @@ import "@audio-ui/elements/sequencer";
   audio-ui-sequencer-cell[data-on] {
     background: var(--primary, oklch(0.205 0 0));
   }
+
+  audio-ui-sequencer[data-disabled],
+  audio-ui-sequencer[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-sequencer[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -291,7 +318,7 @@ import "@audio-ui/elements/sequencer";
   import "@audio-ui/elements/sequencer";
 </script>
 
-<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" default-value="x.x. ..x." onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>
@@ -423,6 +450,15 @@ The parts, nested as they go in the markup.
   audio-ui-sequencer-cell[data-on] {
     background: var(--primary, oklch(0.205 0 0));
   }
+
+  audio-ui-sequencer[data-disabled],
+  audio-ui-sequencer[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-sequencer[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-sequencer aria-label="Pattern" default-value="x.x. ..x." disabled>
@@ -459,7 +495,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="sequencer.html" open>
 
 ```html
-<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" default-value="x.x. ..x." disabled>
+<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." disabled>
   <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>
@@ -547,6 +583,15 @@ audio-ui-sequencer-cell:focus-visible {
 audio-ui-sequencer-cell[data-on] {
   background: var(--primary, oklch(0.205 0 0));
 }
+
+audio-ui-sequencer[data-disabled],
+audio-ui-sequencer[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-sequencer[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -564,7 +609,7 @@ import "@audio-ui/elements/sequencer";
 </script>
 
 <template>
-  <audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" default-value="x.x. ..x." disabled @change="(event) => console.log(event.detail.value)">
+  <audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." disabled @change="(event) => console.log(event.detail.value)">
     <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
       <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0" />
       <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1" />
@@ -643,6 +688,15 @@ import "@audio-ui/elements/sequencer";
   audio-ui-sequencer-cell[data-on] {
     background: var(--primary, oklch(0.205 0 0));
   }
+
+  audio-ui-sequencer[data-disabled],
+  audio-ui-sequencer[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-sequencer[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -660,7 +714,7 @@ import "@audio-ui/elements/sequencer";
   import "@audio-ui/elements/sequencer";
 </script>
 
-<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" default-value="x.x. ..x." disabled onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-sequencer class="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" default-value="x.x. ..x." disabled onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-sequencer-row class="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index="0" aria-label="Kick">
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="0"></audio-ui-sequencer-cell>
     <audio-ui-sequencer-cell class="aspect-square rounded-sm bg-muted outline-none focus-visible:ring-2 focus-visible:ring-ring data-on:bg-primary" step="1"></audio-ui-sequencer-cell>

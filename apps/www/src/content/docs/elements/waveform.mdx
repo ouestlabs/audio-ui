@@ -88,6 +88,15 @@ description: "The <audio-ui-waveform> custom element of @audio-ui/elements: its 
     font-size: 10px;
     pointer-events: none;
   }
+
+  audio-ui-waveform[data-disabled],
+  audio-ui-waveform[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-waveform[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-waveform duration="96" value="30">
@@ -120,7 +129,7 @@ description: "The <audio-ui-waveform> custom element of @audio-ui/elements: its 
 <CodeFile title="waveform.html" open>
 
 ```html
-<audio-ui-waveform class="block w-full max-w-xl" duration="96" value="30">
+<audio-ui-waveform class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="96" value="30">
   <audio-ui-waveform-control class="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
     <audio-ui-waveform-canvas class="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]"></audio-ui-waveform-canvas>
     <audio-ui-waveform-playhead class="inset-y-0 w-0.5 bg-foreground"></audio-ui-waveform-playhead>
@@ -236,6 +245,15 @@ audio-ui-waveform-hover {
   font-size: 10px;
   pointer-events: none;
 }
+
+audio-ui-waveform[data-disabled],
+audio-ui-waveform[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-waveform[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -259,7 +277,7 @@ const peaks: number[] = [];
 </script>
 
 <template>
-  <audio-ui-waveform class="block w-full max-w-xl" duration="96" :peaks="peaks" v-model="position">
+  <audio-ui-waveform class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="96" :peaks="peaks" v-model="position">
     <audio-ui-waveform-control class="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
       <audio-ui-waveform-canvas class="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]" />
       <audio-ui-waveform-playhead class="inset-y-0 w-0.5 bg-foreground" />
@@ -361,6 +379,15 @@ const peaks: number[] = [];
     font-size: 10px;
     pointer-events: none;
   }
+
+  audio-ui-waveform[data-disabled],
+  audio-ui-waveform[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-waveform[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -383,7 +410,7 @@ const peaks: number[] = [];
   const peaks: number[] = [];
 </script>
 
-<audio-ui-waveform class="block w-full max-w-xl" duration="96" peaks={peaks} value={position} oninput={(event) => (position = event.detail.value)}>
+<audio-ui-waveform class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="96" peaks={peaks} value={position} oninput={(event) => (position = event.detail.value)}>
   <audio-ui-waveform-control class="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
     <audio-ui-waveform-canvas class="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]"></audio-ui-waveform-canvas>
     <audio-ui-waveform-playhead class="inset-y-0 w-0.5 bg-foreground"></audio-ui-waveform-playhead>
@@ -515,6 +542,15 @@ The parts, nested as they go in the markup.
     font-size: 10px;
     pointer-events: none;
   }
+
+  audio-ui-waveform[data-disabled],
+  audio-ui-waveform[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-waveform[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-waveform duration="240" value="90">
@@ -547,7 +583,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="waveform.html" open>
 
 ```html
-<audio-ui-waveform class="block w-full max-w-xl" duration="240" value="90">
+<audio-ui-waveform class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="240" value="90">
   <audio-ui-waveform-control class="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
     <audio-ui-waveform-canvas class="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]"></audio-ui-waveform-canvas>
     <audio-ui-waveform-playhead class="inset-y-0 w-0.5 bg-foreground"></audio-ui-waveform-playhead>
@@ -663,6 +699,15 @@ audio-ui-waveform-hover {
   font-size: 10px;
   pointer-events: none;
 }
+
+audio-ui-waveform[data-disabled],
+audio-ui-waveform[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-waveform[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -686,7 +731,7 @@ const peaks: number[] = [];
 </script>
 
 <template>
-  <audio-ui-waveform class="block w-full max-w-xl" duration="240" v-model="position">
+  <audio-ui-waveform class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="240" v-model="position">
     <audio-ui-waveform-control class="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
       <audio-ui-waveform-canvas class="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]" />
       <audio-ui-waveform-playhead class="inset-y-0 w-0.5 bg-foreground" />
@@ -788,6 +833,15 @@ const peaks: number[] = [];
     font-size: 10px;
     pointer-events: none;
   }
+
+  audio-ui-waveform[data-disabled],
+  audio-ui-waveform[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-waveform[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -810,7 +864,7 @@ const peaks: number[] = [];
   const peaks: number[] = [];
 </script>
 
-<audio-ui-waveform class="block w-full max-w-xl" duration="240" value={position} oninput={(event) => (position = event.detail.value)}>
+<audio-ui-waveform class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="240" value={position} oninput={(event) => (position = event.detail.value)}>
   <audio-ui-waveform-control class="relative block h-20 cursor-pointer rounded-md bg-muted" aria-label="Seek">
     <audio-ui-waveform-canvas class="absolute inset-0 text-muted-foreground [--waveform-progress-color:var(--primary)]"></audio-ui-waveform-canvas>
     <audio-ui-waveform-playhead class="inset-y-0 w-0.5 bg-foreground"></audio-ui-waveform-playhead>

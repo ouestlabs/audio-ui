@@ -92,6 +92,15 @@ import styles from "./fader.module.css";
 .thumb:active {
   cursor: grabbing;
 }
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 </CodeFile>
@@ -105,7 +114,7 @@ import styles from "./fader.module.css";
 ```tsx
 import { Fader } from "@audio-ui/react";
 
-<Fader.Root className="relative h-40" defaultValue={-6}>
+<Fader.Root className="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" defaultValue={-6}>
   <Fader.Control className="relative flex h-full w-auto touch-none select-none flex-col items-center">
     <Fader.Track className="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
       <Fader.Indicator className="absolute w-full select-none bg-primary" />
@@ -183,7 +192,7 @@ import styles from "./fader.module.css";
 ```tsx
 import { Fader } from "@audio-ui/react";
 
-<Fader.Root className="relative h-40" defaultValue={0} max={12} min={-12}>
+<Fader.Root className="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" defaultValue={0} max={12} min={-12}>
   <Fader.Control className="relative flex h-full w-auto touch-none select-none flex-col items-center">
     <Fader.Track className="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
       <Fader.Indicator className="absolute w-full select-none bg-primary" />
@@ -234,7 +243,7 @@ import styles from "./fader.module.css";
 ```tsx
 import { Fader } from "@audio-ui/react";
 
-<Fader.Root className="relative h-40" defaultValue={4} anchor={0} max={12} min={-12}>
+<Fader.Root className="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" defaultValue={4} anchor={0} max={12} min={-12}>
   <Fader.Control className="relative flex h-full w-auto touch-none select-none flex-col items-center">
     <Fader.Track className="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
       <Fader.Indicator className="absolute w-full select-none bg-primary" />

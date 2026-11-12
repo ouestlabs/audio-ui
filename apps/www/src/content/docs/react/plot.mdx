@@ -79,6 +79,15 @@ const [band, setBand] = useState({ x: 800, y: 6 });
   box-shadow: 0 0 0 4px color-mix(in oklab, var(--primary, oklch(0.205 0 0)) 20%, transparent);
   cursor: grab;
 }
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 </CodeFile>
@@ -99,7 +108,7 @@ const bell = (hz: number, { x, y }: { x: number; y: number }) =>
 // In the component: the curve follows the handle.
 const [band, setBand] = useState({ x: 800, y: 6 });
 
-<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted relative" minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
   <Plot.Grid className="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" x={{}} y={{}} />
   <Plot.Graph>
     <Plot.Curve className="text-primary/15 fill-current stroke-none" fn={(hz) => bell(hz, band)} fillTo={0} />
@@ -193,7 +202,7 @@ const bell = (hz: number, { x, y }: { x: number; y: number }) =>
 // In the component: the curve follows the handle.
 const [band, setBand] = useState({ x: 800, y: 6 });
 
-<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted relative" minX={20} maxX={20000} minY={-18} maxY={18} scaleX="linear">
+<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" minX={20} maxX={20000} minY={-18} maxY={18} scaleX="linear">
   <Plot.Grid className="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" x={{}} y={{}} />
   <Plot.Graph>
     <Plot.Curve className="text-primary/15 fill-current stroke-none" fn={(hz) => bell(hz, band)} fillTo={0} />
@@ -256,7 +265,7 @@ const bell = (hz: number, { x, y }: { x: number; y: number }) =>
 // In the component: the curve follows the handle.
 const [band, setBand] = useState({ x: 800, y: 6 });
 
-<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted relative" minX={20} maxX={20000} minY={-6} maxY={6} scaleX="log">
+<Plot.Root className="block h-44 w-full max-w-lg rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" minX={20} maxX={20000} minY={-6} maxY={6} scaleX="log">
   <Plot.Grid className="text-[10px] text-muted-foreground [&_[data-part=label][data-axis=x]]:bottom-1 [&_[data-part=label][data-axis=x]]:translate-x-1 [&_[data-part=label][data-axis=y]]:left-1 [&_[data-part=label][data-axis=y]]:-translate-y-full [&_[data-part=line]]:stroke-border" x={{}} y={{}} />
   <Plot.Graph>
     <Plot.Curve className="text-primary/15 fill-current stroke-none" fn={(hz) => bell(hz, band)} fillTo={0} />

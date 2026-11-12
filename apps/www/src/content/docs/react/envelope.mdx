@@ -96,6 +96,15 @@ const points = [
   display: none;
 }
 
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
+
 .graph {
   display: block;
   width: 100%;
@@ -123,7 +132,7 @@ const points = [
   { x: 1, y: 0 },
 ];
 
-<Envelope.Root className="block h-40 w-full max-w-md rounded-md bg-muted relative" aria-label="Amp envelope" defaultValue={points}>
+<Envelope.Root className="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" aria-label="Amp envelope" defaultValue={points}>
   <Envelope.Graph className="block size-full overflow-visible">
     <Envelope.Fill className="text-primary opacity-15 fill-current" />
     <Envelope.Line className="text-primary [stroke-width:2px] fill-none stroke-current [stroke-linejoin:round]" />
@@ -226,7 +235,7 @@ const points = [
   { x: 1, y: 0 },
 ];
 
-<Envelope.Root className="block h-40 w-full max-w-md rounded-md bg-muted relative" aria-label="Amp envelope" defaultValue={points} maxPoints={5}>
+<Envelope.Root className="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" aria-label="Amp envelope" defaultValue={points} maxPoints={5}>
   <Envelope.Graph className="block size-full overflow-visible">
     <Envelope.Fill className="text-primary opacity-15 fill-current" />
     <Envelope.Line className="text-primary [stroke-width:2px] fill-none stroke-current [stroke-linejoin:round]" />
@@ -301,7 +310,7 @@ const points = [
   { x: 1, y: 0 },
 ];
 
-<Envelope.Root className="block h-40 w-full max-w-md rounded-md bg-muted relative" aria-label="Amp envelope" defaultValue={points} step={0.1}>
+<Envelope.Root className="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed relative" aria-label="Amp envelope" defaultValue={points} step={0.1}>
   <Envelope.Graph className="block size-full overflow-visible">
     <Envelope.Fill className="text-primary opacity-15 fill-current" />
     <Envelope.Line className="text-primary [stroke-width:2px] fill-none stroke-current [stroke-linejoin:round]" />

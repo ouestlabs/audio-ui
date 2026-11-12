@@ -58,6 +58,15 @@ import styles from "./piano.module.css";
   border-color: var(--primary, oklch(0.205 0 0));
   background: var(--primary, oklch(0.205 0 0));
 }
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 </CodeFile>
@@ -71,7 +80,7 @@ import styles from "./piano.module.css";
 ```tsx
 import { Piano } from "@audio-ui/react";
 
-<Piano.Root className="relative block h-28 w-full max-w-lg" aria-label="Keys" minPitch={48} maxPitch={71}>
+<Piano.Root className="relative block h-28 w-full max-w-lg data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Keys" minPitch={48} maxPitch={71}>
   <Piano.Keys className="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary">
     {(pitch) => <Piano.Key className="top-0 z-0 h-full cursor-pointer rounded-b-[4px] border border-border bg-background outline-none data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
   </Piano.Keys>
@@ -141,7 +150,7 @@ import styles from "./piano.module.css";
 ```tsx
 import { Piano } from "@audio-ui/react";
 
-<Piano.Root className="relative block h-28 w-full max-w-lg" aria-label="Keys" minPitch={60} maxPitch={71}>
+<Piano.Root className="relative block h-28 w-full max-w-lg data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Keys" minPitch={60} maxPitch={71}>
   <Piano.Keys className="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary">
     {(pitch) => <Piano.Key className="top-0 z-0 h-full cursor-pointer rounded-b-[4px] border border-border bg-background outline-none data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
   </Piano.Keys>
@@ -186,7 +195,7 @@ import styles from "./piano.module.css";
 ```tsx
 import { Piano } from "@audio-ui/react";
 
-<Piano.Root className="relative block h-28 w-full max-w-lg" aria-label="Keys" minPitch={36} maxPitch={96}>
+<Piano.Root className="relative block h-28 w-full max-w-lg data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Keys" minPitch={36} maxPitch={96}>
   <Piano.Keys className="*:top-0 *:z-0 *:h-full *:cursor-pointer *:rounded-b-[4px] *:border *:border-border *:bg-background *:outline-none *:data-[color=black]:z-1 *:data-[color=black]:h-[62%] *:data-[color=black]:border-foreground *:data-[color=black]:bg-foreground *:data-active:border-primary *:data-active:bg-primary">
     {(pitch) => <Piano.Key className="top-0 z-0 h-full cursor-pointer rounded-b-[4px] border border-border bg-background outline-none data-[color=black]:z-1 data-[color=black]:h-[62%] data-[color=black]:border-foreground data-[color=black]:bg-foreground data-active:border-primary data-active:bg-primary" pitch={pitch} />}
   </Piano.Keys>

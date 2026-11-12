@@ -57,6 +57,15 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
     height: calc(var(--spacing, 0.25rem) * 0.5);
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-meter[data-disabled],
+  audio-ui-meter[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-meter[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-meter min="-60" max="6" value="-18 -10">
@@ -87,7 +96,7 @@ description: "The <audio-ui-meter> custom element of @audio-ui/elements: its att
 <CodeFile title="meter.html" open>
 
 ```html
-<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-60" max="6" value="-18 -10">
+<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-60" max="6" value="-18 -10">
   <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
     <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
     <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
@@ -171,6 +180,15 @@ audio-ui-meter-peak {
   height: calc(var(--spacing, 0.25rem) * 0.5);
   background: var(--foreground, oklch(0.145 0 0));
 }
+
+audio-ui-meter[data-disabled],
+audio-ui-meter[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-meter[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -191,7 +209,7 @@ const levels = ref("-18 -10");
 </script>
 
 <template>
-  <audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-60" max="6" :value="levels">
+  <audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-60" max="6" :value="levels">
     <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
       <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary" />
       <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground" />
@@ -267,6 +285,15 @@ const levels = ref("-18 -10");
     height: calc(var(--spacing, 0.25rem) * 0.5);
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-meter[data-disabled],
+  audio-ui-meter[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-meter[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -286,7 +313,7 @@ const levels = ref("-18 -10");
   let levels = $state("-18 -10");
 </script>
 
-<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-60" max="6" value={levels}>
+<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-60" max="6" value={levels}>
   <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
     <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
     <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
@@ -395,6 +422,15 @@ The parts, nested as they go in the markup.
     height: calc(var(--spacing, 0.25rem) * 0.5);
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-meter[data-disabled],
+  audio-ui-meter[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-meter[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-meter min="-24" max="0" value="-18 -10">
@@ -425,7 +461,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="meter.html" open>
 
 ```html
-<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-24" max="0" value="-18 -10">
+<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-24" max="0" value="-18 -10">
   <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
     <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
     <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>
@@ -509,6 +545,15 @@ audio-ui-meter-peak {
   height: calc(var(--spacing, 0.25rem) * 0.5);
   background: var(--foreground, oklch(0.145 0 0));
 }
+
+audio-ui-meter[data-disabled],
+audio-ui-meter[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-meter[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -529,7 +574,7 @@ const levels = ref("-18 -10");
 </script>
 
 <template>
-  <audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-24" max="0" :value="levels">
+  <audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-24" max="0" :value="levels">
     <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
       <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary" />
       <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground" />
@@ -605,6 +650,15 @@ const levels = ref("-18 -10");
     height: calc(var(--spacing, 0.25rem) * 0.5);
     background: var(--foreground, oklch(0.145 0 0));
   }
+
+  audio-ui-meter[data-disabled],
+  audio-ui-meter[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-meter[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -624,7 +678,7 @@ const levels = ref("-18 -10");
   let levels = $state("-18 -10");
 </script>
 
-<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min="-24" max="0" value={levels}>
+<audio-ui-meter class="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min="-24" max="0" value={levels}>
   <audio-ui-meter-channel class="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index="0" aria-label="Left">
     <audio-ui-meter-indicator class="absolute bottom-0 block bg-primary"></audio-ui-meter-indicator>
     <audio-ui-meter-peak class="absolute inset-x-0 block h-0.5 bg-foreground"></audio-ui-meter-peak>

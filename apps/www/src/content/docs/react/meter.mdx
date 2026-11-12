@@ -63,6 +63,15 @@ import styles from "./meter.module.css";
   height: calc(var(--spacing, 0.25rem) * 0.5);
   background: var(--foreground, oklch(0.145 0 0));
 }
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 </CodeFile>
@@ -76,7 +85,7 @@ import styles from "./meter.module.css";
 ```tsx
 import { Meter } from "@audio-ui/react";
 
-<Meter.Root className="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min={-60} max={6} value={[-18, -10]}>
+<Meter.Root className="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min={-60} max={6} value={[-18, -10]}>
   <Meter.Channels>
     {(index) => (
       <Meter.Channel className="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index={index} aria-label={index === 0 ? "Left" : "Right"}>
@@ -157,7 +166,7 @@ import styles from "./meter.module.css";
 ```tsx
 import { Meter } from "@audio-ui/react";
 
-<Meter.Root className="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))]" min={-24} max={0} value={[-18, -10]}>
+<Meter.Root className="flex h-44 gap-[calc(var(--spacing)*1.5*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" min={-24} max={0} value={[-18, -10]}>
   <Meter.Channels>
     {(index) => (
       <Meter.Channel className="relative block h-full w-3 overflow-hidden rounded-sm bg-muted" index={index} aria-label={index === 0 ? "Left" : "Right"}>

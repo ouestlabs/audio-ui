@@ -17,7 +17,7 @@ export interface ElementSkin {
   tailwind: Readonly<Record<string, string>>;
 }
 
-export const SKINS: Record<string, ElementSkin> = {
+const BASE_SKINS: Record<string, ElementSkin> = {
   envelope: {
     css: `audio-ui-envelope {
   display: block;
@@ -894,6 +894,42 @@ audio-ui-xypad-value {
     },
   },
 };
+
+/** The root's tag of an element, where the primitive's `disabled` shows. */
+const ROOT: Record<string, string> = { "piano-roll": "audio-ui-piano-roll" };
+
+/**
+ * Every skin dims a disabled root and says no with the cursor over all of
+ * it, its parts included: they each ask for their own cursor otherwise.
+ */
+function withDisabled(name: string, skin: ElementSkin): ElementSkin {
+  const root = ROOT[name] ?? `audio-ui-${name}`;
+  const classes = skin.tailwind[root] ?? "";
+  return {
+    css: `${skin.css}
+
+${root}[data-disabled],
+${root}[data-disabled] * {
+  cursor: not-allowed;
+}
+
+${root}[data-disabled] {
+  opacity: 0.5;
+}`,
+    tailwind: {
+      ...skin.tailwind,
+      [root]:
+        `${classes} data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed`.trim(),
+    },
+  };
+}
+
+export const SKINS: Record<string, ElementSkin> = Object.fromEntries(
+  Object.entries(BASE_SKINS).map(([name, skin]) => [
+    name,
+    withDisabled(name, skin),
+  ])
+);
 
 /** The theme variables an example's stylesheet reads, from the skins themselves. */
 const VARIABLE = /var\(--([a-z-]+)\)/g;

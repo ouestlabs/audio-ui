@@ -88,6 +88,15 @@ description: "The <audio-ui-fader> custom element of @audio-ui/elements: its att
   audio-ui-fader-thumb:active {
     cursor: grabbing;
   }
+
+  audio-ui-fader[data-disabled],
+  audio-ui-fader[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-fader[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-fader value="-6">
@@ -118,7 +127,7 @@ description: "The <audio-ui-fader> custom element of @audio-ui/elements: its att
 <CodeFile title="fader.html" open>
 
 ```html
-<audio-ui-fader class="relative h-40" value="-6">
+<audio-ui-fader class="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" value="-6">
   <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
     <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
       <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>
@@ -231,6 +240,15 @@ audio-ui-fader-thumb:active {
 audio-ui-fader-thumb:active {
   cursor: grabbing;
 }
+
+audio-ui-fader[data-disabled],
+audio-ui-fader[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-fader[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -251,7 +269,7 @@ const level = ref(-6);
 </script>
 
 <template>
-  <audio-ui-fader class="relative h-40" v-model="level">
+  <audio-ui-fader class="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" v-model="level">
     <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
       <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
         <audio-ui-fader-indicator class="absolute w-full select-none bg-primary" />
@@ -354,6 +372,15 @@ const level = ref(-6);
   audio-ui-fader-thumb:active {
     cursor: grabbing;
   }
+
+  audio-ui-fader[data-disabled],
+  audio-ui-fader[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-fader[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -373,7 +400,7 @@ const level = ref(-6);
   let level = $state(-6);
 </script>
 
-<audio-ui-fader class="relative h-40" value={level} oninput={(event) => (level = event.detail.value)}>
+<audio-ui-fader class="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" value={level} oninput={(event) => (level = event.detail.value)}>
   <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
     <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
       <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>
@@ -509,6 +536,15 @@ The parts, nested as they go in the markup.
   audio-ui-fader-thumb:active {
     cursor: grabbing;
   }
+
+  audio-ui-fader[data-disabled],
+  audio-ui-fader[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-fader[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-fader max="12" min="-12" value="0">
@@ -539,7 +575,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="fader.html" open>
 
 ```html
-<audio-ui-fader class="relative h-40" max="12" min="-12" value="0">
+<audio-ui-fader class="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" max="12" min="-12" value="0">
   <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
     <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
       <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>
@@ -652,6 +688,15 @@ audio-ui-fader-thumb:active {
 audio-ui-fader-thumb:active {
   cursor: grabbing;
 }
+
+audio-ui-fader[data-disabled],
+audio-ui-fader[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-fader[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -672,7 +717,7 @@ const level = ref(0);
 </script>
 
 <template>
-  <audio-ui-fader class="relative h-40" max="12" min="-12" v-model="level">
+  <audio-ui-fader class="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" max="12" min="-12" v-model="level">
     <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
       <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
         <audio-ui-fader-indicator class="absolute w-full select-none bg-primary" />
@@ -775,6 +820,15 @@ const level = ref(0);
   audio-ui-fader-thumb:active {
     cursor: grabbing;
   }
+
+  audio-ui-fader[data-disabled],
+  audio-ui-fader[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-fader[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -794,7 +848,7 @@ const level = ref(0);
   let level = $state(0);
 </script>
 
-<audio-ui-fader class="relative h-40" max="12" min="-12" value={level} oninput={(event) => (level = event.detail.value)}>
+<audio-ui-fader class="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" max="12" min="-12" value={level} oninput={(event) => (level = event.detail.value)}>
   <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
     <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
       <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>
@@ -905,6 +959,15 @@ In React, the same control is the [Fader](/docs/react/fader) primitive of `@audi
   audio-ui-fader-thumb:active {
     cursor: grabbing;
   }
+
+  audio-ui-fader[data-disabled],
+  audio-ui-fader[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-fader[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-fader anchor="0" max="12" min="-12" value="4">
@@ -935,7 +998,7 @@ In React, the same control is the [Fader](/docs/react/fader) primitive of `@audi
 <CodeFile title="fader.html" open>
 
 ```html
-<audio-ui-fader class="relative h-40" anchor="0" max="12" min="-12" value="4">
+<audio-ui-fader class="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" anchor="0" max="12" min="-12" value="4">
   <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
     <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
       <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>
@@ -1048,6 +1111,15 @@ audio-ui-fader-thumb:active {
 audio-ui-fader-thumb:active {
   cursor: grabbing;
 }
+
+audio-ui-fader[data-disabled],
+audio-ui-fader[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-fader[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -1068,7 +1140,7 @@ const level = ref(4);
 </script>
 
 <template>
-  <audio-ui-fader class="relative h-40" anchor="0" max="12" min="-12" v-model="level">
+  <audio-ui-fader class="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" anchor="0" max="12" min="-12" v-model="level">
     <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
       <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
         <audio-ui-fader-indicator class="absolute w-full select-none bg-primary" />
@@ -1171,6 +1243,15 @@ const level = ref(4);
   audio-ui-fader-thumb:active {
     cursor: grabbing;
   }
+
+  audio-ui-fader[data-disabled],
+  audio-ui-fader[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-fader[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -1190,7 +1271,7 @@ const level = ref(4);
   let level = $state(4);
 </script>
 
-<audio-ui-fader class="relative h-40" anchor="0" max="12" min="-12" value={level} oninput={(event) => (level = event.detail.value)}>
+<audio-ui-fader class="relative h-40 data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" anchor="0" max="12" min="-12" value={level} oninput={(event) => (level = event.detail.value)}>
   <audio-ui-fader-control class="relative flex h-full w-auto touch-none select-none flex-col items-center">
     <audio-ui-fader-track class="relative w-2 grow cursor-pointer select-none overflow-hidden rounded-full bg-input/90">
       <audio-ui-fader-indicator class="absolute w-full select-none bg-primary"></audio-ui-fader-indicator>

@@ -74,6 +74,15 @@ description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its 
   audio-ui-envelope-segment[data-flat] {
     display: none;
   }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0">
@@ -104,7 +113,7 @@ description: "The <audio-ui-envelope> custom element of @audio-ui/elements: its 
 <CodeFile title="envelope.html" open>
 
 ```html
-<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0">
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0">
   <audio-ui-envelope-graph>
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
@@ -200,6 +209,15 @@ audio-ui-envelope-segment {
 audio-ui-envelope-segment[data-flat] {
   display: none;
 }
+
+audio-ui-envelope[data-disabled],
+audio-ui-envelope[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-envelope[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -217,7 +235,7 @@ import "@audio-ui/elements/envelope";
 </script>
 
 <template>
-  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" @change="(event) => console.log(event.detail.value)">
     <audio-ui-envelope-graph>
       <audio-ui-envelope-fill class="text-primary opacity-15" />
       <audio-ui-envelope-line class="text-primary [stroke-width:2px]" />
@@ -304,6 +322,15 @@ import "@audio-ui/elements/envelope";
   audio-ui-envelope-segment[data-flat] {
     display: none;
   }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -321,7 +348,7 @@ import "@audio-ui/elements/envelope";
   import "@audio-ui/elements/envelope";
 </script>
 
-<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-envelope-graph>
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
@@ -443,6 +470,15 @@ The parts, nested as they go in the markup.
   audio-ui-envelope-segment[data-flat] {
     display: none;
   }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5">
@@ -473,7 +509,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="envelope.html" open>
 
 ```html
-<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5">
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5">
   <audio-ui-envelope-graph>
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
@@ -569,6 +605,15 @@ audio-ui-envelope-segment {
 audio-ui-envelope-segment[data-flat] {
   display: none;
 }
+
+audio-ui-envelope[data-disabled],
+audio-ui-envelope[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-envelope[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -586,7 +631,7 @@ import "@audio-ui/elements/envelope";
 </script>
 
 <template>
-  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5" @change="(event) => console.log(event.detail.value)">
     <audio-ui-envelope-graph>
       <audio-ui-envelope-fill class="text-primary opacity-15" />
       <audio-ui-envelope-line class="text-primary [stroke-width:2px]" />
@@ -673,6 +718,15 @@ import "@audio-ui/elements/envelope";
   audio-ui-envelope-segment[data-flat] {
     display: none;
   }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -690,7 +744,7 @@ import "@audio-ui/elements/envelope";
   import "@audio-ui/elements/envelope";
 </script>
 
-<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" max-points="5" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-envelope-graph>
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
@@ -787,6 +841,15 @@ In React, the same control is the [Envelope](/docs/react/envelope) primitive of 
   audio-ui-envelope-segment[data-flat] {
     display: none;
   }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
 </style>
 
 <audio-ui-envelope aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1">
@@ -817,7 +880,7 @@ In React, the same control is the [Envelope](/docs/react/envelope) primitive of 
 <CodeFile title="envelope.html" open>
 
 ```html
-<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1">
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1">
   <audio-ui-envelope-graph>
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>
@@ -913,6 +976,15 @@ audio-ui-envelope-segment {
 audio-ui-envelope-segment[data-flat] {
   display: none;
 }
+
+audio-ui-envelope[data-disabled],
+audio-ui-envelope[data-disabled] * {
+  cursor: not-allowed;
+}
+
+audio-ui-envelope[data-disabled] {
+  opacity: 0.5;
+}
 </style>
 ```
 
@@ -930,7 +1002,7 @@ import "@audio-ui/elements/envelope";
 </script>
 
 <template>
-  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1" @change="(event) => console.log(event.detail.value)">
     <audio-ui-envelope-graph>
       <audio-ui-envelope-fill class="text-primary opacity-15" />
       <audio-ui-envelope-line class="text-primary [stroke-width:2px]" />
@@ -1017,6 +1089,15 @@ import "@audio-ui/elements/envelope";
   audio-ui-envelope-segment[data-flat] {
     display: none;
   }
+
+  audio-ui-envelope[data-disabled],
+  audio-ui-envelope[data-disabled] * {
+    cursor: not-allowed;
+  }
+
+  audio-ui-envelope[data-disabled] {
+    opacity: 0.5;
+  }
 }
 </style>
 ```
@@ -1034,7 +1115,7 @@ import "@audio-ui/elements/envelope";
   import "@audio-ui/elements/envelope";
 </script>
 
-<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-envelope class="block h-40 w-full max-w-md rounded-md bg-muted data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Amp envelope" default-value="0 0, 0.12 1, 0.35 0.6 0.4, 0.75 0.6, 1 0" step="0.1" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-envelope-graph>
     <audio-ui-envelope-fill class="text-primary opacity-15"></audio-ui-envelope-fill>
     <audio-ui-envelope-line class="text-primary [stroke-width:2px]"></audio-ui-envelope-line>

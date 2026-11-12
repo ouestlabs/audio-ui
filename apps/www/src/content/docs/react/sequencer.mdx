@@ -66,6 +66,15 @@ const pattern = [
 .cell[data-on] {
   background: var(--primary, oklch(0.205 0 0));
 }
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 </CodeFile>
@@ -84,7 +93,7 @@ const pattern = [
   [false, false, true, false, false, false, true, false],
 ];
 
-<Sequencer.Root className="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" defaultValue={pattern}>
+<Sequencer.Root className="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" defaultValue={pattern}>
   <Sequencer.Rows>
     {(row) => (
       <Sequencer.Row className="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index={row}>
@@ -178,7 +187,7 @@ const pattern = [
   [false, false, true, false, false, false, true, false],
 ];
 
-<Sequencer.Root className="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))]" aria-label="Pattern" defaultValue={pattern} disabled={true}>
+<Sequencer.Root className="grid w-full max-w-xl gap-[calc(var(--spacing)*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Pattern" defaultValue={pattern} disabled={true}>
   <Sequencer.Rows>
     {(row) => (
       <Sequencer.Row className="grid grid-flow-col auto-cols-fr gap-[calc(var(--spacing)*var(--density,1))]" index={row}>

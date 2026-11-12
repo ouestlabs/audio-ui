@@ -60,6 +60,15 @@ import styles from "./pad.module.css";
   background: var(--primary, oklch(0.205 0 0));
   color: var(--primary-foreground, oklch(0.985 0 0));
 }
+
+.root[data-disabled],
+.root[data-disabled] * {
+  cursor: not-allowed;
+}
+
+.root[data-disabled] {
+  opacity: 0.5;
+}
 ```
 
 </CodeFile>
@@ -73,7 +82,7 @@ import styles from "./pad.module.css";
 ```tsx
 import { Pad } from "@audio-ui/react";
 
-<Pad.Root className="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums">
+<Pad.Root className="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums">
   <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</Pad.Item>
   <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</Pad.Item>
   <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</Pad.Item>
@@ -139,7 +148,7 @@ import styles from "./pad.module.css";
 ```tsx
 import { Pad } from "@audio-ui/react";
 
-<Pad.Root className="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))]" aria-label="Drums" disabled={true}>
+<Pad.Root className="grid w-72 grid-cols-4 gap-[calc(var(--spacing)*2*var(--density,1))] data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" aria-label="Drums" disabled={true}>
   <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="kick">Kick</Pad.Item>
   <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="snare">Snare</Pad.Item>
   <Pad.Item className="flex aspect-square select-none items-center justify-center rounded-md bg-muted text-muted-foreground text-xs outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring data-active:bg-primary data-active:text-primary-foreground" value="hat">Hat</Pad.Item>
