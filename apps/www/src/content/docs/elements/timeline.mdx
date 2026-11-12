@@ -144,7 +144,7 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
   }
 </style>
 
-<audio-ui-timeline duration="32" snap-step="1">
+<audio-ui-timeline duration="32" snap-step="1" max-zoom="80">
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track>
@@ -178,7 +178,7 @@ description: "The <audio-ui-timeline> custom element of @audio-ui/elements: its 
 <CodeFile title="timeline.html" open>
 
 ```html
-<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1">
+<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" max-zoom="80">
   <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
@@ -221,7 +221,7 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <template>
-  <audio-ui-timeline duration="32" snap-step="1" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-timeline duration="32" snap-step="1" max-zoom="80" @change="(event) => console.log(event.detail.value)">
     <audio-ui-timeline-viewport>
       <audio-ui-timeline-ruler aria-label="Position" />
       <audio-ui-timeline-track>
@@ -371,7 +371,7 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <template>
-  <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" max-zoom="80" @change="(event) => console.log(event.detail.value)">
     <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
       <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
       <audio-ui-timeline-track class="h-14 border-t">
@@ -405,7 +405,7 @@ import "@audio-ui/elements/timeline";
   import "@audio-ui/elements/timeline";
 </script>
 
-<audio-ui-timeline duration="32" snap-step="1" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-timeline duration="32" snap-step="1" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track>
@@ -555,7 +555,7 @@ import "@audio-ui/elements/timeline";
   import "@audio-ui/elements/timeline";
 </script>
 
-<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="1" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
@@ -759,7 +759,7 @@ The parts, nested as they go in the markup.
   }
 </style>
 
-<audio-ui-timeline duration="64" snap-step="1">
+<audio-ui-timeline duration="64" snap-step="1" max-zoom="80">
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track>
@@ -793,7 +793,7 @@ The parts, nested as they go in the markup.
 <CodeFile title="timeline.html" open>
 
 ```html
-<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1">
+<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" max-zoom="80">
   <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
@@ -836,7 +836,7 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <template>
-  <audio-ui-timeline duration="64" snap-step="1" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-timeline duration="64" snap-step="1" max-zoom="80" @change="(event) => console.log(event.detail.value)">
     <audio-ui-timeline-viewport>
       <audio-ui-timeline-ruler aria-label="Position" />
       <audio-ui-timeline-track>
@@ -986,7 +986,7 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <template>
-  <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" max-zoom="80" @change="(event) => console.log(event.detail.value)">
     <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
       <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
       <audio-ui-timeline-track class="h-14 border-t">
@@ -1020,7 +1020,7 @@ import "@audio-ui/elements/timeline";
   import "@audio-ui/elements/timeline";
 </script>
 
-<audio-ui-timeline duration="64" snap-step="1" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-timeline duration="64" snap-step="1" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track>
@@ -1170,7 +1170,7 @@ import "@audio-ui/elements/timeline";
   import "@audio-ui/elements/timeline";
 </script>
 
-<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="64" snap-step="1" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
@@ -1343,7 +1343,7 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
   }
 </style>
 
-<audio-ui-timeline duration="32" snap-step="4">
+<audio-ui-timeline duration="32" snap-step="4" max-zoom="80">
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track>
@@ -1377,7 +1377,7 @@ In React, the same control is the [Timeline](/docs/react/timeline) primitive of 
 <CodeFile title="timeline.html" open>
 
 ```html
-<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4">
+<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" max-zoom="80">
   <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">
@@ -1420,7 +1420,7 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <template>
-  <audio-ui-timeline duration="32" snap-step="4" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-timeline duration="32" snap-step="4" max-zoom="80" @change="(event) => console.log(event.detail.value)">
     <audio-ui-timeline-viewport>
       <audio-ui-timeline-ruler aria-label="Position" />
       <audio-ui-timeline-track>
@@ -1570,7 +1570,7 @@ import "@audio-ui/elements/timeline";
 </script>
 
 <template>
-  <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" @change="(event) => console.log(event.detail.value)">
+  <audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" max-zoom="80" @change="(event) => console.log(event.detail.value)">
     <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
       <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position" />
       <audio-ui-timeline-track class="h-14 border-t">
@@ -1604,7 +1604,7 @@ import "@audio-ui/elements/timeline";
   import "@audio-ui/elements/timeline";
 </script>
 
-<audio-ui-timeline duration="32" snap-step="4" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-timeline duration="32" snap-step="4" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-timeline-viewport>
     <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track>
@@ -1754,7 +1754,7 @@ import "@audio-ui/elements/timeline";
   import "@audio-ui/elements/timeline";
 </script>
 
-<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" onchange={(event) => console.log(event.detail.value)}>
+<audio-ui-timeline class="block w-full max-w-xl data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" duration="32" snap-step="4" max-zoom="80" onchange={(event) => console.log(event.detail.value)}>
   <audio-ui-timeline-viewport class="rounded-md border [scrollbar-width:none]">
     <audio-ui-timeline-ruler class="ms-20 h-6 cursor-pointer bg-muted" aria-label="Position"></audio-ui-timeline-ruler>
     <audio-ui-timeline-track class="h-14 border-t">

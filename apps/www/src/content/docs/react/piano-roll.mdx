@@ -21,7 +21,7 @@ const notes = [
   { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
 ];
 
-<Timeline.Root className={styles.timelineRoot} duration={8} snapStep={0.5}>
+<Timeline.Root className={styles.timelineRoot} duration={8} snapStep={0.5} maxZoom={300}>
   <PianoRoll.Root className={styles.root} minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
     <PianoRoll.Keys className={styles.keys}>
       <PianoRoll.Rows>
@@ -184,7 +184,7 @@ const notes = [
   { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
 ];
 
-<Timeline.Root className="block w-full max-w-xl" duration={8} snapStep={0.5}>
+<Timeline.Root className="block w-full max-w-xl" duration={8} snapStep={0.5} maxZoom={300}>
   <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
     <PianoRoll.Keys className="h-48 border-e">
       <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
@@ -288,7 +288,7 @@ const notes = [
   { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
 ];
 
-<Timeline.Root className={styles.timelineRoot} duration={16} snapStep={0.5}>
+<Timeline.Root className={styles.timelineRoot} duration={16} snapStep={0.5} maxZoom={300}>
   <PianoRoll.Root className={styles.root} minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
     <PianoRoll.Keys className={styles.keys}>
       <PianoRoll.Rows>
@@ -333,7 +333,7 @@ const notes = [
   { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
 ];
 
-<Timeline.Root className="block w-full max-w-xl" duration={16} snapStep={0.5}>
+<Timeline.Root className="block w-full max-w-xl" duration={16} snapStep={0.5} maxZoom={300}>
   <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
     <PianoRoll.Keys className="h-48 border-e">
       <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">
@@ -387,7 +387,7 @@ const notes = [
   { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
 ];
 
-<Timeline.Root className={styles.timelineRoot} duration={8} snapStep={0.25}>
+<Timeline.Root className={styles.timelineRoot} duration={8} snapStep={0.25} maxZoom={300}>
   <PianoRoll.Root className={styles.root} minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
     <PianoRoll.Keys className={styles.keys}>
       <PianoRoll.Rows>
@@ -432,7 +432,7 @@ const notes = [
   { id: "c", pitch: 67, start: 2, length: 1, velocity: 0.75 },
 ];
 
-<Timeline.Root className="block w-full max-w-xl" duration={8} snapStep={0.25}>
+<Timeline.Root className="block w-full max-w-xl" duration={8} snapStep={0.25} maxZoom={300}>
   <PianoRoll.Root className="grid grid-cols-[3rem_1fr] overflow-hidden rounded-md border data-disabled:opacity-50 data-disabled:cursor-not-allowed data-disabled:**:cursor-not-allowed" minPitch={57} maxPitch={74} defaultValue={notes} mode="draw">
     <PianoRoll.Keys className="h-48 border-e">
       <PianoRoll.Rows className="*:data-[color=black]:bg-muted/70 *:data-octave:border-b">

@@ -198,7 +198,7 @@ export const USAGES: Record<string, Usage> = {
       "</audio-ui-piano-roll>",
     ],
     react: "PianoRoll",
-    root: '<audio-ui-timeline duration="8" snap-step="0.5">',
+    root: '<audio-ui-timeline duration="8" snap-step="0.5" max-zoom="300">',
     target: "audio-ui-piano-roll",
   },
   plot: {
@@ -254,7 +254,7 @@ export const USAGES: Record<string, Usage> = {
       "</audio-ui-timeline-viewport>",
     ],
     react: "Timeline",
-    root: '<audio-ui-timeline duration="32" snap-step="1"%bind%>',
+    root: '<audio-ui-timeline duration="32" snap-step="1" max-zoom="80"%bind%>',
   },
   waveform: {
     entry: "waveform",

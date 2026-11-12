@@ -442,6 +442,7 @@ function Timeline({ rootAttributes }: { rootAttributes?: RootAttributes }) {
     <audio-ui-timeline
       className={part("audio-ui-timeline")}
       duration="32"
+      max-zoom="80"
       snap-step="1"
       {...rootAttributes}
     >
@@ -537,6 +538,7 @@ function PianoRoll({ rootAttributes }: { rootAttributes?: RootAttributes }) {
     <audio-ui-timeline
       className={part("audio-ui-timeline")}
       duration="8"
+      max-zoom="300"
       snap-step="0.5"
       {...rootAttributes}
     >
