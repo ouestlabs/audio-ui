@@ -2538,6 +2538,7 @@
     "usedBy": [
       "arrangement-editor",
       "arrangement-view",
+      "block-audio-editor",
       "block-timeline"
     ]
   },

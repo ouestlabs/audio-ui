@@ -13,9 +13,12 @@ import { createSource, type Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
 import {
   type ChangeEvent,
+  type KeyboardEvent,
+  type PointerEvent,
   type RefObject,
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -26,6 +29,14 @@ import {
   ButtonGroup,
   ButtonGroupText,
 } from "@/registry/bases/base/ui/button-group";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/registry/bases/base/ui/context-menu";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,6 +57,7 @@ import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device
 import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import { TimelineTimeSelection } from "@/registry-audio/bases/base/audio/elements/time-selection";
 import {
   Timeline,
   TimelineLane,
@@ -55,11 +67,20 @@ import {
   TimelineRuler,
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
+import { TimelineLocator } from "@/registry-audio/bases/base/audio/elements/timeline-markers";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
-import type { Arranged } from "@/registry-audio/bases/base/lib/arrangement";
+import type {
+  Arranged,
+  Clipping,
+  TimeSelection,
+} from "@/registry-audio/bases/base/lib/arrangement";
+import type {
+  ArrangementCommand,
+  ArrangementLocator,
+} from "@/registry-audio/bases/base/lib/arrangement-state";
 import type { RecordingSource } from "@/registry-audio/bases/base/lib/clip-player";
 import {
   DEMO_SOURCES,
@@ -123,6 +144,10 @@ const TAKE_SPAN_ROOM = 0.9;
 /** The main volume's range, in dB, as a mixer's fader has it. */
 const MIN_DB = -60;
 const MAX_DB = 6;
+/** The systems whose shortcuts take Command. */
+const APPLE = /Mac|iPhone|iPad/;
+/** How far the arrows move a locator, in seconds. */
+const LOCATOR_STEP = 0.1;
 const formatDb = (db: number) =>
   db <= MIN_DB ? "-∞ dB" : `${db > 0 ? "+" : ""}${db.toFixed(1)} dB`;
 
@@ -217,7 +242,8 @@ function rulerLabels(
   // Only those around what shows: zoomed to the samples, the whole sound would be tens of thousands.
   const first = Math.max(0, Math.floor(from / step) - 1);
   const last = Math.min(Math.floor(duration / step), Math.ceil(to / step) + 1);
-  const decimals = Math.max(0, Math.ceil(-Math.log10(step)));
+  // As many decimals as the step has itself: a quarter second reads 0:00.25, not 0:00.3.
+  const decimals = String(step).split(".")[1]?.length ?? 0;
   return Array.from({ length: Math.max(0, last - first + 1) }, (_, index) => {
     const at = Number(((first + index) * step).toFixed(6));
     return { at, text: formatMark(at, decimals) };
@@ -443,63 +469,285 @@ function useWidth(ref: RefObject<HTMLElement | null>) {
   return width;
 }
 
+/** Whether a key went to a field you type in, where its keys are its own. */
+function typing(target: EventTarget | null) {
+  return (
+    (target instanceof HTMLInputElement && target.type !== "range") ||
+    target instanceof HTMLTextAreaElement ||
+    (target instanceof HTMLElement && target.isContentEditable)
+  );
+}
+
+/** Taking the time from `from` to `to` out, the time after it moving in: nothing when it is empty. */
+const removing = (from: number, to: number): ArrangementCommand[] =>
+  to > from ? [{ from, to, type: "remove-time" }] : [];
+
 /**
- * The sound's lane: the waveform on a timeline, fitted to the width, zoomed
- * with Cmd or Ctrl + wheel down to the samples, the ruler seeking and the
- * navigator moving the view, which turns the page as the playhead leaves it.
- * While a take records, the lane is the take's, drawn as it comes in a view
- * that fits it; while a file is dragged over the editor, it shows where it
- * lands.
+ * The edits of the sound, as an audio editor makes them, each one step of
+ * undo: on the time selected, Cut and Copy; Paste makes room for what it lays
+ * down, over the selection if there is one; Delete and Crop close the gap they
+ * leave; Mark puts a locator at the selection's start, or at the cursor. The
+ * arrangement's length and loop follow the sound's. `handleKey` is the
+ * keyboard of all of them, with Undo and Redo.
  */
-function ClipLane({
-  dropping,
-  onSeek,
+function useClipEdits({
+  arrangement,
+  position,
+}: {
+  arrangement: ReturnType<typeof useArrangement>;
+  position: ReturnType<typeof createSource<number>>;
+}) {
+  const { copyOf, dispatch, doc } = arrangement;
+  const [time, setTime] = useState<TimeSelection | null>(null);
+  const [clipboard, setClipboard] = useState<Clipping | null>(null);
+  const length = doc.duration;
+
+  /** One step of undo: the edit, then the arrangement's length and loop set to the sound's new length. */
+  const commit = useCallback(
+    (commands: ArrangementCommand[], next: number) =>
+      dispatch({
+        commands: [
+          ...commands,
+          { duration: next, type: "set-duration" },
+          { loop: { range: [0, next] }, type: "set-loop" },
+        ],
+        type: "batch",
+      }),
+    [dispatch]
+  );
+  const remove = useCallback(() => {
+    if (!time) {
+      return;
+    }
+    const [from, to] = time.range;
+    commit(removing(from, to), length - (to - from));
+    setTime(null);
+    position.set(from);
+  }, [commit, length, position, time]);
+  const copy = useCallback(() => {
+    if (time) {
+      setClipboard(copyOf(time));
+    }
+  }, [copyOf, time]);
+  const cut = useCallback(() => {
+    if (time) {
+      setClipboard(copyOf(time));
+      remove();
+    }
+  }, [copyOf, remove, time]);
+  const paste = useCallback(() => {
+    if (!clipboard) {
+      return;
+    }
+    const at = time ? time.range[0] : Math.min(position.getSnapshot(), length);
+    const over = time ? time.range[1] - time.range[0] : 0;
+    commit(
+      [
+        ...(time ? removing(time.range[0], time.range[1]) : []),
+        { at, length: clipboard.length, type: "insert-time" },
+        { at, clipping: clipboard, track: TRACK, type: "paste" },
+      ],
+      length - over + clipboard.length
+    );
+    setTime({ range: [at, at + clipboard.length], tracks: [TRACK] });
+  }, [clipboard, commit, length, position, time]);
+  const crop = useCallback(() => {
+    if (!time) {
+      return;
+    }
+    const [from, to] = time.range;
+    commit([...removing(to, length), ...removing(0, from)], to - from);
+    setTime({ range: [0, to - from], tracks: [TRACK] });
+    position.set(0);
+  }, [commit, length, position, time]);
+  const mark = useCallback(
+    () =>
+      dispatch({
+        at: time ? time.range[0] : position.getSnapshot(),
+        type: "add-locator",
+      }),
+    [dispatch, position, time]
+  );
+  const selectAll = useCallback(
+    () => setTime({ range: [0, length], tracks: [TRACK] }),
+    [length]
+  );
+  const clear = useCallback(() => setTime(null), []);
+  const undo = useCallback(() => dispatch({ type: "undo" }), [dispatch]);
+  const redo = useCallback(() => dispatch({ type: "redo" }), [dispatch]);
+
+  const handleKey = useCallback(
+    (event: KeyboardEvent<HTMLElement>) => {
+      if (typing(event.target)) {
+        return;
+      }
+      const withMod: Record<string, (() => void) | undefined> = {
+        a: selectAll,
+        c: copy,
+        v: paste,
+        x: cut,
+        y: redo,
+        z: event.shiftKey ? redo : undo,
+      };
+      const alone: Record<string, (() => void) | undefined> = {
+        backspace: remove,
+        delete: remove,
+        escape: clear,
+        k: crop,
+        m: mark,
+      };
+      const command = (event.metaKey || event.ctrlKey ? withMod : alone)[
+        event.key.toLowerCase()
+      ];
+      if (command) {
+        event.preventDefault();
+        command();
+      }
+    },
+    [clear, copy, crop, cut, mark, paste, redo, remove, selectAll, undo]
+  );
+
+  return {
+    clear,
+    clipboard,
+    copy,
+    crop,
+    cut,
+    handleKey,
+    mark,
+    paste,
+    redo,
+    remove,
+    selectAll,
+    setTime,
+    time,
+    undo,
+  };
+}
+
+/** The key that goes with the others on this system: Command on Apple's, Control elsewhere. */
+const modKey = () => (APPLE.test(navigator.userAgent) ? "⌘" : "Ctrl+");
+
+/** The waveform's menu: the edits, each with its key. It renders only while open, so it reads the system then. */
+function EditMenu({ edits }: { edits: ReturnType<typeof useClipEdits> }) {
+  const mod = modKey();
+  const selected = edits.time !== null;
+  return (
+    <ContextMenuContent className="w-52">
+      <ContextMenuItem disabled={!selected} onClick={edits.cut}>
+        Cut
+        <ContextMenuShortcut>{mod}X</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem disabled={!selected} onClick={edits.copy}>
+        Copy
+        <ContextMenuShortcut>{mod}C</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem disabled={!edits.clipboard} onClick={edits.paste}>
+        Paste
+        <ContextMenuShortcut>{mod}V</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem disabled={!selected} onClick={edits.remove}>
+        Delete
+        <ContextMenuShortcut>⌫</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem disabled={!selected} onClick={edits.crop}>
+        Crop
+        <ContextMenuShortcut>K</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuSeparator />
+      <ContextMenuItem onClick={edits.mark}>
+        Mark
+        <ContextMenuShortcut>M</ContextMenuShortcut>
+      </ContextMenuItem>
+      <ContextMenuItem onClick={edits.selectAll}>
+        Select all
+        <ContextMenuShortcut>{mod}A</ContextMenuShortcut>
+      </ContextMenuItem>
+    </ContextMenuContent>
+  );
+}
+
+/** What a locator's own gestures ask of the arrangement and the transport. */
+interface LocatorActions {
+  onJump: (at: number) => void;
+  onMove: (id: string, to: number) => void;
+  onPlay: (at: number) => void;
+  onRemove: (id: string) => void;
+  onRename: (id: string, name: string) => void;
+}
+
+/**
+ * The lane's zoom, in px per second: fitted to the width at least, as far in
+ * as the samples go, a few px apart, and as wide as a lane can be laid out; a
+ * take recording stays fitted to the view it records into.
+ */
+function laneZoom({
+  duration,
+  sound,
+  takeSpan,
+  width,
+  zoomPx,
+}: {
+  duration: number;
+  sound: Sound | null;
+  takeSpan: number | null;
+  width: number;
+  zoomPx: number | null;
+}) {
+  const shownDuration = takeSpan ?? duration;
+  const fitPx = width > 0 && shownDuration > 0 ? width / shownDuration : 0;
+  const rate =
+    sound && sound.duration > 0 ? sound.samples.frames / sound.duration : 0;
+  const deepest =
+    takeSpan === null && duration > 0
+      ? Math.min(rate * FRAME_PX, MOST_LANE_PX / duration)
+      : 0;
+  const zoom = takeSpan === null ? Math.max(zoomPx ?? fitPx, fitPx) : fitPx;
+  return {
+    fitPx,
+    maxZoom: Math.max(fitPx, deepest),
+    shownDuration,
+    zoom,
+    zoomed: fitPx > 0 && zoom > fitPx * 1.001,
+  };
+}
+
+/** Zoomed in, the view turns the page as the playhead leaves it, while it plays. */
+function useFollowPlayhead({
   playing,
   position,
-  sound,
-  take,
-  takeName,
+  px,
+  viewport,
+  zoomed,
 }: {
-  dropping: boolean;
-  onSeek: (seconds: number) => void;
   playing: boolean;
   position: Source<number>;
-  sound: Sound | null;
-  take: ReturnType<typeof useTake>;
-  takeName: string;
+  px: number;
+  viewport: RefObject<HTMLDivElement | null>;
+  zoomed: boolean;
 }) {
-  const { clock: takeClock, levels: takeLevels, recording } = take;
-  const lane = useRef<HTMLDivElement>(null);
-  const viewport = useRef<HTMLDivElement>(null);
-  const width = useWidth(lane);
-  // Pixels per second; null while the whole sound fits the width it is given, and back to null for each new sound.
-  const [zoomPx, setZoomPx] = useState<number | null>(null);
-  const [zoomedSound, setZoomedSound] = useState(sound);
-  if (zoomedSound !== sound) {
-    setZoomedSound(sound);
-    setZoomPx(null);
-  }
-  // While a take records, the view is the take's, in seconds; null otherwise.
-  const [takeSpan, setTakeSpan] = useState<number | null>(null);
-  const soundDuration = sound?.duration ?? 0;
-  const shownDuration = takeSpan ?? soundDuration;
-  const fitPx = width > 0 && shownDuration > 0 ? width / shownDuration : 0;
-  // As far in as the samples go, a few px apart, as wide as a lane can be laid out; a take recording stays fitted.
-  const maxZoom = Math.max(
-    fitPx,
-    sound && soundDuration > 0 && takeSpan === null
-      ? Math.min(sound.samples.frames * FRAME_PX, MOST_LANE_PX) / soundDuration
-      : 0
-  );
-  const zoom = takeSpan === null ? Math.max(zoomPx ?? fitPx, fitPx) : fitPx;
-  const view = useRef<{ px: number; zoomed: boolean }>({
-    px: 0,
-    zoomed: false,
-  });
-  view.current = { px: zoom, zoomed: fitPx > 0 && zoom > fitPx * 1.001 };
-  const changeZoom = useCallback((next: number) => setZoomPx(next), []);
+  const view = useRef({ px, zoomed });
+  view.current = { px, zoomed };
+  useEffect(() => {
+    if (!playing) {
+      return;
+    }
+    return position.subscribe(() => {
+      if (view.current.zoomed) {
+        followPlayhead(
+          viewport.current,
+          position.getSnapshot() * view.current.px
+        );
+      }
+    });
+  }, [playing, position, viewport]);
+}
 
-  // The stretch that shows, in seconds, for the ruler to mark only that.
+/** The stretch of the timeline that shows, in seconds, read as the view scrolls: what the ruler marks. */
+function useShownStretch(
+  viewport: RefObject<HTMLDivElement | null>,
+  zoom: number
+) {
   const [shown, setShown] = useState<readonly [number, number]>([0, 0]);
   useEffect(() => {
     const element = viewport.current;
@@ -523,38 +771,173 @@ function ClipLane({
       cancelAnimationFrame(pending);
       element.removeEventListener("scroll", onScroll);
     };
-  }, [zoom]);
+  }, [viewport, zoom]);
+  return shown;
+}
 
-  // Zoomed in, the view turns the page as the playhead leaves it.
-  useEffect(() => {
-    if (!playing) {
-      return;
-    }
-    return position.subscribe(() => {
-      if (view.current.zoomed) {
-        followPlayhead(
-          viewport.current,
-          position.getSnapshot() * view.current.px
-        );
-      }
-    });
-  }, [playing, position]);
-
-  // While a take records, the view fits it: MIN_TAKE_SPAN to start, doubled as the take nears its end.
+/** While a take records, the view it records into, in seconds: MIN_TAKE_SPAN to start, doubled as the take nears its end; null otherwise. */
+function useTakeSpan(recording: boolean, clock: Source<number>) {
+  const [span, setSpan] = useState<number | null>(null);
   useEffect(() => {
     if (!recording) {
-      setTakeSpan(null);
+      setSpan(null);
       return;
     }
-    let span = MIN_TAKE_SPAN;
-    setTakeSpan(span);
-    return takeClock.subscribe(() => {
-      if (takeClock.getSnapshot() > span * TAKE_SPAN_ROOM) {
-        span *= 2;
-        setTakeSpan(span);
+    let current = MIN_TAKE_SPAN;
+    setSpan(current);
+    return clock.subscribe(() => {
+      if (clock.getSnapshot() > current * TAKE_SPAN_ROOM) {
+        current *= 2;
+        setSpan(current);
       }
     });
-  }, [recording, takeClock]);
+  }, [clock, recording]);
+  return span;
+}
+
+/** The track's clips on the lane, each drawing its part of the sound it plays, at the clip editor's detail. */
+function SoundClips({
+  clips,
+  hidden,
+  sounds,
+}: {
+  clips: readonly Arranged[];
+  /** While a take records over them: kept in place, unseen. */
+  hidden: boolean;
+  sounds: ReadonlyMap<string, Sound>;
+}) {
+  return clips.map((clip) => {
+    const sound = sounds.get(clip.recording ?? "");
+    return sound ? (
+      <div
+        // Presses go through to the lane, which seeks and selects: a clip here takes no gesture of its own.
+        className={cn(
+          "pointer-events-none absolute inset-y-0",
+          hidden && "invisible"
+        )}
+        key={clip.id}
+        style={{
+          left: `calc(var(--timeline-unit) * ${clip.value.start})`,
+          width: `calc(var(--timeline-unit) * ${clip.value.length})`,
+        }}
+      >
+        <ClipWaveform
+          aria-label={`${sound.name}, waveform`}
+          className="inset-y-0 h-full text-foreground"
+          clip={{
+            sourceLength: clip.sourceLength ?? sound.duration,
+            value: { length: clip.value.length, offset: clip.value.offset },
+          }}
+          peaks={sound.peaks}
+          role="img"
+          samples={sound.samples}
+        />
+      </div>
+    ) : null;
+  });
+}
+
+/** The locators, on a strip of their own over the sound, once there is one: Mark puts them there. */
+function LocatorLane({
+  actions,
+  locators,
+}: {
+  actions: LocatorActions;
+  locators: readonly ArrangementLocator[];
+}) {
+  return locators.length > 0 ? (
+    <TimelineLane aria-label="Locators" className="h-6 border-b">
+      {locators.map((locator) => (
+        <TimelineLocator
+          key={locator.id}
+          locator={locator}
+          step={LOCATOR_STEP}
+          {...actions}
+        />
+      ))}
+    </TimelineLane>
+  ) : null;
+}
+
+/**
+ * The sound's lane: the waveform on a timeline, fitted to the width, zoomed
+ * with Cmd or Ctrl + wheel down to the samples, the ruler seeking and the
+ * navigator moving the view, which turns the page as the playhead leaves it.
+ * While a take records, the lane is the take's, drawn as it comes in a view
+ * that fits it; while a file is dragged over the editor, it shows where it
+ * lands.
+ */
+function ClipLane({
+  clips,
+  dropping,
+  duration,
+  edits,
+  locatorActions,
+  locators,
+  onSeek,
+  playing,
+  position,
+  sounds,
+  take,
+  takeName,
+}: {
+  /** The track's clips: one for the sound, several once it is cut. */
+  clips: readonly Arranged[];
+  dropping: boolean;
+  /** How long the sound is, in seconds: the arrangement's length. */
+  duration: number;
+  edits: ReturnType<typeof useClipEdits>;
+  locatorActions: LocatorActions;
+  locators: readonly ArrangementLocator[];
+  onSeek: (seconds: number) => void;
+  playing: boolean;
+  position: Source<number>;
+  /** Every sound placed, by its recording's id: what each clip draws. */
+  sounds: ReadonlyMap<string, Sound>;
+  take: ReturnType<typeof useTake>;
+  takeName: string;
+}) {
+  const { clock: takeClock, levels: takeLevels, recording } = take;
+  const sound = sounds.get(clips[0]?.recording ?? "") ?? null;
+  const surface = useRef<HTMLDivElement>(null);
+  const lane = useRef<HTMLDivElement>(null);
+  const viewport = useRef<HTMLDivElement>(null);
+  const width = useWidth(lane);
+  // Pixels per second; null while the whole sound fits the width it is given, and back to null for each new sound.
+  const [zoomPx, setZoomPx] = useState<number | null>(null);
+  const [zoomedSound, setZoomedSound] = useState(sound);
+  if (zoomedSound !== sound) {
+    setZoomedSound(sound);
+    setZoomPx(null);
+  }
+  const takeSpan = useTakeSpan(recording, takeClock);
+  const { fitPx, maxZoom, shownDuration, zoom, zoomed } = laneZoom({
+    duration,
+    sound,
+    takeSpan,
+    width,
+    zoomPx,
+  });
+  const changeZoom = useCallback((next: number) => setZoomPx(next), []);
+  const shown = useShownStretch(viewport, zoom);
+  useFollowPlayhead({ playing, position, px: zoom, viewport, zoomed });
+
+  // A press on the lane lets go of the selection, and gives the lane the keys; a drag from there selects.
+  const { clear, setTime, time } = edits;
+  const press = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      if (event.button === 0) {
+        clear();
+      }
+      surface.current?.focus({ preventScroll: true });
+    },
+    [clear]
+  );
+  const select = useCallback(
+    (range: readonly [number, number]) =>
+      setTime({ range: [range[0], range[1]], tracks: [TRACK] }),
+    [setTime]
+  );
 
   return (
     <div className="px-4 py-4 sm:px-6">
@@ -569,55 +952,59 @@ function ClipLane({
           source={recording ? takeClock : position}
           zoom={fitPx > 0 ? zoom : undefined}
         >
-          <TimelineViewport
-            className="overflow-y-hidden rounded-lg border"
-            ref={viewport}
-            scrollbar="hidden"
-          >
-            <TimelineRuler aria-label="Time" getAriaValueText={formatTime}>
-              {rulerLabels(shownDuration, zoom, shown).map((mark) => (
-                <TimelineMark key={mark.at} value={mark.at}>
-                  {mark.text}
-                </TimelineMark>
-              ))}
-            </TimelineRuler>
-            {/* A press seeks; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
-            <TimelineLane className="h-28" seekable>
-              {/* A take recording draws itself as it comes, as the workstation draws one; then it is the sound. */}
-              {recording && takeLevels ? (
-                <ArrangedTake
-                  from={0}
-                  levels={takeLevels}
-                  name={takeName}
-                  position={takeClock}
-                />
-              ) : null}
-              <div
-                className={cn(
-                  "absolute inset-y-0 left-0",
-                  recording && "invisible"
-                )}
-                style={{
-                  width: `calc(var(--timeline-unit) * ${soundDuration || 1})`,
-                }}
+          {/* Right-click for the edits; pressed, it takes the keys they answer to. */}
+          <ContextMenu>
+            <ContextMenuTrigger
+              aria-label="Sound, waveform: drag to select, right-click to edit"
+              className="block rounded-lg outline-none focus-visible:ring-2 focus-visible:ring-ring/50"
+              onKeyDown={edits.handleKey}
+              ref={surface}
+              role="group"
+              tabIndex={0}
+            >
+              <TimelineViewport
+                className="overflow-y-hidden rounded-lg border"
+                ref={viewport}
+                scrollbar="hidden"
               >
-                {sound ? (
-                  <ClipWaveform
-                    aria-label={`${sound.name}, waveform`}
-                    className="inset-y-0 h-full text-foreground"
-                    clip={{
-                      sourceLength: soundDuration,
-                      value: { length: soundDuration, offset: 0 },
-                    }}
-                    peaks={sound.peaks}
-                    role="img"
-                    samples={sound.samples}
+                <TimelineRuler aria-label="Time" getAriaValueText={formatTime}>
+                  {rulerLabels(shownDuration, zoom, shown).map((mark) => (
+                    <TimelineMark key={mark.at} value={mark.at}>
+                      {mark.text}
+                    </TimelineMark>
+                  ))}
+                </TimelineRuler>
+                <LocatorLane actions={locatorActions} locators={locators} />
+                {/* A press seeks and a drag selects; the clip editor's waveform draws the peaks, then the samples, then a line through them with a dot each. */}
+                <TimelineLane
+                  className="h-28"
+                  onPointerDown={press}
+                  onSelectionChange={select}
+                  seekable
+                >
+                  {/* A take recording draws itself as it comes, as the workstation draws one; then it is the sound. */}
+                  {recording && takeLevels ? (
+                    <ArrangedTake
+                      from={0}
+                      levels={takeLevels}
+                      name={takeName}
+                      position={takeClock}
+                    />
+                  ) : null}
+                  <SoundClips
+                    clips={clips}
+                    hidden={recording}
+                    sounds={sounds}
                   />
-                ) : null}
-              </div>
-              <TimelinePlayhead />
-            </TimelineLane>
-          </TimelineViewport>
+                  {time && !recording ? (
+                    <TimelineTimeSelection range={time.range} />
+                  ) : null}
+                  <TimelinePlayhead />
+                </TimelineLane>
+              </TimelineViewport>
+            </ContextMenuTrigger>
+            <EditMenu edits={edits} />
+          </ContextMenu>
           <TimelineNavigator className="mt-2" getAriaValueText={formatTime} />
         </Timeline>
         <DropOverlay dropping={dropping} />
@@ -641,10 +1028,20 @@ export default function BlockAudioEditor() {
     tempo: demoTempo(DEMO),
   });
   const { dispatch, doc } = arrangement;
-  const [sound, setSound] = useState<Sound | null>(null);
+  // Every sound placed stays, by its recording's id, so an undo past a new sound brings the old one back whole.
+  const [sounds, setSounds] = useState<ReadonlyMap<string, Sound>>(
+    () => new Map()
+  );
   const [recordings, setRecordings] = useState<
     ReadonlyMap<string, RecordingSource>
   >(() => new Map());
+  const clips = useMemo(
+    () => doc.clips.filter((clip) => clip.track === TRACK),
+    [doc.clips]
+  );
+  const latestClips = useRef(clips);
+  latestClips.current = clips;
+  const sound = sounds.get(clips[0]?.recording ?? "") ?? null;
   const { meter, play, playing, position, stop } = useArrangementEngine({
     doc,
     metronome: NO_METRONOME,
@@ -652,6 +1049,8 @@ export default function BlockAudioEditor() {
     recordings,
   });
   const fileInput = useRef<HTMLInputElement>(null);
+  const edits = useClipEdits({ arrangement, position });
+  const { clear: clearSelection } = edits;
 
   // The engine keeps a recording by its id once it has it: each sound placed takes an id of its own.
   const placed = useRef(0);
@@ -660,11 +1059,15 @@ export default function BlockAudioEditor() {
     (decoded: RecordingSource, next: Sound) => {
       placed.current += 1;
       const id = `${RECORDING}-${placed.current}`;
-      setSound(next);
-      setRecordings(new Map([[id, decoded]]));
+      setSounds((current) => new Map(current).set(id, next));
+      setRecordings((current) => new Map(current).set(id, decoded));
+      clearSelection();
       dispatch({
         commands: [
-          { id: "loop", type: "remove-clip" },
+          ...latestClips.current.map((clip) => ({
+            id: clip.id,
+            type: "remove-clip" as const,
+          })),
           { clip: loopClip(id, next.duration), type: "add-clip" },
           { duration: next.duration, type: "set-duration" },
           {
@@ -675,7 +1078,7 @@ export default function BlockAudioEditor() {
         type: "batch",
       });
     },
-    [dispatch]
+    [clearSelection, dispatch]
   );
 
   /** Puts a demo sound on the track, at its own tempo, for a delay synced to it. */
@@ -761,6 +1164,17 @@ export default function BlockAudioEditor() {
     [dispatch]
   );
 
+  // A locator's own gestures: press to put the cursor there, double-click to play from there, drag, rename, delete.
+  const locatorActions = useMemo<LocatorActions>(
+    () => ({
+      onJump: (at) => position.set(at),
+      onMove: (id, to) => dispatch({ id, to, type: "move-locator" }),
+      onPlay: (at) => play(at),
+      onRemove: (id) => dispatch({ id, type: "remove-locator" }),
+      onRename: (id, name) => dispatch({ id, name, type: "rename-locator" }),
+    }),
+    [dispatch, play, position]
+  );
   const seek = useCallback(
     (value: number) => {
       if (playing) {
@@ -968,6 +1382,38 @@ export default function BlockAudioEditor() {
               </DropdownMenuContent>
             </DropdownMenu>
           </ButtonGroup>
+          <ButtonGroup>
+            <Toolbar.Button
+              aria-label="Undo"
+              disabled={!arrangement.canUndo}
+              onClick={edits.undo}
+              render={<Button size="icon" variant="outline" />}
+              title="Undo"
+            >
+              <IconPlaceholder
+                hugeicons="Undo02Icon"
+                lucide="Undo2Icon"
+                phosphor="ArrowUUpLeftIcon"
+                remixicon="RiArrowGoBackLine"
+                tabler="IconArrowBackUp"
+              />
+            </Toolbar.Button>
+            <Toolbar.Button
+              aria-label="Redo"
+              disabled={!arrangement.canRedo}
+              onClick={edits.redo}
+              render={<Button size="icon" variant="outline" />}
+              title="Redo"
+            >
+              <IconPlaceholder
+                hugeicons="Redo02Icon"
+                lucide="Redo2Icon"
+                phosphor="ArrowUUpRightIcon"
+                remixicon="RiArrowGoForwardLine"
+                tabler="IconArrowForwardUp"
+              />
+            </Toolbar.Button>
+          </ButtonGroup>
           {/* The output closes the bar, at its end: the level of what comes out, framed as the position is, and the main volume. */}
           <div className="ms-auto flex items-center gap-2">
             <ButtonGroup className="self-stretch">
@@ -1000,11 +1446,16 @@ export default function BlockAudioEditor() {
         </Transport>
       </div>
       <ClipLane
+        clips={clips}
         dropping={dropping}
+        duration={doc.duration}
+        edits={edits}
+        locatorActions={locatorActions}
+        locators={doc.locators}
         onSeek={seek}
         playing={playing}
         position={position}
-        sound={sound}
+        sounds={sounds}
         take={take}
         takeName={`Take ${takes.current + 1}`}
       />

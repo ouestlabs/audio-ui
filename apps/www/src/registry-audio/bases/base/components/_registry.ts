@@ -682,7 +682,7 @@ export const components: RegistryItem[] = [
   {
     categories: ["audio-editor"],
     description:
-      "An audio editor for one sound: a demo loop, a file uploaded or dropped on it, or a take from the microphone after a count-in, drawn live as it records. The transport plays, loops and records, the sound menu picks or uploads, the meter and the main volume close the bar; the waveform seeks and zooms down to the samples; under it the track's device chain, an equalizer and a compressor to start, with the library beside it to add any effect. It plays on the audio clock through the arrangement engine",
+      "An audio editor for one sound: a demo loop, a file uploaded or dropped on it, or a take from the microphone after a count-in, drawn live as it records. The transport plays, loops and records, the sound menu picks or uploads, Undo and Redo follow, the meter and the main volume close the bar; the waveform seeks, zooms down to the samples and selects, its menu cuts, copies, pastes, deletes, crops and marks with their shortcuts; under it the track's device chain, an equalizer and a compressor to start, with the library beside it to add any effect. It plays on the audio clock through the arrangement engine",
     files: [
       {
         path: "components/audio-editor/block-audio-editor.tsx",
@@ -690,7 +690,7 @@ export const components: RegistryItem[] = [
       },
     ],
     meta: {
-      hint: "Play, loop or record from the transport; pick a sound or upload one from its menu, or drop an audio file on the editor. Cmd/Ctrl + scroll zooms the waveform down to the samples; the ruler seeks. Add an effect from the library to the chain.",
+      hint: "Drag over the waveform to select, right-click it to edit: Cmd/Ctrl + X, C, V, Delete, K to crop, M to mark, Cmd/Ctrl + Z to undo. Pick a sound or upload one from its menu, or drop an audio file. Cmd/Ctrl + scroll zooms to the samples. Add an effect from the library to the chain.",
     },
     name: "block-audio-editor",
     dependencies: ["@audio-ui/engine", "@audio-ui/react"],
@@ -702,8 +702,10 @@ export const components: RegistryItem[] = [
       "@audio-ui/knob",
       "@audio-ui/meter",
       "@audio-ui/timeline",
+      "@audio-ui/timeline-markers",
       "@audio-ui/transport",
       "@audio-ui/use-arrangement",
+      "@audio-ui/use-time-selection",
       "@audio-ui/arrangement-engine",
       "@audio-ui/use-audio-levels",
       "@audio-ui/arrangement",
@@ -714,6 +716,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/web-audio",
       "@shadcn/button",
       "@shadcn/button-group",
+      "@shadcn/context-menu",
       "@shadcn/dropdown-menu",
     ],
     type: "registry:block",
