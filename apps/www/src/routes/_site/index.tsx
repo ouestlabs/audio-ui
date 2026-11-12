@@ -1,5 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
+import { useEffect } from "react";
+import {
+  setEditorExpanded,
+  useEditorExpanded,
+} from "@/components/site/home/editor-expanded";
 import type { HomeFigure } from "@/components/site/home/home-figures";
 import { HomeGuide } from "@/components/site/home/home-guide";
 import { HomeHero } from "@/components/site/home/home-hero";
@@ -117,12 +122,18 @@ export const Route = createFileRoute("/_site/")({
 
 function IndexPage() {
   const { elements, figures, guides, spaces } = Route.useLoaderData();
+  // The bar's button gives the editor the whole inset; leaving the home gives it back.
+  const expanded = useEditorExpanded();
+  useEffect(() => () => setEditorExpanded(false), []);
   return (
     <>
       <JsonLd data={buildSoftwareJsonLd()} />
-      <HomeHero />
+      {expanded ? null : <HomeHero />}
       {/* Under the title, the registry's audio editor itself: what a user installs, working. */}
-      <section aria-labelledby="home-editor" className="border-t">
+      <section
+        aria-labelledby="home-editor"
+        className={expanded ? "flex flex-1 flex-col" : "border-t"}
+      >
         <h2 className="sr-only" id="home-editor">
           Audio editor
         </h2>
@@ -132,14 +143,17 @@ function IndexPage() {
       <div
         aria-hidden="true"
         className="h-6 shrink-0 border-t bg-[repeating-linear-gradient(-45deg,var(--border)_0_1px,transparent_1px_7px)]"
+        hidden={expanded}
       />
       {/* Under it, the page in words, the library's figures with the components: what search engines and agents read without running it. */}
-      <HomeGuide
-        elements={elements}
-        figures={figures}
-        guides={guides}
-        spaces={spaces}
-      />
+      {expanded ? null : (
+        <HomeGuide
+          elements={elements}
+          figures={figures}
+          guides={guides}
+          spaces={spaces}
+        />
+      )}
     </>
   );
 }

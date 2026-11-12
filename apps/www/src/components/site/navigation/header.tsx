@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { ExpandEditor } from "@/components/site/home/expand-editor";
 import type { CommandMenuGroup } from "@/components/site/navigation/command-menu";
 import { FrameworkSelect } from "@/components/site/navigation/framework-select";
 import { GitHubLink } from "@/components/site/navigation/github-link";
@@ -133,6 +134,7 @@ export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
   if (part === "github") {
     return (
       <>
+        <ExpandEditor />
         <LabLink />
         <GitHubLink />
       </>
