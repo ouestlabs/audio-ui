@@ -49,11 +49,6 @@ export function getDocsSpaces() {
 const COMPONENTS = "/docs/components/";
 const GUIDES = "/docs/guides";
 const ELEMENTS = "/docs/elements/";
-/** The elements' pages that are guides to a framework, not elements. */
-const FRAMEWORK_PAGES = new Set([
-  "/docs/elements/svelte",
-  "/docs/elements/vue",
-]);
 
 /** The custom elements' pages, as their sidebar orders them: what the home lists for a reader of Vue, Svelte or the web. */
 function elementPages(): SpacePage[] {
@@ -65,7 +60,7 @@ function elementPages(): SpacePage[] {
     )
     .flatMap((node): SpacePage[] => {
       const page = byUrl.get(node.url);
-      return page?.url.startsWith(ELEMENTS) && !FRAMEWORK_PAGES.has(page.url)
+      return page?.url.startsWith(ELEMENTS)
         ? [
             {
               description: page.data.description ?? "",

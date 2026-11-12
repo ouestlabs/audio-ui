@@ -1,9 +1,9 @@
 ---
 title: Custom elements
-description: Every primitive as framework-agnostic Web Components, with the parts, state attributes and events of the React primitives.
+description: Every primitive as framework-agnostic Web Components, with their parts, state attributes and events, in Vue, Svelte, plain HTML and any framework.
 ---
 
-`@audio-ui/elements` provides every primitive as a set of unstyled, accessible custom elements. Each one is built on `@audio-ui/core` and keeps API parity with [`@audio-ui/react`](/docs/react): the same parts, keyboard interactions, ARIA semantics and `data-*` state attributes. The elements work in plain HTML and in any framework that renders HTML, such as Vue, Svelte, Angular or Lit. Every element has a page with its attributes, its parts and a live preview.
+`@audio-ui/elements` provides every primitive as a set of unstyled, accessible custom elements, built on `@audio-ui/core`: their parts, keyboard interactions, ARIA semantics and `data-*` state attributes. The elements work in plain HTML and in any framework that renders HTML, such as Vue, Svelte, Angular or Lit. Every element has a page with its attributes, its parts, a live preview and its usage in your framework.
 
 ## Installation
 
@@ -55,9 +55,9 @@ Registration is a no-op on the server: server-rendered markup upgrades once the 
 
 <TabsContent value="vue">
 
-Declare the tags as custom elements to Vue's compiler, in `vite.config.js`. [Vue](/docs/elements/vue) has the template types and the rest:
+Declare the tags as custom elements to Vue's compiler, in `vite.config.ts`, then register the elements the app uses, once, as in any page:
 
-```js
+```ts
 vue({
   template: {
     compilerOptions: { isCustomElement: (tag) => tag.startsWith("audio-ui-") },
@@ -65,8 +65,16 @@ vue({
 });
 ```
 
+**Types.** `@audio-ui/elements/vue` adds every element to Vue's `GlobalComponents`. Import it once, in a file the project's `tsconfig.json` includes. Templates are then checked as for a component: an element's attributes (`min`, `drag-mode`), the properties it has a setter for (`value`, `format`) and its own events, with the type of their `detail`, such as a knob's `input` or a clip's `clipinput`. Strict templates (`vueCompilerOptions.strictTemplates`) are supported. The import adds nothing to the bundle.
+
+```ts
+import type {} from "@audio-ui/elements/vue";
+```
+
+**Binding.** `v-model` binds an element's `value`: Vue reads it on every `input` and writes it when the model changes. The knob, the fader, the XY pad, the envelope, the sequencer, the waveform, the piano roll and a plot's handles take `v-model`.
+
 ```vue
-<script setup>
+<script setup lang="ts">
 import "@audio-ui/elements/knob";
 import { ref } from "vue";
 
@@ -74,12 +82,7 @@ const cutoff = ref(1000);
 </script>
 
 <template>
-  <audio-ui-knob
-    min="20"
-    max="20000"
-    scale="log"
-    v-model="cutoff"
-  >
+  <audio-ui-knob min="20" max="20000" scale="log" v-model="cutoff">
     <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
     <audio-ui-knob-control>
       <audio-ui-knob-track />
@@ -91,14 +94,52 @@ const cutoff = ref(1000);
 </template>
 ```
 
+`v-model` keeps every value the element proposes. To refuse one, bind `:value` and listen to `@input`, which can call `preventDefault()`:
+
+```vue
+<script setup lang="ts">
+import type { KnobInputEvent } from "@audio-ui/elements/knob";
+import { ref } from "vue";
+
+const cutoff = ref(1000);
+const limit = ref(8000);
+
+function onInput(event: KnobInputEvent) {
+  if (event.detail.value > limit.value) {
+    event.preventDefault();
+  } else {
+    cutoff.value = event.detail.value;
+  }
+}
+</script>
+
+<template>
+  <audio-ui-knob :value="cutoff" @input="onInput" />
+</template>
+```
+
+A part with a value of its own, such as a timeline clip or a range, fires events prefixed with its name: bind it with `:value` and `@clipinput` or `@rangeinput`.
+
 </TabsContent>
 
 <TabsContent value="svelte">
 
-[Svelte](/docs/elements/svelte) has the template types and the rest.
+Svelte renders the tags as they are written. Register the elements the app uses, once, as in any page:
+
+```ts
+import "@audio-ui/elements/knob";
+```
+
+**Types.** `@audio-ui/elements/svelte` adds every element to `SvelteHTMLElements`, in `svelte/elements`. Import it once, in a file the project's `tsconfig.json` includes. Templates are then checked: an element's attributes (`min`, `drag-mode`), the properties it has a setter for (`value`, `format`) and an `on…` handler for each of its own events, with the type of their `detail`, such as a knob's `oninput` or a clip's `onclipinput`. The import adds nothing to the bundle.
+
+```ts
+import type {} from "@audio-ui/elements/svelte";
+```
+
+**Binding.** Svelte binds `bind:value` on `<input>`, `<textarea>` and `<select>` only. Bind an element with `value` and `oninput`:
 
 ```svelte
-<script>
+<script lang="ts">
   import "@audio-ui/elements/knob";
 
   let cutoff = $state(1000);
@@ -120,6 +161,8 @@ const cutoff = ref(1000);
   <audio-ui-knob-value></audio-ui-knob-value>
 </audio-ui-knob>
 ```
+
+Svelte sets what a template gives an element as a property when the element has one, `value`, `scale` and `format` among them, and as an attribute otherwise. A listener that refuses a value calls `event.preventDefault()` instead of assigning it. A part with a value of its own, such as a timeline clip or a range, fires events prefixed with its name: bind it with `value` and `onclipinput` or `onrangeinput`.
 
 </TabsContent>
 

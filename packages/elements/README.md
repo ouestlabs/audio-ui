@@ -84,7 +84,7 @@ In Svelte, which binds `bind:value` on native inputs only, bind it with `value` 
 
 ## Documentation
 
-API reference for every element and part: <https://www.audio-ui.dev/docs/elements>. Vue: <https://www.audio-ui.dev/docs/elements/vue>. Svelte: <https://www.audio-ui.dev/docs/elements/svelte>.
+API reference for every element and part: <https://www.audio-ui.dev/docs/elements>. Vue: <https://www.audio-ui.dev/docs/elements?framework=vue>. Svelte: <https://www.audio-ui.dev/docs/elements?framework=svelte>.
 
 ## License
 

@@ -60,6 +60,11 @@ const MOVED_PAGES = new Map([
   ["/docs/primitives", "/docs/react"],
   ["/docs/headless-styling", "/docs/react/headless-styling"],
   ["/docs/custom-elements", "/docs/elements"],
+  // The frameworks' guides became the tabs of the elements' overview, which follow the framework chosen.
+  ["/docs/elements/vue", "/docs/elements"],
+  ["/docs/elements/svelte", "/docs/elements"],
+  ["/docs/elements/vue.md", "/docs/elements.md"],
+  ["/docs/elements/svelte.md", "/docs/elements.md"],
   ["/docs/engine/controllers", "/docs/core/controllers"],
   ["/docs/primitives.md", "/docs/react.md"],
   ["/docs/headless-styling.md", "/docs/react/headless-styling.md"],

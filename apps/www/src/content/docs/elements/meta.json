@@ -2,9 +2,6 @@
   "title": "Elements",
   "pages": [
     "index",
-    "---Frameworks---",
-    "vue",
-    "svelte",
     "---Elements---",
     "knob",
     "fader",

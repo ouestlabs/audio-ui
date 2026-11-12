@@ -39,8 +39,8 @@ npm install @audio-ui/elements
 ```
 
 - `input` fires on every change with `event.detail` `{ value, reason }`; `preventDefault()` rejects the change. `change` fires once when an interaction ends. The `value` property reads and sets the value; while `input` is dispatched it reads the value proposed, as a native input's does.
-- Vue: `compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")` in the Vue plugin's `template` options, and `import type {} from "@audio-ui/elements/vue"` once for typed templates (strict templates included). Then `v-model="x"`, or `:value` and `@input` to refuse a value with `preventDefault()`. https://www.audio-ui.dev/docs/elements/vue
-- Svelte 5: `import type {} from "@audio-ui/elements/svelte"` once for typed templates, then `value={x}` and `oninput={(event) => (x = event.detail.value)}`: Svelte binds `bind:value` on native inputs only. https://www.audio-ui.dev/docs/elements/svelte
+- Vue: `compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")` in the Vue plugin's `template` options, and `import type {} from "@audio-ui/elements/vue"` once for typed templates (strict templates included). Then `v-model="x"`, or `:value` and `@input` to refuse a value with `preventDefault()`. https://www.audio-ui.dev/docs/elements?framework=vue
+- Svelte 5: `import type {} from "@audio-ui/elements/svelte"` once for typed templates, then `value={x}` and `oninput={(event) => (x = event.detail.value)}`: Svelte binds `bind:value` on native inputs only. https://www.audio-ui.dev/docs/elements?framework=svelte
 - The elements apply only display, positioning and `touch-action`, in zero-specificity rules. Style parts by tag and by `data-*` state attributes (`data-dragging`, `data-disabled`, `data-orientation`). API reference: https://www.audio-ui.dev/docs/elements
 
 Each primitive registers from its own entry point, `@audio-ui/elements/<primitive>`. Parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`, distinct from the root's `input` and `change`. Use the controllers below directly only for interfaces the elements do not cover.
