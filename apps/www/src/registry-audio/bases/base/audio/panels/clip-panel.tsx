@@ -9,18 +9,31 @@ import {
   warpRate,
 } from "@audio-ui/engine/time";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
+import type { WaveformBands } from "@audio-ui/gl/waveform";
 import type { Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,
   type MouseEvent,
+  memo,
   type PointerEvent,
   type ReactNode,
+  type RefObject,
   useCallback,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+import { IconPlaceholder } from "@/components/icon-placeholder";
+import { cn } from "@/registry/bases/base/lib/utils";
+import { Button } from "@/registry/bases/base/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/registry/bases/base/ui/dropdown-menu";
 import {
   ClipBox,
   type ClipMeter,
@@ -36,6 +49,13 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
 import {
+  isSoundView,
+  isSpectrogramView,
+  SOUND_VIEWS,
+  SoundLane,
+  type SoundView,
+} from "@/registry-audio/bases/base/audio/elements/sound-lane";
+import {
   Timeline,
   TimelineLane,
   TimelineMark,
@@ -45,10 +65,10 @@ import {
   TimelineRangeHandle,
   TimelineViewport,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
-import { WaveformLane } from "@/registry-audio/bases/base/audio/elements/waveform-lane";
 import { useLoudest } from "@/registry-audio/bases/base/hooks/use-loudest";
 import {
   type ClipPeaks,
+  type ClipReading,
   clipPeakCount,
   clipSegments,
 } from "@/registry-audio/bases/base/lib/arrangement";
@@ -108,10 +128,14 @@ export function reversedSettings(
 interface ClipPanelProps {
   /** Whether the clip is on: off, it stays on its track and is not heard. Leave it out, with `onActiveChange`, for a panel without the switch. */
   active?: boolean;
+  /** The source as three signals, its lows, mids and highs with the loudest of each, as `splitBands` of `@audio-ui/engine/analysis` gives them: with them, the view menu offers the waveform by band. Called once, so it may split lazily. */
+  bands?: () => WaveformBands;
   /** How long a bar lasts, in seconds: the ruler numbers bars and the lanes draw a line at each. @default 2 */
   bar?: number;
   /** Beats in a bar: zoomed in far enough, the ruler numbers them too. @default 4 */
   beatsPerBar?: number;
+  /** The source's channels, a reader each, for a waveform drawn a row a channel once the rows are tall enough to read, as a DAW draws a stereo recording. `samples` stays their mix. Leave it out for a mono source, or one waveform. */
+  channels?: readonly ClipSamples[];
   /** Whatever the host puts at the end of the title bar. */
   children?: ReactNode;
   className?: string;
@@ -137,15 +161,19 @@ interface ClipPanelProps {
   onValueChange: (value: ClipSettings) => void;
   /** A gesture that changed the settings ended. */
   onValueCommitted?: () => void;
+  /** Another view of the source was picked. */
+  onViewChange?: (view: SoundView) => void;
   /** The arrangement's position, live: while it plays the clip, a playhead shows where in the source it reads. Leave it out for none. */
   position?: Source<number>;
-  /** The source's samples, read as the view needs them: with them, the waveform zooms in to the samples themselves, as a line through them past a frame per pixel. Leave it out to stop at the peaks' detail. */
+  /** The source's samples, read as the view needs them: with them, the waveform zooms in to the samples themselves, as a line through them past a frame per pixel, and is drawn on the GPU when they are held in memory or, streamed from a file, give their `leaves`. Leave it out to stop at the peaks' detail. */
   samples?: ClipSamples;
   /** Where the clip starts on the arrangement, what `position` is read against. @default 0 */
   start?: number;
   value: ClipSettings;
   /** The source's peaks, the shape the waveform draws. */
   values: ClipPeaks;
+  /** How the source is drawn, controlled: its waveform, by band, or its spectrogram on one of four frequency axes. On the GPU only: a reversed clip, or without WebGL 2, is drawn as its waveform. Leave it out for the panel to keep its own. @default "wave" */
+  view?: SoundView;
 }
 
 const formatSeconds = (seconds: number) => `${seconds.toFixed(2)} s`;
@@ -183,97 +211,99 @@ export function warpMarkersTight(
  * stretch the source on either side of it; Delete takes it away (two stay).
  * `tight`, they are ticks along its top that keep the waveform in sight.
  */
-function WarpMarkers({
-  format,
-  markers,
-  onChange,
-  onCommit,
-  span,
-  tight,
-}: {
-  format: (seconds: number) => string;
-  markers: readonly WarpMarker[];
-  onChange: (next: readonly WarpMarker[]) => void;
-  onCommit?: () => void;
-  span: number;
-  tight: boolean;
-}) {
-  const startDrag = useCallback((event: PointerEvent<HTMLSpanElement>) => {
-    event.stopPropagation();
-    event.currentTarget.setPointerCapture(event.pointerId);
-  }, []);
-  const drag = useCallback(
-    (event: PointerEvent<HTMLSpanElement>) => {
-      const handle = event.currentTarget;
-      const box = handle
-        .closest('[data-slot="clip-panel-source"]')
-        ?.getBoundingClientRect();
-      if (
-        !(handle.hasPointerCapture(event.pointerId) && box && box.width > 0)
-      ) {
-        return;
-      }
-      const at = ((event.clientX - box.left) / box.width) * span;
-      onChange(moveWarpMarker(markers, markerIndex(handle), at));
-    },
-    [markers, onChange, span]
-  );
-  const keyDown = useCallback(
-    (event: KeyboardEvent<HTMLSpanElement>) => {
-      const index = markerIndex(event.currentTarget);
-      const step = (event.shiftKey ? 10 : 1) * (span / 100);
-      const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
-      let next: readonly WarpMarker[] | null = null;
-      if (event.key === "Delete" || event.key === "Backspace") {
-        next = removeWarpMarker(markers, index);
-      } else if (direction) {
-        next = moveWarpMarker(
-          markers,
-          index,
-          (markers[index]?.target ?? 0) + direction * step
-        );
-      }
-      if (next) {
-        event.preventDefault();
-        event.stopPropagation();
-        onChange(next);
-        onCommit?.();
-      }
-    },
-    [markers, onChange, onCommit, span]
-  );
-  return markers.map((marker, index) => (
-    <div
-      className={
-        tight
-          ? "pointer-events-none absolute top-0 z-10 h-1.5 w-px bg-foreground/50"
-          : "pointer-events-none absolute inset-y-0 z-10 w-px bg-foreground/70"
-      }
-      data-slot="clip-panel-warp-marker"
-      key={`${marker.source}`}
-      style={{ left: `${(marker.target / span) * 100}%` }}
-    >
-      {tight ? null : (
-        <span
-          aria-label={`Warp marker ${index + 1}`}
-          aria-valuemax={span}
-          aria-valuemin={0}
-          aria-valuenow={marker.target}
-          aria-valuetext={format(marker.target)}
-          className="pointer-events-auto absolute top-0 left-1/2 size-3 -translate-x-1/2 cursor-ew-resize touch-none rounded-sm border border-foreground bg-card outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          data-index={index}
-          onDoubleClick={stopPropagation}
-          onKeyDown={keyDown}
-          onLostPointerCapture={onCommit}
-          onPointerDown={startDrag}
-          onPointerMove={drag}
-          role="slider"
-          tabIndex={0}
-        />
-      )}
-    </div>
-  ));
-}
+const WarpMarkers = memo(
+  ({
+    format,
+    markers,
+    onChange,
+    onCommit,
+    span,
+    tight,
+  }: {
+    format: (seconds: number) => string;
+    markers: readonly WarpMarker[];
+    onChange: (next: readonly WarpMarker[]) => void;
+    onCommit?: () => void;
+    span: number;
+    tight: boolean;
+  }) => {
+    const startDrag = useCallback((event: PointerEvent<HTMLSpanElement>) => {
+      event.stopPropagation();
+      event.currentTarget.setPointerCapture(event.pointerId);
+    }, []);
+    const drag = useCallback(
+      (event: PointerEvent<HTMLSpanElement>) => {
+        const handle = event.currentTarget;
+        const box = handle
+          .closest('[data-slot="clip-panel-source"]')
+          ?.getBoundingClientRect();
+        if (
+          !(handle.hasPointerCapture(event.pointerId) && box && box.width > 0)
+        ) {
+          return;
+        }
+        const at = ((event.clientX - box.left) / box.width) * span;
+        onChange(moveWarpMarker(markers, markerIndex(handle), at));
+      },
+      [markers, onChange, span]
+    );
+    const keyDown = useCallback(
+      (event: KeyboardEvent<HTMLSpanElement>) => {
+        const index = markerIndex(event.currentTarget);
+        const step = (event.shiftKey ? 10 : 1) * (span / 100);
+        const direction = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
+        let next: readonly WarpMarker[] | null = null;
+        if (event.key === "Delete" || event.key === "Backspace") {
+          next = removeWarpMarker(markers, index);
+        } else if (direction) {
+          next = moveWarpMarker(
+            markers,
+            index,
+            (markers[index]?.target ?? 0) + direction * step
+          );
+        }
+        if (next) {
+          event.preventDefault();
+          event.stopPropagation();
+          onChange(next);
+          onCommit?.();
+        }
+      },
+      [markers, onChange, onCommit, span]
+    );
+    return markers.map((marker, index) => (
+      <div
+        className={
+          tight
+            ? "pointer-events-none absolute top-0 z-10 h-1.5 w-px bg-foreground/50"
+            : "pointer-events-none absolute inset-y-0 z-10 w-px bg-foreground/70"
+        }
+        data-slot="clip-panel-warp-marker"
+        key={`${marker.source}`}
+        style={{ left: `${(marker.target / span) * 100}%` }}
+      >
+        {tight ? null : (
+          <span
+            aria-label={`Warp marker ${index + 1}`}
+            aria-valuemax={span}
+            aria-valuemin={0}
+            aria-valuenow={marker.target}
+            aria-valuetext={format(marker.target)}
+            className="pointer-events-auto absolute top-0 left-1/2 size-3 -translate-x-1/2 cursor-ew-resize touch-none rounded-sm border border-foreground bg-card outline-none focus-visible:ring-2 focus-visible:ring-ring"
+            data-index={index}
+            onDoubleClick={stopPropagation}
+            onKeyDown={keyDown}
+            onLostPointerCapture={onCommit}
+            onPointerDown={startDrag}
+            onPointerMove={drag}
+            role="slider"
+            tabIndex={0}
+          />
+        )}
+      </div>
+    ));
+  }
+);
 
 /** The Loop box: the switch, where the loop sits in the source and how long it is, halved or doubled. */
 function LoopBox({
@@ -521,8 +551,10 @@ function SampleBox({
  */
 function ClipPanel({
   active,
+  bands,
   bar = 2,
   beatsPerBar = 4,
+  channels,
   children,
   className,
   collapsed,
@@ -536,12 +568,24 @@ function ClipPanel({
   onRename,
   onValueChange,
   onValueCommitted,
+  onViewChange,
   position: arrangementPosition,
   samples,
   start: clipStart = 0,
   value,
   values,
+  view: viewProp,
 }: ClipPanelProps) {
+  // The view of the source: the host's when given, else the panel's own.
+  const [ownView, setOwnView] = useState<SoundView>("wave");
+  const view = viewProp ?? ownView;
+  const changeView = useCallback(
+    (next: SoundView) => {
+      setOwnView(next);
+      onViewChange?.(next);
+    },
+    [onViewChange]
+  );
   const {
     gain,
     length,
@@ -553,6 +597,10 @@ function ClipPanel({
     warp,
     warpMode = "repitch",
   } = value;
+  // The view shown: the one picked, or the waveform where the GPU cannot draw it.
+  const can = useSourceCan(samples, reversed);
+  const shownView: SoundView =
+    isSpectrogramView(view) && !can.spectrogram ? "wave" : view;
   const meter = useMemo(() => ({ bar, beatsPerBar }), [bar, beatsPerBar]);
   // How long the source lasts on the clip: as recorded, or as its warp stretches it.
   const span = warp ? warpedTime(warp, sourceLength) : sourceLength;
@@ -790,10 +838,23 @@ function ClipPanel({
       onCollapsedChange={onCollapsedChange}
       onFoldedBoxesChange={onFoldedBoxesChange}
       onRename={onRename}
+      tools={
+        samples ? (
+          <SourceViewMenu
+            bands={Boolean(bands) && can.waveform}
+            onViewChange={changeView}
+            spectrogram={can.spectrogram}
+            view={shownView}
+          />
+        ) : null
+      }
     >
       <ClipSource
+        bands={bands}
         bar={bar}
         beatsPerBar={beatsPerBar}
+        can={can}
+        channels={channels}
         format={format}
         length={length}
         loop={loop}
@@ -811,6 +872,7 @@ function ClipPanel({
         sourceLength={sourceLength}
         span={span}
         values={values}
+        view={shownView}
         warp={warp}
       />
     </ClipView>
@@ -821,6 +883,169 @@ function ClipPanel({
 const LABEL_SPACING = 40;
 /** The widest a peak of the waveform is drawn, in px: zooming in stops there, before the drawing turns to blocks. */
 const PEAK_PX = 3;
+/** What the GPU can draw of a clip's source: its waveform, and its spectrogram. */
+interface SourceDrawable {
+  spectrogram: boolean;
+  waveform: boolean;
+}
+
+/**
+ * What the GPU can draw of a clip's source: samples held in memory, or
+ * streamed from a file with their leaves (the waveform) or their spectra (the
+ * spectrogram). A reversed clip reads backwards, which the renderers have no
+ * range for, and is drawn as the canvas' waveform, as it is without WebGL 2.
+ */
+function useSourceCan(
+  samples: ClipSamples | undefined,
+  reversed: boolean
+): SourceDrawable {
+  const [webgl] = useState(hasWebGL2);
+  return useMemo(() => {
+    const inMemory = samples ? !(samples.read(0, 0) instanceof Promise) : false;
+    const gpu = webgl && !reversed && Boolean(samples);
+    return {
+      spectrogram: gpu && (inMemory || Boolean(samples?.spectra)),
+      waveform: gpu && (inMemory || Boolean(samples?.leaves)),
+    };
+  }, [reversed, samples, webgl]);
+}
+
+/**
+ * What the GPU draws of a clip's source, and how: samples held in memory, or
+ * streamed from a file with their leaves (the waveform) or their spectra (the
+ * spectrogram), which it draws without reading them whole, read in the
+ * stretches the clip's warp makes. A reversed clip reads backwards, which the
+ * renderers have no range for, and is the canvas' waveform, as it is without
+ * WebGL 2. `gpuClips` is null where the canvas draws it.
+ */
+function useSourceDrawing({
+  bands,
+  can,
+  channels,
+  reading,
+  samples,
+  sourceLength,
+  span,
+  view,
+}: {
+  bands?: () => WaveformBands;
+  can: SourceDrawable;
+  channels?: readonly ClipSamples[];
+  reading: ClipReading;
+  samples?: ClipSamples;
+  sourceLength: number;
+  span: number;
+  view: SoundView;
+}) {
+  const spectrogram = isSpectrogramView(view) && can.spectrogram;
+  const loudest = useLoudest(
+    can.waveform && !spectrogram ? samples : undefined,
+    channels
+  );
+  const gpuClips = useMemo(
+    () =>
+      samples && (spectrogram || loudest !== null) && sourceLength > 0
+        ? [
+            {
+              bands,
+              channels,
+              gain: 1,
+              id: "source",
+              length: span,
+              peak: loudest ?? 1,
+              sampleRate: samples.frames / sourceLength,
+              samples,
+              segments: (from: number, to: number) =>
+                clipSegments(reading, samples.frames, [from, to]),
+              source: "source",
+              start: 0,
+            },
+          ]
+        : null,
+    [
+      bands,
+      channels,
+      loudest,
+      reading,
+      samples,
+      sourceLength,
+      span,
+      spectrogram,
+    ]
+  );
+  return { gpuClips, spectrogram };
+}
+
+/**
+ * The views of the source, as a menu in the clip's strip, after its name, as
+ * the audio editor's View menu: the waveform, by band when the host gives the
+ * bands, and the spectrogram on each frequency axis when the GPU can draw it.
+ */
+function SourceViewMenu({
+  bands,
+  onViewChange,
+  spectrogram,
+  view,
+}: {
+  bands: boolean;
+  onViewChange: (view: SoundView) => void;
+  spectrogram: boolean;
+  view: SoundView;
+}) {
+  const change = useCallback(
+    (value: string) => {
+      if (isSoundView(value)) {
+        onViewChange(value);
+      }
+    },
+    [onViewChange]
+  );
+  const label =
+    SOUND_VIEWS.find((each) => each.value === view)?.label ?? "Waveform";
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label={`View: ${label}`}
+            size="icon-sm"
+            title="View"
+            variant="ghost"
+          />
+        }
+      >
+        <IconPlaceholder
+          hugeicons="AudioWave01Icon"
+          lucide="AudioLinesIcon"
+          phosphor="WaveformIcon"
+          remixicon="RiPulseLine"
+          tabler="IconWaveSine"
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-72">
+        <DropdownMenuRadioGroup onValueChange={change} value={view}>
+          {SOUND_VIEWS.map((each) => (
+            <DropdownMenuRadioItem
+              closeOnClick
+              disabled={
+                (each.value === "bands" && !bands) ||
+                (isSpectrogramView(each.value) && !spectrogram)
+              }
+              key={each.value}
+              value={each.value}
+            >
+              {each.label}
+              <span className="ms-auto text-muted-foreground text-xs">
+                {each.note}
+              </span>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 /** How far apart two samples are drawn at the closest zoom, in px, with samples to draw. */
 const FRAME_PX = 40;
 /** The widest the source's lane is laid out, in px: past about 17 million, a browser stops laying an element out. */
@@ -851,14 +1076,27 @@ function Unplayed({
 }
 
 /** The ruler's labels at `pxPerSecond`: each beat (`bar.beat`) once they are far enough apart, else every bar, every second, fourth… */
+/** What the ruler numbers at a zoom: every beat (0), or every `n` bars, `n` a power of two, so the numbers stay `LABEL_SPACING` apart. */
+function labelEvery(bar: number, beatsPerBar: number, pxPerSecond: number) {
+  if ((bar / beatsPerBar) * pxPerSecond >= LABEL_SPACING) {
+    return 0;
+  }
+  let every = 1;
+  while (every * bar * pxPerSecond < LABEL_SPACING && every < 1024) {
+    every *= 2;
+  }
+  return every;
+}
+
+/** The ruler's numbers over the source: each beat's (`every` 0), or every `every` bars'. */
 function rulerLabels(
   span: number,
   bar: number,
   beatsPerBar: number,
-  pxPerSecond: number
+  every: number
 ) {
   const beat = bar / beatsPerBar;
-  if (beat * pxPerSecond >= LABEL_SPACING) {
+  if (every === 0) {
     return Array.from({ length: Math.floor(span / beat) + 1 }, (_, index) => {
       const number = Math.floor(index / beatsPerBar) + 1;
       const inBar = (index % beatsPerBar) + 1;
@@ -868,15 +1106,54 @@ function rulerLabels(
       };
     });
   }
-  let every = 1;
-  while (every * bar * pxPerSecond < LABEL_SPACING && every < 1024) {
-    every *= 2;
-  }
   return Array.from(
     { length: Math.floor(span / (bar * every)) + 1 },
     (_, index) => ({ at: index * every * bar, text: `${index * every + 1}` })
   );
 }
+
+/** The ruler's numbers, drawn again only when they change: a zoom moves them by itself, so its steps leave them be. */
+/**
+ * The stretch of the source the view shows, in seconds, with a view's width
+ * either side: what the ruler numbers, so a long source zoomed in lays out a
+ * few dozen numbers, not thousands. It moves by half a view at a time, so a
+ * scroll draws the numbers again only now and then.
+ */
+function useShownSpan(
+  viewportRef: RefObject<HTMLElement | null>,
+  pxPerSecond: number,
+  span: number
+): readonly [number, number] {
+  const [shown, setShown] = useState<readonly [number, number]>([0, span]);
+  useLayoutEffect(() => {
+    const viewport = viewportRef.current;
+    if (!(viewport && pxPerSecond > 0)) {
+      return;
+    }
+    const measure = () => {
+      const view = viewport.clientWidth / pxPerSecond;
+      const half = Math.max(view / 2, 1e-6);
+      const from = Math.floor(viewport.scrollLeft / pxPerSecond / half) * half;
+      setShown((was) => {
+        const next = [Math.max(0, from - view), from + 2 * view] as const;
+        return was[0] === next[0] && was[1] === next[1] ? was : next;
+      });
+    };
+    measure();
+    viewport.addEventListener("scroll", measure, { passive: true });
+    return () => viewport.removeEventListener("scroll", measure);
+  }, [pxPerSecond, viewportRef]);
+  return shown;
+}
+
+const RulerMarks = memo(
+  ({ labels }: { labels: readonly { at: number; text: string }[] }) =>
+    labels.map((label) => (
+      <TimelineMark key={label.at} value={label.at}>
+        {label.text}
+      </TimelineMark>
+    ))
+);
 
 /**
  * The clip's source on a timeline of its own: an overview bar to zoom and
@@ -884,8 +1161,11 @@ function rulerLabels(
  * drag at both ends, and the waveform, warped markers included, under it.
  */
 function ClipSource({
+  bands,
   bar,
   beatsPerBar,
+  can,
+  channels,
   format,
   length,
   loop,
@@ -903,10 +1183,15 @@ function ClipSource({
   sourceLength,
   span,
   values,
+  view,
   warp,
 }: {
+  bands?: () => WaveformBands;
   bar: number;
   beatsPerBar: number;
+  /** What the GPU can draw of the source. */
+  can: SourceDrawable;
+  channels?: readonly ClipSamples[];
   format: (seconds: number) => string;
   length: number;
   loop: readonly [number, number] | null;
@@ -925,6 +1210,7 @@ function ClipSource({
   sourceLength: number;
   span: number;
   values: ClipPeaks;
+  view: SoundView;
   warp: readonly WarpMarker[] | null;
 }) {
   // Fitted to its width until zoomed, as the arrangement is.
@@ -951,6 +1237,7 @@ function ClipSource({
     };
   }, [span]);
   const pxPerSecond = zoom ?? fit;
+  const [shownFrom, shownTo] = useShownSpan(viewportRef, pxPerSecond, span);
   // The whole source in the clip's time, read as the clip plays it.
   const reading = useMemo(
     () => ({
@@ -961,40 +1248,29 @@ function ClipSource({
     }),
     [reversed, sourceLength, span, warp]
   );
-  // On the GPU where it can be: the source of a clip held in memory, read in the stretches its warp makes. A reversed clip reads backwards, which the renderers have no range for, so it is drawn as it was.
-  const [webgl] = useState(hasWebGL2);
-  // Only samples held in memory: a recording streamed from a file is drawn by the canvas, which reads only the frames in view.
-  const inMemory = useMemo(
-    () => (samples ? !(samples.read(0, 0) instanceof Promise) : false),
-    [samples]
-  );
-  const loudest = useLoudest(
-    webgl && !reversed && inMemory ? samples : undefined
-  );
-  const gpuClips = useMemo(
-    () =>
-      samples && loudest !== null && sourceLength > 0
-        ? [
-            {
-              gain: 1,
-              id: "source",
-              length: span,
-              peak: loudest,
-              sampleRate: samples.frames / sourceLength,
-              samples,
-              segments: (from: number, to: number) =>
-                clipSegments(reading, samples.frames, [from, to]),
-              source: "source",
-              start: 0,
-            },
-          ]
-        : null,
-    [loudest, reading, samples, sourceLength, span]
-  );
+  const { gpuClips, spectrogram } = useSourceDrawing({
+    bands,
+    can,
+    channels,
+    reading,
+    samples,
+    sourceLength,
+    span,
+    view,
+  });
   const [playedFrom, playedTo] = loop
     ? [Math.min(offset, loop[0]), loop[1]]
     : [offset, Math.min(span, offset + length)];
-  const labels = rulerLabels(span, bar, beatsPerBar, pxPerSecond);
+  const every = labelEvery(bar, beatsPerBar, pxPerSecond);
+  const labels = useMemo(
+    () => rulerLabels(span, bar, beatsPerBar, every),
+    [bar, beatsPerBar, every, span]
+  );
+  const shownLabels = useMemo(
+    () =>
+      labels.filter((label) => label.at >= shownFrom && label.at <= shownTo),
+    [labels, shownFrom, shownTo]
+  );
   // Zoomed in, a line per beat; out, a line per bar.
   const beat = bar / beatsPerBar;
   const gridStep = beat * pxPerSecond >= LABEL_SPACING / 2 ? beat : bar;
@@ -1025,11 +1301,7 @@ function ClipSource({
         <div className="flex w-max min-w-full flex-1 flex-col">
           {/* Bar numbers, from the start of the source. */}
           <TimelineLane className="h-5 border-foreground/25 border-b text-muted-foreground text-xs">
-            {labels.map((label) => (
-              <TimelineMark key={label.at} value={label.at}>
-                {label.text}
-              </TimelineMark>
-            ))}
+            <RulerMarks labels={shownLabels} />
           </TimelineLane>
           {/* What the clip plays, or the stretch it loops, with its start as a marker. */}
           <TimelineLane className="h-6 border-foreground/25 border-b">
@@ -1083,11 +1355,15 @@ function ClipSource({
                 style={{ width: `calc(var(--timeline-unit) * ${span})` }}
               >
                 {gpuClips ? (
-                  <WaveformLane
+                  <SoundLane
                     aria-label={`${name} source`}
-                    className="h-full text-muted-foreground"
+                    className={cn(
+                      "h-full",
+                      spectrogram ? "text-foreground" : "text-muted-foreground"
+                    )}
                     clips={gpuClips}
                     role="img"
+                    view={view}
                     zoom={pxPerSecond}
                   />
                 ) : null}

@@ -10,10 +10,120 @@
 /** A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`. */
 export interface LaneSamples {
   frames: number;
+  /**
+   * The recording summed up 256 frames at a time, `[min, max, Σx², count]`
+   * each, as `waveformLeaves` of `@audio-ui/gl/waveform` makes them: for a
+   * recording streamed from a file, which a lane then never reads whole. A
+   * waveform lane draws it from them zoomed out, and zoomed in reads only the
+   * frames it shows, `CHUNK_FRAMES` at a time. Left out, a lane reads the
+   * recording whole, once.
+   */
+  leaves?: () => ArrayLike<number> | Promise<ArrayLike<number>>;
   read: (
     from: number,
     to: number
   ) => ArrayLike<number> | Promise<ArrayLike<number>>;
+  /**
+   * For a recording streamed from a file: its spectra, as
+   * `spectrogramSpectra` of `@audio-ui/engine/analysis` makes them. A
+   * spectrogram lane draws it from them zoomed out, and zoomed in reads only
+   * the frames it shows, `CHUNK_FRAMES` at a time. Left out, a spectrogram lane
+   * reads the recording whole, once.
+   */
+  spectra?: () => LaneSpectra | Promise<LaneSpectra>;
+}
+
+/** A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from. */
+export interface LaneSpectra {
+  hop: number;
+  levels: Uint8Array;
+  size: number;
+}
+
+/** The frames a renderer keeps its samples in, and a streamed recording is read in: 65536. */
+export const CHUNK_FRAMES = 1 << 16;
+
+/** The most chunks a renderer keeps of a streamed recording beyond those the view reads: some four million frames. */
+const MOST_HELD = 64;
+
+/** What a renderer holds of a recording it streams: the chunks handed over, oldest first, and those being read. */
+export interface ChunkFeed {
+  held: number[];
+  reading: Set<number>;
+}
+
+/** What a renderer that streams its samples does with them: `gl-waveform` and `gl-spectrogram` both do. */
+export interface ChunkRenderer {
+  drop: (from: number, to: number) => unknown;
+  set: (samples: ArrayLike<number>, offset: number) => unknown;
+}
+
+/**
+ * Hands a renderer the chunks of a streamed recording that `ranges` read, in
+ * frames: those it lacks are read, each handed over once read, and `ready`
+ * draws again. The chunks it held before stay, up to `MOST_HELD`, the oldest
+ * the view no longer reads let go of first. `alive` says whether the renderer
+ * is still the one to hand them to. True when every chunk `ranges` read is held.
+ */
+export function feedChunks(
+  feed: ChunkFeed,
+  samples: LaneSamples,
+  ranges: readonly (readonly [number, number])[],
+  renderer: ChunkRenderer,
+  ready: () => void,
+  alive: () => boolean
+): boolean {
+  const count = Math.ceil(samples.frames / CHUNK_FRAMES);
+  const wanted = new Set<number>();
+  for (const [from, to] of ranges) {
+    const last = Math.min(count, Math.ceil(to / CHUNK_FRAMES));
+    for (
+      let chunk = Math.max(0, Math.floor(from / CHUNK_FRAMES));
+      chunk < last;
+      chunk += 1
+    ) {
+      wanted.add(chunk);
+    }
+  }
+  const held = new Set(feed.held);
+  let whole = true;
+  for (const chunk of wanted) {
+    if (held.has(chunk)) {
+      continue;
+    }
+    whole = false;
+    if (feed.reading.has(chunk)) {
+      continue;
+    }
+    feed.reading.add(chunk);
+    const at = chunk * CHUNK_FRAMES;
+    Promise.resolve(
+      samples.read(at, Math.min(samples.frames, at + CHUNK_FRAMES))
+    ).then(
+      (read) => {
+        feed.reading.delete(chunk);
+        if (alive()) {
+          renderer.set(read, at);
+          feed.held.push(chunk);
+          ready();
+        }
+      },
+      () => feed.reading.delete(chunk)
+    );
+  }
+  // What is being read counts: once it lands, no more than the most are held.
+  const extra =
+    feed.held.length + feed.reading.size - Math.max(MOST_HELD, wanted.size);
+  if (extra > 0) {
+    const gone = new Set(
+      feed.held.filter((chunk) => !wanted.has(chunk)).slice(0, extra)
+    );
+    for (const chunk of gone) {
+      renderer.drop(chunk * CHUNK_FRAMES, (chunk + 1) * CHUNK_FRAMES);
+    }
+    feed.held = feed.held.filter((chunk) => !gone.has(chunk));
+  }
+  return whole;
 }
 
 /** A stretch of a clip that reads its recording straight on: its two times in the clip, in seconds from its start, and the frames of the recording at them. */
@@ -166,8 +276,76 @@ export function placeLane(
   return { from, ratio, to };
 }
 
-/** The clips of a lane the view shows, each with its parts, before their samples are read. */
-function partsInView(
+/** How far, in CSS px, a junction between parts may stray from the one line they are joined into. */
+const JOIN_TOLERANCE = 0.25;
+
+/** Two numbers equal but for rounding. */
+const near = (a: number, b: number) =>
+  Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a), Math.abs(b));
+
+/** Whether the parts of a run read as one line: each junction within `JOIN_TOLERANCE` px of where that line puts its frame. */
+function readsAsOne(run: readonly VisiblePart[]): boolean {
+  const [first] = run;
+  const last = run.at(-1);
+  if (!(first && last)) {
+    return false;
+  }
+  const [from, to] = [first.frames[0], last.frames[1]];
+  const width = last.x + last.width - first.x;
+  return (
+    to > from &&
+    run
+      .slice(1)
+      .every(
+        (part) =>
+          Math.abs(
+            first.x + ((part.frames[0] - from) / (to - from)) * width - part.x
+          ) <= JOIN_TOLERANCE
+      )
+  );
+}
+
+/**
+ * Parts that follow one another on the canvas and in the recording, joined
+ * into one while every junction between them stays within a quarter of a
+ * pixel of where the one line reading them all puts it: a warped clip's
+ * stretches, a pixel or two wide zoomed out, are drawn as one part, not
+ * hundreds, and stay apart zoomed in, where a junction would show. The turns
+ * of a loop, which read the recording again, are never joined.
+ */
+export function joinParts(parts: readonly VisiblePart[]): VisiblePart[] {
+  const joined: VisiblePart[] = [];
+  let run: VisiblePart[] = [];
+  const close = () => {
+    const [first] = run;
+    const last = run.at(-1);
+    if (first && last) {
+      joined.push({
+        frames: [first.frames[0], last.frames[1]],
+        width: last.x + last.width - first.x,
+        x: first.x,
+      });
+    }
+  };
+  for (const part of parts) {
+    const last = run.at(-1);
+    const follows =
+      last &&
+      near(last.x + last.width, part.x) &&
+      near(last.frames[1], part.frames[0]);
+    if (follows && readsAsOne([...run, part])) {
+      run.push(part);
+    } else {
+      close();
+      run = [part];
+    }
+  }
+  close();
+  return joined;
+}
+
+/** The clips of a lane the view shows, each with its parts, before their samples are read: stretches that read as one line joined (`joinParts`). */
+export function partsInView(
   clips: readonly LaneClip[],
   placed: Pick<Placed, "from" | "to">,
   zoom: number
@@ -202,7 +380,7 @@ function partsInView(
           },
         ];
       });
-    return parts.length > 0 ? [{ entry, parts }] : [];
+    return parts.length > 0 ? [{ entry, parts: joinParts(parts) }] : [];
   });
 }
 
@@ -211,37 +389,52 @@ function partsInView(
  * once, not at every paint, since a reader may copy or mix the whole of it
  * each time it is asked. Read again only when the clip hands another reader.
  */
-export type SampleCache = Map<
+export type SampleCache = KeptCache<ArrayLike<number>>;
+
+/** What a lane has read of its recordings, by key: what it read, or is reading, and the reader it read it with. */
+export type KeptCache<Read> = Map<
   string,
-  {
-    read: ArrayLike<number> | Promise<ArrayLike<number>>;
-    samples: LaneSamples;
-  }
+  { read: Read | Promise<Read>; samples: LaneSamples }
 >;
+
+/**
+ * What `read` gives for `samples`, from `cache` under `key` when that reader
+ * is the one it was read with, else read now and kept: once a promise is
+ * settled, the cache holds what it gave, so the next paint has it at once.
+ */
+export function readKept<Read = ArrayLike<number>>(
+  cache: KeptCache<Read> | undefined,
+  key: string,
+  samples: LaneSamples,
+  read: () => Read | Promise<Read>
+): Read | Promise<Read> {
+  const kept = cache?.get(key);
+  if (kept && kept.samples === samples) {
+    return kept.read;
+  }
+  const reading = read();
+  cache?.set(key, { read: reading, samples });
+  if (reading instanceof Promise) {
+    reading.then(
+      (done) => {
+        if (cache?.get(key)?.read === reading) {
+          cache.set(key, { read: done, samples });
+        }
+      },
+      () => cache?.delete(key)
+    );
+  }
+  return reading;
+}
 
 /** A recording's samples, from the cache when its reader is the one it was read with, else read now and kept. */
 export function readOnce(
   entry: LaneClip,
   cache: SampleCache | undefined
 ): ArrayLike<number> | Promise<ArrayLike<number>> {
-  const kept = cache?.get(entry.source);
-  if (kept && kept.samples === entry.samples) {
-    return kept.read;
-  }
-  const read = entry.samples.read(0, entry.samples.frames);
-  cache?.set(entry.source, { read, samples: entry.samples });
-  if (read instanceof Promise) {
-    // Once read, the cache holds the samples themselves: the next paint has them at once.
-    read.then(
-      (samples) => {
-        if (cache?.get(entry.source)?.read === read) {
-          cache.set(entry.source, { read: samples, samples: entry.samples });
-        }
-      },
-      () => cache?.delete(entry.source)
-    );
-  }
-  return read;
+  return readKept(cache, entry.source, entry.samples, () =>
+    entry.samples.read(0, entry.samples.frames)
+  );
 }
 
 /** Whether a reading came back at once, not as a promise. */

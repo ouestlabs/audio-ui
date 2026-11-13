@@ -18,10 +18,25 @@ import {
  */
 export interface ClipSamples {
   frames: number;
+  /**
+   * For a recording streamed from a file: it summed up 256 frames at a time,
+   * as `waveformLeaves` of `@audio-ui/gl/waveform` makes it. A waveform drawn
+   * on the GPU then never reads it whole, only the frames it shows zoomed in.
+   */
+  leaves?: () => ArrayLike<number> | Promise<ArrayLike<number>>;
   read: (
     from: number,
     to: number
   ) => ArrayLike<number> | Promise<ArrayLike<number>>;
+  /**
+   * For a recording streamed from a file: its spectra, as
+   * `spectrogramSpectra` of `@audio-ui/gl/spectrogram` makes them. A
+   * spectrogram drawn on the GPU then never reads it whole, only the frames it
+   * shows zoomed in.
+   */
+  spectra?: () =>
+    | { hop: number; levels: Uint8Array; size: number }
+    | Promise<{ hop: number; levels: Uint8Array; size: number }>;
 }
 
 /** The samples last read for a view, frames `from` to `to`: being read, or read. */

@@ -7,6 +7,7 @@
     "audio-editor",
     "waveform-lane",
     "clip-spectrogram",
+    "sound-lane",
     "piano-roll",
     "sequencer",
     "---Piano roll tools---",

@@ -13,6 +13,7 @@ import {
   placedAt,
   type TimelineState,
   useTimelineContext,
+  useTimelineState,
 } from "../context.ts";
 import { LaneContext } from "./lane.tsx";
 
@@ -42,7 +43,8 @@ function PlacedMark(componentProps: Mark.Props & { dragging?: boolean }) {
     value,
     ...elementProps
   } = componentProps;
-  const { state: rootState } = useTimelineContext("Mark");
+  // The state alone: a zoom moves the mark by itself, through the lane's unit, and does not draw it again.
+  const rootState = useTimelineState("Mark");
   const state = React.useMemo<Mark.State>(
     () => ({ ...rootState, dragging }),
     [rootState, dragging]

@@ -10,6 +10,11 @@ import {
   showMixer,
 } from "../helpers";
 
+/** The clip view's View menu, and two of its views. */
+const VIEW_MENU = /^View:/;
+const SPECTROGRAM_VIEW = /^Spectrogram\s*Octaves/;
+const BAND_VIEW = /^Waveform, by band/;
+
 export const checks: Checks = {
   "CLP-019: with Warp files on import on, a dropped groove comes in warped in Beats at its tempo":
     async (browser) => {
@@ -222,15 +227,20 @@ export const checks: Checks = {
       copy.height = drawn.height;
       const context = copy.getContext("2d");
       context?.drawImage(drawn, 0, 0);
-      const row = context?.getImageData(
+      // A column is empty with no ink from top to bottom: a stereo source is drawn a row a channel, with a line of ground between them.
+      const pixels = context?.getImageData(
         0,
-        Math.floor(drawn.height / 2),
+        0,
         drawn.width,
-        1
+        drawn.height
       ).data;
       let empty = 0;
       for (let column = 0; column < drawn.width; column += 1) {
-        if (!row?.[column * 4 + 3]) {
+        let inked = false;
+        for (let row = 0; row < drawn.height && !inked; row += 1) {
+          inked = Boolean(pixels?.[(row * drawn.width + column) * 4 + 3]);
+        }
+        if (!inked) {
           empty += 1;
         }
       }
@@ -367,7 +377,7 @@ export const checks: Checks = {
         `the fade is drawn from ${curve?.y}, over a name running to ${(header?.y ?? 0) + (header?.height ?? 0)}`
       );
     },
-  "CLP-025: a streamed recording's clip view reads only the frames in view, on one canvas":
+  "CLP-025: a streamed recording's clip view is drawn on the GPU from its leaves, on one canvas, never read whole":
     async (browser) => {
       const page = await open(browser);
       await dropChord(page, '[data-track="track-1"]', "Take", 4);
@@ -378,18 +388,81 @@ export const checks: Checks = {
       const source = page.locator("[data-slot=clip-panel-source]");
       await source.locator("canvas").first().waitFor({ timeout: 5000 });
       await page.waitForTimeout(1500);
-      // A recording streamed from its cache file is never read whole for the GPU: the canvas reads the frames in view.
+      // Its leaves are kept beside its cache file, and the GPU draws from them, reading only the frames in view zoomed in.
+      const kept = await page.evaluate(async () => {
+        const folder = await (
+          await navigator.storage.getDirectory()
+        ).getDirectoryHandle("cache");
+        return (await Array.fromAsync(folder.keys())).filter((name) =>
+          name.endsWith(".leaves")
+        ).length;
+      });
+      assert(kept > 0, "the streamed recording keeps no leaves");
       assert(
         (await source
           .locator("canvas[data-slot=timeline-clip-waveform-gl]")
-          .count()) === 0,
-        "a streamed recording is read whole for the GPU"
+          .count()) === 1,
+        "the source is not drawn on one GPU canvas"
       );
       assert(
         (await source
           .locator("canvas[data-slot=timeline-clip-waveform]")
-          .count()) === 1,
-        "the source is not drawn on one canvas"
+          .count()) === 0,
+        "the source is drawn on the 2D canvas too"
+      );
+    },
+  "CLP-026: the clip view's View menu draws a streamed source as its spectrogram, from spectra kept beside it, and by band":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const source = page.locator("[data-slot=clip-panel-source]");
+      await source.locator("canvas").first().waitFor({ timeout: 5000 });
+      const pick = async (name: RegExp) => {
+        await page.getByRole("button", { name: VIEW_MENU }).click();
+        await page.getByRole("menuitemradio", { name }).click();
+      };
+      await pick(SPECTROGRAM_VIEW);
+      await source
+        .locator("canvas[data-slot=timeline-clip-spectrogram]")
+        .waitFor({ timeout: 10_000 });
+      // The axis takes no width of its own: its labels hang over the lane's edge.
+      await page
+        .locator("[data-slot=spectrogram-axis]")
+        .waitFor({ state: "attached", timeout: 5000 });
+      const spectra = async () =>
+        await page.evaluate(async () => {
+          const folder = await (
+            await navigator.storage.getDirectory()
+          ).getDirectoryHandle("cache");
+          return (await Array.fromAsync(folder.keys())).filter((name) =>
+            name.endsWith(".spectra")
+          ).length;
+        });
+      const waited = async (tries: number): Promise<number> => {
+        const count = await spectra();
+        if (count > 0 || tries === 0) {
+          return count;
+        }
+        await page.waitForTimeout(250);
+        return await waited(tries - 1);
+      };
+      assert(
+        (await waited(40)) > 0,
+        "the spectrogram's spectra are not kept beside the recording"
+      );
+      await pick(BAND_VIEW);
+      await source
+        .locator("canvas[data-slot=timeline-clip-waveform-gl]")
+        .waitFor({ timeout: 5000 });
+      assert(
+        (await page
+          .getByRole("button", { name: VIEW_MENU })
+          .getAttribute("aria-label")) === "View: Waveform, by band",
+        "the View menu does not read the view shown"
       );
     },
   "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":

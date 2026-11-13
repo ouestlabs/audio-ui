@@ -2436,6 +2436,26 @@
         "summary": "What `detectSilences` takes, both optional."
       },
       {
+        "kind": "const",
+        "name": "SPECTRA_SIZE",
+        "summary": "The frames of a window of the spectra, and of one of their columns: 2048, some 43 ms at 48 kHz, the window a spectrogram fits a view with."
+      },
+      {
+        "kind": "interface",
+        "name": "Spectra",
+        "summary": "A recording summed up as spectra, for a spectrogram drawn on the GPU that does not hold the recording: a column every `hop` frames, each bin's level from DC to Nyquist over windows of `size` frames, a byte each."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectraSource",
+        "summary": "A reader of a recording, mixed to one: how many frames it holds, and its frames from `from` to `to`, at once or later."
+      },
+      {
+        "kind": "function",
+        "name": "spectrogramSpectra",
+        "summary": "The spectra of a recording (`Spectra`): a column every `hop` frames, each bin's power over the Hann windows of `size` frames centred in the column every `size / 2` frames (the short-time transform of `@audio/stft`), their mean, as a byte."
+      },
+      {
         "kind": "function",
         "name": "holdPeaks",
         "summary": "Keeps the loudest level each point of a spectrum reached: a peak rises with the spectrum at once, stays put for `hold` seconds, then falls at `fall` dB per second until the spectrum meets it again."
@@ -2466,9 +2486,19 @@
         "summary": "What each slice of a sound is made of: the share of its lows, mids and highs, the loudest of the three being 1."
       },
       {
+        "kind": "interface",
+        "name": "Bands",
+        "summary": "The three bands of a stretch of sound: its lows under 250 Hz, its highs over 2.5 kHz, and the mids between."
+      },
+      {
         "kind": "function",
         "name": "bandShares",
         "summary": "Reads a sound as `count` slices of equal length, each by how its energy is spread over three bands: the lows under 250 Hz, the highs over 2.5 kHz and the mids between."
+      },
+      {
+        "kind": "function",
+        "name": "createBandSplit",
+        "summary": "Splits a sound in three a stretch at a time, as `splitBands` does: each call takes the stretch that follows the one before and carries the crossover's state over, so stretches split in order are the sound split whole."
       },
       {
         "kind": "interface",
@@ -2491,6 +2521,7 @@
       "@audio/loudness-truepeak",
       "@audio/mir-chroma",
       "@audio/pitch-yin",
+      "@audio/stft",
       "@audio/weighting-k"
     ],
     "typesOnly": false,
@@ -4215,6 +4246,31 @@
       },
       {
         "kind": "interface",
+        "name": "LaneSpectra",
+        "summary": "A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from."
+      },
+      {
+        "kind": "const",
+        "name": "CHUNK_FRAMES",
+        "summary": "The frames a renderer keeps its samples in, and a streamed recording is read in: 65536."
+      },
+      {
+        "kind": "interface",
+        "name": "ChunkFeed",
+        "summary": "What a renderer holds of a recording it streams: the chunks handed over, oldest first, and those being read."
+      },
+      {
+        "kind": "interface",
+        "name": "ChunkRenderer",
+        "summary": "What a renderer that streams its samples does with them: `gl-waveform` and `gl-spectrogram` both do."
+      },
+      {
+        "kind": "function",
+        "name": "feedChunks",
+        "summary": "Hands a renderer the chunks of a streamed recording that `ranges` read, in frames: those it lacks are read, each handed over once read, and `ready` draws again."
+      },
+      {
+        "kind": "interface",
         "name": "LaneSegment",
         "summary": "A stretch of a clip that reads its recording straight on: its two times in the clip, in seconds from its start, and the frames of the recording at them."
       },
@@ -4269,9 +4325,29 @@
         "summary": "Sizes the canvas to the stretch of its lane the view shows, and gives that stretch in CSS px from the lane's left with the device pixel ratio, or hides the canvas when none shows."
       },
       {
+        "kind": "function",
+        "name": "joinParts",
+        "summary": "Parts that follow one another on the canvas and in the recording, joined into one while every junction between them stays within a quarter of a pixel of where the one line reading them all puts it: a warped clip's stretches, a pixel or two wide zoomed out, are drawn as one part, not hundreds, and stay apart zoomed in, where a junction would show."
+      },
+      {
+        "kind": "function",
+        "name": "partsInView",
+        "summary": "The clips of a lane the view shows, each with its parts, before their samples are read: stretches that read as one line joined (`joinParts`)."
+      },
+      {
         "kind": "type",
         "name": "SampleCache",
         "summary": "What a lane has read of its recordings, by `source`: a recording is read once, not at every paint, since a reader may copy or mix the whole of it each time it is asked."
+      },
+      {
+        "kind": "type",
+        "name": "KeptCache",
+        "summary": "What a lane has read of its recordings, by key: what it read, or is reading, and the reader it read it with."
+      },
+      {
+        "kind": "function",
+        "name": "readKept",
+        "summary": "What `read` gives for `samples`, from `cache` under `key` when that reader is the one it was read with, else read now and kept: once a promise is settled, the cache holds what it gave, so the next paint has it at once."
       },
       {
         "kind": "function",
@@ -4402,6 +4478,11 @@
         "kind": "interface",
         "name": "LaneSamples",
         "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneSpectra",
+        "summary": "A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from."
       }
     ],
     "from": "@audio-ui/gl/spectrogram",
@@ -4442,6 +4523,21 @@
         "kind": "interface",
         "name": "WaveformInputs",
         "summary": "What a waveform lane draws."
+      },
+      {
+        "kind": "const",
+        "name": "LEAF_FRAMES",
+        "summary": "The frames a leaf of `waveformLeaves` sums up."
+      },
+      {
+        "kind": "function",
+        "name": "waveformLeaves",
+        "summary": "The leaves of `samples`, from its first frame: `[min, max, Σx², count]` of each 256 frames, the last leaf of what is left, NaN left out (a leaf of nothing else is `[Infinity, -Infinity, 0, 0]`)."
+      },
+      {
+        "kind": "function",
+        "name": "leavesPeak",
+        "summary": "The loudest sample the leaves sum up, 0 to 1 for a recording at full scale at most: what a streamed clip's `peak` is."
       },
       {
         "kind": "interface",
@@ -4488,7 +4584,9 @@
     "package": "@audio-ui/gl",
     "audiojs": [],
     "typesOnly": false,
-    "usedBy": []
+    "usedBy": [
+      "use-loudest"
+    ]
   },
   {
     "adapters": [],

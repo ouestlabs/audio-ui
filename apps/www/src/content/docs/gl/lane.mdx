@@ -37,6 +37,10 @@ The lane never starts over for a change of inputs, so what is on the GPU stays: 
 
 A `LaneClip` is a clip of the lane: its `id`, where it `start`s and how `long` it is on the lane in seconds, its `gain`, the recording's `sampleRate` and `samples` (`{ frames, read }`, mixed to one), the `source` it reads, and `segments`, how it reads it. `segments(from, to)` gives the stretches of the clip between two times of it, each with the frames of the recording at its two ends; a stretch whose frames fall is read backwards.
 
+A recording streamed from a file adds `leaves` to its `samples`, what a waveform draws from zoomed out (see [waveform](/docs/gl/waveform#streamed-recordings)): a lane then never reads it whole. `feedChunks` hands a renderer the chunks of `CHUNK_FRAMES` frames a view reads, reading those it lacks and letting go of the oldest past what it keeps; `readKept` reads something of a recording once, kept across paints.
+
+Stretches that follow one another on the canvas and in the recording are drawn as one part while every junction stays within a quarter of a pixel of where that one line puts it (`joinParts`): a warped clip zoomed out is a part or two, not one per marker, and zoomed in, where a junction would show, its stretches stay apart.
+
 `visibleClips` gives the clips the view shows, each with its parts of the canvas (`x` and `width` in CSS px, the `frames` read there, lowest first) and its samples, read once a recording whatever its clips. `sameSamples` tells whether a reader handed out the same memory again, so it is not uploaded twice.
 
 ## WebGL 2

@@ -98,5 +98,13 @@ Test: apps/daw/test/browser/run.ts "CLP-023"
 
 ### CLP-024 Samples up close
 The clip view zooms in past the detail of a recording's peaks, down to 40 px between two samples: closer than the peaks, each column of the waveform spans its lowest and highest sample, and past one sample per pixel the waveform is a line through the samples, with a dot on each one that grows in from 6 px apart to 12. It reads the samples around what the view shows, from memory or from the recording's cache file, keeps them, and reads them ahead as the zoom nears them, so a zoom or a scroll draws in the frame it happens, never the peaks first and the samples after. The source's lane is never laid out wider than 16 million px, so a long recording stops short of the closest zoom.
-Deviation: the reference draws each channel of a stereo recording; here the waveform is the middle of the two, (L + R) / 2.
+A stereo recording is drawn a row a channel once the rows are 40 px tall, as the reference draws it, and as the middle of the two, (L + R) / 2, below that.
 Test: apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-024"; apps/daw/test/samples.test.ts "CLP-024"; apps/daw/test/browser/run.ts "CLP-024"
+
+### CLP-025 A streamed recording on the GPU
+A recording streamed from its cache file is drawn on the GPU without being read whole: its leaves, the lowest and highest sample, the sum of squares and the count of every 256 frames, of its mix, each channel and its three bands, are made as it is written and kept beside it (`cache/<id>.leaves`), or made once from its samples for a cache made before them. Zoomed out the waveform is drawn from them; once a leaf is wider than a device pixel the view reads the frames it shows, 65536 at a time, and lets go of the oldest it no longer shows.
+Test: apps/daw/test/samples.test.ts "CLP-025"; apps/daw/test/browser/run.ts "CLP-025"
+
+### CLP-026 The source's views
+The clip view's View menu, in its strip after the clip's name, draws the source as its waveform, its waveform by band (the lows warm behind, the highs cool in front, each as tall as its own loudest), or its spectrogram on octaves, mel, ERB or hertz, with its frequency axis and the frequency and level under the pointer; the view stays from clip to clip and across a reload. A streamed recording's spectrogram is drawn from its spectra, made once in a worker and kept beside it (`cache/<id>.spectra`), and its bands are split as the view reads them, from a few thousand frames before. A reversed clip is drawn as its waveform.
+Test: apps/daw/test/samples.test.ts "CLP-026"; apps/daw/test/browser/run.ts "CLP-026"

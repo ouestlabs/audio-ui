@@ -150,8 +150,9 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-loudest", {
     categories: ["audio", "timeline"],
+    dependencies: ["@audio-ui/gl"],
     description:
-      "The loudest sample of a recording, read in chunks a frame apart so a long one does not hold the page: what a waveform drawn on the GPU is scaled by, null until it is read",
+      "The loudest sample of a recording, from the leaves of a streamed one or read in chunks a frame apart so a long one does not hold the page: what a waveform drawn on the GPU is scaled by, null until it is read",
   }),
   hookItem("use-bake", {
     categories: ["audio", "timeline"],

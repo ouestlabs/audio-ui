@@ -2,12 +2,14 @@
  * The decoded audio the engine streams (G-013, PRF-006), in the browser's
  * private storage: each recording's channels at the engine's rate, as 32-bit
  * floats one channel after the other, in `cache/<id>.f32`, its peaks the same
- * way, the highest then the lowest, in `cache/<id>.range`, and what it takes to read it again without
+ * way, the highest then the lowest, in `cache/<id>.range`, the leaves its
+ * waveform is drawn from on the GPU in `cache/<id>.leaves`, and what it takes to read it again without
  * decoding, in `cache/<id>.json`. It is made from the
  * dropped file's bytes, and made again from them when it is missing.
  */
 import type { StreamedSource } from "@/lib/clip-player";
 import type { Recording } from "@/lib/daw/recordings";
+import { leavesName, makeLeaves } from "@/lib/daw/samples";
 import { canStore } from "@/lib/daw/storage";
 
 const CACHE = "cache";
@@ -78,6 +80,19 @@ export async function streamRecording(
   await peaks.write(recording.peaks.max as Float32Array<ArrayBuffer>);
   await peaks.write(recording.peaks.min as Float32Array<ArrayBuffer>);
   await peaks.close();
+  // Its leaves while its channels are at hand: the clip view does not read the file through for them.
+  const leaves = await (
+    await folder.getFileHandle(leavesName(`${id}.f32`), { create: true })
+  ).createWritable();
+  await leaves.write(
+    await makeLeaves(
+      channels.length,
+      entry.length,
+      entry.sampleRate,
+      (from, to) => channels.map((channel) => channel.subarray(from, to))
+    )
+  );
+  await leaves.close();
   // A level of amplitudes from before there were two, which nothing reads now.
   await folder.removeEntry(`${id}.peaks`).catch(() => undefined);
   const meta = await (

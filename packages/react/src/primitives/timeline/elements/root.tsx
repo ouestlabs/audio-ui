@@ -13,6 +13,7 @@ import {
   TimelineContext,
   type TimelineContextValue,
   type TimelineState,
+  TimelineStateContext,
   type ViewportMetrics,
   type ZoomChangeEventDetails,
 } from "../context.ts";
@@ -231,7 +232,11 @@ export function Root(componentProps: Root.Props) {
     state,
   });
 
-  return <TimelineContext value={context}>{element}</TimelineContext>;
+  return (
+    <TimelineContext value={context}>
+      <TimelineStateContext value={state}>{element}</TimelineStateContext>
+    </TimelineContext>
+  );
 }
 
 export namespace Root {

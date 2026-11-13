@@ -1,16 +1,16 @@
 ---
 title: useLoudest
-description: "The loudest sample of a recording, read in chunks a frame apart so a long one does not hold the page: what a waveform drawn on the GPU is scaled by, null until it is read."
+description: "The loudest sample of a recording, from the leaves of a streamed one or read in chunks a frame apart so a long one does not hold the page: what a waveform drawn on the GPU is scaled by, null until it is read."
 ---
 
 <Entry name="use-loudest" />
 
 ## Usage
 
-A waveform drawn on the GPU by [`WaveformLane`](/docs/components/base/waveform-lane) shows true amplitude, scaled by the recording's loudest sample so a quiet recording still fills its lane. `useLoudest` reads it from the recording's `samples` (`{ frames, read }`), a chunk of a million frames at a time with a frame between them, so a long recording does not hold the page. It is `null` until it is read, and the host draws the canvas waveform from the peaks meanwhile.
+A waveform drawn on the GPU by [`WaveformLane`](/docs/components/base/waveform-lane) shows true amplitude, scaled by the recording's loudest sample so a quiet recording still fills its lane. `useLoudest` reads it from the recording's `samples` (`{ frames, read }`), a chunk of a million frames at a time with a frame between them, so a long recording does not hold the page. A recording streamed from a file that gives its `leaves` is read from them instead, without reading its samples. Given the recording's `channels` too, it is the loudest of them, which the mix never passes, so a waveform drawn a row a channel fits its rows. It is `null` until it is read, and the host draws the canvas waveform from the peaks meanwhile.
 
 ```tsx
 import { useLoudest } from "@/hooks/use-loudest";
 
-const loudest = useLoudest(samples); // 0 to 1, or null while it is read
+const loudest = useLoudest(samples, channels); // 0 to 1, or null while it is read
 ```

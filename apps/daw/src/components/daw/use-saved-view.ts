@@ -2,6 +2,7 @@ import type { NoteLevel } from "@audio-ui/core/piano-roll";
 import type { GridDivision, MetronomeRhythm } from "@audio-ui/engine/time";
 import { type RefObject, useCallback, useEffect, useState } from "react";
 
+import type { SoundView } from "@/components/audio-ui/sound-lane";
 import { rackDevices } from "@/lib/arrangement";
 import { type ArrangementDoc, allTracks } from "@/lib/arrangement-state";
 import type { ExportSettings } from "@/lib/audio-export";
@@ -27,6 +28,8 @@ interface SavedEntries {
 }
 
 export interface SavedView {
+  /** How the clip view draws an audio clip's source: its waveform, by band, or its spectrogram. */
+  audioView: SoundView;
   clipFolded: string[];
   computerKeys: boolean;
   countIn: number;

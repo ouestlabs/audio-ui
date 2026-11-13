@@ -1,6 +1,10 @@
 import { describe, expect, test } from "bun:test";
 import {
+  CHUNK_FRAMES,
+  type ChunkFeed,
   clearLane,
+  feedChunks,
+  joinParts,
   type LaneClip,
   type LaneSegment,
   type SampleCache,
@@ -251,5 +255,171 @@ describe("clearLane", () => {
 
   test("does nothing without a context", () => {
     expect(() => clearLane(null)).not.toThrow();
+  });
+});
+
+describe("feedChunks", () => {
+  const frames = CHUNK_FRAMES * 100 + 10;
+  const setup = () => {
+    const asked: [number, number][] = [];
+    const set: number[] = [];
+    const dropped: number[] = [];
+    const samples = {
+      frames,
+      read: (from: number, to: number) => {
+        asked.push([from, to]);
+        return Promise.resolve(new Float32Array(to - from));
+      },
+    };
+    const renderer = {
+      drop: (from: number) => dropped.push(from / CHUNK_FRAMES),
+      set: (_: ArrayLike<number>, offset: number) =>
+        set.push(offset / CHUNK_FRAMES),
+    };
+    const feed: ChunkFeed = { held: [], reading: new Set() };
+    return { asked, dropped, feed, renderer, samples, set };
+  };
+  const settle = () => new Promise((resolve) => setTimeout(resolve));
+
+  test("reads the chunks a range covers, hands each over once read, and says when to draw again", async () => {
+    const { asked, feed, renderer, samples, set } = setup();
+    let ready = 0;
+    const whole = feedChunks(
+      feed,
+      samples,
+      [[CHUNK_FRAMES * 2 + 5, CHUNK_FRAMES * 4 - 1]],
+      renderer,
+      () => {
+        ready += 1;
+      },
+      () => true
+    );
+    expect(whole).toBe(false);
+    expect(asked).toEqual([
+      [CHUNK_FRAMES * 2, CHUNK_FRAMES * 3],
+      [CHUNK_FRAMES * 3, CHUNK_FRAMES * 4],
+    ]);
+    await settle();
+    expect(set).toEqual([2, 3]);
+    expect(ready).toBe(2);
+    expect(
+      feedChunks(
+        feed,
+        samples,
+        [[CHUNK_FRAMES * 2, CHUNK_FRAMES * 4]],
+        renderer,
+        () => undefined,
+        () => true
+      )
+    ).toBe(true);
+    expect(asked).toHaveLength(2);
+  });
+
+  test("a chunk being read is not read again, and the last one stops at the recording's end", () => {
+    const { asked, feed, renderer, samples } = setup();
+    const range = [[CHUNK_FRAMES * 100, frames + 500]] as const;
+    feedChunks(
+      feed,
+      samples,
+      range,
+      renderer,
+      () => undefined,
+      () => true
+    );
+    feedChunks(
+      feed,
+      samples,
+      range,
+      renderer,
+      () => undefined,
+      () => true
+    );
+    expect(asked).toEqual([[CHUNK_FRAMES * 100, frames]]);
+  });
+
+  test("a renderer let go of in the meantime is handed nothing", async () => {
+    const { feed, renderer, samples, set } = setup();
+    feedChunks(
+      feed,
+      samples,
+      [[0, 10]],
+      renderer,
+      () => undefined,
+      () => false
+    );
+    await settle();
+    expect(set).toEqual([]);
+    expect(feed.held).toEqual([]);
+  });
+
+  test("past the most it keeps, the oldest chunks the view no longer reads are let go of", async () => {
+    const { dropped, feed, renderer, samples } = setup();
+    const at = (chunk: number) =>
+      [[chunk * CHUNK_FRAMES, (chunk + 1) * CHUNK_FRAMES]] as const;
+    const feedOne = (chunk: number) =>
+      feedChunks(
+        feed,
+        samples,
+        at(chunk),
+        renderer,
+        () => undefined,
+        () => true
+      );
+    // One chunk after another, each read before the next is asked for.
+    await Array.from({ length: 71 }).reduce<Promise<unknown>>(
+      async (before, _, chunk) => {
+        await before;
+        feedOne(chunk);
+        await settle();
+      },
+      Promise.resolve()
+    );
+    expect(feed.held).toHaveLength(64);
+    expect(dropped).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    expect(feed.held.at(-1)).toBe(70);
+  });
+});
+
+describe("joinParts", () => {
+  test("stretches that follow one another and read as one line are one part", () => {
+    // A warp a hair off straight: 100 px a stretch, each 1000 frames but one 1001.
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 100, x: 0 },
+      { frames: [1000, 2001] as [number, number], width: 100, x: 100 },
+      { frames: [2001, 3001] as [number, number], width: 100, x: 200 },
+    ];
+    expect(joinParts(parts)).toEqual([{ frames: [0, 3001], width: 300, x: 0 }]);
+  });
+
+  test("a junction that would stray past a quarter of a pixel stays apart", () => {
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 100, x: 0 },
+      { frames: [1000, 3000] as [number, number], width: 100, x: 100 },
+    ];
+    expect(joinParts(parts)).toEqual(parts);
+  });
+
+  test("the same stretches a pixel wide, zoomed out, are joined", () => {
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 0.5, x: 0 },
+      { frames: [1000, 3000] as [number, number], width: 0.5, x: 0.5 },
+    ];
+    expect(joinParts(parts)).toEqual([{ frames: [0, 3000], width: 1, x: 0 }]);
+  });
+
+  test("the turns of a loop read the recording again and are never joined", () => {
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 1, x: 0 },
+      { frames: [0, 1000] as [number, number], width: 1, x: 1 },
+    ];
+    expect(joinParts(parts)).toEqual(parts);
+  });
+
+  test("parts apart on the canvas are not joined", () => {
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 10, x: 0 },
+      { frames: [1000, 2000] as [number, number], width: 10, x: 20 },
+    ];
+    expect(joinParts(parts)).toEqual(parts);
   });
 });

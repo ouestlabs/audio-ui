@@ -3,6 +3,7 @@ import {
   process as filterSection,
   highpass,
   lowpass,
+  state,
 } from "@audio/biquad";
 import crossover from "@audio/eq-crossover";
 
@@ -79,13 +80,52 @@ export interface SplitBands {
   peaks: { high: number; low: number; mid: number };
 }
 
+/** The three bands of a stretch of sound: its lows under 250 Hz, its highs over 2.5 kHz, and the mids between. */
+export interface Bands {
+  high: Float32Array;
+  low: Float32Array;
+  mid: Float32Array;
+}
+
+/**
+ * Splits a sound in three a stretch at a time, as `splitBands` does: each call
+ * takes the stretch that follows the one before and carries the crossover's
+ * state over, so stretches split in order are the sound split whole. Start
+ * another for another sound, or to read from somewhere else: a stretch read on
+ * its own settles once some tens of milliseconds have gone through.
+ */
+export function createBandSplit(
+  sampleRate: number
+): (stretch: ArrayLike<number>) => Bands {
+  const bands = crossover([LOW_UNDER, HIGH_OVER], 4, sampleRate);
+  const [lowBand = [], midBand = [], highBand = []] = bands;
+  const kept = [lowBand, midBand, highBand].map((sections) =>
+    sections.map(() => state())
+  );
+  const through = (
+    stretch: ArrayLike<number>,
+    sections: Parameters<typeof cascade>[1],
+    states: ReturnType<typeof state>[] | undefined
+  ) => {
+    const out = Float32Array.from(stretch);
+    cascade(out, sections, states);
+    return out;
+  };
+  return (stretch) => ({
+    high: through(stretch, highBand, kept[2]),
+    low: through(stretch, lowBand, kept[0]),
+    mid: through(stretch, midBand, kept[1]),
+  });
+}
+
 /**
  * The sound's channels mixed to one and split in three by a Linkwitz-Riley
  * crossover (`@audio/eq-crossover`, 24 dB an octave) at 250 Hz and 2.5 kHz:
  * the three bands add back to the mix, level and phase. Draw each as a
  * waveform of its own to colour a sound by its frequencies, as DJ software
  * does; `bandShares` is the same split read as shares per slice. It holds
- * three copies of the mix, so call it when a view asks for it.
+ * three copies of the mix, so call it when a view asks for it; a sound too
+ * long to hold is split a stretch at a time by `createBandSplit`.
  */
 export function splitBands(
   channels: readonly Float32Array[],
@@ -99,19 +139,7 @@ export function splitBands(
         (mix[index] as number) + (channel[index] as number) / channels.length;
     }
   }
-  const [lowBand, midBand, highBand] = crossover(
-    [LOW_UNDER, HIGH_OVER],
-    4,
-    sampleRate
-  );
-  const through = (sections: Parameters<typeof cascade>[1]) => {
-    const out = Float32Array.from(mix);
-    cascade(out, sections);
-    return out;
-  };
-  const high = through(highBand ?? []);
-  const low = through(lowBand ?? []);
-  const mid = through(midBand ?? []);
+  const { high, low, mid } = createBandSplit(sampleRate)(mix);
   const loudest = (values: Float32Array) =>
     values.reduce((top, value) => Math.max(top, Math.abs(value)), 0);
   return {

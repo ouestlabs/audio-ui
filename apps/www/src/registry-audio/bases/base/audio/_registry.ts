@@ -93,6 +93,24 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["audio-editor"],
+    dependencies: ["@audio-ui/gl", "@audio-ui/react"],
+    description:
+      "A lane's clips drawn on the GPU in the view you pick: the waveform, the waveform by band, or the spectrogram on octaves, mel, ERB or hertz with its frequency axis and the reading under the pointer. With the views labelled for a menu",
+    files: [
+      {
+        path: "audio/elements/sound-lane.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "sound-lane",
+    registryDependencies: [
+      "@audio-ui/clip-spectrogram",
+      "@audio-ui/waveform-lane",
+    ],
+    type: "registry:ui",
+  },
+  {
     dependencies: ["@audio-ui/react"],
     description:
       "A clip of an arrangement on its track's lane: move it, trim and fade it, pick a fade's curve, rename it in place and act on it from its menu. A MIDI clip draws its notes across its body.",
@@ -684,7 +702,7 @@ export const audio: RegistryItem[] = [
     categories: ["timeline", "waveform", "knob"],
     dependencies: ["@audio-ui/engine", "@audio-ui/gl", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), drawn on the GPU when the source's samples are given and WebGL 2 is there.",
+      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), drawn on the GPU when the source's samples are given and WebGL 2 is there: as its waveform, by band, or as its spectrogram, from the view menu.",
     files: [
       {
         path: "audio/panels/clip-panel.tsx",
@@ -698,7 +716,9 @@ export const audio: RegistryItem[] = [
       "@audio-ui/clip-view",
       "@audio-ui/timeline",
       "@audio-ui/use-loudest",
-      "@audio-ui/waveform-lane",
+      "@audio-ui/sound-lane",
+      "@shadcn/button",
+      "@shadcn/dropdown-menu",
     ],
     type: "registry:ui",
   },

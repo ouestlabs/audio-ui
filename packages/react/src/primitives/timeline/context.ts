@@ -135,6 +135,22 @@ export const TimelineContext = React.createContext<TimelineContextValue | null>(
   null
 );
 
+/**
+ * The root's state alone, for the parts that read nothing else: they are not
+ * drawn again when the zoom or the view changes, which moves them by itself.
+ */
+export const TimelineStateContext = React.createContext<TimelineState | null>(
+  null
+);
+
+export function useTimelineState(part: string): TimelineState {
+  const state = React.use(TimelineStateContext);
+  if (!state) {
+    throw new Error(`Timeline.${part} must be used within Timeline.Root`);
+  }
+  return state;
+}
+
 export function useTimelineContext(part: string): TimelineContextValue {
   const context = React.use(TimelineContext);
   if (!context) {
