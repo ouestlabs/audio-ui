@@ -18,6 +18,12 @@ import { cn } from "@/lib/utils";
  */
 export interface ClipSamples {
   frames: number;
+  /**
+   * For a recording streamed from a file: it summed up 256 frames at a time,
+   * as `waveformLeaves` of `@audio-ui/gl/waveform` makes it. A waveform drawn
+   * on the GPU then never reads it whole, only the frames it shows zoomed in.
+   */
+  leaves?: () => ArrayLike<number> | Promise<ArrayLike<number>>;
   read: (
     from: number,
     to: number

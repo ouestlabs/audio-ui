@@ -1,13 +1,23 @@
 /**
  * A recording's samples as the clip view reads them for its closest zooms
- * (CLP-024): the middle of its channels, (L + R) / 2 for a stereo one, a
- * frame at a time, read from memory or, for a streamed recording, from its
- * cache file, only the frames the view asks for.
+ * (CLP-024): the middle of its channels, (L + R) / 2 for a stereo one, or each
+ * channel alone for a waveform drawn a row a channel, a frame at a time, read
+ * from memory or, for a streamed recording, from its cache file, only the
+ * frames the view asks for. A streamed recording also gives its leaves, what
+ * its waveform is drawn from zoomed out on the GPU: read from beside its cache
+ * file, or made from it once and written there.
  */
+import { LEAF_FRAMES, waveformLeaves } from "@audio-ui/gl/waveform";
 import type { ClipSamples } from "@/components/audio-ui/clip-waveform";
 import type { RecordingSource, StreamedSource } from "@/lib/clip-player";
 
 const BYTES = Float32Array.BYTES_PER_ELEMENT;
+
+/** A file name's extension. */
+const EXTENSION = /\.[^.]+$/;
+
+/** The frames leaves are made of at a time: whole leaves, with a frame of the page between each. */
+const LEAF_STEP = 1 << 20;
 
 /** The middle of `channels`, their first `frames` frames. */
 function middle(channels: readonly ArrayLike<number>[], frames: number) {
@@ -21,23 +31,150 @@ function middle(channels: readonly ArrayLike<number>[], frames: number) {
   return mixed;
 }
 
-/** A streamed recording's cache file, opened once and kept: it is never written again. */
-function cacheFile(source: StreamedSource): () => Promise<File> {
-  let file: Promise<File> | null = null;
-  return () => {
-    file ??= (async () => {
-      const folders = source.path.slice(0, -1);
-      const name = source.path.at(-1) ?? "";
-      // Each folder lies inside the one before.
-      const folder = await folders.reduce(
-        async (parent, step) => (await parent).getDirectoryHandle(step),
-        navigator.storage.getDirectory()
-      );
-      return (await folder.getFileHandle(name)).getFile();
-    })();
-    return file;
-  };
+/** The folder a file of the private storage lies in, from its path: each folder inside the one before. */
+const folderOf = (path: readonly string[]) =>
+  path
+    .slice(0, -1)
+    .reduce<Promise<FileSystemDirectoryHandle>>(
+      async (parent, step) => (await parent).getDirectoryHandle(step),
+      navigator.storage.getDirectory()
+    );
+
+/** Each streamed recording's cache file, opened once and kept: it is never written again. */
+const opened = new WeakMap<StreamedSource, Promise<File>>();
+
+function cacheFile(source: StreamedSource): Promise<File> {
+  const kept = opened.get(source);
+  if (kept) {
+    return kept;
+  }
+  const file = (async () =>
+    (
+      await (
+        await folderOf(source.path)
+      ).getFileHandle(source.path.at(-1) ?? "")
+    ).getFile())();
+  opened.set(source, file);
+  file.catch(() => opened.delete(source));
+  return file;
 }
+
+/** Frames `from` to `to` of one channel of a streamed recording: its channels lie one after the other, `length` frames each. */
+async function readChannel(
+  source: StreamedSource,
+  channel: number,
+  from: number,
+  to: number
+): Promise<Float32Array<ArrayBuffer>> {
+  const file = await cacheFile(source);
+  const at = (channel * source.length + from) * BYTES;
+  const bytes = await file
+    .slice(at, at + Math.max(0, to - from) * BYTES)
+    .arrayBuffer();
+  return new Float32Array(bytes);
+}
+
+/** How many sets of leaves a recording of `channels` keeps: its mix's, and each channel's for one of several. */
+const setsOf = (channels: number) => (channels > 1 ? channels + 1 : 1);
+
+/**
+ * A recording's leaves (`waveformLeaves`), its mix's and then each channel's
+ * for one of several, one set after the other: made `LEAF_STEP` frames at a
+ * time from `read`, which gives every channel's frames between two frames,
+ * with a frame of the page between each.
+ */
+export async function makeLeaves(
+  channels: number,
+  length: number,
+  read: (
+    from: number,
+    to: number
+  ) => readonly ArrayLike<number>[] | Promise<readonly ArrayLike<number>[]>
+): Promise<Float32Array<ArrayBuffer>> {
+  const size = Math.ceil(length / LEAF_FRAMES) * 4;
+  const out = new Float32Array(size * setsOf(channels));
+  const step = async (from: number): Promise<void> => {
+    if (from >= length) {
+      return;
+    }
+    const to = Math.min(length, from + LEAF_STEP);
+    const parts = await read(from, to);
+    const at = (from / LEAF_FRAMES) * 4;
+    out.set(waveformLeaves(middle(parts, to - from)), at);
+    if (channels > 1) {
+      for (const [index, part] of parts.entries()) {
+        out.set(waveformLeaves(part), size * (index + 1) + at);
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve));
+    await step(to);
+  };
+  await step(0);
+  return out;
+}
+
+/** The name of the file a streamed recording's leaves are kept in, beside its samples: `<id>.leaves`. */
+export const leavesName = (samplesName: string) =>
+  samplesName.replace(EXTENSION, ".leaves");
+
+/** Each streamed recording's leaves, read or made once. */
+const leavesMade = new WeakMap<StreamedSource, Promise<Float32Array[]>>();
+
+/** A streamed recording's leaves, its mix's and then each channel's: read from beside its cache file, or made from it and written there. */
+function leavesOf(source: StreamedSource): Promise<Float32Array[]> {
+  const kept = leavesMade.get(source);
+  if (kept) {
+    return kept;
+  }
+  const made = (async () => {
+    const folder = await folderOf(source.path);
+    const name = leavesName(source.path.at(-1) ?? "");
+    const size = Math.ceil(source.length / LEAF_FRAMES) * 4;
+    const sets = setsOf(source.channels);
+    const stored = await folder
+      .getFileHandle(name)
+      .then((handle) => handle.getFile())
+      .catch(() => null);
+    let leaves =
+      stored && stored.size === size * sets * BYTES
+        ? new Float32Array(await stored.arrayBuffer())
+        : null;
+    if (!leaves) {
+      // A cache made before its leaves were: made once from its samples, and kept beside them.
+      leaves = await makeLeaves(source.channels, source.length, (from, to) =>
+        Promise.all(
+          Array.from({ length: source.channels }, (_, channel) =>
+            readChannel(source, channel, from, to)
+          )
+        )
+      );
+      const written = leaves;
+      await folder
+        .getFileHandle(name, { create: true })
+        .then(async (handle) => {
+          const writable = await handle.createWritable();
+          await writable.write(written);
+          await writable.close();
+        })
+        .catch(() => undefined);
+    }
+    const all = leaves;
+    return Array.from({ length: sets }, (_, set) =>
+      all.subarray(set * size, (set + 1) * size)
+    );
+  })();
+  leavesMade.set(source, made);
+  made.catch(() => leavesMade.delete(source));
+  return made;
+}
+
+/** A recording held in memory, its channels. */
+const channelsIn = (source: Exclude<RecordingSource, StreamedSource>) =>
+  "getChannelData" in source
+    ? Array.from({ length: source.numberOfChannels }, (_, channel) =>
+        source.getChannelData(channel)
+      )
+    : source.channels;
 
 /** The readers made so far, one per source, so a view keeps the same one across renders. */
 const made = new WeakMap<RecordingSource, ClipSamples>();
@@ -55,32 +192,21 @@ export function recordingSamples(source: RecordingSource): ClipSamples {
 
 function readerOf(source: RecordingSource): ClipSamples {
   if ("path" in source) {
-    const open = cacheFile(source);
     return {
       frames: source.length,
-      read: async (from, to) => {
-        const file = await open();
-        const frames = Math.max(0, to - from);
-        // Its channels lie one after the other, `length` frames each.
-        const channels = await Promise.all(
-          Array.from({ length: source.channels }, async (_, channel) => {
-            const at = (channel * source.length + from) * BYTES;
-            const bytes = await file
-              .slice(at, at + frames * BYTES)
-              .arrayBuffer();
-            return new Float32Array(bytes);
-          })
-        );
-        return middle(channels, frames);
-      },
+      leaves: async () => (await leavesOf(source))[0] ?? new Float32Array(0),
+      read: async (from, to) =>
+        middle(
+          await Promise.all(
+            Array.from({ length: source.channels }, (_, channel) =>
+              readChannel(source, channel, from, to)
+            )
+          ),
+          Math.max(0, to - from)
+        ),
     };
   }
-  const channels =
-    "getChannelData" in source
-      ? Array.from({ length: source.numberOfChannels }, (_, channel) =>
-          source.getChannelData(channel)
-        )
-      : source.channels;
+  const channels = channelsIn(source);
   return {
     frames: channels[0]?.length ?? 0,
     read: (from, to) =>
@@ -89,4 +215,34 @@ function readerOf(source: RecordingSource): ClipSamples {
         Math.max(0, to - from)
       ),
   };
+}
+
+/** The channel readers made so far, one list per source. */
+const madeChannels = new WeakMap<RecordingSource, readonly ClipSamples[]>();
+
+/**
+ * Each channel of a recording alone, a reader each, for a waveform drawn a row
+ * a channel: the same readers for the same source. Undefined for a mono one.
+ */
+export function recordingChannels(
+  source: RecordingSource
+): readonly ClipSamples[] | undefined {
+  const kept = madeChannels.get(source);
+  if (kept) {
+    return kept.length > 1 ? kept : undefined;
+  }
+  const readers: ClipSamples[] =
+    "path" in source
+      ? Array.from({ length: source.channels }, (_, channel) => ({
+          frames: source.length,
+          leaves: async () =>
+            (await leavesOf(source))[channel + 1] ?? new Float32Array(0),
+          read: (from, to) => readChannel(source, channel, from, to),
+        }))
+      : channelsIn(source).map((channel) => ({
+          frames: channel.length,
+          read: (from, to) => channel.subarray(from, to),
+        }));
+  madeChannels.set(source, readers);
+  return readers.length > 1 ? readers : undefined;
 }

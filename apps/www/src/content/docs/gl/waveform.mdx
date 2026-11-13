@@ -25,6 +25,26 @@ lane.destroy();
 
 A clip's `peak` is its recording's loudest sample, 0 to 1: the waveform is drawn as tall as the loudest reaches the lane's height, as a quiet recording still fills its lane. The clip's `gain` scales what is drawn, as it scales what plays.
 
+## Streamed recordings
+
+A recording streamed from a file is never read whole. Its `samples` give `leaves`: the recording summed up 256 frames at a time, `[min, max, Σx², count]` each, as `waveformLeaves` makes them from its samples, once, as it is written, and kept beside it. Zoomed out the lane draws from them alone, exact at a leaf a device pixel or more; past that it reads the frames it shows, a chunk of `CHUNK_FRAMES` (65536) at a time, and lets go of the oldest chunks it no longer shows. `leavesPeak` gives the clip's `peak` from them.
+
+```ts
+import { leavesPeak, waveformLeaves } from "@audio-ui/gl/waveform";
+
+// Once, while the recording is written: whole leaves a stretch at a time, laid end to end.
+const leaves = waveformLeaves(mix);
+
+const samples = {
+  frames,
+  leaves: () => leaves, // or a promise, read from where they are kept
+  read: (from, to) => readFrames(from, to), // a chunk at a time, at once or as a promise
+};
+const peak = leavesPeak(leaves);
+```
+
+Each channel of a clip's `channels` gives its own leaves for its row.
+
 ## Channels
 
 A recording with several channels is drawn as a DAW draws it: a row for each channel once the rows are tall enough to read, one waveform below that, as a short track shows one lane. `layout` is `"auto"` by default and splits when each row would be at least `SPLIT_ROW_PX` (40) CSS px tall; `"split"` and `"mix"` force it. Give a clip its `channels`, one reader each, for the rows; `samples` stays their mix, which the one waveform, the band look and the spectrogram draw. The rows share the clip's `peak`, so channels are compared at the same height, and are told apart by a pixel of ground. `splitsChannels` and `waveformRows` give the layout for a lane height, to lay out what goes beside it.

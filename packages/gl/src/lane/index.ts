@@ -261,7 +261,75 @@ export function placeLane(
   return { from, ratio, to };
 }
 
-/** The clips of a lane the view shows, each with its parts, before their samples are read. */
+/** How far, in CSS px, a junction between parts may stray from the one line they are joined into. */
+const JOIN_TOLERANCE = 0.25;
+
+/** Two numbers equal but for rounding. */
+const near = (a: number, b: number) =>
+  Math.abs(a - b) <= 1e-6 * Math.max(1, Math.abs(a), Math.abs(b));
+
+/** Whether the parts of a run read as one line: each junction within `JOIN_TOLERANCE` px of where that line puts its frame. */
+function readsAsOne(run: readonly VisiblePart[]): boolean {
+  const [first] = run;
+  const last = run.at(-1);
+  if (!(first && last)) {
+    return false;
+  }
+  const [from, to] = [first.frames[0], last.frames[1]];
+  const width = last.x + last.width - first.x;
+  return (
+    to > from &&
+    run
+      .slice(1)
+      .every(
+        (part) =>
+          Math.abs(
+            first.x + ((part.frames[0] - from) / (to - from)) * width - part.x
+          ) <= JOIN_TOLERANCE
+      )
+  );
+}
+
+/**
+ * Parts that follow one another on the canvas and in the recording, joined
+ * into one while every junction between them stays within a quarter of a
+ * pixel of where the one line reading them all puts it: a warped clip's
+ * stretches, a pixel or two wide zoomed out, are drawn as one part, not
+ * hundreds, and stay apart zoomed in, where a junction would show. The turns
+ * of a loop, which read the recording again, are never joined.
+ */
+export function joinParts(parts: readonly VisiblePart[]): VisiblePart[] {
+  const joined: VisiblePart[] = [];
+  let run: VisiblePart[] = [];
+  const close = () => {
+    const [first] = run;
+    const last = run.at(-1);
+    if (first && last) {
+      joined.push({
+        frames: [first.frames[0], last.frames[1]],
+        width: last.x + last.width - first.x,
+        x: first.x,
+      });
+    }
+  };
+  for (const part of parts) {
+    const last = run.at(-1);
+    const follows =
+      last &&
+      near(last.x + last.width, part.x) &&
+      near(last.frames[1], part.frames[0]);
+    if (follows && readsAsOne([...run, part])) {
+      run.push(part);
+    } else {
+      close();
+      run = [part];
+    }
+  }
+  close();
+  return joined;
+}
+
+/** The clips of a lane the view shows, each with its parts, before their samples are read: stretches that read as one line joined (`joinParts`). */
 export function partsInView(
   clips: readonly LaneClip[],
   placed: Pick<Placed, "from" | "to">,
@@ -297,7 +365,7 @@ export function partsInView(
           },
         ];
       });
-    return parts.length > 0 ? [{ entry, parts }] : [];
+    return parts.length > 0 ? [{ entry, parts: joinParts(parts) }] : [];
   });
 }
 

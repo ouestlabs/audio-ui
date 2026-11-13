@@ -4,6 +4,7 @@ import {
   type ChunkFeed,
   clearLane,
   feedChunks,
+  joinParts,
   type LaneClip,
   type LaneSegment,
   type SampleCache,
@@ -376,5 +377,49 @@ describe("feedChunks", () => {
     expect(feed.held).toHaveLength(64);
     expect(dropped).toEqual([0, 1, 2, 3, 4, 5, 6]);
     expect(feed.held.at(-1)).toBe(70);
+  });
+});
+
+describe("joinParts", () => {
+  test("stretches that follow one another and read as one line are one part", () => {
+    // A warp a hair off straight: 100 px a stretch, each 1000 frames but one 1001.
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 100, x: 0 },
+      { frames: [1000, 2001] as [number, number], width: 100, x: 100 },
+      { frames: [2001, 3001] as [number, number], width: 100, x: 200 },
+    ];
+    expect(joinParts(parts)).toEqual([{ frames: [0, 3001], width: 300, x: 0 }]);
+  });
+
+  test("a junction that would stray past a quarter of a pixel stays apart", () => {
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 100, x: 0 },
+      { frames: [1000, 3000] as [number, number], width: 100, x: 100 },
+    ];
+    expect(joinParts(parts)).toEqual(parts);
+  });
+
+  test("the same stretches a pixel wide, zoomed out, are joined", () => {
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 0.5, x: 0 },
+      { frames: [1000, 3000] as [number, number], width: 0.5, x: 0.5 },
+    ];
+    expect(joinParts(parts)).toEqual([{ frames: [0, 3000], width: 1, x: 0 }]);
+  });
+
+  test("the turns of a loop read the recording again and are never joined", () => {
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 1, x: 0 },
+      { frames: [0, 1000] as [number, number], width: 1, x: 1 },
+    ];
+    expect(joinParts(parts)).toEqual(parts);
+  });
+
+  test("parts apart on the canvas are not joined", () => {
+    const parts = [
+      { frames: [0, 1000] as [number, number], width: 10, x: 0 },
+      { frames: [1000, 2000] as [number, number], width: 10, x: 20 },
+    ];
+    expect(joinParts(parts)).toEqual(parts);
   });
 });

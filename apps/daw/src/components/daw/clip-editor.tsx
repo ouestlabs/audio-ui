@@ -17,7 +17,7 @@ import {
   DRUM_RACK_DEVICE,
 } from "@/lib/arrangement";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
-import { recordingSamples } from "@/lib/daw/samples";
+import { recordingChannels, recordingSamples } from "@/lib/daw/samples";
 import { cn } from "@/lib/utils";
 import { useSavedState } from "./use-saved-view";
 
@@ -293,6 +293,7 @@ export function ClipEditor({
       active={!clip.disabled}
       bar={bar}
       beatsPerBar={doc.tempo.beatsPerBar}
+      channels={recording ? recordingChannels(recording.source) : undefined}
       className={docked}
       collapsed={collapsed}
       foldedBoxes={folded}

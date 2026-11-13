@@ -4214,6 +4214,26 @@
         "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
       },
       {
+        "kind": "const",
+        "name": "CHUNK_FRAMES",
+        "summary": "The frames a renderer keeps its samples in, and a streamed recording is read in: 65536."
+      },
+      {
+        "kind": "interface",
+        "name": "ChunkFeed",
+        "summary": "What a renderer holds of a recording it streams: the chunks handed over, oldest first, and those being read."
+      },
+      {
+        "kind": "interface",
+        "name": "ChunkRenderer",
+        "summary": "What a renderer that streams its samples does with them: `gl-waveform` and `gl-spectrogram` both do."
+      },
+      {
+        "kind": "function",
+        "name": "feedChunks",
+        "summary": "Hands a renderer the chunks of a streamed recording that `ranges` read, in frames: those it lacks are read, each handed over once read, and `ready` draws again."
+      },
+      {
         "kind": "interface",
         "name": "LaneSegment",
         "summary": "A stretch of a clip that reads its recording straight on: its two times in the clip, in seconds from its start, and the frames of the recording at them."
@@ -4269,9 +4289,24 @@
         "summary": "Sizes the canvas to the stretch of its lane the view shows, and gives that stretch in CSS px from the lane's left with the device pixel ratio, or hides the canvas when none shows."
       },
       {
+        "kind": "function",
+        "name": "joinParts",
+        "summary": "Parts that follow one another on the canvas and in the recording, joined into one while every junction between them stays within a quarter of a pixel of where the one line reading them all puts it: a warped clip's stretches, a pixel or two wide zoomed out, are drawn as one part, not hundreds, and stay apart zoomed in, where a junction would show."
+      },
+      {
+        "kind": "function",
+        "name": "partsInView",
+        "summary": "The clips of a lane the view shows, each with its parts, before their samples are read: stretches that read as one line joined (`joinParts`)."
+      },
+      {
         "kind": "type",
         "name": "SampleCache",
         "summary": "What a lane has read of its recordings, by `source`: a recording is read once, not at every paint, since a reader may copy or mix the whole of it each time it is asked."
+      },
+      {
+        "kind": "function",
+        "name": "readKept",
+        "summary": "What `read` gives for `samples`, from `cache` under `key` when that reader is the one it was read with, else read now and kept: once a promise is settled, the cache holds what it gave, so the next paint has it at once."
       },
       {
         "kind": "function",
@@ -4444,6 +4479,21 @@
         "summary": "What a waveform lane draws."
       },
       {
+        "kind": "const",
+        "name": "LEAF_FRAMES",
+        "summary": "The frames a leaf of `waveformLeaves` sums up."
+      },
+      {
+        "kind": "function",
+        "name": "waveformLeaves",
+        "summary": "The leaves of `samples`, from its first frame: `[min, max, Σx², count]` of each 256 frames, the last leaf of what is left, NaN left out (a leaf of nothing else is `[Infinity, -Infinity, 0, 0]`)."
+      },
+      {
+        "kind": "function",
+        "name": "leavesPeak",
+        "summary": "The loudest sample the leaves sum up, 0 to 1 for a recording at full scale at most: what a streamed clip's `peak` is."
+      },
+      {
         "kind": "interface",
         "name": "WaveformRow",
         "summary": "What a clip draws in one row of the lane: a layer of its recording, its samples, the loudest of them, and the row's place and height."
@@ -4488,7 +4538,9 @@
     "package": "@audio-ui/gl",
     "audiojs": [],
     "typesOnly": false,
-    "usedBy": []
+    "usedBy": [
+      "use-loudest"
+    ]
   },
   {
     "adapters": [],

@@ -162,3 +162,43 @@ describe("Timeline.Mark", () => {
     ).toBe("20");
   });
 });
+
+/** How many times a mark was drawn, and the state it was last drawn with. */
+const drawing = { count: 0, state: null as Timeline.Mark.State | null };
+
+function drawMark(
+  props: React.ComponentProps<"div">,
+  state: Timeline.Mark.State
+) {
+  drawing.count += 1;
+  drawing.state = state;
+  return <div {...props} />;
+}
+
+describe("Timeline.Mark that does not move", () => {
+  test("is not drawn again when the zoom changes: a zoom moves it by itself", () => {
+    const mark = <Timeline.Mark render={drawMark} value={20} />;
+    const timeline = (zoom: number) => (
+      <Timeline.Root duration={100} zoom={zoom}>
+        <Timeline.Lane>{mark}</Timeline.Lane>
+      </Timeline.Root>
+    );
+    const view = render(timeline(2));
+    const before = drawing.count;
+    view.rerender(timeline(4));
+    view.rerender(timeline(8));
+    expect(drawing.count).toBe(before);
+  });
+
+  test("is drawn again when the timeline's state changes", () => {
+    const mark = <Timeline.Mark render={drawMark} value={20} />;
+    const timeline = (off: boolean) => (
+      <Timeline.Root disabled={off} duration={100}>
+        <Timeline.Lane>{mark}</Timeline.Lane>
+      </Timeline.Root>
+    );
+    const view = render(timeline(false));
+    view.rerender(timeline(true));
+    expect(drawing.state?.disabled).toBe(true);
+  });
+});
