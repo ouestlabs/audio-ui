@@ -457,11 +457,11 @@ export function recordingSource(source: RecordingSource) {
   if (kept) {
     return kept;
   }
-  const made = {
+  const read = {
     channels: recordingChannels(source),
     sampleRate: source.sampleRate,
     samples: recordingSamples(source),
   };
-  madeSources.set(source, made);
-  return made;
+  madeSources.set(source, read);
+  return read;
 }
