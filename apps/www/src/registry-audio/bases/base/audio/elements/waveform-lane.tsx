@@ -15,6 +15,8 @@ export interface WaveformBands {
   high: ArrayLike<number>;
   low: ArrayLike<number>;
   mid: ArrayLike<number>;
+  /** The loudest sample of each band, 0 to 1: each is drawn as tall as its own loudest reaches, so a band that is quiet in the mix still shows. */
+  peaks?: { high: number; low: number; mid: number };
 }
 
 /** A clip of the lane, with what its waveform needs besides what every lane clip has. */
@@ -98,16 +100,16 @@ function layersOf(
   entry: WaveformClip,
   data: ArrayLike<number>,
   look: WaveformLook
-): [Layer, ArrayLike<number>][] {
+): [Layer, ArrayLike<number>, number][] {
   if (look === "bands" && entry.bands) {
-    const { high, low, mid } = entry.bands();
+    const { high, low, mid, peaks } = entry.bands();
     return [
-      ["low", low],
-      ["mid", mid],
-      ["high", high],
+      ["low", low, peaks?.low ?? entry.peak],
+      ["mid", mid, peaks?.mid ?? entry.peak],
+      ["high", high, peaks?.high ?? entry.peak],
     ];
   }
-  return [["plain", data]];
+  return [["plain", data, entry.peak]];
 }
 
 /** Draws every clip of the lane the view shows, each into its own part of the one canvas. */
@@ -126,11 +128,12 @@ async function paintLane({
   const visible = await visibleClips(clips, placed, zoom);
   const drawn = visible.flatMap((each) =>
     layersOf(each.entry as WaveformClip, each.data, look).map(
-      ([layer, data]) => ({
+      ([layer, data, peak]) => ({
         data,
         each,
         key: `${each.entry.id}:${layer}`,
         layer,
+        peak,
       })
     )
   );
@@ -154,7 +157,7 @@ async function paintLane({
     }
     const { each } = layer;
     const entry = each.entry as WaveformClip;
-    const scale = Math.max(entry.peak, 1e-6) / Math.max(entry.gain, 1e-6);
+    const scale = Math.max(layer.peak, 1e-6) / Math.max(entry.gain, 1e-6);
     // The data is handed over only when it changed: the same samples are not uploaded again.
     const changed = !sameSamples(held.data.get(layer.key), layer.data);
     held.data.set(layer.key, layer.data);

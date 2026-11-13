@@ -28,6 +28,6 @@ import { WaveformLane } from "@/components/audio-ui/waveform-lane";
 | `zoom` | `number` | The lane's pixels a second. |
 | `look` | `"plain" \| "bands"` | One waveform, or the three bands of the sound one over the other. Default `"plain"`. |
 
-With `look="bands"` a clip is drawn as its sound split in three by a Linkwitz-Riley crossover, at 250 Hz and 2.5 kHz (`splitBands` of [`@audio-ui/engine/analysis`](/docs/engine/analysis)): the lows warm, the mids in the ink's own colour and the highs cool, the lows tall behind the highs, as DJ software colours a sound. `bands` is called once a recording and may split it lazily: the split holds three copies of the mix.
+With `look="bands"` a clip is drawn as its sound split in three by a Linkwitz-Riley crossover, at 250 Hz and 2.5 kHz (`splitBands` of [`@audio-ui/engine/analysis`](/docs/engine/analysis)): the lows warm, the mids in the ink's own colour and the highs cool, the lows tall behind the highs, as DJ software colours a sound. Each band is drawn as tall as its own loudest sample reaches (`peaks`), so a band that is quiet in the mix still shows. `bands` is called once a recording and may split it lazily: the split holds three copies of the mix.
 
 A clip is a stretch of its recording, as the audio editor has them. A looped, reversed or warped clip is [`ClipWaveform`](/docs/components/base/arrangement)'s, which draws a clip as it plays; `hasWebGL2` of `useGlLane` says whether to draw this way at all. The color is the text color.
