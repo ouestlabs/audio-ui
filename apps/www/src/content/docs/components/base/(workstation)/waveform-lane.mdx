@@ -1,0 +1,33 @@
+---
+title: Waveform Lane
+description: "The waveforms of a lane's clips on one canvas and one WebGL context, drawn on the GPU by gl-waveform: exact peaks and the RMS inside, a line through the samples zoomed in, plain or as the three bands of the sound."
+---
+
+## Installation
+
+<Install name="waveform-lane" packages="gl-waveform" />
+
+## Usage
+
+`WaveformLane` draws the waveforms of all of a lane's clips on one canvas, each in its own part of it, placed as the clips are on the lane. Drawn by `gl-waveform` on the GPU, every pixel column shows the exact lowest and highest of its samples with the RMS inside, and zoomed in it is a line through the samples, with a dot on each: at any zoom, over recordings of any length. All the clips share one WebGL context (see [`useGlLane`](/docs/hooks/use-gl-lane)). The audio editor switches its lane between this, the spectrogram and the waveform by band from its View menu.
+
+```tsx
+import { WaveformLane } from "@/components/audio-ui/waveform-lane";
+
+<WaveformLane
+  className="h-full text-foreground"
+  clips={clips} // { id, start, clip, gain, peak, sampleRate, samples, bands? }[]
+  look="plain" // or "bands"
+  zoom={pixelsPerSecond}
+/>;
+```
+
+| Prop | Type | |
+| --- | --- | --- |
+| `clips` | `WaveformClip[]` | The clips to draw: `id`, `start` on the lane in seconds, what the `clip` reads (its length, offset and source length), its `gain`, the recording's `peak` (its loudest sample, 0 to 1, drawn as tall as the lane) and `samples` (`{ frames, read }`, mixed to one), and `bands` for the band look. |
+| `zoom` | `number` | The lane's pixels a second. |
+| `look` | `"plain" \| "bands"` | One waveform, or the three bands of the sound one over the other. Default `"plain"`. |
+
+With `look="bands"` a clip is drawn as its sound split in three by a Linkwitz-Riley crossover, at 250 Hz and 2.5 kHz (`splitBands` of [`@audio-ui/engine/analysis`](/docs/engine/analysis)): the lows warm, the mids in the ink's own colour and the highs cool, the lows tall behind the highs, as DJ software colours a sound. `bands` is called once a recording and may split it lazily: the split holds three copies of the mix.
+
+A clip is a stretch of its recording, as the audio editor has them. A looped, reversed or warped clip is [`ClipWaveform`](/docs/components/base/arrangement)'s, which draws a clip as it plays; `hasWebGL2` of `useGlLane` says whether to draw this way at all. The color is the text color.

@@ -1,4 +1,10 @@
-import { process as filterSection, highpass, lowpass } from "@audio/biquad";
+import {
+  cascade,
+  process as filterSection,
+  highpass,
+  lowpass,
+} from "@audio/biquad";
+import crossover from "@audio/eq-crossover";
 
 /** What each slice of a sound is made of: the share of its lows, mids and highs, the loudest of the three being 1. */
 export interface BandShares {
@@ -62,4 +68,48 @@ export function bandShares(
     }
   }
   return shares;
+}
+
+/** A sound as three signals: what it has under 250 Hz, between, and over 2.5 kHz. */
+export interface SplitBands {
+  high: Float32Array;
+  low: Float32Array;
+  mid: Float32Array;
+}
+
+/**
+ * The sound's channels mixed to one and split in three by a Linkwitz-Riley
+ * crossover (`@audio/eq-crossover`, 24 dB an octave) at 250 Hz and 2.5 kHz:
+ * the three bands add back to the mix, level and phase. Draw each as a
+ * waveform of its own to colour a sound by its frequencies, as DJ software
+ * does; `bandShares` is the same split read as shares per slice. It holds
+ * three copies of the mix, so call it when a view asks for it.
+ */
+export function splitBands(
+  channels: readonly Float32Array[],
+  sampleRate: number
+): SplitBands {
+  const length = channels[0]?.length ?? 0;
+  const mix = new Float32Array(length);
+  for (const channel of channels) {
+    for (let index = 0; index < length; index += 1) {
+      mix[index] =
+        (mix[index] as number) + (channel[index] as number) / channels.length;
+    }
+  }
+  const [lowBand, midBand, highBand] = crossover(
+    [LOW_UNDER, HIGH_OVER],
+    4,
+    sampleRate
+  );
+  const through = (sections: Parameters<typeof cascade>[1]) => {
+    const out = Float32Array.from(mix);
+    cascade(out, sections);
+    return out;
+  };
+  return {
+    high: through(highBand ?? []),
+    low: through(lowBand ?? []),
+    mid: through(midBand ?? []),
+  };
 }

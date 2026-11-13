@@ -148,6 +148,12 @@ export const hooks: RegistryItem[] = [
       "@audio-ui/use-arrangement",
     ],
   }),
+  hookItem("use-gl-lane", {
+    categories: ["audio", "timeline"],
+    description:
+      "What a lane drawn by WebGL on one canvas needs: the canvas placed on the stretch of the lane the view shows, drawn again when its inputs change, it resizes, the view scrolls or the theme changes, and let go of when it leaves. Also the clips of a lane the view shows, with the frames each reads, and whether this browser has WebGL 2",
+    registryDependencies: ["@audio-ui/arrangement"],
+  }),
   hookItem("use-bake", {
     categories: ["audio", "timeline"],
     dependencies: ["@audio-ui/engine"],

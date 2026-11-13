@@ -5,15 +5,22 @@ import {
   type ComponentProps,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
   useSyncExternalStore,
 } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
-  type ClipReading,
-  clipFramePositions,
-} from "@/registry-audio/bases/base/lib/arrangement";
+  type GlLaneContext,
+  groundOf,
+  type LaneClip,
+  placeLane,
+  sameSamples,
+  useGlLane,
+  type VisibleClip,
+  visibleClips,
+} from "@/registry-audio/bases/base/hooks/use-gl-lane";
 
 /** The frequency axes a spectrogram is spaced on: octaves, mel, equal space per auditory filter, or hertz. */
 export type SpectrogramScale = Scale;
@@ -63,43 +70,13 @@ export function panBand(
   return [from, from + span];
 }
 
-/** The pixels drawn past each edge of the view, so a scroll shows them at once. */
-const OVERSCAN = 256;
-const THEME_ATTRIBUTES = ["class", "data-theme", "style"];
-
-const TRANSPARENT = /^(transparent|rgba?\([^)]*,\s*0\))$/;
-
-/** The nearest background that is not transparent, from `element` up: what the spectrogram's silence lies over. */
-function groundOf(element: Element): string {
-  for (let node: Element | null = element; node; node = node.parentElement) {
-    const { backgroundColor } = getComputedStyle(node);
-    if (!TRANSPARENT.test(backgroundColor)) {
-      return backgroundColor;
-    }
-  }
-  return "white";
-}
-
-/** The recording's samples, mixed to one. */
-export interface SpectrogramSamples {
-  frames: number;
-  read: (
-    from: number,
-    to: number
-  ) => ArrayLike<number> | Promise<ArrayLike<number>>;
-}
-
-/** A clip of the lane to draw: where it starts on the lane, what it reads and at what level. */
-export interface SpectrogramClip {
-  clip: ClipReading;
-  /** A gain factor on its picture, as the clip's level plays. */
-  gain: number;
-  id: string;
-  /** The recording's sample rate, in hertz. */
-  sampleRate: number;
-  samples: SpectrogramSamples;
-  /** Where the clip starts on the lane, in seconds. */
-  start: number;
+/** What one paint of the lane draws. */
+interface SpectrogramInputs {
+  band: SpectrogramBand | undefined;
+  clips: readonly LaneClip[];
+  pointerHertz: Pick<PointerHertz, "set"> | undefined;
+  scale: SpectrogramScale;
+  zoom: number;
 }
 
 /** What the lane keeps between paints: a renderer a clip, all on one WebGL context. */
@@ -107,52 +84,15 @@ interface Held {
   context: WebGL2RenderingContext | null;
   data: Map<string, ArrayLike<number>>;
   gone: boolean;
-  paints: number;
-  renderers: Map<string, { renderer: Spectrogram; x: number; width: number }>;
+  renderers: Map<string, { renderer: Spectrogram; width: number; x: number }>;
   scales: Record<Scale, Axis> | null;
-}
-
-/** What one paint draws. */
-interface Paint {
-  band: SpectrogramBand | undefined;
-  clips: readonly SpectrogramClip[];
-  scale: SpectrogramScale;
-  zoom: number;
-}
-
-/**
- * Sizes the canvas to the stretch of its lane the view shows, and gives that
- * stretch in CSS px from the lane's left, or hides it when none shows.
- */
-function place(
-  canvas: HTMLCanvasElement,
-  body: HTMLElement,
-  view: HTMLElement | null
-): { from: number; ratio: number; to: number } | null {
-  const box = body.getBoundingClientRect();
-  const sees =
-    view?.getBoundingClientRect() ??
-    new DOMRect(0, 0, window.innerWidth, window.innerHeight);
-  const from = Math.max(0, sees.left - box.left - OVERSCAN);
-  const to = Math.min(box.width, sees.right - box.left + OVERSCAN);
-  if (to <= from) {
-    canvas.style.display = "none";
-    return null;
-  }
-  canvas.style.display = "";
-  canvas.style.left = `${from}px`;
-  canvas.style.width = `${to - from}px`;
-  const ratio = window.devicePixelRatio || 1;
-  canvas.width = Math.round((to - from) * ratio);
-  canvas.height = Math.round(canvas.clientHeight * ratio);
-  return { from, ratio, to };
 }
 
 /** The renderer of a clip, made on the lane's one context: the first makes it, the others share it. */
 async function rendererOf(
   canvas: HTMLCanvasElement,
   held: Held,
-  entry: SpectrogramClip,
+  entry: LaneClip,
   data: ArrayLike<number>
 ): Promise<Spectrogram | null> {
   const known = held.renderers.get(entry.id)?.renderer;
@@ -179,21 +119,11 @@ async function rendererOf(
   }
 }
 
-/** A clip the view shows: its part of the canvas, in CSS px from the canvas' left, and its samples. */
-interface Visible {
-  data: ArrayLike<number>;
-  entry: SpectrogramClip;
-  /** Where the clip starts on the lane, in px. */
-  left: number;
-  width: number;
-  x: number;
-}
-
 /** Updates a clip's renderer for its part of the canvas and draws it; true while it has columns not yet whole. */
 function drawClip(
   held: Held,
   renderer: Spectrogram,
-  { data, entry, left, width, x }: Visible,
+  { data, entry, frames, width, x }: VisibleClip,
   shared: {
     band: readonly [number, number];
     color: string;
@@ -201,21 +131,14 @@ function drawClip(
     height: number;
     ratio: number;
     scale: SpectrogramScale;
-    zoom: number;
   }
 ): boolean {
-  const { band, color, ground, height, ratio, scale, zoom } = shared;
-  const [start = 0, end = 0] = clipFramePositions(
-    entry.clip,
-    entry.samples.frames,
-    1,
-    [(x - left) / zoom, (x + width - left) / zoom]
-  );
+  const { band, color, ground, height, ratio, scale } = shared;
   const axis = held.scales?.[scale];
   const nyquist = entry.sampleRate / 2;
   const [low, high] = band;
   // The data is handed over only when it changed: the same samples are not uploaded again.
-  const changed = held.data.get(entry.id) !== data;
+  const changed = !sameSamples(held.data.get(entry.id), data);
   held.data.set(entry.id, data);
   renderer.update({
     background: ground,
@@ -227,7 +150,7 @@ function drawClip(
     ...(changed ? { data } : {}),
     gain: entry.gain,
     pixelRatio: ratio,
-    range: [Math.min(start, end), Math.max(start, end)],
+    range: frames,
     sampleRate: entry.sampleRate,
     scale,
     viewport: [x, 0, width, height],
@@ -237,42 +160,23 @@ function drawClip(
 }
 
 /** Draws every clip of the lane the view shows, each into its own part of the one canvas; true while some column is not yet whole. */
-async function paintLane(
-  canvas: HTMLCanvasElement,
-  body: HTMLElement,
-  view: HTMLElement | null,
-  held: Held,
-  { band, clips, scale, zoom }: Paint
-): Promise<boolean> {
-  held.paints += 1;
-  const paint = held.paints;
-  const placed = zoom > 0 ? place(canvas, body, view) : null;
+async function paintLane({
+  body,
+  canvas,
+  held,
+  inputs,
+  view,
+}: GlLaneContext<Held, SpectrogramInputs>): Promise<boolean> {
+  const { band, clips, scale, zoom } = inputs();
+  const placed = zoom > 0 ? placeLane(canvas, body, view) : null;
   if (!placed) {
     return false;
   }
-  // The clips the view shows, with their samples read together.
-  const seen = clips.flatMap((entry) => {
-    const left = entry.start * zoom;
-    const x0 = Math.max(left, placed.from);
-    const x1 = Math.min(left + entry.clip.value.length * zoom, placed.to);
-    return x1 > x0 && entry.sampleRate > 0
-      ? [{ entry, left, width: x1 - x0, x: x0 }]
-      : [];
-  });
-  const visible: Visible[] = await Promise.all(
-    seen.map(async (each) => ({
-      ...each,
-      data: await each.entry.samples.read(0, each.entry.samples.frames),
-      x: each.x,
-    }))
-  );
-  if (held.gone || paint !== held.paints) {
-    return false;
-  }
+  const visible = await visibleClips(clips, placed, zoom);
   const renderers = await Promise.all(
     visible.map((each) => rendererOf(canvas, held, each.entry, each.data))
   );
-  if (held.gone || paint !== held.paints) {
+  if (held.gone) {
     return false;
   }
   const shared = {
@@ -282,7 +186,6 @@ async function paintLane(
     height: canvas.clientHeight,
     ratio: placed.ratio,
     scale,
-    zoom,
   };
   // One clear for the whole canvas: the renderers only draw into their parts.
   const gl = held.context;
@@ -293,15 +196,9 @@ async function paintLane(
     const renderer = renderers[index];
     const slot = held.renderers.get(each.entry.id);
     if (renderer && slot) {
-      slot.x = each.x - placed.from;
+      slot.x = each.x;
       slot.width = each.width;
-      pending =
-        drawClip(
-          held,
-          renderer,
-          { ...each, x: each.x - placed.from },
-          shared
-        ) || pending;
+      pending = drawClip(held, renderer, each, shared) || pending;
     }
   }
   // Clips the lane no longer has let go of their textures.
@@ -365,119 +262,85 @@ function SpectrogramLane({
 }: Omit<ComponentProps<"canvas">, "ref"> & {
   /** The frequencies shown, as shares of the axis: Shift and the wheel over the picture zooms it, about the pointer. */
   band?: SpectrogramBand;
-  clips: readonly SpectrogramClip[];
+  clips: readonly LaneClip[];
   /** Told the frequency under the pointer, in hertz, or null off the picture: for `SpectrogramAxis` to mark. */
   pointerHertz?: Pick<PointerHertz, "set">;
   scale?: SpectrogramScale;
   /** The lane's pixels a second. */
   zoom: number;
 }) {
-  const ref = useRef<HTMLCanvasElement>(null);
   const [reading, setReading] = useState<Reading | null>(null);
-  useLayoutEffect(() => {
-    const canvas = ref.current;
-    const body = canvas?.parentElement;
-    if (!(canvas && body)) {
-      return;
-    }
-    const view = canvas.closest<HTMLElement>('[data-slot="timeline-viewport"]');
-    const held: Held = {
+  const inputs = useMemo<SpectrogramInputs>(
+    () => ({ band, clips, pointerHertz, scale, zoom }),
+    [band, clips, pointerHertz, scale, zoom]
+  );
+  const ref = useGlLane<Held, SpectrogramInputs>({
+    attach: ({ body, canvas, held, inputs: now, view }) => {
+      // The cell under the pointer: its frequency and level, read in the clip it is over.
+      const moved = (event: PointerEvent) => {
+        const box = canvas.getBoundingClientRect();
+        const x = event.clientX - box.left;
+        const y = event.clientY - box.top;
+        let cell: Cell | null = null;
+        let floor = -80;
+        if (x >= 0 && y >= 0 && x <= box.width && y <= box.height) {
+          for (const slot of held.renderers.values()) {
+            if (x >= slot.x && x <= slot.x + slot.width) {
+              cell = slot.renderer.pick(x - slot.x, y);
+              [floor] = slot.renderer.levels;
+              break;
+            }
+          }
+        }
+        const own = body.getBoundingClientRect();
+        now().pointerHertz?.set(cell ? (cell.low + cell.high) / 2 : null);
+        setReading(
+          cell
+            ? {
+                height: own.height,
+                left: event.clientX - own.left,
+                text: readingOf(cell, floor),
+                top: event.clientY - own.top,
+                width: own.width,
+              }
+            : null
+        );
+      };
+      const left = () => {
+        now().pointerHertz?.set(null);
+        setReading(null);
+      };
+      // Shift and the wheel zoom the frequencies over this picture, before the lane scrolls time with it.
+      const wheeled = (event: WheelEvent) =>
+        zoomOnWheel(event, canvas, now().band);
+      view?.addEventListener("pointermove", moved, { passive: true });
+      view?.addEventListener("pointerleave", left);
+      view?.addEventListener("wheel", wheeled, {
+        capture: true,
+        passive: false,
+      });
+      return () => {
+        view?.removeEventListener("pointermove", moved);
+        view?.removeEventListener("pointerleave", left);
+        view?.removeEventListener("wheel", wheeled, { capture: true });
+      };
+    },
+    create: () => ({
       context: null,
       data: new Map(),
       gone: false,
-      paints: 0,
       renderers: new Map(),
       scales: null,
-    };
-    // The cell under the pointer: its frequency and level, read in the clip it is over.
-    const moved = (event: PointerEvent) => {
-      const box = canvas.getBoundingClientRect();
-      const x = event.clientX - box.left;
-      const y = event.clientY - box.top;
-      let cell: Cell | null = null;
-      let floor = -80;
-      if (x >= 0 && y >= 0 && x <= box.width && y <= box.height) {
-        for (const slot of held.renderers.values()) {
-          if (x >= slot.x && x <= slot.x + slot.width) {
-            cell = slot.renderer.pick(x - slot.x, y);
-            [floor] = slot.renderer.levels;
-            break;
-          }
-        }
-      }
-      const own = body.getBoundingClientRect();
-      pointerHertz?.set(cell ? (cell.low + cell.high) / 2 : null);
-      setReading(
-        cell
-          ? {
-              height: own.height,
-              left: event.clientX - own.left,
-              text: readingOf(cell, floor),
-              top: event.clientY - own.top,
-              width: own.width,
-            }
-          : null
-      );
-    };
-    const left = () => {
-      pointerHertz?.set(null);
-      setReading(null);
-    };
-    view?.addEventListener("pointermove", moved, { passive: true });
-    view?.addEventListener("pointerleave", left);
-    // Shift and the wheel zoom the frequencies over this picture, before the lane scrolls time with it.
-    const wheeled = (event: WheelEvent) => zoomOnWheel(event, canvas, band);
-    view?.addEventListener("wheel", wheeled, { capture: true, passive: false });
-    let frame = 0;
-    let drawnLeft = 0;
-    const draw = async () => {
-      frame = 0;
-      drawnLeft = view?.scrollLeft ?? 0;
-      const more = await paintLane(canvas, body, view, held, {
-        band,
-        clips,
-        scale,
-        zoom,
-      });
-      if (more) {
-        later();
-      }
-    };
-    function later() {
-      frame ||= requestAnimationFrame(draw);
-    }
-    const scrolled = () => {
-      if (view && Math.abs(view.scrollLeft - drawnLeft) > OVERSCAN / 2) {
-        later();
-      }
-    };
-    later();
-    const unsubscribe = band?.subscribe(later);
-    const resized = new ResizeObserver(later);
-    resized.observe(body);
-    if (view) {
-      resized.observe(view);
-    }
-    view?.addEventListener("scroll", scrolled, { passive: true });
-    const themed = new MutationObserver(later);
-    themed.observe(document.documentElement, {
-      attributeFilter: THEME_ATTRIBUTES,
-    });
-    return () => {
-      held.gone = true;
-      cancelAnimationFrame(frame);
-      resized.disconnect();
-      themed.disconnect();
-      view?.removeEventListener("scroll", scrolled);
-      view?.removeEventListener("pointermove", moved);
-      view?.removeEventListener("pointerleave", left);
-      view?.removeEventListener("wheel", wheeled, { capture: true });
-      unsubscribe?.();
+    }),
+    destroy: (held) => {
       for (const { renderer } of held.renderers.values()) {
         renderer.destroy();
       }
-    };
-  }, [band, clips, pointerHertz, scale, zoom]);
+    },
+    inputs,
+    paint: paintLane,
+    subscribe: (later) => band?.subscribe(later) ?? (() => undefined),
+  });
   return (
     <>
       <canvas

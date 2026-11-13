@@ -54,7 +54,7 @@ export const audio: RegistryItem[] = [
   },
   {
     description:
-      "A clip's recording drawn on a canvas, a column per pixel of the screen, as its clip plays it: looped, reversed, warped, optionally coloured column by column by the lows, mids and highs it holds. It draws only what the view shows, and a zoom in the frame it happens.",
+      "A clip's recording drawn on a canvas, a column per pixel of the screen, as its clip plays it: looped, reversed, warped. It draws only what the view shows, and a zoom in the frame it happens.",
     files: [
       {
         path: "audio/elements/clip-waveform.tsx",
@@ -63,6 +63,21 @@ export const audio: RegistryItem[] = [
     ],
     name: "clip-waveform",
     registryDependencies: ["@audio-ui/arrangement"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["audio-editor"],
+    dependencies: ["gl-waveform"],
+    description:
+      "The waveforms of a lane's clips on one canvas and one WebGL context, drawn on the GPU by gl-waveform: the exact lowest and highest sample of every pixel column with the RMS inside, a line through the samples zoomed in, however long the recording. Plain, or as the three bands of the sound one over the other, the lows warm and the highs cool. Nothing without WebGL 2",
+    files: [
+      {
+        path: "audio/elements/waveform-lane.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "waveform-lane",
+    registryDependencies: ["@audio-ui/use-gl-lane"],
     type: "registry:ui",
   },
   {
@@ -76,7 +91,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "clip-spectrogram",
-    registryDependencies: ["@audio-ui/arrangement"],
+    registryDependencies: ["@audio-ui/use-gl-lane"],
     type: "registry:ui",
   },
   {

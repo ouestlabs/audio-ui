@@ -1,0 +1,32 @@
+---
+title: useGlLane
+description: "What a lane drawn by WebGL on one canvas needs: the canvas placed on the stretch of the lane the view shows, drawn again when its inputs change, it resizes, the view scrolls or the theme changes, and let go of when it leaves."
+---
+
+<Entry name="use-gl-lane" />
+
+## Usage
+
+A lane of clips drawn on the GPU is one canvas in the lane's box, sized to the stretch the view shows, with every clip in its own viewport of one WebGL context: a browser keeps some sixteen contexts and drops the oldest past that, so a canvas a clip would lose its picture once a sound is cut into enough pieces. `useGlLane` is what the two such lanes of the registry share, [`WaveformLane`](/docs/components/base/waveform-lane) and [`SpectrogramLane`](/docs/components/base/clip-spectrogram), and what a lane of your own over another renderer would use.
+
+```tsx
+import { useGlLane, placeLane, visibleClips } from "@/hooks/use-gl-lane";
+
+const ref = useGlLane({
+  create: () => ({ gone: false, renderers: new Map() }), // what the lane keeps between paints
+  destroy: (held) => { /* let go of what create made */ },
+  inputs, // memoized: a new value draws again
+  paint: async ({ body, canvas, held, inputs, view }) => {
+    const { clips, zoom } = inputs();
+    const placed = placeLane(canvas, body, view); // null when no part of the lane shows
+    if (!placed) return false;
+    const visible = await visibleClips(clips, placed, zoom); // each with its x, width and frames
+    // draw each into its viewport; return true while some of it is not yet whole
+    return false;
+  },
+});
+
+<canvas className="absolute inset-y-0" ref={ref} />;
+```
+
+`placeLane` sizes the canvas to what the view shows and gives where it starts, and `visibleClips` the clips of the lane the view shows with the frames each reads there and their samples. `sameSamples` tells whether a reader handed out the same memory again, so it is not uploaded twice, and `hasWebGL2` whether this browser can draw this way at all: a page draws the lane another way when it cannot.
