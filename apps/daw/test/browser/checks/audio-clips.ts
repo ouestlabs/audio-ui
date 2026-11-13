@@ -213,9 +213,18 @@ export const checks: Checks = {
     await page.waitForTimeout(400);
     const read = await canvas.evaluate((element) => {
       const drawn = element as HTMLCanvasElement;
-      const row = drawn
-        .getContext("2d")
-        ?.getImageData(0, Math.floor(drawn.height / 2), drawn.width, 1).data;
+      // Copied to a 2D canvas, so a waveform on the GPU reads as one on the canvas does.
+      const copy = document.createElement("canvas");
+      copy.width = drawn.width;
+      copy.height = drawn.height;
+      const context = copy.getContext("2d");
+      context?.drawImage(drawn, 0, 0);
+      const row = context?.getImageData(
+        0,
+        Math.floor(drawn.height / 2),
+        drawn.width,
+        1
+      ).data;
       let empty = 0;
       for (let column = 0; column < drawn.width; column += 1) {
         if (!row?.[column * 4 + 3]) {
@@ -355,6 +364,39 @@ export const checks: Checks = {
         `the fade is drawn from ${curve?.y}, over a name running to ${(header?.y ?? 0) + (header?.height ?? 0)}`
       );
     },
+  "CLP-025: the clip view draws its source on the GPU, one canvas, and a reversed clip on the canvas it was":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const source = page.locator("[data-slot=clip-panel-source]");
+      await source.locator("canvas").first().waitFor({ timeout: 5000 });
+      // The loudest sample is read in chunks a frame apart: the GPU canvas replaces the peaks' when it is known.
+      await page.waitForTimeout(1500);
+      assert(
+        (await source
+          .locator("canvas[data-slot=timeline-clip-waveform-gl]")
+          .count()) === 1,
+        "the source is not drawn on the GPU"
+      );
+      assert(
+        (await source
+          .locator("canvas[data-slot=timeline-clip-waveform]")
+          .count()) === 0,
+        "the canvas waveform is drawn under the GPU's"
+      );
+      await page.getByRole("button", { exact: true, name: "Rev" }).click();
+      await page.waitForTimeout(800);
+      assert(
+        (await source
+          .locator("canvas[data-slot=timeline-clip-waveform]")
+          .count()) === 1,
+        "a reversed clip is not drawn on the canvas"
+      );
+    },
   "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":
     async (browser) => {
       const page = await open(browser);
@@ -390,8 +432,12 @@ export const checks: Checks = {
       await zoomIn(0);
       await page.keyboard.up("Control");
       await page.waitForTimeout(400);
-      assert(seen.has("peaks"), `it never drew the peaks: ${[...seen]}`);
-      assert(seen.has("samples"), `it never drew the samples: ${[...seen]}`);
+      // On the GPU a pixel column is the exact lowest and highest of its samples (`columns`), then a line; on the canvas, the peaks come first and the samples between.
+      const first = seen.has("columns") ? "columns" : "peaks";
+      assert(seen.has(first), `it never drew the ${first}: ${[...seen]}`);
+      if (first === "peaks") {
+        assert(seen.has("samples"), `it never drew the samples: ${[...seen]}`);
+      }
       assert(
         (await detail()) === "line",
         `the closest zoom draws ${await detail()}`

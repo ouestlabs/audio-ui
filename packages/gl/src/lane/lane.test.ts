@@ -4,6 +4,7 @@ import {
   type LaneSegment,
   sameSamples,
   visibleClips,
+  visibleClipsNow,
 } from "./index.ts";
 
 const RATE = 1000;
@@ -130,5 +131,44 @@ describe("visibleClips", () => {
       100
     );
     expect(reads).toBe(1);
+  });
+});
+
+describe("visibleClipsNow", () => {
+  test("gives what visibleClips gives when every recording is at hand", async () => {
+    const clips = [clip("a", 0, 2), clip("b", 3, 2, 1, "other")];
+    const placed = { from: 0, to: 1000 };
+    const now = visibleClipsNow(clips, placed, 100);
+    const later = await visibleClips(clips, placed, 100);
+    expect(now?.map((each) => each.parts)).toEqual(
+      later.map((each) => each.parts)
+    );
+    expect(sameSamples(now?.[0]?.data, later[0]?.data ?? [])).toBe(true);
+  });
+
+  test("is null when a recording reads its samples later, so the lane waits for them", () => {
+    const streamed: LaneClip = {
+      ...clip("s", 0, 2, 0, "streamed"),
+      samples: { frames: memory.length, read: () => Promise.resolve(memory) },
+    };
+    expect(
+      visibleClipsNow([clip("a", 3, 1), streamed], { from: 0, to: 1000 }, 100)
+    ).toBeNull();
+  });
+
+  test("a clip off the view is not read at all", () => {
+    let reads = 0;
+    const counted: LaneClip = {
+      ...clip("far", 100, 1),
+      samples: {
+        frames: memory.length,
+        read: () => {
+          reads += 1;
+          return memory;
+        },
+      },
+    };
+    expect(visibleClipsNow([counted], { from: 0, to: 1000 }, 100)).toEqual([]);
+    expect(reads).toBe(0);
   });
 });

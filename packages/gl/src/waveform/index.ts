@@ -8,6 +8,7 @@ import {
   sameSamples,
   type VisibleClip,
   visibleClips,
+  visibleClipsNow,
 } from "../lane/index.ts";
 
 /** The three signals a sound is split into to colour it by its frequencies: what it has low, between and high. */
@@ -82,27 +83,33 @@ function colorOf(layer: Layer, ink: string, light: boolean): string {
   return ink;
 }
 
-/** The renderer of a clip's layer, made on the lane's one context: the first makes it, the others share it. */
-async function rendererOf(
+/** `gl-waveform`, once loaded: loaded when a lane first draws, then at hand, so a lane draws at once from then on. */
+let loaded: typeof import("gl-waveform").default | null = null;
+
+/** Loads `gl-waveform`, once. */
+async function loadRenderer() {
+  loaded ??= (await import("gl-waveform")).default;
+  return loaded;
+}
+
+/** The renderer of a row, made on the lane's one context: the first makes it, the others share it. Null when it cannot be made, and the canvas hides. */
+function rendererOf(
+  Renderer: typeof import("gl-waveform").default,
   canvas: HTMLCanvasElement,
   held: Held,
   key: string,
   data: ArrayLike<number>
-): Promise<Waveform | null> {
+): Waveform | null {
   const known = held.renderers.get(key);
   if (known) {
     return known;
   }
-  const { default: Renderer } = await import("gl-waveform");
-  if (held.gone) {
-    return null;
-  }
   try {
-    const renderer = new Renderer(held.context ?? canvas, { data });
-    held.context ??= renderer.gl as WebGL2RenderingContext;
+    const made = new Renderer(held.context ?? canvas, { data });
+    held.context ??= made.gl as WebGL2RenderingContext;
     held.data.set(key, data);
-    held.renderers.set(key, renderer);
-    return renderer;
+    held.renderers.set(key, made);
+    return made;
   } catch {
     canvas.style.display = "none";
     return null;
@@ -202,34 +209,66 @@ interface Planned {
   rows: WaveformRow[];
 }
 
-/** The rows each visible clip draws, the channels of a recording read once a recording. */
-async function plan(
+/** The channels of the recordings drawn in rows, once a recording: at once when every reader hands them at once, else a promise of them. */
+function readChannels(
   visible: readonly VisibleClip[],
   layout: WaveformLayout,
   look: WaveformLook,
   height: number
-): Promise<Planned[]> {
-  const read = new Map<string, Promise<ArrayLike<number>[]>>();
-  return await Promise.all(
-    visible.map(async (each) => {
-      const entry = each.entry as WaveformClip;
-      let channels: ArrayLike<number>[] | null = null;
-      if (entry.channels && splitsChannels(entry, layout, look, height)) {
-        const readers = entry.channels;
-        if (!read.has(entry.source)) {
-          read.set(
-            entry.source,
-            Promise.all(readers.map((reader) => reader.read(0, reader.frames)))
-          );
-        }
-        channels = (await read.get(entry.source)) ?? null;
-      }
-      return {
-        each,
-        rows: waveformRows(entry, each.data, channels, look, height),
-      };
-    })
-  );
+):
+  | Map<string, ArrayLike<number>[]>
+  | Promise<Map<string, ArrayLike<number>[]>> {
+  const reads = new Map<
+    string,
+    (ArrayLike<number> | Promise<ArrayLike<number>>)[]
+  >();
+  for (const { entry } of visible) {
+    const clip = entry as WaveformClip;
+    if (
+      clip.channels &&
+      !reads.has(clip.source) &&
+      splitsChannels(clip, layout, look, height)
+    ) {
+      reads.set(
+        clip.source,
+        clip.channels.map((reader) => reader.read(0, reader.frames))
+      );
+    }
+  }
+  const pending = [...reads.values()]
+    .flat()
+    .some((read) => read instanceof Promise);
+  if (!pending) {
+    return reads as Map<string, ArrayLike<number>[]>;
+  }
+  return Promise.all(
+    [...reads.entries()].map(
+      async ([source, channels]) =>
+        [source, await Promise.all(channels)] as const
+    )
+  ).then((entries) => new Map(entries));
+}
+
+/** The rows each visible clip draws, with the channels read. */
+function plan(
+  visible: readonly VisibleClip[],
+  channels: ReadonlyMap<string, ArrayLike<number>[]>,
+  look: WaveformLook,
+  height: number
+): Planned[] {
+  return visible.map((each) => {
+    const entry = each.entry as WaveformClip;
+    return {
+      each,
+      rows: waveformRows(
+        entry,
+        each.data,
+        channels.get(entry.source) ?? null,
+        look,
+        height
+      ),
+    };
+  });
 }
 
 /** Draws the planned rows, each part of each clip into its place on the canvas, one clear for all of it. */
@@ -275,55 +314,107 @@ function drawPlanned(
   }
 }
 
-/** Draws every clip of the lane the view shows, each into its own parts of the one canvas. A recording has one renderer a row, drawn once for each part of each clip that reads it. */
-async function paint({
-  body,
-  canvas,
-  held,
-  inputs,
-  view,
-}: LaneContext<Held, WaveformInputs>): Promise<boolean> {
-  const { clips, layout = "auto", look, zoom } = inputs();
-  const placed = zoom > 0 ? placeLane(canvas, body, view) : null;
-  if (!placed) {
-    return false;
-  }
-  const planned = await plan(
-    await visibleClips(clips, placed, zoom),
-    layout,
-    look,
-    canvas.clientHeight
-  );
-  const renderers = new Map<string, Waveform | null>();
-  await Promise.all(
-    planned.flatMap(({ rows }) =>
-      rows.map(async (row) => {
-        if (!renderers.has(row.key)) {
-          renderers.set(row.key, null);
-          renderers.set(
-            row.key,
-            await rendererOf(canvas, held, row.key, row.data)
-          );
-        }
-      })
+/**
+ * What the lane draws at this zoom, as the renderer does: `columns` while a
+ * pixel column holds a sample or more, each its exact lowest and highest,
+ * `line` once a sample is wider than a pixel, a line through the samples with
+ * a dot on each. Set on the canvas as `data-detail`, for a page to style or
+ * test by.
+ */
+function detailOf(planned: readonly Planned[], ratio: number): string {
+  const closest = planned
+    .flatMap(({ each }) =>
+      each.parts.map(
+        (part) =>
+          (part.frames[1] - part.frames[0]) / Math.max(1, part.width * ratio)
+      )
     )
-  );
+    .reduce(
+      (least, perPixel) => Math.min(least, perPixel),
+      Number.POSITIVE_INFINITY
+    );
+  return closest < 1 ? "line" : "columns";
+}
+
+/** Draws the rows on the canvas, making the renderers they lack, and lets go of the ones no row draws. */
+function draw(
+  Renderer: typeof import("gl-waveform").default,
+  held: Held,
+  canvas: HTMLCanvasElement,
+  planned: readonly Planned[],
+  ratio: number
+): boolean {
   if (held.gone) {
     return false;
   }
-  drawPlanned(held, planned, renderers, canvas, placed.ratio);
+  const renderers = new Map<string, Waveform | null>();
+  for (const { rows } of planned) {
+    for (const row of rows) {
+      if (!renderers.has(row.key)) {
+        renderers.set(
+          row.key,
+          rendererOf(Renderer, canvas, held, row.key, row.data)
+        );
+      }
+    }
+  }
+  drawPlanned(held, planned, renderers, canvas, ratio);
+  canvas.dataset.detail = detailOf(planned, ratio);
   // Rows the lane no longer draws let go of their textures.
-  const alive = new Set(
-    planned.flatMap(({ rows }) => rows.map((row) => row.key))
-  );
-  for (const [key, renderer] of held.renderers) {
-    if (!alive.has(key)) {
-      renderer.destroy();
+  for (const [key, made] of held.renderers) {
+    if (!renderers.has(key)) {
+      made.destroy();
       held.renderers.delete(key);
       held.data.delete(key);
     }
   }
   return false;
+}
+
+/**
+ * Draws every clip of the lane the view shows, each into its own parts of the
+ * one canvas: at once when the renderer is loaded and the samples are at hand,
+ * so a zoom shows in the frame it happens, else once they are. A recording has
+ * one renderer a row, drawn once for each part of each clip that reads it.
+ */
+function paint({
+  body,
+  canvas,
+  held,
+  inputs,
+  view,
+}: LaneContext<Held, WaveformInputs>): boolean | Promise<boolean> {
+  const { clips, layout = "auto", look, zoom } = inputs();
+  const placed = zoom > 0 ? placeLane(canvas, body, view) : null;
+  if (!placed) {
+    return false;
+  }
+  const height = canvas.clientHeight;
+  const now = visibleClipsNow(clips, placed, zoom);
+  if (loaded && now) {
+    const channels = readChannels(now, layout, look, height);
+    if (!(channels instanceof Promise)) {
+      return draw(
+        loaded,
+        held,
+        canvas,
+        plan(now, channels, look, height),
+        placed.ratio
+      );
+    }
+  }
+  return (async () => {
+    const Renderer = await loadRenderer();
+    const visible = now ?? (await visibleClips(clips, placed, zoom));
+    const channels = await readChannels(visible, layout, look, height);
+    return draw(
+      Renderer,
+      held,
+      canvas,
+      plan(visible, channels, look, height),
+      placed.ratio
+    );
+  })();
 }
 
 /**

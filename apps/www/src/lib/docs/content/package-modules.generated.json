@@ -4265,6 +4265,11 @@
       },
       {
         "kind": "function",
+        "name": "visibleClipsNow",
+        "summary": "The clips of a lane the view shows, as `visibleClips` gives them, when every recording they read hands its samples at once: what lets a lane draw a zoom in the frame it happens."
+      },
+      {
+        "kind": "function",
         "name": "visibleClips",
         "summary": "The clips of a lane the view shows, each with its parts of the canvas and the frames it reads there, and their samples read once a recording."
       },

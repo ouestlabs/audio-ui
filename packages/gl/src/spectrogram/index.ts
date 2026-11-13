@@ -8,8 +8,10 @@ import {
   type LaneContext,
   placeLane,
   sameSamples,
+  type VisibleClip,
   type VisiblePart,
   visibleClips,
+  visibleClipsNow,
 } from "../lane/index.ts";
 
 /** The frequency axes a spectrogram is spaced on: octaves, mel, equal space per auditory filter, or hertz. */
@@ -106,31 +108,37 @@ interface Held {
   scales: Record<Scale, Axis> | null;
 }
 
-/** The renderer of a recording, made on the lane's one context: the first makes it, the others share it. */
-async function rendererOf(
+/** `gl-spectrogram`, once loaded: loaded when a lane first draws, then at hand, so a lane draws at once from then on. */
+let loaded: typeof import("gl-spectrogram") | null = null;
+
+/** Loads `gl-spectrogram`, once. */
+async function loadRenderer() {
+  loaded ??= await import("gl-spectrogram");
+  return loaded;
+}
+
+/** The renderer of a recording, made on the lane's one context: the first makes it, the others share it. Null when it cannot be made, and the canvas hides. */
+function rendererOf(
+  module: typeof import("gl-spectrogram"),
   canvas: HTMLCanvasElement,
   held: Held,
   entry: LaneClip,
   data: ArrayLike<number>
-): Promise<Spectrogram | null> {
+): Spectrogram | null {
   const known = held.renderers.get(entry.source);
   if (known) {
     return known;
   }
-  const { default: Renderer, scales } = await import("gl-spectrogram");
-  if (held.gone) {
-    return null;
-  }
   try {
-    const renderer = new Renderer(held.context ?? canvas, {
+    const made = new module.default(held.context ?? canvas, {
       data,
       sampleRate: entry.sampleRate,
     });
-    held.context ??= renderer.gl as WebGL2RenderingContext;
-    held.scales = scales;
+    held.context ??= made.gl as WebGL2RenderingContext;
+    held.scales = module.scales;
     held.data.set(entry.source, data);
-    held.renderers.set(entry.source, renderer);
-    return renderer;
+    held.renderers.set(entry.source, made);
+    return made;
   } catch {
     canvas.style.display = "none";
     return null;
@@ -189,42 +197,35 @@ function drawPart(
   return renderer.pending;
 }
 
-/** Draws every clip of the lane the view shows, each into its own parts of the one canvas; true while some column is not yet whole. */
-async function paint({
-  body,
-  canvas,
-  held,
-  inputs,
-  view,
-}: LaneContext<Held, SpectrogramInputs>): Promise<boolean> {
-  const { band, clips, scale, zoom } = inputs();
-  const placed = zoom > 0 ? placeLane(canvas, body, view) : null;
-  if (!placed) {
-    return false;
-  }
-  const visible = await visibleClips(clips, placed, zoom);
-  const renderers = new Map<string, Spectrogram | null>();
-  await Promise.all(
-    visible.map(async (each) => {
-      if (!renderers.has(each.entry.source)) {
-        renderers.set(each.entry.source, null);
-        renderers.set(
-          each.entry.source,
-          await rendererOf(canvas, held, each.entry, each.data)
-        );
-      }
-    })
-  );
+/** Draws the visible clips, making the renderers they lack, and lets go of the ones no clip reads; true while some column is not yet whole. */
+function draw(
+  module: typeof import("gl-spectrogram"),
+  held: Held,
+  canvas: HTMLCanvasElement,
+  body: HTMLElement,
+  visible: readonly VisibleClip[],
+  inputs: SpectrogramInputs,
+  ratio: number
+): boolean {
   if (held.gone) {
     return false;
   }
+  const renderers = new Map<string, Spectrogram | null>();
+  for (const each of visible) {
+    if (!renderers.has(each.entry.source)) {
+      renderers.set(
+        each.entry.source,
+        rendererOf(module, canvas, held, each.entry, each.data)
+      );
+    }
+  }
   const shared: Shared = {
-    band: band?.getSnapshot() ?? ([0, 1] as const),
+    band: inputs.band?.getSnapshot() ?? ([0, 1] as const),
     color: getComputedStyle(canvas).color,
     ground: groundOf(body),
     height: canvas.clientHeight,
-    ratio: placed.ratio,
-    scale,
+    ratio,
+    scale: inputs.scale,
   };
   // One clear for the whole canvas: the renderers only draw into their parts.
   const gl = held.context;
@@ -233,26 +234,58 @@ async function paint({
   held.drawn = [];
   let pending = false;
   for (const each of visible) {
-    const renderer = renderers.get(each.entry.source);
-    if (!renderer) {
-      continue;
-    }
-    for (const part of each.parts) {
+    const made = renderers.get(each.entry.source);
+    for (const part of made ? each.parts : []) {
       pending =
-        drawPart(held, renderer, each.entry, each.data, part, shared) ||
-        pending;
+        drawPart(
+          held,
+          made as Spectrogram,
+          each.entry,
+          each.data,
+          part,
+          shared
+        ) || pending;
     }
   }
   // Recordings the lane no longer draws let go of their textures.
-  const alive = new Set(clips.map((entry) => entry.source));
-  for (const [source, renderer] of held.renderers) {
+  const alive = new Set(inputs.clips.map((entry) => entry.source));
+  for (const [source, made] of held.renderers) {
     if (!alive.has(source)) {
-      renderer.destroy();
+      made.destroy();
       held.renderers.delete(source);
       held.data.delete(source);
     }
   }
   return pending;
+}
+
+/**
+ * Draws every clip of the lane the view shows, each into its own parts of the
+ * one canvas: at once when the renderer is loaded and the samples are at hand,
+ * so a zoom shows in the frame it happens, else once they are. True while some
+ * column is not yet whole.
+ */
+function paint({
+  body,
+  canvas,
+  held,
+  inputs,
+  view,
+}: LaneContext<Held, SpectrogramInputs>): boolean | Promise<boolean> {
+  const now = inputs();
+  const placed = now.zoom > 0 ? placeLane(canvas, body, view) : null;
+  if (!placed) {
+    return false;
+  }
+  const visible = visibleClipsNow(now.clips, placed, now.zoom);
+  if (loaded && visible) {
+    return draw(loaded, held, canvas, body, visible, now, placed.ratio);
+  }
+  return (async () => {
+    const module = await loadRenderer();
+    const read = visible ?? (await visibleClips(now.clips, placed, now.zoom));
+    return draw(module, held, canvas, body, read, now, placed.ratio);
+  })();
 }
 
 /** The cell under a pointer, read in the part of the canvas it is over. */
