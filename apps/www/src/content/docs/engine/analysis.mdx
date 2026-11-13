@@ -114,10 +114,9 @@ checkAcx(channels, sampleRate).noiseFloor.value; // the quietest pause of half a
 ## Colouring a waveform
 
 ```ts
-import { bandShares } from "@audio-ui/engine/analysis";
+import { splitBands } from "@audio-ui/engine/analysis";
 
-const { low, mid, high } = bandShares(channels, sampleRate, 8192);
-low[slice]; // 0 to 1: the share of the slice under 250 Hz, the loudest of the three bands being 1
+const { low, mid, high } = splitBands(channels, sampleRate);
 ```
 
-`bandShares` cuts a sound into `count` slices and tells, for each, how its energy is spread over the lows (under 250 Hz), the mids and the highs (over 2.5 kHz). Give the three arrays to `ClipWaveform`'s `tint`, with `mode: "temperature"` (warm where the lows lead, cool where the highs do) or `"bands"` (lows red, mids green, highs blue).
+`splitBands` mixes the channels to one and splits them in three by a Linkwitz-Riley crossover (`@audio/eq-crossover`, 24 dB an octave) at 250 Hz and 2.5 kHz: the lows, the mids and the highs, which add back to the mix. Draw each as a waveform of its own, the lows warm and the highs cool, to colour a sound by its frequencies, as the registry's [`WaveformLane`](/docs/components/base/waveform-lane) does with `look="bands"`. It holds three copies of the mix, so call it when a view asks for it. `bandShares(channels, sampleRate, count)` reads the same bands as shares per slice.

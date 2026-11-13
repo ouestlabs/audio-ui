@@ -1,0 +1,268 @@
+import { type RefObject, useLayoutEffect, useRef } from "react";
+import {
+  type ClipReading,
+  clipFramePositions,
+} from "@/registry-audio/bases/base/lib/arrangement";
+
+/** A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`. */
+export interface LaneSamples {
+  frames: number;
+  read: (
+    from: number,
+    to: number
+  ) => ArrayLike<number> | Promise<ArrayLike<number>>;
+}
+
+/** A clip of a lane to draw: where it starts, what it reads and at what level. */
+export interface LaneClip {
+  clip: ClipReading;
+  /** A gain factor on its picture, as the clip's level plays. */
+  gain: number;
+  id: string;
+  /** The recording's sample rate, in hertz. */
+  sampleRate: number;
+  samples: LaneSamples;
+  /** Where the clip starts on the lane, in seconds. */
+  start: number;
+}
+
+/**
+ * Whether two readings are the same samples: a reader may hand out a new view
+ * of the same memory each time, which is not new data to upload.
+ */
+export function sameSamples(
+  a: ArrayLike<number> | undefined,
+  b: ArrayLike<number>
+): boolean {
+  if (ArrayBuffer.isView(a) && ArrayBuffer.isView(b)) {
+    return (
+      a.buffer === b.buffer &&
+      a.byteOffset === b.byteOffset &&
+      a.byteLength === b.byteLength
+    );
+  }
+  return a === b;
+}
+
+/** A clip the view shows: its part of the canvas in CSS px from the canvas' left, the frames of its recording it reads there, and its samples. */
+export interface VisibleClip {
+  data: ArrayLike<number>;
+  entry: LaneClip;
+  /** The frames of the recording at the part's two ends. */
+  frames: [number, number];
+  width: number;
+  x: number;
+}
+
+/**
+ * The clips of a lane the view shows, each with its part of the canvas and
+ * the frames it reads there, and their samples read together. `placed` is
+ * what `placeLane` gave; `zoom` the lane's pixels a second. Clips off the
+ * view are left out.
+ */
+export async function visibleClips(
+  clips: readonly LaneClip[],
+  placed: { from: number; to: number },
+  zoom: number
+): Promise<VisibleClip[]> {
+  const seen = clips.flatMap((entry) => {
+    const left = entry.start * zoom;
+    const x0 = Math.max(left, placed.from);
+    const x1 = Math.min(left + entry.clip.value.length * zoom, placed.to);
+    if (!(x1 > x0 && entry.sampleRate > 0)) {
+      return [];
+    }
+    const [from = 0, to = 0] = clipFramePositions(
+      entry.clip,
+      entry.samples.frames,
+      1,
+      [(x0 - left) / zoom, (x1 - left) / zoom]
+    );
+    return [
+      {
+        entry,
+        frames: [Math.min(from, to), Math.max(from, to)] as [number, number],
+        width: x1 - x0,
+        x: x0 - placed.from,
+      },
+    ];
+  });
+  return await Promise.all(
+    seen.map(async (each) => ({
+      ...each,
+      data: await each.entry.samples.read(0, each.entry.samples.frames),
+    }))
+  );
+}
+
+/** The pixels drawn past each edge of the view, so a scroll shows them at once. */
+export const OVERSCAN = 256;
+const THEME_ATTRIBUTES = ["class", "data-theme", "style"];
+const TRANSPARENT = /^(transparent|rgba?\([^)]*,\s*0\))$/;
+
+/** The nearest background that is not transparent, from `element` up: what a picture's silence lies over. */
+export function groundOf(element: Element): string {
+  for (let node: Element | null = element; node; node = node.parentElement) {
+    const { backgroundColor } = getComputedStyle(node);
+    if (!TRANSPARENT.test(backgroundColor)) {
+      return backgroundColor;
+    }
+  }
+  return "white";
+}
+
+/** Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way. */
+export function hasWebGL2(): boolean {
+  try {
+    return Boolean(document.createElement("canvas").getContext("webgl2"));
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Sizes the canvas to the stretch of its lane the view shows, and gives that
+ * stretch in CSS px from the lane's left with the device pixel ratio, or
+ * hides the canvas when none shows.
+ */
+export function placeLane(
+  canvas: HTMLCanvasElement,
+  body: HTMLElement,
+  view: HTMLElement | null
+): { from: number; ratio: number; to: number } | null {
+  const box = body.getBoundingClientRect();
+  const sees =
+    view?.getBoundingClientRect() ??
+    new DOMRect(0, 0, window.innerWidth, window.innerHeight);
+  const from = Math.max(0, sees.left - box.left - OVERSCAN);
+  const to = Math.min(box.width, sees.right - box.left + OVERSCAN);
+  if (to <= from) {
+    canvas.style.display = "none";
+    return null;
+  }
+  canvas.style.display = "";
+  canvas.style.left = `${from}px`;
+  canvas.style.width = `${to - from}px`;
+  const ratio = window.devicePixelRatio || 1;
+  // Resizing the drawing buffer reallocates it and empties it: only when the size is not the one it has.
+  const width = Math.round((to - from) * ratio);
+  const height = Math.round(canvas.clientHeight * ratio);
+  if (canvas.width !== width) {
+    canvas.width = width;
+  }
+  if (canvas.height !== height) {
+    canvas.height = height;
+  }
+  return { from, ratio, to };
+}
+
+/** What a lane hands its painter and its listeners. */
+export interface GlLaneContext<Held, Inputs> {
+  body: HTMLElement;
+  canvas: HTMLCanvasElement;
+  held: Held;
+  /** What the lane draws now: read as often as needed, it changes without the lane starting over. */
+  inputs: () => Inputs;
+  /** Asks for a paint in the next frame. */
+  later: () => void;
+  view: HTMLElement | null;
+}
+
+interface GlLaneOptions<Held, Inputs> {
+  /** Listeners of the lane itself (the pointer, the wheel): given the context, gives back what undoes them. */
+  attach?: (context: GlLaneContext<Held, Inputs>) => () => void;
+  /** What the lane keeps between paints. */
+  create: () => Held;
+  /** Lets go of what `create` made. */
+  destroy: (held: Held) => void;
+  /** What the lane draws: a new value draws again. Memoize it, so an unchanged lane is not drawn again. */
+  inputs: Inputs;
+  /** Draws what the view shows; true while some of it is not yet whole, to be drawn again. Told to stop by `held.gone`. */
+  paint: (context: GlLaneContext<Held, Inputs>) => Promise<boolean>;
+  /** A change outside React that draws again (a band zoomed): given `later`, gives back what undoes it. */
+  subscribe?: (later: () => void) => () => void;
+}
+
+/**
+ * What a lane drawn by WebGL on one canvas needs: the canvas placed on the
+ * stretch of the lane the view shows, drawn again when its `inputs` change,
+ * the lane resizes, the view scrolls a good way or the theme changes, and let
+ * go of when it leaves. `paint` draws, from `inputs()` and the `held` it made;
+ * the lane never starts over for a change of inputs, so what is kept on the
+ * GPU stays. Returns the ref to give the canvas, which sits in the lane's box.
+ */
+export function useGlLane<Held extends { gone: boolean }, Inputs>(
+  options: GlLaneOptions<Held, Inputs>
+): RefObject<HTMLCanvasElement | null> {
+  const ref = useRef<HTMLCanvasElement>(null);
+  // The options are read as they are at each paint.
+  const latest = useRef(options);
+  latest.current = options;
+  const asked = useRef<(() => void) | null>(null);
+  useLayoutEffect(() => {
+    const canvas = ref.current;
+    const body = canvas?.parentElement;
+    if (!(canvas && body)) {
+      return;
+    }
+    const view = canvas.closest<HTMLElement>('[data-slot="timeline-viewport"]');
+    const held = latest.current.create();
+    let frame = 0;
+    let drawnLeft = 0;
+    const context: GlLaneContext<Held, Inputs> = {
+      body,
+      canvas,
+      held,
+      inputs: () => latest.current.inputs,
+      later: () => later(),
+      view,
+    };
+    const draw = async () => {
+      frame = 0;
+      drawnLeft = view?.scrollLeft ?? 0;
+      if (await latest.current.paint(context)) {
+        later();
+      }
+    };
+    function later() {
+      frame ||= requestAnimationFrame(draw);
+    }
+    asked.current = later;
+    const detach = latest.current.attach?.(context);
+    const unsubscribe = latest.current.subscribe?.(later);
+    const scrolled = () => {
+      if (view && Math.abs(view.scrollLeft - drawnLeft) > OVERSCAN / 2) {
+        later();
+      }
+    };
+    later();
+    const resized = new ResizeObserver(later);
+    resized.observe(body);
+    if (view) {
+      resized.observe(view);
+    }
+    view?.addEventListener("scroll", scrolled, { passive: true });
+    const themed = new MutationObserver(later);
+    themed.observe(document.documentElement, {
+      attributeFilter: THEME_ATTRIBUTES,
+    });
+    return () => {
+      held.gone = true;
+      asked.current = null;
+      cancelAnimationFrame(frame);
+      resized.disconnect();
+      themed.disconnect();
+      view?.removeEventListener("scroll", scrolled);
+      unsubscribe?.();
+      detach?.();
+      latest.current.destroy(held);
+    };
+  }, []);
+  // New inputs draw again, in the next frame.
+  useLayoutEffect(() => {
+    if (options.inputs !== undefined) {
+      asked.current?.();
+    }
+  }, [options.inputs]);
+  return ref;
+}

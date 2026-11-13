@@ -1,7 +1,5 @@
 import {
   type AudioPeaks,
-  type BandShares,
-  bandShares,
   computePeaks,
   dbToGain,
   detectSilences,
@@ -10,6 +8,8 @@ import {
   measureLoudness,
   normalizePeaks,
   rmsDb,
+  type SplitBands,
+  splitBands,
 } from "@audio-ui/engine/analysis";
 import {
   type ChannelLayout,
@@ -88,13 +88,11 @@ import {
   type PointerHertz,
   SpectrogramAxis,
   type SpectrogramBand,
-  type SpectrogramClip,
   SpectrogramLane,
   type SpectrogramScale,
 } from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
 import {
   type ClipSamples,
-  type ClipTint,
   ClipWaveform,
 } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device-browser";
@@ -123,11 +121,16 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { TimelineLocator } from "@/registry-audio/bases/base/audio/elements/timeline-markers";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
+import {
+  type WaveformClip,
+  WaveformLane,
+} from "@/registry-audio/bases/base/audio/elements/waveform-lane";
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useBake } from "@/registry-audio/bases/base/hooks/use-bake";
 import { useClipEdits } from "@/registry-audio/bases/base/hooks/use-clip-edits";
+import { hasWebGL2 } from "@/registry-audio/bases/base/hooks/use-gl-lane";
 import { useSilenceHover } from "@/registry-audio/bases/base/hooks/use-silence-hover";
 import { useSoundReport } from "@/registry-audio/bases/base/hooks/use-sound-report";
 import { useStatusLine } from "@/registry-audio/bases/base/hooks/use-status-line";
@@ -286,6 +289,8 @@ const IGNORE = () => undefined;
 
 /** A sound the editor plays: its name, its length, and its peaks for the waveform. */
 interface Sound {
+  /** Its mix split in lows, mids and highs, made when a view first asks for it. */
+  bands: () => SplitBands;
   /** How many channels it has: 1 is mono, 2 stereo. */
   channels: number;
   /** The demo it is, or null for a file of yours. */
@@ -306,8 +311,6 @@ interface Sound {
   sampleRate: number;
   /** Its samples, mixed to one channel, for a zoom closer than the peaks have detail for. */
   samples: ClipSamples;
-  /** The share of its lows, mids and highs per slice of its peaks, read when a view first asks for it. */
-  shares: () => BandShares;
 }
 
 /** The clip that plays the recording `recording` on the track, over `length` seconds, round and round. */
@@ -363,7 +366,7 @@ function soundOf(
     peak,
     sampleRate,
     peaks: normalizePeaks(computePeaks(channels, PEAK_COUNT)),
-    shares: lazily(() => bandShares(channels, sampleRate, PEAK_COUNT)),
+    bands: lazily(() => splitBands(channels, sampleRate)),
     rms: rmsDb(mix),
     samples: { frames: mix.length, read: (from, to) => mix.subarray(from, to) },
   };
@@ -1340,15 +1343,10 @@ function RepairItems({
 }
 
 /** What the sound lane draws: the waveform, or the spectrogram on one of its frequency axes. */
-type View = "bands" | "temperature" | "wave" | SpectrogramScale;
+type View = "bands" | "wave" | SpectrogramScale;
 
 const VIEWS: readonly { label: string; note: string; value: View }[] = [
   { label: "Waveform", note: "Level over time", value: "wave" },
-  {
-    label: "Waveform, warm to cool",
-    note: "Colour by pitch",
-    value: "temperature",
-  },
   { label: "Waveform, by band", note: "Lows, mids, highs", value: "bands" },
   { label: "Spectrogram", note: "Octaves", value: "log" },
   { label: "Spectrogram, mel", note: "Pitch scale", value: "mel" },
@@ -2120,15 +2118,12 @@ function SelectionFrame({
   );
 }
 
-/** What colours a sound's waveform in a view: its shares of lows, mids and highs, or nothing for the plain one. */
-function tintOf(sound: Sound, view: View): ClipTint | undefined {
-  if (view !== "temperature" && view !== "bands") {
-    return undefined;
-  }
-  return { ...sound.shares(), mode: view };
-}
+/** Whether a clip plays its recording as it lies, one stretch of it in order: not reversed, not warped, and no loop it turns round before it ends (the editor's clips loop their whole sound, which they never reach the end of). */
+const isPlain = (clip: Arranged) =>
+  !(clip.reversed || clip.warp) &&
+  (!clip.loop || clip.value.offset + clip.value.length <= clip.loop[1] + 1e-6);
 
-/** The track's clips on the lane, each drawing its part of the sound it plays, at the clip editor's detail. */
+/** The track's clips on the lane, each drawing its part of the sound it plays: on one canvas and one WebGL context, the waveform by `gl-waveform` or the spectrogram by `gl-spectrogram`; the canvas waveform where WebGL 2 is missing or a clip is looped, reversed or warped. */
 function SoundClips({
   band,
   clips,
@@ -2150,20 +2145,20 @@ function SoundClips({
   /** The lane's pixels a second. */
   zoom: number;
 }) {
-  const spectrogram = !(
-    view === "wave" ||
-    view === "temperature" ||
-    view === "bands"
-  );
-  // The clips a spectrogram draws, on one canvas and one WebGL context.
-  const drawn = useMemo<SpectrogramClip[]>(
+  const spectrogram = view !== "wave" && view !== "bands";
+  const [webgl] = useState(hasWebGL2);
+  // A waveform is drawn on the GPU when it can be, for the clips as they lie.
+  const gpuWaveform = !spectrogram && webgl && clips.every(isPlain);
+  // The clips the GPU draws, on one canvas.
+  const drawn = useMemo<WaveformClip[]>(
     () =>
-      spectrogram
+      spectrogram || gpuWaveform
         ? clips.flatMap((clip) => {
             const sound = sounds.get(clip.recording ?? "");
             return sound
               ? [
                   {
+                    bands: sound.bands,
                     clip: {
                       sourceLength: clip.sourceLength ?? sound.duration,
                       value: {
@@ -2173,6 +2168,7 @@ function SoundClips({
                     },
                     gain: dbToGain(clip.gain ?? 0),
                     id: clip.id,
+                    peak: dbToGain(sound.peak),
                     sampleRate: sound.sampleRate,
                     samples: sound.samples,
                     start: clip.value.start,
@@ -2181,7 +2177,7 @@ function SoundClips({
               : [];
           })
         : [],
-    [clips, sounds, spectrogram]
+    [clips, gpuWaveform, sounds, spectrogram]
   );
   const parts = clips.map((clip) => {
     const sound = sounds.get(clip.recording ?? "");
@@ -2198,7 +2194,7 @@ function SoundClips({
           width: `calc(var(--timeline-unit) * ${clip.value.length})`,
         }}
       >
-        {view === "wave" || view === "temperature" || view === "bands" ? (
+        {spectrogram || gpuWaveform ? null : (
           // Its level scales what it draws, as it scales what it plays.
           <div
             className="absolute inset-0"
@@ -2214,25 +2210,35 @@ function SoundClips({
               peaks={sound.peaks}
               role="img"
               samples={sound.samples}
-              tint={tintOf(sound, view)}
             />
           </div>
-        ) : null}
+        )}
         <FadeShade value={clip.value} />
       </div>
     ) : null;
   });
+  const lane = hidden ? "invisible" : undefined;
   return (
     <>
       {spectrogram && drawn.length > 0 ? (
         <SpectrogramLane
           aria-label="Spectrogram"
           band={band}
-          className={cn("h-full text-foreground", hidden && "invisible")}
+          className={cn("h-full text-foreground", lane)}
           clips={drawn}
           pointerHertz={pointerHertz}
           role="img"
           scale={view as SpectrogramScale}
+          zoom={zoom}
+        />
+      ) : null}
+      {gpuWaveform && drawn.length > 0 ? (
+        <WaveformLane
+          aria-label="Waveform"
+          className={cn("h-full text-foreground", lane)}
+          clips={drawn}
+          look={view === "bands" ? "bands" : "plain"}
+          role="img"
           zoom={zoom}
         />
       ) : null}
@@ -2645,10 +2651,7 @@ function ClipLane({
                       position={takeClock}
                     />
                   ) : null}
-                  {view === "wave" ||
-                  view === "temperature" ||
-                  view === "bands" ||
-                  !sound ? null : (
+                  {view === "wave" || view === "bands" || !sound ? null : (
                     <SpectrogramAxis
                       band={band}
                       pointer={pointerHertz}

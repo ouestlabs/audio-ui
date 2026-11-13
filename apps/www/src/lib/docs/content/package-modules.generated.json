@@ -2469,6 +2469,16 @@
         "kind": "function",
         "name": "bandShares",
         "summary": "Reads a sound as `count` slices of equal length, each by how its energy is spread over three bands: the lows under 250 Hz, the highs over 2.5 kHz and the mids between."
+      },
+      {
+        "kind": "interface",
+        "name": "SplitBands",
+        "summary": "A sound as three signals: what it has under 250 Hz, between, and over 2.5 kHz."
+      },
+      {
+        "kind": "function",
+        "name": "splitBands",
+        "summary": "The sound's channels mixed to one and split in three by a Linkwitz-Riley crossover (`@audio/eq-crossover`, 24 dB an octave) at 250 Hz and 2.5 kHz: the three bands add back to the mix, level and phase."
       }
     ],
     "from": "@audio-ui/engine/analysis",
@@ -2476,6 +2486,7 @@
     "audiojs": [
       "@audio/beat-detect",
       "@audio/biquad",
+      "@audio/eq-crossover",
       "@audio/loudness-lufs",
       "@audio/loudness-truepeak",
       "@audio/mir-chroma",

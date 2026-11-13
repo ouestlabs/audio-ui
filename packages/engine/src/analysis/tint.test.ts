@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { bandShares } from "./tint.ts";
+import { bandShares, splitBands } from "./tint.ts";
 
 const RATE = 48_000;
 const sine = (frequency: number, seconds = 1) =>
@@ -34,5 +34,50 @@ describe("bandShares", () => {
     const shares = bandShares([new Float32Array(RATE)], RATE, 8);
     expect(shares.low).toHaveLength(8);
     expect(Math.max(...shares.low, ...shares.mid, ...shares.high)).toBe(0);
+  });
+});
+
+describe("splitBands", () => {
+  const rms = (values: Float32Array) =>
+    Math.sqrt(
+      values.reduce((sum, value) => sum + value * value, 0) / values.length
+    );
+
+  test("each tone lands in its band", () => {
+    const [low, mid, high] = [sine(80), sine(800), sine(8000)];
+    const together = low.map(
+      (value, index) => value + (mid[index] as number) + (high[index] as number)
+    );
+    const bands = splitBands([together], RATE);
+    expect(rms(bands.low)).toBeGreaterThan(0.25);
+    expect(rms(bands.low)).toBeLessThan(0.45);
+    expect(rms(bands.mid)).toBeGreaterThan(0.25);
+    expect(rms(bands.high)).toBeGreaterThan(0.25);
+  });
+
+  test("the bands add back to the mix", () => {
+    const mix = sine(1000);
+    const { high, low, mid } = splitBands([mix], RATE);
+    // A crossover that sums flat: past its start-up, low + mid + high is the mix, to a fraction of a dB.
+    const summed = mix.map(
+      (_, index) =>
+        (low[index] as number) +
+        (mid[index] as number) +
+        (high[index] as number)
+    );
+    expect(rms(summed.subarray(RATE / 2))).toBeCloseTo(
+      rms(mix.subarray(RATE / 2)),
+      1
+    );
+  });
+
+  test("silence stays silent and a source is not changed", () => {
+    const quiet = new Float32Array(1000);
+    const bands = splitBands([quiet], RATE);
+    expect(Math.max(...bands.low, ...bands.mid, ...bands.high)).toBe(0);
+    const source = sine(300, 1);
+    const copy = Float32Array.from(source);
+    splitBands([source], RATE);
+    expect(source).toEqual(copy);
   });
 });

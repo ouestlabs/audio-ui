@@ -9,7 +9,7 @@ description: "The spectrograms of a lane's clips on one canvas and one WebGL con
 
 ## Usage
 
-`SpectrogramLane` draws the spectrograms of all of a lane's clips on one canvas, each in its own part of it, placed as the clips are on the lane. Instead of peaks it draws the frequencies of the recording, each column an FFT computed on the GPU by `gl-spectrogram`, so a steady tone is one row thin and a click one column thin at any zoom. All the clips share one WebGL context: a browser keeps some sixteen and drops the oldest past that, so a canvas a clip would lose its picture once a sound is cut into enough pieces. The audio editor switches its lane between the waveform and the spectrogram from its View menu.
+`SpectrogramLane` draws the spectrograms of all of a lane's clips on one canvas, each in its own part of it, placed as the clips are on the lane. Instead of peaks it draws the frequencies of the recording, each column an FFT computed on the GPU by `gl-spectrogram`, so a steady tone is one row thin and a click one column thin at any zoom. All the clips share one WebGL context (see [`useGlLane`](/docs/hooks/use-gl-lane)): a browser keeps some sixteen and drops the oldest past that, so a canvas a clip would lose its picture once a sound is cut into enough pieces. The audio editor switches its lane between the waveform and the spectrogram from its View menu.
 
 ```tsx
 import { SpectrogramLane } from "@/components/audio-ui/clip-spectrogram";
@@ -24,7 +24,7 @@ import { SpectrogramLane } from "@/components/audio-ui/clip-spectrogram";
 
 | Prop | Type | |
 | --- | --- | --- |
-| `clips` | `SpectrogramClip[]` | The clips to draw: `id`, `start` on the lane in seconds, what the `clip` reads (its length, offset and source length), its `gain`, the recording's `sampleRate` and its `samples` (`{ frames, read }`, mixed to one). |
+| `clips` | `LaneClip[]` | The clips to draw: `id`, `start` on the lane in seconds, what the `clip` reads (its length, offset and source length), its `gain`, the recording's `sampleRate` and its `samples` (`{ frames, read }`, mixed to one). |
 | `zoom` | `number` | The lane's pixels a second. |
 | `scale` | `"log" \| "mel" \| "erb" \| "lin"` | The frequency axis. Default `"log"`. |
 | `pointerHertz` | `{ set }` | Told the frequency under the pointer, or `null` off the picture. |
