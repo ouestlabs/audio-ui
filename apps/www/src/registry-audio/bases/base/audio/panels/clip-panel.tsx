@@ -165,8 +165,12 @@ interface ClipPanelProps {
   onViewChange?: (view: SoundView) => void;
   /** The arrangement's position, live: while it plays the clip, a playhead shows where in the source it reads. Leave it out for none. */
   position?: Source<number>;
+  /** The recording's sample rate, in hertz, when `samples` reads a recording the source is cut from (`sourceFrom`). @default the frames of `samples` over `sourceLength` */
+  sampleRate?: number;
   /** The source's samples, read as the view needs them: with them, the waveform zooms in to the samples themselves, as a line through them past a frame per pixel, and is drawn on the GPU when they are held in memory or, streamed from a file, give their `leaves`. Leave it out to stop at the peaks' detail. */
   samples?: ClipSamples;
+  /** Where the source begins in the recording `samples` reads, in seconds, once the clip was cropped: the panel reads it from there. @default 0 */
+  sourceFrom?: number;
   /** Where the clip starts on the arrangement, what `position` is read against. @default 0 */
   start?: number;
   value: ClipSettings;
@@ -570,7 +574,9 @@ function ClipPanel({
   onValueCommitted,
   onViewChange,
   position: arrangementPosition,
+  sampleRate,
   samples,
+  sourceFrom = 0,
   start: clipStart = 0,
   value,
   values,
@@ -599,6 +605,14 @@ function ClipPanel({
   } = value;
   // The view shown: the one picked, or the waveform where the GPU cannot draw it.
   const can = useSourceCan(samples, reversed);
+  // Where the source lies in the recording the samples read, and at what rate.
+  const sourceStretch = useMemo(
+    () => ({
+      from: sourceFrom,
+      rate: sampleRate ?? (samples ? samples.frames / sourceLength : 0),
+    }),
+    [sampleRate, samples, sourceFrom, sourceLength]
+  );
   const shownView: SoundView =
     isSpectrogramView(view) && !can.spectrogram ? "wave" : view;
   const meter = useMemo(() => ({ bar, beatsPerBar }), [bar, beatsPerBar]);
@@ -871,6 +885,7 @@ function ClipPanel({
         samples={samples}
         sourceLength={sourceLength}
         span={span}
+        stretch={sourceStretch}
         values={values}
         view={shownView}
         warp={warp}
@@ -883,6 +898,12 @@ function ClipPanel({
 const LABEL_SPACING = 40;
 /** The widest a peak of the waveform is drawn, in px: zooming in stops there, before the drawing turns to blocks. */
 const PEAK_PX = 3;
+/** Where a clip's source begins in the recording its samples read, in seconds, and the recording's rate. */
+interface SourceStretch {
+  from: number;
+  rate: number;
+}
+
 /** What the GPU can draw of a clip's source: its waveform, and its spectrogram. */
 interface SourceDrawable {
   spectrogram: boolean;
@@ -926,6 +947,7 @@ function useSourceDrawing({
   samples,
   sourceLength,
   span,
+  stretch,
   view,
 }: {
   bands?: () => WaveformBands;
@@ -935,6 +957,7 @@ function useSourceDrawing({
   samples?: ClipSamples;
   sourceLength: number;
   span: number;
+  stretch: SourceStretch;
   view: SoundView;
 }) {
   const spectrogram = isSpectrogramView(view) && can.spectrogram;
@@ -944,7 +967,10 @@ function useSourceDrawing({
   );
   const gpuClips = useMemo(
     () =>
-      samples && (spectrogram || loudest !== null) && sourceLength > 0
+      samples &&
+      (spectrogram || loudest !== null) &&
+      sourceLength > 0 &&
+      stretch.rate > 0
         ? [
             {
               bands,
@@ -953,10 +979,20 @@ function useSourceDrawing({
               id: "source",
               length: span,
               peak: loudest ?? 1,
-              sampleRate: samples.frames / sourceLength,
+              sampleRate: stretch.rate,
               samples,
+              // The source's stretches, read from where it begins in the recording.
               segments: (from: number, to: number) =>
-                clipSegments(reading, samples.frames, [from, to]),
+                clipSegments(reading, Math.round(sourceLength * stretch.rate), [
+                  from,
+                  to,
+                ]).map((segment) => ({
+                  ...segment,
+                  frames: [
+                    segment.frames[0] + stretch.from * stretch.rate,
+                    segment.frames[1] + stretch.from * stretch.rate,
+                  ] as [number, number],
+                })),
               source: "source",
               start: 0,
             },
@@ -971,6 +1007,7 @@ function useSourceDrawing({
       sourceLength,
       span,
       spectrogram,
+      stretch,
     ]
   );
   return { gpuClips, spectrogram };
@@ -1182,6 +1219,7 @@ function ClipSource({
   samples,
   sourceLength,
   span,
+  stretch,
   values,
   view,
   warp,
@@ -1209,6 +1247,8 @@ function ClipSource({
   samples?: ClipSamples;
   sourceLength: number;
   span: number;
+  /** Where the source begins in the recording the samples read, in seconds, and their rate. */
+  stretch: SourceStretch;
   values: ClipPeaks;
   view: SoundView;
   warp: readonly WarpMarker[] | null;
@@ -1256,6 +1296,7 @@ function ClipSource({
     samples,
     sourceLength,
     span,
+    stretch,
     view,
   });
   const [playedFrom, playedTo] = loop

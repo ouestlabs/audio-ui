@@ -103,7 +103,10 @@ function MovingMark(componentProps: Mark.Props) {
     },
     step: stepProp ?? root.step,
     value: [value, value],
-    zoom: root.zoom,
+    // Read when a gesture needs it: the mark is not drawn again at each step of a zoom.
+    get zoom() {
+      return root.zoom.get();
+    },
   };
   const [controller] = React.useState(() => createRangeController(options));
   // Set on every render, so the mark always reads the latest props.

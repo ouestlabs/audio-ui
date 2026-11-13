@@ -25,6 +25,10 @@ lane.destroy();
 
 A clip's `peak` is its recording's loudest sample, 0 to 1: the waveform is drawn as tall as the loudest reaches the lane's height, as a quiet recording still fills its lane. The clip's `gain` scales what is drawn, as it scales what plays.
 
+## Many lanes
+
+A browser keeps some sixteen WebGL contexts and loses the oldest past that. `createWaveformLane(canvas, inputs, { shared: true })` draws on the page's one context instead, a canvas never on the page, and copies the picture onto `canvas`, a 2D one: a page draws as many lanes as it has clips, one a clip as an arrangement draws them, and lanes reading one recording share its renderers, each let go of once no lane draws it. Leave `zoom` out for a lane that fits its clips to its box, and a clip's `peak` for the lane to read it, from its leaves or its samples. A lane of its own lets go of its context when it is destroyed (`releaseContext` of `@audio-ui/gl/lane`), unless it starts again on the same canvas at once, as React does in development.
+
 ## Streamed recordings
 
 A recording streamed from a file is never read whole. Its `samples` give `leaves`: the recording summed up 256 frames at a time, `[min, max, Σx², count]` each, as `waveformLeaves` makes them from its samples, once, as it is written, and kept beside it. Zoomed out the lane draws from them alone, exact at a leaf a device pixel or more; past that it reads the frames it shows, a chunk of `CHUNK_FRAMES` (65536) at a time, and lets go of the oldest chunks it no longer shows. `leavesPeak` gives the clip's `peak` from them.

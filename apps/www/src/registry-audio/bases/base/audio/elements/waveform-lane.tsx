@@ -20,13 +20,16 @@ import { cn } from "@/registry/bases/base/lib/utils";
  * sound one over the other, the lows warm and the highs cool. A clip is read
  * in stretches (`segments`), as a DAW paints a region; a reversed clip is
  * not drawn here, and `hasWebGL2` of `@audio-ui/gl/lane` says whether to draw
- * this way at all.
+ * this way at all. With `shared`, it draws on the page's one WebGL context and
+ * copies the picture onto its canvas, so a page draws as many lanes as it has
+ * clips, as an arrangement's clips each draw their own.
  */
 function WaveformLane({
   className,
   clips,
   layout = "auto",
   look = "plain",
+  shared = false,
   zoom,
   ...props
 }: Omit<ComponentProps<"canvas">, "ref"> & {
@@ -34,8 +37,10 @@ function WaveformLane({
   /** How a recording's channels are laid out: one waveform (`mix`), a row each (`split`), or a row each once the rows are tall enough to read (`auto`), as a DAW does. @default "auto" */
   layout?: WaveformLayout;
   look?: WaveformLook;
-  /** The lane's pixels a second. */
-  zoom: number;
+  /** Draw on the page's one WebGL context, copied onto this canvas: for a lane a clip, past the sixteen contexts a browser keeps. Read once, as the lane starts. @default false */
+  shared?: boolean;
+  /** The lane's pixels a second. Leave it out for a clip's own lane: its clips fit its box. */
+  zoom?: number;
 }) {
   const ref = useRef<HTMLCanvasElement>(null);
   const lane = useRef<Lane<WaveformInputs> | null>(null);
@@ -43,13 +48,15 @@ function WaveformLane({
     () => ({ clips, layout, look, zoom }),
     [clips, layout, look, zoom]
   );
-  const first = useRef(inputs);
+  const first = useRef({ inputs, shared });
   useLayoutEffect(() => {
     const canvas = ref.current;
     if (!canvas) {
       return;
     }
-    lane.current = createWaveformLane(canvas, first.current);
+    lane.current = createWaveformLane(canvas, first.current.inputs, {
+      shared: first.current.shared,
+    });
     return () => {
       lane.current?.destroy();
       lane.current = null;

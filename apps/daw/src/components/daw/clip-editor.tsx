@@ -314,7 +314,9 @@ export function ClipEditor({
       onValueCommitted={settle}
       onViewChange={setAudioView}
       position={engine.position}
+      sampleRate={recording?.source.sampleRate}
       samples={recording ? recordingSamples(recording.source) : undefined}
+      sourceFrom={clip.sourceFrom}
       start={clip.value.start}
       value={settingsOf(clip)}
       values={recording ? sourcePeaks(clip, recording) : []}

@@ -4306,6 +4306,16 @@
       },
       {
         "kind": "function",
+        "name": "releaseContext",
+        "summary": "Lets go of a lane's own WebGL context once the lane is destroyed: a browser keeps only some sixteen, frees a dropped canvas's only when it collects it, and past that loses the oldest, which may be one a page still draws on."
+      },
+      {
+        "kind": "function",
+        "name": "keepContext",
+        "summary": "A lane starts on a canvas whose context was being let go of: it keeps it."
+      },
+      {
+        "kind": "function",
         "name": "sameSamples",
         "summary": "Whether two readings are the same samples: a reader may hand out a new view of the same memory each time, which is not new data to upload."
       },
@@ -4322,7 +4332,7 @@
       {
         "kind": "function",
         "name": "placeLane",
-        "summary": "Sizes the canvas to the stretch of its lane the view shows, and gives that stretch in CSS px from the lane's left with the device pixel ratio, or hides the canvas when none shows."
+        "summary": "Sizes the canvas to the stretch of its lane the view shows, and gives that stretch in CSS px from the lane's left with the device pixel ratio, or hides the canvas when none shows: the lane scrolled out of sight to either side, or up or down."
       },
       {
         "kind": "function",
@@ -4523,6 +4533,11 @@
         "kind": "interface",
         "name": "WaveformInputs",
         "summary": "What a waveform lane draws."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformLaneOptions",
+        "summary": "How a waveform lane draws."
       },
       {
         "kind": "const",

@@ -110,7 +110,10 @@ export function Root(componentProps: Root.Props) {
       grid,
       position: () => position.get(),
       step,
-      zoom,
+      // Read when a gesture needs it: the roll is not drawn again at each step of a zoom.
+      get zoom() {
+        return zoom.get();
+      },
     },
     value,
   };

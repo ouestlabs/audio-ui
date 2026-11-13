@@ -45,4 +45,4 @@ Stretches that follow one another on the canvas and in the recording are drawn a
 
 ## WebGL 2
 
-`hasWebGL2` says whether this browser can draw a lane at all, and a page draws it another way when it cannot. A browser also keeps only some sixteen contexts: a lane takes one, whatever its clips.
+`hasWebGL2` says whether this browser can draw a lane at all, asked once, and a page draws it another way when it cannot. A browser also keeps only some sixteen contexts: a lane takes one, whatever its clips, and lets it go when it is destroyed (`releaseContext`, and `keepContext` for a lane started again on the same canvas in the same task); a waveform lane made `shared` takes none of its own. A lane scrolled out of sight, to either side or up or down, draws nothing until it comes near.

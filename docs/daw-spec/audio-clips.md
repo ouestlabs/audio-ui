@@ -81,7 +81,7 @@ Deviation: the reference also warps files it reads as one-shots; here a single h
 Test: packages/core/src/audio/analysis/beat.test.ts (autoWarp); apps/daw/test/drop.test.ts "CLP-019"; apps/daw/test/browser/run.ts "CLP-019"
 
 ### CLP-020 A waveform at any zoom
-An audio clip's waveform on its track has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one slice per pixel at the closest zoom, each column from its lowest sample to its highest, so a lopsided sound shows lopsided. Each column is joined to the next, and a column narrower than a peak takes the level between the two peaks around it, so a close zoom draws slopes, never steps. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length. The clip view draws its source the same way, and both follow a zoom in the frame it happens, not once it stops.
+An audio clip's waveform on its track is drawn on the GPU where WebGL 2 is, from its recording (its samples, or a streamed one's leaves), every column its exact lowest and highest sample, a row a channel on a tall track; a reversed clip, or without WebGL 2, is drawn from its peaks. It has a column per pixel of the screen at any zoom, with no gaps between them, and shows the recording to one slice per pixel at the closest zoom, each column from its lowest sample to its highest, so a lopsided sound shows lopsided. Each column is joined to the next, and a column narrower than a peak takes the level between the two peaks around it, so a close zoom draws slopes, never steps. It draws only what the view shows, so a zoom or a scroll costs the same whatever the clip's length. The clip view draws its source the same way, and both follow a zoom in the frame it happens, not once it stops.
 Test: apps/www/test/registry-audio/base/lib/arrangement.test.ts "CLP-020"; apps/daw/test/project-file.test.ts "CLP-020"; apps/daw/test/browser/run.ts "CLP-020"
 
 ### CLP-021 The source in the clip view
@@ -108,3 +108,7 @@ Test: apps/daw/test/samples.test.ts "CLP-025"; apps/daw/test/browser/run.ts "CLP
 ### CLP-026 The source's views
 The clip view's View menu, in its strip after the clip's name, draws the source as its waveform, its waveform by band (the lows warm behind, the highs cool in front, each as tall as its own loudest), or its spectrogram on octaves, mel, ERB or hertz, with its frequency axis and the frequency and level under the pointer; the view stays from clip to clip and across a reload. A streamed recording's spectrogram is drawn from its spectra, made once in a worker and kept beside it (`cache/<id>.spectra`), and its bands are split as the view reads them, from a few thousand frames before. A reversed clip is drawn as its waveform.
 Test: apps/daw/test/samples.test.ts "CLP-026"; apps/daw/test/browser/run.ts "CLP-026"
+
+### CLP-027 Many clips on the GPU
+However many audio clips the arrangement holds, each draws its waveform on the GPU: all of them on the page's one WebGL context, each copying its picture onto a canvas of its own, so none is lost past the sixteen contexts a browser keeps, and clips of one recording share what is on the GPU for it. A clip scrolled out of sight draws nothing until it comes near; a clip view that opens on another clip lets go of its own context at once.
+Test: apps/daw/test/browser/run.ts "CLP-027"

@@ -40,6 +40,20 @@ export function warpMarkers(markers: readonly WarpMarker[]): WarpMarker[] {
   return kept;
 }
 
+/** The maps made so far, by the markers they were made from: a map is made once, not at every reading. */
+const maps = new WeakMap<readonly WarpMarker[], WarpMarker[]>();
+
+/** The map of `markers`, made the first time they are read: markers are read as they were then, so new markers are a new array. */
+function mapOf(markers: readonly WarpMarker[]): WarpMarker[] {
+  const kept = maps.get(markers);
+  if (kept) {
+    return kept;
+  }
+  const map = warpMarkers(markers);
+  maps.set(markers, map);
+  return map;
+}
+
 /** Maps a time from one side to the other, along the stretches between the markers. */
 function along(
   markers: readonly WarpMarker[],
@@ -47,7 +61,7 @@ function along(
   from: "source" | "target",
   to: "source" | "target"
 ): number {
-  const map = warpMarkers(markers);
+  const map = mapOf(markers);
   const [first, second] = map;
   if (!first) {
     return time;
@@ -55,13 +69,16 @@ function along(
   if (!second) {
     return time - first[from] + first[to];
   }
-  // The stretch that holds `time`, or the first or last one past the ends.
+  // The stretch that holds `time`, or the first or last one past the ends: the last marker at or before it, searched by halves.
   let index = 0;
-  while (
-    index < map.length - 2 &&
-    time >= (map[index + 1] as WarpMarker)[from]
-  ) {
-    index += 1;
+  let high = map.length - 2;
+  while (index < high) {
+    const middle = (index + high + 1) >> 1;
+    if (time >= (map[middle] as WarpMarker)[from]) {
+      index = middle;
+    } else {
+      high = middle - 1;
+    }
   }
   const a = map[index] as WarpMarker;
   const b = map[index + 1] as WarpMarker;

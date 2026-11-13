@@ -125,8 +125,13 @@ export interface TimelineContextValue {
     step: number;
     viewport: Store<ViewportMetrics>;
     viewportRef: React.RefObject<HTMLElement | null>;
-    /** px per unit, or null while the timeline fits its width. */
-    zoom: number | null;
+    /**
+     * px per unit, or null while the timeline fits its width: read at the
+     * time it is needed, or followed with `useTimelineZoom`. It is no value of
+     * the context, so a part that only moves with the zoom (a clip, a mark,
+     * placed by the lane's unit) is not drawn again at each step of one.
+     */
+    zoom: ZoomSource;
   };
   state: TimelineState;
 }
@@ -149,6 +154,18 @@ export function useTimelineState(part: string): TimelineState {
     throw new Error(`Timeline.${part} must be used within Timeline.Root`);
   }
   return state;
+}
+
+/** The zoom, read now or followed. */
+export interface ZoomSource {
+  get: () => number | null;
+  subscribe: (listener: () => void) => () => void;
+}
+
+/** The zoom, as a part drawn with it reads it: drawn again when it changes. */
+export function useTimelineZoom(part: string): number | null {
+  const { zoom } = useTimelineContext(part).meta;
+  return React.useSyncExternalStore(zoom.subscribe, zoom.get, zoom.get);
 }
 
 export function useTimelineContext(part: string): TimelineContextValue {

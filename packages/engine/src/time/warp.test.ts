@@ -5,6 +5,7 @@ import {
   removeWarpMarker,
   scaleWarp,
   unwarpedTime,
+  type WarpMarker,
   warpedTime,
   warpMarkers,
   warpRate,
@@ -70,5 +71,35 @@ describe("editing markers", () => {
   test("scaling plays it slower or faster from its first marker", () => {
     expect(scaleWarp(map, 2).map((m) => m.target)).toEqual([0, 4, 20]);
     expect(warpRate(scaleWarp(map, 0.5), 0.5)).toBeCloseTo(4, 6);
+  });
+});
+
+describe("warp maps of many markers", () => {
+  test("read the same as a stretch looked for one by one, inside and past the ends", () => {
+    const markers = Array.from({ length: 500 }, (_, index) => ({
+      source: index * 0.5 + (index % 7) * 0.01,
+      target: index * 0.47 + (index % 5) * 0.02,
+    }));
+    // The stretch looked for from the first marker on: what the map gave before it was searched by halves.
+    const linear = (time: number, from: "source" | "target") => {
+      const to = from === "source" ? "target" : "source";
+      let index = 0;
+      while (
+        index < markers.length - 2 &&
+        time >= (markers[index + 1] as WarpMarker)[from]
+      ) {
+        index += 1;
+      }
+      const a = markers[index] as WarpMarker;
+      const b = markers[index + 1] as WarpMarker;
+      return a[to] + ((time - a[from]) * (b[to] - a[to])) / (b[from] - a[from]);
+    };
+    for (let time = -3; time < 260; time += 0.37) {
+      expect(warpedTime(markers, time)).toBeCloseTo(linear(time, "source"), 9);
+      expect(unwarpedTime(markers, time)).toBeCloseTo(
+        linear(time, "target"),
+        9
+      );
+    }
   });
 });

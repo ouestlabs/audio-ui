@@ -7,6 +7,7 @@ import {
   feedChunks,
   groundOf,
   type KeptCache,
+  keepContext,
   type Lane,
   type LaneClip,
   type LaneContext,
@@ -15,6 +16,7 @@ import {
   placeLane,
   readKept,
   readOnce,
+  releaseContext,
   type SampleCache,
   sameSamples,
   type VisiblePart,
@@ -492,6 +494,7 @@ export function createSpectrogramLane(
   hooks: SpectrogramHooks = {}
 ): Lane<SpectrogramInputs> {
   let latest = inputs;
+  keepContext(canvas);
   const lane = createLane<Held, SpectrogramInputs>({
     attach: ({ canvas: target, held, view }) => {
       const moved = (event: PointerEvent) =>
@@ -528,6 +531,7 @@ export function createSpectrogramLane(
       for (const renderer of held.renderers.values()) {
         renderer.destroy();
       }
+      releaseContext(canvas, held.context);
     },
     inputs,
     paint,

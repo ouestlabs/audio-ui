@@ -25,7 +25,8 @@ import { WaveformLane } from "@/components/audio-ui/waveform-lane";
 | Prop | Type | |
 | --- | --- | --- |
 | `clips` | `WaveformClip[]` | The clips to draw: `id`, the `source` recording they read, where each `start`s and how `length` it is on the lane in seconds, its `gain`, the recording's `peak` (its loudest sample, 0 to 1, drawn as tall as the lane), `sampleRate` and `samples` (`{ frames, read }`, mixed to one), `segments` (how it reads its recording, see below) and `bands` for the band look. |
-| `zoom` | `number` | The lane's pixels a second. |
+| `zoom` | `number` | The lane's pixels a second. Leave it out for a clip's own lane: its clips fit its box. |
+| `shared` | `boolean` | Draw on the page's one WebGL context and copy the picture onto this canvas, for a lane a clip: a page then draws as many as it has clips, past the sixteen contexts a browser keeps, and clips of one recording share what is on the GPU for it. Read once, as the lane starts. Default `false`. |
 | `layout` | `"auto" \| "mix" \| "split"` | How a recording's channels are laid out: one waveform, a row each, or a row each once the rows are tall enough to read, as a DAW does. A clip gives its `channels`, one reader each, for the rows. Default `"auto"`. |
 | `look` | `"plain" \| "bands"` | One waveform, or the three bands of the sound one over the other. Default `"plain"`. |
 

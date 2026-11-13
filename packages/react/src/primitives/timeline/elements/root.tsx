@@ -16,6 +16,7 @@ import {
   TimelineStateContext,
   type ViewportMetrics,
   type ZoomChangeEventDetails,
+  type ZoomSource,
 } from "../context.ts";
 
 /**
@@ -166,6 +167,28 @@ export function Root(componentProps: Root.Props) {
     })
   );
 
+  // The zoom, read by the parts rendered with this one at once, and told to those that follow it once laid out.
+  const zoomRef = React.useRef(snapshot.zoom);
+  zoomRef.current = snapshot.zoom;
+  const [zoomListeners] = React.useState(() => new Set<() => void>());
+  const [zoom] = React.useState<ZoomSource>(() => ({
+    get: () => zoomRef.current,
+    subscribe: (listener) => {
+      zoomListeners.add(listener);
+      return () => zoomListeners.delete(listener);
+    },
+  }));
+  const toldZoom = React.useRef(snapshot.zoom);
+  React.useLayoutEffect(() => {
+    if (toldZoom.current === snapshot.zoom) {
+      return;
+    }
+    toldZoom.current = snapshot.zoom;
+    for (const listener of [...zoomListeners]) {
+      listener();
+    }
+  }, [snapshot.zoom, zoomListeners]);
+
   const state = React.useMemo<Root.State>(
     () => ({
       disabled: snapshot.disabled,
@@ -199,7 +222,7 @@ export function Root(componentProps: Root.Props) {
         step,
         viewport,
         viewportRef,
-        zoom: snapshot.zoom,
+        zoom,
       },
       state,
     }),
@@ -213,10 +236,10 @@ export function Root(componentProps: Root.Props) {
       position,
       registerLane,
       scrollTo,
-      snapshot.zoom,
       state,
       step,
       viewport,
+      zoom,
       zoomTo,
     ]
   );

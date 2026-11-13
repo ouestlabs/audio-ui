@@ -21,7 +21,7 @@ export const checks: Checks = {
       await page.waitForSelector('[aria-label="Chord take"][data-track-id]', {
         timeout: 10_000,
       });
-      await page.waitForSelector("[data-slot=timeline-clip-waveform]");
+      await page.waitForSelector("[data-slot^=timeline-clip-waveform]");
     },
   "ARR-007: AIFF, CAF and Apple Lossless files, which Chrome does not decode, make tracks too":
     async (browser) => {
@@ -63,7 +63,7 @@ export const checks: Checks = {
         )
       );
       const waveforms = await page
-        .locator("[data-slot=timeline-clip-waveform]")
+        .locator("[data-slot^=timeline-clip-waveform]")
         .count();
       assert(waveforms >= 3, `${waveforms} waveforms for 3 files`);
     },

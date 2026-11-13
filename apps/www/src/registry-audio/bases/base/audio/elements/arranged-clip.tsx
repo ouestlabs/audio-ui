@@ -1,3 +1,5 @@
+import { dbToGain } from "@audio-ui/engine/analysis";
+import { hasWebGL2 } from "@audio-ui/gl/lane";
 import type {
   FadeShape,
   Source,
@@ -24,7 +26,10 @@ import {
   ContextMenuSeparator,
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
-import { ClipWaveform } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
+import {
+  type ClipSamples,
+  ClipWaveform,
+} from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import {
   TimelineClip,
   TimelineClipFade,
@@ -33,12 +38,14 @@ import {
   TimelineClipHeader,
   trackSwatch,
 } from "@/registry-audio/bases/base/audio/elements/timeline";
+import { WaveformLane } from "@/registry-audio/bases/base/audio/elements/waveform-lane";
 import {
   type Arranged,
   type ClipAction,
   type ClipPeaks,
   clipPeakCount,
   clipReach,
+  clipSegments,
   playedNotes,
   type TrackColor,
 } from "@/registry-audio/bases/base/lib/arrangement";
@@ -321,9 +328,95 @@ interface ArrangedClipProps {
   /** An audio clip's source as peaks spread evenly over its `sourceLength`, amplitudes from 0 to 1 or the lowest and highest samples of each slice: its waveform is drawn from them. */
   peaks?: ClipPeaks;
   selected: boolean;
+  /** An audio clip's recording, to draw its waveform on the GPU where WebGL 2 is: every pixel column its exact lowest and highest sample, a row a channel on a tall track, at any zoom. Leave it out to draw from `peaks`, as a reversed clip is. */
+  source?: ArrangedSource;
   /** The clip's color: its track's, an index into `TRACK_COLORS` or a color of the user's own. */
   swatch: TrackColor;
   trackName: string;
+}
+
+/** A clip's recording, read by its waveform on the GPU: its samples mixed to one, its channels a reader each, and its rate. */
+interface ArrangedSource {
+  channels?: readonly ClipSamples[];
+  sampleRate: number;
+  samples: ClipSamples;
+}
+
+/** Whether this browser draws with WebGL 2, asked once. */
+let webgl: boolean | null = null;
+const drawsOnGpu = () => {
+  webgl ??= hasWebGL2();
+  return webgl;
+};
+
+/** Whether the GPU draws a recording without reading it whole: held in memory, or streamed with its leaves. */
+const drawable = (samples: ClipSamples) =>
+  Boolean(samples.leaves) || !(samples.read(0, 0) instanceof Promise);
+
+/**
+ * An audio clip's waveform, under its title: on the GPU from its recording
+ * where it can be, one lane a clip on the page's one WebGL context, read in
+ * the stretches the clip plays from where it begins in the recording; else
+ * from its peaks, as a reversed clip, which reads backwards, is.
+ */
+function ArrangedWaveform({
+  clip,
+  peaks,
+  source,
+}: {
+  clip: Arranged;
+  peaks?: ClipPeaks;
+  source?: ArrangedSource;
+}) {
+  const gpu =
+    source && !clip.reversed && drawable(source.samples) && drawsOnGpu()
+      ? source
+      : null;
+  const clips = useMemo(() => {
+    if (!gpu) {
+      return null;
+    }
+    const { channels, sampleRate, samples } = gpu;
+    // Its source begins where it was cropped from in the recording: the stretches read from there.
+    const from = (clip.sourceFrom ?? 0) * sampleRate;
+    const frames = Math.round(clip.sourceLength * sampleRate);
+    return [
+      {
+        channels,
+        gain: dbToGain(clip.gain ?? 0),
+        id: clip.id,
+        length: clip.value.length,
+        sampleRate,
+        samples,
+        segments: (start: number, end: number) =>
+          clipSegments(clip, frames, [start, end]).map((segment) => ({
+            ...segment,
+            frames: [segment.frames[0] + from, segment.frames[1] + from] as [
+              number,
+              number,
+            ],
+          })),
+        source: clip.recording ?? clip.id,
+        start: 0,
+      },
+    ];
+  }, [clip, gpu]);
+  if (clips) {
+    return (
+      <WaveformLane
+        className="top-5 bottom-1 h-[calc(100%-1.5rem)] opacity-70"
+        clips={clips}
+        shared
+      />
+    );
+  }
+  return peaks && clipPeakCount(peaks) > 0 ? (
+    <ClipWaveform
+      className="top-5 bottom-1 h-[calc(100%-1.5rem)] opacity-70"
+      clip={clip}
+      peaks={peaks}
+    />
+  ) : null;
 }
 
 const NO_LIFT = () => undefined;
@@ -351,6 +444,7 @@ const ArrangedClip = memo(function ArrangedClipView({
   onSelect,
   peaks,
   selected,
+  source,
   swatch,
   trackName,
 }: ArrangedClipProps) {
@@ -487,13 +581,9 @@ const ArrangedClip = memo(function ArrangedClipView({
             )}
           </TimelineClipHeader>
           {clip.notes ? <ClipNotes clip={clip} /> : null}
-          {!clip.notes && peaks && clipPeakCount(peaks) > 0 ? (
-            <ClipWaveform
-              className="top-5 bottom-1 h-[calc(100%-1.5rem)] opacity-70"
-              clip={clip}
-              peaks={peaks}
-            />
-          ) : null}
+          {clip.notes ? null : (
+            <ArrangedWaveform clip={clip} peaks={peaks} source={source} />
+          )}
           {clip.notes ? null : (
             <>
               <TimelineClipFade edge="in" style={UNDER_HEAD} />
@@ -538,4 +628,5 @@ const ArrangedClip = memo(function ArrangedClipView({
   );
 });
 
+export type { ArrangedSource };
 export { ArrangedClip, ArrangedClipGhost, ArrangedGroupPreview, ArrangedTake };

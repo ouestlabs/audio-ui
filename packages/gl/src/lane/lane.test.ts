@@ -5,8 +5,10 @@ import {
   clearLane,
   feedChunks,
   joinParts,
+  keepContext,
   type LaneClip,
   type LaneSegment,
+  releaseContext,
   type SampleCache,
   sameSamples,
   visibleClips,
@@ -421,5 +423,34 @@ describe("joinParts", () => {
       { frames: [1000, 2000] as [number, number], width: 10, x: 20 },
     ];
     expect(joinParts(parts)).toEqual(parts);
+  });
+});
+
+describe("releaseContext", () => {
+  const context = () => {
+    const lost: string[] = [];
+    const gl = {
+      getExtension: () => ({ loseContext: () => lost.push("lost") }),
+    } as unknown as WebGL2RenderingContext;
+    return { gl, lost };
+  };
+  const canvas = () => ({}) as HTMLCanvasElement;
+  const settle = () => new Promise((resolve) => setTimeout(resolve, 5));
+
+  test("a destroyed lane's context is let go of once the task ends", async () => {
+    const { gl, lost } = context();
+    releaseContext(canvas(), gl);
+    expect(lost).toEqual([]);
+    await settle();
+    expect(lost).toEqual(["lost"]);
+  });
+
+  test("a lane started again on the same canvas in the same task keeps it", async () => {
+    const { gl, lost } = context();
+    const same = canvas();
+    releaseContext(same, gl);
+    keepContext(same);
+    await settle();
+    expect(lost).toEqual([]);
   });
 });

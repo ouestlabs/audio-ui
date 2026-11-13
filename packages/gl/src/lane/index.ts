@@ -193,10 +193,54 @@ export function groundOf(element: Element): string {
 
 /** Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way. */
 export function hasWebGL2(): boolean {
-  try {
-    return Boolean(document.createElement("canvas").getContext("webgl2"));
-  } catch {
-    return false;
+  if (webgl2 === null) {
+    try {
+      const probe = document.createElement("canvas").getContext("webgl2");
+      webgl2 = Boolean(probe);
+      // The probe's context is let go of at once: a browser keeps only some sixteen.
+      probe?.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch {
+      webgl2 = false;
+    }
+  }
+  return webgl2;
+}
+
+/** Whether this browser draws with WebGL 2, asked once. */
+let webgl2: boolean | null = null;
+
+/** The contexts of lanes destroyed in this task, let go of once it ends. */
+const leaving = new WeakMap<HTMLCanvasElement, ReturnType<typeof setTimeout>>();
+
+/**
+ * Lets go of a lane's own WebGL context once the lane is destroyed: a browser
+ * keeps only some sixteen, frees a dropped canvas's only when it collects it,
+ * and past that loses the oldest, which may be one a page still draws on. A
+ * lane started again on the same canvas in the same task, as React does in
+ * development, keeps it (`keepContext`).
+ */
+export function releaseContext(
+  canvas: HTMLCanvasElement,
+  gl: WebGL2RenderingContext | null
+) {
+  if (!gl) {
+    return;
+  }
+  leaving.set(
+    canvas,
+    setTimeout(() => {
+      leaving.delete(canvas);
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+    })
+  );
+}
+
+/** A lane starts on a canvas whose context was being let go of: it keeps it. */
+export function keepContext(canvas: HTMLCanvasElement) {
+  const timer = leaving.get(canvas);
+  if (timer !== undefined) {
+    clearTimeout(timer);
+    leaving.delete(canvas);
   }
 }
 
@@ -243,7 +287,8 @@ export interface Placed {
 /**
  * Sizes the canvas to the stretch of its lane the view shows, and gives that
  * stretch in CSS px from the lane's left with the device pixel ratio, or
- * hides the canvas when none shows.
+ * hides the canvas when none shows: the lane scrolled out of sight to either
+ * side, or up or down.
  */
 export function placeLane(
   canvas: HTMLCanvasElement,
@@ -256,7 +301,10 @@ export function placeLane(
     new DOMRect(0, 0, window.innerWidth, window.innerHeight);
   const from = Math.max(0, sees.left - box.left - OVERSCAN);
   const to = Math.min(box.width, sees.right - box.left + OVERSCAN);
-  if (to <= from) {
+  // A lane scrolled out of sight, up or down, draws nothing until it comes near.
+  const away =
+    box.bottom < sees.top - OVERSCAN || box.top > sees.bottom + OVERSCAN;
+  if (to <= from || away) {
     canvas.style.display = "none";
     return null;
   }
@@ -561,6 +609,7 @@ export function createLane<Held extends { gone: boolean }, Inputs>(
   const held = options.create();
   let frame = 0;
   let drawnLeft = 0;
+  let drawnTop = 0;
   let over = false;
   if (!body) {
     return {
@@ -580,6 +629,7 @@ export function createLane<Held extends { gone: boolean }, Inputs>(
   const draw = () => {
     frame = 0;
     drawnLeft = view?.scrollLeft ?? 0;
+    drawnTop = view?.scrollTop ?? 0;
     const more = options.paint(context);
     if (more instanceof Promise) {
       more.then(
@@ -602,7 +652,14 @@ export function createLane<Held extends { gone: boolean }, Inputs>(
   const detach = options.attach?.(context);
   const unsubscribe = options.subscribe?.(later);
   const scrolled = () => {
-    if (view && Math.abs(view.scrollLeft - drawnLeft) > OVERSCAN / 2) {
+    if (
+      view &&
+      Math.max(
+        Math.abs(view.scrollLeft - drawnLeft),
+        Math.abs(view.scrollTop - drawnTop)
+      ) >
+        OVERSCAN / 2
+    ) {
       later();
     }
   };
