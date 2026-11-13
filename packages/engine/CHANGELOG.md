@@ -1,5 +1,11 @@
 # @audio-ui/engine
 
+## 0.13.1
+
+### Patch Changes
+
+- df6e8b9: Analysis: `splitBands` also gives the loudest sample of each band (`peaks`), so each band can be drawn as tall as its own loudest reaches.
+
 ## 0.13.0
 
 ### Minor Changes
