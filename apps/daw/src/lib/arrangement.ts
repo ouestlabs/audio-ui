@@ -609,6 +609,80 @@ export function clipFramePositions(
   );
 }
 
+/** A stretch of a clip that reads its recording straight on: two times of the clip and the frames of the recording at them. */
+export interface ClipSegment {
+  /** The frames of the recording at `from` and at `to`: the second is the lower when the stretch is read backwards. */
+  frames: readonly [number, number];
+  from: number;
+  to: number;
+}
+
+/** How near a turn of a loop or a warp marker a time is taken as on its either side. */
+const BREAK = 1e-9;
+
+/**
+ * The stretches of a clip between two times of it, in seconds from its start,
+ * each a straight read of its recording, as a DAW paints a region: one for a
+ * clip that plays on from its offset, one for each turn of its loop and each
+ * stretch between its warp markers. `frames` is how many the source holds over
+ * its `sourceLength`. A stretch read backwards (a reversed clip) has its
+ * frames falling. Empty when there is nothing to read.
+ */
+export function clipSegments(
+  clip: ClipReading,
+  frames: number,
+  [from, to]: readonly [number, number]
+): ClipSegment[] {
+  if (
+    frames <= 0 ||
+    !(clip.sourceLength > 0) ||
+    clip.value.length <= 0 ||
+    !(to > from)
+  ) {
+    return [];
+  }
+  const share = sourceShareAt(clip);
+  const { offset } = clip.value;
+  const breaks = new Set<number>();
+  if (clip.loop) {
+    const [start, end] = clip.loop;
+    const length = end - start;
+    if (length > 0) {
+      // The turns: the times the clip reaches the loop's end again.
+      const first = Math.max(0, Math.ceil((from - (end - offset)) / length));
+      for (let turn = first; end - offset + turn * length < to; turn += 1) {
+        breaks.add(end - offset + turn * length);
+      }
+    }
+  }
+  if (clip.warp) {
+    const span = warpedTime(clip.warp, clip.sourceLength);
+    for (const marker of clip.warp) {
+      breaks.add(
+        (clip.reversed ? span - marker.target : marker.target) - offset
+      );
+    }
+  }
+  const times = [
+    from,
+    ...[...breaks]
+      .filter((time) => time > from && time < to)
+      .sort((a, b) => a - b),
+    to,
+  ];
+  return times.slice(1).map((end, index) => {
+    const start = times[index] as number;
+    return {
+      frames: [
+        share(start + BREAK) * frames,
+        share(end - BREAK) * frames,
+      ] as const,
+      from: start,
+      to: end,
+    };
+  });
+}
+
 /**
  * The frames to read for `positions`: from the first one any column touches
  * to one past the last, within the source's `frames`.

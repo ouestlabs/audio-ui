@@ -16,6 +16,7 @@
   "dependencies": {
     "@audio-ui/core": "*",
     "@audio-ui/engine": "*",
+    "@audio-ui/gl": "*",
     "@audio-ui/icons": "*",
     "@audio-ui/react": "*",
     "@base-ui/react": "catalog:",

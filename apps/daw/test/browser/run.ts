@@ -45,6 +45,7 @@ const names = Object.keys(checks).filter(
   (name) => wanted.length === 0 || wanted.some((id) => name.startsWith(id))
 );
 const chrome = await chromium.launch({
+  headless: process.env.HEADED ? false : undefined,
   // A fake microphone, a tone, granted without asking: what a take records (REC).
   args: [
     "--autoplay-policy=no-user-gesture-required",

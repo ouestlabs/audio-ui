@@ -8,6 +8,7 @@ import {
   warpedTime,
   warpRate,
 } from "@audio-ui/engine/time";
+import { hasWebGL2 } from "@audio-ui/gl/lane";
 import type { Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,
@@ -44,7 +45,13 @@ import {
   TimelineRangeHandle,
   TimelineViewport,
 } from "@/components/audio-ui/timeline";
-import { type ClipPeaks, clipPeakCount } from "@/lib/arrangement";
+import { WaveformLane } from "@/components/audio-ui/waveform-lane";
+import { useLoudest } from "@/hooks/use-loudest";
+import {
+  type ClipPeaks,
+  clipPeakCount,
+  clipSegments,
+} from "@/lib/arrangement";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {
@@ -954,6 +961,36 @@ function ClipSource({
     }),
     [reversed, sourceLength, span, warp]
   );
+  // On the GPU where it can be: the source of a clip held in memory, read in the stretches its warp makes. A reversed clip reads backwards, which the renderers have no range for, so it is drawn as it was.
+  const [webgl] = useState(hasWebGL2);
+  // Only samples held in memory: a recording streamed from a file is drawn by the canvas, which reads only the frames in view.
+  const inMemory = useMemo(
+    () => (samples ? !(samples.read(0, 0) instanceof Promise) : false),
+    [samples]
+  );
+  const loudest = useLoudest(
+    webgl && !reversed && inMemory ? samples : undefined
+  );
+  const gpuClips = useMemo(
+    () =>
+      samples && loudest !== null && sourceLength > 0
+        ? [
+            {
+              gain: 1,
+              id: "source",
+              length: span,
+              peak: loudest,
+              sampleRate: samples.frames / sourceLength,
+              samples,
+              segments: (from: number, to: number) =>
+                clipSegments(reading, samples.frames, [from, to]),
+              source: "source",
+              start: 0,
+            },
+          ]
+        : null,
+    [loudest, reading, samples, sourceLength, span]
+  );
   const [playedFrom, playedTo] = loop
     ? [Math.min(offset, loop[0]), loop[1]]
     : [offset, Math.min(span, offset + length)];
@@ -1045,7 +1082,16 @@ function ClipSource({
                 data-slot="clip-panel-source"
                 style={{ width: `calc(var(--timeline-unit) * ${span})` }}
               >
-                {clipPeakCount(values) > 0 ? (
+                {gpuClips ? (
+                  <WaveformLane
+                    aria-label={`${name} source`}
+                    className="h-full text-muted-foreground"
+                    clips={gpuClips}
+                    role="img"
+                    zoom={pxPerSecond}
+                  />
+                ) : null}
+                {!gpuClips && clipPeakCount(values) > 0 ? (
                   <ClipWaveform
                     aria-label={`${name} source`}
                     className="inset-y-0 h-full text-muted-foreground"

@@ -52,7 +52,10 @@ export const checks: Checks = {
           .getAttribute("aria-pressed")) === "true",
         "the groove did not come in in Beats"
       );
-      const tempo = Number(await page.getByLabel("Source tempo").inputValue());
+      // Read whatever the browser's language writes as the decimal mark.
+      const tempo = Number(
+        (await page.getByLabel("Source tempo").inputValue()).replace(",", ".")
+      );
       assert(Math.abs(tempo - 100) < 0.1, `read at ${tempo} BPM, not 100`);
     },
   "CLP-006: a file dropped fades 4 ms at its edges, and Delete on a longer fade brings it back to 4 ms":
@@ -213,9 +216,18 @@ export const checks: Checks = {
     await page.waitForTimeout(400);
     const read = await canvas.evaluate((element) => {
       const drawn = element as HTMLCanvasElement;
-      const row = drawn
-        .getContext("2d")
-        ?.getImageData(0, Math.floor(drawn.height / 2), drawn.width, 1).data;
+      // Copied to a 2D canvas, so a waveform on the GPU reads as one on the canvas does.
+      const copy = document.createElement("canvas");
+      copy.width = drawn.width;
+      copy.height = drawn.height;
+      const context = copy.getContext("2d");
+      context?.drawImage(drawn, 0, 0);
+      const row = context?.getImageData(
+        0,
+        Math.floor(drawn.height / 2),
+        drawn.width,
+        1
+      ).data;
       let empty = 0;
       for (let column = 0; column < drawn.width; column += 1) {
         if (!row?.[column * 4 + 3]) {
@@ -355,6 +367,31 @@ export const checks: Checks = {
         `the fade is drawn from ${curve?.y}, over a name running to ${(header?.y ?? 0) + (header?.height ?? 0)}`
       );
     },
+  "CLP-025: a streamed recording's clip view reads only the frames in view, on one canvas":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const source = page.locator("[data-slot=clip-panel-source]");
+      await source.locator("canvas").first().waitFor({ timeout: 5000 });
+      await page.waitForTimeout(1500);
+      // A recording streamed from its cache file is never read whole for the GPU: the canvas reads the frames in view.
+      assert(
+        (await source
+          .locator("canvas[data-slot=timeline-clip-waveform-gl]")
+          .count()) === 0,
+        "a streamed recording is read whole for the GPU"
+      );
+      assert(
+        (await source
+          .locator("canvas[data-slot=timeline-clip-waveform]")
+          .count()) === 1,
+        "the source is not drawn on one canvas"
+      );
+    },
   "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":
     async (browser) => {
       const page = await open(browser);
@@ -390,8 +427,12 @@ export const checks: Checks = {
       await zoomIn(0);
       await page.keyboard.up("Control");
       await page.waitForTimeout(400);
-      assert(seen.has("peaks"), `it never drew the peaks: ${[...seen]}`);
-      assert(seen.has("samples"), `it never drew the samples: ${[...seen]}`);
+      // On the GPU a pixel column is the exact lowest and highest of its samples (`columns`), then a line; on the canvas, the peaks come first and the samples between.
+      const first = seen.has("columns") ? "columns" : "peaks";
+      assert(seen.has(first), `it never drew the ${first}: ${[...seen]}`);
+      if (first === "peaks") {
+        assert(seen.has("samples"), `it never drew the samples: ${[...seen]}`);
+      }
       assert(
         (await detail()) === "line",
         `the closest zoom draws ${await detail()}`

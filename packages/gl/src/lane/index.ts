@@ -151,18 +151,13 @@ export function placeLane(
   return { from, ratio, to };
 }
 
-/**
- * The clips of a lane the view shows, each with its parts of the canvas and
- * the frames it reads there, and their samples read once a recording. `placed`
- * is what `placeLane` gave; `zoom` the lane's pixels a second. Clips off the
- * view are left out, and so are the parts of a clip off it.
- */
-export async function visibleClips(
+/** The clips of a lane the view shows, each with its parts, before their samples are read. */
+function partsInView(
   clips: readonly LaneClip[],
   placed: Pick<Placed, "from" | "to">,
   zoom: number
-): Promise<VisibleClip[]> {
-  const seen = clips.flatMap((entry) => {
+): { entry: LaneClip; parts: VisiblePart[] }[] {
+  return clips.flatMap((entry) => {
     const left = entry.start * zoom;
     const x0 = Math.max(left, placed.from);
     const x1 = Math.min(left + entry.length * zoom, placed.to);
@@ -174,11 +169,8 @@ export async function visibleClips(
       .flatMap((segment): VisiblePart[] => {
         const a = Math.max(left + segment.from * zoom, x0);
         const b = Math.min(left + segment.to * zoom, x1);
-        if (!(b > a)) {
-          return [];
-        }
         // A stretch read backwards is not drawn: the renderers have no such range.
-        if (segment.frames[1] < segment.frames[0]) {
+        if (!(b > a) || segment.frames[1] < segment.frames[0]) {
           return [];
         }
         // The stretch may have been cut to the view: its frames follow.
@@ -187,20 +179,108 @@ export async function visibleClips(
           segment.frames[0] +
           ((time - segment.from) / span) *
             (segment.frames[1] - segment.frames[0]);
-        const first = at((a - left) / zoom);
-        const last = at((b - left) / zoom);
-        return [{ frames: [first, last], width: b - a, x: a - placed.from }];
+        return [
+          {
+            frames: [at((a - left) / zoom), at((b - left) / zoom)],
+            width: b - a,
+            x: a - placed.from,
+          },
+        ];
       });
     return parts.length > 0 ? [{ entry, parts }] : [];
   });
-  // A recording is read once, whatever its clips.
+}
+
+/**
+ * What a lane has read of its recordings, by `source`: a recording is read
+ * once, not at every paint, since a reader may copy or mix the whole of it
+ * each time it is asked. Read again only when the clip hands another reader.
+ */
+export type SampleCache = Map<
+  string,
+  {
+    read: ArrayLike<number> | Promise<ArrayLike<number>>;
+    samples: LaneSamples;
+  }
+>;
+
+/** A recording's samples, from the cache when its reader is the one it was read with, else read now and kept. */
+export function readOnce(
+  entry: LaneClip,
+  cache: SampleCache | undefined
+): ArrayLike<number> | Promise<ArrayLike<number>> {
+  const kept = cache?.get(entry.source);
+  if (kept && kept.samples === entry.samples) {
+    return kept.read;
+  }
+  const read = entry.samples.read(0, entry.samples.frames);
+  cache?.set(entry.source, { read, samples: entry.samples });
+  if (read instanceof Promise) {
+    // Once read, the cache holds the samples themselves: the next paint has them at once.
+    read.then(
+      (samples) => {
+        if (cache?.get(entry.source)?.read === read) {
+          cache.set(entry.source, { read: samples, samples: entry.samples });
+        }
+      },
+      () => cache?.delete(entry.source)
+    );
+  }
+  return read;
+}
+
+/** Whether a reading came back at once, not as a promise. */
+const isNow = (
+  read: ArrayLike<number> | Promise<ArrayLike<number>>
+): read is ArrayLike<number> => !(read instanceof Promise);
+
+/**
+ * The clips of a lane the view shows, as `visibleClips` gives them, when
+ * every recording they read hands its samples at once: what lets a lane draw
+ * a zoom in the frame it happens. `null` when one reads them later.
+ */
+export function visibleClipsNow(
+  clips: readonly LaneClip[],
+  placed: Pick<Placed, "from" | "to">,
+  zoom: number,
+  cache?: SampleCache
+): VisibleClip[] | null {
+  const seen = partsInView(clips, placed, zoom);
+  const reads = new Map<string, ArrayLike<number>>();
+  for (const { entry } of seen) {
+    if (!reads.has(entry.source)) {
+      const read = readOnce(entry, cache);
+      if (!isNow(read)) {
+        return null;
+      }
+      reads.set(entry.source, read);
+    }
+  }
+  return seen.map((each) => ({
+    ...each,
+    data: reads.get(each.entry.source) as ArrayLike<number>,
+  }));
+}
+
+/**
+ * The clips of a lane the view shows, each with its parts of the canvas and
+ * the frames it reads there, and their samples read once a recording. `placed`
+ * is what `placeLane` gave; `zoom` the lane's pixels a second; `cache` keeps
+ * what was read across paints, so a lane reads a recording once. Clips off
+ * the view are left out, and so are the parts of a clip off it.
+ */
+export async function visibleClips(
+  clips: readonly LaneClip[],
+  placed: Pick<Placed, "from" | "to">,
+  zoom: number,
+  cache?: SampleCache
+): Promise<VisibleClip[]> {
+  const seen = partsInView(clips, placed, zoom);
+  // A recording is read once, whatever its clips, and with a cache once whatever the paints.
   const reads = new Map<string, Promise<ArrayLike<number>>>();
   for (const { entry } of seen) {
     if (!reads.has(entry.source)) {
-      reads.set(
-        entry.source,
-        Promise.resolve(entry.samples.read(0, entry.samples.frames))
-      );
+      reads.set(entry.source, Promise.resolve(readOnce(entry, cache)));
     }
   }
   return await Promise.all(
@@ -234,8 +314,8 @@ export interface LaneOptions<Held extends { gone: boolean }, Inputs> {
   destroy: (held: Held) => void;
   /** What the lane draws first. */
   inputs: Inputs;
-  /** Draws what the view shows; true while some of it is not yet whole, to be drawn again. Told to stop by `held.gone`. */
-  paint: (context: LaneContext<Held, Inputs>) => Promise<boolean>;
+  /** Draws what the view shows, at once when it can and later when it waits on something; true while some of it is not yet whole, to be drawn again. Told to stop by `held.gone`. */
+  paint: (context: LaneContext<Held, Inputs>) => boolean | Promise<boolean>;
   /** The element the lane scrolls in, whose edges are what shows. @default the nearest `[data-slot="timeline-viewport"]` */
   scroller?: HTMLElement | null;
   /** A change outside the inputs that draws again (a band zoomed): given `later`, gives back what undoes it. */
@@ -248,7 +328,7 @@ export interface Lane<Inputs> {
   destroy: () => void;
   /** Draws again, now. */
   redraw: () => void;
-  /** What the lane draws from now on: it draws again in the next frame, keeping what is on the GPU. */
+  /** What the lane draws from now on: it draws again at once, keeping what is on the GPU, and waits only for what it does not hold yet. */
   update: (inputs: Inputs) => void;
 }
 
@@ -289,10 +369,20 @@ export function createLane<Held extends { gone: boolean }, Inputs>(
     later: () => later(),
     view,
   };
-  const draw = async () => {
+  const draw = () => {
     frame = 0;
     drawnLeft = view?.scrollLeft ?? 0;
-    if ((await options.paint(context)) && !over) {
+    const more = options.paint(context);
+    if (more instanceof Promise) {
+      more.then(
+        (again) => {
+          if (again && !over) {
+            later();
+          }
+        },
+        () => undefined
+      );
+    } else if (more && !over) {
       later();
     }
   };
@@ -309,7 +399,16 @@ export function createLane<Held extends { gone: boolean }, Inputs>(
     }
   };
   later();
-  const resized = new ResizeObserver(later);
+  // A resize is drawn at once: the observer runs between the layout and the paint, so the waveform never shows at the old width.
+  const resized = new ResizeObserver(() => {
+    if (frame) {
+      cancelAnimationFrame(frame);
+      frame = 0;
+    }
+    if (!over) {
+      draw();
+    }
+  });
   resized.observe(body);
   if (view) {
     resized.observe(view);
@@ -332,9 +431,16 @@ export function createLane<Held extends { gone: boolean }, Inputs>(
       options.destroy(held);
     },
     redraw: later,
+    // Drawn at once: called while the page lays out (a React layout effect), a zoom shows in the frame it happens, the waveform and the lane at one width.
     update: (next) => {
       inputs = next;
-      later();
+      if (frame) {
+        cancelAnimationFrame(frame);
+        frame = 0;
+      }
+      if (!over) {
+        draw();
+      }
     },
   };
 }
