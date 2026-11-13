@@ -67,9 +67,9 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["audio-editor"],
-    dependencies: ["gl-waveform"],
+    dependencies: ["@audio-ui/gl"],
     description:
-      "The waveforms of a lane's clips on one canvas and one WebGL context, drawn on the GPU by gl-waveform: the exact lowest and highest sample of every pixel column with the RMS inside, a line through the samples zoomed in, however long the recording. Plain, or as the three bands of the sound one over the other, the lows warm and the highs cool. Nothing without WebGL 2",
+      "The waveforms of a lane's clips on one canvas and one WebGL context, drawn on the GPU by gl-waveform through @audio-ui/gl: the exact lowest and highest sample of every pixel column with the RMS inside, a line through the samples zoomed in, however long the recording. Plain, or as the three bands of the sound one over the other, the lows warm and the highs cool. Nothing without WebGL 2",
     files: [
       {
         path: "audio/elements/waveform-lane.tsx",
@@ -77,13 +77,12 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "waveform-lane",
-    registryDependencies: ["@audio-ui/use-gl-lane"],
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/engine", "gl-spectrogram"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/gl"],
     description:
-      "The spectrograms of a lane's clips on one canvas and one WebGL context, computed on the GPU at every zoom by gl-spectrogram, on the frequency axis of your choice (octaves, mel, ERB or hertz), with the frequency and level under the pointer and an axis of frequency labels for the lane. It draws only what the view shows, in the text colour over the ground under it, and nothing without WebGL 2.",
+      "The spectrograms of a lane's clips on one canvas and one WebGL context, computed on the GPU at every zoom by gl-spectrogram through @audio-ui/gl, on the frequency axis of your choice (octaves, mel, ERB or hertz), with the frequency and level under the pointer and an axis of frequency labels for the lane. It draws only what the view shows, in the text colour over the ground under it, and nothing without WebGL 2.",
     files: [
       {
         path: "audio/elements/clip-spectrogram.tsx",
@@ -91,7 +90,6 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "clip-spectrogram",
-    registryDependencies: ["@audio-ui/use-gl-lane"],
     type: "registry:ui",
   },
   {

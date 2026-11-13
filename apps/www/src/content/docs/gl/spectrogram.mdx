@@ -1,0 +1,33 @@
+---
+title: spectrogram
+description: "The spectrograms of a lane's clips on one canvas and one WebGL context, computed on the GPU by gl-spectrogram on one of four frequency axes, with the band zoom, the pointer's cell and the frequency axis laid out for a lane."
+---
+
+<Module from="@audio-ui/gl/spectrogram" />
+
+## Usage
+
+`createSpectrogramLane` draws the spectrograms of a lane's clips on a canvas in the lane's box, each clip in its own parts of it. Instead of peaks it draws the frequencies of the recording, each column an FFT computed on the GPU by `gl-spectrogram`, so a steady tone is one row thin and a click one column thin at any zoom.
+
+```ts
+import { createSpectrogramLane } from "@audio-ui/gl/spectrogram";
+
+const lane = createSpectrogramLane(
+  canvas,
+  { band, clips, scale: "log", zoom: pixelsPerSecond }, // "log" octaves, "mel", "erb" or "lin" hertz
+  { onHit: (hit) => { /* the cell under the pointer, or null */ } }
+);
+
+lane.update({ band, clips, scale: "mel", zoom });
+lane.destroy();
+```
+
+`onHit` gives the cell the pointer is over: its `low` and `high` frequencies, its `level` in dB, the `floor` of the levels drawn (a cell under it has nothing to read), and the pointer's place.
+
+## The band
+
+`band` is the frequencies shown, as shares of the axis from 0 (the floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: anything with `getSnapshot`, `set` and `subscribe`, such as `createSource([0, 1])` of `@audio-ui/core`. Shift and the wheel over the picture zoom it about the pointer. `zoomBand` and `panBand` are the arithmetic, to drive it from your own controls.
+
+## The axis
+
+`spectrogramAxis` lays out the frequency axis for a lane of a given height, as audio.js draws it: labels roundest first (20k, 2k, 200, 20, then between as room allows), each with its tick at the row its frequency sits on by the axis the picture is spaced on, shorter ticks between, the band in view respected. Zoomed in, it labels the round values in view, 1-2-5 a decade across a wide span, even steps across a narrow one. A `pointer` frequency is marked and the labels near it give way. `loadScales` gives the axes (`(await loadScales())[scale]`), `hertzLabel` and `readHertz` write a frequency as the axis and as the pointer's reading do.

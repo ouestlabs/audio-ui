@@ -6,6 +6,7 @@ import {
   automationAt,
   clipFramePositions,
   clipReach,
+  clipSegments,
   clipWaveform,
   clipWaveformBands,
   flatAutomation,
@@ -349,5 +350,65 @@ describe("CLP-024: a clip waveform from its samples", () => {
       [0, 0],
       [2, 1],
     ]);
+  });
+});
+
+describe("clipSegments", () => {
+  const reading = (extra: Record<string, unknown> = {}) =>
+    ({
+      sourceLength: 10,
+      value: { length: 4, offset: 1 },
+      ...extra,
+    }) as Parameters<typeof clipSegments>[0];
+
+  test("a clip that plays on is one stretch from its offset", () => {
+    const found = clipSegments(reading(), 1000, [0, 4]);
+    expect(found).toHaveLength(1);
+    expect(found[0]?.frames[0]).toBeCloseTo(100, 3);
+    expect(found[0]?.frames[1]).toBeCloseTo(500, 3);
+  });
+
+  test("a loop gives a stretch for each turn, each ending at the loop's end", () => {
+    // Loop 1 s to 3 s, the clip reading from 1 s: turns at 2 s, 4 s.
+    const looped = reading({ loop: [1, 3] });
+    const found = clipSegments(looped, 1000, [0, 5]);
+    expect(found.map((one) => [one.from, one.to])).toEqual([
+      [0, 2],
+      [2, 4],
+      [4, 5],
+    ]);
+    // 100 frames a second: every full turn reads the loop's frames, 1 s to 3 s.
+    expect(found[1]?.frames[0]).toBeCloseTo(100, 3);
+    expect(found[1]?.frames[1]).toBeCloseTo(300, 3);
+  });
+
+  test("warp markers cut the clip where the speed changes", () => {
+    // Source 0-4 s plays on the clip 0-4 s, then 4-6 s of source squeezed into 4-5 s of clip.
+    const warped = reading({
+      sourceLength: 6,
+      value: { length: 5, offset: 0 },
+      warp: [
+        { source: 0, target: 0 },
+        { source: 4, target: 4 },
+        { source: 6, target: 5 },
+      ],
+    });
+    const found = clipSegments(warped, 600, [0, 5]);
+    expect(found.map((one) => [one.from, one.to])).toEqual([
+      [0, 4],
+      [4, 5],
+    ]);
+    expect(found[1]?.frames[0]).toBeCloseTo(400, 3);
+    expect(found[1]?.frames[1]).toBeCloseTo(600, 3);
+  });
+
+  test("a reversed clip reads its stretches backwards", () => {
+    const [one] = clipSegments(reading({ reversed: true }), 1000, [0, 4]);
+    expect(one?.frames[1]).toBeLessThan(one?.frames[0] ?? 0);
+  });
+
+  test("nothing to read gives nothing", () => {
+    expect(clipSegments(reading(), 0, [0, 4])).toEqual([]);
+    expect(clipSegments(reading(), 1000, [2, 2])).toEqual([]);
   });
 });

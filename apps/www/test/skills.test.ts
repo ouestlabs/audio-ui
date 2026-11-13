@@ -56,7 +56,7 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set(["react", "core", "elements", "engine"]);
+const PACKAGES = new Set(["react", "core", "elements", "engine", "gl"]);
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");

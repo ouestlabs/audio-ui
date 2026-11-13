@@ -1,0 +1,61 @@
+{
+  "name": "@audio-ui/gl",
+  "version": "0.0.0",
+  "description": "Audio drawn on the GPU, with no UI framework in it: a lane of clips as waveforms or a spectrogram on one canvas and one WebGL context, over gl-waveform and gl-spectrogram, with the frequency axis, the band zoom and the pointer reading that go with them.",
+  "keywords": [
+    "audio-ui",
+    "audio",
+    "webgl",
+    "waveform",
+    "spectrogram",
+    "gpu",
+    "framework-agnostic",
+    "daw"
+  ],
+  "homepage": "https://www.audio-ui.dev/docs/gl",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/gl"
+  },
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    "./lane": {
+      "types": "./dist/lane/index.d.ts",
+      "import": "./dist/lane.js"
+    },
+    "./spectrogram": {
+      "types": "./dist/spectrogram/index.d.ts",
+      "import": "./dist/spectrogram.js"
+    },
+    "./waveform": {
+      "types": "./dist/waveform/index.d.ts",
+      "import": "./dist/waveform.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json",
+    "clean": "rm -rf dist node_modules .turbo",
+    "dev": "bunx --bun tsup --watch",
+    "lint": "biome check --write .",
+    "lint:fix": "biome check --write --unsafe .",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "gl-spectrogram": "2.4.0",
+    "gl-waveform": "5.3.0"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.2",
+    "tsup": "^8.5.0",
+    "typescript": "^7.0.2"
+  }
+}

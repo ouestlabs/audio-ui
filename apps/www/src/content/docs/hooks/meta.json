@@ -28,7 +28,6 @@
     "use-timeline-grid",
     "use-timeline-cursor",
     "use-time-selection",
-    "use-gl-lane",
     "use-bake",
     "use-clip-edits",
     "use-silence-hover",

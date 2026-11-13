@@ -25,6 +25,7 @@ audio-ui/
 ├── packages/
 │   ├── core/       # @audio-ui/core, published: the logic of the controls, framework-agnostic, no dependency
 │   ├── engine/     # @audio-ui/engine, published: the audio logic (devices, time, analysis, MIDI, scales, playback), over core and audio.js
+│   ├── gl/         # @audio-ui/gl, published: audio drawn on the GPU (a lane of clips as waveforms or a spectrogram), over gl-waveform and gl-spectrogram
 │   ├── react/      # @audio-ui/react, published (headless primitives)
 │   ├── elements/   # @audio-ui/elements, published: the primitives as custom elements, over core
 │   └── icons/      # @audio-ui/icons, published: audio glyphs (one thin stroke on a 24 grid, in four weights)
@@ -177,10 +178,11 @@ Each primitive has a page in React (`react/<primitive>.mdx`, headed by `<Module 
 2. After a registry change: `bun run registry:build` from `apps/www/`, **after** the last lint fix, so the generated JSON matches the formatted source
 3. The checks CI runs on every PR:
    ```sh
-   bunx biome ci packages/core packages/engine packages/react packages/elements
+   bunx biome ci packages/core packages/engine packages/gl packages/react packages/elements
    bun run build:pkg
    (cd packages/core && bunx tsc --noEmit && bun test)
    (cd packages/engine && bunx tsc --noEmit && bun test)
+   (cd packages/gl && bunx tsc --noEmit && bun test)
    (cd packages/react && bunx tsc --noEmit && bun test)
    (cd packages/elements && bunx tsc --noEmit && bun test && bun run registers)
    ```

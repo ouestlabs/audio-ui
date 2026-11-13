@@ -668,7 +668,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "block-waveform-player",
-    dependencies: ["@audio-ui/engine", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/gl", "@audio-ui/icons"],
     registryDependencies: [
       "@audio-ui/scrubber",
       "@audio-ui/timeline",
@@ -697,7 +697,6 @@ export const components: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/arranged-clip",
       "@audio-ui/clip-spectrogram",
-      "@audio-ui/use-gl-lane",
       "@audio-ui/waveform-lane",
       "@audio-ui/clip-waveform",
       "@audio-ui/device-browser",

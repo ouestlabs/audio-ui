@@ -15,7 +15,7 @@ import { getHomeIndex } from "@/lib/docs/content/spaces";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
 import BlockAudioEditor from "@/registry-audio/bases/base/components/audio-editor/block-audio-editor";
 
-const PACKAGES = ["react", "core", "engine", "elements", "icons"];
+const PACKAGES = ["react", "core", "engine", "gl", "elements", "icons"];
 
 /** Last month's npm downloads of every package, or null when npm does not answer. */
 async function monthlyDownloads(): Promise<number | null> {

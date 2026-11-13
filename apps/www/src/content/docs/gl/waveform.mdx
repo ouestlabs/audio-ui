@@ -1,0 +1,33 @@
+---
+title: waveform
+description: "The waveforms of a lane's clips on one canvas and one WebGL context, drawn on the GPU by gl-waveform: exact peaks and the RMS inside, a line through the samples zoomed in, plain or as the three bands of the sound."
+---
+
+<Module from="@audio-ui/gl/waveform" />
+
+## Usage
+
+`createWaveformLane` draws the waveforms of a lane's clips on a canvas in the lane's box, each clip in its own parts of it. Drawn by `gl-waveform`, every pixel column shows the exact lowest and highest of its samples with the RMS inside, and zoomed in it is a line through the samples with a dot on each: at any zoom, over recordings of any length. The color is the canvas' text color.
+
+```ts
+import { createWaveformLane } from "@audio-ui/gl/waveform";
+
+const lane = createWaveformLane(canvas, {
+  clips, // WaveformClip[]: a LaneClip with the recording's `peak`, and `bands` for the band look
+  look: "plain", // or "bands"
+  zoom: pixelsPerSecond,
+});
+
+lane.update({ clips, look: "bands", zoom });
+lane.destroy();
+```
+
+A clip's `peak` is its recording's loudest sample, 0 to 1: the waveform is drawn as tall as the loudest reaches the lane's height, as a quiet recording still fills its lane. The clip's `gain` scales what is drawn, as it scales what plays.
+
+## By band
+
+With `look: "bands"` a clip is drawn as the three bands of its sound one over the other: the lows warm behind, the mids in the ink's colour, the highs cool in front, as DJ software colours a sound. A clip's `bands()` gives the sound split in three (`splitBands` of [`@audio-ui/engine/analysis`](/docs/engine/analysis)), with the loudest sample of each band so each is drawn as tall as its own loudest reaches. It is called once a recording and may split lazily: the split holds three copies of the mix.
+
+## Reading backwards
+
+`gl-waveform` has no range that reads backwards: a stretch whose frames fall is not drawn. A reversed clip is the host's own drawing, and a page draws it that way too where WebGL 2 is missing.
