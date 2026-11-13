@@ -52,7 +52,12 @@ export function useLoudness(signal: AudioNode | null) {
     return () => {
       live = false;
       if (meter) {
-        signal.disconnect(meter.input);
+        // The signal is not ours: its owner may have cut its links already, and a link cut twice throws.
+        try {
+          signal.disconnect(meter.input);
+        } catch {
+          // Already apart.
+        }
         meter.dispose();
       }
       meterRef.current = null;
