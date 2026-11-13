@@ -5,9 +5,21 @@
  * from memory or, for a streamed recording, from its cache file, only the
  * frames the view asks for. A streamed recording also gives its leaves, what
  * its waveform is drawn from zoomed out on the GPU: read from beside its cache
- * file, or made from it once and written there.
+ * file, or made from it once and written there, and its spectra, what its
+ * spectrogram is drawn from zoomed out: kept beside it the same way, made once
+ * in a worker.
  */
-import { LEAF_FRAMES, waveformLeaves } from "@audio-ui/gl/waveform";
+import {
+  SPECTRA_SIZE,
+  type Spectra,
+  spectrogramSpectra,
+  splitBands,
+} from "@audio-ui/engine/analysis";
+import {
+  LEAF_FRAMES,
+  type WaveformBands,
+  waveformLeaves,
+} from "@audio-ui/gl/waveform";
 import type { ClipSamples } from "@/components/audio-ui/clip-waveform";
 import type { RecordingSource, StreamedSource } from "@/lib/clip-player";
 
@@ -72,6 +84,87 @@ async function readChannel(
     .slice(at, at + Math.max(0, to - from) * BYTES)
     .arrayBuffer();
   return new Float32Array(bytes);
+}
+
+/** Frames `from` to `to` of a streamed recording, the middle of its channels. */
+export async function readMix(
+  source: StreamedSource,
+  from: number,
+  to: number
+): Promise<Float32Array> {
+  return middle(
+    await Promise.all(
+      Array.from({ length: source.channels }, (_, channel) =>
+        readChannel(source, channel, from, to)
+      )
+    ),
+    Math.max(0, to - from)
+  );
+}
+
+/** A streamed recording's spectra, made from its cache file: in a worker, so the page goes on; here when there is none. */
+export function makeSpectra(source: StreamedSource): Promise<Spectra> {
+  const here = () =>
+    spectrogramSpectra({
+      frames: source.length,
+      read: (from, to) => readMix(source, from, to),
+    });
+  if (typeof Worker === "undefined") {
+    return here();
+  }
+  return new Promise<Spectra>((resolve) => {
+    const worker = new Worker(new URL("./spectra-worker.ts", import.meta.url), {
+      type: "module",
+    });
+    const done = (spectra: Promise<Spectra> | Spectra) => {
+      worker.terminate();
+      resolve(spectra);
+    };
+    worker.onmessage = (event: MessageEvent<Spectra>) => done(event.data);
+    worker.onerror = () => done(here());
+    worker.postMessage(source);
+  });
+}
+
+/** Each streamed recording's spectra, read or made once. */
+const spectraMade = new WeakMap<StreamedSource, Promise<Spectra>>();
+
+/** A streamed recording's spectra: read from beside its cache file, `<id>.spectra`, or made from it and written there. */
+function spectraOf(source: StreamedSource): Promise<Spectra> {
+  const kept = spectraMade.get(source);
+  if (kept) {
+    return kept;
+  }
+  const made = (async () => {
+    const folder = await folderOf(source.path);
+    const name = (source.path.at(-1) ?? "").replace(EXTENSION, ".spectra");
+    const size =
+      Math.ceil(source.length / SPECTRA_SIZE) * (SPECTRA_SIZE / 2 + 1);
+    const stored = await folder
+      .getFileHandle(name)
+      .then((handle) => handle.getFile())
+      .catch(() => null);
+    if (stored && stored.size === size) {
+      return {
+        hop: SPECTRA_SIZE,
+        levels: new Uint8Array(await stored.arrayBuffer()),
+        size: SPECTRA_SIZE,
+      };
+    }
+    const spectra = await makeSpectra(source);
+    await folder
+      .getFileHandle(name, { create: true })
+      .then(async (handle) => {
+        const writable = await handle.createWritable();
+        await writable.write(spectra.levels as Uint8Array<ArrayBuffer>);
+        await writable.close();
+      })
+      .catch(() => undefined);
+    return spectra;
+  })();
+  spectraMade.set(source, made);
+  made.catch(() => spectraMade.delete(source));
+  return made;
 }
 
 /** How many sets of leaves a recording of `channels` keeps: its mix's, and each channel's for one of several. */
@@ -195,15 +288,8 @@ function readerOf(source: RecordingSource): ClipSamples {
     return {
       frames: source.length,
       leaves: async () => (await leavesOf(source))[0] ?? new Float32Array(0),
-      read: async (from, to) =>
-        middle(
-          await Promise.all(
-            Array.from({ length: source.channels }, (_, channel) =>
-              readChannel(source, channel, from, to)
-            )
-          ),
-          Math.max(0, to - from)
-        ),
+      read: (from, to) => readMix(source, from, to),
+      spectra: () => spectraOf(source),
     };
   }
   const channels = channelsIn(source);
@@ -245,4 +331,34 @@ export function recordingChannels(
         }));
   madeChannels.set(source, readers);
   return readers.length > 1 ? readers : undefined;
+}
+
+/** The band splits made so far, one per source. */
+const madeBands = new WeakMap<RecordingSource, () => WaveformBands>();
+
+/**
+ * A recording held in memory as its three bands, for the waveform by band:
+ * split once, the first time it is asked for. Undefined for a streamed one,
+ * which is never held whole.
+ */
+export function recordingBands(
+  source: RecordingSource
+): (() => WaveformBands) | undefined {
+  if ("path" in source) {
+    return;
+  }
+  const kept = madeBands.get(source);
+  if (kept) {
+    return kept;
+  }
+  let split: WaveformBands | null = null;
+  const bands = () => {
+    split ??= splitBands(
+      channelsIn(source),
+      "sampleRate" in source ? source.sampleRate : 48_000
+    );
+    return split;
+  };
+  madeBands.set(source, bands);
+  return bands;
 }

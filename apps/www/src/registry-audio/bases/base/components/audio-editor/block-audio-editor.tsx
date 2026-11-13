@@ -85,13 +85,7 @@ import {
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { ArrangedTake } from "@/registry-audio/bases/base/audio/elements/arranged-clip";
-import {
-  type PointerHertz,
-  SpectrogramAxis,
-  type SpectrogramBand,
-  SpectrogramLane,
-  type SpectrogramScale,
-} from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
+import type { SpectrogramBand } from "@/registry-audio/bases/base/audio/elements/clip-spectrogram";
 import {
   type ClipSamples,
   ClipWaveform,
@@ -100,6 +94,13 @@ import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device
 import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
 import { ExportDialog } from "@/registry-audio/bases/base/audio/elements/export-dialog";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import {
+  isSoundView,
+  isSpectrogramView,
+  SOUND_VIEWS,
+  SoundLane,
+  type SoundView,
+} from "@/registry-audio/bases/base/audio/elements/sound-lane";
 import {
   SoundChannels,
   SoundLevel,
@@ -122,10 +123,7 @@ import {
 } from "@/registry-audio/bases/base/audio/elements/timeline";
 import { TimelineLocator } from "@/registry-audio/bases/base/audio/elements/timeline-markers";
 import { Transport } from "@/registry-audio/bases/base/audio/elements/transport";
-import {
-  type WaveformClip,
-  WaveformLane,
-} from "@/registry-audio/bases/base/audio/elements/waveform-lane";
+import type { WaveformClip } from "@/registry-audio/bases/base/audio/elements/waveform-lane";
 import { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arrangement-engine";
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
@@ -1353,32 +1351,17 @@ function RepairItems({
   );
 }
 
-/** What the sound lane draws: the waveform, or the spectrogram on one of its frequency axes. */
-type View = "bands" | "wave" | SpectrogramScale;
-
-const VIEWS: readonly { label: string; note: string; value: View }[] = [
-  { label: "Waveform", note: "Level over time", value: "wave" },
-  { label: "Waveform, by band", note: "Lows, mids, highs", value: "bands" },
-  { label: "Spectrogram", note: "Octaves", value: "log" },
-  { label: "Spectrogram, mel", note: "Pitch scale", value: "mel" },
-  { label: "Spectrogram, ERB", note: "Hearing filters", value: "erb" },
-  { label: "Spectrogram, hertz", note: "Linear", value: "lin" },
-];
-
-const isView = (value: string): value is View =>
-  VIEWS.some((each) => each.value === value);
-
 /** The ways to draw the sound, as radio items. */
 function ViewItems({
   onViewChange,
   view,
 }: {
-  onViewChange: (view: View) => void;
-  view: View;
+  onViewChange: (view: SoundView) => void;
+  view: SoundView;
 }) {
   const change = useCallback(
     (value: string) => {
-      if (isView(value)) {
+      if (isSoundView(value)) {
         onViewChange(value);
       }
     },
@@ -1386,7 +1369,7 @@ function ViewItems({
   );
   return (
     <DropdownMenuRadioGroup onValueChange={change} value={view}>
-      {VIEWS.map((each) => (
+      {SOUND_VIEWS.map((each) => (
         <DropdownMenuRadioItem closeOnClick key={each.value} value={each.value}>
           {each.label}
           <span className="ms-auto text-muted-foreground text-xs">
@@ -2137,7 +2120,6 @@ function SoundClips({
   band,
   clips,
   hidden,
-  pointerHertz,
   sounds,
   view,
   zoom,
@@ -2145,16 +2127,14 @@ function SoundClips({
   band: SpectrogramBand;
   clips: readonly Arranged[];
   /** What each clip draws. */
-  view: View;
-  /** Told the frequency under the pointer on a spectrogram. */
-  pointerHertz: Pick<PointerHertz, "set">;
+  view: SoundView;
   /** While a take records over them: kept in place, unseen. */
   hidden: boolean;
   sounds: ReadonlyMap<string, Sound>;
   /** The lane's pixels a second. */
   zoom: number;
 }) {
-  const spectrogram = view !== "wave" && view !== "bands";
+  const spectrogram = isSpectrogramView(view);
   const [webgl] = useState(hasWebGL2);
   // A waveform is drawn on the GPU when it can be, for the clips as they lie.
   const gpuWaveform = !spectrogram && webgl && clips.every(isDrawnByGpu);
@@ -2242,25 +2222,14 @@ function SoundClips({
   const lane = hidden ? "invisible" : undefined;
   return (
     <>
-      {spectrogram && drawn.length > 0 ? (
-        <SpectrogramLane
-          aria-label="Spectrogram"
+      {(spectrogram || gpuWaveform) && drawn.length > 0 ? (
+        <SoundLane
+          aria-label={spectrogram ? "Spectrogram" : "Waveform"}
           band={band}
           className={cn("h-full text-foreground", lane)}
           clips={drawn}
-          pointerHertz={pointerHertz}
           role="img"
-          scale={view as SpectrogramScale}
-          zoom={zoom}
-        />
-      ) : null}
-      {gpuWaveform && drawn.length > 0 ? (
-        <WaveformLane
-          aria-label="Waveform"
-          className={cn("h-full text-foreground", lane)}
-          clips={drawn}
-          look={view === "bands" ? "bands" : "plain"}
-          role="img"
+          view={view}
           zoom={zoom}
         />
       ) : null}
@@ -2410,7 +2379,7 @@ function ClipLane({
   take: ReturnType<typeof useTake>;
   takeName: string;
   /** What the lane draws: the waveform or a spectrogram. */
-  view: View;
+  view: SoundView;
 }) {
   const { clock: takeClock, levels: takeLevels, recording } = take;
   const sound = sounds.get(clips[0]?.recording ?? "") ?? null;
@@ -2473,8 +2442,6 @@ function ClipLane({
   );
   // The silence the pointer is over, shown as a zone while it is there.
   const silence = useSilenceHover({ pauses: cues.pauses, zoom });
-  // The frequency under the pointer on a spectrogram, to mark on its axis.
-  const [pointerHertz] = useState(() => createSource<number | null>(null));
   // The frequencies a spectrogram shows, as shares of its axis: a zoom is a change of it, not of the render.
   const [band] = useState(() =>
     createSource<readonly [number, number]>([0, 1])
@@ -2673,19 +2640,10 @@ function ClipLane({
                       position={takeClock}
                     />
                   ) : null}
-                  {view === "wave" || view === "bands" || !sound ? null : (
-                    <SpectrogramAxis
-                      band={band}
-                      pointer={pointerHertz}
-                      sampleRate={sound.sampleRate}
-                      scale={view}
-                    />
-                  )}
                   <SoundClips
                     band={band}
                     clips={clips}
                     hidden={recording}
-                    pointerHertz={pointerHertz}
                     sounds={sounds}
                     view={view}
                     zoom={zoom}
@@ -2960,10 +2918,10 @@ function MoreMenu({
   onCompare: () => void;
   onExport: () => void;
   onLoopingChange: (on: boolean) => void;
-  onViewChange: (view: View) => void;
+  onViewChange: (view: SoundView) => void;
   /** Whether there is a sound to compare and export. */
   sound: boolean;
-  view: View;
+  view: SoundView;
 }) {
   const { canRedo, canUndo, dispatch, doc, history } = arrangement;
   // Read as it opens: the transport hides its Loop on a bar this narrow.
@@ -3296,7 +3254,7 @@ export default function BlockAudioEditor() {
   );
 
   // The export: the selection, or else the whole sound, rendered through the chain as it plays, then encoded and saved.
-  const [view, setView] = useState<View>("wave");
+  const [view, setView] = useState<SoundView>("wave");
   const [exporting, setExporting] = useState(false);
   const [exportSettings, setExportSettings] = useState(DEFAULT_EXPORT_SETTINGS);
   const exportRange = edits.time?.range ?? [0, doc.duration];

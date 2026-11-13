@@ -9,6 +9,7 @@ import {
   warpRate,
 } from "@audio-ui/engine/time";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
+import type { WaveformBands } from "@audio-ui/gl/waveform";
 import type { Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,
@@ -38,6 +39,13 @@ import {
 } from "@/components/audio-ui/clip-waveform";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
 import {
+  isSoundView,
+  isSpectrogramView,
+  SOUND_VIEWS,
+  SoundLane,
+  type SoundView,
+} from "@/components/audio-ui/sound-lane";
+import {
   Timeline,
   TimelineLane,
   TimelineMark,
@@ -47,9 +55,22 @@ import {
   TimelineRangeHandle,
   TimelineViewport,
 } from "@/components/audio-ui/timeline";
-import { WaveformLane } from "@/components/audio-ui/waveform-lane";
+import { Button } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { useLoudest } from "@/hooks/use-loudest";
-import { type ClipPeaks, clipPeakCount, clipSegments } from "@/lib/arrangement";
+import {
+  type ClipPeaks,
+  type ClipReading,
+  clipPeakCount,
+  clipSegments,
+} from "@/lib/arrangement";
+import { cn } from "@/lib/utils";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {
@@ -106,6 +127,8 @@ export function reversedSettings(
 interface ClipPanelProps {
   /** Whether the clip is on: off, it stays on its track and is not heard. Leave it out, with `onActiveChange`, for a panel without the switch. */
   active?: boolean;
+  /** The source as three signals, its lows, mids and highs with the loudest of each, as `splitBands` of `@audio-ui/engine/analysis` gives them: with them, the view menu offers the waveform by band. Called once, so it may split lazily. */
+  bands?: () => WaveformBands;
   /** How long a bar lasts, in seconds: the ruler numbers bars and the lanes draw a line at each. @default 2 */
   bar?: number;
   /** Beats in a bar: zoomed in far enough, the ruler numbers them too. @default 4 */
@@ -137,6 +160,8 @@ interface ClipPanelProps {
   onValueChange: (value: ClipSettings) => void;
   /** A gesture that changed the settings ended. */
   onValueCommitted?: () => void;
+  /** Another view of the source was picked. */
+  onViewChange?: (view: SoundView) => void;
   /** The arrangement's position, live: while it plays the clip, a playhead shows where in the source it reads. Leave it out for none. */
   position?: Source<number>;
   /** The source's samples, read as the view needs them: with them, the waveform zooms in to the samples themselves, as a line through them past a frame per pixel, and is drawn on the GPU when they are held in memory or, streamed from a file, give their `leaves`. Leave it out to stop at the peaks' detail. */
@@ -146,6 +171,8 @@ interface ClipPanelProps {
   value: ClipSettings;
   /** The source's peaks, the shape the waveform draws. */
   values: ClipPeaks;
+  /** How the source is drawn, controlled: its waveform, by band, or its spectrogram on one of four frequency axes. On the GPU only: a reversed clip, or without WebGL 2, is drawn as its waveform. Leave it out for the panel to keep its own. @default "wave" */
+  view?: SoundView;
 }
 
 const formatSeconds = (seconds: number) => `${seconds.toFixed(2)} s`;
@@ -523,6 +550,7 @@ function SampleBox({
  */
 function ClipPanel({
   active,
+  bands,
   bar = 2,
   beatsPerBar = 4,
   channels,
@@ -539,12 +567,24 @@ function ClipPanel({
   onRename,
   onValueChange,
   onValueCommitted,
+  onViewChange,
   position: arrangementPosition,
   samples,
   start: clipStart = 0,
   value,
   values,
+  view: viewProp,
 }: ClipPanelProps) {
+  // The view of the source: the host's when given, else the panel's own.
+  const [ownView, setOwnView] = useState<SoundView>("wave");
+  const view = viewProp ?? ownView;
+  const changeView = useCallback(
+    (next: SoundView) => {
+      setOwnView(next);
+      onViewChange?.(next);
+    },
+    [onViewChange]
+  );
   const {
     gain,
     length,
@@ -795,6 +835,7 @@ function ClipPanel({
       onRename={onRename}
     >
       <ClipSource
+        bands={bands}
         bar={bar}
         beatsPerBar={beatsPerBar}
         channels={channels}
@@ -807,6 +848,7 @@ function ClipPanel({
         onLoopChange={setLoop}
         onPlayedChange={setPlayed}
         onValueCommitted={onValueCommitted}
+        onViewChange={changeView}
         onWarpChange={setWarp}
         playhead={playhead}
         playing={playing}
@@ -815,6 +857,7 @@ function ClipPanel({
         sourceLength={sourceLength}
         span={span}
         values={values}
+        view={view}
         warp={warp}
       />
     </ClipView>
@@ -825,6 +868,147 @@ function ClipPanel({
 const LABEL_SPACING = 40;
 /** The widest a peak of the waveform is drawn, in px: zooming in stops there, before the drawing turns to blocks. */
 const PEAK_PX = 3;
+/**
+ * What the GPU draws of a clip's source, and how: samples held in memory, or
+ * streamed from a file with their leaves (the waveform) or their spectra (the
+ * spectrogram), which it draws without reading them whole, read in the
+ * stretches the clip's warp makes. A reversed clip reads backwards, which the
+ * renderers have no range for, and is the canvas' waveform, as it is without
+ * WebGL 2. `gpuClips` is null where the canvas draws it.
+ */
+function useSourceDrawing({
+  bands,
+  channels,
+  reading,
+  samples,
+  sourceLength,
+  span,
+  view,
+}: {
+  bands?: () => WaveformBands;
+  channels?: readonly ClipSamples[];
+  reading: ClipReading;
+  samples?: ClipSamples;
+  sourceLength: number;
+  span: number;
+  view: SoundView;
+}) {
+  const [webgl] = useState(hasWebGL2);
+  const { reversed } = reading;
+  const can = useMemo(() => {
+    const inMemory = samples ? !(samples.read(0, 0) instanceof Promise) : false;
+    const gpu = webgl && !reversed && Boolean(samples);
+    return {
+      spectrogram: gpu && (inMemory || Boolean(samples?.spectra)),
+      waveform: gpu && (inMemory || Boolean(samples?.leaves)),
+    };
+  }, [reversed, samples, webgl]);
+  const spectrogram = isSpectrogramView(view) && can.spectrogram;
+  const loudest = useLoudest(
+    can.waveform && !spectrogram ? samples : undefined,
+    channels
+  );
+  // The view drawn: the one picked, or the waveform where the GPU cannot draw it.
+  const shownView: SoundView =
+    spectrogram || !isSpectrogramView(view) ? view : "wave";
+  const gpuClips = useMemo(
+    () =>
+      samples && (spectrogram || loudest !== null) && sourceLength > 0
+        ? [
+            {
+              bands,
+              channels,
+              gain: 1,
+              id: "source",
+              length: span,
+              peak: loudest ?? 1,
+              sampleRate: samples.frames / sourceLength,
+              samples,
+              segments: (from: number, to: number) =>
+                clipSegments(reading, samples.frames, [from, to]),
+              source: "source",
+              start: 0,
+            },
+          ]
+        : null,
+    [
+      bands,
+      channels,
+      loudest,
+      reading,
+      samples,
+      sourceLength,
+      span,
+      spectrogram,
+    ]
+  );
+  return { can, gpuClips, shownView, spectrogram };
+}
+
+/**
+ * The views of the source, as a menu at the start of its overview: the
+ * waveform, by band when the host gives the bands, and the spectrogram on each
+ * frequency axis when the GPU can draw it. Its trigger reads the view shown.
+ */
+function SourceViewMenu({
+  bands,
+  onViewChange,
+  spectrogram,
+  view,
+}: {
+  bands: boolean;
+  onViewChange: (view: SoundView) => void;
+  spectrogram: boolean;
+  view: SoundView;
+}) {
+  const change = useCallback(
+    (value: string) => {
+      if (isSoundView(value)) {
+        onViewChange(value);
+      }
+    },
+    [onViewChange]
+  );
+  const label =
+    SOUND_VIEWS.find((each) => each.value === view)?.label ?? "Waveform";
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label={`View: ${label}`}
+            className="h-auto rounded-none border-e px-2 text-xs"
+            size="xs"
+            variant="ghost"
+          />
+        }
+      >
+        {label}
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        <DropdownMenuRadioGroup onValueChange={change} value={view}>
+          {SOUND_VIEWS.map((each) => (
+            <DropdownMenuRadioItem
+              closeOnClick
+              disabled={
+                (each.value === "bands" && !bands) ||
+                (isSpectrogramView(each.value) && !spectrogram)
+              }
+              key={each.value}
+              value={each.value}
+            >
+              {each.label}
+              <span className="ms-auto text-muted-foreground text-xs">
+                {each.note}
+              </span>
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
 /** How far apart two samples are drawn at the closest zoom, in px, with samples to draw. */
 const FRAME_PX = 40;
 /** The widest the source's lane is laid out, in px: past about 17 million, a browser stops laying an element out. */
@@ -940,6 +1124,7 @@ const RulerMarks = memo(
  * drag at both ends, and the waveform, warped markers included, under it.
  */
 function ClipSource({
+  bands,
   bar,
   beatsPerBar,
   channels,
@@ -952,6 +1137,7 @@ function ClipSource({
   onLoopChange,
   onPlayedChange,
   onValueCommitted,
+  onViewChange,
   onWarpChange,
   playhead,
   playing,
@@ -960,8 +1146,10 @@ function ClipSource({
   sourceLength,
   span,
   values,
+  view,
   warp,
 }: {
+  bands?: () => WaveformBands;
   bar: number;
   beatsPerBar: number;
   channels?: readonly ClipSamples[];
@@ -974,6 +1162,7 @@ function ClipSource({
   onLoopChange: (next: readonly [number, number]) => void;
   onPlayedChange: (next: readonly [number, number]) => void;
   onValueCommitted?: () => void;
+  onViewChange: (view: SoundView) => void;
   onWarpChange: (next: readonly WarpMarker[]) => void;
   playhead?: Source<number>;
   /** Whether the clip plays now: its playhead shows. */
@@ -983,6 +1172,7 @@ function ClipSource({
   sourceLength: number;
   span: number;
   values: ClipPeaks;
+  view: SoundView;
   warp: readonly WarpMarker[] | null;
 }) {
   // Fitted to its width until zoomed, as the arrangement is.
@@ -1020,41 +1210,15 @@ function ClipSource({
     }),
     [reversed, sourceLength, span, warp]
   );
-  // On the GPU where it can be: the source of a clip held in memory, read in the stretches its warp makes. A reversed clip reads backwards, which the renderers have no range for, so it is drawn as it was.
-  const [webgl] = useState(hasWebGL2);
-  // Samples held in memory, or streamed from a file with their leaves, which the GPU draws without reading them whole; streamed without, the canvas draws them, reading only the frames in view.
-  const drawable = useMemo(
-    () =>
-      samples
-        ? Boolean(samples.leaves) || !(samples.read(0, 0) instanceof Promise)
-        : false,
-    [samples]
-  );
-  const loudest = useLoudest(
-    webgl && !reversed && drawable ? samples : undefined,
-    channels
-  );
-  const gpuClips = useMemo(
-    () =>
-      samples && loudest !== null && sourceLength > 0
-        ? [
-            {
-              channels,
-              gain: 1,
-              id: "source",
-              length: span,
-              peak: loudest,
-              sampleRate: samples.frames / sourceLength,
-              samples,
-              segments: (from: number, to: number) =>
-                clipSegments(reading, samples.frames, [from, to]),
-              source: "source",
-              start: 0,
-            },
-          ]
-        : null,
-    [channels, loudest, reading, samples, sourceLength, span]
-  );
+  const { can, gpuClips, shownView, spectrogram } = useSourceDrawing({
+    bands,
+    channels,
+    reading,
+    samples,
+    sourceLength,
+    span,
+    view,
+  });
   const [playedFrom, playedTo] = loop
     ? [Math.min(offset, loop[0]), loop[1]]
     : [offset, Math.min(span, offset + length)];
@@ -1088,7 +1252,18 @@ function ClipSource({
       source={playhead}
       zoom={zoom ?? undefined}
     >
-      <TimelineNavigator className="rounded-none" getAriaValueText={format} />
+      <div className="flex">
+        <SourceViewMenu
+          bands={Boolean(bands) && can.waveform}
+          onViewChange={onViewChange}
+          spectrogram={can.spectrogram}
+          view={shownView}
+        />
+        <TimelineNavigator
+          className="min-w-0 flex-1 rounded-none"
+          getAriaValueText={format}
+        />
+      </div>
       {/* Flush in the clip view, which is the frame: no border or corners of its own. */}
       <TimelineViewport
         className="flex min-w-0 flex-1 flex-col border-t bg-muted/40"
@@ -1152,11 +1327,15 @@ function ClipSource({
                 style={{ width: `calc(var(--timeline-unit) * ${span})` }}
               >
                 {gpuClips ? (
-                  <WaveformLane
+                  <SoundLane
                     aria-label={`${name} source`}
-                    className="h-full text-muted-foreground"
+                    className={cn(
+                      "h-full",
+                      spectrogram ? "text-foreground" : "text-muted-foreground"
+                    )}
                     clips={gpuClips}
                     role="img"
+                    view={shownView}
                     zoom={pxPerSecond}
                   />
                 ) : null}

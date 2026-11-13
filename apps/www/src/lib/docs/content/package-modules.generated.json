@@ -2436,6 +2436,26 @@
         "summary": "What `detectSilences` takes, both optional."
       },
       {
+        "kind": "const",
+        "name": "SPECTRA_SIZE",
+        "summary": "The frames of a window of the spectra, and of one of their columns: 2048, some 43 ms at 48 kHz, the window a spectrogram fits a view with."
+      },
+      {
+        "kind": "interface",
+        "name": "Spectra",
+        "summary": "A recording summed up as spectra, for a spectrogram drawn on the GPU that does not hold the recording: a column every `hop` frames, each bin's level from DC to Nyquist over windows of `size` frames, a byte each."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectraSource",
+        "summary": "A reader of a recording, mixed to one: how many frames it holds, and its frames from `from` to `to`, at once or later."
+      },
+      {
+        "kind": "function",
+        "name": "spectrogramSpectra",
+        "summary": "The spectra of a recording (`Spectra`): a column every `hop` frames, each bin's power over the Hann windows of `size` frames centred in the column every `size / 2` frames (the short-time transform of `@audio/stft`), their mean, as a byte."
+      },
+      {
         "kind": "function",
         "name": "holdPeaks",
         "summary": "Keeps the loudest level each point of a spectrum reached: a peak rises with the spectrum at once, stays put for `hold` seconds, then falls at `fall` dB per second until the spectrum meets it again."
@@ -2491,6 +2511,7 @@
       "@audio/loudness-truepeak",
       "@audio/mir-chroma",
       "@audio/pitch-yin",
+      "@audio/stft",
       "@audio/weighting-k"
     ],
     "typesOnly": false,
@@ -4214,6 +4235,11 @@
         "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
       },
       {
+        "kind": "interface",
+        "name": "LaneSpectra",
+        "summary": "A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from."
+      },
+      {
         "kind": "const",
         "name": "CHUNK_FRAMES",
         "summary": "The frames a renderer keeps its samples in, and a streamed recording is read in: 65536."
@@ -4302,6 +4328,11 @@
         "kind": "type",
         "name": "SampleCache",
         "summary": "What a lane has read of its recordings, by `source`: a recording is read once, not at every paint, since a reader may copy or mix the whole of it each time it is asked."
+      },
+      {
+        "kind": "type",
+        "name": "KeptCache",
+        "summary": "What a lane has read of its recordings, by key: what it read, or is reading, and the reader it read it with."
       },
       {
         "kind": "function",
@@ -4437,6 +4468,11 @@
         "kind": "interface",
         "name": "LaneSamples",
         "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
+      },
+      {
+        "kind": "interface",
+        "name": "LaneSpectra",
+        "summary": "A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from."
       }
     ],
     "from": "@audio-ui/gl/spectrogram",

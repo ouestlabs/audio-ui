@@ -17,7 +17,11 @@ import {
   DRUM_RACK_DEVICE,
 } from "@/lib/arrangement";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
-import { recordingChannels, recordingSamples } from "@/lib/daw/samples";
+import {
+  recordingBands,
+  recordingChannels,
+  recordingSamples,
+} from "@/lib/daw/samples";
 import { cn } from "@/lib/utils";
 import { useSavedState } from "./use-saved-view";
 
@@ -97,6 +101,7 @@ export function ClipEditor({
 }) {
   const { dispatch, doc } = arrangement;
   const [savedView, setSavedView] = useSavedState("midiView", MIDI_CLIP_VIEW);
+  const [audioView, setAudioView] = useSavedState("audioView", "wave");
   // Each clip opens with the pen off, whatever the last one had: Draw is turned on for the clip it is wanted on.
   const [pen, setPen] = useState({ clip: clip.id, drawing: false });
   const midiView = {
@@ -291,6 +296,7 @@ export function ClipEditor({
   return (
     <ClipPanel
       active={!clip.disabled}
+      bands={recording ? recordingBands(recording.source) : undefined}
       bar={bar}
       beatsPerBar={doc.tempo.beatsPerBar}
       channels={recording ? recordingChannels(recording.source) : undefined}
@@ -306,11 +312,13 @@ export function ClipEditor({
       onRename={rename}
       onValueChange={changeSettings}
       onValueCommitted={settle}
+      onViewChange={setAudioView}
       position={engine.position}
       samples={recording ? recordingSamples(recording.source) : undefined}
       start={clip.value.start}
       value={settingsOf(clip)}
       values={recording ? sourcePeaks(clip, recording) : []}
+      view={audioView}
     >
       {actions}
     </ClipPanel>

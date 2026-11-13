@@ -24,6 +24,21 @@ lane.destroy();
 
 `onHit` gives the cell the pointer is over: its `low` and `high` frequencies, its `level` in dB, the `floor` of the levels drawn (a cell under it has nothing to read), and the pointer's place.
 
+## Streamed recordings
+
+A recording streamed from a file is never read whole. Its `samples` give `spectra`: a column every `hop` frames, each bin's level to Nyquist over Hann windows of `size` frames, a byte each, as `spectrogramSpectra` of [`@audio-ui/engine/analysis`](/docs/engine/analysis) makes them from its samples, once, and kept beside it (`SPECTRA_SIZE`, 2048 frames, for both by default). Zoomed out the lane draws from them; once a column of the view is narrower than one of theirs it reads the frames it shows, a chunk of `CHUNK_FRAMES` (65536) at a time, and the renderer computes those columns from the samples.
+
+```ts
+import { spectrogramSpectra } from "@audio-ui/engine/analysis";
+
+// Once: read a stretch at a time from any reader, at once or as a promise.
+const spectra = await spectrogramSpectra({ frames, read: readFrames });
+
+const samples = { frames, read: readFrames, spectra: () => spectra };
+```
+
+A full-scale sine reads 0 dB on its bin; the byte keeps a level to 0.6 dB.
+
 ## The band
 
 `band` is the frequencies shown, as shares of the axis from 0 (the floor) to 1 (the Nyquist limit), whatever the axis spaces its rows by: anything with `getSnapshot`, `set` and `subscribe`, such as `createSource([0, 1])` of `@audio-ui/core`. Shift and the wheel over the picture zoom it about the pointer. `zoomBand` and `panBand` are the arithmetic, to drive it from your own controls.

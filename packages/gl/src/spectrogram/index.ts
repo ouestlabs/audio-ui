@@ -1,4 +1,3 @@
-import { fft } from "fourier-transform";
 import type Spectrogram from "gl-spectrogram";
 import type { Axis, Cell, Scale } from "gl-spectrogram";
 import {
@@ -11,7 +10,6 @@ import {
   type Lane,
   type LaneClip,
   type LaneContext,
-  type LaneSamples,
   type LaneSpectra,
   partsInView,
   placeLane,
@@ -21,115 +19,6 @@ import {
   sameSamples,
   type VisiblePart,
 } from "../lane/index.ts";
-
-/** The frames of a window of the spectra, and of one of their columns: 2048, some 43 ms at 48 kHz, the window the renderer fits a view with. */
-export const SPECTRA_SIZE = 2048;
-
-/** A level as the renderer keeps it: a byte, (dB + 150) · 1.6, 0 for silence. */
-const LEVEL_SCALE = 1.6;
-const LEVEL_FLOOR = 150;
-
-/** The frames read at a time while the spectra are made: whole columns, with a frame of the page between each read. */
-const SPECTRA_READ = 1 << 20;
-
-/** A periodic Hann window of `size` frames. */
-const hannOf = (size: number) =>
-  Float64Array.from(
-    { length: size },
-    (_, index) => 0.5 - 0.5 * Math.cos((2 * Math.PI * index) / size)
-  );
-
-/** A mean power, a full-scale sine on its bin being 1, as the byte the renderer keeps. */
-const levelByte = (power: number) =>
-  power > 0
-    ? Math.min(
-        255,
-        Math.max(
-          0,
-          Math.round((10 * Math.log10(power) + LEVEL_FLOOR) * LEVEL_SCALE)
-        )
-      )
-    : 0;
-
-/**
- * The spectra of a recording, for `LaneSamples.spectra`: a column every `hop`
- * frames, each bin's power from DC to Nyquist over the Hann windows of `size`
- * frames centred in the column every `size / 2` frames, their mean, as a byte,
- * (dB + 150) · 1.6, 0 dB a full-scale sine on its bin and 0 silence. It is what
- * `gl-spectrogram` draws a recording it does not hold from, zoomed out: made
- * once, as the recording is written, and kept beside it. Read from `samples` a
- * stretch at a time, with a frame of the page between each. `size` and `hop`
- * are powers of two, `hop` at least `size / 2`.
- */
-export async function spectrogramSpectra(
-  samples: LaneSamples,
-  {
-    hop = SPECTRA_SIZE,
-    size = SPECTRA_SIZE,
-  }: { hop?: number; size?: number } = {}
-): Promise<LaneSpectra> {
-  const bins = size / 2 + 1;
-  const half = size / 2;
-  const columns = Math.ceil(samples.frames / hop);
-  const levels = new Uint8Array(columns * bins);
-  const hann = hannOf(size);
-  // Windows every half a window, centred in the column: as many as fit.
-  const windows = Math.max(1, Math.round(hop / half));
-  const spacing = hop / windows;
-  const full = (size / 4) ** 2;
-  const frame = new Float64Array(size);
-  const power = new Float64Array(bins);
-  const out: [Float64Array, Float64Array] = [
-    new Float64Array(bins),
-    new Float64Array(bins),
-  ];
-  const each = Math.max(1, Math.floor(SPECTRA_READ / hop));
-  const column = (index: number, read: ArrayLike<number>, from: number) => {
-    power.fill(0);
-    for (let window = 0; window < windows; window += 1) {
-      const start = Math.round(index * hop + (window + 0.5) * spacing - half);
-      for (let at = 0; at < size; at += 1) {
-        const frameAt = start + at;
-        const value =
-          frameAt >= 0 && frameAt < samples.frames
-            ? ((read[frameAt - from] as number | undefined) ?? 0)
-            : 0;
-        frame[at] = value * (hann[at] as number);
-      }
-      const [re, im] = fft(frame, out);
-      for (let bin = 0; bin < bins; bin += 1) {
-        power[bin] =
-          (power[bin] as number) +
-          (re[bin] as number) ** 2 +
-          (im[bin] as number) ** 2;
-      }
-    }
-    for (let bin = 0; bin < bins; bin += 1) {
-      levels[index * bins + bin] = levelByte(
-        (power[bin] as number) / windows / full
-      );
-    }
-  };
-  const readFrom = async (first: number): Promise<void> => {
-    if (first >= columns) {
-      return;
-    }
-    const last = Math.min(columns, first + each);
-    // The windows reach half a window past the columns on either side.
-    const from = Math.max(0, first * hop - size);
-    const read = await samples.read(
-      from,
-      Math.min(samples.frames, last * hop + size)
-    );
-    for (let index = first; index < last; index += 1) {
-      column(index, read, from);
-    }
-    await new Promise((resolve) => setTimeout(resolve));
-    await readFrom(last);
-  };
-  await readFrom(0);
-  return { hop, levels, size };
-}
 
 /** The frequency axes a spectrogram is spaced on: octaves, mel, equal space per auditory filter, or hertz. */
 export type SpectrogramScale = Scale;
@@ -247,18 +136,9 @@ type Feed = { data: ArrayLike<number> } | { spectra: LaneSpectra };
 /** What a clip's recording is drawn from, read once: at once when at hand, else a promise of it. */
 function feedOf(held: Held, entry: LaneClip): Feed | Promise<Feed> {
   const { samples } = entry;
-  if (samples.spectra) {
-    const read = readKept(
-      held.spectra,
-      entry.source,
-      samples,
-      () =>
-        samples.spectra?.() ?? {
-          hop: SPECTRA_SIZE,
-          levels: new Uint8Array(0),
-          size: SPECTRA_SIZE,
-        }
-    );
+  const { spectra: make } = samples;
+  if (make) {
+    const read = readKept(held.spectra, entry.source, samples, () => make());
     return read instanceof Promise
       ? read.then((spectra) => ({ spectra }))
       : { spectra: read };
@@ -600,7 +480,8 @@ function zoomOnWheel(
  * tells what the pointer is over.
  *
  * A recording streamed from a file gives its `spectra`
- * (`LaneSamples.spectra`, made by `spectrogramSpectra`) and is never read
+ * (`LaneSamples.spectra`, made by `spectrogramSpectra` of
+ * `@audio-ui/engine/analysis`) and is never read
  * whole: zoomed out it is drawn from them, and once a column of the view is
  * narrower than one of theirs the lane reads the frames it shows, a chunk of
  * `CHUNK_FRAMES` at a time.

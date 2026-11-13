@@ -25,7 +25,7 @@ export interface LaneSamples {
   ) => ArrayLike<number> | Promise<ArrayLike<number>>;
   /**
    * For a recording streamed from a file: its spectra, as
-   * `spectrogramSpectra` of `@audio-ui/gl/spectrogram` makes them. A
+   * `spectrogramSpectra` of `@audio-ui/engine/analysis` makes them. A
    * spectrogram lane draws it from them zoomed out, and zoomed in reads only
    * the frames it shows, `CHUNK_FRAMES` at a time. Left out, a spectrogram lane
    * reads the recording whole, once.
@@ -33,7 +33,7 @@ export interface LaneSamples {
   spectra?: () => LaneSpectra | Promise<LaneSpectra>;
 }
 
-/** A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each. */
+/** A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each, (dB + 150) · 1.6, 0 silence: what `gl-spectrogram` draws a recording it does not hold from. */
 export interface LaneSpectra {
   hop: number;
   levels: Uint8Array;

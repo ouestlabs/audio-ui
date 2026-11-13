@@ -1,0 +1,37 @@
+---
+title: Sound Lane
+description: "A lane's clips drawn on the GPU in the view you pick: the waveform, the waveform by band, or the spectrogram on one of four frequency axes with its axis and the reading under the pointer."
+---
+
+## Installation
+
+<Install name="sound-lane" packages="@audio-ui/gl @audio-ui/react" />
+
+## Usage
+
+`SoundLane` draws a lane's clips in one of the ways a sound is looked at, the view you pick: its waveform ([Waveform Lane](/docs/components/base/waveform-lane)), its waveform by band, the lows warm and the highs cool, or its spectrogram ([Spectrogram Lane](/docs/components/base/clip-spectrogram)) on octaves, mel, ERB or hertz, with the frequency axis down the lane's left edge and the frequency and level under the pointer. The audio editor's View menu and the clip panel's both draw through it. It keeps the frequencies a spectrogram shows across views, and the pointer's frequency goes from the picture to the axis on its own.
+
+```tsx
+import { SOUND_VIEWS, SoundLane, type SoundView } from "@/components/audio-ui/sound-lane";
+
+const [view, setView] = useState<SoundView>("wave");
+
+<SoundLane
+  className="h-full text-foreground"
+  clips={clips} // WaveformClip[]: see Waveform Lane
+  view={view} // "wave", "bands", "log", "mel", "erb" or "lin"
+  zoom={pixelsPerSecond}
+/>;
+```
+
+`SOUND_VIEWS` labels each view for a menu, with a note on what it shows; `isSoundView` checks a menu's value. A clip without `bands` is drawn plain in the band view.
+
+| Prop | Type | |
+| --- | --- | --- |
+| `clips` | `WaveformClip[]` | The clips to draw, as the waveform lane takes them; the spectrogram's axis reads the first one's `sampleRate`. |
+| `view` | `SoundView` | `"wave"`, `"bands"`, or the spectrogram on `"log"`, `"mel"`, `"erb"` or `"lin"`. |
+| `zoom` | `number` | The lane's pixels a second. |
+| `layout` | `"auto" \| "split" \| "mix"` | How a recording's channels are laid out in the waveform. Default `"auto"`: a row a channel once the rows are tall enough to read. |
+| `band` | `SpectrogramBand` | The frequencies a spectrogram shows, as shares of its axis. Leave it out for the lane to keep its own. |
+
+A recording streamed from a file is drawn without being read whole when its `samples` give `leaves` for the waveform and `spectra` for the spectrogram (see [`@audio-ui/gl/waveform`](/docs/gl/waveform#streamed-recordings) and [`@audio-ui/gl/spectrogram`](/docs/gl/spectrogram#streamed-recordings)). It needs WebGL 2 and draws nothing without it: `hasWebGL2` of `@audio-ui/gl/lane` says whether to draw this way at all.

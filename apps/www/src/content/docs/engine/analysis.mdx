@@ -29,6 +29,14 @@ The registry's [`useAudioLevels`](/docs/hooks/use-audio-levels) reads an analyse
 
 `logSpectrum(bins, sampleRate, out, { minHz, maxHz })` resamples an analyser's bins (`getFloatFrequencyData`) onto a log frequency axis, written into `out`, as many points as it holds. `holdPeaks(spectrum, peaks, holding, elapsed, { hold, fall })` keeps each point's loudest level for `hold` seconds, then lets it fall at `fall` dB a second, one frame at a time. `spectrumBands` reduces a spectrum to a few levels from 0 to 1, for bars. [`useSpectrum`](/docs/hooks/use-spectrum) runs them on every frame.
 
+`spectrogramSpectra(source, { size, hop })` sums up a whole recording for a spectrogram drawn on the GPU that does not hold it: a column every `hop` frames, each bin's power over the Hann windows of `size` frames centred in it (the short-time transform of `@audio/stft`), as a byte, (dB + 150) · 1.6, 0 dB a full-scale sine on its bin. It reads `source` (`{ frames, read }`) a stretch at a time, at once or as a promise, so it runs on the page or in a worker over a file; made once and kept beside the recording, it is what a streamed recording's `samples.spectra` gives [`@audio-ui/gl/spectrogram`](/docs/gl/spectrogram#streamed-recordings). `SPECTRA_SIZE`, 2048, is the default for both.
+
+```ts
+import { spectrogramSpectra } from "@audio-ui/engine/analysis";
+
+const spectra = await spectrogramSpectra({ frames, read: readFrames });
+```
+
 ## Curves
 
 A filter, an equalizer and a compressor each have a curve a panel draws. Each function returns the curve as a function, to be sampled at as many points as the plot has:

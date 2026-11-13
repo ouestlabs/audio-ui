@@ -697,7 +697,7 @@ export const components: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/arranged-clip",
       "@audio-ui/clip-spectrogram",
-      "@audio-ui/waveform-lane",
+      "@audio-ui/sound-lane",
       "@audio-ui/clip-waveform",
       "@audio-ui/device-browser",
       "@audio-ui/device-view",
