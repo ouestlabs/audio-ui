@@ -108,6 +108,21 @@ export function sameSamples(
   return a === b;
 }
 
+/**
+ * Clears the whole canvas of a lane's context. The renderers leave the scissor
+ * test on, cut to the last viewport they drew, and a clear is cut by it: a
+ * plain clear would leave every other part of the canvas as it was, the
+ * picture of the frame before showing under the new one.
+ */
+export function clearLane(gl: WebGL2RenderingContext | null) {
+  if (!gl) {
+    return;
+  }
+  gl.disable(gl.SCISSOR_TEST);
+  gl.clearColor(0, 0, 0, 0);
+  gl.clear(gl.COLOR_BUFFER_BIT);
+}
+
 /** What `placeLane` gives: where the canvas starts on the lane, in CSS px, where it ends, and the device pixel ratio. */
 export interface Placed {
   from: number;

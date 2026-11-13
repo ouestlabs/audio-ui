@@ -1,6 +1,7 @@
 import type Spectrogram from "gl-spectrogram";
 import type { Axis, Cell, Scale } from "gl-spectrogram";
 import {
+  clearLane,
   createLane,
   groundOf,
   type Lane,
@@ -231,9 +232,7 @@ function draw(
     scale: inputs.scale,
   };
   // One clear for the whole canvas: the renderers only draw into their parts.
-  const gl = held.context;
-  gl?.clearColor(0, 0, 0, 0);
-  gl?.clear(gl.COLOR_BUFFER_BIT);
+  clearLane(held.context);
   held.drawn = [];
   let pending = false;
   for (const each of visible) {

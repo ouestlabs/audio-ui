@@ -4254,6 +4254,11 @@
         "summary": "Whether two readings are the same samples: a reader may hand out a new view of the same memory each time, which is not new data to upload."
       },
       {
+        "kind": "function",
+        "name": "clearLane",
+        "summary": "Clears the whole canvas of a lane's context."
+      },
+      {
         "kind": "interface",
         "name": "Placed",
         "summary": "What `placeLane` gives: where the canvas starts on the lane, in CSS px, where it ends, and the device pixel ratio."
