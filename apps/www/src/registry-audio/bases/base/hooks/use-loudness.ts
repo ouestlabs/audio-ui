@@ -52,7 +52,11 @@ export function useLoudness(signal: AudioNode | null) {
     return () => {
       live = false;
       if (meter) {
-        signal.disconnect(meter.input);
+        try {
+          signal.disconnect(meter.input);
+        } catch {
+          // Already apart.
+        }
         meter.dispose();
       }
       meterRef.current = null;
