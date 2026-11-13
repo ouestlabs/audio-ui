@@ -3,6 +3,7 @@ import {
   type Lane,
   type WaveformClip,
   type WaveformInputs,
+  type WaveformLayout,
   type WaveformLook,
 } from "@audio-ui/gl/waveform";
 import { type ComponentProps, useLayoutEffect, useMemo, useRef } from "react";
@@ -14,7 +15,8 @@ import { cn } from "@/registry/bases/base/lib/utils";
  * column shows the exact lowest and highest of its samples with the RMS
  * inside, and zoomed in a line through the samples, however long the
  * recording. Put it in the lane's box, `zoom` being the lane's pixels a
- * second. With `look="bands"` each clip is drawn as the three bands of its
+ * second. A recording with several channels is drawn a row each once the rows
+ * are tall enough to read (`layout`), as a DAW does. With `look="bands"` each clip is drawn as the three bands of its
  * sound one over the other, the lows warm and the highs cool. A clip is read
  * in stretches (`segments`), as a DAW paints a region; a reversed clip is
  * not drawn here, and `hasWebGL2` of `@audio-ui/gl/lane` says whether to draw
@@ -23,11 +25,14 @@ import { cn } from "@/registry/bases/base/lib/utils";
 function WaveformLane({
   className,
   clips,
+  layout = "auto",
   look = "plain",
   zoom,
   ...props
 }: Omit<ComponentProps<"canvas">, "ref"> & {
   clips: readonly WaveformClip[];
+  /** How a recording's channels are laid out: one waveform (`mix`), a row each (`split`), or a row each once the rows are tall enough to read (`auto`), as a DAW does. @default "auto" */
+  layout?: WaveformLayout;
   look?: WaveformLook;
   /** The lane's pixels a second. */
   zoom: number;
@@ -35,8 +40,8 @@ function WaveformLane({
   const ref = useRef<HTMLCanvasElement>(null);
   const lane = useRef<Lane<WaveformInputs> | null>(null);
   const inputs = useMemo<WaveformInputs>(
-    () => ({ clips, look, zoom }),
-    [clips, look, zoom]
+    () => ({ clips, layout, look, zoom }),
+    [clips, layout, look, zoom]
   );
   const first = useRef(inputs);
   useLayoutEffect(() => {
@@ -63,5 +68,5 @@ function WaveformLane({
   );
 }
 
-export type { WaveformClip, WaveformLook };
+export type { WaveformClip, WaveformLayout, WaveformLook };
 export { WaveformLane };

@@ -4409,9 +4409,34 @@
         "summary": "How the lane draws a waveform: as one, or as the three bands of the sound one over the other, the lows warm and the highs cool."
       },
       {
+        "kind": "type",
+        "name": "WaveformLayout",
+        "summary": "How a recording with several channels is laid out: `mix` draws them as one waveform; `split` draws each channel in a row of its own, as a DAW does on a tall track; `auto` splits when each row would be at least `SPLIT_ROW_PX` tall, and mixes below that, as a short track shows one lane."
+      },
+      {
+        "kind": "const",
+        "name": "SPLIT_ROW_PX",
+        "summary": "The least height of a channel's row, in CSS px, for `auto` to split."
+      },
+      {
         "kind": "interface",
         "name": "WaveformInputs",
         "summary": "What a waveform lane draws."
+      },
+      {
+        "kind": "interface",
+        "name": "WaveformRow",
+        "summary": "What a clip draws in one row of the lane: a layer of its recording, its samples, the loudest of them, and the row's place and height."
+      },
+      {
+        "kind": "function",
+        "name": "splitsChannels",
+        "summary": "Whether a clip draws each channel in a row of its own at this layout, look and height."
+      },
+      {
+        "kind": "function",
+        "name": "waveformRows",
+        "summary": "The rows a clip draws in a lane `height` px tall, with the samples of each: a channel apiece (`channels`, read), its recording whole, or its three bands."
       },
       {
         "kind": "function",

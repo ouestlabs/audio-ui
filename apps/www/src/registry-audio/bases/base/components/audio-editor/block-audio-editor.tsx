@@ -293,6 +293,8 @@ const IGNORE = () => undefined;
 interface Sound {
   /** Its mix split in lows, mids and highs, made when a view first asks for it. */
   bands: () => SplitBands;
+  /** Each channel's samples, for a waveform drawn a row a channel: only for a sound with several. */
+  channelSamples: ClipSamples[];
   /** How many channels it has: 1 is mono, 2 stereo. */
   channels: number;
   /** The demo it is, or null for a file of yours. */
@@ -371,6 +373,13 @@ function soundOf(
     bands: lazily(() => splitBands(channels, sampleRate)),
     rms: rmsDb(mix),
     samples: { frames: mix.length, read: (from, to) => mix.subarray(from, to) },
+    channelSamples:
+      channels.length > 1
+        ? channels.map((channel) => ({
+            frames: channel.length,
+            read: (from, to) => channel.subarray(from, to),
+          }))
+        : [],
   };
 }
 
@@ -2171,6 +2180,10 @@ function SoundClips({
             return [
               {
                 bands: sound.bands,
+                channels:
+                  sound.channelSamples.length > 0
+                    ? sound.channelSamples
+                    : undefined,
                 gain: dbToGain(clip.gain ?? 0),
                 id: clip.id,
                 length: clip.value.length,

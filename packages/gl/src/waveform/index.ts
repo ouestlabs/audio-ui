@@ -6,6 +6,7 @@ import {
   type LaneContext,
   placeLane,
   sameSamples,
+  type VisibleClip,
   visibleClips,
 } from "../lane/index.ts";
 
@@ -29,9 +30,23 @@ export interface WaveformClip extends LaneClip {
 /** How the lane draws a waveform: as one, or as the three bands of the sound one over the other, the lows warm and the highs cool. */
 export type WaveformLook = "bands" | "plain";
 
+/**
+ * How a recording with several channels is laid out: `mix` draws them as one
+ * waveform; `split` draws each channel in a row of its own, as a DAW does on
+ * a tall track; `auto` splits when each row would be at least `SPLIT_ROW_PX`
+ * tall, and mixes below that, as a short track shows one lane. The band look
+ * draws the mix.
+ */
+export type WaveformLayout = "auto" | "mix" | "split";
+
+/** The least height of a channel's row, in CSS px, for `auto` to split. */
+export const SPLIT_ROW_PX = 40;
+
 /** What a waveform lane draws. */
 export interface WaveformInputs {
   clips: readonly WaveformClip[];
+  /** How channels are laid out. @default "auto" */
+  layout?: WaveformLayout;
   look: WaveformLook;
   /** The lane's pixels a second. */
   zoom: number;
@@ -94,24 +109,173 @@ async function rendererOf(
   }
 }
 
-/** The layers a clip draws, each with its samples and the loudest of them: its recording whole, or its three bands. */
-function layersOf(
-  entry: WaveformClip,
-  data: ArrayLike<number>,
-  look: WaveformLook
-): [Layer, ArrayLike<number>, number][] {
-  if (look === "bands" && entry.bands) {
-    const { high, low, mid, peaks } = entry.bands();
-    return [
-      ["low", low, peaks?.low ?? entry.peak],
-      ["mid", mid, peaks?.mid ?? entry.peak],
-      ["high", high, peaks?.high ?? entry.peak],
-    ];
-  }
-  return [["plain", data, entry.peak]];
+/** What a clip draws in one row of the lane: a layer of its recording, its samples, the loudest of them, and the row's place and height. */
+export interface WaveformRow {
+  data: ArrayLike<number>;
+  /** The row's height, in CSS px. */
+  h: number;
+  key: string;
+  layer: Layer;
+  peak: number;
+  /** The row's top, in CSS px. */
+  y: number;
 }
 
-/** Draws every clip of the lane the view shows, each into its own parts of the one canvas. A recording has one renderer, drawn once for each part of each clip that reads it. */
+/** Whether a clip draws each channel in a row of its own at this layout, look and height. */
+export function splitsChannels(
+  entry: WaveformClip,
+  layout: WaveformLayout,
+  look: WaveformLook,
+  height: number
+): boolean {
+  const count = entry.channels?.length ?? 1;
+  return (
+    look === "plain" &&
+    count > 1 &&
+    (layout === "split" ||
+      (layout === "auto" && height / count >= SPLIT_ROW_PX))
+  );
+}
+
+/** The rows a clip draws in a lane `height` px tall, with the samples of each: a channel apiece (`channels`, read), its recording whole, or its three bands. */
+export function waveformRows(
+  entry: WaveformClip,
+  data: ArrayLike<number>,
+  channels: readonly ArrayLike<number>[] | null,
+  look: WaveformLook,
+  height: number
+): WaveformRow[] {
+  const { source } = entry;
+  if (channels) {
+    const h = height / channels.length;
+    return channels.map((channel, index) => ({
+      data: channel,
+      h,
+      key: `${source}:channel${index}`,
+      layer: "plain",
+      peak: entry.peak,
+      y: index * h,
+    }));
+  }
+  if (look === "bands" && entry.bands) {
+    const { high, low, mid, peaks } = entry.bands();
+    const whole = { h: height, y: 0 };
+    return [
+      {
+        ...whole,
+        data: low,
+        key: `${source}:low`,
+        layer: "low",
+        peak: peaks?.low ?? entry.peak,
+      },
+      {
+        ...whole,
+        data: mid,
+        key: `${source}:mid`,
+        layer: "mid",
+        peak: peaks?.mid ?? entry.peak,
+      },
+      {
+        ...whole,
+        data: high,
+        key: `${source}:high`,
+        layer: "high",
+        peak: peaks?.high ?? entry.peak,
+      },
+    ];
+  }
+  return [
+    {
+      data,
+      h: height,
+      key: `${source}:plain`,
+      layer: "plain",
+      peak: entry.peak,
+      y: 0,
+    },
+  ];
+}
+
+/** A clip the view shows, with the rows it draws. */
+interface Planned {
+  each: VisibleClip;
+  rows: WaveformRow[];
+}
+
+/** The rows each visible clip draws, the channels of a recording read once a recording. */
+async function plan(
+  visible: readonly VisibleClip[],
+  layout: WaveformLayout,
+  look: WaveformLook,
+  height: number
+): Promise<Planned[]> {
+  const read = new Map<string, Promise<ArrayLike<number>[]>>();
+  return await Promise.all(
+    visible.map(async (each) => {
+      const entry = each.entry as WaveformClip;
+      let channels: ArrayLike<number>[] | null = null;
+      if (entry.channels && splitsChannels(entry, layout, look, height)) {
+        const readers = entry.channels;
+        if (!read.has(entry.source)) {
+          read.set(
+            entry.source,
+            Promise.all(readers.map((reader) => reader.read(0, reader.frames)))
+          );
+        }
+        channels = (await read.get(entry.source)) ?? null;
+      }
+      return {
+        each,
+        rows: waveformRows(entry, each.data, channels, look, height),
+      };
+    })
+  );
+}
+
+/** Draws the planned rows, each part of each clip into its place on the canvas, one clear for all of it. */
+function drawPlanned(
+  held: Held,
+  planned: readonly Planned[],
+  renderers: ReadonlyMap<string, Waveform | null>,
+  canvas: HTMLCanvasElement,
+  ratio: number
+) {
+  const ink = getComputedStyle(canvas).color;
+  const light = isLight(ink);
+  // One clear for the whole canvas: the renderers only draw, a clip's layers one over the other.
+  const gl = held.context;
+  gl?.clearColor(0, 0, 0, 0);
+  gl?.clear(gl.COLOR_BUFFER_BIT);
+  for (const { each, rows } of planned) {
+    const entry = each.entry as WaveformClip;
+    for (const row of rows) {
+      const renderer = renderers.get(row.key);
+      if (!renderer) {
+        continue;
+      }
+      const scale = Math.max(row.peak, 1e-6) / Math.max(entry.gain, 1e-6);
+      // The data is handed over only when it changed: the same samples are not uploaded again.
+      const changed = !sameSamples(held.data.get(row.key), row.data);
+      held.data.set(row.key, row.data);
+      // Rows of channels are told apart by a pixel of ground between them.
+      const gap = rows.length > 1 && row.layer === "plain" ? 1 : 0;
+      for (const part of each.parts) {
+        renderer
+          .update({
+            amplitude: [-scale, scale],
+            color: colorOf(row.layer, ink, light),
+            ...(changed ? { data: row.data } : {}),
+            pixelRatio: ratio,
+            range: part.frames,
+            viewport: [part.x, row.y, part.width, Math.max(1, row.h - gap)],
+          })
+          .render();
+      }
+    }
+  }
+}
+
+/** Draws every clip of the lane the view shows, each into its own parts of the one canvas. A recording has one renderer a row, drawn once for each part of each clip that reads it. */
 async function paint({
   body,
   canvas,
@@ -119,70 +283,39 @@ async function paint({
   inputs,
   view,
 }: LaneContext<Held, WaveformInputs>): Promise<boolean> {
-  const { clips, look, zoom } = inputs();
+  const { clips, layout = "auto", look, zoom } = inputs();
   const placed = zoom > 0 ? placeLane(canvas, body, view) : null;
   if (!placed) {
     return false;
   }
-  const visible = await visibleClips(clips, placed, zoom);
-  const drawn = visible.flatMap((each) =>
-    layersOf(each.entry as WaveformClip, each.data, look).map(
-      ([layer, data, peak]) => ({
-        data,
-        each,
-        key: `${each.entry.source}:${layer}`,
-        layer,
-        peak,
-      })
-    )
+  const planned = await plan(
+    await visibleClips(clips, placed, zoom),
+    layout,
+    look,
+    canvas.clientHeight
   );
   const renderers = new Map<string, Waveform | null>();
   await Promise.all(
-    drawn.map(async (layer) => {
-      if (!renderers.has(layer.key)) {
-        renderers.set(layer.key, null);
-        renderers.set(
-          layer.key,
-          await rendererOf(canvas, held, layer.key, layer.data)
-        );
-      }
-    })
+    planned.flatMap(({ rows }) =>
+      rows.map(async (row) => {
+        if (!renderers.has(row.key)) {
+          renderers.set(row.key, null);
+          renderers.set(
+            row.key,
+            await rendererOf(canvas, held, row.key, row.data)
+          );
+        }
+      })
+    )
   );
   if (held.gone) {
     return false;
   }
-  const ink = getComputedStyle(canvas).color;
-  const light = isLight(ink);
-  const height = canvas.clientHeight;
-  // One clear for the whole canvas: the renderers only draw, a clip's layers one over the other.
-  const gl = held.context;
-  gl?.clearColor(0, 0, 0, 0);
-  gl?.clear(gl.COLOR_BUFFER_BIT);
-  for (const layer of drawn) {
-    const renderer = renderers.get(layer.key);
-    if (!renderer) {
-      continue;
-    }
-    const entry = layer.each.entry as WaveformClip;
-    const scale = Math.max(layer.peak, 1e-6) / Math.max(entry.gain, 1e-6);
-    // The data is handed over only when it changed: the same samples are not uploaded again.
-    const changed = !sameSamples(held.data.get(layer.key), layer.data);
-    held.data.set(layer.key, layer.data);
-    for (const part of layer.each.parts) {
-      renderer
-        .update({
-          amplitude: [-scale, scale],
-          color: colorOf(layer.layer, ink, light),
-          ...(changed ? { data: layer.data } : {}),
-          pixelRatio: placed.ratio,
-          range: part.frames,
-          viewport: [part.x, 0, part.width, height],
-        })
-        .render();
-    }
-  }
-  // Recordings the lane no longer draws let go of their textures.
-  const alive = new Set(drawn.map((layer) => layer.key));
+  drawPlanned(held, planned, renderers, canvas, placed.ratio);
+  // Rows the lane no longer draws let go of their textures.
+  const alive = new Set(
+    planned.flatMap(({ rows }) => rows.map((row) => row.key))
+  );
   for (const [key, renderer] of held.renderers) {
     if (!alive.has(key)) {
       renderer.destroy();

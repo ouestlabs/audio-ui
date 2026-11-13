@@ -26,6 +26,8 @@ export interface LaneSegment {
 
 /** A clip of a lane to draw: where it lies, how long it is, and how it reads its recording. */
 export interface LaneClip {
+  /** The recording's channels, one reader each, for a waveform that draws them one over the other: left out for a mono recording. `samples` is their mix. */
+  channels?: readonly LaneSamples[];
   /** A gain factor on its picture, as the clip's level plays. */
   gain: number;
   id: string;
