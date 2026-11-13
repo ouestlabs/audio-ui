@@ -2486,9 +2486,19 @@
         "summary": "What each slice of a sound is made of: the share of its lows, mids and highs, the loudest of the three being 1."
       },
       {
+        "kind": "interface",
+        "name": "Bands",
+        "summary": "The three bands of a stretch of sound: its lows under 250 Hz, its highs over 2.5 kHz, and the mids between."
+      },
+      {
         "kind": "function",
         "name": "bandShares",
         "summary": "Reads a sound as `count` slices of equal length, each by how its energy is spread over three bands: the lows under 250 Hz, the highs over 2.5 kHz and the mids between."
+      },
+      {
+        "kind": "function",
+        "name": "createBandSplit",
+        "summary": "Splits a sound in three a stretch at a time, as `splitBands` does: each call takes the stretch that follows the one before and carries the crossover's state over, so stretches split in order are the sound split whole."
       },
       {
         "kind": "interface",

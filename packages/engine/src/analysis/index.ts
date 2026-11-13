@@ -71,7 +71,9 @@ export {
 } from "./spectrum.ts";
 export {
   type BandShares,
+  type Bands,
   bandShares,
+  createBandSplit,
   type SplitBands,
   splitBands,
 } from "./tint.ts";

@@ -111,6 +111,7 @@ function ClipView({
   onFoldedBoxesChange,
   onRename,
   status,
+  tools,
   ...props
 }: Omit<ComponentProps<"section">, "children"> & {
   /** At the end of the strip, such as a close button. */
@@ -134,6 +135,8 @@ function ClipView({
   onRename?: (name: string) => void;
   /** What the strip says after the name, such as the notes selected or the clip's length. */
   status?: ReactNode;
+  /** Controls right after the name, such as a menu of how the editor draws the clip. */
+  tools?: ReactNode;
 }) {
   const [ownCollapsed, setOwnCollapsed] = useState(defaultCollapsed);
   const collapsed = collapsedProp ?? ownCollapsed;
@@ -202,6 +205,11 @@ function ClipView({
           />
         ) : null}
         <ClipNameField name={name} onRename={onRename} />
+        {tools ? (
+          <div className="relative z-10 flex shrink-0 items-center gap-1">
+            {tools}
+          </div>
+        ) : null}
         <div className="pointer-events-none relative flex min-w-0 flex-1 items-center gap-3 overflow-hidden text-muted-foreground tabular-nums">
           {status}
         </div>

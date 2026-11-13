@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { bandShares, splitBands } from "./tint.ts";
+import { bandShares, createBandSplit, splitBands } from "./tint.ts";
 
 const RATE = 48_000;
 const sine = (frequency: number, seconds = 1) =>
@@ -88,5 +88,54 @@ describe("splitBands", () => {
     const copy = Float32Array.from(source);
     splitBands([source], RATE);
     expect(source).toEqual(copy);
+  });
+});
+
+describe("createBandSplit", () => {
+  test("stretches split in order are the sound split whole", () => {
+    const sound = Float32Array.from(
+      { length: 20_000 },
+      (_, index) => Math.sin(index / 9) + 0.3 * Math.sin(index / 1.3)
+    );
+    const whole = splitBands([sound], RATE);
+    const split = createBandSplit(RATE);
+    const parts = [
+      split(sound.subarray(0, 7000)),
+      split(sound.subarray(7000, 7001)),
+      split(sound.subarray(7001)),
+    ];
+    for (const band of ["low", "mid", "high"] as const) {
+      const joined = new Float32Array(sound.length);
+      let offset = 0;
+      for (const part of parts) {
+        joined.set(part[band], offset);
+        offset += part[band].length;
+      }
+      const most = joined.reduce(
+        (top, value, index) =>
+          Math.max(top, Math.abs(value - (whole[band][index] as number))),
+        0
+      );
+      expect(most).toBeLessThan(1e-6);
+    }
+  });
+
+  test("a stretch read on its own settles to the whole split after some tens of milliseconds", () => {
+    const sound = Float32Array.from(
+      { length: 40_000 },
+      (_, index) => Math.sin(index / 9) + 0.3 * Math.sin(index / 1.3)
+    );
+    const whole = splitBands([sound], RATE);
+    const from = 20_000;
+    const preroll = 8192;
+    const alone = createBandSplit(RATE)(sound.subarray(from - preroll));
+    const most = alone.low
+      .subarray(preroll)
+      .reduce(
+        (top, value, index) =>
+          Math.max(top, Math.abs(value - (whole.low[from + index] as number))),
+        0
+      );
+    expect(most).toBeLessThan(1e-4);
   });
 });

@@ -10,6 +10,8 @@
  * in a worker.
  */
 import {
+  type Bands,
+  createBandSplit,
   SPECTRA_SIZE,
   type Spectra,
   spectrogramSpectra,
@@ -167,18 +169,28 @@ function spectraOf(source: StreamedSource): Promise<Spectra> {
   return made;
 }
 
-/** How many sets of leaves a recording of `channels` keeps: its mix's, and each channel's for one of several. */
-const setsOf = (channels: number) => (channels > 1 ? channels + 1 : 1);
+/** The bands of a sound, low to high, in the order their leaves are kept. */
+const BANDS = ["low", "mid", "high"] as const;
+
+/** How many sets of leaves a recording of `channels` keeps: its mix's, each channel's for one of several, then its three bands'. */
+const setsOf = (channels: number) =>
+  (channels > 1 ? channels + 1 : 1) + BANDS.length;
+
+/** Which set of a recording's leaves is a band's. */
+const bandSet = (channels: number, band: (typeof BANDS)[number]) =>
+  setsOf(channels) - BANDS.length + BANDS.indexOf(band);
 
 /**
- * A recording's leaves (`waveformLeaves`), its mix's and then each channel's
- * for one of several, one set after the other: made `LEAF_STEP` frames at a
- * time from `read`, which gives every channel's frames between two frames,
- * with a frame of the page between each.
+ * A recording's leaves (`waveformLeaves`), one set after the other: its mix's,
+ * each channel's for one of several, then those of its three bands
+ * (`createBandSplit`, carried from stretch to stretch). Made `LEAF_STEP`
+ * frames at a time from `read`, which gives every channel's frames between two
+ * frames, with a frame of the page between each.
  */
 export async function makeLeaves(
   channels: number,
   length: number,
+  sampleRate: number,
   read: (
     from: number,
     to: number
@@ -186,6 +198,7 @@ export async function makeLeaves(
 ): Promise<Float32Array<ArrayBuffer>> {
   const size = Math.ceil(length / LEAF_FRAMES) * 4;
   const out = new Float32Array(size * setsOf(channels));
+  const split = createBandSplit(sampleRate);
   const step = async (from: number): Promise<void> => {
     if (from >= length) {
       return;
@@ -193,11 +206,16 @@ export async function makeLeaves(
     const to = Math.min(length, from + LEAF_STEP);
     const parts = await read(from, to);
     const at = (from / LEAF_FRAMES) * 4;
-    out.set(waveformLeaves(middle(parts, to - from)), at);
+    const mix = middle(parts, to - from);
+    out.set(waveformLeaves(mix), at);
     if (channels > 1) {
       for (const [index, part] of parts.entries()) {
         out.set(waveformLeaves(part), size * (index + 1) + at);
       }
+    }
+    const bands = split(mix);
+    for (const band of BANDS) {
+      out.set(waveformLeaves(bands[band]), size * bandSet(channels, band) + at);
     }
     await new Promise((resolve) => setTimeout(resolve));
     await step(to);
@@ -233,13 +251,17 @@ function leavesOf(source: StreamedSource): Promise<Float32Array[]> {
         ? new Float32Array(await stored.arrayBuffer())
         : null;
     if (!leaves) {
-      // A cache made before its leaves were: made once from its samples, and kept beside them.
-      leaves = await makeLeaves(source.channels, source.length, (from, to) =>
-        Promise.all(
-          Array.from({ length: source.channels }, (_, channel) =>
-            readChannel(source, channel, from, to)
+      // A cache made before its leaves, or its bands' leaves, were: made once from its samples, and kept beside them.
+      leaves = await makeLeaves(
+        source.channels,
+        source.length,
+        source.sampleRate,
+        (from, to) =>
+          Promise.all(
+            Array.from({ length: source.channels }, (_, channel) =>
+              readChannel(source, channel, from, to)
+            )
           )
-        )
       );
       const written = leaves;
       await folder
@@ -333,23 +355,79 @@ export function recordingChannels(
   return readers.length > 1 ? readers : undefined;
 }
 
+/** The frames read before a band's stretch, through the crossover, so it has settled where the stretch begins: some 170 ms at 48 kHz. */
+const PREROLL = 8192;
+
+/** The bands of the stretches of streamed recordings read last, so a stretch is split once for its three rows. */
+const bandReads = new WeakMap<StreamedSource, Map<string, Promise<Bands>>>();
+
+/** Frames `from` to `to` of a streamed recording as its three bands, split with `PREROLL` frames before them. */
+function readBands(
+  source: StreamedSource,
+  from: number,
+  to: number
+): Promise<Bands> {
+  const reads = bandReads.get(source) ?? new Map<string, Promise<Bands>>();
+  bandReads.set(source, reads);
+  const key = `${from}:${to}`;
+  const kept = reads.get(key);
+  if (kept) {
+    return kept;
+  }
+  const read = (async () => {
+    const start = Math.max(0, from - PREROLL);
+    const bands = createBandSplit(source.sampleRate)(
+      await readMix(source, start, to)
+    );
+    const skip = from - start;
+    return {
+      high: bands.high.subarray(skip),
+      low: bands.low.subarray(skip),
+      mid: bands.mid.subarray(skip),
+    };
+  })();
+  reads.set(key, read);
+  read.catch(() => reads.delete(key));
+  // A few stretches are kept: the rows read the same ones at once, then move on.
+  const oldest = reads.keys().next().value;
+  if (reads.size > 6 && oldest !== undefined) {
+    reads.delete(oldest);
+  }
+  return read;
+}
+
+/** A streamed recording's three bands, a reader each with its leaves: they draw it by band without reading it whole. */
+function streamedBands(source: StreamedSource): WaveformBands {
+  const reader = (band: (typeof BANDS)[number]) => ({
+    frames: source.length,
+    leaves: async () =>
+      (await leavesOf(source))[bandSet(source.channels, band)] ??
+      new Float32Array(0),
+    read: async (from: number, to: number) =>
+      (await readBands(source, from, to))[band],
+  });
+  return { high: reader("high"), low: reader("low"), mid: reader("mid") };
+}
+
 /** The band splits made so far, one per source. */
 const madeBands = new WeakMap<RecordingSource, () => WaveformBands>();
 
 /**
- * A recording held in memory as its three bands, for the waveform by band:
- * split once, the first time it is asked for. Undefined for a streamed one,
- * which is never held whole.
+ * A recording as its three bands, for the waveform by band. One held in
+ * memory is split once, the first time it is asked for; a streamed one is
+ * read as bands, its leaves kept with the others and its stretches split as
+ * the view reads them.
  */
-export function recordingBands(
-  source: RecordingSource
-): (() => WaveformBands) | undefined {
-  if ("path" in source) {
-    return;
-  }
+export function recordingBands(source: RecordingSource): () => WaveformBands {
   const kept = madeBands.get(source);
   if (kept) {
     return kept;
+  }
+  if ("path" in source) {
+    const streamed = streamedBands(source);
+    const bands = () => streamed;
+    madeBands.set(source, bands);
+    return bands;
   }
   let split: WaveformBands | null = null;
   const bands = () => {

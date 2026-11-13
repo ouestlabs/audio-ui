@@ -146,3 +146,16 @@ describe("leavesPeak", () => {
     ).toBe(0);
   });
 });
+
+describe("waveformRows with streamed bands", () => {
+  test("a band that is a reader is a row of its own, laid out as one at hand", () => {
+    const reader = { frames: 100, leaves: () => [], read: () => [] };
+    const bands = () => ({ high: reader, low: reader, mid: reader });
+    const rows = waveformRows(clip(2, { bands }), mix, null, "bands", 60);
+    expect(rows.map((row) => [row.key, row.layer, row.y, row.h])).toEqual([
+      ["rec:low", "low", 0, 60],
+      ["rec:mid", "mid", 0, 60],
+      ["rec:high", "high", 0, 60],
+    ]);
+  });
+});

@@ -18,12 +18,17 @@ import {
 
 /** The three signals a sound is split into to colour it by its frequencies: what it has low, between and high. */
 export interface WaveformBands {
-  high: ArrayLike<number>;
-  low: ArrayLike<number>;
-  mid: ArrayLike<number>;
-  /** The loudest sample of each band, 0 to 1: each is drawn as tall as its own loudest reaches, so a band that is quiet in the mix still shows. */
+  /** Each band's samples at hand, or for a recording streamed from a file a reader of them that gives its `leaves`, read as a channel is. */
+  high: ArrayLike<number> | LaneSamples;
+  low: ArrayLike<number> | LaneSamples;
+  mid: ArrayLike<number> | LaneSamples;
+  /** The loudest sample of each band, 0 to 1: each is drawn as tall as its own loudest reaches, so a band that is quiet in the mix still shows. Left out, a streamed band's is read from its leaves. */
   peaks?: { high: number; low: number; mid: number };
 }
+
+/** Whether a band is a reader of its samples, not the samples themselves. */
+const isReader = (band: ArrayLike<number> | LaneSamples): band is LaneSamples =>
+  typeof (band as LaneSamples).read === "function";
 
 /** A clip of the lane, with what its waveform needs besides what every lane clip has. */
 export interface WaveformClip extends LaneClip {
@@ -115,6 +120,19 @@ export function leavesPeak(leaves: ArrayLike<number>): number {
   return loudest;
 }
 
+/** The loudest of leaves read so far, by the leaves: read once, not at every paint. */
+const leafPeaks = new WeakMap<object, number>();
+
+const peakOfLeaves = (leaves: ArrayLike<number>) => {
+  const kept = leafPeaks.get(leaves);
+  if (kept !== undefined) {
+    return kept;
+  }
+  const peak = leavesPeak(leaves);
+  leafPeaks.set(leaves, peak);
+  return peak;
+};
+
 /** What the lane keeps between paints: a renderer a recording and a layer, all on one WebGL context. */
 interface Held {
   context: WebGL2RenderingContext | null;
@@ -189,6 +207,10 @@ export function splitsChannels(
 interface RowPlan extends Omit<WaveformRow, "data"> {
   channel?: number;
   data?: ArrayLike<number>;
+  /** Whether its peak is read from its leaves: a streamed band given none. */
+  peakOfLeaves?: boolean;
+  /** A band's own reader. */
+  reader?: LaneSamples;
 }
 
 /** The rows a clip draws in a lane `height` px tall: a row for each of `channels` channels, its three bands, or its recording whole. */
@@ -212,8 +234,14 @@ function rowsOf(
   }
   if (look === "bands" && entry.bands) {
     const { high, low, mid, peaks } = entry.bands();
-    const band = (layer: Layer, data: ArrayLike<number>, peak?: number) => ({
-      data,
+    const band = (
+      layer: Layer,
+      value: ArrayLike<number> | LaneSamples,
+      peak?: number
+    ): RowPlan => ({
+      ...(isReader(value)
+        ? { peakOfLeaves: peak === undefined, reader: value }
+        : { data: value }),
       h: height,
       key: `${source}:${layer}`,
       layer,
@@ -246,7 +274,13 @@ export function waveformRows(
   height: number
 ): WaveformRow[] {
   return rowsOf(entry, channels?.length ?? 0, look, height).map(
-    ({ channel, data: band, ...row }) => ({
+    ({
+      channel,
+      data: band,
+      peakOfLeaves: _peak,
+      reader: _reader,
+      ...row
+    }) => ({
       ...row,
       data:
         band ?? (channel === undefined ? data : (channels?.[channel] ?? data)),
@@ -256,6 +290,7 @@ export function waveformRows(
 
 /** The reader of a row: its channel's, or the recording's mix. */
 const readerOf = (entry: WaveformClip, row: RowPlan): LaneSamples =>
+  row.reader ??
   (row.channel === undefined ? undefined : entry.channels?.[row.channel]) ??
   entry.samples;
 
@@ -441,7 +476,11 @@ function drawRows(
   for (const { entry, parts, rows } of planned) {
     for (const row of rows) {
       const renderer = renderers.get(row.key);
-      const scale = Math.max(row.peak, 1e-6) / Math.max(entry.gain, 1e-6);
+      // A streamed band given no peak is drawn as tall as its leaves' loudest.
+      const peak = row.peakOfLeaves
+        ? peakOfLeaves(held.data.get(row.key) ?? [])
+        : row.peak;
+      const scale = Math.max(peak, 1e-6) / Math.max(entry.gain, 1e-6);
       // Rows of channels are told apart by a pixel of ground between them.
       const gap = rows.length > 1 && row.layer === "plain" ? 1 : 0;
       for (const part of renderer ? parts : []) {

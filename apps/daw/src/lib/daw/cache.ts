@@ -85,8 +85,11 @@ export async function streamRecording(
     await folder.getFileHandle(leavesName(`${id}.f32`), { create: true })
   ).createWritable();
   await leaves.write(
-    await makeLeaves(channels.length, entry.length, (from, to) =>
-      channels.map((channel) => channel.subarray(from, to))
+    await makeLeaves(
+      channels.length,
+      entry.length,
+      entry.sampleRate,
+      (from, to) => channels.map((channel) => channel.subarray(from, to))
     )
   );
   await leaves.close();

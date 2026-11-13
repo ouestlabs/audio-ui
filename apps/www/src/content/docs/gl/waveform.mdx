@@ -51,7 +51,7 @@ A recording with several channels is drawn as a DAW draws it: a row for each cha
 
 ## By band
 
-With `look: "bands"` a clip is drawn as the three bands of its sound one over the other: the lows warm behind, the mids in the ink's colour, the highs cool in front, as DJ software colours a sound. A clip's `bands()` gives the sound split in three (`splitBands` of [`@audio-ui/engine/analysis`](/docs/engine/analysis)), with the loudest sample of each band so each is drawn as tall as its own loudest reaches. It is called once a recording and may split lazily: the split holds three copies of the mix.
+With `look: "bands"` a clip is drawn as the three bands of its sound one over the other: the lows warm behind, the mids in the ink's colour, the highs cool in front, as DJ software colours a sound. A clip's `bands()` gives the sound split in three (`splitBands` of [`@audio-ui/engine/analysis`](/docs/engine/analysis)), with the loudest sample of each band so each is drawn as tall as its own loudest reaches. It is called once a recording and may split lazily: the split holds three copies of the mix. A recording streamed from a file gives each band as a reader instead (`{ frames, read, leaves }`), whose leaves are made with the others in the same pass (`createBandSplit` of `@audio-ui/engine/analysis`) and whose stretches are split as the view reads them; a band given no peak is drawn as tall as its leaves' loudest.
 
 ## Reading backwards
 
