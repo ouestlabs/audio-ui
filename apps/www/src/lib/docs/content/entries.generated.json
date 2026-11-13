@@ -2189,6 +2189,27 @@
     ]
   },
   {
+    "dependencies": [],
+    "description": "The loudest sample of a recording, read in chunks a frame apart so a long one does not hold the page: what a waveform drawn on the GPU is scaled by, null until it is read",
+    "exports": [
+      {
+        "kind": "function",
+        "name": "useLoudest",
+        "summary": "The loudest sample of a recording, 0 to 1: what a waveform drawn on the GPU is scaled by, so a quiet recording still fills its lane."
+      }
+    ],
+    "files": [
+      "hooks/use-loudest.ts"
+    ],
+    "from": "@/hooks/use-loudest",
+    "kind": "hook",
+    "name": "use-loudest",
+    "registryDependencies": [],
+    "usedBy": [
+      "clip-panel"
+    ]
+  },
+  {
     "dependencies": [
       "@audio-ui/react",
       "@audio-ui/engine"
