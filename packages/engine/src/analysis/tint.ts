@@ -75,6 +75,8 @@ export interface SplitBands {
   high: Float32Array;
   low: Float32Array;
   mid: Float32Array;
+  /** The loudest sample of each band, 0 to 1: draw each as tall as its own loudest reaches, so a band that is quiet in the mix still shows. */
+  peaks: { high: number; low: number; mid: number };
 }
 
 /**
@@ -107,9 +109,15 @@ export function splitBands(
     cascade(out, sections);
     return out;
   };
+  const high = through(highBand ?? []);
+  const low = through(lowBand ?? []);
+  const mid = through(midBand ?? []);
+  const loudest = (values: Float32Array) =>
+    values.reduce((top, value) => Math.max(top, Math.abs(value)), 0);
   return {
-    high: through(highBand ?? []),
-    low: through(lowBand ?? []),
-    mid: through(midBand ?? []),
+    high,
+    low,
+    mid,
+    peaks: { high: loudest(high), low: loudest(low), mid: loudest(mid) },
   };
 }

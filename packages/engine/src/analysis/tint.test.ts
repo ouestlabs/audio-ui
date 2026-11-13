@@ -71,6 +71,15 @@ describe("splitBands", () => {
     );
   });
 
+  test("each band reports its own loudest sample", () => {
+    const { high, low, mid, peaks } = splitBands([sine(80)], RATE);
+    expect(peaks.low).toBeCloseTo(Math.max(...low.map(Math.abs)), 6);
+    expect(peaks.low).toBeGreaterThan(peaks.mid * 5);
+    expect(peaks.low).toBeGreaterThan(peaks.high * 5);
+    expect(Math.max(...mid.map(Math.abs))).toBe(peaks.mid);
+    expect(Math.max(...high.map(Math.abs))).toBe(peaks.high);
+  });
+
   test("silence stays silent and a source is not changed", () => {
     const quiet = new Float32Array(1000);
     const bands = splitBands([quiet], RATE);
