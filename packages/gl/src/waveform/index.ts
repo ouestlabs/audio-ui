@@ -34,8 +34,8 @@ const isReader = (band: ArrayLike<number> | LaneSamples): band is LaneSamples =>
 export interface WaveformClip extends LaneClip {
   /** Read when the lane draws by band: the recording as three signals. Called once a recording, so it may be a lazy split. */
   bands?: () => WaveformBands;
-  /** The loudest sample of the recording, 0 to 1: the waveform is drawn as tall as the loudest reaches the lane's height. */
-  peak: number;
+  /** The loudest sample of the recording, 0 to 1: the waveform is drawn as tall as the loudest reaches the lane's height. Left out, the lane reads it, from a streamed recording's leaves or from its samples once read: the loudest of its channels when it draws them a row each. */
+  peak?: number;
 }
 
 /** How the lane draws a waveform: as one, or as the three bands of the sound one over the other, the lows warm and the highs cool. */
@@ -59,8 +59,20 @@ export interface WaveformInputs {
   /** How channels are laid out. @default "auto" */
   layout?: WaveformLayout;
   look: WaveformLook;
-  /** The lane's pixels a second. */
-  zoom: number;
+  /** The lane's pixels a second. Left out, the lane fits its clips to its box: the end of the last at its right edge, as a clip's own lane is. */
+  zoom?: number;
+}
+
+/** How a waveform lane draws. */
+export interface WaveformLaneOptions {
+  /**
+   * Draw on the page's one WebGL context, shared by every lane made so, and
+   * copy the picture onto `canvas`, a 2D canvas: a page then has as many
+   * lanes as it likes, past the sixteen contexts a browser keeps, as a lane a
+   * clip does, and lanes reading one recording share what is on the GPU for
+   * it. @default false
+   */
+  shared?: boolean;
 }
 
 type Layer = "high" | "low" | "mid" | "plain";
@@ -133,17 +145,65 @@ const peakOfLeaves = (leaves: ArrayLike<number>) => {
   return peak;
 };
 
-/** What the lane keeps between paints: a renderer a recording and a layer, all on one WebGL context. */
-interface Held {
+/** The loudest of samples read so far, by the samples: read once, not at every paint. */
+const samplePeaks = new WeakMap<object, number>();
+
+const peakOfSamples = (samples: ArrayLike<number>) => {
+  const kept = samplePeaks.get(samples);
+  if (kept !== undefined) {
+    return kept;
+  }
+  let peak = 0;
+  for (const value of Array.prototype.values.call(
+    samples
+  ) as Iterable<number>) {
+    peak = Math.max(peak, Math.abs(value) || 0);
+  }
+  samplePeaks.set(samples, peak);
+  return peak;
+};
+
+/**
+ * Where lanes' renderers live: a WebGL context and what is on it, a renderer
+ * a row, with how many lanes draw each. A lane has one of its own, or shares
+ * the page's.
+ */
+interface Stage {
+  /** The canvas the shared renderers draw on, off the page; null for a lane's own, which draws on its canvas. */
+  canvas: HTMLCanvasElement | null;
   context: WebGL2RenderingContext | null;
   /** What each row's renderer was last handed: its samples, or a streamed recording's leaves. */
   data: Map<string, ArrayLike<number>>;
   /** The chunks each streamed row's renderer holds. */
   feeds: Map<string, ChunkFeed>;
-  gone: boolean;
+  /** What draws each row again, for every lane that draws it: a chunk read for one is drawn by all. */
+  lanes: Map<string, Set<() => void>>;
   renderers: Map<string, Waveform>;
   /** What was read for each row, its samples or a streamed recording's leaves, so it is read once, not at every paint. */
   samples: SampleCache;
+}
+
+const emptyStage = (canvas: HTMLCanvasElement | null): Stage => ({
+  canvas,
+  context: null,
+  data: new Map(),
+  feeds: new Map(),
+  lanes: new Map(),
+  renderers: new Map(),
+  samples: new Map(),
+});
+
+/** The page's stage, made when a shared lane first draws: its canvas is never on the page. */
+let pageStage: Stage | null = null;
+
+/** What a lane keeps between paints: its stage, and the rows it holds there. */
+interface Held {
+  gone: boolean;
+  /** The rows the lane drew last: it holds their renderers on the stage. */
+  holds: Set<string>;
+  /** What draws the lane again, once it has drawn. */
+  later: (() => void) | null;
+  stage: Stage;
 }
 
 /** Whether a colour (as a computed style gives it, `rgb(...)`) is light: the ink of a dark theme. */
@@ -204,9 +264,11 @@ export function splitsChannels(
 }
 
 /** A row before its samples are read: the channel it draws, or a band's samples at hand. */
-interface RowPlan extends Omit<WaveformRow, "data"> {
+interface RowPlan extends Omit<WaveformRow, "data" | "peak"> {
   channel?: number;
   data?: ArrayLike<number>;
+  /** How tall it is drawn: left out, read from what its renderer is handed. */
+  peak?: number;
   /** Whether its peak is read from its leaves: a streamed band given none. */
   peakOfLeaves?: boolean;
   /** A band's own reader. */
@@ -277,11 +339,13 @@ export function waveformRows(
     ({
       channel,
       data: band,
+      peak,
       peakOfLeaves: _peak,
       reader: _reader,
       ...row
     }) => ({
       ...row,
+      peak: peak ?? 1,
       data:
         band ?? (channel === undefined ? data : (channels?.[channel] ?? data)),
     })
@@ -300,7 +364,7 @@ const streams = (entry: WaveformClip, row: RowPlan) =>
 
 /** What a row is drawn from, read once: a band's samples, a streamed recording's leaves, or its samples whole. At once when at hand, else a promise. */
 function readRow(
-  held: Held,
+  stage: Stage,
   entry: WaveformClip,
   row: RowPlan
 ): ArrayLike<number> | Promise<ArrayLike<number>> {
@@ -310,13 +374,13 @@ function readRow(
   const reader = readerOf(entry, row);
   if (reader.leaves) {
     return readKept(
-      held.samples,
+      stage.samples,
       `${row.key}:leaves`,
       reader,
       () => reader.leaves?.() ?? []
     );
   }
-  return readKept(held.samples, row.key, reader, () =>
+  return readKept(stage.samples, row.key, reader, () =>
     reader.read(0, reader.frames)
   );
 }
@@ -338,17 +402,17 @@ interface Planned {
 function rendererOf(
   Renderer: typeof import("gl-waveform").default,
   canvas: HTMLCanvasElement,
-  held: Held,
+  stage: Stage,
   key: string,
   data: ArrayLike<number>,
   streamed: boolean
 ): Waveform | null {
-  let made = held.renderers.get(key);
-  const changed = !sameSamples(held.data.get(key), data);
+  let made = stage.renderers.get(key);
+  const changed = !sameSamples(stage.data.get(key), data);
   if (made && changed && streamed) {
     made.destroy();
-    held.renderers.delete(key);
-    held.feeds.delete(key);
+    stage.renderers.delete(key);
+    stage.feeds.delete(key);
     made = undefined;
   }
   if (made) {
@@ -357,18 +421,21 @@ function rendererOf(
     }
   } else {
     try {
-      made = new Renderer(held.context ?? canvas, streamed ? {} : { data });
+      made = new Renderer(
+        stage.context ?? stage.canvas ?? canvas,
+        streamed ? {} : { data }
+      );
       if (streamed) {
         made.peaks(data, 0);
       }
-      held.context ??= made.gl as WebGL2RenderingContext;
-      held.renderers.set(key, made);
+      stage.context ??= made.gl as WebGL2RenderingContext;
+      stage.renderers.set(key, made);
     } catch {
       canvas.style.display = "none";
       return null;
     }
   }
-  held.data.set(key, data);
+  stage.data.set(key, data);
   return made;
 }
 
@@ -386,7 +453,7 @@ function feedRows(
   renderers: ReadonlyMap<string, Waveform | null>,
   ratio: number
 ) {
-  const { held } = context;
+  const { stage } = context.held;
   const ranges = new Map<
     string,
     { reader: LaneSamples; frames: [number, number][] }
@@ -410,15 +477,20 @@ function feedRows(
     if (!renderer) {
       continue;
     }
-    const feed = held.feeds.get(key) ?? { held: [], reading: new Set() };
-    held.feeds.set(key, feed);
+    const feed = stage.feeds.get(key) ?? { held: [], reading: new Set() };
+    stage.feeds.set(key, feed);
     feedChunks(
       feed,
       reader,
       frames,
       renderer,
-      context.later,
-      () => !held.gone && held.renderers.get(key) === renderer
+      // Every lane that draws the row draws the chunk in.
+      () => {
+        for (const later of stage.lanes.get(key) ?? []) {
+          later();
+        }
+      },
+      () => stage.renderers.get(key) === renderer
     );
   }
 }
@@ -443,7 +515,7 @@ function detailOf(planned: readonly Planned[], ratio: number): string {
 /** The renderer of every row the clips draw, made where it lacks, by the row's key. */
 function renderersOf(
   Renderer: typeof import("gl-waveform").default,
-  { canvas, held }: LaneContext<Held, WaveformInputs>,
+  { canvas, held: { stage } }: LaneContext<Held, WaveformInputs>,
   planned: readonly Planned[],
   reads: ReadonlyMap<string, ArrayLike<number>>
 ): Map<string, Waveform | null> {
@@ -454,7 +526,14 @@ function renderersOf(
       if (data && !renderers.has(row.key)) {
         renderers.set(
           row.key,
-          rendererOf(Renderer, canvas, held, row.key, data, streams(entry, row))
+          rendererOf(
+            Renderer,
+            canvas,
+            stage,
+            row.key,
+            data,
+            streams(entry, row)
+          )
         );
       }
     }
@@ -463,8 +542,34 @@ function renderersOf(
 }
 
 /** Draws each part of each clip into its place on the canvas, every row of it, one clear for all of it. */
+/** The loudest a row's renderer was handed: from its leaves, or its samples. */
+const peakOfRow = (stage: Stage, entry: WaveformClip, row: RowPlan): number => {
+  const data = stage.data.get(row.key) ?? [];
+  return streams(entry, row) ? peakOfLeaves(data) : peakOfSamples(data);
+};
+
+/**
+ * How tall each row of a clip is drawn: as its band's own loudest, a band
+ * given none read from its leaves; the rest at the clip's peak, read from the
+ * rows when it is given none, the loudest of them, so channels compare.
+ */
+function peaksOf(stage: Stage, entry: WaveformClip, rows: readonly RowPlan[]) {
+  const plain = rows.filter((row) => row.layer === "plain");
+  const clip =
+    entry.peak ??
+    Math.max(0, ...plain.map((row) => peakOfRow(stage, entry, row)));
+  return rows.map((row) => {
+    if (row.layer === "plain") {
+      return clip;
+    }
+    return row.peakOfLeaves || row.peak === undefined
+      ? peakOfRow(stage, entry, row)
+      : row.peak;
+  });
+}
+
 function drawRows(
-  { canvas, held }: LaneContext<Held, WaveformInputs>,
+  { canvas, held: { stage } }: LaneContext<Held, WaveformInputs>,
   planned: readonly Planned[],
   renderers: ReadonlyMap<string, Waveform | null>,
   ratio: number
@@ -472,15 +577,13 @@ function drawRows(
   const ink = getComputedStyle(canvas).color;
   const light = isLight(ink);
   // One clear for the whole canvas: the renderers only draw, a clip's layers one over the other.
-  clearLane(held.context);
+  clearLane(stage.context);
   for (const { entry, parts, rows } of planned) {
-    for (const row of rows) {
+    const peaks = peaksOf(stage, entry, rows);
+    for (const [index, row] of rows.entries()) {
       const renderer = renderers.get(row.key);
-      // A streamed band given no peak is drawn as tall as its leaves' loudest.
-      const peak = row.peakOfLeaves
-        ? peakOfLeaves(held.data.get(row.key) ?? [])
-        : row.peak;
-      const scale = Math.max(peak, 1e-6) / Math.max(entry.gain, 1e-6);
+      const scale =
+        Math.max(peaks[index] ?? 1, 1e-6) / Math.max(entry.gain, 1e-6);
       // Rows of channels are told apart by a pixel of ground between them.
       const gap = rows.length > 1 && row.layer === "plain" ? 1 : 0;
       for (const part of renderer ? parts : []) {
@@ -510,20 +613,92 @@ function draw(
   if (held.gone) {
     return false;
   }
+  const { stage } = held;
+  if (stage.canvas) {
+    fitStage(stage.canvas, canvas);
+  }
   const renderers = renderersOf(Renderer, context, planned, reads);
+  held.later = context.later;
+  hold(held, new Set(renderers.keys()));
   feedRows(context, planned, renderers, ratio);
   drawRows(context, planned, renderers, ratio);
+  if (stage.canvas) {
+    copyStage(stage.canvas, canvas);
+  }
   canvas.dataset.detail = detailOf(planned, ratio);
-  // Rows the lane no longer draws let go of their textures.
-  for (const [key, made] of held.renderers) {
-    if (!renderers.has(key)) {
-      made.destroy();
-      held.renderers.delete(key);
-      held.data.delete(key);
-      held.feeds.delete(key);
+  return false;
+}
+
+/** The page's canvas at least as large as a lane's: it only grows, as a resize empties it. */
+function fitStage(stage: HTMLCanvasElement, canvas: HTMLCanvasElement) {
+  if (stage.width < canvas.width) {
+    stage.width = canvas.width;
+  }
+  if (stage.height < canvas.height) {
+    stage.height = canvas.height;
+  }
+}
+
+/** What the page's canvas holds of a lane, from its top left corner, onto the lane's own. */
+function copyStage(stage: HTMLCanvasElement, canvas: HTMLCanvasElement) {
+  const flat = canvas.getContext("2d");
+  if (!flat) {
+    return;
+  }
+  flat.clearRect(0, 0, canvas.width, canvas.height);
+  flat.drawImage(
+    stage,
+    0,
+    0,
+    canvas.width,
+    canvas.height,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
+}
+
+/**
+ * The lane holds the rows it draws now, and lets go of those it drew before
+ * and no longer does: a row no lane holds lets go of its renderer.
+ */
+function hold(held: Held, now: ReadonlySet<string>) {
+  const { later, stage } = held;
+  for (const key of now) {
+    if (later && !held.holds.has(key)) {
+      const lanes = stage.lanes.get(key) ?? new Set();
+      lanes.add(later);
+      stage.lanes.set(key, lanes);
     }
   }
-  return false;
+  for (const key of held.holds) {
+    if (!now.has(key)) {
+      release(stage, key, later);
+    }
+  }
+  held.holds = new Set(now);
+}
+
+/** A lane no longer draws a row: once none does, its renderer and what it read are let go of. */
+function release(stage: Stage, key: string, later: (() => void) | null) {
+  const lanes = stage.lanes.get(key);
+  if (later) {
+    lanes?.delete(later);
+  }
+  if (lanes && lanes.size > 0) {
+    return;
+  }
+  stage.lanes.delete(key);
+  stage.renderers.get(key)?.destroy();
+  stage.renderers.delete(key);
+  stage.data.delete(key);
+  stage.feeds.delete(key);
+  // A lane's own stage keeps what it read, for a view it comes back to; the page's lets it go, for recordings no longer drawn.
+  if (stage === pageStage) {
+    stage.samples.delete(key);
+    stage.samples.delete(`${key}:leaves`);
+  }
 }
 
 /**
@@ -537,7 +712,12 @@ function paint(
   context: LaneContext<Held, WaveformInputs>
 ): boolean | Promise<boolean> {
   const { body, canvas, held, inputs, view } = context;
-  const { clips, layout = "auto", look, zoom } = inputs();
+  const { clips, layout = "auto", look } = inputs();
+  // Fitted, the end of the last clip is at the box's right edge.
+  const zoom =
+    inputs().zoom ??
+    body.getBoundingClientRect().width /
+      Math.max(1e-9, ...clips.map((clip) => clip.start + clip.length));
   const placed = zoom > 0 ? placeLane(canvas, body, view) : null;
   if (!placed) {
     return false;
@@ -564,7 +744,7 @@ function paint(
   for (const { entry, rows } of planned) {
     for (const row of rows) {
       if (!reads.has(row.key)) {
-        reads.set(row.key, readRow(held, entry, row));
+        reads.set(row.key, readRow(held.stage, entry, row));
       }
     }
   }
@@ -612,20 +792,29 @@ function paint(
  */
 export function createWaveformLane(
   canvas: HTMLCanvasElement,
-  inputs: WaveformInputs
+  inputs: WaveformInputs,
+  { shared = false }: WaveformLaneOptions = {}
 ): Lane<WaveformInputs> {
   return createLane<Held, WaveformInputs>({
     canvas,
-    create: () => ({
-      context: null,
-      data: new Map(),
-      feeds: new Map(),
-      gone: false,
-      renderers: new Map(),
-      samples: new Map(),
-    }),
+    create: () => {
+      if (shared) {
+        pageStage ??= emptyStage(document.createElement("canvas"));
+      }
+      return {
+        gone: false,
+        holds: new Set(),
+        later: null,
+        stage: shared && pageStage ? pageStage : emptyStage(null),
+      };
+    },
     destroy: (held) => {
-      for (const renderer of held.renderers.values()) {
+      // A shared lane lets go of its rows; the page's stage stays for the other lanes.
+      if (held.stage === pageStage) {
+        hold(held, new Set());
+        return;
+      }
+      for (const renderer of held.stage.renderers.values()) {
         renderer.destroy();
       }
     },

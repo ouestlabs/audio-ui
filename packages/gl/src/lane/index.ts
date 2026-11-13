@@ -243,7 +243,8 @@ export interface Placed {
 /**
  * Sizes the canvas to the stretch of its lane the view shows, and gives that
  * stretch in CSS px from the lane's left with the device pixel ratio, or
- * hides the canvas when none shows.
+ * hides the canvas when none shows: the lane scrolled out of sight to either
+ * side, or up or down.
  */
 export function placeLane(
   canvas: HTMLCanvasElement,
@@ -256,7 +257,10 @@ export function placeLane(
     new DOMRect(0, 0, window.innerWidth, window.innerHeight);
   const from = Math.max(0, sees.left - box.left - OVERSCAN);
   const to = Math.min(box.width, sees.right - box.left + OVERSCAN);
-  if (to <= from) {
+  // A lane scrolled out of sight, up or down, draws nothing until it comes near.
+  const away =
+    box.bottom < sees.top - OVERSCAN || box.top > sees.bottom + OVERSCAN;
+  if (to <= from || away) {
     canvas.style.display = "none";
     return null;
   }
@@ -561,6 +565,7 @@ export function createLane<Held extends { gone: boolean }, Inputs>(
   const held = options.create();
   let frame = 0;
   let drawnLeft = 0;
+  let drawnTop = 0;
   let over = false;
   if (!body) {
     return {
@@ -580,6 +585,7 @@ export function createLane<Held extends { gone: boolean }, Inputs>(
   const draw = () => {
     frame = 0;
     drawnLeft = view?.scrollLeft ?? 0;
+    drawnTop = view?.scrollTop ?? 0;
     const more = options.paint(context);
     if (more instanceof Promise) {
       more.then(
@@ -602,7 +608,14 @@ export function createLane<Held extends { gone: boolean }, Inputs>(
   const detach = options.attach?.(context);
   const unsubscribe = options.subscribe?.(later);
   const scrolled = () => {
-    if (view && Math.abs(view.scrollLeft - drawnLeft) > OVERSCAN / 2) {
+    if (
+      view &&
+      Math.max(
+        Math.abs(view.scrollLeft - drawnLeft),
+        Math.abs(view.scrollTop - drawnTop)
+      ) >
+        OVERSCAN / 2
+    ) {
       later();
     }
   };
