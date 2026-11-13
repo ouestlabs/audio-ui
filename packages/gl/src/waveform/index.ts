@@ -1,5 +1,6 @@
 import type Waveform from "gl-waveform";
 import {
+  clearLane,
   createLane,
   type Lane,
   type LaneClip,
@@ -295,9 +296,7 @@ function drawPlanned(
   const ink = getComputedStyle(canvas).color;
   const light = isLight(ink);
   // One clear for the whole canvas: the renderers only draw, a clip's layers one over the other.
-  const gl = held.context;
-  gl?.clearColor(0, 0, 0, 0);
-  gl?.clear(gl.COLOR_BUFFER_BIT);
+  clearLane(held.context);
   for (const { each, rows } of planned) {
     const entry = each.entry as WaveformClip;
     for (const row of rows) {

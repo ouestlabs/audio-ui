@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import {
+  clearLane,
   type LaneClip,
   type LaneSegment,
   type SampleCache,
@@ -230,5 +231,25 @@ describe("the sample cache", () => {
     expect(
       visibleClipsNow([later], { from: 0, to: 1000 }, 100, cache)?.[0]?.data
     ).toBe(memory);
+  });
+});
+
+describe("clearLane", () => {
+  test("turns the scissor test off before it clears, so the whole canvas is cleared", () => {
+    const calls: string[] = [];
+    const gl = {
+      COLOR_BUFFER_BIT: 0x40_00,
+      SCISSOR_TEST: 0x0c_11,
+      clear: () => calls.push("clear"),
+      clearColor: () => calls.push("clearColor"),
+      disable: (what: number) =>
+        calls.push(what === 0x0c_11 ? "disable scissor" : "disable"),
+    } as unknown as WebGL2RenderingContext;
+    clearLane(gl);
+    expect(calls).toEqual(["disable scissor", "clearColor", "clear"]);
+  });
+
+  test("does nothing without a context", () => {
+    expect(() => clearLane(null)).not.toThrow();
   });
 });
