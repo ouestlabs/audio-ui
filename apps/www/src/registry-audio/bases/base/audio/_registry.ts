@@ -111,9 +111,9 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/gl", "@audio-ui/react"],
     description:
-      "A clip of an arrangement on its track's lane: move it, trim and fade it, pick a fade's curve, rename it in place and act on it from its menu. A MIDI clip draws its notes across its body.",
+      "A clip of an arrangement on its track's lane: move it, trim and fade it, pick a fade's curve, rename it in place and act on it from its menu. A MIDI clip draws its notes across its body; an audio clip given its recording draws its waveform on the GPU, a row a channel on a tall track, on the page's one WebGL context.",
     files: [
       {
         path: "audio/elements/arranged-clip.tsx",
@@ -127,6 +127,7 @@ export const audio: RegistryItem[] = [
     name: "arranged-clip",
     registryDependencies: [
       "@audio-ui/clip-waveform",
+      "@audio-ui/waveform-lane",
       "@audio-ui/timeline",
       "@audio-ui/arrangement",
       "@audio-ui/use-arrangement",

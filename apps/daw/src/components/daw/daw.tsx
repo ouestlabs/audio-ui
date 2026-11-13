@@ -89,6 +89,7 @@ import {
   type Recording,
   sourcePeaks,
 } from "@/lib/daw/recordings";
+import { recordingSource } from "@/lib/daw/samples";
 import {
   isScoreFile,
   readScore,
@@ -814,6 +815,16 @@ export function Daw({
         ? recordings.get(clip.recording)
         : undefined;
       return recording ? sourcePeaks(clip, recording) : undefined;
+    },
+    [recordings]
+  );
+  // The recording a clip plays, for its waveform on the GPU.
+  const sourceOf = useCallback(
+    (clip: Arranged) => {
+      const recording = clip.recording
+        ? recordings.get(clip.recording)
+        : undefined;
+      return recording ? recordingSource(recording.source) : undefined;
     },
     [recordings]
   );
@@ -1640,6 +1651,7 @@ export function Daw({
                   reading={reading}
                   selectedTrack={selectedTrack}
                   shortcuts={ADD_TRACK_KEYS}
+                  sourceOf={sourceOf}
                   timelineGrid={grid}
                   timelineZoom={view}
                   timeSelection={timeSelection}

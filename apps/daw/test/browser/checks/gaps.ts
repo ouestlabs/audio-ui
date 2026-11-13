@@ -65,7 +65,7 @@ export const checks: Checks = {
       assert(decoded === 0, `the project decoded ${decoded} files again`);
       // Its peaks came back from the cache too: the waveform reaches past the middle line.
       const reach = await page
-        .locator("[data-slot=timeline-clip-waveform]")
+        .locator("[data-slot^=timeline-clip-waveform]")
         .first()
         .evaluate((element) => {
           const drawn = element as HTMLCanvasElement;

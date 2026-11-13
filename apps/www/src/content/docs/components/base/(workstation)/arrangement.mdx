@@ -335,7 +335,7 @@ The state is a plain value and a change is a command of `ArrangementCommand`, wh
 />
 ```
 
-What an app owns stays out of the view. `peaksOf` gives the peaks of the sound a clip plays, `findDevice` the description of a device by its id, and `shortcuts` the keys to show beside each kind of track in the add-track menu. `onArm` and `armed` add an Arm button to the tracks that record, `onDevice` makes the view take a device dragged from `device-browser`, and `multiSelect` makes a press add to the selection, for a touch screen. Leave a prop out and what it drives is not drawn.
+What an app owns stays out of the view. `peaksOf` gives the peaks of the sound a clip plays, and `sourceOf` its recording (`{ samples, channels, sampleRate }`): given it, and WebGL 2 there, a clip draws its waveform on the GPU, every column its exact lowest and highest sample at any zoom and a row a channel on a tall track, all the clips on the page's one WebGL context, read from where the clip was cropped from its recording (`sourceFrom`); a reversed clip is drawn from its peaks. `findDevice` the description of a device by its id, and `shortcuts` the keys to show beside each kind of track in the add-track menu. `onArm` and `armed` add an Arm button to the tracks that record, `onDevice` makes the view take a device dragged from `device-browser`, and `multiSelect` makes a press add to the selection, for a touch screen. Leave a prop out and what it drives is not drawn.
 
 ### Arranged clips
 

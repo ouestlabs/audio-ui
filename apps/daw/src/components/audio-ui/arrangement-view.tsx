@@ -29,6 +29,7 @@ import {
   ArrangedClip,
   ArrangedClipGhost,
   ArrangedGroupPreview,
+  type ArrangedSource,
   ArrangedTake,
 } from "@/components/audio-ui/arranged-clip";
 import { DEVICE_DRAG_TYPE } from "@/components/audio-ui/device-chain";
@@ -495,6 +496,8 @@ export interface ArrangementViewProps {
   shortcuts?: Partial<
     Record<"audio-track" | "midi-track" | "return-track", ReactNode>
   >;
+  /** The recording a clip plays, for its waveform drawn on the GPU at any zoom: leave it out, or give none for a clip, to draw from its peaks. */
+  sourceOf?: (clip: Arranged) => ArrangedSource | undefined;
   /** The grid the lanes draw and the clips snap to. */
   timelineGrid: ReturnType<typeof useTimelineGrid>;
   /** The zoom, fitted to the view until it is zoomed. */
@@ -561,6 +564,7 @@ export function ArrangementView({
   onSeek,
   onSelectTrack,
   peaksOf,
+  sourceOf,
   selectedTrack,
   shortcuts,
   timelineGrid: grid,
@@ -1154,6 +1158,7 @@ export function ArrangementView({
                               describe={describe}
                               key={clip.id}
                               peaks={peaksOf(clip)}
+                              source={sourceOf?.(clip)}
                               swatch={mix.color}
                               trackName={track.name}
                               {...arrangedClips.clipProps(clip)}

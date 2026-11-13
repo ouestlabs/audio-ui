@@ -241,7 +241,7 @@ export const checks: Checks = {
     await page.waitForSelector('[aria-label="Kept take"][data-track-id]', {
       timeout: 10_000,
     });
-    await page.waitForSelector("[data-slot=timeline-clip-waveform]", {
+    await page.waitForSelector("[data-slot^=timeline-clip-waveform]", {
       timeout: 10_000,
     });
   },

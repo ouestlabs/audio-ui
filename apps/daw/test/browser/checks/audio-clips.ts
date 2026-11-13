@@ -158,7 +158,10 @@ export const checks: Checks = {
     async (browser) => {
       const page = await open(browser);
       await dropChord(page, "[data-add-track]", "Long take", 20);
-      const canvas = page.locator("[data-slot=timeline-clip-waveform]").first();
+      // On the canvas or the GPU, whichever draws it.
+      const canvas = page
+        .locator("[data-slot^=timeline-clip-waveform]")
+        .first();
       await canvas.waitFor({ timeout: 30_000 });
       await [1, 2, 3, 4, 5].reduce(async (done) => {
         await done;
@@ -172,12 +175,17 @@ export const checks: Checks = {
         const view = drawn
           .closest("[data-slot=timeline-viewport]")
           ?.getBoundingClientRect();
-        const row = drawn
+        // A column is empty with no ink from top to bottom: a stereo clip is drawn a row a channel, with a line of ground between them.
+        const pixels = drawn
           .getContext("2d")
-          ?.getImageData(0, drawn.height / 2, drawn.width, 1).data;
+          ?.getImageData(0, 0, drawn.width, drawn.height).data;
         let empty = 0;
         for (let column = 0; column < drawn.width; column += 1) {
-          if (!row?.[column * 4 + 3]) {
+          let inked = false;
+          for (let row = 0; row < drawn.height && !inked; row += 1) {
+            inked = Boolean(pixels?.[(row * drawn.width + column) * 4 + 3]);
+          }
+          if (!inked) {
             empty += 1;
           }
         }
@@ -464,6 +472,52 @@ export const checks: Checks = {
           .getAttribute("aria-label")) === "View: Waveform, by band",
         "the View menu does not read the view shown"
       );
+    },
+  "CLP-027: more audio clips than a browser keeps WebGL contexts all draw on the GPU, on the page's one":
+    async (browser) => {
+      const page = await open(browser);
+      const lost: string[] = [];
+      page.on("console", (message) => {
+        if (message.text().includes("WebGL contexts")) {
+          lost.push(message.text());
+        }
+      });
+      // Eighteen takes, a track each: past the sixteen contexts a browser keeps.
+      await Array.from({ length: 18 }).reduce<Promise<unknown>>(
+        async (done, _, index) => {
+          await done;
+          await dropChord(page, "[data-add-track]", `Take ${index + 1}`, 1);
+          await page.waitForSelector(
+            `[aria-label="Take ${index + 1}"][data-track-id]`,
+            { timeout: 10_000 }
+          );
+        },
+        Promise.resolve()
+      );
+      // A clip out of sight draws nothing until it comes near: each is scrolled into view, and draws there.
+      const clips = page.locator(
+        "[data-clip-id]:has(canvas[data-slot=timeline-clip-waveform-gl])"
+      );
+      const total = await clips.count();
+      assert(total >= 18, `${total} clips draw on the GPU`);
+      const blank = await Array.from({ length: total }).reduce<Promise<number>>(
+        async (done, _, index) => {
+          const sum = await done;
+          const clip = clips.nth(index);
+          await clip.scrollIntoViewIfNeeded();
+          await page.waitForTimeout(150);
+          const detail = await clip
+            .locator("canvas[data-slot=timeline-clip-waveform-gl]")
+            .getAttribute("data-detail");
+          return detail ? sum : sum + 1;
+        },
+        Promise.resolve(0)
+      );
+      assert(
+        blank === 0,
+        `${blank} of ${total} GPU waveforms stayed blank in view`
+      );
+      assert(lost.length === 0, `a context was lost: ${lost[0]}`);
     },
   "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":
     async (browser) => {

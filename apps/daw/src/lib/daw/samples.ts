@@ -440,3 +440,28 @@ export function recordingBands(source: RecordingSource): () => WaveformBands {
   madeBands.set(source, bands);
   return bands;
 }
+
+/** What an arranged clip reads of its recording, one per source, so a clip is not drawn again for nothing. */
+const madeSources = new WeakMap<
+  RecordingSource,
+  {
+    channels?: readonly ClipSamples[];
+    sampleRate: number;
+    samples: ClipSamples;
+  }
+>();
+
+/** A recording as an arranged clip draws it on the GPU: its mix, its channels and its rate, the same for the same source. */
+export function recordingSource(source: RecordingSource) {
+  const kept = madeSources.get(source);
+  if (kept) {
+    return kept;
+  }
+  const made = {
+    channels: recordingChannels(source),
+    sampleRate: source.sampleRate,
+    samples: recordingSamples(source),
+  };
+  madeSources.set(source, made);
+  return made;
+}
