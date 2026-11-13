@@ -6,11 +6,7 @@
     "esModuleInterop": true,
     "incremental": false,
     "isolatedModules": true,
-    "lib": [
-      "ESNext",
-      "DOM",
-      "DOM.Iterable"
-    ],
+    "lib": ["ESNext", "DOM", "DOM.Iterable"],
     "module": "ESNext",
     "moduleDetection": "force",
     "moduleResolution": "Bundler",
@@ -22,12 +18,7 @@
     "strict": true,
     "strictNullChecks": true,
     "target": "ES2022",
-    "types": [
-      "bun"
-    ]
+    "types": ["bun"]
   },
-  "exclude": [
-    "dist",
-    "node_modules"
-  ]
+  "exclude": ["dist", "node_modules"]
 }
