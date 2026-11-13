@@ -14,6 +14,7 @@ import { createWaveformLane } from "@audio-ui/gl/waveform";
 
 const lane = createWaveformLane(canvas, {
   clips, // WaveformClip[]: a LaneClip with the recording's `peak`, and `bands` for the band look
+  layout: "auto", // a row a channel once the rows are tall enough; or "split", "mix"
   look: "plain", // or "bands"
   zoom: pixelsPerSecond,
 });
@@ -23,6 +24,10 @@ lane.destroy();
 ```
 
 A clip's `peak` is its recording's loudest sample, 0 to 1: the waveform is drawn as tall as the loudest reaches the lane's height, as a quiet recording still fills its lane. The clip's `gain` scales what is drawn, as it scales what plays.
+
+## Channels
+
+A recording with several channels is drawn as a DAW draws it: a row for each channel once the rows are tall enough to read, one waveform below that, as a short track shows one lane. `layout` is `"auto"` by default and splits when each row would be at least `SPLIT_ROW_PX` (40) CSS px tall; `"split"` and `"mix"` force it. Give a clip its `channels`, one reader each, for the rows; `samples` stays their mix, which the one waveform, the band look and the spectrogram draw. The rows share the clip's `peak`, so channels are compared at the same height, and are told apart by a pixel of ground. `splitsChannels` and `waveformRows` give the layout for a lane height, to lay out what goes beside it.
 
 ## By band
 
