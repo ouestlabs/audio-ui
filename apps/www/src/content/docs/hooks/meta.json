@@ -28,6 +28,7 @@
     "use-timeline-grid",
     "use-timeline-cursor",
     "use-time-selection",
+    "use-loudest",
     "use-bake",
     "use-clip-edits",
     "use-silence-hover",

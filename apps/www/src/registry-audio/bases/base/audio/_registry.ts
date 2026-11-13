@@ -682,9 +682,9 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline", "waveform", "knob"],
-    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/gl", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform).",
+      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), drawn on the GPU when the source's samples are given and WebGL 2 is there.",
     files: [
       {
         path: "audio/panels/clip-panel.tsx",
@@ -697,6 +697,8 @@ export const audio: RegistryItem[] = [
       "@audio-ui/parameter-field",
       "@audio-ui/clip-view",
       "@audio-ui/timeline",
+      "@audio-ui/use-loudest",
+      "@audio-ui/waveform-lane",
     ],
     type: "registry:ui",
   },

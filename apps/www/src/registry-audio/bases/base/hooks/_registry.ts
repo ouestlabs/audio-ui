@@ -148,6 +148,11 @@ export const hooks: RegistryItem[] = [
       "@audio-ui/use-arrangement",
     ],
   }),
+  hookItem("use-loudest", {
+    categories: ["audio", "timeline"],
+    description:
+      "The loudest sample of a recording, read in chunks a frame apart so a long one does not hold the page: what a waveform drawn on the GPU is scaled by, null until it is read",
+  }),
   hookItem("use-bake", {
     categories: ["audio", "timeline"],
     dependencies: ["@audio-ui/engine"],
