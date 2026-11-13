@@ -30,7 +30,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Lint
-        run: bunx biome ci packages/core packages/engine packages/react packages/icons packages/elements
+        run: bunx biome ci packages/core packages/engine packages/gl packages/react packages/icons packages/elements
 
       - name: Build
         run: bun run build:pkg
@@ -41,6 +41,10 @@ jobs:
 
       - name: Typecheck engine
         working-directory: packages/engine
+        run: bunx tsc --noEmit
+
+      - name: Typecheck gl
+        working-directory: packages/gl
         run: bunx tsc --noEmit
 
       - name: Typecheck ui
@@ -61,6 +65,10 @@ jobs:
 
       - name: Test engine
         working-directory: packages/engine
+        run: bun test
+
+      - name: Test gl
+        working-directory: packages/gl
         run: bun test
 
       - name: Test ui

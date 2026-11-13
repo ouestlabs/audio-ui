@@ -5,18 +5,18 @@ description: "The spectrograms of a lane's clips on one canvas and one WebGL con
 
 ## Installation
 
-<Install name="clip-spectrogram" packages="@audio-ui/engine gl-spectrogram" />
+<Install name="clip-spectrogram" packages="@audio-ui/engine @audio-ui/gl" />
 
 ## Usage
 
-`SpectrogramLane` draws the spectrograms of all of a lane's clips on one canvas, each in its own part of it, placed as the clips are on the lane. Instead of peaks it draws the frequencies of the recording, each column an FFT computed on the GPU by `gl-spectrogram`, so a steady tone is one row thin and a click one column thin at any zoom. All the clips share one WebGL context (see [`useGlLane`](/docs/hooks/use-gl-lane)): a browser keeps some sixteen and drops the oldest past that, so a canvas a clip would lose its picture once a sound is cut into enough pieces. The audio editor switches its lane between the waveform and the spectrogram from its View menu.
+`SpectrogramLane` draws the spectrograms of all of a lane's clips on one canvas, each in its own part of it, placed as the clips are on the lane. Instead of peaks it draws the frequencies of the recording, each column an FFT computed on the GPU by `gl-spectrogram`, so a steady tone is one row thin and a click one column thin at any zoom. It is a thin React wrapper over [`@audio-ui/gl/spectrogram`](/docs/gl/spectrogram), which does the drawing and has no React in it. All the clips share one WebGL context, and clips of one recording share what is on the GPU for it: a browser keeps some sixteen and drops the oldest past that, so a canvas a clip would lose its picture once a sound is cut into enough pieces. The audio editor switches its lane between the waveform and the spectrogram from its View menu.
 
 ```tsx
 import { SpectrogramLane } from "@/components/audio-ui/clip-spectrogram";
 
 <SpectrogramLane
   className="h-full text-foreground"
-  clips={clips} // { id, start, clip, gain, sampleRate, samples }[], start in seconds on the lane
+  clips={clips} // { id, source, start, length, gain, sampleRate, samples, segments }[], start in seconds on the lane
   scale="log" // "log" octaves, "mel", "erb" or "lin" hertz
   zoom={pixelsPerSecond}
 />;
@@ -24,7 +24,7 @@ import { SpectrogramLane } from "@/components/audio-ui/clip-spectrogram";
 
 | Prop | Type | |
 | --- | --- | --- |
-| `clips` | `LaneClip[]` | The clips to draw: `id`, `start` on the lane in seconds, what the `clip` reads (its length, offset and source length), its `gain`, the recording's `sampleRate` and its `samples` (`{ frames, read }`, mixed to one). |
+| `clips` | `LaneClip[]` | The clips to draw: `id`, the `source` recording they read, where each `start`s and how `length` it is on the lane in seconds, its `gain`, the recording's `sampleRate` and `samples` (`{ frames, read }`, mixed to one), and `segments`, how it reads its recording (see [Waveform Lane](/docs/components/base/waveform-lane)). |
 | `zoom` | `number` | The lane's pixels a second. |
 | `scale` | `"log" \| "mel" \| "erb" \| "lin"` | The frequency axis. Default `"log"`. |
 | `pointerHertz` | `{ set }` | Told the frequency under the pointer, or `null` off the picture. |

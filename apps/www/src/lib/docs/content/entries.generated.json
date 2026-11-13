@@ -228,6 +228,16 @@
         "summary": "Where each column edge of a stretch of a clip reads its recording, in frames of the source: `columns + 1` positions, fractional, from the first column's left edge to the last one's right edge, as a player reads it."
       },
       {
+        "kind": "interface",
+        "name": "ClipSegment",
+        "summary": "A stretch of a clip that reads its recording straight on: two times of the clip and the frames of the recording at them."
+      },
+      {
+        "kind": "function",
+        "name": "clipSegments",
+        "summary": "The stretches of a clip between two times of it, in seconds from its start, each a straight read of its recording, as a DAW paints a region: one for a clip that plays on from its offset, one for each turn of its loop and each stretch between its warp markers."
+      },
+      {
         "kind": "function",
         "name": "framesToRead",
         "summary": "The frames to read for `positions`: from the first one any column touches to one past the last, within the source's `frames`."
@@ -387,7 +397,6 @@
       "use-arrangement",
       "use-bake",
       "use-clip-edits",
-      "use-gl-lane",
       "use-sound-report",
       "use-time-selection",
       "use-timeline-cursor"
@@ -2177,81 +2186,6 @@
       "block-vibe",
       "block-wah",
       "use-pulses-through-compressor"
-    ]
-  },
-  {
-    "dependencies": [],
-    "description": "What a lane drawn by WebGL on one canvas needs: the canvas placed on the stretch of the lane the view shows, drawn again when its inputs change, it resizes, the view scrolls or the theme changes, and let go of when it leaves. Also the clips of a lane the view shows, with the frames each reads, and whether this browser has WebGL 2",
-    "exports": [
-      {
-        "kind": "interface",
-        "name": "LaneSamples",
-        "summary": "A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`."
-      },
-      {
-        "kind": "interface",
-        "name": "LaneClip",
-        "summary": "A clip of a lane to draw: where it starts, what it reads and at what level."
-      },
-      {
-        "kind": "function",
-        "name": "sameSamples",
-        "summary": "Whether two readings are the same samples: a reader may hand out a new view of the same memory each time, which is not new data to upload."
-      },
-      {
-        "kind": "interface",
-        "name": "VisibleClip",
-        "summary": "A clip the view shows: its part of the canvas in CSS px from the canvas' left, the frames of its recording it reads there, and its samples."
-      },
-      {
-        "kind": "function",
-        "name": "visibleClips",
-        "summary": "The clips of a lane the view shows, each with its part of the canvas and the frames it reads there, and their samples read together."
-      },
-      {
-        "kind": "const",
-        "name": "OVERSCAN",
-        "summary": "The pixels drawn past each edge of the view, so a scroll shows them at once."
-      },
-      {
-        "kind": "function",
-        "name": "groundOf",
-        "summary": "The nearest background that is not transparent, from `element` up: what a picture's silence lies over."
-      },
-      {
-        "kind": "function",
-        "name": "hasWebGL2",
-        "summary": "Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way."
-      },
-      {
-        "kind": "function",
-        "name": "placeLane",
-        "summary": "Sizes the canvas to the stretch of its lane the view shows, and gives that stretch in CSS px from the lane's left with the device pixel ratio, or hides the canvas when none shows."
-      },
-      {
-        "kind": "interface",
-        "name": "GlLaneContext",
-        "summary": "What a lane hands its painter and its listeners."
-      },
-      {
-        "kind": "function",
-        "name": "useGlLane",
-        "summary": "What a lane drawn by WebGL on one canvas needs: the canvas placed on the stretch of the lane the view shows, drawn again when its `inputs` change, the lane resizes, the view scrolls a good way or the theme changes, and let go of when it leaves."
-      }
-    ],
-    "files": [
-      "hooks/use-gl-lane.ts"
-    ],
-    "from": "@/hooks/use-gl-lane",
-    "kind": "hook",
-    "name": "use-gl-lane",
-    "registryDependencies": [
-      "arrangement"
-    ],
-    "usedBy": [
-      "block-audio-editor",
-      "clip-spectrogram",
-      "waveform-lane"
     ]
   },
   {

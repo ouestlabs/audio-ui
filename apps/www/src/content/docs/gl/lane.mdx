@@ -1,0 +1,44 @@
+---
+title: lane
+description: "What every GPU lane shares: placing the canvas on what the view shows, the clips in view with the frames they read, drawing again on a change of inputs, a resize, a scroll or the theme, and whether this browser has WebGL 2."
+---
+
+<Module from="@audio-ui/gl/lane" />
+
+## Usage
+
+`createLane` starts a lane on a canvas that sits in the lane's box. You give it what to keep between paints, how to draw, and the inputs; it places the canvas, draws in the next frame whenever the inputs change, the lane resizes, the view scrolls a good way or the theme changes, and lets go of everything on `destroy`.
+
+```ts
+import { createLane, placeLane, visibleClips } from "@audio-ui/gl/lane";
+
+const lane = createLane({
+  canvas,
+  create: () => ({ gone: false, renderers: new Map() }), // what the lane keeps
+  destroy: (held) => { /* let go of what create made */ },
+  inputs: { clips, zoom },
+  paint: async ({ body, canvas, held, inputs, view }) => {
+    const { clips, zoom } = inputs();
+    const placed = placeLane(canvas, body, view); // null when no part of the lane shows
+    if (!placed) return false;
+    const visible = await visibleClips(clips, placed, zoom); // each with its parts: x, width and frames
+    // draw each part into its viewport; return true while some of it is not yet whole
+    return false;
+  },
+});
+
+lane.update({ clips, zoom }); // draws again, keeping what is on the GPU
+lane.destroy();
+```
+
+The lane never starts over for a change of inputs, so what is on the GPU stays: a zoom or a cut draws again without the samples going up a second time.
+
+## Clips
+
+A `LaneClip` is a clip of the lane: its `id`, where it `start`s and how `long` it is on the lane in seconds, its `gain`, the recording's `sampleRate` and `samples` (`{ frames, read }`, mixed to one), the `source` it reads, and `segments`, how it reads it. `segments(from, to)` gives the stretches of the clip between two times of it, each with the frames of the recording at its two ends; a stretch whose frames fall is read backwards.
+
+`visibleClips` gives the clips the view shows, each with its parts of the canvas (`x` and `width` in CSS px, the `frames` read there, lowest first) and its samples, read once a recording whatever its clips. `sameSamples` tells whether a reader handed out the same memory again, so it is not uploaded twice.
+
+## WebGL 2
+
+`hasWebGL2` says whether this browser can draw a lane at all, and a page draws it another way when it cannot. A browser also keeps only some sixteen contexts: a lane takes one, whatever its clips.

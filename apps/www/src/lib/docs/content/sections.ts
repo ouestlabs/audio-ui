@@ -16,8 +16,8 @@ export const DOCS_SECTIONS = [
     label: "Docs",
   },
   {
-    description: "Logic and audio: core and engine",
-    folders: ["core", "engine"],
+    description: "Logic, audio and drawing: core, engine and gl",
+    folders: ["core", "engine", "gl"],
     href: "/docs/core",
     id: "core",
     label: "Core",

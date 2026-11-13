@@ -31,6 +31,7 @@ import {
 } from "@audio-ui/engine/format";
 import type { Repair } from "@audio-ui/engine/repair";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
+import { hasWebGL2 } from "@audio-ui/gl/lane";
 import {
   createSource,
   type FadeShape,
@@ -130,15 +131,16 @@ import { useArrangementEngine } from "@/registry-audio/bases/base/hooks/use-arra
 import { useAudioLevels } from "@/registry-audio/bases/base/hooks/use-audio-levels";
 import { useBake } from "@/registry-audio/bases/base/hooks/use-bake";
 import { useClipEdits } from "@/registry-audio/bases/base/hooks/use-clip-edits";
-import { hasWebGL2 } from "@/registry-audio/bases/base/hooks/use-gl-lane";
+
 import { useSilenceHover } from "@/registry-audio/bases/base/hooks/use-silence-hover";
 import { useSoundReport } from "@/registry-audio/bases/base/hooks/use-sound-report";
 import { useStatusLine } from "@/registry-audio/bases/base/hooks/use-status-line";
-import type {
-  Arranged,
-  ArrangementTrack,
-  TimeSelection,
-  TrackDevice,
+import {
+  type Arranged,
+  type ArrangementTrack,
+  clipSegments,
+  type TimeSelection,
+  type TrackDevice,
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { renderArrangement } from "@/registry-audio/bases/base/lib/arrangement-engine";
 import type {
@@ -2118,10 +2120,8 @@ function SelectionFrame({
   );
 }
 
-/** Whether a clip plays its recording as it lies, one stretch of it in order: not reversed, not warped, and no loop it turns round before it ends (the editor's clips loop their whole sound, which they never reach the end of). */
-const isPlain = (clip: Arranged) =>
-  !(clip.reversed || clip.warp) &&
-  (!clip.loop || clip.value.offset + clip.value.length <= clip.loop[1] + 1e-6);
+/** Whether the GPU draws a clip: any but a reversed one, which reads its recording backwards and which the renderers have no range for. */
+const isDrawnByGpu = (clip: Arranged) => !clip.reversed;
 
 /** The track's clips on the lane, each drawing its part of the sound it plays: on one canvas and one WebGL context, the waveform by `gl-waveform` or the spectrogram by `gl-spectrogram`; the canvas waveform where WebGL 2 is missing or a clip is looped, reversed or warped. */
 function SoundClips({
@@ -2148,33 +2148,42 @@ function SoundClips({
   const spectrogram = view !== "wave" && view !== "bands";
   const [webgl] = useState(hasWebGL2);
   // A waveform is drawn on the GPU when it can be, for the clips as they lie.
-  const gpuWaveform = !spectrogram && webgl && clips.every(isPlain);
+  const gpuWaveform = !spectrogram && webgl && clips.every(isDrawnByGpu);
   // The clips the GPU draws, on one canvas.
   const drawn = useMemo<WaveformClip[]>(
     () =>
       spectrogram || gpuWaveform
         ? clips.flatMap((clip) => {
             const sound = sounds.get(clip.recording ?? "");
-            return sound
-              ? [
-                  {
-                    bands: sound.bands,
-                    clip: {
-                      sourceLength: clip.sourceLength ?? sound.duration,
-                      value: {
-                        length: clip.value.length,
-                        offset: clip.value.offset,
-                      },
-                    },
-                    gain: dbToGain(clip.gain ?? 0),
-                    id: clip.id,
-                    peak: dbToGain(sound.peak),
-                    sampleRate: sound.sampleRate,
-                    samples: sound.samples,
-                    start: clip.value.start,
-                  },
-                ]
-              : [];
+            if (!sound) {
+              return [];
+            }
+            const reading = {
+              loop: clip.loop,
+              reversed: clip.reversed,
+              sourceLength: clip.sourceLength ?? sound.duration,
+              value: {
+                length: clip.value.length,
+                offset: clip.value.offset,
+              },
+              warp: clip.warp,
+            };
+            return [
+              {
+                bands: sound.bands,
+                gain: dbToGain(clip.gain ?? 0),
+                id: clip.id,
+                length: clip.value.length,
+                peak: dbToGain(sound.peak),
+                sampleRate: sound.sampleRate,
+                samples: sound.samples,
+                // How the clip reads its recording: a stretch for each turn of a loop and each stretch between warp markers.
+                segments: (from: number, to: number) =>
+                  clipSegments(reading, sound.samples.frames, [from, to]),
+                source: clip.recording ?? clip.id,
+                start: clip.value.start,
+              },
+            ];
           })
         : [],
     [clips, gpuWaveform, sounds, spectrogram]

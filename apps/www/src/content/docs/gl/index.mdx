@@ -1,0 +1,27 @@
+---
+title: GL
+description: "@audio-ui/gl: audio drawn on the GPU, with no UI framework in it: a lane of clips as waveforms or a spectrogram on one canvas and one WebGL context, over gl-waveform and gl-spectrogram, with the frequency axis, the band zoom and the pointer reading that go with them."
+---
+
+`@audio-ui/gl` draws what a timeline's lane shows, on the GPU: the waveforms of its clips, exact at any zoom and over recordings of any length, or their spectrogram. It is a layer of audio/ui over [`gl-waveform`](https://github.com/dy/gl-waveform) and [`gl-spectrogram`](https://github.com/dy/gl-spectrogram), the renderers audio.js draws its own editor with: they do the drawing, and this package is how a lane uses them. It has no UI framework in it, so a React hook, a custom element or a script all start a lane the same way.
+
+It is one package, `npm install @audio-ui/gl`, and each module is its own entry point, so a page that draws a waveform does not load the spectrogram's renderer. It is optional: `@audio-ui/react` does not need it, and a page without WebGL 2 draws the lane another way (`hasWebGL2` says which).
+
+## What a lane is
+
+A lane is one canvas in the lane's box, sized to the stretch of the lane the view shows. Every clip is drawn in its own part of it, all on one WebGL context: a browser keeps some sixteen contexts and drops the oldest past that, so a canvas a clip would lose its picture once a sound is cut into enough pieces. Clips of one recording share what is on the GPU for it, its peaks and its samples, as a DAW shares the peaks of a file between its regions.
+
+A clip says how it reads its recording as `segments`: the stretches of it that are read straight on, one for a clip that plays on from its offset, one for each turn of a loop and each stretch between warp markers. The host knows how a clip plays; the lane paints each stretch where it falls.
+
+## Modules
+
+| Module | What it holds |
+| --- | --- |
+| [`lane`](/docs/gl/lane) | What every lane shares: placing the canvas on what the view shows, the clips in view with the frames they read, drawing again on a change of inputs, a resize, a scroll or the theme, and whether this browser has WebGL 2. |
+| [`waveform`](/docs/gl/waveform) | The waveforms of a lane's clips: the exact lowest and highest of every pixel column with the RMS inside, a line through the samples zoomed in, plain or as the three bands of the sound. |
+| [`spectrogram`](/docs/gl/spectrogram) | The spectrograms of a lane's clips on one of four frequency axes, the band zoom, the pointer's cell, and the frequency axis laid out for a lane. |
+
+## Next
+
+- [Waveform Lane](/docs/components/base/waveform-lane) and [Spectrogram Lane](/docs/components/base/clip-spectrogram): the registry components that draw a lane in React over this package, which you install and own.
+- [`@audio-ui/engine/analysis`](/docs/engine/analysis): `splitBands` and the other readings of a sound these lanes draw.

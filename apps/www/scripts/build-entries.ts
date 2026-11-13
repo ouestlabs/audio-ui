@@ -143,6 +143,7 @@ const SCRIPT_EXTENSION = /\.[cm]?js$/;
 const MODULE_PACKAGES = [
   { folder: "core", name: "@audio-ui/core" },
   { folder: "engine", name: "@audio-ui/engine" },
+  { folder: "gl", name: "@audio-ui/gl" },
   { folder: "elements", name: "@audio-ui/elements" },
   { folder: "react", name: "@audio-ui/react" },
 ] as const;
