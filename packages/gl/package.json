@@ -50,6 +50,7 @@
     "test": "bun test"
   },
   "dependencies": {
+    "fourier-transform": "2.5.1",
     "gl-spectrogram": "2.4.0",
     "gl-waveform": "5.3.0"
   },

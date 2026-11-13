@@ -23,6 +23,21 @@ export interface LaneSamples {
     from: number,
     to: number
   ) => ArrayLike<number> | Promise<ArrayLike<number>>;
+  /**
+   * For a recording streamed from a file: its spectra, as
+   * `spectrogramSpectra` of `@audio-ui/gl/spectrogram` makes them. A
+   * spectrogram lane draws it from them zoomed out, and zoomed in reads only
+   * the frames it shows, `CHUNK_FRAMES` at a time. Left out, a spectrogram lane
+   * reads the recording whole, once.
+   */
+  spectra?: () => LaneSpectra | Promise<LaneSpectra>;
+}
+
+/** A recording's spectra: a column every `hop` frames, each bin's level to Nyquist over windows of `size` frames, a byte each. */
+export interface LaneSpectra {
+  hop: number;
+  levels: Uint8Array;
+  size: number;
 }
 
 /** The frames a renderer keeps its samples in, and a streamed recording is read in: 65536. */
@@ -374,12 +389,12 @@ export function partsInView(
  * once, not at every paint, since a reader may copy or mix the whole of it
  * each time it is asked. Read again only when the clip hands another reader.
  */
-export type SampleCache = Map<
+export type SampleCache = KeptCache<ArrayLike<number>>;
+
+/** What a lane has read of its recordings, by key: what it read, or is reading, and the reader it read it with. */
+export type KeptCache<Read> = Map<
   string,
-  {
-    read: ArrayLike<number> | Promise<ArrayLike<number>>;
-    samples: LaneSamples;
-  }
+  { read: Read | Promise<Read>; samples: LaneSamples }
 >;
 
 /**
@@ -387,12 +402,12 @@ export type SampleCache = Map<
  * is the one it was read with, else read now and kept: once a promise is
  * settled, the cache holds what it gave, so the next paint has it at once.
  */
-export function readKept(
-  cache: SampleCache | undefined,
+export function readKept<Read = ArrayLike<number>>(
+  cache: KeptCache<Read> | undefined,
   key: string,
   samples: LaneSamples,
-  read: () => ArrayLike<number> | Promise<ArrayLike<number>>
-): ArrayLike<number> | Promise<ArrayLike<number>> {
+  read: () => Read | Promise<Read>
+): Read | Promise<Read> {
   const kept = cache?.get(key);
   if (kept && kept.samples === samples) {
     return kept.read;

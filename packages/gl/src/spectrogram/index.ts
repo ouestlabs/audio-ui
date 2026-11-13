@@ -1,20 +1,135 @@
+import { fft } from "fourier-transform";
 import type Spectrogram from "gl-spectrogram";
 import type { Axis, Cell, Scale } from "gl-spectrogram";
 import {
+  type ChunkFeed,
   clearLane,
   createLane,
+  feedChunks,
   groundOf,
+  type KeptCache,
   type Lane,
   type LaneClip,
   type LaneContext,
+  type LaneSamples,
+  type LaneSpectra,
+  partsInView,
   placeLane,
+  readKept,
+  readOnce,
   type SampleCache,
   sameSamples,
-  type VisibleClip,
   type VisiblePart,
-  visibleClips,
-  visibleClipsNow,
 } from "../lane/index.ts";
+
+/** The frames of a window of the spectra, and of one of their columns: 2048, some 43 ms at 48 kHz, the window the renderer fits a view with. */
+export const SPECTRA_SIZE = 2048;
+
+/** A level as the renderer keeps it: a byte, (dB + 150) · 1.6, 0 for silence. */
+const LEVEL_SCALE = 1.6;
+const LEVEL_FLOOR = 150;
+
+/** The frames read at a time while the spectra are made: whole columns, with a frame of the page between each read. */
+const SPECTRA_READ = 1 << 20;
+
+/** A periodic Hann window of `size` frames. */
+const hannOf = (size: number) =>
+  Float64Array.from(
+    { length: size },
+    (_, index) => 0.5 - 0.5 * Math.cos((2 * Math.PI * index) / size)
+  );
+
+/** A mean power, a full-scale sine on its bin being 1, as the byte the renderer keeps. */
+const levelByte = (power: number) =>
+  power > 0
+    ? Math.min(
+        255,
+        Math.max(
+          0,
+          Math.round((10 * Math.log10(power) + LEVEL_FLOOR) * LEVEL_SCALE)
+        )
+      )
+    : 0;
+
+/**
+ * The spectra of a recording, for `LaneSamples.spectra`: a column every `hop`
+ * frames, each bin's power from DC to Nyquist over the Hann windows of `size`
+ * frames centred in the column every `size / 2` frames, their mean, as a byte,
+ * (dB + 150) · 1.6, 0 dB a full-scale sine on its bin and 0 silence. It is what
+ * `gl-spectrogram` draws a recording it does not hold from, zoomed out: made
+ * once, as the recording is written, and kept beside it. Read from `samples` a
+ * stretch at a time, with a frame of the page between each. `size` and `hop`
+ * are powers of two, `hop` at least `size / 2`.
+ */
+export async function spectrogramSpectra(
+  samples: LaneSamples,
+  {
+    hop = SPECTRA_SIZE,
+    size = SPECTRA_SIZE,
+  }: { hop?: number; size?: number } = {}
+): Promise<LaneSpectra> {
+  const bins = size / 2 + 1;
+  const half = size / 2;
+  const columns = Math.ceil(samples.frames / hop);
+  const levels = new Uint8Array(columns * bins);
+  const hann = hannOf(size);
+  // Windows every half a window, centred in the column: as many as fit.
+  const windows = Math.max(1, Math.round(hop / half));
+  const spacing = hop / windows;
+  const full = (size / 4) ** 2;
+  const frame = new Float64Array(size);
+  const power = new Float64Array(bins);
+  const out: [Float64Array, Float64Array] = [
+    new Float64Array(bins),
+    new Float64Array(bins),
+  ];
+  const each = Math.max(1, Math.floor(SPECTRA_READ / hop));
+  const column = (index: number, read: ArrayLike<number>, from: number) => {
+    power.fill(0);
+    for (let window = 0; window < windows; window += 1) {
+      const start = Math.round(index * hop + (window + 0.5) * spacing - half);
+      for (let at = 0; at < size; at += 1) {
+        const frameAt = start + at;
+        const value =
+          frameAt >= 0 && frameAt < samples.frames
+            ? ((read[frameAt - from] as number | undefined) ?? 0)
+            : 0;
+        frame[at] = value * (hann[at] as number);
+      }
+      const [re, im] = fft(frame, out);
+      for (let bin = 0; bin < bins; bin += 1) {
+        power[bin] =
+          (power[bin] as number) +
+          (re[bin] as number) ** 2 +
+          (im[bin] as number) ** 2;
+      }
+    }
+    for (let bin = 0; bin < bins; bin += 1) {
+      levels[index * bins + bin] = levelByte(
+        (power[bin] as number) / windows / full
+      );
+    }
+  };
+  const readFrom = async (first: number): Promise<void> => {
+    if (first >= columns) {
+      return;
+    }
+    const last = Math.min(columns, first + each);
+    // The windows reach half a window past the columns on either side.
+    const from = Math.max(0, first * hop - size);
+    const read = await samples.read(
+      from,
+      Math.min(samples.frames, last * hop + size)
+    );
+    for (let index = first; index < last; index += 1) {
+      column(index, read, from);
+    }
+    await new Promise((resolve) => setTimeout(resolve));
+    await readFrom(last);
+  };
+  await readFrom(0);
+  return { hop, levels, size };
+}
 
 /** The frequency axes a spectrogram is spaced on: octaves, mel, equal space per auditory filter, or hertz. */
 export type SpectrogramScale = Scale;
@@ -103,13 +218,18 @@ interface Drawn {
 /** What the lane keeps between paints: a renderer a recording, all on one WebGL context, and what each drew where. */
 interface Held {
   context: WebGL2RenderingContext | null;
+  /** What each recording's renderer was last handed: its samples, or a streamed one's spectra. */
   data: Map<string, ArrayLike<number>>;
   drawn: Drawn[];
+  /** The chunks each streamed recording's renderer holds. */
+  feeds: Map<string, ChunkFeed>;
   gone: boolean;
   renderers: Map<string, Spectrogram>;
   /** What was read of each recording, so it is read once, not at every paint. */
   samples: SampleCache;
   scales: Record<Scale, Axis> | null;
+  /** The spectra of each streamed recording, read once. */
+  spectra: KeptCache<LaneSpectra>;
 }
 
 /** `gl-spectrogram`, once loaded: loaded when a lane first draws, then at hand, so a lane draws at once from then on. */
@@ -121,32 +241,85 @@ async function loadRenderer() {
   return loaded;
 }
 
-/** The renderer of a recording, made on the lane's one context: the first makes it, the others share it. Null when it cannot be made, and the canvas hides. */
+/** What a recording's renderer draws from: its samples, read whole, or a streamed one's spectra. */
+type Feed = { data: ArrayLike<number> } | { spectra: LaneSpectra };
+
+/** What a clip's recording is drawn from, read once: at once when at hand, else a promise of it. */
+function feedOf(held: Held, entry: LaneClip): Feed | Promise<Feed> {
+  const { samples } = entry;
+  if (samples.spectra) {
+    const read = readKept(
+      held.spectra,
+      entry.source,
+      samples,
+      () =>
+        samples.spectra?.() ?? {
+          hop: SPECTRA_SIZE,
+          levels: new Uint8Array(0),
+          size: SPECTRA_SIZE,
+        }
+    );
+    return read instanceof Promise
+      ? read.then((spectra) => ({ spectra }))
+      : { spectra: read };
+  }
+  const read = readOnce(entry, held.samples);
+  return read instanceof Promise
+    ? read.then((data) => ({ data }))
+    : { data: read };
+}
+
+/**
+ * The renderer of a recording, handed what it draws from: made on the lane's
+ * one context the first time (the first makes it, the others share it), then
+ * handed only what changed, so the same samples are not uploaded again. A
+ * streamed recording is handed its spectra, and starts over for new ones.
+ * Null when it cannot be made, and the canvas hides.
+ */
 function rendererOf(
   module: typeof import("gl-spectrogram"),
   canvas: HTMLCanvasElement,
   held: Held,
   entry: LaneClip,
-  data: ArrayLike<number>
+  feed: Feed
 ): Spectrogram | null {
-  const known = held.renderers.get(entry.source);
-  if (known) {
-    return known;
+  const { source } = entry;
+  const data = "data" in feed ? feed.data : feed.spectra.levels;
+  let made = held.renderers.get(source);
+  const changed = !sameSamples(held.data.get(source), data);
+  if (made && changed && "spectra" in feed) {
+    made.destroy();
+    held.renderers.delete(source);
+    held.feeds.delete(source);
+    made = undefined;
   }
-  try {
-    const made = new module.default(held.context ?? canvas, {
-      data,
-      sampleRate: entry.sampleRate,
-    });
-    held.context ??= made.gl as WebGL2RenderingContext;
-    held.scales = module.scales;
-    held.data.set(entry.source, data);
-    held.renderers.set(entry.source, made);
-    return made;
-  } catch {
-    canvas.style.display = "none";
-    return null;
+  if (made) {
+    if (changed) {
+      made.update({ data });
+    }
+  } else {
+    try {
+      made = new module.default(held.context ?? canvas, {
+        sampleRate: entry.sampleRate,
+        ...("data" in feed ? { data } : {}),
+      });
+      if ("spectra" in feed) {
+        made.spectra(feed.spectra.levels, {
+          hop: feed.spectra.hop,
+          length: entry.samples.frames,
+          size: feed.spectra.size,
+        });
+      }
+      held.context ??= made.gl as WebGL2RenderingContext;
+      held.scales = module.scales;
+      held.renderers.set(source, made);
+    } catch {
+      canvas.style.display = "none";
+      return null;
+    }
   }
+  held.data.set(source, data);
+  return made;
 }
 
 /** What every part of a paint shares. */
@@ -164,7 +337,6 @@ function drawPart(
   held: Held,
   renderer: Spectrogram,
   entry: LaneClip,
-  data: ArrayLike<number>,
   part: VisiblePart,
   shared: Shared
 ): boolean {
@@ -172,9 +344,6 @@ function drawPart(
   const axis = held.scales?.[scale];
   const nyquist = entry.sampleRate / 2;
   const [low, high] = band;
-  // The data is handed over only when it changed: the same samples are not uploaded again.
-  const changed = !sameSamples(held.data.get(entry.source), data);
-  held.data.set(entry.source, data);
   renderer.update({
     background: ground,
     band:
@@ -182,7 +351,6 @@ function drawPart(
         ? [axis.of(low, axis.low, nyquist), axis.of(high, axis.low, nyquist)]
         : null,
     color,
-    ...(changed ? { data } : {}),
     gain: entry.gain,
     pixelRatio: ratio,
     range: part.frames,
@@ -201,28 +369,84 @@ function drawPart(
   return renderer.pending;
 }
 
+/** A clip the view shows, with its parts and what its recording is drawn from. */
+interface Planned {
+  entry: LaneClip;
+  feed: Feed;
+  parts: VisiblePart[];
+}
+
+/**
+ * Hands each streamed recording's renderer the chunks its parts read where a
+ * column of the view is narrower than a column of its spectra, with a window
+ * either side: wider, the spectra draw it alone.
+ */
+function feedStreamed(
+  context: LaneContext<Held, SpectrogramInputs>,
+  planned: readonly Planned[],
+  renderers: ReadonlyMap<string, Spectrogram | null>,
+  ratio: number
+) {
+  const { held } = context;
+  const ranges = new Map<
+    string,
+    { entry: LaneClip; frames: [number, number][] }
+  >();
+  for (const { entry, feed, parts } of planned) {
+    if (!("spectra" in feed)) {
+      continue;
+    }
+    const kept = ranges.get(entry.source) ?? { entry, frames: [] };
+    ranges.set(entry.source, kept);
+    const { hop, size } = feed.spectra;
+    for (const part of parts) {
+      const perPixel =
+        (part.frames[1] - part.frames[0]) / Math.max(1, part.width * ratio);
+      if (perPixel < hop) {
+        kept.frames.push([part.frames[0] - size, part.frames[1] + size]);
+      }
+    }
+  }
+  for (const [source, { entry, frames }] of ranges) {
+    const renderer = renderers.get(source);
+    if (!renderer) {
+      continue;
+    }
+    const feed = held.feeds.get(source) ?? { held: [], reading: new Set() };
+    held.feeds.set(source, feed);
+    feedChunks(
+      feed,
+      entry.samples,
+      frames,
+      renderer,
+      context.later,
+      () => !held.gone && held.renderers.get(source) === renderer
+    );
+  }
+}
+
 /** Draws the visible clips, making the renderers they lack, and lets go of the ones no clip reads; true while some column is not yet whole. */
 function draw(
   module: typeof import("gl-spectrogram"),
-  held: Held,
-  canvas: HTMLCanvasElement,
-  body: HTMLElement,
-  visible: readonly VisibleClip[],
-  inputs: SpectrogramInputs,
+  context: LaneContext<Held, SpectrogramInputs>,
+  planned: readonly Planned[],
   ratio: number
 ): boolean {
+  const { body, canvas, held } = context;
+  const inputs = context.inputs();
   if (held.gone) {
     return false;
   }
   const renderers = new Map<string, Spectrogram | null>();
-  for (const each of visible) {
-    if (!renderers.has(each.entry.source)) {
+  for (const { entry, feed } of planned) {
+    if (!renderers.has(entry.source)) {
       renderers.set(
-        each.entry.source,
-        rendererOf(module, canvas, held, each.entry, each.data)
+        entry.source,
+        rendererOf(module, canvas, held, entry, feed)
       );
     }
   }
+  feedStreamed(context, planned, renderers, ratio);
   const shared: Shared = {
     band: inputs.band?.getSnapshot() ?? ([0, 1] as const),
     color: getComputedStyle(canvas).color,
@@ -235,18 +459,11 @@ function draw(
   clearLane(held.context);
   held.drawn = [];
   let pending = false;
-  for (const each of visible) {
-    const made = renderers.get(each.entry.source);
-    for (const part of made ? each.parts : []) {
+  for (const { entry, parts } of planned) {
+    const made = renderers.get(entry.source);
+    for (const part of made ? parts : []) {
       pending =
-        drawPart(
-          held,
-          made as Spectrogram,
-          each.entry,
-          each.data,
-          part,
-          shared
-        ) || pending;
+        drawPart(held, made as Spectrogram, entry, part, shared) || pending;
     }
   }
   // Recordings the lane no longer draws let go of their textures.
@@ -256,6 +473,7 @@ function draw(
       made.destroy();
       held.renderers.delete(source);
       held.data.delete(source);
+      held.feeds.delete(source);
     }
   }
   return pending;
@@ -263,32 +481,48 @@ function draw(
 
 /**
  * Draws every clip of the lane the view shows, each into its own parts of the
- * one canvas: at once when the renderer is loaded and the samples are at hand,
- * so a zoom shows in the frame it happens, else once they are. True while some
- * column is not yet whole.
+ * one canvas: at once when the renderer is loaded and what it draws from is at
+ * hand, so a zoom shows in the frame it happens, else once it is. True while
+ * some column is not yet whole.
  */
-function paint({
-  body,
-  canvas,
-  held,
-  inputs,
-  view,
-}: LaneContext<Held, SpectrogramInputs>): boolean | Promise<boolean> {
+function paint(
+  context: LaneContext<Held, SpectrogramInputs>
+): boolean | Promise<boolean> {
+  const { body, canvas, held, inputs, view } = context;
   const now = inputs();
   const placed = now.zoom > 0 ? placeLane(canvas, body, view) : null;
   if (!placed) {
     return false;
   }
-  const visible = visibleClipsNow(now.clips, placed, now.zoom, held.samples);
-  if (loaded && visible) {
-    return draw(loaded, held, canvas, body, visible, now, placed.ratio);
+  const seen = partsInView(now.clips, placed, now.zoom);
+  const feeds = new Map<string, Feed | Promise<Feed>>();
+  for (const { entry } of seen) {
+    if (!feeds.has(entry.source)) {
+      feeds.set(entry.source, feedOf(held, entry));
+    }
+  }
+  const plan = (settled: ReadonlyMap<string, Feed>) =>
+    seen.flatMap(({ entry, parts }) => {
+      const feed = settled.get(entry.source);
+      return feed ? [{ entry, feed, parts }] : [];
+    });
+  const later = [...feeds.values()].some((feed) => feed instanceof Promise);
+  if (loaded && !later) {
+    return draw(
+      loaded,
+      context,
+      plan(feeds as Map<string, Feed>),
+      placed.ratio
+    );
   }
   return (async () => {
     const module = await loadRenderer();
-    const read =
-      visible ??
-      (await visibleClips(now.clips, placed, now.zoom, held.samples));
-    return draw(module, held, canvas, body, read, now, placed.ratio);
+    const settled = new Map(
+      await Promise.all(
+        [...feeds].map(async ([source, feed]) => [source, await feed] as const)
+      )
+    );
+    return draw(module, context, plan(settled), placed.ratio);
   })();
 }
 
@@ -364,6 +598,12 @@ function zoomOnWheel(
  * share one WebGL context. `inputs.band` is the frequencies shown: Shift and
  * the wheel over the picture zoom it about the pointer, and `hooks.onHit`
  * tells what the pointer is over.
+ *
+ * A recording streamed from a file gives its `spectra`
+ * (`LaneSamples.spectra`, made by `spectrogramSpectra`) and is never read
+ * whole: zoomed out it is drawn from them, and once a column of the view is
+ * narrower than one of theirs the lane reads the frames it shows, a chunk of
+ * `CHUNK_FRAMES` at a time.
  */
 export function createSpectrogramLane(
   canvas: HTMLCanvasElement,
@@ -395,11 +635,13 @@ export function createSpectrogramLane(
     create: () => ({
       context: null,
       data: new Map(),
-      samples: new Map(),
       drawn: [],
+      feeds: new Map(),
       gone: false,
       renderers: new Map(),
+      samples: new Map(),
       scales: null,
+      spectra: new Map(),
     }),
     destroy: (held) => {
       for (const renderer of held.renderers.values()) {
@@ -596,4 +838,5 @@ export {
   type Lane,
   type LaneClip,
   type LaneSamples,
+  type LaneSpectra,
 } from "../lane/index.ts";
