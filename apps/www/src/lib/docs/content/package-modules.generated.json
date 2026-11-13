@@ -4264,6 +4264,16 @@
         "summary": "Sizes the canvas to the stretch of its lane the view shows, and gives that stretch in CSS px from the lane's left with the device pixel ratio, or hides the canvas when none shows."
       },
       {
+        "kind": "type",
+        "name": "SampleCache",
+        "summary": "What a lane has read of its recordings, by `source`: a recording is read once, not at every paint, since a reader may copy or mix the whole of it each time it is asked."
+      },
+      {
+        "kind": "function",
+        "name": "readOnce",
+        "summary": "A recording's samples, from the cache when its reader is the one it was read with, else read now and kept."
+      },
+      {
         "kind": "function",
         "name": "visibleClipsNow",
         "summary": "The clips of a lane the view shows, as `visibleClips` gives them, when every recording they read hands its samples at once: what lets a lane draw a zoom in the frame it happens."

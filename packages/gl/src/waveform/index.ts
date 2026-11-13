@@ -5,6 +5,8 @@ import {
   type LaneClip,
   type LaneContext,
   placeLane,
+  readOnce,
+  type SampleCache,
   sameSamples,
   type VisibleClip,
   visibleClips,
@@ -61,6 +63,8 @@ interface Held {
   data: Map<string, ArrayLike<number>>;
   gone: boolean;
   renderers: Map<string, Waveform>;
+  /** What was read of each recording, so it is read once, not at every paint. */
+  samples: SampleCache;
 }
 
 /** Whether a colour (as a computed style gives it, `rgb(...)`) is light: the ink of a dark theme. */
@@ -211,6 +215,7 @@ interface Planned {
 
 /** The channels of the recordings drawn in rows, once a recording: at once when every reader hands them at once, else a promise of them. */
 function readChannels(
+  held: Held,
   visible: readonly VisibleClip[],
   layout: WaveformLayout,
   look: WaveformLook,
@@ -229,9 +234,17 @@ function readChannels(
       !reads.has(clip.source) &&
       splitsChannels(clip, layout, look, height)
     ) {
+      // Each channel is read once, kept by its recording and its index as the mix is.
       reads.set(
         clip.source,
-        clip.channels.map((reader) => reader.read(0, reader.frames))
+        clip.channels.map((reader, index) => {
+          const channel = {
+            ...clip,
+            samples: reader,
+            source: `${clip.source}:channel${index}`,
+          };
+          return readOnce(channel, held.samples);
+        })
       );
     }
   }
@@ -390,9 +403,9 @@ function paint({
     return false;
   }
   const height = canvas.clientHeight;
-  const now = visibleClipsNow(clips, placed, zoom);
+  const now = visibleClipsNow(clips, placed, zoom, held.samples);
   if (loaded && now) {
-    const channels = readChannels(now, layout, look, height);
+    const channels = readChannels(held, now, layout, look, height);
     if (!(channels instanceof Promise)) {
       return draw(
         loaded,
@@ -405,8 +418,9 @@ function paint({
   }
   return (async () => {
     const Renderer = await loadRenderer();
-    const visible = now ?? (await visibleClips(clips, placed, zoom));
-    const channels = await readChannels(visible, layout, look, height);
+    const visible =
+      now ?? (await visibleClips(clips, placed, zoom, held.samples));
+    const channels = await readChannels(held, visible, layout, look, height);
     return draw(
       Renderer,
       held,
@@ -442,6 +456,7 @@ export function createWaveformLane(
     create: () => ({
       context: null,
       data: new Map(),
+      samples: new Map(),
       gone: false,
       renderers: new Map(),
     }),

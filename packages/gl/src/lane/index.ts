@@ -191,6 +191,44 @@ function partsInView(
   });
 }
 
+/**
+ * What a lane has read of its recordings, by `source`: a recording is read
+ * once, not at every paint, since a reader may copy or mix the whole of it
+ * each time it is asked. Read again only when the clip hands another reader.
+ */
+export type SampleCache = Map<
+  string,
+  {
+    read: ArrayLike<number> | Promise<ArrayLike<number>>;
+    samples: LaneSamples;
+  }
+>;
+
+/** A recording's samples, from the cache when its reader is the one it was read with, else read now and kept. */
+export function readOnce(
+  entry: LaneClip,
+  cache: SampleCache | undefined
+): ArrayLike<number> | Promise<ArrayLike<number>> {
+  const kept = cache?.get(entry.source);
+  if (kept && kept.samples === entry.samples) {
+    return kept.read;
+  }
+  const read = entry.samples.read(0, entry.samples.frames);
+  cache?.set(entry.source, { read, samples: entry.samples });
+  if (read instanceof Promise) {
+    // Once read, the cache holds the samples themselves: the next paint has them at once.
+    read.then(
+      (samples) => {
+        if (cache?.get(entry.source)?.read === read) {
+          cache.set(entry.source, { read: samples, samples: entry.samples });
+        }
+      },
+      () => cache?.delete(entry.source)
+    );
+  }
+  return read;
+}
+
 /** Whether a reading came back at once, not as a promise. */
 const isNow = (
   read: ArrayLike<number> | Promise<ArrayLike<number>>
@@ -204,13 +242,14 @@ const isNow = (
 export function visibleClipsNow(
   clips: readonly LaneClip[],
   placed: Pick<Placed, "from" | "to">,
-  zoom: number
+  zoom: number,
+  cache?: SampleCache
 ): VisibleClip[] | null {
   const seen = partsInView(clips, placed, zoom);
   const reads = new Map<string, ArrayLike<number>>();
   for (const { entry } of seen) {
     if (!reads.has(entry.source)) {
-      const read = entry.samples.read(0, entry.samples.frames);
+      const read = readOnce(entry, cache);
       if (!isNow(read)) {
         return null;
       }
@@ -226,23 +265,22 @@ export function visibleClipsNow(
 /**
  * The clips of a lane the view shows, each with its parts of the canvas and
  * the frames it reads there, and their samples read once a recording. `placed`
- * is what `placeLane` gave; `zoom` the lane's pixels a second. Clips off the
- * view are left out, and so are the parts of a clip off it.
+ * is what `placeLane` gave; `zoom` the lane's pixels a second; `cache` keeps
+ * what was read across paints, so a lane reads a recording once. Clips off
+ * the view are left out, and so are the parts of a clip off it.
  */
 export async function visibleClips(
   clips: readonly LaneClip[],
   placed: Pick<Placed, "from" | "to">,
-  zoom: number
+  zoom: number,
+  cache?: SampleCache
 ): Promise<VisibleClip[]> {
   const seen = partsInView(clips, placed, zoom);
-  // A recording is read once, whatever its clips.
+  // A recording is read once, whatever its clips, and with a cache once whatever the paints.
   const reads = new Map<string, Promise<ArrayLike<number>>>();
   for (const { entry } of seen) {
     if (!reads.has(entry.source)) {
-      reads.set(
-        entry.source,
-        Promise.resolve(entry.samples.read(0, entry.samples.frames))
-      );
+      reads.set(entry.source, Promise.resolve(readOnce(entry, cache)));
     }
   }
   return await Promise.all(

@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import {
   type LaneClip,
   type LaneSegment,
+  type SampleCache,
   sameSamples,
   visibleClips,
   visibleClipsNow,
@@ -170,5 +171,64 @@ describe("visibleClipsNow", () => {
     };
     expect(visibleClipsNow([counted], { from: 0, to: 1000 }, 100)).toEqual([]);
     expect(reads).toBe(0);
+  });
+});
+
+describe("the sample cache", () => {
+  const counting = () => {
+    let reads = 0;
+    const samples = {
+      frames: memory.length,
+      read: () => {
+        reads += 1;
+        // A reader that copies the whole recording each time, as one that mixes channels does.
+        return new Float32Array(memory);
+      },
+    };
+    return { count: () => reads, samples };
+  };
+
+  test("a recording is read once across paints, and the same samples come back", () => {
+    const { count, samples } = counting();
+    const cache: SampleCache = new Map();
+    const one: LaneClip = { ...clip("a", 0, 2), samples };
+    const first = visibleClipsNow([one], { from: 0, to: 1000 }, 100, cache);
+    const second = visibleClipsNow([one], { from: 0, to: 1000 }, 50, cache);
+    expect(count()).toBe(1);
+    expect(second?.[0]?.data).toBe(first?.[0]?.data as Float32Array);
+  });
+
+  test("another reader for the recording is read again", () => {
+    const cache: SampleCache = new Map();
+    const a = counting();
+    const b = counting();
+    visibleClipsNow(
+      [{ ...clip("a", 0, 2), samples: a.samples }],
+      { from: 0, to: 1000 },
+      100,
+      cache
+    );
+    visibleClipsNow(
+      [{ ...clip("a", 0, 2), samples: b.samples }],
+      { from: 0, to: 1000 },
+      100,
+      cache
+    );
+    expect([a.count(), b.count()]).toEqual([1, 1]);
+  });
+
+  test("a recording read later is kept once read, so the next paint has it at once", async () => {
+    const cache: SampleCache = new Map();
+    const later: LaneClip = {
+      ...clip("s", 0, 2, 0, "streamed"),
+      samples: { frames: memory.length, read: () => Promise.resolve(memory) },
+    };
+    expect(
+      visibleClipsNow([later], { from: 0, to: 1000 }, 100, cache)
+    ).toBeNull();
+    await visibleClips([later], { from: 0, to: 1000 }, 100, cache);
+    expect(
+      visibleClipsNow([later], { from: 0, to: 1000 }, 100, cache)?.[0]?.data
+    ).toBe(memory);
   });
 });

@@ -7,6 +7,7 @@ import {
   type LaneClip,
   type LaneContext,
   placeLane,
+  type SampleCache,
   sameSamples,
   type VisibleClip,
   type VisiblePart,
@@ -105,6 +106,8 @@ interface Held {
   drawn: Drawn[];
   gone: boolean;
   renderers: Map<string, Spectrogram>;
+  /** What was read of each recording, so it is read once, not at every paint. */
+  samples: SampleCache;
   scales: Record<Scale, Axis> | null;
 }
 
@@ -277,13 +280,15 @@ function paint({
   if (!placed) {
     return false;
   }
-  const visible = visibleClipsNow(now.clips, placed, now.zoom);
+  const visible = visibleClipsNow(now.clips, placed, now.zoom, held.samples);
   if (loaded && visible) {
     return draw(loaded, held, canvas, body, visible, now, placed.ratio);
   }
   return (async () => {
     const module = await loadRenderer();
-    const read = visible ?? (await visibleClips(now.clips, placed, now.zoom));
+    const read =
+      visible ??
+      (await visibleClips(now.clips, placed, now.zoom, held.samples));
     return draw(module, held, canvas, body, read, now, placed.ratio);
   })();
 }
@@ -391,6 +396,7 @@ export function createSpectrogramLane(
     create: () => ({
       context: null,
       data: new Map(),
+      samples: new Map(),
       drawn: [],
       gone: false,
       renderers: new Map(),

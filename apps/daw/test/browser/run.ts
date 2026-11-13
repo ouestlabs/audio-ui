@@ -48,8 +48,6 @@ const chrome = await chromium.launch({
   headless: process.env.HEADED ? false : undefined,
   // A fake microphone, a tone, granted without asking: what a take records (REC).
   args: [
-    // The same locale visible or not: a field reads 100.00 here, not 100,00 on a Mac set to French.
-    "--lang=en-US",
     "--autoplay-policy=no-user-gesture-required",
     "--use-fake-device-for-media-stream",
     "--use-fake-ui-for-media-stream",
