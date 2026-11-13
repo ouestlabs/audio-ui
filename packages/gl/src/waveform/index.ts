@@ -4,6 +4,7 @@ import {
   clearLane,
   createLane,
   feedChunks,
+  keepContext,
   type Lane,
   type LaneClip,
   type LaneContext,
@@ -11,6 +12,7 @@ import {
   partsInView,
   placeLane,
   readKept,
+  releaseContext,
   type SampleCache,
   sameSamples,
   type VisiblePart,
@@ -795,6 +797,7 @@ export function createWaveformLane(
   inputs: WaveformInputs,
   { shared = false }: WaveformLaneOptions = {}
 ): Lane<WaveformInputs> {
+  keepContext(canvas);
   return createLane<Held, WaveformInputs>({
     canvas,
     create: () => {
@@ -817,6 +820,7 @@ export function createWaveformLane(
       for (const renderer of held.stage.renderers.values()) {
         renderer.destroy();
       }
+      releaseContext(canvas, held.stage.context);
     },
     inputs,
     paint,

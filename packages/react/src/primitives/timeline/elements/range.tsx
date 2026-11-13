@@ -116,7 +116,7 @@ export function Range(componentProps: Range.Props) {
   if (!lane) {
     throw new Error("Timeline.Range must be used within a Timeline lane");
   }
-  const { duration, grid, largeStep, step, zoom } = root;
+  const { duration, grid, largeStep, step } = root;
   const disabled = disabledProp || rootState.disabled;
   const minLength = minLengthProp ?? (grid.step > 0 ? grid.step : step);
 
@@ -134,7 +134,10 @@ export function Range(componentProps: Range.Props) {
     onValueCommitted,
     step,
     value: valueProp,
-    zoom,
+    // Read when a gesture needs it: the range is not drawn again at each step of a zoom.
+    get zoom() {
+      return root.zoom.get();
+    },
   };
   const [controller] = React.useState(() => createRangeController(options));
   // Set on every render, so the range always reads the latest props.

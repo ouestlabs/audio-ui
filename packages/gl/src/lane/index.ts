@@ -193,10 +193,54 @@ export function groundOf(element: Element): string {
 
 /** Whether this browser can draw with WebGL 2: the lanes that need it say no, and the page draws them another way. */
 export function hasWebGL2(): boolean {
-  try {
-    return Boolean(document.createElement("canvas").getContext("webgl2"));
-  } catch {
-    return false;
+  if (webgl2 === null) {
+    try {
+      const probe = document.createElement("canvas").getContext("webgl2");
+      webgl2 = Boolean(probe);
+      // The probe's context is let go of at once: a browser keeps only some sixteen.
+      probe?.getExtension("WEBGL_lose_context")?.loseContext();
+    } catch {
+      webgl2 = false;
+    }
+  }
+  return webgl2;
+}
+
+/** Whether this browser draws with WebGL 2, asked once. */
+let webgl2: boolean | null = null;
+
+/** The contexts of lanes destroyed in this task, let go of once it ends. */
+const leaving = new WeakMap<HTMLCanvasElement, ReturnType<typeof setTimeout>>();
+
+/**
+ * Lets go of a lane's own WebGL context once the lane is destroyed: a browser
+ * keeps only some sixteen, frees a dropped canvas's only when it collects it,
+ * and past that loses the oldest, which may be one a page still draws on. A
+ * lane started again on the same canvas in the same task, as React does in
+ * development, keeps it (`keepContext`).
+ */
+export function releaseContext(
+  canvas: HTMLCanvasElement,
+  gl: WebGL2RenderingContext | null
+) {
+  if (!gl) {
+    return;
+  }
+  leaving.set(
+    canvas,
+    setTimeout(() => {
+      leaving.delete(canvas);
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
+    })
+  );
+}
+
+/** A lane starts on a canvas whose context was being let go of: it keeps it. */
+export function keepContext(canvas: HTMLCanvasElement) {
+  const timer = leaving.get(canvas);
+  if (timer !== undefined) {
+    clearTimeout(timer);
+    leaving.delete(canvas);
   }
 }
 

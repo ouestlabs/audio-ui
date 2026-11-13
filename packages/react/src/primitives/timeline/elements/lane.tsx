@@ -6,6 +6,7 @@ import {
   UNIT_PROPERTY,
   unitLength,
   useTimelineContext,
+  useTimelineZoom,
 } from "../context.ts";
 import { useSeekGesture } from "./seek-gesture.ts";
 
@@ -24,6 +25,8 @@ export const LaneContext = React.createContext<LaneContextValue | null>(null);
 export function useLaneProps(part: string) {
   const context = useTimelineContext(part);
   const { actions, meta } = context;
+  // The lane sets the unit its parts are placed with: it alone is drawn again at each step of a zoom.
+  const zoom = useTimelineZoom(part);
   const { registerLane } = actions;
   const unregisterRef = React.useRef<(() => void) | null>(null);
   const elementRef = React.useRef<HTMLElement | null>(null);
@@ -39,7 +42,7 @@ export function useLaneProps(part: string) {
   const [lane] = React.useState<LaneContextValue>(() => ({ elementRef }));
 
   const style: React.CSSProperties = {
-    [UNIT_PROPERTY as string]: unitLength(meta.zoom, meta.duration),
+    [UNIT_PROPERTY as string]: unitLength(zoom, meta.duration),
     // What changes inside a lane (every clip moves at each zoom step) is
     // laid out and styled without the rest of the page: it is a box of its own.
     contain: "layout style",
@@ -49,7 +52,7 @@ export function useLaneProps(part: string) {
     position: "relative",
     // Zoomed, the lane is at least as long as the timeline; it may grow to
     // fill the view, and its parts stay put since they are placed in px.
-    ...(meta.zoom === null ? {} : { minWidth: meta.duration * meta.zoom }),
+    ...(zoom === null ? {} : { minWidth: meta.duration * zoom }),
   };
 
   return { context, lane, laneRef, style };

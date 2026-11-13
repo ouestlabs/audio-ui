@@ -6,7 +6,11 @@ import {
 import * as React from "react";
 import { type PartProps, resolveStyling } from "../../internal/part.ts";
 import { mergeProps, useRender } from "../../internal/render.ts";
-import { type TimelineState, useTimelineContext } from "../context.ts";
+import {
+  type TimelineState,
+  useTimelineContext,
+  useTimelineZoom,
+} from "../context.ts";
 
 /**
  * How much the transforms of the element's ancestors scale it, such as a
@@ -37,8 +41,8 @@ export function Viewport(componentProps: Viewport.Props) {
     scrollerRef,
     viewport,
     viewportRef,
-    zoom,
   } = meta;
+  const zoom = useTimelineZoom("Viewport");
   const elementRef = React.useRef<HTMLDivElement>(null);
   // The zoom and scroll the last layout was at: holding a point still
   // through a zoom needs where it was before.

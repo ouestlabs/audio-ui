@@ -16,6 +16,7 @@ import { VISUALLY_HIDDEN } from "../../internal/visually-hidden.ts";
 import {
   type DescribePosition,
   placedOver,
+  UNIT_PROPERTY,
   unitLength,
   useTimelineContext,
 } from "../context.ts";
@@ -82,7 +83,7 @@ export function Clip(componentProps: Clip.Props) {
   if (!lane) {
     throw new Error("Timeline.Clip must be used within a Timeline lane");
   }
-  const { duration, grid, largeStep, step, zoom } = root;
+  const { duration, grid, largeStep, step } = root;
   const disabled = disabledProp || rootState.disabled;
   const minLength = minLengthProp ?? (grid.step > 0 ? grid.step : step);
 
@@ -107,7 +108,10 @@ export function Clip(componentProps: Clip.Props) {
     sourceLength,
     step,
     value: valueProp,
-    zoom,
+    // Read when a gesture needs it: the clip is not drawn again at each step of a zoom.
+    get zoom() {
+      return root.zoom.get();
+    },
   };
   const [controller] = React.useState(() => createClipController(options));
   // Set on every render, so the clip always reads the latest props.
@@ -239,7 +243,9 @@ export function Clip(componentProps: Clip.Props) {
           "--clip-fade-out-max": length - fadeIn,
           "--clip-offset": offset,
           // A unit inside the clip: fitted, the timeline's unit is a share of the lane, which inside the clip would be a share of the clip.
-          "--clip-unit": unitLength(zoom, length),
+          "--clip-unit": rootState.fitted
+            ? unitLength(null, length)
+            : `var(${UNIT_PROPERTY})`,
           ...(sourceLength === undefined
             ? {}
             : { "--clip-source-length": sourceLength }),

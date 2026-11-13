@@ -317,8 +317,54 @@ describe("Timeline.Clip", () => {
       "calc(var(--clip-unit) * var(--clip-fade-in))"
     );
     fitted.view.unmount();
+    // Zoomed, it is the lane's unit, which follows the zoom without the clip being drawn again.
     const zoomed = renderClip({}, { zoom: 4 });
-    expect(zoomed.clip.style.getPropertyValue("--clip-unit")).toBe("4px");
+    expect(zoomed.clip.style.getPropertyValue("--clip-unit")).toBe(
+      "var(--timeline-unit)"
+    );
+    expect(
+      zoomed.view.getByTestId("lane").style.getPropertyValue("--timeline-unit")
+    ).toBe("4px");
+  });
+
+  test("is not drawn again at each step of a zoom, and a drag reads the zoom it is at", () => {
+    let drawn = 0;
+    const onValueChange = mock(
+      (
+        _value: Timeline.Clip.Value,
+        _details: Timeline.Clip.ChangeEventDetails
+      ) => undefined
+    );
+    const clip = (
+      <Timeline.Clip
+        aria-label="Take"
+        data-testid="clip"
+        defaultValue={start}
+        onValueChange={onValueChange}
+        render={countDraws}
+      >
+        <Timeline.ClipHeader data-testid="header" />
+      </Timeline.Clip>
+    );
+    function countDraws(props: React.ComponentProps<"div">) {
+      drawn += 1;
+      return <div {...props} />;
+    }
+    const timeline = (zoom: number) => (
+      <Timeline.Root duration={100} zoom={zoom}>
+        <Timeline.Lane data-testid="lane">{clip}</Timeline.Lane>
+      </Timeline.Root>
+    );
+    const view = render(timeline(2));
+    const before = drawn;
+    view.rerender(timeline(4));
+    expect(drawn).toBe(before);
+    expect(
+      view.getByTestId("lane").style.getPropertyValue("--timeline-unit")
+    ).toBe("4px");
+    // 40 px at 4 px a unit is 10 units, read at the zoom the drag is at.
+    drag(view.getByTestId("header"), 80, 120);
+    expect(lastCall(onValueChange)[0]).toEqual({ ...start, start: 30 });
   });
 
   test("while a fade is dragged the clip says which, and how far each fade can grow", () => {
