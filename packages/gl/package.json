@@ -1,6 +1,6 @@
 {
   "name": "@audio-ui/gl",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "Audio drawn on the GPU, with no UI framework in it: a lane of clips as waveforms or a spectrogram on one canvas and one WebGL context, over gl-waveform and gl-spectrogram, with the frequency axis, the band zoom and the pointer reading that go with them.",
   "keywords": [
     "audio-ui",
