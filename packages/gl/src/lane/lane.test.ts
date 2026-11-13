@@ -1,6 +1,9 @@
 import { describe, expect, test } from "bun:test";
 import {
+  CHUNK_FRAMES,
+  type ChunkFeed,
   clearLane,
+  feedChunks,
   type LaneClip,
   type LaneSegment,
   type SampleCache,
@@ -251,5 +254,127 @@ describe("clearLane", () => {
 
   test("does nothing without a context", () => {
     expect(() => clearLane(null)).not.toThrow();
+  });
+});
+
+describe("feedChunks", () => {
+  const frames = CHUNK_FRAMES * 100 + 10;
+  const setup = () => {
+    const asked: [number, number][] = [];
+    const set: number[] = [];
+    const dropped: number[] = [];
+    const samples = {
+      frames,
+      read: (from: number, to: number) => {
+        asked.push([from, to]);
+        return Promise.resolve(new Float32Array(to - from));
+      },
+    };
+    const renderer = {
+      drop: (from: number) => dropped.push(from / CHUNK_FRAMES),
+      set: (_: ArrayLike<number>, offset: number) =>
+        set.push(offset / CHUNK_FRAMES),
+    };
+    const feed: ChunkFeed = { held: [], reading: new Set() };
+    return { asked, dropped, feed, renderer, samples, set };
+  };
+  const settle = () => new Promise((resolve) => setTimeout(resolve));
+
+  test("reads the chunks a range covers, hands each over once read, and says when to draw again", async () => {
+    const { asked, feed, renderer, samples, set } = setup();
+    let ready = 0;
+    const whole = feedChunks(
+      feed,
+      samples,
+      [[CHUNK_FRAMES * 2 + 5, CHUNK_FRAMES * 4 - 1]],
+      renderer,
+      () => {
+        ready += 1;
+      },
+      () => true
+    );
+    expect(whole).toBe(false);
+    expect(asked).toEqual([
+      [CHUNK_FRAMES * 2, CHUNK_FRAMES * 3],
+      [CHUNK_FRAMES * 3, CHUNK_FRAMES * 4],
+    ]);
+    await settle();
+    expect(set).toEqual([2, 3]);
+    expect(ready).toBe(2);
+    expect(
+      feedChunks(
+        feed,
+        samples,
+        [[CHUNK_FRAMES * 2, CHUNK_FRAMES * 4]],
+        renderer,
+        () => undefined,
+        () => true
+      )
+    ).toBe(true);
+    expect(asked).toHaveLength(2);
+  });
+
+  test("a chunk being read is not read again, and the last one stops at the recording's end", () => {
+    const { asked, feed, renderer, samples } = setup();
+    const range = [[CHUNK_FRAMES * 100, frames + 500]] as const;
+    feedChunks(
+      feed,
+      samples,
+      range,
+      renderer,
+      () => undefined,
+      () => true
+    );
+    feedChunks(
+      feed,
+      samples,
+      range,
+      renderer,
+      () => undefined,
+      () => true
+    );
+    expect(asked).toEqual([[CHUNK_FRAMES * 100, frames]]);
+  });
+
+  test("a renderer let go of in the meantime is handed nothing", async () => {
+    const { feed, renderer, samples, set } = setup();
+    feedChunks(
+      feed,
+      samples,
+      [[0, 10]],
+      renderer,
+      () => undefined,
+      () => false
+    );
+    await settle();
+    expect(set).toEqual([]);
+    expect(feed.held).toEqual([]);
+  });
+
+  test("past the most it keeps, the oldest chunks the view no longer reads are let go of", async () => {
+    const { dropped, feed, renderer, samples } = setup();
+    const at = (chunk: number) =>
+      [[chunk * CHUNK_FRAMES, (chunk + 1) * CHUNK_FRAMES]] as const;
+    const feedOne = (chunk: number) =>
+      feedChunks(
+        feed,
+        samples,
+        at(chunk),
+        renderer,
+        () => undefined,
+        () => true
+      );
+    // One chunk after another, each read before the next is asked for.
+    await Array.from({ length: 71 }).reduce<Promise<unknown>>(
+      async (before, _, chunk) => {
+        await before;
+        feedOne(chunk);
+        await settle();
+      },
+      Promise.resolve()
+    );
+    expect(feed.held).toHaveLength(64);
+    expect(dropped).toEqual([0, 1, 2, 3, 4, 5, 6]);
+    expect(feed.held.at(-1)).toBe(70);
   });
 });

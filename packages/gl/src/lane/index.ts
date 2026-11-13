@@ -10,10 +10,105 @@
 /** A recording's samples, mixed to one: how many frames it holds, and a reader of the frames from `from` to `to`. */
 export interface LaneSamples {
   frames: number;
+  /**
+   * The recording summed up 256 frames at a time, `[min, max, Σx², count]`
+   * each, as `waveformLeaves` of `@audio-ui/gl/waveform` makes them: for a
+   * recording streamed from a file, which a lane then never reads whole. A
+   * waveform lane draws it from them zoomed out, and zoomed in reads only the
+   * frames it shows, `CHUNK_FRAMES` at a time. Left out, a lane reads the
+   * recording whole, once.
+   */
+  leaves?: () => ArrayLike<number> | Promise<ArrayLike<number>>;
   read: (
     from: number,
     to: number
   ) => ArrayLike<number> | Promise<ArrayLike<number>>;
+}
+
+/** The frames a renderer keeps its samples in, and a streamed recording is read in: 65536. */
+export const CHUNK_FRAMES = 1 << 16;
+
+/** The most chunks a renderer keeps of a streamed recording beyond those the view reads: some four million frames. */
+const MOST_HELD = 64;
+
+/** What a renderer holds of a recording it streams: the chunks handed over, oldest first, and those being read. */
+export interface ChunkFeed {
+  held: number[];
+  reading: Set<number>;
+}
+
+/** What a renderer that streams its samples does with them: `gl-waveform` and `gl-spectrogram` both do. */
+export interface ChunkRenderer {
+  drop: (from: number, to: number) => unknown;
+  set: (samples: ArrayLike<number>, offset: number) => unknown;
+}
+
+/**
+ * Hands a renderer the chunks of a streamed recording that `ranges` read, in
+ * frames: those it lacks are read, each handed over once read, and `ready`
+ * draws again. The chunks it held before stay, up to `MOST_HELD`, the oldest
+ * the view no longer reads let go of first. `alive` says whether the renderer
+ * is still the one to hand them to. True when every chunk `ranges` read is held.
+ */
+export function feedChunks(
+  feed: ChunkFeed,
+  samples: LaneSamples,
+  ranges: readonly (readonly [number, number])[],
+  renderer: ChunkRenderer,
+  ready: () => void,
+  alive: () => boolean
+): boolean {
+  const count = Math.ceil(samples.frames / CHUNK_FRAMES);
+  const wanted = new Set<number>();
+  for (const [from, to] of ranges) {
+    const last = Math.min(count, Math.ceil(to / CHUNK_FRAMES));
+    for (
+      let chunk = Math.max(0, Math.floor(from / CHUNK_FRAMES));
+      chunk < last;
+      chunk += 1
+    ) {
+      wanted.add(chunk);
+    }
+  }
+  const held = new Set(feed.held);
+  let whole = true;
+  for (const chunk of wanted) {
+    if (held.has(chunk)) {
+      continue;
+    }
+    whole = false;
+    if (feed.reading.has(chunk)) {
+      continue;
+    }
+    feed.reading.add(chunk);
+    const at = chunk * CHUNK_FRAMES;
+    Promise.resolve(
+      samples.read(at, Math.min(samples.frames, at + CHUNK_FRAMES))
+    ).then(
+      (read) => {
+        feed.reading.delete(chunk);
+        if (alive()) {
+          renderer.set(read, at);
+          feed.held.push(chunk);
+          ready();
+        }
+      },
+      () => feed.reading.delete(chunk)
+    );
+  }
+  // What is being read counts: once it lands, no more than the most are held.
+  const extra =
+    feed.held.length + feed.reading.size - Math.max(MOST_HELD, wanted.size);
+  if (extra > 0) {
+    const gone = new Set(
+      feed.held.filter((chunk) => !wanted.has(chunk)).slice(0, extra)
+    );
+    for (const chunk of gone) {
+      renderer.drop(chunk * CHUNK_FRAMES, (chunk + 1) * CHUNK_FRAMES);
+    }
+    feed.held = feed.held.filter((chunk) => !gone.has(chunk));
+  }
+  return whole;
 }
 
 /** A stretch of a clip that reads its recording straight on: its two times in the clip, in seconds from its start, and the frames of the recording at them. */
@@ -167,7 +262,7 @@ export function placeLane(
 }
 
 /** The clips of a lane the view shows, each with its parts, before their samples are read. */
-function partsInView(
+export function partsInView(
   clips: readonly LaneClip[],
   placed: Pick<Placed, "from" | "to">,
   zoom: number
@@ -219,29 +314,44 @@ export type SampleCache = Map<
   }
 >;
 
+/**
+ * What `read` gives for `samples`, from `cache` under `key` when that reader
+ * is the one it was read with, else read now and kept: once a promise is
+ * settled, the cache holds what it gave, so the next paint has it at once.
+ */
+export function readKept(
+  cache: SampleCache | undefined,
+  key: string,
+  samples: LaneSamples,
+  read: () => ArrayLike<number> | Promise<ArrayLike<number>>
+): ArrayLike<number> | Promise<ArrayLike<number>> {
+  const kept = cache?.get(key);
+  if (kept && kept.samples === samples) {
+    return kept.read;
+  }
+  const reading = read();
+  cache?.set(key, { read: reading, samples });
+  if (reading instanceof Promise) {
+    reading.then(
+      (done) => {
+        if (cache?.get(key)?.read === reading) {
+          cache.set(key, { read: done, samples });
+        }
+      },
+      () => cache?.delete(key)
+    );
+  }
+  return reading;
+}
+
 /** A recording's samples, from the cache when its reader is the one it was read with, else read now and kept. */
 export function readOnce(
   entry: LaneClip,
   cache: SampleCache | undefined
 ): ArrayLike<number> | Promise<ArrayLike<number>> {
-  const kept = cache?.get(entry.source);
-  if (kept && kept.samples === entry.samples) {
-    return kept.read;
-  }
-  const read = entry.samples.read(0, entry.samples.frames);
-  cache?.set(entry.source, { read, samples: entry.samples });
-  if (read instanceof Promise) {
-    // Once read, the cache holds the samples themselves: the next paint has them at once.
-    read.then(
-      (samples) => {
-        if (cache?.get(entry.source)?.read === read) {
-          cache.set(entry.source, { read: samples, samples: entry.samples });
-        }
-      },
-      () => cache?.delete(entry.source)
-    );
-  }
-  return read;
+  return readKept(cache, entry.source, entry.samples, () =>
+    entry.samples.read(0, entry.samples.frames)
+  );
 }
 
 /** Whether a reading came back at once, not as a promise. */

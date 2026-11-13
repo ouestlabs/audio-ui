@@ -1,5 +1,12 @@
 import { describe, expect, test } from "bun:test";
-import { splitsChannels, type WaveformClip, waveformRows } from "./index.ts";
+import {
+  LEAF_FRAMES,
+  leavesPeak,
+  splitsChannels,
+  type WaveformClip,
+  waveformLeaves,
+  waveformRows,
+} from "./index.ts";
 
 const samples = (frames: number) => ({
   frames,
@@ -76,5 +83,66 @@ describe("waveformRows", () => {
       ["mid", 0.8, 0, 60],
       ["high", 0.1, 0, 60],
     ]);
+  });
+});
+
+describe("waveformLeaves", () => {
+  test("each leaf is the lowest, the highest, the sum of squares and the count of its 256 frames", () => {
+    const signal = Float32Array.from({ length: 600 }, (_, index) =>
+      Math.sin(index / 7)
+    );
+    const leaves = waveformLeaves(signal);
+    expect(leaves).toHaveLength(12);
+    for (let leaf = 0; leaf < 3; leaf += 1) {
+      const part = Array.from(
+        signal.subarray(leaf * LEAF_FRAMES, (leaf + 1) * LEAF_FRAMES)
+      );
+      expect(leaves[leaf * 4]).toBeCloseTo(Math.min(...part), 6);
+      expect(leaves[leaf * 4 + 1]).toBeCloseTo(Math.max(...part), 6);
+      expect(leaves[leaf * 4 + 2]).toBeCloseTo(
+        part.reduce((sum, value) => sum + value * value, 0),
+        3
+      );
+      expect(leaves[leaf * 4 + 3]).toBe(part.length);
+    }
+    expect(leaves[11]).toBe(600 - 2 * LEAF_FRAMES);
+  });
+
+  test("NaN is left out, and a leaf of nothing else is empty", () => {
+    const signal = new Float32Array(512).fill(Number.NaN);
+    signal[300] = -0.5;
+    const leaves = Array.from(waveformLeaves(signal));
+    expect(leaves.slice(0, 4)).toEqual([
+      Number.POSITIVE_INFINITY,
+      Number.NEGATIVE_INFINITY,
+      0,
+      0,
+    ]);
+    expect(leaves.slice(4)).toEqual([-0.5, -0.5, 0.25, 1]);
+  });
+
+  test("the leaves of stretches laid end to end are the leaves of the whole", () => {
+    const signal = Float32Array.from({ length: 2000 }, (_, index) =>
+      Math.cos(index)
+    );
+    const head = waveformLeaves(signal.subarray(0, 1024));
+    const tail = waveformLeaves(signal.subarray(1024));
+    const joined = new Float32Array(head.length + tail.length);
+    joined.set(head);
+    joined.set(tail, head.length);
+    expect(joined).toEqual(waveformLeaves(signal));
+  });
+});
+
+describe("leavesPeak", () => {
+  test("the loudest sample of the leaves that hold some", () => {
+    const signal = new Float32Array(1024);
+    signal[10] = 0.3;
+    signal[700] = -0.8;
+    const leaves = waveformLeaves(signal);
+    expect(leavesPeak(leaves)).toBeCloseTo(0.8, 6);
+    expect(
+      leavesPeak(waveformLeaves(new Float32Array(256).fill(Number.NaN)))
+    ).toBe(0);
   });
 });
