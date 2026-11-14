@@ -56,6 +56,7 @@ export {
   type SoundReport,
 } from "./report.ts";
 export { detectSilences, type SilenceOptions } from "./silence.ts";
+export { stereoCorrelation } from "./stereo.ts";
 export {
   SPECTRA_SIZE,
   type Spectra,

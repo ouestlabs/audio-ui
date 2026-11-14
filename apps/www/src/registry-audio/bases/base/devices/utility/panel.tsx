@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { StereoField } from "@/registry-audio/bases/base/audio/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -9,6 +10,7 @@ import {
   type UtilityState,
   utilityDevice,
 } from "@/registry-audio/bases/base/devices/utility/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const KNOBS = ["gainDb", "pan", "width"] as const;
 const OFF = utilityDevice.parameters
@@ -20,23 +22,27 @@ interface UtilityPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: UtilityState) => void;
+  /** Its live sound: where what comes out sits between the speakers and how alike its sides are, over its knobs, and its levels at the edge. */
+  signal?: DeviceSignal;
   value: UtilityState;
 }
 
 /**
  * The face of the utility device: its gain, pan and width as knobs, and the
- * mono and invert switches in the title bar. It has no display, so it is only
- * as tall as its knobs. Controlled like `DevicePanel`, which it uses for them.
+ * mono and invert switches. Given its signal, the stereo field of what comes
+ * out stands over them; without one it has no display, and is only as tall as
+ * its knobs. Controlled like `DevicePanel`, which it uses for them.
  * Its children sit at the end of the title bar.
  */
 function UtilityPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: UtilityPanelProps) {
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={utilityDevice}
@@ -49,6 +55,9 @@ function UtilityPanel({
         className="flex min-h-0 grow flex-col justify-center gap-2 p-2"
         data-slot="utility-panel"
       >
+        {signal ? (
+          <StereoField className="w-24 self-center" source={signal.output.stereo} />
+        ) : null}
         <DevicePanel
           className="grid-cols-3"
           device={utilityDevice}

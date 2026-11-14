@@ -88,7 +88,7 @@ check("a sine's levels read as its RMS and its peak, in and out", async () => {
 check("a scope starts where the wave rises through zero", async () => {
   const { ctx, output } = await sineEngine(441, 0.8);
   const signal = createDeviceSignal(() => ({ output }), instrument);
-  const samples = await watch(signal.output.scope(512), 300);
+  const samples = await watch(signal.output.scope({ length: 512 }), 300);
   await ctx.close();
   assert(near(samples[0] as number, 0, 0.05), `first sample ${samples[0]}`);
   assert((samples[3] as number) > 0, "the wave rises after it");
@@ -220,23 +220,20 @@ check("the analysers come off once nothing watches", async () => {
     }
     disconnect(node);
   }) as typeof output.disconnect;
+  const taps = () => connected.length;
   const signal = createDeviceSignal(() => ({ output }), instrument);
   const levels = signal.output.levels.subscribe(() => undefined);
   const scope = signal.output.scope().subscribe(() => undefined);
   await wait(200);
   // One tap per kind of read: a stereo one for the levels, a mono one for the scope.
-  assert(connected.length === 2, `${connected.length} taps while watched`);
+  assert(taps() === 2, `${taps()} taps while watched`);
   levels();
   await wait(50);
-  assert(
-    connected.length === 1,
-    `${connected.length} taps with the scope alone`
+  assert(taps() === 1, `${taps()} taps with the scope alone`
   );
   scope();
   await wait(50);
-  assert(
-    connected.length === 0,
-    `${connected.length} taps once nothing watches`
+  assert(taps() === 0, `${taps()} taps once nothing watches`
   );
   await ctx.close();
 });

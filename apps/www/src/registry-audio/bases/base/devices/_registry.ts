@@ -863,7 +863,8 @@ export const devices: RegistryItem[] = [
     panel: {
       categories: ["device", "knob"],
       description:
-        "The face of the utility device: its gain, pan and width as knobs and its mono and invert switches.",
+        "The face of the utility device: its gain, pan and width as knobs and its mono and invert switches, and, given its signal, the stereo field of what comes out over them.",
+      registryDependencies: ["@audio-ui/stereo-field"],
     },
   }),
   ...deviceItems("vibe", {

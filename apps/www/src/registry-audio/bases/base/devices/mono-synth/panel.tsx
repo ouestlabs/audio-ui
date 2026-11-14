@@ -1,6 +1,6 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
 import { SawtoothIcon, SquareIcon, TriangleIcon } from "@audio-ui/icons/react";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -16,6 +16,12 @@ import {
 } from "@/registry/bases/base/ui/toggle-group";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
 import {
+  Plot,
+  PlotGraph,
+  PlotGrid,
+  PlotTrace,
+} from "@/registry-audio/bases/base/audio/elements/plot";
+import {
   DeviceFrame,
   DeviceHeader,
   DevicePanel,
@@ -27,6 +33,7 @@ import {
   monoSynthDevice,
   monoSynthPreset,
 } from "@/registry-audio/bases/base/devices/mono-synth/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do, as the synth's panel lays them out. */
 const GROUPS = [
@@ -58,6 +65,9 @@ const PRESET_NAMES = MONO_SYNTH_PRESETS.map((preset) => ({
 const LOWEST = 48;
 const HIGHEST = 72;
 
+/** The scope's middle line has no figure: the wave is fitted to the height, so a value would mean nothing. */
+const noLabel = () => "";
+
 interface MonoSynthPanelProps {
   /** The notes held now, such as on a MIDI keyboard: their keys light up as they are played. */
   activeNotes?: readonly number[];
@@ -69,6 +79,8 @@ interface MonoSynthPanelProps {
   /** A key is played, as a note of the synth. */
   onNoteOn?: (note: MonoSynthNote) => void;
   onValueChange: (state: MonoSynthState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle, over its keyboard, and its level at the edge. */
+  signal?: DeviceSignal;
   value: MonoSynthState;
 }
 
@@ -87,8 +99,13 @@ function MonoSynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: MonoSynthPanelProps) {
+  const scope = useMemo(
+    () => signal?.output.scope({ fit: true }),
+    [signal]
+  );
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -136,7 +153,7 @@ function MonoSynthPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={monoSynthDevice}
         onValueChange={onValueChange}
@@ -223,6 +240,24 @@ function MonoSynthPanel({
           onValueChange={change}
           value={value}
         />
+        {scope ? (
+          <Plot
+            aria-label="The wave it plays"
+            className="h-16 min-h-10 shrink-0"
+            maxX={1}
+            maxY={1}
+            minX={0}
+            minY={-1}
+          >
+            <PlotGrid y={{ format: noLabel, ticks: [0] }} />
+            <PlotGraph>
+              <PlotTrace
+                className="stroke-[1.5px] stroke-primary"
+                source={scope}
+              />
+            </PlotGraph>
+          </Plot>
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the synth"

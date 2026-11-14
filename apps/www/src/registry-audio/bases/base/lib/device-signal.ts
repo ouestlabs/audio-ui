@@ -11,6 +11,7 @@ import {
   peakDb,
   rmsDb,
   SPECTRUM_FLOOR_DB,
+  stereoCorrelation,
 } from "@audio-ui/engine/analysis";
 import type {
   Device,
@@ -34,6 +35,10 @@ const LEVEL_SAMPLES = 2048;
 /** Samples of the analyser a scope, a spectrum and a history read: 85 ms at 48 kHz. */
 const MONO_SAMPLES = 4096;
 const SPECTRUM_SMOOTHING = 0.8;
+/** The quietest sound a fitted scope scales up to fill, as an amplitude: under it, a sound stays small. */
+const FIT_QUIETEST = 0.01;
+/** How much of its reach a fitted scope keeps each frame once the sound gets quieter. */
+const FIT_FALLBACK = 0.97;
 
 /**
  * What a signal listens to: a device's engine, or anything with an output.
@@ -46,15 +51,26 @@ export interface SignalTarget {
   readonly taps?: DeviceTaps;
 }
 
-/** The two channels of a point, their latest samples, -1 to 1: what a stereo field is drawn from. */
+/** The two channels of a point, their latest samples, -1 to 1, and how alike they are: what a stereo field is drawn from. */
 export interface StereoSamples {
+  /** How alike the two channels are, from -1 (one the other upside down) to 1 (mono), as `stereoCorrelation` reads it. */
+  correlation: number;
   left: Float32Array;
   right: Float32Array;
+  /** Whether both channels are silent: the correlation of silence means nothing. */
+  silent: boolean;
 }
 
 export interface SpectrumOptions extends LogSpectrumOptions {
   /** How many values, spread along a log frequency axis. @default 160 */
   points?: number;
+}
+
+export interface ScopeOptions {
+  /** Scales the samples so the loudest of the last moments reaches 1, as a scope's gain is set to the sound: its shape reads at any level. It rises at once and settles over about a second. @default false */
+  fit?: boolean;
+  /** How many samples, the newest. @default 1024 */
+  length?: number;
 }
 
 export interface HistoryOptions {
@@ -85,10 +101,11 @@ export interface SignalPoint {
   /** Its level per channel, in dB: the RMS, rising at once and falling back, and the loudest sample, held a moment. What a `Meter` paints. */
   readonly levels: Source<MeterFrame>;
   /**
-   * Its latest `length` samples, -1 to 1, from where the wave last rose
-   * through zero, so a steady tone stands still: what a scope draws.
+   * Its latest samples, from where the wave last rose through zero, so a
+   * steady tone stands still: what a scope draws. -1 to 1 as they are, or,
+   * with `fit`, scaled so the loudest of the last moments fills the height.
    */
-  scope: (length?: number) => Source<Float32Array>;
+  scope: (options?: ScopeOptions) => Source<Float32Array>;
   /** Its spectrum along a log frequency axis, in dB. */
   spectrum: (options?: SpectrumOptions) => Source<Float32Array>;
   /** Its two channels' latest samples: what a stereo field is drawn from. A mono sound is on both. */
@@ -384,21 +401,22 @@ function createSignalPoint(
 
   const stereoSamples = watchedSource<StereoSamples>(
     {
+      correlation: 0,
       left: new Float32Array(LEVEL_SAMPLES),
       right: new Float32Array(LEVEL_SAMPLES),
+      silent: true,
     },
     (publish) => {
       const release = stereo.use();
-      const samples = {
-        left: new Float32Array(LEVEL_SAMPLES),
-        right: new Float32Array(LEVEL_SAMPLES),
-      };
+      const left = new Float32Array(LEVEL_SAMPLES);
+      const right = new Float32Array(LEVEL_SAMPLES);
+      const samples: StereoSamples = { correlation: 0, left, right, silent: true };
       let silent = false;
       const stop = everyFrame(() => {
         const nodes = stereo.current();
         if (nodes) {
-          nodes.analysers[0].getFloatTimeDomainData(samples.left);
-          nodes.analysers[1].getFloatTimeDomainData(samples.right);
+          nodes.analysers[0].getFloatTimeDomainData(left);
+          nodes.analysers[1].getFloatTimeDomainData(right);
         }
         const quiet =
           !nodes ||
@@ -407,6 +425,10 @@ function createSignalPoint(
           samples.left.fill(0);
           samples.right.fill(0);
         }
+        samples.silent = quiet;
+        samples.correlation = quiet
+          ? 0
+          : stereoCorrelation(samples.left, samples.right);
         if (!(quiet && silent)) {
           publish(samples);
         }
@@ -419,9 +441,10 @@ function createSignalPoint(
     }
   );
 
-  const scopes = new Map<number, Source<Float32Array>>();
-  const scope = (length = 1024) => {
-    const kept = scopes.get(length);
+  const scopes = new Map<string, Source<Float32Array>>();
+  const scope = ({ fit = false, length = 1024 }: ScopeOptions = {}) => {
+    const key = `${fit}:${length}`;
+    const kept = scopes.get(key);
     if (kept) {
       return kept;
     }
@@ -429,6 +452,7 @@ function createSignalPoint(
       const release = mono.use();
       const buffer = new Float32Array(MONO_SAMPLES);
       const out = new Float32Array(length);
+      let reach = FIT_QUIETEST;
       let silent = false;
       const stop = everyFrame(() => {
         const nodes = mono.current();
@@ -449,7 +473,14 @@ function createSignalPoint(
           }
         }
         out.set(buffer.subarray(start, start + length));
-        const quiet = peakDb(out) < QUIET_DB;
+        const loudest = 10 ** (peakDb(out) / 20);
+        const quiet = loudest < 10 ** (QUIET_DB / 20);
+        if (fit) {
+          reach = Math.max(loudest, reach * FIT_FALLBACK, FIT_QUIETEST);
+          for (let index = 0; index < length; index += 1) {
+            out[index] = (out[index] as number) / reach;
+          }
+        }
         if (!(quiet && silent)) {
           publish(out);
         }
@@ -461,7 +492,7 @@ function createSignalPoint(
         publish(new Float32Array(length));
       };
     });
-    scopes.set(length, made);
+    scopes.set(key, made);
     return made;
   };
 
@@ -522,39 +553,51 @@ function createSignalPoint(
         const buffer = new Float32Array(MONO_SAMPLES);
         const ring = new Float32Array(points).fill(rest);
         const out = new Float32Array(points).fill(rest);
-        const slotMs = (seconds * 1000) / points;
         let head = 0;
+        /** Samples heard since the last whole slot, on the audio clock. */
         let carry = 0;
-        const stop = everyFrame((elapsed) => {
-          carry += elapsed;
-          const fresh = Math.min(points, Math.floor(carry / slotMs));
+        let heardAt: number | null = null;
+        let resting = true;
+        const stop = everyFrame(() => {
+          const nodes = mono.current();
+          if (!nodes) {
+            // Nothing to listen to: the window empties, and starts again with the next sound.
+            if (!resting) {
+              ring.fill(rest);
+              out.fill(rest);
+              publish(out);
+            }
+            resting = true;
+            heardAt = null;
+            return;
+          }
+          resting = false;
+          // Slots are counted on the audio clock, not the screen's: the window holds the samples as they played, a frame late or not.
+          const { currentTime, sampleRate } = nodes.analyser.context;
+          const slot = (seconds * sampleRate) / points;
+          carry += heardAt === null ? 0 : (currentTime - heardAt) * sampleRate;
+          heardAt = currentTime;
+          const fresh = Math.min(points, Math.floor(carry / slot));
           if (fresh === 0) {
             return;
           }
-          carry -= fresh * slotMs;
-          const nodes = mono.current();
-          if (nodes) {
-            nodes.analyser.getFloatTimeDomainData(buffer);
-          }
-          const slotSamples = nodes
-            ? Math.max(
-                1,
-                Math.round((slotMs / 1000) * nodes.analyser.context.sampleRate)
-              )
-            : 1;
-          // The slots that passed since the last frame, oldest first, each read where it falls in the analyser's samples.
+          carry -= fresh * slot;
+          nodes.analyser.getFloatTimeDomainData(buffer);
+          // The slots that passed since the last frame, oldest first: the newest ends where the samples left over begin.
           for (let back = fresh - 1; back >= 0; back -= 1) {
-            const end = Math.max(1, buffer.length - back * slotSamples);
-            let value = rest;
-            if (nodes && of === "level") {
-              value = Math.max(
-                SILENCE_DB,
-                rmsDb(buffer.subarray(Math.max(0, end - slotSamples), end))
-              );
-            } else if (nodes) {
-              value = buffer[end - 1] as number;
-            }
-            ring[head] = value;
+            const end = Math.max(
+              1,
+              buffer.length - Math.round(carry + back * slot)
+            );
+            ring[head] =
+              of === "level"
+                ? Math.max(
+                    SILENCE_DB,
+                    rmsDb(
+                      buffer.subarray(Math.max(0, end - Math.round(slot)), end)
+                    )
+                  )
+                : (buffer[end - 1] as number);
             head = (head + 1) % points;
           }
           out.set(ring.subarray(head), 0);

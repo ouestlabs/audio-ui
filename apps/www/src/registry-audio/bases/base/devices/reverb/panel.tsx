@@ -16,6 +16,7 @@ import {
   PlotGraph,
   PlotGrid,
   PlotHandle,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -28,6 +29,7 @@ import {
   reverbDecay,
   reverbDevice,
 } from "@/registry-audio/bases/base/devices/reverb/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** How much time the plot shows: the longest decay is 10 s, after the longest pre-delay. */
 const WINDOW_SECONDS = 10.5;
@@ -52,6 +54,8 @@ interface ReverbPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ReverbState) => void;
+  /** Its live sound: the level of its tail over the last ten seconds behind the decay it is set to, and its levels at the edge. */
+  signal?: DeviceSignal;
   value: ReverbState;
 }
 
@@ -67,9 +71,15 @@ function ReverbPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: ReverbPanelProps) {
   const decay = useMemo(() => reverbDecay(value), [value]);
+  const tail = useMemo(
+    () =>
+      signal?.wet?.history({ of: "level", points: 210, seconds: WINDOW_SECONDS }),
+    [signal]
+  );
   const change = useCallback(
     ({ x }: { x: number }) =>
       onValueChange(
@@ -86,7 +96,7 @@ function ReverbPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={reverbDevice}
@@ -136,7 +146,16 @@ function ReverbPanel({
             y={{ ticks: DB_TICKS }}
           />
           <PlotGraph>
-            <PlotArea fillTo={DECAY_DB} fn={decay} />
+            {tail ? (
+              // The tail as it rang, its level a moment apart, the newest at the right.
+              <PlotTraceArea fillTo={DECAY_DB} source={tail} />
+            ) : null}
+            <PlotArea
+              // The tail as set is filled while no sound goes in; once it does, the fill is the tail as it rings, and the setting a line over it.
+              className={tail ? "hidden group-data-idle/device:inline" : undefined}
+              fillTo={DECAY_DB}
+              fn={decay}
+            />
             <PlotCurve fn={decay} />
           </PlotGraph>
           {value.enabled ? (

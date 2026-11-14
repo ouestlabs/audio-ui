@@ -6,6 +6,7 @@ import {
 import { createAutoPanEngine } from "@/registry-audio/bases/base/devices/auto-pan/engine";
 import { AutoPanPanel } from "@/registry-audio/bases/base/devices/auto-pan/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -20,14 +21,20 @@ export default function BlockAutoPan() {
     () => autoPanDevice.apply(autoPanDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { tempo } = useDeviceLoop({
+  const { engine, tempo } = useDeviceLoop({
     create: createAutoPanEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, autoPanDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <AutoPanPanel onValueChange={setState} tempo={tempo} value={state} />
+      <AutoPanPanel
+        onValueChange={setState}
+        signal={signal}
+        tempo={tempo}
+        value={state}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import type { ParameterValue } from "@audio-ui/engine/device";
 import type { Tempo } from "@audio-ui/engine/time";
 import { type ComponentType, lazy, type ReactNode } from "react";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
 export interface DevicePanelProps {
@@ -14,6 +15,8 @@ export interface DevicePanelProps {
   /** For an instrument's panel that plays it, such as a pad: a note, by the instrument's note parameters, called again as it moves. */
   onNoteOn?: (note: Readonly<Record<string, number>>) => void;
   onValueChange: (state: Readonly<Record<string, ParameterValue>>) => void;
+  /** The device's live sound, from its engine: what goes in and comes out, and what it reports of itself, drawn on its face. Without it the face shows its settings only. */
+  signal?: DeviceSignal;
   /** For the panels that show a time in notes: the tempo it is read against. */
   tempo?: Tempo;
   value: Readonly<Record<string, ParameterValue>>;

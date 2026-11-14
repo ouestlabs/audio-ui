@@ -6,6 +6,7 @@ import {
 import { createReverbEngine } from "@/registry-audio/bases/base/devices/reverb/engine";
 import { ReverbPanel } from "@/registry-audio/bases/base/devices/reverb/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -20,14 +21,15 @@ export default function BlockReverb() {
     reverbDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createReverbEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, reverbDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ReverbPanel onValueChange={setState} value={state} />
+      <ReverbPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

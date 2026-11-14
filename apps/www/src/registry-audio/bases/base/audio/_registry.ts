@@ -431,7 +431,7 @@ export const audio: RegistryItem[] = [
     categories: ["device", "knob"],
     dependencies: ["@audio-ui/engine"],
     description:
-      "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns.",
+      "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns. Its frame, given the device's live signal, stands its levels going in and coming out at its edge, with the gain it takes off where it reports one, and goes idle while no sound goes in.",
     files: [
       {
         path: "audio/panels/device-panel.tsx",
@@ -440,6 +440,8 @@ export const audio: RegistryItem[] = [
     ],
     name: "device-panel",
     registryDependencies: [
+      "@audio-ui/device-signal",
+      "@audio-ui/meter",
       "@audio-ui/knob",
       "@audio-ui/waveform-select",
       "@audio-ui/filter-type-select",
@@ -541,6 +543,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "device-panels",
     registryDependencies: [
+      "@audio-ui/device-signal",
       "@audio-ui/auto-pan-panel",
       "@audio-ui/channel-eq-panel",
       "@audio-ui/chorus-panel",
@@ -663,6 +666,20 @@ export const audio: RegistryItem[] = [
     ],
     name: "spectrum-analyzer",
     registryDependencies: ["@audio-ui/plot", "@audio-ui/use-spectrum"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "Where a sound sits between the speakers, live: a goniometer of its two channels, scaled to the loudest of the last moments, over a correlation meter from -1 to 1. Painted on a canvas from a source, without a React render.",
+    files: [
+      {
+        path: "audio/elements/stereo-field.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "stereo-field",
     type: "registry:ui",
   },
   {
