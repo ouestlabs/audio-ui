@@ -1,18 +1,8 @@
-import {
-  analyzeBeat,
-  audioChroma,
-  type BeatAnalysis,
-  computePeaks,
-  normalizePeaks,
-} from "@audio-ui/engine/analysis";
+import { analyzeBeat, type BeatAnalysis } from "@audio-ui/engine/analysis";
 import type { RecordingSource } from "@/lib/clip-player";
 import { decodeAudioChannels } from "@/lib/daw/audio-files";
+import { type Measured, measureSound } from "@/lib/daw/measure";
 
-/** How many peaks a recording keeps per second: one per pixel at the closest zoom. */
-const PEAKS_PER_SECOND = 256;
-const LEAST_PEAKS = 4096;
-/** What the longest recordings stop at: a little over an hour at that rate. */
-const MOST_PEAKS = 2 ** 20;
 const EXTENSION = /\.[^.]+$/;
 
 /** A recording's shape, a slice at a time. */
@@ -53,13 +43,6 @@ export function freshRecordingId(taken: ReadonlySet<string>): string {
   return id;
 }
 
-/** How many peaks a recording of so many seconds keeps. */
-export const peakCountFor = (seconds: number) =>
-  Math.min(
-    MOST_PEAKS,
-    Math.max(LEAST_PEAKS, Math.ceil(seconds * PEAKS_PER_SECOND))
-  );
-
 /**
  * Decodes a file's bytes on `context`, at its sample rate (CLP-011: a file at
  * another rate is converted on the way), with the peaks of its loudest
@@ -76,19 +59,24 @@ export async function decodeRecording(
   if (!(channels && first && first.length > 0)) {
     return null;
   }
-  const peaks = normalizePeaks(
-    computePeaks(channels, peakCountFor(first.length / context.sampleRate))
-  );
   return {
+    ...recordingOf(channels, context.sampleRate, name),
     beat: analyzeBeat(channels, context.sampleRate),
-    chroma: audioChroma(channels, context.sampleRate),
-    length: first.length / context.sampleRate,
+  };
+}
+
+/** A recording of channels held in memory, at `sampleRate`, with the peaks of its loudest channel and its chroma: `measured` when they were read already. */
+export function recordingOf(
+  channels: Float32Array[],
+  sampleRate: number,
+  name: string,
+  measured: Measured = measureSound(channels, sampleRate)
+): Recording {
+  return {
+    ...measured,
+    length: (channels[0]?.length ?? 0) / sampleRate,
     name,
-    peaks: {
-      max: Float32Array.from(peaks.max),
-      min: Float32Array.from(peaks.min),
-    },
-    source: { channels, sampleRate: context.sampleRate },
+    source: { channels, sampleRate },
   };
 }
 

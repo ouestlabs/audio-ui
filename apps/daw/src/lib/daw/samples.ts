@@ -291,6 +291,33 @@ const channelsIn = (source: Exclude<RecordingSource, StreamedSource>) =>
       )
     : source.channels;
 
+/** The memory under `channels`, each piece once: what can be handed over without a copy. */
+export const transferable = (channels: readonly Float32Array[]) => [
+  ...new Set(
+    channels
+      .map((channel) => channel.buffer)
+      .filter((buffer) => buffer instanceof ArrayBuffer)
+  ),
+];
+
+/** Frames `from` to `to` of each channel of a recording, copied: read from its cache file for a streamed one. */
+export function readChannels(
+  source: RecordingSource,
+  from: number,
+  to: number
+): Promise<Float32Array[]> {
+  if ("path" in source) {
+    return Promise.all(
+      Array.from({ length: source.channels }, (_, channel) =>
+        readChannel(source, channel, from, to)
+      )
+    );
+  }
+  return Promise.resolve(
+    channelsIn(source).map((channel) => channel.slice(from, to))
+  );
+}
+
 /** The readers made so far, one per source, so a view keeps the same one across renders. */
 const made = new WeakMap<RecordingSource, ClipSamples>();
 

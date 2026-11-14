@@ -68,7 +68,7 @@ import { exportSound } from "@/lib/daw/audio-files";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { renderConsolidated } from "@/lib/daw/consolidate";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
-import { decodeFiles, dropCommands } from "@/lib/daw/drop";
+import { type Dropped, decodeFiles, dropCommands } from "@/lib/daw/drop";
 import {
   DAWPROJECT_ACCEPT,
   exportProject,
@@ -692,6 +692,16 @@ export function Daw({
     }
     return selectedTrack ? [selectedTrack] : [];
   }, [arrangement.selectedTracks, selectedTrack]);
+  // A recording the clip view's Process menu made (CLP-028): stored as a dropped file is, and played from now on.
+  const keepRecording = useCallback(
+    async (id: string, { bytes, recording }: Dropped) => {
+      if (canStore()) {
+        await saveRecording(id, bytes);
+      }
+      setRecordings((current) => new Map([...current, [id, recording]]));
+    },
+    []
+  );
   // Cmd+J (ARR-020): each audio track's clips rendered into one recording, as they play, then one clip per track, one step of undo.
   const consolidateTime = useCallback(
     async (time: TimeSelection) => {
@@ -1510,6 +1520,7 @@ export function Daw({
             folded={clipFolded}
             onCollapsedChange={foldPanel}
             onFoldedChange={setClipFolded}
+            onRecording={keepRecording}
             recordings={recordings}
           />
         ) : (
