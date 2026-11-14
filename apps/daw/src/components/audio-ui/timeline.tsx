@@ -660,6 +660,7 @@ function TimelineTrackControls({
   onToggleFold,
   onUngroup,
   meter,
+  mixControls = true,
   selected,
   switches = true,
   trackId,
@@ -676,6 +677,8 @@ function TimelineTrackControls({
   compact: boolean;
   /** Whether the track has an output. One without, such as a MIDI track with no instrument, has no gain or pan to set. Defaults to `true`. */
   output?: boolean;
+  /** Whether the header has its gain and pan. Leave them to a mixer with `false`: the header keeps its name, solo, mute and arm. Defaults to `true`. */
+  mixControls?: boolean;
   /** Whether the track is folded to a strip: the caret opens it. */
   folded?: boolean;
   /** Gives the header a caret that folds the track. */
@@ -911,7 +914,7 @@ function TimelineTrackControls({
             </ToggleGroup>
           ) : null}
         </div>
-        {compact || !output ? null : (
+        {compact || !(output && mixControls) ? null : (
           <div className="flex h-7 items-center gap-6 pe-1">
             <Fader
               aria-label={`${name} gain`}

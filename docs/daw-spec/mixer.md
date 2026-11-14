@@ -7,9 +7,9 @@ In a track, the clips (or the instrument) feed the device chain, left to right, 
 Test: packages/core/src/audio/playback/mixer.test.ts "MIX-001"
 
 ### MIX-002 Volume
-The volume runs from silence to +6 dB, 0 dB by default; a double-click sets it back to 0 dB. A track's fader in the arrangement and its channel in the mixer are one and the same: the same range and the same place, each moved by the other.
+The volume runs from silence to +6 dB, 0 dB by default; a double-click sets it back to 0 dB. A track's volume and pan are its mixer channel's: its header in the arrangement keeps its name, solo, mute and arm. Each send knob is labeled with its return's letter, and the pan knob with Pan.
 Checked against the reference: +6.0 dB at the top (OBS-004).
-Test: apps/www/test/mixer.test.ts "MIX-002"
+Test: apps/www/test/mixer.test.ts "MIX-002"; apps/daw/test/browser/run.ts "MIX-002"
 
 ### MIX-003 Pan
 The pan runs from 50 left to 50 right, centred by default, and follows a constant-power law with sine curves: 0 dB on both channels at the centre, +3 dB on the side it is turned to and silence on the other at either end. Each channel of a stereo signal is set by its own gain: nothing of the left channel moves into the right.
@@ -100,7 +100,7 @@ A channel's pan and its sends are dragged up and down, as the reference's knobs 
 Test: apps/daw/test/browser/run.ts "MIX-023"
 
 ### MIX-024 A track with no output has no volume
-A MIDI track with no instrument has no output, as in the reference: its channel has no sends, pan, fader or peak, and its header has no gain or pan. In automation mode its chooser lists only its devices' parameters, and a track with none has no chooser or envelope. Its switches stay, and its values are kept: a track given an instrument again has them as they were. A new MIDI track holds an instrument, so this shows when the instrument is removed.
+A MIDI track with no instrument has no output, as in the reference: its channel has no sends, pan, fader or peak. In automation mode its chooser lists only its devices' parameters, and a track with none has no chooser or envelope. Its switches stay, and its values are kept: a track given an instrument again has them as they were. A new MIDI track holds an instrument, so this shows when the instrument is removed.
 Test: apps/daw/test/browser/run.ts "MIX-024"; apps/daw/test/devices.test.ts "MIX-024"
 
 ### MIX-025 The loudness of the mix

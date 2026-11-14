@@ -8,7 +8,6 @@ import {
   loudest,
   open,
   POCKET_SYNTH,
-  REMOVE,
   showMixer,
   UNFOLD,
   UTILITY,
@@ -534,27 +533,16 @@ export const checks: Checks = {
         .waitFor({ timeout: 2000 });
       await slot.getByRole("button", { name: FOLD }).click();
       await strip.waitFor();
-      // Its tools are always there, at the bottom in the title bar's order, with the name over them.
+      // Its arrow is always there, at the bottom, with the name over it.
       await page.mouse.move(0, 0);
       const name = await strip.locator("span[title]").boundingBox();
-      const tools = await Promise.all(
-        [
-          strip.locator("[data-device-grip]"),
-          slot.getByRole("button", { name: REMOVE }),
-          arrow,
-        ].map((tool) => tool.boundingBox())
-      );
-      const [grip, remove, last] = tools;
+      const last = await arrow.boundingBox();
       assert(
         !!name &&
-          !!grip &&
-          !!remove &&
           !!last &&
-          name.y + name.height <= grip.y &&
-          grip.y < remove.y &&
-          remove.y < last.y &&
+          name.y + name.height <= last.y &&
           box.y + box.height - (last.y + last.height) <= 6,
-        `the strip's bottom reads ${JSON.stringify({ name, tools })}`
+        `the strip's bottom reads ${JSON.stringify({ last, name })}`
       );
       const opacity = await arrow.evaluate(
         (el) => getComputedStyle(el).opacity
@@ -651,7 +639,7 @@ export const checks: Checks = {
       // The strip stays at the view's right edge wherever the chain has scrolled.
       const strip = page
         .getByTestId("devices")
-        .getByRole("button", { name: "Open the library" });
+        .getByRole("button", { name: "Add a rack" });
       const stripEnd = async () => {
         const box = await strip.boundingBox();
         return box ? box.x + box.width : 0;

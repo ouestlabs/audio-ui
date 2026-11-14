@@ -8,7 +8,6 @@ import {
   FOLD,
   loudest,
   open,
-  REMOVE,
   showMixer,
   UNFOLD,
 } from "../helpers";
@@ -130,7 +129,9 @@ export const checks: Checks = {
       await gate.dblclick();
       const slot = page.locator("[data-slot=device-chain-slot]").first();
       await slot.getByRole("button", { name: FOLD }).click();
-      await slot.getByRole("button", { name: REMOVE }).click();
+      // Removed by Delete on its fold button, its stop for the keyboard.
+      await slot.getByRole("button", { name: UNFOLD }).focus();
+      await page.keyboard.press("Delete");
       await page.waitForTimeout(100);
       await gate.dblclick();
       await page.locator("[data-slot=device-chain-slot]").first().waitFor();

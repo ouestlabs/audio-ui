@@ -6,15 +6,18 @@ import {
   DEVICES,
   dragKnobVertically,
   dropChord,
+  FOLD,
   loudest,
   MAIN_LOUDNESS,
   MAIN_PEAK,
   open,
   PAN_KNOB,
-  REMOVE,
   SEND_KNOB,
   showMixer,
 } from "../helpers";
+
+/** A track's gain or pan, by its name. */
+const MIX_SLIDER = /gain|pan/;
 
 export const checks: Checks = {
   "MIX-015: the mixer and the detail view take turns under the arrangement":
@@ -450,7 +453,7 @@ export const checks: Checks = {
         `six sends: the switches end at ${switches.y + switches.height}, under the mixer's ${view.y + view.height}`
       );
     },
-  "MIX-024: a MIDI track with no instrument has no volume, pan or sends, in the mixer and in its header, and an instrument brings them back":
+  "MIX-024: a MIDI track with no instrument has no volume, pan or sends in the mixer, and an instrument brings them back":
     async (browser) => {
       const page = await open(browser);
       await page.getByText("1 MIDI", { exact: true }).first().click();
@@ -458,11 +461,17 @@ export const checks: Checks = {
         page.getByRole("slider", { name: `1 MIDI ${name}` });
       await showMixer(page);
       assert(
-        (await controls("pan").count()) === 2,
-        "the new MIDI track has no pan in its header and its channel"
+        (await controls("pan").count()) === 1,
+        "the new MIDI track has no pan in its channel"
       );
       await page.getByRole("tab", { name: "Devices" }).click();
-      await page.getByRole("button", { name: REMOVE }).first().click();
+      // A device is removed by Delete on its fold button, its stop for the keyboard.
+      await page
+        .locator("[data-slot=device-chain-slot]")
+        .first()
+        .getByRole("button", { name: FOLD })
+        .focus();
+      await page.keyboard.press("Delete");
       await page.getByRole("tab", { name: "Mixer" }).click();
       await page.waitForFunction(
         () =>
@@ -475,10 +484,6 @@ export const checks: Checks = {
       assert(
         (await page.getByRole("group", { name: "1 MIDI sends" }).count()) === 0,
         "the channel still has sends"
-      );
-      assert(
-        (await page.getByLabel("1 MIDI gain").count()) === 0,
-        "the header still has a gain"
       );
       assert(
         (await page.getByRole("button", { name: "Mute 1 MIDI" }).count()) > 0,
@@ -511,9 +516,9 @@ export const checks: Checks = {
         .getByRole("option", { name: "Pocket Synth" })
         .first()
         .dblclick();
-      // The header's pan and the channel's, both.
+      // The channel's pan, back.
       await page.getByRole("tab", { name: "Mixer" }).click();
-      await controls("pan").nth(1).waitFor({ timeout: 5000 });
+      await controls("pan").first().waitFor({ timeout: 5000 });
       await page
         .getByRole("combobox", { name: "1 MIDI automation" })
         .waitFor({ timeout: 5000 });
@@ -532,16 +537,6 @@ export const checks: Checks = {
         page,
         mixer.getByRole("slider", { name: SEND_KNOB }).first(),
         "the channel's send"
-      );
-      // A knob of the registry's own timeline, not written by the workstation.
-      await dragKnobVertically(
-        page,
-        page
-          .locator("[data-track-id]")
-          .first()
-          .getByRole("slider", { name: PAN_KNOB })
-          .first(),
-        "the track header's pan"
       );
     },
   "MIX-015: the panel folds to its strip, by its caret or by its line, and opens again":
@@ -826,41 +821,33 @@ export const checks: Checks = {
           document.querySelector('[aria-label="Group 1 copy"][data-track-id]')
       );
     },
-  "MIX-002: a track's fader and its mixer channel are one fader: the same range and the same place, each moved by the other":
+  "MIX-002: a track's volume is its mixer channel's fader: its header keeps its name, solo, mute and arm":
     async (browser) => {
       const page = await open(browser);
       await page.getByRole("tab", { name: "Mixer" }).click();
-      const track = page.getByRole("slider", { name: "4 Audio gain" });
       const channel = page.getByRole("slider", { name: "4 Audio volume" });
       await channel.waitFor({ timeout: 5000 });
-      const read = async () =>
-        Promise.all(
-          [track, channel].map((slider) =>
-            slider.evaluate((input) => {
-              const { max, min, value } = input as HTMLInputElement;
-              return { max, min, value };
-            })
-          )
-        );
-      const same = async (when: string) => {
-        const [a, b] = await read();
-        assert(
-          JSON.stringify(a) === JSON.stringify(b),
-          `${when}: ${JSON.stringify(a)} and ${JSON.stringify(b)}`
-        );
-        return a?.value;
-      };
-      assert((await same("at first")) === "0", "they do not start at 0 dB");
-      await track.focus();
-      await page.keyboard.press("ArrowLeft");
-      await page.keyboard.press("ArrowLeft");
-      const down = await same("moved on the track");
-      assert(Number(down) < 0, `the track's fader reads ${down}`);
+      const header = page.locator("[data-slot=timeline-track-header]", {
+        hasText: "4 Audio",
+      });
+      // Its height's handle is a slider too: what must be gone is a gain or a pan.
+      const sliders = await header
+        .getByRole("slider", { name: MIX_SLIDER })
+        .evaluateAll((all) => all.map((one) => one.getAttribute("aria-label")));
+      assert(
+        sliders.length === 0,
+        `the track's header still has ${sliders.join(", ")}`
+      );
+      assert(
+        (await header.getByRole("button", { name: "Mute 4 Audio" }).count()) >
+          0,
+        "the track's header lost its switches"
+      );
       await channel.focus();
       await page.keyboard.press("End");
       assert(
-        (await same("moved on the channel")) === "6",
-        "the channel's top is not the track's"
+        (await channel.inputValue()) === "6",
+        "the channel's fader does not reach its top"
       );
     },
 };

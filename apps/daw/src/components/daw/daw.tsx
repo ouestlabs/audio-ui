@@ -155,13 +155,13 @@ const LEAST: Record<PanelView, string> = {
   clip: "17.5rem",
   // The tallest device of the library, the compressor, whole, under the strip.
   devices: "22.5rem",
-  // A channel whole with a send: name, send, peak, pan, a fader of 5rem, its value and its switches, under the strip.
-  mixer: "22.25rem",
+  // A channel whole with a send: name, send and its letter, peak, pan and its label, a fader of 5rem, its value and its switches, under the strip.
+  mixer: "23.75rem",
 };
 /** What a rack's title bar takes from the devices in it, in rem: each level of racks adds one. */
 const RACK_BAR = 2.5;
-/** What a row of sends takes in the mixer, in rem: a knob and its gap. Two sends make a row, and the mixer's least holds one. */
-const SEND_ROW = 2.25;
+/** What a row of sends takes in the mixer, in rem: a knob, its letter and its gap. Two sends make a row, and the mixer's least holds one. */
+const SEND_ROW = 3;
 /** The sends a row of a channel holds. */
 const SENDS_PER_ROW = 2;
 
@@ -1576,7 +1576,8 @@ export function Daw({
             onHoldNote={holdNote}
             onNoteOff={noteOff}
             onNoteOn={noteOn}
-            onOpenLibrary={openLibrary}
+            // The chain's way to the library while it is closed; open, the library is beside it already.
+            onOpenLibrary={libraryOpen ? undefined : openLibrary}
             onPadFiles={addPadSample}
             overridden={automation.overridden}
             position={engine.position}
@@ -1696,6 +1697,8 @@ export function Daw({
                   getCursor={getCursor}
                   liveTake={take.live}
                   markers={markers}
+                  // The mixer under the tracks has each track's gain and pan: the headers keep the name, solo, mute and arm.
+                  mixControls={false}
                   onAddMidiClip={addMidiClip}
                   onArm={armTrack}
                   onDevice={dropDevice}

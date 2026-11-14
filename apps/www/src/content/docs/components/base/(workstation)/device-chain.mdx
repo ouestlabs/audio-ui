@@ -201,17 +201,17 @@ A device can be a rack: chains of devices side by side, summed, with eight macro
 ## Interaction
 
 <KeyTable title="Chain">
-<KeyRow gesture={"Drag a device by its header or its grip"}>Moves it. A label with its name follows the pointer, the device shows dimmed where it would land, the others aside, and the row scrolls near its edges. `Escape` puts it back. With `onReceive`, a device goes in or out of a rack's chain the same way.</KeyRow>
+<KeyRow gesture={"Drag a device by its title bar"}>Moves it. A label with its name follows the pointer, the device shows dimmed where it would land, the others aside, and the row scrolls near its edges. `Escape` puts it back. With `onReceive`, a device goes in or out of a rack's chain the same way.</KeyRow>
 <KeyRow gesture={"Hold a device over a chain"}>The chain that would take it lights up, with a line where it lands, its end included. Anywhere over a rack is into the rack: its chain lights up, from its title bar and its list of chains too.</KeyRow>
-<KeyRow gesture={"`ArrowLeft` / `ArrowRight` on the grip"}>Move the device a place.</KeyRow>
-<KeyRow gesture={"`Delete` / `Backspace` on the grip"}>Remove the device.</KeyRow>
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight` on the fold button"}>Move the device a place.</KeyRow>
+<KeyRow gesture={"`Delete` / `Backspace` on the fold button"}>Remove the device.</KeyRow>
 <KeyRow gesture={"Right-click a device"}>Move it left or right, or remove it.</KeyRow>
 <KeyRow gesture={"Click a device's title bar"}>Folds it, outside its buttons: a drag of the title bar moves it instead.</KeyRow>
-<KeyRow gesture={"Fold button"}>Folds the device to a strip with its square, its name down it and its buttons at the bottom; a click anywhere on the strip, outside its buttons, unfolds it.</KeyRow>
+<KeyRow gesture={"Fold button"}>Folds the device to a strip with its square, its name down it and its arrow at the bottom; a click anywhere on the strip, outside its buttons, unfolds it.</KeyRow>
 <KeyRow gesture={"Drop a device from the library"}>Adds it where it is dropped: between two devices, or at the end.</KeyRow>
 </KeyTable>
 
-Each slot is a group named after its device, and its grip is a button, "Move Compressor", that says its keys. A move or a removal is announced ("Compressor moved to 2 of 3."). After a move the focus stays on the grip, after a removal it goes to the device that takes the place, and after a fold to the button that unfolds it. The library's list is a list box, and its shelves are toggle buttons.
+Each slot is a group named after its device. Its title bar carries one button, the fold button, "Fold Compressor", which is also the device's stop for the keyboard and says its keys: the arrows move the device, `Delete` removes it. A move or a removal is announced ("Compressor moved to 2 of 3."). After a move the focus stays on the fold button, after a removal it goes to the device that takes the place, and after a fold to the button that unfolds it. The library's list is a list box, and its shelves are toggle buttons.
 
 ## API reference
 
@@ -242,6 +242,6 @@ Each slot is a group named after its device, and its grip is a button, "Move Com
 ### Parts
 
 <TypeTable title="Components">
-<TypeRow name={"DeviceChainSlotControls"}>The slot's grip, a button that removes the device and one that folds it, for the end of the device's own header.</TypeRow>
+<TypeRow name={"DeviceChainSlotControls"}>The slot's fold button, which the keyboard also moves and removes the device with, for the end of the device's own header.</TypeRow>
 <TypeRow name={"DeviceChainAdd"}>The end of the chain: where a device dragged from a library is dropped, and a button that opens the library through `onClick`. Its children replace the words.</TypeRow>
 </TypeTable>

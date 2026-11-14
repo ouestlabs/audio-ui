@@ -213,14 +213,17 @@ function LoudnessReadout({
   );
 }
 
-/** A send of a channel to a return, from silence to 0 dB (MIX-007). */
+/** A send of a channel to a return, from silence to 0 dB (MIX-007), named by the return's letter under it. */
 function SendKnob({
   back,
+  letter,
   onSend,
   onSettle,
   track,
 }: {
   back: ArrangementTrack;
+  /** The return's letter, A for the first: what the knob is labeled with. */
+  letter: string;
   onSend: (id: string, to: string, level: number) => void;
   onSettle: () => void;
   track: ArrangementTrack;
@@ -230,18 +233,26 @@ function SendKnob({
     [back.id, onSend, track.id]
   );
   return (
-    <Knob
-      aria-label={`${track.name} send to ${back.name}`}
-      formatValue={formatSend}
-      max={1}
-      min={0}
-      onValueChange={change}
-      onValueCommitted={onSettle}
-      size="xs"
-      step={0.01}
-      value={track.sends?.[back.id] ?? 0}
-      valueLabel="hidden"
-    />
+    <span className="flex flex-col items-center">
+      <Knob
+        aria-label={`${track.name} send to ${back.name}`}
+        formatValue={formatSend}
+        max={1}
+        min={0}
+        onValueChange={change}
+        onValueCommitted={onSettle}
+        size="xs"
+        step={0.01}
+        value={track.sends?.[back.id] ?? 0}
+        valueLabel="hidden"
+      />
+      <span
+        aria-hidden="true"
+        className="text-[10px] text-muted-foreground leading-3"
+      >
+        {letter}
+      </span>
+    </span>
   );
 }
 
@@ -444,10 +455,11 @@ function Strip({
           className="row-start-2 flex flex-wrap justify-center gap-1"
           role="group"
         >
-          {returns.map((back) => (
+          {returns.map((back, index) => (
             <SendKnob
               back={back}
               key={back.id}
+              letter={String.fromCharCode(65 + index)}
               onSend={onSend}
               onSettle={onSettle}
               track={track}
@@ -457,20 +469,27 @@ function Strip({
       ) : null}
       {output ? (
         <>
-          <Knob
-            anchor={0}
-            aria-label={`${track.name} pan`}
-            className="row-start-4"
-            formatValue={formatPan}
-            max={1}
-            min={-1}
-            onValueChange={setPan}
-            onValueCommitted={onSettle}
-            size="sm"
-            step={0.02}
-            value={mix.pan}
-            valueLabel="hidden"
-          />
+          <span className="row-start-4 flex flex-col items-center">
+            <Knob
+              anchor={0}
+              aria-label={`${track.name} pan`}
+              formatValue={formatPan}
+              max={1}
+              min={-1}
+              onValueChange={setPan}
+              onValueCommitted={onSettle}
+              size="sm"
+              step={0.02}
+              value={mix.pan}
+              valueLabel="hidden"
+            />
+            <span
+              aria-hidden="true"
+              className="text-[10px] text-muted-foreground leading-3"
+            >
+              Pan
+            </span>
+          </span>
           <div className="row-start-5 flex min-h-0 justify-center gap-1.5">
             <Fader
               aria-label={`${track.name} volume`}

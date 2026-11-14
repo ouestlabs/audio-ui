@@ -12,7 +12,7 @@ Status: partial: OBS-006 says what the reference does with a second instrument.
 Test: apps/www/test/arrangement-state.test.ts "DEV-002"
 
 ### DEV-003 Adding a device
-A double-click on a device in the browser, or Enter on it, adds it at the end of the selected track's chain; dropped, it goes where it is dropped: on a track's chain, on a track's lane (at the end of its chain), or on the add-track button (a track of its own). With no track selected it makes one: an audio track for an effect, a MIDI track for an instrument. A track the device makes is named after it.
+A double-click on a device in the browser, or Enter on it, adds it at the end of the selected track's chain; dropped, it goes where it is dropped: on a track's chain, on a track's lane (at the end of its chain), or on the add-track button (a track of its own). With no track selected it makes one: an audio track for an effect, a MIDI track for an instrument. A track the device makes is named after it. At the end of a track's chain, a + opens the browser while it is closed; open, it is beside the chain already, and the + is gone.
 Status: partial: an instrument picked while an audio track is selected makes a MIDI track after it, and one dropped on an audio track is refused; OBS-014 and OBS-015 check both against the reference, and the name it gives such a track.
 Test: apps/daw/test/devices.test.ts "DEV-003"; apps/daw/test/browser/run.ts "DEV-003"
 
@@ -25,7 +25,7 @@ A device switched off passes its input unchanged to the frame, and keeps the lat
 Test: apps/www/test/arrangement-engine.test.ts "DEV-005"
 
 ### DEV-006 Folding
-The fold button of a device's title bar folds it to a narrow strip, and so does a press on the title bar outside its buttons: a drag of it moves the device instead. A click anywhere on the strip, outside its buttons, unfolds it; a drag of the strip moves the device and leaves it folded. The on square stays where it is, with the same shape. The strip has that square at the top, the device's name down it, and at the bottom its grip, its remove button and its arrow, in the order the title bar has them.
+The fold button of a device's title bar folds it to a narrow strip, and so does a press on the title bar outside its buttons: a drag of it moves the device instead. A click anywhere on the strip, outside its buttons, unfolds it; a drag of the strip moves the device and leaves it folded. The on square stays where it is, with the same shape. The strip has that square at the top, the device's name down it, and its arrow at the bottom. The fold button is the title bar's one button and the device's stop for the keyboard: Left and Right move the device, Delete removes it, and a right-click offers the same.
 Test: apps/daw/test/browser/run.ts "DEV-006"
 
 ### DEV-007 No gap in the sound

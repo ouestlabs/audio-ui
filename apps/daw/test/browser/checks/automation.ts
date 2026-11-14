@@ -77,8 +77,11 @@ export const checks: Checks = {
         );
       };
       await ramp("3 Audio volume automation");
-      const gain = page.getByRole("slider", { name: "3 Audio gain" });
+      // The track's volume is its mixer channel's fader.
+      await page.getByRole("tab", { name: "Mixer" }).click();
+      const gain = page.getByRole("slider", { name: "3 Audio volume" });
       const fromGain = await gain.inputValue();
+      await page.getByRole("tab", { name: "Devices" }).click();
       await page.getByRole("combobox", { name: "3 Audio automation" }).click();
       await page.getByRole("option", { exact: true, name: "Gain" }).click();
       await ramp("3 Audio utility gain automation");
@@ -88,18 +91,14 @@ export const checks: Checks = {
         (document.activeElement as HTMLElement)?.blur()
       );
       await page.keyboard.press("Space");
-      await page.waitForFunction(
-        ([before]) =>
-          (
-            document.querySelector(
-              '[aria-label="3 Audio gain"]'
-            ) as HTMLInputElement | null
-          )?.value !== before,
-        [fromGain],
-        { timeout: 15_000 }
-      );
       await expectChanged(knob, fromKnob);
+      await page.getByRole("tab", { name: "Mixer" }).click();
+      await expectChanged(gain, fromGain);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
       await page.keyboard.press("Space");
+      await page.getByRole("tab", { name: "Devices" }).click();
       assert(
         (await page
           .getByRole("button", { name: "Re-enable automation" })
