@@ -140,9 +140,10 @@ import {
 
 ### Every device
 
-`device-panels` (`npx shadcn@latest add @audio-ui/device-panels`) is every device's panel by the device's stable id, with the width it is drawn at in a row, and `device-library` is every device with its engine, by shelf. Together they draw and play a chain from nothing but the ids and states a project stores:
+`device-panels` (`npx shadcn@latest add @audio-ui/device-panels`) is every device's panel by the device's stable id, with the width it is drawn at in a row, and `device-library` is every device with its engine, by shelf. Together they draw and play a chain from nothing but the ids and states a project stores. Each panel is loaded the first time it is drawn, so a page loads the panels of the devices it shows and no other: draw it inside a `Suspense`.
 
 ```tsx
+import { Suspense } from "react";
 import { devicePanel } from "@/components/audio-ui/device-panels";
 import { DEVICE_SHELVES } from "@/lib/device-library";
 
@@ -155,9 +156,11 @@ const shelves = DEVICE_SHELVES.map((shelf) => ({
   const face = devicePanel(device.device);
   return face ? (
     <DeviceChainSlot className={face.width} key={device.id} title={device.device} value={device.id}>
-      <face.Panel onValueChange={(state) => setDevice(device.id, state)} value={device.state}>
-        <DeviceChainSlotControls />
-      </face.Panel>
+      <Suspense fallback={null}>
+        <face.Panel onValueChange={(state) => setDevice(device.id, state)} value={device.state}>
+          <DeviceChainSlotControls />
+        </face.Panel>
+      </Suspense>
     </DeviceChainSlot>
   ) : null;
 })}

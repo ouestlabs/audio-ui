@@ -201,13 +201,16 @@ export function reverbImpulse(
   const channel = () => new Float32Array(new ArrayBuffer(length * 4));
   const type = state.type ?? "room";
   if (type === "room") {
+    // The envelope falls by the same ratio each sample, 60 dB over the decay: a running product, not an exponential per sample.
+    const fall = Math.exp(-NATURAL_LOG_OF_1000 / length);
     const noise = () => {
       const data = channel();
       let previous = 0;
+      let envelope = 1;
       for (let index = 0; index < length; index += 1) {
-        const envelope = Math.exp((-NATURAL_LOG_OF_1000 * index) / length);
         previous = (1 - pole) * (random() * 2 - 1) * envelope + pole * previous;
         data[index] = previous;
+        envelope *= fall;
       }
       return data;
     };
@@ -229,9 +232,12 @@ export function reverbImpulse(
   if (state.decay < shortest) {
     const faster =
       NATURAL_LOG_OF_1000 * (1 / state.decay - 1 / shortest) * (1 / sampleRate);
+    const step = Math.exp(-faster);
     for (const data of room) {
+      let gain = 1;
       for (let index = 0; index < length; index += 1) {
-        data[index] = (data[index] ?? 0) * Math.exp(-faster * index);
+        data[index] = (data[index] ?? 0) * gain;
+        gain *= step;
       }
     }
   }

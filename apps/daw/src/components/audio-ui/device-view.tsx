@@ -4,6 +4,7 @@ import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
 import { CaretDownIcon, PlusIcon, StackIcon } from "@phosphor-icons/react";
 import {
   type ReactNode,
+  Suspense,
   useCallback,
   useMemo,
   useState,
@@ -305,24 +306,27 @@ function Slot({
       title={entry.device.name}
       value={device.id}
     >
-      <face.Panel
-        activeNotes={activeNotes}
-        onNoteOff={release}
-        onNoteOn={onHoldNote}
-        onValueChange={change}
-        tempo={tempo}
-        value={shown}
-      >
-        {entry.device.sidechain && !inRack ? (
-          <KeySelect
-            device={device}
-            dispatch={dispatch}
-            sources={chain.keySources}
-            track={track}
-          />
-        ) : null}
-        <DeviceChainSlotControls />
-      </face.Panel>
+      {/* Its panel loads the first time a device of its kind is drawn: the slot holds its width until then. */}
+      <Suspense fallback={null}>
+        <face.Panel
+          activeNotes={activeNotes}
+          onNoteOff={release}
+          onNoteOn={onHoldNote}
+          onValueChange={change}
+          tempo={tempo}
+          value={shown}
+        >
+          {entry.device.sidechain && !inRack ? (
+            <KeySelect
+              device={device}
+              dispatch={dispatch}
+              sources={chain.keySources}
+              track={track}
+            />
+          ) : null}
+          <DeviceChainSlotControls />
+        </face.Panel>
+      </Suspense>
     </DeviceChainSlot>
   );
 }
