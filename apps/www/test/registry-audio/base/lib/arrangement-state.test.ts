@@ -393,6 +393,26 @@ describe("apply", () => {
     expect(apply(state, { type: "undo" }).doc.clips[0]?.value.start).toBe(0);
   });
 
+  test("TRN-008: a clip dragged past the end of the arrangement makes it longer as it lands, in the same step of undo", () => {
+    let state = init([at("a", 0, 10)]);
+    const was = state.doc.duration;
+    state = apply(state, {
+      details: { delta: was - 5, target: "move" },
+      id: "a",
+      type: "change-clip",
+      value: { ...at("a", 0, 10).value, start: was - 5 },
+    });
+    state = apply(state, {
+      copy: false,
+      id: "a",
+      track: undefined,
+      type: "commit-clip",
+    });
+    expect(state.doc.duration).toBe(was + 5);
+    expect(state.doc.clips[0]?.value.start).toBe(was - 5);
+    expect(apply(state, { type: "undo" }).doc.duration).toBe(was);
+  });
+
   test("TRN-008: a clip edited past the end of the arrangement makes it longer, in the same step of undo", () => {
     let state = init([at("a", 0, 10)]);
     const was = state.doc.duration;

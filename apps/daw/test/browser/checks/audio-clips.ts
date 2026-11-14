@@ -746,6 +746,71 @@ export const checks: Checks = {
       await page.keyboard.press("Meta+KeyZ");
       await lengthIs(before, false);
     },
+  "TRN-008: a clip dragged into the room past the end of the arrangement makes it longer as it lands, and one undo takes it back":
+    async (browser) => {
+      const page = await open(browser);
+      // Long enough for its head to be grabbed between its fade handles.
+      await dropChord(page, '[data-track="track-1"]', "Take", 16);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      const shown = async () =>
+        Number(
+          await page
+            .locator('input[aria-label="End of the visible range"]')
+            .first()
+            .getAttribute("max")
+        );
+      const before = await shown();
+      // The room past the end, shaded on the clip's lane: the clip is dragged into it.
+      const room = await page
+        .locator('[data-track="track-1"] [data-slot="arrangement-past-end"]')
+        .boundingBox();
+      // By its head, once it is laid out: its body is for picking time.
+      const head = clip.locator("[data-slot=timeline-clip-header]");
+      await head.waitFor({ timeout: 5000 });
+      await page.waitForTimeout(300);
+      const box = await head.boundingBox();
+      assert(room !== null && box !== null, "no room past the end is shown");
+      await page.mouse.move(
+        (box?.x ?? 0) + (box?.width ?? 0) / 2,
+        (box?.y ?? 0) + (box?.height ?? 0) / 2
+      );
+      await page.mouse.down();
+      await page.mouse.move(
+        (room?.x ?? 0) + (room?.width ?? 0) / 2,
+        (box?.y ?? 0) + (box?.height ?? 0) / 2,
+        { steps: 12 }
+      );
+      await page.mouse.up();
+      await page
+        .waitForFunction(
+          (was) =>
+            Number(
+              document
+                .querySelector('input[aria-label="End of the visible range"]')
+                ?.getAttribute("max")
+            ) > was,
+          before,
+          { timeout: 5000 }
+        )
+        .catch(async () =>
+          assert(false, `the arrangement stays ${await shown()} s long`)
+        );
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Meta+KeyZ");
+      await page.waitForFunction(
+        (was) =>
+          Number(
+            document
+              .querySelector('input[aria-label="End of the visible range"]')
+              ?.getAttribute("max")
+          ) === was,
+        before,
+        { timeout: 5000 }
+      );
+    },
   "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":
     async (browser) => {
       const page = await open(browser);

@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import {
   ArrangementView,
   type ReadingFiles,
+  shownLength,
 } from "@/components/audio-ui/arrangement-view";
 import { DeviceView } from "@/components/audio-ui/device-view";
 import { ExportDialog } from "@/components/audio-ui/export-dialog";
@@ -664,8 +665,9 @@ export function Daw({
   );
   // The arrangement's zoom and grid, which the keys change too (KEY-016 to KEY-018).
   const viewportRef = useRef<HTMLDivElement>(null);
+  // The zoom fits the arrangement and the room past its end.
   const view = useTimelineZoom({
-    duration: doc.duration,
+    duration: shownLength(doc.duration, doc.tempo),
     initialZoom: readView().zoom,
     viewportRef,
   });
