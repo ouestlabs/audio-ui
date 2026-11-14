@@ -3,7 +3,6 @@ import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
 import { FrameworkSelect } from "@/components/site/navigation/framework-select";
-import { GroupIcon, PageIcon } from "@/components/site/navigation/group-icon";
 import { SectionSelect } from "@/components/site/navigation/section-select";
 import { Button } from "@/components/ui/button";
 import {
@@ -51,13 +50,11 @@ function NavRow({
 /** A group's title; a space's folds its pages away and back. */
 function GroupLabel({
   collapsible,
-  current,
   onOpenChange,
   open,
   title,
 }: {
   collapsible: boolean;
-  current: boolean;
   onOpenChange: (title: string, open: boolean) => void;
   open: boolean;
   title: string;
@@ -68,8 +65,7 @@ function GroupLabel({
   );
   if (!collapsible) {
     return (
-      <p className="flex items-center gap-2 px-2 pt-3 pb-1 font-semibold text-site-foreground text-xs">
-        <GroupIcon current={current} title={title} />
+      <p className="px-2 pt-3 pb-1 font-semibold text-site-foreground text-xs">
         {title}
       </p>
     );
@@ -81,10 +77,7 @@ function GroupLabel({
       onClick={toggle}
       type="button"
     >
-      <span className="flex items-center gap-2">
-        <GroupIcon current={current} title={title} />
-        {title}
-      </span>
+      {title}
       <CaretDownIcon
         aria-hidden="true"
         className={cn(
@@ -148,11 +141,6 @@ export function MobileNav({
     [categoryLinks]
   );
   const { collapsed } = useGroupFolding();
-  const currentCategoryGroup = categoryGroups.find((group) =>
-    group.names.some(
-      (name) => pathname === `/components/${normalizeSlug(name)}`
-    )
-  )?.label;
 
   return (
     <Popover modal onOpenChange={setOpen} open={open}>
@@ -221,7 +209,6 @@ export function MobileNav({
                   >
                     <GroupLabel
                       collapsible
-                      current={group.label === currentCategoryGroup}
                       onOpenChange={setGroupOpen}
                       open={unfolded}
                       title={group.label}
@@ -257,7 +244,6 @@ export function MobileNav({
                 {group.titled ? (
                   <GroupLabel
                     collapsible={group.collapsible}
-                    current={group.current}
                     onOpenChange={setGroupOpen}
                     open={group.open}
                     title={group.title ?? ""}
@@ -280,10 +266,7 @@ export function MobileNav({
                               key={page.url}
                               onNavigate={close}
                             >
-                              <span className="flex min-w-0 items-center gap-2">
-                                <PageIcon url={page.url} />
-                                {page.name}
-                              </span>
+                              <span className="min-w-0">{page.name}</span>
                               {hint ? (
                                 <span
                                   aria-hidden="true"

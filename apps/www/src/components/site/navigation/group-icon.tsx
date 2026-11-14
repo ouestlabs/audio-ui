@@ -1,25 +1,16 @@
 import {
-  BotIcon,
   BracesIcon,
-  ContrastIcon,
   CrateIcon,
   GridIcon,
-  type IconProps,
-  InsertIcon,
   KnobIcon,
-  MetronomeIcon,
-  PlayheadIcon,
   PlayIcon,
   RackIcon,
   ShapesIcon,
-  SparkleIcon,
   SpeakerIcon,
   TapeIcon,
   TracksIcon,
   WaveformIcon,
 } from "@audio-ui/icons/react";
-import type { ComponentType } from "react";
-import { Icons } from "@/components/site/icons";
 import { cn } from "@/lib/utils";
 
 const GROUP_ICONS = {
@@ -54,7 +45,7 @@ export function SectionIcon({ current, id }: { current: boolean; id: string }) {
   ) : null;
 }
 
-/** The glyph of a space of the docs (a group of the sidebar): thin and muted, and in the title's color when the page being read is in it. Nothing for the other groups. */
+/** The glyph of a space of the docs, beside its title on the home: thin and muted, and in the title's color when `current`. Nothing for the other groups. */
 export function GroupIcon({
   current,
   title,
@@ -71,29 +62,5 @@ export function GroupIcon({
       )}
       weight="fill"
     />
-  ) : null;
-}
-
-const PAGE_ICONS: Record<string, ComponentType<IconProps>> = {
-  "/docs": MetronomeIcon,
-  "/docs/agents": SparkleIcon,
-  "/docs/api": BracesIcon,
-  "/docs/get-started": InsertIcon,
-  "/docs/icons": GridIcon,
-  "/docs/registry": CrateIcon,
-  "/docs/roadmap": PlayheadIcon,
-  "/docs/styling": ContrastIcon,
-  "/llms.txt": BotIcon,
-};
-
-/** The glyph of a page of the sidebar that has one (the Get started pages), or nothing. */
-export function PageIcon({ url }: { url: string }) {
-  // The MCP mark is a logo: it has no weights.
-  if (url === "/docs/mcp") {
-    return <Icons.mcp className="size-3.5 shrink-0 opacity-60" />;
-  }
-  const Icon = PAGE_ICONS[url];
-  return Icon ? (
-    <Icon className="size-3.5 shrink-0 opacity-60" weight="fill" />
   ) : null;
 }
