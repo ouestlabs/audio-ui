@@ -431,7 +431,7 @@ export const audio: RegistryItem[] = [
     categories: ["device", "knob"],
     dependencies: ["@audio-ui/engine"],
     description:
-      "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns. Its frame, given the device's live signal, stands its levels going in and coming out at its edge, with the gain it takes off where it reports one, and goes idle while no sound goes in.",
+      "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns. Its frame, given the device's live signal, goes idle while no sound goes in, so a face's live marks give way.",
     files: [
       {
         path: "audio/panels/device-panel.tsx",
@@ -441,7 +441,6 @@ export const audio: RegistryItem[] = [
     name: "device-panel",
     registryDependencies: [
       "@audio-ui/device-signal",
-      "@audio-ui/meter",
       "@audio-ui/knob",
       "@audio-ui/waveform-select",
       "@audio-ui/filter-type-select",
