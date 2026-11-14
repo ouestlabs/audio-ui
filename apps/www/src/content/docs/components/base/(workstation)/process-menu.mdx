@@ -31,7 +31,7 @@ import { applySoundOperation, soundOperationName } from "@/lib/sound-operations"
 </DropdownMenu>;
 ```
 
-`onProcess` gets the operation picked, as data (`{ type: "repeat", times: 2 }`), so the menu does no audio work itself: [`sound-operations`](/docs/lib/sound-operations) runs it on plain channels and names it as a step of the history, and you decide what it runs on and when. The audio editor bakes it on the sound as edited with [`useBake`](/docs/hooks/use-bake); the [clip panel](/docs/components/base/arrangement#the-clip-panel) hands it to its host, which processes the clip's source into a recording of its own.
+`onProcess` gets the operation picked, as data (`{ type: "repeat", times: 2 }`), so the menu does no audio work itself: [`sound-operations`](/docs/lib/sound-operations) runs it on plain channels and names it as a step of the history, and you decide what it runs on and when. The audio editor bakes it on the sound as edited with [`useBake`](/docs/hooks/use-bake); the [clip panel](/docs/components/base/arrangement#the-clip-panel) offers it in the bar over the clip's sound and in its right-click menu, and hands it to its host with the stretch selected, which processes the clip's source into a recording of its own.
 
 ### Items of your own
 

@@ -22,7 +22,7 @@ import {
   DRUM_RACK_DEVICE,
 } from "@/lib/arrangement";
 import type { Dropped } from "@/lib/daw/drop";
-import { processSource } from "@/lib/daw/process";
+import { processSource, readSource } from "@/lib/daw/process";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import {
   recordingBands,
@@ -31,6 +31,7 @@ import {
 } from "@/lib/daw/samples";
 import {
   type SoundOperation,
+  type SoundRange,
   soundOperationName,
 } from "@/lib/sound-operations";
 import { cn } from "@/lib/utils";
@@ -86,17 +87,17 @@ const sameSource = (clip: Arranged, was: Arranged) =>
   (clip.sourceFrom ?? 0) === (was.sourceFrom ?? 0) &&
   clip.sourceLength === was.sourceLength;
 
-/** The clip reading the recording `id`, `length` long, an operation made of its source: from its start, its times where `processedSettings` puts them. */
+/** The clip reading the recording `id`, `length` long, an operation made of its source or of `range` of it: from its start, its times where `processedSettings` puts them. */
 function withProcessed(
   clip: Arranged,
-  id: string,
-  length: number,
+  { id, length }: { id: string; length: number },
   operation: SoundOperation,
+  range: SoundRange | null,
   duration: number
 ): Arranged {
   const { sourceFrom: _cut, ...rest } = withSettings(
     clip,
-    processedSettings(settingsOf(clip), operation, length),
+    processedSettings(settingsOf(clip), operation, length, range ?? undefined),
     duration
   );
   return { ...rest, recording: id, sourceLength: length };
@@ -210,9 +211,9 @@ export function ClipEditor({
     () => dispatch({ id: clip.id, type: "crop-clip" }),
     [clip.id, dispatch]
   );
-  // An operation of the Process menu (CLP-028): the clip's source made into a recording of its own, then the clip reads it, one step of undo.
+  // An edit or an operation of the Process menu (CLP-028, CLP-029): the clip's source, or the stretch of it selected, made into a recording of its own, then the clip reads it, one step of undo.
   const process = useCallback(
-    async (operation: SoundOperation) => {
+    async (operation: SoundOperation, range: SoundRange | null) => {
       const recording = clip.recording
         ? recordings.get(clip.recording)
         : undefined;
@@ -225,6 +226,7 @@ export function ClipEditor({
           recording,
           clip,
           operation,
+          range,
           new Set(recordings.keys())
         );
         await onRecording(id, made);
@@ -232,7 +234,13 @@ export function ClipEditor({
         dispatch({
           change: (current) =>
             sameSource(current, clip)
-              ? withProcessed(current, id, length, operation, doc.duration)
+              ? withProcessed(
+                  current,
+                  { id, length },
+                  operation,
+                  range,
+                  doc.duration
+                )
               : current,
           id: clip.id,
           type: "edit-clip",
@@ -246,6 +254,27 @@ export function ClipEditor({
       }
     },
     [clip, dispatch, doc.duration, onRecording, recordings]
+  );
+  // What Copy and Cut keep (CLP-029): the samples of a stretch, pasted into this clip's source or another's.
+  const [clipboard, setClipboard] = useState<Float32Array[] | null>(null);
+  const copy = useCallback(
+    async (range: SoundRange) => {
+      const recording = clip.recording
+        ? recordings.get(clip.recording)
+        : undefined;
+      if (recording) {
+        setClipboard(await readSource(recording, clip, range));
+      }
+    },
+    [clip, recordings]
+  );
+  const paste = useCallback(
+    (range: SoundRange) => {
+      if (clipboard) {
+        process({ channels: clipboard, type: "paste" }, range);
+      }
+    },
+    [clipboard, process]
   );
   // A drum clip's pads: those of the drum rack its track plays, lowest note on top, as a drum part is read.
   const drumRack = doc.tracks
@@ -374,6 +403,7 @@ export function ClipEditor({
       bands={recording ? recordingBands(recording.source) : undefined}
       bar={bar}
       beatsPerBar={doc.tempo.beatsPerBar}
+      canPaste={clipboard !== null}
       channels={recording ? recordingChannels(recording.source) : undefined}
       className={docked}
       collapsed={collapsed}
@@ -382,8 +412,10 @@ export function ClipEditor({
       name={clip.name}
       onActiveChange={setActive}
       onCollapsedChange={onCollapsedChange}
+      onCopy={copy}
       onCrop={crop}
       onFoldedBoxesChange={onFoldedChange}
+      onPaste={paste}
       onProcess={recording ? process : undefined}
       onRename={rename}
       onValueChange={changeSettings}

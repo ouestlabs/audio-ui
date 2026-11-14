@@ -10,12 +10,14 @@ import { transferable } from "@/lib/daw/samples";
 import {
   applySoundOperation,
   type SoundOperation,
+  type SoundRange,
 } from "@/lib/sound-operations";
 
-/** What the page sends: a clip's source, read, and the operation to run on it. */
+/** What the page sends: a clip's source, read, the operation to run on it, and the stretch of it to run it on, or none for all of it. */
 export interface ProcessJob {
   channels: Float32Array[];
   operation: SoundOperation;
+  range: SoundRange | null;
   sampleRate: number;
 }
 
@@ -27,10 +29,11 @@ export interface ProcessDone {
 }
 
 self.onmessage = async (event: MessageEvent<ProcessJob>) => {
-  const { channels: read, operation, sampleRate } = event.data;
+  const { channels: read, operation, range, sampleRate } = event.data;
   const { channels } = applySoundOperation(
     { channels: read, sampleRate },
-    operation
+    operation,
+    range ?? undefined
   );
   const bytes = await (
     await encodeAudio(channels, { bitDepth: 32, format: "wav", sampleRate })

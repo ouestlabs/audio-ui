@@ -4,6 +4,7 @@ import {
   moveWarpMarker,
   removeWarpMarker,
   scaleWarp,
+  unwarpedTime,
   type WarpMarker,
   warpedTime,
   warpRate,
@@ -11,7 +12,11 @@ import {
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import type { WaveformBands } from "@audio-ui/gl/waveform";
 import type { Source } from "@audio-ui/react";
-import { MagicWandIcon, WaveformIcon } from "@phosphor-icons/react";
+import {
+  MagicWandIcon,
+  ScissorsIcon,
+  WaveformIcon,
+} from "@phosphor-icons/react";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -47,6 +52,7 @@ import {
   SoundLane,
   type SoundView,
 } from "@/components/audio-ui/sound-lane";
+import { TimelineTimeSelection } from "@/components/audio-ui/time-selection";
 import {
   Timeline,
   TimelineLane,
@@ -59,10 +65,21 @@ import {
 } from "@/components/audio-ui/timeline";
 import { Button } from "@/components/ui/button";
 import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
   DropdownMenu,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuShortcut,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { useLoudest } from "@/hooks/use-loudest";
@@ -74,6 +91,7 @@ import {
 } from "@/lib/arrangement";
 import {
   type SoundOperation,
+  type SoundRange,
   soundOperationTiming,
 } from "@/lib/sound-operations";
 import { cn } from "@/lib/utils";
@@ -147,60 +165,131 @@ export function unwarpedSettings(
   };
 }
 
-/** How near its source's end a clip's end or loop has to be to reach it, in seconds. */
+/** How near two times have to be to be one, in seconds: a clip that ended where a stretch did still does. */
 const END_EPS = 1e-4;
 
-/** A clip played forwards over a source now `sourceLength` long, longer at its end: what reached the end still does. */
-function extendedSettings(
-  settings: ClipSettings,
-  sourceLength: number
-): ClipSettings {
-  const { length, loop, offset } = settings;
-  const end = settings.sourceLength - END_EPS;
+/** The settings of a warped clip as its source plays them as recorded: its times read back through the warp, and the warp gone. */
+function recordedSettings(settings: ClipSettings): ClipSettings {
+  const { length, loop, offset, warp } = settings;
+  if (!warp) {
+    return settings;
+  }
+  const at = (time: number) => unwarpedTime(warp, time);
+  const recordedLoop = loop ? ([at(loop[0]), at(loop[1])] as const) : null;
   return {
     ...settings,
-    length: !loop && offset + length >= end ? sourceLength - offset : length,
-    loop: loop && loop[1] >= end ? [loop[0], sourceLength] : loop,
+    length:
+      loop && recordedLoop
+        ? (length * (recordedLoop[1] - recordedLoop[0])) /
+          Math.max(loop[1] - loop[0], END_EPS)
+        : at(offset + length) - at(offset),
+    loop: recordedLoop,
+    offset: at(offset),
+    warp: null,
+  };
+}
+
+/**
+ * Where a time of a source lies once its stretch `range` is made `length`
+ * long: before it, where it was; after it, moved by as much as it grew or
+ * shrank, a time at its end too; inside it, scaled with a stretch or a change
+ * of speed, else where it was, as far as what was made goes. Cropped, the
+ * stretch is all there is.
+ */
+function movedTime(
+  time: number,
+  [from, to]: SoundRange,
+  length: number,
+  timing: ReturnType<typeof soundOperationTiming>
+): number {
+  if (timing === "cropped") {
+    return Math.min(Math.max(time - from, 0), to - from);
+  }
+  if (time <= from) {
+    return time;
+  }
+  if (time >= to - END_EPS) {
+    return time + length - (to - from);
+  }
+  return timing === "scaled"
+    ? from + ((time - from) * length) / (to - from)
+    : Math.min(time, from + length);
+}
+
+/** A clip played forwards, its times moved as `movedTime` moves them, over a source now `sourceLength` long. */
+function movedSettings(
+  settings: ClipSettings,
+  range: SoundRange,
+  length: number,
+  timing: ReturnType<typeof soundOperationTiming>,
+  sourceLength: number
+): ClipSettings {
+  const move = (time: number) =>
+    Math.min(Math.max(movedTime(time, range, length, timing), 0), sourceLength);
+  const offset = move(settings.offset);
+  const { loop } = settings;
+  if (loop) {
+    const moved = [move(loop[0]), move(loop[1])] as const;
+    if (moved[1] - moved[0] > END_EPS) {
+      // Scaled, the loop plays as many times over as it did; else the clip lasts as long.
+      const scale =
+        timing === "scaled" ? (moved[1] - moved[0]) / (loop[1] - loop[0]) : 1;
+      return {
+        ...settings,
+        length: settings.length * scale,
+        loop: moved,
+        offset,
+        sourceLength,
+      };
+    }
+  }
+  const end = move(settings.offset + (loop ? 0 : settings.length));
+  return {
+    ...settings,
+    // What it played is gone: it plays on from there, as long as it did.
+    length:
+      end - offset > END_EPS
+        ? end - offset
+        : Math.min(settings.length, sourceLength - offset),
+    loop: null,
+    offset,
     sourceLength,
   };
 }
 
 /**
- * The settings of a clip once an operation of the Process menu made its
- * source `sourceLength` long. Its start, end and loop follow the sound: they
- * stay where they were, scale with a stretch or a change of speed, and a clip
- * or a loop that reached the end of its source still does after Repeat or Add
- * silence. An operation that changes the length turns the warp off first, as
- * the Warp button does.
+ * The settings of a clip once an operation made its source `sourceLength`
+ * long, on `range` of it (in the source's own time, played forwards) or on
+ * all of it. What the clip played follows the sound: before the stretch, it
+ * stays; after it, it moves by as much as the stretch grew or shrank, so a
+ * clip or a loop that reached its end still does; inside it, it scales with a
+ * stretch or a change of speed. An operation that changes the length turns
+ * the warp off first, its times read back as recorded.
  */
 export function processedSettings(
   settings: ClipSettings,
   operation: SoundOperation,
-  sourceLength: number
+  sourceLength: number,
+  range: SoundRange = [0, settings.sourceLength]
 ): ClipSettings {
-  const timing = soundOperationTiming(operation);
-  if (timing === "kept") {
+  if (Math.abs(sourceLength - settings.sourceLength) <= END_EPS) {
     return { ...settings, sourceLength };
   }
-  const was: ClipSettings = settings.warp
-    ? { ...settings, ...unwarpedSettings(settings) }
-    : settings;
-  if (timing === "scaled") {
-    const scale = sourceLength / Math.max(was.sourceLength, END_EPS);
-    return {
-      ...was,
-      length: was.length * scale,
-      loop: was.loop ? [was.loop[0] * scale, was.loop[1] * scale] : null,
-      offset: was.offset * scale,
-      sourceLength,
-    };
-  }
+  const timing = soundOperationTiming(operation);
+  const was = recordedSettings(settings);
+  const length =
+    timing === "cropped"
+      ? sourceLength
+      : sourceLength - (was.sourceLength - (range[1] - range[0]));
   if (!was.reversed) {
-    return extendedSettings(was, sourceLength);
+    return movedSettings(was, range, length, timing, sourceLength);
   }
-  // Reversed, the new end of the source is where the clip starts: extend it forwards, then reverse it again.
-  const forward = extendedSettings(
+  // Reversed, it plays the source from its end: moved forwards, then reversed again.
+  const forward = movedSettings(
     { ...was, ...reversedSettings(was) },
+    range,
+    length,
+    timing,
     sourceLength
   );
   return { ...forward, ...reversedSettings(forward) };
@@ -215,6 +304,8 @@ interface ClipPanelProps {
   bar?: number;
   /** Beats in a bar: zoomed in far enough, the ruler numbers them too. @default 4 */
   beatsPerBar?: number;
+  /** Whether something was copied to paste. */
+  canPaste?: boolean;
   /** The source's channels, a reader each, for a waveform drawn a row a channel once the rows are tall enough to read, as a DAW draws a stereo recording. `samples` stays their mix. Leave it out for a mono source, or one waveform. */
   channels?: readonly ClipSamples[];
   /** Whatever the host puts at the end of the title bar. */
@@ -232,12 +323,16 @@ interface ClipPanelProps {
   onActiveChange?: (active: boolean) => void;
   /** The caret on the strip was pressed. */
   onCollapsedChange?: (collapsed: boolean) => void;
+  /** Copy was picked, or Cut: keep the stretch `range` of the source (in its own time, played forwards) to paste. Leave it out for a panel without Copy and Cut. */
+  onCopy?: (range: SoundRange) => void;
   /** Crop was pressed: cut the source down to what the clip plays. Leave it out for a panel without it. */
   onCrop?: () => void;
   /** Which boxes are folded was changed. */
   onFoldedBoxesChange?: (folded: string[]) => void;
-  /** An operation of the Process menu was picked: process the clip's source with `applySoundOperation`, then set what `processedSettings` gives. Leave it out for a panel without the menu. */
-  onProcess?: (operation: SoundOperation) => void;
+  /** Paste was picked: put what was copied in place of `range`, or at its start when it is a point, with `applySoundOperation`. */
+  onPaste?: (range: SoundRange) => void;
+  /** An edit or an operation of the Process menu was picked: run it on `range` of the clip's source (in its own time, played forwards), or on all of it when `range` is null, with `applySoundOperation`, then set what `processedSettings` gives. Leave it out for a panel that does not edit its source. */
+  onProcess?: (operation: SoundOperation, range: SoundRange | null) => void;
   /** A name was typed in the strip. */
   onRename?: (name: string) => void;
   /** Every change, as a gesture goes. */
@@ -638,6 +733,7 @@ function SampleBox({
  */
 function ClipPanel({
   active,
+  canPaste = false,
   bands,
   bar = 2,
   beatsPerBar = 4,
@@ -652,6 +748,8 @@ function ClipPanel({
   onCollapsedChange,
   onCrop,
   onFoldedBoxesChange,
+  onCopy,
+  onPaste,
   onProcess,
   onRename,
   onValueChange,
@@ -700,8 +798,32 @@ function ClipPanel({
   const shownView: SoundView =
     isSpectrogramView(view) && !can.spectrogram ? "wave" : view;
   const meter = useMemo(() => ({ bar, beatsPerBar }), [bar, beatsPerBar]);
+  // What is picked on the source, as long as the source keeps its length: an edit that changes it lets go.
+  const [picked, setPicked] = useState<{
+    at: SourcePick;
+    sourceLength: number;
+  } | null>(null);
+  const pick = picked?.sourceLength === sourceLength ? picked.at : null;
+  const setPick = useCallback(
+    (at: SourcePick | null) => setPicked(at ? { at, sourceLength } : null),
+    [sourceLength]
+  );
+  const range = useMemo(
+    () => (pick ? sourceRange(pick, { reversed, sourceLength, warp }) : null),
+    [pick, reversed, sourceLength, warp]
+  );
   // How long the source lasts on the clip: as recorded, or as its warp stretches it.
   const span = warp ? warpedTime(warp, sourceLength) : sourceLength;
+  const edits = useSourceEdits({
+    canPaste,
+    onCopy,
+    onPaste,
+    onProcess,
+    pick,
+    range,
+    setPick,
+    span,
+  });
   // Where playback reads the source, in the clip's time: from where it starts in it, round its loop.
   const { playhead, playing } = useClipPlayhead(arrangementPosition, {
     length,
@@ -928,26 +1050,24 @@ function ClipPanel({
       onCollapsedChange={onCollapsedChange}
       onFoldedBoxesChange={onFoldedBoxesChange}
       onRename={onRename}
-      tools={
-        <>
-          {samples ? (
-            <SourceViewMenu
-              bands={Boolean(bands) && can.waveform}
-              onViewChange={changeView}
-              spectrogram={can.spectrogram}
-              view={shownView}
-            />
-          ) : null}
-          {onProcess ? <SourceProcessMenu onProcess={onProcess} /> : null}
-        </>
-      }
     >
+      <SourceBar
+        bands={Boolean(bands) && can.waveform}
+        edits={onProcess ? edits : null}
+        format={format}
+        onViewChange={changeView}
+        range={range}
+        samples={Boolean(samples)}
+        spectrogram={can.spectrogram}
+        view={shownView}
+      />
       <ClipSource
         bands={bands}
         bar={bar}
         beatsPerBar={beatsPerBar}
         can={can}
         channels={channels}
+        edits={onProcess ? edits : null}
         format={format}
         length={length}
         loop={loop}
@@ -955,9 +1075,11 @@ function ClipPanel({
         offset={offset}
         onAddMarker={addMarker}
         onLoopChange={setLoop}
+        onPick={setPick}
         onPlayedChange={setPlayed}
         onValueCommitted={onValueCommitted}
         onWarpChange={setWarp}
+        pick={pick}
         playhead={playhead}
         playing={playing}
         reversed={reversed}
@@ -1092,10 +1214,256 @@ function useSourceDrawing({
   return { gpuClips, spectrogram };
 }
 
+/** What is picked on the source, in the clip's time as the view draws it, from and to: a stretch, or the point the caret is at when both meet. */
+type SourcePick = readonly [number, number];
+
+/** A pick in the source's own time, played forwards: what an edit acts on. */
+function sourceRange(
+  pick: SourcePick,
+  {
+    reversed,
+    sourceLength,
+    warp,
+  }: {
+    reversed: boolean;
+    sourceLength: number;
+    warp: readonly WarpMarker[] | null;
+  }
+): SoundRange {
+  const at = (time: number) => {
+    const played = warp ? unwarpedTime(warp, time) : time;
+    return Math.min(
+      Math.max(reversed ? sourceLength - played : played, 0),
+      sourceLength
+    );
+  };
+  const [from, to] = [at(pick[0]), at(pick[1])];
+  return from <= to ? [from, to] : [to, from];
+}
+
+/** How far Louder and Quieter move the level, in dB, as the audio editor's do. */
+const LEVEL_STEP = 3;
+const DELETE: SoundOperation = { type: "delete" };
+const CROP: SoundOperation = { type: "crop" };
+const LOUDER: SoundOperation = { db: LEVEL_STEP, type: "gain" };
+const QUIETER: SoundOperation = { db: -LEVEL_STEP, type: "gain" };
+
+/** What the bar says of the pick: the stretch's length, the caret's time, or how to pick. */
+function pickReadout(
+  range: SoundRange | null,
+  selected: boolean,
+  format: (seconds: number) => string,
+  editable: boolean
+) {
+  if (range && selected) {
+    return `Selection ${format(range[1] - range[0])}`;
+  }
+  if (range) {
+    return `At ${format(range[0])}`;
+  }
+  return editable ? "Drag on the sound to select, right-click to edit" : null;
+}
+
 /**
- * The views of the source, as a menu in the clip's strip, after its name, as
- * the audio editor's View menu: the waveform, by band when the host gives the
- * bands, and the spectrogram on each frequency axis when the GPU can draw it.
+ * The edits of the source on what is picked, as an audio editor makes them:
+ * Cut, Copy, Paste, Delete and Crop on the stretch selected, Louder, Quieter
+ * and the Process menu's operations on it, or on all of the source with none.
+ * Each goes to the host; `handleKey` is the keyboard of all of them.
+ */
+function useSourceEdits({
+  canPaste,
+  onCopy,
+  onPaste,
+  onProcess,
+  pick,
+  range,
+  setPick,
+  span,
+}: {
+  canPaste: boolean;
+  onCopy?: (range: SoundRange) => void;
+  onPaste?: (range: SoundRange) => void;
+  onProcess?: (operation: SoundOperation, range: SoundRange | null) => void;
+  pick: SourcePick | null;
+  range: SoundRange | null;
+  setPick: (pick: SourcePick | null) => void;
+  span: number;
+}) {
+  return useMemo(() => {
+    const selected = pick !== null && pick[1] > pick[0];
+    const stretch = selected ? range : null;
+    const process = (operation: SoundOperation) =>
+      onProcess?.(operation, stretch);
+    const copy = () => {
+      if (stretch) {
+        onCopy?.(stretch);
+      }
+    };
+    const onStretch = (operation: SoundOperation) => () => {
+      if (stretch) {
+        onProcess?.(operation, stretch);
+      }
+    };
+    const cut = () => {
+      if (stretch && onCopy) {
+        onCopy(stretch);
+        onProcess?.(DELETE, stretch);
+      }
+    };
+    const paste = () => {
+      if (canPaste && range) {
+        onPaste?.(range);
+      }
+    };
+    const remove = onStretch(DELETE);
+    const crop = onStretch(CROP);
+    const louder = () => process(LOUDER);
+    const quieter = () => process(QUIETER);
+    const selectAll = () => setPick([0, span]);
+    const clear = () => setPick(null);
+    /** Runs the edit a key stands for, and says whether one did. */
+    const handleKey = (event: KeyboardEvent<HTMLElement>) => {
+      const mod = event.metaKey || event.ctrlKey;
+      const key = event.key.toLowerCase();
+      const run = mod
+        ? { a: selectAll, c: copy, v: paste, x: cut }[key]
+        : {
+            arrowdown: event.shiftKey ? quieter : undefined,
+            arrowup: event.shiftKey ? louder : undefined,
+            backspace: remove,
+            delete: remove,
+            escape: clear,
+            k: crop,
+          }[key];
+      if (!run) {
+        return false;
+      }
+      run();
+      return true;
+    };
+    return {
+      canPaste,
+      clear,
+      copy,
+      crop,
+      cut,
+      handleKey,
+      louder,
+      paste,
+      picked: pick !== null,
+      process,
+      quieter,
+      remove,
+      selectAll,
+      selected,
+    };
+  }, [canPaste, onCopy, onPaste, onProcess, pick, range, setPick, span]);
+}
+
+type SourceEdits = ReturnType<typeof useSourceEdits>;
+
+const APPLE = /Mac|iPhone|iPad/;
+
+/** The edits of the source as menu items, each with its key: the bar's Edit menu and the menu a right-click opens. It renders only while open, so it reads the system then. */
+function SourceEditItems({ edits }: { edits: SourceEdits }) {
+  const mod = APPLE.test(navigator.userAgent) ? "⌘" : "Ctrl+";
+  const none = !edits.selected;
+  return (
+    <>
+      <DropdownMenuItem disabled={none} onClick={edits.cut}>
+        Cut
+        <DropdownMenuShortcut>{mod}X</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem disabled={none} onClick={edits.copy}>
+        Copy
+        <DropdownMenuShortcut>{mod}C</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem
+        disabled={!(edits.canPaste && edits.picked)}
+        onClick={edits.paste}
+      >
+        Paste
+        <DropdownMenuShortcut>{mod}V</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem disabled={none} onClick={edits.remove}>
+        Delete
+        <DropdownMenuShortcut>⌫</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem disabled={none} onClick={edits.crop}>
+        Crop
+        <DropdownMenuShortcut>K</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={edits.louder}>
+        Louder
+        <DropdownMenuShortcut>⇧↑</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuItem onClick={edits.quieter}>
+        Quieter
+        <DropdownMenuShortcut>⇧↓</DropdownMenuShortcut>
+      </DropdownMenuItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuItem onClick={edits.selectAll}>
+        Select all
+        <DropdownMenuShortcut>{mod}A</DropdownMenuShortcut>
+      </DropdownMenuItem>
+    </>
+  );
+}
+
+/** The bar's Edit menu. */
+function SourceEditMenu({ edits }: { edits: SourceEdits }) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={<Button size="sm" title="Edit" variant="ghost" />}
+      >
+        <ScissorsIcon />
+        Edit
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-56">
+        <SourceEditItems edits={edits} />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/**
+ * The bar's Process menu, the audio editor's: on the stretch selected, or on
+ * all of the source with none.
+ */
+function SourceProcessMenu({
+  onProcess,
+  selected,
+}: {
+  onProcess: (operation: SoundOperation) => void;
+  selected: boolean;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            size="sm"
+            title={selected ? "Process the selection" : "Process the sound"}
+            variant="ghost"
+          />
+        }
+      >
+        <MagicWandIcon />
+        Process
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        <ProcessMenuItems onProcess={onProcess} />
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/**
+ * The views of the source, as the bar's View menu, the audio editor's: the
+ * waveform, by band when the host gives the bands, and the spectrogram on
+ * each frequency axis when the GPU can draw it.
  */
 function SourceViewMenu({
   bands,
@@ -1124,13 +1492,14 @@ function SourceViewMenu({
         render={
           <Button
             aria-label={`View: ${label}`}
-            size="icon-sm"
+            size="sm"
             title="View"
             variant="ghost"
           />
         }
       >
         <WaveformIcon />
+        View
       </DropdownMenuTrigger>
       <DropdownMenuContent align="start" className="w-72">
         <DropdownMenuRadioGroup onValueChange={change} value={view}>
@@ -1156,34 +1525,19 @@ function SourceViewMenu({
   );
 }
 
-/**
- * The operations on the source, as a menu in the clip's strip, after its
- * views, as the audio editor's Process menu: its structure, level and tone,
- * time and pitch, and repairs.
- */
-function SourceProcessMenu({
-  onProcess,
-}: {
-  onProcess: (operation: SoundOperation) => void;
-}) {
+/** The menu a right-click on the sound opens: its edits, then the Process menu. */
+function SourceContextItems({ edits }: { edits: SourceEdits }) {
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger
-        render={
-          <Button
-            aria-label="Process"
-            size="icon-sm"
-            title="Process"
-            variant="ghost"
-          />
-        }
-      >
-        <MagicWandIcon />
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="start" className="w-64">
-        <ProcessMenuItems onProcess={onProcess} />
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <>
+      <SourceEditItems edits={edits} />
+      <DropdownMenuSeparator />
+      <DropdownMenuSub>
+        <DropdownMenuSubTrigger>Process</DropdownMenuSubTrigger>
+        <DropdownMenuSubContent className="w-64">
+          <ProcessMenuItems onProcess={edits.process} />
+        </DropdownMenuSubContent>
+      </DropdownMenuSub>
+    </>
   );
 }
 
@@ -1297,6 +1651,221 @@ const RulerMarks = memo(
 );
 
 /**
+ * The source's own bar, as an audio editor's: its edits and the Process menu
+ * where the host edits the source, how it is drawn, and what is picked.
+ */
+function SourceBar({
+  bands,
+  edits,
+  format,
+  onViewChange,
+  range,
+  samples,
+  spectrogram,
+  view,
+}: {
+  bands: boolean;
+  edits: SourceEdits | null;
+  format: (seconds: number) => string;
+  onViewChange: (view: SoundView) => void;
+  range: SoundRange | null;
+  samples: boolean;
+  spectrogram: boolean;
+  view: SoundView;
+}) {
+  if (!(edits || samples)) {
+    return null;
+  }
+  return (
+    <div
+      className="flex h-9 shrink-0 items-center gap-0.5 border-b px-1"
+      data-slot="clip-panel-toolbar"
+    >
+      {edits ? <SourceEditMenu edits={edits} /> : null}
+      {edits ? (
+        <SourceProcessMenu
+          onProcess={edits.process}
+          selected={edits.selected}
+        />
+      ) : null}
+      {samples ? (
+        <SourceViewMenu
+          bands={bands}
+          onViewChange={onViewChange}
+          spectrogram={spectrogram}
+          view={view}
+        />
+      ) : null}
+      <span
+        className="ms-auto truncate px-1.5 text-muted-foreground text-xs tabular-nums"
+        data-slot="clip-panel-pick"
+      >
+        {pickReadout(range, edits?.selected ?? false, format, Boolean(edits))}
+      </span>
+    </div>
+  );
+}
+
+/** What is picked, over the sound: the stretch selected, or the caret. */
+function PickMark({ pick }: { pick: SourcePick | null }) {
+  if (!pick) {
+    return null;
+  }
+  if (pick[1] > pick[0]) {
+    return <TimelineTimeSelection range={pick} />;
+  }
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-y-0 z-10 w-px bg-foreground/70"
+      data-slot="clip-panel-caret"
+      style={{ left: `calc(var(--timeline-unit) * ${pick[0]})` }}
+    />
+  );
+}
+
+/** How far a press has to move, in px, to select a stretch rather than put the caret down. */
+const PICK_SLOP = 3;
+
+/**
+ * The sound of the source as an audio editor's: a drag on it selects a
+ * stretch, a press puts the caret down (Shift extends what is selected), a
+ * right-click opens its edits and the Process menu, and its keys run them
+ * while it has the focus. Warped, a double-click adds a marker; else it
+ * selects all of it.
+ */
+function SourceEditor({
+  children,
+  edits,
+  name,
+  onAddMarker,
+  onPick,
+  pick,
+  span,
+  warped,
+}: {
+  children: ReactNode;
+  edits: SourceEdits | null;
+  name: string;
+  onAddMarker: (event: MouseEvent<HTMLDivElement>) => void;
+  onPick: (pick: SourcePick | null) => void;
+  pick: SourcePick | null;
+  span: number;
+  warped: boolean;
+}) {
+  const drag = useRef<{ anchor: number; x: number } | null>(null);
+  /** The time under the pointer, in the clip's time, or null off the sound. */
+  const timeAt = useCallback(
+    (clientX: number, element: HTMLElement) => {
+      const box = element
+        .querySelector('[data-slot="clip-panel-source"]')
+        ?.getBoundingClientRect();
+      if (!box || box.width <= 0) {
+        return null;
+      }
+      return Math.min(
+        Math.max(((clientX - box.left) / box.width) * span, 0),
+        span
+      );
+    },
+    [span]
+  );
+  const press = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const target = event.target as Element;
+      if (
+        event.button !== 0 ||
+        target.closest('[data-slot="clip-panel-warp-marker"]')
+      ) {
+        return;
+      }
+      const at = timeAt(event.clientX, event.currentTarget);
+      if (at === null) {
+        return;
+      }
+      // Shift keeps the far end of what is selected and moves the other.
+      const far =
+        pick && Math.abs(at - pick[0]) > Math.abs(at - pick[1])
+          ? pick[0]
+          : pick?.[1];
+      const anchor = event.shiftKey && far !== undefined ? far : at;
+      drag.current = { anchor, x: event.clientX };
+      event.currentTarget.setPointerCapture(event.pointerId);
+      onPick(anchor <= at ? [anchor, at] : [at, anchor]);
+    },
+    [onPick, pick, timeAt]
+  );
+  const move = useCallback(
+    (event: PointerEvent<HTMLDivElement>) => {
+      const held = drag.current;
+      if (!held || Math.abs(event.clientX - held.x) < PICK_SLOP) {
+        return;
+      }
+      const at = timeAt(event.clientX, event.currentTarget);
+      if (at !== null) {
+        onPick(held.anchor <= at ? [held.anchor, at] : [at, held.anchor]);
+      }
+    },
+    [onPick, timeAt]
+  );
+  const release = useCallback(() => {
+    drag.current = null;
+  }, []);
+  // A right-click outside what is selected puts the caret there first.
+  const contextMenu = useCallback(
+    (event: MouseEvent<HTMLDivElement>) => {
+      const at = timeAt(event.clientX, event.currentTarget);
+      if (at !== null && !(pick && at >= pick[0] && at <= pick[1])) {
+        onPick([at, at]);
+      }
+    },
+    [onPick, pick, timeAt]
+  );
+  const keyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (event.target === event.currentTarget && edits?.handleKey(event)) {
+        event.preventDefault();
+      }
+    },
+    [edits]
+  );
+  if (!edits) {
+    return (
+      // biome-ignore lint/a11y/noStaticElementInteractions: a pointer shortcut; the markers' own keys and the Warp switch cover the keyboard
+      <div
+        className="relative flex flex-1 flex-col"
+        onDoubleClick={onAddMarker}
+      >
+        {children}
+      </div>
+    );
+  }
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger
+        aria-label={`${name}: drag to select, right-click to edit`}
+        className="relative flex flex-1 select-none flex-col outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset"
+        data-slot="clip-panel-edit"
+        onContextMenu={contextMenu}
+        onDoubleClick={warped ? onAddMarker : edits.selectAll}
+        onKeyDown={keyDown}
+        onLostPointerCapture={release}
+        onPointerDown={press}
+        onPointerMove={move}
+        onPointerUp={release}
+        role="application"
+        tabIndex={0}
+      >
+        {children}
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-56">
+        <SourceContextItems edits={edits} />
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+
+/**
  * The clip's source on a timeline of its own: an overview bar to zoom and
  * scroll with, a ruler in bars, the stretch the clip plays (or its loop) to
  * drag at both ends, and the waveform, warped markers included, under it.
@@ -1307,6 +1876,7 @@ function ClipSource({
   beatsPerBar,
   can,
   channels,
+  edits,
   format,
   length,
   loop,
@@ -1314,9 +1884,11 @@ function ClipSource({
   offset,
   onAddMarker,
   onLoopChange,
+  onPick,
   onPlayedChange,
   onValueCommitted,
   onWarpChange,
+  pick,
   playhead,
   playing,
   reversed,
@@ -1334,6 +1906,8 @@ function ClipSource({
   /** What the GPU can draw of the source. */
   can: SourceDrawable;
   channels?: readonly ClipSamples[];
+  /** The edits of the source, or null where the host does not edit it: no pick, no menu. */
+  edits: SourceEdits | null;
   format: (seconds: number) => string;
   length: number;
   loop: readonly [number, number] | null;
@@ -1341,9 +1915,11 @@ function ClipSource({
   offset: number;
   onAddMarker: (event: MouseEvent<HTMLDivElement>) => void;
   onLoopChange: (next: readonly [number, number]) => void;
+  onPick: (pick: SourcePick | null) => void;
   onPlayedChange: (next: readonly [number, number]) => void;
   onValueCommitted?: () => void;
   onWarpChange: (next: readonly WarpMarker[]) => void;
+  pick: SourcePick | null;
   playhead?: Source<number>;
   /** Whether the clip plays now: its playhead shows. */
   playing: boolean;
@@ -1484,10 +2060,14 @@ function ClipSource({
             )}
           </TimelineLane>
           {/* Warped, a double-click on the waveform pins what plays there with a new marker. */}
-          {/* biome-ignore lint/a11y/noStaticElementInteractions: a pointer shortcut; the markers' own keys and the Warp switch cover the keyboard */}
-          <div
-            className="relative flex flex-1 flex-col"
-            onDoubleClick={onAddMarker}
+          <SourceEditor
+            edits={edits}
+            name={name}
+            onAddMarker={onAddMarker}
+            onPick={onPick}
+            pick={pick}
+            span={span}
+            warped={warp !== null}
           >
             {/* At least its own height, and as tall as the panel lets it. */}
             <TimelineLane
@@ -1535,9 +2115,10 @@ function ClipSource({
                   />
                 ) : null}
               </div>
+              <PickMark pick={pick} />
               {playing ? <TimelinePlayhead /> : null}
             </TimelineLane>
-          </div>
+          </SourceEditor>
         </div>
       </TimelineViewport>
     </Timeline>
