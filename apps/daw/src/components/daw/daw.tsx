@@ -69,7 +69,7 @@ import { exportSound } from "@/lib/daw/audio-files";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { renderConsolidated } from "@/lib/daw/consolidate";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
-import { type Dropped, decodeFiles, dropCommands } from "@/lib/daw/drop";
+import { decodeFiles, dropCommands } from "@/lib/daw/drop";
 import {
   DAWPROJECT_ACCEPT,
   exportProject,
@@ -83,6 +83,7 @@ import {
   saveToFolder,
 } from "@/lib/daw/folder";
 import { projectFromFolder } from "@/lib/daw/open-folder";
+import type { Processed } from "@/lib/daw/process";
 import { newProject, TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import {
   freshMidiClipId,
@@ -711,11 +712,17 @@ export function Daw({
     }
     return selectedTrack ? [selectedTrack] : [];
   }, [arrangement.selectedTracks, selectedTrack]);
-  // A recording the clip view's Process menu made (CLP-028): stored as a dropped file is, and played from now on.
+  // A recording the clip view's Process menu or an edit made (CLP-028, CLP-029): its bytes stored as a dropped file's are, or stored by the worker that made it, and played from now on.
   const keepRecording = useCallback(
-    async (id: string, { bytes, recording }: Dropped) => {
-      if (canStore()) {
-        await saveRecording(id, bytes);
+    async ({ id, kept, recording }: Processed) => {
+      if (kept instanceof ArrayBuffer) {
+        if (canStore()) {
+          await saveRecording(id, kept);
+        }
+      } else {
+        kept.catch(() =>
+          setSaved("Not saved: the browser refused to store the file")
+        );
       }
       setRecordings((current) => new Map([...current, [id, recording]]));
     },

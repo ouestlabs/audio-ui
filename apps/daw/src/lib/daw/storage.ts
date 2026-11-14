@@ -4,10 +4,10 @@
  * so it plays again whatever became of the files. One project for now.
  */
 import type { ArrangementDoc } from "@/lib/arrangement-state";
+import { RECORDINGS } from "@/lib/daw/files";
 import { withUniqueTrackIds } from "./project";
 
 const PROJECT = "project.json";
-const RECORDINGS = "recordings";
 
 /** What is saved of a recording besides its bytes. */
 export interface SavedRecording {

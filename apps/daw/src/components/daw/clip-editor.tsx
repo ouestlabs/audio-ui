@@ -21,8 +21,7 @@ import {
   type ClipSwing,
   DRUM_RACK_DEVICE,
 } from "@/lib/arrangement";
-import type { Dropped } from "@/lib/daw/drop";
-import { processSource, readSource } from "@/lib/daw/process";
+import { type Processed, processSource, readSource } from "@/lib/daw/process";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import {
   recordingBands,
@@ -128,8 +127,8 @@ export function ClipEditor({
   folded: readonly string[];
   onCollapsedChange: (collapsed: boolean) => void;
   onFoldedChange: (folded: string[]) => void;
-  /** A recording the Process menu made, under its id: keep it with the project's. */
-  onRecording: (id: string, made: Dropped) => Promise<void>;
+  /** A recording the Process menu or an edit made: keep it with the project's. */
+  onRecording: (made: Processed) => Promise<void>;
   recordings: ReadonlyMap<string, Recording>;
 }) {
   const { dispatch, doc } = arrangement;
@@ -223,15 +222,16 @@ export function ClipEditor({
       }
       const notice = toast.loading(`${soundOperationName(operation)}…`);
       try {
-        const [id, made] = await processSource(
+        const made = await processSource(
           recording,
           clip,
           operation,
           range,
           new Set(recordings.keys())
         );
-        await onRecording(id, made);
-        const { length } = made.recording;
+        await onRecording(made);
+        const { id, recording: kept } = made;
+        const { length } = kept;
         dispatch({
           change: (current) =>
             sameSource(current, clip)

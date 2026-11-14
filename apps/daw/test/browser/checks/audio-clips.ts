@@ -571,6 +571,31 @@ export const checks: Checks = {
         { was: before },
         { timeout: 5000 }
       );
+      // Redone, its file stored after as the page goes on, the project opens on it again.
+      await page.keyboard.press("Meta+Shift+KeyZ");
+      await page.waitForFunction(
+        async (want) => {
+          const folder = await (
+            await navigator.storage.getDirectory()
+          ).getDirectoryHandle("recordings");
+          return (await Array.fromAsync(folder.keys())).length >= want;
+        },
+        2,
+        { timeout: 30_000 }
+      );
+      await page.waitForTimeout(1500);
+      await page.reload();
+      await page.locator("[data-clip-id]").first().waitFor({ timeout: 30_000 });
+      await page.waitForFunction(
+        ({ was }) => {
+          const box = document
+            .querySelector("[data-clip-id]")
+            ?.getBoundingClientRect();
+          return box !== undefined && Math.abs(box.width - 2 * was) < 2;
+        },
+        { was: before },
+        { timeout: 10_000 }
+      );
     },
   "CLP-029: the clip view edits its sound as an audio editor does: a drag selects, Delete takes it out, Copy and Paste put it back, one undo each":
     async (browser) => {
