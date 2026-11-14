@@ -35,20 +35,22 @@ type Apart = (data: Float32Array, options: Options) => Float32Array;
 /** `wsola` takes every channel at once and shares one search, so the channels stay in phase. */
 const together: Together = (data, options) => wsola(data, options);
 
-/** The others take one channel at a time. */
-const APART: Record<Exclude<StretchMethod, "wsola">, Apart> = {
-  hybrid: (data, options) => hybrid(data, options),
-  paulstretch: (data, options) => paulstretch(data, options),
-  pvocLock: (data, options) => pvocLock(data, options),
-  pvsola: (data, options) => pvsola(data, options),
-  transient: (data, options) => transient(data, options),
-};
+/** The others take one channel at a time: a map, so a name it does not hold finds nothing, not a function every object inherits. */
+const APART = new Map<string, Apart>(
+  Object.entries({
+    hybrid: (data, options) => hybrid(data, options),
+    paulstretch: (data, options) => paulstretch(data, options),
+    pvocLock: (data, options) => pvocLock(data, options),
+    pvsola: (data, options) => pvsola(data, options),
+    transient: (data, options) => transient(data, options),
+  } satisfies Record<Exclude<StretchMethod, "wsola">, Apart>)
+);
 
 /**
  * Every channel `factor` times as long, its pitch unchanged: 2 is twice as
  * slow, 0.5 twice as fast. The channels share one analysis where the method
  * allows it (`wsola`), so they stay in phase; the other methods take them
- * one by one.
+ * one by one. A method not in `STRETCH_METHODS` throws a `RangeError`.
  */
 export function stretchChannels(
   channels: readonly Float32Array[],
@@ -62,7 +64,10 @@ export function stretchChannels(
   if (method === "wsola") {
     return together([...channels], options);
   }
-  const apart = APART[method];
+  const apart = APART.get(method);
+  if (!apart) {
+    throw new RangeError(`There is no stretch method called "${method}".`);
+  }
   return channels.map((channel) => apart(channel, options));
 }
 

@@ -69,12 +69,19 @@ export function panChannels(
 /** A filter's shape: what it lets through, 12 dB an octave. */
 export type FilterType = "highpass" | "lowpass" | "notch";
 
-const DESIGNS = { highpass, lowpass, notch } as const;
+/** Each filter's design, as a map: a type it does not hold finds nothing, not a function every object inherits. */
+const DESIGNS = new Map<string, typeof lowpass>(
+  Object.entries({ highpass, lowpass, notch } satisfies Record<
+    FilterType,
+    typeof lowpass
+  >)
+);
 
 /**
  * Every channel through one filter of the cookbook, at `frequency` in hertz
  * and a `q` (one over the square root of two by default, the flattest). A
- * frequency at or over the Nyquist limit comes back as it is.
+ * frequency at or over the Nyquist limit comes back as it is, and a type
+ * other than `highpass`, `lowpass` or `notch` throws a `RangeError`.
  */
 export function filterChannels(
   channels: readonly Float32Array[],
@@ -84,7 +91,11 @@ export function filterChannels(
   if (!(frequency > 0 && frequency < sampleRate / 2)) {
     return [...channels];
   }
-  const coefficients = DESIGNS[type](frequency, q, sampleRate);
+  const design = DESIGNS.get(type);
+  if (!design) {
+    throw new RangeError(`There is no filter type called "${type}".`);
+  }
+  const coefficients = design(frequency, q, sampleRate);
   return channels.map((channel) => {
     const out = Float32Array.from(channel);
     processSection(out, coefficients);

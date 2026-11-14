@@ -62,3 +62,17 @@ describe("speedChannels", () => {
     expect(frequencyOf(out ?? new Float32Array())).toBeLessThan(900);
   });
 });
+
+describe("a stretch by a method it does not know", () => {
+  test("throws, even for a name every object inherits", () => {
+    const channels = [new Float32Array(1024)];
+    for (const method of ["varispeed", "constructor"]) {
+      expect(() =>
+        stretchChannels(channels, RATE, {
+          factor: 2,
+          method: method as "transient",
+        })
+      ).toThrow(RangeError);
+    }
+  });
+});
