@@ -7,9 +7,18 @@ import {
   FrameContent,
   FrameHeader,
 } from "@/components/site/layout/frame";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { DEFAULT_CONFIG, useConfig } from "@/hooks/use-config";
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { type Config, DEFAULT_CONFIG, useConfig } from "@/hooks/use-config";
 import { useMounted } from "@/hooks/use-mounted";
+
+type PackageManager = Config["packageManager"];
 
 export function CodeBlockCommand({
   __npm__,
@@ -29,7 +38,7 @@ export function CodeBlockCommand({
     ? (config.packageManager ?? DEFAULT_CONFIG.packageManager)
     : DEFAULT_CONFIG.packageManager;
 
-  const tabs = React.useMemo(
+  const commands = React.useMemo(
     () => ({
       bun: __bun__,
       npm: __npm__,
@@ -39,73 +48,85 @@ export function CodeBlockCommand({
     [__npm__, __pnpm__, __yarn__, __bun__]
   );
 
-  const command = tabs[packageManager] ?? "";
+  const command = commands[packageManager] ?? "";
   const handlePackageManagerChange = React.useCallback(
-    (value: string) =>
-      setConfig({
-        ...config,
-        packageManager: value as "pnpm" | "npm" | "yarn" | "bun",
-      }),
+    (value: PackageManager | null) => {
+      if (value) {
+        setConfig({ ...config, packageManager: value });
+      }
+    },
     [config, setConfig]
   );
 
   return (
-    <Tabs
-      className="gap-0"
-      onValueChange={handlePackageManagerChange}
-      value={packageManager}
-    >
-      {/* The frame of the site: the package managers in its header, the command in its panel. */}
-      <Frame className="not-typeset" data-code-command="">
-        <FrameHeader className="min-h-11 flex-row items-center justify-between gap-3 px-2 py-1.5">
-          <div className="flex items-center gap-2 ps-1">
-            <TerminalIcon
-              aria-hidden="true"
-              className="size-4 text-site-muted-foreground"
-              weight="fill"
-            />
-            <TabsList>
-              {(Object.keys(tabs) as (keyof typeof tabs)[]).map((key) => {
-                const Icon = Icons[key];
-                return (
-                  <TabsTrigger key={key} value={key}>
-                    <Icon className="size-3.5" />
-                    {key}
-                  </TabsTrigger>
-                );
-              })}
-            </TabsList>
-          </div>
-          <CopyButton
-            className="relative"
-            event="copy_command"
-            properties={{
-              base: config.base,
-              command,
-              iconLibrary: config.iconLibrary,
-              pm: packageManager,
-              style: config.style,
-            }}
-            style={{ right: "auto", top: "auto" }}
-            value={command}
-            variant="outline"
+    // The frame of the site: the package manager chosen in its header, its command in the panel.
+    <Frame className="not-typeset" data-code-command="">
+      <FrameHeader className="min-h-11 flex-row items-center justify-between gap-3 px-2 py-1.5">
+        <div className="flex items-center gap-2 ps-1">
+          <TerminalIcon
+            aria-hidden="true"
+            className="size-4 text-site-muted-foreground"
+            weight="fill"
           />
-        </FrameHeader>
-        <FrameContent className="no-scrollbar scroll-fade-x overflow-x-auto">
-          {Object.entries(tabs).map(([key, value]) => (
-            <TabsContent className="mt-0 px-4 py-3.5" key={key} value={key}>
-              <pre>
-                <code
-                  className="relative mr-4 font-mono text-sm leading-none"
-                  data-language="bash"
-                >
-                  {value}
-                </code>
-              </pre>
-            </TabsContent>
-          ))}
-        </FrameContent>
-      </Frame>
-    </Tabs>
+          <Select
+            onValueChange={handlePackageManagerChange}
+            value={packageManager}
+          >
+            <SelectTrigger aria-label="Package manager">
+              <SelectValue>
+                {(value: PackageManager) => {
+                  const Icon = Icons[value];
+                  return (
+                    <>
+                      <Icon aria-hidden="true" className="size-3.5" />
+                      {value}
+                    </>
+                  );
+                }}
+              </SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              <SelectGroup>
+                {(Object.keys(commands) as PackageManager[]).map((key) => {
+                  const Icon = Icons[key];
+                  return (
+                    <SelectItem key={key} value={key}>
+                      <Icon aria-hidden="true" className="size-3.5" />
+                      {key}
+                    </SelectItem>
+                  );
+                })}
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </div>
+        <CopyButton
+          className="relative"
+          event="copy_command"
+          properties={{
+            base: config.base,
+            command,
+            iconLibrary: config.iconLibrary,
+            pm: packageManager,
+            style: config.style,
+          }}
+          style={{ right: "auto", top: "auto" }}
+          value={command}
+          variant="outline"
+        />
+      </FrameHeader>
+      <FrameContent className="no-scrollbar scroll-fade-x overflow-x-auto">
+        <div className="px-4 py-3.5">
+          <pre>
+            <code
+              className="relative mr-4 font-mono text-sm leading-none"
+              data-language="bash"
+            >
+              {command}
+            </code>
+          </pre>
+        </div>
+      </FrameContent>
+    </Frame>
   );
 }

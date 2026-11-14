@@ -82,7 +82,6 @@ export const ComponentSidebarCategoryMenu = React.memo(
               <React.Fragment key={group.label}>
                 <GroupLabel
                   collapsible
-                  current={group.label === currentGroup}
                   onOpenChange={setOpen}
                   open={open}
                   title={group.label}
