@@ -556,21 +556,6 @@
         "summary": "The lengths a pause can be shrunk to: 0 takes it out whole."
       },
       {
-        "kind": "const",
-        "name": "LEVEL_NUDGE",
-        "summary": "How far Louder and Quieter move the selection's level, in dB."
-      },
-      {
-        "kind": "const",
-        "name": "MIN_DB",
-        "summary": "A selection's level range, in dB: silence at the bottom, a boost of 6 dB at the top."
-      },
-      {
-        "kind": "const",
-        "name": "MAX_DB",
-        "summary": ""
-      },
-      {
         "kind": "function",
         "name": "typing",
         "summary": "Whether a key went to a field you type in, where its keys are its own."
@@ -584,16 +569,6 @@
         "kind": "const",
         "name": "splice",
         "summary": "The crossfade of an edit's seam at `at`, in a sound `length` long: the clip that ends there and the one that starts there play through each other."
-      },
-      {
-        "kind": "interface",
-        "name": "StretchShape",
-        "summary": "What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB."
-      },
-      {
-        "kind": "const",
-        "name": "FLAT",
-        "summary": ""
       },
       {
         "kind": "const",
@@ -628,6 +603,7 @@
     "kind": "lib",
     "name": "clip-edits",
     "registryDependencies": [
+      "selection-frame",
       "arrangement",
       "use-arrangement"
     ],
@@ -1678,6 +1654,7 @@
   },
   {
     "dependencies": [
+      "@audio-ui/core",
       "@audio-ui/engine"
     ],
     "description": "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair, with an audio editor's Delete, Crop, Paste and Gain; applySoundOperation runs one on plain channels, on all of them or a stretch spliced back with crossfaded seams, soundOperationName names it as a step of the history",
@@ -2078,6 +2055,7 @@
     "kind": "hook",
     "name": "use-clip-edits",
     "registryDependencies": [
+      "selection-frame",
       "arrangement",
       "clip-edits",
       "use-arrangement"

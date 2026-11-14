@@ -96,6 +96,30 @@ describe("applySoundOperation on a stretch", () => {
   });
 });
 
+describe("a stretch shaped on its frame", () => {
+  test("fades in and out along its curves and takes its level", () => {
+    const steady = {
+      channels: [new Float32Array(100).fill(1)],
+      sampleRate: 100,
+    };
+    const shaped = Array.from(
+      applySoundOperation(steady, {
+        fadeIn: 0.1,
+        fadeInShape: "linear",
+        fadeOut: 0.1,
+        fadeOutShape: "linear",
+        gain: -6,
+        type: "shape",
+      }).channels[0] ?? []
+    );
+    const level = 10 ** (-6 / 20);
+    expect(shaped[0]).toBe(0);
+    expect(shaped[5]).toBeCloseTo(0.5 * level, 3);
+    expect(shaped[50]).toBeCloseTo(level, 3);
+    expect(shaped[99]).toBeCloseTo(0.1 * level, 3);
+  });
+});
+
 describe("soundOperationName", () => {
   test("names each operation as a step of the history", () => {
     const named: [SoundOperation, string][] = [
@@ -116,6 +140,17 @@ describe("soundOperationName", () => {
       [{ channels: [], type: "paste" }, "Paste"],
       [{ db: 3, type: "gain" }, "Louder"],
       [{ db: -3, type: "gain" }, "Quieter"],
+      [
+        {
+          fadeIn: 0.5,
+          fadeInShape: "linear",
+          fadeOut: 0,
+          fadeOutShape: "linear",
+          gain: 0,
+          type: "shape",
+        },
+        "Fade",
+      ],
     ];
     for (const [operation, name] of named) {
       expect(soundOperationName(operation)).toBe(name);

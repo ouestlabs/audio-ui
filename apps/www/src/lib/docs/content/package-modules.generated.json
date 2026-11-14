@@ -1828,6 +1828,7 @@
     "audiojs": [],
     "typesOnly": false,
     "usedBy": [
+      "sound-operations",
       "use-timeline-cursor"
     ]
   },
@@ -2528,6 +2529,7 @@
     "usedBy": [
       "arrangement",
       "audio-export",
+      "sound-operations",
       "use-audio-levels",
       "use-audio-signal",
       "use-loudness",
@@ -6797,7 +6799,6 @@
     "usedBy": [
       "arrangement",
       "arrangement-engine",
-      "clip-edits",
       "use-arrangement",
       "use-audio-levels",
       "use-clip-edits",

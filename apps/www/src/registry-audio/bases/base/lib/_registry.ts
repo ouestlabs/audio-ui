@@ -21,13 +21,14 @@ const items: RegistryItem[] = [
     description:
       "The pure parts of editing one sound on a track of an arrangement: taking time out and the crossfade at its seam, the fades and level of a stretch of time, how far a pause is shrunk, and which keys are a field's own",
     registryDependencies: [
+      "@audio-ui/selection-frame",
       "@audio-ui/arrangement",
       "@audio-ui/use-arrangement",
     ],
   }),
   libItem("sound-operations", {
     categories: ["lib", "audio"],
-    dependencies: ["@audio-ui/engine"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair, with an audio editor's Delete, Crop, Paste and Gain; applySoundOperation runs one on plain channels, on all of them or a stretch spliced back with crossfaded seams, soundOperationName names it as a step of the history",
     registryDependencies: [],
