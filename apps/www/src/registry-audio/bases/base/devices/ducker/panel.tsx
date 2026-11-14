@@ -3,6 +3,7 @@ import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
   PlotHandle,
@@ -18,7 +19,10 @@ import {
   duckerCurve,
   duckerDevice,
 } from "@/registry-audio/bases/base/devices/ducker/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
+import {
+  curveDot,
+  type DeviceSignal,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_KEY_DB = -60;
 const MAX_KEY_DB = 0;
@@ -57,6 +61,11 @@ function DuckerPanel({
   value,
 }: DuckerPanelProps) {
   const curve = useMemo(() => duckerCurve(value), [value]);
+  // The dot rides the curve at the level of the key, the louder of its channels: how far it ducks the sound now.
+  const dot = useMemo(() => {
+    const levels = signal?.key?.levels;
+    return levels && curveDot(levels, curve);
+  }, [curve, signal]);
   const change = useCallback(
     ({ x }: { x: number }) =>
       onValueChange(duckerDevice.apply(value, { thresholdDb: x }).state),
@@ -98,6 +107,10 @@ function DuckerPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {dot ? (
+            // With no sound going in, the dot has no place on the curve.
+            <PlotDot className="group-data-idle/device:hidden" source={dot} />
+          ) : null}
           {value.enabled ? (
             <PlotHandle
               aria-label="Threshold"

@@ -3,6 +3,7 @@ import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
   PlotHandle,
@@ -18,7 +19,10 @@ import {
   limiterCurve,
   limiterDevice,
 } from "@/registry-audio/bases/base/devices/limiter/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
+import {
+  curveDot,
+  type DeviceSignal,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_DB = -48;
 const MAX_DB = 0;
@@ -56,6 +60,11 @@ function LimiterPanel({
   value,
 }: LimiterPanelProps) {
   const curve = useMemo(() => limiterCurve(value), [value]);
+  // The dot rides the curve at the level going in, the louder of its channels.
+  const dot = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels && curveDot(levels, curve);
+  }, [curve, signal]);
   const change = useCallback(
     ({ x, y }: { x: number; y: number }) =>
       onValueChange(
@@ -102,6 +111,10 @@ function LimiterPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {dot ? (
+            // With no sound going in, the dot has no place on the curve.
+            <PlotDot className="group-data-idle/device:hidden" source={dot} />
+          ) : null}
           {value.enabled ? (
             <PlotHandle
               aria-label="Ceiling and gain"

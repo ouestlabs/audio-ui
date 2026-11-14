@@ -3,6 +3,7 @@ import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
   PlotHandle,
@@ -19,7 +20,10 @@ import {
   companderCurve,
   companderDevice,
 } from "@/registry-audio/bases/base/devices/compander/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
+import {
+  curveDot,
+  type DeviceSignal,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_DB = -90;
 const MAX_DB = 0;
@@ -56,6 +60,11 @@ function CompanderPanel({
   value,
 }: CompanderPanelProps) {
   const curve = useMemo(() => companderCurve(value), [value]);
+  // The dot rides the curve at the level going in, the louder of its channels.
+  const dot = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels && curveDot(levels, curve);
+  }, [curve, signal]);
   // A handle moves up and down only: its level in says which point it is.
   const movePoint = useCallback(
     ({ x, y }: { x: number; y: number }) => {
@@ -100,6 +109,10 @@ function CompanderPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {dot ? (
+            // With no sound going in, the dot has no place on the curve.
+            <PlotDot className="group-data-idle/device:hidden" source={dot} />
+          ) : null}
           {value.enabled
             ? COMPANDER_POINTS.map((id, index) => {
                 const inDb = COMPANDER_POINTS_DB[index] ?? 0;

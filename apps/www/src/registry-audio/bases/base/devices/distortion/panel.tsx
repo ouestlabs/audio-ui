@@ -19,7 +19,10 @@ import {
   distortionDevice,
   distortionShape,
 } from "@/registry-audio/bases/base/devices/distortion/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
+import {
+  type DeviceSignal,
+  peakDots,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 const TICKS = [-0.5, 0, 0.5];
 const UNITY = (input: number) => input;
@@ -35,35 +38,6 @@ const shapeOf = (curve: string, input: number) =>
 const OFF = distortionDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled");
-
-/**
- * Two dots on the curve at the held peak of what goes in, one each side of
- * zero: how far along the curve the sound swings, from the clean middle
- * towards where it bends.
- */
-function useSwing(
-  signal: DeviceSignal | undefined,
-  curve: (input: number) => number
-) {
-  const levels = signal?.input?.levels;
-  return useMemo(() => {
-    if (!levels) {
-      return null;
-    }
-    const reach = () =>
-      Math.min(1, 10 ** (Math.max(...(levels.getSnapshot().peaks ?? [])) / 20));
-    return [1, -1].map((side) => ({
-      key: side,
-      source: {
-        getSnapshot: () => {
-          const x = side * reach();
-          return { x, y: curve(x) };
-        },
-        subscribe: levels.subscribe,
-      },
-    }));
-  }, [curve, levels]);
-}
 
 interface DistortionPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */
@@ -89,7 +63,11 @@ function DistortionPanel({
   value,
 }: DistortionPanelProps) {
   const curve = useMemo(() => distortionCurve(value), [value]);
-  const swing = useSwing(signal, curve);
+  // Two dots at the peaks of what goes in: how far along the curve the sound swings.
+  const swing = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels ? peakDots(levels, curve) : null;
+  }, [curve, signal]);
   const pickCurve = useCallback(
     (next: string) => onValueChange(distortionDevice.set(value, "curve", next)),
     [onValueChange, value]
@@ -124,15 +102,18 @@ function DistortionPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
-          {swing
-            ? swing.map((dot) => (
-                <PlotDot
-                  className="group-data-idle/device:hidden"
-                  key={dot.key}
-                  source={dot.source}
-                />
-              ))
-            : null}
+          {swing ? (
+            <>
+              <PlotDot
+                className="group-data-idle/device:hidden"
+                source={swing.positive}
+              />
+              <PlotDot
+                className="group-data-idle/device:hidden"
+                source={swing.negative}
+              />
+            </>
+          ) : null}
         </Plot>
         <div className="grid grid-cols-[auto_1fr] items-start gap-x-3">
           <div className="flex flex-col items-center gap-1.5">

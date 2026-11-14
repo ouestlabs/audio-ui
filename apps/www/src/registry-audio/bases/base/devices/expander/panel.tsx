@@ -11,6 +11,7 @@ import {
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
   PlotHandle,
@@ -26,7 +27,10 @@ import {
   expanderCurve,
   expanderDevice,
 } from "@/registry-audio/bases/base/devices/expander/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
+import {
+  curveDot,
+  type DeviceSignal,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_DB = -80;
 const MAX_IN_DB = 0;
@@ -69,6 +73,11 @@ function ExpanderPanel({
   value,
 }: ExpanderPanelProps) {
   const curve = useMemo(() => expanderCurve(value), [value]);
+  // The dot rides the curve at the level going in, the louder of its channels.
+  const dot = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels && curveDot(levels, curve);
+  }, [curve, signal]);
   const change = useCallback(
     ({ x }: { x: number }) =>
       onValueChange(expanderDevice.apply(value, { thresholdDb: x }).state),
@@ -143,6 +152,10 @@ function ExpanderPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {dot ? (
+            // With no sound going in, the dot has no place on the curve.
+            <PlotDot className="group-data-idle/device:hidden" source={dot} />
+          ) : null}
           {value.enabled ? (
             <PlotHandle
               aria-label="Threshold"

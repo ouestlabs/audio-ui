@@ -659,6 +659,53 @@ export function deriveSource<From, To>(
   );
 }
 
+/**
+ * A dot on a transfer curve at the level of `levels`, the louder of its
+ * channels: where the sound sits on the curve now, for a `Plot.Dot` (`x` the
+ * level in, `y` what `curve` makes of it). It follows the levels without a
+ * React render.
+ */
+export function curveDot(
+  levels: Source<MeterFrame>,
+  curve: (level: number) => number
+): Source<{ x: number; y: number }> {
+  const point = { x: SILENCE_DB, y: SILENCE_DB };
+  return {
+    getSnapshot: () => {
+      point.x = Math.max(...levels.getSnapshot().levels);
+      point.y = curve(point.x);
+      return point;
+    },
+    subscribe: levels.subscribe,
+  };
+}
+
+/**
+ * Two dots on a shaper's curve, from -1 to 1, at the held peak of `levels`,
+ * one each side of zero: how far along the curve the sound swings, from the
+ * clean middle towards where it bends. For two `Plot.Dot`s, `positive` and
+ * `negative`; they follow the levels without a React render.
+ */
+export function peakDots(
+  levels: Source<MeterFrame>,
+  curve: (input: number) => number
+): Record<"negative" | "positive", Source<{ x: number; y: number }>> {
+  const reach = () =>
+    Math.min(1, 10 ** (Math.max(...(levels.getSnapshot().peaks ?? [])) / 20));
+  const dot = (side: number) => {
+    const point = { x: 0, y: 0 };
+    return {
+      getSnapshot: () => {
+        point.x = side * reach();
+        point.y = curve(point.x);
+        return point;
+      },
+      subscribe: levels.subscribe,
+    };
+  };
+  return { negative: dot(-1), positive: dot(1) };
+}
+
 const sameReadings = (a: DeviceReadings, b: DeviceReadings) => {
   if (a.gainReductionDb !== b.gainReductionDb) {
     return false;

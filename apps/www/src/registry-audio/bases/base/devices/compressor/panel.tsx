@@ -27,7 +27,10 @@ import {
   compressorDevice,
   compressorUnused,
 } from "@/registry-audio/bases/base/devices/compressor/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
+import {
+  curveDot,
+  type DeviceSignal,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_DB = -60;
 const MAX_DB = 6;
@@ -82,18 +85,10 @@ function CompressorPanel({
   );
   const unused = compressorUnused(value.model);
   // The dot rides the curve at the level going in, the louder of its channels.
-  const levels = signal?.input?.levels;
-  const dot = useMemo(
-    () =>
-      levels && {
-        getSnapshot: () => {
-          const x = Math.max(...levels.getSnapshot().levels);
-          return { x, y: output(x) };
-        },
-        subscribe: levels.subscribe,
-      },
-    [levels, output]
-  );
+  const dot = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels && curveDot(levels, output);
+  }, [output, signal]);
   return (
     <div
       className={cn("h-full w-full", className)}
