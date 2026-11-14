@@ -328,7 +328,7 @@ export const hooks: RegistryItem[] = [
     categories: ["hooks", "audio", "device"],
     dependencies: ["@audio-ui/engine"],
     description:
-      "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and analysers of what goes in and comes out are there for a meter or a spectrum.",
+      "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal).",
     registryDependencies: [
       "@audio-ui/demo-sound",
       "@audio-ui/use-demo-source",
