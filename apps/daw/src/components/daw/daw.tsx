@@ -361,6 +361,22 @@ function exportRangeText(range: readonly [number, number], selected: boolean) {
     : `The arrangement, to the end of its last clip: ${seconds} s.`;
 }
 
+/**
+ * The library on the left (KEY-021): whether it shows, kept from visit to
+ * visit, its search field, and how the end of a chain opens it with its search
+ * focused. Open, the library is beside the chain already: the chain has no way
+ * to it then (DEV-003).
+ */
+function useLibraryPanel() {
+  const [open, setOpen] = useSavedState("libraryOpen", true);
+  const search = useRef<HTMLInputElement>(null);
+  const show = useCallback(() => {
+    setOpen(true);
+    requestAnimationFrame(() => search.current?.focus());
+  }, [setOpen]);
+  return { open, openFromChain: open ? undefined : show, search, setOpen };
+}
+
 export function Daw({
   folder: initialFolder,
   initial,
@@ -569,15 +585,14 @@ export function Daw({
     },
     [setPanelView, setSelectedTrack]
   );
-  // The library on the left (KEY-021), and its search, which the end of a chain focuses.
-  const [libraryOpen, setLibraryOpen] = useSavedState("libraryOpen", true);
+  const {
+    open: libraryOpen,
+    openFromChain: openLibrary,
+    search: librarySearch,
+    setOpen: setLibraryOpen,
+  } = useLibraryPanel();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const openSettings = useCallback(() => setSettingsOpen(true), []);
-  const librarySearch = useRef<HTMLInputElement>(null);
-  const openLibrary = useCallback(() => {
-    setLibraryOpen(true);
-    requestAnimationFrame(() => librarySearch.current?.focus());
-  }, [setLibraryOpen]);
   /** Puts a device of the library on `onto`, or on a track of its own (DEV-003), and shows it in the device view. */
   const placeDevice = useCallback(
     (device: string, onto: string | null) => {
@@ -1576,8 +1591,7 @@ export function Daw({
             onHoldNote={holdNote}
             onNoteOff={noteOff}
             onNoteOn={noteOn}
-            // The chain's way to the library while it is closed; open, the library is beside it already.
-            onOpenLibrary={libraryOpen ? undefined : openLibrary}
+            onOpenLibrary={openLibrary}
             onPadFiles={addPadSample}
             overridden={automation.overridden}
             position={engine.position}
