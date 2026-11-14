@@ -32,7 +32,8 @@ Test: apps/daw/test/browser/run.ts "TRN-007"
 
 ### TRN-008 The end of the arrangement
 Playback stops at the end of the arrangement's length.
-Deviation: the reference plays on past its last clip for as long as it is left running. The arrangement here has a length, which grows when a clip is laid past it.
+Deviation: the reference plays on past its last clip for as long as it is left running. The arrangement here has a length, which grows when a clip is laid past it, or when the clip view stretches a clip past it (its end dragged or typed, a loop played longer), in the same step of undo.
+Test: apps/www/test/registry-audio/base/lib/arrangement-state.test.ts "TRN-008"; apps/daw/test/browser/run.ts "TRN-008"
 
 ### TRN-009 What you see is what you hear
 The playhead is drawn where the sound that leaves the speakers is: the position of the audio clock less the output latency.

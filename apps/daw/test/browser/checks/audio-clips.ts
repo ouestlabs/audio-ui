@@ -702,6 +702,50 @@ export const checks: Checks = {
         `the right-click menu has no ${missing.join(", ")}`
       );
     },
+  "TRN-008: a clip stretched past the end of the arrangement in the clip view makes it longer, and one undo takes it back":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      // The arrangement's length, in seconds: as far as its overview bar reaches.
+      const duration = async () =>
+        Number(
+          await page
+            .locator('input[aria-label="End of the visible range"]')
+            .first()
+            .getAttribute("max")
+        );
+      // Waits for the arrangement to be longer than `was`, or as long as it.
+      const lengthIs = async (was: number, longer: boolean) =>
+        await page.waitForFunction(
+          ({ longer: grown, was: seconds }) => {
+            const now = Number(
+              document
+                .querySelector('input[aria-label="End of the visible range"]')
+                ?.getAttribute("max")
+            );
+            return grown ? now > seconds : now === seconds;
+          },
+          { longer, was },
+          { timeout: 5000 }
+        );
+      const before = await duration();
+      const panel = page.locator("[data-slot=clip-panel]");
+      // Looped, a clip plays on as long as it is made to: past the arrangement's end.
+      await panel.getByRole("button", { exact: true, name: "Loop" }).click();
+      const end = panel.locator('input[aria-label="End"]');
+      await end.fill("999.1.1");
+      await end.press("Enter");
+      await lengthIs(before, true);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Meta+KeyZ");
+      await lengthIs(before, false);
+    },
   "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":
     async (browser) => {
       const page = await open(browser);

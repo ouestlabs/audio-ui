@@ -3099,10 +3099,19 @@ const handlers: Handlers = {
     ),
   "duplicate-track": (state, { id }) => duplicateTrack(state, id),
   "edit-clip": (state, { id, change }) =>
-    burst(state, (doc) => ({
-      ...doc,
-      clips: doc.clips.map((clip) => (clip.id === id ? change(clip) : clip)),
-    })),
+    burst(state, (doc) => {
+      const clips = doc.clips.map((clip) =>
+        clip.id === id ? change(clip) : clip
+      );
+      // A clip edited past the end makes room for itself: the arrangement grows to hold it (TRN-008).
+      const edited = clips.find((clip) => clip.id === id);
+      const end = edited ? edited.value.start + edited.value.length : 0;
+      return {
+        ...doc,
+        clips,
+        duration: Math.max(doc.duration, end),
+      };
+    }),
   "fade-time": (state, { time }) =>
     edit(state, (doc) => ({ ...doc, clips: fadeTime(doc.clips, time) })),
   "insert-time": (state, { at, length }) =>
