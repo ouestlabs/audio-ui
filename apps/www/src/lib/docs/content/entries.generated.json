@@ -1689,6 +1689,11 @@
       },
       {
         "kind": "type",
+        "name": "SoundRange",
+        "summary": "A stretch of a sound, from where it starts to where it ends, in seconds."
+      },
+      {
+        "kind": "type",
         "name": "SoundOperation",
         "summary": "One change to a sound's samples."
       },
@@ -1703,14 +1708,19 @@
         "summary": "What an operation is called, as a step of the history: \"Repeat ×2\", \"Pitch -5 st\"."
       },
       {
+        "kind": "const",
+        "name": "SEAM",
+        "summary": "How long the seam between what an operation made and what it left is crossfaded, in seconds: no click at either end."
+      },
+      {
         "kind": "function",
         "name": "applySoundOperation",
-        "summary": "The sound an operation makes: new channels, at the same rate."
+        "summary": "The sound an operation makes, at the same rate: of the whole sound, or of `range` alone, spliced back in with its seams crossfaded."
       },
       {
         "kind": "function",
         "name": "soundOperationTiming",
-        "summary": "How an operation moves the times of a sound: `\"scaled\"` by how much longer it makes it (Stretch, Speed), `\"extended\"` at the end (Repeat, Add silence), or `\"kept\"`."
+        "summary": "How an operation moves the times in the stretch it changes: `\"scaled\"` by how much longer it makes it (Stretch, Speed), `\"cropped\"` to it alone (Crop), or `\"spliced\"`, where what it made starts where the stretch did and what follows moves by as much as it grew or shrank (Delete, Paste, Repeat, Add silence, and the rest, which keep its length)."
       }
     ],
     "files": [
@@ -2857,14 +2867,14 @@
       }
     ],
     "files": [
-      "hooks/use-time-selection.ts",
-      "components/audio-ui/time-selection.tsx"
+      "hooks/use-time-selection.ts"
     ],
     "from": "@/hooks/use-time-selection",
     "kind": "hook",
     "name": "use-time-selection",
     "registryDependencies": [
       "arrangement",
+      "time-selection",
       "use-arrangement"
     ],
     "usedBy": [

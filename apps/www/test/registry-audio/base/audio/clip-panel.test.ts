@@ -132,6 +132,57 @@ describe("processedSettings", () => {
     );
   });
 
+  test("CLP-029: Delete on a stretch moves what follows it back, so the clip plays the same sound", () => {
+    const remove = { type: "delete" } as const;
+    expect(
+      processedSettings(settings({ length: 4 }), remove, 3, [1, 2])
+    ).toEqual(settings({ length: 3, sourceLength: 3 }));
+    expect(
+      processedSettings(settings({ length: 1, offset: 2.5 }), remove, 3, [1, 2])
+    ).toEqual(settings({ length: 1, offset: 1.5, sourceLength: 3 }));
+  });
+
+  test("CLP-029: Paste at a point makes room for itself, Crop keeps the stretch alone", () => {
+    expect(
+      processedSettings(
+        settings({ length: 4 }),
+        { channels: [], type: "paste" },
+        5,
+        [1, 1]
+      )
+    ).toEqual(settings({ length: 5, sourceLength: 5 }));
+    expect(
+      processedSettings(settings({ length: 4 }), { type: "crop" }, 2, [1, 3])
+    ).toEqual(settings({ length: 2, sourceLength: 2 }));
+  });
+
+  test("CLP-029: a stretch made longer scales what is inside it and moves what follows", () => {
+    expect(
+      processedSettings(
+        settings({ length: 2, offset: 1.5 }),
+        { factor: 2, method: "transient", type: "stretch" },
+        5,
+        [1, 2]
+      )
+    ).toEqual(settings({ length: 2.5, offset: 2, sourceLength: 5 }));
+  });
+
+  test("CLP-029: a warped clip is read back as recorded before its warp goes", () => {
+    // Its source's 2 s play over the clip's 4 s: the clip's 2 s to 4 s are the source's 1 s to 2 s.
+    const warped = settings({
+      length: 2,
+      offset: 2,
+      sourceLength: 2,
+      warp: [
+        { source: 0, target: 0 },
+        { source: 2, target: 4 },
+      ],
+    });
+    expect(
+      processedSettings(warped, { type: "delete" }, 1.5, [0, 0.5])
+    ).toEqual(settings({ length: 1, offset: 0.5, sourceLength: 1.5 }));
+  });
+
   test("CLP-028: an operation that changes the length turns the warp off first", () => {
     expect(
       processedSettings(

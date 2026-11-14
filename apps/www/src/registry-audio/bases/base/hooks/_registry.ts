@@ -92,14 +92,11 @@ export const hooks: RegistryItem[] = [
         path: "hooks/use-time-selection.ts",
         type: "registry:hook",
       },
-      {
-        path: "audio/elements/time-selection.tsx",
-        type: "registry:ui",
-      },
     ],
     name: "use-time-selection",
     registryDependencies: [
       "@audio-ui/arrangement",
+      "@audio-ui/time-selection",
       "@audio-ui/use-arrangement",
     ],
     type: "registry:hook",
