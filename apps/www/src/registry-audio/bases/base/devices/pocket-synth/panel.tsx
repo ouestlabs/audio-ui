@@ -137,6 +137,11 @@ function PocketSynthPanel({
       >
         <XYPad
           aria-label="Tone"
+          background={
+            live ? (
+              <ScopePlot aria-label="The wave it makes" bare source={live} />
+            ) : null
+          }
           fill
           formatValue={formatPad}
           maxX={PAD_MAX}
@@ -147,9 +152,6 @@ function PocketSynthPanel({
           onValueCommitted={onNoteOff}
           value={shown}
         />
-        {live ? (
-          <ScopePlot aria-label="The wave it plays" source={live} />
-        ) : null}
         <WaveformSelect
           aria-label={WAVE.label}
           onValueChange={pickWave}

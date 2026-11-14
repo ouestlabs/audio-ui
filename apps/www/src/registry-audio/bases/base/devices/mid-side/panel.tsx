@@ -16,7 +16,7 @@ import {
   PlotHandle,
   PlotLine,
 } from "@/registry-audio/bases/base/audio/elements/plot";
-import { StereoField } from "@/registry-audio/bases/base/audio/elements/stereo-field";
+import { StereoFieldLayer } from "@/registry-audio/bases/base/audio/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -123,41 +123,36 @@ function MidSidePanel({
         className="flex min-h-0 grow flex-col gap-2 p-2"
         data-slot="mid-side-panel"
       >
-        <div className="flex h-28 min-h-16 grow gap-2">
-          <Plot
-            aria-label="Mid and side levels"
-            className="h-full min-w-0 flex-1"
-            maxX={MAX_DB}
-            maxY={MAX_DB}
-            minX={MIN_DB}
-            minY={MIN_DB}
-          >
-            <PlotGrid
-              x={{ format: formatMark, ticks: TICKS }}
-              y={{ format: formatMark, ticks: TICKS }}
-            />
-            <PlotGraph>
-              <PlotLine axis="x" className="stroke-foreground/40" value={0} />
-              <PlotLine axis="y" className="stroke-foreground/40" value={0} />
-            </PlotGraph>
-            {value.enabled ? (
-              <PlotHandle
-                aria-label="Mid and side"
-                getAriaLabel={getAriaLabel}
-                getAriaValueText={describeValue}
-                onValueChange={change}
-                value={{ x: value.sideDb, y: value.midDb }}
-              />
-            ) : null}
-          </Plot>
+        <Plot
+          aria-label="Mid and side levels"
+          className="h-28 min-h-16 grow"
+          maxX={MAX_DB}
+          maxY={MAX_DB}
+          minX={MIN_DB}
+          minY={MIN_DB}
+        >
           {signal ? (
-            // Where what comes out sits between the speakers.
-            <StereoField
-              className="w-20 shrink-0 self-center"
-              source={signal.output.stereo}
+            // Behind what the plot draws: where what comes out sits between the speakers.
+            <StereoFieldLayer source={signal.output.stereo} />
+          ) : null}
+          <PlotGrid
+            x={{ format: formatMark, ticks: TICKS }}
+            y={{ format: formatMark, ticks: TICKS }}
+          />
+          <PlotGraph>
+            <PlotLine axis="x" className="stroke-foreground/40" value={0} />
+            <PlotLine axis="y" className="stroke-foreground/40" value={0} />
+          </PlotGraph>
+          {value.enabled ? (
+            <PlotHandle
+              aria-label="Mid and side"
+              getAriaLabel={getAriaLabel}
+              getAriaValueText={describeValue}
+              onValueChange={change}
+              value={{ x: value.sideDb, y: value.midDb }}
             />
           ) : null}
-        </div>
+        </Plot>
         <DevicePanel
           className="grid-cols-3"
           device={midSideDevice}

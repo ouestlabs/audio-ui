@@ -51,7 +51,7 @@ A signal has a point for each place of the engine a face can read: `input` (an e
 | `spectrum({ minHz, maxHz, points })` | dB along a log frequency axis | A `PlotTraceArea` behind a curve, a `SpectrumPlot` |
 | `scope({ length, fit })` | The newest samples from where the wave rises through zero, so a steady tone stands still; `fit` scales the loudest of the last moments to the height | A `ScopePlot` |
 | `history({ seconds, points, of, newestFirst })` | What it held over the last `seconds`, counted on the audio clock: the signal itself (`"value"`) or its level in dB (`"level"`) | A `PlotTrace`, a `LevelPlot` |
-| `stereo` | The two channels' newest samples and how alike they are, from -1 to 1 | A `StereoField` |
+| `stereo` | The two channels' newest samples and how alike they are, from -1 to 1 | A `StereoField`, or a `StereoFieldLayer` behind another plot |
 
 The signal's `readings` are what the engine reports of itself, such as the gain a compressor takes off. [`device-signal`](/docs/lib/device-signal) has the full list, and `deriveSource`, which turns one source into another for a face's own reading of it.
 

@@ -14,8 +14,8 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
-import { SpectrumPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -51,6 +51,10 @@ const FREE_OFF = ["division"] as const;
 
 const formatSeconds = (seconds: number) => `${seconds}s`;
 const formatPercent = (percent: number) => `${percent}%`;
+
+/** The scale the spectrum behind the sweep is drawn on, in dB of level. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 
 interface PhaserPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */
@@ -144,15 +148,18 @@ function PhaserPanel({
             y={{ format: formatPercent, ticks: PERCENT_TICKS }}
           />
           <PlotGraph>
+            {spectrum ? (
+              // Behind the sweep, on a scale of its own: what comes out, the notches its stages cut moving as it runs.
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotCurve fn={sweep} />
           </PlotGraph>
         </Plot>
-        {spectrum ? (
-          <SpectrumPlot
-            aria-label="Its notches in what comes out"
-            source={spectrum}
-          />
-        ) : null}
         <DevicePanel
           className="grid-cols-5"
           device={phaserDevice}

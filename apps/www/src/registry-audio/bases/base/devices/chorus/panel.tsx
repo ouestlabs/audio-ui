@@ -7,7 +7,7 @@ import {
   PlotGraph,
   PlotGrid,
 } from "@/registry-audio/bases/base/audio/elements/plot";
-import { StereoField } from "@/registry-audio/bases/base/audio/elements/stereo-field";
+import { StereoFieldLayer } from "@/registry-audio/bases/base/audio/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -87,33 +87,28 @@ function ChorusPanel({
         className="flex min-h-0 grow flex-col gap-2 p-2"
         data-slot="chorus-panel"
       >
-        <div className="flex h-28 min-h-16 grow gap-2">
-          <Plot
-            aria-label="Delay time over two seconds"
-            className="h-full min-w-0 flex-1"
-            maxX={WINDOW_SECONDS}
-            maxY={MAX_MS}
-            minX={0}
-            minY={0}
-          >
-            <PlotGrid
-              x={{ format: formatSeconds, ticks: TIME_TICKS }}
-              y={{ format: formatMs, ticks: MS_TICKS }}
-            />
-            <PlotGraph>
-              {sweeps.map(({ sweep, voice }) => (
-                <PlotCurve fn={sweep} key={voice} />
-              ))}
-            </PlotGraph>
-          </Plot>
+        <Plot
+          aria-label="Delay time over two seconds"
+          className="h-28 min-h-16 grow"
+          maxX={WINDOW_SECONDS}
+          maxY={MAX_MS}
+          minX={0}
+          minY={0}
+        >
           {signal ? (
-            // Where what comes out sits between the speakers.
-            <StereoField
-              className="w-20 shrink-0 self-center"
-              source={signal.output.stereo}
-            />
+            // Behind what the plot draws: where what comes out sits between the speakers.
+            <StereoFieldLayer source={signal.output.stereo} />
           ) : null}
-        </div>
+          <PlotGrid
+            x={{ format: formatSeconds, ticks: TIME_TICKS }}
+            y={{ format: formatMs, ticks: MS_TICKS }}
+          />
+          <PlotGraph>
+            {sweeps.map(({ sweep, voice }) => (
+              <PlotCurve fn={sweep} key={voice} />
+            ))}
+          </PlotGraph>
+        </Plot>
         <DevicePanel
           className="grid-cols-4"
           device={chorusDevice}

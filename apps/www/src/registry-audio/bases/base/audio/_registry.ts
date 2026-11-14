@@ -686,7 +686,7 @@ export const audio: RegistryItem[] = [
     categories: ["device", "plot"],
     dependencies: ["@audio-ui/react"],
     description:
-      "Where a sound sits between the speakers, live: a goniometer of its two channels, scaled to the loudest of the last moments, over a correlation meter from -1 to 1. Painted on a canvas from a source, without a React render.",
+      "Where a sound sits between the speakers, live: a goniometer of its two channels, scaled to the loudest of the last moments, over a correlation meter from -1 to 1 (StereoField), or as a layer behind another plot with the correlation in its corner (StereoFieldLayer). Painted on a canvas from a source, without a React render.",
     files: [
       {
         path: "audio/elements/stereo-field.tsx",
