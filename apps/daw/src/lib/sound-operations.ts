@@ -1,3 +1,5 @@
+import { type FadeShape, fadeGain } from "@audio-ui/core/timeline";
+import { dbToGain } from "@audio-ui/engine/analysis";
 import {
   type DitherMethod,
   ditherChannels,
@@ -42,6 +44,15 @@ export type SoundOperation =
   | { channels: readonly Float32Array[]; type: "paste" }
   /** One gain on every channel, `db` decibels up or down. */
   | { db: number; type: "gain" }
+  /** Fades at its two ends, `fadeIn` and `fadeOut` seconds long along their curves, and one level over it, `gain` in dB. */
+  | {
+      fadeIn: number;
+      fadeInShape: FadeShape;
+      fadeOut: number;
+      fadeOutShape: FadeShape;
+      gain: number;
+      type: "shape";
+    }
   /** The sound played from its end. */
   | { type: "reverse" }
   /** The sound played `times` times in a row. */
@@ -98,6 +109,8 @@ export function soundOperationName(operation: SoundOperation): string {
       return "Paste";
     case "gain":
       return operation.db > 0 ? "Louder" : "Quieter";
+    case "shape":
+      return operation.fadeIn > 0 || operation.fadeOut > 0 ? "Fade" : "Level";
     case "reverse":
       return "Reverse";
     case "repeat":
@@ -129,6 +142,28 @@ export function soundOperationName(operation: SoundOperation): string {
   }
 }
 
+/** Every channel faded in and out along its curves and brought to one level. */
+function shapedChannels(
+  channels: readonly Float32Array[],
+  sampleRate: number,
+  shape: Extract<SoundOperation, { type: "shape" }>
+): Float32Array[] {
+  const level = dbToGain(shape.gain);
+  return channels.map((channel) => {
+    const frames = channel.length;
+    const rise = Math.min(frames, Math.round(shape.fadeIn * sampleRate));
+    const fall = Math.min(frames, Math.round(shape.fadeOut * sampleRate));
+    return channel.map((sample, index) => {
+      const into = index < rise ? fadeGain(shape.fadeInShape, index / rise) : 1;
+      const outOf =
+        index >= frames - fall
+          ? fadeGain(shape.fadeOutShape, (frames - index) / fall)
+          : 1;
+      return sample * level * into * outOf;
+    });
+  });
+}
+
 /** The channels an operation makes of `channels`, at `sampleRate`. */
 function changed(
   { channels, sampleRate }: SoundSamples,
@@ -148,6 +183,8 @@ function changed(
       );
     case "gain":
       return gainChannels(channels, operation.db);
+    case "shape":
+      return shapedChannels(channels, sampleRate, operation);
     case "reverse":
       return reverseChannels(channels);
     case "repeat":

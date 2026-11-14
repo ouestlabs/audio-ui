@@ -207,9 +207,17 @@ export function ClipEditor({
       edit((current) => withSettings(current, next, doc.duration)),
     [doc.duration, edit]
   );
+  // Crop (CLP-029): the clip's source cut down to the stretch kept, the recording left as it is, and the clip on what is left of it.
   const crop = useCallback(
-    () => dispatch({ id: clip.id, type: "crop-clip" }),
-    [clip.id, dispatch]
+    (range: SoundRange, next: ClipSettings) => {
+      edit((current) => ({
+        ...withSettings(current, next, doc.duration),
+        sourceFrom: (current.sourceFrom ?? 0) + range[0],
+        sourceLength: next.sourceLength,
+      }));
+      settle();
+    },
+    [doc.duration, edit, settle]
   );
   // An edit or an operation of the Process menu (CLP-028, CLP-029): the clip's source, or the stretch of it selected, made into a recording of its own, then the clip reads it, one step of undo.
   const process = useCallback(
