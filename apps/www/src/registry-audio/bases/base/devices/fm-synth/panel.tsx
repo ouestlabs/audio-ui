@@ -22,6 +22,7 @@ import {
   fmSynthDevice,
   fmSynthPreset,
 } from "@/registry-audio/bases/base/devices/fm-synth/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do: what every operator shares, then each operator's four. */
 const GROUPS = [
@@ -74,6 +75,8 @@ interface FmSynthPanelProps {
   /** A key is played, as a note of the synth. */
   onNoteOn?: (note: FmSynthNote) => void;
   onValueChange: (state: FmSynthState) => void;
+  /** Its live sound: the spectrum of what it plays, its carrier and the sidebands the operators make. */
+  signal?: DeviceSignal;
   value: FmSynthState;
 }
 
@@ -92,6 +95,7 @@ function FmSynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: FmSynthPanelProps) {
   const [preset, setPreset] = useState<string | null>(null);
@@ -123,7 +127,7 @@ function FmSynthPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={fmSynthDevice}
         onValueChange={onValueChange}

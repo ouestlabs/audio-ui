@@ -5,6 +5,7 @@ import {
 } from "@/registry-audio/bases/base/devices/limiter/device";
 import { createLimiterEngine } from "@/registry-audio/bases/base/devices/limiter/engine";
 import { LimiterPanel } from "@/registry-audio/bases/base/devices/limiter/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
@@ -18,14 +19,15 @@ export default function BlockLimiter() {
     limiterDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createLimiterEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, limiterDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <LimiterPanel onValueChange={setState} value={state} />
+      <LimiterPanel signal={signal} onValueChange={setState} value={state} />
     </div>
   );
 }

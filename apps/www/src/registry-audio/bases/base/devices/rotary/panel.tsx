@@ -19,6 +19,7 @@ import {
   rotaryBands,
   rotaryDevice,
 } from "@/registry-audio/bases/base/devices/rotary/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -38,6 +39,8 @@ interface RotaryPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: RotaryState) => void;
+  /** Its live sound: the spectrum of what comes out, behind the drum's band and the horn's. */
+  signal?: DeviceSignal;
   value: RotaryState;
 }
 
@@ -51,11 +54,12 @@ function RotaryPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: RotaryPanelProps) {
   const bands = useMemo(() => rotaryBands(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={rotaryDevice}

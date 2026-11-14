@@ -37,6 +37,7 @@ import {
   resonanceDb,
   resonanceFromDb,
 } from "@/registry-audio/bases/base/devices/filter/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -72,6 +73,8 @@ interface FilterPanelProps {
   onValueChange: (state: FilterState) => void;
   /** A live spectrum behind the curve, such as from `useSpectrum`. */
   spectrum?: Source<Float32Array>;
+  /** Its live sound: the spectrum of what comes out, behind the curve. */
+  signal?: DeviceSignal;
   value: FilterState;
 }
 
@@ -88,6 +91,7 @@ function FilterPanel({
   children,
   className,
   onValueChange,
+  signal,
   spectrum,
   value,
 }: FilterPanelProps) {
@@ -118,7 +122,7 @@ function FilterPanel({
     disabled = UNDRIVEN_OFF;
   }
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={filterDevice}

@@ -17,6 +17,7 @@ import {
   type TransientState,
   transientDevice,
 } from "@/registry-audio/bases/base/devices/transient/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const LIMIT_DB = 12;
 const TICKS = [-12, 0, 12];
@@ -34,6 +35,8 @@ interface TransientPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: TransientState) => void;
+  /** Its live sound: the level going in and the level coming out over the last moments, its attacks and its sustain as it shapes them. */
+  signal?: DeviceSignal;
   value: TransientState;
 }
 
@@ -48,6 +51,7 @@ function TransientPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: TransientPanelProps) {
   const change = useCallback(
@@ -58,7 +62,7 @@ function TransientPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={transientDevice}

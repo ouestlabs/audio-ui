@@ -26,6 +26,7 @@ import {
   polySynthDevice,
   polySynthPreset,
 } from "@/registry-audio/bases/base/devices/poly-synth/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do, as the synth's panel lays them out. */
 const GROUPS = [
@@ -65,6 +66,8 @@ interface PolySynthPanelProps {
   /** A key is played, as a note of the synth. */
   onNoteOn?: (note: PolySynthNote) => void;
   onValueChange: (state: PolySynthState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: PolySynthState;
 }
 
@@ -82,6 +85,7 @@ function PolySynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: PolySynthPanelProps) {
   const [preset, setPreset] = useState<string | null>(null);
@@ -122,7 +126,7 @@ function PolySynthPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={polySynthDevice}
         onValueChange={onValueChange}

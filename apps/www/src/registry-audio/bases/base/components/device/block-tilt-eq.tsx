@@ -5,6 +5,7 @@ import {
 } from "@/registry-audio/bases/base/devices/tilt-eq/device";
 import { createTiltEqEngine } from "@/registry-audio/bases/base/devices/tilt-eq/engine";
 import { TiltEqPanel } from "@/registry-audio/bases/base/devices/tilt-eq/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
@@ -20,14 +21,15 @@ export default function BlockTiltEq() {
     tiltEqDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createTiltEqEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, tiltEqDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <TiltEqPanel onValueChange={setState} value={state} />
+      <TiltEqPanel signal={signal} onValueChange={setState} value={state} />
     </div>
   );
 }

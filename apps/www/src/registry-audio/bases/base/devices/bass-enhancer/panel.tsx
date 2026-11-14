@@ -19,6 +19,7 @@ import {
   bassEnhancerBands,
   bassEnhancerDevice,
 } from "@/registry-audio/bases/base/devices/bass-enhancer/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 2000;
@@ -38,6 +39,8 @@ interface BassEnhancerPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: BassEnhancerState) => void;
+  /** Its live sound: the spectrum of what comes out, its sub and its harmonics, behind the bands it works on. */
+  signal?: DeviceSignal;
   value: BassEnhancerState;
 }
 
@@ -50,11 +53,12 @@ function BassEnhancerPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: BassEnhancerPanelProps) {
   const bands = useMemo(() => bassEnhancerBands(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={bassEnhancerDevice}

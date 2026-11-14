@@ -5,6 +5,7 @@ import {
 } from "@/registry-audio/bases/base/devices/deesser/device";
 import { createDeesserEngine } from "@/registry-audio/bases/base/devices/deesser/engine";
 import { DeesserPanel } from "@/registry-audio/bases/base/devices/deesser/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
@@ -24,16 +25,17 @@ export default function BlockDeesser() {
     deesserDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { analyser } = useDeviceLoop({
+  const { analyser, engine } = useDeviceLoop({
     create: createDeesserEngine,
     destination: master,
     source: "groove",
     state,
   });
+  const signal = useDeviceSignal(engine, deesserDevice);
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <DeesserPanel
+      <DeesserPanel signal={signal}
         onValueChange={setState}
         spectrum={spectrum}
         value={state}

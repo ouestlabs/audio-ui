@@ -5,6 +5,7 @@ import {
 } from "@/registry-audio/bases/base/devices/compander/device";
 import { createCompanderEngine } from "@/registry-audio/bases/base/devices/compander/engine";
 import { CompanderPanel } from "@/registry-audio/bases/base/devices/compander/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
@@ -21,14 +22,15 @@ export default function BlockCompander() {
     companderDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createCompanderEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, companderDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <CompanderPanel onValueChange={setState} value={state} />
+      <CompanderPanel signal={signal} onValueChange={setState} value={state} />
     </div>
   );
 }

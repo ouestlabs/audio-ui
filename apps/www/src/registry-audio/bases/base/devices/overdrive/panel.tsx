@@ -22,6 +22,7 @@ import {
   overdriveBand,
   overdriveDevice,
 } from "@/registry-audio/bases/base/devices/overdrive/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -51,6 +52,8 @@ interface OverdrivePanelProps {
   onValueChange: (state: OverdriveState) => void;
   /** A live spectrum behind the curve, such as from `useSpectrum`. */
   spectrum?: Source<Float32Array>;
+  /** Its live sound: the spectrum of what comes out, behind the band that reaches the clip. */
+  signal?: DeviceSignal;
   value: OverdriveState;
 }
 
@@ -65,6 +68,7 @@ function OverdrivePanel({
   children,
   className,
   onValueChange,
+  signal,
   spectrum,
   value,
 }: OverdrivePanelProps) {
@@ -75,7 +79,7 @@ function OverdrivePanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={overdriveDevice}

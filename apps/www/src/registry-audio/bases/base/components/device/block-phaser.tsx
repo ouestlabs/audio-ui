@@ -5,6 +5,7 @@ import {
 } from "@/registry-audio/bases/base/devices/phaser/device";
 import { createPhaserEngine } from "@/registry-audio/bases/base/devices/phaser/engine";
 import { PhaserPanel } from "@/registry-audio/bases/base/devices/phaser/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
@@ -18,14 +19,15 @@ export default function BlockPhaser() {
     phaserDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { tempo } = useDeviceLoop({
+  const { engine, tempo } = useDeviceLoop({
     create: createPhaserEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, phaserDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <PhaserPanel onValueChange={setState} tempo={tempo} value={state} />
+      <PhaserPanel signal={signal} onValueChange={setState} tempo={tempo} value={state} />
     </div>
   );
 }

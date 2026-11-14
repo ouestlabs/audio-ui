@@ -14,6 +14,7 @@ import {
   type GuitarState,
   guitarDevice,
 } from "@/registry-audio/bases/base/devices/guitar/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do. */
 const GROUPS = [
@@ -33,6 +34,8 @@ interface GuitarPanelProps {
   /** A key is played, as a note of the keyboard. */
   onNoteOn?: (note: GuitarNote) => void;
   onValueChange: (state: GuitarState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: GuitarState;
 }
 
@@ -50,6 +53,7 @@ function GuitarPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: GuitarPanelProps) {
   const play = useCallback(
@@ -59,7 +63,7 @@ function GuitarPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={guitarDevice}
         onValueChange={onValueChange}

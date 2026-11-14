@@ -17,6 +17,7 @@ import {
   stutterCycle,
   stutterDevice,
 } from "@/registry-audio/bases/base/devices/stutter/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const SWITCHES = ["enabled"] as const;
 const OFF = stutterDevice.parameters
@@ -29,6 +30,8 @@ interface StutterPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: StutterState) => void;
+  /** Its live sound: the level of what comes out over the length of one interval, its slices and their repeats as they play. */
+  signal?: DeviceSignal;
   value: StutterState;
 }
 
@@ -42,6 +45,7 @@ function StutterPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: StutterPanelProps) {
   const cycle = useMemo(() => stutterCycle(value), [value]);
@@ -54,7 +58,7 @@ function StutterPanel({
     [cycle]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={stutterDevice}

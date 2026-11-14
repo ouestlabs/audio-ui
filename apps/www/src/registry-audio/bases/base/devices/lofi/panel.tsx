@@ -17,6 +17,7 @@ import {
   lofiCurve,
   lofiDevice,
 } from "@/registry-audio/bases/base/devices/lofi/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -33,6 +34,8 @@ interface LofiPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: LofiState) => void;
+  /** Its live sound: the spectrum of what comes out, behind the band it keeps. */
+  signal?: DeviceSignal;
   value: LofiState;
 }
 
@@ -47,11 +50,12 @@ function LofiPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: LofiPanelProps) {
   const curve = useMemo(() => lofiCurve(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={lofiDevice}

@@ -18,6 +18,7 @@ import {
   duckerCurve,
   duckerDevice,
 } from "@/registry-audio/bases/base/devices/ducker/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_KEY_DB = -60;
 const MAX_KEY_DB = 0;
@@ -37,6 +38,8 @@ interface DuckerPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: DuckerState) => void;
+  /** Its live sound: a dot rides the curve at the level of the key it ducks for. */
+  signal?: DeviceSignal;
   value: DuckerState;
 }
 
@@ -50,6 +53,7 @@ function DuckerPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: DuckerPanelProps) {
   const curve = useMemo(() => duckerCurve(value), [value]);
@@ -59,7 +63,7 @@ function DuckerPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={duckerDevice}

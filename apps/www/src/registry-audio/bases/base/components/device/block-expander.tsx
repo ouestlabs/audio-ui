@@ -5,6 +5,7 @@ import {
 } from "@/registry-audio/bases/base/devices/expander/device";
 import { createExpanderEngine } from "@/registry-audio/bases/base/devices/expander/engine";
 import { ExpanderPanel } from "@/registry-audio/bases/base/devices/expander/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
@@ -21,14 +22,15 @@ export default function BlockExpander() {
     expanderDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createExpanderEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, expanderDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ExpanderPanel onValueChange={setState} value={state} />
+      <ExpanderPanel signal={signal} onValueChange={setState} value={state} />
     </div>
   );
 }

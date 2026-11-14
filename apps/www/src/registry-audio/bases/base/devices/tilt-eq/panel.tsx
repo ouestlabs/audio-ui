@@ -20,6 +20,7 @@ import {
   tiltEqCurve,
   tiltEqDevice,
 } from "@/registry-audio/bases/base/devices/tilt-eq/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -40,6 +41,8 @@ interface TiltEqPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: TiltEqState) => void;
+  /** Its live sound: the spectrum of what comes out, behind the curve. */
+  signal?: DeviceSignal;
   value: TiltEqState;
 }
 
@@ -52,11 +55,12 @@ function TiltEqPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: TiltEqPanelProps) {
   const curve = useMemo(() => tiltEqCurve(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={tiltEqDevice}

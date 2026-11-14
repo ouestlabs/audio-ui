@@ -246,7 +246,10 @@ interface ChainProps {
 /** What gives a device's panel its live sound: the engine's `signal`, such as `ArrangementEngine.signal`. */
 export type DeviceSignalOf = (
   id: string,
-  device: Pick<Device<readonly ParameterDescriptor[]>, "kind" | "signals">
+  device: Pick<
+    Device<readonly ParameterDescriptor[]>,
+    "kind" | "sidechain" | "signals"
+  >
 ) => DeviceSignal;
 
 /** Whether a slot is folded, kept with the view by the device's id. */

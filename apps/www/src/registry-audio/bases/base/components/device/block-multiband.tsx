@@ -5,6 +5,7 @@ import {
 } from "@/registry-audio/bases/base/devices/multiband/device";
 import { createMultibandEngine } from "@/registry-audio/bases/base/devices/multiband/engine";
 import { MultibandPanel } from "@/registry-audio/bases/base/devices/multiband/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
@@ -24,15 +25,16 @@ export default function BlockMultiband() {
     multibandDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { analyser } = useDeviceLoop({
+  const { analyser, engine } = useDeviceLoop({
     create: createMultibandEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, multibandDevice);
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <MultibandPanel
+      <MultibandPanel signal={signal}
         onValueChange={setState}
         spectrum={spectrum}
         value={state}

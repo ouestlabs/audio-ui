@@ -50,6 +50,8 @@ export interface SignalTarget {
   readonly input?: AudioNode | null;
   readonly output: AudioNode;
   readonly readings?: () => DeviceReadings;
+  /** The input of the key a sidechain listens to, on a device that takes one. */
+  readonly sidechain?: AudioNode;
   readonly taps?: DeviceTaps;
 }
 
@@ -125,6 +127,8 @@ export interface SignalPoint {
 export interface DeviceSignal {
   /** What goes in. `null` for an instrument, which takes notes, not sound. */
   readonly input: SignalPoint | null;
+  /** The key its sidechain listens to, for a device that takes one: what a ducker ducks for. */
+  readonly key: SignalPoint | null;
   /** What moves the sound: its LFO, from -1 to 1, for a device that declares `modulator`. */
   readonly modulator: SignalPoint | null;
   readonly output: SignalPoint;
@@ -685,7 +689,10 @@ const sameReadings = (a: DeviceReadings, b: DeviceReadings) => {
  */
 export function createDeviceSignal(
   target: () => SignalTarget | null | undefined,
-  device: Pick<Device<readonly ParameterDescriptor[]>, "kind" | "signals">
+  device: Pick<
+    Device<readonly ParameterDescriptor[]>,
+    "kind" | "sidechain" | "signals"
+  >
 ): DeviceSignal {
   const declares = (name: (typeof device.signals)[number]) =>
     device.signals.includes(name);
@@ -708,6 +715,9 @@ export function createDeviceSignal(
       device.kind === "instrument"
         ? null
         : createSignalPoint(() => target()?.input),
+    key: device.sidechain
+      ? createSignalPoint(() => target()?.sidechain)
+      : null,
     modulator: declares("modulator")
       ? createSignalPoint(() => target()?.taps?.modulator)
       : null,

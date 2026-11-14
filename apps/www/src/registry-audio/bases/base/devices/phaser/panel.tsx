@@ -25,6 +25,7 @@ import {
   phaserDevice,
   phaserSweep,
 } from "@/registry-audio/bases/base/devices/phaser/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;
@@ -57,6 +58,8 @@ interface PhaserPanelProps {
   onValueChange: (state: PhaserState) => void;
   /** The host's tempo, which a synced rate is read against. @default 120 BPM */
   tempo?: Tempo;
+  /** Its live sound: the spectrum of what comes out, where its notches sweep. */
+  signal?: DeviceSignal;
   value: PhaserState;
 }
 
@@ -71,6 +74,7 @@ function PhaserPanel({
   children,
   className,
   onValueChange,
+  signal,
   tempo = DEFAULT_TEMPO,
   value,
 }: PhaserPanelProps) {
@@ -88,7 +92,7 @@ function PhaserPanel({
     unused = [...UNUSED[value.mode], ...(value.sync ? SYNCED_OFF : FREE_OFF)];
   }
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={phaserDevice}

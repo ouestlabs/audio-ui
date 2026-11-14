@@ -19,6 +19,7 @@ import {
   exciterBand,
   exciterDevice,
 } from "@/registry-audio/bases/base/devices/exciter/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -38,6 +39,8 @@ interface ExciterPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ExciterState) => void;
+  /** Its live sound: the spectrum of what comes out, behind the band it excites. */
+  signal?: DeviceSignal;
   value: ExciterState;
 }
 
@@ -50,11 +53,12 @@ function ExciterPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: ExciterPanelProps) {
   const band = useMemo(() => exciterBand(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={exciterDevice}

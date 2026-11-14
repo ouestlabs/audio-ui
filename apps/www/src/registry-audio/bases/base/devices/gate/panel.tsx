@@ -18,6 +18,7 @@ import {
   gateCurve,
   gateDevice,
 } from "@/registry-audio/bases/base/devices/gate/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_DB = -80;
 const MAX_DB = 0;
@@ -35,6 +36,8 @@ interface GatePanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: GateState) => void;
+  /** Its live sound: a dot rides the curve at the level going in. */
+  signal?: DeviceSignal;
   value: GateState;
 }
 
@@ -49,6 +52,7 @@ function GatePanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: GatePanelProps) {
   const curve = useMemo(() => gateCurve(value), [value]);
@@ -58,7 +62,7 @@ function GatePanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={gateDevice}

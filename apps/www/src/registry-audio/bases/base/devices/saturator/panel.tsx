@@ -18,6 +18,7 @@ import {
   saturatorCurve,
   saturatorDevice,
 } from "@/registry-audio/bases/base/devices/saturator/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const TICKS = [-0.5, 0, 0.5];
 const UNITY = (input: number) => input;
@@ -36,6 +37,8 @@ interface SaturatorPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: SaturatorState) => void;
+  /** Its live sound: two dots ride the curve at the peaks of what goes in, how far along it the sound swings. */
+  signal?: DeviceSignal;
   value: SaturatorState;
 }
 
@@ -49,6 +52,7 @@ function SaturatorPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: SaturatorPanelProps) {
   const curve = useMemo(() => saturatorCurve(value), [value]);
@@ -57,7 +61,7 @@ function SaturatorPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={saturatorDevice}

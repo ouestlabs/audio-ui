@@ -28,6 +28,7 @@ import {
   wahDevice,
   wahReach,
 } from "@/registry-audio/bases/base/devices/wah/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -69,6 +70,8 @@ interface WahPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: WahState) => void;
+  /** Its live sound: the spectrum of what comes out, where its band moves. */
+  signal?: DeviceSignal;
   value: WahState;
 }
 
@@ -82,6 +85,7 @@ function WahPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: WahPanelProps) {
   const curves = useMemo(() => {
@@ -110,7 +114,7 @@ function WahPanel({
     }
   }
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={wahDevice}

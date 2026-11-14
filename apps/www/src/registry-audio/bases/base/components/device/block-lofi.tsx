@@ -5,6 +5,7 @@ import {
 } from "@/registry-audio/bases/base/devices/lofi/device";
 import { createLofiEngine } from "@/registry-audio/bases/base/devices/lofi/engine";
 import { LofiPanel } from "@/registry-audio/bases/base/devices/lofi/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
@@ -18,14 +19,15 @@ const MASTER_VOLUME = 0.7;
 export default function BlockLofi() {
   const [state, setState] = useState<LofiState>(() => lofiDevice.defaults());
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createLofiEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, lofiDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <LofiPanel onValueChange={setState} value={state} />
+      <LofiPanel signal={signal} onValueChange={setState} value={state} />
     </div>
   );
 }

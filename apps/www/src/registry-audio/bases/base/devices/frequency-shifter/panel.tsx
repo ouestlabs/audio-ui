@@ -24,6 +24,7 @@ import {
   frequencyShifterDevice,
   frequencyShifterPartials,
 } from "@/registry-audio/bases/base/devices/frequency-shifter/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -45,6 +46,8 @@ interface FrequencyShifterPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: FrequencyShifterState) => void;
+  /** Its live sound: the spectrum going in and the spectrum coming out, shifted, over the note it draws. */
+  signal?: DeviceSignal;
   value: FrequencyShifterState;
 }
 
@@ -59,6 +62,7 @@ function FrequencyShifterPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: FrequencyShifterPanelProps) {
   const partials = useMemo(() => {
@@ -76,7 +80,7 @@ function FrequencyShifterPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={frequencyShifterDevice}

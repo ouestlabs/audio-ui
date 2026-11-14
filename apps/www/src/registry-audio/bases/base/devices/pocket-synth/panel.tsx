@@ -20,6 +20,7 @@ import {
   pocketSynthPitch,
   pocketSynthPosition,
 } from "@/registry-audio/bases/base/devices/pocket-synth/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** Graduations along the fader: ticks only, the readout beside it says the value. */
 const VOLUME_MARKS = [0, 0.25, 0.5, 0.75, 1];
@@ -54,6 +55,8 @@ interface PocketSynthPanelProps {
   /** A note is played: called as the pad is pressed and again as it moves. */
   onNoteOn?: (note: PocketSynthNote) => void;
   onValueChange: (state: PocketSynthState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: PocketSynthState;
 }
 
@@ -71,6 +74,7 @@ function PocketSynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: PocketSynthPanelProps) {
   const faderId = useId();
@@ -116,7 +120,7 @@ function PocketSynthPanel({
   );
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={pocketSynthDevice}
         onValueChange={onValueChange}

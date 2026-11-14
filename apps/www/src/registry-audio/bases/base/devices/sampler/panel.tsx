@@ -24,6 +24,7 @@ import {
   samplerDevice,
   sliceOf,
 } from "@/registry-audio/bases/base/devices/sampler/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** What the title bar holds: the sample, a list. */
 const HEADER_CONTROLS = ["sample"] as const;
@@ -47,6 +48,8 @@ interface SamplerPanelProps {
   /** A pad is struck, as the note of its slice. */
   onNoteOn?: (note: SamplerNote) => void;
   onValueChange: (state: SamplerState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: SamplerState;
 }
 
@@ -64,6 +67,7 @@ function SamplerPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: SamplerPanelProps) {
   const pickSample = useCallback(
@@ -89,7 +93,7 @@ function SamplerPanel({
   );
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={samplerDevice}
         onValueChange={onValueChange}

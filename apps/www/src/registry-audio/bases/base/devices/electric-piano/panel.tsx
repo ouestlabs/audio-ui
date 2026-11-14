@@ -22,6 +22,7 @@ import {
   electricPianoDevice,
   electricPianoPreset,
 } from "@/registry-audio/bases/base/devices/electric-piano/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do, as the piano's panel lays them out. */
 const GROUPS = [
@@ -51,6 +52,8 @@ interface ElectricPianoPanelProps {
   /** A key is struck, as a note of the piano. */
   onNoteOn?: (note: ElectricPianoNote) => void;
   onValueChange: (state: ElectricPianoState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: ElectricPianoState;
 }
 
@@ -68,6 +71,7 @@ function ElectricPianoPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: ElectricPianoPanelProps) {
   const [preset, setPreset] = useState<string | null>(null);
@@ -99,7 +103,7 @@ function ElectricPianoPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={electricPianoDevice}
         onValueChange={onValueChange}

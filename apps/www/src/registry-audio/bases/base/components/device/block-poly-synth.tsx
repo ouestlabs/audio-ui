@@ -7,6 +7,7 @@ import {
 } from "@/registry-audio/bases/base/devices/poly-synth/device";
 import { createPolySynthEngine } from "@/registry-audio/bases/base/devices/poly-synth/engine";
 import { PolySynthPanel } from "@/registry-audio/bases/base/devices/poly-synth/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { usePolyphony } from "@/registry-audio/bases/base/hooks/use-polyphony";
@@ -25,6 +26,8 @@ export default function BlockPolySynth() {
     polySynthDevice.defaults()
   );
   const master = useMasterBus(1);
+  // Its voices play into this bus and nothing else does: that is where it is heard.
+  const signal = useDeviceSignal(master && { output: master }, polySynthDevice);
   const { noteOff, noteOn } = usePolyphony({
     create: createPolySynthEngine,
     destination: master,
@@ -46,7 +49,7 @@ export default function BlockPolySynth() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <PolySynthPanel
+      <PolySynthPanel signal={signal}
         activeNotes={midi.activeNotes}
         onNoteOff={releaseKey}
         onNoteOn={playKey}

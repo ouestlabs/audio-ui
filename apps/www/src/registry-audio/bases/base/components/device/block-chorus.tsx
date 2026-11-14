@@ -5,6 +5,7 @@ import {
 } from "@/registry-audio/bases/base/devices/chorus/device";
 import { createChorusEngine } from "@/registry-audio/bases/base/devices/chorus/engine";
 import { ChorusPanel } from "@/registry-audio/bases/base/devices/chorus/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
@@ -20,14 +21,15 @@ export default function BlockChorus() {
     chorusDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { tempo } = useDeviceLoop({
+  const { engine, tempo } = useDeviceLoop({
     create: createChorusEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, chorusDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ChorusPanel onValueChange={setState} tempo={tempo} value={state} />
+      <ChorusPanel signal={signal} onValueChange={setState} tempo={tempo} value={state} />
     </div>
   );
 }

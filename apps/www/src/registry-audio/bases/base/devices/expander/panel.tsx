@@ -26,6 +26,7 @@ import {
   expanderCurve,
   expanderDevice,
 } from "@/registry-audio/bases/base/devices/expander/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_DB = -80;
 const MAX_IN_DB = 0;
@@ -48,6 +49,8 @@ interface ExpanderPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ExpanderState) => void;
+  /** Its live sound: a dot rides the curve at the level going in. */
+  signal?: DeviceSignal;
   value: ExpanderState;
 }
 
@@ -62,6 +65,7 @@ function ExpanderPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: ExpanderPanelProps) {
   const curve = useMemo(() => expanderCurve(value), [value]);
@@ -79,7 +83,7 @@ function ExpanderPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={expanderDevice}

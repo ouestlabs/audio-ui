@@ -6,6 +6,7 @@ import {
 } from "@/registry-audio/bases/base/devices/wave-shaper/device";
 import { createWaveShaperEngine } from "@/registry-audio/bases/base/devices/wave-shaper/engine";
 import { WaveShaperPanel } from "@/registry-audio/bases/base/devices/wave-shaper/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
@@ -24,6 +25,7 @@ export default function BlockWaveShaper() {
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine ?? null, waveShaperDevice);
 
   const play = useCallback(
     (note: WaveShaperNote) => engine?.noteOn(note),
@@ -33,7 +35,7 @@ export default function BlockWaveShaper() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <WaveShaperPanel
+      <WaveShaperPanel signal={signal}
         onNoteOff={release}
         onNoteOn={play}
         onValueChange={setState}

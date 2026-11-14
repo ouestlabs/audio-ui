@@ -22,6 +22,7 @@ import {
   stringMachineDevice,
   stringMachinePreset,
 } from "@/registry-audio/bases/base/devices/string-machine/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do, as the machine's panel lays them out. */
 const GROUPS = [
@@ -51,6 +52,8 @@ interface StringMachinePanelProps {
   /** A key is played, as a note of the machine. */
   onNoteOn?: (note: StringMachineNote) => void;
   onValueChange: (state: StringMachineState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: StringMachineState;
 }
 
@@ -68,6 +71,7 @@ function StringMachinePanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: StringMachinePanelProps) {
   const [preset, setPreset] = useState<string | null>(null);
@@ -99,7 +103,7 @@ function StringMachinePanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={stringMachineDevice}
         onValueChange={onValueChange}

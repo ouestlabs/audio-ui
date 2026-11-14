@@ -16,7 +16,10 @@ import {
  */
 export function useDeviceSignal(
   engine: SignalTarget | null,
-  device: Pick<Device<readonly ParameterDescriptor[]>, "kind" | "signals">
+  device: Pick<
+    Device<readonly ParameterDescriptor[]>,
+    "kind" | "sidechain" | "signals"
+  >
 ): DeviceSignal {
   const current = useRef(engine);
   current.current = engine;

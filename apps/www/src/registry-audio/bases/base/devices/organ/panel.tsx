@@ -30,6 +30,7 @@ import {
   organDevice,
   organPreset,
 } from "@/registry-audio/bases/base/devices/organ/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do, beside the drawbars. */
 const GROUPS = [
@@ -104,6 +105,8 @@ interface OrganPanelProps {
   /** A key is played, as a note of the organ. */
   onNoteOn?: (note: OrganNote) => void;
   onValueChange: (state: OrganState) => void;
+  /** Its live sound: the spectrum of what it plays, the harmonics its drawbars set. */
+  signal?: DeviceSignal;
   value: OrganState;
 }
 
@@ -121,6 +124,7 @@ function OrganPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: OrganPanelProps) {
   const [preset, setPreset] = useState<string | null>(null);
@@ -166,7 +170,7 @@ function OrganPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={organDevice}
         onValueChange={onValueChange}

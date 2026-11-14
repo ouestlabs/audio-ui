@@ -18,6 +18,7 @@ import {
   type TapeKeysState,
   tapeKeysDevice,
 } from "@/registry-audio/bases/base/devices/tape-keys/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do. */
 const GROUPS = [
@@ -42,6 +43,8 @@ interface TapeKeysPanelProps {
   /** A key is played, as a note of the keyboard. */
   onNoteOn?: (note: TapeKeysNote) => void;
   onValueChange: (state: TapeKeysState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: TapeKeysState;
 }
 
@@ -59,6 +62,7 @@ function TapeKeysPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: TapeKeysPanelProps) {
   const pickStation = useCallback(
@@ -77,7 +81,7 @@ function TapeKeysPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={tapeKeysDevice}
         onValueChange={onValueChange}

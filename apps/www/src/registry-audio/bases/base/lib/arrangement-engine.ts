@@ -289,7 +289,10 @@ export interface ArrangementEngine {
    */
   signal: (
     id: string,
-    device: Pick<Device<readonly ParameterDescriptor[]>, "kind" | "signals">
+    device: Pick<
+    Device<readonly ParameterDescriptor[]>,
+    "kind" | "sidechain" | "signals"
+  >
   ) => DeviceSignal;
   /** Stops playback: the clips and the notes stop, the effects' tails ring on. */
   stop: () => void;

@@ -16,6 +16,7 @@ import {
   waveShaperPosition,
   waveShaperResonance,
 } from "@/registry-audio/bases/base/devices/wave-shaper/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const PAD_MAX = 100;
 /** The knobs under the pad: the wave is the row of buttons. */
@@ -40,6 +41,8 @@ interface WaveShaperPanelProps {
   /** A note is played: called as the pad is pressed and again as it moves. */
   onNoteOn?: (note: WaveShaperNote) => void;
   onValueChange: (state: WaveShaperState) => void;
+  /** Its live sound: the wave it makes now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: WaveShaperState;
 }
 
@@ -57,6 +60,7 @@ function WaveShaperPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: WaveShaperPanelProps) {
   const [position, setPosition] = useState({ x: 50, y: 50 });
@@ -87,7 +91,7 @@ function WaveShaperPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={waveShaperDevice}
         onValueChange={onValueChange}

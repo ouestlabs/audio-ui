@@ -18,6 +18,7 @@ import {
   limiterCurve,
   limiterDevice,
 } from "@/registry-audio/bases/base/devices/limiter/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_DB = -48;
 const MAX_DB = 0;
@@ -35,6 +36,8 @@ interface LimiterPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: LimiterState) => void;
+  /** Its live sound: a dot rides the curve at the level going in. */
+  signal?: DeviceSignal;
   value: LimiterState;
 }
 
@@ -49,6 +52,7 @@ function LimiterPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: LimiterPanelProps) {
   const curve = useMemo(() => limiterCurve(value), [value]);
@@ -60,7 +64,7 @@ function LimiterPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={limiterDevice}

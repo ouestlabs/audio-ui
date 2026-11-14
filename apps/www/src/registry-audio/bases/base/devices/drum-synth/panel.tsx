@@ -12,6 +12,7 @@ import {
   type DrumSynthState,
   drumSynthDevice,
 } from "@/registry-audio/bases/base/devices/drum-synth/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do. */
 const GROUPS = [
@@ -29,6 +30,8 @@ interface DrumSynthPanelProps {
   /** The pad is struck, as hard as the press is high on it. */
   onNoteOn?: (note: DrumSynthNote) => void;
   onValueChange: (state: DrumSynthState) => void;
+  /** Its live sound: the level of what it plays over the last two seconds, each hit's attack and decay. */
+  signal?: DeviceSignal;
   value: DrumSynthState;
 }
 
@@ -47,6 +50,7 @@ function DrumSynthPanel({
   className,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: DrumSynthPanelProps) {
   const strike = useCallback(
@@ -59,7 +63,7 @@ function DrumSynthPanel({
   );
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={drumSynthDevice}
         onValueChange={onValueChange}

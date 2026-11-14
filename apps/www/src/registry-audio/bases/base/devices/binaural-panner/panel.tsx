@@ -18,6 +18,7 @@ import {
   binauralPlace,
   binauralPoint,
 } from "@/registry-audio/bases/base/devices/binaural-panner/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const SWITCHES = ["enabled"] as const;
 const OFF = binauralPannerDevice.parameters
@@ -34,6 +35,8 @@ interface BinauralPannerPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: BinauralPannerState) => void;
+  /** Its live sound: where what comes out sits between the speakers, and how alike its sides are. */
+  signal?: DeviceSignal;
   value: BinauralPannerState;
 }
 
@@ -47,6 +50,7 @@ function BinauralPannerPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: BinauralPannerPanelProps) {
   const point = useMemo(() => binauralPoint(value), [value]);
@@ -63,7 +67,7 @@ function BinauralPannerPanel({
     [value.azimuthDeg, value.distanceM]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={binauralPannerDevice}

@@ -21,6 +21,7 @@ import {
   graphicEqCurve,
   graphicEqDevice,
 } from "@/registry-audio/bases/base/devices/graphic-eq/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -86,6 +87,8 @@ interface GraphicEqPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: GraphicEqState) => void;
+  /** Its live sound: the spectrum of what comes out, behind the curve. */
+  signal?: DeviceSignal;
   value: GraphicEqState;
 }
 
@@ -99,6 +102,7 @@ function GraphicEqPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: GraphicEqPanelProps) {
   const curve = useMemo(() => graphicEqCurve(value), [value]);
@@ -108,7 +112,7 @@ function GraphicEqPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={graphicEqDevice}

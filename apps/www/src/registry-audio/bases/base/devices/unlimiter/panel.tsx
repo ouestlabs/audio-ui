@@ -18,6 +18,7 @@ import {
   unlimiterLift,
   unlimiterUnused,
 } from "@/registry-audio/bases/base/devices/unlimiter/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MAX_SIZE_DB = 30;
 const MAX_LIFT_DB = 18;
@@ -35,6 +36,8 @@ interface UnlimiterPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: UnlimiterState) => void;
+  /** Its live sound: the level going in and the level coming out over the last moments, the attacks it lifts. */
+  signal?: DeviceSignal;
   value: UnlimiterState;
 }
 
@@ -49,11 +52,12 @@ function UnlimiterPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: UnlimiterPanelProps) {
   const lift = useMemo(() => unlimiterLift(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={unlimiterDevice}

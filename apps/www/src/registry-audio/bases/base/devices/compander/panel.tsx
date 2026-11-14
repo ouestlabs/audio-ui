@@ -19,6 +19,7 @@ import {
   companderCurve,
   companderDevice,
 } from "@/registry-audio/bases/base/devices/compander/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_DB = -90;
 const MAX_DB = 0;
@@ -36,6 +37,8 @@ interface CompanderPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: CompanderState) => void;
+  /** Its live sound: a dot rides the curve at the level going in. */
+  signal?: DeviceSignal;
   value: CompanderState;
 }
 
@@ -49,6 +52,7 @@ function CompanderPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: CompanderPanelProps) {
   const curve = useMemo(() => companderCurve(value), [value]);
@@ -64,7 +68,7 @@ function CompanderPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={companderDevice}
