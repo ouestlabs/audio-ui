@@ -46,7 +46,7 @@ function middle(channels: readonly ArrayLike<number>[], frames: number) {
 }
 
 /** The folder a file of the private storage lies in, from its path: each folder inside the one before. */
-const folderOf = (path: readonly string[]) =>
+export const folderOf = (path: readonly string[]) =>
   path
     .slice(0, -1)
     .reduce<Promise<FileSystemDirectoryHandle>>(
@@ -57,7 +57,7 @@ const folderOf = (path: readonly string[]) =>
 /** Each streamed recording's cache file, opened once and kept: it is never written again. */
 const opened = new WeakMap<StreamedSource, Promise<File>>();
 
-function cacheFile(source: StreamedSource): Promise<File> {
+export function cacheFile(source: StreamedSource): Promise<File> {
   const kept = opened.get(source);
   if (kept) {
     return kept;
@@ -173,7 +173,7 @@ function spectraOf(source: StreamedSource): Promise<Spectra> {
 const BANDS = ["low", "mid", "high"] as const;
 
 /** How many sets of leaves a recording of `channels` keeps: its mix's, each channel's for one of several, then its three bands'. */
-const setsOf = (channels: number) =>
+export const setsOf = (channels: number) =>
   (channels > 1 ? channels + 1 : 1) + BANDS.length;
 
 /** Which set of a recording's leaves is a band's. */
