@@ -12,8 +12,10 @@
 import { cachedRecording, canStream, streamRecording } from "@/lib/daw/cache";
 import type {
   MemoryJob,
+  ProcessAnswer,
   ProcessDone,
   ProcessJob,
+  ProcessRequest,
 } from "@/lib/daw/process-worker";
 import {
   freshRecordingId,
@@ -35,15 +37,66 @@ type Reply<Kind extends ProcessDone["kind"]> = Extract<
   { kind: Kind }
 >;
 
-/**
- * `job` run in a worker of its own, which ends once it is done: `first`, its
- * first answer (from memory, all of it; streamed, the cache made), and `last`,
- * once a streamed recording's file is stored too.
- */
-function inWorker(job: ProcessJob) {
+/** How long the worker is kept with no job before it is let go of, in ms. */
+const IDLE = 30_000;
+
+/** The worker every job runs in, kept between jobs so an edit does not wait for one to start, the answers each job waits for, and the next ticket. */
+const processing = {
+  answers: new Map<number, (done: ProcessDone) => void>(),
+  idle: undefined as ReturnType<typeof setTimeout> | undefined,
+  tickets: 0,
+  worker: null as Worker | null,
+};
+
+/** The worker, started if none runs: called ahead of the first edit too (`warmProcessing`). */
+function processWorker(): Worker {
+  clearTimeout(processing.idle);
+  if (processing.worker) {
+    return processing.worker;
+  }
   const worker = new Worker(new URL("./process-worker.ts", import.meta.url), {
     type: "module",
   });
+  worker.onmessage = ({ data }: MessageEvent<ProcessAnswer>) =>
+    processing.answers.get(data.ticket)?.(data.done);
+  // Lost, every job waiting on it fails, and the next one starts another.
+  worker.onerror = (event) => {
+    worker.terminate();
+    processing.worker = null;
+    const message = event.message || "the sound could not be processed";
+    for (const answer of [...processing.answers.values()]) {
+      answer({ kind: "failed", message });
+    }
+  };
+  processing.worker = worker;
+  return worker;
+}
+
+/** Lets the worker go once no job has needed it for a while. */
+function idleLater() {
+  clearTimeout(processing.idle);
+  processing.idle = setTimeout(() => {
+    if (processing.answers.size === 0) {
+      processing.worker?.terminate();
+      processing.worker = null;
+    }
+  }, IDLE);
+}
+
+/** Starts the worker ahead of an edit, as the editor of a clip opens, so the first one does not wait for it either. */
+export function warmProcessing() {
+  processWorker();
+  idleLater();
+}
+
+/**
+ * `job` run in the worker: `first`, its first answer (from memory, all of it;
+ * streamed, the cache made), and `last`, once a streamed recording's file is
+ * stored too.
+ */
+function inWorker(job: ProcessJob) {
+  processing.tickets += 1;
+  const ticket = processing.tickets;
   let answer: (done: ProcessDone) => void = () => undefined;
   let fail: (error: Error) => void = () => undefined;
   const first = new Promise<Reply<"made" | "memory">>((resolve, reject) => {
@@ -55,31 +108,24 @@ function inWorker(job: ProcessJob) {
     fail = reject;
   });
   const last = new Promise<void>((resolve, reject) => {
-    worker.onmessage = ({ data }: MessageEvent<ProcessDone>) => {
-      answer(data);
-      if (data.kind === "failed") {
-        const error = new Error(data.message);
+    processing.answers.set(ticket, (done) => {
+      answer(done);
+      if (done.kind === "failed") {
+        const error = new Error(done.message);
         fail(error);
         reject(error);
       }
-      if (data.kind !== "made") {
-        worker.terminate();
+      if (done.kind !== "made") {
+        processing.answers.delete(ticket);
+        idleLater();
         resolve();
       }
-    };
-    worker.onerror = (event) => {
-      worker.terminate();
-      const error = new Error(
-        event.message || "the sound could not be processed"
-      );
-      fail(error);
-      reject(error);
-    };
+    });
   });
   // A failure before the cache is made is the first answer's: the last one is let go of.
   last.catch(() => undefined);
-  worker.postMessage(
-    job,
+  processWorker().postMessage(
+    { job, ticket } satisfies ProcessRequest,
     job.kind === "memory" ? { transfer: transferable(job.channels) } : {}
   );
   return { first, last };

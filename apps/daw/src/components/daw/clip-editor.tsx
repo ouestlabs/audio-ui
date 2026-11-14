@@ -1,6 +1,12 @@
 import type { Note } from "@audio-ui/core/piano-roll";
 import { secondsPerBar, secondsPerBeat } from "@audio-ui/engine/time";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
 import { toast } from "sonner";
 import {
   ClipPanel,
@@ -21,7 +27,12 @@ import {
   type ClipSwing,
   DRUM_RACK_DEVICE,
 } from "@/lib/arrangement";
-import { type Processed, processSource, readSource } from "@/lib/daw/process";
+import {
+  type Processed,
+  processSource,
+  readSource,
+  warmProcessing,
+} from "@/lib/daw/process";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import {
   recordingBands,
@@ -148,6 +159,13 @@ export function ClipEditor({
     [clip.id, setSavedView]
   );
   const bar = secondsPerBar(doc.tempo);
+  // An audio clip's editor opened: the worker its edits run in is started now, so the first one does not wait for it.
+  const audio = !clip.notes;
+  useEffect(() => {
+    if (audio) {
+      warmProcessing();
+    }
+  }, [audio]);
   // Laid flat in the detail view, which draws the edge above it: no card of its own, and as tall as the view unless rolled up.
   const docked = cn("rounded-none border-0", !collapsed && "h-full");
   const edit = useCallback(
