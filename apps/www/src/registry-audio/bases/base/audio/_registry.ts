@@ -671,6 +671,21 @@ export const audio: RegistryItem[] = [
     categories: ["device", "plot"],
     dependencies: ["@audio-ui/react"],
     description:
+      "Live views of a sound over the Plot: ScopePlot, a wave held still on each cycle; SpectrumPlot, a spectrum along a log frequency axis; LevelPlot, a level over time, and a second one filled under it to compare what went in with what came out. Each follows a source without a React render.",
+    files: [
+      {
+        path: "audio/elements/signal-plot.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "signal-plot",
+    registryDependencies: ["@audio-ui/plot"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot"],
+    dependencies: ["@audio-ui/react"],
+    description:
       "Where a sound sits between the speakers, live: a goniometer of its two channels, scaled to the loudest of the last moments, over a correlation meter from -1 to 1. Painted on a canvas from a source, without a React render.",
     files: [
       {

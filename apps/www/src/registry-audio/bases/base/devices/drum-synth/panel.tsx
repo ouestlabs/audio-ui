@@ -1,7 +1,8 @@
 import type { Pad as PadPrimitive } from "@audio-ui/react/pad";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
+import { LevelPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -53,6 +54,8 @@ function DrumSynthPanel({
   signal,
   value,
 }: DrumSynthPanelProps) {
+  // Each hit as it rang: its attack and its decay, the newest at the end.
+  const live = useMemo(() => signal?.output.history({ of: "level", points: 240, seconds: 2 }), [signal]);
   const strike = useCallback(
     (_pad: string, details: PadPrimitive.Root.OnEventDetails) =>
       onNoteOn?.({ velocity: details.velocity }),
@@ -81,6 +84,9 @@ function DrumSynthPanel({
           onValueChange={onValueChange}
           value={value}
         />
+        {live ? (
+          <LevelPlot aria-label="What it played over the last two seconds" source={live} />
+        ) : null}
         <Pad
           activePads={activeNotes?.length ? ACTIVE : undefined}
           aria-label="Strike the drum"

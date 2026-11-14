@@ -8,6 +8,7 @@ import {
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { WaveformSelect } from "@/registry-audio/bases/base/audio/elements/waveform-select";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -77,6 +78,8 @@ function PocketSynthPanel({
   signal,
   value,
 }: PocketSynthPanelProps) {
+  // The wave it plays now, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const faderId = useId();
   const faderLabelId = useId();
   const faderValueId = useId();
@@ -144,6 +147,9 @@ function PocketSynthPanel({
           onValueCommitted={onNoteOff}
           value={shown}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <WaveformSelect
           aria-label={WAVE.label}
           onValueChange={pickWave}

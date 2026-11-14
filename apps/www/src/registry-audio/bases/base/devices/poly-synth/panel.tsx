@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useState, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -14,6 +14,7 @@ import {
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -88,6 +89,8 @@ function PolySynthPanel({
   signal,
   value,
 }: PolySynthPanelProps) {
+  // The wave its voices play now, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -183,6 +186,9 @@ function PolySynthPanel({
           onValueChange={change}
           value={value}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the synth"

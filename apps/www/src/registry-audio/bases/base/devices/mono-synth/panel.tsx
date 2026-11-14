@@ -15,12 +15,7 @@ import {
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
-import {
-  Plot,
-  PlotGraph,
-  PlotGrid,
-  PlotTrace,
-} from "@/registry-audio/bases/base/audio/elements/plot";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -65,8 +60,6 @@ const PRESET_NAMES = MONO_SYNTH_PRESETS.map((preset) => ({
 const LOWEST = 48;
 const HIGHEST = 72;
 
-/** The scope's middle line has no figure: the wave is fitted to the height, so a value would mean nothing. */
-const noLabel = () => "";
 
 interface MonoSynthPanelProps {
   /** The notes held now, such as on a MIDI keyboard: their keys light up as they are played. */
@@ -240,24 +233,7 @@ function MonoSynthPanel({
           onValueChange={change}
           value={value}
         />
-        {scope ? (
-          <Plot
-            aria-label="The wave it plays"
-            className="h-16 min-h-10 shrink-0"
-            maxX={1}
-            maxY={1}
-            minX={0}
-            minY={-1}
-          >
-            <PlotGrid y={{ format: noLabel, ticks: [0] }} />
-            <PlotGraph>
-              <PlotTrace
-                className="stroke-[1.5px] stroke-primary"
-                source={scope}
-              />
-            </PlotGraph>
-          </Plot>
-        ) : null}
+        {scope ? <ScopePlot aria-label="The wave it plays" source={scope} /> : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the synth"

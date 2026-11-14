@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useState, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from "@/registry/bases/base/ui/select";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
+import { SpectrumPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -98,6 +99,8 @@ function FmSynthPanel({
   signal,
   value,
 }: FmSynthPanelProps) {
+  // Where its sound has its energy: the carrier and the sidebands its operators make.
+  const live = useMemo(() => signal?.output.spectrum(), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -164,6 +167,9 @@ function FmSynthPanel({
           onValueChange={change}
           value={value}
         />
+        {live ? (
+          <SpectrumPlot aria-label="Its spectrum" source={live} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the synth"

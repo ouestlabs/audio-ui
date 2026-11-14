@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/registry/bases/base/ui/select";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -70,6 +71,8 @@ function SamplerPanel({
   signal,
   value,
 }: SamplerPanelProps) {
+  // The sample as it plays, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const pickSample = useCallback(
     (sample: string | null) => {
       if (sample) {
@@ -133,6 +136,9 @@ function SamplerPanel({
           onValueChange={onValueChange}
           value={value}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <Pad
           activePads={lit}
           aria-label="Slices"

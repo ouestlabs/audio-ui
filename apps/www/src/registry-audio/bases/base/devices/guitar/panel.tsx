@@ -1,7 +1,8 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -56,6 +57,8 @@ function GuitarPanel({
   signal,
   value,
 }: GuitarPanelProps) {
+  // The string as it rings, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const play = useCallback(
     (pitch: number) => onNoteOn?.({ frequency: midiToHz(pitch) }),
     [onNoteOn]
@@ -81,6 +84,9 @@ function GuitarPanel({
           onValueChange={onValueChange}
           value={value}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Pick the strings"

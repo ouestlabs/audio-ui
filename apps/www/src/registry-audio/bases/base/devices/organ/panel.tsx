@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useState, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -15,6 +15,7 @@ import {
 } from "@/registry/bases/base/ui/toggle-group";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
+import { SpectrumPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -127,6 +128,8 @@ function OrganPanel({
   signal,
   value,
 }: OrganPanelProps) {
+  // The harmonics its drawbars set, as they sound.
+  const live = useMemo(() => signal?.output.spectrum(), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -252,6 +255,9 @@ function OrganPanel({
             value={value}
           />
         </div>
+        {live ? (
+          <SpectrumPlot aria-label="Its spectrum" source={live} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the organ"
