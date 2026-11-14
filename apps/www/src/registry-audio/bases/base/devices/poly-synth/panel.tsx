@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -14,7 +14,6 @@ import {
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
-import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -27,7 +26,6 @@ import {
   polySynthDevice,
   polySynthPreset,
 } from "@/registry-audio/bases/base/devices/poly-synth/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do, as the synth's panel lays them out. */
 const GROUPS = [
@@ -67,8 +65,6 @@ interface PolySynthPanelProps {
   /** A key is played, as a note of the synth. */
   onNoteOn?: (note: PolySynthNote) => void;
   onValueChange: (state: PolySynthState) => void;
-  /** Its live sound: the wave it plays now, held still on each cycle. */
-  signal?: DeviceSignal;
   value: PolySynthState;
 }
 
@@ -86,11 +82,8 @@ function PolySynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
-  signal,
   value,
 }: PolySynthPanelProps) {
-  // The wave its voices play now, held still on each cycle.
-  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -129,7 +122,7 @@ function PolySynthPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)} signal={signal}>
+    <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
         device={polySynthDevice}
         onValueChange={onValueChange}
@@ -186,9 +179,6 @@ function PolySynthPanel({
           onValueChange={change}
           value={value}
         />
-        {live ? (
-          <ScopePlot aria-label="The wave it plays" source={live} />
-        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the synth"

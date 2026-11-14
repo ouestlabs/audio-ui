@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from "@/registry/bases/base/ui/select";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
-import { SpectrumPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -23,7 +22,6 @@ import {
   fmSynthDevice,
   fmSynthPreset,
 } from "@/registry-audio/bases/base/devices/fm-synth/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do: what every operator shares, then each operator's four. */
 const GROUPS = [
@@ -76,8 +74,6 @@ interface FmSynthPanelProps {
   /** A key is played, as a note of the synth. */
   onNoteOn?: (note: FmSynthNote) => void;
   onValueChange: (state: FmSynthState) => void;
-  /** Its live sound: the spectrum of what it plays, its carrier and the sidebands the operators make. */
-  signal?: DeviceSignal;
   value: FmSynthState;
 }
 
@@ -96,11 +92,8 @@ function FmSynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
-  signal,
   value,
 }: FmSynthPanelProps) {
-  // Where its sound has its energy: the carrier and the sidebands its operators make.
-  const live = useMemo(() => signal?.output.spectrum(), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -130,7 +123,7 @@ function FmSynthPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)} signal={signal}>
+    <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
         device={fmSynthDevice}
         onValueChange={onValueChange}
@@ -167,7 +160,6 @@ function FmSynthPanel({
           onValueChange={change}
           value={value}
         />
-        {live ? <SpectrumPlot aria-label="Its spectrum" source={live} /> : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the synth"

@@ -601,7 +601,7 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The guitar's face: the string's tone, decay and palm mute, the body and the volume, and a keyboard from the open low E up three octaves, controlled, with no audio in it.",
-      registryDependencies: ["@audio-ui/piano", "@audio-ui/signal-plot"],
+      registryDependencies: ["@audio-ui/piano"],
     },
   }),
   ...deviceItems("drum-synth", {
@@ -621,7 +621,7 @@ export const devices: RegistryItem[] = [
       dependencies: [],
       description:
         "The face of the Drum Synth device: its voice and tuning, decay, tone and snap, its volume, and a pad that strikes it, harder near its top.",
-      registryDependencies: ["@audio-ui/pad", "@audio-ui/signal-plot"],
+      registryDependencies: ["@audio-ui/pad"],
     },
   }),
   ...deviceItems("multiband", {

@@ -7,7 +7,6 @@ import {
 import { createDrumSynthEngine } from "@/registry-audio/bases/base/devices/drum-synth/engine";
 import { DrumSynthPanel } from "@/registry-audio/bases/base/devices/drum-synth/panel";
 import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
@@ -28,7 +27,6 @@ export default function BlockDrumSynth() {
     destination: master,
     state,
   });
-  const signal = useDeviceSignal(engine ?? null, drumSynthDevice);
 
   const strike = useCallback(
     (note: DrumSynthNote) => {
@@ -47,7 +45,6 @@ export default function BlockDrumSynth() {
         activeNotes={midi.activeNotes}
         onNoteOn={strike}
         onValueChange={setState}
-        signal={signal}
         value={state}
       />
     </div>

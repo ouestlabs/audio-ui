@@ -7,7 +7,6 @@ import {
 import { createPocketSynthEngine } from "@/registry-audio/bases/base/devices/pocket-synth/engine";
 import { PocketSynthPanel } from "@/registry-audio/bases/base/devices/pocket-synth/panel";
 import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 /**
@@ -25,7 +24,6 @@ export default function BlockPocketSynth() {
     destination: master,
     state,
   });
-  const signal = useDeviceSignal(engine ?? null, pocketSynthDevice);
 
   const play = useCallback(
     (note: PocketSynthNote) => engine?.noteOn(note),
@@ -39,7 +37,6 @@ export default function BlockPocketSynth() {
         onNoteOff={release}
         onNoteOn={play}
         onValueChange={setState}
-        signal={signal}
         value={state}
       />
     </div>

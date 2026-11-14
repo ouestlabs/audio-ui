@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -15,7 +15,6 @@ import {
 } from "@/registry/bases/base/ui/toggle-group";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
-import { SpectrumPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -31,7 +30,6 @@ import {
   organDevice,
   organPreset,
 } from "@/registry-audio/bases/base/devices/organ/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do, beside the drawbars. */
 const GROUPS = [
@@ -106,8 +104,6 @@ interface OrganPanelProps {
   /** A key is played, as a note of the organ. */
   onNoteOn?: (note: OrganNote) => void;
   onValueChange: (state: OrganState) => void;
-  /** Its live sound: the spectrum of what it plays, the harmonics its drawbars set. */
-  signal?: DeviceSignal;
   value: OrganState;
 }
 
@@ -125,11 +121,8 @@ function OrganPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
-  signal,
   value,
 }: OrganPanelProps) {
-  // The harmonics its drawbars set, as they sound.
-  const live = useMemo(() => signal?.output.spectrum(), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -173,7 +166,7 @@ function OrganPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)} signal={signal}>
+    <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
         device={organDevice}
         onValueChange={onValueChange}
@@ -255,7 +248,6 @@ function OrganPanel({
             value={value}
           />
         </div>
-        {live ? <SpectrumPlot aria-label="Its spectrum" source={live} /> : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the organ"

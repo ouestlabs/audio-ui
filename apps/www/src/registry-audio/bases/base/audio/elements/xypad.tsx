@@ -20,8 +20,6 @@ const xypadVariants = cva("", {
 interface XYPadProps
   extends XYPadPrimitive.Root.Props,
     VariantProps<typeof xypadVariants> {
-  /** Drawn inside the pad, under its grid and its thumb, filling it and taking no pointer: what the pad plays, such as the wave it makes. */
-  background?: React.ReactNode;
   /** Takes the height left in a column in place of its size's, down to a strip: in a short panel it gives way to the controls under it. */
   fill?: boolean;
   formatValue?: (value: { x: number; y: number }) => React.ReactNode;
@@ -34,7 +32,6 @@ export function XYPad({
   "aria-describedby": ariaDescribedBy,
   "aria-label": ariaLabel,
   "aria-labelledby": ariaLabelledBy,
-  background,
   className,
   fill = false,
   size,
@@ -64,15 +61,6 @@ export function XYPad({
         )}
         data-slot="xypad"
       >
-        {background ? (
-          <div
-            aria-hidden="true"
-            className="pointer-events-none absolute inset-0"
-            data-slot="xypad-background"
-          >
-            {background}
-          </div>
-        ) : null}
         <div
           aria-hidden="true"
           className="pointer-events-none absolute inset-0"
