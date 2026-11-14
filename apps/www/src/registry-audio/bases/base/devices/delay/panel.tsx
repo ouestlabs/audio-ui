@@ -1,4 +1,5 @@
 import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
+import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -15,6 +16,7 @@ import {
   PlotGraph,
   PlotGrid,
   PlotHandle,
+  PlotDot,
   PlotLine,
   PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
@@ -25,20 +27,70 @@ import {
 } from "@/registry-audio/bases/base/audio/panels/device-panel";
 import {
   type DelayState,
+  type DelayTap,
   delayDevice,
   delaySeconds,
   delayTaps,
   GRAIN_PARAMETERS,
   nearestDivision,
 } from "@/registry-audio/bases/base/devices/delay/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
+import {
+  type DeviceSignal,
+  deriveSource,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */
 const WINDOW_MS = 3000;
 const TIME_TICKS = [500, 1000, 2000];
 const PERCENT_TICKS = [25, 50, 75];
-/** The level of the echoes at the foot of the plot, in dB: full scale at the top. */
-const ECHO_FLOOR_DB = -60;
+/** The window of the sound that went in, the newest first: the plot's three seconds, back from now. */
+const TAPE = {
+  newestFirst: true,
+  of: "level",
+  points: 240,
+  seconds: WINDOW_MS / 1000,
+} as const;
+/** The quietest sound the tape is scaled up to fill, as an amplitude. */
+const TAPE_QUIETEST = 0.01;
+
+/**
+ * The plot read as a delay's tape: what went in over its three seconds, the
+ * newest at the start, as amplitudes scaled so the loudest of them fills the
+ * height. A hit runs right along it, past the echoes' lines.
+ */
+function useTape(signal: DeviceSignal | undefined) {
+  return useMemo(() => {
+    const heard = signal?.input?.history(TAPE);
+    if (!heard) {
+      return null;
+    }
+    const out = new Float32Array(TAPE.points);
+    return deriveSource(heard, (levels) => {
+      let loudest = TAPE_QUIETEST;
+      for (let index = 0; index < out.length; index += 1) {
+        const amplitude = 10 ** ((levels[index] ?? -100) / 20);
+        out[index] = amplitude;
+        loudest = Math.max(loudest, amplitude);
+      }
+      for (let index = 0; index < out.length; index += 1) {
+        out[index] = (out[index] as number) / loudest;
+      }
+      return out;
+    });
+  }, [signal]);
+}
+
+/** Where an echo's head reads the tape now: on its line, as high as the sound under it at the echo's level. */
+function headSource(tape: Source<Float32Array>, tap: DelayTap) {
+  const at = Math.round((tap.timeMs / WINDOW_MS) * (TAPE.points - 1));
+  return {
+    getSnapshot: () => ({
+      x: tap.timeMs,
+      y: 100 * tap.level * (tape.getSnapshot()[at] ?? 0),
+    }),
+    subscribe: tape.subscribe,
+  };
+}
 /** In the title bar: the switch and the mode. The grain delay's own knobs show with it alone. */
 const IN_THE_TITLE_BAR = ["enabled", "mode"] as const;
 const NOT_GRAIN = [...IN_THE_TITLE_BAR, ...GRAIN_PARAMETERS] as const;
@@ -61,7 +113,7 @@ interface DelayPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: DelayState) => void;
-  /** Its live sound: the level of its echoes over the last three seconds, behind the lines of the echoes it is set to make. */
+  /** Its live sound: the plot runs as a tape, what went in over the last three seconds scrolling past the echoes' lines, a dot on each at what it plays back now. */
   signal?: DeviceSignal;
   /** The host's tempo, which a synced delay reads its note value against. @default 120 BPM */
   tempo?: Tempo;
@@ -75,8 +127,10 @@ interface DelayPanelProps {
  * and the time knob is drawn off, as the note one is when it is not. The knobs
  * under it are the same parameters, for a precise value, and the grain
  * delay's pitch, spray, jitter and grain size when it is the mode, picked in
- * the title bar. Controlled like `DevicePanel`, which it uses for the knobs.
- * Its children sit at the end of the title bar.
+ * the title bar. Given its signal, the plot runs as a tape: the sound that
+ * went in scrolls from the start past the lines, its heads, and a dot on each
+ * stands at what that echo plays back now. Controlled like `DevicePanel`,
+ * which it uses for the knobs. Its children sit at the end of the title bar.
  */
 function DelayPanel({
   children,
@@ -86,15 +140,7 @@ function DelayPanel({
   tempo = DEFAULT_TEMPO,
   value,
 }: DelayPanelProps) {
-  const echoes = useMemo(
-    () =>
-      signal?.wet?.history({
-        of: "level",
-        points: 240,
-        seconds: WINDOW_MS / 1000,
-      }),
-    [signal]
-  );
+  const tape = useTape(signal);
   const taps = useMemo(
     () => delayTaps(value, WINDOW_MS, tempo),
     [tempo, value]
@@ -176,14 +222,9 @@ function DelayPanel({
             y={{ format: formatPercentMark, ticks: PERCENT_TICKS }}
           />
           <PlotGraph>
-            {echoes ? (
-              // The echoes as they come back, their level a moment apart, the newest at the right.
-              <PlotTraceArea
-                fillTo={ECHO_FLOOR_DB}
-                max={0}
-                min={ECHO_FLOOR_DB}
-                source={echoes}
-              />
+            {tape ? (
+              // The tape: what went in, the newest at the start, running past the echoes' lines.
+              <PlotTraceArea fillTo={0} max={1} min={0} source={tape} />
             ) : null}
             {taps.map((tap) => (
               <PlotLine
@@ -195,6 +236,15 @@ function DelayPanel({
               />
             ))}
           </PlotGraph>
+          {tape
+            ? taps.map((tap) => (
+                <PlotDot
+                  className="size-2 group-data-idle/device:hidden"
+                  key={tap.timeMs}
+                  source={headSource(tape, tap)}
+                />
+              ))
+            : null}
           {value.enabled ? (
             <PlotHandle
               aria-label="Time and feedback"

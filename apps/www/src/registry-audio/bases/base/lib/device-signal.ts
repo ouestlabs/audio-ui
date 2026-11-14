@@ -34,6 +34,8 @@ const PEAK_FALL_DB_PER_SECOND = 12;
 const LEVEL_SAMPLES = 2048;
 /** Samples of the analyser a scope, a spectrum and a history read: 85 ms at 48 kHz. */
 const MONO_SAMPLES = 4096;
+/** Samples of the analyser a history reads: 680 ms at 48 kHz, so a frame that comes late still finds the samples it missed. */
+const HISTORY_SAMPLES = 32_768;
 const SPECTRUM_SMOOTHING = 0.8;
 /** The quietest sound a fitted scope scales up to fill, as an amplitude: under it, a sound stays small. */
 const FIT_QUIETEST = 0.01;
@@ -74,6 +76,8 @@ export interface ScopeOptions {
 }
 
 export interface HistoryOptions {
+  /** The newest value first and the oldest last: a window that runs back in time from its start, as a tape runs past a delay's heads. @default false, the oldest first */
+  newestFirst?: boolean;
   /** What each value is: the signal itself, as a modulator's position (`"value"`), or its level in dB (`"level"`). @default "value" */
   of?: "level" | "value";
   /** How many values the window holds, spread evenly over it. @default 240 */
@@ -263,6 +267,13 @@ function makeMono(ctx: BaseAudioContext) {
   return { analyser, disconnect: () => analyser.disconnect(), input: analyser };
 }
 
+/** One long analyser of the point's channels mixed down: for a history. */
+function makeLong(ctx: BaseAudioContext) {
+  const analyser = ctx.createAnalyser();
+  analyser.fftSize = HISTORY_SAMPLES;
+  return { analyser, disconnect: () => analyser.disconnect(), input: analyser };
+}
+
 /** An analyser per channel, a mono sound spread to both first: for levels and a stereo field. */
 function makeStereo(ctx: BaseAudioContext) {
   const spread = ctx.createGain();
@@ -319,6 +330,7 @@ function createSignalPoint(
   node: () => AudioNode | null | undefined
 ): SignalPoint {
   const mono = createTap(node, makeMono);
+  const long = createTap(node, makeLong);
   const stereo = createTap(node, makeStereo);
 
   /** The loudest sample of the last frame, in dB, and the levels: one read of the analysers shared by `levels` and `active`. */
@@ -537,8 +549,13 @@ function createSignalPoint(
   };
 
   const histories = new Map<string, Source<Float32Array>>();
-  const history = ({ of = "value", points = 240, seconds }: HistoryOptions) => {
-    const key = `${of}:${points}:${seconds}`;
+  const history = ({
+    newestFirst = false,
+    of = "value",
+    points = 240,
+    seconds,
+  }: HistoryOptions) => {
+    const key = `${newestFirst}:${of}:${points}:${seconds}`;
     const kept = histories.get(key);
     if (kept) {
       return kept;
@@ -547,8 +564,8 @@ function createSignalPoint(
     const made = watchedSource(
       new Float32Array(points).fill(rest),
       (publish) => {
-        const release = mono.use();
-        const buffer = new Float32Array(MONO_SAMPLES);
+        const release = long.use();
+        const buffer = new Float32Array(HISTORY_SAMPLES);
         const ring = new Float32Array(points).fill(rest);
         const out = new Float32Array(points).fill(rest);
         let head = 0;
@@ -557,7 +574,7 @@ function createSignalPoint(
         let heardAt: number | null = null;
         let resting = true;
         const stop = everyFrame(() => {
-          const nodes = mono.current();
+          const nodes = long.current();
           if (!nodes) {
             // Nothing to listen to: the window empties, and starts again with the next sound.
             if (!resting) {
@@ -598,8 +615,14 @@ function createSignalPoint(
                 : (buffer[end - 1] as number);
             head = (head + 1) % points;
           }
-          out.set(ring.subarray(head), 0);
-          out.set(ring.subarray(0, head), points - head);
+          if (newestFirst) {
+            for (let index = 0; index < points; index += 1) {
+              out[index] = ring[(head - 1 - index + points) % points] as number;
+            }
+          } else {
+            out.set(ring.subarray(head), 0);
+            out.set(ring.subarray(0, head), points - head);
+          }
           publish(out);
         });
         return () => {
@@ -614,6 +637,22 @@ function createSignalPoint(
   };
 
   return { active, history, levels, scope, spectrum, stereo: stereoSamples };
+}
+
+/**
+ * A source computed from another, once per change however many watch it: a
+ * face's own reading of a signal, such as a level turned into a height. While
+ * nothing watches it, it does not watch `source` either. `compute` is given
+ * the source's value and returns the new one; it may update one array in
+ * place.
+ */
+export function deriveSource<From, To>(
+  source: Source<From>,
+  compute: (value: From) => To
+): Source<To> {
+  return watchedSource(compute(source.getSnapshot()), (publish) =>
+    source.subscribe(() => publish(compute(source.getSnapshot())))
+  );
 }
 
 const sameReadings = (a: DeviceReadings, b: DeviceReadings) => {

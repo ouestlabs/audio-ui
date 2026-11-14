@@ -53,7 +53,16 @@ async function sineEngine(frequency: number, amplitude: number, gain = 1) {
   output.disconnect();
   output.connect(mute).connect(ctx.destination);
   oscillator.start();
+  await running(ctx);
   return { ctx, input, oscillator, output };
+}
+
+/** Waits until the context's clock has run a tenth of a second: the first context of a page can take a moment to start rendering after it resumes. */
+async function running(ctx: BaseAudioContext) {
+  const from = ctx.currentTime;
+  while (ctx.currentTime - from < 0.1) {
+    await wait(20);
+  }
 }
 
 const near = (actual: number, expected: number, tolerance: number) =>
