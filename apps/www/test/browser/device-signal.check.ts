@@ -13,7 +13,7 @@ const effect = defineDevice({
   id: "check.effect",
   name: "Effect",
   parameters: [{ default: true, id: "enabled", kind: "toggle", label: "On" }],
-  signals: ["gainReduction", "modulator"],
+  signals: ["modulator"],
 });
 const instrument = defineDevice({
   description: "Makes a tone.",
@@ -238,7 +238,7 @@ check("the analysers come off once nothing watches", async () => {
   await ctx.close();
 });
 
-check("a compressor's reduction and levels come from its engine", async () => {
+check("a compressor's readings and levels come from its engine", async () => {
   const ctx = new AudioContext();
   await ctx.resume();
   const engine = createCompressorEngine(ctx, {
@@ -256,15 +256,15 @@ check("a compressor's reduction and levels come from its engine", async () => {
   engine.output.connect(mute).connect(ctx.destination);
   oscillator.start();
   const signal = createDeviceSignal(() => engine, compressorDevice);
-  assert(signal.reduction, "a compressor declares its reduction");
-  const [reduction, into, out] = await Promise.all([
-    watch(signal.reduction, 800),
+  const [readings, into, out] = await Promise.all([
+    watch(signal.readings, 800),
     watch(signal.input?.levels as Source<{ levels: readonly number[] }>, 800),
     watch(signal.output.levels, 800),
   ]);
   engine.dispose();
   await ctx.close();
   // A sine at 0.7 is -6 dB RMS, 24 dB over the threshold: at 8:1 about 21 dB come off.
+  const reduction = readings.gainReductionDb ?? 0;
   assert(reduction < -12, `reduction ${reduction}`);
   assert(
     (into.levels[0] as number) - (out.levels[0] as number) > 12,

@@ -898,6 +898,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/demo-sound",
       "@audio-ui/use-device-loop",
       "@audio-ui/use-master-bus",
+      "@audio-ui/use-device-signal",
     ],
     type: "registry:block",
   },

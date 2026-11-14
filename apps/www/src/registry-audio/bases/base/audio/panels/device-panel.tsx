@@ -1,4 +1,3 @@
-import type { Source } from "@audio-ui/core";
 import type {
   ChoiceParameter,
   Device,
@@ -8,7 +7,7 @@ import type {
   ParameterValue,
   ToggleParameter,
 } from "@audio-ui/engine/device";
-import { type ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -24,7 +23,6 @@ import {
   isFilterType,
 } from "@/registry-audio/bases/base/audio/elements/filter-type-select";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
-import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import {
   isWaveform,
   WaveformSelect,
@@ -283,87 +281,16 @@ function ChoiceOption({
 interface DeviceFrameProps {
   children: ReactNode;
   className?: string;
-  /** The device's live sound, from `useDeviceSignal` or a host: its levels going in and coming out, and the gain it takes off where it reports one, stand at the edge of the frame. */
+  /** The device's live sound, from `useDeviceSignal` or a host: the frame is idle (`data-idle`) while no sound goes in, so the live marks of its face give way. */
   signal?: DeviceSignal;
-}
-
-/** The levels of a device, the RMS and the held peak of each channel, as a meter column reads them: from -60 to +6 dB, spread as a digital peak meter does. */
-function LevelMeter({
-  label,
-  source,
-}: {
-  label: string;
-  source: DeviceSignal["output"]["levels"];
-}) {
-  return (
-    <div className="flex min-h-0 flex-col items-center gap-1">
-      <Meter
-        aria-label={`${label} level`}
-        className="h-auto min-h-8 grow gap-px [--meter-thickness:--spacing(1)]"
-        scale="iec"
-        size="sm"
-        source={source}
-      />
-      <span aria-hidden="true" className="text-[10px] text-muted-foreground">
-        {label}
-      </span>
-    </div>
-  );
-}
-
-/** How far a reduction meter reaches, in dB. */
-const REDUCTION_RANGE_DB = 24;
-
-/** The gain a device takes off, in dB, as a bar that hangs from the top: the further down, the more it takes off. */
-function ReductionMeter({ source }: { source: Source<number> }) {
-  const frames = useMemo(
-    () => ({
-      getSnapshot: () => ({ levels: [-source.getSnapshot()] }),
-      subscribe: source.subscribe,
-    }),
-    [source]
-  );
-  return (
-    <div className="flex min-h-0 flex-col items-center gap-1">
-      <Meter
-        aria-label="Gain reduction"
-        // Drawn upside down, it hangs from the top; past its range it is still a reduction, not a clip.
-        className="h-auto min-h-8 grow rotate-180 [--meter-thickness:--spacing(1)] [&_.cn-meter-fill]:bg-primary"
-        clipThreshold={Number.POSITIVE_INFINITY}
-        max={REDUCTION_RANGE_DB}
-        min={0}
-        peakMarks="hidden"
-        size="sm"
-        source={frames}
-      />
-      <span aria-hidden="true" className="text-[10px] text-muted-foreground">
-        GR
-      </span>
-    </div>
-  );
-}
-
-/** What a device's frame shows of its sound at its edge: the level going in, the gain it takes off, and the level coming out. */
-function DeviceLevels({ signal }: { signal: DeviceSignal }) {
-  return (
-    <div
-      className="col-start-2 row-start-2 flex min-h-0 gap-1.5 border-s px-1.5 pt-2 pb-1"
-      data-slot="device-levels"
-    >
-      {signal.input ? (
-        <LevelMeter label="In" source={signal.input.levels} />
-      ) : null}
-      {signal.reduction ? <ReductionMeter source={signal.reduction} /> : null}
-      <LevelMeter label="Out" source={signal.output.levels} />
-    </div>
-  );
 }
 
 /**
  * The frame of a device: a bordered strip with a header over a body, as a
  * device sits in a chain. Its corners follow the style, like the blocks'
- * surface. Given its `signal`, its levels stand at the edge of everything
- * under the header.
+ * surface. Given its `signal`, it is idle (`data-idle`) while no sound goes
+ * in, or for an instrument while none comes out: a face hides its live marks
+ * with `group-data-idle/device:`.
  */
 function DeviceFrame({ children, className, signal }: DeviceFrameProps) {
   // Idle while no sound goes in, or for an instrument while none comes out: its live marks give way, its settings stay.
@@ -383,8 +310,6 @@ function DeviceFrame({ children, className, signal }: DeviceFrameProps) {
     <div
       className={cn(
         "cn-audio-device group/device flex w-full min-w-0 flex-col overflow-hidden border bg-card",
-        signal &&
-          "grid grid-cols-[minmax(0,1fr)_auto] grid-rows-[auto_minmax(0,1fr)] [&>[data-slot=device-header]]:col-span-2",
         className
       )}
       data-frame=""
@@ -393,7 +318,6 @@ function DeviceFrame({ children, className, signal }: DeviceFrameProps) {
       ref={root}
     >
       {children}
-      {signal ? <DeviceLevels signal={signal} /> : null}
     </div>
   );
 }

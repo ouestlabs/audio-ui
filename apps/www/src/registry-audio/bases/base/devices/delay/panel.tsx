@@ -16,6 +16,7 @@ import {
   PlotGrid,
   PlotHandle,
   PlotLine,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -30,11 +31,14 @@ import {
   GRAIN_PARAMETERS,
   nearestDivision,
 } from "@/registry-audio/bases/base/devices/delay/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** How much time the plot shows, from the dry sound on: the longest echo time is 2 s. */
 const WINDOW_MS = 3000;
 const TIME_TICKS = [500, 1000, 2000];
 const PERCENT_TICKS = [25, 50, 75];
+/** The level of the echoes at the foot of the plot, in dB: full scale at the top. */
+const ECHO_FLOOR_DB = -60;
 /** In the title bar: the switch and the mode. The grain delay's own knobs show with it alone. */
 const IN_THE_TITLE_BAR = ["enabled", "mode"] as const;
 const NOT_GRAIN = [...IN_THE_TITLE_BAR, ...GRAIN_PARAMETERS] as const;
@@ -57,6 +61,8 @@ interface DelayPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: DelayState) => void;
+  /** Its live sound: the level of its echoes over the last three seconds, behind the lines of the echoes it is set to make. */
+  signal?: DeviceSignal;
   /** The host's tempo, which a synced delay reads its note value against. @default 120 BPM */
   tempo?: Tempo;
   value: DelayState;
@@ -76,9 +82,19 @@ function DelayPanel({
   children,
   className,
   onValueChange,
+  signal,
   tempo = DEFAULT_TEMPO,
   value,
 }: DelayPanelProps) {
+  const echoes = useMemo(
+    () =>
+      signal?.wet?.history({
+        of: "level",
+        points: 240,
+        seconds: WINDOW_MS / 1000,
+      }),
+    [signal]
+  );
   const taps = useMemo(
     () => delayTaps(value, WINDOW_MS, tempo),
     [tempo, value]
@@ -110,7 +126,7 @@ function DelayPanel({
   );
   const grain = value.mode === "grain";
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={delayDevice}
@@ -160,6 +176,15 @@ function DelayPanel({
             y={{ format: formatPercentMark, ticks: PERCENT_TICKS }}
           />
           <PlotGraph>
+            {echoes ? (
+              // The echoes as they come back, their level a moment apart, the newest at the right.
+              <PlotTraceArea
+                fillTo={ECHO_FLOOR_DB}
+                max={0}
+                min={ECHO_FLOOR_DB}
+                source={echoes}
+              />
+            ) : null}
             {taps.map((tap) => (
               <PlotLine
                 axis="x"

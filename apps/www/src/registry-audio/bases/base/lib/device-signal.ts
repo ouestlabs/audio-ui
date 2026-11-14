@@ -124,10 +124,8 @@ export interface DeviceSignal {
   /** What moves the sound: its LFO, from -1 to 1, for a device that declares `modulator`. */
   readonly modulator: SignalPoint | null;
   readonly output: SignalPoint;
-  /** What it reports of itself, read each frame. */
+  /** What it reports of itself, read each frame: the gain it takes off, for a device that declares `gainReduction`. */
   readonly readings: Source<DeviceReadings>;
-  /** The gain it takes off now, in dB, 0 or negative, for a device that declares `gainReduction`. */
-  readonly reduction: Source<number> | null;
   /** Its processed sound alone, for a device that declares `wet`. */
   readonly wet: SignalPoint | null;
 }
@@ -633,8 +631,8 @@ const sameReadings = (a: DeviceReadings, b: DeviceReadings) => {
 
 /**
  * The live signal of a device, from its engine, as a face shows it: what goes
- * in and comes out, and what its device declares in `signals` (its
- * `gainReduction`, its `modulator` and `wet` taps). `target` is read each
+ * in and comes out, its readings, and the taps its device declares in
+ * `signals` (its `modulator` and its `wet` sound). `target` is read each
  * frame, so the signal follows the engine a host makes again, and is silent
  * while there is none; nothing is listened to until a source is watched, and
  * the last watcher to leave takes every analyser off. It never changes the
@@ -642,8 +640,8 @@ const sameReadings = (a: DeviceReadings, b: DeviceReadings) => {
  *
  * ```ts
  * const signal = createDeviceSignal(() => engine, compressorDevice);
- * signal.output.levels // what a Meter paints
- * signal.reduction // the dB it takes off
+ * signal.input?.levels // what a Meter paints
+ * signal.readings // the dB it takes off, as its engine reports it
  * ```
  */
 export function createDeviceSignal(
@@ -676,22 +674,6 @@ export function createDeviceSignal(
       : null,
     output: createSignalPoint(() => target()?.output),
     readings,
-    reduction: declares("gainReduction")
-      ? watchedSource(0, (publish) => {
-          let last = 0;
-          const stop = readings.subscribe(() => {
-            const db = readings.getSnapshot().gainReductionDb ?? 0;
-            if (db !== last) {
-              last = db;
-              publish(db);
-            }
-          });
-          return () => {
-            stop();
-            publish(0);
-          };
-        })
-      : null,
     wet: declares("wet") ? createSignalPoint(() => target()?.taps?.wet) : null,
   };
 }

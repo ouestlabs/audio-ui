@@ -2216,7 +2216,14 @@ export default function BlockAudioEditor() {
       loop: { ...doc.loop, range: [played[0], end] as const },
     };
   }, [comparing, doc, played]);
-  const { meter, play, playing, position, stop } = useArrangementEngine({
+  const {
+    engine: running,
+    meter,
+    play,
+    playing,
+    position,
+    stop,
+  } = useArrangementEngine({
     doc: heard,
     metronome: NO_METRONOME,
     overridden: NOT_MOVED,
@@ -3018,6 +3025,7 @@ export default function BlockAudioEditor() {
             onPadFiles={IGNORE}
             overridden={NOT_MOVED}
             position={position}
+            signalOf={running?.signal}
             track={TRACK}
           />
         </div>
