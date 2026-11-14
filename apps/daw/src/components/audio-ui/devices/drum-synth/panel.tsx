@@ -1,5 +1,5 @@
 import type { Pad as PadPrimitive } from "@audio-ui/react/pad";
-import { type ReactNode, useCallback, useMemo } from "react";
+import { type ReactNode, useCallback } from "react";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -11,8 +11,6 @@ import {
   drumSynthDevice,
 } from "@/components/audio-ui/devices/drum-synth/device";
 import { Pad, PadItem } from "@/components/audio-ui/pad";
-import { LevelPlot } from "@/components/audio-ui/signal-plot";
-import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do. */
@@ -31,8 +29,6 @@ interface DrumSynthPanelProps {
   /** The pad is struck, as hard as the press is high on it. */
   onNoteOn?: (note: DrumSynthNote) => void;
   onValueChange: (state: DrumSynthState) => void;
-  /** Its live sound: the level of what it plays over the last two seconds, each hit's attack and decay. */
-  signal?: DeviceSignal;
   value: DrumSynthState;
 }
 
@@ -51,14 +47,9 @@ function DrumSynthPanel({
   className,
   onNoteOn,
   onValueChange,
-  signal,
   value,
 }: DrumSynthPanelProps) {
   // Each hit as it rang: its attack and its decay, the newest at the end.
-  const live = useMemo(
-    () => signal?.output.history({ of: "level", points: 240, seconds: 2 }),
-    [signal]
-  );
   const strike = useCallback(
     (_pad: string, details: PadPrimitive.Root.OnEventDetails) =>
       onNoteOn?.({ velocity: details.velocity }),
@@ -69,7 +60,7 @@ function DrumSynthPanel({
   );
 
   return (
-    <DeviceFrame className={cn("h-full", className)} signal={signal}>
+    <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
         device={drumSynthDevice}
         onValueChange={onValueChange}
@@ -87,12 +78,6 @@ function DrumSynthPanel({
           onValueChange={onValueChange}
           value={value}
         />
-        {live ? (
-          <LevelPlot
-            aria-label="What it played over the last two seconds"
-            source={live}
-          />
-        ) : null}
         <Pad
           activePads={activeNotes?.length ? ACTIVE : undefined}
           aria-label="Strike the drum"

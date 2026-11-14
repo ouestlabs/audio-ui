@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useMemo } from "react";
+import { type ReactNode, useCallback } from "react";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -13,8 +13,6 @@ import {
   guitarDevice,
 } from "@/components/audio-ui/devices/guitar/device";
 import { Piano } from "@/components/audio-ui/piano";
-import { ScopePlot } from "@/components/audio-ui/signal-plot";
-import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do. */
@@ -35,8 +33,6 @@ interface GuitarPanelProps {
   /** A key is played, as a note of the keyboard. */
   onNoteOn?: (note: GuitarNote) => void;
   onValueChange: (state: GuitarState) => void;
-  /** Its live sound: the wave it plays now, held still on each cycle. */
-  signal?: DeviceSignal;
   value: GuitarState;
 }
 
@@ -54,11 +50,8 @@ function GuitarPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
-  signal,
   value,
 }: GuitarPanelProps) {
-  // The string as it rings, held still on each cycle.
-  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const play = useCallback(
     (pitch: number) => onNoteOn?.({ frequency: midiToHz(pitch) }),
     [onNoteOn]
@@ -66,7 +59,7 @@ function GuitarPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)} signal={signal}>
+    <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
         device={guitarDevice}
         onValueChange={onValueChange}
@@ -84,9 +77,6 @@ function GuitarPanel({
           onValueChange={onValueChange}
           value={value}
         />
-        {live ? (
-          <ScopePlot aria-label="The wave it plays" source={live} />
-        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Pick the strings"
