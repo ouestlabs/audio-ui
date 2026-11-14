@@ -1,5 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { DRUM_RACK_DEVICE, padRecordings } from "@/lib/arrangement";
+import { peakCountFor } from "@/lib/daw/measure";
 import { newProject, withUniqueTrackIds } from "@/lib/daw/project";
 import {
   PROJECT_FORMAT,
@@ -11,7 +12,6 @@ import {
   withFreshIds,
   writeProjectFile,
 } from "@/lib/daw/project-file";
-import { peakCountFor } from "@/lib/daw/recordings";
 
 const bytes = (text: string, extra: number[] = []) =>
   new Uint8Array([...text].map((char) => char.charCodeAt(0)).concat(extra))

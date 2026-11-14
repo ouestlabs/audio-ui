@@ -44,3 +44,14 @@ describe("repairChannels", () => {
     }
   });
 });
+
+describe("a repair by a name it does not know", () => {
+  test("throws, even for a name every object inherits", () => {
+    const channels = [new Float32Array(16)];
+    for (const name of ["hiss", "constructor", "toString"]) {
+      expect(() =>
+        repairChannels(channels, RATE, name as (typeof REPAIRS)[number])
+      ).toThrow(RangeError);
+    }
+  });
+});

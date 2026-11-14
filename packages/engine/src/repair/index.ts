@@ -42,33 +42,42 @@ export type Repair = (typeof REPAIRS)[number];
 
 type Mono = (data: Float32Array, fs: number) => Float32Array;
 
-const METHODS: Record<Repair, Mono> = {
-  breaths: (data, fs) => debreath(data, { fs }),
-  clean: (data, fs) => denoise(data, { fs }),
-  clicks: (data, fs) => declick(data, { fs }),
-  clipping: (data, fs) => declip(data, { fs }),
-  crackle: (data, fs) => decrackle(data, { fs }),
-  hum50: (data, fs) => dehum(data, { freq: 50, fs }),
-  hum60: (data, fs) => dehum(data, { freq: 60, fs }),
-  noise: (data, fs) => wiener(data, { fs }),
-  plosives: (data, fs) => deplosive(data, { fs }),
-  reverb: (data, fs) => dereverb(data, { fs }),
-  speechNoise: (data, fs) => omlsa(data, { fs }),
-  wind: (data, fs) => dewind(data, { fs }),
-};
+/** Each repair's method, as a map: a name it does not hold finds nothing, not a function every object inherits. */
+const METHODS = new Map<string, Mono>(
+  Object.entries({
+    breaths: (data, fs) => debreath(data, { fs }),
+    clean: (data, fs) => denoise(data, { fs }),
+    clicks: (data, fs) => declick(data, { fs }),
+    clipping: (data, fs) => declip(data, { fs }),
+    crackle: (data, fs) => decrackle(data, { fs }),
+    hum50: (data, fs) => dehum(data, { freq: 50, fs }),
+    hum60: (data, fs) => dehum(data, { freq: 60, fs }),
+    noise: (data, fs) => wiener(data, { fs }),
+    plosives: (data, fs) => deplosive(data, { fs }),
+    reverb: (data, fs) => dereverb(data, { fs }),
+    speechNoise: (data, fs) => omlsa(data, { fs }),
+    wind: (data, fs) => dewind(data, { fs }),
+  } satisfies Record<Repair, Mono>)
+);
 
 /**
  * Every channel with one defect taken out, by the method made for it, each
  * channel on its own. The source is left as it is, and a sound with no such
- * defect comes back as it was.
+ * defect comes back as it was. A name not in `REPAIRS` throws a `RangeError`.
  */
 export function repairChannels(
   channels: readonly Float32Array[],
   sampleRate: number,
   repair: Repair
 ): Float32Array[] {
-  const method = METHODS[repair];
-  return channels.map((channel) =>
-    method(Float32Array.from(channel), sampleRate)
-  );
+  const method = METHODS.get(repair);
+  if (typeof method !== "function") {
+    throw new RangeError(`There is no repair called "${repair}".`);
+  }
+  // Called here, where the check above holds, not in a callback.
+  const repaired: Float32Array[] = [];
+  for (const channel of channels) {
+    repaired.push(method(Float32Array.from(channel), sampleRate));
+  }
+  return repaired;
 }

@@ -26,4 +26,4 @@ repairChannels(channels, 48_000, "clean"); // finds what the sound carries and p
 | `wind`, `plosives` | Low rumble, and the bursts of p and b |
 | `breaths`, `reverb` | Breaths between phrases, and a room's late reverb |
 
-The registry's [`useBake`](/docs/hooks/use-bake) runs them as steps of undo from the audio editor's Process menu.
+The registry's [`sound-operations`](/docs/lib/sound-operations) names them as operations of the [Process menu](/docs/components/base/process-menu), which the audio editor bakes as steps of undo through [`useBake`](/docs/hooks/use-bake) and the clip panel runs on a clip's source.

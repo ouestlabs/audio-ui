@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { leavesPeak, waveformLeaves } from "@audio-ui/gl/waveform";
 import {
   makeLeaves,
+  readChannels,
   recordingBands,
   recordingChannels,
   recordingSamples,
@@ -82,5 +83,22 @@ describe("a recording's channels and bands for the clip view (CLP-025, CLP-026)"
         leavesPeak(leaves.subarray(band * size, (band + 1) * size))
       ).toBeLessThan(1.5);
     }
+  });
+});
+
+describe("a clip's source as the Process menu reads it (CLP-028)", () => {
+  test("each channel of the stretch read, copied, so processing it leaves the recording as it was", async () => {
+    const left = new Float32Array([0, 0.1, 0.2, 0.3]);
+    const source = {
+      channels: [left, new Float32Array([1, 0.9, 0.8, 0.7])],
+      sampleRate: 4,
+    };
+    const read = await readChannels(source, 1, 3);
+    expect(read.map((channel) => Array.from(channel))).toEqual([
+      [0.1, 0.2].map(Math.fround),
+      [0.9, 0.8].map(Math.fround),
+    ]);
+    read[0]?.fill(0);
+    expect(left[1]).toBe(Math.fround(0.1));
   });
 });

@@ -161,3 +161,17 @@ describe("ditherChannels", () => {
     expect(channel).toEqual(copy);
   });
 });
+
+describe("a filter of a kind it does not know", () => {
+  test("throws, even for a name every object inherits", () => {
+    const channels = [new Float32Array(64)];
+    for (const type of ["bandpass", "constructor"]) {
+      expect(() =>
+        filterChannels(channels, 48_000, {
+          frequency: 1000,
+          type: type as "lowpass",
+        })
+      ).toThrow(RangeError);
+    }
+  });
+});

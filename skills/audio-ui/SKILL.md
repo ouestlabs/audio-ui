@@ -108,6 +108,7 @@ The CRITICAL rules (sound without clicks, live data without re-renders) are in t
 | Tune an instrument, name the note of a sound | `tuner` (it installs `use-microphone` and `use-pitch`) |
 | Note editor | `piano-roll` |
 | A note editor's menus: scale, find, edit commands, MIDI and MusicXML files | `scale-menu`, `note-find`, `note-edit-menu`, `midi-file`, `musicxml-file` |
+| Process a sound: reverse, repeat, normalize, filter, stretch, pitch, speed, repair | `process-menu`, which installs `sound-operations`; `use-bake` for a track's sound as edited |
 | Play a piano roll's notes, with undo and redo | `use-piano-roll-playback`, `use-undo-history` |
 | Play, stop, record, loop, bars and tempo | `transport` |
 | Play and pause with a seek bar | `scrubber` |

@@ -1,7 +1,12 @@
 import type { Note } from "@audio-ui/core/piano-roll";
 import { secondsPerBar, secondsPerBeat } from "@audio-ui/engine/time";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
-import { ClipPanel, type ClipSettings } from "@/components/audio-ui/clip-panel";
+import { toast } from "sonner";
+import {
+  ClipPanel,
+  type ClipSettings,
+  processedSettings,
+} from "@/components/audio-ui/clip-panel";
 import {
   MIDI_CLIP_VIEW,
   MidiClipPanel,
@@ -16,12 +21,18 @@ import {
   type ClipSwing,
   DRUM_RACK_DEVICE,
 } from "@/lib/arrangement";
+import type { Dropped } from "@/lib/daw/drop";
+import { processSource } from "@/lib/daw/process";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import {
   recordingBands,
   recordingChannels,
   recordingSamples,
 } from "@/lib/daw/samples";
+import {
+  type SoundOperation,
+  soundOperationName,
+} from "@/lib/sound-operations";
 import { cn } from "@/lib/utils";
 import { useSavedState } from "./use-saved-view";
 
@@ -69,11 +80,35 @@ function withSettings(
   };
 }
 
+/** Whether a clip still reads the stretch of the recording it read: the one an operation was run on. */
+const sameSource = (clip: Arranged, was: Arranged) =>
+  clip.recording === was.recording &&
+  (clip.sourceFrom ?? 0) === (was.sourceFrom ?? 0) &&
+  clip.sourceLength === was.sourceLength;
+
+/** The clip reading the recording `id`, `length` long, an operation made of its source: from its start, its times where `processedSettings` puts them. */
+function withProcessed(
+  clip: Arranged,
+  id: string,
+  length: number,
+  operation: SoundOperation,
+  duration: number
+): Arranged {
+  const { sourceFrom: _cut, ...rest } = withSettings(
+    clip,
+    processedSettings(settingsOf(clip), operation, length),
+    duration
+  );
+  return { ...rest, recording: id, sourceLength: length };
+}
+
 /**
  * The clip view: the selected clip in its editor. A MIDI clip's notes in the
  * piano roll, whose keys play the track's instrument through the engine; an
  * audio clip's region, loop, warp, gain and reverse in the clip panel. Every
- * change is a command of the arrangement, a drag one step of undo.
+ * change is a command of the arrangement, a drag one step of undo. An
+ * operation of its Process menu makes a recording of the clip's source,
+ * handed to `onRecording` to keep, and the clip reads it: one step of undo.
  */
 export function ClipEditor({
   actions,
@@ -84,6 +119,7 @@ export function ClipEditor({
   folded,
   onCollapsedChange,
   onFoldedChange,
+  onRecording,
   recordings,
 }: {
   /** What the clip view's strip carries at its end, such as the tabs of the panel it is in. */
@@ -97,6 +133,8 @@ export function ClipEditor({
   folded: readonly string[];
   onCollapsedChange: (collapsed: boolean) => void;
   onFoldedChange: (folded: string[]) => void;
+  /** A recording the Process menu made, under its id: keep it with the project's. */
+  onRecording: (id: string, made: Dropped) => Promise<void>;
   recordings: ReadonlyMap<string, Recording>;
 }) {
   const { dispatch, doc } = arrangement;
@@ -171,6 +209,43 @@ export function ClipEditor({
   const crop = useCallback(
     () => dispatch({ id: clip.id, type: "crop-clip" }),
     [clip.id, dispatch]
+  );
+  // An operation of the Process menu (CLP-028): the clip's source made into a recording of its own, then the clip reads it, one step of undo.
+  const process = useCallback(
+    async (operation: SoundOperation) => {
+      const recording = clip.recording
+        ? recordings.get(clip.recording)
+        : undefined;
+      if (!recording) {
+        return;
+      }
+      const notice = toast.loading(`${soundOperationName(operation)}…`);
+      try {
+        const [id, made] = await processSource(
+          recording,
+          clip,
+          operation,
+          new Set(recordings.keys())
+        );
+        await onRecording(id, made);
+        const { length } = made.recording;
+        dispatch({
+          change: (current) =>
+            sameSource(current, clip)
+              ? withProcessed(current, id, length, operation, doc.duration)
+              : current,
+          id: clip.id,
+          type: "edit-clip",
+        });
+        dispatch({ type: "settle-clip-edit" });
+        toast.dismiss(notice);
+      } catch (error) {
+        toast.error(`Not processed: ${(error as Error).message}`, {
+          id: notice,
+        });
+      }
+    },
+    [clip, dispatch, doc.duration, onRecording, recordings]
   );
   // A drum clip's pads: those of the drum rack its track plays, lowest note on top, as a drum part is read.
   const drumRack = doc.tracks
@@ -309,6 +384,7 @@ export function ClipEditor({
       onCollapsedChange={onCollapsedChange}
       onCrop={crop}
       onFoldedBoxesChange={onFoldedChange}
+      onProcess={recording ? process : undefined}
       onRename={rename}
       onValueChange={changeSettings}
       onValueCommitted={settle}

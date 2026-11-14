@@ -275,6 +275,24 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["audio-editor", "waveform"],
+    dependencies: ["@audio-ui/engine"],
+    description:
+      "The Process menu's items over a sound's samples, in groups you place in a menu of your own: Structure (Reverse, Repeat, Add silence), Level and tone (Normalize, Pan, Dither, Filter), Time and pitch (Stretch, Pitch, Speed, each by the method picked) and Repair, each an operation handed to onProcess.",
+    files: [
+      {
+        path: "audio/elements/process-menu.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "process-menu",
+    registryDependencies: [
+      "@audio-ui/sound-operations",
+      "@shadcn/dropdown-menu",
+    ],
+    type: "registry:ui",
+  },
+  {
     categories: ["piano"],
     dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
@@ -703,7 +721,7 @@ export const audio: RegistryItem[] = [
     categories: ["timeline", "waveform", "knob"],
     dependencies: ["@audio-ui/engine", "@audio-ui/gl", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), drawn on the GPU when the source's samples are given and WebGL 2 is there: as its waveform, by band, or as its spectrogram, from the view menu.",
+      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), drawn on the GPU when the source's samples are given and WebGL 2 is there: as its waveform, by band, or as its spectrogram, from the view menu. Given onProcess, a Process menu beside it runs the audio editor's operations on the source, and processedSettings says where the clip's start, end and loop go.",
     files: [
       {
         path: "audio/panels/clip-panel.tsx",
@@ -718,6 +736,8 @@ export const audio: RegistryItem[] = [
       "@audio-ui/timeline",
       "@audio-ui/use-loudest",
       "@audio-ui/sound-lane",
+      "@audio-ui/process-menu",
+      "@audio-ui/sound-operations",
       "@shadcn/button",
       "@shadcn/dropdown-menu",
     ],

@@ -1,0 +1,28 @@
+---
+title: sound-operations
+description: "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair; applySoundOperation runs one on plain channels, soundOperationName names it as a step of the history."
+---
+
+<Entry name="sound-operations" />
+
+## Usage
+
+An operation is data, `{ type: "stretch", factor: 1.5, method: "transient" }`, so a menu, a key or an agent's tool can pick one and the code that holds the sound runs it. The [Process menu](/docs/components/base/process-menu) lists them.
+
+```ts
+import {
+  applySoundOperation,
+  soundOperationName,
+  soundOperationTiming,
+} from "@/lib/sound-operations";
+
+const operation = { semitones: -2, method: "formant", type: "shift" } as const;
+
+// Plain channels in, plain channels out, at the same rate.
+const next = applySoundOperation({ channels, sampleRate: 48_000 }, operation);
+
+soundOperationName(operation); // "Pitch -2 st"
+soundOperationTiming(operation); // "kept": the length stays
+```
+
+Each operation is one of [`@audio-ui/engine/files`](/docs/engine/files) (`reverseChannels`, `repeatChannels`, `padChannels`, `normalizeChannels`, `panChannels`, `ditherChannels`, `filterChannels`, `stretchChannels`, `shiftChannels`, `speedChannels`) or `repairChannels` of [`@audio-ui/engine/repair`](/docs/engine/repair), whose methods the menu offers as a choice. `soundOperationTiming` says how one moves the times in a sound: `"scaled"` for Stretch and Speed, `"extended"` at the end for Repeat and Add silence, `"kept"` for the rest; the clip panel's `processedSettings` reads it to keep a clip on what it played.

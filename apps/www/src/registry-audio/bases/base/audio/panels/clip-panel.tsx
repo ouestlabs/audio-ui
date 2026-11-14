@@ -48,6 +48,7 @@ import {
   ClipWaveform,
 } from "@/registry-audio/bases/base/audio/elements/clip-waveform";
 import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
+import { ProcessMenuItems } from "@/registry-audio/bases/base/audio/elements/process-menu";
 import {
   isSoundView,
   isSpectrogramView,
@@ -72,6 +73,10 @@ import {
   clipPeakCount,
   clipSegments,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import {
+  type SoundOperation,
+  soundOperationTiming,
+} from "@/registry-audio/bases/base/lib/sound-operations";
 
 /** What the panel sets on a clip. Times are in the source's own time, from its start, or with `warp` on the clip's. */
 export interface ClipSettings {
@@ -125,6 +130,82 @@ export function reversedSettings(
   };
 }
 
+/**
+ * The settings of a clip whose warp is turned off, as the Warp button does:
+ * the source plays as recorded, as far as it goes, and the loop, whose times
+ * were the clip's, is gone.
+ */
+export function unwarpedSettings(
+  settings: ClipSettings
+): Partial<ClipSettings> {
+  const { length, offset, sourceLength } = settings;
+  return {
+    length: Math.min(length, sourceLength - Math.min(offset, sourceLength)),
+    loop: null,
+    offset: Math.min(offset, sourceLength),
+    warp: null,
+  };
+}
+
+/** How near its source's end a clip's end or loop has to be to reach it, in seconds. */
+const END_EPS = 1e-4;
+
+/** A clip played forwards over a source now `sourceLength` long, longer at its end: what reached the end still does. */
+function extendedSettings(
+  settings: ClipSettings,
+  sourceLength: number
+): ClipSettings {
+  const { length, loop, offset } = settings;
+  const end = settings.sourceLength - END_EPS;
+  return {
+    ...settings,
+    length: !loop && offset + length >= end ? sourceLength - offset : length,
+    loop: loop && loop[1] >= end ? [loop[0], sourceLength] : loop,
+    sourceLength,
+  };
+}
+
+/**
+ * The settings of a clip once an operation of the Process menu made its
+ * source `sourceLength` long. Its start, end and loop follow the sound: they
+ * stay where they were, scale with a stretch or a change of speed, and a clip
+ * or a loop that reached the end of its source still does after Repeat or Add
+ * silence. An operation that changes the length turns the warp off first, as
+ * the Warp button does.
+ */
+export function processedSettings(
+  settings: ClipSettings,
+  operation: SoundOperation,
+  sourceLength: number
+): ClipSettings {
+  const timing = soundOperationTiming(operation);
+  if (timing === "kept") {
+    return { ...settings, sourceLength };
+  }
+  const was: ClipSettings = settings.warp
+    ? { ...settings, ...unwarpedSettings(settings) }
+    : settings;
+  if (timing === "scaled") {
+    const scale = sourceLength / Math.max(was.sourceLength, END_EPS);
+    return {
+      ...was,
+      length: was.length * scale,
+      loop: was.loop ? [was.loop[0] * scale, was.loop[1] * scale] : null,
+      offset: was.offset * scale,
+      sourceLength,
+    };
+  }
+  if (!was.reversed) {
+    return extendedSettings(was, sourceLength);
+  }
+  // Reversed, the new end of the source is where the clip starts: extend it forwards, then reverse it again.
+  const forward = extendedSettings(
+    { ...was, ...reversedSettings(was) },
+    sourceLength
+  );
+  return { ...forward, ...reversedSettings(forward) };
+}
+
 interface ClipPanelProps {
   /** Whether the clip is on: off, it stays on its track and is not heard. Leave it out, with `onActiveChange`, for a panel without the switch. */
   active?: boolean;
@@ -155,6 +236,8 @@ interface ClipPanelProps {
   onCrop?: () => void;
   /** Which boxes are folded was changed. */
   onFoldedBoxesChange?: (folded: string[]) => void;
+  /** An operation of the Process menu was picked: process the clip's source with `applySoundOperation`, then set what `processedSettings` gives. Leave it out for a panel without the menu. */
+  onProcess?: (operation: SoundOperation) => void;
   /** A name was typed in the strip. */
   onRename?: (name: string) => void;
   /** Every change, as a gesture goes. */
@@ -569,6 +652,7 @@ function ClipPanel({
   onCollapsedChange,
   onCrop,
   onFoldedBoxesChange,
+  onProcess,
   onRename,
   onValueChange,
   onValueCommitted,
@@ -685,15 +769,7 @@ function ClipPanel({
     () =>
       setAndCommit(
         warp
-          ? {
-              length: Math.min(
-                length,
-                sourceLength - Math.min(offset, sourceLength)
-              ),
-              loop: null,
-              offset: Math.min(offset, sourceLength),
-              warp: null,
-            }
+          ? unwarpedSettings(value)
           : {
               warp: [
                 { source: 0, target: 0 },
@@ -703,7 +779,7 @@ function ClipPanel({
               warpMode: value.warpMode ?? "beats",
             }
       ),
-    [length, offset, setAndCommit, sourceLength, value.warpMode, warp]
+    [setAndCommit, sourceLength, value, warp]
   );
   const setWarpMode = useCallback(
     (next: WarpMode) => setAndCommit({ warpMode: next }),
@@ -853,14 +929,17 @@ function ClipPanel({
       onFoldedBoxesChange={onFoldedBoxesChange}
       onRename={onRename}
       tools={
-        samples ? (
-          <SourceViewMenu
-            bands={Boolean(bands) && can.waveform}
-            onViewChange={changeView}
-            spectrogram={can.spectrogram}
-            view={shownView}
-          />
-        ) : null
+        <>
+          {samples ? (
+            <SourceViewMenu
+              bands={Boolean(bands) && can.waveform}
+              onViewChange={changeView}
+              spectrogram={can.spectrogram}
+              view={shownView}
+            />
+          ) : null}
+          {onProcess ? <SourceProcessMenu onProcess={onProcess} /> : null}
+        </>
       }
     >
       <ClipSource
@@ -1078,6 +1157,43 @@ function SourceViewMenu({
             </DropdownMenuRadioItem>
           ))}
         </DropdownMenuRadioGroup>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+}
+
+/**
+ * The operations on the source, as a menu in the clip's strip, after its
+ * views, as the audio editor's Process menu: its structure, level and tone,
+ * time and pitch, and repairs.
+ */
+function SourceProcessMenu({
+  onProcess,
+}: {
+  onProcess: (operation: SoundOperation) => void;
+}) {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger
+        render={
+          <Button
+            aria-label="Process"
+            size="icon-sm"
+            title="Process"
+            variant="ghost"
+          />
+        }
+      >
+        <IconPlaceholder
+          hugeicons="MagicWand01Icon"
+          lucide="WandSparklesIcon"
+          phosphor="MagicWandIcon"
+          remixicon="RiMagicLine"
+          tabler="IconWand"
+        />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="start" className="w-64">
+        <ProcessMenuItems onProcess={onProcess} />
       </DropdownMenuContent>
     </DropdownMenu>
   );

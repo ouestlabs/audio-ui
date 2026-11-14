@@ -519,6 +519,59 @@ export const checks: Checks = {
       );
       assert(lost.length === 0, `a context was lost: ${lost[0]}`);
     },
+  "CLP-028: the clip view's Process menu makes a recording of the clip's source, which the clip plays whole, and one undo takes it back":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const width = async () => (await clip.boundingBox())?.width ?? 0;
+      const before = await width();
+      const cached = async () =>
+        await page.evaluate(async () => {
+          const folder = await (
+            await navigator.storage.getDirectory()
+          ).getDirectoryHandle("cache");
+          return (await Array.fromAsync(folder.keys())).filter((name) =>
+            name.endsWith(".f32")
+          ).length;
+        });
+      const recordings = await cached();
+      await page.getByRole("button", { exact: true, name: "Process" }).click();
+      await page.getByRole("menuitem", { name: "Repeat" }).click();
+      await page.getByRole("menuitem", { name: "2 times" }).click();
+      // The clip played its source to the end: it plays the two of it.
+      await page.waitForFunction(
+        ({ was }) => {
+          const box = document
+            .querySelector("[data-clip-id]")
+            ?.getBoundingClientRect();
+          return box !== undefined && Math.abs(box.width - 2 * was) < 2;
+        },
+        { was: before },
+        { timeout: 20_000 }
+      );
+      assert(
+        (await cached()) === recordings + 1,
+        "the processed source is not kept as a recording of its own"
+      );
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Meta+KeyZ");
+      await page.waitForFunction(
+        ({ was }) => {
+          const box = document
+            .querySelector("[data-clip-id]")
+            ?.getBoundingClientRect();
+          return box !== undefined && Math.abs(box.width - was) < 2;
+        },
+        { was: before },
+        { timeout: 5000 }
+      );
+    },
   "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":
     async (browser) => {
       const page = await open(browser);
