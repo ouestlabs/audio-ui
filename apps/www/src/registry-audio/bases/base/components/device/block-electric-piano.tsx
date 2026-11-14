@@ -7,7 +7,6 @@ import {
 } from "@/registry-audio/bases/base/devices/electric-piano/device";
 import { createElectricPianoEngine } from "@/registry-audio/bases/base/devices/electric-piano/engine";
 import { ElectricPianoPanel } from "@/registry-audio/bases/base/devices/electric-piano/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { usePolyphony } from "@/registry-audio/bases/base/hooks/use-polyphony";
@@ -26,11 +25,6 @@ export default function BlockElectricPiano() {
     electricPianoDevice.defaults()
   );
   const master = useMasterBus(1);
-  // Its voices play into this bus and nothing else does: that is where it is heard.
-  const signal = useDeviceSignal(
-    master && { output: master },
-    electricPianoDevice
-  );
   const { noteOff, noteOn } = usePolyphony({
     create: createElectricPianoEngine,
     destination: master,
@@ -57,7 +51,6 @@ export default function BlockElectricPiano() {
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
-        signal={signal}
         value={state}
       />
     </div>

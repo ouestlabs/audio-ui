@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -17,7 +17,6 @@ import {
 } from "@/components/audio-ui/devices/organ/device";
 import { Fader } from "@/components/audio-ui/fader";
 import { Piano } from "@/components/audio-ui/piano";
-import { SpectrumPlot } from "@/components/audio-ui/signal-plot";
 import {
   Select,
   SelectContent,
@@ -27,7 +26,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
-import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do, beside the drawbars. */
@@ -103,8 +101,6 @@ interface OrganPanelProps {
   /** A key is played, as a note of the organ. */
   onNoteOn?: (note: OrganNote) => void;
   onValueChange: (state: OrganState) => void;
-  /** Its live sound: the spectrum of what it plays, the harmonics its drawbars set. */
-  signal?: DeviceSignal;
   value: OrganState;
 }
 
@@ -122,11 +118,8 @@ function OrganPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
-  signal,
   value,
 }: OrganPanelProps) {
-  // The harmonics its drawbars set, as they sound.
-  const live = useMemo(() => signal?.output.spectrum(), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -170,7 +163,7 @@ function OrganPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)} signal={signal}>
+    <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
         device={organDevice}
         onValueChange={onValueChange}
@@ -252,7 +245,6 @@ function OrganPanel({
             value={value}
           />
         </div>
-        {live ? <SpectrumPlot aria-label="Its spectrum" source={live} /> : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the organ"

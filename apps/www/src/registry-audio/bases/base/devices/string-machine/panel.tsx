@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -10,7 +10,6 @@ import {
   SelectValue,
 } from "@/registry/bases/base/ui/select";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
-import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -23,7 +22,6 @@ import {
   stringMachineDevice,
   stringMachinePreset,
 } from "@/registry-audio/bases/base/devices/string-machine/device";
-import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do, as the machine's panel lays them out. */
 const GROUPS = [
@@ -53,8 +51,6 @@ interface StringMachinePanelProps {
   /** A key is played, as a note of the machine. */
   onNoteOn?: (note: StringMachineNote) => void;
   onValueChange: (state: StringMachineState) => void;
-  /** Its live sound: the wave it plays now, held still on each cycle. */
-  signal?: DeviceSignal;
   value: StringMachineState;
 }
 
@@ -72,11 +68,8 @@ function StringMachinePanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
-  signal,
   value,
 }: StringMachinePanelProps) {
-  // The wave its strings play now, held still on each cycle.
-  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -106,7 +99,7 @@ function StringMachinePanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)} signal={signal}>
+    <DeviceFrame className={cn("h-full", className)}>
       <DeviceHeader
         device={stringMachineDevice}
         onValueChange={onValueChange}
@@ -142,9 +135,6 @@ function StringMachinePanel({
           onValueChange={change}
           value={value}
         />
-        {live ? (
-          <ScopePlot aria-label="The wave it plays" source={live} />
-        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the strings"

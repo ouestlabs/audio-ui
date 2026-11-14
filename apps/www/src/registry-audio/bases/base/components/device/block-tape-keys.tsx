@@ -7,7 +7,6 @@ import {
 } from "@/registry-audio/bases/base/devices/tape-keys/device";
 import { createTapeKeysEngine } from "@/registry-audio/bases/base/devices/tape-keys/engine";
 import { TapeKeysPanel } from "@/registry-audio/bases/base/devices/tape-keys/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { usePolyphony } from "@/registry-audio/bases/base/hooks/use-polyphony";
@@ -26,8 +25,6 @@ export default function BlockTapeKeys() {
     tapeKeysDevice.defaults()
   );
   const master = useMasterBus(1);
-  // Its voices play into this bus and nothing else does: that is where it is heard.
-  const signal = useDeviceSignal(master && { output: master }, tapeKeysDevice);
   const { noteOff, noteOn } = usePolyphony({
     create: createTapeKeysEngine,
     destination: master,
@@ -54,7 +51,6 @@ export default function BlockTapeKeys() {
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
-        signal={signal}
         value={state}
       />
     </div>

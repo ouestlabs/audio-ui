@@ -25,5 +25,3 @@ const signal = useDeviceSignal(engine, compressorDevice);
 ```
 
 `useDeviceSignal(engine, device)` returns the [device signal](/docs/lib/device-signal) of `engine`: the same object for the life of the component, following `engine` as it changes and silent while it is `null`, such as before the sound starts. It listens only while the panel watches one of its sources, and needs no cleanup: unmounting the panel takes its analysers off.
-
-An instrument played as chords has an engine per voice: give the hook what they all play into instead, such as the bus they share, `{ output: bus }`.

@@ -7,7 +7,6 @@ import {
 } from "@/registry-audio/bases/base/devices/guitar/device";
 import { createGuitarEngine } from "@/registry-audio/bases/base/devices/guitar/engine";
 import { GuitarPanel } from "@/registry-audio/bases/base/devices/guitar/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { usePolyphony } from "@/registry-audio/bases/base/hooks/use-polyphony";
@@ -26,8 +25,6 @@ export default function BlockGuitar() {
     guitarDevice.defaults()
   );
   const master = useMasterBus(1);
-  // Its voices play into this bus and nothing else does: that is where it is heard.
-  const signal = useDeviceSignal(master && { output: master }, guitarDevice);
   const { noteOff, noteOn } = usePolyphony({
     create: createGuitarEngine,
     destination: master,
@@ -54,7 +51,6 @@ export default function BlockGuitar() {
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
-        signal={signal}
         value={state}
       />
     </div>

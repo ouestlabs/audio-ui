@@ -8,7 +8,6 @@ import {
 import { createMonoSynthEngine } from "@/registry-audio/bases/base/devices/mono-synth/engine";
 import { MonoSynthPanel } from "@/registry-audio/bases/base/devices/mono-synth/panel";
 import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 
@@ -32,7 +31,6 @@ export default function BlockMonoSynth() {
     destination: master,
     state,
   });
-  const signal = useDeviceSignal(engine ?? null, monoSynthDevice);
 
   const playKey = useCallback(
     (note: MonoSynthNote) => engine?.noteOn(note, { id: PANEL_NOTE }),
@@ -58,7 +56,6 @@ export default function BlockMonoSynth() {
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
-        signal={signal}
         value={state}
       />
     </div>
