@@ -4,6 +4,19 @@ import type { DeviceBinding, DeviceContext } from "./define.ts";
 import type { InstrumentBinding } from "./instrument.ts";
 
 /**
+ * The points of an engine's graph a host may listen to beyond its input and
+ * its output, by the names its device declares in `signals`. A host only
+ * listens to them, with an analyser for a meter or a trace: connecting one
+ * anywhere else plays it twice.
+ */
+export interface DeviceTaps {
+  /** What moves the sound: the signal of an LFO, from -1 to 1, as it reaches what it modulates. */
+  readonly modulator?: AudioNode;
+  /** The processed sound alone, before the dry sound is mixed back in: a reverb's or a delay's tail. */
+  readonly wet?: AudioNode;
+}
+
+/**
  * The engine of an effect on the Web Audio API: the binding of its state
  * (`update`, `dispose`, `readings`) between an input and an output. Every
  * `create<Name>Engine` of an effect returns one, with what it adds of its own.
@@ -17,6 +30,8 @@ export interface EffectEngine<State> extends DeviceBinding<State> {
   readonly ready?: Promise<boolean>;
   /** The input of the signal that drives it, on a device a sidechain keys. Only listened to, never heard. */
   readonly sidechain?: AudioNode;
+  /** The points of its graph its device names in `signals`, for a host to listen to. */
+  readonly taps?: DeviceTaps;
 }
 
 /**
@@ -30,6 +45,8 @@ export interface InstrumentEngine<State, Note>
   readonly output: AudioNode;
   /** Resolves once what it loads is in the graph. */
   readonly ready?: Promise<boolean>;
+  /** The points of its graph its device names in `signals`, for a host to listen to. */
+  readonly taps?: DeviceTaps;
 }
 
 /** What every `create<Name>Engine` is: an engine on a context, for the state it starts with and the host's tempo. */

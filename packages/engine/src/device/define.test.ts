@@ -68,6 +68,22 @@ describe("defineDevice", () => {
     });
     expect(synth.kind).toBe("instrument");
   });
+
+  test("declares the signals its engine reports, none by default", () => {
+    expect(compressor.signals).toEqual([]);
+    expect(compressor.describe().signals).toBeUndefined();
+    const metered = defineDevice({
+      description: "Brings loud parts down.",
+      id: "audioui.metered",
+      name: "Metered",
+      parameters: [
+        { default: true, id: "enabled", kind: "toggle", label: "On" },
+      ],
+      signals: ["gainReduction"],
+    });
+    expect(metered.signals).toEqual(["gainReduction"]);
+    expect(metered.describe().signals).toEqual(["gainReduction"]);
+  });
 });
 
 describe("definition errors", () => {
