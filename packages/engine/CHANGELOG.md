@@ -1,5 +1,11 @@
 # @audio-ui/engine
 
+## 0.14.2
+
+### Patch Changes
+
+- f71e822: Files, repair: `repairChannels`, `stretchChannels` and `filterChannels` throw a `RangeError` that names the repair, method or filter type they do not know. Before, an unknown name failed as a call of `undefined`, and a name every object inherits, such as `"constructor"`, ran that inherited function.
+
 ## 0.14.1
 
 ### Patch Changes
