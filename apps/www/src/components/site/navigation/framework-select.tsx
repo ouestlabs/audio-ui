@@ -98,7 +98,8 @@ function FrameworkItem({
  * names it, the sidebar puts its sections first, and the pages show their code
  * and their install for it. Its button shows the framework chosen, or that
  * none is; in a section for React alone (React, the registry, its catalog),
- * React, and another framework picked there opens the elements, its own. `compact` draws the button on one line, for the bar of the inset
+ * React, and another framework picked there opens the elements, its own; the
+ * registry's menu lists React alone. `compact` draws the button on one line, for the bar of the inset
  * while the sidebar is shut.
  */
 export function FrameworkSelect({
@@ -131,6 +132,11 @@ export function FrameworkSelect({
     },
     [forReact, navigate, pathname, setChosen]
   );
+  // The registry is React's alone for now: its menu offers React and nothing else.
+  const registry = reading?.id === "registry";
+  const offered = registry
+    ? FRAMEWORKS.filter((each) => each.id === "react")
+    : FRAMEWORKS;
   const current = FRAMEWORKS.find((each) => each.id === framework) ?? null;
   const shown = current ?? ANY;
   const Logo = current ? LOGOS[current.id] : null;
@@ -169,7 +175,7 @@ export function FrameworkSelect({
         </DropdownMenuTrigger>
       )}
       <DropdownMenuContent className={compact ? "w-64" : undefined}>
-        {FRAMEWORKS.map((each) => (
+        {offered.map((each) => (
           <FrameworkItem
             chosen={each.id === current?.id}
             framework={each}
@@ -177,8 +183,16 @@ export function FrameworkSelect({
             onChoose={choose}
           />
         ))}
-        <DropdownMenuSeparator />
-        <FrameworkItem chosen={!current} framework={null} onChoose={choose} />
+        {registry ? null : (
+          <>
+            <DropdownMenuSeparator />
+            <FrameworkItem
+              chosen={!current}
+              framework={null}
+              onChoose={choose}
+            />
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
