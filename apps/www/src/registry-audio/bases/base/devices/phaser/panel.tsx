@@ -15,6 +15,7 @@ import {
   PlotGraph,
   PlotGrid,
 } from "@/registry-audio/bases/base/audio/elements/plot";
+import { SpectrumPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -78,6 +79,8 @@ function PhaserPanel({
   tempo = DEFAULT_TEMPO,
   value,
 }: PhaserPanelProps) {
+  // What comes out: the notches its stages cut, moving as the sweep runs.
+  const spectrum = useMemo(() => signal?.output.spectrum(), [signal]);
   const sweep = useMemo(() => phaserSweep(value, tempo), [tempo, value]);
   const pickMode = useCallback(
     (mode: string | null) => {
@@ -144,6 +147,9 @@ function PhaserPanel({
             <PlotCurve fn={sweep} />
           </PlotGraph>
         </Plot>
+        {spectrum ? (
+          <SpectrumPlot aria-label="Its notches in what comes out" source={spectrum} />
+        ) : null}
         <DevicePanel
           className="grid-cols-5"
           device={phaserDevice}

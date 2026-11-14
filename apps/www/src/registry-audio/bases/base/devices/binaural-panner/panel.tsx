@@ -7,6 +7,7 @@ import {
   PlotHandle,
   PlotLine,
 } from "@/registry-audio/bases/base/audio/elements/plot";
+import { StereoField } from "@/registry-audio/bases/base/audio/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -80,7 +81,7 @@ function BinauralPannerPanel({
         className="flex min-h-0 grow flex-col items-center gap-2 p-2"
         data-slot="binaural-panner-panel"
       >
-        <div className="flex min-h-28 w-full grow justify-center">
+        <div className="flex min-h-28 w-full grow justify-center gap-4">
           <Plot
             aria-label="The sound around the head, seen from above"
             className="aspect-square h-full w-auto"
@@ -107,6 +108,10 @@ function BinauralPannerPanel({
               />
             ) : null}
           </Plot>
+          {signal ? (
+            // Where what comes out sits between the speakers, beside where it is placed around the head.
+            <StereoField className="w-20 shrink-0 self-center" source={signal.output.stereo} />
+          ) : null}
         </div>
         <DevicePanel
           className="w-full grid-cols-4"

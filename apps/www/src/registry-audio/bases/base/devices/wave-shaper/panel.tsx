@@ -3,6 +3,7 @@ import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { WaveformSelect } from "@/registry-audio/bases/base/audio/elements/waveform-select";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -63,6 +64,8 @@ function WaveShaperPanel({
   signal,
   value,
 }: WaveShaperPanelProps) {
+  // What comes out, held still on each cycle: the shape the table gives the wave.
+  const scope = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const [position, setPosition] = useState({ x: 50, y: 50 });
   // A note held, such as on a MIDI keyboard, takes the point to its pitch across; up stays where the hand left it.
   const held = activeNotes?.at(-1);
@@ -115,6 +118,9 @@ function WaveShaperPanel({
           onValueCommitted={onNoteOff}
           value={shown}
         />
+        {scope ? (
+          <ScopePlot aria-label="The wave it makes" source={scope} />
+        ) : null}
         <WaveformSelect
           aria-label={WAVE.label}
           onValueChange={pickWave}
