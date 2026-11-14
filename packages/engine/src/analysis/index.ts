@@ -56,7 +56,6 @@ export {
   type SoundReport,
 } from "./report.ts";
 export { detectSilences, type SilenceOptions } from "./silence.ts";
-export { stereoCorrelation } from "./stereo.ts";
 export {
   SPECTRA_SIZE,
   type Spectra,
@@ -70,6 +69,7 @@ export {
   type PeakHoldOptions,
   SPECTRUM_FLOOR_DB,
 } from "./spectrum.ts";
+export { stereoCorrelation } from "./stereo.ts";
 export {
   type BandShares,
   type Bands,
