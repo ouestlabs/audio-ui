@@ -532,7 +532,7 @@ export const audio: RegistryItem[] = [
   {
     dependencies: ["@audio-ui/engine"],
     description:
-      "Every device's panel by the device's stable id, with the width it is drawn at in a row: what draws a track's chain from the ids a project stores, with the face each device has on its own page.",
+      "Every device's panel by the device's stable id, with the width it is drawn at in a row: what draws a track's chain from the ids a project stores, with the face each device has on its own page. Each panel loads the first time it is drawn, so a page loads only the panels of the devices it shows.",
     files: [
       {
         path: "audio/device-panels.tsx",

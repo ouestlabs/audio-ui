@@ -1,53 +1,6 @@
 import type { ParameterValue } from "@audio-ui/engine/device";
 import type { Tempo } from "@audio-ui/engine/time";
-import type { ComponentType, ReactNode } from "react";
-import { AutoPanPanel } from "@/components/audio-ui/devices/auto-pan/panel";
-import { BassEnhancerPanel } from "@/components/audio-ui/devices/bass-enhancer/panel";
-import { BinauralPannerPanel } from "@/components/audio-ui/devices/binaural-panner/panel";
-import { ChannelEqPanel } from "@/components/audio-ui/devices/channel-eq/panel";
-import { ChorusPanel } from "@/components/audio-ui/devices/chorus/panel";
-import { CompanderPanel } from "@/components/audio-ui/devices/compander/panel";
-import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
-import { DeesserPanel } from "@/components/audio-ui/devices/deesser/panel";
-import { DelayPanel } from "@/components/audio-ui/devices/delay/panel";
-import { DistortionPanel } from "@/components/audio-ui/devices/distortion/panel";
-import { DrumSynthPanel } from "@/components/audio-ui/devices/drum-synth/panel";
-import { DuckerPanel } from "@/components/audio-ui/devices/ducker/panel";
-import { ElectricPianoPanel } from "@/components/audio-ui/devices/electric-piano/panel";
-import { EqualizerPanel } from "@/components/audio-ui/devices/equalizer/panel";
-import { ExciterPanel } from "@/components/audio-ui/devices/exciter/panel";
-import { ExpanderPanel } from "@/components/audio-ui/devices/expander/panel";
-import { FilterPanel } from "@/components/audio-ui/devices/filter/panel";
-import { FmSynthPanel } from "@/components/audio-ui/devices/fm-synth/panel";
-import { FrequencyShifterPanel } from "@/components/audio-ui/devices/frequency-shifter/panel";
-import { GatePanel } from "@/components/audio-ui/devices/gate/panel";
-import { GraphicEqPanel } from "@/components/audio-ui/devices/graphic-eq/panel";
-import { GuitarPanel } from "@/components/audio-ui/devices/guitar/panel";
-import { LimiterPanel } from "@/components/audio-ui/devices/limiter/panel";
-import { LofiPanel } from "@/components/audio-ui/devices/lofi/panel";
-import { MidSidePanel } from "@/components/audio-ui/devices/mid-side/panel";
-import { MonoSynthPanel } from "@/components/audio-ui/devices/mono-synth/panel";
-import { MultibandPanel } from "@/components/audio-ui/devices/multiband/panel";
-import { OrganPanel } from "@/components/audio-ui/devices/organ/panel";
-import { OverdrivePanel } from "@/components/audio-ui/devices/overdrive/panel";
-import { PhaserPanel } from "@/components/audio-ui/devices/phaser/panel";
-import { PocketSynthPanel } from "@/components/audio-ui/devices/pocket-synth/panel";
-import { PolySynthPanel } from "@/components/audio-ui/devices/poly-synth/panel";
-import { ReduxPanel } from "@/components/audio-ui/devices/redux/panel";
-import { ReverbPanel } from "@/components/audio-ui/devices/reverb/panel";
-import { RotaryPanel } from "@/components/audio-ui/devices/rotary/panel";
-import { SamplerPanel } from "@/components/audio-ui/devices/sampler/panel";
-import { SaturatorPanel } from "@/components/audio-ui/devices/saturator/panel";
-import { StringMachinePanel } from "@/components/audio-ui/devices/string-machine/panel";
-import { StutterPanel } from "@/components/audio-ui/devices/stutter/panel";
-import { TapeKeysPanel } from "@/components/audio-ui/devices/tape-keys/panel";
-import { TiltEqPanel } from "@/components/audio-ui/devices/tilt-eq/panel";
-import { TransientPanel } from "@/components/audio-ui/devices/transient/panel";
-import { UnlimiterPanel } from "@/components/audio-ui/devices/unlimiter/panel";
-import { UtilityPanel } from "@/components/audio-ui/devices/utility/panel";
-import { VibePanel } from "@/components/audio-ui/devices/vibe/panel";
-import { WahPanel } from "@/components/audio-ui/devices/wah/panel";
-import { WaveShaperPanel } from "@/components/audio-ui/devices/wave-shaper/panel";
+import { type ComponentType, lazy, type ReactNode } from "react";
 
 /** What every device's panel takes: its state, what changes it, and what a host puts in its title bar. */
 export interface DevicePanelProps {
@@ -72,76 +25,293 @@ export interface DevicePanelEntry {
   width: string;
 }
 
-/** A panel as the catalog holds it: its own device's state, read as any device's. */
-function entry<State, Note = never>(
-  Panel: ComponentType<{
-    activeNotes?: readonly number[];
-    children?: ReactNode;
-    className?: string;
-    onNoteOff?: () => void;
-    onNoteOn?: (note: Note) => void;
-    onValueChange: (state: State) => void;
-    tempo?: Tempo;
-    value: State;
-  }>,
+/** A panel as the catalog holds it: its own device's state, read as any device's, loaded the first time it is drawn, so a host loads the panels of the devices it shows and no other. */
+function entry(
+  load: () => Promise<ComponentType<never>>,
   width = "w-80"
 ): DevicePanelEntry {
-  return { Panel: Panel as unknown as DevicePanelEntry["Panel"], width };
+  return {
+    Panel: lazy(async () => ({
+      default: (await load()) as unknown as DevicePanelEntry["Panel"],
+    })),
+    width,
+  };
 }
 
 /**
  * Every device's panel, by the device's stable id, such as
  * `audioui.compressor`: what draws a device on a track's chain with the face it
  * has on its own page. Pairs with `device-library`, which makes its engine.
+ * Each panel loads the first time it is drawn: draw it inside a `Suspense`.
  */
 export const DEVICE_PANELS: Readonly<Record<string, DevicePanelEntry>> = {
-  "audioui.auto-pan": entry(AutoPanPanel),
-  "audioui.channel-eq": entry(ChannelEqPanel),
-  "audioui.chorus": entry(ChorusPanel),
-  "audioui.compressor": entry(CompressorPanel, "w-96"),
-  "audioui.deesser": entry(DeesserPanel),
-  "audioui.delay": entry(DelayPanel, "w-[28rem]"),
-  "audioui.distortion": entry(DistortionPanel, "w-96"),
-  "audioui.electric-piano": entry(ElectricPianoPanel, "w-[32rem]"),
-  "audioui.equalizer": entry(EqualizerPanel, "w-96"),
-  "audioui.filter": entry(FilterPanel),
-  "audioui.fm-synth": entry(FmSynthPanel, "w-[52rem]"),
-  "audioui.gate": entry(GatePanel),
-  "audioui.unlimiter": entry(UnlimiterPanel),
-  "audioui.compander": entry(CompanderPanel),
-  "audioui.ducker": entry(DuckerPanel),
-  "audioui.expander": entry(ExpanderPanel),
-  "audioui.binaural-panner": entry(BinauralPannerPanel),
-  "audioui.stutter": entry(StutterPanel),
-  "audioui.rotary": entry(RotaryPanel, "w-96"),
-  "audioui.bass-enhancer": entry(BassEnhancerPanel),
-  "audioui.exciter": entry(ExciterPanel),
-  "audioui.frequency-shifter": entry(FrequencyShifterPanel, "w-96"),
-  "audioui.wah": entry(WahPanel, "w-[32rem]"),
-  "audioui.graphic-eq": entry(GraphicEqPanel, "w-[28rem]"),
-  "audioui.tilt-eq": entry(TiltEqPanel),
-  "audioui.limiter": entry(LimiterPanel),
-  "audioui.mid-side": entry(MidSidePanel),
-  "audioui.mono-synth": entry(MonoSynthPanel, "w-[40rem]"),
-  "audioui.organ": entry(OrganPanel, "w-[44rem]"),
-  "audioui.string-machine": entry(StringMachinePanel, "w-[36rem]"),
-  "audioui.tape-keys": entry(TapeKeysPanel, "w-[32rem]"),
-  "audioui.guitar": entry(GuitarPanel, "w-[30rem]"),
-  "audioui.drum-synth": entry(DrumSynthPanel, "w-[26rem]"),
-  "audioui.multiband": entry(MultibandPanel, "w-96"),
-  "audioui.overdrive": entry(OverdrivePanel),
-  "audioui.phaser": entry(PhaserPanel, "w-[28rem]"),
-  "audioui.pocket-synth": entry(PocketSynthPanel),
-  "audioui.poly-synth": entry(PolySynthPanel, "w-[40rem]"),
-  "audioui.redux": entry(ReduxPanel),
-  "audioui.lofi": entry(LofiPanel),
-  "audioui.reverb": entry(ReverbPanel),
-  "audioui.sampler": entry(SamplerPanel, "w-[32rem]"),
-  "audioui.saturator": entry(SaturatorPanel),
-  "audioui.transient": entry(TransientPanel),
-  "audioui.utility": entry(UtilityPanel),
-  "audioui.vibe": entry(VibePanel),
-  "audioui.wave-shaper": entry(WaveShaperPanel),
+  "audioui.auto-pan": entry(() =>
+    import("@/components/audio-ui/devices/auto-pan/panel").then(
+      (m) => m.AutoPanPanel
+    )
+  ),
+  "audioui.channel-eq": entry(() =>
+    import("@/components/audio-ui/devices/channel-eq/panel").then(
+      (m) => m.ChannelEqPanel
+    )
+  ),
+  "audioui.chorus": entry(() =>
+    import("@/components/audio-ui/devices/chorus/panel").then(
+      (m) => m.ChorusPanel
+    )
+  ),
+  "audioui.compressor": entry(
+    () =>
+      import("@/components/audio-ui/devices/compressor/panel").then(
+        (m) => m.CompressorPanel
+      ),
+    "w-96"
+  ),
+  "audioui.deesser": entry(() =>
+    import("@/components/audio-ui/devices/deesser/panel").then(
+      (m) => m.DeesserPanel
+    )
+  ),
+  "audioui.delay": entry(
+    () =>
+      import("@/components/audio-ui/devices/delay/panel").then(
+        (m) => m.DelayPanel
+      ),
+    "w-[28rem]"
+  ),
+  "audioui.distortion": entry(
+    () =>
+      import("@/components/audio-ui/devices/distortion/panel").then(
+        (m) => m.DistortionPanel
+      ),
+    "w-96"
+  ),
+  "audioui.electric-piano": entry(
+    () =>
+      import("@/components/audio-ui/devices/electric-piano/panel").then(
+        (m) => m.ElectricPianoPanel
+      ),
+    "w-[32rem]"
+  ),
+  "audioui.equalizer": entry(
+    () =>
+      import("@/components/audio-ui/devices/equalizer/panel").then(
+        (m) => m.EqualizerPanel
+      ),
+    "w-96"
+  ),
+  "audioui.filter": entry(() =>
+    import("@/components/audio-ui/devices/filter/panel").then(
+      (m) => m.FilterPanel
+    )
+  ),
+  "audioui.fm-synth": entry(
+    () =>
+      import("@/components/audio-ui/devices/fm-synth/panel").then(
+        (m) => m.FmSynthPanel
+      ),
+    "w-[52rem]"
+  ),
+  "audioui.gate": entry(() =>
+    import("@/components/audio-ui/devices/gate/panel").then((m) => m.GatePanel)
+  ),
+  "audioui.unlimiter": entry(() =>
+    import("@/components/audio-ui/devices/unlimiter/panel").then(
+      (m) => m.UnlimiterPanel
+    )
+  ),
+  "audioui.compander": entry(() =>
+    import("@/components/audio-ui/devices/compander/panel").then(
+      (m) => m.CompanderPanel
+    )
+  ),
+  "audioui.ducker": entry(() =>
+    import("@/components/audio-ui/devices/ducker/panel").then(
+      (m) => m.DuckerPanel
+    )
+  ),
+  "audioui.expander": entry(() =>
+    import("@/components/audio-ui/devices/expander/panel").then(
+      (m) => m.ExpanderPanel
+    )
+  ),
+  "audioui.binaural-panner": entry(() =>
+    import("@/components/audio-ui/devices/binaural-panner/panel").then(
+      (m) => m.BinauralPannerPanel
+    )
+  ),
+  "audioui.stutter": entry(() =>
+    import("@/components/audio-ui/devices/stutter/panel").then(
+      (m) => m.StutterPanel
+    )
+  ),
+  "audioui.rotary": entry(
+    () =>
+      import("@/components/audio-ui/devices/rotary/panel").then(
+        (m) => m.RotaryPanel
+      ),
+    "w-96"
+  ),
+  "audioui.bass-enhancer": entry(() =>
+    import("@/components/audio-ui/devices/bass-enhancer/panel").then(
+      (m) => m.BassEnhancerPanel
+    )
+  ),
+  "audioui.exciter": entry(() =>
+    import("@/components/audio-ui/devices/exciter/panel").then(
+      (m) => m.ExciterPanel
+    )
+  ),
+  "audioui.frequency-shifter": entry(
+    () =>
+      import("@/components/audio-ui/devices/frequency-shifter/panel").then(
+        (m) => m.FrequencyShifterPanel
+      ),
+    "w-96"
+  ),
+  "audioui.wah": entry(
+    () =>
+      import("@/components/audio-ui/devices/wah/panel").then((m) => m.WahPanel),
+    "w-[32rem]"
+  ),
+  "audioui.graphic-eq": entry(
+    () =>
+      import("@/components/audio-ui/devices/graphic-eq/panel").then(
+        (m) => m.GraphicEqPanel
+      ),
+    "w-[28rem]"
+  ),
+  "audioui.tilt-eq": entry(() =>
+    import("@/components/audio-ui/devices/tilt-eq/panel").then(
+      (m) => m.TiltEqPanel
+    )
+  ),
+  "audioui.limiter": entry(() =>
+    import("@/components/audio-ui/devices/limiter/panel").then(
+      (m) => m.LimiterPanel
+    )
+  ),
+  "audioui.mid-side": entry(() =>
+    import("@/components/audio-ui/devices/mid-side/panel").then(
+      (m) => m.MidSidePanel
+    )
+  ),
+  "audioui.mono-synth": entry(
+    () =>
+      import("@/components/audio-ui/devices/mono-synth/panel").then(
+        (m) => m.MonoSynthPanel
+      ),
+    "w-[40rem]"
+  ),
+  "audioui.organ": entry(
+    () =>
+      import("@/components/audio-ui/devices/organ/panel").then(
+        (m) => m.OrganPanel
+      ),
+    "w-[44rem]"
+  ),
+  "audioui.string-machine": entry(
+    () =>
+      import("@/components/audio-ui/devices/string-machine/panel").then(
+        (m) => m.StringMachinePanel
+      ),
+    "w-[36rem]"
+  ),
+  "audioui.tape-keys": entry(
+    () =>
+      import("@/components/audio-ui/devices/tape-keys/panel").then(
+        (m) => m.TapeKeysPanel
+      ),
+    "w-[32rem]"
+  ),
+  "audioui.guitar": entry(
+    () =>
+      import("@/components/audio-ui/devices/guitar/panel").then(
+        (m) => m.GuitarPanel
+      ),
+    "w-[30rem]"
+  ),
+  "audioui.drum-synth": entry(
+    () =>
+      import("@/components/audio-ui/devices/drum-synth/panel").then(
+        (m) => m.DrumSynthPanel
+      ),
+    "w-[26rem]"
+  ),
+  "audioui.multiband": entry(
+    () =>
+      import("@/components/audio-ui/devices/multiband/panel").then(
+        (m) => m.MultibandPanel
+      ),
+    "w-96"
+  ),
+  "audioui.overdrive": entry(() =>
+    import("@/components/audio-ui/devices/overdrive/panel").then(
+      (m) => m.OverdrivePanel
+    )
+  ),
+  "audioui.phaser": entry(
+    () =>
+      import("@/components/audio-ui/devices/phaser/panel").then(
+        (m) => m.PhaserPanel
+      ),
+    "w-[28rem]"
+  ),
+  "audioui.pocket-synth": entry(() =>
+    import("@/components/audio-ui/devices/pocket-synth/panel").then(
+      (m) => m.PocketSynthPanel
+    )
+  ),
+  "audioui.poly-synth": entry(
+    () =>
+      import("@/components/audio-ui/devices/poly-synth/panel").then(
+        (m) => m.PolySynthPanel
+      ),
+    "w-[40rem]"
+  ),
+  "audioui.redux": entry(() =>
+    import("@/components/audio-ui/devices/redux/panel").then(
+      (m) => m.ReduxPanel
+    )
+  ),
+  "audioui.lofi": entry(() =>
+    import("@/components/audio-ui/devices/lofi/panel").then((m) => m.LofiPanel)
+  ),
+  "audioui.reverb": entry(() =>
+    import("@/components/audio-ui/devices/reverb/panel").then(
+      (m) => m.ReverbPanel
+    )
+  ),
+  "audioui.sampler": entry(
+    () =>
+      import("@/components/audio-ui/devices/sampler/panel").then(
+        (m) => m.SamplerPanel
+      ),
+    "w-[32rem]"
+  ),
+  "audioui.saturator": entry(() =>
+    import("@/components/audio-ui/devices/saturator/panel").then(
+      (m) => m.SaturatorPanel
+    )
+  ),
+  "audioui.transient": entry(() =>
+    import("@/components/audio-ui/devices/transient/panel").then(
+      (m) => m.TransientPanel
+    )
+  ),
+  "audioui.utility": entry(() =>
+    import("@/components/audio-ui/devices/utility/panel").then(
+      (m) => m.UtilityPanel
+    )
+  ),
+  "audioui.vibe": entry(() =>
+    import("@/components/audio-ui/devices/vibe/panel").then((m) => m.VibePanel)
+  ),
+  "audioui.wave-shaper": entry(() =>
+    import("@/components/audio-ui/devices/wave-shaper/panel").then(
+      (m) => m.WaveShaperPanel
+    )
+  ),
 };
 
 /** The panel of the device with the stable id `id`. */
