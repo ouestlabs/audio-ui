@@ -65,7 +65,7 @@ export function stretchChannels(
     return together([...channels], options);
   }
   const apart = APART.get(method);
-  if (!apart) {
+  if (typeof apart !== "function") {
     throw new RangeError(`There is no stretch method called "${method}".`);
   }
   return channels.map((channel) => apart(channel, options));

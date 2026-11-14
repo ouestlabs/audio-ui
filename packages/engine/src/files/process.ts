@@ -92,7 +92,7 @@ export function filterChannels(
     return [...channels];
   }
   const design = DESIGNS.get(type);
-  if (!design) {
+  if (typeof design !== "function") {
     throw new RangeError(`There is no filter type called "${type}".`);
   }
   const coefficients = design(frequency, q, sampleRate);
