@@ -1880,9 +1880,10 @@ function SourceEditor({
 }
 
 /**
- * The clip's source on a timeline of its own: an overview bar to zoom and
- * scroll with, a ruler in bars, the stretch the clip plays (or its loop) to
- * drag at both ends, and the waveform, warped markers included, under it.
+ * The clip's source on a timeline of its own: a ruler in bars, the stretch
+ * the clip plays (or its loop) to drag at both ends, the waveform, warp
+ * markers included, under it, and an overview bar to zoom and scroll with
+ * under all of them.
  */
 function ClipSource({
   bands,
@@ -2026,10 +2027,9 @@ function ClipSource({
       source={playhead}
       zoom={zoom ?? undefined}
     >
-      <TimelineNavigator className="rounded-none" getAriaValueText={format} />
       {/* Flush in the clip view, which is the frame: no border or corners of its own. */}
       <TimelineViewport
-        className="flex min-w-0 flex-1 flex-col border-t bg-muted/40"
+        className="flex min-w-0 flex-1 flex-col bg-muted/40"
         ref={viewportRef}
         scrollbar="hidden"
       >
@@ -2135,6 +2135,11 @@ function ClipSource({
           </SourceEditor>
         </div>
       </TimelineViewport>
+      {/* Under the sound, as the arrangement's and the audio editor's are. */}
+      <TimelineNavigator
+        className="rounded-none border-t"
+        getAriaValueText={format}
+      />
     </Timeline>
   );
 }
