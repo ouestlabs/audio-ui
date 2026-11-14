@@ -669,28 +669,33 @@ function SampleBox({
       />
       {rate === null ? null : (
         <>
-          {/* The source's own tempo: in time at the arrangement's, it plays at their ratio. */}
-          <ParameterField
-            label="Source tempo"
-            max={999}
-            min={1}
-            onValueChange={onTempo}
-            onValueCommitted={onCommit}
-            precision={2}
-            shortLabel="BPM"
-            size="sm"
-            value={tempo / rate}
-          />
-          <div className="grid grid-cols-2 gap-1">
+          {/* The source's own tempo: in time at the arrangement's, it plays at their ratio. Halved and doubled beside it, so they read as the tempo's, not the loop's. */}
+          <div className="flex gap-1">
+            <ParameterField
+              className="min-w-0 flex-1"
+              label="Source tempo"
+              max={999}
+              min={1}
+              onValueChange={onTempo}
+              onValueCommitted={onCommit}
+              precision={2}
+              shortLabel="BPM"
+              size="sm"
+              value={tempo / rate}
+            />
             <ClipToggle
               aria-label="Half the tempo: it plays twice as fast"
+              className="h-auto px-1.5"
               onClick={onFaster}
+              title="Half the tempo: it plays twice as fast"
             >
               ÷2
             </ClipToggle>
             <ClipToggle
               aria-label="Twice the tempo: it plays half as fast"
+              className="h-auto px-1.5"
               onClick={onSlower}
+              title="Twice the tempo: it plays half as fast"
             >
               ×2
             </ClipToggle>
