@@ -155,13 +155,13 @@ const LEAST: Record<PanelView, string> = {
   clip: "17.5rem",
   // The tallest device of the library, the compressor, whole, under the strip.
   devices: "22.5rem",
-  // A channel whole with a send: name, send, peak, pan, a fader of 5rem, its value and its switches, under the strip.
-  mixer: "22.25rem",
+  // A channel whole with a send: name, send and its letter, peak, pan and its label, a fader of 5rem, its value and its switches, under the strip.
+  mixer: "23.75rem",
 };
 /** What a rack's title bar takes from the devices in it, in rem: each level of racks adds one. */
 const RACK_BAR = 2.5;
-/** What a row of sends takes in the mixer, in rem: a knob and its gap. Two sends make a row, and the mixer's least holds one. */
-const SEND_ROW = 2.25;
+/** What a row of sends takes in the mixer, in rem: a knob, its letter and its gap. Two sends make a row, and the mixer's least holds one. */
+const SEND_ROW = 3;
 /** The sends a row of a channel holds. */
 const SENDS_PER_ROW = 2;
 
@@ -359,6 +359,22 @@ function exportRangeText(range: readonly [number, number], selected: boolean) {
   return selected
     ? `The time selected: ${seconds} s.`
     : `The arrangement, to the end of its last clip: ${seconds} s.`;
+}
+
+/**
+ * The library on the left (KEY-021): whether it shows, kept from visit to
+ * visit, its search field, and how the end of a chain opens it with its search
+ * focused. Open, the library is beside the chain already: the chain has no way
+ * to it then (DEV-003).
+ */
+function useLibraryPanel() {
+  const [open, setOpen] = useSavedState("libraryOpen", true);
+  const search = useRef<HTMLInputElement>(null);
+  const show = useCallback(() => {
+    setOpen(true);
+    requestAnimationFrame(() => search.current?.focus());
+  }, [setOpen]);
+  return { open, openFromChain: open ? undefined : show, search, setOpen };
 }
 
 export function Daw({
@@ -569,15 +585,14 @@ export function Daw({
     },
     [setPanelView, setSelectedTrack]
   );
-  // The library on the left (KEY-021), and its search, which the end of a chain focuses.
-  const [libraryOpen, setLibraryOpen] = useSavedState("libraryOpen", true);
+  const {
+    open: libraryOpen,
+    openFromChain: openLibrary,
+    search: librarySearch,
+    setOpen: setLibraryOpen,
+  } = useLibraryPanel();
   const [settingsOpen, setSettingsOpen] = useState(false);
   const openSettings = useCallback(() => setSettingsOpen(true), []);
-  const librarySearch = useRef<HTMLInputElement>(null);
-  const openLibrary = useCallback(() => {
-    setLibraryOpen(true);
-    requestAnimationFrame(() => librarySearch.current?.focus());
-  }, [setLibraryOpen]);
   /** Puts a device of the library on `onto`, or on a track of its own (DEV-003), and shows it in the device view. */
   const placeDevice = useCallback(
     (device: string, onto: string | null) => {
@@ -1696,6 +1711,8 @@ export function Daw({
                   getCursor={getCursor}
                   liveTake={take.live}
                   markers={markers}
+                  // The mixer under the tracks has each track's gain and pan: the headers keep the name, solo, mute and arm.
+                  mixControls={false}
                   onAddMidiClip={addMidiClip}
                   onArm={armTrack}
                   onDevice={dropDevice}

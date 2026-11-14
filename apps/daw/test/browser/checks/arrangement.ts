@@ -396,7 +396,9 @@ export const checks: Checks = {
           .count()) === 0,
         "nothing is overridden yet"
       );
-      await page.getByRole("slider", { name: "3 Audio gain" }).focus();
+      // The track's volume moved by hand, on its mixer channel.
+      await page.getByRole("tab", { name: "Mixer" }).click();
+      await page.getByRole("slider", { name: "3 Audio volume" }).focus();
       await page.keyboard.press("ArrowLeft");
       await page.getByRole("button", { name: "Re-enable automation" }).click();
       assert(
@@ -480,10 +482,11 @@ export const checks: Checks = {
       const clip = await page.waitForSelector("[data-clip-id]", {
         timeout: 10_000,
       });
+      // Measured once the picking is let go of: the tracks share the height there is, and it can change.
+      await page.keyboard.press("Escape");
       const box = await clip.boundingBox();
       const lane = await page.locator('[data-track="track-2"]').boundingBox();
       assert(box && lane, "the clip and the lane are there");
-      await page.keyboard.press("Escape");
       await page.keyboard.down("Shift");
       await page.mouse.move(lane.x + box.width + 6, lane.y + lane.height / 2);
       await page.mouse.down();

@@ -23,5 +23,5 @@ A device's envelopes stay out of a `.dawproject` file, and its report says so by
 Test: apps/www/test/registry-audio/base/lib/dawproject.test.ts "AUT-005"
 
 ### AUT-006 The controls move
-As the arrangement plays, what an envelope moves moves on screen, untouched: a track's gain and pan in its header and in the mixer, a device's knobs, a rack's macros. Stopped, they show where the envelope stands at the cursor. A move of the envelope is not a move by hand: nothing is overridden, and turning another knob keeps only that knob's value.
+As the arrangement plays, what an envelope moves moves on screen, untouched: a track's gain and pan in the mixer, a device's knobs, a rack's macros. Stopped, they show where the envelope stands at the cursor. A move of the envelope is not a move by hand: nothing is overridden, and turning another knob keeps only that knob's value.
 Test: apps/daw/test/browser/run.ts "AUT-006"

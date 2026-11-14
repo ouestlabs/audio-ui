@@ -159,12 +159,13 @@ function takesDevice(event: DragEvent<HTMLElement>) {
   return Array.from(event.dataTransfer.types).includes(DEVICE_DRAG_TYPE);
 }
 
-function gripOf(root: HTMLElement | null, id: string | undefined) {
+/** A slot's stop for the keyboard, its fold button: where the focus goes after a move or a removal. */
+function keyOf(root: HTMLElement | null, id: string | undefined) {
   if (!(root && id)) {
     return null;
   }
   return root.querySelector<HTMLElement>(
-    `[data-device-grip="${CSS.escape(id)}"]`
+    `[data-device-key="${CSS.escape(id)}"]`
   );
 }
 
@@ -242,8 +243,8 @@ function DeviceChain({
     }
     apply(id, index);
     setMessage(`${title} moved to ${index + 1} of ${ids.length}.`);
-    // The slot is drawn again in its new place: its grip keeps the focus the key was pressed on.
-    requestAnimationFrame(() => gripOf(root.current, id)?.focus());
+    // The slot is drawn again in its new place: its fold button keeps the focus the key was pressed on.
+    requestAnimationFrame(() => keyOf(root.current, id)?.focus());
   }, []);
 
   const remove = useCallback((id: string, title: string) => {
@@ -258,7 +259,7 @@ function DeviceChain({
     // The focus goes to the slot that takes its place, or to the end of the chain.
     requestAnimationFrame(() =>
       (
-        gripOf(root.current, neighbor) ??
+        keyOf(root.current, neighbor) ??
         root.current?.querySelector<HTMLElement>(
           '[data-slot="device-chain-add"]'
         )
@@ -487,16 +488,20 @@ function DeviceChain({
   );
 }
 
-/** The grip of a slot: drag it to move the device, press Left or Right to move it a place, Delete to remove it. */
-function SlotGrip() {
-  const { dragging, move, remove, startDrag } = useDeviceChain();
-  const { index, title, value } = useSlot();
+/**
+ * The slot's fold button, and the device's stop for the keyboard: Left and
+ * Right move it, Delete removes it. Dragging the title bar moves it too, a
+ * press on it folds it, and a right-click offers the same commands.
+ */
+function SlotFold() {
+  const { move, remove } = useDeviceChain();
+  const { folded, index, title, toggleFold, value } = useSlot();
   const handleKey = useCallback(
     (event: KeyboardEvent<HTMLButtonElement>) => {
       const step = { ArrowLeft: -1, ArrowRight: 1 }[event.key];
-      if (step) {
+      if (step && move) {
         event.preventDefault();
-        move?.(value, index + step, title);
+        move(value, index + step, title);
       } else if (
         (event.key === "Delete" || event.key === "Backspace") &&
         remove
@@ -507,78 +512,9 @@ function SlotGrip() {
     },
     [index, move, remove, title, value]
   );
-  const handlePointerDown = useCallback(
-    (event: PointerEvent<HTMLButtonElement>) => startDrag(event, value),
-    [startDrag, value]
-  );
-  if (!move) {
-    return null;
-  }
-  return (
-    <button
-      aria-keyshortcuts={
-        remove ? "ArrowLeft ArrowRight Delete" : "ArrowLeft ArrowRight"
-      }
-      aria-label={`Move ${title}`}
-      className={cn(
-        "flex size-6 shrink-0 cursor-grab touch-none items-center justify-center text-muted-foreground/70 transition-colors hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring active:cursor-grabbing",
-        dragging === value && "cursor-grabbing bg-muted text-foreground"
-      )}
-      data-device-grip={value}
-      onKeyDown={handleKey}
-      onPointerDown={handlePointerDown}
-      type="button"
-    >
-      <svg
-        aria-hidden="true"
-        className="size-3.5"
-        fill="currentColor"
-        focusable="false"
-        viewBox="0 0 16 16"
-      >
-        <circle cx="5.5" cy="3.5" r="1.25" />
-        <circle cx="10.5" cy="3.5" r="1.25" />
-        <circle cx="5.5" cy="8" r="1.25" />
-        <circle cx="10.5" cy="8" r="1.25" />
-        <circle cx="5.5" cy="12.5" r="1.25" />
-        <circle cx="10.5" cy="12.5" r="1.25" />
-      </svg>
-    </button>
-  );
-}
-
-function SlotRemove() {
-  const { remove } = useDeviceChain();
-  const { title, value } = useSlot();
-  const removeIt = useCallback(
-    () => remove?.(value, title),
-    [remove, title, value]
-  );
-  if (!remove) {
-    return null;
-  }
-  return (
-    <Button
-      aria-label={`Remove ${title}`}
-      className="text-muted-foreground hover:text-destructive"
-      onClick={removeIt}
-      size="icon-xs"
-      variant="ghost"
-    >
-      <IconPlaceholder
-        aria-hidden="true"
-        hugeicons="Cancel01Icon"
-        lucide="XIcon"
-        phosphor="XIcon"
-        remixicon="RiCloseLine"
-        tabler="IconX"
-      />
-    </Button>
-  );
-}
-
-function SlotFold() {
-  const { folded, title, toggleFold } = useSlot();
+  const keys = [move && "ArrowLeft ArrowRight", remove && "Delete"]
+    .filter(Boolean)
+    .join(" ");
   const arrow = (
     <IconPlaceholder
       aria-hidden="true"
@@ -595,10 +531,13 @@ function SlotFold() {
     return (
       <button
         aria-expanded={false}
+        aria-keyshortcuts={keys || undefined}
         aria-label={`Unfold ${title}`}
         className="flex size-6 shrink-0 cursor-pointer items-center justify-center text-muted-foreground/70 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+        data-device-key={value}
         data-slot="device-chain-slot-fold"
         onClick={toggleFold}
+        onKeyDown={handleKey}
         type="button"
       >
         {arrow}
@@ -608,9 +547,12 @@ function SlotFold() {
   return (
     <Button
       aria-expanded
+      aria-keyshortcuts={keys || undefined}
       aria-label={`Fold ${title}`}
+      data-device-key={value}
       data-slot="device-chain-slot-fold"
       onClick={toggleFold}
+      onKeyDown={handleKey}
       size="icon-xs"
       variant="ghost"
     >
@@ -620,8 +562,9 @@ function SlotFold() {
 }
 
 /**
- * The slot's grip, a button that removes the device and one that folds it,
- * for the end of the device's own header: the `children` of a panel go there.
+ * The slot's fold button, which the keyboard also moves and removes the device
+ * with, for the end of the device's own header: the `children` of a panel go
+ * there.
  */
 function DeviceChainSlotControls({
   className,
@@ -633,14 +576,12 @@ function DeviceChainSlotControls({
       data-slot="device-chain-slot-controls"
       {...props}
     >
-      <SlotGrip />
-      <SlotRemove />
       <SlotFold />
     </div>
   );
 }
 
-/** The commands of a slot on a right-click, beside the keys that do them on its grip. */
+/** The commands of a slot on a right-click, beside the keys that do them on its fold button. */
 function SlotMenu() {
   const { move, order, remove } = useDeviceChain();
   const { index, title, value } = useSlot();
@@ -703,10 +644,10 @@ interface DeviceChainSlotProps extends Omit<ComponentProps<"div">, "title"> {
 
 /**
  * One device of the chain, drawn by its own panel: put `DeviceChainSlotControls`
- * at the end of the panel's header. Drag the device by its header or by the
- * grip: a label follows the pointer, and the device shows dimmed where it would
- * land, the others aside; or press Left or Right on the grip; Delete removes it, and a
- * right-click gives the same commands. Folded, the slot is a narrow strip with
+ * at the end of the panel's header. Drag the device by its title bar: a label
+ * follows the pointer, and the device shows dimmed where it would land, the
+ * others aside; or press Left or Right on its fold button; Delete removes it,
+ * and a right-click gives the same commands. Folded, the slot is a narrow strip with
  * its on and off square at the top, the device's name down it, and the same
  * controls at the bottom; a click anywhere else on the strip unfolds it. Open, a click on its title bar, outside its buttons, folds it; a drag of the title bar moves it.
  */
@@ -813,8 +754,6 @@ function DeviceChainSlot({
       >
         {title}
       </span>
-      <SlotGrip />
-      <SlotRemove />
       <SlotFold />
     </div>
   ) : (

@@ -507,6 +507,8 @@ export interface ArrangementViewProps {
   liveTake: ArrangementTake | null;
   /** The locators and the time signatures, with the commands behind them. */
   markers: ReturnType<typeof useTimelineMarkers>;
+  /** Whether the track headers have their gain and pan: `false` where a mixer shows them, as a workstation's does under the tracks. @default true */
+  mixControls?: boolean;
   /** A press on a clip or a header adds to the selection, and a drag across bare lane draws a rectangle: for a touch screen, which has no Shift. */
   multiSelect?: boolean;
   /** A double-click on a MIDI lane: an empty clip a bar long, from the bar under the pointer. */
@@ -611,6 +613,7 @@ export function ArrangementView({
   getCursor,
   liveTake,
   markers,
+  mixControls = true,
   multiSelect = false,
   onAddMidiClip,
   onArm,
@@ -1142,6 +1145,7 @@ export function ArrangementView({
                             name={track.name}
                           />
                         }
+                        mixControls={mixControls}
                         name={track.name}
                         onMix={automation.changeMix}
                         onMixCommit={settle}
