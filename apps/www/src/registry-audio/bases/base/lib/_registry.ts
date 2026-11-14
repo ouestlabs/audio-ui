@@ -107,6 +107,12 @@ const items: RegistryItem[] = [
       "Racks: devices in parallel chains, each with its volume, pan, switch and solo, lined up on the slowest and summed, and eight macros that turn parameters of the devices inside over a stretch of their travel; the engine that plays one on a track's chain.",
     registryDependencies: ["@audio-ui/arrangement", "@audio-ui/device-library"],
   }),
+  libItem("device-signal", {
+    categories: ["lib", "audio", "device", "web-audio"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
+    description:
+      "The live signal of a device, from its engine, as its face shows it: what goes in and comes out (levels, activity, a scope, a spectrum, a history, the stereo samples) and what the device declares in signals (its gain reduction, its modulator and wet taps). Analysers go on a point only while something watches it, one frame loop reads every signal on the page, and a signal follows the engine a host makes again.",
+  }),
   libItem("drum-rack", {
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/engine"],

@@ -203,6 +203,13 @@ export const hooks: RegistryItem[] = [
       "The engines of a device on a page: as many as asked, made on a destination's context from the state of the moment, each following the state and the host's tempo, disposed when the destination changes and on unmount, never updated once disposed. One for an effect, one per voice for an instrument.",
     registryDependencies: [],
   }),
+  hookItem("use-device-signal", {
+    categories: ["hooks", "audio", "device"],
+    dependencies: ["@audio-ui/engine"],
+    description:
+      "The live signal of a device's engine, for its panel's signal prop: the same object for the life of the component, following the engine as it changes and silent while there is none, listening only while the panel watches it.",
+    registryDependencies: ["@audio-ui/device-signal"],
+  }),
   hookItem("use-polyphony", {
     categories: ["audio", "synth"],
     dependencies: ["@audio-ui/engine"],
