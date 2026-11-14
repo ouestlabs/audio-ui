@@ -6,8 +6,9 @@ import {
   PlotGraph,
   PlotGrid,
   PlotLine,
+  PlotTrace,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
-import { LevelPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -32,6 +33,8 @@ const OFF = unlimiterDevice.parameters
 
 const formatDb = (db: number) => `${db} dB`;
 
+/** The level at the foot of the plot for the envelope behind it, in dB: full scale at the top. */
+const ENVELOPE_FLOOR_DB = -60;
 /** The envelope's window: long enough for a few hits, short enough to see each attack. */
 const ENVELOPE = { of: "level", points: 240, seconds: 1.5 } as const;
 
@@ -93,6 +96,23 @@ function UnlimiterPanel({
             y={{ format: formatDb, ticks: LIFT_TICKS }}
           />
           <PlotGraph>
+            {envelope ? (
+              <>
+                {/* Behind the control, on a level scale of its own: what went in, filled, and what came out, a line over it, over the last moments. */}
+                <PlotTraceArea
+                  fillTo={ENVELOPE_FLOOR_DB}
+                  max={0}
+                  min={ENVELOPE_FLOOR_DB}
+                  source={envelope.heard}
+                />
+                <PlotTrace
+                  className="stroke-primary/60 group-data-idle/device:hidden"
+                  max={0}
+                  min={ENVELOPE_FLOOR_DB}
+                  source={envelope.played}
+                />
+              </>
+            ) : null}
             {value.adaptive ? (
               <PlotLine
                 axis="x"
@@ -103,13 +123,6 @@ function UnlimiterPanel({
             <PlotCurve fn={lift} />
           </PlotGraph>
         </Plot>
-        {envelope ? (
-          <LevelPlot
-            aria-label="Level in and out"
-            source={envelope.played}
-            under={envelope.heard}
-          />
-        ) : null}
         <DevicePanel
           className="grid-cols-4"
           device={unlimiterDevice}

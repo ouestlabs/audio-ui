@@ -7,8 +7,9 @@ import {
   PlotGrid,
   PlotHandle,
   PlotLine,
+  PlotTrace,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
-import { LevelPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -31,6 +32,8 @@ const formatMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describeValue = (value: number) => formatLevel(value);
 const getAriaLabel = (axis: "x" | "y") => (axis === "x" ? "Sustain" : "Attack");
 
+/** The level at the foot of the plot for the envelope behind it, in dB: full scale at the top. */
+const ENVELOPE_FLOOR_DB = -60;
 /** The envelope's window: long enough for a few hits, short enough to see each attack. */
 const ENVELOPE = { of: "level", points: 240, seconds: 1.5 } as const;
 
@@ -98,6 +101,23 @@ function TransientPanel({
             y={{ format: formatMark, ticks: TICKS }}
           />
           <PlotGraph>
+            {envelope ? (
+              <>
+                {/* Behind the control, on a level scale of its own: what went in, filled, and what came out, a line over it, over the last moments. */}
+                <PlotTraceArea
+                  fillTo={ENVELOPE_FLOOR_DB}
+                  max={0}
+                  min={ENVELOPE_FLOOR_DB}
+                  source={envelope.heard}
+                />
+                <PlotTrace
+                  className="stroke-primary/60 group-data-idle/device:hidden"
+                  max={0}
+                  min={ENVELOPE_FLOOR_DB}
+                  source={envelope.played}
+                />
+              </>
+            ) : null}
             <PlotLine axis="x" className="stroke-foreground/40" value={0} />
             <PlotLine axis="y" className="stroke-foreground/40" value={0} />
           </PlotGraph>
@@ -111,13 +131,6 @@ function TransientPanel({
             />
           ) : null}
         </Plot>
-        {envelope ? (
-          <LevelPlot
-            aria-label="Level in and out"
-            source={envelope.played}
-            under={envelope.heard}
-          />
-        ) : null}
         <DevicePanel
           device={transientDevice}
           disabled={value.enabled ? undefined : OFF}
