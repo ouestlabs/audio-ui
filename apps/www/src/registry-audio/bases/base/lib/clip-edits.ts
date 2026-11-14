@@ -1,10 +1,7 @@
-/**
- * The pure parts of editing one sound on a track of an arrangement: taking
- * time out, the crossfade at its seam, the fades and level of a stretch, and
- * what a key press is for. `use-clip-edits` puts them behind the keyboard and
- * the menus.
- */
-import type { FadeShape } from "@audio-ui/react";
+import {
+  FLAT,
+  type SelectionShape,
+} from "@/registry-audio/bases/base/audio/elements/selection-frame";
 import type { Arranged } from "@/registry-audio/bases/base/lib/arrangement";
 import type { ArrangementCommand } from "@/registry-audio/bases/base/lib/arrangement-state";
 
@@ -19,13 +16,6 @@ export const SHRINK_GAP = 0.3;
 
 /** The lengths a pause can be shrunk to: 0 takes it out whole. */
 export const SHRINK_GAPS = [0, 0.1, 0.3, 0.5] as const;
-
-/** How far Louder and Quieter move the selection's level, in dB. */
-export const LEVEL_NUDGE = 3;
-
-/** A selection's level range, in dB: silence at the bottom, a boost of 6 dB at the top. */
-export const MIN_DB = -60;
-export const MAX_DB = 6;
 
 /** Whether a key went to a field you type in, where its keys are its own. */
 export function typing(target: EventTarget | null) {
@@ -55,23 +45,6 @@ export const splice = (
       ]
     : [];
 
-/** What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB. */
-export interface StretchShape {
-  fadeIn: number;
-  fadeInShape: FadeShape;
-  fadeOut: number;
-  fadeOutShape: FadeShape;
-  gain: number;
-}
-
-export const FLAT: StretchShape = {
-  fadeIn: 0,
-  fadeInShape: "linear",
-  fadeOut: 0,
-  fadeOutShape: "linear",
-  gain: 0,
-};
-
 export const clipEnd = (clip: Arranged) => clip.value.start + clip.value.length;
 /** Two times the same, to the frame. */
 export const near = (a: number, b: number) => Math.abs(a - b) < 1e-4;
@@ -80,7 +53,7 @@ export const near = (a: number, b: number) => Math.abs(a - b) < 1e-4;
 export function shapeOf(
   clips: readonly Arranged[],
   [from, to]: readonly [number, number]
-): StretchShape {
+): SelectionShape {
   const clip = clips.find(
     (item) => near(item.value.start, from) && near(clipEnd(item), to)
   );
@@ -126,7 +99,7 @@ export function pieceOf(
 export function shapeStretch(
   clips: readonly Arranged[],
   [from, to]: readonly [number, number],
-  shape: StretchShape
+  shape: SelectionShape
 ): ArrangementCommand[] {
   const touched = clips.filter(
     (clip) => clip.value.start < to && clipEnd(clip) > from

@@ -712,6 +712,7 @@ export const components: RegistryItem[] = [
       "@audio-ui/use-bake",
       "@audio-ui/process-menu",
       "@audio-ui/sound-operations",
+      "@audio-ui/selection-frame",
       "@audio-ui/sound-report",
       "@audio-ui/use-clip-edits",
       "@audio-ui/use-sound-report",

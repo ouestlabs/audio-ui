@@ -572,6 +572,136 @@ export const checks: Checks = {
         { timeout: 5000 }
       );
     },
+  "CLP-029: the clip view edits its sound as an audio editor does: a drag selects, Delete takes it out, Copy and Paste put it back, one undo each":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      const sound = page.locator("[data-slot=clip-panel-edit]");
+      await sound.waitFor({ timeout: 5000 });
+      const width = async () => (await clip.boundingBox())?.width ?? 0;
+      const before = await width();
+      const settled = async (to: number) =>
+        await page.waitForFunction(
+          (want) => {
+            const box = document
+              .querySelector("[data-clip-id]")
+              ?.getBoundingClientRect();
+            return box !== undefined && Math.abs(box.width - want) < 2;
+          },
+          to,
+          { timeout: 20_000 }
+        );
+      // A quarter of the sound, from a quarter in, dragged across.
+      const box = await sound.boundingBox();
+      const y = (box?.y ?? 0) + (box?.height ?? 0) / 2;
+      const x = (share: number) => (box?.x ?? 0) + (box?.width ?? 0) * share;
+      await page.mouse.move(x(0.25), y);
+      await page.mouse.down();
+      await page.mouse.move(x(0.5), y, { steps: 8 });
+      await page.mouse.up();
+      assert(
+        (
+          (await page.locator("[data-slot=clip-panel-pick]").textContent()) ??
+          ""
+        ).startsWith("Selection"),
+        "a drag on the sound selects nothing"
+      );
+      await page.keyboard.press("Meta+KeyC");
+      await page.keyboard.press("Backspace");
+      await settled(before * 0.75);
+      // The caret at the start, the quarter pasted back: as long as it was.
+      await page.mouse.click(x(0.01), y);
+      await page.keyboard.press("Meta+KeyV");
+      await settled(before);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Meta+KeyZ");
+      await settled(before * 0.75);
+      await page.keyboard.press("Meta+KeyZ");
+      await settled(before);
+      // Crop keeps the selection: the clip plays that quarter alone, the recording left as it is.
+      await page.mouse.move(x(0.25), y);
+      await page.mouse.down();
+      await page.mouse.move(x(0.5), y, { steps: 8 });
+      await page.mouse.up();
+      await page.keyboard.press("KeyK");
+      await settled(before * 0.25);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Meta+KeyZ");
+      await settled(before);
+      // The selection's frame: its fade-in corner dragged in fades the stretch, baked into a recording of its own.
+      const kept = async () =>
+        await page.evaluate(async () => {
+          const folder = await (
+            await navigator.storage.getDirectory()
+          ).getDirectoryHandle("cache");
+          return (await Array.fromAsync(folder.keys())).filter((name) =>
+            name.endsWith(".f32")
+          ).length;
+        });
+      const recordings = await kept();
+      await page.mouse.move(x(0.25), y);
+      await page.mouse.down();
+      await page.mouse.move(x(0.75), y, { steps: 8 });
+      await page.mouse.up();
+      const fade = sound
+        .locator('[data-slot="timeline-clip-fade-handle"]')
+        .first();
+      await fade.waitFor({ timeout: 5000 });
+      const corner = await fade.boundingBox();
+      await page.mouse.move(
+        (corner?.x ?? 0) + (corner?.width ?? 0) / 2,
+        (corner?.y ?? 0) + (corner?.height ?? 0) / 2
+      );
+      await page.mouse.down();
+      await page.mouse.move(
+        (corner?.x ?? 0) + (box?.width ?? 0) * 0.2,
+        (corner?.y ?? 0) + (corner?.height ?? 0) / 2,
+        { steps: 8 }
+      );
+      await page.mouse.up();
+      await page.waitForFunction(
+        async (was) => {
+          const folder = await (
+            await navigator.storage.getDirectory()
+          ).getDirectoryHandle("cache");
+          return (
+            (await Array.fromAsync(folder.keys())).filter((name) =>
+              name.endsWith(".f32")
+            ).length > was
+          );
+        },
+        recordings,
+        { timeout: 20_000 }
+      );
+      assert(
+        (await width()) > before * 0.99,
+        "a fade changed how long the clip lasts"
+      );
+      // A right-click opens the edits and the Process menu.
+      await sound.click({ button: "right" });
+      const missing = (
+        await Promise.all(
+          ["Cut", "Copy", "Paste", "Delete", "Crop", "Process"].map(
+            async (name) =>
+              (await page.getByRole("menuitem", { name }).count()) > 0
+                ? null
+                : name
+          )
+        )
+      ).filter((name) => name !== null);
+      assert(
+        missing.length === 0,
+        `the right-click menu has no ${missing.join(", ")}`
+      );
+    },
   "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":
     async (browser) => {
       const page = await open(browser);

@@ -16,7 +16,7 @@ import {
   recordingOf,
 } from "@/lib/daw/recordings";
 import { readChannels, transferable } from "@/lib/daw/samples";
-import type { SoundOperation } from "@/lib/sound-operations";
+import type { SoundOperation, SoundRange } from "@/lib/sound-operations";
 
 /** `job` run in a worker of its own, which ends with it. */
 function inWorker(job: ProcessJob): Promise<ProcessDone> {
@@ -36,11 +36,27 @@ function inWorker(job: ProcessJob): Promise<ProcessDone> {
   });
 }
 
-/** The recording an operation makes of a clip's source, under a new id, with the bytes to keep it by. */
+/** Frames `range` of a clip's source, every channel: what Copy keeps to paste. */
+export function readSource(
+  recording: Recording,
+  clip: { sourceFrom?: number },
+  [from, to]: SoundRange
+): Promise<Float32Array[]> {
+  const { sampleRate } = recording.source;
+  const start = (clip.sourceFrom ?? 0) * sampleRate;
+  return readChannels(
+    recording.source,
+    Math.round(start + from * sampleRate),
+    Math.round(start + to * sampleRate)
+  );
+}
+
+/** The recording an operation makes of a clip's source, or of `range` of it, under a new id, with the bytes to keep it by. */
 export async function processSource(
   recording: Recording,
   clip: { sourceFrom?: number; sourceLength: number },
   operation: SoundOperation,
+  range: SoundRange | null,
   taken: ReadonlySet<string>
 ): Promise<[string, Dropped]> {
   const { sampleRate } = recording.source;
@@ -52,6 +68,7 @@ export async function processSource(
       from + Math.round(clip.sourceLength * sampleRate)
     ),
     operation,
+    range,
     sampleRate,
   });
   const id = freshRecordingId(taken);

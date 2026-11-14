@@ -1,13 +1,13 @@
 ---
 title: sound-operations
-description: "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair; applySoundOperation runs one on plain channels, soundOperationName names it as a step of the history."
+description: "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair, with Delete, Crop, Paste and Gain; applySoundOperation runs one on plain channels, on all of them or a stretch, soundOperationName names it as a step of the history."
 ---
 
 <Entry name="sound-operations" />
 
 ## Usage
 
-An operation is data, `{ type: "stretch", factor: 1.5, method: "transient" }`, so a menu, a key or an agent's tool can pick one and the code that holds the sound runs it. The [Process menu](/docs/components/base/process-menu) lists them.
+An operation is data, `{ type: "stretch", factor: 1.5, method: "transient" }`, so a menu, a key or an agent's tool can pick one and the code that holds the sound runs it. The [Process menu](/docs/components/base/process-menu) lists the processes; Delete, Crop, Paste and Gain are an audio editor's edits.
 
 ```ts
 import {
@@ -17,12 +17,21 @@ import {
 } from "@/lib/sound-operations";
 
 const operation = { semitones: -2, method: "formant", type: "shift" } as const;
+const sound = { channels, sampleRate: 48_000 };
 
 // Plain channels in, plain channels out, at the same rate.
-const next = applySoundOperation({ channels, sampleRate: 48_000 }, operation);
+const next = applySoundOperation(sound, operation);
+
+// On a stretch alone, 1 s to 2.5 s, spliced back with each seam crossfaded.
+const edited = applySoundOperation(sound, { db: 3, type: "gain" }, [1, 2.5]);
+
+// The edits: take a stretch out, keep it alone, or put copied samples in its place.
+applySoundOperation(sound, { type: "delete" }, [1, 2.5]);
+applySoundOperation(sound, { type: "crop" }, [1, 2.5]);
+applySoundOperation(sound, { channels: copied, type: "paste" }, [4, 4]); // at a point: inserted there
 
 soundOperationName(operation); // "Pitch -2 st"
-soundOperationTiming(operation); // "kept": the length stays
+soundOperationTiming(operation); // "spliced": what follows the stretch moves by as much as it grew
 ```
 
-Each operation is one of [`@audio-ui/engine/files`](/docs/engine/files) (`reverseChannels`, `repeatChannels`, `padChannels`, `normalizeChannels`, `panChannels`, `ditherChannels`, `filterChannels`, `stretchChannels`, `shiftChannels`, `speedChannels`) or `repairChannels` of [`@audio-ui/engine/repair`](/docs/engine/repair), whose methods the menu offers as a choice. `soundOperationTiming` says how one moves the times in a sound: `"scaled"` for Stretch and Speed, `"extended"` at the end for Repeat and Add silence, `"kept"` for the rest; the clip panel's `processedSettings` reads it to keep a clip on what it played.
+Each process is one of [`@audio-ui/engine/files`](/docs/engine/files) (`reverseChannels`, `repeatChannels`, `padChannels`, `normalizeChannels`, `panChannels`, `ditherChannels`, `filterChannels`, `stretchChannels`, `shiftChannels`, `speedChannels`, `gainChannels`) or `repairChannels` of [`@audio-ui/engine/repair`](/docs/engine/repair), whose methods the menu offers as a choice. Given a `range`, in seconds, the operation runs on that stretch alone, and each seam with the rest is crossfaded over `SEAM` (5 ms), so a cut, an insert or a stretch processed on its own makes no click. `soundOperationTiming` says how one moves the times in the stretch: `"scaled"` for Stretch and Speed, `"cropped"` for Crop, `"spliced"` for the rest; the clip panel's `processedSettings` reads it to keep a clip on what it played.

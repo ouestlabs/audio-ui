@@ -384,6 +384,32 @@ const placedAt = (from: number, to: number) => ({
 });
 
 /** The song's notes as a MIDI clip holds them: in seconds, at the song's tempo. */
+/** A clip with the clip panel's settings: it keeps its place, and what it plays ends as early as the timeline needs, its fades inside it. */
+function withClipSettings(
+  clip: Arranged,
+  next: ClipSettings,
+  duration: number
+): Arranged {
+  const length = Math.min(next.length, duration - clip.value.start);
+  const fadeIn = Math.min(clip.value.fadeIn, length);
+  return {
+    ...clip,
+    gain: next.gain,
+    loop: next.loop ?? undefined,
+    reversed: next.reversed,
+    transpose: next.transpose,
+    warpMode: next.warpMode,
+    warp: next.warp ?? undefined,
+    value: {
+      ...clip.value,
+      fadeIn,
+      fadeOut: Math.min(clip.value.fadeOut, length - fadeIn),
+      length,
+      offset: next.offset,
+    },
+  };
+}
+
 const notesOf = (notes: readonly SongNote[]): Arranged["notes"] =>
   notes.map(({ length, pitch, start, velocity }, index) => ({
     id: `n${index}`,
@@ -605,7 +631,7 @@ function ClipDock({
   /** The arrangement's position, live, which an audio clip's panel shows where it plays. */
   position: ComponentProps<typeof ClipPanel>["position"];
   onCollapsedChange: (collapsed: boolean) => void;
-  onCrop: () => void;
+  onCrop: NonNullable<ComponentProps<typeof ClipPanel>["onCrop"]>;
   onValueChange: (next: ClipSettings) => void;
   onValueCommitted: () => void;
   /** The ids of the boxes folded in the panel: held here, so they stay folded from clip to clip. */
@@ -893,10 +919,6 @@ export default function BlockTimeline() {
   const splitStep = bar / 4;
   const addClip = useCallback(
     (clip: Arranged) => dispatch({ type: "add-clip", clip }),
-    [dispatch]
-  );
-  const crop = useCallback(
-    (id: string) => dispatch({ type: "crop-clip", id }),
     [dispatch]
   );
   const duplicateSelection = useCallback(() => {
@@ -1218,30 +1240,11 @@ export default function BlockTimeline() {
   );
   const changeClipSettings = useCallback(
     (next: ClipSettings) => {
-      if (!editedClip) {
-        return;
+      if (editedClip) {
+        editClip(editedClip.id, (clip) =>
+          withClipSettings(clip, next, duration)
+        );
       }
-      editClip(editedClip.id, (clip) => {
-        // The clip keeps its place: what it plays changes, so it ends as early as the timeline needs.
-        const length = Math.min(next.length, duration - clip.value.start);
-        const fadeIn = Math.min(clip.value.fadeIn, length);
-        return {
-          ...clip,
-          gain: next.gain,
-          loop: next.loop ?? undefined,
-          reversed: next.reversed,
-          transpose: next.transpose,
-          warpMode: next.warpMode,
-          warp: next.warp ?? undefined,
-          value: {
-            ...clip.value,
-            fadeIn,
-            fadeOut: Math.min(clip.value.fadeOut, length - fadeIn),
-            length,
-            offset: next.offset,
-          },
-        };
-      });
     },
     [duration, editClip, editedClip]
   );
@@ -1344,11 +1347,20 @@ export default function BlockTimeline() {
     },
     [editClip, editedClip, settleClipEdit]
   );
-  const cropEdited = useCallback(() => {
-    if (editedClip) {
-      crop(editedClip.id);
-    }
-  }, [crop, editedClip]);
+  // Crop, from the clip panel: its source cut down to the stretch kept, and the clip on what is left of it.
+  const cropEdited = useCallback(
+    (range: readonly [number, number], next: ClipSettings) => {
+      if (editedClip) {
+        editClip(editedClip.id, (clip) => ({
+          ...withClipSettings(clip, next, duration),
+          sourceFrom: (clip.sourceFrom ?? 0) + range[0],
+          sourceLength: next.sourceLength,
+        }));
+        settleClipEdit();
+      }
+    },
+    [duration, editClip, editedClip, settleClipEdit]
+  );
   const closeClipView = useCallback(() => setClipViewOpen(false), []);
   /**
    * Cmd/Ctrl + Alt + 3 shows or hides the clip panel, read from the key's place

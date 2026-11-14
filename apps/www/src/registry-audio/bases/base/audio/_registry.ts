@@ -293,6 +293,34 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
+    categories: ["timeline"],
+    description:
+      "A stretch of time selected on a lane, drawn over it: a tint with an edge, which lets the pointer through to what is under it.",
+    files: [
+      {
+        path: "audio/elements/time-selection.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "time-selection",
+    type: "registry:ui",
+  },
+  {
+    categories: ["audio-editor", "timeline"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
+    description:
+      "A selection drawn as an audio editor's frame over a lane: its edges drag, showing their time to the millisecond, a handle in each top corner fades it in and out along a curve, and a line across it sets its level, each taking effect as it lets go.",
+    files: [
+      {
+        path: "audio/elements/selection-frame.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "selection-frame",
+    registryDependencies: ["@audio-ui/timeline"],
+    type: "registry:ui",
+  },
+  {
     categories: ["piano"],
     dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
@@ -721,7 +749,7 @@ export const audio: RegistryItem[] = [
     categories: ["timeline", "waveform", "knob"],
     dependencies: ["@audio-ui/engine", "@audio-ui/gl", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp, Reverse, Crop, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), drawn on the GPU when the source's samples are given and WebGL 2 is there: as its waveform, by band, or as its spectrogram, from the view menu. Given onProcess, a Process menu beside it runs the audio editor's operations on the source, and processedSettings says where the clip's start, end and loop go.",
+      "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp and its mode, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), drawn on the GPU when the source's samples are given and WebGL 2 is there: as its waveform, by band, or as its spectrogram, from the view menu. The source is edited as in an audio editor: a bar over it with Edit, Process and View, a drag selects a stretch framed with fades and a level to drag, a right-click opens Crop, Reverse, Louder and Quieter and, given onProcess, Cut, Copy, Paste, Delete and the Process menu, with their keys; on the selection they rewrite it, with none they set the clip; processedSettings says where the clip's start, end and loop go.",
     files: [
       {
         path: "audio/panels/clip-panel.tsx",
@@ -738,7 +766,10 @@ export const audio: RegistryItem[] = [
       "@audio-ui/sound-lane",
       "@audio-ui/process-menu",
       "@audio-ui/sound-operations",
+      "@audio-ui/selection-frame",
+      "@audio-ui/time-selection",
       "@shadcn/button",
+      "@shadcn/context-menu",
       "@shadcn/dropdown-menu",
     ],
     type: "registry:ui",

@@ -92,14 +92,11 @@ export const hooks: RegistryItem[] = [
         path: "hooks/use-time-selection.ts",
         type: "registry:hook",
       },
-      {
-        path: "audio/elements/time-selection.tsx",
-        type: "registry:ui",
-      },
     ],
     name: "use-time-selection",
     registryDependencies: [
       "@audio-ui/arrangement",
+      "@audio-ui/time-selection",
       "@audio-ui/use-arrangement",
     ],
     type: "registry:hook",
@@ -143,6 +140,7 @@ export const hooks: RegistryItem[] = [
     description:
       "The edits of one sound on a track, each one step of undo: Cut, Copy, Paste, Delete, Crop, Mark, Louder and Quieter on a time selection, Trim silence and Shrink pauses from the pauses it is given, and the keyboard of all of them with Undo and Redo",
     registryDependencies: [
+      "@audio-ui/selection-frame",
       "@audio-ui/arrangement",
       "@audio-ui/clip-edits",
       "@audio-ui/use-arrangement",

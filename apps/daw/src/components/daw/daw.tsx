@@ -269,6 +269,23 @@ function deletesItsOwn(event: KeyboardEvent) {
   );
 }
 
+/** Whether a key goes to the clip view's sound, which edits what is selected on it with Cut, Copy, Paste, Select all, Crop, Louder and Quieter (CLP-029), and not to the arrangement. */
+function editsItsOwn(event: KeyboardEvent) {
+  if (
+    !(
+      event.target instanceof Element &&
+      event.target.closest('[data-slot="clip-panel-edit"]')
+    )
+  ) {
+    return false;
+  }
+  const key = event.key.toLowerCase();
+  return event.metaKey || event.ctrlKey
+    ? ["a", "c", "v", "x"].includes(key)
+    : key === "k" ||
+        (event.shiftKey && (key === "arrowup" || key === "arrowdown"));
+}
+
 /** Whether a key press goes to a field being typed in rather than to the app. */
 function typing(target: EventTarget | null) {
   return (
@@ -1361,8 +1378,8 @@ export function Daw({
         TAKEN.add(event);
         return;
       }
-      // Typing, and Delete in the clip view, on a device or a locator, which deletes what is focused there: the clip it is in stays.
-      if (typing(event.target) || deletesItsOwn(event)) {
+      // Typing, Delete in the clip view, on a device or a locator, which deletes what is focused there (the clip it is in stays), and the keys the clip view's sound edits with.
+      if (typing(event.target) || deletesItsOwn(event) || editsItsOwn(event)) {
         TAKEN.add(event);
         return;
       }

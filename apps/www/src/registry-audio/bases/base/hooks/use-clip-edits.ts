@@ -1,5 +1,12 @@
 import type { createSource } from "@audio-ui/react";
 import { type KeyboardEvent, useCallback, useMemo, useState } from "react";
+import {
+  FLAT,
+  LEVEL_NUDGE,
+  MAX_DB,
+  MIN_DB,
+  type SelectionShape,
+} from "@/registry-audio/bases/base/audio/elements/selection-frame";
 import type { useArrangement } from "@/registry-audio/bases/base/hooks/use-arrangement";
 import type {
   Clipping,
@@ -8,13 +15,8 @@ import type {
 import type { ArrangementCommand } from "@/registry-audio/bases/base/lib/arrangement-state";
 import {
   EDGE_EPS,
-  FLAT,
-  LEVEL_NUDGE,
-  MAX_DB,
-  MIN_DB,
   removing,
   SHRINK_GAP,
-  type StretchShape,
   shapeOf,
   shapeStretch,
   splice,
@@ -205,7 +207,7 @@ export function useClipEdits({
   );
   /** Fades and level on the selection, as one step named `label`: what is in it becomes clips of its own, shaped. */
   const shape = useCallback(
-    (next: StretchShape, label: string) => {
+    (next: SelectionShape, label: string) => {
       if (time) {
         act(label, {
           commands: shapeStretch(clips, time.range, next),

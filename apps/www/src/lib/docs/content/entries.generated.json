@@ -556,21 +556,6 @@
         "summary": "The lengths a pause can be shrunk to: 0 takes it out whole."
       },
       {
-        "kind": "const",
-        "name": "LEVEL_NUDGE",
-        "summary": "How far Louder and Quieter move the selection's level, in dB."
-      },
-      {
-        "kind": "const",
-        "name": "MIN_DB",
-        "summary": "A selection's level range, in dB: silence at the bottom, a boost of 6 dB at the top."
-      },
-      {
-        "kind": "const",
-        "name": "MAX_DB",
-        "summary": ""
-      },
-      {
         "kind": "function",
         "name": "typing",
         "summary": "Whether a key went to a field you type in, where its keys are its own."
@@ -584,16 +569,6 @@
         "kind": "const",
         "name": "splice",
         "summary": "The crossfade of an edit's seam at `at`, in a sound `length` long: the clip that ends there and the one that starts there play through each other."
-      },
-      {
-        "kind": "interface",
-        "name": "StretchShape",
-        "summary": "What fades and level on a selection set: the fades at its two ends, their curves, and its level in dB."
-      },
-      {
-        "kind": "const",
-        "name": "FLAT",
-        "summary": ""
       },
       {
         "kind": "const",
@@ -628,6 +603,7 @@
     "kind": "lib",
     "name": "clip-edits",
     "registryDependencies": [
+      "selection-frame",
       "arrangement",
       "use-arrangement"
     ],
@@ -1678,14 +1654,20 @@
   },
   {
     "dependencies": [
+      "@audio-ui/core",
       "@audio-ui/engine"
     ],
-    "description": "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair; applySoundOperation runs one on plain channels, soundOperationName names it as a step of the history",
+    "description": "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair, with an audio editor's Delete, Crop, Paste and Gain; applySoundOperation runs one on plain channels, on all of them or a stretch spliced back with crossfaded seams, soundOperationName names it as a step of the history",
     "exports": [
       {
         "kind": "interface",
         "name": "SoundSamples",
         "summary": "A sound as plain samples: what an operation reads and writes."
+      },
+      {
+        "kind": "type",
+        "name": "SoundRange",
+        "summary": "A stretch of a sound, from where it starts to where it ends, in seconds."
       },
       {
         "kind": "type",
@@ -1703,14 +1685,19 @@
         "summary": "What an operation is called, as a step of the history: \"Repeat ×2\", \"Pitch -5 st\"."
       },
       {
+        "kind": "const",
+        "name": "SEAM",
+        "summary": "How long the seam between what an operation made and what it left is crossfaded, in seconds: no click at either end."
+      },
+      {
         "kind": "function",
         "name": "applySoundOperation",
-        "summary": "The sound an operation makes: new channels, at the same rate."
+        "summary": "The sound an operation makes, at the same rate: of the whole sound, or of `range` alone, spliced back in with its seams crossfaded."
       },
       {
         "kind": "function",
         "name": "soundOperationTiming",
-        "summary": "How an operation moves the times of a sound: `\"scaled\"` by how much longer it makes it (Stretch, Speed), `\"extended\"` at the end (Repeat, Add silence), or `\"kept\"`."
+        "summary": "How an operation moves the times in the stretch it changes: `\"scaled\"` by how much longer it makes it (Stretch, Speed), `\"cropped\"` to it alone (Crop), or `\"spliced\"`, where what it made starts where the stretch did and what follows moves by as much as it grew or shrank (Delete, Paste, Repeat, Add silence, and the rest, which keep its length)."
       }
     ],
     "files": [
@@ -2068,6 +2055,7 @@
     "kind": "hook",
     "name": "use-clip-edits",
     "registryDependencies": [
+      "selection-frame",
       "arrangement",
       "clip-edits",
       "use-arrangement"
@@ -2857,14 +2845,14 @@
       }
     ],
     "files": [
-      "hooks/use-time-selection.ts",
-      "components/audio-ui/time-selection.tsx"
+      "hooks/use-time-selection.ts"
     ],
     "from": "@/hooks/use-time-selection",
     "kind": "hook",
     "name": "use-time-selection",
     "registryDependencies": [
       "arrangement",
+      "time-selection",
       "use-arrangement"
     ],
     "usedBy": [
