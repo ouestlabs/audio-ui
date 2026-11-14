@@ -290,9 +290,9 @@ export interface ArrangementEngine {
   signal: (
     id: string,
     device: Pick<
-    Device<readonly ParameterDescriptor[]>,
-    "kind" | "sidechain" | "signals"
-  >
+      Device<readonly ParameterDescriptor[]>,
+      "kind" | "sidechain" | "signals"
+    >
   ) => DeviceSignal;
   /** Stops playback: the clips and the notes stop, the effects' tails ring on. */
   stop: () => void;
@@ -489,7 +489,13 @@ export async function createArrangementEngine(
     if (device.device === DRUM_RACK_DEVICE) {
       const player = createDrumRackEngine(ctx, library);
       player.output.connect(input);
-      return { device, kind: "drums", output: player.output, player, recordings };
+      return {
+        device,
+        kind: "drums",
+        output: player.output,
+        player,
+        recordings,
+      };
     }
     if (device.device === INSTRUMENT_RACK_DEVICE) {
       const player = createInstrumentRackEngine(ctx, library, voices);

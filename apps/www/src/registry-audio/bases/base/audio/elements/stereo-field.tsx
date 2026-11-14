@@ -94,10 +94,12 @@ export function StereoField({ className, source, ...props }: StereoFieldProps) {
       }
     };
     const measure = () => {
-      ratio = window.devicePixelRatio || 1;
-      canvas.width = Math.round(canvas.clientWidth * ratio);
-      canvas.height = Math.round(canvas.clientHeight * ratio);
-      color = getComputedStyle(canvas).color;
+      const { devicePixelRatio } = window;
+      const { clientHeight, clientWidth } = canvas;
+      ratio = devicePixelRatio || 1;
+      canvas.width = Math.round(clientWidth * ratio);
+      canvas.height = Math.round(clientHeight * ratio);
+      ({ color } = getComputedStyle(canvas));
       paint();
     };
     const resize = new ResizeObserver(measure);

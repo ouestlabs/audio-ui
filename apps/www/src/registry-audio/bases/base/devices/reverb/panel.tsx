@@ -77,7 +77,11 @@ function ReverbPanel({
   const decay = useMemo(() => reverbDecay(value), [value]);
   const tail = useMemo(
     () =>
-      signal?.wet?.history({ of: "level", points: 210, seconds: WINDOW_SECONDS }),
+      signal?.wet?.history({
+        of: "level",
+        points: 210,
+        seconds: WINDOW_SECONDS,
+      }),
     [signal]
   );
   const change = useCallback(
@@ -152,7 +156,9 @@ function ReverbPanel({
             ) : null}
             <PlotArea
               // The tail as set is filled while no sound goes in; once it does, the fill is the tail as it rings, and the setting a line over it.
-              className={tail ? "hidden group-data-idle/device:inline" : undefined}
+              className={
+                tail ? "hidden group-data-idle/device:inline" : undefined
+              }
               fillTo={DECAY_DB}
               fn={decay}
             />

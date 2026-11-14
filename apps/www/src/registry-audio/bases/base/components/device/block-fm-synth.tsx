@@ -49,11 +49,12 @@ export default function BlockFmSynth() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <FmSynthPanel signal={signal}
+      <FmSynthPanel
         activeNotes={midi.activeNotes}
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
+        signal={signal}
         value={state}
       />
     </div>

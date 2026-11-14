@@ -5,8 +5,8 @@ import {
 } from "@/registry-audio/bases/base/devices/overdrive/device";
 import { createOverdriveEngine } from "@/registry-audio/bases/base/devices/overdrive/engine";
 import { OverdrivePanel } from "@/registry-audio/bases/base/devices/overdrive/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -29,10 +29,7 @@ export default function BlockOverdrive() {
   const signal = useDeviceSignal(engine, overdriveDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <OverdrivePanel signal={signal}
-        onValueChange={setState}
-        value={state}
-      />
+      <OverdrivePanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

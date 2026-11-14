@@ -6,8 +6,8 @@ import {
 } from "@/registry-audio/bases/base/devices/pocket-synth/device";
 import { createPocketSynthEngine } from "@/registry-audio/bases/base/devices/pocket-synth/engine";
 import { PocketSynthPanel } from "@/registry-audio/bases/base/devices/pocket-synth/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 /**
@@ -35,10 +35,11 @@ export default function BlockPocketSynth() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <PocketSynthPanel signal={signal}
+      <PocketSynthPanel
         onNoteOff={release}
         onNoteOn={play}
         onValueChange={setState}
+        signal={signal}
         value={state}
       />
     </div>

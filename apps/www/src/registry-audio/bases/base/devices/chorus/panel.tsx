@@ -40,10 +40,10 @@ interface ChorusPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ChorusState) => void;
-  /** The host's tempo, which a synced rate is read against. @default 120 BPM */
-  tempo?: Tempo;
   /** Its live sound: where what comes out sits between the speakers, and how alike its sides are. */
   signal?: DeviceSignal;
+  /** The host's tempo, which a synced rate is read against. @default 120 BPM */
+  tempo?: Tempo;
   value: ChorusState;
 }
 
@@ -108,7 +108,10 @@ function ChorusPanel({
           </Plot>
           {signal ? (
             // Where what comes out sits between the speakers.
-            <StereoField className="w-20 shrink-0 self-center" source={signal.output.stereo} />
+            <StereoField
+              className="w-20 shrink-0 self-center"
+              source={signal.output.stereo}
+            />
           ) : null}
         </div>
         <DevicePanel

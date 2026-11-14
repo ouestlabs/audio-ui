@@ -5,8 +5,8 @@ import {
 } from "@/registry-audio/bases/base/devices/channel-eq/device";
 import { createChannelEqEngine } from "@/registry-audio/bases/base/devices/channel-eq/engine";
 import { ChannelEqPanel } from "@/registry-audio/bases/base/devices/channel-eq/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -30,10 +30,7 @@ export default function BlockChannelEq() {
   const signal = useDeviceSignal(engine, channelEqDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ChannelEqPanel signal={signal}
-        onValueChange={setState}
-        value={state}
-      />
+      <ChannelEqPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

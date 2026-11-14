@@ -49,11 +49,12 @@ export default function BlockTapeKeys() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <TapeKeysPanel signal={signal}
+      <TapeKeysPanel
         activeNotes={midi.activeNotes}
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
+        signal={signal}
         value={state}
       />
     </div>

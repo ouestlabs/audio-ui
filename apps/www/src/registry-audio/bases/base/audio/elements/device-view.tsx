@@ -313,7 +313,8 @@ function Slot({
   const { activeNotes, onHoldNote, signalOf } = chain;
   const release = useCallback(() => onHoldNote(null), [onHoldNote]);
   // One signal per device, kept by the engine: asking again on each render gives the same one.
-  const signal = entry && signalOf ? signalOf(device.id, entry.device) : undefined;
+  const signal =
+    entry && signalOf ? signalOf(device.id, entry.device) : undefined;
   const [folded, setFolded] = chain.useEntry("deviceFolded", device.id, false);
   const fold = { folded, onFoldedChange: setFolded };
   if (device.rack && device.device === DRUM_RACK_DEVICE) {

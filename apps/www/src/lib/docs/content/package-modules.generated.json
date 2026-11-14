@@ -210,7 +210,9 @@
     "package": "@audio-ui/core",
     "audiojs": [],
     "typesOnly": false,
-    "usedBy": []
+    "usedBy": [
+      "device-signal"
+    ]
   },
   {
     "adapters": [
@@ -726,7 +728,9 @@
     "package": "@audio-ui/core",
     "audiojs": [],
     "typesOnly": false,
-    "usedBy": []
+    "usedBy": [
+      "device-signal"
+    ]
   },
   {
     "adapters": [
@@ -2482,6 +2486,11 @@
         "summary": "The quietest a point is drawn: what a silent bin, `-Infinity` dB, becomes."
       },
       {
+        "kind": "function",
+        "name": "stereoCorrelation",
+        "summary": "How alike the two channels of a sound are, from -1 to 1, as a correlation meter reads it: 1 when both carry the same sound (mono, at any levels), 0 when they have nothing in common or only one side sounds, and -1 when one is the other upside down, which cancels out once the two are summed to mono."
+      },
+      {
         "kind": "interface",
         "name": "BandShares",
         "summary": "What each slice of a sound is made of: the share of its lows, mids and highs, the loudest of the three being 1."
@@ -2529,6 +2538,7 @@
     "usedBy": [
       "arrangement",
       "audio-export",
+      "device-signal",
       "sound-operations",
       "use-audio-levels",
       "use-audio-signal",
@@ -2604,6 +2614,11 @@
       },
       {
         "kind": "type",
+        "name": "DeviceSignalName",
+        "summary": "What a device's engine lets a host watch of its sound beyond its input and its output."
+      },
+      {
+        "kind": "type",
         "name": "DeviceState",
         "summary": "The state of a device: each parameter's id to its value."
       },
@@ -2646,6 +2661,11 @@
         "kind": "function",
         "name": "createWorkletStage",
         "summary": "A stage of an engine that runs a worklet: the sound passes clean while the worklet loads, then fades over to it."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceTaps",
+        "summary": "The points of an engine's graph a host may listen to beyond its input and its output, by the names its device declares in `signals`."
       },
       {
         "kind": "interface",
@@ -2766,12 +2786,14 @@
       "arrangement-engine",
       "dawproject",
       "device-library",
+      "device-signal",
       "drum-rack",
       "instrument-rack",
       "polyphony",
       "rack",
       "use-device-engines",
       "use-device-loop",
+      "use-device-signal",
       "use-noise-through-eq",
       "use-polyphony",
       "voice-pool"

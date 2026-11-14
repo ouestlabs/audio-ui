@@ -6,8 +6,8 @@ import {
 } from "@/registry-audio/bases/base/devices/drum-synth/device";
 import { createDrumSynthEngine } from "@/registry-audio/bases/base/devices/drum-synth/engine";
 import { DrumSynthPanel } from "@/registry-audio/bases/base/devices/drum-synth/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceEngines } from "@/registry-audio/bases/base/hooks/use-device-engines";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
@@ -43,10 +43,11 @@ export default function BlockDrumSynth() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <DrumSynthPanel signal={signal}
+      <DrumSynthPanel
         activeNotes={midi.activeNotes}
         onNoteOn={strike}
         onValueChange={setState}
+        signal={signal}
         value={state}
       />
     </div>

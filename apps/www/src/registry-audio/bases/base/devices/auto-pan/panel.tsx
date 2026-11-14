@@ -98,7 +98,9 @@ function AutoPanPanel({
           <PlotGraph>
             <PlotCurve
               // The sweep as set while no sound goes in; once it does, the oscillator as it ran.
-              className={history ? "hidden group-data-idle/device:inline" : undefined}
+              className={
+                history ? "hidden group-data-idle/device:inline" : undefined
+              }
               fn={sweep}
             />
             {history ? (

@@ -55,7 +55,10 @@ function DrumSynthPanel({
   value,
 }: DrumSynthPanelProps) {
   // Each hit as it rang: its attack and its decay, the newest at the end.
-  const live = useMemo(() => signal?.output.history({ of: "level", points: 240, seconds: 2 }), [signal]);
+  const live = useMemo(
+    () => signal?.output.history({ of: "level", points: 240, seconds: 2 }),
+    [signal]
+  );
   const strike = useCallback(
     (_pad: string, details: PadPrimitive.Root.OnEventDetails) =>
       onNoteOn?.({ velocity: details.velocity }),
@@ -85,7 +88,10 @@ function DrumSynthPanel({
           value={value}
         />
         {live ? (
-          <LevelPlot aria-label="What it played over the last two seconds" source={live} />
+          <LevelPlot
+            aria-label="What it played over the last two seconds"
+            source={live}
+          />
         ) : null}
         <Pad
           activePads={activeNotes?.length ? ACTIVE : undefined}

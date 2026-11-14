@@ -5,8 +5,8 @@ import {
 } from "@/registry-audio/bases/base/devices/gate/device";
 import { createGateEngine } from "@/registry-audio/bases/base/devices/gate/engine";
 import { GatePanel } from "@/registry-audio/bases/base/devices/gate/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -38,7 +38,7 @@ export default function BlockGate() {
   const signal = useDeviceSignal(engine, gateDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <GatePanel signal={signal} onValueChange={setState} value={state} />
+      <GatePanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

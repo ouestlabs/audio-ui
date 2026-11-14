@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useState, useMemo } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -255,9 +255,7 @@ function OrganPanel({
             value={value}
           />
         </div>
-        {live ? (
-          <SpectrumPlot aria-label="Its spectrum" source={live} />
-        ) : null}
+        {live ? <SpectrumPlot aria-label="Its spectrum" source={live} /> : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the organ"

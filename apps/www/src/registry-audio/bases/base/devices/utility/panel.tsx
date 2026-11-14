@@ -56,7 +56,10 @@ function UtilityPanel({
         data-slot="utility-panel"
       >
         {signal ? (
-          <StereoField className="w-24 self-center" source={signal.output.stereo} />
+          <StereoField
+            className="w-24 self-center"
+            source={signal.output.stereo}
+          />
         ) : null}
         <DevicePanel
           className="grid-cols-3"

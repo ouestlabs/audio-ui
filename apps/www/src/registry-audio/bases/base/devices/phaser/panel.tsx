@@ -57,10 +57,10 @@ interface PhaserPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: PhaserState) => void;
-  /** The host's tempo, which a synced rate is read against. @default 120 BPM */
-  tempo?: Tempo;
   /** Its live sound: the spectrum of what comes out, where its notches sweep. */
   signal?: DeviceSignal;
+  /** The host's tempo, which a synced rate is read against. @default 120 BPM */
+  tempo?: Tempo;
   value: PhaserState;
 }
 
@@ -148,7 +148,10 @@ function PhaserPanel({
           </PlotGraph>
         </Plot>
         {spectrum ? (
-          <SpectrumPlot aria-label="Its notches in what comes out" source={spectrum} />
+          <SpectrumPlot
+            aria-label="Its notches in what comes out"
+            source={spectrum}
+          />
         ) : null}
         <DevicePanel
           className="grid-cols-5"

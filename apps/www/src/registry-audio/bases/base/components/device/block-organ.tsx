@@ -47,11 +47,12 @@ export default function BlockOrgan() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <OrganPanel signal={signal}
+      <OrganPanel
         activeNotes={midi.activeNotes}
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
+        signal={signal}
         value={state}
       />
     </div>

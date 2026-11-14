@@ -27,7 +27,10 @@ export default function BlockStringMachine() {
   );
   const master = useMasterBus(1);
   // Its voices play into this bus and nothing else does: that is where it is heard.
-  const signal = useDeviceSignal(master && { output: master }, stringMachineDevice);
+  const signal = useDeviceSignal(
+    master && { output: master },
+    stringMachineDevice
+  );
   const { noteOff, noteOn } = usePolyphony({
     create: createStringMachineEngine,
     destination: master,
@@ -49,11 +52,12 @@ export default function BlockStringMachine() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <StringMachinePanel signal={signal}
+      <StringMachinePanel
         activeNotes={midi.activeNotes}
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
+        signal={signal}
         value={state}
       />
     </div>

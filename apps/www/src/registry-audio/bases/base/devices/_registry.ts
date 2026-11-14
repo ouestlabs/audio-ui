@@ -242,7 +242,11 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Electric Piano device: its four presets, its controls by what they do (tone, pickup, tremolo, output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/piano", "@shadcn/select", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/piano",
+        "@shadcn/select",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("equalizer", {
@@ -358,7 +362,11 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The face of the FM Synth device: its eight presets, what every operator shares, each operator's four controls and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/piano", "@shadcn/select", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/piano",
+        "@shadcn/select",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("gate", {
@@ -453,7 +461,11 @@ export const devices: RegistryItem[] = [
       categories: ["device", "plot", "knob"],
       description:
         "The face of the mid/side device: a square with the side level across and the mid level up, and a handle to drag to both at once, over the bass mono and widening knobs, the widening picked in its title bar.",
-      registryDependencies: ["@audio-ui/plot", "@shadcn/select", "@audio-ui/stereo-field"],
+      registryDependencies: [
+        "@audio-ui/plot",
+        "@shadcn/select",
+        "@audio-ui/stereo-field",
+      ],
     },
   }),
   ...deviceItems("mono-synth", {
@@ -473,7 +485,12 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/icons", "@audio-ui/engine"],
       description:
         "The face of the Mono Synth device: its eight presets, the oscillator's wave and the range in its title bar, its controls by what they do (oscillators, filter, envelope, glide and vibrato) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/piano", "@shadcn/select", "@shadcn/toggle-group", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/piano",
+        "@shadcn/select",
+        "@shadcn/toggle-group",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("organ", {
@@ -493,7 +510,13 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Organ device: its six registrations and the rotary speaker in its title bar, nine drawbars as faders, its percussion, key click, drive and volume, and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/fader", "@audio-ui/piano", "@shadcn/select", "@shadcn/toggle-group", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/fader",
+        "@audio-ui/piano",
+        "@shadcn/select",
+        "@shadcn/toggle-group",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("string-machine", {
@@ -513,7 +536,11 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The face of the String Machine device: its eight presets, its controls by what they do (registers, tone, bow and output) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/piano", "@shadcn/select", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/piano",
+        "@shadcn/select",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("tape-keys", {
@@ -533,7 +560,11 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Tape Keys device: the track its heads read in its title bar, the tape's speed, wow and tone, the volume, and its 35 keys. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/piano", "@shadcn/toggle-group", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/piano",
+        "@shadcn/toggle-group",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("tilt-eq", {
@@ -647,7 +678,11 @@ export const devices: RegistryItem[] = [
       categories: ["device", "plot", "knob"],
       description:
         "The face of the phaser-flanger device: the sweep of its oscillator over two seconds, over the device knobs, with the ones the mode does not use drawn off, and the mode picked in its title bar.",
-      registryDependencies: ["@audio-ui/plot", "@shadcn/select", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/plot",
+        "@shadcn/select",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("pocket-synth", {
@@ -667,7 +702,13 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/icons", "@audio-ui/engine"],
       description:
         "The face of the Pocket Synth device: a pad that plays it, its waveform and filter, and its volume. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/fader", "@audio-ui/waveform-select", "@audio-ui/xypad", "@shadcn/toggle-group", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/fader",
+        "@audio-ui/waveform-select",
+        "@audio-ui/xypad",
+        "@shadcn/toggle-group",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("poly-synth", {
@@ -687,7 +728,11 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Poly Synth device: its eight presets, its controls by what they do (oscillators, filter, envelope, vibrato and chorus) and a keyboard that plays it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/piano", "@shadcn/select", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/piano",
+        "@shadcn/select",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("redux", {
@@ -759,7 +804,11 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Sampler device: its sample in its title bar, its controls and sixteen pads, one a slice, that play it. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/pad", "@shadcn/select", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/pad",
+        "@shadcn/select",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("stutter", {
@@ -814,7 +863,11 @@ export const devices: RegistryItem[] = [
       categories: ["device", "plot", "knob"],
       description:
         "The face of the transient shaper device: a square with the sustain across and the attack up, and a handle to drag to both at once, over the output knob.",
-      registryDependencies: ["@audio-ui/plot", "@shadcn/select", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/plot",
+        "@shadcn/select",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
   ...deviceItems("unlimiter", {
@@ -911,7 +964,11 @@ export const devices: RegistryItem[] = [
       dependencies: ["@audio-ui/engine"],
       description:
         "The face of the Wave Shaper device: a pad that plays it, its waveform and its knobs. Controlled, with the notes leaving through onNoteOn and onNoteOff.",
-      registryDependencies: ["@audio-ui/waveform-select", "@audio-ui/xypad", "@audio-ui/signal-plot"],
+      registryDependencies: [
+        "@audio-ui/waveform-select",
+        "@audio-ui/xypad",
+        "@audio-ui/signal-plot",
+      ],
     },
   }),
 ];

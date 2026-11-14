@@ -5,8 +5,8 @@ import {
 } from "@/registry-audio/bases/base/devices/filter/device";
 import { createFilterEngine } from "@/registry-audio/bases/base/devices/filter/engine";
 import { FilterPanel } from "@/registry-audio/bases/base/devices/filter/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -30,7 +30,7 @@ export default function BlockFilter() {
   const signal = useDeviceSignal(engine, filterDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <FilterPanel signal={signal} onValueChange={setState} value={state} />
+      <FilterPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

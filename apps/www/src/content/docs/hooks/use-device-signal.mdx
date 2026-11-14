@@ -1,0 +1,29 @@
+---
+title: useDeviceSignal
+description: "The live sound of a device's engine for its panel's signal prop: the same object for the life of the component, following the engine as it changes, listening only while the panel watches it"
+---
+
+<Entry name="use-device-signal" />
+
+## Usage
+
+```tsx
+import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
+import { createCompressorEngine } from "@/components/audio-ui/devices/compressor/engine";
+import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
+import { useDeviceEngines } from "@/hooks/use-device-engines";
+import { useDeviceSignal } from "@/hooks/use-device-signal";
+
+const [engine = null] = useDeviceEngines({
+  create: createCompressorEngine,
+  destination,
+  state,
+});
+const signal = useDeviceSignal(engine, compressorDevice);
+
+<CompressorPanel onValueChange={setState} signal={signal} value={state} />;
+```
+
+`useDeviceSignal(engine, device)` returns the [device signal](/docs/lib/device-signal) of `engine`: the same object for the life of the component, following `engine` as it changes and silent while it is `null`, such as before the sound starts. It listens only while the panel watches one of its sources, and needs no cleanup: unmounting the panel takes its analysers off.
+
+An instrument played as chords has an engine per voice: give the hook what they all play into instead, such as the bus they share, `{ output: bus }`.

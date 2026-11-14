@@ -5,8 +5,8 @@ import {
 } from "@/registry-audio/bases/base/devices/rotary/device";
 import { createRotaryEngine } from "@/registry-audio/bases/base/devices/rotary/engine";
 import { RotaryPanel } from "@/registry-audio/bases/base/devices/rotary/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -29,7 +29,7 @@ export default function BlockRotary() {
   const signal = useDeviceSignal(engine, rotaryDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <RotaryPanel signal={signal} onValueChange={setState} value={state} />
+      <RotaryPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

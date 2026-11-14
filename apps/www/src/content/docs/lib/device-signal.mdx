@@ -1,0 +1,52 @@
+---
+title: device-signal
+description: "A device's live sound from its engine, for its panel's signal: what goes in and comes out, its key, its taps and its readings as live sources, read in one frame loop and only while watched"
+---
+
+<Entry name="device-signal" />
+
+## Usage
+
+`createDeviceSignal(target, device)` reads an engine as a panel draws it. `target` is read each frame, so the signal follows the engine a host makes again and is silent while it returns `null`; `device` says which points it has: `input` for an effect, `key` for a device with a sidechain, and the taps it declares in `signals`.
+
+```ts
+import { createDeviceSignal } from "@/lib/device-signal";
+
+const signal = createDeviceSignal(() => engine, compressorDevice);
+
+signal.input?.levels; // the RMS and held peak of each channel, in dB
+signal.output.spectrum({ minHz: 20, maxHz: 20_000 }); // dB along a log axis
+signal.output.scope({ fit: true }); // the newest wave, held still on each cycle
+signal.wet?.history({ of: "level", seconds: 3 }); // a reverb's or a delay's tail over time
+signal.readings; // what the engine reports, such as the gain it takes off
+```
+
+A component holding an engine uses [`useDeviceSignal`](/docs/hooks/use-device-signal) instead, and a project's engine gives one per device with `ArrangementEngine.signal(id, device)`.
+
+Each point (`input`, `output`, `key`, `wet`, `modulator`) reads:
+
+- `levels`: the RMS of each channel in dB, rising at once and falling at 30 dB a second, and the loudest sample, held a moment, in the shape a `Meter` paints.
+- `active`: whether sound passes, `false` once it has been silent for 400 ms. A panel's frame is idle while its input is not active.
+- `spectrum({ minHz, maxHz, points })`: dB along a log frequency axis.
+- `scope({ length, fit })`: the newest `length` samples from where the wave last rose through zero; with `fit`, scaled so the loudest of the last moments reaches 1.
+- `history({ seconds, points, of, newestFirst })`: the signal itself (`"value"`) or its level in dB (`"level"`) over the last `seconds`, its slots counted on the audio clock; `newestFirst` puts now at the start.
+- `stereo`: the two channels' newest samples, how alike they are from -1 to 1, and whether both are silent.
+
+A point puts its analysers on the engine when the first of its sources is watched and takes them off with the last, and every source of the page is read in one animation frame that sleeps once nothing is watched. A source publishes silence once rather than every frame.
+
+Three helpers turn a source into what a face draws, without a React render:
+
+- `deriveSource(source, compute)`: a source computed from another, once per change however many watch it.
+- `curveDot(levels, curve)`: a point on a transfer curve at the louder channel's level, for a `Plot.Dot`.
+- `peakDots(levels, curve)`: two points on a shaper's curve at the held peak, `positive` and `negative`.
+
+```tsx
+const dot = useMemo(() => {
+  const levels = signal?.input?.levels;
+  return levels && curveDot(levels, curve);
+}, [curve, signal]);
+
+{dot ? <PlotDot className="group-data-idle/device:hidden" source={dot} /> : null}
+```
+
+The [Device signal](/docs/guides/device-signal) guide says what each kind of device draws and how a device declares its taps.

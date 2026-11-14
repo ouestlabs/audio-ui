@@ -27,7 +27,10 @@ export default function BlockElectricPiano() {
   );
   const master = useMasterBus(1);
   // Its voices play into this bus and nothing else does: that is where it is heard.
-  const signal = useDeviceSignal(master && { output: master }, electricPianoDevice);
+  const signal = useDeviceSignal(
+    master && { output: master },
+    electricPianoDevice
+  );
   const { noteOff, noteOn } = usePolyphony({
     create: createElectricPianoEngine,
     destination: master,
@@ -49,11 +52,12 @@ export default function BlockElectricPiano() {
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ElectricPianoPanel signal={signal}
+      <ElectricPianoPanel
         activeNotes={midi.activeNotes}
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
+        signal={signal}
         value={state}
       />
     </div>

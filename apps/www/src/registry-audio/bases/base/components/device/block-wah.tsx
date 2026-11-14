@@ -5,8 +5,8 @@ import {
 } from "@/registry-audio/bases/base/devices/wah/device";
 import { createWahEngine } from "@/registry-audio/bases/base/devices/wah/engine";
 import { WahPanel } from "@/registry-audio/bases/base/devices/wah/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -27,7 +27,7 @@ export default function BlockWah() {
   const signal = useDeviceSignal(engine, wahDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <WahPanel signal={signal} onValueChange={setState} value={state} />
+      <WahPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

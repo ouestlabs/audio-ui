@@ -13,10 +13,10 @@ import {
 import {
   Plot,
   PlotCursor,
+  PlotDot,
   PlotGraph,
   PlotGrid,
   PlotHandle,
-  PlotDot,
   PlotLine,
   PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";

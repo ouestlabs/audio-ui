@@ -89,11 +89,12 @@ export default function BlockSampler() {
       onDrop={dropFile}
       role="group"
     >
-      <SamplerPanel signal={signal}
+      <SamplerPanel
         activeNotes={midi.activeNotes}
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
+        signal={signal}
         value={state}
       />
     </div>

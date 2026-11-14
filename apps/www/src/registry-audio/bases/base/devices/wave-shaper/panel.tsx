@@ -1,9 +1,9 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import { WaveformSelect } from "@/registry-audio/bases/base/audio/elements/waveform-select";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
-import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,

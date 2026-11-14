@@ -5,8 +5,8 @@ import {
 } from "@/registry-audio/bases/base/devices/frequency-shifter/device";
 import { createFrequencyShifterEngine } from "@/registry-audio/bases/base/devices/frequency-shifter/engine";
 import { FrequencyShifterPanel } from "@/registry-audio/bases/base/devices/frequency-shifter/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -29,7 +29,11 @@ export default function BlockFrequencyShifter() {
   const signal = useDeviceSignal(engine, frequencyShifterDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <FrequencyShifterPanel signal={signal} onValueChange={setState} value={state} />
+      <FrequencyShifterPanel
+        onValueChange={setState}
+        signal={signal}
+        value={state}
+      />
     </div>
   );
 }

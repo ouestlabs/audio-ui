@@ -110,7 +110,10 @@ function BinauralPannerPanel({
           </Plot>
           {signal ? (
             // Where what comes out sits between the speakers, beside where it is placed around the head.
-            <StereoField className="w-20 shrink-0 self-center" source={signal.output.stereo} />
+            <StereoField
+              className="w-20 shrink-0 self-center"
+              source={signal.output.stereo}
+            />
           ) : null}
         </div>
         <DevicePanel

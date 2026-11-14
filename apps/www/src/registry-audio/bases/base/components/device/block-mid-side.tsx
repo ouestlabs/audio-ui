@@ -5,8 +5,8 @@ import {
 } from "@/registry-audio/bases/base/devices/mid-side/device";
 import { createMidSideEngine } from "@/registry-audio/bases/base/devices/mid-side/engine";
 import { MidSidePanel } from "@/registry-audio/bases/base/devices/mid-side/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -31,7 +31,7 @@ export default function BlockMidSide() {
   const signal = useDeviceSignal(engine, midSideDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <MidSidePanel signal={signal} onValueChange={setState} value={state} />
+      <MidSidePanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

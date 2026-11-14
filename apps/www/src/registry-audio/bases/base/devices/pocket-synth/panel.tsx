@@ -6,9 +6,9 @@ import {
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import { WaveformSelect } from "@/registry-audio/bases/base/audio/elements/waveform-select";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
-import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,

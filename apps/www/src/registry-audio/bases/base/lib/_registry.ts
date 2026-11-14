@@ -311,6 +311,7 @@ const items: RegistryItem[] = [
       "@audio-ui/use-arrangement",
       "@audio-ui/clip-player",
       "@audio-ui/device-library",
+      "@audio-ui/device-signal",
       "@audio-ui/mixer-engine",
       "@audio-ui/rack",
       "@audio-ui/drum-rack",

@@ -58,11 +58,15 @@ async function sineEngine(frequency: number, amplitude: number, gain = 1) {
 }
 
 /** Waits until the context's clock has run a tenth of a second: the first context of a page can take a moment to start rendering after it resumes. */
-async function running(ctx: BaseAudioContext) {
-  const from = ctx.currentTime;
-  while (ctx.currentTime - from < 0.1) {
-    await wait(20);
+async function running(
+  ctx: BaseAudioContext,
+  from = ctx.currentTime
+): Promise<void> {
+  if (ctx.currentTime - from >= 0.1) {
+    return;
   }
+  await wait(20);
+  return running(ctx, from);
 }
 
 const near = (actual: number, expected: number, tolerance: number) =>
@@ -192,7 +196,7 @@ check("silence reads silent and inactive, and so does no engine", async () => {
 
 check("a signal follows a new engine and lets go of the old one", async () => {
   const first = await sineEngine(441, 0.5);
-  const ctx = first.ctx;
+  const { ctx } = first;
   const second = ctx.createGain();
   second.gain.value = 0.1;
   first.oscillator.connect(second);
@@ -238,12 +242,10 @@ check("the analysers come off once nothing watches", async () => {
   assert(taps() === 2, `${taps()} taps while watched`);
   levels();
   await wait(50);
-  assert(taps() === 1, `${taps()} taps with the scope alone`
-  );
+  assert(taps() === 1, `${taps()} taps with the scope alone`);
   scope();
   await wait(50);
-  assert(taps() === 0, `${taps()} taps once nothing watches`
-  );
+  assert(taps() === 0, `${taps()} taps once nothing watches`);
   await ctx.close();
 });
 

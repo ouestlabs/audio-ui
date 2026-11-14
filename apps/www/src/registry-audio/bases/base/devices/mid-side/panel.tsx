@@ -152,7 +152,10 @@ function MidSidePanel({
           </Plot>
           {signal ? (
             // Where what comes out sits between the speakers.
-            <StereoField className="w-20 shrink-0 self-center" source={signal.output.stereo} />
+            <StereoField
+              className="w-20 shrink-0 self-center"
+              source={signal.output.stereo}
+            />
           ) : null}
         </div>
         <DevicePanel

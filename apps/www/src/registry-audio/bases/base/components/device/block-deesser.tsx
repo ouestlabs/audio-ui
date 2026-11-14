@@ -5,8 +5,8 @@ import {
 } from "@/registry-audio/bases/base/devices/deesser/device";
 import { createDeesserEngine } from "@/registry-audio/bases/base/devices/deesser/engine";
 import { DeesserPanel } from "@/registry-audio/bases/base/devices/deesser/panel";
-import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -31,10 +31,7 @@ export default function BlockDeesser() {
   const signal = useDeviceSignal(engine, deesserDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <DeesserPanel signal={signal}
-        onValueChange={setState}
-        value={state}
-      />
+      <DeesserPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

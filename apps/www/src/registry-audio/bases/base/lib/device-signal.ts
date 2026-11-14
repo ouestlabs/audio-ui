@@ -308,7 +308,11 @@ function createChannelFollower() {
   let holdUntil = 0;
   return {
     step: (rms: number, loudest: number, seconds: number, now: number) => {
-      level = Math.max(rms, level - RELEASE_DB_PER_SECOND * seconds, SILENCE_DB);
+      level = Math.max(
+        rms,
+        level - RELEASE_DB_PER_SECOND * seconds,
+        SILENCE_DB
+      );
       if (loudest >= peak) {
         peak = loudest;
         holdUntil = now + PEAK_HOLD_MS;
@@ -328,6 +332,84 @@ const silentFrame = (): MeterFrame => ({
 const isSilentFrame = (frame: MeterFrame) =>
   frame.levels.every((db) => db <= SILENCE_DB) &&
   (frame.peaks ?? []).every((db) => db <= SILENCE_DB);
+
+/** Where the newest `length` samples of `buffer` start at a rise through zero, so a steady tone stands still; the newest of them when none rises. */
+function risingStart(buffer: Float32Array, length: number) {
+  for (let index = buffer.length - length; index > 0; index -= 1) {
+    if ((buffer[index - 1] as number) < 0 && (buffer[index] as number) >= 0) {
+      return index;
+    }
+  }
+  return buffer.length - length;
+}
+
+/** Multiplies every sample of `samples` by `by`, in place. */
+function scale(samples: Float32Array, by: number) {
+  for (let index = 0; index < samples.length; index += 1) {
+    samples[index] = (samples[index] as number) * by;
+  }
+}
+
+/** A slot of a history that ends at sample `end` of `buffer` and lasts `slot` samples: the level of its samples in dB, or its last sample. */
+function slotValue(
+  buffer: Float32Array,
+  end: number,
+  slot: number,
+  of: "level" | "value"
+) {
+  const last = Math.max(1, end);
+  if (of === "value") {
+    return buffer[last - 1] as number;
+  }
+  const first = Math.max(0, last - Math.round(slot));
+  return Math.max(SILENCE_DB, rmsDb(buffer.subarray(first, last)));
+}
+
+/**
+ * Counts the slots of a history on the audio clock, not the screen's, so the
+ * window holds the samples as they played, a frame late or not: each
+ * `advance` says how many whole slots of `seconds / points` passed since the
+ * last, how long one is in samples, and how many samples are left over after
+ * the last whole one.
+ */
+function createSlotClock(seconds: number, points: number) {
+  let carry = 0;
+  let heardAt: number | null = null;
+  return {
+    advance: ({ currentTime, sampleRate }: BaseAudioContext) => {
+      const slot = (seconds * sampleRate) / points;
+      carry += heardAt === null ? 0 : (currentTime - heardAt) * sampleRate;
+      heardAt = currentTime;
+      const whole = Math.floor(carry / slot);
+      // A gap longer than the window, such as a tab in the background, drops what no slot can show.
+      carry -= whole * slot;
+      return { carry, fresh: Math.min(points, whole), slot };
+    },
+    reset: () => {
+      carry = 0;
+      heardAt = null;
+    },
+  };
+}
+
+/** A ring of values, its newest just before `head`, written into `out` in time order, or the newest first. */
+function unroll<Out extends Float32Array>(
+  ring: Float32Array,
+  head: number,
+  out: Out,
+  newestFirst: boolean
+): Out {
+  const count = ring.length;
+  if (newestFirst) {
+    for (let index = 0; index < count; index += 1) {
+      out[index] = ring[(head - 1 - index + count) % count] as number;
+    }
+  } else {
+    out.set(ring.subarray(head), 0);
+    out.set(ring.subarray(0, head), count - head);
+  }
+  return out;
+}
 
 /** The point that `node` stands for, read as live sources. */
 function createSignalPoint(
@@ -424,7 +506,12 @@ function createSignalPoint(
       const release = stereo.use();
       const left = new Float32Array(LEVEL_SAMPLES);
       const right = new Float32Array(LEVEL_SAMPLES);
-      const samples: StereoSamples = { correlation: 0, left, right, silent: true };
+      const samples: StereoSamples = {
+        correlation: 0,
+        left,
+        right,
+        silent: true,
+      };
       let silent = false;
       const stop = everyFrame(() => {
         const nodes = stereo.current();
@@ -475,25 +562,13 @@ function createSignalPoint(
         } else {
           buffer.fill(0);
         }
-        // The newest window that starts where the wave rises through zero: a steady tone stands still.
-        let start = buffer.length - length;
-        for (let index = start; index > 0; index -= 1) {
-          if (
-            (buffer[index - 1] as number) < 0 &&
-            (buffer[index] as number) >= 0
-          ) {
-            start = index;
-            break;
-          }
-        }
+        const start = risingStart(buffer, length);
         out.set(buffer.subarray(start, start + length));
         const loudest = 10 ** (peakDb(out) / 20);
         const quiet = loudest < 10 ** (QUIET_DB / 20);
         if (fit) {
           reach = Math.max(loudest, reach * FIT_FALLBACK, FIT_QUIETEST);
-          for (let index = 0; index < length; index += 1) {
-            out[index] = (out[index] as number) / reach;
-          }
+          scale(out, 1 / reach);
         }
         if (!(quiet && silent)) {
           publish(out);
@@ -573,9 +648,7 @@ function createSignalPoint(
         const ring = new Float32Array(points).fill(rest);
         const out = new Float32Array(points).fill(rest);
         let head = 0;
-        /** Samples heard since the last whole slot, on the audio clock. */
-        let carry = 0;
-        let heardAt: number | null = null;
+        const clock = createSlotClock(seconds, points);
         let resting = true;
         const stop = everyFrame(() => {
           const nodes = long.current();
@@ -587,47 +660,22 @@ function createSignalPoint(
               publish(out);
             }
             resting = true;
-            heardAt = null;
+            clock.reset();
             return;
           }
           resting = false;
-          // Slots are counted on the audio clock, not the screen's: the window holds the samples as they played, a frame late or not.
-          const { currentTime, sampleRate } = nodes.analyser.context;
-          const slot = (seconds * sampleRate) / points;
-          carry += heardAt === null ? 0 : (currentTime - heardAt) * sampleRate;
-          heardAt = currentTime;
-          const fresh = Math.min(points, Math.floor(carry / slot));
+          const { carry, fresh, slot } = clock.advance(nodes.analyser.context);
           if (fresh === 0) {
             return;
           }
-          carry -= fresh * slot;
           nodes.analyser.getFloatTimeDomainData(buffer);
           // The slots that passed since the last frame, oldest first: the newest ends where the samples left over begin.
           for (let back = fresh - 1; back >= 0; back -= 1) {
-            const end = Math.max(
-              1,
-              buffer.length - Math.round(carry + back * slot)
-            );
-            ring[head] =
-              of === "level"
-                ? Math.max(
-                    SILENCE_DB,
-                    rmsDb(
-                      buffer.subarray(Math.max(0, end - Math.round(slot)), end)
-                    )
-                  )
-                : (buffer[end - 1] as number);
+            const end = buffer.length - Math.round(carry + back * slot);
+            ring[head] = slotValue(buffer, end, slot, of);
             head = (head + 1) % points;
           }
-          if (newestFirst) {
-            for (let index = 0; index < points; index += 1) {
-              out[index] = ring[(head - 1 - index + points) % points] as number;
-            }
-          } else {
-            out.set(ring.subarray(head), 0);
-            out.set(ring.subarray(0, head), points - head);
-          }
-          publish(out);
+          publish(unroll(ring, head, out, newestFirst));
         });
         return () => {
           stop();
@@ -762,9 +810,7 @@ export function createDeviceSignal(
       device.kind === "instrument"
         ? null
         : createSignalPoint(() => target()?.input),
-    key: device.sidechain
-      ? createSignalPoint(() => target()?.sidechain)
-      : null,
+    key: device.sidechain ? createSignalPoint(() => target()?.sidechain) : null,
     modulator: declares("modulator")
       ? createSignalPoint(() => target()?.taps?.modulator)
       : null,

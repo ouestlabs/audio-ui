@@ -60,7 +60,6 @@ const PRESET_NAMES = MONO_SYNTH_PRESETS.map((preset) => ({
 const LOWEST = 48;
 const HIGHEST = 72;
 
-
 interface MonoSynthPanelProps {
   /** The notes held now, such as on a MIDI keyboard: their keys light up as they are played. */
   activeNotes?: readonly number[];
@@ -95,10 +94,7 @@ function MonoSynthPanel({
   signal,
   value,
 }: MonoSynthPanelProps) {
-  const scope = useMemo(
-    () => signal?.output.scope({ fit: true }),
-    [signal]
-  );
+  const scope = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -233,7 +229,9 @@ function MonoSynthPanel({
           onValueChange={change}
           value={value}
         />
-        {scope ? <ScopePlot aria-label="The wave it plays" source={scope} /> : null}
+        {scope ? (
+          <ScopePlot aria-label="The wave it plays" source={scope} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the synth"
