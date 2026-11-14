@@ -15,6 +15,7 @@ import { NuqsAdapter } from "nuqs/adapters/tanstack-router";
 import posthog, { type PostHogConfig } from "posthog-js";
 import { useEffect } from "react";
 import { PresetHandler } from "@/components/customizer/preset-handler";
+import { IconsProvider } from "@/components/icons/icons-context";
 import { JsonLd } from "@/components/site/json-ld";
 import { QueryProvider } from "@/components/site/providers/query-provider";
 import { ThemeProvider } from "@/components/site/providers/theme-provider";
@@ -193,7 +194,10 @@ function RootDocument() {
             <NuqsAdapter>
               <JotaiProvider>
                 <Analytics>
-                  <Outlet />
+                  {/* What the icons' page shows: read by its frame and by the header's menu, which a page outside the site's layout draws too. */}
+                  <IconsProvider>
+                    <Outlet />
+                  </IconsProvider>
                 </Analytics>
                 <TailwindIndicator />
                 <StyleSheets />

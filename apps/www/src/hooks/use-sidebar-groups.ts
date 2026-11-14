@@ -122,6 +122,12 @@ function sectionAt(tree: PageTree, pathname: string): DocsSectionId {
     : sectionOfPath(pathname);
 }
 
+/** The section of the page being read: the Docs, the Core, the Elements, React, the Registry or the Icons. */
+export function useReadingSection(tree: PageTree): DocsSectionId {
+  const pathname = useLocation({ select: (location) => location.pathname });
+  return React.useMemo(() => sectionAt(tree, pathname), [tree, pathname]);
+}
+
 /** A section as the switcher lists it. */
 export interface SiteSection {
   current: boolean;
@@ -136,12 +142,8 @@ export interface SiteSection {
  * framework, React's in a section for React alone, else the one chosen.
  */
 export function useSiteSections(tree: PageTree): SiteSection[] {
-  const pathname = useLocation({ select: (location) => location.pathname });
   const [chosen] = useFramework();
-  const reading = React.useMemo(
-    () => sectionAt(tree, pathname),
-    [tree, pathname]
-  );
+  const reading = useReadingSection(tree);
   const framework = needsReact(reading) ? "react" : chosen;
   return React.useMemo(
     () =>
@@ -190,10 +192,7 @@ export function useSidebarGroups(tree: PageTree) {
   );
   const currentTitle = currentGroup?.title;
   // The section of the page being read: the sidebar shows its groups alone.
-  const reading = React.useMemo(
-    () => sectionAt(tree, pathname),
-    [tree, pathname]
-  );
+  const reading = useReadingSection(tree);
   const groups = all.filter(
     (group) => group.section === reading && !unused.includes(group.folder)
   );

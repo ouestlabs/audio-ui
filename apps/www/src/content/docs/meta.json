@@ -11,6 +11,7 @@
     "(registry)",
     "components",
     "hooks",
-    "lib"
+    "lib",
+    "icons"
   ]
 }

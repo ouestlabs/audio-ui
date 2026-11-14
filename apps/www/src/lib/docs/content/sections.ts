@@ -1,7 +1,8 @@
 /**
  * The site's sections: the Docs (what the reader learns first), the
  * primitives (custom elements, and React's), the framework-agnostic core with
- * the engine, and the registry they install and own, with its catalog. The
+ * the engine, the registry they install and own, with its catalog, and the
+ * icons, with theirs. The
  * switcher at the top of the sidebar shows one set of primitives, the reader's
  * framework's (`menuSections`). A section gathers top-level folders of the
  * content whatever their addresses, so a component page keeps its URL under
@@ -42,6 +43,13 @@ export const DOCS_SECTIONS = [
     href: "/docs/registry",
     id: "registry",
     label: "Registry",
+  },
+  {
+    description: "Audio glyphs, in four weights",
+    folders: ["icons"],
+    href: "/icons",
+    id: "icons",
+    label: "Icons",
   },
 ] as const;
 

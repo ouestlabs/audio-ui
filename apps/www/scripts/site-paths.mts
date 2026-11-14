@@ -75,6 +75,7 @@ export function prerenderPages() {
   return [
     { path: "/" },
     { path: "/components" },
+    { path: "/icons" },
     { path: "/about" },
     { path: "/contact" },
     { path: "/privacy" },

@@ -5,7 +5,7 @@ import {
   iconCatalogTable,
 } from "@/lib/docs/content/icon-docs";
 
-const PAGE = `${import.meta.dir}/../src/content/docs/(root)/icons.mdx`;
+const PAGE = `${import.meta.dir}/../src/content/docs/icons/index.mdx`;
 
 describe("the icons page", () => {
   test("the table lists every icon of the package with its component", () => {

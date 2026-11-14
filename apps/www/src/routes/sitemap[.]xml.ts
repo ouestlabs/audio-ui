@@ -26,6 +26,7 @@ function entries(baseUrl: string): Entry[] {
       baseUrl,
       `${baseUrl}/docs`,
       `${baseUrl}/components`,
+      `${baseUrl}/icons`,
       `${baseUrl}/about`,
       `${baseUrl}/contact`,
       `${baseUrl}/privacy`,

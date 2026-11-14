@@ -37,7 +37,7 @@ draw(glyphs.knob, "bold", "knob"); // the same drawing as plain nodes, for Vue, 
 
 `draw` returns `{ nodes, strokeWidth }`: each node is `{ tag, attrs, children? }`, and the SVG's own attributes (`viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, round caps and joins) are the same for every icon. The third argument names a mask when the weight needs one, so give each icon of a page its own.
 
-The [Icons page](https://www.audio-ui.dev/docs/icons) lets you search the catalog, pick a weight and a size, and copy or save the SVG of an icon.
+The [Icons page](https://www.audio-ui.dev/icons) lets you search the catalog, pick a weight and a size, and copy or save the SVG of an icon.
 
 ## Adding a glyph
 

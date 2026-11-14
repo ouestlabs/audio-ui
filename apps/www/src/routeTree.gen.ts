@@ -25,6 +25,7 @@ import { Route as SiteSplatRouteImport } from './routes/_site/$'
 import { Route as SiteAboutRouteImport } from './routes/_site/about'
 import { Route as SiteContactRouteImport } from './routes/_site/contact'
 import { Route as SiteDocsRouteImport } from './routes/_site/docs'
+import { Route as SiteIconsRouteImport } from './routes/_site/icons'
 import { Route as SitePrivacyRouteImport } from './routes/_site/privacy'
 import { Route as ApiIndexRouteImport } from './routes/api/index'
 import { Route as LlmIndexRouteImport } from './routes/llm/index'
@@ -118,6 +119,11 @@ const SiteDocsRoute = SiteDocsRouteImport.update({
   path: '/docs',
   getParentRoute: () => SiteRoute,
 } as any)
+const SiteIconsRoute = SiteIconsRouteImport.update({
+  id: '/icons',
+  path: '/icons',
+  getParentRoute: () => SiteRoute,
+} as any)
 const SitePrivacyRoute = SitePrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
@@ -200,6 +206,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof SiteAboutRoute
   '/contact': typeof SiteContactRoute
   '/docs': typeof SiteDocsRouteWithChildren
+  '/icons': typeof SiteIconsRoute
   '/privacy': typeof SitePrivacyRoute
   '/llm/$': typeof LlmSplatRoute
   '/api/': typeof ApiIndexRoute
@@ -228,6 +235,7 @@ export interface FileRoutesByTo {
   '/$': typeof SiteSplatRoute
   '/about': typeof SiteAboutRoute
   '/contact': typeof SiteContactRoute
+  '/icons': typeof SiteIconsRoute
   '/privacy': typeof SitePrivacyRoute
   '/llm/$': typeof LlmSplatRoute
   '/': typeof SiteIndexRoute
@@ -260,6 +268,7 @@ export interface FileRoutesById {
   '/_site/about': typeof SiteAboutRoute
   '/_site/contact': typeof SiteContactRoute
   '/_site/docs': typeof SiteDocsRouteWithChildren
+  '/_site/icons': typeof SiteIconsRoute
   '/_site/privacy': typeof SitePrivacyRoute
   '/llm/$': typeof LlmSplatRoute
   '/_site/': typeof SiteIndexRoute
@@ -293,6 +302,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/contact'
     | '/docs'
+    | '/icons'
     | '/privacy'
     | '/llm/$'
     | '/api/'
@@ -321,6 +331,7 @@ export interface FileRouteTypes {
     | '/$'
     | '/about'
     | '/contact'
+    | '/icons'
     | '/privacy'
     | '/llm/$'
     | '/'
@@ -352,6 +363,7 @@ export interface FileRouteTypes {
     | '/_site/about'
     | '/_site/contact'
     | '/_site/docs'
+    | '/_site/icons'
     | '/_site/privacy'
     | '/llm/$'
     | '/_site/'
@@ -504,6 +516,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SiteDocsRouteImport
       parentRoute: typeof SiteRoute
     }
+    '/_site/icons': {
+      id: '/_site/icons'
+      path: '/icons'
+      fullPath: '/icons'
+      preLoaderRoute: typeof SiteIconsRouteImport
+      parentRoute: typeof SiteRoute
+    }
     '/_site/privacy': {
       id: '/_site/privacy'
       path: '/privacy'
@@ -617,6 +636,7 @@ interface SiteRouteChildren {
   SiteAboutRoute: typeof SiteAboutRoute
   SiteContactRoute: typeof SiteContactRoute
   SiteDocsRoute: typeof SiteDocsRouteWithChildren
+  SiteIconsRoute: typeof SiteIconsRoute
   SitePrivacyRoute: typeof SitePrivacyRoute
   SiteIndexRoute: typeof SiteIndexRoute
   SiteComponentsCategoryRoute: typeof SiteComponentsCategoryRoute
@@ -628,6 +648,7 @@ const SiteRouteChildren: SiteRouteChildren = {
   SiteAboutRoute: SiteAboutRoute,
   SiteContactRoute: SiteContactRoute,
   SiteDocsRoute: SiteDocsRouteWithChildren,
+  SiteIconsRoute: SiteIconsRoute,
   SitePrivacyRoute: SitePrivacyRoute,
   SiteIndexRoute: SiteIndexRoute,
   SiteComponentsCategoryRoute: SiteComponentsCategoryRoute,

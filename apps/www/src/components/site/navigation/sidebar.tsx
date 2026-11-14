@@ -1,11 +1,12 @@
 import { Suspense } from "react";
 import { ComponentSidebarContent } from "@/components/catalog/sidebar/component-sidebar-content";
 import { DocsNavigation } from "@/components/docs/page/sidebar";
+import { IconSidebarContent } from "@/components/icons/icon-sidebar";
 import { Sidebar, SidebarContent, useSidebar } from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import type { source } from "@/lib/docs/content/source";
 
-export type SiteSection = "components" | "docs";
+export type SiteSection = "components" | "docs" | "icons";
 
 const ROWS = [64, 80, 48, 72, 56, 88, 60, 76] as const;
 
@@ -23,7 +24,7 @@ function LinksSkeleton() {
 /**
  * The one navigation sidebar of the site. Its header (the logo, the section
  * tabs, the search) stays put while the links under it follow the section: the
- * docs' pages, or the components' categories.
+ * docs' pages, the components' categories, or the icons'.
  */
 export function SiteSidebar({
   header,
@@ -48,9 +49,9 @@ export function SiteSidebar({
           <Suspense fallback={<LinksSkeleton />}>
             <ComponentSidebarContent />
           </Suspense>
-        ) : (
-          <DocsNavigation tree={tree} />
-        )}
+        ) : null}
+        {section === "icons" ? <IconSidebarContent /> : null}
+        {section === "docs" ? <DocsNavigation tree={tree} /> : null}
       </SidebarContent>
     </Sidebar>
   );
