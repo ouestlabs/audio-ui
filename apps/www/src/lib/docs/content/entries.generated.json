@@ -1680,6 +1680,57 @@
     "dependencies": [
       "@audio-ui/engine"
     ],
+    "description": "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair; applySoundOperation runs one on plain channels, soundOperationName names it as a step of the history",
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "SoundSamples",
+        "summary": "A sound as plain samples: what an operation reads and writes."
+      },
+      {
+        "kind": "type",
+        "name": "SoundOperation",
+        "summary": "One change to a sound's samples."
+      },
+      {
+        "kind": "const",
+        "name": "REPAIR_NAMES",
+        "summary": "What each repair is called."
+      },
+      {
+        "kind": "function",
+        "name": "soundOperationName",
+        "summary": "What an operation is called, as a step of the history: \"Repeat ×2\", \"Pitch -5 st\"."
+      },
+      {
+        "kind": "function",
+        "name": "applySoundOperation",
+        "summary": "The sound an operation makes: new channels, at the same rate."
+      },
+      {
+        "kind": "function",
+        "name": "soundOperationTiming",
+        "summary": "How an operation moves the times of a sound: `\"scaled\"` by how much longer it makes it (Stretch, Speed), `\"extended\"` at the end (Repeat, Add silence), or `\"kept\"`."
+      }
+    ],
+    "files": [
+      "lib/sound-operations.ts"
+    ],
+    "from": "@/lib/sound-operations",
+    "kind": "lib",
+    "name": "sound-operations",
+    "registryDependencies": [],
+    "usedBy": [
+      "block-audio-editor",
+      "clip-panel",
+      "process-menu",
+      "use-bake"
+    ]
+  },
+  {
+    "dependencies": [
+      "@audio-ui/engine"
+    ],
     "description": "The rate of an oscillator that is either free, in hertz, or synced: one cycle per note value of the host's tempo. The two parameters a device adds for it, and the function that reads the rate.",
     "exports": [
       {
@@ -1967,16 +2018,9 @@
     "usedBy": []
   },
   {
-    "dependencies": [
-      "@audio-ui/engine"
-    ],
-    "description": "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat, Add silence, Normalize, Pan, Filter, Stretch, Pitch, Speed, Dither and Repair over it",
+    "dependencies": [],
+    "description": "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo; process(operation) bakes one of the Process menu's operations, named after it",
     "exports": [
-      {
-        "kind": "interface",
-        "name": "BakedSound",
-        "summary": "A sound as plain samples: what an operation reads and writes."
-      },
       {
         "kind": "function",
         "name": "renderEdited",
@@ -1997,7 +2041,8 @@
     "registryDependencies": [
       "arrangement",
       "arrangement-engine",
-      "clip-player"
+      "clip-player",
+      "sound-operations"
     ],
     "usedBy": [
       "block-audio-editor",

@@ -156,13 +156,13 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-bake", {
     categories: ["audio", "timeline"],
-    dependencies: ["@audio-ui/engine"],
     description:
-      "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo, with Reverse, Repeat, Add silence, Normalize, Pan, Filter, Stretch, Pitch, Speed, Dither and Repair over it",
+      "Changes the samples of a sound as edited: renders what a track's clips play, hands the channels to an operation and puts the result back as one step of undo; process(operation) bakes one of the Process menu's operations, named after it",
     registryDependencies: [
       "@audio-ui/arrangement",
       "@audio-ui/arrangement-engine",
       "@audio-ui/clip-player",
+      "@audio-ui/sound-operations",
     ],
   }),
   hookItem("use-sound-report", {

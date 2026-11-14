@@ -8,6 +8,7 @@
     "waveform-lane",
     "clip-spectrogram",
     "sound-lane",
+    "process-menu",
     "piano-roll",
     "sequencer",
     "---Piano roll tools---",

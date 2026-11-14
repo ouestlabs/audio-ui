@@ -25,6 +25,13 @@ const items: RegistryItem[] = [
       "@audio-ui/use-arrangement",
     ],
   }),
+  libItem("sound-operations", {
+    categories: ["lib", "audio"],
+    dependencies: ["@audio-ui/engine"],
+    description:
+      "The operations that change a sound's samples, as data: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair; applySoundOperation runs one on plain channels, soundOperationName names it as a step of the history",
+    registryDependencies: [],
+  }),
   libItem("audio-export", {
     categories: ["lib", "audio"],
     dependencies: ["@audio-ui/engine"],

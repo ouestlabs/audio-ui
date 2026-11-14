@@ -3190,7 +3190,7 @@
     "typesOnly": false,
     "usedBy": [
       "audio-export",
-      "use-bake"
+      "sound-operations"
     ]
   },
   {
@@ -3297,7 +3297,7 @@
     "audiojs": [],
     "typesOnly": false,
     "usedBy": [
-      "use-bake"
+      "sound-operations"
     ]
   },
   {
@@ -3326,7 +3326,7 @@
     ],
     "typesOnly": false,
     "usedBy": [
-      "use-bake"
+      "sound-operations"
     ]
   },
   {

@@ -1,0 +1,58 @@
+---
+title: Process Menu
+description: "The operations on a sound's samples as menu items: Reverse, Repeat, Add silence, Normalize, Pan, Dither, Filter, Stretch, Pitch, Speed and Repair, each handed to you as data to run."
+---
+
+## Installation
+
+<Install name="process-menu" packages="@audio-ui/engine" />
+
+## Usage
+
+`ProcessMenuItems` lists the operations that change a sound's samples, in four groups: Structure (Reverse, Repeat, Add silence), Level and tone (Normalize, Pan, Dither, Filter), Time and pitch (Stretch, Pitch, Speed, each by the method picked) and Repair. Place them in a dropdown menu's content, or a submenu's, with a trigger of your own. The audio editor's Process menu and the clip panel's are made of them.
+
+```tsx
+import { ProcessMenuItems } from "@/components/audio-ui/process-menu";
+import { applySoundOperation, soundOperationName } from "@/lib/sound-operations";
+
+<DropdownMenu>
+  <DropdownMenuTrigger render={<Button aria-label="Process" size="icon" variant="outline" />}>
+    <WandSparklesIcon />
+  </DropdownMenuTrigger>
+  <DropdownMenuContent align="start" className="w-64">
+    <ProcessMenuItems
+      disabled={!sound}
+      onProcess={(operation) => {
+        setSound(applySoundOperation(sound, operation));
+        setStatus(soundOperationName(operation)); // "Repeat ×2", "Pitch -5 st"
+      }}
+    />
+  </DropdownMenuContent>
+</DropdownMenu>;
+```
+
+`onProcess` gets the operation picked, as data (`{ type: "repeat", times: 2 }`), so the menu does no audio work itself: [`sound-operations`](/docs/lib/sound-operations) runs it on plain channels and names it as a step of the history, and you decide what it runs on and when. The audio editor bakes it on the sound as edited with [`useBake`](/docs/hooks/use-bake); the [clip panel](/docs/components/base/arrangement#the-clip-panel) hands it to its host, which processes the clip's source into a recording of its own.
+
+### Items of your own
+
+`children` go first in the Structure group, beside the operations. The audio editor puts its edits that clean a sound up there:
+
+```tsx
+<ProcessMenuItems disabled={!sound} onProcess={baking.process}>
+  <DropdownMenuItem onClick={edits.trimSilence}>Trim silence</DropdownMenuItem>
+  <DropdownMenuSub>
+    <DropdownMenuSubTrigger>Shrink pauses</DropdownMenuSubTrigger>
+    <DropdownMenuSubContent>…</DropdownMenuSubContent>
+  </DropdownMenuSub>
+</ProcessMenuItems>
+```
+
+## API reference
+
+### ProcessMenuItems
+
+<TypeTable>
+<TypeRow name={"onProcess"} type={"(operation: SoundOperation) => void"}>An operation was picked: run it with `applySoundOperation`.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"}>Whether there is nothing to process: every item is greyed out.</TypeRow>
+<TypeRow name={"children"} type={"ReactNode"}>Items of your own, at the top of the Structure group.</TypeRow>
+</TypeTable>

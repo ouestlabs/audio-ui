@@ -13,23 +13,17 @@ import {
 } from "@audio-ui/engine/analysis";
 import {
   type ChannelLayout,
-  type DitherMethod,
   decodeAudioChannels,
   downloadFile,
-  type FilterType,
   LAYOUT_CHANNELS,
   mixChannels,
-  type NormalizeTarget,
   resampleChannels,
-  type ShiftMethod,
-  type StretchMethod,
 } from "@audio-ui/engine/files";
 import {
   formatLevel,
   formatSampleRate,
   formatTime,
 } from "@audio-ui/engine/format";
-import type { Repair } from "@audio-ui/engine/repair";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import {
@@ -94,6 +88,7 @@ import { DeviceBrowser } from "@/registry-audio/bases/base/audio/elements/device
 import { DeviceView } from "@/registry-audio/bases/base/audio/elements/device-view";
 import { ExportDialog } from "@/registry-audio/bases/base/audio/elements/export-dialog";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
+import { ProcessMenuItems } from "@/registry-audio/bases/base/audio/elements/process-menu";
 import {
   isSoundView,
   isSpectrogramView,
@@ -181,6 +176,7 @@ import {
   type RecordedBlock,
   sliceBlocks,
 } from "@/registry-audio/bases/base/lib/recording";
+import type { SoundOperation } from "@/registry-audio/bases/base/lib/sound-operations";
 import { webAudio } from "@/registry-audio/bases/base/lib/web-audio";
 
 const TRACK = "track-1";
@@ -764,590 +760,41 @@ function ShrinkItem({
   );
 }
 
-/** The operations that change a sound's samples, as the Process menu offers them. */
-type Structure = Pick<
-  ReturnType<typeof useBake>,
-  | "dither"
-  | "filter"
-  | "normalize"
-  | "pad"
-  | "pan"
-  | "repair"
-  | "repeat"
-  | "reverse"
-  | "shift"
-  | "speed"
-  | "stretch"
->;
-
-const REPEATS = [2, 3, 4, 8] as const;
-const PADS = [0.5, 1, 2] as const;
-const NORMALIZE_TARGETS = [
-  { label: "Peak to -1 dBFS", note: "Safe ceiling", target: { peak: -1 } },
-  {
-    label: "-23 LUFS",
-    note: "Broadcast, EBU R128",
-    target: { lufs: -23 },
-  },
-  { label: "-16 LUFS", note: "Podcasts", target: { lufs: -16 } },
-  { label: "-14 LUFS", note: "Streaming", target: { lufs: -14 } },
-] as const;
-const PANS = [
-  { label: "Left", pan: -1 },
-  { label: "Half left", pan: -0.5 },
-  { label: "Half right", pan: 0.5 },
-  { label: "Right", pan: 1 },
-] as const;
-const DITHERS = [
-  { method: "tpdf", note: "Steady noise" },
-  { method: "shaped", note: "Noise moved up" },
-  { method: "feedback", note: "No added noise" },
-] as const satisfies readonly { method: DitherMethod; note: string }[];
-const DITHER_NAMES: Record<DitherMethod, string> = {
-  feedback: "Error feedback",
-  shaped: "Noise-shaped",
-  tpdf: "Triangular",
-};
-const DEPTHS = [16, 8] as const;
-
-/** One bit depth by one method. */
-function DitherItem({
-  bits,
-  dither,
-  method,
-}: {
-  bits: number;
-  dither: Structure["dither"];
-  method: DitherMethod;
-}) {
-  const run = useCallback(() => dither(bits, method), [bits, dither, method]);
-  return <DropdownMenuItem onClick={run}>{bits} bits</DropdownMenuItem>;
-}
-
-const FILTERS = [
-  {
-    frequency: 40,
-    label: "Remove rumble",
-    note: "High-pass 40 Hz",
-    type: "highpass",
-  },
-  {
-    frequency: 80,
-    label: "Thin the lows",
-    note: "High-pass 80 Hz",
-    type: "highpass",
-  },
-  {
-    frequency: 8000,
-    label: "Soften the highs",
-    note: "Low-pass 8 kHz",
-    type: "lowpass",
-  },
-  {
-    frequency: 3000,
-    label: "Telephone",
-    note: "Low-pass 3 kHz",
-    type: "lowpass",
-  },
-] as const;
-
-const REPAIR_ITEMS = [
-  { label: "Clean automatically", note: "Finds the defect", repair: "clean" },
-  { label: "Remove clicks", note: "Vinyl, mouth, splices", repair: "clicks" },
-  { label: "Remove crackle", note: "Shellac, dense ticks", repair: "crackle" },
-  { label: "Remove hum, 50 Hz", note: "Europe, Africa, Asia", repair: "hum50" },
-  { label: "Remove hum, 60 Hz", note: "Americas", repair: "hum60" },
-  { label: "Remove noise", note: "Steady hiss", repair: "noise" },
-  {
-    label: "Remove noise from speech",
-    note: "Changing noise",
-    repair: "speechNoise",
-  },
-  { label: "Repair clipping", note: "Rebuilds cut peaks", repair: "clipping" },
-  { label: "Remove wind", note: "Low rumble", repair: "wind" },
-  { label: "Soften plosives", note: "P and b bursts", repair: "plosives" },
-  { label: "Reduce breaths", note: "Between phrases", repair: "breaths" },
-  { label: "Reduce reverb", note: "A room's tail", repair: "reverb" },
-] as const satisfies readonly { label: string; note: string; repair: Repair }[];
-
-/** One repair. */
-function RepairItem({
-  label,
-  note,
-  repair,
-  run,
-}: {
-  label: string;
-  note: string;
-  repair: Repair;
-  run: Structure["repair"];
-}) {
-  const start = useCallback(() => run(repair, label), [label, repair, run]);
-  return (
-    <DropdownMenuItem onClick={start}>
-      {label}
-      <span className="ms-auto text-muted-foreground text-xs">{note}</span>
-    </DropdownMenuItem>
-  );
-}
-
-const STRETCHES = [
-  { method: "transient", note: "Music with drums" },
-  { method: "pvocLock", note: "General music" },
-  { method: "wsola", note: "Speech, shorter" },
-  { method: "pvsola", note: "Speech, longer" },
-  { method: "hybrid", note: "Full mixes" },
-  { method: "paulstretch", note: "Ambient, extreme" },
-] as const satisfies readonly { method: StretchMethod; note: string }[];
-const STRETCH_NAMES: Record<StretchMethod, string> = {
-  hybrid: "Hybrid",
-  paulstretch: "PaulStretch",
-  pvocLock: "Phase vocoder",
-  pvsola: "Vocoder and overlap-add",
-  transient: "Transient-aware",
-  wsola: "Overlap-add",
-};
-const FACTORS = [0.5, 0.75, 1.25, 1.5, 2] as const;
-const SPEEDS = [0.5, 0.75, 1.25, 1.5, 2] as const;
-const SHIFTS = [
-  { method: "auto", note: "Chosen from the sound" },
-  { method: "transient", note: "Music with drums" },
-  { method: "phaseLock", note: "General music" },
-  { method: "formant", note: "Voice, keeps its character" },
-] as const satisfies readonly { method: ShiftMethod; note: string }[];
-const SHIFT_NAMES: Record<ShiftMethod, string> = {
-  auto: "Automatic",
-  formant: "Formant-preserving",
-  phaseLock: "Phase-locked",
-  psola: "Pitch-synchronous",
-  transient: "Transient-aware",
-  wsola: "Overlap-add",
-};
-const SEMITONES = [12, 7, 5, 2, -2, -5, -7, -12] as const;
-
-/** One count of a method: stretch by a factor. */
-function StretchItem({
-  factor,
-  method,
-  stretch,
-}: {
-  factor: number;
-  method: StretchMethod;
-  stretch: Structure["stretch"];
-}) {
-  const run = useCallback(
-    () => stretch(factor, method),
-    [factor, method, stretch]
-  );
-  return (
-    <DropdownMenuItem onClick={run}>
-      {Math.round(factor * 100)} % as long
-    </DropdownMenuItem>
-  );
-}
-
-/** One method of stretching, its factors in a submenu. */
-function StretchMethodItem({
-  method,
-  note,
-  stretch,
-}: {
-  method: StretchMethod;
-  note: string;
-  stretch: Structure["stretch"];
-}) {
-  return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>
-        {STRETCH_NAMES[method]}
-        <span className="ms-auto text-muted-foreground text-xs">{note}</span>
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className="w-48">
-        {FACTORS.map((factor) => (
-          <StretchItem
-            factor={factor}
-            key={factor}
-            method={method}
-            stretch={stretch}
-          />
-        ))}
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
-  );
-}
-
-/** One speed. */
-function SpeedItem({
-  speed,
-  value,
-}: {
-  speed: Structure["speed"];
-  value: number;
-}) {
-  const run = useCallback(() => speed(value), [speed, value]);
-  return <DropdownMenuItem onClick={run}>×{value}</DropdownMenuItem>;
-}
-
-/** One shift, in semitones. */
-function ShiftItem({
-  method,
-  semitones,
-  shift,
-}: {
-  method: ShiftMethod;
-  semitones: number;
-  shift: Structure["shift"];
-}) {
-  const run = useCallback(
-    () => shift(semitones, method),
-    [method, semitones, shift]
-  );
-  return (
-    <DropdownMenuItem onClick={run}>
-      {semitones > 0 ? "+" : ""}
-      {semitones} semitones
-    </DropdownMenuItem>
-  );
-}
-
-/** One method of shifting a pitch, its steps in a submenu. */
-function ShiftMethodItem({
-  method,
-  note,
-  shift,
-}: {
-  method: ShiftMethod;
-  note: string;
-  shift: Structure["shift"];
-}) {
-  return (
-    <DropdownMenuSub>
-      <DropdownMenuSubTrigger>
-        {SHIFT_NAMES[method]}
-        <span className="ms-auto text-muted-foreground text-xs">{note}</span>
-      </DropdownMenuSubTrigger>
-      <DropdownMenuSubContent className="w-48">
-        {SEMITONES.map((semitones) => (
-          <ShiftItem
-            key={semitones}
-            method={method}
-            semitones={semitones}
-            shift={shift}
-          />
-        ))}
-      </DropdownMenuSubContent>
-    </DropdownMenuSub>
-  );
-}
-
-/** One level a sound is normalized to. */
-function NormalizeItem({
-  label,
-  normalize,
-  note,
-  target,
-}: {
-  label: string;
-  normalize: Structure["normalize"];
-  note: string;
-  target: NormalizeTarget;
-}) {
-  const run = useCallback(() => normalize(target), [normalize, target]);
-  return (
-    <DropdownMenuItem onClick={run}>
-      {label}
-      <span className="ms-auto text-muted-foreground text-xs">{note}</span>
-    </DropdownMenuItem>
-  );
-}
-
-/** One balance. */
-function PanItem({
-  label,
-  pan,
-  value,
-}: {
-  label: string;
-  pan: Structure["pan"];
-  value: number;
-}) {
-  const run = useCallback(() => pan(value), [pan, value]);
-  return <DropdownMenuItem onClick={run}>{label}</DropdownMenuItem>;
-}
-
-/** One filter. */
-function FilterItem({
-  filter,
-  frequency,
-  label,
-  note,
-  type,
-}: {
-  filter: Structure["filter"];
-  frequency: number;
-  label: string;
-  note: string;
-  type: FilterType;
-}) {
-  const run = useCallback(
-    () => filter(type, frequency),
-    [filter, frequency, type]
-  );
-  return (
-    <DropdownMenuItem onClick={run}>
-      {label}
-      <span className="ms-auto text-muted-foreground text-xs">{note}</span>
-    </DropdownMenuItem>
-  );
-}
-
-/** One count of repeats. */
-function RepeatItem({
-  repeat,
-  times,
-}: {
-  repeat: Structure["repeat"];
-  times: number;
-}) {
-  const run = useCallback(() => repeat(times), [repeat, times]);
-  return <DropdownMenuItem onClick={run}>{times} times</DropdownMenuItem>;
-}
-
-/** One length of silence, added at the end. */
-function PadItem({ pad, seconds }: { pad: Structure["pad"]; seconds: number }) {
-  const run = useCallback(() => pad(seconds, "end"), [pad, seconds]);
-  return (
-    <DropdownMenuItem onClick={run}>{seconds} s at the end</DropdownMenuItem>
-  );
-}
-
-/** What the edits that clean a sound up are called, in the Process menu and the bar's folded menu. */
+/** The Process menu: the edits that clean a sound up, the operations on its samples, and its analysis. */
 function ProcessItems({
   disabled,
   edits,
-  structure,
+  onAnalyze,
+  onProcess,
 }: {
   disabled: boolean;
   edits: ReturnType<typeof useClipEdits>;
-  structure: Structure;
+  onAnalyze: () => void;
+  onProcess: (operation: SoundOperation) => void;
 }) {
   return (
-    <DropdownMenuGroup>
-      <DropdownMenuLabel>Structure</DropdownMenuLabel>
-      <DropdownMenuItem disabled={disabled} onClick={edits.trimSilence}>
-        Trim silence
-        <span className="ms-auto text-muted-foreground text-xs">
-          Start and end
-        </span>
-      </DropdownMenuItem>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Shrink pauses
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-48">
-          {SHRINK_GAPS.map((gap) => (
-            <ShrinkItem edits={edits} gap={gap} key={gap} />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuItem disabled={disabled} onClick={structure.reverse}>
-        Reverse
-      </DropdownMenuItem>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Repeat
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-48">
-          {REPEATS.map((times) => (
-            <RepeatItem key={times} repeat={structure.repeat} times={times} />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Add silence
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-48">
-          {PADS.map((seconds) => (
-            <PadItem key={seconds} pad={structure.pad} seconds={seconds} />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-    </DropdownMenuGroup>
-  );
-}
-
-/** The Process menu's second group: a sound's level, balance and tone. */
-function ToneItems({
-  disabled,
-  structure,
-}: {
-  disabled: boolean;
-  structure: Structure;
-}) {
-  return (
-    <DropdownMenuGroup>
-      <DropdownMenuLabel>Level and tone</DropdownMenuLabel>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Normalize
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-64">
-          {NORMALIZE_TARGETS.map((each) => (
-            <NormalizeItem
-              key={each.label}
-              label={each.label}
-              normalize={structure.normalize}
-              note={each.note}
-              target={each.target}
-            />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>Pan</DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-48">
-          {PANS.map((each) => (
-            <PanItem
-              key={each.label}
-              label={each.label}
-              pan={structure.pan}
-              value={each.pan}
-            />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Dither
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-64">
-          {DITHERS.map((each) => (
-            <DropdownMenuSub key={each.method}>
-              <DropdownMenuSubTrigger>
-                {DITHER_NAMES[each.method]}
-                <span className="ms-auto text-muted-foreground text-xs">
-                  {each.note}
-                </span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="w-40">
-                {DEPTHS.map((bits) => (
-                  <DitherItem
-                    bits={bits}
-                    dither={structure.dither}
-                    key={bits}
-                    method={each.method}
-                  />
-                ))}
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Filter
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-64">
-          {FILTERS.map((each) => (
-            <FilterItem
-              filter={structure.filter}
-              frequency={each.frequency}
-              key={each.label}
-              label={each.label}
-              note={each.note}
-              type={each.type}
-            />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-    </DropdownMenuGroup>
-  );
-}
-
-/** The Process menu's third group: a sound's time and pitch. */
-function TimeItems({
-  disabled,
-  structure,
-}: {
-  disabled: boolean;
-  structure: Structure;
-}) {
-  return (
-    <DropdownMenuGroup>
-      <DropdownMenuLabel>Time and pitch</DropdownMenuLabel>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Stretch
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-72">
-          {STRETCHES.map((each) => (
-            <StretchMethodItem
-              key={each.method}
-              method={each.method}
-              note={each.note}
-              stretch={structure.stretch}
-            />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Pitch
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-72">
-          {SHIFTS.map((each) => (
-            <ShiftMethodItem
-              key={each.method}
-              method={each.method}
-              note={each.note}
-              shift={structure.shift}
-            />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Speed
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-48">
-          {SPEEDS.map((value) => (
-            <SpeedItem key={value} speed={structure.speed} value={value} />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-    </DropdownMenuGroup>
-  );
-}
-
-/** The Process menu's group of repairs: each defect taken out by the method made for it. */
-function RepairItems({
-  disabled,
-  structure,
-}: {
-  disabled: boolean;
-  structure: Structure;
-}) {
-  return (
-    <DropdownMenuGroup>
-      <DropdownMenuLabel>Repair</DropdownMenuLabel>
-      <DropdownMenuSub>
-        <DropdownMenuSubTrigger disabled={disabled}>
-          Remove a defect
-        </DropdownMenuSubTrigger>
-        <DropdownMenuSubContent className="w-80">
-          {REPAIR_ITEMS.map((each) => (
-            <RepairItem
-              key={each.repair}
-              label={each.label}
-              note={each.note}
-              repair={each.repair}
-              run={structure.repair}
-            />
-          ))}
-        </DropdownMenuSubContent>
-      </DropdownMenuSub>
-    </DropdownMenuGroup>
+    <>
+      <ProcessMenuItems disabled={disabled} onProcess={onProcess}>
+        <DropdownMenuItem disabled={disabled} onClick={edits.trimSilence}>
+          Trim silence
+          <span className="ms-auto text-muted-foreground text-xs">
+            Start and end
+          </span>
+        </DropdownMenuItem>
+        <DropdownMenuSub>
+          <DropdownMenuSubTrigger disabled={disabled}>
+            Shrink pauses
+          </DropdownMenuSubTrigger>
+          <DropdownMenuSubContent className="w-48">
+            {SHRINK_GAPS.map((gap) => (
+              <ShrinkItem edits={edits} gap={gap} key={gap} />
+            ))}
+          </DropdownMenuSubContent>
+        </DropdownMenuSub>
+      </ProcessMenuItems>
+      <DropdownMenuSeparator />
+      <AnalyzeItems disabled={disabled} onAnalyze={onAnalyze} />
+    </>
   );
 }
 
@@ -2902,16 +2349,16 @@ function MoreMenu({
   onExport,
   onAnalyze,
   onLoopingChange,
+  onProcess,
   onViewChange,
   sound,
-  structure,
   view,
 }: {
   arrangement: ReturnType<typeof useArrangement>;
   comparing: boolean;
   edits: ReturnType<typeof useClipEdits>;
   onAnalyze: () => void;
-  structure: Structure;
+  onProcess: (operation: SoundOperation) => void;
   /** The editor, whose transport tells whether its own Loop shows. */
   frame: RefObject<HTMLDivElement | null>;
   named: WeakMap<ArrangementDoc, string>;
@@ -2999,16 +2446,9 @@ function MoreMenu({
             <ProcessItems
               disabled={!sound}
               edits={edits}
-              structure={structure}
+              onAnalyze={onAnalyze}
+              onProcess={onProcess}
             />
-            <DropdownMenuSeparator />
-            <ToneItems disabled={!sound} structure={structure} />
-            <DropdownMenuSeparator />
-            <TimeItems disabled={!sound} structure={structure} />
-            <DropdownMenuSeparator />
-            <RepairItems disabled={!sound} structure={structure} />
-            <DropdownMenuSeparator />
-            <AnalyzeItems disabled={!sound} onAnalyze={onAnalyze} />
           </DropdownMenuSubContent>
         </DropdownMenuSub>
         <DropdownMenuSeparator />
@@ -3741,16 +3181,9 @@ export default function BlockAudioEditor() {
                 <ProcessItems
                   disabled={!sound}
                   edits={edits}
-                  structure={baking}
+                  onAnalyze={analyze}
+                  onProcess={baking.process}
                 />
-                <DropdownMenuSeparator />
-                <ToneItems disabled={!sound} structure={baking} />
-                <DropdownMenuSeparator />
-                <TimeItems disabled={!sound} structure={baking} />
-                <DropdownMenuSeparator />
-                <RepairItems disabled={!sound} structure={baking} />
-                <DropdownMenuSeparator />
-                <AnalyzeItems disabled={!sound} onAnalyze={analyze} />
               </DropdownMenuContent>
             </DropdownMenu>
             <DropdownMenu>
@@ -3829,9 +3262,9 @@ export default function BlockAudioEditor() {
               onCompare={toggleCompare}
               onExport={openExport}
               onLoopingChange={setLooping}
+              onProcess={baking.process}
               onViewChange={setView}
               sound={sound !== null}
-              structure={baking}
               view={view}
             />
           </ButtonGroup>
