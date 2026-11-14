@@ -3,7 +3,6 @@ import {
   type FormatDisplayOptions,
   formatForDisplay,
   type Hotkey,
-  useAppHotkeyList,
   useAppHotkeys,
 } from "@tanstack/react-hotkeys";
 import { useSyncExternalStore } from "react";
@@ -65,48 +64,25 @@ function Row({
 }
 
 /**
- * The keyboard, as a cheat sheet: every app hotkey by group, with the keys it
- * is pressed with now, the user's own when rebound; then the keys of the
- * arrangement's parts and the gestures.
+ * The keys that are not commands of their own, read only: the keys of the
+ * arrangement's parts and the gestures, after the commands the Settings'
+ * Shortcuts tab lets the user rebind.
  */
-export function ShortcutList() {
-  const items = useAppHotkeyList();
-  const groups = [...new Set(items.map((item) => item.appHotkey.meta?.group))];
+export function OtherShortcuts() {
   return (
-    <div className="flex min-h-0 flex-col gap-3 overflow-y-auto p-2 text-sm whitespace-nowrap">
-      {groups.map((group) => (
-        <section aria-label={group} className="flex flex-col gap-2" key={group}>
-          <h4 className="font-medium text-muted-foreground text-xs">{group}</h4>
-          {items
-            .filter((item) => item.appHotkey.meta?.group === group)
-            .map(({ appHotkey }) => (
-              <Row
-                action={appHotkey.meta?.name ?? appHotkey.id}
-                key={appHotkey.id}
-              >
-                {appHotkey.hotkey ? (
-                  <HotkeyKeys hotkey={appHotkey.hotkey} />
-                ) : (
-                  <span className="text-muted-foreground">Unassigned</span>
-                )}
-              </Row>
-            ))}
-        </section>
+    <section aria-label="Also" className="flex flex-col gap-1.5 pb-3 text-sm">
+      <h3 className="pb-1 font-medium text-muted-foreground text-xs">Also</h3>
+      {OTHER_KEYS.map(({ action, keys }) => (
+        <Row action={action} key={action}>
+          {typeof keys === "string" ? (
+            <span className="text-muted-foreground">{keys}</span>
+          ) : (
+            keys.map((hotkey) => (
+              <HotkeyKeys hotkey={hotkey} key={String(hotkey)} />
+            ))
+          )}
+        </Row>
       ))}
-      <section aria-label="Also" className="flex flex-col gap-2">
-        <h4 className="font-medium text-muted-foreground text-xs">Also</h4>
-        {OTHER_KEYS.map(({ action, keys }) => (
-          <Row action={action} key={action}>
-            {typeof keys === "string" ? (
-              <span className="text-muted-foreground">{keys}</span>
-            ) : (
-              keys.map((hotkey) => (
-                <HotkeyKeys hotkey={hotkey} key={String(hotkey)} />
-              ))
-            )}
-          </Row>
-        ))}
-      </section>
-    </div>
+    </section>
   );
 }

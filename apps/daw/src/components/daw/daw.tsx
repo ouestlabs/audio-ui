@@ -110,7 +110,7 @@ import {
 import { libraryDevice } from "@/lib/device-library";
 import { webAudio } from "@/lib/web-audio";
 import { RecordSettings } from "./record-settings";
-import { SettingsDialog } from "./settings-dialog";
+import { SettingsDialog, type SettingsSection } from "./settings-dialog";
 import { CommandKeys } from "./shortcut-list";
 import {
   clipsToReselect,
@@ -592,7 +592,16 @@ export function Daw({
     setOpen: setLibraryOpen,
   } = useLibraryPanel();
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const openSettings = useCallback(() => setSettingsOpen(true), []);
+  // The section the settings open on: the last one shown, or Shortcuts from the menu's Keyboard shortcuts.
+  const [settingsAt, setSettingsAt] = useState<SettingsSection | null>(null);
+  const openSettings = useCallback(() => {
+    setSettingsAt(null);
+    setSettingsOpen(true);
+  }, []);
+  const openShortcuts = useCallback(() => {
+    setSettingsAt("Shortcuts");
+    setSettingsOpen(true);
+  }, []);
   /** Puts a device of the library on `onto`, or on a track of its own (DEV-003), and shows it in the device view. */
   const placeDevice = useCallback(
     (device: string, onto: string | null) => {
@@ -1654,6 +1663,7 @@ export function Daw({
           }
           onRhythmChange={setRhythm}
           onSettings={openSettings}
+          onShortcuts={openShortcuts}
           onStop={stop}
           onTempoChange={setTempo}
           onUndo={commands.undo}
@@ -1799,6 +1809,7 @@ export function Daw({
           rhythm,
           tempo: doc.tempo,
         }}
+        section={settingsAt}
       />
       <ExportDialog
         onExport={exportAudio}

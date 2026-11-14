@@ -118,7 +118,8 @@ export const checks: Checks = {
         .locator('[data-track="track-1"]')
         .evaluate((lane) => lane.getBoundingClientRect().width);
     const fitted = await wide();
-    await page.getByRole("button", { name: "More controls" }).click();
+    // The presets beside the zoom field.
+    await page.getByRole("button", { name: "Zoom presets" }).click();
     await page.getByRole("menuitemradio", { name: "Zoom 400 %" }).click();
     await page.waitForFunction(
       (from) =>
@@ -129,11 +130,14 @@ export const checks: Checks = {
       fitted
     );
     // A preset leaves the menu open, to try another.
+    await page.keyboard.press("Escape");
+    // The keys are listed once, in the settings: the menu's Keyboard shortcuts opens them there.
+    await page.getByRole("button", { name: "More controls" }).click();
     await page.getByRole("menuitem", { name: "Keyboard shortcuts" }).click();
     await page
+      .getByRole("dialog")
       .getByText("Add a locator at the cursor")
       .waitFor({ timeout: 5000 });
-    await page.keyboard.press("Escape");
     await page.keyboard.press("Escape");
     await page
       .locator('[data-track="track-2"]')
