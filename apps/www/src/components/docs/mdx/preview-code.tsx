@@ -11,13 +11,14 @@ export function PreviewCode({ children }: { children: ReactNode }) {
   const show = useCallback(() => setOpen(true), []);
   return (
     <FrameContent
-      className="mt-0.5 bg-site-code [&_pre]:max-h-72"
+      // What it holds starts at its top: the framework tabs' margin is the page's, not the frame's, and their list sits inset.
+      className="mt-0.5 bg-site-code *:mt-0 [&_[data-slot=tabs-list]]:m-2 [&_pre]:max-h-72"
       data-slot="code"
     >
       {open ? (
         children
       ) : (
-        <div className="relative max-h-36 overflow-hidden">
+        <div className="relative max-h-36 overflow-hidden *:mt-0">
           {children}
           <div className="absolute inset-0 flex items-end justify-center pb-3">
             <div

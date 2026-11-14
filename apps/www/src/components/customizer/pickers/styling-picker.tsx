@@ -15,7 +15,7 @@ import { STYLINGS, type StylingId } from "@/lib/docs/content/stylings";
 
 function StylingIcon({ id }: { id: StylingId }) {
   return id === "css" ? (
-    <Icons.css className="size-4 shrink-0" />
+    <Icons.css className="size-4 shrink-0 text-site-foreground" />
   ) : (
     <Icons.tailwind className="size-4 shrink-0 text-site-foreground" />
   );
