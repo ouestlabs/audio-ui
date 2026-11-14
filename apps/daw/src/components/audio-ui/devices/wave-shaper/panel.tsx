@@ -108,6 +108,11 @@ function WaveShaperPanel({
       >
         <XYPad
           aria-label="Tone"
+          background={
+            scope ? (
+              <ScopePlot aria-label="The wave it makes" bare source={scope} />
+            ) : null
+          }
           fill
           formatValue={formatPad}
           maxX={PAD_MAX}
@@ -118,9 +123,6 @@ function WaveShaperPanel({
           onValueCommitted={onNoteOff}
           value={shown}
         />
-        {scope ? (
-          <ScopePlot aria-label="The wave it makes" source={scope} />
-        ) : null}
         <WaveformSelect
           aria-label={WAVE.label}
           onValueChange={pickWave}

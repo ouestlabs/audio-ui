@@ -19,6 +19,8 @@ const LIVE_LINE = "stroke-[1.5px] stroke-primary";
 const noLabel = () => "";
 
 interface ScopePlotProps extends PlotFrameProps {
+  /** Drawn without its frame and its middle line, filling the box it sits in, such as a pad's background, under what is drawn on it. */
+  bare?: boolean;
   /** The samples, -1 to 1, such as a signal point's `scope({ fit: true })`. */
   source: Source<ArrayLike<number>>;
 }
@@ -26,10 +28,11 @@ interface ScopePlotProps extends PlotFrameProps {
 /**
  * A live wave, as a scope draws it: the samples of a source spread across,
  * -1 at the foot and 1 at the top, around a middle line. It follows the
- * source without a React render.
+ * source without a React render. `bare`, it fills the surface it sits in.
  */
 function ScopePlot({
   "aria-label": label = "Wave",
+  bare = false,
   className,
   source,
   ...props
@@ -37,7 +40,12 @@ function ScopePlot({
   return (
     <Plot
       aria-label={label}
-      className={cn("h-16 min-h-10", className)}
+      className={cn(
+        bare
+          ? "pointer-events-none size-full min-h-0 rounded-none border-0 bg-transparent"
+          : "h-16 min-h-10",
+        className
+      )}
       data-slot="scope-plot"
       maxX={1}
       maxY={1}
@@ -45,9 +53,12 @@ function ScopePlot({
       minY={-1}
       {...props}
     >
-      <PlotGrid y={{ format: noLabel, ticks: [0] }} />
+      {bare ? null : <PlotGrid y={{ format: noLabel, ticks: [0] }} />}
       <PlotGraph>
-        <PlotTrace className={LIVE_LINE} source={source} />
+        <PlotTrace
+          className={bare ? "stroke-[1.5px] stroke-primary/60" : LIVE_LINE}
+          source={source}
+        />
       </PlotGraph>
     </Plot>
   );
