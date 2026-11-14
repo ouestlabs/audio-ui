@@ -6,6 +6,7 @@ import {
 import { createUtilityEngine } from "@/registry-audio/bases/base/devices/utility/engine";
 import { UtilityPanel } from "@/registry-audio/bases/base/devices/utility/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -18,14 +19,15 @@ export default function BlockUtility() {
     utilityDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createUtilityEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, utilityDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <UtilityPanel onValueChange={setState} value={state} />
+      <UtilityPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

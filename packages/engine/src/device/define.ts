@@ -113,7 +113,26 @@ export interface DeviceDefinition<
    * engine's `sidechain` input and an agent can be told. @default false
    */
   sidechain?: boolean;
+  /**
+   * What its engine lets a host watch beyond what goes in and what comes out:
+   * the readings it reports (`gainReduction`) and the points of its graph it
+   * names in its `taps` (`modulator`, `wet`). A host draws a meter or a trace
+   * for each one, and only for those. @default []
+   */
+  signals?: readonly DeviceSignalName[];
 }
+
+/**
+ * What a device's engine lets a host watch of its sound beyond its input and
+ * its output. `gainReduction` and `bandGainReduction` are read from its
+ * `readings()`; `modulator` and `wet` are points of its graph it names in its
+ * `taps`.
+ */
+export type DeviceSignalName =
+  | "bandGainReduction"
+  | "gainReduction"
+  | "modulator"
+  | "wet";
 
 /** A parameter as an agent or a catalog reads it: JSON-safe, with no function in it. */
 export interface ParameterDescription {
@@ -142,6 +161,8 @@ export interface DeviceDescription {
   parameters: ParameterDescription[];
   /** Whether the device takes a key signal beside the one it processes. */
   sidechain?: boolean;
+  /** What its engine lets a host watch beyond its input and its output. */
+  signals?: DeviceSignalName[];
 }
 
 /** One parameter `apply` changed. */
@@ -254,6 +275,8 @@ export interface Device<Parameters extends readonly ParameterDescriptor[]> {
   ) => DeviceState<Parameters>;
   /** Whether the device takes a second signal, a key, besides the one it processes. Its engine then has a `sidechain` input to connect it to. */
   readonly sidechain: boolean;
+  /** What its engine lets a host watch beyond its input and its output: its readings and its taps, by name. Empty for a device that declares none. */
+  readonly signals: readonly DeviceSignalName[];
 }
 
 /** Raised when a device is defined with parameters that cannot work. */
@@ -419,6 +442,7 @@ export function defineDevice<
     throw new DeviceDefinitionError("A device needs an id.");
   }
   const note = definition.note ?? [];
+  const signals = definition.signals ?? [];
   if (note.length > 0 && definition.kind !== "instrument") {
     throw new DeviceDefinitionError(
       `${definition.id}: only an instrument has notes.`
@@ -569,6 +593,7 @@ export function defineDevice<
     note,
     parameters,
     sidechain: definition.sidechain === true,
+    signals,
     apply: (state, changes) => {
       const applied: DeviceChange[] = [];
       const rejected: DeviceRejection[] = [];
@@ -604,6 +629,7 @@ export function defineDevice<
       name: definition.name,
       note: note.length > 0 ? note.map(describeParameter) : undefined,
       sidechain: definition.sidechain === true ? true : undefined,
+      signals: signals.length > 0 ? [...signals] : undefined,
       parameters: parameters.map(describeParameter),
     }),
     sanitize: (state) => {

@@ -3,6 +3,7 @@ import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
 } from "@/registry-audio/bases/base/audio/elements/plot";
@@ -16,6 +17,10 @@ import {
   reduxCurve,
   reduxDevice,
 } from "@/registry-audio/bases/base/devices/redux/device";
+import {
+  type DeviceSignal,
+  peakDots,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 const TICKS = [-0.5, 0, 0.5];
 const UNITY = (input: number) => input;
@@ -29,6 +34,8 @@ interface ReduxPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ReduxState) => void;
+  /** Its live sound: two dots ride the curve at the peaks of what goes in, how far along it the sound swings. */
+  signal?: DeviceSignal;
   value: ReduxState;
 }
 
@@ -42,11 +49,17 @@ function ReduxPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: ReduxPanelProps) {
   const curve = useMemo(() => reduxCurve(value), [value]);
+  // Two dots at the peaks of what goes in: how far along the curve the sound swings.
+  const swing = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels ? peakDots(levels, curve) : null;
+  }, [curve, signal]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={reduxDevice}
@@ -75,6 +88,18 @@ function ReduxPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {swing ? (
+            <>
+              <PlotDot
+                className="group-data-idle/device:hidden"
+                source={swing.positive}
+              />
+              <PlotDot
+                className="group-data-idle/device:hidden"
+                source={swing.negative}
+              />
+            </>
+          ) : null}
         </Plot>
         <DevicePanel
           className="grid-cols-3"

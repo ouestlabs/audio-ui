@@ -1,6 +1,7 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import { WaveformSelect } from "@/registry-audio/bases/base/audio/elements/waveform-select";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 import {
@@ -16,6 +17,7 @@ import {
   waveShaperPosition,
   waveShaperResonance,
 } from "@/registry-audio/bases/base/devices/wave-shaper/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const PAD_MAX = 100;
 /** The knobs under the pad: the wave is the row of buttons. */
@@ -40,6 +42,8 @@ interface WaveShaperPanelProps {
   /** A note is played: called as the pad is pressed and again as it moves. */
   onNoteOn?: (note: WaveShaperNote) => void;
   onValueChange: (state: WaveShaperState) => void;
+  /** Its live sound: the wave it makes now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: WaveShaperState;
 }
 
@@ -57,8 +61,11 @@ function WaveShaperPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: WaveShaperPanelProps) {
+  // What comes out, held still on each cycle: the shape the table gives the wave.
+  const scope = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const [position, setPosition] = useState({ x: 50, y: 50 });
   // A note held, such as on a MIDI keyboard, takes the point to its pitch across; up stays where the hand left it.
   const held = activeNotes?.at(-1);
@@ -87,7 +94,7 @@ function WaveShaperPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={waveShaperDevice}
         onValueChange={onValueChange}
@@ -101,6 +108,11 @@ function WaveShaperPanel({
       >
         <XYPad
           aria-label="Tone"
+          background={
+            scope ? (
+              <ScopePlot aria-label="The wave it makes" bare source={scope} />
+            ) : null
+          }
           fill
           formatValue={formatPad}
           maxX={PAD_MAX}

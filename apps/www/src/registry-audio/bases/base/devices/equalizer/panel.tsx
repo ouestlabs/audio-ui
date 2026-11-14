@@ -1,6 +1,5 @@
 import { bandGainForHandle, bandHandleDb } from "@audio-ui/engine/analysis";
 import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
-import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Toggle } from "@/registry/bases/base/ui/toggle";
@@ -28,6 +27,7 @@ import {
   equalizerDevice,
   FILTER_TAKES,
 } from "@/registry-audio/bases/base/devices/equalizer/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -151,8 +151,8 @@ interface EqualizerPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: EqualizerState) => void;
-  /** A live spectrum behind the curve, such as from `useSpectrum`. */
-  spectrum?: Source<Float32Array>;
+  /** Its live sound: the spectrum of what comes out behind the curve, and its levels at the edge. */
+  signal?: DeviceSignal;
   value: EqualizerState;
 }
 
@@ -168,9 +168,13 @@ function EqualizerPanel({
   children,
   className,
   onValueChange,
-  spectrum,
+  signal,
   value,
 }: EqualizerPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const [selected, setSelected] = useState(1);
   const curve = useMemo(() => equalizerCurve(value), [value]);
   const picked = EQUALIZER_BANDS[selected];
@@ -201,7 +205,7 @@ function EqualizerPanel({
     []
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={equalizerDevice}

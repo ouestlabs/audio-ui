@@ -93,7 +93,7 @@ The props of the headless parts are on [XYPad](/docs/react/xypad#api-reference).
 
 ### Registry component
 
-`XYPad` accepts style props (`size`, `formatValue`, `valueDisplay`, `className`) plus primitive props from `XYPadPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the axis inputs.
+`XYPad` accepts style props (`size`, `formatValue`, `valueDisplay`, `background`, `className`) plus primitive props from `XYPadPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the axis inputs.
 
 #### Value and state
 
@@ -118,6 +118,7 @@ The props of the headless parts are on [XYPad](/docs/react/xypad#api-reference).
 <TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\" | \"xl\""} default={"\"default\""}>Size variant (affects height).</TypeRow>
 <TypeRow name={"formatValue"} type={"(value: { x: number; y: number }) => React.ReactNode"}>Custom formatter for the value display.</TypeRow>
 <TypeRow name={"valueDisplay"} type={"\"visible\" | \"hidden\""} default={"\"visible\""}>Use `"hidden"` to hide the overlay.</TypeRow>
+<TypeRow name={"background"} type={"React.ReactNode"}>Drawn inside the pad, under its grid and its thumb, filling it and taking no pointer: what the pad plays, such as a `ScopePlot` with `bare`.</TypeRow>
 <TypeRow name={"className"} type={"string"}>Classes for the pad surface.</TypeRow>
 </TypeTable>
 

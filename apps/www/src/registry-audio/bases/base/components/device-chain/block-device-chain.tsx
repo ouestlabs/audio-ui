@@ -150,6 +150,7 @@ export default function BlockDeviceChain() {
           onPadFiles={hold}
           overridden={NOT_MOVED}
           position={engine.position}
+          signalOf={running?.signal}
           track={TRACK}
         />
       </div>

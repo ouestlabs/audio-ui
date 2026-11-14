@@ -19,11 +19,16 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
+/** The scale a spectrum is drawn on, in dB of level: its own, behind the plot's. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 const MAX_DB = 18;
 const DB_TICKS = [-12, 0, 12];
 /** What the panel draws itself: a fader per band. */
@@ -36,7 +41,8 @@ const LABELS = Object.fromEntries(
   graphicEqDevice.parameters.map((parameter) => [parameter.id, parameter.label])
 );
 
-const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
+const formatDbMark = (db: number) =>
+  formatLevel(db, "dB", { decimals: 0, unit: false });
 const describePointer = (point: { x: number; y: number }) =>
   `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 
@@ -85,6 +91,8 @@ interface GraphicEqPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: GraphicEqState) => void;
+  /** Its live sound: the spectrum of what comes out, behind the curve. */
+  signal?: DeviceSignal;
   value: GraphicEqState;
 }
 
@@ -98,8 +106,13 @@ function GraphicEqPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: GraphicEqPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const curve = useMemo(() => graphicEqCurve(value), [value]);
   const setBand = useCallback(
     (id: BandId, db: number) =>
@@ -107,7 +120,7 @@ function GraphicEqPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={graphicEqDevice}
@@ -135,6 +148,15 @@ function GraphicEqPanel({
             y={{ format: formatDbMark, ticks: DB_TICKS }}
           />
           <PlotGraph>
+            {spectrum ? (
+              // What comes out, behind what the device does to it.
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotArea fillTo={0} fn={curve} />
             <PlotCurve fn={curve} />
           </PlotGraph>

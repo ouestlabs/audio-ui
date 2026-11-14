@@ -1,6 +1,6 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
 import { SawtoothIcon, SquareIcon, TriangleIcon } from "@audio-ui/icons/react";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -15,6 +15,7 @@ import {
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -27,6 +28,7 @@ import {
   monoSynthDevice,
   monoSynthPreset,
 } from "@/registry-audio/bases/base/devices/mono-synth/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do, as the synth's panel lays them out. */
 const GROUPS = [
@@ -69,6 +71,8 @@ interface MonoSynthPanelProps {
   /** A key is played, as a note of the synth. */
   onNoteOn?: (note: MonoSynthNote) => void;
   onValueChange: (state: MonoSynthState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle, over its keyboard, and its level at the edge. */
+  signal?: DeviceSignal;
   value: MonoSynthState;
 }
 
@@ -87,8 +91,10 @@ function MonoSynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: MonoSynthPanelProps) {
+  const scope = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -136,7 +142,7 @@ function MonoSynthPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={monoSynthDevice}
         onValueChange={onValueChange}
@@ -223,6 +229,9 @@ function MonoSynthPanel({
           onValueChange={change}
           value={value}
         />
+        {scope ? (
+          <ScopePlot aria-label="The wave it plays" source={scope} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the synth"

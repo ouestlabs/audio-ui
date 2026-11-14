@@ -16,6 +16,7 @@ import {
   PlotHandle,
   PlotLine,
 } from "@/components/audio-ui/plot";
+import { StereoFieldLayer } from "@/components/audio-ui/stereo-field";
 import {
   Select,
   SelectContent,
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_DB = -24;
@@ -52,6 +54,8 @@ interface MidSidePanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: MidSideState) => void;
+  /** Its live sound: where what comes out sits between the speakers, and how alike its sides are. */
+  signal?: DeviceSignal;
   value: MidSideState;
 }
 
@@ -66,6 +70,7 @@ function MidSidePanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: MidSidePanelProps) {
   const change = useCallback(
@@ -82,7 +87,7 @@ function MidSidePanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={midSideDevice}
@@ -126,6 +131,10 @@ function MidSidePanel({
           minX={MIN_DB}
           minY={MIN_DB}
         >
+          {signal ? (
+            // Behind what the plot draws: where what comes out sits between the speakers.
+            <StereoFieldLayer source={signal.output.stereo} />
+          ) : null}
           <PlotGrid
             x={{ format: formatMark, ticks: TICKS }}
             y={{ format: formatMark, ticks: TICKS }}

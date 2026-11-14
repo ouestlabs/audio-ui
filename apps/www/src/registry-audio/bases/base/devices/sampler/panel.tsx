@@ -11,6 +11,7 @@ import {
   SelectValue,
 } from "@/registry/bases/base/ui/select";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -24,6 +25,7 @@ import {
   samplerDevice,
   sliceOf,
 } from "@/registry-audio/bases/base/devices/sampler/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** What the title bar holds: the sample, a list. */
 const HEADER_CONTROLS = ["sample"] as const;
@@ -47,6 +49,8 @@ interface SamplerPanelProps {
   /** A pad is struck, as the note of its slice. */
   onNoteOn?: (note: SamplerNote) => void;
   onValueChange: (state: SamplerState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: SamplerState;
 }
 
@@ -64,8 +68,11 @@ function SamplerPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: SamplerPanelProps) {
+  // The sample as it plays, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const pickSample = useCallback(
     (sample: string | null) => {
       if (sample) {
@@ -89,7 +96,7 @@ function SamplerPanel({
   );
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={samplerDevice}
         onValueChange={onValueChange}
@@ -129,6 +136,9 @@ function SamplerPanel({
           onValueChange={onValueChange}
           value={value}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <Pad
           activePads={lit}
           aria-label="Slices"

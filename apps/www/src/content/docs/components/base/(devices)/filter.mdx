@@ -25,7 +25,7 @@ Takes part of the spectrum out: a low-pass, a high-pass, a band-pass or a notch,
 
 ## Panel
 
-The panel draws the curve of the filter, with a handle on it, and picks the circuit in its title bar, those without the type greyed out. Pass a spectrum to the panel to see what comes out behind the curve. `filterCurve(state)` is the curve it draws: an analog circuit's is measured on it, its response to a click too quiet to saturate, read at each frequency the plot draws.
+The panel draws the curve of the filter, with a handle on it, and picks the circuit in its title bar, those without the type greyed out. Pass `signal`, the device's live sound from [`useDeviceSignal`](/docs/hooks/use-device-signal), to see the spectrum of what comes out behind the curve. `filterCurve(state)` is the curve it draws: an analog circuit's is measured on it, its response to a click too quiet to saturate, read at each frequency the plot draws.
 
 <DeviceUsage name="filter" />
 

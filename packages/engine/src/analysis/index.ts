@@ -69,6 +69,7 @@ export {
   type PeakHoldOptions,
   SPECTRUM_FLOOR_DB,
 } from "./spectrum.ts";
+export { stereoCorrelation } from "./stereo.ts";
 export {
   type BandShares,
   type Bands,

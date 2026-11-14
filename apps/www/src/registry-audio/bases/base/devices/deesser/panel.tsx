@@ -1,5 +1,4 @@
 import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
-import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -31,6 +30,7 @@ import {
   deesserResponse,
   deesserUnused,
 } from "@/registry-audio/bases/base/devices/deesser/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 500;
 const MAX_HZ = 20_000;
@@ -76,8 +76,8 @@ interface DeesserPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: DeesserState) => void;
-  /** A live spectrum behind the curve, such as from `useSpectrum`. */
-  spectrum?: Source<Float32Array>;
+  /** Its live sound: the spectrum of what comes out, behind the reduction it makes at each frequency. */
+  signal?: DeviceSignal;
   value: DeesserState;
 }
 
@@ -94,9 +94,13 @@ function DeesserPanel({
   children,
   className,
   onValueChange,
-  spectrum,
+  signal,
   value,
 }: DeesserPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const response = useMemo(() => deesserResponse(value), [value]);
   const change = useCallback(
     ({ x, y }: { x: number; y: number }) =>
@@ -117,7 +121,7 @@ function DeesserPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={deesserDevice}

@@ -431,7 +431,7 @@ export const audio: RegistryItem[] = [
     categories: ["device", "knob"],
     dependencies: ["@audio-ui/engine"],
     description:
-      "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns.",
+      "A panel for any device: a knob per number and a toggle per switch, from its descriptors, controlled by a state a host owns. Its frame, given the device's live signal, goes idle while no sound goes in, so a face's live marks give way.",
     files: [
       {
         path: "audio/panels/device-panel.tsx",
@@ -440,6 +440,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "device-panel",
     registryDependencies: [
+      "@audio-ui/device-signal",
       "@audio-ui/knob",
       "@audio-ui/waveform-select",
       "@audio-ui/filter-type-select",
@@ -541,6 +542,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "device-panels",
     registryDependencies: [
+      "@audio-ui/device-signal",
       "@audio-ui/auto-pan-panel",
       "@audio-ui/channel-eq-panel",
       "@audio-ui/chorus-panel",
@@ -663,6 +665,35 @@ export const audio: RegistryItem[] = [
     ],
     name: "spectrum-analyzer",
     registryDependencies: ["@audio-ui/plot", "@audio-ui/use-spectrum"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "Live views of a sound over the Plot: ScopePlot, a wave held still on each cycle; SpectrumPlot, a spectrum along a log frequency axis; LevelPlot, a level over time, and a second one filled under it to compare what went in with what came out. Each follows a source without a React render.",
+    files: [
+      {
+        path: "audio/elements/signal-plot.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "signal-plot",
+    registryDependencies: ["@audio-ui/plot"],
+    type: "registry:ui",
+  },
+  {
+    categories: ["device", "plot"],
+    dependencies: ["@audio-ui/react"],
+    description:
+      "Where a sound sits between the speakers, live: a goniometer of its two channels, scaled to the loudest of the last moments, over a correlation meter from -1 to 1 (StereoField), or as a layer behind another plot with the correlation in its corner (StereoFieldLayer). Painted on a canvas from a source, without a React render.",
+    files: [
+      {
+        path: "audio/elements/stereo-field.tsx",
+        type: "registry:ui",
+      },
+    ],
+    name: "stereo-field",
     type: "registry:ui",
   },
   {

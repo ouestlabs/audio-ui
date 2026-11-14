@@ -6,12 +6,10 @@ import {
 import { createMultibandEngine } from "@/registry-audio/bases/base/devices/multiband/engine";
 import { MultibandPanel } from "@/registry-audio/bases/base/devices/multiband/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 
 const MASTER_VOLUME = 0.7;
-const MIN_HZ = 20;
-const MAX_HZ = 20_000;
 
 /**
  * A multiband compressor you can plug in: its state, a panel that draws the
@@ -24,19 +22,15 @@ export default function BlockMultiband() {
     multibandDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { analyser } = useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createMultibandEngine,
     destination: master,
     state,
   });
-  const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
+  const signal = useDeviceSignal(engine, multibandDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <MultibandPanel
-        onValueChange={setState}
-        spectrum={spectrum}
-        value={state}
-      />
+      <MultibandPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

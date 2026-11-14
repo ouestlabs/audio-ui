@@ -1,5 +1,9 @@
 import type { Source } from "@audio-ui/core";
-import type { ParameterValue } from "@audio-ui/engine/device";
+import type {
+  Device,
+  ParameterDescriptor,
+  ParameterValue,
+} from "@audio-ui/engine/device";
 import { secondsPerBeat, type Tempo } from "@audio-ui/engine/time";
 import {
   type ReactNode,
@@ -61,6 +65,7 @@ import {
 } from "@/registry-audio/bases/base/lib/arrangement";
 import { trackOf } from "@/registry-audio/bases/base/lib/arrangement-state";
 import { libraryDevice } from "@/registry-audio/bases/base/lib/device-library";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 import {
   DRUM_KIT_PADS,
   drumKit,
@@ -228,6 +233,8 @@ interface ChainProps {
   onPadFiles: (rack: string, note: number, files: File[]) => void;
   /** The track the chain is on, with its envelopes. */
   owner: ArrangementTrack;
+  /** The live signal of a device, by its id, as the engine that plays the arrangement gives it: its panel draws its levels and what it reports. */
+  signalOf?: DeviceSignalOf;
   /** The notes the track's clips sound as the arrangement plays: a drum rack's pads light them up. */
   sounding?: Source<readonly number[]>;
   tempo: Arrangement["doc"]["tempo"];
@@ -235,6 +242,15 @@ interface ChainProps {
   /** Where the view keeps what it remembers per device. */
   useEntry: DeviceViewMemory;
 }
+
+/** What gives a device's panel its live sound: the engine's `signal`, such as `ArrangementEngine.signal`. */
+export type DeviceSignalOf = (
+  id: string,
+  device: Pick<
+    Device<readonly ParameterDescriptor[]>,
+    "kind" | "sidechain" | "signals"
+  >
+) => DeviceSignal;
 
 /** Whether a slot is folded, kept with the view by the device's id. */
 interface SlotFold {
@@ -294,8 +310,11 @@ function Slot({
     (on: boolean) => change({ ...shown, enabled: on } as never),
     [change, shown]
   );
-  const { activeNotes, onHoldNote } = chain;
+  const { activeNotes, onHoldNote, signalOf } = chain;
   const release = useCallback(() => onHoldNote(null), [onHoldNote]);
+  // One signal per device, kept by the engine: asking again on each render gives the same one.
+  const signal =
+    entry && signalOf ? signalOf(device.id, entry.device) : undefined;
   const [folded, setFolded] = chain.useEntry("deviceFolded", device.id, false);
   const fold = { folded, onFoldedChange: setFolded };
   if (device.rack && device.device === DRUM_RACK_DEVICE) {
@@ -324,6 +343,7 @@ function Slot({
           onNoteOff={release}
           onNoteOn={onHoldNote}
           onValueChange={change}
+          signal={signal}
           tempo={tempo}
           value={shown}
         >
@@ -887,6 +907,7 @@ export function DeviceView({
   onPadFiles,
   overridden,
   position,
+  signalOf,
   track,
   useEntry = useLocalEntry,
 }: {
@@ -921,6 +942,8 @@ export function DeviceView({
     note: number,
     files: File[]
   ) => void;
+  /** The live signal of a device by its id, such as `ArrangementEngine.signal`: each panel draws what goes in and comes out. Leave it out and the panels show their settings only. */
+  signalOf?: DeviceSignalOf;
   track: string | null;
   /** Where the view keeps what it remembers per device, such as a slot folded; each lasts as long as the view when none is given. */
   useEntry?: DeviceViewMemory;
@@ -1125,6 +1148,7 @@ export function DeviceView({
         onPadFiles={padFiles}
         owner={current}
         place={undefined}
+        signalOf={signalOf}
         sounding={sounding}
         tempo={doc.tempo}
         track={current.id}

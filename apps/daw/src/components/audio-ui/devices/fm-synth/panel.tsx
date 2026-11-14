@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -13,6 +13,7 @@ import {
   fmSynthPreset,
 } from "@/components/audio-ui/devices/fm-synth/device";
 import { Piano } from "@/components/audio-ui/piano";
+import { SpectrumPlot } from "@/components/audio-ui/signal-plot";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do: what every operator shares, then each operator's four. */
@@ -74,6 +76,8 @@ interface FmSynthPanelProps {
   /** A key is played, as a note of the synth. */
   onNoteOn?: (note: FmSynthNote) => void;
   onValueChange: (state: FmSynthState) => void;
+  /** Its live sound: the spectrum of what it plays, its carrier and the sidebands the operators make. */
+  signal?: DeviceSignal;
   value: FmSynthState;
 }
 
@@ -92,8 +96,11 @@ function FmSynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: FmSynthPanelProps) {
+  // Where its sound has its energy: the carrier and the sidebands its operators make.
+  const live = useMemo(() => signal?.output.spectrum(), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -123,7 +130,7 @@ function FmSynthPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={fmSynthDevice}
         onValueChange={onValueChange}
@@ -160,6 +167,7 @@ function FmSynthPanel({
           onValueChange={change}
           value={value}
         />
+        {live ? <SpectrumPlot aria-label="Its spectrum" source={live} /> : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the synth"

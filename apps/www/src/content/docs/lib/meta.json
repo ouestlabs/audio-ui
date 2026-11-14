@@ -3,6 +3,7 @@
   "pages": [
     "---Devices and engines---",
     "device-library",
+    "device-signal",
     "polyphony",
     "voice-pool",
     "rack",

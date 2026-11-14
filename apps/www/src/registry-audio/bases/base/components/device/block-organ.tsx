@@ -7,6 +7,7 @@ import {
 } from "@/registry-audio/bases/base/devices/organ/device";
 import { createOrganEngine } from "@/registry-audio/bases/base/devices/organ/engine";
 import { OrganPanel } from "@/registry-audio/bases/base/devices/organ/panel";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 import { useMidiInput } from "@/registry-audio/bases/base/hooks/use-midi-input";
 import { usePolyphony } from "@/registry-audio/bases/base/hooks/use-polyphony";
@@ -23,6 +24,8 @@ const PANEL_NOTE = "panel";
 export default function BlockOrgan() {
   const [state, setState] = useState<OrganState>(() => organDevice.defaults());
   const master = useMasterBus(1);
+  // Its voices play into this bus and nothing else does: that is where it is heard.
+  const signal = useDeviceSignal(master && { output: master }, organDevice);
   const { noteOff, noteOn } = usePolyphony({
     create: createOrganEngine,
     destination: master,
@@ -49,6 +52,7 @@ export default function BlockOrgan() {
         onNoteOff={releaseKey}
         onNoteOn={playKey}
         onValueChange={setState}
+        signal={signal}
         value={state}
       />
     </div>

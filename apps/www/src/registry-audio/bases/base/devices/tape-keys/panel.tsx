@@ -1,11 +1,12 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   ToggleGroup,
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -18,6 +19,7 @@ import {
   type TapeKeysState,
   tapeKeysDevice,
 } from "@/registry-audio/bases/base/devices/tape-keys/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do. */
 const GROUPS = [
@@ -42,6 +44,8 @@ interface TapeKeysPanelProps {
   /** A key is played, as a note of the keyboard. */
   onNoteOn?: (note: TapeKeysNote) => void;
   onValueChange: (state: TapeKeysState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: TapeKeysState;
 }
 
@@ -59,8 +63,11 @@ function TapeKeysPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: TapeKeysPanelProps) {
+  // The tape as it plays, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const pickStation = useCallback(
     (values: unknown[]) => {
       const [station] = values;
@@ -77,7 +84,7 @@ function TapeKeysPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={tapeKeysDevice}
         onValueChange={onValueChange}
@@ -115,6 +122,9 @@ function TapeKeysPanel({
           onValueChange={onValueChange}
           value={value}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the tapes"

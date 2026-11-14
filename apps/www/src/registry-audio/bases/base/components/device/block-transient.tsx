@@ -6,6 +6,7 @@ import {
 import { createTransientEngine } from "@/registry-audio/bases/base/devices/transient/engine";
 import { TransientPanel } from "@/registry-audio/bases/base/devices/transient/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -21,14 +22,15 @@ export default function BlockTransient() {
     transientDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createTransientEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, transientDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <TransientPanel onValueChange={setState} value={state} />
+      <TransientPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

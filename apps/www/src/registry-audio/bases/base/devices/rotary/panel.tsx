@@ -8,6 +8,7 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -19,9 +20,13 @@ import {
   rotaryBands,
   rotaryDevice,
 } from "@/registry-audio/bases/base/devices/rotary/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
+/** The scale a spectrum is drawn on, in dB of level: its own, behind the plot's. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 const MIN_DB = -36;
 const MAX_DB = 6;
 const DB_TICKS = [-24, -12, 0];
@@ -38,6 +43,8 @@ interface RotaryPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: RotaryState) => void;
+  /** Its live sound: the spectrum of what comes out, behind the drum's band and the horn's. */
+  signal?: DeviceSignal;
   value: RotaryState;
 }
 
@@ -51,11 +58,16 @@ function RotaryPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: RotaryPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const bands = useMemo(() => rotaryBands(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={rotaryDevice}
@@ -80,6 +92,15 @@ function RotaryPanel({
           <PlotCursor format={describePointer} />
           <PlotGrid x={{ count: 6 }} y={{ ticks: DB_TICKS }} />
           <PlotGraph>
+            {spectrum ? (
+              // What comes out, behind what the device does to it.
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotCurve
               className="stroke-muted-foreground [stroke-dasharray:4_4]"
               fn={bands.drum}

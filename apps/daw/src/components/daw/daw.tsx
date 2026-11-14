@@ -1604,6 +1604,7 @@ export function Daw({
             onPadFiles={addPadSample}
             overridden={automation.overridden}
             position={engine.position}
+            signalOf={engine.engine?.signal}
             track={selectedTrack}
             useEntry={useSavedEntry}
           />

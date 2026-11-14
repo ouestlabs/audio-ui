@@ -6,6 +6,7 @@ import {
 import { createReduxEngine } from "@/registry-audio/bases/base/devices/redux/engine";
 import { ReduxPanel } from "@/registry-audio/bases/base/devices/redux/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -19,14 +20,15 @@ const MASTER_VOLUME = 0.7;
 export default function BlockRedux() {
   const [state, setState] = useState<ReduxState>(() => reduxDevice.defaults());
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createReduxEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, reduxDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ReduxPanel onValueChange={setState} value={state} />
+      <ReduxPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

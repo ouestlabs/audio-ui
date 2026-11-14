@@ -135,6 +135,8 @@ export function createVibeEngine(
     },
     input,
     output,
+    // The lamp itself, from -1 (dark) to 1 (bright), before its depth: what moves the stages.
+    taps: { modulator: lamp },
     update: (state) => {
       const next = vibeMix(state);
       smooth(wet.gain, next.wet);

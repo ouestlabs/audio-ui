@@ -5,6 +5,7 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTrace,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -16,6 +17,7 @@ import {
   vibeDevice,
   vibeLight,
 } from "@/registry-audio/bases/base/devices/vibe/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** Two seconds of the lamp, whatever its speed: the plot shows how it pulses meanwhile. */
 const WINDOW_SECONDS = 2;
@@ -35,6 +37,8 @@ interface VibePanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: VibeState) => void;
+  /** Its live sound: what its lamp did over the last two seconds, scrolling, in place of the drawn light while sound goes in. */
+  signal?: DeviceSignal;
   value: VibeState;
 }
 
@@ -48,11 +52,18 @@ function VibePanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: VibePanelProps) {
   const light = useMemo(() => vibeLight(value), [value]);
+  // The lamp as it ran: only while it moves anything.
+  const lamp = value.enabled ? signal?.modulator : null;
+  const history = useMemo(
+    () => lamp?.history({ points: 240, seconds: WINDOW_SECONDS }),
+    [lamp]
+  );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={vibeDevice}
@@ -78,7 +89,21 @@ function VibePanel({
             y={{ format: formatLight, ticks: LIGHT_TICKS }}
           />
           <PlotGraph>
-            <PlotCurve fn={light} />
+            <PlotCurve
+              // The light as set while no sound goes in; once it does, the lamp as it ran.
+              className={
+                history ? "hidden group-data-idle/device:inline" : undefined
+              }
+              fn={light}
+            />
+            {history ? (
+              <PlotTrace
+                className="stroke-[1.5px] stroke-primary group-data-idle/device:hidden"
+                max={1}
+                min={-1}
+                source={history}
+              />
+            ) : null}
           </PlotGraph>
         </Plot>
         <DevicePanel

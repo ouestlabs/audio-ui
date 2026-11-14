@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -13,6 +13,7 @@ import {
   electricPianoPreset,
 } from "@/components/audio-ui/devices/electric-piano/device";
 import { Piano } from "@/components/audio-ui/piano";
+import { ScopePlot } from "@/components/audio-ui/signal-plot";
 import {
   Select,
   SelectContent,
@@ -21,6 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do, as the piano's panel lays them out. */
@@ -51,6 +53,8 @@ interface ElectricPianoPanelProps {
   /** A key is struck, as a note of the piano. */
   onNoteOn?: (note: ElectricPianoNote) => void;
   onValueChange: (state: ElectricPianoState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: ElectricPianoState;
 }
 
@@ -68,8 +72,11 @@ function ElectricPianoPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: ElectricPianoPanelProps) {
+  // The wave it plays now, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const [preset, setPreset] = useState<string | null>(null);
   const pickPreset = useCallback(
     (name: string | null) => {
@@ -99,7 +106,7 @@ function ElectricPianoPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={electricPianoDevice}
         onValueChange={onValueChange}
@@ -136,6 +143,9 @@ function ElectricPianoPanel({
           onValueChange={change}
           value={value}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the piano"

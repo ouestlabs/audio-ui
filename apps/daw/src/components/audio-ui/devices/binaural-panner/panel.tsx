@@ -17,6 +17,8 @@ import {
   PlotHandle,
   PlotLine,
 } from "@/components/audio-ui/plot";
+import { StereoFieldLayer } from "@/components/audio-ui/stereo-field";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const SWITCHES = ["enabled"] as const;
@@ -34,6 +36,8 @@ interface BinauralPannerPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: BinauralPannerState) => void;
+  /** Its live sound: where what comes out sits between the speakers, and how alike its sides are. */
+  signal?: DeviceSignal;
   value: BinauralPannerState;
 }
 
@@ -47,6 +51,7 @@ function BinauralPannerPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: BinauralPannerPanelProps) {
   const point = useMemo(() => binauralPoint(value), [value]);
@@ -63,7 +68,7 @@ function BinauralPannerPanel({
     [value.azimuthDeg, value.distanceM]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={binauralPannerDevice}
@@ -76,33 +81,40 @@ function BinauralPannerPanel({
         className="flex min-h-0 grow flex-col items-center gap-2 p-2"
         data-slot="binaural-panner-panel"
       >
-        <div className="flex min-h-28 w-full grow justify-center">
-          <Plot
-            aria-label="The sound around the head, seen from above"
-            className="aspect-square h-full w-auto"
-            maxX={1}
-            maxY={1}
-            minX={-1}
-            minY={-1}
-          >
-            <PlotGrid
-              x={{ format: formatSide, ticks: SIDES }}
-              y={{ format: formatFacing, ticks: SIDES }}
-            />
-            <PlotGraph>
-              <PlotLine axis="x" className="stroke-foreground/40" value={0} />
-              <PlotLine axis="y" className="stroke-foreground/40" value={0} />
-            </PlotGraph>
-            {value.enabled ? (
-              <PlotHandle
-                aria-label="Where the sound is"
-                getAriaLabel={getAriaLabel}
-                getAriaValueText={describe}
-                onValueChange={move}
-                value={point}
+        {/* The top view takes the row's height, whatever decides it, and is as wide as it is tall. */}
+        <div className="relative min-h-28 w-full grow">
+          <div className="absolute inset-y-0 left-1/2 aspect-square -translate-x-1/2">
+            <Plot
+              aria-label="The sound around the head, seen from above"
+              className="size-full"
+              maxX={1}
+              maxY={1}
+              minX={-1}
+              minY={-1}
+            >
+              {signal ? (
+                // Behind what the plot draws: where what comes out sits between the speakers.
+                <StereoFieldLayer source={signal.output.stereo} />
+              ) : null}
+              <PlotGrid
+                x={{ format: formatSide, ticks: SIDES }}
+                y={{ format: formatFacing, ticks: SIDES }}
               />
-            ) : null}
-          </Plot>
+              <PlotGraph>
+                <PlotLine axis="x" className="stroke-foreground/40" value={0} />
+                <PlotLine axis="y" className="stroke-foreground/40" value={0} />
+              </PlotGraph>
+              {value.enabled ? (
+                <PlotHandle
+                  aria-label="Where the sound is"
+                  getAriaLabel={getAriaLabel}
+                  getAriaValueText={describe}
+                  onValueChange={move}
+                  value={point}
+                />
+              ) : null}
+            </Plot>
+          </div>
         </div>
         <DevicePanel
           className="w-full grid-cols-4"

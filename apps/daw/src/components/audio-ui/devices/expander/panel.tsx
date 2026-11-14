@@ -12,6 +12,7 @@ import {
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
   PlotHandle,
@@ -25,6 +26,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { curveDot, type DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_DB = -80;
@@ -48,6 +50,8 @@ interface ExpanderPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ExpanderState) => void;
+  /** Its live sound: a dot rides the curve at the level going in. */
+  signal?: DeviceSignal;
   value: ExpanderState;
 }
 
@@ -62,9 +66,15 @@ function ExpanderPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: ExpanderPanelProps) {
   const curve = useMemo(() => expanderCurve(value), [value]);
+  // The dot rides the curve at the level going in, the louder of its channels.
+  const dot = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels && curveDot(levels, curve);
+  }, [curve, signal]);
   const change = useCallback(
     ({ x }: { x: number }) =>
       onValueChange(expanderDevice.apply(value, { thresholdDb: x }).state),
@@ -79,7 +89,7 @@ function ExpanderPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={expanderDevice}
@@ -139,6 +149,10 @@ function ExpanderPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {dot ? (
+            // With no sound going in, the dot has no place on the curve.
+            <PlotDot className="group-data-idle/device:hidden" source={dot} />
+          ) : null}
           {value.enabled ? (
             <PlotHandle
               aria-label="Threshold"

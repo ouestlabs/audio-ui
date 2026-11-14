@@ -12,11 +12,13 @@ import {
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
   PlotHandle,
   PlotLine,
 } from "@/components/audio-ui/plot";
+import { curveDot, type DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_KEY_DB = -60;
@@ -37,6 +39,8 @@ interface DuckerPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: DuckerState) => void;
+  /** Its live sound: a dot rides the curve at the level of the key it ducks for. */
+  signal?: DeviceSignal;
   value: DuckerState;
 }
 
@@ -50,16 +54,22 @@ function DuckerPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: DuckerPanelProps) {
   const curve = useMemo(() => duckerCurve(value), [value]);
+  // The dot rides the curve at the level of the key, the louder of its channels: how far it ducks the sound now.
+  const dot = useMemo(() => {
+    const levels = signal?.key?.levels;
+    return levels && curveDot(levels, curve);
+  }, [curve, signal]);
   const change = useCallback(
     ({ x }: { x: number }) =>
       onValueChange(duckerDevice.apply(value, { thresholdDb: x }).state),
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={duckerDevice}
@@ -94,6 +104,10 @@ function DuckerPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {dot ? (
+            // With no sound going in, the dot has no place on the curve.
+            <PlotDot className="group-data-idle/device:hidden" source={dot} />
+          ) : null}
           {value.enabled ? (
             <PlotHandle
               aria-label="Threshold"

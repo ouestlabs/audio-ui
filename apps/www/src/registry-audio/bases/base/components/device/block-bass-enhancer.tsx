@@ -6,6 +6,7 @@ import {
 import { createBassEnhancerEngine } from "@/registry-audio/bases/base/devices/bass-enhancer/engine";
 import { BassEnhancerPanel } from "@/registry-audio/bases/base/devices/bass-enhancer/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -21,14 +22,19 @@ export default function BlockBassEnhancer() {
     bassEnhancerDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createBassEnhancerEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, bassEnhancerDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <BassEnhancerPanel onValueChange={setState} value={state} />
+      <BassEnhancerPanel
+        onValueChange={setState}
+        signal={signal}
+        value={state}
+      />
     </div>
   );
 }

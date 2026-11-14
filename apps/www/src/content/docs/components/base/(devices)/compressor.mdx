@@ -40,7 +40,7 @@ Every model takes the knobs as they are set. The model runs in an `AudioWorklet`
 
 ## Panel
 
-The panel draws the transfer curve the state plays: the threshold, the dashed unity line, and a dot that rides the curve at the level going in. Pass `level`, a live source in dB, to show the dot. Below the threshold the curve sits above unity by the make-up gain. The model is picked in its title bar.
+The panel draws the transfer curve the state plays: the threshold, the dashed unity line, and a dot that rides the curve at the level going in. Pass `signal`, the device's live sound from [`useDeviceSignal`](/docs/hooks/use-device-signal), to show the dot. Below the threshold the curve sits above unity by the make-up gain. The model is picked in its title bar.
 
 <DeviceUsage name="compressor" />
 

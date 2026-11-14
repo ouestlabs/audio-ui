@@ -6,6 +6,7 @@ import {
 import { createDelayEngine } from "@/registry-audio/bases/base/devices/delay/engine";
 import { DelayPanel } from "@/registry-audio/bases/base/devices/delay/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -23,14 +24,20 @@ export default function BlockDelay() {
     () => delayDevice.apply(delayDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { tempo } = useDeviceLoop({
+  const { engine, tempo } = useDeviceLoop({
     create: createDelayEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, delayDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <DelayPanel onValueChange={setState} tempo={tempo} value={state} />
+      <DelayPanel
+        onValueChange={setState}
+        signal={signal}
+        tempo={tempo}
+        value={state}
+      />
     </div>
   );
 }

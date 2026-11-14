@@ -463,6 +463,7 @@
       "use-arrangement",
       "clip-player",
       "device-library",
+      "device-signal",
       "mixer-engine",
       "rack",
       "drum-rack",
@@ -985,6 +986,83 @@
       "instrument-rack",
       "rack",
       "voice-pool"
+    ]
+  },
+  {
+    "dependencies": [
+      "@audio-ui/core",
+      "@audio-ui/engine"
+    ],
+    "description": "The live signal of a device, from its engine, as its face shows it: what goes in and comes out (levels, activity, a scope, a spectrum, a history, the stereo samples) and what the device declares in signals (its gain reduction, its modulator and wet taps). Analysers go on a point only while something watches it, one frame loop reads every signal on the page, and a signal follows the engine a host makes again.",
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "SignalTarget",
+        "summary": "What a signal listens to: a device's engine, or anything with an output."
+      },
+      {
+        "kind": "interface",
+        "name": "StereoSamples",
+        "summary": "The two channels of a point, their latest samples, -1 to 1, and how alike they are: what a stereo field is drawn from."
+      },
+      {
+        "kind": "interface",
+        "name": "SpectrumOptions",
+        "summary": ""
+      },
+      {
+        "kind": "interface",
+        "name": "ScopeOptions",
+        "summary": ""
+      },
+      {
+        "kind": "interface",
+        "name": "HistoryOptions",
+        "summary": ""
+      },
+      {
+        "kind": "interface",
+        "name": "SignalPoint",
+        "summary": "One point of a device's sound, such as what goes in or what comes out, read as live sources."
+      },
+      {
+        "kind": "interface",
+        "name": "DeviceSignal",
+        "summary": "Everything a device's face can show of its sound, as live sources: what goes in (an effect's), what comes out, the points its engine names in its `taps` and the readings it reports, each one present when the device declares it in `signals`."
+      },
+      {
+        "kind": "function",
+        "name": "deriveSource",
+        "summary": "A source computed from another, once per change however many watch it: a face's own reading of a signal, such as a level turned into a height."
+      },
+      {
+        "kind": "function",
+        "name": "curveDot",
+        "summary": "A dot on a transfer curve at the level of `levels`, the louder of its channels: where the sound sits on the curve now, for a `Plot.Dot` (`x` the level in, `y` what `curve` makes of it)."
+      },
+      {
+        "kind": "function",
+        "name": "peakDots",
+        "summary": "Two dots on a shaper's curve, from -1 to 1, at the held peak of `levels`, one each side of zero: how far along the curve the sound swings, from the clean middle towards where it bends."
+      },
+      {
+        "kind": "function",
+        "name": "createDeviceSignal",
+        "summary": "The live signal of a device, from its engine, as a face shows it: what goes in and comes out, its readings, and the taps its device declares in `signals` (its `modulator` and its `wet` sound)."
+      }
+    ],
+    "files": [
+      "lib/device-signal.ts"
+    ],
+    "from": "@/lib/device-signal",
+    "kind": "lib",
+    "name": "device-signal",
+    "registryDependencies": [],
+    "usedBy": [
+      "arrangement-engine",
+      "device-panel",
+      "device-panels",
+      "use-device-signal"
     ]
   },
   {
@@ -2156,7 +2234,7 @@
     "dependencies": [
       "@audio-ui/engine"
     ],
-    "description": "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and analysers of what goes in and comes out are there for a meter or a spectrum.",
+    "description": "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal).",
     "exports": [
       {
         "kind": "interface",
@@ -2219,6 +2297,77 @@
       "block-vibe",
       "block-wah",
       "use-pulses-through-compressor"
+    ]
+  },
+  {
+    "dependencies": [
+      "@audio-ui/engine"
+    ],
+    "description": "The live signal of a device's engine, for its panel's signal prop: the same object for the life of the component, following the engine as it changes and silent while there is none, listening only while the panel watches it.",
+    "exports": [
+      {
+        "kind": "function",
+        "name": "useDeviceSignal",
+        "summary": "The live signal of a device's engine, for its panel's `signal`: what goes in and comes out, and what the device declares in `signals`."
+      }
+    ],
+    "files": [
+      "hooks/use-device-signal.ts"
+    ],
+    "from": "@/hooks/use-device-signal",
+    "kind": "hook",
+    "name": "use-device-signal",
+    "registryDependencies": [
+      "device-signal"
+    ],
+    "usedBy": [
+      "block-auto-pan",
+      "block-bass-enhancer",
+      "block-binaural-panner",
+      "block-channel-eq",
+      "block-chorus",
+      "block-compander",
+      "block-compressor",
+      "block-deesser",
+      "block-delay",
+      "block-distortion",
+      "block-drum-synth",
+      "block-ducker",
+      "block-electric-piano",
+      "block-equalizer",
+      "block-exciter",
+      "block-expander",
+      "block-filter",
+      "block-fm-synth",
+      "block-frequency-shifter",
+      "block-gate",
+      "block-graphic-eq",
+      "block-guitar",
+      "block-limiter",
+      "block-lofi",
+      "block-mid-side",
+      "block-mono-synth",
+      "block-multiband",
+      "block-organ",
+      "block-overdrive",
+      "block-phaser",
+      "block-pocket-synth",
+      "block-poly-synth",
+      "block-redux",
+      "block-reverb",
+      "block-rotary",
+      "block-sampler",
+      "block-saturator",
+      "block-string-machine",
+      "block-stutter",
+      "block-tape-keys",
+      "block-tilt-eq",
+      "block-transient",
+      "block-unlimiter",
+      "block-utility",
+      "block-vibe",
+      "block-wah",
+      "block-wave-shaper"
     ]
   },
   {
@@ -2757,12 +2906,6 @@
     "name": "use-spectrum",
     "registryDependencies": [],
     "usedBy": [
-      "block-channel-eq",
-      "block-deesser",
-      "block-equalizer",
-      "block-filter",
-      "block-multiband",
-      "block-overdrive",
       "plot-demo",
       "spectrum-analyzer",
       "spectrum-analyzer-demo"

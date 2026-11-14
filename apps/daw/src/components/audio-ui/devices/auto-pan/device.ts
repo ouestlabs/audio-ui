@@ -57,6 +57,7 @@ export const autoPanDevice = defineDevice({
       unit: "%",
     },
   ],
+  signals: ["modulator"],
 });
 
 export type AutoPanState = DeviceState<typeof autoPanDevice.parameters>;

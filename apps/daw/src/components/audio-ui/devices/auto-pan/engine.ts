@@ -70,6 +70,8 @@ export function createAutoPanEngine(
     },
     input,
     output,
+    // The oscillator itself, from -1 to 1, before either depth: where the pan or the level is headed.
+    taps: { modulator: oscillator },
     update: (state, next) => {
       tempo = next?.tempo ?? tempo;
       oscillator.type = state.shape;

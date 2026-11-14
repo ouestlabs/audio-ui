@@ -6,6 +6,7 @@ import {
 import { createExciterEngine } from "@/registry-audio/bases/base/devices/exciter/engine";
 import { ExciterPanel } from "@/registry-audio/bases/base/devices/exciter/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -20,14 +21,15 @@ export default function BlockExciter() {
     exciterDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createExciterEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, exciterDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <ExciterPanel onValueChange={setState} value={state} />
+      <ExciterPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

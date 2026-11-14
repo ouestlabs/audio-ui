@@ -1,5 +1,4 @@
-import type { Source } from "@audio-ui/react";
-import { type ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -28,6 +27,10 @@ import {
   compressorDevice,
   compressorUnused,
 } from "@/registry-audio/bases/base/devices/compressor/device";
+import {
+  curveDot,
+  type DeviceSignal,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_DB = -60;
 const MAX_DB = 6;
@@ -51,9 +54,9 @@ interface CompressorPanelProps {
   /** Whatever the host puts next to the name: a play button, a reading. */
   children?: ReactNode;
   className?: string;
-  /** The level going in, in dB, as a live source: a dot rides the curve at it. */
-  level?: Source<number>;
   onValueChange: (state: CompressorState) => void;
+  /** Its live sound: a dot rides the curve at the level going in, and its levels and the gain it takes off stand at the edge. */
+  signal?: DeviceSignal;
   value: CompressorState;
 }
 
@@ -67,8 +70,8 @@ interface CompressorPanelProps {
 function CompressorPanel({
   children,
   className,
-  level,
   onValueChange,
+  signal,
   value,
 }: CompressorPanelProps) {
   const output = useMemo(() => compressorCurve(value), [value]);
@@ -81,37 +84,17 @@ function CompressorPanel({
     [onValueChange, value]
   );
   const unused = compressorUnused(value.model);
-  const dot = useMemo(
-    () =>
-      level && {
-        getSnapshot: () => {
-          const x = level.getSnapshot();
-          return { x, y: output(x) };
-        },
-        subscribe: level.subscribe,
-      },
-    [level, output]
-  );
-  // The dot rides the curve while there is a signal; with none it has no place on it.
-  const root = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    const element = root.current;
-    if (!(element && level)) {
-      return;
-    }
-    const sync = () =>
-      element.toggleAttribute("data-idle", level.getSnapshot() < MIN_DB);
-    sync();
-    return level.subscribe(sync);
-  }, [level]);
+  // The dot rides the curve at the level going in, the louder of its channels.
+  const dot = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels && curveDot(levels, output);
+  }, [output, signal]);
   return (
     <div
-      className={cn("group/compressor h-full w-full", className)}
-      data-idle=""
+      className={cn("h-full w-full", className)}
       data-slot="compressor-panel"
-      ref={root}
     >
-      <DeviceFrame className="h-full">
+      <DeviceFrame className="h-full" signal={signal}>
         <DeviceHeader
           activator="enabled"
           device={compressorDevice}
@@ -170,10 +153,8 @@ function CompressorPanel({
               <PlotCurve fn={output} />
             </PlotGraph>
             {dot ? (
-              <PlotDot
-                className="group-data-idle/compressor:hidden"
-                source={dot}
-              />
+              // With no sound going in, the dot has no place on the curve.
+              <PlotDot className="group-data-idle/device:hidden" source={dot} />
             ) : null}
           </Plot>
           <DevicePanel

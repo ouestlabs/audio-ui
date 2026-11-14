@@ -15,6 +15,7 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTraceArea,
 } from "@/components/audio-ui/plot";
 import {
   Select,
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */
@@ -50,11 +52,17 @@ const FREE_OFF = ["division"] as const;
 const formatSeconds = (seconds: number) => `${seconds}s`;
 const formatPercent = (percent: number) => `${percent}%`;
 
+/** The scale the spectrum behind the sweep is drawn on, in dB of level. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
+
 interface PhaserPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */
   children?: ReactNode;
   className?: string;
   onValueChange: (state: PhaserState) => void;
+  /** Its live sound: the spectrum of what comes out, where its notches sweep. */
+  signal?: DeviceSignal;
   /** The host's tempo, which a synced rate is read against. @default 120 BPM */
   tempo?: Tempo;
   value: PhaserState;
@@ -71,9 +79,12 @@ function PhaserPanel({
   children,
   className,
   onValueChange,
+  signal,
   tempo = DEFAULT_TEMPO,
   value,
 }: PhaserPanelProps) {
+  // What comes out: the notches its stages cut, moving as the sweep runs.
+  const spectrum = useMemo(() => signal?.output.spectrum(), [signal]);
   const sweep = useMemo(() => phaserSweep(value, tempo), [tempo, value]);
   const pickMode = useCallback(
     (mode: string | null) => {
@@ -88,7 +99,7 @@ function PhaserPanel({
     unused = [...UNUSED[value.mode], ...(value.sync ? SYNCED_OFF : FREE_OFF)];
   }
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={phaserDevice}
@@ -137,6 +148,15 @@ function PhaserPanel({
             y={{ format: formatPercent, ticks: PERCENT_TICKS }}
           />
           <PlotGraph>
+            {spectrum ? (
+              // Behind the sweep, on a scale of its own: what comes out, the notches its stages cut moving as it runs.
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotCurve fn={sweep} />
           </PlotGraph>
         </Plot>

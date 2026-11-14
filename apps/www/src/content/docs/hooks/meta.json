@@ -4,6 +4,7 @@
     "---Engines and output---",
     "use-master-bus",
     "use-device-engines",
+    "use-device-signal",
     "use-polyphony",
     "use-device-loop",
     "use-synth-voices",

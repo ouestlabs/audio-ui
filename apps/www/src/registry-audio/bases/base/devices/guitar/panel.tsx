@@ -1,7 +1,8 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -14,6 +15,7 @@ import {
   type GuitarState,
   guitarDevice,
 } from "@/registry-audio/bases/base/devices/guitar/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** The controls by what they do. */
 const GROUPS = [
@@ -33,6 +35,8 @@ interface GuitarPanelProps {
   /** A key is played, as a note of the keyboard. */
   onNoteOn?: (note: GuitarNote) => void;
   onValueChange: (state: GuitarState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: GuitarState;
 }
 
@@ -50,8 +54,11 @@ function GuitarPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: GuitarPanelProps) {
+  // The string as it rings, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const play = useCallback(
     (pitch: number) => onNoteOn?.({ frequency: midiToHz(pitch) }),
     [onNoteOn]
@@ -59,7 +66,7 @@ function GuitarPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={guitarDevice}
         onValueChange={onValueChange}
@@ -77,6 +84,9 @@ function GuitarPanel({
           onValueChange={onValueChange}
           value={value}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Pick the strings"

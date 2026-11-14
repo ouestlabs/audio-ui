@@ -15,11 +15,16 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
+/** The scale a spectrum is drawn on, in dB of level: its own, behind the plot's. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 const MIN_DB = -36;
 const MAX_DB = 6;
 const DB_TICKS = [-24, -12, 0];
@@ -33,6 +38,8 @@ interface LofiPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: LofiState) => void;
+  /** Its live sound: the spectrum of what comes out, behind the band it keeps. */
+  signal?: DeviceSignal;
   value: LofiState;
 }
 
@@ -47,11 +54,16 @@ function LofiPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: LofiPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const curve = useMemo(() => lofiCurve(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={lofiDevice}
@@ -75,6 +87,15 @@ function LofiPanel({
         >
           <PlotGrid x={{ count: 6 }} y={{ ticks: DB_TICKS }} />
           <PlotGraph>
+            {spectrum ? (
+              // What comes out, behind what the device does to it.
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotArea fillTo={MIN_DB} fn={curve} />
             <PlotCurve fn={curve} />
           </PlotGraph>

@@ -8,6 +8,7 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -19,9 +20,13 @@ import {
   exciterBand,
   exciterDevice,
 } from "@/registry-audio/bases/base/devices/exciter/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
+/** The scale a spectrum is drawn on, in dB of level: its own, behind the plot's. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 const MIN_DB = -36;
 const MAX_DB = 12;
 const DB_TICKS = [-24, -12, 0];
@@ -38,6 +43,8 @@ interface ExciterPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ExciterState) => void;
+  /** Its live sound: the spectrum of what comes out, behind the band it excites. */
+  signal?: DeviceSignal;
   value: ExciterState;
 }
 
@@ -50,11 +57,16 @@ function ExciterPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: ExciterPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const band = useMemo(() => exciterBand(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={exciterDevice}
@@ -79,6 +91,15 @@ function ExciterPanel({
           <PlotCursor format={describePointer} />
           <PlotGrid x={{ count: 6 }} y={{ ticks: DB_TICKS }} />
           <PlotGraph>
+            {spectrum ? (
+              // What comes out, behind what the device does to it.
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotArea fillTo={MIN_DB} fn={band} />
             <PlotCurve fn={band} />
           </PlotGraph>

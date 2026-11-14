@@ -160,6 +160,8 @@ export function createDelayEngine(
     input,
     output,
     ready,
+    // The echoes alone, every mode's, after their level and before the dry sound joins them.
+    taps: { wet },
     update: (state, next) => {
       latest = state;
       tempo = next?.tempo ?? tempo;

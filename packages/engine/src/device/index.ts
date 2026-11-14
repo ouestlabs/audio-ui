@@ -11,6 +11,7 @@ export {
   type DeviceDescription,
   type DeviceReadings,
   type DeviceRejection,
+  type DeviceSignalName,
   type DeviceState,
   defineDevice,
   type NumberParameter,
@@ -22,6 +23,7 @@ export {
 export {
   createFeed,
   createWorkletStage,
+  type DeviceTaps,
   type EffectEngine,
   type EngineFactory,
   FEED_RELEASE_MS,

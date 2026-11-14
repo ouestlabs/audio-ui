@@ -6,6 +6,7 @@ import {
 import { createUnlimiterEngine } from "@/registry-audio/bases/base/devices/unlimiter/engine";
 import { UnlimiterPanel } from "@/registry-audio/bases/base/devices/unlimiter/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -21,14 +22,15 @@ export default function BlockUnlimiter() {
     unlimiterDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createUnlimiterEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, unlimiterDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <UnlimiterPanel onValueChange={setState} value={state} />
+      <UnlimiterPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

@@ -1,5 +1,4 @@
 import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
-import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -37,6 +36,7 @@ import {
   resonanceDb,
   resonanceFromDb,
 } from "@/registry-audio/bases/base/devices/filter/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -70,8 +70,8 @@ interface FilterPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: FilterState) => void;
-  /** A live spectrum behind the curve, such as from `useSpectrum`. */
-  spectrum?: Source<Float32Array>;
+  /** Its live sound: the spectrum of what comes out, behind the curve. */
+  signal?: DeviceSignal;
   value: FilterState;
 }
 
@@ -88,9 +88,13 @@ function FilterPanel({
   children,
   className,
   onValueChange,
-  spectrum,
+  signal,
   value,
 }: FilterPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const curve = useMemo(() => filterCurve(value), [value]);
   const change = useCallback(
     ({ x, y }: { x: number; y: number }) =>
@@ -118,7 +122,7 @@ function FilterPanel({
     disabled = UNDRIVEN_OFF;
   }
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={filterDevice}

@@ -6,6 +6,7 @@ import {
   ToggleGroupItem,
 } from "@/registry/bases/base/ui/toggle-group";
 import { Fader } from "@/registry-audio/bases/base/audio/elements/fader";
+import { ScopePlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import { WaveformSelect } from "@/registry-audio/bases/base/audio/elements/waveform-select";
 import { XYPad } from "@/registry-audio/bases/base/audio/elements/xypad";
 import {
@@ -20,6 +21,7 @@ import {
   pocketSynthPitch,
   pocketSynthPosition,
 } from "@/registry-audio/bases/base/devices/pocket-synth/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** Graduations along the fader: ticks only, the readout beside it says the value. */
 const VOLUME_MARKS = [0, 0.25, 0.5, 0.75, 1];
@@ -54,6 +56,8 @@ interface PocketSynthPanelProps {
   /** A note is played: called as the pad is pressed and again as it moves. */
   onNoteOn?: (note: PocketSynthNote) => void;
   onValueChange: (state: PocketSynthState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: PocketSynthState;
 }
 
@@ -71,8 +75,11 @@ function PocketSynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: PocketSynthPanelProps) {
+  // The wave it plays now, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const faderId = useId();
   const faderLabelId = useId();
   const faderValueId = useId();
@@ -116,7 +123,7 @@ function PocketSynthPanel({
   );
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={pocketSynthDevice}
         onValueChange={onValueChange}
@@ -130,6 +137,11 @@ function PocketSynthPanel({
       >
         <XYPad
           aria-label="Tone"
+          background={
+            live ? (
+              <ScopePlot aria-label="The wave it makes" bare source={live} />
+            ) : null
+          }
           fill
           formatValue={formatPad}
           maxX={PAD_MAX}

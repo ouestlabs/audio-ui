@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -13,7 +13,9 @@ import {
   tapeKeysDevice,
 } from "@/components/audio-ui/devices/tape-keys/device";
 import { Piano } from "@/components/audio-ui/piano";
+import { ScopePlot } from "@/components/audio-ui/signal-plot";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** The controls by what they do. */
@@ -39,6 +41,8 @@ interface TapeKeysPanelProps {
   /** A key is played, as a note of the keyboard. */
   onNoteOn?: (note: TapeKeysNote) => void;
   onValueChange: (state: TapeKeysState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: TapeKeysState;
 }
 
@@ -56,8 +60,11 @@ function TapeKeysPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: TapeKeysPanelProps) {
+  // The tape as it plays, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const pickStation = useCallback(
     (values: unknown[]) => {
       const [station] = values;
@@ -74,7 +81,7 @@ function TapeKeysPanel({
   const release = useCallback(() => onNoteOff?.(), [onNoteOff]);
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={tapeKeysDevice}
         onValueChange={onValueChange}
@@ -112,6 +119,9 @@ function TapeKeysPanel({
           onValueChange={onValueChange}
           value={value}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <Piano
           activeNotes={activeNotes}
           aria-label="Play the tapes"

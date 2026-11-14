@@ -6,6 +6,7 @@ import {
 import { createSaturatorEngine } from "@/registry-audio/bases/base/devices/saturator/engine";
 import { SaturatorPanel } from "@/registry-audio/bases/base/devices/saturator/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -21,14 +22,15 @@ export default function BlockSaturator() {
     saturatorDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createSaturatorEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, saturatorDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <SaturatorPanel onValueChange={setState} value={state} />
+      <SaturatorPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

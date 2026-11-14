@@ -12,11 +12,13 @@ import {
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
   PlotHandle,
   PlotLine,
 } from "@/components/audio-ui/plot";
+import { curveDot, type DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_DB = -80;
@@ -35,6 +37,8 @@ interface GatePanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: GateState) => void;
+  /** Its live sound: a dot rides the curve at the level going in. */
+  signal?: DeviceSignal;
   value: GateState;
 }
 
@@ -49,16 +53,22 @@ function GatePanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: GatePanelProps) {
   const curve = useMemo(() => gateCurve(value), [value]);
+  // The dot rides the curve at the level going in, the louder of its channels.
+  const dot = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels && curveDot(levels, curve);
+  }, [curve, signal]);
   const change = useCallback(
     ({ x }: { x: number }) =>
       onValueChange(gateDevice.apply(value, { thresholdDb: x }).state),
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={gateDevice}
@@ -100,6 +110,10 @@ function GatePanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {dot ? (
+            // With no sound going in, the dot has no place on the curve.
+            <PlotDot className="group-data-idle/device:hidden" source={dot} />
+          ) : null}
           {value.enabled ? (
             <PlotHandle
               aria-label="Threshold"

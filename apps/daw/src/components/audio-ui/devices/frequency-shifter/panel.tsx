@@ -14,6 +14,8 @@ import {
   PlotGraph,
   PlotGrid,
   PlotLine,
+  PlotTrace,
+  PlotTraceArea,
 } from "@/components/audio-ui/plot";
 import {
   Select,
@@ -23,10 +25,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
+/** The scale the spectra are drawn on, in dB of level: their own, behind the note's lines. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
+const SPECTRUM = { maxHz: MAX_HZ, minHz: MIN_HZ };
 const IN_THE_TITLE_BAR = ["enabled", "mode"] as const;
 const ALL = frequencyShifterDevice.parameters
   .map((parameter) => parameter.id)
@@ -45,6 +52,8 @@ interface FrequencyShifterPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: FrequencyShifterState) => void;
+  /** Its live sound: the spectrum going in and the spectrum coming out, shifted, over the note it draws. */
+  signal?: DeviceSignal;
   value: FrequencyShifterState;
 }
 
@@ -59,8 +68,12 @@ function FrequencyShifterPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: FrequencyShifterPanelProps) {
+  // What goes in, filled, and what comes out, a line over it: every partial moved by the same hertz, so harmonics stop lining up.
+  const heard = useMemo(() => signal?.input?.spectrum(SPECTRUM), [signal]);
+  const shifted = useMemo(() => signal?.output.spectrum(SPECTRUM), [signal]);
   const partials = useMemo(() => {
     const { input, output } = frequencyShifterPartials(value);
     // Off, or with nothing of it mixed in, what comes out is what goes in.
@@ -76,7 +89,7 @@ function FrequencyShifterPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={frequencyShifterDevice}
@@ -123,6 +136,22 @@ function FrequencyShifterPanel({
         >
           <PlotGrid x={{ count: 6 }} />
           <PlotGraph>
+            {heard ? (
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={heard}
+              />
+            ) : null}
+            {shifted ? (
+              <PlotTrace
+                className="stroke-[1.5px] stroke-primary group-data-idle/device:hidden"
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={shifted}
+              />
+            ) : null}
             {partials.input.map((hz) => (
               <PlotLine
                 axis="x"

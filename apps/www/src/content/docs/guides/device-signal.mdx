@@ -1,0 +1,117 @@
+---
+title: Device signal
+description: "What a device's face shows of its sound while it plays: the points of its engine it is read at, how a device declares them, the sources a panel draws from, and when the analysers come off."
+---
+
+A device's face shows its settings with no sound at all: a curve, a handle, its knobs. While it plays, it shows what the engine does to the sound as well, read from the engine itself and never animated on its own:
+
+- an equalizer, a filter or a wah draws the spectrum of what comes out behind its curve;
+- a compressor, a limiter or a gate rides a dot along its transfer curve at the level going in;
+- a distortion or a saturator marks how far along its curve the sound swings;
+- a delay runs its input past its heads as a tape, a dot on each at what that echo plays back;
+- a reverb fills its decay with the tail as it rings;
+- an auto pan or a vibe draws its oscillator as it ran over the last two seconds;
+- a utility, a chorus or a mid/side device shows where the sound sits between the speakers;
+- a synth shows the wave it plays, an organ its harmonics, a drum synth each hit's decay.
+
+With no sound going in, a face is idle: its live marks give way and its settings stay.
+
+## The signal of a device
+
+Every panel takes a `signal`: what its engine lets a face read, as live sources. Make one from the engine with [`useDeviceSignal`](/docs/hooks/use-device-signal):
+
+```tsx
+import { compressorDevice } from "@/components/audio-ui/devices/compressor/device";
+import { CompressorPanel } from "@/components/audio-ui/devices/compressor/panel";
+import { useDeviceSignal } from "@/hooks/use-device-signal";
+
+const signal = useDeviceSignal(engine, compressorDevice);
+
+<CompressorPanel onValueChange={setState} signal={signal} value={state} />;
+```
+
+On a project, the engine that plays it hands out one per device, by its id: `ArrangementEngine.signal(id, device)`. Give it to the device view as `signalOf`, and each panel on a track's chain gets its own:
+
+```tsx
+const { engine } = useArrangementEngine({ doc, recordings });
+
+<DeviceView signalOf={engine?.signal} {...props} />;
+```
+
+A signal follows the engine as a host makes it again, after an undo or a new device in the same place, and is silent while there is none. A device switched off on a track has the sound go around it, so its face is idle.
+
+## Points and what they read
+
+A signal has a point for each place of the engine a face can read: `input` (an effect's), `output`, `key` (a device with a sidechain) and the taps its device declares. Each point reads, as a [source](/docs/guides#your-own-engine):
+
+| Source | What it holds | Drawn by |
+| --- | --- | --- |
+| `levels` | The RMS of each channel in dB, rising at once and falling back, and its held peak | A `Meter`, a dot on a transfer curve (`curveDot`), two on a shaper's curve (`peakDots`) |
+| `active` | Whether sound passes, `false` after a moment of silence | The frame's idle state |
+| `spectrum({ minHz, maxHz, points })` | dB along a log frequency axis | A `PlotTraceArea` behind a curve, a `SpectrumPlot` |
+| `scope({ length, fit })` | The newest samples from where the wave rises through zero, so a steady tone stands still; `fit` scales the loudest of the last moments to the height | A `ScopePlot` |
+| `history({ seconds, points, of, newestFirst })` | What it held over the last `seconds`, counted on the audio clock: the signal itself (`"value"`) or its level in dB (`"level"`) | A `PlotTrace`, a `LevelPlot` |
+| `stereo` | The two channels' newest samples and how alike they are, from -1 to 1 | A `StereoField`, or a `StereoFieldLayer` behind another plot |
+
+The signal's `readings` are what the engine reports of itself, such as the gain a compressor takes off. [`device-signal`](/docs/lib/device-signal) has the full list, and `deriveSource`, which turns one source into another for a face's own reading of it.
+
+## Declaring what an engine exposes
+
+Beyond what goes in and comes out, a device declares what its engine lets a host read in `signals`, and its engine names those points in `taps`:
+
+```ts
+// device.ts
+export const autoPanDevice = defineDevice({
+  // …
+  signals: ["modulator"],
+});
+
+// engine.ts
+return {
+  input,
+  output,
+  // The oscillator itself, from -1 to 1, before either depth.
+  taps: { modulator: oscillator },
+  update,
+};
+```
+
+| Name | Where it comes from | A face draws |
+| --- | --- | --- |
+| `modulator` | `taps.modulator`: an LFO, -1 to 1 | The oscillator as it ran |
+| `wet` | `taps.wet`: the processed sound alone, before the dry joins it | A reverb's tail, a delay's echoes |
+| `gainReduction`, `bandGainReduction` | `readings()` | What it takes off |
+
+A tap is only listened to: an analyser plays nothing, so connecting one never changes the sound. A device declares only what its engine really has: an LFO that runs inside an AudioWorklet and does not report its phase is not a tap, and its face shows what it does to the sound instead, such as the phaser's notches in its spectrum.
+
+## A new device with a live face
+
+1. Declare in the device what its engine exposes beyond its input and output, and name those points in the engine's `taps`.
+2. Give the panel a `signal?: DeviceSignal` prop and pass it to `DeviceFrame`, which makes the panel idle while no sound goes in.
+3. Read what the face needs from it inside a `useMemo`, so the source is the same from one render to the next, and draw it with the Plot's live parts or `signal-plot`. Hide a mark that has no meaning in silence with `group-data-idle/device:hidden`.
+
+```tsx
+const spectrum = useMemo(
+  () => signal?.output.spectrum({ maxHz: 20_000, minHz: 20 }),
+  [signal]
+);
+
+<DeviceFrame signal={signal}>
+  {/* … */}
+  <PlotGraph>
+    {spectrum ? (
+      <PlotTraceArea fillTo={-100} max={-10} min={-100} source={spectrum} />
+    ) : null}
+    <PlotCurve fn={curve} />
+  </PlotGraph>
+</DeviceFrame>;
+```
+
+## When it listens, and what it costs
+
+- **Only while watched.** A point puts an analyser on the engine when the first source of it is subscribed, and takes it off with the last: a device whose face is not drawn costs nothing. A history reads an analyser of its own, long enough that a frame drawn late still finds the samples it missed.
+- **One frame loop.** Every source of every signal on the page is read in the same animation frame, and the loop sleeps once nothing is watched. Nothing re-renders React: the parts that draw a source paint the DOM, or a canvas, directly.
+- **Silence once.** A source publishes silence once, not every frame, so an idle face does not repaint.
+- **No cleanup to call.** A signal holds nothing of its own; unmounting what draws it is enough. When an engine is disposed, its signal reads silence.
+
+The browser checks in `test/browser/device-signal.check.ts` play real sound through real engines and check what the signal reads: a sine's level and peak, a scope's trigger, a spectrum's peak, an LFO's swing, a compressor's reduction, and forty-eight devices watched at once.

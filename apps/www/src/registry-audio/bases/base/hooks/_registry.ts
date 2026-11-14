@@ -203,6 +203,13 @@ export const hooks: RegistryItem[] = [
       "The engines of a device on a page: as many as asked, made on a destination's context from the state of the moment, each following the state and the host's tempo, disposed when the destination changes and on unmount, never updated once disposed. One for an effect, one per voice for an instrument.",
     registryDependencies: [],
   }),
+  hookItem("use-device-signal", {
+    categories: ["hooks", "audio", "device"],
+    dependencies: ["@audio-ui/engine"],
+    description:
+      "The live signal of a device's engine, for its panel's signal prop: the same object for the life of the component, following the engine as it changes and silent while there is none, listening only while the panel watches it.",
+    registryDependencies: ["@audio-ui/device-signal"],
+  }),
   hookItem("use-polyphony", {
     categories: ["audio", "synth"],
     dependencies: ["@audio-ui/engine"],
@@ -321,7 +328,7 @@ export const hooks: RegistryItem[] = [
     categories: ["hooks", "audio", "device"],
     dependencies: ["@audio-ui/engine"],
     description:
-      "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and analysers of what goes in and comes out are there for a meter or a spectrum.",
+      "A short loop of drums and plucked notes played through an effect's engine and out to a destination, for a block to show what a device does: it plays while the session's play switch is on, the engine is made for it and follows the state (use-device-engines), and the engine is returned for the panel's live sound (use-device-signal).",
     registryDependencies: [
       "@audio-ui/demo-sound",
       "@audio-ui/use-demo-source",

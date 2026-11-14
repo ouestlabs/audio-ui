@@ -16,7 +16,10 @@ import {
   PlotGraph,
   PlotGrid,
   PlotLine,
+  PlotTrace,
+  PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MAX_SIZE_DB = 30;
@@ -30,11 +33,18 @@ const OFF = unlimiterDevice.parameters
 
 const formatDb = (db: number) => `${db} dB`;
 
+/** The level at the foot of the plot for the envelope behind it, in dB: full scale at the top. */
+const ENVELOPE_FLOOR_DB = -60;
+/** The envelope's window: long enough for a few hits, short enough to see each attack. */
+const ENVELOPE = { of: "level", points: 240, seconds: 1.5 } as const;
+
 interface UnlimiterPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */
   children?: ReactNode;
   className?: string;
   onValueChange: (state: UnlimiterState) => void;
+  /** Its live sound: the level going in and the level coming out over the last moments, the attacks it lifts. */
+  signal?: DeviceSignal;
   value: UnlimiterState;
 }
 
@@ -49,11 +59,18 @@ function UnlimiterPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: UnlimiterPanelProps) {
+  // What went in, filled, and what came out, a line over it, over the last moments: the attacks and the tails as it shapes them.
+  const envelope = useMemo(() => {
+    const heard = signal?.input?.history(ENVELOPE);
+    const played = signal?.output.history(ENVELOPE);
+    return heard && played ? { heard, played } : null;
+  }, [signal]);
   const lift = useMemo(() => unlimiterLift(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={unlimiterDevice}
@@ -79,6 +96,23 @@ function UnlimiterPanel({
             y={{ format: formatDb, ticks: LIFT_TICKS }}
           />
           <PlotGraph>
+            {envelope ? (
+              <>
+                {/* Behind the control, on a level scale of its own: what went in, filled, and what came out, a line over it, over the last moments. */}
+                <PlotTraceArea
+                  fillTo={ENVELOPE_FLOOR_DB}
+                  max={0}
+                  min={ENVELOPE_FLOOR_DB}
+                  source={envelope.heard}
+                />
+                <PlotTrace
+                  className="stroke-primary/60 group-data-idle/device:hidden"
+                  max={0}
+                  min={ENVELOPE_FLOOR_DB}
+                  source={envelope.played}
+                />
+              </>
+            ) : null}
             {value.adaptive ? (
               <PlotLine
                 axis="x"

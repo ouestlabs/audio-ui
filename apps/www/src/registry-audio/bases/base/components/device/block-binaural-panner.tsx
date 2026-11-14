@@ -6,6 +6,7 @@ import {
 import { createBinauralPannerEngine } from "@/registry-audio/bases/base/devices/binaural-panner/engine";
 import { BinauralPannerPanel } from "@/registry-audio/bases/base/devices/binaural-panner/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
 
 const MASTER_VOLUME = 0.7;
@@ -20,14 +21,19 @@ export default function BlockBinauralPanner() {
     binauralPannerDevice.defaults()
   );
   const master = useMasterBus(MASTER_VOLUME);
-  useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createBinauralPannerEngine,
     destination: master,
     state,
   });
+  const signal = useDeviceSignal(engine, binauralPannerDevice);
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <BinauralPannerPanel onValueChange={setState} value={state} />
+      <BinauralPannerPanel
+        onValueChange={setState}
+        signal={signal}
+        value={state}
+      />
     </div>
   );
 }

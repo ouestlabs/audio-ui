@@ -6,12 +6,10 @@ import {
 import { createEqualizerEngine } from "@/registry-audio/bases/base/devices/equalizer/engine";
 import { EqualizerPanel } from "@/registry-audio/bases/base/devices/equalizer/panel";
 import { useDeviceLoop } from "@/registry-audio/bases/base/hooks/use-device-loop";
+import { useDeviceSignal } from "@/registry-audio/bases/base/hooks/use-device-signal";
 import { useMasterBus } from "@/registry-audio/bases/base/hooks/use-master-bus";
-import { useSpectrum } from "@/registry-audio/bases/base/hooks/use-spectrum";
 
 const MASTER_VOLUME = 0.7;
-const MIN_HZ = 20;
-const MAX_HZ = 20_000;
 /** A shape worth looking at: some weight, a dip in the low mids, some air. */
 const START = { highDb: 5, lowDb: 3, lowMidDb: -4 };
 
@@ -26,20 +24,16 @@ export default function BlockEqualizer() {
     () => equalizerDevice.apply(equalizerDevice.defaults(), START).state
   );
   const master = useMasterBus(MASTER_VOLUME);
-  const { analyser } = useDeviceLoop({
+  const { engine } = useDeviceLoop({
     create: createEqualizerEngine,
     destination: master,
     state,
   });
-  const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
+  const signal = useDeviceSignal(engine, equalizerDevice);
 
   return (
     <div className="cn-audio-panel h-full w-full min-w-0">
-      <EqualizerPanel
-        onValueChange={setState}
-        spectrum={spectrum}
-        value={state}
-      />
+      <EqualizerPanel onValueChange={setState} signal={signal} value={state} />
     </div>
   );
 }

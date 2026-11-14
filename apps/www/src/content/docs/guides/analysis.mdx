@@ -5,6 +5,8 @@ description: "Live levels and spectra from an analyser, in the shape a meter or 
 
 Tap a signal with an `AnalyserNode`, a tap that plays nothing, and these hooks turn it into a live [source](/docs/guides#your-own-engine) a component repaints from, with no React render per frame.
 
+A device's face reads its own engine the same way, through its signal: see [Device signal](/docs/guides/device-signal).
+
 ## Levels
 
 `useAudioLevels` turns one analyser per channel into what a [Meter](/docs/components/base/meter) paints: a level in dB that rises at once and falls at a release rate, and a peak that holds for a moment before it falls, as a live source.

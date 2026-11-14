@@ -7,6 +7,7 @@ import {
   PlotGraph,
   PlotGrid,
 } from "@/registry-audio/bases/base/audio/elements/plot";
+import { StereoFieldLayer } from "@/registry-audio/bases/base/audio/elements/stereo-field";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -17,6 +18,7 @@ import {
   chorusDevice,
   chorusSweep,
 } from "@/registry-audio/bases/base/devices/chorus/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 /** Two seconds of the sweep: the slowest rate is a cycle in 20 s, the plot shows what it does meanwhile. */
 const WINDOW_SECONDS = 2;
@@ -38,6 +40,8 @@ interface ChorusPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ChorusState) => void;
+  /** Its live sound: where what comes out sits between the speakers, and how alike its sides are. */
+  signal?: DeviceSignal;
   /** The host's tempo, which a synced rate is read against. @default 120 BPM */
   tempo?: Tempo;
   value: ChorusState;
@@ -53,6 +57,7 @@ function ChorusPanel({
   children,
   className,
   onValueChange,
+  signal,
   tempo = DEFAULT_TEMPO,
   value,
 }: ChorusPanelProps) {
@@ -69,7 +74,7 @@ function ChorusPanel({
     unused = value.sync ? SYNCED_OFF : FREE_OFF;
   }
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={chorusDevice}
@@ -90,6 +95,10 @@ function ChorusPanel({
           minX={0}
           minY={0}
         >
+          {signal ? (
+            // Behind what the plot draws: where what comes out sits between the speakers.
+            <StereoFieldLayer source={signal.output.stereo} />
+          ) : null}
           <PlotGrid
             x={{ format: formatSeconds, ticks: TIME_TICKS }}
             y={{ format: formatMs, ticks: MS_TICKS }}

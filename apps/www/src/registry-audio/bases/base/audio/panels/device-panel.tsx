@@ -7,7 +7,7 @@ import type {
   ParameterValue,
   ToggleParameter,
 } from "@audio-ui/engine/device";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Select,
@@ -27,6 +27,7 @@ import {
   isWaveform,
   WaveformSelect,
 } from "@/registry-audio/bases/base/audio/elements/waveform-select";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;
 type AnyState = Record<string, ParameterValue>;
@@ -280,18 +281,41 @@ function ChoiceOption({
 interface DeviceFrameProps {
   children: ReactNode;
   className?: string;
+  /** The device's live sound, from `useDeviceSignal` or a host: the frame is idle (`data-idle`) while no sound goes in, so the live marks of its face give way. */
+  signal?: DeviceSignal;
 }
 
-/** The frame of a device: a bordered strip with a header over a body, as a device sits in a chain. Its corners follow the style, like the blocks' surface. */
-function DeviceFrame({ children, className }: DeviceFrameProps) {
+/**
+ * The frame of a device: a bordered strip with a header over a body, as a
+ * device sits in a chain. Its corners follow the style, like the blocks'
+ * surface. Given its `signal`, it is idle (`data-idle`) while no sound goes
+ * in, or for an instrument while none comes out: a face hides its live marks
+ * with `group-data-idle/device:`.
+ */
+function DeviceFrame({ children, className, signal }: DeviceFrameProps) {
+  // Idle while no sound goes in, or for an instrument while none comes out: its live marks give way, its settings stay.
+  const root = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    const element = root.current;
+    if (!(element && signal)) {
+      return;
+    }
+    const { active } = signal.input ?? signal.output;
+    const sync = () =>
+      element.toggleAttribute("data-idle", !active.getSnapshot());
+    sync();
+    return active.subscribe(sync);
+  }, [signal]);
   return (
     <div
       className={cn(
-        "cn-audio-device flex w-full min-w-0 flex-col overflow-hidden border bg-card",
+        "cn-audio-device group/device flex w-full min-w-0 flex-col overflow-hidden border bg-card",
         className
       )}
       data-frame=""
+      data-idle=""
       data-slot="device-frame"
+      ref={root}
     >
       {children}
     </div>

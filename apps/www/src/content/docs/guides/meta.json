@@ -8,6 +8,7 @@
     "synthesis",
     "demo-sounds",
     "input",
-    "analysis"
+    "analysis",
+    "device-signal"
   ]
 }

@@ -1,5 +1,4 @@
 import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
-import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -22,6 +21,7 @@ import {
   overdriveBand,
   overdriveDevice,
 } from "@/registry-audio/bases/base/devices/overdrive/device";
+import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal";
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
@@ -49,8 +49,8 @@ interface OverdrivePanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: OverdriveState) => void;
-  /** A live spectrum behind the curve, such as from `useSpectrum`. */
-  spectrum?: Source<Float32Array>;
+  /** Its live sound: the spectrum of what comes out, behind the band that reaches the clip. */
+  signal?: DeviceSignal;
   value: OverdriveState;
 }
 
@@ -65,9 +65,13 @@ function OverdrivePanel({
   children,
   className,
   onValueChange,
-  spectrum,
+  signal,
   value,
 }: OverdrivePanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const band = useMemo(() => overdriveBand(value), [value]);
   const change = useCallback(
     ({ x }: { x: number }) =>
@@ -75,7 +79,7 @@ function OverdrivePanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={overdriveDevice}

@@ -4,6 +4,7 @@ import { CurveSelect } from "@/registry-audio/bases/base/audio/elements/curve-se
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
 } from "@/registry-audio/bases/base/audio/elements/plot";
@@ -18,6 +19,10 @@ import {
   distortionDevice,
   distortionShape,
 } from "@/registry-audio/bases/base/devices/distortion/device";
+import {
+  type DeviceSignal,
+  peakDots,
+} from "@/registry-audio/bases/base/lib/device-signal";
 
 const TICKS = [-0.5, 0, 0.5];
 const UNITY = (input: number) => input;
@@ -39,6 +44,8 @@ interface DistortionPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: DistortionState) => void;
+  /** Its live sound: two dots ride the curve at the peaks of what goes in, how far along it the sound swings, and its levels stand at the edge. */
+  signal?: DeviceSignal;
   value: DistortionState;
 }
 
@@ -52,15 +59,21 @@ function DistortionPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: DistortionPanelProps) {
   const curve = useMemo(() => distortionCurve(value), [value]);
+  // Two dots at the peaks of what goes in: how far along the curve the sound swings.
+  const swing = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels ? peakDots(levels, curve) : null;
+  }, [curve, signal]);
   const pickCurve = useCallback(
     (next: string) => onValueChange(distortionDevice.set(value, "curve", next)),
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={distortionDevice}
@@ -89,6 +102,18 @@ function DistortionPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {swing ? (
+            <>
+              <PlotDot
+                className="group-data-idle/device:hidden"
+                source={swing.positive}
+              />
+              <PlotDot
+                className="group-data-idle/device:hidden"
+                source={swing.negative}
+              />
+            </>
+          ) : null}
         </Plot>
         <div className="grid grid-cols-[auto_1fr] items-start gap-x-3">
           <div className="flex flex-col items-center gap-1.5">
