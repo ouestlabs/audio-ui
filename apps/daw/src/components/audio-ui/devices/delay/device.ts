@@ -124,6 +124,7 @@ export const delayDevice = defineDevice({
       unit: "ms",
     },
   ],
+  signals: ["wet"],
 });
 
 export type DelayState = DeviceState<typeof delayDevice.parameters>;

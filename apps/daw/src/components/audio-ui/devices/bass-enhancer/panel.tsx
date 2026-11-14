@@ -17,11 +17,16 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 20;
 const MAX_HZ = 2000;
+/** The scale a spectrum is drawn on, in dB of level: its own, behind the plot's. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 const MIN_DB = -36;
 const MAX_DB = 6;
 const DB_TICKS = [-24, -12, 0];
@@ -38,6 +43,8 @@ interface BassEnhancerPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: BassEnhancerState) => void;
+  /** Its live sound: the spectrum of what comes out, its sub and its harmonics, behind the bands it works on. */
+  signal?: DeviceSignal;
   value: BassEnhancerState;
 }
 
@@ -50,11 +57,16 @@ function BassEnhancerPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: BassEnhancerPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const bands = useMemo(() => bassEnhancerBands(value), [value]);
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={bassEnhancerDevice}
@@ -79,6 +91,15 @@ function BassEnhancerPanel({
           <PlotCursor format={describePointer} />
           <PlotGrid x={{ count: 4 }} y={{ ticks: DB_TICKS }} />
           <PlotGraph>
+            {spectrum ? (
+              // What comes out, behind what the device does to it.
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotCurve
               className="stroke-muted-foreground [stroke-dasharray:4_4]"
               fn={bands.sub}

@@ -16,6 +16,7 @@ import {
   PlotGraph,
   PlotGrid,
 } from "@/components/audio-ui/plot";
+import { SpectrumPlot } from "@/components/audio-ui/signal-plot";
 import {
   Select,
   SelectContent,
@@ -24,6 +25,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */
@@ -55,6 +57,8 @@ interface PhaserPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: PhaserState) => void;
+  /** Its live sound: the spectrum of what comes out, where its notches sweep. */
+  signal?: DeviceSignal;
   /** The host's tempo, which a synced rate is read against. @default 120 BPM */
   tempo?: Tempo;
   value: PhaserState;
@@ -71,9 +75,12 @@ function PhaserPanel({
   children,
   className,
   onValueChange,
+  signal,
   tempo = DEFAULT_TEMPO,
   value,
 }: PhaserPanelProps) {
+  // What comes out: the notches its stages cut, moving as the sweep runs.
+  const spectrum = useMemo(() => signal?.output.spectrum(), [signal]);
   const sweep = useMemo(() => phaserSweep(value, tempo), [tempo, value]);
   const pickMode = useCallback(
     (mode: string | null) => {
@@ -88,7 +95,7 @@ function PhaserPanel({
     unused = [...UNUSED[value.mode], ...(value.sync ? SYNCED_OFF : FREE_OFF)];
   }
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={phaserDevice}
@@ -140,6 +147,12 @@ function PhaserPanel({
             <PlotCurve fn={sweep} />
           </PlotGraph>
         </Plot>
+        {spectrum ? (
+          <SpectrumPlot
+            aria-label="Its notches in what comes out"
+            source={spectrum}
+          />
+        ) : null}
         <DevicePanel
           className="grid-cols-5"
           device={phaserDevice}

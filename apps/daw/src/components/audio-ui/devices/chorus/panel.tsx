@@ -16,6 +16,8 @@ import {
   PlotGraph,
   PlotGrid,
 } from "@/components/audio-ui/plot";
+import { StereoField } from "@/components/audio-ui/stereo-field";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** Two seconds of the sweep: the slowest rate is a cycle in 20 s, the plot shows what it does meanwhile. */
@@ -38,6 +40,8 @@ interface ChorusPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: ChorusState) => void;
+  /** Its live sound: where what comes out sits between the speakers, and how alike its sides are. */
+  signal?: DeviceSignal;
   /** The host's tempo, which a synced rate is read against. @default 120 BPM */
   tempo?: Tempo;
   value: ChorusState;
@@ -53,6 +57,7 @@ function ChorusPanel({
   children,
   className,
   onValueChange,
+  signal,
   tempo = DEFAULT_TEMPO,
   value,
 }: ChorusPanelProps) {
@@ -69,7 +74,7 @@ function ChorusPanel({
     unused = value.sync ? SYNCED_OFF : FREE_OFF;
   }
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={chorusDevice}
@@ -82,24 +87,33 @@ function ChorusPanel({
         className="flex min-h-0 grow flex-col gap-2 p-2"
         data-slot="chorus-panel"
       >
-        <Plot
-          aria-label="Delay time over two seconds"
-          className="h-28 min-h-16 grow"
-          maxX={WINDOW_SECONDS}
-          maxY={MAX_MS}
-          minX={0}
-          minY={0}
-        >
-          <PlotGrid
-            x={{ format: formatSeconds, ticks: TIME_TICKS }}
-            y={{ format: formatMs, ticks: MS_TICKS }}
-          />
-          <PlotGraph>
-            {sweeps.map(({ sweep, voice }) => (
-              <PlotCurve fn={sweep} key={voice} />
-            ))}
-          </PlotGraph>
-        </Plot>
+        <div className="flex h-28 min-h-16 grow gap-2">
+          <Plot
+            aria-label="Delay time over two seconds"
+            className="h-full min-w-0 flex-1"
+            maxX={WINDOW_SECONDS}
+            maxY={MAX_MS}
+            minX={0}
+            minY={0}
+          >
+            <PlotGrid
+              x={{ format: formatSeconds, ticks: TIME_TICKS }}
+              y={{ format: formatMs, ticks: MS_TICKS }}
+            />
+            <PlotGraph>
+              {sweeps.map(({ sweep, voice }) => (
+                <PlotCurve fn={sweep} key={voice} />
+              ))}
+            </PlotGraph>
+          </Plot>
+          {signal ? (
+            // Where what comes out sits between the speakers.
+            <StereoField
+              className="w-20 shrink-0 self-center"
+              source={signal.output.stereo}
+            />
+          ) : null}
+        </div>
         <DevicePanel
           className="grid-cols-4"
           device={chorusDevice}

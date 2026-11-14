@@ -1,5 +1,5 @@
 import { formatLevel } from "@audio-ui/engine/format";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -15,7 +15,10 @@ import {
   PlotGrid,
   PlotHandle,
   PlotLine,
+  PlotTrace,
+  PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const LIMIT_DB = 12;
@@ -29,11 +32,18 @@ const formatMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describeValue = (value: number) => formatLevel(value);
 const getAriaLabel = (axis: "x" | "y") => (axis === "x" ? "Sustain" : "Attack");
 
+/** The level at the foot of the plot for the envelope behind it, in dB: full scale at the top. */
+const ENVELOPE_FLOOR_DB = -60;
+/** The envelope's window: long enough for a few hits, short enough to see each attack. */
+const ENVELOPE = { of: "level", points: 240, seconds: 1.5 } as const;
+
 interface TransientPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */
   children?: ReactNode;
   className?: string;
   onValueChange: (state: TransientState) => void;
+  /** Its live sound: the level going in and the level coming out over the last moments, its attacks and its sustain as it shapes them. */
+  signal?: DeviceSignal;
   value: TransientState;
 }
 
@@ -48,8 +58,15 @@ function TransientPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: TransientPanelProps) {
+  // What went in, filled, and what came out, a line over it, over the last moments: the attacks and the tails as it shapes them.
+  const envelope = useMemo(() => {
+    const heard = signal?.input?.history(ENVELOPE);
+    const played = signal?.output.history(ENVELOPE);
+    return heard && played ? { heard, played } : null;
+  }, [signal]);
   const change = useCallback(
     ({ x, y }: { x: number; y: number }) =>
       onValueChange(
@@ -58,7 +75,7 @@ function TransientPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={transientDevice}
@@ -84,6 +101,23 @@ function TransientPanel({
             y={{ format: formatMark, ticks: TICKS }}
           />
           <PlotGraph>
+            {envelope ? (
+              <>
+                {/* Behind the control, on a level scale of its own: what went in, filled, and what came out, a line over it, over the last moments. */}
+                <PlotTraceArea
+                  fillTo={ENVELOPE_FLOOR_DB}
+                  max={0}
+                  min={ENVELOPE_FLOOR_DB}
+                  source={envelope.heard}
+                />
+                <PlotTrace
+                  className="stroke-primary/60 group-data-idle/device:hidden"
+                  max={0}
+                  min={ENVELOPE_FLOOR_DB}
+                  source={envelope.played}
+                />
+              </>
+            ) : null}
             <PlotLine axis="x" className="stroke-foreground/40" value={0} />
             <PlotLine axis="y" className="stroke-foreground/40" value={0} />
           </PlotGraph>

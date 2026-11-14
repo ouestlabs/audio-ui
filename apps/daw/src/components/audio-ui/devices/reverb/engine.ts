@@ -120,6 +120,8 @@ export function createReverbEngine(
     },
     input,
     output,
+    // The tail alone, after its level and before the dry sound joins it.
+    taps: { wet },
     update: (state) => {
       latest = state;
       const settings = reverbSettings(state);

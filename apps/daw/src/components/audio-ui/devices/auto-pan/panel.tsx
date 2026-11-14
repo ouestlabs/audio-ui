@@ -15,7 +15,9 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTrace,
 } from "@/components/audio-ui/plot";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** Two seconds of the oscillator, whatever the rate: the plot shows what it does meanwhile. */
@@ -37,6 +39,8 @@ interface AutoPanPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: AutoPanState) => void;
+  /** Its live sound: what its oscillator did over the last two seconds, scrolling, in place of the drawn sweep while sound goes in, and its levels at the edge. */
+  signal?: DeviceSignal;
   /** The host's tempo, which a synced rate is read against. @default 120 BPM */
   tempo?: Tempo;
   value: AutoPanState;
@@ -50,16 +54,23 @@ function AutoPanPanel({
   children,
   className,
   onValueChange,
+  signal,
   tempo = DEFAULT_TEMPO,
   value,
 }: AutoPanPanelProps) {
   const sweep = useMemo(() => autoPanSweep(value, tempo), [tempo, value]);
+  // The oscillator as it ran, scaled by the depth as the sweep is: only while it moves anything.
+  const moved = value.enabled && value.depth > 0 ? signal?.modulator : null;
+  const history = useMemo(
+    () => moved?.history({ points: 240, seconds: WINDOW_SECONDS }),
+    [moved]
+  );
   let unused: readonly (typeof ALL)[number][] = ALL;
   if (value.enabled) {
     unused = value.sync ? SYNCED_OFF : FREE_OFF;
   }
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={autoPanDevice}
@@ -85,7 +96,22 @@ function AutoPanPanel({
             y={{ format: formatPercent, ticks: PERCENT_TICKS }}
           />
           <PlotGraph>
-            <PlotCurve fn={sweep} />
+            <PlotCurve
+              // The sweep as set while no sound goes in; once it does, the oscillator as it ran.
+              className={
+                history ? "hidden group-data-idle/device:inline" : undefined
+              }
+              fn={sweep}
+            />
+            {history ? (
+              <PlotTrace
+                // Drawn as the sweep is: the same line, as it ran.
+                className="stroke-[1.5px] stroke-primary group-data-idle/device:hidden"
+                max={100 / value.depth}
+                min={-100 / value.depth}
+                source={history}
+              />
+            ) : null}
           </PlotGraph>
         </Plot>
         <DevicePanel

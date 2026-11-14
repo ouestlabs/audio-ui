@@ -14,10 +14,12 @@ import {
 import {
   Plot,
   PlotCurve,
+  PlotDot,
   PlotGraph,
   PlotGrid,
   PlotHandle,
 } from "@/components/audio-ui/plot";
+import { curveDot, type DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_DB = -90;
@@ -36,6 +38,8 @@ interface CompanderPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: CompanderState) => void;
+  /** Its live sound: a dot rides the curve at the level going in. */
+  signal?: DeviceSignal;
   value: CompanderState;
 }
 
@@ -49,9 +53,15 @@ function CompanderPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: CompanderPanelProps) {
   const curve = useMemo(() => companderCurve(value), [value]);
+  // The dot rides the curve at the level going in, the louder of its channels.
+  const dot = useMemo(() => {
+    const levels = signal?.input?.levels;
+    return levels && curveDot(levels, curve);
+  }, [curve, signal]);
   // A handle moves up and down only: its level in says which point it is.
   const movePoint = useCallback(
     ({ x, y }: { x: number; y: number }) => {
@@ -64,7 +74,7 @@ function CompanderPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={companderDevice}
@@ -96,6 +106,10 @@ function CompanderPanel({
             />
             <PlotCurve fn={curve} />
           </PlotGraph>
+          {dot ? (
+            // With no sound going in, the dot has no place on the curve.
+            <PlotDot className="group-data-idle/device:hidden" source={dot} />
+          ) : null}
           {value.enabled
             ? COMPANDER_POINTS.map((id, index) => {
                 const inDb = COMPANDER_POINTS_DB[index] ?? 0;

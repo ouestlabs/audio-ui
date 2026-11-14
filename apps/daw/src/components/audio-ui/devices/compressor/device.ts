@@ -96,6 +96,7 @@ export const compressorDevice = defineDevice({
       unit: "%",
     },
   ],
+  signals: ["gainReduction"],
 });
 
 export type CompressorState = DeviceState<typeof compressorDevice.parameters>;

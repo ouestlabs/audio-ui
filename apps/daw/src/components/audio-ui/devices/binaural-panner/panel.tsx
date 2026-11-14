@@ -17,6 +17,8 @@ import {
   PlotHandle,
   PlotLine,
 } from "@/components/audio-ui/plot";
+import { StereoField } from "@/components/audio-ui/stereo-field";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const SWITCHES = ["enabled"] as const;
@@ -34,6 +36,8 @@ interface BinauralPannerPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: BinauralPannerState) => void;
+  /** Its live sound: where what comes out sits between the speakers, and how alike its sides are. */
+  signal?: DeviceSignal;
   value: BinauralPannerState;
 }
 
@@ -47,6 +51,7 @@ function BinauralPannerPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: BinauralPannerPanelProps) {
   const point = useMemo(() => binauralPoint(value), [value]);
@@ -63,7 +68,7 @@ function BinauralPannerPanel({
     [value.azimuthDeg, value.distanceM]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={binauralPannerDevice}
@@ -76,7 +81,7 @@ function BinauralPannerPanel({
         className="flex min-h-0 grow flex-col items-center gap-2 p-2"
         data-slot="binaural-panner-panel"
       >
-        <div className="flex min-h-28 w-full grow justify-center">
+        <div className="flex min-h-28 w-full grow justify-center gap-4">
           <Plot
             aria-label="The sound around the head, seen from above"
             className="aspect-square h-full w-auto"
@@ -103,6 +108,13 @@ function BinauralPannerPanel({
               />
             ) : null}
           </Plot>
+          {signal ? (
+            // Where what comes out sits between the speakers, beside where it is placed around the head.
+            <StereoField
+              className="w-20 shrink-0 self-center"
+              source={signal.output.stereo}
+            />
+          ) : null}
         </div>
         <DevicePanel
           className="w-full grid-cols-4"

@@ -1,4 +1,8 @@
-import type { DeviceContext } from "@audio-ui/engine/device";
+import type {
+  Device,
+  DeviceContext,
+  ParameterDescriptor,
+} from "@audio-ui/engine/device";
 import {
   arrangementFrame,
   heardFrame,
@@ -51,6 +55,11 @@ import {
   type LibraryEngine,
   libraryDevice,
 } from "@/lib/device-library";
+import {
+  createDeviceSignal,
+  type DeviceSignal,
+  type SignalTarget,
+} from "@/lib/device-signal";
 import {
   createDrumRackEngine,
   type DrumRackEngine,
@@ -159,6 +168,8 @@ function padRecordings(
 /** The instrument at the head of a MIDI track, by the kind of track device it plays, as it was last given, with the recordings it had then. */
 type TrackInstrument = {
   device: TrackDevice;
+  /** Where its sound comes out, before the track's effects: what its panel's levels and scope listen to. */
+  output: AudioNode;
   recordings: ReadonlyMap<string, RecordingSource>;
 } & (
   | { kind: "drums"; player: DrumRackEngine }
@@ -262,6 +273,21 @@ export interface ArrangementEngine {
   schedule: (from: number, to: number) => void;
   /** Sets the metronome: it clicks on the audio clock, straight to the output, never through a track or the main track's meter. */
   setMetronome: (settings: MetronomeSettings) => void;
+  /**
+   * The live signal of the device `id`, wherever it is on a track's chain or
+   * at the head of a MIDI track, for its panel's `signal`: what goes into its
+   * engine and comes out, and what `device` declares it reports. One object
+   * per device for the life of the engine; it follows the device's engine as
+   * it is made again, and is silent while there is none, or while the device
+   * is switched off and the sound goes around it.
+   */
+  signal: (
+    id: string,
+    device: Pick<
+      Device<readonly ParameterDescriptor[]>,
+      "kind" | "sidechain" | "signals"
+    >
+  ) => DeviceSignal;
   /** Stops playback: the clips and the notes stop, the effects' tails ring on. */
   stop: () => void;
   /**
@@ -355,6 +381,7 @@ export async function createArrangementEngine(
   const rate = ctx.sampleRate;
   const mixer = createMixer(ctx, destination);
   const runtimes = new Map<string, TrackRuntime>();
+  const signals = new Map<string, DeviceSignal>();
   let doc: ArrangementDoc | null = null;
   let overrides: Readonly<Record<string, readonly AutomatedParameter[]>> = {};
   let state: PlaybackState = STOPPED;
@@ -391,6 +418,20 @@ export async function createArrangementEngine(
 
   const releaseVoices = (runtime: TrackRuntime, at: number) => {
     runtime.instrument?.player.release(at / rate);
+  };
+
+  /** What the device `id` sounds through now: its engine on a chain, a rack's, or the instrument at the head of a track. */
+  const signalTarget = (id: string): SignalTarget | null => {
+    for (const runtime of runtimes.values()) {
+      const placed = runtime.devices.get(id);
+      if (placed) {
+        return placed.engine as SignalTarget;
+      }
+      if (runtime.instrument?.device.id === id) {
+        return { output: runtime.instrument.output };
+      }
+    }
+    return null;
   };
 
   const disposeRuntime = (id: string) => {
@@ -442,12 +483,24 @@ export async function createArrangementEngine(
     if (device.device === DRUM_RACK_DEVICE) {
       const player = createDrumRackEngine(ctx, library);
       player.output.connect(input);
-      return { device, kind: "drums", player, recordings };
+      return {
+        device,
+        kind: "drums",
+        output: player.output,
+        player,
+        recordings,
+      };
     }
     if (device.device === INSTRUMENT_RACK_DEVICE) {
       const player = createInstrumentRackEngine(ctx, library, voices);
       player.output.connect(input);
-      return { device, kind: "layers", player, recordings };
+      return {
+        device,
+        kind: "layers",
+        output: player.output,
+        player,
+        recordings,
+      };
     }
     const entry = library(device.device);
     if (entry?.device.kind !== "instrument") {
@@ -462,7 +515,8 @@ export async function createArrangementEngine(
       voices,
       input
     );
-    return { device, kind: "voices", player, recordings };
+    // Its voices play straight into the track's input, which a MIDI track feeds nothing else: that is where its sound is heard.
+    return { device, kind: "voices", output: input, player, recordings };
   };
 
   /** A MIDI track's instrument: made the first time, then brought in step when its device or the recordings change. */
@@ -1254,6 +1308,8 @@ export async function createArrangementEngine(
       for (const id of [...runtimes.keys()]) {
         disposeRuntime(id);
       }
+      // With no engine left, a signal still watched is silent and lets go of its analysers.
+      signals.clear();
       mixer.dispose();
     },
     monitor: (track, input) => {
@@ -1327,6 +1383,15 @@ export async function createArrangementEngine(
         // What the scheduler has already passed, from the moment it was asked.
         scheduleClicks(Math.max(now(), state.at), scheduled);
       }
+    },
+    signal: (id, device) => {
+      const kept = signals.get(id);
+      if (kept) {
+        return kept;
+      }
+      const made = createDeviceSignal(() => signalTarget(id), device);
+      signals.set(id, made);
+      return made;
     },
     stop,
     update: (next, recordings, overridden = {}) => {

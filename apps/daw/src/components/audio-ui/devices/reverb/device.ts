@@ -78,6 +78,7 @@ export const reverbDevice = defineDevice({
       unit: "%",
     },
   ],
+  signals: ["wet"],
 });
 
 export type ReverbState = DeviceState<typeof reverbDevice.parameters>;

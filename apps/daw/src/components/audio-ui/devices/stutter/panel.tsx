@@ -1,3 +1,4 @@
+import { DEFAULT_TEMPO, secondsPerBeat } from "@audio-ui/engine/time";
 import { type ReactNode, useMemo } from "react";
 import {
   DeviceFrame,
@@ -15,7 +16,9 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTraceArea,
 } from "@/components/audio-ui/plot";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const SWITCHES = ["enabled"] as const;
@@ -24,11 +27,16 @@ const OFF = stutterDevice.parameters
   .filter((id) => id !== "enabled");
 const formatBeats = (beats: number) => `${Number(beats.toFixed(2))}`;
 
+/** The level at the foot of the plot for what plays, in dB: full scale at the top. */
+const PLAYED_FLOOR_DB = -60;
+
 interface StutterPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */
   children?: ReactNode;
   className?: string;
   onValueChange: (state: StutterState) => void;
+  /** Its live sound: the level of what comes out over the length of one interval, its slices and their repeats as they play. */
+  signal?: DeviceSignal;
   value: StutterState;
 }
 
@@ -42,9 +50,20 @@ function StutterPanel({
   children,
   className,
   onValueChange,
+  signal,
   value,
 }: StutterPanelProps) {
   const cycle = useMemo(() => stutterCycle(value), [value]);
+  // What comes out over one interval as drawn, newest at the end: its slices and their repeats as they play.
+  const played = useMemo(
+    () =>
+      signal?.output.history({
+        of: "level",
+        points: 240,
+        seconds: cycle.beats * secondsPerBeat(DEFAULT_TEMPO),
+      }),
+    [cycle.beats, signal]
+  );
   const ticks = useMemo(
     () =>
       Array.from(
@@ -54,7 +73,7 @@ function StutterPanel({
     [cycle]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={stutterDevice}
@@ -77,7 +96,22 @@ function StutterPanel({
         >
           <PlotGrid x={{ format: formatBeats, ticks }} />
           <PlotGraph>
-            <PlotArea fillTo={0} fn={cycle.level} />
+            {played ? (
+              <PlotTraceArea
+                fillTo={PLAYED_FLOOR_DB}
+                max={0}
+                min={PLAYED_FLOOR_DB}
+                source={played}
+              />
+            ) : null}
+            <PlotArea
+              // The slices as set are filled while no sound goes in; once it does, the fill is what plays, and the setting a line over it.
+              className={
+                played ? "hidden group-data-idle/device:inline" : undefined
+              }
+              fillTo={0}
+              fn={cycle.level}
+            />
             <PlotCurve fn={cycle.level} />
           </PlotGraph>
         </Plot>

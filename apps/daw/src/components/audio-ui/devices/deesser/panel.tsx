@@ -1,5 +1,4 @@
 import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
-import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import {
   DeviceFrame,
@@ -30,6 +29,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 const MIN_HZ = 500;
@@ -49,7 +49,8 @@ const OFF = deesserDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled" && id !== "model");
 
-const formatDbMark = (db: number) => (db > 0 ? `+${db}` : String(db));
+const formatDbMark = (db: number) =>
+  formatLevel(db, "dB", { decimals: 0, unit: false });
 const describePointer = (point: { x: number; y: number }) =>
   `${formatFrequency(point.x)} · ${formatLevel(point.y)}`;
 const describeValue = (value: number, axis: "x" | "y") =>
@@ -75,8 +76,8 @@ interface DeesserPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: DeesserState) => void;
-  /** A live spectrum behind the curve, such as from `useSpectrum`. */
-  spectrum?: Source<Float32Array>;
+  /** Its live sound: the spectrum of what comes out, behind the reduction it makes at each frequency. */
+  signal?: DeviceSignal;
   value: DeesserState;
 }
 
@@ -93,9 +94,13 @@ function DeesserPanel({
   children,
   className,
   onValueChange,
-  spectrum,
+  signal,
   value,
 }: DeesserPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const response = useMemo(() => deesserResponse(value), [value]);
   const change = useCallback(
     ({ x, y }: { x: number; y: number }) =>
@@ -116,7 +121,7 @@ function DeesserPanel({
     [onValueChange, value]
   );
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         activator="enabled"
         device={deesserDevice}

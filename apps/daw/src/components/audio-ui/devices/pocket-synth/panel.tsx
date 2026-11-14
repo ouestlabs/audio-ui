@@ -10,9 +10,11 @@ import {
   pocketSynthPosition,
 } from "@/components/audio-ui/devices/pocket-synth/device";
 import { Fader } from "@/components/audio-ui/fader";
+import { ScopePlot } from "@/components/audio-ui/signal-plot";
 import { WaveformSelect } from "@/components/audio-ui/waveform-select";
 import { XYPad } from "@/components/audio-ui/xypad";
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import type { DeviceSignal } from "@/lib/device-signal";
 import { cn } from "@/lib/utils";
 
 /** Graduations along the fader: ticks only, the readout beside it says the value. */
@@ -48,6 +50,8 @@ interface PocketSynthPanelProps {
   /** A note is played: called as the pad is pressed and again as it moves. */
   onNoteOn?: (note: PocketSynthNote) => void;
   onValueChange: (state: PocketSynthState) => void;
+  /** Its live sound: the wave it plays now, held still on each cycle. */
+  signal?: DeviceSignal;
   value: PocketSynthState;
 }
 
@@ -65,8 +69,11 @@ function PocketSynthPanel({
   onNoteOff,
   onNoteOn,
   onValueChange,
+  signal,
   value,
 }: PocketSynthPanelProps) {
+  // The wave it plays now, held still on each cycle.
+  const live = useMemo(() => signal?.output.scope({ fit: true }), [signal]);
   const faderId = useId();
   const faderLabelId = useId();
   const faderValueId = useId();
@@ -110,7 +117,7 @@ function PocketSynthPanel({
   );
 
   return (
-    <DeviceFrame className={cn("h-full", className)}>
+    <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
         device={pocketSynthDevice}
         onValueChange={onValueChange}
@@ -134,6 +141,9 @@ function PocketSynthPanel({
           onValueCommitted={onNoteOff}
           value={shown}
         />
+        {live ? (
+          <ScopePlot aria-label="The wave it plays" source={live} />
+        ) : null}
         <WaveformSelect
           aria-label={WAVE.label}
           onValueChange={pickWave}
