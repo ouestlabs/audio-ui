@@ -3,7 +3,7 @@ import type {
   SignatureChange,
   Tempo,
 } from "@audio-ui/engine/time";
-import { EnvelopeIcon } from "@audio-ui/icons/react";
+import { AutomationIcon } from "@audio-ui/icons/react";
 import type { Source } from "@audio-ui/react";
 import {
   ArrowArcLeftIcon,
@@ -315,7 +315,7 @@ export function TopBar(props: TopBarProps) {
           onClick={toggleAutomation}
           pressed={automating}
         >
-          <EnvelopeIcon aria-hidden="true" />
+          <AutomationIcon aria-hidden="true" />
         </BarButton>
         <DropdownMenu>
           <DropdownMenuTrigger
