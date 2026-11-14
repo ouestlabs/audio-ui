@@ -1,5 +1,4 @@
 import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
-import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -50,8 +49,6 @@ interface OverdrivePanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: OverdriveState) => void;
-  /** A live spectrum behind the curve, such as from `useSpectrum`. */
-  spectrum?: Source<Float32Array>;
   /** Its live sound: the spectrum of what comes out, behind the band that reaches the clip. */
   signal?: DeviceSignal;
   value: OverdriveState;
@@ -69,9 +66,12 @@ function OverdrivePanel({
   className,
   onValueChange,
   signal,
-  spectrum,
   value,
 }: OverdrivePanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const band = useMemo(() => overdriveBand(value), [value]);
   const change = useCallback(
     ({ x }: { x: number }) =>

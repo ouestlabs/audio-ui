@@ -1,5 +1,4 @@
 import { formatFrequency, formatLevel } from "@audio-ui/engine/format";
-import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -71,8 +70,6 @@ interface FilterPanelProps {
   children?: ReactNode;
   className?: string;
   onValueChange: (state: FilterState) => void;
-  /** A live spectrum behind the curve, such as from `useSpectrum`. */
-  spectrum?: Source<Float32Array>;
   /** Its live sound: the spectrum of what comes out, behind the curve. */
   signal?: DeviceSignal;
   value: FilterState;
@@ -92,9 +89,12 @@ function FilterPanel({
   className,
   onValueChange,
   signal,
-  spectrum,
   value,
 }: FilterPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const curve = useMemo(() => filterCurve(value), [value]);
   const change = useCallback(
     ({ x, y }: { x: number; y: number }) =>

@@ -9,6 +9,7 @@ import {
   PlotGraph,
   PlotGrid,
   PlotLine,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -24,6 +25,9 @@ import type { DeviceSignal } from "@/registry-audio/bases/base/lib/device-signal
 
 const MIN_HZ = 20;
 const MAX_HZ = 20_000;
+/** The scale a spectrum is drawn on, in dB of level: its own, behind the plot's. */
+const SPECTRUM_MIN_DB = -100;
+const SPECTRUM_MAX_DB = -10;
 const MAX_DB = 18;
 const DB_TICKS = [-12, 0, 12];
 const SWITCHES = ["enabled"] as const;
@@ -58,6 +62,10 @@ function TiltEqPanel({
   signal,
   value,
 }: TiltEqPanelProps) {
+  const spectrum = useMemo(
+    () => signal?.output.spectrum({ maxHz: MAX_HZ, minHz: MIN_HZ }),
+    [signal]
+  );
   const curve = useMemo(() => tiltEqCurve(value), [value]);
   return (
     <DeviceFrame className={cn("h-full", className)} signal={signal}>
@@ -88,6 +96,15 @@ function TiltEqPanel({
             y={{ format: formatDbMark, ticks: DB_TICKS }}
           />
           <PlotGraph>
+            {spectrum ? (
+              // What comes out, behind what the device does to it.
+              <PlotTraceArea
+                fillTo={SPECTRUM_MIN_DB}
+                max={SPECTRUM_MAX_DB}
+                min={SPECTRUM_MIN_DB}
+                source={spectrum}
+              />
+            ) : null}
             <PlotLine
               axis="x"
               className="stroke-foreground/40"
