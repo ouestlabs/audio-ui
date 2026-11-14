@@ -74,7 +74,10 @@ export function repairChannels(
   if (typeof method !== "function") {
     throw new RangeError(`There is no repair called "${repair}".`);
   }
-  return channels.map((channel) =>
-    method(Float32Array.from(channel), sampleRate)
-  );
+  // Called here, where the check above holds, not in a callback.
+  const repaired: Float32Array[] = [];
+  for (const channel of channels) {
+    repaired.push(method(Float32Array.from(channel), sampleRate));
+  }
+  return repaired;
 }

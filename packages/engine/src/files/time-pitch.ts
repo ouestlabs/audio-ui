@@ -68,7 +68,12 @@ export function stretchChannels(
   if (typeof apart !== "function") {
     throw new RangeError(`There is no stretch method called "${method}".`);
   }
-  return channels.map((channel) => apart(channel, options));
+  // Called here, where the check above holds, not in a callback.
+  const stretched: Float32Array[] = [];
+  for (const channel of channels) {
+    stretched.push(apart(channel, options));
+  }
+  return stretched;
 }
 
 /** How a pitch is shifted: let the library choose from the sound (`auto`), or a method by name. */
