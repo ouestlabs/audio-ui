@@ -66,6 +66,12 @@ export interface StreamedJob {
 
 export type ProcessJob = MemoryJob | StreamedJob;
 
+/** A job sent to the worker, and the ticket its answers come back with: one worker runs every job, side by side. */
+export interface ProcessRequest {
+  job: ProcessJob;
+  ticket: number;
+}
+
 /** What comes back: from memory, the sound and its file's bytes; streamed, its cache made, then its file stored; or why it failed. */
 export type ProcessDone =
   | {
@@ -78,14 +84,20 @@ export type ProcessDone =
   | { kind: "saved" }
   | { kind: "failed"; message: string };
 
+/** An answer to the job of `ticket`. */
+export interface ProcessAnswer {
+  done: ProcessDone;
+  ticket: number;
+}
+
+/** How a job answers: to its own ticket. */
+type Post = (done: ProcessDone, transfer?: Transferable[]) => void;
+
 const BYTES = Float32Array.BYTES_PER_ELEMENT;
 /** The frames read before an edited stretch to settle the band filters, so the leaves made of it join those before it. */
 const SETTLE = 16 * LEAF_FRAMES;
 /** The frames of a WAV file written at a time. */
 const WAV_BLOCK = 1 << 18;
-
-const post = (done: ProcessDone, transfer: Transferable[] = []) =>
-  self.postMessage(done, { transfer });
 
 /** The frames of `range`, in seconds, as `applySoundOperation` reads them: rounded, in order, inside a sound of `frames`. */
 const framesOf = (
@@ -97,12 +109,10 @@ const framesOf = (
     .map((time) => Math.max(0, Math.min(frames, Math.round(time * sampleRate))))
     .sort((a, b) => a - b) as [number, number];
 
-async function inMemory({
-  channels: read,
-  operation,
-  range,
-  sampleRate,
-}: MemoryJob) {
+async function inMemory(
+  { channels: read, operation, range, sampleRate }: MemoryJob,
+  post: Post
+) {
   const { channels } = applySoundOperation(
     { channels: read, sampleRate },
     operation,
@@ -188,7 +198,8 @@ async function writeCache(
   entry: CacheEntry,
   samples: Parameters<typeof writeFile>[2],
   peaks: { max: Float32Array; min: Float32Array },
-  leaves: Float32Array
+  leaves: Float32Array,
+  post: Post
 ) {
   const names = cacheNames(id);
   await Promise.all([
@@ -228,7 +239,8 @@ async function storedLeaves(source: StreamedSource) {
  */
 async function splice(
   { id, operation, source, window: [start, end] }: StreamedJob,
-  range: SoundRange
+  range: SoundRange,
+  post: Post
 ): Promise<boolean> {
   const old = await storedLeaves(source);
   if (!old) {
@@ -327,14 +339,15 @@ async function splice(
       file.slice(at(channel, start + last), at(channel, end)),
     ]),
     leavesPeaks(leaves, count, length, sampleRate),
-    leaves
+    leaves,
+    post
   );
   return true;
 }
 
-async function streamed(job: StreamedJob) {
+async function streamed(job: StreamedJob, post: Post) {
   const { id, operation, range, source, window } = job;
-  if (range && operation.type !== "crop" && (await splice(job, range))) {
+  if (range && operation.type !== "crop" && (await splice(job, range, post))) {
     return;
   }
   const { sampleRate } = source;
@@ -365,15 +378,17 @@ async function streamed(job: StreamedJob) {
     { channels: channels.length, length, sampleRate },
     channels as Float32Array<ArrayBuffer>[],
     measurePeaks(channels, sampleRate),
-    leaves
+    leaves,
+    post
   );
 }
 
-self.onmessage = async (event: MessageEvent<ProcessJob>) => {
+self.onmessage = async ({ data }: MessageEvent<ProcessRequest>) => {
+  const { job, ticket } = data;
+  const post: Post = (done, transfer = []) =>
+    self.postMessage({ done, ticket } satisfies ProcessAnswer, { transfer });
   try {
-    await (event.data.kind === "memory"
-      ? inMemory(event.data)
-      : streamed(event.data));
+    await (job.kind === "memory" ? inMemory(job, post) : streamed(job, post));
   } catch (error) {
     post({ kind: "failed", message: (error as Error).message });
   }
