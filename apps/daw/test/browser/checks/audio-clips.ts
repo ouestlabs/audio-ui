@@ -344,10 +344,13 @@ export const checks: Checks = {
       );
       await page.getByRole("button", { name: "Unfold Loop" }).waitFor();
       const strip = await box.boundingBox();
-      assert(strip && strip.width < 48, "the box did not fold to a strip");
+      const { height = 0, width = 0, x = 0, y = 0 } = strip ?? {};
+      assert(Math.min(width, height) < 48, "the box did not fold to a strip");
+      // Its far end from the title: down a strip beside the editor, along a row in the column of settings.
+      const column = width > height;
       await page.mouse.click(
-        (strip?.x ?? 0) + (strip?.width ?? 0) / 2,
-        (strip?.y ?? 0) + (strip?.height ?? 0) - 8
+        column ? x + width - 8 : x + width / 2,
+        column ? y + height / 2 : y + height - 8
       );
       await page.getByRole("button", { name: "Fold Loop" }).waitFor();
     },

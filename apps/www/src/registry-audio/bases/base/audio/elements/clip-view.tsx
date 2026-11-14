@@ -222,7 +222,7 @@ function ClipView({
         <div className="flex min-h-0 min-w-0 flex-1 flex-col @3xl:flex-row">
           <BoxesContext value={boxContext}>
             <div
-              className="flex shrink-0 overflow-x-auto border-b @3xl:border-e @3xl:border-b-0"
+              className="no-scrollbar scroll-fade-x flex shrink-0 overflow-x-auto border-b @3xl:scroll-fade-y @3xl:w-52 @3xl:flex-col @3xl:overflow-x-hidden @3xl:overflow-y-auto @3xl:border-e @3xl:border-b-0"
               data-slot="clip-view-boxes"
             >
               {boxes}
@@ -273,19 +273,19 @@ function ClipBox({
       onClick={toggle}
       type="button"
     >
-      <Caret className={folded ? "-rotate-90" : "rotate-90"} />
+      <Caret className={folded ? "-rotate-90" : "rotate-90 @3xl:rotate-0"} />
     </button>
   ) : null;
   if (folded) {
     return (
       <section
         aria-label={title}
-        className="relative flex w-6 shrink-0 flex-col items-center gap-2 border-s py-2 first:border-s-0 hover:bg-muted/50"
+        className="relative flex w-6 shrink-0 flex-col items-center gap-2 border-s py-2 first:border-s-0 hover:bg-muted/50 @3xl:w-full @3xl:flex-row @3xl:gap-1.5 @3xl:border-s-0 @3xl:border-t @3xl:px-2 @3xl:py-1.5 @3xl:first:border-t-0"
         data-folded=""
         data-slot="clip-box"
       >
         {caret}
-        <h4 className="font-semibold text-muted-foreground uppercase tracking-wide [writing-mode:vertical-rl]">
+        <h4 className="font-semibold text-muted-foreground uppercase tracking-wide [writing-mode:vertical-rl] @3xl:[writing-mode:horizontal-tb]">
           {title}
         </h4>
       </section>
@@ -295,7 +295,7 @@ function ClipBox({
     <section
       aria-label={title}
       className={cn(
-        "flex w-40 shrink-0 flex-col gap-1.5 border-s p-2 first:border-s-0",
+        "flex w-40 shrink-0 flex-col gap-1.5 border-s p-2 first:border-s-0 @3xl:w-full @3xl:border-s-0 @3xl:border-t @3xl:first:border-t-0",
         className
       )}
       data-slot="clip-box"
@@ -303,10 +303,11 @@ function ClipBox({
       <div
         className={cn("flex h-5 items-center gap-1.5", foldable && "relative")}
       >
-        <h4 className="truncate font-semibold text-muted-foreground uppercase tracking-wide">
+        {/* In the column, the caret leads its heading, as a section's does; in the row, it ends it. */}
+        <span className="ms-auto @3xl:order-first @3xl:ms-0">{caret}</span>
+        <h4 className="order-first truncate font-semibold text-muted-foreground uppercase tracking-wide @3xl:order-none">
           {title}
         </h4>
-        <span className="ms-auto">{caret}</span>
       </div>
       {children}
     </section>

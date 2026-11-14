@@ -48,8 +48,12 @@ interface NoteEditMenuProps {
   onEdit: (edit: NoteEdit) => void;
 }
 
-/** A menu of commands over notes: put `NoteEditMenuItems` and `NoteEditMenuSub` in its content, beside items of your own. */
-function NoteEditMenu({
+/**
+ * What the items read, without a menu of its own: wrap the content of a menu
+ * that opens otherwise, such as a right-click's, so `NoteEditMenuItems` and
+ * `NoteEditMenuSub` work in it.
+ */
+function NoteEditMenuProvider({
   children,
   disabled = NEVER_DISABLED,
   onEdit,
@@ -58,10 +62,15 @@ function NoteEditMenu({
     () => ({ isDisabled: disabled, onEdit }),
     [disabled, onEdit]
   );
+  return <NoteEditMenuContext value={value}>{children}</NoteEditMenuContext>;
+}
+
+/** A menu of commands over notes: put `NoteEditMenuItems` and `NoteEditMenuSub` in its content, beside items of your own. */
+function NoteEditMenu({ children, ...props }: NoteEditMenuProps) {
   return (
-    <NoteEditMenuContext value={value}>
+    <NoteEditMenuProvider {...props}>
       <DropdownMenu>{children}</DropdownMenu>
-    </NoteEditMenuContext>
+    </NoteEditMenuProvider>
   );
 }
 
@@ -158,6 +167,7 @@ export {
   NoteEditMenu,
   NoteEditMenuContent,
   NoteEditMenuItems,
+  NoteEditMenuProvider,
   NoteEditMenuSub,
   NoteEditMenuTrigger,
 };

@@ -56,6 +56,8 @@ interface DrumStepEditorProps {
   onNotesCommitted?: () => void;
   /** The pads, top to bottom: a row each. */
   pads: readonly DrumStepPad[];
+  /** Whether a press on a step that plays rolls it, controlled: the host draws the Repeat toggle then, as the MIDI clip panel does in its bar. Left out, the editor draws its own. */
+  repeating?: boolean;
   /** The step being played, a live value: its column lights up. */
   source?: Source<number>;
   /** Where the first step starts, in the clip's source: its loop's start. @default 0 */
@@ -85,6 +87,7 @@ function DrumStepEditor({
   onNotesChange,
   onNotesCommitted,
   pads,
+  repeating: held,
   source,
   start = 0,
   step,
@@ -95,8 +98,9 @@ function DrumStepEditor({
     [pads, start, step, steps]
   );
   const view = useMemo(() => stepsOf(notes, grid), [grid, notes]);
-  const [repeating, setRepeating] = useState(false);
-  const toggleRepeating = useCallback(() => setRepeating((on) => !on), []);
+  const [own, setOwn] = useState(false);
+  const toggleRepeating = useCallback(() => setOwn((on) => !on), []);
+  const repeating = held ?? own;
 
   // A step that changed is a note added or taken away, the rest left as they are; with Repeat on, a step that plays turns into its next roll instead of off.
   const changePattern = useCallback(
@@ -270,23 +274,25 @@ function DrumStepEditor({
       className={cn("flex min-h-0 min-w-0 flex-col gap-2 p-2", className)}
       data-slot="drum-step-editor"
     >
-      <div className="flex items-center gap-2">
-        <Button
-          aria-pressed={repeating}
-          className="h-6 px-2 text-xs"
-          onClick={toggleRepeating}
-          size="xs"
-          variant={repeating ? "default" : "outline"}
-        >
-          Repeat
-        </Button>
-        {repeating ? (
-          <span className="truncate text-[10px] text-muted-foreground">
-            Press a step that plays to roll it: twice, three times, four, then
-            once again.
-          </span>
-        ) : null}
-      </div>
+      {held === undefined ? (
+        <div className="flex items-center gap-2">
+          <Button
+            aria-pressed={repeating}
+            className="h-6 px-2 text-xs"
+            onClick={toggleRepeating}
+            size="xs"
+            variant={repeating ? "default" : "outline"}
+          >
+            Repeat
+          </Button>
+          {repeating ? (
+            <span className="truncate text-[10px] text-muted-foreground">
+              Press a step that plays to roll it: twice, three times, four, then
+              once again.
+            </span>
+          ) : null}
+        </div>
+      ) : null}
       {/* Each axis scrolls in a box of its own, so each fades at its own edges: the pads down, the steps across, under the pads' names, which stay. */}
       <div className="no-scrollbar scroll-fade min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
         <div

@@ -271,21 +271,40 @@ function deletesItsOwn(event: KeyboardEvent) {
   );
 }
 
-/** Whether a key goes to the clip view's sound, which edits what is selected on it with Cut, Copy, Paste, Select all, Crop, Louder and Quieter (CLP-029), and not to the arrangement. */
+/** The clip view's editors, which edit what is picked in them with keys of their own: the sound's and the notes'. */
+const OWN_EDITS =
+  '[data-slot="clip-panel-edit"], [data-slot="midi-clip-panel-editor"]';
+
+/**
+ * Whether a key goes to an editor of the clip view and not to the arrangement:
+ * on the sound, Cut, Copy, Paste, Select all, Crop, Louder and Quieter
+ * (CLP-029); on the notes, the Notes menu's keys, Split, Join, Quantize,
+ * Insert, Duplicate and Delete time, besides the roll's own.
+ */
 function editsItsOwn(event: KeyboardEvent) {
-  if (
-    !(
-      event.target instanceof Element &&
-      event.target.closest('[data-slot="clip-panel-edit"]')
-    )
-  ) {
+  if (!(event.target instanceof Element && event.target.closest(OWN_EDITS))) {
     return false;
   }
   const key = event.key.toLowerCase();
-  return event.metaKey || event.ctrlKey
-    ? ["a", "c", "v", "x"].includes(key)
-    : key === "k" ||
-        (event.shiftKey && (key === "arrowup" || key === "arrowdown"));
+  if (event.metaKey || event.ctrlKey) {
+    return [
+      "a",
+      "backspace",
+      "c",
+      "d",
+      "delete",
+      "e",
+      "i",
+      "j",
+      "u",
+      "v",
+      "x",
+    ].includes(key);
+  }
+  return (
+    key === "k" ||
+    (event.shiftKey && (key === "arrowup" || key === "arrowdown"))
+  );
 }
 
 /** Whether a key press goes to a field being typed in rather than to the app. */

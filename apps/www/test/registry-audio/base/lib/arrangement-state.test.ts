@@ -417,9 +417,9 @@ describe("apply", () => {
     let state = init([at("a", 0, 10)]);
     const was = state.doc.duration;
     state = apply(state, {
-      change: (clip) => ({
-        ...clip,
-        value: { ...clip.value, length: was + 20 },
+      change: (held) => ({
+        ...held,
+        value: { ...held.value, length: was + 20 },
       }),
       id: "a",
       type: "edit-clip",
