@@ -344,10 +344,13 @@ export const checks: Checks = {
       );
       await page.getByRole("button", { name: "Unfold Loop" }).waitFor();
       const strip = await box.boundingBox();
-      assert(strip && strip.width < 48, "the box did not fold to a strip");
+      const { height = 0, width = 0, x = 0, y = 0 } = strip ?? {};
+      assert(Math.min(width, height) < 48, "the box did not fold to a strip");
+      // Its far end from the title: down a strip beside the editor, along a row in the column of settings.
+      const column = width > height;
       await page.mouse.click(
-        (strip?.x ?? 0) + (strip?.width ?? 0) / 2,
-        (strip?.y ?? 0) + (strip?.height ?? 0) - 8
+        column ? x + width - 8 : x + width / 2,
+        column ? y + height / 2 : y + height - 8
       );
       await page.getByRole("button", { name: "Fold Loop" }).waitFor();
     },
@@ -571,6 +574,31 @@ export const checks: Checks = {
         { was: before },
         { timeout: 5000 }
       );
+      // Redone, its file stored after as the page goes on, the project opens on it again.
+      await page.keyboard.press("Meta+Shift+KeyZ");
+      await page.waitForFunction(
+        async (want) => {
+          const folder = await (
+            await navigator.storage.getDirectory()
+          ).getDirectoryHandle("recordings");
+          return (await Array.fromAsync(folder.keys())).length >= want;
+        },
+        2,
+        { timeout: 30_000 }
+      );
+      await page.waitForTimeout(1500);
+      await page.reload();
+      await page.locator("[data-clip-id]").first().waitFor({ timeout: 30_000 });
+      await page.waitForFunction(
+        ({ was }) => {
+          const box = document
+            .querySelector("[data-clip-id]")
+            ?.getBoundingClientRect();
+          return box !== undefined && Math.abs(box.width - 2 * was) < 2;
+        },
+        { was: before },
+        { timeout: 10_000 }
+      );
     },
   "CLP-029: the clip view edits its sound as an audio editor does: a drag selects, Delete takes it out, Copy and Paste put it back, one undo each":
     async (browser) => {
@@ -700,6 +728,115 @@ export const checks: Checks = {
       assert(
         missing.length === 0,
         `the right-click menu has no ${missing.join(", ")}`
+      );
+    },
+  "TRN-008: a clip stretched past the end of the arrangement in the clip view makes it longer, and one undo takes it back":
+    async (browser) => {
+      const page = await open(browser);
+      await dropChord(page, '[data-track="track-1"]', "Take", 4);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      await clip.click();
+      await page.getByRole("tab", { name: "Clip" }).click();
+      // The arrangement's length, in seconds: as far as its overview bar reaches.
+      const duration = async () =>
+        Number(
+          await page
+            .locator('input[aria-label="End of the visible range"]')
+            .first()
+            .getAttribute("max")
+        );
+      // Waits for the arrangement to be longer than `was`, or as long as it.
+      const lengthIs = async (was: number, longer: boolean) =>
+        await page.waitForFunction(
+          ({ longer: grown, was: seconds }) => {
+            const now = Number(
+              document
+                .querySelector('input[aria-label="End of the visible range"]')
+                ?.getAttribute("max")
+            );
+            return grown ? now > seconds : now === seconds;
+          },
+          { longer, was },
+          { timeout: 5000 }
+        );
+      const before = await duration();
+      const panel = page.locator("[data-slot=clip-panel]");
+      // Looped, a clip plays on as long as it is made to: past the arrangement's end.
+      await panel.getByRole("button", { exact: true, name: "Loop" }).click();
+      const end = panel.locator('input[aria-label="End"]');
+      await end.fill("999.1.1");
+      await end.press("Enter");
+      await lengthIs(before, true);
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Meta+KeyZ");
+      await lengthIs(before, false);
+    },
+  "TRN-008: a clip dragged into the room past the end of the arrangement makes it longer as it lands, and one undo takes it back":
+    async (browser) => {
+      const page = await open(browser);
+      // Long enough for its head to be grabbed between its fade handles.
+      await dropChord(page, '[data-track="track-1"]', "Take", 16);
+      const clip = page.locator("[data-clip-id]").first();
+      await clip.waitFor({ timeout: 10_000 });
+      const shown = async () =>
+        Number(
+          await page
+            .locator('input[aria-label="End of the visible range"]')
+            .first()
+            .getAttribute("max")
+        );
+      const before = await shown();
+      // The room past the end, shaded on the clip's lane: the clip is dragged into it.
+      const room = await page
+        .locator('[data-track="track-1"] [data-slot="arrangement-past-end"]')
+        .boundingBox();
+      // By its head, once it is laid out: its body is for picking time.
+      const head = clip.locator("[data-slot=timeline-clip-header]");
+      await head.waitFor({ timeout: 5000 });
+      await page.waitForTimeout(300);
+      const box = await head.boundingBox();
+      assert(room !== null && box !== null, "no room past the end is shown");
+      await page.mouse.move(
+        (box?.x ?? 0) + (box?.width ?? 0) / 2,
+        (box?.y ?? 0) + (box?.height ?? 0) / 2
+      );
+      await page.mouse.down();
+      await page.mouse.move(
+        (room?.x ?? 0) + (room?.width ?? 0) / 2,
+        (box?.y ?? 0) + (box?.height ?? 0) / 2,
+        { steps: 12 }
+      );
+      await page.mouse.up();
+      await page
+        .waitForFunction(
+          (was) =>
+            Number(
+              document
+                .querySelector('input[aria-label="End of the visible range"]')
+                ?.getAttribute("max")
+            ) > was,
+          before,
+          { timeout: 5000 }
+        )
+        .catch(async () =>
+          assert(false, `the arrangement stays ${await shown()} s long`)
+        );
+      await page.evaluate(() =>
+        (document.activeElement as HTMLElement)?.blur()
+      );
+      await page.keyboard.press("Meta+KeyZ");
+      await page.waitForFunction(
+        (was) =>
+          Number(
+            document
+              .querySelector('input[aria-label="End of the visible range"]')
+              ?.getAttribute("max")
+          ) === was,
+        before,
+        { timeout: 5000 }
       );
     },
   "CLP-024: the clip view zooms past its peaks into the samples, then a line through them with a dot on each":

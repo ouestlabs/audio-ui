@@ -37,7 +37,10 @@ import {
   DropdownMenuTrigger,
 } from "@/registry/bases/base/ui/dropdown-menu";
 import { Kbd, KbdGroup } from "@/registry/bases/base/ui/kbd";
-import { ArrangementView } from "@/registry-audio/bases/base/audio/elements/arrangement-view";
+import {
+  ArrangementView,
+  shownLength,
+} from "@/registry-audio/bases/base/audio/elements/arrangement-view";
 import { Meter } from "@/registry-audio/bases/base/audio/elements/meter";
 import { ParameterField } from "@/registry-audio/bases/base/audio/elements/parameter-field";
 import { TRACK_COLORS } from "@/registry-audio/bases/base/audio/elements/timeline";
@@ -973,7 +976,11 @@ export default function BlockTimeline() {
   const undo = useCallback(() => dispatch({ type: "undo" }), [dispatch]);
   // The timeline fits the width it is given until it is zoomed, and its grid follows the zoom.
   const viewportRef = useRef<HTMLDivElement>(null);
-  const view = useTimelineZoom({ duration, viewportRef });
+  // The zoom fits the arrangement and the room past its end.
+  const view = useTimelineZoom({
+    duration: shownLength(duration, tempo),
+    viewportRef,
+  });
   const { zoom } = view;
   const grid = useTimelineGrid({ tempo, zoom });
   const { snapStep, step: gridSeconds } = grid;

@@ -21,8 +21,7 @@ import {
   type ClipSwing,
   DRUM_RACK_DEVICE,
 } from "@/lib/arrangement";
-import type { Dropped } from "@/lib/daw/drop";
-import { processSource, readSource } from "@/lib/daw/process";
+import { type Processed, processSource, readSource } from "@/lib/daw/process";
 import { type Recording, sourcePeaks } from "@/lib/daw/recordings";
 import {
   recordingBands,
@@ -55,13 +54,9 @@ function settingsOf(clip: Arranged): ClipSettings {
   };
 }
 
-/** The clip with the panel's settings, ending where the timeline does at most, its fades kept inside it. */
-function withSettings(
-  clip: Arranged,
-  next: ClipSettings,
-  duration: number
-): Arranged {
-  const length = Math.min(next.length, duration - clip.value.start);
+/** The clip with the panel's settings, its fades kept inside it: past the end of the arrangement, the arrangement grows to hold it (TRN-008). */
+function withSettings(clip: Arranged, next: ClipSettings): Arranged {
+  const { length } = next;
   const fadeIn = Math.min(clip.value.fadeIn, length);
   return {
     ...clip,
@@ -92,13 +87,11 @@ function withProcessed(
   clip: Arranged,
   { id, length }: { id: string; length: number },
   operation: SoundOperation,
-  range: SoundRange | null,
-  duration: number
+  range: SoundRange | null
 ): Arranged {
   const { sourceFrom: _cut, ...rest } = withSettings(
     clip,
-    processedSettings(settingsOf(clip), operation, length, range ?? undefined),
-    duration
+    processedSettings(settingsOf(clip), operation, length, range ?? undefined)
   );
   return { ...rest, recording: id, sourceLength: length };
 }
@@ -134,8 +127,8 @@ export function ClipEditor({
   folded: readonly string[];
   onCollapsedChange: (collapsed: boolean) => void;
   onFoldedChange: (folded: string[]) => void;
-  /** A recording the Process menu made, under its id: keep it with the project's. */
-  onRecording: (id: string, made: Dropped) => Promise<void>;
+  /** A recording the Process menu or an edit made: keep it with the project's. */
+  onRecording: (made: Processed) => Promise<void>;
   recordings: ReadonlyMap<string, Recording>;
 }) {
   const { dispatch, doc } = arrangement;
@@ -196,28 +189,27 @@ export function ClipEditor({
         sourceLength: region.sourceLength,
         value: {
           ...current.value,
-          length: Math.min(region.length, doc.duration - current.value.start),
+          length: region.length,
           offset: region.offset,
         },
       })),
-    [doc.duration, edit]
+    [edit]
   );
   const changeSettings = useCallback(
-    (next: ClipSettings) =>
-      edit((current) => withSettings(current, next, doc.duration)),
-    [doc.duration, edit]
+    (next: ClipSettings) => edit((current) => withSettings(current, next)),
+    [edit]
   );
   // Crop (CLP-029): the clip's source cut down to the stretch kept, the recording left as it is, and the clip on what is left of it.
   const crop = useCallback(
     (range: SoundRange, next: ClipSettings) => {
       edit((current) => ({
-        ...withSettings(current, next, doc.duration),
+        ...withSettings(current, next),
         sourceFrom: (current.sourceFrom ?? 0) + range[0],
         sourceLength: next.sourceLength,
       }));
       settle();
     },
-    [doc.duration, edit, settle]
+    [edit, settle]
   );
   // An edit or an operation of the Process menu (CLP-028, CLP-029): the clip's source, or the stretch of it selected, made into a recording of its own, then the clip reads it, one step of undo.
   const process = useCallback(
@@ -230,25 +222,20 @@ export function ClipEditor({
       }
       const notice = toast.loading(`${soundOperationName(operation)}…`);
       try {
-        const [id, made] = await processSource(
+        const made = await processSource(
           recording,
           clip,
           operation,
           range,
           new Set(recordings.keys())
         );
-        await onRecording(id, made);
-        const { length } = made.recording;
+        await onRecording(made);
+        const { id, recording: kept } = made;
+        const { length } = kept;
         dispatch({
           change: (current) =>
             sameSource(current, clip)
-              ? withProcessed(
-                  current,
-                  { id, length },
-                  operation,
-                  range,
-                  doc.duration
-                )
+              ? withProcessed(current, { id, length }, operation, range)
               : current,
           id: clip.id,
           type: "edit-clip",
@@ -261,7 +248,7 @@ export function ClipEditor({
         });
       }
     },
-    [clip, dispatch, doc.duration, onRecording, recordings]
+    [clip, dispatch, onRecording, recordings]
   );
   // What Copy and Cut keep (CLP-029): the samples of a stretch, pasted into this clip's source or another's.
   const [clipboard, setClipboard] = useState<Float32Array[] | null>(null);

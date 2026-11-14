@@ -24,6 +24,7 @@ import {
   ContextMenuContent,
   ContextMenuItem,
   ContextMenuSeparator,
+  ContextMenuShortcut,
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
 import {
@@ -53,27 +54,35 @@ import {
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
 const UNDER_HEAD = { height: "calc(100% - 1.25rem)", top: "1.25rem" };
 
-/** A clip's menu: what is done to it, then what is done away with. */
+/** A clip's menu: what is done to it, then what is done away with, each with the key the timeline runs it with. */
 function menuEntries(disabled: boolean): {
   action: ClipAction;
   destructive?: boolean;
   label: string;
   separatorBefore?: boolean;
+  shortcut?: string;
 }[] {
   return [
     { action: "edit", label: "Edit clip" },
     { action: "rename", label: "Rename" },
-    { action: "duplicate", label: "Duplicate" },
-    { action: "split", label: "Split at the cursor", separatorBefore: true },
+    { action: "duplicate", label: "Duplicate", shortcut: "⌘D" },
+    {
+      action: "split",
+      label: "Split at the cursor",
+      separatorBefore: true,
+      shortcut: "⌘E",
+    },
     {
       action: "toggle",
       label: disabled ? "Switch clip on" : "Switch clip off",
+      shortcut: "0",
     },
     {
       action: "remove",
       destructive: true,
       label: "Delete",
       separatorBefore: true,
+      shortcut: "⌫",
     },
   ];
 }
@@ -620,6 +629,9 @@ const ArrangedClip = memo(function ArrangedClipView({
               variant={entry.destructive ? "destructive" : "default"}
             >
               {entry.label}
+              {entry.shortcut ? (
+                <ContextMenuShortcut>{entry.shortcut}</ContextMenuShortcut>
+              ) : null}
             </ContextMenuItem>
           </Fragment>
         ))}

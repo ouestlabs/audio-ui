@@ -393,7 +393,7 @@ export const audio: RegistryItem[] = [
     categories: ["piano"],
     dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
-      "A menu of commands over a piano roll's notes (split, join, quantize, legato, time commands, fit to scale, chance, velocity), with their keys: items and submenus you place, beside items of your own. The commands come as data in lib/note-edits, to run from keys or a toolbar too.",
+      "A menu of commands over a piano roll's notes (split, join, quantize, legato, time commands, transposing, fit to scale, chance, velocity), with their keys: items and submenus you place, beside items of your own, or in a right-click's menu. The commands come as data in lib/note-edits, to run from keys or a toolbar too.",
     files: [
       {
         path: "audio/elements/note-edit-menu.tsx",
@@ -813,7 +813,7 @@ export const audio: RegistryItem[] = [
     categories: ["timeline", "piano"],
     dependencies: ["@audio-ui/core", "@audio-ui/engine", "@audio-ui/react"],
     description:
-      "The clip view of an arrangement's MIDI clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2, Dupl. Loop), Groove (the swing, on the eighths or the sixteenths, and for a drum clip its steps or its roll), Scale (the clip's scale marked on the roll, Fit notes, and the keys the song's notes are likeliest in; on, transposing by one moves by its steps) and Notes (transpose, invert, reverse, legato, ×2, ÷2, humanize, velocity ramps) boxes, beside its piano roll (Draw, Fold, the loop brace on the ruler, keys, grid, a velocity or chance lane), or for a drum clip its steps, a row per pad. Notes are drawn a grid step at a time.",
+      "The clip view of an arrangement's MIDI clip, its notes first: a strip with its switch and name that rolls the view up, a column of its settings (Clip: start, end; Loop: switch, position, length, ÷2, ×2; Groove: the swing on the eighths or the sixteenths), and its piano roll (the loop brace on the ruler, keys, grid, a velocity or chance lane) or, for a drum clip, its steps, a row per pad, under a bar: Draw on the roll or Repeat on the steps, the Notes menu (the commands of note-edits by what they change, with their keys and on a right-click; no pitch commands on drums), the clip's Scale (marked on the roll's rows, with the keys the song's notes are likeliest in) and View (steps or roll, Fold, the lane). Notes are drawn a grid step at a time.",
     files: [
       {
         path: "audio/panels/midi-clip-panel.tsx",
@@ -826,10 +826,12 @@ export const audio: RegistryItem[] = [
       "@audio-ui/clip-view",
       "@audio-ui/drum-step-editor",
       "@audio-ui/knob",
+      "@audio-ui/note-edit-menu",
       "@audio-ui/piano-roll",
       "@audio-ui/scale-menu",
       "@audio-ui/timeline",
       "@shadcn/button",
+      "@shadcn/context-menu",
       "@shadcn/dropdown-menu",
     ],
     type: "registry:ui",

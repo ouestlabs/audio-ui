@@ -80,6 +80,9 @@ const SCORE = new TextEncoder().encode(`<?xml version="1.0"?>
   </measure></part>
 </score-partwise>`);
 
+/** The Notes menu's button, its name the word and its caret. */
+const NOTES_MENU = /^Notes/;
+
 export const checks: Checks = {
   "MID-008: a MIDI file on the add-track button makes a MIDI track a part, with its instrument; a score on a MIDI track, a clip; on an audio track, a notice":
     async (browser) => {
@@ -166,7 +169,7 @@ export const checks: Checks = {
       );
       await page.keyboard.press("Space");
     },
-  "MID-010: a clip's Scale box offers the song's likeliest keys, marks the one picked on the roll and its root, and undo takes it back with the clip still open":
+  "MID-010: a clip's Scale menu offers the song's likeliest keys, marks the one picked on the roll and its root, and undo takes it back with the clip still open":
     async (browser) => {
       const page = await open(browser);
       const onTheLane = page.locator('[data-track="track-3"] [data-clip-id]');
@@ -243,7 +246,7 @@ export const checks: Checks = {
       `an empty clip beside an A major chord offers ${keys.join(", ")}`
     );
   },
-  "MID-011: with the scale on, +1 moves the notes a step of the scale, and Fit notes moves those out of it in":
+  "MID-011: with the scale on, Notes > Pitch > Up moves the notes a step of the scale, and Fit to scale moves those out of it in":
     async (browser) => {
       const page = await open(browser);
       const onTheLane = page.locator('[data-track="track-3"] [data-clip-id]');
@@ -282,9 +285,16 @@ export const checks: Checks = {
       const detected = page.locator("[data-slot=scale-menu-detect]");
       await detected.getByRole("menuitem").first().waitFor({ timeout: 5000 });
       await detected.getByRole("menuitem", { name: "D Minor" }).click();
-      await page
-        .getByRole("button", { name: "Transpose up a step of the scale" })
-        .click();
+      // The Notes menu, in the bar over the roll: its commands by what they change.
+      const command = async (group: string, name: string) => {
+        await page
+          .locator("[data-slot=midi-clip-panel-toolbar]")
+          .getByRole("button", { name: NOTES_MENU })
+          .click();
+        await page.getByRole("menuitem", { name: group }).hover();
+        await page.getByRole("menuitem", { exact: true, name }).click();
+      };
+      await command("Pitch", "Up");
       await page.waitForFunction(
         () =>
           [
@@ -299,7 +309,7 @@ export const checks: Checks = {
         (await pitches()) === "D5 E5 F5 G5",
         `a step of D minor up gives ${await pitches()}`
       );
-      // E minor has F sharp, not F: Fit notes moves F to E, the lower of two as near.
+      // E minor has F sharp, not F: Fit to scale moves F to E, the lower of two as near.
       await scaleMenu.click();
       await page.getByRole("menuitem", { name: "Root: D" }).hover();
       await page.getByRole("menuitemradio", { exact: true, name: "E" }).click();
@@ -310,9 +320,7 @@ export const checks: Checks = {
       if (await page.locator("[data-slot=scale-menu-content]").isVisible()) {
         await scaleMenu.click();
       }
-      await page
-        .getByRole("button", { exact: true, name: "Fit notes" })
-        .click();
+      await command("Pitch", "Fit to scale");
       await page.waitForFunction(
         () =>
           ![

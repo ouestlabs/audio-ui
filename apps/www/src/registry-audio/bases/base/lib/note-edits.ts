@@ -8,6 +8,7 @@ import {
   invertNotes,
   joinNotes,
   legatoNotes,
+  moveNotes,
   type Note,
   type NoteId,
   quantizeNotes,
@@ -20,7 +21,11 @@ import {
   stretchNotes,
   toggleMuted,
 } from "@audio-ui/core/piano-roll";
-import { rollScale, type Scale } from "@audio-ui/engine/pitch";
+import {
+  rollScale,
+  type Scale,
+  scalePitchClasses,
+} from "@audio-ui/engine/pitch";
 
 /** What an edit knows of the editor it runs in. */
 export interface NoteEditContext {
@@ -36,6 +41,8 @@ export interface NoteEditContext {
   scale: Scale | null;
   /** Whether notes are selected, rather than the edit taking every note. */
   selected: boolean;
+  /** The grid, in the notes' own time: what Split cuts a selection on and Quantize rounds to. @default 1 */
+  step?: number;
 }
 
 /** One command over notes: a menu item, and perhaps a key. */
@@ -51,9 +58,9 @@ export interface NoteEdit {
   shortcut?: string;
 }
 
-/** Every step of a clip: the times a chop to the grid cuts at. */
-const gridLines = (duration: number) =>
-  Array.from({ length: duration }, (_, step) => step);
+/** Every line of the grid along a clip: the times a chop to the grid cuts at. */
+const gridLines = (duration: number, step = 1) =>
+  Array.from({ length: Math.ceil(duration / step) }, (_, line) => line * step);
 
 /** The time the selected notes cover, as a time command reads it. */
 const spanOf = (notes: Note[], ids: Set<NoteId>) =>
@@ -63,9 +70,13 @@ const spanOf = (notes: Note[], ids: Set<NoteId>) =>
 export const TIME_EDITS: NoteEdit[] = [
   {
     // Selected notes chop on the grid; with none, the notes crossing the playhead split there.
-    edit: (notes, ids, { at, bounds, nextId, selected }) =>
-      splitNotes(notes, ids, selected ? gridLines(bounds.duration) : at, nextId)
-        .notes,
+    edit: (notes, ids, { at, bounds, nextId, selected, step }) =>
+      splitNotes(
+        notes,
+        ids,
+        selected ? gridLines(bounds.duration, step) : at,
+        nextId
+      ).notes,
     id: "split",
     label: "Split",
     shortcut: "⌘E",
@@ -83,8 +94,13 @@ export const TIME_EDITS: NoteEdit[] = [
     shortcut: "⌘J",
   },
   {
-    edit: (notes, ids, { bounds }) =>
-      quantizeNotes(notes, ids, Math.round, bounds),
+    edit: (notes, ids, { bounds, step = 1 }) =>
+      quantizeNotes(
+        notes,
+        ids,
+        (time) => Math.round(time / step) * step,
+        bounds
+      ),
     id: "quantize",
     label: "Quantize",
     shortcut: "⌘U",
@@ -142,8 +158,65 @@ export const TIME_EDITS: NoteEdit[] = [
   },
 ];
 
-/** Edits that change the notes' pitches. */
+/** The pitch `steps` steps of `scale` from `pitch`, up for a positive count: a pitch out of the scale goes to the next one in it. */
+function scaleStep(pitch: number, scale: Scale, steps: number): number {
+  const classes = scalePitchClasses(scale);
+  const direction = Math.sign(steps);
+  let at = pitch;
+  for (let left = Math.abs(steps); left > 0; ) {
+    at += direction;
+    if (classes.includes(((at % 12) + 12) % 12)) {
+      left -= 1;
+    }
+  }
+  return at;
+}
+
+/** Moves each note in `ids` a step: of the scale when one is marked, else a semitone. One that would leave the roll stays where it is. */
+function stepNotes(
+  notes: Note[],
+  ids: Set<NoteId>,
+  { bounds, scale }: NoteEditContext,
+  steps: number
+): Note[] {
+  if (!scale) {
+    return moveNotes(notes, ids, 0, steps, bounds);
+  }
+  return notes.map((note) => {
+    if (!ids.has(note.id)) {
+      return note;
+    }
+    const pitch = scaleStep(note.pitch, scale, steps);
+    return pitch < bounds.minPitch || pitch > bounds.maxPitch
+      ? note
+      : { ...note, pitch };
+  });
+}
+
+/** Edits that change the notes' pitches: up and down a step (of the scale when one is marked), an octave, inverted, or fitted to the scale. */
 export const PITCH_EDITS: NoteEdit[] = [
+  {
+    edit: (notes, ids, context) => stepNotes(notes, ids, context, 1),
+    id: "up",
+    label: "Up",
+  },
+  {
+    edit: (notes, ids, context) => stepNotes(notes, ids, context, -1),
+    id: "down",
+    label: "Down",
+  },
+  {
+    edit: (notes, ids, { bounds }) => moveNotes(notes, ids, 0, 12, bounds),
+    id: "octave-up",
+    label: "Octave up",
+    shortcut: "⇧↑",
+  },
+  {
+    edit: (notes, ids, { bounds }) => moveNotes(notes, ids, 0, -12, bounds),
+    id: "octave-down",
+    label: "Octave down",
+    shortcut: "⇧↓",
+  },
   {
     edit: (notes, ids) => invertNotes(notes, ids),
     id: "invert",
@@ -186,8 +259,8 @@ export const VELOCITY_EDITS: NoteEdit[] = [
     label: "Decrescendo",
   },
   {
-    edit: (notes, ids, { bounds }) =>
-      humanizeNotes(notes, ids, { timing: 0.25, velocity: 0.15 }, bounds),
+    edit: (notes, ids, { bounds, step = 1 }) =>
+      humanizeNotes(notes, ids, { timing: step / 4, velocity: 0.15 }, bounds),
     id: "humanize",
     label: "Humanize",
   },

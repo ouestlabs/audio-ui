@@ -1406,8 +1406,9 @@ function changeClip(
       return origin && details.delta !== undefined
         ? {
             ...clip,
+            // Past the end too: the arrangement grows to hold them as they land.
             value: moveClip(origin.value, origin.value.start + details.delta, {
-              duration: state.doc.duration,
+              duration: Number.POSITIVE_INFINITY,
             }),
           }
         : clip;
@@ -1435,12 +1436,17 @@ function commitClip(
   };
   const { copying, group } = gesture;
   const origins = copy ? (copying ?? []) : [];
+  // A clip dropped or stretched past the end makes room for itself: the arrangement grows to hold it (TRN-008).
+  const duration = Math.max(
+    state.doc.duration,
+    ...settled.doc.clips.map((clip) => clip.value.start + clip.value.length)
+  );
   return {
     ...settled,
     doc: {
       ...settled.doc,
       clips: land(settled.doc.clips, {
-        duration: state.doc.duration,
+        duration,
         group: group
           ? [...group.keys()]
           : otherSelected(selected as string[], id),
@@ -1449,6 +1455,7 @@ function commitClip(
         origins,
         track,
       }),
+      duration,
     },
   };
 }
@@ -3099,10 +3106,19 @@ const handlers: Handlers = {
     ),
   "duplicate-track": (state, { id }) => duplicateTrack(state, id),
   "edit-clip": (state, { id, change }) =>
-    burst(state, (doc) => ({
-      ...doc,
-      clips: doc.clips.map((clip) => (clip.id === id ? change(clip) : clip)),
-    })),
+    burst(state, (doc) => {
+      const clips = doc.clips.map((clip) =>
+        clip.id === id ? change(clip) : clip
+      );
+      // A clip edited past the end makes room for itself: the arrangement grows to hold it (TRN-008).
+      const edited = clips.find((clip) => clip.id === id);
+      const end = edited ? edited.value.start + edited.value.length : 0;
+      return {
+        ...doc,
+        clips,
+        duration: Math.max(doc.duration, end),
+      };
+    }),
   "fade-time": (state, { time }) =>
     edit(state, (doc) => ({ ...doc, clips: fadeTime(doc.clips, time) })),
   "insert-time": (state, { at, length }) =>

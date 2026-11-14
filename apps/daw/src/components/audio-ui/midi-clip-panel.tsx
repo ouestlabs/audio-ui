@@ -1,27 +1,19 @@
 import { pitchName } from "@audio-ui/core";
 import {
   duplicateTime,
-  fitNotesToScale,
-  humanizeNotes,
-  invertNotes,
-  legatoNotes,
-  moveNotes,
   type Note,
   type NoteId,
   type NoteLevel,
-  type RollBounds,
-  rampVelocity,
-  reverseNotes,
-  stretchNotes,
 } from "@audio-ui/core/piano-roll";
-import {
-  type KeyNote,
-  rollScale,
-  type Scale,
-  scalePitchClasses,
-} from "@audio-ui/engine/pitch";
+import { type KeyNote, rollScale, type Scale } from "@audio-ui/engine/pitch";
 import type { PianoRoll as PianoRollPrimitive, Source } from "@audio-ui/react";
 import {
+  CaretDownIcon,
+  PencilSimpleIcon,
+  RepeatIcon,
+} from "@phosphor-icons/react";
+import {
+  type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
   useCallback,
@@ -44,6 +36,13 @@ import {
   type DrumStepPad,
 } from "@/components/audio-ui/drum-step-editor";
 import { Knob } from "@/components/audio-ui/knob";
+import {
+  NoteEditMenu,
+  NoteEditMenuContent,
+  NoteEditMenuProvider,
+  NoteEditMenuSub,
+  NoteEditMenuTrigger,
+} from "@/components/audio-ui/note-edit-menu";
 import {
   PianoRoll,
   PianoRollGrid,
@@ -75,8 +74,33 @@ import {
   TimelineRuler,
 } from "@/components/audio-ui/timeline";
 import { Button } from "@/components/ui/button";
-import { DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import type { ClipScale, ClipSwing } from "@/lib/arrangement";
+import {
+  applyNoteEdit,
+  canApplyNoteEdit,
+  type NoteEdit,
+  noteEditForKey,
+  PITCH_EDITS,
+  PLAY_EDITS,
+  TIME_EDITS,
+  VELOCITY_EDITS,
+} from "@/lib/note-edits";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;
@@ -140,11 +164,11 @@ interface MidiClipPanelProps {
   className?: string;
   /** Whether the panel is rolled up to its strip, controlled: keep it outside to hold it from clip to clip. Leave it out for the panel to keep its own. */
   collapsed?: boolean;
-  /** The ids of its folded boxes ("midi:loop", "midi:notes"), controlled. */
+  /** The ids of its folded boxes ("midi:loop", "midi:groove"), controlled. */
   foldedBoxes?: readonly string[];
-  /** The sound of the song's recordings the Scale box reads the key from too: a weight per pitch class, C to B, in seconds, such as each audio clip's `audioChroma` times how long it plays. */
+  /** The sound of the song's recordings the Scale menu reads the key from too: a weight per pitch class, C to B, in seconds, such as each audio clip's `audioChroma` times how long it plays. */
   keyAudio?: readonly number[];
-  /** The notes the Scale box reads the key from: every part of the song, as one part alone is often ambiguous. @default the clip's notes */
+  /** The notes the Scale menu reads the key from: every part of the song, as one part alone is often ambiguous. @default the clip's notes */
   keyNotes?: readonly KeyNote[];
   name: string;
   /** The clip's notes, in seconds from the start of its source. */
@@ -169,7 +193,7 @@ interface MidiClipPanelProps {
   onRegionChange?: (region: MidiClipRegion) => void;
   /** A name was typed in the strip. */
   onRename?: (name: string) => void;
-  /** A scale was picked, or turned on or off. Leave it out for a panel without the Scale box. */
+  /** A scale was picked, or turned on or off. Leave it out for a panel without the Scale menu. */
   onScaleChange?: (scale: ClipScale) => void;
   /** The swing was turned, or its step changed; `null` plays the clip straight. Leave it out for a panel without the Groove box. */
   onSwingChange?: (swing: ClipSwing | null) => void;
@@ -197,53 +221,6 @@ interface MidiClipPanelProps {
   view?: MidiClipView;
 }
 
-/** What a Notes button does to the notes it acts on. */
-type NotesEdit = (
-  notes: Note[],
-  ids: Set<NoteId>,
-  bounds: RollBounds,
-  loopEnd: number
-) => Note[];
-
-const NOTE_EDITS: { edit: NotesEdit; label: string; name: string }[] = [
-  {
-    edit: (notes, ids) => invertNotes(notes, ids),
-    label: "Inv",
-    name: "Invert",
-  },
-  {
-    edit: (notes, ids) => reverseNotes(notes, ids),
-    label: "Rev",
-    name: "Reverse",
-  },
-  {
-    edit: (notes, ids, bounds, loopEnd) =>
-      legatoNotes(notes, ids, bounds.minLength, loopEnd),
-    label: "Legato",
-    name: "Legato",
-  },
-  {
-    edit: (notes, ids, bounds) => stretchNotes(notes, ids, 2, bounds),
-    label: "×2",
-    name: "Twice as long",
-  },
-  {
-    edit: (notes, ids, bounds) => stretchNotes(notes, ids, 0.5, bounds),
-    label: "÷2",
-    name: "Half as long",
-  },
-  {
-    edit: (notes, ids, bounds) =>
-      humanizeNotes(
-        notes,
-        ids,
-        { timing: bounds.minLength / 4, velocity: 0.15 },
-        bounds
-      ),
-    label: "Human",
-    name: "Humanize",
-  },
-];
 /** One value when they all agree, the two ends when they do not: the first note's would read as true of every one. */
 function spread(values: readonly number[], format: (value: number) => string) {
   const low = Math.min(...values);
@@ -285,55 +262,14 @@ export function noteSelectionReadout(
   ];
 }
 
-const TRANSPOSE_STEPS = [-12, -1, 1, 12];
-
-/** The pitch `steps` steps of `scale` from `pitch`, up for a positive count: a pitch out of the scale goes to the next one in it. */
-function scaleStep(pitch: number, scale: Scale, steps: number): number {
-  const classes = scalePitchClasses(scale);
-  const direction = Math.sign(steps);
-  let at = pitch;
-  for (let left = Math.abs(steps); left > 0; ) {
-    at += direction;
-    if (classes.includes(((at % 12) + 12) % 12)) {
-      left -= 1;
-    }
-  }
-  return at;
-}
-
-/** Moves each note in `ids` by `steps` steps of `scale`; one that would leave the roll stays where it is. */
-function stepNotes(
-  notes: readonly Note[],
-  ids: ReadonlySet<NoteId>,
-  scale: Scale,
-  steps: number,
-  bounds: RollBounds
-): Note[] {
-  return notes.map((note) => {
-    if (!ids.has(note.id)) {
-      return note;
-    }
-    const pitch = scaleStep(note.pitch, scale, steps);
-    return pitch < bounds.minPitch || pitch > bounds.maxPitch
-      ? note
-      : { ...note, pitch };
-  });
-}
-const RAMPS = [
-  { from: 0.3, label: "↗", name: "Crescendo", to: 1 },
-  { from: 1, label: "↘", name: "Decrescendo", to: 0.3 },
-];
-
-/** The Loop box: the switch, where the loop sits and how long it is, halved or doubled, and its notes played again after it. */
+/** The Loop box: the switch, where the loop sits and how long it is, halved or doubled. */
 function LoopBox({
   disabled,
   loop,
   meter,
-  noteCount,
   offset,
   onCommit,
   onDouble,
-  onDuplicate,
   onHalve,
   onLength,
   onPosition,
@@ -345,11 +281,9 @@ function LoopBox({
   disabled: boolean;
   loop: readonly [number, number] | null;
   meter: { bar: number; beatsPerBar: number };
-  noteCount: number;
   offset: number;
   onCommit?: () => void;
   onDouble: () => void;
-  onDuplicate: () => void;
   onHalve: () => void;
   onLength: (seconds: number) => void;
   onPosition: (seconds: number) => void;
@@ -405,32 +339,20 @@ function LoopBox({
           ×2
         </ClipToggle>
       </div>
-      <ClipToggle
-        disabled={!(enabled && loop) || noteCount === 0}
-        onClick={onDuplicate}
-        title="Duplicate the loop's notes into a second pass"
-      >
-        Dupl. Loop
-      </ClipToggle>
     </ClipBox>
   );
 }
 
 const percent = (value: number) => `${Math.round(value * 100)}%`;
 
-/** The Groove box: for a drum clip, its steps or its roll; the swing, and the step it swings, an eighth or a sixteenth. */
+/** The Groove box: the swing, and the step it swings, an eighth or a sixteenth. */
 function GrooveBox({
   onCommit,
-  onShowSteps,
   onSwingChange,
-  steps,
   swing,
 }: {
   onCommit?: () => void;
-  /** Given for a drum clip: shows its steps, or with `false` its roll. */
-  onShowSteps?: (steps: boolean) => void;
   onSwingChange?: (swing: ClipSwing | null) => void;
-  steps: boolean;
   swing: ClipSwing | undefined;
 }) {
   const division = swing?.division ?? 16;
@@ -451,20 +373,8 @@ function GrooveBox({
     },
     [onCommit, onSwingChange, swing]
   );
-  const showSteps = useCallback(() => onShowSteps?.(true), [onShowSteps]);
-  const showRoll = useCallback(() => onShowSteps?.(false), [onShowSteps]);
   return (
     <ClipBox foldable id="midi:groove" title="Groove">
-      {onShowSteps ? (
-        <div className="grid grid-cols-2 gap-1">
-          <ClipToggle onClick={showSteps} pressed={steps}>
-            Steps
-          </ClipToggle>
-          <ClipToggle onClick={showRoll} pressed={!steps}>
-            Roll
-          </ClipToggle>
-        </div>
-      ) : null}
       <div className="flex items-center gap-2">
         <Knob
           aria-label="Swing"
@@ -506,22 +416,17 @@ function GrooveBox({
 
 const C_MAJOR: ClipScale = { name: "major", on: false, root: 0 };
 
-/** The Scale box: the clip's scale picked from a menu, turned on or off, and the keys its song's notes are likeliest in. */
-function ScaleBox({
+/** The clip's scale, as a menu in the bar over its notes: picked, turned on or off, and the keys its song's notes are likeliest in. */
+function ClipScaleMenu({
   keyAudio,
   keyNotes,
-  noteCount,
   onCommit,
-  onFit,
   onScaleChange,
   scale = C_MAJOR,
 }: {
   keyAudio?: readonly number[];
   keyNotes: readonly KeyNote[];
-  noteCount: number;
   onCommit?: () => void;
-  /** Moves the notes out of the scale onto its nearest pitch: the selected ones, or every one. */
-  onFit: () => void;
   onScaleChange: (scale: ClipScale) => void;
   scale?: ClipScale;
 }) {
@@ -553,105 +458,238 @@ function ScaleBox({
     [change]
   );
   return (
-    <ClipBox foldable id="midi:scale" title="Scale">
-      <ScaleMenu
-        enabled={scale.on}
-        onEnabledChange={turn}
-        onScaleChange={pick}
-        scale={scale}
-      >
-        <ScaleMenuTrigger className="h-6 w-full px-2 text-xs" size="xs" />
-        <ScaleMenuContent align="start">
-          <ScaleMenuToggle />
-          <DropdownMenuSeparator />
-          <ScaleMenuRoot />
-          <ScaleMenuName />
-          <DropdownMenuSeparator />
-          <ScaleMenuDetect audio={keyAudio} notes={keyNotes} />
-        </ScaleMenuContent>
-      </ScaleMenu>
-      <ClipToggle
-        disabled={!scale.on || noteCount === 0}
-        onClick={onFit}
-        title="Move the notes out of the scale onto its nearest pitch"
-      >
-        Fit notes
-      </ClipToggle>
-    </ClipBox>
+    <ScaleMenu
+      enabled={scale.on}
+      onEnabledChange={turn}
+      onScaleChange={pick}
+      scale={scale}
+    >
+      <ScaleMenuTrigger size="sm" />
+      <ScaleMenuContent align="start">
+        <ScaleMenuToggle />
+        <DropdownMenuSeparator />
+        <ScaleMenuRoot />
+        <ScaleMenuName />
+        <DropdownMenuSeparator />
+        <ScaleMenuDetect audio={keyAudio} notes={keyNotes} />
+      </ScaleMenuContent>
+    </ScaleMenu>
   );
 }
 
-/** The Notes box: transposing, the note operations and the velocity ramps, on the selected notes or every note. */
-function NotesBox({
-  noteCount,
-  onEdit,
-  onRamp,
-  onTranspose,
-  scaled,
-  selected,
+const DRUM_TIME_EDITS = TIME_EDITS.filter((edit) => edit.id !== "legato");
+
+/**
+ * The Notes menu's items: the commands of `note-edits`, by what they change,
+ * and the loop's notes played again after it. A drum clip's pads are its
+ * pitches, so it has no Pitch, and its hits no legato.
+ */
+function NotesMenuItems({
+  drums,
+  onDuplicateLoop,
 }: {
-  noteCount: number;
-  onEdit: (event: MouseEvent<HTMLButtonElement>) => void;
-  onRamp: (event: MouseEvent<HTMLButtonElement>) => void;
-  onTranspose: (event: MouseEvent<HTMLButtonElement>) => void;
-  /** With the clip's scale on, -1 and +1 move by its steps. */
-  scaled: boolean;
-  selected: number;
+  drums: boolean;
+  onDuplicateLoop?: () => void;
 }) {
-  const stepName = scaled ? "a step of the scale" : "a semitone";
   return (
-    <ClipBox foldable id="midi:notes" title="Notes">
-      <p className="text-[10px] text-muted-foreground leading-tight">
-        {selected > 0 ? `${selected} selected` : "All notes"}
-      </p>
-      <div className="grid grid-cols-4 gap-0.5">
-        {TRANSPOSE_STEPS.map((semitones) => (
-          <ClipToggle
-            aria-label={`Transpose ${semitones > 0 ? "up" : "down"} ${Math.abs(semitones) === 12 ? "an octave" : stepName}`}
-            className="px-0"
-            data-semitones={semitones}
-            disabled={noteCount === 0}
-            key={semitones}
-            onClick={onTranspose}
-          >
-            {semitones > 0 ? `+${semitones}` : String(semitones)}
-          </ClipToggle>
-        ))}
-      </div>
-      <div className="grid grid-cols-3 gap-1">
-        {NOTE_EDITS.map((item, index) => (
-          <ClipToggle
-            aria-label={item.name}
-            className="px-0"
-            data-index={index}
-            disabled={noteCount === 0}
-            key={item.name}
-            onClick={onEdit}
-            title={item.name}
-          >
-            {item.label}
-          </ClipToggle>
-        ))}
-      </div>
-      <div className="grid grid-cols-2 gap-1">
-        {RAMPS.map((ramp, index) => (
-          <ClipToggle
-            aria-label={ramp.name}
-            data-index={index}
-            disabled={noteCount === 0}
-            key={ramp.name}
-            onClick={onRamp}
-            title={ramp.name}
-          >
-            {ramp.label}
-          </ClipToggle>
-        ))}
-      </div>
-    </ClipBox>
+    <>
+      <NoteEditMenuSub
+        edits={drums ? DRUM_TIME_EDITS : TIME_EDITS}
+        label="Time"
+      />
+      {drums ? null : <NoteEditMenuSub edits={PITCH_EDITS} label="Pitch" />}
+      <NoteEditMenuSub edits={PLAY_EDITS} label="Play" />
+      <NoteEditMenuSub edits={VELOCITY_EDITS} label="Velocity" />
+      <DropdownMenuSeparator />
+      <DropdownMenuItem disabled={!onDuplicateLoop} onClick={onDuplicateLoop}>
+        Duplicate the loop
+      </DropdownMenuItem>
+    </>
   );
 }
 
-/** The clip's piano roll: Draw at the top left, Fold above the keys (onto the scale's rows too when one is marked), the loop brace on the ruler, and a velocity or chance lane under the notes. */
+/**
+ * The bar over the notes, as an audio editor's: the pen on the roll, Repeat
+ * on a drum clip's steps, the Notes menu, on the selected notes or every note with none selected, the
+ * clip's scale (`children`), and the view: a drum clip's steps or roll, the
+ * roll folded to the pitches it uses, and the lane under it.
+ */
+function NotesBar({
+  children,
+  drawing,
+  drums,
+  folded,
+  level,
+  notes,
+  onDrawingChange,
+  onDuplicateLoop,
+  onFoldedChange,
+  onLevelChange,
+  onRepeatingChange,
+  onStepsChange,
+  repeating,
+  steps,
+}: {
+  children?: ReactNode;
+  drawing: boolean;
+  drums: boolean;
+  folded: boolean;
+  level: NoteLevel;
+  notes: {
+    cannotEdit: (edit: NoteEdit) => boolean;
+    onEdit: (edit: NoteEdit) => void;
+  };
+  onDrawingChange: () => void;
+  onDuplicateLoop?: () => void;
+  onFoldedChange: () => void;
+  onLevelChange: (level: NoteLevel) => void;
+  onRepeatingChange: () => void;
+  onStepsChange: (steps: boolean) => void;
+  repeating: boolean;
+  steps: boolean;
+}) {
+  const roll = !(drums && steps);
+  const pickView = useCallback(
+    (value: string) => onStepsChange(value === "steps"),
+    [onStepsChange]
+  );
+  const pickLane = useCallback(
+    (value: string) =>
+      onLevelChange(value === "chance" ? "chance" : "velocity"),
+    [onLevelChange]
+  );
+  return (
+    <div
+      className="flex h-9 shrink-0 items-center gap-0.5 border-b px-1"
+      data-slot="midi-clip-panel-toolbar"
+    >
+      {roll ? (
+        <Button
+          aria-pressed={drawing}
+          onClick={onDrawingChange}
+          size="sm"
+          title="Draw notes, a grid step at a time (B)"
+          variant={drawing ? "secondary" : "ghost"}
+        >
+          <PencilSimpleIcon />
+          Draw
+        </Button>
+      ) : (
+        <Button
+          aria-pressed={repeating}
+          onClick={onRepeatingChange}
+          size="sm"
+          title="Roll a step that plays: press it for two, three or four hits, then one again"
+          variant={repeating ? "secondary" : "ghost"}
+        >
+          <RepeatIcon />
+          Repeat
+        </Button>
+      )}
+      <NoteEditMenu disabled={notes.cannotEdit} onEdit={notes.onEdit}>
+        <NoteEditMenuTrigger size="sm" variant="ghost" />
+        <NoteEditMenuContent align="start">
+          <NotesMenuItems drums={drums} onDuplicateLoop={onDuplicateLoop} />
+        </NoteEditMenuContent>
+      </NoteEditMenu>
+      {children}
+      <DropdownMenu>
+        <DropdownMenuTrigger
+          render={<Button size="sm" title="View" variant="ghost" />}
+        >
+          View
+          <CaretDownIcon />
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="start" className="w-48">
+          {drums ? (
+            <>
+              <DropdownMenuRadioGroup
+                onValueChange={pickView}
+                value={steps ? "steps" : "roll"}
+              >
+                <DropdownMenuRadioItem value="steps">
+                  Steps
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="roll">Roll</DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+              {roll ? <DropdownMenuSeparator /> : null}
+            </>
+          ) : null}
+          {roll ? (
+            <>
+              <DropdownMenuCheckboxItem
+                checked={folded}
+                onCheckedChange={onFoldedChange}
+              >
+                Fold to the notes
+              </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup onValueChange={pickLane} value={level}>
+                <DropdownMenuLabel>Lane</DropdownMenuLabel>
+                <DropdownMenuRadioItem value="velocity">
+                  Velocity
+                </DropdownMenuRadioItem>
+                <DropdownMenuRadioItem value="chance">
+                  Chance
+                </DropdownMenuRadioItem>
+              </DropdownMenuRadioGroup>
+            </>
+          ) : null}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+}
+
+/**
+ * The notes' editor, the roll or the steps, with the Notes menu on a
+ * right-click and its commands' keys while it has the focus.
+ */
+function NotesEditor({
+  cannotEdit,
+  children,
+  drums,
+  onDuplicateLoop,
+  onEdit,
+}: {
+  cannotEdit: (edit: NoteEdit) => boolean;
+  children: ReactNode;
+  drums: boolean;
+  onDuplicateLoop?: () => void;
+  onEdit: (edit: NoteEdit) => void;
+}) {
+  const keyDown = useCallback(
+    (event: KeyboardEvent<HTMLDivElement>) => {
+      if (!(event.metaKey || event.ctrlKey)) {
+        return;
+      }
+      const edit = noteEditForKey(event.key.toLowerCase(), event.shiftKey);
+      if (edit && !cannotEdit(edit)) {
+        event.preventDefault();
+        onEdit(edit);
+      }
+    },
+    [cannotEdit, onEdit]
+  );
+  return (
+    <ContextMenu>
+      <ContextMenuTrigger
+        className="flex min-h-0 min-w-0 flex-1 flex-col"
+        data-slot="midi-clip-panel-editor"
+        onKeyDown={keyDown}
+      >
+        {children}
+      </ContextMenuTrigger>
+      <ContextMenuContent className="w-56">
+        <NoteEditMenuProvider disabled={cannotEdit} onEdit={onEdit}>
+          <NotesMenuItems drums={drums} onDuplicateLoop={onDuplicateLoop} />
+        </NoteEditMenuProvider>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
+
+/** The clip's piano roll: its keys, folded to the notes (and the scale's rows when one is marked) from the View menu, the loop brace on the ruler, and a velocity or chance lane under the notes. */
 function ClipRoll({
   bars,
   beat,
@@ -676,9 +714,6 @@ function ClipRoll({
   setSelection,
   span,
   step,
-  toggleDrawing,
-  toggleFolded,
-  toggleLevel,
   value,
 }: {
   bars: readonly number[];
@@ -705,9 +740,6 @@ function ClipRoll({
   setSelection: (selection: readonly NoteId[]) => void;
   span: number;
   step: number;
-  toggleDrawing: () => void;
-  toggleFolded: () => void;
-  toggleLevel: () => void;
   value: Note[];
 }) {
   // Opens on the notes, or on middle C with none, each time it shows (key the panel by clip), and again when it folds or unfolds, as its rows change.
@@ -778,40 +810,8 @@ function ClipRoll({
         style={ROLL_SIZE}
         value={value}
       >
-        <PianoRollStrip
-          className="border-b"
-          lead={
-            <Button
-              aria-pressed={drawing}
-              className="h-full w-full rounded-none text-[10px] uppercase tracking-wide"
-              onClick={toggleDrawing}
-              size="sm"
-              type="button"
-              variant={drawing ? "default" : "ghost"}
-            >
-              Draw
-            </Button>
-          }
-        >
-          <TimelineNavigator className="rounded-none" />
-        </PianoRollStrip>
         <PianoRollViewport ref={viewportRef}>
-          <PianoRollStrip
-            className="border-b"
-            lead={
-              <Button
-                aria-pressed={folded}
-                className="h-full w-full rounded-none text-[10px] uppercase tracking-wide"
-                onClick={toggleFolded}
-                size="sm"
-                type="button"
-                variant={folded ? "default" : "ghost"}
-              >
-                Fold
-              </Button>
-            }
-            sticky="top"
-          >
+          <PianoRollStrip className="border-b" sticky="top">
             {/* The loop brace, or what the clip plays: drag it, or its ends. */}
             <TimelineLane className="h-5 bg-background">
               <TimelineRange
@@ -862,16 +862,9 @@ function ClipRoll({
             className="border-t"
             lead={
               <>
-                <Button
-                  aria-label={`Lane: ${level}, show ${level === "velocity" ? "chance" : "velocity"}`}
-                  className="h-5 w-full shrink-0 rounded-none text-[9px] uppercase tracking-wide"
-                  onClick={toggleLevel}
-                  size="sm"
-                  type="button"
-                  variant="ghost"
-                >
+                <span className="flex h-5 w-full shrink-0 items-center justify-center text-[9px] text-muted-foreground uppercase tracking-wide">
                   {level === "velocity" ? "Vel" : "Chance"}
-                </Button>
+                </span>
                 <PianoRollVelocityScale level={level} />
               </>
             }
@@ -884,6 +877,10 @@ function ClipRoll({
             />
           </PianoRollStrip>
         </PianoRollViewport>
+        {/* Under the notes, as the arrangement's and the audio clip's are. */}
+        <PianoRollStrip className="border-t">
+          <TimelineNavigator className="rounded-none" />
+        </PianoRollStrip>
       </PianoRoll>
     </Timeline>
   );
@@ -942,17 +939,17 @@ function stepSource(
 }
 
 /**
- * The clip view of an arrangement's MIDI clip, as a DAW's: a Clip box (its
- * switch and name, where it starts and ends in its source or with Loop on
- * the stretch that repeats, in bars.beats.sixteenths) and
- * a Notes box (transpose, invert, reverse, legato, ×2, ÷2, humanize and
- * velocity ramps, on the selected notes or every note) beside its piano roll,
- * and with `onScaleChange` a Scale box (the clip's scale, marked on the roll's
- * rows when on, and the keys `keyNotes` are likeliest in):
- * Draw at the top left, Fold above the keys (onto the scale's rows too when it is on), the loop brace on the ruler, and
- * a velocity or chance lane under the notes. Drawing paints a note a grid step
- * at a time; the notes are in seconds, from the start of the clip's source.
- * Key it by the clip, so it opens on each clip's notes.
+ * The clip view of an arrangement's MIDI clip, as a DAW's, its notes first: a
+ * column of its settings (Clip, where it starts and ends in its source or with
+ * Loop on the stretch that repeats, in bars.beats.sixteenths; Loop; Groove,
+ * given `onSwingChange`) beside its piano roll, or a drum clip's steps, under
+ * a bar: Draw, the Notes menu (the commands of `note-edits` by what they
+ * change, also on a right-click and from their keys; no pitch commands on
+ * drums), with `onScaleChange` the clip's Scale (marked on the roll's rows,
+ * with the keys `keyNotes` are likeliest in) and View (steps or roll, Fold,
+ * the lane under the notes). Drawing paints a note a grid step at a time; the
+ * notes are in seconds, from the start of the clip's source. Key it by the
+ * clip, so it opens on each clip's notes.
  */
 function MidiClipPanel({
   active,
@@ -1009,13 +1006,15 @@ function MidiClipPanel({
     () => changeView({ drawing: !drawing }),
     [changeView, drawing]
   );
+  const [repeating, setRepeating] = useState(false);
+  const toggleRepeating = useCallback(() => setRepeating((on) => !on), []);
   const toggleFolded = useCallback(
     () => changeView({ folded: !folded }),
     [changeView, folded]
   );
-  const toggleLevel = useCallback(
-    () => changeView({ level: level === "velocity" ? "chance" : "velocity" }),
-    [changeView, level]
+  const setLevel = useCallback(
+    (next: NoteLevel) => changeView({ level: next }),
+    [changeView]
   );
   // A drum clip opens on its steps, a row per pad, unless its roll was asked for.
   const drums = pads && pads.length > 0 ? pads : undefined;
@@ -1044,64 +1043,50 @@ function MidiClipPanel({
     [bar, span]
   );
 
-  // The Notes box acts on the selected notes, or on every note with none selected.
-  const editNotes = useCallback(
-    (edit: (all: Note[], ids: Set<NoteId>, bounds: RollBounds) => Note[]) => {
-      const all = [...notes];
-      const ids = new Set(
-        selection.length > 0 ? selection : all.map((note) => note.id)
-      );
+  // With the scale on, a step is a step of the scale; an octave stays twelve semitones.
+  const marked = scale?.on ? scale : null;
+  // The Notes menu's commands, on the selected notes or every note with none selected.
+  const runEdit = useCallback(
+    (edit: NoteEdit) => {
       onNotesChange(
-        edit(all, ids, {
-          duration: span,
-          maxPitch: MAX_PITCH,
-          minLength: step,
-          minPitch: MIN_PITCH,
+        applyNoteEdit(edit, [...notes], selection, {
+          at: playhead?.getSnapshot() ?? offset,
+          bounds: {
+            duration: span,
+            maxPitch: MAX_PITCH,
+            minLength: step,
+            minPitch: MIN_PITCH,
+          },
+          loopEnd: loop?.[1] ?? offset + length,
+          nextId: () => `note-${crypto.randomUUID().slice(0, 8)}`,
+          scale: marked,
+          step,
         })
       );
       onNotesCommitted?.();
     },
-    [notes, onNotesChange, onNotesCommitted, selection, span, step]
+    [
+      length,
+      loop,
+      marked,
+      notes,
+      offset,
+      onNotesChange,
+      onNotesCommitted,
+      playhead,
+      selection,
+      span,
+      step,
+    ]
   );
-  const handleNoteEdit = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      const item = NOTE_EDITS[Number(event.currentTarget.dataset.index)];
-      if (item) {
-        editNotes((all, ids, bounds) =>
-          item.edit(all, ids, bounds, loop?.[1] ?? offset + length)
-        );
-      }
-    },
-    [editNotes, length, loop, offset]
-  );
-  // With the scale on, a step is a step of the scale; an octave stays twelve semitones.
-  const marked = scale?.on ? scale : null;
-  const handleTranspose = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      const semitones = Number(event.currentTarget.dataset.semitones);
-      editNotes((all, ids, bounds) =>
-        marked && Math.abs(semitones) === 1
-          ? stepNotes(all, ids, marked, semitones, bounds)
-          : moveNotes(all, ids, 0, semitones, bounds)
-      );
-    },
-    [editNotes, marked]
-  );
-  const fitToScale = useCallback(() => {
-    if (marked) {
-      editNotes((all, ids, bounds) =>
-        fitNotesToScale(all, ids, rollScale(marked), bounds)
-      );
-    }
-  }, [editNotes, marked]);
-  const handleRamp = useCallback(
-    (event: MouseEvent<HTMLButtonElement>) => {
-      const ramp = RAMPS[Number(event.currentTarget.dataset.index)];
-      if (ramp) {
-        editNotes((all, ids) => rampVelocity(all, ids, ramp.from, ramp.to));
-      }
-    },
-    [editNotes]
+  const cannotEdit = useCallback(
+    (edit: NoteEdit) =>
+      !canApplyNoteEdit(edit, {
+        hasNotes: notes.length > 0,
+        hasScale: marked !== null,
+        hasSelection: selection.length > 0,
+      }),
+    [marked, notes.length, selection.length]
   );
 
   // Where the clip plays: the fields and the brace.
@@ -1225,11 +1210,9 @@ function MidiClipPanel({
             disabled={!onRegionChange}
             loop={loop}
             meter={meter}
-            noteCount={notes.length}
             offset={offset}
             onCommit={onNotesCommitted}
             onDouble={doubleLoop}
-            onDuplicate={duplicateLoop}
             onHalve={halveLoop}
             onLength={setLoopLength}
             onPosition={setLoopPosition}
@@ -1238,34 +1221,13 @@ function MidiClipPanel({
             step={step}
             stretch={loopSpan}
           />
-          {onSwingChange || drums ? (
+          {onSwingChange ? (
             <GrooveBox
               onCommit={onNotesCommitted}
-              onShowSteps={drums ? setShowSteps : undefined}
               onSwingChange={onSwingChange}
-              steps={showSteps}
               swing={swing}
             />
           ) : null}
-          {onScaleChange ? (
-            <ScaleBox
-              keyAudio={keyAudio}
-              keyNotes={keyNotes ?? notes}
-              noteCount={notes.length}
-              onCommit={onNotesCommitted}
-              onFit={fitToScale}
-              onScaleChange={onScaleChange}
-              scale={scale}
-            />
-          ) : null}
-          <NotesBox
-            noteCount={notes.length}
-            onEdit={handleNoteEdit}
-            onRamp={handleRamp}
-            onTranspose={handleTranspose}
-            scaled={marked !== null}
-            selected={selection.length}
-          />
         </>
       }
       className={className}
@@ -1279,51 +1241,81 @@ function MidiClipPanel({
       onRename={onRename}
       status={<MidiClipStatus held={held} meter={meter} notes={notes} />}
     >
-      {drums && showSteps ? (
-        <DrumStepEditor
-          beatEvery={Math.max(1, Math.round(beat / step))}
-          className="flex-1"
-          notes={notes}
-          onAudition={onPadOn}
-          onNotesChange={onNotesChange}
-          onNotesCommitted={onNotesCommitted}
-          pads={drums}
-          source={playedStep}
-          start={stepFrom}
-          step={step}
-          steps={Math.max(1, Math.round(loopSpan / step))}
-        />
-      ) : (
-        <ClipRoll
-          bars={bars}
-          beat={beat}
-          drawing={drawing}
-          folded={folded}
-          length={length}
-          level={level}
-          loop={loop}
-          name={name}
-          offset={offset}
-          onNoteOff={onNoteOff}
-          onNoteOn={onNoteOn}
-          onNotesChange={onNotesChange}
-          onNotesCommitted={onNotesCommitted}
-          onRegionChange={onRegionChange}
-          padNames={padNames}
-          playhead={playhead}
-          playing={playing}
-          scale={scale?.on ? scale : null}
-          selection={selection}
-          setBrace={setBrace}
-          setSelection={setSelection}
-          span={span}
-          step={step}
-          toggleDrawing={toggleDrawing}
-          toggleFolded={toggleFolded}
-          toggleLevel={toggleLevel}
-          value={value}
-        />
-      )}
+      <NotesBar
+        drawing={drawing}
+        drums={Boolean(drums)}
+        folded={folded}
+        level={level}
+        notes={{ cannotEdit, onEdit: runEdit }}
+        onDrawingChange={toggleDrawing}
+        onDuplicateLoop={loop && notes.length > 0 ? duplicateLoop : undefined}
+        onFoldedChange={toggleFolded}
+        onLevelChange={setLevel}
+        onRepeatingChange={toggleRepeating}
+        onStepsChange={setShowSteps}
+        repeating={repeating}
+        steps={showSteps}
+      >
+        {onScaleChange && !drums ? (
+          <ClipScaleMenu
+            keyAudio={keyAudio}
+            keyNotes={keyNotes ?? notes}
+            onCommit={onNotesCommitted}
+            onScaleChange={onScaleChange}
+            scale={scale}
+          />
+        ) : null}
+      </NotesBar>
+      <NotesEditor
+        cannotEdit={cannotEdit}
+        drums={Boolean(drums)}
+        onDuplicateLoop={loop && notes.length > 0 ? duplicateLoop : undefined}
+        onEdit={runEdit}
+      >
+        {drums && showSteps ? (
+          <DrumStepEditor
+            beatEvery={Math.max(1, Math.round(beat / step))}
+            className="flex-1"
+            notes={notes}
+            onAudition={onPadOn}
+            onNotesChange={onNotesChange}
+            onNotesCommitted={onNotesCommitted}
+            pads={drums}
+            repeating={repeating}
+            source={playedStep}
+            start={stepFrom}
+            step={step}
+            steps={Math.max(1, Math.round(loopSpan / step))}
+          />
+        ) : (
+          <ClipRoll
+            bars={bars}
+            beat={beat}
+            drawing={drawing}
+            folded={folded}
+            length={length}
+            level={level}
+            loop={loop}
+            name={name}
+            offset={offset}
+            onNoteOff={onNoteOff}
+            onNoteOn={onNoteOn}
+            onNotesChange={onNotesChange}
+            onNotesCommitted={onNotesCommitted}
+            onRegionChange={onRegionChange}
+            padNames={padNames}
+            playhead={playhead}
+            playing={playing}
+            scale={scale?.on ? scale : null}
+            selection={selection}
+            setBrace={setBrace}
+            setSelection={setSelection}
+            span={span}
+            step={step}
+            value={value}
+          />
+        )}
+      </NotesEditor>
     </ClipView>
   );
 }

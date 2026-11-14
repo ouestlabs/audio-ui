@@ -2,6 +2,7 @@ import {
   barsBeatsWith,
   secondsPerBar,
   secondsPerBeat,
+  type Tempo,
 } from "@audio-ui/engine/time";
 import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
 import {
@@ -508,6 +509,27 @@ export interface ArrangementViewProps {
   viewportRef: RefObject<HTMLDivElement | null>;
 }
 
+/** The least room the arrangement shows past its end, in bars, for a clip to be dropped or stretched there: the arrangement grows to hold it. */
+const ROOM_BARS = 4;
+/** The room past the end as a share of the arrangement's length, where that is more: wide enough to aim at on a long song. */
+const ROOM_SHARE = 0.1;
+
+/** How long an arrangement's timeline is shown: its length, and room past its end. Give the timeline's zoom the same, so it fits all of it. */
+export const shownLength = (duration: number, tempo: Tempo) =>
+  duration + Math.max(ROOM_BARS * secondsPerBar(tempo), duration * ROOM_SHARE);
+
+/** The room past the arrangement's end, shaded over a track's lane: what lands there makes the arrangement longer. */
+function PastTheEnd({ from }: { from: number }) {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute inset-y-0 right-0 border-foreground/20 border-s bg-background/60"
+      data-slot="arrangement-past-end"
+      style={{ left: `calc(var(--timeline-unit) * ${from})` }}
+    />
+  );
+}
+
 /** What a row needs of its track: what it is, whether it sounds, whether it takes files, how deep it sits and, a group, the tracks in it. */
 function rowOf(
   track: ArrangementTrack,
@@ -589,6 +611,7 @@ export function ArrangementView({
   const dropLine = useRef<HTMLDivElement>(null);
   const beat = secondsPerBeat(tempo);
   const bar = secondsPerBar(tempo);
+  const shown = shownLength(duration, tempo);
   const describe = useCallback(
     (seconds: number) => {
       const { bar: number, beat: at } = barsBeatsWith(
@@ -913,7 +936,7 @@ export function ArrangementView({
   return (
     <Timeline
       className="min-h-0 flex-1"
-      duration={duration}
+      duration={shown}
       onPositionChange={onSeek}
       snapPoints={snapPoints}
       snapStep={grid.snapStep}
@@ -989,7 +1012,7 @@ export function ArrangementView({
                 getAriaValueText={describe}
               >
                 <TimelineBarMarks
-                  duration={duration}
+                  duration={shown}
                   signatures={signatures}
                   tempo={tempo}
                   zoom={zoom}
@@ -1136,6 +1159,7 @@ export function ArrangementView({
                         onSelectionChange={timeSelection.onSelectionChange}
                         seekable
                       >
+                        <PastTheEnd from={duration} />
                         <DropLine active={dropOn === track.id} ref={dropLine} />
                         <ReadingClips reading={reading} track={track.id} />
                         {isGroup ? (

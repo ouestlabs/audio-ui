@@ -8,18 +8,10 @@
  * dropped file's bytes, and made again from them when it is missing.
  */
 import type { StreamedSource } from "@/lib/clip-player";
+import { CACHE, type CacheEntry, cacheNames } from "@/lib/daw/files";
 import type { Recording } from "@/lib/daw/recordings";
-import { leavesName, makeLeaves } from "@/lib/daw/samples";
+import { makeLeaves } from "@/lib/daw/samples";
 import { canStore } from "@/lib/daw/storage";
-
-const CACHE = "cache";
-
-/** What a recording's cache keeps beside its samples. */
-interface CacheEntry {
-  channels: number;
-  length: number;
-  sampleRate: number;
-}
 
 /** Whether recordings can be streamed here: shared memory, a worker and the private storage. */
 export function canStream(): boolean {
@@ -38,7 +30,7 @@ const folderOf = async () =>
 const sourceOf = (id: string, entry: CacheEntry): StreamedSource => ({
   channels: entry.channels,
   length: entry.length,
-  path: [CACHE, `${id}.f32`],
+  path: [CACHE, cacheNames(id).samples],
   sampleRate: entry.sampleRate,
 });
 
@@ -57,7 +49,7 @@ export async function streamRecording(
   const channels = source.channels as readonly Float32Array[];
   const folder = await folderOf();
   const samples = await (
-    await folder.getFileHandle(`${id}.f32`, { create: true })
+    await folder.getFileHandle(cacheNames(id).samples, { create: true })
   ).createWritable();
   await channels.reduce(async (written, channel) => {
     await written;
@@ -75,14 +67,14 @@ export async function streamRecording(
     sampleRate: source.sampleRate,
   };
   const peaks = await (
-    await folder.getFileHandle(`${id}.range`, { create: true })
+    await folder.getFileHandle(cacheNames(id).range, { create: true })
   ).createWritable();
   await peaks.write(recording.peaks.max as Float32Array<ArrayBuffer>);
   await peaks.write(recording.peaks.min as Float32Array<ArrayBuffer>);
   await peaks.close();
   // Its leaves while its channels are at hand: the clip view does not read the file through for them.
   const leaves = await (
-    await folder.getFileHandle(leavesName(`${id}.f32`), { create: true })
+    await folder.getFileHandle(cacheNames(id).leaves, { create: true })
   ).createWritable();
   await leaves.write(
     await makeLeaves(
@@ -96,7 +88,7 @@ export async function streamRecording(
   // A level of amplitudes from before there were two, which nothing reads now.
   await folder.removeEntry(`${id}.peaks`).catch(() => undefined);
   const meta = await (
-    await folder.getFileHandle(`${id}.json`, { create: true })
+    await folder.getFileHandle(cacheNames(id).entry, { create: true })
   ).createWritable();
   await meta.write(JSON.stringify(entry));
   await meta.close();
@@ -112,13 +104,17 @@ export async function cachedRecording(
   try {
     const folder = await folderOf();
     const entry = JSON.parse(
-      await (await (await folder.getFileHandle(`${id}.json`)).getFile()).text()
+      await (
+        await (await folder.getFileHandle(cacheNames(id).entry)).getFile()
+      ).text()
     ) as CacheEntry;
-    const samples = await (await folder.getFileHandle(`${id}.f32`)).getFile();
+    const samples = await (
+      await folder.getFileHandle(cacheNames(id).samples)
+    ).getFile();
     // A cache made before peaks had this file is missing it: made again, it draws the sound as it is.
     const range = new Float32Array(
       await (
-        await (await folder.getFileHandle(`${id}.range`)).getFile()
+        await (await folder.getFileHandle(cacheNames(id).range)).getFile()
       ).arrayBuffer()
     );
     if (

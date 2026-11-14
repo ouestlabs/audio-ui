@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import {
   ArrangementView,
   type ReadingFiles,
+  shownLength,
 } from "@/components/audio-ui/arrangement-view";
 import { DeviceView } from "@/components/audio-ui/device-view";
 import { ExportDialog } from "@/components/audio-ui/export-dialog";
@@ -68,7 +69,7 @@ import { exportSound } from "@/lib/daw/audio-files";
 import { canStream, streamRecording } from "@/lib/daw/cache";
 import { renderConsolidated } from "@/lib/daw/consolidate";
 import { addDeviceCommand, takesDevice } from "@/lib/daw/devices";
-import { type Dropped, decodeFiles, dropCommands } from "@/lib/daw/drop";
+import { decodeFiles, dropCommands } from "@/lib/daw/drop";
 import {
   DAWPROJECT_ACCEPT,
   exportProject,
@@ -82,6 +83,7 @@ import {
   saveToFolder,
 } from "@/lib/daw/folder";
 import { projectFromFolder } from "@/lib/daw/open-folder";
+import type { Processed } from "@/lib/daw/process";
 import { newProject, TRACK_COLOR_COUNT } from "@/lib/daw/project";
 import {
   freshMidiClipId,
@@ -269,21 +271,40 @@ function deletesItsOwn(event: KeyboardEvent) {
   );
 }
 
-/** Whether a key goes to the clip view's sound, which edits what is selected on it with Cut, Copy, Paste, Select all, Crop, Louder and Quieter (CLP-029), and not to the arrangement. */
+/** The clip view's editors, which edit what is picked in them with keys of their own: the sound's and the notes'. */
+const OWN_EDITS =
+  '[data-slot="clip-panel-edit"], [data-slot="midi-clip-panel-editor"]';
+
+/**
+ * Whether a key goes to an editor of the clip view and not to the arrangement:
+ * on the sound, Cut, Copy, Paste, Select all, Crop, Louder and Quieter
+ * (CLP-029); on the notes, the Notes menu's keys, Split, Join, Quantize,
+ * Insert, Duplicate and Delete time, besides the roll's own.
+ */
 function editsItsOwn(event: KeyboardEvent) {
-  if (
-    !(
-      event.target instanceof Element &&
-      event.target.closest('[data-slot="clip-panel-edit"]')
-    )
-  ) {
+  if (!(event.target instanceof Element && event.target.closest(OWN_EDITS))) {
     return false;
   }
   const key = event.key.toLowerCase();
-  return event.metaKey || event.ctrlKey
-    ? ["a", "c", "v", "x"].includes(key)
-    : key === "k" ||
-        (event.shiftKey && (key === "arrowup" || key === "arrowdown"));
+  if (event.metaKey || event.ctrlKey) {
+    return [
+      "a",
+      "backspace",
+      "c",
+      "d",
+      "delete",
+      "e",
+      "i",
+      "j",
+      "u",
+      "v",
+      "x",
+    ].includes(key);
+  }
+  return (
+    key === "k" ||
+    (event.shiftKey && (key === "arrowup" || key === "arrowdown"))
+  );
 }
 
 /** Whether a key press goes to a field being typed in rather than to the app. */
@@ -664,8 +685,9 @@ export function Daw({
   );
   // The arrangement's zoom and grid, which the keys change too (KEY-016 to KEY-018).
   const viewportRef = useRef<HTMLDivElement>(null);
+  // The zoom fits the arrangement and the room past its end.
   const view = useTimelineZoom({
-    duration: doc.duration,
+    duration: shownLength(doc.duration, doc.tempo),
     initialZoom: readView().zoom,
     viewportRef,
   });
@@ -709,11 +731,17 @@ export function Daw({
     }
     return selectedTrack ? [selectedTrack] : [];
   }, [arrangement.selectedTracks, selectedTrack]);
-  // A recording the clip view's Process menu made (CLP-028): stored as a dropped file is, and played from now on.
+  // A recording the clip view's Process menu or an edit made (CLP-028, CLP-029): its bytes stored as a dropped file's are, or stored by the worker that made it, and played from now on.
   const keepRecording = useCallback(
-    async (id: string, { bytes, recording }: Dropped) => {
-      if (canStore()) {
-        await saveRecording(id, bytes);
+    async ({ id, kept, recording }: Processed) => {
+      if (kept instanceof ArrayBuffer) {
+        if (canStore()) {
+          await saveRecording(id, kept);
+        }
+      } else {
+        kept.catch(() =>
+          setSaved("Not saved: the browser refused to store the file")
+        );
       }
       setRecordings((current) => new Map([...current, [id, recording]]));
     },

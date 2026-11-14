@@ -29,20 +29,28 @@ export interface Measured {
   peaks: RecordingPeaks;
 }
 
-/** The peaks of `channels`' loudest channel and their chroma, at `sampleRate`. */
-export function measureSound(
+/** The peaks of `channels`' loudest channel, at `sampleRate`: as many as a recording that long keeps. */
+export function measurePeaks(
   channels: readonly Float32Array[],
   sampleRate: number
-): Measured {
+): RecordingPeaks {
   const length = (channels[0]?.length ?? 0) / sampleRate;
   const peaks = normalizePeaks(
     computePeaks([...channels], peakCountFor(length))
   );
   return {
+    max: Float32Array.from(peaks.max),
+    min: Float32Array.from(peaks.min),
+  };
+}
+
+/** The peaks of `channels`' loudest channel and their chroma, at `sampleRate`. */
+export function measureSound(
+  channels: readonly Float32Array[],
+  sampleRate: number
+): Measured {
+  return {
     chroma: audioChroma([...channels], sampleRate),
-    peaks: {
-      max: Float32Array.from(peaks.max),
-      min: Float32Array.from(peaks.min),
-    },
+    peaks: measurePeaks(channels, sampleRate),
   };
 }

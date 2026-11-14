@@ -39,8 +39,8 @@ describe("applySoundOperation on a stretch", () => {
     channels: [Float32Array.from({ length: 10 }, (_, index) => index)],
     sampleRate: 10,
   });
-  const frames = (sound: { channels: Float32Array[] }) =>
-    Array.from(sound.channels[0] ?? []);
+  const frames = (made: { channels: Float32Array[] }) =>
+    Array.from(made.channels[0] ?? []);
 
   test("Delete takes the stretch out and closes the gap", () => {
     expect(

@@ -89,7 +89,7 @@ Under the clip view's ruler, a range holds what the clip plays of its source, or
 Test: apps/www/test/registry-audio/base/audio/clip-panel.test.ts "CLP-021"; apps/daw/test/browser/run.ts "CLP-021"
 
 ### CLP-022 Folding a clip box
-A press anywhere on the heading of a foldable box of the clip view folds it to a narrow strip, and a press anywhere on the strip unfolds it: the caret shows the way, it is not the only place to aim at.
+A press anywhere on the heading of a foldable box of the clip view folds it to a narrow strip (a short row in the column of settings beside a wide editor), and a press anywhere on the strip unfolds it: the caret shows the way, it is not the only place to aim at.
 Test: apps/daw/test/browser/run.ts "CLP-022"
 
 ### CLP-023 Fade handles

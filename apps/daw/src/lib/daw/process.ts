@@ -1,15 +1,20 @@
 /**
- * What an operation of the clip view's Process menu makes of a clip's source
- * (CLP-028): the stretch of its recording the clip reads, from `sourceFrom`
- * over `sourceLength`, processed into a recording of its own in a worker, so
- * the page goes on, and kept and streamed as a dropped file is, in floats so a
- * gain past full scale stays in it. The recording the clip read is left as it
- * was, for the other clips of it. Its beat is not read again: the clip is
- * already laid out.
+ * What an operation of the clip view's Process menu or an edit of its sound
+ * makes of a clip's source (CLP-028, CLP-029): the stretch of its recording
+ * the clip reads, from `sourceFrom` over `sourceLength`, processed into a
+ * recording of its own in a worker, so the page goes on, in floats so a gain
+ * past full scale stays in it. A streamed recording is read, processed and
+ * cached there, and the page streams the result as soon as its cache is
+ * written; its file is stored after. The recording the clip read is left as it
+ * was, for the other clips of it. Its beat is not read again, the clip being
+ * laid out already, nor its chroma, carried over instead.
  */
-import { canStream, streamRecording } from "@/lib/daw/cache";
-import type { Dropped } from "@/lib/daw/drop";
-import type { ProcessDone, ProcessJob } from "@/lib/daw/process-worker";
+import { cachedRecording, canStream, streamRecording } from "@/lib/daw/cache";
+import type {
+  MemoryJob,
+  ProcessDone,
+  ProcessJob,
+} from "@/lib/daw/process-worker";
 import {
   freshRecordingId,
   type Recording,
@@ -18,22 +23,66 @@ import {
 import { readChannels, transferable } from "@/lib/daw/samples";
 import type { SoundOperation, SoundRange } from "@/lib/sound-operations";
 
-/** `job` run in a worker of its own, which ends with it. */
-function inWorker(job: ProcessJob): Promise<ProcessDone> {
-  return new Promise((resolve, reject) => {
-    const worker = new Worker(new URL("./process-worker.ts", import.meta.url), {
-      type: "module",
-    });
-    worker.onmessage = (event: MessageEvent<ProcessDone>) => {
-      worker.terminate();
-      resolve(event.data);
+/** A recording an operation made, under its id, and how the project keeps it: the bytes to store, or the worker storing them. */
+export interface Processed {
+  id: string;
+  kept: ArrayBuffer | Promise<void>;
+  recording: Recording;
+}
+
+type Reply<Kind extends ProcessDone["kind"]> = Extract<
+  ProcessDone,
+  { kind: Kind }
+>;
+
+/**
+ * `job` run in a worker of its own, which ends once it is done: `first`, its
+ * first answer (from memory, all of it; streamed, the cache made), and `last`,
+ * once a streamed recording's file is stored too.
+ */
+function inWorker(job: ProcessJob) {
+  const worker = new Worker(new URL("./process-worker.ts", import.meta.url), {
+    type: "module",
+  });
+  let answer: (done: ProcessDone) => void = () => undefined;
+  let fail: (error: Error) => void = () => undefined;
+  const first = new Promise<Reply<"made" | "memory">>((resolve, reject) => {
+    answer = (done) => {
+      if (done.kind === "made" || done.kind === "memory") {
+        resolve(done);
+      }
+    };
+    fail = reject;
+  });
+  const last = new Promise<void>((resolve, reject) => {
+    worker.onmessage = ({ data }: MessageEvent<ProcessDone>) => {
+      answer(data);
+      if (data.kind === "failed") {
+        const error = new Error(data.message);
+        fail(error);
+        reject(error);
+      }
+      if (data.kind !== "made") {
+        worker.terminate();
+        resolve();
+      }
     };
     worker.onerror = (event) => {
       worker.terminate();
-      reject(new Error(event.message || "the sound could not be processed"));
+      const error = new Error(
+        event.message || "the sound could not be processed"
+      );
+      fail(error);
+      reject(error);
     };
-    worker.postMessage(job, { transfer: transferable(job.channels) });
   });
+  // A failure before the cache is made is the first answer's: the last one is let go of.
+  last.catch(() => undefined);
+  worker.postMessage(
+    job,
+    job.kind === "memory" ? { transfer: transferable(job.channels) } : {}
+  );
+  return { first, last };
 }
 
 /** Frames `range` of a clip's source, every channel: what Copy keeps to paste. */
@@ -51,33 +100,76 @@ export function readSource(
   );
 }
 
-/** The recording an operation makes of a clip's source, or of `range` of it, under a new id, with the bytes to keep it by. */
+/** How many semitones an operation on all of a sound moves its pitch. */
+function pitchMove(operation: SoundOperation): number {
+  switch (operation.type) {
+    case "shift":
+      return operation.semitones;
+    case "speed":
+      return 12 * Math.log2(operation.speed);
+    default:
+      return 0;
+  }
+}
+
+/** A sound's chroma once an operation on all of it moved its pitch: turned by as many semitones, and as it was otherwise. */
+function carriedChroma(
+  chroma: readonly number[] | undefined,
+  operation: SoundOperation,
+  range: SoundRange | null
+): readonly number[] | undefined {
+  const turn = range || !chroma ? 0 : Math.round(pitchMove(operation));
+  return turn === 0
+    ? chroma
+    : chroma?.map((_, index) => chroma[(((index - turn) % 12) + 12) % 12] ?? 0);
+}
+
+/** The recording an operation makes of a clip's source, or of `range` of it, under a new id, and how the project keeps it. */
 export async function processSource(
   recording: Recording,
   clip: { sourceFrom?: number; sourceLength: number },
   operation: SoundOperation,
   range: SoundRange | null,
   taken: ReadonlySet<string>
-): Promise<[string, Dropped]> {
-  const { sampleRate } = recording.source;
-  const from = Math.round((clip.sourceFrom ?? 0) * sampleRate);
-  const { bytes, channels, measured } = await inWorker({
-    channels: await readChannels(
-      recording.source,
-      from,
-      from + Math.round(clip.sourceLength * sampleRate)
-    ),
+): Promise<Processed> {
+  const { source } = recording;
+  const from = Math.round((clip.sourceFrom ?? 0) * source.sampleRate);
+  const to = from + Math.round(clip.sourceLength * source.sampleRate);
+  const id = freshRecordingId(taken);
+  const chroma = carriedChroma(recording.chroma, operation, range);
+  if ("path" in source) {
+    const { first, last } = inWorker({
+      id,
+      kind: "streamed",
+      operation,
+      range,
+      source,
+      window: [from, to],
+    });
+    await first;
+    const made = await cachedRecording(id, recording.name, source.sampleRate);
+    if (!made) {
+      throw new Error("the processed sound could not be read back");
+    }
+    return { id, kept: last, recording: { ...made, chroma } };
+  }
+  const job: MemoryJob = {
+    channels: await readChannels(source, from, to),
+    kind: "memory",
     operation,
     range,
-    sampleRate,
-  });
-  const id = freshRecordingId(taken);
-  const made = recordingOf(channels, sampleRate, recording.name, measured);
-  return [
+    sampleRate: source.sampleRate,
+  };
+  const done = (await inWorker(job).first) as Reply<"memory">;
+  const made = recordingOf(
+    done.channels,
+    source.sampleRate,
+    recording.name,
+    done.measured
+  );
+  return {
     id,
-    {
-      bytes,
-      recording: canStream() ? await streamRecording(id, made) : made,
-    },
-  ];
+    kept: done.bytes,
+    recording: canStream() ? await streamRecording(id, made) : made,
+  };
 }
