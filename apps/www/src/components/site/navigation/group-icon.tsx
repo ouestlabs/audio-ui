@@ -27,6 +27,7 @@ const SECTION_ICONS = {
   docs: TapeIcon,
   engine: SpeakerIcon,
   elements: ShapesIcon,
+  icons: GridIcon,
   react: ShapesIcon,
   registry: CrateIcon,
 } as const;

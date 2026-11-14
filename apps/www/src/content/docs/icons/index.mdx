@@ -1,6 +1,6 @@
 ---
 title: Icons
-description: "The glyphs audio/ui draws for itself: one thin stroke on a 24 grid, in four weights, named for what they draw. Search them, pick a weight and a size, then copy the SVG."
+description: "The glyphs audio/ui draws for itself: one thin stroke on a 24 grid, in four weights, named for what they draw. Install the package and draw them in React or any framework."
 ---
 
 Audio has things a general icon set does not draw: a knob, a rack unit, the shape of a sawtooth, the response of a high shelf. These glyphs are audio/ui's own, drawn to sit together and to take the color of the text around them.
@@ -34,13 +34,13 @@ import { KnobIcon } from "@audio-ui/icons/react";
 <KnobIcon className="text-muted-foreground" size={20} weight="bold" />;
 ```
 
-The package works without React. `@audio-ui/icons` holds the glyphs as data, the catalog and `toSvg`, which gives the text of an SVG file for any glyph in any weight; `draw` gives the same drawing as plain nodes, for a Vue, Svelte or custom element adapter to render. **Copy SVG** and **Download** on this page give the same text.
+The package works without React. `@audio-ui/icons` holds the glyphs as data, the catalog and `toSvg`, which gives the text of an SVG file for any glyph in any weight; `draw` gives the same drawing as plain nodes, for a Vue, Svelte or custom element adapter to render. **Copy SVG** and **Download** in the [catalog](/icons) give the same text.
 
 </ForFrameworks>
 
 <ForFrameworks only="vue svelte web">
 
-The glyphs are data, under `glyphs`, named for what they draw: `glyphs.knob`, `glyphs.tracks`, `glyphs.sine`, `glyphs.lowpass`. `toSvg` gives the text of an SVG for any glyph, in any weight and size, drawn in the color of its text; `draw` gives the same drawing as plain nodes. **Copy SVG** and **Download** on this page give the same text.
+The glyphs are data, under `glyphs`, named for what they draw: `glyphs.knob`, `glyphs.tracks`, `glyphs.sine`, `glyphs.lowpass`. `toSvg` gives the text of an SVG for any glyph, in any weight and size, drawn in the color of its text; `draw` gives the same drawing as plain nodes. **Copy SVG** and **Download** in the [catalog](/icons) give the same text.
 
 ```ts
 import { glyphs, toSvg } from "@audio-ui/icons";

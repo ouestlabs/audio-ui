@@ -1,4 +1,5 @@
 import * as React from "react";
+import { IconPanel } from "@/components/icons/icon-panel";
 import { CustomizerChoicesSkeleton } from "@/components/site/layout/framed-skeleton";
 import {
   Sheet,
@@ -6,6 +7,7 @@ import {
   SheetDescription,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { useCustomizerScope } from "@/hooks/use-customizer-scope";
 import { lazyComponent } from "@/lib/lazy";
 import { cn } from "@/lib/utils";
 import { useCustomizer } from "../../catalog/components-context";
@@ -20,6 +22,19 @@ const CustomizerSidebarContent = lazyComponent(
     ssr: false,
   }
 );
+
+/** What the panel holds: the icon picked on the icons' page, the design system's choices elsewhere. */
+function PanelContent({
+  anchorRef,
+}: {
+  anchorRef: React.RefObject<HTMLDivElement | null>;
+}) {
+  return useCustomizerScope() === "icons" ? (
+    <IconPanel />
+  ) : (
+    <CustomizerSidebarContent anchorRef={anchorRef} isMobile={false} />
+  );
+}
 
 /** Full-height bordered aside for the /components layout. */
 function CustomizerPanelSidebar() {
@@ -42,7 +57,7 @@ function CustomizerPanelSidebar() {
             "fade-in-0 slide-in-from-right-4 animate-in duration-200 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:animate-none"
         )}
       >
-        <CustomizerSidebarContent anchorRef={anchorRef} isMobile={false} />
+        <PanelContent anchorRef={anchorRef} />
       </div>
     </aside>
   );
@@ -52,6 +67,7 @@ function CustomizerPanelSidebar() {
 function CustomizerPanelSheet() {
   const { customizerOpen, setCustomizerOpen } = useCustomizer();
   const anchorRef = React.useRef<HTMLDivElement | null>(null);
+  const icons = useCustomizerScope() === "icons";
 
   return (
     <Sheet onOpenChange={setCustomizerOpen} open={customizerOpen}>
@@ -62,10 +78,12 @@ function CustomizerPanelSheet() {
       >
         <SheetTitle className="sr-only">Customize</SheetTitle>
         <SheetDescription className="sr-only">
-          Adjust the style, colors, fonts, and other design system options.
+          {icons
+            ? "Pick the weight and the size, then copy or save the icon."
+            : "Adjust the style, colors, fonts, and other design system options."}
         </SheetDescription>
         <CustomizerSidebarHeader />
-        <CustomizerSidebarContent anchorRef={anchorRef} isMobile={false} />
+        <PanelContent anchorRef={anchorRef} />
       </SheetContent>
     </Sheet>
   );

@@ -35,7 +35,8 @@ function SectionText({ section }: { section: SiteSection }) {
 
 /**
  * The site's sections as one menu: the Docs, the primitives of the reader's
- * framework, the core with the engine, and the registry with its catalog. Its
+ * framework, the core with the engine, the registry with its catalog, and the
+ * icons. Its
  * button shows the section being read, and each item is a link to a
  * section's landing page. `compact` draws the button on
  * one line, for the bar of the inset while the sidebar is shut.

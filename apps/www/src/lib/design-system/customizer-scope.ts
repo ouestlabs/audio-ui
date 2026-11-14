@@ -1,9 +1,11 @@
 /**
  * What the customizer changes on a page: `all` where the registry draws (its
  * previews and sources, the home's editor, the catalog), `elements` where the
- * custom elements alone do, `none` where nothing on the page follows it.
+ * custom elements alone do, `icons` on the icons' page, where it holds the icon
+ * picked with its weight and its size, `none` where nothing on the page
+ * follows it.
  */
-export type CustomizerScope = "all" | "elements" | "none";
+export type CustomizerScope = "all" | "elements" | "icons" | "none";
 
 declare module "@tanstack/react-router" {
   interface StaticDataRouteOption {

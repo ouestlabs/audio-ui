@@ -2,6 +2,12 @@ import { CaretDownIcon } from "@phosphor-icons/react/ssr";
 import { Link } from "@tanstack/react-router";
 import * as React from "react";
 import { ComponentUpdateIndicator } from "@/components/docs/catalog/component-update-indicator";
+import {
+  ICON_CATEGORIES,
+  ICON_CATEGORIES_TITLE,
+  ICON_PAGES,
+  useIconLinks,
+} from "@/components/icons/icon-sidebar";
 import { FrameworkSelect } from "@/components/site/navigation/framework-select";
 import { SectionSelect } from "@/components/site/navigation/section-select";
 import { Button } from "@/components/ui/button";
@@ -10,7 +16,11 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { useGroupFolding, useSidebarGroups } from "@/hooks/use-sidebar-groups";
+import {
+  useGroupFolding,
+  useReadingSection,
+  useSidebarGroups,
+} from "@/hooks/use-sidebar-groups";
 import { getDocsPageUpdateHint } from "@/lib/docs/content/docs";
 import type { source } from "@/lib/docs/content/source";
 import type { CategoryInfo } from "@/lib/registry/core/registry";
@@ -97,6 +107,51 @@ function Count({ children }: { children: React.ReactNode }) {
   );
 }
 
+/** The Icons section's links: the catalog and the usage page, then the catalog's categories. */
+function IconLinks({ onNavigate }: { onNavigate: () => void }) {
+  const { isCurrentCategory, isCurrentPage, showAll } = useIconLinks();
+  const { collapsed, setOpen } = useGroupFolding();
+  const unfolded = !collapsed.has(ICON_CATEGORIES_TITLE);
+  const jump = React.useCallback(() => {
+    showAll();
+    onNavigate();
+  }, [onNavigate, showAll]);
+  return (
+    <>
+      {ICON_PAGES.map((page) => (
+        <NavRow
+          active={isCurrentPage(page.href)}
+          href={page.href}
+          key={page.href}
+          onNavigate={onNavigate}
+        >
+          {page.label}
+          {page.count ? <Count>{page.count}</Count> : null}
+        </NavRow>
+      ))}
+      <GroupLabel
+        collapsible
+        onOpenChange={setOpen}
+        open={unfolded}
+        title={ICON_CATEGORIES_TITLE}
+      />
+      {unfolded
+        ? ICON_CATEGORIES.map((category) => (
+            <NavRow
+              active={isCurrentCategory(category.hash)}
+              href={`/icons#${category.hash}`}
+              key={category.hash}
+              onNavigate={jump}
+            >
+              {category.label}
+              <Count>{category.count}</Count>
+            </NavRow>
+          ))
+        : null}
+    </>
+  );
+}
+
 export function MobileNav({
   items: _items,
   tree,
@@ -110,7 +165,13 @@ export function MobileNav({
 }) {
   const [open, setOpen] = React.useState(false);
   const { groups, pathname, setOpen: setGroupOpen } = useSidebarGroups(tree);
-  const section = isActive(pathname, "/components") ? "components" : "docs";
+  const reading = useReadingSection(tree);
+  let section = "docs";
+  if (isActive(pathname, "/components")) {
+    section = "components";
+  } else if (reading === "icons") {
+    section = "icons";
+  }
   const close = React.useCallback(() => setOpen(false), []);
 
   // The menu is for below `lg`: from there up the sidebar is the navigation.
@@ -238,51 +299,56 @@ export function MobileNav({
                 );
               })}
             </>
-          ) : (
-            groups.map((group) => (
-              <div className="flex shrink-0 flex-col gap-0.5" key={group.title}>
-                {group.titled ? (
-                  <GroupLabel
-                    collapsible={group.collapsible}
-                    onOpenChange={setGroupOpen}
-                    open={group.open}
-                    title={group.title ?? ""}
-                  />
-                ) : null}
-                {group.open
-                  ? group.sections.map((part) => (
-                      <React.Fragment key={part.title ?? "untitled"}>
-                        {part.title ? (
-                          <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
-                            {part.title}
-                          </p>
-                        ) : null}
-                        {part.pages.map((page) => {
-                          const hint = getDocsPageUpdateHint(page.url);
-                          return (
-                            <NavRow
-                              active={page.url === pathname}
-                              href={page.url}
-                              key={page.url}
-                              onNavigate={close}
-                            >
-                              <span className="min-w-0">{page.name}</span>
-                              {hint ? (
-                                <span
-                                  aria-hidden="true"
-                                  className="site-rounded-full size-1.5 bg-blue-500"
-                                  title={hint}
-                                />
-                              ) : null}
-                            </NavRow>
-                          );
-                        })}
-                      </React.Fragment>
-                    ))
-                  : null}
-              </div>
-            ))
-          )}
+          ) : null}
+          {section === "icons" ? <IconLinks onNavigate={close} /> : null}
+          {section === "docs"
+            ? groups.map((group) => (
+                <div
+                  className="flex shrink-0 flex-col gap-0.5"
+                  key={group.title}
+                >
+                  {group.titled ? (
+                    <GroupLabel
+                      collapsible={group.collapsible}
+                      onOpenChange={setGroupOpen}
+                      open={group.open}
+                      title={group.title ?? ""}
+                    />
+                  ) : null}
+                  {group.open
+                    ? group.sections.map((part) => (
+                        <React.Fragment key={part.title ?? "untitled"}>
+                          {part.title ? (
+                            <p className="px-2 pt-1 pb-1 text-site-muted-foreground text-xs">
+                              {part.title}
+                            </p>
+                          ) : null}
+                          {part.pages.map((page) => {
+                            const hint = getDocsPageUpdateHint(page.url);
+                            return (
+                              <NavRow
+                                active={page.url === pathname}
+                                href={page.url}
+                                key={page.url}
+                                onNavigate={close}
+                              >
+                                <span className="min-w-0">{page.name}</span>
+                                {hint ? (
+                                  <span
+                                    aria-hidden="true"
+                                    className="site-rounded-full size-1.5 bg-blue-500"
+                                    title={hint}
+                                  />
+                                ) : null}
+                              </NavRow>
+                            );
+                          })}
+                        </React.Fragment>
+                      ))
+                    : null}
+                </div>
+              ))
+            : null}
         </nav>
       </PopoverContent>
     </Popover>
