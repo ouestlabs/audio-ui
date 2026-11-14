@@ -1,5 +1,5 @@
 import { formatLevel } from "@audio-ui/engine/format";
-import { type ReactNode, useCallback } from "react";
+import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
@@ -8,6 +8,7 @@ import {
   PlotHandle,
   PlotLine,
 } from "@/registry-audio/bases/base/audio/elements/plot";
+import { LevelPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -29,6 +30,9 @@ const OFF = transientDevice.parameters
 const formatMark = (db: number) => (db > 0 ? `+${db}` : String(db));
 const describeValue = (value: number) => formatLevel(value);
 const getAriaLabel = (axis: "x" | "y") => (axis === "x" ? "Sustain" : "Attack");
+
+/** The envelope's window: long enough for a few hits, short enough to see each attack. */
+const ENVELOPE = { of: "level", points: 240, seconds: 1.5 } as const;
 
 interface TransientPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */
@@ -54,6 +58,12 @@ function TransientPanel({
   signal,
   value,
 }: TransientPanelProps) {
+  // What went in, filled, and what came out, a line over it, over the last moments: the attacks and the tails as it shapes them.
+  const envelope = useMemo(() => {
+    const heard = signal?.input?.history(ENVELOPE);
+    const played = signal?.output.history(ENVELOPE);
+    return heard && played ? { heard, played } : null;
+  }, [signal]);
   const change = useCallback(
     ({ x, y }: { x: number; y: number }) =>
       onValueChange(
@@ -101,6 +111,13 @@ function TransientPanel({
             />
           ) : null}
         </Plot>
+        {envelope ? (
+          <LevelPlot
+            aria-label="Level in and out"
+            source={envelope.played}
+            under={envelope.heard}
+          />
+        ) : null}
         <DevicePanel
           device={transientDevice}
           disabled={value.enabled ? undefined : OFF}

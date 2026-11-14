@@ -96,6 +96,7 @@ export const vibeDevice = defineDevice({
       step: 0.1,
     },
   ],
+  signals: ["modulator"],
 });
 
 export type VibeState = DeviceState<typeof vibeDevice.parameters>;

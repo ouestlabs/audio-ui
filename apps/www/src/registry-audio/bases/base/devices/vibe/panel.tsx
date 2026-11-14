@@ -5,6 +5,7 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTrace,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -55,6 +56,12 @@ function VibePanel({
   value,
 }: VibePanelProps) {
   const light = useMemo(() => vibeLight(value), [value]);
+  // The lamp as it ran: only while it moves anything.
+  const lamp = value.enabled ? signal?.modulator : null;
+  const history = useMemo(
+    () => lamp?.history({ points: 240, seconds: WINDOW_SECONDS }),
+    [lamp]
+  );
   return (
     <DeviceFrame className={cn("h-full", className)} signal={signal}>
       <DeviceHeader
@@ -82,7 +89,21 @@ function VibePanel({
             y={{ format: formatLight, ticks: LIGHT_TICKS }}
           />
           <PlotGraph>
-            <PlotCurve fn={light} />
+            <PlotCurve
+              // The light as set while no sound goes in; once it does, the lamp as it ran.
+              className={
+                history ? "hidden group-data-idle/device:inline" : undefined
+              }
+              fn={light}
+            />
+            {history ? (
+              <PlotTrace
+                className="stroke-[1.5px] stroke-primary group-data-idle/device:hidden"
+                max={1}
+                min={-1}
+                source={history}
+              />
+            ) : null}
           </PlotGraph>
         </Plot>
         <DevicePanel

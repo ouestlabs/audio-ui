@@ -1,3 +1,4 @@
+import { DEFAULT_TEMPO, secondsPerBeat } from "@audio-ui/engine/time";
 import { type ReactNode, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -6,6 +7,7 @@ import {
   PlotCurve,
   PlotGraph,
   PlotGrid,
+  PlotTraceArea,
 } from "@/registry-audio/bases/base/audio/elements/plot";
 import {
   DeviceFrame,
@@ -24,6 +26,9 @@ const OFF = stutterDevice.parameters
   .map((parameter) => parameter.id)
   .filter((id) => id !== "enabled");
 const formatBeats = (beats: number) => `${Number(beats.toFixed(2))}`;
+
+/** The level at the foot of the plot for what plays, in dB: full scale at the top. */
+const PLAYED_FLOOR_DB = -60;
 
 interface StutterPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */
@@ -49,6 +54,16 @@ function StutterPanel({
   value,
 }: StutterPanelProps) {
   const cycle = useMemo(() => stutterCycle(value), [value]);
+  // What comes out over one interval as drawn, newest at the end: its slices and their repeats as they play.
+  const played = useMemo(
+    () =>
+      signal?.output.history({
+        of: "level",
+        points: 240,
+        seconds: cycle.beats * secondsPerBeat(DEFAULT_TEMPO),
+      }),
+    [cycle.beats, signal]
+  );
   const ticks = useMemo(
     () =>
       Array.from(
@@ -81,7 +96,22 @@ function StutterPanel({
         >
           <PlotGrid x={{ format: formatBeats, ticks }} />
           <PlotGraph>
-            <PlotArea fillTo={0} fn={cycle.level} />
+            {played ? (
+              <PlotTraceArea
+                fillTo={PLAYED_FLOOR_DB}
+                max={0}
+                min={PLAYED_FLOOR_DB}
+                source={played}
+              />
+            ) : null}
+            <PlotArea
+              // The slices as set are filled while no sound goes in; once it does, the fill is what plays, and the setting a line over it.
+              className={
+                played ? "hidden group-data-idle/device:inline" : undefined
+              }
+              fillTo={0}
+              fn={cycle.level}
+            />
             <PlotCurve fn={cycle.level} />
           </PlotGraph>
         </Plot>

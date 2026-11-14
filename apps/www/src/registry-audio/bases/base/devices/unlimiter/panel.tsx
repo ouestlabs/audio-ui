@@ -7,6 +7,7 @@ import {
   PlotGrid,
   PlotLine,
 } from "@/registry-audio/bases/base/audio/elements/plot";
+import { LevelPlot } from "@/registry-audio/bases/base/audio/elements/signal-plot";
 import {
   DeviceFrame,
   DeviceHeader,
@@ -30,6 +31,9 @@ const OFF = unlimiterDevice.parameters
   .filter((id) => id !== "enabled");
 
 const formatDb = (db: number) => `${db} dB`;
+
+/** The envelope's window: long enough for a few hits, short enough to see each attack. */
+const ENVELOPE = { of: "level", points: 240, seconds: 1.5 } as const;
 
 interface UnlimiterPanelProps {
   /** Whatever the host puts at the end of the title bar: a play button, a reading. */
@@ -55,6 +59,12 @@ function UnlimiterPanel({
   signal,
   value,
 }: UnlimiterPanelProps) {
+  // What went in, filled, and what came out, a line over it, over the last moments: the attacks and the tails as it shapes them.
+  const envelope = useMemo(() => {
+    const heard = signal?.input?.history(ENVELOPE);
+    const played = signal?.output.history(ENVELOPE);
+    return heard && played ? { heard, played } : null;
+  }, [signal]);
   const lift = useMemo(() => unlimiterLift(value), [value]);
   return (
     <DeviceFrame className={cn("h-full", className)} signal={signal}>
@@ -93,6 +103,13 @@ function UnlimiterPanel({
             <PlotCurve fn={lift} />
           </PlotGraph>
         </Plot>
+        {envelope ? (
+          <LevelPlot
+            aria-label="Level in and out"
+            source={envelope.played}
+            under={envelope.heard}
+          />
+        ) : null}
         <DevicePanel
           className="grid-cols-4"
           device={unlimiterDevice}

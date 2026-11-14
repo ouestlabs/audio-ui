@@ -108,17 +108,22 @@ const LEVEL_FLOOR_DB = -60;
 interface LevelPlotProps extends PlotFrameProps {
   /** The level in dB over time, the oldest first, such as a signal point's `history({ of: "level", seconds })`. */
   source: Source<ArrayLike<number>>;
+  /** Another level over the same time, filled under the line of `source`: what went in, against what came out. Without it, `source` is filled. */
+  under?: Source<ArrayLike<number>>;
 }
 
 /**
  * A live level over time, the newest at the end, from -60 dB at the foot to
  * full scale at the top: the shape of each hit, its attack and its decay, as
- * they scroll by. It follows the source without a React render.
+ * they scroll by. Given `under`, that level is filled and `source` is a line
+ * over it, so a device's effect on the envelope shows as the gap between
+ * them. It follows the sources without a React render.
  */
 function LevelPlot({
   "aria-label": label = "Level over time",
   className,
   source,
+  under,
   ...props
 }: LevelPlotProps) {
   return (
@@ -133,7 +138,7 @@ function LevelPlot({
       {...props}
     >
       <PlotGraph>
-        <PlotTraceArea fillTo={LEVEL_FLOOR_DB} source={source} />
+        <PlotTraceArea fillTo={LEVEL_FLOOR_DB} source={under ?? source} />
         <PlotTrace className={LIVE_LINE} source={source} />
       </PlotGraph>
     </Plot>
