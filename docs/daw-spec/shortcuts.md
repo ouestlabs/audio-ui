@@ -4,7 +4,7 @@ The reference's keyboard, Mac keys. Each command also lives in the command menu,
 
 ## How the keys are held
 
-Every command's keys are declared once, as TanStack Hotkeys app hotkeys (`apps/daw/src/lib/daw/shortcuts.ts`): an id, a name, a group and a default, with second keys beside some (Cmd+Y for redo, Backspace for delete). The shortcuts menu, the menus and the tooltips show them from there, named for the platform (⌘ on a Mac, Ctrl elsewhere), so a key rebound by the user shows as it is. The settings' Shortcuts section rebinds a command by recording the keys pressed, and refuses keys another command answers. What the user rebinds is kept in this browser, only what differs from the defaults. A key the workstation takes first (typing, the computer's keyboard, Escape, the time selected, the cursor) is not a shortcut too, and a key two chords match runs once.
+Every command's keys are declared once, as TanStack Hotkeys app hotkeys (`apps/daw/src/lib/daw/shortcuts.ts`): an id, a name, a group and a default, with second keys beside some (Cmd+Y for redo, Backspace for delete). The settings' Shortcuts section, which the menu's Keyboard shortcuts opens, the menus and the tooltips show them from there, named for the platform (⌘ on a Mac, Ctrl elsewhere), so a key rebound by the user shows as it is. The settings' Shortcuts section rebinds a command by recording the keys pressed, and refuses keys another command answers. What the user rebinds is kept in this browser, only what differs from the defaults. A key the workstation takes first (typing, the computer's keyboard, Escape, the time selected, the cursor) is not a shortcut too, and a key two chords match runs once.
 
 ## Kept by the browser
 

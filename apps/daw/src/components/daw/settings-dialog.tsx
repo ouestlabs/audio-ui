@@ -47,10 +47,13 @@ import {
 } from "@/lib/daw/settings";
 import { ALSO_HOTKEYS, type ShortcutCommand } from "@/lib/daw/shortcuts";
 import { RECORD_QUANTIZE } from "@/lib/recording";
-import { HotkeyKeys } from "./shortcut-list";
+import { HotkeyKeys, OtherShortcuts } from "./shortcut-list";
 import type { AudioInput } from "./use-take";
 
 const SECTIONS = ["General", "Audio", "MIDI", "Record", "Shortcuts"] as const;
+
+/** A section of the settings, as their list names it. */
+export type SettingsSection = (typeof SECTIONS)[number];
 
 const THEMES = [
   { label: "Light", value: "light" },
@@ -777,6 +780,7 @@ function ShortcutsSection({
             ))}
         </section>
       ))}
+      <OtherShortcuts />
     </>
   );
 }
@@ -808,6 +812,8 @@ export interface SettingsDialogProps {
   onOpenChange: (open: boolean) => void;
   open: boolean;
   record: RecordSettingsSectionProps;
+  /** The section it opens on, such as Shortcuts from the menu's Keyboard shortcuts. Left out, it opens on the one it showed last. */
+  section?: SettingsSection | null;
 }
 
 /**
@@ -823,8 +829,15 @@ export function SettingsDialog({
   onOpenChange,
   open,
   record,
+  section: opening,
 }: SettingsDialogProps) {
   const [section, setSection] = useState<string>(SECTIONS[0]);
+  // Opened on a section: that one shows.
+  useEffect(() => {
+    if (open && opening) {
+      setSection(opening);
+    }
+  }, [open, opening]);
   const [recording, setRecording] = useState(false);
   const { setInputEnabled } = useMidiInput();
   // What was kept applies as the workstation opens: the output it plays on, the MIDI devices switched off.

@@ -9,6 +9,7 @@ import {
   ArrowArcLeftIcon,
   ArrowArcRightIcon,
   ArrowCounterClockwiseIcon,
+  CaretDownIcon,
   DotsThreeIcon,
   MagnifyingGlassMinusIcon,
   MagnifyingGlassPlusIcon,
@@ -18,7 +19,6 @@ import { type ComponentProps, type ReactNode, useCallback } from "react";
 import { ParameterField } from "@/components/audio-ui/parameter-field";
 import { Transport } from "@/components/audio-ui/transport";
 import { AudioUiIcon } from "@/components/site/audio-ui-icon";
-import { ModeSwitcher } from "@/components/site/mode-switcher";
 import { Button } from "@/components/ui/button";
 import { ButtonGroup } from "@/components/ui/button-group";
 import {
@@ -29,9 +29,6 @@ import {
   DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuShortcut,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Separator } from "@/components/ui/separator";
@@ -41,7 +38,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import type { ShortcutCommand } from "@/lib/daw/shortcuts";
-import { CommandKeys, ShortcutList } from "./shortcut-list";
+import { CommandKeys } from "./shortcut-list";
 
 /** The zoom presets, as shares of the fitted view: Fit shows everything. */
 const ZOOM_PRESETS = [1, 2, 4, 8];
@@ -151,6 +148,8 @@ export interface TopBarProps
   onSaveAs?: () => void;
   /** Opens the workstation's settings. */
   onSettings: () => void;
+  /** Opens the settings on their Shortcuts section, the one list of the keys. */
+  onShortcuts: () => void;
   onStop: () => void;
   onTempoChange: (tempo: Tempo) => void;
   onUndo?: () => void;
@@ -181,6 +180,23 @@ export function TopBar(props: TopBarProps) {
   );
   const preset = ZOOM_PRESETS.find(
     (ratio) => Math.abs(ratio - zoomRatio) < 0.01
+  );
+  // The presets, Fit to 800 %: beside the zoom field, or in the menu on a window too narrow to show it.
+  const presets = (
+    <DropdownMenuRadioGroup
+      onValueChange={pickZoom}
+      value={preset === undefined ? "" : String(preset)}
+    >
+      {ZOOM_PRESETS.map((ratio) => (
+        <DropdownMenuRadioItem
+          disabled={ratio > props.zoomMaxRatio}
+          key={ratio}
+          value={String(ratio)}
+        >
+          {ratio === 1 ? "Fit" : `Zoom ${ratio * 100} %`}
+        </DropdownMenuRadioItem>
+      ))}
+    </DropdownMenuRadioGroup>
   );
   return (
     <header className="flex h-12 shrink-0 items-center gap-3 border-b px-3">
@@ -260,7 +276,7 @@ export function TopBar(props: TopBarProps) {
             <ArrowArcRightIcon aria-hidden="true" />
           </BarButton>
         </ButtonGroup>
-        <div className="hidden items-center xl:flex">
+        <div className="hidden items-center gap-1 xl:flex">
           <ParameterField
             className="w-44"
             format={PERCENT}
@@ -275,6 +291,23 @@ export function TopBar(props: TopBarProps) {
             unit="Zoom"
             value={zoomRatio}
           />
+          <DropdownMenu>
+            <DropdownMenuTrigger
+              render={
+                <Button
+                  aria-label="Zoom presets"
+                  className="text-muted-foreground"
+                  size="icon"
+                  variant="outline"
+                />
+              }
+            >
+              <CaretDownIcon aria-hidden="true" />
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-auto min-w-36">
+              {presets}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
         <BarButton
           command="automation"
@@ -341,21 +374,9 @@ export function TopBar(props: TopBarProps) {
                 <CommandKeys command="export" />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuRadioGroup
-              onValueChange={pickZoom}
-              value={preset === undefined ? "" : String(preset)}
-            >
-              {ZOOM_PRESETS.map((ratio) => (
-                <DropdownMenuRadioItem
-                  disabled={ratio > props.zoomMaxRatio}
-                  key={ratio}
-                  value={String(ratio)}
-                >
-                  {ratio === 1 ? "Fit" : `Zoom ${ratio * 100} %`}
-                </DropdownMenuRadioItem>
-              ))}
-            </DropdownMenuRadioGroup>
+            {/* The zoom's presets, only while the zoom field is hidden: on a wider window they are beside it. */}
+            <DropdownMenuSeparator className="xl:hidden" />
+            <div className="contents xl:hidden">{presets}</div>
             <DropdownMenuSeparator />
             <DropdownMenuItem onClick={props.onSettings}>
               Settings…
@@ -363,17 +384,11 @@ export function TopBar(props: TopBarProps) {
                 <CommandKeys command="settings" />
               </DropdownMenuShortcut>
             </DropdownMenuItem>
-            <DropdownMenuSub>
-              <DropdownMenuSubTrigger>
-                Keyboard shortcuts
-              </DropdownMenuSubTrigger>
-              <DropdownMenuSubContent className="flex max-h-(--available-height) w-auto flex-col">
-                <ShortcutList />
-              </DropdownMenuSubContent>
-            </DropdownMenuSub>
+            <DropdownMenuItem onClick={props.onShortcuts}>
+              Keyboard shortcuts
+            </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
-        <ModeSwitcher />
       </div>
     </header>
   );

@@ -28,6 +28,9 @@ import {
   ContextMenuRadioGroup,
   ContextMenuRadioItem,
   ContextMenuSeparator,
+  ContextMenuSub,
+  ContextMenuSubContent,
+  ContextMenuSubTrigger,
   ContextMenuTrigger,
 } from "@/registry/bases/base/ui/context-menu";
 import {
@@ -622,19 +625,29 @@ function TimelineTrackMenu({
         Insert track
       </TimelineTrackMenuItem>
       <ContextMenuSeparator />
-      {TRACK_COLORS.map((swatch, index) => (
-        <ContextMenuItem data-color={index} key={swatch.name} onClick={onColor}>
-          <span
-            aria-hidden="true"
-            className={cn("size-2.5 rounded-full", swatch.dot)}
-          />
-          {swatch.name}
-        </ContextMenuItem>
-      ))}
-      <ContextMenuItem onClick={onCustomColor}>
-        <span aria-hidden="true" className="size-2.5 rounded-full border" />
-        Custom...
-      </ContextMenuItem>
+      {/* The palette in a submenu of its own: the menu itself is the track's actions. */}
+      <ContextMenuSub>
+        <ContextMenuSubTrigger>Color</ContextMenuSubTrigger>
+        <ContextMenuSubContent className="w-auto min-w-36">
+          {TRACK_COLORS.map((swatch, index) => (
+            <ContextMenuItem
+              data-color={index}
+              key={swatch.name}
+              onClick={onColor}
+            >
+              <span
+                aria-hidden="true"
+                className={cn("size-2.5 rounded-full", swatch.dot)}
+              />
+              {swatch.name}
+            </ContextMenuItem>
+          ))}
+          <ContextMenuItem onClick={onCustomColor}>
+            <span aria-hidden="true" className="size-2.5 rounded-full border" />
+            Custom…
+          </ContextMenuItem>
+        </ContextMenuSubContent>
+      </ContextMenuSub>
     </ContextMenuContent>
   );
 }
