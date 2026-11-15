@@ -88,9 +88,10 @@ A Root owns the position, the zoom and the grid. Everything else is a part you p
 <TabsContent value="react">
 
 ```tsx
+import type { ClipValue } from "@audio-ui/core/timeline";
 import { Timeline } from "@/components/audio-ui/timeline/react";
 
-export function Arrangement({ clip, onClip }: { clip: Timeline.ClipValue; onClip: (clip: Timeline.ClipValue) => void }) {
+export function Arrangement({ clip, onClip }: { clip: ClipValue; onClip: (clip: ClipValue) => void }) {
   return (
     <Timeline.Root
       duration={64}
