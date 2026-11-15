@@ -9,6 +9,16 @@ export {
 } from "./fader/index.ts";
 export * from "./knob/index.ts";
 export {
+  type ChannelPublicState,
+  type MeterApi,
+  type MeterPrimitive,
+  type MeterPrimitiveOptions,
+  type MeterPublicState,
+  type MeterSlots,
+  type MeterState,
+  meter,
+} from "./meter/index.ts";
+export {
   type XYPadApi,
   type XYPadPrimitive,
   type XYPadPrimitiveOptions,

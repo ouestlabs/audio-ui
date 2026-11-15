@@ -15,6 +15,10 @@
       "types": "./dist/fader/index.d.ts",
       "import": "./dist/fader.js"
     },
+    "./meter": {
+      "types": "./dist/meter/index.d.ts",
+      "import": "./dist/meter.js"
+    },
     "./xypad": {
       "types": "./dist/xypad/index.d.ts",
       "import": "./dist/xypad.js"
