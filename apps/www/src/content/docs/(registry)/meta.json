@@ -4,6 +4,8 @@
     "registry",
     "styling",
     "knob-ui-sdk",
+    "fader-ui-sdk",
+    "xypad-ui-sdk",
     "[Component catalog](/components)"
   ]
 }

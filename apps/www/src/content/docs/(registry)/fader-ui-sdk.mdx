@@ -1,0 +1,234 @@
+---
+title: Fader on the UI SDK
+description: "The fader written once and rendered in React, Vue, Svelte and custom elements: install each adapter with its framework's CLI, the parts, what a change reports, and how an agent sets it."
+---
+
+The fader's behavior is one description, `fader` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. Each framework renders it with a thin adapter that you copy into your project and own. A press on the track, the drag of the thumb, the wheel, the keys, the grid and the reset are the same in all four, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is not published yet: this page describes what the next release installs. The [knob](/docs/knob-ui-sdk) is built the same way.
+
+## Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/fader-react
+```
+
+One file, `components/audio-ui/fader/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/fader-vue.json
+```
+
+One file, `components/audio-ui/fader/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/fader-svelte.json
+```
+
+Four files in `components/audio-ui/fader/svelte/`: the thumb, the value, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/knob-ui-sdk#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/fader-web.json
+```
+
+One file, `components/audio-ui/fader/web.ts`. Import it once, and it registers the `audio-ui-fader` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+## Usage
+
+The parts are the same everywhere: a Root that owns the value, a Control that takes the pointer and the wheel, a Track and an Indicator that draw the travel and the fill, a Thumb that holds the focusable input, optional Marks along the track, and a Value for the text. A part takes the classes and attributes of its element, and the state attributes `data-disabled`, `data-dragging` and `data-orientation` to style from.
+
+The Track, the Indicator, the Thumb and the Marks are positioned for you, from the bottom of a vertical fader and from the start edge of a horizontal one. Give the Track its length and the Control its size.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import { useState } from "react";
+import { Fader } from "@/components/audio-ui/fader/react";
+
+export function Level() {
+  const [level, setLevel] = useState(-12);
+  return (
+    <Fader.Root max={6} min={-60} onValueChange={setLevel} value={level}>
+      <Fader.Control className="relative h-40 w-8">
+        <Fader.Track className="absolute inset-y-0 left-1/2 w-1 bg-muted">
+          <Fader.Indicator className="absolute bg-primary" />
+          <Fader.Mark value={0} />
+        </Fader.Track>
+        <Fader.Thumb aria-label="Level" className="size-4 rounded-full bg-card" />
+      </Fader.Control>
+      <Fader.Value />
+    </Fader.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { Fader } from "@/components/audio-ui/fader/vue";
+
+const level = ref(-12);
+</script>
+
+<template>
+  <Fader.Root :max="6" :min="-60" :value="level" @value-change="(next: number) => (level = next)">
+    <Fader.Control class="relative h-40 w-8">
+      <Fader.Track class="absolute inset-y-0 left-1/2 w-1 bg-muted">
+        <Fader.Indicator class="absolute bg-primary" />
+        <Fader.Mark :value="0" />
+      </Fader.Track>
+      <Fader.Thumb aria-label="Level" class="size-4 rounded-full bg-card" />
+    </Fader.Control>
+    <Fader.Value />
+  </Fader.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { Fader } from "$lib/components/audio-ui/fader/svelte";
+
+  let level = $state(-12);
+</script>
+
+<Fader.Root max={6} min={-60} value={level} onValueChange={(next: number) => (level = next)}>
+  <Fader.Control class="relative h-40 w-8">
+    <Fader.Track class="absolute inset-y-0 left-1/2 w-1 bg-muted">
+      <Fader.Indicator class="absolute bg-primary" />
+      <Fader.Mark value={0} />
+    </Fader.Track>
+    <Fader.Thumb aria-label="Level" class="size-4 rounded-full bg-card" />
+  </Fader.Control>
+  <Fader.Value />
+</Fader.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-fader min="-60" max="6" value="-12">
+  <audio-ui-fader-control>
+    <audio-ui-fader-track>
+      <audio-ui-fader-indicator></audio-ui-fader-indicator>
+      <audio-ui-fader-mark value="0"></audio-ui-fader-mark>
+    </audio-ui-fader-track>
+    <audio-ui-fader-thumb aria-label="Level"></audio-ui-fader-thumb>
+  </audio-ui-fader-control>
+  <audio-ui-fader-value></audio-ui-fader-value>
+</audio-ui-fader>
+
+<script type="module">
+  import "./audio-ui/fader/web.ts";
+
+  document.querySelector("audio-ui-fader").addEventListener("input", (event) => {
+    console.log(event.detail.value, event.detail.reason, event.detail.source);
+  });
+</script>
+```
+
+Each part binds a microtask after it connects, all together. Read the element's state after that, not in the line that wrote the markup.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+## Interaction
+
+- A press on the track jumps to the value under the pointer, and a press on the thumb drags from where it was taken.
+- The mouse wheel steps the value. Arrows move one `step`, Shift with an arrow or Page Up and Page Down move `largeStep`, Home and End go to the ends.
+- A double click, an Alt with a click, or Delete returns to `defaultValue`.
+- A disabled fader takes none of these.
+
+## Options
+
+Set on the Root, as props (an attribute in kebab case on the custom element).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `value`, `defaultValue` | `number` | the midpoint | The controlled value, or the starting one. `defaultValue` is also where a reset returns. |
+| `min`, `max`, `step` | `number` | `-60`, `6`, `1` | The range, in dB for an audio fader, and the grid the value snaps to. |
+| `largeStep` | `number` | `10` | What Page Up, Page Down and Shift with an arrow move by. |
+| `anchor` | `number` | `min` | Where the Indicator's fill starts, like `0` on a pan from -1 to 1. |
+| `orientation` | `"vertical"` or `"horizontal"` | `"vertical"` | Which way the travel runs. |
+| `format`, `locale` | `Intl.NumberFormat` options, a locale | | The Value's text and the input's `aria-valuetext`. |
+| `disabled` | `boolean` | `false` | Takes no key, wheel or press. |
+| `name` | `string` | | The form field's name, carried by the input. |
+| `onValueChange` | `(value, details) => void` | | Every change, which `details.cancel()` refuses. |
+| `onValueCommitted` | `(value, details) => void` | | The end of a gesture. |
+
+The Mark takes a `value` and carries `data-active` while the value has reached it from the anchor. The Thumb takes `getAriaValueText(formatted, value, index)` to announce the value in your own words, like `"-6 dB"`.
+
+## What a change reports
+
+`details` carries what moved the value and how:
+
+- `reason`: `"drag"`, `"track-press"`, `"keyboard"`, `"wheel"`, `"input-change"` (a typed value) or `"reset"`.
+- `source`: `"mouse"`, `"touch"`, `"pen"`, `"keyboard"`, `"programmatic"` or `"agent"`, for analytics and for telling a person from an agent. It is never a reason to behave differently.
+- `event`: the DOM event behind it, when there is one.
+- `cancel()`: refuses the change. A controlled fader keeps the value you give it.
+
+While a pointer drags the thumb, it follows the pointer even if a controlled `value` lags behind, as with a seek bar driven by playback time.
+
+On the custom element, `onValueChange` is an `input` event and `onValueCommitted` a `change` event, both with `detail: { value, reason, source }`, and `event.preventDefault()` refuses a change.
+
+## For an agent
+
+The fader declares one action, `setValue`, and the name on its Thumb is what an agent finds it by. The bridge of the framework you use (`createAgent` in `@ui-sdk/<framework>/agent`) reads its value and range, sets it with the source `"agent"`, and the same `onValueChange` hears it, so an app can refuse a value as it would a person's.
+
+## Differences from the React fader of `@audio-ui/react`
+
+The behavior and the `data-*` state attributes are the same. These differ:
+
+- Every part carries a `data-slot` attribute, such as `fader-thumb`.
+- A change reports a `source`.
+- On a right-to-left page, a horizontal fader's thumb is not shifted to the other side of its position.
+- `Value` is not editable: there is no `editable` prop to type a value.
+- There is no Provider.
