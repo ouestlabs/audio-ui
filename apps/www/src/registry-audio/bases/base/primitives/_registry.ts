@@ -84,4 +84,26 @@ export const primitives: RegistryItem[] = [
     ],
     "A two-axis pad for two parameters at once: a press, a drag, wheel, keys and a native range input per axis, and the change's source for an agent."
   ),
+  ...primitiveItems(
+    "meter",
+    [
+      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/vue", "vue"],
+        files: ["vue.ts"],
+        name: "vue",
+      },
+      {
+        dependencies: ["@ui-sdk/svelte", "svelte"],
+        files: ["svelte/Value.svelte", "svelte/index.ts", "svelte/parts.ts"],
+        name: "svelte",
+      },
+      {
+        dependencies: ["@audio-ui/core", "@ui-sdk/web"],
+        files: ["web.ts"],
+        name: "web",
+      },
+    ],
+    "A level meter, vertical or horizontal, one channel or many: clip and warning levels with a held clip, peak marks, graduations, and a live source painted frame by frame with no render."
+  ),
 ];

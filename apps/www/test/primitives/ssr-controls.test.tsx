@@ -4,6 +4,8 @@ import { createSSRApp, h } from "vue";
 import { renderToString as renderVue } from "vue/server-renderer";
 import { Fader } from "@/registry-audio/bases/base/primitives/fader/react.tsx";
 import { Fader as VueFader } from "@/registry-audio/bases/base/primitives/fader/vue.ts";
+import { Meter } from "@/registry-audio/bases/base/primitives/meter/react.tsx";
+import { Meter as VueMeter } from "@/registry-audio/bases/base/primitives/meter/vue.ts";
 import { XYPad } from "@/registry-audio/bases/base/primitives/xypad/react.tsx";
 import { XYPad as VueXYPad } from "@/registry-audio/bases/base/primitives/xypad/vue.ts";
 
@@ -72,5 +74,46 @@ describe("server rendering of the fader and the XY pad", () => {
       })
     );
     expect(padFeatures(pad)).toEqual(PAD);
+  });
+
+  test("the meter writes its channels, levels and indicators, in React and Vue", async () => {
+    const meter = (markup: string) => ({
+      channels: markup.match(/role="meter"/g)?.length,
+      indicator: /scaleY\(0\.5\)/.test(markup),
+      level: markup.includes('aria-valuenow="-30"'),
+    });
+    const expected = { channels: 2, indicator: true, level: true };
+    const react = renderToString(
+      <Meter.Root max={0} min={-60} value={[-30, -60]}>
+        {({ channelCount }) =>
+          Array.from({ length: channelCount }, (_, index) => (
+            <Meter.Channel index={index} key={index}>
+              <Meter.Indicator />
+              <Meter.Value />
+            </Meter.Channel>
+          ))
+        }
+      </Meter.Root>
+    );
+    expect(meter(react)).toEqual(expected);
+    const vue = await renderVue(
+      createSSRApp({
+        render: () =>
+          h(
+            VueMeter.Root,
+            { max: 0, min: -60, value: [-30, -60] },
+            {
+              default: ({ state }: { state: { channelCount: number } }) =>
+                Array.from({ length: state.channelCount }, (_, index) =>
+                  h(VueMeter.Channel, { index, key: index }, () => [
+                    h(VueMeter.Indicator),
+                    h(VueMeter.Value),
+                  ])
+                ),
+            }
+          ),
+      })
+    );
+    expect(meter(vue)).toEqual(expected);
   });
 });

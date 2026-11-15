@@ -189,6 +189,24 @@ export interface MeterPrimitive {
 
 const SLOT = (name: string) => `[data-slot="meter-${name}"]`;
 
+/**
+ * Finds the parts of a channel a live source writes to. A framework that binds
+ * a parent before its children, as custom elements do, has not marked them
+ * yet when the channel binds, so what is missing is looked for again.
+ */
+function resolve(nodes: MeterChannelNodes) {
+  const { channel } = nodes;
+  if (channel) {
+    nodes.indicator ??=
+      channel.querySelector<HTMLElement>(SLOT("indicator")) ?? undefined;
+    nodes.peak ??=
+      channel.querySelector<HTMLElement>(SLOT("peak")) ?? undefined;
+    nodes.value ??=
+      channel.querySelector<HTMLElement>(SLOT("value")) ?? undefined;
+  }
+  return nodes;
+}
+
 /** The channel's view as the state its parts read. */
 function channelState(state: MeterState, index: number): ChannelPublicState {
   const view = channelView(state.frame, index, state.config);
@@ -211,14 +229,15 @@ const channelAttrs = (channel: ChannelPublicState) => ({
 
 /** Writes the level's text into the value part's first text node, which the framework made. */
 function writeText(part: HTMLElement, text: string) {
-  const node = [...part.childNodes].find(
-    (child): child is Text => child.nodeType === Node.TEXT_NODE
-  );
-  if (!node) {
-    part.appendChild(document.createTextNode(text));
-  } else if (node.data !== text) {
-    node.data = text;
+  for (const child of part.childNodes) {
+    if (child.nodeType === Node.TEXT_NODE) {
+      if (child.nodeValue !== text) {
+        child.nodeValue = text;
+      }
+      return;
+    }
   }
+  part.appendChild(document.createTextNode(text));
 }
 
 export const meter: MeterPrimitive = definePrimitive({
@@ -253,19 +272,21 @@ export const meter: MeterPrimitive = definePrimitive({
       ChannelPublicState
     >({
       attrs: (state: MeterState, { id, props }) => {
-        const view = channelView(state.frame, props.index, state.config);
+        // An index written as an attribute comes as text.
+        const index = Number(props.index);
+        const view = channelView(state.frame, index, state.config);
         const { max, min } = state.config;
-        const channel = channelState(state, props.index);
+        const channel = channelState(state, index);
         return {
           ...channelAttrs(channel),
-          "aria-labelledby": state.labelled.includes(props.index)
-            ? `${id}-label-${props.index}`
+          "aria-labelledby": state.labelled.includes(index)
+            ? `${id}-label-${index}`
             : undefined,
           "aria-valuemax": String(max),
           "aria-valuemin": String(min),
           "aria-valuenow": String(Math.min(max, Math.max(min, view.valueNow))),
           "aria-valuetext":
-            props.getAriaValueText?.(view.text, view.valueNow, props.index) ??
+            props.getAriaValueText?.(view.text, view.valueNow, index) ??
             view.text,
           role: "meter",
           style: css({ position: "relative" }),
@@ -273,18 +294,15 @@ export const meter: MeterPrimitive = definePrimitive({
       },
       // A live source paints the channel's elements itself, from the root's one subscription.
       bind: (el, part) => {
-        const index = part.props.index;
+        const index = Number(part.props.index);
         const nodes: MeterChannelNodes = {
           channel: el,
           getAriaValueText: part.props.getAriaValueText,
-          indicator:
-            el.querySelector<HTMLElement>(SLOT("indicator")) ?? undefined,
-          peak: el.querySelector<HTMLElement>(SLOT("peak")) ?? undefined,
-          value: el.querySelector<HTMLElement>(SLOT("value")) ?? undefined,
         };
         part.api.channels.set(index, nodes);
         const { source } = part.store.get();
         if (source) {
+          resolve(nodes);
           const state = part.store.get();
           const frame = source.getSnapshot();
           const view = channelView(frame, index, state.config);
@@ -301,11 +319,12 @@ export const meter: MeterPrimitive = definePrimitive({
         return () => part.api.channels.delete(index);
       },
       props: { getAriaValueText: "value", index: "key" },
-      state: (state: MeterState, { props }) => channelState(state, props.index),
+      state: (state: MeterState, { props }) =>
+        channelState(state, Number(props.index)),
     }),
     indicator: slot<InChannel, ChannelPublicState>({
       attrs: (state: MeterState, { props }) => {
-        const index = props.index ?? 0;
+        const index = Number(props.index ?? 0);
         const channel = channelState(state, index);
         const view = channelView(state.frame, index, state.config);
         const horizontal = state.orientation === "horizontal";
@@ -326,15 +345,16 @@ export const meter: MeterPrimitive = definePrimitive({
       },
       props: { index: { from: "channel", kind: "number", required: true } },
       state: (state: MeterState, { props }) =>
-        channelState(state, props.index ?? 0),
+        channelState(state, Number(props.index ?? 0)),
     }),
     label: slot<InChannel>({
       attrs: (_state: MeterState, { id, props }) => ({
-        id: `${id}-label-${props.index ?? 0}`,
+        id: `${id}-label-${Number(props.index ?? 0)}`,
         role: "presentation",
       }),
       bind: (_el, part) => {
-        const index = part.props.index ?? 0;
+        // An index a part inherits from its channel comes as the key text.
+        const index = Number(part.props.index ?? 0);
         part.store.set({ labelled: [...part.store.get().labelled, index] });
         return () =>
           part.store.set({
@@ -367,7 +387,7 @@ export const meter: MeterPrimitive = definePrimitive({
     }),
     peak: slot<InChannel, ChannelPublicState>({
       attrs: (state: MeterState, { props }) => {
-        const index = props.index ?? 0;
+        const index = Number(props.index ?? 0);
         const channel = channelState(state, index);
         const { peakPercent } = channelView(state.frame, index, state.config);
         const at = `${(peakPercent ?? 0) * 100}%`;
@@ -382,7 +402,7 @@ export const meter: MeterPrimitive = definePrimitive({
       },
       props: { index: { from: "channel", kind: "number", required: true } },
       state: (state: MeterState, { props }) =>
-        channelState(state, props.index ?? 0),
+        channelState(state, Number(props.index ?? 0)),
     }),
     root: slot<object, MeterPublicState>({
       attrs: (state: MeterState) => ({
@@ -402,8 +422,9 @@ export const meter: MeterPrimitive = definePrimitive({
           if (frame.levels.length !== part.store.get().channelCount) {
             part.store.set({ channelCount: frame.levels.length });
           }
-          for (const [index, nodes] of part.api.channels) {
+          for (const [index, registered] of part.api.channels) {
             if (index < frame.levels.length) {
+              const nodes = resolve(registered);
               const view = channelView(frame, index, config);
               paintChannel(
                 { ...nodes, value: undefined },
@@ -451,9 +472,13 @@ export const meter: MeterPrimitive = definePrimitive({
       attrs: (_state: MeterState) => ({ "aria-hidden": "true" }),
       props: { index: { from: "channel", kind: "number", required: true } },
       state: (state: MeterState, { props }) =>
-        channelState(state, props.index ?? 0),
+        channelState(state, Number(props.index ?? 0)),
     }),
   }),
   state: stateOf,
-  sync: (options: MeterPrimitiveOptions) => stateOf(options),
+  // What the options give, not what the parts registered: the labels stay.
+  sync: (options: MeterPrimitiveOptions) => {
+    const { labelled: _labelled, ...held } = stateOf(options);
+    return held;
+  },
 });

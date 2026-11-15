@@ -2,6 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { render } from "svelte/server";
 import FaderFixture from "./fixtures/fader.svelte";
 import Fixture from "./fixtures/knob.svelte";
+import MeterFixture from "./fixtures/meter.svelte";
 import XYPadFixture from "./fixtures/xypad.svelte";
 import { EVERY_FEATURE, serverFeatures } from "./server-html.ts";
 
@@ -41,6 +42,18 @@ describe.skipIf(process.env.SVELTE_GENERATE !== "server")(
       }).body;
       expect(pad.match(/type="range"/g)).toHaveLength(2);
       expect(pad).toMatch(/left:\s?25%/);
+    });
+
+    test("the meter writes its channels, levels and indicators", () => {
+      const { body } = render(MeterFixture, {
+        props: {
+          decibels: (formatted: string) => `${formatted} dB`,
+          options: { max: 0, min: -60, value: [-30, -60] },
+        },
+      });
+      expect(body.match(/role="meter"/g)).toHaveLength(2);
+      expect(body).toMatch(/scaleY\(0\.5\)/);
+      expect(body).toContain('aria-valuenow="-30"');
     });
   }
 );
