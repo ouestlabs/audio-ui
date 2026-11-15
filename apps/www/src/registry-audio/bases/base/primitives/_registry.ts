@@ -201,4 +201,37 @@ export const primitives: RegistryItem[] = [
     ],
     "A step sequencer for a drum machine: a grid of steps to switch on and off, one row per sound, painted by dragging, with a velocity bar under each step and the step being played marked from a live clock."
   ),
+  ...primitiveItems(
+    "plot",
+    [
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react.tsx"],
+        name: "react",
+      },
+      {
+        dependencies: ["@ui-sdk/vue", "vue"],
+        files: ["vue.ts"],
+        name: "vue",
+      },
+      {
+        dependencies: ["@ui-sdk/svelte", "svelte"],
+        files: [
+          "svelte/Band.svelte",
+          "svelte/Curve.svelte",
+          "svelte/Grid.svelte",
+          "svelte/GridLines.svelte",
+          "svelte/Handle.svelte",
+          "svelte/Line.svelte",
+          "svelte/Path.svelte",
+          "svelte/Trace.svelte",
+          "svelte/index.ts",
+          "svelte/parts.ts",
+        ],
+        name: "svelte",
+      },
+      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+    ],
+    "A plot of values over two axes: curves, live traces, lines, bands, a grid with its labels, dots and draggable handles with a native input each, and a cursor that reads the value under the pointer."
+  ),
 ];

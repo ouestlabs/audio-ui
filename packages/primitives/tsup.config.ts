@@ -4,6 +4,7 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   clean: true,
   entry: {
+    plot: "src/plot/index.ts",
     sequencer: "src/sequencer/index.ts",
     piano: "src/piano/index.ts",
     pad: "src/pad/index.ts",

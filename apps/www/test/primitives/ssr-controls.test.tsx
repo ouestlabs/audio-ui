@@ -11,6 +11,7 @@ import { Meter } from "@/registry-audio/bases/base/primitives/meter/react.tsx";
 import { Meter as VueMeter } from "@/registry-audio/bases/base/primitives/meter/vue.ts";
 import { Pad } from "@/registry-audio/bases/base/primitives/pad/react.tsx";
 import { Piano } from "@/registry-audio/bases/base/primitives/piano/react.tsx";
+import { Plot } from "@/registry-audio/bases/base/primitives/plot/react.tsx";
 import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/react.tsx";
 import { XYPad } from "@/registry-audio/bases/base/primitives/xypad/react.tsx";
 import { XYPad as VueXYPad } from "@/registry-audio/bases/base/primitives/xypad/vue.ts";
@@ -228,5 +229,21 @@ describe("server rendering of the fader and the XY pad", () => {
     );
     expect(html.match(/<button/g)).toHaveLength(4);
     expect(html.match(/aria-pressed="true"/g)).toHaveLength(2);
+  });
+
+  test("the plot writes its handle's input and its grid's markup, in React", () => {
+    const html = renderToString(
+      <Plot.Root maxX={100} maxY={100}>
+        <Plot.Grid y={{ ticks: [0, 50, 100] }} />
+        <Plot.Handle
+          aria-label="Cutoff"
+          defaultValue={{ x: 25, y: 75 }}
+          handle="cutoff"
+        />
+      </Plot.Root>
+    );
+    expect(html).toContain('data-slot="plot-grid"');
+    expect(html.match(/type="range"/g)).toHaveLength(2);
+    expect(html).toContain('aria-label="Cutoff');
   });
 });
