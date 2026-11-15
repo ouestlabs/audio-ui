@@ -11,6 +11,7 @@
     "pad-ui-sdk",
     "piano-ui-sdk",
     "sequencer-ui-sdk",
+    "plot-ui-sdk",
     "[Component catalog](/components)"
   ]
 }
