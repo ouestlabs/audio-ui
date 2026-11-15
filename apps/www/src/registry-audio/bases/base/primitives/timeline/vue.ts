@@ -19,6 +19,19 @@ const parts = createParts(timeline, {
   clipTrimStartInput: "input",
   lane: "div",
   mark: "div",
+  navigator: "div",
+  navigatorEnd: "div",
+  navigatorEndInput: "input",
+  navigatorStart: "div",
+  navigatorStartInput: "input",
+  navigatorWindow: "div",
+  navigatorWindowInput: "input",
+  range: "div",
+  rangeEnd: "div",
+  rangeEndInput: "input",
+  rangeInput: "input",
+  rangeStart: "div",
+  rangeStartInput: "input",
   playhead: "div",
   root: "div",
   ruler: "div",
@@ -226,6 +239,125 @@ const ClipFade = defineComponent(
   { inheritAttrs: false, name: "TimelineClipFade", props: ["clip", "edge"] }
 );
 
+/** The stretch the viewport shows, inside the navigator: dragging it scrolls. Its native input moves it from the keyboard. */
+const NavigatorWindow = defineComponent(
+  (
+    props: { getAriaValueText?: (value: number, duration: number) => string },
+    { attrs, slots }
+  ) =>
+    () => {
+      const { naming, rest } = nameOf(attrs);
+      return h(parts.NavigatorWindow, rest as never, {
+        default: (scope: object) => [
+          slots.default?.(scope),
+          h(parts.NavigatorWindowInput, {
+            ...naming,
+            getAriaValueText: props.getAriaValueText,
+          } as never),
+        ],
+      });
+    },
+  {
+    inheritAttrs: false,
+    name: "TimelineNavigatorWindow",
+    props: ["getAriaValueText"],
+  }
+);
+
+/** An edge with the input it holds, for the navigator and for a range. */
+const bordered = (
+  name: string,
+  pick: (edge: string) => { handle: object; input: object },
+  keyed?: string
+) =>
+  defineComponent(
+    (
+      props: {
+        edge: string;
+        getAriaValueText?: (value: number, duration: number) => string;
+        range?: string;
+      },
+      { attrs, slots }
+    ) =>
+      () => {
+        const { naming, rest } = nameOf(attrs);
+        const { handle, input } = pick(props.edge);
+        const own = keyed ? { [keyed]: props.range } : {};
+        return h(handle as never, { ...rest, ...own } as never, {
+          default: (scope: object) => [
+            slots.default?.(scope),
+            h(
+              input as never,
+              {
+                ...naming,
+                ...own,
+                getAriaValueText: props.getAriaValueText,
+              } as never
+            ),
+          ],
+        });
+      },
+    {
+      inheritAttrs: false,
+      name,
+      props: ["edge", "getAriaValueText", "range"],
+    }
+  );
+
+/** An edge of the navigator's window: dragging it zooms, holding the other edge still. */
+const NavigatorHandle = bordered("TimelineNavigatorHandle", (edge) =>
+  edge === "start"
+    ? { handle: parts.NavigatorStart, input: parts.NavigatorStartInput }
+    : { handle: parts.NavigatorEnd, input: parts.NavigatorEndInput }
+);
+
+/** Resizes one edge of a range, by dragging or from the keyboard through its native input. */
+const RangeHandle = bordered(
+  "TimelineRangeHandle",
+  (edge) =>
+    edge === "start"
+      ? { handle: parts.RangeStart, input: parts.RangeStartInput }
+      : { handle: parts.RangeEnd, input: parts.RangeEndInput },
+  "range"
+);
+
+/**
+ * A stretch laid over a lane, such as a loop or a selection. Its edges take
+ * the same `range` name. Its own native `<input type="range">` moves it from
+ * the keyboard and carries its name, unless it is not `movable`.
+ */
+const Range = defineComponent(
+  (
+    props: {
+      getAriaValueText?: (value: number, duration: number) => string;
+      movable?: boolean;
+      range: string;
+    },
+    { attrs, slots }
+  ) =>
+    () => {
+      const { naming, rest } = nameOf(attrs);
+      const movable = props.movable ?? true;
+      return h(parts.Range, { ...rest, movable, range: props.range } as never, {
+        default: (scope: object) => [
+          slots.default?.(scope),
+          movable
+            ? h(parts.RangeInput, {
+                ...naming,
+                getAriaValueText: props.getAriaValueText,
+                range: props.range,
+              } as never)
+            : null,
+        ],
+      });
+    },
+  {
+    inheritAttrs: false,
+    name: "TimelineRange",
+    props: ["getAriaValueText", "movable", "range"],
+  }
+);
+
 export const Timeline = {
   Clip,
   ClipFade,
@@ -234,7 +366,12 @@ export const Timeline = {
   ClipHeader: parts.ClipHeader,
   Lane: parts.Lane,
   Mark,
+  Navigator: parts.Navigator,
+  NavigatorHandle,
+  NavigatorWindow,
   Playhead: parts.Playhead,
+  Range,
+  RangeHandle,
   Root: parts.Root,
   Ruler,
   Track: parts.Track,

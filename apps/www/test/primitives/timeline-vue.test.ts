@@ -7,6 +7,29 @@ timelineSuite("Vue", async (tree) => {
   const inner = () => [
     tree.playhead ? h(Timeline.Playhead) : null,
     tree.mark ? h(Timeline.Mark, tree.mark as never) : null,
+    tree.range
+      ? h(
+          Timeline.Range,
+          {
+            "aria-label": tree.range.label,
+            defaultValue: tree.range.defaultValue,
+            drawable: tree.range.drawable,
+            range: tree.range.range,
+          } as never,
+          () => [
+            h(Timeline.RangeHandle, {
+              "aria-label": "Loop start",
+              edge: "start",
+              range: tree.range?.range,
+            } as never),
+            h(Timeline.RangeHandle, {
+              "aria-label": "Loop end",
+              edge: "end",
+              range: tree.range?.range,
+            } as never),
+          ]
+        )
+      : null,
     tree.clip
       ? h(
           Timeline.Clip,
@@ -33,6 +56,21 @@ timelineSuite("Vue", async (tree) => {
   const app = createApp({
     render: () =>
       h(Timeline.Root, tree.options as never, () => [
+        tree.navigator
+          ? h(Timeline.Navigator, null, () => [
+              h(Timeline.NavigatorWindow, {
+                "aria-label": tree.navigator?.label,
+              }),
+              h(Timeline.NavigatorHandle, {
+                "aria-label": "Zoom start",
+                edge: "start",
+              }),
+              h(Timeline.NavigatorHandle, {
+                "aria-label": "Zoom end",
+                edge: "end",
+              }),
+            ])
+          : null,
         h(Timeline.Viewport, null, () => [
           tree.ruler
             ? h(Timeline.Ruler, { "aria-label": tree.ruler.label }, () =>

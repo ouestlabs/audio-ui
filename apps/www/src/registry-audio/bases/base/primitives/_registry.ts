@@ -262,4 +262,40 @@ export const primitives: RegistryItem[] = [
     ],
     "A waveform of audio: bars or a canvas drawn from peaks or a live signal, a seekable control with a native input, a playhead and thumb that follow a live position, a hover readout, markers, and named regions with draggable edges."
   ),
+  ...primitiveItems(
+    "timeline",
+    [
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react.tsx"],
+        name: "react",
+      },
+      {
+        dependencies: ["@ui-sdk/vue", "vue"],
+        files: ["vue.ts"],
+        name: "vue",
+      },
+      {
+        dependencies: ["@ui-sdk/svelte", "svelte"],
+        files: [
+          "svelte/Clip.svelte",
+          "svelte/ClipFade.svelte",
+          "svelte/ClipFadeHandle.svelte",
+          "svelte/ClipHandle.svelte",
+          "svelte/Mark.svelte",
+          "svelte/NavigatorHandle.svelte",
+          "svelte/NavigatorWindow.svelte",
+          "svelte/Range.svelte",
+          "svelte/RangeHandle.svelte",
+          "svelte/Ruler.svelte",
+          "svelte/TrackResizeHandle.svelte",
+          "svelte/index.ts",
+          "svelte/parts.ts",
+        ],
+        name: "svelte",
+      },
+      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+    ],
+    "An arrangement timeline: a position and a zoom, a viewport that scrolls and zooms around the pointer, a ruler, a navigator, tracks with resizable heights, lanes, marks, ranges such as loops, and clips that move, trim and fade, each with a native input for the keyboard."
+  ),
 ];

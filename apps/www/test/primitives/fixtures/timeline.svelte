@@ -12,6 +12,25 @@ let { tree }: { tree: Record<string, any> } = $props();
   {#if tree.mark}
     <Timeline.Mark {...tree.mark} />
   {/if}
+  {#if tree.range}
+    <Timeline.Range
+      aria-label={tree.range.label}
+      defaultValue={tree.range.defaultValue}
+      drawable={tree.range.drawable}
+      range={tree.range.range}
+    >
+      <Timeline.RangeHandle
+        aria-label="Loop start"
+        edge="start"
+        range={tree.range.range}
+      />
+      <Timeline.RangeHandle
+        aria-label="Loop end"
+        edge="end"
+        range={tree.range.range}
+      />
+    </Timeline.Range>
+  {/if}
   {#if tree.clip}
     <Timeline.Clip
       aria-label={tree.clip.label}
@@ -30,6 +49,13 @@ let { tree }: { tree: Record<string, any> } = $props();
 {/snippet}
 
 <Timeline.Root {...tree.options}>
+  {#if tree.navigator}
+    <Timeline.Navigator>
+      <Timeline.NavigatorWindow aria-label={tree.navigator.label} />
+      <Timeline.NavigatorHandle aria-label="Zoom start" edge="start" />
+      <Timeline.NavigatorHandle aria-label="Zoom end" edge="end" />
+    </Timeline.Navigator>
+  {/if}
   <Timeline.Viewport>
     {#if tree.ruler}
       <Timeline.Ruler aria-label={tree.ruler.label}>

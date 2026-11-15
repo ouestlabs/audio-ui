@@ -19,6 +19,19 @@ const parts = createParts(timeline, {
   clipTrimStartInput: "input",
   lane: "div",
   mark: "div",
+  navigator: "div",
+  navigatorEnd: "div",
+  navigatorEndInput: "input",
+  navigatorStart: "div",
+  navigatorStartInput: "input",
+  navigatorWindow: "div",
+  navigatorWindowInput: "input",
+  range: "div",
+  rangeEnd: "div",
+  rangeEndInput: "input",
+  rangeInput: "input",
+  rangeStart: "div",
+  rangeStartInput: "input",
   playhead: "div",
   root: "div",
   ruler: "div",
@@ -255,6 +268,149 @@ function ClipFade({ clip, edge, ...props }: ClipFadeProps) {
   );
 }
 
+type WindowProps = Omit<
+  ComponentProps<typeof parts.NavigatorWindow>,
+  "children"
+> &
+  Naming & {
+    children?: ReactNode;
+    getAriaValueText?: (value: number, duration: number) => string;
+  };
+
+/** The stretch the viewport shows, inside the navigator: dragging it scrolls. Its native input moves it from the keyboard. */
+function NavigatorWindow({
+  "aria-describedby": describedBy,
+  "aria-label": label,
+  "aria-labelledby": labelledBy,
+  children,
+  getAriaValueText,
+  ...props
+}: WindowProps) {
+  return (
+    <parts.NavigatorWindow {...props}>
+      {children}
+      <parts.NavigatorWindowInput
+        aria-describedby={describedBy}
+        aria-label={label}
+        aria-labelledby={labelledBy}
+        getAriaValueText={getAriaValueText}
+      />
+    </parts.NavigatorWindow>
+  );
+}
+
+type NavigatorHandleProps = Omit<
+  ComponentProps<typeof parts.NavigatorStart>,
+  "children"
+> &
+  Naming & {
+    children?: ReactNode;
+    /** The edge of the window this handle moves: dragging it zooms. */
+    edge: "end" | "start";
+    getAriaValueText?: (value: number, duration: number) => string;
+  };
+
+/** An edge of the navigator's window: dragging it zooms, holding the other edge still. */
+function NavigatorHandle({
+  "aria-describedby": describedBy,
+  "aria-label": label,
+  "aria-labelledby": labelledBy,
+  children,
+  edge,
+  getAriaValueText,
+  ...props
+}: NavigatorHandleProps) {
+  const Handle = edge === "start" ? parts.NavigatorStart : parts.NavigatorEnd;
+  const Input =
+    edge === "start" ? parts.NavigatorStartInput : parts.NavigatorEndInput;
+  return (
+    <Handle {...(props as object)}>
+      {children}
+      <Input
+        aria-describedby={describedBy}
+        aria-label={label}
+        aria-labelledby={labelledBy}
+        getAriaValueText={getAriaValueText}
+      />
+    </Handle>
+  );
+}
+
+type RangeProps = Omit<ComponentProps<typeof parts.Range>, "children"> &
+  Naming & {
+    children?: ReactNode;
+    getAriaValueText?: (value: number, duration: number) => string;
+  };
+
+/**
+ * A stretch laid over a lane, such as a loop or a selection. Its edges take
+ * the same `range` name. Its own native `<input type="range">` moves it from
+ * the keyboard and carries its name, unless it is not `movable`.
+ */
+function Range({
+  "aria-describedby": describedBy,
+  "aria-label": label,
+  "aria-labelledby": labelledBy,
+  children,
+  getAriaValueText,
+  movable = true,
+  range,
+  ...props
+}: RangeProps) {
+  return (
+    <parts.Range {...props} movable={movable} range={range}>
+      {children}
+      {movable ? (
+        <parts.RangeInput
+          aria-describedby={describedBy}
+          aria-label={label}
+          aria-labelledby={labelledBy}
+          getAriaValueText={getAriaValueText}
+          range={range}
+        />
+      ) : null}
+    </parts.Range>
+  );
+}
+
+type RangeHandleProps = Omit<
+  ComponentProps<typeof parts.RangeStart>,
+  "children"
+> &
+  Naming & {
+    children?: ReactNode;
+    /** The edge of the range this handle resizes. */
+    edge: "end" | "start";
+    getAriaValueText?: (value: number, duration: number) => string;
+  };
+
+/** Resizes one edge of a range, by dragging or from the keyboard through its native input. */
+function RangeHandle({
+  "aria-describedby": describedBy,
+  "aria-label": label,
+  "aria-labelledby": labelledBy,
+  children,
+  edge,
+  getAriaValueText,
+  range,
+  ...props
+}: RangeHandleProps) {
+  const Handle = edge === "start" ? parts.RangeStart : parts.RangeEnd;
+  const Input = edge === "start" ? parts.RangeStartInput : parts.RangeEndInput;
+  return (
+    <Handle {...(props as object)} range={range}>
+      {children}
+      <Input
+        aria-describedby={describedBy}
+        aria-label={label}
+        aria-labelledby={labelledBy}
+        getAriaValueText={getAriaValueText}
+        range={range}
+      />
+    </Handle>
+  );
+}
+
 export const Timeline = {
   Clip,
   ClipFade,
@@ -263,7 +419,12 @@ export const Timeline = {
   ClipHeader: parts.ClipHeader,
   Lane: parts.Lane,
   Mark,
+  Navigator: parts.Navigator,
+  NavigatorHandle,
+  NavigatorWindow,
   Playhead: parts.Playhead,
+  Range,
+  RangeHandle,
   Root: parts.Root,
   Ruler,
   Track: parts.Track,

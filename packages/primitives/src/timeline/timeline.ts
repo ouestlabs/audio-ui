@@ -51,6 +51,20 @@ import {
   UNIT_PROPERTY,
   unitLength,
 } from "./layout.ts";
+import {
+  createNavigatorApi,
+  type NavigatorApi,
+  type NavigatorSlots,
+  navigatorSlots,
+} from "./navigator.ts";
+import {
+  createRangeApi,
+  type RangeApi,
+  type RangeChangeDetails,
+  type RangeCommitDetails,
+  type RangeSlots,
+  rangeSlots,
+} from "./ranges.ts";
 
 /**
  * The timeline as a UI SDK primitive, over the controllers of
@@ -109,6 +123,14 @@ export interface TimelinePrimitiveOptions {
   onMarkCommitted?: (value: number, details: MarkCommitDetails) => void;
   onPositionChange?: (value: number, details: ChangeDetails) => void;
   onPositionCommitted?: (value: number, details: CommitDetails) => void;
+  onRangeChange?: (
+    value: readonly [number, number],
+    details: RangeChangeDetails
+  ) => void;
+  onRangeCommitted?: (
+    value: readonly [number, number],
+    details: RangeCommitDetails
+  ) => void;
   /** A Shift drag on the ruler, or on a seekable lane, selected a stretch. */
   onSelectionChange?: (
     range: readonly [number, number],
@@ -212,7 +234,7 @@ export interface MarkPublicState extends TimelinePublicState {
 }
 
 /** What a timeline's `api` gives an adapter. */
-export interface TimelineApi extends ClipApi {
+export interface TimelineApi extends ClipApi, NavigatorApi, RangeApi {
   /** Where the next zoom should hold still; the viewport applies it once laid out. */
   anchor: { current: ZoomAnchor | null };
   controller: TimelineController;
@@ -255,19 +277,24 @@ type Slot<Props, Public = TimelinePublicState> = SlotDefinition<
 >;
 
 /** The timeline's slots, by name, with the props and the public state of each. */
-export type TimelineSlots = ClipSlots & {
-  lane: Slot<PartProps & { seekable?: boolean }>;
-  mark: Slot<MarkProps, MarkPublicState>;
-  playhead: Slot<PartProps>;
-  root: Slot<PartProps>;
-  ruler: Slot<PartProps>;
-  rulerInput: Slot<PartProps & { getAriaValueText?: DescribePosition }, object>;
-  track: Slot<TrackProps, TrackPublicState>;
-  trackHeader: Slot<PartProps, TrackPublicState>;
-  trackResizeHandle: Slot<TrackRef, TrackPublicState>;
-  trackResizeInput: Slot<TrackRef, object>;
-  viewport: Slot<PartProps>;
-};
+export type TimelineSlots = ClipSlots &
+  NavigatorSlots &
+  RangeSlots & {
+    lane: Slot<PartProps & { seekable?: boolean }>;
+    mark: Slot<MarkProps, MarkPublicState>;
+    playhead: Slot<PartProps>;
+    root: Slot<PartProps>;
+    ruler: Slot<PartProps>;
+    rulerInput: Slot<
+      PartProps & { getAriaValueText?: DescribePosition },
+      object
+    >;
+    track: Slot<TrackProps, TrackPublicState>;
+    trackHeader: Slot<PartProps, TrackPublicState>;
+    trackResizeHandle: Slot<TrackRef, TrackPublicState>;
+    trackResizeInput: Slot<TrackRef, object>;
+    viewport: Slot<PartProps>;
+  };
 
 /** The type of `timeline`, written out so a declaration can print it. */
 export interface TimelinePrimitive {
@@ -482,8 +509,10 @@ export const timeline: TimelinePrimitive = definePrimitive({
     const bump = () =>
       context.store.set({ parts: context.store.get().parts + 1 } as never);
 
-    return {
+    const result = {
       ...createClipApi(context, () => adjustOptions(options()), bump),
+      ...createRangeApi(context, () => adjustOptions(options()), bump),
+      ...createNavigatorApi(context, () => result),
       anchor,
       controller,
       internal: { keyOf: (value: unknown) => String(value) },
@@ -643,7 +672,8 @@ export const timeline: TimelinePrimitive = definePrimitive({
         anchor.current = at ?? null;
         return true;
       },
-    };
+    } as unknown as TimelineApi;
+    return result;
   },
   controlled: ["position", "zoom"],
   name: "timeline",
@@ -661,6 +691,8 @@ export const timeline: TimelinePrimitive = definePrimitive({
     onClipRemove: "callback",
     onClipSelectedChange: "callback",
     onMarkChange: "callback",
+    onRangeChange: "callback",
+    onRangeCommitted: "callback",
     onMarkCommitted: "callback",
     onPositionChange: "callback",
     onPositionCommitted: "callback",
@@ -683,6 +715,8 @@ export const timeline: TimelinePrimitive = definePrimitive({
 
     return {
       ...clipSlots(slot),
+      ...navigatorSlots(slot),
+      ...rangeSlots(slot),
       lane: slot<{ seekable?: boolean }, TimelinePublicState>({
         attrs: (state: TimelineState) => ({
           ...stateAttrs(state),

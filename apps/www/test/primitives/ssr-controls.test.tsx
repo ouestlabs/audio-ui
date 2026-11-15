@@ -13,6 +13,7 @@ import { Pad } from "@/registry-audio/bases/base/primitives/pad/react.tsx";
 import { Piano } from "@/registry-audio/bases/base/primitives/piano/react.tsx";
 import { Plot } from "@/registry-audio/bases/base/primitives/plot/react.tsx";
 import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/react.tsx";
+import { Timeline } from "@/registry-audio/bases/base/primitives/timeline/react.tsx";
 import { Waveform } from "@/registry-audio/bases/base/primitives/waveform/react.tsx";
 import { XYPad } from "@/registry-audio/bases/base/primitives/xypad/react.tsx";
 import { XYPad as VueXYPad } from "@/registry-audio/bases/base/primitives/xypad/vue.ts";
@@ -260,5 +261,34 @@ describe("server rendering of the fader and the XY pad", () => {
     expect(html).toContain('aria-valuetext="25%"');
     expect(html).toContain('aria-label="Position"');
     expect(html.match(/data-slot="waveform-bar"/g)).toHaveLength(4);
+  });
+
+  test("the timeline writes its lanes' unit, its clip's place and its ruler's input, in React", () => {
+    const html = renderToString(
+      <Timeline.Root duration={100} position={25} zoom={10}>
+        <Timeline.Viewport>
+          <Timeline.Ruler aria-label="Position" />
+          <Timeline.Lane>
+            <Timeline.Playhead />
+            <Timeline.Clip
+              aria-label="Take"
+              clip="a"
+              defaultValue={{
+                fadeIn: 0,
+                fadeOut: 0,
+                length: 20,
+                offset: 0,
+                start: 10,
+              }}
+            />
+          </Timeline.Lane>
+        </Timeline.Viewport>
+      </Timeline.Root>
+    );
+    expect(html).toContain("--timeline-unit:10px");
+    expect(html).toContain("--timeline-offset:25");
+    expect(html).toContain('data-clip="a"');
+    expect(html).toContain("--timeline-length:20");
+    expect(html).toContain('aria-label="Position"');
   });
 });

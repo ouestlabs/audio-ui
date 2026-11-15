@@ -28,6 +28,12 @@ timelineSuite("custom elements", async (tree: TimelineTree) => {
     (tree.playhead
       ? "<audio-ui-timeline-playhead></audio-ui-timeline-playhead>"
       : "") +
+    (tree.range
+      ? `<audio-ui-timeline-range range='${tree.range.range}' default-value='${JSON.stringify(tree.range.defaultValue)}' ${tree.range.drawable ? "drawable" : ""} ${tree.range.label ? `aria-label='${tree.range.label}'` : ""}>` +
+        `<audio-ui-timeline-range-start range='${tree.range.range}' aria-label='Loop start'></audio-ui-timeline-range-start>` +
+        `<audio-ui-timeline-range-end range='${tree.range.range}' aria-label='Loop end'></audio-ui-timeline-range-end>` +
+        "</audio-ui-timeline-range>"
+      : "") +
     (tree.clip
       ? `<audio-ui-timeline-clip clip='${tree.clip.clip}' default-value='${JSON.stringify(tree.clip.defaultValue)}' ${tree.clip.label ? `aria-label='${tree.clip.label}'` : ""}>` +
         `<audio-ui-timeline-clip-header clip='${tree.clip.clip}'></audio-ui-timeline-clip-header>` +
@@ -53,7 +59,7 @@ timelineSuite("custom elements", async (tree: TimelineTree) => {
       `<audio-ui-timeline-track-resize-handle track='${tree.track.track}' ${tree.track.label ? `aria-label='${tree.track.label}'` : ""}></audio-ui-timeline-track-resize-handle>` +
       "</audio-ui-timeline-track>"
     : "";
-  container.innerHTML = `<audio-ui-timeline ${attributes(tree.options)}><audio-ui-timeline-viewport>${ruler}${lane}${track}</audio-ui-timeline-viewport></audio-ui-timeline>`;
+  container.innerHTML = `<audio-ui-timeline ${attributes(tree.options)}>${tree.navigator ? `<audio-ui-timeline-navigator><audio-ui-timeline-navigator-window ${tree.navigator.label ? `aria-label='${tree.navigator.label}'` : ""}></audio-ui-timeline-navigator-window><audio-ui-timeline-navigator-start aria-label='Zoom start'></audio-ui-timeline-navigator-start><audio-ui-timeline-navigator-end aria-label='Zoom end'></audio-ui-timeline-navigator-end></audio-ui-timeline-navigator>` : ""}<audio-ui-timeline-viewport>${ruler}${lane}${track}</audio-ui-timeline-viewport></audio-ui-timeline>`;
   const root = container.querySelector("audio-ui-timeline") as HTMLElement & {
     source?: unknown;
   };
@@ -116,6 +122,14 @@ timelineSuite("custom elements", async (tree: TimelineTree) => {
   );
   listen("clipremove", (detail) =>
     tree.options.onClipRemove(detail.clip as string)
+  );
+  listen("rangechange", (detail, event) =>
+    tree.options.onRangeChange(detail.value as never, {
+      cancel: () => event.preventDefault(),
+      edge: detail.edge as string,
+      range: detail.range as string,
+      reason: detail.reason as string,
+    })
   );
   listen("markchange", (detail, event) =>
     tree.options.onMarkChange(detail.value as number, {

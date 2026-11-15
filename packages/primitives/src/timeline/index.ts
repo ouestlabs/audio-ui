@@ -9,6 +9,23 @@ export type {
   ClipRef,
   ClipSlots,
 } from "./clips.ts";
+export type {
+  NavigatorApi,
+  NavigatorEdgeState,
+  NavigatorProps,
+  NavigatorSlots,
+} from "./navigator.ts";
+export type {
+  RangeApi,
+  RangeChangeDetails,
+  RangeCommitDetails,
+  RangeEdgeState,
+  RangeProps,
+  RangePublicState,
+  RangeRef,
+  RangeSlots,
+  RangeValue,
+} from "./ranges.ts";
 export {
   type DescribePosition,
   LENGTH_PROPERTY,

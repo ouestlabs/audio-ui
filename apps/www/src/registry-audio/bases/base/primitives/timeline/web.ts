@@ -35,6 +35,25 @@ function addInput(
   owner.appendChild(part);
 }
 
+/** The window and the edges of a navigator each hold an input of their own. */
+const renderNavigator = (tag: string) => (part: HTMLElement) =>
+  addInput(part, tag);
+
+/** A range holds the input that moves it, unless it is not movable; its edges hold one each. */
+function renderRange(range: HTMLElement) {
+  if (range.getAttribute("movable") !== "false") {
+    addInput(
+      range,
+      "audio-ui-timeline-range-input",
+      range.getAttribute("range"),
+      "range"
+    );
+  }
+}
+
+const renderRangeEdge = (tag: string) => (handle: HTMLElement) =>
+  addInput(handle, tag, handle.getAttribute("range"), "range");
+
 /** A mark that is not named takes its value for a name. */
 function nameMark(mark: HTMLElement) {
   if (!mark.hasAttribute("mark")) {
@@ -185,7 +204,75 @@ export const parts = createParts(timeline, {
     render: nameMark,
     tag: "audio-ui-timeline-mark",
   },
+  navigator: { display: "block", tag: "audio-ui-timeline-navigator" },
+  navigatorEnd: {
+    display: "block",
+    render: renderNavigator("audio-ui-timeline-navigator-end-input"),
+    tag: "audio-ui-timeline-navigator-end",
+  },
+  navigatorEndInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-navigator-end-input",
+    target: (el) => el.querySelector("input"),
+  },
+  navigatorStart: {
+    display: "block",
+    render: renderNavigator("audio-ui-timeline-navigator-start-input"),
+    tag: "audio-ui-timeline-navigator-start",
+  },
+  navigatorStartInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-navigator-start-input",
+    target: (el) => el.querySelector("input"),
+  },
+  navigatorWindow: {
+    display: "block",
+    render: renderNavigator("audio-ui-timeline-navigator-window-input"),
+    tag: "audio-ui-timeline-navigator-window",
+  },
+  navigatorWindowInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-navigator-window-input",
+    target: (el) => el.querySelector("input"),
+  },
   playhead: { display: "block", tag: "audio-ui-timeline-playhead" },
+  range: {
+    display: "block",
+    kinds: { defaultValue: jsonAttribute, value: jsonAttribute },
+    render: renderRange,
+    tag: "audio-ui-timeline-range",
+  },
+  rangeEnd: {
+    display: "block",
+    render: renderRangeEdge("audio-ui-timeline-range-end-input"),
+    tag: "audio-ui-timeline-range-end",
+  },
+  rangeEndInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-range-end-input",
+    target: (el) => el.querySelector("input"),
+  },
+  rangeInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-range-input",
+    target: (el) => el.querySelector("input"),
+  },
+  rangeStart: {
+    display: "block",
+    render: renderRangeEdge("audio-ui-timeline-range-start-input"),
+    tag: "audio-ui-timeline-range-start",
+  },
+  rangeStartInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-range-start-input",
+    target: (el) => el.querySelector("input"),
+  },
   root: {
     display: "block",
     events: {
@@ -194,6 +281,8 @@ export const parts = createParts(timeline, {
       onClipRemove: "clipremove",
       onClipSelectedChange: "clipselect",
       onMarkChange: "markchange",
+      onRangeChange: "rangechange",
+      onRangeCommitted: "rangecommit",
       onMarkCommitted: "markcommit",
       onPositionChange: "input",
       onPositionCommitted: "change",

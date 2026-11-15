@@ -10,11 +10,30 @@ timelineSuite("React", async (tree) => {
     <>
       {tree.playhead ? <Timeline.Playhead /> : null}
       {tree.mark ? <Timeline.Mark {...tree.mark} /> : null}
+      {tree.range ? (
+        <Timeline.Range
+          aria-label={tree.range.label}
+          defaultValue={tree.range.defaultValue as never}
+          drawable={tree.range.drawable}
+          range={tree.range.range}
+        >
+          <Timeline.RangeHandle
+            aria-label="Loop start"
+            edge="start"
+            range={tree.range.range}
+          />
+          <Timeline.RangeHandle
+            aria-label="Loop end"
+            edge="end"
+            range={tree.range.range}
+          />
+        </Timeline.Range>
+      ) : null}
       {tree.clip ? (
         <Timeline.Clip
           aria-label={tree.clip.label}
           clip={tree.clip.clip}
-          defaultValue={tree.clip.defaultValue}
+          defaultValue={tree.clip.defaultValue as never}
         >
           <Timeline.ClipHeader clip={tree.clip.clip} />
           <Timeline.ClipFade clip={tree.clip.clip} edge="in" />
@@ -34,6 +53,13 @@ timelineSuite("React", async (tree) => {
   await act(() => {
     root.render(
       <Timeline.Root {...(tree.options as object)}>
+        {tree.navigator ? (
+          <Timeline.Navigator className="navigator">
+            <Timeline.NavigatorWindow aria-label={tree.navigator.label} />
+            <Timeline.NavigatorHandle aria-label="Zoom start" edge="start" />
+            <Timeline.NavigatorHandle aria-label="Zoom end" edge="end" />
+          </Timeline.Navigator>
+        ) : null}
         <Timeline.Viewport>
           {tree.ruler ? (
             <Timeline.Ruler aria-label={tree.ruler.label}>

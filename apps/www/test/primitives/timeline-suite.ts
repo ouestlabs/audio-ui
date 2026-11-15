@@ -32,7 +32,12 @@ export interface TimelineTree {
   clip?: { clip: string; defaultValue: ClipValue; label?: string };
   lane?: { seekable?: boolean };
   mark?: { movable?: boolean; value: number };
+  navigator?: { label?: string };
   options: TimelineOptions & {
+    onRangeChange: (
+      value: number[],
+      details: { edge: string; range: string; reason: string } & ChangeDetails
+    ) => void;
     onClipChange: (
       value: ClipValue,
       details: { clip: string; reason: string; target?: string } & ChangeDetails
@@ -56,6 +61,12 @@ export interface TimelineTree {
     onZoomChange: (zoom: number, details: ChangeDetails) => void;
   };
   playhead?: boolean;
+  range?: {
+    defaultValue: number[];
+    drawable?: boolean;
+    label?: string;
+    range: string;
+  };
   ruler?: { label?: string };
   track?: { height?: number; label?: string; track: string };
 }
@@ -83,6 +94,7 @@ async function render(
   const clips: [ClipValue, string, string | undefined, string][] = [];
   const picked: [boolean, string][] = [];
   const removed: string[] = [];
+  const ranges: [number[], string, string, string][] = [];
   const mounted = await mount({
     ruler: {},
     ...tree,
@@ -102,6 +114,9 @@ async function render(
       },
       onClipSelectedChange: (selected, details) => {
         picked.push([selected, details.clip]);
+      },
+      onRangeChange: (value, details) => {
+        ranges.push([[...value], details.range, details.edge, details.reason]);
       },
       onMarkChange: (value, details) => {
         marks.push([value, details.mark, details.reason]);
@@ -163,6 +178,7 @@ async function render(
     picked,
     playhead: one("playhead"),
     positions,
+    ranges,
     removed,
     resize: one("trackResizeHandle"),
     resizeInput: inputOf(one("trackResizeInput")),
@@ -338,6 +354,85 @@ export function timelineSuite(framework: string, mount: MountTimeline) {
       });
       p.unmount();
     });
+    test("a navigator shows the stretch the viewport shows, with a window and an edge to zoom by on each side", async () => {
+      const p = await render(mount, { navigator: { label: "Visible" } });
+      const window = p.part("navigatorWindow");
+      expect(styleOf(window)).toContain("left: 0%");
+      expect(styleOf(window)).toContain("width: 100%");
+      expect(
+        p.inputOf(p.part("navigatorWindowInput")).getAttribute("aria-label")
+      ).toBe("Visible");
+      expect(p.part("navigatorStart").getAttribute("data-edge")).toBe("start");
+      expect(p.part("navigatorEnd").getAttribute("data-edge")).toBe("end");
+      expect(
+        p.inputOf(p.part("navigatorStartInput")).getAttribute("aria-label")
+      ).toBe("Zoom start");
+      expect(p.inputOf(p.part("navigatorEndInput")).value).toBe("100");
+      p.unmount();
+    });
+
+    describe("a range", () => {
+      test("is placed over the stretch it spans, and its body moves it, reporting its name and edge", async () => {
+        const p = await render(mount, {
+          lane: {},
+          range: { defaultValue: [20, 50], range: "loop" },
+        });
+        const range = p.part("range");
+        expect(styleOf(range)).toContain("--timeline-offset: 20");
+        expect(styleOf(range)).toContain("--timeline-length: 30");
+        await p.act(() => {
+          pointer(range, "pointerdown", { clientX: 30, pointerId: 1 });
+          pointer(range, "pointermove", { clientX: 40, pointerId: 1 });
+        });
+        expect(p.ranges.at(-1)).toEqual([[30, 60], "loop", "both", "drag"]);
+        expect(p.positions).toHaveLength(0);
+        expect(styleOf(range)).toContain("--timeline-offset: 30");
+        await p.act(() => {
+          pointer(range, "pointerup", { clientX: 40, pointerId: 1 });
+        });
+        p.unmount();
+      });
+
+      test("is resized by its edges, by dragging or from their own inputs", async () => {
+        const p = await render(mount, {
+          lane: {},
+          range: { defaultValue: [20, 50], label: "Loop", range: "loop" },
+        });
+        const end = p.part("rangeEnd");
+        await p.act(() => {
+          pointer(end, "pointerdown", { clientX: 50, pointerId: 1 });
+          pointer(end, "pointermove", { clientX: 80, pointerId: 1 });
+          pointer(end, "pointerup", { clientX: 80, pointerId: 1 });
+        });
+        expect(p.ranges.at(-1)).toEqual([[20, 80], "loop", "end", "drag"]);
+        const start = p.inputOf(p.part("rangeStartInput"));
+        expect(start.getAttribute("aria-label")).toBe("Loop start");
+        await p.act(() => key(start, "ArrowRight"));
+        expect(p.ranges.at(-1)?.[2]).toBe("start");
+        expect(p.ranges.at(-1)?.[3]).toBe("keyboard");
+        const own = p.inputOf(p.part("rangeInput"));
+        expect(own.getAttribute("aria-label")).toBe("Loop");
+        p.unmount();
+      });
+
+      test("is drawn across the bare lane when it is drawable", async () => {
+        const p = await render(mount, {
+          lane: {},
+          range: { defaultValue: [20, 50], drawable: true, range: "loop" },
+        });
+        await p.act(() => {
+          pointer(p.lane, "pointerdown", { clientX: 60, pointerId: 1 });
+          pointer(p.lane, "pointermove", { clientX: 75, pointerId: 1 });
+        });
+        expect(p.ranges.at(-1)?.[0]).toEqual([60, 75]);
+        expect(p.ranges.at(-1)?.[3]).toBe("draw");
+        await p.act(() => {
+          pointer(p.lane, "pointerup", { clientX: 75, pointerId: 1 });
+        });
+        p.unmount();
+      });
+    });
+
     describe("a clip", () => {
       const value: ClipValue = {
         fadeIn: 0,
