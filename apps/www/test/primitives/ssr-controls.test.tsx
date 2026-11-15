@@ -1,7 +1,10 @@
 import { describe, expect, test } from "bun:test";
+import { polylinePoints } from "@audio-ui/core/envelope";
 import { renderToString } from "react-dom/server";
 import { createSSRApp, h } from "vue";
 import { renderToString as renderVue } from "vue/server-renderer";
+import { Envelope } from "@/registry-audio/bases/base/primitives/envelope/react.tsx";
+import { Envelope as VueEnvelope } from "@/registry-audio/bases/base/primitives/envelope/vue.ts";
 import { Fader } from "@/registry-audio/bases/base/primitives/fader/react.tsx";
 import { Fader as VueFader } from "@/registry-audio/bases/base/primitives/fader/vue.ts";
 import { Meter } from "@/registry-audio/bases/base/primitives/meter/react.tsx";
@@ -115,5 +118,60 @@ describe("server rendering of the fader and the XY pad", () => {
       })
     );
     expect(meter(vue)).toEqual(expected);
+  });
+
+  test("the envelope writes its points, handles and curve, in React and Vue", async () => {
+    const points = [
+      { x: 0, y: 0 },
+      { x: 0.5, y: 1 },
+      { x: 1, y: 0 },
+    ];
+    const markup = (html: string) => ({
+      line: html.includes(`points="${polylinePoints(points)}"`),
+      points: html.match(/role="slider"/g)?.length,
+    });
+    // Three points and two handles, all sliders.
+    const expected = { line: true, points: 5 };
+    const react = renderToString(
+      <Envelope.Root value={points}>
+        {({ value }) => (
+          <>
+            <Envelope.Graph>
+              <Envelope.Line />
+            </Envelope.Graph>
+            {value.map((_, index) => (
+              <Envelope.Point index={index} key={index} />
+            ))}
+            {value.slice(0, -1).map((_, index) => (
+              <Envelope.Segment index={index} key={index} />
+            ))}
+          </>
+        )}
+      </Envelope.Root>
+    );
+    expect(markup(react)).toEqual(expected);
+    const vue = await renderVue(
+      createSSRApp({
+        render: () =>
+          h(
+            VueEnvelope.Root,
+            { value: points },
+            {
+              default: ({ state }: { state: { value: unknown[] } }) => [
+                h(VueEnvelope.Graph, null, () => [h(VueEnvelope.Line)]),
+                ...state.value.map((_, index) =>
+                  h(VueEnvelope.Point, { index, key: index })
+                ),
+                ...state.value
+                  .slice(0, -1)
+                  .map((_, index) =>
+                    h(VueEnvelope.Segment, { index, key: index })
+                  ),
+              ],
+            }
+          ),
+      })
+    );
+    expect(markup(vue)).toEqual(expected);
   });
 });

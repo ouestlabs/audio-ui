@@ -106,4 +106,32 @@ export const primitives: RegistryItem[] = [
     ],
     "A level meter, vertical or horizontal, one channel or many: clip and warning levels with a held clip, peak marks, graduations, and a live source painted frame by frame with no render."
   ),
+  ...primitiveItems(
+    "envelope",
+    [
+      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/vue", "vue"],
+        files: ["vue.ts"],
+        name: "vue",
+      },
+      {
+        dependencies: ["@ui-sdk/svelte", "svelte"],
+        files: [
+          "svelte/Fill.svelte",
+          "svelte/Line.svelte",
+          "svelte/Polyline.svelte",
+          "svelte/index.ts",
+          "svelte/parts.ts",
+        ],
+        name: "svelte",
+      },
+      {
+        dependencies: ["@audio-ui/core", "@ui-sdk/web"],
+        files: ["web.ts"],
+        name: "web",
+      },
+    ],
+    "A breakpoint envelope editor, such as an ADSR shape or an automation curve: points to drag, add and remove, segments to bend, a grid to snap to, and the point's index in each change."
+  ),
 ];

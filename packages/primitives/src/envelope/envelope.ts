@@ -319,7 +319,6 @@ export const envelope: EnvelopePrimitive = definePrimitive({
       attrs: (state: EnvelopeState) => ({
         ...stateAttrs(state.view),
         "data-blocked": flag(state.view.isAddBlocked),
-        style: css({ position: "relative" }),
       }),
       on: {
         // A double click adds a point; with Alt it straightens the segment under it.
