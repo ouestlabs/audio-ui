@@ -174,4 +174,31 @@ export const primitives: RegistryItem[] = [
     ],
     "A piano keyboard to play, laid out like a piano or evenly, horizontal or vertical: keys that sound while pressed, glide across, chords with several pointers, harder toward the free end, and the keyboard as one tab stop."
   ),
+  ...primitiveItems(
+    "sequencer",
+    [
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react.tsx"],
+        name: "react",
+      },
+      {
+        dependencies: ["@ui-sdk/vue", "vue"],
+        files: ["vue.ts"],
+        name: "vue",
+      },
+      {
+        dependencies: ["@ui-sdk/svelte", "svelte"],
+        files: [
+          "svelte/Cell.svelte",
+          "svelte/Velocity.svelte",
+          "svelte/index.ts",
+          "svelte/parts.ts",
+        ],
+        name: "svelte",
+      },
+      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+    ],
+    "A step sequencer for a drum machine: a grid of steps to switch on and off, one row per sound, painted by dragging, with a velocity bar under each step and the step being played marked from a live clock."
+  ),
 ];

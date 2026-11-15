@@ -11,6 +11,7 @@ import { Meter } from "@/registry-audio/bases/base/primitives/meter/react.tsx";
 import { Meter as VueMeter } from "@/registry-audio/bases/base/primitives/meter/vue.ts";
 import { Pad } from "@/registry-audio/bases/base/primitives/pad/react.tsx";
 import { Piano } from "@/registry-audio/bases/base/primitives/piano/react.tsx";
+import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/react.tsx";
 import { XYPad } from "@/registry-audio/bases/base/primitives/xypad/react.tsx";
 import { XYPad as VueXYPad } from "@/registry-audio/bases/base/primitives/xypad/vue.ts";
 
@@ -204,5 +205,28 @@ describe("server rendering of the fader and the XY pad", () => {
     expect(html.match(/<button/g)).toHaveLength(3);
     expect(html).toContain('aria-label="C4"');
     expect(html).toContain(">C#4<");
+  });
+
+  test("the sequencer writes its rows and cells, with the pattern's state, in React", () => {
+    const html = renderToString(
+      <Sequencer.Root
+        defaultValue={[
+          [true, false],
+          [false, true],
+        ]}
+      >
+        {({ rows, steps }) =>
+          Array.from({ length: rows }, (_, row) => (
+            <Sequencer.Row index={row} key={row}>
+              {Array.from({ length: steps }, (_, step) => (
+                <Sequencer.Cell key={step} row={row} step={step} />
+              ))}
+            </Sequencer.Row>
+          ))
+        }
+      </Sequencer.Root>
+    );
+    expect(html.match(/<button/g)).toHaveLength(4);
+    expect(html.match(/aria-pressed="true"/g)).toHaveLength(2);
   });
 });

@@ -55,6 +55,17 @@ export {
   piano,
 } from "./piano/index.ts";
 export {
+  type CellState,
+  type SequencerApi,
+  type SequencerPrimitive,
+  type SequencerPrimitiveOptions,
+  type SequencerRootState,
+  type SequencerSlots,
+  type SequencerState,
+  sequencer,
+  type VelocityState,
+} from "./sequencer/index.ts";
+export {
   type XYPadApi,
   type XYPadPrimitive,
   type XYPadPrimitiveOptions,
