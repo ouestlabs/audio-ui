@@ -43,6 +43,18 @@ export {
   pad,
 } from "./pad/index.ts";
 export {
+  type KeyState,
+  type NoteOffDetails,
+  type NoteOnDetails,
+  type PianoApi,
+  type PianoPrimitive,
+  type PianoPrimitiveOptions,
+  type PianoRootState,
+  type PianoSlots,
+  type PianoState,
+  piano,
+} from "./piano/index.ts";
+export {
   type XYPadApi,
   type XYPadPrimitive,
   type XYPadPrimitiveOptions,

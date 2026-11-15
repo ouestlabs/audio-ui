@@ -27,6 +27,10 @@
       "types": "./dist/pad/index.d.ts",
       "import": "./dist/pad.js"
     },
+    "./piano": {
+      "types": "./dist/piano/index.d.ts",
+      "import": "./dist/piano.js"
+    },
     "./xypad": {
       "types": "./dist/xypad/index.d.ts",
       "import": "./dist/xypad.js"

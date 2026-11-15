@@ -10,6 +10,7 @@ import { Fader as VueFader } from "@/registry-audio/bases/base/primitives/fader/
 import { Meter } from "@/registry-audio/bases/base/primitives/meter/react.tsx";
 import { Meter as VueMeter } from "@/registry-audio/bases/base/primitives/meter/vue.ts";
 import { Pad } from "@/registry-audio/bases/base/primitives/pad/react.tsx";
+import { Piano } from "@/registry-audio/bases/base/primitives/piano/react.tsx";
 import { XYPad } from "@/registry-audio/bases/base/primitives/xypad/react.tsx";
 import { XYPad as VueXYPad } from "@/registry-audio/bases/base/primitives/xypad/vue.ts";
 
@@ -186,5 +187,22 @@ describe("server rendering of the fader and the XY pad", () => {
     expect(html.match(/<button/g)).toHaveLength(2);
     expect(html).toContain('role="group"');
     expect(html.match(/data-active/g)).toHaveLength(1);
+  });
+
+  test("the piano writes a button for each pitch, named by its note, in React", () => {
+    const html = renderToString(
+      <Piano.Root layout="even" maxPitch={62} minPitch={60}>
+        {({ pitches }) =>
+          pitches.map((pitch) => (
+            <Piano.Key key={pitch} pitch={pitch}>
+              <Piano.Label />
+            </Piano.Key>
+          ))
+        }
+      </Piano.Root>
+    );
+    expect(html.match(/<button/g)).toHaveLength(3);
+    expect(html).toContain('aria-label="C4"');
+    expect(html).toContain(">C#4<");
   });
 });

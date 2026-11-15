@@ -152,4 +152,26 @@ export const primitives: RegistryItem[] = [
     ],
     "A grid of pads to strike, for drums and samples: each sounds while held, by pointer or keyboard, harder where it is pressed, with choke groups, several pointers at once, and the grid as one tab stop."
   ),
+  ...primitiveItems(
+    "piano",
+    [
+      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/vue", "vue"],
+        files: ["vue.ts"],
+        name: "vue",
+      },
+      {
+        dependencies: ["@ui-sdk/svelte", "svelte"],
+        files: ["svelte/Label.svelte", "svelte/index.ts", "svelte/parts.ts"],
+        name: "svelte",
+      },
+      {
+        dependencies: ["@audio-ui/core", "@ui-sdk/web"],
+        files: ["web.ts"],
+        name: "web",
+      },
+    ],
+    "A piano keyboard to play, laid out like a piano or evenly, horizontal or vertical: keys that sound while pressed, glide across, chords with several pointers, harder toward the free end, and the keyboard as one tab stop."
+  ),
 ];

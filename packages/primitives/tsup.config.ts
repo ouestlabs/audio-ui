@@ -4,6 +4,7 @@ import { defineConfig } from "tsup";
 export default defineConfig({
   clean: true,
   entry: {
+    piano: "src/piano/index.ts",
     pad: "src/pad/index.ts",
     envelope: "src/envelope/index.ts",
     fader: "src/fader/index.ts",
