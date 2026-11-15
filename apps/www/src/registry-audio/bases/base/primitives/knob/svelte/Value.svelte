@@ -1,10 +1,14 @@
 <script lang="ts">
 import type { KnobPublicState } from "@audio-ui/primitives/knob";
-import type { Snippet } from "svelte";
+import type { ComponentProps, Snippet } from "svelte";
 import { parts } from "./parts.ts";
 
-let { children: content, ...rest }: { children?: Snippet<[KnobPublicState]> } =
-  $props();
+let {
+  children: content,
+  ...rest
+}: Omit<ComponentProps<typeof parts.Value>, "children"> & {
+  children?: Snippet<[KnobPublicState]>;
+} = $props();
 </script>
 
 <parts.Value {...rest}>

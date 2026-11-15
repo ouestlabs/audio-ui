@@ -22,7 +22,7 @@
     "dist"
   ],
   "scripts": {
-    "build:pkg": "bunx --bun tsup",
+    "build:pkg": "bunx --bun tsup && tsc -p tsconfig.build.json",
     "clean": "rm -rf dist node_modules .turbo",
     "lint": "biome check --write .",
     "test": "bun test"

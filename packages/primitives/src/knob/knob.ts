@@ -15,6 +15,9 @@ import {
   css,
   definePrimitive,
   dispatch,
+  type PrimitiveInstance,
+  type PropSpec,
+  type SlotDefinition,
 } from "@ui-sdk/core";
 
 /**
@@ -145,7 +148,77 @@ export const VISUALLY_HIDDEN = {
   width: "1px",
 };
 
-export const knob = definePrimitive({
+/** What a knob's `api` gives an adapter. */
+export interface KnobApi {
+  controller: KnobController;
+  /** Moves the knob to `value` from outside, as a property does: no change is reported. */
+  set: (value: number) => void;
+  /** Sets the value as typed: on the grid, reported and committed. */
+  setValue: (value: number, event?: Event) => void;
+}
+
+/** The props every part takes. */
+interface PartProps {
+  id?: string;
+}
+
+/** The knob's slots, by name, with the props and the public state of each. */
+export type KnobSlots = {
+  control: SlotDefinition<KnobState, KnobApi, PartProps, KnobPublicState>;
+  indicator: SlotDefinition<
+    KnobState,
+    KnobApi,
+    PartProps & { strokeWidth?: number },
+    ArcState
+  >;
+  input: SlotDefinition<
+    KnobState,
+    KnobApi,
+    PartProps & {
+      getAriaValueText?: (formatted: string, value: number) => string;
+    },
+    object
+  >;
+  label: SlotDefinition<KnobState, KnobApi, PartProps, object>;
+  mark: SlotDefinition<
+    KnobState,
+    KnobApi,
+    PartProps & { value: number },
+    KnobPublicState
+  >;
+  root: SlotDefinition<KnobState, KnobApi, PartProps, KnobPublicState>;
+  thumb: SlotDefinition<KnobState, KnobApi, PartProps, KnobPublicState>;
+  track: SlotDefinition<
+    KnobState,
+    KnobApi,
+    PartProps & { strokeWidth?: number },
+    ArcState
+  >;
+  value: SlotDefinition<KnobState, KnobApi, PartProps, KnobPublicState>;
+};
+
+/**
+ * The type of `knob`, written out: the kernel's own types its inferred type
+ * would name are not exported, so a declaration could not print it.
+ */
+export interface KnobPrimitive {
+  options: Record<string, PropSpec> | undefined;
+  slots: KnobSlots;
+  (
+    initialOptions: KnobPrimitiveOptions & { id: string }
+  ): Omit<PrimitiveInstance, "api" | "get" | "types"> & {
+    api: KnobApi;
+    get: () => KnobState;
+    types: {
+      api: KnobApi;
+      options: KnobPrimitiveOptions;
+      slots: KnobSlots;
+      state: KnobState;
+    };
+  };
+}
+
+export const knob: KnobPrimitive = definePrimitive({
   agent: { actions: ["setValue"] },
   api: (context) => {
     const change = createChange(context);
@@ -356,6 +429,3 @@ export const knob = definePrimitive({
       ? { name: options.name }
       : { name: options.name, value: options.value },
 });
-
-// Their names let the declaration of `knob` refer to the kernel's own types.
-export type { Primitive, SlotDefinition } from "@ui-sdk/core";
