@@ -12,6 +12,7 @@
     "piano-ui-sdk",
     "sequencer-ui-sdk",
     "plot-ui-sdk",
+    "waveform-ui-sdk",
     "[Component catalog](/components)"
   ]
 }
