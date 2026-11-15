@@ -6,6 +6,7 @@ export default defineConfig({
   entry: {
     plot: "src/plot/index.ts",
     waveform: "src/waveform/index.ts",
+    timeline: "src/timeline/index.ts",
     sequencer: "src/sequencer/index.ts",
     piano: "src/piano/index.ts",
     pad: "src/pad/index.ts",
