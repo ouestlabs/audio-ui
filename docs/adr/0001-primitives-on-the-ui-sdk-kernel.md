@@ -36,4 +36,5 @@ What the spike showed:
 - The Timeline and the PianoRoll are the largest Primitives and need their own spike on `createSpans` (several selected clips moved together, a zoom that changes the grid, fades, the loop region) before they move.
 - Where an adapter's source lives (the registry, which users copy) and where the suite that drives it runs.
 - Solid, Safari and Firefox, and a slow device, were not tried.
+- Installation was tried in three empty projects (Vite React, Vite Vue, SvelteKit) with each framework's CLI. The code runs in all three; **without the declarations, a TypeScript project fails to typecheck** (`@audio-ui/primitives/knob` has no types, so every part is an error), which makes the declarations a blocker for a release.
 - Declarations: `tsc` cannot emit `knob`'s type, which names kernel types its entry does not export (`BaseSlotProps`, `Feature`, `SlotProps`, `Listener`). `@audio-ui/primitives` builds its JavaScript only until that is settled with the kernel's authors or by a hand-written type.

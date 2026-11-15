@@ -310,6 +310,9 @@ test("icons are string literals, so the shadcn CLI can turn them into imports", 
   expect(expressions).toEqual([]);
 });
 
+/** `name@version` declares `name`. */
+const VERSION_SUFFIX = /(.)@.*$/;
+
 /** `@scope/pkg/sub` or `pkg/sub` to the name npm installs. */
 function packageOf(specifier: string) {
   const [first = "", second = ""] = specifier.split("/");
@@ -322,7 +325,7 @@ test("every package a registry file imports is declared by it or by what it inst
     const declared = new Set<string>();
     for (const name of withDependencies(item.name ?? "")) {
       for (const dependency of byName.get(name)?.dependencies ?? []) {
-        declared.add(dependency);
+        declared.add(packageOf(dependency.replace(VERSION_SUFFIX, "$1")));
       }
     }
     for (const file of item.files ?? []) {
@@ -359,11 +362,18 @@ test("every item says what it is", () => {
 
 test("no item pins the version of a package it asks for", () => {
   // The user's own range decides: the CLI installs what is missing and leaves
-  // a version an app already has, and the docs say how to update it.
+  // a version an app already has, and the docs say how to update it. The UI
+  // SDK is the exception while it is a beta: npm's `latest` is an older beta
+  // than the one the primitives are written for, so a bare name installs the
+  // wrong kernel.
   expect(
     items.flatMap((item) =>
       (item.dependencies ?? [])
-        .filter((dependency) => PINNED_DEPENDENCY.test(dependency))
+        .filter(
+          (dependency) =>
+            PINNED_DEPENDENCY.test(dependency) &&
+            !dependency.startsWith("@ui-sdk/")
+        )
         .map((dependency) => `${item.name}: ${dependency}`)
     )
   ).toEqual([]);
