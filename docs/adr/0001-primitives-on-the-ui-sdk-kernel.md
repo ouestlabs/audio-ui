@@ -36,3 +36,4 @@ What the spike showed:
 - The Timeline and the PianoRoll are the largest Primitives and need their own spike on `createSpans` (several selected clips moved together, a zoom that changes the grid, fades, the loop region) before they move.
 - Where an adapter's source lives (the registry, which users copy) and where the suite that drives it runs.
 - Solid, Safari and Firefox, and a slow device, were not tried.
+- Declarations: `tsc` cannot emit `knob`'s type, which names kernel types its entry does not export (`BaseSlotProps`, `Feature`, `SlotProps`, `Listener`). `@audio-ui/primitives` builds its JavaScript only until that is settled with the kernel's authors or by a hand-written type.

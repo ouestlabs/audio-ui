@@ -278,7 +278,7 @@
     },
     "packages/engine": {
       "name": "@audio-ui/engine",
-      "version": "0.13.1",
+      "version": "0.15.0",
       "dependencies": {
         "@audio-ui/core": "^0.29.1",
         "@audio/beat-detect": "1.1.0",
@@ -361,7 +361,7 @@
     },
     "packages/gl": {
       "name": "@audio-ui/gl",
-      "version": "0.3.1",
+      "version": "0.5.0",
       "dependencies": {
         "gl-spectrogram": "2.4.0",
         "gl-waveform": "5.3.0",
@@ -391,9 +391,26 @@
         "react",
       ],
     },
+    "packages/primitives": {
+      "name": "@audio-ui/primitives",
+      "version": "0.0.0",
+      "dependencies": {
+        "@audio-ui/core": "workspace:*",
+      },
+      "devDependencies": {
+        "@happy-dom/global-registrator": "^21.0.4",
+        "@types/bun": "1.4.2",
+        "@ui-sdk/core": "0.1.0-beta.5",
+        "tsup": "^8.5.0",
+        "typescript": "^7.0.2",
+      },
+      "peerDependencies": {
+        "@ui-sdk/core": "0.1.0-beta.5",
+      },
+    },
     "packages/react": {
       "name": "@audio-ui/react",
-      "version": "0.16.0",
+      "version": "0.16.2",
       "dependencies": {
         "@audio-ui/core": "^0.29.0",
       },
@@ -528,6 +545,8 @@
     "@audio-ui/gl": ["@audio-ui/gl@workspace:packages/gl"],
 
     "@audio-ui/icons": ["@audio-ui/icons@workspace:packages/icons"],
+
+    "@audio-ui/primitives": ["@audio-ui/primitives@workspace:packages/primitives"],
 
     "@audio-ui/react": ["@audio-ui/react@workspace:packages/react"],
 
@@ -1884,6 +1903,8 @@
     "@typescript/typescript-win32-arm64": ["@typescript/typescript-win32-arm64@7.0.2", "", { "os": "win32", "cpu": "arm64" }, "sha512-Gyl1Vy6OsWesLzmq+EP0Fb7b4Nid5232AvcA2SFcdYreldpNtYFFofPjnt62y9hQy7VTaZp65ICJjuAQRaVcIQ=="],
 
     "@typescript/typescript-win32-x64": ["@typescript/typescript-win32-x64@7.0.2", "", { "os": "win32", "cpu": "x64" }, "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g=="],
+
+    "@ui-sdk/core": ["@ui-sdk/core@0.1.0-beta.5", "", {}, "sha512-dmunrxWrZ+vwldKJ6THQNYyyfbLFY6K82hBvIZSnuGwpEQmXKmM0iuANgGXtaqw8unSB2p9E5s3y7zfE9rgP6Q=="],
 
     "@ungap/structured-clone": ["@ungap/structured-clone@1.4.0", "", {}, "sha512-1mEZtMKPM09vDmQt5y7YvmN2+DFTP7Tg0EWXdic8/C6VRnpb33e4ghisCIE3WZjsE2N8mf+QV1Zqh7ZFYLWInQ=="],
 

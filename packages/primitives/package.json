@@ -1,0 +1,43 @@
+{
+  "name": "@audio-ui/primitives",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The behavior of audio/ui's primitives, written once on the UI SDK kernel: a knob, a meter, a timeline. Each framework renders it with a thin adapter.",
+  "license": "MIT",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./knob": {
+      "types": "./dist/knob/index.d.ts",
+      "import": "./dist/knob.js"
+    }
+  },
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build:pkg": "bunx --bun tsup",
+    "clean": "rm -rf dist node_modules .turbo",
+    "lint": "biome check --write .",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@audio-ui/core": "workspace:*"
+  },
+  "devDependencies": {
+    "@happy-dom/global-registrator": "^21.0.4",
+    "@types/bun": "1.4.2",
+    "@ui-sdk/core": "0.1.0-beta.5",
+    "tsup": "^8.5.0",
+    "typescript": "^7.0.2"
+  },
+  "peerDependencies": {
+    "@ui-sdk/core": "0.1.0-beta.5"
+  }
+}
