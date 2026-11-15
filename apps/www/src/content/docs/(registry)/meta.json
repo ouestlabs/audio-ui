@@ -8,6 +8,9 @@
     "xypad-ui-sdk",
     "meter-ui-sdk",
     "envelope-ui-sdk",
+    "pad-ui-sdk",
+    "piano-ui-sdk",
+    "sequencer-ui-sdk",
     "[Component catalog](/components)"
   ]
 }

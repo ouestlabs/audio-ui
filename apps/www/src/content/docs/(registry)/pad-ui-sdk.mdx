@@ -1,0 +1,200 @@
+---
+title: Pad grid on the UI SDK
+description: "The drum pad grid written once and rendered in React, Vue, Svelte and custom elements: install each adapter with its framework's CLI, the parts, strikes and velocity, choke groups, and the differences from the React one."
+---
+
+The pad grid's behavior is one description, `pad` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. A pad sounds while it is held, by pointer or from the keyboard. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is not published yet: this page describes what the next release installs. The [knob](/docs/knob-ui-sdk), the [fader](/docs/fader-ui-sdk), the [XY pad](/docs/xypad-ui-sdk), the [meter](/docs/meter-ui-sdk) and the [envelope](/docs/envelope-ui-sdk) are built the same way.
+
+## Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/pad-react
+```
+
+One file, `components/audio-ui/pad/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/pad-vue.json
+```
+
+One file, `components/audio-ui/pad/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/pad-svelte.json
+```
+
+Two files in `components/audio-ui/pad/svelte/`: `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/knob-ui-sdk#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/pad-web.json
+```
+
+One file, `components/audio-ui/pad/web.ts`. Import it once, and it registers the `audio-ui-pad` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+## Usage
+
+A Root groups the pads, and an Item is one pad, a `<button>` identified by its `value`. Write an Item for each pad, in reading order: the order they have in the document is the order the arrow keys walk.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import { Pad } from "@/components/audio-ui/pad/react";
+
+const KIT = ["Kick", "Snare", "Hat", "Clap"];
+
+export function Drums({ play }: { play: (name: string, velocity: number) => void }) {
+  return (
+    <Pad.Root className="grid grid-cols-2 gap-2" columns={2} onPadOn={(value, { velocity }) => play(value, velocity)}>
+      {KIT.map((name) => (
+        <Pad.Item className="size-20 rounded-md bg-muted data-active:bg-primary" key={name} value={name}>
+          {name}
+        </Pad.Item>
+      ))}
+    </Pad.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { Pad } from "@/components/audio-ui/pad/vue";
+
+const kit = ["Kick", "Snare", "Hat", "Clap"];
+const emit = defineEmits<{ play: [name: string, velocity: number] }>();
+</script>
+
+<template>
+  <Pad.Root class="grid grid-cols-2 gap-2" :columns="2" @pad-on="(value, { velocity }) => emit('play', value, velocity)">
+    <Pad.Item v-for="name in kit" :key="name" :value="name" class="size-20 rounded-md bg-muted data-active:bg-primary">
+      {{ name }}
+    </Pad.Item>
+  </Pad.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { Pad } from "$lib/components/audio-ui/pad/svelte";
+
+  const kit = ["Kick", "Snare", "Hat", "Clap"];
+  let { play }: { play: (name: string, velocity: number) => void } = $props();
+</script>
+
+<Pad.Root class="grid grid-cols-2 gap-2" columns={2} onPadOn={(value, { velocity }) => play(value, velocity)}>
+  {#each kit as name (name)}
+    <Pad.Item class="size-20 rounded-md bg-muted data-active:bg-primary" value={name}>{name}</Pad.Item>
+  {/each}
+</Pad.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-pad columns="2">
+  <audio-ui-pad-item value="Kick"><button>Kick</button></audio-ui-pad-item>
+  <audio-ui-pad-item value="Snare"><button>Snare</button></audio-ui-pad-item>
+  <audio-ui-pad-item value="Hat"><button>Hat</button></audio-ui-pad-item>
+  <audio-ui-pad-item value="Clap"><button>Clap</button></audio-ui-pad-item>
+</audio-ui-pad>
+
+<script type="module">
+  import "./audio-ui/pad/web.ts";
+
+  const grid = document.querySelector("audio-ui-pad");
+  grid.addEventListener("padon", (event) => play(event.detail.value, event.detail.velocity));
+</script>
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+On a custom element, an Item wraps the button: the button inside it is the pad. The two callbacks are the `padon` and `padoff` events.
+
+## Interaction
+
+- A press strikes the pad and holds it until the pointer is released. Each pointer holds its own pad, so several can sound at once on a touch screen.
+- A strike is harder where a pen or screen presses harder, or else toward the top of the pad, from 0.25 to 1. Enter and Space strike at 0.8, until the key is released or the pad loses focus.
+- The pads are one tab stop. Left and Right walk them in reading order, Up and Down by a row of `columns`, Home and End go to the ends. A disabled pad is stepped over.
+
+## Options
+
+Set on the Root, as props (an attribute in kebab case on the custom element).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `columns` | `number` | `4` | How many pads a row holds: what the up and down arrows move by. Lay the grid out to match. |
+| `activePads` | `string[]` | | Pads lit from elsewhere, such as a sequencer or a MIDI input, on top of the ones held here. |
+| `disabled` | `boolean` | `false` | Strikes nothing. |
+| `onPadOn` | `(value, details) => void` | | A pad is struck. `details.cancel()` keeps it silent. |
+| `onPadOff` | `(value, details) => void` | | A pad is released, loses focus while held, or is choked. |
+
+An Item takes its `value`, a `disabled`, and a `chokeGroup`: pads that share one stop each other, so striking one stops the last one struck, held or still ringing, as an open and a closed hi-hat do.
+
+## What a strike reports
+
+- `onPadOn` gets `velocity` from 0 to 1, a `reason` (`"press"` or `"keyboard"`), a `source` (`"mouse"`, `"touch"`, `"pen"` or `"keyboard"`) and the `event`.
+- `onPadOff` gets a `reason`: `"press"`, `"keyboard"`, or `"choke"` when another pad of its group cut it.
+
+## States to style from
+
+- `data-active` on a pad while it sounds, held here or listed in `activePads`, and `data-disabled` on the Root and the pads.
+- `--pad-velocity` on a pad, from 0 to 1: how hard it was last struck, for a flash that follows the force.
+
+## Differences from the React pad of `@audio-ui/react`
+
+The behavior and the `data-*` state attributes are the same. These differ:
+
+- Every part carries a `data-slot` attribute, such as `pad-item`.
+- A strike reports a `source`.
+- On custom elements the callbacks are the `padon` and `padoff` events.
