@@ -1,7 +1,11 @@
 export {
+  type ChangeDetails,
+  type CommitDetails,
+  VISUALLY_HIDDEN,
+} from "../shared.ts";
+export {
   type ArcState,
   arcOf,
-  type ChangeDetails,
   indicatorSpan,
   type KnobApi,
   type KnobPrimitive,
@@ -10,5 +14,4 @@ export {
   type KnobSlots,
   type KnobState,
   knob,
-  VISUALLY_HIDDEN,
 } from "./knob.ts";

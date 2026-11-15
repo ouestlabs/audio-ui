@@ -10,11 +10,8 @@ import {
   SWEEP_ANGLE,
 } from "@audio-ui/core/knob";
 import {
-  type ChangeSource,
-  createChange,
   css,
   definePrimitive,
-  dispatch,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
@@ -32,22 +29,12 @@ import {
  * so the server writes it, custom elements from the knob's root.
  */
 
-export interface ChangeDetails {
-  cancel: () => void;
-  event?: Event;
-  reason: string;
-  source?: string;
-}
-
 export interface KnobPrimitiveOptions
   extends Omit<KnobOptions, "onValueChange" | "onValueCommitted"> {
   /** The form field's name, which the native input carries. */
   name?: string;
   onValueChange?: (value: number, details: ChangeDetails) => void;
-  onValueCommitted?: (
-    value: number,
-    details: { event?: Event; reason: string }
-  ) => void;
+  onValueCommitted?: (value: number, details: CommitDetails) => void;
 }
 
 export interface KnobState {
@@ -60,33 +47,19 @@ export interface KnobState {
   view: KnobSnapshot;
 }
 
+import {
+  type ChangeDetails,
+  type CommitDetails,
+  connectController,
+  flag,
+  VISUALLY_HIDDEN,
+} from "../shared.ts";
+
 /** What a knob with these options shows before anything moves it. */
 function viewOf(options: KnobPrimitiveOptions): KnobSnapshot {
   const controller = createKnobController();
   controller.setOptions(options as KnobOptions);
   return controller.getSnapshot();
-}
-
-const flag = (on: boolean) => (on ? "" : undefined);
-
-/**
- * How a change of ours came about, when its event says. UI SDK reads it from
- * its own reasons, which ours aren't, or from input it tracks once asked, so
- * the first interaction would report "programmatic". Without such an event,
- * UI SDK decides, and an agent's change stays the agent's.
- */
-function sourceOf(event?: Event): ChangeSource | undefined {
-  if (typeof PointerEvent !== "undefined" && event instanceof PointerEvent) {
-    return event.pointerType === "touch" || event.pointerType === "pen"
-      ? event.pointerType
-      : "mouse";
-  }
-  if (event instanceof KeyboardEvent) {
-    return "keyboard";
-  }
-  if (event instanceof WheelEvent) {
-    return "mouse";
-  }
 }
 
 /** The state attributes every part carries, as the published knob writes them. */
@@ -135,18 +108,6 @@ export const indicatorSpan = (view: KnobSnapshot) =>
     Math.min(view.anchorPercent, view.percent),
     Math.max(view.anchorPercent, view.percent),
   ] as const;
-
-export const VISUALLY_HIDDEN = {
-  border: "0",
-  "clip-path": "inset(50%)",
-  height: "1px",
-  margin: "-1px",
-  overflow: "hidden",
-  padding: "0",
-  position: "absolute",
-  "white-space": "nowrap",
-  width: "1px",
-};
 
 /** What a knob's `api` gives an adapter. */
 export interface KnobApi {
@@ -221,51 +182,8 @@ export interface KnobPrimitive {
 export const knob: KnobPrimitive = definePrimitive({
   agent: { actions: ["setValue"] },
   api: (context) => {
-    const change = createChange(context);
     const controller: KnobController = createKnobController();
-    let configuredValue: number | undefined;
-    const configure = () => {
-      const options = context.options() as KnobPrimitiveOptions;
-      configuredValue = context.store.get().value;
-      controller.setOptions({
-        ...options,
-        // The controller always works controlled: the kernel holds the value.
-        onValueChange: (value, details) => {
-          const source = sourceOf(details.event);
-          const accepted = change("value", value, {
-            event: details.event,
-            reason: details.reason,
-            ...(source ? { source } : {}),
-          });
-          if (!accepted) {
-            details.cancel();
-          }
-        },
-        onValueCommitted: (value, details) => {
-          dispatch(context, "onValueCommitted", value, {
-            event: details.event,
-            reason: details.reason,
-          });
-        },
-        value: configuredValue,
-      } as KnobOptions);
-      // The controller tells no one of new options: the parts read its snapshot here.
-      context.store.set({ view: controller.getSnapshot() });
-    };
-    configure();
-    context.onOptions(configure);
-    context.onDestroy(
-      context.store.subscribe(() => {
-        if (context.store.get().value !== configuredValue) {
-          configure();
-        }
-      })
-    );
-    context.onDestroy(
-      controller.subscribe(() =>
-        context.store.set({ view: controller.getSnapshot() })
-      )
-    );
+    connectController(context, controller);
     return {
       controller,
       /** Moves the knob to `value` from outside, as a property does: no change is reported. */

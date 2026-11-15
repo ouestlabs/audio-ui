@@ -11,6 +11,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./fader": {
+      "types": "./dist/fader/index.d.ts",
+      "import": "./dist/fader.js"
+    },
+    "./xypad": {
+      "types": "./dist/xypad/index.d.ts",
+      "import": "./dist/xypad.js"
+    },
     "./knob": {
       "types": "./dist/knob/index.d.ts",
       "import": "./dist/knob.js"
