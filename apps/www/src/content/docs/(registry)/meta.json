@@ -6,6 +6,7 @@
     "knob-ui-sdk",
     "fader-ui-sdk",
     "xypad-ui-sdk",
+    "meter-ui-sdk",
     "[Component catalog](/components)"
   ]
 }
