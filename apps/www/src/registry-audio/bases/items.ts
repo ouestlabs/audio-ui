@@ -165,3 +165,45 @@ export function movedItem(name: string, module: string): RegistryItem {
     type: "registry:lib",
   };
 }
+
+/** The frameworks a primitive is rendered in, with the files each one installs. */
+export interface PrimitiveFramework {
+  /** The npm packages its files import, besides the primitive's. */
+  dependencies: string[];
+  /** Its files, relative to the primitive's folder in `primitives/<name>/`. */
+  files: string[];
+  name: "react" | "svelte" | "vue" | "web";
+}
+
+/**
+ * A primitive as the registry ships it: one item per framework,
+ * `<name>-<framework>`, from the adapter files in `primitives/<name>/`. Each
+ * installs to `components/audio-ui/<name>/`, and the behavior it renders comes
+ * from `@audio-ui/primitives` over the UI SDK kernel, so the user owns only
+ * the thin adapter.
+ */
+export function primitiveItems(
+  name: string,
+  frameworks: PrimitiveFramework[],
+  description: string
+): RegistryItem[] {
+  return frameworks.map((framework) => ({
+    categories: ["primitive", framework.name],
+    dependencies: [
+      "@audio-ui/primitives",
+      "@ui-sdk/core",
+      ...framework.dependencies,
+    ],
+    description: `${description} Its ${framework.name} adapter.`,
+    files: framework.files.map((file) =>
+      fileOf(
+        `primitives/${name}/${file}`,
+        "registry:ui",
+        `components/audio-ui/${name}/${file}`
+      )
+    ),
+    name: `${name}-${framework.name}`,
+    registryDependencies: [],
+    type: "registry:ui",
+  }));
+}

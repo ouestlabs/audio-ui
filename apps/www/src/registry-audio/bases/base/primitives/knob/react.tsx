@@ -1,5 +1,3 @@
-"use client";
-
 import { DEFAULT_ARC_STROKE_WIDTH } from "@audio-ui/core/knob";
 import {
   type ArcState,
