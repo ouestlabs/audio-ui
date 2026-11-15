@@ -13,6 +13,7 @@
     "sequencer-ui-sdk",
     "plot-ui-sdk",
     "waveform-ui-sdk",
+    "timeline-ui-sdk",
     "[Component catalog](/components)"
   ]
 }
