@@ -234,4 +234,32 @@ export const primitives: RegistryItem[] = [
     ],
     "A plot of values over two axes: curves, live traces, lines, bands, a grid with its labels, dots and draggable handles with a native input each, and a cursor that reads the value under the pointer."
   ),
+  ...primitiveItems(
+    "waveform",
+    [
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react.tsx"],
+        name: "react",
+      },
+      {
+        dependencies: ["@ui-sdk/vue", "vue"],
+        files: ["vue.ts"],
+        name: "vue",
+      },
+      {
+        dependencies: ["@ui-sdk/svelte", "svelte"],
+        files: [
+          "svelte/Bars.svelte",
+          "svelte/Control.svelte",
+          "svelte/RegionHandle.svelte",
+          "svelte/index.ts",
+          "svelte/parts.ts",
+        ],
+        name: "svelte",
+      },
+      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+    ],
+    "A waveform of audio: bars or a canvas drawn from peaks or a live signal, a seekable control with a native input, a playhead and thumb that follow a live position, a hover readout, markers, and named regions with draggable edges."
+  ),
 ];

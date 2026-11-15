@@ -91,6 +91,25 @@ export {
   type VelocityState,
 } from "./sequencer/index.ts";
 export {
+  type BarPublicState,
+  type BarsProps,
+  type CanvasProps,
+  type DescribeValue,
+  type LevelsSource,
+  type PositionSource,
+  type RegionChangeDetails,
+  type RegionCommitDetails,
+  type RegionProps,
+  type RegionPublicState,
+  type WaveformApi,
+  type WaveformPrimitive,
+  type WaveformPrimitiveOptions,
+  type WaveformPublicState,
+  type WaveformSlots,
+  type WaveformState,
+  waveform,
+} from "./waveform/index.ts";
+export {
   type XYPadApi,
   type XYPadPrimitive,
   type XYPadPrimitiveOptions,

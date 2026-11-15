@@ -13,6 +13,7 @@ import { Pad } from "@/registry-audio/bases/base/primitives/pad/react.tsx";
 import { Piano } from "@/registry-audio/bases/base/primitives/piano/react.tsx";
 import { Plot } from "@/registry-audio/bases/base/primitives/plot/react.tsx";
 import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/react.tsx";
+import { Waveform } from "@/registry-audio/bases/base/primitives/waveform/react.tsx";
 import { XYPad } from "@/registry-audio/bases/base/primitives/xypad/react.tsx";
 import { XYPad as VueXYPad } from "@/registry-audio/bases/base/primitives/xypad/vue.ts";
 
@@ -245,5 +246,19 @@ describe("server rendering of the fader and the XY pad", () => {
     expect(html).toContain('data-slot="plot-grid"');
     expect(html.match(/type="range"/g)).toHaveLength(2);
     expect(html).toContain('aria-label="Cutoff');
+  });
+
+  test("the waveform writes its position, its input and its bars, in React", () => {
+    const html = renderToString(
+      <Waveform.Root duration={100} value={25}>
+        <Waveform.Control aria-label="Position" />
+        <Waveform.Playhead />
+        <Waveform.Bars count={4} />
+      </Waveform.Root>
+    );
+    expect(html).toContain("--waveform-position:25%");
+    expect(html).toContain('aria-valuetext="25%"');
+    expect(html).toContain('aria-label="Position"');
+    expect(html.match(/data-slot="waveform-bar"/g)).toHaveLength(4);
   });
 });

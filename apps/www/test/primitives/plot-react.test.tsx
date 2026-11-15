@@ -13,7 +13,9 @@ plotSuite("React", async (tree) => {
         {tree.band ? <Plot.Band {...tree.band} /> : null}
         {tree.curve ? <Plot.Curve {...tree.curve} /> : null}
         {tree.line ? <Plot.Line {...tree.line} /> : null}
-        {tree.trace ? <Plot.Trace {...(tree.trace as never as { source: never })} /> : null}
+        {tree.trace ? (
+          <Plot.Trace {...(tree.trace as never as { source: never })} />
+        ) : null}
         {tree.mark ? <Plot.Mark {...tree.mark} /> : null}
         {tree.dot ? <Plot.Dot {...(tree.dot as object)} /> : null}
         {tree.handle ? (

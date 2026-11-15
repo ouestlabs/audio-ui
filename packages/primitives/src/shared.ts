@@ -81,7 +81,11 @@ export interface HeldState<Value, Snapshot> {
  */
 export function connectController<Value, Snapshot>(
   context: PrimitiveContext<any, HeldState<Value, Snapshot> & object, any>,
-  controller: Controller<Value, Snapshot>
+  controller: Controller<Value, Snapshot>,
+  /** Fills in what the controller needs of the options the app left out. */
+  adjust: (options: Record<string, unknown>) => Record<string, unknown> = (
+    options
+  ) => options
 ) {
   const change = createChange(context);
   let configuredValue: Value | undefined;
@@ -89,7 +93,7 @@ export function connectController<Value, Snapshot>(
     const options = context.options() as Record<string, unknown>;
     configuredValue = context.store.get().value;
     (controller.setOptions as (options: unknown) => void)({
-      ...options,
+      ...adjust(options),
       onValueChange: (
         value: Value,
         details: {
