@@ -1,4 +1,16 @@
 export {
+  type EnvelopeApi,
+  type EnvelopePrimitive,
+  type EnvelopePrimitiveOptions,
+  type EnvelopePublicState,
+  type EnvelopeSlots,
+  type EnvelopeState,
+  envelope,
+  type PointState,
+  type SegmentState,
+  type ShapeState,
+} from "./envelope/index.ts";
+export {
   type FaderApi,
   type FaderPrimitive,
   type FaderPrimitiveOptions,

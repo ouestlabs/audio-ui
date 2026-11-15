@@ -12,6 +12,8 @@ export const flag = (on: boolean) => (on ? "" : undefined);
 export interface ChangeDetails {
   cancel: () => void;
   event?: Event;
+  /** The point or segment that moved, for a control that has several. */
+  index?: number;
   reason: string;
   source?: string;
 }
@@ -19,6 +21,7 @@ export interface ChangeDetails {
 /** What a commit reports to `onValueCommitted`, beside the value. */
 export interface CommitDetails {
   event?: Event;
+  index?: number;
   reason: string;
 }
 
@@ -89,11 +92,18 @@ export function connectController<Value, Snapshot>(
       ...options,
       onValueChange: (
         value: Value,
-        details: { cancel: () => void; event?: Event; reason: string }
+        details: {
+          cancel: () => void;
+          event?: Event;
+          index?: number;
+          reason: string;
+        }
       ) => {
         const source = sourceOf(details.event);
         const accepted = change("value", value, {
           event: details.event,
+          // Which point or segment moved, for a control with several.
+          ...(details.index === undefined ? {} : { index: details.index }),
           reason: details.reason,
           ...(source ? { source } : {}),
         } as never);
@@ -103,10 +113,11 @@ export function connectController<Value, Snapshot>(
       },
       onValueCommitted: (
         value: Value,
-        details: { event?: Event; reason: string }
+        details: { event?: Event; index?: number; reason: string }
       ) => {
         dispatch(context, "onValueCommitted", value, {
           event: details.event,
+          ...(details.index === undefined ? {} : { index: details.index }),
           reason: details.reason,
         });
       },
