@@ -1,4 +1,9 @@
 {
   "title": "Registry",
-  "pages": ["registry", "styling", "[Component catalog](/components)"]
+  "pages": [
+    "registry",
+    "styling",
+    "knob-ui-sdk",
+    "[Component catalog](/components)"
+  ]
 }
