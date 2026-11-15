@@ -9,6 +9,7 @@ import { Fader } from "@/registry-audio/bases/base/primitives/fader/react.tsx";
 import { Fader as VueFader } from "@/registry-audio/bases/base/primitives/fader/vue.ts";
 import { Meter } from "@/registry-audio/bases/base/primitives/meter/react.tsx";
 import { Meter as VueMeter } from "@/registry-audio/bases/base/primitives/meter/vue.ts";
+import { Pad } from "@/registry-audio/bases/base/primitives/pad/react.tsx";
 import { XYPad } from "@/registry-audio/bases/base/primitives/xypad/react.tsx";
 import { XYPad as VueXYPad } from "@/registry-audio/bases/base/primitives/xypad/vue.ts";
 
@@ -173,5 +174,17 @@ describe("server rendering of the fader and the XY pad", () => {
       })
     );
     expect(markup(vue)).toEqual(expected);
+  });
+
+  test("the pad grid writes its buttons with one tab stop, in React", () => {
+    const html = renderToString(
+      <Pad.Root activePads={["snare"]} columns={2}>
+        <Pad.Item value="kick">Kick</Pad.Item>
+        <Pad.Item value="snare">Snare</Pad.Item>
+      </Pad.Root>
+    );
+    expect(html.match(/<button/g)).toHaveLength(2);
+    expect(html).toContain('role="group"');
+    expect(html.match(/data-active/g)).toHaveLength(1);
   });
 });

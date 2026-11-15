@@ -31,6 +31,18 @@ export {
   meter,
 } from "./meter/index.ts";
 export {
+  type PadApi,
+  type PadItemState,
+  type PadOffDetails,
+  type PadOnDetails,
+  type PadPrimitive,
+  type PadPrimitiveOptions,
+  type PadRootState,
+  type PadSlots,
+  type PadState,
+  pad,
+} from "./pad/index.ts";
+export {
   type XYPadApi,
   type XYPadPrimitive,
   type XYPadPrimitiveOptions,

@@ -134,4 +134,22 @@ export const primitives: RegistryItem[] = [
     ],
     "A breakpoint envelope editor, such as an ADSR shape or an automation curve: points to drag, add and remove, segments to bend, a grid to snap to, and the point's index in each change."
   ),
+  ...primitiveItems(
+    "pad",
+    [
+      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/vue", "vue"],
+        files: ["vue.ts"],
+        name: "vue",
+      },
+      {
+        dependencies: ["@ui-sdk/svelte", "svelte"],
+        files: ["svelte/index.ts", "svelte/parts.ts"],
+        name: "svelte",
+      },
+      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+    ],
+    "A grid of pads to strike, for drums and samples: each sounds while held, by pointer or keyboard, harder where it is pressed, with choke groups, several pointers at once, and the grid as one tab stop."
+  ),
 ];

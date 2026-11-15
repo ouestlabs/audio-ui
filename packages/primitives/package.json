@@ -23,6 +23,10 @@
       "types": "./dist/meter/index.d.ts",
       "import": "./dist/meter.js"
     },
+    "./pad": {
+      "types": "./dist/pad/index.d.ts",
+      "import": "./dist/pad.js"
+    },
     "./xypad": {
       "types": "./dist/xypad/index.d.ts",
       "import": "./dist/xypad.js"
