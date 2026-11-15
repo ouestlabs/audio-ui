@@ -187,6 +187,7 @@ Each primitive has a page in React (`react/<primitive>.mdx`, headed by `<Module 
    (cd packages/elements && bunx tsc --noEmit && bun test && bun run registers)
    ```
    For `apps/www`: `bun run typecheck` and `bun test`.
+   For the primitives written on the UI SDK kernel (`packages/primitives`): `bun test` there, and `bun run test:primitives` in `apps/www`, which drives the same scenarios against the adapters of React, Vue, Svelte and custom elements in `registry-audio/bases/base/primitives/`. It runs apart from `bun test` because Svelte needs its browser build.
 4. For UI changes, look at the page in a browser (dev server on :4000) and tab through the controls.
 
 ---

@@ -87,6 +87,14 @@ jobs:
         working-directory: packages/elements
         run: bun run registers
 
+      - name: Test primitives
+        working-directory: packages/primitives
+        run: bun test
+
+      - name: Primitives in React, Vue, Svelte and custom elements
+        working-directory: apps/www
+        run: bun run test:primitives
+
       - name: Typecheck www
         working-directory: apps/www
         run: bun run typecheck

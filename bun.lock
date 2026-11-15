@@ -139,6 +139,7 @@
         "@audio-ui/engine": "*",
         "@audio-ui/gl": "*",
         "@audio-ui/icons": "*",
+        "@audio-ui/primitives": "*",
         "@audio-ui/react": "*",
         "@audio/dynamics-compand": "catalog:",
         "@audio/dynamics-compressor": "catalog:",
@@ -231,15 +232,22 @@
         "@types/node": "catalog:",
         "@types/react": "catalog:",
         "@types/react-dom": "catalog:",
+        "@ui-sdk/core": "0.1.0-beta.5",
+        "@ui-sdk/react": "0.1.0-beta.5",
+        "@ui-sdk/svelte": "0.1.0-beta.5",
+        "@ui-sdk/vue": "0.1.0-beta.5",
+        "@ui-sdk/web": "0.1.0-beta.5",
         "@vitejs/plugin-react": "catalog:",
         "chokidar": "^5.0.0",
         "playwright-core": "1.64.0",
         "satori": "catalog:",
         "shadcn": "catalog:",
+        "svelte": "^5.57.3",
         "tailwindcss": "catalog:",
         "tw-animate-css": "catalog:",
         "typescript": "catalog:",
         "vite": "catalog:",
+        "vue": "^3.5.45",
         "wrangler": "catalog:",
       },
     },
@@ -1905,6 +1913,14 @@
     "@typescript/typescript-win32-x64": ["@typescript/typescript-win32-x64@7.0.2", "", { "os": "win32", "cpu": "x64" }, "sha512-0BQ3HkAHHlKLSp1qRvf3SUhGpGsDuhB/jgFw75guyqbxJqEaS0Cw/VFO8i2nHglJUzQCRtMMR/IBAKE3ETMC4g=="],
 
     "@ui-sdk/core": ["@ui-sdk/core@0.1.0-beta.5", "", {}, "sha512-dmunrxWrZ+vwldKJ6THQNYyyfbLFY6K82hBvIZSnuGwpEQmXKmM0iuANgGXtaqw8unSB2p9E5s3y7zfE9rgP6Q=="],
+
+    "@ui-sdk/react": ["@ui-sdk/react@0.1.0-beta.5", "", { "peerDependencies": { "@types/react": ">=19.2.10", "@ui-sdk/core": "^0.1.0-beta.5", "react": ">=19", "react-dom": ">=19" }, "optionalPeers": ["@types/react"] }, "sha512-Zfvl94ulACX511lQKQDnK7wVjhYUYsR5LLnCZ800NzQ3983TxZasHxXyC+KYNlvppkYfpELPlAbVslsSIGQ9/A=="],
+
+    "@ui-sdk/svelte": ["@ui-sdk/svelte@0.1.0-beta.5", "", { "peerDependencies": { "@ui-sdk/core": "^0.1.0-beta.5", "svelte": ">=5.33" } }, "sha512-gz0LY7ETpq3KpGyUcrJAG/avwfEij0n+FNGb2igtpZLVWiqWibZPicW7ugAbdLCTjB8asVgNtlj+hHyMLbbkCw=="],
+
+    "@ui-sdk/vue": ["@ui-sdk/vue@0.1.0-beta.5", "", { "peerDependencies": { "@nuxt/kit": "^4.0.0 || ^5.0.0-0", "@nuxt/schema": "^4.0.0 || ^5.0.0-0", "@ui-sdk/core": "^0.1.0-beta.5", "nuxt": "^4.0.0 || ^5.0.0-0", "vue": ">=3.5" }, "optionalPeers": ["@nuxt/kit", "@nuxt/schema", "nuxt"] }, "sha512-nt7DzUYByRAKABHEWWFzRQbkTDofE7yndq2QaSiMC1itTmmoucpVYZrDZqCpqRCHy4L6TTG+S83XUEk7nA463Q=="],
+
+    "@ui-sdk/web": ["@ui-sdk/web@0.1.0-beta.5", "", { "peerDependencies": { "@ui-sdk/core": "^0.1.0-beta.5" } }, "sha512-Ufgux0iewhxAA1bmxTZB0EI3fqZPnV5cJpUKxG79d3peXgQTYnblvUIRnChDVyfmYHL3w55fBeM6J+5yAr6zTg=="],
 
     "@ungap/structured-clone": ["@ungap/structured-clone@1.4.0", "", {}, "sha512-1mEZtMKPM09vDmQt5y7YvmN2+DFTP7Tg0EWXdic8/C6VRnpb33e4ghisCIE3WZjsE2N8mf+QV1Zqh7ZFYLWInQ=="],
 
