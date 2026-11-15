@@ -1,14 +1,20 @@
+import { type FadeShape, fadeGain } from "@audio-ui/core/timeline";
 import { timeline } from "@audio-ui/primitives/timeline";
 import { createParts } from "@ui-sdk/web";
 
 /** Adds the part `tag` holding a native input to `owner`, with the names the owner was given. */
-function addInput(owner: HTMLElement, tag: string, track?: string | null) {
+function addInput(
+  owner: HTMLElement,
+  tag: string,
+  name?: string | null,
+  by = "track"
+) {
   if (owner.querySelector("input")) {
     return;
   }
   const part = document.createElement(tag);
-  if (track) {
-    part.setAttribute("track", track);
+  if (name) {
+    part.setAttribute(by, name);
   }
   const input = document.createElement("input");
   for (const name of [
@@ -39,6 +45,65 @@ function nameMark(mark: HTMLElement) {
 const numberAttribute = (value: string | null) =>
   value === null ? undefined : Number(value);
 
+/** A clip holds the input that moves it, unless it is not movable. */
+function renderClip(clip: HTMLElement) {
+  if (clip.getAttribute("movable") !== "false") {
+    addInput(
+      clip,
+      "audio-ui-timeline-clip-input",
+      clip.getAttribute("clip"),
+      "clip"
+    );
+  }
+}
+
+/** An edge of a clip holds an input of its own, in a part named after it. */
+const renderEdge = (tag: string) => (handle: HTMLElement) =>
+  addInput(handle, tag, handle.getAttribute("clip"), "clip");
+
+const FADE_SAMPLES = 16;
+
+/** Draws a fade's curve in an `<svg>` inside the part, from its `data-shape` and `data-edge`. */
+function renderFade(host: HTMLElement) {
+  const SVG = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(SVG, "svg");
+  svg.setAttribute("aria-hidden", "true");
+  svg.setAttribute("preserveAspectRatio", "none");
+  svg.setAttribute("viewBox", "0 0 1 1");
+  svg.setAttribute("width", "100%");
+  svg.setAttribute("height", "100%");
+  svg.style.display = "block";
+  const fill = document.createElementNS(SVG, "path");
+  fill.style.fill = "var(--clip-fade-shade, currentColor)";
+  const line = document.createElementNS(SVG, "path");
+  line.setAttribute("fill", "none");
+  line.setAttribute("stroke", "currentColor");
+  line.setAttribute("stroke-width", "1.5");
+  line.style.vectorEffect = "non-scaling-stroke";
+  svg.appendChild(fill);
+  svg.appendChild(line);
+  host.appendChild(svg);
+  const draw = () => {
+    const shape = (host.getAttribute("data-shape") ?? "linear") as FadeShape;
+    const edge = host.hasAttribute("data-edge-in") ? "in" : "out";
+    const points: string[] = [];
+    for (let index = 0; index <= FADE_SAMPLES; index += 1) {
+      const x = index / FADE_SAMPLES;
+      const gain = fadeGain(shape, edge === "in" ? x : 1 - x);
+      points.push(`${x} ${1 - gain}`);
+    }
+    fill.setAttribute("d", `M0 0H1L${[...points].reverse().join("L")}Z`);
+    line.setAttribute("d", `M${points.join("L")}`);
+  };
+  draw();
+  const observer = new MutationObserver(draw);
+  observer.observe(host, { attributeFilter: ["data-shape"], attributes: true });
+  return () => {
+    observer.disconnect();
+    svg.remove();
+  };
+}
+
 const jsonAttribute = (value: string | null) =>
   value ? JSON.parse(value) : undefined;
 
@@ -47,6 +112,73 @@ const jsonAttribute = (value: string | null) =>
  * track's resize handle make the input they hold themselves.
  */
 export const parts = createParts(timeline, {
+  clip: {
+    display: "block",
+    kinds: { defaultValue: jsonAttribute, value: jsonAttribute },
+    render: renderClip,
+    tag: "audio-ui-timeline-clip",
+  },
+  clipFadeIn: {
+    display: "block",
+    render: renderFade,
+    tag: "audio-ui-timeline-clip-fade-in",
+  },
+  clipFadeInHandle: {
+    display: "block",
+    render: renderEdge("audio-ui-timeline-clip-fade-in-input"),
+    tag: "audio-ui-timeline-clip-fade-in-handle",
+  },
+  clipFadeInInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-clip-fade-in-input",
+    target: (el) => el.querySelector("input"),
+  },
+  clipFadeOut: {
+    display: "block",
+    render: renderFade,
+    tag: "audio-ui-timeline-clip-fade-out",
+  },
+  clipFadeOutHandle: {
+    display: "block",
+    render: renderEdge("audio-ui-timeline-clip-fade-out-input"),
+    tag: "audio-ui-timeline-clip-fade-out-handle",
+  },
+  clipFadeOutInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-clip-fade-out-input",
+    target: (el) => el.querySelector("input"),
+  },
+  clipHeader: { display: "block", tag: "audio-ui-timeline-clip-header" },
+  clipInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-clip-input",
+    target: (el) => el.querySelector("input"),
+  },
+  clipTrimEnd: {
+    display: "block",
+    render: renderEdge("audio-ui-timeline-clip-trim-end-input"),
+    tag: "audio-ui-timeline-clip-trim-end",
+  },
+  clipTrimEndInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-clip-trim-end-input",
+    target: (el) => el.querySelector("input"),
+  },
+  clipTrimStart: {
+    display: "block",
+    render: renderEdge("audio-ui-timeline-clip-trim-start-input"),
+    tag: "audio-ui-timeline-clip-trim-start",
+  },
+  clipTrimStartInput: {
+    display: "contents",
+    properties: ["getAriaValueText"],
+    tag: "audio-ui-timeline-clip-trim-start-input",
+    target: (el) => el.querySelector("input"),
+  },
   lane: { display: "block", tag: "audio-ui-timeline-lane" },
   mark: {
     display: "block",
@@ -57,6 +189,10 @@ export const parts = createParts(timeline, {
   root: {
     display: "block",
     events: {
+      onClipChange: "clipchange",
+      onClipCommitted: "clipcommit",
+      onClipRemove: "clipremove",
+      onClipSelectedChange: "clipselect",
       onMarkChange: "markchange",
       onMarkCommitted: "markcommit",
       onPositionChange: "input",
@@ -88,7 +224,7 @@ export const parts = createParts(timeline, {
     tag: "audio-ui-timeline-ruler-input",
     target: (el) => el.querySelector("input"),
   },
-  track: { display: "flex", tag: "audio-ui-timeline-track" },
+  track: { display: "block", tag: "audio-ui-timeline-track" },
   trackHeader: { display: "block", tag: "audio-ui-timeline-track-header" },
   trackResizeHandle: {
     display: "block",

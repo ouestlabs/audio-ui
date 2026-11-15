@@ -6,6 +6,7 @@ import {
 } from "@audio-ui/core";
 import {
   anchoredScroll,
+  type ClipValue,
   createRangeController,
   createTimelineController,
   createTrackController,
@@ -34,6 +35,22 @@ import {
   sourceOf,
   VISUALLY_HIDDEN,
 } from "../shared.ts";
+import {
+  type ClipApi,
+  type ClipChangeDetails,
+  type ClipCommitDetails,
+  type ClipSlots,
+  clipSlots,
+  createClipApi,
+} from "./clips.ts";
+import {
+  LENGTH_PROPERTY,
+  laneOf,
+  OFFSET_PROPERTY,
+  placedAt,
+  UNIT_PROPERTY,
+  unitLength,
+} from "./layout.ts";
 
 /**
  * The timeline as a UI SDK primitive, over the controllers of
@@ -48,13 +65,6 @@ import {
  * Parts that hold a controller of their own (a track, a mark) are named by a
  * prop and report through the Root, with their name in the details.
  */
-
-/** Set on every lane: the width of one unit of time, so parts place themselves with `calc()`. */
-export const UNIT_PROPERTY = "--timeline-unit";
-/** Set on every placed part: where it sits, in units. */
-export const OFFSET_PROPERTY = "--timeline-offset";
-/** Set on every part that spans a stretch of the lane: how long it is, in units. */
-export const LENGTH_PROPERTY = "--timeline-length";
 
 const describeAsNumber = (value: number) =>
   String(Math.round(value * 100) / 100);
@@ -86,6 +96,15 @@ export interface TimelinePrimitiveOptions {
   maxZoom?: number;
   /** @default 0 */
   minZoom?: number;
+  onClipChange?: (value: ClipValue, details: ClipChangeDetails) => void;
+  onClipCommitted?: (value: ClipValue, details: ClipCommitDetails) => void;
+  onClipDragOffsetChange?: (offset: number, details: { clip: string }) => void;
+  /** Delete or Backspace on a clip: removing it is up to you. */
+  onClipRemove?: (clip: string, details: { clip: string }) => void;
+  onClipSelectedChange?: (
+    selected: boolean,
+    details: { clip: string; event?: Event }
+  ) => void;
   onMarkChange?: (value: number, details: MarkChangeDetails) => void;
   onMarkCommitted?: (value: number, details: MarkCommitDetails) => void;
   onPositionChange?: (value: number, details: ChangeDetails) => void;
@@ -193,7 +212,7 @@ export interface MarkPublicState extends TimelinePublicState {
 }
 
 /** What a timeline's `api` gives an adapter. */
-export interface TimelineApi {
+export interface TimelineApi extends ClipApi {
   /** Where the next zoom should hold still; the viewport applies it once laid out. */
   anchor: { current: ZoomAnchor | null };
   controller: TimelineController;
@@ -236,7 +255,7 @@ type Slot<Props, Public = TimelinePublicState> = SlotDefinition<
 >;
 
 /** The timeline's slots, by name, with the props and the public state of each. */
-export type TimelineSlots = {
+export type TimelineSlots = ClipSlots & {
   lane: Slot<PartProps & { seekable?: boolean }>;
   mark: Slot<MarkProps, MarkPublicState>;
   playhead: Slot<PartProps>;
@@ -312,17 +331,6 @@ const stateAttrs = (state: TimelineState) => ({
   "data-scrubbing": flag(state.view.scrubbing),
 });
 
-/** The width of one unit: px when zoomed, a share of the lane when fitted. */
-const unitLength = (zoom: number | null, duration: number) =>
-  zoom === null ? `calc(100% / ${duration > 0 ? duration : 1})` : `${zoom}px`;
-
-/** Places a part at its `--timeline-offset` along the lane. */
-const placedAt = (value: number) => ({
-  [OFFSET_PROPERTY]: String(value),
-  left: `calc(var(${UNIT_PROPERTY}) * var(${OFFSET_PROPERTY}))`,
-  position: "absolute",
-});
-
 /**
  * How much the transforms of the element's ancestors scale it, such as a
  * dialog that zooms in: what `getBoundingClientRect` gives is divided by it to
@@ -340,16 +348,14 @@ const originLane = (lanes: Set<HTMLElement>) =>
     a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
   )[0] ?? null;
 
-/** The lane an element sits in. */
-const laneOf = (el: Element | null) =>
-  el?.closest<HTMLElement>("[data-timeline-lane]") ?? null;
-
 const PRESS_SLOP_PX = 3;
 
 const inField = (target: EventTarget | null) =>
   target instanceof HTMLInputElement ||
   target instanceof HTMLTextAreaElement ||
   (target instanceof HTMLElement && target.isContentEditable);
+
+export { LENGTH_PROPERTY, OFFSET_PROPERTY, UNIT_PROPERTY };
 
 export const timeline: TimelinePrimitive = definePrimitive({
   agent: { actions: ["setPosition"] },
@@ -477,6 +483,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
       context.store.set({ parts: context.store.get().parts + 1 } as never);
 
     return {
+      ...createClipApi(context, () => adjustOptions(options()), bump),
       anchor,
       controller,
       internal: { keyOf: (value: unknown) => String(value) },
@@ -648,6 +655,11 @@ export const timeline: TimelinePrimitive = definePrimitive({
     largeStep: "number",
     maxZoom: "number",
     minZoom: "number",
+    onClipChange: "callback",
+    onClipCommitted: "callback",
+    onClipDragOffsetChange: "callback",
+    onClipRemove: "callback",
+    onClipSelectedChange: "callback",
     onMarkChange: "callback",
     onMarkCommitted: "callback",
     onPositionChange: "callback",
@@ -670,6 +682,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
       api.trackFor(state, props as TrackProps).getSnapshot();
 
     return {
+      ...clipSlots(slot),
       lane: slot<{ seekable?: boolean }, TimelinePublicState>({
         attrs: (state: TimelineState) => ({
           ...stateAttrs(state),

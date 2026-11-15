@@ -1,3 +1,14 @@
+export type {
+  ClipApi,
+  ClipChangeDetails,
+  ClipCommitDetails,
+  ClipEdgeState,
+  ClipFadeState,
+  ClipProps,
+  ClipPublicState,
+  ClipRef,
+  ClipSlots,
+} from "./clips.ts";
 export {
   type DescribePosition,
   LENGTH_PROPERTY,

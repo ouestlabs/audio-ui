@@ -4,6 +4,19 @@ import { defineComponent, h } from "vue";
 
 /** Which element each part is. */
 const parts = createParts(timeline, {
+  clip: "div",
+  clipFadeIn: "svg",
+  clipFadeInHandle: "div",
+  clipFadeInInput: "input",
+  clipFadeOut: "svg",
+  clipFadeOutHandle: "div",
+  clipFadeOutInput: "input",
+  clipHeader: "div",
+  clipInput: "input",
+  clipTrimEnd: "div",
+  clipTrimEndInput: "input",
+  clipTrimStart: "div",
+  clipTrimStartInput: "input",
   lane: "div",
   mark: "div",
   playhead: "div",
@@ -97,7 +110,128 @@ const Mark = defineComponent(
   { inheritAttrs: false, name: "TimelineMark", props: ["mark", "value"] }
 );
 
+/**
+ * A stretch of a source laid on a lane: a recording, a pattern. Its parts
+ * (the header, the handles, the fades) take the same `clip` name. Its own
+ * native `<input type="range">` moves it from the keyboard and carries its
+ * name, unless it is not `movable`.
+ */
+const Clip = defineComponent(
+  (
+    props: {
+      clip: string;
+      getAriaValueText?: (value: number, duration: number) => string;
+      movable?: boolean;
+    },
+    { attrs, slots }
+  ) =>
+    () => {
+      const { naming, rest } = nameOf(attrs);
+      const movable = props.movable ?? true;
+      return h(parts.Clip, { ...rest, clip: props.clip, movable } as never, {
+        default: (scope: object) => [
+          slots.default?.(scope),
+          movable
+            ? h(parts.ClipInput, {
+                ...naming,
+                clip: props.clip,
+                getAriaValueText: props.getAriaValueText,
+              } as never)
+            : null,
+        ],
+      });
+    },
+  {
+    inheritAttrs: false,
+    name: "TimelineClip",
+    props: ["clip", "getAriaValueText", "movable"],
+  }
+);
+
+/** An edge of a clip with the input it holds: a trim handle or a fade handle. */
+const edged = (
+  name: string,
+  pick: (edge: string) => { handle: object; input: object }
+) =>
+  defineComponent(
+    (
+      props: {
+        clip: string;
+        edge: string;
+        getAriaValueText?: (value: number, duration: number) => string;
+      },
+      { attrs, slots }
+    ) =>
+      () => {
+        const { naming, rest } = nameOf(attrs);
+        const { handle, input } = pick(props.edge);
+        return h(handle as never, { ...rest, clip: props.clip } as never, {
+          default: (scope: object) => [
+            slots.default?.(scope),
+            h(
+              input as never,
+              {
+                ...naming,
+                clip: props.clip,
+                getAriaValueText: props.getAriaValueText,
+              } as never
+            ),
+          ],
+        });
+      },
+    {
+      inheritAttrs: false,
+      name,
+      props: ["clip", "edge", "getAriaValueText"],
+    }
+  );
+
+/** Trims one edge of the clip, by dragging or from the keyboard through its native input: it moves where in the source the clip begins instead of stretching it. */
+const ClipHandle = edged("TimelineClipHandle", (edge) =>
+  edge === "start"
+    ? { handle: parts.ClipTrimStart, input: parts.ClipTrimStartInput }
+    : { handle: parts.ClipTrimEnd, input: parts.ClipTrimEndInput }
+);
+
+/** Sets one fade of the clip, by dragging or from the keyboard through its native input. A double click, or Enter, steps its shape. */
+const ClipFadeHandle = edged("TimelineClipFadeHandle", (edge) =>
+  edge === "in"
+    ? { handle: parts.ClipFadeInHandle, input: parts.ClipFadeInInput }
+    : { handle: parts.ClipFadeOutHandle, input: parts.ClipFadeOutInput }
+);
+
+/** Shades a fade of the clip: its curve, in a 1 by 1 box. Style its `color` for the line, and `--clip-fade-shade` for the fill. */
+const ClipFade = defineComponent(
+  (props: { clip: string; edge: "in" | "out" }, { attrs }) =>
+    () =>
+      h(
+        props.edge === "in" ? parts.ClipFadeIn : parts.ClipFadeOut,
+        { ...attrs, clip: props.clip } as never,
+        {
+          default: ({ state }: { state: { fill: string; line: string } }) => [
+            h("path", {
+              d: state.fill,
+              style: { fill: "var(--clip-fade-shade, currentColor)" },
+            }),
+            h("path", {
+              d: state.line,
+              fill: "none",
+              stroke: "currentColor",
+              "stroke-width": 1.5,
+              style: { vectorEffect: "non-scaling-stroke" },
+            }),
+          ],
+        }
+      ),
+  { inheritAttrs: false, name: "TimelineClipFade", props: ["clip", "edge"] }
+);
+
 export const Timeline = {
+  Clip,
+  ClipFade,
+  ClipFadeHandle,
+  ClipHandle,
+  ClipHeader: parts.ClipHeader,
   Lane: parts.Lane,
   Mark,
   Playhead: parts.Playhead,

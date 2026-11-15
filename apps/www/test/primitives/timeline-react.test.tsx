@@ -10,6 +10,25 @@ timelineSuite("React", async (tree) => {
     <>
       {tree.playhead ? <Timeline.Playhead /> : null}
       {tree.mark ? <Timeline.Mark {...tree.mark} /> : null}
+      {tree.clip ? (
+        <Timeline.Clip
+          aria-label={tree.clip.label}
+          clip={tree.clip.clip}
+          defaultValue={tree.clip.defaultValue}
+        >
+          <Timeline.ClipHeader clip={tree.clip.clip} />
+          <Timeline.ClipFade clip={tree.clip.clip} edge="in" />
+          <Timeline.ClipFade clip={tree.clip.clip} edge="out" />
+          <Timeline.ClipHandle clip={tree.clip.clip} edge="start" />
+          <Timeline.ClipHandle clip={tree.clip.clip} edge="end" />
+          <Timeline.ClipFadeHandle
+            aria-label="Fade in"
+            clip={tree.clip.clip}
+            edge="in"
+          />
+          <Timeline.ClipFadeHandle clip={tree.clip.clip} edge="out" />
+        </Timeline.Clip>
+      ) : null}
     </>
   );
   await act(() => {

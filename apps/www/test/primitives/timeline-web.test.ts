@@ -28,6 +28,17 @@ timelineSuite("custom elements", async (tree: TimelineTree) => {
     (tree.playhead
       ? "<audio-ui-timeline-playhead></audio-ui-timeline-playhead>"
       : "") +
+    (tree.clip
+      ? `<audio-ui-timeline-clip clip='${tree.clip.clip}' default-value='${JSON.stringify(tree.clip.defaultValue)}' ${tree.clip.label ? `aria-label='${tree.clip.label}'` : ""}>` +
+        `<audio-ui-timeline-clip-header clip='${tree.clip.clip}'></audio-ui-timeline-clip-header>` +
+        `<audio-ui-timeline-clip-fade-in clip='${tree.clip.clip}'></audio-ui-timeline-clip-fade-in>` +
+        `<audio-ui-timeline-clip-fade-out clip='${tree.clip.clip}'></audio-ui-timeline-clip-fade-out>` +
+        `<audio-ui-timeline-clip-trim-start clip='${tree.clip.clip}'></audio-ui-timeline-clip-trim-start>` +
+        `<audio-ui-timeline-clip-trim-end clip='${tree.clip.clip}'></audio-ui-timeline-clip-trim-end>` +
+        `<audio-ui-timeline-clip-fade-in-handle clip='${tree.clip.clip}'></audio-ui-timeline-clip-fade-in-handle>` +
+        `<audio-ui-timeline-clip-fade-out-handle clip='${tree.clip.clip}'></audio-ui-timeline-clip-fade-out-handle>` +
+        "</audio-ui-timeline-clip>"
+      : "") +
     (tree.mark
       ? `<audio-ui-timeline-mark ${attributes(tree.mark)}></audio-ui-timeline-mark>`
       : "");
@@ -89,6 +100,22 @@ timelineSuite("custom elements", async (tree: TimelineTree) => {
       reason: detail.reason as string,
       track: detail.track as string,
     })
+  );
+  listen("clipchange", (detail, event) =>
+    tree.options.onClipChange(detail.value as never, {
+      cancel: () => event.preventDefault(),
+      clip: detail.clip as string,
+      reason: detail.reason as string,
+      target: detail.target as string,
+    })
+  );
+  listen("clipselect", (detail) =>
+    tree.options.onClipSelectedChange(detail.value as boolean, {
+      clip: detail.clip as string,
+    })
+  );
+  listen("clipremove", (detail) =>
+    tree.options.onClipRemove(detail.clip as string)
   );
   listen("markchange", (detail, event) =>
     tree.options.onMarkChange(detail.value as number, {

@@ -7,6 +7,28 @@ timelineSuite("Vue", async (tree) => {
   const inner = () => [
     tree.playhead ? h(Timeline.Playhead) : null,
     tree.mark ? h(Timeline.Mark, tree.mark as never) : null,
+    tree.clip
+      ? h(
+          Timeline.Clip,
+          {
+            "aria-label": tree.clip.label,
+            clip: tree.clip.clip,
+            defaultValue: tree.clip.defaultValue,
+          } as never,
+          () => {
+            const clip = tree.clip?.clip;
+            return [
+              h(Timeline.ClipHeader, { clip } as never),
+              h(Timeline.ClipFade, { clip, edge: "in" } as never),
+              h(Timeline.ClipFade, { clip, edge: "out" } as never),
+              h(Timeline.ClipHandle, { clip, edge: "start" } as never),
+              h(Timeline.ClipHandle, { clip, edge: "end" } as never),
+              h(Timeline.ClipFadeHandle, { clip, edge: "in" } as never),
+              h(Timeline.ClipFadeHandle, { clip, edge: "out" } as never),
+            ];
+          }
+        )
+      : null,
   ];
   const app = createApp({
     render: () =>

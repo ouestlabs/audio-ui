@@ -14,15 +14,34 @@ interface ChangeDetails {
   source?: string;
 }
 
+interface ClipValue {
+  fadeIn: number;
+  fadeInShape?: string;
+  fadeOut: number;
+  length: number;
+  offset: number;
+  start: number;
+}
+
 export interface TimelineOptions {
   [option: string]: unknown;
 }
 
 /** What the suite asks a framework to render, besides the timeline itself. */
 export interface TimelineTree {
+  clip?: { clip: string; defaultValue: ClipValue; label?: string };
   lane?: { seekable?: boolean };
   mark?: { movable?: boolean; value: number };
   options: TimelineOptions & {
+    onClipChange: (
+      value: ClipValue,
+      details: { clip: string; reason: string; target?: string } & ChangeDetails
+    ) => void;
+    onClipRemove: (name: string) => void;
+    onClipSelectedChange: (
+      selected: boolean,
+      details: { clip: string }
+    ) => void;
     onMarkChange: (
       value: number,
       details: { mark: string } & ChangeDetails
@@ -61,12 +80,29 @@ async function render(
   const heights: [number | undefined, string, string][] = [];
   const marks: [number, string, string][] = [];
   const selections: number[][] = [];
+  const clips: [ClipValue, string, string | undefined, string][] = [];
+  const picked: [boolean, string][] = [];
+  const removed: string[] = [];
   const mounted = await mount({
     ruler: {},
     ...tree,
     options: {
       duration: 100,
       ...options,
+      onClipChange: (value, details) => {
+        clips.push([
+          { ...value },
+          details.clip,
+          details.target,
+          details.reason,
+        ]);
+      },
+      onClipRemove: (name) => {
+        removed.push(name);
+      },
+      onClipSelectedChange: (selected, details) => {
+        picked.push([selected, details.clip]);
+      },
       onMarkChange: (value, details) => {
         marks.push([value, details.mark, details.reason]);
       },
@@ -107,20 +143,27 @@ async function render(
       mockRect(element, box);
     }
   }
+  const part = (slot: string) => one(slot);
   const inputOf = (part: HTMLElement | null) =>
     part?.matches("input")
       ? (part as HTMLInputElement)
       : (part?.querySelector("input") as HTMLInputElement);
   return {
     ...mounted,
+    part,
+    inputOf,
+    clip: one("clip"),
+    clips,
     commits,
     heights,
     input: inputOf(one("rulerInput")),
     lane,
     mark: one("mark"),
     marks,
+    picked,
     playhead: one("playhead"),
     positions,
+    removed,
     resize: one("trackResizeHandle"),
     resizeInput: inputOf(one("trackResizeInput")),
     root,
@@ -294,6 +337,129 @@ export function timelineSuite(framework: string, mount: MountTimeline) {
         pointer(p.mark, "pointerup", { clientX: 40, pointerId: 1 });
       });
       p.unmount();
+    });
+    describe("a clip", () => {
+      const value: ClipValue = {
+        fadeIn: 0,
+        fadeOut: 0,
+        length: 20,
+        offset: 0,
+        start: 10,
+      };
+
+      test("is placed over the stretch it spans, with its fades and offset for what is inside", async () => {
+        const p = await render(mount, {
+          clip: { clip: "a", defaultValue: { ...value, fadeIn: 4, offset: 7 } },
+          lane: {},
+        });
+        expect(styleOf(p.clip)).toContain("--timeline-offset: 10");
+        expect(styleOf(p.clip)).toContain("--timeline-length: 20");
+        expect(styleOf(p.clip)).toContain("--clip-fade-in: 4");
+        expect(styleOf(p.clip)).toContain("--clip-fade-in-max: 20");
+        expect(styleOf(p.clip)).toContain("--clip-offset: 7");
+        expect(p.clip.getAttribute("data-clip")).toBe("a");
+        p.unmount();
+      });
+
+      test("is moved by dragging its header, and the change names the clip and what moved", async () => {
+        const p = await render(mount, {
+          clip: { clip: "a", defaultValue: value },
+          lane: {},
+        });
+        const header = p.part("clipHeader");
+        await p.act(() => {
+          pointer(header, "pointerdown", { clientX: 20, pointerId: 1 });
+          pointer(header, "pointermove", { clientX: 35, pointerId: 1 });
+        });
+        expect(p.clips.at(-1)?.[0].start).toBe(25);
+        expect(p.clips.at(-1)?.[1]).toBe("a");
+        expect(p.clips.at(-1)?.[2]).toBe("move");
+        expect(styleOf(p.clip)).toContain("--timeline-offset: 25");
+        expect(p.positions).toHaveLength(0);
+        await p.act(() => {
+          pointer(header, "pointerup", { clientX: 35, pointerId: 1 });
+        });
+        p.unmount();
+      });
+
+      test("is selected by a press on its body, which moves the position there too", async () => {
+        const p = await render(mount, {
+          clip: { clip: "a", defaultValue: value },
+          lane: {},
+        });
+        await p.act(() => {
+          pointer(p.clip, "pointerdown", { clientX: 15, pointerId: 1 });
+        });
+        expect(p.picked.at(-1)).toEqual([true, "a"]);
+        expect(p.positions.at(-1)?.[0]).toBe(15);
+        expect(p.clip.hasAttribute("data-selected")).toBe(true);
+        await p.act(() => {
+          pointer(p.clip, "pointerup", { clientX: 15, pointerId: 1 });
+        });
+        p.unmount();
+      });
+
+      test("is trimmed by an edge: the end shortens it, the start moves where in the source it begins", async () => {
+        const p = await render(mount, {
+          clip: { clip: "a", defaultValue: value },
+          lane: {},
+        });
+        const end = p.part("clipTrimEnd");
+        await p.act(() => {
+          pointer(end, "pointerdown", { clientX: 30, pointerId: 1 });
+          pointer(end, "pointermove", { clientX: 25, pointerId: 1 });
+          pointer(end, "pointerup", { clientX: 25, pointerId: 1 });
+        });
+        expect(p.clips.at(-1)?.[0].length).toBe(15);
+        expect(p.clips.at(-1)?.[2]).toBe("trim-end");
+        const start = p.part("clipTrimStart");
+        await p.act(() => {
+          pointer(start, "pointerdown", { clientX: 10, pointerId: 1 });
+          pointer(start, "pointermove", { clientX: 14, pointerId: 1 });
+          pointer(start, "pointerup", { clientX: 14, pointerId: 1 });
+        });
+        expect(p.clips.at(-1)?.[0].start).toBe(14);
+        expect(p.clips.at(-1)?.[0].offset).toBe(4);
+        p.unmount();
+      });
+
+      test("fades are set by their handles, shaded, and stepped through their shapes by Enter", async () => {
+        const p = await render(mount, {
+          clip: { clip: "a", defaultValue: value, label: "Clip" },
+          lane: {},
+        });
+        const handle = p.part("clipFadeInHandle");
+        await p.act(() => {
+          pointer(handle, "pointerdown", { clientX: 10, pointerId: 1 });
+          pointer(handle, "pointermove", { clientX: 16, pointerId: 1 });
+          pointer(handle, "pointerup", { clientX: 16, pointerId: 1 });
+        });
+        expect(p.clips.at(-1)?.[0].fadeIn).toBe(6);
+        expect(p.clips.at(-1)?.[2]).toBe("fade-in");
+        expect(styleOf(p.clip)).toContain("--clip-fade-in: 6");
+        const shade = p.part("clipFadeIn");
+        expect(shade.querySelectorAll("path")).toHaveLength(2);
+        const input = p.inputOf(p.part("clipFadeInInput"));
+        await p.act(() => key(input, "Enter"));
+        expect(p.clips.at(-1)?.[0].fadeInShape).toBe("fast");
+        p.unmount();
+      });
+
+      test("has an input that names it and moves it from the keyboard, and Delete asks for its removal", async () => {
+        const p = await render(mount, {
+          clip: { clip: "a", defaultValue: value, label: "Take 1" },
+          lane: {},
+        });
+        const input = p.inputOf(p.part("clipInput"));
+        expect(input.getAttribute("aria-label")).toBe("Take 1");
+        expect(input.getAttribute("aria-valuetext")).toBe("10 to 30");
+        await p.act(() => key(input, "ArrowRight"));
+        expect(p.clips.at(-1)?.[0].start).toBe(11);
+        expect(p.clips.at(-1)?.[3]).toBe("keyboard");
+        await p.act(() => key(input, "Delete"));
+        expect(p.removed.at(-1)).toBe("a");
+        p.unmount();
+      });
     });
   });
 }
