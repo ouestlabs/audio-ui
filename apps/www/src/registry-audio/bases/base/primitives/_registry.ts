@@ -294,7 +294,11 @@ export const primitives: RegistryItem[] = [
         ],
         name: "svelte",
       },
-      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+      {
+        dependencies: ["@audio-ui/core", "@ui-sdk/web"],
+        files: ["web.ts"],
+        name: "web",
+      },
     ],
     "An arrangement timeline: a position and a zoom, a viewport that scrolls and zooms around the pointer, a ruler, a navigator, tracks with resizable heights, lanes, marks, ranges such as loops, and clips that move, trim and fade, each with a native input for the keyboard."
   ),
