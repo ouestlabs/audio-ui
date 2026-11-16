@@ -1,8 +1,5 @@
 import {
-  bindDrag,
-  createChange,
   css,
-  dispatch,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
@@ -18,8 +15,10 @@ import { definePrimitive } from "../define";
 import {
   type ChangeDetails,
   type CommitDetails,
+  createGestures,
+  createReporter,
   flag,
-  sourceOf,
+  numberFormat,
   VISUALLY_HIDDEN,
 } from "../shared";
 
@@ -123,17 +122,6 @@ const onGrid = (state: FaderState, raw: number) =>
 const displayed = (state: FaderState) =>
   state.draft ?? clamp(state.value, state.min, state.max);
 
-const formatters = new Map<string, Intl.NumberFormat>();
-function format(state: FaderState, value: number) {
-  const key = JSON.stringify([state.locale, state.format]);
-  let formatter = formatters.get(key);
-  if (!formatter) {
-    formatter = new Intl.NumberFormat(state.locale, state.format);
-    formatters.set(key, formatter);
-  }
-  return formatter.format(value);
-}
-
 const views = new WeakMap<FaderState, FaderSnapshot>();
 
 /** What the parts draw from `state`, worked out once per state. */
@@ -152,7 +140,7 @@ export function viewOf(state: FaderState): FaderSnapshot {
       from: shareOf(state, Math.min(anchor, value)),
       to: shareOf(state, Math.max(anchor, value)),
     },
-    formatted: format(state, value),
+    formatted: numberFormat(state.locale, state.format).format(value),
     largeStep: state.largeStep,
     max: state.max,
     min: state.min,
@@ -190,12 +178,6 @@ function valueUnder(
     state,
     state.min + clamp(share, 0, 1) * (state.max - state.min)
   );
-}
-
-/** One pointer gesture, from press to release. */
-interface Gesture {
-  pointerId: number;
-  stop: () => void;
 }
 
 /** What the parts of a fader read: its state, drawn. */
@@ -329,38 +311,12 @@ function stateOf(options: FaderPrimitiveOptions) {
 export const fader: FaderPrimitive = definePrimitive({
   agent: { actions: ["setValue"] },
   api: (context) => {
-    const change = createChange(context);
-    const state = () => context.store.get() as FaderState;
-    let gesture: Gesture | null = null;
-
-    const commit = (value: number, reason: string, event?: Event) => {
-      const source = sourceOf(event);
-      dispatch(context, "onValueCommitted", value, {
-        event,
-        reason,
-        ...(source ? { source } : {}),
-      });
-    };
-    /** Reports a change and keeps it unless an app refused it; says whether it went through. */
-    const report = (value: number, reason: string, event?: Event) => {
-      const source = sourceOf(event);
-      return change(
-        "value",
-        value as never,
-        {
-          event,
-          reason,
-          ...(source ? { source } : {}),
-        } as never
-      );
-    };
-    /** A change that is over as soon as it is made: keys, typed values, the wheel, a reset. */
-    const setAtOnce = (value: number, reason: string, event?: Event) => {
-      if (value !== displayed(state()) && report(value, reason, event)) {
-        commit(value, reason, event);
-      }
-    };
-    context.onDestroy(() => gesture?.stop());
+    const { commit, report, setAtOnce, state } = createReporter(
+      context,
+      displayed,
+      Object.is
+    );
+    const gestures = createGestures(context);
 
     return {
       keyDown: (event: KeyboardEvent, element: Element) => {
@@ -384,20 +340,16 @@ export const fader: FaderPrimitive = definePrimitive({
         control: HTMLElement,
         thumb: HTMLElement | null
       ) => {
-        const current = state();
-        if (current.disabled || event.button !== 0) {
+        if (
+          state().disabled ||
+          event.button !== 0 ||
+          !gestures.accepts(event, () =>
+            context.store.set({ dragging: false, draft: null } as never)
+          )
+        ) {
           return;
         }
-        if (gesture) {
-          // Another finger does not take the gesture over; the same pointer
-          // pressing again means its release was missed, so that drag ends here.
-          if (gesture.pointerId !== event.pointerId) {
-            return;
-          }
-          gesture.stop();
-          gesture = null;
-          context.store.set({ dragging: false, draft: null } as never);
-        }
+        const current = state();
         const vertical = current.orientation === "vertical";
         const onThumb = Boolean(thumb?.contains(event.target as Node));
         // Taken by the thumb, the drag keeps the pointer where it grabbed it.
@@ -427,15 +379,14 @@ export const fader: FaderPrimitive = definePrimitive({
           );
         }
         context.store.set({ dragging: true } as never);
-        const stop = bindDrag(control, event, {
+        gestures.start(control, event, null, {
           onEnd: (end) => {
-            gesture = null;
             context.store.set({ dragging: false, draft: null } as never);
             if (changed) {
               commit(value, moved ? "drag" : "track-press", end);
             }
           },
-          onMove: ({ event: move }) => {
+          onMove: (move) => {
             moved = true;
             set(
               valueUnder(
@@ -449,7 +400,6 @@ export const fader: FaderPrimitive = definePrimitive({
             );
           },
         });
-        gesture = { pointerId: event.pointerId, stop };
       },
       reset: (event?: Event) => {
         const current = state();

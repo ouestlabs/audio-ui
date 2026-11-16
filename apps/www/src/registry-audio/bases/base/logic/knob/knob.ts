@@ -1,8 +1,5 @@
 import {
-  bindDrag,
-  createChange,
   css,
-  dispatch,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
@@ -20,8 +17,10 @@ import { definePrimitive } from "../define";
 import {
   type ChangeDetails,
   type CommitDetails,
+  createGestures,
+  createReporter,
   flag,
-  sourceOf,
+  numberFormat,
   VISUALLY_HIDDEN,
 } from "../shared";
 
@@ -161,17 +160,6 @@ const onGrid = (state: KnobState, raw: number) =>
 const displayed = (state: KnobState) =>
   state.draft ?? clamp(state.value, state.min, state.max);
 
-const formatters = new Map<string, Intl.NumberFormat>();
-function format(state: KnobState, value: number) {
-  const key = JSON.stringify([state.locale, state.format]);
-  let formatter = formatters.get(key);
-  if (!formatter) {
-    formatter = new Intl.NumberFormat(state.locale, state.format);
-    formatters.set(key, formatter);
-  }
-  return formatter.format(value);
-}
-
 export type { ChangeDetails, CommitDetails } from "../shared";
 
 const views = new WeakMap<KnobState, KnobSnapshot>();
@@ -194,7 +182,7 @@ export function viewOf(state: KnobState): KnobSnapshot {
     disabled: state.disabled,
     dragMode: state.dragMode,
     dragging: state.dragging,
-    formatted: format(state, value),
+    formatted: numberFormat(state.locale, state.format).format(value),
     largeStep: state.largeStep,
     max: state.max,
     min: state.min,
@@ -277,13 +265,11 @@ interface Gesture {
   lastY: number;
   /** Farthest distance from the press point, in px. */
   maxDistance: number;
-  pointerId: number;
   /** How far the drag has taken the dial, 0 to 1 and beyond, accumulated so Shift can make any stretch finer. */
   position: number;
   rect: DOMRect;
   startX: number;
   startY: number;
-  stop: () => void;
 }
 
 /** The value a gesture has turned the knob to, after one pointer move. */
@@ -456,49 +442,18 @@ function stateOf(options: KnobPrimitiveOptions) {
 export const knob: KnobPrimitive = definePrimitive({
   agent: { actions: ["setValue"] },
   api: (context) => {
-    const change = createChange(context);
-    const state = () => context.store.get() as KnobState;
-    let gesture: Gesture | null = null;
+    const { commit, report, setAtOnce, state } = createReporter(
+      context,
+      displayed
+    );
+    const gestures = createGestures<Gesture>(context);
     let lastTapAt = 0;
 
-    const commit = (value: number, reason: string, event?: Event) => {
-      const source = sourceOf(event);
-      dispatch(context, "onValueCommitted", value, {
-        event,
-        reason,
-        ...(source ? { source } : {}),
-      });
-    };
-    /** Reports a change and keeps it unless an app refused it; says whether it went through. */
-    const report = (value: number, reason: string, event?: Event) => {
-      const source = sourceOf(event);
-      return change(
-        "value",
-        value as never,
-        {
-          event,
-          reason,
-          ...(source ? { source } : {}),
-        } as never
-      );
-    };
-    /** A change that is over as soon as it is made: keys, typed values, the wheel, a reset. */
-    const setAtOnce = (value: number, reason: string, event?: Event) => {
-      if (report(value, reason, event)) {
-        commit(value, reason, event);
-      }
-    };
-
-    /** Ends the gesture: a tap that moved little is a tap, and a second one soon after resets. */
-    const finish = (end: PointerEvent, allowTap: boolean) => {
-      const current = gesture;
-      if (!current) {
-        return;
-      }
-      gesture = null;
+    /** Ends a gesture: a tap that moved little is a tap, and a second one soon after resets. */
+    const finish = (end: PointerEvent, ended: Gesture, allowTap: boolean) => {
       const turned = displayed(state());
       context.store.set({ dragging: false, draft: null } as never);
-      if (allowTap && current.maxDistance <= TAP_MAX_MOVE_PX) {
+      if (allowTap && ended.maxDistance <= TAP_MAX_MOVE_PX) {
         const now = performance.now();
         const isDoubleTap = now - lastTapAt <= DOUBLE_TAP_MAX_MS;
         lastTapAt = isDoubleTap ? 0 : now;
@@ -508,11 +463,10 @@ export const knob: KnobPrimitive = definePrimitive({
         return;
       }
       lastTapAt = 0;
-      if (current.changed) {
+      if (ended.changed) {
         commit(turned, "drag", end);
       }
     };
-    context.onDestroy(() => gesture?.stop());
 
     return {
       keyDown: (event: KeyboardEvent) => {
@@ -541,19 +495,13 @@ export const knob: KnobPrimitive = definePrimitive({
         return true;
       },
       press: (event: PointerEvent, control: HTMLElement) => {
-        const current = state();
-        if (current.disabled) {
+        if (
+          state().disabled ||
+          !gestures.accepts(event, (stale) => finish(event, stale, false))
+        ) {
           return;
         }
-        if (gesture) {
-          // Another finger does not take the gesture over; the same pointer
-          // pressing again means its release was missed, so that drag ends here.
-          if (gesture.pointerId !== event.pointerId) {
-            return;
-          }
-          gesture.stop();
-          finish(event, false);
-        }
+        const current = state();
         // Alt and a press returns to the default, as in a DAW.
         if (event.altKey) {
           setAtOnce(resetValue(current), "reset", event);
@@ -567,16 +515,13 @@ export const knob: KnobPrimitive = definePrimitive({
           maxDistance: 0,
           position: fractionOf(displayed(current), current, current.scale),
           rect,
-          pointerId: event.pointerId,
           startX: event.clientX,
           startY: event.clientY,
-          stop: () => undefined,
         };
-        gesture = started;
         context.store.set({ dragging: true } as never);
-        started.stop = bindDrag(control, event, {
-          onEnd: (end, canceled) => finish(end, !canceled),
-          onMove: ({ event: move }) => {
+        gestures.start(control, event, started, {
+          onEnd: (end, ended, canceled) => finish(end, ended, !canceled),
+          onMove: (move) => {
             started.maxDistance = Math.max(
               started.maxDistance,
               Math.hypot(
