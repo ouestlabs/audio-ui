@@ -18,6 +18,7 @@ import { Timeline } from "@/registry-audio/bases/base/primitives/timeline/react.
 import { Waveform } from "@/registry-audio/bases/base/primitives/waveform/react.tsx";
 import { XYPad } from "@/registry-audio/bases/base/primitives/xypad/react.tsx";
 import { XYPad as VueXYPad } from "@/registry-audio/bases/base/primitives/xypad/vue.ts";
+import { range } from "./helpers.ts";
 
 /** What a fader at 25 and a pad at (25, 75) hold in their server HTML, before any script runs. */
 const faderFeatures = (markup: string) => ({
@@ -89,14 +90,14 @@ describe("server rendering of the fader and the XY pad", () => {
   test("the meter writes its channels, levels and indicators, in React and Vue", async () => {
     const meter = (markup: string) => ({
       channels: markup.match(/role="meter"/g)?.length,
-      indicator: /scaleY\(0\.5\)/.test(markup),
+      indicator: markup.includes("scaleY(0.5)"),
       level: markup.includes('aria-valuenow="-30"'),
     });
     const expected = { channels: 2, indicator: true, level: true };
     const react = renderToString(
       <Meter.Root max={0} min={-60} value={[-30, -60]}>
         {({ channelCount }) =>
-          Array.from({ length: channelCount }, (_, index) => (
+          range(channelCount).map((index) => (
             <Meter.Channel index={index} key={index}>
               <Meter.Indicator />
               <Meter.Value />
@@ -146,10 +147,10 @@ describe("server rendering of the fader and the XY pad", () => {
             <Envelope.Graph>
               <Envelope.Line />
             </Envelope.Graph>
-            {value.map((_, index) => (
+            {range(value.length).map((index) => (
               <Envelope.Point index={index} key={index} />
             ))}
-            {value.slice(0, -1).map((_, index) => (
+            {range(value.length - 1).map((index) => (
               <Envelope.Segment index={index} key={index} />
             ))}
           </>
@@ -220,9 +221,9 @@ describe("server rendering of the fader and the XY pad", () => {
         ]}
       >
         {({ rows, steps }) =>
-          Array.from({ length: rows }, (_, row) => (
+          range(rows).map((row) => (
             <Sequencer.Row index={row} key={row}>
-              {Array.from({ length: steps }, (_, step) => (
+              {range(steps).map((step) => (
                 <Sequencer.Cell key={step} row={row} step={step} />
               ))}
             </Sequencer.Row>

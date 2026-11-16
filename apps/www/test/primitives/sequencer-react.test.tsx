@@ -1,6 +1,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/react.tsx";
+import { range } from "./helpers.ts";
 import { sequencerSuite } from "./sequencer-suite.ts";
 
 sequencerSuite("React", async ({ options, velocityBars }) => {
@@ -10,13 +11,13 @@ sequencerSuite("React", async ({ options, velocityBars }) => {
     root.render(
       <Sequencer.Root {...options}>
         {({ rows, steps }) =>
-          Array.from({ length: rows }, (_, row) => (
+          range(rows).map((row) => (
             <Sequencer.Row index={row} key={row}>
-              {Array.from({ length: steps }, (_, step) => (
+              {range(steps).map((step) => (
                 <Sequencer.Cell key={step} row={row} step={step} />
               ))}
               {velocityBars
-                ? Array.from({ length: steps }, (_, step) => (
+                ? range(steps).map((step) => (
                     <Sequencer.Velocity key={step} row={row} step={step} />
                   ))
                 : null}

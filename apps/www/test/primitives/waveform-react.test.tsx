@@ -6,7 +6,7 @@ import { waveformSuite } from "./waveform-suite.ts";
 waveformSuite("React", async (tree) => {
   const container = document.body.appendChild(document.createElement("div"));
   const root = createRoot(container);
-  const region = tree.region;
+  const { region } = tree;
   await act(() => {
     root.render(
       <Waveform.Root {...(tree.options as object)}>

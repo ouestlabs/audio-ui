@@ -1,4 +1,5 @@
 import "@/registry-audio/bases/base/primitives/timeline/web.ts";
+import { flush } from "./helpers.ts";
 import { type TimelineTree, timelineSuite } from "./timeline-suite.ts";
 
 const kebab = (name: string) =>
@@ -138,10 +139,7 @@ timelineSuite("custom elements", async (tree: TimelineTree) => {
       reason: detail.reason as string,
     })
   );
-  for (let tick = 0; tick < 3; tick += 1) {
-    await Promise.resolve();
-  }
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await flush(3);
   return {
     act: async (interact) => {
       interact();

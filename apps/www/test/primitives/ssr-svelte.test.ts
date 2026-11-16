@@ -6,6 +6,10 @@ import MeterFixture from "./fixtures/meter.svelte";
 import XYPadFixture from "./fixtures/xypad.svelte";
 import { EVERY_FEATURE, serverFeatures } from "./server-html.ts";
 
+const BOTTOM_25 = /bottom:\s?25%/;
+const LEFT_25 = /left:\s?25%/;
+const METER_ROLE = /role="meter"/g;
+
 // Components compiled for the server run apart: `bun run test:svelte-server`.
 describe.skipIf(process.env.SVELTE_GENERATE !== "server")(
   "server rendering in Svelte",
@@ -33,7 +37,7 @@ describe.skipIf(process.env.SVELTE_GENERATE !== "server")(
         },
       }).body;
       expect(fader).toContain('type="range"');
-      expect(fader).toMatch(/bottom:\s?25%/);
+      expect(fader).toMatch(BOTTOM_25);
       const pad = render(XYPadFixture, {
         props: {
           options: { value: { x: 25, y: 75 } },
@@ -41,7 +45,7 @@ describe.skipIf(process.env.SVELTE_GENERATE !== "server")(
         },
       }).body;
       expect(pad.match(/type="range"/g)).toHaveLength(2);
-      expect(pad).toMatch(/left:\s?25%/);
+      expect(pad).toMatch(LEFT_25);
     });
 
     test("the meter writes its channels, levels and indicators", () => {
@@ -51,8 +55,8 @@ describe.skipIf(process.env.SVELTE_GENERATE !== "server")(
           options: { max: 0, min: -60, value: [-30, -60] },
         },
       });
-      expect(body.match(/role="meter"/g)).toHaveLength(2);
-      expect(body).toMatch(/scaleY\(0\.5\)/);
+      expect(body.match(METER_ROLE)).toHaveLength(2);
+      expect(body).toContain("scaleY(0.5)");
       expect(body).toContain('aria-valuenow="-30"');
     });
   }

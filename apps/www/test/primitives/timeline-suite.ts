@@ -159,10 +159,10 @@ async function render(
     }
   }
   const part = (slot: string) => one(slot);
-  const inputOf = (part: HTMLElement | null) =>
-    part?.matches("input")
-      ? (part as HTMLInputElement)
-      : (part?.querySelector("input") as HTMLInputElement);
+  const inputOf = (element: HTMLElement | null) =>
+    element?.matches("input")
+      ? (element as HTMLInputElement)
+      : (element?.querySelector("input") as HTMLInputElement);
   return {
     ...mounted,
     part,

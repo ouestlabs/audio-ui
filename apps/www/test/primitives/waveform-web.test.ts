@@ -1,4 +1,5 @@
 import "@/registry-audio/bases/base/primitives/waveform/web.ts";
+import { flush } from "./helpers.ts";
 import { type WaveformTree, waveformSuite } from "./waveform-suite.ts";
 
 const kebab = (name: string) =>
@@ -134,10 +135,7 @@ waveformSuite("custom elements", async (tree: WaveformTree) => {
       reason: detail.reason,
     });
   });
-  for (let tick = 0; tick < 3; tick += 1) {
-    await Promise.resolve();
-  }
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await flush(3);
   return {
     act: async (interact) => {
       interact();

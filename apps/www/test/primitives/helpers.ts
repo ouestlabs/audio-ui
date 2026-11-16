@@ -103,3 +103,17 @@ export function installFrames() {
     },
   };
 }
+
+/** The numbers 0 to length - 1: indexes that keys can be made from. */
+export const range = (length: number) =>
+  Array.from({ length }, (_, index) => index);
+
+/** Lets the microtasks queued so far run, then the timers due now. */
+export async function flush(ticks = 3): Promise<void> {
+  if (ticks > 0) {
+    await Promise.resolve();
+    await flush(ticks - 1);
+    return;
+  }
+  await new Promise((resolve) => setTimeout(resolve, 0));
+}

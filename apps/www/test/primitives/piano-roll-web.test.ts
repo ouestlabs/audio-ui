@@ -1,4 +1,5 @@
 import "@/registry-audio/bases/base/primitives/piano-roll/web.ts";
+import { flush } from "./helpers.ts";
 import { type PianoRollTree, pianoRollSuite } from "./piano-roll-suite.ts";
 
 const kebab = (name: string) =>
@@ -70,10 +71,7 @@ pianoRollSuite("custom elements", async (tree: PianoRollTree) => {
       reason: detail.reason as string,
     })
   );
-  for (let tick = 0; tick < 4; tick += 1) {
-    await Promise.resolve();
-  }
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await flush(4);
   return {
     act: async (interact) => {
       interact();

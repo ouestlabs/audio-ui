@@ -7,7 +7,7 @@ import {
   plot,
 } from "@audio-ui/primitives/plot";
 import { createParts } from "@ui-sdk/react/primitive";
-import type { ComponentProps, ReactNode } from "react";
+import { type ComponentProps, type ReactNode, useCallback } from "react";
 
 /** Which element each part is. */
 const parts = createParts(plot, {
@@ -175,9 +175,12 @@ function Handle({
   handle,
   ...props
 }: HandleProps) {
-  const nameOf = (along: "x" | "y") =>
-    getAriaLabel?.(along) ??
-    (label && axis === "both" ? `${label} ${along.toUpperCase()}` : label);
+  const nameOf = useCallback(
+    (along: "x" | "y") =>
+      getAriaLabel?.(along) ??
+      (label && axis === "both" ? `${label} ${along.toUpperCase()}` : label),
+    [axis, getAriaLabel, label]
+  );
   return (
     <parts.Handle {...props} axis={axis} handle={handle}>
       {(state) => (

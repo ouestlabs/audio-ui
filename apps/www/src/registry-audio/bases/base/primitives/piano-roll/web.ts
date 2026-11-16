@@ -130,12 +130,12 @@ const numberAttribute = (value: string | null) =>
   value === null ? undefined : Number(value);
 
 /** `folded` is on, off, or `"scale"`. */
-const foldedAttribute = (value: string | null) =>
-  value === null || value === "false"
-    ? undefined
-    : value === "scale"
-      ? "scale"
-      : true;
+const foldedAttribute = (value: string | null) => {
+  if (value === null || value === "false") {
+    return;
+  }
+  return value === "scale" ? "scale" : true;
+};
 
 /**
  * The whole web adapter of the piano roll: a tag for each part. The notes, the

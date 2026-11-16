@@ -2,6 +2,9 @@ import { describe, expect, test } from "bun:test";
 import { createSource } from "@audio-ui/core";
 import { key, mockRect, pointer } from "./helpers.ts";
 
+const MARK_LEFT = /left: (49\.9|50|50\.0)/;
+const HANDLE_TOP = /top: (20|19\.9\d*)%/;
+
 /**
  * One suite for the plot in every framework: it writes no markup of its own,
  * only drives the DOM a framework renders from the same `plot.ts`, and finds
@@ -184,7 +187,7 @@ export function plotSuite(framework: string, mount: MountPlot) {
         { mark: { axis: "x", value: 632.456 } },
         { maxX: 20_000, minX: 20, scaleX: "log" }
       );
-      expect(styleOf(p.mark)).toMatch(/left: (49\.9|50|50\.0)/);
+      expect(styleOf(p.mark)).toMatch(MARK_LEFT);
       p.unmount();
     });
 
@@ -332,7 +335,7 @@ export function plotSuite(framework: string, mount: MountPlot) {
         handle: { handle: "a", value: { x: 20, y: 80 } },
       });
       expect(styleOf(p.handle)).toContain("left: 20%");
-      expect(styleOf(p.handle)).toMatch(/top: (20|19\.9\d*)%/);
+      expect(styleOf(p.handle)).toMatch(HANDLE_TOP);
       p.unmount();
     });
 

@@ -1,6 +1,7 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { Meter } from "@/registry-audio/bases/base/primitives/meter/react.tsx";
+import { range } from "./helpers.ts";
 import { decibels, meterSuite } from "./meter-suite.ts";
 
 meterSuite("React", async ({ labels, marks, options }) => {
@@ -14,7 +15,7 @@ meterSuite("React", async ({ labels, marks, options }) => {
             {(marks ?? []).map((mark) => (
               <Meter.Mark key={mark} value={mark} />
             ))}
-            {Array.from({ length: channelCount }, (_, index) => (
+            {range(channelCount).map((index) => (
               <Meter.Channel
                 aria-label={`Output ${index + 1}`}
                 getAriaValueText={decibels}

@@ -139,15 +139,16 @@ export function sequencerSuite(framework: string, mount: MountSequencer) {
       expect(s.changes.at(-1)?.[0][0]).toEqual([true, true, false, false]);
       expect(s.cell(0, 1).getAttribute("aria-pressed")).toBe("true");
       // A pointer reports each cell it crosses on its way.
-      for (const clientX of [250, 350]) {
-        await s.act(() =>
+      const cross = (clientX: number) =>
+        s.act(() =>
           pointer(s.cell(0, 1), "pointermove", {
             clientX,
             clientY: 25,
             pointerId: 1,
           })
         );
-      }
+      await cross(250);
+      await cross(350);
       // The drag carries the new state across the cells it crosses.
       expect(s.changes.at(-1)?.[0][0]).toEqual([true, true, true, true]);
       await s.act(() =>

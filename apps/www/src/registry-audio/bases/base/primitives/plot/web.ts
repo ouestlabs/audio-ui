@@ -58,7 +58,7 @@ function drawGrid(
 ) {
   const columns = ticksOf(axes.x, part.x as never);
   const rows = ticksOf(axes.y, part.y as never);
-  const svg = shapeIn(part, "g").svg;
+  const { svg } = shapeIn(part, "g");
   const group = svg.querySelector("g") as Element;
   const lines: string[] = [];
   for (const tick of columns) {
@@ -112,6 +112,66 @@ function drawGrid(
   }
 }
 
+type PlotAxes = PlotState["axes"];
+
+/** The curves and traces: a path each, from a function or a live source. */
+function paintPaths(el: HTMLElement, axes: PlotAxes) {
+  for (const curve of el.querySelectorAll<
+    HTMLElement & { fn?: (x: number) => number }
+  >("audio-ui-plot-curve")) {
+    const d = curve.fn
+      ? curveOf(
+          axes,
+          curve.fn,
+          numberOf(curve, "samples"),
+          numberOf(curve, "fill-to")
+        )
+      : "";
+    shapeIn(curve, "path", { "data-plot": "path", d });
+  }
+  for (const trace of el.querySelectorAll<
+    HTMLElement & { source?: { getSnapshot: () => ArrayLike<number> } }
+  >("audio-ui-plot-trace")) {
+    const d = trace.source
+      ? traceOf(axes, trace.source.getSnapshot(), {
+          fillTo: numberOf(trace, "fill-to"),
+          max: numberOf(trace, "max"),
+          min: numberOf(trace, "min"),
+        })
+      : "";
+    shapeIn(trace, "path", { "data-plot": "path", d });
+  }
+}
+
+/** The lines and bands: a value or a range on one axis. */
+function paintMarks(el: HTMLElement, axes: PlotAxes) {
+  for (const line of el.querySelectorAll("audio-ui-plot-line")) {
+    const axis = line.getAttribute("axis") === "y" ? "y" : "x";
+    const ends = lineOf(axes, axis, numberOf(line, "value") ?? 0);
+    shapeIn(line, "line", {
+      x1: String(ends.x1),
+      x2: String(ends.x2),
+      y1: String(ends.y1),
+      y2: String(ends.y2),
+    });
+  }
+  for (const band of el.querySelectorAll("audio-ui-plot-band")) {
+    const axis = band.getAttribute("axis") === "y" ? "y" : "x";
+    const box = bandOf(
+      axes,
+      axis,
+      numberOf(band, "from") ?? 0,
+      numberOf(band, "to") ?? 0
+    );
+    shapeIn(band, "rect", {
+      height: String(box.height),
+      width: String(box.width),
+      x: String(box.x),
+      y: String(box.y),
+    });
+  }
+}
+
 /** The path a part draws is written as its child. */
 function drawParts(
   el: HTMLElement,
@@ -122,56 +182,8 @@ function drawParts(
 ) {
   const paint = () => {
     const { axes } = instance.get() as PlotState;
-    for (const curve of el.querySelectorAll<
-      HTMLElement & { fn?: (x: number) => number }
-    >("audio-ui-plot-curve")) {
-      const d = curve.fn
-        ? curveOf(
-            axes,
-            curve.fn,
-            numberOf(curve, "samples"),
-            numberOf(curve, "fill-to")
-          )
-        : "";
-      shapeIn(curve, "path", { "data-plot": "path", d });
-    }
-    for (const trace of el.querySelectorAll<
-      HTMLElement & { source?: { getSnapshot: () => ArrayLike<number> } }
-    >("audio-ui-plot-trace")) {
-      const d = trace.source
-        ? traceOf(axes, trace.source.getSnapshot(), {
-            fillTo: numberOf(trace, "fill-to"),
-            max: numberOf(trace, "max"),
-            min: numberOf(trace, "min"),
-          })
-        : "";
-      shapeIn(trace, "path", { "data-plot": "path", d });
-    }
-    for (const line of el.querySelectorAll("audio-ui-plot-line")) {
-      const axis = line.getAttribute("axis") === "y" ? "y" : "x";
-      const ends = lineOf(axes, axis, numberOf(line, "value") ?? 0);
-      shapeIn(line, "line", {
-        x1: String(ends.x1),
-        x2: String(ends.x2),
-        y1: String(ends.y1),
-        y2: String(ends.y2),
-      });
-    }
-    for (const band of el.querySelectorAll("audio-ui-plot-band")) {
-      const axis = band.getAttribute("axis") === "y" ? "y" : "x";
-      const box = bandOf(
-        axes,
-        axis,
-        numberOf(band, "from") ?? 0,
-        numberOf(band, "to") ?? 0
-      );
-      shapeIn(band, "rect", {
-        height: String(box.height),
-        width: String(box.width),
-        x: String(box.x),
-        y: String(box.y),
-      });
-    }
+    paintPaths(el, axes);
+    paintMarks(el, axes);
     for (const grid of el.querySelectorAll("audio-ui-plot-grid")) {
       drawGrid(grid, axes);
     }

@@ -1,4 +1,5 @@
 import "@/registry-audio/bases/base/primitives/plot/web.ts";
+import { flush } from "./helpers.ts";
 import { type PlotTree, plotSuite } from "./plot-suite.ts";
 
 const kebab = (name: string) =>
@@ -115,10 +116,7 @@ plotSuite("custom elements", async (tree: PlotTree) => {
     }>;
     tree.options.onValueCommitted(detail.value, { reason: detail.reason });
   });
-  for (let tick = 0; tick < 3; tick += 1) {
-    await Promise.resolve();
-  }
-  await new Promise((resolve) => setTimeout(resolve, 0));
+  await flush(3);
   return {
     act: async (interact) => {
       interact();

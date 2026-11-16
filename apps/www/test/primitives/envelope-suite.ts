@@ -96,11 +96,17 @@ async function render(mount: MountEnvelope, options: EnvelopeOptions = {}) {
 }
 
 /** Waits for a signal the controller raises a frame after the change, so an animation can replay. */
-async function until(check: () => boolean, tick: () => Promise<void>) {
-  for (let attempt = 0; attempt < 30 && !check(); attempt += 1) {
-    await new Promise((resolve) => setTimeout(resolve, 20));
-    await tick();
+async function until(
+  check: () => boolean,
+  tick: () => Promise<void>,
+  attempts = 30
+): Promise<void> {
+  if (check() || attempts === 0) {
+    return;
   }
+  await new Promise((resolve) => setTimeout(resolve, 20));
+  await tick();
+  await until(check, tick, attempts - 1);
 }
 
 const styleOf = (element: HTMLElement | undefined) =>

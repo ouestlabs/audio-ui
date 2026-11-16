@@ -67,9 +67,10 @@ type BarsProps = Omit<ComponentProps<typeof parts.Bars>, "children"> & {
 
 /** The levels as a fixed number of elements, one `Waveform.Bar` each, styled in plain CSS from `--waveform-level`. */
 function Bars({ children, count = 24, ...props }: BarsProps) {
+  const indexes = Array.from({ length: count }, (_, index) => index);
   return (
     <parts.Bars count={count} {...props}>
-      {Array.from({ length: count }, (_, index) =>
+      {indexes.map((index) =>
         children ? (
           children(index, count)
         ) : (

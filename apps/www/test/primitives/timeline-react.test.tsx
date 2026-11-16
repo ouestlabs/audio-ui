@@ -50,6 +50,7 @@ timelineSuite("React", async (tree) => {
       ) : null}
     </>
   );
+  const rulerContent = tree.lane ? null : inner;
   await act(() => {
     root.render(
       <Timeline.Root {...(tree.options as object)}>
@@ -63,7 +64,7 @@ timelineSuite("React", async (tree) => {
         <Timeline.Viewport>
           {tree.ruler ? (
             <Timeline.Ruler aria-label={tree.ruler.label}>
-              {tree.lane ? null : inner}
+              {rulerContent}
             </Timeline.Ruler>
           ) : null}
           {tree.lane ? (

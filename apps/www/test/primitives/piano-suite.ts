@@ -128,12 +128,12 @@ export function pianoSuite(framework: string, mount: MountPiano) {
 
     test("an even layout gives each key an equal share, and a vertical one runs from the bottom", async () => {
       const even = await render(mount);
-      expect(styleOf(even.key(61))).toMatch(/left: 33\.3/);
-      expect(styleOf(even.key(61))).toMatch(/width: 33\.3/);
+      expect(styleOf(even.key(61))).toContain("left: 33.3");
+      expect(styleOf(even.key(61))).toContain("width: 33.3");
       even.unmount();
       const vertical = await render(mount, { orientation: "vertical" });
-      expect(styleOf(vertical.key(61))).toMatch(/bottom: 33\.3/);
-      expect(styleOf(vertical.key(61))).toMatch(/height: 33\.3/);
+      expect(styleOf(vertical.key(61))).toContain("bottom: 33.3");
+      expect(styleOf(vertical.key(61))).toContain("height: 33.3");
       vertical.unmount();
     });
 

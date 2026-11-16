@@ -257,9 +257,8 @@ export function meterSuite(
       m.unmount();
     });
 
-    test.skipIf(!dynamicCount)(
-      "the channels follow a live source that changes its channel count",
-      async () => {
+    if (dynamicCount) {
+      test("the channels follow a live source that changes its channel count", async () => {
         const source = createSource<MeterFrame>({ levels: [-30] });
         const m = await render(mount, { max: 0, min: -60, source });
         expect(
@@ -272,7 +271,7 @@ export function meterSuite(
         expect(channels).toHaveLength(3);
         expect(channels[2]?.getAttribute("aria-valuenow")).toBe("-10");
         m.unmount();
-      }
-    );
+      });
+    }
   });
 }

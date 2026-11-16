@@ -17,15 +17,15 @@ function addInput(
     part.setAttribute(by, name);
   }
   const input = document.createElement("input");
-  for (const name of [
+  for (const attribute of [
     "aria-describedby",
     "aria-label",
     "aria-labelledby",
   ] as const) {
-    const value = owner.getAttribute(name);
+    const value = owner.getAttribute(attribute);
     if (value !== null) {
-      input.setAttribute(name, value);
-      owner.removeAttribute(name);
+      input.setAttribute(attribute, value);
+      owner.removeAttribute(attribute);
     }
   }
   for (const type of ["input", "change"]) {

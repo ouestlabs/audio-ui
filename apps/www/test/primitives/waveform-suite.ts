@@ -83,11 +83,11 @@ async function render(
       },
       onValueChange: (value, details) => {
         changes.push([value, details.reason, details.source]);
-        (options.onValueChange as typeof details.cancel | undefined) &&
-          (options.onValueChange as (v: number, d: ChangeDetails) => void)(
-            value,
-            details
-          );
+        (
+          options.onValueChange as
+            | ((v: number, d: ChangeDetails) => void)
+            | undefined
+        )?.(value, details);
       },
       onValueCommitted: (value, details) => {
         commits.push([value, details.reason]);

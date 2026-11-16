@@ -1,5 +1,6 @@
 import { createApp, h, nextTick } from "vue";
 import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/vue.ts";
+import { range } from "./helpers.ts";
 import { sequencerSuite } from "./sequencer-suite.ts";
 
 sequencerSuite("Vue", async ({ options, velocityBars }) => {
@@ -8,13 +9,13 @@ sequencerSuite("Vue", async ({ options, velocityBars }) => {
     render: () =>
       h(Sequencer.Root, options, {
         default: ({ state }: { state: { rows: number; steps: number } }) =>
-          Array.from({ length: state.rows }, (_, row) =>
+          range(state.rows).map((row) =>
             h(Sequencer.Row, { index: row, key: row }, () => [
-              ...Array.from({ length: state.steps }, (_, step) =>
+              ...range(state.steps).map((step) =>
                 h(Sequencer.Cell, { key: step, row, step })
               ),
               ...(velocityBars
-                ? Array.from({ length: state.steps }, (_, step) =>
+                ? range(state.steps).map((step) =>
                     h(Sequencer.Velocity, { key: step, row, step })
                   )
                 : []),

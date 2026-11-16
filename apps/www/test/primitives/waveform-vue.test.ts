@@ -4,7 +4,7 @@ import { waveformSuite } from "./waveform-suite.ts";
 
 waveformSuite("Vue", async (tree) => {
   const container = document.body.appendChild(document.createElement("div"));
-  const region = tree.region;
+  const { region } = tree;
   const app = createApp({
     render: () =>
       h(Waveform.Root, tree.options as never, () => [
