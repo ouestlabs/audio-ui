@@ -2,7 +2,7 @@ import { describe, expect, test } from "bun:test";
 import { withExamples, withUsage } from "../scripts/react-usage.ts";
 import { REACT_USAGES } from "../src/lib/docs/content/react-usage.ts";
 
-const PAGES = `${import.meta.dir}/../src/content/docs/react-package`;
+const PAGES = `${import.meta.dir}/../src/content/docs/primitives`;
 
 describe("React usage", () => {
   test("every primitive's page holds its usage in each styling, as the table writes it", async () => {

@@ -7,7 +7,7 @@
     "engine",
     "gl",
     "elements",
-    "react",
+    "primitives",
     "(registry)",
     "components",
     "hooks",

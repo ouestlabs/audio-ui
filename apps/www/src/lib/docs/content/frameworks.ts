@@ -60,7 +60,7 @@ export function shownTo(url: string, framework: FrameworkId | null): boolean {
 /** The elements' overview, whose tabs show a reader the setup of their framework. */
 export const ELEMENTS = "/docs/elements";
 /** React's primitives, the elements' twins. */
-const REACT_PRIMITIVES = "/docs/react-package";
+const REACT_PRIMITIVES = "/docs/primitives";
 /** The primitives with a page in both Elements and React, by their last segment, the overviews with them. */
 const TWINS = new Set([
   "",

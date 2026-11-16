@@ -2,7 +2,7 @@
  * The framework addresses of the docs: `/docs/vue/knob` is the page of the
  * knob on the UI SDK, read for Vue. They are the same pages under another
  * address, so the router rewrites them to the page's own address with the
- * framework in a `?framework=` that only the router sees, and back the other way: an address the reader sees never has it. Every page of the docs a framework is shown has one (`/docs/vue/guides/output`), but the sections that are one framework's own, React's primitives (`/docs/react-package`) and the elements: their pages stay where they are.
+ * framework in a `?framework=` that only the router sees, and back the other way: an address the reader sees never has it. Every page of the docs a framework is shown has one (`/docs/vue/guides/output`), but the sections that are one framework's own, React's primitives (`/docs/primitives`) and the elements: their pages stay where they are.
  */
 
 /** The addresses only a React app uses: React's primitives, the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs are every framework's. */
@@ -14,12 +14,12 @@ export const REACT_ADDRESSES = [
   "/docs/guides",
   "/docs/hooks",
   "/docs/lib",
-  "/docs/react-package",
+  "/docs/primitives",
   "/docs/styling",
 ];
 
 /** The sections of one framework, which have no address per framework: React's primitives and the elements. */
-const OWN_SECTIONS = ["/docs/elements", "/docs/react-package"];
+const OWN_SECTIONS = ["/docs/elements", "/docs/primitives"];
 
 export const under = (url: string, prefix: string) =>
   url === prefix || url.startsWith(`${prefix}/`);

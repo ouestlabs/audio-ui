@@ -61,7 +61,7 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
     },
     {
       elementsHref: "/docs/elements",
-      href: "/docs/react-package",
+      href: "/docs/primitives",
       label: "Primitives",
       // The primitives are the entries the elements and React share: the elements' own, less the types of its frameworks.
       value: String(

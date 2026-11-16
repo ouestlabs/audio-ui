@@ -32,8 +32,8 @@ export const DOCS_SECTIONS = [
   },
   {
     description: "Headless primitives for React",
-    folders: ["react-package"],
-    href: "/docs/react-package",
+    folders: ["primitives"],
+    href: "/docs/primitives",
     id: "react",
     label: "React",
   },
