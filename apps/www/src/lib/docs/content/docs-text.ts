@@ -9,6 +9,7 @@ import {
   parseAttrs,
   replaceFrontmatter,
 } from "@/lib/docs/content/mdx-to-markdown";
+import { expandPrimitiveApi } from "@/lib/docs/content/primitive-api";
 import {
   expandLinkCards,
   expandQuickStart,
@@ -58,7 +59,9 @@ export async function processMdxForLLMs(content: string): Promise<string> {
         expandDeviceUsage(
           expandInstall(
             expandDeviceControls(
-              expandLinkCards(expandQuickStart(replaceFrontmatter(content)))
+              expandPrimitiveApi(
+                expandLinkCards(expandQuickStart(replaceFrontmatter(content)))
+              )
             )
           ).replace(ELEMENTS_PREVIEW_REGEX, "")
         )

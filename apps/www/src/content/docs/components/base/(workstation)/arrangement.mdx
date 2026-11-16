@@ -1035,3 +1035,24 @@ In the web adapter, the position is the `input` and `change` events, and the res
 - `data-scrubbing` on the Root while a pointer moves the position, `data-fitted` while no zoom is set, `data-disabled` on every part.
 - `data-selected`, `data-dragging` and `data-fading` (`in` or `out`) on a clip and its parts, `data-edge` on a handle, `data-clip`, `data-range`, `data-track` for the name.
 - A clip sets `--clip-offset`, `--clip-source-length`, `--clip-fade-in`, `--clip-fade-out`, their `-max` and `--clip-unit` for what you draw inside it, such as a waveform.
+
+### Parts
+
+<ForFrameworks only="react vue svelte">
+
+<PrimitiveParts name="timeline" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+The tags the web adapter registers: the inputs inside a part are made for you.
+
+<PrimitiveTags name="timeline" />
+
+</ForFrameworks>
+
+### Events
+
+<PrimitiveEvents name="timeline" />
+

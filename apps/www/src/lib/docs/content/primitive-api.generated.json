@@ -1,0 +1,2205 @@
+[
+  {
+    "actions": [],
+    "component": "Envelope",
+    "events": [
+      {
+        "callback": "onValueChange",
+        "event": "input",
+        "vue": "value-change"
+      },
+      {
+        "callback": "onValueCommitted",
+        "event": "change",
+        "vue": "value-committed"
+      }
+    ],
+    "name": "envelope",
+    "options": [
+      {
+        "description": "Uncontrolled starting points. Defaults to an ADSR-like shape.",
+        "name": "defaultValue",
+        "optional": true,
+        "type": "Breakpoint[]"
+      },
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "description": "How point coordinates are written, e.g. `{ maximumFractionDigits: 2 }`.",
+        "name": "format",
+        "optional": true,
+        "type": "Intl.NumberFormatOptions"
+      },
+      {
+        "description": "",
+        "name": "locale",
+        "optional": true,
+        "type": "Intl.LocalesArgument"
+      },
+      {
+        "description": "",
+        "name": "onValueChange",
+        "optional": true,
+        "type": "(value: Breakpoint[], details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onValueCommitted",
+        "optional": true,
+        "type": "(value: Breakpoint[], details: CommitDetails) => void"
+      },
+      {
+        "default": "0.01",
+        "description": "Keyboard step on both axes, in normalized units.",
+        "name": "step",
+        "optional": true,
+        "type": "number"
+      }
+    ],
+    "parts": [
+      {
+        "element": "svg",
+        "name": "Fill",
+        "props": {
+          "strokeWidth": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Graph",
+        "props": {}
+      },
+      {
+        "element": "svg",
+        "name": "Line",
+        "props": {
+          "strokeWidth": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Point",
+        "props": {
+          "getAriaValueText": "value",
+          "index": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Segment",
+        "props": {
+          "getAriaValueText": "value",
+          "index": "key"
+        }
+      }
+    ],
+    "tags": [
+      "audio-ui-envelope",
+      "audio-ui-envelope-fill",
+      "audio-ui-envelope-graph",
+      "audio-ui-envelope-line",
+      "audio-ui-envelope-point",
+      "audio-ui-envelope-segment"
+    ]
+  },
+  {
+    "actions": [
+      "setValue"
+    ],
+    "component": "Fader",
+    "events": [
+      {
+        "callback": "onValueChange",
+        "event": "input",
+        "vue": "value-change"
+      },
+      {
+        "callback": "onValueCommitted",
+        "event": "change",
+        "vue": "value-committed"
+      }
+    ],
+    "name": "fader",
+    "options": [
+      {
+        "description": "Value the fill starts from, such as `0` on a -1…1 pan. Defaults to `min`.",
+        "name": "anchor",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "description": "How the value is written, e.g. `{ maximumFractionDigits: 1 }`.",
+        "name": "format",
+        "optional": true,
+        "type": "Intl.NumberFormatOptions"
+      },
+      {
+        "default": "10",
+        "description": "Step for Page Up/Page Down and Shift + arrow keys.",
+        "name": "largeStep",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "locale",
+        "optional": true,
+        "type": "Intl.LocalesArgument"
+      },
+      {
+        "default": "6",
+        "description": "",
+        "name": "max",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "-60",
+        "description": "",
+        "name": "min",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "The form field's name, which the native input carries.",
+        "name": "name",
+        "optional": true,
+        "type": "string"
+      },
+      {
+        "description": "",
+        "name": "onValueChange",
+        "optional": true,
+        "type": "(value: number, details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onValueCommitted",
+        "optional": true,
+        "type": "(value: number, details: CommitDetails) => void"
+      },
+      {
+        "default": "\"vertical\"",
+        "description": "",
+        "name": "orientation",
+        "optional": true,
+        "type": "FaderOrientation"
+      },
+      {
+        "default": "1",
+        "description": "",
+        "name": "step",
+        "optional": true,
+        "type": "number"
+      }
+    ],
+    "parts": [
+      {
+        "element": "div",
+        "name": "Control",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Indicator",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Label",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Mark",
+        "props": {
+          "value": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Thumb",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Track",
+        "props": {}
+      },
+      {
+        "element": "output",
+        "name": "Value",
+        "props": {}
+      }
+    ],
+    "tags": [
+      "audio-ui-fader",
+      "audio-ui-fader-control",
+      "audio-ui-fader-indicator",
+      "audio-ui-fader-input",
+      "audio-ui-fader-label",
+      "audio-ui-fader-mark",
+      "audio-ui-fader-thumb",
+      "audio-ui-fader-track",
+      "audio-ui-fader-value"
+    ]
+  },
+  {
+    "actions": [
+      "setValue"
+    ],
+    "component": "Knob",
+    "events": [
+      {
+        "callback": "onValueChange",
+        "event": "input",
+        "vue": "value-change"
+      },
+      {
+        "callback": "onValueCommitted",
+        "event": "change",
+        "vue": "value-committed"
+      }
+    ],
+    "name": "knob",
+    "options": [
+      {
+        "description": "Value the indicator arc grows from, such as `0` on a -1…1 pan. Defaults to `min`.",
+        "name": "anchor",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "default": "\"circular\"",
+        "description": "",
+        "name": "dragMode",
+        "optional": true,
+        "type": "KnobDragMode"
+      },
+      {
+        "description": "How the value is written, e.g. `{ maximumFractionDigits: 1 }`.",
+        "name": "format",
+        "optional": true,
+        "type": "Intl.NumberFormatOptions"
+      },
+      {
+        "default": "10",
+        "description": "Step for Page Up/Page Down and Shift + arrow keys.",
+        "name": "largeStep",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "locale",
+        "optional": true,
+        "type": "Intl.LocalesArgument"
+      },
+      {
+        "default": "100",
+        "description": "",
+        "name": "max",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "0",
+        "description": "",
+        "name": "min",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "The form field's name, which the native input carries.",
+        "name": "name",
+        "optional": true,
+        "type": "string"
+      },
+      {
+        "description": "",
+        "name": "onValueChange",
+        "optional": true,
+        "type": "(value: number, details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onValueCommitted",
+        "optional": true,
+        "type": "(value: number, details: CommitDetails) => void"
+      },
+      {
+        "default": "\"linear\"",
+        "description": "",
+        "name": "scale",
+        "optional": true,
+        "type": "ParameterScaleProp"
+      },
+      {
+        "default": "1",
+        "description": "",
+        "name": "step",
+        "optional": true,
+        "type": "number"
+      }
+    ],
+    "parts": [
+      {
+        "element": "div",
+        "name": "Control",
+        "props": {}
+      },
+      {
+        "element": "svg",
+        "name": "Indicator",
+        "props": {
+          "strokeWidth": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Label",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Mark",
+        "props": {
+          "value": "number"
+        }
+      },
+      {
+        "name": "Provider",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Thumb",
+        "props": {}
+      },
+      {
+        "element": "svg",
+        "name": "Track",
+        "props": {
+          "strokeWidth": "number"
+        }
+      },
+      {
+        "element": "output",
+        "name": "Value",
+        "props": {}
+      }
+    ],
+    "tags": [
+      "audio-ui-knob",
+      "audio-ui-knob-control",
+      "audio-ui-knob-indicator",
+      "audio-ui-knob-input",
+      "audio-ui-knob-label",
+      "audio-ui-knob-mark",
+      "audio-ui-knob-thumb",
+      "audio-ui-knob-track",
+      "audio-ui-knob-value"
+    ]
+  },
+  {
+    "actions": [],
+    "component": "Meter",
+    "events": [],
+    "name": "meter",
+    "options": [
+      {
+        "default": "0",
+        "description": "Level at or above which a channel is clipping.",
+        "name": "clipThreshold",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "format",
+        "optional": true,
+        "type": "Intl.NumberFormatOptions"
+      },
+      {
+        "description": "",
+        "name": "locale",
+        "optional": true,
+        "type": "Intl.LocalesArgument"
+      },
+      {
+        "default": "6",
+        "description": "",
+        "name": "max",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "-60",
+        "description": "",
+        "name": "min",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "\"vertical\"",
+        "description": "",
+        "name": "orientation",
+        "optional": true,
+        "type": "MeterOrientation"
+      },
+      {
+        "description": "Peak-hold level per channel.",
+        "name": "peak",
+        "optional": true,
+        "type": "readonly number[]"
+      },
+      {
+        "default": "\"linear\"",
+        "description": "How levels are spread along the length.",
+        "name": "scale",
+        "optional": true,
+        "type": "LevelScale"
+      },
+      {
+        "description": "A live frame an engine pushes to, painted without a render.",
+        "name": "source",
+        "optional": true,
+        "type": "Source<MeterFrame>"
+      },
+      {
+        "description": "Level at or above which a channel is in its warning zone. Unset, there is none.",
+        "name": "warnThreshold",
+        "optional": true,
+        "type": "number"
+      }
+    ],
+    "parts": [
+      {
+        "element": "div",
+        "name": "Channel",
+        "props": {
+          "getAriaValueText": "value",
+          "index": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Indicator",
+        "props": {
+          "index": {
+            "from": "channel",
+            "kind": "number",
+            "required": true
+          }
+        }
+      },
+      {
+        "element": "span",
+        "name": "Label",
+        "props": {
+          "index": {
+            "from": "channel",
+            "kind": "number",
+            "required": true
+          }
+        }
+      },
+      {
+        "element": "div",
+        "name": "Mark",
+        "props": {
+          "value": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Peak",
+        "props": {
+          "index": {
+            "from": "channel",
+            "kind": "number",
+            "required": true
+          }
+        }
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Track",
+        "props": {}
+      },
+      {
+        "element": "span",
+        "name": "Value",
+        "props": {
+          "index": {
+            "from": "channel",
+            "kind": "number",
+            "required": true
+          }
+        }
+      }
+    ],
+    "tags": [
+      "audio-ui-meter",
+      "audio-ui-meter-channel",
+      "audio-ui-meter-indicator",
+      "audio-ui-meter-label",
+      "audio-ui-meter-mark",
+      "audio-ui-meter-peak",
+      "audio-ui-meter-track",
+      "audio-ui-meter-value"
+    ]
+  },
+  {
+    "actions": [],
+    "component": "Pad",
+    "events": [
+      {
+        "callback": "onPadOff",
+        "event": "padoff",
+        "vue": "pad-off"
+      },
+      {
+        "callback": "onPadOn",
+        "event": "padon",
+        "vue": "pad-on"
+      }
+    ],
+    "name": "pad",
+    "options": [
+      {
+        "description": "Pads lit from elsewhere, on top of the ones held here.",
+        "name": "activePads",
+        "optional": true,
+        "type": "readonly string[]"
+      },
+      {
+        "default": "4",
+        "description": "How many pads a row holds: what the up and down arrows move by.",
+        "name": "columns",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "description": "",
+        "name": "onPadOff",
+        "optional": true,
+        "type": "(value: string, details: PadOffDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onPadOn",
+        "optional": true,
+        "type": "(value: string, details: PadOnDetails) => void"
+      }
+    ],
+    "parts": [
+      {
+        "element": "button",
+        "name": "Item",
+        "props": {
+          "chokeGroup": "string",
+          "disabled": "boolean",
+          "value": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      }
+    ],
+    "tags": [
+      "audio-ui-pad",
+      "audio-ui-pad-item"
+    ]
+  },
+  {
+    "actions": [],
+    "component": "Piano",
+    "events": [
+      {
+        "callback": "onNoteOff",
+        "event": "noteoff",
+        "vue": "note-off"
+      },
+      {
+        "callback": "onNoteOn",
+        "event": "noteon",
+        "vue": "note-on"
+      }
+    ],
+    "name": "piano",
+    "options": [
+      {
+        "description": "Pitches lit from elsewhere, on top of the keys pressed here.",
+        "name": "activeNotes",
+        "optional": true,
+        "type": "readonly number[]"
+      },
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "default": "\"keyboard\"",
+        "description": "How the keys share the length: like a piano, or one equal share each.",
+        "name": "layout",
+        "optional": true,
+        "type": "KeyLayout"
+      },
+      {
+        "default": "72",
+        "description": "Highest MIDI pitch, inclusive.",
+        "name": "maxPitch",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "48",
+        "description": "Lowest MIDI pitch, inclusive: 60 is middle C.",
+        "name": "minPitch",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "onNoteOff",
+        "optional": true,
+        "type": "(pitch: number, details: NoteOffDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onNoteOn",
+        "optional": true,
+        "type": "(pitch: number, details: NoteOnDetails) => void"
+      },
+      {
+        "default": "\"horizontal\"",
+        "description": "",
+        "name": "orientation",
+        "optional": true,
+        "type": "\"horizontal\" | \"vertical\""
+      },
+      {
+        "description": "Only these pitches get keys, instead of `minPitch` to `maxPitch`.",
+        "name": "pitches",
+        "optional": true,
+        "type": "readonly number[]"
+      }
+    ],
+    "parts": [
+      {
+        "element": "button",
+        "name": "Key",
+        "props": {
+          "pitch": "key"
+        }
+      },
+      {
+        "element": "span",
+        "name": "Label",
+        "props": {
+          "pitch": {
+            "from": "key",
+            "kind": "number",
+            "required": true
+          }
+        }
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      }
+    ],
+    "tags": [
+      "audio-ui-piano",
+      "audio-ui-piano-key",
+      "audio-ui-piano-label"
+    ]
+  },
+  {
+    "actions": [
+      "setValue"
+    ],
+    "component": "PianoRoll",
+    "events": [
+      {
+        "callback": "onNoteOff",
+        "event": "noteoff",
+        "vue": "note-off"
+      },
+      {
+        "callback": "onNoteOn",
+        "event": "noteon",
+        "vue": "note-on"
+      },
+      {
+        "callback": "onSelectionChange",
+        "event": "selectionchange",
+        "vue": "selection-change"
+      },
+      {
+        "callback": "onValueChange",
+        "event": "input",
+        "vue": "value-change"
+      },
+      {
+        "callback": "onValueCommitted",
+        "event": "change",
+        "vue": "value-committed"
+      }
+    ],
+    "name": "piano-roll",
+    "options": [
+      {
+        "description": "Pitches sounding from outside: they light up their rows and keys.",
+        "name": "activePitches",
+        "optional": true,
+        "type": "readonly number[]"
+      },
+      {
+        "description": "",
+        "name": "createNoteId",
+        "optional": true,
+        "type": "() => NoteId"
+      },
+      {
+        "description": "",
+        "name": "defaultSelection",
+        "optional": true,
+        "type": "readonly NoteId[]"
+      },
+      {
+        "description": "",
+        "name": "defaultValue",
+        "optional": true,
+        "type": "readonly Note[]"
+      },
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "description": "",
+        "name": "drawStyle",
+        "optional": true,
+        "type": "\"paint\" | \"stretch\""
+      },
+      {
+        "default": "1",
+        "description": "The timeline's length, in its units.",
+        "name": "duration",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "folded",
+        "optional": true,
+        "type": "boolean | \"scale\""
+      },
+      {
+        "description": "",
+        "name": "getNoteLabel",
+        "optional": true,
+        "type": "(note: Note) => string"
+      },
+      {
+        "description": "",
+        "name": "maxPitch",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "minLength",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "minPitch",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "mode",
+        "optional": true,
+        "type": "\"draw\" | \"select\""
+      },
+      {
+        "description": "A pitch stops sounding, from a key, a note or a gesture on the grid.",
+        "name": "onNoteOff",
+        "optional": true,
+        "type": "(pitch: number, details: RollNoteOffDetails) => void"
+      },
+      {
+        "description": "A pitch is about to sound, from a key, a note or a gesture on the grid: `details.cancel()` keeps it from.",
+        "name": "onNoteOn",
+        "optional": true,
+        "type": "(pitch: number, details: RollNoteOnDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onSelectionChange",
+        "optional": true,
+        "type": "( selection: readonly NoteId[], details: ChangeDetails ) => void"
+      },
+      {
+        "description": "",
+        "name": "onValueChange",
+        "optional": true,
+        "type": "(value: Note[], details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onValueCommitted",
+        "optional": true,
+        "type": "(value: Note[], details: CommitDetails) => void"
+      },
+      {
+        "description": "The playback position, in the timeline's units.",
+        "name": "position",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "scale",
+        "optional": true,
+        "type": "RollScale | null"
+      },
+      {
+        "description": "",
+        "name": "selection",
+        "optional": true,
+        "type": "readonly NoteId[]"
+      },
+      {
+        "description": "",
+        "name": "snapOffset",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "snapPoints",
+        "optional": true,
+        "type": "readonly number[]"
+      },
+      {
+        "description": "",
+        "name": "snapStep",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "A live playback position, read when a gesture needs it.",
+        "name": "source",
+        "optional": true,
+        "type": "Source<number>"
+      },
+      {
+        "description": "",
+        "name": "step",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "value",
+        "optional": true,
+        "type": "readonly Note[]"
+      }
+    ],
+    "parts": [
+      {
+        "element": "div",
+        "name": "Grid",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Keys",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Marquee",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Note",
+        "props": {
+          "note": "key"
+        }
+      },
+      {
+        "name": "NoteHandle",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Notes",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Row",
+        "props": {
+          "pitch": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Rows",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "SelectionSpan",
+        "props": {}
+      },
+      {
+        "name": "StretchHandle",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Velocity",
+        "props": {
+          "getAriaValueText": "value",
+          "level": "string",
+          "note": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "VelocityLane",
+        "props": {
+          "level": "string"
+        }
+      }
+    ],
+    "tags": [
+      "audio-ui-piano-roll",
+      "audio-ui-piano-roll-grid",
+      "audio-ui-piano-roll-keys",
+      "audio-ui-piano-roll-marquee",
+      "audio-ui-piano-roll-note",
+      "audio-ui-piano-roll-note-end",
+      "audio-ui-piano-roll-note-start",
+      "audio-ui-piano-roll-notes",
+      "audio-ui-piano-roll-row",
+      "audio-ui-piano-roll-rows",
+      "audio-ui-piano-roll-selection-span",
+      "audio-ui-piano-roll-stretch-end",
+      "audio-ui-piano-roll-stretch-start",
+      "audio-ui-piano-roll-velocity",
+      "audio-ui-piano-roll-velocity-input",
+      "audio-ui-piano-roll-velocity-lane"
+    ]
+  },
+  {
+    "actions": [],
+    "component": "Plot",
+    "events": [
+      {
+        "callback": "onValueChange",
+        "event": "input",
+        "vue": "value-change"
+      },
+      {
+        "callback": "onValueCommitted",
+        "event": "change",
+        "vue": "value-committed"
+      }
+    ],
+    "name": "plot",
+    "options": [
+      {
+        "default": "false",
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "default": "1",
+        "description": "",
+        "name": "maxX",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "1",
+        "description": "",
+        "name": "maxY",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "0",
+        "description": "",
+        "name": "minX",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "0",
+        "description": "",
+        "name": "minY",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "A handle moved: its name is `details.handle`. `details.cancel()` refuses it.",
+        "name": "onValueChange",
+        "optional": true,
+        "type": "(value: PlotPoint, details: HandleChangeDetails) => void"
+      },
+      {
+        "description": "A handle's gesture ended, or a key or input moved it.",
+        "name": "onValueCommitted",
+        "optional": true,
+        "type": "(value: PlotPoint, details: HandleCommitDetails) => void"
+      },
+      {
+        "default": "\"linear\"",
+        "description": "How x values spread across: `\"log\"` for frequency, or your own `{ toPosition, toValue }`.",
+        "name": "scaleX",
+        "optional": true,
+        "type": "ParameterScaleProp"
+      },
+      {
+        "default": "\"linear\"",
+        "description": "How y values spread up.",
+        "name": "scaleY",
+        "optional": true,
+        "type": "ParameterScaleProp"
+      }
+    ],
+    "parts": [
+      {
+        "element": "svg",
+        "name": "Band",
+        "props": {
+          "axis": "string",
+          "from": "number",
+          "to": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Cursor",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "CursorReadout",
+        "props": {
+          "format": "value"
+        }
+      },
+      {
+        "element": "svg",
+        "name": "Curve",
+        "props": {
+          "fillTo": "number",
+          "fn": "value",
+          "samples": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Dot",
+        "props": {
+          "source": "value",
+          "value": "value"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Grid",
+        "props": {
+          "x": "value",
+          "y": "value"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Handle",
+        "props": {
+          "axis": "string",
+          "defaultValue": "value",
+          "disabled": "boolean",
+          "handle": "key",
+          "value": "value"
+        }
+      },
+      {
+        "element": "svg",
+        "name": "Line",
+        "props": {
+          "axis": "string",
+          "value": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Mark",
+        "props": {
+          "axis": "string",
+          "value": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "svg",
+        "name": "Trace",
+        "props": {
+          "fillTo": "number",
+          "max": "number",
+          "min": "number",
+          "source": "value"
+        }
+      }
+    ],
+    "tags": [
+      "audio-ui-plot",
+      "audio-ui-plot-band",
+      "audio-ui-plot-cursor",
+      "audio-ui-plot-cursor-readout",
+      "audio-ui-plot-curve",
+      "audio-ui-plot-dot",
+      "audio-ui-plot-grid",
+      "audio-ui-plot-handle",
+      "audio-ui-plot-input-x",
+      "audio-ui-plot-input-y",
+      "audio-ui-plot-line",
+      "audio-ui-plot-mark",
+      "audio-ui-plot-trace"
+    ]
+  },
+  {
+    "actions": [],
+    "component": "Sequencer",
+    "events": [
+      {
+        "callback": "onValueChange",
+        "event": "input",
+        "vue": "value-change"
+      },
+      {
+        "callback": "onValueCommitted",
+        "event": "change",
+        "vue": "value-committed"
+      },
+      {
+        "callback": "onVelocityChange",
+        "event": "velocitychange",
+        "vue": "velocity-change"
+      },
+      {
+        "callback": "onVelocityCommitted",
+        "event": "velocitycommit",
+        "vue": "velocity-committed"
+      }
+    ],
+    "name": "sequencer",
+    "options": [
+      {
+        "description": "Uncontrolled starting pattern: a row per sound, each a list of steps.",
+        "name": "defaultValue",
+        "optional": true,
+        "type": "Pattern"
+      },
+      {
+        "description": "Uncontrolled starting velocities.",
+        "name": "defaultVelocities",
+        "optional": true,
+        "type": "Velocities"
+      },
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "description": "",
+        "name": "onValueChange",
+        "optional": true,
+        "type": "(value: boolean[][], details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onValueCommitted",
+        "optional": true,
+        "type": "(value: boolean[][], details: CommitDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onVelocityChange",
+        "optional": true,
+        "type": "(velocities: number[][], details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onVelocityCommitted",
+        "optional": true,
+        "type": "( velocities: number[][], details: CommitDetails ) => void"
+      },
+      {
+        "description": "The step being played, a live value followed without a render.",
+        "name": "source",
+        "optional": true,
+        "type": "Source<number>"
+      },
+      {
+        "description": "The pattern: a row per sound, each a list of steps.",
+        "name": "value",
+        "optional": true,
+        "type": "Pattern"
+      },
+      {
+        "description": "How loud each step plays, 0…1, a row per sound like the pattern.",
+        "name": "velocities",
+        "optional": true,
+        "type": "Velocities"
+      }
+    ],
+    "parts": [
+      {
+        "element": "button",
+        "name": "Cell",
+        "props": {
+          "cell": "key",
+          "row": "number",
+          "step": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Row",
+        "props": {
+          "index": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Velocity",
+        "props": {
+          "cell": "key",
+          "row": "number",
+          "step": "number"
+        }
+      }
+    ],
+    "tags": [
+      "audio-ui-sequencer",
+      "audio-ui-sequencer-cell",
+      "audio-ui-sequencer-row",
+      "audio-ui-sequencer-velocity",
+      "audio-ui-sequencer-velocity-input"
+    ]
+  },
+  {
+    "actions": [
+      "setPosition"
+    ],
+    "component": "Timeline",
+    "events": [
+      {
+        "callback": "onClipChange",
+        "event": "clipchange",
+        "vue": "clip-change"
+      },
+      {
+        "callback": "onClipCommitted",
+        "event": "clipcommit",
+        "vue": "clip-committed"
+      },
+      {
+        "callback": "onClipDragOffsetChange",
+        "event": null,
+        "vue": "clip-drag-offset-change"
+      },
+      {
+        "callback": "onClipRemove",
+        "event": "clipremove",
+        "vue": "clip-remove"
+      },
+      {
+        "callback": "onClipSelectedChange",
+        "event": "clipselect",
+        "vue": "clip-selected-change"
+      },
+      {
+        "callback": "onMarkChange",
+        "event": "markchange",
+        "vue": "mark-change"
+      },
+      {
+        "callback": "onMarkCommitted",
+        "event": "markcommit",
+        "vue": "mark-committed"
+      },
+      {
+        "callback": "onPositionChange",
+        "event": "input",
+        "vue": "position-change"
+      },
+      {
+        "callback": "onPositionCommitted",
+        "event": "change",
+        "vue": "position-committed"
+      },
+      {
+        "callback": "onRangeChange",
+        "event": "rangechange",
+        "vue": "range-change"
+      },
+      {
+        "callback": "onRangeCommitted",
+        "event": "rangecommit",
+        "vue": "range-committed"
+      },
+      {
+        "callback": "onSelectionChange",
+        "event": "selectionchange",
+        "vue": "selection-change"
+      },
+      {
+        "callback": "onSelectionCommitted",
+        "event": "selectioncommit",
+        "vue": "selection-committed"
+      },
+      {
+        "callback": "onTrackHeightChange",
+        "event": "trackheightchange",
+        "vue": "track-height-change"
+      },
+      {
+        "callback": "onTrackHeightCommitted",
+        "event": "trackheightcommit",
+        "vue": "track-height-committed"
+      },
+      {
+        "callback": "onZoomChange",
+        "event": "zoomchange",
+        "vue": "zoom-change"
+      }
+    ],
+    "name": "timeline",
+    "options": [
+      {
+        "description": "",
+        "name": "defaultPosition",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "defaultZoom",
+        "optional": true,
+        "type": "number | null"
+      },
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "default": "1",
+        "description": "Length of the timeline, in your units.",
+        "name": "duration",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "largeStep",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "Infinity",
+        "description": "",
+        "name": "maxZoom",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "0",
+        "description": "",
+        "name": "minZoom",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "onClipChange",
+        "optional": true,
+        "type": "(value: ClipValue, details: ClipChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onClipCommitted",
+        "optional": true,
+        "type": "(value: ClipValue, details: ClipCommitDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onClipDragOffsetChange",
+        "optional": true,
+        "type": "(offset: number, details: { clip: string }) => void"
+      },
+      {
+        "description": "Delete or Backspace on a clip: removing it is up to you.",
+        "name": "onClipRemove",
+        "optional": true,
+        "type": "(clip: string, details: { clip: string }) => void"
+      },
+      {
+        "description": "",
+        "name": "onClipSelectedChange",
+        "optional": true,
+        "type": "( selected: boolean, details: { clip: string; event: PointerEvent; reason: string } ) => void"
+      },
+      {
+        "description": "",
+        "name": "onMarkChange",
+        "optional": true,
+        "type": "(value: number, details: MarkChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onMarkCommitted",
+        "optional": true,
+        "type": "(value: number, details: MarkCommitDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onPositionChange",
+        "optional": true,
+        "type": "(value: number, details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onPositionCommitted",
+        "optional": true,
+        "type": "(value: number, details: CommitDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onRangeChange",
+        "optional": true,
+        "type": "( value: readonly [number, number], details: RangeChangeDetails ) => void"
+      },
+      {
+        "description": "",
+        "name": "onRangeCommitted",
+        "optional": true,
+        "type": "( value: readonly [number, number], details: RangeCommitDetails ) => void"
+      },
+      {
+        "description": "A Shift drag on the ruler, or on a seekable lane, selected a stretch.",
+        "name": "onSelectionChange",
+        "optional": true,
+        "type": "( range: readonly [number, number], details: ChangeDetails & { event: PointerEvent } ) => void"
+      },
+      {
+        "description": "",
+        "name": "onSelectionCommitted",
+        "optional": true,
+        "type": "( range: readonly [number, number], details: CommitDetails & { event: PointerEvent } ) => void"
+      },
+      {
+        "description": "",
+        "name": "onTrackHeightChange",
+        "optional": true,
+        "type": "( height: number | undefined, details: TrackChangeDetails ) => void"
+      },
+      {
+        "description": "",
+        "name": "onTrackHeightCommitted",
+        "optional": true,
+        "type": "( height: number | undefined, details: TrackCommitDetails ) => void"
+      },
+      {
+        "description": "",
+        "name": "onZoomChange",
+        "optional": true,
+        "type": "(zoom: number, details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "position",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "snapOffset",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "snapPoints",
+        "optional": true,
+        "type": "readonly number[]"
+      },
+      {
+        "description": "",
+        "name": "snapStep",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "source",
+        "optional": true,
+        "type": "PositionSource"
+      },
+      {
+        "description": "",
+        "name": "step",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "zoom",
+        "optional": true,
+        "type": "number | null"
+      }
+    ],
+    "parts": [
+      {
+        "element": "div",
+        "name": "Clip",
+        "props": {
+          "additive": "boolean",
+          "clip": "key",
+          "defaultSelected": "boolean",
+          "defaultValue": "value",
+          "disabled": "boolean",
+          "minLength": "number",
+          "movable": "boolean",
+          "selected": "boolean",
+          "sourceLength": "number",
+          "value": "value"
+        }
+      },
+      {
+        "name": "ClipFade",
+        "props": {}
+      },
+      {
+        "name": "ClipFadeHandle",
+        "props": {}
+      },
+      {
+        "name": "ClipHandle",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "ClipHeader",
+        "props": {
+          "clip": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Lane",
+        "props": {
+          "id": "id",
+          "seekable": "boolean",
+          "selects": "boolean"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Mark",
+        "props": {
+          "mark": "key",
+          "movable": "boolean",
+          "step": "number",
+          "value": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Navigator",
+        "props": {
+          "minWindowWidth": "number"
+        }
+      },
+      {
+        "name": "NavigatorHandle",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "NavigatorWindow",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Playhead",
+        "props": {
+          "id": "id"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Range",
+        "props": {
+          "defaultValue": "value",
+          "disabled": "boolean",
+          "drawable": "boolean",
+          "minDrawnWidth": "number",
+          "minLength": "number",
+          "movable": "boolean",
+          "range": "key",
+          "value": "value"
+        }
+      },
+      {
+        "name": "RangeHandle",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Ruler",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Track",
+        "props": {
+          "height": "number",
+          "largeStep": "number",
+          "maxHeight": "number",
+          "minHeight": "number",
+          "selected": "boolean",
+          "step": "number",
+          "track": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "TrackHeader",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "TrackResizeHandle",
+        "props": {
+          "track": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Viewport",
+        "props": {}
+      }
+    ],
+    "tags": [
+      "audio-ui-timeline",
+      "audio-ui-timeline-clip",
+      "audio-ui-timeline-clip-fade-in",
+      "audio-ui-timeline-clip-fade-in-handle",
+      "audio-ui-timeline-clip-fade-in-input",
+      "audio-ui-timeline-clip-fade-out",
+      "audio-ui-timeline-clip-fade-out-handle",
+      "audio-ui-timeline-clip-fade-out-input",
+      "audio-ui-timeline-clip-header",
+      "audio-ui-timeline-clip-input",
+      "audio-ui-timeline-clip-trim-end",
+      "audio-ui-timeline-clip-trim-end-input",
+      "audio-ui-timeline-clip-trim-start",
+      "audio-ui-timeline-clip-trim-start-input",
+      "audio-ui-timeline-lane",
+      "audio-ui-timeline-mark",
+      "audio-ui-timeline-navigator",
+      "audio-ui-timeline-navigator-end",
+      "audio-ui-timeline-navigator-end-input",
+      "audio-ui-timeline-navigator-start",
+      "audio-ui-timeline-navigator-start-input",
+      "audio-ui-timeline-navigator-window",
+      "audio-ui-timeline-navigator-window-input",
+      "audio-ui-timeline-playhead",
+      "audio-ui-timeline-range",
+      "audio-ui-timeline-range-end",
+      "audio-ui-timeline-range-end-input",
+      "audio-ui-timeline-range-input",
+      "audio-ui-timeline-range-start",
+      "audio-ui-timeline-range-start-input",
+      "audio-ui-timeline-ruler",
+      "audio-ui-timeline-ruler-input",
+      "audio-ui-timeline-track",
+      "audio-ui-timeline-track-header",
+      "audio-ui-timeline-track-resize-handle",
+      "audio-ui-timeline-track-resize-input",
+      "audio-ui-timeline-viewport"
+    ]
+  },
+  {
+    "actions": [
+      "setValue"
+    ],
+    "component": "Waveform",
+    "events": [
+      {
+        "callback": "onRegionChange",
+        "event": "regionchange",
+        "vue": "region-change"
+      },
+      {
+        "callback": "onRegionCommitted",
+        "event": "regioncommit",
+        "vue": "region-committed"
+      },
+      {
+        "callback": "onSelectionChange",
+        "event": "selectionchange",
+        "vue": "selection-change"
+      },
+      {
+        "callback": "onSelectionCommitted",
+        "event": "selectioncommit",
+        "vue": "selection-committed"
+      },
+      {
+        "callback": "onValueChange",
+        "event": "input",
+        "vue": "value-change"
+      },
+      {
+        "callback": "onValueCommitted",
+        "event": "change",
+        "vue": "value-committed"
+      }
+    ],
+    "name": "waveform",
+    "options": [
+      {
+        "description": "",
+        "name": "defaultValue",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "default": "1",
+        "description": "Length of the audio, in the unit `value` is in.",
+        "name": "duration",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "Step for Page Up/Page Down and Shift + arrow keys. Defaults to a tenth of `duration`.",
+        "name": "largeStep",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "A live signal drawn outside any render, instead of `peaks`.",
+        "name": "levels",
+        "optional": true,
+        "type": "LevelsSource"
+      },
+      {
+        "default": "false",
+        "description": "Whether the audio is still on its way.",
+        "name": "loading",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "description": "The form field's name.",
+        "name": "name",
+        "optional": true,
+        "type": "string"
+      },
+      {
+        "description": "A Shift + drag moved the selection: `[start, end]`, with `details.cancel()` to keep it.",
+        "name": "onRegionChange",
+        "optional": true,
+        "type": "( value: WaveformRegionValue, details: RegionChangeDetails ) => void"
+      },
+      {
+        "description": "",
+        "name": "onRegionCommitted",
+        "optional": true,
+        "type": "( value: WaveformRegionValue, details: RegionCommitDetails ) => void"
+      },
+      {
+        "description": "",
+        "name": "onSelectionChange",
+        "optional": true,
+        "type": "( range: readonly [number, number], details: ChangeDetails ) => void"
+      },
+      {
+        "description": "",
+        "name": "onSelectionCommitted",
+        "optional": true,
+        "type": "( range: readonly [number, number], details: CommitDetails ) => void"
+      },
+      {
+        "description": "",
+        "name": "onValueChange",
+        "optional": true,
+        "type": "(value: number, details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onValueCommitted",
+        "optional": true,
+        "type": "(value: number, details: CommitDetails) => void"
+      },
+      {
+        "description": "The audio's shape: a level per slice, or `{ min, max }` samples per slice.",
+        "name": "peaks",
+        "optional": true,
+        "type": "WaveformPeaks"
+      },
+      {
+        "description": "The stretch of the audio shown, `[start, end]` in `duration` units.",
+        "name": "range",
+        "optional": true,
+        "type": "readonly [number, number]"
+      },
+      {
+        "description": "Step for the arrow keys. Defaults to a hundredth of `duration`.",
+        "name": "step",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "",
+        "name": "value",
+        "optional": true,
+        "type": "number"
+      }
+    ],
+    "parts": [
+      {
+        "element": "span",
+        "name": "Bar",
+        "props": {
+          "index": "key"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Bars",
+        "props": {
+          "count": "number",
+          "gain": "number",
+          "idle": "string",
+          "minLevel": "number",
+          "mirrored": "boolean"
+        }
+      },
+      {
+        "element": "canvas",
+        "name": "Canvas",
+        "props": {
+          "barGap": "number",
+          "barRadius": "number",
+          "barWidth": "number",
+          "gain": "number",
+          "idle": "string",
+          "lineWidth": "number",
+          "minBarHeight": "number",
+          "mirrored": "boolean",
+          "mode": "string",
+          "scrollSpeed": "number",
+          "variant": "string"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Control",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Hover",
+        "props": {
+          "format": "value"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Marker",
+        "props": {
+          "value": "number"
+        }
+      },
+      {
+        "element": "div",
+        "name": "Playhead",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Region",
+        "props": {
+          "defaultValue": "value",
+          "disabled": "boolean",
+          "minLength": "number",
+          "movable": "boolean",
+          "region": "key",
+          "value": "value"
+        }
+      },
+      {
+        "name": "RegionHandle",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Thumb",
+        "props": {}
+      }
+    ],
+    "tags": [
+      "audio-ui-waveform",
+      "audio-ui-waveform-bar",
+      "audio-ui-waveform-bars",
+      "audio-ui-waveform-canvas",
+      "audio-ui-waveform-control",
+      "audio-ui-waveform-hover",
+      "audio-ui-waveform-input",
+      "audio-ui-waveform-marker",
+      "audio-ui-waveform-playhead",
+      "audio-ui-waveform-region",
+      "audio-ui-waveform-region-end",
+      "audio-ui-waveform-region-end-input",
+      "audio-ui-waveform-region-start",
+      "audio-ui-waveform-region-start-input",
+      "audio-ui-waveform-thumb"
+    ]
+  },
+  {
+    "actions": [
+      "setValue"
+    ],
+    "component": "XYPad",
+    "events": [
+      {
+        "callback": "onValueChange",
+        "event": "input",
+        "vue": "value-change"
+      },
+      {
+        "callback": "onValueCommitted",
+        "event": "change",
+        "vue": "value-committed"
+      }
+    ],
+    "name": "xypad",
+    "options": [
+      {
+        "description": "",
+        "name": "disabled",
+        "optional": true,
+        "type": "boolean"
+      },
+      {
+        "description": "How each axis is written, e.g. `{ maximumFractionDigits: 1 }`.",
+        "name": "format",
+        "optional": true,
+        "type": "Intl.NumberFormatOptions"
+      },
+      {
+        "description": "",
+        "name": "locale",
+        "optional": true,
+        "type": "Intl.LocalesArgument"
+      },
+      {
+        "default": "100",
+        "description": "",
+        "name": "maxX",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "100",
+        "description": "",
+        "name": "maxY",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "0",
+        "description": "",
+        "name": "minX",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "0",
+        "description": "",
+        "name": "minY",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "description": "The form field's name: each axis input is `<name>.x` and `<name>.y`.",
+        "name": "name",
+        "optional": true,
+        "type": "string"
+      },
+      {
+        "description": "",
+        "name": "onValueChange",
+        "optional": true,
+        "type": "(value: XYPadPoint, details: ChangeDetails) => void"
+      },
+      {
+        "description": "",
+        "name": "onValueCommitted",
+        "optional": true,
+        "type": "(value: XYPadPoint, details: CommitDetails) => void"
+      },
+      {
+        "default": "1",
+        "description": "",
+        "name": "stepX",
+        "optional": true,
+        "type": "number"
+      },
+      {
+        "default": "1",
+        "description": "",
+        "name": "stepY",
+        "optional": true,
+        "type": "number"
+      }
+    ],
+    "parts": [
+      {
+        "element": "div",
+        "name": "Control",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Label",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Root",
+        "props": {}
+      },
+      {
+        "element": "div",
+        "name": "Thumb",
+        "props": {}
+      },
+      {
+        "element": "output",
+        "name": "Value",
+        "props": {}
+      }
+    ],
+    "tags": [
+      "audio-ui-xypad",
+      "audio-ui-xypad-control",
+      "audio-ui-xypad-input-x",
+      "audio-ui-xypad-input-y",
+      "audio-ui-xypad-label",
+      "audio-ui-xypad-thumb",
+      "audio-ui-xypad-value"
+    ]
+  }
+]

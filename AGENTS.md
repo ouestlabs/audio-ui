@@ -138,7 +138,7 @@ How items are grouped:
 - A component page is a component a user puts on screen. A hook or a lib is documented on its own entry page; the component page that uses it says what it does in a sentence and links to it.
 - Workstation and Devices parts are controlled and engine-agnostic: state comes in as values and live sources, changes go out through callbacks, never through one of our audio hooks. They must work over an engine of the user's own (an AudioWorklet, WASM).
 
-A primitive has one page: the component's (`components/base/(elements|workstation)/<name>.mdx`, the timeline's is `arrangement.mdx`). Its styled React component is inside `<ForFrameworks only="react">`, and its **Headless primitive** section, for every framework, holds the install of each adapter, its usage, options and what a change reports.
+A primitive has one page: the component's (`components/base/(elements|workstation)/<name>.mdx`, the timeline's is `arrangement.mdx`). Its styled React component is inside `<ForFrameworks only="react">`, and its **Headless primitive** section, for every framework, holds the install of each adapter, its usage, options and what a change reports. Its API reference ends with the parts, the tags of the web adapter and the events as each framework names them, drawn by `<PrimitiveParts>`, `<PrimitiveTags>` and `<PrimitiveEvents>` from `lib/docs/content/primitive-api.generated.json`, which `registry:build` writes from the primitive's source and its adapters: `test/primitive-api.test.ts` fails when it is stale, when an option of the source is in no table of the page, or when the three adapters export different parts.
 
 ---
 
