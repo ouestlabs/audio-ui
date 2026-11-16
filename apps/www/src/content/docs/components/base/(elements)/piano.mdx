@@ -1,9 +1,11 @@
 ---
 title: Piano
-description: A piano keyboard for a MIDI pitch range, played with the pointer, touch or the keyboard.
+description: A piano keyboard for a MIDI pitch range, played with the pointer, touch or the keyboard. Headless in React, Vue, Svelte and the web, and styled for shadcn/ui in React.
 component: true
 base: base
 ---
+
+<ForFrameworks only="react">
 
 <ComponentPreview styleName="base-nova" name="piano-size-default-demo" />
 
@@ -21,10 +23,6 @@ Plays or shows notes, for a virtual instrument, a MIDI visualizer or a chord ref
 ## Installation
 
 <Install name="piano" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
-
-## Anatomy
-
-It is built on the headless [Piano](/docs/piano-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -89,7 +87,7 @@ The keys share one tab stop. On the focused key:
 
 ## API reference
 
-The headless parts and their options are on [Piano](/docs/piano-ui-sdk).
+The headless parts and their options are in [Headless primitive](#headless-primitive), below.
 
 ### Registry component
 
@@ -123,3 +121,228 @@ Additional valid HTML attributes passed to `Piano.Root` are forwarded.
 ### External notes via activeNotes
 
 <ComponentPreview styleName="base-nova" name="piano-active-notes-demo" />
+
+</ForFrameworks>
+
+## Headless primitive
+
+The piano's behavior is one description, `piano` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. A key sounds while it is pressed, by pointer or from the keyboard, and dragging across the keys glides from one to the next. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive), the [fader](/docs/components/base/fader#headless-primitive), the [XY pad](/docs/components/base/xypad#headless-primitive), the [meter](/docs/components/base/meter#headless-primitive) and the [envelope](/docs/components/base/envelope#headless-primitive) are built the same way.
+
+### Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/piano-react
+```
+
+One file, `components/audio-ui/piano/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-vue.json
+```
+
+One file, `components/audio-ui/piano/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-svelte.json
+```
+
+Three files in `components/audio-ui/piano/svelte/`: the label, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-web.json
+```
+
+One file, `components/audio-ui/piano/web.ts`. Import it once, and it registers the `audio-ui-piano` tags. It also imports `@audio-ui/core`.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+### Usage
+
+A Root is the keyboard, and a Key is one key, a `<button>` placed along it for its `pitch` and named by its note, such as "C4". A Label inside a Key writes that name for you to style. You write a Key for each pitch: the Root's content can read the state, whose `pitches` lists them lowest first, so the keys follow `minPitch`, `maxPitch` and `pitches`. That is a function in React, the default slot in Vue and a snippet in Svelte.
+
+**Give the Root its size.** The keys are placed with percentages, so a Root with no height or width has nothing to place them in.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import { Piano } from "@/components/audio-ui/piano/react";
+
+export function Keys({ on, off }: { on: (pitch: number, velocity: number) => void; off: (pitch: number) => void }) {
+  return (
+    <Piano.Root
+      className="relative h-32 w-96"
+      maxPitch={72}
+      minPitch={60}
+      onNoteOff={off}
+      onNoteOn={(pitch, { velocity }) => on(pitch, velocity)}
+    >
+      {({ pitches }) =>
+        pitches.map((pitch) => (
+          <Piano.Key
+            className="rounded-b border bg-background data-[color=black]:z-10 data-[color=black]:h-2/3 data-[color=black]:bg-foreground data-active:bg-primary"
+            key={pitch}
+            pitch={pitch}
+          />
+        ))
+      }
+    </Piano.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { Piano } from "@/components/audio-ui/piano/vue";
+
+const emit = defineEmits<{ on: [pitch: number, velocity: number]; off: [pitch: number] }>();
+</script>
+
+<template>
+  <Piano.Root
+    class="relative h-32 w-96"
+    :max-pitch="72"
+    :min-pitch="60"
+    @note-off="(pitch) => emit('off', pitch)"
+    @note-on="(pitch, { velocity }) => emit('on', pitch, velocity)"
+  >
+    <template #default="{ state }">
+      <Piano.Key
+        v-for="pitch in state.pitches"
+        :key="pitch"
+        :pitch="pitch"
+        class="rounded-b border bg-background data-[color=black]:z-10 data-[color=black]:h-2/3 data-[color=black]:bg-foreground data-active:bg-primary"
+      />
+    </template>
+  </Piano.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { Piano } from "$lib/components/audio-ui/piano/svelte";
+
+  let { on, off }: { on: (pitch: number, velocity: number) => void; off: (pitch: number) => void } = $props();
+</script>
+
+<Piano.Root
+  class="relative h-32 w-96"
+  maxPitch={72}
+  minPitch={60}
+  onNoteOff={off}
+  onNoteOn={(pitch, { velocity }) => on(pitch, velocity)}
+>
+  {#snippet children(state)}
+    {#each state.pitches as pitch (pitch)}
+      <Piano.Key class="rounded-b border bg-background data-[color=black]:z-10 data-[color=black]:h-2/3 data-[color=black]:bg-foreground data-active:bg-primary" {pitch} />
+    {/each}
+  {/snippet}
+</Piano.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<style>
+  audio-ui-piano { position: relative; display: block; width: 24rem; height: 8rem; }
+  audio-ui-piano button { border: 1px solid #888; background: #fff; }
+  audio-ui-piano button[data-color="black"] { height: 66%; background: #111; z-index: 1; }
+  audio-ui-piano button[data-active] { background: #2f7d4a; }
+</style>
+
+<audio-ui-piano min-pitch="60" max-pitch="72"></audio-ui-piano>
+
+<script type="module">
+  import "./audio-ui/piano/web.ts";
+
+  const keyboard = document.querySelector("audio-ui-piano");
+  keyboard.addEventListener("noteon", (event) => console.log(event.detail.value, event.detail.velocity));
+  keyboard.addEventListener("noteoff", (event) => console.log(event.detail.value));
+</script>
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+In the web adapter, the keyboard makes a key for each pitch, each a wrapper around a `<button>`. To style or fill them yourself, write the `audio-ui-piano-key` elements with a `pitch` and a button inside: the keyboard then leaves them as they are, and an `audio-ui-piano-label` inside a button gets its note.
+
+### Interaction
+
+- A press strikes the key under the pointer, harder toward its free end, from 0.25 to 1. Black keys sit on top of the white ones and are tried first.
+- Dragging across the keys glides: the key left is released with the reason `"glide"`, and the one entered sounds. Each pointer holds its own key, so chords can be played on a touch screen.
+- Enter and Space play a key at 0.8 until the key is released or it loses focus.
+- The keys are one tab stop, which starts on middle C. The arrows walk the keys, Shift with an arrow moves an octave, Page Up and Page Down move an octave, Home and End go to the ends.
+
+### Options
+
+Set on the Root, as props (an attribute in kebab case in the web adapter).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `minPitch`, `maxPitch` | `number` | `48`, `72` | The lowest and highest MIDI pitch, inclusive: 60 is middle C. |
+| `pitches` | `number[]` | | Only these pitches get keys, instead of `minPitch` to `maxPitch`. |
+| `layout` | `"keyboard"` or `"even"` | `"keyboard"` | Like a piano, with the black keys between the white ones, or one equal share for each key, as the rows of a piano roll are. |
+| `orientation` | `"horizontal"` or `"vertical"` | `"horizontal"` | Which way the keys run. A vertical keyboard puts the low end at the bottom. |
+| `activeNotes` | `number[]` | | Pitches lit from elsewhere, such as a MIDI input or a sequencer, on top of the keys pressed here. |
+| `disabled` | `boolean` | `false` | Plays nothing. |
+| `onNoteOn` | `(pitch, details) => void` | | A key sounds. `details.cancel()` keeps it silent. |
+| `onNoteOff` | `(pitch, details) => void` | | A key is released, the pointer glides off it, or it loses focus while held. |
+
+### What a note reports
+
+- `onNoteOn` gets `velocity` from 0 to 1, a `reason` (`"press"`, `"glide"` or `"keyboard"`), a `source` and the `event`.
+- `onNoteOff` gets a `reason`: `"press"`, `"glide"` or `"keyboard"`.
+- In the web adapter, they are the `noteon` and `noteoff` events, with `detail: { value, reason, source, velocity }`, where `value` is the pitch.
+
+### States to style from
+
+- `data-active` on a key while it sounds, pressed here or listed in `activeNotes`.
+- `data-color` on a key, `"black"` or `"white"`, `data-disabled`, `data-layout` and `data-orientation`.

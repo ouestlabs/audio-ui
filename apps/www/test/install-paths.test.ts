@@ -227,6 +227,16 @@ const PAGE_ITEM: Record<string, string> = {
   rack: "rack-panel",
 };
 
+const ADAPTER = /^([a-z-]+)\/(react|svelte|vue|web)$/;
+
+/** The adapter of a primitive for another framework, which the page's headless section shows: its own item installs it, `knob-vue`. */
+const adapter = (used: string) => {
+  const match = ADAPTER.exec(used);
+  return Boolean(
+    match && items.some((item) => item.name === `${match[1]}-${match[2]}`)
+  );
+};
+
 test("a component's docs page only imports what installing it brings", async () => {
   const pages = await Array.fromAsync(
     new Bun.Glob("**/*.mdx").scan({
@@ -244,7 +254,10 @@ test("a component's docs page only imports what installing it brings", async () 
         : `block-${component}`;
       const brought = withDependencies(itemName);
       return [...new Set(imports(await Bun.file(page).text()))]
-        .filter((used) => !brought.has(installedBy.get(used) ?? used))
+        .filter(
+          (used) =>
+            !(brought.has(installedBy.get(used) ?? used) || adapter(used))
+        )
         .map((used) => `${component}: ${used}`);
     })
   );

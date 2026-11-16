@@ -14,6 +14,7 @@ import { DocsCopyPage } from "@/components/docs/page/copy-page";
 import { JsonLd } from "@/components/site/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { useFramework } from "@/hooks/use-framework";
 import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { siteConfig } from "@/lib/config";
 import {
@@ -244,6 +245,7 @@ function DocArticle({
   toc: Parameters<typeof DocsTableOfContents>[0]["toc"];
 }) {
   const neighbours = useNeighbours(pageTree, data.url);
+  const [framework] = useFramework();
 
   return (
     <>
@@ -288,7 +290,8 @@ function DocArticle({
             <div className="typeset typeset-changelog w-full flex-1 *:data-[slot=alert]:first:mt-0">
               <Mdx components={getMDXComponents()} />
             </div>
-            {data.componentName && data.base ? (
+            {/* The catalog of styled components is React's. */}
+            {data.componentName && data.base && framework === "react" ? (
               <DocsComponentCatalogSection componentSlug={data.componentName} />
             ) : null}
           </div>

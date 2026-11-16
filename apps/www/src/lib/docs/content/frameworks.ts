@@ -1,4 +1,8 @@
-import { REACT_ADDRESSES, under } from "@/lib/docs/content/framework-paths";
+import {
+  PRIMITIVE_PAGES,
+  REACT_ADDRESSES,
+  under,
+} from "@/lib/docs/content/framework-paths";
 import { DOCS_SECTIONS, type DocsSection } from "@/lib/docs/content/sections";
 
 /**
@@ -43,6 +47,7 @@ export function isFramework(value: unknown): value is FrameworkId {
 export function shownTo(url: string, framework: FrameworkId): boolean {
   return (
     framework === "react" ||
+    Object.values<string>(PRIMITIVE_PAGES).includes(url) ||
     !REACT_ADDRESSES.some((prefix) => under(url, prefix))
   );
 }

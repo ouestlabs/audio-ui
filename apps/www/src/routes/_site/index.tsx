@@ -10,7 +10,7 @@ import { HomeGuide } from "@/components/site/home/home-guide";
 import { HomeHero } from "@/components/site/home/home-hero";
 import { JsonLd } from "@/components/site/json-ld";
 import { siteConfig } from "@/lib/config";
-import { UI_SDK_PRIMITIVES } from "@/lib/docs/content/framework-paths";
+import { PRIMITIVE_PAGES } from "@/lib/docs/content/framework-paths";
 import { getHomeIndex } from "@/lib/docs/content/spaces";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
 import BlockAudioEditor from "@/registry-audio/bases/base/components/audio-editor/block-audio-editor";
@@ -62,7 +62,7 @@ const loadHome = createServerFn({ method: "GET" }).handler(async () => {
     {
       href: "/docs/registry",
       label: "Primitives",
-      value: String(UI_SDK_PRIMITIVES.length),
+      value: String(Object.keys(PRIMITIVE_PAGES).length),
     },
     ...(downloads === null
       ? []

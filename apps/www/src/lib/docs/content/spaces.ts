@@ -1,3 +1,4 @@
+import { PRIMITIVE_PAGES } from "@/lib/docs/content/framework-paths";
 import {
   getAllPagesFromFolder,
   getGroupsFromFolder,
@@ -48,7 +49,7 @@ export function getDocsSpaces() {
 
 const COMPONENTS = "/docs/components/";
 const GUIDES = "/docs/guides";
-const UI_SDK_PAGE = /^\/docs\/[a-z-]+-ui-sdk$/;
+const PRIMITIVE_URLS = new Set<string>(Object.values(PRIMITIVE_PAGES));
 
 /** The primitives' pages, as their sidebar orders them: what the home lists for a reader of Vue, Svelte or the web. */
 function primitivePages(): SpacePage[] {
@@ -60,7 +61,7 @@ function primitivePages(): SpacePage[] {
     )
     .flatMap((node): SpacePage[] => {
       const page = byUrl.get(node.url);
-      return page && UI_SDK_PAGE.test(page.url)
+      return page && PRIMITIVE_URLS.has(page.url)
         ? [
             {
               description: page.data.description ?? "",

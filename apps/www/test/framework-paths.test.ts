@@ -8,15 +8,19 @@ import {
 } from "@/lib/docs/content/framework-paths";
 import { docsPages } from "../scripts/site-paths.mts";
 
-test("a framework address is the page of the primitive on the UI SDK, read for the framework", () => {
-  expect(pageOfFrameworkAddress("/docs/vue/knob")).toEqual({
+test("a framework address is the page of the primitive, read for the framework", () => {
+  expect(pageOfFrameworkAddress("/docs/vue/components/base/knob")).toEqual({
     framework: "vue",
-    pathname: "/docs/knob-ui-sdk",
+    pathname: "/docs/components/base/knob",
   });
-  expect(pageOfFrameworkAddress("/docs/web-components/piano-roll")).toEqual({
+  expect(
+    pageOfFrameworkAddress("/docs/web-components/components/base/piano-roll")
+  ).toEqual({
     framework: "web",
-    pathname: "/docs/piano-roll-ui-sdk",
+    pathname: "/docs/components/base/piano-roll",
   });
+  // The rest of the styled catalog is React's.
+  expect(pageOfFrameworkAddress("/docs/vue/components/base/lcd")).toBeNull();
   expect(pageOfFrameworkAddress("/docs/svelte")).toEqual({
     framework: "svelte",
     pathname: "/docs",
@@ -24,18 +28,21 @@ test("a framework address is the page of the primitive on the UI SDK, read for t
 });
 
 test("an address with no framework prefix is left alone", () => {
-  expect(pageOfFrameworkAddress("/docs/knob-ui-sdk")).toBeNull();
+  expect(pageOfFrameworkAddress("/docs/components/base/knob")).toBeNull();
   expect(pageOfFrameworkAddress("/docs/vuex")).toBeNull();
 });
 
 test("a page read for a framework goes back to its framework address", () => {
-  expect(frameworkAddressOf("/docs/knob-ui-sdk", "vue")).toBe("/docs/vue/knob");
+  expect(frameworkAddressOf("/docs/components/base/knob", "vue")).toBe(
+    "/docs/vue/components/base/knob"
+  );
+  expect(frameworkAddressOf("/docs/components/base/lcd", "vue")).toBeNull();
   expect(frameworkAddressOf("/docs", "web")).toBe("/docs/web-components");
   expect(frameworkAddressOf("/docs/registry", "web")).toBe(
     "/docs/web-components/registry"
   );
-  expect(frameworkAddressOf("/docs/knob-ui-sdk", "react")).toBe(
-    "/docs/react/knob"
+  expect(frameworkAddressOf("/docs/components/base/lcd", "react")).toBe(
+    "/docs/react/components/base/lcd"
   );
   expect(frameworkAddressOf("/docs/styling", "vue")).toBeNull();
 });
@@ -94,15 +101,17 @@ const run = (kept: string | null, pathname: string) => {
 };
 
 test("the redirect script goes to the address of the framework kept", () => {
-  expect(run("vue", "/docs/knob-ui-sdk")).toBe("/docs/vue/knob?x=1#a");
+  expect(run("vue", "/docs/components/base/knob")).toBe(
+    "/docs/vue/components/base/knob?x=1#a"
+  );
   expect(run("web", "/docs")).toBe("/docs/web-components?x=1#a");
-  expect(run("svelte", "/docs/piano-roll-ui-sdk/")).toBe(
-    "/docs/svelte/piano-roll?x=1#a"
+  expect(run("svelte", "/docs/components/base/piano-roll/")).toBe(
+    "/docs/svelte/components/base/piano-roll?x=1#a"
   );
 });
 
 test("the redirect script stays where it is without a framework kept or an address for the page", () => {
-  expect(run(null, "/docs/knob-ui-sdk")).toBeNull();
+  expect(run(null, "/docs/components/base/knob")).toBeNull();
   expect(run("vue", "/docs/guides/output")).toBeNull();
   expect(run("vue", "/docs/vue/knob")).toBeNull();
 });

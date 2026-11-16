@@ -40,7 +40,7 @@ Common hooks (check the primitive's page for the exact list, don't invent names)
 | Data attributes | `data-disabled`, `data-dragging`, `data-orientation` (Fader), `data-active` (Knob.Mark, live Waveform), `data-clipping` (Meter), `data-selected`, `data-scrubbing`, `data-in-scale`, `data-out-of-scale`, `data-scale-root` (PianoRoll.Row), `data-muted` (PianoRoll.Note), `data-has-selection` (PianoRoll.Root) |
 | CSS variables | `--xy-pad-x` / `--xy-pad-y`, `--knob-mark-angle`, `--waveform-position`, `--waveform-level`, `--timeline-unit`, `--sequencer-velocity`, `--piano-roll-velocity`, `--piano-roll-chance`, `--piano-roll-level`, `--piano-roll-deviation` |
 
-Read the part list on the primitive's page (`https://www.audio-ui.dev/docs/<name>-ui-sdk`): a part outside its parent does nothing.
+Read the part list on the primitive's page (`https://www.audio-ui.dev/docs/components/base/<name>`, under Headless primitive): a part outside its parent does nothing.
 
 ```tsx
 import { Knob } from "@/components/audio-ui/knob/react"; // installed with `npx shadcn@latest add @audio-ui/knob-react`

@@ -1,11 +1,11 @@
 /**
- * The framework addresses of the docs: `/docs/vue/knob` is the page of the
- * knob on the UI SDK, read for Vue. They are the same pages under another
+ * The framework addresses of the docs: `/docs/vue/components/base/knob` is the
+ * page of the knob, read for Vue. They are the same pages under another
  * address, so the router rewrites them to the page's own address with the
  * framework in a `?framework=` that only the router sees, and back the other way: an address the reader sees never has it. Every page of the docs a framework is shown has one (`/docs/vue/guides/output`).
  */
 
-/** The addresses only a React app uses: the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs are every framework's. */
+/** The addresses only a React app uses: the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs (`PRIMITIVE_PAGES`) are every framework's. */
 export const REACT_ADDRESSES = [
   "/components",
   "/docs/api",
@@ -31,26 +31,26 @@ export const FRAMEWORK_SEGMENTS = {
 type Segment = keyof typeof FRAMEWORK_SEGMENTS;
 type Prefixed = (typeof FRAMEWORK_SEGMENTS)[Segment];
 
-/** The primitives, which have a page on the UI SDK at `/docs/<name>-ui-sdk`. */
-export const UI_SDK_PRIMITIVES = [
-  "envelope",
-  "fader",
-  "knob",
-  "meter",
-  "pad",
-  "piano",
-  "piano-roll",
-  "plot",
-  "sequencer",
-  "timeline",
-  "waveform",
-  "xypad",
-] as const;
+/** The pages of the primitives, by name: every framework reads them, for the headless primitive each installs, where the rest of `/docs/components` is the styled catalog of React. */
+export const PRIMITIVE_PAGES = {
+  envelope: "/docs/components/base/envelope",
+  fader: "/docs/components/base/fader",
+  knob: "/docs/components/base/knob",
+  meter: "/docs/components/base/meter",
+  pad: "/docs/components/base/pad",
+  piano: "/docs/components/base/piano",
+  "piano-roll": "/docs/components/base/piano-roll",
+  plot: "/docs/components/base/plot",
+  sequencer: "/docs/components/base/sequencer",
+  timeline: "/docs/components/base/arrangement",
+  waveform: "/docs/components/base/waveform",
+  xypad: "/docs/components/base/xypad",
+} as const;
 
-const PRIMITIVE_PAGE = new Set<string>(UI_SDK_PRIMITIVES);
+const PRIMITIVE_PATHS: readonly string[] = Object.values(PRIMITIVE_PAGES);
+
 const PREFIXED = /^\/docs\/(react|svelte|vue|web-components)(?:\/(.*))?$/;
 const TRAILING_SLASH = /\/$/;
-const UI_SDK_ADDRESS = /^\/docs\/([a-z-]+)-ui-sdk$/;
 const SEGMENT_OF = new Map<string, Segment>(
   Object.entries(FRAMEWORK_SEGMENTS).map(([segment, id]) => [
     id,
@@ -68,11 +68,12 @@ function addressable(pathname: string, framework: string): boolean {
   }
   return (
     framework === "react" ||
+    PRIMITIVE_PATHS.includes(pathname) ||
     !REACT_ADDRESSES.some((prefix) => under(pathname, prefix))
   );
 }
 
-/** The page a framework address is, and its framework: `/docs/vue/knob` is `/docs/knob-ui-sdk` for Vue, `/docs/vue/guides/output` is `/docs/guides/output`; `/docs/vue` is the docs' own first page. Null for any other address, and for a page the framework is not shown. */
+/** The page a framework address is, and its framework: `/docs/vue/components/base/knob` is `/docs/components/base/knob` for Vue, `/docs/vue/guides/output` is `/docs/guides/output`; `/docs/vue` is the docs' own first page. Null for any other address, and for a page the framework is not shown. */
 export function pageOfFrameworkAddress(
   pathname: string
 ): { framework: Prefixed; pathname: string } | null {
@@ -85,9 +86,7 @@ export function pageOfFrameworkAddress(
   if (rest === "") {
     return { framework, pathname: "/docs" };
   }
-  const page = PRIMITIVE_PAGE.has(rest)
-    ? `/docs/${rest}-ui-sdk`
-    : `/docs/${rest}`;
+  const page = `/docs/${rest}`;
   return addressable(page, framework) ? { framework, pathname: page } : null;
 }
 
@@ -99,10 +98,6 @@ export function frameworkAddressOf(
   const segment = framework ? SEGMENT_OF.get(framework) : undefined;
   if (!(segment && framework && addressable(pathname, framework))) {
     return null;
-  }
-  const name = UI_SDK_ADDRESS.exec(pathname)?.[1];
-  if (name && PRIMITIVE_PAGE.has(name)) {
-    return `/docs/${segment}/${name}`;
   }
   return `/docs/${segment}${pathname.slice("/docs".length)}`;
 }
@@ -123,7 +118,7 @@ export function frameworkAddresses(pages: readonly string[]): string[] {
 
 /**
  * Runs in the head, before the first paint: a page that has an address for the
- * framework the reader kept (`/docs/knob-ui-sdk` for Vue) goes to it, so the
+ * framework the reader kept (`/docs/components/base/knob` for Vue) goes to it, so the
  * page is drawn for their framework from the start. It is `frameworkAddressOf`
  * written for a document with no module, from the same lists. It runs in a function: a `var` at the top of a page would be a property of `window`, and `window.name` turns what it is given into text.
  */
@@ -134,17 +129,15 @@ export const FRAMEWORK_REDIRECT_SCRIPT = `
         Object.entries(FRAMEWORK_SEGMENTS).map(([segment, id]) => [id, segment])
       )
     )};
-    var primitives = ${JSON.stringify(UI_SDK_PRIMITIVES)};
+    var primitives = ${JSON.stringify(PRIMITIVE_PATHS)};
     var reactOnly = ${JSON.stringify(REACT_ADDRESSES)};
     var kept = localStorage['audio-ui-framework'];
     var segment = segments[kept];
     var path = location.pathname.replace(/\\/$/, '');
     var under = function (prefix) { return path === prefix || path.indexOf(prefix + '/') === 0; };
     var to = null;
-    if (segment && (path === '/docs' || path.indexOf('/docs/') === 0) && !${PREFIXED.toString()}.test(path) && (kept === 'react' || !reactOnly.some(under))) {
-      var name = /^\\/docs\\/([a-z-]+)-ui-sdk$/.exec(path);
-      to = name && primitives.indexOf(name[1]) >= 0 ? '/docs/' + segment + '/' + name[1]
-        : '/docs/' + segment + path.slice(5);
+    if (segment && (path === '/docs' || path.indexOf('/docs/') === 0) && !${PREFIXED.toString()}.test(path) && (kept === 'react' || primitives.indexOf(path) >= 0 || !reactOnly.some(under))) {
+      to = '/docs/' + segment + path.slice(5);
     }
     if (to) location.replace(to + location.search + location.hash);
   } catch (_) {} })();
