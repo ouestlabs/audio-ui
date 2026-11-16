@@ -29,7 +29,6 @@
     "@audio-ui/gl": "*",
     "@audio-ui/icons": "*",
     "@audio-ui/primitives": "*",
-    "@audio-ui/react": "*",
     "@audio/dynamics-compand": "catalog:",
     "@audio/dynamics-compressor": "catalog:",
     "@audio/dynamics-deesser": "catalog:",

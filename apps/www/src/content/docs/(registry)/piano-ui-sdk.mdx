@@ -223,12 +223,3 @@ Set on the Root, as props (an attribute in kebab case on the custom element).
 
 - `data-active` on a key while it sounds, pressed here or listed in `activeNotes`.
 - `data-color` on a key, `"black"` or `"white"`, `data-disabled`, `data-layout` and `data-orientation`.
-
-## Differences from the React piano of `@audio-ui/react`
-
-The behavior and the `data-*` state attributes are the same. These differ:
-
-- There is no `Keys` part: you write a Key for each pitch, and the Root's content reads `pitches` from its state. In React, the content is a function and must be the Root's only child.
-- On custom elements the keyboard makes the keys unless you write them.
-- Every part carries a `data-slot` attribute, such as `piano-key`.
-- A note reports a `source`.

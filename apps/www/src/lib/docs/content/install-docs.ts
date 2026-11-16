@@ -1,6 +1,6 @@
 /**
  * The Installation section of a component's page, written once. A page says
- * `<Install name="knob" packages="@audio-ui/react class-variance-authority" />`
+ * `<Install name="knob" packages="@audio-ui/core class-variance-authority" />`
  * and the site draws the CLI tab and the Manual tab from it; the pages served
  * as markdown get the same text from `expandInstall`.
  */

@@ -29,8 +29,6 @@ const SKILL_NAME = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const MARKDOWN_LINK = /\]\((\.{1,2}\/[^)#\s]+)/g;
 // A whole name: not the start of a template such as `@audio-ui/block-<name>`.
 const REGISTRY_NAME = /@audio-ui\/([a-z0-9-]*[a-z0-9])(?![a-z0-9<-])/g;
-// An import, not a path into an installed package (`node_modules/@audio-ui/react/dist`).
-const REACT_ENTRY = /(?<!node_modules\/)@audio-ui\/react\/([a-z0-9-]+)/g;
 const DATA_ATTRIBUTE = /`(data-[a-z-]+)`/g;
 const CSS_VARIABLE = /`(--[a-z-]+)`/g;
 const ICON_PATH = /icon_(?:small|large): "([^"]+)"/g;
@@ -59,14 +57,7 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set([
-  "react",
-  "core",
-  "elements",
-  "engine",
-  "gl",
-  "primitives",
-]);
+const PACKAGES = new Set(["core", "engine", "gl", "primitives"]);
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
@@ -93,16 +84,20 @@ const registryNames = new Set(
     (item) => item.name
   )
 );
-const uiExports = Object.keys(
-  (await Bun.file(`${ROOT}/packages/react/package.json`).json()).exports
-);
 const coreExports = Object.keys(
   (await Bun.file(`${ROOT}/packages/core/package.json`).json()).exports
 );
 const engineExports = Object.keys(
   (await Bun.file(`${ROOT}/packages/engine/package.json`).json()).exports
 );
-const uiSource = (await read("**/*.{ts,tsx}", `${ROOT}/packages/react/src`))
+const uiSource = (
+  await Promise.all(
+    ["primitives", "core"].map((name) =>
+      read("**/*.{ts,tsx}", `${ROOT}/packages/${name}/src`)
+    )
+  )
+)
+  .flat()
   .map((file) => file.text)
   .join("\n");
 const withRules = await readSkillNames();
@@ -160,13 +155,6 @@ describe.each(markdown)("$path", ({ path, text }) => {
   test("every @audio-ui/<name> is a registry item or a package", () => {
     const missing = matches(text, REGISTRY_NAME).filter(
       (name) => !(PACKAGES.has(name) || registryNames.has(name))
-    );
-    expect(missing).toEqual([]);
-  });
-
-  test("every @audio-ui/react/<entry> is exported", () => {
-    const missing = matches(text, REACT_ENTRY).filter(
-      (entry) => !uiExports.includes(`./${entry}`)
     );
     expect(missing).toEqual([]);
   });

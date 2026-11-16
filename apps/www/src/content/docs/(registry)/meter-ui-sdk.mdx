@@ -233,12 +233,3 @@ The Mark takes a `value` and sits along the length at its level. A Channel takes
 ## Accessibility
 
 Each channel is a `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and an `aria-valuetext` that reads the level as a number with its unit, not as a share of the range. Name it with `aria-label`, or with a Label part inside it, which sets `aria-labelledby`. The Indicator, the Peak and the Value are hidden from assistive technology: the channel announces its own level.
-
-## Differences from the React meter of `@audio-ui/react`
-
-The behavior and the `data-*` state attributes are the same. These differ:
-
-- There is no `Channels` part: you write the channels, and the Root's content reads `channelCount` from its state. In React, the content is a function and must be the Root's only child.
-- On custom elements the channels are written in the markup, and their number does not follow a live source.
-- Every part carries a `data-slot` attribute, such as `meter-indicator`.
-- The hidden `x` that the React meter writes inside each channel, so that screen readers which skip an empty meter still read it, is not written.

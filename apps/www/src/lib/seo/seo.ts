@@ -398,7 +398,7 @@ export function buildSoftwareJsonLd() {
     codeRepository: siteConfig.links.github,
     description: siteConfig.description,
     license: "https://opensource.org/licenses/MIT",
-    name: "@audio-ui/react",
+    name: "audio/ui",
     programmingLanguage: "TypeScript",
     runtimePlatform: "React 19",
     sameAs: [siteConfig.links.npm],

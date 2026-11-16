@@ -190,11 +190,3 @@ An Item takes its `value`, a `disabled`, and a `chokeGroup`: pads that share one
 
 - `data-active` on a pad while it sounds, held here or listed in `activePads`, and `data-disabled` on the Root and the pads.
 - `--pad-velocity` on a pad, from 0 to 1: how hard it was last struck, for a flash that follows the force.
-
-## Differences from the React pad of `@audio-ui/react`
-
-The behavior and the `data-*` state attributes are the same. These differ:
-
-- Every part carries a `data-slot` attribute, such as `pad-item`.
-- A strike reports a `source`.
-- On custom elements the callbacks are the `padon` and `padoff` events.

@@ -2,7 +2,7 @@
 
 The logic of audio/ui's primitives with no UI framework in it: values on a grid, linear and logarithmic scales, range geometry, live sources a view can follow outside its render cycle, and frame scheduling.
 
-`@audio-ui/react` is built on it. Use it directly to build the same controls for another framework, or for the DOM alone.
+The primitives of the audio/ui registry are built on it. Use it directly to build the same controls for another framework, or for the DOM alone.
 
 ```bash
 npm install @audio-ui/core

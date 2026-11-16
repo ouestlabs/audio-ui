@@ -205,12 +205,3 @@ On the custom element, `onValueChange` is an `input` event and `onValueCommitted
 ## For an agent
 
 The pad declares one action, `setValue(x, y)`, and the name on its Thumb is what an agent finds it by. The bridge of the framework you use (`createAgent` in `@ui-sdk/<framework>/agent`) sets the point with the source `"agent"`. Each axis is a change of its own, so `onValueChange` hears two, and an app can refuse either.
-
-## Differences from the React pad of `@audio-ui/react`
-
-The behavior and the `data-*` state attributes are the same. These differ:
-
-- Every part carries a `data-slot` attribute, such as `xypad-thumb`, and the two inputs are `xypad-input-x` and `xypad-input-y`.
-- A change reports a `source`.
-- The Value's content reads the part's state, not three arguments.
-- There is no Provider.

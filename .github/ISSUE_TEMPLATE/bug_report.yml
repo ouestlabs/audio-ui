@@ -48,8 +48,8 @@ body:
     id: versions
     attributes:
       label: Package versions
-      description: "The version of `@audio-ui/react` or `@audio-ui/core` you use, or the registry item and style you installed (ex. `@audio-ui/knob`, `base-nova`)."
-      placeholder: ex. "@audio-ui/react 0.2.2"
+      description: "The version of `@audio-ui/core` you use, or the registry item and style you installed (ex. `@audio-ui/knob`, `base-nova`)."
+      placeholder: ex. "@audio-ui/core 0.29.0"
     validations:
       required: true
 

@@ -222,13 +222,3 @@ On the custom element, `onValueChange` is an `input` event and `onValueCommitted
 ## For an agent
 
 The fader declares one action, `setValue`, and the name on its Thumb is what an agent finds it by. The bridge of the framework you use (`createAgent` in `@ui-sdk/<framework>/agent`) reads its value and range, sets it with the source `"agent"`, and the same `onValueChange` hears it, so an app can refuse a value as it would a person's.
-
-## Differences from the React fader of `@audio-ui/react`
-
-The behavior and the `data-*` state attributes are the same. These differ:
-
-- Every part carries a `data-slot` attribute, such as `fader-thumb`.
-- A change reports a `source`.
-- On a right-to-left page, a horizontal fader's thumb is not shifted to the other side of its position.
-- `Value` is not editable: there is no `editable` prop to type a value.
-- There is no Provider.

@@ -219,15 +219,6 @@ On the custom element, `onValueChange` is an `input` event and `onValueCommitted
 
 The knob declares one action, `setValue`, and the name on its Thumb is what an agent finds it by. The bridge of the framework you use (`createAgent` in `@ui-sdk/<framework>/agent`) reads its value and range, sets it with the source `"agent"`, and the same `onValueChange` hears it, so an app can refuse a value as it would a person's.
 
-## Differences from the React knob of `@audio-ui/react`
-
-The behavior is the same, and so are the `data-*` state attributes. These differ:
-
-- Every part carries a `data-slot` attribute, such as `knob-thumb`.
-- A change reports a `source`.
-- The Mark part is in every framework, custom elements included.
-- `Knob.Provider` gives its knobs a drag mode in React, Vue and Svelte; the custom elements have none.
-
 ## Package
 
 `@audio-ui/primitives` holds the behavior (`@audio-ui/primitives/knob`) with `@ui-sdk/core` as a peer dependency, pinned to the beta the primitives are written for. The adapters are in the registry, not the package.

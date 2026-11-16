@@ -294,14 +294,3 @@ On the custom element, `onValueChange` is an `input` event and `onValueCommitted
 ## Accessibility
 
 A Point is a `role="slider"` on its level, from 0 to 1, and its `aria-valuetext` reads its coordinates, `0.5, 1`, with the format and the locale of the Root. A Segment is a slider on its curve, from -1 to 1. Give each an `aria-label`: the Graph, the Line and the Fill are hidden from assistive technology.
-
-## Differences from the React envelope of `@audio-ui/react`
-
-The behavior and the gestures are the same. These differ:
-
-- The Graph is a `<div>` and not an `<svg>`. The Line and the Fill are each an `<svg>` over it, drawn in their `color`, where the React ones are polylines inside the Graph's svg.
-- There are no `Points` and `Segments` parts: you write a Point and a Segment for each, and the Root's content reads `value` from its state. In React, the content is a function and must be the Root's only child.
-- On custom elements the Points and the Segments are made for you, and take the name "Point 1" and "Curve 1".
-- The Graph does not set its own position or size.
-- Every part carries a `data-slot` attribute, such as `envelope-point`.
-- A change reports a `source`.

@@ -1,5 +1,4 @@
 import { describe, expect, test } from "bun:test";
-import { Knob as Published } from "@audio-ui/react/knob";
 import { renderToString } from "react-dom/server";
 import { createSSRApp, h } from "vue";
 import { renderToString as renderVue } from "vue/server-renderer";
@@ -14,8 +13,8 @@ const OPTIONS = {
   min: 0,
 } as const;
 
-/** The same knob, rendered on the server by the published primitive and by the UI SDK one. */
-function html(K: typeof Knob | typeof Published) {
+/** The knob, rendered on the server. */
+function html(K: typeof Knob) {
   return renderToString(
     <K.Root {...OPTIONS}>
       <K.Control>
@@ -29,8 +28,7 @@ function html(K: typeof Knob | typeof Published) {
 }
 
 describe("server rendering", () => {
-  test("React: the UI SDK knob writes what the published one does", () => {
-    expect(serverFeatures(html(Published))).toEqual(EVERY_FEATURE);
+  test("React: the knob writes every feature", () => {
     expect(serverFeatures(html(Knob))).toEqual(EVERY_FEATURE);
     expect(html(Knob)).toContain('data-slot="knob-thumb"');
   });

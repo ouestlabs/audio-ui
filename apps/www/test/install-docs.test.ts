@@ -12,12 +12,12 @@ const INSTALL_TAG = /<Install\s+([^>]*?)\/>/g;
 
 describe("installPlan", () => {
   test("a component installs by its name, and its source is shown as a file of the project", () => {
-    const plan = installPlan({ name: "knob", packages: "@audio-ui/react cva" });
+    const plan = installPlan({ name: "knob", packages: "@audio-ui/core cva" });
     expect(plan.cli).toEqual([
       { code: "npx shadcn@latest add @audio-ui/knob", type: "command" },
     ]);
     expect(plan.manual[0]?.parts).toEqual([
-      { code: "npm install @audio-ui/react cva", type: "command" },
+      { code: "npm install @audio-ui/core cva", type: "command" },
     ]);
     expect(plan.manual[1]?.parts).toEqual([
       { name: "knob", title: "components/audio-ui/knob.tsx", type: "source" },

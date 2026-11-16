@@ -26,7 +26,6 @@
         "../../packages/icons/src/providers/react/index.tsx"
       ],
       "@audio-ui/primitives/*": ["../../packages/primitives/src/*/index.ts"],
-      "@audio-ui/react": ["../../packages/react/src/index.ts"],
       "fumadocs-mdx:collections/*": ["./.source/*"]
     },
     "types": ["bun", "mdx", "node", "react", "react-dom", "vite/client"]
