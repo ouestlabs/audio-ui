@@ -32,7 +32,7 @@ ${steps([
   SKILLS_STEP,
   MCP_STEP,
 ])}`,
-  vue: `Set up audio/ui in this Vue project. It needs Vue 3. The shadcn CLI needs a components.json at the root with the components alias, and the bundler needs that alias: create what is missing. Tailwind CSS is not needed.
+  vue: `Set up audio/ui in this Vue project. It needs Vue 3. The shadcn CLI needs a components.json at the root, and the bundler needs the @ alias to import the file, which lands in src/components/audio-ui: create what is missing. Tailwind CSS is not needed.
 
 ${steps([
   `Primitives install with the shadcn CLI, for example: npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json. The name of the item is <primitive>-vue. ${RELEASE_AGE} ${BY_HAND}`,
@@ -40,7 +40,7 @@ ${steps([
   SKILLS_STEP,
   MCP_STEP,
 ])}`,
-  web: `Set up audio/ui in this project, with no framework: plain HTML and a module script. The shadcn CLI needs a components.json with the components alias, and no Tailwind CSS.
+  web: `Set up audio/ui in this project, with no framework: plain HTML and a module script. The shadcn CLI needs a components.json, and no Tailwind CSS.
 
 ${steps([
   `Primitives install with the shadcn CLI, for example: npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json. The name of the item is <primitive>-web. Import the file once, and it registers the audio-ui-knob tags. ${RELEASE_AGE} ${BY_HAND}`,

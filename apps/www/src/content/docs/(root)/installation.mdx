@@ -15,7 +15,7 @@ audio/ui is built on **React 19** and [Tailwind CSS v4](https://tailwindcss.com)
 
 <ForFrameworks only="vue">
 
-A Vue 3 app. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root, with the `components` alias (`@/components`). Your bundler needs that alias to build, as for any import of yours: in Vite, `resolve.alias` of `@` to `./src`. Tailwind CSS is not needed.
+A Vue 3 app. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root. The file lands in `src/components/audio-ui/`, whatever alias `components.json` names. Your bundler needs that alias to build, as for any import of yours: in Vite, `resolve.alias` of `@` to `./src`. Tailwind CSS is not needed.
 
 In Nuxt 4, the CLI writes to `components/` at the project root, not under `app/`: import from there with Nuxt's root alias, `~~/components/audio-ui/knob/vue`.
 
@@ -29,7 +29,7 @@ A Svelte 5 app. The shadcn CLI copies the primitive into your project, and it ne
 
 <ForFrameworks only="web">
 
-A page, or an app, with a bundler such as Vite that resolves package imports. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root, with the `components` alias (`@/components`). It needs no Tailwind and no path alias.
+A page, or an app, with a bundler such as Vite that resolves package imports. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root. The file lands in `src/components/audio-ui/`. It needs no Tailwind and no path alias.
 
 With `"tsx": false` in `components.json`, the CLI writes the file as `web.js`; with `true`, as `web.ts`. Import the one you got.
 
