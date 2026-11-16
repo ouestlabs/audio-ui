@@ -569,6 +569,7 @@ const itemsByBase = new Map(
 const REGEX_SPECIALS = /[.*+?^${}()|[\]\\]/g;
 const SOURCE_EXTENSION = /\.tsx?$/;
 const INDEX_FILE = /\/index$/;
+const SVELTE_ROOT = /^~\/src\/lib\//;
 const explicitRewrites = [...itemsByBase.values()]
   .flatMap((items) => [...items.values()])
   .flatMap((item) => item.files ?? [])
@@ -580,7 +581,7 @@ const explicitRewrites = [...itemsByBase.values()]
     const svelte = file.path.includes("/svelte/");
     const target = file.target.replace(SOURCE_EXTENSION, "");
     const installed = svelte
-      ? `$lib/components/${target.replace(INDEX_FILE, "")}`
+      ? `$lib/${target.replace(SVELTE_ROOT, "").replace(INDEX_FILE, "")}`
       : `@/${target}`;
     const source = file.path.replace(SOURCE_EXTENSION, "");
     // A folder's index is imported as the folder.

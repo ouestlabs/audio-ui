@@ -207,7 +207,8 @@ export function primitiveItems(
     // a `registry:component` one in `components`, which is where it belongs.
     const svelte = framework.name === "svelte";
     const type = svelte ? "registry:component" : "registry:ui";
-    const root = svelte ? "" : "components/";
+    // Both CLIs write a `~/` target from the project's root: `src/lib/components`, where shadcn-svelte keeps its own.
+    const root = svelte ? "~/src/lib/components/" : "components/";
     return {
       categories: ["primitive", framework.name],
       dependencies: [

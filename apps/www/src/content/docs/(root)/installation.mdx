@@ -15,43 +15,39 @@ audio/ui is built on **React 19** and [Tailwind CSS v4](https://tailwindcss.com)
 
 <ForFrameworks only="vue">
 
-A Vue 3 app. The [shadcn-vue](https://www.shadcn-vue.com) CLI copies the primitive into your project, and it needs two things first:
-
-- a `components.json` at the root, with the `components` alias (`@/components`);
-- the `@` alias in `tsconfig.json`, under `compilerOptions`: `"baseUrl": "."` and `"paths": { "@/*": ["./src/*"] }`.
-
-Your bundler needs the same alias to build: in Vite, `resolve.alias` of `@` to `./src`. Tailwind CSS is not needed.
+A Vue 3 app. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root, with the `components` alias (`@/components`). Your bundler needs that alias to build, as for any import of yours: in Vite, `resolve.alias` of `@` to `./src`. Tailwind CSS is not needed.
 
 </ForFrameworks>
 
 <ForFrameworks only="svelte">
 
-A Svelte 5 app. The [shadcn-svelte](https://www.shadcn-svelte.com) CLI copies the primitive into your project, and it needs three things first:
-
-- a `components.json` at the root, with the `components` alias (`$lib/components`);
-- Tailwind CSS installed: the CLI stops without it, even for a primitive that has no styles;
-- your `$lib` alias in `tsconfig.json`. A SvelteKit project made with the latest `sv` template has no such alias (it uses `#lib`), so declare it under `compilerOptions.paths`:
-
-```json
-{
-  "compilerOptions": {
-    "paths": {
-      "$lib": ["./src/lib"],
-      "$lib/*": ["./src/lib/*"]
-    }
-  }
-}
-```
-
-Outside SvelteKit, which provides `$lib` itself, your bundler needs the alias too: in Vite, `resolve.alias` of `$lib` to `./src/lib`.
+A Svelte 5 app. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root. The files land in `src/lib/components`. SvelteKit provides the `$lib` alias that imports them; outside SvelteKit, your bundler needs it: in Vite, `resolve.alias` of `$lib` to `./src/lib`. Tailwind CSS is not needed.
 
 </ForFrameworks>
 
 <ForFrameworks only="web">
 
-A page, or an app, with a bundler such as Vite that resolves package imports. The [shadcn](https://ui.shadcn.com/docs/cli) CLI copies the primitive into your project, and it needs a `components.json` at the root, with the `components` alias (`@/components`). It needs no Tailwind and no path alias.
+A page, or an app, with a bundler such as Vite that resolves package imports. The shadcn CLI copies the primitive into your project, and it needs one thing first: a `components.json` at the root, with the `components` alias (`@/components`). It needs no Tailwind and no path alias.
 
 With `"tsx": false` in `components.json`, the CLI writes the file as `web.js`; with `true`, as `web.ts`. Import the one you got.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+A minimal `components.json` is enough:
+
+```json
+{
+  "$schema": "https://ui.shadcn.com/schema.json",
+  "style": "base-nova",
+  "tsx": true,
+  "tailwind": { "css": "src/style.css", "baseColor": "neutral", "cssVariables": true },
+  "aliases": { "components": "@/components", "utils": "@/lib/utils" }
+}
+```
+
+The shadcn-vue and shadcn-svelte CLIs install the same items, with their own prerequisites (an alias in `tsconfig.json`, and Tailwind CSS for shadcn-svelte).
 
 </ForFrameworks>
 
@@ -80,7 +76,7 @@ The same works for every item of the [Docs](/docs), including the `block-*` bloc
 Copy the headless primitive from the address of its item, `<name>-vue.json`:
 
 ```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
 ```
 
 It writes `components/audio-ui/knob/vue.ts` and installs what it imports: `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/vue` and `vue`. Every primitive installs the same way.
@@ -92,10 +88,10 @@ It writes `components/audio-ui/knob/vue.ts` and installs what it imports: `@audi
 Copy the headless primitive from the address of its item, `<name>-svelte.json`:
 
 ```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
 ```
 
-It writes a component for each part in `components/audio-ui/knob/svelte/`, with an `index.ts`, and installs what they import: `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/svelte` and `svelte`. Every primitive installs the same way.
+It writes a component for each part in `src/lib/components/audio-ui/knob/svelte/`, with an `index.ts`, and installs what they import: `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/svelte` and `svelte`. Every primitive installs the same way.
 
 </ForFrameworks>
 

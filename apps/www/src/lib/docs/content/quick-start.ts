@@ -24,18 +24,18 @@ ${steps([
   SKILLS_STEP,
   MCP_STEP,
 ])}`,
-  svelte: `Set up audio/ui in this Svelte project. It needs Svelte 5. The shadcn-svelte CLI needs a components.json, Tailwind CSS installed and a $lib alias under compilerOptions.paths in tsconfig.json (and in the bundler's config, outside SvelteKit): create what is missing.
+  svelte: `Set up audio/ui in this Svelte project. It needs Svelte 5. The shadcn CLI needs a components.json at the root, and the bundler needs the $lib alias outside SvelteKit: create what is missing. Tailwind CSS is not needed.
 
 ${steps([
-  `Primitives install with the shadcn-svelte CLI, for example: npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json. The name of the item is <primitive>-svelte. ${RELEASE_AGE} ${BY_HAND}`,
+  `Primitives install with the shadcn CLI, for example: npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json. The name of the item is <primitive>-svelte. ${RELEASE_AGE} ${BY_HAND}`,
   AGENT_NOTE,
   SKILLS_STEP,
   MCP_STEP,
 ])}`,
-  vue: `Set up audio/ui in this Vue project. It needs Vue 3. The shadcn-vue CLI needs a components.json and the @ alias in tsconfig.json (and in the bundler's config): create what is missing. Tailwind CSS is not needed.
+  vue: `Set up audio/ui in this Vue project. It needs Vue 3. The shadcn CLI needs a components.json at the root with the components alias, and the bundler needs that alias: create what is missing. Tailwind CSS is not needed.
 
 ${steps([
-  `Primitives install with the shadcn-vue CLI, for example: npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json. The name of the item is <primitive>-vue. ${RELEASE_AGE} ${BY_HAND}`,
+  `Primitives install with the shadcn CLI, for example: npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json. The name of the item is <primitive>-vue. ${RELEASE_AGE} ${BY_HAND}`,
   AGENT_NOTE,
   SKILLS_STEP,
   MCP_STEP,

@@ -12,7 +12,7 @@ The same registry installs the primitive of your framework alone, with no styles
 npx shadcn@latest add @audio-ui/knob-react
 ```
 
-The suffix is the framework: `-react`, `-vue`, `-svelte` or `-web` (`shadcn-vue` and `shadcn-svelte` take the item's URL, `https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`). The primitives are unstyled: `Knob`, `Fader`, `XYPad`, `Envelope`, `Meter`, `Plot`, `Waveform`, `Timeline`, `Sequencer`, `Piano`, `PianoRoll` and `Pad`. Their logic is `@audio-ui/primitives`, over `@audio-ui/core`, which the CLI adds to `package.json`.
+The suffix is the framework: `-react`, `-vue`, `-svelte` or `-web` (Vue, Svelte and the web install from the item's URL, `npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`, with a `components.json` and nothing else). The primitives are unstyled: `Knob`, `Fader`, `XYPad`, `Envelope`, `Meter`, `Plot`, `Waveform`, `Timeline`, `Sequencer`, `Piano`, `PianoRoll` and `Pad`. Their logic is `@audio-ui/primitives`, over `@audio-ui/core`, which the CLI adds to `package.json`.
 
 ## Another framework
 
