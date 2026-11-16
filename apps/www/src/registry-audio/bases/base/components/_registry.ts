@@ -305,6 +305,45 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["fader"],
+    description: "fader example, in the Vue adapter",
+    files: [
+      {
+        path: "components/fader/fader-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "fader-vue-demo",
+    registryDependencies: ["@audio-ui/fader-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["fader"],
+    description: "fader example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/fader/fader-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "fader-svelte-demo",
+    registryDependencies: ["@audio-ui/fader-svelte"],
+    type: "registry:example",
+  },
+  {
+    categories: ["fader"],
+    description: "fader example, in the web adapter",
+    files: [
+      {
+        path: "components/fader/fader-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "fader-web-demo",
+    registryDependencies: ["@audio-ui/fader-web"],
+    type: "registry:example",
+  },
+  {
+    categories: ["fader"],
     description:
       "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     files: [
@@ -408,7 +447,7 @@ export const components: RegistryItem[] = [
     description: "Knob example, in the Vue adapter",
     files: [
       {
-        path: "components/knob/knob-vue-demo.vue",
+        path: "components/knob/knob-demo.vue",
         type: "registry:example",
       },
     ],
@@ -421,7 +460,7 @@ export const components: RegistryItem[] = [
     description: "Knob example, in the Svelte adapter",
     files: [
       {
-        path: "components/knob/knob-svelte-demo.svelte",
+        path: "components/knob/knob-demo.svelte",
         type: "registry:example",
       },
     ],
@@ -434,7 +473,7 @@ export const components: RegistryItem[] = [
     description: "Knob example, in the web adapter",
     files: [
       {
-        path: "components/knob/knob-web-demo.ts",
+        path: "components/knob/knob-demo.ts",
         type: "registry:example",
       },
     ],
@@ -471,6 +510,45 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["envelope"],
+    description: "envelope example, in the Vue adapter",
+    files: [
+      {
+        path: "components/envelope/envelope-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-vue-demo",
+    registryDependencies: ["@audio-ui/envelope-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["envelope"],
+    description: "envelope example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/envelope/envelope-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-svelte-demo",
+    registryDependencies: ["@audio-ui/envelope-svelte"],
+    type: "registry:example",
+  },
+  {
+    categories: ["envelope"],
+    description: "envelope example, in the web adapter",
+    files: [
+      {
+        path: "components/envelope/envelope-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "envelope-web-demo",
+    registryDependencies: ["@audio-ui/envelope-web"],
+    type: "registry:example",
+  },
+  {
+    categories: ["envelope"],
     description: "Controlled envelope with a live point count",
     files: [
       {
@@ -493,6 +571,45 @@ export const components: RegistryItem[] = [
     ],
     name: "piano-size-default-demo",
     registryDependencies: ["@audio-ui/piano", "@audio-ui/use-midi-input"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    description: "piano example, in the Vue adapter",
+    files: [
+      {
+        path: "components/piano/piano-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-vue-demo",
+    registryDependencies: ["@audio-ui/piano-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    description: "piano example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/piano/piano-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-svelte-demo",
+    registryDependencies: ["@audio-ui/piano-svelte"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano"],
+    description: "piano example, in the web adapter",
+    files: [
+      {
+        path: "components/piano/piano-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-web-demo",
+    registryDependencies: ["@audio-ui/piano-web"],
     type: "registry:example",
   },
   {
@@ -653,6 +770,48 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["meter"],
+    description: "meter example, in the Vue adapter",
+    files: [
+      {
+        path: "components/meter/meter-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-vue-demo",
+    registryDependencies: ["@audio-ui/meter-vue", "@audio-ui/simulated-levels"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "meter example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/meter/meter-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-svelte-demo",
+    registryDependencies: [
+      "@audio-ui/meter-svelte",
+      "@audio-ui/simulated-levels",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
+    description: "meter example, in the web adapter",
+    files: [
+      {
+        path: "components/meter/meter-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "meter-web-demo",
+    registryDependencies: ["@audio-ui/meter-web", "@audio-ui/simulated-levels"],
+    type: "registry:example",
+  },
+  {
+    categories: ["meter"],
     description:
       "A VU needle that follows the microphone when it is on, and a moving signal when it is not",
     files: [
@@ -681,6 +840,45 @@ export const components: RegistryItem[] = [
     ],
     name: "xypad-live-value-demo",
     registryDependencies: ["@audio-ui/xypad"],
+    type: "registry:example",
+  },
+  {
+    categories: ["xypad"],
+    description: "xypad example, in the Vue adapter",
+    files: [
+      {
+        path: "components/xypad/xypad-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "xypad-vue-demo",
+    registryDependencies: ["@audio-ui/xypad-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["xypad"],
+    description: "xypad example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/xypad/xypad-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "xypad-svelte-demo",
+    registryDependencies: ["@audio-ui/xypad-svelte"],
+    type: "registry:example",
+  },
+  {
+    categories: ["xypad"],
+    description: "xypad example, in the web adapter",
+    files: [
+      {
+        path: "components/xypad/xypad-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "xypad-web-demo",
+    registryDependencies: ["@audio-ui/xypad-web"],
     type: "registry:example",
   },
   {
@@ -1756,6 +1954,57 @@ export const components: RegistryItem[] = [
     registryDependencies: [
       "@audio-ui/pad",
       "@audio-ui/use-master-bus",
+      "@audio-ui/web-audio",
+      "@audio-ui/drum-synthesis",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["pad"],
+    description: "pad example, in the Vue adapter",
+    files: [
+      {
+        path: "components/pad/pad-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "pad-vue-demo",
+    registryDependencies: [
+      "@audio-ui/pad-vue",
+      "@audio-ui/web-audio",
+      "@audio-ui/drum-synthesis",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["pad"],
+    description: "pad example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/pad/pad-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "pad-svelte-demo",
+    registryDependencies: [
+      "@audio-ui/pad-svelte",
+      "@audio-ui/web-audio",
+      "@audio-ui/drum-synthesis",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["pad"],
+    description: "pad example, in the web adapter",
+    files: [
+      {
+        path: "components/pad/pad-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "pad-web-demo",
+    registryDependencies: [
+      "@audio-ui/pad-web",
       "@audio-ui/web-audio",
       "@audio-ui/drum-synthesis",
     ],

@@ -327,6 +327,11 @@ const items: RegistryItem[] = [
     description:
       "AI-native tool surface for a piano roll, createPianoRollTools builds typed, agent-agnostic tools (setNotes/addNotes/removeNotes/transpose/clear/setTempo) an LLM calls to compose melodies and basslines from natural language, parameterized by the roll's pitch range and grid",
   }),
+  libItem("simulated-levels", {
+    categories: ["lib", "audio", "meter"],
+    description:
+      "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from, as a live source for any framework",
+  }),
   libItem("drum-synthesis", {
     categories: ["lib", "audio", "synth", "sequencer"],
     description:

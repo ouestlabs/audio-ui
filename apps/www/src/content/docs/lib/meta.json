@@ -26,6 +26,7 @@
     "synced-rate",
     "envelope-ramp",
     "drum-synthesis",
+    "simulated-levels",
     "---Sound in and out---",
     "audio-export",
     "---Editing---",

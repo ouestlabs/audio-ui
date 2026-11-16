@@ -313,6 +313,7 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-simulated-levels", {
     categories: ["hooks", "audio", "meter"],
+    registryDependencies: ["@audio-ui/simulated-levels"],
     description:
       "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from: a demo meter that is never at rest",
   }),

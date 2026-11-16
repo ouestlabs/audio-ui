@@ -85,6 +85,24 @@
   },
   {
     "categories": ["fader"],
+    "description": "fader example, in the Vue adapter",
+    "name": "fader-vue-demo",
+    "title": "Fader vue demo"
+  },
+  {
+    "categories": ["fader"],
+    "description": "fader example, in the Svelte adapter",
+    "name": "fader-svelte-demo",
+    "title": "Fader svelte demo"
+  },
+  {
+    "categories": ["fader"],
+    "description": "fader example, in the web adapter",
+    "name": "fader-web-demo",
+    "title": "Fader web demo"
+  },
+  {
+    "categories": ["fader"],
     "description": "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     "name": "fader-pan-demo",
     "title": "Fader pan demo"
@@ -157,6 +175,24 @@
   },
   {
     "categories": ["envelope"],
+    "description": "envelope example, in the Vue adapter",
+    "name": "envelope-vue-demo",
+    "title": "Envelope vue demo"
+  },
+  {
+    "categories": ["envelope"],
+    "description": "envelope example, in the Svelte adapter",
+    "name": "envelope-svelte-demo",
+    "title": "Envelope svelte demo"
+  },
+  {
+    "categories": ["envelope"],
+    "description": "envelope example, in the web adapter",
+    "name": "envelope-web-demo",
+    "title": "Envelope web demo"
+  },
+  {
+    "categories": ["envelope"],
     "description": "Controlled envelope with a live point count",
     "name": "envelope-adsr-demo",
     "title": "Envelope adsr demo"
@@ -166,6 +202,24 @@
     "description": "Piano size default example",
     "name": "piano-size-default-demo",
     "title": "Piano size default demo"
+  },
+  {
+    "categories": ["piano"],
+    "description": "piano example, in the Vue adapter",
+    "name": "piano-vue-demo",
+    "title": "Piano vue demo"
+  },
+  {
+    "categories": ["piano"],
+    "description": "piano example, in the Svelte adapter",
+    "name": "piano-svelte-demo",
+    "title": "Piano svelte demo"
+  },
+  {
+    "categories": ["piano"],
+    "description": "piano example, in the web adapter",
+    "name": "piano-web-demo",
+    "title": "Piano web demo"
   },
   {
     "categories": ["piano"],
@@ -217,6 +271,24 @@
   },
   {
     "categories": ["meter"],
+    "description": "meter example, in the Vue adapter",
+    "name": "meter-vue-demo",
+    "title": "Meter vue demo"
+  },
+  {
+    "categories": ["meter"],
+    "description": "meter example, in the Svelte adapter",
+    "name": "meter-svelte-demo",
+    "title": "Meter svelte demo"
+  },
+  {
+    "categories": ["meter"],
+    "description": "meter example, in the web adapter",
+    "name": "meter-web-demo",
+    "title": "Meter web demo"
+  },
+  {
+    "categories": ["meter"],
     "description": "A VU needle that follows the microphone when it is on, and a moving signal when it is not",
     "name": "needle-meter-demo",
     "title": "Needle meter demo"
@@ -226,6 +298,24 @@
     "description": "XYPad with live x/y readout",
     "name": "xypad-live-value-demo",
     "title": "Xypad live value demo"
+  },
+  {
+    "categories": ["xypad"],
+    "description": "xypad example, in the Vue adapter",
+    "name": "xypad-vue-demo",
+    "title": "Xypad vue demo"
+  },
+  {
+    "categories": ["xypad"],
+    "description": "xypad example, in the Svelte adapter",
+    "name": "xypad-svelte-demo",
+    "title": "Xypad svelte demo"
+  },
+  {
+    "categories": ["xypad"],
+    "description": "xypad example, in the web adapter",
+    "name": "xypad-web-demo",
+    "title": "Xypad web demo"
   },
   {
     "categories": ["xypad"],
@@ -502,6 +592,24 @@
     "description": "Four drum pads that play harder near the top; the closed hat cuts the open one short",
     "name": "pad-demo",
     "title": "Pad demo"
+  },
+  {
+    "categories": ["pad"],
+    "description": "pad example, in the Vue adapter",
+    "name": "pad-vue-demo",
+    "title": "Pad vue demo"
+  },
+  {
+    "categories": ["pad"],
+    "description": "pad example, in the Svelte adapter",
+    "name": "pad-svelte-demo",
+    "title": "Pad svelte demo"
+  },
+  {
+    "categories": ["pad"],
+    "description": "pad example, in the web adapter",
+    "name": "pad-web-demo",
+    "title": "Pad web demo"
   },
   {
     "categories": ["tuner"],
