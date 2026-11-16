@@ -845,10 +845,6 @@ export default function BlockTimeline() {
       dispatch({ type: "select-clip", id, additive }),
     [dispatch]
   );
-  const _selectClips = useCallback(
-    (ids: string[]) => dispatch({ type: "select-clips", ids }),
-    [dispatch]
-  );
   const selectTrack = useCallback(
     (id: string, additive = false) =>
       dispatch({ type: "select-track", id, additive }),
@@ -960,17 +956,9 @@ export default function BlockTimeline() {
     (id: string) => dispatch({ type: "duplicate-track", id }),
     [dispatch]
   );
-  const _moveTrack = useCallback(
-    (id: string, index: number) => dispatch({ type: "move-track", id, index }),
-    [dispatch]
-  );
   const redo = useCallback(() => dispatch({ type: "redo" }), [dispatch]);
   const removeTrack = useCallback(
     (id: string) => dispatch({ type: "remove-track", id }),
-    [dispatch]
-  );
-  const _renameTrack = useCallback(
-    (id: string, name: string) => dispatch({ type: "rename-track", id, name }),
     [dispatch]
   );
   const undo = useCallback(() => dispatch({ type: "undo" }), [dispatch]);
@@ -1030,18 +1018,9 @@ export default function BlockTimeline() {
     clock.set(clock.getSnapshot() * ratio);
     rescale(ratio);
   }, [bar, clock, rescale]);
-  const _handleAddTrack = useCallback(() => addTrack(), [addTrack]);
-  const _handleAddMidiTrack = useCallback(
-    () => addTrack(undefined, "midi"),
-    [addTrack]
-  );
   // Multi-select: a press on a clip adds it to the selection, and a drag on bare lane draws a rectangle. For touch, which has no Shift.
   const [multi, setMulti] = useState(false);
   // A touch screen has no Shift: in multi-select mode every press on a header adds to the tracks picked.
-  const _pickTrack = useCallback(
-    (id: string, additive: boolean) => selectTrack(id, additive || multi),
-    [multi, selectTrack]
-  );
   // Stop goes back to the top, as a DAW's does.
   const { stop: stopEngine } = engine;
   const stop = useCallback(() => {
@@ -1510,11 +1489,6 @@ export default function BlockTimeline() {
   );
   const changeLooping = useCallback(
     (on: boolean) => dispatch({ type: "set-loop", loop: { on } }),
-    [dispatch]
-  );
-  const _changeLoop = useCallback(
-    (range: readonly [number, number]) =>
-      dispatch({ type: "change-loop", range }),
     [dispatch]
   );
   // Z zooms onto the selection, + and - zoom around the cursor, X steps back through the zooms they left behind.
