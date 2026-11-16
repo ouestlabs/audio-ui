@@ -9,11 +9,11 @@ import {
 } from "@audio-ui/core/envelope";
 import {
   css,
-  definePrimitive,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
 } from "@ui-sdk/core";
+import { definePrimitive } from "../define.ts";
 import {
   type ChangeDetails,
   type CommitDetails,

@@ -11,11 +11,11 @@ import {
 } from "@audio-ui/core/knob";
 import {
   css,
-  definePrimitive,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
 } from "@ui-sdk/core";
+import { definePrimitive } from "../define.ts";
 
 /**
  * The knob as a UI SDK primitive, with nothing of the knob rewritten: the

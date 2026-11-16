@@ -21,12 +21,12 @@ import {
 } from "@audio-ui/core/plot";
 import {
   css,
-  definePrimitive,
   dispatch,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
 } from "@ui-sdk/core";
+import { definePrimitive } from "../define.ts";
 import { flag, noop, sourceOf, VISUALLY_HIDDEN } from "../shared.ts";
 
 /**

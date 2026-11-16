@@ -15,12 +15,12 @@ import {
 import {
   createChange,
   css,
-  definePrimitive,
   dispatch,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
 } from "@ui-sdk/core";
+import { definePrimitive } from "../define.ts";
 import {
   type ChangeDetails,
   type CommitDetails,

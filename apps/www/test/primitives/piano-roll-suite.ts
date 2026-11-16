@@ -22,6 +22,10 @@ interface ChangeDetails {
   source?: string;
 }
 
+const KEBAB = /([a-z0-9])([A-Z])/g;
+/** A part as its `data-slot` writes it: `trackHeader` is `track-header`. */
+const kebab = (slot: string) => slot.replace(KEBAB, "$1-$2").toLowerCase();
+
 export interface PianoRollOptions {
   [option: string]: unknown;
 }
@@ -87,15 +91,15 @@ async function render(mount: MountPianoRoll, options: PianoRollOptions = {}) {
   });
   const one = (slot: string) =>
     mounted.container.querySelector(
-      `[data-slot="pianoRoll-${slot}"]`
+      `[data-slot="piano-roll-${kebab(slot)}"]`
     ) as HTMLElement;
   const all = (slot: string) => [
     ...mounted.container.querySelectorAll<HTMLElement>(
-      `[data-slot="pianoRoll-${slot}"]`
+      `[data-slot="piano-roll-${kebab(slot)}"]`
     ),
   ];
   const root = mounted.container.querySelector(
-    '[data-slot="pianoRoll"]'
+    '[data-slot="piano-roll"]'
   ) as HTMLElement;
   const grid = one("grid");
   mockRect(grid, { bottom: 40, height: 40, right: 100, width: 100 });
@@ -211,7 +215,7 @@ export function pianoRollSuite(framework: string, mount: MountPianoRoll) {
       const p = await render(mount);
       const handle = p
         .notes()[0]
-        ?.querySelector('[data-slot="pianoRoll-noteEnd"]') as HTMLElement;
+        ?.querySelector('[data-slot="piano-roll-note-end"]') as HTMLElement;
       expect(handle.getAttribute("data-edge")).toBe("end");
       await p.act(() => {
         pointer(handle, "pointerdown", {

@@ -14,7 +14,7 @@ const LEAD_PX = 160;
 /** The width of the track headers, which the lanes start after. */
 function leadWidth(viewport: HTMLElement) {
   return (
-    viewport.querySelector<HTMLElement>('[data-slot="timeline-trackHeader"]')
+    viewport.querySelector<HTMLElement>('[data-slot="timeline-track-header"]')
       ?.offsetWidth ?? LEAD_PX
   );
 }

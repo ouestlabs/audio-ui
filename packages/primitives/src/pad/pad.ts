@@ -8,12 +8,12 @@ import {
 } from "@audio-ui/core/pad";
 import {
   css,
-  definePrimitive,
   dispatch,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
 } from "@ui-sdk/core";
+import { definePrimitive } from "../define.ts";
 import { flag, sourceOf } from "../shared.ts";
 
 /**

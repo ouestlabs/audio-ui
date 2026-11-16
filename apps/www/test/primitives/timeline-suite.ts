@@ -23,6 +23,10 @@ interface ClipValue {
   start: number;
 }
 
+const KEBAB = /([a-z0-9])([A-Z])/g;
+/** A part as its `data-slot` writes it: `trackHeader` is `track-header`. */
+const kebab = (slot: string) => slot.replace(KEBAB, "$1-$2").toLowerCase();
+
 export interface TimelineOptions {
   [option: string]: unknown;
 }
@@ -145,7 +149,7 @@ async function render(
   });
   const one = (slot: string) =>
     mounted.container.querySelector(
-      `[data-slot="timeline-${slot}"]`
+      `[data-slot="timeline-${kebab(slot)}"]`
     ) as HTMLElement;
   const root = mounted.container.querySelector(
     '[data-slot="timeline"]'

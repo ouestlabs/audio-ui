@@ -12,11 +12,11 @@ import {
 } from "@audio-ui/core/meter";
 import {
   css,
-  definePrimitive,
   type PrimitiveInstance,
   type PropSpec,
   type SlotDefinition,
 } from "@ui-sdk/core";
+import { definePrimitive } from "../define.ts";
 import { flag, noop } from "../shared.ts";
 
 /**

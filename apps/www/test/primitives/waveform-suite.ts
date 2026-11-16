@@ -299,10 +299,10 @@ export function waveformSuite(framework: string, mount: MountWaveform) {
         region: { defaultValue: [20, 50], label: "Loop", region: "loop" },
       });
       const start = p.root.querySelector(
-        '[data-slot="waveform-regionStart"]'
+        '[data-slot="waveform-region-start"]'
       ) as HTMLElement;
       const end = p.root.querySelector(
-        '[data-slot="waveform-regionEnd"]'
+        '[data-slot="waveform-region-end"]'
       ) as HTMLElement;
       expect(start.getAttribute("data-edge")).toBe("start");
       expect(end.getAttribute("data-edge")).toBe("end");
