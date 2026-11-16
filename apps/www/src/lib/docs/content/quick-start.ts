@@ -66,3 +66,18 @@ export function expandQuickStart(content: string) {
       `Copy the prompt of your framework into your agent.\n\n${prompts}\n\nThen ask your agent to build a component:\n\n\`\`\`text\n${BUILD_PROMPT}\n\`\`\``
   );
 }
+
+const CARD =
+  /<LinkCard\s+href="([^"]+)"\s+title="([^"]+)">([^<]*)<\/LinkCard>/g;
+const CARDS_TAG = /<\/?LinkCards>\n?/g;
+
+/** The `<LinkCard>`s of a page as a list of links, for the pages served as markdown. */
+export function expandLinkCards(content: string) {
+  return content
+    .replace(
+      CARD,
+      (_tag, href: string, title: string, text: string) =>
+        `- [${title}](${href}): ${text}`
+    )
+    .replace(CARDS_TAG, "");
+}

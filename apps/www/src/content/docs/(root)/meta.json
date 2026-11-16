@@ -2,9 +2,10 @@
   "root": true,
   "title": "Get started",
   "pages": [
-    "---Basics---",
+    "---Overview---",
     "index",
-    "get-started",
+    "introduction",
+    "installation",
     "---For agents---",
     "agents",
     "mcp",

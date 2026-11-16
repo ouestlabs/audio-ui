@@ -1,17 +1,11 @@
 ---
 title: Installation
-description: A quick guide to adding audio/ui components to your application.
+description: Set audio/ui up by hand in a React app with shadcn/ui, for the styled components.
 ---
-
-audio/ui is set up by your agent: paste one prompt, and it installs what your framework needs. The headless primitives are one adapter per framework that is copied into your project, and in React the styled components are for a shadcn project.
-
-## Quick Start
-
-<QuickStart />
 
 <ForFrameworks only="react">
 
-The rest of this guide sets up the styled components, in a React app with shadcn/ui.
+The prompt of the [Get Started](/docs) page does this for you. Here is what it sets up by hand, for the styled components in a React app with shadcn/ui.
 
 ## Prerequisites
 
@@ -48,23 +42,5 @@ If your package manager still resolves the old version, bypass its cache: with B
 ## Styling
 
 Components are styled with a design token system defined by CSS variables and implemented with Tailwind CSS, following the same conventions as shadcn/ui so they're fully customizable. See the [Styling guide](/docs/styling) for details.
-
-</ForFrameworks>
-
-## Work with an AI agent
-
-Give your agent the [Agent skill](/docs/agents) and connect the [MCP server](/docs/mcp), so it picks the right component and reads the docs live. Every docs page is also served as markdown, with a Copy Markdown button, and [llms.txt](/llms.txt) maps them all.
-
-## Next Steps
-
-<ForFrameworks only="vue svelte web">
-
-Open [Knob](/docs/components/base/knob#installation) to place your first primitive, with its code in your framework.
-
-</ForFrameworks>
-
-<ForFrameworks only="react">
-
-Head over to the [Knob](/docs/components/base/knob) docs to install your first component, or browse the [component catalog](/components) for ready-to-use blocks.
 
 </ForFrameworks>
