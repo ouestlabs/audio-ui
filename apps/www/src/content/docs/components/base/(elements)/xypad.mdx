@@ -11,6 +11,14 @@ base: base
 
 Controls two values at once, such as filter cutoff and resonance, pan and mix, or two macros. The registry component is written on the `XYPad` primitive of `@audio-ui/primitives`, which installs with it and adds a grid, a crosshair, a cursor and a value display.
 
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+The XY pad's behavior is one description, `xypad` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. Its value is a point, `{ x, y }`, two parameters moved at once. Each framework renders it with a thin adapter that you copy into your project and own. The press, the drag, the wheel, the keys, the grid and the reset are the same in all four, and one suite of tests runs against each adapter.
+
+</ForFrameworks>
+
 ## Overview
 
 - **Input:** press or drag on the pad, or use the mouse wheel, a trackpad or the keyboard, on both axes.
@@ -20,137 +28,19 @@ Controls two values at once, such as filter cutoff and resonance, pan and mix, o
 
 ## Installation
 
+<ForFrameworks only="react">
+
 <Install name="xypad" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
-
-## Usage
-
-```tsx
-import { XYPad } from "@/components/audio-ui/xypad";
-```
-
-**Uncontrolled:** set only the initial value.
-
-```tsx
-<XYPad
-  defaultValue={{ x: 0, y: 0 }}
-  maxX={100}
-  maxY={1}
-  minX={-100}
-  minY={-1}
-  stepX={1}
-  stepY={0.01}
-/>
-```
-
-**Controlled:** drive the value from state.
-
-```tsx
-const [position, setPosition] = useState({ x: 50, y: 50 });
-
-<XYPad
-  maxX={100}
-  maxY={100}
-  minX={0}
-  minY={0}
-  onValueChange={setPosition}
-  onValueCommitted={(value, details) => console.log("Committed:", value, details.reason)}
-  value={position}
-/>
-```
-
-## Interaction
-
-### Pointer
-
-<KeyTable title="Behavior">
-<KeyRow gesture={"Press / drag on pad"}>A press jumps the value to the pointer; a drag follows it. Reported as `eventDetails.reason` `"press"` then `"drag"`.</KeyRow>
-<KeyRow gesture={"Clamping"}>Values always clamp to the configured axis ranges and snap to `stepX` / `stepY`.</KeyRow>
-<KeyRow gesture={"Commit event"}>`onValueCommitted` fires when a gesture that changed the value ends.</KeyRow>
-<KeyRow gesture={"Lagging value"}>While dragging, the cursor follows the pointer even if a controlled `value` updates late. Reject a value with `eventDetails.cancel()`.</KeyRow>
-</KeyTable>
-
-### Keyboard
-
-On the focused pad:
-
-<KeyTable title="Keys">
-<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Decrease / increase X by `stepX`</KeyRow>
-<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Increase / decrease Y by `stepY`</KeyRow>
-<KeyRow gesture={"`Shift` + arrow"}>Move by 10 steps</KeyRow>
-<KeyRow gesture={"`PageUp` / `PageDown`"}>Increase / decrease Y by `stepY × 10`</KeyRow>
-<KeyRow gesture={"`Home` / `End`"}>X to `minX` / `maxX`</KeyRow>
-</KeyTable>
-
-### Wheel
-
-Wheel and trackpad input over the pad moves the point by the scrolled distance: scrolling up raises Y, scrolling right raises X. Reported as `eventDetails.reason === "wheel"`.
-
-## API reference
-
-The headless parts and their options are in [Headless primitive](#headless-primitive), below.
-
-### Registry component
-
-`XYPad` accepts style props (`size`, `formatValue`, `valueDisplay`, `className`) plus the props of the `XYPad` primitive's Root. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the axis inputs.
-
-#### Value and state
-
-<TypeTable>
-<TypeRow name={"value"} type={"{ x: number; y: number }"}>Controlled value.</TypeRow>
-<TypeRow name={"defaultValue"} type={"{ x: number; y: number }"} default={"center"}>Uncontrolled starting value. Defaults to the center of the pad.</TypeRow>
-<TypeRow name={"minX / maxX"} type={"number"} default={"0 / 100"}>X range.</TypeRow>
-<TypeRow name={"minY / maxY"} type={"number"} default={"0 / 100"}>Y range.</TypeRow>
-<TypeRow name={"stepX / stepY"} type={"number"} default={"1"}>Step per axis.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables pointer, wheel, and keyboard.</TypeRow>
-<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each axis for `XYPad.Value` and the inputs' `aria-valuetext`.</TypeRow>
-<TypeRow name={"locale"} type={"Intl.LocalesArgument"} default={"runtime"}>Locale used by `format`.</TypeRow>
-<TypeRow name={"onValueChange"} type={"(value, eventDetails) => void"}>Fires on every change: press, drag, keyboard, wheel and input changes.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"(value, eventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
-<TypeRow name={"aria-label"} type={"string"}>Accessible name for the pad's inputs.</TypeRow>
-<TypeRow name={"aria-labelledby"} type={"string"}>ID of a labeling element.</TypeRow>
-</TypeTable>
-
-#### Layout and display
-
-<TypeTable>
-<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\" | \"xl\""} default={"\"default\""}>Size variant (affects height).</TypeRow>
-<TypeRow name={"formatValue"} type={"(value: { x: number; y: number }) => React.ReactNode"}>Custom formatter for the value display.</TypeRow>
-<TypeRow name={"valueDisplay"} type={"\"visible\" | \"hidden\""} default={"\"visible\""}>Use `"hidden"` to hide the overlay.</TypeRow>
-<TypeRow name={"className"} type={"string"}>Classes for the pad surface.</TypeRow>
-</TypeTable>
-
-
-
-The `XYPad` primitive that installs with it exposes `XYPad.Root`, `XYPad.Control` (the pad surface), `XYPad.Thumb` (positioned at the value, holds the axis inputs), `XYPad.Value` (formatted `<output>`), and `XYPad.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`. Draw grids and crosshairs with your own elements and the `--xy-pad-x` / `--xy-pad-y` variables.
-
-## Examples
-
-### Bipolar ranges (pan and mix style)
-
-<ComponentPreview styleName="base-nova" name="xypad-bipolar-range-demo" />
-
-
-### Pocket synth
-
-An oscillator, a filter and an XY pad that plays them: drag the pad to sweep the sound.
-
-<ComponentPreview styleName="base-nova" name="block-pocket-synth" />
-
-### Wave shaper
-
-Distortion, tone and detune on a synth, with the XY pad and knobs side by side.
-
-<ComponentPreview styleName="base-nova" name="block-wave-shaper" />
 
 </ForFrameworks>
 
-## Headless primitive
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation) and the [fader](/docs/components/base/fader#installation) are built the same way.
 
-The XY pad's behavior is one description, `xypad` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. Its value is a point, `{ x, y }`, two parameters moved at once. Each framework renders it with a thin adapter that you copy into your project and own. The press, the drag, the wheel, the keys, the grid and the reset are the same in all four, and one suite of tests runs against each adapter.
+<ForFrameworks only="react">
 
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive) and the [fader](/docs/components/base/fader#headless-primitive) are built the same way.
+The primitive alone, without the styling:
 
-### Installation
+</ForFrameworks>
 
 <FrameworkTabs defaultValue="react">
 
@@ -187,7 +77,7 @@ One file, `components/audio-ui/xypad/vue.ts`.
 npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/xypad-svelte.json
 ```
 
-Four files in `components/audio-ui/xypad/svelte/`: the thumb, the value, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
+Four files in `components/audio-ui/xypad/svelte/`: the thumb, the value, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
 
 </TabsContent>
 
@@ -205,7 +95,51 @@ One file, `components/audio-ui/xypad/web.ts`. Import it once, and it registers t
 
 Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
 
-### Usage
+## Usage
+
+<ForFrameworks only="react">
+
+```tsx
+import { XYPad } from "@/components/audio-ui/xypad";
+```
+
+**Uncontrolled:** set only the initial value.
+
+```tsx
+<XYPad
+  defaultValue={{ x: 0, y: 0 }}
+  maxX={100}
+  maxY={1}
+  minX={-100}
+  minY={-1}
+  stepX={1}
+  stepY={0.01}
+/>
+```
+
+**Controlled:** drive the value from state.
+
+```tsx
+const [position, setPosition] = useState({ x: 50, y: 50 });
+
+<XYPad
+  maxX={100}
+  maxY={100}
+  minX={0}
+  minY={0}
+  onValueChange={setPosition}
+  onValueCommitted={(value, details) => console.log("Committed:", value, details.reason)}
+  value={position}
+/>
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+The primitive alone, part by part:
+
+</ForFrameworks>
 
 The parts are a Root that owns the point, a Control that takes the pointer and the wheel, a Thumb that marks the point and holds the two inputs, a Value for the text, and an optional Label. The Thumb is placed for you, from the left edge and the top edge of the Control, and the Root carries the same place as two CSS variables, `--xy-pad-x` and `--xy-pad-y`, for a crosshair or a guide. Give the Control its size.
 
@@ -309,13 +243,70 @@ The point is JSON in an attribute. Each part binds a microtask after it connects
 
 The Thumb holds a native `<input type="range">` for each axis. Both carry the name, which is the Thumb's `aria-label` followed by "X" or "Y" (`getAriaLabel(axis)` on the Thumb says it in your own words), and the form names `<name>.x` and `<name>.y`. Only the X input is in the tab order, and the arrow keys move both axes from it.
 
-### Interaction
+## Interaction
 
-- A press moves the point under the pointer, and a drag follows it.
-- Arrows move one step on their axis, Shift ten. Page Up and Page Down move y by ten steps, Home and End go to the ends of x.
-- A double click, an Alt with a press, or Delete returns to `defaultValue`.
-- The mouse wheel and the trackpad move the point.
-- A disabled pad takes none of these.
+### Pointer
+
+<KeyTable title="Behavior">
+<KeyRow gesture={"Press / drag on pad"}>A press jumps the value to the pointer; a drag follows it. Reported as `eventDetails.reason` `"press"` then `"drag"`.</KeyRow>
+<KeyRow gesture={"Clamping"}>Values always clamp to the configured axis ranges and snap to `stepX` / `stepY`.</KeyRow>
+<KeyRow gesture={"Commit event"}>`onValueCommitted` fires when a gesture that changed the value ends.</KeyRow>
+<KeyRow gesture={"Lagging value"}>While dragging, the cursor follows the pointer even if a controlled `value` updates late. Reject a value with `eventDetails.cancel()`.</KeyRow>
+</KeyTable>
+
+### Keyboard
+
+On the focused pad:
+
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Decrease / increase X by `stepX`</KeyRow>
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Increase / decrease Y by `stepY`</KeyRow>
+<KeyRow gesture={"`Shift` + arrow"}>Move by 10 steps</KeyRow>
+<KeyRow gesture={"`PageUp` / `PageDown`"}>Increase / decrease Y by `stepY × 10`</KeyRow>
+<KeyRow gesture={"`Home` / `End`"}>X to `minX` / `maxX`</KeyRow>
+</KeyTable>
+
+### Wheel
+
+Wheel and trackpad input over the pad moves the point by the scrolled distance: scrolling up raises Y, scrolling right raises X. Reported as `eventDetails.reason === "wheel"`.
+
+## API reference
+
+<ForFrameworks only="react">
+
+### Registry component
+
+`XYPad` accepts style props (`size`, `formatValue`, `valueDisplay`, `className`) plus the props of the `XYPad` primitive's Root. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the axis inputs.
+
+#### Value and state
+
+<TypeTable>
+<TypeRow name={"value"} type={"{ x: number; y: number }"}>Controlled value.</TypeRow>
+<TypeRow name={"defaultValue"} type={"{ x: number; y: number }"} default={"center"}>Uncontrolled starting value. Defaults to the center of the pad.</TypeRow>
+<TypeRow name={"minX / maxX"} type={"number"} default={"0 / 100"}>X range.</TypeRow>
+<TypeRow name={"minY / maxY"} type={"number"} default={"0 / 100"}>Y range.</TypeRow>
+<TypeRow name={"stepX / stepY"} type={"number"} default={"1"}>Step per axis.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables pointer, wheel, and keyboard.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"}>Formats each axis for `XYPad.Value` and the inputs' `aria-valuetext`.</TypeRow>
+<TypeRow name={"locale"} type={"Intl.LocalesArgument"} default={"runtime"}>Locale used by `format`.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value, eventDetails) => void"}>Fires on every change: press, drag, keyboard, wheel and input changes.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value, eventDetails) => void"}>Fires when an interaction ends with a new value.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Accessible name for the pad's inputs.</TypeRow>
+<TypeRow name={"aria-labelledby"} type={"string"}>ID of a labeling element.</TypeRow>
+</TypeTable>
+
+#### Layout and display
+
+<TypeTable>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\" | \"xl\""} default={"\"default\""}>Size variant (affects height).</TypeRow>
+<TypeRow name={"formatValue"} type={"(value: { x: number; y: number }) => React.ReactNode"}>Custom formatter for the value display.</TypeRow>
+<TypeRow name={"valueDisplay"} type={"\"visible\" | \"hidden\""} default={"\"visible\""}>Use `"hidden"` to hide the overlay.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Classes for the pad surface.</TypeRow>
+</TypeTable>
+
+The `XYPad` primitive that installs with it exposes `XYPad.Root`, `XYPad.Control` (the pad surface), `XYPad.Thumb` (positioned at the value, holds the axis inputs), `XYPad.Value` (formatted `<output>`), and `XYPad.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`. Draw grids and crosshairs with your own elements and the `--xy-pad-x` / `--xy-pad-y` variables.
+
+</ForFrameworks>
 
 ### Options
 
@@ -345,6 +336,28 @@ The Value shows both axes as one text, with the separator of the locale. Its con
 
 In the web adapter, `onValueChange` is an `input` event and `onValueCommitted` a `change` event, both with `detail: { value, reason, source }`, where `value` is the point, and `event.preventDefault()` refuses a change.
 
-### For an agent
+<ForFrameworks only="react">
+
+## Examples
+
+### Bipolar ranges (pan and mix style)
+
+<ComponentPreview styleName="base-nova" name="xypad-bipolar-range-demo" />
+
+### Pocket synth
+
+An oscillator, a filter and an XY pad that plays them: drag the pad to sweep the sound.
+
+<ComponentPreview styleName="base-nova" name="block-pocket-synth" />
+
+### Wave shaper
+
+Distortion, tone and detune on a synth, with the XY pad and knobs side by side.
+
+<ComponentPreview styleName="base-nova" name="block-wave-shaper" />
+
+</ForFrameworks>
+
+## For an agent
 
 The pad declares one action, `setValue(x, y)`, and the name on its Thumb is what an agent finds it by. The bridge of the framework you use (`createAgent` in `@ui-sdk/<framework>/agent`) sets the point with the source `"agent"`. Each axis is a change of its own, so `onValueChange` hears two, and an app can refuse either.

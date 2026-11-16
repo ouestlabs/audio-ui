@@ -13,7 +13,7 @@ import { Meter } from "@/components/audio-ui/meter";
 
 `@/components` is the `components` alias in the project's `components.json`: use the alias it declares. The CLI prints every file it writes; if a project installed components earlier, they may sit in another folder, so import from the path it printed. Components the one you add depends on (a block's knob, a plot's knob) land in the same folder. Hooks go to `hooks/`, libs to `lib/`, blocks to `components/examples/`.
 
-Without the styled component, the headless primitive installs from the same registry, one item per framework (`@audio-ui/knob-react`, `knob-vue`, `knob-svelte`, `knob-web`): `npx shadcn@latest add @audio-ui/knob-react` copies it to `components/audio-ui/knob/react.tsx`, and `import { Knob } from "@/components/audio-ui/knob/react"` gives its parts (`Knob.Root`, `Knob.Thumb`…). Its page: `https://www.audio-ui.dev/docs/components/base/knob#headless-primitive`.
+Without the styled component, the headless primitive installs from the same registry, one item per framework (`@audio-ui/knob-react`, `knob-vue`, `knob-svelte`, `knob-web`): `npx shadcn@latest add @audio-ui/knob-react` copies it to `components/audio-ui/knob/react.tsx`, and `import { Knob } from "@/components/audio-ui/knob/react"` gives its parts (`Knob.Root`, `Knob.Thumb`…). Its page: `https://www.audio-ui.dev/docs/components/base/knob#usage`.
 
 ## Elements
 

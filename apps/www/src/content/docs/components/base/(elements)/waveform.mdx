@@ -11,6 +11,14 @@ base: base
 
 Components for drawing audio. `Waveform` shows a whole file and lets you scrub through it. `LiveWaveform` follows a signal as it plays. `BarVisualizer` turns that signal into a few bars you style in CSS. All three are written on the `Waveform` primitive of `@audio-ui/primitives`, which works with any audio: decoded PCM samples, a microphone or a stream from your server.
 
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+The waveform's behavior is one description, `waveform` in `@audio-ui/primitives`, over the seek and region controllers of `@audio-ui/core`. It shows the shape of audio, from `peaks` known upfront or from a live `levels` signal, and follows a playback position that can be seeked. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+</ForFrameworks>
+
 ## Overview
 
 - **Two kinds of data:** a file's shape is known in advance, so `Waveform` takes `values` (amplitudes from `0` to `1`, at any resolution). A live signal is not, so `LiveWaveform` and `BarVisualizer` take a [`source`](#live-signals) and follow it outside React.
@@ -24,6 +32,8 @@ Components for drawing audio. `Waveform` shows a whole file and lets you scrub t
 - **Accessibility:** the seekable waveform holds a native `<input type="range">`: it takes focus, carries `aria-label`, announces the played share (or the text from `getAriaValueText`, such as a time), and supports the arrow keys, <kbd>Home</kbd>, <kbd>End</kbd>, <kbd>Page Up</kbd> and <kbd>Page Down</kbd>. Each region handle holds one too. Live waveforms are images: give them an `aria-label`.
 
 ## Installation
+
+<ForFrameworks only="react">
 
 <CodeTabs>
 
@@ -75,7 +85,72 @@ npm install @audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sd
 
 </CodeTabs>
 
+</ForFrameworks>
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation), the [XY pad](/docs/components/base/xypad#installation), the [meter](/docs/components/base/meter#installation), the [envelope](/docs/components/base/envelope#installation), the [pad grid](/docs/components/base/pad#installation), the [piano](/docs/components/base/piano#installation), the [sequencer](/docs/components/base/sequencer#installation) and the [plot](/docs/components/base/plot#installation) are built the same way.
+
+<ForFrameworks only="react">
+
+The primitive alone, without the styling:
+
+</ForFrameworks>
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/waveform-react
+```
+
+One file, `components/audio-ui/waveform/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-vue.json
+```
+
+One file, `components/audio-ui/waveform/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-svelte.json
+```
+
+Ten files in `components/audio-ui/waveform/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-web.json
+```
+
+One file, `components/audio-ui/waveform/web.ts`. Import it once, and it registers the `audio-ui-waveform` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
 ## Usage
+
+<ForFrameworks only="react">
 
 ```tsx
 import {
@@ -120,277 +195,13 @@ const { bands } = useAudioSignal(analyser);
 <BarVisualizer aria-label="Agent speaking" mirrored source={bands} />;
 ```
 
-## Feeding real audio
-
-`values` is a plain prop: the component does not decode audio. `@audio-ui/engine/analysis` and the `audio-decode` lib (`npx shadcn@latest add @audio-ui/audio-decode`) turn a real audio file into `values`: `decodeAudioChannels` (from `audio-decode`) reads every channel's PCM samples at the context's sample rate, with the browser's own decoder, or for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed; `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
-
-```tsx
-import { computePeaks, normalizePeaks } from "@audio-ui/engine/analysis";
-import { decodeAudioChannels } from "@audio-ui/engine/files";
-
-const context = new AudioContext();
-const channels = await decodeAudioChannels(context, await file.arrayBuffer());
-
-const values = normalizePeaks(computePeaks(channels, 4096));
-```
-
-The second argument to `computePeaks` is a resolution, not a bar count: the canvas fits whatever you pass to its own width and to any `range`. Compute it once per file, with more slices than the widest view you expect will show (a few thousand covers a zoomed-in clip editor). For a simpler shape, `downsampleWaveform` and `normalizeWaveform` give one amplitude per slice instead.
-
-## Showing part of the audio
-
-`range` is the stretch of the audio to show, `[start, end]` in `duration` units. Everything follows it: the bars are drawn from that stretch of `values` alone, a press seeks inside it, the input's keys stay inside it, and regions and markers are placed across it.
-
-```tsx
-<Waveform
-  aria-label="Clip"
-  duration={source.duration}
-  range={[clip.offset, clip.offset + clip.length]}
-  values={source.peaks}
-/>
-```
-
-When the position is outside the stretch, the root carries `data-outside` and the playhead is hidden, rather than pinned to an edge it hasn't reached. Past the largest canvas a browser will draw (16,384 pixels a side), the bitmap is drawn coarser rather than going blank.
-
-## Following playback
-
-`value` re-renders React each time it changes, which is fine for a `timeupdate` event a few times a second. For a playhead that glides every animation frame, pass a `source`, an object in the shape of an external store:
-
-```ts
-interface WaveformSource {
-  getSnapshot: () => number; // the position, in `duration` units
-  subscribe: (listener: () => void) => () => void;
-}
-```
-
-The waveform subscribes to it and moves the playhead, repaints the canvas and updates the input itself. While the pointer scrubs, the waveform follows the pointer and ignores the source until release; the same holds for a controlled `value` that updates late.
-
-## Regions and markers
-
-Anything inside `Waveform` is laid over the canvas, on the same timeline. A region is `[start, end]` in `duration` units; drag its body to move it, and give it a handle per edge to resize it:
-
-```tsx
-const [loop, setLoop] = useState<readonly [number, number]>([48, 96]);
-
-<Waveform aria-label="Track progress" duration={180} values={values}>
-  <WaveformRegion onValueChange={setLoop} value={loop}>
-    <WaveformRegionHandle aria-label="Loop start" edge="start" />
-    <WaveformRegionHandle aria-label="Loop end" edge="end" />
-  </WaveformRegion>
-  <WaveformMarker value={124}>Chorus</WaveformMarker>
-  <WaveformHover format={formatTime} />
-</Waveform>
-```
-
-A press on a region never seeks the waveform underneath. Each handle is a slider of its own: it takes focus, and the arrow keys, <kbd>Page Up</kbd> / <kbd>Page Down</kbd>, <kbd>Home</kbd> and <kbd>End</kbd> move its edge, which stops `minLength` short of the other one. Leave the handles out for a region that only moves, or pass `movable={false}` for one that only resizes.
-
-## Live signals
-
-A live waveform reads from a `source`, an object in the shape of an external store whose snapshot is the current levels, `0–1` each:
-
-```ts
-interface LevelsSource {
-  getSnapshot: () => ArrayLike<number>;
-  subscribe: (listener: () => void) => () => void;
-}
-```
-
-The `use-audio-signal` hook (`npx shadcn@latest add @audio-ui/use-audio-signal`) reads two of them from an `AnalyserNode`, every animation frame and only while something is drawing them:
-
-```tsx
-const { level, bands, samples } = useAudioSignal(analyser, { bandCount: 32 });
-```
-
-- `level` is the loudest sample of the moment, as a single level. Draw it with `mode="scrolling"`: the waveform records it over time, the newest entering from the right, or from the middle outwards with `mirrored`. When the signal stops (pass `null` as the analyser to pause), the trace holds still.
-- `bands` is the spectrum as log-spaced frequency bands, low to high. Draw it with a `BarVisualizer`, or a `LiveWaveform` in its default `mode="static"`: the bars stay in place and follow the bands, rising at once and falling smoothly.
-- `samples` is the raw waveform of the moment, `-1` to `1`. Draw it with `shape="scope"`.
-
-Any signal works. `createSource` from `@audio-ui/core` makes a source you push to yourself, from a WebSocket, a worklet or a test:
-
-```tsx
-import { createSource } from "@audio-ui/core";
-
-const levels = createSource(new Float32Array(16));
-
-socket.onmessage = (event) => levels.set(event.data);
-```
-
-While its signal is audible, a live waveform carries `data-active`. `idle` picks what the bars do meanwhile (`"pulse"` breathes, `"wave"` ripples), and `loading` sweeps across them while a connection is on its way.
-
-## Theming
-
-Colors come from CSS, and the canvas repaints when the theme changes:
-
-<TypeTable title="CSS variables">
-<TypeRow name={"--waveform-color"} default={"text color"}>Bars ahead of the position, and every bar of a live waveform.</TypeRow>
-<TypeRow name={"--waveform-progress-color"} default={"--waveform-color"}>Bars behind the position.</TypeRow>
-<TypeRow name={"--waveform-bar-radius"} default={"0px"}>Bar corner radius on the canvas (any CSS length).</TypeRow>
-<TypeRow name={"--waveform-position"}>Set on the root: the playback position, as a percentage.</TypeRow>
-<TypeRow name={"--waveform-level"}>Set on each bar of a `BarVisualizer`: its level, `0–1`.</TypeRow>
-</TypeTable>
-
-The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-visualizer-bar`. Those the playback position has passed carry `data-played`.
-
-## API reference
-
-The headless parts and their options are in [Headless primitive](#headless-primitive), below.
-
-### Registry component
-
-`aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the element that needs them: the waveform's input, a region handle's input, or the live waveform itself.
-
-#### Waveform
-
-<TypeTable>
-<TypeRow name={"values"} type={"ArrayLike<number> | { min, max }"}>The audio's shape at any resolution: `0–1` amplitudes, or each slice's lowest and highest sample, `-1–1`.</TypeRow>
-<TypeRow name={"range"} type={"readonly [number, number]"} default={"whole audio"}>The stretch of the audio to show, `[start, end]` in `duration` units: a clip's window onto its source, a zoomed view. The playhead, seeking, hover, regions and markers all follow it. Defaults to the whole audio. While the position is outside it, the root carries `data-outside`.</TypeRow>
-<TypeRow name={"value"} type={"number"}>Controlled position, from `0` to `duration`.</TypeRow>
-<TypeRow name={"defaultValue"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
-<TypeRow name={"source"} type={"WaveformSource"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
-<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit `value` is in (typically seconds).</TypeRow>
-<TypeRow name={"step"} type={"number"} default={"duration / 100"}>Step for the arrow keys. Defaults to a hundredth of `duration`.</TypeRow>
-<TypeRow name={"largeStep"} type={"number"} default={"duration / 10"}>Step for Page Up/Page Down and Shift + arrow keys. Defaults to a tenth of `duration`.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables pointer and keyboard interaction.</TypeRow>
-<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
-<TypeRow name={"onValueChange"} type={"(value: number, eventDetails) => void"}>Fires while seeking. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, or `"input-change"`; call `eventDetails.cancel()` to reject it.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails) => void"}>Fires when a seek that moved the position ends.</TypeRow>
-<TypeRow name={"getAriaValueText"} type={"(value: number, duration: number) => string"} default={"played share"}>Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`.</TypeRow>
-<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units; feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
-<TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when a selection that changed ends.</TypeRow>
-<TypeRow name={"shape"} type={"\"mirror\" | \"bars\" | \"line\""} default={"\"mirror\""}>How the amplitudes are drawn.</TypeRow>
-<TypeRow name={"barWidth"} type={"number"} default={"2"}>Bar width, in CSS pixels, snapped to whole device pixels.</TypeRow>
-<TypeRow name={"barGap"} type={"number"} default={"1"}>Space between bars, in CSS pixels, snapped to whole device pixels.</TypeRow>
-<TypeRow name={"variant"} type={"\"default\" | \"playhead\""} default={"\"default\""}>`playhead` adds a playhead line and a handle.</TypeRow>
-<TypeRow name={"className"} type={"string"}>Classes for the waveform surface.</TypeRow>
-</TypeTable>
-
-#### WaveformRegion
-
-<TypeTable>
-<TypeRow name={"value"} type={"readonly [number, number]"}>Controlled region, as `[start, end]` in `duration` units.</TypeRow>
-<TypeRow name={"defaultValue"} type={"readonly [number, number]"} default={"whole timeline"}>Uncontrolled starting region.</TypeRow>
-<TypeRow name={"minLength"} type={"number"} default={"the waveform's step"}>The shortest the region can be resized to, in `duration` units. Defaults to the root's `step`.</TypeRow>
-<TypeRow name={"movable"} type={"boolean"} default={"true"}>Whether dragging the region's body moves it.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Also disabled when the waveform is.</TypeRow>
-<TypeRow name={"onValueChange"} type={"(value, eventDetails) => void"}>Fires while moving or resizing. `eventDetails.edge` is `"start"`, `"end"` or `"both"`; `eventDetails.reason` is `"drag"`, `"keyboard"` or `"input-change"`.</TypeRow>
-<TypeRow name={"onValueCommitted"} type={"(value, eventDetails) => void"}>Fires when a move or resize that changed the region ends.</TypeRow>
-</TypeTable>
-
-`WaveformRegionHandle` takes `edge` (`"start"` or `"end"`) and `getAriaValueText`. `WaveformMarker` takes `value` and shows its children as a label. `WaveformHover` takes `format`, which prints the hovered position; without it only the line shows.
-
-#### LiveWaveform
-
-<TypeTable>
-<TypeRow name={"source"} type={"LevelsSource | null"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
-<TypeRow name={"mode"} type={"\"static\" | \"scrolling\""} default={"\"static\""}>`static` spreads the current levels across the width; `scrolling` records the loudest one over time.</TypeRow>
-<TypeRow name={"scrollSpeed"} type={"number"} default={"60"}>How fast the scrolling mode moves, in CSS pixels per second.</TypeRow>
-<TypeRow name={"shape"} type={"\"mirror\" | \"bars\" | \"line\" | \"scope\""} default={"\"mirror\""}>How the signal is drawn. `scope` traces raw samples instead of levels.</TypeRow>
-<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels before they are drawn.</TypeRow>
-<TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Makes the drawing symmetric: the first level in the center, or, when scrolling, the newest one, with older ones moving out on both sides.</TypeRow>
-<TypeRow name={"idle"} type={"\"none\" | \"pulse\" | \"wave\""} default={"\"none\""}>In `static` mode, what the bars do while there is no signal.</TypeRow>
-<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
-</TypeTable>
-
-#### BarVisualizer
-
-<TypeTable>
-<TypeRow name={"source"} type={"LevelsSource | null"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
-<TypeRow name={"count"} type={"number"} default={"24"}>How many bars to draw. The levels are fitted to them.</TypeRow>
-<TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Mirrors the levels around the middle bar, the lowest band in the center.</TypeRow>
-<TypeRow name={"minLevel"} type={"number"} default={"0.08"}>Resting level, 0…1: silent bars keep this much of their size.</TypeRow>
-<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels before they are drawn.</TypeRow>
-<TypeRow name={"idle"} type={"\"none\" | \"pulse\" | \"wave\""} default={"\"none\""}>What the bars do while there is no signal.</TypeRow>
-<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
-<TypeRow name={"align"} type={"\"start\" | \"center\" | \"end\""} default={"\"center\""}>Where the bars grow from.</TypeRow>
-<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}>`vertical` stacks the bars and grows them sideways.</TypeRow>
-</TypeTable>
-
-
-
-The `Waveform` primitive that installs with it exposes the parts these components are built from:
-
-<TypeTable title="Parts">
-<TypeRow name={"Waveform.Root"}>Owns the data (`peaks`, or a live `levels` source) and the position (`value`, `source`, `duration`). Carries `data-active` while a live signal is audible.</TypeRow>
-<TypeRow name={"Waveform.Control"}>The seekable surface; holds the input. Leave it out for a waveform that is only shown.</TypeRow>
-<TypeRow name={"Waveform.Canvas"}>Draws on a canvas: `variant`, `mode`, `scrollSpeed`, `barWidth`, `barGap`, `barRadius`, `minBarHeight`, `lineWidth`, `gain`, `mirrored`, `idle`.</TypeRow>
-<TypeRow name={"Waveform.Bars, Waveform.Bar"}>Draws as elements: `count`, `minLevel`, `gain`, `mirrored`, `idle`. Each bar gets `--waveform-level`, `data-index` and `data-played`.</TypeRow>
-<TypeRow name={"Waveform.Region, Waveform.RegionHandle"}>A stretch of the timeline, named by `region`, and the handle of one of its edges. What they report goes to the Root's `onRegionChange` and `onRegionCommitted`, with the region's name in the details.</TypeRow>
-<TypeRow name={"Waveform.Marker"}>A point on the timeline.</TypeRow>
-<TypeRow name={"Waveform.Playhead, Waveform.Thumb"}>Follow the playback position.</TypeRow>
-<TypeRow name={"Waveform.Hover"}>Shown at the hovered position; its `format` turns that position into the text it writes.</TypeRow>
-</TypeTable>
-
-Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes that state as data attributes such as `data-disabled`, `data-dragging` and `data-loading`.
-
-## Examples
-
-### Player, wired to a real uploaded file
-
-<ComponentPreview styleName="base-nova" name="block-waveform-player" />
-
 </ForFrameworks>
 
-## Headless primitive
+<ForFrameworks only="react">
 
-The waveform's behavior is one description, `waveform` in `@audio-ui/primitives`, over the seek and region controllers of `@audio-ui/core`. It shows the shape of audio, from `peaks` known upfront or from a live `levels` signal, and follows a playback position that can be seeked. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+The primitive alone, part by part:
 
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive), the [fader](/docs/components/base/fader#headless-primitive), the [XY pad](/docs/components/base/xypad#headless-primitive), the [meter](/docs/components/base/meter#headless-primitive), the [envelope](/docs/components/base/envelope#headless-primitive), the [pad grid](/docs/components/base/pad#headless-primitive), the [piano](/docs/components/base/piano#headless-primitive), the [sequencer](/docs/components/base/sequencer#headless-primitive) and the [plot](/docs/components/base/plot#headless-primitive) are built the same way.
-
-### Installation
-
-<FrameworkTabs defaultValue="react">
-
-<TabsList>
-  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
-  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
-  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
-  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
-</TabsList>
-
-<TabsContent value="react">
-
-```bash
-npx shadcn@latest add @audio-ui/waveform-react
-```
-
-One file, `components/audio-ui/waveform/react.tsx`.
-
-</TabsContent>
-
-<TabsContent value="vue">
-
-```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-vue.json
-```
-
-One file, `components/audio-ui/waveform/vue.ts`.
-
-</TabsContent>
-
-<TabsContent value="svelte">
-
-```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-svelte.json
-```
-
-Ten files in `components/audio-ui/waveform/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
-
-</TabsContent>
-
-<TabsContent value="web">
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-web.json
-```
-
-One file, `components/audio-ui/waveform/web.ts`. Import it once, and it registers the `audio-ui-waveform` tags.
-
-</TabsContent>
-
-</FrameworkTabs>
-
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
-
-### Usage
+</ForFrameworks>
 
 A Root owns the position and what is shown. Everything else is a part you place in it:
 
@@ -500,7 +311,141 @@ In the web adapter, `peaks`, `levels` and `source` are properties, not attribute
 
 Give the Root a `source`, a live position in `duration` units in the shape of an external store: `getSnapshot()` returns it and `subscribe(listener)` is called on each tick. The `--waveform-position` variable, the Canvas and the input follow it straight in the DOM, with no render. `levels` is the same for a signal, such as a microphone or an analyser: each value is a level from 0 to 1, and while it is audible the Root carries `data-active`. `createSource` from `@audio-ui/core` makes either.
 
-### Interaction
+<ForFrameworks only="react">
+
+## Feeding real audio
+
+`values` is a plain prop: the component does not decode audio. `@audio-ui/engine/analysis` and the `audio-decode` lib (`npx shadcn@latest add @audio-ui/audio-decode`) turn a real audio file into `values`: `decodeAudioChannels` (from `audio-decode`) reads every channel's PCM samples at the context's sample rate, with the browser's own decoder, or for an AIFF, CAF or Apple Lossless file it refuses, as Chrome does, a decoder of its format and a resampler, loaded the first time one is needed; `computePeaks` reduces them to each slice's lowest and highest sample across all channels (so a take panned hard to one side still draws), and `normalizePeaks` scales them so the loudest sample reaches full height.
+
+```tsx
+import { computePeaks, normalizePeaks } from "@audio-ui/engine/analysis";
+import { decodeAudioChannels } from "@audio-ui/engine/files";
+
+const context = new AudioContext();
+const channels = await decodeAudioChannels(context, await file.arrayBuffer());
+
+const values = normalizePeaks(computePeaks(channels, 4096));
+```
+
+The second argument to `computePeaks` is a resolution, not a bar count: the canvas fits whatever you pass to its own width and to any `range`. Compute it once per file, with more slices than the widest view you expect will show (a few thousand covers a zoomed-in clip editor). For a simpler shape, `downsampleWaveform` and `normalizeWaveform` give one amplitude per slice instead.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+## Showing part of the audio
+
+`range` is the stretch of the audio to show, `[start, end]` in `duration` units. Everything follows it: the bars are drawn from that stretch of `values` alone, a press seeks inside it, the input's keys stay inside it, and regions and markers are placed across it.
+
+```tsx
+<Waveform
+  aria-label="Clip"
+  duration={source.duration}
+  range={[clip.offset, clip.offset + clip.length]}
+  values={source.peaks}
+/>
+```
+
+When the position is outside the stretch, the root carries `data-outside` and the playhead is hidden, rather than pinned to an edge it hasn't reached. Past the largest canvas a browser will draw (16,384 pixels a side), the bitmap is drawn coarser rather than going blank.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+## Following playback
+
+`value` re-renders React each time it changes, which is fine for a `timeupdate` event a few times a second. For a playhead that glides every animation frame, pass a `source`, an object in the shape of an external store:
+
+```ts
+interface WaveformSource {
+  getSnapshot: () => number; // the position, in `duration` units
+  subscribe: (listener: () => void) => () => void;
+}
+```
+
+The waveform subscribes to it and moves the playhead, repaints the canvas and updates the input itself. While the pointer scrubs, the waveform follows the pointer and ignores the source until release; the same holds for a controlled `value` that updates late.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+## Regions and markers
+
+Anything inside `Waveform` is laid over the canvas, on the same timeline. A region is `[start, end]` in `duration` units; drag its body to move it, and give it a handle per edge to resize it:
+
+```tsx
+const [loop, setLoop] = useState<readonly [number, number]>([48, 96]);
+
+<Waveform aria-label="Track progress" duration={180} values={values}>
+  <WaveformRegion onValueChange={setLoop} value={loop}>
+    <WaveformRegionHandle aria-label="Loop start" edge="start" />
+    <WaveformRegionHandle aria-label="Loop end" edge="end" />
+  </WaveformRegion>
+  <WaveformMarker value={124}>Chorus</WaveformMarker>
+  <WaveformHover format={formatTime} />
+</Waveform>
+```
+
+A press on a region never seeks the waveform underneath. Each handle is a slider of its own: it takes focus, and the arrow keys, <kbd>Page Up</kbd> / <kbd>Page Down</kbd>, <kbd>Home</kbd> and <kbd>End</kbd> move its edge, which stops `minLength` short of the other one. Leave the handles out for a region that only moves, or pass `movable={false}` for one that only resizes.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+## Live signals
+
+A live waveform reads from a `source`, an object in the shape of an external store whose snapshot is the current levels, `0–1` each:
+
+```ts
+interface LevelsSource {
+  getSnapshot: () => ArrayLike<number>;
+  subscribe: (listener: () => void) => () => void;
+}
+```
+
+The `use-audio-signal` hook (`npx shadcn@latest add @audio-ui/use-audio-signal`) reads two of them from an `AnalyserNode`, every animation frame and only while something is drawing them:
+
+```tsx
+const { level, bands, samples } = useAudioSignal(analyser, { bandCount: 32 });
+```
+
+- `level` is the loudest sample of the moment, as a single level. Draw it with `mode="scrolling"`: the waveform records it over time, the newest entering from the right, or from the middle outwards with `mirrored`. When the signal stops (pass `null` as the analyser to pause), the trace holds still.
+- `bands` is the spectrum as log-spaced frequency bands, low to high. Draw it with a `BarVisualizer`, or a `LiveWaveform` in its default `mode="static"`: the bars stay in place and follow the bands, rising at once and falling smoothly.
+- `samples` is the raw waveform of the moment, `-1` to `1`. Draw it with `shape="scope"`.
+
+Any signal works. `createSource` from `@audio-ui/core` makes a source you push to yourself, from a WebSocket, a worklet or a test:
+
+```tsx
+import { createSource } from "@audio-ui/core";
+
+const levels = createSource(new Float32Array(16));
+
+socket.onmessage = (event) => levels.set(event.data);
+```
+
+While its signal is audible, a live waveform carries `data-active`. `idle` picks what the bars do meanwhile (`"pulse"` breathes, `"wave"` ripples), and `loading` sweeps across them while a connection is on its way.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+## Theming
+
+Colors come from CSS, and the canvas repaints when the theme changes:
+
+<TypeTable title="CSS variables">
+<TypeRow name={"--waveform-color"} default={"text color"}>Bars ahead of the position, and every bar of a live waveform.</TypeRow>
+<TypeRow name={"--waveform-progress-color"} default={"--waveform-color"}>Bars behind the position.</TypeRow>
+<TypeRow name={"--waveform-bar-radius"} default={"0px"}>Bar corner radius on the canvas (any CSS length).</TypeRow>
+<TypeRow name={"--waveform-position"}>Set on the root: the playback position, as a percentage.</TypeRow>
+<TypeRow name={"--waveform-level"}>Set on each bar of a `BarVisualizer`: its level, `0–1`.</TypeRow>
+</TypeTable>
+
+The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-visualizer-bar`. Those the playback position has passed carry `data-played`.
+
+</ForFrameworks>
+
+## Interaction
 
 **Control**
 
@@ -514,6 +459,97 @@ Give the Root a `source`, a live position in `duration` units in the shape of an
 - Dragging a Region's body moves it, unless `movable` is false. Dragging a RegionHandle resizes that edge.
 - On a handle's input, the arrows and Page keys move the edge and Home and End send it to its limit.
 - A press on a region never reaches the Control underneath.
+
+## API reference
+
+<ForFrameworks only="react">
+
+### Registry component
+
+`aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the element that needs them: the waveform's input, a region handle's input, or the live waveform itself.
+
+#### Waveform
+
+<TypeTable>
+<TypeRow name={"values"} type={"ArrayLike<number> | { min, max }"}>The audio's shape at any resolution: `0–1` amplitudes, or each slice's lowest and highest sample, `-1–1`.</TypeRow>
+<TypeRow name={"range"} type={"readonly [number, number]"} default={"whole audio"}>The stretch of the audio to show, `[start, end]` in `duration` units: a clip's window onto its source, a zoomed view. The playhead, seeking, hover, regions and markers all follow it. Defaults to the whole audio. While the position is outside it, the root carries `data-outside`.</TypeRow>
+<TypeRow name={"value"} type={"number"}>Controlled position, from `0` to `duration`.</TypeRow>
+<TypeRow name={"defaultValue"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
+<TypeRow name={"source"} type={"WaveformSource"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the audio, in the unit `value` is in (typically seconds).</TypeRow>
+<TypeRow name={"step"} type={"number"} default={"duration / 100"}>Step for the arrow keys. Defaults to a hundredth of `duration`.</TypeRow>
+<TypeRow name={"largeStep"} type={"number"} default={"duration / 10"}>Step for Page Up/Page Down and Shift + arrow keys. Defaults to a tenth of `duration`.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables pointer and keyboard interaction.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value: number, eventDetails) => void"}>Fires while seeking. `eventDetails.reason` is `"press"`, `"drag"`, `"keyboard"`, or `"input-change"`; call `eventDetails.cancel()` to reject it.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value: number, eventDetails) => void"}>Fires when a seek that moved the position ends.</TypeRow>
+<TypeRow name={"getAriaValueText"} type={"(value: number, duration: number) => string"} default={"played share"}>Returns how the position is announced, e.g. `"0:12 of 1:42"`. Defaults to the played share, e.g. `"30%"`.</TypeRow>
+<TypeRow name={"onSelectionChange"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires while a stretch is selected by dragging with Shift held, as `[start, end]` in `duration` units; feed it to a `Waveform.Region`. A plain press and drag still seek. `eventDetails.cancel()` keeps the selection as it was.</TypeRow>
+<TypeRow name={"onSelectionCommitted"} type={"(range: readonly [number, number], eventDetails) => void"}>Fires when a selection that changed ends.</TypeRow>
+<TypeRow name={"shape"} type={"\"mirror\" | \"bars\" | \"line\""} default={"\"mirror\""}>How the amplitudes are drawn.</TypeRow>
+<TypeRow name={"barWidth"} type={"number"} default={"2"}>Bar width, in CSS pixels, snapped to whole device pixels.</TypeRow>
+<TypeRow name={"barGap"} type={"number"} default={"1"}>Space between bars, in CSS pixels, snapped to whole device pixels.</TypeRow>
+<TypeRow name={"variant"} type={"\"default\" | \"playhead\""} default={"\"default\""}>`playhead` adds a playhead line and a handle.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Classes for the waveform surface.</TypeRow>
+</TypeTable>
+
+#### WaveformRegion
+
+<TypeTable>
+<TypeRow name={"value"} type={"readonly [number, number]"}>Controlled region, as `[start, end]` in `duration` units.</TypeRow>
+<TypeRow name={"defaultValue"} type={"readonly [number, number]"} default={"whole timeline"}>Uncontrolled starting region.</TypeRow>
+<TypeRow name={"minLength"} type={"number"} default={"the waveform's step"}>The shortest the region can be resized to, in `duration` units. Defaults to the root's `step`.</TypeRow>
+<TypeRow name={"movable"} type={"boolean"} default={"true"}>Whether dragging the region's body moves it.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Also disabled when the waveform is.</TypeRow>
+<TypeRow name={"onValueChange"} type={"(value, eventDetails) => void"}>Fires while moving or resizing. `eventDetails.edge` is `"start"`, `"end"` or `"both"`; `eventDetails.reason` is `"drag"`, `"keyboard"` or `"input-change"`.</TypeRow>
+<TypeRow name={"onValueCommitted"} type={"(value, eventDetails) => void"}>Fires when a move or resize that changed the region ends.</TypeRow>
+</TypeTable>
+
+`WaveformRegionHandle` takes `edge` (`"start"` or `"end"`) and `getAriaValueText`. `WaveformMarker` takes `value` and shows its children as a label. `WaveformHover` takes `format`, which prints the hovered position; without it only the line shows.
+
+#### LiveWaveform
+
+<TypeTable>
+<TypeRow name={"source"} type={"LevelsSource | null"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
+<TypeRow name={"mode"} type={"\"static\" | \"scrolling\""} default={"\"static\""}>`static` spreads the current levels across the width; `scrolling` records the loudest one over time.</TypeRow>
+<TypeRow name={"scrollSpeed"} type={"number"} default={"60"}>How fast the scrolling mode moves, in CSS pixels per second.</TypeRow>
+<TypeRow name={"shape"} type={"\"mirror\" | \"bars\" | \"line\" | \"scope\""} default={"\"mirror\""}>How the signal is drawn. `scope` traces raw samples instead of levels.</TypeRow>
+<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels before they are drawn.</TypeRow>
+<TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Makes the drawing symmetric: the first level in the center, or, when scrolling, the newest one, with older ones moving out on both sides.</TypeRow>
+<TypeRow name={"idle"} type={"\"none\" | \"pulse\" | \"wave\""} default={"\"none\""}>In `static` mode, what the bars do while there is no signal.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
+</TypeTable>
+
+#### BarVisualizer
+
+<TypeTable>
+<TypeRow name={"source"} type={"LevelsSource | null"}>A live position followed outside React; takes precedence over `value`.</TypeRow>
+<TypeRow name={"count"} type={"number"} default={"24"}>How many bars to draw. The levels are fitted to them.</TypeRow>
+<TypeRow name={"mirrored"} type={"boolean"} default={"false"}>Mirrors the levels around the middle bar, the lowest band in the center.</TypeRow>
+<TypeRow name={"minLevel"} type={"number"} default={"0.08"}>Resting level, 0…1: silent bars keep this much of their size.</TypeRow>
+<TypeRow name={"gain"} type={"number"} default={"1"}>Visual gain applied to the levels before they are drawn.</TypeRow>
+<TypeRow name={"idle"} type={"\"none\" | \"pulse\" | \"wave\""} default={"\"none\""}>What the bars do while there is no signal.</TypeRow>
+<TypeRow name={"loading"} type={"boolean"} default={"false"}>Whether the audio is still on its way. Seeking waits, and the bars sweep.</TypeRow>
+<TypeRow name={"align"} type={"\"start\" | \"center\" | \"end\""} default={"\"center\""}>Where the bars grow from.</TypeRow>
+<TypeRow name={"orientation"} type={"\"horizontal\" | \"vertical\""} default={"\"horizontal\""}>`vertical` stacks the bars and grows them sideways.</TypeRow>
+</TypeTable>
+
+The `Waveform` primitive that installs with it exposes the parts these components are built from:
+
+<TypeTable title="Parts">
+<TypeRow name={"Waveform.Root"}>Owns the data (`peaks`, or a live `levels` source) and the position (`value`, `source`, `duration`). Carries `data-active` while a live signal is audible.</TypeRow>
+<TypeRow name={"Waveform.Control"}>The seekable surface; holds the input. Leave it out for a waveform that is only shown.</TypeRow>
+<TypeRow name={"Waveform.Canvas"}>Draws on a canvas: `variant`, `mode`, `scrollSpeed`, `barWidth`, `barGap`, `barRadius`, `minBarHeight`, `lineWidth`, `gain`, `mirrored`, `idle`.</TypeRow>
+<TypeRow name={"Waveform.Bars, Waveform.Bar"}>Draws as elements: `count`, `minLevel`, `gain`, `mirrored`, `idle`. Each bar gets `--waveform-level`, `data-index` and `data-played`.</TypeRow>
+<TypeRow name={"Waveform.Region, Waveform.RegionHandle"}>A stretch of the timeline, named by `region`, and the handle of one of its edges. What they report goes to the Root's `onRegionChange` and `onRegionCommitted`, with the region's name in the details.</TypeRow>
+<TypeRow name={"Waveform.Marker"}>A point on the timeline.</TypeRow>
+<TypeRow name={"Waveform.Playhead, Waveform.Thumb"}>Follow the playback position.</TypeRow>
+<TypeRow name={"Waveform.Hover"}>Shown at the hovered position; its `format` turns that position into the text it writes.</TypeRow>
+</TypeTable>
+
+Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes that state as data attributes such as `data-disabled`, `data-dragging` and `data-loading`.
+
+</ForFrameworks>
 
 ### Options
 
@@ -552,3 +588,13 @@ In the web adapter, the seek is the `input` and `change` events, and the selecti
 - `data-dragging` while a pointer scrubs or selects, `data-loading`, `data-disabled` on every part.
 - `data-active` on the Root while a live signal is audible, and `data-outside` while the position is outside the stretch shown.
 - `data-played` on the bars the position has passed, `data-index` on a bar, `data-region` and `data-edge` on a region and its handles.
+
+<ForFrameworks only="react">
+
+## Examples
+
+### Player, wired to a real uploaded file
+
+<ComponentPreview styleName="base-nova" name="block-waveform-player" />
+
+</ForFrameworks>

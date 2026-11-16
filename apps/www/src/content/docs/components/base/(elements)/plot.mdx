@@ -11,7 +11,17 @@ base: base
 
 An equalizer, a filter response or a compressor curve: a surface with two axes, on which you draw curves and live traces and place draggable handles in the axes' units. The registry component is written on the `Plot` primitive of `@audio-ui/primitives`, which installs with it.
 
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+The plot's behavior is one description, `plot` in `@audio-ui/primitives`, over the controllers of `@audio-ui/core`. It is a surface with two axes, each a range and a scale (linear, logarithmic or your own), on which you place curves, live traces, lines, bands, a grid, dots, marks and draggable handles in the axes' units: an EQ curve over `20` to `20000` Hz and `-12` to `12` dB is written in hertz and decibels. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+</ForFrameworks>
+
 ## Installation
+
+<ForFrameworks only="react">
 
 <CodeTabs>
 
@@ -63,71 +73,15 @@ npm install @audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sd
 
 </CodeTabs>
 
-## Usage
-
-```tsx
-import {
-  Plot,
-  PlotArea,
-  PlotCurve,
-  PlotGraph,
-  PlotGrid,
-  PlotHandle,
-} from "@/components/audio-ui/plot";
-import { eqResponse } from "@audio-ui/engine/analysis";
-
-<Plot minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
-  <PlotGrid x={{ count: 6 }} y={{ ticks: [-12, 0, 12] }} />
-  <PlotGraph>
-    <PlotArea fillTo={0} fn={response} />
-    <PlotCurve fn={response} />
-  </PlotGraph>
-  <PlotHandle
-    aria-label="Band 1"
-    onValueChange={({ x, y }) => setBand({ frequency: x, gainDb: y })}
-    value={{ x: band.frequency, y: band.gainDb }}
-  />
-</Plot>;
-```
-
-`fn` is `y = fn(x)` in the axes' units. `@audio-ui/engine/analysis` gives you the functions for the usual curves: `eqResponse`, `biquadResponse` and `compressorOutput`, and for keeping a band's handle on the curve, `bandHandleDb` (where it sits) and `bandGainForHandle` (the gain that puts it where the pointer is).
-
-## Handles
-
-A handle holds a native `<input type="range">` per axis, so it works from the keyboard: the arrow keys move it by a hundredth of the axis, a tenth with <kbd>Shift</kbd>, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends. Dragging moves it from where it is rather than jumping to the pointer, and four times finer with <kbd>Shift</kbd>. A double click, an <kbd>Alt</kbd> + click or <kbd>Delete</kbd> return it to `defaultValue`, or the middle of the plot (`reason: "reset"`). `axis="x"` or `axis="y"` holds it to one axis.
-
-## Live signals
-
-`PlotTrace` draws a list of y values from a `source` straight in the DOM, with no React render per frame: the spectrum of the sound behind an equalizer, on a scale of its own (`min`, `max`). `PlotDot` is a point that follows a live `{ x, y }`, such as the input level riding a compressor's curve. The `use-spectrum` hook turns an `AnalyserNode` into the source a trace wants, resampled onto a logarithmic frequency axis, and the default example plays pink noise through the equalizer so you hear what you draw.
-
-```tsx
-const spectrum = useSpectrum(analyser, { minHz: 20, maxHz: 20000 });
-
-<PlotGraph>
-  <PlotTraceArea fillTo={-100} min={-100} max={-10} source={spectrum} />
-  <PlotCurve fn={response} />
-</PlotGraph>;
-```
-
-The hook's options are in [Analysis](/docs/guides/analysis#spectrum).
-
-## API reference
-
-The headless parts and their options are in [Headless primitive](#headless-primitive), below.
-
-### Registry component
-
-`PlotCursor` takes a `format` function, `(value) => string`, for its readout; `PlotTraceArea` is a `Trace` drawn as a filled area. The rest take the primitive's props.
-
 </ForFrameworks>
 
-## Headless primitive
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation), the [XY pad](/docs/components/base/xypad#installation), the [meter](/docs/components/base/meter#installation), the [envelope](/docs/components/base/envelope#installation), the [pad grid](/docs/components/base/pad#installation), the [piano](/docs/components/base/piano#installation) and the [sequencer](/docs/components/base/sequencer#installation) are built the same way.
 
-The plot's behavior is one description, `plot` in `@audio-ui/primitives`, over the controllers of `@audio-ui/core`. It is a surface with two axes, each a range and a scale (linear, logarithmic or your own), on which you place curves, live traces, lines, bands, a grid, dots, marks and draggable handles in the axes' units: an EQ curve over `20` to `20000` Hz and `-12` to `12` dB is written in hertz and decibels. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+<ForFrameworks only="react">
 
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive), the [fader](/docs/components/base/fader#headless-primitive), the [XY pad](/docs/components/base/xypad#headless-primitive), the [meter](/docs/components/base/meter#headless-primitive), the [envelope](/docs/components/base/envelope#headless-primitive), the [pad grid](/docs/components/base/pad#headless-primitive), the [piano](/docs/components/base/piano#headless-primitive) and the [sequencer](/docs/components/base/sequencer#headless-primitive) are built the same way.
+The primitive alone, without the styling:
 
-### Installation
+</ForFrameworks>
 
 <FrameworkTabs defaultValue="react">
 
@@ -164,7 +118,7 @@ One file, `components/audio-ui/plot/vue.ts`.
 npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-svelte.json
 ```
 
-Ten files in `components/audio-ui/plot/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
+Ten files in `components/audio-ui/plot/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
 
 </TabsContent>
 
@@ -182,7 +136,44 @@ One file, `components/audio-ui/plot/web.ts`. Import it once, and it registers th
 
 Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
 
-### Usage
+## Usage
+
+<ForFrameworks only="react">
+
+```tsx
+import {
+  Plot,
+  PlotArea,
+  PlotCurve,
+  PlotGraph,
+  PlotGrid,
+  PlotHandle,
+} from "@/components/audio-ui/plot";
+import { eqResponse } from "@audio-ui/engine/analysis";
+
+<Plot minX={20} maxX={20000} minY={-18} maxY={18} scaleX="log">
+  <PlotGrid x={{ count: 6 }} y={{ ticks: [-12, 0, 12] }} />
+  <PlotGraph>
+    <PlotArea fillTo={0} fn={response} />
+    <PlotCurve fn={response} />
+  </PlotGraph>
+  <PlotHandle
+    aria-label="Band 1"
+    onValueChange={({ x, y }) => setBand({ frequency: x, gainDb: y })}
+    value={{ x: band.frequency, y: band.gainDb }}
+  />
+</Plot>;
+```
+
+`fn` is `y = fn(x)` in the axes' units. `@audio-ui/engine/analysis` gives you the functions for the usual curves: `eqResponse`, `biquadResponse` and `compressorOutput`, and for keeping a band's handle on the curve, `bandHandleDb` (where it sits) and `bandGainForHandle` (the gain that puts it where the pointer is).
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+The primitive alone, part by part:
+
+</ForFrameworks>
 
 A Root is the surface. Everything you put in it is placed by value, not by pixel:
 
@@ -314,7 +305,34 @@ In the web adapter, what is not text is a property, not an attribute: a Curve's 
 
 A Trace takes a `source`, a live list of values (a spectrum, a waveform) in the shape of an external store: `getSnapshot()` returns the values and `subscribe(listener)` is called on each frame. Its path is written straight onto the DOM, so a spectrum at 60 frames renders nothing. A Dot takes a `value` or a `source` of a point the same way. `createSource` from `@audio-ui/core` makes one, and the registry's `useSpectrum` gives you one over an analyser.
 
-### Interaction
+<ForFrameworks only="react">
+
+## Handles
+
+A handle holds a native `<input type="range">` per axis, so it works from the keyboard: the arrow keys move it by a hundredth of the axis, a tenth with <kbd>Shift</kbd>, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends. Dragging moves it from where it is rather than jumping to the pointer, and four times finer with <kbd>Shift</kbd>. A double click, an <kbd>Alt</kbd> + click or <kbd>Delete</kbd> return it to `defaultValue`, or the middle of the plot (`reason: "reset"`). `axis="x"` or `axis="y"` holds it to one axis.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+## Live signals
+
+`PlotTrace` draws a list of y values from a `source` straight in the DOM, with no React render per frame: the spectrum of the sound behind an equalizer, on a scale of its own (`min`, `max`). `PlotDot` is a point that follows a live `{ x, y }`, such as the input level riding a compressor's curve. The `use-spectrum` hook turns an `AnalyserNode` into the source a trace wants, resampled onto a logarithmic frequency axis, and the default example plays pink noise through the equalizer so you hear what you draw.
+
+```tsx
+const spectrum = useSpectrum(analyser, { minHz: 20, maxHz: 20000 });
+
+<PlotGraph>
+  <PlotTraceArea fillTo={-100} min={-100} max={-10} source={spectrum} />
+  <PlotCurve fn={response} />
+</PlotGraph>;
+```
+
+The hook's options are in [Analysis](/docs/guides/analysis#spectrum).
+
+</ForFrameworks>
+
+## Interaction
 
 **Handles**
 
@@ -327,6 +345,16 @@ A Trace takes a `source`, a live list of values (a spectrum, a waveform) in the 
 - Its `--plot-cursor-x` and `--plot-cursor-y` CSS variables hold its place, in percent.
 
 A disabled plot takes none of these.
+
+## API reference
+
+<ForFrameworks only="react">
+
+### Registry component
+
+`PlotCursor` takes a `format` function, `(value) => string`, for its readout; `PlotTraceArea` is a `Trace` drawn as a filled area. The rest take the primitive's props.
+
+</ForFrameworks>
 
 ### Options
 
