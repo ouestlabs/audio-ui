@@ -24,6 +24,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { META_THEME_COLORS, siteConfig } from "@/lib/config";
 import { DESIGN_SYSTEM_BOOT_SCRIPT } from "@/lib/design-system/boot-cache";
 import { watchStyleCss } from "@/lib/design-system/style-css";
+import { FRAMEWORK_REDIRECT_SCRIPT } from "@/lib/docs/content/framework-paths";
 import { watchPreloadErrors } from "@/lib/load-failure";
 import {
   buildAuthorJsonLd,
@@ -165,6 +166,7 @@ export const Route = createRootRoute({
     ],
     scripts: [
       { children: THEME_SCRIPT },
+      { children: FRAMEWORK_REDIRECT_SCRIPT },
       { children: DESIGN_SYSTEM_BOOT_SCRIPT },
     ],
     styles: [{ children: HIGHLIGHT_THEME_CSS }],

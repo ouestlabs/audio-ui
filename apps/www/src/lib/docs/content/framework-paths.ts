@@ -87,3 +87,26 @@ export function frameworkAddresses(): string[] {
     ...UI_SDK_PRIMITIVES.map((name) => `/docs/${segment}/${name}`),
   ]);
 }
+
+/**
+ * Runs in the head, before the first paint: a page that has an address for the
+ * framework the reader kept (`/docs/knob-ui-sdk` for Vue) goes to it, so the
+ * page is drawn for their framework from the start. It is `frameworkAddressOf`
+ * written for a document with no module, from the same lists.
+ */
+export const FRAMEWORK_REDIRECT_SCRIPT = `
+  try {
+    var segments = ${JSON.stringify(
+      Object.fromEntries(
+        Object.entries(FRAMEWORK_SEGMENTS).map(([segment, id]) => [id, segment])
+      )
+    )};
+    var primitives = ${JSON.stringify(UI_SDK_PRIMITIVES)};
+    var segment = segments[localStorage['audio-ui-framework']];
+    var path = location.pathname.replace(/\\/$/, '');
+    var name = /^\\/docs\\/([a-z-]+)-ui-sdk$/.exec(path);
+    var to = path === '/docs/registry' ? '/docs/' + segment
+      : name && primitives.indexOf(name[1]) >= 0 ? '/docs/' + segment + '/' + name[1] : null;
+    if (segment && to) location.replace(to + location.search + location.hash);
+  } catch (_) {}
+`;

@@ -1,5 +1,6 @@
 import { expect, test } from "bun:test";
 import {
+  FRAMEWORK_REDIRECT_SCRIPT,
   frameworkAddresses,
   frameworkAddressOf,
   pageOfFrameworkAddress,
@@ -45,4 +46,34 @@ test("every framework address built is one the router reads", () => {
       frameworkAddressOf(page?.pathname ?? "", page?.framework ?? null)
     ).toBe(address);
   }
+});
+
+const run = (kept: string | null, pathname: string) => {
+  const went: string[] = [];
+  new Function("localStorage", "location", FRAMEWORK_REDIRECT_SCRIPT)(
+    { "audio-ui-framework": kept },
+    {
+      hash: "#a",
+      pathname,
+      replace: (url: string) => {
+        went.push(url);
+      },
+      search: "?x=1",
+    }
+  );
+  return went[0] ?? null;
+};
+
+test("the redirect script goes to the address of the framework kept", () => {
+  expect(run("vue", "/docs/knob-ui-sdk")).toBe("/docs/vue/knob?x=1#a");
+  expect(run("web", "/docs/registry")).toBe("/docs/web-components?x=1#a");
+  expect(run("svelte", "/docs/piano-roll-ui-sdk/")).toBe(
+    "/docs/svelte/piano-roll?x=1#a"
+  );
+});
+
+test("the redirect script stays where it is without a framework kept or an address for the page", () => {
+  expect(run(null, "/docs/knob-ui-sdk")).toBeNull();
+  expect(run("vue", "/docs/guides/output")).toBeNull();
+  expect(run("vue", "/docs/vue/knob")).toBeNull();
 });
