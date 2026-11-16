@@ -2,8 +2,7 @@
   {
     "dependencies": [
       "@audio-ui/core",
-      "@audio-ui/engine",
-      "@audio-ui/react"
+      "@audio-ui/engine"
     ],
     "description": "The document of an arrangement of clips on tracks: its clips, tracks and mixes, how far a clip reaches, where a MIDI clip's notes play, and what a track's volume and pan automation gives at a point of the song",
     "exports": [
@@ -404,8 +403,7 @@
   },
   {
     "dependencies": [
-      "@audio-ui/engine",
-      "@audio-ui/react"
+      "@audio-ui/engine"
     ],
     "description": "Plays an arrangement on the audio clock: its audio clips, its notes through each track's instrument, its device chains, sends and returns, and an offline render to a buffer, with a hook for the transport, the playhead and the meters",
     "exports": [
@@ -1903,7 +1901,6 @@
   },
   {
     "dependencies": [
-      "@audio-ui/react",
       "@audio-ui/core",
       "@audio-ui/engine"
     ],
@@ -1952,7 +1949,7 @@
   },
   {
     "dependencies": [
-      "@audio-ui/react",
+      "@audio-ui/core",
       "@audio-ui/engine"
     ],
     "description": "The live levels of a signal from its AnalyserNodes, in the shape a Meter paints from: RMS in dB per channel with a peak that holds and falls, refreshed every frame without re-rendering",
@@ -2115,9 +2112,7 @@
     ]
   },
   {
-    "dependencies": [
-      "@audio-ui/react"
-    ],
+    "dependencies": [],
     "description": "The edits of one sound on a track, each one step of undo: Cut, Copy, Paste, Delete, Crop, Mark, Louder and Quieter on a time selection, Trim silence and Shrink pauses from the pauses it is given, and the keyboard of all of them with Undo and Redo",
     "exports": [
       {
@@ -2384,7 +2379,6 @@
   {
     "dependencies": [
       "@audio-ui/core",
-      "@audio-ui/react",
       "@audio-ui/engine"
     ],
     "description": "How loud a signal is while it plays, in LUFS, as streaming services and broadcasters measure it (ITU-R BS.1770): its momentary, short-term and integrated loudness, measured on the audio thread, as a live source refreshed every 100 ms without re-rendering",
@@ -2678,7 +2672,6 @@
   {
     "dependencies": [
       "@audio-ui/core",
-      "@audio-ui/react",
       "@audio-ui/engine"
     ],
     "description": "The pitch of a signal as a live source: the note nearest the sound and its offset in cents, steadied by a median and held a moment after the sound stops, with no React render per reading",
@@ -2869,7 +2862,6 @@
   {
     "dependencies": [
       "@audio-ui/core",
-      "@audio-ui/react",
       "@audio-ui/engine"
     ],
     "description": "The spectrum of an AnalyserNode as a live source for Plot.Trace: dB per point on a logarithmic frequency axis, refreshed every frame without re-rendering, and its held peaks as a second source",
@@ -2963,9 +2955,7 @@
     ]
   },
   {
-    "dependencies": [
-      "@audio-ui/react"
-    ],
+    "dependencies": [],
     "description": "A stretch of time on some tracks of an arrangement, drawn by dragging across bare lanes, with its overlay and what the keyboard does with it: copy, cut, paste, duplicate, consolidate, loop, fade, delete and open time, each one step of undo.",
     "exports": [
       {
@@ -2999,8 +2989,7 @@
   },
   {
     "dependencies": [
-      "@audio-ui/core",
-      "@audio-ui/react"
+      "@audio-ui/core"
     ],
     "description": "What the keyboard does with an arrangement's cursor: the arrows on the grid, Home and End, Up and Down to pick a track, Alt and the arrows to jump between locators and clip edges, M to add a locator.",
     "exports": [

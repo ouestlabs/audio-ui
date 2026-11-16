@@ -213,6 +213,7 @@
     "usedBy": [
       "arrangement-engine",
       "device-signal",
+      "use-audio-levels",
       "use-clip-edits",
       "use-loudness",
       "use-piano-roll-playback",
@@ -735,7 +736,8 @@
     "audiojs": [],
     "typesOnly": false,
     "usedBy": [
-      "device-signal"
+      "device-signal",
+      "use-audio-levels"
     ]
   },
   {
@@ -6826,9 +6828,7 @@
     "package": "@audio-ui/react",
     "audiojs": [],
     "typesOnly": false,
-    "usedBy": [
-      "use-audio-levels"
-    ]
+    "usedBy": []
   },
   {
     "adapters": [],

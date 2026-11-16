@@ -28,7 +28,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "xypad"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the filter cutoff up",
     files: [
@@ -271,7 +271,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["instrument", "synth", "xypad"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A wave shaper synth you can plug in: its state, a panel that draws and plays it and a Web Audio engine that makes the sound, each its own file. Press the pad: pitch goes across, the resonance up",
     files: [
@@ -693,7 +693,7 @@ export const components: RegistryItem[] = [
       hint: "Drag over the waveform to select, right-click it to edit: Cmd/Ctrl + X, C, V, Delete, K to crop, M to mark, Cmd/Ctrl + Z to undo. Pick a sound or upload one from its menu, or drop an audio file. Double-click selects a hit, triple-click a sound between pauses. Space plays the selection, B plays it before the edits, the arrows move the cursor, = and - zoom. A pinch or Cmd/Ctrl + scroll zooms to the samples. Add an effect from the library to the chain.",
     },
     name: "block-audio-editor",
-    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine"],
     registryDependencies: [
       "@audio-ui/arranged-clip",
       "@audio-ui/clip-spectrogram",
@@ -836,7 +836,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A compressor you can plug in: its state, a panel that draws it and a Web Audio engine that plays it, side by side. Play a pulsing signal and turn the knobs",
     files: [
@@ -880,7 +880,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["delay-reverb", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A delay you can plug in: its state, a panel that draws the echoes it makes with a handle for the time and the feedback, and an engine that plays it. Play a loop through it and drag",
     files: [
@@ -903,7 +903,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["delay-reverb", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A reverb you can plug in: its state, a panel that draws the tail it makes with a handle for the decay time, and an engine that plays it. Play a loop through it and drag",
     files: [
@@ -925,7 +925,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["eq", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A filter you can plug in: its state, a panel that draws the curve it plays with a handle for the cutoff and the resonance, and an engine that plays it. Play a loop through it and drag, the spectrum behind is what comes out",
     files: [
@@ -947,7 +947,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["distortion", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A distortion you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it and turn the drive",
     files: [
@@ -969,7 +969,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["modulation", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A chorus you can plug in: its state, a panel that draws the sweep of its delay and an engine that plays it. Play a loop through it and turn the rate and the depth",
     files: [
@@ -992,7 +992,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["utility", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A utility you can plug in: its state, a panel and an engine that plays it. Play a loop through it and move the pan and the width",
     files: [
@@ -1014,7 +1014,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A limiter you can plug in: its state, a panel that draws its transfer curve with a handle on the ceiling and an engine that plays it. Play a loop through it, push the gain and pull the ceiling down",
     files: [
@@ -1036,7 +1036,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A gate you can plug in: its state, a panel that draws its transfer curve with a handle on the threshold and an engine that plays it. Play a loop through it and raise the threshold: the quiet parts go",
     files: [
@@ -1058,7 +1058,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "An expander you can plug in: its state, a panel that draws its curve and an engine that plays it. Play a loop through it: downward, what falls under the threshold is turned down; upward, the peaks are lifted",
     files: [
@@ -1080,7 +1080,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A ducker you can plug in: its state, a panel that draws the gain for the key's level and an engine that plays it. A held chord, ducked by the kick of the loop",
     files: [
@@ -1102,7 +1102,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A compander you can plug in: its state, a panel that draws its curve with a handle on each point and an engine that plays it. Play a loop through it and drag the points: under the straight line it turns the sound down, over it up",
     files: [
@@ -1124,7 +1124,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "An unlimiter you can plug in: its state, a panel that draws the lift for an attack's size and an engine that plays it. Play a loop through it: its flattened attacks are lifted back",
     files: [
@@ -1146,7 +1146,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["distortion", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A saturator you can plug in: its state, a panel that draws its transfer curve and an engine that plays it. Play a loop through it, pick a curve and turn the drive",
     files: [
@@ -1168,7 +1168,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["modulation", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A phaser and flanger you can plug in: its state, a panel that draws the sweep and an engine that plays it. Play a loop through it, switch the mode and turn the rate and the feedback",
     files: [
@@ -1191,7 +1191,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["modulation", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A photocell vibe you can plug in: its state, a panel that draws the lamp and an engine that plays it, each its own file. Play the loop and turn the speed and the intensity",
     files: [
@@ -1214,7 +1214,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["modulation", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "An auto pan you can plug in: its state, a panel that draws the movement and an engine that plays it. Play a loop through it, pick a waveform and switch to tremolo",
     files: [
@@ -1237,7 +1237,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["eq", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A channel EQ you can plug in: its state, a panel that draws the curve with a handle on the mid band and an engine that plays it. Play a loop through it and drag, the spectrum behind is what comes out",
     files: [
@@ -1259,7 +1259,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["distortion", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "An overdrive you can plug in: its state, a panel that draws the band that reaches the clip and an engine that plays it. Play a loop through it, drag the handle and turn the drive",
     files: [
@@ -1281,7 +1281,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A de-esser you can plug in: its state, a panel that draws what it does at each frequency and an engine that plays it. Play a voice through it, lower the threshold and the s sits back",
     files: [
@@ -1303,7 +1303,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A multiband compressor you can plug in: its state, a panel that draws the three bands and an engine that plays it. Play a loop through it and hold one band down",
     files: [
@@ -1325,7 +1325,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["dynamics", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A transient shaper you can plug in: its state, a panel with a handle for the attack and the sustain and an engine that plays it. Play a loop through it and drag the handle: up for more click, left for a shorter ring",
     files: [
@@ -1347,7 +1347,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["utility", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A mid/side device you can plug in: its state, a panel with a handle for the mid and the side and an engine that plays it. Play a wide loop through it and take the side down",
     files: [
@@ -1369,7 +1369,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["distortion", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A redux you can plug in: its state, a panel that draws the stairs the bits make and an engine that plays it. Play a loop through it and take the bits down",
     files: [
@@ -1391,7 +1391,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["distortion", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A lo-fi you can plug in: its state, a panel that draws the band it leaves and an engine that plays it. Play a loop through it and turn up the wow and the crackle",
     files: [
@@ -1413,7 +1413,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["eq", "plot", "fader", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A graphic EQ you can plug in: its state, a panel that draws the curve over a fader per band and an engine that plays it. Play a loop through it and pull the faders, the spectrum behind is what comes out",
     files: [
@@ -1435,7 +1435,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["eq", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A tilt EQ you can plug in: its state, a panel that draws the curve it tilts and an engine that plays it. Play a loop through it and turn the tilt: brighter one way, darker the other",
     files: [
@@ -1457,7 +1457,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["modulation", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A wah you can plug in: its state, a panel that draws the band and its travel and an engine that plays it. Play a loop through it: the louder the hit, the higher the band",
     files: [
@@ -1479,7 +1479,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["modulation", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A frequency shifter you can plug in: its state, a panel that draws what it does to a note and an engine that plays it. Play a loop through it and turn the shift: its harmonics stop lining up",
     files: [
@@ -1501,7 +1501,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["eq", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "An exciter you can plug in: its state, a panel that draws the band it excites and an engine that plays it. Play a loop through it and raise the amount: it comes forward",
     files: [
@@ -1523,7 +1523,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["eq", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A bass enhancer you can plug in: its state, a panel that draws the sub it takes and where its harmonics go, and an engine that plays it. Play a loop through it on small speakers and raise the amount",
     files: [
@@ -1545,7 +1545,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["modulation", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A rotary speaker you can plug in: its state, a panel that draws its two bands and an engine that plays it. Play a loop through it and switch to Fast: the rotors wind up",
     files: [
@@ -1567,7 +1567,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["modulation", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A stutter you can plug in: its state, a panel that draws one interval and an engine that plays it. Play a loop through it and switch it on: it catches a slice and repeats it",
     files: [
@@ -1589,7 +1589,7 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["utility", "plot", "knob"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "A binaural panner you can plug in: its state, a panel with the head seen from above and an engine that plays it. Put headphones on, play a loop and drag the sound around the head",
     files: [
@@ -1800,7 +1800,7 @@ export const components: RegistryItem[] = [
       },
     ],
     name: "transport-demo",
-    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio-ui/engine"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     registryDependencies: ["@audio-ui/transport"],
     type: "registry:example",
   },

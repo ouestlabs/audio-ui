@@ -10,7 +10,7 @@ export interface InstallProps {
   kind?: "device";
   /** The registry item, `npx shadcn@latest add @audio-ui/<name>`. */
   name: string;
-  /** The npm packages the component imports. @default "@audio-ui/react" (a device: react and core) */
+  /** The npm packages the component imports. @default the primitives and the React adapter's packages */
   packages?: string;
   /** The registry item whose source the Manual tab shows. @default name (a device: its demo, `block-<name>`) */
   source?: string;
@@ -51,8 +51,9 @@ export function installAgent(name: string): InstallPart[] {
   ];
 }
 
-const REACT = "@audio-ui/react";
-const REACT_AND_CORE = "@audio-ui/react @audio-ui/core";
+const REACT =
+  "@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5";
+const REACT_AND_CORE = REACT;
 
 /** What the two tabs hold, as data: the site draws it, and the markdown pages print it. */
 export function installPlan(props: InstallProps): InstallPlan {

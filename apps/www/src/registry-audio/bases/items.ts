@@ -128,7 +128,9 @@ export function deviceItems(
     },
     {
       categories: panel.categories,
-      dependencies: ["@audio-ui/react", ...(panel.dependencies ?? [])],
+      dependencies: [
+        ...new Set(["@audio-ui/core", ...(panel.dependencies ?? [])]),
+      ],
       description: panel.description,
       files: [deviceFile(name, "panel.tsx", "registry:ui")],
       name: `${name}-panel`,

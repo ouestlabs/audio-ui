@@ -96,7 +96,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["audio-editor"],
-    dependencies: ["@audio-ui/core", "@audio-ui/gl", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/gl"],
     description:
       "A lane's clips drawn on the GPU in the view you pick: the waveform, the waveform by band, or the spectrogram on octaves, mel, ERB or hertz with its frequency axis and the reading under the pointer. With the views labelled for a menu",
     files: [
@@ -113,7 +113,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/engine", "@audio-ui/gl", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/gl"],
     description:
       "A clip of an arrangement on its track's lane: move it, trim and fade it, pick a fade's curve, rename it in place and act on it from its menu. A MIDI clip draws its notes across its body; an audio clip given its recording draws its waveform on the GPU, a row a channel on a tall track, on the page's one WebGL context.",
     files: [
@@ -318,7 +318,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["audio-editor", "timeline"],
-    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "A selection drawn as an audio editor's frame over a lane: its edges drag, showing their time to the millisecond, a handle in each top corner fades it in and out along a curve, and a line across it sets its level, each taking effect as it lets go.",
     files: [
@@ -420,7 +420,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core"],
     description:
       "A chromatic tuner on its own: the nearest note with a needle on a scale of cents, a start button and a field for the pitch of A4. Also the display alone, for a tuner of another shape.",
     files: [
@@ -501,7 +501,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core"],
     description:
       "The face of a drum rack: eight macros, sixteen pads on a bank of the 128 notes, each named for its sound and played when struck, the picked pad's voice, tune, decay and mix, a recording dropped on a pad, and the picked pad's devices, which the host draws.",
     files: [
@@ -606,7 +606,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "synth", "xypad"],
-    dependencies: ["@audio-ui/react", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/icons"],
     description:
       "A row of buttons, one per waveform, each drawn as its shape: pick one. Fed by the options of a device's choice parameter.",
     files: [
@@ -665,7 +665,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "The level of a sound across frequencies, live, on a log axis in hertz, with held peaks.",
     files: [
@@ -680,7 +680,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot"],
-    dependencies: ["@audio-ui/react"],
+    dependencies: [],
     description:
       "Live views of a sound over the Plot: ScopePlot, a wave held still on each cycle; SpectrumPlot, a spectrum along a log frequency axis; LevelPlot, a level over time, and a second one filled under it to compare what went in with what came out. Each follows a source without a React render.",
     files: [
@@ -695,7 +695,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["device", "plot"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core"],
     description:
       "Where a sound sits between the speakers, live: a goniometer of its two channels, scaled to the loudest of the last moments, over a correlation meter from -1 to 1 (StereoField), or as a layer behind another plot with the correlation in its corner (StereoFieldLayer). Painted on a canvas from a source, without a React render.",
     files: [
@@ -792,7 +792,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline", "waveform", "knob"],
-    dependencies: ["@audio-ui/engine", "@audio-ui/gl", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/gl"],
     description:
       "The clip view of an arrangement's audio clip: a strip with its switch and name that rolls the view up, then Clip (start, end), Loop (switch, position, length, ÷2, ×2) and Sample (Warp and its mode, Gain, Transpose, speed) boxes in bars.beats.16ths, the last two foldable, beside its source on a timeline of its own (overview, bar ruler, the stretch it plays or loops to drag, warp markers on the waveform), drawn on the GPU when the source's samples are given and WebGL 2 is there: as its waveform, by band, or as its spectrogram, from the view menu. The source is edited as in an audio editor: a bar over it with Edit, Process and View, a drag selects a stretch framed with fades and a level to drag, a right-click opens Crop, Reverse, Louder and Quieter and, given onProcess, Cut, Copy, Paste, Delete and the Process menu, with their keys; on the selection they rewrite it, with none they set the clip; processedSettings says where the clip's start, end and loop go.",
     files: [
@@ -821,7 +821,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline"],
-    dependencies: ["@audio-ui/core", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core"],
     description:
       "The frame of a clip's detail view: a strip along its top (the caret that rolls the view up to it, the clip's switch, its name to rename, a status, actions), boxes of its properties beside its editor (ClipBox, foldable to a strip), rows, small toggles, position fields in bars.beats.16ths (parameter fields), and useClipPlayhead, where playback reads the clip's source from the arrangement's position.",
     files: [
@@ -856,7 +856,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["timeline", "piano"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "The clip view of an arrangement's MIDI clip, its notes first: a strip with its switch and name that rolls the view up, a column of its settings (Clip: start, end; Loop: switch, position, length, ÷2, ×2; Groove: the swing on the eighths or the sixteenths), and its piano roll (the loop brace on the ruler, keys, grid, a velocity or chance lane) or, for a drum clip, its steps, a row per pad, under a bar: Draw on the roll or Repeat on the steps, the Notes menu (the commands of note-edits by what they change, with their keys and on a right-click; no pitch commands on drums), the clip's Scale (marked on the roll's rows, with the keys the song's notes are likeliest in) and View (steps or roll, Fold, the lane). Notes are drawn a grid step at a time.",
     files: [
@@ -1004,7 +1004,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/core", "@audio-ui/react", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/core", "@audio-ui/icons"],
     description:
       "A step grid: press a step, or drag across several, to draw a pattern.",
     files: [
@@ -1030,12 +1030,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: [
-      "@audio-ui/core",
-      "@audio-ui/react",
-      "@audio-ui/icons",
-      "@audio-ui/engine",
-    ],
+    dependencies: ["@audio-ui/core", "@audio-ui/icons", "@audio-ui/engine"],
     description:
       "A compact player: play and pause, the position, a seek bar and the length.",
     files: [
@@ -1068,12 +1063,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "transport",
-    dependencies: [
-      "@audio-ui/core",
-      "@audio-ui/react",
-      "@audio-ui/icons",
-      "@audio-ui/engine",
-    ],
+    dependencies: ["@audio-ui/core", "@audio-ui/icons", "@audio-ui/engine"],
     registryDependencies: [
       "@audio-ui/bpm-control",
       "@shadcn/button",
@@ -1084,7 +1074,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The arrangement of a workstation, controlled: the loop, the ruler, the locators and time signatures, a row per track with its header, meter, automation and clips, the return and group tracks, and the row that takes files and devices dropped on it. State comes in through the arrangement's hooks and every change goes out as a command or a callback, so it runs over an engine of your own.",
     files: [
@@ -1118,7 +1108,7 @@ export const audio: RegistryItem[] = [
   },
   {
     categories: ["mixer"],
-    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "The mixer of an arrangement, controlled: a channel for each track and return, then the main track. Each has its pan, its sends, its fader, its meter and its peak, and Solo, Mute and an Arm light; the main track reads its loudness in LUFS and stays in sight at the right while the channels scroll, and a channel moves by its name. Every change is a command of the arrangement.",
     files: [

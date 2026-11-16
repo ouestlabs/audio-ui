@@ -4,7 +4,6 @@ import {
   secondsPerBeat,
   type Tempo,
 } from "@audio-ui/engine/time";
-import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
 import {
   type ComponentProps,
   type DragEvent,
@@ -870,7 +869,7 @@ export function ArrangementView({
     [onArm, removeTrack, renameTrack, trackMenu, ungroupTrack]
   );
   const changeLoop = useCallback(
-    (range: TimelinePrimitive.Range.Value) =>
+    (range: readonly [number, number]) =>
       dispatch({ range, type: "change-loop" }),
     [dispatch]
   );
