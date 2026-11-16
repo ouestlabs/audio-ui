@@ -235,6 +235,24 @@
   },
   {
     "categories": ["piano-roll"],
+    "description": "piano-roll example, in the Vue adapter",
+    "name": "piano-roll-vue-demo",
+    "title": "Piano roll vue demo"
+  },
+  {
+    "categories": ["piano-roll"],
+    "description": "piano-roll example, in the Svelte adapter",
+    "name": "piano-roll-svelte-demo",
+    "title": "Piano roll svelte demo"
+  },
+  {
+    "categories": ["piano-roll"],
+    "description": "piano-roll example, in the web adapter",
+    "name": "piano-roll-web-demo",
+    "title": "Piano roll web demo"
+  },
+  {
+    "categories": ["piano-roll"],
     "description": "A scale menu lighting the keys of the scale it picks",
     "name": "scale-menu-demo",
     "title": "Scale menu demo"
@@ -342,6 +360,24 @@
     "title": "Block timeline"
   },
   {
+    "categories": ["timeline"],
+    "description": "timeline example, in the Vue adapter",
+    "name": "timeline-vue-demo",
+    "title": "Timeline vue demo"
+  },
+  {
+    "categories": ["timeline"],
+    "description": "timeline example, in the Svelte adapter",
+    "name": "timeline-svelte-demo",
+    "title": "Timeline svelte demo"
+  },
+  {
+    "categories": ["timeline"],
+    "description": "timeline example, in the web adapter",
+    "name": "timeline-web-demo",
+    "title": "Timeline web demo"
+  },
+  {
     "categories": ["waveform"],
     "description": "Waveform with a resizable loop region, markers and a hover time",
     "name": "waveform-region-demo",
@@ -370,6 +406,24 @@
     "description": "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
     "name": "plot-demo",
     "title": "Plot demo"
+  },
+  {
+    "categories": ["plot"],
+    "description": "plot example, in the Vue adapter",
+    "name": "plot-vue-demo",
+    "title": "Plot vue demo"
+  },
+  {
+    "categories": ["plot"],
+    "description": "plot example, in the Svelte adapter",
+    "name": "plot-svelte-demo",
+    "title": "Plot svelte demo"
+  },
+  {
+    "categories": ["plot"],
+    "description": "plot example, in the web adapter",
+    "name": "plot-web-demo",
+    "title": "Plot web demo"
   },
   {
     "categories": ["dynamics", "plot", "knob"],

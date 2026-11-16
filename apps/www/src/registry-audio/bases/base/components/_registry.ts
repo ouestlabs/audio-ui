@@ -659,6 +659,45 @@ export const components: RegistryItem[] = [
   },
   {
     categories: ["piano-roll"],
+    description: "piano-roll example, in the Vue adapter",
+    files: [
+      {
+        path: "components/piano-roll/vue/piano-roll-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-roll-vue-demo",
+    registryDependencies: ["@audio-ui/piano-roll-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano-roll"],
+    description: "piano-roll example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/piano-roll/svelte/piano-roll-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-roll-svelte-demo",
+    registryDependencies: ["@audio-ui/piano-roll-svelte"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano-roll"],
+    description: "piano-roll example, in the web adapter",
+    files: [
+      {
+        path: "components/piano-roll/web/piano-roll-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "piano-roll-web-demo",
+    registryDependencies: ["@audio-ui/piano-roll-web"],
+    type: "registry:example",
+  },
+  {
+    categories: ["piano-roll"],
     dependencies: ["@audio-ui/engine"],
     description: "A scale menu lighting the keys of the scale it picks",
     files: [
@@ -1031,6 +1070,45 @@ export const components: RegistryItem[] = [
       "@shadcn/toggle",
     ],
     type: "registry:block",
+  },
+  {
+    categories: ["timeline"],
+    description: "timeline example, in the Vue adapter",
+    files: [
+      {
+        path: "components/timeline/vue/timeline-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "timeline-vue-demo",
+    registryDependencies: ["@audio-ui/timeline-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["timeline"],
+    description: "timeline example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/timeline/svelte/timeline-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "timeline-svelte-demo",
+    registryDependencies: ["@audio-ui/timeline-svelte"],
+    type: "registry:example",
+  },
+  {
+    categories: ["timeline"],
+    description: "timeline example, in the web adapter",
+    files: [
+      {
+        path: "components/timeline/web/timeline-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "timeline-web-demo",
+    registryDependencies: ["@audio-ui/timeline-web"],
+    type: "registry:example",
   },
   {
     categories: ["waveform"],

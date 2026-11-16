@@ -109,7 +109,7 @@
       "name": "tuner"
     },
     {
-      "count": 35,
+      "count": 38,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
       "name": "plot"
@@ -127,7 +127,7 @@
       "name": "piano"
     },
     {
-      "count": 6,
+      "count": 9,
       "description": "Piano roll editors and their parts: a scale menu, note find and note edits, playback, undo and MIDI files.",
       "label": "Piano roll",
       "name": "piano-roll"
@@ -163,7 +163,7 @@
       "name": "audio-editor"
     },
     {
-      "count": 1,
+      "count": 4,
       "description": "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
       "label": "Timeline",
       "name": "timeline"
@@ -181,5 +181,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 115
+  "totalComponents": 124
 }
