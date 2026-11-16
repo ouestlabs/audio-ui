@@ -78,10 +78,6 @@ The registry component is written on the `Timeline` primitive of `@audio-ui/prim
 - **Navigator:** `TimelineNavigator` shows the whole timeline as one bar, with the visible part inside it. Drag the window to scroll, drag an edge to zoom, and double-click to show everything. With `scrollbar="hidden"` on the viewport, it replaces the scrollbar.
 - **Accessibility:** the ruler, each range and range handle, and the navigator's window and edges hold a native `<input type="range">`, so every pointer action has a keyboard equivalent. The ruler's input spans the timeline: it takes focus, carries `aria-label` and announces the position (or the text from `getAriaValueText`, such as "Bar 3, beat 2"). The arrow keys move by `step`, <kbd>Page Up</kbd> / <kbd>Page Down</kbd> and Shift by `largeStep`, and <kbd>Home</kbd> / <kbd>End</kbd> go to the ends.
 
-### Anatomy
-
-It is built on the headless primitive that installs with it: its parts, and how they fit, are under [Headless primitive](#headless-primitive) below.
-
 ### Usage
 
 ```tsx
@@ -608,7 +604,7 @@ A new change clears redo, since the redo branch no longer follows from the prese
 
 ## API reference
 
-The headless parts and their options are on [Timeline](/docs/components/base/arrangement#headless-primitive).
+The headless parts and their options are in [Headless primitive](#headless-primitive), below.
 
 ### Registry component
 

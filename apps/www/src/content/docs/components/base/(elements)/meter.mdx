@@ -22,10 +22,6 @@ Shows audio levels for a stereo output, a channel strip or any multi-channel sou
 
 <Install name="meter" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
 
-## Anatomy
-
-It is built on the headless primitive that installs with it: its parts, and how they fit, are under [Headless primitive](#headless-primitive) below.
-
 ## Usage
 
 ```tsx
@@ -85,7 +81,7 @@ To read the levels in React as well, for a numeric readout for example, use `use
 
 ## API reference
 
-The headless parts and their options are on [Meter](/docs/components/base/meter#headless-primitive).
+The headless parts and their options are in [Headless primitive](#headless-primitive), below.
 
 ### Registry component
 
@@ -354,7 +350,7 @@ Set on the Root, as props (an attribute in kebab case in the web adapter).
 | `warnThreshold` | `number` | | The level at or above which a channel is in its warning zone, below the clip threshold. Unset, there is no warning zone. |
 | `format`, `locale` | `Intl.NumberFormat` options, a locale | one decimal | How a level is written, for the Value and for `aria-valuetext`. |
 
-The Mark takes a `value` and sits along the length at its level. A Channel takes `getAriaValueText(formatted, value, index)` to announce its level in your own words, like `"-6 dB"`. A function `scale` is a property: on a custom element, set it from script.
+The Mark takes a `value` and sits along the length at its level. A Channel takes `getAriaValueText(formatted, value, index)` to announce its level in your own words, like `"-6 dB"`. A function `scale` is a property: in the web adapter, set it from script.
 
 ### States to style from
 

@@ -27,10 +27,6 @@ A piano roll for writing a phrase: a keyboard down the side, notes on a grid, an
 
 <Install name="piano-roll" />
 
-## Anatomy
-
-It is built on the headless primitive that installs with it: its parts, and how they fit, are under [Headless primitive](#headless-primitive) below.
-
 ## Usage
 
 A note's `id` is a `string` or a `number`, so type the notes you keep with the roll's `Note`, or a state of literals such as `{ id: "a", … }` is narrower than what `onValueChange` gives back:
@@ -185,7 +181,7 @@ The pitch range and the grid are in the schemas, and every note a model writes i
 
 ## API reference
 
-The headless parts and their options are on [PianoRoll](/docs/components/base/piano-roll#headless-primitive).
+The headless parts and their options are in [Headless primitive](#headless-primitive), below.
 
 ### Registry components
 
@@ -424,7 +420,7 @@ const emit = defineEmits<{ notes: [notes: Note[]] }>();
 </script>
 ```
 
-In the web adapter the rows, the notes (with a handle for each edge, with the `handles` attribute) and the velocity bars are made for you, one for each pitch or note, and style from their tags and `data-*` attributes. A note keeps its place among the others while it is dragged. The Keys part gives nothing on a custom element: draw an `audio-ui-piano` beside the grid and set its `pitches` from the roll's.
+In the web adapter the rows, the notes (with a handle for each edge, with the `handles` attribute) and the velocity bars are made for you, one for each pitch or note, and style from their tags and `data-*` attributes. A note keeps its place among the others while it is dragged. The Keys part gives nothing in the web adapter: draw an `audio-ui-piano` beside the grid and set its `pitches` from the roll's.
 
 </TabsContent>
 
