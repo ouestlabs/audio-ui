@@ -1,4 +1,5 @@
-import { Sequencer } from "@audio-ui/react/sequencer";
+import { Sequencer } from "@/components/audio-ui/sequencer/react";
+import { indexes } from "@/lib/indexes";
 import { INSTRUMENTS } from "./audio/engine";
 import { STEPS } from "./audio/patterns";
 import { Dial, type Scale } from "./ui/dial";
@@ -15,7 +16,7 @@ const TEMPO: Scale = {
   min: 60,
   numerals: [60, 120, 180],
 };
-const STEP_INDEXES = Array.from({ length: STEPS }, (_, step) => step);
+const STEP_INDEXES = indexes(STEPS).map((step) => step);
 const BASS_ROWS = ["gate", "accent"] as const;
 const BASS_GATE = INSTRUMENTS.length;
 
@@ -115,25 +116,26 @@ export default function Mira16() {
             source={mira.position}
             value={mira.pattern}
           >
-            <Sequencer.Rows>
-              {(index) => {
+            {({ rows, steps }) =>
+              indexes(rows).map((index) => {
                 if (index === row) {
                   return (
                     <Sequencer.Row
                       aria-label={name.long}
                       className="mira-step-row"
                       index={index}
+                      key={index}
                     >
-                      <Sequencer.Cells>
-                        {(step) => (
-                          <Sequencer.Cell
-                            aria-label={`${name.long}, step ${step + 1}`}
-                            className="mira-step"
-                            data-group={Math.floor(step / 4)}
-                            step={step}
-                          />
-                        )}
-                      </Sequencer.Cells>
+                      {indexes(steps).map((step) => (
+                        <Sequencer.Cell
+                          aria-label={`${name.long}, step ${step + 1}`}
+                          className="mira-step"
+                          data-group={Math.floor(step / 4)}
+                          key={step}
+                          row={index}
+                          step={step}
+                        />
+                      ))}
                     </Sequencer.Row>
                   );
                 }
@@ -146,21 +148,22 @@ export default function Mira16() {
                     aria-label={`Bass ${label}`}
                     className="mira-step-row mira-bass-row"
                     index={index}
+                    key={index}
                   >
-                    <Sequencer.Cells>
-                      {(step) => (
-                        <Sequencer.Cell
-                          aria-label={`Bass ${label}, step ${step + 1}`}
-                          className="mira-bass-step"
-                          data-accent={index === BASS_GATE + 1 || undefined}
-                          step={step}
-                        />
-                      )}
-                    </Sequencer.Cells>
+                    {indexes(steps).map((step) => (
+                      <Sequencer.Cell
+                        aria-label={`Bass ${label}, step ${step + 1}`}
+                        className="mira-bass-step"
+                        data-accent={index === BASS_GATE + 1 || undefined}
+                        key={step}
+                        row={index}
+                        step={step}
+                      />
+                    ))}
                   </Sequencer.Row>
                 );
-              }}
-            </Sequencer.Rows>
+              })
+            }
           </Sequencer.Root>
           <div className="mira-pitches">
             {STEP_INDEXES.map((step) => (

@@ -1,6 +1,6 @@
 import { pitchName } from "@audio-ui/core";
-import { Fader } from "@audio-ui/react/fader";
 import { useCallback } from "react";
+import { Fader } from "@/components/audio-ui/fader/react";
 
 /** The finger's place below the lowest string, where it waits between strums; a step above the highest is silent too, so no string lies on the edge. */
 export const REST = -1;

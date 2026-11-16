@@ -1,4 +1,4 @@
-import { Piano } from "@audio-ui/react/piano";
+import { Piano } from "@/components/audio-ui/piano/react";
 import { FOOTAGES } from "./audio/engine";
 import { Dial } from "./ui/dial";
 import { Drawbar } from "./ui/drawbar";
@@ -130,15 +130,15 @@ export default function Capella9() {
           onNoteOff={capella.noteOff}
           onNoteOn={capella.pressKey}
         >
-          <Piano.Keys>
-            {(pitch: number) => (
+          {({ pitches }) =>
+            pitches.map((pitch) => (
               <Piano.Key
                 className="capella-piano-key"
                 key={pitch}
                 pitch={pitch}
               />
-            )}
-          </Piano.Keys>
+            ))
+          }
         </Piano.Root>
       </div>
     </div>

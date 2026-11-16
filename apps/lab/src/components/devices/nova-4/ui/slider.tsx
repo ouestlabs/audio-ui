@@ -1,5 +1,5 @@
-import { Fader } from "@audio-ui/react/fader";
 import { useCallback } from "react";
+import { Fader } from "@/components/audio-ui/fader/react";
 import type { Knobbed, OnParam } from "./params";
 
 /** A short vertical slider on the panel's 0 to 10 scale: an operator's level. */

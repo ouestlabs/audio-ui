@@ -1,5 +1,5 @@
-import { Pad } from "@audio-ui/react/pad";
-import { Waveform } from "@audio-ui/react/waveform";
+import { Pad } from "@/components/audio-ui/pad/react";
+import { Waveform } from "@/components/audio-ui/waveform/react";
 import { SLICES } from "./audio/engine";
 import { Dial, SEMITONES } from "./ui/dial";
 import { Lcd } from "./ui/lcd";
@@ -76,6 +76,7 @@ export default function Altair16() {
                 <Waveform.Region
                   className="altair-slice"
                   movable={false}
+                  region="slice"
                   value={[
                     altair.selected * length,
                     (altair.selected + 1) * length,

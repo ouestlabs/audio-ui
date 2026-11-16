@@ -1,5 +1,6 @@
-import { Meter } from "@audio-ui/react/meter";
+import { Meter } from "@/components/audio-ui/meter/react";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
+import { indexes } from "@/lib/indexes";
 import { BAND_HERTZ } from "../audio/engine";
 
 /** The bands printed under the ladders: every fifth, from the lowest to the highest. */
@@ -26,8 +27,8 @@ export function Bands({ analysers }: { analysers: readonly AnalyserNode[] }) {
         orientation="vertical"
         source={source}
       >
-        <Meter.Channels>
-          {(index) => (
+        {({ channelCount }) =>
+          indexes(channelCount).map((index) => (
             <Meter.Channel
               aria-label={`Band ${kilohertz(BAND_HERTZ[index] ?? 0)} Hz`}
               className="maia-band"
@@ -37,8 +38,8 @@ export function Bands({ analysers }: { analysers: readonly AnalyserNode[] }) {
             >
               <Meter.Indicator className="maia-band-level" />
             </Meter.Channel>
-          )}
-        </Meter.Channels>
+          ))
+        }
       </Meter.Root>
       <div aria-hidden="true" className="maia-band-scale">
         {BAND_HERTZ.map((hz, index) => (

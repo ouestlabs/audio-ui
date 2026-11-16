@@ -1,5 +1,5 @@
-import { Knob } from "@audio-ui/react/knob";
 import { useCallback } from "react";
+import { Knob } from "@/components/audio-ui/knob/react";
 import type { Channel, Knob as Param } from "../audio/engine";
 import type { OnKnob } from "./params";
 

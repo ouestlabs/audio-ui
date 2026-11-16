@@ -1,4 +1,4 @@
-import { Piano } from "@audio-ui/react/piano";
+import { Piano } from "@/components/audio-ui/piano/react";
 import { formantSemitones } from "./audio/engine";
 import { Bands } from "./ui/bands";
 import { Dial } from "./ui/dial";
@@ -135,11 +135,11 @@ export default function Maia16() {
           onNoteOff={maia.releaseKey}
           onNoteOn={maia.pressKey}
         >
-          <Piano.Keys>
-            {(pitch: number) => (
+          {({ pitches }) =>
+            pitches.map((pitch) => (
               <Piano.Key className="maia-piano-key" key={pitch} pitch={pitch} />
-            )}
-          </Piano.Keys>
+            ))
+          }
         </Piano.Root>
       </div>
     </div>

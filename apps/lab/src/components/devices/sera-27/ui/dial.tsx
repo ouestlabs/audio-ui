@@ -1,5 +1,5 @@
-import { Knob } from "@audio-ui/react/knob";
 import { useCallback, useMemo } from "react";
+import { Knob } from "@/components/audio-ui/knob/react";
 import type { Param } from "../audio/engine";
 
 /** A control of the panel that moves a number: a section's level, the sustain, and the tempo. */

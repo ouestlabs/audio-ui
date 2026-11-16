@@ -1,6 +1,7 @@
-import { Meter } from "@audio-ui/react/meter";
 import { useMemo } from "react";
+import { Meter } from "@/components/audio-ui/meter/react";
 import { useAudioLevels } from "@/hooks/use-audio-levels";
+import { indexes } from "@/lib/indexes";
 
 const decibels = (formatted: string) => `${formatted} dB`;
 
@@ -22,8 +23,8 @@ export function Levels({
       scale="iec"
       source={source}
     >
-      <Meter.Channels>
-        {(index, count) => (
+      {({ channelCount: count }) =>
+        indexes(count).map((index) => (
           <Meter.Channel
             aria-label={count > 1 ? `${label} ${index + 1}` : label}
             className="rigel-meter-channel"
@@ -34,8 +35,8 @@ export function Levels({
             <Meter.Indicator className="rigel-meter-indicator" />
             <Meter.Peak className="rigel-meter-peak" />
           </Meter.Channel>
-        )}
-      </Meter.Channels>
+        ))
+      }
     </Meter.Root>
   );
 }

@@ -1,4 +1,4 @@
-import { createSource } from "@audio-ui/react";
+import { createSource } from "@audio-ui/core";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { useTransportClock } from "@/hooks/use-transport-clock";

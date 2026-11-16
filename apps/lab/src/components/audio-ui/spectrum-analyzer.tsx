@@ -1,4 +1,6 @@
-import type { Plot as PlotPrimitive, Source } from "@audio-ui/react";
+import type { Source } from "@audio-ui/core";
+import { formatFrequency } from "@audio-ui/engine/format";
+import type { ComponentProps } from "react";
 import {
   Plot,
   PlotCursor,
@@ -10,8 +12,6 @@ import {
 import { useSpectrumPeaks } from "@/hooks/use-spectrum";
 import { cn } from "@/lib/utils";
 
-const formatHz = (hz: number) =>
-  hz >= 1000 ? `${Number((hz / 1000).toFixed(1))} kHz` : `${Math.round(hz)} Hz`;
 /** Every 20 dB strictly inside the scale, so no label sits on an edge. */
 const dbTicks = (min: number, max: number) => {
   const ticks: number[] = [];
@@ -23,10 +23,10 @@ const dbTicks = (min: number, max: number) => {
   return ticks;
 };
 const describePointer = (point: { x: number; y: number }) =>
-  `${formatHz(point.x)} · ${Math.round(point.y)} dB`;
+  `${formatFrequency(point.x)} · ${Math.round(point.y)} dB`;
 
 type SpectrumAnalyzerProps = Omit<
-  PlotPrimitive.Root.Props,
+  ComponentProps<typeof Plot>,
   "children" | "maxX" | "maxY" | "minX" | "minY" | "scaleX" | "scaleY"
 > & {
   /** The loudest level drawn, in dB. @default -10 */

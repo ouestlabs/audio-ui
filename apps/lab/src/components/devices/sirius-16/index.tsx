@@ -1,4 +1,5 @@
-import { Sequencer } from "@audio-ui/react/sequencer";
+import { Sequencer } from "@/components/audio-ui/sequencer/react";
+import { indexes } from "@/lib/indexes";
 import { STEPS } from "./audio/patterns";
 import { Dial, TEMPO } from "./ui/dial";
 import { Lcd } from "./ui/lcd";
@@ -8,7 +9,7 @@ import { StepKnob } from "./ui/step-knob";
 import { useSirius } from "./use-sirius";
 
 const WAVES = ["Saw", "Square"] as const;
-const STEP_INDEXES = Array.from({ length: STEPS }, (_, step) => step);
+const STEP_INDEXES = indexes(STEPS).map((step) => step);
 const ROWS = ["Gate", "Accent", "Slide"] as const;
 
 /** Sirius-16: the panel. The sound is in `audio/`, what the panel keeps in `use-sirius.ts`. */
@@ -128,29 +129,30 @@ export default function Sirius16() {
             source={sirius.position}
             value={sirius.pattern}
           >
-            <Sequencer.Rows>
-              {(index) => (
+            {({ rows, steps }) =>
+              indexes(rows).map((index) => (
                 <Sequencer.Row
                   aria-label={ROWS[index]}
                   className="sirius-step-row"
                   index={index}
+                  key={index}
                 >
                   <span aria-hidden="true" className="sirius-row-label">
                     {ROWS[index]}
                   </span>
-                  <Sequencer.Cells>
-                    {(step) => (
-                      <Sequencer.Cell
-                        aria-label={`${ROWS[index]}, step ${step + 1}`}
-                        className="sirius-step"
-                        data-row={index}
-                        step={step}
-                      />
-                    )}
-                  </Sequencer.Cells>
+                  {indexes(steps).map((step) => (
+                    <Sequencer.Cell
+                      aria-label={`${ROWS[index]}, step ${step + 1}`}
+                      className="sirius-step"
+                      data-row={index}
+                      key={step}
+                      row={index}
+                      step={step}
+                    />
+                  ))}
                 </Sequencer.Row>
-              )}
-            </Sequencer.Rows>
+              ))
+            }
           </Sequencer.Root>
           <ol aria-hidden="true" className="sirius-numbers">
             <li />

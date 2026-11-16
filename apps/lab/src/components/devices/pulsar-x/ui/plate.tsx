@@ -1,5 +1,5 @@
 import { pitchName } from "@audio-ui/core";
-import { XYPad } from "@audio-ui/react/xypad";
+import { XYPad } from "@/components/audio-ui/xypad/react";
 import { inScale, ROOT, type Scale, SPAN } from "../audio/scales";
 
 const NOTES = Array.from({ length: SPAN + 1 }, (_, note) => note);

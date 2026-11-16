@@ -1,5 +1,5 @@
+import { createSource } from "@audio-ui/core";
 import { computePeaks } from "@audio-ui/engine/analysis";
-import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useMasterBus } from "@/hooks/use-master-bus";
 import { useMidiInput } from "@/hooks/use-midi-input";

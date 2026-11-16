@@ -1,4 +1,4 @@
-import { Piano } from "@audio-ui/react/piano";
+import { Piano } from "@/components/audio-ui/piano/react";
 import type { Param } from "./audio/engine";
 import { PRESETS } from "./audio/presets";
 import { Dial } from "./ui/dial";
@@ -107,15 +107,15 @@ export default function Castor4() {
           onNoteOff={castor.noteOff}
           onNoteOn={castor.pressKey}
         >
-          <Piano.Keys>
-            {(pitch: number) => (
+          {({ pitches }) =>
+            pitches.map((pitch) => (
               <Piano.Key
                 className="castor-piano-key"
                 key={pitch}
                 pitch={pitch}
               />
-            )}
-          </Piano.Keys>
+            ))
+          }
         </Piano.Root>
       </div>
     </div>
