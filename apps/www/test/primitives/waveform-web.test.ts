@@ -28,10 +28,7 @@ waveformSuite("custom elements", async (tree: WaveformTree) => {
   const parts: string[] = [];
   if (tree.control) {
     parts.push(
-      `<audio-ui-waveform-control ${attributes({ ariaLabel: tree.control.label })}></audio-ui-waveform-control>`.replace(
-        "aria-label=",
-        "aria-label="
-      )
+      `<audio-ui-waveform-control ${attributes({ ariaLabel: tree.control.label })}></audio-ui-waveform-control>`
     );
   }
   if (tree.playhead) {
