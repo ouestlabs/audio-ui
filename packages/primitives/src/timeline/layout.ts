@@ -9,6 +9,16 @@ export const LENGTH_PROPERTY = "--timeline-length";
 export const unitLength = (zoom: number | null, duration: number) =>
   zoom === null ? `calc(100% / ${duration > 0 ? duration : 1})` : `${zoom}px`;
 
+/** Sets a lane's unit and width from the zoom, on the element itself. */
+export function paintScale(
+  el: HTMLElement,
+  zoom: number | null,
+  duration: number
+) {
+  el.style.setProperty(UNIT_PROPERTY, unitLength(zoom, duration));
+  el.style.minWidth = zoom === null ? "" : `${duration * zoom}px`;
+}
+
 /** Places a part at its `--timeline-offset` along the lane. */
 export const placedAt = (value: number) => ({
   [OFFSET_PROPERTY]: String(value),

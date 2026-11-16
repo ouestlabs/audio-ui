@@ -150,24 +150,24 @@ function ClipNotes({ clip }: { clip: Arranged }) {
   const rows = high - Math.min(...pitches) + 2;
   const { length, start } = clip.value;
   return (
-    <div
+    // One svg in the clip's own units: a zoom resizes it, and its notes are scaled when it is painted, not laid out one by one.
+    <svg
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-5 bottom-1"
+      className="pointer-events-none absolute inset-x-0 top-5 h-[calc(100%-1.5rem)] w-full text-current opacity-70"
       data-slot="timeline-clip-notes"
+      preserveAspectRatio="none"
+      viewBox={`0 0 ${length} ${rows}`}
     >
-      {notes.map((note) => (
-        <span
-          className="absolute min-h-0.5 rounded-[1px] bg-current opacity-70"
-          key={note.id}
-          style={{
-            height: `${100 / rows}%`,
-            left: `${((note.start - start) / length) * 100}%`,
-            top: `${((high - note.pitch) / rows) * 100}%`,
-            width: `${(note.length / length) * 100}%`,
-          }}
-        />
-      ))}
-    </div>
+      <path
+        d={notes
+          .map(
+            (note) =>
+              `M${note.start - start} ${high - note.pitch}h${note.length}v1h${-note.length}z`
+          )
+          .join("")}
+        fill="currentColor"
+      />
+    </svg>
   );
 }
 

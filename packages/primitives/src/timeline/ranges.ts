@@ -194,7 +194,7 @@ export function createRangeApi(
         step,
         value: own.value,
         get zoom() {
-          return context.store.get().view.zoom as number | null;
+          return context.store.get().frame.zoom as number | null;
         },
       };
       return controllerFor(name, options, owner);
