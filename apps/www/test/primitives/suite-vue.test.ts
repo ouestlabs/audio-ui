@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Knob } from "@/registry-audio/bases/base/primitives/knob/vue.ts";
+import { Knob } from "@/registry-audio/bases/base/primitives/knob/vue/index.ts";
 import { knobSuite } from "./knob-suite.ts";
 
 knobSuite("Vue", async ({ label, options, provider, thumbLabel }) => {

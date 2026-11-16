@@ -7,12 +7,12 @@ export const primitives: RegistryItem[] = [
     [
       {
         dependencies: ["@audio-ui/core", "@ui-sdk/react"],
-        files: ["react.tsx"],
+        files: ["react/index.tsx"],
         name: "react",
       },
       {
         dependencies: ["@audio-ui/core", "@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -32,7 +32,7 @@ export const primitives: RegistryItem[] = [
       },
       {
         dependencies: ["@audio-ui/core", "@ui-sdk/web"],
-        files: ["web.ts"],
+        files: ["web/index.ts"],
         name: "web",
       },
     ],
@@ -41,10 +41,14 @@ export const primitives: RegistryItem[] = [
   ...primitiveItems(
     "fader",
     [
-      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react/index.tsx"],
+        name: "react",
+      },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -57,17 +61,21 @@ export const primitives: RegistryItem[] = [
         ],
         name: "svelte",
       },
-      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+      { dependencies: ["@ui-sdk/web"], files: ["web/index.ts"], name: "web" },
     ],
     "A linear fader for one parameter, vertical or horizontal: a press on the track, a drag of the thumb, wheel, keys, graduations, an anchor, and the change's source for an agent."
   ),
   ...primitiveItems(
     "xypad",
     [
-      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react/index.tsx"],
+        name: "react",
+      },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -80,17 +88,21 @@ export const primitives: RegistryItem[] = [
         ],
         name: "svelte",
       },
-      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+      { dependencies: ["@ui-sdk/web"], files: ["web/index.ts"], name: "web" },
     ],
     "A two-axis pad for two parameters at once: a press, a drag, wheel, keys and a native range input per axis, and the change's source for an agent."
   ),
   ...primitiveItems(
     "meter",
     [
-      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react/index.tsx"],
+        name: "react",
+      },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -100,7 +112,7 @@ export const primitives: RegistryItem[] = [
       },
       {
         dependencies: ["@audio-ui/core", "@ui-sdk/web"],
-        files: ["web.ts"],
+        files: ["web/index.ts"],
         name: "web",
       },
     ],
@@ -109,10 +121,14 @@ export const primitives: RegistryItem[] = [
   ...primitiveItems(
     "envelope",
     [
-      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react/index.tsx"],
+        name: "react",
+      },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -128,7 +144,7 @@ export const primitives: RegistryItem[] = [
       },
       {
         dependencies: ["@audio-ui/core", "@ui-sdk/web"],
-        files: ["web.ts"],
+        files: ["web/index.ts"],
         name: "web",
       },
     ],
@@ -137,10 +153,14 @@ export const primitives: RegistryItem[] = [
   ...primitiveItems(
     "pad",
     [
-      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react/index.tsx"],
+        name: "react",
+      },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -148,17 +168,21 @@ export const primitives: RegistryItem[] = [
         files: ["svelte/index.ts", "svelte/parts.ts"],
         name: "svelte",
       },
-      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+      { dependencies: ["@ui-sdk/web"], files: ["web/index.ts"], name: "web" },
     ],
     "A grid of pads to strike, for drums and samples: each sounds while held, by pointer or keyboard, harder where it is pressed, with choke groups, several pointers at once, and the grid as one tab stop."
   ),
   ...primitiveItems(
     "piano",
     [
-      { dependencies: ["@ui-sdk/react"], files: ["react.tsx"], name: "react" },
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react/index.tsx"],
+        name: "react",
+      },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -168,7 +192,7 @@ export const primitives: RegistryItem[] = [
       },
       {
         dependencies: ["@audio-ui/core", "@ui-sdk/web"],
-        files: ["web.ts"],
+        files: ["web/index.ts"],
         name: "web",
       },
     ],
@@ -179,12 +203,12 @@ export const primitives: RegistryItem[] = [
     [
       {
         dependencies: ["@ui-sdk/react"],
-        files: ["react.tsx"],
+        files: ["react/index.tsx"],
         name: "react",
       },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -197,7 +221,7 @@ export const primitives: RegistryItem[] = [
         ],
         name: "svelte",
       },
-      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+      { dependencies: ["@ui-sdk/web"], files: ["web/index.ts"], name: "web" },
     ],
     "A step sequencer for a drum machine: a grid of steps to switch on and off, one row per sound, painted by dragging, with a velocity bar under each step and the step being played marked from a live clock."
   ),
@@ -206,12 +230,12 @@ export const primitives: RegistryItem[] = [
     [
       {
         dependencies: ["@ui-sdk/react"],
-        files: ["react.tsx"],
+        files: ["react/index.tsx"],
         name: "react",
       },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -230,7 +254,7 @@ export const primitives: RegistryItem[] = [
         ],
         name: "svelte",
       },
-      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+      { dependencies: ["@ui-sdk/web"], files: ["web/index.ts"], name: "web" },
     ],
     "A plot of values over two axes: curves, live traces, lines, bands, a grid with its labels, dots and draggable handles with a native input each, and a cursor that reads the value under the pointer."
   ),
@@ -239,12 +263,12 @@ export const primitives: RegistryItem[] = [
     [
       {
         dependencies: ["@ui-sdk/react"],
-        files: ["react.tsx"],
+        files: ["react/index.tsx"],
         name: "react",
       },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -258,7 +282,7 @@ export const primitives: RegistryItem[] = [
         ],
         name: "svelte",
       },
-      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+      { dependencies: ["@ui-sdk/web"], files: ["web/index.ts"], name: "web" },
     ],
     "A waveform of audio: bars or a canvas drawn from peaks or a live signal, a seekable control with a native input, a playhead and thumb that follow a live position, a hover readout, markers, and named regions with draggable edges."
   ),
@@ -267,12 +291,12 @@ export const primitives: RegistryItem[] = [
     [
       {
         dependencies: ["@ui-sdk/react"],
-        files: ["react.tsx"],
+        files: ["react/index.tsx"],
         name: "react",
       },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -296,7 +320,7 @@ export const primitives: RegistryItem[] = [
       },
       {
         dependencies: ["@audio-ui/core", "@ui-sdk/web"],
-        files: ["web.ts"],
+        files: ["web/index.ts"],
         name: "web",
       },
     ],
@@ -307,12 +331,12 @@ export const primitives: RegistryItem[] = [
     [
       {
         dependencies: ["@ui-sdk/react"],
-        files: ["react.tsx"],
+        files: ["react/index.tsx"],
         name: "react",
       },
       {
         dependencies: ["@ui-sdk/vue", "vue"],
-        files: ["vue.ts"],
+        files: ["vue/index.ts"],
         name: "vue",
       },
       {
@@ -329,7 +353,7 @@ export const primitives: RegistryItem[] = [
         ],
         name: "svelte",
       },
-      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+      { dependencies: ["@ui-sdk/web"], files: ["web/index.ts"], name: "web" },
     ],
     "A piano roll for editing MIDI notes: a grid you draw, move, resize and select notes on, with rows by pitch and scale, velocity or chance bars, a marquee, and a native input on each bar for the keyboard. It sits on a timeline's duration, grid, zoom and playback position, which you give it."
   ),

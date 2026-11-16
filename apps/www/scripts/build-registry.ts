@@ -576,17 +576,28 @@ const explicitRewrites = [...itemsByBase.values()]
     if (!file.target) {
       return [];
     }
-    const source = file.path
-      .replace(SOURCE_EXTENSION, "")
-      .replace(REGEX_SPECIALS, "\\$&");
-    // A Svelte file lands under `$lib/components` (shadcn-svelte), and its folder's index is the folder.
+    // A Svelte file lands under `$lib/components` (shadcn-svelte).
     const svelte = file.path.includes("/svelte/");
     const target = file.target.replace(SOURCE_EXTENSION, "");
     const installed = svelte
       ? `$lib/components/${target.replace(INDEX_FILE, "")}`
       : `@/${target}`;
-    return SOURCE_ROOTS.map(
-      (root) => [new RegExp(`${root}${source}(?=")`, "g"), installed] as const
+    const source = file.path.replace(SOURCE_EXTENSION, "");
+    // A folder's index is imported as the folder.
+    const sources = INDEX_FILE.test(source)
+      ? [source, source.replace(INDEX_FILE, "")]
+      : [source];
+    return sources.flatMap((from) =>
+      SOURCE_ROOTS.map(
+        (root) =>
+          [
+            new RegExp(
+              `${root}${from.replace(REGEX_SPECIALS, "\\$&")}(?=")`,
+              "g"
+            ),
+            installed,
+          ] as const
+      )
     );
   });
 // Every item name, once, in the order the registry lists them.

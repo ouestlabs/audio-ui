@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Piano } from "@/registry-audio/bases/base/primitives/piano/vue.ts";
+import { Piano } from "@/registry-audio/bases/base/primitives/piano/vue/index.ts";
 import { pianoSuite } from "./piano-suite.ts";
 
 pianoSuite("Vue", async ({ labels, options }) => {

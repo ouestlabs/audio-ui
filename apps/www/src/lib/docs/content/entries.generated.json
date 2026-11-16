@@ -1270,6 +1270,9 @@
       "pad-vue-demo",
       "pad-web-demo",
       "sequencer",
+      "sequencer-svelte-demo",
+      "sequencer-vue-demo",
+      "sequencer-web-demo",
       "use-piano-roll-playback"
     ]
   },
@@ -1820,6 +1823,29 @@
       "clip-panel",
       "process-menu",
       "use-bake"
+    ]
+  },
+  {
+    "dependencies": [],
+    "description": "A clock that counts the steps of a pattern at a tempo and tells a Sequencer which one is playing, for a preview in any framework",
+    "exports": [
+      {
+        "kind": "function",
+        "name": "createStepPlayer",
+        "summary": "A clock that counts steps at a tempo, for a pattern played in a preview."
+      }
+    ],
+    "files": [
+      "lib/step-player.ts"
+    ],
+    "from": "@/lib/step-player",
+    "kind": "lib",
+    "name": "step-player",
+    "registryDependencies": [],
+    "usedBy": [
+      "sequencer-svelte-demo",
+      "sequencer-vue-demo",
+      "sequencer-web-demo"
     ]
   },
   {
@@ -3304,6 +3330,9 @@
       "pad-vue-demo",
       "pad-web-demo",
       "sequencer",
+      "sequencer-svelte-demo",
+      "sequencer-vue-demo",
+      "sequencer-web-demo",
       "spectrum-analyzer-demo",
       "use-device-loop",
       "use-master-bus",

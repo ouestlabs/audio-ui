@@ -1,4 +1,4 @@
-import "@/registry-audio/bases/base/primitives/envelope/web.ts";
+import "@/registry-audio/bases/base/primitives/envelope/web/index.ts";
 import { type EnvelopeTree, envelopeSuite } from "./envelope-suite.ts";
 
 const kebab = (name: string) =>

@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Meter } from "@/registry-audio/bases/base/primitives/meter/vue.ts";
+import { Meter } from "@/registry-audio/bases/base/primitives/meter/vue/index.ts";
 import { decibels, meterSuite } from "./meter-suite.ts";
 
 meterSuite("Vue", async ({ labels, marks, options }) => {

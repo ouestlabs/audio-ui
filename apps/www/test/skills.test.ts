@@ -376,7 +376,7 @@ describe("skills/design styles", () => {
       source.replace(
         INSTALLED_PRIMITIVE,
         (_, name) =>
-          `"${ROOT}/apps/www/src/registry-audio/bases/base/primitives/${name}/react.tsx"`
+          `"${ROOT}/apps/www/src/registry-audio/bases/base/primitives/${name}/react/index.tsx"`
       )
     );
     const panel = await import(copy).finally(() => Bun.file(copy).delete());

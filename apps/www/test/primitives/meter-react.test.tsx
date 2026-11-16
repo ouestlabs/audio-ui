@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Meter } from "@/registry-audio/bases/base/primitives/meter/react.tsx";
+import { Meter } from "@/registry-audio/bases/base/primitives/meter/react/index.tsx";
 import { range } from "./helpers.ts";
 import { decibels, meterSuite } from "./meter-suite.ts";
 

@@ -1,5 +1,5 @@
 import { pitchName } from "@audio-ui/core";
-import "@/registry-audio/bases/base/primitives/piano/web.ts";
+import "@/registry-audio/bases/base/primitives/piano/web/index.ts";
 import { type PianoTree, pianoSuite } from "./piano-suite.ts";
 
 const kebab = (name: string) =>

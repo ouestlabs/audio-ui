@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Timeline } from "@/registry-audio/bases/base/primitives/timeline/react.tsx";
+import { Timeline } from "@/registry-audio/bases/base/primitives/timeline/react/index.tsx";
 import { timelineSuite } from "./timeline-suite.ts";
 
 timelineSuite("React", async (tree) => {

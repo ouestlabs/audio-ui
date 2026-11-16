@@ -630,6 +630,24 @@
     "title": "Sequencer demo"
   },
   {
+    "categories": ["sequencer"],
+    "description": "sequencer example, in the Vue adapter",
+    "name": "sequencer-vue-demo",
+    "title": "Sequencer vue demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "description": "sequencer example, in the Svelte adapter",
+    "name": "sequencer-svelte-demo",
+    "title": "Sequencer svelte demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "description": "sequencer example, in the web adapter",
+    "name": "sequencer-web-demo",
+    "title": "Sequencer web demo"
+  },
+  {
     "categories": ["scrubber"],
     "description": "A bar to seek on, with play or pause, the position and the length: a clock stands in for a player, and the bar and the time follow it",
     "name": "scrubber-demo",

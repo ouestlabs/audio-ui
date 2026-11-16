@@ -195,6 +195,8 @@ export interface PrimitiveFramework {
  * from `@audio-ui/primitives` over the UI SDK kernel, so the user owns only
  * the thin adapter.
  */
+const ADAPTER_INDEX = /^(react|vue|web)\/index(\.\w+)$/;
+
 export function primitiveItems(
   name: string,
   frameworks: PrimitiveFramework[],
@@ -222,7 +224,8 @@ export function primitiveItems(
         fileOf(
           `primitives/${name}/${file}`,
           type,
-          `${root}audio-ui/${name}/${file}`
+          // Installed as `audio-ui/<name>/react.tsx`: the folder of an adapter in the registry is its source's alone.
+          `${root}audio-ui/${name}/${file.replace(ADAPTER_INDEX, "$1$2")}`
         )
       ),
       name: `${name}-${framework.name}`,

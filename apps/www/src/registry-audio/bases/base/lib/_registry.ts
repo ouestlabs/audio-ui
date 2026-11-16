@@ -332,6 +332,11 @@ const items: RegistryItem[] = [
     description:
       "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from, as a live source for any framework",
   }),
+  libItem("step-player", {
+    categories: ["lib", "audio", "sequencer"],
+    description:
+      "A clock that counts the steps of a pattern at a tempo and tells a Sequencer which one is playing, for a preview in any framework",
+  }),
   libItem("drum-synthesis", {
     categories: ["lib", "audio", "synth", "sequencer"],
     description:

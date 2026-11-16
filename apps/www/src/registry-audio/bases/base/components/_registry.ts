@@ -2063,6 +2063,60 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["sequencer"],
+    description: "sequencer example, in the Vue adapter",
+    files: [
+      {
+        path: "components/sequencer/sequencer-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-vue-demo",
+    registryDependencies: [
+      "@audio-ui/sequencer-vue",
+      "@audio-ui/web-audio",
+      "@audio-ui/drum-synthesis",
+      "@audio-ui/step-player",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["sequencer"],
+    description: "sequencer example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/sequencer/sequencer-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-svelte-demo",
+    registryDependencies: [
+      "@audio-ui/sequencer-svelte",
+      "@audio-ui/web-audio",
+      "@audio-ui/drum-synthesis",
+      "@audio-ui/step-player",
+    ],
+    type: "registry:example",
+  },
+  {
+    categories: ["sequencer"],
+    description: "sequencer example, in the web adapter",
+    files: [
+      {
+        path: "components/sequencer/sequencer-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "sequencer-web-demo",
+    registryDependencies: [
+      "@audio-ui/sequencer-web",
+      "@audio-ui/web-audio",
+      "@audio-ui/drum-synthesis",
+      "@audio-ui/step-player",
+    ],
+    type: "registry:example",
+  },
+  {
     categories: ["scrubber"],
     dependencies: ["@audio-ui/core"],
     description:

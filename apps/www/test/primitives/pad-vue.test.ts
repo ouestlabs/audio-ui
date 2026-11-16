@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Pad } from "@/registry-audio/bases/base/primitives/pad/vue.ts";
+import { Pad } from "@/registry-audio/bases/base/primitives/pad/vue/index.ts";
 import { padSuite } from "./pad-suite.ts";
 
 padSuite("Vue", async ({ options, pads }) => {

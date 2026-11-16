@@ -139,7 +139,7 @@
       "name": "synth"
     },
     {
-      "count": 1,
+      "count": 4,
       "description": "Step sequencer components: grids of steps to draw a pattern on, that you can hear.",
       "label": "Sequencer",
       "name": "sequencer"
@@ -181,5 +181,5 @@
       "name": "xypad"
     }
   ],
-  "totalComponents": 109
+  "totalComponents": 112
 }

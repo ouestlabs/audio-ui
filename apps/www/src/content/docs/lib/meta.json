@@ -27,6 +27,7 @@
     "envelope-ramp",
     "drum-synthesis",
     "simulated-levels",
+    "step-player",
     "---Sound in and out---",
     "audio-export",
     "---Editing---",
