@@ -1,0 +1,270 @@
+---
+title: Timeline on the UI SDK
+description: "The arrangement timeline written once and rendered in React, Vue, Svelte and custom elements: install each adapter with its framework's CLI, the position and zoom, tracks, marks, ranges and clips that move, trim and fade, and the differences from the React one."
+---
+
+The timeline's behavior is one description, `timeline` in `@audio-ui/primitives`, over the controllers of `@audio-ui/core/timeline`. It is the surface of an arrangement: a playback position and a zoom in units of your own (seconds, beats, steps), lanes the parts are placed on, tracks, marks, ranges such as a loop, and clips that move, trim and fade. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is not published yet: this page describes what the next release installs. The [knob](/docs/knob-ui-sdk), the [fader](/docs/fader-ui-sdk), the [XY pad](/docs/xypad-ui-sdk), the [meter](/docs/meter-ui-sdk), the [envelope](/docs/envelope-ui-sdk), the [pad grid](/docs/pad-ui-sdk), the [piano](/docs/piano-ui-sdk), the [sequencer](/docs/sequencer-ui-sdk), the [plot](/docs/plot-ui-sdk) and the [waveform](/docs/waveform-ui-sdk) are built the same way.
+
+## Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/timeline-react
+```
+
+One file, `components/audio-ui/timeline/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-vue.json
+```
+
+One file, `components/audio-ui/timeline/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-svelte.json
+```
+
+Ten files in `components/audio-ui/timeline/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/knob-ui-sdk#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-web.json
+```
+
+One file, `components/audio-ui/timeline/web.ts`. Import it once, and it registers the `audio-ui-timeline` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+## Usage
+
+A Root owns the position, the zoom and the grid. Everything else is a part you place in it:
+
+- **Viewport**: the scrolling window. Cmd/Ctrl with the wheel, or a pinch, zooms around the pointer; a clip dragged near its edges scrolls it.
+- **Ruler**: the lane that moves the position. A press jumps to the pointer, a drag scrubs, Shift scrubs four times finer. It holds the native `<input type="range">` that takes the keys and carries the name.
+- **Lane**: a strip the parts are placed on. Its `--timeline-unit` CSS variable is the width of one unit. With `seekable`, a press on its bare area moves the position.
+- **Track**, **TrackHeader**, **TrackResizeHandle**: a row with a header that stays at the left edge, and a handle that asks for a new height.
+- **Playhead**: follows the position through its `--timeline-offset` variable, with no render.
+- **Mark**: a point at a `value`. With `movable`, a drag or the arrows move it.
+- **Range**, **RangeHandle**: a stretch laid over a lane, such as a loop.
+- **Clip**, **ClipHeader**, **ClipHandle**, **ClipFade**, **ClipFadeHandle**: a stretch of a source that moves, trims and fades.
+- **Navigator**, **NavigatorWindow**, **NavigatorHandle**: a bar with the stretch the viewport shows, which a drag scrolls and zooms.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import type { ClipValue } from "@audio-ui/core/timeline";
+import { Timeline } from "@/components/audio-ui/timeline/react";
+
+export function Arrangement({ clip, onClip }: { clip: ClipValue; onClip: (clip: ClipValue) => void }) {
+  return (
+    <Timeline.Root
+      duration={64}
+      onClipChange={(value) => onClip(value)}
+      snapStep={1}
+    >
+      <Timeline.Viewport>
+        <Timeline.Ruler aria-label="Position" className="h-6" />
+        <Timeline.Lane className="h-16">
+          <Timeline.Playhead className="inset-y-0 w-px bg-primary" />
+          <Timeline.Clip aria-label="Take 1" className="inset-y-1 rounded bg-card" clip="take-1" value={clip}>
+            <Timeline.ClipHeader className="h-4" clip="take-1" />
+            <Timeline.ClipHandle aria-label="Trim start" className="absolute inset-y-0 left-0 w-1" clip="take-1" edge="start" />
+            <Timeline.ClipHandle aria-label="Trim end" className="absolute inset-y-0 right-0 w-1" clip="take-1" edge="end" />
+          </Timeline.Clip>
+        </Timeline.Lane>
+      </Timeline.Viewport>
+    </Timeline.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { Timeline } from "@/components/audio-ui/timeline/vue";
+
+defineProps<{ clip: object }>();
+const emit = defineEmits<{ clip: [clip: object] }>();
+</script>
+
+<template>
+  <Timeline.Root :duration="64" :snap-step="1" @clip-change="(next: object) => emit('clip', next)">
+    <Timeline.Viewport>
+      <Timeline.Ruler aria-label="Position" class="h-6" />
+      <Timeline.Lane class="h-16">
+        <Timeline.Playhead class="inset-y-0 w-px bg-primary" />
+        <Timeline.Clip aria-label="Take 1" class="inset-y-1 rounded bg-card" clip="take-1" :value="clip">
+          <Timeline.ClipHeader class="h-4" clip="take-1" />
+          <Timeline.ClipHandle aria-label="Trim start" class="absolute inset-y-0 left-0 w-1" clip="take-1" edge="start" />
+          <Timeline.ClipHandle aria-label="Trim end" class="absolute inset-y-0 right-0 w-1" clip="take-1" edge="end" />
+        </Timeline.Clip>
+      </Timeline.Lane>
+    </Timeline.Viewport>
+  </Timeline.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { Timeline } from "$lib/components/audio-ui/timeline/svelte";
+
+  let { clip, onClip }: { clip: object; onClip: (clip: object) => void } = $props();
+</script>
+
+<Timeline.Root duration={64} onClipChange={(value) => onClip(value)} snapStep={1}>
+  <Timeline.Viewport>
+    <Timeline.Ruler aria-label="Position" class="h-6" />
+    <Timeline.Lane class="h-16">
+      <Timeline.Playhead class="inset-y-0 w-px bg-primary" />
+      <Timeline.Clip aria-label="Take 1" class="inset-y-1 rounded bg-card" clip="take-1" value={clip}>
+        <Timeline.ClipHeader class="h-4" clip="take-1" />
+        <Timeline.ClipHandle aria-label="Trim start" class="absolute inset-y-0 left-0 w-1" clip="take-1" edge="start" />
+        <Timeline.ClipHandle aria-label="Trim end" class="absolute inset-y-0 right-0 w-1" clip="take-1" edge="end" />
+      </Timeline.Clip>
+    </Timeline.Lane>
+  </Timeline.Viewport>
+</Timeline.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-timeline duration="64" snap-step="1">
+  <audio-ui-timeline-viewport>
+    <audio-ui-timeline-ruler aria-label="Position"></audio-ui-timeline-ruler>
+    <audio-ui-timeline-lane>
+      <audio-ui-timeline-playhead></audio-ui-timeline-playhead>
+      <audio-ui-timeline-clip
+        clip="take-1"
+        aria-label="Take 1"
+        default-value='{"start":8,"length":16,"offset":0,"fadeIn":0,"fadeOut":0}'
+      >
+        <audio-ui-timeline-clip-header clip="take-1"></audio-ui-timeline-clip-header>
+        <audio-ui-timeline-clip-trim-start clip="take-1" aria-label="Trim start"></audio-ui-timeline-clip-trim-start>
+        <audio-ui-timeline-clip-trim-end clip="take-1" aria-label="Trim end"></audio-ui-timeline-clip-trim-end>
+      </audio-ui-timeline-clip>
+    </audio-ui-timeline-lane>
+  </audio-ui-timeline-viewport>
+</audio-ui-timeline>
+
+<script type="module">
+  import "./audio-ui/timeline/web.ts";
+
+  document.querySelector("audio-ui-timeline").addEventListener("clipchange", (event) => {
+    console.log(event.detail.clip, event.detail.value, event.detail.target);
+  });
+</script>
+```
+
+On a custom element, a live `source` is a property, and so is a Grid's `snapPoints` as a JSON attribute. A clip, a range, a track and a mark are named by an attribute (`clip`, `range`, `track`, `mark`) that the parts that belong to it repeat. The inputs, and a fade's curve, are made for you. Each part binds a microtask after it connects: read the element's state after that.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+## Named parts
+
+A clip, a range, a track and a mark each hold a controller of their own, and a part that belongs to one carries its name: `clip="take-1"` on the Clip, its header, its handles and its fades. What they report goes through the Root, with the name in the details. A Mark takes its value for a name unless it has one, which is enough for a mark that does not move.
+
+## A live position
+
+Give the Root a `source`, a live position in the shape of an external store: `getSnapshot()` returns it and `subscribe(listener)` is called on each tick. The Playhead, the Ruler's input and a seek follow it straight in the DOM, with no render. `createSource` from `@audio-ui/core` makes one, and `useTransportClock` from the registry gives you one on the audio clock.
+
+## Interaction
+
+- **Ruler**: a press seeks, a drag scrubs, and the end commits. Shift with a drag selects a stretch instead when the Root has `onSelectionChange`, to loop it.
+- **Clip**: a press on its body selects it and moves the position there. Dragging its header moves it on the grid unless Cmd/Ctrl is held, over other lanes too, and scrolls the viewport near its edges. A handle trims an edge, which moves where in the source the clip begins instead of stretching it; a fade handle sets a fade, and a double click or Enter steps its shape.
+- **Range**: its body moves it, its handles resize it, and with `drawable` a drag across the bare lane draws a new one.
+- **Track**: its resize handle asks for a height by a drag or the arrows (Down is taller); a double click gives the height up.
+- **Navigator**: dragging the window scrolls, dragging an edge zooms and holds the other edge still, and a double click shows everything.
+- The arrows move by `step`, Shift or Page Up and Page Down by `largeStep`, on every input.
+
+A disabled timeline takes none of these.
+
+## Options
+
+Set on the Root, as props (an attribute in kebab case on the custom element).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `position`, `defaultPosition` | `number` | `0` | The playback position, controlled or starting. |
+| `source` | `{ getSnapshot, subscribe }` | | A live position, followed with no render. |
+| `zoom`, `defaultZoom` | `number` | fits the width | px per unit. Unset, the timeline fits its width until zoomed. |
+| `minZoom`, `maxZoom` | `number` | `0`, `Infinity` | The zoom's limits. |
+| `duration` | `number` | `1` | The length of the timeline, in your units. |
+| `snapStep`, `snapOffset` | `number` | `0` | The grid every gesture lands on unless Cmd/Ctrl is held. 0 is no grid. |
+| `snapPoints` | `number[]` | | Places that pull a press, or a dragged clip or range, onto them from a few px away. |
+| `step`, `largeStep` | `number` | the grid step, ten steps | The keys' steps. |
+| `disabled` | `boolean` | `false` | Takes no gesture. |
+| `onPositionChange`, `onPositionCommitted` | `(value, details) => void` | | A seek, and its end. |
+| `onZoomChange` | `(zoom, details) => void` | | The zoom changed, already clamped. |
+| `onSelectionChange`, `onSelectionCommitted` | `(range, details) => void` | | A Shift drag on the ruler, or on a seekable lane. |
+| `onClipChange`, `onClipCommitted` | `(clip, details) => void` | | A clip moved, trimmed or faded. `details.clip` names it and `details.target` says what moved. |
+| `onClipSelectedChange`, `onClipRemove`, `onClipDragOffsetChange` | | | A press selects a clip, Delete asks to remove it, a move drags it up or down. |
+| `onRangeChange`, `onRangeCommitted` | `(range, details) => void` | | A range moved, resized or drawn, with `details.range` and `details.edge`. |
+| `onTrackHeightChange`, `onTrackHeightCommitted` | `(height, details) => void` | | A track's resize handle asks for a height, `undefined` to give it up. |
+| `onMarkChange`, `onMarkCommitted` | `(value, details) => void` | | A movable mark moved. |
+
+A Clip takes `clip`, `value` or `defaultValue` (`{ start, length, offset, fadeIn, fadeOut }`, with the fade shapes), `selected`, `movable`, `minLength` and `sourceLength`. A Range takes `range`, `value`, `drawable`, `movable`, `minLength` and `minDrawnWidth`. A Track takes `track`, `height`, `minHeight`, `maxHeight`, `step`, `largeStep` and `selected`. A Lane takes `seekable`.
+
+## What a change reports
+
+`details` carries:
+
+- `reason`: `"press"`, `"drag"`, `"keyboard"`, `"input-change"`, `"wheel"`, `"double-click"` or `"draw"`.
+- `source`: `"mouse"`, `"touch"`, `"pen"`, `"keyboard"`, `"programmatic"` or `"agent"`.
+- `event` and `cancel()`: the DOM event behind it, and the refusal. A controlled value keeps what you give it.
+- The name of the clip, range, track or mark, and for a clip or a range what moved.
+
+On the custom element, the position is the `input` and `change` events, and the rest are `zoomchange`, `selectionchange`, `clipchange`, `clipcommit`, `clipselect`, `clipremove`, `rangechange`, `rangecommit`, `trackheightchange`, `trackheightcommit`, `markchange` and `markcommit`, each with a `detail` of the value and its reasons. `event.preventDefault()` refuses a change.
+
+## States to style from
+
+- `data-scrubbing` on the Root while a pointer moves the position, `data-fitted` while no zoom is set, `data-disabled` on every part.
+- `data-selected`, `data-dragging` and `data-fading` (`in` or `out`) on a clip and its parts, `data-edge` on a handle, `data-clip`, `data-range`, `data-track` for the name.
+- A clip sets `--clip-offset`, `--clip-source-length`, `--clip-fade-in`, `--clip-fade-out`, their `-max` and `--clip-unit` for what you draw inside it, such as a waveform.

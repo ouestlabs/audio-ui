@@ -1,7 +1,3 @@
-import {
-  PianoRoll as PianoRollPrimitive,
-  Timeline as TimelinePrimitive,
-} from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import {
   type ComponentProps,
@@ -15,6 +11,10 @@ import {
   useState,
 } from "react";
 import { cn } from "@/lib/utils";
+import { useTimelineValues } from "@/components/audio-ui/timeline";
+import { Piano as PianoPrimitive } from "@/components/audio-ui/piano/react";
+import { PianoRoll as PianoRollPrimitive } from "@/components/audio-ui/piano-roll/react";
+import { Timeline as TimelinePrimitive } from "@/components/audio-ui/timeline/react";
 
 const pianoRollVariants = cva("", {
   defaultVariants: {
@@ -90,7 +90,10 @@ function tallestLane(element: HTMLElement): number {
   );
 }
 
-type PianoRollProps = Omit<PianoRollPrimitive.Root.Props, "className"> & {
+type PianoRollProps = Omit<
+  ComponentProps<typeof PianoRollPrimitive.Root>,
+  "className"
+> & {
   className?: string;
 };
 
@@ -99,7 +102,9 @@ type PianoRollProps = Omit<PianoRollPrimitive.Root.Props, "className"> & {
  * the left, the timeline's beside it. Give it a height; its viewport takes
  * what is left. Sits inside a `Timeline`.
  */
-function PianoRoll({ className, ...props }: PianoRollProps) {
+function PianoRoll({ className, style, ...props }: PianoRollProps) {
+  // The duration, the grid, the zoom and the position of the timeline it sits in, which it was given both.
+  const timeline = useTimelineValues();
   return (
     <PianoRollPrimitive.Root
       className={cn(
@@ -107,7 +112,10 @@ function PianoRoll({ className, ...props }: PianoRollProps) {
         className
       )}
       data-slot="piano-roll"
+      {...timeline}
       {...props}
+      // A copy: the part merges its own style into the one it is given, which a frozen object does not take.
+      style={style && { ...style }}
     />
   );
 }
@@ -117,7 +125,9 @@ function PianoRollViewport({
   children,
   className,
   ...props
-}: TimelinePrimitive.Viewport.Props) {
+}: Omit<ComponentProps<typeof TimelinePrimitive.Viewport>, "children"> & {
+  children?: ReactNode;
+}) {
   return (
     <TimelinePrimitive.Viewport
       className={cn(
@@ -169,7 +179,10 @@ function PianoRollStrip({
   );
 }
 
-type PianoRollKeysProps = Omit<PianoRollPrimitive.Keys.Props, "className"> &
+type PianoRollKeysProps = Omit<
+  ComponentProps<typeof PianoRollPrimitive.Keys>,
+  "children" | "className"
+> &
   VariantProps<typeof pianoRollVariants> & {
     className?: string;
     /** A name for some keys, by pitch, written on them in place of the note's: a drum rack's pads, say. */
@@ -194,36 +207,49 @@ function PianoRollKeys({
       data-slot="piano-roll-keys"
       {...props}
     >
-      <PianoRollPrimitive.Rows>
-        {(pitch) => (
-          <PianoRollPrimitive.Key
-            className="border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none data-[color=black]:bg-foreground/85 data-[color=black]:text-background data-[color=black]:not-data-[active]:hover:bg-foreground/70 data-[active]:data-[color]:bg-primary data-[active]:data-[color]:text-primary-foreground inset-x-0 flex cursor-pointer items-center justify-end pe-1.5 text-[10px] outline-none"
-            key={pitch}
-            pitch={pitch}
-          >
-            {/* A key with a name of its own, such as a drum rack's pad, says it; else only C, where octaves are counted from, and folded, every row names itself. */}
-            {names?.[pitch] === undefined ? (
-              <PianoRollPrimitive.KeyLabel
-                className={cn(
-                  pitch % 12 !== 0 &&
-                    "hidden group-data-folded/piano-roll:inline"
+      {({ active, keyOff, keyOn, pitches }) => (
+        <PianoPrimitive.Root
+          activeNotes={active}
+          layout="even"
+          onNoteOff={keyOff}
+          onNoteOn={keyOn}
+          orientation="vertical"
+          pitches={pitches}
+        >
+          {({ pitches: rows }) =>
+            rows.map((pitch) => (
+              <PianoPrimitive.Key
+                className="border-border/60 border-b bg-background text-muted-foreground transition-colors duration-100 ease-out last:border-b-0 hover:bg-muted focus-visible:z-10 focus-visible:ring-1 focus-visible:ring-ring focus-visible:ring-inset motion-reduce:transition-none data-[color=black]:bg-foreground/85 data-[color=black]:text-background data-[color=black]:not-data-[active]:hover:bg-foreground/70 data-[active]:data-[color]:bg-primary data-[active]:data-[color]:text-primary-foreground inset-x-0 flex cursor-pointer items-center justify-end pe-1.5 text-[10px] outline-none"
+                key={pitch}
+                pitch={pitch}
+              >
+                {/* A key with a name of its own, such as a drum rack's pad, says it; else only C, where octaves are counted from, and folded, every row names itself. */}
+                {names?.[pitch] === undefined ? (
+                  <PianoPrimitive.Label
+                    className={cn(
+                      pitch % 12 !== 0 &&
+                        "hidden group-data-folded/piano-roll:inline"
+                    )}
+                    pitch={pitch}
+                  />
+                ) : (
+                  <span className="truncate">{names[pitch]}</span>
                 )}
-              />
-            ) : (
-              <span className="truncate">{names[pitch]}</span>
-            )}
-          </PianoRollPrimitive.Key>
-        )}
-      </PianoRollPrimitive.Rows>
+              </PianoPrimitive.Key>
+            ))
+          }
+        </PianoPrimitive.Root>
+      )}
     </PianoRollPrimitive.Keys>
   );
 }
 
 type PianoRollGridProps = Omit<
-  PianoRollPrimitive.Grid.Props,
-  "className" | "style"
+  ComponentProps<typeof PianoRollPrimitive.Grid>,
+  "children" | "className" | "style"
 > &
   VariantProps<typeof pianoRollVariants> & {
+    children?: ReactNode;
     /** A firmer line every `accentStep` units, such as each beat. */
     accentStep?: number;
     className?: string;
@@ -298,10 +324,12 @@ function PianoRollGrid({
             <PianoRollPrimitive.NoteHandle
               className="transition-colors hover:bg-foreground/30 motion-reduce:transition-none absolute inset-y-0 w-[min(0.375rem,25%)] cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0"
               edge="start"
+              note={note}
             />
             <PianoRollPrimitive.NoteHandle
               className="transition-colors hover:bg-foreground/30 motion-reduce:transition-none absolute inset-y-0 w-[min(0.375rem,25%)] cursor-ew-resize data-[edge=end]:right-0 data-[edge=start]:left-0"
               edge="end"
+              note={note}
             />
           </PianoRollPrimitive.Note>
         )}
@@ -313,9 +341,10 @@ function PianoRollGrid({
 }
 
 type PianoRollVelocityProps = Omit<
-  PianoRollPrimitive.VelocityLane.Props,
-  "className" | "style"
+  ComponentProps<typeof PianoRollPrimitive.VelocityLane>,
+  "children" | "className" | "style"
 > & {
+  children?: ReactNode;
   /** A firmer line every `accentStep` units, as on the grid above. */
   accentStep?: number;
   className?: string;
@@ -411,6 +440,7 @@ function PianoRollVelocity({
           <PianoRollPrimitive.Velocity
             className="rounded-t-[min(var(--radius-sm),2px)] bg-primary opacity-60 transition-opacity duration-150 ease-out hover:opacity-100 has-focus-visible:opacity-100 has-focus-visible:ring-2 has-focus-visible:ring-ring/50 data-[selected]:opacity-100 group-data-has-selection/piano-roll:not-data-selected:opacity-25 data-muted:bg-muted-foreground motion-reduce:transition-none w-1.5 cursor-ns-resize after:absolute after:-inset-x-1 after:inset-y-0 group-data-[mode=draw]/piano-roll:cursor-crosshair"
             key={note.id}
+            level={level}
             note={note}
           >
             {/* How far the velocity may stray each time it plays, above the bar or into it. */}
@@ -433,7 +463,10 @@ function PianoRollVelocity({
 function PianoRollStretchHandle({
   className,
   ...props
-}: Omit<PianoRollPrimitive.StretchHandle.Props, "className"> & {
+}: Omit<
+  ComponentProps<typeof PianoRollPrimitive.StretchHandle>,
+  "className"
+> & {
   className?: string;
 }) {
   return (
@@ -452,7 +485,10 @@ function PianoRollStretchHandle({
 function PianoRollSelectionSpan({
   className,
   ...props
-}: Omit<PianoRollPrimitive.SelectionSpan.Props, "className"> & {
+}: Omit<
+  ComponentProps<typeof PianoRollPrimitive.SelectionSpan>,
+  "className"
+> & {
   className?: string;
 }) {
   return (
@@ -470,7 +506,7 @@ function PianoRollVelocityScale({
   level = "velocity",
   ...props
 }: ComponentProps<"div"> & {
-  level?: PianoRollPrimitive.VelocityLane.Props["level"];
+  level?: ComponentProps<typeof PianoRollPrimitive.VelocityLane>["level"];
 }) {
   const ref = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);

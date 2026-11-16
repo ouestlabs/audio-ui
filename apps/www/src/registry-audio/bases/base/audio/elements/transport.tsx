@@ -1,3 +1,4 @@
+import type { Source } from "@audio-ui/core";
 import {
   barsBeatsWith,
   gridLabel,
@@ -17,7 +18,6 @@ import {
   RecordIcon,
   StopIcon,
 } from "@audio-ui/icons/react";
-import type { Source } from "@audio-ui/react";
 import { Toolbar } from "@base-ui/react/toolbar";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";

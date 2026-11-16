@@ -18,17 +18,24 @@ Shows what a sound is made of: the fundamental and harmonics of a note, the low 
 The analyzer is a Plot: a log frequency axis, a filled trace for the spectrum, and a second trace for the peaks.
 
 ```tsx
-import { Plot } from "@audio-ui/react";
+import {
+  Plot,
+  PlotCursor,
+  PlotGraph,
+  PlotGrid,
+  PlotTrace,
+  PlotTraceArea,
+} from "@/components/audio-ui/plot";
 
-<Plot.Root scaleX="log">
-  <Plot.Grid />
-  <Plot.Graph>
-    <Plot.Trace /> {/* the spectrum, filled */}
-    <Plot.Trace /> {/* the spectrum's line */}
-    <Plot.Trace /> {/* the held peaks */}
-  </Plot.Graph>
-  <Plot.Cursor />
-</Plot.Root>
+<Plot scaleX="log">
+  <PlotGrid />
+  <PlotGraph>
+    <PlotTraceArea /> {/* the spectrum, filled */}
+    <PlotTrace /> {/* the spectrum's line */}
+    <PlotTrace /> {/* the held peaks */}
+  </PlotGraph>
+  <PlotCursor />
+</Plot>
 ```
 
 ## Usage

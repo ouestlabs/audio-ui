@@ -1,4 +1,4 @@
-import { Piano } from "@audio-ui/react/piano";
+import { Piano } from "@/components/audio-ui/piano/react";
 import { HIGHEST, LOWEST } from "./audio/engine";
 import { Dial } from "./ui/dial";
 import { Section } from "./ui/section";
@@ -77,11 +77,11 @@ export default function Rhea35() {
           onNoteOff={rhea.noteOff}
           onNoteOn={rhea.pressKey}
         >
-          <Piano.Keys>
-            {(pitch: number) => (
+          {({ pitches }) =>
+            pitches.map((pitch) => (
               <Piano.Key className="rhea-piano-key" key={pitch} pitch={pitch} />
-            )}
-          </Piano.Keys>
+            ))
+          }
         </Piano.Root>
       </div>
     </div>

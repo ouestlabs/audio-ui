@@ -89,7 +89,7 @@ const items: RegistryItem[] = [
   }),
   libItem("arrangement", {
     categories: ["lib", "audio", "timeline"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine", "@audio-ui/react"],
+    dependencies: ["@audio-ui/core", "@audio-ui/engine"],
     description:
       "The document of an arrangement of clips on tracks: its clips, tracks and mixes, how far a clip reaches, where a MIDI clip's notes play, and what a track's volume and pan automation gives at a point of the song",
   }),
@@ -291,7 +291,7 @@ const items: RegistryItem[] = [
   }),
   {
     categories: ["lib", "audio", "timeline", "mixer"],
-    dependencies: ["@audio-ui/engine", "@audio-ui/react"],
+    dependencies: ["@audio-ui/engine"],
     description:
       "Plays an arrangement on the audio clock: its audio clips, its notes through each track's instrument, its device chains, sends and returns, and an offline render to a buffer, with a hook for the transport, the playhead and the meters",
     files: [

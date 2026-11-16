@@ -1,7 +1,7 @@
-import { XYPad as XYPadPrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
 import type * as React from "react";
 import { cn } from "@/lib/utils";
+import { XYPad as XYPadPrimitive } from "@/components/audio-ui/xypad/react";
 
 const xypadVariants = cva("", {
   defaultVariants: {
@@ -18,7 +18,7 @@ const xypadVariants = cva("", {
 });
 
 interface XYPadProps
-  extends XYPadPrimitive.Root.Props,
+  extends React.ComponentProps<typeof XYPadPrimitive.Root>,
     VariantProps<typeof xypadVariants> {
   /** Takes the height left in a column in place of its size's, down to a strip: in a short panel it gives way to the controls under it. */
   fill?: boolean;
@@ -39,9 +39,9 @@ export function XYPad({
   valueDisplay = "visible",
   ...props
 }: XYPadProps) {
-  const valueChildren: XYPadPrimitive.Value.Props["children"] = formatValue
-    ? (_formattedX, _formattedY, value) => formatValue(value)
-    : undefined;
+  const valueChildren: React.ComponentProps<
+    typeof XYPadPrimitive.Value
+  >["children"] = formatValue ? ({ value }) => formatValue(value) : undefined;
 
   return (
     <XYPadPrimitive.Root

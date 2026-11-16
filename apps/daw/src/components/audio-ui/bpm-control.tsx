@@ -1,5 +1,5 @@
-import { ParameterField } from "@/components/audio-ui/parameter-field";
 import { cn } from "@/lib/utils";
+import { ParameterField } from "@/components/audio-ui/parameter-field";
 
 const DEFAULT_MIN_BPM = 20;
 const DEFAULT_MAX_BPM = 200;

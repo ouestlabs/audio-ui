@@ -41,7 +41,7 @@ export const rootSeo: RootSeo = {
   description:
     "Accessible, composable Audio UI components for React. {{count}} copy-ready blocks and demos covering players, faders, knobs, XY pads, and transport controls, built on top of shadcn/ui.",
   intro:
-    "Browse {{count}} audio/ui components for React and Tailwind CSS. Built on shadcn/ui and @audio-ui/react's headless primitives, every block is copy-ready and fully compatible with your shadcn/ui setup.",
+    "Browse {{count}} audio/ui components for React and Tailwind CSS. Built on shadcn/ui and @audio-ui/primitives' headless primitives, every block is copy-ready and fully compatible with your shadcn/ui setup.",
   keywords: [
     "audio ui components",
     "react audio components",

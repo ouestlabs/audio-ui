@@ -1,5 +1,6 @@
+import { createSource } from "@audio-ui/core";
+import type { MeterFrame } from "@audio-ui/core/meter";
 import { peakDb, rmsDb } from "@audio-ui/engine/analysis";
-import { createSource, type Meter } from "@audio-ui/react";
 import { useEffect, useState } from "react";
 
 /** Below what a Meter draws: the level of digital silence. */
@@ -22,7 +23,7 @@ function readDb(analyser: AnalyserNode, buffer: Float32Array<ArrayBuffer>) {
   };
 }
 
-const silence = (channels: number): Meter.Root.Frame => ({
+const silence = (channels: number): MeterFrame => ({
   levels: Array.from({ length: channels }, () => SILENCE_DB),
   peaks: Array.from({ length: channels }, () => SILENCE_DB),
 });
@@ -39,7 +40,7 @@ const silence = (channels: number): Meter.Root.Frame => ({
  */
 export function useAudioLevels(analysers: readonly AnalyserNode[]) {
   const [source] = useState(() =>
-    createSource<Meter.Root.Frame>(silence(analysers.length))
+    createSource<MeterFrame>(silence(analysers.length))
   );
 
   useEffect(() => {

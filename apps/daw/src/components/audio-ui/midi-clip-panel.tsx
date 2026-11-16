@@ -1,3 +1,4 @@
+import type { Source } from "@audio-ui/core";
 import { pitchName } from "@audio-ui/core";
 import {
   duplicateTime,
@@ -6,12 +7,10 @@ import {
   type NoteLevel,
 } from "@audio-ui/core/piano-roll";
 import { type KeyNote, rollScale, type Scale } from "@audio-ui/engine/pitch";
-import type { PianoRoll as PianoRollPrimitive, Source } from "@audio-ui/react";
-import {
-  CaretDownIcon,
-  PencilSimpleIcon,
-  RepeatIcon,
-} from "@phosphor-icons/react";
+import type {
+  RollNoteOffDetails,
+  RollNoteOnDetails,
+} from "@audio-ui/primitives/piano-roll";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -22,6 +21,23 @@ import {
   useRef,
   useState,
 } from "react";
+import { Button } from "@/components/ui/button";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   ClipBox,
   type ClipMeter,
@@ -73,24 +89,10 @@ import {
   TimelineRangeHandle,
   TimelineRuler,
 } from "@/components/audio-ui/timeline";
-import { Button } from "@/components/ui/button";
-import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import type { ClipScale, ClipSwing } from "@/lib/arrangement";
+import type {
+  ClipScale,
+  ClipSwing,
+} from "@/lib/arrangement";
 import {
   applyNoteEdit,
   canApplyNoteEdit,
@@ -101,6 +103,7 @@ import {
   TIME_EDITS,
   VELOCITY_EDITS,
 } from "@/lib/note-edits";
+import { PencilSimpleIcon, RepeatIcon, CaretDownIcon } from "@phosphor-icons/react";
 
 /** C1 to C7: the range a clip's notes can take, scrolled to where they are. */
 const MIN_PITCH = 24;
@@ -180,9 +183,9 @@ interface MidiClipPanelProps {
   /** Which boxes are folded was changed. */
   onFoldedBoxesChange?: (folded: string[]) => void;
   /** Fires when a pitch stops sounding. */
-  onNoteOff?: PianoRollPrimitive.Root.Props["onNoteOff"];
+  onNoteOff?: (pitch: number, details: RollNoteOffDetails) => void;
   /** Fires when a key is pressed or a note drawn: sound it. */
-  onNoteOn?: PianoRollPrimitive.Root.Props["onNoteOn"];
+  onNoteOn?: (pitch: number, details: RollNoteOnDetails) => void;
   /** Fires on every change of the notes, as a drag goes. */
   onNotesChange: (notes: Note[]) => void;
   /** Fires once a change ends: the place to take an undo step. */
@@ -571,7 +574,8 @@ function NotesBar({
           title="Draw notes, a grid step at a time (B)"
           variant={drawing ? "secondary" : "ghost"}
         >
-          <PencilSimpleIcon />
+          <PencilSimpleIcon
+          />
           Draw
         </Button>
       ) : (
@@ -582,7 +586,8 @@ function NotesBar({
           title="Roll a step that plays: press it for two, three or four hits, then one again"
           variant={repeating ? "secondary" : "ghost"}
         >
-          <RepeatIcon />
+          <RepeatIcon
+          />
           Repeat
         </Button>
       )}
@@ -598,7 +603,8 @@ function NotesBar({
           render={<Button size="sm" title="View" variant="ghost" />}
         >
           View
-          <CaretDownIcon />
+          <CaretDownIcon
+          />
         </DropdownMenuTrigger>
         <DropdownMenuContent align="start" className="w-48">
           {drums ? (
@@ -725,8 +731,8 @@ function ClipRoll({
   loop: readonly [number, number] | null;
   name: string;
   offset: number;
-  onNoteOff?: PianoRollPrimitive.Root.Props["onNoteOff"];
-  onNoteOn?: PianoRollPrimitive.Root.Props["onNoteOn"];
+  onNoteOff?: (pitch: number, details: RollNoteOffDetails) => void;
+  onNoteOn?: (pitch: number, details: RollNoteOnDetails) => void;
   onNotesChange: (notes: Note[]) => void;
   onNotesCommitted?: () => void;
   onRegionChange?: (region: MidiClipRegion) => void;

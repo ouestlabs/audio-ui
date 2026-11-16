@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="waveform-region-demo" />
 
-Components for drawing audio. `Waveform` shows a whole file and lets you scrub through it. `LiveWaveform` follows a signal as it plays. `BarVisualizer` turns that signal into a few bars you style in CSS. All three wrap the `Waveform` primitive from `@audio-ui/react`, which works with any audio: decoded PCM samples, a microphone or a stream from your server.
+Components for drawing audio. `Waveform` shows a whole file and lets you scrub through it. `LiveWaveform` follows a signal as it plays. `BarVisualizer` turns that signal into a few bars you style in CSS. All three are written on the `Waveform` primitive of `@audio-ui/primitives`, which works with any audio: decoded PCM samples, a microphone or a stream from your server.
 
 ## Overview
 
@@ -48,7 +48,7 @@ It installs the element alone. For the waveform above, ready to run: `npx shadcn
 <Step>Install the following dependencies:</Step>
 
 ```bash
-npm install @audio-ui/react
+npm install @audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
 
 <Step>Copy and paste the following code into your project.</Step>
@@ -75,7 +75,7 @@ npm install @audio-ui/react
 
 ## Anatomy
 
-It is built on the headless [Waveform](/docs/react/waveform) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [Waveform](/docs/waveform-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -206,10 +206,10 @@ const { level, bands, samples } = useAudioSignal(analyser, { bandCount: 32 });
 - `bands` is the spectrum as log-spaced frequency bands, low to high. Draw it with a `BarVisualizer`, or a `LiveWaveform` in its default `mode="static"`: the bars stay in place and follow the bands, rising at once and falling smoothly.
 - `samples` is the raw waveform of the moment, `-1` to `1`. Draw it with `shape="scope"`.
 
-Any signal works. `createSource` from `@audio-ui/react` makes a source you push to yourself, from a WebSocket, a worklet or a test:
+Any signal works. `createSource` from `@audio-ui/core` makes a source you push to yourself, from a WebSocket, a worklet or a test:
 
 ```tsx
-import { createSource } from "@audio-ui/react";
+import { createSource } from "@audio-ui/core";
 
 const levels = createSource(new Float32Array(16));
 
@@ -234,7 +234,7 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 
 ## API reference
 
-The props of the headless parts are on [Waveform](/docs/react/waveform#api-reference).
+The headless parts and their options are on [Waveform](/docs/waveform-ui-sdk).
 
 ### Registry component
 
@@ -308,17 +308,17 @@ The props of the headless parts are on [Waveform](/docs/react/waveform#api-refer
 
 
 
-`@audio-ui/react/waveform` exposes the parts these components are built from:
+The `Waveform` primitive that installs with it exposes the parts these components are built from:
 
 <TypeTable title="Parts">
 <TypeRow name={"Waveform.Root"}>Owns the data (`peaks`, or a live `levels` source) and the position (`value`, `source`, `duration`). Carries `data-active` while a live signal is audible.</TypeRow>
 <TypeRow name={"Waveform.Control"}>The seekable surface; holds the input. Leave it out for a waveform that is only shown.</TypeRow>
 <TypeRow name={"Waveform.Canvas"}>Draws on a canvas: `variant`, `mode`, `scrollSpeed`, `barWidth`, `barGap`, `barRadius`, `minBarHeight`, `lineWidth`, `gain`, `mirrored`, `idle`.</TypeRow>
 <TypeRow name={"Waveform.Bars, Waveform.Bar"}>Draws as elements: `count`, `minLevel`, `gain`, `mirrored`, `idle`. Each bar gets `--waveform-level`, `data-index` and `data-played`.</TypeRow>
-<TypeRow name={"Waveform.Region, Waveform.RegionHandle"}>A stretch of the timeline, and the handle of one of its edges.</TypeRow>
+<TypeRow name={"Waveform.Region, Waveform.RegionHandle"}>A stretch of the timeline, named by `region`, and the handle of one of its edges. What they report goes to the Root's `onRegionChange` and `onRegionCommitted`, with the region's name in the details.</TypeRow>
 <TypeRow name={"Waveform.Marker"}>A point on the timeline.</TypeRow>
 <TypeRow name={"Waveform.Playhead, Waveform.Thumb"}>Follow the playback position.</TypeRow>
-<TypeRow name={"Waveform.Hover"}>Shown at the hovered position; its children receive that position.</TypeRow>
+<TypeRow name={"Waveform.Hover"}>Shown at the hovered position; its `format` turns that position into the text it writes.</TypeRow>
 </TypeTable>
 
 Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes that state as data attributes such as `data-disabled`, `data-dragging` and `data-loading`.

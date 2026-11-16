@@ -1,0 +1,290 @@
+---
+title: Piano roll on the UI SDK
+description: "The piano roll written once and rendered in React, Vue, Svelte and custom elements: install each adapter with its framework's CLI, the notes, rows, marquee and velocity bars, the timeline values you give it, what a change reports, and the differences from the React one."
+---
+
+The piano roll's behavior is one description, `pianoRoll` in `@audio-ui/primitives`, over the controller of `@audio-ui/core/piano-roll`. It is a grid of MIDI notes you draw, move, resize and select, with rows by pitch (folded to the notes or to a scale), a marquee, bars for the velocity or the chance to play, and the commands of an editor on the keys. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is not published yet: this page describes what the next release installs. The [timeline](/docs/timeline-ui-sdk) it sits on, the [piano](/docs/piano-ui-sdk) it draws its keys with and the other controls are built the same way.
+
+## Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/piano-roll-react
+```
+
+One file, `components/audio-ui/piano-roll/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-vue.json
+```
+
+One file, `components/audio-ui/piano-roll/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-svelte.json
+```
+
+Ten files in `components/audio-ui/piano-roll/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/knob-ui-sdk#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-web.json
+```
+
+One file, `components/audio-ui/piano-roll/web.ts`. Import it once, and it registers the `audio-ui-piano-roll` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+## Usage
+
+A Root holds the notes and their selection. The roll is a column of parts you place in it:
+
+- **Grid**: the surface the notes are drawn on, a lane of the timeline. A press draws a note in draw mode, or starts a marquee in select mode; a double click adds or removes a note; Enter adds one at the playback position.
+- **Rows** and **Row**: a row for each pitch drawn, to style from `data-color`, `data-in-scale`, `data-scale-root`, `data-octave` and `data-active`.
+- **Notes** and **Note**: a note for each note of the roll, in reading order. A press selects it and a drag moves it. A **NoteHandle** resizes an edge.
+- **Marquee**: the box a drag across the bare grid draws. **SelectionSpan** shows the stretch the selection covers, and a **StretchHandle** in it stretches the selected notes.
+- **VelocityLane** and **Velocity**: a bar under each note, whose height is its velocity (or its chance, with `level="chance"`), set by a drag or through its native input.
+- **Keys**: gives the pitches drawn, the ones sounding and the audition calls, to draw a vertical [piano](/docs/piano-ui-sdk) beside the grid. The part is a grid of one cell, so the piano drawn inside takes its whole height and width: stretch the part beside the grid, and the keys line up with the rows.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import type { Note } from "@audio-ui/primitives/piano-roll";
+import { Piano } from "@/components/audio-ui/piano/react";
+import { PianoRoll } from "@/components/audio-ui/piano-roll/react";
+
+export function Roll({ notes, onNotes }: { notes: Note[]; onNotes: (notes: Note[]) => void }) {
+  return (
+    <PianoRoll.Root
+      className="flex"
+      duration={16}
+      maxPitch={72}
+      minPitch={48}
+      mode="select"
+      onValueChange={onNotes}
+      snapStep={0.25}
+      value={notes}
+    >
+      <PianoRoll.Keys className="w-16">
+        {({ active, keyOff, keyOn, pitches }) => (
+          <Piano.Root
+            activeNotes={active}
+            layout="even"
+            onNoteOff={keyOff}
+            onNoteOn={keyOn}
+            orientation="vertical"
+            pitches={pitches}
+          >
+            {({ pitches }) => pitches.map((pitch) => <Piano.Key key={pitch} pitch={pitch} />)}
+          </Piano.Root>
+        )}
+      </PianoRoll.Keys>
+      <PianoRoll.Grid className="relative h-64 flex-1">
+        <PianoRoll.Rows>{(pitch) => <PianoRoll.Row className="data-[color=black]:bg-muted" pitch={pitch} />}</PianoRoll.Rows>
+        <PianoRoll.Notes>
+          {(note) => (
+            <PianoRoll.Note className="rounded bg-primary data-selected:ring-2" note={note}>
+              <PianoRoll.NoteHandle className="absolute inset-y-0 right-0 w-1" edge="end" note={note} />
+            </PianoRoll.Note>
+          )}
+        </PianoRoll.Notes>
+        <PianoRoll.Marquee className="border border-primary bg-primary/10" />
+      </PianoRoll.Grid>
+    </PianoRoll.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import type { Note } from "@audio-ui/primitives/piano-roll";
+import { PianoRoll } from "@/components/audio-ui/piano-roll/vue";
+
+defineProps<{ notes: Note[] }>();
+const emit = defineEmits<{ notes: [notes: Note[]] }>();
+</script>
+
+<template>
+  <PianoRoll.Root
+    :duration="16"
+    :max-pitch="72"
+    :min-pitch="48"
+    :snap-step="0.25"
+    :value="notes"
+    @value-change="(next: Note[]) => emit('notes', next)"
+  >
+    <PianoRoll.Grid class="relative h-64">
+      <PianoRoll.Rows>
+        <template #default="{ pitch }"><PianoRoll.Row :pitch="pitch" /></template>
+      </PianoRoll.Rows>
+      <PianoRoll.Notes>
+        <template #default="{ note }">
+          <PianoRoll.Note class="rounded bg-primary data-selected:ring-2" :note="note">
+            <PianoRoll.NoteHandle class="absolute inset-y-0 right-0 w-1" edge="end" :note="note" />
+          </PianoRoll.Note>
+        </template>
+      </PianoRoll.Notes>
+      <PianoRoll.Marquee class="border border-primary bg-primary/10" />
+    </PianoRoll.Grid>
+  </PianoRoll.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import type { Note } from "@audio-ui/primitives/piano-roll";
+  import { PianoRoll } from "$lib/components/audio-ui/piano-roll/svelte";
+
+  let { notes, onNotes }: { notes: Note[]; onNotes: (notes: Note[]) => void } = $props();
+</script>
+
+<PianoRoll.Root duration={16} maxPitch={72} minPitch={48} onValueChange={onNotes} snapStep={0.25} value={notes}>
+  <PianoRoll.Grid class="relative h-64">
+    <PianoRoll.Rows>
+      {#snippet children(pitch)}
+        <PianoRoll.Row {pitch} />
+      {/snippet}
+    </PianoRoll.Rows>
+    <PianoRoll.Notes>
+      {#snippet children(note)}
+        <PianoRoll.Note class="rounded bg-primary data-selected:ring-2" {note}>
+          <PianoRoll.NoteHandle class="absolute inset-y-0 right-0 w-1" edge="end" {note} />
+        </PianoRoll.Note>
+      {/snippet}
+    </PianoRoll.Notes>
+    <PianoRoll.Marquee class="border border-primary bg-primary/10" />
+  </PianoRoll.Grid>
+</PianoRoll.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-piano-roll duration="16" min-pitch="48" max-pitch="72" snap-step="0.25">
+  <audio-ui-piano-roll-grid style="height: 16rem">
+    <audio-ui-piano-roll-rows></audio-ui-piano-roll-rows>
+    <audio-ui-piano-roll-notes handles></audio-ui-piano-roll-notes>
+    <audio-ui-piano-roll-marquee></audio-ui-piano-roll-marquee>
+  </audio-ui-piano-roll-grid>
+</audio-ui-piano-roll>
+
+<script type="module">
+  import "./audio-ui/piano-roll/web.ts";
+
+  const roll = document.querySelector("audio-ui-piano-roll");
+  roll.value = [{ id: 1, pitch: 60, start: 0, length: 2 }];
+  roll.addEventListener("input", (event) => console.log(event.detail.value, event.detail.reason));
+</script>
+```
+
+On a custom element the rows, the notes (with a handle for each edge, with the `handles` attribute) and the velocity bars are made for you, one for each pitch or note, and style from their tags and `data-*` attributes. A note keeps its place among the others while it is dragged. The Keys part gives nothing on a custom element: draw an `audio-ui-piano` beside the grid and set its `pitches` from the roll's.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+## The timeline it sits on
+
+The roll reads a timeline's length, grid, zoom and playback position. The UI SDK has no provider to read them from, so you give them to the Root, as the values you give the [Timeline](/docs/timeline-ui-sdk):
+
+- `duration`, `snapStep`, `snapOffset` and `snapPoints`: the length, the grid every gesture lands on unless Cmd/Ctrl is held, and what pulls a note onto it.
+- `zoom`: px per unit, or unset while the roll fits its width. Control it, and give the same value to the Timeline, so the roll and the ruler stay aligned.
+- `source` or `position`: the playback position, which Enter and the shortcuts that add at the playhead read. A `source` is a live value in the shape of an external store.
+
+The Grid and the VelocityLane are lanes the Timeline's viewport finds in its DOM, so a roll inside a Timeline's Viewport scrolls and zooms with the ruler.
+
+## Interaction
+
+- **Draw mode**: a press draws a note, and a drag stretches it (`drawStyle="stretch"`) or paints across cells (`"paint"`). **Select mode**: a press selects, a drag across the bare grid draws the marquee, Shift or Cmd/Ctrl adds to the selection.
+- **Notes**: a drag moves the selection on the grid, over rows, Alt with a drag copies it; Delete removes it, the arrows move it, Shift with an arrow by a larger step. A double click removes a note, and one on the bare grid adds one.
+- **Keys of the editor**: Cmd/Ctrl with A selects all, Escape clears the selection, and the editing commands (duplicate, quantize, legato, mute, transpose) are the controller's shortcuts on the grid and on a note.
+- **Velocity bars**: a press sets the velocity where the pointer is, a drag draws across the bars, and on the input the arrows move it by a step.
+
+A disabled roll takes none of these.
+
+## Options
+
+Set on the Root, as props (an attribute in kebab case on the custom element, the arrays as JSON).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `value`, `defaultValue` | `Note[]` | `[]` | The notes: `{ id, pitch, start, length, velocity?, chance?, deviation?, muted? }`. Controlled, or the starting ones. |
+| `selection`, `defaultSelection` | `NoteId[]` | `[]` | The ids of the notes selected. |
+| `mode` | `"draw"` or `"select"` | `"select"` | What a press on the grid does. |
+| `drawStyle` | `"paint"` or `"stretch"` | | How a drag in draw mode draws. |
+| `minPitch`, `maxPitch` | `number` | `48`, `72` | The pitches the rows cover. |
+| `folded` | `boolean` or `"scale"` | `false` | Draw only the pitches carrying notes, and with `"scale"` those in the scale too. |
+| `scale` | `{ root, scale }` | | Marks the rows in a scale. |
+| `minLength` | `number` | the grid step | The shortest note. |
+| `activePitches` | `number[]` | | Pitches sounding from elsewhere: they light their rows and keys. |
+| `getNoteLabel` | `(note) => string` | pitch name and span | Names a note for assistive technology. |
+| `createNoteId` | `() => NoteId` | `"note-<n>"` | Makes the id of a note drawn, added or duplicated. |
+| `disabled` | `boolean` | `false` | Takes no gesture. |
+| `duration`, `snapStep`, `snapOffset`, `snapPoints`, `zoom`, `source`, `position`, `step` | | | The timeline's values, above. |
+| `onValueChange`, `onValueCommitted` | `(notes, details) => void` | | The notes changed, and a gesture that changed them ended. |
+| `onSelectionChange` | `(ids, details) => void` | | The selection changed. |
+| `onNoteOn`, `onNoteOff` | `(pitch, details) => void` | | A key or a note auditioned a pitch. |
+
+A Note, a NoteHandle and a Velocity take the `note` they belong to. A Velocity takes `level` (`"velocity"` or `"chance"`), and so does the VelocityLane.
+
+## What a change reports
+
+`details` carries:
+
+- `reason`: what changed the notes, such as `"draw"`, `"drag"`, `"keyboard"`, `"paste"` or a command's name.
+- `source`: `"mouse"`, `"touch"`, `"pen"`, `"keyboard"`, `"programmatic"` or `"agent"`.
+- `event` and `cancel()`: the DOM event behind it, and the refusal. A controlled roll keeps the notes you give it.
+
+On the custom element, the notes are the `input` and `change` events, and the selection and the keys are `selectionchange`, `noteon` and `noteoff`, with a `detail` of the value and its reason. `event.preventDefault()` refuses a change.
+
+## States to style from
+
+- On the Root and every part: `data-mode`, `data-editing` while a pointer edits, `data-folded`, `data-disabled`; on the Root `data-has-selection`.
+- On a note and its parts: `data-selected`, `data-muted`, `data-note` for its id. A note sets `--piano-roll-velocity` and `--piano-roll-chance`, a bar `--piano-roll-level` and `--piano-roll-deviation`, for what you draw inside them.
+- On a row: `data-color` (`black` or `white`), `data-in-scale`, `data-out-of-scale`, `data-scale-root`, `data-octave`, `data-active`, and `data-pitch`.

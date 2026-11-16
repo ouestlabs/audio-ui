@@ -42,7 +42,7 @@ Without the registry, the same loop is a few lines per channel:
 
 ```ts
 import { peakDb, rmsDb } from "@audio-ui/engine/analysis";
-import { createSource } from "@audio-ui/react";
+import { createSource } from "@audio-ui/core";
 
 const buffer = new Float32Array(analyser.fftSize);
 const source = createSource({ levels: [-60, -60], peaks: [-60, -60] });

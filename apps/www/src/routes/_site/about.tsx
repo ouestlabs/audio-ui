@@ -33,16 +33,16 @@ function AboutPage() {
       <p>It ships in layers that share the same behavior:</p>
       <ul>
         <li>
-          <code>@audio-ui/react</code>, headless React primitives on npm:
-          behavior and accessibility, no styles.
+          The <code>@audio-ui</code> registry, headless primitives for React,
+          Vue, Svelte and the web: behavior and accessibility, no styles.
         </li>
         <li>
-          The <code>@audio-ui</code> registry, styled components and blocks you
-          install with the shadcn CLI and own as your own code.
+          Styled components and blocks for shadcn/ui, installed from the same
+          registry with the shadcn CLI and owned as your own code.
         </li>
         <li>
-          <code>@audio-ui/core</code>, the same controllers without React, for
-          Vue, Svelte, Solid, Angular, web components or the plain DOM.
+          <code>@audio-ui/core</code>, the same controllers without a framework,
+          for Solid, Angular or the plain DOM.
         </li>
       </ul>
       <h2>Who makes it</h2>

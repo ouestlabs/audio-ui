@@ -4,7 +4,6 @@ import {
   secondsPerBeat,
   type Tempo,
 } from "@audio-ui/engine/time";
-import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
 import {
   type ComponentProps,
   type DragEvent,
@@ -14,6 +13,7 @@ import {
   type Ref,
   type RefObject,
   useCallback,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -551,6 +551,50 @@ const ROOM_BARS = 4;
 /** The room past the end as a share of the arrangement's length, where that is more: wide enough to aim at on a long song. */
 const ROOM_SHARE = 0.1;
 
+/**
+ * The stretch of time the viewport shows, with a viewport's width either side,
+ * in steps of half a viewport: it changes only when the scroll or the zoom
+ * moves into a new step, so a clip is mounted before it scrolls into view and
+ * a scroll or a zoom does not render the arrangement each frame.
+ */
+function useVisibleSpan(
+  viewportRef: RefObject<HTMLDivElement | null>,
+  zoom: number
+): readonly [number, number] {
+  const [span, setSpan] = useState<readonly [number, number]>([
+    0,
+    Number.POSITIVE_INFINITY,
+  ]);
+  useLayoutEffect(() => {
+    const element = viewportRef.current;
+    if (!(element && zoom > 0)) {
+      return;
+    }
+    const measure = () => {
+      const width = element.clientWidth / zoom;
+      const step = Math.max(width / 2, 1e-6);
+      const from = Math.max(
+        0,
+        Math.floor((element.scrollLeft / zoom - width) / step) * step
+      );
+      const to =
+        Math.ceil((element.scrollLeft / zoom + 2 * width) / step) * step;
+      setSpan((held) =>
+        held[0] === from && held[1] === to ? held : [from, to]
+      );
+    };
+    measure();
+    element.addEventListener("scroll", measure, { passive: true });
+    const observer = new ResizeObserver(measure);
+    observer.observe(element);
+    return () => {
+      element.removeEventListener("scroll", measure);
+      observer.disconnect();
+    };
+  }, [viewportRef, zoom]);
+  return span;
+}
+
 /** How long an arrangement's timeline is shown: its length, and room past its end. Give the timeline's zoom the same, so it fits all of it. */
 export const shownLength = (duration: number, tempo: Tempo) =>
   duration + Math.max(ROOM_BARS * secondsPerBar(tempo), duration * ROOM_SHARE);
@@ -645,6 +689,7 @@ export function ArrangementView({
     tracks,
   } = doc;
   const { zoom } = view;
+  const visible = useVisibleSpan(viewportRef, zoom);
   const [dropOn, setDropOn] = useState<string | null>(null);
   const dropLine = useRef<HTMLDivElement>(null);
   const beat = secondsPerBeat(tempo);
@@ -824,7 +869,7 @@ export function ArrangementView({
     [onArm, removeTrack, renameTrack, trackMenu, ungroupTrack]
   );
   const changeLoop = useCallback(
-    (range: TimelinePrimitive.Range.Value) =>
+    (range: readonly [number, number]) =>
       dispatch({ range, type: "change-loop" }),
     [dispatch]
   );
@@ -1215,7 +1260,14 @@ export function ArrangementView({
                           />
                         ))}
                         {clips
-                          .filter((clip) => clip.track === track.id)
+                          .filter(
+                            (clip) =>
+                              clip.track === track.id &&
+                              (selectedIds.includes(clip.id) ||
+                                (clip.value.start <= visible[1] &&
+                                  clip.value.start + clip.value.length >=
+                                    visible[0]))
+                          )
                           .map((clip) => (
                             <ArrangedClip
                               describe={describe}

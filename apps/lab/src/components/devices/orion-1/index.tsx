@@ -1,4 +1,4 @@
-import { Piano } from "@audio-ui/react/piano";
+import { Piano } from "@/components/audio-ui/piano/react";
 import type { Param, Wave } from "./audio/engine";
 import { Dial } from "./ui/dial";
 import { Lcd } from "./ui/lcd";
@@ -129,11 +129,11 @@ export default function Orion1() {
           onNoteOff={orion.noteOff}
           onNoteOn={orion.pressKey}
         >
-          <Piano.Keys>
-            {(pitch: number) => (
+          {({ pitches }) =>
+            pitches.map((pitch) => (
               <Piano.Key className="piano-key" key={pitch} pitch={pitch} />
-            )}
-          </Piano.Keys>
+            ))
+          }
         </Piano.Root>
       </div>
     </div>

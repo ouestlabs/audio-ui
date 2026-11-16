@@ -8,15 +8,7 @@ import type {
   ToggleParameter,
 } from "@audio-ui/engine/device";
 import { type ReactNode, useCallback, useEffect, useRef } from "react";
-import {
-  FilterTypeSelect,
-  isFilterType,
-} from "@/components/audio-ui/filter-type-select";
-import { Knob } from "@/components/audio-ui/knob";
-import {
-  isWaveform,
-  WaveformSelect,
-} from "@/components/audio-ui/waveform-select";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -26,8 +18,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Toggle } from "@/components/ui/toggle";
+import {
+  FilterTypeSelect,
+  isFilterType,
+} from "@/components/audio-ui/filter-type-select";
+import { Knob } from "@/components/audio-ui/knob";
+import {
+  isWaveform,
+  WaveformSelect,
+} from "@/components/audio-ui/waveform-select";
 import type { DeviceSignal } from "@/lib/device-signal";
-import { cn } from "@/lib/utils";
 
 type AnyDevice = Device<readonly ParameterDescriptor[]>;
 type AnyState = Record<string, ParameterValue>;

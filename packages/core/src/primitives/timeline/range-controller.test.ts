@@ -197,3 +197,36 @@ describe("Range controller pointers", () => {
     expect(result).toEqual(ONE_FINGER);
   });
 });
+
+describe("a key moves a range whose view resets it at once", () => {
+  test("the commit carries the range just moved to, not the one the props hold", () => {
+    const commits: (readonly [number, number])[] = [];
+    const range = createRangeController({
+      duration: 100,
+      grid: { offset: 0, step: 0 },
+      largeStep: 10,
+      minLength: 0,
+      movable: true,
+      onValueCommitted: (value: readonly [number, number]) =>
+        commits.push(value),
+      step: 4,
+      value: [32, 32],
+    } as never);
+    // A view that takes its props back as soon as it is told of a change.
+    range.subscribe(() =>
+      range.setOptions({
+        duration: 100,
+        grid: { offset: 0, step: 0 },
+        largeStep: 10,
+        minLength: 0,
+        movable: true,
+        onValueCommitted: (value: readonly [number, number]) =>
+          commits.push(value),
+        step: 4,
+        value: [32, 32],
+      } as never)
+    );
+    range.keyDown(new KeyboardEvent("keydown", { key: "ArrowRight" }));
+    expect(commits).toEqual([[36, 36]]);
+  });
+});

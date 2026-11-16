@@ -1,5 +1,4 @@
-import { snapMove } from "@audio-ui/core/timeline";
-import { adjacentPoint } from "@audio-ui/react";
+import { adjacentPoint, snapMove } from "@audio-ui/core/timeline";
 import { useCallback } from "react";
 import type {
   Arranged,

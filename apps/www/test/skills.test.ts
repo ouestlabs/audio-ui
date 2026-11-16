@@ -4,6 +4,7 @@ import { components } from "@/registry-audio/bases/base/components/_registry";
 import { devices } from "@/registry-audio/bases/base/devices/_registry";
 import { hooks } from "@/registry-audio/bases/base/hooks/_registry";
 import { lib } from "@/registry-audio/bases/base/lib/_registry";
+import { primitives } from "@/registry-audio/bases/base/primitives/_registry";
 import {
   compileSkill,
   readRules,
@@ -28,8 +29,6 @@ const SKILL_NAME = /^[a-z0-9]+(-[a-z0-9]+)*$/;
 const MARKDOWN_LINK = /\]\((\.{1,2}\/[^)#\s]+)/g;
 // A whole name: not the start of a template such as `@audio-ui/block-<name>`.
 const REGISTRY_NAME = /@audio-ui\/([a-z0-9-]*[a-z0-9])(?![a-z0-9<-])/g;
-// An import, not a path into an installed package (`node_modules/@audio-ui/react/dist`).
-const REACT_ENTRY = /(?<!node_modules\/)@audio-ui\/react\/([a-z0-9-]+)/g;
 const DATA_ATTRIBUTE = /`(data-[a-z-]+)`/g;
 const CSS_VARIABLE = /`(--[a-z-]+)`/g;
 const ICON_PATH = /icon_(?:small|large): "([^"]+)"/g;
@@ -39,6 +38,8 @@ const INTL_UNITS = new Set<string>(Intl.supportedValuesOf("unit"));
 // Not the `audio-ui` skill's own name.
 const RULE_ID =
   /`((?:audio|live|values|a11y|core|design|style|ai)-(?!ui`)[a-z0-9-]+)`/g;
+// A primitive's adapter, as a project imports it once the CLI has copied it.
+const INSTALLED_PRIMITIVE = /"@\/components\/audio-ui\/([a-z-]+)\/react"/g;
 const CORE_ENTRY = /(?<!node_modules\/)@audio-ui\/core\/([a-z0-9-]+)/g;
 const ENGINE_ENTRY = /(?<!node_modules\/)@audio-ui\/engine\/([a-z0-9-]+)/g;
 // A fenced code block of a markdown file.
@@ -56,7 +57,7 @@ const DIGIT_START = /^\d/;
 // A registry item kept only to redirect an old install name.
 const RETIRED = /^(Gone|Renamed|Moved)/;
 
-const PACKAGES = new Set(["react", "core", "elements", "engine", "gl"]);
+const PACKAGES = new Set(["core", "engine", "gl", "primitives"]);
 
 function matches(text: string, pattern: RegExp): string[] {
   return [...text.matchAll(pattern)].map((match) => match[1] ?? "");
@@ -79,12 +80,9 @@ const skills = (
 ).map((path) => path.split("/")[0] ?? "");
 const markdown = await read("**/*.md", SKILLS_DIR);
 const registryNames = new Set(
-  [...audio, ...devices, ...components, ...hooks, ...lib].map(
+  [...audio, ...devices, ...components, ...hooks, ...lib, ...primitives].map(
     (item) => item.name
   )
-);
-const uiExports = Object.keys(
-  (await Bun.file(`${ROOT}/packages/react/package.json`).json()).exports
 );
 const coreExports = Object.keys(
   (await Bun.file(`${ROOT}/packages/core/package.json`).json()).exports
@@ -92,7 +90,14 @@ const coreExports = Object.keys(
 const engineExports = Object.keys(
   (await Bun.file(`${ROOT}/packages/engine/package.json`).json()).exports
 );
-const uiSource = (await read("**/*.{ts,tsx}", `${ROOT}/packages/react/src`))
+const uiSource = (
+  await Promise.all(
+    ["primitives", "core"].map((name) =>
+      read("**/*.{ts,tsx}", `${ROOT}/packages/${name}/src`)
+    )
+  )
+)
+  .flat()
   .map((file) => file.text)
   .join("\n");
 const withRules = await readSkillNames();
@@ -150,13 +155,6 @@ describe.each(markdown)("$path", ({ path, text }) => {
   test("every @audio-ui/<name> is a registry item or a package", () => {
     const missing = matches(text, REGISTRY_NAME).filter(
       (name) => !(PACKAGES.has(name) || registryNames.has(name))
-    );
-    expect(missing).toEqual([]);
-  });
-
-  test("every @audio-ui/react/<entry> is exported", () => {
-    const missing = matches(text, REACT_ENTRY).filter(
-      (entry) => !uiExports.includes(`./${entry}`)
     );
     expect(missing).toEqual([]);
   });
@@ -372,7 +370,15 @@ describe("skills/design styles", () => {
     // Rendered from inside the app, where react and the primitives resolve.
     const copy = `${import.meta.dir}/skill-panel.tmp.tsx`;
     const source = await readPanel();
-    await Bun.write(copy, source);
+    // The adapters the kit imports from `components/audio-ui/<name>/react`, where the CLI installs them, are the registry's files.
+    await Bun.write(
+      copy,
+      source.replace(
+        INSTALLED_PRIMITIVE,
+        (_, name) =>
+          `"${ROOT}/apps/www/src/registry-audio/bases/base/primitives/${name}/react.tsx"`
+      )
+    );
     const panel = await import(copy).finally(() => Bun.file(copy).delete());
     const html = renderToString(
       createElement(panel.Panel, { skin: "retro", title: "Kit" })

@@ -5,6 +5,7 @@
  */
 import { readdirSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { frameworkAddresses } from "../src/lib/docs/content/framework-paths.ts";
 
 const DOCS = join(import.meta.dirname, "../src/content/docs");
 
@@ -81,6 +82,9 @@ export function prerenderPages() {
     { path: "/privacy" },
     ...categoryPaths().map((path) => ({ path })),
     ...docsPages().map(({ path }) => ({ path })),
+    ...frameworkAddresses(docsPages().map(({ path }) => path)).map((path) => ({
+      path,
+    })),
     ...STATIC_TEXT_PATHS.map((path) => ({
       path,
       prerender: { outputPath: path },

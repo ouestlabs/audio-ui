@@ -18,7 +18,11 @@ export interface ItemSpec {
 }
 
 /** The file types the factories make: a lib, a hook, or a component. */
-type FileType = "registry:hook" | "registry:lib" | "registry:ui";
+type FileType =
+  | "registry:component"
+  | "registry:hook"
+  | "registry:lib"
+  | "registry:ui";
 
 const fileOf = (path: string, type: FileType, target?: string) =>
   target ? { path, target, type } : { path, type };
@@ -124,7 +128,9 @@ export function deviceItems(
     },
     {
       categories: panel.categories,
-      dependencies: ["@audio-ui/react", ...(panel.dependencies ?? [])],
+      dependencies: [
+        ...new Set(["@audio-ui/core", ...(panel.dependencies ?? [])]),
+      ],
       description: panel.description,
       files: [deviceFile(name, "panel.tsx", "registry:ui")],
       name: `${name}-panel`,
@@ -164,4 +170,64 @@ export function movedItem(name: string, module: string): RegistryItem {
     registryDependencies: [],
     type: "registry:lib",
   };
+}
+
+/**
+ * The kernel's version, in every item that imports it. `latest` on npm is
+ * an older beta than the one the primitives are written for, so a bare name
+ * would install the wrong one.
+ */
+const UI_SDK = "0.1.0-beta.5";
+
+/** The frameworks a primitive is rendered in, with the files each one installs. */
+export interface PrimitiveFramework {
+  /** The npm packages its files import, besides the primitive's. */
+  dependencies: string[];
+  /** Its files, relative to the primitive's folder in `primitives/<name>/`. */
+  files: string[];
+  name: "react" | "svelte" | "vue" | "web";
+}
+
+/**
+ * A primitive as the registry ships it: one item per framework,
+ * `<name>-<framework>`, from the adapter files in `primitives/<name>/`. Each
+ * installs to `components/audio-ui/<name>/`, and the behavior it renders comes
+ * from `@audio-ui/primitives` over the UI SDK kernel, so the user owns only
+ * the thin adapter.
+ */
+export function primitiveItems(
+  name: string,
+  frameworks: PrimitiveFramework[],
+  description: string
+): RegistryItem[] {
+  return frameworks.map((framework) => {
+    // shadcn-svelte puts a `registry:ui` file under its own `ui` folder, and
+    // a `registry:component` one in `components`, which is where it belongs.
+    const svelte = framework.name === "svelte";
+    const type = svelte ? "registry:component" : "registry:ui";
+    const root = svelte ? "" : "components/";
+    return {
+      categories: ["primitive", framework.name],
+      dependencies: [
+        "@audio-ui/primitives",
+        `@ui-sdk/core@${UI_SDK}`,
+        ...framework.dependencies.map((dependency) =>
+          dependency.startsWith("@ui-sdk/")
+            ? `${dependency}@${UI_SDK}`
+            : dependency
+        ),
+      ],
+      description: `${description} Its ${framework.name} adapter.`,
+      files: framework.files.map((file) =>
+        fileOf(
+          `primitives/${name}/${file}`,
+          type,
+          `${root}audio-ui/${name}/${file}`
+        )
+      ),
+      name: `${name}-${framework.name}`,
+      registryDependencies: [],
+      type,
+    };
+  });
 }

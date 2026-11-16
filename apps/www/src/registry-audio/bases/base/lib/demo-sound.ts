@@ -273,47 +273,6 @@ function drawDrums(
 }
 
 /** What the drums, the bass, the keys and the line play, over two bars. */
-/** A note of the groove, as a MIDI clip holds it: its pitch, and its start and length in beats, swing included. */
-interface GrooveNote {
-  length: number;
-  pitch: number;
-  start: number;
-  velocity: number;
-}
-
-const pitchOf = (hertz: number) => Math.round(69 + 12 * Math.log2(hertz / 440));
-/** A step in beats, the off-beat sixteenths pushed back by the swing as `timeOf` does. */
-const beatOf = (step: number) => (step + (step % 2 === 1 ? SWING : 0)) / 4;
-/** How long the keys' chords ring, in steps: up to the next one, a little short of it. */
-const KEY_STEPS = [5.5, 9.5];
-
-/**
- * The groove's bass, keys and plucked line as notes, for MIDI tracks to play:
- * the same notes, on the same steps and with the same swing as the groove.
- */
-const _GROOVE_SCORE: Record<"bass" | "keys" | "pluck", GrooveNote[]> = {
-  bass: BASS.map(([step, steps, bar]) => ({
-    length: steps / 4,
-    pitch: pitchOf(BASS_ROOTS_HZ[bar] ?? 55),
-    start: beatOf(step),
-    velocity: 0.85,
-  })),
-  keys: KEYS.flatMap(([step, chord, velocity], index) =>
-    (CHORDS_HZ[chord] ?? []).map((hertz) => ({
-      length: (KEY_STEPS[index % 2] ?? 5.5) / 4,
-      pitch: pitchOf(hertz),
-      start: beatOf(step),
-      velocity: 0.8 * velocity,
-    }))
-  ),
-  pluck: PLUCKS.map(([step, hertz, velocity]) => ({
-    length: 0.5,
-    pitch: pitchOf(hertz),
-    start: beatOf(step),
-    velocity,
-  })),
-};
-
 /** The parts the groove is mixed from: each draws itself into the mix it is given. */
 const GROOVE_PARTS = {
   bass: (ctx: BaseAudioContext, mix: AudioNode) => {
@@ -353,9 +312,6 @@ const GROOVE_PARTS = {
     });
   },
 };
-
-/** One of the groove's parts on its own: its drums, its bass, its keys or its plucked line. */
-type GroovePart = keyof typeof GROOVE_PARTS;
 
 function drawGroove(ctx: BaseAudioContext, out: AudioNode) {
   const mix = ctx.createGain();
@@ -412,55 +368,6 @@ function renderDemoLoop(sampleRate: number): Promise<AudioBuffer> {
   }
   const buffer = drawLoop(sampleRate, LOOP_SECONDS, drawGroove);
   rendered.set(sampleRate, buffer);
-  return buffer;
-}
-
-const parts = new Map<string, Promise<AudioBuffer>>();
-
-/**
- * One part of the groove on its own, two bars at its tempo and at the level it
- * has in the mix: what a track of an arrangement plays, in step with
- * `renderDemoLoop` since both are drawn from the same notes and hits. The four
- * parts played together are the groove.
- */
-function _renderGroovePart(
-  part: GroovePart,
-  sampleRate: number
-): Promise<AudioBuffer> {
-  const id = `${part}:${sampleRate}`;
-  const cached = parts.get(id);
-  if (cached) {
-    return cached;
-  }
-  const buffer = drawLoop(sampleRate, LOOP_SECONDS, (ctx, out) => {
-    const mix = ctx.createGain();
-    mix.gain.value = GROOVE_TRIM;
-    mix.connect(out);
-    GROOVE_PARTS[part](ctx, mix);
-  });
-  parts.set(id, buffer);
-  return buffer;
-}
-
-const beats = new Map<number, Promise<AudioBuffer>>();
-
-/**
- * The drums of the groove on their own, two bars at its tempo: what a drum
- * track of an arrangement plays, in step with `renderDemoLoop` since both are
- * drawn from the same hits.
- */
-function _renderBeatLoop(sampleRate: number): Promise<AudioBuffer> {
-  const cached = beats.get(sampleRate);
-  if (cached) {
-    return cached;
-  }
-  const buffer = drawLoop(sampleRate, LOOP_SECONDS, (ctx, out) => {
-    const mix = ctx.createGain();
-    mix.gain.value = GROOVE_TRIM;
-    mix.connect(out);
-    drawDrums(ctx, mix, seededRandom(23));
-  });
-  beats.set(sampleRate, buffer);
   return buffer;
 }
 

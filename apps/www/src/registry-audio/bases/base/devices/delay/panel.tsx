@@ -1,5 +1,5 @@
+import type { Source } from "@audio-ui/core";
 import { DEFAULT_TEMPO, type Tempo } from "@audio-ui/engine/time";
-import type { Source } from "@audio-ui/react";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {

@@ -1,5 +1,5 @@
 import { pitchName } from "@audio-ui/core";
-import type { Pad as PadPrimitive } from "@audio-ui/react";
+import type { PadOnDetails } from "@audio-ui/primitives/pad";
 import {
   type ChangeEvent,
   type DragEvent,
@@ -612,7 +612,7 @@ function DrumRackPanel({
     []
   );
   const strike = useCallback(
-    (value: string, details: PadPrimitive.Root.OnEventDetails) => {
+    (value: string, details: PadOnDetails) => {
       const note = Number(value);
       onSelectNote(note);
       onPadOn?.(note, details.velocity);

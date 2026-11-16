@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="xypad-live-value-demo" />
 
-Controls two values at once, such as filter cutoff and resonance, pan and mix, or two macros. The registry component wraps the `XYPad` primitive from `@audio-ui/react` and adds a grid, a crosshair, a cursor and a value display.
+Controls two values at once, such as filter cutoff and resonance, pan and mix, or two macros. The registry component is written on the `XYPad` primitive of `@audio-ui/primitives`, which installs with it and adds a grid, a crosshair, a cursor and a value display.
 
 ## Overview
 
@@ -18,11 +18,11 @@ Controls two values at once, such as filter cutoff and resonance, pan and mix, o
 
 ## Installation
 
-<Install name="xypad" packages="@audio-ui/react class-variance-authority" />
+<Install name="xypad" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
 
 ## Anatomy
 
-It is built on the headless [XYPad](/docs/react/xypad) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [XYPad](/docs/xypad-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -89,11 +89,11 @@ Wheel and trackpad input over the pad moves the point by the scrolled distance: 
 
 ## API reference
 
-The props of the headless parts are on [XYPad](/docs/react/xypad#api-reference).
+The headless parts and their options are on [XYPad](/docs/xypad-ui-sdk).
 
 ### Registry component
 
-`XYPad` accepts style props (`size`, `formatValue`, `valueDisplay`, `className`) plus primitive props from `XYPadPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the axis inputs.
+`XYPad` accepts style props (`size`, `formatValue`, `valueDisplay`, `className`) plus the props of the `XYPad` primitive's Root. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the axis inputs.
 
 #### Value and state
 
@@ -123,7 +123,7 @@ The props of the headless parts are on [XYPad](/docs/react/xypad#api-reference).
 
 
 
-`@audio-ui/react/xypad` exposes `XYPad.Root`, `XYPad.Control` (the pad surface), `XYPad.Thumb` (positioned at the value, holds the axis inputs), `XYPad.Value` (formatted `<output>`), and `XYPad.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`. Draw grids and crosshairs with your own elements and the `--xy-pad-x` / `--xy-pad-y` variables.
+The `XYPad` primitive that installs with it exposes `XYPad.Root`, `XYPad.Control` (the pad surface), `XYPad.Thumb` (positioned at the value, holds the axis inputs), `XYPad.Value` (formatted `<output>`), and `XYPad.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`. Draw grids and crosshairs with your own elements and the `--xy-pad-x` / `--xy-pad-y` variables.
 
 ## Examples
 

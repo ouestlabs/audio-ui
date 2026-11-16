@@ -4,11 +4,11 @@
     {
       "id": 13,
       "prompt": "Build a retro analog synth panel in React: oscillator waveform, a filter with cutoff and resonance, an amp envelope and a master volume with a stereo meter. It must look like real vintage hardware. The project has no shadcn and no Tailwind.",
-      "expected_output": "@audio-ui/react primitives styled from styles/base.css and styles/retro.css with hardware taste: sections by signal flow, a larger master knob, printed labels, one amber lamp.",
+      "expected_output": "Headless primitives (the registry's -react items) styled from styles/base.css and styles/retro.css with hardware taste: sections by signal flow, a larger master knob, printed labels, one amber lamp.",
       "files": [],
       "expectations": [
         "Reads the skill's design.md and directions.md, and states the chosen direction in one sentence before writing CSS",
-        "Imports only primitives that exist from @audio-ui/react (or @audio-ui/react/<entry>), with the real part tree: Knob.Root > Control > Track/Indicator/Thumb, Meter.Channels given a render function, Fader.Control containing Track and Thumb",
+        "Imports only primitives that exist, installed from the registry (components/audio-ui/<name>/react), with the real part tree: Knob.Root > Control > Track/Indicator/Thumb, Meter.Root given a function of its channel count that returns Meter.Channel parts, Fader.Control containing Track and Thumb",
         "Gives the parts the structure of styles/base.css (a sized control, a sized fader track, a flex Meter.Root with a height) and never sets position, bottom, left, translate or rotate on a thumb",
         "Every control has an aria-label or a Label part, and a :focus-visible style exists",
         "Uses the retro skin (skin-retro class and styles/retro.css) and does not add gradients, glass or glow from another direction",
@@ -26,7 +26,7 @@
       "files": [],
       "expectations": [
         "Reads the skill's design.md and directions.md, and states the chosen direction in one sentence before writing CSS",
-        "Imports only primitives that exist from @audio-ui/react (or @audio-ui/react/<entry>), with the real part tree: Knob.Root > Control > Track/Indicator/Thumb, Meter.Channels given a render function, Fader.Control containing Track and Thumb",
+        "Imports only primitives that exist, installed from the registry (components/audio-ui/<name>/react), with the real part tree: Knob.Root > Control > Track/Indicator/Thumb, Meter.Root given a function of its channel count that returns Meter.Channel parts, Fader.Control containing Track and Thumb",
         "Gives the parts the structure of styles/base.css (a sized control, a sized fader track, a flex Meter.Root with a height) and never sets position, bottom, left, translate or rotate on a thumb",
         "Every control has an aria-label or a Label part, and a :focus-visible style exists",
         "Uses the minimal skin: no shadows, no gradients, radius of 2px or less, one accent color",
@@ -42,7 +42,7 @@
       "files": [],
       "expectations": [
         "Reads the skill's design.md and directions.md, and states the chosen direction in one sentence before writing CSS",
-        "Imports only primitives that exist from @audio-ui/react (or @audio-ui/react/<entry>), with the real part tree: Knob.Root > Control > Track/Indicator/Thumb, Meter.Channels given a render function, Fader.Control containing Track and Thumb",
+        "Imports only primitives that exist, installed from the registry (components/audio-ui/<name>/react), with the real part tree: Knob.Root > Control > Track/Indicator/Thumb, Meter.Root given a function of its channel count that returns Meter.Channel parts, Fader.Control containing Track and Thumb",
         "Gives the parts the structure of styles/base.css (a sized control, a sized fader track, a flex Meter.Root with a height) and never sets position, bottom, left, translate or rotate on a thumb",
         "Every control has an aria-label or a Label part, and a :focus-visible style exists",
         "Uses the modern skin: flat surfaces, 1px borders, one signal color, and no glow, glassmorphism, backdrop-filter or purple and cyan gradients",

@@ -1,25 +1,92 @@
-import { Plot as PlotPrimitive } from "@audio-ui/react";
+import { resolveScale } from "@audio-ui/core";
+import { valueOn } from "@audio-ui/core/plot";
+import {
+  type ComponentProps,
+  createContext,
+  type RefObject,
+  use,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+} from "react";
+import { Plot as PlotPrimitive } from "@/components/audio-ui/plot/react";
 import { cn } from "@/lib/utils";
 
+type RootProps = ComponentProps<typeof PlotPrimitive.Root>;
+type HandleCallbacks = Pick<RootProps, "onValueChange" | "onValueCommitted">;
+
+/** What `useValueAtPointer` reads: the plot's element, and its axes. */
+const PlotAxes = createContext<{
+  axes: {
+    x: { max: number; min: number; scale: ReturnType<typeof resolveScale> };
+    y: { max: number; min: number; scale: ReturnType<typeof resolveScale> };
+  };
+  el: RefObject<HTMLDivElement | null>;
+  /** What each handle asked to hear of its own changes. */
+  handlers: RefObject<Map<string, HandleCallbacks>>;
+} | null>(null);
+
 /** The frame: give it a width and a height, draw in it with the parts below. */
-function Plot({ className, ...props }: PlotPrimitive.Root.Props) {
+function Plot({
+  className,
+  onValueChange,
+  onValueCommitted,
+  ...props
+}: RootProps) {
+  const el = useRef<HTMLDivElement | null>(null);
+  const handlers = useRef(new Map<string, HandleCallbacks>());
+  // A handle hears its own changes through its props; the plot hears all of them.
+  const change = useCallback<NonNullable<RootProps["onValueChange"]>>(
+    (value, details) => {
+      handlers.current.get(details.handle)?.onValueChange?.(value, details);
+      onValueChange?.(value, details);
+    },
+    [onValueChange]
+  );
+  const commit = useCallback<NonNullable<RootProps["onValueCommitted"]>>(
+    (value, details) => {
+      handlers.current.get(details.handle)?.onValueCommitted?.(value, details);
+      onValueCommitted?.(value, details);
+    },
+    [onValueCommitted]
+  );
+  const { maxX = 1, maxY = 1, minX = 0, minY = 0, scaleX, scaleY } = props;
+  const context = useMemo(
+    () => ({
+      axes: {
+        x: { max: maxX, min: minX, scale: resolveScale(scaleX ?? "linear") },
+        y: { max: maxY, min: minY, scale: resolveScale(scaleY ?? "linear") },
+      },
+      el,
+      handlers,
+    }),
+    [maxX, maxY, minX, minY, scaleX, scaleY]
+  );
   return (
-    <PlotPrimitive.Root
-      className={cn(
-        "rounded-xl border bg-card relative h-48 w-full touch-none select-none data-disabled:opacity-50",
-        className
-      )}
-      data-slot="plot"
-      {...props}
-    />
+    <PlotAxes value={context}>
+      <PlotPrimitive.Root
+        className={cn(
+          "rounded-xl border bg-card relative h-48 w-full touch-none select-none data-disabled:opacity-50",
+          className
+        )}
+        data-slot="plot"
+        onValueChange={change}
+        onValueCommitted={commit}
+        ref={el}
+        {...props}
+      />
+    </PlotAxes>
   );
 }
 
-function PlotGraph({ className, ...props }: PlotPrimitive.Graph.Props) {
+/** The layer the parts draw in: it clips them to the frame's corners. */
+function PlotGraph({ className, ...props }: ComponentProps<"div">) {
   return (
-    <PlotPrimitive.Graph
+    <div
       className={cn(
-        "text-primary overflow-hidden! rounded-[inherit]",
+        "text-primary absolute inset-0 overflow-hidden! rounded-[inherit]",
         className
       )}
       data-slot="plot-graph"
@@ -29,7 +96,10 @@ function PlotGraph({ className, ...props }: PlotPrimitive.Graph.Props) {
 }
 
 /** A curve: `y = fn(x)` across the plot. */
-function PlotCurve({ className, ...props }: PlotPrimitive.Curve.Props) {
+function PlotCurve({
+  className,
+  ...props
+}: ComponentProps<typeof PlotPrimitive.Curve>) {
   return (
     <PlotPrimitive.Curve
       className={cn(
@@ -43,7 +113,10 @@ function PlotCurve({ className, ...props }: PlotPrimitive.Curve.Props) {
 }
 
 /** The same, filled down to `fillTo`: draw it under a `PlotCurve`. */
-function PlotArea({ className, ...props }: PlotPrimitive.Curve.Props) {
+function PlotArea({
+  className,
+  ...props
+}: ComponentProps<typeof PlotPrimitive.Curve>) {
   return (
     <PlotPrimitive.Curve
       className={cn("fill-primary/15 stroke-none", className)}
@@ -54,7 +127,10 @@ function PlotArea({ className, ...props }: PlotPrimitive.Curve.Props) {
 }
 
 /** A live line from a `source`, such as a spectrum: it follows the signal without re-rendering. */
-function PlotTrace({ className, ...props }: PlotPrimitive.Trace.Props) {
+function PlotTrace({
+  className,
+  ...props
+}: ComponentProps<typeof PlotPrimitive.Trace>) {
   return (
     <PlotPrimitive.Trace
       className={cn(
@@ -68,7 +144,10 @@ function PlotTrace({ className, ...props }: PlotPrimitive.Trace.Props) {
 }
 
 /** The same, filled down to `fillTo`. */
-function PlotTraceArea({ className, ...props }: PlotPrimitive.Trace.Props) {
+function PlotTraceArea({
+  className,
+  ...props
+}: ComponentProps<typeof PlotPrimitive.Trace>) {
   return (
     <PlotPrimitive.Trace
       className={cn("fill-primary/10 stroke-none", className)}
@@ -79,7 +158,10 @@ function PlotTraceArea({ className, ...props }: PlotPrimitive.Trace.Props) {
 }
 
 /** Where the signal is right now: the input level on a compressor's curve. */
-function PlotDot({ className, ...props }: PlotPrimitive.Dot.Props) {
+function PlotDot({
+  className,
+  ...props
+}: ComponentProps<typeof PlotPrimitive.Dot>) {
   return (
     <PlotPrimitive.Dot
       className={cn(
@@ -93,7 +175,10 @@ function PlotDot({ className, ...props }: PlotPrimitive.Dot.Props) {
 }
 
 /** A rule at a value: 0 dB, a cutoff, a threshold. */
-function PlotLine({ className, ...props }: PlotPrimitive.Line.Props) {
+function PlotLine({
+  className,
+  ...props
+}: ComponentProps<typeof PlotPrimitive.Line>) {
   return (
     <PlotPrimitive.Line
       className={cn("stroke-border", className)}
@@ -103,7 +188,10 @@ function PlotLine({ className, ...props }: PlotPrimitive.Line.Props) {
   );
 }
 
-type PlotCursorProps = Omit<PlotPrimitive.Cursor.Props, "children"> & {
+type PlotCursorProps = Omit<
+  ComponentProps<typeof PlotPrimitive.Cursor>,
+  "children"
+> & {
   /** Turns the value under the pointer, in the axes' units, into the text shown in the corner. */
   format: (value: { x: number; y: number }) => string;
 };
@@ -134,7 +222,10 @@ function PlotCursor({ className, format, ...props }: PlotCursorProps) {
 }
 
 /** Grid lines and labels at round values it works out from the axes: pass `x` and `y` to choose which axes, and `ticks` or `format` to choose the values and their text. */
-function PlotGrid({ className, ...props }: PlotPrimitive.Grid.Props) {
+function PlotGrid({
+  className,
+  ...props
+}: ComponentProps<typeof PlotPrimitive.Grid>) {
   return (
     <PlotPrimitive.Grid
       className={cn(
@@ -155,7 +246,11 @@ function PlotGrid({ className, ...props }: PlotPrimitive.Grid.Props) {
 }
 
 /** A label at a value on an axis: "1k" under a frequency, "+12" by a gain. */
-function PlotMark({ axis, className, ...props }: PlotPrimitive.Mark.Props) {
+function PlotMark({
+  axis,
+  className,
+  ...props
+}: ComponentProps<typeof PlotPrimitive.Mark>) {
   return (
     <PlotPrimitive.Mark
       axis={axis}
@@ -173,7 +268,10 @@ function PlotMark({ axis, className, ...props }: PlotPrimitive.Mark.Props) {
 }
 
 /** A shaded stretch of one axis. */
-function PlotBand({ className, ...props }: PlotPrimitive.Band.Props) {
+function PlotBand({
+  className,
+  ...props
+}: ComponentProps<typeof PlotPrimitive.Band>) {
   return (
     <PlotPrimitive.Band
       className={cn("fill-foreground/5", className)}
@@ -183,8 +281,33 @@ function PlotBand({ className, ...props }: PlotPrimitive.Band.Props) {
   );
 }
 
+type PlotHandleProps = Omit<
+  ComponentProps<typeof PlotPrimitive.Handle>,
+  "handle"
+> &
+  HandleCallbacks & {
+    /** The handle's name, in what the plot reports. Defaults to one of its own. */
+    handle?: string;
+  };
+
 /** A point to drag: a band, a cutoff, a threshold. Arrow keys move it too. */
-function PlotHandle({ className, ...props }: PlotPrimitive.Handle.Props) {
+function PlotHandle({
+  className,
+  handle,
+  onValueChange,
+  onValueCommitted,
+  ...props
+}: PlotHandleProps) {
+  const own = useId();
+  const name = handle ?? own;
+  const context = use(PlotAxes);
+  useEffect(() => {
+    const handlers = context?.handlers.current;
+    handlers?.set(name, { onValueChange, onValueCommitted });
+    return () => {
+      handlers?.delete(name);
+    };
+  }, [context, name, onValueChange, onValueCommitted]);
   return (
     <PlotPrimitive.Handle
       className={cn(
@@ -192,13 +315,37 @@ function PlotHandle({ className, ...props }: PlotPrimitive.Handle.Props) {
         className
       )}
       data-slot="plot-handle"
+      handle={name}
       {...props}
     />
   );
 }
 
-/** Turns a pointer position into a value on the plot, for adding a point where someone double-clicks. */
-const { useValueAtPointer } = PlotPrimitive;
+/** Turns a pointer position into a value on the plot, for adding a point where someone double-clicks. Read it inside a `Plot`. */
+function useValueAtPointer() {
+  const context = use(PlotAxes);
+  return useCallback(
+    (clientX: number, clientY: number) => {
+      const rect = context?.el.current?.getBoundingClientRect();
+      if (!(context && rect) || rect.width === 0 || rect.height === 0) {
+        return null;
+      }
+      const across = Math.min(
+        1,
+        Math.max(0, (clientX - rect.left) / rect.width)
+      );
+      const up = Math.min(
+        1,
+        Math.max(0, 1 - (clientY - rect.top) / rect.height)
+      );
+      return {
+        x: valueOn(context.axes.x, across),
+        y: valueOn(context.axes.y, up),
+      };
+    },
+    [context]
+  );
+}
 
 export {
   Plot,

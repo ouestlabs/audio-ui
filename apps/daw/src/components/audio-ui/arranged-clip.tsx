@@ -1,10 +1,11 @@
+import type { Source } from "@audio-ui/core";
+import type { ClipValue, FadeShape } from "@audio-ui/core/timeline";
 import { dbToGain } from "@audio-ui/engine/analysis";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import type {
-  FadeShape,
-  Source,
-  Timeline as TimelinePrimitive,
-} from "@audio-ui/react";
+  ClipChangeDetails,
+  ClipCommitDetails,
+} from "@audio-ui/primitives/timeline";
 import {
   type FocusEvent,
   Fragment,
@@ -18,6 +19,15 @@ import {
   useRef,
   useState,
 } from "react";
+import { cn } from "@/lib/utils";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuShortcut,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import {
   type ClipSamples,
   ClipWaveform,
@@ -32,14 +42,6 @@ import {
 } from "@/components/audio-ui/timeline";
 import { WaveformLane } from "@/components/audio-ui/waveform-lane";
 import {
-  ContextMenu,
-  ContextMenuContent,
-  ContextMenuItem,
-  ContextMenuSeparator,
-  ContextMenuShortcut,
-  ContextMenuTrigger,
-} from "@/components/ui/context-menu";
-import {
   type Arranged,
   type ClipAction,
   type ClipPeaks,
@@ -49,10 +51,9 @@ import {
   playedNotes,
   type TrackColor,
 } from "@/lib/arrangement";
-import { cn } from "@/lib/utils";
 
 /** Where a fade is drawn: over the body, under the title bar, as the waveform is. */
-const UNDER_HEAD = { height: "calc(100% - 1.25rem)", top: "1.25rem" };
+const UNDER_HEAD = "[--clip-fade-top:1.25rem]";
 
 /** A clip's menu: what is done to it, then what is done away with, each with the key the timeline runs it with. */
 function menuEntries(disabled: boolean): {
@@ -149,24 +150,24 @@ function ClipNotes({ clip }: { clip: Arranged }) {
   const rows = high - Math.min(...pitches) + 2;
   const { length, start } = clip.value;
   return (
-    <div
+    // One svg in the clip's own units: a zoom resizes it, and its notes are scaled when it is painted, not laid out one by one.
+    <svg
       aria-hidden="true"
-      className="pointer-events-none absolute inset-x-0 top-5 bottom-1"
+      className="pointer-events-none absolute inset-x-0 top-5 h-[calc(100%-1.5rem)] w-full text-current opacity-70"
       data-slot="timeline-clip-notes"
+      preserveAspectRatio="none"
+      viewBox={`0 0 ${length} ${rows}`}
     >
-      {notes.map((note) => (
-        <span
-          className="absolute min-h-0.5 rounded-[1px] bg-current opacity-70"
-          key={note.id}
-          style={{
-            height: `${100 / rows}%`,
-            left: `${((note.start - start) / length) * 100}%`,
-            top: `${((high - note.pitch) / rows) * 100}%`,
-            width: `${(note.length / length) * 100}%`,
-          }}
-        />
-      ))}
-    </div>
+      <path
+        d={notes
+          .map(
+            (note) =>
+              `M${note.start - start} ${high - note.pitch}h${note.length}v1h${-note.length}z`
+          )
+          .join("")}
+        fill="currentColor"
+      />
+    </svg>
   );
 }
 
@@ -318,15 +319,8 @@ interface ArrangedClipProps {
   multi?: boolean;
   /** Something chosen from the clip's menu (renaming is the clip's own). */
   onAction: (action: ClipAction, id: string) => void;
-  onChange: (
-    id: string,
-    value: TimelinePrimitive.Clip.Value,
-    details: TimelinePrimitive.Clip.ChangeEventDetails
-  ) => void;
-  onCommit: (
-    id: string,
-    details: TimelinePrimitive.Clip.CommitEventDetails
-  ) => void;
+  onChange: (id: string, value: ClipValue, details: ClipChangeDetails) => void;
+  onCommit: (id: string, details: ClipCommitDetails) => void;
   /** A fade's curve was picked from the menu of its handle. */
   onFadeShape: (id: string, edge: "in" | "out", shape: FadeShape) => void;
   /** Tells the arrangement how far this clip is dragged up or down, for the rest of its group to follow. */
@@ -511,7 +505,7 @@ const ArrangedClip = memo(function ArrangedClipView({
   const handleSelected = useCallback(
     (
       _selected: boolean,
-      details: TimelinePrimitive.Clip.SelectEventDetails
+      details: { clip: string; event: PointerEvent; reason: string }
     ) => {
       const { event } = details;
       onSelect(
@@ -522,10 +516,8 @@ const ArrangedClip = memo(function ArrangedClipView({
     [clip.id, multi, onSelect]
   );
   const handleChange = useCallback(
-    (
-      value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.ChangeEventDetails
-    ) => onChange(clip.id, value, details),
+    (value: ClipValue, details: ClipChangeDetails) =>
+      onChange(clip.id, value, details),
     [clip.id, onChange]
   );
   const handleDragOffset = useCallback(
@@ -533,10 +525,8 @@ const ArrangedClip = memo(function ArrangedClipView({
     [clip.id, onLift]
   );
   const handleCommitted = useCallback(
-    (
-      _value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.CommitEventDetails
-    ) => onCommit(clip.id, details),
+    (_value: ClipValue, details: ClipCommitDetails) =>
+      onCommit(clip.id, details),
     [clip.id, onCommit]
   );
   return (
@@ -595,8 +585,8 @@ const ArrangedClip = memo(function ArrangedClipView({
           )}
           {clip.notes ? null : (
             <>
-              <TimelineClipFade edge="in" style={UNDER_HEAD} />
-              <TimelineClipFade edge="out" style={UNDER_HEAD} />
+              <TimelineClipFade className={UNDER_HEAD} edge="in" />
+              <TimelineClipFade className={UNDER_HEAD} edge="out" />
             </>
           )}
           <TimelineClipHandle aria-label={`${clip.name} start`} edge="start" />

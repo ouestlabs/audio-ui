@@ -1,4 +1,4 @@
-import { Knob } from "@audio-ui/react/knob";
+import { Knob } from "@/components/audio-ui/knob/react";
 import { STATIONS, stationOf } from "../audio/engine";
 
 const STOPS = STATIONS.map((name, index) => ({ index, name }));

@@ -1,5 +1,6 @@
-import type { Source } from "@audio-ui/react";
+import type { Source } from "@audio-ui/core";
 import type { ComponentProps } from "react";
+import { cn } from "@/lib/utils";
 import {
   Plot,
   PlotGraph,
@@ -7,7 +8,6 @@ import {
   PlotTrace,
   PlotTraceArea,
 } from "@/components/audio-ui/plot";
-import { cn } from "@/lib/utils";
 
 type PlotFrameProps = Omit<
   ComponentProps<typeof Plot>,

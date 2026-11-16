@@ -1,6 +1,8 @@
-import { createSource, type Meter as MeterPrimitive } from "@audio-ui/react";
-import { Meter } from "@audio-ui/react/meter";
+import { createSource } from "@audio-ui/core";
+import type { MeterFrame } from "@audio-ui/core/meter";
 import { useEffect, useState } from "react";
+import { Meter } from "@/components/audio-ui/meter/react";
+import { indexes } from "@/lib/indexes";
 import { TAPE_SECONDS } from "../audio/engine";
 
 const SECONDS = [0, 2, 4, 6, 8] as const;
@@ -13,7 +15,7 @@ const seconds = (formatted: string) => `${formatted} seconds`;
  */
 export function TapeGauge({ read }: { read: () => number }) {
   const [source] = useState(() =>
-    createSource<MeterPrimitive.Root.Frame>({ levels: [TAPE_SECONDS] })
+    createSource<MeterFrame>({ levels: [TAPE_SECONDS] })
   );
   useEffect(() => {
     let frame = 0;
@@ -39,8 +41,8 @@ export function TapeGauge({ read }: { read: () => number }) {
         orientation="horizontal"
         source={source}
       >
-        <Meter.Channels>
-          {(index) => (
+        {({ channelCount }) => [
+          ...indexes(channelCount).map((index) => (
             <Meter.Channel
               aria-label="Tape left"
               className="rhea-gauge-channel"
@@ -50,13 +52,13 @@ export function TapeGauge({ read }: { read: () => number }) {
             >
               <Meter.Indicator className="rhea-gauge-level" />
             </Meter.Channel>
-          )}
-        </Meter.Channels>
-        {SECONDS.map((second) => (
-          <Meter.Mark className="rhea-gauge-mark" key={second} value={second}>
-            {second}
-          </Meter.Mark>
-        ))}
+          )),
+          ...SECONDS.map((second) => (
+            <Meter.Mark className="rhea-gauge-mark" key={second} value={second}>
+              {second}
+            </Meter.Mark>
+          )),
+        ]}
       </Meter.Root>
       <span aria-hidden="true" className="rhea-gauge-label">
         Tape left, seconds

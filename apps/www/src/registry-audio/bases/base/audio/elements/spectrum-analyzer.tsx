@@ -1,6 +1,6 @@
+import type { Source } from "@audio-ui/core";
 import { formatFrequency } from "@audio-ui/engine/format";
-
-import type { Plot as PlotPrimitive, Source } from "@audio-ui/react";
+import type { ComponentProps } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
   Plot,
@@ -26,7 +26,7 @@ const describePointer = (point: { x: number; y: number }) =>
   `${formatFrequency(point.x)} · ${Math.round(point.y)} dB`;
 
 type SpectrumAnalyzerProps = Omit<
-  PlotPrimitive.Root.Props,
+  ComponentProps<typeof Plot>,
   "children" | "maxX" | "maxY" | "minX" | "minY" | "scaleX" | "scaleY"
 > & {
   /** The loudest level drawn, in dB. @default -10 */

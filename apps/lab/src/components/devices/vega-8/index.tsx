@@ -1,4 +1,5 @@
-import { Sequencer } from "@audio-ui/react/sequencer";
+import { Sequencer } from "@/components/audio-ui/sequencer/react";
+import { indexes } from "@/lib/indexes";
 import { INSTRUMENTS } from "./audio/engine";
 import { STEPS } from "./audio/patterns";
 import { Dial, type Scale } from "./ui/dial";
@@ -14,7 +15,7 @@ const TEMPO: Scale = {
   min: 60,
   numerals: [60, 120, 180],
 };
-const NUMBERS = Array.from({ length: STEPS }, (_, step) => step + 1);
+const NUMBERS = indexes(STEPS).map((step) => step + 1);
 
 /** Vega-8: the panel. The sound is in `audio/`, what the panel keeps in `use-vega.ts`. */
 export default function Vega8() {
@@ -98,28 +99,29 @@ export default function Vega8() {
             source={vega.position}
             value={vega.pattern}
           >
-            <Sequencer.Rows>
-              {(index) =>
+            {({ rows, steps }) =>
+              indexes(rows).map((index) =>
                 index === row ? (
                   <Sequencer.Row
                     aria-label={name.long}
                     className="vega-step-row"
                     index={index}
+                    key={index}
                   >
-                    <Sequencer.Cells>
-                      {(step) => (
-                        <Sequencer.Cell
-                          aria-label={`${name.long}, step ${step + 1}`}
-                          className="vega-step"
-                          data-group={Math.floor(step / 4)}
-                          step={step}
-                        />
-                      )}
-                    </Sequencer.Cells>
+                    {indexes(steps).map((step) => (
+                      <Sequencer.Cell
+                        aria-label={`${name.long}, step ${step + 1}`}
+                        className="vega-step"
+                        data-group={Math.floor(step / 4)}
+                        key={step}
+                        row={index}
+                        step={step}
+                      />
+                    ))}
                   </Sequencer.Row>
                 ) : null
-              }
-            </Sequencer.Rows>
+              )
+            }
           </Sequencer.Root>
           <ol aria-hidden="true" className="vega-numbers">
             {NUMBERS.map((number) => (

@@ -1,6 +1,6 @@
 # audio/ui
 
-Accessible, composable audio UI components for React: headless primitives published as `@audio-ui/react`, plus a copy-paste registry of styled components built on them.
+Accessible, composable audio UI components for React: headless primitives, one adapter per framework, and a copy-paste registry of styled components built on them.
 
 ## Language
 
@@ -25,7 +25,7 @@ The moment a gesture ends and the parameter's pending value becomes final. Disti
 _Avoid_: change (for gesture-end), submit
 
 **Primitive**:
-A headless, unstyled, accessible control published in `@audio-ui/react` (Envelope, Fader, Knob, Meter, Pad, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad), its framework-free logic in `@audio-ui/core`.
+A headless, unstyled, accessible control written once in `@audio-ui/primitives` and installed from the registry for each framework (Envelope, Fader, Knob, Meter, Pad, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad), its framework-free logic in `@audio-ui/core`.
 _Avoid_: component (when the headless building block is meant), widget
 
 **Element**:

@@ -165,19 +165,13 @@ export function Entry({ name }: { name: string }) {
 /**
  * The head of a published module's page, such as `@audio-ui/engine/time`,
  * read from the package and its sources: the install, the import, the
- * adapters that draw it, the registry's hooks and libs that build on it, the
- * audio.js packages it is built on, and what it exports. The adapters and
- * the registry follow the reader's framework.
+ * registry's hooks and libs that build on it, the audio.js packages it is
+ * built on, and what it exports. The registry follows the reader's framework.
  */
 export function Module({ from }: { from: string }) {
   const packageModule = moduleOf(from);
-  // The reader's framework: React's adapter for React, the elements' for the others; the registry's users, React's alone.
+  // The registry's users are React's alone.
   const [framework] = useFramework();
-  const adapterOf =
-    framework === "react" ? "@audio-ui/react" : "@audio-ui/elements";
-  const adapters = framework
-    ? packageModule.adapters.filter((name) => name.startsWith(adapterOf))
-    : packageModule.adapters;
   const usedBy = framework && framework !== "react" ? [] : packageModule.usedBy;
   return (
     <>
@@ -185,12 +179,6 @@ export function Module({ from }: { from: string }) {
       <Code code={importLine(packageModule)} />
       <Facts
         rows={[
-          ...(adapters.length > 0
-            ? ([["Adapters", <Items key="adapters" names={adapters} />]] as [
-                string,
-                React.ReactNode,
-              ][])
-            : []),
           ...(usedBy.length > 0
             ? ([["Used by", <Items key="used" names={usedBy} />]] as [
                 string,

@@ -1,5 +1,5 @@
-import { Knob } from "@audio-ui/react/knob";
 import { useCallback } from "react";
+import { Knob } from "@/components/audio-ui/knob/react";
 import type { Knob as Param } from "../audio/mapping";
 
 const MARKS = Array.from({ length: 11 }, (_, value) => value);

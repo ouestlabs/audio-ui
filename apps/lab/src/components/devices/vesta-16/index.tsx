@@ -1,4 +1,4 @@
-import { Pad } from "@audio-ui/react/pad";
+import { Pad } from "@/components/audio-ui/pad/react";
 import { KITS, SAMPLE_NAMES } from "./audio/kits";
 import { Dial, type Scale } from "./ui/dial";
 import { Key } from "./ui/key";

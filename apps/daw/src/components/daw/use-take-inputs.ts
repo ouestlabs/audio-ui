@@ -1,4 +1,4 @@
-import type { Source } from "@audio-ui/react";
+import type { Source } from "@audio-ui/core";
 import { useCallback, useMemo, useState } from "react";
 import type { useArrangementEngine } from "@/hooks/use-arrangement-engine";
 import { useComputerKeyboard } from "@/hooks/use-computer-keyboard";

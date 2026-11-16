@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="pad-demo" />
 
-Triggers sounds, for a drum machine, a sampler or a clip launcher. The registry component wraps the `Pad` primitive from `@audio-ui/react` and lays the pads out in a grid of `columns`.
+Triggers sounds, for a drum machine, a sampler or a clip launcher. The registry component is written on the `Pad` primitive of `@audio-ui/primitives`, which installs with it and lays the pads out in a grid of `columns`.
 
 ## Overview
 
@@ -24,7 +24,7 @@ Triggers sounds, for a drum machine, a sampler or a clip launcher. The registry 
 
 ## Anatomy
 
-It is built on the headless [Pad](/docs/react/pad) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [Pad](/docs/pad-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -90,11 +90,11 @@ The pads share one tab stop. On the focused pad:
 
 ## API reference
 
-The props of the headless parts are on [Pad](/docs/react/pad#api-reference).
+The headless parts and their options are on [Pad](/docs/pad-ui-sdk).
 
 ### Registry component
 
-`Pad` accepts `className` and `style` plus primitive props from `PadPrimitive.Root.Props`, and sets the grid's columns from `columns`. `PadItem` accepts the props of `PadPrimitive.Item`.
+`Pad` accepts `className` and `style` plus the props of the `Pad` primitive's Root, and sets the grid's columns from `columns`. `PadItem` accepts the props of the primitive's `Pad.Item`.
 
 Additional valid HTML attributes passed to `Pad.Root` and `Pad.Item` are forwarded.
 

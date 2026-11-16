@@ -1,4 +1,4 @@
-import { createSource } from "@audio-ui/react";
+import { createSource } from "@audio-ui/core";
 import { useLayoutEffect, useState } from "react";
 import { Piano } from "@/registry-audio/bases/base/audio/elements/piano";
 import { SpectrumAnalyzer } from "@/registry-audio/bases/base/audio/elements/spectrum-analyzer";

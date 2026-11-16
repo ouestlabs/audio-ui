@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="piano-size-default-demo" />
 
-Plays or shows notes, for a virtual instrument, a MIDI visualizer or a chord reference. The registry component wraps the `Piano` primitive from `@audio-ui/react` and draws white and black keys for any MIDI range.
+Plays or shows notes, for a virtual instrument, a MIDI visualizer or a chord reference. The registry component is written on the `Piano` primitive of `@audio-ui/primitives`, which installs with it and draws white and black keys for any MIDI range.
 
 ## Overview
 
@@ -20,11 +20,11 @@ Plays or shows notes, for a virtual instrument, a MIDI visualizer or a chord ref
 
 ## Installation
 
-<Install name="piano" packages="@audio-ui/react class-variance-authority" />
+<Install name="piano" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
 
 ## Anatomy
 
-It is built on the headless [Piano](/docs/react/piano) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [Piano](/docs/piano-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -89,11 +89,11 @@ The keys share one tab stop. On the focused key:
 
 ## API reference
 
-The props of the headless parts are on [Piano](/docs/react/piano#api-reference).
+The headless parts and their options are on [Piano](/docs/piano-ui-sdk).
 
 ### Registry component
 
-`Piano` accepts style props (`size`, `className`) plus primitive props from `PianoPrimitive.Root.Props`.
+`Piano` accepts style props (`size`, `className`) plus the props of the `Piano` primitive's Root.
 
 #### Value and state
 

@@ -300,7 +300,7 @@ export function getDocsComponentCatalogIntro(
 ): string {
   const p = count;
 
-  return `Browse ${p} production-ready audio/ui ${label} components for players, mixers, and synth interfaces. These examples use the headless primitives from @audio-ui/react and stay fully compatible with Shadcn Create so radius, color, and typography match your configured theme.`;
+  return `Browse ${p} production-ready audio/ui ${label} components for players, mixers, and synth interfaces. These examples use the headless primitives from @audio-ui/primitives and stay fully compatible with Shadcn Create so radius, color, and typography match your configured theme.`;
 }
 
 type BreadcrumbItem = {
@@ -398,7 +398,7 @@ export function buildSoftwareJsonLd() {
     codeRepository: siteConfig.links.github,
     description: siteConfig.description,
     license: "https://opensource.org/licenses/MIT",
-    name: "@audio-ui/react",
+    name: "audio/ui",
     programmingLanguage: "TypeScript",
     runtimePlatform: "React 19",
     sameAs: [siteConfig.links.npm],

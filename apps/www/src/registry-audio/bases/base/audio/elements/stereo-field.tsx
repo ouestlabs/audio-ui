@@ -1,4 +1,4 @@
-import type { Source } from "@audio-ui/react";
+import type { Source } from "@audio-ui/core";
 import { type ComponentProps, type RefObject, useEffect, useRef } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 

@@ -8,12 +8,7 @@ const SECTIONS = [
   { folder: "core", guides: ["controllers"], package: "@audio-ui/core" },
   { folder: "engine", guides: [], package: "@audio-ui/engine" },
   { folder: "gl", guides: [], package: "@audio-ui/gl" },
-  { folder: "elements", guides: [], package: "@audio-ui/elements" },
-  { folder: "react", guides: [], package: "@audio-ui/react" },
 ] as const;
-
-/** The modules with a page of their own: a framework's template types (`@audio-ui/elements/vue`) are set up in their framework's tab of the package's overview. */
-const PAGED = packageModules.filter((each) => !each.typesOnly);
 
 /** A module's page in its folder: a package's root is the folder's overview. */
 const pageOf = (from: string, pkg: string) =>
@@ -21,7 +16,7 @@ const pageOf = (from: string, pkg: string) =>
 
 test("every module of the packages has its own page, headed by its entry", async () => {
   const wrong = await Promise.all(
-    PAGED.map(async (each) => {
+    packageModules.map(async (each) => {
       const section = SECTIONS.find((one) => one.package === each.package);
       if (!section) {
         return `${each.from}: no docs section for ${each.package}`;
@@ -52,7 +47,8 @@ test("each package's sidebar lists every module once, beside its guides and over
       ].map((file) => file.replace(".mdx", ""));
       const expected = [
         "index",
-        ...PAGED.filter((each) => each.package === section.package)
+        ...packageModules
+          .filter((each) => each.package === section.package)
           .map((each) => pageOf(each.from, each.package))
           .filter((page) => page !== "index"),
         ...section.guides,

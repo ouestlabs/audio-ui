@@ -1,6 +1,6 @@
 # audio/ui
 
-**Version 1.2.0**  
+**Version 1.3.0**  
 audio/ui  
 October 2026
 
@@ -35,7 +35,7 @@ How to pick, install and wire audio/ui components in React, for AI agents and LL
    - 3.1 [Headless primitives: style by state](#31-headless-primitives-style-by-state)
    - 3.2 [Registry components: props before className](#32-registry-components-props-before-classname)
    - 3.3 [Semantic tokens only](#33-semantic-tokens-only)
-   - 3.4 [Never edit the package](#34-never-edit-the-package)
+   - 3.4 [Edit your copy, never the package](#34-edit-your-copy-never-the-package)
 4. [AI Control](#4-ai-control): **MEDIUM**
    - 4.1 [Keep the person in charge](#41-keep-the-person-in-charge)
    - 4.2 [Schemas come from the instance](#42-schemas-come-from-the-instance)
@@ -419,7 +419,7 @@ Styling the registry components through their props and tokens, and the headless
 
 **Impact: MEDIUM (state styles without extra renders)**
 
-`@audio-ui/react` ships no CSS. Every part accepts `className` and `style` as a value **or a function of its state**, and exposes state as `data-*` attributes and CSS variables.
+The headless primitives ship no CSS. Every part takes the classes and attributes of its element, and exposes its state as `data-*` attributes and CSS variables to style from.
 
 **Incorrect:**
 
@@ -435,7 +435,7 @@ const [dragging, setDragging] = useState(false);
 
 ```tsx
 <Knob.Root>
-  <Knob.Control className={(state) => (state.dragging ? "knob dragging" : "knob")} />
+  <Knob.Control className="knob data-[dragging]:cursor-grabbing" />
 </Knob.Root>
 ```
 
@@ -445,17 +445,17 @@ const [dragging, setDragging] = useState(false);
 .knob[data-disabled] { opacity: 0.5; }
 ```
 
-Common hooks (check the part's API reference for the exact list, don't invent names):
+Common hooks (check the primitive's page for the exact list, don't invent names):
 
 | Hook | Examples |
 | --- | --- |
 | Data attributes | `data-disabled`, `data-dragging`, `data-orientation` (Fader), `data-active` (Knob.Mark, live Waveform), `data-clipping` (Meter), `data-selected`, `data-scrubbing`, `data-in-scale`, `data-out-of-scale`, `data-scale-root` (PianoRoll.Row), `data-muted` (PianoRoll.Note), `data-has-selection` (PianoRoll.Root) |
 | CSS variables | `--xy-pad-x` / `--xy-pad-y`, `--knob-mark-angle`, `--waveform-position`, `--waveform-level`, `--timeline-unit`, `--sequencer-velocity`, `--piano-roll-velocity`, `--piano-roll-chance`, `--piano-roll-level`, `--piano-roll-deviation` |
 
-Read the part list in the docs' **Anatomy** section: a part outside its parent does nothing.
+Read the part list on the primitive's page (`https://www.audio-ui.dev/docs/<name>-ui-sdk`): a part outside its parent does nothing.
 
 ```tsx
-import { Knob } from "@audio-ui/react/knob"; // one entry per primitive keeps the bundle small
+import { Knob } from "@/components/audio-ui/knob/react"; // installed with `npx shadcn@latest add @audio-ui/knob-react`
 
 <Knob.Root aria-label="Cutoff" defaultValue={50}>
   <Knob.Control>
@@ -512,17 +512,17 @@ import { Knob } from "@/components/audio-ui/knob";
 </div>
 ```
 
-### 3.4 Never edit the package
+### 3.4 Edit your copy, never the package
 
 **Impact: LOW (upgrades keep working)**
 
-Changes made inside `node_modules/@audio-ui/react` (or a fork of it) vanish on the next install and block every upgrade. The look lives in your code: either the headless parts styled by state, or the registry component copied into the project.
+Changes made inside `node_modules/@audio-ui/primitives` (or a fork of it) vanish on the next install and block every upgrade. The look lives in your code: the adapter and the registry component are copied into the project, and they are yours to edit.
 
 **Incorrect (patching the installed package):**
 
 ```bash
 # lost on the next install, conflicts with every upgrade
-sed -i 's/strokeWidth = 4/strokeWidth = 6/' node_modules/@audio-ui/react/dist/index.js
+sed -i 's/strokeWidth = 4/strokeWidth = 6/' node_modules/@audio-ui/primitives/dist/knob/index.js
 ```
 
 **Correct (style the parts, or own a copy):**
@@ -532,7 +532,7 @@ sed -i 's/strokeWidth = 4/strokeWidth = 6/' node_modules/@audio-ui/react/dist/in
 ```
 
 ```bash
-npx shadcn@latest add @audio-ui/knob   # then edit components/audio-ui/knob.tsx: it belongs to the project
+npx shadcn@latest add @audio-ui/knob-react   # then edit components/audio-ui/knob/react.tsx: it belongs to the project
 ```
 
 ---

@@ -1,5 +1,6 @@
 import {
   type RefObject,
+  startTransition,
   useCallback,
   useLayoutEffect,
   useMemo,
@@ -145,7 +146,8 @@ export function useTimelineZoom({
     () => ({
       maxZoom,
       minZoom: fit || undefined,
-      onZoomChange: setZoomed,
+      onZoomChange: (next: number | null) =>
+        startTransition(() => setZoomed(next)),
       zoom: zoomed === null ? undefined : zoom,
     }),
     [fit, maxZoom, zoom, zoomed]

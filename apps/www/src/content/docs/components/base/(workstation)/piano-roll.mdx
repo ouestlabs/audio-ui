@@ -27,9 +27,17 @@ A piano roll for writing a phrase: a keyboard down the side, notes on a grid, an
 
 ## Anatomy
 
-It is built on the headless [PianoRoll](/docs/react/piano-roll) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [PianoRoll](/docs/piano-roll-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
+
+A note's `id` is a `string` or a `number`, so type the notes you keep with the roll's `Note`, or a state of literals such as `{ id: "a", … }` is narrower than what `onValueChange` gives back:
+
+```tsx
+import type { Note } from "@audio-ui/primitives/piano-roll";
+
+const [notes, setNotes] = useState<Note[]>([]);
+```
 
 ```tsx
 import { Timeline, TimelineNavigator } from "@/components/audio-ui/timeline";
@@ -175,7 +183,7 @@ The pitch range and the grid are in the schemas, and every note a model writes i
 
 ## API reference
 
-The props of the headless parts are on [PianoRoll](/docs/react/piano-roll#api-reference).
+The headless parts and their options are on [PianoRoll](/docs/piano-roll-ui-sdk).
 
 ### Registry components
 

@@ -57,44 +57,8 @@
       }
     }
   },
+  "html": { "experimentalFullSupportEnabled": true },
   "javascript": {
     "globals": ["Bun"]
-  },
-  "overrides": [
-    {
-      "includes": ["packages/react/bench/*"],
-      "linter": {
-        "rules": {
-          "correctness": {
-            "noUndeclaredVariables": "off",
-            "noUnusedFunctionParameters": "off"
-          },
-          "performance": {
-            "noAwaitInLoops": "off",
-            "noJsxPropsBind": "off"
-          },
-          "suspicious": {
-            "noArrayIndexKey": "off",
-            "noShadow": "off"
-          }
-        }
-      }
-    },
-    {
-      "includes": [
-        "packages/react/src/primitives/*/test/*.bench.tsx",
-        "packages/react/test/bench.ts"
-      ],
-      "linter": {
-        "rules": {
-          "performance": {
-            "noJsxPropsBind": "off"
-          },
-          "suspicious": {
-            "noMisplacedAssertion": "off"
-          }
-        }
-      }
-    }
-  ]
+  }
 }

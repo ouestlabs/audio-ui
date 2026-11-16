@@ -1,4 +1,20 @@
 {
   "title": "Registry",
-  "pages": ["registry", "styling", "[Component catalog](/components)"]
+  "pages": [
+    "registry",
+    "styling",
+    "knob-ui-sdk",
+    "fader-ui-sdk",
+    "xypad-ui-sdk",
+    "meter-ui-sdk",
+    "envelope-ui-sdk",
+    "pad-ui-sdk",
+    "piano-ui-sdk",
+    "sequencer-ui-sdk",
+    "plot-ui-sdk",
+    "waveform-ui-sdk",
+    "timeline-ui-sdk",
+    "piano-roll-ui-sdk",
+    "[Component catalog](/components)"
+  ]
 }

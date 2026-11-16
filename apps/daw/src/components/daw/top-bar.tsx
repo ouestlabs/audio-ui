@@ -1,10 +1,10 @@
+import type { Source } from "@audio-ui/core";
 import type {
   MetronomeRhythm,
   SignatureChange,
   Tempo,
 } from "@audio-ui/engine/time";
 import { AutomationIcon } from "@audio-ui/icons/react";
-import type { Source } from "@audio-ui/react";
 import {
   ArrowArcLeftIcon,
   ArrowArcRightIcon,

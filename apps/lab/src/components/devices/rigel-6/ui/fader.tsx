@@ -1,5 +1,5 @@
-import { Fader } from "@audio-ui/react/fader";
 import { useCallback } from "react";
+import { Fader } from "@/components/audio-ui/fader/react";
 import { FADER_MAX, FADER_MIN } from "../audio/engine";
 import { MARKS } from "./params";
 

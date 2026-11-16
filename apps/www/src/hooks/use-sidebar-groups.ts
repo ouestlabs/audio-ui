@@ -1,7 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import * as React from "react";
 import { useFramework } from "@/hooks/use-framework";
-import { menuSections, needsReact } from "@/lib/docs/content/frameworks";
+import { menuSections } from "@/lib/docs/content/frameworks";
 import {
   getCurrentBase,
   getGroupsFromFolder,
@@ -138,20 +138,17 @@ export interface SiteSection {
 }
 
 /**
- * The switcher's sections, the one being read marked: the primitives of the
- * framework, React's in a section for React alone, else the one chosen.
+ * The switcher's sections, the one being read marked.
  */
 export function useSiteSections(tree: PageTree): SiteSection[] {
-  const [chosen] = useFramework();
   const reading = useReadingSection(tree);
-  const framework = needsReact(reading) ? "react" : chosen;
   return React.useMemo(
     () =>
-      menuSections(framework, reading).map((each) => ({
+      menuSections().map((each) => ({
         ...each,
         current: each.id === reading,
       })),
-    [framework, reading]
+    [reading]
   );
 }
 

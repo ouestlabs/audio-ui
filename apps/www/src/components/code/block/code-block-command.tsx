@@ -1,4 +1,3 @@
-import { TerminalIcon } from "@phosphor-icons/react/ssr";
 import * as React from "react";
 import { CopyButton } from "@/components/code/copy/copy-button";
 import { Icons } from "@/components/site/icons";
@@ -62,12 +61,7 @@ export function CodeBlockCommand({
     // The frame of the site: the package manager chosen in its header, its command in the panel.
     <Frame className="not-typeset" data-code-command="">
       <FrameHeader className="min-h-11 flex-row items-center justify-between gap-3 px-2 py-1.5">
-        <div className="flex items-center gap-2 ps-1">
-          <TerminalIcon
-            aria-hidden="true"
-            className="size-4 text-site-muted-foreground"
-            weight="fill"
-          />
+        <div className="flex items-center">
           <Select
             onValueChange={handlePackageManagerChange}
             value={packageManager}

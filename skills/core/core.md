@@ -1,6 +1,6 @@
 # Without React: @audio-ui/core
 
-`@audio-ui/core` is the logic of every audio/ui control with no UI framework in it: value math, scales, pointer, wheel and keyboard handling, live sources. `@audio-ui/react` is one adapter over it. Use it directly for Vue, Svelte, Solid, Angular, web components or the plain DOM.
+`@audio-ui/core` is the logic of every audio/ui control with no UI framework in it: value math, scales, pointer, wheel and keyboard handling, live sources. The primitives are adapters over it. Use it directly for Solid, Angular, Lit or the plain DOM, or for a control of your own.
 
 ```bash
 npm install @audio-ui/core   # no dependencies
@@ -12,38 +12,41 @@ The audio logic behind the controls (devices, musical time and the scheduler, le
 npm install @audio-ui/engine
 ```
 
-## The primitives as custom elements
+## The primitives for Vue, Svelte and the web
 
-Before writing a binding, use `@audio-ui/elements`: every primitive as unstyled, accessible Web Components built on these controllers, at API parity with `@audio-ui/react` (parts, keyboard interactions, ARIA semantics, native range inputs, `data-*` attributes).
+Before writing a binding, install the primitive: every one is unstyled and accessible, written once over these controllers (`@audio-ui/primitives`, on the UI SDK) and rendered in each framework by a thin adapter that the CLI copies into your project (parts, keyboard interactions, ARIA semantics, native range inputs, `data-*` attributes). The item is named `<primitive>-<framework>`.
 
 ```bash
-npm install @audio-ui/elements
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
 ```
+
+The web adapter is one file, which registers the elements once it is imported:
 
 ```html
 <audio-ui-knob min="20" max="20000" default-value="1000" scale="log">
-  <audio-ui-knob-label>Cutoff</audio-ui-knob-label>
   <audio-ui-knob-control>
     <audio-ui-knob-track></audio-ui-knob-track>
     <audio-ui-knob-indicator></audio-ui-knob-indicator>
-    <audio-ui-knob-thumb></audio-ui-knob-thumb>
+    <audio-ui-knob-thumb aria-label="Cutoff"></audio-ui-knob-thumb>
   </audio-ui-knob-control>
   <audio-ui-knob-value></audio-ui-knob-value>
 </audio-ui-knob>
 
 <script type="module">
-  import "@audio-ui/elements/knob"; // registers the elements
+  import "./audio-ui/knob/web.ts"; // registers the elements
   const knob = document.querySelector("audio-ui-knob");
   knob.addEventListener("input", (event) => setCutoff(event.detail.value));
 </script>
 ```
 
-- `input` fires on every change with `event.detail` `{ value, reason }`; `preventDefault()` rejects the change. `change` fires once when an interaction ends. The `value` property reads and sets the value; while `input` is dispatched it reads the value proposed, as a native input's does.
-- Vue: `compilerOptions.isCustomElement: (tag) => tag.startsWith("audio-ui-")` in the Vue plugin's `template` options, and `import type {} from "@audio-ui/elements/vue"` once for typed templates (strict templates included). Then `v-model="x"`, or `:value` and `@input` to refuse a value with `preventDefault()`. https://www.audio-ui.dev/docs/elements?framework=vue
-- Svelte 5: `import type {} from "@audio-ui/elements/svelte"` once for typed templates, then `value={x}` and `oninput={(event) => (x = event.detail.value)}`: Svelte binds `bind:value` on native inputs only. https://www.audio-ui.dev/docs/elements?framework=svelte
-- The elements apply only display, positioning and `touch-action`, in zero-specificity rules. Style parts by tag and by `data-*` state attributes (`data-dragging`, `data-disabled`, `data-orientation`). API reference: https://www.audio-ui.dev/docs/elements
+- On the elements, `input` fires on every change with `event.detail` `{ value, reason, source }`; `preventDefault()` rejects the change. `change` fires once when an interaction ends. Each part binds a microtask after it connects: read the element's state after that.
+- Vue: `import { Knob } from "@/components/audio-ui/knob/vue"`, then `<Knob.Root :value="x" @value-change="(next) => (x = next)">` with `Knob.Control`, `Knob.Track`, `Knob.Indicator`, `Knob.Thumb` and `Knob.Value`. https://www.audio-ui.dev/docs/vue/knob
+- Svelte 5: `import { Knob } from "$lib/components/audio-ui/knob/svelte"`, then `<Knob.Root {value} onValueChange={(next) => (value = next)}>` with the same parts. `shadcn-svelte` reads the `$lib` alias from `tsconfig.json`. https://www.audio-ui.dev/docs/svelte/knob
+- A part takes the classes and attributes of its element and applies only display, positioning and `touch-action`. Style parts by tag or class and by `data-*` state attributes (`data-dragging`, `data-disabled`, `data-orientation`).
 
-Each primitive registers from its own entry point, `@audio-ui/elements/<primitive>`. Parts with a value of their own fire prefixed events, such as `clipinput` and `clipchange`, distinct from the root's `input` and `change`. Use the controllers below directly only for interfaces the elements do not cover.
+Every primitive has a page with its install, its parts and its options in each framework: `https://www.audio-ui.dev/docs/<primitive>-ui-sdk`. Use the controllers below directly only for interfaces the primitives do not cover.
 
 ## What it exports
 
@@ -93,7 +96,7 @@ The knob resets on a double tap by itself, because a tap on a knob changes nothi
 
 Read the signatures in the `*Controller` type of each module before calling one: they are the source of truth.
 
-The React primitives are the reference implementation of each adapter: `packages/react/src/primitives/<name>/elements/` in https://github.com/ouestlabs/audio-ui shows which part gets which listener and attribute.
+The primitives are the reference implementation of each adapter: `packages/primitives/src/<name>/` in https://github.com/ouestlabs/audio-ui shows which part gets which listener and attribute.
 
 ## A knob in the plain DOM
 
@@ -431,7 +434,7 @@ Give every section the layout the skins expect: `<section class="section">` with
 
 ## Vue
 
-For the primitives, use the elements with `v-model` above. This binding is for a control of your own on a controller.
+For the primitives, use the Vue adapter above. This binding is for a control of your own on a controller.
 
 ```ts
 import { createKnobController, type KnobOptions } from "@audio-ui/core/knob";
@@ -457,7 +460,7 @@ Bind `snapshot.value.angle`, `.formatted` and the rest in the template; call `kn
 
 ## Svelte 5
 
-For the primitives, use the elements with `value` and `oninput` above. This binding is for a control of your own on a controller.
+For the primitives, use the Svelte adapter above. This binding is for a control of your own on a controller.
 
 ```ts
 // knob.svelte.ts

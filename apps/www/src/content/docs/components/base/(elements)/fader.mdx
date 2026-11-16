@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="fader-vertical-demo" />
 
-A linear control for continuous parameters such as volume, gain or a send level. The registry component wraps the `Fader` primitive from `@audio-ui/react` and adds size variants and thumb marks.
+A linear control for continuous parameters such as volume, gain or a send level. The registry component is written on the `Fader` primitive of `@audio-ui/primitives`, which installs with it and adds size variants and thumb marks.
 
 ## Overview
 
@@ -18,11 +18,11 @@ A linear control for continuous parameters such as volume, gain or a send level.
 
 ## Installation
 
-<Install name="fader" packages="@audio-ui/react class-variance-authority" />
+<Install name="fader" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
 
 ## Anatomy
 
-It is built on the headless [Fader](/docs/react/fader) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [Fader](/docs/fader-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -81,11 +81,11 @@ The mouse wheel over the fader moves the value by `step` and reports `eventDetai
 
 ## API reference
 
-The props of the headless parts are on [Fader](/docs/react/fader#api-reference).
+The headless parts and their options are on [Fader](/docs/fader-ui-sdk).
 
 ### Registry component
 
-`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.Root.Props` (`name`, `form`, `format`, `locale`, `largeStep`, `render`, …). The primitive's `Fader.Mark` places a graduation at a `value` along the track, with `data-active` once the value has reached it, to build your own ruler. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
+`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus the props of the `Fader` primitive's Root (`name`, `form`, `format`, `locale`, `largeStep`, `render`, …). The primitive's `Fader.Mark` places a graduation at a `value` along the track, with `data-active` once the value has reached it, to build your own ruler. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
 
 #### Value and state
 

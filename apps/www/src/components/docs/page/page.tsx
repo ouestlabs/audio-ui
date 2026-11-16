@@ -4,17 +4,16 @@ import {
   ArrowRightIcon,
   ArrowUpRightIcon,
 } from "@phosphor-icons/react/ssr";
-import { Link, notFound, useNavigate } from "@tanstack/react-router";
+import { Link, notFound } from "@tanstack/react-router";
 import { createServerFn } from "@tanstack/react-start";
 import { findNeighbour } from "fumadocs-core/page-tree";
 import type { MDXProps } from "mdx/types";
-import { lazy, Suspense, useEffect } from "react";
+import { lazy, Suspense } from "react";
 import { DocsComponentCatalogSection } from "@/components/docs/catalog/component-catalog-section";
 import { DocsCopyPage } from "@/components/docs/page/copy-page";
 import { JsonLd } from "@/components/site/json-ld";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useFramework } from "@/hooks/use-framework";
 import { useSidebarGroups } from "@/hooks/use-sidebar-groups";
 import { siteConfig } from "@/lib/config";
 import {
@@ -22,7 +21,6 @@ import {
   pageScope,
 } from "@/lib/design-system/customizer-scope";
 import { readRawDoc } from "@/lib/docs/content/docs-text";
-import { twinPage } from "@/lib/docs/content/frameworks";
 import { getPageImage, source } from "@/lib/docs/content/source";
 import {
   buildBreadcrumbJsonLd,
@@ -106,18 +104,6 @@ export const loadDocPage = createServerFn({ method: "GET" })
   });
 
 type Neighbours = ReturnType<typeof findNeighbour>;
-
-/** A primitive's page read in the other framework than the one chosen: its twin, in place of it. */
-function useFrameworkTwin(url: string) {
-  const [framework] = useFramework();
-  const navigate = useNavigate();
-  useEffect(() => {
-    const twin = twinPage(url, framework);
-    if (twin) {
-      navigate({ href: twin, replace: true });
-    }
-  }, [framework, navigate, url]);
-}
 
 /**
  * The pages before and after `url` as the sidebar lists them for the reader:
@@ -258,7 +244,6 @@ function DocArticle({
   toc: Parameters<typeof DocsTableOfContents>[0]["toc"];
 }) {
   const neighbours = useNeighbours(pageTree, data.url);
-  useFrameworkTwin(data.url);
 
   return (
     <>

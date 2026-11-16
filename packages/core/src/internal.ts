@@ -1,5 +1,5 @@
 /**
- * Language helpers the adapters (such as `@audio-ui/react`) share with the
+ * Language helpers the adapters (such as `@audio-ui/primitives`) share with the
  * core. Not part of the public API: they may change in any release.
  */
 

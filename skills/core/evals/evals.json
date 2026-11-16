@@ -4,10 +4,24 @@
     {
       "id": 7,
       "prompt": "My app is in Vue 3 (no React). I want a rotary knob for filter cutoff, keyboard accessible, with our own CSS.",
+      "expected_output": "The registry's Vue primitive for the knob (knob-vue), installed with shadcn-vue and assembled from its parts, styled by data attributes and classes, with an accessible name and a log scale for the cutoff.",
+      "files": [],
+      "expectations": [
+        "Installs the knob-vue item of the audio/ui registry (npx shadcn-vue@latest add .../knob-vue.json), not @audio-ui/react or a hand-written slider",
+        "Imports Knob from the installed file (components/audio-ui/knob/vue) and assembles the documented parts (Root, Control, Track, Indicator, Thumb, Value)",
+        "Binds the value with :value and @value-change on Knob.Root",
+        "Uses scale=\"log\" with a positive min for the cutoff",
+        "Gives the knob an accessible name on Knob.Thumb",
+        "Styles state through data-* attributes (data-dragging, data-disabled), not by tracking pointer state manually"
+      ]
+    },
+    {
+      "id": 8,
+      "prompt": "My Vue 3 app needs a knob drawn on a canvas, not with the usual parts. I want audio/ui's logic for the value, the drag and the keyboard under my own drawing.",
       "expected_output": "A Vue composable over createKnobController from @audio-ui/core/knob: created once, setOptions plus resync on change, drawn from getSnapshot, a hidden range input wired to keyDown and type, listeners removed on dispose.",
       "files": [],
       "expectations": [
-        "Uses @audio-ui/core (createKnobController from @audio-ui/core/knob), not @audio-ui/react or the shadcn registry",
+        "Uses @audio-ui/core (createKnobController from @audio-ui/core/knob), not the registry's styled components",
         "Creates the controller once per component, not in a computed or on every option change",
         "Calls setOptions with the full options when they change and resyncs the snapshot afterwards",
         "Draws rotation and text from getSnapshot() (angle, formatted), not from its own angle math",

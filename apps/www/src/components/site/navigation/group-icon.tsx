@@ -1,16 +1,16 @@
 import {
-  BracesIcon,
-  CrateIcon,
-  GridIcon,
   KnobIcon,
   PlayIcon,
   RackIcon,
-  ShapesIcon,
-  SpeakerIcon,
-  TapeIcon,
   TracksIcon,
   WaveformIcon,
 } from "@audio-ui/icons/react";
+import {
+  BookOpenIcon,
+  BracketsCurlyIcon,
+  PackageIcon,
+  ShapesIcon,
+} from "@phosphor-icons/react/ssr";
 import { cn } from "@/lib/utils";
 
 const GROUP_ICONS = {
@@ -22,14 +22,10 @@ const GROUP_ICONS = {
 } as const;
 
 const SECTION_ICONS = {
-  components: GridIcon,
-  core: BracesIcon,
-  docs: TapeIcon,
-  engine: SpeakerIcon,
-  elements: ShapesIcon,
-  icons: GridIcon,
-  react: ShapesIcon,
-  registry: CrateIcon,
+  core: BracketsCurlyIcon,
+  docs: BookOpenIcon,
+  icons: ShapesIcon,
+  registry: PackageIcon,
 } as const;
 
 /** The glyph of a section of the docs, in the color of the text when it is the one being read. */

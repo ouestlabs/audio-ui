@@ -1,9 +1,9 @@
+import { createSource } from "@audio-ui/core";
 import {
   createLoudnessMeter,
   type LiveLoudness,
   type LoudnessMeter,
 } from "@audio-ui/engine/analysis";
-import { createSource } from "@audio-ui/react";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const UNMEASURED: LiveLoudness = {

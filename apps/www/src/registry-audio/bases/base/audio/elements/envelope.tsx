@@ -1,7 +1,7 @@
-import { Envelope as EnvelopePrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
-import { type CSSProperties, useCallback } from "react";
+import { type ComponentProps, type CSSProperties, useCallback } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { Envelope as EnvelopePrimitive } from "@/registry-audio/bases/base/primitives/envelope/react";
 
 const envelopeVariants = cva("", {
   defaultVariants: {
@@ -30,7 +30,9 @@ const gridStep = (step: number | undefined) =>
   step && step > 0 ? step : DEFAULT_GRID_STEP;
 
 /** A line every step of `snap` across and down, spread over the whole frame like a plot's: they sit on the data's own coordinates, so a point is on a line at 0, ¼, ½, ¾ and 1. */
-function gridLines(snap: EnvelopePrimitive.Root.Props["snap"]): CSSProperties {
+function gridLines(
+  snap: ComponentProps<typeof EnvelopePrimitive.Root>["snap"]
+): CSSProperties {
   const [x, y] = typeof snap === "object" ? [snap.x, snap.y] : [snap, snap];
   const share = (step: number | undefined) =>
     `calc((100% - 2 * ${INSET}) * ${gridStep(step)})`;
@@ -41,6 +43,10 @@ function gridLines(snap: EnvelopePrimitive.Root.Props["snap"]): CSSProperties {
     backgroundSize: `${share(x)} 100%, 100% ${share(y)}`,
   };
 }
+
+/** The numbers 0 to length - 1: a point has no name but its place. */
+const indexes = (length: number) =>
+  Array.from({ length: Math.max(length, 0) }, (_, index) => index);
 
 type Domain = readonly [number, number];
 
@@ -54,7 +60,7 @@ function describeAxis(share: number, domain?: Domain, unit = "") {
 }
 
 interface EnvelopeProps
-  extends EnvelopePrimitive.Root.Props,
+  extends Omit<ComponentProps<typeof EnvelopePrimitive.Root>, "children">,
     VariantProps<typeof envelopeVariants> {
   /** Whether a handle on each segment bends it. @default true */
   curves?: boolean;
@@ -111,53 +117,59 @@ export function Envelope({
         snap={snap}
         {...props}
       >
-        <EnvelopePrimitive.Graph className="size-full overflow-visible">
-          <EnvelopePrimitive.Fill className="cn-envelope-fill" />
-          <EnvelopePrimitive.Line className="cn-envelope-path [stroke-linejoin:round]" />
-        </EnvelopePrimitive.Graph>
-        {curves ? (
-          <EnvelopePrimitive.Segments>
-            {(point, index) => (
-              <EnvelopePrimitive.Segment
-                aria-label={`Curve ${index + 1}`}
-                className="cn-envelope-curve group/segment cursor-ns-resize opacity-0 outline-none after:absolute after:-inset-2 pointer-coarse:opacity-100 pointer-coarse:after:-inset-4 group-focus-within/envelope:opacity-100 group-hover/envelope:opacity-100 data-dragging:opacity-100"
-                index={index}
-                key={index}
-              >
-                <span
-                  aria-hidden="true"
-                  className="cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden whitespace-nowrap group-data-dragging/segment:block"
+        {({ value: points }) => (
+          <>
+            <EnvelopePrimitive.Graph className="size-full overflow-visible">
+              <EnvelopePrimitive.Fill className="cn-envelope-fill" />
+              <EnvelopePrimitive.Line className="cn-envelope-path [stroke-linejoin:round]" />
+            </EnvelopePrimitive.Graph>
+            {curves
+              ? indexes(points.length - 1).map((index) => (
+                  <EnvelopePrimitive.Segment
+                    aria-label={`Curve ${index + 1}`}
+                    className="cn-envelope-curve group/segment cursor-ns-resize opacity-0 outline-none after:absolute after:-inset-2 pointer-coarse:opacity-100 pointer-coarse:after:-inset-4 group-focus-within/envelope:opacity-100 group-hover/envelope:opacity-100 data-dragging:opacity-100"
+                    index={index}
+                    key={index}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute bottom-full left-1/2 z-10 mb-2 hidden whitespace-nowrap group-data-dragging/segment:block"
+                    >
+                      {describeCurve(points[index]?.curve)}
+                    </span>
+                  </EnvelopePrimitive.Segment>
+                ))
+              : null}
+            {indexes(points.length).map((index) => {
+              const point = points[index];
+              if (!point) {
+                return null;
+              }
+              return (
+                <EnvelopePrimitive.Point
+                  aria-label={`Point ${index + 1} of ${points.length}`}
+                  className="cn-envelope-point group/point size-4 cursor-grab data-dragging:bg-primary focus-visible:bg-primary touch-none select-none outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 active:cursor-grabbing"
+                  getAriaValueText={describe}
+                  index={index}
+                  key={index}
                 >
-                  {describeCurve(point.curve)}
-                </span>
-              </EnvelopePrimitive.Segment>
-            )}
-          </EnvelopePrimitive.Segments>
-        ) : null}
-        <EnvelopePrimitive.Points>
-          {(point, index, points) => (
-            <EnvelopePrimitive.Point
-              aria-label={`Point ${index + 1} of ${points.length}`}
-              className="cn-envelope-point group/point size-4 cursor-grab data-dragging:bg-primary focus-visible:bg-primary touch-none select-none outline-none after:absolute after:-inset-2 pointer-coarse:after:-inset-3.5 active:cursor-grabbing"
-              getAriaValueText={describe}
-              index={index}
-              key={index}
-            >
-              <span
-                aria-hidden="true"
-                className={cn(
-                  "cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute left-1/2 z-10 hidden whitespace-nowrap group-hover/point:block group-data-dragging/point:block group-focus-visible/point:block",
-                  // Near the top the label goes under the point, so it stays inside the page.
-                  point.y > LABEL_FLIP_ABOVE
-                    ? "top-full mt-2"
-                    : "bottom-full mb-2"
-                )}
-              >
-                {describe(point)}
-              </span>
-            </EnvelopePrimitive.Point>
-          )}
-        </EnvelopePrimitive.Points>
+                  <span
+                    aria-hidden="true"
+                    className={cn(
+                      "cn-envelope-point-value -translate-x-1/2 pointer-events-none absolute left-1/2 z-10 hidden whitespace-nowrap group-hover/point:block group-data-dragging/point:block group-focus-visible/point:block",
+                      // Near the top the label goes under the point, so it stays inside the page.
+                      point.y > LABEL_FLIP_ABOVE
+                        ? "top-full mt-2"
+                        : "bottom-full mb-2"
+                    )}
+                  >
+                    {describe(point)}
+                  </span>
+                </EnvelopePrimitive.Point>
+              );
+            })}
+          </>
+        )}
       </EnvelopePrimitive.Root>
     </div>
   );

@@ -120,7 +120,7 @@ export function HomeHero() {
             </Link>
           }
         />
-        {/* The registry's catalog is React's: a reader of another framework browses the elements. */}
+        {/* The registry's catalog is React's: a reader of another framework browses the primitives. */}
         {forReact ? (
           <Button
             nativeButton={false}
@@ -131,8 +131,8 @@ export function HomeHero() {
           <Button
             nativeButton={false}
             render={
-              <Link params={{ _splat: "elements" }} to="/docs/$">
-                Browse elements
+              <Link params={{ _splat: "registry" }} to="/docs/$">
+                Browse primitives
               </Link>
             }
             variant="outline"

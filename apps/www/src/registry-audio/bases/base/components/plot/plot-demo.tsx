@@ -379,7 +379,6 @@ export default function PlotDemo() {
       )
     );
   }, []);
-  const _band = bands[selected];
   const { analyser } = useNoiseThroughEq(bands);
   const spectrum = useSpectrum(analyser, { maxHz: MAX_HZ, minHz: MIN_HZ });
 

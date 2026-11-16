@@ -5,7 +5,11 @@ import type {
   RackChain,
   TrackDevice,
 } from "@/lib/arrangement";
-import { triggerHihat, triggerKick, triggerSnare } from "@/lib/drum-synthesis";
+import {
+  triggerHihat,
+  triggerKick,
+  triggerSnare,
+} from "@/lib/drum-synthesis";
 import { chainInstrument } from "@/lib/instrument-rack";
 import {
   createRackEngine,

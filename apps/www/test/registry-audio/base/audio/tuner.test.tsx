@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { createSource } from "@audio-ui/react";
+import { createSource } from "@audio-ui/core";
 import { act, fireEvent, render, within } from "@testing-library/react";
 import {
   Tuner,

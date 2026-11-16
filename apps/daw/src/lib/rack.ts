@@ -1,6 +1,10 @@
 import type { DeviceContext, ParameterValue } from "@audio-ui/engine/device";
 import { panGains } from "@audio-ui/engine/playback";
-import type { Rack, RackChain, TrackDevice } from "@/lib/arrangement";
+import type {
+  Rack,
+  RackChain,
+  TrackDevice,
+} from "@/lib/arrangement";
 import type {
   AnyDeviceState,
   LibraryDevice,

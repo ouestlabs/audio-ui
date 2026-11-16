@@ -30,7 +30,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Lint
-        run: bunx biome ci packages/core packages/engine packages/gl packages/react packages/icons packages/elements
+        run: bunx biome ci packages/core packages/engine packages/gl packages/icons
 
       - name: Build
         run: bun run build:pkg
@@ -47,16 +47,8 @@ jobs:
         working-directory: packages/gl
         run: bunx tsc --noEmit
 
-      - name: Typecheck ui
-        working-directory: packages/react
-        run: bunx tsc --noEmit
-
       - name: Typecheck icons
         working-directory: packages/icons
-        run: bunx tsc --noEmit
-
-      - name: Typecheck elements
-        working-directory: packages/elements
         run: bunx tsc --noEmit
 
       - name: Test core
@@ -71,21 +63,17 @@ jobs:
         working-directory: packages/gl
         run: bun test
 
-      - name: Test ui
-        working-directory: packages/react
-        run: bun test
-
       - name: Test icons
         working-directory: packages/icons
         run: bun test
 
-      - name: Test elements
-        working-directory: packages/elements
+      - name: Test primitives
+        working-directory: packages/primitives
         run: bun test
 
-      - name: Registration of elements
-        working-directory: packages/elements
-        run: bun run registers
+      - name: Primitives in React, Vue, Svelte and custom elements
+        working-directory: apps/www
+        run: bun run test:primitives
 
       - name: Typecheck www
         working-directory: apps/www

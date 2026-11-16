@@ -1,21 +1,23 @@
+import { FADE_SHAPES, type FadeShape, fadeGain } from "@audio-ui/core/timeline";
 import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
 import { CurveIcon } from "@audio-ui/icons/react";
 import {
-  FADE_SHAPES,
-  type FadeShape,
-  fadeGain,
-  Timeline as TimelinePrimitive,
-} from "@audio-ui/react";
-import {
+  type ComponentProps,
   type CSSProperties,
+  createContext,
   type FocusEvent,
   type KeyboardEvent,
   type MouseEvent,
   type ReactNode,
+  type RefObject,
+  use,
   useCallback,
   useEffect,
+  useId,
+  useMemo,
   useRef,
   useState,
+  useSyncExternalStore,
 } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";
 import { cn } from "@/registry/bases/base/lib/utils";
@@ -50,21 +52,308 @@ import type {
   Mix,
   TrackColor,
 } from "@/registry-audio/bases/base/lib/arrangement";
+import { Timeline as TimelinePrimitive } from "@/registry-audio/bases/base/primitives/timeline/react";
 
-function Timeline({ className, ...props }: TimelinePrimitive.Root.Props) {
+type RootProps = ComponentProps<typeof TimelinePrimitive.Root>;
+
+type ClipCallbacks = {
+  onDragOffsetChange?: (offset: number) => void;
+  onRemove?: (details: { clip: string }) => void;
+  onSelectedChange?: RootProps["onClipSelectedChange"];
+  onValueChange?: RootProps["onClipChange"];
+  onValueCommitted?: RootProps["onClipCommitted"];
+};
+type RangeCallbacks = {
+  onValueChange?: RootProps["onRangeChange"];
+  onValueCommitted?: RootProps["onRangeCommitted"];
+};
+type MarkCallbacks = {
+  onValueChange?: RootProps["onMarkChange"];
+  onValueCommitted?: RootProps["onMarkCommitted"];
+};
+type TrackCallbacks = {
+  onHeightChange?: RootProps["onTrackHeightChange"];
+  onHeightCommitted?: RootProps["onTrackHeightCommitted"];
+};
+type RulerCallbacks = {
+  onSelectionChange?: RootProps["onSelectionChange"];
+  onSelectionCommitted?: RootProps["onSelectionCommitted"];
+};
+
+/** What each named part asked to hear of its own changes: the timeline reports them all at its root, and routes each to its part. */
+interface Registry {
+  clips: Map<string, ClipCallbacks>;
+  marks: Map<string, MarkCallbacks>;
+  ranges: Map<string, RangeCallbacks>;
+  rulers: Set<RulerCallbacks>;
+  tracks: Map<string, TrackCallbacks>;
+}
+const TimelineRegistry = createContext<RefObject<Registry> | null>(null);
+
+/** The name of the clip, range or track a part is in, so its parts need not be told. */
+const ClipName = createContext("");
+const RangeName = createContext("");
+const TrackName = createContext("");
+
+/** What a piano roll over a timeline reads of it, to take as its own options. */
+export interface TimelineValues {
+  duration: number;
+  position: number | undefined;
+  snapOffset: number | undefined;
+  snapPoints: readonly number[] | undefined;
+  snapStep: number | undefined;
+  source: RootProps["source"];
+  step: number | undefined;
+  zoom: number | null;
+}
+
+/** The zoom as the timeline last reported it: held outside React, so a zoom does not render the timeline, only what reads it. */
+interface ZoomStore {
+  get: () => number | null;
+  subscribe: (listener: () => void) => () => void;
+}
+const TimelineValuesContext = createContext<
+  (Omit<TimelineValues, "zoom"> & { zoom: ZoomStore }) | null
+>(null);
+const neverZoomed: ZoomStore = { get: () => null, subscribe: () => noop };
+function noop() {
+  /* nothing to stop */
+}
+
+/** The duration, grid, zoom and position of the timeline a part is in: what a piano roll takes as options. It renders again when the zoom changes. */
+export function useTimelineValues(): TimelineValues | null {
+  const context = use(TimelineValuesContext);
+  const zoom = useSyncExternalStore(
+    (context?.zoom ?? neverZoomed).subscribe,
+    (context?.zoom ?? neverZoomed).get,
+    () => null
+  );
+  return context ? { ...context, zoom } : null;
+}
+
+/** Registers `callbacks` for the part called `name` in the timeline's registry, for as long as the part is there. */
+function useRegistered<Kind extends "clips" | "marks" | "ranges" | "tracks">(
+  kind: Kind,
+  name: string,
+  callbacks: Registry[Kind] extends Map<string, infer Value> ? Value : never
+) {
+  const registry = use(TimelineRegistry);
+  useEffect(() => {
+    const entries = registry?.current[kind] as Map<string, unknown> | undefined;
+    entries?.set(name, callbacks);
+    return () => {
+      entries?.delete(name);
+    };
+  }, [callbacks, kind, name, registry]);
+}
+
+function Timeline({
+  className,
+  defaultZoom,
+  onClipChange,
+  onClipCommitted,
+  onClipDragOffsetChange,
+  onClipRemove,
+  onClipSelectedChange,
+  onMarkChange,
+  onMarkCommitted,
+  onRangeChange,
+  onRangeCommitted,
+  onSelectionChange,
+  onSelectionCommitted,
+  onTrackHeightChange,
+  onTrackHeightCommitted,
+  onZoomChange,
+  zoom,
+  ...props
+}: RootProps) {
+  const registry = useRef<Registry>({
+    clips: new Map(),
+    marks: new Map(),
+    ranges: new Map(),
+    rulers: new Set(),
+    tracks: new Map(),
+  });
+  // The zoom is reported to whoever reads it (a piano roll over this timeline) through a store: it is not a state, so a zoom does not render the timeline.
+  const zoomed = useRef<number | null>(zoom ?? defaultZoom ?? null);
+  const listeners = useRef(new Set<() => void>());
+  const zoomStore = useMemo<ZoomStore>(
+    () => ({
+      get: () => zoomed.current,
+      subscribe: (listener) => {
+        listeners.current.add(listener);
+        return () => {
+          listeners.current.delete(listener);
+        };
+      },
+    }),
+    []
+  );
+  useEffect(() => {
+    if (zoom !== undefined && zoomed.current !== zoom) {
+      zoomed.current = zoom;
+      for (const listener of listeners.current) {
+        listener();
+      }
+    }
+  }, [zoom]);
+  const changeZoom = useCallback<NonNullable<RootProps["onZoomChange"]>>(
+    (next, details) => {
+      zoomed.current = next;
+      for (const listener of listeners.current) {
+        listener();
+      }
+      onZoomChange?.(next, details);
+    },
+    [onZoomChange]
+  );
+  const {
+    duration = 1,
+    position,
+    snapOffset,
+    snapPoints,
+    snapStep,
+    source,
+    step,
+  } = props;
+  const values = useMemo(
+    () => ({
+      duration,
+      position,
+      snapOffset,
+      snapPoints,
+      snapStep,
+      source,
+      step,
+      zoom: zoomStore,
+    }),
+    [
+      duration,
+      position,
+      snapOffset,
+      snapPoints,
+      snapStep,
+      source,
+      step,
+      zoomStore,
+    ]
+  );
+  const routes = useMemo<Partial<RootProps>>(
+    () => ({
+      onClipChange: (value, details) => {
+        registry.current.clips
+          .get(details.clip)
+          ?.onValueChange?.(value, details);
+        onClipChange?.(value, details);
+      },
+      onClipCommitted: (value, details) => {
+        registry.current.clips
+          .get(details.clip)
+          ?.onValueCommitted?.(value, details);
+        onClipCommitted?.(value, details);
+      },
+      onClipDragOffsetChange: (offset, details) => {
+        registry.current.clips.get(details.clip)?.onDragOffsetChange?.(offset);
+        onClipDragOffsetChange?.(offset, details);
+      },
+      onClipRemove: (clip, details) => {
+        registry.current.clips.get(clip)?.onRemove?.(details);
+        onClipRemove?.(clip, details);
+      },
+      onClipSelectedChange: (selected, details) => {
+        registry.current.clips
+          .get(details.clip)
+          ?.onSelectedChange?.(selected, details);
+        onClipSelectedChange?.(selected, details);
+      },
+      onMarkChange: (value, details) => {
+        registry.current.marks
+          .get(details.mark)
+          ?.onValueChange?.(value, details);
+        onMarkChange?.(value, details);
+      },
+      onMarkCommitted: (value, details) => {
+        registry.current.marks
+          .get(details.mark)
+          ?.onValueCommitted?.(value, details);
+        onMarkCommitted?.(value, details);
+      },
+      onRangeChange: (value, details) => {
+        registry.current.ranges
+          .get(details.range)
+          ?.onValueChange?.(value, details);
+        onRangeChange?.(value, details);
+      },
+      onRangeCommitted: (value, details) => {
+        registry.current.ranges
+          .get(details.range)
+          ?.onValueCommitted?.(value, details);
+        onRangeCommitted?.(value, details);
+      },
+      onSelectionChange: (range, details) => {
+        for (const ruler of registry.current.rulers) {
+          ruler.onSelectionChange?.(range, details);
+        }
+        onSelectionChange?.(range, details);
+      },
+      onSelectionCommitted: (range, details) => {
+        for (const ruler of registry.current.rulers) {
+          ruler.onSelectionCommitted?.(range, details);
+        }
+        onSelectionCommitted?.(range, details);
+      },
+      onTrackHeightChange: (height, details) => {
+        registry.current.tracks
+          .get(details.track)
+          ?.onHeightChange?.(height, details);
+        onTrackHeightChange?.(height, details);
+      },
+      onTrackHeightCommitted: (height, details) => {
+        registry.current.tracks
+          .get(details.track)
+          ?.onHeightCommitted?.(height, details);
+        onTrackHeightCommitted?.(height, details);
+      },
+    }),
+    [
+      onClipChange,
+      onClipCommitted,
+      onClipDragOffsetChange,
+      onClipRemove,
+      onClipSelectedChange,
+      onMarkChange,
+      onMarkCommitted,
+      onRangeChange,
+      onRangeCommitted,
+      onSelectionChange,
+      onSelectionCommitted,
+      onTrackHeightChange,
+      onTrackHeightCommitted,
+    ]
+  );
   return (
-    <TimelinePrimitive.Root
-      className={cn(
-        "cn-timeline flex w-full min-w-0 flex-col data-disabled:opacity-50",
-        className
-      )}
-      data-slot="timeline"
-      {...props}
-    />
+    <TimelineRegistry value={registry}>
+      <TimelineValuesContext value={values}>
+        <TimelinePrimitive.Root
+          className={cn(
+            "cn-timeline flex w-full min-w-0 flex-col data-disabled:opacity-50",
+            className
+          )}
+          data-slot="timeline"
+          {...routes}
+          defaultZoom={defaultZoom}
+          onZoomChange={changeZoom}
+          zoom={zoom}
+          {...props}
+        />
+      </TimelineValuesContext>
+    </TimelineRegistry>
   );
 }
 
-type TimelineViewportProps = TimelinePrimitive.Viewport.Props & {
+type TimelineViewportProps = ComponentProps<
+  typeof TimelinePrimitive.Viewport
+> & {
   /** `hidden` drops the native scrollbar, for a `TimelineNavigator` to scroll with instead. */
   scrollbar?: "hidden" | "native";
 };
@@ -88,7 +377,23 @@ function TimelineViewport({
   );
 }
 
-function TimelineRuler({ className, ...props }: TimelinePrimitive.Ruler.Props) {
+type TimelineRulerProps = ComponentProps<typeof TimelinePrimitive.Ruler> &
+  RulerCallbacks;
+
+function TimelineRuler({
+  className,
+  onSelectionChange,
+  onSelectionCommitted,
+  ...props
+}: TimelineRulerProps) {
+  const registry = use(TimelineRegistry);
+  useEffect(() => {
+    const callbacks = { onSelectionChange, onSelectionCommitted };
+    registry?.current.rulers.add(callbacks);
+    return () => {
+      registry?.current.rulers.delete(callbacks);
+    };
+  }, [onSelectionChange, onSelectionCommitted, registry]);
   return (
     <TimelinePrimitive.Ruler
       className={cn(
@@ -102,11 +407,15 @@ function TimelineRuler({ className, ...props }: TimelinePrimitive.Ruler.Props) {
   );
 }
 
-type TimelineLaneProps = Omit<TimelinePrimitive.Lane.Props, "style"> & {
-  /** Distance between grid lines, in the timeline's units. Leave it out for no lines. */
-  gridStep?: number;
-  style?: CSSProperties;
-};
+type TimelineLaneProps = Omit<
+  ComponentProps<typeof TimelinePrimitive.Lane>,
+  "style"
+> &
+  RulerCallbacks & {
+    /** Distance between grid lines, in the timeline's units. Leave it out for no lines. */
+    gridStep?: number;
+    style?: CSSProperties;
+  };
 
 /** A line every `gridStep` units, sized from the lane's own unit so it follows the zoom. */
 function gridLines(gridStep: number | undefined): CSSProperties | undefined {
@@ -123,33 +432,69 @@ function gridLines(gridStep: number | undefined): CSSProperties | undefined {
 function TimelineLane({
   className,
   gridStep,
+  onSelectionChange,
+  onSelectionCommitted,
   style,
   ...props
 }: TimelineLaneProps) {
+  const registry = use(TimelineRegistry);
+  useEffect(() => {
+    const callbacks = { onSelectionChange, onSelectionCommitted };
+    registry?.current.rulers.add(callbacks);
+    return () => {
+      registry?.current.rulers.delete(callbacks);
+    };
+  }, [onSelectionChange, onSelectionCommitted, registry]);
   return (
     <TimelinePrimitive.Lane
       className={cn("cn-timeline-lane", className)}
       data-slot="timeline-lane"
+      selects={Boolean(onSelectionChange)}
       style={{ ...gridLines(gridStep), ...style }}
       {...props}
     />
   );
 }
 
-function TimelineTrack({ className, ...props }: TimelinePrimitive.Track.Props) {
+type TimelineTrackProps = Omit<
+  ComponentProps<typeof TimelinePrimitive.Track>,
+  "track"
+> &
+  TrackCallbacks & {
+    /** The track's name, in what the timeline reports. Defaults to one of its own. */
+    track?: string;
+  };
+
+function TimelineTrack({
+  className,
+  onHeightChange,
+  onHeightCommitted,
+  track,
+  ...props
+}: TimelineTrackProps) {
+  const own = useId();
+  const name = track ?? own;
+  const callbacks = useMemo(
+    () => ({ onHeightChange, onHeightCommitted }),
+    [onHeightChange, onHeightCommitted]
+  );
+  useRegistered("tracks", name, callbacks);
   return (
-    <TimelinePrimitive.Track
-      className={className}
-      data-slot="timeline-track"
-      {...props}
-    />
+    <TrackName value={name}>
+      <TimelinePrimitive.Track
+        className={className}
+        data-slot="timeline-track"
+        track={name}
+        {...props}
+      />
+    </TrackName>
   );
 }
 
 function TimelineTrackHeader({
   className,
   ...props
-}: TimelinePrimitive.TrackHeader.Props) {
+}: ComponentProps<typeof TimelinePrimitive.TrackHeader>) {
   return (
     <TimelinePrimitive.TrackHeader
       className={cn(
@@ -165,7 +510,8 @@ function TimelineTrackHeader({
 function TimelineTrackResizeHandle({
   className,
   ...props
-}: TimelinePrimitive.TrackResizeHandle.Props) {
+}: Omit<ComponentProps<typeof TimelinePrimitive.TrackResizeHandle>, "track">) {
+  const track = use(TrackName);
   return (
     <TimelinePrimitive.TrackResizeHandle
       className={cn(
@@ -173,12 +519,36 @@ function TimelineTrackResizeHandle({
         className
       )}
       data-slot="timeline-track-resize-handle"
+      track={track}
       {...props}
     />
   );
 }
 
-function TimelineMark({ className, ...props }: TimelinePrimitive.Mark.Props) {
+type TimelineMarkProps = Omit<
+  ComponentProps<typeof TimelinePrimitive.Mark>,
+  "mark"
+> &
+  MarkCallbacks & {
+    /** The mark's name, in what the timeline reports. Defaults to one of its own. */
+    mark?: string;
+  };
+
+function TimelineMark({
+  className,
+  mark,
+  movable,
+  onValueChange,
+  onValueCommitted,
+  ...props
+}: TimelineMarkProps) {
+  const own = useId();
+  const name = mark ?? own;
+  const callbacks = useMemo(
+    () => ({ onValueChange, onValueCommitted }),
+    [onValueChange, onValueCommitted]
+  );
+  useRegistered("marks", name, callbacks);
   return (
     <TimelinePrimitive.Mark
       className={cn(
@@ -186,6 +556,9 @@ function TimelineMark({ className, ...props }: TimelinePrimitive.Mark.Props) {
         className
       )}
       data-slot="timeline-mark"
+      mark={name}
+      // A mark that is told of its moves can be dragged.
+      movable={movable ?? Boolean(onValueChange || onValueCommitted)}
       {...props}
     />
   );
@@ -194,7 +567,7 @@ function TimelineMark({ className, ...props }: TimelinePrimitive.Mark.Props) {
 function TimelinePlayhead({
   className,
   ...props
-}: TimelinePrimitive.Playhead.Props) {
+}: ComponentProps<typeof TimelinePrimitive.Playhead>) {
   return (
     <TimelinePrimitive.Playhead
       className={cn(
@@ -207,36 +580,59 @@ function TimelinePlayhead({
   );
 }
 
+type TimelineRangeProps = Omit<
+  ComponentProps<typeof TimelinePrimitive.Range>,
+  "range"
+> &
+  RangeCallbacks & {
+    /** The range's name, in what the timeline reports. Defaults to one of its own. */
+    range?: string;
+  };
+
 function TimelineRange({
   children,
   className,
+  onValueChange,
+  onValueCommitted,
+  range,
   ...props
-}: TimelinePrimitive.Range.Props) {
+}: TimelineRangeProps) {
+  const own = useId();
+  const name = range ?? own;
+  const callbacks = useMemo(
+    () => ({ onValueChange, onValueCommitted }),
+    [onValueChange, onValueCommitted]
+  );
+  useRegistered("ranges", name, callbacks);
   return (
-    <TimelinePrimitive.Range
-      className={cn(
-        "cn-timeline-range @container/range inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
-        className
-      )}
-      data-slot="timeline-range"
-      minDrawnWidth={32}
-      {...props}
-    >
-      {/* Its true length against the ruler, while it is drawn wider to keep its handles apart. */}
-      <span
-        aria-hidden="true"
-        className="cn-timeline-range-extent pointer-events-none absolute start-0 bottom-0 h-0.5 w-[calc(var(--timeline-unit)*var(--timeline-length))] @min-[4rem]/range:hidden"
-        data-slot="timeline-range-extent"
-      />
-      {children}
-    </TimelinePrimitive.Range>
+    <RangeName value={name}>
+      <TimelinePrimitive.Range
+        className={cn(
+          "cn-timeline-range @container/range inset-y-0 cursor-grab touch-none data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
+          className
+        )}
+        data-slot="timeline-range"
+        minDrawnWidth={32}
+        range={name}
+        {...props}
+      >
+        {/* Its true length against the ruler, while it is drawn wider to keep its handles apart. */}
+        <span
+          aria-hidden="true"
+          className="cn-timeline-range-extent pointer-events-none absolute start-0 bottom-0 h-0.5 w-[calc(var(--timeline-unit)*var(--timeline-length))] @min-[4rem]/range:hidden"
+          data-slot="timeline-range-extent"
+        />
+        {children}
+      </TimelinePrimitive.Range>
+    </RangeName>
   );
 }
 
 function TimelineRangeHandle({
   className,
   ...props
-}: TimelinePrimitive.RangeHandle.Props) {
+}: Omit<ComponentProps<typeof TimelinePrimitive.RangeHandle>, "range">) {
+  const range = use(RangeName);
   return (
     <TimelinePrimitive.RangeHandle
       className={cn(
@@ -246,6 +642,7 @@ function TimelineRangeHandle({
         className
       )}
       data-slot="timeline-range-handle"
+      range={range}
       {...props}
     />
   );
@@ -277,38 +674,75 @@ function switchesOn(mix: Pick<Mix, "muted" | "soloed">, armed?: boolean) {
 const FADE_LIMIT =
   "pointer-events-none absolute inset-y-0 z-30 hidden border-foreground/60 border-l border-dashed";
 
+type TimelineClipProps = Omit<
+  ComponentProps<typeof TimelinePrimitive.Clip>,
+  "clip"
+> &
+  ClipCallbacks & {
+    /** The clip's name, in what the timeline reports. Defaults to one of its own. */
+    clip?: string;
+  };
+
 function TimelineClip({
   children,
   className,
+  clip,
+  onDragOffsetChange,
+  onRemove,
+  onSelectedChange,
+  onValueChange,
+  onValueCommitted,
   ...props
-}: TimelinePrimitive.Clip.Props) {
+}: TimelineClipProps) {
+  const own = useId();
+  const name = clip ?? own;
+  const callbacks = useMemo(
+    () => ({
+      onDragOffsetChange,
+      onRemove,
+      onSelectedChange,
+      onValueChange,
+      onValueCommitted,
+    }),
+    [
+      onDragOffsetChange,
+      onRemove,
+      onSelectedChange,
+      onValueChange,
+      onValueCommitted,
+    ]
+  );
+  useRegistered("clips", name, callbacks);
   return (
-    <TimelinePrimitive.Clip
-      className={cn(
-        "cn-timeline-clip group/clip isolate inset-y-0 touch-none data-dragging:z-10 data-disabled:cursor-not-allowed",
-        className
-      )}
-      data-slot="timeline-clip"
-      {...props}
-    >
-      {children}
-      <span
-        aria-hidden="true"
-        className={cn(FADE_LIMIT, "group-data-[fading=in]/clip:block")}
-        style={{
-          insetInlineStart:
-            "calc(var(--timeline-unit) * var(--clip-fade-in-max))",
-        }}
-      />
-      <span
-        aria-hidden="true"
-        className={cn(FADE_LIMIT, "group-data-[fading=out]/clip:block")}
-        style={{
-          insetInlineEnd:
-            "calc(var(--timeline-unit) * var(--clip-fade-out-max))",
-        }}
-      />
-    </TimelinePrimitive.Clip>
+    <ClipName value={name}>
+      <TimelinePrimitive.Clip
+        className={cn(
+          "cn-timeline-clip group/clip isolate inset-y-0 touch-none data-dragging:z-10 data-disabled:cursor-not-allowed",
+          className
+        )}
+        clip={name}
+        data-slot="timeline-clip"
+        {...props}
+      >
+        {children}
+        <span
+          aria-hidden="true"
+          className={cn(FADE_LIMIT, "group-data-[fading=in]/clip:block")}
+          style={{
+            insetInlineStart:
+              "calc(var(--timeline-unit) * var(--clip-fade-in-max))",
+          }}
+        />
+        <span
+          aria-hidden="true"
+          className={cn(FADE_LIMIT, "group-data-[fading=out]/clip:block")}
+          style={{
+            insetInlineEnd:
+              "calc(var(--timeline-unit) * var(--clip-fade-out-max))",
+          }}
+        />
+      </TimelinePrimitive.Clip>
+    </ClipName>
   );
 }
 
@@ -316,13 +750,15 @@ function TimelineClip({
 function TimelineClipHeader({
   className,
   ...props
-}: TimelinePrimitive.ClipHeader.Props) {
+}: Omit<ComponentProps<typeof TimelinePrimitive.ClipHeader>, "clip">) {
+  const clip = use(ClipName);
   return (
     <TimelinePrimitive.ClipHeader
       className={cn(
         "cn-timeline-clip-header flex h-5 cursor-grab items-center truncate px-2 text-xs data-dragging:cursor-grabbing data-disabled:cursor-not-allowed",
         className
       )}
+      clip={clip}
       data-slot="timeline-clip-header"
       {...props}
     />
@@ -332,7 +768,8 @@ function TimelineClipHeader({
 function TimelineClipHandle({
   className,
   ...props
-}: TimelinePrimitive.ClipHandle.Props) {
+}: Omit<ComponentProps<typeof TimelinePrimitive.ClipHandle>, "clip">) {
+  const clip = use(ClipName);
   return (
     <TimelinePrimitive.ClipHandle
       className={cn(
@@ -340,6 +777,7 @@ function TimelineClipHandle({
         "after:absolute after:-inset-x-1.5 after:inset-y-0 pointer-coarse:after:-inset-x-3",
         className
       )}
+      clip={clip}
       data-slot="timeline-clip-handle"
       {...props}
     />
@@ -350,10 +788,12 @@ function TimelineClipHandle({
 function TimelineClipFade({
   className,
   ...props
-}: TimelinePrimitive.ClipFade.Props) {
+}: Omit<ComponentProps<typeof TimelinePrimitive.ClipFade>, "clip">) {
+  const clip = use(ClipName);
   return (
     <TimelinePrimitive.ClipFade
       className={cn("cn-timeline-clip-fade", className)}
+      clip={clip}
       data-slot="timeline-clip-fade"
       {...props}
     />
@@ -375,7 +815,10 @@ const FADE_CURVES = Object.fromEntries(
   ])
 ) as Record<FadeShape, (progress: number) => number>;
 
-type TimelineClipFadeHandleProps = TimelinePrimitive.ClipFadeHandle.Props & {
+type TimelineClipFadeHandleProps = Omit<
+  ComponentProps<typeof TimelinePrimitive.ClipFadeHandle>,
+  "clip"
+> & {
   /** The fade's curve. With `onShapeChange`, a right-click on the handle lists the curves. */
   shape?: FadeShape;
   onShapeChange?: (shape: FadeShape) => void;
@@ -387,6 +830,7 @@ function TimelineClipFadeHandle({
   shape = "linear",
   ...props
 }: TimelineClipFadeHandleProps) {
+  const clip = use(ClipName);
   const handleShape = useCallback(
     (value: string) => onShapeChange?.(value as FadeShape),
     [onShapeChange]
@@ -399,6 +843,7 @@ function TimelineClipFadeHandle({
         "after:absolute after:-inset-1 pointer-coarse:opacity-100 pointer-coarse:after:-inset-2",
         className
       )}
+      clip={clip}
       data-slot="timeline-clip-fade-handle"
       {...props}
     />
@@ -433,8 +878,14 @@ function TimelineClipFadeHandle({
 /** The whole timeline as one bar: drag the window to scroll, an edge to zoom, double-click to show everything. */
 function TimelineNavigator({
   className,
+  getAriaValueText,
   ...props
-}: TimelinePrimitive.Navigator.Props) {
+}: ComponentProps<typeof TimelinePrimitive.Navigator> & {
+  /** Announces the visible range, e.g. `"0:10 to 0:40"`. */
+  getAriaValueText?: ComponentProps<
+    typeof TimelinePrimitive.NavigatorWindow
+  >["getAriaValueText"];
+}) {
   return (
     <TimelinePrimitive.Navigator
       className={cn("cn-timeline-navigator shrink-0 select-none", className)}
@@ -445,6 +896,7 @@ function TimelineNavigator({
       <TimelinePrimitive.NavigatorWindow
         aria-label="Visible range"
         className="cn-timeline-navigator-window inset-y-0 cursor-grab rounded-[inherit] active:cursor-grabbing"
+        getAriaValueText={getAriaValueText}
       />
       <TimelinePrimitive.NavigatorHandle
         aria-label="Start of the visible range"

@@ -1,4 +1,3 @@
-import type { Timeline as TimelinePrimitive } from "@audio-ui/react";
 import { useCallback, useRef, useState } from "react";
 import type {
   Arranged,
@@ -83,7 +82,7 @@ export function useTimeSelection({
   const onSelectionChange = useCallback(
     (
       range: readonly [number, number],
-      details: TimelinePrimitive.Lane.SelectionChangeEventDetails
+      details: { event: PointerEvent; reason: string }
     ) => {
       const order = tracks.map((track) => track.id);
       const first = order.indexOf(pressTrack.current ?? "");

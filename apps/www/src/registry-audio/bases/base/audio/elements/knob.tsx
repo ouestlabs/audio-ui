@@ -1,7 +1,7 @@
-import { Knob as KnobPrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { Knob as KnobPrimitive } from "@/registry-audio/bases/base/primitives/knob/react";
 
 const knobVariants = cva(
   "cn-knob relative inline-flex outline-none data-disabled:cursor-not-allowed",
@@ -42,7 +42,7 @@ const knobBodyVariants = cva("cn-knob-body absolute z-0", {
 /** A graduation around the dial: a value, or a value and its label. */
 export type KnobMark = number | { label?: ReactNode; value: number };
 
-export type KnobProps = KnobPrimitive.Root.Props &
+export type KnobProps = ComponentProps<typeof KnobPrimitive.Root> &
   VariantProps<typeof knobVariants> & {
     /** Prints the value in the readout and in what screen readers announce, e.g. as `"8.7 kHz"`. Defaults to `format`/`locale`. */
     formatValue?: (value: number) => string;
@@ -155,7 +155,9 @@ function Knob({
           data-slot="knob-value"
           editable={editableValue}
         >
-          {(formatted, value) => (formatValue ? formatValue(value) : formatted)}
+          {({ formatted, value }) =>
+            formatValue ? formatValue(value) : formatted
+          }
         </KnobPrimitive.Value>
       )}
     </KnobPrimitive.Root>

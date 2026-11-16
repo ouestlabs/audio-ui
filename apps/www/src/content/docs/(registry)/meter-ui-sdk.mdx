@@ -1,0 +1,235 @@
+---
+title: Meter on the UI SDK
+description: "The level meter written once and rendered in React, Vue, Svelte and custom elements: install each adapter with its framework's CLI, the parts, a live source painted with no render, and the differences from the React one."
+---
+
+The meter's behavior is one description, `meter` in `@audio-ui/primitives`, over the view of `@audio-ui/core`. Each framework renders it with a thin adapter that you copy into your project and own. The levels, the clip and warning zones, the scales and the peak marks are the same in all four, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is not published yet: this page describes what the next release installs. The [knob](/docs/knob-ui-sdk), the [fader](/docs/fader-ui-sdk) and the [XY pad](/docs/xypad-ui-sdk) are built the same way.
+
+## Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/meter-react
+```
+
+One file, `components/audio-ui/meter/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-vue.json
+```
+
+One file, `components/audio-ui/meter/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-svelte.json
+```
+
+Three files in `components/audio-ui/meter/svelte/`: the value, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/knob-ui-sdk#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-web.json
+```
+
+One file, `components/audio-ui/meter/web.ts`. Import it once, and it registers the `audio-ui-meter` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, `vue` or `svelte`, and for the custom elements `@audio-ui/core`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+## Usage
+
+A Root groups the channels. Each Channel has an `index`, the position of its level, and holds an Indicator that grows with the level, a Peak mark, a Value for the text and a Label that names it. Marks sit along the length, beside the channels. You write the channels yourself, one for each level.
+
+The Root's content can read the meter's state, `{ channelCount, orientation }`, so the channels follow the count of a live source: a function in React, the default slot in Vue, a snippet in Svelte.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import { Meter } from "@/components/audio-ui/meter/react";
+
+export function Output({ levels }: { levels: number[] }) {
+  return (
+    <Meter.Root aria-label="Output" className="flex h-40 gap-1" value={levels} warnThreshold={-6}>
+      {({ channelCount }) => [
+        <Meter.Mark key="zero" value={0} />,
+        ...Array.from({ length: channelCount }, (_, index) => (
+          <Meter.Channel
+            aria-label={`Channel ${index + 1}`}
+            className="relative w-4 bg-muted"
+            index={index}
+            key={index}
+          >
+            <Meter.Indicator className="absolute bottom-0 bg-primary data-warning:bg-amber-400 data-clipping:bg-destructive" />
+            <Meter.Peak className="absolute h-0.5 w-full bg-foreground" />
+          </Meter.Channel>
+        )),
+      ]}
+    </Meter.Root>
+  );
+}
+```
+
+The function is the Root's only child: put a Mark inside it, as here.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { Meter } from "@/components/audio-ui/meter/vue";
+
+defineProps<{ levels: number[] }>();
+</script>
+
+<template>
+  <Meter.Root aria-label="Output" class="flex h-40 gap-1" :value="levels" :warn-threshold="-6">
+    <template #default="{ state }">
+      <Meter.Mark :value="0" />
+      <Meter.Channel
+        v-for="index in state.channelCount"
+        :key="index"
+        :aria-label="`Channel ${index}`"
+        :index="index - 1"
+        class="relative w-4 bg-muted"
+      >
+        <Meter.Indicator class="absolute bottom-0 bg-primary" />
+        <Meter.Peak class="absolute h-0.5 w-full bg-foreground" />
+      </Meter.Channel>
+    </template>
+  </Meter.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { Meter } from "$lib/components/audio-ui/meter/svelte";
+
+  let { levels }: { levels: number[] } = $props();
+</script>
+
+<Meter.Root aria-label="Output" class="flex h-40 gap-1" value={levels} warnThreshold={-6}>
+  {#snippet children(state)}
+    <Meter.Mark value={0} />
+    {#each Array.from({ length: state.channelCount }, (_, i) => i) as index (index)}
+      <Meter.Channel aria-label={`Channel ${index + 1}`} class="relative w-4 bg-muted" {index}>
+        <Meter.Indicator class="absolute bottom-0 bg-primary" />
+        <Meter.Peak class="absolute h-0.5 w-full bg-foreground" />
+      </Meter.Channel>
+    {/each}
+  {/snippet}
+</Meter.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-meter aria-label="Output" value="[-30,-12]" warn-threshold="-6">
+  <audio-ui-meter-mark value="0"></audio-ui-meter-mark>
+  <audio-ui-meter-channel index="0" aria-label="Left">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+  <audio-ui-meter-channel index="1" aria-label="Right">
+    <audio-ui-meter-indicator></audio-ui-meter-indicator>
+    <audio-ui-meter-peak></audio-ui-meter-peak>
+  </audio-ui-meter-channel>
+</audio-ui-meter>
+
+<script type="module">
+  import "./audio-ui/meter/web.ts";
+</script>
+```
+
+Each part binds a microtask after it connects, all together. The channels are written in the markup, so their number does not follow a live source.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The Indicator is scaled from the bottom of a vertical meter and from the start of a horizontal one: give the Channel its size and `position: relative`, and the Indicator `position: absolute` with the color. The Peak is placed by `bottom` or `left`, and hidden while its channel has no peak. A Value takes the formatted level as its text, or a function of the state in React, a slot in Vue and a snippet in Svelte, which reads `text`, `valueNow` and the zone the level is in.
+
+## A live source
+
+An engine updates levels 60 times a second, which is too often to render. Give the Root a `source` instead of `value`: the meter writes each frame straight to the elements of its channels, from one subscription for all of them, and the framework never renders for it.
+
+```ts
+import { createSource } from "@audio-ui/core";
+import type { MeterFrame } from "@audio-ui/core/meter";
+
+const source = createSource<MeterFrame>({ levels: [-30, -30], peaks: [-6, -6] });
+
+// From the engine's frame loop:
+source.set({ levels: [-22.4, -19.8], peaks: [-6, -6] });
+```
+
+Any object with `getSnapshot()` returning `{ levels, peaks? }` and `subscribe(listener)` works. The levels, the peak marks, `aria-valuenow`, `aria-valuetext` and the Value's text are written on each frame, and a clip is kept: the channel and its Indicator carry `data-clipped` from the first level at or above the clip threshold until a click on the meter clears it, as in a DAW. A source that changes its number of channels renders the channels again, and only then. On a custom element, `source` is a property, not an attribute.
+
+## Options
+
+Set on the Root, as props (an attribute in kebab case on the custom element).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `value` | `number[]` | | The level of each channel, in dB. Its length is the channel count. |
+| `peak` | `number[]` | | The peak-hold level of each channel. Timing and decay live outside the primitive. |
+| `source` | `{ getSnapshot, subscribe }` | | A live signal, painted with no render. It takes precedence over `value` and `peak`. |
+| `min`, `max` | `number` | `-60`, `6` | The range, in dB. |
+| `orientation` | `"vertical"` or `"horizontal"` | `"vertical"` | Which way the bars run. |
+| `scale` | `"linear"`, `"iec"` or a function | `"linear"` | How levels are spread along the length. `"iec"` gives the top more room, as digital peak meters do; a function is any increasing curve of the level. |
+| `clipThreshold` | `number` | `0` | The level at or above which a channel is clipping. |
+| `warnThreshold` | `number` | | The level at or above which a channel is in its warning zone, below the clip threshold. Unset, there is no warning zone. |
+| `format`, `locale` | `Intl.NumberFormat` options, a locale | one decimal | How a level is written, for the Value and for `aria-valuetext`. |
+
+The Mark takes a `value` and sits along the length at its level. A Channel takes `getAriaValueText(formatted, value, index)` to announce its level in your own words, like `"-6 dB"`. A function `scale` is a property: on a custom element, set it from script.
+
+## States to style from
+
+- `data-orientation` on the Root, the channels, the Indicators, the Peaks and the Marks.
+- `data-warning` and `data-clipping` on a channel, its Indicator and its Peak, while its level is in the warning zone or at or above the clip threshold.
+- `data-clipped` on a channel and its Indicator, with a live source, from the first clip until a click on the meter.
+
+## Accessibility
+
+Each channel is a `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and an `aria-valuetext` that reads the level as a number with its unit, not as a share of the range. Name it with `aria-label`, or with a Label part inside it, which sets `aria-labelledby`. The Indicator, the Peak and the Value are hidden from assistive technology: the channel announces its own level.

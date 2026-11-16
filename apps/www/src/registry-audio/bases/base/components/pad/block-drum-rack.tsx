@@ -1,4 +1,4 @@
-import type { Pad as PadPrimitive } from "@audio-ui/react";
+import type { PadOffDetails, PadOnDetails } from "@audio-ui/primitives/pad";
 import { useCallback, useRef, useState } from "react";
 import { Knob } from "@/registry-audio/bases/base/audio/elements/knob";
 import { Pad, PadItem } from "@/registry-audio/bases/base/audio/elements/pad";
@@ -157,7 +157,7 @@ export default function BlockDrumRack() {
   const ringing = useRef(new Map<string, GainNode[]>());
 
   const strike = useCallback(
-    (id: string, details: PadPrimitive.Root.OnEventDetails) => {
+    (id: string, details: PadOnDetails) => {
       const ctx = webAudio.resume();
       const index = kitRef.current.findIndex((item) => item.id === id);
       const sound = kitRef.current[index];
@@ -179,19 +179,16 @@ export default function BlockDrumRack() {
   );
 
   // Drum hits ring on after the pad is released: only a choke stops them.
-  const choke = useCallback(
-    (id: string, details: PadPrimitive.Root.OffEventDetails) => {
-      const ctx = webAudio.resume();
-      if (!ctx || details.reason !== "choke") {
-        return;
-      }
-      for (const hit of ringing.current.get(id) ?? []) {
-        hit.gain.setTargetAtTime(0, ctx.currentTime, CHOKE_FADE);
-      }
-      ringing.current.delete(id);
-    },
-    []
-  );
+  const choke = useCallback((id: string, details: PadOffDetails) => {
+    const ctx = webAudio.resume();
+    if (!ctx || details.reason !== "choke") {
+      return;
+    }
+    for (const hit of ringing.current.get(id) ?? []) {
+      hit.gain.setTargetAtTime(0, ctx.currentTime, CHOKE_FADE);
+    }
+    ringing.current.delete(id);
+  }, []);
 
   const edit = useCallback(
     (change: Partial<Pick<Sound, "decay" | "level" | "tune">>) =>

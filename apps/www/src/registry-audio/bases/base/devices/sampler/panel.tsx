@@ -1,5 +1,5 @@
 import { midiToHz } from "@audio-ui/engine/pitch";
-import type { Pad as PadPrimitive } from "@audio-ui/react";
+import type { PadOnDetails } from "@audio-ui/primitives/pad";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
 import {
@@ -75,7 +75,7 @@ function SamplerPanel({
     [onValueChange, value]
   );
   const strike = useCallback(
-    (slice: string, details: PadPrimitive.Root.OnEventDetails) =>
+    (slice: string, details: PadOnDetails) =>
       onNoteOn?.({
         frequency: midiToHz(SAMPLER_FIRST_NOTE + Number(slice)),
         velocity: details.velocity,

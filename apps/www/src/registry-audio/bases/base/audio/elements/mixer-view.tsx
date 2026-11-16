@@ -1,6 +1,7 @@
+import type { Source } from "@audio-ui/core";
+import type { MeterFrame } from "@audio-ui/core/meter";
 import { dbToGain, gainToDb, peakDb } from "@audio-ui/engine/analysis";
 import { formatLevel, formatPan as formatPanOf } from "@audio-ui/engine/format";
-import type { Meter as MeterPrimitive, Source } from "@audio-ui/react";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -51,7 +52,7 @@ type Engine = ReturnType<typeof useArrangementEngine>;
 const MIN_DB = -60;
 const MAX_DB = 6;
 const NO_ANALYSERS: readonly AnalyserNode[] = [];
-const SILENT: MeterPrimitive.Root.Frame = {
+const SILENT: MeterFrame = {
   levels: [-100, -100],
   peaks: [-100, -100],
 };
@@ -84,7 +85,7 @@ function StripMeter({
   marks,
 }: {
   label: string;
-  levels: Source<MeterPrimitive.Root.Frame>;
+  levels: Source<MeterFrame>;
   marks?: readonly number[];
 }) {
   return (

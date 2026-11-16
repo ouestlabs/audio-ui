@@ -1,6 +1,7 @@
-import { Piano as PianoPrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
+import type { ComponentProps } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { Piano as PianoPrimitive } from "@/registry-audio/bases/base/primitives/piano/react";
 
 const pianoVariants = cva("", {
   defaultVariants: {
@@ -16,7 +17,10 @@ const pianoVariants = cva("", {
 });
 
 interface PianoProps
-  extends Omit<PianoPrimitive.Root.Props, "className">,
+  extends Omit<
+      ComponentProps<typeof PianoPrimitive.Root>,
+      "children" | "className"
+    >,
     VariantProps<typeof pianoVariants> {
   className?: string;
 }
@@ -33,15 +37,15 @@ export function Piano({ className, size, ...props }: PianoProps) {
       data-slot="piano"
       {...props}
     >
-      <PianoPrimitive.Keys>
-        {(pitch) => (
+      {({ pitches }) =>
+        pitches.map((pitch) => (
           <PianoPrimitive.Key
             className="cn-piano-key cursor-pointer"
             key={pitch}
             pitch={pitch}
           />
-        )}
-      </PianoPrimitive.Keys>
+        ))
+      }
     </PianoPrimitive.Root>
   );
 }

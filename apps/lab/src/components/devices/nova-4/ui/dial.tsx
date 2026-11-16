@@ -1,5 +1,5 @@
-import { Knob } from "@audio-ui/react/knob";
 import { useCallback, useMemo } from "react";
+import { Knob } from "@/components/audio-ui/knob/react";
 import type { Knobbed, OnParam } from "./params";
 
 /** A rotary knob on the panel's 0 to 10 scale, or on the steps of a list (`max`), snapped to its marks. */

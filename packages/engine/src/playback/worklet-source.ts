@@ -2,7 +2,7 @@
 
 /** A hash of the sources this bundle was made from, checked by a test. */
 export const CLIP_PLAYER_WORKLET_INPUTS =
-  "48b372333d55b7c1fb34321e7e46b0f3d566a3abc4c813c35812d9030db0ccc1";
+  "82fdffe3a0a9e1bec62b8b81974b0bcdc883c32bd14ae40401d938cdaffe13c9";
 
 /**
  * The clip player's processor, as the source of a module: load it into a

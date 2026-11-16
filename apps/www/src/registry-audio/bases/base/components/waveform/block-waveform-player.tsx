@@ -1,3 +1,4 @@
+import { createSource } from "@audio-ui/core";
 import {
   type AudioPeaks,
   computePeaks,
@@ -6,7 +7,6 @@ import {
 import { decodeAudioChannels } from "@audio-ui/engine/files";
 import { formatTime } from "@audio-ui/engine/format";
 import { LoopIcon } from "@audio-ui/icons/react";
-import { createSource } from "@audio-ui/react";
 import type { ChangeEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { IconPlaceholder } from "@/components/icon-placeholder";

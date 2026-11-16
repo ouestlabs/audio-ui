@@ -7,7 +7,7 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="knob-demo" />
 
-A rotary control for continuous parameters such as level, cutoff or pan. The registry component wraps the `Knob` primitive from `@audio-ui/react` and adds size variants and theme styles.
+A rotary control for continuous parameters such as level, cutoff or pan. The registry component is written on the `Knob` primitive of `@audio-ui/primitives`, which installs with it and adds size variants and theme styles.
 
 ## Overview
 
@@ -17,11 +17,11 @@ A rotary control for continuous parameters such as level, cutoff or pan. The reg
 
 ## Installation
 
-<Install name="knob" packages="@audio-ui/react class-variance-authority" />
+<Install name="knob" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
 
 ## Anatomy
 
-It is built on the headless [Knob](/docs/react/knob) of `@audio-ui/react`: its parts, and how they fit, are on that page.
+It is built on the headless [Knob](/docs/knob-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
 
 ## Usage
 
@@ -94,11 +94,11 @@ The mouse wheel over the knob moves the value by `step` and reports `eventDetail
 
 ## API reference
 
-The props of the headless parts are on [Knob](/docs/react/knob#api-reference).
+The headless parts and their options are on [Knob](/docs/knob-ui-sdk).
 
 ### Registry component
 
-`Knob` accepts `size` and `className` plus primitive props from `KnobPrimitive.Root.Props`. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the knob's input.
+`Knob` accepts `size` and `className` plus the props of the `Knob` primitive's Root. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the knob's input.
 
 <TypeTable>
 <TypeRow name={"value"} type={"number"}>Where the mark sits, on the knob's scale.</TypeRow>
@@ -124,7 +124,7 @@ The props of the headless parts are on [Knob](/docs/react/knob#api-reference).
 <TypeRow name={"className"} type={"string"}>On the root wrapper.</TypeRow>
 </TypeTable>
 
-`@audio-ui/react/knob` exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Provider` (the default `dragMode` of the knobs below it), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
+The `Knob` primitive that installs with it exposes `Knob.Root`, `Knob.Control` (pointer, wheel, reset), `Knob.Track` and `Knob.Indicator` (SVG arcs; `strokeWidth` in the 48×48 viewBox), `Knob.Thumb` (rotates with the value and holds the input), `Knob.Value` (formatted `<output>`), `Knob.Provider` (the default `dragMode` of the knobs below it), `Knob.Mark` (a graduation at a `value`, rotated onto the dial's scale, with `data-active` once reached), and `Knob.Label`. Every part accepts a `render` prop, `className` / `style` as functions of state, and exposes `data-disabled` / `data-dragging`.
 
 ## Examples
 
@@ -145,7 +145,7 @@ Use `anchor` to show a reference point on the rail (for example the center of a 
 To turn every knob of an app that way, wrap it once in `Knob.Provider`: each `Knob.Root` below it takes that mode, unless it sets its own `dragMode`.
 
 ```tsx
-import { Knob } from "@audio-ui/react"
+import { Knob } from "@/components/audio-ui/knob/react"
 
 <Knob.Provider dragMode="vertical">
   <Mixer />

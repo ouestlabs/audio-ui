@@ -1,7 +1,7 @@
-import { Fader as FaderPrimitive } from "@audio-ui/react";
 import { cva, type VariantProps } from "class-variance-authority";
-import type { ReactNode } from "react";
+import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { Fader as FaderPrimitive } from "@/registry-audio/bases/base/primitives/fader/react";
 
 const faderVariants = cva("", {
   defaultVariants: {
@@ -81,7 +81,7 @@ const faderThumbMarkVariants = cva("cn-fader-thumb-mark", {
 export type FaderMark = number | { label?: ReactNode; value: number };
 
 interface FaderProps
-  extends FaderPrimitive.Root.Props,
+  extends ComponentProps<typeof FaderPrimitive.Root>,
     VariantProps<typeof faderVariants> {
   /** Lets you type the value: a double click on the readout, or Enter while it has focus. */
   editableValue?: boolean;
@@ -233,10 +233,8 @@ export function Fader({
               data-slot="fader-value"
               editable={editableValue}
             >
-              {(formatted, values) =>
-                formatValue && values[0] !== undefined
-                  ? formatValue(values[0])
-                  : formatted[0]
+              {({ formatted, value }) =>
+                formatValue ? formatValue(value) : formatted
               }
             </FaderPrimitive.Value>
           )}

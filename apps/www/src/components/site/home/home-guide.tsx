@@ -37,7 +37,7 @@ const AGENTS = [
 const FAQ: FaqItem[] = [
   {
     answer:
-      "An open-source library of accessible audio components for the web: knobs, faders, meters, waveforms, timelines, step sequencers, piano rolls and more, as headless React primitives and custom elements on npm, or as styled shadcn/ui components you own.",
+      "An open-source library of accessible audio components for the web: knobs, faders, meters, waveforms, timelines, step sequencers, piano rolls and more, as headless primitives for React, Vue, Svelte and the web, or as styled shadcn/ui components you own.",
     question: "What is audio/ui?",
   },
   {
@@ -47,7 +47,7 @@ const FAQ: FaqItem[] = [
   },
   {
     answer:
-      "No. With shadcn/ui and Tailwind CSS v4, install styled components from the registry. Without them, use the headless primitives of @audio-ui/react and style them your way.",
+      "No. With shadcn/ui and Tailwind CSS v4, install styled components from the registry. Without them, install the headless primitives of your framework from the registry and style them your way.",
     question: "Do I need shadcn/ui?",
   },
   {
@@ -62,7 +62,7 @@ const FAQ: FaqItem[] = [
   },
   {
     answer:
-      "Yes. @audio-ui/elements has every primitive as a custom element, for plain HTML and any framework, typed for Vue and Svelte templates, and @audio-ui/core holds the logic with no dependency.",
+      "Yes. Every primitive comes for React, Vue, Svelte and plain web components, over @audio-ui/core, which holds the logic with no dependency.",
     question: "Can I use it outside React?",
   },
   {
@@ -84,12 +84,12 @@ const LEAD = "max-w-2xl text-pretty text-site-muted-foreground text-sm";
  * usual questions. Search engines and agents read the page without running it.
  */
 export function HomeGuide({
-  elements,
   figures,
   guides,
+  primitives,
   spaces,
 }: HomeIndex & { figures: HomeFigure[] }) {
-  // A reader of another framework than React sees what is theirs: the elements, not the registry and its guides.
+  // A reader of another framework than React sees what is theirs: the primitives, not the registry's styled components and its guides.
   const [framework] = useFramework();
   const forReact = framework === null || framework === "react";
   return (
@@ -104,20 +104,13 @@ export function HomeGuide({
         <div className="-mx-4 sm:-mx-6">
           <HomeFigures
             figures={
-              forReact
-                ? figures
-                : figures
-                    .filter((each) => !each.reactOnly)
-                    .map((each) => ({
-                      ...each,
-                      href: each.elementsHref ?? each.href,
-                    }))
+              forReact ? figures : figures.filter((each) => !each.reactOnly)
             }
           />
         </div>
         {forReact ? null : (
           <ul className="mt-10 grid gap-x-8 gap-y-4 sm:grid-cols-2 xl:grid-cols-3">
-            {elements.map((page) => (
+            {primitives.map((page) => (
               <li key={page.url}>
                 <Link
                   className="font-medium text-sm hover:underline"

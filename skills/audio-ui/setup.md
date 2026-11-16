@@ -20,21 +20,23 @@ or by hand:
 
 Then `npx shadcn@latest add @audio-ui/knob`. Requires React 19 and Tailwind CSS v4.
 
-## Package only
+## Headless primitives only
+
+The same registry installs the primitive of your framework alone, with no styles, one item per primitive and framework:
 
 ```bash
-npm install @audio-ui/react
+npx shadcn@latest add @audio-ui/knob-react
 ```
 
-Primitives are unstyled and export `Knob`, `Fader`, `XYPad`, `Envelope`, `Meter`, `Plot`, `Waveform`, `Timeline`, `Sequencer`, `Piano` and `PianoRoll`. Peer dependencies: `react` and `react-dom` 19.
+The suffix is the framework: `-react`, `-vue`, `-svelte` or `-web` (`shadcn-vue` and `shadcn-svelte` take the item's URL, `https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`). The primitives are unstyled: `Knob`, `Fader`, `XYPad`, `Envelope`, `Meter`, `Plot`, `Waveform`, `Timeline`, `Sequencer`, `Piano`, `PianoRoll` and `Pad`. Their logic is `@audio-ui/primitives`, over `@audio-ui/core`, which the CLI adds to `package.json`.
 
-## Without React
+## Another framework
+
+Vue, Svelte and the web have the same primitives, as items of the registry (`knob-vue`, `knob-svelte`, `knob-web`): see the `core` skill. For a control of your own, or a framework with no adapter (Solid, Angular, Lit), `@audio-ui/core` has the framework-free controllers, with no dependency:
 
 ```bash
 npm install @audio-ui/core
 ```
-
-No dependencies. The framework-free controllers of every primitive, for Vue, Svelte, Solid, Angular, web components or the plain DOM: see the `core` skill.
 
 ## MCP server
 

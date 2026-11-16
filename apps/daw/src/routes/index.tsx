@@ -1,7 +1,7 @@
-import { Knob } from "@audio-ui/react";
 import { HotkeysProvider } from "@tanstack/react-hotkeys";
 import { createFileRoute } from "@tanstack/react-router";
 import { useCallback, useEffect, useState } from "react";
+import { Knob } from "@/components/audio-ui/knob/react";
 import { Daw, type DawProps } from "@/components/daw/daw";
 import { SmallScreenNotice } from "@/components/daw/small-screen-notice";
 import { clearView } from "@/components/daw/use-saved-view";

@@ -1,8 +1,14 @@
-import { Sequencer as SequencerPrimitive } from "@audio-ui/react";
-import type { CSSProperties, ReactNode } from "react";
+import type { ComponentProps, CSSProperties, ReactNode } from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { Sequencer as SequencerPrimitive } from "@/registry-audio/bases/base/primitives/sequencer/react";
 
-type SequencerProps = Omit<SequencerPrimitive.Root.Props, "className"> & {
+/** The numbers 0 to length - 1, to make a part of each row or step from. */
+const indexes = (length: number) => Array.from({ length }, (_, index) => index);
+
+type SequencerProps = Omit<
+  ComponentProps<typeof SequencerPrimitive.Root>,
+  "children" | "className"
+> & {
   className?: string;
   /** Names each row, such as "Kick": it labels the row for assistive technology and is written beside it. */
   rowLabels?: readonly string[];
@@ -53,8 +59,8 @@ function Sequencer({
       data-slot="sequencer"
       {...props}
     >
-      <SequencerPrimitive.Rows>
-        {(row) => (
+      {({ rows, steps }) =>
+        indexes(rows).map((row) => (
           <SequencerPrimitive.Row
             aria-label={rowLabels?.[row] ?? `Row ${row + 1}`}
             className={
@@ -63,6 +69,7 @@ function Sequencer({
                 : "flex items-center"
             }
             index={row}
+            key={row}
           >
             {renderRowLabel?.(row) ??
               (rowLabels ? (
@@ -75,55 +82,55 @@ function Sequencer({
               ) : null)}
             <div className="flex min-w-0 flex-1 flex-col gap-1">
               <div className="grid grid-flow-col auto-cols-fr gap-1">
-                <SequencerPrimitive.Cells>
-                  {(step) => (
-                    <SequencerPrimitive.Cell
-                      aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1}`}
-                      className={cn(
-                        "cn-sequencer-cell flex min-w-0 cursor-pointer touch-none items-center justify-center font-medium text-[9px] tabular-nums outline-none aria-pressed:text-primary-foreground",
-                        size === "sm" ? "h-6" : "h-9",
-                        step % beatEvery === 0 && "cn-sequencer-cell-beat",
-                        shadeByVelocity &&
-                          "aria-pressed:opacity-(--sequencer-cell-level)"
-                      )}
-                      data-step={step}
-                      step={step}
-                      style={
-                        shadeByVelocity
-                          ? ({
-                              "--sequencer-cell-level":
-                                0.35 + 0.65 * (velocities?.[row]?.[step] ?? 1),
-                            } as CSSProperties)
-                          : undefined
-                      }
-                    >
-                      {renderCell?.(row, step)}
-                    </SequencerPrimitive.Cell>
-                  )}
-                </SequencerPrimitive.Cells>
+                {indexes(steps).map((step) => (
+                  <SequencerPrimitive.Cell
+                    aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1}`}
+                    className={cn(
+                      "cn-sequencer-cell flex min-w-0 cursor-pointer touch-none items-center justify-center font-medium text-[9px] tabular-nums outline-none aria-pressed:text-primary-foreground",
+                      size === "sm" ? "h-6" : "h-9",
+                      step % beatEvery === 0 && "cn-sequencer-cell-beat",
+                      shadeByVelocity &&
+                        "aria-pressed:opacity-(--sequencer-cell-level)"
+                    )}
+                    data-step={step}
+                    key={step}
+                    row={row}
+                    step={step}
+                    style={
+                      shadeByVelocity
+                        ? ({
+                            "--sequencer-cell-level":
+                              0.35 + 0.65 * (velocities?.[row]?.[step] ?? 1),
+                          } as CSSProperties)
+                        : undefined
+                    }
+                  >
+                    {renderCell?.(row, step)}
+                  </SequencerPrimitive.Cell>
+                ))}
               </div>
               {showVelocity ? (
                 <div className="grid grid-flow-col auto-cols-fr gap-1">
-                  <SequencerPrimitive.Cells>
-                    {(step) => (
-                      <SequencerPrimitive.Velocity
-                        aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1} velocity`}
-                        className={cn(
-                          "cn-sequencer-velocity group/velocity relative min-w-0 cursor-ns-resize touch-none outline-none",
-                          size === "sm" ? "h-3" : "h-8"
-                        )}
-                        step={step}
-                      >
-                        <span className="cn-sequencer-velocity-fill absolute inset-x-0 bottom-0 h-[calc(var(--sequencer-velocity)*100%)]" />
-                      </SequencerPrimitive.Velocity>
-                    )}
-                  </SequencerPrimitive.Cells>
+                  {indexes(steps).map((step) => (
+                    <SequencerPrimitive.Velocity
+                      aria-label={`${rowLabels?.[row] ?? `Row ${row + 1}`}, step ${step + 1} velocity`}
+                      className={cn(
+                        "cn-sequencer-velocity group/velocity relative min-w-0 cursor-ns-resize touch-none outline-none",
+                        size === "sm" ? "h-3" : "h-8"
+                      )}
+                      key={step}
+                      row={row}
+                      step={step}
+                    >
+                      <span className="cn-sequencer-velocity-fill absolute inset-x-0 bottom-0 h-[calc(var(--sequencer-velocity)*100%)]" />
+                    </SequencerPrimitive.Velocity>
+                  ))}
                 </div>
               ) : null}
             </div>
           </SequencerPrimitive.Row>
-        )}
-      </SequencerPrimitive.Rows>
+        ))
+      }
     </SequencerPrimitive.Root>
   );
 }

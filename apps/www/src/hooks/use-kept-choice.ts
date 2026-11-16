@@ -10,11 +10,14 @@ import { useCallback, useEffect, useSyncExternalStore } from "react";
 export function createKeptChoice<T extends string>({
   isValid,
   key,
+  onChange,
   param,
 }: {
   isValid: (value: unknown) => value is T;
   /** Where the browser keeps it. */
   key: string;
+  /** Told of each choice made, to mirror it on the document. */
+  onChange?: (value: T | null) => void;
   /** The address' parameter. */
   param: string;
 }) {
@@ -38,6 +41,7 @@ export function createKeptChoice<T extends string>({
   /** Keeps a choice in the browser and tells every reader of it, the address left as it is: a choice that goes to another page carries it in that page's link. */
   function remember(next: T | null) {
     chosen = next;
+    onChange?.(next);
     try {
       if (next) {
         localStorage.setItem(key, next);
@@ -79,5 +83,5 @@ export function createKeptChoice<T extends string>({
     return [isValid(value) ? value : kept, choose] as const;
   }
 
-  return { remember, useChoice };
+  return { read, remember, useChoice };
 }

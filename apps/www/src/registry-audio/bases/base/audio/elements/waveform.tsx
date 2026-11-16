@@ -1,25 +1,43 @@
-import { Waveform as WaveformPrimitive } from "@audio-ui/react";
-import type { ComponentProps } from "react";
+import {
+  type ComponentProps,
+  createContext,
+  type ReactNode,
+  type RefObject,
+  use,
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+} from "react";
 import { cn } from "@/registry/bases/base/lib/utils";
+import { Waveform as WaveformPrimitive } from "@/registry-audio/bases/base/primitives/waveform/react";
 
 /** Fades the canvas out at both ends, so bars don't stop on a hard edge. */
 const EDGE_FADE =
   "[-webkit-mask-image:linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)] mask-[linear-gradient(to_right,transparent,black_16px,black_calc(100%-16px),transparent)]";
 
-type LiveWaveformShape = NonNullable<WaveformPrimitive.Canvas.Props["variant"]>;
+type RootProps = ComponentProps<typeof WaveformPrimitive.Root>;
+type CanvasProps = ComponentProps<typeof WaveformPrimitive.Canvas>;
+type RegionCallbacks = Pick<RootProps, "onRegionChange" | "onRegionCommitted">;
+
+/** What a region part reads: the regions' callbacks, and the name of the region it is in. */
+const RegionHandlers = createContext<RefObject<
+  Map<string, RegionCallbacks>
+> | null>(null);
+const RegionName = createContext<string | null>(null);
+
+type LiveWaveformShape = NonNullable<CanvasProps["variant"]>;
 /** A file is drawn from its levels: the raw trace is for live samples. */
 type WaveformShape = Exclude<LiveWaveformShape, "scope">;
 
-type WaveformProps = Omit<WaveformPrimitive.Root.Props, "levels" | "peaks"> &
-  Pick<
-    WaveformPrimitive.Control.Props,
-    "getAriaValueText" | "onSelectionChange" | "onSelectionCommitted"
-  > &
-  Pick<WaveformPrimitive.Canvas.Props, "barGap" | "barWidth"> & {
+type WaveformProps = Omit<RootProps, "children" | "levels" | "peaks"> &
+  Pick<ComponentProps<typeof WaveformPrimitive.Control>, "getAriaValueText"> &
+  Pick<CanvasProps, "barGap" | "barWidth"> & {
+    children?: ReactNode;
     /** How the amplitudes are drawn. */
     shape?: WaveformShape;
     /** The audio's shape, at any resolution: amplitudes (0-1), or `{ min, max }` samples (-1-1) per slice. */
-    values: WaveformPrimitive.Root.Peaks;
+    values: RootProps["peaks"];
     variant?: "default" | "playhead";
   };
 
@@ -32,72 +50,122 @@ function Waveform({
   children,
   className,
   getAriaValueText,
-  onSelectionChange,
-  onSelectionCommitted,
+  onRegionChange,
+  onRegionCommitted,
   shape,
   values,
   variant = "default",
   ...props
 }: WaveformProps) {
+  const regions = useRef(new Map<string, RegionCallbacks>());
+  // A region hears its own changes through its props; the waveform hears all of them.
+  const changeRegion = useCallback<NonNullable<RootProps["onRegionChange"]>>(
+    (value, details) => {
+      regions.current.get(details.region)?.onRegionChange?.(value, details);
+      onRegionChange?.(value, details);
+    },
+    [onRegionChange]
+  );
+  const commitRegion = useCallback<NonNullable<RootProps["onRegionCommitted"]>>(
+    (value, details) => {
+      regions.current.get(details.region)?.onRegionCommitted?.(value, details);
+      onRegionCommitted?.(value, details);
+    },
+    [onRegionCommitted]
+  );
   return (
-    <WaveformPrimitive.Root
-      className="group/waveform w-full min-w-0 data-disabled:cursor-not-allowed"
-      peaks={values}
-      {...props}
-    >
-      <WaveformPrimitive.Control
-        aria-describedby={ariaDescribedBy}
-        aria-label={ariaLabel}
-        aria-labelledby={ariaLabelledBy}
-        className={cn(
-          "cn-waveform relative w-full min-w-0 cursor-pointer touch-none select-none overflow-hidden py-1",
-          "has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
-          "data-disabled:pointer-events-none data-disabled:opacity-50 data-loading:cursor-progress",
-          className
-        )}
-        data-slot="waveform"
-        getAriaValueText={getAriaValueText}
-        onSelectionChange={onSelectionChange}
-        onSelectionCommitted={onSelectionCommitted}
+    <RegionHandlers value={regions}>
+      <WaveformPrimitive.Root
+        className="group/waveform w-full min-w-0 data-disabled:cursor-not-allowed"
+        onRegionChange={changeRegion}
+        onRegionCommitted={commitRegion}
+        peaks={values}
+        {...props}
       >
-        <WaveformPrimitive.Canvas
-          barGap={barGap}
-          barWidth={barWidth}
-          className={cn("cn-waveform-canvas block size-full", EDGE_FADE)}
-          variant={shape}
-        />
-        {children}
-        {variant === "playhead" ? (
-          <>
-            <WaveformPrimitive.Playhead className="cn-waveform-playhead group-data-outside/waveform:hidden" />
-            <WaveformPrimitive.Thumb className="cn-waveform-thumb group-data-outside/waveform:hidden" />
-          </>
-        ) : null}
-      </WaveformPrimitive.Control>
-    </WaveformPrimitive.Root>
+        <WaveformPrimitive.Control
+          aria-describedby={ariaDescribedBy}
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          className={cn(
+            "cn-waveform relative w-full min-w-0 cursor-pointer touch-none select-none overflow-hidden py-1",
+            "has-focus-visible:ring-3 has-focus-visible:ring-ring/50",
+            "data-disabled:pointer-events-none data-disabled:opacity-50 data-loading:cursor-progress",
+            className
+          )}
+          data-slot="waveform"
+          getAriaValueText={getAriaValueText}
+        >
+          <WaveformPrimitive.Canvas
+            barGap={barGap}
+            barWidth={barWidth}
+            className={cn("cn-waveform-canvas block size-full", EDGE_FADE)}
+            variant={shape}
+          />
+          {children}
+          {variant === "playhead" ? (
+            <>
+              <WaveformPrimitive.Playhead className="cn-waveform-playhead group-data-outside/waveform:hidden" />
+              <WaveformPrimitive.Thumb className="cn-waveform-thumb group-data-outside/waveform:hidden" />
+            </>
+          ) : null}
+        </WaveformPrimitive.Control>
+      </WaveformPrimitive.Root>
+    </RegionHandlers>
   );
 }
 
+type WaveformRegionProps = Omit<
+  ComponentProps<typeof WaveformPrimitive.Region>,
+  "region"
+> & {
+  /** The region's name, in what the waveform reports. Defaults to one of its own. */
+  region?: string;
+  /** A move or a resize, as `[start, end]`. */
+  onValueChange?: RegionCallbacks["onRegionChange"];
+  onValueCommitted?: RegionCallbacks["onRegionCommitted"];
+};
+
+/** A stretch of the audio, `[start, end]`, with handles to move and resize it. */
 function WaveformRegion({
   className,
+  onValueChange,
+  onValueCommitted,
+  region,
   ...props
-}: WaveformPrimitive.Region.Props) {
+}: WaveformRegionProps) {
+  const own = useId();
+  const name = region ?? own;
+  const regions = use(RegionHandlers);
+  useEffect(() => {
+    const handlers = regions?.current;
+    handlers?.set(name, {
+      onRegionChange: onValueChange,
+      onRegionCommitted: onValueCommitted,
+    });
+    return () => {
+      handlers?.delete(name);
+    };
+  }, [name, onValueChange, onValueCommitted, regions]);
   return (
-    <WaveformPrimitive.Region
-      className={cn(
-        "cn-waveform-region pointer-events-none inset-y-0",
-        className
-      )}
-      data-slot="waveform-region"
-      {...props}
-    />
+    <RegionName value={name}>
+      <WaveformPrimitive.Region
+        className={cn(
+          "cn-waveform-region pointer-events-none inset-y-0",
+          className
+        )}
+        data-slot="waveform-region"
+        region={name}
+        {...props}
+      />
+    </RegionName>
   );
 }
 
 function WaveformRegionHandle({
   className,
   ...props
-}: WaveformPrimitive.RegionHandle.Props) {
+}: Omit<ComponentProps<typeof WaveformPrimitive.RegionHandle>, "region">) {
+  const region = use(RegionName);
   return (
     <WaveformPrimitive.RegionHandle
       className={cn(
@@ -106,6 +174,7 @@ function WaveformRegionHandle({
         className
       )}
       data-slot="waveform-region-handle"
+      region={region ?? ""}
       {...props}
     />
   );
@@ -115,7 +184,9 @@ function WaveformMarker({
   children,
   className,
   ...props
-}: WaveformPrimitive.Marker.Props) {
+}: Omit<ComponentProps<typeof WaveformPrimitive.Marker>, "children"> & {
+  children?: ReactNode;
+}) {
   return (
     <WaveformPrimitive.Marker
       className={cn(
@@ -134,30 +205,20 @@ function WaveformMarker({
   );
 }
 
-type WaveformHoverProps = Omit<WaveformPrimitive.Hover.Props, "children"> & {
-  /** Prints the hovered position, e.g. as a time. Left out, only the line shows. */
-  format?: (value: number) => string;
-};
-
-function WaveformHover({ className, format, ...props }: WaveformHoverProps) {
-  const label = format
-    ? (value: number) => (
-        <span className="cn-waveform-hover-label absolute top-0 left-1/2 -translate-x-1/2 whitespace-nowrap">
-          {format(value)}
-        </span>
-      )
-    : undefined;
+/** A line under the pointer, with its position written beside it by `format`: left out, only the line shows. */
+function WaveformHover({
+  className,
+  ...props
+}: ComponentProps<typeof WaveformPrimitive.Hover>) {
   return (
     <WaveformPrimitive.Hover
       className={cn(
-        "cn-waveform-hover pointer-events-none inset-y-0 z-10 w-px",
+        "cn-waveform-hover pointer-events-none inset-y-0 z-10 w-px indent-1 whitespace-nowrap",
         className
       )}
       data-slot="waveform-hover"
       {...props}
-    >
-      {label}
-    </WaveformPrimitive.Hover>
+    />
   );
 }
 
@@ -165,16 +226,13 @@ type LiveWaveformProps = Omit<
   ComponentProps<"div">,
   "children" | "defaultValue"
 > &
-  Pick<
-    WaveformPrimitive.Canvas.Props,
-    "gain" | "idle" | "mirrored" | "mode" | "scrollSpeed"
-  > & {
+  Pick<CanvasProps, "gain" | "idle" | "mirrored" | "mode" | "scrollSpeed"> & {
     /** Shows a sweep while the signal is on its way. */
     loading?: boolean;
     /** How the signal is drawn. `scope` traces raw samples instead of levels. */
     shape?: LiveWaveformShape;
     /** A live signal, such as `useAudioSignal(analyser).level` to scroll, `.bands` to dance or `.samples` for a scope. */
-    source?: WaveformPrimitive.Root.Levels | null;
+    source?: RootProps["levels"] | null;
   };
 
 function LiveWaveform({
@@ -216,7 +274,7 @@ type BarVisualizerProps = Omit<
   "children" | "defaultValue"
 > &
   Pick<
-    WaveformPrimitive.Bars.Props,
+    ComponentProps<typeof WaveformPrimitive.Bars>,
     "count" | "gain" | "idle" | "minLevel" | "mirrored"
   > & {
     /** Where the bars grow from. */
@@ -225,7 +283,7 @@ type BarVisualizerProps = Omit<
     loading?: boolean;
     orientation?: "horizontal" | "vertical";
     /** A live signal, such as `useAudioSignal(analyser).bands`. */
-    source?: WaveformPrimitive.Root.Levels | null;
+    source?: RootProps["levels"] | null;
   };
 
 function BarVisualizer({

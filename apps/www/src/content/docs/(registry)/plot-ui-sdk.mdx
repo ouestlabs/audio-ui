@@ -1,0 +1,255 @@
+---
+title: Plot on the UI SDK
+description: "The plot written once and rendered in React, Vue, Svelte and custom elements: install each adapter with its framework's CLI, the curves, traces, grid and handles you place in the axes' units, what a handle reports, and the differences from the React one."
+---
+
+The plot's behavior is one description, `plot` in `@audio-ui/primitives`, over the controllers of `@audio-ui/core`. It is a surface with two axes, each a range and a scale (linear, logarithmic or your own), on which you place curves, live traces, lines, bands, a grid, dots, marks and draggable handles in the axes' units: an EQ curve over `20` to `20000` Hz and `-12` to `12` dB is written in hertz and decibels. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is not published yet: this page describes what the next release installs. The [knob](/docs/knob-ui-sdk), the [fader](/docs/fader-ui-sdk), the [XY pad](/docs/xypad-ui-sdk), the [meter](/docs/meter-ui-sdk), the [envelope](/docs/envelope-ui-sdk), the [pad grid](/docs/pad-ui-sdk), the [piano](/docs/piano-ui-sdk) and the [sequencer](/docs/sequencer-ui-sdk) are built the same way.
+
+## Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/plot-react
+```
+
+One file, `components/audio-ui/plot/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-vue.json
+```
+
+One file, `components/audio-ui/plot/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-svelte.json
+```
+
+Ten files in `components/audio-ui/plot/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/knob-ui-sdk#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/plot-web.json
+```
+
+One file, `components/audio-ui/plot/web.ts`. Import it once, and it registers the `audio-ui-plot` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+## Usage
+
+A Root is the surface. Everything you put in it is placed by value, not by pixel:
+
+- **Grid**: lines and labels along each axis.
+- **Curve**: a function of x, drawn as a path.
+- **Trace**: a live list of values, drawn straight in the DOM.
+- **Line**, **Band**, **Mark**, **Dot**: a value or a range on an axis, a point.
+- **Handle**: a draggable point with a native `<input type="range">` for each axis it moves on, so the keys and a screen reader work.
+- **Cursor** and **CursorReadout**: a marker that follows the pointer, and the text of the value under it.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import { useState } from "react";
+import { Plot } from "@/components/audio-ui/plot/react";
+
+export function Eq() {
+  const [peak, setPeak] = useState({ x: 1000, y: 6 });
+  const response = (hz: number) => peak.y * Math.exp(-(Math.log2(hz / peak.x) ** 2));
+
+  return (
+    <Plot.Root
+      className="h-48 w-full"
+      maxX={20_000}
+      maxY={12}
+      minX={20}
+      minY={-12}
+      onValueChange={setPeak}
+      scaleX="log"
+    >
+      <Plot.Grid className="text-muted" x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
+      <Plot.Curve className="text-primary" fn={response} />
+      <Plot.Handle aria-label="Peak" className="size-3 rounded-full bg-primary" handle="peak" value={peak} />
+    </Plot.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { Plot } from "@/components/audio-ui/plot/vue";
+
+const peak = ref({ x: 1000, y: 6 });
+const response = (hz: number) => peak.value.y * Math.exp(-(Math.log2(hz / peak.value.x) ** 2));
+</script>
+
+<template>
+  <Plot.Root
+    class="h-48 w-full"
+    :max-x="20000"
+    :max-y="12"
+    :min-x="20"
+    :min-y="-12"
+    scale-x="log"
+    @value-change="(point) => (peak = point)"
+  >
+    <Plot.Grid class="text-muted" :x="{ ticks: [100, 1000, 10000] }" :y="{ ticks: [-12, 0, 12] }" />
+    <Plot.Curve class="text-primary" :fn="response" />
+    <Plot.Handle aria-label="Peak" class="size-3 rounded-full bg-primary" handle="peak" :value="peak" />
+  </Plot.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { Plot } from "$lib/components/audio-ui/plot/svelte";
+
+  let peak = $state({ x: 1000, y: 6 });
+  const response = (hz: number) => peak.y * Math.exp(-(Math.log2(hz / peak.x) ** 2));
+</script>
+
+<Plot.Root class="h-48 w-full" maxX={20_000} maxY={12} minX={20} minY={-12} onValueChange={(point) => (peak = point)} scaleX="log">
+  <Plot.Grid class="text-muted" x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
+  <Plot.Curve class="text-primary" fn={response} />
+  <Plot.Handle aria-label="Peak" class="size-3 rounded-full bg-primary" handle="peak" value={peak} />
+</Plot.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-plot min-x="20" max-x="20000" min-y="-12" max-y="12" scale-x="log" style="display: block; height: 12rem">
+  <audio-ui-plot-grid></audio-ui-plot-grid>
+  <audio-ui-plot-curve></audio-ui-plot-curve>
+  <audio-ui-plot-handle handle="peak" default-value='{"x":1000,"y":6}' aria-label="Peak"></audio-ui-plot-handle>
+</audio-ui-plot>
+
+<script type="module">
+  import "./audio-ui/plot/web.ts";
+
+  const plot = document.querySelector("audio-ui-plot");
+  plot.querySelector("audio-ui-plot-grid").x = { ticks: [100, 1000, 10000] };
+  const curve = plot.querySelector("audio-ui-plot-curve");
+  const draw = ({ x, y }) => {
+    curve.fn = (hz) => y * Math.exp(-(Math.log2(hz / x) ** 2));
+  };
+  draw({ x: 1000, y: 6 });
+  plot.addEventListener("input", (event) => draw(event.detail.value));
+</script>
+```
+
+On a custom element, what is not text is a property, not an attribute: a Curve's `fn`, a Trace's `source`, a Grid's `x` and `y`, a CursorReadout's `format`. A Dot's and a Handle's `value` can be a JSON attribute. Each part binds a microtask after it connects: read the element's state after that.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+## Live traces and dots
+
+A Trace takes a `source`, a live list of values (a spectrum, a waveform) in the shape of an external store: `getSnapshot()` returns the values and `subscribe(listener)` is called on each frame. Its path is written straight onto the DOM, so a spectrum at 60 frames renders nothing. A Dot takes a `value` or a `source` of a point the same way. `createSource` from `@audio-ui/core` makes one, and the registry's `useSpectrum` gives you one over an analyser.
+
+## Interaction
+
+**Handles**
+
+- A press and a drag move the point on the axes it has (`axis` is `"both"`, `"x"` or `"y"`). Shift with a drag moves it finely, Alt with a press or Delete returns it to its `defaultValue`.
+- On a handle's inputs, the arrows move it by a small step, Shift with an arrow by a large one, Home and End go to the ends of the range.
+
+**Cursor**
+
+- It follows a mouse or a pen over the plot, and sets `data-active` while the pointer is on it. It takes no touch, which would scroll.
+- Its `--plot-cursor-x` and `--plot-cursor-y` CSS variables hold its place, in percent.
+
+A disabled plot takes none of these.
+
+## Options
+
+Set on the Root, as props (an attribute in kebab case on the custom element).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `minX`, `maxX`, `minY`, `maxY` | `number` | `0`, `1` | The range of each axis, in your units. |
+| `scaleX`, `scaleY` | `"linear"`, `"log"` or `{ toPosition, toValue }` | `"linear"` | How values spread along an axis. |
+| `disabled` | `boolean` | `false` | Takes no gesture. |
+| `onValueChange` | `(value, details) => void` | | A handle moved. `details.cancel()` refuses it. |
+| `onValueCommitted` | `(value, details) => void` | | A handle's gesture, key or input ended. |
+
+A Handle takes `handle` (its name), `axis`, `value` or `defaultValue` (`{ x, y }`) and `disabled`. A Grid takes `x` and `y`, each `{ ticks, count, labels, format }`. A Curve takes `fn` and `fillTo`, and a Trace `source`, `min`, `max` and `fillTo`. A Line and a Mark take `axis` and `value`, a Band `axis`, `from` and `to`.
+
+## What a change reports
+
+`details` carries:
+
+- `handle`: the name of the handle that moved, since one plot holds several.
+- `reason`: what moved it, `"drag"`, `"keyboard"`, `"input-change"` or `"reset"`.
+- `source`: `"mouse"`, `"touch"`, `"pen"`, `"keyboard"`, `"programmatic"` or `"agent"`.
+- `event` and `cancel()`: the DOM event behind it, and the refusal. A controlled handle keeps the value you give it.
+
+On the custom element, `onValueChange` is an `input` event and `onValueCommitted` a `change` event, with `detail: { handle, value, reason, source }`, and `event.preventDefault()` refuses a change.
+
+## Styling
+
+The parts draw geometry and carry no look of their own: until you style them, a Curve is a filled black shape, the grid lines have no stroke and the labels sit at the corner of their value. The examples above give a Curve `text-primary`, which only colors it once the path has a stroke. A starting point, in plain CSS, that you then own:
+
+```css
+[data-slot="plot"] { color: #555; }
+[data-slot="plot-curve"] path { fill: none; stroke: currentColor; stroke-width: 2; }
+[data-slot="plot-grid"] [data-part="line"] { stroke: #ddd; }
+[data-slot="plot-grid"] [data-part="line"][data-zero] { stroke: #aaa; }
+[data-slot="plot-grid"] [data-part="label"][data-axis="x"] { bottom: 4px; transform: translateX(-50%); }
+[data-slot="plot-grid"] [data-part="label"][data-axis="y"] { left: 6px; transform: translateY(-50%); }
+```
+
+The registry's styled `plot` element already carries these.
+
+## States to style from
+
+- `data-dragging` on a handle while it is held, `data-handle` for its name and `data-axis` for the axes it moves on.
+- `data-active` on the Cursor while the pointer is over the plot.
+- `data-disabled` on every part.

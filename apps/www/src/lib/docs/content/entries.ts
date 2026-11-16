@@ -27,17 +27,7 @@ export function entryUrl(name: string): string | undefined {
 const IMPORTED_NAMES = 5;
 
 /** The line a project imports an entry's values with, the first few by their order in the file. */
-export function importLine(
-  entry: Pick<Entry, "exports" | "from"> & { typesOnly?: boolean }
-): string {
-  // An entry of types only, such as a framework's template types, is imported for them alone.
-  if (entry.typesOnly) {
-    return `import type {} from "${entry.from}";`;
-  }
-  // A custom element's entry registers its elements: importing it is what a page does.
-  if (entry.from.startsWith("@audio-ui/elements")) {
-    return `import "${entry.from}";`;
-  }
+export function importLine(entry: Pick<Entry, "exports" | "from">): string {
   // A namespace's members, `Knob.Root`, come with one import of the namespace.
   const values = [
     ...new Set(
@@ -105,7 +95,7 @@ function exportsMarkdown(exports: Entry["exports"]) {
   ];
 }
 
-/** A module's head as markdown, for an agent: the install, the import, its adapters, what uses it, the audio.js it builds on and its exports. */
+/** A module's head as markdown, for an agent: the install, the import, what uses it, the audio.js it builds on and its exports. */
 export function moduleMarkdown(packageModule: PackageModule): string {
   const list = (names: readonly string[]) =>
     names.map((name) => `\`${name}\``).join(", ") || "nothing";
@@ -118,9 +108,6 @@ export function moduleMarkdown(packageModule: PackageModule): string {
     importLine(packageModule),
     "```",
     "",
-    ...(packageModule.adapters.length > 0
-      ? [`- Adapters: ${list(packageModule.adapters)}`]
-      : []),
     ...(packageModule.usedBy.length > 0
       ? [`- Used by: ${list(packageModule.usedBy)}`]
       : []),

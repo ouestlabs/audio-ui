@@ -1,6 +1,14 @@
-import type { FadeShape, Timeline as TimelinePrimitive } from "@audio-ui/react";
+import type { ClipValue, FadeShape } from "@audio-ui/core/timeline";
+import type {
+  ClipChangeDetails,
+  ClipCommitDetails,
+} from "@audio-ui/primitives/timeline";
 import { type RefObject, useCallback, useState } from "react";
-import type { Arranged, ArrangementTrack, ClipAction } from "@/lib/arrangement";
+import type {
+  Arranged,
+  ArrangementTrack,
+  ClipAction,
+} from "@/lib/arrangement";
 import type { ArrangementCommand } from "@/lib/arrangement-state";
 
 /** The track of those given whose lane is nearest `y`, up or down, in the view: where a clip let go off the tracks goes. */
@@ -102,15 +110,12 @@ export function useArrangedClips({
     [dispatch, getPosition, onEdit, onSelect, splitStep]
   );
   const onChange = useCallback(
-    (
-      id: string,
-      value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.ChangeEventDetails
-    ) => dispatch({ details, id, type: "change-clip", value }),
+    (id: string, value: ClipValue, details: ClipChangeDetails) =>
+      dispatch({ details, id, type: "change-clip", value }),
     [dispatch]
   );
   const onCommit = useCallback(
-    (id: string, details: TimelinePrimitive.Clip.CommitEventDetails) => {
+    (id: string, details: ClipCommitDetails) => {
       const named =
         details.lane instanceof HTMLElement
           ? details.lane.dataset.track
