@@ -176,6 +176,30 @@ export function createClipApi(
   const controllers = new Map<string, ClipController>();
   const clipProps = new Map<string, ClipProps>();
   const provisional = new Set<string>();
+  /** The controller of a clip: made once, and again when the clip itself first binds after a part that started it. */
+  const controllerFor = (name: string, options: object, owner: boolean) => {
+    let controller = controllers.get(name);
+    // A part that binds before the clip itself (custom elements make what a clip holds as they connect) starts the controller without what the clip was given: the clip starts it again, with it.
+    if (controller && owner && provisional.has(name)) {
+      provisional.delete(name);
+      controller = undefined;
+      // The parts that read the early one read this one now.
+      queueMicrotask(bump);
+    }
+    if (controller) {
+      if (owner) {
+        controller.setOptions(options as never);
+      }
+    } else {
+      controller = createClipController(options as never);
+      controller.subscribe(bump);
+      controllers.set(name, controller);
+      if (!owner) {
+        provisional.add(name);
+      }
+    }
+    return controller;
+  };
   return {
     clipFor: (state, props, owner = false) => {
       const name = String(props.clip);
@@ -255,30 +279,18 @@ export function createClipApi(
           return context.store.get().view.zoom as number | null;
         },
       };
-      let controller = controllers.get(name);
-      // A part that binds before the clip itself (custom elements make what a clip holds as they connect) starts the controller without what the clip was given: the clip starts it again, with it.
-      if (controller && owner && provisional.has(name)) {
-        provisional.delete(name);
-        controller = undefined;
-        // The parts that read the early one read this one now.
-        queueMicrotask(bump);
-      }
-      if (controller) {
-        if (owner) {
-          controller.setOptions(options as never);
-        }
-      } else {
-        controller = createClipController(options as never);
-        controller.subscribe(bump);
-        controllers.set(name, controller);
-        if (!owner) {
-          provisional.add(name);
-        }
-      }
-      return controller;
+      return controllerFor(name, options, owner);
     },
     clipProps,
   };
+}
+
+/** Which fade a drag is on, if any. */
+function fadingOf(target: string | null | undefined): "in" | "out" | undefined {
+  if (target === "fade-in") {
+    return "in";
+  }
+  return target === "fade-out" ? "out" : undefined;
 }
 
 /** What a clip part reads of its clip. */
@@ -288,12 +300,7 @@ function stateOf(
   props: ClipRef
 ): ClipPublicState {
   const view = api.clipFor(state, props).getSnapshot();
-  const fading =
-    view.dragTarget === "fade-in"
-      ? "in"
-      : view.dragTarget === "fade-out"
-        ? "out"
-        : undefined;
+  const fading = fadingOf(view.dragTarget);
   return {
     disabled: view.disabled,
     dragging: view.dragging,
@@ -339,7 +346,7 @@ export function clipSlots(slot: any) {
       event.stopPropagation();
       const controller = api.clipFor(store.get(), props);
       const own = api.clipProps.get(String(props.clip));
-      const disabled = controller.getSnapshot().disabled;
+      const { disabled } = controller.getSnapshot();
       const enabled =
         !disabled && (target !== "move" || (own?.movable ?? true));
       if (!(el && enabled)) {
@@ -368,14 +375,12 @@ export function clipSlots(slot: any) {
         const view = controller.getSnapshot();
         const { value } = view;
         const describe = props.getAriaValueText ?? describeNumber;
-        const current =
-          edge === "start"
-            ? value.start
-            : edge === "end"
-              ? clipEnd(value)
-              : edge === "in"
-                ? value.fadeIn
-                : value.fadeOut;
+        const current = {
+          end: clipEnd(value),
+          in: value.fadeIn,
+          out: value.fadeOut,
+          start: value.start,
+        }[edge];
         const [min, max] =
           edge === "in" || edge === "out"
             ? [
@@ -462,17 +467,19 @@ export function clipSlots(slot: any) {
         { api, props }: { api: TimelineApi; props: ClipRef }
       ) => {
         const view = stateOf(state, api, props);
-        const place = fade
-          ? edge === "in"
-            ? {
-                "inset-inline-start":
-                  "calc(var(--clip-unit) * var(--clip-fade-in))",
-              }
-            : {
-                "inset-inline-end":
-                  "calc(var(--clip-unit) * var(--clip-fade-out))",
-              }
-          : {};
+        let place = {};
+        if (fade) {
+          place =
+            edge === "in"
+              ? {
+                  "inset-inline-start":
+                    "calc(var(--clip-unit) * var(--clip-fade-in))",
+                }
+              : {
+                  "inset-inline-end":
+                    "calc(var(--clip-unit) * var(--clip-fade-out))",
+                };
+        }
         return {
           ...attrsOf(view, String(props.clip)),
           "data-edge": edge,
@@ -575,12 +582,7 @@ export function clipSlots(slot: any) {
         const view = api.clipFor(state, props, true).getSnapshot();
         const { value } = view;
         const { fadeIn, fadeOut, length, offset, start } = value;
-        const fading =
-          view.dragTarget === "fade-in"
-            ? "in"
-            : view.dragTarget === "fade-out"
-              ? "out"
-              : undefined;
+        const fading = fadingOf(view.dragTarget);
         return {
           ...attrsOf(
             {

@@ -529,7 +529,7 @@ export const envelope: EnvelopePrimitive = definePrimitive({
         },
         pointerdown: (event, { api, el, props, store }) => {
           const index = Number(props.index);
-          const flat = segmentState(store.get().view, index).flat;
+          const { flat } = segmentState(store.get().view, index);
           if (store.get().view.disabled || flat || event.button !== 0) {
             return;
           }

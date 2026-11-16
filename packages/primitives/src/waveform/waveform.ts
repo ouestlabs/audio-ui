@@ -32,6 +32,7 @@ import {
   type CommitDetails,
   connectController,
   flag,
+  noop,
   sourceOf,
   VISUALLY_HIDDEN,
 } from "../shared.ts";
@@ -326,7 +327,7 @@ function repaint(
   attach: () => () => void
 ) {
   let last: unknown[] = [];
-  let detach = () => undefined as void;
+  let detach: () => void = noop;
   const run = () => {
     const next = signature();
     if (
@@ -936,9 +937,9 @@ export const waveform: WaveformPrimitive = definePrimitive({
             }
           };
           let followed: PositionSource | undefined;
-          let unfollow = () => undefined as void;
+          let unfollow: () => void = noop;
           let heard: LevelsSource | undefined;
-          let unhear = () => undefined as void;
+          let unhear: () => void = noop;
           const mark = () => {
             const { levels } = part.store.get();
             el.toggleAttribute(

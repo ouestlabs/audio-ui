@@ -17,7 +17,7 @@ import {
   type PropSpec,
   type SlotDefinition,
 } from "@ui-sdk/core";
-import { flag } from "../shared.ts";
+import { flag, noop } from "../shared.ts";
 
 /**
  * The meter as a UI SDK primitive. Levels arrive two ways: as `value` (and
@@ -410,9 +410,9 @@ export const meter: MeterPrimitive = definePrimitive({
         role: "group",
       }),
       // One subscription paints every channel of a live source.
-      bind: (el, part) => {
+      bind: (_el, part) => {
         let watched: Source<MeterFrame> | undefined;
-        let stop = () => {};
+        let stop: () => void = noop;
         const paint = () => {
           const { config, orientation, source } = part.store.get();
           if (!source) {
@@ -443,7 +443,7 @@ export const meter: MeterPrimitive = definePrimitive({
           if (source !== watched) {
             stop();
             watched = source;
-            stop = source ? source.subscribe(paint) : () => {};
+            stop = source ? source.subscribe(paint) : noop;
           }
           paint();
         };

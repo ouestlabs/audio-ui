@@ -6,6 +6,9 @@ import {
 } from "@ui-sdk/core";
 
 /** A boolean as a data attribute: present and empty, or absent. */
+/** Does nothing: the unsubscribe of a source that is not followed yet. */
+export const noop = () => undefined;
+
 export const flag = (on: boolean) => (on ? "" : undefined);
 
 /** What a change reports to `onValueChange`, beside the value. */

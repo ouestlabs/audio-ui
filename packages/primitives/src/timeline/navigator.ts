@@ -69,10 +69,7 @@ export interface NavigatorApi {
 
 const describeNumber = (value: number) => String(Math.round(value * 100) / 100);
 
-export function createNavigatorApi(
-  context: { store: { get: () => TimelineState } },
-  api: () => TimelineApi
-): NavigatorApi {
+export function createNavigatorApi(api: () => TimelineApi): NavigatorApi {
   const navigator = { el: null as HTMLElement | null, minWindowWidth: 0 };
   return {
     navigator,

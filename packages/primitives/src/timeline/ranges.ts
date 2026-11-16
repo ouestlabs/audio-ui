@@ -125,6 +125,29 @@ export function createRangeApi(
   const controllers = new Map<string, RangeController>();
   const rangeProps = new Map<string, RangeProps>();
   const provisional = new Set<string>();
+  /** The controller of a range: made once, and again when the range itself first binds after a part that started it. */
+  const controllerFor = (name: string, options: object, owner: boolean) => {
+    let controller = controllers.get(name);
+    // A part that binds before the range itself starts the controller without what the range was given: the range starts it again, with it.
+    if (controller && owner && provisional.has(name)) {
+      provisional.delete(name);
+      controller = undefined;
+      queueMicrotask(bump);
+    }
+    if (controller) {
+      if (owner) {
+        controller.setOptions(options as never);
+      }
+    } else {
+      controller = createRangeController(options as never);
+      controller.subscribe(bump);
+      controllers.set(name, controller);
+      if (!owner) {
+        provisional.add(name);
+      }
+    }
+    return controller;
+  };
   return {
     rangeFor: (state, props, owner = false) => {
       const name = String(props.range);
@@ -174,26 +197,7 @@ export function createRangeApi(
           return context.store.get().view.zoom as number | null;
         },
       };
-      let controller = controllers.get(name);
-      // A part that binds before the range itself starts the controller without what the range was given: the range starts it again, with it.
-      if (controller && owner && provisional.has(name)) {
-        provisional.delete(name);
-        controller = undefined;
-        queueMicrotask(bump);
-      }
-      if (controller) {
-        if (owner) {
-          controller.setOptions(options as never);
-        }
-      } else {
-        controller = createRangeController(options as never);
-        controller.subscribe(bump);
-        controllers.set(name, controller);
-        if (!owner) {
-          provisional.add(name);
-        }
-      }
-      return controller;
+      return controllerFor(name, options, owner);
     },
     rangeProps,
   };
@@ -221,7 +225,7 @@ const attrsOf = (state: RangePublicState, range: string) => ({
 export function rangeSlots(slot: any) {
   /** A drag of `edge` from a part of the range: the press stops here, so the lane underneath takes none. */
   const press =
-    (edge: "both" | "end" | "start") =>
+    (side: "both" | "end" | "start") =>
     (
       event: PointerEvent,
       {
@@ -244,17 +248,17 @@ export function rangeSlots(slot: any) {
       const own = api.rangeProps.get(String(props.range));
       const enabled =
         !controller.getSnapshot().disabled &&
-        (edge !== "both" || (own?.movable ?? true));
+        (side !== "both" || (own?.movable ?? true));
       if (!(el && enabled)) {
         return;
       }
       event.preventDefault();
-      if (edge !== "both") {
+      if (side !== "both") {
         el.querySelector<HTMLInputElement>('input[type="range"]')?.focus({
           preventScroll: true,
         });
       }
-      controller.press(edge, event, el, laneOf(el));
+      controller.press(side, event, el, laneOf(el));
     };
 
   const edge = (kind: "end" | "start") =>

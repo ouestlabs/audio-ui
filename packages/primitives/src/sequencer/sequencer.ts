@@ -24,6 +24,7 @@ import {
   type ChangeDetails,
   type CommitDetails,
   flag,
+  noop,
   sourceOf,
   VISUALLY_HIDDEN,
 } from "../shared.ts";
@@ -379,7 +380,7 @@ export const sequencer: SequencerPrimitive = definePrimitive({
       // The step being played is marked on its cells without a render.
       bind: (_el, part) => {
         let watched: Source<number> | undefined;
-        let stop = () => {};
+        let stop: () => void = noop;
         const mark = (step: number | null, on: boolean) => {
           if (step === null) {
             return;
@@ -406,7 +407,7 @@ export const sequencer: SequencerPrimitive = definePrimitive({
           if (source !== watched) {
             stop();
             watched = source;
-            stop = source ? source.subscribe(follow) : () => {};
+            stop = source ? source.subscribe(follow) : noop;
           }
           follow();
         };

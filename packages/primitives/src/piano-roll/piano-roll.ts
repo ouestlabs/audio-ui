@@ -717,13 +717,9 @@ export const pianoRoll: PianoRollPrimitive = definePrimitive({
         state: (state: PianoRollState) => publicOf(state),
       }),
       note: slot({
-        attrs: (
-          state: PianoRollState,
-          { api, props }: { api: PianoRollApi; props: NoteRef }
-        ) => {
+        attrs: (state: PianoRollState, { props }: { props: NoteRef }) => {
           const note = noteOf(state, props.note);
           const selected = state.view.selection.has(idOf(state, props.note));
-          void api;
           return {
             ...stateAttrs(state),
             "aria-disabled": state.view.disabled ? "true" : undefined,
@@ -833,11 +829,11 @@ export const pianoRoll: PianoRollPrimitive = definePrimitive({
           if (state.view.editing) {
             frozen.ids ??= ordered.map((note) => note.id);
             const known = new Map(
-              state.view.notes.map((note) => [note.id, note])
+              state.view.notes.map((entry) => [entry.id, entry])
             );
-            const ids = frozen.ids;
-            const kept = ids.flatMap((id) => known.get(id) ?? []);
-            const added = ordered.filter((note) => !ids.includes(note.id));
+            const { ids: order } = frozen;
+            const kept = order.flatMap((id) => known.get(id) ?? []);
+            const added = ordered.filter((entry) => !order.includes(entry.id));
             ordered = [...kept, ...added];
           } else {
             frozen.ids = null;

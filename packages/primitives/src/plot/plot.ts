@@ -27,7 +27,7 @@ import {
   type PropSpec,
   type SlotDefinition,
 } from "@ui-sdk/core";
-import { flag, sourceOf, VISUALLY_HIDDEN } from "../shared.ts";
+import { flag, noop, sourceOf, VISUALLY_HIDDEN } from "../shared.ts";
 
 /**
  * The plot as a UI SDK primitive: a surface with two axes (a range and a scale
@@ -408,7 +408,7 @@ export const curveOf = (
   fn: (x: number) => number,
   samples?: number,
   fillTo?: number
-) => (fn ? curvePath(fn, axes.x, axes.y, samples ?? 256, fillTo) : "");
+) => curvePath(fn, axes.x, axes.y, samples ?? 256, fillTo);
 
 /** The path of a trace of `values`: what a `trace` part draws. */
 export const traceOf = (
@@ -429,7 +429,7 @@ export const traceOf = (
 export const plot: PlotPrimitive = definePrimitive({
   api: (context) => {
     const handles = new Map<string, PlotHandleController>();
-    const root: PlotApi["root"] = { el: undefined, forget: () => {} };
+    const root: PlotApi["root"] = { el: undefined, forget: noop };
     let rect: DOMRect | null = null;
     root.forget = () => {
       rect = null;

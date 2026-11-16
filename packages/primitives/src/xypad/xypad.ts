@@ -185,21 +185,37 @@ export const xypad: XYPadPrimitive = definePrimitive({
           const { view } = state;
           const value = view.value[axis];
           const formatted = view.formatted[axis];
+          const along =
+            axis === "x"
+              ? {
+                  max: view.maxX,
+                  min: view.minX,
+                  orientation: "horizontal",
+                  step: view.stepX,
+                  // Only the X input is in the tab order: its keys move both axes.
+                  tabindex: undefined,
+                }
+              : {
+                  max: view.maxY,
+                  min: view.minY,
+                  orientation: "vertical",
+                  step: view.stepY,
+                  tabindex: "-1",
+                };
           return {
             "aria-labelledby": state.labelled ? `${id}-label` : undefined,
-            "aria-orientation": axis === "x" ? "horizontal" : "vertical",
+            "aria-orientation": along.orientation,
             "aria-valuetext": props.getAriaValueText
               ? props.getAriaValueText(formatted, value, axis)
               : formatted,
             disabled: flag(view.disabled),
-            max: String(axis === "x" ? view.maxX : view.maxY),
-            min: String(axis === "x" ? view.minX : view.minY),
+            max: String(along.max),
+            min: String(along.min),
             name:
               state.name === undefined ? undefined : `${state.name}.${axis}`,
-            step: String(axis === "x" ? view.stepX : view.stepY),
+            step: String(along.step),
             style: css(VISUALLY_HIDDEN),
-            // Only the X input is in the tab order: its keys move both axes.
-            tabindex: axis === "x" ? undefined : "-1",
+            tabindex: along.tabindex,
             type: "range",
             value: String(value),
           };

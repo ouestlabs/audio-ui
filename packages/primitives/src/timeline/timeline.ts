@@ -32,6 +32,7 @@ import {
   type ChangeDetails,
   type CommitDetails,
   flag,
+  noop,
   sourceOf,
   VISUALLY_HIDDEN,
 } from "../shared.ts";
@@ -249,7 +250,6 @@ export interface TimelineApi extends ClipApi, NavigatorApi, RangeApi {
   /** Scrolls the viewport to `left` px and reports where it landed. */
   scrollerTo: { current: ((left: number) => void) | null };
   trackFor: (
-    state: TimelineState,
     props: TrackProps,
     /** Whether `props` are the track part's own, which hold what the track is given. */
     owner?: boolean
@@ -506,7 +506,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
     const result = {
       ...createClipApi(context, () => adjustOptions(options()), bump),
       ...createRangeApi(context, () => adjustOptions(options()), bump),
-      ...createNavigatorApi(context, () => result),
+      ...createNavigatorApi(() => result),
       anchor,
       controller,
       internal: { keyOf: (value: unknown) => String(value) },
@@ -585,7 +585,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
         )
       ),
       scrollerTo: { current: null as ((left: number) => void) | null },
-      trackFor: (state: TimelineState, props: TrackProps, owner = false) => {
+      trackFor: (props: TrackProps, owner = false) => {
         const name = String(props.track);
         const trackOptions = {
           height: props.height,
@@ -621,7 +621,6 @@ export const timeline: TimelinePrimitive = definePrimitive({
           },
           step: props.step ?? 8,
         };
-        void state;
         if (owner) {
           trackProps.set(name, props);
         }
@@ -704,8 +703,8 @@ export const timeline: TimelinePrimitive = definePrimitive({
     zoom: "value",
   },
   slots: (slot) => {
-    const trackView = (state: TimelineState, api: TimelineApi, props: object) =>
-      api.trackFor(state, props as TrackProps).getSnapshot();
+    const trackView = (api: TimelineApi, props: object) =>
+      api.trackFor(props as TrackProps).getSnapshot();
 
     return {
       ...clipSlots(slot),
@@ -846,9 +845,8 @@ export const timeline: TimelinePrimitive = definePrimitive({
       root: slot<object, TimelinePublicState>({
         attrs: (state: TimelineState) => stateAttrs(state),
         // The position reaches the DOM outside any render: a live source paints every frame.
-        bind: (el, part) => {
+        bind: (_el, part) => {
           const { controller, position } = part.api;
-          void el;
           const paint = () =>
             position.set(
               clampFinite(
@@ -858,7 +856,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
               )
             );
           let followed: PositionSource | undefined;
-          let unfollow = () => undefined as void;
+          let unfollow: () => void = noop;
           const watch = () => {
             const live = (
               part.store.get() as TimelineState & {
@@ -967,7 +965,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
         attrs: (state: TimelineState, { api, props }) => ({
           ...stateAttrs(state),
           "data-resizing": flag(
-            api.trackFor(state, props, true).getSnapshot().resizing
+            api.trackFor(props, true).getSnapshot().resizing
           ),
           "data-selected": flag(Boolean(props.selected)),
           "data-track": String(props.track),
@@ -995,7 +993,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
         },
         state: (state: TimelineState, { api, props }) => ({
           ...publicState(state),
-          resizing: trackView(state, api, props).resizing,
+          resizing: trackView(api, props).resizing,
           selected: Boolean(props.selected),
         }),
       }),
@@ -1019,13 +1017,12 @@ export const timeline: TimelinePrimitive = definePrimitive({
       trackResizeHandle: slot<TrackRef, TrackPublicState>({
         attrs: (state: TimelineState, { api, props }) => ({
           ...stateAttrs(state),
-          "data-resizing": flag(trackView(state, api, props).resizing),
+          "data-resizing": flag(trackView(api, props).resizing),
           style: css({ "touch-action": "none" }),
         }),
         on: {
-          dblclick: (event, { api, props, store }) =>
-            api.trackFor(store.get(), props).reset(event),
-          pointerdown: (event, { api, el, props, store }) => {
+          dblclick: (event, { api, props }) => api.trackFor(props).reset(event),
+          pointerdown: (event, { api, el, props }) => {
             // The track's own press (to pick it) is not this one.
             event.stopPropagation();
             if (!el || event.button !== 0) {
@@ -1034,13 +1031,13 @@ export const timeline: TimelinePrimitive = definePrimitive({
             el.querySelector<HTMLInputElement>('input[type="range"]')?.focus({
               preventScroll: true,
             });
-            api.trackFor(store.get(), props).press(event, el);
+            api.trackFor(props).press(event, el);
           },
         },
         props: { track: "key" },
         state: (state: TimelineState, { api, props }) => ({
           ...publicState(state),
-          resizing: trackView(state, api, props).resizing,
+          resizing: trackView(api, props).resizing,
           selected: false,
         }),
       }),
@@ -1058,12 +1055,12 @@ export const timeline: TimelinePrimitive = definePrimitive({
           };
         },
         on: {
-          change: (event, { api, el, props, store }) =>
+          change: (event, { api, el, props }) =>
             api
-              .trackFor(store.get(), props)
+              .trackFor(props)
               .typeAt(Number((el as HTMLInputElement).value), event),
-          keydown: (event, { api, props, store }) => {
-            if (api.trackFor(store.get(), props).keyDown(event)) {
+          keydown: (event, { api, props }) => {
+            if (api.trackFor(props).keyDown(event)) {
               event.preventDefault();
             }
           },
