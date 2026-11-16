@@ -389,6 +389,22 @@ export const timeline: TimelinePrimitive = definePrimitive({
     });
     const change = createChange(context);
 
+    // The parts render from the snapshot: it is set only when it differs, so a zoom that several things report is one change to them.
+    const publish = () => {
+      const next = controller.getSnapshot();
+      const held = context.store.get().view;
+      if (
+        next.disabled !== held.disabled ||
+        next.duration !== held.duration ||
+        next.fitted !== held.fitted ||
+        next.position !== held.position ||
+        next.scrubbing !== held.scrubbing ||
+        next.zoom !== held.zoom
+      ) {
+        context.store.set({ view: next });
+      }
+    };
+
     // The controller always works controlled: the kernel holds the position and the zoom.
     const configure = () => {
       const wanted = options();
@@ -428,7 +444,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
         position: held.position,
         zoom: held.zoom,
       });
-      context.store.set({ view: controller.getSnapshot() } as never);
+      publish();
     };
     configure();
     context.onOptions(configure);
@@ -444,11 +460,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
         }
       })
     );
-    context.onDestroy(
-      controller.subscribe(() =>
-        context.store.set({ view: controller.getSnapshot() } as never)
-      )
-    );
+    context.onDestroy(controller.subscribe(publish));
 
     // A Shift drag selects only when the app listens for it.
     const listen = () => {
@@ -1153,7 +1165,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
           const settle = () => {
             const current = drawnZoom();
             if (previous && previous.zoom > 0 && previous.zoom !== current) {
-              const middle = el.clientWidth / 2;
+              const middle = api.viewport.get().width / 2;
               const at = api.anchor.current ?? {
                 offset: middle,
                 value: valueAtOffset(
