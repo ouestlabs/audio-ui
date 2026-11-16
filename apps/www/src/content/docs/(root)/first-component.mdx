@@ -1,0 +1,246 @@
+---
+title: First Component
+description: Add a knob to your app and style its state.
+---
+
+Let's add a Cutoff knob. Drag it, turn the mouse wheel over it or use the arrow keys, and its value follows.
+
+If you haven't installed the primitive yet, start with [Installation](/docs/installation).
+
+## Create the component
+
+<ForFrameworks only="react">
+
+Create `CutoffKnob.tsx` next to your app component. The knob keeps its value in your state, and its parts are placed inside its Root:
+
+```tsx title="CutoffKnob.tsx"
+import { useState } from "react";
+import { Knob } from "@/components/audio-ui/knob/react";
+import "./cutoff-knob.css";
+
+export function CutoffKnob() {
+  const [value, setValue] = useState(40);
+  return (
+    <Knob.Root
+      format={{ style: "unit", unit: "percent" }}
+      onValueChange={setValue}
+      value={value}
+    >
+      <Knob.Control className="cutoff-control">
+        <Knob.Track className="cutoff-track" />
+        <Knob.Indicator className="cutoff-arc" />
+        <Knob.Thumb aria-label="Cutoff" className="cutoff-thumb" />
+      </Knob.Control>
+      <Knob.Value />
+    </Knob.Root>
+  );
+}
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="vue">
+
+Create `CutoffKnob.vue` next to your app component. The knob keeps its value in your state, and its parts are placed inside its Root:
+
+```vue title="CutoffKnob.vue"
+<script setup lang="ts">
+import { ref } from "vue";
+import { Knob } from "@/components/audio-ui/knob/vue";
+import "./cutoff-knob.css";
+
+const value = ref(40);
+</script>
+
+<template>
+  <Knob.Root
+    :format="{ style: 'unit', unit: 'percent' }"
+    :value="value"
+    @value-change="(next: number) => (value = next)"
+  >
+    <Knob.Control class="cutoff-control">
+      <Knob.Track class="cutoff-track" />
+      <Knob.Indicator class="cutoff-arc" />
+      <Knob.Thumb aria-label="Cutoff" class="cutoff-thumb" />
+    </Knob.Control>
+    <Knob.Value />
+  </Knob.Root>
+</template>
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+Create `CutoffKnob.svelte` next to your app component. The knob keeps its value in your state, and its parts are placed inside its Root:
+
+```svelte title="CutoffKnob.svelte"
+<script lang="ts">
+  import { Knob } from "$lib/components/audio-ui/knob/svelte";
+  import "./cutoff-knob.css";
+
+  let value = $state(40);
+</script>
+
+<Knob.Root
+  format={{ style: "unit", unit: "percent" }}
+  {value}
+  onValueChange={(next: number) => (value = next)}
+>
+  <Knob.Control class="cutoff-control">
+    <Knob.Track class="cutoff-track" />
+    <Knob.Indicator class="cutoff-arc" />
+    <Knob.Thumb aria-label="Cutoff" class="cutoff-thumb" />
+  </Knob.Control>
+  <Knob.Value />
+</Knob.Root>
+```
+
+With the latest SvelteKit, import through `#lib` in place of `$lib`.
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+There is no component to write: the knob is markup. Put it in your page, and import the file you installed once, in your app's browser entry. It registers the `audio-ui-knob` tags:
+
+```ts title="main.ts"
+import "./components/audio-ui/knob/web.js";
+import "./cutoff-knob.css";
+```
+
+```html title="index.html"
+<audio-ui-knob value="40" format='{"style":"unit","unit":"percent"}'>
+  <audio-ui-knob-control class="cutoff-control">
+    <audio-ui-knob-track class="cutoff-track"></audio-ui-knob-track>
+    <audio-ui-knob-indicator class="cutoff-arc"></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb aria-label="Cutoff" class="cutoff-thumb"></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+```
+
+The file is `web.ts` when your `components.json` has `"tsx": true`. The value is an attribute here: to read it as it changes, listen to the `input` event of the knob, whose `detail.value` is the new value.
+
+</ForFrameworks>
+
+The Root owns the value. The Control takes the pointer and the wheel. The Track and the Indicator draw the two arcs, the Thumb is the focusable input and turns with the value, and the Value writes the text. Each part takes the classes of its element.
+
+<ForFrameworks only="react">
+
+## Use it in your app
+
+In your app component, import and render `CutoffKnob`:
+
+```tsx title="App.tsx"
+import { CutoffKnob } from "./CutoffKnob";
+
+export default function App() {
+  return <CutoffKnob />;
+}
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="vue">
+
+## Use it in your app
+
+In your app component, import and render `CutoffKnob`:
+
+```vue title="App.vue"
+<script setup lang="ts">
+import CutoffKnob from "./CutoffKnob.vue";
+</script>
+
+<template>
+  <CutoffKnob />
+</template>
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+## Use it in your app
+
+In your app component, import and render `CutoffKnob`:
+
+```svelte title="App.svelte"
+<script lang="ts">
+  import CutoffKnob from "./CutoffKnob.svelte";
+</script>
+
+<CutoffKnob />
+```
+
+</ForFrameworks>
+
+Open your app. You should see a ring and a value, "40 %". It has no look yet: add styles to see its arcs.
+
+## Add styles
+
+The knob is headless: it brings behavior and accessibility, and no styles. Save this as `cutoff-knob.css`, next to the component:
+
+```css title="cutoff-knob.css"
+.cutoff-control {
+  position: relative;
+  display: block;
+  width: 6rem;
+  height: 6rem;
+  cursor: grab;
+  touch-action: none;
+}
+
+.cutoff-control[data-dragging] {
+  cursor: grabbing;
+}
+
+.cutoff-track,
+.cutoff-arc {
+  position: absolute;
+  inset: 0;
+}
+
+.cutoff-track {
+  color: #d4d4d4;
+}
+
+.cutoff-arc {
+  color: #2f7d4a;
+}
+
+.cutoff-thumb {
+  position: absolute;
+  inset: 0.75rem;
+  border-radius: 9999px;
+  background: #fff;
+  box-shadow: 0 0 0 1px #d4d4d4;
+}
+
+.cutoff-thumb::after {
+  content: "";
+  position: absolute;
+  top: 0.4rem;
+  left: 50%;
+  width: 2px;
+  height: 0.6rem;
+  margin-left: -1px;
+  border-radius: 1px;
+  background: #111;
+}
+
+.cutoff-control[data-dragging] .cutoff-thumb {
+  box-shadow: 0 0 0 2px #2f7d4a;
+}
+```
+
+The two arcs take their color from the CSS `color` of their part. While the knob is dragged, its Control has a `data-dragging` attribute, which the last two rules use. Each part carries state attributes like it (`data-disabled`, `data-drag-mode`), and the page of the [Knob](/docs/components/base/knob) lists them.
+
+With Tailwind CSS, put the classes on the parts instead, with the `data-dragging:` variant: `data-dragging:cursor-grabbing`.
+
+## Try it
+
+Drag around the ring, turn the mouse wheel over it, or focus it with Tab and press the arrow keys, Page Up, Page Down, Home and End. A screen reader announces it as a slider named "Cutoff", with its value, because the Thumb holds a native `<input type="range">`.
+
+Continue with the page of the [Knob](/docs/components/base/knob) for its options: a log scale for a frequency, marks around the dial, and the details of every change.
