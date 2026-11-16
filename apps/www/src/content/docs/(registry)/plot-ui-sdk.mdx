@@ -85,11 +85,13 @@ A Root is the surface. Everything you put in it is placed by value, not by pixel
 <TabsContent value="react">
 
 ```tsx
+import { useState } from "react";
 import { Plot } from "@/components/audio-ui/plot/react";
 
-const response = (hz: number) => 6 * Math.exp(-(Math.log2(hz / 1000) ** 2));
+export function Eq() {
+  const [peak, setPeak] = useState({ x: 1000, y: 6 });
+  const response = (hz: number) => peak.y * Math.exp(-(Math.log2(hz / peak.x) ** 2));
 
-export function Eq({ onBand }: { onBand: (point: { x: number; y: number }) => void }) {
   return (
     <Plot.Root
       className="h-48 w-full"
@@ -97,17 +99,12 @@ export function Eq({ onBand }: { onBand: (point: { x: number; y: number }) => vo
       maxY={12}
       minX={20}
       minY={-12}
-      onValueChange={(point) => onBand(point)}
+      onValueChange={setPeak}
       scaleX="log"
     >
-      <Plot.Grid className="text-muted" x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
-      <Plot.Curve className="text-primary" fn={response} />
-      <Plot.Handle
-        aria-label="Peak"
-        className="size-3 rounded-full bg-primary"
-        defaultValue={{ x: 1000, y: 6 }}
-        handle="peak"
-      />
+      <Plot.Grid x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
+      <Plot.Curve fn={response} />
+      <Plot.Handle aria-label="Peak" className="size-3 rounded-full bg-primary" handle="peak" value={peak} />
     </Plot.Root>
   );
 }
@@ -119,10 +116,11 @@ export function Eq({ onBand }: { onBand: (point: { x: number; y: number }) => vo
 
 ```vue
 <script setup lang="ts">
+import { ref } from "vue";
 import { Plot } from "@/components/audio-ui/plot/vue";
 
-const emit = defineEmits<{ band: [point: { x: number; y: number }] }>();
-const response = (hz: number) => 6 * Math.exp(-(Math.log2(hz / 1000) ** 2));
+const peak = ref({ x: 1000, y: 6 });
+const response = (hz: number) => peak.value.y * Math.exp(-(Math.log2(hz / peak.value.x) ** 2));
 </script>
 
 <template>
@@ -133,11 +131,11 @@ const response = (hz: number) => 6 * Math.exp(-(Math.log2(hz / 1000) ** 2));
     :min-x="20"
     :min-y="-12"
     scale-x="log"
-    @value-change="(point) => emit('band', point)"
+    @value-change="(point) => (peak = point)"
   >
-    <Plot.Grid class="text-muted" :x="{ ticks: [100, 1000, 10000] }" :y="{ ticks: [-12, 0, 12] }" />
-    <Plot.Curve class="text-primary" :fn="response" />
-    <Plot.Handle aria-label="Peak" class="size-3 rounded-full bg-primary" :default-value="{ x: 1000, y: 6 }" handle="peak" />
+    <Plot.Grid :x="{ ticks: [100, 1000, 10000] }" :y="{ ticks: [-12, 0, 12] }" />
+    <Plot.Curve :fn="response" />
+    <Plot.Handle aria-label="Peak" class="size-3 rounded-full bg-primary" handle="peak" :value="peak" />
   </Plot.Root>
 </template>
 ```
@@ -150,14 +148,14 @@ const response = (hz: number) => 6 * Math.exp(-(Math.log2(hz / 1000) ** 2));
 <script lang="ts">
   import { Plot } from "$lib/components/audio-ui/plot/svelte";
 
-  let { onBand }: { onBand: (point: { x: number; y: number }) => void } = $props();
-  const response = (hz: number) => 6 * Math.exp(-(Math.log2(hz / 1000) ** 2));
+  let peak = $state({ x: 1000, y: 6 });
+  const response = (hz: number) => peak.y * Math.exp(-(Math.log2(hz / peak.x) ** 2));
 </script>
 
-<Plot.Root class="h-48 w-full" maxX={20_000} maxY={12} minX={20} minY={-12} onValueChange={onBand} scaleX="log">
-  <Plot.Grid class="text-muted" x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
-  <Plot.Curve class="text-primary" fn={response} />
-  <Plot.Handle aria-label="Peak" class="size-3 rounded-full bg-primary" defaultValue={{ x: 1000, y: 6 }} handle="peak" />
+<Plot.Root class="h-48 w-full" maxX={20_000} maxY={12} minX={20} minY={-12} onValueChange={(point) => (peak = point)} scaleX="log">
+  <Plot.Grid x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
+  <Plot.Curve fn={response} />
+  <Plot.Handle aria-label="Peak" class="size-3 rounded-full bg-primary" handle="peak" value={peak} />
 </Plot.Root>
 ```
 
@@ -169,7 +167,7 @@ const response = (hz: number) => 6 * Math.exp(-(Math.log2(hz / 1000) ** 2));
 <audio-ui-plot min-x="20" max-x="20000" min-y="-12" max-y="12" scale-x="log" style="display: block; height: 12rem">
   <audio-ui-plot-grid></audio-ui-plot-grid>
   <audio-ui-plot-curve></audio-ui-plot-curve>
-  <audio-ui-plot-handle handle="peak" value='{"x":1000,"y":6}' aria-label="Peak"></audio-ui-plot-handle>
+  <audio-ui-plot-handle handle="peak" default-value='{"x":1000,"y":6}' aria-label="Peak"></audio-ui-plot-handle>
 </audio-ui-plot>
 
 <script type="module">
@@ -177,8 +175,12 @@ const response = (hz: number) => 6 * Math.exp(-(Math.log2(hz / 1000) ** 2));
 
   const plot = document.querySelector("audio-ui-plot");
   plot.querySelector("audio-ui-plot-grid").x = { ticks: [100, 1000, 10000] };
-  plot.querySelector("audio-ui-plot-curve").fn = (hz) => 6 * Math.exp(-(Math.log2(hz / 1000) ** 2));
-  plot.addEventListener("input", (event) => console.log(event.detail.handle, event.detail.value));
+  const curve = plot.querySelector("audio-ui-plot-curve");
+  const draw = ({ x, y }) => {
+    curve.fn = (hz) => y * Math.exp(-(Math.log2(hz / x) ** 2));
+  };
+  draw({ x: 1000, y: 6 });
+  plot.addEventListener("input", (event) => draw(event.detail.value));
 </script>
 ```
 
