@@ -121,7 +121,7 @@ Installed components import from `@/components/audio-ui/<name>`. Every import, i
 2. **Pick the layer and the component** from the two tables above. No `components.json`, or the user wants a distinct look (retro, minimalist, modern): install the headless primitive (`npx shadcn@latest add @audio-ui/<name>-react`) and style it with the kit of the `design` skill, never a hand-written slider.
 2b. **Choose a visual direction** and say it in one sentence (retro hardware, minimal or modern), then follow the `design` skill: it has the skins, the `Panel` markup, and how to compose a look from a brief. Outside React, the `core` skill has the plain DOM kit.
 3. **Read the component's docs before writing code**: `https://www.audio-ui.dev/llm/components/base/<name>` (markdown), or the MCP server ([setup.md](./setup.md)). Props are specific; a guessed prop compiles and misbehaves. Offline, the verified `Panel` markup and the props table of the `design` skill's `directions.md` cover knob, fader, meter, XY pad, pad and piano; the items are `@audio-ui/knob-react`, `fader-react`, `meter-react`, `xypad-react`, `pad-react`, `piano-react`.
-4. **Install, then import from where it landed.** Registry: `npx shadcn@latest add @audio-ui/<name>` (add the namespace once, [setup.md](./setup.md)) copies it to `components/audio-ui/<name>.tsx`: `import { Meter } from "@/components/audio-ui/meter"` (through the project's `components` alias). The CLI prints every file it writes: import from those paths, not from memory. Headless primitive: `npx shadcn@latest add @audio-ui/<name>-react` copies it to `components/audio-ui/<name>/react.tsx`, and `import { Knob } from "@/components/audio-ui/knob/react"`. Other frameworks: use the `core` skill.
+4. **Install, then import from where it landed.** Registry: `npx shadcn@latest add @audio-ui/<name>` (`@audio-ui` is in shadcn's registry directory, nothing to configure, [setup.md](./setup.md)) copies it to `components/audio-ui/<name>.tsx`: `import { Meter } from "@/components/audio-ui/meter"` (through the project's `components` alias). The CLI prints every file it writes: import from those paths, not from memory. Headless primitive: `npx shadcn@latest add @audio-ui/<name>-react` copies it to `components/audio-ui/<name>/react.tsx`, and `import { Knob } from "@/components/audio-ui/knob/react"`. Other frameworks: use the `core` skill.
 5. **Write the code against the CRITICAL and HIGH rules** first, starting with the `web-audio` skill for anything that makes or measures sound.
 6. **Verify.** Type check, render the page and look at a screenshot. A headless browser has no microphone: feed an `OscillatorNode` through the same analyser to test an input path. Drag every control fast (no clicks in the sound), Tab to each control and use the arrow keys, background the tab during playback, and check nothing re-renders per frame.
 
@@ -135,7 +135,7 @@ rules/a11y-accessible-name.md
 ```
 
 - [components.md](./components.md): every component and block with its install name and import
-- [setup.md](./setup.md): registry namespace, npm packages, MCP server
+- [setup.md](./setup.md): the registry, npm packages, MCP server
 - Full docs: https://www.audio-ui.dev/llms.txt
 
 ## Full Compiled Document

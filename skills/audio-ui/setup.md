@@ -2,23 +2,7 @@
 
 ## Registry (shadcn)
 
-Add the namespace to `components.json` once, with the CLI:
-
-```bash
-npx shadcn@latest registry add "@audio-ui=https://www.audio-ui.dev/r/{style}/{name}.json"
-```
-
-or by hand:
-
-```json
-{
-  "registries": {
-    "@audio-ui": "https://www.audio-ui.dev/r/{style}/{name}.json"
-  }
-}
-```
-
-Then `npx shadcn@latest add @audio-ui/knob`. Requires React 19 and Tailwind CSS v4.
+`@audio-ui` is in shadcn's registry directory: there is no namespace to add to `components.json`. Run `npx shadcn@latest add @audio-ui/knob`. Requires React 19 and Tailwind CSS v4.
 
 ## Headless primitives only
 
