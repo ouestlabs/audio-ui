@@ -10,19 +10,19 @@ import {
   scrubTo,
   stepBy,
   stepFromKey,
+  numberFormatter,
 } from "@ui-sdk/core/number";
-import { definePrimitive } from "../define";
 import {
   type ChangeDetails,
   type CommitDetails,
   createGestures,
   createReporter,
+  definePrimitive,
   flag,
-  numberFormat,
   VISUALLY_HIDDEN,
-} from "../shared";
+} from "../primitive";
 
-export type { ChangeDetails, CommitDetails } from "../shared";
+export type { ChangeDetails, CommitDetails } from "../primitive";
 
 /** Which way a fader's travel runs. */
 export type FaderOrientation = "horizontal" | "vertical";
@@ -140,7 +140,10 @@ export function viewOf(state: FaderState): FaderSnapshot {
       from: shareOf(state, Math.min(anchor, value)),
       to: shareOf(state, Math.max(anchor, value)),
     },
-    formatted: numberFormat(state.locale, state.format).format(value),
+    formatted: numberFormatter(
+      state.locale as string | undefined,
+      state.format
+    ).format(value),
     largeStep: state.largeStep,
     max: state.max,
     min: state.min,

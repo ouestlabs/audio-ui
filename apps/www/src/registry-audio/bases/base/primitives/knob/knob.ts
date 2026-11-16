@@ -8,21 +8,21 @@ import {
   clamp,
   fractionOf,
   type NumberScale,
+  numberFormatter,
   scrubTo,
   stepBy,
   stepFromKey,
   valueAt,
 } from "@ui-sdk/core/number";
-import { definePrimitive } from "../define";
 import {
   type ChangeDetails,
   type CommitDetails,
   createGestures,
   createReporter,
+  definePrimitive,
   flag,
-  numberFormat,
   VISUALLY_HIDDEN,
-} from "../shared";
+} from "../primitive";
 
 /** How a drag turns a knob: up and down, around its centre, or by the turns of the pointer. */
 export type KnobDragMode = "circular" | "revolution" | "vertical";
@@ -160,7 +160,7 @@ const onGrid = (state: KnobState, raw: number) =>
 const displayed = (state: KnobState) =>
   state.draft ?? clamp(state.value, state.min, state.max);
 
-export type { ChangeDetails, CommitDetails } from "../shared";
+export type { ChangeDetails, CommitDetails } from "../primitive";
 
 const views = new WeakMap<KnobState, KnobSnapshot>();
 
@@ -182,7 +182,10 @@ export function viewOf(state: KnobState): KnobSnapshot {
     disabled: state.disabled,
     dragMode: state.dragMode,
     dragging: state.dragging,
-    formatted: numberFormat(state.locale, state.format).format(value),
+    formatted: numberFormatter(
+      state.locale as string | undefined,
+      state.format
+    ).format(value),
     largeStep: state.largeStep,
     max: state.max,
     min: state.min,

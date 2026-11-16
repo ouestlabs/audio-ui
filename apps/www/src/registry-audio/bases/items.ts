@@ -1,11 +1,5 @@
 import type { RegistryItem } from "shadcn/schema";
-import {
-  LOGIC_PRIMITIVES,
-  logicFiles,
-  SVELTE_FOLDER,
-  sourceOf,
-  targetOf,
-} from "./logic.ts";
+import { primitiveFiles, SHIPPED_PRIMITIVES } from "./primitives.ts";
 
 /**
  * The factories of registry items: every `_registry.ts` declares its items
@@ -198,9 +192,9 @@ export interface PrimitiveFramework {
 /**
  * A primitive as the registry ships it: one item per framework,
  * `<name>-<framework>`, from the adapter files in `primitives/<name>/`. Each
- * installs to `components/audio-ui/<name>/`, and the behavior it renders comes
- * from `@audio-ui/primitives` over the UI SDK kernel, so the user owns only
- * the thin adapter.
+ * installs to `components/audio-ui/<name>/`. A primitive written in the
+ * registry ships in each of its items, beside the adapter, so the user owns
+ * both; the others still render `@audio-ui/primitives`.
  */
 const ADAPTER_INDEX = /^(react|vue|web)\/index(\.\w+)$/;
 
@@ -209,9 +203,9 @@ export function primitiveItems(
   frameworks: PrimitiveFramework[],
   description: string
 ): RegistryItem[] {
-  // A primitive whose logic ships with it needs no package of ours: the item `<name>-logic` carries it.
-  const ships = LOGIC_PRIMITIVES.has(name);
-  const items: RegistryItem[] = frameworks.map((framework) => {
+  // A primitive written in the registry ships in each item: no package of ours.
+  const ships = SHIPPED_PRIMITIVES.has(name);
+  return frameworks.map((framework) => {
     // shadcn-svelte puts a `registry:ui` file under its own `ui` folder, and
     // a `registry:component` one in `components`, which is where it belongs.
     const svelte = framework.name === "svelte";
@@ -233,35 +227,23 @@ export function primitiveItems(
               : dependency
           ),
       ],
-      description: `${description} Its ${framework.name} adapter.`,
-      files: framework.files.map((file) =>
-        fileOf(
-          `primitives/${name}/${file}`,
-          type,
-          // Installed as `audio-ui/<name>/react.tsx`: the folder of an adapter in the registry is its source's alone.
-          `${root}audio-ui/${name}/${file.replace(ADAPTER_INDEX, "$1$2")}`
-        )
-      ),
+      description: `${description} Its ${framework.name} adapter${ships ? ", with the primitive it renders" : ""}.`,
+      files: [
+        ...(ships ? primitiveFiles(name) : []).map((file) =>
+          fileOf(`primitives/${file}`, type, `${root}audio-ui/${file}`)
+        ),
+        ...framework.files.map((file) =>
+          fileOf(
+            `primitives/${name}/${file}`,
+            type,
+            // Installed as `audio-ui/<name>/react.tsx`: the folder of an adapter in the registry is its source's alone.
+            `${root}audio-ui/${name}/${file.replace(ADAPTER_INDEX, "$1$2")}`
+          )
+        ),
+      ],
       name: `${name}-${framework.name}`,
-      registryDependencies: ships
-        ? [`@audio-ui/${name}-logic${svelte ? "-svelte" : ""}`]
-        : [],
+      registryDependencies: [],
       type,
     };
   });
-  if (!ships) {
-    return items;
-  }
-  const logic = (suffix: string, folder?: string): RegistryItem => ({
-    categories: ["primitive", "logic"],
-    dependencies: [`@ui-sdk/core@${UI_SDK}`],
-    description: `The logic of the ${name}, in files you own: its controller and the helpers it reads, with no package of ours. The adapters of ${suffix ? "Svelte" : "every other framework"} import it.`,
-    files: logicFiles(name).map((file) =>
-      fileOf(sourceOf(file), "registry:lib", targetOf(file, folder))
-    ),
-    name: `${name}-logic${suffix}`,
-    registryDependencies: [],
-    type: "registry:lib",
-  });
-  return [...items, logic(""), logic("-svelte", SVELTE_FOLDER)];
 }

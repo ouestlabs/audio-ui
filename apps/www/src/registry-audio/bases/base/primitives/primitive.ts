@@ -1,7 +1,14 @@
+/**
+ * What every primitive of audio/ui shares and the kernel does not do: parts
+ * named in kebab case, a value reported as `onValueChange` and
+ * `onValueCommitted`, one pointer gesture at a time, and a native input
+ * hidden from sight. The primitives import it from `../primitive`.
+ */
 import {
   bindDrag,
   type ChangeSource,
   createChange,
+  definePrimitive as definePrimitiveOf,
   dispatch,
   type PointerSample,
   type PrimitiveContext,
@@ -97,22 +104,6 @@ export function createReporter<State extends { value: Value }, Value>(
   return { commit, report, setAtOnce, state };
 }
 
-const formatters = new Map<string, Intl.NumberFormat>();
-
-/** The number format of a locale and options, made once and kept. */
-export function numberFormat(
-  locale: Intl.LocalesArgument | undefined,
-  options: Intl.NumberFormatOptions | undefined
-) {
-  const key = JSON.stringify([locale, options]);
-  let formatter = formatters.get(key);
-  if (!formatter) {
-    formatter = new Intl.NumberFormat(locale, options);
-    formatters.set(key, formatter);
-  }
-  return formatter;
-}
-
 /** What a gesture hears, from the press that started it to its release. */
 export interface GestureHandlers<Data> {
   /** The pointer lifted, or the browser took it over (`canceled`). */
@@ -178,3 +169,36 @@ export function createGestures<Data>(context: {
     },
   };
 }
+
+const KEBAB = /([a-z0-9])([A-Z])/g;
+const kebab = (name: string) => name.replace(KEBAB, "$1-$2").toLowerCase();
+
+/**
+ * The part a primitive draws names itself in `data-slot`, in kebab case
+ * (`xypad-input-x`, `piano-roll-note`), the names the styles and the docs
+ * select: the kernel writes the slot's key as it is (`xypad-inputX`). A
+ * component that gives its own name to a part (`timeline-time-selection`)
+ * keeps it.
+ */
+function nameSlots(name: string, slots: Record<string, any>) {
+  const prefix = kebab(name);
+  for (const [key, definition] of Object.entries(slots)) {
+    const fallback = key === "root" ? prefix : `${prefix}-${kebab(key)}`;
+    const { attrs } = definition;
+    definition.attrs = (state: unknown, context: { props?: object }) => ({
+      ...attrs?.(state, context),
+      "data-slot":
+        (context.props as Record<string, string> | undefined)?.["data-slot"] ??
+        fallback,
+    });
+    definition.props = { ...definition.props, "data-slot": "string" };
+  }
+  return slots;
+}
+
+/** `definePrimitive` of the kernel, with the parts named in kebab case and a `data-slot` that can be given. */
+export const definePrimitive = ((options: any) =>
+  definePrimitiveOf({
+    ...options,
+    slots: (slot: unknown) => nameSlots(options.name, options.slots(slot)),
+  })) as typeof definePrimitiveOf;

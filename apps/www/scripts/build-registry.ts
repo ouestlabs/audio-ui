@@ -22,9 +22,9 @@ import { isCatalogItemName } from "../src/lib/registry/catalog/catalog-name.ts";
 import { BASES as ALL_BASES } from "../src/registry/bases.ts";
 import { categories, rootSeo } from "../src/registry-audio/bases/categories.ts";
 import {
-  LOGIC_PRIMITIVES,
   rewriteAdapter,
-} from "../src/registry-audio/bases/logic.ts";
+  SHIPPED_PRIMITIVES,
+} from "../src/registry-audio/bases/primitives.ts";
 
 // ---------------------------------------------------------------------------
 // Where things are
@@ -36,16 +36,6 @@ const BASES_DIR = `${REGISTRY_AUDIO}/bases`;
 const OUTPUT_ROOT = `${PROJECT_ROOT}/public/r/styles`;
 
 const NAMESPACE = "@audio-ui";
-const LOGIC_DEPENDENCY = /^@audio-ui\/([a-z-]+-logic(?:-svelte)?)$/;
-// Where the registry is served from: the logic an adapter needs is named by its address, which every CLI reads, and not by the namespace, which shadcn-svelte does not know.
-const ORIGIN =
-  process.env.AUDIO_UI_REGISTRY_ORIGIN ?? "https://www.audio-ui.dev";
-
-/** The address of a logic item in the style being built, for a dependency by name. */
-function logicUrl(dependency: string, style: string) {
-  const name = LOGIC_DEPENDENCY.exec(dependency)?.[1];
-  return name ? `${ORIGIN}/r/styles/${style}/${name}.json` : dependency;
-}
 const HOMEPAGE = "https://www.audio-ui.dev";
 const DEFAULT_STYLE = "base-nova";
 
@@ -366,16 +356,13 @@ async function buildFile(
   if (file.type !== "registry:page") {
     content = content.replace(EXPORT_DEFAULT, "export");
   }
-  // 5. The logic that ships with a primitive, and the adapters over it, import it by relative paths
+  // 5. An adapter of a primitive written in the registry imports it by a relative path
   const adapter = ADAPTER_ITEM.exec(item.name);
-  if (adapter?.[1] && LOGIC_PRIMITIVES.has(adapter[1])) {
+  if (adapter?.[1] && SHIPPED_PRIMITIVES.has(adapter[1])) {
     content = rewriteAdapter(adapter[1], adapter[2] ?? "", content);
   }
 
-  // A file of the logic keeps its path from there: two of them may share a name.
-  const fileName = file.path.startsWith("logic/")
-    ? file.path
-    : file.path.slice(file.path.lastIndexOf("/") + 1);
+  const fileName = file.path.slice(file.path.lastIndexOf("/") + 1);
   return {
     content: content.trim(),
     path: fileName,
@@ -417,9 +404,7 @@ async function buildItem(
     name: item.name,
     // Our own items are served under the @audio-ui namespace.
     registryDependencies: item.registryDependencies?.map((dependency) =>
-      itemNames.has(dependency)
-        ? `${NAMESPACE}/${dependency}`
-        : logicUrl(dependency, build.name)
+      itemNames.has(dependency) ? `${NAMESPACE}/${dependency}` : dependency
     ),
     title: item.title,
     type: item.type,

@@ -27,13 +27,13 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="knob-demo" />
 
-A rotary control for continuous parameters such as level, cutoff or pan. The registry component is written on the knob primitive, whose logic installs with it, and adds size variants and theme styles.
+A rotary control for continuous parameters such as level, cutoff or pan. The registry component is written on the knob primitive, which installs with it, and adds size variants and theme styles.
 
 </ForFrameworks>
 
 <ForFrameworks only="vue svelte web">
 
-The knob's behavior is one file of logic, written on the UI SDK kernel and copied into your project. Each framework renders it with a thin adapter that you also own: a few parts, about 120 to 150 lines. The drag, the wheel, the keys, the scale and the reset are the same in all four, and one suite of tests runs against each adapter.
+The knob's behavior is one file, the primitive, written on the UI SDK kernel and copied into your project. Each framework renders it with a thin adapter that you also own: a few parts, about 120 to 150 lines. The drag, the wheel, the keys, the scale and the reset are the same in all four, and one suite of tests runs against each adapter.
 
 </ForFrameworks>
 
@@ -45,7 +45,7 @@ The knob's behavior is one file of logic, written on the UI SDK kernel and copie
 
 ## Installation
 
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the logic and the adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the primitive and its adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
 
 <ForFrameworks only="react">
 
@@ -102,33 +102,26 @@ npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 
 </FrameworkTabs>
 
-### 2. The logic
+### 2. The primitive
 
-The same files for every framework: the knob's behavior, written on the kernel's helpers, and the two small files it shares with the other primitives. Copy them into `lib/audio-ui/logic/` (`src/lib/audio-ui/logic/` in Svelte).
+The same two files for every framework: `knob.ts`, the knob's behavior written on the kernel's helpers, and `primitive.ts`, the little every primitive shares. Copy them into `components/audio-ui/` (`src/lib/components/audio-ui/` in Svelte).
 
 <ComponentSource
   styleName="base-nova"
-  name="knob-logic"
-  title="lib/audio-ui/logic/define.ts"
+  name="knob-react"
+  title="components/audio-ui/primitive.ts"
 />
 
 <ComponentSource
   styleName="base-nova"
   file={1}
-  name="knob-logic"
-  title="lib/audio-ui/logic/shared.ts"
-/>
-
-<ComponentSource
-  styleName="base-nova"
-  file={2}
-  name="knob-logic"
-  title="lib/audio-ui/logic/knob/knob.ts"
+  name="knob-react"
+  title="components/audio-ui/knob/knob.ts"
 />
 
 ### 3. The adapter
 
-Your framework's few parts, over the logic. They import it by a relative path, so keep the two folders as shown, or update the path.
+Your framework's few parts, over the primitive. They import it by a relative path, from the same folder, so keep the files as shown, or update the path.
 
 <FrameworkTabs defaultValue="react">
 
@@ -143,11 +136,12 @@ Your framework's few parts, over the logic. They import it by a relative path, s
 
 <ComponentSource
   styleName="base-nova"
+  file={2}
   name="knob-react"
   title="components/audio-ui/knob/react.tsx"
 />
 
-Or let the CLI write it, with the logic it imports:
+Or let the CLI write it, with the primitive it renders:
 
 ```bash
 npx shadcn@latest add @audio-ui/knob-react
@@ -159,11 +153,12 @@ npx shadcn@latest add @audio-ui/knob-react
 
 <ComponentSource
   styleName="base-nova"
+  file={2}
   name="knob-vue"
   title="components/audio-ui/knob/vue.ts"
 />
 
-Or let the CLI write it, with the logic it imports:
+Or let the CLI write it, with the primitive it renders:
 
 ```bash
 npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
@@ -173,71 +168,72 @@ npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
 
 <TabsContent value="svelte">
 
-A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the logic goes in `src/lib/audio-ui/logic/` and these import it from there.
+A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the primitive goes in `src/lib/components/audio-ui/` too.
 
 <ComponentSource
   styleName="base-nova"
+  file={2}
   name="knob-svelte"
   title="src/lib/components/audio-ui/knob/svelte/Arc.svelte"
 />
 
 <ComponentSource
   styleName="base-nova"
-  file={1}
+  file={3}
   name="knob-svelte"
   title="src/lib/components/audio-ui/knob/svelte/Indicator.svelte"
 />
 
 <ComponentSource
   styleName="base-nova"
-  file={2}
+  file={4}
   name="knob-svelte"
   title="src/lib/components/audio-ui/knob/svelte/Provider.svelte"
 />
 
 <ComponentSource
   styleName="base-nova"
-  file={3}
+  file={5}
   name="knob-svelte"
   title="src/lib/components/audio-ui/knob/svelte/Root.svelte"
 />
 
 <ComponentSource
   styleName="base-nova"
-  file={4}
+  file={6}
   name="knob-svelte"
   title="src/lib/components/audio-ui/knob/svelte/Thumb.svelte"
 />
 
 <ComponentSource
   styleName="base-nova"
-  file={5}
+  file={7}
   name="knob-svelte"
   title="src/lib/components/audio-ui/knob/svelte/Track.svelte"
 />
 
 <ComponentSource
   styleName="base-nova"
-  file={6}
+  file={8}
   name="knob-svelte"
   title="src/lib/components/audio-ui/knob/svelte/Value.svelte"
 />
 
 <ComponentSource
   styleName="base-nova"
-  file={7}
+  file={9}
   name="knob-svelte"
   title="src/lib/components/audio-ui/knob/svelte/index.ts"
 />
 
 <ComponentSource
   styleName="base-nova"
-  file={8}
+  file={10}
   name="knob-svelte"
   title="src/lib/components/audio-ui/knob/svelte/parts.ts"
 />
 
-Or let the CLI write it, with the logic it imports:
+Or let the CLI write it, with the primitive it renders:
 
 ```bash
 npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
@@ -251,11 +247,12 @@ Import it once, and it registers the `audio-ui-knob` tags.
 
 <ComponentSource
   styleName="base-nova"
+  file={2}
   name="knob-web"
   title="components/audio-ui/knob/web.ts"
 />
 
-Or let the CLI write it, with the logic it imports:
+Or let the CLI write it, with the primitive it renders:
 
 ```bash
 npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
@@ -265,7 +262,7 @@ npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
 
 </FrameworkTabs>
 
-The CLI also installs what each imports, and puts the files where that framework keeps its components. A file two items share, such as `define.ts`, is written once.
+The CLI also installs what each imports, and puts the files where that framework keeps its components. `primitive.ts`, which every primitive shares, is written once.
 
 ### 4. The styles
 
@@ -603,4 +600,4 @@ The knob declares one action, `setValue`, and the name on its Thumb is what an a
 
 ## Package
 
-There is no package to install: the logic is `knob.ts` in your project, and `@ui-sdk/core` is the only dependency, pinned to the beta the primitive is written for. The adapters are files of the registry as well.
+There is no package to install: the primitive is `{n}.ts` in your project, and `@ui-sdk/core` is the only dependency, pinned to the beta the primitive is written for. The adapters are files of the registry as well.

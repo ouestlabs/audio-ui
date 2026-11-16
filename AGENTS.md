@@ -71,6 +71,7 @@ bun test
 
 - `<name>/`: Envelope, Fader, Knob, Meter, Pad, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad, each a `definePrimitive` description over `@audio-ui/core` (its attributes, events and state, once for every framework)
 - The adapters (React, Vue, Svelte, custom elements) are not in the package: they are files of the registry, `apps/www/src/registry-audio/bases/base/primitives/<name>/<framework>/`, that the CLI copies into a project
+- Being moved into the registry, one primitive at a time: `primitives/<name>/<name>.ts` written by hand over `primitives/primitive.ts` (what every primitive shares), installed beside its adapter in `components/audio-ui/`, with only `@ui-sdk/*` as dependencies. The ones done are listed in `SHIPPED_PRIMITIVES` (`registry-audio/bases/primitives.ts`); the package stays for the others until they are done
 
 ### `apps/www/src/`: two registry trees
 
