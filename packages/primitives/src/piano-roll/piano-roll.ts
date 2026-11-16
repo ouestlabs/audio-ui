@@ -57,6 +57,25 @@ const describeNote = (note: Note) =>
 
 const describeVelocity = (velocity: number) => `${Math.round(velocity * 100)}%`;
 
+/** Why a pitch sounds or stops: a key pressed or glided over, the keyboard, or a note drawn, picked up or moved. */
+export type RollNoteReason = "draw" | "drag" | "glide" | "keyboard" | "press";
+
+/** What a pitch about to sound reports. */
+export interface RollNoteOnDetails {
+  cancel: () => void;
+  event?: Event;
+  reason: RollNoteReason;
+  source?: string;
+  /** How hard it sounds, from 0 to 1. */
+  velocity: number;
+}
+
+/** What a pitch that stops reports. */
+export interface RollNoteOffDetails {
+  event?: Event;
+  reason: RollNoteReason;
+}
+
 export interface PianoRollPrimitiveOptions {
   /** Pitches sounding from outside: they light up their rows and keys. */
   activePitches?: readonly number[];
@@ -73,8 +92,10 @@ export interface PianoRollPrimitiveOptions {
   minLength?: number;
   minPitch?: number;
   mode?: "draw" | "select";
-  onNoteOff?: (pitch: number, details: ChangeDetails) => void;
-  onNoteOn?: (pitch: number, details: ChangeDetails) => void;
+  /** A pitch stops sounding, from a key, a note or a gesture on the grid. */
+  onNoteOff?: (pitch: number, details: RollNoteOffDetails) => void;
+  /** A pitch is about to sound, from a key, a note or a gesture on the grid: `details.cancel()` keeps it from. */
+  onNoteOn?: (pitch: number, details: RollNoteOnDetails) => void;
   onSelectionChange?: (
     selection: readonly NoteId[],
     details: ChangeDetails
@@ -397,17 +418,24 @@ export const pianoRoll: PianoRollPrimitive = definePrimitive({
         minLength: wanted.minLength,
         minPitch: wanted.minPitch ?? 48,
         mode: wanted.mode ?? "select",
-        onNoteOff: (pitch: number, details: { event?: Event }) => {
+        onNoteOff: (pitch: number, details: RollNoteOffDetails) => {
           dispatch(context, "onNoteOff", pitch, {
             event: details.event,
-            reason: "keyboard",
+            reason: details.reason,
           });
         },
-        onNoteOn: (pitch: number, details: { event?: Event }) => {
-          dispatch(context, "onNoteOn", pitch, {
-            event: details.event,
-            reason: "keyboard",
-          });
+        onNoteOn: (pitch: number, details: RollNoteOnDetails) => {
+          const source = sourceOf(details.event);
+          if (
+            dispatch(context, "onNoteOn", pitch, {
+              event: details.event,
+              reason: details.reason,
+              ...(source ? { source } : {}),
+              velocity: details.velocity,
+            })
+          ) {
+            details.cancel();
+          }
         },
         onSelectionChange: (
           selection: readonly NoteId[],

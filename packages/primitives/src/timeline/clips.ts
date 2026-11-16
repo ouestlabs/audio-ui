@@ -269,7 +269,7 @@ export function createClipApi(
         value: own.value,
         // Read when a gesture needs it: a clip is not drawn again at each step of a zoom.
         get zoom() {
-          return context.store.get().frame.zoom as number | null;
+          return context.store.get().view.zoom as number | null;
         },
       };
       return controllerFor(name, options, owner);

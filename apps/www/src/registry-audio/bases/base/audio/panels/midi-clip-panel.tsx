@@ -1,3 +1,4 @@
+import type { Source } from "@audio-ui/core";
 import { pitchName } from "@audio-ui/core";
 import {
   duplicateTime,
@@ -6,7 +7,10 @@ import {
   type NoteLevel,
 } from "@audio-ui/core/piano-roll";
 import { type KeyNote, rollScale, type Scale } from "@audio-ui/engine/pitch";
-import type { PianoRoll as PianoRollPrimitive, Source } from "@audio-ui/react";
+import type {
+  RollNoteOffDetails,
+  RollNoteOnDetails,
+} from "@audio-ui/primitives/piano-roll";
 import {
   type KeyboardEvent,
   type MouseEvent,
@@ -179,9 +183,9 @@ interface MidiClipPanelProps {
   /** Which boxes are folded was changed. */
   onFoldedBoxesChange?: (folded: string[]) => void;
   /** Fires when a pitch stops sounding. */
-  onNoteOff?: PianoRollPrimitive.Root.Props["onNoteOff"];
+  onNoteOff?: (pitch: number, details: RollNoteOffDetails) => void;
   /** Fires when a key is pressed or a note drawn: sound it. */
-  onNoteOn?: PianoRollPrimitive.Root.Props["onNoteOn"];
+  onNoteOn?: (pitch: number, details: RollNoteOnDetails) => void;
   /** Fires on every change of the notes, as a drag goes. */
   onNotesChange: (notes: Note[]) => void;
   /** Fires once a change ends: the place to take an undo step. */
@@ -742,8 +746,8 @@ function ClipRoll({
   loop: readonly [number, number] | null;
   name: string;
   offset: number;
-  onNoteOff?: PianoRollPrimitive.Root.Props["onNoteOff"];
-  onNoteOn?: PianoRollPrimitive.Root.Props["onNoteOn"];
+  onNoteOff?: (pitch: number, details: RollNoteOffDetails) => void;
+  onNoteOn?: (pitch: number, details: RollNoteOnDetails) => void;
   onNotesChange: (notes: Note[]) => void;
   onNotesCommitted?: () => void;
   onRegionChange?: (region: MidiClipRegion) => void;

@@ -1,10 +1,8 @@
+import { createSource } from "@audio-ui/core";
 import type { Note } from "@audio-ui/core/piano-roll";
 import { playedVelocity } from "@audio-ui/engine/playback";
 import type { Tempo } from "@audio-ui/engine/time";
-import {
-  createSource,
-  type PianoRoll as PianoRollPrimitive,
-} from "@audio-ui/react";
+import type { RollNoteOnDetails } from "@audio-ui/primitives/piano-roll";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { UseSynthVoicesReturn } from "@/registry-audio/bases/base/hooks/use-synth-voices";
 import {
@@ -142,7 +140,7 @@ export function usePianoRollPlayback({
    * edit sounding a pitch it has scheduled would cut it off.
    */
   const onNoteOn = useCallback(
-    (pitch: number, details: PianoRollPrimitive.Root.NoteOnEventDetails) => {
+    (pitch: number, details: RollNoteOnDetails) => {
       const fromKeys = details.reason === "press" || details.reason === "glide";
       if (isPlayingRef.current && !fromKeys) {
         return;

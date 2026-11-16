@@ -215,6 +215,7 @@
       "device-signal",
       "use-clip-edits",
       "use-loudness",
+      "use-piano-roll-playback",
       "use-pitch",
       "use-spectrum"
     ]
@@ -6826,8 +6827,7 @@
     "audiojs": [],
     "typesOnly": false,
     "usedBy": [
-      "use-audio-levels",
-      "use-piano-roll-playback"
+      "use-audio-levels"
     ]
   },
   {

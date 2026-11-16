@@ -253,7 +253,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/react"],
+    dependencies: ["@audio-ui/core"],
     description:
       "A note editor on a grid: draw, move, resize and select notes, with a playable keyboard and a velocity lane.",
     files: [
@@ -263,7 +263,11 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "piano-roll",
-    registryDependencies: ["@audio-ui/timeline"],
+    registryDependencies: [
+      "@audio-ui/piano-react",
+      "@audio-ui/piano-roll-react",
+      "@audio-ui/timeline",
+    ],
     type: "registry:ui",
   },
   {

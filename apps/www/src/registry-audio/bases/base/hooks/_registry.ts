@@ -123,7 +123,12 @@ export const hooks: RegistryItem[] = [
   }),
   hookItem("use-piano-roll-playback", {
     categories: ["audio", "piano", "sequencer"],
-    dependencies: ["@audio-ui/core", "@audio-ui/engine", "@audio-ui/react"],
+    dependencies: [
+      "@audio-ui/core",
+      "@audio-ui/engine",
+      "@audio-ui/core",
+      "@audio-ui/primitives",
+    ],
     description:
       "Plays a piano roll's notes, which you own: play, pause and stop, a loop or once through, a metronome, seeking, and the notes the roll auditions, with a playhead for the timeline and a clock for the transport.",
     registryDependencies: [

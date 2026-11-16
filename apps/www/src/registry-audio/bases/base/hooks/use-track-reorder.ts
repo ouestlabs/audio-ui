@@ -87,7 +87,7 @@ export function useTrackReorder({
     const box = row.getBoundingClientRect();
     // The copy is the track's header, the column the name and the controls sit in.
     const header = (
-      row.querySelector<HTMLElement>('[data-slot="timeline-track-header"]') ??
+      row.querySelector<HTMLElement>('[data-slot="timeline-trackHeader"]') ??
       row
     ).getBoundingClientRect();
     startSortableDrag({
