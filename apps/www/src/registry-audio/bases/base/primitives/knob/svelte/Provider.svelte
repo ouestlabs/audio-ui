@@ -1,6 +1,6 @@
 <script lang="ts">
 import { type Snippet, setContext } from "svelte";
-import { DEFAULTS, type Defaults } from "./parts.ts";
+import { DEFAULTS, type Defaults } from "./parts";
 
 let { children, dragMode }: Defaults & { children: Snippet } = $props();
 // Read as the knobs render, so a change of the prop reaches them.

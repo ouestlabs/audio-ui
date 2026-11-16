@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** Resizes one edge of a region, by dragging or from the keyboard through its native input. */
 let {
@@ -12,7 +12,7 @@ let {
   getAriaValueText,
   region,
   ...rest
-}: Omit<ComponentProps<typeof parts.RegionStart>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.RegionStart>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

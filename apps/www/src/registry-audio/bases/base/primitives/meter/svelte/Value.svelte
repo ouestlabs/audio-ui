@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { ChannelPublicState } from "@audio-ui/primitives/meter";
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 
 let {
   children: content,

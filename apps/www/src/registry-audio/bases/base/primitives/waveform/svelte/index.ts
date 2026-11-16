@@ -1,6 +1,6 @@
 import Bars from "./Bars.svelte";
 import Control from "./Control.svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 import RegionHandle from "./RegionHandle.svelte";
 
 export const Waveform = {

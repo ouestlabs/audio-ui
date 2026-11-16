@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** Sets the track's height: by dragging, or from the keyboard through its native input. A double-click gives the height up. */
 let {
@@ -10,7 +10,7 @@ let {
   children: content,
   track,
   ...rest
-}: Omit<ComponentProps<typeof parts.TrackResizeHandle>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.TrackResizeHandle>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

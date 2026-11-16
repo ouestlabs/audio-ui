@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { ComponentProps } from "svelte";
 import Polyline from "./Polyline.svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 
 /** The curve through the points: an `<svg>` over the graph, drawn in its `color`. */
 let {

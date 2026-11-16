@@ -19,3 +19,14 @@ export const parts = createParts(waveform, {
   root: "div",
   thumb: "div",
 });
+
+/** The props a part names, without the open index signature that would turn them into `unknown` under `Omit`. */
+export type Known<T> = {
+  [K in keyof T as string extends K
+    ? never
+    : number extends K
+      ? never
+      : symbol extends K
+        ? never
+        : K]: T[K];
+};

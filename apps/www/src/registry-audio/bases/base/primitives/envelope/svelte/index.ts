@@ -1,6 +1,6 @@
 import Fill from "./Fill.svelte";
 import Line from "./Line.svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 
 export const Envelope = {
   Fill,

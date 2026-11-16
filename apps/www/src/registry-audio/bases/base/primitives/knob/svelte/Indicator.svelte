@@ -2,7 +2,7 @@
 import { DEFAULT_ARC_STROKE_WIDTH } from "@audio-ui/core/knob";
 import type { ComponentProps } from "svelte";
 import Arc from "./Arc.svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 
 let {
   strokeWidth,

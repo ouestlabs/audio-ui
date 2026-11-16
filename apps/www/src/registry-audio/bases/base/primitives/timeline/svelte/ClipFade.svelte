@@ -1,13 +1,13 @@
 <script lang="ts">
 import type { ComponentProps } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** Shades a fade of the clip: its curve, in a 1 by 1 box. Style its `color` for the line, and `--clip-fade-shade` for the fill. */
 let {
   clip,
   edge,
   ...rest
-}: Omit<ComponentProps<typeof parts.ClipFadeIn>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.ClipFadeIn>>, "children"> & {
   edge: "in" | "out";
 } = $props();
 </script>

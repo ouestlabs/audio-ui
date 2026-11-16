@@ -1,4 +1,4 @@
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 import Value from "./Value.svelte";
 
 export const Meter = {

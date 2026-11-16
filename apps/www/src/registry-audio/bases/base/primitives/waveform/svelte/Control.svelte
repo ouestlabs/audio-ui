@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /**
  * The seekable surface: a press jumps to the pointer and a drag scrubs. It
@@ -15,7 +15,7 @@ let {
   children: content,
   getAriaValueText,
   ...rest
-}: Omit<ComponentProps<typeof parts.Control>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.Control>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

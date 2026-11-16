@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { KnobPublicState } from "@audio-ui/primitives/knob";
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 
 /** The thumb, with the native input that carries the knob's name inside it. */
 let {

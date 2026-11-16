@@ -5,7 +5,7 @@ import ClipHandle from "./ClipHandle.svelte";
 import Mark from "./Mark.svelte";
 import NavigatorHandle from "./NavigatorHandle.svelte";
 import NavigatorWindow from "./NavigatorWindow.svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 import Range from "./Range.svelte";
 import RangeHandle from "./RangeHandle.svelte";
 import Ruler from "./Ruler.svelte";

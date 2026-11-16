@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /**
  * A stretch of a source laid on a lane: a recording, a pattern. Its parts
@@ -17,7 +17,7 @@ let {
   getAriaValueText,
   movable = true,
   ...rest
-}: Omit<ComponentProps<typeof parts.Clip>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.Clip>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

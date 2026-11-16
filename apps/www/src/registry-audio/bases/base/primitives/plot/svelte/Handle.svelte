@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { HandleState } from "@audio-ui/primitives/plot";
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /**
  * A point on the plot that can be moved, in the axes' units, with a native
@@ -15,7 +15,10 @@ let {
   getAriaValueText,
   handle,
   ...rest
-}: Omit<ComponentProps<typeof parts.Handle>, "aria-label" | "children"> & {
+}: Omit<
+  Known<ComponentProps<typeof parts.Handle>>,
+  "aria-label" | "children"
+> & {
   "aria-label"?: string;
   children?: Snippet<[HandleState]>;
   /** Names each axis input. Defaults to `aria-label`, followed by "X" or "Y" when the handle moves along both. */

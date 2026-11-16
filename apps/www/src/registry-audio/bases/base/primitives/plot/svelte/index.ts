@@ -3,7 +3,7 @@ import Curve from "./Curve.svelte";
 import Grid from "./Grid.svelte";
 import Handle from "./Handle.svelte";
 import Line from "./Line.svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 import Trace from "./Trace.svelte";
 
 export const Plot = {

@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** Trims one edge of the clip, by dragging or from the keyboard through its native input: it moves where in the source the clip begins instead of stretching it. */
 let {
@@ -12,7 +12,7 @@ let {
   edge,
   getAriaValueText,
   ...rest
-}: Omit<ComponentProps<typeof parts.ClipTrimStart>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.ClipTrimStart>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

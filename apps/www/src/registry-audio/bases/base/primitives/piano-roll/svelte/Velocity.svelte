@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { Note } from "@audio-ui/primitives/piano-roll";
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** A bar under a note, in a `VelocityLane`: its height is the note's velocity, or its chance, which a drag or the keys set through its native input. */
 let {
@@ -13,7 +13,7 @@ let {
   level,
   note,
   ...rest
-}: Omit<ComponentProps<typeof parts.Velocity>, "children" | "note"> & {
+}: Omit<Known<ComponentProps<typeof parts.Velocity>>, "children" | "note"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

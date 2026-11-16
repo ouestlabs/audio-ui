@@ -1,10 +1,12 @@
 <script lang="ts">
 import type { ComponentProps } from "svelte";
 import GridLines from "./GridLines.svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** Grid lines and their labels: `data-part="line"` and `data-part="label"`, each with `data-axis`. */
-let { ...rest }: Omit<ComponentProps<typeof parts.Grid>, "children"> = $props();
+let {
+  ...rest
+}: Omit<Known<ComponentProps<typeof parts.Grid>>, "children"> = $props();
 </script>
 
 <parts.Grid {...rest}>

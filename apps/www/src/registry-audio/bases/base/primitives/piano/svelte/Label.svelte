@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 
 /** The name of the key it sits in, such as "C4", unless it has content of its own. */
 let {

@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /**
  * A stretch laid over a lane, such as a loop or a selection. Its edges take
@@ -16,7 +16,7 @@ let {
   movable = true,
   range,
   ...rest
-}: Omit<ComponentProps<typeof parts.Range>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.Range>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

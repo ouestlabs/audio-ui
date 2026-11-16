@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** Resizes one edge of a range, by dragging or from the keyboard through its native input. */
 let {
@@ -12,7 +12,7 @@ let {
   getAriaValueText,
   range,
   ...rest
-}: Omit<ComponentProps<typeof parts.RangeStart>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.RangeStart>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** Sets one fade of the clip, by dragging or from the keyboard through its native input. A double click, or Enter, steps its shape. */
 let {
@@ -12,7 +12,7 @@ let {
   edge,
   getAriaValueText,
   ...rest
-}: Omit<ComponentProps<typeof parts.ClipFadeInHandle>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.ClipFadeInHandle>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

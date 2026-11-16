@@ -1,13 +1,13 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** The levels as a fixed number of elements, one `Waveform.Bar` each, styled in plain CSS from `--waveform-level`. */
 let {
   bar,
   count = 24,
   ...rest
-}: Omit<ComponentProps<typeof parts.Bars>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.Bars>>, "children"> & {
   /** Draws one bar. Left out, plain bars are rendered. */
   bar?: Snippet<[number, number]>;
 } = $props();

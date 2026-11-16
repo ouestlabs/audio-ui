@@ -1,14 +1,14 @@
 <script lang="ts">
 import type { Note } from "@audio-ui/primitives/piano-roll";
 import type { ComponentProps } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** Resizes one edge of a note by dragging. */
 let {
   edge,
   note,
   ...rest
-}: Omit<ComponentProps<typeof parts.NoteStart>, "note"> & {
+}: Omit<Known<ComponentProps<typeof parts.NoteStart>>, "note"> & {
   edge: "end" | "start";
   note: Note;
 } = $props();

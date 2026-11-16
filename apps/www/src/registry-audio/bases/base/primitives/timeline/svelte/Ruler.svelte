@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /**
  * The lane that moves the position: a press jumps to the pointer and a drag
@@ -14,7 +14,7 @@ let {
   children: content,
   getAriaValueText,
   ...rest
-}: Omit<ComponentProps<typeof parts.Ruler>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.Ruler>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

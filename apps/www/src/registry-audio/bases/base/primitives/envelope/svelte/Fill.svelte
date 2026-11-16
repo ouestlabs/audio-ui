@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { ComponentProps } from "svelte";
 import Polyline from "./Polyline.svelte";
-import { parts } from "./parts.ts";
+import { parts } from "./parts";
 
 /** The area under the curve: an `<svg>` over the graph, filled with its `color`. */
 let { ...rest }: Omit<ComponentProps<typeof parts.Fill>, "children"> = $props();

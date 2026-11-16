@@ -1,6 +1,6 @@
 <script lang="ts">
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** The stretch the viewport shows, inside the navigator: dragging it scrolls. Its native input moves it from the keyboard. */
 let {
@@ -10,7 +10,7 @@ let {
   children: content,
   getAriaValueText,
   ...rest
-}: Omit<ComponentProps<typeof parts.NavigatorWindow>, "children"> & {
+}: Omit<Known<ComponentProps<typeof parts.NavigatorWindow>>, "children"> & {
   "aria-describedby"?: string;
   "aria-label"?: string;
   "aria-labelledby"?: string;

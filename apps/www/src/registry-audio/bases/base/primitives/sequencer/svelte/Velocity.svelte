@@ -1,7 +1,7 @@
 <script lang="ts">
 import type { VelocityState } from "@audio-ui/primitives/sequencer";
 import type { ComponentProps, Snippet } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /**
  * How loud one step plays, as a bar whose height is the `--sequencer-velocity`
@@ -15,7 +15,7 @@ let {
   step,
   ...rest
 }: Omit<
-  ComponentProps<typeof parts.Velocity>,
+  Known<ComponentProps<typeof parts.Velocity>>,
   "aria-label" | "cell" | "children"
 > & {
   "aria-label"?: string;

@@ -1,9 +1,11 @@
 <script lang="ts">
 import type { ComponentProps } from "svelte";
-import { parts } from "./parts.ts";
+import { type Known, parts } from "./parts";
 
 /** A straight line across the plot at a value. Style its `stroke`. */
-let { ...rest }: Omit<ComponentProps<typeof parts.Line>, "children"> = $props();
+let {
+  ...rest
+}: Omit<Known<ComponentProps<typeof parts.Line>>, "children"> = $props();
 </script>
 
 <parts.Line {...rest}>
