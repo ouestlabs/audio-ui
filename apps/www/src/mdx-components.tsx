@@ -18,6 +18,7 @@ import { FrameworkTabs } from "@/components/docs/mdx/framework-tabs";
 import { IconCatalog } from "@/components/docs/mdx/icon-catalog";
 import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
+import { QuickStart } from "@/components/docs/mdx/quick-start";
 import {
   KeyRow,
   KeyTable,
@@ -61,6 +62,7 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     Control,
     DemoSounds,
     ForFrameworks,
+    QuickStart,
     CodeFile,
     ForStyling,
     FrameworkTabs,

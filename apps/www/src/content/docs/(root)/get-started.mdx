@@ -3,68 +3,13 @@ title: Installation
 description: A quick guide to adding audio/ui components to your application.
 ---
 
-audio/ui installs as the framework it is used in wants it: the headless primitives, one adapter per framework that you copy into your project with its CLI, and in React the styled components for a shadcn project. With your framework chosen in the sidebar, this page shows its install alone.
+audio/ui is set up by your agent: paste one prompt, and it installs what your framework needs. The headless primitives are one adapter per framework that is copied into your project, and in React the styled components are for a shadcn project.
 
-## Your framework
+## Quick Start
 
-<FrameworkTabs defaultValue="react">
+<QuickStart />
 
-<TabsList>
-  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
-  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
-  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
-  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
-</TabsList>
-
-<TabsContent value="react">
-
-Copy a styled component into a shadcn project with its CLI, as the rest of this guide sets up:
-
-```bash
-npx shadcn@latest add @audio-ui/knob
-```
-
-Or, without the styles, copy the headless primitive and style it yourself:
-
-```bash
-npx shadcn@latest add @audio-ui/knob-react
-```
-
-</TabsContent>
-
-<TabsContent value="vue">
-
-Copy the headless primitive into your project with shadcn-vue's CLI:
-
-```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
-```
-
-</TabsContent>
-
-<TabsContent value="svelte">
-
-Copy the headless primitive into your project with shadcn-svelte's CLI:
-
-```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
-```
-
-</TabsContent>
-
-<TabsContent value="web">
-
-Copy the headless primitive into your project with the shadcn CLI. Import it once, and it registers the `audio-ui-knob` tags:
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
-```
-
-</TabsContent>
-
-</FrameworkTabs>
-
-[Knob on the UI SDK](/docs/components/base/knob#installation) has each adapter's files, its parts and how it is used. Every primitive installs the same way.
+[Knob](/docs/components/base/knob#installation) has each adapter's files, its parts and how it is used. Every primitive installs the same way.
 
 <ForFrameworks only="react">
 

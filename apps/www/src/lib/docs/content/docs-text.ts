@@ -9,6 +9,7 @@ import {
   parseAttrs,
   replaceFrontmatter,
 } from "@/lib/docs/content/mdx-to-markdown";
+import { expandQuickStart } from "@/lib/docs/content/quick-start";
 
 /** Each docs page's MDX as text, in the bundle: Workers have no files to read, so the build puts them in. */
 const rawDocs = import.meta.glob<string>("/src/content/docs/**/*.mdx", {
@@ -53,7 +54,7 @@ export async function processMdxForLLMs(content: string): Promise<string> {
       expandIconCatalog(
         expandDeviceUsage(
           expandInstall(
-            expandDeviceControls(replaceFrontmatter(content))
+            expandDeviceControls(expandQuickStart(replaceFrontmatter(content)))
           ).replace(ELEMENTS_PREVIEW_REGEX, "")
         )
       )
