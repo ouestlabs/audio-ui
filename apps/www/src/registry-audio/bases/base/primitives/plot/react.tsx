@@ -7,24 +7,52 @@ import {
   plot,
 } from "@audio-ui/primitives/plot";
 import { createParts } from "@ui-sdk/react/primitive";
-import { type ComponentProps, type ReactNode, useCallback } from "react";
+import {
+  type ComponentProps,
+  type ComponentType,
+  type ReactNode,
+  useCallback,
+} from "react";
+
+const noop = () => undefined;
+
+/** The parts that are native inputs: `input`, `rulerInput`, `inputX`. */
+const INPUT_PART = /input[xy]?$/i;
+
+/**
+ * The kernel listens to the native inputs itself, so React sees a `value` and
+ * no `onChange`: this tells it the field is read elsewhere, and keeps it from
+ * warning of one.
+ */
+function quietInputs<Parts extends object>(source: Parts): Parts {
+  const quiet: Record<string, unknown> = {};
+  for (const [name, Part] of Object.entries(source)) {
+    const Component = Part as ComponentType<{ onChange?: () => void }>;
+    quiet[name] = INPUT_PART.test(name)
+      ? (props: object) => <Component {...props} onChange={noop} />
+      : Part;
+  }
+  return quiet as Parts;
+}
 
 /** Which element each part is. */
-const parts = createParts(plot, {
-  band: "svg",
-  curve: "svg",
-  cursor: "div",
-  cursorReadout: "div",
-  dot: "div",
-  grid: "div",
-  handle: "div",
-  inputX: "input",
-  inputY: "input",
-  line: "svg",
-  mark: "div",
-  root: "div",
-  trace: "svg",
-});
+const parts = quietInputs(
+  createParts(plot, {
+    band: "svg",
+    curve: "svg",
+    cursor: "div",
+    cursorReadout: "div",
+    dot: "div",
+    grid: "div",
+    handle: "div",
+    inputX: "input",
+    inputY: "input",
+    line: "svg",
+    mark: "div",
+    root: "div",
+    trace: "svg",
+  })
+);
 
 /** A path that keeps its width however the plot is stretched. */
 const NON_SCALING = { vectorEffect: "non-scaling-stroke" } as const;

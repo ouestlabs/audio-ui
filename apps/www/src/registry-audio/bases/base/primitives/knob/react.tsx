@@ -9,6 +9,7 @@ import {
 import { createParts } from "@ui-sdk/react/primitive";
 import {
   type ComponentProps,
+  type ComponentType,
   createContext,
   type FocusEvent,
   type KeyboardEvent,
@@ -22,18 +23,41 @@ import {
   useState,
 } from "react";
 
+const noop = () => undefined;
+
+/** The parts that are native inputs: `input`, `rulerInput`, `inputX`. */
+const INPUT_PART = /input[xy]?$/i;
+
+/**
+ * The kernel listens to the native inputs itself, so React sees a `value` and
+ * no `onChange`: this tells it the field is read elsewhere, and keeps it from
+ * warning of one.
+ */
+function quietInputs<Parts extends object>(source: Parts): Parts {
+  const quiet: Record<string, unknown> = {};
+  for (const [name, Part] of Object.entries(source)) {
+    const Component = Part as ComponentType<{ onChange?: () => void }>;
+    quiet[name] = INPUT_PART.test(name)
+      ? (props: object) => <Component {...props} onChange={noop} />
+      : Part;
+  }
+  return quiet as Parts;
+}
+
 /** Which element each part is. */
-const parts = createParts(knob, {
-  control: "div",
-  indicator: "svg",
-  input: "input",
-  label: "div",
-  mark: "div",
-  root: "div",
-  thumb: "div",
-  track: "svg",
-  value: "output",
-});
+const parts = quietInputs(
+  createParts(knob, {
+    control: "div",
+    indicator: "svg",
+    input: "input",
+    label: "div",
+    mark: "div",
+    root: "div",
+    thumb: "div",
+    track: "svg",
+    value: "output",
+  })
+);
 
 /**
  * What a provider gives every knob below it. UI SDK has no such thing, so

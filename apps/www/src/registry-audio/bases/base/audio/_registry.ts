@@ -878,7 +878,7 @@ export const audio: RegistryItem[] = [
     type: "registry:ui",
   },
   {
-    dependencies: ["@audio-ui/engine", "@audio-ui/react", "@audio-ui/icons"],
+    dependencies: ["@audio-ui/engine", "@audio-ui/core", "@audio-ui/icons"],
     description:
       "A zoomable timeline for arrangement views and editors, with a ruler that seeks, lanes and a playhead.",
     files: [
@@ -889,6 +889,7 @@ export const audio: RegistryItem[] = [
     ],
     name: "timeline",
     registryDependencies: [
+      "@audio-ui/timeline-react",
       "@audio-ui/arrangement",
       "@audio-ui/fader",
       "@audio-ui/knob",
@@ -1045,7 +1046,7 @@ export const audio: RegistryItem[] = [
       },
     ],
     name: "scrubber",
-    registryDependencies: ["@shadcn/button"],
+    registryDependencies: ["@audio-ui/timeline-react", "@shadcn/button"],
     type: "registry:ui",
   },
   {

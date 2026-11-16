@@ -48,6 +48,7 @@ import {
   LENGTH_PROPERTY,
   laneOf,
   OFFSET_PROPERTY,
+  paintScale,
   placedAt,
   UNIT_PROPERTY,
   unitLength,
@@ -118,7 +119,7 @@ export interface TimelinePrimitiveOptions {
   onClipRemove?: (clip: string, details: { clip: string }) => void;
   onClipSelectedChange?: (
     selected: boolean,
-    details: { clip: string; event?: Event }
+    details: { clip: string; event: PointerEvent; reason: string }
   ) => void;
   onMarkChange?: (value: number, details: MarkChangeDetails) => void;
   onMarkCommitted?: (value: number, details: MarkCommitDetails) => void;
@@ -135,11 +136,11 @@ export interface TimelinePrimitiveOptions {
   /** A Shift drag on the ruler, or on a seekable lane, selected a stretch. */
   onSelectionChange?: (
     range: readonly [number, number],
-    details: ChangeDetails
+    details: ChangeDetails & { event: PointerEvent }
   ) => void;
   onSelectionCommitted?: (
     range: readonly [number, number],
-    details: CommitDetails
+    details: CommitDetails & { event: PointerEvent }
   ) => void;
   onTrackHeightChange?: (
     height: number | undefined,
@@ -174,6 +175,8 @@ export interface TrackCommitDetails extends CommitDetails {
 
 export interface TimelineState {
   duration: number;
+  /** The latest snapshot of the controller, on every step of a zoom or a scrub. Live: no part renders for it; the ones that follow it paint themselves. */
+  frame: TimelineSnapshot;
   /** Counts the changes a track's or mark's controller made, so the parts read them again. */
   parts: number;
   position: number;
@@ -380,6 +383,7 @@ export { LENGTH_PROPERTY, OFFSET_PROPERTY, UNIT_PROPERTY };
 
 export const timeline: TimelinePrimitive = definePrimitive({
   agent: { actions: ["setPosition"] },
+  live: ["frame", "position", "zoom"],
   api: (context) => {
     const options = () => context.options() as TimelinePrimitiveOptions;
     const controller: TimelineController = createTimelineController({
@@ -388,6 +392,20 @@ export const timeline: TimelinePrimitive = definePrimitive({
       zoom: options().zoom,
     });
     const change = createChange(context);
+
+    // The frame follows every step; the view, which parts render from, changes only with what they draw.
+    const publish = () => {
+      const next = controller.getSnapshot();
+      const held = context.store.get().view;
+      const drawn =
+        next.disabled !== held.disabled ||
+        next.duration !== held.duration ||
+        next.fitted !== held.fitted ||
+        next.scrubbing !== held.scrubbing;
+      context.store.set(
+        (drawn ? { frame: next, view: next } : { frame: next }) as never
+      );
+    };
 
     // The controller always works controlled: the kernel holds the position and the zoom.
     const configure = () => {
@@ -428,7 +446,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
         position: held.position,
         zoom: held.zoom,
       });
-      context.store.set({ view: controller.getSnapshot() } as never);
+      publish();
     };
     configure();
     context.onOptions(configure);
@@ -444,11 +462,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
         }
       })
     );
-    context.onDestroy(
-      controller.subscribe(() =>
-        context.store.set({ view: controller.getSnapshot() } as never)
-      )
-    );
+    context.onDestroy(controller.subscribe(publish));
 
     // A Shift drag selects only when the app listens for it.
     const listen = () => {
@@ -563,7 +577,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
           step: props.step ?? settings.step,
           value: [props.value, props.value] as [number, number],
           get zoom() {
-            return context.store.get().view.zoom;
+            return context.store.get().frame.zoom;
           },
         };
         let mark = markControllers.get(name);
@@ -646,7 +660,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
       }),
       viewportEl: { current: null as HTMLElement | null },
       zoom: {
-        get: () => context.store.get().view.zoom,
+        get: () => context.store.get().frame.zoom,
         subscribe: (listener: () => void) => {
           zoomListeners.add(listener);
           return () => {
@@ -715,19 +729,27 @@ export const timeline: TimelinePrimitive = definePrimitive({
           ...stateAttrs(state),
           "data-timeline-lane": "",
           style: css({
-            [UNIT_PROPERTY]: unitLength(state.view.zoom, state.duration),
+            [UNIT_PROPERTY]: unitLength(state.frame.zoom, state.duration),
             // What changes inside a lane is laid out and styled without the rest of the page.
             contain: "layout style",
             "overflow-x": "clip",
             position: "relative",
-            ...(state.view.zoom === null
+            ...(state.frame.zoom === null
               ? {}
-              : { "min-width": `${state.duration * state.view.zoom}px` }),
+              : { "min-width": `${state.duration * state.frame.zoom}px` }),
           }),
         }),
         bind: (el, part) => {
           part.api.lanes.add(el);
-          return () => part.api.lanes.delete(el);
+          const paint = () => {
+            const { duration, frame } = part.store.get();
+            paintScale(el, frame.zoom, duration);
+          };
+          const off = part.store.subscribe(paint);
+          return () => {
+            off();
+            part.api.lanes.delete(el);
+          };
         },
         on: {
           pointerdown: (event, { api, el, props, store }) => {
@@ -887,19 +909,27 @@ export const timeline: TimelinePrimitive = definePrimitive({
           ...stateAttrs(state),
           "data-timeline-lane": "",
           style: css({
-            [UNIT_PROPERTY]: unitLength(state.view.zoom, state.duration),
+            [UNIT_PROPERTY]: unitLength(state.frame.zoom, state.duration),
             contain: "layout style",
             "overflow-x": "clip",
             position: "relative",
             "touch-action": "none",
-            ...(state.view.zoom === null
+            ...(state.frame.zoom === null
               ? {}
-              : { "min-width": `${state.duration * state.view.zoom}px` }),
+              : { "min-width": `${state.duration * state.frame.zoom}px` }),
           }),
         }),
         bind: (el, part) => {
           part.api.lanes.add(el);
-          return () => part.api.lanes.delete(el);
+          const paint = () => {
+            const { duration, frame } = part.store.get();
+            paintScale(el, frame.zoom, duration);
+          };
+          const off = part.store.subscribe(paint);
+          return () => {
+            off();
+            part.api.lanes.delete(el);
+          };
         },
         on: {
           pointerdown: (event, { api, el, store }) => {
@@ -1092,9 +1122,9 @@ export const timeline: TimelinePrimitive = definePrimitive({
             );
           };
           const drawnZoom = () => {
-            const { duration, view } = store.get();
-            if (view.zoom !== null) {
-              return view.zoom;
+            const { duration, frame } = store.get();
+            if (frame.zoom !== null) {
+              return frame.zoom;
             }
             const width =
               (el
@@ -1170,10 +1200,10 @@ export const timeline: TimelinePrimitive = definePrimitive({
             report();
           };
           settle();
-          let lastZoom = store.get().view.zoom;
+          let lastZoom = store.get().frame.zoom;
           const offStore = store.subscribe(() => {
             wheelZoom.setOptions(wheelOptions());
-            const { zoom } = store.get().view;
+            const { zoom } = store.get().frame;
             if (zoom !== lastZoom) {
               lastZoom = zoom;
               cancelAnimationFrame(applying);
@@ -1213,6 +1243,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
     const view = viewOf(options);
     return {
       duration: options.duration ?? 1,
+      frame: view,
       parts: 0,
       position: view.position,
       source: options.source,

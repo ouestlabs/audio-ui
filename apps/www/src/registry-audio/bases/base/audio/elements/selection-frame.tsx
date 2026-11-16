@@ -1,10 +1,11 @@
-import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
-import { formatTime } from "@audio-ui/engine/format";
 import {
+  type ClipValue,
   type FadeShape,
   fadeGain,
-  type Timeline as TimelinePrimitive,
-} from "@audio-ui/react";
+} from "@audio-ui/core/timeline";
+import { dbToGain, gainToDb } from "@audio-ui/engine/analysis";
+import { formatTime } from "@audio-ui/engine/format";
+import type { ClipChangeDetails } from "@audio-ui/primitives/timeline";
 import {
   type KeyboardEvent,
   type PointerEvent,
@@ -295,10 +296,7 @@ function SelectionFrame({
   const current = preview ?? shape;
   const [from, to] = range;
   const change = useCallback(
-    (
-      next: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.ChangeEventDetails
-    ) => {
+    (next: ClipValue, details: ClipChangeDetails) => {
       const trim = TRIMS[details.target];
       fading.current = !trim;
       if (trim) {
@@ -311,7 +309,7 @@ function SelectionFrame({
     [current, onRangeChange]
   );
   const commit = useCallback(
-    (next: TimelinePrimitive.Clip.Value) => {
+    (next: ClipValue) => {
       setEdge(null);
       if (fading.current) {
         fading.current = false;

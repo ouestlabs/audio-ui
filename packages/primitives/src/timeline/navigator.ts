@@ -62,7 +62,12 @@ export type NavigatorSlots = {
 /** What the navigator's `api` gives its parts. */
 export interface NavigatorApi {
   /** The bar, and what it was given, once the navigator part binds. */
-  navigator: { el: HTMLElement | null; minWindowWidth: number };
+  navigator: {
+    el: HTMLElement | null;
+    minWindowWidth: number;
+    /** The bar's width, measured when it binds and when it is resized: reading it from the DOM at each paint would lay the page out each time. */
+    width: number;
+  };
   /** A controller over the viewport as it is now. */
   navigatorFor: (state: TimelineState) => NavigatorController;
 }
@@ -70,7 +75,11 @@ export interface NavigatorApi {
 const describeNumber = (value: number) => String(Math.round(value * 100) / 100);
 
 export function createNavigatorApi(api: () => TimelineApi): NavigatorApi {
-  const navigator = { el: null as HTMLElement | null, minWindowWidth: 0 };
+  const navigator = {
+    el: null as HTMLElement | null,
+    minWindowWidth: 0,
+    width: 0,
+  };
   return {
     navigator,
     navigatorFor: (state) =>
@@ -90,7 +99,7 @@ export function createNavigatorApi(api: () => TimelineApi): NavigatorApi {
 function layoutOf(api: TimelineApi, state: TimelineState) {
   const { duration } = state;
   const range = visibleRange(api.viewport.get(), duration);
-  const bar = api.navigator.el?.getBoundingClientRect().width ?? 0;
+  const bar = api.navigator.width;
   const { minWindowWidth } = api.navigator;
   const drawn =
     minWindowWidth > 0 && bar > 0 && duration > 0
@@ -250,10 +259,22 @@ export function navigatorSlots(slot: any) {
         style: css({ position: "relative", "touch-action": "none" }),
       }),
       bind: (el: HTMLElement, part: any) => {
-        part.api.navigator.el = el;
-        part.api.navigator.minWindowWidth = part.props.minWindowWidth ?? 0;
+        const { navigator } = part.api;
+        navigator.el = el;
+        navigator.minWindowWidth = part.props.minWindowWidth ?? 0;
+        navigator.width = el.getBoundingClientRect().width;
+        // The parts read the width again when the bar is resized.
+        const observer = new ResizeObserver(() => {
+          const { width } = el.getBoundingClientRect();
+          if (width !== navigator.width) {
+            navigator.width = width;
+            part.store.set({ parts: part.store.get().parts + 1 });
+          }
+        });
+        observer.observe(el);
         return () => {
-          part.api.navigator.el = null;
+          observer.disconnect();
+          navigator.el = null;
         };
       },
       on: {

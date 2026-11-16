@@ -1,5 +1,7 @@
 import { createChangeEventDetails } from "@audio-ui/core";
 import {
+  type ClipChangeEventDetails,
+  type ClipCommitEventDetails,
   type ClipController,
   type ClipTarget,
   type ClipValue,
@@ -74,23 +76,14 @@ export interface ClipFadeState extends ClipEdgeState {
   line: string;
 }
 
-/** What the clip's change reports. */
-export interface ClipChangeDetails {
-  cancel: () => void;
+/** What the clip's change reports: what moved (`target`), for a move how far and over which lane, whether Alt asks for a copy, the reason, the event, and the clip's name. */
+export type ClipChangeDetails = ClipChangeEventDetails & {
   clip: string;
-  event?: Event;
-  reason: string;
   source?: string;
-  /** What moved: the clip, an edge or a fade. */
-  target?: ClipTarget;
-}
+};
 
-export interface ClipCommitDetails {
-  clip: string;
-  event?: Event;
-  reason: string;
-  target?: ClipTarget;
-}
+/** What a clip's gesture ending reports. */
+export type ClipCommitDetails = ClipCommitEventDetails & { clip: string };
 
 type Slot<Props, Public = ClipPublicState> = SlotDefinition<
   TimelineState,
@@ -276,7 +269,7 @@ export function createClipApi(
         value: own.value,
         // Read when a gesture needs it: a clip is not drawn again at each step of a zoom.
         get zoom() {
-          return context.store.get().view.zoom as number | null;
+          return context.store.get().frame.zoom as number | null;
         },
       };
       return controllerFor(name, options, owner);

@@ -1837,7 +1837,9 @@
     "audiojs": [],
     "typesOnly": false,
     "usedBy": [
+      "arrangement",
       "sound-operations",
+      "use-arrangement",
       "use-timeline-cursor"
     ]
   },
@@ -6824,12 +6826,8 @@
     "audiojs": [],
     "typesOnly": false,
     "usedBy": [
-      "arrangement",
-      "use-arrangement",
       "use-audio-levels",
-      "use-piano-roll-playback",
-      "use-time-selection",
-      "use-timeline-cursor"
+      "use-piano-roll-playback"
     ]
   },
   {

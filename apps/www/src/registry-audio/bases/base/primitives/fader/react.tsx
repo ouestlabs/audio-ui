@@ -3,6 +3,7 @@ import { fader } from "@audio-ui/primitives/fader";
 import { createParts } from "@ui-sdk/react/primitive";
 import {
   type ComponentProps,
+  type ComponentType,
   type FocusEvent,
   type KeyboardEvent,
   type MouseEvent,
@@ -14,18 +15,41 @@ import {
   useState,
 } from "react";
 
+const noop = () => undefined;
+
+/** The parts that are native inputs: `input`, `rulerInput`, `inputX`. */
+const INPUT_PART = /input[xy]?$/i;
+
+/**
+ * The kernel listens to the native inputs itself, so React sees a `value` and
+ * no `onChange`: this tells it the field is read elsewhere, and keeps it from
+ * warning of one.
+ */
+function quietInputs<Parts extends object>(source: Parts): Parts {
+  const quiet: Record<string, unknown> = {};
+  for (const [name, Part] of Object.entries(source)) {
+    const Component = Part as ComponentType<{ onChange?: () => void }>;
+    quiet[name] = INPUT_PART.test(name)
+      ? (props: object) => <Component {...props} onChange={noop} />
+      : Part;
+  }
+  return quiet as Parts;
+}
+
 /** Which element each part is. */
-const parts = createParts(fader, {
-  control: "div",
-  indicator: "div",
-  input: "input",
-  label: "div",
-  mark: "div",
-  root: "div",
-  thumb: "div",
-  track: "div",
-  value: "output",
-});
+const parts = quietInputs(
+  createParts(fader, {
+    control: "div",
+    indicator: "div",
+    input: "input",
+    label: "div",
+    mark: "div",
+    root: "div",
+    thumb: "div",
+    track: "div",
+    value: "output",
+  })
+);
 
 type ThumbProps = ComponentProps<typeof parts.Thumb> & {
   getAriaValueText?: (

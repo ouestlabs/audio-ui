@@ -1,27 +1,55 @@
 import type { Note as NoteValue } from "@audio-ui/primitives/piano-roll";
 import { pianoRoll } from "@audio-ui/primitives/piano-roll";
 import { createParts } from "@ui-sdk/react/primitive";
-import { type ComponentProps, Fragment, type ReactNode } from "react";
+import {
+  type ComponentProps,
+  type ComponentType,
+  Fragment,
+  type ReactNode,
+} from "react";
+
+const noop = () => undefined;
+
+/** The parts that are native inputs: `input`, `rulerInput`, `inputX`. */
+const INPUT_PART = /input[xy]?$/i;
+
+/**
+ * The kernel listens to the native inputs itself, so React sees a `value` and
+ * no `onChange`: this tells it the field is read elsewhere, and keeps it from
+ * warning of one.
+ */
+function quietInputs<Parts extends object>(source: Parts): Parts {
+  const quiet: Record<string, unknown> = {};
+  for (const [name, Part] of Object.entries(source)) {
+    const Component = Part as ComponentType<{ onChange?: () => void }>;
+    quiet[name] = INPUT_PART.test(name)
+      ? (props: object) => <Component {...props} onChange={noop} />
+      : Part;
+  }
+  return quiet as Parts;
+}
 
 /** Which element each part is. */
-const parts = createParts(pianoRoll, {
-  grid: "div",
-  keys: "div",
-  marquee: "div",
-  note: "div",
-  noteEnd: "div",
-  noteStart: "div",
-  notes: "div",
-  root: "div",
-  row: "div",
-  rows: "div",
-  selectionSpan: "div",
-  stretchEnd: "div",
-  stretchStart: "div",
-  velocity: "div",
-  velocityInput: "input",
-  velocityLane: "div",
-});
+const parts = quietInputs(
+  createParts(pianoRoll, {
+    grid: "div",
+    keys: "div",
+    marquee: "div",
+    note: "div",
+    noteEnd: "div",
+    noteStart: "div",
+    notes: "div",
+    root: "div",
+    row: "div",
+    rows: "div",
+    selectionSpan: "div",
+    stretchEnd: "div",
+    stretchStart: "div",
+    velocity: "div",
+    velocityInput: "input",
+    velocityLane: "div",
+  })
+);
 
 type Naming = {
   "aria-describedby"?: string;

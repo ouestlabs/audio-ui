@@ -1,10 +1,11 @@
+import type { Source } from "@audio-ui/core";
+import type { ClipValue, FadeShape } from "@audio-ui/core/timeline";
 import { dbToGain } from "@audio-ui/engine/analysis";
 import { hasWebGL2 } from "@audio-ui/gl/lane";
 import type {
-  FadeShape,
-  Source,
-  Timeline as TimelinePrimitive,
-} from "@audio-ui/react";
+  ClipChangeDetails,
+  ClipCommitDetails,
+} from "@audio-ui/primitives/timeline";
 import {
   type FocusEvent,
   Fragment,
@@ -318,15 +319,8 @@ interface ArrangedClipProps {
   multi?: boolean;
   /** Something chosen from the clip's menu (renaming is the clip's own). */
   onAction: (action: ClipAction, id: string) => void;
-  onChange: (
-    id: string,
-    value: TimelinePrimitive.Clip.Value,
-    details: TimelinePrimitive.Clip.ChangeEventDetails
-  ) => void;
-  onCommit: (
-    id: string,
-    details: TimelinePrimitive.Clip.CommitEventDetails
-  ) => void;
+  onChange: (id: string, value: ClipValue, details: ClipChangeDetails) => void;
+  onCommit: (id: string, details: ClipCommitDetails) => void;
   /** A fade's curve was picked from the menu of its handle. */
   onFadeShape: (id: string, edge: "in" | "out", shape: FadeShape) => void;
   /** Tells the arrangement how far this clip is dragged up or down, for the rest of its group to follow. */
@@ -511,7 +505,7 @@ const ArrangedClip = memo(function ArrangedClipView({
   const handleSelected = useCallback(
     (
       _selected: boolean,
-      details: TimelinePrimitive.Clip.SelectEventDetails
+      details: { clip: string; event: PointerEvent; reason: string }
     ) => {
       const { event } = details;
       onSelect(
@@ -522,10 +516,8 @@ const ArrangedClip = memo(function ArrangedClipView({
     [clip.id, multi, onSelect]
   );
   const handleChange = useCallback(
-    (
-      value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.ChangeEventDetails
-    ) => onChange(clip.id, value, details),
+    (value: ClipValue, details: ClipChangeDetails) =>
+      onChange(clip.id, value, details),
     [clip.id, onChange]
   );
   const handleDragOffset = useCallback(
@@ -533,10 +525,8 @@ const ArrangedClip = memo(function ArrangedClipView({
     [clip.id, onLift]
   );
   const handleCommitted = useCallback(
-    (
-      _value: TimelinePrimitive.Clip.Value,
-      details: TimelinePrimitive.Clip.CommitEventDetails
-    ) => onCommit(clip.id, details),
+    (_value: ClipValue, details: ClipCommitDetails) =>
+      onCommit(clip.id, details),
     [clip.id, onCommit]
   );
   return (

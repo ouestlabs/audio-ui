@@ -1,17 +1,40 @@
 import { type XYPadPublicState, xypad } from "@audio-ui/primitives/xypad";
 import { createParts } from "@ui-sdk/react/primitive";
-import type { ComponentProps, ReactNode } from "react";
+import type { ComponentProps, ComponentType, ReactNode } from "react";
+
+const noop = () => undefined;
+
+/** The parts that are native inputs: `input`, `rulerInput`, `inputX`. */
+const INPUT_PART = /input[xy]?$/i;
+
+/**
+ * The kernel listens to the native inputs itself, so React sees a `value` and
+ * no `onChange`: this tells it the field is read elsewhere, and keeps it from
+ * warning of one.
+ */
+function quietInputs<Parts extends object>(source: Parts): Parts {
+  const quiet: Record<string, unknown> = {};
+  for (const [name, Part] of Object.entries(source)) {
+    const Component = Part as ComponentType<{ onChange?: () => void }>;
+    quiet[name] = INPUT_PART.test(name)
+      ? (props: object) => <Component {...props} onChange={noop} />
+      : Part;
+  }
+  return quiet as Parts;
+}
 
 /** Which element each part is. */
-const parts = createParts(xypad, {
-  control: "div",
-  inputX: "input",
-  inputY: "input",
-  label: "div",
-  root: "div",
-  thumb: "div",
-  value: "output",
-});
+const parts = quietInputs(
+  createParts(xypad, {
+    control: "div",
+    inputX: "input",
+    inputY: "input",
+    label: "div",
+    root: "div",
+    thumb: "div",
+    value: "output",
+  })
+);
 
 type Axis = "x" | "y";
 
