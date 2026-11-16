@@ -159,6 +159,42 @@ import "./components/audio-ui/knob/web.ts";
 
 The page of each component has its parts, its options and an example in your framework: [Knob](/docs/components/base/knob) is the first to open.
 
+<ForFrameworks only="web">
+
+## Without a build step
+
+A plain HTML page can run the primitive with no bundler and no `node_modules`. Install it once with the CLI, with `"tsx": false` in `components.json` so the file is JavaScript: you get `web.js`, which imports three packages by name. An import map tells the browser where each one is, here on [esm.sh](https://esm.sh):
+
+```html title="index.html"
+<script type="importmap">
+  {
+    "imports": {
+      "@audio-ui/core/": "https://esm.sh/*@audio-ui/core@0.29.2/",
+      "@audio-ui/primitives/": "https://esm.sh/*@audio-ui/primitives@0.1.0/",
+      "@ui-sdk/core": "https://esm.sh/*@ui-sdk/core@0.1.0-beta.5",
+      "@ui-sdk/core/": "https://esm.sh/*@ui-sdk/core@0.1.0-beta.5/",
+      "@ui-sdk/web": "https://esm.sh/*@ui-sdk/web@0.1.0-beta.5"
+    }
+  }
+</script>
+<script type="module" src="./components/audio-ui/knob/web.js"></script>
+
+<audio-ui-knob value="40">
+  <audio-ui-knob-control>
+    <audio-ui-knob-track></audio-ui-knob-track>
+    <audio-ui-knob-indicator></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb aria-label="Cutoff"></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+```
+
+Use the versions your `package.json` has after the install, or the ones the item names, `@ui-sdk/*@0.1.0-beta.5`. The `*` before a package keeps its own dependencies out of the file, so they all resolve through the map. Without it, the page failed in our test: the elements did not render. Browsers only run module scripts from a server, so open the page through one, not from the file system.
+
+esm.sh is a third-party service: point the map at copies you host to avoid it.
+
+</ForFrameworks>
+
 ## The package a primitive needs
 
 Primitives import from `@audio-ui/core` (and some components from `@audio-ui/engine`: pitch, MIDI, musical time, analysis). Installing one adds the package to your `package.json` if it is not there, with no version pinned: the version is yours to choose.
