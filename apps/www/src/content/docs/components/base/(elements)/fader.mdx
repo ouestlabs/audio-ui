@@ -371,6 +371,26 @@ While a pointer drags the thumb, it follows the pointer even if a controlled `va
 
 In the web adapter, `onValueChange` is an `input` event and `onValueCommitted` a `change` event, both with `detail: { value, reason, source }`, and `event.preventDefault()` refuses a change.
 
+### Parts
+
+<ForFrameworks only="react vue svelte">
+
+<PrimitiveParts name="fader" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+The tags the web adapter registers: the inputs inside a part are made for you.
+
+<PrimitiveTags name="fader" />
+
+</ForFrameworks>
+
+### Events
+
+<PrimitiveEvents name="fader" />
+
 <ForFrameworks only="react">
 
 ## Examples

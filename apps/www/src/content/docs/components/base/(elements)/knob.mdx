@@ -378,6 +378,26 @@ Set on the Root, as props (an attribute in kebab case in the web adapter).
 
 In the web adapter, `onValueChange` is an `input` event and `onValueCommitted` a `change` event, both with `detail: { value, reason, source }`, and `event.preventDefault()` refuses a change.
 
+### Parts
+
+<ForFrameworks only="react vue svelte">
+
+<PrimitiveParts name="knob" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+The tags the web adapter registers: the inputs inside a part are made for you.
+
+<PrimitiveTags name="knob" />
+
+</ForFrameworks>
+
+### Events
+
+<PrimitiveEvents name="knob" />
+
 <ForFrameworks only="react">
 
 ## Examples

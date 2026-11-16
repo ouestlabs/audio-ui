@@ -449,6 +449,26 @@ In the web adapter, `onValueChange` is an `input` event and `onValueCommitted` a
 
 A Point is a `role="slider"` on its level, from 0 to 1, and its `aria-valuetext` reads its coordinates, `0.5, 1`, with the format and the locale of the Root. A Segment is a slider on its curve, from -1 to 1. Give each an `aria-label`: the Graph, the Line and the Fill are hidden from assistive technology.
 
+### Parts
+
+<ForFrameworks only="react vue svelte">
+
+<PrimitiveParts name="envelope" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+The tags the web adapter registers: the inputs inside a part are made for you.
+
+<PrimitiveTags name="envelope" />
+
+</ForFrameworks>
+
+### Events
+
+<PrimitiveEvents name="envelope" />
+
 <ForFrameworks only="react">
 
 ## Examples

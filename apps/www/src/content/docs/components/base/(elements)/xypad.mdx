@@ -356,6 +356,26 @@ The Value shows both axes as one text, with the separator of the locale. Its con
 
 In the web adapter, `onValueChange` is an `input` event and `onValueCommitted` a `change` event, both with `detail: { value, reason, source }`, where `value` is the point, and `event.preventDefault()` refuses a change.
 
+### Parts
+
+<ForFrameworks only="react vue svelte">
+
+<PrimitiveParts name="xypad" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+The tags the web adapter registers: the inputs inside a part are made for you.
+
+<PrimitiveTags name="xypad" />
+
+</ForFrameworks>
+
+### Events
+
+<PrimitiveEvents name="xypad" />
+
 <ForFrameworks only="react">
 
 ## Examples

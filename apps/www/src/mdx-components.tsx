@@ -19,6 +19,11 @@ import { IconCatalog } from "@/components/docs/mdx/icon-catalog";
 import { Install, InstallAgentParts } from "@/components/docs/mdx/install";
 import { LinkCard, LinkCards } from "@/components/docs/mdx/link-cards";
 import { Mermaid } from "@/components/docs/mdx/mermaid";
+import {
+  PrimitiveEvents,
+  PrimitiveParts,
+  PrimitiveTags,
+} from "@/components/docs/mdx/primitive-api";
 import { QuickStart } from "@/components/docs/mdx/quick-start";
 import {
   KeyRow,
@@ -65,6 +70,9 @@ export function getMDXComponents(components?: MDXComponents): MDXComponents {
     ForFrameworks,
     LinkCard,
     LinkCards,
+    PrimitiveEvents,
+    PrimitiveParts,
+    PrimitiveTags,
     QuickStart,
     CodeFile,
     ForStyling,

@@ -330,3 +330,24 @@ Set on the Root, as props (an attribute in kebab case in the web adapter, the gr
 - `data-on` and `aria-pressed` on a cell while its step is on, `data-current` while it is the step being played, `data-row` and `data-step` for its place.
 - `data-painting` on the Root and the cells while a pointer paints.
 - `data-disabled` on every part.
+
+### Parts
+
+<ForFrameworks only="react vue svelte">
+
+<PrimitiveParts name="sequencer" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+The tags the web adapter registers: the inputs inside a part are made for you.
+
+<PrimitiveTags name="sequencer" />
+
+</ForFrameworks>
+
+### Events
+
+<PrimitiveEvents name="sequencer" />
+

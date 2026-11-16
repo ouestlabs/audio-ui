@@ -516,3 +516,24 @@ In the web adapter, the notes are the `input` and `change` events, and the selec
 - On the Root and every part: `data-mode`, `data-editing` while a pointer edits, `data-folded`, `data-disabled`; on the Root `data-has-selection`.
 - On a note and its parts: `data-selected`, `data-muted`, `data-note` for its id. A note sets `--piano-roll-velocity` and `--piano-roll-chance`, a bar `--piano-roll-level` and `--piano-roll-deviation`, for what you draw inside them.
 - On a row: `data-color` (`black` or `white`), `data-in-scale`, `data-out-of-scale`, `data-scale-root`, `data-octave`, `data-active`, and `data-pitch`.
+
+### Parts
+
+<ForFrameworks only="react vue svelte">
+
+<PrimitiveParts name="piano-roll" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+The tags the web adapter registers: the inputs inside a part are made for you.
+
+<PrimitiveTags name="piano-roll" />
+
+</ForFrameworks>
+
+### Events
+
+<PrimitiveEvents name="piano-roll" />
+

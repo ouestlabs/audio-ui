@@ -392,6 +392,26 @@ The Mark takes a `value` and sits along the length at its level. A Channel takes
 
 Each channel is a `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and an `aria-valuetext` that reads the level as a number with its unit, not as a share of the range. Name it with `aria-label`, or with a Label part inside it, which sets `aria-labelledby`. The Indicator, the Peak and the Value are hidden from assistive technology: the channel announces its own level.
 
+### Parts
+
+<ForFrameworks only="react vue svelte">
+
+<PrimitiveParts name="meter" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+The tags the web adapter registers: the inputs inside a part are made for you.
+
+<PrimitiveTags name="meter" />
+
+</ForFrameworks>
+
+### Events
+
+<PrimitiveEvents name="meter" />
+
 <ForFrameworks only="react">
 
 ## Examples

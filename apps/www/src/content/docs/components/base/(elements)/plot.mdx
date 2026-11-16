@@ -421,3 +421,24 @@ The registry's styled `plot` element already carries these.
 - `data-dragging` on a handle while it is held, `data-handle` for its name and `data-axis` for the axes it moves on.
 - `data-active` on the Cursor while the pointer is over the plot.
 - `data-disabled` on every part.
+
+### Parts
+
+<ForFrameworks only="react vue svelte">
+
+<PrimitiveParts name="plot" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+The tags the web adapter registers: the inputs inside a part are made for you.
+
+<PrimitiveTags name="plot" />
+
+</ForFrameworks>
+
+### Events
+
+<PrimitiveEvents name="plot" />
+
