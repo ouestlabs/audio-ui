@@ -231,6 +231,21 @@ A Handle takes `handle` (its name), `axis`, `value` or `defaultValue` (`{ x, y }
 
 On the custom element, `onValueChange` is an `input` event and `onValueCommitted` a `change` event, with `detail: { handle, value, reason, source }`, and `event.preventDefault()` refuses a change.
 
+## Styling
+
+The parts draw geometry and carry no look of their own: until you style them, a Curve is a filled black shape, the grid lines have no stroke and the labels sit at the corner of their value. The examples above give a Curve `text-primary`, which only colors it once the path has a stroke. A starting point, in plain CSS, that you then own:
+
+```css
+[data-slot="plot"] { color: #555; }
+[data-slot="plot-curve"] path { fill: none; stroke: currentColor; stroke-width: 2; }
+[data-slot="plot-grid"] [data-part="line"] { stroke: #ddd; }
+[data-slot="plot-grid"] [data-part="line"][data-zero] { stroke: #aaa; }
+[data-slot="plot-grid"] [data-part="label"][data-axis="x"] { bottom: 4px; transform: translateX(-50%); }
+[data-slot="plot-grid"] [data-part="label"][data-axis="y"] { left: 6px; transform: translateY(-50%); }
+```
+
+The registry's styled `plot` element already carries these.
+
 ## States to style from
 
 - `data-dragging` on a handle while it is held, `data-handle` for its name and `data-axis` for the axes it moves on.
