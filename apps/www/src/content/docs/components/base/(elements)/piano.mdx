@@ -84,7 +84,7 @@ One file, `components/audio-ui/piano/react.tsx`.
 <TabsContent value="vue">
 
 ```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-vue.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-vue.json
 ```
 
 One file, `components/audio-ui/piano/vue.ts`.
@@ -94,10 +94,10 @@ One file, `components/audio-ui/piano/vue.ts`.
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-svelte.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-svelte.json
 ```
 
-Three files in `components/audio-ui/piano/svelte/`: the label, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
+Three files in `components/audio-ui/piano/svelte/`: the label, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
@@ -261,6 +261,8 @@ const emit = defineEmits<{ on: [pitch: number, velocity: number]; off: [pitch: n
   {/snippet}
 </Piano.Root>
 ```
+
+With the latest SvelteKit, import through `#lib` in place of `$lib`: `#lib/components/audio-ui/piano/svelte`.
 
 </TabsContent>
 

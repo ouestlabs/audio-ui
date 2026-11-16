@@ -13,6 +13,9 @@ test("every framework has a prompt that names its install and the agent's resour
     expect(prompt).toContain("https://www.audio-ui.dev/llms.txt");
     expect(prompt).toContain("npx skills@latest add ouestlabs/audio-ui");
     expect(prompt).toContain("https://www.audio-ui.dev/mcp");
+    if (id !== "react") {
+      expect(prompt).toContain("do it by hand");
+    }
     expect(prompt).toContain(
       id === "react" ? "@audio-ui/knob" : `knob-${id}.json`
     );

@@ -83,7 +83,7 @@ One file, `components/audio-ui/knob/react.tsx`. It imports `@audio-ui/primitives
 <TabsContent value="vue">
 
 ```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
 ```
 
 One file, `components/audio-ui/knob/vue.ts`. It imports `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/vue` and `vue`.
@@ -93,12 +93,10 @@ One file, `components/audio-ui/knob/vue.ts`. It imports `@audio-ui/primitives`, 
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
 ```
 
 Nine files in `components/audio-ui/knob/svelte/`: a component per part and an `index.ts`. They import `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/svelte` and `svelte`.
-
-`shadcn-svelte` reads your `$lib` alias from `tsconfig.json`. A SvelteKit project made with the latest `sv` template has no such alias (it uses `#lib`), so declare it under `compilerOptions.paths` first: `"$lib": ["./src/lib"]` and `"$lib/*": ["./src/lib/*"]`.
 
 </TabsContent>
 
@@ -242,6 +240,8 @@ const value = ref(40);
   <Knob.Value />
 </Knob.Root>
 ```
+
+With the latest SvelteKit, import through `#lib` in place of `$lib`: `#lib/components/audio-ui/knob/svelte`.
 
 </TabsContent>
 

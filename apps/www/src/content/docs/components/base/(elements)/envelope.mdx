@@ -85,7 +85,7 @@ One file, `components/audio-ui/envelope/react.tsx`.
 <TabsContent value="vue">
 
 ```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/envelope-vue.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/envelope-vue.json
 ```
 
 One file, `components/audio-ui/envelope/vue.ts`.
@@ -95,10 +95,10 @@ One file, `components/audio-ui/envelope/vue.ts`.
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/envelope-svelte.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/envelope-svelte.json
 ```
 
-Five files in `components/audio-ui/envelope/svelte/`: the line, the fill, the polyline they share, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
+Five files in `components/audio-ui/envelope/svelte/`: the line, the fill, the polyline they share, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
@@ -290,6 +290,8 @@ const points = ref([
   {/snippet}
 </Envelope.Root>
 ```
+
+With the latest SvelteKit, import through `#lib` in place of `$lib`: `#lib/components/audio-ui/envelope/svelte`.
 
 </TabsContent>
 

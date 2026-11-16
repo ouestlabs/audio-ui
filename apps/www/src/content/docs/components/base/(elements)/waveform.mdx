@@ -135,7 +135,7 @@ One file, `components/audio-ui/waveform/react.tsx`.
 <TabsContent value="vue">
 
 ```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-vue.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-vue.json
 ```
 
 One file, `components/audio-ui/waveform/vue.ts`.
@@ -145,10 +145,10 @@ One file, `components/audio-ui/waveform/vue.ts`.
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-svelte.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-svelte.json
 ```
 
-Ten files in `components/audio-ui/waveform/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
+Ten files in `components/audio-ui/waveform/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
@@ -297,6 +297,8 @@ const emit = defineEmits<{ seek: [time: number] }>();
   </Waveform.Control>
 </Waveform.Root>
 ```
+
+With the latest SvelteKit, import through `#lib` in place of `$lib`: `#lib/components/audio-ui/waveform/svelte`.
 
 </TabsContent>
 

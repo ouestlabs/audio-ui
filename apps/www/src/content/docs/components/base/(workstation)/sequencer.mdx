@@ -75,7 +75,7 @@ One file, `components/audio-ui/sequencer/react.tsx`.
 <TabsContent value="vue">
 
 ```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-vue.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-vue.json
 ```
 
 One file, `components/audio-ui/sequencer/vue.ts`.
@@ -85,10 +85,10 @@ One file, `components/audio-ui/sequencer/vue.ts`.
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-svelte.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-svelte.json
 ```
 
-Four files in `components/audio-ui/sequencer/svelte/`: the cell, the velocity, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
+Four files in `components/audio-ui/sequencer/svelte/`: the cell, the velocity, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
@@ -228,6 +228,8 @@ const emit = defineEmits<{ change: [pattern: boolean[][]] }>();
   {/snippet}
 </Sequencer.Root>
 ```
+
+With the latest SvelteKit, import through `#lib` in place of `$lib`: `#lib/components/audio-ui/sequencer/svelte`.
 
 </TabsContent>
 

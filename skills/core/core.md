@@ -17,8 +17,8 @@ npm install @audio-ui/engine
 Before writing a binding, install the primitive: every one is unstyled and accessible, written once over these controllers (`@audio-ui/primitives`, on the UI SDK) and rendered in each framework by a thin adapter that the CLI copies into your project (parts, keyboard interactions, ARIA semantics, native range inputs, `data-*` attributes). The item is named `<primitive>-<framework>`.
 
 ```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
 npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
 ```
 
@@ -43,7 +43,7 @@ The web adapter is one file, which registers the elements once it is imported:
 
 - On the elements, `input` fires on every change with `event.detail` `{ value, reason, source }`; `preventDefault()` rejects the change. `change` fires once when an interaction ends. Each part binds a microtask after it connects: read the element's state after that.
 - Vue: `import { Knob } from "@/components/audio-ui/knob/vue"`, then `<Knob.Root :value="x" @value-change="(next) => (x = next)">` with `Knob.Control`, `Knob.Track`, `Knob.Indicator`, `Knob.Thumb` and `Knob.Value`. https://www.audio-ui.dev/docs/vue/components/base/knob
-- Svelte 5: `import { Knob } from "$lib/components/audio-ui/knob/svelte"`, then `<Knob.Root {value} onValueChange={(next) => (value = next)}>` with the same parts. `shadcn-svelte` reads the `$lib` alias from `tsconfig.json`. https://www.audio-ui.dev/docs/svelte/components/base/knob
+- Svelte 5: `import { Knob } from "$lib/components/audio-ui/knob/svelte"`, then `<Knob.Root {value} onValueChange={(next) => (value = next)}>` with the same parts. 
 - A part takes the classes and attributes of its element and applies only display, positioning and `touch-action`. Style parts by tag or class and by `data-*` state attributes (`data-dragging`, `data-disabled`, `data-orientation`).
 
 Every primitive has a page with its install, its parts and its options in each framework: `https://www.audio-ui.dev/docs/components/base/<primitive>` (the headless primitive section; the timeline's is on `arrangement`). Use the controllers below directly only for interfaces the primitives do not cover.
