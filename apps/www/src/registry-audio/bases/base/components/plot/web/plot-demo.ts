@@ -22,6 +22,7 @@ export default function plotWebDemo(element: HTMLElement) {
     </audio-ui-plot>`;
   let peak = { x: 1000, y: 6 };
   const plot = element.querySelector("audio-ui-plot");
+  const handle = element.querySelector("audio-ui-plot-handle");
   const grid = element.querySelector("audio-ui-plot-grid") as Grid | null;
   const curves = [
     ...element.querySelectorAll("audio-ui-plot-curve"),
@@ -38,6 +39,7 @@ export default function plotWebDemo(element: HTMLElement) {
   draw();
   const onInput = (event: Event) => {
     peak = (event as CustomEvent).detail.value;
+    handle?.setAttribute("value", JSON.stringify(peak));
     draw();
   };
   plot?.addEventListener("input", onInput);
