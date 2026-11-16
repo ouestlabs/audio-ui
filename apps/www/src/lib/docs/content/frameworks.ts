@@ -35,13 +35,13 @@ export function isFramework(value: unknown): value is FrameworkId {
   return FRAMEWORKS.some((framework) => framework.id === value);
 }
 
-/** The sections only a React app uses: the primitives for React, and the registry with its catalog. */
-const REACT_ONLY: readonly string[] = ["react", "registry"];
+/** The sections only a React app uses: the primitives for React. The registry is every framework's, for the primitives it installs. */
+const REACT_ONLY: readonly string[] = ["react"];
 
 /** Whether a section is for React alone: read there, the framework is React, whatever the reader chose. */
 export const needsReact = (section: string) => REACT_ONLY.includes(section);
 
-/** The addresses only a React app uses: React's primitives, the registry with its catalog, its guides and its API. */
+/** The addresses only a React app uses: React's primitives, the styled catalog, its guides and its API. The registry's landing page and the pages of the primitives it installs are every framework's. */
 const REACT_ADDRESSES = [
   "/components",
   "/docs/api",
@@ -51,7 +51,6 @@ const REACT_ADDRESSES = [
   "/docs/hooks",
   "/docs/lib",
   "/docs/react",
-  "/docs/registry",
   "/docs/styling",
 ];
 
@@ -144,7 +143,7 @@ export interface FrameworkSection {
 
 /**
  * The switcher's sections: the Docs, one set of primitives, the core with the
- * engine, the registry, for React or no framework chosen, and the icons. The primitives are the section being
+ * engine, the registry and the icons. The primitives are the section being
  * read when it is one of them, else the framework's: React's for React and
  * for no framework chosen, the elements for the others.
  * Either is named Primitives: the framework menu under it names the framework.
@@ -156,9 +155,7 @@ export function menuSections(
   const framed = framework && framework !== "react" ? "elements" : "react";
   const primitives =
     reading === "react" || reading === "elements" ? reading : framed;
-  // The registry is React's: a reader of another framework is not shown it.
-  const registry = framework && framework !== "react" ? [] : ["registry"];
-  return ["docs", primitives, "core", ...registry, "icons"].flatMap((id) => {
+  return ["docs", primitives, "core", "registry", "icons"].flatMap((id) => {
     const section = DOCS_SECTIONS.find((each) => each.id === id);
     if (!section) {
       return [];
