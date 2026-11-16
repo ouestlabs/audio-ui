@@ -254,7 +254,7 @@
     },
     "packages/core": {
       "name": "@audio-ui/core",
-      "version": "0.29.1",
+      "version": "0.29.2",
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",
         "@types/bun": "1.4.2",
@@ -381,7 +381,7 @@
       "name": "@audio-ui/primitives",
       "version": "0.0.0",
       "dependencies": {
-        "@audio-ui/core": "workspace:*",
+        "@audio-ui/core": "^0.29.2",
       },
       "devDependencies": {
         "@happy-dom/global-registrator": "^21.0.4",

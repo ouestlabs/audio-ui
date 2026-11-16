@@ -26,7 +26,7 @@ audio-ui/
 │   ├── core/       # @audio-ui/core, published: the logic of the controls, framework-agnostic, no dependency
 │   ├── engine/     # @audio-ui/engine, published: the audio logic (devices, time, analysis, MIDI, scales, playback), over core and audio.js
 │   ├── gl/         # @audio-ui/gl, published: audio drawn on the GPU (a lane of clips as waveforms or a spectrogram), over gl-waveform and gl-spectrogram
-│   ├── primitives/ # @audio-ui/primitives: the behavior of each primitive, written once on the UI SDK kernel; the adapters are the registry's (private until the first release)
+│   ├── primitives/ # @audio-ui/primitives: the behavior of each primitive, written once on the UI SDK kernel; the adapters are the registry's
 │   └── icons/      # @audio-ui/icons, published: audio glyphs (one thin stroke on a 24 grid, in four weights)
 └── skills/         # The agent skills we ship to library users: audio-ui, web-audio, design, core (npx skills add ouestlabs/audio-ui)
 ```
