@@ -1,23 +1,152 @@
 ---
 title: Installation
-description: Set audio/ui up by hand in a React app with shadcn/ui, for the styled components.
+description: Set audio/ui up by hand in your framework, as the prompt of Get Started does for you.
 ---
 
-<ForFrameworks only="react">
-
-The prompt of the [Get Started](/docs) page does this for you. Here is what it sets up by hand, for the styled components in a React app with shadcn/ui.
+The prompt of the [Get Started](/docs) page does this for you. Here is what it sets up by hand, in your framework.
 
 ## Prerequisites
 
-audio/ui is built on **React 19** and [Tailwind CSS v4](https://tailwindcss.com). Set up both first. The [shadcn/ui installation guide](https://ui.shadcn.com/docs/installation) covers the environment.
+<ForFrameworks only="react">
 
-## Components
+audio/ui is built on **React 19** and [Tailwind CSS v4](https://tailwindcss.com). Set up both first, with shadcn/ui: the [shadcn/ui installation guide](https://ui.shadcn.com/docs/installation) covers the environment.
 
-You can install audio/ui using the [**shadcn CLI**](https://ui.shadcn.com/docs/cli) for automation or by manual installation for full control. Both methods apply to everything in the [Docs](/docs), including the `block-*` blocks and demos you install with `@audio-ui/…`.
+</ForFrameworks>
 
-### The package a component needs
+<ForFrameworks only="vue">
 
-Some components import from `@audio-ui/core` (pitch, MIDI, musical time, analysis). Installing one adds the package to your `package.json` if it is not there, with no version pinned: the version is yours to choose.
+A Vue 3 app, with [shadcn-vue](https://www.shadcn-vue.com) set up: its CLI copies the primitive into your project.
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+A Svelte 5 app, with [shadcn-svelte](https://www.shadcn-svelte.com) set up: its CLI copies the primitive into your project.
+
+shadcn-svelte reads your `$lib` alias from `tsconfig.json`. A SvelteKit project made with the latest `sv` template has no such alias (it uses `#lib`), so declare it first, under `compilerOptions.paths`:
+
+```json
+{
+  "compilerOptions": {
+    "paths": {
+      "$lib": ["./src/lib"],
+      "$lib/*": ["./src/lib/*"]
+    }
+  }
+}
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+A page, or an app, with a bundler such as Vite that resolves package imports, and the [shadcn](https://ui.shadcn.com/docs/cli) CLI, which copies the primitive into your project.
+
+</ForFrameworks>
+
+## Install a primitive
+
+<ForFrameworks only="react">
+
+Copy a styled component with the shadcn CLI. `@audio-ui` is in shadcn's registry directory, so there is nothing to configure:
+
+```bash
+npx shadcn@latest add @audio-ui/knob
+```
+
+Or, without the styles, copy the headless primitive and style it yourself:
+
+```bash
+npx shadcn@latest add @audio-ui/knob-react
+```
+
+The same works for every item of the [Docs](/docs), including the `block-*` blocks and demos you install with `@audio-ui/…`. You can also install by manual copy, for full control.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue">
+
+Copy the headless primitive from the address of its item, `<name>-vue.json`:
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+```
+
+It writes `components/audio-ui/knob/vue.ts` and installs what it imports: `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/vue` and `vue`. Every primitive installs the same way.
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+Copy the headless primitive from the address of its item, `<name>-svelte.json`:
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+```
+
+It writes a component for each part in `components/audio-ui/knob/svelte/`, with an `index.ts`, and installs what they import: `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/svelte` and `svelte`. Every primitive installs the same way.
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+Copy the headless primitive from the address of its item, `<name>-web.json`:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
+```
+
+It writes `components/audio-ui/knob/web.ts` and installs what it imports: `@audio-ui/primitives`, `@audio-ui/core` and `@ui-sdk/web`. Every primitive installs the same way.
+
+</ForFrameworks>
+
+## Use it
+
+<ForFrameworks only="react">
+
+Import it from where it landed, through your `components` alias:
+
+```tsx
+import { Knob } from "@/components/audio-ui/knob";
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="vue">
+
+Import its parts from where it landed:
+
+```ts
+import { Knob } from "@/components/audio-ui/knob/vue";
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+Import its parts from where it landed:
+
+```ts
+import { Knob } from "$lib/components/audio-ui/knob/svelte";
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+Import it once, in your app's browser entry: the import registers the `audio-ui-knob` tags, and the page can then use them.
+
+```ts
+import "./components/audio-ui/knob/web.ts";
+```
+
+</ForFrameworks>
+
+The page of each component has its parts, its options and an example in your framework: [Knob](/docs/components/base/knob) is the first to open.
+
+## The package a primitive needs
+
+Primitives import from `@audio-ui/core` (and some components from `@audio-ui/engine`: pitch, MIDI, musical time, analysis). Installing one adds the package to your `package.json` if it is not there, with no version pinned: the version is yours to choose.
 
 The CLI leaves a version you already have. If an older `@audio-ui/core` is installed and a component needs a subpath it did not have yet, your build says it cannot resolve `@audio-ui/engine/time` (or `/pitch`, `/midi`, `/analysis`). Update the package:
 
@@ -29,6 +158,14 @@ If your package manager still resolves the old version, bypass its cache: with B
 
 ## Styling
 
+<ForFrameworks only="react">
+
 Components are styled with a design token system defined by CSS variables and implemented with Tailwind CSS, following the same conventions as shadcn/ui so they're fully customizable. See the [Styling guide](/docs/styling) for details.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+A primitive is headless: it brings behavior and accessibility, and no styles. Each part takes the classes and attributes of its element, and carries state attributes (`data-dragging`, `data-disabled`…) to style from, with your own CSS or with Tailwind CSS. The page of each component lists the attributes of its parts.
 
 </ForFrameworks>
