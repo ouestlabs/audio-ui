@@ -14,6 +14,7 @@
     "plot-ui-sdk",
     "waveform-ui-sdk",
     "timeline-ui-sdk",
+    "piano-roll-ui-sdk",
     "[Component catalog](/components)"
   ]
 }

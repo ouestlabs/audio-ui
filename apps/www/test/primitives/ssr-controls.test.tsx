@@ -301,6 +301,7 @@ describe("server rendering of the fader and the XY pad", () => {
         maxPitch={63}
         minPitch={60}
       >
+        <PianoRoll.Keys>{({ pitches }) => pitches.join(",")}</PianoRoll.Keys>
         <PianoRoll.Grid>
           <PianoRoll.Rows>
             {(pitch) => <PianoRoll.Row pitch={pitch} />}
@@ -311,6 +312,7 @@ describe("server rendering of the fader and the XY pad", () => {
         </PianoRoll.Grid>
       </PianoRoll.Root>
     );
+    expect(html).toContain("63,62,61,60");
     expect(html).toContain("--piano-roll-rows:4");
     expect(html.match(/data-pitch=/g)).toHaveLength(4);
     expect(html).toContain('aria-label="C#4, 10 to 30"');
