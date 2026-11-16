@@ -2,6 +2,8 @@ export type { Note, NoteId } from "@audio-ui/core/piano-roll";
 export {
   CHANCE_PROPERTY,
   DEVIATION_PROPERTY,
+  type KeyOffDetails,
+  type KeyOnDetails,
   type KeysPublicState,
   LEVEL_PROPERTY,
   type NoteEdgeState,

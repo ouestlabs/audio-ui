@@ -71,7 +71,7 @@ A Root holds the notes and their selection. The roll is a column of parts you pl
 - **Notes** and **Note**: a note for each note of the roll, in reading order. A press selects it and a drag moves it. A **NoteHandle** resizes an edge.
 - **Marquee**: the box a drag across the bare grid draws. **SelectionSpan** shows the stretch the selection covers, and a **StretchHandle** in it stretches the selected notes.
 - **VelocityLane** and **Velocity**: a bar under each note, whose height is its velocity (or its chance, with `level="chance"`), set by a drag or through its native input.
-- **Keys**: gives the pitches drawn, the ones sounding and the audition calls, to draw a vertical [piano](/docs/piano-ui-sdk) beside the grid.
+- **Keys**: gives the pitches drawn, the ones sounding and the audition calls, to draw a vertical [piano](/docs/piano-ui-sdk) beside the grid. The piano's keys are placed by percentage of its height, so give it the height of the grid (`h-full` in a Keys part that stretches beside it), or it collapses to nothing.
 
 <FrameworkTabs defaultValue="react">
 
@@ -105,6 +105,7 @@ export function Roll({ notes, onNotes }: { notes: Note[]; onNotes: (notes: Note[
         {({ active, keyOff, keyOn, pitches }) => (
           <Piano.Root
             activeNotes={active}
+            className="h-full"
             layout="even"
             onNoteOff={keyOff}
             onNoteOn={keyOn}

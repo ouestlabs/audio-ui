@@ -154,13 +154,58 @@ export interface RowsPublicState extends PianoRollPublicState {
   pitches: readonly number[];
 }
 
+/** What a key of the keyboard beside the roll reports when it sounds, as a piano reports it: the event can be missing. */
+export interface KeyOnDetails {
+  cancel: () => void;
+  event?: Event;
+  reason: string;
+  source?: string;
+  velocity?: number;
+}
+
+/** What a key reports when it is released. */
+export interface KeyOffDetails {
+  event?: Event;
+  reason: string;
+}
+
 export interface KeysPublicState extends PianoRollPublicState {
   /** The pitches sounding. */
   active: readonly number[];
-  keyOff: PianoRollController["keyOff"];
+  /** Silences a pitch from a key. */
+  keyOff: (pitch: number, details: KeyOffDetails) => void;
   /** Auditions a pitch from a key. */
-  keyOn: PianoRollController["keyOn"];
+  keyOn: (pitch: number, details: KeyOnDetails) => void;
   pitches: readonly number[];
+}
+
+const keyCallsOf = new WeakMap<
+  PianoRollController,
+  Pick<KeysPublicState, "keyOff" | "keyOn">
+>();
+
+/** The calls of the keys, made once for a controller so that the state stays equal between renders. */
+function keyCalls(controller: PianoRollController) {
+  let calls = keyCallsOf.get(controller);
+  if (!calls) {
+    calls = {
+      keyOff: (pitch, details) =>
+        controller.keyOff(
+          pitch,
+          details as Parameters<PianoRollController["keyOff"]>[1]
+        ),
+      keyOn: (pitch, details) => {
+        // The controller reads Shift from the event; a piano's key may report none.
+        details.event ??= new Event(details.reason);
+        controller.keyOn(
+          pitch,
+          details as Parameters<PianoRollController["keyOn"]>[1]
+        );
+      },
+    };
+    keyCallsOf.set(controller, calls);
+  }
+  return calls;
 }
 
 export interface VelocityProps extends NoteRef {
@@ -640,8 +685,7 @@ export const pianoRoll: PianoRollPrimitive = definePrimitive({
         state: (state: PianoRollState, { api }: { api: PianoRollApi }) => ({
           ...publicOf(state),
           active: [...state.view.active],
-          keyOff: api.controller.keyOff,
-          keyOn: api.controller.keyOn,
+          ...keyCalls(api.controller),
           pitches: state.view.rows.pitches,
         }),
       }),
