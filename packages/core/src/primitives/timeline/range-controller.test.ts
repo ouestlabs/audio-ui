@@ -207,7 +207,8 @@ describe("a key moves a range whose view resets it at once", () => {
       largeStep: 10,
       minLength: 0,
       movable: true,
-      onValueCommitted: (value) => commits.push(value),
+      onValueCommitted: (value: readonly [number, number]) =>
+        commits.push(value),
       step: 4,
       value: [32, 32],
     } as never);
