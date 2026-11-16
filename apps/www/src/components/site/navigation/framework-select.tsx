@@ -25,7 +25,7 @@ const LOGOS: Record<
   web: Icons.javascript,
 };
 
-function LogoOf({ id }: { id: FrameworkId }) {
+export function LogoOf({ id }: { id: FrameworkId }) {
   const Logo = LOGOS[id];
   return <Logo aria-hidden="true" className="size-4" />;
 }

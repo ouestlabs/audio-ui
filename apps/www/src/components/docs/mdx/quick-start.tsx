@@ -1,3 +1,4 @@
+import { LogoOf } from "@/components/site/navigation/framework-select";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -31,7 +32,10 @@ function PromptBox({
 }) {
   const { copyToClipboard, isCopied } = useCopyToClipboard();
   return (
-    <div className="not-prose my-4 overflow-hidden rounded-lg border bg-card text-card-foreground">
+    <div
+      className="my-4 overflow-hidden rounded-lg border bg-card text-card-foreground"
+      data-not-typeset=""
+    >
       <div className="flex items-center justify-between gap-2 border-b p-2">
         {children ?? (
           <span className="px-2 text-muted-foreground text-sm">{label}</span>
@@ -44,7 +48,10 @@ function PromptBox({
           {isCopied ? "Copied" : "Copy Prompt"}
         </Button>
       </div>
-      <pre className="whitespace-pre-wrap p-4 font-mono text-sm leading-relaxed">
+      <pre
+        className="m-0 whitespace-pre-wrap rounded-none border-0 bg-transparent p-4 font-mono text-sm leading-relaxed"
+        data-not-typeset=""
+      >
         {text}
       </pre>
     </div>
@@ -73,6 +80,7 @@ export function QuickStart() {
         >
           <SelectTrigger aria-label="Framework">
             <SelectValue>
+              <LogoOf id={framework} />
               {FRAMEWORKS.find((item) => item.id === framework)?.label}
             </SelectValue>
           </SelectTrigger>
@@ -80,6 +88,7 @@ export function QuickStart() {
             <SelectGroup>
               {FRAMEWORKS.map((item) => (
                 <SelectItem key={item.id} value={item.id}>
+                  <LogoOf id={item.id} />
                   {item.label}
                 </SelectItem>
               ))}
