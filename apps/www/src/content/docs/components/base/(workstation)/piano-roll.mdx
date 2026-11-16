@@ -31,6 +31,14 @@ It is built on the headless [PianoRoll](/docs/piano-roll-ui-sdk) primitive that 
 
 ## Usage
 
+A note's `id` is a `string` or a `number`, so type the notes you keep with the roll's `Note`, or a state of literals such as `{ id: "a", … }` is narrower than what `onValueChange` gives back:
+
+```tsx
+import type { Note } from "@audio-ui/primitives/piano-roll";
+
+const [notes, setNotes] = useState<Note[]>([]);
+```
+
 ```tsx
 import { Timeline, TimelineNavigator } from "@/components/audio-ui/timeline";
 import {
