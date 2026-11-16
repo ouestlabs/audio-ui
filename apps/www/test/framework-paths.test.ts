@@ -18,7 +18,7 @@ test("a framework address is the page of the primitive on the UI SDK, read for t
   });
   expect(pageOfFrameworkAddress("/docs/svelte")).toEqual({
     framework: "svelte",
-    pathname: "/docs/registry",
+    pathname: "/docs",
   });
 });
 
@@ -30,8 +30,9 @@ test("an address with no framework prefix is left alone", () => {
 
 test("a page read for a framework goes back to its framework address", () => {
   expect(frameworkAddressOf("/docs/knob-ui-sdk", "vue")).toBe("/docs/vue/knob");
+  expect(frameworkAddressOf("/docs", "web")).toBe("/docs/web-components");
   expect(frameworkAddressOf("/docs/registry", "web")).toBe(
-    "/docs/web-components"
+    "/docs/web-components/registry"
   );
   expect(frameworkAddressOf("/docs/knob-ui-sdk", "react")).toBe(
     "/docs/react/knob"
@@ -53,7 +54,6 @@ test("every page of the docs has the address of each framework it is shown to", 
   // The sections of one framework keep their address.
   expect(frameworkAddressOf("/docs/react-package/knob", "react")).toBeNull();
   expect(frameworkAddressOf("/docs/elements/knob", "vue")).toBeNull();
-  expect(frameworkAddressOf("/docs", "vue")).toBeNull();
   expect(pageOfFrameworkAddress("/docs/vue/engine/analysis")).toEqual({
     framework: "vue",
     pathname: "/docs/engine/analysis",
@@ -89,7 +89,7 @@ const run = (kept: string | null, pathname: string) => {
 
 test("the redirect script goes to the address of the framework kept", () => {
   expect(run("vue", "/docs/knob-ui-sdk")).toBe("/docs/vue/knob?x=1#a");
-  expect(run("web", "/docs/registry")).toBe("/docs/web-components?x=1#a");
+  expect(run("web", "/docs")).toBe("/docs/web-components?x=1#a");
   expect(run("svelte", "/docs/piano-roll-ui-sdk/")).toBe(
     "/docs/svelte/piano-roll?x=1#a"
   );

@@ -64,7 +64,10 @@ const SEGMENT_OF = new Map<string, Segment>(
 
 /** Whether a page has an address for a framework: the docs' own pages the framework is shown, not the sections that are one framework's. */
 function addressable(pathname: string, framework: string): boolean {
-  if (!pathname.startsWith("/docs/") || PREFIXED.test(pathname)) {
+  if (
+    !(pathname === "/docs" || pathname.startsWith("/docs/")) ||
+    PREFIXED.test(pathname)
+  ) {
     return false;
   }
   if (OWN_SECTIONS.some((section) => under(pathname, section))) {
@@ -75,7 +78,7 @@ function addressable(pathname: string, framework: string): boolean {
     : !REACT_ADDRESSES.some((prefix) => under(pathname, prefix));
 }
 
-/** The page a framework address is, and its framework: `/docs/vue/knob` is `/docs/knob-ui-sdk` for Vue, `/docs/vue/guides/output` is `/docs/guides/output`; `/docs/vue` is the registry's. Null for any other address, and for a page the framework is not shown. */
+/** The page a framework address is, and its framework: `/docs/vue/knob` is `/docs/knob-ui-sdk` for Vue, `/docs/vue/guides/output` is `/docs/guides/output`; `/docs/vue` is the docs' own first page. Null for any other address, and for a page the framework is not shown. */
 export function pageOfFrameworkAddress(
   pathname: string
 ): { framework: Prefixed; pathname: string } | null {
@@ -86,7 +89,7 @@ export function pageOfFrameworkAddress(
   const framework = FRAMEWORK_SEGMENTS[match[1] as Segment];
   const rest = (match[2] ?? "").replace(TRAILING_SLASH, "");
   if (rest === "") {
-    return { framework, pathname: "/docs/registry" };
+    return { framework, pathname: "/docs" };
   }
   const page = PRIMITIVE_PAGE.has(rest)
     ? `/docs/${rest}-ui-sdk`
@@ -102,9 +105,6 @@ export function frameworkAddressOf(
   const segment = framework ? SEGMENT_OF.get(framework) : undefined;
   if (!(segment && framework && addressable(pathname, framework))) {
     return null;
-  }
-  if (pathname === "/docs/registry") {
-    return `/docs/${segment}`;
   }
   const name = UI_SDK_ADDRESS.exec(pathname)?.[1];
   if (name && PRIMITIVE_PAGE.has(name)) {
@@ -148,10 +148,9 @@ export const FRAMEWORK_REDIRECT_SCRIPT = `
     var path = location.pathname.replace(/\\/$/, '');
     var under = function (prefix) { return path === prefix || path.indexOf(prefix + '/') === 0; };
     var to = null;
-    if (segment && path.indexOf('/docs/') === 0 && !${PREFIXED.toString()}.test(path) && !own.some(under) && (kept === 'react' || !reactOnly.some(under))) {
+    if (segment && (path === '/docs' || path.indexOf('/docs/') === 0) && !${PREFIXED.toString()}.test(path) && !own.some(under) && (kept === 'react' || !reactOnly.some(under))) {
       var name = /^\\/docs\\/([a-z-]+)-ui-sdk$/.exec(path);
-      to = path === '/docs/registry' ? '/docs/' + segment
-        : name && primitives.indexOf(name[1]) >= 0 ? '/docs/' + segment + '/' + name[1]
+      to = name && primitives.indexOf(name[1]) >= 0 ? '/docs/' + segment + '/' + name[1]
         : '/docs/' + segment + path.slice(5);
     }
     if (to) location.replace(to + location.search + location.hash);
