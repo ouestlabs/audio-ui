@@ -351,6 +351,8 @@ test("every package a registry file imports is declared by it or by what it inst
         if (
           !(
             specifier.startsWith("node:") ||
+            // SvelteKit's alias of the project's library folder.
+            specifier.startsWith("$lib/") ||
             PROVIDED_PACKAGES.has(name) ||
             declared.has(name)
           )

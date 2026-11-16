@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Timeline } from "@/registry-audio/bases/base/primitives/timeline/vue.ts";
+import { Timeline } from "@/registry-audio/bases/base/primitives/timeline/vue/index.ts";
 import { timelineSuite } from "./timeline-suite.ts";
 
 timelineSuite("Vue", async (tree) => {

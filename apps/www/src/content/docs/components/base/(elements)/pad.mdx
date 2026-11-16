@@ -1,15 +1,41 @@
 ---
 title: Pad
-description: A grid of drum pads struck by pointer, touch or keyboard, with velocity and choke groups. Headless in React, Vue, Svelte and the web, and styled for shadcn/ui in React.
+description: A grid of drum pads struck by pointer, touch or keyboard, with velocity and choke groups.
 component: true
 base: base
 ---
+
+<ForFrameworks only="vue">
+
+<ComponentPreview styleName="base-nova" name="pad-vue-demo" />
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+<ComponentPreview styleName="base-nova" name="pad-svelte-demo" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+<ComponentPreview styleName="base-nova" name="pad-web-demo" />
+
+</ForFrameworks>
 
 <ForFrameworks only="react">
 
 <ComponentPreview styleName="base-nova" name="pad-demo" />
 
 Triggers sounds, for a drum machine, a sampler or a clip launcher. The registry component is written on the `Pad` primitive of `@audio-ui/primitives`, which installs with it and lays the pads out in a grid of `columns`.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+The pad grid's behavior is one description, `pad` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. A pad sounds while it is held, by pointer or from the keyboard. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+</ForFrameworks>
 
 ## Overview
 
@@ -22,9 +48,76 @@ Triggers sounds, for a drum machine, a sampler or a clip launcher. The registry 
 
 ## Installation
 
+<ForFrameworks only="react">
+
 <Install name="pad" />
 
+</ForFrameworks>
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation), the [XY pad](/docs/components/base/xypad#installation), the [meter](/docs/components/base/meter#installation) and the [envelope](/docs/components/base/envelope#installation) are built the same way.
+
+<ForFrameworks only="react">
+
+The primitive alone, without the styling:
+
+</ForFrameworks>
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/pad-react
+```
+
+One file, `components/audio-ui/pad/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/pad-vue.json
+```
+
+One file, `components/audio-ui/pad/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/pad-svelte.json
+```
+
+Two files in `components/audio-ui/pad/svelte/`: `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/pad-web.json
+```
+
+One file, `components/audio-ui/pad/web.ts`. Import it once, and it registers the `audio-ui-pad` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
 ## Usage
+
+<ForFrameworks only="react">
 
 ```tsx
 import { Pad, PadItem } from "@/components/audio-ui/pad";
@@ -65,109 +158,13 @@ import { Pad, PadItem } from "@/components/audio-ui/pad";
 </Pad>
 ```
 
-## Interaction
-
-### Pointer
-
-<KeyTable title="Behavior">
-<KeyRow gesture={"Press a pad"}>Fires `onPadOn` with a velocity; the pad stays active while held.</KeyRow>
-<KeyRow gesture={"Release"}>Fires `onPadOff`.</KeyRow>
-<KeyRow gesture={"Multiple pointers"}>Each pointer (finger) holds its own pad, so several play at once on touch devices.</KeyRow>
-</KeyTable>
-
-### Keyboard
-
-The pads share one tab stop. On the focused pad:
-
-<KeyTable title="Keys">
-<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Move focus to the previous / next pad in reading order</KeyRow>
-<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Move focus a row up / down</KeyRow>
-<KeyRow gesture={"`Space` / `Enter`"}>Hold the focused pad: `onPadOn` on press, `onPadOff` on release</KeyRow>
-<KeyRow gesture={"`Home` / `End`"}>Move focus to the first / last pad</KeyRow>
-</KeyTable>
-
-## API reference
-
-The headless parts and their options are in [Headless primitive](#headless-primitive), below.
-
-### Registry component
-
-`Pad` accepts `className` and `style` plus the props of the `Pad` primitive's Root, and sets the grid's columns from `columns`. `PadItem` accepts the props of the primitive's `Pad.Item`.
-
-Additional valid HTML attributes passed to `Pad.Root` and `Pad.Item` are forwarded.
-
-## Examples
-
-### Drum rack
-
-Sixteen pads, each its own sound: strike a pad to play and select it, then shape it with the knobs. The three hihats share a choke group.
-
-<ComponentPreview styleName="base-nova" name="block-drum-rack" />
-
 </ForFrameworks>
 
-## Headless primitive
+<ForFrameworks only="react">
 
-The pad grid's behavior is one description, `pad` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. A pad sounds while it is held, by pointer or from the keyboard. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+The primitive alone, part by part:
 
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive), the [fader](/docs/components/base/fader#headless-primitive), the [XY pad](/docs/components/base/xypad#headless-primitive), the [meter](/docs/components/base/meter#headless-primitive) and the [envelope](/docs/components/base/envelope#headless-primitive) are built the same way.
-
-### Installation
-
-<FrameworkTabs defaultValue="react">
-
-<TabsList>
-  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
-  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
-  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
-  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
-</TabsList>
-
-<TabsContent value="react">
-
-```bash
-npx shadcn@latest add @audio-ui/pad-react
-```
-
-One file, `components/audio-ui/pad/react.tsx`.
-
-</TabsContent>
-
-<TabsContent value="vue">
-
-```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/pad-vue.json
-```
-
-One file, `components/audio-ui/pad/vue.ts`.
-
-</TabsContent>
-
-<TabsContent value="svelte">
-
-```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/pad-svelte.json
-```
-
-Two files in `components/audio-ui/pad/svelte/`: `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
-
-</TabsContent>
-
-<TabsContent value="web">
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/pad-web.json
-```
-
-One file, `components/audio-ui/pad/web.ts`. Import it once, and it registers the `audio-ui-pad` tags.
-
-</TabsContent>
-
-</FrameworkTabs>
-
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
-
-### Usage
+</ForFrameworks>
 
 A Root groups the pads, and an Item is one pad, a `<button>` identified by its `value`. Write an Item for each pad, in reading order: the order they have in the document is the order the arrow keys walk.
 
@@ -266,11 +263,43 @@ const emit = defineEmits<{ play: [name: string, velocity: number] }>();
 
 In the web adapter, an Item wraps the button: the button inside it is the pad. The two callbacks are the `padon` and `padoff` events.
 
-### Interaction
+### What a strike reports
 
-- A press strikes the pad and holds it until the pointer is released. Each pointer holds its own pad, so several can sound at once on a touch screen.
-- A strike is harder where a pen or screen presses harder, or else toward the top of the pad, from 0.25 to 1. Enter and Space strike at 0.8, until the key is released or the pad loses focus.
-- The pads are one tab stop. Left and Right walk them in reading order, Up and Down by a row of `columns`, Home and End go to the ends. A disabled pad is stepped over.
+- `onPadOn` gets `velocity` from 0 to 1, a `reason` (`"press"` or `"keyboard"`), a `source` (`"mouse"`, `"touch"`, `"pen"` or `"keyboard"`) and the `event`.
+- `onPadOff` gets a `reason`: `"press"`, `"keyboard"`, or `"choke"` when another pad of its group cut it.
+
+## Interaction
+
+### Pointer
+
+<KeyTable title="Behavior">
+<KeyRow gesture={"Press a pad"}>Fires `onPadOn` with a velocity; the pad stays active while held.</KeyRow>
+<KeyRow gesture={"Release"}>Fires `onPadOff`.</KeyRow>
+<KeyRow gesture={"Multiple pointers"}>Each pointer (finger) holds its own pad, so several play at once on touch devices.</KeyRow>
+</KeyTable>
+
+### Keyboard
+
+The pads share one tab stop. On the focused pad:
+
+<KeyTable title="Keys">
+<KeyRow gesture={"`ArrowLeft` / `ArrowRight`"}>Move focus to the previous / next pad in reading order</KeyRow>
+<KeyRow gesture={"`ArrowUp` / `ArrowDown`"}>Move focus a row up / down</KeyRow>
+<KeyRow gesture={"`Space` / `Enter`"}>Hold the focused pad: `onPadOn` on press, `onPadOff` on release</KeyRow>
+<KeyRow gesture={"`Home` / `End`"}>Move focus to the first / last pad</KeyRow>
+</KeyTable>
+
+## API reference
+
+<ForFrameworks only="react">
+
+### Registry component
+
+`Pad` accepts `className` and `style` plus the props of the `Pad` primitive's Root, and sets the grid's columns from `columns`. `PadItem` accepts the props of the primitive's `Pad.Item`.
+
+Additional valid HTML attributes passed to `Pad.Root` and `Pad.Item` are forwarded.
+
+</ForFrameworks>
 
 ### Options
 
@@ -286,12 +315,19 @@ Set on the Root, as props (an attribute in kebab case in the web adapter).
 
 An Item takes its `value`, a `disabled`, and a `chokeGroup`: pads that share one stop each other, so striking one stops the last one struck, held or still ringing, as an open and a closed hi-hat do.
 
-### What a strike reports
-
-- `onPadOn` gets `velocity` from 0 to 1, a `reason` (`"press"` or `"keyboard"`), a `source` (`"mouse"`, `"touch"`, `"pen"` or `"keyboard"`) and the `event`.
-- `onPadOff` gets a `reason`: `"press"`, `"keyboard"`, or `"choke"` when another pad of its group cut it.
-
 ### States to style from
 
 - `data-active` on a pad while it sounds, held here or listed in `activePads`, and `data-disabled` on the Root and the pads.
 - `--pad-velocity` on a pad, from 0 to 1: how hard it was last struck, for a flash that follows the force.
+
+<ForFrameworks only="react">
+
+## Examples
+
+### Drum rack
+
+Sixteen pads, each its own sound: strike a pad to play and select it, then shape it with the knobs. The three hihats share a choke group.
+
+<ComponentPreview styleName="base-nova" name="block-drum-rack" />
+
+</ForFrameworks>

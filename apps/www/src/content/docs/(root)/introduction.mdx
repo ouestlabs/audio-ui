@@ -1,0 +1,140 @@
+---
+title: Introduction
+description: Accessible audio controls for React, Vue, Svelte and the web, as headless primitives and as styled components you copy into your shadcn/ui project. Built to be used by people and by AI agents.
+---
+
+**audio/ui** is a set of accessible, composable audio controls for the web, in React, Vue, Svelte or plain HTML: knobs, faders, XY pads, envelopes, meters, waveforms, timelines, sequencers, drum pads, piano keyboards and piano rolls.
+
+Audio controls have many details: a knob has to drag, respond to the wheel and the keyboard, reset on double click, and be announced correctly by a screen reader. audio/ui implements them once.
+
+## What to install
+
+Both come from the `@audio-ui` registry, which puts the code in your project: you read it, change it and own it.
+
+**The primitives** are headless: behavior and accessibility, no styles, one adapter per framework (React, Vue, Svelte and plain web components) over the same logic. Pick them when you have your own design system.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/knob-react
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+<ForFrameworks only="react">
+
+**The styled components and ready blocks** are for projects that use shadcn/ui and Tailwind CSS v4.
+
+```bash
+npx shadcn@latest add @audio-ui/knob
+```
+
+</ForFrameworks>
+
+## Top components
+
+<ForFrameworks only="vue svelte web">
+
+Each links to its page, with its install and its usage in your framework.
+
+<TypeTable title="Top components">
+<TypeRow name="Knob">Rotary parameter with drag, wheel, keyboard and reset. [Docs](/docs/components/base/knob#installation).</TypeRow>
+<TypeRow name="Fader">Linear gain or parameter slider. [Docs](/docs/components/base/fader#installation).</TypeRow>
+<TypeRow name="XY Pad">Two parameters on one surface. [Docs](/docs/components/base/xypad#installation).</TypeRow>
+<TypeRow name="Envelope">Breakpoint editor for ADSR and other ramps. [Docs](/docs/components/base/envelope#installation).</TypeRow>
+<TypeRow name="Meter">Stereo and multi-channel level with peak hold. [Docs](/docs/components/base/meter#installation).</TypeRow>
+<TypeRow name="Waveform">Seekable waveform with a loop region. [Docs](/docs/components/base/waveform#installation).</TypeRow>
+<TypeRow name="Plot">Draggable curves for EQs, filters and compressors. [Docs](/docs/components/base/plot#installation).</TypeRow>
+<TypeRow name="Timeline">Zoomable arrangement view with a smooth playhead. [Docs](/docs/components/base/arrangement#installation).</TypeRow>
+<TypeRow name="Sequencer">Step grid to draw a pattern. [Docs](/docs/components/base/sequencer#installation).</TypeRow>
+<TypeRow name="Pad">Drum pads with velocity. [Docs](/docs/components/base/pad#installation).</TypeRow>
+<TypeRow name="Piano Roll">Note editor with a velocity lane. [Docs](/docs/components/base/piano-roll#installation).</TypeRow>
+</TypeTable>
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+Each links to its docs, with a live preview, the API and the source. Install any of them with `npx shadcn@latest add @audio-ui/<name>`.
+
+<TypeTable title="Top components">
+<TypeRow name="Knob">Rotary parameter with drag, wheel, keyboard and reset. [Docs](/docs/components/base/knob).</TypeRow>
+<TypeRow name="Fader">Linear gain or parameter slider. [Docs](/docs/components/base/fader).</TypeRow>
+<TypeRow name="XY Pad">Two parameters on one surface. [Docs](/docs/components/base/xypad).</TypeRow>
+<TypeRow name="Envelope">Breakpoint editor for ADSR and other ramps. [Docs](/docs/components/base/envelope).</TypeRow>
+<TypeRow name="Meter">Stereo and multi-channel level with peak hold. [Docs](/docs/components/base/meter).</TypeRow>
+<TypeRow name="Waveform">Seekable, live or bar-style waveform with regions. [Docs](/docs/components/base/waveform).</TypeRow>
+<TypeRow name="Plot">Draggable curves for EQs, filters and compressors. [Docs](/docs/components/base/plot).</TypeRow>
+<TypeRow name="Timeline">Zoomable arrangement view with a smooth playhead. [Docs](/docs/components/base/arrangement).</TypeRow>
+<TypeRow name="Sequencer">Step grid to draw a pattern. [Docs](/docs/components/base/sequencer).</TypeRow>
+<TypeRow name="Pad">Drum pads with velocity and choke groups. [Docs](/docs/components/base/pad).</TypeRow>
+<TypeRow name="Piano Roll">DAW-style note editor with a velocity lane. [Docs](/docs/components/base/piano-roll).</TypeRow>
+</TypeTable>
+
+Looking for a whole screen? The [component catalog](/components) has composed blocks (a pocket synth, a wave shaper, a waveform player) you can install the same way.
+
+</ForFrameworks>
+
+## Built for agents
+
+audio/ui is made to be used by AI coding agents as much as by people. Open code, one consistent API and plain markdown docs mean an agent can find the right component, read how it works and wire it up without guessing.
+
+- **[Agent skill](/docs/agents):** teaches your agent which layer to pick, how to install and the mistakes to avoid.
+- **[MCP server](/docs/mcp):** `https://www.audio-ui.dev/mcp` lets your agent list components, read their docs and search the catalog.
+- **[llms.txt](/llms.txt):** a structured map of every docs page, each also served as markdown.
+
+## Principles
+
+- **Accessible by default:** native inputs where it matters, labelled controls, full keyboard support.
+- **Composable:** small parts that fit together, so you pick the level of abstraction for each screen.
+- **Open code:** read it, change it, own it.
+- **No lag:** values that change every frame, like playheads and meters, move without re-rendering your page.
+
+## Next steps
+
+<ForFrameworks only="vue svelte web">
+
+Head over to [Get started](/docs) to add audio/ui to your project, or open [Knob](/docs/components/base/knob#installation) to place your first primitive, with its code in your framework.
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+Head over to [Get started](/docs) to add audio/ui to your project, or open [Knob](/docs/components/base/knob) to install your first component.
+
+</ForFrameworks>

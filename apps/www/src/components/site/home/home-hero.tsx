@@ -115,7 +115,7 @@ export function HomeHero() {
         <Button
           nativeButton={false}
           render={
-            <Link params={{ _splat: "get-started" }} to="/docs/$">
+            <Link to="/docs">
               Get started <ArrowRightIcon aria-hidden weight="bold" />
             </Link>
           }

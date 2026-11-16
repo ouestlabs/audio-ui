@@ -70,7 +70,7 @@ bun test
 ### `@audio-ui/primitives` (`packages/primitives/src/`)
 
 - `<name>/`: Envelope, Fader, Knob, Meter, Pad, Piano, PianoRoll, Plot, Sequencer, Timeline, Waveform, XYPad, each a `definePrimitive` description over `@audio-ui/core` (its attributes, events and state, once for every framework)
-- The adapters (React, Vue, Svelte, custom elements) are not in the package: they are files of the registry, `apps/www/src/registry-audio/bases/base/primitives/<name>/`, that the CLI copies into a project
+- The adapters (React, Vue, Svelte, custom elements) are not in the package: they are files of the registry, `apps/www/src/registry-audio/bases/base/primitives/<name>/<framework>/`, that the CLI copies into a project
 
 ### `apps/www/src/`: two registry trees
 
@@ -126,7 +126,7 @@ The docs, the catalog's `categoryGroups` and the shipped skill share one map, by
 - `(devices)/`: effects and instruments, like plugins. One page per device, by family.
 - `guides/` (beside `components/`, at `/docs/guides/<page>`): guides to what makes the sound, a page per concept (output, clock and time, synthesis, input, analysis), each linking to the hook and lib entries it uses. Its overview says how an engine of the user's own drives the components.
 
-The docs are in sections (`lib/docs/content/sections.ts`), switched at the top of the sidebar, with the reader's framework (React, Vue, Svelte or Web, `lib/docs/content/frameworks.ts`) chosen under it: **Docs** (`(root)/`, `guides/`); **Core** (`core/` and `engine/`, `@audio-ui/core` and `@audio-ui/engine` and their modules); **Registry** (`(registry)/`, `components/`, whose pages of the twelve primitives (`PRIMITIVE_PAGES` in `framework-paths.ts`) are every framework's, `hooks/`, `lib/`, and the components catalog at `/components`); **Icons** (`icons/`, the usage page, and the icons' catalog at `/icons`, whose side panel holds the icon picked, its weight and its size). The framework chosen (React by default) names the hero and opens the tabs of `<FrameworkTabs>` on its own. It is kept in the browser, and every page of the docs it is shown has an address for it, `/docs/<framework>/<page>` (`lib/docs/content/framework-paths.ts`: `/docs/vue/engine/analysis`, `/docs/web-components/components/base/knob`, with `web-components` for Web), which the router rewrites to the page's own address; a link or a page loaded whole goes to the address of the framework kept. The pages only a React app uses (the catalog, guides, hooks, libs, styling and API) have none for the others. A folder in parentheses adds no URL segment, so a component page stays at `/docs/components/base/<name>`.
+The docs are in sections (`lib/docs/content/sections.ts`), switched at the top of the sidebar, with the reader's framework (React, Vue, Svelte or Web, `lib/docs/content/frameworks.ts`) chosen under it: **Docs** (`(root)/`, `guides/`); **Core** (`core/` and `engine/`, `@audio-ui/core` and `@audio-ui/engine` and their modules); **Components** (`(registry)/`, `components/`, whose pages of the twelve primitives (`PRIMITIVE_PAGES` in `framework-paths.ts`) are every framework's, `hooks/`, `lib/`, and the components catalog at `/components`); **Icons** (`icons/`, the usage page, and the icons' catalog at `/icons`, whose side panel holds the icon picked, its weight and its size). The framework chosen (React by default) names the hero and opens the tabs of `<FrameworkTabs>` on its own. It is kept in the browser, and every page of the docs it is shown has an address for it, `/docs/<framework>/<page>` (`lib/docs/content/framework-paths.ts`: `/docs/vue/engine/analysis`, `/docs/web-components/components/base/knob`, with `web-components` for Web), which the router rewrites to the page's own address; a link or a page loaded whole goes to the address of the framework kept. The pages only a React app uses (the catalog, guides, hooks, libs, styling and API) have none for the others. A folder in parentheses adds no URL segment, so a component page stays at `/docs/components/base/<name>`.
 
 Every hook and lib has its own entry page, `hooks/<name>.mdx` or `lib/<name>.mdx`, listed once in that folder's `meta.json`. It opens with `<Entry name="<name>" />`, which draws the install command, the import, the files, what it depends on, what uses it and its exports from `lib/docs/content/entries.generated.json` (written by `registry:build` from the `_registry.ts` files and the sources), then goes on with a written Usage section. `test/registry-entries-docs.test.ts` fails on an entry with no page or a page with no entry.
 
@@ -144,7 +144,7 @@ A primitive has one page: the component's (`components/base/(elements|workstatio
 
 ## Rules
 
-### Registry items (`registry-audio/bases/base/components/{category}/`)
+### Registry items (`registry-audio/bases/base/components/{category}/<framework>/`)
 
 - Filename `block-{component}-{variant}.tsx` (blocks) or `{component}-{feature}-demo.tsx` (demos); default export `Block{Component}{Variant}` / `{Component}{Feature}Demo`, PascalCase of the filename, no params
 - No `"use client"` directive: the site is TanStack Start, where it means nothing

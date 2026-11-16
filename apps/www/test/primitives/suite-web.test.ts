@@ -1,4 +1,4 @@
-import "@/registry-audio/bases/base/primitives/knob/web.ts";
+import "@/registry-audio/bases/base/primitives/knob/web/index.ts";
 import { type KnobTree, knobSuite } from "./knob-suite.ts";
 
 type KnobEvent = CustomEvent<{ reason: string; value: number }>;

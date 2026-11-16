@@ -568,6 +568,7 @@ const itemsByBase = new Map(
 // source module becomes that path, before the folder rules above apply.
 const REGEX_SPECIALS = /[.*+?^${}()|[\]\\]/g;
 const SOURCE_EXTENSION = /\.tsx?$/;
+const INDEX_FILE = /\/index$/;
 const explicitRewrites = [...itemsByBase.values()]
   .flatMap((items) => [...items.values()])
   .flatMap((item) => item.files ?? [])
@@ -575,12 +576,28 @@ const explicitRewrites = [...itemsByBase.values()]
     if (!file.target) {
       return [];
     }
-    const source = file.path
-      .replace(SOURCE_EXTENSION, "")
-      .replace(REGEX_SPECIALS, "\\$&");
-    const installed = `@/${file.target.replace(SOURCE_EXTENSION, "")}`;
-    return SOURCE_ROOTS.map(
-      (root) => [new RegExp(`${root}${source}(?=")`, "g"), installed] as const
+    // A Svelte file lands under `$lib/components` (shadcn-svelte).
+    const svelte = file.path.includes("/svelte/");
+    const target = file.target.replace(SOURCE_EXTENSION, "");
+    const installed = svelte
+      ? `$lib/components/${target.replace(INDEX_FILE, "")}`
+      : `@/${target}`;
+    const source = file.path.replace(SOURCE_EXTENSION, "");
+    // A folder's index is imported as the folder.
+    const sources = INDEX_FILE.test(source)
+      ? [source, source.replace(INDEX_FILE, "")]
+      : [source];
+    return sources.flatMap((from) =>
+      SOURCE_ROOTS.map(
+        (root) =>
+          [
+            new RegExp(
+              `${root}${from.replace(REGEX_SPECIALS, "\\$&")}(?=")`,
+              "g"
+            ),
+            installed,
+          ] as const
+      )
     );
   });
 // Every item name, once, in the order the registry lists them.

@@ -2,8 +2,8 @@ import { describe, expect, test } from "bun:test";
 import { renderToString } from "react-dom/server";
 import { createSSRApp, h } from "vue";
 import { renderToString as renderVue } from "vue/server-renderer";
-import { Knob } from "@/registry-audio/bases/base/primitives/knob/react.tsx";
-import { Knob as VueKnob } from "@/registry-audio/bases/base/primitives/knob/vue.ts";
+import { Knob } from "@/registry-audio/bases/base/primitives/knob/react/index.tsx";
+import { Knob as VueKnob } from "@/registry-audio/bases/base/primitives/knob/vue/index.ts";
 import { EVERY_FEATURE, serverFeatures } from "./server-html.ts";
 
 const OPTIONS = {

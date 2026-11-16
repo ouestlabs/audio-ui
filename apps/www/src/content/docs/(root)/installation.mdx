@@ -1,0 +1,46 @@
+---
+title: Installation
+description: Set audio/ui up by hand in a React app with shadcn/ui, for the styled components.
+---
+
+<ForFrameworks only="react">
+
+The prompt of the [Get Started](/docs) page does this for you. Here is what it sets up by hand, for the styled components in a React app with shadcn/ui.
+
+## Prerequisites
+
+audio/ui is built on **React 19** and [Tailwind CSS v4](https://tailwindcss.com). Set up both first. The [shadcn/ui installation guide](https://ui.shadcn.com/docs/installation) covers the environment.
+
+## Setup the audio/ui Registry
+
+Add the audio/ui registry namespace to your `components.json` and set your component library and style. See the [shadcn registry docs](https://ui.shadcn.com/docs/registry) for the registry config.
+
+```json
+{
+  "registries": {
+    "@audio-ui": "https://www.audio-ui.dev/r/{style}/{name}.json"
+  }
+}
+```
+
+## Components
+
+You can install audio/ui using the [**shadcn CLI**](https://ui.shadcn.com/docs/cli) for automation or by manual installation for full control. Both methods apply to everything in [Docs](/docs/) and the [component catalog](/components), including the `block-*` blocks and demos you install with `@audio-ui/…`.
+
+### The package a component needs
+
+Some components import from `@audio-ui/core` (pitch, MIDI, musical time, analysis). Installing one adds the package to your `package.json` if it is not there, with no version pinned: the version is yours to choose.
+
+The CLI leaves a version you already have. If an older `@audio-ui/core` is installed and a component needs a subpath it did not have yet, your build says it cannot resolve `@audio-ui/engine/time` (or `/pitch`, `/midi`, `/analysis`). Update the package:
+
+```bash
+npm install @audio-ui/core@latest
+```
+
+If your package manager still resolves the old version, bypass its cache: with Bun, add `--no-cache`.
+
+## Styling
+
+Components are styled with a design token system defined by CSS variables and implemented with Tailwind CSS, following the same conventions as shadcn/ui so they're fully customizable. See the [Styling guide](/docs/styling) for details.
+
+</ForFrameworks>

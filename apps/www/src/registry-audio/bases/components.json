@@ -85,6 +85,24 @@
   },
   {
     "categories": ["fader"],
+    "description": "fader example, in the Vue adapter",
+    "name": "fader-vue-demo",
+    "title": "Fader vue demo"
+  },
+  {
+    "categories": ["fader"],
+    "description": "fader example, in the Svelte adapter",
+    "name": "fader-svelte-demo",
+    "title": "Fader svelte demo"
+  },
+  {
+    "categories": ["fader"],
+    "description": "fader example, in the web adapter",
+    "name": "fader-web-demo",
+    "title": "Fader web demo"
+  },
+  {
+    "categories": ["fader"],
     "description": "Pan fader filling from the center: anchored at 0 on a -1…1 range",
     "name": "fader-pan-demo",
     "title": "Fader pan demo"
@@ -127,6 +145,24 @@
   },
   {
     "categories": ["knob"],
+    "description": "Knob example, in the Vue adapter",
+    "name": "knob-vue-demo",
+    "title": "Knob vue demo"
+  },
+  {
+    "categories": ["knob"],
+    "description": "Knob example, in the Svelte adapter",
+    "name": "knob-svelte-demo",
+    "title": "Knob svelte demo"
+  },
+  {
+    "categories": ["knob"],
+    "description": "Knob example, in the web adapter",
+    "name": "knob-web-demo",
+    "title": "Knob web demo"
+  },
+  {
+    "categories": ["knob"],
     "description": "Filter cutoff knob on a logarithmic scale, 20 Hz to 20 kHz, every decade the same share of the dial",
     "name": "knob-filter-control-demo",
     "title": "Knob filter control demo"
@@ -136,6 +172,24 @@
     "description": "Envelope size default example",
     "name": "envelope-size-default-demo",
     "title": "Envelope size default demo"
+  },
+  {
+    "categories": ["envelope"],
+    "description": "envelope example, in the Vue adapter",
+    "name": "envelope-vue-demo",
+    "title": "Envelope vue demo"
+  },
+  {
+    "categories": ["envelope"],
+    "description": "envelope example, in the Svelte adapter",
+    "name": "envelope-svelte-demo",
+    "title": "Envelope svelte demo"
+  },
+  {
+    "categories": ["envelope"],
+    "description": "envelope example, in the web adapter",
+    "name": "envelope-web-demo",
+    "title": "Envelope web demo"
   },
   {
     "categories": ["envelope"],
@@ -151,6 +205,24 @@
   },
   {
     "categories": ["piano"],
+    "description": "piano example, in the Vue adapter",
+    "name": "piano-vue-demo",
+    "title": "Piano vue demo"
+  },
+  {
+    "categories": ["piano"],
+    "description": "piano example, in the Svelte adapter",
+    "name": "piano-svelte-demo",
+    "title": "Piano svelte demo"
+  },
+  {
+    "categories": ["piano"],
+    "description": "piano example, in the web adapter",
+    "name": "piano-web-demo",
+    "title": "Piano web demo"
+  },
+  {
+    "categories": ["piano"],
     "description": "Piano lit from an external source via activeNotes",
     "name": "piano-active-notes-demo",
     "title": "Piano active notes demo"
@@ -160,6 +232,24 @@
     "description": "A MIDI clip editor: a scrolling roll with a playable keyboard down its side, a loop brace and a ruler that labels bars, beats and sixteenths as you zoom, and a velocity lane you can drag taller. The transport plays, pauses and stops, loops or plays once through, clicks a metronome and sets the tempo and signature. Draw or select notes, mark a scale and fold onto it, undo and redo, and edit the selection from the Notes menu: split at the playhead, chop, join, legato, reverse, invert, stretch, fit to scale, crescendo and humanize. Drop a MIDI file on it to import one, or export the clip as a .mid file",
     "name": "block-piano-roll",
     "title": "Block piano roll"
+  },
+  {
+    "categories": ["piano-roll"],
+    "description": "piano-roll example, in the Vue adapter",
+    "name": "piano-roll-vue-demo",
+    "title": "Piano roll vue demo"
+  },
+  {
+    "categories": ["piano-roll"],
+    "description": "piano-roll example, in the Svelte adapter",
+    "name": "piano-roll-svelte-demo",
+    "title": "Piano roll svelte demo"
+  },
+  {
+    "categories": ["piano-roll"],
+    "description": "piano-roll example, in the web adapter",
+    "name": "piano-roll-web-demo",
+    "title": "Piano roll web demo"
   },
   {
     "categories": ["piano-roll"],
@@ -199,6 +289,24 @@
   },
   {
     "categories": ["meter"],
+    "description": "meter example, in the Vue adapter",
+    "name": "meter-vue-demo",
+    "title": "Meter vue demo"
+  },
+  {
+    "categories": ["meter"],
+    "description": "meter example, in the Svelte adapter",
+    "name": "meter-svelte-demo",
+    "title": "Meter svelte demo"
+  },
+  {
+    "categories": ["meter"],
+    "description": "meter example, in the web adapter",
+    "name": "meter-web-demo",
+    "title": "Meter web demo"
+  },
+  {
+    "categories": ["meter"],
     "description": "A VU needle that follows the microphone when it is on, and a moving signal when it is not",
     "name": "needle-meter-demo",
     "title": "Needle meter demo"
@@ -208,6 +316,24 @@
     "description": "XYPad with live x/y readout",
     "name": "xypad-live-value-demo",
     "title": "Xypad live value demo"
+  },
+  {
+    "categories": ["xypad"],
+    "description": "xypad example, in the Vue adapter",
+    "name": "xypad-vue-demo",
+    "title": "Xypad vue demo"
+  },
+  {
+    "categories": ["xypad"],
+    "description": "xypad example, in the Svelte adapter",
+    "name": "xypad-svelte-demo",
+    "title": "Xypad svelte demo"
+  },
+  {
+    "categories": ["xypad"],
+    "description": "xypad example, in the web adapter",
+    "name": "xypad-web-demo",
+    "title": "Xypad web demo"
   },
   {
     "categories": ["xypad"],
@@ -234,16 +360,70 @@
     "title": "Block timeline"
   },
   {
+    "categories": ["timeline"],
+    "description": "timeline example, in the Vue adapter",
+    "name": "timeline-vue-demo",
+    "title": "Timeline vue demo"
+  },
+  {
+    "categories": ["timeline"],
+    "description": "timeline example, in the Svelte adapter",
+    "name": "timeline-svelte-demo",
+    "title": "Timeline svelte demo"
+  },
+  {
+    "categories": ["timeline"],
+    "description": "timeline example, in the web adapter",
+    "name": "timeline-web-demo",
+    "title": "Timeline web demo"
+  },
+  {
     "categories": ["waveform"],
     "description": "Waveform with a resizable loop region, markers and a hover time",
     "name": "waveform-region-demo",
     "title": "Waveform region demo"
   },
   {
+    "categories": ["waveform"],
+    "description": "waveform example, in the Vue adapter",
+    "name": "waveform-vue-demo",
+    "title": "Waveform vue demo"
+  },
+  {
+    "categories": ["waveform"],
+    "description": "waveform example, in the Svelte adapter",
+    "name": "waveform-svelte-demo",
+    "title": "Waveform svelte demo"
+  },
+  {
+    "categories": ["waveform"],
+    "description": "waveform example, in the web adapter",
+    "name": "waveform-web-demo",
+    "title": "Waveform web demo"
+  },
+  {
     "categories": ["plot"],
     "description": "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
     "name": "plot-demo",
     "title": "Plot demo"
+  },
+  {
+    "categories": ["plot"],
+    "description": "plot example, in the Vue adapter",
+    "name": "plot-vue-demo",
+    "title": "Plot vue demo"
+  },
+  {
+    "categories": ["plot"],
+    "description": "plot example, in the Svelte adapter",
+    "name": "plot-svelte-demo",
+    "title": "Plot svelte demo"
+  },
+  {
+    "categories": ["plot"],
+    "description": "plot example, in the web adapter",
+    "name": "plot-web-demo",
+    "title": "Plot web demo"
   },
   {
     "categories": ["dynamics", "plot", "knob"],
@@ -486,6 +666,24 @@
     "title": "Pad demo"
   },
   {
+    "categories": ["pad"],
+    "description": "pad example, in the Vue adapter",
+    "name": "pad-vue-demo",
+    "title": "Pad vue demo"
+  },
+  {
+    "categories": ["pad"],
+    "description": "pad example, in the Svelte adapter",
+    "name": "pad-svelte-demo",
+    "title": "Pad svelte demo"
+  },
+  {
+    "categories": ["pad"],
+    "description": "pad example, in the web adapter",
+    "name": "pad-web-demo",
+    "title": "Pad web demo"
+  },
+  {
     "categories": ["tuner"],
     "description": "A chromatic tuner: start it, play a note and read the nearest note, a needle on a scale of cents and the frequency, in the primary color within 5 cents, with a field for the pitch of A4",
     "name": "tuner-demo",
@@ -502,6 +700,24 @@
     "description": "A drum machine: draw a pattern and hear it. Press a step or drag across several; the playing column lights up",
     "name": "sequencer-demo",
     "title": "Sequencer demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "description": "sequencer example, in the Vue adapter",
+    "name": "sequencer-vue-demo",
+    "title": "Sequencer vue demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "description": "sequencer example, in the Svelte adapter",
+    "name": "sequencer-svelte-demo",
+    "title": "Sequencer svelte demo"
+  },
+  {
+    "categories": ["sequencer"],
+    "description": "sequencer example, in the web adapter",
+    "name": "sequencer-web-demo",
+    "title": "Sequencer web demo"
   },
   {
     "categories": ["scrubber"],

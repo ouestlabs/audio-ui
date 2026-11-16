@@ -11,7 +11,7 @@ description: "Change, fix or add a headless primitive or its logic: the behavior
 
 - **Logic that doesn't need a framework** (geometry, value mapping, clip operations, peaks): `packages/core/src/primitives/<name>/`, with a `*.test.ts` next to it. Shared helpers: `packages/core/src/{shared,value,dom}/`.
 - **The behavior of a primitive** (its attributes, events and state, once for every framework): `packages/primitives/src/<name>/`, a `definePrimitive` description over the core's controller, with its tests next to it.
-- **The adapters**: `apps/www/src/registry-audio/bases/base/primitives/<name>/` (`react.tsx`, `vue.ts`, `svelte/`, `web.ts`), declared in `primitives/_registry.ts`. Each is thin: parts and what only its framework needs (a provider, an editable readout).
+- **The adapters**: `apps/www/src/registry-audio/bases/base/primitives/<name>/` (a folder for each framework: `react/`, `vue/`, `svelte/`, `web/`, each with its `index`), declared in `primitives/_registry.ts`. Each is thin: parts and what only its framework needs (a provider, an editable readout).
 - A new export from core that adapters need but users don't goes in `packages/core/src/internal.ts`, not `index.ts`.
 - **Audio logic** (devices, time, analysis, MIDI, scales, playback), and anything built on an audio.js atom: `packages/engine/src/<module>/`. Core takes no dependency; the engine imports core only through its public entries.
 

@@ -1,6 +1,6 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { Knob } from "@/registry-audio/bases/base/primitives/knob/react.tsx";
+import { Knob } from "@/registry-audio/bases/base/primitives/knob/react/index.tsx";
 import { knobSuite } from "./knob-suite.ts";
 
 knobSuite("React", async ({ label, options, provider, thumbLabel }) => {

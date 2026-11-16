@@ -1,19 +1,19 @@
 {
   "categories": [
     {
-      "count": 2,
+      "count": 5,
       "description": "Interactive envelope components for editing linear ramp breakpoints.",
       "label": "Envelope",
       "name": "envelope"
     },
     {
-      "count": 4,
+      "count": 7,
       "description": "Fader components for level, gain, and mix controls.",
       "label": "Fader",
       "name": "fader"
     },
     {
-      "count": 40,
+      "count": 43,
       "description": "Rotary knob components for continuous parameters like level, cutoff, and pan.",
       "label": "Knob",
       "name": "knob"
@@ -31,7 +31,7 @@
       "name": "parameter-field"
     },
     {
-      "count": 3,
+      "count": 6,
       "description": "Decibel meter components for monitoring stereo and multi-channel audio levels.",
       "label": "Meter",
       "name": "meter"
@@ -109,25 +109,25 @@
       "name": "tuner"
     },
     {
-      "count": 35,
+      "count": 38,
       "description": "Plots for drawing curves and dragging points on them: equalizers, filters and compressors.",
       "label": "Plot",
       "name": "plot"
     },
     {
-      "count": 4,
+      "count": 7,
       "description": "Drum pad grids: strike them by pointer or keyboard, with velocity and choke groups.",
       "label": "Pad",
       "name": "pad"
     },
     {
-      "count": 10,
+      "count": 13,
       "description": "Virtual piano keyboard components with MIDI note ranges and glissando.",
       "label": "Piano",
       "name": "piano"
     },
     {
-      "count": 6,
+      "count": 9,
       "description": "Piano roll editors and their parts: a scale menu, note find and note edits, playback, undo and MIDI files.",
       "label": "Piano roll",
       "name": "piano-roll"
@@ -139,7 +139,7 @@
       "name": "synth"
     },
     {
-      "count": 1,
+      "count": 4,
       "description": "Step sequencer components: grids of steps to draw a pattern on, that you can hear.",
       "label": "Sequencer",
       "name": "sequencer"
@@ -163,23 +163,23 @@
       "name": "audio-editor"
     },
     {
-      "count": 1,
+      "count": 4,
       "description": "Zoomable, snapping timeline components for arrangements, clip editors and piano rolls.",
       "label": "Timeline",
       "name": "timeline"
     },
     {
-      "count": 2,
+      "count": 5,
       "description": "Seekable waveform components for scrubbing and visualizing audio playback.",
       "label": "Waveform",
       "name": "waveform"
     },
     {
-      "count": 4,
+      "count": 7,
       "description": "Two-dimensional XY pad components for filter and effect controls.",
       "label": "XY Pad",
       "name": "xypad"
     }
   ],
-  "totalComponents": 88
+  "totalComponents": 124
 }

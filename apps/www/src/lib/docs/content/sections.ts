@@ -26,7 +26,7 @@ export const DOCS_SECTIONS = [
     folders: ["(registry)", "components", "hooks", "lib"],
     href: "/docs/registry",
     id: "registry",
-    label: "Registry",
+    label: "Components",
   },
   {
     description: "Audio glyphs, in four weights",

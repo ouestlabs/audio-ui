@@ -1,0 +1,25 @@
+---
+title: step-player
+description: "A clock that counts the steps of a pattern at a tempo and tells a Sequencer which one is playing, for a preview in any framework"
+---
+
+<Entry name="step-player" />
+
+## Usage
+
+Counts the steps of a pattern at a tempo and calls you on each one, to play what the pattern holds there. Its `source` is the step being played, `-1` while stopped, as a live source a [Sequencer](/docs/components/base/sequencer) takes: a clock that ticks every step costs no render in any framework.
+
+```ts
+import { createStepPlayer } from "@/lib/step-player";
+
+const player = createStepPlayer({
+  bpm: 112,
+  onStep: (step) => playKit(step),
+  steps: 16,
+});
+
+player.start();
+player.stop();
+```
+
+It ticks with a timer, so it is not sample accurate. For a transport that keeps time under load, use [`useTransportClock`](/docs/hooks/use-transport-clock), over the scheduler of `@audio-ui/engine/time`.

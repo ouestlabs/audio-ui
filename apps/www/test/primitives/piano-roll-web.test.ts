@@ -1,4 +1,4 @@
-import "@/registry-audio/bases/base/primitives/piano-roll/web.ts";
+import "@/registry-audio/bases/base/primitives/piano-roll/web/index.ts";
 import { flush } from "./helpers.ts";
 import { type PianoRollTree, pianoRollSuite } from "./piano-roll-suite.ts";
 

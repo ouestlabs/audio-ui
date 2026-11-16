@@ -13,8 +13,8 @@ All paths below are under `apps/www/src/registry-audio/bases/base/` unless they 
 | --- | --- | --- | --- |
 | A styled element over a primitive | `audio/elements/<name>.tsx` | `audio/_registry.ts` | `registry:ui` |
 | A device: its state, its engine, its face (controlled, no audio) | `devices/<name>/device.ts`, `engine.ts`, `panel.tsx` | `devices/_registry.ts` | `registry:lib`, `registry:lib`, `registry:ui` |
-| A composed screen | `components/<category>/block-<component>-<variant>.tsx` | `components/_registry.ts` | `registry:block` |
-| A focused example for the docs | `components/<category>/<component>-<feature>-demo.tsx` | `components/_registry.ts` | `registry:example` |
+| A composed screen | `components/<category>/react/block-<component>-<variant>.tsx` | `components/_registry.ts` | `registry:block` |
+| A focused example for the docs | `components/<category>/react/<component>-<feature>-demo.tsx` (the Vue, Svelte and web ones are `<component>-demo.vue`, `.svelte` and `.ts` in `vue/`, `svelte/` and `web/`) | `components/_registry.ts` | `registry:example` |
 | A hook | `hooks/use-<name>.ts` | `hooks/_registry.ts` | `registry:hook` |
 | Framework-free logic | `lib/<name>.ts` | `lib/_registry.ts` | `registry:lib` |
 

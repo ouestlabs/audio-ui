@@ -1,15 +1,41 @@
 ---
 title: Meter
-description: A level meter in decibels for one or more channels, with peak hold. Headless in React, Vue, Svelte and the web, and styled for shadcn/ui in React.
+description: A level meter in decibels for one or more channels, with peak hold.
 component: true
 base: base
 ---
+
+<ForFrameworks only="vue">
+
+<ComponentPreview styleName="base-nova" name="meter-vue-demo" />
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+<ComponentPreview styleName="base-nova" name="meter-svelte-demo" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+<ComponentPreview styleName="base-nova" name="meter-web-demo" />
+
+</ForFrameworks>
 
 <ForFrameworks only="react">
 
 <ComponentPreview styleName="base-nova" name="meter-size-default-demo" />
 
 Shows audio levels for a stereo output, a channel strip or any multi-channel source. The registry component is written on the `Meter` primitive of `@audio-ui/primitives`, which installs with it: one bar per channel, a destructive color when a channel clips, and an optional peak-hold mark. The meter only displays levels: it takes no pointer or keyboard input, and no focus.
+
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+The meter's behavior is one description, `meter` in `@audio-ui/primitives`, over the view of `@audio-ui/core`. Each framework renders it with a thin adapter that you copy into your project and own. The levels, the clip and warning zones, the scales and the peak marks are the same in all four, and one suite of tests runs against each adapter.
+
+</ForFrameworks>
 
 ## Overview
 
@@ -20,122 +46,19 @@ Shows audio levels for a stereo output, a channel strip or any multi-channel sou
 
 ## Installation
 
+<ForFrameworks only="react">
+
 <Install name="meter" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
-
-## Usage
-
-```tsx
-import { Meter } from "@/components/audio-ui/meter";
-```
-
-**Static levels:**
-
-```tsx
-<Meter value={[-9, -14]} />
-```
-
-**With a peak-hold mark:**
-
-```tsx
-<Meter peak={[-4, -8]} value={[-9, -14]} />
-```
-
-## Feeding real levels
-
-`value` and `peak` are plain props: fine for static or slowly changing levels, but a signal sampled 60 times a second would re-render React on every frame. For live audio, pass a `source` instead: the meter subscribes to it and writes each frame to the DOM, without a React render.
-
-A source is any object with the shape of an external store, so you can bring your own (Tone.js, a worklet, a WebSocket):
-
-```ts
-interface MeterSource {
-  getSnapshot: () => { levels: readonly number[]; peaks?: readonly number[] };
-  subscribe: (listener: () => void) => () => void;
-}
-```
-
-`createSource` from `@audio-ui/core` makes one you push to. The `use-audio-levels` hook is one: it samples the RMS level of one `AnalyserNode` per channel every animation frame, how loud the signal sounds, and lets it fall back smoothly; its peak is the loudest sample, held a moment before it falls, so the mark shows how near the signal comes to clipping.
-
-```bash
-npx shadcn@latest add @audio-ui/use-audio-levels
-```
-
-```tsx
-import { Meter } from "@/components/audio-ui/meter";
-import { useAudioLevels } from "@/hooks/use-audio-levels";
-
-// One analyser per channel, made once: a new array restarts the sampling.
-const analysers = useMemo(() => {
-  const analyser = ctx.createAnalyser();
-  output.connect(analyser); // a tap: the analyser plays nothing
-  return [analyser];
-}, [ctx, output]);
-
-const levels = useAudioLevels(analysers);
-
-<Meter aria-label="Output" source={levels} />;
-```
-
-For a stereo meter, split the signal with a `ChannelSplitter` and give the hook one analyser per side. The hook and the other analysis tools are in [Analysis](/docs/guides/analysis).
-
-To read the levels in React as well, for a numeric readout for example, use `useSyncExternalStore(levels.subscribe, levels.getSnapshot)`.
-
-## API reference
-
-The headless parts and their options are in [Headless primitive](#headless-primitive), below.
-
-### Registry component
-
-`Meter` accepts style props (`size`, `peakMarks`, `marks`, `className`) plus the props of the `Meter` primitive's Root.
-
-#### Value and state
-
-<TypeTable>
-<TypeRow name={"value"} type={"number[]"}>Level (dB) per channel; array length is the channel count.</TypeRow>
-<TypeRow name={"peak"} type={"number[]"}>Peak-hold level per channel. Timing and decay live outside the primitive.</TypeRow>
-<TypeRow name={"source"} type={"MeterSource"}>A live signal painted outside React; takes precedence over `value` and `peak`.</TypeRow>
-<TypeRow name={"min"} type={"number"} default={"-60"}>Minimum of the dB range.</TypeRow>
-<TypeRow name={"max"} type={"number"} default={"6"}>Maximum of the dB range.</TypeRow>
-<TypeRow name={"clipThreshold"} type={"number"} default={"0"}>Level at or above which a channel is clipping.</TypeRow>
-<TypeRow name={"orientation"} type={"\"vertical\" | \"horizontal\""} default={"\"vertical\""}>Bar direction.</TypeRow>
-<TypeRow name={"format"} type={"Intl.NumberFormatOptions"} default={"one decimal"}>Formats each level for `Meter.Value` and the channels' `aria-valuetext`. Defaults to one decimal.</TypeRow>
-<TypeRow name={"aria-label"} type={"string"}>Accessible name for the meter group and its channels.</TypeRow>
-</TypeTable>
-
-#### Layout and display
-
-<TypeTable>
-<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Size variant (sets the meter height).</TypeRow>
-<TypeRow name={"peakMarks"} type={"\"visible\" | \"hidden\""} default={"\"visible\""}>Shows or hides the peak-hold mark per channel.</TypeRow>
-<TypeRow name={"marks"} type={"number[]"}>Levels graduated along the meter, each with a tick and its label, such as `[6, 0, -6, -12, -20, -30, -40, -60]`.</TypeRow>
-<TypeRow name={"scale"} type={"\"linear\" | \"iec\" | (level) => number"} default={"\"iec\""}>How levels are spread along the length: the registry element starts on the IEC scale of digital peak meters.</TypeRow>
-<TypeRow name={"className"} type={"string"}>Additional CSS classes.</TypeRow>
-</TypeTable>
-
-
-
-The `Meter` primitive that installs with it exposes `Meter.Root` (the group, whose children can be a function of its state, `{ channelCount, orientation }`, to write one `Meter.Channel` for each channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level), `Meter.Mark` (a graduation at a level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
-
-## Examples
-
-### Mixing console
-
-Each channel's meter reads its real signal after the fader, and the master's reads both sides.
-
-<ComponentPreview styleName="base-nova" name="block-mixer" />
-
-### Needle meter
-
-For a dial instead of a bar, see [Needle meter](/docs/components/base/needle-meter): a VU meter to the standard, fed by the same `source`.
 
 </ForFrameworks>
 
-## Headless primitive
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation) and the [XY pad](/docs/components/base/xypad#installation) are built the same way.
 
-The meter's behavior is one description, `meter` in `@audio-ui/primitives`, over the view of `@audio-ui/core`. Each framework renders it with a thin adapter that you copy into your project and own. The levels, the clip and warning zones, the scales and the peak marks are the same in all four, and one suite of tests runs against each adapter.
+<ForFrameworks only="react">
 
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive), the [fader](/docs/components/base/fader#headless-primitive) and the [XY pad](/docs/components/base/xypad#headless-primitive) are built the same way.
+The primitive alone, without the styling:
 
-### Installation
+</ForFrameworks>
 
 <FrameworkTabs defaultValue="react">
 
@@ -172,7 +95,7 @@ One file, `components/audio-ui/meter/vue.ts`.
 npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/meter-svelte.json
 ```
 
-Three files in `components/audio-ui/meter/svelte/`: the value, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
+Three files in `components/audio-ui/meter/svelte/`: the value, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
 
 </TabsContent>
 
@@ -190,7 +113,33 @@ One file, `components/audio-ui/meter/web.ts`. Import it once, and it registers t
 
 Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, `vue` or `svelte`, and for the web adapter `@audio-ui/core`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
 
-### Usage
+## Usage
+
+<ForFrameworks only="react">
+
+```tsx
+import { Meter } from "@/components/audio-ui/meter";
+```
+
+**Static levels:**
+
+```tsx
+<Meter value={[-9, -14]} />
+```
+
+**With a peak-hold mark:**
+
+```tsx
+<Meter peak={[-4, -8]} value={[-9, -14]} />
+```
+
+</ForFrameworks>
+
+<ForFrameworks only="react">
+
+The primitive alone, part by part:
+
+</ForFrameworks>
 
 A Root groups the channels. Each Channel has an `index`, the position of its level, and holds an Indicator that grows with the level, a Peak mark, a Value for the text and a Label that names it. Marks sit along the length, beside the channels. You write the channels yourself, one for each level.
 
@@ -334,6 +283,85 @@ source.set({ levels: [-22.4, -19.8], peaks: [-6, -6] });
 
 Any object with `getSnapshot()` returning `{ levels, peaks? }` and `subscribe(listener)` works. The levels, the peak marks, `aria-valuenow`, `aria-valuetext` and the Value's text are written on each frame, and a clip is kept: the channel and its Indicator carry `data-clipped` from the first level at or above the clip threshold until a click on the meter clears it, as in a DAW. A source that changes its number of channels renders the channels again, and only then. In the web adapter, `source` is a property, not an attribute.
 
+<ForFrameworks only="react">
+
+## Feeding real levels
+
+`value` and `peak` are plain props: fine for static or slowly changing levels, but a signal sampled 60 times a second would re-render React on every frame. For live audio, pass a `source` instead: the meter subscribes to it and writes each frame to the DOM, without a React render.
+
+A source is any object with the shape of an external store, so you can bring your own (Tone.js, a worklet, a WebSocket):
+
+```ts
+interface MeterSource {
+  getSnapshot: () => { levels: readonly number[]; peaks?: readonly number[] };
+  subscribe: (listener: () => void) => () => void;
+}
+```
+
+`createSource` from `@audio-ui/core` makes one you push to. The `use-audio-levels` hook is one: it samples the RMS level of one `AnalyserNode` per channel every animation frame, how loud the signal sounds, and lets it fall back smoothly; its peak is the loudest sample, held a moment before it falls, so the mark shows how near the signal comes to clipping.
+
+```bash
+npx shadcn@latest add @audio-ui/use-audio-levels
+```
+
+```tsx
+import { Meter } from "@/components/audio-ui/meter";
+import { useAudioLevels } from "@/hooks/use-audio-levels";
+
+// One analyser per channel, made once: a new array restarts the sampling.
+const analysers = useMemo(() => {
+  const analyser = ctx.createAnalyser();
+  output.connect(analyser); // a tap: the analyser plays nothing
+  return [analyser];
+}, [ctx, output]);
+
+const levels = useAudioLevels(analysers);
+
+<Meter aria-label="Output" source={levels} />;
+```
+
+For a stereo meter, split the signal with a `ChannelSplitter` and give the hook one analyser per side. The hook and the other analysis tools are in [Analysis](/docs/guides/analysis).
+
+To read the levels in React as well, for a numeric readout for example, use `useSyncExternalStore(levels.subscribe, levels.getSnapshot)`.
+
+</ForFrameworks>
+
+## API reference
+
+<ForFrameworks only="react">
+
+### Registry component
+
+`Meter` accepts style props (`size`, `peakMarks`, `marks`, `className`) plus the props of the `Meter` primitive's Root.
+
+#### Value and state
+
+<TypeTable>
+<TypeRow name={"value"} type={"number[]"}>Level (dB) per channel; array length is the channel count.</TypeRow>
+<TypeRow name={"peak"} type={"number[]"}>Peak-hold level per channel. Timing and decay live outside the primitive.</TypeRow>
+<TypeRow name={"source"} type={"MeterSource"}>A live signal painted outside React; takes precedence over `value` and `peak`.</TypeRow>
+<TypeRow name={"min"} type={"number"} default={"-60"}>Minimum of the dB range.</TypeRow>
+<TypeRow name={"max"} type={"number"} default={"6"}>Maximum of the dB range.</TypeRow>
+<TypeRow name={"clipThreshold"} type={"number"} default={"0"}>Level at or above which a channel is clipping.</TypeRow>
+<TypeRow name={"orientation"} type={"\"vertical\" | \"horizontal\""} default={"\"vertical\""}>Bar direction.</TypeRow>
+<TypeRow name={"format"} type={"Intl.NumberFormatOptions"} default={"one decimal"}>Formats each level for `Meter.Value` and the channels' `aria-valuetext`. Defaults to one decimal.</TypeRow>
+<TypeRow name={"aria-label"} type={"string"}>Accessible name for the meter group and its channels.</TypeRow>
+</TypeTable>
+
+#### Layout and display
+
+<TypeTable>
+<TypeRow name={"size"} type={"\"sm\" | \"default\" | \"lg\""} default={"\"default\""}>Size variant (sets the meter height).</TypeRow>
+<TypeRow name={"peakMarks"} type={"\"visible\" | \"hidden\""} default={"\"visible\""}>Shows or hides the peak-hold mark per channel.</TypeRow>
+<TypeRow name={"marks"} type={"number[]"}>Levels graduated along the meter, each with a tick and its label, such as `[6, 0, -6, -12, -20, -30, -40, -60]`.</TypeRow>
+<TypeRow name={"scale"} type={"\"linear\" | \"iec\" | (level) => number"} default={"\"iec\""}>How levels are spread along the length: the registry element starts on the IEC scale of digital peak meters.</TypeRow>
+<TypeRow name={"className"} type={"string"}>Additional CSS classes.</TypeRow>
+</TypeTable>
+
+The `Meter` primitive that installs with it exposes `Meter.Root` (the group, whose children can be a function of its state, `{ channelCount, orientation }`, to write one `Meter.Channel` for each channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level), `Meter.Mark` (a graduation at a level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
+
+</ForFrameworks>
+
 ### Options
 
 Set on the Root, as props (an attribute in kebab case in the web adapter).
@@ -361,3 +389,19 @@ The Mark takes a `value` and sits along the length at its level. A Channel takes
 ### Accessibility
 
 Each channel is a `role="meter"` with `aria-valuenow`, `aria-valuemin`, `aria-valuemax` and an `aria-valuetext` that reads the level as a number with its unit, not as a share of the range. Name it with `aria-label`, or with a Label part inside it, which sets `aria-labelledby`. The Indicator, the Peak and the Value are hidden from assistive technology: the channel announces its own level.
+
+<ForFrameworks only="react">
+
+## Examples
+
+### Mixing console
+
+Each channel's meter reads its real signal after the fader, and the master's reads both sides.
+
+<ComponentPreview styleName="base-nova" name="block-mixer" />
+
+### Needle meter
+
+For a dial instead of a bar, see [Needle meter](/docs/components/base/needle-meter): a VU meter to the standard, fed by the same `source`.
+
+</ForFrameworks>

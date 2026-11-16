@@ -1,0 +1,21 @@
+---
+title: simulated-levels
+description: "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from, as a live source for any framework"
+---
+
+<Entry name="simulated-levels" />
+
+## Usage
+
+Levels that move on their own, in the shape a [Meter](/docs/components/base/meter) paints from: a random walk per channel, with a peak that holds and then falls like a real signal's. For a meter shown without sound, such as a preview that does not ask for the microphone. [`useSimulatedLevels`](/docs/hooks/use-simulated-levels) is the React hook over it.
+
+```ts
+import { createSimulatedLevels } from "@/lib/simulated-levels";
+
+const simulated = createSimulatedLevels(2, { max: -6, min: -48 });
+
+// `source` is what a Meter takes; `run()` moves it until the function it returns is called.
+const stop = simulated.run();
+```
+
+`source` is a live source, `{ getSnapshot, subscribe }`: each frame costs no render in any framework. `min` and `max` keep the levels between two values in dB, for a meter with a narrower scale.

@@ -1,9 +1,27 @@
 ---
 title: Piano roll
-description: "A note editor on a grid: draw, move, resize and select notes, with a playable keyboard and a velocity lane. Headless in React, Vue, Svelte and the web, and styled for shadcn/ui in React."
+description: "A note editor on a grid: draw, move, resize and select notes, with a playable keyboard and a velocity lane."
 component: true
 base: base
 ---
+
+<ForFrameworks only="vue">
+
+<ComponentPreview styleName="base-nova" name="piano-roll-vue-demo" />
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+<ComponentPreview styleName="base-nova" name="piano-roll-svelte-demo" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+<ComponentPreview styleName="base-nova" name="piano-roll-web-demo" />
+
+</ForFrameworks>
 
 <ForFrameworks only="react">
 
@@ -15,6 +33,14 @@ base: base
 
 A piano roll for writing a phrase: a keyboard down the side, notes on a grid, and a velocity bar under each note. It sits inside a [Timeline](/docs/components/base/arrangement), so notes use the timeline's units, snap to its grid and follow its zoom.
 
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+The piano roll's behavior is one description, `pianoRoll` in `@audio-ui/primitives`, over the controller of `@audio-ui/core/piano-roll`. It is a grid of MIDI notes you draw, move, resize and select, with rows by pitch (folded to the notes or to a scale), a marquee, bars for the velocity or the chance to play, and the commands of an editor on the keys. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+</ForFrameworks>
+
 ## Overview
 
 - **Notes:** press on the grid to draw a note or to start a selection rectangle, depending on the mode. Drag a note to move it, drag an edge to resize it, and double-click to delete it. Selected notes move and resize together.
@@ -25,9 +51,76 @@ A piano roll for writing a phrase: a keyboard down the side, notes on a grid, an
 
 ## Installation
 
+<ForFrameworks only="react">
+
 <Install name="piano-roll" />
 
+</ForFrameworks>
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [timeline](/docs/components/base/arrangement#installation) it sits on, the [piano](/docs/components/base/piano#installation) it draws its keys with and the other controls are built the same way.
+
+<ForFrameworks only="react">
+
+The primitive alone, without the styling:
+
+</ForFrameworks>
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/piano-roll-react
+```
+
+One file, `components/audio-ui/piano-roll/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-vue.json
+```
+
+One file, `components/audio-ui/piano-roll/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-svelte.json
+```
+
+Ten files in `components/audio-ui/piano-roll/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-web.json
+```
+
+One file, `components/audio-ui/piano-roll/web.ts`. Import it once, and it registers the `audio-ui-piano-roll` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
 ## Usage
+
+<ForFrameworks only="react">
 
 A note's `id` is a `string` or a `number`, so type the notes you keep with the roll's `Note`, or a state of literals such as `{ id: "a", … }` is narrower than what `onValueChange` gives back:
 
@@ -147,119 +240,13 @@ const tools = Object.fromEntries(
 
 The pitch range and the grid are in the schemas, and every note a model writes is clamped into them, so whatever it answers lands on the roll's rows and steps. The tools read and write `{ notes, bpm }` and depend on no agent library: the example wires them to the AI SDK, and any tool-calling API takes the same description and schema.
 
-## Interaction
-
-### Pointer
-
-<KeyTable title="Gestures">
-<KeyRow gesture={"Press on empty grid"}>With `mode="draw"`, draws a note whose end follows the pointer. With `mode="select"`, starts a selection rectangle (a double-click draws). `Shift` adds to the selection.</KeyRow>
-<KeyRow gesture={"Drag a note"}>Moves it, with the selection when it is part of it. On the grid unless <kbd>Cmd</kbd> / <kbd>Ctrl</kbd> is held.</KeyRow>
-<KeyRow gesture={"`Alt` + drag a note"}>Moves a copy.</KeyRow>
-<KeyRow gesture={"Drag a note's edge"}>Resizes it: the end changes the length, the start trims it from the front.</KeyRow>
-<KeyRow gesture={"`Shift` + click a note"}>Toggles it in the selection.</KeyRow>
-<KeyRow gesture={"Double-click a note"}>Deletes it.</KeyRow>
-<KeyRow gesture={"Drag a velocity bar"}>Changes the velocity of the selection by the same amount.</KeyRow>
-<KeyRow gesture={"`Cmd` / `Ctrl` + drag a velocity bar"}>Sets how far the velocity of the selection may stray each time it plays.</KeyRow>
-<KeyRow gesture={"Drag across a velocity or chance lane"}>With `mode="draw"`, paints every bar under the pointer to its height.</KeyRow>
-<KeyRow gesture={"Drag a stretch handle"}>Stretches the selection in time from its other edge.</KeyRow>
-<KeyRow gesture={"Press a key"}>Plays it; with `Shift`, selects every note on its row.</KeyRow>
-</KeyTable>
-
-### Keyboard
-
-<KeyTable title="Keys">
-<KeyRow gesture={"Arrow keys on a note"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by a semitone. With `Shift`: resize it, or move an octave.</KeyRow>
-<KeyRow gesture={"`Enter`, `Space` on a note"}>Toggle it in the selection.</KeyRow>
-<KeyRow gesture={"`Delete`, `Backspace`"}>Remove the selected notes.</KeyRow>
-<KeyRow gesture={"`Enter` on the grid"}>Adds a note at the playback position.</KeyRow>
-<KeyRow gesture={"`Escape`, `Cmd` / `Ctrl` + `A`"}>Clear the selection, select every note.</KeyRow>
-<KeyRow gesture={"`Cmd` / `Ctrl` + `D`"}>Repeat the selection right after itself and select the copies.</KeyRow>
-<KeyRow gesture={"`Cmd` / `Ctrl` + `C`, `X`, `V`"}>Copy, cut, and paste at the playback position.</KeyRow>
-<KeyRow gesture={"`Q`"}>Snap the starts of the selection (every note, with none selected) to the grid.</KeyRow>
-<KeyRow gesture={"Arrow keys, `Page Up` / `Down`, `Home` / `End` on a velocity bar"}>Change the velocity by 5%, by 25%, or to silent or full.</KeyRow>
-</KeyTable>
-
-## API reference
-
-The headless parts and their options are in [Headless primitive](#headless-primitive), below.
-
-### Registry components
-
-`PianoRoll` takes the `Root` props. The rest lay the editor out on two columns, the keys' and the timeline's:
-
-<TypeTable title="Components">
-<TypeRow name={"PianoRollViewport"}>Scrolls the roll both ways, without scrollbars: put a `TimelineNavigator` above it to scroll and zoom across.</TypeRow>
-<TypeRow name={"PianoRollStrip"}>A row of the editor: `lead` in the keys' column, stuck to the left edge, the lanes in `children` beside it. `sticky` keeps it at the `"top"` or `"bottom"` of the viewport.</TypeRow>
-<TypeRow name={"PianoRollKeys"}>The keyboard down the side, one key per row. `size` is `"sm"`, `"default"` or `"lg"`; `names`, by pitch, writes a name on a key in place of its note's, such as a drum rack's pads.</TypeRow>
-<TypeRow name={"PianoRollGrid"}>The notes, on their rows. `gridStep` draws a line every step, `accentStep` a firmer one, such as each beat; anything placed on the timeline, such as a `TimelinePlayhead`, goes in `children`.</TypeRow>
-<TypeRow name={"PianoRollVelocity"}>Each note's velocity as a bar.</TypeRow>
-<TypeRow name={"PianoRollVelocityScale"}>The scale beside the velocity lane, for the `lead` of its strip.</TypeRow>
-</TypeTable>
-
 </ForFrameworks>
 
-## Headless primitive
+<ForFrameworks only="react">
 
-The piano roll's behavior is one description, `pianoRoll` in `@audio-ui/primitives`, over the controller of `@audio-ui/core/piano-roll`. It is a grid of MIDI notes you draw, move, resize and select, with rows by pitch (folded to the notes or to a scale), a marquee, bars for the velocity or the chance to play, and the commands of an editor on the keys. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+The primitive alone, part by part:
 
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [timeline](/docs/components/base/arrangement#headless-primitive) it sits on, the [piano](/docs/components/base/piano#headless-primitive) it draws its keys with and the other controls are built the same way.
-
-### Installation
-
-<FrameworkTabs defaultValue="react">
-
-<TabsList>
-  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
-  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
-  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
-  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
-</TabsList>
-
-<TabsContent value="react">
-
-```bash
-npx shadcn@latest add @audio-ui/piano-roll-react
-```
-
-One file, `components/audio-ui/piano-roll/react.tsx`.
-
-</TabsContent>
-
-<TabsContent value="vue">
-
-```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-vue.json
-```
-
-One file, `components/audio-ui/piano-roll/vue.ts`.
-
-</TabsContent>
-
-<TabsContent value="svelte">
-
-```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-svelte.json
-```
-
-Ten files in `components/audio-ui/piano-roll/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
-
-</TabsContent>
-
-<TabsContent value="web">
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/piano-roll-web.json
-```
-
-One file, `components/audio-ui/piano-roll/web.ts`. Import it once, and it registers the `audio-ui-piano-roll` tags.
-
-</TabsContent>
-
-</FrameworkTabs>
-
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
-
-### Usage
+</ForFrameworks>
 
 A Root holds the notes and their selection. The roll is a column of parts you place in it:
 
@@ -268,7 +255,7 @@ A Root holds the notes and their selection. The roll is a column of parts you pl
 - **Notes** and **Note**: a note for each note of the roll, in reading order. A press selects it and a drag moves it. A **NoteHandle** resizes an edge.
 - **Marquee**: the box a drag across the bare grid draws. **SelectionSpan** shows the stretch the selection covers, and a **StretchHandle** in it stretches the selected notes.
 - **VelocityLane** and **Velocity**: a bar under each note, whose height is its velocity (or its chance, with `level="chance"`), set by a drag or through its native input.
-- **Keys**: gives the pitches drawn, the ones sounding and the audition calls, to draw a vertical [piano](/docs/components/base/piano#headless-primitive) beside the grid. The part is a grid of one cell, so the piano drawn inside takes its whole height and width: stretch the part beside the grid, and the keys line up with the rows.
+- **Keys**: gives the pitches drawn, the ones sounding and the audition calls, to draw a vertical [piano](/docs/components/base/piano#installation) beside the grid. The part is a grid of one cell, so the piano drawn inside takes its whole height and width: stretch the part beside the grid, and the keys line up with the rows.
 
 <FrameworkTabs defaultValue="react">
 
@@ -428,7 +415,7 @@ In the web adapter the rows, the notes (with a handle for each edge, with the `h
 
 ### The timeline it sits on
 
-The roll reads a timeline's length, grid, zoom and playback position. The UI SDK has no provider to read them from, so you give them to the Root, as the values you give the [Timeline](/docs/components/base/arrangement#headless-primitive):
+The roll reads a timeline's length, grid, zoom and playback position. The UI SDK has no provider to read them from, so you give them to the Root, as the values you give the [Timeline](/docs/components/base/arrangement#installation):
 
 - `duration`, `snapStep`, `snapOffset` and `snapPoints`: the length, the grid every gesture lands on unless Cmd/Ctrl is held, and what pulls a note onto it.
 - `zoom`: px per unit, or unset while the roll fits its width. Control it, and give the same value to the Timeline, so the roll and the ruler stay aligned.
@@ -436,14 +423,56 @@ The roll reads a timeline's length, grid, zoom and playback position. The UI SDK
 
 The Grid and the VelocityLane are lanes the Timeline's viewport finds in its DOM, so a roll inside a Timeline's Viewport scrolls and zooms with the ruler.
 
-### Interaction
+## Interaction
 
-- **Draw mode**: a press draws a note, and a drag stretches it (`drawStyle="stretch"`) or paints across cells (`"paint"`). **Select mode**: a press selects, a drag across the bare grid draws the marquee, Shift or Cmd/Ctrl adds to the selection.
-- **Notes**: a drag moves the selection on the grid, over rows, Alt with a drag copies it; Delete removes it, the arrows move it, Shift with an arrow by a larger step. A double click removes a note, and one on the bare grid adds one.
-- **Keys of the editor**: Cmd/Ctrl with A selects all, Escape clears the selection, and the editing commands (duplicate, quantize, legato, mute, transpose) are the controller's shortcuts on the grid and on a note.
-- **Velocity bars**: a press sets the velocity where the pointer is, a drag draws across the bars, and on the input the arrows move it by a step.
+### Pointer
 
-A disabled roll takes none of these.
+<KeyTable title="Gestures">
+<KeyRow gesture={"Press on empty grid"}>With `mode="draw"`, draws a note whose end follows the pointer. With `mode="select"`, starts a selection rectangle (a double-click draws). `Shift` adds to the selection.</KeyRow>
+<KeyRow gesture={"Drag a note"}>Moves it, with the selection when it is part of it. On the grid unless <kbd>Cmd</kbd> / <kbd>Ctrl</kbd> is held.</KeyRow>
+<KeyRow gesture={"`Alt` + drag a note"}>Moves a copy.</KeyRow>
+<KeyRow gesture={"Drag a note's edge"}>Resizes it: the end changes the length, the start trims it from the front.</KeyRow>
+<KeyRow gesture={"`Shift` + click a note"}>Toggles it in the selection.</KeyRow>
+<KeyRow gesture={"Double-click a note"}>Deletes it.</KeyRow>
+<KeyRow gesture={"Drag a velocity bar"}>Changes the velocity of the selection by the same amount.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + drag a velocity bar"}>Sets how far the velocity of the selection may stray each time it plays.</KeyRow>
+<KeyRow gesture={"Drag across a velocity or chance lane"}>With `mode="draw"`, paints every bar under the pointer to its height.</KeyRow>
+<KeyRow gesture={"Drag a stretch handle"}>Stretches the selection in time from its other edge.</KeyRow>
+<KeyRow gesture={"Press a key"}>Plays it; with `Shift`, selects every note on its row.</KeyRow>
+</KeyTable>
+
+### Keyboard
+
+<KeyTable title="Keys">
+<KeyRow gesture={"Arrow keys on a note"}>`Left` / `Right` move it by a grid step, `Up` / `Down` by a semitone. With `Shift`: resize it, or move an octave.</KeyRow>
+<KeyRow gesture={"`Enter`, `Space` on a note"}>Toggle it in the selection.</KeyRow>
+<KeyRow gesture={"`Delete`, `Backspace`"}>Remove the selected notes.</KeyRow>
+<KeyRow gesture={"`Enter` on the grid"}>Adds a note at the playback position.</KeyRow>
+<KeyRow gesture={"`Escape`, `Cmd` / `Ctrl` + `A`"}>Clear the selection, select every note.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `D`"}>Repeat the selection right after itself and select the copies.</KeyRow>
+<KeyRow gesture={"`Cmd` / `Ctrl` + `C`, `X`, `V`"}>Copy, cut, and paste at the playback position.</KeyRow>
+<KeyRow gesture={"`Q`"}>Snap the starts of the selection (every note, with none selected) to the grid.</KeyRow>
+<KeyRow gesture={"Arrow keys, `Page Up` / `Down`, `Home` / `End` on a velocity bar"}>Change the velocity by 5%, by 25%, or to silent or full.</KeyRow>
+</KeyTable>
+
+## API reference
+
+<ForFrameworks only="react">
+
+### Registry components
+
+`PianoRoll` takes the `Root` props. The rest lay the editor out on two columns, the keys' and the timeline's:
+
+<TypeTable title="Components">
+<TypeRow name={"PianoRollViewport"}>Scrolls the roll both ways, without scrollbars: put a `TimelineNavigator` above it to scroll and zoom across.</TypeRow>
+<TypeRow name={"PianoRollStrip"}>A row of the editor: `lead` in the keys' column, stuck to the left edge, the lanes in `children` beside it. `sticky` keeps it at the `"top"` or `"bottom"` of the viewport.</TypeRow>
+<TypeRow name={"PianoRollKeys"}>The keyboard down the side, one key per row. `size` is `"sm"`, `"default"` or `"lg"`; `names`, by pitch, writes a name on a key in place of its note's, such as a drum rack's pads.</TypeRow>
+<TypeRow name={"PianoRollGrid"}>The notes, on their rows. `gridStep` draws a line every step, `accentStep` a firmer one, such as each beat; anything placed on the timeline, such as a `TimelinePlayhead`, goes in `children`.</TypeRow>
+<TypeRow name={"PianoRollVelocity"}>Each note's velocity as a bar.</TypeRow>
+<TypeRow name={"PianoRollVelocityScale"}>The scale beside the velocity lane, for the `lead` of its strip.</TypeRow>
+</TypeTable>
+
+</ForFrameworks>
 
 ### Options
 

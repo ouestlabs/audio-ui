@@ -20,7 +20,7 @@ npx shadcn@latest add @audio-ui/knob-react
 npx shadcn@latest add @audio-ui/knob
 ```
 
-See [Get started](https://www.audio-ui.dev/docs/get-started) for the registry setup.
+See [Get started](https://www.audio-ui.dev/docs) for the registry setup.
 
 For coding agents, four skills (`audio-ui`, `web-audio`, `design`, `core`) install as one Claude Code plugin, or with the open skills CLI:
 

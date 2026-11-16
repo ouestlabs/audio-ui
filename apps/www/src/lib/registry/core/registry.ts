@@ -295,6 +295,47 @@ const componentModules = import.meta.glob<{ default: React.ComponentType }>([
   "../../../registry-audio/bases/*/**/*.tsx",
 ]);
 
+/** The demos of the other frameworks, by their files: a Vue or Svelte component, or a web function that draws into an element. */
+const frameworkModules = import.meta.glob<{ default: unknown }>([
+  "../../../registry-audio/bases/*/components/**/*-demo.{vue,svelte}",
+  "../../../registry-audio/bases/*/components/**/*-demo.ts",
+]);
+
+function FrameworkDemo({
+  demo,
+  mount,
+}: {
+  demo: unknown;
+  mount: (element: HTMLElement, demo: never) => () => void;
+}) {
+  const ref = React.useRef<HTMLDivElement>(null);
+  React.useEffect(() => {
+    const element = ref.current;
+    return element ? mount(element, demo as never) : undefined;
+  }, [demo, mount]);
+  return React.createElement("div", { className: "contents", ref });
+}
+
+/** A demo of another framework as a React component: it mounts its own runtime into an element, in the browser only. */
+async function frameworkDemo(
+  load: () => Promise<{ default: unknown }>,
+  path: string
+): Promise<{ default: React.ComponentType }> {
+  const { default: demo } = await load();
+  let mount: (element: HTMLElement, demo: never) => () => void;
+  if (path.endsWith(".vue")) {
+    mount = (await import("./mount-vue")).mountVue;
+  } else if (path.endsWith(".svelte")) {
+    mount = (await import("./mount-svelte")).mountSvelte;
+  } else {
+    mount = (element, fn) =>
+      (fn as (element: HTMLElement) => () => void)(element);
+  }
+  return {
+    default: () => React.createElement(FrameworkDemo, { demo, mount }),
+  };
+}
+
 /**
  * Get a lazy-loaded component by base and name
  */
@@ -315,10 +356,11 @@ export function getComponent(
   }
 
   // The path in the metadata is relative to the base, e.g. "audio/elements/knob.tsx".
-  const load =
-    componentModules[
-      `../../../registry-audio/bases/${base}/${item.files[0].path}`
-    ];
+  const path = `../../../registry-audio/bases/${base}/${item.files[0].path}`;
+  const loadFramework = frameworkModules[path];
+  const load = loadFramework
+    ? () => frameworkDemo(loadFramework, path)
+    : componentModules[path];
   if (!load) {
     return null;
   }

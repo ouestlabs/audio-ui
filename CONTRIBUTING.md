@@ -66,8 +66,8 @@ Currently only the `base` base (Base UI) ships audio items; file paths inside ea
 | -------------------- | ----------------------------------------------- | ------------------------------ |
 | `registry:ui`        | Styled element wrappers (fader, knob, transport, xypad, sortable-list) | `bases/base/audio/`            |
 | `registry:component` | Larger assemblies (player, channel-strip)       | `bases/base/audio/`            |
-| `registry:block`     | Pre-assembled patterns (`block-*.tsx`)          | `bases/base/components/{category}/` |
-| `registry:example`   | Focused demos (`*-demo.tsx`)                    | `bases/base/components/{category}/` |
+| `registry:block`     | Pre-assembled patterns (`block-*.tsx`)          | `bases/base/components/{category}/react/` |
+| `registry:example`   | Focused demos (`*-demo.tsx`)                    | `bases/base/components/{category}/react/` |
 | `registry:hook`      | Hooks (`use-audio`, `use-sound`)                | `bases/base/hooks/`            |
 | `registry:lib`       | Utilities and stores (`store`, `html`, `web`)   | `bases/base/lib/`              |
 
@@ -77,7 +77,7 @@ Users install items with `npx shadcn@latest add @audio-ui/{name}`. The item `nam
 
 ## Block & Demo Development
 
-Blocks and demos live together in `bases/base/components/{category}/` and are the main contribution surface.
+Blocks and demos live together in `bases/base/components/{category}/react/` and are the main contribution surface.
 
 ### File Naming
 
@@ -246,7 +246,7 @@ Every registry item is declared in the `_registry.ts` of its folder. Blocks and 
   registryDependencies: ["@audio-ui/{dep}", "@shadcn/{dep}"],
   files: [
     {
-      path: "components/{category}/block-{component}-{variant}.tsx",
+      path: "components/{category}/react/block-{component}-{variant}.tsx",
       type: "registry:block",
     },
   ],
@@ -334,7 +334,7 @@ bun run lint:fix
 
 ## Block Creation Checklist
 
-- File at `src/registry-audio/bases/base/components/{category}/block-{component}-{variant}.tsx`
+- File at `src/registry-audio/bases/base/components/{category}/react/block-{component}-{variant}.tsx`
 - Default export named `Block{ComponentVariant}` matching the filename
 - Audio components imported from `@/registry-audio/bases/base/audio/...`
 - shadcn components imported from `@/registry/bases/base/ui/...`

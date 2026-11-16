@@ -1,9 +1,27 @@
 ---
 title: Arrangement
-description: "A DAW's arrangement: a zoomable timeline with a ruler that seeks and lanes of clips, and the parts around it, its state, clips, tracks, locators, automation and MIDI playback, each installed on its own. Headless in React, Vue, Svelte and the web, and styled for shadcn/ui in React."
+description: "A DAW's arrangement: a zoomable timeline with a ruler that seeks and lanes of clips, and the parts around it, its state, clips, tracks, locators, automation and MIDI playback, each installed on its own."
 component: true
 base: base
 ---
+
+<ForFrameworks only="vue">
+
+<ComponentPreview styleName="base-nova" name="timeline-vue-demo" />
+
+</ForFrameworks>
+
+<ForFrameworks only="svelte">
+
+<ComponentPreview styleName="base-nova" name="timeline-svelte-demo" />
+
+</ForFrameworks>
+
+<ForFrameworks only="web">
+
+<ComponentPreview styleName="base-nova" name="timeline-web-demo" />
+
+</ForFrameworks>
 
 <ForFrameworks only="react">
 
@@ -11,10 +29,19 @@ base: base
 
 An arrangement is tracks of clips along a song. It comes in two layers that install together and apart. The **timeline** draws and moves the clips on a zoomable ruler: lanes, ranges, a playhead and a navigator, with no notion of tempo. The **arrangement parts** hold what a DAW's arrangement needs around it: the state, the clips, track reordering, locators and time signatures, automation and MIDI playback. Each is a file you own, takes its state as values and reports changes through callbacks, so the arrangement can live in your own store and play through an engine of your own.
 
+</ForFrameworks>
+
+<ForFrameworks only="vue svelte web">
+
+The timeline's behavior is one description, `timeline` in `@audio-ui/primitives`, over the controllers of `@audio-ui/core/timeline`. It is the surface of an arrangement: a playback position and a zoom in units of your own (seconds, beats, steps), lanes the parts are placed on, tracks, marks, ranges such as a loop, and clips that move, trim and fade. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+</ForFrameworks>
+
 ## Installation
 
-The whole arrangement installs with `npx shadcn@latest add @audio-ui/arrangement-editor`: every part below, with the timeline. A part installs alone by its name (`@audio-ui/arranged-clip`, `@audio-ui/use-track-reorder`…). The preview above is `@audio-ui/block-timeline`, which wires them into a screen around `@audio-ui/arrangement-view`. The tabs below are the timeline on its own.
+<ForFrameworks only="react">
 
+The whole arrangement installs with `npx shadcn@latest add @audio-ui/arrangement-editor`: every part below, with the timeline. A part installs alone by its name (`@audio-ui/arranged-clip`, `@audio-ui/use-track-reorder`…). The preview above is `@audio-ui/block-timeline`, which wires them into a screen around `@audio-ui/arrangement-view`. The tabs below are the timeline on its own.
 
 <CodeTabs>
 
@@ -63,6 +90,71 @@ npm install @audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sd
 </TabsContent>
 
 </CodeTabs>
+
+</ForFrameworks>
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation), the [fader](/docs/components/base/fader#installation), the [XY pad](/docs/components/base/xypad#installation), the [meter](/docs/components/base/meter#installation), the [envelope](/docs/components/base/envelope#installation), the [pad grid](/docs/components/base/pad#installation), the [piano](/docs/components/base/piano#installation), the [sequencer](/docs/components/base/sequencer#installation), the [plot](/docs/components/base/plot#installation) and the [waveform](/docs/components/base/waveform#installation) are built the same way.
+
+<ForFrameworks only="react">
+
+The primitive alone, without the styling:
+
+</ForFrameworks>
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/timeline-react
+```
+
+One file, `components/audio-ui/timeline/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-vue.json
+```
+
+One file, `components/audio-ui/timeline/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-svelte.json
+```
+
+Ten files in `components/audio-ui/timeline/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#installation) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-web.json
+```
+
+One file, `components/audio-ui/timeline/web.ts`. Import it once, and it registers the `audio-ui-timeline` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+<ForFrameworks only="react">
 
 ## The timeline
 
@@ -266,6 +358,9 @@ Every lane sets a `--timeline-unit` CSS variable, the width of one unit. Parts a
 <div style={{ left: "calc(var(--timeline-unit) * 12)", position: "absolute" }} />
 ```
 
+</ForFrameworks>
+
+<ForFrameworks only="react">
 
 ## The arrangement
 
@@ -521,7 +616,6 @@ const engine = useArrangementEngine({ doc, overridden: automation.overridden, re
 
 A track can also hold MIDI: in the block, every track is, Drums, Bass, Organ, Lead and Pad, and **+ MIDI** under the tracks adds one. A MIDI clip draws its notes across its body and, picked, opens on a piano roll in the clip panel (`midi-clip-panel`, `npx shadcn@latest add @audio-ui/midi-clip-panel`), with the same strip, and its Clip and Loop boxes in a column beside the roll. A bar over the roll carries Draw, Notes and View. Notes holds the commands of the [note edit menu](/docs/components/base/note-edit-menu) by what they change, Time, Pitch, Play and Velocity, and Duplicate the loop, which plays the loop's notes again after it: each acts on the selected notes or every note, and the same menu opens on a right-click on the roll, its keys working while the roll has the focus. View folds the roll to its notes and picks the lane under them, velocity or chance. Draw notes a grid step at a time, drag the loop brace on its ruler, move, stretch and edit them as in the [piano roll](/docs/components/base/piano-roll), and each edit is one undo step of the arrangement. Double-click a bare MIDI lane for an empty clip a bar long, which loops as it is stretched. While the arrangement plays, their notes go to the instrument of the track's chain (in the block, a drum rack with a Drum Synth on every pad on Drums, a mono synth on Bass, an organ on Organ and on Lead, and a string machine on Pad), each at its frame of the audio clock, through the track's channel; a key pressed in the piano roll plays the same instrument. In `lib/arrangement`, a track's `kind` is `"audio"` or `"midi"`, a MIDI clip keeps its `notes` in its source's time, and `playedNotes` gives where they play through the clip's offset and loop.
 
-
 ### Drums
 
 Drums are MIDI too, as the block's are: a MIDI track whose instrument is a [drum rack](/docs/components/base/rack#drum-racks), each pad playing a [Drum Synth](/docs/components/base/drum-synth) through its own effects, so every hit is a note you can edit, every sound a device you can shape. Give the clip panel the rack's pads, `pads`, as `{ note, name }` from top to bottom, and a drum clip opens on its steps: a row per pad (`drum-step-editor`, `npx shadcn@latest add @audio-ui/drum-step-editor`, over the [sequencer](/docs/components/base/sequencer)). Press a step to switch it, and drag across to paint; with Repeat on, in the bar where Draw is on the roll, a press on a step that plays makes it a roll, two, three or four hits across the step, and back to one. A step is drawn fainter the softer it plays, so a ghost note shows as one, and while the clip plays, the view keeps the step being played in sight. A pad's name sounds it through `onPadOn`, and its menu fills the row every 2, 4 or 8 steps, or clears it. The steps are the clip's notes, seen another way: Roll, in the View menu, shows the same notes on the piano roll, its keys named after the pads, with their velocity and chance in the lane under them, and a note off the grid still lights its step. `drum-steps` (`npx shadcn@latest add @audio-ui/drum-steps`) holds the reading and the edits, `stepsOf` (each step's velocity, chance, shift and `repeats`), `withStep`, `withStepLevel`, `withStepRepeats` and `filledEvery`, for a step editor of your own. `DrumStepEditor` draws its own Repeat toggle, or none given `repeating`, for a host that draws it, as the panel does.
@@ -601,193 +695,15 @@ const step = undo(history, clips); // { history, present } or null
 
 A new change clears redo, since the redo branch no longer follows from the present. `HISTORY_LIMIT` bounds the depth. The arrangement block uses it for its undo and redo buttons and for Cmd/Ctrl + Z, with Shift (or Y) to redo.
 
-
-## API reference
-
-The headless parts and their options are in [Headless primitive](#headless-primitive), below.
-
-### Registry component
-
-#### Timeline
-
-<TypeTable>
-<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the timeline, in your units.</TypeRow>
-<TypeRow name={"zoom"} type={"number"}>Zoom, in px per unit.</TypeRow>
-<TypeRow name={"defaultZoom"} type={"number"}>Uncontrolled starting zoom, in px per unit. Unset, the timeline fits its width until zoomed.</TypeRow>
-<TypeRow name={"minZoom / maxZoom"} type={"number"} default={"0 / Infinity"}>Bounds the zoom is clamped to.</TypeRow>
-<TypeRow name={"onZoomChange"} type={"(zoom, eventDetails) => void"}>Fires when the zoom changes, already clamped. `eventDetails.cancel()` keeps the zoom where it was.</TypeRow>
-<TypeRow name={"position"} type={"number"}>Playback position, from 0 to `duration`.</TypeRow>
-<TypeRow name={"defaultPosition"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
-<TypeRow name={"source"} type={"{ getSnapshot, subscribe }"}>A live position followed outside React; takes precedence over `position`.</TypeRow>
-<TypeRow name={"onPositionChange"} type={"(value, eventDetails) => void"}>Fires while the position is moved: press, drag, keyboard and input changes.</TypeRow>
-<TypeRow name={"onPositionCommitted"} type={"(value, eventDetails) => void"}>Fires when a gesture that moved the position ends.</TypeRow>
-<TypeRow name={"snapStep"} type={"number"} default={"0"}>Distance between grid lines, in your units. 0 is no grid.</TypeRow>
-<TypeRow name={"snapOffset"} type={"number"} default={"0"}>Where the grid's lines start, in your units.</TypeRow>
-<TypeRow name={"step / largeStep"} type={"number"} default={"snapStep / ten steps"}>Keyboard steps.</TypeRow>
-<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables seeking and zooming.</TypeRow>
-</TypeTable>
-
-#### Parts
-
-<TypeTable title="Components">
-<TypeRow name={"TimelineViewport"}>The scrolling window. Zooms around the pointer with Cmd/Ctrl + scroll. `scrollbar="hidden"` drops the native scrollbar.</TypeRow>
-<TypeRow name={"TimelineRuler"}>The lane that seeks. Holds the input; takes `aria-label` and `getAriaValueText`.</TypeRow>
-<TypeRow name={"TimelineLane"}>A strip the timeline's parts are placed on. `gridStep` draws a line every that many units.</TypeRow>
-<TypeRow name={"TimelineTrack"}>A row: a header beside a lane. `height`, `selected`, `onHeightChange`.</TypeRow>
-<TypeRow name={"TimelineTrackHeader"}>The strip that names a track, kept at the left edge.</TypeRow>
-<TypeRow name={"TimelineTrackResizeHandle"}>Sets the track's height, by dragging or with the keys.</TypeRow>
-<TypeRow name={"TimelineMark"}>Something placed at `value`: a bar number, a cue. With `onValueChange` or `onValueCommitted` it moves: a drag takes it along the lane, on the grid unless Cmd/Ctrl is held, landing on a `snapPoints` place within a few px, and Left and Right on something focused inside it move it by `step`. A press that stays one keeps its click; a drag does not click.</TypeRow>
-<TypeRow name={"TimelinePlayhead"}>Follows the position on the lane it sits in.</TypeRow>
-<TypeRow name={"TimelineRange"}>A stretch of the timeline: `value`, `defaultValue`, `minLength`, `movable`, `drawable`, `onValueChange`, `onValueCommitted`. It sets `minDrawnWidth` to 32, and while it is drawn wider than it is long, a line along its bottom shows its true length against the ruler.</TypeRow>
-<TypeRow name={"TimelineRangeHandle"}>Resizes one `edge` of the range.</TypeRow>
-<TypeRow name={"TimelineClip"}>A stretch of a source: `value`, `sourceLength`, `selected`, `onValueChange`, `onValueCommitted`, `onRemove`. Dragged over other lanes too.</TypeRow>
-<TypeRow name={"TimelineClipHeader"}>The clip's title bar: drag it to move the clip.</TypeRow>
-<TypeRow name={"TimelineClipHandle"}>Trims one `edge` of the clip.</TypeRow>
-<TypeRow name={"TimelineClipFade"}>Draws a fade, as a line with its shading. Takes `edge`.</TypeRow>
-<TypeRow name={"TimelineClipFadeHandle"}>Sets a fade, at the clip's top corner: a square that shows when the clip is hovered or selected. Takes `edge`.</TypeRow>
-<TypeRow name={"TimelineNavigator"}>The whole timeline as one bar, scrolling and zooming the viewport.</TypeRow>
-</TypeTable>
-
-The `Timeline` primitive that installs with it exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Track` with its `Timeline.TrackHeader` and `Timeline.TrackResizeHandle`, `Timeline.Mark`, `Timeline.Playhead`, `Timeline.Range`, `Timeline.RangeHandle`, `Timeline.Clip`, `Timeline.ClipHeader`, `Timeline.ClipHandle`, `Timeline.ClipFade`, `Timeline.ClipFadeHandle`, and `Timeline.Navigator` with its `Timeline.NavigatorWindow` and `Timeline.NavigatorHandle`. Clips, ranges, tracks and marks are named by a `clip`, `range`, `track` or `mark` prop, which the parts that belong to one repeat, and what they report goes to the Root with that name in the details. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.
-
-### ArrangedClip
-
-<TypeTable>
-<TypeRow name={"clip"} type={"Arranged"}>The clip: its place (`value`), its source and its notes.</TypeRow>
-<TypeRow name={"selected"} type={"boolean"}>Whether it is in the selection.</TypeRow>
-<TypeRow name={"swatch"} type={"number | string"}>Its color: its track's, an index into `TRACK_COLORS` or a CSS hex of the user's own.</TypeRow>
-<TypeRow name={"peaks"} type={"ArrayLike<number> | { max, min }"}>An audio clip's source as peaks spread evenly over its `sourceLength`, amplitudes from 0 to 1 or the lowest and highest samples of each slice: its waveform is drawn from them, the stretch it plays, round its loop, mirrored when reversed, stretched by its warp (`clipWaveform` in `lib/arrangement` reads it the same way).</TypeRow>
-<TypeRow name={"trackName"} type={"string"}>Its track's name, for its label.</TypeRow>
-<TypeRow name={"describe"} type={"(time) => string"}>A time in words, such as "Bar 3, beat 2".</TypeRow>
-<TypeRow name={"onChange, onCommit"} type={"(id, value, details) => void, (id, details) => void"}>The clip moved, trimmed or faded, and the gesture ended.</TypeRow>
-<TypeRow name={"onSelect"} type={"(id, additive) => void"}>It was pressed: `additive` with Shift, Cmd or Ctrl, or with `multi`.</TypeRow>
-<TypeRow name={"onAction"} type={"(action, id) => void"}>Picked from its menu: `"edit"`, `"duplicate"`, `"split"`, `"toggle"` or `"remove"`.</TypeRow>
-<TypeRow name={"onRename, onRemove, onFadeShape"} type={"(id, …) => void"}>Renamed in place, deleted with its key, and a fade's curve picked.</TypeRow>
-<TypeRow name={"multi"} type={"boolean"} default={"false"}>Whether a press adds it to the selection, for a touch screen.</TypeRow>
-<TypeRow name={"copying, lift, onLift"} type={"boolean, number, (id, offset) => void"}>For group drags: whether it is a copy being dragged, how far it is held up or down, and how far it is dragged.</TypeRow>
-</TypeTable>
-
-### useArrangedClips
-
-<TypeTable>
-<TypeRow name={"clips, copying, selectedIds, tracks, dispatch"} type={"as useArrangement returns them"}>The arrangement. A return track takes no clip: leave it out of `tracks`.</TypeRow>
-<TypeRow name={"getPosition, splitStep"} type={"() => number, number"}>Where the menu's split cuts, and the closest it comes to a clip's edge.</TypeRow>
-<TypeRow name={"viewportRef"} type={"Ref"}>The viewport the tracks scroll in: a clip let go off them goes to the nearest.</TypeRow>
-<TypeRow name={"onEdit, onPress"} type={"(id) => void, () => void"}>"Edit" chosen from a clip's menu, and a clip pressed, for what else it lets go of.</TypeRow>
-<TypeRow name={"clipProps(clip), ghostsOn(trackId)"} type={"props, Arranged[]"}>What an `ArrangedClip` takes, and the originals of the clips being copied on a track.</TypeRow>
-<TypeRow name={"onRemove, onRename"} type={"(id) => void, (id, name) => void"}>The same commands, for a clip's other editors.</TypeRow>
-</TypeTable>
-
-### TimelineLocator and TimelineSignature
-
-<TypeTable>
-<TypeRow name={"locator"} type={"{ at, name }"}>A locator.</TypeRow>
-<TypeRow name={"onJump, onRemove, onRename"} type={"(at) => void, (at) => void, (at, name) => void"}>Pressed, deleted and renamed.</TypeRow>
-<TypeRow name={"onLoopToNext"} type={"(id) => void"}>Its menu's "Loop to the next locator": the loop from it to the next one, or to the end. Without it, the menu has no such entry.</TypeRow>
-<TypeRow name={"change"} type={"{ id, at, beatsPerBar, beatUnit }"}>A time-signature change.</TypeRow>
-<TypeRow name={"editing, onEditingChange"} type={"boolean, (id | null) => void"}>Whether it is being typed.</TypeRow>
-<TypeRow name={"onMove, onSet, onRemove"} type={"(id, to) => void, (id, beats, unit) => void, (id) => void"}>Moved by `step` with the arrows, typed, deleted.</TypeRow>
-<TypeRow name={"step"} type={"number"}>How far the arrows move a change: the grid.</TypeRow>
-</TypeTable>
-
-### useTimelineMarkers
-
-<TypeTable>
-<TypeRow name={"dispatch, getPosition"} type={"(command) => state, () => number"}>The arrangement's commands, and where the cursor is.</TypeRow>
-<TypeRow name={"onJump, onPlay, step"} type={"(at) => void, (at) => void, number"}>A marker pressed, a locator double-clicked to play from, and how far the arrows move one.</TypeRow>
-<TypeRow name={"locator, signature"} type={"props"}>To spread on `TimelineLocator` and `TimelineSignature`.</TypeRow>
-<TypeRow name={"addLocator, addSignature, editingSignature"} type={"() => void, () => void, string | null"}>New markers at the cursor, and the change being typed.</TypeRow>
-</TypeTable>
-
-### useTrackAutomation
-
-<TypeTable>
-<TypeRow name={"dispatch, tracks"} type={"(command) => void, ArrangementTrack[]"}>The arrangement's commands, and the tracks whose automation a change by hand overrides.</TypeRow>
-<TypeRow name={"automating, setAutomating, toggle"} type={"boolean, (on) => void, () => void"}>Automation mode.</TypeRow>
-<TypeRow name={"parameterOf, show"} type={"(trackId) => parameter, (trackId, parameter) => void"}>What a track's lane shows, Volume until another is chosen.</TypeRow>
-<TypeRow name={"changeMix"} type={"(trackId, patch) => void"}>A mix changed by hand: a fader's drag is a burst, a switch a step, and an automated gain or pan is overridden.</TypeRow>
-<TypeRow name={"overridden, anyOverridden, reenable"} type={"Record<trackId, parameter[]>, boolean, () => void"}>What plays its mix instead of its envelope, and the way back.</TypeRow>
-<TypeRow name={"edit, clear"} type={"(trackId, parameter, points) => void, (trackId, parameter) => void"}>Draws an envelope, which plays again; takes one away.</TypeRow>
-</TypeTable>
-
-### TrackAutomationChooser and TrackAutomation
-
-<TypeTable>
-<TypeRow name={"track"} type={"ArrangementTrack"}>The track, with its `automation`.</TypeRow>
-<TypeRow name={"parameter"} type={"AutomatedParameter"}>What the lane shows: `"volume"`, `"pan"`, or a device's parameter by its key.</TypeRow>
-<TypeRow name={"targets"} type={"AutomationTarget[]"}>The track's devices' parameters it can automate, as `deviceTargets` gives them: the chooser lists them by device, and the envelope reads and stands by them.</TypeRow>
-<TypeRow name={"onParameterChange, onClear"} type={"(trackId, parameter) => void"}>The chooser's: another parameter picked, and its envelope cleared.</TypeRow>
-<TypeRow name={"output"} type={"boolean"} default={"true"}>Whether the track has an output. One without, such as a MIDI track with no instrument, has no volume or pan: the chooser lists only its devices' parameters.</TypeRow>
-<TypeRow name={"mix"} type={"Mix"}>The track's mix, where a line with no points stands.</TypeRow>
-<TypeRow name={"onChange, onCommit"} type={"(trackId, parameter, points) => void, () => void"}>The envelope was edited, and the gesture ended.</TypeRow>
-<TypeRow name={"duration, snapStep, describe"} type={"number, number, (time) => string"}>The arrangement's length, the grid a point snaps to in time, and a time in words.</TypeRow>
-<TypeRow name={"overridden"} type={"AutomatedParameter[]"}>The parameters moved by hand since, drawn greyed.</TypeRow>
-</TypeTable>
-
 </ForFrameworks>
 
-## Headless primitive
+## Usage
 
-The timeline's behavior is one description, `timeline` in `@audio-ui/primitives`, over the controllers of `@audio-ui/core/timeline`. It is the surface of an arrangement: a playback position and a zoom in units of your own (seconds, beats, steps), lanes the parts are placed on, tracks, marks, ranges such as a loop, and clips that move, trim and fade. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+<ForFrameworks only="react">
 
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive), the [fader](/docs/components/base/fader#headless-primitive), the [XY pad](/docs/components/base/xypad#headless-primitive), the [meter](/docs/components/base/meter#headless-primitive), the [envelope](/docs/components/base/envelope#headless-primitive), the [pad grid](/docs/components/base/pad#headless-primitive), the [piano](/docs/components/base/piano#headless-primitive), the [sequencer](/docs/components/base/sequencer#headless-primitive), the [plot](/docs/components/base/plot#headless-primitive) and the [waveform](/docs/components/base/waveform#headless-primitive) are built the same way.
+The primitive alone, part by part:
 
-### Installation
-
-<FrameworkTabs defaultValue="react">
-
-<TabsList>
-  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
-  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
-  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
-  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
-</TabsList>
-
-<TabsContent value="react">
-
-```bash
-npx shadcn@latest add @audio-ui/timeline-react
-```
-
-One file, `components/audio-ui/timeline/react.tsx`.
-
-</TabsContent>
-
-<TabsContent value="vue">
-
-```bash
-npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-vue.json
-```
-
-One file, `components/audio-ui/timeline/vue.ts`.
-
-</TabsContent>
-
-<TabsContent value="svelte">
-
-```bash
-npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-svelte.json
-```
-
-Ten files in `components/audio-ui/timeline/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
-
-</TabsContent>
-
-<TabsContent value="web">
-
-```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/timeline-web.json
-```
-
-One file, `components/audio-ui/timeline/web.ts`. Import it once, and it registers the `audio-ui-timeline` tags.
-
-</TabsContent>
-
-</FrameworkTabs>
-
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
-
-### Usage
+</ForFrameworks>
 
 A Root owns the position, the zoom and the grid. Everything else is a part you place in it:
 
@@ -940,7 +856,7 @@ A clip, a range, a track and a mark each hold a controller of their own, and a p
 
 Give the Root a `source`, a live position in the shape of an external store: `getSnapshot()` returns it and `subscribe(listener)` is called on each tick. The Playhead, the Ruler's input and a seek follow it straight in the DOM, with no render. `createSource` from `@audio-ui/core` makes one, and `useTransportClock` from the registry gives you one on the audio clock.
 
-### Interaction
+## Interaction
 
 - **Ruler**: a press seeks, a drag scrubs, and the end commits. Shift with a drag selects a stretch instead when the Root has `onSelectionChange`, to loop it.
 - **Clip**: a press on its body selects it and moves the position there. Dragging its header moves it on the grid unless Cmd/Ctrl is held, over other lanes too, and scrolls the viewport near its edges. A handle trims an edge, which moves where in the source the clip begins instead of stretching it; a fade handle sets a fade, and a double click or Enter steps its shape.
@@ -950,6 +866,130 @@ Give the Root a `source`, a live position in the shape of an external store: `ge
 - The arrows move by `step`, Shift or Page Up and Page Down by `largeStep`, on every input.
 
 A disabled timeline takes none of these.
+
+## API reference
+
+<ForFrameworks only="react">
+
+### Registry component
+
+#### Timeline
+
+<TypeTable>
+<TypeRow name={"duration"} type={"number"} default={"1"}>Length of the timeline, in your units.</TypeRow>
+<TypeRow name={"zoom"} type={"number"}>Zoom, in px per unit.</TypeRow>
+<TypeRow name={"defaultZoom"} type={"number"}>Uncontrolled starting zoom, in px per unit. Unset, the timeline fits its width until zoomed.</TypeRow>
+<TypeRow name={"minZoom / maxZoom"} type={"number"} default={"0 / Infinity"}>Bounds the zoom is clamped to.</TypeRow>
+<TypeRow name={"onZoomChange"} type={"(zoom, eventDetails) => void"}>Fires when the zoom changes, already clamped. `eventDetails.cancel()` keeps the zoom where it was.</TypeRow>
+<TypeRow name={"position"} type={"number"}>Playback position, from 0 to `duration`.</TypeRow>
+<TypeRow name={"defaultPosition"} type={"number"} default={"0"}>Uncontrolled starting position.</TypeRow>
+<TypeRow name={"source"} type={"{ getSnapshot, subscribe }"}>A live position followed outside React; takes precedence over `position`.</TypeRow>
+<TypeRow name={"onPositionChange"} type={"(value, eventDetails) => void"}>Fires while the position is moved: press, drag, keyboard and input changes.</TypeRow>
+<TypeRow name={"onPositionCommitted"} type={"(value, eventDetails) => void"}>Fires when a gesture that moved the position ends.</TypeRow>
+<TypeRow name={"snapStep"} type={"number"} default={"0"}>Distance between grid lines, in your units. 0 is no grid.</TypeRow>
+<TypeRow name={"snapOffset"} type={"number"} default={"0"}>Where the grid's lines start, in your units.</TypeRow>
+<TypeRow name={"step / largeStep"} type={"number"} default={"snapStep / ten steps"}>Keyboard steps.</TypeRow>
+<TypeRow name={"disabled"} type={"boolean"} default={"false"}>Disables seeking and zooming.</TypeRow>
+</TypeTable>
+
+#### Parts
+
+<TypeTable title="Components">
+<TypeRow name={"TimelineViewport"}>The scrolling window. Zooms around the pointer with Cmd/Ctrl + scroll. `scrollbar="hidden"` drops the native scrollbar.</TypeRow>
+<TypeRow name={"TimelineRuler"}>The lane that seeks. Holds the input; takes `aria-label` and `getAriaValueText`.</TypeRow>
+<TypeRow name={"TimelineLane"}>A strip the timeline's parts are placed on. `gridStep` draws a line every that many units.</TypeRow>
+<TypeRow name={"TimelineTrack"}>A row: a header beside a lane. `height`, `selected`, `onHeightChange`.</TypeRow>
+<TypeRow name={"TimelineTrackHeader"}>The strip that names a track, kept at the left edge.</TypeRow>
+<TypeRow name={"TimelineTrackResizeHandle"}>Sets the track's height, by dragging or with the keys.</TypeRow>
+<TypeRow name={"TimelineMark"}>Something placed at `value`: a bar number, a cue. With `onValueChange` or `onValueCommitted` it moves: a drag takes it along the lane, on the grid unless Cmd/Ctrl is held, landing on a `snapPoints` place within a few px, and Left and Right on something focused inside it move it by `step`. A press that stays one keeps its click; a drag does not click.</TypeRow>
+<TypeRow name={"TimelinePlayhead"}>Follows the position on the lane it sits in.</TypeRow>
+<TypeRow name={"TimelineRange"}>A stretch of the timeline: `value`, `defaultValue`, `minLength`, `movable`, `drawable`, `onValueChange`, `onValueCommitted`. It sets `minDrawnWidth` to 32, and while it is drawn wider than it is long, a line along its bottom shows its true length against the ruler.</TypeRow>
+<TypeRow name={"TimelineRangeHandle"}>Resizes one `edge` of the range.</TypeRow>
+<TypeRow name={"TimelineClip"}>A stretch of a source: `value`, `sourceLength`, `selected`, `onValueChange`, `onValueCommitted`, `onRemove`. Dragged over other lanes too.</TypeRow>
+<TypeRow name={"TimelineClipHeader"}>The clip's title bar: drag it to move the clip.</TypeRow>
+<TypeRow name={"TimelineClipHandle"}>Trims one `edge` of the clip.</TypeRow>
+<TypeRow name={"TimelineClipFade"}>Draws a fade, as a line with its shading. Takes `edge`.</TypeRow>
+<TypeRow name={"TimelineClipFadeHandle"}>Sets a fade, at the clip's top corner: a square that shows when the clip is hovered or selected. Takes `edge`.</TypeRow>
+<TypeRow name={"TimelineNavigator"}>The whole timeline as one bar, scrolling and zooming the viewport.</TypeRow>
+</TypeTable>
+
+The `Timeline` primitive that installs with it exposes the same parts as `Timeline.Root`, `Timeline.Viewport`, `Timeline.Ruler`, `Timeline.Lane`, `Timeline.Track` with its `Timeline.TrackHeader` and `Timeline.TrackResizeHandle`, `Timeline.Mark`, `Timeline.Playhead`, `Timeline.Range`, `Timeline.RangeHandle`, `Timeline.Clip`, `Timeline.ClipHeader`, `Timeline.ClipHandle`, `Timeline.ClipFade`, `Timeline.ClipFadeHandle`, and `Timeline.Navigator` with its `Timeline.NavigatorWindow` and `Timeline.NavigatorHandle`. Clips, ranges, tracks and marks are named by a `clip`, `range`, `track` or `mark` prop, which the parts that belong to one repeat, and what they report goes to the Root with that name in the details. Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes `data-disabled`, `data-fitted` and `data-scrubbing`.
+
+### ArrangedClip
+
+<TypeTable>
+<TypeRow name={"clip"} type={"Arranged"}>The clip: its place (`value`), its source and its notes.</TypeRow>
+<TypeRow name={"selected"} type={"boolean"}>Whether it is in the selection.</TypeRow>
+<TypeRow name={"swatch"} type={"number | string"}>Its color: its track's, an index into `TRACK_COLORS` or a CSS hex of the user's own.</TypeRow>
+<TypeRow name={"peaks"} type={"ArrayLike<number> | { max, min }"}>An audio clip's source as peaks spread evenly over its `sourceLength`, amplitudes from 0 to 1 or the lowest and highest samples of each slice: its waveform is drawn from them, the stretch it plays, round its loop, mirrored when reversed, stretched by its warp (`clipWaveform` in `lib/arrangement` reads it the same way).</TypeRow>
+<TypeRow name={"trackName"} type={"string"}>Its track's name, for its label.</TypeRow>
+<TypeRow name={"describe"} type={"(time) => string"}>A time in words, such as "Bar 3, beat 2".</TypeRow>
+<TypeRow name={"onChange, onCommit"} type={"(id, value, details) => void, (id, details) => void"}>The clip moved, trimmed or faded, and the gesture ended.</TypeRow>
+<TypeRow name={"onSelect"} type={"(id, additive) => void"}>It was pressed: `additive` with Shift, Cmd or Ctrl, or with `multi`.</TypeRow>
+<TypeRow name={"onAction"} type={"(action, id) => void"}>Picked from its menu: `"edit"`, `"duplicate"`, `"split"`, `"toggle"` or `"remove"`.</TypeRow>
+<TypeRow name={"onRename, onRemove, onFadeShape"} type={"(id, …) => void"}>Renamed in place, deleted with its key, and a fade's curve picked.</TypeRow>
+<TypeRow name={"multi"} type={"boolean"} default={"false"}>Whether a press adds it to the selection, for a touch screen.</TypeRow>
+<TypeRow name={"copying, lift, onLift"} type={"boolean, number, (id, offset) => void"}>For group drags: whether it is a copy being dragged, how far it is held up or down, and how far it is dragged.</TypeRow>
+</TypeTable>
+
+### useArrangedClips
+
+<TypeTable>
+<TypeRow name={"clips, copying, selectedIds, tracks, dispatch"} type={"as useArrangement returns them"}>The arrangement. A return track takes no clip: leave it out of `tracks`.</TypeRow>
+<TypeRow name={"getPosition, splitStep"} type={"() => number, number"}>Where the menu's split cuts, and the closest it comes to a clip's edge.</TypeRow>
+<TypeRow name={"viewportRef"} type={"Ref"}>The viewport the tracks scroll in: a clip let go off them goes to the nearest.</TypeRow>
+<TypeRow name={"onEdit, onPress"} type={"(id) => void, () => void"}>"Edit" chosen from a clip's menu, and a clip pressed, for what else it lets go of.</TypeRow>
+<TypeRow name={"clipProps(clip), ghostsOn(trackId)"} type={"props, Arranged[]"}>What an `ArrangedClip` takes, and the originals of the clips being copied on a track.</TypeRow>
+<TypeRow name={"onRemove, onRename"} type={"(id) => void, (id, name) => void"}>The same commands, for a clip's other editors.</TypeRow>
+</TypeTable>
+
+### TimelineLocator and TimelineSignature
+
+<TypeTable>
+<TypeRow name={"locator"} type={"{ at, name }"}>A locator.</TypeRow>
+<TypeRow name={"onJump, onRemove, onRename"} type={"(at) => void, (at) => void, (at, name) => void"}>Pressed, deleted and renamed.</TypeRow>
+<TypeRow name={"onLoopToNext"} type={"(id) => void"}>Its menu's "Loop to the next locator": the loop from it to the next one, or to the end. Without it, the menu has no such entry.</TypeRow>
+<TypeRow name={"change"} type={"{ id, at, beatsPerBar, beatUnit }"}>A time-signature change.</TypeRow>
+<TypeRow name={"editing, onEditingChange"} type={"boolean, (id | null) => void"}>Whether it is being typed.</TypeRow>
+<TypeRow name={"onMove, onSet, onRemove"} type={"(id, to) => void, (id, beats, unit) => void, (id) => void"}>Moved by `step` with the arrows, typed, deleted.</TypeRow>
+<TypeRow name={"step"} type={"number"}>How far the arrows move a change: the grid.</TypeRow>
+</TypeTable>
+
+### useTimelineMarkers
+
+<TypeTable>
+<TypeRow name={"dispatch, getPosition"} type={"(command) => state, () => number"}>The arrangement's commands, and where the cursor is.</TypeRow>
+<TypeRow name={"onJump, onPlay, step"} type={"(at) => void, (at) => void, number"}>A marker pressed, a locator double-clicked to play from, and how far the arrows move one.</TypeRow>
+<TypeRow name={"locator, signature"} type={"props"}>To spread on `TimelineLocator` and `TimelineSignature`.</TypeRow>
+<TypeRow name={"addLocator, addSignature, editingSignature"} type={"() => void, () => void, string | null"}>New markers at the cursor, and the change being typed.</TypeRow>
+</TypeTable>
+
+### useTrackAutomation
+
+<TypeTable>
+<TypeRow name={"dispatch, tracks"} type={"(command) => void, ArrangementTrack[]"}>The arrangement's commands, and the tracks whose automation a change by hand overrides.</TypeRow>
+<TypeRow name={"automating, setAutomating, toggle"} type={"boolean, (on) => void, () => void"}>Automation mode.</TypeRow>
+<TypeRow name={"parameterOf, show"} type={"(trackId) => parameter, (trackId, parameter) => void"}>What a track's lane shows, Volume until another is chosen.</TypeRow>
+<TypeRow name={"changeMix"} type={"(trackId, patch) => void"}>A mix changed by hand: a fader's drag is a burst, a switch a step, and an automated gain or pan is overridden.</TypeRow>
+<TypeRow name={"overridden, anyOverridden, reenable"} type={"Record<trackId, parameter[]>, boolean, () => void"}>What plays its mix instead of its envelope, and the way back.</TypeRow>
+<TypeRow name={"edit, clear"} type={"(trackId, parameter, points) => void, (trackId, parameter) => void"}>Draws an envelope, which plays again; takes one away.</TypeRow>
+</TypeTable>
+
+### TrackAutomationChooser and TrackAutomation
+
+<TypeTable>
+<TypeRow name={"track"} type={"ArrangementTrack"}>The track, with its `automation`.</TypeRow>
+<TypeRow name={"parameter"} type={"AutomatedParameter"}>What the lane shows: `"volume"`, `"pan"`, or a device's parameter by its key.</TypeRow>
+<TypeRow name={"targets"} type={"AutomationTarget[]"}>The track's devices' parameters it can automate, as `deviceTargets` gives them: the chooser lists them by device, and the envelope reads and stands by them.</TypeRow>
+<TypeRow name={"onParameterChange, onClear"} type={"(trackId, parameter) => void"}>The chooser's: another parameter picked, and its envelope cleared.</TypeRow>
+<TypeRow name={"output"} type={"boolean"} default={"true"}>Whether the track has an output. One without, such as a MIDI track with no instrument, has no volume or pan: the chooser lists only its devices' parameters.</TypeRow>
+<TypeRow name={"mix"} type={"Mix"}>The track's mix, where a line with no points stands.</TypeRow>
+<TypeRow name={"onChange, onCommit"} type={"(trackId, parameter, points) => void, () => void"}>The envelope was edited, and the gesture ended.</TypeRow>
+<TypeRow name={"duration, snapStep, describe"} type={"number, number, (time) => string"}>The arrangement's length, the grid a point snaps to in time, and a time in words.</TypeRow>
+<TypeRow name={"overridden"} type={"AutomatedParameter[]"}>The parameters moved by hand since, drawn greyed.</TypeRow>
+</TypeTable>
+
+</ForFrameworks>
 
 ### Options
 

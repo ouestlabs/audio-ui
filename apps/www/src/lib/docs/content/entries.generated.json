@@ -1266,7 +1266,13 @@
       "demo-sound",
       "drum-rack",
       "pad-demo",
+      "pad-svelte-demo",
+      "pad-vue-demo",
+      "pad-web-demo",
       "sequencer",
+      "sequencer-svelte-demo",
+      "sequencer-vue-demo",
+      "sequencer-web-demo",
       "use-piano-roll-playback"
     ]
   },
@@ -1702,6 +1708,35 @@
   },
   {
     "dependencies": [],
+    "description": "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from, as a live source for any framework",
+    "exports": [
+      {
+        "kind": "interface",
+        "name": "SimulatedFrame",
+        "summary": ""
+      },
+      {
+        "kind": "function",
+        "name": "createSimulatedLevels",
+        "summary": "Levels that move on their own, in the shape a `Meter` paints from: a random walk per channel with a peak that holds for a moment and then falls, like a real signal's."
+      }
+    ],
+    "files": [
+      "lib/simulated-levels.ts"
+    ],
+    "from": "@/lib/simulated-levels",
+    "kind": "lib",
+    "name": "simulated-levels",
+    "registryDependencies": [],
+    "usedBy": [
+      "meter-svelte-demo",
+      "meter-vue-demo",
+      "meter-web-demo",
+      "use-simulated-levels"
+    ]
+  },
+  {
+    "dependencies": [],
     "description": "The gesture of reordering a row by dragging one of its items: the others slide aside, the item shows dimmed where it would land, what follows the pointer settles there, the view scrolls at its edges. No render while it moves.",
     "exports": [
       {
@@ -1788,6 +1823,29 @@
       "clip-panel",
       "process-menu",
       "use-bake"
+    ]
+  },
+  {
+    "dependencies": [],
+    "description": "A clock that counts the steps of a pattern at a tempo and tells a Sequencer which one is playing, for a preview in any framework",
+    "exports": [
+      {
+        "kind": "function",
+        "name": "createStepPlayer",
+        "summary": "A clock that counts steps at a tempo, for a pattern played in a preview."
+      }
+    ],
+    "files": [
+      "lib/step-player.ts"
+    ],
+    "from": "@/lib/step-player",
+    "kind": "lib",
+    "name": "step-player",
+    "registryDependencies": [],
+    "usedBy": [
+      "sequencer-svelte-demo",
+      "sequencer-vue-demo",
+      "sequencer-web-demo"
     ]
   },
   {
@@ -2810,11 +2868,6 @@
     "description": "Levels that move on their own, with a peak that holds and falls, in the shape a Meter paints from: a demo meter that is never at rest",
     "exports": [
       {
-        "kind": "interface",
-        "name": "SimulatedFrame",
-        "summary": ""
-      },
-      {
         "kind": "function",
         "name": "useSimulatedLevels",
         "summary": "Levels that move on their own, in the shape a `Meter` paints from: a random walk per channel with a peak that holds for a moment and then falls, like a real signal's."
@@ -2826,7 +2879,9 @@
     "from": "@/hooks/use-simulated-levels",
     "kind": "hook",
     "name": "use-simulated-levels",
-    "registryDependencies": [],
+    "registryDependencies": [
+      "simulated-levels"
+    ],
     "usedBy": [
       "meter-size-default-demo",
       "needle-meter-demo"
@@ -3271,7 +3326,13 @@
       "block-timeline",
       "block-waveform-player",
       "pad-demo",
+      "pad-svelte-demo",
+      "pad-vue-demo",
+      "pad-web-demo",
       "sequencer",
+      "sequencer-svelte-demo",
+      "sequencer-vue-demo",
+      "sequencer-web-demo",
       "spectrum-analyzer-demo",
       "use-device-loop",
       "use-master-bus",

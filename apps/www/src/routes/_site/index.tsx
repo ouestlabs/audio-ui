@@ -13,7 +13,7 @@ import { siteConfig } from "@/lib/config";
 import { PRIMITIVE_PAGES } from "@/lib/docs/content/framework-paths";
 import { getHomeIndex } from "@/lib/docs/content/spaces";
 import { buildPageMetadata, buildSoftwareJsonLd } from "@/lib/seo/seo";
-import BlockAudioEditor from "@/registry-audio/bases/base/components/audio-editor/block-audio-editor";
+import BlockAudioEditor from "@/registry-audio/bases/base/components/audio-editor/react/block-audio-editor";
 
 const PACKAGES = ["core", "engine", "gl", "icons"];
 

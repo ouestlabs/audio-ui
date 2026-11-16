@@ -13,7 +13,7 @@ import { Meter } from "@/components/audio-ui/meter";
 
 `@/components` is the `components` alias in the project's `components.json`: use the alias it declares. The CLI prints every file it writes; if a project installed components earlier, they may sit in another folder, so import from the path it printed. Components the one you add depends on (a block's knob, a plot's knob) land in the same folder. Hooks go to `hooks/`, libs to `lib/`, blocks to `components/examples/`.
 
-Without the styled component, the headless primitive installs from the same registry, one item per framework (`@audio-ui/knob-react`, `knob-vue`, `knob-svelte`, `knob-web`): `npx shadcn@latest add @audio-ui/knob-react` copies it to `components/audio-ui/knob/react.tsx`, and `import { Knob } from "@/components/audio-ui/knob/react"` gives its parts (`Knob.Root`, `Knob.Thumb`…). Its page: `https://www.audio-ui.dev/docs/components/base/knob#headless-primitive`.
+Without the styled component, the headless primitive installs from the same registry, one item per framework (`@audio-ui/knob-react`, `knob-vue`, `knob-svelte`, `knob-web`): `npx shadcn@latest add @audio-ui/knob-react` copies it to `components/audio-ui/knob/react.tsx`, and `import { Knob } from "@/components/audio-ui/knob/react"` gives its parts (`Knob.Root`, `Knob.Thumb`…). Its page: `https://www.audio-ui.dev/docs/components/base/knob#usage`.
 
 ## Elements
 
@@ -204,6 +204,7 @@ What makes the sound, on the Web Audio API: install each on its own, to `hooks/`
 | `use-polyphony` | `usePolyphony` from `@/hooks/use-polyphony`, `createPolyphony` from `@/lib/polyphony` | Chords on an instrument device whose engine plays one voice: `usePolyphony({ create: createPolySynthEngine, destination, state })` returns `noteOn(note, id)` and `noteOff(id)`, a note past the last voice taking the one held longest; `createPolyphony(engines)` for notes scheduled on engines of your own |
 | `envelope-ramp` | `scheduleEnvelopeRamp`, `sliceEnvelope` from `@/lib/envelope-ramp` | An envelope's points as a gain ramp on any `AudioParam` |
 | `drum-synthesis` | `triggerKick`, `triggerSnare`, `triggerHihat` from `@/lib/drum-synthesis` | Drum hits from oscillators and noise, no samples: `triggerKick(ctx, destination, time, { tune, decay })`, the same for `triggerSnare` and `triggerHihat`, with `time` on the audio clock |
+| `step-player` | `createStepPlayer` from `@/lib/step-player` | Counts a pattern's steps at a tempo on a timer and calls `onStep(step)`: `start()`, `stop()`, `isPlaying()`, and `source`, the playing step (`-1` stopped) as a live source for a `Sequencer`. Not sample accurate: for a transport that keeps time use `use-transport-clock` |
 | `use-midi-input` | `useMidiInput` from `@/hooks/use-midi-input` | The page's MIDI keyboard: note on with velocity, note off, pitch bend, `activeNotes` for a piano. Connect from a click |
 | `use-computer-keyboard` | `useComputerKeyboard` from `@/hooks/use-computer-keyboard` | The computer's keys as a keyboard of notes while `enabled`: the middle row from A plays white keys from middle C, the row above black ones (by `code`, so any layout); Z/X octave, C/V velocity; fields and Cmd/Ctrl/Alt keys are left alone. |
 | `use-microphone` | `useMicrophone` from `@/hooks/use-microphone` | The microphone as an `AnalyserNode`, raw, never played out. Start it from a click |

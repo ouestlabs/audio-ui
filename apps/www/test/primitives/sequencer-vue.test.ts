@@ -1,5 +1,5 @@
 import { createApp, h, nextTick } from "vue";
-import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/vue.ts";
+import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/vue/index.ts";
 import { range } from "./helpers.ts";
 import { sequencerSuite } from "./sequencer-suite.ts";
 
