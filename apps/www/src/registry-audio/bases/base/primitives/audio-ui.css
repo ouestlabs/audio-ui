@@ -1,6 +1,6 @@
 /*
- * The anatomy of the knob, the fader and the XY pad, drawn: flat and square, one thin
- * stroke, the foreground as the accent. It reads the tokens of the UI SDK
+ * The anatomy of the primitives, drawn: flat and square, one thin stroke,
+ * the foreground as the accent. It reads the tokens of the UI SDK
  * stylesheet (`--ui-*`) when the page has it, and falls back to its own.
  * Every rule targets a `data-slot` or a state attribute, in the `ui-sdk`
  * layer, so a class or a rule of yours outside the layer wins.
@@ -33,6 +33,14 @@
       --ui-ring,
       light-dark(oklch(0.913 0 0), oklch(0.333 0 0))
     );
+    --audio-ui-destructive: var(
+      --ui-destructive,
+      light-dark(oklch(0.577 0.245 27.325), oklch(0.704 0.191 22.216))
+    );
+    --audio-ui-warning: light-dark(
+      oklch(0.769 0.188 70.08),
+      oklch(0.828 0.189 84.429)
+    );
     color-scheme: light dark;
   }
 
@@ -46,7 +54,8 @@
   :is(
     [data-slot="knob-label"],
     [data-slot="fader-label"],
-    [data-slot="xypad-label"]
+    [data-slot="xypad-label"],
+    [data-slot="meter-label"]
   ) {
     font-size: 0.75rem;
     font-weight: 500;
@@ -55,7 +64,8 @@
   :is(
     [data-slot="knob-value"],
     [data-slot="fader-value"],
-    [data-slot="xypad-value"]
+    [data-slot="xypad-value"],
+    [data-slot="meter-value"]
   ) {
     font-size: 0.75rem;
     font-variant-numeric: tabular-nums;
@@ -254,6 +264,97 @@
 
     &:has(:focus-visible) {
       outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  /* Meter */
+
+  [data-slot="meter"] {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: flex-start;
+
+    &[data-orientation="horizontal"] {
+      flex-direction: column;
+      align-items: stretch;
+    }
+  }
+
+  [data-slot="meter-channel"] {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+
+    &[data-orientation="horizontal"] {
+      flex-direction: row;
+    }
+  }
+
+  [data-slot="meter-track"] {
+    position: relative;
+    display: block;
+    width: 0.5rem;
+    height: 10rem;
+    overflow: hidden;
+    background: var(--audio-ui-muted);
+
+    &:has([data-orientation="horizontal"]) {
+      width: 10rem;
+      height: 0.5rem;
+    }
+  }
+
+  /* What clipped stays marked at the end of the track until a click on the meter. */
+  [data-slot="meter-channel"][data-clipped] [data-slot="meter-track"] {
+    box-shadow: inset 0 2px var(--audio-ui-destructive);
+
+    &:has([data-orientation="horizontal"]) {
+      box-shadow: inset -2px 0 var(--audio-ui-destructive);
+    }
+  }
+
+  [data-slot="meter-indicator"] {
+    position: absolute;
+    bottom: 0;
+    background: var(--audio-ui-foreground);
+
+    &[data-warning] {
+      background: var(--audio-ui-warning);
+    }
+
+    &[data-clipping] {
+      background: var(--audio-ui-destructive);
+    }
+  }
+
+  [data-slot="meter-peak"] {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 1px;
+    background: var(--audio-ui-foreground);
+
+    &[data-orientation="horizontal"] {
+      top: 0;
+      width: 1px;
+      height: 100%;
+    }
+
+    &[data-clipping] {
+      background: var(--audio-ui-destructive);
+    }
+  }
+
+  [data-slot="meter-mark"] {
+    width: 0.25rem;
+    height: 1px;
+    background: var(--audio-ui-input);
+
+    &[data-orientation="horizontal"] {
+      width: 1px;
+      height: 0.25rem;
     }
   }
 }

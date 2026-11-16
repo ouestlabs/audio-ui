@@ -226,6 +226,16 @@ export function meterSuite(
       m.unmount();
     });
 
+    test("each channel is named by its own label", async () => {
+      const m = await render(mount, { value: [-6, -12] }, { labels: true });
+      const ids = m.labels.map((label) => label.id);
+      expect(new Set(ids).size).toBe(2);
+      expect(
+        m.channels.map((channel) => channel.getAttribute("aria-labelledby"))
+      ).toEqual(ids);
+      m.unmount();
+    });
+
     test("a live source is painted to the DOM, frame by frame", async () => {
       const source = createSource<MeterFrame>({ levels: [-30], peaks: [-30] });
       const m = await render(mount, { max: 0, min: -60, source });
