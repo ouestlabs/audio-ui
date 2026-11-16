@@ -46,7 +46,6 @@ Both packages are published to npm. Every change here is a change to someone's a
    (cd packages/core && bunx tsc --noEmit && bun test)
    (cd packages/engine && bunx tsc --noEmit && bun test)
    (cd packages/react && bunx tsc --noEmit && bun test)
-   (cd packages/elements && bunx tsc --noEmit && bun test && bun run registers)
    ```
 8. **Look at it.** Run `bun run dev`, open the component's docs page on `localhost:4000`, and drive it with the pointer, the wheel and the keyboard.
 

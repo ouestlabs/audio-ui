@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "@audio-ui/core": "*",
-    "@audio-ui/elements": "*",
     "@audio-ui/engine": "*",
     "@audio-ui/gl": "*",
     "@audio-ui/icons": "*",

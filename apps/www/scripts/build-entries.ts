@@ -155,8 +155,6 @@ export interface PackageModule {
   from: string;
   /** The package it is in, what a project installs. */
   package: string;
-  /** Whether it holds types only, such as `@audio-ui/elements/vue`: a project imports it with `import type {}`. */
-  typesOnly: boolean;
   /** The registry's hooks and libs that import it: the ones with a page of their own. */
   usedBy: string[];
 }
@@ -384,7 +382,6 @@ export async function buildPackageModules(): Promise<PackageModule[]> {
             from,
             package: name,
             audiojs: await audioJsOf(entry),
-            typesOnly: target.import === undefined,
             usedBy: itemFiles
               .filter((item) =>
                 item.sources.some((text) => text.includes(`from "${from}"`))

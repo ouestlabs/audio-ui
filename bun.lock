@@ -135,7 +135,6 @@
       "version": "0.0.0",
       "dependencies": {
         "@audio-ui/core": "*",
-        "@audio-ui/elements": "*",
         "@audio-ui/engine": "*",
         "@audio-ui/gl": "*",
         "@audio-ui/icons": "*",
@@ -260,29 +259,6 @@
         "tsup": "^8.5.0",
         "typescript": "^7.0.2",
       },
-    },
-    "packages/elements": {
-      "name": "@audio-ui/elements",
-      "version": "0.5.1",
-      "dependencies": {
-        "@audio-ui/core": "^0.29.1",
-      },
-      "devDependencies": {
-        "@happy-dom/global-registrator": "^21.0.4",
-        "@types/bun": "1.4.2",
-        "svelte": "^5.57.3",
-        "tsup": "^8.5.0",
-        "typescript": "^7.0.2",
-        "vue": "^3.5.45",
-      },
-      "peerDependencies": {
-        "svelte": ">=5",
-        "vue": ">=3.5",
-      },
-      "optionalPeers": [
-        "svelte",
-        "vue",
-      ],
     },
     "packages/engine": {
       "name": "@audio-ui/engine",
@@ -545,8 +521,6 @@
     "@antfu/install-pkg": ["@antfu/install-pkg@2.1.0", "", { "dependencies": { "package-manager-detector": "^1.8.0", "tinyexec": "^1.3.1" } }, "sha512-sdg9NxU3zR4Mnawfbc/x6GB5Wf17WYud5qOuEuxXjaKpYpMkISSJEjItGebXJ2bQ4DIcly4NYH23mtkGJjvKUw=="],
 
     "@audio-ui/core": ["@audio-ui/core@workspace:packages/core"],
-
-    "@audio-ui/elements": ["@audio-ui/elements@workspace:packages/elements"],
 
     "@audio-ui/engine": ["@audio-ui/engine@workspace:packages/engine"],
 

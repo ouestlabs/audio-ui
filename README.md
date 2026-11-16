@@ -4,7 +4,7 @@
 
 Accessible, composable Audio UI components for the web, in React, Vue, Svelte or plain HTML: knobs, faders, meters, pads, waveforms, timelines, piano rolls and the synths, mixers and players made from them.
 
-- **Primitives on npm.** Headless, accessible parts with the behavior built in and the styling left to you: [`@audio-ui/react`](packages/react) for React, and [`@audio-ui/elements`](packages/elements) as custom elements for any framework, typed for Vue and Svelte templates, both on the framework-agnostic [`@audio-ui/core`](packages/core).
+- **Primitives on npm.** Headless, accessible parts with the behavior built in and the styling left to you: [`@audio-ui/react`](packages/react) for React, on the framework-agnostic [`@audio-ui/core`](packages/core).
 - **Components you own.** A shadcn registry of styled components, blocks and hooks built on the primitives, copied into your project with the CLI.
 - **Web Audio API first.** Meters, spectrum analyzers and tuners read real signals from `AnalyserNode`s, and live values move without re-rendering React.
 
@@ -44,7 +44,6 @@ bun run dev    # the docs site on http://localhost:4000
 | `apps/video` | Remotion videos of the real components |
 | `packages/core` | `@audio-ui/core`, framework-agnostic logic |
 | `packages/react` | `@audio-ui/react`, the headless primitives |
-| `packages/elements` | `@audio-ui/elements`, every primitive as Web Components |
 | `skills/` | The agent skills we ship to people using the library: `audio-ui`, `web-audio`, `design`, `core` |
 
 Before opening a pull request:

@@ -190,7 +190,6 @@
     "from": "@audio-ui/core",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "arrangement-engine",
       "device-signal",
@@ -358,7 +357,6 @@
     "from": "@audio-ui/core/envelope",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "arrangement",
       "dawproject",
@@ -436,7 +434,6 @@
     "from": "@audio-ui/core/fader",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -590,7 +587,6 @@
     "from": "@audio-ui/core/knob",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -699,7 +695,6 @@
     "from": "@audio-ui/core/meter",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "device-signal",
       "use-audio-levels"
@@ -766,7 +761,6 @@
     "from": "@audio-ui/core/pad",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -840,7 +834,6 @@
     "from": "@audio-ui/core/piano",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -1139,7 +1132,6 @@
     "from": "@audio-ui/core/piano-roll",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "arrangement",
       "dawproject",
@@ -1245,7 +1237,6 @@
     "from": "@audio-ui/core/plot",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -1359,7 +1350,6 @@
     "from": "@audio-ui/core/sequencer",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -1778,7 +1768,6 @@
     "from": "@audio-ui/core/timeline",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "arrangement",
       "sound-operations",
@@ -2052,7 +2041,6 @@
     "from": "@audio-ui/core/waveform",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -2126,7 +2114,6 @@
     "from": "@audio-ui/core/xypad",
     "package": "@audio-ui/core",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -2475,7 +2462,6 @@
       "@audio/stft",
       "@audio/weighting-k"
     ],
-    "typesOnly": false,
     "usedBy": [
       "arrangement",
       "audio-export",
@@ -2720,7 +2706,6 @@
       "@audio/measure-response",
       "@audio/synth-noise"
     ],
-    "typesOnly": false,
     "usedBy": [
       "arrangement",
       "arrangement-engine",
@@ -2907,7 +2892,6 @@
       "@audio/reverb-schroeder",
       "@audio/reverb-spring"
     ],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -3149,7 +3133,6 @@
       "@audio/shift",
       "@audio/stretch"
     ],
-    "typesOnly": false,
     "usedBy": [
       "audio-export",
       "sound-operations"
@@ -3256,7 +3239,6 @@
     "from": "@audio-ui/engine/format",
     "package": "@audio-ui/engine",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "sound-operations"
     ]
@@ -3284,7 +3266,6 @@
     "audiojs": [
       "@audio/denoise"
     ],
-    "typesOnly": false,
     "usedBy": [
       "sound-operations"
     ]
@@ -3455,7 +3436,6 @@
       "@audio/spatial-binaural",
       "@audio/spatial-microshift"
     ],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -3499,7 +3479,6 @@
     "from": "@audio-ui/engine/midi",
     "package": "@audio-ui/engine",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "use-midi-input"
     ]
@@ -3568,7 +3547,6 @@
       "@audio/mir-key",
       "@audio/note"
     ],
-    "typesOnly": false,
     "usedBy": [
       "arrangement",
       "use-pitch",
@@ -3862,7 +3840,6 @@
     "from": "@audio-ui/engine/playback",
     "package": "@audio-ui/engine",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "arrangement",
       "arrangement-engine",
@@ -4159,7 +4136,6 @@
     "from": "@audio-ui/engine/time",
     "package": "@audio-ui/engine",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "arrangement",
       "arrangement-engine",
@@ -4184,7 +4160,6 @@
     "from": "@audio-ui/engine/worklet",
     "package": "@audio-ui/engine",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "clip-player",
       "recording"
@@ -4351,7 +4326,6 @@
     "from": "@audio-ui/gl/lane",
     "package": "@audio-ui/gl",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -4450,7 +4424,6 @@
     "from": "@audio-ui/gl/spectrogram",
     "package": "@audio-ui/gl",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": []
   },
   {
@@ -4549,7 +4522,6 @@
     "from": "@audio-ui/gl/waveform",
     "package": "@audio-ui/gl",
     "audiojs": [],
-    "typesOnly": false,
     "usedBy": [
       "use-loudest"
     ]

@@ -27,7 +27,6 @@ audio-ui/
 │   ├── engine/     # @audio-ui/engine, published: the audio logic (devices, time, analysis, MIDI, scales, playback), over core and audio.js
 │   ├── gl/         # @audio-ui/gl, published: audio drawn on the GPU (a lane of clips as waveforms or a spectrogram), over gl-waveform and gl-spectrogram
 │   ├── react/      # @audio-ui/react, published (headless primitives)
-│   ├── elements/   # @audio-ui/elements, published: the primitives as custom elements, over core
 │   └── icons/      # @audio-ui/icons, published: audio glyphs (one thin stroke on a 24 grid, in four weights)
 └── skills/         # The agent skills we ship to library users: audio-ui, web-audio, design, core (npx skills add ouestlabs/audio-ui)
 ```
@@ -163,8 +162,7 @@ The registry component's page links to the primitive's page on the UI SDK (`(reg
 ### Published packages
 
 - Relative imports carry the `.ts` extension (`./x.ts`, compiled with `rewriteRelativeImportExtensions`). A `.js` specifier breaks the www Turbopack build.
-- Every user-visible change to `packages/core`, `packages/engine`, `packages/react` or `packages/elements` needs a changeset (`bun run changeset`). Never edit `package.json` versions.
-- In `packages/elements`, `bun run registers` fails when an entry, imported for its side effect, registers no element.
+- Every user-visible change to `packages/core`, `packages/engine` or `packages/react` needs a changeset (`bun run changeset`). Never edit `package.json` versions.
 
 ### Writing (docs, changesets, comments, commit messages, UI copy)
 
@@ -178,13 +176,12 @@ The registry component's page links to the primitive's page on the UI SDK (`(reg
 2. After a registry change: `bun run registry:build` from `apps/www/`, **after** the last lint fix, so the generated JSON matches the formatted source
 3. The checks CI runs on every PR:
    ```sh
-   bunx biome ci packages/core packages/engine packages/gl packages/react packages/elements
+   bunx biome ci packages/core packages/engine packages/gl packages/react
    bun run build:pkg
    (cd packages/core && bunx tsc --noEmit && bun test)
    (cd packages/engine && bunx tsc --noEmit && bun test)
    (cd packages/gl && bunx tsc --noEmit && bun test)
    (cd packages/react && bunx tsc --noEmit && bun test)
-   (cd packages/elements && bunx tsc --noEmit && bun test && bun run registers)
    ```
    For `apps/www`: `bun run typecheck` and `bun test`.
    For the primitives written on the UI SDK kernel (`packages/primitives`): `bun test` there, and `bun run test:primitives` in `apps/www`, which drives the same scenarios against the adapters of React, Vue, Svelte and custom elements in `registry-audio/bases/base/primitives/`. It runs apart from `bun test` because Svelte needs its browser build.
