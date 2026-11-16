@@ -11,6 +11,7 @@ import { Meter } from "@/registry-audio/bases/base/primitives/meter/react.tsx";
 import { Meter as VueMeter } from "@/registry-audio/bases/base/primitives/meter/vue.ts";
 import { Pad } from "@/registry-audio/bases/base/primitives/pad/react.tsx";
 import { Piano } from "@/registry-audio/bases/base/primitives/piano/react.tsx";
+import { PianoRoll } from "@/registry-audio/bases/base/primitives/piano-roll/react.tsx";
 import { Plot } from "@/registry-audio/bases/base/primitives/plot/react.tsx";
 import { Sequencer } from "@/registry-audio/bases/base/primitives/sequencer/react.tsx";
 import { Timeline } from "@/registry-audio/bases/base/primitives/timeline/react.tsx";
@@ -290,5 +291,29 @@ describe("server rendering of the fader and the XY pad", () => {
     expect(html).toContain('data-clip="a"');
     expect(html).toContain("--timeline-length:20");
     expect(html).toContain('aria-label="Position"');
+  });
+
+  test("the piano roll writes its rows and notes, placed and named, in React", () => {
+    const html = renderToString(
+      <PianoRoll.Root
+        defaultValue={[{ id: 1, length: 20, pitch: 61, start: 10 }]}
+        duration={100}
+        maxPitch={63}
+        minPitch={60}
+      >
+        <PianoRoll.Grid>
+          <PianoRoll.Rows>
+            {(pitch) => <PianoRoll.Row pitch={pitch} />}
+          </PianoRoll.Rows>
+          <PianoRoll.Notes>
+            {(note) => <PianoRoll.Note note={note} />}
+          </PianoRoll.Notes>
+        </PianoRoll.Grid>
+      </PianoRoll.Root>
+    );
+    expect(html).toContain("--piano-roll-rows:4");
+    expect(html.match(/data-pitch=/g)).toHaveLength(4);
+    expect(html).toContain('aria-label="C#4, 10 to 30"');
+    expect(html).toContain("--timeline-length:20");
   });
 });

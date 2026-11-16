@@ -302,4 +302,35 @@ export const primitives: RegistryItem[] = [
     ],
     "An arrangement timeline: a position and a zoom, a viewport that scrolls and zooms around the pointer, a ruler, a navigator, tracks with resizable heights, lanes, marks, ranges such as loops, and clips that move, trim and fade, each with a native input for the keyboard."
   ),
+  ...primitiveItems(
+    "piano-roll",
+    [
+      {
+        dependencies: ["@ui-sdk/react"],
+        files: ["react.tsx"],
+        name: "react",
+      },
+      {
+        dependencies: ["@ui-sdk/vue", "vue"],
+        files: ["vue.ts"],
+        name: "vue",
+      },
+      {
+        dependencies: ["@ui-sdk/svelte", "svelte"],
+        files: [
+          "svelte/Note.svelte",
+          "svelte/NoteHandle.svelte",
+          "svelte/Notes.svelte",
+          "svelte/Rows.svelte",
+          "svelte/StretchHandle.svelte",
+          "svelte/Velocity.svelte",
+          "svelte/index.ts",
+          "svelte/parts.ts",
+        ],
+        name: "svelte",
+      },
+      { dependencies: ["@ui-sdk/web"], files: ["web.ts"], name: "web" },
+    ],
+    "A piano roll for editing MIDI notes: a grid you draw, move, resize and select notes on, with rows by pitch and scale, velocity or chance bars, a marquee, and a native input on each bar for the keyboard. It sits on a timeline's duration, grid, zoom and playback position, which you give it."
+  ),
 ];

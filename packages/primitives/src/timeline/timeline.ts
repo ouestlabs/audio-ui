@@ -369,12 +369,6 @@ function layoutScale(element: HTMLElement) {
   return drawn > 0 && laid > 0 ? drawn / laid : 1;
 }
 
-/** The first lane in the document. */
-const originLane = (lanes: Set<HTMLElement>) =>
-  [...lanes].sort((a, b) =>
-    a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING ? -1 : 1
-  )[0] ?? null;
-
 const PRESS_SLOP_PX = 3;
 
 const inField = (target: EventTarget | null) =>
@@ -1089,7 +1083,7 @@ export const timeline: TimelinePrimitive = definePrimitive({
           let previous: { scrollStart: number; zoom: number } | null = null;
 
           const origin = () => {
-            const lane = originLane(api.lanes);
+            const lane = el.querySelector<HTMLElement>("[data-timeline-lane]");
             if (!lane) {
               return 0;
             }
@@ -1106,8 +1100,9 @@ export const timeline: TimelinePrimitive = definePrimitive({
               return view.zoom;
             }
             const width =
-              (originLane(api.lanes)?.getBoundingClientRect().width ?? 0) /
-              layoutScale(el);
+              (el
+                .querySelector<HTMLElement>("[data-timeline-lane]")
+                ?.getBoundingClientRect().width ?? 0) / layoutScale(el);
             return width / Math.max(duration, Number.MIN_VALUE);
           };
           const wheelOptions = () => ({

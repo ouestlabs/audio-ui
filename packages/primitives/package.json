@@ -39,6 +39,10 @@
       "types": "./dist/timeline/index.d.ts",
       "import": "./dist/timeline.js"
     },
+    "./piano-roll": {
+      "types": "./dist/piano-roll/index.d.ts",
+      "import": "./dist/piano-roll.js"
+    },
     "./waveform": {
       "types": "./dist/waveform/index.d.ts",
       "import": "./dist/waveform.js"
