@@ -681,7 +681,15 @@ export const pianoRoll: PianoRollPrimitive = definePrimitive({
         state: (state: PianoRollState) => publicOf(state),
       }),
       keys: slot({
-        attrs: (state: PianoRollState) => stateAttrs(state),
+        attrs: (state: PianoRollState) => ({
+          ...stateAttrs(state),
+          // A grid of one cell: the keyboard drawn inside takes the part's whole height and width.
+          style: css({
+            display: "grid",
+            "grid-template-columns": "minmax(0, 1fr)",
+            "grid-template-rows": "minmax(0, 1fr)",
+          }),
+        }),
         state: (state: PianoRollState, { api }: { api: PianoRollApi }) => ({
           ...publicOf(state),
           active: [...state.view.active],
