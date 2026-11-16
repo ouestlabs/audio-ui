@@ -1,9 +1,11 @@
 ---
 title: Waveform
-description: "Draws audio: a seekable waveform with regions and markers, a live waveform that scrolls with the signal, and a bar visualizer."
+description: "Draws audio: a seekable waveform with regions and markers, a live waveform that scrolls with the signal, and a bar visualizer. Headless in React, Vue, Svelte and the web, and styled for shadcn/ui in React."
 component: true
 base: base
 ---
+
+<ForFrameworks only="react">
 
 <ComponentPreview styleName="base-nova" name="waveform-region-demo" />
 
@@ -75,7 +77,7 @@ npm install @audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sd
 
 ## Anatomy
 
-It is built on the headless [Waveform](/docs/waveform-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
+It is built on the headless primitive that installs with it: its parts, and how they fit, are under [Headless primitive](#headless-primitive) below.
 
 ## Usage
 
@@ -234,7 +236,7 @@ The bars of a `BarVisualizer` are plain elements: restyle them with `.cn-bar-vis
 
 ## API reference
 
-The headless parts and their options are on [Waveform](/docs/waveform-ui-sdk).
+The headless parts and their options are on [Waveform](/docs/components/base/waveform#headless-primitive).
 
 ### Registry component
 
@@ -328,3 +330,229 @@ Every part accepts a `render` prop and `className` / `style` as functions of sta
 ### Player, wired to a real uploaded file
 
 <ComponentPreview styleName="base-nova" name="block-waveform-player" />
+
+</ForFrameworks>
+
+## Headless primitive
+
+The waveform's behavior is one description, `waveform` in `@audio-ui/primitives`, over the seek and region controllers of `@audio-ui/core`. It shows the shape of audio, from `peaks` known upfront or from a live `levels` signal, and follows a playback position that can be seeked. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive), the [fader](/docs/components/base/fader#headless-primitive), the [XY pad](/docs/components/base/xypad#headless-primitive), the [meter](/docs/components/base/meter#headless-primitive), the [envelope](/docs/components/base/envelope#headless-primitive), the [pad grid](/docs/components/base/pad#headless-primitive), the [piano](/docs/components/base/piano#headless-primitive), the [sequencer](/docs/components/base/sequencer#headless-primitive) and the [plot](/docs/components/base/plot#headless-primitive) are built the same way.
+
+### Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/waveform-react
+```
+
+One file, `components/audio-ui/waveform/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-vue.json
+```
+
+One file, `components/audio-ui/waveform/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-svelte.json
+```
+
+Ten files in `components/audio-ui/waveform/svelte/`: a component for the parts that draw, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/waveform-web.json
+```
+
+One file, `components/audio-ui/waveform/web.ts`. Import it once, and it registers the `audio-ui-waveform` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+### Usage
+
+A Root owns the position and what is shown. Everything else is a part you place in it:
+
+- **Canvas**: draws the shape on the device pixel grid, sharp at any density, and only when something changed.
+- **Bars** and **Bar**: the shape as a fixed number of elements, styled in plain CSS from `--waveform-level`.
+- **Control**: the seekable surface. A press jumps to the pointer and a drag scrubs. It holds the native `<input type="range">` that takes focus and the keys, and carries the accessible name.
+- **Playhead** and **Thumb**: follow the position through the `--waveform-position` CSS variable.
+- **Hover**: shown at the hovered point, with the text `format` returns.
+- **Marker**: a point of interest at a `value`.
+- **Region** and **RegionHandle**: a named stretch laid over the waveform, moved by its body and resized by its edges.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import { Waveform } from "@/components/audio-ui/waveform/react";
+
+export function Player({ peaks, time, onSeek }: { peaks: number[]; time: number; onSeek: (time: number) => void }) {
+  return (
+    <Waveform.Root duration={120} onValueChange={onSeek} peaks={peaks} value={time}>
+      <Waveform.Control aria-label="Position" className="relative h-16">
+        <Waveform.Canvas className="absolute inset-0 size-full text-muted-foreground" />
+        <Waveform.Playhead className="absolute inset-y-0 w-px bg-primary" />
+      </Waveform.Control>
+    </Waveform.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { Waveform } from "@/components/audio-ui/waveform/vue";
+
+defineProps<{ peaks: number[]; time: number }>();
+const emit = defineEmits<{ seek: [time: number] }>();
+</script>
+
+<template>
+  <Waveform.Root :duration="120" :peaks="peaks" :value="time" @value-change="(next: number) => emit('seek', next)">
+    <Waveform.Control aria-label="Position" class="relative h-16">
+      <Waveform.Canvas class="absolute inset-0 size-full text-muted-foreground" />
+      <Waveform.Playhead class="absolute inset-y-0 w-px bg-primary" />
+    </Waveform.Control>
+  </Waveform.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { Waveform } from "$lib/components/audio-ui/waveform/svelte";
+
+  let { peaks, time, onSeek }: { peaks: number[]; time: number; onSeek: (time: number) => void } = $props();
+</script>
+
+<Waveform.Root duration={120} onValueChange={onSeek} {peaks} value={time}>
+  <Waveform.Control aria-label="Position" class="relative h-16">
+    <Waveform.Canvas class="absolute inset-0 size-full text-muted-foreground" />
+    <Waveform.Playhead class="absolute inset-y-0 w-px bg-primary" />
+  </Waveform.Control>
+</Waveform.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-waveform duration="120" style="display: block; position: relative">
+  <audio-ui-waveform-control aria-label="Position" style="height: 4rem">
+    <audio-ui-waveform-canvas style="position: absolute; inset: 0"></audio-ui-waveform-canvas>
+    <audio-ui-waveform-playhead></audio-ui-waveform-playhead>
+  </audio-ui-waveform-control>
+</audio-ui-waveform>
+
+<script type="module">
+  import "./audio-ui/waveform/web.ts";
+
+  const waveform = document.querySelector("audio-ui-waveform");
+  waveform.peaks = peaks;
+  waveform.addEventListener("input", (event) => console.log(event.detail.value, event.detail.reason));
+</script>
+```
+
+In the web adapter, `peaks`, `levels` and `source` are properties, not attributes, and a Hover's `format` too. The canvas, the control's input, the bars and a region's edge inputs are made for you. Each part binds a microtask after it connects: read the element's state after that.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+### A live position and a live signal
+
+Give the Root a `source`, a live position in `duration` units in the shape of an external store: `getSnapshot()` returns it and `subscribe(listener)` is called on each tick. The `--waveform-position` variable, the Canvas and the input follow it straight in the DOM, with no render. `levels` is the same for a signal, such as a microphone or an analyser: each value is a level from 0 to 1, and while it is audible the Root carries `data-active`. `createSource` from `@audio-ui/core` makes either.
+
+### Interaction
+
+**Control**
+
+- A press seeks, a drag scrubs, and the end of the gesture commits.
+- Shift with a drag selects a stretch instead, reported to `onSelectionChange` and `onSelectionCommitted`. Without them a Shift drag is an ordinary seek.
+- The arrows move by `step`, Shift with an arrow and Page Up and Page Down by `largeStep`, Home and End go to the ends.
+- Nothing seeks while `disabled` or `loading`.
+
+**Regions**
+
+- Dragging a Region's body moves it, unless `movable` is false. Dragging a RegionHandle resizes that edge.
+- On a handle's input, the arrows and Page keys move the edge and Home and End send it to its limit.
+- A press on a region never reaches the Control underneath.
+
+### Options
+
+Set on the Root, as props (an attribute in kebab case in the web adapter).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `value`, `defaultValue` | `number` | `0` | The position, controlled or starting. |
+| `source` | `{ getSnapshot, subscribe }` | | A live position, followed with no render. It takes precedence over `value`. |
+| `duration` | `number` | `1` | The length of the audio, in the unit `value` is in. |
+| `peaks` | `number[]` or `{ min, max }[]` | | The shape, at any resolution: a level per slice, or the lowest and highest sample of each. |
+| `levels` | `{ getSnapshot, subscribe }` | | A live signal drawn instead of `peaks`. |
+| `range` | `[start, end]` | the whole audio | The stretch shown. The position, seeking, hover, regions and markers follow it. |
+| `step`, `largeStep` | `number` | a hundredth, a tenth of `duration` | The keys' steps. |
+| `loading` | `boolean` | `false` | The audio is still on its way. Seeking waits. |
+| `disabled` | `boolean` | `false` | Takes no gesture. |
+| `onValueChange`, `onValueCommitted` | `(value, details) => void` | | A seek, and its end. |
+| `onSelectionChange`, `onSelectionCommitted` | `(range, details) => void` | | A Shift drag. |
+| `onRegionChange`, `onRegionCommitted` | `(region, details) => void` | | A region moved or resized, with `details.region` and `details.edge`. |
+
+A Region takes `region` (its name), `value` or `defaultValue` (`[start, end]`), `minLength`, `movable` and `disabled`; a RegionHandle takes `edge` and the same `region`. The Canvas takes `variant`, `mode`, `barWidth`, `barGap`, `barRadius`, `gain`, `idle` and the rest of the painter's options, the Bars `count`, `gain`, `idle`, `minLevel` and `mirrored`. Colors come from `--waveform-color` and `--waveform-progress-color`.
+
+### What a change reports
+
+`details` carries:
+
+- `reason`: `"press"`, `"drag"`, `"keyboard"` or `"input-change"`.
+- `source`: `"mouse"`, `"touch"`, `"pen"`, `"keyboard"`, `"programmatic"` or `"agent"`.
+- `event` and `cancel()`: the DOM event behind it, and the refusal.
+- For a region, `region` (its name) and `edge` (`"start"`, `"end"` or `"both"`).
+
+In the web adapter, the seek is the `input` and `change` events, and the selection and the regions are `selectionchange`, `selectioncommit`, `regionchange` and `regioncommit`, each with a `detail` of the value and its reasons. `event.preventDefault()` refuses a change.
+
+### States to style from
+
+- `data-dragging` while a pointer scrubs or selects, `data-loading`, `data-disabled` on every part.
+- `data-active` on the Root while a live signal is audible, and `data-outside` while the position is outside the stretch shown.
+- `data-played` on the bars the position has passed, `data-index` on a bar, `data-region` and `data-edge` on a region and its handles.

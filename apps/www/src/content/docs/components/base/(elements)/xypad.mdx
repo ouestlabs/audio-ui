@@ -1,9 +1,11 @@
 ---
 title: XY Pad
-description: A two-dimensional control for two parameters at once, with pointer, wheel and keyboard input.
+description: A two-dimensional control for two parameters at once, with pointer, wheel and keyboard input. Headless in React, Vue, Svelte and the web, and styled for shadcn/ui in React.
 component: true
 base: base
 ---
+
+<ForFrameworks only="react">
 
 <ComponentPreview styleName="base-nova" name="xypad-live-value-demo" />
 
@@ -22,7 +24,7 @@ Controls two values at once, such as filter cutoff and resonance, pan and mix, o
 
 ## Anatomy
 
-It is built on the headless [XYPad](/docs/xypad-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
+It is built on the headless primitive that installs with it: its parts, and how they fit, are under [Headless primitive](#headless-primitive) below.
 
 ## Usage
 
@@ -89,7 +91,7 @@ Wheel and trackpad input over the pad moves the point by the scrolled distance: 
 
 ## API reference
 
-The headless parts and their options are on [XYPad](/docs/xypad-ui-sdk).
+The headless parts and their options are on [XYPad](/docs/components/base/xypad#headless-primitive).
 
 ### Registry component
 
@@ -143,3 +145,210 @@ An oscillator, a filter and an XY pad that plays them: drag the pad to sweep the
 Distortion, tone and detune on a synth, with the XY pad and knobs side by side.
 
 <ComponentPreview styleName="base-nova" name="block-wave-shaper" />
+
+</ForFrameworks>
+
+## Headless primitive
+
+The XY pad's behavior is one description, `xypad` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. Its value is a point, `{ x, y }`, two parameters moved at once. Each framework renders it with a thin adapter that you copy into your project and own. The press, the drag, the wheel, the keys, the grid and the reset are the same in all four, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive) and the [fader](/docs/components/base/fader#headless-primitive) are built the same way.
+
+### Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/xypad-react
+```
+
+One file, `components/audio-ui/xypad/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/xypad-vue.json
+```
+
+One file, `components/audio-ui/xypad/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/xypad-svelte.json
+```
+
+Four files in `components/audio-ui/xypad/svelte/`: the thumb, the value, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/xypad-web.json
+```
+
+One file, `components/audio-ui/xypad/web.ts`. Import it once, and it registers the `audio-ui-xypad` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+### Usage
+
+The parts are a Root that owns the point, a Control that takes the pointer and the wheel, a Thumb that marks the point and holds the two inputs, a Value for the text, and an optional Label. The Thumb is placed for you, from the left edge and the top edge of the Control, and the Root carries the same place as two CSS variables, `--xy-pad-x` and `--xy-pad-y`, for a crosshair or a guide. Give the Control its size.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import { useState } from "react";
+import { XYPad } from "@/components/audio-ui/xypad/react";
+
+export function Filter() {
+  const [point, setPoint] = useState({ x: 25, y: 75 });
+  return (
+    <XYPad.Root onValueChange={setPoint} value={point}>
+      <XYPad.Control className="relative size-40 rounded-md bg-muted">
+        <XYPad.Thumb aria-label="Cutoff and resonance" className="absolute size-3 rounded-full bg-primary" />
+      </XYPad.Control>
+      <XYPad.Value />
+    </XYPad.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { XYPad } from "@/components/audio-ui/xypad/vue";
+
+const point = ref({ x: 25, y: 75 });
+</script>
+
+<template>
+  <XYPad.Root :value="point" @value-change="(next) => (point = next)">
+    <XYPad.Control class="relative size-40 rounded-md bg-muted">
+      <XYPad.Thumb aria-label="Cutoff and resonance" class="absolute size-3 rounded-full bg-primary" />
+    </XYPad.Control>
+    <XYPad.Value />
+  </XYPad.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { XYPad } from "$lib/components/audio-ui/xypad/svelte";
+
+  let point = $state({ x: 25, y: 75 });
+</script>
+
+<XYPad.Root value={point} onValueChange={(next) => (point = next)}>
+  <XYPad.Control class="relative size-40 rounded-md bg-muted">
+    <XYPad.Thumb aria-label="Cutoff and resonance" class="absolute size-3 rounded-full bg-primary" />
+  </XYPad.Control>
+  <XYPad.Value />
+</XYPad.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-xypad value='{"x":25,"y":75}'>
+  <audio-ui-xypad-control>
+    <audio-ui-xypad-thumb aria-label="Cutoff and resonance"></audio-ui-xypad-thumb>
+  </audio-ui-xypad-control>
+  <audio-ui-xypad-value></audio-ui-xypad-value>
+</audio-ui-xypad>
+
+<script type="module">
+  import "./audio-ui/xypad/web.ts";
+
+  document.querySelector("audio-ui-xypad").addEventListener("input", (event) => {
+    console.log(event.detail.value, event.detail.reason, event.detail.source);
+  });
+</script>
+```
+
+The point is JSON in an attribute. Each part binds a microtask after it connects, all together: read the element's state after that, not in the line that wrote the markup.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+### Two inputs, one name
+
+The Thumb holds a native `<input type="range">` for each axis. Both carry the name, which is the Thumb's `aria-label` followed by "X" or "Y" (`getAriaLabel(axis)` on the Thumb says it in your own words), and the form names `<name>.x` and `<name>.y`. Only the X input is in the tab order, and the arrow keys move both axes from it.
+
+### Interaction
+
+- A press moves the point under the pointer, and a drag follows it.
+- Arrows move one step on their axis, Shift ten. Page Up and Page Down move y by ten steps, Home and End go to the ends of x.
+- A double click, an Alt with a press, or Delete returns to `defaultValue`.
+- The mouse wheel and the trackpad move the point.
+- A disabled pad takes none of these.
+
+### Options
+
+Set on the Root, as props (an attribute in kebab case in the web adapter).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `value`, `defaultValue` | `{ x, y }` | the center | The controlled point, or the starting one. `defaultValue` is also where a reset returns. |
+| `minX`, `maxX`, `minY`, `maxY` | `number` | `0`, `100` | The range of each axis. |
+| `stepX`, `stepY` | `number` | `1` | The grid each axis snaps to. |
+| `format`, `locale` | `Intl.NumberFormat` options, a locale | | How each axis is written, for the Value and the inputs' `aria-valuetext`. |
+| `disabled` | `boolean` | `false` | Takes no key, wheel or press. |
+| `name` | `string` | | The form field's name. |
+| `onValueChange` | `(point, details) => void` | | Every change, which `details.cancel()` refuses. |
+| `onValueCommitted` | `(point, details) => void` | | The end of a gesture. |
+
+The Value shows both axes as one text, with the separator of the locale. Its content can read `formatted.x`, `formatted.y` and `value` from the state.
+
+### What a change reports
+
+`details` carries what moved the point and how:
+
+- `reason`: `"press"`, `"drag"`, `"keyboard"`, `"wheel"`, `"input-change"` (a typed value) or `"reset"`.
+- `source`: `"mouse"`, `"touch"`, `"pen"`, `"keyboard"`, `"programmatic"` or `"agent"`.
+- `event`: the DOM event behind it, when there is one.
+- `cancel()`: refuses the change. A controlled pad keeps the point you give it.
+
+In the web adapter, `onValueChange` is an `input` event and `onValueCommitted` a `change` event, both with `detail: { value, reason, source }`, where `value` is the point, and `event.preventDefault()` refuses a change.
+
+### For an agent
+
+The pad declares one action, `setValue(x, y)`, and the name on its Thumb is what an agent finds it by. The bridge of the framework you use (`createAgent` in `@ui-sdk/<framework>/agent`) sets the point with the source `"agent"`. Each axis is a change of its own, so `onValueChange` hears two, and an app can refuse either.

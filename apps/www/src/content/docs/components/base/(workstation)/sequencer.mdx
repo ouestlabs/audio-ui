@@ -1,9 +1,11 @@
 ---
 title: Sequencer
-description: "A step grid: press a step, or drag across several, to draw a pattern."
+description: "A step grid: press a step, or drag across several, to draw a pattern. Headless in React, Vue, Svelte and the web, and styled for shadcn/ui in React."
 component: true
 base: base
 ---
+
+<ForFrameworks only="react">
 
 <ComponentPreview styleName="base-nova" name="sequencer-demo" />
 
@@ -13,7 +15,7 @@ base: base
 
 ## Anatomy
 
-It is built on the headless [Sequencer](/docs/sequencer-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
+It is built on the headless primitive that installs with it: its parts, and how they fit, are under [Headless primitive](#headless-primitive) below.
 
 ## Usage
 
@@ -47,7 +49,7 @@ The steps share one tab stop, and each is a toggle button (`aria-pressed`) named
 
 ## API reference
 
-The headless parts and their options are on [Sequencer](/docs/sequencer-ui-sdk).
+The headless parts and their options are on [Sequencer](/docs/components/base/sequencer#headless-primitive).
 
 ### Registry component
 
@@ -62,3 +64,245 @@ The headless parts and their options are on [Sequencer](/docs/sequencer-ui-sdk).
 <TypeRow name={"renderCell"} type={"(row: number, step: number) => ReactNode"}>What a step shows inside it, such as how many times it repeats.</TypeRow>
 <TypeRow name={"renderRowLabel"} type={"(row: number) => ReactNode"}>What sits beside a row in place of its written name, such as a button that sounds it; the row keeps its name for assistive technology.</TypeRow>
 </TypeTable>
+
+</ForFrameworks>
+
+## Headless primitive
+
+The sequencer's behavior is one description, `sequencer` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. It is a grid of steps to switch on and off, one row for each sound, as in a drum machine, with a velocity bar under each step. It holds two values, the pattern and the velocities. Each framework renders it with a thin adapter that you copy into your project and own, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#headless-primitive), the [fader](/docs/components/base/fader#headless-primitive), the [XY pad](/docs/components/base/xypad#headless-primitive), the [meter](/docs/components/base/meter#headless-primitive) and the [envelope](/docs/components/base/envelope#headless-primitive) are built the same way.
+
+### Installation
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/sequencer-react
+```
+
+One file, `components/audio-ui/sequencer/react.tsx`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-vue.json
+```
+
+One file, `components/audio-ui/sequencer/vue.ts`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-svelte.json
+```
+
+Four files in `components/audio-ui/sequencer/svelte/`: the cell, the velocity, `parts.ts` and `index.ts`. `shadcn-svelte` reads your `$lib` alias from `tsconfig.json`: see the [knob's installation](/docs/components/base/knob#headless-primitive) if your SvelteKit project has none.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/sequencer-web.json
+```
+
+One file, `components/audio-ui/sequencer/web.ts`. Import it once, and it registers the `audio-ui-sequencer` tags.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+
+### Usage
+
+A Root groups the rows. A Row is one sound, a Cell one of its steps, a `<button>` pressed when the step is on, and a Velocity a bar under a step. You write a Row for each row and a Cell for each step, with their `row` and `step`: the Root's content can read the state, `{ rows, steps }`, so the grid follows the pattern. That is a function in React, the default slot in Vue and a snippet in Svelte.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import { Sequencer } from "@/components/audio-ui/sequencer/react";
+
+const KIT = ["Kick", "Snare", "Hat"];
+
+export function Beat({ pattern, onChange }: { pattern: boolean[][]; onChange: (pattern: boolean[][]) => void }) {
+  return (
+    <Sequencer.Root onValueChange={onChange} value={pattern}>
+      {({ rows, steps }) =>
+        Array.from({ length: rows }, (_, row) => (
+          <Sequencer.Row aria-label={KIT[row]} className="flex gap-1" index={row} key={row}>
+            {Array.from({ length: steps }, (_, step) => (
+              <Sequencer.Cell
+                aria-label={`${KIT[row]}, step ${step + 1}`}
+                className="size-8 rounded bg-muted data-on:bg-primary data-current:ring-2"
+                key={step}
+                row={row}
+                step={step}
+              />
+            ))}
+          </Sequencer.Row>
+        ))
+      }
+    </Sequencer.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { Sequencer } from "@/components/audio-ui/sequencer/vue";
+
+const kit = ["Kick", "Snare", "Hat"];
+defineProps<{ pattern: boolean[][] }>();
+const emit = defineEmits<{ change: [pattern: boolean[][]] }>();
+</script>
+
+<template>
+  <Sequencer.Root :value="pattern" @value-change="(next) => emit('change', next)">
+    <template #default="{ state }">
+      <Sequencer.Row v-for="row in state.rows" :key="row" :aria-label="kit[row - 1]" :index="row - 1" class="flex gap-1">
+        <Sequencer.Cell
+          v-for="step in state.steps"
+          :key="step"
+          :aria-label="`${kit[row - 1]}, step ${step}`"
+          :row="row - 1"
+          :step="step - 1"
+          class="size-8 rounded bg-muted data-on:bg-primary data-current:ring-2"
+        />
+      </Sequencer.Row>
+    </template>
+  </Sequencer.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { Sequencer } from "$lib/components/audio-ui/sequencer/svelte";
+
+  const kit = ["Kick", "Snare", "Hat"];
+  let { pattern, onChange }: { pattern: boolean[][]; onChange: (pattern: boolean[][]) => void } = $props();
+</script>
+
+<Sequencer.Root value={pattern} onValueChange={onChange}>
+  {#snippet children(state)}
+    {#each Array.from({ length: state.rows }, (_, i) => i) as row (row)}
+      <Sequencer.Row aria-label={kit[row]} class="flex gap-1" index={row}>
+        {#each Array.from({ length: state.steps }, (_, i) => i) as step (step)}
+          <Sequencer.Cell aria-label={`${kit[row]}, step ${step + 1}`} class="size-8 rounded bg-muted data-on:bg-primary data-current:ring-2" {row} {step} />
+        {/each}
+      </Sequencer.Row>
+    {/each}
+  {/snippet}
+</Sequencer.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<style>
+  audio-ui-sequencer-row { display: flex; gap: 4px; }
+  audio-ui-sequencer-cell button { width: 32px; height: 32px; }
+  audio-ui-sequencer-cell button[data-on] { background: #2f7d4a; }
+  audio-ui-sequencer-cell button[data-current] { outline: 2px solid #fff; }
+</style>
+
+<audio-ui-sequencer value='[[true,false,false,false],[false,false,true,false]]'></audio-ui-sequencer>
+
+<script type="module">
+  import "./audio-ui/sequencer/web.ts";
+
+  const grid = document.querySelector("audio-ui-sequencer");
+  grid.addEventListener("input", (event) => console.log(event.detail.value, event.detail.reason));
+  // The step being played, from a live source: no render for a clock that ticks every step.
+  // grid.source = createSource(0);
+</script>
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+In the web adapter the sequencer makes the rows, the cells and the velocity bars itself, one for each step of its pattern. Add the `velocity-bars` attribute to get the bars.
+
+**Velocity bars.** Write a Velocity for each step, in the Row, under the cells. Its height is the `--sequencer-velocity` CSS variable, from 0 to 1, which you read in your styles. It holds a native `<input type="range">` that carries its name and takes the keys.
+
+### The step being played
+
+Give the Root a `source`, a live value of the step being played, in the shape of an external store: `getSnapshot()` returns the step and `subscribe(listener)` is called on each tick. The step's cells get `data-current` straight in the DOM, so a clock ticking every step renders nothing. `createSource` from `@audio-ui/core` makes one, and `useTransportClock` from the registry gives you one on the audio clock.
+
+In the web adapter, `source` is a property, not an attribute.
+
+### Interaction
+
+**Cells**
+
+- A press flips the step, and dragging on carries the new state across every cell the pointer crosses.
+- Space and Enter flip the focused step. The cells are one tab stop: the arrows move by a step and by a row, Home and End go to the ends of a row.
+
+**Velocity bars**
+
+- A press sets the velocity where the pointer is, and dragging on draws across the steps of the row. Alt with a press brings it back to full.
+- On the input, the arrows change it by 0.05, Page Up and Page Down by 0.25, Home and End go to silent and full, Delete and Backspace bring it back to full.
+
+A disabled sequencer takes none of these.
+
+### Options
+
+Set on the Root, as props (an attribute in kebab case in the web adapter, the grids as JSON).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `value`, `defaultValue` | `boolean[][]` | | The pattern: a row for each sound, each a list of steps. Controlled, or the starting one. |
+| `velocities`, `defaultVelocities` | `number[][]` | | How loud each step plays, from 0 to 1, a row for each sound like the pattern. A step it does not list plays at full. |
+| `source` | `{ getSnapshot, subscribe }` | | The step being played, followed with no render. |
+| `disabled` | `boolean` | `false` | Takes no gesture. |
+| `onValueChange` | `(pattern, details) => void` | | A step is flipped. `details.cancel()` keeps the pattern as it was. |
+| `onValueCommitted` | `(pattern, details) => void` | | A press, a paint or a key that changed the pattern ends. |
+| `onVelocityChange` | `(velocities, details) => void` | | A velocity is drawn or nudged. |
+| `onVelocityCommitted` | `(velocities, details) => void` | | A drag, a key or a reset that changed a velocity ends. |
+
+### What a change reports
+
+- Pattern: `reason` is `"press"`, `"paint"` or `"keyboard"`.
+- Velocities: `reason` is `"drag"`, `"keyboard"`, `"input-change"` or `"reset"`.
+- Both carry a `source` (`"mouse"`, `"touch"`, `"pen"`, `"keyboard"`) and the `event`.
+- In the web adapter, the pattern is the `input` and `change` events, and the velocities the `velocitychange` and `velocitycommit` events, with `detail: { value, reason, source }`.
+
+### States to style from
+
+- `data-on` and `aria-pressed` on a cell while its step is on, `data-current` while it is the step being played, `data-row` and `data-step` for its place.
+- `data-painting` on the Root and the cells while a pointer paints.
+- `data-disabled` on every part.

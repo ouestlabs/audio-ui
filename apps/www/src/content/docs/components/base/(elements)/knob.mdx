@@ -1,9 +1,11 @@
 ---
 title: Knob
-description: A rotary control for continuous parameters, with pointer, wheel and keyboard input.
+description: A rotary control for continuous parameters, with pointer, wheel and keyboard input. Headless in React, Vue, Svelte and the web, and styled for shadcn/ui in React.
 component: true
 base: base
 ---
+
+<ForFrameworks only="react">
 
 <ComponentPreview styleName="base-nova" name="knob-demo" />
 
@@ -21,7 +23,7 @@ A rotary control for continuous parameters such as level, cutoff or pan. The reg
 
 ## Anatomy
 
-It is built on the headless [Knob](/docs/knob-ui-sdk) primitive that installs with it: its parts, and how they fit, are on that page.
+It is built on the headless primitive that installs with it: its parts, and how they fit, are under [Headless primitive](#headless-primitive) below.
 
 ## Usage
 
@@ -94,7 +96,7 @@ The mouse wheel over the knob moves the value by `step` and reports `eventDetail
 
 ## API reference
 
-The headless parts and their options are on [Knob](/docs/knob-ui-sdk).
+The headless parts and their options are on [Knob](/docs/components/base/knob#headless-primitive).
 
 ### Registry component
 
@@ -151,3 +153,227 @@ import { Knob } from "@/components/audio-ui/knob/react"
   <Mixer />
 </Knob.Provider>
 ```
+
+</ForFrameworks>
+
+## Headless primitive
+
+The knob's behavior is one description, `knob` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. Each framework renders it with a thin adapter that you copy into your project and own: a few parts, about 120 to 150 lines. The drag, the wheel, the keys, the scale and the reset are the same in all four, and one suite of tests runs against each adapter.
+
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter.
+
+### Installation
+
+Each framework has its own item, and its CLI puts the files where that framework keeps its components. The CLI also installs what they import.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```bash
+npx shadcn@latest add @audio-ui/knob-react
+```
+
+One file, `components/audio-ui/knob/react.tsx`. It imports `@audio-ui/primitives`, `@audio-ui/core` and `@ui-sdk/react`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+```
+
+One file, `components/audio-ui/knob/vue.ts`. It imports `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/vue` and `vue`.
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+```
+
+Nine files in `components/audio-ui/knob/svelte/`: a component per part and an `index.ts`. They import `@audio-ui/primitives`, `@audio-ui/core`, `@ui-sdk/svelte` and `svelte`.
+
+`shadcn-svelte` reads your `$lib` alias from `tsconfig.json`. A SvelteKit project made with the latest `sv` template has no such alias (it uses `#lib`), so declare it under `compilerOptions.paths` first: `"$lib": ["./src/lib"]` and `"$lib/*": ["./src/lib/*"]`.
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
+```
+
+One file, `components/audio-ui/knob/web.ts`. Import it once, and it registers the `audio-ui-knob` tags. It imports `@audio-ui/primitives`, `@audio-ui/core` and `@ui-sdk/web`.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`: npm's `latest` is an older beta than the one the primitives are written for.
+
+### Usage
+
+The parts are the same everywhere: a Root that owns the value, a Control that takes the pointer and the wheel, a Track and an Indicator that draw the arcs, a Thumb that holds the focusable input, and a Value for the text. A part takes the classes and attributes of its element, and a state attribute (`data-dragging`, `data-disabled`, `data-drag-mode`) on each part to style from.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+```tsx
+import { useState } from "react";
+import { Knob } from "@/components/audio-ui/knob/react";
+
+export function Cutoff() {
+  const [value, setValue] = useState(40);
+  return (
+    <Knob.Root
+      format={{ style: "unit", unit: "percent" }}
+      onValueChange={setValue}
+      value={value}
+    >
+      <Knob.Control className="relative size-24">
+        <Knob.Track className="absolute inset-0 text-muted" />
+        <Knob.Indicator className="absolute inset-0 text-primary" />
+        <Knob.Thumb aria-label="Cutoff" className="absolute inset-3 rounded-full bg-card" />
+      </Knob.Control>
+      <Knob.Value />
+    </Knob.Root>
+  );
+}
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+```vue
+<script setup lang="ts">
+import { ref } from "vue";
+import { Knob } from "@/components/audio-ui/knob/vue";
+
+const value = ref(40);
+</script>
+
+<template>
+  <Knob.Root
+    :format="{ style: 'unit', unit: 'percent' }"
+    :value="value"
+    @value-change="(next: number) => (value = next)"
+  >
+    <Knob.Control class="relative size-24">
+      <Knob.Track class="absolute inset-0 text-muted" />
+      <Knob.Indicator class="absolute inset-0 text-primary" />
+      <Knob.Thumb aria-label="Cutoff" class="absolute inset-3 rounded-full bg-card" />
+    </Knob.Control>
+    <Knob.Value />
+  </Knob.Root>
+</template>
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+```svelte
+<script lang="ts">
+  import { Knob } from "$lib/components/audio-ui/knob/svelte";
+
+  let value = $state(40);
+</script>
+
+<Knob.Root
+  format={{ style: "unit", unit: "percent" }}
+  {value}
+  onValueChange={(next: number) => (value = next)}
+>
+  <Knob.Control class="relative size-24">
+    <Knob.Track class="absolute inset-0 text-muted" />
+    <Knob.Indicator class="absolute inset-0 text-primary" />
+    <Knob.Thumb aria-label="Cutoff" class="absolute inset-3 rounded-full bg-card" />
+  </Knob.Control>
+  <Knob.Value />
+</Knob.Root>
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+```html
+<audio-ui-knob value="40" format='{"style":"unit","unit":"percent"}'>
+  <audio-ui-knob-control>
+    <audio-ui-knob-track></audio-ui-knob-track>
+    <audio-ui-knob-indicator></audio-ui-knob-indicator>
+    <audio-ui-knob-thumb aria-label="Cutoff"></audio-ui-knob-thumb>
+  </audio-ui-knob-control>
+  <audio-ui-knob-value></audio-ui-knob-value>
+</audio-ui-knob>
+
+<script type="module">
+  import "./audio-ui/knob/web.ts";
+
+  document.querySelector("audio-ui-knob").addEventListener("input", (event) => {
+    console.log(event.detail.value, event.detail.reason, event.detail.source);
+  });
+</script>
+```
+
+Each part binds a microtask after it connects, all together. Read the element's state after that, not in the line that wrote the markup.
+
+</TabsContent>
+
+</FrameworkTabs>
+
+### Options
+
+Set on the Root, as props (an attribute in kebab case in the web adapter).
+
+| Option | Type | Default | |
+| --- | --- | --- | --- |
+| `value`, `defaultValue` | `number` | the midpoint | The controlled value, or the starting one. `defaultValue` is also where a reset returns. |
+| `min`, `max`, `step` | `number` | `0`, `100`, `1` | The range and the grid the value snaps to. |
+| `largeStep` | `number` | | What Page Up, Page Down and Shift with an arrow move by. |
+| `anchor` | `number` | | Where the Indicator's arc starts, like `0` for a pan. |
+| `scale` | `"linear"`, `"log"` or `{ toPosition, toValue }` | `"linear"` | How the value maps onto the dial. |
+| `dragMode` | `"circular"`, `"revolution"`, `"vertical"` | `"circular"` | How pointer travel turns into value. |
+| `format`, `locale` | `Intl.NumberFormat` options, a locale | | The Value's text and the input's `aria-valuetext`. |
+| `disabled` | `boolean` | `false` | Takes no key, wheel or drag. |
+| `name` | `string` | | The form field's name, carried by the input. |
+| `onValueChange` | `(value, details) => void` | | Every change, which `details.cancel()` refuses. |
+| `onValueCommitted` | `(value, details) => void` | | The end of a gesture. |
+
+### What a change reports
+
+`details` carries what moved the value and how:
+
+- `reason`: `"drag"`, `"wheel"`, `"keyboard"` or `"reset"`.
+- `source`: `"mouse"`, `"touch"`, `"pen"`, `"keyboard"`, `"programmatic"` or `"agent"`, for analytics and for telling a person from an agent. It is never a reason to behave differently.
+- `event`: the DOM event behind it, when there is one.
+- `cancel()`: refuses the change. A controlled knob keeps the value you give it.
+
+In the web adapter, `onValueChange` is an `input` event and `onValueCommitted` a `change` event, both with `detail: { value, reason, source }`, and `event.preventDefault()` refuses a change.
+
+### For an agent
+
+The knob declares one action, `setValue`, and the name on its Thumb is what an agent finds it by. The bridge of the framework you use (`createAgent` in `@ui-sdk/<framework>/agent`) reads its value and range, sets it with the source `"agent"`, and the same `onValueChange` hears it, so an app can refuse a value as it would a person's.
+
+### Package
+
+`@audio-ui/primitives` holds the behavior (`@audio-ui/primitives/knob`) with `@ui-sdk/core` as a peer dependency, pinned to the beta the primitives are written for. The adapters are in the registry, not the package.

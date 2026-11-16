@@ -1,7 +1,7 @@
 import { useLocation } from "@tanstack/react-router";
 import * as React from "react";
 import { useFramework } from "@/hooks/use-framework";
-import { menuSections } from "@/lib/docs/content/frameworks";
+import { menuSections, shownTo } from "@/lib/docs/content/frameworks";
 import {
   getCurrentBase,
   getGroupsFromFolder,
@@ -214,14 +214,23 @@ export function useSidebarGroups(tree: PageTree) {
           group.title &&
           collapsed.has(group.title)
         ),
-        sections: group.sections.map((part) => ({
-          ...part,
-          pages: part.pages
-            .filter((page) => !(otherThanReact && REACT_PAGES.has(page.url)))
-            .map((page) =>
-              LANDING_PAGES.has(page.url) ? { ...page, name: "Overview" } : page
-            ),
-        })),
+        // What the reader's framework is shown: a group or a part with no page left goes.
+        sections: group.sections
+          .map((part) => ({
+            ...part,
+            pages: part.pages
+              .filter(
+                (page) =>
+                  !(otherThanReact && REACT_PAGES.has(page.url)) &&
+                  shownTo(page.url, framework ?? "react")
+              )
+              .map((page) =>
+                LANDING_PAGES.has(page.url)
+                  ? { ...page, name: "Overview" }
+                  : page
+              ),
+          }))
+          .filter((part) => part.pages.length > 0),
         titled,
       };
     }),
