@@ -85,7 +85,7 @@ The props of the headless parts are on [Fader](/docs/react/fader#api-reference).
 
 ### Registry component
 
-`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus primitive props from `FaderPrimitive.Root.Props` (`name`, `form`, `format`, `locale`, `largeStep`, `render`, …). The primitive's `Fader.Mark` places a graduation at a `value` along the track, with `data-active` once the value has reached it, to build your own ruler. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
+`Fader` accepts style props (`size`, `thumbMarks`, `className`) plus the props of the `Fader` primitive's Root (`name`, `form`, `format`, `locale`, `largeStep`, `render`, …). The primitive's `Fader.Mark` places a graduation at a `value` along the track, with `data-active` once the value has reached it, to build your own ruler. `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to the thumb's input.
 
 #### Value and state
 

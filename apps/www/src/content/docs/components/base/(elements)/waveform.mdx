@@ -315,10 +315,10 @@ The `Waveform` primitive that installs with it exposes the parts these component
 <TypeRow name={"Waveform.Control"}>The seekable surface; holds the input. Leave it out for a waveform that is only shown.</TypeRow>
 <TypeRow name={"Waveform.Canvas"}>Draws on a canvas: `variant`, `mode`, `scrollSpeed`, `barWidth`, `barGap`, `barRadius`, `minBarHeight`, `lineWidth`, `gain`, `mirrored`, `idle`.</TypeRow>
 <TypeRow name={"Waveform.Bars, Waveform.Bar"}>Draws as elements: `count`, `minLevel`, `gain`, `mirrored`, `idle`. Each bar gets `--waveform-level`, `data-index` and `data-played`.</TypeRow>
-<TypeRow name={"Waveform.Region, Waveform.RegionHandle"}>A stretch of the timeline, and the handle of one of its edges.</TypeRow>
+<TypeRow name={"Waveform.Region, Waveform.RegionHandle"}>A stretch of the timeline, named by `region`, and the handle of one of its edges. What they report goes to the Root's `onRegionChange` and `onRegionCommitted`, with the region's name in the details.</TypeRow>
 <TypeRow name={"Waveform.Marker"}>A point on the timeline.</TypeRow>
 <TypeRow name={"Waveform.Playhead, Waveform.Thumb"}>Follow the playback position.</TypeRow>
-<TypeRow name={"Waveform.Hover"}>Shown at the hovered position; its children receive that position.</TypeRow>
+<TypeRow name={"Waveform.Hover"}>Shown at the hovered position; its `format` turns that position into the text it writes.</TypeRow>
 </TypeTable>
 
 Every part accepts a `render` prop and `className` / `style` as functions of state, and exposes that state as data attributes such as `data-disabled`, `data-dragging` and `data-loading`.

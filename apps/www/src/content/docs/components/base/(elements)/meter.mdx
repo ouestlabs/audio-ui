@@ -87,7 +87,7 @@ The props of the headless parts are on [Meter](/docs/react/meter#api-reference).
 
 ### Registry component
 
-`Meter` accepts style props (`size`, `peakMarks`, `marks`, `className`) plus primitive props from `MeterPrimitive.Root.Props`.
+`Meter` accepts style props (`size`, `peakMarks`, `marks`, `className`) plus the props of the `Meter` primitive's Root.
 
 #### Value and state
 
@@ -115,7 +115,7 @@ The props of the headless parts are on [Meter](/docs/react/meter#api-reference).
 
 
 
-The `Meter` primitive that installs with it exposes `Meter.Root` (the group), `Meter.Channels` (one child per channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
+The `Meter` primitive that installs with it exposes `Meter.Root` (the group, whose children can be a function of its state, `{ channelCount, orientation }`, to write one `Meter.Channel` for each channel), `Meter.Channel` (a `role="meter"`), `Meter.Track`, `Meter.Indicator` (the lit part), `Meter.Peak` (the peak-hold mark), `Meter.Value` (the formatted level), `Meter.Mark` (a graduation at a level) and `Meter.Label`. Channel parts expose `data-orientation` and `data-clipping`.
 
 ## Examples
 
