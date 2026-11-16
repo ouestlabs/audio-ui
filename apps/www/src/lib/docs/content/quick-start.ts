@@ -24,7 +24,7 @@ ${steps([
   SKILLS_STEP,
   MCP_STEP,
 ])}`,
-  svelte: `Set up audio/ui in this Svelte project. It needs Svelte 5. The shadcn CLI needs a components.json at the root, and the bundler needs the $lib alias outside SvelteKit: create what is missing. Tailwind CSS is not needed.
+  svelte: `Set up audio/ui in this Svelte project. It needs Svelte 5. The shadcn CLI needs a components.json at the root, and the files land in src/lib/components: import them through the alias of src/lib ($lib, or #lib in the latest SvelteKit; outside SvelteKit, add the alias to the bundler's config): create what is missing. Tailwind CSS is not needed.
 
 ${steps([
   `Primitives install with the shadcn CLI, for example: npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json. The name of the item is <primitive>-svelte. ${RELEASE_AGE} ${BY_HAND}`,
