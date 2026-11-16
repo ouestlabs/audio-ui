@@ -1,3 +1,4 @@
+import { useCallback } from "react";
 import { LogoOf } from "@/components/site/navigation/framework-select";
 import { Button } from "@/components/ui/button";
 import {
@@ -31,6 +32,9 @@ function PromptBox({
   text: string;
 }) {
   const { copyToClipboard, isCopied } = useCopyToClipboard();
+  const copy = useCallback(() => {
+    copyToClipboard(text);
+  }, [copyToClipboard, text]);
   return (
     <div
       className="my-4 overflow-hidden rounded-lg border bg-card text-card-foreground"
@@ -40,11 +44,7 @@ function PromptBox({
         {children ?? (
           <span className="px-2 text-muted-foreground text-sm">{label}</span>
         )}
-        <Button
-          onClick={() => copyToClipboard(text)}
-          size="sm"
-          variant="secondary"
-        >
+        <Button onClick={copy} size="sm" variant="secondary">
           {isCopied ? "Copied" : "Copy Prompt"}
         </Button>
       </div>
@@ -66,18 +66,19 @@ function PromptBox({
 export function QuickStart() {
   const [kept, choose] = useFramework();
   const framework: FrameworkId = kept ?? "react";
+  const pick = useCallback(
+    (next: unknown) => {
+      if (isFramework(next)) {
+        choose(next);
+      }
+    },
+    [choose]
+  );
   return (
     <>
       <p>Pick your framework, then copy this prompt into your agent.</p>
       <PromptBox text={QUICK_START_PROMPTS[framework]}>
-        <Select
-          onValueChange={(next) => {
-            if (isFramework(next)) {
-              choose(next);
-            }
-          }}
-          value={framework}
-        >
+        <Select onValueChange={pick} value={framework}>
           <SelectTrigger aria-label="Framework">
             <SelectValue>
               <LogoOf id={framework} />
