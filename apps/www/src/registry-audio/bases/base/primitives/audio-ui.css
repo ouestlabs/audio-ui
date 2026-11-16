@@ -1,0 +1,195 @@
+/*
+ * The anatomy of the knob and the fader, drawn: flat and square, one thin
+ * stroke, the foreground as the accent. It reads the tokens of the UI SDK
+ * stylesheet (`--ui-*`) when the page has it, and falls back to its own.
+ * Every rule targets a `data-slot` or a state attribute, in the `ui-sdk`
+ * layer, so a class or a rule of yours outside the layer wins.
+ */
+@layer ui-sdk;
+
+@layer ui-sdk {
+  :where(:root, :host) {
+    --audio-ui-background: var(
+      --ui-background,
+      light-dark(oklch(1 0 0), oklch(0.145 0 0))
+    );
+    --audio-ui-foreground: var(
+      --ui-foreground,
+      light-dark(oklch(0.145 0 0), oklch(0.985 0 0))
+    );
+    --audio-ui-muted: var(
+      --ui-muted,
+      light-dark(oklch(0.967 0 0), oklch(0.226 0 0))
+    );
+    --audio-ui-muted-foreground: var(
+      --ui-muted-foreground,
+      light-dark(oklch(0.528 0 0), oklch(0.706 0 0))
+    );
+    --audio-ui-input: var(
+      --ui-input,
+      light-dark(oklch(0.82 0 0), oklch(0.409 0 0))
+    );
+    --audio-ui-ring: var(
+      --ui-ring,
+      light-dark(oklch(0.913 0 0), oklch(0.333 0 0))
+    );
+    color-scheme: light dark;
+  }
+
+  :is([data-slot="knob"], [data-slot="fader"]) {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  :is([data-slot="knob-label"], [data-slot="fader-label"]) {
+    font-size: 0.75rem;
+    font-weight: 500;
+  }
+
+  :is([data-slot="knob-value"], [data-slot="fader-value"]) {
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums;
+    color: var(--audio-ui-muted-foreground);
+  }
+
+  :is([data-slot="knob-control"], [data-slot="fader-control"])[data-disabled] {
+    opacity: 0.5;
+  }
+
+  /* Knob */
+
+  [data-slot="knob-control"] {
+    position: relative;
+    display: block;
+    width: 6rem;
+    height: 6rem;
+    cursor: grab;
+
+    &[data-dragging] {
+      cursor: grabbing;
+    }
+  }
+
+  :is([data-slot="knob-track"], [data-slot="knob-indicator"]) {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+  }
+
+  [data-slot="knob-track"] {
+    color: var(--audio-ui-muted);
+  }
+
+  [data-slot="knob-indicator"] {
+    color: var(--audio-ui-foreground);
+  }
+
+  [data-slot="knob-thumb"] {
+    position: absolute;
+    inset: 0;
+
+    &::after {
+      position: absolute;
+      top: 14%;
+      left: 50%;
+      width: 2px;
+      height: 18%;
+      margin-left: -1px;
+      content: "";
+      background: var(--audio-ui-foreground);
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+      border-radius: 50%;
+    }
+  }
+
+  [data-slot="knob-mark"]::after {
+    position: absolute;
+    top: -6%;
+    left: 50%;
+    width: 1px;
+    height: 5%;
+    content: "";
+    background: var(--audio-ui-input);
+  }
+
+  [data-slot="knob-mark"][data-active]::after {
+    background: var(--audio-ui-foreground);
+  }
+
+  /* Fader */
+
+  [data-slot="fader-control"] {
+    display: block;
+    width: 1.25rem;
+    height: 10rem;
+    margin: 0.5rem 0;
+    cursor: pointer;
+
+    &[data-orientation="horizontal"] {
+      width: 10rem;
+      height: 1.25rem;
+      margin: 0 0.5rem 1rem;
+    }
+  }
+
+  [data-slot="fader-track"] {
+    display: block;
+    width: 0.25rem;
+    height: 100%;
+    margin: 0 auto;
+    background: var(--audio-ui-muted);
+
+    &[data-orientation="horizontal"] {
+      width: 100%;
+      height: 0.25rem;
+      margin: calc((1.25rem - 0.25rem) / 2) 0 0;
+    }
+  }
+
+  [data-slot="fader-indicator"] {
+    background: var(--audio-ui-foreground);
+  }
+
+  [data-slot="fader-thumb"] {
+    width: 1.25rem;
+    height: 0.625rem;
+    background: var(--audio-ui-background);
+    border: 1px solid var(--audio-ui-foreground);
+
+    &[data-orientation="horizontal"] {
+      width: 0.625rem;
+      height: 1.25rem;
+    }
+
+    &:has(:focus-visible) {
+      outline: 4px solid var(--audio-ui-ring);
+    }
+  }
+
+  [data-slot="fader-mark"] {
+    background: var(--audio-ui-input);
+
+    &[data-active] {
+      background: var(--audio-ui-foreground);
+    }
+
+    &[data-orientation="vertical"] {
+      left: 50%;
+      width: 0.5rem;
+      height: 1px;
+      margin-left: 0.5rem;
+    }
+
+    &[data-orientation="horizontal"] {
+      top: 100%;
+      width: 1px;
+      height: 0.5rem;
+    }
+  }
+}

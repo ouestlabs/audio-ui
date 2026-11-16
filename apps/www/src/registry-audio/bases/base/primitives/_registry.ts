@@ -357,4 +357,18 @@ export const primitives: RegistryItem[] = [
     ],
     "A piano roll for editing MIDI notes: a grid you draw, move, resize and select notes on, with rows by pitch and scale, velocity or chance bars, a marquee, and a native input on each bar for the keyboard. It sits on a timeline's duration, grid, zoom and playback position, which you give it."
   ),
+  {
+    categories: ["primitive", "css"],
+    description:
+      "The anatomy of the knob and the fader, drawn: flat, square, one thin stroke. Optional, and the same for every framework. It reads the tokens of the UI SDK stylesheet when the page has it.",
+    files: [
+      {
+        path: "primitives/audio-ui.css",
+        target: "~/src/audio-ui-primitives.css",
+        type: "registry:file",
+      },
+    ],
+    name: "primitives-css",
+    type: "registry:file",
+  },
 ];
