@@ -15,15 +15,22 @@ audio/ui is built on **React 19** and [Tailwind CSS v4](https://tailwindcss.com)
 
 <ForFrameworks only="vue">
 
-A Vue 3 app, with [shadcn-vue](https://www.shadcn-vue.com) set up: its CLI copies the primitive into your project.
+A Vue 3 app. The [shadcn-vue](https://www.shadcn-vue.com) CLI copies the primitive into your project, and it needs two things first:
+
+- a `components.json` at the root, with the `components` alias (`@/components`);
+- the `@` alias in `tsconfig.json`, under `compilerOptions`: `"baseUrl": "."` and `"paths": { "@/*": ["./src/*"] }`.
+
+Your bundler needs the same alias to build: in Vite, `resolve.alias` of `@` to `./src`. Tailwind CSS is not needed.
 
 </ForFrameworks>
 
 <ForFrameworks only="svelte">
 
-A Svelte 5 app, with [shadcn-svelte](https://www.shadcn-svelte.com) set up: its CLI copies the primitive into your project.
+A Svelte 5 app. The [shadcn-svelte](https://www.shadcn-svelte.com) CLI copies the primitive into your project, and it needs three things first:
 
-shadcn-svelte reads your `$lib` alias from `tsconfig.json`. A SvelteKit project made with the latest `sv` template has no such alias (it uses `#lib`), so declare it first, under `compilerOptions.paths`:
+- a `components.json` at the root, with the `components` alias (`$lib/components`);
+- Tailwind CSS installed: the CLI stops without it, even for a primitive that has no styles;
+- your `$lib` alias in `tsconfig.json`. A SvelteKit project made with the latest `sv` template has no such alias (it uses `#lib`), so declare it under `compilerOptions.paths`:
 
 ```json
 {
@@ -36,11 +43,15 @@ shadcn-svelte reads your `$lib` alias from `tsconfig.json`. A SvelteKit project 
 }
 ```
 
+Outside SvelteKit, which provides `$lib` itself, your bundler needs the alias too: in Vite, `resolve.alias` of `$lib` to `./src/lib`.
+
 </ForFrameworks>
 
 <ForFrameworks only="web">
 
-A page, or an app, with a bundler such as Vite that resolves package imports, and the [shadcn](https://ui.shadcn.com/docs/cli) CLI, which copies the primitive into your project.
+A page, or an app, with a bundler such as Vite that resolves package imports. The [shadcn](https://ui.shadcn.com/docs/cli) CLI copies the primitive into your project, and it needs a `components.json` at the root, with the `components` alias (`@/components`). It needs no Tailwind and no path alias.
+
+With `"tsx": false` in `components.json`, the CLI writes the file as `web.js`; with `true`, as `web.ts`. Import the one you got.
 
 </ForFrameworks>
 
@@ -99,6 +110,10 @@ npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
 It writes `components/audio-ui/knob/web.ts` and installs what it imports: `@audio-ui/primitives`, `@audio-ui/core` and `@ui-sdk/web`. Every primitive installs the same way.
 
 </ForFrameworks>
+
+## Without the CLI
+
+Each item is a JSON file at its address, and the CLI only reads it: you can do the same by hand. Open the address of the item (for the knob in Vue, `https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json`), write each entry of `files` to its path under `components/audio-ui/` with its `content`, and install the packages its `dependencies` lists. An agent can do this for you: the prompt of [Get Started](/docs) says how.
 
 ## Use it
 

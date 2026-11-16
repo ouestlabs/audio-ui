@@ -6,6 +6,8 @@ const SKILLS_STEP =
   "If you support skills, run: npx skills@latest add ouestlabs/audio-ui";
 const MCP_STEP =
   "If you support MCP servers, connect https://www.audio-ui.dev/mcp, so you can search the components and read their docs live.";
+const BY_HAND =
+  "If the CLI cannot run, do it by hand: open the item's JSON address, write each entry of files to its path under components/audio-ui/ with its content, and install the packages of its dependencies.";
 const RELEASE_AGE =
   "If a release-age policy blocks an install, stop and ask me instead of changing it.";
 
@@ -22,26 +24,26 @@ ${steps([
   SKILLS_STEP,
   MCP_STEP,
 ])}`,
-  svelte: `Set up audio/ui in this Svelte project. It needs Svelte 5 and shadcn-svelte, with a $lib alias declared under compilerOptions.paths in tsconfig.json.
+  svelte: `Set up audio/ui in this Svelte project. It needs Svelte 5. The shadcn-svelte CLI needs a components.json, Tailwind CSS installed and a $lib alias under compilerOptions.paths in tsconfig.json (and in the bundler's config, outside SvelteKit): create what is missing.
 
 ${steps([
-  `Primitives install with the shadcn-svelte CLI, for example: npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json. The name of the item is <primitive>-svelte. ${RELEASE_AGE}`,
+  `Primitives install with the shadcn-svelte CLI, for example: npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json. The name of the item is <primitive>-svelte. ${RELEASE_AGE} ${BY_HAND}`,
   AGENT_NOTE,
   SKILLS_STEP,
   MCP_STEP,
 ])}`,
-  vue: `Set up audio/ui in this Vue project. It needs Vue 3 and shadcn-vue.
+  vue: `Set up audio/ui in this Vue project. It needs Vue 3. The shadcn-vue CLI needs a components.json and the @ alias in tsconfig.json (and in the bundler's config): create what is missing. Tailwind CSS is not needed.
 
 ${steps([
-  `Primitives install with the shadcn-vue CLI, for example: npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json. The name of the item is <primitive>-vue. ${RELEASE_AGE}`,
+  `Primitives install with the shadcn-vue CLI, for example: npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json. The name of the item is <primitive>-vue. ${RELEASE_AGE} ${BY_HAND}`,
   AGENT_NOTE,
   SKILLS_STEP,
   MCP_STEP,
 ])}`,
-  web: `Set up audio/ui in this project, with no framework: plain HTML and a module script.
+  web: `Set up audio/ui in this project, with no framework: plain HTML and a module script. The shadcn CLI needs a components.json with the components alias, and no Tailwind CSS.
 
 ${steps([
-  `Primitives install with the shadcn CLI, for example: npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json. The name of the item is <primitive>-web. Import the file once, and it registers the audio-ui-knob tags. ${RELEASE_AGE}`,
+  `Primitives install with the shadcn CLI, for example: npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json. The name of the item is <primitive>-web. Import the file once, and it registers the audio-ui-knob tags. ${RELEASE_AGE} ${BY_HAND}`,
   AGENT_NOTE,
   SKILLS_STEP,
   MCP_STEP,
