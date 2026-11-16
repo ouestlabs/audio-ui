@@ -102,8 +102,8 @@ export function Eq() {
       onValueChange={setPeak}
       scaleX="log"
     >
-      <Plot.Grid x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
-      <Plot.Curve fn={response} />
+      <Plot.Grid className="text-muted" x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
+      <Plot.Curve className="text-primary" fn={response} />
       <Plot.Handle aria-label="Peak" className="size-3 rounded-full bg-primary" handle="peak" value={peak} />
     </Plot.Root>
   );
@@ -133,8 +133,8 @@ const response = (hz: number) => peak.value.y * Math.exp(-(Math.log2(hz / peak.v
     scale-x="log"
     @value-change="(point) => (peak = point)"
   >
-    <Plot.Grid :x="{ ticks: [100, 1000, 10000] }" :y="{ ticks: [-12, 0, 12] }" />
-    <Plot.Curve :fn="response" />
+    <Plot.Grid class="text-muted" :x="{ ticks: [100, 1000, 10000] }" :y="{ ticks: [-12, 0, 12] }" />
+    <Plot.Curve class="text-primary" :fn="response" />
     <Plot.Handle aria-label="Peak" class="size-3 rounded-full bg-primary" handle="peak" :value="peak" />
   </Plot.Root>
 </template>
@@ -153,8 +153,8 @@ const response = (hz: number) => peak.value.y * Math.exp(-(Math.log2(hz / peak.v
 </script>
 
 <Plot.Root class="h-48 w-full" maxX={20_000} maxY={12} minX={20} minY={-12} onValueChange={(point) => (peak = point)} scaleX="log">
-  <Plot.Grid x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
-  <Plot.Curve fn={response} />
+  <Plot.Grid class="text-muted" x={{ ticks: [100, 1000, 10_000] }} y={{ ticks: [-12, 0, 12] }} />
+  <Plot.Curve class="text-primary" fn={response} />
   <Plot.Handle aria-label="Peak" class="size-3 rounded-full bg-primary" handle="peak" value={peak} />
 </Plot.Root>
 ```
