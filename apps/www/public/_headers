@@ -12,8 +12,8 @@
 /assets/*
   Cache-Control: public, max-age=31536000, immutable
 
-# The web adapters are scripts other sites load: any page may, and they are cached for an hour, since their names carry no hash.
+# The web adapters are scripts other sites load: any page may. Their folder is a version, and the files of a version never change.
 /web/*
   Access-Control-Allow-Origin: *
   Cross-Origin-Resource-Policy: cross-origin
-  Cache-Control: public, max-age=3600
+  Cache-Control: public, max-age=31536000, immutable

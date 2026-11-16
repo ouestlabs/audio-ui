@@ -161,6 +161,7 @@ A primitive has one page: the component's (`components/base/(elements|workstatio
 
 - Relative imports carry the `.ts` extension (`./x.ts`, compiled with `rewriteRelativeImportExtensions`). A `.js` specifier breaks the www Turbopack build.
 - Every user-visible change to `packages/core` or `packages/engine` needs a changeset (`bun run changeset`). Never edit `package.json` versions.
+- The web adapters are served as scripts by version (`apps/www/public/web/<version>/`, the version of `@audio-ui/primitives`), and the files of a version never change for the people pinned to it. A change to an adapter of `primitives/*/web/` or to what it builds on ships with a changeset for `@audio-ui/primitives`, so the next build writes a new folder; commit the folder `registry:build` writes, and never edit an older one.
 
 ### Writing (docs, changesets, comments, commit messages, UI copy)
 

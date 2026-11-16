@@ -6,7 +6,10 @@ const PRIMITIVES = join(
   import.meta.dir,
   "../src/registry-audio/bases/base/primitives"
 );
-const WEB = join(import.meta.dir, "../public/web");
+const { version } = (await Bun.file(
+  join(import.meta.dir, "../../../packages/primitives/package.json")
+).json()) as { version: string };
+const WEB = join(import.meta.dir, "../public/web", version);
 
 const primitives = readdirSync(PRIMITIVES, { withFileTypes: true })
   .filter((entry) => entry.isDirectory())
@@ -40,6 +43,13 @@ test("a web script imports its chunks by relative path, and no package by name",
       ).toBe(true);
     }
   }
+});
+
+test("the installation page pins the version of the scripts it shows", async () => {
+  const page = await Bun.file(
+    join(import.meta.dir, "../src/content/docs/(root)/installation.mdx")
+  ).text();
+  expect(page).toContain(`https://www.audio-ui.dev/web/${version}/knob.js`);
 });
 
 test("the files of /web/ may be loaded by any page", async () => {
