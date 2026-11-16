@@ -1,4 +1,5 @@
 import { expect, test } from "bun:test";
+import { runInNewContext } from "node:vm";
 import {
   FRAMEWORK_REDIRECT_SCRIPT,
   frameworkAddresses,
@@ -71,19 +72,28 @@ test("every framework address built is one the router reads", () => {
   }
 });
 
+/** Runs the script as a page does, as a global script. */
 const run = (kept: string | null, pathname: string) => {
   const went: string[] = [];
-  new Function("localStorage", "location", FRAMEWORK_REDIRECT_SCRIPT)(
-    { "audio-ui-framework": kept },
-    {
+  const window: Record<string, unknown> = {
+    localStorage: { "audio-ui-framework": kept },
+    location: {
       hash: "#a",
       pathname,
       replace: (url: string) => {
         went.push(url);
       },
       search: "?x=1",
-    }
+    },
+  };
+  runInNewContext(FRAMEWORK_REDIRECT_SCRIPT, window);
+  // A `var` at the top of a page is a property of `window`, and `window.name` turns what it is given into text.
+  const leaked = Object.keys(window).filter(
+    (key) => key !== "localStorage" && key !== "location"
   );
+  if (leaked.length > 0) {
+    throw new Error(`the script leaks globals: ${leaked.join(", ")}`);
+  }
   return went.at(0) ?? null;
 };
 

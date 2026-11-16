@@ -131,10 +131,10 @@ export function frameworkAddresses(pages: readonly string[]): string[] {
  * Runs in the head, before the first paint: a page that has an address for the
  * framework the reader kept (`/docs/knob-ui-sdk` for Vue) goes to it, so the
  * page is drawn for their framework from the start. It is `frameworkAddressOf`
- * written for a document with no module, from the same lists.
+ * written for a document with no module, from the same lists. It runs in a function: a `var` at the top of a page would be a property of `window`, and `window.name` turns what it is given into text.
  */
 export const FRAMEWORK_REDIRECT_SCRIPT = `
-  try {
+  (function () { try {
     var segments = ${JSON.stringify(
       Object.fromEntries(
         Object.entries(FRAMEWORK_SEGMENTS).map(([segment, id]) => [id, segment])
@@ -154,5 +154,5 @@ export const FRAMEWORK_REDIRECT_SCRIPT = `
         : '/docs/' + segment + path.slice(5);
     }
     if (to) location.replace(to + location.search + location.hash);
-  } catch (_) {}
+  } catch (_) {} })();
 `;
