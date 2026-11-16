@@ -27,13 +27,13 @@ base: base
 
 <ComponentPreview styleName="base-nova" name="fader-vertical-demo" />
 
-A linear control for continuous parameters such as volume, gain or a send level. The registry component is written on the `Fader` primitive of `@audio-ui/primitives`, which installs with it and adds size variants and thumb marks.
+A linear control for continuous parameters such as volume, gain or a send level. The registry component is written on the fader primitive, whose logic installs with it, and adds size variants and thumb marks.
 
 </ForFrameworks>
 
 <ForFrameworks only="vue svelte web">
 
-The fader's behavior is one description, `fader` in `@audio-ui/primitives`, over the controller of `@audio-ui/core`. Each framework renders it with a thin adapter that you copy into your project and own. A press on the track, the drag of the thumb, the wheel, the keys, the grid and the reset are the same in all four, and one suite of tests runs against each adapter.
+The fader's behavior is one file of logic, written on the UI SDK kernel and copied into your project. Each framework renders it with a thin adapter that you also own. A press on the track, the drag of the thumb, the wheel, the keys, the grid and the reset are the same in all four, and one suite of tests runs against each adapter.
 
 </ForFrameworks>
 
@@ -46,19 +46,19 @@ The fader's behavior is one description, `fader` in `@audio-ui/primitives`, over
 
 ## Installation
 
-<ForFrameworks only="react">
-
-<Install name="fader" packages="@audio-ui/primitives @audio-ui/core @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
-
-</ForFrameworks>
-
-The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. `@audio-ui/primitives` is on npm, and each item below installs it with the adapter. The [knob](/docs/components/base/knob#installation) is built the same way.
+The primitives are built on the [UI SDK](https://ui-sdk.dev) kernel, in beta. Nothing of ours comes from npm: the logic and the adapter are files you copy into your project and own, and the only packages are the kernel's. The commands name its version, `@ui-sdk/*@0.1.0-beta.5`.
 
 <ForFrameworks only="react">
 
-The primitive alone, without the styling:
+The styled component, with size variants and theme styles, is one command:
+
+<Install name="fader" packages="@ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5 class-variance-authority" />
+
+The rest of this section is the primitive alone, without the styling.
 
 </ForFrameworks>
+
+### 1. The kernel
 
 <FrameworkTabs defaultValue="react">
 
@@ -72,46 +72,182 @@ The primitive alone, without the styling:
 <TabsContent value="react">
 
 ```bash
-npx shadcn@latest add @audio-ui/fader-react
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/react@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/fader/react.tsx`.
 
 </TabsContent>
 
 <TabsContent value="vue">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/fader-vue.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/vue@0.1.0-beta.5 vue
 ```
-
-One file, `components/audio-ui/fader/vue.ts`.
 
 </TabsContent>
 
 <TabsContent value="svelte">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/fader-svelte.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/svelte@0.1.0-beta.5 svelte
 ```
-
-Four files in `components/audio-ui/fader/svelte/`: the thumb, the value, `parts.ts` and `index.ts`. 
 
 </TabsContent>
 
 <TabsContent value="web">
 
 ```bash
-npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/fader-web.json
+npm install @ui-sdk/core@0.1.0-beta.5 @ui-sdk/web@0.1.0-beta.5
 ```
-
-One file, `components/audio-ui/fader/web.ts`. Import it once, and it registers the `audio-ui-fader` tags.
 
 </TabsContent>
 
 </FrameworkTabs>
 
-Each item also installs what it imports: `@audio-ui/primitives`, the adapter of your framework from `@ui-sdk`, and `vue` or `svelte`. The items name the kernel's version, `@ui-sdk/*@0.1.0-beta.5`.
+### 2. The logic
+
+The same files for every framework: the fader's behavior, written on the kernel's helpers, and the two small files it shares with the other primitives. Copy them into `lib/audio-ui/logic/` (`src/lib/audio-ui/logic/` in Svelte).
+
+<ComponentSource
+  styleName="base-nova"
+  name="fader-logic"
+  title="lib/audio-ui/logic/define.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={1}
+  name="fader-logic"
+  title="lib/audio-ui/logic/shared.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="fader-logic"
+  title="lib/audio-ui/logic/fader/fader.ts"
+/>
+
+### 3. The adapter
+
+Your framework's few parts, over the logic. They import it by a relative path, so keep the two folders as shown, or update the path.
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+<ComponentSource
+  styleName="base-nova"
+  name="fader-react"
+  title="components/audio-ui/fader/react.tsx"
+/>
+
+Or let the CLI write it, with the logic it imports:
+
+```bash
+npx shadcn@latest add @audio-ui/fader-react
+```
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+<ComponentSource
+  styleName="base-nova"
+  name="fader-vue"
+  title="components/audio-ui/fader/vue.ts"
+/>
+
+Or let the CLI write it, with the logic it imports:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/fader-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+A component per part, and an `index.ts` that gathers them. Svelte keeps its files under `src/lib`, so the logic goes in `src/lib/audio-ui/logic/` and these import it from there.
+
+<ComponentSource
+  styleName="base-nova"
+  name="fader-svelte"
+  title="src/lib/components/audio-ui/fader/svelte/Thumb.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={1}
+  name="fader-svelte"
+  title="src/lib/components/audio-ui/fader/svelte/Value.svelte"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={2}
+  name="fader-svelte"
+  title="src/lib/components/audio-ui/fader/svelte/index.ts"
+/>
+
+<ComponentSource
+  styleName="base-nova"
+  file={3}
+  name="fader-svelte"
+  title="src/lib/components/audio-ui/fader/svelte/parts.ts"
+/>
+
+Or let the CLI write it, with the logic it imports:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/fader-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+Import it once, and it registers the `audio-ui-fader` tags.
+
+<ComponentSource
+  styleName="base-nova"
+  name="fader-web"
+  title="components/audio-ui/fader/web.ts"
+/>
+
+Or let the CLI write it, with the logic it imports:
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/fader-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
+
+The CLI also installs what each imports, and puts the files where that framework keeps its components. A file two items share, such as `define.ts`, is written once.
+
+### 4. The styles
+
+Optional, and the same for every framework: the anatomy of the knob and the fader, drawn flat and square, in the look of the UI SDK docs. It reads the tokens of the UI SDK stylesheet (`--ui-*`) when the page has it, and falls back to its own. Every rule is in the `ui-sdk` layer, so a rule of yours outside the layer wins.
+
+<ComponentSource
+  styleName="base-nova"
+  name="primitives-css"
+  title="src/audio-ui-primitives.css"
+/>
+
+Import it once, or let the CLI write it:
+
+```bash
+npx shadcn@latest add @audio-ui/primitives-css
+```
 
 ## Usage
 
