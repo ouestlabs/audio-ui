@@ -1,15 +1,24 @@
 ---
 title: Registry
-description: Learn how to use the audio/ui Registry with shadcn/ui.
+description: Learn how to use the audio/ui Registry with your framework's shadcn CLI.
 ---
 
-The audio/ui registry adds audio components and blocks to a shadcn/ui project. Add the namespace once, then install any item by name.
-
-## Setup
-
-Add the `@audio-ui` namespace to your `components.json` once: [Installation](/docs/installation#setup-the-audioui-registry) has the line, and the prerequisites.
+The audio/ui registry puts the code of audio components in your project, and you own it. Every item installs by name, with the shadcn CLI of your framework.
 
 ## Usage
+
+<FrameworkTabs defaultValue="react">
+
+<TabsList>
+  <TabsTrigger value="react"><Icons.reactColor /> React</TabsTrigger>
+  <TabsTrigger value="vue"><Icons.vue /> Vue</TabsTrigger>
+  <TabsTrigger value="svelte"><Icons.svelte /> Svelte</TabsTrigger>
+  <TabsTrigger value="web"><Icons.javascript /> JavaScript</TabsTrigger>
+</TabsList>
+
+<TabsContent value="react">
+
+Add the `@audio-ui` namespace to your `components.json` once: [Installation](/docs/installation#setup-the-audioui-registry) has the line, and the prerequisites.
 
 Install blocks via the shadcn CLI using the `@audio-ui/{name}` syntax.
 
@@ -22,3 +31,39 @@ Install components via the shadcn CLI using the `@audio-ui/{name}` syntax.
 ```bash
 npx shadcn@latest add @audio-ui/knob
 ```
+
+The headless primitive alone is `@audio-ui/{name}-react`.
+
+</TabsContent>
+
+<TabsContent value="vue">
+
+Install a primitive with the shadcn-vue CLI, from the address of its item: `<name>-vue.json`.
+
+```bash
+npx shadcn-vue@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-vue.json
+```
+
+</TabsContent>
+
+<TabsContent value="svelte">
+
+Install a primitive with the shadcn-svelte CLI, from the address of its item: `<name>-svelte.json`.
+
+```bash
+npx shadcn-svelte@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-svelte.json
+```
+
+</TabsContent>
+
+<TabsContent value="web">
+
+Install a primitive with the shadcn CLI, from the address of its item: `<name>-web.json`. Import the file once, and it registers the tags.
+
+```bash
+npx shadcn@latest add https://www.audio-ui.dev/r/styles/base-nova/knob-web.json
+```
+
+</TabsContent>
+
+</FrameworkTabs>
