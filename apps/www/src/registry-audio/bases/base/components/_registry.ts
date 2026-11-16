@@ -1047,6 +1047,45 @@ export const components: RegistryItem[] = [
     type: "registry:example",
   },
   {
+    categories: ["waveform"],
+    description: "waveform example, in the Vue adapter",
+    files: [
+      {
+        path: "components/waveform/vue/waveform-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-vue-demo",
+    registryDependencies: ["@audio-ui/waveform-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description: "waveform example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/waveform/svelte/waveform-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-svelte-demo",
+    registryDependencies: ["@audio-ui/waveform-svelte"],
+    type: "registry:example",
+  },
+  {
+    categories: ["waveform"],
+    description: "waveform example, in the web adapter",
+    files: [
+      {
+        path: "components/waveform/web/waveform-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "waveform-web-demo",
+    registryDependencies: ["@audio-ui/waveform-web"],
+    type: "registry:example",
+  },
+  {
     categories: ["plot"],
     description:
       "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
@@ -1069,6 +1108,45 @@ export const components: RegistryItem[] = [
       "@shadcn/popover",
       "@shadcn/select",
     ],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description: "plot example, in the Vue adapter",
+    files: [
+      {
+        path: "components/plot/vue/plot-demo.vue",
+        type: "registry:example",
+      },
+    ],
+    name: "plot-vue-demo",
+    registryDependencies: ["@audio-ui/plot-vue"],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description: "plot example, in the Svelte adapter",
+    files: [
+      {
+        path: "components/plot/svelte/plot-demo.svelte",
+        type: "registry:example",
+      },
+    ],
+    name: "plot-svelte-demo",
+    registryDependencies: ["@audio-ui/plot-svelte"],
+    type: "registry:example",
+  },
+  {
+    categories: ["plot"],
+    description: "plot example, in the web adapter",
+    files: [
+      {
+        path: "components/plot/web/plot-demo.ts",
+        type: "registry:example",
+      },
+    ],
+    name: "plot-web-demo",
+    registryDependencies: ["@audio-ui/plot-web"],
     type: "registry:example",
   },
   {

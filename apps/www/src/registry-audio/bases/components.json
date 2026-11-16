@@ -348,6 +348,24 @@
     "title": "Waveform region demo"
   },
   {
+    "categories": ["waveform"],
+    "description": "waveform example, in the Vue adapter",
+    "name": "waveform-vue-demo",
+    "title": "Waveform vue demo"
+  },
+  {
+    "categories": ["waveform"],
+    "description": "waveform example, in the Svelte adapter",
+    "name": "waveform-svelte-demo",
+    "title": "Waveform svelte demo"
+  },
+  {
+    "categories": ["waveform"],
+    "description": "waveform example, in the web adapter",
+    "name": "waveform-web-demo",
+    "title": "Waveform web demo"
+  },
+  {
     "categories": ["plot"],
     "description": "An equalizer: drag each band to set its frequency and gain, and the curve is the response of all three",
     "name": "plot-demo",
