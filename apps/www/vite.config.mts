@@ -24,7 +24,8 @@ export default defineConfig({
     "import.meta.env.VITE_DEPLOYMENT_ID": JSON.stringify(deploymentId),
   },
   plugins: [
-    devtools(),
+    // The console is not piped to the server: its stream stays open and the tab never reads as loaded.
+    devtools({ consolePiping: { enabled: false } }),
     cloudflare({ viteEnvironment: { name: "ssr" } }),
     fumadocsMdx(),
     tailwindcss(),
