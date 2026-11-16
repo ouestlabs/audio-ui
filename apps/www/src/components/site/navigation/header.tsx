@@ -15,7 +15,6 @@ import { Wordmark } from "@/components/site/navigation/wordmark";
 import { Separator } from "@/components/ui/separator";
 import { siteConfig } from "@/lib/config";
 import { source } from "@/lib/docs/content/source";
-import { getCategories } from "@/lib/registry/core/registry";
 import { cn } from "@/lib/utils";
 import { Button } from "../../ui/button";
 
@@ -103,7 +102,6 @@ function SiteLogo() {
  */
 export function SiteSidebarHeader() {
   const pageTree = source.getPageTree();
-  const componentCategories = getCategories();
   const commandGroups = buildCommandMenuGroups(pageTree.children);
 
   return (
@@ -117,7 +115,6 @@ export function SiteSidebarHeader() {
       <div className="*:w-full">
         <SiteHeaderCommandMenu
           commandGroups={commandGroups}
-          componentCategories={componentCategories}
           navItems={siteConfig.navItems}
         />
       </div>
@@ -149,13 +146,11 @@ export function SiteBarContent({ part }: { part: "end" | "github" | "start" }) {
     );
   }
   const pageTree = source.getPageTree();
-  const componentCategories = getCategories();
   return (
     <div className="flex items-center gap-2">
       <div className="shrink-0">
         <SiteHeaderCommandMenu
           commandGroups={buildCommandMenuGroups(pageTree.children)}
-          componentCategories={componentCategories}
           navItems={siteConfig.navItems}
         />
       </div>
@@ -173,7 +168,6 @@ export function SiteHeader({
   sticky?: boolean;
 } = {}) {
   const pageTree = source.getPageTree();
-  const componentCategories = getCategories();
   const commandGroups = buildCommandMenuGroups(pageTree.children);
 
   return (
@@ -186,11 +180,7 @@ export function SiteHeader({
     >
       <div className="container-wrapper">
         <div className="flex h-[calc(var(--header-height)-1px)] items-center gap-3.5">
-          <SiteHeaderMobileNav
-            componentCategories={componentCategories}
-            navItems={siteConfig.navItems}
-            tree={pageTree}
-          />
+          <SiteHeaderMobileNav navItems={siteConfig.navItems} tree={pageTree} />
           <Button
             className="hidden pl-2 md:flex"
             nativeButton={false}
@@ -209,7 +199,6 @@ export function SiteHeader({
           <div className="ml-auto flex items-center gap-2">
             <SiteHeaderCommandMenu
               commandGroups={commandGroups}
-              componentCategories={componentCategories}
               navItems={siteConfig.navItems}
             />
             <Separator className="hidden sm:flex" orientation="vertical" />

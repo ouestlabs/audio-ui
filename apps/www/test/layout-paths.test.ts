@@ -8,7 +8,6 @@ describe("addressOfLayoutPath", () => {
     ["/_site", "/"],
     ["/_site/docs", "/docs"],
     ["/_site/docs/", "/docs"],
-    ["/_site/components", "/components"],
     ["/_site/docs/components/base/knob", "/docs/components/base/knob"],
   ])("%s stands for %s", (pathname, address) => {
     expect(addressOfLayoutPath(pathname)).toBe(address);

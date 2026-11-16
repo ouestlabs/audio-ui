@@ -9,7 +9,6 @@ import { createServerFn } from "@tanstack/react-start";
 import { findNeighbour } from "fumadocs-core/page-tree";
 import type { MDXProps } from "mdx/types";
 import { lazy, Suspense } from "react";
-import { DocsComponentCatalogSection } from "@/components/docs/catalog/component-catalog-section";
 import { DocsCopyPage } from "@/components/docs/page/copy-page";
 import { JsonLd } from "@/components/site/json-ld";
 import { Badge } from "@/components/ui/badge";
@@ -234,7 +233,7 @@ interface DocArticleProps {
   pageTree: Parameters<typeof findNeighbour>[0];
 }
 
-/** The page as it reads: the title and its tools, the MDX, the component's catalog, and the pager. */
+/** The page as it reads: the title and its tools, the MDX, and the pager. */
 function DocArticle({
   Mdx,
   props: { data, pageTree },
@@ -290,10 +289,6 @@ function DocArticle({
             <div className="typeset typeset-changelog w-full flex-1 *:data-[slot=alert]:first:mt-0">
               <Mdx components={getMDXComponents()} />
             </div>
-            {/* The catalog of styled components is React's. */}
-            {data.componentName && data.base && framework === "react" ? (
-              <DocsComponentCatalogSection componentSlug={data.componentName} />
-            ) : null}
           </div>
           <DocsPager neighbours={neighbours} />
         </div>

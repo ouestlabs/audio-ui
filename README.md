@@ -8,7 +8,7 @@ Accessible, composable Audio UI components for the web, in React, Vue, Svelte or
 - **Components you own.** A shadcn registry of styled components, blocks and hooks built on the primitives, copied into your project with the CLI.
 - **Web Audio API first.** Meters, spectrum analyzers and tuners read real signals from `AnalyserNode`s, and live values move without re-rendering React.
 
-Docs, demos and the catalog: **https://www.audio-ui.dev**
+Docs and demos: **https://www.audio-ui.dev**
 
 ## Use it
 

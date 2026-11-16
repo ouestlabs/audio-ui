@@ -4,7 +4,7 @@ import {
   CustomizerContext,
   type CustomizerContextValue,
   useCustomizer,
-} from "@/components/catalog/components-context";
+} from "@/components/customizer/customizer-context";
 import { CustomizerPanel } from "@/components/customizer/panel/panel";
 import { useIsDesktopCustomizer } from "@/components/customizer/panel/use-is-desktop-customizer";
 import {
@@ -134,7 +134,7 @@ function CustomizeToggle() {
 }
 
 /**
- * The framed layout of the docs and of the catalog: a navigation sidebar on
+ * The framed layout of the docs and the icons: a navigation sidebar on
  * the left, the page in an inset frame (a bar, the page scrolling under it,
  * an optional footer) and the customizer in a sidebar on the right. Whether
  * each sidebar is open is remembered, and shared by the two views. Below `lg`

@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { source } from "@/lib/docs/content/source";
-import { getCategories } from "@/lib/registry/core/registry";
 import { getSiteUrl } from "@/lib/seo/seo";
 
 interface Entry {
@@ -25,7 +24,6 @@ function entries(baseUrl: string): Entry[] {
     ...[
       baseUrl,
       `${baseUrl}/docs`,
-      `${baseUrl}/components`,
       `${baseUrl}/icons`,
       `${baseUrl}/about`,
       `${baseUrl}/contact`,
@@ -36,9 +34,6 @@ function entries(baseUrl: string): Entry[] {
     ...[...docs].map(([path, lastModified]) => ({
       lastModified,
       url: `${baseUrl}${path}`,
-    })),
-    ...getCategories().map((category) => ({
-      url: `${baseUrl}/components/${category.name}`,
     })),
   ];
 }

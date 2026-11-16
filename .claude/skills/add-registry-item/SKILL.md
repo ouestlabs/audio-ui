@@ -18,7 +18,7 @@ All paths below are under `apps/www/src/registry-audio/bases/base/` unless they 
 | A hook | `hooks/use-<name>.ts` | `hooks/_registry.ts` | `registry:hook` |
 | Framework-free logic | `lib/<name>.ts` | `lib/_registry.ts` | `registry:lib` |
 
-Before writing, open the closest existing item of the same kind and copy its shape. The catalog is deliberately small: prefer extending an existing block or demo over adding a near-duplicate, and ask before adding a new block.
+Before writing, open the closest existing item of the same kind and copy its shape. The registry is deliberately small: prefer extending an existing block or demo over adding a near-duplicate, and ask before adding a new block.
 
 ## 2. Write it
 
@@ -62,4 +62,4 @@ bun test
 
 Run `registry:build` **after** the last lint fix, or the generated JSON lags the source. Commit the regenerated files with the change.
 
-Then open the page on `localhost:4000` (the catalog `/components` and the docs page), use the item with the pointer and the keyboard, and check both themes.
+Then open the page on `localhost:4000` (the docs page of its component), use the item with the pointer and the keyboard, and check both themes.

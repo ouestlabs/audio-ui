@@ -290,19 +290,6 @@ export function getComponentDocSeo(
   };
 }
 
-/**
- * Docs catalog CTA intro shown at the bottom of a component doc page.
- */
-export function getDocsComponentCatalogIntro(
-  _slug: CanonicalComponentDocSlug,
-  label: string,
-  count: number
-): string {
-  const p = count;
-
-  return `Browse ${p} production-ready audio/ui ${label} components for players, mixers, and synth interfaces. These examples use the headless primitives from @audio-ui/primitives and stay fully compatible with Shadcn Create so radius, color, and typography match your configured theme.`;
-}
-
 type BreadcrumbItem = {
   name: string;
   path: string;

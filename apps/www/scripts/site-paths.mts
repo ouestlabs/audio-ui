@@ -3,7 +3,7 @@
  * prerenders: Node-only (it reads the content folder), so it lives with the
  * scripts and the Vite config, not in the app.
  */
-import { readdirSync, readFileSync } from "node:fs";
+import { readdirSync } from "node:fs";
 import { join } from "node:path";
 import { frameworkAddresses } from "../src/lib/docs/content/framework-paths.ts";
 
@@ -44,22 +44,7 @@ export function docsPages() {
   });
 }
 
-const WHITESPACE = /\s+/g;
-
 /** The addresses of the component catalog's categories. */
-export function categoryPaths(): string[] {
-  const registry = JSON.parse(
-    readFileSync(
-      join(import.meta.dirname, "../src/registry-audio/bases/registry.json"),
-      "utf8"
-    )
-  ) as { categories: { name: string }[] };
-  return registry.categories.map(
-    (category) =>
-      `/components/${category.name.toLowerCase().replace(WHITESPACE, "-")}`
-  );
-}
-
 /** The files of text a build writes next to the pages, so they are served as static files too. */
 export const STATIC_TEXT_PATHS = [
   "/llms.txt",
@@ -75,12 +60,10 @@ export const STATIC_TEXT_PATHS = [
 export function prerenderPages() {
   return [
     { path: "/" },
-    { path: "/components" },
     { path: "/icons" },
     { path: "/about" },
     { path: "/contact" },
     { path: "/privacy" },
-    ...categoryPaths().map((path) => ({ path })),
     ...docsPages().map(({ path }) => ({ path })),
     ...frameworkAddresses(docsPages().map(({ path }) => path)).map((path) => ({
       path,

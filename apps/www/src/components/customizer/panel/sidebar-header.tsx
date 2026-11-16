@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/tooltip";
 
 import { cn } from "@/lib/utils";
-import { useCustomizer } from "../../catalog/components-context";
+import { useCustomizer } from "../customizer-context";
 
 export function CustomizerSidebarHeader({ className }: { className?: string }) {
   const { toggleCustomizer } = useCustomizer();
