@@ -23,8 +23,14 @@ export const rememberFramework = framework.remember;
  * prerendered for any framework.
  */
 export function useFramework() {
-  const [value] = framework.useChoice();
+  const [kept] = framework.useChoice();
   const navigate = useNavigate();
+  // The router sees the framework of a framework address on the server too, so it is read from there first: the page is drawn for it from the first paint.
+  const named = useLocation({
+    select: (location) =>
+      (location.search as { framework?: unknown }).framework,
+  });
+  const value = isFramework(named) ? named : kept;
   const pathname = useLocation({ select: (location) => location.pathname });
   const choose = useCallback(
     (next: FrameworkId | null) => {
