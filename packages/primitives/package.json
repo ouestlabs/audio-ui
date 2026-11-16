@@ -1,8 +1,29 @@
 {
   "name": "@audio-ui/primitives",
   "version": "0.0.0",
-  "private": true,
   "description": "The behavior of audio/ui's primitives, written once on the UI SDK kernel: a knob, a meter, a timeline. Each framework renders it with a thin adapter.",
+  "keywords": [
+    "audio-ui",
+    "audio",
+    "headless",
+    "primitives",
+    "ui-sdk",
+    "knob",
+    "fader",
+    "timeline",
+    "piano-roll",
+    "web-audio",
+    "music"
+  ],
+  "homepage": "https://www.audio-ui.dev/docs/registry",
+  "bugs": {
+    "url": "https://github.com/ouestlabs/audio-ui/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ouestlabs/audio-ui.git",
+    "directory": "packages/primitives"
+  },
   "license": "MIT",
   "sideEffects": false,
   "type": "module",
@@ -72,7 +93,7 @@
     "test": "bun test"
   },
   "dependencies": {
-    "@audio-ui/core": "workspace:*"
+    "@audio-ui/core": "^0.29.2"
   },
   "devDependencies": {
     "@happy-dom/global-registrator": "^21.0.4",
@@ -83,5 +104,8 @@
   },
   "peerDependencies": {
     "@ui-sdk/core": "0.1.0-beta.5"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
